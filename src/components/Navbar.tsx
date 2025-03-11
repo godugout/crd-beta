@@ -10,7 +10,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 
 const Navbar = () => {
   const { user, signOut } = useAuth();
-  const { isMobile } = useIsMobile();
+  const isMobile = useIsMobile();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
@@ -38,7 +38,7 @@ const Navbar = () => {
       });
     }
   };
-  
+
   const isActive = (path: string) => {
     return location.pathname === path;
   };
