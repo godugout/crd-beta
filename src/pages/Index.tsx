@@ -1,8 +1,9 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Upload, Grid, Share2 } from 'lucide-react';
+import { ArrowRight, Upload, Grid, Share2, RotateCw } from 'lucide-react';
 import Navbar from '@/components/Navbar';
+import { useAuth } from '@/context/AuthContext';
 
 interface CardData {
   id: number;
@@ -22,6 +23,7 @@ interface CardData {
 
 const Index = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [activeCard, setActiveCard] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [view, setView] = useState<'showcase' | 'collection' | 'upload'>('showcase');
@@ -205,9 +207,7 @@ const Index = () => {
             className="absolute top-4 right-4 bg-white bg-opacity-90 text-gray-800 p-2 rounded-full hover:bg-opacity-100 transition shadow-sm"
             onClick={flipCard}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
+            <RotateCw className="h-6 w-6" />
           </button>
           
           {/* Return to collection button */}
@@ -215,9 +215,7 @@ const Index = () => {
             className="absolute top-4 left-4 bg-white bg-opacity-90 text-gray-800 p-2 rounded-full hover:bg-opacity-100 transition shadow-sm"
             onClick={() => setView('collection')}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
+            <ArrowRight className="h-6 w-6 rotate-180" />
           </button>
         </div>
         
@@ -233,9 +231,11 @@ const Index = () => {
           
           <div className="flex flex-wrap gap-4">
             <button className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+              <Share2 className="mr-2 h-4 w-4" />
               Share Card
             </button>
             <button className="flex items-center px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition">
+              <Upload className="mr-2 h-4 w-4" />
               Download
             </button>
           </div>
@@ -259,9 +259,7 @@ const Index = () => {
             >
               <div 
                 className="flex-shrink-0 w-12 h-16 rounded-md overflow-hidden" 
-                style={{ 
-                  backgroundColor: card.backgroundColor
-                }}
+                style={{ backgroundColor: card.backgroundColor }}
               ></div>
               <div className="ml-4">
                 <h4 className="font-medium">{card.name}</h4>
@@ -299,9 +297,7 @@ const Index = () => {
         <label className="block text-gray-700 font-medium mb-2">Card Image</label>
         <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
           <div className="flex flex-col items-center">
-            <svg className="h-12 w-12 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
+            <Upload className="h-12 w-12 text-gray-400" />
             <p className="mt-2 text-sm text-gray-500">Drag and drop your card image here, or click to browse</p>
             <button className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition">
               Select Image
@@ -375,7 +371,7 @@ const Index = () => {
       <Navbar />
       
       {/* Main content - Added top padding to account for fixed navbar */}
-      <main className="py-20 px-4">
+      <main className="pt-16 pb-6 px-4">
         {view === 'showcase' && renderShowcase()}
         {view === 'collection' && renderCollection()}
         {view === 'upload' && renderUploadForm()}
@@ -387,7 +383,7 @@ const Index = () => {
           <div className="flex flex-col md:flex-row justify-between">
             <div className="mb-6 md:mb-0">
               <div className="flex items-center">
-                <span className="text-xl font-bold text-cardshow-dark">CardShow</span>
+                <span className="text-xl font-bold text-gray-900">CardShow</span>
               </div>
               <p className="text-sm mt-2 text-gray-600">The fun way to share your trading card collection</p>
             </div>
