@@ -1,10 +1,10 @@
 
 import React from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { User } from '@/lib/types';
+import { User as UserType } from '@/lib/types';
 
 interface NavAvatarProps {
-  user: User;
+  user: UserType;
   onClick: () => void;
 }
 

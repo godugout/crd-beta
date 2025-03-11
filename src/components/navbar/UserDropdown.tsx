@@ -1,10 +1,10 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { User } from '@/lib/types';
+import { User as UserType } from '@/lib/types';
 
 interface UserDropdownProps {
-  user: User;
+  user: UserType;
   isOpen: boolean;
   onClose: () => void;
   onSignOut: () => void;
