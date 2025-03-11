@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Grid3X3, FolderOpen, Image, LogOut, User } from 'lucide-react';
+import { Grid3X3, FolderOpen, Image, LogOut, UserIcon } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { User as UserType } from '@/lib/types';
 
@@ -74,7 +74,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ user, isOpen, onClose, onSignOu
               className="flex items-center py-3 px-2 hover:bg-gray-50 rounded-md"
               onClick={onClose}
             >
-              <User size={18} className="mr-3 text-cardshow-slate" />
+              <UserIcon size={18} className="mr-3 text-cardshow-slate" />
               <span>Sign In</span>
             </Link>
           </>
