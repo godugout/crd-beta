@@ -1,12 +1,12 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Grid3X3, FolderOpen, Image, LogOut } from 'lucide-react';
+import { Grid3X3, FolderOpen, Image, LogOut, User } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { User } from '@/lib/types';
+import { User as UserType } from '@/lib/types';
 
 interface MobileMenuProps {
-  user: User | null;
+  user: UserType | null;
   isOpen: boolean;
   onClose: () => void;
   onSignOut: () => void;
