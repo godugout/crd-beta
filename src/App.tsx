@@ -9,6 +9,8 @@ import { AuthProvider } from "@/context/AuthContext";
 import Index from "./pages/Index";
 import Gallery from "./pages/Gallery";
 import Editor from "./pages/Editor";
+import Collections from "./pages/Collections";
+import CollectionDetail from "./pages/CollectionDetail";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import { useAuth } from "./context/AuthContext";
@@ -48,6 +50,22 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <Editor />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/collections" 
+        element={
+          <ProtectedRoute>
+            <Collections />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/collection/:id" 
+        element={
+          <ProtectedRoute>
+            <CollectionDetail />
           </ProtectedRoute>
         } 
       />
