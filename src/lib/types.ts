@@ -9,6 +9,8 @@ export interface Card {
   tags: string[];
   createdAt: Date;
   updatedAt: Date;
+  userId?: string;
+  isPublic?: boolean;
 }
 
 export interface Collection {
@@ -18,12 +20,21 @@ export interface Collection {
   cards: Card[];
   createdAt: Date;
   updatedAt: Date;
+  userId?: string;
+  isPublic?: boolean;
 }
 
 export interface User {
   id: string;
   name: string;
   email: string;
-  cards: Card[];
-  collections: Collection[];
+  cards?: Card[];
+  collections?: Collection[];
+  avatarUrl?: string;
+}
+
+export interface AuthState {
+  user: User | null;
+  isLoading: boolean;
+  error: string | null;
 }
