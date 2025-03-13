@@ -2,7 +2,7 @@
 import React from 'react';
 import { CardData } from '@/types/card';
 import CardItem from './CardItem';
-import { Sparkles, Flame, PaintBucket, Zap, Clock } from 'lucide-react';
+import { Sparkles, Flame, PaintBucket, Zap, Clock, XCircle } from 'lucide-react';
 
 interface CardSidebarProps {
   cardData: CardData[];
@@ -12,6 +12,7 @@ interface CardSidebarProps {
   toggleEffect: (effect: string) => void;
   snapshots: { id: number, timestamp: Date, effects: string[] }[];
   onSelectSnapshot: (snapshotId: number) => void;
+  onClearEffects: () => void;
 }
 
 const CardSidebar = ({ 
@@ -21,7 +22,8 @@ const CardSidebar = ({
   activeEffects,
   toggleEffect,
   snapshots,
-  onSelectSnapshot
+  onSelectSnapshot,
+  onClearEffects
 }: CardSidebarProps) => {
   const effectOptions = [
     { name: 'Classic Holographic', icon: <Sparkles className="h-4 w-4" /> },
@@ -64,6 +66,18 @@ const CardSidebar = ({
               {effect.name}
             </button>
           ))}
+          
+          {activeEffects.length > 0 && (
+            <button 
+              className="w-full mt-2 text-left px-4 py-2 rounded-lg border border-red-200 hover:bg-red-50 transition flex items-center text-red-600"
+              onClick={onClearEffects}
+            >
+              <span className="mr-2 text-red-500">
+                <XCircle className="h-4 w-4" />
+              </span>
+              Clear All Effects
+            </button>
+          )}
         </div>
       </div>
 
