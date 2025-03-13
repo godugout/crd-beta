@@ -1,19 +1,23 @@
 
 import React from 'react';
-import { RotateCw, ArrowRight, Camera } from 'lucide-react';
+import { RotateCw, ArrowRight, Camera, Settings } from 'lucide-react';
 
 interface CardControlsProps {
   flipCard: () => void;
   onBackToCollection: () => void;
   onSnapshot: () => void;
   activeEffectsCount: number;
+  onToggleAdvancedControls: () => void;
+  showAdvancedControls: boolean;
 }
 
 const CardControls = ({ 
   flipCard, 
   onBackToCollection, 
   onSnapshot,
-  activeEffectsCount
+  activeEffectsCount,
+  onToggleAdvancedControls,
+  showAdvancedControls
 }: CardControlsProps) => {
   return (
     <>
@@ -40,6 +44,15 @@ const CardControls = ({
       >
         <Camera className="h-6 w-6 group-hover:text-blue-500 transition-colors" />
         <span className="sr-only">Take Snapshot</span>
+      </button>
+
+      {/* Advanced Settings button */}
+      <button 
+        className={`absolute bottom-4 right-16 bg-white bg-opacity-90 text-gray-800 p-2 rounded-full hover:bg-opacity-100 transition shadow-sm group ${showAdvancedControls ? 'bg-blue-50 text-blue-500' : ''}`}
+        onClick={onToggleAdvancedControls}
+      >
+        <Settings className={`h-6 w-6 ${showAdvancedControls ? 'text-blue-500' : 'group-hover:text-blue-500'} transition-colors`} />
+        <span className="sr-only">Advanced Controls</span>
       </button>
 
       {activeEffectsCount > 0 && (

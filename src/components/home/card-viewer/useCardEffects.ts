@@ -1,5 +1,11 @@
 
-import { useState, useRef, RefObject } from 'react';
+import { useState, useRef, RefObject, useCallback } from 'react';
+
+interface AnimationSpeed {
+  motion: number;
+  pulse: number;
+  shimmer: number;
+}
 
 interface UseCardEffectsReturn {
   cardRef: RefObject<HTMLDivElement>;
@@ -10,6 +16,7 @@ interface UseCardEffectsReturn {
   handleCanvasMouseMove: (e: React.MouseEvent<HTMLDivElement>) => void;
   handleMouseMove: (e: React.MouseEvent<HTMLDivElement>) => void;
   handleMouseLeave: () => void;
+  setAnimationSpeed: (speeds: AnimationSpeed) => void;
 }
 
 export const useCardEffects = (): UseCardEffectsReturn => {
@@ -18,9 +25,14 @@ export const useCardEffects = (): UseCardEffectsReturn => {
   const canvasRef = useRef<HTMLDivElement>(null);
   const [isMoving, setIsMoving] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [animationSpeed, setAnimationSpeed] = useState<AnimationSpeed>({
+    motion: 1.0,
+    pulse: 1.0,
+    shimmer: 3.0
+  });
 
   // Handle mouse movement for canvas area (floating effect)
-  const handleCanvasMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleCanvasMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     if (!canvasRef.current) return;
     
     const rect = canvasRef.current.getBoundingClientRect();
@@ -34,15 +46,15 @@ export const useCardEffects = (): UseCardEffectsReturn => {
     setMousePosition({ x: relativeX, y: relativeY });
     
     if (containerRef.current) {
-      // Move container slightly based on mouse position
-      const moveX = relativeX * 15; // Max 15px movement
-      const moveY = relativeY * 15;
+      // Move container slightly based on mouse position, adjusted by motion speed
+      const moveX = relativeX * 15 * animationSpeed.motion; // Max 15px movement, adjusted by speed
+      const moveY = relativeY * 15 * animationSpeed.motion;
       containerRef.current.style.transform = `translate(${moveX}px, ${moveY}px)`;
     }
-  };
+  }, [animationSpeed.motion]);
 
   // Handle mouse movement for 3D effect on card
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     if (!cardRef.current || !containerRef.current) return;
     
     setIsMoving(true);
@@ -55,9 +67,9 @@ export const useCardEffects = (): UseCardEffectsReturn => {
     const relativeX = (e.clientX - centerX) / (rect.width / 2);
     const relativeY = (e.clientY - centerY) / (rect.height / 2);
     
-    // Apply rotation based on mouse position (max 20 degrees)
-    const rotateY = relativeX * 20;
-    const rotateX = -relativeY * 20;
+    // Apply rotation based on mouse position (max 20 degrees), adjusted by motion speed
+    const rotateY = relativeX * 20 * animationSpeed.motion;
+    const rotateX = -relativeY * 20 * animationSpeed.motion;
     
     cardRef.current.style.transform = `perspective(1000px) rotateY(${rotateY}deg) rotateX(${rotateX}deg)`;
     
@@ -69,10 +81,10 @@ export const useCardEffects = (): UseCardEffectsReturn => {
         shine.style.backgroundPosition = `${shinePositionX}% 0`;
       }
     }
-  };
+  }, [animationSpeed.motion]);
 
   // Reset card position when mouse leaves
-  const handleMouseLeave = () => {
+  const handleMouseLeave = useCallback(() => {
     if (cardRef.current) {
       setIsMoving(false);
       cardRef.current.style.transform = '';
@@ -81,7 +93,7 @@ export const useCardEffects = (): UseCardEffectsReturn => {
     if (containerRef.current) {
       containerRef.current.style.transform = '';
     }
-  };
+  }, []);
 
   return {
     cardRef,
@@ -91,6 +103,7 @@ export const useCardEffects = (): UseCardEffectsReturn => {
     mousePosition,
     handleCanvasMouseMove,
     handleMouseMove,
-    handleMouseLeave
+    handleMouseLeave,
+    setAnimationSpeed
   };
 };
