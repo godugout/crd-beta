@@ -1,9 +1,10 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { CardData } from '@/types/card';
 import CardViewer from './CardViewer';
 import CardDescription from './CardDescription';
 import CardSidebar from './CardSidebar';
+import { toast } from 'sonner';
 
 interface CardShowcaseProps {
   cardData: CardData[];
@@ -14,6 +15,13 @@ interface CardShowcaseProps {
   setView: (view: 'showcase' | 'collection' | 'upload') => void;
 }
 
+interface Snapshot {
+  id: number;
+  timestamp: Date;
+  effects: string[];
+  cardId: number;
+}
+
 const CardShowcase = ({ 
   cardData, 
   activeCard, 
@@ -22,6 +30,43 @@ const CardShowcase = ({
   flipCard, 
   setView 
 }: CardShowcaseProps) => {
+  const [activeEffects, setActiveEffects] = useState<string[]>([]);
+  const [snapshots, setSnapshots] = useState<Snapshot[]>([]);
+  
+  const toggleEffect = (effect: string) => {
+    setActiveEffects(prev => 
+      prev.includes(effect) 
+        ? prev.filter(e => e !== effect)
+        : [...prev, effect]
+    );
+    
+    toast.success(
+      activeEffects.includes(effect) 
+        ? `${effect} effect removed` 
+        : `${effect} effect applied`
+    );
+  };
+  
+  const handleTakeSnapshot = () => {
+    const newSnapshot: Snapshot = {
+      id: Date.now(),
+      timestamp: new Date(),
+      effects: [...activeEffects],
+      cardId: cardData[activeCard].id
+    };
+    
+    setSnapshots(prev => [newSnapshot, ...prev]);
+    toast.success('Snapshot saved to gallery!');
+  };
+  
+  const handleSelectSnapshot = (snapshotId: number) => {
+    const snapshot = snapshots.find(s => s.id === snapshotId);
+    if (snapshot) {
+      setActiveEffects(snapshot.effects);
+      toast.info('Snapshot effects applied');
+    }
+  };
+
   if (!cardData.length) {
     return (
       <div className="max-w-7xl mx-auto p-8 text-center">
@@ -37,6 +82,8 @@ const CardShowcase = ({
     );
   }
 
+  const filteredSnapshots = snapshots.filter(s => s.cardId === cardData[activeCard].id);
+
   return (
     <div className="max-w-7xl mx-auto flex flex-col lg:flex-row p-4">
       {/* Card display area */}
@@ -46,6 +93,8 @@ const CardShowcase = ({
           isFlipped={isFlipped} 
           flipCard={flipCard} 
           onBackToCollection={() => setView('collection')} 
+          activeEffects={activeEffects}
+          onSnapshot={handleTakeSnapshot}
         />
         
         <CardDescription card={cardData[activeCard]} />
@@ -55,7 +104,11 @@ const CardShowcase = ({
       <CardSidebar 
         cardData={cardData} 
         activeCard={activeCard} 
-        onSelectCard={selectCard} 
+        onSelectCard={selectCard}
+        activeEffects={activeEffects}
+        toggleEffect={toggleEffect}
+        snapshots={filteredSnapshots}
+        onSelectSnapshot={handleSelectSnapshot}
       />
     </div>
   );

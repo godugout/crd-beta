@@ -13,4 +13,5 @@ export interface CardData {
   cardNumber: string;
   description: string;
   specialEffect: string;
+  imageUrl?: string;
 }
