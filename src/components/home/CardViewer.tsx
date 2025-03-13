@@ -24,9 +24,33 @@ const CardViewer = ({
 }: CardViewerProps) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLDivElement>(null);
   const [isMoving, setIsMoving] = useState(false);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
-  // Handle mouse movement for 3D effect
+  // Handle mouse movement for canvas area (floating effect)
+  const handleCanvasMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!canvasRef.current) return;
+    
+    const rect = canvasRef.current.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    
+    // Calculate relative position (-1 to 1)
+    const relativeX = (e.clientX - centerX) / (rect.width / 2);
+    const relativeY = (e.clientY - centerY) / (rect.height / 2);
+    
+    setMousePosition({ x: relativeX, y: relativeY });
+    
+    if (containerRef.current) {
+      // Move container slightly based on mouse position
+      const moveX = relativeX * 15; // Max 15px movement
+      const moveY = relativeY * 15;
+      containerRef.current.style.transform = `translate(${moveX}px, ${moveY}px)`;
+    }
+  };
+
+  // Handle mouse movement for 3D effect on card
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!cardRef.current || !containerRef.current) return;
     
@@ -40,9 +64,9 @@ const CardViewer = ({
     const relativeX = (e.clientX - centerX) / (rect.width / 2);
     const relativeY = (e.clientY - centerY) / (rect.height / 2);
     
-    // Apply rotation based on mouse position (max 15 degrees)
-    const rotateY = relativeX * 15;
-    const rotateX = -relativeY * 15;
+    // Apply rotation based on mouse position (max 20 degrees)
+    const rotateY = relativeX * 20;
+    const rotateX = -relativeY * 20;
     
     cardRef.current.style.transform = `perspective(1000px) rotateY(${rotateY}deg) rotateX(${rotateX}deg)`;
     
@@ -62,13 +86,17 @@ const CardViewer = ({
       setIsMoving(false);
       cardRef.current.style.transform = '';
     }
+    
+    if (containerRef.current) {
+      containerRef.current.style.transform = '';
+    }
   };
 
   const getCardClasses = () => {
     const classes = [
       'w-64 h-96 relative transition-all duration-300 rounded-lg shadow-xl overflow-hidden',
       isFlipped ? 'scale-x-[-1]' : '',
-      isMoving ? 'mouse-move' : 'dynamic-card'
+      isMoving ? 'mouse-move' : 'dynamic-card floating-card'
     ];
     
     if (activeEffects.includes('Classic Holographic')) {
@@ -129,16 +157,20 @@ const CardViewer = ({
   };
 
   return (
-    <div className="relative w-full h-96 md:h-[500px] flex items-center justify-center p-4 bg-gradient-to-br from-gray-900 to-gray-800 rounded-lg overflow-hidden">
+    <div 
+      ref={canvasRef}
+      className="relative w-full h-96 md:h-[500px] flex items-center justify-center p-4 bg-gradient-to-br from-gray-900 to-gray-800 rounded-lg overflow-hidden"
+      onMouseMove={handleCanvasMouseMove}
+      onMouseLeave={handleMouseLeave}
+    >
       {/* Dynamic background */}
       <div className="absolute inset-0 opacity-25 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-blue-500 via-transparent to-transparent"></div>
       
       {/* Card container with 3D perspective */}
       <div 
         ref={containerRef}
-        className="card-3d-container relative w-80 h-[450px] flex items-center justify-center"
+        className="card-3d-container relative w-80 h-[450px] flex items-center justify-center transition-transform duration-200"
         onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
       >
         {/* Card representation */}
         <div 
@@ -204,7 +236,7 @@ const CardViewer = ({
       )}
 
       <div className="absolute top-1/2 left-4 transform -translate-y-1/2 text-xs text-white opacity-60 rotate-[-90deg] origin-center">
-        Move your mouse over the card
+        Move your mouse over the card area
       </div>
     </div>
   );

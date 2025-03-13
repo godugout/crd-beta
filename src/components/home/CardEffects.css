@@ -44,6 +44,24 @@
   }
 }
 
+@keyframes float {
+  0% {
+    transform: translateY(0px) translateX(0px);
+  }
+  25% {
+    transform: translateY(-5px) translateX(3px);
+  }
+  50% {
+    transform: translateY(0px) translateX(-3px);
+  }
+  75% {
+    transform: translateY(5px) translateX(2px);
+  }
+  100% {
+    transform: translateY(0px) translateX(0px);
+  }
+}
+
 .card-3d-container {
   perspective: 1500px;
   transition: transform 0.1s ease;
@@ -130,6 +148,14 @@
   animation: tilt 10s infinite ease-in-out;
 }
 
+.floating-card {
+  animation: float 6s infinite ease-in-out;
+}
+
 .dynamic-card.mouse-move {
+  animation: none;
+}
+
+.floating-card.mouse-move {
   animation: none;
 }
