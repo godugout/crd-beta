@@ -43,7 +43,10 @@ const CardShowcase = ({
     toast.success(
       activeEffects.includes(effect) 
         ? `${effect} effect removed` 
-        : `${effect} effect applied`
+        : `${effect} effect applied`,
+      {
+        position: 'bottom-right',
+      }
     );
   };
   
@@ -56,14 +59,25 @@ const CardShowcase = ({
     };
     
     setSnapshots(prev => [newSnapshot, ...prev]);
-    toast.success('Snapshot saved to gallery!');
   };
   
   const handleSelectSnapshot = (snapshotId: number) => {
     const snapshot = snapshots.find(s => s.id === snapshotId);
     if (snapshot) {
       setActiveEffects(snapshot.effects);
-      toast.info('Snapshot effects applied');
+      toast.info('Snapshot effects applied', {
+        description: `Applied ${snapshot.effects.length} effect${snapshot.effects.length !== 1 ? 's' : ''}`,
+        position: 'bottom-right',
+      });
+    }
+  };
+
+  const handleClearEffects = () => {
+    if (activeEffects.length > 0) {
+      setActiveEffects([]);
+      toast.info('All effects cleared', {
+        position: 'bottom-right',
+      });
     }
   };
 
@@ -85,9 +99,9 @@ const CardShowcase = ({
   const filteredSnapshots = snapshots.filter(s => s.cardId === cardData[activeCard].id);
 
   return (
-    <div className="max-w-7xl mx-auto flex flex-col lg:flex-row p-4">
+    <div className="max-w-7xl mx-auto flex flex-col lg:flex-row p-4 gap-6">
       {/* Card display area */}
-      <div className="w-full lg:w-2/3 flex flex-col">
+      <div className="w-full lg:w-2/3 flex flex-col gap-6">
         <CardViewer 
           card={cardData[activeCard]} 
           isFlipped={isFlipped} 
@@ -109,6 +123,7 @@ const CardShowcase = ({
         toggleEffect={toggleEffect}
         snapshots={filteredSnapshots}
         onSelectSnapshot={handleSelectSnapshot}
+        onClearEffects={handleClearEffects}
       />
     </div>
   );
