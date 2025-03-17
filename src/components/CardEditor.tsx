@@ -26,6 +26,7 @@ const CardEditor: React.FC<CardEditorProps> = ({ card, className }) => {
   const [newTag, setNewTag] = useState('');
   
   const handleImageUpload = (file: File, url: string) => {
+    console.log('Image uploaded:', file, url);
     setImageFile(file);
     setImageUrl(url);
   };
@@ -63,6 +64,7 @@ const CardEditor: React.FC<CardEditorProps> = ({ card, className }) => {
         thumbnailUrl: imageUrl, // In a real app, we'd generate a thumbnail
         tags
       });
+      toast.success('Card updated successfully');
     } else {
       // Add new card
       addCard({
@@ -72,6 +74,7 @@ const CardEditor: React.FC<CardEditorProps> = ({ card, className }) => {
         thumbnailUrl: imageUrl, // In a real app, we'd generate a thumbnail
         tags
       });
+      toast.success('Card created successfully');
     }
     
     // Navigate to gallery
@@ -164,12 +167,12 @@ const CardEditor: React.FC<CardEditorProps> = ({ card, className }) => {
           </div>
           
           <div className="mt-auto">
-            <button
+            <Button
               type="submit"
-              className="w-full py-3 bg-cardshow-blue text-white rounded-lg shadow-sm hover:bg-opacity-90 transition-colors"
+              className="w-full py-3"
             >
               {card ? 'Update Card' : 'Create Card'}
-            </button>
+            </Button>
           </div>
         </div>
       </form>
