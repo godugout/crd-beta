@@ -50,9 +50,6 @@ export const useFabricCanvas = ({
     
     setCanvas(fabricCanvas);
     
-    // We can't directly assign to canvasRef.current as it's read-only
-    // But Fabric will still use the same canvas element
-    
     // Clean up on unmount
     return () => {
       fabricCanvas.dispose();
@@ -70,51 +67,56 @@ export const useFabricCanvas = ({
           canvas.remove(backgroundImage);
         }
         
-        // Use FabricImage.fromURL instead of loadImage
-        FabricImage.fromURL(editorImgRef.current.src, (fabricImage) => {
-          if (!canvas) return;
-          
-          // Calculate scaling to fit the canvas
-          const canvasWidth = canvas.getWidth();
-          const canvasHeight = canvas.getHeight();
-          
-          // Apply image rotation
-          fabricImage.set({
-            originX: 'center',
-            originY: 'center',
-            left: canvasWidth / 2,
-            top: canvasHeight / 2,
-            angle: imageData.rotation || 0,
-            selectable: false,
-            evented: false,
-          });
-          
-          // Scale to fit the canvas
-          const imgWidth = fabricImage.width || 0;
-          const imgHeight = fabricImage.height || 0;
-          
-          const scale = Math.min(
-            canvasWidth / imgWidth,
-            canvasHeight / imgHeight
-          );
-          
-          fabricImage.scale(scale);
-          
-          // Add to canvas and set as background
-          canvas.add(fabricImage);
-          
-          // Use moveToBack instead of sendToBack
-          fabricImage.moveToBack();
-          
-          setBackgroundImage(fabricImage);
-          
-          // Create initial crop box if none exists
-          if (cropBoxes.length === 0) {
-            addNewCropBox();
+        // Fixed: Properly call FabricImage.fromURL with correct type structure
+        FabricImage.fromURL(
+          editorImgRef.current.src, 
+          {
+            callback: (fabricImage) => {
+              if (!canvas) return;
+              
+              // Calculate scaling to fit the canvas
+              const canvasWidth = canvas.getWidth();
+              const canvasHeight = canvas.getHeight();
+              
+              // Apply image rotation
+              fabricImage.set({
+                originX: 'center',
+                originY: 'center',
+                left: canvasWidth / 2,
+                top: canvasHeight / 2,
+                angle: imageData.rotation || 0,
+                selectable: false,
+                evented: false,
+              });
+              
+              // Scale to fit the canvas
+              const imgWidth = fabricImage.width || 0;
+              const imgHeight = fabricImage.height || 0;
+              
+              const scale = Math.min(
+                canvasWidth / imgWidth,
+                canvasHeight / imgHeight
+              );
+              
+              fabricImage.scale(scale);
+              
+              // Add to canvas and set as background
+              canvas.add(fabricImage);
+              
+              // Use moveToBack instead of sendToBack
+              fabricImage.moveToBack();
+              
+              setBackgroundImage(fabricImage);
+              
+              // Create initial crop box if none exists
+              if (cropBoxes.length === 0) {
+                addNewCropBox();
+              }
+              
+              canvas.renderAll();
+            }
           }
-          
-          canvas.renderAll();
-        });
+        );
         
       } catch (error) {
         console.error('Failed to load image:', error);
