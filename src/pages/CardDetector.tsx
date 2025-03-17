@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import Navbar from '@/components/Navbar';
 import { CropIcon, ChevronRight, Upload, SaveAll } from 'lucide-react';
@@ -28,17 +29,15 @@ const CardDetector = () => {
   };
 
   const handleCropComplete = (croppedFile: File, croppedUrl: string) => {
+    // Create card object matching the expected Card type structure
     const newCard = {
-      id: `card-${Date.now()}`,
       title: croppedFile.name.split('.')[0] || 'New Card',
       description: 'Detected and cropped with Card Detector',
-      image_url: croppedUrl,
-      rarity: 'common',
-      price: null,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      creator_id: 'dev-user-id',
-      edition_size: 1
+      imageUrl: croppedUrl,
+      thumbnailUrl: croppedUrl,
+      tags: ['card detector', 'auto-detected'],
+      userId: 'dev-user-id',
+      isPublic: false
     };
 
     addCard(newCard);
