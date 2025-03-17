@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from 'react';
 import { Canvas, Rect, util } from 'fabric';
 import { DetectedCard } from '../types';
@@ -31,12 +30,10 @@ export const useCardCanvas = () => {
     // Create a fabric image object
     util.loadImage(img.src)
       .then(fabricImg => {
-        canvas.setBackgroundImage(fabricImg, canvas.renderAll.bind(canvas), {
-          scaleX: width / img.naturalWidth,
-          scaleY: height / img.naturalHeight,
-          originX: 'left',
-          originY: 'top'
-        });
+        canvas.backgroundImage = fabricImg;
+        canvas.backgroundImage.scaleX = width / img.naturalWidth;
+        canvas.backgroundImage.scaleY = height / img.naturalHeight;
+        canvas.renderAll();
       });
     
     // Configure canvas for tracing
