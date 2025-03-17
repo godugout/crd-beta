@@ -29,15 +29,15 @@ export const useCardCanvas = () => {
     setDisplayHeight(height);
     
     // Create a fabric image object
-    util.loadImage(img.src).then(fabricImg => {
-      canvas.set('backgroundImage', fabricImg, {
-        scaleX: width / img.naturalWidth,
-        scaleY: height / img.naturalHeight,
-        originX: 'left',
-        originY: 'top'
+    util.loadImage(img.src)
+      .then(fabricImg => {
+        canvas.setBackgroundImage(fabricImg, canvas.renderAll.bind(canvas), {
+          scaleX: width / img.naturalWidth,
+          scaleY: height / img.naturalHeight,
+          originX: 'left',
+          originY: 'top'
+        });
       });
-      canvas.renderAll();
-    });
     
     // Configure canvas for tracing
     setupCanvasForTracing(canvas);

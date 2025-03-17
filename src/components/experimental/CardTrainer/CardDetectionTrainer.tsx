@@ -2,6 +2,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Pen, Wand2, Layers } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
 import { toast } from 'sonner';
 import { detectCardsInImage } from '@/components/card-upload/cardDetection';
 import { useCardCanvas } from './hooks/useCardCanvas';
@@ -12,6 +13,7 @@ import TracingTab from './components/TracingTab';
 import DetectionTab from './components/DetectionTab';
 import ComparisonTab from './components/ComparisonTab';
 import ImageDisplay from './components/ImageDisplay';
+import TabContent from './components/TabContent';
 
 const CardDetectionTrainer = () => {
   // References
@@ -108,71 +110,25 @@ const CardDetectionTrainer = () => {
         </p>
       </div>
       
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
-        <TabsList>
-          <TabsTrigger value="trace" className="flex items-center gap-2">
-            <Pen className="h-4 w-4" />
-            Trace Cards
-          </TabsTrigger>
-          <TabsTrigger value="detect" className="flex items-center gap-2">
-            <Wand2 className="h-4 w-4" />
-            Detect Cards
-          </TabsTrigger>
-          <TabsTrigger value="compare" className="flex items-center gap-2">
-            <Layers className="h-4 w-4" />
-            Compare Results
-          </TabsTrigger>
-        </TabsList>
-      </Tabs>
-      
-      <div className="flex flex-wrap gap-3 mb-6">
-        <ImageUpload 
-          fileInputRef={fileInputRef}
-          onImageChange={handleImageChange}
-        />
-        
-        {activeTab === 'detect' && (
-          <Button 
-            variant="default" 
-            onClick={handleDetectCards}
-            disabled={!image || isProcessing}
-          >
-            <Wand2 className={`mr-2 h-4 w-4 ${isProcessing ? 'animate-spin' : ''}`} />
-            Detect Cards
-          </Button>
-        )}
-      </div>
-      
-      <TabsContent value="trace">
-        <TracingTab 
-          image={image}
-          manualTraces={manualTraces}
-          onAddTrace={handleAddTrace}
-          onClearTraces={handleClearTraces}
-          onCompareResults={handleCompareResults}
-        />
-      </TabsContent>
-      
-      <TabsContent value="detect">
-        <DetectionTab 
-          image={image}
-          detectedCards={detectedCards}
-          isProcessing={isProcessing}
-          showEdges={showEdges}
-          showContours={showContours}
-          onDetectCards={handleDetectCards}
-          onClearDetection={() => setDetectedCards([])}
-          onToggleEdges={setShowEdges}
-          onToggleContours={setShowContours}
-        />
-      </TabsContent>
-      
-      <TabsContent value="compare">
-        <ComparisonTab 
-          detectedCards={detectedCards}
-          manualTraces={manualTraces}
-        />
-      </TabsContent>
+      <TabContent
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        image={image}
+        fileInputRef={fileInputRef}
+        detectedCards={detectedCards}
+        manualTraces={manualTraces}
+        isProcessing={isProcessing}
+        showEdges={showEdges}
+        showContours={showContours}
+        onImageChange={handleImageChange}
+        onDetectCards={handleDetectCards}
+        onAddTrace={handleAddTrace}
+        onClearTraces={handleClearTraces}
+        onCompareResults={handleCompareResults}
+        onToggleEdges={setShowEdges}
+        onToggleContours={setShowContours}
+        onClearDetection={() => setDetectedCards([])}
+      />
       
       <ImageDisplay 
         image={image}
