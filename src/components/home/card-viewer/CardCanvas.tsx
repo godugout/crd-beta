@@ -29,7 +29,7 @@ const CardCanvas: React.FC<CardCanvasProps> = ({
   // Use the hook directly instead of trying to access methods on a React component
   const effectsLayer = useCardEffects({ activeEffects, isFlipped });
   const cardElementRef = useRef<HTMLDivElement>(null);
-  const [mousePos, setMousePos] = useState({ x: '50%', y: '50%' });
+  const [mousePos, setMousePos] = useState({ x: 0.5, y: 0.5 });
   
   // Set CSS variables for mouse position to use in the refractor effect
   useEffect(() => {
@@ -37,13 +37,13 @@ const CardCanvas: React.FC<CardCanvasProps> = ({
       if (!cardElementRef.current) return;
       
       const rect = cardElementRef.current.getBoundingClientRect();
-      const x = ((e.clientX - rect.left) / rect.width) * 100;
-      const y = ((e.clientY - rect.top) / rect.height) * 100;
+      const x = (e.clientX - rect.left) / rect.width;
+      const y = (e.clientY - rect.top) / rect.height;
       
-      cardElementRef.current.style.setProperty('--mouse-x', `${x}%`);
-      cardElementRef.current.style.setProperty('--mouse-y', `${y}%`);
+      cardElementRef.current.style.setProperty('--mouse-x', `${x * 100}%`);
+      cardElementRef.current.style.setProperty('--mouse-y', `${y * 100}%`);
       
-      setMousePos({ x: `${x}%`, y: `${y}%` });
+      setMousePos({ x, y });
     };
     
     window.addEventListener('mousemove', handleMouseMove);
@@ -110,17 +110,17 @@ const CardCanvas: React.FC<CardCanvasProps> = ({
           <div 
             className="spectral-hologram-layer" 
             style={{ 
-              '--mouse-x': mousePos.x, 
-              '--mouse-y': mousePos.y 
+              '--mouse-x': `${mousePos.x * 100}%`, 
+              '--mouse-y': `${mousePos.y * 100}%` 
             } as React.CSSProperties}
           ></div>
         )}
         
         {/* Refractor WebGL effect overlay */}
         <RefractorEffect 
-          active={hasRefractorEffect} 
+          isActive={hasRefractorEffect} 
           intensity={1.0}
-          animated={true}
+          mousePosition={mousePos}
         />
         
         {/* Advanced Holographic Engine */}
