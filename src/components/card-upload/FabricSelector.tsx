@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -16,7 +15,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Shirt, ShirtOff, TagIcon } from 'lucide-react';
+import { Shirt, TagIcon } from 'lucide-react';
 
 export interface FabricSelectorProps {
   onSelect: (fabricOptions: {
@@ -76,7 +75,6 @@ const FabricSelector: React.FC<FabricSelectorProps> = ({
     { value: 'large', label: 'Large' }
   ];
   
-  // Years from 1950 to current year
   const years = Array.from({ length: new Date().getFullYear() - 1949 }, (_, i) => ({
     value: String(1950 + i),
     label: String(1950 + i)

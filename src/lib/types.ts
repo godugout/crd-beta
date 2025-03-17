@@ -1,4 +1,3 @@
-
 export interface Card {
   id: string;
   title: string;
@@ -11,6 +10,14 @@ export interface Card {
   updatedAt: Date;
   userId?: string;
   isPublic?: boolean;
+  fabricSwatches?: Array<{
+    type: string;
+    team: string;
+    year: string;
+    manufacturer: string;
+    position: string;
+    size: string;
+  }>;
 }
 
 export interface Collection {

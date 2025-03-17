@@ -38,8 +38,8 @@ const CardFront: React.FC<CardFrontProps> = ({ card }) => {
             year={swatch.year}
             team={swatch.team}
             manufacturer={swatch.manufacturer}
-            position={swatch.position}
-            size={swatch.size}
+            position={swatch.position as "top-left" | "top-right" | "bottom-left" | "bottom-right" | "center"}
+            size={swatch.size as "small" | "medium" | "large"}
           />
         ))}
         
