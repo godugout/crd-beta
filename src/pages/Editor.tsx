@@ -13,7 +13,8 @@ const Editor = () => {
           <div className="py-8">
             <h1 className="text-3xl font-bold text-cardshow-dark mb-2">Create New Card</h1>
             <p className="text-cardshow-slate">
-              Upload an image and add details to create your digital card
+              Upload an image and add details to create your digital card. 
+              For best results, use images with a 2.5:3.5 ratio.
             </p>
           </div>
           
