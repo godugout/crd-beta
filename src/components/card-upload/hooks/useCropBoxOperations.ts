@@ -18,6 +18,7 @@ export const useCropBoxOperations = ({
   canvasRef
 }: UseCropBoxOperationsProps) => {
   
+  // Rotate the selected crop box clockwise
   const rotateClockwise = () => {
     if (selectedCropIndex >= 0 && selectedCropIndex < cropBoxes.length) {
       const newBoxes = [...cropBoxes];
@@ -29,6 +30,7 @@ export const useCropBoxOperations = ({
     }
   };
 
+  // Rotate the selected crop box counter-clockwise
   const rotateCounterClockwise = () => {
     if (selectedCropIndex >= 0 && selectedCropIndex < cropBoxes.length) {
       const newBoxes = [...cropBoxes];
@@ -40,15 +42,19 @@ export const useCropBoxOperations = ({
     }
   };
 
+  // Add a new crop box to the canvas
   const addNewCropBox = () => {
     if (!canvasRef.current) return;
     
     const canvas = canvasRef.current;
     const rect = canvas.getBoundingClientRect();
     
+    // Standard trading card ratio (2.5:3.5)
+    const cardRatio = 2.5 / 3.5;
+    
     // Create a new crop box with proper card ratio
     const newWidth = rect.width * 0.3;
-    const newHeight = newWidth * (3.5 / 2.5);
+    const newHeight = newWidth / cardRatio;
     
     const newBox: CropBoxProps = {
       x: (rect.width - newWidth) / 2,
@@ -63,6 +69,7 @@ export const useCropBoxOperations = ({
     setSelectedCropIndex(newBoxes.length - 1);
   };
 
+  // Remove the selected crop box
   const removeCropBox = () => {
     if (cropBoxes.length <= 1) {
       toast.error("At least one crop area is required");
@@ -78,27 +85,26 @@ export const useCropBoxOperations = ({
     }
   };
 
+  // Maximize the crop box while maintaining aspect ratio
   const maximizeCrop = () => {
     if (!canvasRef.current) return;
     
     const canvas = canvasRef.current;
     const rect = canvas.getBoundingClientRect();
     
-    // Calculate the maximum possible crop area while maintaining the 2.5:3.5 aspect ratio
-    const canvasWidth = rect.width;
-    const canvasHeight = rect.height;
-    
-    // Calculate the maximum crop area within the image bounds
-    let maxWidth, maxHeight;
+    // Standard trading card ratio (2.5:3.5)
     const cardRatio = 2.5 / 3.5;
     
-    if (canvasWidth / canvasHeight > cardRatio) {
-      // The image is wider than the card ratio
-      maxHeight = canvasHeight * 0.9;
+    // Calculate the maximum crop area within the canvas bounds
+    let maxWidth, maxHeight;
+    
+    if (rect.width / rect.height > cardRatio) {
+      // The canvas is wider than the card ratio
+      maxHeight = rect.height * 0.9;
       maxWidth = maxHeight * cardRatio;
     } else {
-      // The image is taller than the card ratio
-      maxWidth = canvasWidth * 0.9;
+      // The canvas is taller than the card ratio
+      maxWidth = rect.width * 0.9;
       maxHeight = maxWidth / cardRatio;
     }
     
@@ -107,8 +113,8 @@ export const useCropBoxOperations = ({
     const currentBox = newBoxes[selectedCropIndex];
     
     newBoxes[selectedCropIndex] = {
-      x: (canvasWidth - maxWidth) / 2,
-      y: (canvasHeight - maxHeight) / 2,
+      x: (rect.width - maxWidth) / 2,
+      y: (rect.height - maxHeight) / 2,
       width: maxWidth,
       height: maxHeight,
       rotation: currentBox ? currentBox.rotation : 0

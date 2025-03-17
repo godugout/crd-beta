@@ -1,5 +1,5 @@
 
-import React, { useEffect, useRef } from 'react';
+import React, { useRef } from 'react';
 import { CropBoxProps } from './CropBox';
 import { ImageData } from './hooks/useCropState';
 import { useFabricCanvas } from './hooks/useFabricCanvas';
@@ -25,7 +25,7 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({
 }) => {
   const fabricRef = useRef<HTMLCanvasElement>(null);
   
-  // Use the custom hook for Fabric.js canvas integration
+  // Use our refactored Fabric.js canvas hook
   useFabricCanvas({
     fabricRef,
     canvasRef,
