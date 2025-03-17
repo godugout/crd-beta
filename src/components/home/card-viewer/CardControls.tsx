@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { RotateCw, ArrowRight, Camera, Settings } from 'lucide-react';
+import { RotateCw, ArrowRight, Camera, Settings, BookOpen } from 'lucide-react';
 
 interface CardControlsProps {
   flipCard: () => void;
@@ -9,6 +9,8 @@ interface CardControlsProps {
   activeEffectsCount: number;
   onToggleAdvancedControls: () => void;
   showAdvancedControls: boolean;
+  onTogglePresetsPanel: () => void;
+  showPresetsPanel: boolean;
 }
 
 const CardControls = ({ 
@@ -17,7 +19,9 @@ const CardControls = ({
   onSnapshot,
   activeEffectsCount,
   onToggleAdvancedControls,
-  showAdvancedControls
+  showAdvancedControls,
+  onTogglePresetsPanel,
+  showPresetsPanel
 }: CardControlsProps) => {
   return (
     <>
@@ -44,6 +48,15 @@ const CardControls = ({
       >
         <Camera className="h-6 w-6 group-hover:text-blue-500 transition-colors" />
         <span className="sr-only">Take Snapshot</span>
+      </button>
+
+      {/* Presets Panel button */}
+      <button 
+        className={`absolute bottom-4 left-16 bg-white bg-opacity-90 text-gray-800 p-2 rounded-full hover:bg-opacity-100 transition shadow-sm group ${showPresetsPanel ? 'bg-blue-50 text-blue-500' : ''}`}
+        onClick={onTogglePresetsPanel}
+      >
+        <BookOpen className={`h-6 w-6 ${showPresetsPanel ? 'text-blue-500' : 'group-hover:text-blue-500'} transition-colors`} />
+        <span className="sr-only">Effect Presets</span>
       </button>
 
       {/* Advanced Settings button */}

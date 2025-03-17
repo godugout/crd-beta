@@ -1,5 +1,5 @@
 
-import React, { useRef, useState } from 'react';
+import React from 'react';
 import { CardData } from '@/types/card';
 
 interface CardCanvasProps {
@@ -27,6 +27,7 @@ const CardCanvas = ({
       isFlipped ? 'scale-x-[-1]' : '',
     ];
     
+    // Apply all active effects to the card
     if (activeEffects.includes('Classic Holographic')) {
       classes.push('card-holographic');
     }
@@ -43,6 +44,19 @@ const CardCanvas = ({
       classes.push('card-electric');
     }
     
+    // Add new effect classes
+    if (activeEffects.includes('Gold Foil')) {
+      classes.push('card-gold-foil');
+    }
+    
+    if (activeEffects.includes('Chrome')) {
+      classes.push('card-chrome');
+    }
+    
+    if (activeEffects.includes('Vintage')) {
+      classes.push('card-vintage');
+    }
+    
     return classes.join(' ');
   };
 
@@ -57,14 +71,16 @@ const CardCanvas = ({
       };
     }
     
-    if (activeEffects.includes('Refractor')) {
+    // Add filter modifications for new effects
+    if (activeEffects.includes('Vintage')) {
       filterStyle = {
         ...filterStyle,
-        borderRadius: '12px',
+        filter: `${filterStyle.filter || ''} sepia(0.3) contrast(0.95) brightness(0.9)`.trim(),
       };
     }
     
-    if (activeEffects.includes('Prismatic')) {
+    if (activeEffects.includes('Refractor') || activeEffects.includes('Gold Foil') || 
+        activeEffects.includes('Chrome') || activeEffects.includes('Prismatic')) {
       filterStyle = {
         ...filterStyle,
         borderRadius: '12px',

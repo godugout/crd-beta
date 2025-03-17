@@ -253,6 +253,50 @@ export type Database = {
         }
         Relationships: []
       }
+      content_resources: {
+        Row: {
+          category: string | null
+          created_at: string
+          description: string | null
+          id: string
+          organization_id: string | null
+          resource_type: string
+          title: string
+          updated_at: string
+          url: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          organization_id?: string | null
+          resource_type: string
+          title: string
+          updated_at?: string
+          url: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          organization_id?: string | null
+          resource_type?: string
+          title?: string
+          updated_at?: string
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_resources_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "parent_organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fan_feeds: {
         Row: {
           cover_image_url: string | null
@@ -483,6 +527,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      parent_organizations: {
+        Row: {
+          contact_email: string | null
+          created_at: string
+          description: string | null
+          id: string
+          logo_url: string | null
+          name: string
+          updated_at: string
+          website_url: string | null
+        }
+        Insert: {
+          contact_email?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          logo_url?: string | null
+          name: string
+          updated_at?: string
+          website_url?: string | null
+        }
+        Update: {
+          contact_email?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          logo_url?: string | null
+          name?: string
+          updated_at?: string
+          website_url?: string | null
+        }
+        Relationships: []
       }
       poem_styles: {
         Row: {

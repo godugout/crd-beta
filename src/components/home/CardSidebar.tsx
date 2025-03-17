@@ -2,7 +2,7 @@
 import React from 'react';
 import { CardData } from '@/types/card';
 import CardItem from './CardItem';
-import { Sparkles, Flame, PaintBucket, Zap, Clock, XCircle } from 'lucide-react';
+import { Sparkles, Flame, PaintBucket, Zap, Clock, XCircle, Award, PackageOpen, Palmtree } from 'lucide-react';
 
 interface CardSidebarProps {
   cardData: CardData[];
@@ -29,7 +29,11 @@ const CardSidebar = ({
     { name: 'Classic Holographic', icon: <Sparkles className="h-4 w-4" /> },
     { name: 'Refractor', icon: <Flame className="h-4 w-4" /> },
     { name: 'Prismatic', icon: <PaintBucket className="h-4 w-4" /> },
-    { name: 'Electric', icon: <Zap className="h-4 w-4" /> }
+    { name: 'Electric', icon: <Zap className="h-4 w-4" /> },
+    // Add new effects
+    { name: 'Gold Foil', icon: <Award className="h-4 w-4" /> },
+    { name: 'Chrome', icon: <PackageOpen className="h-4 w-4" /> },
+    { name: 'Vintage', icon: <Palmtree className="h-4 w-4" /> }
   ];
 
   return (

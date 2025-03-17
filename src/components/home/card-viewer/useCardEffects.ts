@@ -5,6 +5,9 @@ interface AnimationSpeed {
   motion: number;
   pulse: number;
   shimmer: number;
+  gold?: number;
+  chrome?: number;
+  vintage?: number;
 }
 
 interface UseCardEffectsReturn {
@@ -25,10 +28,13 @@ export const useCardEffects = (): UseCardEffectsReturn => {
   const canvasRef = useRef<HTMLDivElement>(null);
   const [isMoving, setIsMoving] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const [animationSpeed, setAnimationSpeed] = useState<AnimationSpeed>({
+  const [animationSpeed, setAnimationSpeedState] = useState<AnimationSpeed>({
     motion: 1.0,
     pulse: 1.0,
-    shimmer: 3.0
+    shimmer: 3.0,
+    gold: 1.0,
+    chrome: 1.0,
+    vintage: 1.0
   });
 
   // Handle mouse movement for canvas area (floating effect)
@@ -73,12 +79,27 @@ export const useCardEffects = (): UseCardEffectsReturn => {
     
     cardRef.current.style.transform = `perspective(1000px) rotateY(${rotateY}deg) rotateX(${rotateX}deg)`;
     
-    // Adjust holographic effect based on angle
+    // Adjust effects based on angle and mouse position for dynamic light effects
     if (cardRef.current) {
+      // For holographic effects
       const shine = cardRef.current.querySelector('.card-holographic::before') as HTMLElement;
       if (shine) {
         const shinePositionX = 50 + relativeX * 50;
         shine.style.backgroundPosition = `${shinePositionX}% 0`;
+      }
+      
+      // For gold foil effects
+      const goldShine = cardRef.current.querySelector('.card-gold-foil::before') as HTMLElement;
+      if (goldShine) {
+        const goldShinePositionX = 50 + relativeX * 60;
+        goldShine.style.backgroundPosition = `${goldShinePositionX}% 0`;
+      }
+      
+      // For chrome effects
+      const chromeShine = cardRef.current.querySelector('.card-chrome::before') as HTMLElement;
+      if (chromeShine) {
+        const chromeShinePositionX = 50 + relativeX * 70;
+        chromeShine.style.backgroundPosition = `${chromeShinePositionX}% 0`;
       }
     }
   }, [animationSpeed.motion]);
@@ -92,6 +113,32 @@ export const useCardEffects = (): UseCardEffectsReturn => {
     
     if (containerRef.current) {
       containerRef.current.style.transform = '';
+    }
+  }, []);
+
+  // Update animation speeds with new effect parameters
+  const setAnimationSpeed = useCallback((speeds: AnimationSpeed) => {
+    setAnimationSpeedState(prev => ({
+      ...prev,
+      ...speeds
+    }));
+    
+    // Apply CSS variables to document root
+    const root = document.documentElement;
+    root.style.setProperty('--motion-speed', speeds.motion.toString());
+    root.style.setProperty('--pulse-intensity', speeds.pulse.toString());
+    root.style.setProperty('--shimmer-speed', `${speeds.shimmer}s`);
+    
+    if (speeds.gold !== undefined) {
+      root.style.setProperty('--gold-intensity', speeds.gold.toString());
+    }
+    
+    if (speeds.chrome !== undefined) {
+      root.style.setProperty('--chrome-intensity', speeds.chrome.toString());
+    }
+    
+    if (speeds.vintage !== undefined) {
+      root.style.setProperty('--vintage-intensity', speeds.vintage.toString());
     }
   }, []);
 
