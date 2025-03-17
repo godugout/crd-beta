@@ -33,49 +33,52 @@ export const useBackgroundImage = ({
         }
         
         // Create fabric image from URL
-        FabricImage.fromURL(editorImgRef.current.src, (fabricImage) => {
-          if (!canvas) return;
-          
-          // Calculate scaling to fit the canvas
-          const canvasWidth = canvas.getWidth();
-          const canvasHeight = canvas.getHeight();
-          
-          // Apply image rotation
-          fabricImage.set({
-            originX: 'center',
-            originY: 'center',
-            left: canvasWidth / 2,
-            top: canvasHeight / 2,
-            angle: imageData.rotation || 0,
-            selectable: false,
-            evented: false,
-          });
-          
-          // Scale to fit the canvas
-          const imgWidth = fabricImage.width || 0;
-          const imgHeight = fabricImage.height || 0;
-          
-          const scale = Math.min(
-            canvasWidth / imgWidth,
-            canvasHeight / imgHeight
-          );
-          
-          fabricImage.scale(scale);
-          
-          // Add to canvas and set as background
-          canvas.add(fabricImage);
-          
-          // Move to back
-          fabricImage.moveToBack();
-          
-          setBackgroundImage(fabricImage);
-          
-          // Create initial crop box if none exists
-          if (cropBoxesLength === 0) {
-            addNewCropBox();
+        // Updated to use the v6 API format with callback inside options object
+        FabricImage.fromURL(editorImgRef.current.src, {
+          callback: (fabricImage) => {
+            if (!canvas) return;
+            
+            // Calculate scaling to fit the canvas
+            const canvasWidth = canvas.getWidth();
+            const canvasHeight = canvas.getHeight();
+            
+            // Apply image rotation
+            fabricImage.set({
+              originX: 'center',
+              originY: 'center',
+              left: canvasWidth / 2,
+              top: canvasHeight / 2,
+              angle: imageData.rotation || 0,
+              selectable: false,
+              evented: false,
+            });
+            
+            // Scale to fit the canvas
+            const imgWidth = fabricImage.width || 0;
+            const imgHeight = fabricImage.height || 0;
+            
+            const scale = Math.min(
+              canvasWidth / imgWidth,
+              canvasHeight / imgHeight
+            );
+            
+            fabricImage.scale(scale);
+            
+            // Add to canvas and set as background
+            canvas.add(fabricImage);
+            
+            // Move to back
+            fabricImage.moveToBack();
+            
+            setBackgroundImage(fabricImage);
+            
+            // Create initial crop box if none exists
+            if (cropBoxesLength === 0) {
+              addNewCropBox();
+            }
+            
+            canvas.renderAll();
           }
-          
-          canvas.renderAll();
         });
         
       } catch (error) {
