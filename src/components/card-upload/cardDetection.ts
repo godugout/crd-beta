@@ -117,12 +117,25 @@ export const applyCrop = async (
   const sourceWidth = box.width / scale;
   const sourceHeight = box.height / scale;
   
+  // Save context state
+  tempCtx.save();
+  
+  // Apply rotation if needed
+  if (box.rotation !== 0) {
+    tempCtx.translate(tempCanvas.width / 2, tempCanvas.height / 2);
+    tempCtx.rotate(box.rotation * Math.PI / 180);
+    tempCtx.translate(-tempCanvas.width / 2, -tempCanvas.height / 2);
+  }
+  
   // Draw the cropped portion
   tempCtx.drawImage(
     editorImg,
     sourceX, sourceY, sourceWidth, sourceHeight,
     0, 0, tempCanvas.width, tempCanvas.height
   );
+  
+  // Restore context state
+  tempCtx.restore();
   
   // Create a blob from the temp canvas
   return new Promise<{file: File, url: string}>((resolve) => {
