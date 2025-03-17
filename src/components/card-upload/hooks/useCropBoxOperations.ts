@@ -44,14 +44,15 @@ export const useCropBoxOperations = ({
     if (!canvasRef.current) return;
     
     const canvas = canvasRef.current;
+    const rect = canvas.getBoundingClientRect();
     
     // Create a new crop box with proper card ratio
-    const newWidth = canvas.width * 0.3;
+    const newWidth = rect.width * 0.3;
     const newHeight = newWidth * (3.5 / 2.5);
     
     const newBox: CropBoxProps = {
-      x: (canvas.width - newWidth) / 2,
-      y: (canvas.height - newHeight) / 2,
+      x: (rect.width - newWidth) / 2,
+      y: (rect.height - newHeight) / 2,
       width: newWidth,
       height: newHeight,
       rotation: 0
@@ -81,10 +82,11 @@ export const useCropBoxOperations = ({
     if (!canvasRef.current) return;
     
     const canvas = canvasRef.current;
+    const rect = canvas.getBoundingClientRect();
     
     // Calculate the maximum possible crop area while maintaining the 2.5:3.5 aspect ratio
-    const canvasWidth = canvas.width;
-    const canvasHeight = canvas.height;
+    const canvasWidth = rect.width;
+    const canvasHeight = rect.height;
     
     // Calculate the maximum crop area within the image bounds
     let maxWidth, maxHeight;
@@ -92,11 +94,11 @@ export const useCropBoxOperations = ({
     
     if (canvasWidth / canvasHeight > cardRatio) {
       // The image is wider than the card ratio
-      maxHeight = canvasHeight;
+      maxHeight = canvasHeight * 0.9;
       maxWidth = maxHeight * cardRatio;
     } else {
       // The image is taller than the card ratio
-      maxWidth = canvasWidth;
+      maxWidth = canvasWidth * 0.9;
       maxHeight = maxWidth / cardRatio;
     }
     

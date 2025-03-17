@@ -1,9 +1,8 @@
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { CropBoxProps } from './CropBox';
 import { ImageData } from './hooks/useCropState';
-import { useCanvasRenderer } from './hooks/useCanvasRenderer';
-import { useMouseInteractions } from './hooks/useMouseInteractions';
+import { useFabricCanvas } from './hooks/useFabricCanvas';
 
 interface EditorCanvasProps {
   canvasRef: React.RefObject<HTMLCanvasElement>;
@@ -24,32 +23,24 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({
   imageData,
   editorImgRef
 }) => {
-  // Use the custom hooks for rendering and mouse interactions
-  useCanvasRenderer(canvasRef, cropBoxes, editorImgRef, imageData, selectedCropIndex);
+  const fabricRef = useRef<HTMLCanvasElement>(null);
   
-  const {
-    handleMouseDown,
-    handleMouseMove,
-    handleMouseUp
-  } = useMouseInteractions({
+  // Use the custom hook for Fabric.js canvas integration
+  useFabricCanvas({
+    fabricRef,
     canvasRef,
     cropBoxes, 
     setCropBoxes,
     selectedCropIndex,
     setSelectedCropIndex,
+    imageData,
     editorImgRef
   });
 
   return (
     <canvas 
-      ref={canvasRef}
-      width={600}
-      height={600}
+      ref={fabricRef}
       className="w-full h-full touch-none"
-      onMouseDown={handleMouseDown}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseUp}
     />
   );
 };

@@ -89,8 +89,10 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
 
   // Handler to extract the selected crop
   const handleStageSelectedCrop = async () => {
-    const selectedBox = cropBoxes[selectedCropIndex];
-    await stageSelectedCrop(selectedBox, canvasRef, editorImgRef);
+    if (selectedCropIndex >= 0 && selectedCropIndex < cropBoxes.length) {
+      const selectedBox = cropBoxes[selectedCropIndex];
+      await stageSelectedCrop(selectedBox, canvasRef, editorImgRef);
+    }
   };
 
   return (

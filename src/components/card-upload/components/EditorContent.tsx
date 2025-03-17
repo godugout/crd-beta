@@ -47,14 +47,6 @@ const EditorContent: React.FC<EditorContentProps> = ({
         src={editorImage || ''} 
         alt="Editor reference" 
         className="hidden"
-        onLoad={() => {
-          // Force canvas redraw when image loads
-          if (canvasRef.current && editorImgRef.current) {
-            const canvas = canvasRef.current;
-            canvas.width = 600;
-            canvas.height = 600;
-          }
-        }}
       />
       
       <EditorCanvas
