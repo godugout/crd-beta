@@ -35,8 +35,8 @@ const DugoutLabs = () => {
                 className="h-auto p-4 flex flex-col items-center justify-center"
                 onClick={() => setCurrentExperiment(LabExperiment.CARD_DETECTION)}
               >
-                <span className="font-medium mb-1">Card Detection Test</span>
-                <span className="text-xs text-muted-foreground">Improve auto-detection of cards in images</span>
+                <span className="font-medium mb-1">Card Tracing Trainer</span>
+                <span className="text-xs text-muted-foreground">Help improve auto-detection of cards by tracing them</span>
               </Button>
               
               {/* More experiment buttons can be added here */}
