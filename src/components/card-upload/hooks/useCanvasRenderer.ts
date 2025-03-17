@@ -1,4 +1,3 @@
-
 import { useEffect } from 'react';
 import { CropBoxProps, drawCropBox } from '../CropBox';
 import { ImageData } from './useCropState';

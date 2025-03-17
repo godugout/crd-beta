@@ -1,4 +1,3 @@
-
 import { CropBoxProps, getResizeHandle, isPointInRotatedRect } from '../../CropBox';
 import { isRotationHandle } from './useRotation';
 import { createNewCropBox, updateCursorStyle } from './useCropBox';

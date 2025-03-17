@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from 'react';
-import { Canvas, Rect, Image, loadSVGFromURL, loadImage } from 'fabric';
+import { Canvas, Rect, Image as FabricImage } from 'fabric';
 import { toast } from 'sonner';
 import { CropBoxProps } from '../CropBox';
 import { ImageData } from './useCropState';
@@ -30,7 +30,7 @@ export const useFabricCanvas = ({
   editorImgRef
 }: UseFabricCanvasProps) => {
   const [canvas, setCanvas] = useState<Canvas | null>(null);
-  const [backgroundImage, setBackgroundImage] = useState<Image | null>(null);
+  const [backgroundImage, setBackgroundImage] = useState<FabricImage | null>(null);
   const [cropRects, setCropRects] = useState<Rect[]>([]);
   
   // Initialize the Fabric canvas
@@ -50,10 +50,8 @@ export const useFabricCanvas = ({
     
     setCanvas(fabricCanvas);
     
-    // Provide a reference to the original canvas ref
-    if (canvasRef?.current) {
-      canvasRef.current = fabricRef.current;
-    }
+    // We can't directly assign to canvasRef.current as it's read-only
+    // But Fabric will still use the same canvas element
     
     // Clean up on unmount
     return () => {
@@ -72,46 +70,51 @@ export const useFabricCanvas = ({
           canvas.remove(backgroundImage);
         }
         
-        // Load the image from the editor image reference
-        const img = await loadImage(editorImgRef.current.src);
-        
-        // Create a fabric Image object
-        const fabricImage = new Image(img);
-        
-        // Calculate scaling to fit the canvas
-        const canvasWidth = canvas.getWidth();
-        const canvasHeight = canvas.getHeight();
-        
-        // Apply image rotation
-        fabricImage.set({
-          originX: 'center',
-          originY: 'center',
-          left: canvasWidth / 2,
-          top: canvasHeight / 2,
-          angle: imageData.rotation || 0,
-          selectable: false,
-          evented: false,
+        // Use FabricImage.fromURL instead of loadImage
+        FabricImage.fromURL(editorImgRef.current.src, (fabricImage) => {
+          if (!canvas) return;
+          
+          // Calculate scaling to fit the canvas
+          const canvasWidth = canvas.getWidth();
+          const canvasHeight = canvas.getHeight();
+          
+          // Apply image rotation
+          fabricImage.set({
+            originX: 'center',
+            originY: 'center',
+            left: canvasWidth / 2,
+            top: canvasHeight / 2,
+            angle: imageData.rotation || 0,
+            selectable: false,
+            evented: false,
+          });
+          
+          // Scale to fit the canvas
+          const imgWidth = fabricImage.width || 0;
+          const imgHeight = fabricImage.height || 0;
+          
+          const scale = Math.min(
+            canvasWidth / imgWidth,
+            canvasHeight / imgHeight
+          );
+          
+          fabricImage.scale(scale);
+          
+          // Add to canvas and set as background
+          canvas.add(fabricImage);
+          
+          // Use moveToBack instead of sendToBack
+          fabricImage.moveToBack();
+          
+          setBackgroundImage(fabricImage);
+          
+          // Create initial crop box if none exists
+          if (cropBoxes.length === 0) {
+            addNewCropBox();
+          }
+          
+          canvas.renderAll();
         });
-        
-        // Scale to fit the canvas
-        const scale = Math.min(
-          canvasWidth / img.width,
-          canvasHeight / img.height
-        );
-        
-        fabricImage.scale(scale);
-        
-        // Add to canvas and set as background
-        canvas.add(fabricImage);
-        fabricImage.sendToBack();
-        setBackgroundImage(fabricImage);
-        
-        // Create initial crop box if none exists
-        if (cropBoxes.length === 0) {
-          addNewCropBox();
-        }
-        
-        canvas.renderAll();
         
       } catch (error) {
         console.error('Failed to load image:', error);
