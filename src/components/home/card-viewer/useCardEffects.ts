@@ -95,7 +95,14 @@ export const useCardEffects = (): UseCardEffectsReturn => {
       const refractor = cardRef.current.querySelector('.card-refractor::before') as HTMLElement;
       if (refractor) {
         const refractorPositionX = 50 + relativeX * 60;
-        refractor.style.backgroundPosition = `${refractorPositionX}% 0`;
+        const refractorPositionY = 50 + relativeY * 30;
+        refractor.style.backgroundPosition = `${refractorPositionX}% ${refractorPositionY}%`;
+        
+        // Add RGB shift based on viewing angle
+        const rgbShiftX = relativeX * 5 * (animationSpeed.refractor || 1.0);
+        const rgbShiftY = relativeY * 5 * (animationSpeed.refractor || 1.0);
+        refractor.style.filter = `hue-rotate(${rgbShiftX * 15}deg) saturate(${1.2 + Math.abs(relativeX) * 0.5})`;
+        refractor.style.transform = `translateZ(2px) translateX(${rgbShiftX}px) translateY(${rgbShiftY}px)`;
       }
       
       const goldShine = cardRef.current.querySelector('.card-gold-foil::before') as HTMLElement;
@@ -110,7 +117,7 @@ export const useCardEffects = (): UseCardEffectsReturn => {
         chromeShine.style.backgroundPosition = `${chromeShinePositionX}% 0`;
       }
     }
-  }, [animationSpeed.motion]);
+  }, [animationSpeed.motion, animationSpeed.refractor]);
 
   const handleMouseLeave = useCallback(() => {
     if (cardRef.current) {
@@ -161,6 +168,7 @@ export const useCardEffects = (): UseCardEffectsReturn => {
     if (speeds.refractor !== undefined) {
       root.style.setProperty('--refractor-intensity', speeds.refractor.toString());
       root.style.setProperty('--refractor-speed', `${5 - speeds.refractor * 2}s`);
+      root.style.setProperty('--refractor-angle', `${speeds.refractor * 45}deg`);
     }
     
     if (speeds.spectral !== undefined) {

@@ -1,11 +1,8 @@
 
-/* Import all card effect styles */
-@import './AnimationKeyframes.css';
 @import './BaseEffects.css';
 @import './HolographicEffects.css';
-@import './PremiumEffects.css';
-@import './VintageEffects.css';
 @import './RefractorEffects.css';
 @import './SpectralEffects.css';
-@import './FabricSwatchEffects.css';
-
+@import './PremiumEffects.css';
+@import './VintageEffects.css';
+@import './AnimationKeyframes.css';

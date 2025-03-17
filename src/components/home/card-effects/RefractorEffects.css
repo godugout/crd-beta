@@ -1,126 +1,165 @@
 
-/* Refractor Effect CSS */
+/* Refractor Effect Variables */
 :root {
-  --refractor-intensity: 1;
+  --refractor-intensity: 1.0;
   --refractor-speed: 3s;
-  --refractor-color-primary: rgba(183, 255, 255, 0.5);
-  --refractor-color-secondary: rgba(255, 207, 255, 0.5);
-  --refractor-color-tertiary: rgba(205, 255, 221, 0.5);
-  --refractor-border-glow: rgba(255, 255, 255, 0.8);
+  --refractor-angle: 45deg;
+  --refractor-color-1: rgba(255, 0, 128, 0.2);
+  --refractor-color-2: rgba(0, 255, 255, 0.2);
+  --refractor-color-3: rgba(255, 255, 0, 0.2);
 }
 
-/* Base Refractor Effect Classes */
+/* Refractor Card Base */
 .card-refractor {
   position: relative;
   overflow: hidden;
-  z-index: 1;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.card-refractor::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    125deg,
-    var(--refractor-color-primary),
-    var(--refractor-color-secondary),
-    var(--refractor-color-tertiary),
-    var(--refractor-color-secondary),
-    var(--refractor-color-primary)
-  );
-  background-size: 400% 400%;
-  z-index: -1;
-  opacity: 0.7;
-  mix-blend-mode: overlay;
-  pointer-events: none;
-  animation: refractor-shine calc(var(--refractor-speed) * 2) ease infinite;
-  animation-play-state: var(--animation-play-state, running);
+  border-radius: 12px;
+  transition: all 0.3s ease;
 }
 
 .card-refractor::after {
   content: '';
   position: absolute;
-  inset: -1px;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
   background: linear-gradient(
-    135deg,
-    #fff3,
-    transparent 40%,
-    transparent 60%,
-    #fff3
+    var(--refractor-angle),
+    var(--refractor-color-1),
+    var(--refractor-color-2),
+    var(--refractor-color-3),
+    transparent
   );
-  background-size: 200% 200%;
+  mix-blend-mode: color-dodge;
+  opacity: calc(0.4 * var(--refractor-intensity));
+  z-index: 5;
   pointer-events: none;
-  border-radius: inherit;
-  animation: refractor-edge var(--refractor-speed) ease infinite;
-  animation-play-state: var(--animation-play-state, running);
+  transform: translateZ(1px);
 }
 
-/* RGB Split Effect */
-.card-refractor .card-inner::after {
+.card-refractor::before {
+  content: '';
+  position: absolute;
+  left: -100%;
+  top: -100%;
+  width: 300%;
+  height: 300%;
+  background: radial-gradient(
+    circle at center,
+    rgba(255, 255, 255, 0.8) 0%,
+    rgba(255, 255, 255, 0) 50%
+  );
+  mix-blend-mode: screen;
+  opacity: calc(0.5 * var(--refractor-intensity));
+  z-index: 3;
+  transform-origin: var(--mouse-x) var(--mouse-y);
+  pointer-events: none;
+  animation: refractorSweep var(--refractor-speed) ease-in-out infinite alternate;
+  will-change: transform, background-position;
+}
+
+/* RGB Fringing Effect at Edges */
+.card-refractor .card-content {
+  position: relative;
+}
+
+.card-refractor .card-content::before {
   content: '';
   position: absolute;
   inset: 0;
   background: radial-gradient(
-    circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
-    rgba(255, 0, 0, 0.1),
-    rgba(0, 255, 0, 0.1) 30%,
-    rgba(0, 0, 255, 0.1) 60%
+    circle at var(--mouse-x) var(--mouse-y),
+    transparent 30%,
+    rgba(255, 0, 0, 0.05) 90%,
+    rgba(0, 255, 255, 0.05) 100%
   );
   mix-blend-mode: screen;
-  opacity: var(--refractor-intensity, 1);
+  opacity: calc(0.6 * var(--refractor-intensity));
   pointer-events: none;
-  z-index: 5;
+  z-index: 2;
+  transform: translateZ(0);
 }
 
-/* Animation for refractor edge effect */
-@keyframes refractor-edge {
-  0% {
-    background-position: 0% 0%;
-    opacity: 0.4;
-  }
-  50% {
-    background-position: 100% 100%;
-    opacity: 0.8;
-  }
-  100% {
-    background-position: 0% 0%;
-    opacity: 0.4;
-  }
-}
-
-/* Animation for the refractor shine effect */
-@keyframes refractor-shine {
-  0% {
-    background-position: 0% 0%;
-  }
-  50% {
-    background-position: 100% 100%;
-  }
-  100% {
-    background-position: 0% 0%;
-  }
-}
-
-/* Add box shadow to simulate refraction */
-.card-refractor:hover {
+.card-refractor .card-content::after {
+  content: '';
+  position: absolute;
+  inset: 0;
   box-shadow: 
-    0 0 15px 2px var(--refractor-border-glow),
-    0 0 5px 1px rgba(255, 255, 255, 0.8) inset;
+    inset 0 0 2px 0 rgba(255, 0, 0, 0.5),
+    inset 0 0 4px 1px rgba(0, 255, 255, 0.5);
+  mix-blend-mode: screen;
+  opacity: calc(0.3 * var(--refractor-intensity));
+  z-index: 2;
+  border-radius: 12px;
+  pointer-events: none;
 }
 
-/* Media Queries for Performance Optimization */
-@media (prefers-reduced-motion: reduce) {
-  .card-refractor::before,
-  .card-refractor::after {
-    animation: none;
+/* Animated Prismatic Color Flow */
+@keyframes refractorSweep {
+  0% {
+    background-position: 0% 0%;
+    transform: rotate(0deg) scale(1);
+  }
+  33% {
+    background-position: 100% 0%;
+    transform: rotate(1deg) scale(1.05);
+  }
+  66% {
+    background-position: 100% 100%;
+    transform: rotate(-1deg) scale(1.02);
+  }
+  100% {
+    background-position: 0% 100%;
+    transform: rotate(0deg) scale(1);
   }
 }
 
-/* Lower end device optimizations */
+/* Optimizations for devices */
 @media (max-width: 768px) {
   .card-refractor::before,
   .card-refractor::after {
-    animation-duration: calc(var(--refractor-speed) * 3);
+    animation-duration: calc(var(--refractor-speed) * 1.5);
+  }
+  
+  .card-refractor .card-content::before,
+  .card-refractor .card-content::after {
+    opacity: calc(0.5 * var(--refractor-intensity));
+  }
+}
+
+/* Reduced effects for low-power devices */
+@media (prefers-reduced-motion) {
+  .card-refractor::before {
+    animation: none;
+  }
+  
+  .card-refractor::after {
+    background: linear-gradient(
+      var(--refractor-angle),
+      var(--refractor-color-1),
+      var(--refractor-color-2)
+    );
+    opacity: calc(0.3 * var(--refractor-intensity));
+  }
+}
+
+/* Enhanced version for high-end devices */
+@supports (backdrop-filter: blur(10px)) {
+  .card-refractor::after {
+    backdrop-filter: hue-rotate(45deg);
+    animation: refractorHueShift calc(var(--refractor-speed) * 2) infinite alternate;
+  }
+  
+  @keyframes refractorHueShift {
+    0% {
+      backdrop-filter: hue-rotate(0deg) contrast(1.05);
+    }
+    50% {
+      backdrop-filter: hue-rotate(60deg) contrast(1.1);
+    }
+    100% {
+      backdrop-filter: hue-rotate(0deg) contrast(1.05);
+    }
   }
 }
