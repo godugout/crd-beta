@@ -1,6 +1,7 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { cn } from '@/lib/utils';
-import { Upload, Image, X, Crop } from 'lucide-react';
+import { Upload, Image as ImageIcon, X, Crop } from 'lucide-react';
 import { toast } from 'sonner';
 import { 
   Dialog,
@@ -78,7 +79,7 @@ const CardUpload: React.FC<CardUploadProps> = ({ onImageUpload, className, initi
     const localUrl = URL.createObjectURL(file);
     
     // Load the image to check dimensions and detect card content
-    const img = new Image();
+    const img = new window.Image();
     img.onload = () => {
       // Check if dimensions match standard card ratio (2.5:3.5)
       const ratio = img.width / img.height;
