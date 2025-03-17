@@ -7,14 +7,16 @@ import { useDragging } from './useDragging';
 import { createNewCropBox, updateCursorStyle } from './useCropBox';
 import { UseMouseInteractionsProps, MouseHandlers, DragState } from './types';
 
-export const useMouseInteractions = ({
-  canvasRef,
-  cropBoxes, 
-  setCropBoxes,
-  selectedCropIndex,
-  setSelectedCropIndex,
-  editorImgRef
-}: UseMouseInteractionsProps): MouseHandlers => {
+export const useMouseInteractions = (props: UseMouseInteractionsProps): MouseHandlers => {
+  const {
+    canvasRef,
+    cropBoxes, 
+    setCropBoxes,
+    selectedCropIndex,
+    setSelectedCropIndex,
+    editorImgRef
+  } = props;
+  
   const [dragStart, setDragStart] = useState<DragState>({ x: 0, y: 0 });
   
   const { isDragging, setIsDragging, handleDragging } = useDragging(

@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { CropBoxProps, getResizeHandle, drawCropBox, isPointInRotatedRect } from './CropBox';
+import React from 'react';
+import { CropBoxProps } from './CropBox';
 import { ImageData } from './hooks/useCropState';
 import { useCanvasRenderer } from './hooks/useCanvasRenderer';
 import { useMouseInteractions } from './hooks/useMouseInteractions';
@@ -31,14 +31,14 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({
     handleMouseDown,
     handleMouseMove,
     handleMouseUp
-  } = useMouseInteractions(
+  } = useMouseInteractions({
     canvasRef,
     cropBoxes, 
     setCropBoxes,
     selectedCropIndex,
     setSelectedCropIndex,
     editorImgRef
-  );
+  });
 
   return (
     <canvas 
