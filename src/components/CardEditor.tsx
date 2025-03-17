@@ -7,6 +7,7 @@ import { useCards } from '@/context/CardContext';
 import { Card as CardType } from '@/lib/types';
 import { Plus, X } from 'lucide-react';
 import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
 
 interface CardEditorProps {
   card?: CardType;
@@ -84,6 +85,7 @@ const CardEditor: React.FC<CardEditorProps> = ({ card, className }) => {
           <CardUpload 
             onImageUpload={handleImageUpload} 
             className="max-w-xs"
+            initialImageUrl={card?.imageUrl}
           />
         </div>
         
