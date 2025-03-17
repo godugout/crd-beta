@@ -66,8 +66,8 @@ export const useBackgroundImage = ({
           // Add to canvas and set as background
           canvas.add(fabricImage);
           
-          // Move to back
-          fabricImage.moveToBack();
+          // Move to back - use sendToBack() from canvas instead of moveToBack()
+          canvas.sendToBack(fabricImage);
           
           setBackgroundImage(fabricImage);
           
