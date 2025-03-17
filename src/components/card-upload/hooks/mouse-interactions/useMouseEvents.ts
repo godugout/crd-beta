@@ -20,6 +20,7 @@ export const useMouseEvents = (
     handleDragging: (x: number, y: number, dragStart: DragState) => DragState;
     handleResizing: (x: number, y: number, dragStart: DragState) => DragState;
     handleRotation: (x: number, y: number, dragStart: DragState) => DragState;
+    handleStopResizing?: () => void;
   }
 ) => {
   const {
@@ -45,7 +46,8 @@ export const useMouseEvents = (
   const {
     handleDragging,
     handleResizing,
-    handleRotation
+    handleRotation,
+    handleStopResizing
   } = handlers;
 
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
@@ -106,7 +108,7 @@ export const useMouseEvents = (
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     
-    // Update cursor style based on interaction mode
+    // Provide better visual feedback with cursor styles
     updateCursorStyle(
       e, 
       canvasRef, 
@@ -137,6 +139,9 @@ export const useMouseEvents = (
   };
 
   const handleMouseUp = () => {
+    if (isResizing && handleStopResizing) {
+      handleStopResizing();
+    }
     setIsDragging(false);
     setIsResizing(null);
     setIsRotating(false);

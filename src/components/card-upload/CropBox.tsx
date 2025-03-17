@@ -18,18 +18,18 @@ export const CropBox: React.FC<{
   return null;
 };
 
-// Get resize handle from mouse position
+// Get resize handle from mouse position with improved precision
 export const getResizeHandle = (
   e: React.MouseEvent<HTMLCanvasElement>, 
   box: CropBoxProps, 
-  handleSize: number = 8
+  handleSize: number = 12 // Increased handle size for easier grabbing
 ): string | null => {
   if (!e.currentTarget) return null;
   
   const canvas = e.currentTarget;
   const rect = canvas.getBoundingClientRect();
   const x = e.clientX - rect.left;
-  const y = e.clientY - rect.left;
+  const y = e.clientY - rect.top;
   
   // For rotated boxes, we need to transform the mouse coordinates
   // into the box's coordinate system

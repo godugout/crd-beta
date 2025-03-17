@@ -1,5 +1,4 @@
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { CropBoxProps } from '../../CropBox';
 import { DragState } from './types';
 
@@ -9,114 +8,140 @@ export const useResizing = (
   selectedCropIndex: number
 ) => {
   const [isResizing, setIsResizing] = useState<string | null>(null);
+  const [initialBox, setInitialBox] = useState<CropBoxProps | null>(null);
+  const [shift, setShift] = useState(false);
+  
+  // Track keyboard modifiers for enhanced resizing
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Shift') setShift(true);
+    };
+    
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (e.key === 'Shift') setShift(false);
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+    
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
+  }, []);
+
+  const handleStartResizing = (handle: string) => {
+    if (selectedCropIndex >= 0 && selectedCropIndex < cropBoxes.length) {
+      // Store the initial box state when starting to resize
+      setInitialBox({...cropBoxes[selectedCropIndex]});
+      setIsResizing(handle);
+    }
+  };
 
   const handleResizing = (x: number, y: number, dragStart: DragState) => {
-    if (selectedCropIndex >= 0 && selectedCropIndex < cropBoxes.length && isResizing) {
-      const selectedBox = {...cropBoxes[selectedCropIndex]};
-      
-      // Calculate the center of the box for rotation calculations
-      const centerX = selectedBox.x + selectedBox.width / 2;
-      const centerY = selectedBox.y + selectedBox.height / 2;
-      
-      // Convert rotation angle to radians
-      const angleRad = -selectedBox.rotation * Math.PI / 180;
-      const cos = Math.cos(angleRad);
-      const sin = Math.sin(angleRad);
-      
-      // Convert mouse coordinates to box's coordinate system
-      const translateAndRotatePoint = (pointX: number, pointY: number) => {
-        // Translate to origin
-        const translatedX = pointX - centerX;
-        const translatedY = pointY - centerY;
-        
-        // Rotate around origin (opposite to box rotation)
-        const rotatedX = translatedX * cos - translatedY * sin;
-        const rotatedY = translatedX * sin + translatedY * cos;
-        
-        return { rotatedX, rotatedY };
-      };
-      
-      // Convert current mouse position to box's coordinate system
-      const currentPoint = translateAndRotatePoint(x, y);
-      
-      // Convert drag start position to box's coordinate system
-      const startPoint = translateAndRotatePoint(dragStart.x, dragStart.y);
-      
-      // Calculate the delta between current and start positions
-      const deltaX = currentPoint.rotatedX - startPoint.rotatedX;
-      const deltaY = currentPoint.rotatedY - startPoint.rotatedY;
-      
-      // Maintain aspect ratio (2.5:3.5)
-      const aspectRatio = 2.5 / 3.5;
-      
-      // Initialize new dimensions and position offsets
-      let newWidth = selectedBox.width;
-      let newHeight = selectedBox.height;
-      let newX = selectedBox.x;
-      let newY = selectedBox.y;
-      
-      // Handle resize based on which corner is being dragged
-      switch (isResizing) {
-        case 'tl': // Top-left
-          // Update width and height based on drag delta
-          newWidth = Math.max(100, selectedBox.width - deltaX * 2);
-          newHeight = newWidth / aspectRatio;
-          
-          // Calculate new position to maintain center
-          newX = centerX - newWidth / 2;
-          newY = centerY - newHeight / 2;
-          break;
-          
-        case 'tr': // Top-right
-          // Update width and height based on drag delta
-          newWidth = Math.max(100, selectedBox.width + deltaX * 2);
-          newHeight = newWidth / aspectRatio;
-          
-          // Calculate new position to maintain center
-          newX = centerX - newWidth / 2;
-          newY = centerY - newHeight / 2;
-          break;
-          
-        case 'bl': // Bottom-left
-          // Update width and height based on drag delta
-          newWidth = Math.max(100, selectedBox.width - deltaX * 2);
-          newHeight = newWidth / aspectRatio;
-          
-          // Calculate new position to maintain center
-          newX = centerX - newWidth / 2;
-          newY = centerY - newHeight / 2;
-          break;
-          
-        case 'br': // Bottom-right
-          // Update width and height based on drag delta
-          newWidth = Math.max(100, selectedBox.width + deltaX * 2);
-          newHeight = newWidth / aspectRatio;
-          
-          // Calculate new position to maintain center
-          newX = centerX - newWidth / 2;
-          newY = centerY - newHeight / 2;
-          break;
-      }
-      
-      // Update the crop box with new dimensions and position
-      const newBoxes = [...cropBoxes];
-      newBoxes[selectedCropIndex] = {
-        ...selectedBox,
-        x: newX,
-        y: newY,
-        width: newWidth,
-        height: newHeight
-      };
-      
-      setCropBoxes(newBoxes);
-      return { x, y }; // Return current mouse position
+    if (selectedCropIndex < 0 || !isResizing || !initialBox) {
+      return dragStart;
     }
-    return dragStart; // Return unchanged if no resizing
+    
+    const selectedBox = {...cropBoxes[selectedCropIndex]};
+    
+    // Calculate deltas from initial mouse position
+    const deltaX = x - dragStart.x;
+    const deltaY = y - dragStart.y;
+    
+    // Fixed aspect ratio (2.5:3.5)
+    const aspectRatio = 2.5 / 3.5;
+    
+    // New dimensions variables
+    let newWidth = selectedBox.width;
+    let newHeight = selectedBox.height;
+    let newX = selectedBox.x;
+    let newY = selectedBox.y;
+    
+    // Base resize increments on initial box dimensions and mouse movement
+    const resizeMultiplier = shift ? 0.5 : 1; // Hold shift for more precise control
+    
+    switch (isResizing) {
+      case 'tl': // Top-left corner
+        // Determine dominant axis for aspect ratio preservation
+        if (Math.abs(deltaX) > Math.abs(deltaY)) {
+          // Width dominant
+          newWidth = Math.max(100, initialBox.width - deltaX * resizeMultiplier);
+          newHeight = newWidth / aspectRatio;
+        } else {
+          // Height dominant
+          newHeight = Math.max(140, initialBox.height - deltaY * resizeMultiplier);
+          newWidth = newHeight * aspectRatio;
+        }
+        // Adjust position to maintain the bottom-right corner fixed
+        newX = initialBox.x + initialBox.width - newWidth;
+        newY = initialBox.y + initialBox.height - newHeight;
+        break;
+        
+      case 'tr': // Top-right corner
+        if (Math.abs(deltaX) > Math.abs(deltaY)) {
+          newWidth = Math.max(100, initialBox.width + deltaX * resizeMultiplier);
+          newHeight = newWidth / aspectRatio;
+        } else {
+          newHeight = Math.max(140, initialBox.height - deltaY * resizeMultiplier);
+          newWidth = newHeight * aspectRatio;
+        }
+        // Keep left edge fixed, adjust Y to maintain bottom edge
+        newX = initialBox.x;
+        newY = initialBox.y + initialBox.height - newHeight;
+        break;
+        
+      case 'bl': // Bottom-left corner
+        if (Math.abs(deltaX) > Math.abs(deltaY)) {
+          newWidth = Math.max(100, initialBox.width - deltaX * resizeMultiplier);
+          newHeight = newWidth / aspectRatio;
+        } else {
+          newHeight = Math.max(140, initialBox.height + deltaY * resizeMultiplier);
+          newWidth = newHeight * aspectRatio;
+        }
+        // Keep top and right edges fixed
+        newX = initialBox.x + initialBox.width - newWidth;
+        newY = initialBox.y;
+        break;
+        
+      case 'br': // Bottom-right corner
+        if (Math.abs(deltaX) > Math.abs(deltaY)) {
+          newWidth = Math.max(100, initialBox.width + deltaX * resizeMultiplier);
+          newHeight = newWidth / aspectRatio;
+        } else {
+          newHeight = Math.max(140, initialBox.height + deltaY * resizeMultiplier);
+          newWidth = newHeight * aspectRatio;
+        }
+        // Keep top-left corner fixed
+        newX = initialBox.x;
+        newY = initialBox.y;
+        break;
+    }
+    
+    // Apply changes
+    const newBoxes = [...cropBoxes];
+    newBoxes[selectedCropIndex] = {
+      ...selectedBox,
+      x: newX,
+      y: newY,
+      width: newWidth,
+      height: newHeight
+    };
+    
+    setCropBoxes(newBoxes);
+    return { x, y }; // Return current mouse position for drag start update
+  };
+
+  const handleStopResizing = () => {
+    setIsResizing(null);
+    setInitialBox(null);
   };
 
   return {
     isResizing,
-    setIsResizing,
-    handleResizing
+    setIsResizing: handleStartResizing,
+    handleResizing,
+    handleStopResizing,
+    isShiftPressed: shift
   };
 };

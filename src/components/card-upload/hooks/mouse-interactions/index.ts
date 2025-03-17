@@ -17,7 +17,13 @@ export const useMouseInteractions = (props: UseMouseInteractionsProps): MouseHan
     props.selectedCropIndex
   );
   
-  const { isResizing, setIsResizing, handleResizing } = useResizing(
+  const { 
+    isResizing, 
+    setIsResizing, 
+    handleResizing, 
+    handleStopResizing,
+    isShiftPressed 
+  } = useResizing(
     props.cropBoxes,
     props.setCropBoxes,
     props.selectedCropIndex
@@ -45,7 +51,8 @@ export const useMouseInteractions = (props: UseMouseInteractionsProps): MouseHan
     {
       handleDragging,
       handleResizing,
-      handleRotation
+      handleRotation,
+      handleStopResizing
     }
   );
 };

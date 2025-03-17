@@ -50,32 +50,62 @@ export const updateCursorStyle = (
   const x = e.clientX - rect.left;
   const y = e.clientY - rect.top;
   
-  if (!isDragging && !isResizing && !isRotating && selectedCropIndex >= 0 && selectedCropIndex < cropBoxes.length) {
-    let cursorStyle = 'default';
-    
-    const selectedBox = cropBoxes[selectedCropIndex];
-    if (selectedBox && isRotationHandle(x, y, selectedBox)) {
-      cursorStyle = 'grab';
+  if (isDragging) {
+    canvas.style.cursor = 'grabbing';
+    return;
+  }
+  
+  if (isResizing) {
+    // Use appropriate resize cursors based on which handle is being used
+    switch (isResizing) {
+      case 'tl': case 'br':
+        canvas.style.cursor = 'nwse-resize';
+        break;
+      case 'tr': case 'bl':
+        canvas.style.cursor = 'nesw-resize';
+        break;
     }
+    return;
+  }
+  
+  if (isRotating) {
+    canvas.style.cursor = 'grabbing';
+    return;
+  }
+  
+  // Not actively dragging/resizing - just update cursor based on position
+  let cursorStyle = 'default';
+  
+  if (selectedCropIndex >= 0 && selectedCropIndex < cropBoxes.length) {
+    const selectedBox = cropBoxes[selectedCropIndex];
     
-    cropBoxes.forEach((box) => {
-      const resizeHandle = getResizeHandle(e, box);
+    if (isRotationHandle(x, y, selectedBox)) {
+      cursorStyle = 'grab';
+    } else {
+      // Check resize handles first (higher priority than move)
+      const resizeHandle = getResizeHandle(e, selectedBox);
       if (resizeHandle) {
         switch (resizeHandle) {
-          case 'tl':
-          case 'br':
+          case 'tl': case 'br':
             cursorStyle = 'nwse-resize';
             break;
-          case 'tr':
-          case 'bl':
+          case 'tr': case 'bl':
             cursorStyle = 'nesw-resize';
             break;
         }
-      } else if (isPointInRotatedRect(x, y, box)) {
+      } else if (isPointInRotatedRect(x, y, selectedBox)) {
         cursorStyle = 'move';
       }
-    });
-    
-    canvas.style.cursor = cursorStyle;
+    }
+  } else {
+    // If no selection, check if hovering over any box
+    for (const box of cropBoxes) {
+      if (isPointInRotatedRect(x, y, box)) {
+        cursorStyle = 'move';
+        break;
+      }
+    }
   }
+  
+  canvas.style.cursor = cursorStyle;
 };
