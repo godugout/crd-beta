@@ -25,21 +25,43 @@ export const useEditor = ({ onCropComplete, currentFile, setShowEditor }: UseEdi
     canvasRef: React.RefObject<HTMLCanvasElement>,
     editorImgRef: React.RefObject<HTMLImageElement>
   ) => {
-    const result = await applyCrop(selectedBox, canvasRef.current, currentFile, editorImgRef.current);
-    
-    if (result) {
-      // Add to staging area with the cropFile included
-      const newStagedCard: StagedCardProps = {
-        id: `card-${Date.now()}`,
-        cropBox: {...selectedBox},
-        previewUrl: result.url,
-        file: result.file  // Store the file for later use
-      };
+    try {
+      if (!currentFile) {
+        toast.error("No image file loaded");
+        return;
+      }
       
-      setStagedCards(prev => [...prev, newStagedCard]);
-      toast.success("Card added to staging area");
-    } else {
-      toast.error("Failed to crop the image");
+      if (!canvasRef.current) {
+        toast.error("Canvas not initialized");
+        return;
+      }
+      
+      if (!editorImgRef.current) {
+        toast.error("Editor image not loaded");
+        return;
+      }
+      
+      console.log("Starting crop with box:", selectedBox);
+      const result = await applyCrop(selectedBox, canvasRef.current, currentFile, editorImgRef.current);
+      
+      if (result && result.file && result.url) {
+        // Add to staging area with the cropFile included
+        const newStagedCard: StagedCardProps = {
+          id: `card-${Date.now()}`,
+          cropBox: {...selectedBox},
+          previewUrl: result.url,
+          file: result.file  // Store the file for later use
+        };
+        
+        setStagedCards(prev => [...prev, newStagedCard]);
+        toast.success("Card added to staging area");
+      } else {
+        console.error("Failed to crop the image, result:", result);
+        toast.error("Failed to crop the image");
+      }
+    } catch (error) {
+      console.error("Error in stageSelectedCrop:", error);
+      toast.error(`Error cropping image: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 

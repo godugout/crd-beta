@@ -83,77 +83,102 @@ export const applyCrop = async (
   currentFile: File | null,
   editorImg: HTMLImageElement | null
 ): Promise<{file: File, url: string} | null> => {
-  if (!canvas || !currentFile || !editorImg) return null;
-  
-  // Create a temporary canvas for the cropped image
-  const tempCanvas = document.createElement('canvas');
-  const tempCtx = tempCanvas.getContext('2d');
-  
-  if (!tempCtx) return null;
-  
-  // Set dimensions for the cropped image
-  tempCanvas.width = box.width;
-  tempCanvas.height = box.height;
-  
-  // Calculate the source coordinates in the original image
-  // We need to account for the scaling and positioning in the canvas
-  const canvasWidth = canvas.width;
-  const canvasHeight = canvas.height;
-  
-  const scale = Math.min(
-    canvasWidth / editorImg.naturalWidth,
-    canvasHeight / editorImg.naturalHeight
-  );
-  
-  const scaledWidth = editorImg.naturalWidth * scale;
-  const scaledHeight = editorImg.naturalHeight * scale;
-  
-  const offsetX = (canvasWidth - scaledWidth) / 2;
-  const offsetY = (canvasHeight - scaledHeight) / 2;
-  
-  // Calculate source coordinates (in the original image)
-  const sourceX = (box.x - offsetX) / scale;
-  const sourceY = (box.y - offsetY) / scale;
-  const sourceWidth = box.width / scale;
-  const sourceHeight = box.height / scale;
-  
-  // Save context state
-  tempCtx.save();
-  
-  // Apply rotation if needed
-  if (box.rotation !== 0) {
-    tempCtx.translate(tempCanvas.width / 2, tempCanvas.height / 2);
-    tempCtx.rotate(box.rotation * Math.PI / 180);
-    tempCtx.translate(-tempCanvas.width / 2, -tempCanvas.height / 2);
+  if (!canvas || !currentFile || !editorImg) {
+    console.error("Missing required parameters for crop:", { canvas: !!canvas, file: !!currentFile, img: !!editorImg });
+    return null;
   }
   
-  // Draw the cropped portion
-  tempCtx.drawImage(
-    editorImg,
-    sourceX, sourceY, sourceWidth, sourceHeight,
-    0, 0, tempCanvas.width, tempCanvas.height
-  );
-  
-  // Restore context state
-  tempCtx.restore();
-  
-  // Create a blob from the temp canvas
-  return new Promise<{file: File, url: string}>((resolve) => {
-    tempCanvas.toBlob((blob) => {
-      if (blob && currentFile) {
-        // Create a new file with the cropped image
-        const croppedFile = new File(
-          [blob], 
-          currentFile.name, 
-          { type: currentFile.type }
-        );
-        
-        // Return the cropped file and URL
-        resolve({
-          file: croppedFile,
-          url: URL.createObjectURL(blob)
-        });
-      }
-    }, currentFile.type);
-  });
+  try {
+    // Create a temporary canvas for the cropped image
+    const tempCanvas = document.createElement('canvas');
+    const tempCtx = tempCanvas.getContext('2d');
+    
+    if (!tempCtx) {
+      console.error("Failed to get 2D context for temp canvas");
+      return null;
+    }
+    
+    // Set dimensions for the cropped image
+    tempCanvas.width = box.width;
+    tempCanvas.height = box.height;
+    
+    // Calculate the source coordinates in the original image
+    // We need to account for the scaling and positioning in the canvas
+    const canvasWidth = canvas.width;
+    const canvasHeight = canvas.height;
+    
+    const scale = Math.min(
+      canvasWidth / editorImg.naturalWidth,
+      canvasHeight / editorImg.naturalHeight
+    );
+    
+    const scaledWidth = editorImg.naturalWidth * scale;
+    const scaledHeight = editorImg.naturalHeight * scale;
+    
+    const offsetX = (canvasWidth - scaledWidth) / 2;
+    const offsetY = (canvasHeight - scaledHeight) / 2;
+    
+    // Calculate source coordinates (in the original image)
+    const sourceX = (box.x - offsetX) / scale;
+    const sourceY = (box.y - offsetY) / scale;
+    const sourceWidth = box.width / scale;
+    const sourceHeight = box.height / scale;
+    
+    console.log("Crop dimensions:", {
+      source: { x: sourceX, y: sourceY, width: sourceWidth, height: sourceHeight },
+      destination: { width: tempCanvas.width, height: tempCanvas.height },
+      original: { width: editorImg.naturalWidth, height: editorImg.naturalHeight },
+      scale,
+      offset: { x: offsetX, y: offsetY }
+    });
+    
+    // Save context state
+    tempCtx.save();
+    
+    // Apply rotation if needed
+    if (box.rotation !== 0) {
+      tempCtx.translate(tempCanvas.width / 2, tempCanvas.height / 2);
+      tempCtx.rotate(box.rotation * Math.PI / 180);
+      tempCtx.translate(-tempCanvas.width / 2, -tempCanvas.height / 2);
+    }
+    
+    // Draw the cropped portion
+    tempCtx.drawImage(
+      editorImg,
+      Math.max(0, sourceX), 
+      Math.max(0, sourceY), 
+      Math.min(editorImg.naturalWidth, sourceWidth), 
+      Math.min(editorImg.naturalHeight, sourceHeight),
+      0, 0, tempCanvas.width, tempCanvas.height
+    );
+    
+    // Restore context state
+    tempCtx.restore();
+    
+    // Create a blob from the temp canvas
+    return new Promise<{file: File, url: string}>((resolve, reject) => {
+      tempCanvas.toBlob((blob) => {
+        if (blob && currentFile) {
+          // Create a new file with the cropped image
+          const croppedFile = new File(
+            [blob], 
+            currentFile.name, 
+            { type: currentFile.type }
+          );
+          
+          // Return the cropped file and URL
+          resolve({
+            file: croppedFile,
+            url: URL.createObjectURL(blob)
+          });
+        } else {
+          console.error("Failed to create blob from canvas or file is missing");
+          reject(new Error("Failed to create blob from canvas"));
+        }
+      }, currentFile.type);
+    });
+  } catch (error) {
+    console.error("Error in applyCrop:", error);
+    return null;
+  }
 };
