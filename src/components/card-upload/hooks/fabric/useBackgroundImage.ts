@@ -66,9 +66,18 @@ export const useBackgroundImage = ({
           // Add to canvas and set as background
           canvas.add(fabricImage);
           
-          // Move to back - in Fabric.js v6, use bringToFront/sendBackwards methods
-          canvas.bringToFront(fabricImage);
-          canvas.sendBackwards(fabricImage, true); // true sends it to the very back
+          // Move to back - in Fabric.js v6, we need to send it to the back 
+          // by manipulating the canvas objects array directly
+          if (canvas._objects && canvas._objects.length > 0) {
+            // Remove the image from its current position
+            const index = canvas._objects.indexOf(fabricImage);
+            if (index > -1) {
+              canvas._objects.splice(index, 1);
+            }
+            
+            // Insert it at the beginning of the array (back)
+            canvas._objects.unshift(fabricImage);
+          }
           
           setBackgroundImage(fabricImage);
           
