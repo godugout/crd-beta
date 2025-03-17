@@ -1,3 +1,4 @@
+
 import { useState, useRef, RefObject, useCallback, useEffect } from 'react';
 
 interface AnimationSpeed {
