@@ -9,6 +9,7 @@ import NotFound from './pages/NotFound';
 import SignatureDemo from './pages/SignatureDemo';
 import CollectionDetail from './pages/CollectionDetail';
 import Collections from './pages/Collections';
+import PbrDemo from './pages/PbrDemo';
 import './App.css';
 
 function App() {
@@ -22,6 +23,7 @@ function App() {
         <Route path="/collections" element={<Collections />} />
         <Route path="/collections/:id" element={<CollectionDetail />} />
         <Route path="/signature" element={<SignatureDemo />} />
+        <Route path="/pbr" element={<PbrDemo />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
