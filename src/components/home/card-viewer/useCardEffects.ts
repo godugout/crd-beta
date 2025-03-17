@@ -1,5 +1,4 @@
-
-import { useState, useRef, RefObject, useCallback } from 'react';
+import { useState, useRef, RefObject, useCallback, useEffect } from 'react';
 
 interface AnimationSpeed {
   motion: number;
@@ -29,12 +28,12 @@ export const useCardEffects = (): UseCardEffectsReturn => {
   const [isMoving, setIsMoving] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [animationSpeed, setAnimationSpeedState] = useState<AnimationSpeed>({
-    motion: 1.0,
-    pulse: 1.0,
-    shimmer: 3.0,
-    gold: 1.0,
-    chrome: 1.0,
-    vintage: 1.0
+    motion: 0.7, // Reduced from 1.0 for more subtle motion
+    pulse: 0.8, // Reduced for more subtlety
+    shimmer: 5.0, // Increased from 3.0 for slower shimmer
+    gold: 0.8, // Reduced for more subtlety
+    chrome: 0.8, // Reduced for more subtlety
+    vintage: 0.8 // Reduced for more subtlety
   });
 
   // Handle mouse movement for canvas area (floating effect)
@@ -53,8 +52,9 @@ export const useCardEffects = (): UseCardEffectsReturn => {
     
     if (containerRef.current) {
       // Move container slightly based on mouse position, adjusted by motion speed
-      const moveX = relativeX * 15 * animationSpeed.motion; // Max 15px movement, adjusted by speed
-      const moveY = relativeY * 15 * animationSpeed.motion;
+      // Reduced movement from 15px to 10px for more subtle effect
+      const moveX = relativeX * 10 * animationSpeed.motion;
+      const moveY = relativeY * 10 * animationSpeed.motion;
       containerRef.current.style.transform = `translate(${moveX}px, ${moveY}px)`;
     }
   }, [animationSpeed.motion]);
@@ -73,9 +73,9 @@ export const useCardEffects = (): UseCardEffectsReturn => {
     const relativeX = (e.clientX - centerX) / (rect.width / 2);
     const relativeY = (e.clientY - centerY) / (rect.height / 2);
     
-    // Apply rotation based on mouse position (max 20 degrees), adjusted by motion speed
-    const rotateY = relativeX * 20 * animationSpeed.motion;
-    const rotateX = -relativeY * 20 * animationSpeed.motion;
+    // Reduced rotation from 20 to 15 degrees for more subtle effect
+    const rotateY = relativeX * 15 * animationSpeed.motion;
+    const rotateX = -relativeY * 15 * animationSpeed.motion;
     
     cardRef.current.style.transform = `perspective(1000px) rotateY(${rotateY}deg) rotateX(${rotateX}deg)`;
     
@@ -104,15 +104,28 @@ export const useCardEffects = (): UseCardEffectsReturn => {
     }
   }, [animationSpeed.motion]);
 
-  // Reset card position when mouse leaves
+  // Reset card position when mouse leaves, but with a smoother transition
   const handleMouseLeave = useCallback(() => {
     if (cardRef.current) {
       setIsMoving(false);
+      cardRef.current.style.transition = 'transform 0.8s cubic-bezier(0.23, 1, 0.32, 1)'; // Added easing
       cardRef.current.style.transform = '';
+      // Reset transition after animation completes
+      setTimeout(() => {
+        if (cardRef.current) {
+          cardRef.current.style.transition = '';
+        }
+      }, 800);
     }
     
     if (containerRef.current) {
+      containerRef.current.style.transition = 'transform 0.8s cubic-bezier(0.23, 1, 0.32, 1)'; // Added easing
       containerRef.current.style.transform = '';
+      setTimeout(() => {
+        if (containerRef.current) {
+          containerRef.current.style.transition = '';
+        }
+      }, 800);
     }
   }, []);
 
@@ -140,6 +153,18 @@ export const useCardEffects = (): UseCardEffectsReturn => {
     if (speeds.vintage !== undefined) {
       root.style.setProperty('--vintage-intensity', speeds.vintage.toString());
     }
+  }, []);
+
+  // Initialize with slower default values
+  useEffect(() => {
+    setAnimationSpeed({
+      motion: 0.7,
+      pulse: 0.8,
+      shimmer: 5.0,
+      gold: 0.8,
+      chrome: 0.8,
+      vintage: 0.8
+    });
   }, []);
 
   return {

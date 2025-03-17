@@ -1,62 +1,62 @@
 
 .card-3d-container {
   perspective: 1500px;
-  transition: transform 0.1s ease;
+  transition: transform 0.2s ease; /* slower transition */
 }
 
 .dynamic-card {
-  transition: all 0.3s ease;
+  transition: all 0.5s ease; /* slower transition from 0.3s to 0.5s */
   transform-style: preserve-3d;
-  animation: gentle-sway 8s infinite ease-in-out;
+  animation: gentle-sway 12s infinite ease-in-out; /* slower animation from 8s to 12s */
 }
 
 .floating-card {
-  animation: float 12s infinite ease-in-out;
+  animation: float 18s infinite ease-in-out; /* slower animation from 12s to 18s */
 }
 
 .dynamic-card.mouse-move {
   animation: none;
-  transition: transform 0.2s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+  transition: transform 0.3s cubic-bezier(0.17, 0.67, 0.83, 0.67); /* slower transition */
 }
 
 .floating-card.mouse-move {
   animation: none;
-  transition: transform 0.2s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+  transition: transform 0.3s cubic-bezier(0.17, 0.67, 0.83, 0.67); /* slower transition */
 }
 
-/* Improved animation keyframes for smoother, more natural motion */
+/* Improved animation keyframes for smoother, more natural motion with smaller movements */
 @keyframes gentle-sway {
   0% {
-    transform: perspective(1000px) rotateY(-1deg) rotateX(0.5deg) translateZ(0px);
+    transform: perspective(1000px) rotateY(-0.75deg) rotateX(0.4deg) translateZ(0px);
   }
   25% {
-    transform: perspective(1000px) rotateY(0.5deg) rotateX(-0.25deg) translateZ(2px);
+    transform: perspective(1000px) rotateY(0.35deg) rotateX(-0.2deg) translateZ(1px);
   }
   50% {
-    transform: perspective(1000px) rotateY(1deg) rotateX(-0.5deg) translateZ(0px);
+    transform: perspective(1000px) rotateY(0.75deg) rotateX(-0.4deg) translateZ(0px);
   }
   75% {
-    transform: perspective(1000px) rotateY(0.5deg) rotateX(0.25deg) translateZ(2px);
+    transform: perspective(1000px) rotateY(0.35deg) rotateX(0.2deg) translateZ(1px);
   }
   100% {
-    transform: perspective(1000px) rotateY(-1deg) rotateX(0.5deg) translateZ(0px);
+    transform: perspective(1000px) rotateY(-0.75deg) rotateX(0.4deg) translateZ(0px);
   }
 }
 
 @keyframes float {
   0% {
-    transform: translateY(0px) rotateY(-0.5deg);
+    transform: translateY(0px) rotateY(-0.4deg);
   }
   25% {
-    transform: translateY(-5px) rotateY(0.25deg);
+    transform: translateY(-3px) rotateY(0.2deg);
   }
   50% {
-    transform: translateY(0px) rotateY(0.5deg);
+    transform: translateY(0px) rotateY(0.4deg);
   }
   75% {
-    transform: translateY(5px) rotateY(0.25deg);
+    transform: translateY(3px) rotateY(0.2deg);
   }
   100% {
-    transform: translateY(0px) rotateY(-0.5deg);
+    transform: translateY(0px) rotateY(-0.4deg);
   }
 }
