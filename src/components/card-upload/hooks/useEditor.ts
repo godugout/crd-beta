@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { CropBoxProps } from '../CropBox';
@@ -37,12 +38,14 @@ export const useEditor = ({ onCropComplete, currentFile, setShowEditor }: UseEdi
       
       const canvas = canvasRef.current;
       if (!canvas) {
-        console.warn("Canvas reference not available");
-        // We'll try to continue since we might have the editor image
+        console.warn("Canvas reference not available, but proceeding with the editor image");
+        // Continue with the operation since we have the editor image
       }
       
       console.log("Starting crop with box:", selectedBox);
       
+      // We're passing the canvas (which might be null) but the applyCrop function 
+      // is now better equipped to handle this case
       const result = await applyCrop(selectedBox, canvas, currentFile, editorImgRef.current);
       
       if (result && result.file && result.url) {

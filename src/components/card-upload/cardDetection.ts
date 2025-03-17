@@ -1,9 +1,10 @@
+
 import { CropBoxProps } from './CropBox';
 
 export const detectCardsInImage = (
   img: HTMLImageElement,
   isStandardRatio: boolean,
-  canvas: HTMLCanvasElement
+  canvas: HTMLCanvasElement | null
 ): CropBoxProps[] => {
   const detectedCards: CropBoxProps[] = [];
   
@@ -46,7 +47,9 @@ export const applyCrop = async (
   editorImg: HTMLImageElement
 ): Promise<{ file: File; url: string } | null> => {
   try {
-    // Create a temporary canvas if none was provided
+    console.log("Applying crop with box:", cropBox);
+    
+    // Create a temporary canvas
     const tempCanvas = document.createElement('canvas');
     const ctx = tempCanvas.getContext('2d');
     
@@ -76,7 +79,7 @@ export const applyCrop = async (
       ctx.rotate((rotation * Math.PI) / 180);
     }
     
-    // Draw the image on the canvas, centered and cropped
+    // Draw the image on the canvas, accounting for rotation
     ctx.drawImage(
       editorImg,
       x - width / 2,  // Source X - adjusted for rotation center
@@ -111,6 +114,7 @@ export const applyCrop = async (
     // Create a URL for the blob
     const url = URL.createObjectURL(blob);
     
+    console.log("Successfully created cropped image:", url);
     return { file: croppedFile, url };
   } catch (error) {
     console.error('Error applying crop:', error);
