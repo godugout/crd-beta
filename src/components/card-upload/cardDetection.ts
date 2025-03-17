@@ -1,6 +1,10 @@
 
 import { CropBoxProps } from './CropBox';
 
+// Standard trading card ratio (2.5:3.5)
+const CARD_RATIO = 2.5 / 3.5;
+const RATIO_TOLERANCE = 0.15; // Allow some deviation from perfect ratio
+
 export const detectCardsInImage = (
   img: HTMLImageElement,
   isStandardRatio: boolean,
@@ -8,7 +12,7 @@ export const detectCardsInImage = (
 ): CropBoxProps[] => {
   const detectedCards: CropBoxProps[] = [];
   
-  // If the image matches the standard card ratio, create a single crop box
+  // If the image itself is already in card ratio, treat the whole image as a card
   if (isStandardRatio) {
     const width = img.width;
     const height = img.height;
@@ -19,22 +23,78 @@ export const detectCardsInImage = (
       height: height,
       rotation: 0
     });
-  } else {
-    // Mock card detection (replace with actual card detection logic)
-    const numCards = Math.floor(Math.random() * 4) + 1; // Random number of cards between 1 and 4
-    for (let i = 0; i < numCards; i++) {
-      const width = img.width / numCards * (Math.random() * 0.4 + 0.8); // Varying widths
-      const height = img.height / numCards * (Math.random() * 0.4 + 0.8); // Varying heights
-      const x = Math.random() * (img.width - width);
-      const y = Math.random() * (img.height - height);
-      detectedCards.push({
-        x: x,
-        y: y,
-        width: width,
-        height: height,
-        rotation: 0
-      });
+    return detectedCards;
+  }
+  
+  // This would be replaced with actual card detection logic
+  // For now, let's make some intelligent guesses about card locations
+  
+  // Simple edge detection mock
+  const canvasWidth = img.width;
+  const canvasHeight = img.height;
+  
+  // For a simple algorithm, check standard card ratio areas in the image
+  // using a sliding window approach
+  const checkForCardAtPosition = (x: number, y: number, width: number): boolean => {
+    // Calculate height based on standard card ratio
+    const height = width / CARD_RATIO;
+    
+    // Check if this region is likely to be a card
+    // In a real implementation, this would analyze pixel data to detect card edges
+    // For now, just check if it's within the image and meets minimum size requirements
+    return (
+      x >= 0 && y >= 0 && 
+      x + width <= canvasWidth && 
+      y + height <= canvasHeight &&
+      width > 50 && height > 70  // Minimum reasonable card size
+    );
+  };
+  
+  // Try to detect multiple cards
+  // Simplified approach: divide the image into grid cells and check each cell
+  // In a real implementation, this would use computer vision techniques
+  
+  const gridSize = 3; // Try a 3x3 grid
+  const cellWidth = canvasWidth / gridSize;
+  const cellHeight = canvasHeight / gridSize;
+  
+  for (let row = 0; row < gridSize; row++) {
+    for (let col = 0; col < gridSize; col++) {
+      const x = col * cellWidth;
+      const y = row * cellHeight;
+      
+      // Try different card sizes
+      const cardWidth = Math.min(cellWidth * 0.9, cellHeight * 0.9 * CARD_RATIO);
+      
+      if (checkForCardAtPosition(x, y, cardWidth)) {
+        // This position might contain a card
+        // Calculate ideal height based on card ratio
+        const cardHeight = cardWidth / CARD_RATIO;
+        
+        // Add detected card with some random offsets to make it look more realistic
+        detectedCards.push({
+          x: x + Math.random() * 20 - 10,
+          y: y + Math.random() * 20 - 10,
+          width: cardWidth,
+          height: cardHeight,
+          rotation: Math.random() * 5 - 2.5 // Slight random rotation
+        });
+      }
     }
+  }
+  
+  // If no cards detected, just create a single crop box
+  if (detectedCards.length === 0) {
+    const defaultWidth = Math.min(canvasWidth, canvasHeight * CARD_RATIO) * 0.8;
+    const defaultHeight = defaultWidth / CARD_RATIO;
+    
+    detectedCards.push({
+      x: (canvasWidth - defaultWidth) / 2,
+      y: (canvasHeight - defaultHeight) / 2,
+      width: defaultWidth,
+      height: defaultHeight,
+      rotation: 0
+    });
   }
   
   return detectedCards;

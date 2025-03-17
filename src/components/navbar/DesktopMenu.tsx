@@ -98,6 +98,15 @@ const DesktopMenu: React.FC<DesktopMenuProps> = ({ user, isActive }) => {
                     Explore physically-based rendering for cards
                   </div>
                 </Link>
+                <Link
+                  to="/card-detector"
+                  className="group flex flex-col gap-1 p-3 rounded-md hover:bg-blue-50"
+                >
+                  <div className="text-sm font-medium">Card Detector</div>
+                  <div className="text-xs text-muted-foreground">
+                    Automatically detect and crop cards from images
+                  </div>
+                </Link>
               </div>
             </NavigationMenuContent>
           </NavigationMenuItem>

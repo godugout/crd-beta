@@ -85,6 +85,13 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ user, isOpen, onClose, onSignOu
                   >
                     <span>PBR Demo</span>
                   </Link>
+                  <Link 
+                    to="/card-detector" 
+                    className="flex items-center py-2 pl-8 pr-2 hover:bg-gray-50 rounded-md"
+                    onClick={onClose}
+                  >
+                    <span>Card Detector</span>
+                  </Link>
                 </AccordionContent>
               </AccordionItem>
             </Accordion>
