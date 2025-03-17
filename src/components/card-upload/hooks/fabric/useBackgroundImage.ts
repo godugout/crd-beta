@@ -66,8 +66,9 @@ export const useBackgroundImage = ({
           // Add to canvas and set as background
           canvas.add(fabricImage);
           
-          // Move to back - use sendToBack() from canvas instead of moveToBack()
-          canvas.sendToBack(fabricImage);
+          // Move to back - in Fabric.js v6, use bringToFront/sendBackwards methods
+          canvas.bringToFront(fabricImage);
+          canvas.sendBackwards(fabricImage, true); // true sends it to the very back
           
           setBackgroundImage(fabricImage);
           
