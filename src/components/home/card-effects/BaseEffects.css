@@ -7,11 +7,11 @@
 .dynamic-card {
   transition: all 0.3s ease;
   transform-style: preserve-3d;
-  animation: tilt calc(10s / var(--motion-speed)) infinite ease-in-out;
+  animation: gentle-sway 8s infinite ease-in-out;
 }
 
 .floating-card {
-  animation: float calc(6s / var(--motion-speed)) infinite ease-in-out;
+  animation: float 12s infinite ease-in-out;
 }
 
 .dynamic-card.mouse-move {
@@ -20,4 +20,16 @@
 
 .floating-card.mouse-move {
   animation: none;
+}
+
+@keyframes gentle-sway {
+  0% {
+    transform: perspective(1000px) rotateY(-2deg);
+  }
+  50% {
+    transform: perspective(1000px) rotateY(2deg);
+  }
+  100% {
+    transform: perspective(1000px) rotateY(-2deg);
+  }
 }

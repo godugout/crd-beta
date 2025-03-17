@@ -2,7 +2,7 @@
 import React, { useState, useCallback } from 'react';
 import { CardData } from '@/types/card';
 import { toast } from 'sonner';
-import '../card-effects/index.css';
+import './card-effects/index.css';
 import CardCanvas from './card-viewer/CardCanvas';
 import CardControls from './card-viewer/CardControls';
 import EffectControls from './card-viewer/EffectControls';
@@ -44,7 +44,17 @@ const CardViewer = ({
     setAnimationSpeed
   } = useCardEffects();
 
-  const effectSettings = useEffectSettings(setAnimationSpeed);
+  const effectSettings = useEffectSettings((settings) => {
+    setAnimationSpeed({
+      motion: settings.motionSpeed,
+      pulse: settings.pulseIntensity,
+      shimmer: settings.shimmerSpeed,
+      gold: settings.goldIntensity,
+      chrome: settings.chromeIntensity,
+      vintage: settings.vintageIntensity
+    });
+  });
+  
   const { userPresets, builtInPresets, handleToggleFavorite, saveUserPreset } = usePresetsState();
   
   const handleSnapshot = () => {
@@ -125,10 +135,21 @@ const CardViewer = ({
       {/* Advanced Effect Controls */}
       <EffectControls 
         isOpen={showAdvancedControls}
-        {...effectSettings}
         onClose={() => setShowAdvancedControls(false)}
         onSaveEffectsCombination={handleSaveEffectsCombination}
         activeEffects={activeEffects}
+        onMotionSpeedChange={effectSettings.handleMotionSpeedChange}
+        onPulseIntensityChange={effectSettings.handlePulseIntensityChange}
+        onShimmerSpeedChange={effectSettings.handleShimmerSpeedChange}
+        onGoldIntensityChange={effectSettings.handleGoldIntensityChange}
+        onChromeIntensityChange={effectSettings.handleChromeIntensityChange}
+        onVintageIntensityChange={effectSettings.handleVintageIntensityChange}
+        motionSpeed={effectSettings.motionSpeed}
+        pulseIntensity={effectSettings.pulseIntensity}
+        shimmerSpeed={effectSettings.shimmerSpeed}
+        goldIntensity={effectSettings.goldIntensity}
+        chromeIntensity={effectSettings.chromeIntensity}
+        vintageIntensity={effectSettings.vintageIntensity}
       />
 
       {/* Effects Presets Panel */}
