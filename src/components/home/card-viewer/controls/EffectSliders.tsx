@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Timer, Zap, Sparkles, Sun } from 'lucide-react';
+import { Timer, Zap, Sparkles, Sun, Prism } from 'lucide-react';
 import EffectSlider from './EffectSlider';
 
 interface EffectSlidersProps {
@@ -10,12 +10,14 @@ interface EffectSlidersProps {
   goldIntensity: number;
   chromeIntensity: number;
   vintageIntensity: number;
+  refractorIntensity: number;
   onMotionSpeedChange: (value: number[]) => void;
   onPulseIntensityChange: (value: number[]) => void;
   onShimmerSpeedChange: (value: number[]) => void;
   onGoldIntensityChange: (value: number[]) => void;
   onChromeIntensityChange: (value: number[]) => void;
   onVintageIntensityChange: (value: number[]) => void;
+  onRefractorIntensityChange: (value: number[]) => void;
   activeEffects: string[];
 }
 
@@ -26,12 +28,14 @@ const EffectSliders = ({
   goldIntensity,
   chromeIntensity,
   vintageIntensity,
+  refractorIntensity,
   onMotionSpeedChange,
   onPulseIntensityChange,
   onShimmerSpeedChange,
   onGoldIntensityChange,
   onChromeIntensityChange,
   onVintageIntensityChange,
+  onRefractorIntensityChange,
   activeEffects
 }: EffectSlidersProps) => {
   return (
@@ -72,6 +76,20 @@ const EffectSliders = ({
           max={5.0}
           step={0.5}
           onValueChange={onShimmerSpeedChange}
+        />
+      )}
+
+      {/* New Refractor effect slider */}
+      {activeEffects.includes('Refractor') && (
+        <EffectSlider
+          id="refractor-intensity"
+          label="Refraction Intensity"
+          icon={<Prism className="h-3 w-3" />}
+          value={refractorIntensity}
+          min={0.1}
+          max={2.0}
+          step={0.1}
+          onValueChange={onRefractorIntensityChange}
         />
       )}
 

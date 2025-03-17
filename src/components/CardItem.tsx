@@ -149,6 +149,13 @@ const CardItem: React.FC<CardItemProps> = ({ card, className, onClick, activeEff
                 {formattedDate}
               </div>
             </div>
+            
+            {/* Refractor effect overlay if active */}
+            {activeEffects.includes('Refractor') && (
+              <div className="absolute inset-0 pointer-events-none opacity-50 overflow-hidden rounded-xl">
+                <div className="absolute inset-0 card-refractor"></div>
+              </div>
+            )}
           </div>
         </div>
         

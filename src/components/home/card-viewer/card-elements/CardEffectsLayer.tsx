@@ -1,4 +1,5 @@
-import React, { CSSProperties } from 'react';
+
+import React, { CSSProperties, useEffect, useRef } from 'react';
 
 interface CardEffectsLayerProps {
   activeEffects: string[];
@@ -56,6 +57,14 @@ export const useCardEffects = ({
       filterStyle = {
         ...filterStyle,
         filter: 'contrast(1.1) brightness(1.1) saturate(1.3)',
+      };
+    }
+    
+    // Add filter modifications for refractor effect
+    if (activeEffects.includes('Refractor')) {
+      filterStyle = {
+        ...filterStyle,
+        filter: `${filterStyle.filter || ''} contrast(1.15) brightness(1.05) saturate(1.2)`.trim(),
       };
     }
     

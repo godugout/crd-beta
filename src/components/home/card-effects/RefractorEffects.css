@@ -1,0 +1,126 @@
+
+/* Refractor Effect CSS */
+:root {
+  --refractor-intensity: 1;
+  --refractor-speed: 3s;
+  --refractor-color-primary: rgba(183, 255, 255, 0.5);
+  --refractor-color-secondary: rgba(255, 207, 255, 0.5);
+  --refractor-color-tertiary: rgba(205, 255, 221, 0.5);
+  --refractor-border-glow: rgba(255, 255, 255, 0.8);
+}
+
+/* Base Refractor Effect Classes */
+.card-refractor {
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-refractor::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    125deg,
+    var(--refractor-color-primary),
+    var(--refractor-color-secondary),
+    var(--refractor-color-tertiary),
+    var(--refractor-color-secondary),
+    var(--refractor-color-primary)
+  );
+  background-size: 400% 400%;
+  z-index: -1;
+  opacity: 0.7;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  animation: refractor-shine calc(var(--refractor-speed) * 2) ease infinite;
+  animation-play-state: var(--animation-play-state, running);
+}
+
+.card-refractor::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  background: linear-gradient(
+    135deg,
+    #fff3,
+    transparent 40%,
+    transparent 60%,
+    #fff3
+  );
+  background-size: 200% 200%;
+  pointer-events: none;
+  border-radius: inherit;
+  animation: refractor-edge var(--refractor-speed) ease infinite;
+  animation-play-state: var(--animation-play-state, running);
+}
+
+/* RGB Split Effect */
+.card-refractor .card-inner::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    rgba(255, 0, 0, 0.1),
+    rgba(0, 255, 0, 0.1) 30%,
+    rgba(0, 0, 255, 0.1) 60%
+  );
+  mix-blend-mode: screen;
+  opacity: var(--refractor-intensity, 1);
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* Animation for refractor edge effect */
+@keyframes refractor-edge {
+  0% {
+    background-position: 0% 0%;
+    opacity: 0.4;
+  }
+  50% {
+    background-position: 100% 100%;
+    opacity: 0.8;
+  }
+  100% {
+    background-position: 0% 0%;
+    opacity: 0.4;
+  }
+}
+
+/* Animation for the refractor shine effect */
+@keyframes refractor-shine {
+  0% {
+    background-position: 0% 0%;
+  }
+  50% {
+    background-position: 100% 100%;
+  }
+  100% {
+    background-position: 0% 0%;
+  }
+}
+
+/* Add box shadow to simulate refraction */
+.card-refractor:hover {
+  box-shadow: 
+    0 0 15px 2px var(--refractor-border-glow),
+    0 0 5px 1px rgba(255, 255, 255, 0.8) inset;
+}
+
+/* Media Queries for Performance Optimization */
+@media (prefers-reduced-motion: reduce) {
+  .card-refractor::before,
+  .card-refractor::after {
+    animation: none;
+  }
+}
+
+/* Lower end device optimizations */
+@media (max-width: 768px) {
+  .card-refractor::before,
+  .card-refractor::after {
+    animation-duration: calc(var(--refractor-speed) * 3);
+  }
+}

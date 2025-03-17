@@ -8,6 +8,7 @@ interface EffectSettings {
   goldIntensity: number;
   chromeIntensity: number;
   vintageIntensity: number;
+  refractorIntensity: number;
 }
 
 interface UseEffectSettingsReturn extends EffectSettings {
@@ -17,6 +18,7 @@ interface UseEffectSettingsReturn extends EffectSettings {
   handleGoldIntensityChange: (value: number[]) => void;
   handleChromeIntensityChange: (value: number[]) => void;
   handleVintageIntensityChange: (value: number[]) => void;
+  handleRefractorIntensityChange: (value: number[]) => void;
   getCurrentSettings: () => EffectSettings;
   applySettings: (settings: EffectSettings) => void;
 }
@@ -30,6 +32,7 @@ export const useEffectSettings = (
   const [goldIntensity, setGoldIntensity] = useState(1.0);
   const [chromeIntensity, setChromeIntensity] = useState(1.0);
   const [vintageIntensity, setVintageIntensity] = useState(1.0);
+  const [refractorIntensity, setRefractorIntensity] = useState(1.0);
 
   useEffect(() => {
     // Update animation speeds when controls change
@@ -39,7 +42,8 @@ export const useEffectSettings = (
       shimmerSpeed,
       goldIntensity,
       chromeIntensity,
-      vintageIntensity
+      vintageIntensity,
+      refractorIntensity
     });
   }, [
     motionSpeed, 
@@ -48,6 +52,7 @@ export const useEffectSettings = (
     goldIntensity, 
     chromeIntensity, 
     vintageIntensity,
+    refractorIntensity,
     onSettingsChange
   ]);
 
@@ -75,13 +80,21 @@ export const useEffectSettings = (
     setVintageIntensity(value[0]);
   };
 
+  const handleRefractorIntensityChange = (value: number[]) => {
+    setRefractorIntensity(value[0]);
+    
+    // Update CSS variable for refractor intensity
+    document.documentElement.style.setProperty('--refractor-intensity', value[0].toString());
+  };
+
   const getCurrentSettings = (): EffectSettings => ({
     motionSpeed,
     pulseIntensity,
     shimmerSpeed,
     goldIntensity,
     chromeIntensity,
-    vintageIntensity
+    vintageIntensity,
+    refractorIntensity
   });
 
   const applySettings = (settings: EffectSettings) => {
@@ -91,6 +104,12 @@ export const useEffectSettings = (
     setGoldIntensity(settings.goldIntensity);
     setChromeIntensity(settings.chromeIntensity);
     setVintageIntensity(settings.vintageIntensity);
+    
+    // Set refractor intensity if it exists in the settings
+    if (settings.refractorIntensity !== undefined) {
+      setRefractorIntensity(settings.refractorIntensity);
+      document.documentElement.style.setProperty('--refractor-intensity', settings.refractorIntensity.toString());
+    }
   };
 
   return {
@@ -100,12 +119,14 @@ export const useEffectSettings = (
     goldIntensity,
     chromeIntensity,
     vintageIntensity,
+    refractorIntensity,
     handleMotionSpeedChange,
     handlePulseIntensityChange,
     handleShimmerSpeedChange,
     handleGoldIntensityChange,
     handleChromeIntensityChange,
     handleVintageIntensityChange,
+    handleRefractorIntensityChange,
     getCurrentSettings,
     applySettings
   };

@@ -51,7 +51,8 @@ const CardViewer = ({
       shimmer: settings.shimmerSpeed,
       gold: settings.goldIntensity,
       chrome: settings.chromeIntensity,
-      vintage: settings.vintageIntensity
+      vintage: settings.vintageIntensity,
+      refractor: settings.refractorIntensity
     });
   });
   
@@ -144,12 +145,14 @@ const CardViewer = ({
         onGoldIntensityChange={effectSettings.handleGoldIntensityChange}
         onChromeIntensityChange={effectSettings.handleChromeIntensityChange}
         onVintageIntensityChange={effectSettings.handleVintageIntensityChange}
+        onRefractorIntensityChange={effectSettings.handleRefractorIntensityChange}
         motionSpeed={effectSettings.motionSpeed}
         pulseIntensity={effectSettings.pulseIntensity}
         shimmerSpeed={effectSettings.shimmerSpeed}
         goldIntensity={effectSettings.goldIntensity}
         chromeIntensity={effectSettings.chromeIntensity}
         vintageIntensity={effectSettings.vintageIntensity}
+        refractorIntensity={effectSettings.refractorIntensity}
       />
 
       {/* Effects Presets Panel */}

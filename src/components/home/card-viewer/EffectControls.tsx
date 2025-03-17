@@ -10,6 +10,7 @@ interface EffectControlsProps {
   goldIntensity: number;
   chromeIntensity: number;
   vintageIntensity: number;
+  refractorIntensity: number;
   onClose: () => void;
   onMotionSpeedChange: (value: number[]) => void;
   onPulseIntensityChange: (value: number[]) => void;
@@ -17,6 +18,7 @@ interface EffectControlsProps {
   onGoldIntensityChange: (value: number[]) => void;
   onChromeIntensityChange: (value: number[]) => void;
   onVintageIntensityChange: (value: number[]) => void;
+  onRefractorIntensityChange: (value: number[]) => void;
   onSaveEffectsCombination: (name: string) => void;
   activeEffects: string[];
 }

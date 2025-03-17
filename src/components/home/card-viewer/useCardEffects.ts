@@ -1,3 +1,4 @@
+
 import { useState, useRef, RefObject, useCallback, useEffect } from 'react';
 
 interface AnimationSpeed {
@@ -7,6 +8,7 @@ interface AnimationSpeed {
   gold?: number;
   chrome?: number;
   vintage?: number;
+  refractor?: number;
 }
 
 interface UseCardEffectsReturn {
@@ -33,7 +35,8 @@ export const useCardEffects = (): UseCardEffectsReturn => {
     shimmer: 5.0, // Increased from 3.0 for slower shimmer
     gold: 0.8, // Reduced for more subtlety
     chrome: 0.8, // Reduced for more subtlety
-    vintage: 0.8 // Reduced for more subtlety
+    vintage: 0.8, // Reduced for more subtlety
+    refractor: 1.0 // Default refractor intensity
   });
 
   // Handle mouse movement for canvas area (floating effect)
@@ -79,6 +82,15 @@ export const useCardEffects = (): UseCardEffectsReturn => {
     
     cardRef.current.style.transform = `perspective(1000px) rotateY(${rotateY}deg) rotateX(${rotateX}deg)`;
     
+    // Add mouse position as CSS custom properties for refractor effect
+    if (cardRef.current) {
+      const mouseX = ((e.clientX - rect.left) / rect.width) * 100;
+      const mouseY = ((e.clientY - rect.top) / rect.height) * 100;
+      
+      cardRef.current.style.setProperty('--mouse-x', `${mouseX}%`);
+      cardRef.current.style.setProperty('--mouse-y', `${mouseY}%`);
+    }
+    
     // Adjust effects based on angle and mouse position for dynamic light effects
     if (cardRef.current) {
       // For holographic effects
@@ -86,6 +98,13 @@ export const useCardEffects = (): UseCardEffectsReturn => {
       if (shine) {
         const shinePositionX = 50 + relativeX * 50;
         shine.style.backgroundPosition = `${shinePositionX}% 0`;
+      }
+      
+      // For refractor effects - update the animation play state and position
+      const refractor = cardRef.current.querySelector('.card-refractor::before') as HTMLElement;
+      if (refractor) {
+        const refractorPositionX = 50 + relativeX * 60;
+        refractor.style.backgroundPosition = `${refractorPositionX}% 0`;
       }
       
       // For gold foil effects
@@ -153,9 +172,15 @@ export const useCardEffects = (): UseCardEffectsReturn => {
     if (speeds.vintage !== undefined) {
       root.style.setProperty('--vintage-intensity', speeds.vintage.toString());
     }
+    
+    if (speeds.refractor !== undefined) {
+      root.style.setProperty('--refractor-intensity', speeds.refractor.toString());
+      // Also update the refractor animation speed
+      root.style.setProperty('--refractor-speed', `${5 - speeds.refractor * 2}s`);
+    }
   }, []);
 
-  // Initialize with slower default values
+  // Initialize with default values
   useEffect(() => {
     setAnimationSpeed({
       motion: 0.7,
@@ -163,7 +188,8 @@ export const useCardEffects = (): UseCardEffectsReturn => {
       shimmer: 5.0,
       gold: 0.8,
       chrome: 0.8,
-      vintage: 0.8
+      vintage: 0.8,
+      refractor: 1.0
     });
   }, []);
 

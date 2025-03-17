@@ -13,12 +13,14 @@ interface EffectControlPanelProps {
   goldIntensity: number;
   chromeIntensity: number;
   vintageIntensity: number;
+  refractorIntensity: number;
   onMotionSpeedChange: (value: number[]) => void;
   onPulseIntensityChange: (value: number[]) => void;
   onShimmerSpeedChange: (value: number[]) => void;
   onGoldIntensityChange: (value: number[]) => void;
   onChromeIntensityChange: (value: number[]) => void;
   onVintageIntensityChange: (value: number[]) => void;
+  onRefractorIntensityChange: (value: number[]) => void;
   onSaveEffectsCombination: (name: string) => void;
   activeEffects: string[];
 }
@@ -32,12 +34,14 @@ const EffectControlPanel = ({
   goldIntensity,
   chromeIntensity,
   vintageIntensity,
+  refractorIntensity,
   onMotionSpeedChange,
   onPulseIntensityChange,
   onShimmerSpeedChange,
   onGoldIntensityChange,
   onChromeIntensityChange,
   onVintageIntensityChange,
+  onRefractorIntensityChange,
   onSaveEffectsCombination,
   activeEffects
 }: EffectControlPanelProps) => {
@@ -63,12 +67,14 @@ const EffectControlPanel = ({
           goldIntensity={goldIntensity}
           chromeIntensity={chromeIntensity}
           vintageIntensity={vintageIntensity}
+          refractorIntensity={refractorIntensity}
           onMotionSpeedChange={onMotionSpeedChange}
           onPulseIntensityChange={onPulseIntensityChange}
           onShimmerSpeedChange={onShimmerSpeedChange}
           onGoldIntensityChange={onGoldIntensityChange}
           onChromeIntensityChange={onChromeIntensityChange}
           onVintageIntensityChange={onVintageIntensityChange}
+          onRefractorIntensityChange={onRefractorIntensityChange}
           activeEffects={activeEffects}
         />
 
