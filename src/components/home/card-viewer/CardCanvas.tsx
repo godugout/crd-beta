@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { CardData } from '@/types/card';
 import CardFront from './card-elements/CardFront';
@@ -15,34 +14,33 @@ interface CardCanvasProps {
   onMouseLeave: () => void;
 }
 
-const CardCanvas = ({ 
-  card, 
-  isFlipped, 
+const CardCanvas: React.FC<CardCanvasProps> = ({
+  card,
+  isFlipped,
   activeEffects,
   containerRef,
   cardRef,
   onMouseMove,
   onMouseLeave
-}: CardCanvasProps) => {
-  const { getCardClasses, getFilterStyle } = CardEffectsLayer({ activeEffects, isFlipped });
-
-  // Add card background color to the filter styles
-  const combinedStyle = {
-    ...getFilterStyle(),
-    backgroundColor: card.backgroundColor
-  };
-
+}) => {
+  // Create an instance of CardEffectsLayer to access its methods
+  const effectsLayer = CardEffectsLayer({ activeEffects, isFlipped });
+  
   return (
-    <div 
+    <div
       ref={cardRef}
-      className={getCardClasses()}
-      style={combinedStyle}
+      className={`dynamic-card ${effectsLayer.getCardClasses()}`}
+      style={effectsLayer.getFilterStyle()}
+      onMouseMove={onMouseMove}
+      onMouseLeave={onMouseLeave}
     >
-      {!isFlipped ? (
-        <CardFront card={card} />
-      ) : (
-        <CardBack card={card} />
-      )}
+      <div className="card-inner relative w-full h-full">
+        {/* Front face of the card */}
+        {!isFlipped && <CardFront card={card} />}
+        
+        {/* Back face of the card */}
+        {isFlipped && <CardBack card={card} />}
+      </div>
     </div>
   );
 };

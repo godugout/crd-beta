@@ -1,15 +1,15 @@
 
-import React from 'react';
+import React, { CSSProperties } from 'react';
 
 interface CardEffectsLayerProps {
   activeEffects: string[];
   isFlipped: boolean;
 }
 
-const CardEffectsLayer: React.FC<CardEffectsLayerProps> = ({ 
+const CardEffectsLayer = ({ 
   activeEffects,
   isFlipped 
-}) => {
+}: CardEffectsLayerProps) => {
   const getCardClasses = () => {
     const classes = [
       'w-64 h-96 relative transition-all duration-300 rounded-lg shadow-xl overflow-hidden',
@@ -49,7 +49,7 @@ const CardEffectsLayer: React.FC<CardEffectsLayerProps> = ({
   };
 
   const getFilterStyle = () => {
-    let filterStyle: React.CSSProperties = {};
+    let filterStyle: CSSProperties = {};
     
     // Apply filters based on active effects
     if (activeEffects.includes('Classic Holographic')) {

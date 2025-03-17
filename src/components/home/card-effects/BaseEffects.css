@@ -24,12 +24,18 @@
 
 @keyframes gentle-sway {
   0% {
-    transform: perspective(1000px) rotateY(-2deg);
+    transform: perspective(1000px) rotateY(-1deg) rotateX(0.5deg);
+  }
+  25% {
+    transform: perspective(1000px) rotateY(0deg) rotateX(0deg);
   }
   50% {
-    transform: perspective(1000px) rotateY(2deg);
+    transform: perspective(1000px) rotateY(1deg) rotateX(-0.5deg);
+  }
+  75% {
+    transform: perspective(1000px) rotateY(0deg) rotateX(0deg);
   }
   100% {
-    transform: perspective(1000px) rotateY(-2deg);
+    transform: perspective(1000px) rotateY(-1deg) rotateX(0.5deg);
   }
 }
