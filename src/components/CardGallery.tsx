@@ -5,7 +5,8 @@ import { cn } from '@/lib/utils';
 import CardItem from './CardItem';
 import { useCards } from '@/context/CardContext';
 import { Card } from '@/lib/types';
-import { PlusCircle, Search, Tag, X } from 'lucide-react';
+import { PlusCircle, Search, Tag, X, AlertCircle } from 'lucide-react';
+import { toast } from 'sonner';
 
 // Define available card effects
 const CARD_EFFECTS = [
@@ -28,21 +29,30 @@ const CardGallery: React.FC<CardGalleryProps> = ({ className }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [cardEffects, setCardEffects] = useState<Record<string, string[]>>({});
+  const [isLoading, setIsLoading] = useState(true);
   
   // Get all unique tags from cards
-  const allTags = Array.from(new Set(cards.flatMap(card => card.tags)));
+  const allTags = Array.from(new Set(cards.flatMap(card => card.tags || [])));
   
   // Initialize random effects for each card when component mounts or cards change
   useEffect(() => {
-    const effectsMap: Record<string, string[]> = {};
-    
-    cards.forEach((card) => {
-      // Give each card a different random effect
-      const randomEffect = CARD_EFFECTS[Math.floor(Math.random() * CARD_EFFECTS.length)];
-      effectsMap[card.id] = [randomEffect];
-    });
-    
-    setCardEffects(effectsMap);
+    try {
+      setIsLoading(true);
+      const effectsMap: Record<string, string[]> = {};
+      
+      cards.forEach((card) => {
+        // Give each card a different random effect
+        const randomEffect = CARD_EFFECTS[Math.floor(Math.random() * CARD_EFFECTS.length)];
+        effectsMap[card.id] = [randomEffect];
+      });
+      
+      setCardEffects(effectsMap);
+    } catch (error) {
+      console.error("Error loading card effects:", error);
+      toast.error("Failed to load card effects");
+    } finally {
+      setIsLoading(false);
+    }
   }, [cards]);
   
   // Filter cards based on search query and selected tags
@@ -50,10 +60,10 @@ const CardGallery: React.FC<CardGalleryProps> = ({ className }) => {
     const matchesSearch = searchQuery === '' || 
       card.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       card.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      card.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+      (card.tags && card.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase())));
     
     const matchesTags = selectedTags.length === 0 || 
-      selectedTags.every(tag => card.tags.includes(tag));
+      (card.tags && selectedTags.every(tag => card.tags.includes(tag)));
     
     return matchesSearch && matchesTags;
   });
@@ -70,6 +80,18 @@ const CardGallery: React.FC<CardGalleryProps> = ({ className }) => {
     setSearchQuery('');
     setSelectedTags([]);
   };
+  
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center py-20">
+        <div className="animate-pulse flex flex-col items-center">
+          <div className="h-12 w-12 rounded-full bg-gray-200 mb-4"></div>
+          <div className="h-4 w-32 bg-gray-200 rounded mb-2"></div>
+          <div className="h-3 w-40 bg-gray-100 rounded"></div>
+        </div>
+      </div>
+    );
+  }
   
   return (
     <div className={cn("", className)}>
@@ -153,9 +175,14 @@ const CardGallery: React.FC<CardGalleryProps> = ({ className }) => {
       ) : (
         <div className="flex flex-col items-center justify-center py-16 text-center">
           <div className="bg-cardshow-neutral rounded-full p-6 mb-4">
-            <Search className="h-8 w-8 text-cardshow-slate" />
+            {cards.length === 0 ? 
+              <PlusCircle className="h-8 w-8 text-cardshow-slate" /> :
+              <AlertCircle className="h-8 w-8 text-cardshow-slate" />
+            }
           </div>
-          <h3 className="text-xl font-semibold mb-2">No cards found</h3>
+          <h3 className="text-xl font-semibold mb-2">
+            {cards.length === 0 ? "No cards in your collection" : "No matching cards found"}
+          </h3>
           <p className="text-cardshow-slate mb-6 max-w-md">
             {cards.length === 0 
               ? "You haven't created any cards yet. Create your first card to get started!" 

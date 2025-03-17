@@ -2,8 +2,17 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
 import { User } from '@/lib/types';
+import { 
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+  navigationMenuTriggerStyle 
+} from "@/components/ui/navigation-menu";
+import { Grid3X3, Image, FolderOpen, Sparkles } from 'lucide-react';
 
 interface DesktopMenuProps {
   user: User | null;
@@ -12,35 +21,88 @@ interface DesktopMenuProps {
 
 const DesktopMenu: React.FC<DesktopMenuProps> = ({ user, isActive }) => {
   return (
-    <div className="hidden md:flex items-center space-x-8">
-      {/* During development, always show all navigation options */}
-      <Link 
-        to="/gallery" 
-        className={cn(
-          "text-cardshow-slate hover:text-cardshow-blue transition-colors",
-          isActive('/gallery') && "text-cardshow-blue font-medium"
-        )}
-      >
-        Gallery
-      </Link>
-      <Link 
-        to="/collections" 
-        className={cn(
-          "text-cardshow-slate hover:text-cardshow-blue transition-colors",
-          isActive('/collections') && "text-cardshow-blue font-medium"
-        )}
-      >
-        Collections
-      </Link>
-      <Link 
-        to="/editor" 
-        className={cn(
-          "text-cardshow-slate hover:text-cardshow-blue transition-colors",
-          isActive('/editor') && "text-cardshow-blue font-medium"
-        )}
-      >
-        Create
-      </Link>
+    <div className="hidden md:flex items-center space-x-2">
+      <NavigationMenu>
+        <NavigationMenuList>
+          <NavigationMenuItem>
+            <Link to="/gallery">
+              <NavigationMenuLink
+                className={cn(
+                  navigationMenuTriggerStyle(),
+                  "flex items-center gap-1.5",
+                  isActive('/gallery') && "bg-blue-50 text-cardshow-blue"
+                )}
+              >
+                <Grid3X3 className="h-4 w-4" />
+                <span>Gallery</span>
+              </NavigationMenuLink>
+            </Link>
+          </NavigationMenuItem>
+          
+          <NavigationMenuItem>
+            <Link to="/collections">
+              <NavigationMenuLink
+                className={cn(
+                  navigationMenuTriggerStyle(),
+                  "flex items-center gap-1.5",
+                  isActive('/collections') && "bg-blue-50 text-cardshow-blue"
+                )}
+              >
+                <FolderOpen className="h-4 w-4" />
+                <span>Collections</span>
+              </NavigationMenuLink>
+            </Link>
+          </NavigationMenuItem>
+          
+          <NavigationMenuItem>
+            <Link to="/editor">
+              <NavigationMenuLink
+                className={cn(
+                  navigationMenuTriggerStyle(),
+                  "flex items-center gap-1.5",
+                  isActive('/editor') && "bg-blue-50 text-cardshow-blue"
+                )}
+              >
+                <Image className="h-4 w-4" />
+                <span>Create</span>
+              </NavigationMenuLink>
+            </Link>
+          </NavigationMenuItem>
+          
+          <NavigationMenuItem>
+            <NavigationMenuTrigger 
+              className={cn(
+                "flex items-center gap-1.5"
+              )}
+            >
+              <Sparkles className="h-4 w-4" />
+              <span>Demos</span>
+            </NavigationMenuTrigger>
+            <NavigationMenuContent>
+              <div className="grid gap-3 p-4 md:w-[400px] lg:w-[500px] grid-cols-2">
+                <Link
+                  to="/signature"
+                  className="group flex flex-col gap-1 p-3 rounded-md hover:bg-blue-50"
+                >
+                  <div className="text-sm font-medium">Signature Demo</div>
+                  <div className="text-xs text-muted-foreground">
+                    Test our signature verification system
+                  </div>
+                </Link>
+                <Link
+                  to="/pbr"
+                  className="group flex flex-col gap-1 p-3 rounded-md hover:bg-blue-50"
+                >
+                  <div className="text-sm font-medium">PBR Demo</div>
+                  <div className="text-xs text-muted-foreground">
+                    Explore physically-based rendering for cards
+                  </div>
+                </Link>
+              </div>
+            </NavigationMenuContent>
+          </NavigationMenuItem>
+        </NavigationMenuList>
+      </NavigationMenu>
     </div>
   );
 };
