@@ -32,10 +32,11 @@ export const useBackgroundImage = ({
           canvas.remove(backgroundImage);
         }
         
-        // Create fabric image from URL
-        // Updated to use the v6 API format with callback inside options object
+        // Create new Fabric image
+        // In Fabric.js v6, the second parameter should be an object containing various options
+        // The correct property for the callback in v6 is 'onLoad', not 'callback'
         FabricImage.fromURL(editorImgRef.current.src, {
-          callback: (fabricImage) => {
+          onLoad: (fabricImage) => {
             if (!canvas) return;
             
             // Calculate scaling to fit the canvas
