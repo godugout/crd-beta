@@ -36,17 +36,16 @@ export const useEditor = ({ onCropComplete, currentFile, setShowEditor }: UseEdi
         return;
       }
       
-      const canvas = canvasRef.current;
-      if (!canvas) {
-        console.warn("Canvas reference not available, but proceeding with the editor image");
-        // Continue with the operation since we have the editor image
-      }
-      
       console.log("Starting crop with box:", selectedBox);
       
-      // We're passing the canvas (which might be null) but the applyCrop function 
-      // is now better equipped to handle this case
-      const result = await applyCrop(selectedBox, canvas, currentFile, editorImgRef.current);
+      // We're passing the canvas reference directly instead of accessing it here
+      // This gives more control to the applyCrop function to handle null cases
+      const result = await applyCrop(
+        selectedBox, 
+        canvasRef.current, 
+        currentFile, 
+        editorImgRef.current
+      );
       
       if (result && result.file && result.url) {
         const newStagedCard: StagedCardProps = {

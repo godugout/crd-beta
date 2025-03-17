@@ -49,6 +49,11 @@ export const applyCrop = async (
   try {
     console.log("Applying crop with box:", cropBox);
     
+    if (!editorImg) {
+      console.error('Editor image is not available');
+      return null;
+    }
+    
     // Create a temporary canvas
     const tempCanvas = document.createElement('canvas');
     const ctx = tempCanvas.getContext('2d');
@@ -79,18 +84,25 @@ export const applyCrop = async (
       ctx.rotate((rotation * Math.PI) / 180);
     }
     
-    // Draw the image on the canvas, accounting for rotation
-    ctx.drawImage(
-      editorImg,
-      x - width / 2,  // Source X - adjusted for rotation center
-      y - height / 2, // Source Y - adjusted for rotation center
-      width,          // Source width
-      height,         // Source height
-      -width / 2,     // Destination X - centered
-      -height / 2,    // Destination Y - centered
-      width,          // Destination width
-      height          // Destination height
-    );
+    // Draw the image on the canvas, accounting for rotation and position
+    try {
+      ctx.drawImage(
+        editorImg,
+        x - width / 2,  // Source X - adjusted for rotation center
+        y - height / 2, // Source Y - adjusted for rotation center
+        width,          // Source width
+        height,         // Source height
+        -width / 2,     // Destination X - centered
+        -height / 2,    // Destination Y - centered
+        width,          // Destination width
+        height          // Destination height
+      );
+    } catch (drawError) {
+      console.error('Error drawing image on canvas:', drawError);
+      // Try a more direct approach if the above fails
+      ctx.restore();
+      ctx.drawImage(editorImg, 0, 0, width, height);
+    }
     
     // Restore the context state
     ctx.restore();
