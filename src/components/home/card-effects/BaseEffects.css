@@ -16,26 +16,47 @@
 
 .dynamic-card.mouse-move {
   animation: none;
+  transition: transform 0.2s cubic-bezier(0.17, 0.67, 0.83, 0.67);
 }
 
 .floating-card.mouse-move {
   animation: none;
+  transition: transform 0.2s cubic-bezier(0.17, 0.67, 0.83, 0.67);
 }
 
+/* Improved animation keyframes for smoother, more natural motion */
 @keyframes gentle-sway {
   0% {
-    transform: perspective(1000px) rotateY(-1deg) rotateX(0.5deg);
+    transform: perspective(1000px) rotateY(-1deg) rotateX(0.5deg) translateZ(0px);
   }
   25% {
-    transform: perspective(1000px) rotateY(0deg) rotateX(0deg);
+    transform: perspective(1000px) rotateY(0.5deg) rotateX(-0.25deg) translateZ(2px);
   }
   50% {
-    transform: perspective(1000px) rotateY(1deg) rotateX(-0.5deg);
+    transform: perspective(1000px) rotateY(1deg) rotateX(-0.5deg) translateZ(0px);
   }
   75% {
-    transform: perspective(1000px) rotateY(0deg) rotateX(0deg);
+    transform: perspective(1000px) rotateY(0.5deg) rotateX(0.25deg) translateZ(2px);
   }
   100% {
-    transform: perspective(1000px) rotateY(-1deg) rotateX(0.5deg);
+    transform: perspective(1000px) rotateY(-1deg) rotateX(0.5deg) translateZ(0px);
+  }
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0px) rotateY(-0.5deg);
+  }
+  25% {
+    transform: translateY(-5px) rotateY(0.25deg);
+  }
+  50% {
+    transform: translateY(0px) rotateY(0.5deg);
+  }
+  75% {
+    transform: translateY(5px) rotateY(0.25deg);
+  }
+  100% {
+    transform: translateY(0px) rotateY(-0.5deg);
   }
 }

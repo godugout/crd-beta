@@ -1,8 +1,9 @@
+
 import React from 'react';
 import { CardData } from '@/types/card';
 import CardFront from './card-elements/CardFront';
 import CardBack from './card-elements/CardBack';
-import CardEffectsLayer from './card-elements/CardEffectsLayer';
+import CardEffectsLayer, { useCardEffects } from './card-elements/CardEffectsLayer';
 
 interface CardCanvasProps {
   card: CardData;
@@ -23,8 +24,8 @@ const CardCanvas: React.FC<CardCanvasProps> = ({
   onMouseMove,
   onMouseLeave
 }) => {
-  // Create an instance of CardEffectsLayer to access its methods
-  const effectsLayer = CardEffectsLayer({ activeEffects, isFlipped });
+  // Use the hook directly instead of trying to access methods on a React component
+  const effectsLayer = useCardEffects({ activeEffects, isFlipped });
   
   return (
     <div

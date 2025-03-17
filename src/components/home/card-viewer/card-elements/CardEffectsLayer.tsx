@@ -1,4 +1,3 @@
-
 import React, { CSSProperties } from 'react';
 
 interface CardEffectsLayerProps {
@@ -6,7 +5,8 @@ interface CardEffectsLayerProps {
   isFlipped: boolean;
 }
 
-const CardEffectsLayer = ({ 
+// Changed from component to hook (note the "use" prefix)
+export const useCardEffects = ({ 
   activeEffects,
   isFlipped 
 }: CardEffectsLayerProps) => {
@@ -79,6 +79,13 @@ const CardEffectsLayer = ({
   };
 
   return { getCardClasses, getFilterStyle };
+};
+
+// Keep the original component for backward compatibility but use the hook internally
+const CardEffectsLayer: React.FC<CardEffectsLayerProps> = (props) => {
+  // This component doesn't render anything visible
+  // It just provides the effect utilities via the hook
+  return null;
 };
 
 export default CardEffectsLayer;
