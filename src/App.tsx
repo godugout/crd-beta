@@ -1,98 +1,31 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { CardProvider } from "@/context/CardContext";
-import { AuthProvider } from "@/context/AuthContext";
-import Index from "./pages/Index";
-import Gallery from "./pages/Gallery";
-import Editor from "./pages/Editor";
-import Collections from "./pages/Collections";
-import CollectionDetail from "./pages/CollectionDetail";
-import Auth from "./pages/Auth";
-import NotFound from "./pages/NotFound";
-import { useAuth } from "./context/AuthContext";
 
-const queryClient = new QueryClient();
+import React from 'react';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import Index from './pages/Index';
+import Gallery from './pages/Gallery';
+import Editor from './pages/Editor';
+import Auth from './pages/Auth';
+import NotFound from './pages/NotFound';
+import SignatureDemo from './pages/SignatureDemo';
+import CollectionDetail from './pages/CollectionDetail';
+import Collections from './pages/Collections';
+import './App.css';
 
-// Modified ProtectedRoute component for development
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, isLoading } = useAuth();
-  
-  // During development, bypass authentication check
-  // This line skips the auth check and renders children directly
-  return <>{children}</>;
-  
-  /* Original authentication logic (commented out during development)
-  if (isLoading) {
-    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
-  }
-  
-  if (!user) {
-    return <Navigate to="/auth" replace />;
-  }
-  
-  return <>{children}</>;
-  */
-};
-
-const AppRoutes = () => {
+function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Index />} />
-      <Route path="/auth" element={<Auth />} />
-      <Route 
-        path="/gallery" 
-        element={
-          <ProtectedRoute>
-            <Gallery />
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/editor" 
-        element={
-          <ProtectedRoute>
-            <Editor />
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/collections" 
-        element={
-          <ProtectedRoute>
-            <Collections />
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/collection/:id" 
-        element={
-          <ProtectedRoute>
-            <CollectionDetail />
-          </ProtectedRoute>
-        } 
-      />
-      <Route path="*" element={<NotFound />} />
-    </Routes>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/gallery" element={<Gallery />} />
+        <Route path="/editor" element={<Editor />} />
+        <Route path="/auth" element={<Auth />} />
+        <Route path="/collections" element={<Collections />} />
+        <Route path="/collections/:id" element={<CollectionDetail />} />
+        <Route path="/signature" element={<SignatureDemo />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </BrowserRouter>
   );
-};
-
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <AuthProvider>
-        <CardProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <AppRoutes />
-          </BrowserRouter>
-        </CardProvider>
-      </AuthProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+}
 
 export default App;
