@@ -88,7 +88,8 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
           x: 50,
           y: 50,
           width: 150,
-          height: 210 // 3.5/2.5 ratio
+          height: 210, // 3.5/2.5 ratio
+          rotation: 0
         }]);
         setSelectedCropIndex(0);
       };
@@ -144,7 +145,8 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
       x: (canvas.width - newWidth) / 2,
       y: (canvas.height - newHeight) / 2,
       width: newWidth,
-      height: newHeight
+      height: newHeight,
+      rotation: 0
     };
     
     const newBoxes = [...cropBoxes, newBox];
@@ -204,11 +206,14 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
     
     // Update the selected crop box
     const newBoxes = [...cropBoxes];
+    const currentBox = newBoxes[selectedCropIndex];
+    
     newBoxes[selectedCropIndex] = {
       x: offsetX + (scaledWidth - maxWidth) / 2,
       y: offsetY + (scaledHeight - maxHeight) / 2,
       width: maxWidth,
-      height: maxHeight
+      height: maxHeight,
+      rotation: currentBox ? currentBox.rotation : 0
     };
     
     setCropBoxes(newBoxes);

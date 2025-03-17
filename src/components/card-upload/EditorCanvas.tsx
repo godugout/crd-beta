@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CropBoxProps, getResizeHandle, drawCropBox } from './CropBox';
+import { CropBoxProps, getResizeHandle, drawCropBox, isPointInRotatedRect } from './CropBox';
 import { ImageData } from './hooks/useCropState';
 
 interface EditorCanvasProps {
@@ -26,7 +26,6 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({
   const [isRotating, setIsRotating] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
-  // Draw the editor with crop boxes
   useEffect(() => {
     if (canvasRef.current && editorImgRef.current) {
       const canvas = canvasRef.current;
@@ -35,7 +34,6 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({
       if (ctx && editorImgRef.current) {
         const img = editorImgRef.current;
         
-        // Calculate scaling to fit image in canvas
         const canvasWidth = canvas.width;
         const canvasHeight = canvas.height;
         const scale = Math.min(
@@ -48,21 +46,16 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({
         const x = (canvasWidth - scaledWidth) / 2;
         const y = (canvasHeight - scaledHeight) / 2;
         
-        // Clear canvas
         ctx.clearRect(0, 0, canvasWidth, canvasHeight);
         
-        // Draw background
         ctx.fillStyle = '#f1f5f9';
         ctx.fillRect(0, 0, canvasWidth, canvasHeight);
         
-        // Save context for image rotation
         ctx.save();
         
-        // Center rotation
         ctx.translate(canvasWidth / 2, canvasHeight / 2);
         ctx.rotate(imageData.rotation * Math.PI / 180);
         
-        // Draw image (centered)
         ctx.drawImage(
           img, 
           -scaledWidth / 2, 
@@ -71,10 +64,8 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({
           scaledHeight
         );
         
-        // Restore context to draw crop boxes without rotation
         ctx.restore();
         
-        // Draw all crop boxes
         cropBoxes.forEach((box, index) => {
           drawCropBox(ctx, box, index === selectedCropIndex);
         });
@@ -90,42 +81,44 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     
-    // Check if clicking on a selected box's resize handle
-    const selectedBox = cropBoxes[selectedCropIndex];
-    const resizeHandle = getResizeHandle(e, selectedBox);
-    
-    if (resizeHandle) {
-      setIsResizing(resizeHandle);
-      setDragStart({ x, y });
-      return;
-    }
-    
-    // Check if clicking for rotation (near top-center of selected crop box)
-    if (selectedBox) {
-      const rotateHandleX = selectedBox.x + selectedBox.width / 2;
-      const rotateHandleY = selectedBox.y - 20;
-      const rotateHandleRadius = 12;
+    if (selectedCropIndex >= 0 && selectedCropIndex < cropBoxes.length) {
+      const selectedBox = cropBoxes[selectedCropIndex];
+      const resizeHandle = getResizeHandle(e, selectedBox);
       
-      if (
-        Math.sqrt(Math.pow(x - rotateHandleX, 2) + Math.pow(y - rotateHandleY, 2)) <= rotateHandleRadius
-      ) {
+      if (resizeHandle) {
+        setIsResizing(resizeHandle);
+        setDragStart({ x, y });
+        return;
+      }
+      
+      const rotateHandleDistance = 20;
+      const rotateHandleRadius = 10;
+      
+      const centerX = selectedBox.x + selectedBox.width / 2;
+      const centerY = selectedBox.y + selectedBox.height / 2;
+      const halfHeight = selectedBox.height / 2;
+      
+      const rotateAngleRad = selectedBox.rotation * Math.PI / 180;
+      const topEdgeX = centerX;
+      const topEdgeY = centerY - halfHeight;
+      
+      const rotatedTopX = centerX + (topEdgeX - centerX) * Math.cos(rotateAngleRad) - (topEdgeY - centerY) * Math.sin(rotateAngleRad);
+      const rotatedTopY = centerY + (topEdgeX - centerX) * Math.sin(rotateAngleRad) + (topEdgeY - centerY) * Math.cos(rotateAngleRad);
+      
+      const rotateHandleX = rotatedTopX - rotateHandleDistance * Math.sin(rotateAngleRad);
+      const rotateHandleY = rotatedTopY - rotateHandleDistance * Math.cos(rotateAngleRad);
+      
+      if (Math.sqrt(Math.pow(x - rotateHandleX, 2) + Math.pow(y - rotateHandleY, 2)) <= rotateHandleRadius) {
         setIsRotating(true);
         setDragStart({ x, y });
         return;
       }
     }
     
-    // Check if clicking inside an existing crop box
     for (let i = 0; i < cropBoxes.length; i++) {
       const box = cropBoxes[i];
       
-      if (
-        x >= box.x && 
-        x <= box.x + box.width && 
-        y >= box.y && 
-        y <= box.y + box.height
-      ) {
-        // Select this box
+      if (isPointInRotatedRect(x, y, box)) {
         setSelectedCropIndex(i);
         setIsDragging(true);
         setDragStart({ x, y });
@@ -133,9 +126,7 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({
       }
     }
     
-    // If clicked outside all boxes and there's an image loaded, create a new crop box
     if (editorImgRef.current) {
-      // Create a new crop box with proper card ratio
       const newWidth = 150;
       const newHeight = newWidth * (3.5 / 2.5);
       
@@ -143,7 +134,8 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({
         x: x - newWidth / 2,
         y: y - newHeight / 2,
         width: newWidth,
-        height: newHeight
+        height: newHeight,
+        rotation: 0
       };
       
       const newBoxes = [...cropBoxes, newBox];
@@ -162,25 +154,32 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     
-    // Update cursor style based on position
-    if (!isDragging && !isResizing && !isRotating) {
+    if (!isDragging && !isResizing && !isRotating && selectedCropIndex >= 0 && selectedCropIndex < cropBoxes.length) {
       let cursorStyle = 'default';
       
-      // Check for rotation handle
       const selectedBox = cropBoxes[selectedCropIndex];
       if (selectedBox) {
-        const rotateHandleX = selectedBox.x + selectedBox.width / 2;
-        const rotateHandleY = selectedBox.y - 20;
-        const rotateHandleRadius = 12;
+        const centerX = selectedBox.x + selectedBox.width / 2;
+        const centerY = selectedBox.y + selectedBox.height / 2;
+        const halfHeight = selectedBox.height / 2;
+        const rotateHandleDistance = 20;
+        const rotateHandleRadius = 10;
         
-        if (
-          Math.sqrt(Math.pow(x - rotateHandleX, 2) + Math.pow(y - rotateHandleY, 2)) <= rotateHandleRadius
-        ) {
+        const rotateAngleRad = selectedBox.rotation * Math.PI / 180;
+        const topEdgeX = centerX;
+        const topEdgeY = centerY - halfHeight;
+        
+        const rotatedTopX = centerX + (topEdgeX - centerX) * Math.cos(rotateAngleRad) - (topEdgeY - centerY) * Math.sin(rotateAngleRad);
+        const rotatedTopY = centerY + (topEdgeX - centerX) * Math.sin(rotateAngleRad) + (topEdgeY - centerY) * Math.cos(rotateAngleRad);
+        
+        const rotateHandleX = rotatedTopX - rotateHandleDistance * Math.sin(rotateAngleRad);
+        const rotateHandleY = rotatedTopY - rotateHandleDistance * Math.cos(rotateAngleRad);
+        
+        if (Math.sqrt(Math.pow(x - rotateHandleX, 2) + Math.pow(y - rotateHandleY, 2)) <= rotateHandleRadius) {
           cursorStyle = 'grab';
         }
       }
       
-      // If over an existing box or resize handle
       cropBoxes.forEach((box) => {
         const resizeHandle = getResizeHandle(e, box);
         if (resizeHandle) {
@@ -194,12 +193,7 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({
               cursorStyle = 'nesw-resize';
               break;
           }
-        } else if (
-          x >= box.x && 
-          x <= box.x + box.width && 
-          y >= box.y && 
-          y <= box.y + box.height
-        ) {
+        } else if (isPointInRotatedRect(x, y, box)) {
           cursorStyle = 'move';
         }
       });
@@ -207,29 +201,31 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({
       canvas.style.cursor = cursorStyle;
     }
     
-    if (isRotating) {
-      const selectedBox = cropBoxes[selectedCropIndex];
+    if (isRotating && selectedCropIndex >= 0 && selectedCropIndex < cropBoxes.length) {
+      const selectedBox = {...cropBoxes[selectedCropIndex]};
       const boxCenterX = selectedBox.x + selectedBox.width / 2;
       const boxCenterY = selectedBox.y + selectedBox.height / 2;
       
-      // Calculate angle based on mouse position relative to box center
       const startAngle = Math.atan2(dragStart.y - boxCenterY, dragStart.x - boxCenterX);
       const currentAngle = Math.atan2(y - boxCenterY, x - boxCenterX);
       
-      // Convert from radians to degrees
-      const angleDiff = (currentAngle - startAngle) * (180 / Math.PI);
+      let angleDiff = (currentAngle - startAngle) * (180 / Math.PI);
       
-      // Rotate the cropbox (not implemented yet, would need to add rotation property to CropBoxProps)
-      // For now, just update the dragStart
+      const newBoxes = [...cropBoxes];
+      newBoxes[selectedCropIndex] = {
+        ...selectedBox,
+        rotation: (selectedBox.rotation + angleDiff) % 360
+      };
+      
+      setCropBoxes(newBoxes);
       setDragStart({ x, y });
       
-    } else if (isResizing) {
+    } else if (isResizing && selectedCropIndex >= 0 && selectedCropIndex < cropBoxes.length) {
       const deltaX = x - dragStart.x;
       const deltaY = y - dragStart.y;
       const newBoxes = [...cropBoxes];
       const box = { ...newBoxes[selectedCropIndex] };
       
-      // Lock aspect ratio to 2.5:3.5
       const aspectRatio = 2.5 / 3.5;
       
       switch (isResizing) {
@@ -270,7 +266,6 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({
           break;
       }
       
-      // Enforce minimum size
       const minSize = 100;
       if (box.width < minSize) {
         const scale = minSize / box.width;
@@ -282,17 +277,17 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({
       setCropBoxes(newBoxes);
       setDragStart({ x, y });
       
-    } else if (isDragging) {
+    } else if (isDragging && selectedCropIndex >= 0 && selectedCropIndex < cropBoxes.length) {
       const deltaX = x - dragStart.x;
       const deltaY = y - dragStart.y;
       
       const newBoxes = [...cropBoxes];
-      const box = newBoxes[selectedCropIndex];
+      const box = {...newBoxes[selectedCropIndex]};
       
-      // Update crop box position, keeping it within canvas bounds
       box.x = Math.max(0, Math.min(canvas.width - box.width, box.x + deltaX));
       box.y = Math.max(0, Math.min(canvas.height - box.height, box.y + deltaY));
       
+      newBoxes[selectedCropIndex] = box;
       setCropBoxes(newBoxes);
       setDragStart({ x, y });
     }

@@ -24,7 +24,8 @@ export const detectCardsInImage = (
       x: 0,
       y: 0,
       width: canvas.width,
-      height: canvas.height
+      height: canvas.height,
+      rotation: 0
     };
     
     return [singleCard];
@@ -46,7 +47,8 @@ export const detectCardsInImage = (
       x: 0,
       y: (img.height - cardHeight) / 2,
       width: cardWidth,
-      height: cardHeight
+      height: cardHeight,
+      rotation: 0
     });
     
     // Right card
@@ -54,7 +56,8 @@ export const detectCardsInImage = (
       x: img.width / 2,
       y: (img.height - cardHeight) / 2,
       width: cardWidth,
-      height: cardHeight
+      height: cardHeight,
+      rotation: 0
     });
   } else {
     // Default to a single card with proper ratio
@@ -65,7 +68,8 @@ export const detectCardsInImage = (
       x: (img.width - cardWidth) / 2,
       y: (img.height - cardHeight) / 2,
       width: cardWidth,
-      height: cardHeight
+      height: cardHeight,
+      rotation: 0
     });
   }
   
