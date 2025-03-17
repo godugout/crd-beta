@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import Navbar from '@/components/Navbar';
 import { Button } from '@/components/ui/button';
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, ArrowDown, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import OldCardCreator from '@/components/OldCardCreator';
@@ -16,7 +16,9 @@ const Collections = () => {
     setClickCount(prev => {
       const newCount = prev + 1;
       if (newCount === 5) {
-        toast.success("You found the easter egg! Original card creator unlocked!");
+        toast.success("You found the easter egg! Original card creator unlocked!", {
+          description: "This is where it all began - the first build of CardShow!"
+        });
         setShowEasterEgg(true);
         return 0;
       }
@@ -56,20 +58,28 @@ const Collections = () => {
           {showEasterEgg ? (
             <div className="mb-8">
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                <h3 className="text-xl font-semibold mb-2 text-blue-800">Original Card Creator</h3>
+                <div className="flex justify-between items-center">
+                  <h3 className="text-xl font-semibold text-blue-800">Original Card Creator (circa 2023)</h3>
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    onClick={() => setShowEasterEgg(false)}
+                    className="h-8 w-8 text-blue-600"
+                  >
+                    <X size={18} />
+                  </Button>
+                </div>
                 <p className="text-blue-600 mb-4">
-                  This is where it all began! The original card creator from the first build.
+                  This is where it all began! The original card creator from the first build of CardShow. Browse the collection, view cards, and even try uploading a new one!
                 </p>
-                <Button 
-                  variant="outline" 
-                  onClick={() => setShowEasterEgg(false)}
-                  className="text-blue-600 border-blue-300"
-                >
-                  Hide Easter Egg
-                </Button>
+                <div className="flex items-center justify-center mt-2 text-blue-500">
+                  <ArrowDown className="animate-bounce" size={24} />
+                </div>
               </div>
               
-              <OldCardCreator />
+              <div className="border border-gray-200 rounded-lg overflow-hidden">
+                <OldCardCreator />
+              </div>
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center py-16 text-center">
