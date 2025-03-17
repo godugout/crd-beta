@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import CardUpload from './CardUpload';
+import CardUpload from '@/components/card-upload';
 import { useCards } from '@/context/CardContext';
 import { Card as CardType } from '@/lib/types';
 import { Plus, X } from 'lucide-react';

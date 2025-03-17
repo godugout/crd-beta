@@ -4,7 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import { useCards } from '@/context/CardContext';
 import { Card as CardType, Collection } from '@/lib/types';
-import CardUpload from '@/components/CardUpload';
+import CardUpload from '@/components/card-upload';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
