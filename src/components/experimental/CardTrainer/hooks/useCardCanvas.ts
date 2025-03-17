@@ -1,5 +1,6 @@
+
 import { useState, useRef, useEffect } from 'react';
-import { Canvas, Rect, util } from 'fabric';
+import { Canvas, Rect, util, Image as FabricImage } from 'fabric';
 import { DetectedCard } from '../types';
 import { toast } from 'sonner';
 
@@ -30,9 +31,16 @@ export const useCardCanvas = () => {
     // Create a fabric image object
     util.loadImage(img.src)
       .then(fabricImg => {
-        canvas.backgroundImage = fabricImg;
-        canvas.backgroundImage.scaleX = width / img.naturalWidth;
-        canvas.backgroundImage.scaleY = height / img.naturalHeight;
+        // Create a FabricImage from the loaded image
+        const backgroundImage = new FabricImage(fabricImg, {
+          scaleX: width / img.naturalWidth,
+          scaleY: height / img.naturalHeight,
+          selectable: false,
+          evented: false
+        });
+        
+        // Set as background image
+        canvas.set('backgroundImage', backgroundImage);
         canvas.renderAll();
       });
     
