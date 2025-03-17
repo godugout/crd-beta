@@ -8,6 +8,7 @@ interface StagedCardProps {
   id: string;
   cropBox: CropBoxProps;
   previewUrl: string;
+  file?: File;  // Add file property to store the cropped file
 }
 
 export interface UseEditorProps {
@@ -27,22 +28,31 @@ export const useEditor = ({ onCropComplete, currentFile, setShowEditor }: UseEdi
     const result = await applyCrop(selectedBox, canvasRef.current, currentFile, editorImgRef.current);
     
     if (result) {
-      // Add to staging area instead of completing immediately
+      // Add to staging area with the cropFile included
       const newStagedCard: StagedCardProps = {
         id: `card-${Date.now()}`,
         cropBox: {...selectedBox},
-        previewUrl: result.url
+        previewUrl: result.url,
+        file: result.file  // Store the file for later use
       };
       
       setStagedCards(prev => [...prev, newStagedCard]);
       toast.success("Card added to staging area");
+    } else {
+      toast.error("Failed to crop the image");
     }
   };
 
   const selectStagedCard = (cardId: string) => {
     const stagedCard = stagedCards.find(card => card.id === cardId);
-    if (stagedCard && currentFile) {
-      onCropComplete(new File([currentFile], currentFile.name), stagedCard.previewUrl);
+    if (stagedCard) {
+      if (stagedCard.file) {
+        // If we have the stored file, use it
+        onCropComplete(stagedCard.file, stagedCard.previewUrl);
+      } else if (currentFile) {
+        // Fallback to the original file if needed
+        onCropComplete(new File([currentFile], currentFile.name), stagedCard.previewUrl);
+      }
       setShowEditor(false);
     }
   };
