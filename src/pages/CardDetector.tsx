@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Navbar from '@/components/Navbar';
 import { CropIcon, ChevronRight, Upload, SaveAll } from 'lucide-react';
@@ -6,13 +5,13 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { ImageEditor } from '@/components/card-upload';
-import { useCardContext } from '@/context/CardContext';
+import { useCards } from '@/context/CardContext';
 
 const CardDetector = () => {
   const [showEditor, setShowEditor] = useState(false);
   const [currentFile, setCurrentFile] = useState<File | null>(null);
   const [editorImage, setEditorImage] = useState<string | null>(null);
-  const { addCard } = useCardContext();
+  const { addCard } = useCards();
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -29,7 +28,6 @@ const CardDetector = () => {
   };
 
   const handleCropComplete = (croppedFile: File, croppedUrl: string) => {
-    // Create new card with the cropped image
     const newCard = {
       id: `card-${Date.now()}`,
       title: croppedFile.name.split('.')[0] || 'New Card',
@@ -43,7 +41,6 @@ const CardDetector = () => {
       edition_size: 1
     };
 
-    // Add the card to the context
     addCard(newCard);
     
     toast.success('Card added to your gallery!', {
@@ -57,7 +54,6 @@ const CardDetector = () => {
       
       <main className="flex-1 pt-16 pb-24">
         <div className="container mx-auto max-w-6xl px-4">
-          {/* Breadcrumb */}
           <div className="flex items-center text-sm text-gray-500 py-4">
             <Link to="/" className="hover:text-cardshow-blue">Home</Link>
             <ChevronRight className="h-4 w-4 mx-2" />
