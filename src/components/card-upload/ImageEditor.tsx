@@ -132,6 +132,28 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
     }));
   };
 
+  const rotateClockwise = () => {
+    if (selectedCropIndex >= 0 && selectedCropIndex < cropBoxes.length) {
+      const newBoxes = [...cropBoxes];
+      newBoxes[selectedCropIndex] = {
+        ...newBoxes[selectedCropIndex],
+        rotation: (newBoxes[selectedCropIndex].rotation + 15) % 360
+      };
+      setCropBoxes(newBoxes);
+    }
+  };
+
+  const rotateCounterClockwise = () => {
+    if (selectedCropIndex >= 0 && selectedCropIndex < cropBoxes.length) {
+      const newBoxes = [...cropBoxes];
+      newBoxes[selectedCropIndex] = {
+        ...newBoxes[selectedCropIndex],
+        rotation: (newBoxes[selectedCropIndex].rotation - 15 + 360) % 360
+      };
+      setCropBoxes(newBoxes);
+    }
+  };
+
   const addNewCropBox = () => {
     if (!canvasRef.current) return;
     
@@ -271,6 +293,8 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
                 onMaximizeCrop={maximizeCrop}
                 onAddCropBox={addNewCropBox}
                 onRemoveCropBox={removeCropBox}
+                onRotateClockwise={rotateClockwise}
+                onRotateCounterClockwise={rotateCounterClockwise}
               />
             </div>
           </ResizablePanel>

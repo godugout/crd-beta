@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { CropBoxProps, getResizeHandle, isPointInRotatedRect } from '../CropBox';
 
@@ -90,59 +89,70 @@ export const useMouseInteractions = (
 
   const handleResizing = (x: number, y: number) => {
     if (selectedCropIndex >= 0 && selectedCropIndex < cropBoxes.length && isResizing) {
-      const deltaX = x - dragStart.x;
-      const deltaY = y - dragStart.y;
-      const newBoxes = [...cropBoxes];
-      const box = { ...newBoxes[selectedCropIndex] };
+      const selectedBox = {...cropBoxes[selectedCropIndex]};
+      const boxCenterX = selectedBox.x + selectedBox.width / 2;
+      const boxCenterY = selectedBox.y + selectedBox.height / 2;
+      
+      const angleRad = -selectedBox.rotation * Math.PI / 180;
+      const translatedX = x - boxCenterX;
+      const translatedY = y - boxCenterY;
+      const rotatedX = translatedX * Math.cos(angleRad) - translatedY * Math.sin(angleRad);
+      const rotatedY = translatedX * Math.sin(angleRad) + translatedY * Math.cos(angleRad);
+      
+      const dragStartTranslatedX = dragStart.x - boxCenterX;
+      const dragStartTranslatedY = dragStart.y - boxCenterY;
+      const dragStartRotatedX = dragStartTranslatedX * Math.cos(angleRad) - dragStartTranslatedY * Math.sin(angleRad);
+      const dragStartRotatedY = dragStartTranslatedX * Math.sin(angleRad) + dragStartTranslatedY * Math.cos(angleRad);
+      
+      const deltaX = rotatedX - dragStartRotatedX;
+      const deltaY = rotatedY - dragStartRotatedY;
       
       const aspectRatio = 2.5 / 3.5;
+      let newWidth = selectedBox.width;
+      let newHeight = selectedBox.height;
+      let newX = selectedBox.x;
+      let newY = selectedBox.y;
       
       switch (isResizing) {
         case 'tl': // Top-left
-          const newWidthTL = box.width - deltaX;
-          const newHeightTL = newWidthTL / aspectRatio;
-          
-          box.x = box.x + box.width - newWidthTL;
-          box.y = box.y + box.height - newHeightTL;
-          box.width = newWidthTL;
-          box.height = newHeightTL;
+          newWidth = selectedBox.width - deltaX * 2;
+          newHeight = newWidth / aspectRatio;
           break;
         
         case 'tr': // Top-right
-          const newWidthTR = box.width + deltaX;
-          const newHeightTR = newWidthTR / aspectRatio;
-          
-          box.y = box.y + box.height - newHeightTR;
-          box.width = newWidthTR;
-          box.height = newHeightTR;
+          newWidth = selectedBox.width + deltaX * 2;
+          newHeight = newWidth / aspectRatio;
           break;
         
         case 'bl': // Bottom-left
-          const newWidthBL = box.width - deltaX;
-          const newHeightBL = newWidthBL / aspectRatio;
-          
-          box.x = box.x + box.width - newWidthBL;
-          box.width = newWidthBL;
-          box.height = newHeightBL;
+          newWidth = selectedBox.width - deltaX * 2;
+          newHeight = newWidth / aspectRatio;
           break;
         
         case 'br': // Bottom-right
-          const newWidthBR = box.width + deltaX;
-          const newHeightBR = newWidthBR / aspectRatio;
-          
-          box.width = newWidthBR;
-          box.height = newHeightBR;
+          newWidth = selectedBox.width + deltaX * 2;
+          newHeight = newWidth / aspectRatio;
           break;
       }
       
       const minSize = 100;
-      if (box.width < minSize) {
-        const scale = minSize / box.width;
-        box.width = minSize;
-        box.height *= scale;
+      if (newWidth < minSize) {
+        newWidth = minSize;
+        newHeight = newWidth / aspectRatio;
       }
       
-      newBoxes[selectedCropIndex] = box;
+      newX = boxCenterX - newWidth / 2;
+      newY = boxCenterY - newHeight / 2;
+      
+      const newBoxes = [...cropBoxes];
+      newBoxes[selectedCropIndex] = {
+        ...selectedBox,
+        x: newX,
+        y: newY,
+        width: newWidth,
+        height: newHeight
+      };
+      
       setCropBoxes(newBoxes);
       setDragStart({ x, y });
     }
@@ -240,7 +250,6 @@ export const useMouseInteractions = (
       }
     }
     
-    // If no box was clicked, create a new one
     createNewCropBox(x, y);
   };
 
@@ -252,7 +261,6 @@ export const useMouseInteractions = (
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     
-    // Update cursor style based on what's under the mouse
     updateCursorStyle(e);
     
     if (isRotating) {
