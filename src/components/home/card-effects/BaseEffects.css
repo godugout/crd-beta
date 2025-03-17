@@ -24,6 +24,17 @@
   transition: transform 0.3s cubic-bezier(0.17, 0.67, 0.83, 0.67); /* slower transition */
 }
 
+/* Animation state classes */
+.animation-active {
+  animation-play-state: running;
+}
+
+.animation-slowing {
+  animation-play-state: paused;
+  transition: transform 2s cubic-bezier(0.17, 0.67, 0.83, 0.67); /* slow down card movement */
+  transform: perspective(1000px) rotateY(0) rotateX(0) !important; /* gradually return to neutral position */
+}
+
 /* Improved animation keyframes for smoother, more natural motion with smaller movements */
 @keyframes gentle-sway {
   0% {

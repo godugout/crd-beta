@@ -30,11 +30,15 @@ const CardCanvas: React.FC<CardCanvasProps> = ({
   const effectsLayer = useCardEffects({ activeEffects, isFlipped });
   const cardElementRef = useRef<HTMLDivElement>(null);
   const [mousePos, setMousePos] = useState({ x: 0.5, y: 0.5 });
+  const [animationActive, setAnimationActive] = useState(true);
   
   // Set CSS variables for mouse position to use in the refractor effect
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (!cardElementRef.current) return;
+      
+      // Set animation to active when mouse moves
+      setAnimationActive(true);
       
       const rect = cardElementRef.current.getBoundingClientRect();
       const x = (e.clientX - rect.left) / rect.width;
@@ -46,10 +50,24 @@ const CardCanvas: React.FC<CardCanvasProps> = ({
       setMousePos({ x, y });
     };
     
+    // Mouse leave handler to gradually slow down animation
+    const handleMouseLeave = () => {
+      // Start fading out animation
+      setAnimationActive(false);
+    };
+    
     window.addEventListener('mousemove', handleMouseMove);
+    
+    // Add mouse leave event listener to the card element
+    if (cardElementRef.current) {
+      cardElementRef.current.addEventListener('mouseleave', handleMouseLeave);
+    }
     
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
+      if (cardElementRef.current) {
+        cardElementRef.current.removeEventListener('mouseleave', handleMouseLeave);
+      }
     };
   }, []);
   
@@ -87,7 +105,7 @@ const CardCanvas: React.FC<CardCanvasProps> = ({
   return (
     <div
       ref={cardRef}
-      className={`dynamic-card ${effectsLayer.getCardClasses()} ${hasSpectralEffect ? 'spectral-hologram' : ''}`}
+      className={`dynamic-card ${effectsLayer.getCardClasses()} ${hasSpectralEffect ? 'spectral-hologram' : ''} ${animationActive ? 'animation-active' : 'animation-slowing'}`}
       style={effectsLayer.getFilterStyle()}
       onMouseMove={onMouseMove}
       onMouseLeave={onMouseLeave}
@@ -128,7 +146,7 @@ const CardCanvas: React.FC<CardCanvasProps> = ({
           active={hasSpectralEffect}
           intensity={0.7}
           colorMode="rainbow"
-          animated={true}
+          animated={animationActive}
           microtext={`CARD-${card.id} AUTHENTIC HOLOGRAM `}
           particleCount={hasSpectralEffect ? 50 : 0}
         />
