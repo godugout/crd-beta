@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -17,10 +16,15 @@ import { useAuth } from "./context/AuthContext";
 
 const queryClient = new QueryClient();
 
-// Protected route component
+// Modified ProtectedRoute component for development
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, isLoading } = useAuth();
   
+  // During development, bypass authentication check
+  // This line skips the auth check and renders children directly
+  return <>{children}</>;
+  
+  /* Original authentication logic (commented out during development)
   if (isLoading) {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   }
@@ -30,6 +34,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   }
   
   return <>{children}</>;
+  */
 };
 
 const AppRoutes = () => {

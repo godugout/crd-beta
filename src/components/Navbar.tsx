@@ -14,6 +14,14 @@ const Navbar = () => {
   const { user, isMenuOpen, toggleMenu, closeMenu, handleSignOut, isActive } = useNavbar();
   const isMobile = useIsMobile();
 
+  // For development, create a dummy user if no user exists
+  const developmentUser = user || {
+    id: 'dev-user-id',
+    email: 'dev@example.com',
+    name: 'Developer',
+    avatarUrl: null
+  };
+
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200">
       <div className="max-w-6xl mx-auto px-4">
@@ -23,21 +31,16 @@ const Navbar = () => {
             <span className="text-xl font-bold text-cardshow-dark">CardShow</span>
           </Link>
 
-          {/* Desktop Navigation */}
-          {!isMobile && <DesktopMenu user={user} isActive={isActive} />}
+          {/* Desktop Navigation - Always show all options during development */}
+          {!isMobile && <DesktopMenu user={developmentUser} isActive={isActive} />}
 
           {/* Right side - User menu or Sign In button */}
           <div className="flex items-center">
-            {user ? (
+            {/* Always show avatar during development */}
+            {!isMobile && (
               <div className="relative">
-                <NavAvatar user={user} onClick={toggleMenu} />
+                <NavAvatar user={developmentUser} onClick={toggleMenu} />
               </div>
-            ) : (
-              !isMobile && (
-                <Link to="/auth">
-                  <Button className="bg-cardshow-blue hover:bg-cardshow-blue/90">Sign In</Button>
-                </Link>
-              )
             )}
             
             {/* Mobile Menu Toggle */}
@@ -53,20 +56,20 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu - Always use development user */}
       {isMobile && (
         <MobileMenu 
-          user={user} 
+          user={developmentUser} 
           isOpen={isMenuOpen} 
           onClose={closeMenu}
           onSignOut={handleSignOut}
         />
       )}
       
-      {/* Desktop User Menu Dropdown */}
-      {!isMobile && user && (
+      {/* Desktop User Menu Dropdown - Always use development user */}
+      {!isMobile && (
         <UserDropdown 
-          user={user} 
+          user={developmentUser} 
           isOpen={isMenuOpen}
           onClose={closeMenu}
           onSignOut={handleSignOut}
