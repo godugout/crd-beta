@@ -46,6 +46,10 @@ export const useCardEffects = ({
       classes.push('card-vintage');
     }
     
+    if (activeEffects.includes('Spectral')) {
+      classes.push('spectral-hologram');
+    }
+    
     return classes.join(' ');
   };
 
@@ -68,6 +72,15 @@ export const useCardEffects = ({
       };
     }
     
+    // Add filter modifications for spectral effect
+    if (activeEffects.includes('Spectral')) {
+      filterStyle = {
+        ...filterStyle,
+        filter: `${filterStyle.filter || ''} contrast(1.2) brightness(1.1) saturate(1.4)`.trim(),
+        '--hologram-intensity': '0.7'
+      } as CSSProperties;
+    }
+    
     // Add filter modifications for new effects
     if (activeEffects.includes('Vintage')) {
       filterStyle = {
@@ -77,7 +90,8 @@ export const useCardEffects = ({
     }
     
     if (activeEffects.includes('Refractor') || activeEffects.includes('Gold Foil') || 
-        activeEffects.includes('Chrome') || activeEffects.includes('Prismatic')) {
+        activeEffects.includes('Chrome') || activeEffects.includes('Prismatic') ||
+        activeEffects.includes('Spectral')) {
       filterStyle = {
         ...filterStyle,
         borderRadius: '12px',

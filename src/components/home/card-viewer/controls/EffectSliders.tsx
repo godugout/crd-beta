@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Timer, Zap, Sparkles, Sun, Diamond } from 'lucide-react';
+import { Timer, Zap, Sparkles, Sun, Diamond, Palette } from 'lucide-react';
 import EffectSlider from './EffectSlider';
 
 interface EffectSlidersProps {
@@ -11,6 +11,7 @@ interface EffectSlidersProps {
   chromeIntensity: number;
   vintageIntensity: number;
   refractorIntensity: number;
+  spectralIntensity: number;
   onMotionSpeedChange: (value: number[]) => void;
   onPulseIntensityChange: (value: number[]) => void;
   onShimmerSpeedChange: (value: number[]) => void;
@@ -18,6 +19,7 @@ interface EffectSlidersProps {
   onChromeIntensityChange: (value: number[]) => void;
   onVintageIntensityChange: (value: number[]) => void;
   onRefractorIntensityChange: (value: number[]) => void;
+  onSpectralIntensityChange: (value: number[]) => void;
   activeEffects: string[];
 }
 
@@ -29,6 +31,7 @@ const EffectSliders = ({
   chromeIntensity,
   vintageIntensity,
   refractorIntensity,
+  spectralIntensity,
   onMotionSpeedChange,
   onPulseIntensityChange,
   onShimmerSpeedChange,
@@ -36,6 +39,7 @@ const EffectSliders = ({
   onChromeIntensityChange,
   onVintageIntensityChange,
   onRefractorIntensityChange,
+  onSpectralIntensityChange,
   activeEffects
 }: EffectSlidersProps) => {
   return (
@@ -76,6 +80,20 @@ const EffectSliders = ({
           max={5.0}
           step={0.5}
           onValueChange={onShimmerSpeedChange}
+        />
+      )}
+
+      {/* New Spectral effect slider */}
+      {activeEffects.includes('Spectral') && (
+        <EffectSlider
+          id="spectral-intensity"
+          label="Holographic Intensity"
+          icon={<Palette className="h-3 w-3" />}
+          value={spectralIntensity}
+          min={0.1}
+          max={2.0}
+          step={0.1}
+          onValueChange={onSpectralIntensityChange}
         />
       )}
 

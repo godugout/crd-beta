@@ -13,6 +13,8 @@ interface CardContainerProps {
     goldIntensity: number;
     chromeIntensity: number;
     vintageIntensity: number;
+    refractorIntensity: number;
+    spectralIntensity: number;
   };
   children: React.ReactNode;
 }
@@ -30,7 +32,9 @@ const CardContainer: React.FC<CardContainerProps> = ({
     '--shimmer-speed': `${effectSettings.shimmerSpeed}s`,
     '--gold-intensity': `${effectSettings.goldIntensity}`,
     '--chrome-intensity': `${effectSettings.chromeIntensity}`,
-    '--vintage-intensity': `${effectSettings.vintageIntensity}`
+    '--vintage-intensity': `${effectSettings.vintageIntensity}`,
+    '--refractor-intensity': `${effectSettings.refractorIntensity}`,
+    '--hologram-intensity': `${effectSettings.spectralIntensity}`
   } as CSSProperties;
 
   return (
