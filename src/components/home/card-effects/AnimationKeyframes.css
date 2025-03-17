@@ -1,0 +1,102 @@
+
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #e60073, 0 0 40px #e60073;
+  }
+  50% {
+    box-shadow: 0 0 15px #fff, 0 0 30px #fff, 0 0 45px #e60073, 0 0 60px #e60073;
+  }
+  100% {
+    box-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #e60073, 0 0 40px #e60073;
+  }
+}
+
+@keyframes shine {
+  0% {
+    background-position: -100% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes gold-shimmer {
+  0% {
+    background-position: -100% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes chrome-reflection {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 300% 0;
+  }
+}
+
+@keyframes vintage-fade {
+  0% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes tilt {
+  0% {
+    transform: perspective(1000px) rotateY(-5deg) rotateX(0deg);
+  }
+  50% {
+    transform: perspective(1000px) rotateY(5deg) rotateX(5deg);
+  }
+  100% {
+    transform: perspective(1000px) rotateY(-5deg) rotateX(0deg);
+  }
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0px) translateX(0px);
+  }
+  25% {
+    transform: translateY(-5px) translateX(3px);
+  }
+  50% {
+    transform: translateY(0px) translateX(-3px);
+  }
+  75% {
+    transform: translateY(5px) translateX(2px);
+  }
+  100% {
+    transform: translateY(0px) translateX(0px);
+  }
+}
+
+:root {
+  --motion-speed: 1;
+  --pulse-intensity: 1;
+  --shimmer-speed: 3s;
+  --gold-intensity: 1;
+  --chrome-intensity: 1;
+  --vintage-intensity: 1;
+}

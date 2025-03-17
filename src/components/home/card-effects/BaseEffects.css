@@ -1,0 +1,23 @@
+
+.card-3d-container {
+  perspective: 1500px;
+  transition: transform 0.1s ease;
+}
+
+.dynamic-card {
+  transition: all 0.3s ease;
+  transform-style: preserve-3d;
+  animation: tilt calc(10s / var(--motion-speed)) infinite ease-in-out;
+}
+
+.floating-card {
+  animation: float calc(6s / var(--motion-speed)) infinite ease-in-out;
+}
+
+.dynamic-card.mouse-move {
+  animation: none;
+}
+
+.floating-card.mouse-move {
+  animation: none;
+}

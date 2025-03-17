@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 import { Trash2, Edit, Share2, Tag } from 'lucide-react';
 import { toast } from 'sonner';
 import { useCards } from '@/context/CardContext';
-import '../components/home/CardEffects.css';
+import '../components/home/card-effects/index.css';
 
 interface CardItemProps {
   card: Card;
