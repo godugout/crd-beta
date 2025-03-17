@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { FlaskConical, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger } from '@/components/ui/sheet';
-import CardDetectionTest from './CardDetectionTest';
+import CardDetectionTrainer from './CardTrainer/CardDetectionTrainer';
 
 enum LabExperiment {
   CARD_DETECTION = 'card-detection',
@@ -16,7 +16,7 @@ const DugoutLabs = () => {
   const renderExperiment = () => {
     switch (currentExperiment) {
       case LabExperiment.CARD_DETECTION:
-        return <CardDetectionTest />;
+        return <CardDetectionTrainer />;
       default:
         return (
           <div className="p-6 flex flex-col items-center justify-center space-y-6 text-center">
