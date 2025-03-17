@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Timer, Zap, Sparkles, Sun, Prism } from 'lucide-react';
+import { Timer, Zap, Sparkles, Sun, Diamond } from 'lucide-react';
 import EffectSlider from './EffectSlider';
 
 interface EffectSlidersProps {
@@ -84,7 +84,7 @@ const EffectSliders = ({
         <EffectSlider
           id="refractor-intensity"
           label="Refraction Intensity"
-          icon={<Prism className="h-3 w-3" />}
+          icon={<Diamond className="h-3 w-3" />}
           value={refractorIntensity}
           min={0.1}
           max={2.0}
