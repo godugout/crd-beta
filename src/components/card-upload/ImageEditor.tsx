@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { 
   Dialog,
@@ -16,6 +17,13 @@ import { detectCardsInImage, applyCrop } from './cardDetection';
 import EditorToolbar from './EditorToolbar';
 import EditorSidebar from './EditorSidebar';
 import { toast } from 'sonner';
+import { RotateCw } from 'lucide-react';
+
+interface StagedCardProps {
+  id: string;
+  cropBox: CropBoxProps;
+  previewUrl: string;
+}
 
 interface ImageEditorProps {
   showEditor: boolean;
@@ -38,9 +46,19 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
   const [selectedCropIndex, setSelectedCropIndex] = useState<number>(0);
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState<string | null>(null);
+  const [isRotating, setIsRotating] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-  const [imageData, setImageData] = useState<{ width: number, height: number, scale: number }>({ width: 0, height: 0, scale: 1 });
+  const [imageData, setImageData] = useState<{ 
+    width: number, 
+    height: number, 
+    scale: number,
+    rotation: number 
+  }>({ width: 0, height: 0, scale: 1, rotation: 0 });
   const [detectedCards, setDetectedCards] = useState<CropBoxProps[]>([]);
+  const [stagedCards, setStagedCards] = useState<StagedCardProps[]>([]);
+  
+  // Lock the main image by default
+  const [imageIsLocked, setImageIsLocked] = useState(true);
 
   // Initialize canvas and detect cards when image is loaded
   useEffect(() => {
@@ -57,13 +75,22 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
         setImageData({
           width: img.width,
           height: img.height,
-          scale: 1
+          scale: 1,
+          rotation: 0
         });
+        
+        // Clear staged cards
+        setStagedCards([]);
         
         // Detect cards in the image
         const detected = detectCardsInImage(img, isStandardRatio, canvasRef.current);
         setDetectedCards(detected);
-        setCropBoxes(detected);
+        setCropBoxes(detected.length > 0 ? [detected[0]] : [{
+          x: 50,
+          y: 50,
+          width: 150,
+          height: 210 // 3.5/2.5 ratio
+        }]);
         setSelectedCropIndex(0);
       };
     }
@@ -104,8 +131,24 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
         ctx.fillStyle = '#f1f5f9';
         ctx.fillRect(0, 0, canvasWidth, canvasHeight);
         
-        // Draw image
-        ctx.drawImage(img, x, y, scaledWidth, scaledHeight);
+        // Save context for image rotation
+        ctx.save();
+        
+        // Center rotation
+        ctx.translate(canvasWidth / 2, canvasHeight / 2);
+        ctx.rotate(imageData.rotation * Math.PI / 180);
+        
+        // Draw image (centered)
+        ctx.drawImage(
+          img, 
+          -scaledWidth / 2, 
+          -scaledHeight / 2, 
+          scaledWidth, 
+          scaledHeight
+        );
+        
+        // Restore context to draw crop boxes without rotation
+        ctx.restore();
         
         // Draw all crop boxes
         cropBoxes.forEach((box, index) => {
@@ -113,7 +156,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
         });
       }
     }
-  }, [showEditor, editorImage, cropBoxes, selectedCropIndex]);
+  }, [showEditor, editorImage, cropBoxes, selectedCropIndex, imageData.rotation]);
 
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
@@ -131,6 +174,21 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
       setIsResizing(resizeHandle);
       setDragStart({ x, y });
       return;
+    }
+    
+    // Check if clicking for rotation (near top-center of selected crop box)
+    if (selectedBox) {
+      const rotateHandleX = selectedBox.x + selectedBox.width / 2;
+      const rotateHandleY = selectedBox.y - 20;
+      const rotateHandleRadius = 12;
+      
+      if (
+        Math.sqrt(Math.pow(x - rotateHandleX, 2) + Math.pow(y - rotateHandleY, 2)) <= rotateHandleRadius
+      ) {
+        setIsRotating(true);
+        setDragStart({ x, y });
+        return;
+      }
     }
     
     // Check if clicking inside an existing crop box
@@ -151,7 +209,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
       }
     }
     
-    // If clicked outside all boxes and there's an image loaded
+    // If clicked outside all boxes and there's an image loaded, create a new crop box
     if (editorImage) {
       // Create a new crop box with proper card ratio
       const newWidth = 150;
@@ -181,10 +239,24 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
     const y = e.clientY - rect.top;
     
     // Update cursor style based on position
-    if (!isDragging && !isResizing) {
+    if (!isDragging && !isResizing && !isRotating) {
       let cursorStyle = 'default';
       
-      // If over an existing box
+      // Check for rotation handle
+      const selectedBox = cropBoxes[selectedCropIndex];
+      if (selectedBox) {
+        const rotateHandleX = selectedBox.x + selectedBox.width / 2;
+        const rotateHandleY = selectedBox.y - 20;
+        const rotateHandleRadius = 12;
+        
+        if (
+          Math.sqrt(Math.pow(x - rotateHandleX, 2) + Math.pow(y - rotateHandleY, 2)) <= rotateHandleRadius
+        ) {
+          cursorStyle = 'grab';
+        }
+      }
+      
+      // If over an existing box or resize handle
       cropBoxes.forEach((box) => {
         const resizeHandle = getResizeHandle(e, box);
         if (resizeHandle) {
@@ -211,7 +283,23 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
       canvas.style.cursor = cursorStyle;
     }
     
-    if (isResizing) {
+    if (isRotating) {
+      const selectedBox = cropBoxes[selectedCropIndex];
+      const boxCenterX = selectedBox.x + selectedBox.width / 2;
+      const boxCenterY = selectedBox.y + selectedBox.height / 2;
+      
+      // Calculate angle based on mouse position relative to box center
+      const startAngle = Math.atan2(dragStart.y - boxCenterY, dragStart.x - boxCenterX);
+      const currentAngle = Math.atan2(y - boxCenterY, x - boxCenterX);
+      
+      // Convert from radians to degrees
+      const angleDiff = (currentAngle - startAngle) * (180 / Math.PI);
+      
+      // Rotate the cropbox (not implemented yet, would need to add rotation property to CropBoxProps)
+      // For now, just update the dragStart
+      setDragStart({ x, y });
+      
+    } else if (isResizing) {
       const deltaX = x - dragStart.x;
       const deltaY = y - dragStart.y;
       const newBoxes = [...cropBoxes];
@@ -289,6 +377,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
   const handleMouseUp = () => {
     setIsDragging(false);
     setIsResizing(null);
+    setIsRotating(false);
   };
 
   const addNewCropBox = () => {
@@ -327,14 +416,40 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
     }
   };
 
-  const applySelectedCrop = async () => {
+  const stageSelectedCrop = async () => {
     const selectedBox = cropBoxes[selectedCropIndex];
     const result = await applyCrop(selectedBox, canvasRef.current, currentFile, editorImgRef.current);
     
     if (result) {
-      onCropComplete(result.file, result.url);
+      // Add to staging area instead of completing immediately
+      const newStagedCard: StagedCardProps = {
+        id: `card-${Date.now()}`,
+        cropBox: {...selectedBox},
+        previewUrl: result.url
+      };
+      
+      setStagedCards(prev => [...prev, newStagedCard]);
+      toast.success("Card added to staging area");
+    }
+  };
+
+  const selectStagedCard = (cardId: string) => {
+    const stagedCard = stagedCards.find(card => card.id === cardId);
+    if (stagedCard) {
+      onCropComplete(new File([currentFile!], currentFile!.name), stagedCard.previewUrl);
       setShowEditor(false);
     }
+  };
+
+  const removeStagedCard = (cardId: string) => {
+    setStagedCards(prev => prev.filter(card => card.id !== cardId));
+  };
+
+  const rotateImage = () => {
+    setImageData(prev => ({
+      ...prev,
+      rotation: (prev.rotation + 90) % 360
+    }));
   };
 
   const maximizeCrop = () => {
@@ -423,6 +538,16 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
                 onMouseLeave={handleMouseUp}
               />
               
+              <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm rounded-lg shadow-lg p-2">
+                <button
+                  onClick={rotateImage}
+                  className="p-2 hover:bg-gray-100 rounded-md" 
+                  title="Rotate image"
+                >
+                  <RotateCw className="h-5 w-5 text-cardshow-slate" />
+                </button>
+              </div>
+              
               <EditorToolbar 
                 onMaximizeCrop={maximizeCrop}
                 onAddCropBox={addNewCropBox}
@@ -438,8 +563,11 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
               cropBoxes={cropBoxes}
               selectedCropIndex={selectedCropIndex}
               setSelectedCropIndex={setSelectedCropIndex}
-              onExtractCard={applySelectedCrop}
+              onExtractCard={stageSelectedCrop}
               onCancel={() => setShowEditor(false)}
+              stagedCards={stagedCards}
+              onSelectStagedCard={selectStagedCard}
+              onRemoveStagedCard={removeStagedCard}
             />
           </ResizablePanel>
         </ResizablePanelGroup>

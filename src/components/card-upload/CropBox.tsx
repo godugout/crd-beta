@@ -6,6 +6,7 @@ export interface CropBoxProps {
   y: number;
   width: number;
   height: number;
+  rotation?: number;
 }
 
 export const CropBox: React.FC<{
@@ -28,7 +29,7 @@ export const getResizeHandle = (
   const canvas = e.currentTarget;
   const rect = canvas.getBoundingClientRect();
   const x = e.clientX - rect.left;
-  const y = e.clientY - rect.top;
+  const y = e.clientY - rect.left;
   
   // Check if cursor is on any of the resize handles
   // Top-left
@@ -69,6 +70,24 @@ export const drawCropBox = (
     ctx.fillRect(box.x - handleSize/2, box.y + box.height - handleSize/2, handleSize, handleSize);
     // Bottom-right
     ctx.fillRect(box.x + box.width - handleSize/2, box.y + box.height - handleSize/2, handleSize, handleSize);
+    
+    // Draw rotation handle
+    const rotateHandleX = box.x + box.width / 2;
+    const rotateHandleY = box.y - 20;
+    const rotateHandleRadius = 8;
+    
+    // Draw a line connecting the rotation handle to the box
+    ctx.beginPath();
+    ctx.moveTo(rotateHandleX, box.y);
+    ctx.lineTo(rotateHandleX, rotateHandleY);
+    ctx.strokeStyle = '#2563eb';
+    ctx.stroke();
+    
+    // Draw the rotation handle
+    ctx.beginPath();
+    ctx.arc(rotateHandleX, rotateHandleY, rotateHandleRadius, 0, Math.PI * 2);
+    ctx.fillStyle = '#2563eb';
+    ctx.fill();
     
     // Draw a transparent overlay for selected crop
     ctx.fillStyle = 'rgba(37, 99, 235, 0.1)';
