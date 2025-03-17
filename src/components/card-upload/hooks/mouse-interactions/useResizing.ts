@@ -1,6 +1,5 @@
-
 import { useState } from 'react';
-import { CropBoxProps, getResizeHandle } from '../../CropBox';
+import { CropBoxProps } from '../../CropBox';
 import { DragState } from './types';
 
 export const useResizing = (
@@ -17,44 +16,85 @@ export const useResizing = (
       const boxCenterY = selectedBox.y + selectedBox.height / 2;
       
       const angleRad = -selectedBox.rotation * Math.PI / 180;
+      const cos = Math.cos(angleRad);
+      const sin = Math.sin(angleRad);
+      
       const translatedX = x - boxCenterX;
       const translatedY = y - boxCenterY;
-      const rotatedX = translatedX * Math.cos(angleRad) - translatedY * Math.sin(angleRad);
-      const rotatedY = translatedX * Math.sin(angleRad) + translatedY * Math.cos(angleRad);
+      
+      const rotatedX = translatedX * cos - translatedY * sin;
+      const rotatedY = translatedX * sin + translatedY * cos;
       
       const dragStartTranslatedX = dragStart.x - boxCenterX;
       const dragStartTranslatedY = dragStart.y - boxCenterY;
-      const dragStartRotatedX = dragStartTranslatedX * Math.cos(angleRad) - dragStartTranslatedY * Math.sin(angleRad);
-      const dragStartRotatedY = dragStartTranslatedX * Math.sin(angleRad) + dragStartTranslatedY * Math.cos(angleRad);
+      const dragStartRotatedX = dragStartTranslatedX * cos - dragStartTranslatedY * sin;
+      const dragStartRotatedY = dragStartTranslatedX * sin + dragStartTranslatedY * cos;
       
       const deltaX = rotatedX - dragStartRotatedX;
       const deltaY = rotatedY - dragStartRotatedY;
       
       const aspectRatio = 2.5 / 3.5;
+      
       let newWidth = selectedBox.width;
       let newHeight = selectedBox.height;
-      let newX = selectedBox.x;
-      let newY = selectedBox.y;
+      let offsetX = 0;
+      let offsetY = 0;
       
       switch (isResizing) {
         case 'tl': // Top-left
-          newWidth = selectedBox.width - deltaX * 2;
-          newHeight = newWidth / aspectRatio;
+          if (Math.abs(deltaX) > Math.abs(deltaY * aspectRatio)) {
+            newWidth = selectedBox.width - deltaX * 2;
+            newHeight = newWidth / aspectRatio;
+            offsetX = deltaX;
+            offsetY = (selectedBox.height - newHeight) / 2;
+          } else {
+            newHeight = selectedBox.height - deltaY * 2;
+            newWidth = newHeight * aspectRatio;
+            offsetY = deltaY;
+            offsetX = (selectedBox.width - newWidth) / 2;
+          }
           break;
         
         case 'tr': // Top-right
-          newWidth = selectedBox.width + deltaX * 2;
-          newHeight = newWidth / aspectRatio;
+          if (Math.abs(deltaX) > Math.abs(deltaY * aspectRatio)) {
+            newWidth = selectedBox.width + deltaX * 2;
+            newHeight = newWidth / aspectRatio;
+            offsetX = -deltaX;
+            offsetY = (selectedBox.height - newHeight) / 2;
+          } else {
+            newHeight = selectedBox.height - deltaY * 2;
+            newWidth = newHeight * aspectRatio;
+            offsetY = deltaY;
+            offsetX = (selectedBox.width - newWidth) / 2;
+          }
           break;
         
         case 'bl': // Bottom-left
-          newWidth = selectedBox.width - deltaX * 2;
-          newHeight = newWidth / aspectRatio;
+          if (Math.abs(deltaX) > Math.abs(deltaY * aspectRatio)) {
+            newWidth = selectedBox.width - deltaX * 2;
+            newHeight = newWidth / aspectRatio;
+            offsetX = deltaX;
+            offsetY = (selectedBox.height - newHeight) / 2;
+          } else {
+            newHeight = selectedBox.height + deltaY * 2;
+            newWidth = newHeight * aspectRatio;
+            offsetY = -deltaY;
+            offsetX = (selectedBox.width - newWidth) / 2;
+          }
           break;
         
         case 'br': // Bottom-right
-          newWidth = selectedBox.width + deltaX * 2;
-          newHeight = newWidth / aspectRatio;
+          if (Math.abs(deltaX) > Math.abs(deltaY * aspectRatio)) {
+            newWidth = selectedBox.width + deltaX * 2;
+            newHeight = newWidth / aspectRatio;
+            offsetX = -deltaX;
+            offsetY = (selectedBox.height - newHeight) / 2;
+          } else {
+            newHeight = selectedBox.height + deltaY * 2;
+            newWidth = newHeight * aspectRatio;
+            offsetY = -deltaY;
+            offsetX = (selectedBox.width - newWidth) / 2;
+          }
           break;
       }
       
@@ -64,8 +104,11 @@ export const useResizing = (
         newHeight = newWidth / aspectRatio;
       }
       
-      newX = boxCenterX - newWidth / 2;
-      newY = boxCenterY - newHeight / 2;
+      const newCenterX = boxCenterX;
+      const newCenterY = boxCenterY;
+      
+      const newX = newCenterX - newWidth / 2;
+      const newY = newCenterY - newHeight / 2;
       
       const newBoxes = [...cropBoxes];
       newBoxes[selectedCropIndex] = {
