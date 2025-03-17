@@ -5,14 +5,16 @@ import { cn } from '@/lib/utils';
 import { Trash2, Edit, Share2, Tag } from 'lucide-react';
 import { toast } from 'sonner';
 import { useCards } from '@/context/CardContext';
+import '../components/home/CardEffects.css';
 
 interface CardItemProps {
   card: Card;
   className?: string;
   onClick?: () => void;
+  activeEffects?: string[];
 }
 
-const CardItem: React.FC<CardItemProps> = ({ card, className, onClick }) => {
+const CardItem: React.FC<CardItemProps> = ({ card, className, onClick, activeEffects = [] }) => {
   const [isFlipped, setIsFlipped] = useState(false);
   const { deleteCard } = useCards();
   
@@ -50,6 +52,41 @@ const CardItem: React.FC<CardItemProps> = ({ card, className, onClick }) => {
     day: 'numeric',
     year: 'numeric',
   }).format(card.createdAt);
+
+  // Build card front classes based on active effects
+  const getCardFrontClasses = () => {
+    const classes = ["card-front rounded-xl overflow-hidden shadow-card bg-white"];
+    
+    if (activeEffects.includes('Classic Holographic')) {
+      classes.push('card-holographic');
+    }
+    
+    if (activeEffects.includes('Refractor')) {
+      classes.push('card-refractor');
+    }
+    
+    if (activeEffects.includes('Prismatic')) {
+      classes.push('card-prismatic');
+    }
+    
+    if (activeEffects.includes('Electric')) {
+      classes.push('card-electric');
+    }
+    
+    if (activeEffects.includes('Gold Foil')) {
+      classes.push('card-gold-foil');
+    }
+    
+    if (activeEffects.includes('Chrome')) {
+      classes.push('card-chrome');
+    }
+    
+    if (activeEffects.includes('Vintage')) {
+      classes.push('card-vintage');
+    }
+    
+    return cn(...classes);
+  };
   
   return (
     <div 
@@ -61,7 +98,7 @@ const CardItem: React.FC<CardItemProps> = ({ card, className, onClick }) => {
     >
       <div className={cn("card-inner w-full h-full", isFlipped ? "flipped" : "")}>
         {/* Card Front */}
-        <div className="card-front rounded-xl overflow-hidden shadow-card bg-white">
+        <div className={getCardFrontClasses()}>
           <div className="relative w-full h-full">
             <img
               src={card.imageUrl}
@@ -71,6 +108,12 @@ const CardItem: React.FC<CardItemProps> = ({ card, className, onClick }) => {
             />
             <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-4">
               <h3 className="text-white font-semibold truncate">{card.title}</h3>
+              
+              {activeEffects.length > 0 && (
+                <span className="text-xs text-white/90 bg-black/40 px-2 py-0.5 rounded-full">
+                  {activeEffects[0]}
+                </span>
+              )}
             </div>
             
             {/* Hover Actions */}

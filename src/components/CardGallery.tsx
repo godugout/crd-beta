@@ -1,11 +1,22 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import CardItem from './CardItem';
 import { useCards } from '@/context/CardContext';
 import { Card } from '@/lib/types';
 import { PlusCircle, Search, Tag, X } from 'lucide-react';
+
+// Define available card effects
+const CARD_EFFECTS = [
+  'Classic Holographic',
+  'Refractor',
+  'Prismatic',
+  'Electric',
+  'Gold Foil',
+  'Chrome',
+  'Vintage'
+];
 
 interface CardGalleryProps {
   className?: string;
@@ -16,9 +27,23 @@ const CardGallery: React.FC<CardGalleryProps> = ({ className }) => {
   const { cards } = useCards();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [cardEffects, setCardEffects] = useState<Record<string, string[]>>({});
   
   // Get all unique tags from cards
   const allTags = Array.from(new Set(cards.flatMap(card => card.tags)));
+  
+  // Initialize random effects for each card when component mounts or cards change
+  useEffect(() => {
+    const effectsMap: Record<string, string[]> = {};
+    
+    cards.forEach((card) => {
+      // Give each card a different random effect
+      const randomEffect = CARD_EFFECTS[Math.floor(Math.random() * CARD_EFFECTS.length)];
+      effectsMap[card.id] = [randomEffect];
+    });
+    
+    setCardEffects(effectsMap);
+  }, [cards]);
   
   // Filter cards based on search query and selected tags
   const filteredCards = cards.filter(card => {
@@ -118,7 +143,10 @@ const CardGallery: React.FC<CardGalleryProps> = ({ className }) => {
               key={card.id} 
               className="animate-scale-in transition-all duration-300"
             >
-              <CardItem card={card} />
+              <CardItem 
+                card={card}
+                activeEffects={cardEffects[card.id] || []} 
+              />
             </div>
           ))}
         </div>
