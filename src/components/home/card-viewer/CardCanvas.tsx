@@ -129,6 +129,7 @@ const CardCanvas: React.FC<CardCanvasProps> = ({
           intensity={0.7}
           colorMode="rainbow"
           animated={true}
+          microtext={`CARD-${card.id} AUTHENTIC HOLOGRAM `}
           particleCount={hasSpectralEffect ? 50 : 0}
         />
       </div>

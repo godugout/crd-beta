@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { CropBoxProps } from '../CropBox';
@@ -31,21 +30,22 @@ export const useEditor = ({ onCropComplete, currentFile, setShowEditor }: UseEdi
         return;
       }
       
-      if (!canvasRef.current) {
-        toast.error("Canvas not initialized");
-        return;
-      }
-      
       if (!editorImgRef.current) {
         toast.error("Editor image not loaded");
         return;
       }
       
+      const canvas = canvasRef.current;
+      if (!canvas) {
+        console.warn("Canvas reference not available");
+        // We'll try to continue since we might have the editor image
+      }
+      
       console.log("Starting crop with box:", selectedBox);
-      const result = await applyCrop(selectedBox, canvasRef.current, currentFile, editorImgRef.current);
+      
+      const result = await applyCrop(selectedBox, canvas, currentFile, editorImgRef.current);
       
       if (result && result.file && result.url) {
-        // Add to staging area with the cropFile included
         const newStagedCard: StagedCardProps = {
           id: `card-${Date.now()}`,
           cropBox: {...selectedBox},
@@ -69,10 +69,8 @@ export const useEditor = ({ onCropComplete, currentFile, setShowEditor }: UseEdi
     const stagedCard = stagedCards.find(card => card.id === cardId);
     if (stagedCard) {
       if (stagedCard.file) {
-        // If we have the stored file, use it
         onCropComplete(stagedCard.file, stagedCard.previewUrl);
       } else if (currentFile) {
-        // Fallback to the original file if needed
         onCropComplete(new File([currentFile], currentFile.name), stagedCard.previewUrl);
       }
       setShowEditor(false);

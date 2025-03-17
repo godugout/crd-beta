@@ -1,184 +1,119 @@
-
 import { CropBoxProps } from './CropBox';
 
 export const detectCardsInImage = (
-  img: HTMLImageElement, 
+  img: HTMLImageElement,
   isStandardRatio: boolean,
-  canvas: HTMLCanvasElement | null
+  canvas: HTMLCanvasElement
 ): CropBoxProps[] => {
-  if (!canvas) return [];
+  const detectedCards: CropBoxProps[] = [];
   
-  const ctx = canvas.getContext('2d');
-  if (!ctx) return [];
-  
-  // Set canvas dimensions to match the image
-  canvas.width = img.width;
-  canvas.height = img.height;
-  
-  // Draw image on canvas
-  ctx.drawImage(img, 0, 0, img.width, img.height);
-  
-  // If it's already a standard ratio, just use the whole image
+  // If the image matches the standard card ratio, create a single crop box
   if (isStandardRatio) {
-    const singleCard: CropBoxProps = {
+    const width = img.width;
+    const height = img.height;
+    detectedCards.push({
       x: 0,
       y: 0,
-      width: canvas.width,
-      height: canvas.height,
-      rotation: 0
-    };
-    
-    return [singleCard];
-  }
-  
-  // Simple heuristic to detect multiple cards
-  const possibleCards: CropBoxProps[] = [];
-  
-  // Check if width is roughly twice the expected width for a single card
-  const isWideFormat = img.width > img.height * 1.8;
-  
-  if (isWideFormat) {
-    // Likely contains two cards side by side
-    const cardWidth = img.width / 2;
-    const cardHeight = cardWidth * (3.5 / 2.5);
-    
-    // Left card
-    possibleCards.push({
-      x: 0,
-      y: (img.height - cardHeight) / 2,
-      width: cardWidth,
-      height: cardHeight,
-      rotation: 0
-    });
-    
-    // Right card
-    possibleCards.push({
-      x: img.width / 2,
-      y: (img.height - cardHeight) / 2,
-      width: cardWidth,
-      height: cardHeight,
+      width: width,
+      height: height,
       rotation: 0
     });
   } else {
-    // Default to a single card with proper ratio
-    const cardWidth = img.width * 0.8;
-    const cardHeight = cardWidth * (3.5 / 2.5);
-    
-    possibleCards.push({
-      x: (img.width - cardWidth) / 2,
-      y: (img.height - cardHeight) / 2,
-      width: cardWidth,
-      height: cardHeight,
-      rotation: 0
-    });
+    // Mock card detection (replace with actual card detection logic)
+    const numCards = Math.floor(Math.random() * 4) + 1; // Random number of cards between 1 and 4
+    for (let i = 0; i < numCards; i++) {
+      const width = img.width / numCards * (Math.random() * 0.4 + 0.8); // Varying widths
+      const height = img.height / numCards * (Math.random() * 0.4 + 0.8); // Varying heights
+      const x = Math.random() * (img.width - width);
+      const y = Math.random() * (img.height - height);
+      detectedCards.push({
+        x: x,
+        y: y,
+        width: width,
+        height: height,
+        rotation: 0
+      });
+    }
   }
   
-  return possibleCards;
+  return detectedCards;
 };
 
-// Apply crop to an image
 export const applyCrop = async (
-  box: CropBoxProps,
+  cropBox: CropBoxProps,
   canvas: HTMLCanvasElement | null,
-  currentFile: File | null,
-  editorImg: HTMLImageElement | null
-): Promise<{file: File, url: string} | null> => {
-  if (!canvas || !currentFile || !editorImg) {
-    console.error("Missing required parameters for crop:", { canvas: !!canvas, file: !!currentFile, img: !!editorImg });
-    return null;
-  }
-  
+  originalFile: File,
+  editorImg: HTMLImageElement
+): Promise<{ file: File; url: string } | null> => {
   try {
-    // Create a temporary canvas for the cropped image
+    // Create a temporary canvas if none was provided
     const tempCanvas = document.createElement('canvas');
-    const tempCtx = tempCanvas.getContext('2d');
+    const ctx = tempCanvas.getContext('2d');
     
-    if (!tempCtx) {
-      console.error("Failed to get 2D context for temp canvas");
+    if (!ctx) {
+      console.error('Could not get canvas context');
       return null;
     }
     
-    // Set dimensions for the cropped image
-    tempCanvas.width = box.width;
-    tempCanvas.height = box.height;
+    // Calculate the cropping parameters
+    const { x, y, width, height, rotation } = cropBox;
     
-    // Calculate the source coordinates in the original image
-    // We need to account for the scaling and positioning in the canvas
-    const canvasWidth = canvas.width;
-    const canvasHeight = canvas.height;
+    // Set the canvas size to match the crop box dimensions
+    tempCanvas.width = width;
+    tempCanvas.height = height;
     
-    const scale = Math.min(
-      canvasWidth / editorImg.naturalWidth,
-      canvasHeight / editorImg.naturalHeight
-    );
+    // Clear the canvas
+    ctx.clearRect(0, 0, width, height);
     
-    const scaledWidth = editorImg.naturalWidth * scale;
-    const scaledHeight = editorImg.naturalHeight * scale;
+    // Save the context state before transformations
+    ctx.save();
     
-    const offsetX = (canvasWidth - scaledWidth) / 2;
-    const offsetY = (canvasHeight - scaledHeight) / 2;
+    // Move to the center of the canvas for rotation
+    ctx.translate(width / 2, height / 2);
     
-    // Calculate source coordinates (in the original image)
-    const sourceX = (box.x - offsetX) / scale;
-    const sourceY = (box.y - offsetY) / scale;
-    const sourceWidth = box.width / scale;
-    const sourceHeight = box.height / scale;
-    
-    console.log("Crop dimensions:", {
-      source: { x: sourceX, y: sourceY, width: sourceWidth, height: sourceHeight },
-      destination: { width: tempCanvas.width, height: tempCanvas.height },
-      original: { width: editorImg.naturalWidth, height: editorImg.naturalHeight },
-      scale,
-      offset: { x: offsetX, y: offsetY }
-    });
-    
-    // Save context state
-    tempCtx.save();
-    
-    // Apply rotation if needed
-    if (box.rotation !== 0) {
-      tempCtx.translate(tempCanvas.width / 2, tempCanvas.height / 2);
-      tempCtx.rotate(box.rotation * Math.PI / 180);
-      tempCtx.translate(-tempCanvas.width / 2, -tempCanvas.height / 2);
+    // Rotate the canvas if needed
+    if (rotation !== 0) {
+      ctx.rotate((rotation * Math.PI) / 180);
     }
     
-    // Draw the cropped portion
-    tempCtx.drawImage(
+    // Draw the image on the canvas, centered and cropped
+    ctx.drawImage(
       editorImg,
-      Math.max(0, sourceX), 
-      Math.max(0, sourceY), 
-      Math.min(editorImg.naturalWidth, sourceWidth), 
-      Math.min(editorImg.naturalHeight, sourceHeight),
-      0, 0, tempCanvas.width, tempCanvas.height
+      x - width / 2,  // Source X - adjusted for rotation center
+      y - height / 2, // Source Y - adjusted for rotation center
+      width,          // Source width
+      height,         // Source height
+      -width / 2,     // Destination X - centered
+      -height / 2,    // Destination Y - centered
+      width,          // Destination width
+      height          // Destination height
     );
     
-    // Restore context state
-    tempCtx.restore();
+    // Restore the context state
+    ctx.restore();
     
-    // Create a blob from the temp canvas
-    return new Promise<{file: File, url: string}>((resolve, reject) => {
-      tempCanvas.toBlob((blob) => {
-        if (blob && currentFile) {
-          // Create a new file with the cropped image
-          const croppedFile = new File(
-            [blob], 
-            currentFile.name, 
-            { type: currentFile.type }
-          );
-          
-          // Return the cropped file and URL
-          resolve({
-            file: croppedFile,
-            url: URL.createObjectURL(blob)
-          });
-        } else {
-          console.error("Failed to create blob from canvas or file is missing");
-          reject(new Error("Failed to create blob from canvas"));
-        }
-      }, currentFile.type);
+    // Convert the canvas to a blob
+    const blob = await new Promise<Blob | null>((resolve) => {
+      tempCanvas.toBlob((blob) => resolve(blob), 'image/jpeg', 0.95);
     });
+    
+    if (!blob) {
+      console.error('Failed to create blob from canvas');
+      return null;
+    }
+    
+    // Create a new file from the blob
+    const croppedFile = new File([blob], originalFile.name, {
+      type: 'image/jpeg',
+      lastModified: Date.now(),
+    });
+    
+    // Create a URL for the blob
+    const url = URL.createObjectURL(blob);
+    
+    return { file: croppedFile, url };
   } catch (error) {
-    console.error("Error in applyCrop:", error);
+    console.error('Error applying crop:', error);
     return null;
   }
 };

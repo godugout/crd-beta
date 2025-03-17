@@ -24,6 +24,7 @@ const HolographicEngine: React.FC<HolographicEngineProps> = ({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [deviceOrientation, setDeviceOrientation] = useState({ alpha: 0, beta: 0, gamma: 0 });
   const particlesRef = useRef<HTMLCanvasElement>(null);
+  const microtextRef = useRef<HTMLCanvasElement>(null);
   const [isSupported, setIsSupported] = useState(true);
   
   // Use device orientation if available
@@ -52,7 +53,7 @@ const HolographicEngine: React.FC<HolographicEngineProps> = ({
     }
   }, [active]);
   
-  // Initialize WebGL holographic effect
+  // Initialize WebGL holographic effect with spectral diffraction
   useEffect(() => {
     if (!active || !canvasRef.current) return;
     
@@ -84,7 +85,7 @@ const HolographicEngine: React.FC<HolographicEngineProps> = ({
     
     if (!vertexShader || !fragmentShader) return;
     
-    // Vertex shader with 3D transformation
+    // Vertex shader with 3D transformation for parallax effects
     gl.shaderSource(vertexShader, `
       attribute vec2 position;
       varying vec2 vUv;
@@ -95,7 +96,7 @@ const HolographicEngine: React.FC<HolographicEngineProps> = ({
       }
     `);
     
-    // Fragment shader with spectral diffraction
+    // Fragment shader with spectral diffraction patterns using Signed Distance Fields
     const colorValues = (() => {
       switch (colorMode) {
         case 'gold':
@@ -136,7 +137,7 @@ const HolographicEngine: React.FC<HolographicEngineProps> = ({
       // Colors based on mode
       ${colorValues}
       
-      // Signed Distance Field for micropatterns
+      // Signed Distance Field functions for micropatterns and etched microtext
       float sdCircle(vec2 p, float r) {
         return length(p) - r;
       }
@@ -149,6 +150,13 @@ const HolographicEngine: React.FC<HolographicEngineProps> = ({
         return length(p) * sign(p.y);
       }
       
+      float sdRhombus(vec2 p, vec2 b) {
+        p = abs(p);
+        float h = clamp((-2.0 * b.x * b.y + 2.0 * p.x * p.y) / (b.x * b.x + b.y * b.y), 0.0, 1.0);
+        float d = length(p - 0.5 * h * vec2(b.y, b.x) / dot(b, b) * vec2(b.x, -b.y));
+        return d * sign(p.x * b.y - p.y * b.x);
+      }
+      
       void main() {
         // Normalized coordinates
         vec2 uv = vUv;
@@ -158,7 +166,7 @@ const HolographicEngine: React.FC<HolographicEngineProps> = ({
         float dist = distance(uv, center) * 2.0;
         float angle = atan(uv.y - center.y, uv.x - center.x);
         
-        // Dynamic offset based on mouse or device orientation
+        // Dynamic light source tracking using mouse or device orientation
         vec2 offset = mousePosition * 0.1;
         float mouseDist = length(offset);
         float moveFactor = mouseDist * 5.0 * intensity;
@@ -166,39 +174,47 @@ const HolographicEngine: React.FC<HolographicEngineProps> = ({
         // Create dynamic holographic pattern
         float pattern = 0.0;
         
-        // Diffraction grating effect
+        // Diffraction grating effect - creates rainbow patterns
         float lines = sin((uv.x + uv.y) * 50.0 + time + angle * 3.0) * 0.5 + 0.5;
         float circles = smoothstep(0.3, 0.4, sin(dist * 15.0 - time) * 0.5 + 0.5);
         
-        // Add micro-patterns using SDFs
+        // Add micro-patterns using Signed Distance Fields
         float scale = 80.0;
         vec2 id = floor(uv * scale);
         vec2 grid = fract(uv * scale) - 0.5;
         
         float micro = 0.0;
-        if (mod(id.x + id.y, 2.0) < 1.0) {
+        
+        // Create varied micropatterns using SDF
+        if (mod(id.x + id.y, 3.0) < 1.0) {
           micro = smoothstep(0.1, 0.0, sdCircle(grid, 0.2));
-        } else {
+        } else if (mod(id.x + id.y, 3.0) < 2.0) {
           micro = smoothstep(0.1, 0.0, sdHexagon(grid, 0.2));
+        } else {
+          micro = smoothstep(0.1, 0.0, sdRhombus(grid, vec2(0.2, 0.3)));
         }
         
-        // Add spectral splitting with parallax
+        // Add spectral splitting with parallax effect
         float rainbow = sin(dist * 15.0 - angle * 2.0 + time * 0.5) * 0.5 + 0.5;
         
-        // Combine patterns
-        pattern = mix(lines, circles, 0.5) + micro * 0.2;
+        // Create dynamic light refraction based on viewing angle
+        float refraction = sin(angle * 5.0 + dist * 10.0 + time * 0.2) * 0.5 + 0.5;
+        
+        // Combine patterns with micropatterns
+        pattern = mix(lines, circles, 0.5) + micro * 0.2 + refraction * 0.1;
         
         // Calculate holographic colors with spectral separation
         vec3 baseColor = mix(color1, color2, rainbow);
         float edgeGlow = smoothstep(0.8, 1.0, dist) * intensity;
         
         // Apply spectral shifts based on viewing angle (mouse position or device)
-        float rShift = offset.x * 0.02 * intensity;
-        float bShift = -offset.x * 0.02 * intensity;
+        float rShift = offset.x * 0.03 * intensity;
+        float gShift = offset.y * 0.01 * intensity;
+        float bShift = -offset.x * 0.03 * intensity;
         
         // Calculate RGB channels with chromatic aberration
         float r = pattern + rShift;
-        float g = pattern;
+        float g = pattern + gShift;
         float b = pattern + bShift;
         
         // Edge highlighting with spectral split
@@ -208,8 +224,16 @@ const HolographicEngine: React.FC<HolographicEngineProps> = ({
           mix(baseColor.b * b, 1.0, edgeGlow * 0.9)
         );
         
+        // Dynamic light response - makes brighter areas respond more to movement
+        float lightResponse = smoothstep(0.4, 0.6, pattern);
+        finalColor += vec3(0.1, 0.1, 0.2) * lightResponse * moveFactor;
+        
+        // Enhance specular highlights
+        float specular = pow(pattern, 3.0) * intensity;
+        finalColor += specular * vec3(1.0, 1.0, 1.0);
+        
         // Final output with adjusted opacity based on pattern
-        gl_FragColor = vec4(finalColor, 0.2 + pattern * 0.4 * intensity);
+        gl_FragColor = vec4(finalColor, 0.2 + pattern * 0.6 * intensity);
       }
     `);
     
@@ -259,7 +283,7 @@ const HolographicEngine: React.FC<HolographicEngineProps> = ({
     const resolutionLocation = gl.getUniformLocation(program, 'resolution');
     const mousePositionLocation = gl.getUniformLocation(program, 'mousePosition');
     
-    // Track mouse position
+    // Track mouse position for dynamic light source tracking
     let mousePosition = { x: 0, y: 0 };
     
     const handleMouseMove = (e: MouseEvent) => {
@@ -352,7 +376,7 @@ const HolographicEngine: React.FC<HolographicEngineProps> = ({
       resizeObserver.observe(canvas.parentElement);
     }
     
-    // Particle class
+    // Advanced particle class with lifecycle
     class Particle {
       x: number;
       y: number;
@@ -362,16 +386,25 @@ const HolographicEngine: React.FC<HolographicEngineProps> = ({
       opacity: number;
       life: number;
       maxLife: number;
+      color: string;
+      glow: number;
       
       constructor() {
         this.x = Math.random() * canvas.width;
         this.y = Math.random() * canvas.height;
         this.size = Math.random() * 3 + 1;
-        this.speedX = (Math.random() - 0.5) * 0.2;
-        this.speedY = (Math.random() - 0.5) * 0.2;
+        this.speedX = (Math.random() - 0.5) * 0.3;
+        this.speedY = (Math.random() - 0.5) * 0.3;
         this.opacity = 0;
         this.life = 0;
-        this.maxLife = Math.random() * 100 + 50;
+        this.maxLife = Math.random() * 150 + 50;
+        
+        // Dynamic colors for particles
+        const hue = Math.random() * 60 + (colorMode === 'gold' ? 40 : 
+                                        colorMode === 'blue' ? 220 : 
+                                        Math.random() * 360);
+        this.color = `hsla(${hue}, 100%, 70%, 1)`;
+        this.glow = Math.random() * 5 + 2;
       }
       
       update() {
@@ -384,6 +417,13 @@ const HolographicEngine: React.FC<HolographicEngineProps> = ({
           this.opacity = this.life / 20;
         } else if (this.life > this.maxLife - 20) {
           this.opacity = (this.maxLife - this.life) / 20;
+        } else {
+          this.opacity = 1;
+          
+          // Add some random flicker
+          if (Math.random() > 0.9) {
+            this.opacity = Math.random() * 0.5 + 0.5;
+          }
         }
         
         // Reset if out of bounds or end of life
@@ -401,7 +441,23 @@ const HolographicEngine: React.FC<HolographicEngineProps> = ({
       }
       
       draw() {
-        ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity * 0.7 * intensity})`;
+        // Create a glowing effect
+        const gradient = ctx.createRadialGradient(
+          this.x, this.y, 0,
+          this.x, this.y, this.size * this.glow
+        );
+        
+        gradient.addColorStop(0, this.color);
+        gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size * this.glow, 0, Math.PI * 2);
+        ctx.closePath();
+        ctx.fill();
+        
+        // Draw the core
+        ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity * 0.8 * intensity})`;
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
         ctx.closePath();
@@ -446,7 +502,73 @@ const HolographicEngine: React.FC<HolographicEngineProps> = ({
       }
       resizeObserver.disconnect();
     };
-  }, [active, particleCount, intensity, animated]);
+  }, [active, particleCount, intensity, animated, colorMode]);
+  
+  // Microtext generation using Canvas for etched text
+  useEffect(() => {
+    if (!active || !microtextRef.current || !microtext) return;
+    
+    const canvas = microtextRef.current;
+    const ctx = canvas.getContext('2d');
+    
+    if (!ctx) return;
+    
+    // Set canvas size
+    const resizeObserver = new ResizeObserver(() => {
+      if (canvas.parentElement) {
+        canvas.width = canvas.parentElement.clientWidth;
+        canvas.height = canvas.parentElement.clientHeight;
+        drawMicrotext();
+      }
+    });
+    
+    if (canvas.parentElement) {
+      resizeObserver.observe(canvas.parentElement);
+    }
+    
+    // Function to draw microtext
+    const drawMicrotext = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Set very small font for microtext
+      const fontSize = 5;
+      ctx.font = `${fontSize}px monospace`;
+      ctx.fillStyle = `rgba(255, 255, 255, ${0.2 * intensity})`;
+      
+      // Create a pattern of repeating text
+      const text = microtext || 'AUTHENTIC HOLOGRAM ';
+      const textWidth = ctx.measureText(text).width;
+      
+      // Draw text in a grid pattern
+      for (let y = 0; y < canvas.height; y += fontSize * 1.5) {
+        // Offset each row slightly for a more organic look
+        const offset = (y / fontSize) % 2 === 0 ? 0 : textWidth / 2;
+        
+        for (let x = -offset; x < canvas.width; x += textWidth) {
+          ctx.fillText(text, x, y);
+        }
+      }
+      
+      // Add a subtle wave effect
+      ctx.fillStyle = `rgba(255, 255, 255, ${0.05 * intensity})`;
+      ctx.font = `${fontSize * 0.8}px monospace`;
+      
+      for (let y = fontSize * 0.75; y < canvas.height; y += fontSize * 1.5) {
+        const waveOffset = Math.sin(y * 0.1) * 10;
+        
+        for (let x = waveOffset; x < canvas.width; x += textWidth) {
+          ctx.fillText(text.split('').reverse().join(''), x, y);
+        }
+      }
+    };
+    
+    drawMicrotext();
+    
+    // Cleanup
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [active, microtext, intensity]);
   
   // Skip rendering if not active or not supported
   if (!active || !isSupported) return null;
@@ -463,6 +585,19 @@ const HolographicEngine: React.FC<HolographicEngineProps> = ({
         }}
       />
       
+      {/* Microtext overlay */}
+      {microtext && (
+        <canvas 
+          ref={microtextRef}
+          className="absolute inset-0 w-full h-full pointer-events-none z-15"
+          style={{ 
+            mixBlendMode: 'overlay',
+            opacity: 0.5,
+            transform: 'rotate(45deg)',
+          }}
+        />
+      )}
+      
       {/* Particle system overlay */}
       {particleCount > 0 && (
         <canvas 
@@ -474,6 +609,34 @@ const HolographicEngine: React.FC<HolographicEngineProps> = ({
           }}
         />
       )}
+      
+      {/* CSS 3D parallax layers for additional depth */}
+      <div 
+        className="absolute inset-0 pointer-events-none z-5 parallax-container"
+        style={{
+          perspective: '1000px',
+          transformStyle: 'preserve-3d',
+        }}
+      >
+        <div 
+          className="absolute inset-0 z-1 parallax-layer"
+          style={{
+            transform: 'translateZ(-10px) scale(1.5)',
+            backgroundImage: 'radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255,255,255,0.1) 0%, transparent 70%)',
+            opacity: 0.5 * intensity,
+          }}
+        />
+        
+        <div 
+          className="absolute inset-0 z-2 parallax-layer"
+          style={{
+            transform: 'translateZ(-5px) scale(1.2)',
+            backgroundImage: 'linear-gradient(45deg, transparent 95%, rgba(255,255,255,0.3) 100%)',
+            backgroundSize: '5px 5px',
+            opacity: 0.3 * intensity,
+          }}
+        />
+      </div>
     </>
   );
 };
