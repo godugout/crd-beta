@@ -6,6 +6,7 @@ import { PlusCircle, ArrowDown, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import OldCardCreator from '@/components/OldCardCreator';
+import DugoutLabs from '@/components/experimental/DugoutLabs';
 
 const Collections = () => {
   const navigate = useNavigate();
@@ -46,13 +47,17 @@ const Collections = () => {
               </p>
             </div>
             
-            <Button 
-              onClick={() => navigate('/editor')}
-              className="flex items-center gap-2"
-            >
-              <PlusCircle size={18} />
-              New Card
-            </Button>
+            <div className="flex gap-2">
+              <DugoutLabs />
+              
+              <Button 
+                onClick={() => navigate('/editor')}
+                className="flex items-center gap-2"
+              >
+                <PlusCircle size={18} />
+                New Card
+              </Button>
+            </div>
           </div>
           
           {showEasterEgg ? (
