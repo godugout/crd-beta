@@ -1,0 +1,212 @@
+
+/* Base fabric swatch styles */
+.fabric-swatch {
+  border-radius: 4px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  transform: translateZ(0);
+}
+
+/* Edge effect to make it look like cut fabric */
+.fabric-edge {
+  box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.3);
+  z-index: 5;
+  pointer-events: none;
+}
+
+/* ===== FABRIC TYPE STYLES ===== */
+
+/* Basketball jersey mesh */
+.fabric-basketball {
+  background-color: #f8f8f8;
+  background-image: 
+    repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(0, 0, 0, 0.03) 2px, rgba(0, 0, 0, 0.03) 4px);
+}
+
+.fabric-basketball .fabric-texture {
+  background-image: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23000000' fill-opacity='0.05'%3E%3Cpath d='M0 0h20v20H0V0zm10 17a7 7 0 1 0 0-14 7 7 0 0 0 0 14zm0-2a5 5 0 1 1 0-10 5 5 0 0 1 0 10z'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 10px 10px;
+}
+
+/* Baseball jersey */
+.fabric-baseball {
+  background-color: #f5f5f5;
+  background-image: 
+    linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+  background-size: 4px 4px;
+}
+
+.fabric-baseball .fabric-stitching {
+  background-image: 
+    linear-gradient(90deg, transparent 49%, rgba(255, 0, 0, 0.1) 49%, rgba(255, 0, 0, 0.1) 51%, transparent 51%);
+  background-size: 10px 2px;
+}
+
+/* Football jersey */
+.fabric-football {
+  background-color: #f0f0f0;
+  background-image: 
+    repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(0, 0, 0, 0.02) 5px, rgba(0, 0, 0, 0.02) 10px);
+}
+
+.fabric-football .fabric-texture {
+  background-image: 
+    repeating-linear-gradient(-45deg, transparent, transparent 5px, rgba(0, 0, 0, 0.02) 5px, rgba(0, 0, 0, 0.02) 10px);
+}
+
+/* Hockey jersey */
+.fabric-hockey {
+  background-color: #f2f2f2;
+  background-image: 
+    repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0, 0, 0, 0.04) 2px, rgba(0, 0, 0, 0.04) 4px);
+}
+
+/* Soccer jersey */
+.fabric-soccer {
+  background-color: #f7f7f7;
+  background-image: 
+    linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+  background-size: 5px 5px;
+}
+
+/* Cotton fabric */
+.fabric-cotton {
+  background-color: #f9f9f9;
+  background-image: 
+    radial-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+  background-size: 4px 4px;
+}
+
+/* Wool fabric */
+.fabric-wool {
+  background-color: #f6f6f6;
+  background-image: 
+    radial-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px),
+    radial-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+  background-size: 3px 3px, 4px 4px;
+  background-position: 0 0, 2px 2px;
+}
+
+/* ===== ERA SPECIFIC STYLES ===== */
+
+/* Vintage era (pre-1980) */
+.era-vintage {
+  filter: sepia(0.2) contrast(0.95) brightness(0.95);
+}
+
+.era-vintage .fabric-wear {
+  background: radial-gradient(circle at 30% 70%, rgba(255, 255, 255, 0.1), transparent 50%),
+              radial-gradient(circle at 70% 30%, rgba(0, 0, 0, 0.05), transparent 50%);
+  opacity: 0.7;
+}
+
+/* Classic era (1980-2000) */
+.era-classic {
+  filter: contrast(1.05);
+}
+
+.era-classic .fabric-wear {
+  background: linear-gradient(45deg, transparent 48%, rgba(0, 0, 0, 0.02) 49%, rgba(0, 0, 0, 0.02) 51%, transparent 52%);
+  background-size: 10px 10px;
+  opacity: 0.5;
+}
+
+/* Modern era (2000+) */
+.era-modern {
+  filter: saturate(1.05) brightness(1.02);
+}
+
+/* ===== TEAM COLOR OVERRIDES ===== */
+
+/* Team: Chicago Bulls */
+.team-chicago-bulls {
+  background-color: #CE1141;
+}
+
+.team-chicago-bulls .fabric-texture {
+  opacity: 0.1;
+  mix-blend-mode: screen;
+}
+
+/* Team: Los Angeles Lakers */
+.team-los-angeles-lakers {
+  background-color: #FDB927;
+}
+
+.team-los-angeles-lakers .fabric-texture {
+  opacity: 0.15;
+  mix-blend-mode: multiply;
+}
+
+/* Team: Brooklyn Nets */
+.team-brooklyn-nets {
+  background-color: #000000;
+}
+
+.team-brooklyn-nets .fabric-texture {
+  opacity: 0.2;
+  mix-blend-mode: screen;
+}
+
+/* Team: Minnesota Wolves */
+.team-minnesota-wolves {
+  background-color: #0C2340;
+}
+
+.team-minnesota-wolves .fabric-texture {
+  opacity: 0.15;
+  mix-blend-mode: screen;
+}
+
+/* Team: Duke */
+.team-duke {
+  background-color: #001A57;
+}
+
+.team-duke .fabric-texture {
+  opacity: 0.15;
+  mix-blend-mode: screen;
+}
+
+/* Team: Memphis Grizzlies */
+.team-memphis-grizzlies {
+  background-color: #5D76A9;
+}
+
+.team-memphis-grizzlies .fabric-texture {
+  opacity: 0.15;
+  mix-blend-mode: soft-light;
+}
+
+/* ===== MANUFACTURER STYLES ===== */
+
+/* Nike */
+.manufacturer-nike .fabric-logo {
+  content: "✓";
+  color: rgba(0, 0, 0, 0.5);
+}
+
+/* Adidas */
+.manufacturer-adidas .fabric-stitching {
+  background-image: 
+    repeating-linear-gradient(90deg, transparent, transparent 3px, rgba(0, 0, 0, 0.05) 3px, rgba(0, 0, 0, 0.05) 6px);
+  background-size: 9px 2px;
+}
+
+/* Champion */
+.manufacturer-champion .fabric-texture {
+  filter: contrast(1.1);
+}
+
+/* ===== HOVER EFFECTS ===== */
+.fabric-swatch:hover .fabric-texture {
+  opacity: 0.8;
+  transition: all 0.3s ease;
+}
+
+.fabric-swatch:hover .fabric-edge {
+  box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.4);
+  transition: all 0.3s ease;
+}

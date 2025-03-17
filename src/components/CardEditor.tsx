@@ -5,13 +5,24 @@ import { cn } from '@/lib/utils';
 import CardUpload from '@/components/card-upload';
 import { useCards } from '@/context/CardContext';
 import { Card as CardType } from '@/lib/types';
-import { Plus, X } from 'lucide-react';
+import { Plus, X, Scissors } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import FabricSelector from '@/components/card-upload/FabricSelector';
+import FabricSwatch from '@/components/home/card-effects/FabricSwatch';
 
 interface CardEditorProps {
   card?: CardType;
   className?: string;
+}
+
+interface FabricSwatchOptions {
+  type: string;
+  team: string;
+  year: string;
+  manufacturer: string;
+  position: string;
+  size: string;
 }
 
 const CardEditor: React.FC<CardEditorProps> = ({ card, className }) => {
@@ -24,6 +35,8 @@ const CardEditor: React.FC<CardEditorProps> = ({ card, className }) => {
   const [description, setDescription] = useState(card?.description || '');
   const [tags, setTags] = useState<string[]>(card?.tags || []);
   const [newTag, setNewTag] = useState('');
+  const [fabricSwatches, setFabricSwatches] = useState<FabricSwatchOptions[]>([]);
+  const [showFabricSelector, setShowFabricSelector] = useState(false);
   
   const handleImageUpload = (file: File, url: string) => {
     console.log('Image uploaded:', file, url);
@@ -41,6 +54,20 @@ const CardEditor: React.FC<CardEditorProps> = ({ card, className }) => {
   const handleRemoveTag = (tagToRemove: string) => {
     setTags(tags.filter(tag => tag !== tagToRemove));
   };
+
+  const handleAddFabricSwatch = (options: FabricSwatchOptions) => {
+    setFabricSwatches([...fabricSwatches, options]);
+    setShowFabricSelector(false);
+    toast.success('Fabric swatch added!', {
+      description: 'Premium fabric swatch has been added to your card'
+    });
+  };
+
+  const handleRemoveFabricSwatch = (index: number) => {
+    const newSwatches = [...fabricSwatches];
+    newSwatches.splice(index, 1);
+    setFabricSwatches(newSwatches);
+  };
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,6 +82,16 @@ const CardEditor: React.FC<CardEditorProps> = ({ card, className }) => {
       return;
     }
     
+    // Create metadata for fabric swatches
+    const fabricMetadata = fabricSwatches.map(swatch => ({
+      type: swatch.type,
+      team: swatch.team,
+      year: swatch.year,
+      manufacturer: swatch.manufacturer,
+      position: swatch.position,
+      size: swatch.size
+    }));
+    
     if (card) {
       // Update existing card
       updateCard(card.id, {
@@ -62,7 +99,8 @@ const CardEditor: React.FC<CardEditorProps> = ({ card, className }) => {
         description,
         imageUrl,
         thumbnailUrl: imageUrl, // In a real app, we'd generate a thumbnail
-        tags
+        tags,
+        fabricSwatches: fabricMetadata
       });
       toast.success('Card updated successfully');
     } else {
@@ -72,7 +110,8 @@ const CardEditor: React.FC<CardEditorProps> = ({ card, className }) => {
         description,
         imageUrl,
         thumbnailUrl: imageUrl, // In a real app, we'd generate a thumbnail
-        tags
+        tags,
+        fabricSwatches: fabricMetadata
       });
       toast.success('Card created successfully');
     }
@@ -85,11 +124,35 @@ const CardEditor: React.FC<CardEditorProps> = ({ card, className }) => {
     <div className={cn("max-w-4xl mx-auto p-4", className)}>
       <form onSubmit={handleSubmit} className="grid md:grid-cols-2 gap-8">
         <div className="flex justify-center">
-          <CardUpload 
-            onImageUpload={handleImageUpload} 
-            className="max-w-xs"
-            initialImageUrl={card?.imageUrl}
-          />
+          <div className="relative max-w-xs">
+            <CardUpload 
+              onImageUpload={handleImageUpload} 
+              className="w-full"
+              initialImageUrl={card?.imageUrl}
+            />
+            
+            {/* Render fabric swatches on top of the image */}
+            {imageUrl && fabricSwatches.map((swatch, index) => (
+              <div key={index} className="relative">
+                <FabricSwatch 
+                  fabricType={swatch.type}
+                  team={swatch.team}
+                  year={swatch.year}
+                  manufacturer={swatch.manufacturer}
+                  position={swatch.position as any}
+                  size={swatch.size as any}
+                />
+                <button
+                  type="button"
+                  onClick={() => handleRemoveFabricSwatch(index)}
+                  className="absolute -top-2 -right-2 bg-white rounded-full p-0.5 shadow-sm hover:bg-gray-100 z-20"
+                  title="Remove fabric swatch"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
         
         <div className="flex flex-col">
@@ -121,10 +184,12 @@ const CardEditor: React.FC<CardEditorProps> = ({ card, className }) => {
             />
           </div>
           
-          <div className="mb-8">
-            <label className="block text-sm font-medium text-cardshow-dark mb-2">
-              Tags
-            </label>
+          <div className="mb-6">
+            <div className="flex justify-between items-center mb-2">
+              <label className="block text-sm font-medium text-cardshow-dark">
+                Tags
+              </label>
+            </div>
             <div className="flex flex-wrap gap-2 mb-3">
               {tags.map((tag, index) => (
                 <div 
@@ -164,6 +229,56 @@ const CardEditor: React.FC<CardEditorProps> = ({ card, className }) => {
                 <Plus size={20} />
               </button>
             </div>
+          </div>
+
+          {/* Premium fabric swatch section */}
+          <div className="mb-6">
+            <div className="flex justify-between items-center mb-2">
+              <label className="block text-sm font-medium text-cardshow-dark">
+                Premium Fabric Swatches
+              </label>
+              <button
+                type="button"
+                onClick={() => setShowFabricSelector(!showFabricSelector)}
+                className="flex items-center text-xs font-medium text-cardshow-blue hover:underline"
+              >
+                <Scissors size={14} className="mr-1" />
+                {showFabricSelector ? 'Hide Options' : 'Add Fabric'}
+              </button>
+            </div>
+            
+            {showFabricSelector && (
+              <FabricSelector 
+                onSelect={handleAddFabricSwatch}
+                selectedTeam={title.includes('Bulls') ? 'chicago-bulls' : 
+                             title.includes('Lakers') ? 'los-angeles-lakers' : 
+                             title.includes('Nets') ? 'brooklyn-nets' : 
+                             title.includes('Wolves') ? 'minnesota-wolves' : 
+                             title.includes('Duke') ? 'duke' : 
+                             title.includes('Grizzlies') ? 'memphis-grizzlies' : ''}
+              />
+            )}
+            
+            {fabricSwatches.length > 0 && !showFabricSelector && (
+              <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                <p className="text-sm text-gray-600 mb-2">
+                  {fabricSwatches.length} fabric {fabricSwatches.length === 1 ? 'swatch' : 'swatches'} added
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {fabricSwatches.map((swatch, index) => (
+                    <div key={index} className="text-xs px-2 py-1 bg-white border rounded-full">
+                      {swatch.type} • {swatch.year}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {fabricSwatches.length === 0 && !showFabricSelector && (
+              <p className="text-sm text-gray-500 italic">
+                Add fabric swatches to enhance your card with authentic uniform material
+              </p>
+            )}
           </div>
           
           <div className="mt-auto">

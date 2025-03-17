@@ -1,4 +1,13 @@
 
+export interface FabricSwatch {
+  type: string;
+  team: string;
+  year: string;
+  manufacturer: string;
+  position: string;
+  size: string;
+}
+
 export interface CardData {
   id: number;
   name: string;
@@ -14,4 +23,5 @@ export interface CardData {
   description: string;
   specialEffect: string;
   imageUrl?: string;
+  fabricSwatches?: FabricSwatch[];
 }
