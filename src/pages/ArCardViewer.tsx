@@ -83,9 +83,9 @@ const ArCardViewer = () => {
                 availableCards={availableCards}
                 cameraError={cameraError}
                 scale={scale}
-                setScale={setScale}
+                setScale={handleZoomIn}
                 rotation={rotation}
-                setRotation={setRotation}
+                setRotation={handleRotate}
                 onLaunchAr={handleLaunchAr}
               />
             </div>

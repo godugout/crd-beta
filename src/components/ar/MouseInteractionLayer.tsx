@@ -27,10 +27,10 @@ const MouseInteractionLayer: React.FC<MouseInteractionLayerProps> = ({
   const [lastMousePos, setLastMousePos] = useState({ x: 0, y: 0 });
   const [lastMoveTime, setLastMoveTime] = useState(0);
 
-  // Initialize positions for all cards
+  // Initialize positions for all cards - centered by default
   useEffect(() => {
     const initialPositions: Record<string, CardPosition> = {};
-    cards.forEach((card, i) => {
+    cards.forEach((card) => {
       if (!positions[card.id]) {
         initialPositions[card.id] = {
           x: 0,
@@ -70,6 +70,9 @@ const MouseInteractionLayer: React.FC<MouseInteractionLayerProps> = ({
     
     // Change cursor
     document.body.style.cursor = 'grabbing';
+    
+    // Prevent default to avoid text selection
+    e.preventDefault();
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
@@ -80,14 +83,19 @@ const MouseInteractionLayer: React.FC<MouseInteractionLayerProps> = ({
       const deltaX = e.clientX - dragStartPos.x;
       const deltaY = e.clientY - dragStartPos.y;
       
+      // Apply a sensitivity factor to make movement smoother
+      const sensitivity = 0.5;
+      const moveX = deltaX * sensitivity;
+      const moveY = deltaY * sensitivity;
+      
       // Update position in local state
       setPositions(prev => {
         const newPositions = { ...prev };
         if (newPositions[selectedCardId]) {
           newPositions[selectedCardId] = {
             ...newPositions[selectedCardId],
-            x: newPositions[selectedCardId].x + deltaX * 0.05,
-            y: newPositions[selectedCardId].y + deltaY * 0.05
+            x: newPositions[selectedCardId].x + moveX,
+            y: newPositions[selectedCardId].y + moveY
           };
         }
         return newPositions;
@@ -98,8 +106,8 @@ const MouseInteractionLayer: React.FC<MouseInteractionLayerProps> = ({
         const pos = positions[selectedCardId];
         onUpdateCardPosition(
           selectedCardId,
-          pos.x + deltaX * 0.05,
-          pos.y + deltaY * 0.05,
+          pos.x + moveX,
+          pos.y + moveY,
           pos.rotation
         );
       }
@@ -116,7 +124,7 @@ const MouseInteractionLayer: React.FC<MouseInteractionLayerProps> = ({
     // Apply spin based on mouse speed
     if (selectedCardId && (mouseMoveSpeed.x > 10 || mouseMoveSpeed.y > 10)) {
       const speed = Math.max(mouseMoveSpeed.x, mouseMoveSpeed.y);
-      const rotationDelta = speed * 2; // Scale spin based on mouse speed
+      const rotationDelta = Math.min(speed * 2, 90); // Cap the rotation to avoid extreme spins
       
       setPositions(prev => {
         const newPositions = { ...prev };

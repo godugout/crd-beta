@@ -68,15 +68,22 @@ const CameraView: React.FC<CameraViewProps> = ({
         style={{ filter: 'brightness(0.9)' }}
       />
       
-      {/* AR overlay with cards */}
+      {/* AR overlay with cards - centered by default */}
       <div className="absolute inset-0 pointer-events-none">
         {activeCards.map((card, index) => {
+          // Get position or use default centered position
           const position = cardPositions[card.id] || { x: 0, y: 0, rotation: 0 };
           
           return (
             <motion.div
               key={card.id}
-              className="absolute left-1/2 top-1/2"
+              className="absolute"
+              style={{
+                left: '50%',
+                top: '50%',
+                position: 'absolute',
+                transformOrigin: 'center',
+              }}
               initial={{ x: '-50%', y: '-50%' }}
               animate={{
                 x: `calc(-50% + ${position.x}px)`,

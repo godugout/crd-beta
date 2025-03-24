@@ -26,6 +26,16 @@ const ArViewerContainer: React.FC<ArViewerContainerProps> = ({
   setRotation,
   onLaunchAr
 }) => {
+  // Handle scale changes by calling the provided function
+  const handleScaleChange = (newScale: number) => {
+    setScale(newScale);
+  };
+  
+  // Handle rotation changes by calling the provided function
+  const handleRotationChange = (newRotation: number) => {
+    setRotation(newRotation);
+  };
+
   return (
     <div className="bg-white shadow-lg rounded-lg overflow-hidden">
       <Tabs defaultValue="preview" className="w-full">
@@ -50,9 +60,9 @@ const ArViewerContainer: React.FC<ArViewerContainerProps> = ({
         <TabsContent value="settings" className="p-6">
           <ArSettingsPanel
             scale={scale}
-            setScale={setScale}
+            setScale={handleScaleChange}
             rotation={rotation}
-            setRotation={setRotation}
+            setRotation={handleRotationChange}
           />
         </TabsContent>
       </Tabs>

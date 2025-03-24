@@ -32,15 +32,15 @@ const ArCardItem: React.FC<ArCardItemProps> = ({
   return (
     <div 
       ref={cardRef}
-      className={`pointer-events-auto transition-shadow ${isSelected ? 'shadow-lg ring-2 ring-blue-500' : ''} 
-                 ${effectClass} transition-all duration-300`}
+      className={`pointer-events-auto transition-all duration-300 ${isSelected ? 'shadow-lg ring-2 ring-blue-500' : ''} 
+                 ${effectClass}`}
       style={{
         width: '150px',
         height: '210px',
         transformOrigin: 'center',
         touchAction: 'none',
         zIndex: isSelected ? 10 : 1,
-        transition: isSelected ? 'box-shadow 0.3s ease' : 'transform 0.3s ease',
+        transition: isSelected ? 'box-shadow 0.3s ease, transform 0.3s ease' : 'transform 0.3s ease',
         willChange: 'transform, opacity',
         borderRadius: '8px',
         overflow: 'hidden',
