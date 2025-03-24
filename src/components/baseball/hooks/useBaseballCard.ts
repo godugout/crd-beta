@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { CardData } from '../types/BaseballCard';
 
 export const BASEBALL_CARDS: CardData[] = [
@@ -66,20 +66,45 @@ export const BASEBALL_CARDS: CardData[] = [
 
 export const useBaseballCard = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [cardData, setCardData] = useState<CardData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     setIsLoading(true);
-    const card = id 
-      ? BASEBALL_CARDS.find(card => card.id === id) 
-      : BASEBALL_CARDS[0];
+    setError(null);
+    
+    try {
+      // If no ID is provided, use the first card
+      if (!id) {
+        setCardData(BASEBALL_CARDS[0]);
+        setIsLoading(false);
+        return;
+      }
       
-    if (card) {
-      setCardData(card);
+      // Find the card with the matching ID
+      const card = BASEBALL_CARDS.find(card => card.id === id);
+      
+      if (card) {
+        setCardData(card);
+      } else {
+        // If no card is found with the given ID, set an error
+        setError(`Card with ID "${id}" not found`);
+        console.error(`Card with ID "${id}" not found`);
+        
+        // Optionally redirect to the first card after a delay
+        setTimeout(() => {
+          navigate('/baseball-card-viewer/' + BASEBALL_CARDS[0].id);
+        }, 2000);
+      }
+    } catch (err) {
+      console.error('Error loading card data:', err);
+      setError('Failed to load card data');
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
-  }, [id]);
+  }, [id, navigate]);
 
-  return { cardData, isLoading, allCards: BASEBALL_CARDS };
+  return { cardData, isLoading, error, allCards: BASEBALL_CARDS };
 };
