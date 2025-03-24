@@ -24,6 +24,9 @@ const CardDisplay: React.FC<CardDisplayProps> = ({
   toggleFlip,
   cardContainerRef
 }) => {
+  // For debugging
+  console.log("Rendering CardDisplay with data:", cardData);
+  
   return (
     <div className="absolute inset-0 flex items-center justify-center">
       <div 
@@ -42,6 +45,7 @@ const CardDisplay: React.FC<CardDisplayProps> = ({
             `,
           }}
         >
+          {/* Front of the card */}
           <div 
             className="backface-hidden absolute w-full h-full rounded-lg shadow-2xl bg-cover bg-center overflow-hidden"
             style={{ backgroundImage: `url(${cardData.imageUrl})` }}
@@ -49,6 +53,7 @@ const CardDisplay: React.FC<CardDisplayProps> = ({
             <div className="card-shine absolute inset-0"></div>
           </div>
           
+          {/* Back of the card */}
           <div 
             className="backface-hidden absolute w-full h-full rounded-lg shadow-2xl bg-cover bg-center overflow-hidden"
             style={{ 

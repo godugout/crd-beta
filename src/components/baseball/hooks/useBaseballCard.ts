@@ -75,9 +75,12 @@ export const useBaseballCard = () => {
     setIsLoading(true);
     setError(null);
     
+    console.log("useBaseballCard: Loading card with ID:", id);
+    
     try {
       // If no ID is provided, use the first card
       if (!id) {
+        console.log("No ID provided, using first card");
         setCardData(BASEBALL_CARDS[0]);
         setIsLoading(false);
         return;
@@ -87,11 +90,12 @@ export const useBaseballCard = () => {
       const card = BASEBALL_CARDS.find(card => card.id === id);
       
       if (card) {
+        console.log("Found card:", card);
         setCardData(card);
       } else {
         // If no card is found with the given ID, set an error
-        setError(`Card with ID "${id}" not found`);
         console.error(`Card with ID "${id}" not found`);
+        setError(`Card with ID "${id}" not found`);
         
         // Optionally redirect to the first card after a delay
         setTimeout(() => {

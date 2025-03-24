@@ -10,6 +10,14 @@ const BaseballCardRenderer: React.FC = () => {
   const { cardData, isLoading, error, allCards } = useBaseballCard();
   const navigate = useNavigate();
 
+  // For debugging
+  console.log("BaseballCardRenderer state:", { 
+    cardData, 
+    isLoading, 
+    error, 
+    allCardsCount: allCards.length 
+  });
+
   // Handle loading state
   if (isLoading) {
     return (

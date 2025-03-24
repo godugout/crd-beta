@@ -13,6 +13,9 @@ interface CardContainerProps {
 }
 
 const CardContainer: React.FC<CardContainerProps> = ({ cardData, allCards }) => {
+  // For debugging
+  console.log("Rendering CardContainer with cardData:", cardData);
+  
   const [isFlipped, setIsFlipped] = useState(false);
   const [rotateX, setRotateX] = useState(0);
   const [rotateY, setRotateY] = useState(0);
