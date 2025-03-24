@@ -1,13 +1,15 @@
 
 import React, { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { ChevronLeft, Share2, Plus, Trash2 } from 'lucide-react';
 import { Card } from '@/lib/types';
 import { toast } from 'sonner';
 import CameraView from './CameraView';
 import ArControls from './ArControls';
 import RadioDial from './RadioDial';
 import MouseInteractionLayer from './MouseInteractionLayer';
+import CardSelector from './CardSelector';
+import ArHeader from './ArHeader';
+import ArInfoOverlay from './ArInfoOverlay';
+import './arModeEffects.css';
 
 interface ArModeViewProps {
   activeCards: Card[];
@@ -160,93 +162,26 @@ const ArModeView: React.FC<ArModeViewProps> = ({
         onRotate={onRotate}
       />
       
-      {/* Add/Remove Card Buttons */}
-      <div className="absolute top-16 right-4 z-50 flex flex-col gap-2">
-        <Button
-          variant="outline"
-          size="icon"
-          className="bg-black/50 text-white border-white/20 transition-all hover:bg-black/70"
-          onClick={() => setShowCardSelector(!showCardSelector)}
-        >
-          <Plus className="h-4 w-4" />
-        </Button>
-        
-        {selectedCardId && (
-          <Button
-            variant="outline"
-            size="icon"
-            className="bg-black/50 text-white border-white/20 transition-all hover:bg-black/70"
-            onClick={handleRemoveSelected}
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        )}
-      </div>
+      {/* Header with exit, add/remove buttons */}
+      <ArHeader 
+        onExitAr={onExitAr}
+        onToggleSelector={() => setShowCardSelector(!showCardSelector)}
+        onRemoveSelected={handleRemoveSelected}
+        selectedCardId={selectedCardId}
+      />
       
-      {/* Card Selector with animation */}
-      {showCardSelector && (
-        <div className="absolute right-4 top-28 z-50 bg-white/90 backdrop-blur-sm rounded-lg shadow-lg p-4 w-64 max-h-80 overflow-y-auto card-selector animate-fadeIn">
-          <h3 className="font-semibold mb-3">Add Card to Scene</h3>
-          <div className="space-y-2">
-            {availableCards.map((card, index) => (
-              <div 
-                key={card.id}
-                className="flex items-center p-2 rounded-md hover:bg-gray-100 cursor-pointer transition-colors card-appear"
-                style={{ animationDelay: `${index * 0.05}s` }}
-                onClick={() => handleAddCard(card)}
-              >
-                <div className="w-8 h-12 bg-gray-200 rounded overflow-hidden mr-2">
-                  <img 
-                    src={card.imageUrl} 
-                    alt={card.title}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <div className="flex-1 text-sm truncate">{card.title}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      {/* Card Selector */}
+      <CardSelector
+        showCardSelector={showCardSelector}
+        availableCards={availableCards}
+        onAddCard={handleAddCard}
+      />
       
-      {/* Exit AR Button */}
-      <Button
-        variant="outline"
-        size="sm"
-        className="absolute top-4 left-4 z-50 bg-black/50 text-white border-white/20 transition-all hover:bg-black/70"
-        onClick={onExitAr}
-      >
-        <ChevronLeft className="mr-1 h-4 w-4" />
-        Exit AR
-      </Button>
-      
-      {/* Share Button */}
-      <Button
-        variant="outline"
-        size="icon"
-        className="absolute top-4 right-4 z-50 bg-black/50 text-white border-white/20 transition-all hover:bg-black/70"
-        onClick={() => toast.success('Sharing options opened')}
-      >
-        <Share2 className="h-4 w-4" />
-      </Button>
-      
-      {/* Mouse instructions */}
-      <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-40 bg-black/40 text-white text-xs px-3 py-1 rounded-full backdrop-blur-sm">
-        Mouse drag to move • Fast mouse movement to spin cards
-      </div>
-      
-      {/* Info overlay for selected card */}
-      {selectedCardId && (
-        <div className="absolute bottom-20 left-4 right-4 z-40 bg-black/40 backdrop-blur-sm text-white p-3 rounded-lg animate-fadeIn">
-          <div className="text-sm">
-            <p className="font-semibold">{activeCards.find(c => c.id === selectedCardId)?.title}</p>
-            <p className="text-xs text-white/70 mt-0.5">{activeCards.find(c => c.id === selectedCardId)?.description}</p>
-          </div>
-          <div className="text-xs text-white/70 mt-2">
-            <p>Use the dial to cycle through cards • Drag to position • Move mouse quickly to spin</p>
-          </div>
-        </div>
-      )}
+      {/* Card Info Overlay */}
+      <ArInfoOverlay 
+        selectedCardId={selectedCardId}
+        activeCards={activeCards}
+      />
     </div>
   );
 };
