@@ -40,29 +40,31 @@ const BaseballCardViewer = () => {
               defaultSize={20} 
               minSize={0}
               maxSize={30}
-              className={`${isOpen ? 'block' : 'hidden'} bg-gray-800 border-r border-gray-700`}
+              className="bg-gray-800 border-r border-gray-700"
             >
-              <BaseballCardSidebar />
+              <CollapsibleContent>
+                <BaseballCardSidebar />
+              </CollapsibleContent>
+            </ResizablePanel>
+
+            <ResizableHandle withHandle className="bg-gray-700" />
+          
+            <ResizablePanel defaultSize={80}>
+              <div className="relative h-full">
+                <CollapsibleTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="absolute top-4 left-4 z-10 bg-gray-800/50 hover:bg-gray-700/50 text-white"
+                  >
+                    <PanelLeft className="h-4 w-4" />
+                  </Button>
+                </CollapsibleTrigger>
+                
+                <BaseballCardRenderer />
+              </div>
             </ResizablePanel>
           </Collapsible>
-          
-          <ResizableHandle withHandle className="bg-gray-700" />
-          
-          <ResizablePanel defaultSize={80}>
-            <div className="relative h-full">
-              <CollapsibleTrigger asChild>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="absolute top-4 left-4 z-10 bg-gray-800/50 hover:bg-gray-700/50 text-white"
-                >
-                  <PanelLeft className="h-4 w-4" />
-                </Button>
-              </CollapsibleTrigger>
-              
-              <BaseballCardRenderer />
-            </div>
-          </ResizablePanel>
         </ResizablePanelGroup>
       </main>
     </div>
