@@ -26,7 +26,7 @@ const CardGallery: React.FC<CardGalleryProps> = ({
   cards: propCards
 }) => {
   const navigate = useNavigate();
-  const { cards: contextCards } = useCards();
+  const { cards: contextCards, refreshCards } = useCards();
   const cards = propCards || contextCards; // Use prop cards if provided, otherwise use context
   
   const [searchQuery, setSearchQuery] = useState('');
@@ -124,7 +124,8 @@ const CardGallery: React.FC<CardGalleryProps> = ({
       ) : (
         <EmptyState 
           isEmpty={cards.length === 0} 
-          isFiltered={cards.length > 0 && filteredCards.length === 0} 
+          isFiltered={cards.length > 0 && filteredCards.length === 0}
+          onRefresh={refreshCards}
         />
       )}
     </div>

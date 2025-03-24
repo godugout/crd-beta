@@ -3,17 +3,20 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { PlusCircle, AlertCircle } from 'lucide-react';
+import SampleCardsButton from './SampleCardsButton';
 
 interface EmptyStateProps {
   isEmpty: boolean;
   isFiltered: boolean;
   className?: string;
+  onRefresh?: () => void;
 }
 
 const EmptyState: React.FC<EmptyStateProps> = ({ 
   isEmpty, 
   isFiltered,
-  className = "" 
+  className = "",
+  onRefresh
 }) => {
   const navigate = useNavigate();
   
@@ -30,17 +33,22 @@ const EmptyState: React.FC<EmptyStateProps> = ({
       </h3>
       <p className="text-cardshow-slate mb-6 max-w-md">
         {isEmpty 
-          ? "You haven't created any cards yet. Create your first card to get started!" 
+          ? "You haven't created any cards yet. Create your first card or add sample cards to get started!" 
           : "Try adjusting your search or filters to find what you're looking for."}
       </p>
+      
       {isEmpty && (
-        <Button
-          onClick={() => navigate('/editor')}
-          className="flex items-center justify-center rounded-lg bg-cardshow-blue px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-opacity-90 transition-colors"
-        >
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Create Your First Card
-        </Button>
+        <div className="flex flex-col sm:flex-row gap-4">
+          <Button
+            onClick={() => navigate('/editor')}
+            className="flex items-center justify-center rounded-lg bg-cardshow-blue px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-opacity-90 transition-colors"
+          >
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Create Your First Card
+          </Button>
+          
+          <SampleCardsButton onComplete={onRefresh} />
+        </div>
       )}
     </div>
   );
