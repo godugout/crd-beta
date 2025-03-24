@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 import CardItem from './CardItem';
 import { useCards } from '@/context/CardContext';
 import { Card } from '@/lib/types';
-import { PlusCircle, Search, Tag, X, AlertCircle } from 'lucide-react';
+import { PlusCircle, Search, Tag, X, AlertCircle, ChevronRight } from 'lucide-react';
 import { toast } from 'sonner';
 
 // Define available card effects
@@ -21,9 +21,15 @@ const CARD_EFFECTS = [
 
 interface CardGalleryProps {
   className?: string;
+  viewMode?: 'grid' | 'list';
+  onCardClick?: (cardId: string) => void;
 }
 
-const CardGallery: React.FC<CardGalleryProps> = ({ className }) => {
+const CardGallery: React.FC<CardGalleryProps> = ({ 
+  className, 
+  viewMode = 'grid',
+  onCardClick
+}) => {
   const navigate = useNavigate();
   const { cards } = useCards();
   const [searchQuery, setSearchQuery] = useState('');
@@ -79,6 +85,15 @@ const CardGallery: React.FC<CardGalleryProps> = ({ className }) => {
   const clearFilters = () => {
     setSearchQuery('');
     setSelectedTags([]);
+  };
+
+  const handleCardItemClick = (cardId: string) => {
+    if (onCardClick) {
+      onCardClick(cardId);
+    } else {
+      // Default behavior if no click handler is provided
+      navigate(`/card/${cardId}`);
+    }
   };
   
   if (isLoading) {
@@ -157,21 +172,65 @@ const CardGallery: React.FC<CardGalleryProps> = ({ className }) => {
         </div>
       )}
       
-      {/* Cards grid */}
+      {/* Cards display based on view mode */}
       {filteredCards.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {filteredCards.map((card) => (
-            <div 
-              key={card.id} 
-              className="animate-scale-in transition-all duration-300"
-            >
-              <CardItem 
-                card={card}
-                activeEffects={cardEffects[card.id] || []} 
-              />
-            </div>
-          ))}
-        </div>
+        viewMode === 'grid' ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {filteredCards.map((card) => (
+              <div 
+                key={card.id} 
+                className="animate-scale-in transition-all duration-300"
+                onClick={() => handleCardItemClick(card.id)}
+              >
+                <CardItem 
+                  card={card}
+                  activeEffects={cardEffects[card.id] || []} 
+                />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {filteredCards.map((card) => (
+              <div 
+                key={card.id}
+                className="flex items-center bg-white rounded-lg overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200"
+                onClick={() => handleCardItemClick(card.id)}
+              >
+                <div className="w-24 h-24 flex-shrink-0">
+                  <img 
+                    src={card.imageUrl} 
+                    alt={card.title}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="p-4 flex-grow">
+                  <h3 className="font-medium text-cardshow-dark">{card.title}</h3>
+                  <p className="text-sm text-cardshow-slate line-clamp-1">{card.description}</p>
+                  
+                  {card.tags && card.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      {card.tags.slice(0, 3).map((tag, index) => (
+                        <span 
+                          key={index}
+                          className="inline-flex items-center text-xs bg-cardshow-blue-light text-cardshow-blue px-2 py-0.5 rounded-full"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                      {card.tags.length > 3 && (
+                        <span className="text-xs text-cardshow-slate">+{card.tags.length - 3} more</span>
+                      )}
+                    </div>
+                  )}
+                </div>
+                <div className="p-4 flex items-center text-gray-400">
+                  <ChevronRight className="h-5 w-5" />
+                </div>
+              </div>
+            ))}
+          </div>
+        )
       ) : (
         <div className="flex flex-col items-center justify-center py-16 text-center">
           <div className="bg-cardshow-neutral rounded-full p-6 mb-4">

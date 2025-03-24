@@ -1,19 +1,48 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import Navbar from '@/components/Navbar';
 import CardGallery from '@/components/CardGallery';
-import { ChevronRight, Grid3X3, GalleryHorizontal, Tv2 } from 'lucide-react';
+import { ChevronRight, Grid3X3, LayoutList, Tv2, Filter } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useCards } from '@/context/CardContext';
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import FullscreenViewer from '@/components/gallery/FullscreenViewer';
 
 const Gallery = () => {
   const { cards } = useCards();
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   
   // Check if we have baseball cards in the collection
   const hasBaseballCards = cards.some(card => 
     card.tags?.some(tag => ['baseball', 'vintage'].includes(tag.toLowerCase()))
   );
+
+  const handleCardClick = (cardId: string) => {
+    setSelectedCardId(cardId);
+    setIsFullscreen(true);
+  };
+  
+  const handleCloseFullscreen = () => {
+    setIsFullscreen(false);
+  };
+  
+  if (isFullscreen && selectedCardId) {
+    return (
+      <FullscreenViewer 
+        cardId={selectedCardId} 
+        onClose={handleCloseFullscreen}
+      />
+    );
+  }
   
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -61,7 +90,56 @@ const Gallery = () => {
             </div>
           )}
           
-          <CardGallery />
+          {/* View Mode Controls */}
+          <div className="flex justify-between items-center mb-6">
+            <div className="flex space-x-2">
+              <Button
+                variant={viewMode === 'grid' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setViewMode('grid')}
+                className="flex items-center"
+              >
+                <Grid3X3 className="h-4 w-4 mr-2" />
+                Grid
+              </Button>
+              <Button
+                variant={viewMode === 'list' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setViewMode('list')}
+                className="flex items-center"
+              >
+                <LayoutList className="h-4 w-4 mr-2" />
+                List
+              </Button>
+            </div>
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="flex items-center">
+                  <Filter className="h-4 w-4 mr-2" />
+                  Filters
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56">
+                <DropdownMenuGroup>
+                  <DropdownMenuItem className="cursor-pointer">
+                    Newest First
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="cursor-pointer">
+                    Oldest First
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="cursor-pointer">
+                    Alphabetical (A-Z)
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="cursor-pointer">
+                    Alphabetical (Z-A)
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+          
+          <CardGallery viewMode={viewMode} onCardClick={handleCardClick} />
         </div>
       </main>
     </div>

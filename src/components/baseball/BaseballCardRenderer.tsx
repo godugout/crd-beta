@@ -38,13 +38,15 @@ const BaseballCardRenderer: React.FC = () => {
           <AlertCircle className="h-12 w-12 text-red-500 mb-4" />
           <h2 className="text-xl font-bold text-white mb-2">Card Not Found</h2>
           <p className="text-gray-300 mb-6">{error || "The requested baseball card couldn't be loaded."}</p>
-          <Button 
-            onClick={() => navigate('/baseball-card-viewer/' + allCards[0].id)}
-            className="flex items-center gap-2"
-          >
-            <RefreshCcw className="h-4 w-4" />
-            View Available Cards
-          </Button>
+          {allCards.length > 0 && (
+            <Button 
+              onClick={() => navigate('/baseball-card-viewer/' + allCards[0].id)}
+              className="flex items-center gap-2"
+            >
+              <RefreshCcw className="h-4 w-4" />
+              View Available Cards
+            </Button>
+          )}
         </div>
       </div>
     );

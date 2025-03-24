@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Card } from '@/lib/types';
 import { cn } from '@/lib/utils';
-import { Trash2, Edit, Share2, Tag } from 'lucide-react';
+import { Trash2, Edit, Share2, Tag, Maximize2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useCards } from '@/context/CardContext';
 import '../components/home/card-effects/index.css';
@@ -18,7 +18,8 @@ const CardItem: React.FC<CardItemProps> = ({ card, className, onClick, activeEff
   const [isFlipped, setIsFlipped] = useState(false);
   const { deleteCard } = useCards();
   
-  const handleFlip = () => {
+  const handleFlip = (e: React.MouseEvent) => {
+    e.stopPropagation();
     setIsFlipped(!isFlipped);
   };
   
@@ -94,7 +95,7 @@ const CardItem: React.FC<CardItemProps> = ({ card, className, onClick, activeEff
         "card-container relative w-full aspect-[2.5/3.5] cursor-pointer group",
         className
       )}
-      onClick={onClick || handleFlip}
+      onClick={onClick}
     >
       <div className={cn("card-inner w-full h-full", isFlipped ? "flipped" : "")}>
         {/* Card Front */}
@@ -125,18 +126,28 @@ const CardItem: React.FC<CardItemProps> = ({ card, className, onClick, activeEff
                     toast.info('Edit feature coming soon');
                   }}
                   className="p-1.5 rounded-full hover:bg-gray-100 transition-colors"
+                  title="Edit"
                 >
                   <Edit size={16} className="text-cardshow-slate" />
                 </button>
                 <button 
                   onClick={handleShare}
                   className="p-1.5 rounded-full hover:bg-gray-100 transition-colors"
+                  title="Share"
                 >
                   <Share2 size={16} className="text-cardshow-slate" />
                 </button>
                 <button 
+                  onClick={handleFlip}
+                  className="p-1.5 rounded-full hover:bg-gray-100 transition-colors"
+                  title="Flip card"
+                >
+                  <Tag size={16} className="text-cardshow-slate" />
+                </button>
+                <button 
                   onClick={handleDelete}
                   className="p-1.5 rounded-full hover:bg-gray-100 transition-colors"
+                  title="Delete"
                 >
                   <Trash2 size={16} className="text-red-500" />
                 </button>
