@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import Navbar from '@/components/Navbar';
 import { Button } from '@/components/ui/button';
@@ -319,7 +320,7 @@ const CardAnimation = () => {
                             <div className="h-8 w-8 flex items-center justify-center bg-cyan-50 text-cyan-500 rounded-full">
                               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <path d="M3 9h18v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z"></path>
-                                <path d="m3 9 2.45-4.9A2 2 0 0 0 17.24 3h9.52a2 2 0 0 1 1.8 1.1L21 9"></path>
+                                <path d="m3 9 2.45-4.9A2 2 0 0 1 7.24 3h9.52a2 2 0 0 1 1.8 1.1L21 9"></path>
                                 <path d="M12 6v3"></path>
                               </svg>
                             </div>
