@@ -6,6 +6,8 @@ import { Card } from '@/lib/types';
 import { toast } from 'sonner';
 import CameraView from './CameraView';
 import ArControls from './ArControls';
+import RadioDial from './RadioDial';
+import MouseInteractionLayer from './MouseInteractionLayer';
 
 interface ArModeViewProps {
   activeCards: Card[];
@@ -19,6 +21,12 @@ interface ArModeViewProps {
   onRotate: () => void;
   onAddCard?: (card: Card) => void;
   onRemoveCard?: (cardId: string) => void;
+}
+
+interface CardPosition {
+  x: number;
+  y: number;
+  rotation: number;
 }
 
 const ArModeView: React.FC<ArModeViewProps> = ({
@@ -38,9 +46,17 @@ const ArModeView: React.FC<ArModeViewProps> = ({
     activeCards.length > 0 ? activeCards[0].id : null
   );
   const [showCardSelector, setShowCardSelector] = useState(false);
+  const [cardPositions, setCardPositions] = useState<Record<string, CardPosition>>({});
 
   const handleSelectCard = (id: string) => {
     setSelectedCardId(id);
+  };
+
+  const handleUpdateCardPosition = (cardId: string, x: number, y: number, rotation: number) => {
+    setCardPositions(prev => ({
+      ...prev,
+      [cardId]: { x, y, rotation }
+    }));
   };
 
   const handleAddCard = (card: Card) => {
@@ -57,6 +73,12 @@ const ArModeView: React.FC<ArModeViewProps> = ({
     
     setShowCardSelector(false);
     setSelectedCardId(card.id);
+    
+    // Initialize position for the new card
+    setCardPositions(prev => ({
+      ...prev,
+      [card.id]: { x: 0, y: 0, rotation: 0 }
+    }));
     
     // Provide feedback
     toast.success('Card added to scene');
@@ -75,6 +97,13 @@ const ArModeView: React.FC<ArModeViewProps> = ({
     } else {
       setSelectedCardId(null);
     }
+    
+    // Remove card position data
+    setCardPositions(prev => {
+      const newPositions = { ...prev };
+      delete newPositions[selectedCardId];
+      return newPositions;
+    });
     
     toast.success('Card removed from scene');
   };
@@ -105,6 +134,21 @@ const ArModeView: React.FC<ArModeViewProps> = ({
         selectedCardId={selectedCardId}
         onSelectCard={handleSelectCard}
         onError={onCameraError}
+        cardPositions={cardPositions}
+      />
+      
+      {/* Mouse Interaction Layer */}
+      <MouseInteractionLayer
+        cards={activeCards}
+        selectedCardId={selectedCardId}
+        onUpdateCardPosition={handleUpdateCardPosition}
+      />
+      
+      {/* Radio Dial for card navigation */}
+      <RadioDial
+        cards={activeCards}
+        activeCardId={selectedCardId}
+        onSelectCard={handleSelectCard}
       />
       
       {/* AR Controls */}
@@ -186,6 +230,11 @@ const ArModeView: React.FC<ArModeViewProps> = ({
         <Share2 className="h-4 w-4" />
       </Button>
       
+      {/* Mouse instructions */}
+      <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-40 bg-black/40 text-white text-xs px-3 py-1 rounded-full backdrop-blur-sm">
+        Mouse drag to move • Fast mouse movement to spin cards
+      </div>
+      
       {/* Info overlay for selected card */}
       {selectedCardId && (
         <div className="absolute bottom-20 left-4 right-4 z-40 bg-black/40 backdrop-blur-sm text-white p-3 rounded-lg animate-fadeIn">
@@ -194,7 +243,7 @@ const ArModeView: React.FC<ArModeViewProps> = ({
             <p className="text-xs text-white/70 mt-0.5">{activeCards.find(c => c.id === selectedCardId)?.description}</p>
           </div>
           <div className="text-xs text-white/70 mt-2">
-            <p>Tap to select • Double-tap to reset position • Press and hold to change effect</p>
+            <p>Use the dial to cycle through cards • Drag to position • Move mouse quickly to spin</p>
           </div>
         </div>
       )}

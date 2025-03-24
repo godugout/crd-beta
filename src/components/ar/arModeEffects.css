@@ -1,0 +1,65 @@
+
+/* Radio dial specific animations */
+@keyframes dial-glow {
+  0% {
+    box-shadow: 0 0 5px 0 rgba(59, 130, 246, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 15px 2px rgba(59, 130, 246, 0.6);
+  }
+  100% {
+    box-shadow: 0 0 5px 0 rgba(59, 130, 246, 0.3);
+  }
+}
+
+@keyframes appear {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease forwards;
+}
+
+.card-appear {
+  opacity: 0;
+  animation: appear 0.3s ease forwards;
+}
+
+/* Mouse trail effect */
+.mouse-trail {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.6) 0%, rgba(59, 130, 246, 0) 70%);
+  transition: width 0.2s, height 0.2s;
+}

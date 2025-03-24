@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import { Button } from '@/components/ui/button';
@@ -13,8 +12,8 @@ import ArSettingsPanel from '@/components/ar/ArSettingsPanel';
 import ArModeView from '@/components/ar/ArModeView';
 import { supabase } from '@/integrations/supabase/client';
 import '../components/home/card-effects/index.css';
+import '../components/ar/arModeEffects.css';
 
-// Define an interface that matches the actual database schema
 interface CardRecord {
   id: string;
   title: string;
@@ -46,7 +45,6 @@ const ArCardViewer = () => {
       setIsLoading(true);
       
       try {
-        // Fetch cards from the database
         const { data: cardsData, error } = await supabase
           .from('cards')
           .select('*')
@@ -58,7 +56,6 @@ const ArCardViewer = () => {
           return;
         }
         
-        // Convert the database cards to our Card format
         const formattedCards: Card[] = (cardsData as CardRecord[]).map(card => ({
           id: card.id,
           title: card.title,
@@ -73,7 +70,6 @@ const ArCardViewer = () => {
         
         setAvailableCards(formattedCards);
         
-        // If ID is provided, find that card, otherwise use the first one
         const cardById = id 
           ? formattedCards.find(card => card.id === id) 
           : null;
@@ -81,7 +77,6 @@ const ArCardViewer = () => {
         const selectedCard = cardById || formattedCards[0] || null;
         setActiveCard(selectedCard);
         
-        // Initialize AR cards with the active card
         if (selectedCard) {
           setArCards([selectedCard]);
         }
@@ -98,15 +93,17 @@ const ArCardViewer = () => {
   
   const handleLaunchAr = () => {
     setIsArMode(true);
-    // Ensure the active card is in the AR scene
     if (activeCard && !arCards.some(card => card.id === activeCard.id)) {
       setArCards(prev => [...prev, activeCard]);
     }
     
-    // Apply holographic effect CSS variables
     document.documentElement.style.setProperty('--shimmer-speed', '3s');
     document.documentElement.style.setProperty('--hologram-intensity', '0.7');
     document.documentElement.style.setProperty('--motion-speed', '1');
+    
+    toast.info('Mouse Controls Active', {
+      description: 'Drag cards to position them. Move mouse quickly to spin cards.'
+    });
   };
 
   const handleExitAr = () => {
@@ -148,7 +145,6 @@ const ArCardViewer = () => {
   };
   
   const handleRemoveCard = (cardId: string) => {
-    // Don't allow removing the last card
     if (arCards.length <= 1) {
       toast.error("Can't remove the last card");
       return;

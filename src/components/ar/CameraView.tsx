@@ -1,137 +1,121 @@
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { Card } from '@/lib/types';
-import { AlertCircle } from 'lucide-react';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import ArCardItem from './ArCardItem';
+import { motion } from 'framer-motion';
 
 interface CameraViewProps {
   activeCards: Card[];
   selectedCardId: string | null;
   onSelectCard: (id: string) => void;
   onError: (message: string) => void;
+  cardPositions?: Record<string, { x: number, y: number, rotation: number }>;
 }
 
-const CameraView: React.FC<CameraViewProps> = ({ 
-  activeCards, 
+const CameraView: React.FC<CameraViewProps> = ({
+  activeCards,
   selectedCardId,
   onSelectCard,
-  onError 
+  onError,
+  cardPositions = {}
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
   const [cameraReady, setCameraReady] = useState(false);
-  const [cameraError, setCameraError] = useState<string | null>(null);
-  const [lightPosition, setLightPosition] = useState({ x: 0.5, y: 0.5 });
-
+  
+  // Initialize camera
   useEffect(() => {
     let stream: MediaStream | null = null;
-
-    const startCamera = async () => {
+    
+    const initCamera = async () => {
       try {
         // Request camera access
-        stream = await navigator.mediaDevices.getUserMedia({ 
-          video: { facingMode: 'environment' }, // Use back camera if available
-          audio: false 
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'environment' }
         });
         
+        // Set video source
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
-          videoRef.current.play();
           setCameraReady(true);
-          setCameraError(null);
         }
       } catch (err) {
-        console.error('Error accessing camera:', err);
-        const errorMessage = err instanceof Error ? err.message : 'Unknown error accessing camera';
-        setCameraError(errorMessage);
-        onError(errorMessage);
+        console.error("Camera error:", err);
+        onError(typeof err === 'object' && err !== null && 'message' in err 
+          ? (err as Error).message 
+          : 'Could not access camera');
       }
     };
-
-    startCamera();
-
-    // Clean up function
+    
+    initCamera();
+    
+    // Clean up
     return () => {
       if (stream) {
         stream.getTracks().forEach(track => track.stop());
       }
     };
   }, [onError]);
-  
-  // Track mouse/touch movement to simulate light reflections
-  const handlePointerMove = (e: React.PointerEvent) => {
-    if (!containerRef.current) return;
-    
-    const rect = containerRef.current.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width;
-    const y = (e.clientY - rect.top) / rect.height;
-    
-    setLightPosition({ x, y });
-    
-    // Update CSS variables for use in effects
-    document.documentElement.style.setProperty('--mouse-x', `${x * 100}%`);
-    document.documentElement.style.setProperty('--mouse-y', `${y * 100}%`);
-  };
-
-  if (cameraError) {
-    return (
-      <div className="h-full flex items-center justify-center p-4">
-        <Alert variant="destructive" className="w-full max-w-md">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Camera Access Error</AlertTitle>
-          <AlertDescription>
-            {cameraError}
-          </AlertDescription>
-        </Alert>
-      </div>
-    );
-  }
 
   return (
-    <div 
-      ref={containerRef} 
-      className="relative w-full h-full overflow-hidden"
-      onPointerMove={handlePointerMove}
-    >
-      {/* Video feed from camera */}
-      <video 
+    <div className="relative h-full w-full overflow-hidden">
+      {/* Camera background */}
+      <video
         ref={videoRef}
-        className="w-full h-full object-cover"
+        autoPlay
         playsInline
         muted
+        className="absolute inset-0 min-w-full min-h-full object-cover"
+        style={{ filter: 'brightness(0.9)' }}
       />
       
-      {/* Dynamic lighting overlay for holographic effects */}
-      <div 
-        className="absolute inset-0 pointer-events-none z-10 bg-gradient-radial from-white/5 to-transparent opacity-50"
-        style={{
-          background: `radial-gradient(circle at ${lightPosition.x * 100}% ${lightPosition.y * 100}%, rgba(255,255,255,0.1) 0%, transparent 70%)`,
-        }}
-      />
-      
-      {/* AR card items */}
-      <div className="absolute inset-0 pointer-events-auto">
-        {activeCards.map((card, index) => (
-          <ArCardItem
-            key={card.id}
-            card={card}
-            index={index}
-            isSelected={card.id === selectedCardId}
-            onSelect={onSelectCard}
-          />
-        ))}
+      {/* AR overlay with cards */}
+      <div className="absolute inset-0 pointer-events-none">
+        {activeCards.map((card, index) => {
+          const position = cardPositions[card.id] || { x: 0, y: 0, rotation: 0 };
+          
+          return (
+            <motion.div
+              key={card.id}
+              className="absolute left-1/2 top-1/2"
+              initial={{ x: '-50%', y: '-50%' }}
+              animate={{
+                x: `calc(-50% + ${position.x}px)`,
+                y: `calc(-50% + ${position.y}px)`,
+                rotate: position.rotation
+              }}
+              transition={{ type: 'spring', damping: 20 }}
+            >
+              <ArCardItem
+                card={card}
+                index={index}
+                isSelected={card.id === selectedCardId}
+                onSelect={onSelectCard}
+              />
+            </motion.div>
+          );
+        })}
+        
+        {!cameraReady && (
+          <div className="absolute inset-0 bg-black flex flex-col items-center justify-center text-white">
+            <div className="animate-pulse">
+              <div className="w-16 h-16 rounded-full border-4 border-t-blue-500 border-white/30 animate-spin mb-4 mx-auto"></div>
+              <p>Initializing camera...</p>
+            </div>
+          </div>
+        )}
       </div>
       
-      {/* Loading indicator */}
-      {!cameraReady && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-white">
-          <div className="text-center">
-            <div className="w-8 h-8 border-2 border-t-transparent border-white rounded-full animate-spin mx-auto mb-2"></div>
-            <p>Initializing camera...</p>
-          </div>
-        </div>
-      )}
+      {/* Augmented reality overlay effects */}
+      <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-black/40 to-transparent opacity-70"></div>
+      
+      {/* Grid pattern overlay for AR effect */}
+      <div 
+        className="absolute inset-0 pointer-events-none opacity-10"
+        style={{
+          backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)',
+          backgroundSize: '20px 20px'
+        }}
+      ></div>
     </div>
   );
 };

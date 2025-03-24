@@ -1,9 +1,8 @@
-
 import React, { useState, useEffect } from 'react';
-import Navbar from '@/components/Navbar';
-import { useCardData } from '@/components/gallery/useCardData';
-import { Link } from 'react-router-dom';
 import { Card, Collection } from '@/lib/types';
+import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
+import { useCardData } from '@/components/gallery/useCardData';
 import { supabase } from '@/integrations/supabase/client';
 import { ChevronRight, Layers, Camera, Box } from 'lucide-react';
 import { useCardEffects } from '@/components/home/card-viewer/useCardEffects';
@@ -34,21 +33,19 @@ interface CardRecord {
 const CardShowcase = () => {
   const { cards, isLoading: isLoadingCards } = useCardData();
   const [collections, setCollections] = useState<Collection[]>([]);
-  const [isLoadingCollections, setIsLoadingCollections] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   
-  // Get card effects for special display
-  const effects = useCardEffects();
-
+  // Fetch collections
   useEffect(() => {
     const fetchCollections = async () => {
-      setIsLoadingCollections(true);
+      setIsLoading(true);
       
       try {
         const { data, error } = await supabase
           .from('collections')
           .select('*')
           .order('created_at', { ascending: false });
-          
+        
         if (error) {
           console.error('Error fetching collections:', error);
           return;
@@ -57,7 +54,7 @@ const CardShowcase = () => {
         // Transform to our Collection type
         const formattedCollections: Collection[] = (data as CollectionRecord[]).map(col => ({
           id: col.id,
-          name: col.title, // Use 'title' field from the database as 'name'
+          name: col.name || col.title, // Use 'name' field if it exists, otherwise 'title'
           description: col.description || '',
           cards: [],
           createdAt: new Date(col.created_at),
@@ -66,47 +63,50 @@ const CardShowcase = () => {
         
         setCollections(formattedCollections);
         
-        // Now get cards for each collection
+        // Fetch cards for each collection
         for (const collection of formattedCollections) {
           const { data: collectionCards, error: cardsError } = await supabase
             .from('cards')
             .select('*')
             .eq('collection_id', collection.id);
-            
-          if (!cardsError && collectionCards) {
-            // Update the collection with its cards
-            setCollections(prev => 
-              prev.map(col => 
-                col.id === collection.id 
-                  ? {
-                      ...col,
-                      cards: (collectionCards as CardRecord[]).map(card => ({
-                        id: card.id,
-                        title: card.title,
-                        description: card.description || '',
-                        imageUrl: card.image_url || '',
-                        thumbnailUrl: card.thumbnail_url || card.image_url || '',
-                        tags: card.tags || [],
-                        createdAt: new Date(card.created_at),
-                        updatedAt: new Date(card.updated_at),
-                        collectionId: card.collection_id
-                      }))
-                    }
-                  : col
-              )
-            );
+          
+          if (cardsError) {
+            console.error(`Error fetching cards for collection ${collection.id}:`, cardsError);
+            continue;
           }
+          
+          // Update the collection with its cards
+          setCollections(cols => 
+            cols.map(col => 
+              col.id === collection.id 
+                ? {
+                    ...col,
+                    cards: (collectionCards as CardRecord[]).map(card => ({
+                      id: card.id,
+                      title: card.title,
+                      description: card.description || '',
+                      imageUrl: card.image_url || '',
+                      thumbnailUrl: card.thumbnail_url || card.image_url || '',
+                      tags: card.tags || [],
+                      createdAt: new Date(card.created_at),
+                      updatedAt: new Date(card.updated_at),
+                      collectionId: card.collection_id
+                    }))
+                  }
+                : col
+            )
+          );
         }
       } catch (err) {
-        console.error('Unexpected error fetching collections:', err);
+        console.error('Error in collection fetching process:', err);
       } finally {
-        setIsLoadingCollections(false);
+        setIsLoading(false);
       }
     };
     
     fetchCollections();
   }, []);
-  
+
   // Simple card display component with effects
   const CardDisplay = ({ card }: { card: Card }) => {
     const [isHovered, setIsHovered] = useState(false);
@@ -191,7 +191,7 @@ const CardShowcase = () => {
               </Link>
             </div>
             
-            {isLoadingCollections ? (
+            {isLoading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {[1, 2, 3].map(i => (
                   <div key={i} className="animate-pulse bg-white rounded-lg p-4 shadow-sm">
