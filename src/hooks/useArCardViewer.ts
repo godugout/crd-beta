@@ -34,6 +34,7 @@ export function useArCardViewer(id?: string) {
       setIsLoading(true);
       
       try {
+        console.log("Fetching cards from Supabase...");
         const { data: cardsData, error } = await supabase
           .from('cards')
           .select('*')
@@ -45,29 +46,69 @@ export function useArCardViewer(id?: string) {
           return;
         }
         
-        const formattedCards: Card[] = (cardsData as CardRecord[]).map(card => ({
-          id: card.id,
-          title: card.title,
-          description: card.description || '',
-          imageUrl: card.image_url || '',
-          thumbnailUrl: card.thumbnail_url || card.image_url || '',
-          tags: card.tags || [],
-          createdAt: new Date(card.created_at),
-          updatedAt: new Date(card.updated_at),
-          collectionId: card.collection_id
-        }));
+        console.log("Cards data received:", cardsData);
         
-        setAvailableCards(formattedCards);
-        
-        const cardById = id 
-          ? formattedCards.find(card => card.id === id) 
-          : null;
+        // If no cards are found in the database, create some sample cards for demo purposes
+        if (!cardsData || cardsData.length === 0) {
+          console.log("No cards found in database, using sample cards");
+          const sampleCards: Card[] = [
+            {
+              id: "sample-1",
+              title: "Sample Baseball Card",
+              description: "This is a sample baseball card for demonstration",
+              imageUrl: "/lovable-uploads/a38aa501-ea2d-4416-9699-1e69b1826233.png",
+              thumbnailUrl: "/lovable-uploads/a38aa501-ea2d-4416-9699-1e69b1826233.png",
+              tags: ["baseball", "sample", "demo"],
+              createdAt: new Date(),
+              updatedAt: new Date()
+            },
+            {
+              id: "sample-2",
+              title: "Sample Trading Card",
+              description: "This is a sample trading card for demonstration",
+              imageUrl: "/lovable-uploads/667e6ad2-af96-40ac-bd16-a69778e14b21.png",
+              thumbnailUrl: "/lovable-uploads/667e6ad2-af96-40ac-bd16-a69778e14b21.png",
+              tags: ["trading", "sample", "demo"],
+              createdAt: new Date(),
+              updatedAt: new Date()
+            }
+          ];
           
-        const selectedCard = cardById || formattedCards[0] || null;
-        setActiveCard(selectedCard);
-        
-        if (selectedCard) {
-          setArCards([selectedCard]);
+          setAvailableCards(sampleCards);
+          const selectedCard = id ? sampleCards.find(card => card.id === id) : sampleCards[0];
+          setActiveCard(selectedCard || sampleCards[0]);
+          
+          if (selectedCard) {
+            setArCards([selectedCard]);
+          }
+        } else {
+          // Format the cards from the database
+          const formattedCards: Card[] = (cardsData as CardRecord[]).map(card => ({
+            id: card.id,
+            title: card.title,
+            description: card.description || '',
+            imageUrl: card.image_url || '',
+            thumbnailUrl: card.thumbnail_url || card.image_url || '',
+            tags: card.tags || [],
+            createdAt: new Date(card.created_at),
+            updatedAt: new Date(card.updated_at),
+            collectionId: card.collection_id
+          }));
+          
+          console.log("Formatted cards:", formattedCards);
+          setAvailableCards(formattedCards);
+          
+          const cardById = id 
+            ? formattedCards.find(card => card.id === id) 
+            : null;
+            
+          const selectedCard = cardById || formattedCards[0] || null;
+          console.log("Selected card:", selectedCard);
+          setActiveCard(selectedCard);
+          
+          if (selectedCard) {
+            setArCards([selectedCard]);
+          }
         }
       } catch (err) {
         console.error('Error in card fetching process:', err);

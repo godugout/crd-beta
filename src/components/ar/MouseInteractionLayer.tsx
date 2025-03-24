@@ -15,6 +15,8 @@ const MouseInteractionLayer: React.FC<MouseInteractionLayerProps> = ({
   selectedCardId,
   onUpdateCardPosition
 }) => {
+  console.log("MouseInteractionLayer rendering with cards:", cards, "selectedCardId:", selectedCardId);
+  
   const {
     isDragging,
     mouseMoveSpeed,
@@ -30,11 +32,12 @@ const MouseInteractionLayer: React.FC<MouseInteractionLayerProps> = ({
 
   return (
     <div 
-      className="absolute inset-0 z-30"
+      className="absolute inset-0 z-30 cursor-grab"
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
+      style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
     >
       {/* Visualize the mouse speed as a subtle glow/trail */}
       <MouseTrail 

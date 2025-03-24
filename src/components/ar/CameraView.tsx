@@ -56,6 +56,8 @@ const CameraView: React.FC<CameraViewProps> = ({
     };
   }, [onError]);
 
+  console.log("Rendering CameraView with active cards:", activeCards);
+
   return (
     <div className="relative h-full w-full overflow-hidden">
       {/* Camera background */}
@@ -69,7 +71,7 @@ const CameraView: React.FC<CameraViewProps> = ({
       />
       
       {/* AR overlay with cards - centered by default */}
-      <div className="absolute inset-0 pointer-events-none">
+      <div className="absolute inset-0 pointer-events-none z-10">
         {activeCards.map((card, index) => {
           // Get position or use default centered position
           const position = cardPositions[card.id] || { x: 0, y: 0, rotation: 0 };
@@ -77,11 +79,10 @@ const CameraView: React.FC<CameraViewProps> = ({
           return (
             <motion.div
               key={card.id}
-              className="absolute"
+              className="absolute pointer-events-auto"
               style={{
                 left: '50%',
                 top: '50%',
-                position: 'absolute',
                 transformOrigin: 'center',
               }}
               initial={{ x: '-50%', y: '-50%' }}
@@ -96,7 +97,7 @@ const CameraView: React.FC<CameraViewProps> = ({
                 card={card}
                 index={index}
                 isSelected={card.id === selectedCardId}
-                onSelect={onSelectCard}
+                onSelect={() => onSelectCard(card.id)}
               />
             </motion.div>
           );
@@ -104,7 +105,7 @@ const CameraView: React.FC<CameraViewProps> = ({
         
         {!cameraReady && (
           <div className="absolute inset-0 bg-black flex flex-col items-center justify-center text-white">
-            <div className="animate-pulse">
+            <div className="animate-pulse flex flex-col items-center">
               <div className="w-16 h-16 rounded-full border-4 border-t-blue-500 border-white/30 animate-spin mb-4 mx-auto"></div>
               <p>Initializing camera...</p>
             </div>

@@ -50,11 +50,24 @@ const ArModeView: React.FC<ArModeViewProps> = ({
   const [showCardSelector, setShowCardSelector] = useState(false);
   const [cardPositions, setCardPositions] = useState<Record<string, CardPosition>>({});
 
+  // Update selected card when active cards change
+  useEffect(() => {
+    if (activeCards.length > 0 && !selectedCardId) {
+      setSelectedCardId(activeCards[0].id);
+    } else if (selectedCardId && !activeCards.some(card => card.id === selectedCardId)) {
+      setSelectedCardId(activeCards.length > 0 ? activeCards[0].id : null);
+    }
+  }, [activeCards, selectedCardId]);
+
+  console.log("ArModeView rendering with activeCards:", activeCards, "selectedCardId:", selectedCardId);
+
   const handleSelectCard = (id: string) => {
+    console.log("Selecting card:", id);
     setSelectedCardId(id);
   };
 
   const handleUpdateCardPosition = (cardId: string, x: number, y: number, rotation: number) => {
+    console.log("Updating card position:", cardId, x, y, rotation);
     setCardPositions(prev => ({
       ...prev,
       [cardId]: { x, y, rotation }

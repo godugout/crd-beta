@@ -26,6 +26,8 @@ export const useMouseInteraction = ({
   const [lastMousePos, setLastMousePos] = useState({ x: 0, y: 0 });
   const [lastMoveTime, setLastMoveTime] = useState(0);
 
+  console.log("useMouseInteraction hook with cards:", cards, "selectedCardId:", selectedCardId);
+
   // Initialize positions for all cards - centered by default
   useEffect(() => {
     const initialPositions: Record<string, CardPosition> = {};
@@ -39,7 +41,10 @@ export const useMouseInteraction = ({
       }
     });
     
-    setPositions(prev => ({ ...prev, ...initialPositions }));
+    if (Object.keys(initialPositions).length > 0) {
+      console.log("Initializing positions for cards:", initialPositions);
+      setPositions(prev => ({ ...prev, ...initialPositions }));
+    }
   }, [cards]);
 
   // Calculate mouse speed
@@ -62,13 +67,11 @@ export const useMouseInteraction = ({
   const handleMouseDown = (e: React.MouseEvent) => {
     if (!selectedCardId) return;
     
+    console.log("Mouse down on card:", selectedCardId);
     setIsDragging(true);
     setDragStartPos({ x: e.clientX, y: e.clientY });
     setLastMousePos({ x: e.clientX, y: e.clientY });
     setLastMoveTime(Date.now());
-    
-    // Change cursor
-    document.body.style.cursor = 'grabbing';
     
     // Prevent default to avoid text selection
     e.preventDefault();
@@ -117,8 +120,9 @@ export const useMouseInteraction = ({
   };
 
   const handleMouseUp = () => {
+    if (!isDragging) return;
+    
     setIsDragging(false);
-    document.body.style.cursor = 'default';
     
     // Apply spin based on mouse speed
     if (selectedCardId && (mouseMoveSpeed.x > 10 || mouseMoveSpeed.y > 10)) {
