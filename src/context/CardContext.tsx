@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Card, Collection } from '../lib/types';
 import { useAuth } from './AuthContext';
@@ -39,7 +38,6 @@ export const CardProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
 
-  // Initialize card operations hook
   const { 
     refreshCards,
     addCard,
@@ -52,7 +50,6 @@ export const CardProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setError
   });
 
-  // Initialize collection operations hook
   const {
     refreshCollections,
     addCollection,
@@ -68,13 +65,11 @@ export const CardProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setError
   });
 
-  // Load data from Supabase on initial render and when user changes
   useEffect(() => {
     if (user) {
       refreshCards();
       refreshCollections();
     } else {
-      // Clear data when user logs out
       setCards([]);
       setCollections([]);
     }
