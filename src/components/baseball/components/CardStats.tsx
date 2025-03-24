@@ -1,10 +1,10 @@
 
 import React from 'react';
 import { BarChart4 } from 'lucide-react';
-import { CardStats } from '../types/BaseballCard';
+import type { CardStats as CardStatsType } from '../types/BaseballCard';
 
 interface CardStatsProps {
-  stats: CardStats;
+  stats: CardStatsType;
 }
 
 const CardStats: React.FC<CardStatsProps> = ({ stats }) => {
@@ -67,4 +67,3 @@ const CardStats: React.FC<CardStatsProps> = ({ stats }) => {
 };
 
 export default CardStats;
-

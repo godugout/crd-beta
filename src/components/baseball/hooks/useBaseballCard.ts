@@ -1,8 +1,9 @@
+
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { CardData } from '../types/BaseballCard';
 
-const BASEBALL_CARDS: CardData[] = [
+export const BASEBALL_CARDS: CardData[] = [
   {
     id: "t206-wagner",
     title: "1909-11 T206 Honus Wagner",
@@ -80,5 +81,5 @@ export const useBaseballCard = () => {
     setIsLoading(false);
   }, [id]);
 
-  return { cardData, isLoading };
+  return { cardData, isLoading, allCards: BASEBALL_CARDS };
 };
