@@ -4,6 +4,21 @@ import { Card } from '@/lib/types';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
+// Define an interface that matches the actual database schema
+interface CardRecord {
+  id: string;
+  title: string;
+  description: string | null;
+  image_url: string | null;
+  thumbnail_url?: string | null;
+  tags?: string[];
+  collection_id?: string;
+  created_at: string;
+  updated_at: string;
+  user_id?: string;
+  is_public?: boolean;
+}
+
 export const useCardData = () => {
   const [cards, setCards] = useState<Card[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -27,12 +42,12 @@ export const useCardData = () => {
       }
 
       // Transform the database records into our Card type
-      const formattedCards: Card[] = data.map(card => ({
+      const formattedCards: Card[] = (data as CardRecord[]).map(card => ({
         id: card.id,
         title: card.title,
         description: card.description || '',
         imageUrl: card.image_url || '',
-        thumbnailUrl: card.thumbnail_url || '',
+        thumbnailUrl: card.thumbnail_url || card.image_url || '',
         tags: card.tags || [],
         createdAt: new Date(card.created_at),
         updatedAt: new Date(card.updated_at),

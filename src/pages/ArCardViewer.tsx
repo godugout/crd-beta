@@ -14,6 +14,21 @@ import ArModeView from '@/components/ar/ArModeView';
 import { supabase } from '@/integrations/supabase/client';
 import '../components/home/card-effects/index.css';
 
+// Define an interface that matches the actual database schema
+interface CardRecord {
+  id: string;
+  title: string;
+  description: string | null;
+  image_url: string | null;
+  thumbnail_url?: string | null;
+  tags?: string[];
+  collection_id?: string;
+  created_at: string;
+  updated_at: string;
+  user_id?: string;
+  is_public?: boolean;
+}
+
 const ArCardViewer = () => {
   const { id } = useParams<{ id: string }>();
   const [activeCard, setActiveCard] = useState<Card | null>(null);
@@ -44,12 +59,12 @@ const ArCardViewer = () => {
         }
         
         // Convert the database cards to our Card format
-        const formattedCards: Card[] = cardsData.map(card => ({
+        const formattedCards: Card[] = (cardsData as CardRecord[]).map(card => ({
           id: card.id,
           title: card.title,
           description: card.description || '',
           imageUrl: card.image_url || '',
-          thumbnailUrl: card.thumbnail_url || '',
+          thumbnailUrl: card.thumbnail_url || card.image_url || '',
           tags: card.tags || [],
           createdAt: new Date(card.created_at),
           updatedAt: new Date(card.updated_at),

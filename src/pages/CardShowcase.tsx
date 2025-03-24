@@ -8,6 +8,29 @@ import { supabase } from '@/integrations/supabase/client';
 import { ChevronRight, Layers, Camera, Box } from 'lucide-react';
 import { useCardEffects } from '@/components/home/card-viewer/useCardEffects';
 
+// Define interfaces that match the actual database schema
+interface CollectionRecord {
+  id: string;
+  name?: string;
+  title: string;
+  description: string | null;
+  created_at: string;
+  updated_at: string;
+  owner_id: string;
+}
+
+interface CardRecord {
+  id: string;
+  title: string;
+  description: string | null;
+  image_url: string | null;
+  thumbnail_url?: string | null;
+  tags?: string[];
+  collection_id?: string;
+  created_at: string;
+  updated_at: string;
+}
+
 const CardShowcase = () => {
   const { cards, isLoading: isLoadingCards } = useCardData();
   const [collections, setCollections] = useState<Collection[]>([]);
@@ -32,9 +55,9 @@ const CardShowcase = () => {
         }
         
         // Transform to our Collection type
-        const formattedCollections: Collection[] = data.map(col => ({
+        const formattedCollections: Collection[] = (data as CollectionRecord[]).map(col => ({
           id: col.id,
-          name: col.name,
+          name: col.title, // Use 'title' field from the database as 'name'
           description: col.description || '',
           cards: [],
           createdAt: new Date(col.created_at),
@@ -57,12 +80,12 @@ const CardShowcase = () => {
                 col.id === collection.id 
                   ? {
                       ...col,
-                      cards: collectionCards.map(card => ({
+                      cards: (collectionCards as CardRecord[]).map(card => ({
                         id: card.id,
                         title: card.title,
                         description: card.description || '',
                         imageUrl: card.image_url || '',
-                        thumbnailUrl: card.thumbnail_url || '',
+                        thumbnailUrl: card.thumbnail_url || card.image_url || '',
                         tags: card.tags || [],
                         createdAt: new Date(card.created_at),
                         updatedAt: new Date(card.updated_at),
