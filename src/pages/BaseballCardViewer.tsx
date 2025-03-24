@@ -1,12 +1,25 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import Navbar from '@/components/Navbar';
 import BaseballCardRenderer from '@/components/baseball/BaseballCardRenderer';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, PanelLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { 
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger 
+} from '@/components/ui/collapsible';
+import { 
+  ResizablePanelGroup,
+  ResizablePanel,
+  ResizableHandle
+} from '@/components/ui/resizable';
+import BaseballCardSidebar from '@/components/baseball/BaseballCardSidebar';
 
 const BaseballCardViewer = () => {
+  const [isOpen, setIsOpen] = useState(true);
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-900">
       <Navbar />
@@ -21,7 +34,36 @@ const BaseballCardViewer = () => {
       </div>
       
       <main className="flex-1 pt-16">
-        <BaseballCardRenderer />
+        <ResizablePanelGroup direction="horizontal" className="min-h-[calc(100vh-4rem)]">
+          <Collapsible open={isOpen} onOpenChange={setIsOpen} className="h-full">
+            <ResizablePanel 
+              defaultSize={20} 
+              minSize={0}
+              maxSize={30}
+              className={`${isOpen ? 'block' : 'hidden'} bg-gray-800 border-r border-gray-700`}
+            >
+              <BaseballCardSidebar />
+            </ResizablePanel>
+          </Collapsible>
+          
+          <ResizableHandle withHandle className="bg-gray-700" />
+          
+          <ResizablePanel defaultSize={80}>
+            <div className="relative h-full">
+              <CollapsibleTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="absolute top-4 left-4 z-10 bg-gray-800/50 hover:bg-gray-700/50 text-white"
+                >
+                  <PanelLeft className="h-4 w-4" />
+                </Button>
+              </CollapsibleTrigger>
+              
+              <BaseballCardRenderer />
+            </div>
+          </ResizablePanel>
+        </ResizablePanelGroup>
       </main>
     </div>
   );

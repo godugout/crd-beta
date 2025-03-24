@@ -1,4 +1,3 @@
-
 import React, { useRef, useState, useEffect } from 'react';
 import { 
   Award, 
@@ -113,11 +112,9 @@ const BaseballCardRenderer: React.FC = () => {
   const [cardData, setCardData] = useState<CardData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load card data based on ID
   useEffect(() => {
     setIsLoading(true);
     
-    // Find the card by ID or use the first one if no ID is provided
     const card = id 
       ? BASEBALL_CARDS.find(card => card.id === id) 
       : BASEBALL_CARDS[0];
@@ -129,25 +126,18 @@ const BaseballCardRenderer: React.FC = () => {
     setIsLoading(false);
   }, [id]);
 
-  // Handle card rotation based on mouse movement
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!cardContainerRef.current) return;
     
     const rect = cardContainerRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left; // x position within the element
-    const y = e.clientY - rect.top; // y position within the element
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
     
-    // Calculate rotation based on mouse position
-    // The center of the element would be rect.width/2, rect.height/2
     const centerX = rect.width / 2;
     const centerY = rect.height / 2;
     
-    // Calculate the max rotation in degrees
     const maxRotation = 12;
     
-    // Calculate rotation based on distance from center
-    // Divide by centerX/Y to get a value between -1 and 1
-    // Multiply by maxRotation to get the actual rotation
     const newRotateY = ((x - centerX) / centerX) * maxRotation;
     const newRotateX = ((centerY - y) / centerY) * maxRotation;
     
@@ -155,33 +145,30 @@ const BaseballCardRenderer: React.FC = () => {
     setRotateY(newRotateY);
   };
 
-  // Reset rotation when mouse leaves
   const handleMouseLeave = () => {
     setRotateX(0);
     setRotateY(0);
   };
 
-  // Toggle card flip
   const toggleFlip = () => {
     setIsFlipped(!isFlipped);
   };
   
   if (isLoading || !cardData) {
     return (
-      <div className="w-full h-[600px] flex items-center justify-center">
+      <div className="w-full h-full flex items-center justify-center">
         <div className="animate-pulse flex flex-col items-center">
-          <div className="w-64 h-96 bg-gray-200 rounded-lg"></div>
-          <div className="mt-4 h-4 bg-gray-200 rounded w-48"></div>
+          <div className="w-64 h-96 bg-gray-800 rounded-lg"></div>
+          <div className="mt-4 h-4 bg-gray-800 rounded w-48"></div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="relative w-full h-[calc(100vh-5rem)] bg-gray-900 overflow-hidden">
-      {/* ESPN-style overlay/HUD graphics - Fixed at the top */}
+    <div className="relative w-full h-full bg-gray-900 overflow-hidden">
       <div className="absolute top-0 left-0 right-0 z-10 bg-gradient-to-b from-black/80 to-transparent p-4 text-white">
-        <div className="container mx-auto">
+        <div className="container mx-auto max-w-7xl">
           <div className="flex justify-between items-center">
             <div className="flex items-center space-x-2">
               <Badge variant="outline" className="bg-red-600 border-none text-white uppercase font-bold px-3 py-1">
@@ -197,7 +184,6 @@ const BaseballCardRenderer: React.FC = () => {
         </div>
       </div>
 
-      {/* Card Display Area - Center */}
       <div className="absolute inset-0 flex items-center justify-center">
         <div 
           ref={cardContainerRef}
@@ -215,7 +201,6 @@ const BaseballCardRenderer: React.FC = () => {
               `,
             }}
           >
-            {/* Front of card */}
             <div 
               className={`backface-hidden absolute w-full h-full rounded-lg shadow-2xl
                           bg-cover bg-center overflow-hidden`}
@@ -224,7 +209,6 @@ const BaseballCardRenderer: React.FC = () => {
               <div className="card-shine absolute inset-0"></div>
             </div>
             
-            {/* Back of card */}
             <div 
               className={`backface-hidden absolute w-full h-full rounded-lg shadow-2xl
                           bg-cover bg-center overflow-hidden`}
@@ -273,8 +257,7 @@ const BaseballCardRenderer: React.FC = () => {
         </div>
       </div>
 
-      {/* Stats overlay - Right side */}
-      <div className="absolute top-1/2 right-0 transform -translate-y-1/2 w-64 md:w-96 bg-black/60 backdrop-blur-md p-4 rounded-l-lg border-l-4 border-blue-500 text-white">
+      <div className="absolute top-1/2 right-4 transform -translate-y-1/2 w-64 md:w-80 bg-black/60 backdrop-blur-md p-4 rounded-lg border-l-4 border-blue-500 text-white">
         <h3 className="text-lg font-bold flex items-center mb-4">
           <Info className="mr-2 h-5 w-5 text-blue-400" /> Card Details
         </h3>
@@ -332,9 +315,8 @@ const BaseballCardRenderer: React.FC = () => {
         </div>
       </div>
       
-      {/* Career Stats - Left side */}
       {cardData.stats && (
-        <div className="absolute top-1/2 left-0 transform -translate-y-1/2 w-64 md:w-80 bg-black/60 backdrop-blur-md p-4 rounded-r-lg border-r-4 border-red-500 text-white">
+        <div className="absolute top-1/2 left-4 transform -translate-y-1/2 w-64 md:w-72 bg-black/60 backdrop-blur-md p-4 rounded-lg border-r-4 border-red-500 text-white hidden lg:block">
           <h3 className="text-lg font-bold flex items-center mb-4">
             <BarChart4 className="mr-2 h-5 w-5 text-red-400" /> Career Stats
           </h3>
@@ -388,7 +370,6 @@ const BaseballCardRenderer: React.FC = () => {
         </div>
       )}
 
-      {/* Controls - Bottom */}
       <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 text-white">
         <div className="container mx-auto flex justify-center">
           <Button 
@@ -400,7 +381,6 @@ const BaseballCardRenderer: React.FC = () => {
         </div>
       </div>
       
-      {/* Card navigation */}
       <div className="absolute bottom-20 left-0 right-0 p-4">
         <div className="container mx-auto flex justify-center gap-2">
           {BASEBALL_CARDS.map((card) => (
