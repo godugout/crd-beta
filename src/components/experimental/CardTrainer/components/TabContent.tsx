@@ -64,6 +64,37 @@ const TabContent: React.FC<TabContentProps> = ({
             Compare Results
           </TabsTrigger>
         </TabsList>
+        
+        <TabsContent value="trace">
+          <TracingTab 
+            image={image}
+            manualTraces={manualTraces}
+            onAddTrace={onAddTrace}
+            onClearTraces={onClearTraces}
+            onCompareResults={onCompareResults}
+          />
+        </TabsContent>
+        
+        <TabsContent value="detect">
+          <DetectionTab 
+            image={image}
+            detectedCards={detectedCards}
+            isProcessing={isProcessing}
+            showEdges={showEdges}
+            showContours={showContours}
+            onDetectCards={onDetectCards}
+            onClearDetection={onClearDetection}
+            onToggleEdges={onToggleEdges}
+            onToggleContours={onToggleContours}
+          />
+        </TabsContent>
+        
+        <TabsContent value="compare">
+          <ComparisonTab 
+            detectedCards={detectedCards}
+            manualTraces={manualTraces}
+          />
+        </TabsContent>
       </Tabs>
       
       <div className="flex flex-wrap gap-3 mb-6">
@@ -104,37 +135,6 @@ const TabContent: React.FC<TabContentProps> = ({
           </Button>
         )}
       </div>
-      
-      <TabsContent value="trace">
-        <TracingTab 
-          image={image}
-          manualTraces={manualTraces}
-          onAddTrace={onAddTrace}
-          onClearTraces={onClearTraces}
-          onCompareResults={onCompareResults}
-        />
-      </TabsContent>
-      
-      <TabsContent value="detect">
-        <DetectionTab 
-          image={image}
-          detectedCards={detectedCards}
-          isProcessing={isProcessing}
-          showEdges={showEdges}
-          showContours={showContours}
-          onDetectCards={onDetectCards}
-          onClearDetection={onClearDetection}
-          onToggleEdges={onToggleEdges}
-          onToggleContours={onToggleContours}
-        />
-      </TabsContent>
-      
-      <TabsContent value="compare">
-        <ComparisonTab 
-          detectedCards={detectedCards}
-          manualTraces={manualTraces}
-        />
-      </TabsContent>
     </>
   );
 };
