@@ -1,9 +1,8 @@
-
 import React, { useState } from 'react';
 import Navbar from '@/components/Navbar';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { ChevronLeft, Play, Pause, Save, Download, RotateCw, Sparkles, Layers, Zap } from 'lucide-react';
+import { ChevronLeft, Play, Pause, Save, Download, RotateCw, Sparkles, Layers, Zap, ArrowRight } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
@@ -320,7 +319,7 @@ const CardAnimation = () => {
                             <div className="h-8 w-8 flex items-center justify-center bg-cyan-50 text-cyan-500 rounded-full">
                               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <path d="M3 9h18v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z"></path>
-                                <path d="m3 9 2.45-4.9A2 2 0 0 1 7.24 3h9.52a2 2 0 0 1 1.8 1.1L21 9"></path>
+                                <path d="m3 9 2.45-4.9A2 2 0 0 0 17.24 3h9.52a2 2 0 0 1 1.8 1.1L21 9"></path>
                                 <path d="M12 6v3"></path>
                               </svg>
                             </div>
@@ -410,7 +409,8 @@ const CardAnimation = () => {
       </main>
 
       {/* Define animations keyframes for the particle effects */}
-      <style jsx global>{`
+      <style>
+        {`
         @keyframes float-1 {
           0%, 100% { transform: translateY(0) translateX(0); }
           50% { transform: translateY(-10px) translateX(5px); }
@@ -437,7 +437,8 @@ const CardAnimation = () => {
         .animate-float-3 {
           animation: float-3 5s ease-in-out infinite;
         }
-      `}</style>
+        `}
+      </style>
     </div>
   );
 };

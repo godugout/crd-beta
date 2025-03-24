@@ -12,7 +12,7 @@ import {
   NavigationMenuTrigger,
   navigationMenuTriggerStyle 
 } from "@/components/ui/navigation-menu";
-import { Grid3X3, Image, FolderOpen, Sparkles, Cube, Layers, Play } from 'lucide-react';
+import { Grid3X3, Image, FolderOpen, Sparkles, Box, Layers, Play } from 'lucide-react';
 
 interface DesktopMenuProps {
   user: User | null;

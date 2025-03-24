@@ -1,10 +1,9 @@
-
 import React from 'react';
 import Navbar from '@/components/Navbar';
 import CardEditor from '@/components/CardEditor';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { Cube, Layers, Zap } from 'lucide-react';
+import { Box, Layers, Zap } from 'lucide-react';
 
 const Editor = () => {
   return (
@@ -37,7 +36,7 @@ const Editor = () => {
             <Link to="/ar-card-viewer" className="group bg-gradient-to-br from-indigo-50 to-blue-50 border border-indigo-100 rounded-lg p-4 transition-all hover:shadow-md">
               <div className="flex items-center gap-3 mb-2">
                 <div className="bg-indigo-100 text-indigo-600 p-2 rounded-full">
-                  <Cube className="h-5 w-5" />
+                  <Box className="h-5 w-5" />
                 </div>
                 <h3 className="font-semibold text-indigo-900">AR Card Viewer</h3>
               </div>
