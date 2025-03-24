@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, Share2, Plus, Trash2 } from 'lucide-react';
 import { Card } from '@/lib/types';
@@ -17,6 +17,8 @@ interface ArModeViewProps {
   onZoomIn: () => void;
   onZoomOut: () => void;
   onRotate: () => void;
+  onAddCard?: (card: Card) => void;
+  onRemoveCard?: (cardId: string) => void;
 }
 
 const ArModeView: React.FC<ArModeViewProps> = ({
@@ -28,7 +30,9 @@ const ArModeView: React.FC<ArModeViewProps> = ({
   onFlip,
   onZoomIn,
   onZoomOut,
-  onRotate
+  onRotate,
+  onAddCard,
+  onRemoveCard
 }) => {
   const [selectedCardId, setSelectedCardId] = useState<string | null>(
     activeCards.length > 0 ? activeCards[0].id : null
@@ -46,18 +50,52 @@ const ArModeView: React.FC<ArModeViewProps> = ({
       return;
     }
     
-    // This is just a notification - the actual adding happens in the parent component
-    toast.success('Card added to scene');
+    // Call the parent handler
+    if (onAddCard) {
+      onAddCard(card);
+    }
+    
     setShowCardSelector(false);
     setSelectedCardId(card.id);
+    
+    // Provide feedback
+    toast.success('Card added to scene');
   };
 
   const handleRemoveSelected = () => {
-    if (!selectedCardId) return;
+    if (!selectedCardId || !onRemoveCard) return;
     
-    // This is just a notification - the actual removal happens in the parent component
+    // Call the parent handler
+    onRemoveCard(selectedCardId);
+    
+    // Select another card if available
+    if (activeCards.length > 1) {
+      const newSelectedId = activeCards.find(c => c.id !== selectedCardId)?.id || null;
+      setSelectedCardId(newSelectedId);
+    } else {
+      setSelectedCardId(null);
+    }
+    
     toast.success('Card removed from scene');
   };
+  
+  // Handle click outside card selector to close it
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (showCardSelector) {
+        const target = e.target as HTMLElement;
+        if (!target.closest('.card-selector')) {
+          setShowCardSelector(false);
+        }
+      }
+    };
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showCardSelector]);
 
   return (
     <div className="relative h-screen w-screen bg-black">
@@ -83,7 +121,7 @@ const ArModeView: React.FC<ArModeViewProps> = ({
         <Button
           variant="outline"
           size="icon"
-          className="bg-black/50 text-white border-white/20"
+          className="bg-black/50 text-white border-white/20 transition-all hover:bg-black/70"
           onClick={() => setShowCardSelector(!showCardSelector)}
         >
           <Plus className="h-4 w-4" />
@@ -93,7 +131,7 @@ const ArModeView: React.FC<ArModeViewProps> = ({
           <Button
             variant="outline"
             size="icon"
-            className="bg-black/50 text-white border-white/20"
+            className="bg-black/50 text-white border-white/20 transition-all hover:bg-black/70"
             onClick={handleRemoveSelected}
           >
             <Trash2 className="h-4 w-4" />
@@ -101,15 +139,16 @@ const ArModeView: React.FC<ArModeViewProps> = ({
         )}
       </div>
       
-      {/* Card Selector */}
+      {/* Card Selector with animation */}
       {showCardSelector && (
-        <div className="absolute right-4 top-28 z-50 bg-white rounded-lg shadow-lg p-4 w-64 max-h-80 overflow-y-auto">
+        <div className="absolute right-4 top-28 z-50 bg-white/90 backdrop-blur-sm rounded-lg shadow-lg p-4 w-64 max-h-80 overflow-y-auto card-selector animate-fadeIn">
           <h3 className="font-semibold mb-3">Add Card to Scene</h3>
           <div className="space-y-2">
-            {availableCards.map(card => (
+            {availableCards.map((card, index) => (
               <div 
                 key={card.id}
-                className="flex items-center p-2 rounded-md hover:bg-gray-100 cursor-pointer"
+                className="flex items-center p-2 rounded-md hover:bg-gray-100 cursor-pointer transition-colors card-appear"
+                style={{ animationDelay: `${index * 0.05}s` }}
                 onClick={() => handleAddCard(card)}
               >
                 <div className="w-8 h-12 bg-gray-200 rounded overflow-hidden mr-2">
@@ -130,7 +169,7 @@ const ArModeView: React.FC<ArModeViewProps> = ({
       <Button
         variant="outline"
         size="sm"
-        className="absolute top-4 left-4 z-50 bg-black/50 text-white border-white/20"
+        className="absolute top-4 left-4 z-50 bg-black/50 text-white border-white/20 transition-all hover:bg-black/70"
         onClick={onExitAr}
       >
         <ChevronLeft className="mr-1 h-4 w-4" />
@@ -141,11 +180,24 @@ const ArModeView: React.FC<ArModeViewProps> = ({
       <Button
         variant="outline"
         size="icon"
-        className="absolute top-4 right-4 z-50 bg-black/50 text-white border-white/20"
+        className="absolute top-4 right-4 z-50 bg-black/50 text-white border-white/20 transition-all hover:bg-black/70"
         onClick={() => toast.success('Sharing options opened')}
       >
         <Share2 className="h-4 w-4" />
       </Button>
+      
+      {/* Info overlay for selected card */}
+      {selectedCardId && (
+        <div className="absolute bottom-20 left-4 right-4 z-40 bg-black/40 backdrop-blur-sm text-white p-3 rounded-lg animate-fadeIn">
+          <div className="text-sm">
+            <p className="font-semibold">{activeCards.find(c => c.id === selectedCardId)?.title}</p>
+            <p className="text-xs text-white/70 mt-0.5">{activeCards.find(c => c.id === selectedCardId)?.description}</p>
+          </div>
+          <div className="text-xs text-white/70 mt-2">
+            <p>Tap to select • Double-tap to reset position • Press and hold to change effect</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

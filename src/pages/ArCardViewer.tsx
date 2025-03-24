@@ -12,6 +12,7 @@ import { Card } from '@/lib/types';
 import ArPreviewPanel from '@/components/ar/ArPreviewPanel';
 import ArSettingsPanel from '@/components/ar/ArSettingsPanel';
 import ArModeView from '@/components/ar/ArModeView';
+import '../components/home/card-effects/index.css';
 
 const ArCardViewer = () => {
   const { id } = useParams<{ id: string }>();
@@ -58,6 +59,11 @@ const ArCardViewer = () => {
     if (activeCard && !arCards.some(card => card.id === activeCard.id)) {
       setArCards(prev => [...prev, activeCard]);
     }
+    
+    // Apply holographic effect CSS variables
+    document.documentElement.style.setProperty('--shimmer-speed', '3s');
+    document.documentElement.style.setProperty('--hologram-intensity', '0.7');
+    document.documentElement.style.setProperty('--motion-speed', '1');
   };
 
   const handleExitAr = () => {
@@ -135,6 +141,8 @@ const ArCardViewer = () => {
             onZoomIn={handleZoomIn}
             onZoomOut={handleZoomOut}
             onRotate={handleRotate}
+            onAddCard={handleAddCard}
+            onRemoveCard={handleRemoveCard}
           />
         ) : (
           <div className="container mx-auto px-4 py-8">

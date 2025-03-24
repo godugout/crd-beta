@@ -22,6 +22,7 @@ const CameraView: React.FC<CameraViewProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const [cameraReady, setCameraReady] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
+  const [lightPosition, setLightPosition] = useState({ x: 0.5, y: 0.5 });
 
   useEffect(() => {
     let stream: MediaStream | null = null;
@@ -57,6 +58,21 @@ const CameraView: React.FC<CameraViewProps> = ({
       }
     };
   }, [onError]);
+  
+  // Track mouse/touch movement to simulate light reflections
+  const handlePointerMove = (e: React.PointerEvent) => {
+    if (!containerRef.current) return;
+    
+    const rect = containerRef.current.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width;
+    const y = (e.clientY - rect.top) / rect.height;
+    
+    setLightPosition({ x, y });
+    
+    // Update CSS variables for use in effects
+    document.documentElement.style.setProperty('--mouse-x', `${x * 100}%`);
+    document.documentElement.style.setProperty('--mouse-y', `${y * 100}%`);
+  };
 
   if (cameraError) {
     return (
@@ -73,13 +89,25 @@ const CameraView: React.FC<CameraViewProps> = ({
   }
 
   return (
-    <div ref={containerRef} className="relative w-full h-full overflow-hidden">
+    <div 
+      ref={containerRef} 
+      className="relative w-full h-full overflow-hidden"
+      onPointerMove={handlePointerMove}
+    >
       {/* Video feed from camera */}
       <video 
         ref={videoRef}
         className="w-full h-full object-cover"
         playsInline
         muted
+      />
+      
+      {/* Dynamic lighting overlay for holographic effects */}
+      <div 
+        className="absolute inset-0 pointer-events-none z-10 bg-gradient-radial from-white/5 to-transparent opacity-50"
+        style={{
+          background: `radial-gradient(circle at ${lightPosition.x * 100}% ${lightPosition.y * 100}%, rgba(255,255,255,0.1) 0%, transparent 70%)`,
+        }}
       />
       
       {/* AR card items */}
