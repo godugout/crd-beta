@@ -168,17 +168,24 @@ export const useCollectionOperations = ({
         )
       );
       
-      // Add card to collection
-      const card = collections.flatMap(c => c.cards).find(c => c.id === cardId) || 
-                 setCards(state => state).find(c => c.id === cardId);
-                 
-      if (card) {
+      // Find the card to add to the collection
+      const cardToAdd = collections
+        .flatMap(c => c.cards)
+        .find(c => c.id === cardId);
+        
+      const cardFromState = cardToAdd || setCards(state => {
+        const foundCard = state.find(c => c.id === cardId);
+        return state; // Return the state unchanged
+      }).find(c => c.id === cardId);
+      
+      // Add card to collection if found
+      if (cardFromState) {
         setCollections(prev => 
           prev.map(collection => 
             collection.id === collectionId 
               ? { 
                   ...collection, 
-                  cards: [...collection.cards.filter(c => c.id !== cardId), {...card, collectionId}]
+                  cards: [...collection.cards.filter(c => c.id !== cardId), {...cardFromState, collectionId}]
                 } 
               : collection
           )
