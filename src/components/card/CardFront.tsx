@@ -1,16 +1,19 @@
 
 import React from 'react';
+import { Card } from '@/lib/types';
 import { cn } from '@/lib/utils';
-import { formatDate } from '@/lib/date-utils';
-import { EditActions } from './EditActions';
+import { MoreHorizontal, RefreshCw, Share2, Trash2 } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface CardFrontProps {
-  card: {
-    imageUrl: string;
-    title: string;
-    createdAt: Date;
-  };
-  activeEffects: string[];
+  card: Card;
+  activeEffects?: string[];
   onFlip: (e: React.MouseEvent) => void;
   onShare: (e: React.MouseEvent) => void;
   onDelete: (e: React.MouseEvent) => void;
@@ -18,88 +21,95 @@ interface CardFrontProps {
 
 export const CardFront: React.FC<CardFrontProps> = ({ 
   card, 
-  activeEffects,
-  onFlip, 
-  onShare, 
-  onDelete 
+  activeEffects = [],
+  onFlip,
+  onShare,
+  onDelete
 }) => {
-  // Build card front classes based on active effects
-  const getCardFrontClasses = () => {
-    const classes = ["card-front rounded-xl overflow-hidden shadow-card bg-white"];
-    
-    if (activeEffects.includes('Classic Holographic')) {
-      classes.push('card-holographic');
+  const effectClasses = activeEffects.map(effect => {
+    switch (effect.toLowerCase()) {
+      case 'holographic':
+        return 'effect-holographic';
+      case 'shimmer':
+        return 'effect-shimmer';
+      case 'vintage':
+        return 'effect-vintage';
+      case 'refractor':
+      default:
+        return 'effect-refractor';
     }
-    
-    if (activeEffects.includes('Refractor')) {
-      classes.push('card-refractor');
-    }
-    
-    if (activeEffects.includes('Prismatic')) {
-      classes.push('card-prismatic');
-    }
-    
-    if (activeEffects.includes('Electric')) {
-      classes.push('card-electric');
-    }
-    
-    if (activeEffects.includes('Gold Foil')) {
-      classes.push('card-gold-foil');
-    }
-    
-    if (activeEffects.includes('Chrome')) {
-      classes.push('card-chrome');
-    }
-    
-    if (activeEffects.includes('Vintage')) {
-      classes.push('card-vintage');
-    }
-    
-    return cn(...classes);
-  };
-
-  const formattedDate = formatDate(card.createdAt);
-
+  });
+  
   return (
-    <div className={getCardFrontClasses()}>
-      <div className="relative w-full h-full">
-        <img
+    <div className="card-face card-front absolute inset-0 bg-white rounded-lg shadow-lg overflow-hidden select-none">
+      {/* Card image */}
+      <div className={cn(
+        "relative w-full h-full bg-cover bg-center overflow-hidden",
+        ...effectClasses
+      )}>
+        <img 
           src={card.imageUrl}
           alt={card.title}
           className="w-full h-full object-cover"
-          loading="lazy"
         />
         
-        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-4">
-          <h3 className="text-white font-semibold truncate">{card.title}</h3>
+        {/* Card info overlay at bottom */}
+        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+          <h3 className="font-bold text-white text-lg leading-tight">{card.title}</h3>
           
-          {activeEffects.length > 0 && (
-            <span className="text-xs text-white/90 bg-black/40 px-2 py-0.5 rounded-full">
-              {activeEffects[0]}
-            </span>
+          {card.tags && card.tags.length > 0 && (
+            <div className="flex flex-wrap gap-1 mt-1">
+              {card.tags.slice(0, 3).map((tag, index) => (
+                <span 
+                  key={index}
+                  className="inline-flex text-xs bg-cardshow-blue/80 text-white px-1.5 py-0.5 rounded"
+                >
+                  {tag}
+                </span>
+              ))}
+              
+              {card.tags.length > 3 && (
+                <span className="text-xs text-gray-300">+{card.tags.length - 3}</span>
+              )}
+            </div>
           )}
         </div>
         
-        {/* Hover Actions */}
-        <EditActions 
-          onFlip={onFlip}
-          onShare={onShare}
-          onDelete={onDelete}
-        />
-
-        {/* Card indicator and created date */}
-        <div className="absolute top-0 left-0 p-3">
-          <div className="bg-white/90 backdrop-blur-sm rounded-full px-2 py-1 text-xs text-cardshow-slate shadow-subtle">
-            {formattedDate}
-          </div>
+        {/* Action buttons */}
+        <div className="absolute top-2 right-2 flex space-x-1">
+          <button
+            onClick={onFlip}
+            className="p-1.5 bg-white/80 hover:bg-white rounded-full text-cardshow-dark"
+            title="Flip card"
+          >
+            <RefreshCw size={14} />
+          </button>
+          
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button 
+                className="p-1.5 bg-white/80 hover:bg-white rounded-full text-cardshow-dark"
+                title="More options"
+              >
+                <MoreHorizontal size={14} />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={onShare}>
+                <Share2 className="mr-2 h-4 w-4" />
+                <span>Share</span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem 
+                onClick={onDelete}
+                className="text-red-600 focus:text-red-600"
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                <span>Delete</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
-        
-        {/* Refractor effect overlay if active */}
-        {activeEffects.includes('Refractor') && (
-          <div className="absolute inset-0 pointer-events-none opacity-50 overflow-hidden rounded-xl">
-            <div className="absolute inset-0 card-refractor"></div>
-          </div>
-        )}
       </div>
     </div>
   );

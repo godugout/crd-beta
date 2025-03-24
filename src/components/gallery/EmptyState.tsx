@@ -1,55 +1,70 @@
 
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, AlertCircle } from 'lucide-react';
-import SampleCardsButton from './SampleCardsButton';
+import { PlusCircle, RefreshCw, Filter } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface EmptyStateProps {
   isEmpty: boolean;
   isFiltered: boolean;
-  className?: string;
-  onRefresh?: () => void;
+  onRefresh: () => Promise<void>;
 }
 
-const EmptyState: React.FC<EmptyStateProps> = ({ 
-  isEmpty, 
-  isFiltered,
-  className = "",
-  onRefresh
-}) => {
+const EmptyState: React.FC<EmptyStateProps> = ({ isEmpty, isFiltered, onRefresh }) => {
   const navigate = useNavigate();
   
-  return (
-    <div className={`flex flex-col items-center justify-center py-16 text-center ${className}`}>
-      <div className="bg-cardshow-neutral rounded-full p-6 mb-4">
-        {isEmpty ? 
-          <PlusCircle className="h-8 w-8 text-cardshow-slate" /> :
-          <AlertCircle className="h-8 w-8 text-cardshow-slate" />
-        }
-      </div>
-      <h3 className="text-xl font-semibold mb-2">
-        {isEmpty ? "No cards in your collection" : "No matching cards found"}
-      </h3>
-      <p className="text-cardshow-slate mb-6 max-w-md">
-        {isEmpty 
-          ? "You haven't created any cards yet. Create your first card or add sample cards to get started!" 
-          : "Try adjusting your search or filters to find what you're looking for."}
-      </p>
-      
-      {isEmpty && (
-        <div className="flex flex-col sm:flex-row gap-4">
-          <Button
-            onClick={() => navigate('/editor')}
-            className="flex items-center justify-center rounded-lg bg-cardshow-blue px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-opacity-90 transition-colors"
-          >
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Create Your First Card
-          </Button>
-          
-          <SampleCardsButton onComplete={onRefresh} />
+  if (isFiltered) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 text-center">
+        <div className="bg-amber-100 rounded-full p-6 mb-4">
+          <Filter className="h-8 w-8 text-amber-600" />
         </div>
-      )}
+        <h3 className="text-xl font-semibold mb-2">No matching cards</h3>
+        <p className="text-cardshow-slate mb-6 max-w-md">
+          We couldn't find any cards matching your current filters. Try adjusting your search or filter criteria.
+        </p>
+      </div>
+    );
+  }
+  
+  if (isEmpty) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 text-center">
+        <div className="bg-cardshow-neutral rounded-full p-6 mb-4">
+          <PlusCircle className="h-8 w-8 text-cardshow-slate" />
+        </div>
+        <h3 className="text-xl font-semibold mb-2">No cards yet</h3>
+        <p className="text-cardshow-slate mb-6 max-w-md">
+          Your collection is empty. Start by creating your first card!
+        </p>
+        <Button 
+          onClick={() => navigate('/editor')}
+          className="flex items-center"
+        >
+          <PlusCircle className="h-4 w-4 mr-2" />
+          Create Your First Card
+        </Button>
+      </div>
+    );
+  }
+  
+  return (
+    <div className="flex flex-col items-center justify-center py-16 text-center">
+      <div className="bg-blue-100 rounded-full p-6 mb-4">
+        <RefreshCw className="h-8 w-8 text-blue-600" />
+      </div>
+      <h3 className="text-xl font-semibold mb-2">Something went wrong</h3>
+      <p className="text-cardshow-slate mb-6 max-w-md">
+        We couldn't load your cards. Please try refreshing.
+      </p>
+      <Button 
+        onClick={() => onRefresh()}
+        variant="outline"
+        className="flex items-center"
+      >
+        <RefreshCw className="h-4 w-4 mr-2" />
+        Refresh
+      </Button>
     </div>
   );
 };

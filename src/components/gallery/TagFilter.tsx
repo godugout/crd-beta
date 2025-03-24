@@ -1,7 +1,8 @@
 
 import React from 'react';
-import { cn } from '@/lib/utils';
 import { Tag, X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 interface TagFilterProps {
   allTags: string[];
@@ -12,46 +13,46 @@ interface TagFilterProps {
 }
 
 const TagFilter: React.FC<TagFilterProps> = ({ 
-  allTags, 
-  selectedTags, 
-  onTagSelect, 
+  allTags,
+  selectedTags,
+  onTagSelect,
   onClearFilters,
-  className = ""
+  className
 }) => {
   if (allTags.length === 0) return null;
   
   return (
-    <div className={`mb-6 ${className}`}>
-      <div className="flex items-center mb-2">
-        <Tag size={16} className="mr-2 text-cardshow-slate" />
-        <h3 className="text-sm font-medium text-cardshow-dark">Filter by tags</h3>
+    <div className={cn("mb-6", className)}>
+      <div className="flex items-center gap-2 mb-2">
+        <Tag className="h-4 w-4 text-cardshow-slate" />
+        <span className="text-sm font-medium text-cardshow-dark">Filter by tags</span>
         
-        {(selectedTags.length > 0) && onClearFilters && (
-          <button 
+        {onClearFilters && (
+          <Button 
+            variant="ghost" 
+            size="sm" 
             onClick={onClearFilters}
-            className="ml-auto text-xs text-cardshow-blue hover:underline"
+            className="ml-auto text-xs h-7 px-2"
           >
+            <X className="h-3 w-3 mr-1" />
             Clear filters
-          </button>
+          </Button>
         )}
       </div>
       
-      <div className="flex flex-wrap gap-2 mt-2">
-        {allTags.map((tag, index) => (
+      <div className="flex flex-wrap gap-2">
+        {allTags.map((tag) => (
           <button
-            key={index}
+            key={tag}
             onClick={() => onTagSelect(tag)}
             className={cn(
-              "flex items-center text-xs px-3 py-1.5 rounded-full transition-colors",
-              selectedTags.includes(tag) 
-                ? "bg-cardshow-blue text-white" 
-                : "bg-cardshow-blue-light text-cardshow-blue hover:bg-cardshow-blue-light/70"
+              "text-xs px-3 py-1 rounded-full transition-colors",
+              selectedTags.includes(tag)
+                ? "bg-cardshow-blue text-white"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
             )}
           >
             {tag}
-            {selectedTags.includes(tag) && (
-              <X size={12} className="ml-1" />
-            )}
           </button>
         ))}
       </div>

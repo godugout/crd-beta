@@ -10,8 +10,8 @@ interface SearchInputProps {
 }
 
 const SearchInput: React.FC<SearchInputProps> = ({ 
-  value, 
-  onChange, 
+  value,
+  onChange,
   placeholder = "Search...",
   className = ""
 }) => {

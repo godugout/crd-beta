@@ -6,6 +6,7 @@ import Gallery from './pages/Gallery';
 import Editor from './pages/Editor';
 import Collections from './pages/Collections';
 import CollectionDetail from './pages/CollectionDetail';
+import CollectionForm from './pages/CollectionForm';
 import NotFound from './pages/NotFound';
 import PbrDemo from './pages/PbrDemo';
 import SignatureDemo from './pages/SignatureDemo';
@@ -25,6 +26,8 @@ function App() {
         <Route path="/editor" element={<Editor />} />
         <Route path="/collections" element={<Collections />} />
         <Route path="/collections/:id" element={<CollectionDetail />} />
+        <Route path="/collections/new" element={<CollectionForm />} />
+        <Route path="/collections/:id/edit" element={<CollectionForm />} />
         <Route path="/pbr" element={<PbrDemo />} />
         <Route path="/signature" element={<SignatureDemo />} />
         <Route path="/card-detector" element={<CardDetector />} />

@@ -11,6 +11,7 @@ import TagFilter from './gallery/TagFilter';
 import CardGrid from './gallery/CardGrid';
 import CardList from './gallery/CardList';
 import EmptyState from './gallery/EmptyState';
+import { useCards } from '@/context/CardContext';
 
 interface CardGalleryProps {
   className?: string;
@@ -99,7 +100,6 @@ const CardGallery: React.FC<CardGalleryProps> = ({
         </button>
       </div>
       
-      {/* Tags filter */}
       <TagFilter 
         allTags={allTags}
         selectedTags={selectedTags}
@@ -107,7 +107,6 @@ const CardGallery: React.FC<CardGalleryProps> = ({
         onClearFilters={(selectedTags.length > 0 || searchQuery) ? clearFilters : undefined}
       />
       
-      {/* Cards display based on view mode */}
       {filteredCards.length > 0 ? (
         viewMode === 'grid' ? (
           <CardGrid 
@@ -133,6 +132,3 @@ const CardGallery: React.FC<CardGalleryProps> = ({
 };
 
 export default CardGallery;
-
-// Don't remove this import, it's used in the file above
-import { useCards } from '@/context/CardContext';
