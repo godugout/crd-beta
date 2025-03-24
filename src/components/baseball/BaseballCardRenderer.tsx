@@ -52,7 +52,11 @@ const BaseballCardRenderer: React.FC = () => {
     );
   }
 
-  return <CardContainer cardData={cardData} allCards={allCards} />;
+  return (
+    <div className="relative w-full h-full z-10">
+      <CardContainer cardData={cardData} allCards={allCards} />
+    </div>
+  );
 };
 
 export default BaseballCardRenderer;

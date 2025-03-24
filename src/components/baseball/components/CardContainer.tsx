@@ -50,7 +50,7 @@ const CardContainer: React.FC<CardContainerProps> = ({ cardData, allCards }) => 
   };
 
   return (
-    <div className="relative w-full h-full bg-gray-900 overflow-hidden">
+    <div className="relative w-full h-full bg-gray-900 overflow-hidden z-0">
       <CardHeader cardData={cardData} />
       
       <CardDisplay 
@@ -64,9 +64,11 @@ const CardContainer: React.FC<CardContainerProps> = ({ cardData, allCards }) => 
         cardContainerRef={cardContainerRef}
       />
 
-      <CardDetails card={cardData} />
-      {cardData.stats && <CardStats stats={cardData.stats} />}
-      <CardNavigation cards={allCards} currentCardId={cardData.id} />
+      <div className="relative z-10">
+        <CardDetails card={cardData} />
+        {cardData.stats && <CardStats stats={cardData.stats} />}
+        <CardNavigation cards={allCards} currentCardId={cardData.id} />
+      </div>
     </div>
   );
 };

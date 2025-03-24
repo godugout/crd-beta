@@ -24,7 +24,7 @@ const BaseballCardViewer = () => {
     <div className="min-h-screen flex flex-col bg-gray-900">
       <Navbar />
       
-      <div className="absolute top-16 left-4 z-10 mt-2">
+      <div className="absolute top-16 left-4 z-50 mt-2">
         <Button asChild variant="ghost" className="text-white hover:bg-white/10">
           <Link to="/gallery" className="flex items-center">
             <ChevronLeft className="mr-1 h-4 w-4" />
@@ -40,22 +40,22 @@ const BaseballCardViewer = () => {
               defaultSize={20} 
               minSize={0}
               maxSize={30}
-              className="bg-gray-800 border-r border-gray-700"
+              className="bg-gray-800 border-r border-gray-700 z-40"
             >
-              <CollapsibleContent>
+              <CollapsibleContent className="h-full z-30">
                 <BaseballCardSidebar />
               </CollapsibleContent>
             </ResizablePanel>
 
-            <ResizableHandle withHandle className="bg-gray-700" />
+            <ResizableHandle withHandle className="bg-gray-700 z-30" />
           
-            <ResizablePanel defaultSize={80}>
+            <ResizablePanel defaultSize={80} className="relative">
               <div className="relative h-full">
                 <CollapsibleTrigger asChild>
                   <Button 
                     variant="ghost" 
                     size="icon" 
-                    className="absolute top-4 left-4 z-10 bg-gray-800/50 hover:bg-gray-700/50 text-white"
+                    className="absolute top-4 left-4 z-50 bg-gray-800/50 hover:bg-gray-700/50 text-white"
                   >
                     <PanelLeft className="h-4 w-4" />
                   </Button>

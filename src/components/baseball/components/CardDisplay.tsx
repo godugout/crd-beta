@@ -28,10 +28,10 @@ const CardDisplay: React.FC<CardDisplayProps> = ({
   console.log("Rendering CardDisplay with data:", cardData);
   
   return (
-    <div className="absolute inset-0 flex items-center justify-center">
+    <div className="absolute inset-0 flex items-center justify-center z-20">
       <div 
         ref={cardContainerRef}
-        className="perspective-1000 w-64 md:w-80 h-96 md:h-[480px]"
+        className="perspective-1000 w-64 md:w-80 h-96 md:h-[480px] relative z-30"
         onMouseMove={onMouseMove}
         onMouseLeave={onMouseLeave}
       >
@@ -100,7 +100,7 @@ const CardDisplay: React.FC<CardDisplayProps> = ({
         </div>
       </div>
 
-      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 text-white">
+      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 text-white z-40">
         <div className="container mx-auto flex justify-center">
           <Button 
             onClick={toggleFlip}
