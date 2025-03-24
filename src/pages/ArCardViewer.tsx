@@ -6,12 +6,12 @@ import { useParams, Link } from 'react-router-dom';
 import { ChevronLeft, Camera, PanelLeft, Smartphone, AlertCircle } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { BASEBALL_CARDS } from '@/components/baseball/hooks/useBaseballCard';
 import { toast } from 'sonner';
 import { Card } from '@/lib/types';
 import ArPreviewPanel from '@/components/ar/ArPreviewPanel';
 import ArSettingsPanel from '@/components/ar/ArSettingsPanel';
 import ArModeView from '@/components/ar/ArModeView';
+import { supabase } from '@/integrations/supabase/client';
 import '../components/home/card-effects/index.css';
 
 const ArCardViewer = () => {
@@ -24,33 +24,61 @@ const ArCardViewer = () => {
   const [scale, setScale] = useState(100);
   const [rotation, setRotation] = useState(0);
   const [cameraError, setCameraError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   
   useEffect(() => {
-    // Convert baseball cards to the Card format for our viewer
-    const convertedCards: Card[] = BASEBALL_CARDS.map(baseballCard => ({
-      id: baseballCard.id,
-      title: baseballCard.player,
-      description: `${baseballCard.year} ${baseballCard.manufacturer}`,
-      imageUrl: baseballCard.imageUrl,
-      thumbnailUrl: baseballCard.imageUrl,
-      tags: [baseballCard.team, baseballCard.position],
-      createdAt: new Date(),
-      updatedAt: new Date()
-    }));
-    
-    setAvailableCards(convertedCards);
-    
-    // If ID is provided, find that card, otherwise use the first one
-    const card = id 
-      ? convertedCards.find(card => card.id === id) 
-      : convertedCards[0];
+    const fetchCards = async () => {
+      setIsLoading(true);
       
-    setActiveCard(card || null);
+      try {
+        // Fetch cards from the database
+        const { data: cardsData, error } = await supabase
+          .from('cards')
+          .select('*')
+          .order('created_at', { ascending: false });
+          
+        if (error) {
+          console.error('Error fetching cards:', error);
+          toast.error('Failed to load cards');
+          return;
+        }
+        
+        // Convert the database cards to our Card format
+        const formattedCards: Card[] = cardsData.map(card => ({
+          id: card.id,
+          title: card.title,
+          description: card.description || '',
+          imageUrl: card.image_url || '',
+          thumbnailUrl: card.thumbnail_url || '',
+          tags: card.tags || [],
+          createdAt: new Date(card.created_at),
+          updatedAt: new Date(card.updated_at),
+          collectionId: card.collection_id
+        }));
+        
+        setAvailableCards(formattedCards);
+        
+        // If ID is provided, find that card, otherwise use the first one
+        const cardById = id 
+          ? formattedCards.find(card => card.id === id) 
+          : null;
+          
+        const selectedCard = cardById || formattedCards[0] || null;
+        setActiveCard(selectedCard);
+        
+        // Initialize AR cards with the active card
+        if (selectedCard) {
+          setArCards([selectedCard]);
+        }
+      } catch (err) {
+        console.error('Error in card fetching process:', err);
+        toast.error('An unexpected error occurred');
+      } finally {
+        setIsLoading(false);
+      }
+    };
     
-    // Initialize AR cards with the active card
-    if (card) {
-      setArCards([card]);
-    }
+    fetchCards();
   }, [id]);
   
   const handleLaunchAr = () => {
@@ -130,7 +158,15 @@ const ArCardViewer = () => {
       )}
       
       <main className={`flex-1 ${isArMode ? 'pt-0' : 'pt-16'}`}>
-        {isArMode ? (
+        {isLoading ? (
+          <div className="flex items-center justify-center h-full">
+            <div className="animate-pulse flex flex-col items-center">
+              <div className="w-32 h-48 bg-gray-300 rounded-lg"></div>
+              <div className="h-4 w-24 bg-gray-300 mt-4 rounded"></div>
+              <div className="h-3 w-32 bg-gray-200 mt-2 rounded"></div>
+            </div>
+          </div>
+        ) : isArMode ? (
           <ArModeView 
             activeCards={arCards}
             availableCards={availableCards}
@@ -186,7 +222,7 @@ const ArCardViewer = () => {
                   <TabsContent value="preview" className="p-6">
                     <ArPreviewPanel 
                       activeCard={activeCard}
-                      baseballCards={BASEBALL_CARDS}
+                      availableCards={availableCards}
                       cameraError={cameraError}
                       onLaunchAr={handleLaunchAr}
                     />

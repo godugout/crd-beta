@@ -15,12 +15,13 @@ import BaseballCardViewer from './pages/BaseballCardViewer';
 import ArCardViewer from './pages/ArCardViewer';
 import CardComparison from './pages/CardComparison';
 import CardAnimation from './pages/CardAnimation';
+import CardShowcase from './pages/CardShowcase';
 
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Index />} />
+        <Route path="/" element={<CardShowcase />} />
         <Route path="/auth" element={<Auth />} />
         <Route path="/gallery" element={<Gallery />} />
         <Route path="/editor" element={<Editor />} />
@@ -37,6 +38,7 @@ function App() {
         <Route path="/ar-card-viewer/:id" element={<ArCardViewer />} />
         <Route path="/card-comparison" element={<CardComparison />} />
         <Route path="/card-animation" element={<CardAnimation />} />
+        <Route path="/showcase" element={<CardShowcase />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>

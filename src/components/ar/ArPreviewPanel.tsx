@@ -7,26 +7,25 @@ import { Card } from '@/lib/types';
 
 interface ArPreviewPanelProps {
   activeCard: Card | null;
-  baseballCards: Array<{
-    id: string;
-    title: string;
-    player: string;
-    team: string;
-    year: string;
-    manufacturer: string;
-    position: string;
-    imageUrl: string;
-  }>;
+  availableCards: Card[];
   cameraError: string | null;
   onLaunchAr: () => void;
 }
 
 const ArPreviewPanel: React.FC<ArPreviewPanelProps> = ({
   activeCard,
-  baseballCards,
+  availableCards,
   cameraError,
   onLaunchAr
 }) => {
+  if (!availableCards.length) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-gray-500">No cards available. Add some cards to your collection first.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col md:flex-row gap-6">
       <div className="flex-1 flex flex-col">
@@ -48,7 +47,7 @@ const ArPreviewPanel: React.FC<ArPreviewPanelProps> = ({
           className="w-full bg-blue-600 hover:bg-blue-700"
           size="lg"
           onClick={onLaunchAr}
-          disabled={!!cameraError}
+          disabled={!!cameraError || !activeCard}
         >
           <Camera className="mr-2 h-5 w-5" />
           Launch AR Experience
@@ -57,13 +56,13 @@ const ArPreviewPanel: React.FC<ArPreviewPanelProps> = ({
       
       <div className="md:w-64">
         <h3 className="font-semibold mb-4">Available Cards</h3>
-        <div className="space-y-3">
-          {baseballCards.map(card => (
+        <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
+          {availableCards.map(card => (
             <Link 
               key={card.id}
               to={`/ar-card-viewer/${card.id}`}
               className={`block p-3 rounded-md border transition-colors ${
-                activeCard?.id === card.id.toString() 
+                activeCard?.id === card.id 
                   ? 'border-blue-500 bg-blue-50' 
                   : 'border-gray-200 hover:bg-gray-50'
               }`}
@@ -71,14 +70,18 @@ const ArPreviewPanel: React.FC<ArPreviewPanelProps> = ({
               <div className="flex items-center">
                 <div className="w-10 h-14 bg-gray-200 rounded overflow-hidden mr-3">
                   <img 
-                    src={card.imageUrl} 
-                    alt={card.player}
+                    src={card.thumbnailUrl || card.imageUrl} 
+                    alt={card.title}
                     className="w-full h-full object-cover"
                   />
                 </div>
                 <div className="flex-1">
-                  <div className="font-medium text-sm">{card.player}</div>
-                  <div className="text-xs text-gray-500">{card.year} {card.manufacturer}</div>
+                  <div className="font-medium text-sm">{card.title}</div>
+                  <div className="text-xs text-gray-500 truncate">
+                    {card.tags && card.tags.length > 0 
+                      ? card.tags.slice(0, 2).join(', ') 
+                      : 'No tags'}
+                  </div>
                 </div>
               </div>
             </Link>
