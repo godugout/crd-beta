@@ -92,6 +92,34 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ user, isOpen, onClose, onSignOu
                   >
                     <span>Card Detector</span>
                   </Link>
+                  <Link 
+                    to="/baseball-card-viewer" 
+                    className="flex items-center py-2 pl-8 pr-2 hover:bg-gray-50 rounded-md"
+                    onClick={onClose}
+                  >
+                    <span>Baseball Cards</span>
+                  </Link>
+                  <Link 
+                    to="/ar-card-viewer" 
+                    className="flex items-center py-2 pl-8 pr-2 hover:bg-gray-50 rounded-md"
+                    onClick={onClose}
+                  >
+                    <span>AR Card Viewer</span>
+                  </Link>
+                  <Link 
+                    to="/card-comparison" 
+                    className="flex items-center py-2 pl-8 pr-2 hover:bg-gray-50 rounded-md"
+                    onClick={onClose}
+                  >
+                    <span>Card Comparison</span>
+                  </Link>
+                  <Link 
+                    to="/card-animation" 
+                    className="flex items-center py-2 pl-8 pr-2 hover:bg-gray-50 rounded-md"
+                    onClick={onClose}
+                  >
+                    <span>Animation Studio</span>
+                  </Link>
                 </AccordionContent>
               </AccordionItem>
             </Accordion>

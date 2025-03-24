@@ -11,6 +11,9 @@ import PbrDemo from './pages/PbrDemo';
 import SignatureDemo from './pages/SignatureDemo';
 import CardDetector from './pages/CardDetector';
 import BaseballCardViewer from './pages/BaseballCardViewer';
+import ArCardViewer from './pages/ArCardViewer';
+import CardComparison from './pages/CardComparison';
+import CardAnimation from './pages/CardAnimation';
 
 function App() {
   return (
@@ -27,6 +30,10 @@ function App() {
         <Route path="/card-detector" element={<CardDetector />} />
         <Route path="/baseball-card-viewer" element={<BaseballCardViewer />} />
         <Route path="/baseball-card-viewer/:id" element={<BaseballCardViewer />} />
+        <Route path="/ar-card-viewer" element={<ArCardViewer />} />
+        <Route path="/ar-card-viewer/:id" element={<ArCardViewer />} />
+        <Route path="/card-comparison" element={<CardComparison />} />
+        <Route path="/card-animation" element={<CardAnimation />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>

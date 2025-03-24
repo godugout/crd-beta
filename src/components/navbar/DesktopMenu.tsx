@@ -12,7 +12,7 @@ import {
   NavigationMenuTrigger,
   navigationMenuTriggerStyle 
 } from "@/components/ui/navigation-menu";
-import { Grid3X3, Image, FolderOpen, Sparkles } from 'lucide-react';
+import { Grid3X3, Image, FolderOpen, Sparkles, Cube, Layers, Play } from 'lucide-react';
 
 interface DesktopMenuProps {
   user: User | null;
@@ -105,6 +105,42 @@ const DesktopMenu: React.FC<DesktopMenuProps> = ({ user, isActive }) => {
                   <div className="text-sm font-medium">Card Detector</div>
                   <div className="text-xs text-muted-foreground">
                     Automatically detect and crop cards from images
+                  </div>
+                </Link>
+                <Link
+                  to="/baseball-card-viewer"
+                  className="group flex flex-col gap-1 p-3 rounded-md hover:bg-blue-50"
+                >
+                  <div className="text-sm font-medium">Baseball Cards</div>
+                  <div className="text-xs text-muted-foreground">
+                    Explore our interactive baseball card viewer
+                  </div>
+                </Link>
+                <Link
+                  to="/ar-card-viewer"
+                  className="group flex flex-col gap-1 p-3 rounded-md hover:bg-blue-50"
+                >
+                  <div className="text-sm font-medium">AR Card Viewer</div>
+                  <div className="text-xs text-muted-foreground">
+                    Experience cards in augmented reality
+                  </div>
+                </Link>
+                <Link
+                  to="/card-comparison"
+                  className="group flex flex-col gap-1 p-3 rounded-md hover:bg-blue-50"
+                >
+                  <div className="text-sm font-medium">Card Comparison</div>
+                  <div className="text-xs text-muted-foreground">
+                    Compare multiple cards side by side
+                  </div>
+                </Link>
+                <Link
+                  to="/card-animation"
+                  className="group flex flex-col gap-1 p-3 rounded-md hover:bg-blue-50"
+                >
+                  <div className="text-sm font-medium">Animation Studio</div>
+                  <div className="text-xs text-muted-foreground">
+                    Create animated card transitions
                   </div>
                 </Link>
               </div>
