@@ -7,7 +7,6 @@ import { ChevronLeft, Camera, PanelLeft, Smartphone, AlertCircle } from 'lucide-
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { BASEBALL_CARDS } from '@/components/baseball/hooks/useBaseballCard';
-import { CardData } from '@/components/baseball/types/BaseballCard';
 import { toast } from 'sonner';
 import { Card } from '@/lib/types';
 import ArPreviewPanel from '@/components/ar/ArPreviewPanel';
@@ -17,6 +16,8 @@ import ArModeView from '@/components/ar/ArModeView';
 const ArCardViewer = () => {
   const { id } = useParams<{ id: string }>();
   const [activeCard, setActiveCard] = useState<Card | null>(null);
+  const [arCards, setArCards] = useState<Card[]>([]);
+  const [availableCards, setAvailableCards] = useState<Card[]>([]);
   const [isArMode, setIsArMode] = useState(false);
   const [isFlipped, setIsFlipped] = useState(false);
   const [scale, setScale] = useState(100);
@@ -26,7 +27,7 @@ const ArCardViewer = () => {
   useEffect(() => {
     // Convert baseball cards to the Card format for our viewer
     const convertedCards: Card[] = BASEBALL_CARDS.map(baseballCard => ({
-      id: baseballCard.id.toString(),
+      id: baseballCard.id,
       title: baseballCard.player,
       description: `${baseballCard.year} ${baseballCard.manufacturer}`,
       imageUrl: baseballCard.imageUrl,
@@ -36,16 +37,27 @@ const ArCardViewer = () => {
       updatedAt: new Date()
     }));
     
+    setAvailableCards(convertedCards);
+    
     // If ID is provided, find that card, otherwise use the first one
     const card = id 
       ? convertedCards.find(card => card.id === id) 
       : convertedCards[0];
       
     setActiveCard(card || null);
+    
+    // Initialize AR cards with the active card
+    if (card) {
+      setArCards([card]);
+    }
   }, [id]);
   
   const handleLaunchAr = () => {
     setIsArMode(true);
+    // Ensure the active card is in the AR scene
+    if (activeCard && !arCards.some(card => card.id === activeCard.id)) {
+      setArCards(prev => [...prev, activeCard]);
+    }
   };
 
   const handleExitAr = () => {
@@ -79,6 +91,22 @@ const ArCardViewer = () => {
   const handleRotate = () => {
     setRotation(prev => (prev + 90) % 360);
   };
+  
+  const handleAddCard = (card: Card) => {
+    if (!arCards.some(c => c.id === card.id)) {
+      setArCards(prev => [...prev, card]);
+    }
+  };
+  
+  const handleRemoveCard = (cardId: string) => {
+    // Don't allow removing the last card
+    if (arCards.length <= 1) {
+      toast.error("Can't remove the last card");
+      return;
+    }
+    
+    setArCards(prev => prev.filter(card => card.id !== cardId));
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -98,7 +126,8 @@ const ArCardViewer = () => {
       <main className={`flex-1 ${isArMode ? 'pt-0' : 'pt-16'}`}>
         {isArMode ? (
           <ArModeView 
-            activeCard={activeCard}
+            activeCards={arCards}
+            availableCards={availableCards}
             onExitAr={handleExitAr}
             onCameraError={handleCameraError}
             onTakeSnapshot={handleTakeSnapshot}
@@ -112,7 +141,7 @@ const ArCardViewer = () => {
             <div className="max-w-4xl mx-auto">
               <h1 className="text-3xl font-bold mb-6">Augmented Reality Card Viewer</h1>
               <p className="text-gray-600 mb-8">
-                Experience your trading cards in augmented reality. Place your cards in the real world, walk around them in 3D space, and share the experience with friends.
+                Experience your trading cards in augmented reality. Place multiple cards in the real world, position them with touch gestures, and share the experience with friends.
               </p>
               
               {cameraError && (
@@ -130,7 +159,7 @@ const ArCardViewer = () => {
                   <Smartphone className="h-4 w-4 text-amber-600" />
                   <AlertTitle className="text-amber-800">Ready for AR</AlertTitle>
                   <AlertDescription className="text-amber-700">
-                    Camera access will be requested when you launch the AR experience.
+                    Camera access will be requested when you launch the AR experience. You'll be able to place multiple cards and position them with touch gestures.
                   </AlertDescription>
                 </Alert>
               )}

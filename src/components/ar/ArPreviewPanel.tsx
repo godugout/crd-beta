@@ -4,11 +4,19 @@ import { Button } from '@/components/ui/button';
 import { Camera } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Card } from '@/lib/types';
-import { CardData } from '@/types/card';
 
 interface ArPreviewPanelProps {
   activeCard: Card | null;
-  baseballCards: CardData[];
+  baseballCards: Array<{
+    id: string;
+    title: string;
+    player: string;
+    team: string;
+    year: string;
+    manufacturer: string;
+    position: string;
+    imageUrl: string;
+  }>;
   cameraError: string | null;
   onLaunchAr: () => void;
 }
