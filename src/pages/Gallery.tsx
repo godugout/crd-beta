@@ -2,7 +2,7 @@
 import React from 'react';
 import Navbar from '@/components/Navbar';
 import CardGallery from '@/components/CardGallery';
-import { ChevronRight, Grid3X3, GalleryHorizontal } from 'lucide-react';
+import { ChevronRight, Grid3X3, GalleryHorizontal, Tv2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useCards } from '@/context/CardContext';
@@ -44,18 +44,18 @@ const Gallery = () => {
               <div className="p-6 flex flex-col md:flex-row items-center justify-between">
                 <div className="mb-4 md:mb-0">
                   <h2 className="text-white text-xl font-bold mb-2 flex items-center">
-                    <GalleryHorizontal className="mr-2 h-5 w-5" />
-                    Immersive Baseball Card Viewer
+                    <Tv2 className="mr-2 h-5 w-5" />
+                    ESPN-Style Baseball Card Viewer
                   </h2>
                   <p className="text-blue-100">
-                    Experience your vintage baseball cards in 3D with our new immersive viewer
+                    Experience your vintage baseball cards in 3D with our immersive viewer featuring statistics and professional graphics
                   </p>
                 </div>
                 <Button 
                   className="bg-white text-blue-700 hover:bg-blue-50"
                   onClick={() => window.location.href = '/baseball-card-viewer'}
                 >
-                  Launch 3D Viewer
+                  Launch Immersive Viewer
                 </Button>
               </div>
             </div>
