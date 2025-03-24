@@ -1,8 +1,16 @@
 
 import { useState } from 'react';
 import { Card, Collection } from '@/lib/types';
-import { toast } from 'sonner';
-import { collectionOperations } from '@/lib/supabase';
+import { 
+  fetchCollections,
+  createCollection,
+  updateCollection,
+  deleteCollection
+} from './operations/collectionOperations';
+import {
+  addCardToCollection,
+  removeCardFromCollection
+} from './operations/cardCollectionOperations';
 
 interface UseCollectionOperationsProps {
   collections: Collection[];
@@ -22,236 +30,54 @@ export const useCollectionOperations = ({
   
   // Fetch collections from Supabase
   const refreshCollections = async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      
-      const { data, error } = await collectionOperations.getCollections();
-      
-      if (error) {
-        setError(error.message);
-        toast.error('Failed to load collections: ' + error.message);
-        return;
-      }
-      
-      if (data) {
-        setCollections(data);
-      }
-    } catch (err: any) {
-      console.error('Fetch collections error:', err);
-      setError(err.message || 'Failed to load collections');
-      toast.error('An unexpected error occurred loading collections');
-    } finally {
-      setIsLoading(false);
-    }
+    await fetchCollections(setIsLoading, setError, setCollections);
   };
 
   // Collection operations
-  const addCollection = async (collection: Omit<Collection, 'id' | 'cards' | 'createdAt' | 'updatedAt'>) => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      
-      const { data, error } = await collectionOperations.createCollection(collection);
-      
-      if (error) {
-        setError(error.message);
-        toast.error('Failed to create collection: ' + error.message);
-        return;
-      }
-      
-      if (data) {
-        setCollections(prev => [...prev, data]);
-        toast.success('Collection created successfully');
-        return data;
-      }
-    } catch (err: any) {
-      console.error('Create collection error:', err);
-      setError(err.message || 'Failed to create collection');
-      toast.error('An unexpected error occurred');
-    } finally {
-      setIsLoading(false);
-    }
+  const handleAddCollection = async (collection: Omit<Collection, 'id' | 'cards' | 'createdAt' | 'updatedAt'>) => {
+    return await createCollection(collection, setIsLoading, setError, setCollections);
   };
 
-  const updateCollection = async (id: string, updates: Partial<Omit<Collection, 'id' | 'cards' | 'createdAt' | 'updatedAt'>>) => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      
-      const { data, error } = await collectionOperations.updateCollection(id, updates);
-      
-      if (error) {
-        setError(error.message);
-        toast.error('Failed to update collection: ' + error.message);
-        return;
-      }
-      
-      if (data) {
-        // Preserve the cards array from the existing collection
-        const existingCollection = collections.find(c => c.id === id);
-        const updatedCollection = {
-          ...data,
-          cards: existingCollection ? existingCollection.cards : []
-        };
-        
-        setCollections(prev => 
-          prev.map(collection => 
-            collection.id === id ? updatedCollection : collection
-          )
-        );
-        
-        toast.success('Collection updated successfully');
-      }
-    } catch (err: any) {
-      console.error('Update collection error:', err);
-      setError(err.message || 'Failed to update collection');
-      toast.error('An unexpected error occurred');
-    } finally {
-      setIsLoading(false);
-    }
+  const handleUpdateCollection = async (id: string, updates: Partial<Omit<Collection, 'id' | 'cards' | 'createdAt' | 'updatedAt'>>) => {
+    await updateCollection(id, updates, collections, setIsLoading, setError, setCollections);
   };
 
-  const deleteCollection = async (id: string) => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      
-      const { error } = await collectionOperations.deleteCollection(id);
-      
-      if (error) {
-        setError(error.message);
-        toast.error('Failed to delete collection: ' + error.message);
-        return;
-      }
-      
-      // Update card's collectionId if it belongs to the deleted collection
-      setCards(prev => 
-        prev.map(card => 
-          card.collectionId === id 
-            ? { ...card, collectionId: undefined }
-            : card
-        )
-      );
-      
-      setCollections(prev => prev.filter(collection => collection.id !== id));
-      toast.success('Collection deleted successfully');
-    } catch (err: any) {
-      console.error('Delete collection error:', err);
-      setError(err.message || 'Failed to delete collection');
-      toast.error('An unexpected error occurred');
-    } finally {
-      setIsLoading(false);
-    }
+  const handleDeleteCollection = async (id: string) => {
+    await deleteCollection(id, setIsLoading, setError, setCards, setCollections);
   };
 
   // Card-Collection operations
-  const addCardToCollection = async (cardId: string, collectionId: string) => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      
-      const { error } = await collectionOperations.addCardToCollection(cardId, collectionId);
-      
-      if (error) {
-        setError(error.message);
-        toast.error('Failed to add card to collection: ' + error.message);
-        return;
-      }
-      
-      // Update card's collectionId
-      setCards(prev => 
-        prev.map(card => 
-          card.id === cardId 
-            ? { ...card, collectionId }
-            : card
-        )
-      );
-      
-      // Find the card to add to the collection
-      const cardToAdd = collections
-        .flatMap(c => c.cards)
-        .find(c => c.id === cardId);
-        
-      const cardFromState = cardToAdd || setCards(state => {
-        const foundCard = state.find(c => c.id === cardId);
-        return state; // Return the state unchanged
-      }).find(c => c.id === cardId);
-      
-      // Add card to collection if found
-      if (cardFromState) {
-        setCollections(prev => 
-          prev.map(collection => 
-            collection.id === collectionId 
-              ? { 
-                  ...collection, 
-                  cards: [...collection.cards.filter(c => c.id !== cardId), {...cardFromState, collectionId}]
-                } 
-              : collection
-          )
-        );
-      }
-      
-      toast.success('Card added to collection');
-    } catch (err: any) {
-      console.error('Add card to collection error:', err);
-      setError(err.message || 'Failed to add card to collection');
-      toast.error('An unexpected error occurred');
-    } finally {
-      setIsLoading(false);
-    }
+  const handleAddCardToCollection = async (cardId: string, collectionId: string) => {
+    const cards = collections.flatMap(c => c.cards);
+    await addCardToCollection(
+      cardId, 
+      collectionId, 
+      collections, 
+      cards,
+      setIsLoading, 
+      setError, 
+      setCards, 
+      setCollections
+    );
   };
 
-  const removeCardFromCollection = async (cardId: string, collectionId: string) => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      
-      const { error } = await collectionOperations.removeCardFromCollection(cardId);
-      
-      if (error) {
-        setError(error.message);
-        toast.error('Failed to remove card from collection: ' + error.message);
-        return;
-      }
-      
-      // Update card's collectionId
-      setCards(prev => 
-        prev.map(card => 
-          card.id === cardId 
-            ? { ...card, collectionId: undefined }
-            : card
-        )
-      );
-      
-      // Remove card from collection
-      setCollections(prev => 
-        prev.map(collection => 
-          collection.id === collectionId 
-            ? { 
-                ...collection, 
-                cards: collection.cards.filter(card => card.id !== cardId)
-              } 
-            : collection
-        )
-      );
-      
-      toast.success('Card removed from collection');
-    } catch (err: any) {
-      console.error('Remove card from collection error:', err);
-      setError(err.message || 'Failed to remove card from collection');
-      toast.error('An unexpected error occurred');
-    } finally {
-      setIsLoading(false);
-    }
+  const handleRemoveCardFromCollection = async (cardId: string, collectionId: string) => {
+    await removeCardFromCollection(
+      cardId, 
+      collectionId, 
+      setIsLoading, 
+      setError, 
+      setCards, 
+      setCollections
+    );
   };
 
   return {
     refreshCollections,
-    addCollection,
-    updateCollection,
-    deleteCollection,
-    addCardToCollection,
-    removeCardFromCollection
+    addCollection: handleAddCollection,
+    updateCollection: handleUpdateCollection,
+    deleteCollection: handleDeleteCollection,
+    addCardToCollection: handleAddCardToCollection,
+    removeCardFromCollection: handleRemoveCardFromCollection
   };
 };
