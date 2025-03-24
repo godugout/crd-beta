@@ -23,19 +23,26 @@ interface CardGalleryProps {
   className?: string;
   viewMode?: 'grid' | 'list';
   onCardClick?: (cardId: string) => void;
+  cards?: Card[]; // Allow passing cards directly to component
 }
 
 const CardGallery: React.FC<CardGalleryProps> = ({ 
   className, 
   viewMode = 'grid',
-  onCardClick
+  onCardClick,
+  cards: propCards
 }) => {
   const navigate = useNavigate();
-  const { cards } = useCards();
+  const { cards: contextCards } = useCards();
+  const cards = propCards || contextCards; // Use prop cards if provided, otherwise use context
+  
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [cardEffects, setCardEffects] = useState<Record<string, string[]>>({});
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Debug log to check cards
+  console.log("CardGallery rendering with cards:", cards?.length, cards);
   
   // Get all unique tags from cards
   const allTags = Array.from(new Set(cards.flatMap(card => card.tags || [])));
@@ -73,6 +80,9 @@ const CardGallery: React.FC<CardGalleryProps> = ({
     
     return matchesSearch && matchesTags;
   });
+  
+  // Debug filtered cards
+  console.log("Filtered cards:", filteredCards.length);
   
   const handleTagSelect = (tag: string) => {
     if (selectedTags.includes(tag)) {
