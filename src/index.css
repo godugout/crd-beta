@@ -6,140 +6,126 @@
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 0 0% 11%;
+    --foreground: 224 71.4% 4.1%;
 
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 11%;
-
+    --card-foreground: 224 71.4% 4.1%;
+ 
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 11%;
+    --popover-foreground: 224 71.4% 4.1%;
+ 
+    --primary: 220.9 39.3% 11%;
+    --primary-foreground: 210 20% 98%;
+ 
+    --secondary: 220 14.3% 95.9%;
+    --secondary-foreground: 220.9 39.3% 11%;
+ 
+    --muted: 220 14.3% 95.9%;
+    --muted-foreground: 220 8.9% 46.1%;
+ 
+    --accent: 220 14.3% 95.9%;
+    --accent-foreground: 220.9 39.3% 11%;
+ 
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 20% 98%;
 
-    --primary: 214 100% 50%;
-    --primary-foreground: 0 0% 100%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 224 71.4% 4.1%;
+ 
+    --radius: 0.5rem;
 
-    --secondary: 210 20% 96%;
-    --secondary-foreground: 0 0% 11%;
-
-    --muted: 210 20% 96%;
-    --muted-foreground: 240 10% 40%;
-
-    --accent: 210 20% 96%;
-    --accent-foreground: 0 0% 11%;
-
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
-
-    --border: 215 20% 90%;
-    --input: 215 20% 90%;
-    --ring: 215 100% 50%;
-
-    --radius: 0.75rem;
-
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5% 26%;
-    --sidebar-primary: 240 6% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 5% 96%;
-    --sidebar-accent-foreground: 240 6% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217 92% 60%;
+    /* CardShow custom colors */
+    --cardshow-blue: rgb(59 130 246);
+    --cardshow-blue-light: rgb(219 234 254);
+    --cardshow-dark: rgb(30 41 59);
+    --cardshow-slate: rgb(100 116 139);
+    --cardshow-neutral: rgb(241 245 249);
   }
-
+ 
+  .dark {
+    --background: 224 71.4% 4.1%;
+    --foreground: 210 20% 98%;
+ 
+    --card: 224 71.4% 4.1%;
+    --card-foreground: 210 20% 98%;
+ 
+    --popover: 224 71.4% 4.1%;
+    --popover-foreground: 210 20% 98%;
+ 
+    --primary: 210 20% 98%;
+    --primary-foreground: 220.9 39.3% 11%;
+ 
+    --secondary: 215 27.9% 16.9%;
+    --secondary-foreground: 210 20% 98%;
+ 
+    --muted: 215 27.9% 16.9%;
+    --muted-foreground: 217.9 10.6% 64.9%;
+ 
+    --accent: 215 27.9% 16.9%;
+    --accent-foreground: 210 20% 98%;
+ 
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 20% 98%;
+ 
+    --border: 215 27.9% 16.9%;
+    --input: 215 27.9% 16.9%;
+    --ring: 216 12.2% 83.9%;
+  }
+}
+ 
+@layer base {
   * {
     @apply border-border;
   }
-
   body {
-    @apply bg-background text-foreground antialiased;
-    font-feature-settings: "ss01", "ss02", "cv01", "cv02", "cv03";
-  }
-
-  /* Safari-like scrollbar styling */
-  ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-  }
-
-  ::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  ::-webkit-scrollbar-thumb {
-    background: #d1d1d6;
-    border-radius: 4px;
-  }
-
-  ::-webkit-scrollbar-thumb:hover {
-    background: #a1a1a6;
+    @apply bg-background text-foreground;
   }
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+/* 3D card transformations */
+.perspective-1000 {
+  perspective: 1000px;
+}
 
-  .glass-morphism {
-    @apply backdrop-blur-md bg-white/80 border border-white/20 shadow-subtle;
-  }
+.preserve-3d {
+  transform-style: preserve-3d;
+}
 
-  .card-shadow {
-    box-shadow: 0 4px 20px -4px rgba(0, 0, 0, 0.1);
-    transition: box-shadow 0.3s ease, transform 0.3s ease;
-  }
+.backface-hidden {
+  backface-visibility: hidden;
+}
 
-  .card-shadow:hover {
-    box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.15);
-    transform: translateY(-8px);
+/* Floating animation */
+@keyframes floating {
+  0% {
+    transform: translateY(0px);
   }
+  50% {
+    transform: translateY(-10px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
 
-  /* Card flip effect */
-  .card-container {
-    perspective: 1000px;
-  }
+.floating-card {
+  animation: floating 3s ease-in-out infinite;
+}
 
-  .card-inner {
-    transition: transform 0.6s;
-    transform-style: preserve-3d;
-  }
-
-  .card-front, .card-back {
-    backface-visibility: hidden;
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-  }
-
-  .card-back {
-    transform: rotateY(180deg);
-  }
-
-  .flipped .card-inner {
-    transform: rotateY(180deg);
-  }
-
-  /* Page transitions */
-  .page-transition-enter {
-    opacity: 0;
-    transform: scale(0.98);
-  }
-
-  .page-transition-enter-active {
-    opacity: 1;
-    transform: scale(1);
-    transition: opacity 0.3s, transform 0.3s;
-  }
-
-  .page-transition-exit {
-    opacity: 1;
-    transform: scale(1);
-  }
-
-  .page-transition-exit-active {
-    opacity: 0;
-    transform: scale(0.98);
-    transition: opacity 0.3s, transform 0.3s;
-  }
+/* Card shine effect */
+.card-shine {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.25) 25%,
+    rgba(255, 255, 255, 0) 50%
+  );
+  pointer-events: none;
+  border-radius: 0.75rem;
 }

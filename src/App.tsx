@@ -10,6 +10,7 @@ import NotFound from './pages/NotFound';
 import PbrDemo from './pages/PbrDemo';
 import SignatureDemo from './pages/SignatureDemo';
 import CardDetector from './pages/CardDetector';
+import BaseballCardViewer from './pages/BaseballCardViewer';
 
 function App() {
   return (
@@ -24,6 +25,8 @@ function App() {
         <Route path="/pbr" element={<PbrDemo />} />
         <Route path="/signature" element={<SignatureDemo />} />
         <Route path="/card-detector" element={<CardDetector />} />
+        <Route path="/baseball-card-viewer" element={<BaseballCardViewer />} />
+        <Route path="/baseball-card-viewer/:id" element={<BaseballCardViewer />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>

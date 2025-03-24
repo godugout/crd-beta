@@ -2,10 +2,19 @@
 import React from 'react';
 import Navbar from '@/components/Navbar';
 import CardGallery from '@/components/CardGallery';
-import { ChevronRight, Grid3X3 } from 'lucide-react';
+import { ChevronRight, Grid3X3, GalleryHorizontal } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { useCards } from '@/context/CardContext';
 
 const Gallery = () => {
+  const { cards } = useCards();
+  
+  // Check if we have baseball cards in the collection
+  const hasBaseballCards = cards.some(card => 
+    card.tags?.some(tag => ['baseball', 'vintage'].includes(tag.toLowerCase()))
+  );
+  
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Navbar />
@@ -28,6 +37,29 @@ const Gallery = () => {
               Browse, search, and manage your digital card collection
             </p>
           </div>
+          
+          {/* Baseball Card Immersive View Promotion */}
+          {hasBaseballCards && (
+            <div className="mb-8 bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg overflow-hidden shadow-lg">
+              <div className="p-6 flex flex-col md:flex-row items-center justify-between">
+                <div className="mb-4 md:mb-0">
+                  <h2 className="text-white text-xl font-bold mb-2 flex items-center">
+                    <GalleryHorizontal className="mr-2 h-5 w-5" />
+                    Immersive Baseball Card Viewer
+                  </h2>
+                  <p className="text-blue-100">
+                    Experience your vintage baseball cards in 3D with our new immersive viewer
+                  </p>
+                </div>
+                <Button 
+                  className="bg-white text-blue-700 hover:bg-blue-50"
+                  onClick={() => window.location.href = '/baseball-card-viewer'}
+                >
+                  Launch 3D Viewer
+                </Button>
+              </div>
+            </div>
+          )}
           
           <CardGallery />
         </div>
