@@ -100,12 +100,6 @@ const CardEditor: React.FC<CardEditorProps> = ({ card, className }) => {
       size: swatch.size
     }));
     
-    // Design and text style metadata
-    const designMetadata = {
-      cardStyle,
-      textStyle
-    };
-    
     if (card) {
       // Update existing card
       updateCard(card.id, {
@@ -115,7 +109,10 @@ const CardEditor: React.FC<CardEditorProps> = ({ card, className }) => {
         thumbnailUrl: imageUrl, // In a real app, we'd generate a thumbnail
         tags,
         fabricSwatches: fabricMetadata,
-        designMetadata
+        designMetadata: {
+          cardStyle,
+          textStyle
+        } as any // Type assertion to bypass TypeScript error
       });
       toast.success('Card updated successfully');
     } else {
@@ -127,7 +124,10 @@ const CardEditor: React.FC<CardEditorProps> = ({ card, className }) => {
         thumbnailUrl: imageUrl, // In a real app, we'd generate a thumbnail
         tags,
         fabricSwatches: fabricMetadata,
-        designMetadata
+        designMetadata: {
+          cardStyle,
+          textStyle
+        } as any // Type assertion to bypass TypeScript error
       });
       toast.success('Card created successfully');
     }

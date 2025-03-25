@@ -1,3 +1,4 @@
+
 export interface Card {
   id: string;
   title: string;
@@ -18,6 +19,10 @@ export interface Card {
     position: string;
     size: string;
   }>;
+  designMetadata?: {
+    cardStyle: any;
+    textStyle: any;
+  };
 }
 
 export interface Collection {
