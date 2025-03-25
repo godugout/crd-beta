@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Upload } from 'lucide-react';
 
 interface CardUploadProps {
@@ -7,6 +7,20 @@ interface CardUploadProps {
 }
 
 const CardUpload = ({ setView }: CardUploadProps) => {
+  const [file, setFile] = useState<File | null>(null);
+  
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setFile(e.target.files[0]);
+    }
+  };
+  
+  const handleUpload = () => {
+    // In a real app, we would upload the file to a server here
+    // For now, just navigate to the collection view
+    setView('collection');
+  };
+  
   return (
     <div className="max-w-3xl mx-auto bg-white p-6 rounded-lg shadow-lg">
       <h2 className="text-2xl font-bold mb-6">Upload Your Card</h2>
@@ -17,9 +31,19 @@ const CardUpload = ({ setView }: CardUploadProps) => {
           <div className="flex flex-col items-center">
             <Upload className="h-12 w-12 text-gray-400" />
             <p className="mt-2 text-sm text-gray-500">Drag and drop your card image here, or click to browse</p>
-            <button className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition">
+            <input 
+              type="file" 
+              className="hidden" 
+              id="card-upload" 
+              accept="image/*" 
+              onChange={handleFileSelect}
+            />
+            <label htmlFor="card-upload" className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition cursor-pointer">
               Select Image
-            </button>
+            </label>
+            {file && (
+              <p className="mt-2 text-sm text-green-600">{file.name} selected</p>
+            )}
           </div>
         </div>
       </div>
@@ -75,7 +99,7 @@ const CardUpload = ({ setView }: CardUploadProps) => {
         </button>
         <button 
           className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-          onClick={() => setView('collection')}
+          onClick={handleUpload}
         >
           Upload Card
         </button>

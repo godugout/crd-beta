@@ -1,87 +1,95 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { cn } from '@/lib/utils';
-import CardUpload from '@/components/card-upload';
 import { useCards } from '@/context/CardContext';
-import { Card as CardType } from '@/lib/types';
-import { Plus, X, Scissors } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import FabricSelector from '@/components/card-upload/FabricSelector';
-import FabricSwatch from '@/components/home/card-effects/FabricSwatch';
+import { ProgressSteps } from './ui/progress-steps';
+import CardBasicInfo from './card-editor/CardBasicInfo';
+import CardDesignCustomization, { CardStyle } from './card-editor/CardDesignCustomization';
+import CardTextCustomization, { TextStyle } from './card-editor/CardTextCustomization';
+import CardPreview from './card-editor/CardPreview';
+import { ChevronLeft, ChevronRight, Save } from 'lucide-react';
 
 interface CardEditorProps {
-  card?: CardType;
+  card?: any;
   className?: string;
 }
 
-interface FabricSwatchOptions {
-  type: string;
-  team: string;
-  year: string;
-  manufacturer: string;
-  position: string;
-  size: string;
-}
+const steps = ["Upload & Info", "Card Design", "Card Text", "Preview"];
 
 const CardEditor: React.FC<CardEditorProps> = ({ card, className }) => {
   const navigate = useNavigate();
   const { addCard, updateCard } = useCards();
   
+  const [currentStep, setCurrentStep] = useState(0);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imageUrl, setImageUrl] = useState<string>(card?.imageUrl || '');
   const [title, setTitle] = useState(card?.title || '');
   const [description, setDescription] = useState(card?.description || '');
   const [tags, setTags] = useState<string[]>(card?.tags || []);
   const [newTag, setNewTag] = useState('');
-  const [fabricSwatches, setFabricSwatches] = useState<FabricSwatchOptions[]>([]);
-  const [showFabricSelector, setShowFabricSelector] = useState(false);
+  const [fabricSwatches, setFabricSwatches] = useState<any[]>(card?.fabricSwatches || []);
+  
+  // Card design customization state
+  const [cardStyle, setCardStyle] = useState<CardStyle>({
+    effect: 'classic',
+    brightness: 100,
+    contrast: 100,
+    saturation: 100,
+    borderWidth: 0,
+    borderRadius: 8,
+    borderColor: '#ffffff',
+    backgroundColor: '#ffffff'
+  });
+  
+  // Card text customization state
+  const [textStyle, setTextStyle] = useState<TextStyle>({
+    titleFont: 'sans',
+    titleSize: 24,
+    titleColor: '#ffffff',
+    titleAlignment: 'left',
+    titleWeight: 'bold',
+    titleStyle: 'normal',
+    descriptionFont: 'sans',
+    descriptionSize: 12,
+    descriptionColor: '#ffffff',
+    showOverlay: true,
+    overlayOpacity: 50,
+    overlayColor: '#000000',
+    overlayPosition: 'bottom'
+  });
   
   const handleImageUpload = (file: File, url: string) => {
-    console.log('Image uploaded:', file, url);
     setImageFile(file);
     setImageUrl(url);
   };
   
-  const handleAddTag = () => {
-    if (newTag.trim() !== '' && !tags.includes(newTag.trim())) {
-      setTags([...tags, newTag.trim()]);
-      setNewTag('');
-    }
-  };
-  
-  const handleRemoveTag = (tagToRemove: string) => {
-    setTags(tags.filter(tag => tag !== tagToRemove));
-  };
-
-  const handleAddFabricSwatch = (options: FabricSwatchOptions) => {
-    setFabricSwatches([...fabricSwatches, options]);
-    setShowFabricSelector(false);
-    toast.success('Fabric swatch added!', {
-      description: 'Premium fabric swatch has been added to your card'
-    });
-  };
-
-  const handleRemoveFabricSwatch = (index: number) => {
-    const newSwatches = [...fabricSwatches];
-    newSwatches.splice(index, 1);
-    setFabricSwatches(newSwatches);
-  };
-  
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!imageUrl) {
+  const goToNextStep = () => {
+    if (currentStep === 0 && !imageUrl) {
       toast.error('Please upload an image');
       return;
     }
     
-    if (!title.trim()) {
+    if (currentStep === 0 && !title.trim()) {
       toast.error('Please provide a title');
       return;
     }
     
+    if (currentStep < steps.length - 1) {
+      setCurrentStep(currentStep + 1);
+      window.scrollTo(0, 0);
+    }
+  };
+  
+  const goToPreviousStep = () => {
+    if (currentStep > 0) {
+      setCurrentStep(currentStep - 1);
+      window.scrollTo(0, 0);
+    }
+  };
+  
+  const handleSubmit = () => {
     // Create metadata for fabric swatches
     const fabricMetadata = fabricSwatches.map(swatch => ({
       type: swatch.type,
@@ -92,6 +100,12 @@ const CardEditor: React.FC<CardEditorProps> = ({ card, className }) => {
       size: swatch.size
     }));
     
+    // Design and text style metadata
+    const designMetadata = {
+      cardStyle,
+      textStyle
+    };
+    
     if (card) {
       // Update existing card
       updateCard(card.id, {
@@ -100,7 +114,8 @@ const CardEditor: React.FC<CardEditorProps> = ({ card, className }) => {
         imageUrl,
         thumbnailUrl: imageUrl, // In a real app, we'd generate a thumbnail
         tags,
-        fabricSwatches: fabricMetadata
+        fabricSwatches: fabricMetadata,
+        designMetadata
       });
       toast.success('Card updated successfully');
     } else {
@@ -111,7 +126,8 @@ const CardEditor: React.FC<CardEditorProps> = ({ card, className }) => {
         imageUrl,
         thumbnailUrl: imageUrl, // In a real app, we'd generate a thumbnail
         tags,
-        fabricSwatches: fabricMetadata
+        fabricSwatches: fabricMetadata,
+        designMetadata
       });
       toast.success('Card created successfully');
     }
@@ -120,177 +136,105 @@ const CardEditor: React.FC<CardEditorProps> = ({ card, className }) => {
     navigate('/gallery');
   };
   
+  const renderStepContent = () => {
+    switch (currentStep) {
+      case 0:
+        return (
+          <CardBasicInfo 
+            title={title}
+            setTitle={setTitle}
+            description={description}
+            setDescription={setDescription}
+            tags={tags}
+            setTags={setTags}
+            newTag={newTag}
+            setNewTag={setNewTag}
+            fabricSwatches={fabricSwatches}
+            setFabricSwatches={setFabricSwatches}
+            imageFile={imageFile}
+            imageUrl={imageUrl}
+            onImageUpload={handleImageUpload}
+          />
+        );
+      case 1:
+        return (
+          <CardDesignCustomization 
+            imageUrl={imageUrl}
+            cardStyle={cardStyle}
+            setCardStyle={setCardStyle}
+          />
+        );
+      case 2:
+        return (
+          <CardTextCustomization 
+            imageUrl={imageUrl}
+            textStyle={textStyle}
+            setTextStyle={setTextStyle}
+            cardTitle={title}
+            setCardTitle={setTitle}
+            cardDescription={description}
+            setCardDescription={setDescription}
+          />
+        );
+      case 3:
+        return (
+          <CardPreview 
+            imageUrl={imageUrl}
+            title={title}
+            description={description}
+            fabricSwatches={fabricSwatches}
+            cardStyle={cardStyle}
+            textStyle={textStyle}
+          />
+        );
+      default:
+        return null;
+    }
+  };
+  
   return (
-    <div className={cn("max-w-4xl mx-auto p-4", className)}>
-      <form onSubmit={handleSubmit} className="grid md:grid-cols-2 gap-8">
-        <div className="flex justify-center">
-          <div className="relative max-w-xs">
-            <CardUpload 
-              onImageUpload={handleImageUpload} 
-              className="w-full"
-              initialImageUrl={card?.imageUrl}
-            />
-            
-            {/* Render fabric swatches on top of the image */}
-            {imageUrl && fabricSwatches.map((swatch, index) => (
-              <div key={index} className="relative">
-                <FabricSwatch 
-                  fabricType={swatch.type}
-                  team={swatch.team}
-                  year={swatch.year}
-                  manufacturer={swatch.manufacturer}
-                  position={swatch.position as any}
-                  size={swatch.size as any}
-                />
-                <button
-                  type="button"
-                  onClick={() => handleRemoveFabricSwatch(index)}
-                  className="absolute -top-2 -right-2 bg-white rounded-full p-0.5 shadow-sm hover:bg-gray-100 z-20"
-                  title="Remove fabric swatch"
-                >
-                  <X size={14} />
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
+    <div className={className}>
+      <div className="max-w-4xl mx-auto mb-8">
+        <ProgressSteps 
+          steps={steps}
+          currentStep={currentStep}
+          className="mb-8"
+        />
         
-        <div className="flex flex-col">
-          <div className="mb-6">
-            <label htmlFor="title" className="block text-sm font-medium text-cardshow-dark mb-2">
-              Card Title
-            </label>
-            <input
-              type="text"
-              id="title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-cardshow-blue focus:ring-1 focus:ring-cardshow-blue transition-colors"
-              placeholder="Enter card title"
-            />
-          </div>
+        <div className="p-6 bg-white rounded-lg shadow-sm">
+          {renderStepContent()}
           
-          <div className="mb-6">
-            <label htmlFor="description" className="block text-sm font-medium text-cardshow-dark mb-2">
-              Description
-            </label>
-            <textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              rows={4}
-              className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-cardshow-blue focus:ring-1 focus:ring-cardshow-blue transition-colors"
-              placeholder="Enter card description"
-            />
-          </div>
-          
-          <div className="mb-6">
-            <div className="flex justify-between items-center mb-2">
-              <label className="block text-sm font-medium text-cardshow-dark">
-                Tags
-              </label>
-            </div>
-            <div className="flex flex-wrap gap-2 mb-3">
-              {tags.map((tag, index) => (
-                <div 
-                  key={index}
-                  className="flex items-center bg-cardshow-blue-light text-cardshow-blue text-sm px-3 py-1 rounded-full"
-                >
-                  {tag}
-                  <button 
-                    type="button"
-                    onClick={() => handleRemoveTag(tag)}
-                    className="ml-2"
-                  >
-                    <X size={14} />
-                  </button>
-                </div>
-              ))}
-            </div>
-            <div className="flex">
-              <input
-                type="text"
-                value={newTag}
-                onChange={(e) => setNewTag(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    handleAddTag();
-                  }
-                }}
-                className="flex-1 px-4 py-2 rounded-l-lg border border-gray-200 focus:border-cardshow-blue focus:ring-1 focus:ring-cardshow-blue transition-colors"
-                placeholder="Add a tag"
-              />
-              <button 
-                type="button"
-                onClick={handleAddTag}
-                className="px-4 py-2 bg-cardshow-blue text-white rounded-r-lg hover:bg-opacity-90 transition-colors"
-              >
-                <Plus size={20} />
-              </button>
-            </div>
-          </div>
-
-          {/* Premium fabric swatch section */}
-          <div className="mb-6">
-            <div className="flex justify-between items-center mb-2">
-              <label className="block text-sm font-medium text-cardshow-dark">
-                Premium Fabric Swatches
-              </label>
-              <button
-                type="button"
-                onClick={() => setShowFabricSelector(!showFabricSelector)}
-                className="flex items-center text-xs font-medium text-cardshow-blue hover:underline"
-              >
-                <Scissors size={14} className="mr-1" />
-                {showFabricSelector ? 'Hide Options' : 'Add Fabric'}
-              </button>
-            </div>
-            
-            {showFabricSelector && (
-              <FabricSelector 
-                onSelect={handleAddFabricSwatch}
-                selectedTeam={title.includes('Bulls') ? 'chicago-bulls' : 
-                             title.includes('Lakers') ? 'los-angeles-lakers' : 
-                             title.includes('Nets') ? 'brooklyn-nets' : 
-                             title.includes('Wolves') ? 'minnesota-wolves' : 
-                             title.includes('Duke') ? 'duke' : 
-                             title.includes('Grizzlies') ? 'memphis-grizzlies' : ''}
-              />
-            )}
-            
-            {fabricSwatches.length > 0 && !showFabricSelector && (
-              <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-                <p className="text-sm text-gray-600 mb-2">
-                  {fabricSwatches.length} fabric {fabricSwatches.length === 1 ? 'swatch' : 'swatches'} added
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {fabricSwatches.map((swatch, index) => (
-                    <div key={index} className="text-xs px-2 py-1 bg-white border rounded-full">
-                      {swatch.type} • {swatch.year}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-            
-            {fabricSwatches.length === 0 && !showFabricSelector && (
-              <p className="text-sm text-gray-500 italic">
-                Add fabric swatches to enhance your card with authentic uniform material
-              </p>
-            )}
-          </div>
-          
-          <div className="mt-auto">
+          <div className="mt-8 flex justify-between">
             <Button
-              type="submit"
-              className="w-full py-3"
+              type="button"
+              variant="outline"
+              onClick={goToPreviousStep}
+              disabled={currentStep === 0}
             >
-              {card ? 'Update Card' : 'Create Card'}
+              <ChevronLeft className="mr-1 h-4 w-4" />
+              Back
             </Button>
+            
+            {currentStep < steps.length - 1 ? (
+              <Button
+                type="button"
+                onClick={goToNextStep}
+              >
+                Next
+                <ChevronRight className="ml-1 h-4 w-4" />
+              </Button>
+            ) : (
+              <Button
+                type="button"
+                onClick={handleSubmit}
+              >
+                <Save className="mr-1 h-4 w-4" />
+                Save Card
+              </Button>
+            )}
           </div>
         </div>
-      </form>
+      </div>
     </div>
   );
 };
