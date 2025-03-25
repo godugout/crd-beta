@@ -1,0 +1,28 @@
+
+import { CardStyle } from './CardDesignCustomization';
+import { TextStyle } from './CardTextCustomization';
+
+export interface CardEditorState {
+  imageFile: File | null;
+  imageUrl: string;
+  title: string;
+  description: string;
+  tags: string[];
+  fabricSwatches: FabricSwatch[];
+  cardStyle: CardStyle;
+  textStyle: TextStyle;
+}
+
+export interface FabricSwatch {
+  type: string;
+  team: string;
+  year: string;
+  manufacturer: string;
+  position: string;
+  size: string;
+}
+
+export interface CardMetadata {
+  cardStyle: CardStyle;
+  textStyle: TextStyle;
+}
