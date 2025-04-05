@@ -5,7 +5,7 @@ import {
   createCard,
   updateCard,
   deleteCard
-} from './operations/cardOperations';
+} from '../operations/cardOperations';
 
 interface UseCardOperationsProps {
   cards: Card[];

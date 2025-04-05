@@ -1,8 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Card, Collection } from '../lib/types';
 import { useAuth } from './AuthContext';
-import { useCardOperations } from './card/useCardOperations';
-import { useCollectionOperations } from './card/useCollectionOperations';
+import { useCardOperations, useCollectionOperations } from './card/hooks';
 
 type CardContextType = {
   cards: Card[];
