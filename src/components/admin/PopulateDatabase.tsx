@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
-import { Loader2 } from 'lucide-react';
+import { Loader2, AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export const PopulateDatabase = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -25,17 +26,17 @@ export const PopulateDatabase = () => {
       if (error) {
         console.error('Error populating database:', error);
         toast.error('Failed to populate database');
-        setResult({ error: error.message });
+        setResult({ success: false, error: error.message });
         return;
       }
       
       console.log('Database populated successfully:', data);
       toast.success(data.message || 'Database populated successfully');
-      setResult(data);
-    } catch (err) {
+      setResult({ ...data, success: true });
+    } catch (err: any) {
       console.error('Unexpected error:', err);
       toast.error('An unexpected error occurred');
-      setResult({ error: err.message });
+      setResult({ success: false, error: err.message });
     } finally {
       setIsLoading(false);
     }
@@ -48,6 +49,19 @@ export const PopulateDatabase = () => {
         This will add sample trading cards to your database for testing. The cards include sports
         memorabilia and trading card game collectibles with images sourced from Wikimedia Commons.
       </p>
+      
+      {!result?.success && result?.error && (
+        <Alert variant="destructive" className="mb-6">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>
+            {result.error}
+            <div className="mt-2 text-sm">
+              Make sure your Supabase Edge Function is deployed and configured correctly.
+            </div>
+          </AlertDescription>
+        </Alert>
+      )}
       
       <Button 
         onClick={handlePopulateDatabase} 
@@ -62,15 +76,11 @@ export const PopulateDatabase = () => {
         ) : 'Populate Database with Sample Cards'}
       </Button>
       
-      {result && (
-        <div className={`mt-4 p-4 rounded ${result.success ? 'bg-green-50' : 'bg-red-50'}`}>
-          {result.success ? (
-            <>
-              <p className="font-medium text-green-700">{result.message}</p>
-              <p className="text-sm text-green-600 mt-2">Collection ID: {result.collectionId}</p>
-            </>
-          ) : (
-            <p className="font-medium text-red-700">Error: {result.error}</p>
+      {result?.success && (
+        <div className="mt-4 p-4 rounded bg-green-50">
+          <p className="font-medium text-green-700">{result.message}</p>
+          {result.collectionId && (
+            <p className="text-sm text-green-600 mt-2">Collection ID: {result.collectionId}</p>
           )}
         </div>
       )}

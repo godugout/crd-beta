@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { Card, Collection } from '../lib/types';
 import { useAuth } from './AuthContext';
 import { useCardOperations, useCollectionOperations } from './card/hooks';
@@ -49,12 +49,32 @@ export const CardProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
+  const isRefreshing = useRef(false);
+  const lastRefreshTime = useRef(0);
   
   const { getCard } = useCardOperations();
 
-  // Function to refresh cards from the data source
+  // Function to refresh cards from the data source with debouncing
   const refreshCards = async () => {
-    await fetchCards(setIsLoading, setError, setCards);
+    const now = Date.now();
+    
+    // Prevent multiple simultaneous refreshes
+    if (isRefreshing.current) {
+      return;
+    }
+    
+    // Prevent excessive refreshes (limit to once every 5 seconds)
+    if (now - lastRefreshTime.current < 5000) {
+      return;
+    }
+    
+    try {
+      isRefreshing.current = true;
+      lastRefreshTime.current = now;
+      await fetchCards(setIsLoading, setError, setCards);
+    } finally {
+      isRefreshing.current = false;
+    }
   };
 
   // Function to add a new card

@@ -67,6 +67,8 @@ export function useCardData({
   const [processedCards, setProcessedCards] = useState<Card[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
+  const [lastRefreshTime, setLastRefreshTime] = useState(0);
 
   const processCards = useCallback(() => {
     try {
@@ -98,14 +100,25 @@ export function useCardData({
   }, [allCards, filter, sort, limit]);
 
   const refetch = useCallback(async () => {
+    // Prevent multiple refreshes within a short time period
+    const now = Date.now();
+    if (now - lastRefreshTime < 2000) {
+      return;
+    }
+    
+    setLastRefreshTime(now);
     setIsLoading(true);
     try {
       await refreshCards();
+      // Reset retry count on success
+      setRetryCount(0);
     } catch (err) {
       console.error('Error refreshing cards:', err);
       setError(err instanceof Error ? err : new Error('Failed to refresh cards'));
+      // Increment retry count on failure
+      setRetryCount(prev => prev + 1);
     }
-  }, [refreshCards]);
+  }, [refreshCards, lastRefreshTime]);
 
   // Process cards when dependencies change
   useEffect(() => {
@@ -118,6 +131,19 @@ export function useCardData({
       refetch();
     }
   }, [autoFetch, refetch]);
+
+  // Auto-retry mechanism with exponential backoff, but limited to 3 retries
+  useEffect(() => {
+    if (error && retryCount < 3) {
+      const timeout = Math.min(2000 * Math.pow(2, retryCount), 30000); // Max 30 seconds
+      const timer = setTimeout(() => {
+        console.log(`Retrying fetch (attempt ${retryCount + 1})...`);
+        refetch();
+      }, timeout);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [error, retryCount, refetch]);
 
   return {
     cards: processedCards,
