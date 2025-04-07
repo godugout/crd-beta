@@ -5,6 +5,8 @@ import EditorToolbar from '../EditorToolbar';
 import ImageRotateButton from './ImageRotateButton';
 import { CropBoxProps } from '../CropBox';
 import { ImageData } from '../hooks/useCropState';
+import { Badge } from '@/components/ui/badge';
+import { CheckCircle2 } from 'lucide-react';
 
 interface EditorContentProps {
   canvasRef: React.RefObject<HTMLCanvasElement>;
@@ -21,6 +23,9 @@ interface EditorContentProps {
   onRotateClockwise: () => void;
   onRotateCounterClockwise: () => void;
   editorImage?: string | null;
+  batchMode?: boolean;
+  batchSelections?: number[];
+  onToggleBatchSelection?: (index: number) => void;
 }
 
 const EditorContent: React.FC<EditorContentProps> = ({
@@ -37,7 +42,10 @@ const EditorContent: React.FC<EditorContentProps> = ({
   onRemoveCropBox,
   onRotateClockwise,
   onRotateCounterClockwise,
-  editorImage
+  editorImage,
+  batchMode = false,
+  batchSelections = [],
+  onToggleBatchSelection
 }) => {
   return (
     <div className="relative border rounded-lg overflow-hidden bg-gray-100 h-full">
@@ -57,7 +65,23 @@ const EditorContent: React.FC<EditorContentProps> = ({
         setSelectedCropIndex={setSelectedCropIndex}
         imageData={imageData}
         editorImgRef={editorImgRef}
+        batchMode={batchMode}
+        batchSelections={batchSelections}
+        onToggleBatchSelection={onToggleBatchSelection}
       />
+      
+      {batchMode && cropBoxes.length > 0 && (
+        <div className="absolute top-2 left-2 z-10 flex flex-wrap gap-1">
+          <Badge variant="outline" className="bg-white/80 backdrop-blur-sm">
+            {cropBoxes.length} items detected
+          </Badge>
+          {batchSelections && batchSelections.length > 0 && (
+            <Badge className="bg-cardshow-blue">
+              {batchSelections.length} selected
+            </Badge>
+          )}
+        </div>
+      )}
       
       <ImageRotateButton onRotate={onRotateImage} />
       
@@ -67,6 +91,7 @@ const EditorContent: React.FC<EditorContentProps> = ({
         onRemoveCropBox={onRemoveCropBox}
         onRotateClockwise={onRotateClockwise}
         onRotateCounterClockwise={onRotateCounterClockwise}
+        batchMode={batchMode}
       />
     </div>
   );

@@ -23,17 +23,18 @@ export const useEditor = ({ onCropComplete, currentFile, setShowEditor }: UseEdi
   const stageSelectedCrop = async (
     selectedBox: CropBoxProps, 
     canvasRef: React.RefObject<HTMLCanvasElement>,
-    editorImgRef: React.RefObject<HTMLImageElement>
+    editorImgRef: React.RefObject<HTMLImageElement>,
+    showToast: boolean = true
   ) => {
     try {
       if (!currentFile) {
-        toast.error("No image file loaded");
-        return;
+        showToast && toast.error("No image file loaded");
+        return null;
       }
       
       if (!editorImgRef.current) {
-        toast.error("Editor image not loaded");
-        return;
+        showToast && toast.error("Editor image not loaded");
+        return null;
       }
       
       console.log("Starting crop with box:", selectedBox);
@@ -49,21 +50,25 @@ export const useEditor = ({ onCropComplete, currentFile, setShowEditor }: UseEdi
       
       if (result && result.file && result.url) {
         const newStagedCard: StagedCardProps = {
-          id: `card-${Date.now()}`,
+          id: `card-${Date.now()}-${Math.random().toString(16).slice(2)}`,
           cropBox: {...selectedBox},
           previewUrl: result.url,
           file: result.file  // Store the file for later use
         };
         
         setStagedCards(prev => [...prev, newStagedCard]);
-        toast.success("Card added to staging area");
+        showToast && toast.success("Card added to staging area");
+        
+        return result;
       } else {
         console.error("Failed to crop the image, result:", result);
-        toast.error("Failed to crop the image");
+        showToast && toast.error("Failed to crop the image");
+        return null;
       }
     } catch (error) {
       console.error("Error in stageSelectedCrop:", error);
-      toast.error(`Error cropping image: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      showToast && toast.error(`Error cropping image: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      return null;
     }
   };
 
