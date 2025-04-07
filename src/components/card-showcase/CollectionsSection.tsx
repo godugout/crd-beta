@@ -8,11 +8,13 @@ import { useNavigate } from 'react-router-dom';
 export interface CollectionsSectionProps {
   collections: Collection[];
   isLoading: boolean;
+  handleViewCollection?: (collectionId: string) => void; // Make this optional with '?'
 }
 
 const CollectionsSection: React.FC<CollectionsSectionProps> = ({
   collections,
-  isLoading
+  isLoading,
+  handleViewCollection
 }) => {
   const navigate = useNavigate();
   
@@ -20,8 +22,13 @@ const CollectionsSection: React.FC<CollectionsSectionProps> = ({
     navigate('/collection/create');
   };
   
-  const handleViewCollection = (collectionId: string) => {
-    navigate(`/collection/${collectionId}`);
+  const onViewCollection = (collectionId: string) => {
+    if (handleViewCollection) {
+      handleViewCollection(collectionId);
+    } else {
+      // Default behavior if not provided
+      navigate(`/collection/${collectionId}`);
+    }
   };
   
   return (
@@ -46,7 +53,7 @@ const CollectionsSection: React.FC<CollectionsSectionProps> = ({
             <div 
               key={collection.id} 
               className="border border-gray-200 rounded-lg overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
-              onClick={() => handleViewCollection(collection.id)}
+              onClick={() => onViewCollection(collection.id)}
             >
               <div className="h-40 bg-gray-100 overflow-hidden">
                 {collection.coverImageUrl ? (

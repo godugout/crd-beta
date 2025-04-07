@@ -84,6 +84,7 @@ export function CollectionDetail() {
             collectionId: card.collection_id,
             isPublic: card.is_public || false,
             tags: card.tags || [],
+            // Make sure we properly map design_metadata from the database
             designMetadata: card.design_metadata || {}
           }));
           
