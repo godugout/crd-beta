@@ -7,14 +7,14 @@ import CollectionsSection from '@/components/card-showcase/CollectionsSection';
 import ArFeaturesSection from '@/components/card-showcase/ArFeaturesSection';
 import MemoryPacksSection from '@/components/card-showcase/MemoryPacksSection';
 import SiteFooter from '@/components/card-showcase/SiteFooter';
-import { useCollection } from '@/context/card/hooks';
+import { useCards } from '@/context/CardContext';
 import { useAuth } from '@/context/auth/useAuth';
 import { useCardData } from '@/components/gallery/useCardData';
 
 const Index = () => {
   const { user } = useAuth();
   const { cards, isLoading } = useCardData();
-  const { collections } = useCollection();
+  const { collections } = useCards();
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -36,7 +36,11 @@ const Index = () => {
         />
         
         {/* Memory Packs */}
-        <MemoryPacksSection />
+        <MemoryPacksSection 
+          isLoading={isLoading}
+          packs={[]}
+          handleViewPack={() => {}}
+        />
         
         {/* AR Features */}
         <ArFeaturesSection />

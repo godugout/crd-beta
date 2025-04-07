@@ -1,151 +1,202 @@
+
+import { useCallback } from 'react';
 import { CropBoxProps, getResizeHandle, isPointInRotatedRect } from '../../CropBox';
-import { isRotationHandle } from './useRotation';
-import { createNewCropBox, updateCursorStyle } from './useCropBox';
-import { DragState, UseMouseInteractionsProps } from './types';
 
-export const useMouseEvents = (
-  props: UseMouseInteractionsProps,
-  state: {
-    dragStart: DragState;
-    setDragStart: (state: DragState) => void;
-    isDragging: boolean;
-    setIsDragging: (isDragging: boolean) => void;
-    isResizing: string | null;
-    setIsResizing: (handle: string | null) => void;
-    isRotating: boolean;
-    setIsRotating: (isRotating: boolean) => void;
-  },
-  handlers: {
-    handleDragging: (x: number, y: number, dragStart: DragState) => DragState;
-    handleResizing: (x: number, y: number, dragStart: DragState) => DragState;
-    handleRotation: (x: number, y: number, dragStart: DragState) => DragState;
-    handleStopResizing?: () => void;
-  }
+interface MouseEventProps {
+  canvasRef: React.RefObject<HTMLCanvasElement>;
+  cropBoxes: CropBoxProps[];
+  selectedCropIndex: number;
+  setSelectedCropIndex: (index: number) => void;
+  setCropBoxes: React.Dispatch<React.SetStateAction<CropBoxProps[]>>;
+  isDrawing: boolean;
+  setIsDrawing: React.Dispatch<React.SetStateAction<boolean>>;
+  startPos: { x: number, y: number } | null;
+  setStartPos: React.Dispatch<React.SetStateAction<{ x: number, y: number } | null>>;
+  currentPos: { x: number, y: number } | null;
+  setCurrentPos: React.Dispatch<React.SetStateAction<{ x: number, y: number } | null>>;
+  dragMode: string;
+  setDragMode: React.Dispatch<React.SetStateAction<string>>;
+  resizeHandle: string | null;
+  setResizeHandle: React.Dispatch<React.SetStateAction<string | null>>;
+}
+
+// Create crop box function (replacement for imported one)
+const createNewCropBox = (
+  x: number, 
+  y: number, 
+  width: number, 
+  height: number, 
+  cropBoxesLength: number
+): CropBoxProps => {
+  return {
+    id: cropBoxesLength + 1,
+    x,
+    y,
+    width,
+    height,
+    color: '#FF0000',
+    rotation: 0,
+    memorabiliaType: 'unknown',
+    confidence: 0.5
+  };
+};
+
+// Update cursor style function (replacement for imported one)
+const updateCursorStyle = (
+  canvasRef: React.RefObject<HTMLCanvasElement>,
+  resizeHandle: string | null,
+  dragMode: string
 ) => {
-  const {
-    canvasRef,
-    cropBoxes,
-    setCropBoxes,
-    selectedCropIndex,
-    setSelectedCropIndex,
-    editorImgRef
-  } = props;
+  if (!canvasRef.current) return;
+  
+  if (dragMode === 'move') {
+    canvasRef.current.style.cursor = 'move';
+  } else if (resizeHandle) {
+    switch (resizeHandle) {
+      case 'n':
+      case 's':
+        canvasRef.current.style.cursor = 'ns-resize';
+        break;
+      case 'e':
+      case 'w':
+        canvasRef.current.style.cursor = 'ew-resize';
+        break;
+      case 'ne':
+      case 'sw':
+        canvasRef.current.style.cursor = 'nesw-resize';
+        break;
+      case 'nw':
+      case 'se':
+        canvasRef.current.style.cursor = 'nwse-resize';
+        break;
+      default:
+        canvasRef.current.style.cursor = 'default';
+    }
+  } else {
+    canvasRef.current.style.cursor = 'default';
+  }
+};
 
-  const {
-    dragStart,
-    setDragStart,
-    isDragging,
-    setIsDragging,
-    isResizing,
-    setIsResizing,
-    isRotating,
-    setIsRotating
-  } = state;
-
-  const {
-    handleDragging,
-    handleResizing,
-    handleRotation,
-    handleStopResizing
-  } = handlers;
-
-  const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+export const useMouseEvents = ({
+  canvasRef,
+  cropBoxes,
+  selectedCropIndex,
+  setSelectedCropIndex,
+  setCropBoxes,
+  isDrawing,
+  setIsDrawing,
+  startPos,
+  setStartPos,
+  currentPos,
+  setCurrentPos,
+  dragMode,
+  setDragMode,
+  resizeHandle,
+  setResizeHandle
+}: MouseEventProps) => {
+  // Handle mouse down
+  const handleMouseDown = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (!canvasRef.current) return;
     
-    const rect = canvas.getBoundingClientRect();
+    const rect = canvasRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     
-    if (selectedCropIndex >= 0 && selectedCropIndex < cropBoxes.length) {
-      const selectedBox = cropBoxes[selectedCropIndex];
-      const resizeHandle = getResizeHandle(e, selectedBox);
-      
-      if (resizeHandle) {
-        setIsResizing(resizeHandle);
-        setDragStart({ x, y });
-        return;
-      }
-      
-      if (isRotationHandle(x, y, selectedBox)) {
-        setIsRotating(true);
-        setDragStart({ x, y });
-        return;
-      }
-    }
+    setStartPos({ x, y });
+    setCurrentPos({ x, y });
     
     // Check if clicking on an existing crop box
-    for (let i = 0; i < cropBoxes.length; i++) {
-      const box = cropBoxes[i];
-      
+    let found = false;
+    cropBoxes.forEach((box, index) => {
       if (isPointInRotatedRect(x, y, box)) {
-        setSelectedCropIndex(i);
-        setIsDragging(true);
-        setDragStart({ x, y });
-        return;
+        setSelectedCropIndex(index);
+        
+        // Check if we're on a resize handle
+        const handle = getResizeHandle(e, box);
+        if (handle) {
+          setDragMode('resize');
+          setResizeHandle(handle);
+        } else {
+          setDragMode('move');
+        }
+        
+        found = true;
       }
+    });
+    
+    if (!found) {
+      setSelectedCropIndex(-1);
+      setIsDrawing(true);
+      setDragMode('draw');
     }
+  }, [canvasRef, cropBoxes, setSelectedCropIndex, setStartPos, setCurrentPos, setIsDrawing, setDragMode, setResizeHandle]);
+  
+  // Handle mouse move
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (!canvasRef.current) return;
     
-    // Create a new crop box at the click position
-    const newDragStart = createNewCropBox(
-      x, 
-      y, 
-      cropBoxes, 
-      setCropBoxes, 
-      setSelectedCropIndex, 
-      setIsDragging, 
-      editorImgRef
-    );
-    setDragStart(newDragStart);
-  };
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    
-    const rect = canvas.getBoundingClientRect();
+    const rect = canvasRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     
-    // Provide better visual feedback with cursor styles
-    updateCursorStyle(
-      e, 
-      canvasRef, 
-      cropBoxes, 
-      selectedCropIndex, 
-      isDragging, 
-      isResizing, 
-      isRotating, 
-      isRotationHandle, 
-      getResizeHandle, 
-      isPointInRotatedRect
-    );
+    setCurrentPos({ x, y });
     
-    let newDragStart = dragStart;
-    
-    // Handle the active interaction mode
-    if (isRotating) {
-      newDragStart = handleRotation(x, y, dragStart);
-    } else if (isResizing) {
-      newDragStart = handleResizing(x, y, dragStart);
-    } else if (isDragging) {
-      newDragStart = handleDragging(x, y, dragStart);
+    // Update cursor style based on position
+    if (!startPos) {
+      const hoveredBoxIndex = cropBoxes.findIndex(box => isPointInRotatedRect(x, y, box));
+      
+      if (hoveredBoxIndex !== -1) {
+        const hoverResizeHandle = getResizeHandle(e, cropBoxes[hoveredBoxIndex]);
+        if (hoverResizeHandle) {
+          updateCursorStyle(canvasRef, hoverResizeHandle, '');
+        } else {
+          canvasRef.current.style.cursor = 'move';
+        }
+      } else {
+        canvasRef.current.style.cursor = 'default';
+      }
     }
     
-    if (newDragStart !== dragStart) {
-      setDragStart(newDragStart);
+  }, [canvasRef, startPos, cropBoxes, setCurrentPos]);
+  
+  // Handle mouse up
+  const handleMouseUp = useCallback(() => {
+    if (!startPos || !currentPos || !canvasRef.current) {
+      setIsDrawing(false);
+      setDragMode('');
+      setStartPos(null);
+      setCurrentPos(null);
+      setResizeHandle(null);
+      return;
     }
-  };
-
-  const handleMouseUp = () => {
-    if (isResizing && handleStopResizing) {
-      handleStopResizing();
+    
+    if (isDrawing) {
+      // Calculate the width and height
+      const width = Math.abs(currentPos.x - startPos.x);
+      const height = Math.abs(currentPos.y - startPos.y);
+      
+      // Only create a box if it has meaningful dimensions
+      if (width > 10 && height > 10) {
+        // Determine top-left corner
+        const x = Math.min(startPos.x, currentPos.x);
+        const y = Math.min(startPos.y, currentPos.y);
+        
+        // Create and add the new crop box
+        const newBox = createNewCropBox(x, y, width, height, cropBoxes.length);
+        setCropBoxes(prev => [...prev, newBox]);
+        setSelectedCropIndex(cropBoxes.length);
+      }
     }
-    setIsDragging(false);
-    setIsResizing(null);
-    setIsRotating(false);
-  };
-
+    
+    // Reset state
+    setIsDrawing(false);
+    setDragMode('');
+    setStartPos(null);
+    setCurrentPos(null);
+    setResizeHandle(null);
+    
+  }, [startPos, currentPos, canvasRef, isDrawing, cropBoxes, setCropBoxes, setSelectedCropIndex, setIsDrawing, setDragMode, setStartPos, setCurrentPos, setResizeHandle]);
+  
   return {
     handleMouseDown,
     handleMouseMove,

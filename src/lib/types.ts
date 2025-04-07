@@ -1,4 +1,3 @@
-
 export interface FabricSwatch {
   type: string;
   team: string;
@@ -67,8 +66,8 @@ export interface Card {
 export interface OaklandMemoryData {
   title: string;
   description: string;
-  date?: string; // Changed from Date to string to match usage
-  memoryType?: string;
+  date: string;
+  memoryType: string;
   opponent?: string;
   score?: string;
   location?: string;
@@ -76,7 +75,6 @@ export interface OaklandMemoryData {
   attendees: string[];
   tags: string[];
   imageUrl?: string;
-  template?: string;
-  historicalContext?: string; // Added historical context
-  personalSignificance?: string; // Added personal significance
+  historicalContext?: string;
+  personalSignificance?: string;
 }

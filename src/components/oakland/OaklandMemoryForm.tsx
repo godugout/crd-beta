@@ -5,7 +5,6 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form';
-import { OaklandMemoryData } from '@/lib/types';
 import BasicMemoryFields from './form-fields/BasicMemoryFields';
 import DatePickerField from './form-fields/DatePickerField';
 import MemoryTypeField from './form-fields/MemoryTypeField';
@@ -15,6 +14,7 @@ import AttendeeField from './form-fields/AttendeeField';
 import TagField from './form-fields/TagField';
 import HistoricalContextField from './form-fields/HistoricalContextField';
 import PersonalSignificanceField from './form-fields/PersonalSignificanceField';
+import { format } from 'date-fns';
 
 // Form schema for Oakland memories
 const formSchema = z.object({
@@ -34,6 +34,23 @@ const formSchema = z.object({
 });
 
 export type OaklandMemoryFormValues = z.infer<typeof formSchema>;
+
+// Define the OaklandMemoryData type
+export interface OaklandMemoryData {
+  title: string;
+  description: string;
+  date: string;
+  memoryType: string;
+  opponent?: string;
+  score?: string;
+  location?: string;
+  section?: string;
+  attendees: string[];
+  tags: string[];
+  imageUrl?: string;
+  historicalContext?: string;
+  personalSignificance?: string;
+}
 
 // Component props
 interface OaklandMemoryFormProps {
@@ -116,9 +133,6 @@ const OaklandMemoryForm: React.FC<OaklandMemoryFormProps> = ({ onSubmit, initial
     </Form>
   );
 };
-
-// Missing import for format from date-fns
-import { format } from 'date-fns';
 
 export { OaklandMemoryForm };
 export type { OaklandMemoryData };

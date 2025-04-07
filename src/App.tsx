@@ -22,9 +22,9 @@ import MemoryPacks from './pages/MemoryPacks';
 import MemoryPackDetail from './pages/MemoryPackDetail';
 import MemoryPackCreator from './pages/MemoryPackCreator';
 // Oakland Pages
-import OaklandLanding from './pages/OaklandLanding';
-import OaklandMemories from './pages/OaklandMemories';
-import OaklandMemoryDetail from './pages/OaklandMemoryDetail';
+import OaklandLanding from './pages/oakland/OaklandLanding';
+import OaklandMemories from './pages/oakland/OaklandMemories';
+import OaklandMemoryDetail from './pages/oakland/OaklandMemoryDetail';
 import OaklandMemoryCreator from './pages/OaklandMemoryCreator';
 // Game Day Mode
 import GameDayMode from './pages/GameDayMode';
