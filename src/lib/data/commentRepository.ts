@@ -220,13 +220,17 @@ function transformCommentFromDb(record: any): Comment {
     parentId: record.parent_id,
     createdAt: record.created_at,
     updatedAt: record.updated_at,
-    user: record.profiles ? {
+  };
+  
+  // Add user data if available
+  if (record.profiles) {
+    comment.user = {
       id: record.profiles.id,
       name: record.profiles.full_name, 
       avatarUrl: record.profiles.avatar_url,
       username: record.profiles.username
-    } : undefined
-  };
+    };
+  }
   
   return comment;
 }

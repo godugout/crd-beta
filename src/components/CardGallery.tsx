@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -39,7 +38,6 @@ const CardGallery: React.FC<CardGalleryProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>(initialTags || []);
   
-  // Fetch cards data if not provided via props
   const { 
     cards: fetchedCards, 
     isLoading: isLoadingCards, 
@@ -49,24 +47,20 @@ const CardGallery: React.FC<CardGalleryProps> = ({
     teamId,
     collectionId,
     tags: selectedTags.length > 0 ? selectedTags : undefined,
-    autoFetch: !propCards // Only auto-fetch if cards aren't provided via props
+    autoFetch: !propCards
   });
   
   const cards = propCards || fetchedCards;
   
-  // Device and performance optimizations
   const { isMobile, shouldOptimizeAnimations } = useMobileOptimization();
   
-  // Get card effects with reduced animations based on device capabilities
   const { cardEffects, isLoading: isLoadingEffects } = useCardEffects(cards);
   
-  // Memoize filtered cards to avoid recalculation on every render
   const filteredCards = useMemo(() => 
     filterCards(cards, searchQuery, selectedTags),
     [cards, searchQuery, selectedTags]
   );
   
-  // Memoize all unique tags to avoid recalculation
   const allTags = useMemo(() => 
     Array.from(new Set(cards.flatMap(card => card.tags || []))),
     [cards]
@@ -91,7 +85,6 @@ const CardGallery: React.FC<CardGalleryProps> = ({
     if (onCardClick) {
       onCardClick(cardId);
     } else {
-      // Default behavior if no click handler is provided
       navigate(`/card/${cardId}`);
     }
   };
@@ -103,7 +96,6 @@ const CardGallery: React.FC<CardGalleryProps> = ({
   return (
     <div className={cn("", className)}>
       <ErrorBoundary>
-        {/* Toolbar with search and actions */}
         <div className="mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <SearchInput 
             value={searchQuery}
@@ -147,7 +139,6 @@ const CardGallery: React.FC<CardGalleryProps> = ({
           </div>
         </div>
         
-        {/* Tag filters */}
         <TagFilter 
           allTags={allTags}
           selectedTags={selectedTags}
@@ -155,12 +146,11 @@ const CardGallery: React.FC<CardGalleryProps> = ({
           onClearFilters={(selectedTags.length > 0 || searchQuery) ? clearFilters : undefined}
         />
         
-        {/* Card display - grid or list based on viewMode */}
         {viewMode === 'grid' ? (
           <CardGridWrapper 
             cards={filteredCards}
             isLoading={isLoading}
-            error={cardsError instanceof Error ? cardsError : (cardsError ? new Error(String(cardsError)) : null)}
+            error={cardsError ? (typeof cardsError === 'string' ? new Error(cardsError) : cardsError as Error) : null}
             onCardClick={handleCardItemClick}
             getCardEffects={(cardId) => cardEffects[cardId] || []}
             useVirtualization={!isMobile && filteredCards.length > 20}
@@ -186,7 +176,6 @@ interface CardGridProps {
   useVirtualization?: boolean;
 }
 
-// Renamed to CardGridWrapper to avoid naming conflicts
 const CardGridWrapper: React.FC<CardGridProps> = ({ 
   cards,
   isLoading,

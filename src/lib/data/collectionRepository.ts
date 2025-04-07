@@ -1,6 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { Collection, DbCollection, Card } from '../schema/types';
+import { Collection, DbCollection } from '../schema/types';
 import { toast } from 'sonner';
 
 /**
@@ -8,43 +8,38 @@ import { toast } from 'sonner';
  */
 export const collectionRepository = {
   /**
-   * Get all collections with optional filtering
+   * Get all collections
    */
-  getCollections: async (
-    options?: {
-      userId?: string;
-      teamId?: string;
-      includeCards?: boolean;
-      visibility?: 'public' | 'private' | 'team';
-    }
-  ): Promise<{ data: Collection[] | null; error: any }> => {
+  getCollections: async (userId?: string): Promise<{ data: Collection[] | null; error: any }> => {
     try {
       let query = supabase
         .from('collections')
-        .select(options?.includeCards ? '*, cards(*)' : '*');
+        .select('*');
       
-      // Apply filters if provided
-      if (options?.userId) {
-        query = query.eq('owner_id', options.userId);
+      if (userId) {
+        query = query.eq('owner_id', userId);
       }
       
-      if (options?.teamId) {
-        query = query.eq('team_id', options.teamId);
-      }
-      
-      if (options?.visibility) {
-        query = query.eq('visibility', options.visibility);
-      }
-      
-      const { data, error } = await query.order('created_at', { ascending: false });
+      const { data, error } = await query
+        .order('created_at', { ascending: false });
       
       if (error) {
         console.error('Error fetching collections:', error);
         return { data: null, error };
       }
       
-      // Transform database records to our Collection type
-      const collections = data.map(record => transformCollectionFromDb(record, options?.includeCards));
+      if (!data) {
+        return { data: [], error: null };
+      }
+      
+      const collections: Collection[] = data.map(record => {
+        if (!record || typeof record === 'string') {
+          console.error('Invalid collection record:', record);
+          return null;
+        }
+        
+        return transformCollectionFromDb(record as DbCollection);
+      }).filter(Boolean) as Collection[];
       
       return { data: collections, error: null };
     } catch (err) {
@@ -54,13 +49,13 @@ export const collectionRepository = {
   },
   
   /**
-   * Get a single collection by ID
+   * Get a collection by ID
    */
-  getCollection: async (id: string, includeCards: boolean = true): Promise<{ data: Collection | null; error: any }> => {
+  getCollection: async (id: string): Promise<{ data: Collection | null; error: any }> => {
     try {
       const { data, error } = await supabase
         .from('collections')
-        .select(includeCards ? '*, cards(*)' : '*')
+        .select('*')
         .eq('id', id)
         .single();
       
@@ -69,7 +64,11 @@ export const collectionRepository = {
         return { data: null, error };
       }
       
-      const collection = transformCollectionFromDb(data, includeCards);
+      if (!data) {
+        return { data: null, error: new Error('Collection not found') };
+      }
+      
+      const collection = transformCollectionFromDb(data as DbCollection);
       
       return { data: collection, error: null };
     } catch (err) {
@@ -83,9 +82,12 @@ export const collectionRepository = {
    */
   createCollection: async (collection: Partial<Collection>): Promise<{ data: Collection | null; error: any }> => {
     try {
-      // Prepare data for insertion
+      if (!collection.name) {
+        return { data: null, error: new Error('Collection name is required') };
+      }
+      
       const collectionData = {
-        title: collection.name || collection.title || '',
+        title: collection.name, // Name is stored as title in DB
         description: collection.description,
         cover_image_url: collection.coverImageUrl,
         owner_id: collection.userId || collection.ownerId,
@@ -107,9 +109,13 @@ export const collectionRepository = {
         return { data: null, error };
       }
       
-      const newCollection = transformCollectionFromDb(data, false);
+      if (!data) {
+        return { data: null, error: new Error('No data returned from collection creation') };
+      }
       
+      const newCollection = transformCollectionFromDb(data as DbCollection);
       toast.success('Collection created successfully');
+      
       return { data: newCollection, error: null };
     } catch (err) {
       console.error('Unexpected error in createCollection:', err);
@@ -119,23 +125,19 @@ export const collectionRepository = {
   },
   
   /**
-   * Update an existing collection
+   * Update a collection
    */
-  updateCollection: async (
-    id: string, 
-    updates: Partial<Collection>
-  ): Promise<{ data: Collection | null; error: any }> => {
+  updateCollection: async (id: string, updates: Partial<Collection>): Promise<{ data: Collection | null; error: any }> => {
     try {
       // Convert to database field names
       const updateData: Record<string, any> = {};
       
       if (updates.name !== undefined) updateData.title = updates.name;
-      if (updates.title !== undefined) updateData.title = updates.title;
       if (updates.description !== undefined) updateData.description = updates.description;
       if (updates.coverImageUrl !== undefined) updateData.cover_image_url = updates.coverImageUrl;
-      if (updates.teamId !== undefined) updateData.team_id = updates.teamId;
       if (updates.visibility !== undefined) updateData.visibility = updates.visibility;
       if (updates.allowComments !== undefined) updateData.allow_comments = updates.allowComments;
+      if (updates.teamId !== undefined) updateData.team_id = updates.teamId;
       if (updates.designMetadata !== undefined) updateData.design_metadata = updates.designMetadata;
       
       const { data, error } = await supabase
@@ -151,9 +153,13 @@ export const collectionRepository = {
         return { data: null, error };
       }
       
-      const updatedCollection = transformCollectionFromDb(data, false);
+      if (!data) {
+        return { data: null, error: new Error('No data returned from collection update') };
+      }
       
+      const updatedCollection = transformCollectionFromDb(data as DbCollection);
       toast.success('Collection updated successfully');
+      
       return { data: updatedCollection, error: null };
     } catch (err) {
       console.error('Unexpected error in updateCollection:', err);
@@ -163,7 +169,7 @@ export const collectionRepository = {
   },
   
   /**
-   * Delete a collection
+   * Delete a collection by ID
    */
   deleteCollection: async (id: string): Promise<{ success: boolean; error: any }> => {
     try {
@@ -186,17 +192,57 @@ export const collectionRepository = {
       return { success: false, error: err };
     }
   },
-
+  
   /**
-   * Add a card to a collection
+   * Get public collections
    */
-  addCardToCollection: async (cardId: string, collectionId: string): Promise<{ success: boolean; error: any }> => {
+  getPublicCollections: async (): Promise<{ data: Collection[] | null; error: any }> => {
     try {
-      // Update the card's collection_id
+      const { data, error } = await supabase
+        .from('collections')
+        .select('*')
+        .eq('visibility', 'public')
+        .order('created_at', { ascending: false });
+      
+      if (error) {
+        console.error('Error fetching public collections:', error);
+        return { data: null, error };
+      }
+      
+      if (!data) {
+        return { data: [], error: null };
+      }
+      
+      const collections: Collection[] = data.map(record => {
+        if (!record || typeof record === 'string') {
+          console.error('Invalid collection record:', record);
+          return null;
+        }
+        
+        return transformCollectionFromDb(record as DbCollection);
+      }).filter(Boolean) as Collection[];
+      
+      return { data: collections, error: null };
+    } catch (err) {
+      console.error('Unexpected error in getPublicCollections:', err);
+      return { data: null, error: err };
+    }
+  },
+  
+  /**
+   * Add cards to a collection
+   */
+  addCardToCollection: async (
+    collectionId: string, 
+    cardId: string
+  ): Promise<{ success: boolean; error: any }> => {
+    try {
       const { error } = await supabase
-        .from('cards')
-        .update({ collection_id: collectionId })
-        .eq('id', cardId);
+        .from('collection_cards')
+        .insert({
+          collection_id: collectionId,
+          card_id: cardId
+        });
       
       if (error) {
         console.error('Error adding card to collection:', error);
@@ -211,70 +257,24 @@ export const collectionRepository = {
   },
   
   /**
-   * Remove a card from a collection
+   * Get collection cards
    */
-  removeCardFromCollection: async (cardId: string): Promise<{ success: boolean; error: any }> => {
-    try {
-      const { error } = await supabase
-        .from('cards')
-        .update({ collection_id: null })
-        .eq('id', cardId);
-      
-      if (error) {
-        console.error('Error removing card from collection:', error);
-        return { success: false, error };
-      }
-      
-      return { success: true, error: null };
-    } catch (err) {
-      console.error('Unexpected error in removeCardFromCollection:', err);
-      return { success: false, error: err };
-    }
-  },
-
-  /**
-   * Add a collection to a team
-   */
-  assignToTeam: async (collectionId: string, teamId: string): Promise<{ success: boolean; error: any }> => {
-    try {
-      const { error } = await supabase
-        .from('collections')
-        .update({ team_id: teamId })
-        .eq('id', collectionId);
-      
-      if (error) {
-        console.error('Error assigning collection to team:', error);
-        return { success: false, error };
-      }
-      
-      return { success: true, error: null };
-    } catch (err) {
-      console.error('Unexpected error in assignToTeam:', err);
-      return { success: false, error: err };
-    }
-  },
-
-  /**
-   * Get team collections with optimized query
-   */
-  getTeamCollections: async (teamId: string, includeCards: boolean = false): Promise<{ data: Collection[] | null; error: any }> => {
+  getCollectionCards: async (collectionId: string): Promise<{ data: any[] | null; error: any }> => {
     try {
       const { data, error } = await supabase
-        .from('collections')
-        .select(includeCards ? '*, cards(*)' : '*')
-        .eq('team_id', teamId)
+        .from('cards')
+        .select('*')
+        .eq('collection_id', collectionId)
         .order('created_at', { ascending: false });
-      
+        
       if (error) {
-        console.error('Error fetching team collections:', error);
+        console.error('Error fetching collection cards:', error);
         return { data: null, error };
       }
       
-      const collections = data.map(record => transformCollectionFromDb(record, includeCards));
-      
-      return { data: collections, error: null };
+      return { data, error: null };
     } catch (err) {
-      console.error('Unexpected error in getTeamCollections:', err);
+      console.error('Unexpected error in getCollectionCards:', err);
       return { data: null, error: err };
     }
   }
@@ -283,46 +283,21 @@ export const collectionRepository = {
 /**
  * Helper to transform database record to Collection type
  */
-function transformCollectionFromDb(record: DbCollection, includeCards: boolean = false): Collection {
+function transformCollectionFromDb(record: DbCollection): Collection {
   if (!record) return {} as Collection;
-  
-  const collection: Collection = {
+
+  return {
     id: record.id,
-    name: record.title,
-    title: record.title, // For backward compatibility
+    name: record.title, // Title field in DB maps to name in our app
     description: record.description || '',
-    coverImageUrl: record.cover_image_url || '',
-    userId: record.owner_id, // Using owner_id as per current DB
+    coverImageUrl: record.cover_image_url,
+    userId: record.owner_id,
     ownerId: record.owner_id, // For backward compatibility
     teamId: record.team_id,
-    visibility: record.visibility || 'private',
-    allowComments: record.allow_comments !== undefined ? record.allow_comments : true,
+    visibility: record.visibility as 'public' | 'private' | 'team',
+    allowComments: record.allow_comments,
     createdAt: record.created_at,
     updatedAt: record.updated_at,
-    cards: [],
-    designMetadata: record.design_metadata || {
-      wrapperColor: '',
-      wrapperPattern: '',
-      packType: 'standard'
-    }
+    designMetadata: record.design_metadata
   };
-  
-  // Process cards if included and available
-  if (includeCards && record.cards) {
-    collection.cards = (record.cards as any[]).map((card: any) => ({
-      id: card.id,
-      title: card.title || '',
-      description: card.description || '',
-      imageUrl: card.image_url || '',
-      thumbnailUrl: card.thumbnail_url || card.image_url || '',
-      createdAt: card.created_at,
-      updatedAt: card.updated_at,
-      userId: card.user_id,
-      teamId: card.team_id,
-      collectionId: card.collection_id,
-      tags: card.tags || [],
-    }));
-  }
-  
-  return collection;
 }

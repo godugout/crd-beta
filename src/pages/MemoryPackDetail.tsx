@@ -27,13 +27,10 @@ const MemoryPackDetail = () => {
   const [isUnwrapping, setIsUnwrapping] = useState(false);
   const [isUnwrapped, setIsUnwrapped] = useState(false);
   
-  // Find the collection/pack by ID
   const pack = collections.find(c => c.id === id);
   
-  // Get cards that belong to this pack
   const packCards = cards.filter(card => card.collectionId === id);
   
-  // Debug logging
   console.log("Memory Pack:", pack);
   console.log("Pack cards:", packCards);
   
@@ -43,6 +40,18 @@ const MemoryPackDetail = () => {
       navigate('/collections');
     }
   }, [pack, isLoading, navigate]);
+  
+  const cardsWithFixedTypes: Card[] = packCards.map(card => ({
+    ...card,
+    designMetadata: {
+      ...card.designMetadata,
+      oaklandMemory: card.designMetadata?.oaklandMemory ? {
+        ...card.designMetadata.oaklandMemory,
+        title: card.designMetadata.oaklandMemory.title || card.title || '',
+        description: card.designMetadata.oaklandMemory.description || card.description || ''
+      } : undefined
+    }
+  }));
   
   const handleCardClick = (cardId: string) => {
     setSelectedCardId(cardId);
@@ -94,7 +103,6 @@ const MemoryPackDetail = () => {
       <Navbar />
       
       <main className="container mx-auto max-w-6xl px-4 pt-16 pb-24">
-        {/* Breadcrumb */}
         <div className="flex items-center text-sm text-gray-500 py-4 mt-4">
           <Link to="/" className="hover:text-cardshow-blue">Home</Link>
           <ChevronRight className="h-4 w-4 mx-2" />
@@ -241,7 +249,6 @@ const MemoryPackDetail = () => {
                   </div>
                 </div>
                 
-                {/* Display cards */}
                 {packCards.length > 0 ? (
                   <CardGallery 
                     cards={packCards} 

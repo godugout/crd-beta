@@ -1,4 +1,3 @@
-
 /**
  * Core data models for the application
  * Extended with team functionality and enhanced metadata
@@ -115,6 +114,8 @@ export interface OaklandMemoryData {
   imageUrl?: string;
   historicalContext?: string;
   personalSignificance?: string;
+  template?: string;
+  teamId?: string;
 }
 
 export interface GeoLocation {
@@ -152,6 +153,7 @@ export interface Comment {
   parentId?: string;
   createdAt: string;
   updatedAt: string;
+  user?: User;
 }
 
 export interface Reaction {
@@ -162,6 +164,7 @@ export interface Reaction {
   commentId?: string;
   type: 'like' | 'love' | 'wow' | 'haha' | 'sad' | 'angry';
   createdAt: string;
+  user?: User;
 }
 
 export interface SharedItem {

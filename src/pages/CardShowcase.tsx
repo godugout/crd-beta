@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -6,14 +5,12 @@ import { Card, Collection } from '@/lib/types';
 import Navbar from '@/components/Navbar';
 import { toast } from 'sonner';
 
-// Import the refactored components
 import HeroSection from '@/components/card-showcase/HeroSection';
 import FeaturedCardsSection from '@/components/card-showcase/FeaturedCardsSection';
 import CollectionsSection from '@/components/card-showcase/CollectionsSection';
 import ArFeaturesSection from '@/components/card-showcase/ArFeaturesSection';
 import SiteFooter from '@/components/card-showcase/SiteFooter';
 
-// Define a simpler type for database records to avoid deep type instantiation
 interface CardRecord {
   id: string;
   title: string;
@@ -25,7 +22,6 @@ interface CardRecord {
   price?: number;
   edition_size?: number;
   rarity?: string;
-  // Optional fields that might not exist in all records
   thumbnail_url?: string | null;
   tags?: string[] | null;
   collection_id?: string | null;
@@ -33,20 +29,17 @@ interface CardRecord {
 
 interface CollectionRecord {
   id: string;
-  title: string;
-  description: string | null;
-  owner_id?: string;
-  created_at: string;
-  updated_at: string;
-  name: string; // Added to match Collection type
-  coverImageUrl?: string; // Added to match Collection type
-  visibility?: 'public' | 'private'; // Added to match Collection type
-  allowComments?: boolean; // Added to match Collection type
+  name: string;
+  title?: string;
+  description?: string;
+  coverImageUrl?: string;
+  visibility?: 'public' | 'private';
+  allowComments?: boolean;
   designMetadata?: {
     wrapperColor?: string;
     wrapperPattern?: string;
     packType?: 'memory-pack' | 'standard';
-  }; // Added to match Collection type
+  };
 }
 
 const CardShowcase = () => {
@@ -59,7 +52,6 @@ const CardShowcase = () => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        // Fetch cards
         const { data: cardsData, error: cardsError } = await supabase
           .from('cards')
           .select('*')
@@ -68,7 +60,6 @@ const CardShowcase = () => {
           
         if (cardsError) throw cardsError;
         
-        // Fetch collections
         const { data: collectionsData, error: collectionsError } = await supabase
           .from('collections')
           .select('*')
@@ -77,7 +68,6 @@ const CardShowcase = () => {
           
         if (collectionsError) throw collectionsError;
         
-        // Type-safe conversion of database records to application types
         const formattedCards: Card[] = (cardsData as CardRecord[]).map(card => ({
           id: card.id,
           title: card.title,
@@ -85,14 +75,13 @@ const CardShowcase = () => {
           imageUrl: card.image_url || '',
           thumbnailUrl: card.thumbnail_url || card.image_url || '',
           tags: card.tags || [],
-          createdAt: card.created_at, // Use string directly, not converting to Date
+          createdAt: card.created_at,
           collectionId: card.collection_id || undefined
         }));
-
-        // Ensure collections have all required fields from the Collection type
+        
         const formattedCollections: Collection[] = (collectionsData as CollectionRecord[]).map(collection => ({
           id: collection.id,
-          name: collection.name || collection.title, // Use name or fallback to title
+          name: collection.name || collection.title,
           description: collection.description || '',
           coverImageUrl: collection.coverImageUrl || '',
           visibility: collection.visibility || 'public',

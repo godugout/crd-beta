@@ -1,3 +1,12 @@
+
+import { Card as SchemaCard, OaklandMemoryData as SchemaOaklandMemoryData } from '@/lib/schema/types';
+
+// Re-export compatible types to make sure they align with the schema
+export type { Card as Card } from '@/lib/schema/types';
+export type { OaklandMemoryData as OaklandMemoryData } from '@/lib/schema/types';
+export type { Collection, User, Team, TeamMember, Comment, Reaction } from '@/lib/schema/types';
+
+// Ensure fabric swatch is compatible
 export interface FabricSwatch {
   type: string;
   team: string;
@@ -12,6 +21,7 @@ export interface User {
   email: string;
   name?: string;
   avatarUrl?: string | null;
+  username?: string;
 }
 
 export interface Collection {
@@ -20,61 +30,24 @@ export interface Collection {
   description?: string;
   coverImageUrl?: string;
   userId?: string;
-  cards?: Card[];
-  visibility?: 'public' | 'private'; // Add visibility
-  allowComments?: boolean; // Add comment permission
+  cards?: SchemaCard[];
+  visibility?: 'public' | 'private'; 
+  allowComments?: boolean;
   designMetadata?: {
-    wrapperColor?: string; // Add wrapper color for memory packs
-    wrapperPattern?: string; // Add wrapper pattern
-    packType?: 'memory-pack' | 'standard'; // Add pack type
+    wrapperColor?: string;
+    wrapperPattern?: string;
+    packType?: 'memory-pack' | 'standard';
   };
 }
 
-export interface Card {
-  id: string;
-  title: string;
-  description: string;
-  imageUrl: string;
-  thumbnailUrl?: string;
-  uploadDate?: string;
-  createdAt?: string; // Changed from Date to string to match usage
-  userId?: string;
-  collectionId?: string;
-  designMetadata?: {
-    cardStyle: any;
-    textStyle: any;
-    oaklandMemory?: {
-      date?: string;
-      opponent?: string;
-      score?: string;
-      location?: string;
-      section?: string;
-      memoryType?: string;
-      attendees?: string[];
-      template?: string;
-      teamId?: string;
-      imageUrl?: string;
-      tags?: string[]; // Added tags to oaklandMemory
-      historicalContext?: string; // Added historical context
-      personalSignificance?: string; // Added personal significance
-    };
-  };
-  tags?: string[];
-  fabricSwatches?: FabricSwatch[];
+// Make this type exactly match the schema Card type
+export interface Card extends SchemaCard {
+  // Add any additional fields here that might be needed for compatibility
 }
 
-export interface OaklandMemoryData {
+// Fix the OaklandMemoryData to include title and description
+export interface OaklandMemoryData extends SchemaOaklandMemoryData {
+  // Ensure all required fields are present
   title: string;
   description: string;
-  date: string;
-  memoryType: string;
-  opponent?: string;
-  score?: string;
-  location?: string;
-  section?: string;
-  attendees: string[];
-  tags: string[];
-  imageUrl?: string;
-  historicalContext?: string;
-  personalSignificance?: string;
 }

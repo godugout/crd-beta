@@ -1,6 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { Team, TeamMember, DbTeam, DbTeamMember } from '../schema/types';
+import { Team, TeamMember, User } from '../schema/types';
 import { toast } from 'sonner';
 
 /**
@@ -8,101 +8,71 @@ import { toast } from 'sonner';
  */
 export const teamRepository = {
   /**
-   * Get all teams the current user is a member of
+   * Get teams for a user
    */
   getUserTeams: async (userId: string): Promise<{ data: Team[] | null; error: any }> => {
     try {
-      // First get all teams the user is a member of
-      const { data: teamMemberships, error: membershipError } = await supabase
+      // Get teams where user is a member
+      const { data: teamMembers, error: memberError } = await supabase
         .from('team_members')
-        .select('team_id, role')
+        .select('team_id')
         .eq('user_id', userId);
       
-      if (membershipError) {
-        console.error('Error fetching team memberships:', membershipError);
-        return { data: null, error: membershipError };
+      if (memberError) {
+        console.error('Error fetching team memberships:', memberError);
+        return { data: null, error: memberError };
       }
       
-      if (!teamMemberships || teamMemberships.length === 0) {
-        // No teams found
+      if (!teamMembers || teamMembers.length === 0) {
         return { data: [], error: null };
       }
       
-      // Get the actual team data for each membership
-      const teamIds = teamMemberships.map(tm => tm.team_id);
-      
-      const { data: teamsData, error: teamsError } = await supabase
+      // Get all team data
+      const teamIds = teamMembers.map(tm => tm.team_id);
+      const { data: teams, error: teamError } = await supabase
         .from('teams')
         .select('*')
         .in('id', teamIds);
       
-      if (teamsError) {
-        console.error('Error fetching teams:', teamsError);
-        return { data: null, error: teamsError };
+      if (teamError) {
+        console.error('Error fetching teams:', teamError);
+        return { data: null, error: teamError };
       }
       
-      // Transform database records to our Team type and add role info
-      const teams = teamsData.map(team => {
-        const membership = teamMemberships.find(tm => tm.team_id === team.id);
-        const transformed = transformTeamFromDb(team);
-        return {
-          ...transformed,
-          userRole: membership?.role
-        };
-      });
+      if (!teams) {
+        return { data: [], error: null };
+      }
       
-      return { data: teams, error: null };
+      const transformedTeams: Team[] = teams.map(team => ({
+        id: team.id,
+        name: team.name,
+        description: team.description,
+        logoUrl: team.logo_url,
+        ownerId: team.owner_id,
+        createdAt: team.created_at,
+        updatedAt: team.updated_at
+      }));
+      
+      return { data: transformedTeams, error: null };
     } catch (err) {
       console.error('Unexpected error in getUserTeams:', err);
       return { data: null, error: err };
     }
   },
-
-  /**
-   * Get a single team by ID
-   */
-  getTeam: async (id: string): Promise<{ data: Team | null; error: any }> => {
-    try {
-      const { data, error } = await supabase
-        .from('teams')
-        .select('*')
-        .eq('id', id)
-        .single();
-      
-      if (error) {
-        console.error('Error fetching team:', error);
-        return { data: null, error };
-      }
-      
-      const team = transformTeamFromDb(data);
-      
-      return { data: team, error: null };
-    } catch (err) {
-      console.error('Unexpected error in getTeam:', err);
-      return { data: null, error: err };
-    }
-  },
-
+  
   /**
    * Create a new team
    */
-  createTeam: async (
-    team: Partial<Team>,
-    currentUserId: string
-  ): Promise<{ data: Team | null; error: any }> => {
+  createTeam: async (name: string, description: string | undefined, ownerId: string): Promise<{ data: Team | null; error: any }> => {
     try {
-      // Start a transaction
-      // First create the team
-      const teamData = {
-        name: team.name || '',
-        description: team.description || '',
-        logo_url: team.logoUrl || '',
-        owner_id: currentUserId
-      };
-      
-      const { data: teamResult, error: teamError } = await supabase
+      // Create the team
+      const { data: team, error: teamError } = await supabase
         .from('teams')
-        .insert(teamData)
+        .insert({
+          name,
+          description,
+          owner_id: ownerId
+        })
         .select()
         .single();
       
@@ -112,26 +82,33 @@ export const teamRepository = {
         return { data: null, error: teamError };
       }
       
-      // Then add the creator as the owner
-      const memberData = {
-        team_id: teamResult.id,
-        user_id: currentUserId,
-        role: 'owner'
-      };
-      
-      const { error: memberError } = await supabase
-        .from('team_members')
-        .insert(memberData);
-      
-      if (memberError) {
-        console.error('Error adding team member:', memberError);
-        // Try to clean up the team if member creation failed
-        await supabase.from('teams').delete().eq('id', teamResult.id);
-        toast.error('Failed to complete team setup');
-        return { data: null, error: memberError };
+      if (!team) {
+        return { data: null, error: new Error('No data returned from team creation') };
       }
       
-      const newTeam = transformTeamFromDb(teamResult);
+      // Add owner as a team member with owner role
+      const { error: memberError } = await supabase
+        .from('team_members')
+        .insert({
+          team_id: team.id,
+          user_id: ownerId,
+          role: 'owner'
+        });
+      
+      if (memberError) {
+        console.error('Error adding owner as team member:', memberError);
+        // Not returning error here as the team was created
+      }
+      
+      const newTeam: Team = {
+        id: team.id,
+        name: team.name,
+        description: team.description,
+        logoUrl: team.logo_url,
+        ownerId: team.owner_id,
+        createdAt: team.created_at,
+        updatedAt: team.updated_at
+      };
       
       toast.success('Team created successfully');
       return { data: newTeam, error: null };
@@ -141,72 +118,44 @@ export const teamRepository = {
       return { data: null, error: err };
     }
   },
-
+  
   /**
-   * Update an existing team
+   * Get team details
    */
-  updateTeam: async (
-    id: string, 
-    updates: Partial<Team>
-  ): Promise<{ data: Team | null; error: any }> => {
+  getTeam: async (teamId: string): Promise<{ data: Team | null; error: any }> => {
     try {
-      // Convert to database field names
-      const updateData: Record<string, any> = {};
-      
-      if (updates.name !== undefined) updateData.name = updates.name;
-      if (updates.description !== undefined) updateData.description = updates.description;
-      if (updates.logoUrl !== undefined) updateData.logo_url = updates.logoUrl;
-      
       const { data, error } = await supabase
         .from('teams')
-        .update(updateData)
-        .eq('id', id)
-        .select()
+        .select('*')
+        .eq('id', teamId)
         .single();
       
       if (error) {
-        console.error('Error updating team:', error);
-        toast.error('Failed to update team');
+        console.error('Error fetching team:', error);
         return { data: null, error };
       }
       
-      const updatedTeam = transformTeamFromDb(data);
+      if (!data) {
+        return { data: null, error: new Error('Team not found') };
+      }
       
-      toast.success('Team updated successfully');
-      return { data: updatedTeam, error: null };
+      const team: Team = {
+        id: data.id,
+        name: data.name,
+        description: data.description,
+        logoUrl: data.logo_url,
+        ownerId: data.owner_id,
+        createdAt: data.created_at,
+        updatedAt: data.updated_at
+      };
+      
+      return { data: team, error: null };
     } catch (err) {
-      console.error('Unexpected error in updateTeam:', err);
-      toast.error('An unexpected error occurred');
+      console.error('Unexpected error in getTeam:', err);
       return { data: null, error: err };
     }
   },
-
-  /**
-   * Delete a team
-   */
-  deleteTeam: async (id: string): Promise<{ success: boolean; error: any }> => {
-    try {
-      // This will automatically delete all team_members due to CASCADE
-      const { error } = await supabase
-        .from('teams')
-        .delete()
-        .eq('id', id);
-      
-      if (error) {
-        console.error('Error deleting team:', error);
-        toast.error('Failed to delete team');
-        return { success: false, error };
-      }
-      
-      toast.success('Team deleted successfully');
-      return { success: true, error: null };
-    } catch (err) {
-      console.error('Unexpected error in deleteTeam:', err);
-      toast.error('An unexpected error occurred');
-      return { success: false, error: err };
-    }
-  },
-
+  
   /**
    * Get team members
    */
@@ -214,7 +163,19 @@ export const teamRepository = {
     try {
       const { data, error } = await supabase
         .from('team_members')
-        .select('*, profiles:user_id(id, full_name, avatar_url, username)')
+        .select(`
+          id, 
+          team_id, 
+          user_id, 
+          role, 
+          joined_at,
+          profiles:user_id (
+            id, 
+            full_name, 
+            avatar_url, 
+            username
+          )
+        `)
         .eq('team_id', teamId);
       
       if (error) {
@@ -222,21 +183,34 @@ export const teamRepository = {
         return { data: null, error };
       }
       
-      // Transform database records to our TeamMember type
-      const members = data.map(record => ({
-        id: record.id,
-        teamId: record.team_id,
-        userId: record.user_id,
-        role: record.role,
-        joinedAt: record.joined_at,
-        // Add user profile info if available
-        user: record.profiles ? {
-          id: record.profiles.id,
-          name: record.profiles.full_name,
-          avatarUrl: record.profiles.avatar_url,
-          username: record.profiles.username
-        } : undefined
-      })) as TeamMember[];
+      if (!data) {
+        return { data: [], error: null };
+      }
+      
+      const members: TeamMember[] = data.map(record => {
+        const userData = record.profiles;
+        let user: User | undefined = undefined;
+        
+        // Check if userData is valid before accessing it
+        if (userData && typeof userData === 'object' && 'id' in userData) {
+          user = {
+            id: userData.id,
+            email: '', // Email isn't returned from profiles for security
+            name: userData.full_name,
+            avatarUrl: userData.avatar_url,
+            username: userData.username
+          };
+        }
+        
+        return {
+          id: record.id,
+          teamId: record.team_id,
+          userId: record.user_id,
+          role: record.role,
+          joinedAt: record.joined_at,
+          user
+        };
+      });
       
       return { data: members, error: null };
     } catch (err) {
@@ -244,40 +218,69 @@ export const teamRepository = {
       return { data: null, error: err };
     }
   },
-
+  
   /**
-   * Add a user to a team
+   * Add a member to a team
    */
   addTeamMember: async (
     teamId: string, 
     userId: string, 
-    role: 'admin' | 'member' | 'viewer' = 'member'
+    role: 'admin' | 'member' | 'viewer'
   ): Promise<{ success: boolean; error: any }> => {
     try {
-      const memberData = {
-        team_id: teamId,
-        user_id: userId,
-        role: role
-      };
-      
-      const { error } = await supabase
+      // First check if user is already in the team
+      const { data: existing, error: checkError } = await supabase
         .from('team_members')
-        .insert(memberData);
+        .select('id')
+        .eq('team_id', teamId)
+        .eq('user_id', userId)
+        .maybeSingle();
       
-      if (error) {
-        console.error('Error adding team member:', error);
-        return { success: false, error };
+      if (checkError) {
+        console.error('Error checking existing team member:', checkError);
+        return { success: false, error: checkError };
       }
       
+      if (existing) {
+        // Update existing member's role
+        const { error: updateError } = await supabase
+          .from('team_members')
+          .update({ role })
+          .eq('id', existing.id);
+        
+        if (updateError) {
+          console.error('Error updating team member:', updateError);
+          toast.error('Failed to update team member');
+          return { success: false, error: updateError };
+        }
+      } else {
+        // Add new team member
+        const { error: insertError } = await supabase
+          .from('team_members')
+          .insert({
+            team_id: teamId,
+            user_id: userId,
+            role
+          });
+        
+        if (insertError) {
+          console.error('Error adding team member:', insertError);
+          toast.error('Failed to add team member');
+          return { success: false, error: insertError };
+        }
+      }
+      
+      toast.success(existing ? 'Team member updated' : 'Team member added');
       return { success: true, error: null };
     } catch (err) {
       console.error('Unexpected error in addTeamMember:', err);
+      toast.error('An unexpected error occurred');
       return { success: false, error: err };
     }
   },
-
+  
   /**
-   * Remove a user from a team
+   * Remove a member from a team
    */
   removeTeamMember: async (teamId: string, userId: string): Promise<{ success: boolean; error: any }> => {
     try {
@@ -289,94 +292,64 @@ export const teamRepository = {
       
       if (error) {
         console.error('Error removing team member:', error);
+        toast.error('Failed to remove team member');
         return { success: false, error };
       }
       
+      toast.success('Team member removed');
       return { success: true, error: null };
     } catch (err) {
       console.error('Unexpected error in removeTeamMember:', err);
+      toast.error('An unexpected error occurred');
       return { success: false, error: err };
     }
   },
-
+  
   /**
-   * Check if user is a member of a team with specific role
+   * Update a team's details
    */
-  isTeamMember: async (
-    teamId: string, 
-    userId: string,
-    role?: 'owner' | 'admin' | 'member' | 'viewer'
-  ): Promise<{ isMember: boolean; memberRole?: string; error: any }> => {
+  updateTeam: async (teamId: string, updates: Partial<Team>): Promise<{ data: Team | null; error: any }> => {
     try {
-      let query = supabase
-        .from('team_members')
-        .select('role')
-        .eq('team_id', teamId)
-        .eq('user_id', userId);
+      // Convert to database field names
+      const updateData: Record<string, any> = {};
       
-      if (role) {
-        query = query.eq('role', role);
-      }
+      if (updates.name !== undefined) updateData.name = updates.name;
+      if (updates.description !== undefined) updateData.description = updates.description;
+      if (updates.logoUrl !== undefined) updateData.logo_url = updates.logoUrl;
       
-      const { data, error } = await query.maybeSingle();
+      const { data, error } = await supabase
+        .from('teams')
+        .update(updateData)
+        .eq('id', teamId)
+        .select()
+        .single();
       
       if (error) {
-        console.error('Error checking team membership:', error);
-        return { isMember: false, error };
+        console.error('Error updating team:', error);
+        toast.error('Failed to update team');
+        return { data: null, error };
       }
       
-      return { 
-        isMember: !!data, 
-        memberRole: data?.role,
-        error: null 
+      if (!data) {
+        return { data: null, error: new Error('No data returned from team update') };
+      }
+      
+      const updatedTeam: Team = {
+        id: data.id,
+        name: data.name,
+        description: data.description,
+        logoUrl: data.logo_url,
+        ownerId: data.owner_id,
+        createdAt: data.created_at,
+        updatedAt: data.updated_at
       };
-    } catch (err) {
-      console.error('Unexpected error in isTeamMember:', err);
-      return { isMember: false, error: err };
-    }
-  },
-
-  /**
-   * Update a team member's role
-   */
-  updateMemberRole: async (
-    teamId: string,
-    userId: string,
-    role: 'admin' | 'member' | 'viewer'
-  ): Promise<{ success: boolean; error: any }> => {
-    try {
-      const { error } = await supabase
-        .from('team_members')
-        .update({ role })
-        .eq('team_id', teamId)
-        .eq('user_id', userId);
       
-      if (error) {
-        console.error('Error updating member role:', error);
-        return { success: false, error };
-      }
-      
-      return { success: true, error: null };
+      toast.success('Team updated successfully');
+      return { data: updatedTeam, error: null };
     } catch (err) {
-      console.error('Unexpected error in updateMemberRole:', err);
-      return { success: false, error: err };
+      console.error('Unexpected error in updateTeam:', err);
+      toast.error('An unexpected error occurred');
+      return { data: null, error: err };
     }
   }
 };
-
-/**
- * Helper to transform database record to Team type
- */
-function transformTeamFromDb(record: DbTeam): Team {
-  if (!record) return {} as Team;
-  
-  return {
-    id: record.id,
-    name: record.name,
-    description: record.description || '',
-    logoUrl: record.logo_url || '',
-    createdAt: record.created_at,
-    updatedAt: record.updated_at,
-    ownerId: record.owner_id
-  };
-}

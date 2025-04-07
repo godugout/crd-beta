@@ -51,6 +51,18 @@ const Gallery = () => {
     card.tags?.some(tag => ['baseball', 'vintage'].includes(tag.toLowerCase()))
   );
 
+  const displayCards: Card[] = cards.map(card => ({
+    ...card,
+    designMetadata: {
+      ...card.designMetadata,
+      oaklandMemory: card.designMetadata?.oaklandMemory ? {
+        ...card.designMetadata.oaklandMemory,
+        title: card.designMetadata.oaklandMemory.title || card.title || '',
+        description: card.designMetadata.oaklandMemory.description || card.description || ''
+      } : undefined
+    }
+  }));
+
   const handleCardClick = (cardId: string) => {
     setSelectedCardId(cardId);
     setIsFullscreen(true);
@@ -184,7 +196,7 @@ const Gallery = () => {
             <CardGallery 
               viewMode={viewMode} 
               onCardClick={handleCardClick} 
-              cards={cards} 
+              cards={displayCards} 
             />
           </ErrorBoundary>
         </div>

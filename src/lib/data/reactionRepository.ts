@@ -182,7 +182,7 @@ export const reactionRepository = {
 function transformReactionFromDb(record: any): Reaction {
   if (!record) return {} as Reaction;
   
-  return {
+  const reaction: Reaction = {
     id: record.id,
     userId: record.user_id,
     cardId: record.card_id,
@@ -190,12 +190,17 @@ function transformReactionFromDb(record: any): Reaction {
     commentId: record.comment_id,
     type: record.type,
     createdAt: record.created_at,
-    // Add profile info if available
-    user: record.profiles ? {
+  };
+
+  // Add profile info if available
+  if (record.profiles) {
+    reaction.user = {
       id: record.profiles.id,
       name: record.profiles.full_name,
       avatarUrl: record.profiles.avatar_url,
       username: record.profiles.username
-    } : undefined
-  };
+    };
+  }
+  
+  return reaction;
 }
