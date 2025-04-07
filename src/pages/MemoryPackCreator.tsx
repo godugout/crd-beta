@@ -11,7 +11,6 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Card } from '@/lib/types';
 import { Collection } from '../lib/types';
 
-// Rest of the component implementation
 const MemoryPackCreator = () => {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -21,10 +20,9 @@ const MemoryPackCreator = () => {
   const [description, setDescription] = useState('');
   const [wrapperColor, setWrapperColor] = useState('#006341'); // Default to Oakland A's green
   const [wrapperPattern, setWrapperPattern] = useState('solid');
-  const [visibility, setVisibility] = useState<'public' | 'private'>('public');
+  const [visibility, setVisibility] = useState<'public' | 'private' | 'team'>('public');
   const [allowComments, setAllowComments] = useState(true);
 
-  // Load pack if editing
   useEffect(() => {
     if (id && id !== 'new') {
       const pack = collections.find(c => c.id === id);
@@ -36,7 +34,6 @@ const MemoryPackCreator = () => {
         setVisibility(pack.visibility || 'public');
         setAllowComments(pack.allowComments !== false);
         
-        // Set selected cards if available
         if (pack.cards && pack.cards.length > 0) {
           setSelectedCards(pack.cards);
         }
@@ -44,7 +41,6 @@ const MemoryPackCreator = () => {
     }
   }, [id, collections]);
 
-  // Save the memory pack
   const handleSave = () => {
     const packData = {
       name,
@@ -59,12 +55,8 @@ const MemoryPackCreator = () => {
     };
     
     if (id && id !== 'new') {
-      // Update existing pack
       updateCollection(id, packData as Partial<Omit<Collection, "id" | "cards" | "createdAt" | "updatedAt">>);
-      // Update the cards in the collection
-      // This would typically be handled by a separate API call
     } else {
-      // Create new pack
       addCollection(packData as Collection);
     }
     
@@ -83,7 +75,6 @@ const MemoryPackCreator = () => {
           
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-8">
-              {/* Basic Info Section */}
               <div className="bg-white p-6 rounded-lg shadow-sm">
                 <h2 className="text-xl font-semibold mb-4">Basic Information</h2>
                 
@@ -111,7 +102,6 @@ const MemoryPackCreator = () => {
                 </div>
               </div>
               
-              {/* Design Section */}
               <div className="bg-white p-6 rounded-lg shadow-sm">
                 <h2 className="text-xl font-semibold mb-4">Pack Design</h2>
                 
@@ -202,7 +192,6 @@ const MemoryPackCreator = () => {
                 </div>
               </div>
               
-              {/* Settings Section */}
               <div className="bg-white p-6 rounded-lg shadow-sm">
                 <h2 className="text-xl font-semibold mb-4">Pack Settings</h2>
                 
@@ -211,7 +200,7 @@ const MemoryPackCreator = () => {
                     <Label className="mb-2 block">Visibility</Label>
                     <RadioGroup 
                       value={visibility}
-                      onValueChange={(value) => setVisibility(value as 'public' | 'private')}
+                      onValueChange={(value) => setVisibility(value as 'public' | 'private' | 'team')}
                       className="flex space-x-4"
                     >
                       <div className="flex items-center space-x-2">
@@ -221,6 +210,10 @@ const MemoryPackCreator = () => {
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem id="visibility-private" value="private" />
                         <Label htmlFor="visibility-private">Private</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem id="visibility-team" value="team" />
+                        <Label htmlFor="visibility-team">Team</Label>
                       </div>
                     </RadioGroup>
                   </div>
@@ -240,7 +233,6 @@ const MemoryPackCreator = () => {
               </div>
             </div>
             
-            {/* Preview and Actions */}
             <div className="space-y-8">
               <div className="bg-white p-6 rounded-lg shadow-sm">
                 <h2 className="text-xl font-semibold mb-4">Pack Preview</h2>

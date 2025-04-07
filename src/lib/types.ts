@@ -1,6 +1,15 @@
 
 // Import types from schema but don't re-export them directly to avoid conflicts
-import { Card as SchemaCard, OaklandMemoryData as SchemaOaklandMemoryData } from '@/lib/schema/types';
+import { 
+  Card as SchemaCard, 
+  OaklandMemoryData as SchemaOaklandMemoryData,
+  Collection as SchemaCollection,
+  User as SchemaUser,
+  Team, 
+  TeamMember, 
+  Comment, 
+  Reaction 
+} from '@/lib/schema/types';
 
 // Define our own types that extend or are compatible with schema types
 export interface FabricSwatch {
@@ -13,29 +22,13 @@ export interface FabricSwatch {
 }
 
 // User interface that's compatible with schema User
-export interface User {
-  id: string;
-  email: string;
-  name?: string;
-  avatarUrl?: string | null;
-  username?: string;
+export interface User extends SchemaUser {
+  // Any additional fields needed
 }
 
 // Collection interface compatible with schema Collection
-export interface Collection {
-  id: string;
-  name: string;
-  description?: string;
-  coverImageUrl?: string;
-  userId?: string;
-  cards?: SchemaCard[];
-  visibility?: 'public' | 'private' | 'team'; 
-  allowComments?: boolean;
-  designMetadata?: {
-    wrapperColor?: string;
-    wrapperPattern?: string;
-    packType?: 'memory-pack' | 'standard';
-  };
+export interface Collection extends SchemaCollection {
+  // Any additional fields needed
 }
 
 // Card interface that extends SchemaCard to ensure compatibility
@@ -45,9 +38,8 @@ export interface Card extends SchemaCard {
 
 // OaklandMemoryData that ensures title and description are present
 export interface OaklandMemoryData extends SchemaOaklandMemoryData {
-  title: string;
-  description: string;
+  // Required fields already defined in schema
 }
 
-// Re-export other types from schema as needed
-export type { Collection as Collection, User as User, Team, TeamMember, Comment, Reaction } from '@/lib/schema/types';
+// Re-export the Team, TeamMember, Comment, and Reaction types directly
+export { Team, TeamMember, Comment, Reaction };

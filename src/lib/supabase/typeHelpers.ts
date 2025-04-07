@@ -51,6 +51,13 @@ export type DbTeamMember = {
   user_id: string;
   role: 'owner' | 'admin' | 'member' | 'viewer';
   joined_at: string;
+  user?: {
+    id: string;
+    full_name?: string;
+    avatar_url?: string;
+    username?: string;
+    email?: string;
+  };
 };
 
 export type DbReaction = {

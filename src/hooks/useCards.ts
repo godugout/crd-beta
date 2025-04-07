@@ -1,8 +1,10 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { Card } from '@/lib/schema/types';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { DbCard } from '@/lib/supabase/typeHelpers';
 
 interface UseCardsOptions {
   teamId?: string;
@@ -56,7 +58,7 @@ export function useCards(options: UseCardsOptions = {}) {
 
       if (data) {
         // Transform database records to our Card type
-        const transformedCards: Card[] = data.map(card => ({
+        const transformedCards: Card[] = (data as DbCard[]).map(card => ({
           id: card.id,
           title: card.title || '',
           description: card.description || '',
@@ -128,20 +130,21 @@ export function useCards(options: UseCardsOptions = {}) {
 
       if (data) {
         // Transform back to our Card type
+        const dbCard = data as DbCard;
         const newCard: Card = {
-          id: data.id,
-          title: data.title || '',
-          description: data.description || '',
-          imageUrl: data.image_url || '',
-          thumbnailUrl: data.thumbnail_url || data.image_url || '',
-          createdAt: data.created_at,
-          updatedAt: data.updated_at,
-          userId: data.user_id,
-          teamId: data.team_id,
-          collectionId: data.collection_id,
-          isPublic: data.is_public || false,
-          tags: data.tags || [],
-          designMetadata: data.design_metadata ? data.design_metadata : {},
+          id: dbCard.id,
+          title: dbCard.title || '',
+          description: dbCard.description || '',
+          imageUrl: dbCard.image_url || '',
+          thumbnailUrl: dbCard.thumbnail_url || dbCard.image_url || '',
+          createdAt: dbCard.created_at,
+          updatedAt: dbCard.updated_at,
+          userId: dbCard.user_id,
+          teamId: dbCard.team_id,
+          collectionId: dbCard.collection_id,
+          isPublic: dbCard.is_public || false,
+          tags: dbCard.tags || [],
+          designMetadata: dbCard.design_metadata ? dbCard.design_metadata : {},
           reactions: []
         };
 
@@ -187,20 +190,21 @@ export function useCards(options: UseCardsOptions = {}) {
 
       if (data) {
         // Transform back to our Card type
+        const dbCard = data as DbCard;
         const updatedCard: Card = {
-          id: data.id,
-          title: data.title || '',
-          description: data.description || '',
-          imageUrl: data.image_url || '',
-          thumbnailUrl: data.thumbnail_url || data.image_url || '',
-          createdAt: data.created_at,
-          updatedAt: data.updated_at,
-          userId: data.user_id,
-          teamId: data.team_id,
-          collectionId: data.collection_id,
-          isPublic: data.is_public || false,
-          tags: data.tags || [],
-          designMetadata: data.design_metadata ? data.design_metadata : {},
+          id: dbCard.id,
+          title: dbCard.title || '',
+          description: dbCard.description || '',
+          imageUrl: dbCard.image_url || '',
+          thumbnailUrl: dbCard.thumbnail_url || dbCard.image_url || '',
+          createdAt: dbCard.created_at,
+          updatedAt: dbCard.updated_at,
+          userId: dbCard.user_id,
+          teamId: dbCard.team_id,
+          collectionId: dbCard.collection_id,
+          isPublic: dbCard.is_public || false,
+          tags: dbCard.tags || [],
+          designMetadata: dbCard.design_metadata ? dbCard.design_metadata : {},
           reactions: []
         };
         

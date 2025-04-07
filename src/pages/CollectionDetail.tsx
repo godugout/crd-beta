@@ -21,15 +21,16 @@ import { Separator } from "@/components/ui/separator"
 import { Link } from 'react-router-dom';
 
 interface CollectionDetailParams {
-  collectionId?: string;
+  [key: string]: string;
+  id: string;
 }
 
 const CollectionDetail: React.FC = () => {
-  const { collectionId } = useParams<CollectionDetailParams>();
+  const { id } = useParams<CollectionDetailParams>();
   const navigate = useNavigate();
   const { collections, cards, updateCollection, deleteCollection, addCardToCollection, removeCardFromCollection } = useCards();
   const { user } = useAuth();
-  const [collection, setCollection] = useState(collections?.find(c => c.id === collectionId) || null);
+  const [collection, setCollection] = useState(collections?.find(c => c.id === id) || null);
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState(collection?.name || '');
   const [description, setDescription] = useState(collection?.description || '');
@@ -45,9 +46,9 @@ const CollectionDetail: React.FC = () => {
   
   useEffect(() => {
     if (collections) {
-      setCollection(collections.find(c => c.id === collectionId) || null);
+      setCollection(collections.find(c => c.id === id) || null);
     }
-  }, [collectionId, collections]);
+  }, [id, collections]);
   
   useEffect(() => {
     if (collection) {
@@ -61,19 +62,19 @@ const CollectionDetail: React.FC = () => {
   
   useEffect(() => {
     if (cards && collection) {
-      const collectionCards = cards.filter(card => card.collectionId === collectionId);
+      const collectionCards = cards.filter(card => card.collectionId === id);
       setFetchedCards(collectionCards);
     }
-  }, [cards, collectionId]);
+  }, [cards, id]);
   
   const handleEditClick = () => {
     setIsEditing(true);
   };
   
   const handleSaveClick = async () => {
-    if (!collectionId) return;
+    if (!id) return;
     
-    await updateCollection(collectionId, {
+    await updateCollection(id, {
       name,
       description,
       coverImageUrl,
@@ -99,24 +100,24 @@ const CollectionDetail: React.FC = () => {
   };
   
   const confirmDelete = async () => {
-    if (!collectionId) return;
+    if (!id) return;
     
-    await deleteCollection(collectionId);
+    await deleteCollection(id);
     setIsDeleteAlertOpen(false);
     navigate('/collections');
   };
   
   const handleAddCardToCollection = async (cardId: string) => {
-    if (!collectionId) return;
+    if (!id) return;
     
-    await addCardToCollection(cardId, collectionId);
+    await addCardToCollection(cardId, id);
     toast.success('Card added to collection');
   };
   
   const handleRemoveCardFromCollection = async (cardId: string) => {
-    if (!collectionId) return;
+    if (!id) return;
     
-    await removeCardFromCollection(cardId, collectionId);
+    await removeCardFromCollection(cardId, id);
     toast.success('Card removed from collection');
   };
 
