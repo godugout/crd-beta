@@ -5,7 +5,6 @@ import { cn } from '@/lib/utils';
 import { PlusCircle, Grid, List } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
-import { useCardData } from '@/hooks/useCardData';
 import { useMobileOptimization } from '@/hooks/useMobileOptimization';
 import { filterCards } from './gallery/utils/filterCards';
 import { CardGrid } from './ui/card-components/CardGrid';
@@ -13,35 +12,47 @@ import SearchInput from './gallery/SearchInput';
 import TagFilter from './gallery/TagFilter';
 import CardList from './gallery/CardList';
 import { useCardEffects } from './gallery/hooks/useCardEffects';
-import { Card } from '@/lib/types';
+import { Card } from '@/lib/schema/types';
+import { useCards } from '@/hooks/useCards';
 
 interface CardGalleryProps {
   className?: string;
   viewMode?: 'grid' | 'list';
   onCardClick?: (cardId: string) => void;
-  cards?: Card[]; // Allow passing cards directly to component
+  cards?: Card[]; 
+  teamId?: string;
+  collectionId?: string;
+  tags?: string[];
 }
 
 const CardGallery: React.FC<CardGalleryProps> = ({ 
   className, 
   viewMode: initialViewMode = 'grid',
   onCardClick,
-  cards: propCards
+  cards: propCards,
+  teamId,
+  collectionId,
+  tags: initialTags
 }) => {
   const navigate = useNavigate();
   const [viewMode, setViewMode] = useState(initialViewMode);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [selectedTags, setSelectedTags] = useState<string[]>(initialTags || []);
   
   // Fetch cards data if not provided via props
   const { 
-    cards: contextCards, 
+    cards: fetchedCards, 
     isLoading: isLoadingCards, 
     error: cardsError, 
-    refetch: refreshCards 
-  } = useCardData();
+    fetchCards: refreshCards 
+  } = useCards({
+    teamId,
+    collectionId,
+    tags: selectedTags.length > 0 ? selectedTags : undefined,
+    autoFetch: !propCards // Only auto-fetch if cards aren't provided via props
+  });
   
-  const cards = propCards || contextCards;
+  const cards = propCards || fetchedCards;
   
   // Device and performance optimizations
   const { isMobile, shouldOptimizeAnimations } = useMobileOptimization();
