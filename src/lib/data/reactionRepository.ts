@@ -23,7 +23,11 @@ export const reactionRepository = {
         return { data: null, error };
       }
       
-      const reactions = data.map(transformReactionFromDb);
+      if (!data) {
+        return { data: [], error: null };
+      }
+      
+      const reactions = data.map((record: any) => transformReactionFromDb(record));
       
       return { data: reactions, error: null };
     } catch (err) {
@@ -67,7 +71,7 @@ export const reactionRepository = {
           .from('reactions')
           .update({ type })
           .eq('id', existingReaction.id)
-          .select()
+          .select('*, profiles:user_id(id, full_name, avatar_url, username)')
           .single();
       } else {
         // Create new reaction
@@ -82,7 +86,7 @@ export const reactionRepository = {
         result = await supabase
           .from('reactions')
           .insert(reactionData)
-          .select()
+          .select('*, profiles:user_id(id, full_name, avatar_url, username)')
           .single();
       }
 
@@ -144,10 +148,14 @@ export const reactionRepository = {
         return { data: null, error };
       }
       
+      if (!data) {
+        return { data: {}, error: null };
+      }
+      
       // Process the data to get counts by type for each card
       const counts: Record<string, Record<string, number>> = {};
       
-      data.forEach(reaction => {
+      data.forEach((reaction: any) => {
         if (!reaction.card_id) return;
         
         if (!counts[reaction.card_id]) {
@@ -171,7 +179,7 @@ export const reactionRepository = {
 /**
  * Helper to transform database record to Reaction type
  */
-function transformReactionFromDb(record: DbReaction): Reaction {
+function transformReactionFromDb(record: any): Reaction {
   if (!record) return {} as Reaction;
   
   return {

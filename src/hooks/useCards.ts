@@ -68,7 +68,7 @@ export function useCards(options: UseCardsOptions = {}) {
           userId: card.user_id,
           teamId: card.team_id,
           collectionId: card.collection_id,
-          isPublic: card.is_public,
+          isPublic: card.is_public || false,
           tags: card.tags || [],
           designMetadata: card.design_metadata || {},
           reactions: []
@@ -140,7 +140,7 @@ export function useCards(options: UseCardsOptions = {}) {
           userId: data.user_id,
           teamId: data.team_id,
           collectionId: data.collection_id,
-          isPublic: data.is_public,
+          isPublic: data.is_public || false,
           tags: data.tags || [],
           designMetadata: data.design_metadata || {},
           reactions: []
@@ -199,7 +199,7 @@ export function useCards(options: UseCardsOptions = {}) {
           userId: data.user_id,
           teamId: data.team_id,
           collectionId: data.collection_id,
-          isPublic: data.is_public,
+          isPublic: data.is_public || false,
           tags: data.tags || [],
           designMetadata: data.design_metadata || {},
           reactions: []

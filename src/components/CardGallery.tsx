@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -6,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import { useMobileOptimization } from '@/hooks/useMobileOptimization';
 import { filterCards } from './gallery/utils/filterCards';
-import { CardGrid } from './ui/card-components/CardGrid';
+import { CardGrid as CardGridComponent } from './ui/card-components/CardGrid';
 import SearchInput from './gallery/SearchInput';
 import TagFilter from './gallery/TagFilter';
 import CardList from './gallery/CardList';
@@ -156,10 +157,10 @@ const CardGallery: React.FC<CardGalleryProps> = ({
         
         {/* Card display - grid or list based on viewMode */}
         {viewMode === 'grid' ? (
-          <CardGrid 
+          <CardGridWrapper 
             cards={filteredCards}
             isLoading={isLoading}
-            error={cardsError instanceof Error ? cardsError : cardsError ? new Error(cardsError) : null}
+            error={cardsError instanceof Error ? cardsError : (cardsError ? new Error(String(cardsError)) : null)}
             onCardClick={handleCardItemClick}
             getCardEffects={(cardId) => cardEffects[cardId] || []}
             useVirtualization={!isMobile && filteredCards.length > 20}
@@ -185,7 +186,8 @@ interface CardGridProps {
   useVirtualization?: boolean;
 }
 
-const CardGrid = ({ 
+// Renamed to CardGridWrapper to avoid naming conflicts
+const CardGridWrapper: React.FC<CardGridProps> = ({ 
   cards,
   isLoading,
   error,
@@ -224,11 +226,13 @@ const CardGrid = ({
   }
 
   return (
-    <CardGrid 
+    <CardGridComponent 
       cards={cards}
       onCardClick={onCardClick}
       getCardEffects={getCardEffects}
       useVirtualization={useVirtualization}
+      isLoading={isLoading}
+      error={error}
     />
   );
 };

@@ -1,6 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { Comment, DbComment } from '../schema/types';
+import { Comment } from '../schema/types';
 import { toast } from 'sonner';
 
 /**
@@ -48,7 +48,11 @@ export const commentRepository = {
         return { data: null, error };
       }
       
-      const comments = data.map(transformCommentFromDb);
+      if (!data) {
+        return { data: [], error: null };
+      }
+      
+      const comments = data.map((record: any) => transformCommentFromDb(record));
       
       return { data: comments, error: null };
     } catch (err) {
@@ -91,6 +95,10 @@ export const commentRepository = {
         return { data: null, error };
       }
       
+      if (!data) {
+        return { data: null, error: new Error('No data returned from comment creation') };
+      }
+      
       const newComment = transformCommentFromDb(data);
       
       return { data: newComment, error: null };
@@ -120,6 +128,10 @@ export const commentRepository = {
         console.error('Error updating comment:', error);
         toast.error('Failed to update comment');
         return { data: null, error };
+      }
+      
+      if (!data) {
+        return { data: null, error: new Error('No data returned from comment update') };
       }
       
       const updatedComment = transformCommentFromDb(data);
@@ -162,22 +174,25 @@ export const commentRepository = {
    */
   getReplyCount: async (commentIds: string[]): Promise<{ data: Record<string, number> | null; error: any }> => {
     try {
-      // Use Postgres's WITH clause for efficient reply counting
-      const { data, error } = await supabase.rpc(
-        'get_comment_reply_counts',
-        { parent_ids: commentIds }
-      );
+      // Count replies for each parent comment
+      const { data, error } = await supabase
+        .from('comments')
+        .select('parent_id, id')
+        .in('parent_id', commentIds);
       
       if (error) {
         console.error('Error getting reply counts:', error);
         return { data: null, error };
       }
       
-      // Convert the array of { parent_id, count } objects to a Record
+      // Convert to record of counts
       const counts: Record<string, number> = {};
-      if (data && Array.isArray(data)) {
-        data.forEach(item => {
-          counts[item.parent_id] = item.count;
+      
+      if (data) {
+        data.forEach((item: any) => {
+          if (item.parent_id) {
+            counts[item.parent_id] = (counts[item.parent_id] || 0) + 1;
+          }
         });
       }
       
@@ -195,7 +210,7 @@ export const commentRepository = {
 function transformCommentFromDb(record: any): Comment {
   if (!record) return {} as Comment;
   
-  return {
+  const comment: Comment = {
     id: record.id,
     content: record.content,
     userId: record.user_id,
@@ -205,7 +220,6 @@ function transformCommentFromDb(record: any): Comment {
     parentId: record.parent_id,
     createdAt: record.created_at,
     updatedAt: record.updated_at,
-    // Add profile info if available
     user: record.profiles ? {
       id: record.profiles.id,
       name: record.profiles.full_name, 
@@ -213,4 +227,6 @@ function transformCommentFromDb(record: any): Comment {
       username: record.profiles.username
     } : undefined
   };
+  
+  return comment;
 }
