@@ -1,6 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { Card } from '../schema/types';
+import { Card, DbCard } from '../schema/types';
 import { toast } from 'sonner';
 
 /**
@@ -103,10 +103,11 @@ export const cardRepository = {
         tags: card.tags || [],
         is_public: card.isPublic || false,
         user_id: card.userId,
-        // Required fields for the current DB schema
-        creator_id: card.userId, // Required by current schema
-        rarity: 'common', // Required by current schema
-        edition_size: 1 // Required by current schema
+        // If database requires creator_id and rarity, include them
+        creator_id: card.userId,
+        rarity: 'common',
+        edition_size: 1,
+        design_metadata: card.designMetadata || {}
       };
       
       const { data, error } = await supabase
@@ -151,6 +152,7 @@ export const cardRepository = {
       if (updates.teamId !== undefined) updateData.team_id = updates.teamId;
       if (updates.tags !== undefined) updateData.tags = updates.tags;
       if (updates.isPublic !== undefined) updateData.is_public = updates.isPublic;
+      if (updates.designMetadata !== undefined) updateData.design_metadata = updates.designMetadata;
       
       const { data, error } = await supabase
         .from('cards')
@@ -221,13 +223,72 @@ export const cardRepository = {
       console.error('Unexpected error in assignToTeam:', err);
       return { success: false, error: err };
     }
+  },
+
+  /**
+   * Batch update multiple cards
+   */
+  batchUpdate: async (
+    cardIds: string[], 
+    updates: Partial<Card>
+  ): Promise<{ success: boolean; error: any }> => {
+    try {
+      // Convert to database field names
+      const updateData: Record<string, any> = {};
+      
+      if (updates.teamId !== undefined) updateData.team_id = updates.teamId;
+      if (updates.collectionId !== undefined) updateData.collection_id = updates.collectionId;
+      if (updates.isPublic !== undefined) updateData.is_public = updates.isPublic;
+      if (updates.tags !== undefined) updateData.tags = updates.tags;
+      
+      const { error } = await supabase
+        .from('cards')
+        .update(updateData)
+        .in('id', cardIds);
+      
+      if (error) {
+        console.error('Error batch updating cards:', error);
+        return { success: false, error };
+      }
+      
+      return { success: true, error: null };
+    } catch (err) {
+      console.error('Unexpected error in batchUpdate:', err);
+      return { success: false, error: err };
+    }
+  },
+
+  /**
+   * Get cards by team with efficient query
+   */
+  getTeamCards: async (teamId: string): Promise<{ data: Card[] | null; error: any }> => {
+    try {
+      const { data, error } = await supabase
+        .from('cards')
+        .select('*')
+        .eq('team_id', teamId)
+        .order('created_at', { ascending: false });
+      
+      if (error) {
+        console.error('Error fetching team cards:', error);
+        return { data: null, error };
+      }
+      
+      // Transform database records to our Card type
+      const cards = data.map(transformCardFromDb);
+      
+      return { data: cards, error: null };
+    } catch (err) {
+      console.error('Unexpected error in getTeamCards:', err);
+      return { data: null, error: err };
+    }
   }
 };
 
 /**
  * Helper to transform database record to Card type
  */
-function transformCardFromDb(record: any): Card {
+function transformCardFromDb(record: DbCard): Card {
   if (!record) return {} as Card;
   
   return {
@@ -243,11 +304,10 @@ function transformCardFromDb(record: any): Card {
     collectionId: record.collection_id,
     isPublic: record.is_public,
     tags: record.tags || [],
-    reactions: [], // Reactions might need to be implemented separately
-    // Transform any other fields as needed
     designMetadata: record.design_metadata || {
       cardStyle: {},
       textStyle: {}
     },
+    reactions: [] // Reactions might need to be loaded separately
   };
 }

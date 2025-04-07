@@ -70,6 +70,7 @@ export function useCards(options: UseCardsOptions = {}) {
           collectionId: card.collection_id,
           isPublic: card.is_public,
           tags: card.tags || [],
+          designMetadata: card.design_metadata || {},
           reactions: []
         }));
 
@@ -110,7 +111,8 @@ export function useCards(options: UseCardsOptions = {}) {
         is_public: cardData.isPublic || false,
         user_id: user.id,
         creator_id: user.id, // Required by current db schema
-        rarity: 'common' // Required by current db schema
+        rarity: 'common', // Required by current db schema
+        design_metadata: cardData.designMetadata || {}
       };
 
       const { data, error } = await supabase
@@ -140,6 +142,7 @@ export function useCards(options: UseCardsOptions = {}) {
           collectionId: data.collection_id,
           isPublic: data.is_public,
           tags: data.tags || [],
+          designMetadata: data.design_metadata || {},
           reactions: []
         };
 
@@ -168,6 +171,7 @@ export function useCards(options: UseCardsOptions = {}) {
       if (updates.teamId !== undefined) updateData.team_id = updates.teamId;
       if (updates.tags !== undefined) updateData.tags = updates.tags;
       if (updates.isPublic !== undefined) updateData.is_public = updates.isPublic;
+      if (updates.designMetadata !== undefined) updateData.design_metadata = updates.designMetadata;
       
       const { data, error } = await supabase
         .from('cards')
@@ -197,6 +201,7 @@ export function useCards(options: UseCardsOptions = {}) {
           collectionId: data.collection_id,
           isPublic: data.is_public,
           tags: data.tags || [],
+          designMetadata: data.design_metadata || {},
           reactions: []
         };
         
@@ -248,57 +253,107 @@ export function useCards(options: UseCardsOptions = {}) {
       return false;
     }
 
-    // Note: Since reactions table doesn't seem to exist in the database yet,
-    // we'll implement this as an optimistic UI update only
-    // and skip the actual database call for now
-    
-    // Optimistic update
-    setCards(prev => prev.map(card => {
-      if (card.id !== cardId) return card;
+    try {
+      // First check if user already reacted
+      const { data: existingReaction } = await supabase
+        .from('reactions')
+        .select('id')
+        .eq('card_id', cardId)
+        .eq('user_id', user.id)
+        .maybeSingle();
       
-      const existingReactionIndex = card.reactions?.findIndex(r => r.userId === user.id);
-      const reactions = [...(card.reactions || [])];
+      let result;
       
-      if (existingReactionIndex !== undefined && existingReactionIndex >= 0) {
+      if (existingReaction) {
         // Update existing reaction
-        reactions[existingReactionIndex] = {
-          ...reactions[existingReactionIndex],
-          type
-        };
+        result = await supabase
+          .from('reactions')
+          .update({ type })
+          .eq('id', existingReaction.id);
       } else {
         // Add new reaction
-        reactions.push({
-          id: 'temp-' + Date.now(),
-          userId: user.id,
-          cardId,
-          type,
-          createdAt: new Date().toISOString()
-        });
+        result = await supabase
+          .from('reactions')
+          .insert({
+            card_id: cardId,
+            user_id: user.id,
+            type
+          });
       }
       
-      return {
-        ...card,
-        reactions
-      };
-    }));
+      if (result.error) {
+        console.error('Error adding reaction:', result.error);
+        toast.error('Failed to add reaction');
+        return false;
+      }
+      
+      // Optimistic update
+      setCards(prev => prev.map(card => {
+        if (card.id !== cardId) return card;
+        
+        const existingReactionIndex = card.reactions?.findIndex(r => r.userId === user.id);
+        const reactions = [...(card.reactions || [])];
+        
+        if (existingReactionIndex !== undefined && existingReactionIndex >= 0) {
+          // Update existing reaction
+          reactions[existingReactionIndex] = {
+            ...reactions[existingReactionIndex],
+            type
+          };
+        } else {
+          // Add new reaction
+          reactions.push({
+            id: 'temp-' + Date.now(),
+            userId: user.id,
+            cardId,
+            type,
+            createdAt: new Date().toISOString()
+          });
+        }
+        
+        return {
+          ...card,
+          reactions
+        };
+      }));
 
-    return true;
+      return true;
+    } catch (err) {
+      console.error('Error adding reaction:', err);
+      return false;
+    }
   }, [user]);
 
   const removeReaction = useCallback(async (cardId: string) => {
     if (!user) return false;
 
-    // Optimistic update for reaction removal
-    setCards(prev => prev.map(card => {
-      if (card.id !== cardId) return card;
+    try {
+      const { error } = await supabase
+        .from('reactions')
+        .delete()
+        .eq('card_id', cardId)
+        .eq('user_id', user.id);
       
-      return {
-        ...card,
-        reactions: (card.reactions || []).filter(r => r.userId !== user.id)
-      };
-    }));
-    
-    return true;
+      if (error) {
+        console.error('Error removing reaction:', error);
+        return false;
+      }
+      
+      // Optimistic update
+      setCards(prev => prev.map(card => {
+        if (card.id !== cardId) return card;
+        
+        return {
+          ...card,
+          reactions: (card.reactions || []).filter(r => r.userId !== user.id)
+        };
+      }));
+      
+      return true;
+    } catch (err) {
+      console.error('Error removing reaction:', err);
+      return false;
+    }
   }, [user]);
 
   return {

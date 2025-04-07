@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import CardGallery from '@/components/CardGallery';
 import FullscreenViewer from '@/components/gallery/FullscreenViewer';
 import { toast } from 'sonner';
+import { Card, Collection } from '@/lib/schema/types';
 
 const CollectionDetail = () => {
   const { id } = useParams<{ id: string }>();

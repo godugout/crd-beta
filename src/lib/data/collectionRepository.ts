@@ -1,6 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { Collection } from '../schema/types';
+import { Collection, DbCollection, Card } from '../schema/types';
 import { toast } from 'sonner';
 
 /**
@@ -25,7 +25,7 @@ export const collectionRepository = {
       
       // Apply filters if provided
       if (options?.userId) {
-        query = query.eq('owner_id', options.userId); // Using owner_id as per current DB
+        query = query.eq('owner_id', options.userId);
       }
       
       if (options?.teamId) {
@@ -85,10 +85,10 @@ export const collectionRepository = {
     try {
       // Prepare data for insertion
       const collectionData = {
-        title: collection.name || collection.title, // In case either is provided
+        title: collection.name || collection.title || '',
         description: collection.description,
         cover_image_url: collection.coverImageUrl,
-        owner_id: collection.userId, // Using owner_id as per current DB
+        owner_id: collection.userId || collection.ownerId,
         team_id: collection.teamId,
         visibility: collection.visibility || 'private',
         allow_comments: collection.allowComments !== undefined ? collection.allowComments : true,
@@ -192,7 +192,7 @@ export const collectionRepository = {
    */
   addCardToCollection: async (cardId: string, collectionId: string): Promise<{ success: boolean; error: any }> => {
     try {
-      // For now, we update the card directly rather than using a junction table
+      // Update the card's collection_id
       const { error } = await supabase
         .from('cards')
         .update({ collection_id: collectionId })
@@ -252,22 +252,48 @@ export const collectionRepository = {
       console.error('Unexpected error in assignToTeam:', err);
       return { success: false, error: err };
     }
+  },
+
+  /**
+   * Get team collections with optimized query
+   */
+  getTeamCollections: async (teamId: string, includeCards: boolean = false): Promise<{ data: Collection[] | null; error: any }> => {
+    try {
+      const { data, error } = await supabase
+        .from('collections')
+        .select(includeCards ? '*, cards(*)' : '*')
+        .eq('team_id', teamId)
+        .order('created_at', { ascending: false });
+      
+      if (error) {
+        console.error('Error fetching team collections:', error);
+        return { data: null, error };
+      }
+      
+      const collections = data.map(record => transformCollectionFromDb(record, includeCards));
+      
+      return { data: collections, error: null };
+    } catch (err) {
+      console.error('Unexpected error in getTeamCollections:', err);
+      return { data: null, error: err };
+    }
   }
 };
 
 /**
  * Helper to transform database record to Collection type
  */
-function transformCollectionFromDb(record: any, includeCards: boolean = false): Collection {
+function transformCollectionFromDb(record: DbCollection, includeCards: boolean = false): Collection {
   if (!record) return {} as Collection;
   
   const collection: Collection = {
     id: record.id,
-    name: record.title, // Note that DB uses 'title' but our model uses 'name'
-    title: record.title,
+    name: record.title,
+    title: record.title, // For backward compatibility
     description: record.description || '',
     coverImageUrl: record.cover_image_url || '',
     userId: record.owner_id, // Using owner_id as per current DB
+    ownerId: record.owner_id, // For backward compatibility
     teamId: record.team_id,
     visibility: record.visibility || 'private',
     allowComments: record.allow_comments !== undefined ? record.allow_comments : true,
@@ -283,7 +309,7 @@ function transformCollectionFromDb(record: any, includeCards: boolean = false): 
   
   // Process cards if included and available
   if (includeCards && record.cards) {
-    collection.cards = record.cards.map((card: any) => ({
+    collection.cards = (record.cards as any[]).map((card: any) => ({
       id: card.id,
       title: card.title || '',
       description: card.description || '',

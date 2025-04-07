@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -16,6 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import FullscreenViewer from '@/components/gallery/FullscreenViewer';
+import { Card } from '@/lib/schema/types';
 
 const Gallery = () => {
   const { isMobile } = useMobileOptimization();
@@ -24,14 +24,12 @@ const Gallery = () => {
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   const [sortOrder, setSortOrder] = useState<string>('newest');
   
-  // Use our standardized data fetching hook
   const { 
     cards, 
     isLoading, 
     error, 
     refetch 
   } = useCardData({
-    // Sort cards based on sortOrder
     sort: (a, b) => {
       switch (sortOrder) {
         case 'newest':
@@ -46,10 +44,9 @@ const Gallery = () => {
           return 0;
       }
     },
-    deps: [sortOrder] // Re-sort when sortOrder changes
+    deps: [sortOrder]
   });
   
-  // Check if we have baseball cards in the collection
   const hasBaseballCards = cards.some(card => 
     card.tags?.some(tag => ['baseball', 'vintage'].includes(tag.toLowerCase()))
   );
@@ -82,7 +79,6 @@ const Gallery = () => {
       
       <main className="flex-1 pt-16 pb-24">
         <div className="container mx-auto max-w-6xl px-4">
-          {/* Breadcrumb */}
           <div className="flex items-center text-sm text-gray-500 py-4">
             <Link to="/" className="hover:text-cardshow-blue">Home</Link>
             <ChevronRight className="h-4 w-4 mx-2" />
@@ -99,7 +95,6 @@ const Gallery = () => {
             </p>
           </div>
           
-          {/* Baseball Card Immersive View Promotion */}
           {hasBaseballCards && (
             <div className="mb-8 bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg overflow-hidden shadow-lg">
               <div className="p-6 flex flex-col md:flex-row items-center justify-between">
@@ -123,7 +118,6 @@ const Gallery = () => {
           )}
           
           <ErrorBoundary>
-            {/* View Mode Controls */}
             <div className="flex justify-between items-center mb-6">
               <div className="flex space-x-2">
                 <Button

@@ -153,42 +153,75 @@ export type Database = {
       }
       cards: {
         Row: {
+          collection_id: string | null
           created_at: string
           creator_id: string
           description: string | null
           edition_size: number
           id: string
           image_url: string | null
+          is_public: boolean | null
           price: number | null
           rarity: string
+          tags: string[] | null
+          team_id: string | null
+          thumbnail_url: string | null
           title: string
           updated_at: string
+          user_id: string | null
         }
         Insert: {
+          collection_id?: string | null
           created_at?: string
           creator_id: string
           description?: string | null
           edition_size?: number
           id?: string
           image_url?: string | null
+          is_public?: boolean | null
           price?: number | null
           rarity: string
+          tags?: string[] | null
+          team_id?: string | null
+          thumbnail_url?: string | null
           title: string
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
+          collection_id?: string | null
           created_at?: string
           creator_id?: string
           description?: string | null
           edition_size?: number
           id?: string
           image_url?: string | null
+          is_public?: boolean | null
           price?: number | null
           rarity?: string
+          tags?: string[] | null
+          team_id?: string | null
+          thumbnail_url?: string | null
           title?: string
           updated_at?: string
+          user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "cards_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "collections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cards_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       collection_cards: {
         Row: {
@@ -228,30 +261,118 @@ export type Database = {
       }
       collections: {
         Row: {
+          allow_comments: boolean | null
+          cover_image_url: string | null
           created_at: string
           description: string | null
+          design_metadata: Json | null
           id: string
           owner_id: string
+          team_id: string | null
           title: string
           updated_at: string
+          visibility: string | null
         }
         Insert: {
+          allow_comments?: boolean | null
+          cover_image_url?: string | null
           created_at?: string
           description?: string | null
+          design_metadata?: Json | null
           id?: string
           owner_id: string
+          team_id?: string | null
           title: string
           updated_at?: string
+          visibility?: string | null
         }
         Update: {
+          allow_comments?: boolean | null
+          cover_image_url?: string | null
           created_at?: string
           description?: string | null
+          design_metadata?: Json | null
           id?: string
           owner_id?: string
+          team_id?: string | null
           title?: string
           updated_at?: string
+          visibility?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "collections_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      comments: {
+        Row: {
+          card_id: string | null
+          collection_id: string | null
+          content: string
+          created_at: string
+          id: string
+          parent_id: string | null
+          team_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          card_id?: string | null
+          collection_id?: string | null
+          content: string
+          created_at?: string
+          id?: string
+          parent_id?: string | null
+          team_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          card_id?: string | null
+          collection_id?: string | null
+          content?: string
+          created_at?: string
+          id?: string
+          parent_id?: string | null
+          team_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comments_card_id_fkey"
+            columns: ["card_id"]
+            isOneToOne: false
+            referencedRelation: "cards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comments_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "collections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comments_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comments_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       content_resources: {
         Row: {
@@ -675,6 +796,7 @@ export type Database = {
           created_at: string
           full_name: string | null
           id: string
+          team_id: string | null
           updated_at: string
           username: string | null
         }
@@ -683,6 +805,7 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id: string
+          team_id?: string | null
           updated_at?: string
           username?: string | null
         }
@@ -691,10 +814,64 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id?: string
+          team_id?: string | null
           updated_at?: string
           username?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reactions: {
+        Row: {
+          card_id: string | null
+          collection_id: string | null
+          comment_id: string | null
+          created_at: string
+          id: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          card_id?: string | null
+          collection_id?: string | null
+          comment_id?: string | null
+          created_at?: string
+          id?: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          card_id?: string | null
+          collection_id?: string | null
+          comment_id?: string | null
+          created_at?: string
+          id?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reactions_card_id_fkey"
+            columns: ["card_id"]
+            isOneToOne: false
+            referencedRelation: "cards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reactions_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "collections"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       song_analyses: {
         Row: {
@@ -1070,6 +1247,68 @@ export type Database = {
         }
         Relationships: []
       }
+      team_members: {
+        Row: {
+          id: string
+          joined_at: string
+          role: string
+          team_id: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          joined_at?: string
+          role: string
+          team_id: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          joined_at?: string
+          role?: string
+          team_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_members_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      teams: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          logo_url: string | null
+          name: string
+          owner_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          logo_url?: string | null
+          name: string
+          owner_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          logo_url?: string | null
+          name?: string
+          owner_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       time_capsules: {
         Row: {
           created_at: string
@@ -1359,7 +1598,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_team_role: {
+        Args: { team_id: string; user_id: string }
+        Returns: string
+      }
+      is_team_member: {
+        Args: { team_id: string; user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       fan_feed_theme: "music" | "sports" | "entertainment"

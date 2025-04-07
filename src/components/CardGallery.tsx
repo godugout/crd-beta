@@ -1,8 +1,7 @@
-
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { PlusCircle, Grid, List } from 'lucide-react';
+import { PlusCircle, Grid, List, AlertOctagon, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import { useMobileOptimization } from '@/hooks/useMobileOptimization';
@@ -174,6 +173,63 @@ const CardGallery: React.FC<CardGalleryProps> = ({
         )}
       </ErrorBoundary>
     </div>
+  );
+};
+
+interface CardGridProps {
+  cards: Card[];
+  isLoading: boolean;
+  error: Error | null;
+  onCardClick: (cardId: string) => void;
+  getCardEffects: (cardId: string) => any[];
+  useVirtualization?: boolean;
+}
+
+const CardGrid = ({ 
+  cards,
+  isLoading,
+  error,
+  onCardClick,
+  getCardEffects,
+  useVirtualization
+}) => {
+  const onRetry = () => {
+    window.location.reload();
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <p>Loading cards...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center p-8 text-center">
+        <div className="mb-4 text-red-500">
+          <AlertOctagon className="h-12 w-12 mx-auto" />
+        </div>
+        <h3 className="text-xl font-semibold mb-2">Failed to load cards</h3>
+        <p className="text-gray-600 mb-4">
+          {error?.message || 'An unexpected error occurred'}
+        </p>
+        <Button onClick={onRetry} variant="outline">
+          <RefreshCw className="mr-2 h-4 w-4" />
+          Retry
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <CardGrid 
+      cards={cards}
+      onCardClick={onCardClick}
+      getCardEffects={getCardEffects}
+      useVirtualization={useVirtualization}
+    />
   );
 };
 

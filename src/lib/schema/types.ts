@@ -1,7 +1,7 @@
 
 /**
  * Core data models for the application
- * Extended from existing types.ts with stronger relationships and validations
+ * Extended with team functionality and enhanced metadata
  */
 import { z } from 'zod';
 import type { Database } from '@/integrations/supabase/types';
@@ -50,7 +50,6 @@ export interface Card {
   description: string;
   imageUrl: string;
   thumbnailUrl?: string;
-  uploadDate?: string;
   createdAt?: string;
   updatedAt?: string;
   userId?: string;
@@ -83,9 +82,11 @@ export interface CardStats {
 export interface Collection {
   id: string;
   name: string;
+  title?: string; // For backward compatibility with DB
   description?: string;
   coverImageUrl?: string;
   userId?: string; 
+  ownerId?: string; // For backward compatibility with DB
   teamId?: string;
   cards?: Card[];
   visibility: 'public' | 'private' | 'team';
@@ -186,20 +187,25 @@ export const userSchema = z.object({
   teamId: z.string().uuid().optional()
 });
 
+export const teamSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string().min(1).max(100),
+  description: z.string().max(1000).optional(),
+  logoUrl: z.string().url().optional(),
+  ownerId: z.string().uuid()
+});
+
 export const cardSchema = z.object({
   id: z.string().uuid(),
   title: z.string().min(1).max(100),
   description: z.string().max(1000).optional(),
   imageUrl: z.string().url(),
   thumbnailUrl: z.string().url().optional(),
-  uploadDate: z.string().optional(),
-  createdAt: z.string().optional(),
-  updatedAt: z.string().optional(),
   userId: z.string().uuid().optional(),
   teamId: z.string().uuid().optional(),
   collectionId: z.string().uuid().optional(),
   isPublic: z.boolean().optional().default(false),
-  tags: z.array(z.string()).optional(),
+  tags: z.array(z.string()).optional().default([])
 });
 
 export const collectionSchema = z.object({
@@ -208,21 +214,90 @@ export const collectionSchema = z.object({
   description: z.string().max(1000).optional(),
   coverImageUrl: z.string().url().optional(),
   userId: z.string().uuid().optional(),
+  ownerId: z.string().uuid().optional(),
   teamId: z.string().uuid().optional(),
   visibility: z.enum(['public', 'private', 'team']).default('private'),
   allowComments: z.boolean().default(true),
-  createdAt: z.string().optional(),
-  updatedAt: z.string().optional(),
 });
 
-// Type helpers for Supabase
+// Type helpers for database operations
+export type DbCard = {
+  id: string;
+  title: string;
+  description?: string;
+  image_url: string;
+  thumbnail_url?: string;
+  collection_id?: string;
+  user_id?: string;
+  team_id?: string;
+  created_at: string;
+  updated_at: string;
+  is_public?: boolean;
+  tags?: string[];
+  design_metadata?: any;
+};
+
+export type DbCollection = {
+  id: string;
+  title: string;
+  description?: string;
+  cover_image_url?: string;
+  owner_id?: string;
+  team_id?: string;
+  visibility?: 'public' | 'private' | 'team';
+  allow_comments?: boolean;
+  created_at: string;
+  updated_at: string;
+  design_metadata?: any;
+};
+
+export type DbTeam = {
+  id: string;
+  name: string;
+  description?: string;
+  logo_url?: string;
+  owner_id: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export type DbTeamMember = {
+  id: string;
+  team_id: string;
+  user_id: string;
+  role: 'owner' | 'admin' | 'member' | 'viewer';
+  joined_at: string;
+};
+
+export type DbReaction = {
+  id: string;
+  user_id: string;
+  card_id?: string;
+  collection_id?: string;
+  comment_id?: string;
+  type: 'like' | 'love' | 'wow' | 'haha' | 'sad' | 'angry';
+  created_at: string;
+};
+
+export type DbComment = {
+  id: string;
+  content: string;
+  user_id: string;
+  card_id?: string;
+  collection_id?: string;
+  team_id?: string;
+  parent_id?: string;
+  created_at: string;
+  updated_at: string;
+};
+
+// For compatibility with existing database types
 export type Tables = Database['public']['Tables'];
 export type CardInsert = Tables['cards']['Insert'];
 export type CardUpdate = Tables['cards']['Update'];
 export type CollectionInsert = Tables['collections']['Insert'];
 export type CollectionUpdate = Tables['collections']['Update'];
 
-// For now, since teams table might not exist yet in the Database type
-export type TeamInsert = Omit<Team, 'id' | 'createdAt' | 'updatedAt'>;
-export type TeamUpdate = Partial<Omit<Team, 'id' | 'createdAt' | 'updatedAt'>>;
-
+// For team operations
+export type TeamInsert = Omit<DbTeam, 'id' | 'created_at' | 'updated_at'>;
+export type TeamUpdate = Partial<Omit<DbTeam, 'id' | 'created_at' | 'updated_at'>>;
