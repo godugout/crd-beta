@@ -8,67 +8,64 @@ export interface CropBoxProps {
   y: number;
   width: number;
   height: number;
-  color: string;
   rotation?: number;
-  selected?: boolean;
-  batchSelected?: boolean;
+  color: string;
   memorabiliaType?: MemorabiliaType;
   confidence?: number;
 }
 
-// Enhanced version with required memorabiliaType and confidence
+// Enhanced version with required memorabiliaType field for cropped items
 export interface EnhancedCropBoxProps {
   id: number;
   x: number;
   y: number;
   width: number;
   height: number;
+  rotation: number;
   color: string;
-  rotation?: number;
-  selected?: boolean;
-  batchSelected?: boolean;
   memorabiliaType: MemorabiliaType;
   confidence: number;
 }
 
-export interface CropBoxStyle {
-  left: string;
-  top: string;
-  width: string;
-  height: string;
-  borderColor: string;
-  transform?: string;
-}
-
-// This component no longer renders anything as Fabric.js handles rendering
-const CropBox: React.FC<{
+interface CropBoxComponentProps {
   box: CropBoxProps;
   isSelected: boolean;
-  canvasRef: React.RefObject<HTMLCanvasElement>;
-}> = () => null;
+  onClick: () => void;
+}
 
-// Helper functions needed by other components
-export const getResizeHandle = (
-  e: React.MouseEvent<HTMLCanvasElement>, 
-  box: CropBoxProps
-): string | null => {
-  return null; // Since we're using Fabric.js now, this is just a stub
-};
+const CropBox: React.FC<CropBoxComponentProps> = ({ box, isSelected, onClick }) => {
+  const boxStyle: React.CSSProperties = {
+    position: 'absolute',
+    left: `${box.x}px`,
+    top: `${box.y}px`,
+    width: `${box.width}px`,
+    height: `${box.height}px`,
+    border: `2px solid ${box.color}`,
+    transform: box.rotation ? `rotate(${box.rotation}deg)` : 'none',
+    transformOrigin: 'center',
+    cursor: 'pointer',
+    boxShadow: isSelected ? '0 0 0 2px blue, 0 0 10px rgba(0, 0, 255, 0.5)' : 'none',
+    zIndex: isSelected ? 10 : 1
+  };
 
-export const isPointInRotatedRect = (
-  x: number, 
-  y: number, 
-  box: CropBoxProps
-): boolean => {
-  return false; // Since we're using Fabric.js now, this is just a stub
-};
-
-export const drawCropBox = (
-  ctx: CanvasRenderingContext2D,
-  box: CropBoxProps,
-  isSelected: boolean
-): void => {
-  // Stub function since we're using Fabric.js now
+  return (
+    <div 
+      className="crop-box" 
+      style={boxStyle}
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick();
+      }}
+    >
+      {isSelected && (
+        <div className="crop-box-controls flex items-center justify-center h-full">
+          <div className="bg-black/50 text-white px-2 py-1 rounded text-xs">
+            {box.width.toFixed(0)} × {box.height.toFixed(0)}
+          </div>
+        </div>
+      )}
+    </div>
+  );
 };
 
 export default CropBox;

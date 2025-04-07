@@ -38,6 +38,7 @@ const CardDetector = () => {
   const [memorabiliaTypes, setMemorabiliaTypes] = useState<{[key in MemorabiliaType]: boolean}>({
     card: true,
     ticket: true,
+    photo: true,
     program: true,
     autograph: true,
     face: true,
@@ -75,6 +76,8 @@ const CardDetector = () => {
           return detectionMode === 'group' 
             ? 'Person detected from group photo with Card Detector'
             : 'Person detected with Card Detector';
+        case 'photo':
+          return 'Photo detected with Card Detector';
         default:
           return 'Item detected with Card Detector';
       }
@@ -124,6 +127,7 @@ const CardDetector = () => {
       case 'autograph': return 'Autographed Item';
       case 'card': return 'Baseball Card';
       case 'face': return 'Person';
+      case 'photo': return 'Photo';
       default: return 'New Card';
     }
   };

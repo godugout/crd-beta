@@ -2,8 +2,9 @@
 export * from './useCardOperations';
 export * from './useCollectionOperations';
 
+// This is a wrapper function that uses the CardContext to provide collection functionality
+// This fixes the circular dependency issue
 export const useCollection = () => {
-  // This is a temporary wrapper to fix the import error
   // Using useCards() context to provide collection functionality
   const { collections, addCollection, updateCollection, deleteCollection, addCardToCollection, removeCardFromCollection } = useCards();
   

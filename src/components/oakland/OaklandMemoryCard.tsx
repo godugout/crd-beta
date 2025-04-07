@@ -1,11 +1,9 @@
 
 import React from 'react';
 import { format } from 'date-fns';
-import { Badge } from '@/components/ui/badge';
-import { MapPin, Calendar, Users } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import OaklandCardTemplate, { OaklandTemplateType } from './OaklandCardTemplates';
-import { OaklandMemoryData } from './OaklandMemoryForm';
+import { OaklandMemoryData } from '@/lib/types';
+import { OaklandTemplateType } from './OaklandCardTemplates';
+import OaklandCardTemplate from './OaklandCardTemplates';
 
 interface OaklandMemoryCardProps {
   memory: OaklandMemoryData;
@@ -20,78 +18,49 @@ const OaklandMemoryCard: React.FC<OaklandMemoryCardProps> = ({
   className,
   onClick
 }) => {
-  // Determine template based on memory type if not explicitly provided
-  const effectiveTemplate = templateType || 
-    memory.memoryType === 'game' ? 'classic' : 
-    memory.memoryType === 'tailgate' ? 'tailgate' : 
-    memory.memoryType === 'memorabilia' ? 'dynasty' : 'coliseum';
-
   return (
-    <OaklandCardTemplate 
-      type={effectiveTemplate as OaklandTemplateType}
-      className={cn("group cursor-pointer transition-all duration-300 hover:scale-[1.02]", className)}
+    <OaklandCardTemplate
+      type={templateType}
+      className={className}
       onClick={onClick}
     >
-      <div className="p-4 flex flex-col h-full text-white">
-        {/* Header */}
-        <div className="mb-2">
-          <h3 className="text-lg font-bold text-[#EFB21E] line-clamp-2">{memory.title}</h3>
-          
-          {memory.date && (
-            <div className="flex items-center text-xs mt-1 opacity-90">
-              <Calendar className="h-3 w-3 mr-1" />
-              {format(new Date(memory.date), 'MMM d, yyyy')}
-            </div>
-          )}
-        </div>
+      {memory.imageUrl && (
+        <img 
+          src={memory.imageUrl} 
+          alt={memory.title} 
+          className="absolute inset-0 w-full h-full object-cover opacity-40"
+        />
+      )}
+      
+      <div className="relative z-10 p-5 flex flex-col h-full">
+        <h3 className="text-xl font-bold text-[#EFB21E] mb-2">{memory.title}</h3>
         
-        {/* Content */}
-        <div className="flex-grow">
-          <p className="text-sm line-clamp-3 mb-2">{memory.description}</p>
-          
-          {memory.memoryType === 'game' && memory.opponent && (
-            <div className="mb-2">
-              <Badge variant="outline" className="bg-[#EFB21E]/20 text-[#EFB21E] border-[#EFB21E]/40">
-                vs {memory.opponent}
-              </Badge>
-              {memory.score && (
-                <span className="ml-2 text-sm text-[#EFB21E]">{memory.score}</span>
-              )}
-            </div>
-          )}
-          
-          {memory.location && (
-            <div className="flex items-center text-xs mb-2">
-              <MapPin className="h-3 w-3 mr-1" />
-              <span className="opacity-90">
-                {memory.location}
-                {memory.section && ` • ${memory.section}`}
-              </span>
-            </div>
-          )}
-          
-          {memory.attendees && memory.attendees.length > 0 && (
-            <div className="flex items-center text-xs mb-2">
-              <Users className="h-3 w-3 mr-1" />
-              <span className="opacity-90">
-                With {memory.attendees.length === 1 ? memory.attendees[0] : `${memory.attendees[0]} +${memory.attendees.length - 1}`}
-              </span>
-            </div>
-          )}
-        </div>
+        {memory.date && (
+          <div className="flex items-center text-sm text-white mb-2">
+            <span>{format(new Date(memory.date), 'MMM d, yyyy')}</span>
+          </div>
+        )}
         
-        {/* Footer */}
+        <p className="flex-grow text-sm text-white line-clamp-3">{memory.description}</p>
+        
+        {memory.opponent && (
+          <div className="mt-3 p-2 bg-black/50 rounded text-center">
+            <div className="font-semibold text-[#EFB21E]">vs {memory.opponent}</div>
+            {memory.score && <div className="text-sm text-white">{memory.score}</div>}
+          </div>
+        )}
+        
         {memory.tags && memory.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1 mt-2">
-            {memory.tags.slice(0, 3).map(tag => (
-              <Badge key={tag} variant="secondary" className="text-[10px] bg-[#003831] text-[#EFB21E]">
+          <div className="mt-2 flex flex-wrap gap-1">
+            {memory.tags.slice(0, 2).map((tag) => (
+              <div key={tag} className="text-xs px-1.5 py-0.5 bg-[#006341] text-white rounded">
                 #{tag}
-              </Badge>
+              </div>
             ))}
-            {memory.tags.length > 3 && (
-              <Badge variant="secondary" className="text-[10px] bg-[#003831] text-[#EFB21E]">
-                +{memory.tags.length - 3}
-              </Badge>
+            {memory.tags.length > 2 && (
+              <div className="text-xs px-1.5 py-0.5 bg-[#006341] text-white rounded">
+                +{memory.tags.length - 2}
+              </div>
             )}
           </div>
         )}

@@ -1,79 +1,85 @@
 
 import React from 'react';
-import { Card } from '@/components/ui/card';
-import { Link } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
-import { Card as CardType } from '@/lib/types';
+import { Card } from '@/lib/types';
+import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 
-export interface FeaturedCardsSectionProps {
+interface FeaturedCardsSectionProps {
   title: string;
-  cardsData: CardType[];
+  cardsData: Card[];
   isLoading: boolean;
+  onCardClick?: (cardId: string) => void;
+  onAddClick?: () => void;
 }
 
-const FeaturedCardsSection: React.FC<FeaturedCardsSectionProps> = ({ 
-  title, 
-  cardsData, 
-  isLoading 
+const FeaturedCardsSection: React.FC<FeaturedCardsSectionProps> = ({
+  title,
+  cardsData,
+  isLoading,
+  onCardClick,
+  onAddClick
 }) => {
   return (
-    <section className="py-16 bg-gray-50">
+    <section className="py-12 bg-white">
       <div className="container mx-auto px-4">
-        <div className="flex justify-between items-center mb-8">
-          <h2 className="text-2xl font-bold text-gray-900">{title}</h2>
-          <Link 
-            to="/gallery" 
-            className="text-cardshow-blue flex items-center hover:underline"
-          >
-            View All <ArrowRight className="ml-1 h-4 w-4" />
-          </Link>
-        </div>
-        
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {isLoading ? (
-            // Loading skeletons
-            Array.from({ length: 6 }).map((_, index) => (
-              <LoadingCard key={index} />
-            ))
-          ) : (
-            // Actual cards
-            cardsData.map(card => (
-              <Link to={`/card/${card.id}`} key={card.id}>
-                <Card className="overflow-hidden group hover:shadow-lg transition-all duration-300">
-                  <div className="aspect-[2.5/3.5] relative">
-                    <img 
-                      src={card.imageUrl || '/placeholder-card.jpg'} 
-                      alt={card.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
-                    />
-                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-4">
-                      <h3 className="text-lg font-medium text-white">{card.name}</h3>
-                      <p className="text-sm text-gray-300">
-                        {card.year} {card.brand && `• ${card.brand}`}
-                      </p>
-                    </div>
-                  </div>
-                </Card>
-              </Link>
-            ))
+        <div className="flex items-center justify-between mb-8">
+          <h2 className="text-2xl font-bold">{title}</h2>
+          {onAddClick && (
+            <Button variant="outline" onClick={onAddClick}>
+              Add Card
+            </Button>
           )}
         </div>
+        
+        {isLoading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="flex flex-col">
+                <Skeleton className="aspect-[2.5/3.5] w-full rounded-md mb-3" />
+                <Skeleton className="h-4 w-3/4 mb-2" />
+                <Skeleton className="h-3 w-1/2" />
+              </div>
+            ))}
+          </div>
+        ) : cardsData.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
+            {cardsData.map((card) => (
+              <div 
+                key={card.id} 
+                className="group cursor-pointer"
+                onClick={() => onCardClick && onCardClick(card.id)}
+              >
+                <div className="aspect-[2.5/3.5] overflow-hidden rounded-lg border border-gray-200 mb-3 bg-gray-50 relative">
+                  {card.imageUrl ? (
+                    <img 
+                      src={card.thumbnailUrl || card.imageUrl} 
+                      alt={card.title} 
+                      className="w-full h-full object-contain group-hover:scale-105 transition-transform"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gray-50">
+                      <span className="text-gray-300 text-xl">No Image</span>
+                    </div>
+                  )}
+                </div>
+                <h3 className="font-medium text-gray-900 truncate">{card.title}</h3>
+                <p className="text-sm text-gray-500">
+                  {card.tags?.join(', ') || 'No tags'}
+                </p>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <p className="text-gray-500 mb-4">No cards available</p>
+            {onAddClick && (
+              <Button onClick={onAddClick}>Create Your First Card</Button>
+            )}
+          </div>
+        )}
       </div>
     </section>
   );
 };
-
-const LoadingCard = () => (
-  <Card className="overflow-hidden">
-    <div className="aspect-[2.5/3.5] relative bg-gray-200">
-      <Skeleton className="h-full w-full" />
-      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-4">
-        <Skeleton className="h-6 w-32 mb-2" />
-        <Skeleton className="h-4 w-24" />
-      </div>
-    </div>
-  </Card>
-);
 
 export default FeaturedCardsSection;

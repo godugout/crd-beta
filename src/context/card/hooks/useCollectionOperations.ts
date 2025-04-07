@@ -1,82 +1,110 @@
 
+import { useState } from 'react';
 import { Collection, Card } from '@/lib/types';
-import { 
-  fetchCollections,
-  createCollection,
-  updateCollection,
-  deleteCollection
-} from '../operations/collectionOperations';
-import {
-  addCardToCollection,
-  removeCardFromCollection
-} from '../operations/cardCollectionOperations';
+import { v4 as uuidv4 } from 'uuid';
 
-interface UseCollectionOperationsProps {
-  collections: Collection[];
-  setCollections: React.Dispatch<React.SetStateAction<Collection[]>>;
-  setCards: React.Dispatch<React.SetStateAction<Card[]>>;
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
-  setError: React.Dispatch<React.SetStateAction<string | null>>;
-}
+export const useCollectionOperations = () => {
+  const [collections, setCollections] = useState<Collection[]>([]);
 
-export const useCollectionOperations = ({
-  collections,
-  setCollections,
-  setCards,
-  setIsLoading, 
-  setError
-}: UseCollectionOperationsProps) => {
-  
-  // Fetch collections from Supabase
-  const refreshCollections = async () => {
-    await fetchCollections(setIsLoading, setError, setCollections);
+  const addCollection = (collectionData: Partial<Collection>): Collection => {
+    const newCollection: Collection = {
+      id: collectionData.id || uuidv4(),
+      name: collectionData.name || 'Untitled Collection',
+      description: collectionData.description || '',
+      coverImageUrl: collectionData.coverImageUrl || '',
+      userId: collectionData.userId || 'anonymous',
+      cards: collectionData.cards || [],
+      visibility: collectionData.visibility || 'public',
+      allowComments: collectionData.allowComments !== undefined ? collectionData.allowComments : true,
+      designMetadata: collectionData.designMetadata || {},
+    };
+
+    setCollections(prevCollections => [...prevCollections, newCollection]);
+    return newCollection;
   };
 
-  // Collection operations
-  const handleAddCollection = async (collection: Omit<Collection, 'id' | 'cards' | 'createdAt' | 'updatedAt'>) => {
-    return await createCollection(collection, setIsLoading, setError, setCollections);
+  const updateCollection = (id: string, updates: Partial<Collection>): Collection | null => {
+    let updatedCollection: Collection | null = null;
+
+    setCollections(prevCollections => {
+      return prevCollections.map(collection => {
+        if (collection.id === id) {
+          updatedCollection = { ...collection, ...updates };
+          return updatedCollection;
+        }
+        return collection;
+      });
+    });
+
+    return updatedCollection;
   };
 
-  const handleUpdateCollection = async (id: string, updates: Partial<Omit<Collection, 'id' | 'cards' | 'createdAt' | 'updatedAt'>>) => {
-    await updateCollection(id, updates, collections, setIsLoading, setError, setCollections);
+  const deleteCollection = (id: string): boolean => {
+    const collectionExists = collections.some(collection => collection.id === id);
+    
+    if (collectionExists) {
+      setCollections(prevCollections => prevCollections.filter(collection => collection.id !== id));
+      return true;
+    }
+    
+    return false;
   };
 
-  const handleDeleteCollection = async (id: string) => {
-    await deleteCollection(id, setIsLoading, setError, setCards, setCollections);
+  const addCardToCollection = (collectionId: string, card: Card): boolean => {
+    const collectionExists = collections.some(collection => collection.id === collectionId);
+    
+    if (!collectionExists) {
+      return false;
+    }
+
+    setCollections(prevCollections => {
+      return prevCollections.map(collection => {
+        if (collection.id === collectionId) {
+          const cards = collection.cards || [];
+          // Check if card already exists to avoid duplicates
+          if (!cards.some(c => c.id === card.id)) {
+            return {
+              ...collection,
+              cards: [...cards, card]
+            };
+          }
+        }
+        return collection;
+      });
+    });
+
+    return true;
   };
 
-  // Card-Collection operations
-  const handleAddCardToCollection = async (cardId: string, collectionId: string) => {
-    const cards = collections.flatMap(c => c.cards);
-    await addCardToCollection(
-      cardId, 
-      collectionId, 
-      collections, 
-      cards,
-      setIsLoading, 
-      setError, 
-      setCards, 
-      setCollections
-    );
-  };
+  const removeCardFromCollection = (collectionId: string, cardId: string): boolean => {
+    const collection = collections.find(collection => collection.id === collectionId);
+    
+    if (!collection || !collection.cards) {
+      return false;
+    }
 
-  const handleRemoveCardFromCollection = async (cardId: string, collectionId: string) => {
-    await removeCardFromCollection(
-      cardId, 
-      collectionId, 
-      setIsLoading, 
-      setError, 
-      setCards, 
-      setCollections
-    );
+    setCollections(prevCollections => {
+      return prevCollections.map(collection => {
+        if (collection.id === collectionId && collection.cards) {
+          return {
+            ...collection,
+            cards: collection.cards.filter(card => card.id !== cardId)
+          };
+        }
+        return collection;
+      });
+    });
+
+    return true;
   };
 
   return {
-    refreshCollections,
-    addCollection: handleAddCollection,
-    updateCollection: handleUpdateCollection,
-    deleteCollection: handleDeleteCollection,
-    addCardToCollection: handleAddCardToCollection,
-    removeCardFromCollection: handleRemoveCardFromCollection
+    collections,
+    addCollection,
+    updateCollection,
+    deleteCollection,
+    addCardToCollection,
+    removeCardFromCollection,
+    setCollections
   };
 };

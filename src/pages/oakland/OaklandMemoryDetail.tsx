@@ -1,221 +1,190 @@
 
-import React, { useEffect, useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import React from 'react';
+import { useParams, Link } from 'react-router-dom';
 import { useCards } from '@/context/CardContext';
 import Navbar from '@/components/Navbar';
-import { ChevronRight, Clock, MapPin, Users, Calendar, Edit, ArrowLeft, Share2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import OaklandCardTemplate from '@/components/oakland/OaklandCardTemplates';
+import { ChevronLeft, MapPin, Calendar, Users, Clock, Edit, Share2 } from 'lucide-react';
 import { format } from 'date-fns';
-import { Card } from '@/lib/types';
+import OaklandCardTemplate, { OaklandTemplateType } from '@/components/oakland/OaklandCardTemplates';
 import { toast } from 'sonner';
 
-const OaklandMemoryDetail: React.FC = () => {
+const OaklandMemoryDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const { cards, getCard } = useCards();
-  const navigate = useNavigate();
-  const [memory, setMemory] = useState<Card | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    if (id) {
-      const card = getCard(id);
-      if (card) {
-        setMemory(card);
-      } else {
-        toast.error('Memory not found');
-      }
-      setIsLoading(false);
-    }
-  }, [id, getCard]);
-
-  // Get Oakland specific metadata
-  const oaklandData = memory?.designMetadata?.oaklandMemory;
-  const templateType = oaklandData?.template || 'classic';
-
-  if (isLoading) {
+  const { getCard } = useCards();
+  const card = getCard(id || '');
+  
+  if (!card) {
     return (
       <div className="min-h-screen bg-gray-50">
         <Navbar />
-        <div className="container mx-auto max-w-6xl px-4 pt-20">
-          <div className="animate-pulse flex flex-col md:flex-row gap-8">
-            <div className="w-full md:w-1/2 aspect-[2.5/3.5] bg-gray-200 rounded-xl"></div>
-            <div className="w-full md:w-1/2">
-              <div className="h-8 w-64 bg-gray-200 rounded mb-4"></div>
-              <div className="h-4 w-full bg-gray-100 rounded mb-8"></div>
-              <div className="space-y-4">
-                <div className="h-4 w-3/4 bg-gray-100 rounded"></div>
-                <div className="h-4 w-1/2 bg-gray-100 rounded"></div>
-                <div className="h-4 w-5/6 bg-gray-100 rounded"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!memory || !oaklandData) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <Navbar />
-        <div className="container mx-auto max-w-6xl px-4 pt-20">
-          <div className="text-center py-16">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">Memory Not Found</h2>
-            <p className="text-gray-600 mb-8">The memory you're looking for doesn't exist or has been removed.</p>
-            <Button asChild>
-              <Link to="/oakland/memories">
-                <ArrowLeft className="mr-2 h-4 w-4" /> 
-                Back to Memories
-              </Link>
+        <main className="pt-24 pb-12 px-4">
+          <div className="max-w-4xl mx-auto text-center">
+            <h1 className="text-2xl font-bold text-gray-700">Memory not found</h1>
+            <p className="mt-2 text-gray-500">The memory you're looking for doesn't exist or has been removed.</p>
+            <Button asChild className="mt-6">
+              <Link to="/oakland-memories">Back to Memories</Link>
             </Button>
           </div>
-        </div>
+        </main>
       </div>
     );
   }
-
+  
+  const memory = card.designMetadata?.oaklandMemory;
+  
+  // Handle copy link functionality
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(window.location.href);
+    toast.success("Link copied to clipboard!");
+  };
+  
+  // Convert template string to OaklandTemplateType or use classic as default
+  const templateType = (memory?.template as OaklandTemplateType) || 'classic';
+  
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
       
-      <main className="container mx-auto max-w-6xl px-4 pt-16 pb-24">
-        {/* Breadcrumb */}
-        <div className="flex items-center text-sm text-gray-500 py-4 mt-4">
-          <Link to="/" className="hover:text-[#006341]">Home</Link>
-          <ChevronRight className="h-4 w-4 mx-2" />
-          <Link to="/oakland" className="hover:text-[#006341]">Oakland A's</Link>
-          <ChevronRight className="h-4 w-4 mx-2" />
-          <Link to="/oakland/memories" className="hover:text-[#006341]">Memories</Link>
-          <ChevronRight className="h-4 w-4 mx-2" />
-          <span className="text-[#003831] font-medium">{memory.title}</span>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-8">
-          {/* Memory Card */}
-          <div className="flex justify-center">
-            <OaklandCardTemplate type={templateType} className="w-full max-w-md">
-              <div className="relative h-full">
-                <div className="absolute top-0 left-0 w-full p-4 bg-gradient-to-b from-black/50 to-transparent">
-                  <h2 className="text-2xl font-bold text-white">{memory.title}</h2>
-                  {oaklandData.date && (
-                    <div className="flex items-center text-sm text-white/90 mt-1">
-                      <Calendar className="w-3 h-3 mr-1" />
-                      {format(new Date(oaklandData.date), 'MMMM d, yyyy')}
-                    </div>
-                  )}
-                </div>
-                
-                <div className="w-full h-full flex items-center justify-center">
+      <main className="pt-24 pb-12 px-4 sm:px-6 max-w-7xl mx-auto">
+        <div className="mb-10">
+          <Link to="/oakland-memories">
+            <Button variant="ghost" className="mb-4 -ml-4">
+              <ChevronLeft className="mr-2 h-4 w-4" />
+              Back to Memories
+            </Button>
+          </Link>
+          
+          <div className="flex flex-wrap md:flex-nowrap justify-between gap-8">
+            {/* Card Display */}
+            <div className="w-full md:w-1/3 max-w-xs mx-auto md:mx-0">
+              <OaklandCardTemplate 
+                type={templateType}
+                className="mx-auto md:mx-0 shadow-xl"
+              >
+                {card.imageUrl && (
                   <img 
-                    src={memory.imageUrl} 
-                    alt={memory.title} 
-                    className="object-contain max-h-full"
+                    src={memory?.imageUrl || card.imageUrl} 
+                    alt={card.title} 
+                    className="absolute inset-0 w-full h-full object-cover opacity-40"
                   />
-                </div>
+                )}
                 
-                <div className="absolute bottom-0 left-0 w-full p-4 bg-gradient-to-t from-black/70 to-transparent">
-                  {oaklandData.location && (
-                    <div className="flex items-center text-sm text-white/90 mb-1">
-                      <MapPin className="w-3 h-3 mr-1" />
-                      {oaklandData.location}
-                      {oaklandData.section && ` • ${oaklandData.section}`}
+                <div className="relative z-10 p-5 flex flex-col h-full text-white">
+                  <h2 className="text-xl font-bold text-[#EFB21E] mb-2">{card.title}</h2>
+                  
+                  {memory?.date && (
+                    <div className="flex items-center text-sm mb-3">
+                      <Calendar className="h-4 w-4 mr-2 text-[#EFB21E]" />
+                      {format(new Date(memory.date), 'MMMM d, yyyy')}
                     </div>
                   )}
                   
-                  {oaklandData.opponent && (
-                    <div className="text-sm text-white/80">
-                      vs {oaklandData.opponent}
-                      {oaklandData.score && ` • ${oaklandData.score}`}
+                  <p className="flex-grow text-sm">{card.description}</p>
+                  
+                  {memory?.opponent && (
+                    <div className="mt-4 p-2 bg-[#003831]/50 rounded-md">
+                      <div className="font-semibold text-[#EFB21E]">vs {memory.opponent}</div>
+                      {memory.score && (
+                        <div className="text-sm mt-1">{memory.score}</div>
+                      )}
                     </div>
                   )}
                 </div>
-              </div>
-            </OaklandCardTemplate>
-          </div>
-          
-          {/* Memory Details */}
-          <div>
-            <div className="flex justify-between items-start mb-4">
-              <h1 className="text-3xl font-bold text-[#003831]">{memory.title}</h1>
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm">
-                  <Share2 className="h-4 w-4 mr-2" />
+              </OaklandCardTemplate>
+              
+              <div className="flex justify-center mt-4 gap-2">
+                <Button variant="outline" size="sm" onClick={handleCopyLink}>
+                  <Share2 className="h-4 w-4 mr-1" />
                   Share
                 </Button>
-                <Button size="sm" asChild>
-                  <Link to={`/oakland/memories/${id}/edit`}>
-                    <Edit className="h-4 w-4 mr-2" />
+                
+                <Button asChild size="sm">
+                  <Link to={`/oakland-memory-editor/${card.id}`}>
+                    <Edit className="h-4 w-4 mr-1" />
                     Edit
                   </Link>
                 </Button>
               </div>
             </div>
             
-            <p className="text-gray-700 mb-6">{memory.description}</p>
-            
-            <div className="border-t border-gray-200 pt-4 mb-6">
-              <h3 className="font-medium text-[#003831] mb-2">Memory Details</h3>
-              <div className="space-y-2">
-                {oaklandData.date && (
-                  <div className="flex items-center text-gray-600">
-                    <Calendar className="h-4 w-4 mr-2 text-[#006341]" />
-                    <span>Date: {format(new Date(oaklandData.date), 'MMMM d, yyyy')}</span>
-                  </div>
-                )}
+            {/* Memory Details */}
+            <div className="flex-grow">
+              <h1 className="text-3xl font-bold text-[#003831]">{card.title}</h1>
+              
+              <div className="mt-6 space-y-6">
+                <div>
+                  <h3 className="text-lg font-semibold text-[#003831]">About this memory</h3>
+                  <p className="mt-2 text-gray-700 whitespace-pre-line">{card.description}</p>
+                </div>
                 
-                {oaklandData.memoryType && (
-                  <div className="flex items-center text-gray-600">
-                    <Clock className="h-4 w-4 mr-2 text-[#006341]" />
-                    <span>Memory Type: {oaklandData.memoryType.charAt(0).toUpperCase() + oaklandData.memoryType.slice(1)}</span>
-                  </div>
-                )}
-                
-                {oaklandData.location && (
-                  <div className="flex items-center text-gray-600">
-                    <MapPin className="h-4 w-4 mr-2 text-[#006341]" />
-                    <span>Location: {oaklandData.location}{oaklandData.section && ` (${oaklandData.section})`}</span>
-                  </div>
-                )}
-                
-                {oaklandData.attendees && oaklandData.attendees.length > 0 && (
-                  <div className="flex items-start text-gray-600">
-                    <Users className="h-4 w-4 mr-2 mt-1 text-[#006341]" />
-                    <div>
-                      <span>Attended With: </span>
-                      <span>{oaklandData.attendees.join(', ')}</span>
+                {memory && (
+                  <>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                      {memory.location && (
+                        <div className="flex items-start">
+                          <MapPin className="h-5 w-5 text-[#006341] mr-2 mt-0.5" />
+                          <div>
+                            <div className="font-medium">Location</div>
+                            <div className="text-gray-600">
+                              {memory.location}
+                              {memory.section && <span className="block text-sm">{memory.section}</span>}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {memory.date && (
+                        <div className="flex items-start">
+                          <Calendar className="h-5 w-5 text-[#006341] mr-2 mt-0.5" />
+                          <div>
+                            <div className="font-medium">Date</div>
+                            <div className="text-gray-600">{format(new Date(memory.date), 'MMMM d, yyyy')}</div>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {memory.attendees && memory.attendees.length > 0 && (
+                        <div className="flex items-start">
+                          <Users className="h-5 w-5 text-[#006341] mr-2 mt-0.5" />
+                          <div>
+                            <div className="font-medium">With</div>
+                            <div className="text-gray-600">
+                              {memory.attendees.join(', ')}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {memory.memoryType && (
+                        <div className="flex items-start">
+                          <Clock className="h-5 w-5 text-[#006341] mr-2 mt-0.5" />
+                          <div>
+                            <div className="font-medium">Memory Type</div>
+                            <div className="text-gray-600">
+                              {memory.memoryType.charAt(0).toUpperCase() + memory.memoryType.slice(1)}
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  </div>
+                    
+                    {memory.tags && memory.tags.length > 0 && (
+                      <div>
+                        <h3 className="text-lg font-semibold text-[#003831]">Tags</h3>
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {memory.tags.map(tag => (
+                            <div key={tag} className="px-3 py-1 bg-[#EFB21E]/20 text-[#003831] rounded-full text-sm">
+                              #{tag}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             </div>
-            
-            {oaklandData.historicalContext && (
-              <div className="mb-6">
-                <h3 className="font-medium text-[#003831] mb-2">Historical Context</h3>
-                <p className="text-gray-700">{oaklandData.historicalContext}</p>
-              </div>
-            )}
-            
-            {oaklandData.personalSignificance && (
-              <div className="mb-6">
-                <h3 className="font-medium text-[#003831] mb-2">Personal Significance</h3>
-                <p className="text-gray-700">{oaklandData.personalSignificance}</p>
-              </div>
-            )}
-            
-            {memory.tags && memory.tags.length > 0 && (
-              <div>
-                <h3 className="font-medium text-[#003831] mb-2">Tags</h3>
-                <div className="flex flex-wrap gap-2">
-                  {memory.tags.map(tag => (
-                    <div key={tag} className="bg-gray-100 px-3 py-1 rounded-full text-sm text-gray-700">
-                      #{tag}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </main>

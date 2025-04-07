@@ -1,11 +1,12 @@
 
 import { useCallback, useEffect } from 'react';
-import { Canvas, Rect, util, IEvent, FabricObject } from 'fabric';
+import { Canvas, Rect, TEvent, FabricObject } from 'fabric';
 import { EnhancedCropBoxProps } from '../../CropBox';
+import { MemorabiliaType } from '../../cardDetection';
 
 // Define types for the fabric events
 type TPointerEvent = MouseEvent | TouchEvent;
-type BasicTransformEvent<E extends TPointerEvent> = IEvent<E>;
+type BasicTransformEvent = TEvent;
 
 interface UseCropRectanglesProps {
   canvas: Canvas | null;
@@ -13,6 +14,9 @@ interface UseCropRectanglesProps {
   setCropBoxes: React.Dispatch<React.SetStateAction<EnhancedCropBoxProps[]>>;
   selectedCropIndex: number;
   setSelectedCropIndex: React.Dispatch<React.SetStateAction<number>>;
+  batchMode?: boolean;
+  batchSelections?: number[];
+  onToggleBatchSelection?: (index: number) => void;
 }
 
 export const useCropRectangles = ({
@@ -20,7 +24,10 @@ export const useCropRectangles = ({
   cropBoxes,
   setCropBoxes,
   selectedCropIndex,
-  setSelectedCropIndex
+  setSelectedCropIndex,
+  batchMode = false,
+  batchSelections = [],
+  onToggleBatchSelection
 }: UseCropRectanglesProps) => {
   
   // Function to render crop boxes on canvas
@@ -34,6 +41,7 @@ export const useCropRectangles = ({
     // Create and add new rects based on cropBoxes state
     cropBoxes.forEach((box, index) => {
       const isSelected = index === selectedCropIndex;
+      const isInBatch = batchSelections.includes(index);
       
       const rect = new Rect({
         left: box.x,
@@ -42,8 +50,8 @@ export const useCropRectangles = ({
         height: box.height,
         angle: box.rotation || 0,
         fill: 'transparent',
-        stroke: isSelected ? '#FFCC00' : box.color,
-        strokeWidth: isSelected ? a : 1,
+        stroke: isInBatch ? '#4CAF50' : (isSelected ? '#FFCC00' : box.color),
+        strokeWidth: isSelected ? 2 : 1,
         strokeDashArray: isSelected ? [5, 5] : undefined,
         cornerColor: '#FFCC00',
         cornerSize: 8,
@@ -52,13 +60,14 @@ export const useCropRectangles = ({
         hasBorders: true,
         selectable: true,
         hoverCursor: 'pointer',
-        // Store original index for reference
-        data: { 
-          cropBoxIndex: index,
-          memorabiliaType: box.memorabiliaType,
-          confidence: box.confidence
-        }
       });
+      
+      // Extend the rect object to store additional data
+      (rect as any).data = { 
+        cropBoxIndex: index,
+        memorabiliaType: box.memorabiliaType,
+        confidence: box.confidence
+      };
       
       canvas.add(rect);
       if (isSelected) {
@@ -67,7 +76,7 @@ export const useCropRectangles = ({
     });
     
     canvas.renderAll();
-  }, [canvas, cropBoxes, selectedCropIndex]);
+  }, [canvas, cropBoxes, selectedCropIndex, batchSelections]);
   
   // Initialize event handlers
   const initializeEvents = useCallback(() => {
@@ -76,15 +85,15 @@ export const useCropRectangles = ({
     // Handle selection change
     canvas.on('selection:created', (e) => {
       const selectedObject = e.selected?.[0];
-      if (selectedObject && selectedObject.data?.cropBoxIndex !== undefined) {
-        setSelectedCropIndex(selectedObject.data.cropBoxIndex);
+      if (selectedObject && (selectedObject as any).data?.cropBoxIndex !== undefined) {
+        setSelectedCropIndex((selectedObject as any).data.cropBoxIndex);
       }
     });
     
     canvas.on('selection:updated', (e) => {
       const selectedObject = e.selected?.[0];
-      if (selectedObject && selectedObject.data?.cropBoxIndex !== undefined) {
-        setSelectedCropIndex(selectedObject.data.cropBoxIndex);
+      if (selectedObject && (selectedObject as any).data?.cropBoxIndex !== undefined) {
+        setSelectedCropIndex((selectedObject as any).data.cropBoxIndex);
       }
     });
     
@@ -97,8 +106,8 @@ export const useCropRectangles = ({
       if (!e.target) return;
       
       const modifiedObject = e.target;
-      if (modifiedObject.data?.cropBoxIndex !== undefined) {
-        const index = modifiedObject.data.cropBoxIndex;
+      if ((modifiedObject as any).data?.cropBoxIndex !== undefined) {
+        const index = (modifiedObject as any).data.cropBoxIndex;
         
         setCropBoxes(prev => {
           const updated = [...prev];
@@ -120,8 +129,8 @@ export const useCropRectangles = ({
       if (!e.target) return;
       
       const scalingObject = e.target;
-      if (scalingObject.data?.cropBoxIndex !== undefined) {
-        const index = scalingObject.data.cropBoxIndex;
+      if ((scalingObject as any).data?.cropBoxIndex !== undefined) {
+        const index = (scalingObject as any).data.cropBoxIndex;
         
         // Update in real-time while scaling
         setCropBoxes(prev => {
@@ -140,8 +149,8 @@ export const useCropRectangles = ({
       if (!e.target) return;
       
       const movingObject = e.target;
-      if (movingObject.data?.cropBoxIndex !== undefined) {
-        const index = movingObject.data.cropBoxIndex;
+      if ((movingObject as any).data?.cropBoxIndex !== undefined) {
+        const index = (movingObject as any).data.cropBoxIndex;
         
         // Update in real-time while moving
         setCropBoxes(prev => {
@@ -160,8 +169,8 @@ export const useCropRectangles = ({
       if (!e.target) return;
       
       const rotatingObject = e.target;
-      if (rotatingObject.data?.cropBoxIndex !== undefined) {
-        const index = rotatingObject.data.cropBoxIndex;
+      if ((rotatingObject as any).data?.cropBoxIndex !== undefined) {
+        const index = (rotatingObject as any).data.cropBoxIndex;
         
         // Update in real-time while rotating
         setCropBoxes(prev => {
@@ -175,25 +184,35 @@ export const useCropRectangles = ({
       }
     });
     
-  }, [canvas, setCropBoxes, setSelectedCropIndex]);
+    if (batchMode && onToggleBatchSelection) {
+      canvas.on('mouse:dblclick', (e) => {
+        const clickedObject = e.target;
+        if (clickedObject && (clickedObject as any).data?.cropBoxIndex !== undefined) {
+          const index = (clickedObject as any).data.cropBoxIndex;
+          onToggleBatchSelection(index);
+        }
+      });
+    }
+    
+  }, [canvas, setCropBoxes, setSelectedCropIndex, batchMode, onToggleBatchSelection]);
   
   // Update cropbox type
-  const updateCropBoxType = useCallback((index: number, memorabiliaType: string, confidence: number) => {
+  const updateCropBoxType = useCallback((index: number, memorabiliaType: MemorabiliaType, confidence: number) => {
     setCropBoxes(prev => {
       const updated = [...prev];
       if (updated[index]) {
         updated[index] = {
           ...updated[index],
-          memorabiliaType: memorabiliaType as any,
+          memorabiliaType,
           confidence
         };
         
         // Also update the data if the object exists on canvas
         const objects = canvas?.getObjects() || [];
-        const matchingRect = objects.find(obj => obj.data?.cropBoxIndex === index);
+        const matchingRect = objects.find(obj => (obj as any).data?.cropBoxIndex === index);
         if (matchingRect) {
-          matchingRect.data = {
-            ...matchingRect.data,
+          (matchingRect as any).data = {
+            ...(matchingRect as any).data,
             memorabiliaType,
             confidence
           };
@@ -210,7 +229,7 @@ export const useCropRectangles = ({
     // First remove it from the canvas
     if (canvas) {
       const objects = canvas.getObjects();
-      const matchingRect = objects.find(obj => obj.data?.cropBoxIndex === index);
+      const matchingRect = objects.find(obj => (obj as any).data?.cropBoxIndex === index);
       if (matchingRect) {
         canvas.remove(matchingRect);
       }
@@ -245,6 +264,7 @@ export const useCropRectangles = ({
         canvas.off('object:scaling');
         canvas.off('object:moving');
         canvas.off('object:rotating');
+        canvas.off('mouse:dblclick');
       };
     }
   }, [canvas, initializeEvents, renderCropBoxes]);
@@ -252,13 +272,10 @@ export const useCropRectangles = ({
   // Re-render when cropBoxes or selection changes
   useEffect(() => {
     renderCropBoxes();
-  }, [cropBoxes, selectedCropIndex, renderCropBoxes]);
+  }, [cropBoxes, selectedCropIndex, batchSelections, renderCropBoxes]);
   
   return {
     updateCropBoxType,
     deleteCropBox
   };
 };
-
-// Fix the typo in the code
-const a = 2;
