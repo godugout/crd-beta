@@ -1,15 +1,14 @@
 
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '@/context/AuthContext';
-import { useToast } from '@/components/ui/use-toast';
+import { useAuth } from '@/context/auth/useAuth';
+import { toast } from 'sonner';
 
 export function useNavbar() {
   const { user, signOut } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const { toast } = useToast();
 
   const toggleMenu = () => {
     setIsMenuOpen(prev => !prev);
@@ -22,24 +21,28 @@ export function useNavbar() {
   const handleSignOut = async () => {
     try {
       await signOut();
-      toast({
-        title: "Signed out successfully",
-        description: "You have been signed out of your account.",
-        duration: 3000,
-      });
+      toast.success("Signed out successfully");
       navigate('/');
     } catch (error: any) {
-      toast({
-        title: "Error signing out",
-        description: error.message || "An unexpected error occurred",
-        variant: "destructive",
-        duration: 5000,
+      toast.error("Error signing out", {
+        description: error.message || "An unexpected error occurred"
       });
     }
   };
 
   const isActive = (path: string) => {
-    return location.pathname === path;
+    if (path === '/') {
+      return location.pathname === '/';
+    }
+    return location.pathname.startsWith(path);
+  };
+
+  const getActiveSection = () => {
+    const pathParts = location.pathname.split('/');
+    if (pathParts.length > 1) {
+      return pathParts[1]; // Returns 'cards', 'collections', etc.
+    }
+    return ''; // Home
   };
 
   return {
@@ -48,6 +51,7 @@ export function useNavbar() {
     toggleMenu,
     closeMenu,
     handleSignOut,
-    isActive
+    isActive,
+    activeSection: getActiveSection()
   };
 }

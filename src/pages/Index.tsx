@@ -1,6 +1,5 @@
 
 import React from 'react';
-import Navbar from '@/components/Navbar';
 import HeroSection from '@/components/card-showcase/HeroSection';
 import FeaturedCardsSection from '@/components/card-showcase/FeaturedCardsSection';
 import CollectionsSection from '@/components/card-showcase/CollectionsSection';
@@ -11,6 +10,7 @@ import { useCards } from '@/context/CardContext';
 import { useAuth } from '@/context/auth/useAuth';
 import { useCardData } from '@/components/gallery/useCardData';
 import { useNavigate } from 'react-router-dom';
+import MetaTags from '@/components/shared/MetaTags';
 
 const Index = () => {
   const navigate = useNavigate();
@@ -19,22 +19,25 @@ const Index = () => {
   const { collections } = useCards();
   
   const handleViewCard = (id: string) => {
-    navigate(`/card/${id}`);
+    navigate(`/cards/${id}`);
   };
   
   const handleCreateCard = () => {
-    navigate('/card/create');
+    navigate('/cards/create');
   };
   
   const handleViewPack = (id: string) => {
-    navigate(`/pack/${id}`);
+    navigate(`/packs/${id}`);
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
+    <>
+      <MetaTags 
+        title="Home" 
+        description="Create, collect, and share digital trading cards with CardShow."
+      />
       
-      <main className="flex-grow">
+      <div className="flex flex-col">
         <HeroSection />
         
         {/* Featured Cards */}
@@ -60,10 +63,10 @@ const Index = () => {
         
         {/* AR Features */}
         <ArFeaturesSection />
-      </main>
+      </div>
       
       <SiteFooter />
-    </div>
+    </>
   );
 };
 

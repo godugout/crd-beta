@@ -2,34 +2,33 @@
 import { useState, useEffect } from 'react';
 
 /**
- * Hook for detecting media query matches
- * 
- * @param query CSS media query to match
+ * Custom hook for responsive design with media queries
+ * @param query CSS media query string
  * @returns boolean indicating if the media query matches
  */
-export function useMediaQuery(query: string): boolean {
-  const [matches, setMatches] = useState<boolean>(false);
-
+export const useMediaQuery = (query: string): boolean => {
+  const [matches, setMatches] = useState(false);
+  
   useEffect(() => {
-    // Create media query list
+    // Create a media query list
     const mediaQuery = window.matchMedia(query);
     
-    // Set initial value
+    // Set the initial value
     setMatches(mediaQuery.matches);
     
-    // Define listener function
-    const handler = (event: MediaQueryListEvent) => {
+    // Create an event listener function
+    const handleChange = (event: MediaQueryListEvent) => {
       setMatches(event.matches);
     };
     
-    // Add event listener
-    mediaQuery.addEventListener('change', handler);
+    // Add the listener to the media query
+    mediaQuery.addEventListener('change', handleChange);
     
-    // Clean up
+    // Cleanup function
     return () => {
-      mediaQuery.removeEventListener('change', handler);
+      mediaQuery.removeEventListener('change', handleChange);
     };
   }, [query]);
-
+  
   return matches;
-}
+};
