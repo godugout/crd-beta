@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'sonner';
@@ -35,6 +34,8 @@ import SignatureDemo from './pages/SignatureDemo';
 import ArCardViewer from './pages/ArCardViewer';
 import CardComparison from './pages/CardComparison';
 import CardAnimation from './pages/CardAnimation';
+// Admin Page
+import AdminPage from './pages/Admin';
 
 const App = () => {
   return (
@@ -76,6 +77,9 @@ const App = () => {
             <Route path="/ar-card-viewer" element={<ArCardViewer />} />
             <Route path="/card-comparison" element={<CardComparison />} />
             <Route path="/animation" element={<CardAnimation />} />
+            
+            {/* Admin Page */}
+            <Route path="/admin" element={<AdminPage />} />
             
             <Route path="*" element={<NotFound />} />
           </Routes>
