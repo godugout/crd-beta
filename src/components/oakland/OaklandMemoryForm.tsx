@@ -13,6 +13,8 @@ import GameDetailsFields from './form-fields/GameDetailsFields';
 import LocationFields from './form-fields/LocationFields';
 import AttendeeField from './form-fields/AttendeeField';
 import TagField from './form-fields/TagField';
+import HistoricalContextField from './form-fields/HistoricalContextField';
+import PersonalSignificanceField from './form-fields/PersonalSignificanceField';
 
 // Form schema for Oakland memories
 const formSchema = z.object({
@@ -27,6 +29,8 @@ const formSchema = z.object({
   attendees: z.array(z.string()).default([]),
   tags: z.array(z.string()).default([]),
   imageUrl: z.string().optional(),
+  historicalContext: z.string().optional(),
+  personalSignificance: z.string().optional(),
 });
 
 export type OaklandMemoryFormValues = z.infer<typeof formSchema>;
@@ -54,6 +58,8 @@ const OaklandMemoryForm: React.FC<OaklandMemoryFormProps> = ({ onSubmit, initial
       attendees: initialData?.attendees || [],
       tags: initialData?.tags || [],
       imageUrl: initialData?.imageUrl || '',
+      historicalContext: initialData?.historicalContext || '',
+      personalSignificance: initialData?.personalSignificance || '',
     },
   });
 
@@ -83,6 +89,12 @@ const OaklandMemoryForm: React.FC<OaklandMemoryFormProps> = ({ onSubmit, initial
 
         {/* Location Fields */}
         <LocationFields form={form} />
+
+        {/* Historical Context */}
+        <HistoricalContextField form={form} />
+
+        {/* Personal Significance */}
+        <PersonalSignificanceField form={form} />
 
         {/* Attendees */}
         <AttendeeField 

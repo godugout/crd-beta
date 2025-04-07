@@ -49,6 +49,8 @@ export interface Card {
       teamId?: string;
       imageUrl?: string;
       tags?: string[]; // Added tags to oaklandMemory
+      historicalContext?: string; // Added historical context
+      personalSignificance?: string; // Added personal significance
     };
   };
   tags?: string[];
@@ -68,4 +70,6 @@ export interface OaklandMemoryData {
   tags: string[];
   imageUrl?: string;
   template?: string;
+  historicalContext?: string; // Added historical context
+  personalSignificance?: string; // Added personal significance
 }

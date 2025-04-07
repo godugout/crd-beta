@@ -62,6 +62,8 @@ const OaklandMemoryCreator: React.FC<OaklandMemoryCreatorProps> = ({ className }
         template: selectedTemplate,
         teamId: 'oakland-athletics',
         imageUrl: imageUrl,
+        historicalContext: memoryData.historicalContext,
+        personalSignificance: memoryData.personalSignificance,
       };
 
       // Create card with Oakland specific metadata
