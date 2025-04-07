@@ -2,14 +2,11 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'sonner';
-
 // Auth
 import { AuthProvider } from './context/AuthContext';
 import Auth from './pages/Auth';
-
 // Card Context
 import { CardProvider } from './context/CardContext';
-
 // Main Pages
 import Index from './pages/Index';
 import Gallery from './pages/Gallery';
@@ -20,16 +17,18 @@ import Collections from './pages/Collections';
 import CollectionDetail from './pages/CollectionDetail';
 import CollectionForm from './pages/CollectionForm';
 import NotFound from './pages/NotFound';
-
 // Memory Pack Pages
 import MemoryPacks from './pages/MemoryPacks';
 import MemoryPackDetail from './pages/MemoryPackDetail';
 import MemoryPackCreator from './pages/MemoryPackCreator';
-
-// Oakland Pages - Direct import from existing page
+// Oakland Pages
 import OaklandLanding from './pages/OaklandLanding';
 import OaklandMemories from './pages/OaklandMemories';
-// Demos - Direct import from existing pages
+import OaklandMemoryDetail from './pages/OaklandMemoryDetail';
+import OaklandMemoryCreator from './pages/OaklandMemoryCreator';
+// Game Day Mode
+import GameDayMode from './pages/GameDayMode';
+// Demo Pages
 import PbrDemo from './pages/PbrDemo';
 import BaseballCardViewer from './pages/BaseballCardViewer';
 import SignatureDemo from './pages/SignatureDemo';
@@ -61,22 +60,23 @@ const App = () => {
             <Route path="/packs/new" element={<MemoryPackCreator />} />
             <Route path="/packs/:id/edit" element={<MemoryPackCreator />} />
             
-            {/* Oakland routes */}
+            {/* Oakland Routes */}
             <Route path="/oakland" element={<OaklandLanding />} />
             <Route path="/oakland/memories" element={<OaklandMemories />} />
-            {/* Temporarily commenting these routes as their components don't exist yet */}
-            {/*
             <Route path="/oakland/memories/:id" element={<OaklandMemoryDetail />} />
             <Route path="/oakland/create" element={<OaklandMemoryCreator />} />
-            */}
             
-            {/* Demo routes */}
+            {/* Game Day Mode */}
+            <Route path="/gameday" element={<GameDayMode />} />
+            
+            {/* Demo Pages */}
             <Route path="/pbr" element={<PbrDemo />} />
             <Route path="/baseball-card-viewer" element={<BaseballCardViewer />} />
             <Route path="/signature" element={<SignatureDemo />} />
-            <Route path="/ar" element={<ArCardViewer />} />
+            <Route path="/ar-card-viewer" element={<ArCardViewer />} />
             <Route path="/card-comparison" element={<CardComparison />} />
             <Route path="/animation" element={<CardAnimation />} />
+            
             <Route path="*" element={<NotFound />} />
           </Routes>
         </CardProvider>

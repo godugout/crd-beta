@@ -1,54 +1,67 @@
-import React from 'react';
-import { NavLink } from 'react-router-dom';
-import { Package } from 'lucide-react';
 
-const DesktopMenu = () => {
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { User } from '@/lib/types';
+
+interface DesktopMenuProps {
+  isActive: (path: string) => boolean;
+  user?: User;
+}
+
+const DesktopMenu: React.FC<DesktopMenuProps> = ({ isActive, user }) => {
   return (
-    <nav className="flex items-center space-x-6 text-sm">
-      
-      <NavLink 
-        to="/gallery" 
-        className={({ isActive }) => 
-          isActive ? "font-medium text-cardshow-blue" : "text-cardshow-dark hover:text-cardshow-blue transition-colors"
-        }
+    <div className="hidden lg:flex space-x-1">
+      <Link
+        to="/"
+        className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+          isActive('/') ? 'bg-gray-100 text-gray-900' : 'text-gray-700 hover:bg-gray-100'
+        }`}
+      >
+        Home
+      </Link>
+      <Link
+        to="/gallery"
+        className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+          isActive('/gallery') ? 'bg-gray-100 text-gray-900' : 'text-gray-700 hover:bg-gray-100'
+        }`}
       >
         Gallery
-      </NavLink>
-      <NavLink 
-        to="/collections" 
-        className={({ isActive }) => 
-          isActive ? "font-medium text-cardshow-blue" : "text-cardshow-dark hover:text-cardshow-blue transition-colors"
-        }
+      </Link>
+      <Link
+        to="/collections"
+        className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+          isActive('/collections') ? 'bg-gray-100 text-gray-900' : 'text-gray-700 hover:bg-gray-100'
+        }`}
       >
         Collections
-      </NavLink>
-      
-      <NavLink 
-        to="/packs" 
-        className={({ isActive }) => 
-          isActive ? "font-medium text-cardshow-blue flex items-center" : "text-cardshow-dark hover:text-cardshow-blue transition-colors flex items-center"
-        }
+      </Link>
+      <Link
+        to="/editor"
+        className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+          isActive('/editor') ? 'bg-gray-100 text-gray-900' : 'text-gray-700 hover:bg-gray-100'
+        }`}
       >
-        <Package className="h-4 w-4 mr-1" />
-        Memory Packs
-      </NavLink>
-      <NavLink 
-        to="/editor" 
-        className={({ isActive }) => 
-          isActive ? "font-medium text-cardshow-blue" : "text-cardshow-dark hover:text-cardshow-blue transition-colors"
-        }
+        Create
+      </Link>
+      <Link
+        to="/oakland"
+        className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+          isActive('/oakland') ? 'bg-gray-100 text-gray-900' : 'text-gray-700 hover:bg-gray-100'
+        }`}
       >
-        Create Card
-      </NavLink>
-      <NavLink 
-        to="/card-detector" 
-        className={({ isActive }) => 
-          isActive ? "font-medium text-cardshow-blue" : "text-cardshow-dark hover:text-cardshow-blue transition-colors"
-        }
+        Oakland A's
+      </Link>
+      <Link
+        to="/gameday"
+        className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+          isActive('/gameday') 
+            ? 'bg-[#006341] text-white' 
+            : 'text-[#006341] bg-[#EFB21E]/10 hover:bg-[#EFB21E]/20'
+        }`}
       >
-        Card Detector
-      </NavLink>
-    </nav>
+        Game Day Mode
+      </Link>
+    </div>
   );
 };
 
