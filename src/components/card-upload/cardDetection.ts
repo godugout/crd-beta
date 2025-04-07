@@ -1,18 +1,16 @@
-
 import { CropBoxProps } from './CropBox';
 
 // Define all memorabilia types
 export type MemorabiliaType = 'card' | 'ticket' | 'program' | 'autograph' | 'face' | 'unknown';
 
 // Enhanced version with required memorabiliaType field for cropped items
-export interface EnhancedCropBoxProps extends CropBoxProps {
-  memorabiliaType: MemorabiliaType;
-  confidence: number;
-}
+export interface EnhancedCropBoxProps extends CropBoxProps {}
 
 // Detect cards in an uploaded image
 export async function detectCardsInImage(
-  image: HTMLImageElement
+  image: HTMLImageElement,
+  enhancementEnabled: boolean = true,
+  canvas?: HTMLCanvasElement | null
 ): Promise<EnhancedCropBoxProps[]> {
   console.log('Detecting cards in image:', image.src);
   

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { MemorabiliaType } from './cardDetection';
 
@@ -10,22 +9,12 @@ export interface CropBoxProps {
   height: number;
   rotation: number; // Changed from optional to required
   color: string;
-  memorabiliaType?: MemorabiliaType;
-  confidence?: number;
+  memorabiliaType: MemorabiliaType; // Changed from optional to required
+  confidence: number; // Changed from optional to required
 }
 
-// Enhanced version with required memorabiliaType field for cropped items
-export interface EnhancedCropBoxProps {
-  id: number;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  rotation: number;
-  color: string;
-  memorabiliaType: MemorabiliaType;
-  confidence: number;
-}
+// This type is now the same as CropBoxProps since we made the required fields non-optional
+export interface EnhancedCropBoxProps extends CropBoxProps {}
 
 interface CropBoxComponentProps {
   box: CropBoxProps;

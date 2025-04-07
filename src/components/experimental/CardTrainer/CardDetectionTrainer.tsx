@@ -11,7 +11,6 @@ import DetectionTab from './components/DetectionTab';
 import ComparisonTab from './components/ComparisonTab';
 import { CardTrainerProps, DetectedCard } from './types';
 import { detectCardsInImage } from '../../card-upload/cardDetection';
-import { EnhancedCropBoxProps } from '../../card-upload/CropBox';
 
 const CardDetectionTrainer: React.FC<CardTrainerProps> = () => {
   const [uploadedImage, setUploadedImage] = useState<HTMLImageElement | null>(null);
@@ -32,29 +31,35 @@ const CardDetectionTrainer: React.FC<CardTrainerProps> = () => {
   
   // Run detection when an image is uploaded
   useEffect(() => {
-    if (uploadedImage && canvasRef.current) {
-      // Run the detection algorithm
-      const autoDetectedCards = detectCardsInImage(
-        uploadedImage,
-        false,
-        canvasRef.current
-      );
-      
-      // Convert to DetectedCard format
-      const convertedCards: DetectedCard[] = autoDetectedCards.map(card => ({
-        x: card.x,
-        y: card.y,
-        width: card.width,
-        height: card.height,
-        rotation: card.rotation || 0
-      }));
-      
-      setDetectionResults(convertedCards);
-      
-      // Initialize the canvas for manual tracing
-      createCanvas(uploadedImage);
-    }
-  }, [uploadedImage, canvasRef, createCanvas]);
+    const runDetection = async () => {
+      if (uploadedImage) {
+        try {
+          // Run the detection algorithm
+          const autoDetectedCards = await detectCardsInImage(uploadedImage);
+          
+          // Convert to DetectedCard format if needed
+          const convertedCards: DetectedCard[] = autoDetectedCards.map(card => ({
+            x: card.x,
+            y: card.y,
+            width: card.width,
+            height: card.height,
+            rotation: card.rotation || 0,
+            memorabiliaType: card.memorabiliaType,
+            confidence: card.confidence
+          }));
+          
+          setDetectionResults(convertedCards);
+          
+          // Initialize the canvas for manual tracing
+          createCanvas(uploadedImage);
+        } catch (error) {
+          console.error('Error detecting cards:', error);
+        }
+      }
+    };
+    
+    runDetection();
+  }, [uploadedImage, createCanvas]);
   
   // Run comparison metrics when detections or manual traces change
   useEffect(() => {

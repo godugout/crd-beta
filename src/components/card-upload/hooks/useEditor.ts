@@ -3,11 +3,12 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { EnhancedCropBoxProps, MemorabiliaType, applyCrop } from '../cardDetection';
 
-interface StagedCardProps {
+export interface StagedCardProps {
   id: string;
   cropBox: EnhancedCropBoxProps;
   previewUrl: string;
   file?: File;
+  url?: string; // Added url property to match expected type
 }
 
 export interface UseEditorProps {
@@ -67,7 +68,8 @@ export const useEditor = ({
             memorabiliaType: actualType
           },
           previewUrl: result.url,
-          file: result.file
+          file: result.file,
+          url: result.url // Add the url property to match expected type
         };
         
         setStagedCards(prev => [...prev, newStagedCard]);
@@ -105,8 +107,10 @@ export const useEditor = ({
     }
   };
 
-  const selectStagedCard = (cardId: string) => {
-    const stagedCard = stagedCards.find(card => card.id === cardId);
+  // Fix types for select and remove functions to handle numbers or strings
+  const selectStagedCard = (cardId: string | number) => {
+    const idStr = cardId.toString();
+    const stagedCard = stagedCards.find(card => card.id === idStr);
     if (stagedCard) {
       if (stagedCard.file) {
         onCropComplete(
@@ -125,8 +129,9 @@ export const useEditor = ({
     }
   };
 
-  const removeStagedCard = (cardId: string) => {
-    setStagedCards(prev => prev.filter(card => card.id !== cardId));
+  const removeStagedCard = (cardId: string | number) => {
+    const idStr = cardId.toString();
+    setStagedCards(prev => prev.filter(card => card.id !== idStr));
   };
 
   return {
