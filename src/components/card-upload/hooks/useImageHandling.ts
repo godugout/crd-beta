@@ -1,19 +1,19 @@
 
 import { useState, useEffect } from 'react';
-import { CropBoxProps } from '../CropBox';
-import { detectCardsInImage } from '../cardDetection';
+import { EnhancedCropBoxProps, MemorabiliaType, detectCardsInImage } from '../cardDetection';
 import { ImageData } from './useCropState';
 
 export interface UseImageHandlingProps {
   editorImage: string | null;
   showEditor: boolean;
   setImageData: React.Dispatch<React.SetStateAction<ImageData>>;
-  setCropBoxes: React.Dispatch<React.SetStateAction<CropBoxProps[]>>;
-  setDetectedCards: React.Dispatch<React.SetStateAction<CropBoxProps[]>>;
+  setCropBoxes: React.Dispatch<React.SetStateAction<EnhancedCropBoxProps[]>>;
+  setDetectedCards: React.Dispatch<React.SetStateAction<EnhancedCropBoxProps[]>>;
   setSelectedCropIndex: (index: number) => void;
   canvasRef: React.RefObject<HTMLCanvasElement>;
   editorImgRef: React.RefObject<HTMLImageElement>;
   batchProcessingMode?: boolean;
+  enabledMemorabiliaTypes?: MemorabiliaType[];
 }
 
 export const useImageHandling = ({
@@ -25,7 +25,8 @@ export const useImageHandling = ({
   setSelectedCropIndex,
   canvasRef,
   editorImgRef,
-  batchProcessingMode = false
+  batchProcessingMode = false,
+  enabledMemorabiliaTypes = ['card', 'ticket', 'program', 'autograph', 'face', 'unknown']
 }: UseImageHandlingProps) => {
   
   // Initialize canvas and detect cards when image is loaded
@@ -48,20 +49,34 @@ export const useImageHandling = ({
         });
         
         // Detect cards or faces in the image based on mode
-        const detected = detectCardsInImage(img, isStandardRatio, canvasRef.current, batchProcessingMode);
-        setDetectedCards(detected);
+        const detected = detectCardsInImage(
+          img, 
+          isStandardRatio, 
+          canvasRef.current, 
+          batchProcessingMode,
+          !batchProcessingMode // Only detect memorabilia in individual mode
+        );
+        
+        // Filter results by enabled types
+        const filteredDetected = detected.filter(item => 
+          enabledMemorabiliaTypes.includes(item.memorabiliaType || 'unknown')
+        );
+        
+        setDetectedCards(filteredDetected);
         
         if (batchProcessingMode) {
           // In batch mode, use all detected items
-          setCropBoxes(detected);
+          setCropBoxes(filteredDetected);
         } else {
           // In single mode, start with the first detection or default box
-          setCropBoxes(detected.length > 0 ? [detected[0]] : [{
+          setCropBoxes(filteredDetected.length > 0 ? [filteredDetected[0]] : [{
             x: 50,
             y: 50,
             width: 150,
             height: 210, // 3.5/2.5 ratio
-            rotation: 0
+            rotation: 0,
+            memorabiliaType: 'unknown',
+            confidence: 0.5
           }]);
         }
         
@@ -77,7 +92,8 @@ export const useImageHandling = ({
     setSelectedCropIndex, 
     canvasRef, 
     editorImgRef, 
-    batchProcessingMode
+    batchProcessingMode,
+    enabledMemorabiliaTypes
   ]);
 
   const rotateImage = () => {

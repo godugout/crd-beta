@@ -6,12 +6,13 @@ import { useInitFabricCanvas } from './fabric/useInitFabricCanvas';
 import { useBackgroundImage } from './fabric/useBackgroundImage';
 import { useCropRectangles } from './fabric/useCropRectangles';
 import { useCreateCropBox } from './fabric/useCreateCropBox';
+import { EnhancedCropBoxProps, MemorabiliaType } from '../cardDetection';
 
 interface UseFabricCanvasProps {
   fabricRef: React.RefObject<HTMLCanvasElement>;
   canvasRef: React.RefObject<HTMLCanvasElement>;
-  cropBoxes: CropBoxProps[];
-  setCropBoxes: React.Dispatch<React.SetStateAction<CropBoxProps[]>>;
+  cropBoxes: EnhancedCropBoxProps[];
+  setCropBoxes: React.Dispatch<React.SetStateAction<EnhancedCropBoxProps[]>>;
   selectedCropIndex: number;
   setSelectedCropIndex: (index: number) => void;
   imageData: ImageData;
@@ -19,6 +20,7 @@ interface UseFabricCanvasProps {
   batchMode?: boolean;
   batchSelections?: number[];
   onToggleBatchSelection?: (index: number) => void;
+  onMemorabiliaTypeChange?: (index: number, type: MemorabiliaType) => void;
 }
 
 export const useFabricCanvas = ({
@@ -32,7 +34,8 @@ export const useFabricCanvas = ({
   editorImgRef,
   batchMode = false,
   batchSelections = [],
-  onToggleBatchSelection
+  onToggleBatchSelection,
+  onMemorabiliaTypeChange
 }: UseFabricCanvasProps) => {
   
   // Initialize the canvas

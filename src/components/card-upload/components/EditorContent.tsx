@@ -3,16 +3,17 @@ import React from 'react';
 import EditorCanvas from '../EditorCanvas';
 import EditorToolbar from '../EditorToolbar';
 import ImageRotateButton from './ImageRotateButton';
-import { CropBoxProps } from '../CropBox';
+import { EnhancedCropBoxProps, MemorabiliaType } from '../cardDetection';
 import { ImageData } from '../hooks/useCropState';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle2 } from 'lucide-react';
+import MemorabiliaTypeIndicator from '../MemorabiliaTypeIndicator';
 
 interface EditorContentProps {
   canvasRef: React.RefObject<HTMLCanvasElement>;
   editorImgRef: React.RefObject<HTMLImageElement>;
-  cropBoxes: CropBoxProps[];
-  setCropBoxes: React.Dispatch<React.SetStateAction<CropBoxProps[]>>;
+  cropBoxes: EnhancedCropBoxProps[];
+  setCropBoxes: React.Dispatch<React.SetStateAction<EnhancedCropBoxProps[]>>;
   selectedCropIndex: number;
   setSelectedCropIndex: (index: number) => void;
   imageData: ImageData;
@@ -22,6 +23,7 @@ interface EditorContentProps {
   onRemoveCropBox: () => void;
   onRotateClockwise: () => void;
   onRotateCounterClockwise: () => void;
+  onMemorabiliaTypeChange?: (index: number, type: MemorabiliaType) => void;
   editorImage?: string | null;
   batchMode?: boolean;
   batchSelections?: number[];
@@ -42,6 +44,7 @@ const EditorContent: React.FC<EditorContentProps> = ({
   onRemoveCropBox,
   onRotateClockwise,
   onRotateCounterClockwise,
+  onMemorabiliaTypeChange,
   editorImage,
   batchMode = false,
   batchSelections = [],
@@ -68,6 +71,7 @@ const EditorContent: React.FC<EditorContentProps> = ({
         batchMode={batchMode}
         batchSelections={batchSelections}
         onToggleBatchSelection={onToggleBatchSelection}
+        onMemorabiliaTypeChange={onMemorabiliaTypeChange}
       />
       
       {batchMode && cropBoxes.length > 0 && (
@@ -80,6 +84,16 @@ const EditorContent: React.FC<EditorContentProps> = ({
               {batchSelections.length} selected
             </Badge>
           )}
+        </div>
+      )}
+      
+      {/* Show memorabilia type indicator for selected item */}
+      {!batchMode && cropBoxes?.[selectedCropIndex] && (
+        <div className="absolute top-2 left-2 z-10 bg-white/80 backdrop-blur-sm rounded-md px-2 py-1">
+          <MemorabiliaTypeIndicator
+            type={cropBoxes[selectedCropIndex].memorabiliaType || 'unknown'}
+            confidence={cropBoxes[selectedCropIndex].confidence || 0.7}
+          />
         </div>
       )}
       

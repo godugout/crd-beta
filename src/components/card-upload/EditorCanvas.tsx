@@ -3,11 +3,12 @@ import React, { useRef } from 'react';
 import { CropBoxProps } from './CropBox';
 import { ImageData } from './hooks/useCropState';
 import { useFabricCanvas } from './hooks/useFabricCanvas';
+import { EnhancedCropBoxProps, MemorabiliaType } from './cardDetection';
 
 interface EditorCanvasProps {
   canvasRef: React.RefObject<HTMLCanvasElement>;
-  cropBoxes: CropBoxProps[];
-  setCropBoxes: React.Dispatch<React.SetStateAction<CropBoxProps[]>>;
+  cropBoxes: EnhancedCropBoxProps[];
+  setCropBoxes: React.Dispatch<React.SetStateAction<EnhancedCropBoxProps[]>>;
   selectedCropIndex: number;
   setSelectedCropIndex: (index: number) => void;
   imageData: ImageData;
@@ -15,6 +16,7 @@ interface EditorCanvasProps {
   batchMode?: boolean;
   batchSelections?: number[];
   onToggleBatchSelection?: (index: number) => void;
+  onMemorabiliaTypeChange?: (index: number, type: MemorabiliaType) => void;
 }
 
 const EditorCanvas: React.FC<EditorCanvasProps> = ({
@@ -27,7 +29,8 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({
   editorImgRef,
   batchMode = false,
   batchSelections = [],
-  onToggleBatchSelection
+  onToggleBatchSelection,
+  onMemorabiliaTypeChange
 }) => {
   const fabricRef = useRef<HTMLCanvasElement>(null);
   
@@ -43,7 +46,8 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({
     editorImgRef,
     batchMode,
     batchSelections,
-    onToggleBatchSelection
+    onToggleBatchSelection,
+    onMemorabiliaTypeChange
   });
 
   return (

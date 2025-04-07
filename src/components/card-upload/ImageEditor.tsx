@@ -1,5 +1,5 @@
 
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { 
   Dialog,
   DialogContent,
@@ -16,7 +16,9 @@ import { Button } from '@/components/ui/button';
 import { 
   Check,
   CheckCircle2,
-  XCircle
+  XCircle,
+  ImageIcon,
+  SlidersHorizontal
 } from 'lucide-react';
 import { useCropState } from './hooks/useCropState';
 import { useEditor } from './hooks/useEditor';
@@ -24,15 +26,20 @@ import { useCropBoxOperations } from './hooks/useCropBoxOperations';
 import { useImageHandling } from './hooks/useImageHandling';
 import EditorSidebar from './EditorSidebar';
 import EditorContent from './components/EditorContent';
+import { MemorabiliaType } from './cardDetection';
+import MemorabiliaTypeIndicator from './MemorabiliaTypeIndicator';
+import MemorabiliaTypeSelector from './MemorabiliaTypeSelector';
 
 interface ImageEditorProps {
   showEditor: boolean;
   setShowEditor: (show: boolean) => void;
   editorImage: string | null;
   currentFile: File | null;
-  onCropComplete: (file: File, url: string) => void;
+  onCropComplete: (file: File, url: string, memorabiliaType?: MemorabiliaType) => void;
   batchProcessingMode?: boolean;
-  onBatchProcessComplete?: (files: File[], urls: string[]) => void;
+  onBatchProcessComplete?: (files: File[], urls: string[], types?: MemorabiliaType[]) => void;
+  enabledMemorabiliaTypes?: MemorabiliaType[];
+  autoEnhance?: boolean;
 }
 
 const ImageEditor: React.FC<ImageEditorProps> = ({
@@ -42,7 +49,9 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
   currentFile,
   onCropComplete,
   batchProcessingMode = false,
-  onBatchProcessComplete
+  onBatchProcessComplete,
+  enabledMemorabiliaTypes = ['card', 'ticket', 'program', 'autograph', 'face', 'unknown'],
+  autoEnhance = true
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const editorImgRef = useRef<HTMLImageElement>(null);
@@ -68,7 +77,8 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
   } = useEditor({ 
     onCropComplete, 
     currentFile, 
-    setShowEditor 
+    setShowEditor,
+    autoEnhance 
   });
 
   const {
@@ -96,14 +106,34 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
     setSelectedCropIndex,
     canvasRef,
     editorImgRef,
-    batchProcessingMode
+    batchProcessingMode,
+    enabledMemorabiliaTypes
   });
+
+  // Handle memorabilia type changes
+  const handleMemorabiliaTypeChange = (index: number, type: MemorabiliaType) => {
+    setCropBoxes(prev => {
+      const updated = [...prev];
+      if (updated[index]) {
+        updated[index] = {
+          ...updated[index],
+          memorabiliaType: type
+        };
+      }
+      return updated;
+    });
+  };
 
   // Handler to extract the selected crop
   const handleStageSelectedCrop = async () => {
     if (selectedCropIndex >= 0 && selectedCropIndex < cropBoxes.length) {
       const selectedBox = cropBoxes[selectedCropIndex];
-      await stageSelectedCrop(selectedBox, canvasRef, editorImgRef);
+      await stageSelectedCrop(
+        selectedBox, 
+        canvasRef, 
+        editorImgRef, 
+        selectedBox.memorabiliaType
+      );
     }
   };
 
@@ -124,6 +154,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
     
     const files: File[] = [];
     const urls: string[] = [];
+    const types: MemorabiliaType[] = [];
     
     // If no specific selections, use all detected cards
     const selectionsToProcess = batchSelections.length > 0 
@@ -134,17 +165,19 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
     for (const index of selectionsToProcess) {
       if (index >= 0 && index < cropBoxes.length) {
         const cropBox = cropBoxes[index];
-        const result = await stageSelectedCrop(cropBox, canvasRef, editorImgRef, false);
+        const memorabiliaType = cropBox.memorabiliaType || 'face';
+        const result = await stageSelectedCrop(cropBox, canvasRef, editorImgRef, memorabiliaType, false);
         
         if (result && result.file && result.url) {
           files.push(result.file);
           urls.push(result.url);
+          types.push(memorabiliaType);
         }
       }
     }
     
     if (files.length > 0) {
-      onBatchProcessComplete(files, urls);
+      onBatchProcessComplete(files, urls, types);
       setShowEditor(false);
     }
   };
@@ -153,11 +186,15 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
     <Dialog open={showEditor} onOpenChange={setShowEditor}>
       <DialogContent className="max-w-6xl">
         <DialogHeader>
-          <DialogTitle>{batchProcessingMode ? 'Batch Card Detection' : 'Card Image Editor'}</DialogTitle>
+          <DialogTitle>
+            {batchProcessingMode 
+              ? 'Batch People Detection' 
+              : 'Memorabilia Detector & Enhancer'}
+          </DialogTitle>
           <DialogDescription>
             {batchProcessingMode 
               ? 'Select and adjust multiple detection areas to create individual cards from your image'
-              : 'Adjust crop areas to extract trading cards from your image (standard ratio 2.5:3.5)'
+              : 'Adjust detection areas to extract and enhance memorabilia items from your image'
             }
           </DialogDescription>
         </DialogHeader>
@@ -178,6 +215,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
               onRemoveCropBox={removeCropBox}
               onRotateClockwise={rotateClockwise}
               onRotateCounterClockwise={rotateCounterClockwise}
+              onMemorabiliaTypeChange={handleMemorabiliaTypeChange}
               editorImage={editorImage}
               batchMode={batchProcessingMode}
               batchSelections={batchSelections}
@@ -191,11 +229,11 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
             {batchProcessingMode ? (
               <div className="h-full flex flex-col p-4">
                 <div className="flex-none mb-4 pb-4 border-b">
-                  <h3 className="text-lg font-medium mb-2">Detected Items ({cropBoxes.length})</h3>
+                  <h3 className="text-lg font-medium mb-2">Detected People ({cropBoxes.length})</h3>
                   <p className="text-sm text-gray-500 mb-4">
                     {batchSelections.length > 0 
-                      ? `${batchSelections.length} items selected` 
-                      : "Select specific items or process all"}
+                      ? `${batchSelections.length} people selected` 
+                      : "Select specific people or process all"}
                   </p>
                   
                   <div className="flex space-x-2">
@@ -244,7 +282,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
                         {batchSelections.includes(index) && <Check className="h-4 w-4" />}
                       </div>
                       <div>
-                        <p className="font-medium">Item {index + 1}</p>
+                        <p className="font-medium">Person {index + 1}</p>
                         <p className="text-xs text-gray-500">
                           {Math.round(cropBox.width)} x {Math.round(cropBox.height)} px
                         </p>
@@ -258,7 +296,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
                     onClick={handleBatchProcess} 
                     className="w-full mb-2"
                   >
-                    Process {batchSelections.length > 0 ? batchSelections.length : 'All'} Items
+                    Process {batchSelections.length > 0 ? batchSelections.length : 'All'} People
                   </Button>
                   <Button 
                     variant="outline" 
@@ -270,16 +308,107 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
                 </div>
               </div>
             ) : (
-              <EditorSidebar 
-                cropBoxes={cropBoxes}
-                selectedCropIndex={selectedCropIndex}
-                setSelectedCropIndex={setSelectedCropIndex}
-                onExtractCard={handleStageSelectedCrop}
-                onCancel={() => setShowEditor(false)}
-                stagedCards={stagedCards}
-                onSelectStagedCard={selectStagedCard}
-                onRemoveStagedCard={removeStagedCard}
-              />
+              <div className="h-full flex flex-col p-4">
+                {selectedCropIndex >= 0 && selectedCropIndex < cropBoxes.length && (
+                  <div className="mb-4 pb-4 border-b">
+                    <h3 className="text-lg font-medium mb-2">Selected Item</h3>
+
+                    <div className="mb-3">
+                      <label className="text-sm text-gray-700 mb-1 block">Item Type</label>
+                      <MemorabiliaTypeSelector
+                        value={cropBoxes[selectedCropIndex].memorabiliaType || 'unknown'}
+                        onChange={(type) => handleMemorabiliaTypeChange(selectedCropIndex, type)}
+                        className="w-full"
+                        enabledTypes={enabledMemorabiliaTypes}
+                      />
+                    </div>
+
+                    {autoEnhance && (
+                      <div className="bg-blue-50 rounded-md p-2 text-xs flex items-center">
+                        <SlidersHorizontal className="h-4 w-4 text-blue-500 mr-2" />
+                        <span>Auto-enhancement will optimize this {cropBoxes[selectedCropIndex].memorabiliaType || 'item'}</span>
+                      </div>
+                    )}
+
+                    <Button
+                      className="w-full mt-3"
+                      onClick={handleStageSelectedCrop}
+                    >
+                      <ImageIcon className="h-4 w-4 mr-2" />
+                      Extract Selected Item
+                    </Button>
+                  </div>
+                )}
+
+                {/* Staged Cards Section */}
+                <div className="mb-3">
+                  <h3 className="text-md font-medium mb-2">
+                    Extracted Items ({stagedCards.length})
+                  </h3>
+                </div>
+                
+                <div className="flex-grow overflow-y-auto">
+                  {stagedCards.length === 0 ? (
+                    <div className="text-center p-6 text-gray-400 border-2 border-dashed rounded-md">
+                      <p className="text-sm">
+                        No items extracted yet. Select and extract items to preview them here.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {stagedCards.map((card) => (
+                        <div key={card.id} className="relative bg-gray-50 border rounded-md overflow-hidden">
+                          <img 
+                            src={card.previewUrl} 
+                            alt="Staged card" 
+                            className="w-full h-36 object-contain"
+                          />
+                          
+                          {card.cropBox.memorabiliaType && (
+                            <div className="absolute top-1 left-1">
+                              <MemorabiliaTypeIndicator 
+                                type={card.cropBox.memorabiliaType} 
+                                confidence={card.cropBox.confidence || 0.7}
+                              />
+                            </div>
+                          )}
+                          
+                          <div className="absolute top-1 right-1">
+                            <button 
+                              onClick={() => removeStagedCard(card.id)}
+                              className="p-1 bg-white/80 backdrop-blur-sm rounded-full hover:bg-gray-100 transition-colors"
+                            >
+                              <XCircle className="h-5 w-5 text-red-500" />
+                            </button>
+                          </div>
+                          
+                          <div className="p-2">
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="w-full text-xs"
+                              onClick={() => selectStagedCard(card.id)}
+                            >
+                              <Check className="h-3 w-3 mr-1" />
+                              Create Card
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                
+                <div className="flex-none pt-4 border-t mt-4">
+                  <Button 
+                    variant="outline" 
+                    className="w-full" 
+                    onClick={() => setShowEditor(false)}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
             )}
           </ResizablePanel>
         </ResizablePanelGroup>
