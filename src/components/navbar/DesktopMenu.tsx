@@ -1,155 +1,45 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { User } from '@/lib/types';
-import { 
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-  navigationMenuTriggerStyle 
-} from "@/components/ui/navigation-menu";
-import { Grid3X3, Image, FolderOpen, Sparkles, Box, Layers, Play } from 'lucide-react';
+import { useAuth } from '@/context/auth';
 
-interface DesktopMenuProps {
-  user: User | null;
-  isActive: (path: string) => boolean;
+interface NavItemProps {
+  href: string;
+  text: string;
+  isActive: boolean;
 }
 
-const DesktopMenu: React.FC<DesktopMenuProps> = ({ user, isActive }) => {
+const NavItem: React.FC<NavItemProps> = ({ href, text, isActive }) => (
+  <Link
+    to={href}
+    className={cn(
+      'px-3 py-2 text-sm font-medium rounded-md transition-colors',
+      isActive 
+        ? 'bg-cardshow-blue-light text-cardshow-blue' 
+        : 'text-cardshow-dark hover:bg-gray-100'
+    )}
+  >
+    {text}
+  </Link>
+);
+
+export const DesktopMenu: React.FC = () => {
+  const location = useLocation();
+  const { user } = useAuth();
+  
+  const isActive = (path: string) => {
+    if (path === '/') return location.pathname === '/';
+    return location.pathname.startsWith(path);
+  };
+
   return (
-    <div className="hidden md:flex items-center space-x-2">
-      <NavigationMenu>
-        <NavigationMenuList>
-          <NavigationMenuItem>
-            <Link to="/gallery">
-              <NavigationMenuLink
-                className={cn(
-                  navigationMenuTriggerStyle(),
-                  "flex items-center gap-1.5",
-                  isActive('/gallery') && "bg-blue-50 text-cardshow-blue"
-                )}
-              >
-                <Grid3X3 className="h-4 w-4" />
-                <span>Gallery</span>
-              </NavigationMenuLink>
-            </Link>
-          </NavigationMenuItem>
-          
-          <NavigationMenuItem>
-            <Link to="/collections">
-              <NavigationMenuLink
-                className={cn(
-                  navigationMenuTriggerStyle(),
-                  "flex items-center gap-1.5",
-                  isActive('/collections') && "bg-blue-50 text-cardshow-blue"
-                )}
-              >
-                <FolderOpen className="h-4 w-4" />
-                <span>Collections</span>
-              </NavigationMenuLink>
-            </Link>
-          </NavigationMenuItem>
-          
-          <NavigationMenuItem>
-            <Link to="/editor">
-              <NavigationMenuLink
-                className={cn(
-                  navigationMenuTriggerStyle(),
-                  "flex items-center gap-1.5",
-                  isActive('/editor') && "bg-blue-50 text-cardshow-blue"
-                )}
-              >
-                <Image className="h-4 w-4" />
-                <span>Create</span>
-              </NavigationMenuLink>
-            </Link>
-          </NavigationMenuItem>
-          
-          <NavigationMenuItem>
-            <NavigationMenuTrigger 
-              className={cn(
-                "flex items-center gap-1.5"
-              )}
-            >
-              <Sparkles className="h-4 w-4" />
-              <span>Demos</span>
-            </NavigationMenuTrigger>
-            <NavigationMenuContent>
-              <div className="grid gap-3 p-4 md:w-[400px] lg:w-[500px] grid-cols-2">
-                <Link
-                  to="/signature"
-                  className="group flex flex-col gap-1 p-3 rounded-md hover:bg-blue-50"
-                >
-                  <div className="text-sm font-medium">Signature Demo</div>
-                  <div className="text-xs text-muted-foreground">
-                    Test our signature verification system
-                  </div>
-                </Link>
-                <Link
-                  to="/pbr"
-                  className="group flex flex-col gap-1 p-3 rounded-md hover:bg-blue-50"
-                >
-                  <div className="text-sm font-medium">PBR Demo</div>
-                  <div className="text-xs text-muted-foreground">
-                    Explore physically-based rendering for cards
-                  </div>
-                </Link>
-                <Link
-                  to="/card-detector"
-                  className="group flex flex-col gap-1 p-3 rounded-md hover:bg-blue-50"
-                >
-                  <div className="text-sm font-medium">Card Detector</div>
-                  <div className="text-xs text-muted-foreground">
-                    Automatically detect and crop cards from images
-                  </div>
-                </Link>
-                <Link
-                  to="/baseball-card-viewer"
-                  className="group flex flex-col gap-1 p-3 rounded-md hover:bg-blue-50"
-                >
-                  <div className="text-sm font-medium">Baseball Cards</div>
-                  <div className="text-xs text-muted-foreground">
-                    Explore our interactive baseball card viewer
-                  </div>
-                </Link>
-                <Link
-                  to="/ar-card-viewer"
-                  className="group flex flex-col gap-1 p-3 rounded-md hover:bg-blue-50"
-                >
-                  <div className="text-sm font-medium">AR Card Viewer</div>
-                  <div className="text-xs text-muted-foreground">
-                    Experience cards in augmented reality
-                  </div>
-                </Link>
-                <Link
-                  to="/card-comparison"
-                  className="group flex flex-col gap-1 p-3 rounded-md hover:bg-blue-50"
-                >
-                  <div className="text-sm font-medium">Card Comparison</div>
-                  <div className="text-xs text-muted-foreground">
-                    Compare multiple cards side by side
-                  </div>
-                </Link>
-                <Link
-                  to="/card-animation"
-                  className="group flex flex-col gap-1 p-3 rounded-md hover:bg-blue-50"
-                >
-                  <div className="text-sm font-medium">Animation Studio</div>
-                  <div className="text-xs text-muted-foreground">
-                    Create animated card transitions
-                  </div>
-                </Link>
-              </div>
-            </NavigationMenuContent>
-          </NavigationMenuItem>
-        </NavigationMenuList>
-      </NavigationMenu>
+    <div className="hidden md:flex md:items-center md:space-x-1">
+      <NavItem href="/" text="Home" isActive={isActive('/')} />
+      <NavItem href="/gallery" text="Gallery" isActive={isActive('/gallery')} />
+      <NavItem href="/collections" text="Collections" isActive={isActive('/collections')} />
+      <NavItem href="/oakland-memories" text="A's Memories" isActive={isActive('/oakland-memories')} />
+      {user && <NavItem href="/editor" text="Create Card" isActive={isActive('/editor')} />}
     </div>
   );
 };
-
-export default DesktopMenu;

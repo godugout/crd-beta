@@ -16,6 +16,10 @@ import ArCardViewer from './pages/ArCardViewer';
 import CardComparison from './pages/CardComparison';
 import CardAnimation from './pages/CardAnimation';
 import CardShowcase from './pages/CardShowcase';
+import OaklandMemories from './pages/OaklandMemories';
+import OaklandMemoryCreator from './pages/OaklandMemoryCreator';
+import OaklandMemoryDetail from './pages/OaklandMemoryDetail';
+import OaklandLanding from './pages/OaklandLanding';
 
 function App() {
   return (
@@ -39,6 +43,10 @@ function App() {
         <Route path="/card-comparison" element={<CardComparison />} />
         <Route path="/card-animation" element={<CardAnimation />} />
         <Route path="/showcase" element={<CardShowcase />} />
+        <Route path="/oakland" element={<OaklandLanding />} />
+        <Route path="/oakland-memories" element={<OaklandMemories />} />
+        <Route path="/oakland-memories/create" element={<OaklandMemoryCreator />} />
+        <Route path="/oakland-memories/:id" element={<OaklandMemoryDetail />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
