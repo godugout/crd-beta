@@ -221,5 +221,8 @@ export type CardInsert = Tables['cards']['Insert'];
 export type CardUpdate = Tables['cards']['Update'];
 export type CollectionInsert = Tables['collections']['Insert'];
 export type CollectionUpdate = Tables['collections']['Update'];
-export type TeamInsert = Tables['teams']['Insert']; 
-export type TeamUpdate = Tables['teams']['Update'];
+
+// For now, since teams table might not exist yet in the Database type
+export type TeamInsert = Omit<Team, 'id' | 'createdAt' | 'updatedAt'>;
+export type TeamUpdate = Partial<Omit<Team, 'id' | 'createdAt' | 'updatedAt'>>;
+

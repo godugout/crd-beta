@@ -1,8 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { Collection, CollectionInsert, CollectionUpdate, collectionSchema } from '../schema/types';
+import { Collection } from '../schema/types';
 import { toast } from 'sonner';
-import { cardRepository } from './cardRepository';
 
 /**
  * Repository for collection-related data operations
@@ -26,7 +25,7 @@ export const collectionRepository = {
       
       // Apply filters if provided
       if (options?.userId) {
-        query = query.eq('user_id', options.userId);
+        query = query.eq('owner_id', options.userId); // Using owner_id as per current DB
       }
       
       if (options?.teamId) {
@@ -46,14 +45,6 @@ export const collectionRepository = {
       
       // Transform database records to our Collection type
       const collections = data.map(record => transformCollectionFromDb(record, options?.includeCards));
-      
-      // Validate with Zod schema
-      try {
-        collections.forEach(collection => collectionSchema.parse(collection));
-      } catch (validationError) {
-        console.error('Collection validation error:', validationError);
-        // Continue despite validation errors but log them
-      }
       
       return { data: collections, error: null };
     } catch (err) {
@@ -80,14 +71,6 @@ export const collectionRepository = {
       
       const collection = transformCollectionFromDb(data, includeCards);
       
-      // Validate with Zod schema
-      try {
-        collectionSchema.parse(collection);
-      } catch (validationError) {
-        console.error('Collection validation error:', validationError);
-        // Continue despite validation error but log it
-      }
-      
       return { data: collection, error: null };
     } catch (err) {
       console.error('Unexpected error in getCollection:', err);
@@ -98,15 +81,15 @@ export const collectionRepository = {
   /**
    * Create a new collection
    */
-  createCollection: async (collection: Omit<CollectionInsert, 'id' | 'created_at' | 'updated_at'>): Promise<{ data: Collection | null; error: any }> => {
+  createCollection: async (collection: Partial<Collection>): Promise<{ data: Collection | null; error: any }> => {
     try {
       // Prepare data for insertion
       const collectionData = {
-        name: collection.name,
+        title: collection.name || collection.title, // In case either is provided
         description: collection.description,
         cover_image_url: collection.coverImageUrl,
+        owner_id: collection.userId, // Using owner_id as per current DB
         team_id: collection.teamId,
-        user_id: collection.userId,
         visibility: collection.visibility || 'private',
         allow_comments: collection.allowComments !== undefined ? collection.allowComments : true,
         design_metadata: collection.designMetadata || {}
@@ -140,13 +123,14 @@ export const collectionRepository = {
    */
   updateCollection: async (
     id: string, 
-    updates: Partial<Omit<CollectionUpdate, 'id' | 'created_at' | 'updated_at'>>
+    updates: Partial<Collection>
   ): Promise<{ data: Collection | null; error: any }> => {
     try {
       // Convert to database field names
-      const updateData: any = {};
+      const updateData: Record<string, any> = {};
       
-      if (updates.name !== undefined) updateData.name = updates.name;
+      if (updates.name !== undefined) updateData.title = updates.name;
+      if (updates.title !== undefined) updateData.title = updates.title;
       if (updates.description !== undefined) updateData.description = updates.description;
       if (updates.coverImageUrl !== undefined) updateData.cover_image_url = updates.coverImageUrl;
       if (updates.teamId !== undefined) updateData.team_id = updates.teamId;
@@ -208,6 +192,7 @@ export const collectionRepository = {
    */
   addCardToCollection: async (cardId: string, collectionId: string): Promise<{ success: boolean; error: any }> => {
     try {
+      // For now, we update the card directly rather than using a junction table
       const { error } = await supabase
         .from('cards')
         .update({ collection_id: collectionId })
@@ -278,10 +263,11 @@ function transformCollectionFromDb(record: any, includeCards: boolean = false): 
   
   const collection: Collection = {
     id: record.id,
-    name: record.name,
+    name: record.title, // Note that DB uses 'title' but our model uses 'name'
+    title: record.title,
     description: record.description || '',
     coverImageUrl: record.cover_image_url || '',
-    userId: record.user_id,
+    userId: record.owner_id, // Using owner_id as per current DB
     teamId: record.team_id,
     visibility: record.visibility || 'private',
     allowComments: record.allow_comments !== undefined ? record.allow_comments : true,

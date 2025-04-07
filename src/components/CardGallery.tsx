@@ -160,7 +160,7 @@ const CardGallery: React.FC<CardGalleryProps> = ({
           <CardGrid 
             cards={filteredCards}
             isLoading={isLoading}
-            error={cardsError}
+            error={cardsError instanceof Error ? cardsError : cardsError ? new Error(cardsError) : null}
             onCardClick={handleCardItemClick}
             getCardEffects={(cardId) => cardEffects[cardId] || []}
             useVirtualization={!isMobile && filteredCards.length > 20}

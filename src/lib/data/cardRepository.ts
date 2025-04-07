@@ -1,6 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { Card, CardInsert, CardUpdate, cardSchema } from '../schema/types';
+import { Card } from '../schema/types';
 import { toast } from 'sonner';
 
 /**
@@ -22,7 +22,7 @@ export const cardRepository = {
     try {
       let query = supabase
         .from('cards')
-        .select('*, reactions(*)');
+        .select('*');
       
       // Apply filters if provided
       if (options?.userId) {
@@ -55,14 +55,6 @@ export const cardRepository = {
       // Transform database records to our Card type
       const cards = data.map(transformCardFromDb);
       
-      // Validate with Zod schema
-      try {
-        cards.forEach(card => cardSchema.parse(card));
-      } catch (validationError) {
-        console.error('Card validation error:', validationError);
-        // Continue despite validation errors but log them
-      }
-      
       return { data: cards, error: null };
     } catch (err) {
       console.error('Unexpected error in getCards:', err);
@@ -77,7 +69,7 @@ export const cardRepository = {
     try {
       const { data, error } = await supabase
         .from('cards')
-        .select('*, reactions(*)')
+        .select('*')
         .eq('id', id)
         .single();
       
@@ -87,14 +79,6 @@ export const cardRepository = {
       }
       
       const card = transformCardFromDb(data);
-      
-      // Validate with Zod schema
-      try {
-        cardSchema.parse(card);
-      } catch (validationError) {
-        console.error('Card validation error:', validationError);
-        // Continue despite validation error but log it
-      }
       
       return { data: card, error: null };
     } catch (err) {
@@ -106,12 +90,12 @@ export const cardRepository = {
   /**
    * Create a new card
    */
-  createCard: async (card: Omit<CardInsert, 'id' | 'created_at' | 'updated_at'>): Promise<{ data: Card | null; error: any }> => {
+  createCard: async (card: Partial<Card>): Promise<{ data: Card | null; error: any }> => {
     try {
       // Prepare data for insertion
       const cardData = {
         title: card.title,
-        description: card.description,
+        description: card.description || '',
         image_url: card.imageUrl,
         thumbnail_url: card.thumbnailUrl,
         collection_id: card.collectionId,
@@ -119,6 +103,10 @@ export const cardRepository = {
         tags: card.tags || [],
         is_public: card.isPublic || false,
         user_id: card.userId,
+        // Required fields for the current DB schema
+        creator_id: card.userId, // Required by current schema
+        rarity: 'common', // Required by current schema
+        edition_size: 1 // Required by current schema
       };
       
       const { data, error } = await supabase
@@ -149,11 +137,11 @@ export const cardRepository = {
    */
   updateCard: async (
     id: string, 
-    updates: Partial<Omit<CardUpdate, 'id' | 'created_at' | 'updated_at'>>
+    updates: Partial<Card>
   ): Promise<{ data: Card | null; error: any }> => {
     try {
       // Convert to database field names
-      const updateData: any = {};
+      const updateData: Record<string, any> = {};
       
       if (updates.title !== undefined) updateData.title = updates.title;
       if (updates.description !== undefined) updateData.description = updates.description;
@@ -214,80 +202,6 @@ export const cardRepository = {
   },
 
   /**
-   * Add a reaction to a card
-   */
-  addReaction: async (
-    cardId: string, 
-    userId: string, 
-    type: 'like' | 'love' | 'wow' | 'haha' | 'sad' | 'angry'
-  ): Promise<{ success: boolean; error: any }> => {
-    try {
-      // First check if the user already reacted to this card
-      const { data: existingReaction } = await supabase
-        .from('reactions')
-        .select('*')
-        .eq('card_id', cardId)
-        .eq('user_id', userId)
-        .single();
-      
-      if (existingReaction) {
-        // Update existing reaction
-        const { error } = await supabase
-          .from('reactions')
-          .update({ type })
-          .eq('id', existingReaction.id);
-        
-        if (error) {
-          console.error('Error updating reaction:', error);
-          return { success: false, error };
-        }
-      } else {
-        // Create new reaction
-        const { error } = await supabase
-          .from('reactions')
-          .insert({
-            card_id: cardId,
-            user_id: userId,
-            type,
-          });
-        
-        if (error) {
-          console.error('Error adding reaction:', error);
-          return { success: false, error };
-        }
-      }
-      
-      return { success: true, error: null };
-    } catch (err) {
-      console.error('Unexpected error in addReaction:', err);
-      return { success: false, error: err };
-    }
-  },
-
-  /**
-   * Remove a reaction from a card
-   */
-  removeReaction: async (cardId: string, userId: string): Promise<{ success: boolean; error: any }> => {
-    try {
-      const { error } = await supabase
-        .from('reactions')
-        .delete()
-        .eq('card_id', cardId)
-        .eq('user_id', userId);
-      
-      if (error) {
-        console.error('Error removing reaction:', error);
-        return { success: false, error };
-      }
-      
-      return { success: true, error: null };
-    } catch (err) {
-      console.error('Unexpected error in removeReaction:', err);
-      return { success: false, error: err };
-    }
-  },
-
-  /**
    * Add a card to a team
    */
   assignToTeam: async (cardId: string, teamId: string): Promise<{ success: boolean; error: any }> => {
@@ -329,13 +243,7 @@ function transformCardFromDb(record: any): Card {
     collectionId: record.collection_id,
     isPublic: record.is_public,
     tags: record.tags || [],
-    reactions: record.reactions ? record.reactions.map((r: any) => ({
-      id: r.id,
-      userId: r.user_id,
-      cardId: r.card_id,
-      type: r.type,
-      createdAt: r.created_at
-    })) : [],
+    reactions: [], // Reactions might need to be implemented separately
     // Transform any other fields as needed
     designMetadata: record.design_metadata || {
       cardStyle: {},
