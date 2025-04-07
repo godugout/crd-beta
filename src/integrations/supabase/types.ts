@@ -157,6 +157,7 @@ export type Database = {
           created_at: string
           creator_id: string
           description: string | null
+          design_metadata: Json | null
           edition_size: number
           id: string
           image_url: string | null
@@ -175,6 +176,7 @@ export type Database = {
           created_at?: string
           creator_id: string
           description?: string | null
+          design_metadata?: Json | null
           edition_size?: number
           id?: string
           image_url?: string | null
@@ -193,6 +195,7 @@ export type Database = {
           created_at?: string
           creator_id?: string
           description?: string | null
+          design_metadata?: Json | null
           edition_size?: number
           id?: string
           image_url?: string | null

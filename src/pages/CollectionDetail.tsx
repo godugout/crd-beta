@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { toast } from 'sonner';
+import { DbCard } from '@/lib/supabase/typeHelpers';
 
 export function CollectionDetail() {
   const { id } = useParams<{ id: string }>();
@@ -71,7 +72,7 @@ export function CollectionDetail() {
           toast.error('Failed to load cards');
         } else if (cardsData) {
           // Transform database records to our Card type
-          const formattedCards: Card[] = cardsData.map(card => ({
+          const formattedCards: Card[] = (cardsData as DbCard[]).map(card => ({
             id: card.id,
             title: card.title || '',
             description: card.description || '',
