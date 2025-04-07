@@ -50,7 +50,7 @@ interface OaklandCardTemplateProps {
   type: OaklandTemplateType;
   className?: string;
   children?: React.ReactNode;
-  onClick?: () => void;
+  onClick?: () => void; // Added onClick prop to fix type error
 }
 
 const OaklandCardTemplate: React.FC<OaklandCardTemplateProps> = ({

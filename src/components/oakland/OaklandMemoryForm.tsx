@@ -334,7 +334,8 @@ const OaklandMemoryForm: React.FC<OaklandMemoryFormProps> = ({ onSubmit, initial
               ))}
             </div>
           )}
-          <FormMessage name={`attendees`} />
+          {/* Fixed: Removed the 'name' attribute from FormMessage */}
+          <FormMessage />
         </div>
 
         {/* Tags */}
@@ -378,7 +379,8 @@ const OaklandMemoryForm: React.FC<OaklandMemoryFormProps> = ({ onSubmit, initial
               ))}
             </div>
           )}
-          <FormMessage name={`tags`} />
+          {/* Fixed: Removed the 'name' attribute from FormMessage */}
+          <FormMessage />
         </div>
 
         {/* Submit Button */}

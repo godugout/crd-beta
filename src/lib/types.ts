@@ -1,3 +1,4 @@
+
 export interface FabricSwatch {
   type: string;
   team: string;
@@ -47,6 +48,7 @@ export interface Card {
       template?: string;
       teamId?: string;
       imageUrl?: string;
+      tags?: string[]; // Added tags to oaklandMemory
     };
   };
   tags?: string[];
