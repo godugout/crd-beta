@@ -8,12 +8,14 @@ interface OaklandCardTemplateProps {
   type: OaklandTemplateType;
   className?: string;
   children?: React.ReactNode;
+  onClick?: () => void; // Add onClick handler prop
 }
 
 const OaklandCardTemplate: React.FC<OaklandCardTemplateProps> = ({
   type,
   className,
-  children
+  children,
+  onClick
 }) => {
   const getTemplateStyles = () => {
     switch (type) {
@@ -39,6 +41,7 @@ const OaklandCardTemplate: React.FC<OaklandCardTemplateProps> = ({
         getTemplateStyles(),
         className
       )}
+      onClick={onClick} // Add onClick handler
     >
       {children}
     </div>

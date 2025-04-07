@@ -13,7 +13,7 @@ import {
   Layers,
   X,
   Box,
-  Baseball
+  Trophy
 } from 'lucide-react';
 
 interface NavItemProps {
@@ -96,7 +96,7 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose }) => {
             <NavItem 
               href="/oakland-memories" 
               text="A's Memories" 
-              icon={<Baseball size={20} />} 
+              icon={<Trophy size={20} />} 
               isActive={isActive('/oakland-memories')}
               onClick={onClose}
             />
@@ -149,3 +149,4 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose }) => {
     </div>
   );
 };
+

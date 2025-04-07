@@ -1,52 +1,33 @@
+export interface FabricSwatch {
+  type: string;
+  team: string;
+  year: string;
+  manufacturer: string;
+  position: string;
+  size: string;
+}
 
 export interface Card {
   id: string;
   title: string;
   description: string;
   imageUrl: string;
-  thumbnailUrl: string;
-  collectionId?: string;
-  tags: string[];
-  createdAt: Date;
-  updatedAt: Date;
-  userId?: string;
-  isPublic?: boolean;
-  fabricSwatches?: Array<{
-    type: string;
-    team: string;
-    year: string;
-    manufacturer: string;
-    position: string;
-    size: string;
-  }>;
+  thumbnailUrl?: string;
+  uploadDate?: string;
   designMetadata?: {
     cardStyle: any;
     textStyle: any;
+    oaklandMemory?: {
+      date?: string;
+      opponent?: string;
+      score?: string;
+      location?: string;
+      section?: string;
+      memoryType?: string;
+      attendees?: string[];
+      template?: string;
+      teamId?: string;
+    };
   };
-}
-
-export interface Collection {
-  id: string;
-  name: string;
-  description: string;
-  cards: Card[];
-  createdAt: Date;
-  updatedAt: Date;
-  userId?: string;
-  isPublic?: boolean;
-}
-
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-  cards?: Card[];
-  collections?: Collection[];
-  avatarUrl?: string;
-}
-
-export interface AuthState {
-  user: User | null;
-  isLoading: boolean;
-  error: string | null;
+  tags?: string[];
 }

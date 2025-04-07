@@ -1,9 +1,11 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import { Button } from '@/components/ui/button';
-import { CardStack, Camera, Users, Clock, Trophy, Leaf, CalendarDays } from 'lucide-react';
+import { 
+  Camera, Users, Clock, Trophy, Leaf, CalendarDays, 
+  Layers
+} from 'lucide-react';
 
 const OaklandLanding = () => {
   return (
@@ -115,7 +117,7 @@ const OaklandLanding = () => {
               description="Preserve the pre-game atmosphere with friends and family in the parking lot before the first pitch."
             />
             <FeatureCard
-              icon={<CardStack />}
+              icon={<Layers />} 
               title="Digitize Memorabilia"
               description="Create digital versions of your physical memorabilia like tickets, programs, and signed items."
             />
