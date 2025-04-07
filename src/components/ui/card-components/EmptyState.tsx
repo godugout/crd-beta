@@ -3,6 +3,7 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import * as LucideIcons from 'lucide-react';
+import { LucideProps } from 'lucide-react';
 
 interface EmptyStateProps {
   /**
@@ -44,17 +45,17 @@ export const EmptyState = ({
   onAction,
   className = ""
 }: EmptyStateProps) => {
-  // Get the icon component from the Lucide library
-  const LucideIcon = icon ? LucideIcons[icon] : null;
+  // Dynamically get the icon component from Lucide
+  const IconComponent = icon ? (LucideIcons[icon] as React.ComponentType<LucideProps>) : null;
 
   return (
     <div className={cn(
       "flex flex-col items-center justify-center text-center p-8 rounded-lg border border-dashed border-gray-300",
       className
     )}>
-      {LucideIcon && (
+      {IconComponent && (
         <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-4">
-          <LucideIcon className="h-6 w-6 text-gray-500" />
+          <IconComponent className="h-6 w-6 text-gray-500" />
         </div>
       )}
       
