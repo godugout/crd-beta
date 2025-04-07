@@ -1,17 +1,18 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card } from '@/lib/types';
 import { cn } from '@/lib/utils';
-import { PlusCircle } from 'lucide-react';
-import { useCardEffects } from './gallery/hooks/useCardEffects';
+import { PlusCircle, Grid, List } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
+import { useCardData } from '@/hooks/useCardData';
+import { useMobileOptimization } from '@/hooks/useMobileOptimization';
 import { filterCards } from './gallery/utils/filterCards';
+import { CardGrid } from './ui/card-components/CardGrid';
 import SearchInput from './gallery/SearchInput';
 import TagFilter from './gallery/TagFilter';
-import CardGrid from './gallery/CardGrid';
 import CardList from './gallery/CardList';
-import EmptyState from './gallery/EmptyState';
-import { useCards } from '@/context/CardContext';
+import { useCardEffects } from './gallery/hooks/useCardEffects';
 
 interface CardGalleryProps {
   className?: string;
@@ -22,38 +23,56 @@ interface CardGalleryProps {
 
 const CardGallery: React.FC<CardGalleryProps> = ({ 
   className, 
-  viewMode = 'grid',
+  viewMode: initialViewMode = 'grid',
   onCardClick,
   cards: propCards
 }) => {
   const navigate = useNavigate();
-  const { cards: contextCards, refreshCards } = useCards();
-  const cards = propCards || contextCards; // Use prop cards if provided, otherwise use context
-  
+  const [viewMode, setViewMode] = useState(initialViewMode);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   
-  // Get card effects
-  const { cardEffects, isLoading } = useCardEffects(cards);
+  // Fetch cards data if not provided via props
+  const { 
+    cards: contextCards, 
+    isLoading: isLoadingCards, 
+    error: cardsError, 
+    refetch: refreshCards 
+  } = useCardData({
+    autoFetch: !propCards,
+  });
   
-  // Debug log to check cards
-  console.log("CardGallery rendering with cards:", cards?.length, cards);
+  const cards = propCards || contextCards;
   
-  // Get all unique tags from cards
-  const allTags = Array.from(new Set(cards.flatMap(card => card.tags || [])));
+  // Device and performance optimizations
+  const { isMobile, shouldOptimizeAnimations } = useMobileOptimization();
   
-  // Filter cards based on search query and selected tags
-  const filteredCards = filterCards(cards, searchQuery, selectedTags);
+  // Get card effects with reduced animations based on device capabilities
+  const { cardEffects, isLoading: isLoadingEffects } = useCardEffects(
+    cards, 
+    shouldOptimizeAnimations
+  );
   
-  // Debug filtered cards
-  console.log("Filtered cards:", filteredCards.length);
+  // Memoize filtered cards to avoid recalculation on every render
+  const filteredCards = useMemo(() => 
+    filterCards(cards, searchQuery, selectedTags),
+    [cards, searchQuery, selectedTags]
+  );
+  
+  // Memoize all unique tags to avoid recalculation
+  const allTags = useMemo(() => 
+    Array.from(new Set(cards.flatMap(card => card.tags || []))),
+    [cards]
+  );
+  
+  const isLoading = isLoadingCards || isLoadingEffects;
   
   const handleTagSelect = (tag: string) => {
-    if (selectedTags.includes(tag)) {
-      setSelectedTags(selectedTags.filter(t => t !== tag));
-    } else {
-      setSelectedTags([...selectedTags, tag]);
-    }
+    setSelectedTags(prev => 
+      prev.includes(tag) 
+        ? prev.filter(t => t !== tag) 
+        : [...prev, tag]
+    );
   };
   
   const clearFilters = () => {
@@ -70,63 +89,83 @@ const CardGallery: React.FC<CardGalleryProps> = ({
     }
   };
   
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center py-20">
-        <div className="animate-pulse flex flex-col items-center">
-          <div className="h-12 w-12 rounded-full bg-gray-200 mb-4"></div>
-          <div className="h-4 w-32 bg-gray-200 rounded mb-2"></div>
-          <div className="h-3 w-40 bg-gray-100 rounded"></div>
-        </div>
-      </div>
-    );
-  }
-  
+  const handleCreateCard = () => {
+    navigate('/editor');
+  };
+
   return (
     <div className={cn("", className)}>
-      <div className="mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <SearchInput 
-          value={searchQuery}
-          onChange={setSearchQuery}
-          placeholder="Search cards..."
+      <ErrorBoundary>
+        {/* Toolbar with search and actions */}
+        <div className="mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <SearchInput 
+            value={searchQuery}
+            onChange={setSearchQuery}
+            placeholder="Search cards..."
+          />
+          
+          <div className="flex gap-2">
+            <div className="flex rounded-lg border overflow-hidden">
+              <Button
+                variant="ghost"
+                size="sm"
+                className={cn(
+                  "rounded-none",
+                  viewMode === 'grid' && "bg-gray-100"
+                )}
+                onClick={() => setViewMode('grid')}
+              >
+                <Grid className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className={cn(
+                  "rounded-none",
+                  viewMode === 'list' && "bg-gray-100"
+                )}
+                onClick={() => setViewMode('list')}
+              >
+                <List className="h-4 w-4" />
+              </Button>
+            </div>
+          
+            <Button
+              onClick={handleCreateCard}
+              className="flex items-center justify-center rounded-lg bg-cardshow-blue px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-opacity-90 transition-colors"
+            >
+              <PlusCircle className="mr-2 h-4 w-4" />
+              New Card
+            </Button>
+          </div>
+        </div>
+        
+        {/* Tag filters */}
+        <TagFilter 
+          allTags={allTags}
+          selectedTags={selectedTags}
+          onTagSelect={handleTagSelect}
+          onClearFilters={(selectedTags.length > 0 || searchQuery) ? clearFilters : undefined}
         />
         
-        <button
-          onClick={() => navigate('/editor')}
-          className="flex items-center justify-center rounded-lg bg-cardshow-blue px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-opacity-90 transition-colors"
-        >
-          <PlusCircle className="mr-2 h-4 w-4" />
-          New Card
-        </button>
-      </div>
-      
-      <TagFilter 
-        allTags={allTags}
-        selectedTags={selectedTags}
-        onTagSelect={handleTagSelect}
-        onClearFilters={(selectedTags.length > 0 || searchQuery) ? clearFilters : undefined}
-      />
-      
-      {filteredCards.length > 0 ? (
-        viewMode === 'grid' ? (
+        {/* Card display - grid or list based on viewMode */}
+        {viewMode === 'grid' ? (
           <CardGrid 
-            cards={filteredCards} 
-            cardEffects={cardEffects} 
-            onCardClick={handleCardItemClick} 
+            cards={filteredCards}
+            isLoading={isLoading}
+            error={cardsError}
+            onCardClick={handleCardItemClick}
+            getCardEffects={(cardId) => cardEffects[cardId] || []}
+            useVirtualization={!isMobile && filteredCards.length > 20}
           />
         ) : (
           <CardList 
-            cards={filteredCards} 
-            onCardClick={handleCardItemClick} 
+            cards={filteredCards}
+            isLoading={isLoading}
+            onCardClick={handleCardItemClick}
           />
-        )
-      ) : (
-        <EmptyState 
-          isEmpty={cards.length === 0} 
-          isFiltered={cards.length > 0 && filteredCards.length === 0}
-          onRefresh={refreshCards}
-        />
-      )}
+        )}
+      </ErrorBoundary>
     </div>
   );
 };

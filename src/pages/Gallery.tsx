@@ -1,11 +1,13 @@
 
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import CardGallery from '@/components/CardGallery';
 import { ChevronRight, Grid3X3, LayoutList, Tv2, Filter } from 'lucide-react';
-import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { useCards } from '@/context/CardContext';
+import { useCardData } from '@/hooks/useCardData';
+import { useMobileOptimization } from '@/hooks/useMobileOptimization';
+import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -16,10 +18,36 @@ import {
 import FullscreenViewer from '@/components/gallery/FullscreenViewer';
 
 const Gallery = () => {
-  const { cards } = useCards();
+  const { isMobile } = useMobileOptimization();
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
+  const [sortOrder, setSortOrder] = useState<string>('newest');
+  
+  // Use our standardized data fetching hook
+  const { 
+    cards, 
+    isLoading, 
+    error, 
+    refetch 
+  } = useCardData({
+    // Sort cards based on sortOrder
+    sort: (a, b) => {
+      switch (sortOrder) {
+        case 'newest':
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        case 'oldest':
+          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+        case 'az':
+          return a.title.localeCompare(b.title);
+        case 'za':
+          return b.title.localeCompare(a.title);
+        default:
+          return 0;
+      }
+    },
+    deps: [sortOrder] // Re-sort when sortOrder changes
+  });
   
   // Check if we have baseball cards in the collection
   const hasBaseballCards = cards.some(card => 
@@ -33,6 +61,10 @@ const Gallery = () => {
   
   const handleCloseFullscreen = () => {
     setIsFullscreen(false);
+  };
+  
+  const handleSortChange = (order: string) => {
+    setSortOrder(order);
   };
   
   if (isFullscreen && selectedCardId) {
@@ -90,56 +122,77 @@ const Gallery = () => {
             </div>
           )}
           
-          {/* View Mode Controls */}
-          <div className="flex justify-between items-center mb-6">
-            <div className="flex space-x-2">
-              <Button
-                variant={viewMode === 'grid' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setViewMode('grid')}
-                className="flex items-center"
-              >
-                <Grid3X3 className="h-4 w-4 mr-2" />
-                Grid
-              </Button>
-              <Button
-                variant={viewMode === 'list' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setViewMode('list')}
-                className="flex items-center"
-              >
-                <LayoutList className="h-4 w-4 mr-2" />
-                List
-              </Button>
+          <ErrorBoundary>
+            {/* View Mode Controls */}
+            <div className="flex justify-between items-center mb-6">
+              <div className="flex space-x-2">
+                <Button
+                  variant={viewMode === 'grid' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setViewMode('grid')}
+                  className="flex items-center"
+                >
+                  <Grid3X3 className="h-4 w-4 mr-2" />
+                  Grid
+                </Button>
+                <Button
+                  variant={viewMode === 'list' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setViewMode('list')}
+                  className="flex items-center"
+                >
+                  <LayoutList className="h-4 w-4 mr-2" />
+                  List
+                </Button>
+              </div>
+              
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="flex items-center">
+                    <Filter className="h-4 w-4 mr-2" />
+                    {sortOrder === 'newest' && 'Newest First'}
+                    {sortOrder === 'oldest' && 'Oldest First'}
+                    {sortOrder === 'az' && 'A-Z'}
+                    {sortOrder === 'za' && 'Z-A'}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56">
+                  <DropdownMenuGroup>
+                    <DropdownMenuItem 
+                      className="cursor-pointer"
+                      onClick={() => handleSortChange('newest')}
+                    >
+                      Newest First
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      className="cursor-pointer"
+                      onClick={() => handleSortChange('oldest')}
+                    >
+                      Oldest First
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      className="cursor-pointer"
+                      onClick={() => handleSortChange('az')}
+                    >
+                      Alphabetical (A-Z)
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      className="cursor-pointer"
+                      onClick={() => handleSortChange('za')}
+                    >
+                      Alphabetical (Z-A)
+                    </DropdownMenuItem>
+                  </DropdownMenuGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
             
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="flex items-center">
-                  <Filter className="h-4 w-4 mr-2" />
-                  Filters
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56">
-                <DropdownMenuGroup>
-                  <DropdownMenuItem className="cursor-pointer">
-                    Newest First
-                  </DropdownMenuItem>
-                  <DropdownMenuItem className="cursor-pointer">
-                    Oldest First
-                  </DropdownMenuItem>
-                  <DropdownMenuItem className="cursor-pointer">
-                    Alphabetical (A-Z)
-                  </DropdownMenuItem>
-                  <DropdownMenuItem className="cursor-pointer">
-                    Alphabetical (Z-A)
-                  </DropdownMenuItem>
-                </DropdownMenuGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-          
-          <CardGallery viewMode={viewMode} onCardClick={handleCardClick} />
+            <CardGallery 
+              viewMode={viewMode} 
+              onCardClick={handleCardClick} 
+              cards={cards} 
+            />
+          </ErrorBoundary>
         </div>
       </main>
     </div>
