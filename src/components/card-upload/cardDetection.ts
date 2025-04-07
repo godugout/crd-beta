@@ -1,336 +1,397 @@
-// Import the EnhancedCropBoxProps type we defined in CropBox.tsx
-import { EnhancedCropBoxProps } from './CropBox';
+import * as ort from 'onnxruntime-web';
+import { CropBoxProps, EnhancedCropBoxProps } from '../CropBox';
+import { v4 as uuidv4 } from 'uuid';
 
-// Export it again here to ensure it's available from both modules
-export type { EnhancedCropBoxProps };
-
-export type MemorabiliaType = 'card' | 'ticket' | 'photo' | 'program' | 'autograph' | 'face' | 'unknown';
-
-export interface DetectedCard {
-  id: number;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  rotation: number;
-  confidence: number;
-  memorabiliaType: MemorabiliaType;
+// Define the types for the metadata
+interface Metadata {
+  labels: string[];
+  confidenceThreshold: number;
+  iouThreshold: number;
 }
 
-// Example card detection function
-export const detectCards = async (
-  imageElement: HTMLImageElement
-): Promise<EnhancedCropBoxProps[]> => {
-  // Simulated card detection
-  // In a real implementation, this would use ML to detect card boundaries
-  
-  const imageWidth = imageElement.naturalWidth;
-  const imageHeight = imageElement.naturalHeight;
-  
-  // For demo purposes, just create a single box
-  const detectedCards: EnhancedCropBoxProps[] = [
-    {
-      id: 1,
-      x: imageWidth * 0.25, // 25% from left
-      y: imageHeight * 0.25, // 25% from top
-      width: imageWidth * 0.5, // 50% of image width
-      height: imageHeight * 0.5, // 50% of image height
+let metadata: Metadata | null = null;
+
+// Load the ONNX model and metadata
+const loadModel = async (): Promise<ort.InferenceSession> => {
+  try {
+    const modelUrl = '/models/yolov8n-face.onnx';
+    const session = await ort.InferenceSession.create(modelUrl, {
+      executionProviders: ['webgl'],
+      graphOptimizationLevel: 'all',
+    });
+    return session;
+  } catch (error) {
+    console.error('Failed to load ONNX model:', error);
+    throw error;
+  }
+};
+
+const loadMetadata = async (): Promise<Metadata> => {
+  try {
+    const metadataUrl = '/models/metadata.json';
+    const response = await fetch(metadataUrl);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch metadata: ${response.status} ${response.statusText}`);
+    }
+    const data = await response.json();
+    return {
+      labels: data.labels || [],
+      confidenceThreshold: data.confidenceThreshold || 0.7,
+      iouThreshold: data.iouThreshold || 0.7,
+    };
+  } catch (error) {
+    console.error('Failed to load metadata:', error);
+    // Provide default values to allow the app to function
+    return {
+      labels: [],
+      confidenceThreshold: 0.7,
+      iouThreshold: 0.7,
+    };
+  }
+};
+
+// Preprocess the image
+const preprocessImage = (image: HTMLImageElement): ort.Tensor => {
+  const modelInputWidth = 640;
+  const modelInputHeight = 640;
+
+  // Resize the image to the model input size
+  const resizedImage = document.createElement('canvas');
+  resizedImage.width = modelInputWidth;
+  resizedImage.height = modelInputHeight;
+  const ctx = resizedImage.getContext('2d');
+  if (!ctx) {
+    throw new Error('Could not get context from the resized image canvas');
+  }
+  ctx.drawImage(image, 0, 0, modelInputWidth, modelInputHeight);
+
+  // Get the image data from the resized image
+  const imageData = ctx.getImageData(0, 0, modelInputWidth, modelInputHeight);
+  const data = imageData.data;
+
+  // Normalize the image data and convert to float32 array
+  const float32Data = new Float32Array(modelInputWidth * modelInputHeight * 3);
+  for (let i = 0; i < data.length; i += 4) {
+    float32Data[i / 4 * 3] = data[i] / 255.0;       // Red
+    float32Data[i / 4 * 3 + 1] = data[i + 1] / 255.0; // Green
+    float32Data[i / 4 * 3 + 2] = data[i + 2] / 255.0; // Blue
+  }
+
+  // Create the tensor
+  const inputTensor = new ort.Tensor('float32', float32Data, [1, 3, modelInputHeight, modelInputWidth]);
+  return inputTensor;
+};
+
+// Postprocess the model output
+const postprocessOutput = (
+  outputTensor: ort.Tensor,
+  imageWidth: number,
+  imageHeight: number
+): EnhancedCropBoxProps[] => {
+  if (!metadata) {
+    console.warn('Metadata not loaded, using default values.');
+    return [];
+  }
+
+  const modelInputWidth = 640;
+  const modelInputHeight = 640;
+  const confidenceThreshold = metadata.confidenceThreshold;
+  const iouThreshold = metadata.iouThreshold;
+  const labels = metadata.labels;
+
+  const outputData = outputTensor.data as Float32Array;
+  const numRows = outputTensor.dims[1];
+
+  const boxes: {
+    box: { x1: number; y1: number; x2: number; y2: number; };
+    classProbabilities: number[];
+  }[] = [];
+
+  for (let i = 0; i < numRows; i++) {
+    const classProbabilities = outputData.slice(i * 85 + 4, i * 85 + 84);
+    const maxProbability = Math.max(...classProbabilities);
+
+    if (maxProbability > confidenceThreshold) {
+      const x = outputData[i * 85];
+      const y = outputData[i * 85 + 1];
+      const w = outputData[i * 85 + 2];
+      const h = outputData[i * 85 + 3];
+
+      const x1 = (x - w / 2) * imageWidth / modelInputWidth;
+      const y1 = (y - h / 2) * imageHeight / modelInputHeight;
+      const x2 = (x + w / 2) * imageWidth / modelInputWidth;
+      const y2 = (y + h / 2) * imageHeight / modelInputHeight;
+
+      boxes.push({
+        box: { x1, y1, x2, y2 },
+        classProbabilities: Array.from(classProbabilities)
+      });
+    }
+  }
+
+  // Apply Non-Maximum Suppression (NMS)
+  const selectedBoxes = nms(boxes, iouThreshold);
+
+  // Convert selected boxes to CropBoxProps
+  const cropBoxes: EnhancedCropBoxProps[] = selectedBoxes.map(box => {
+    const classIndex = box.classProbabilities.indexOf(Math.max(...box.classProbabilities));
+    const label = labels[classIndex] || 'unknown';
+    const confidence = box.classProbabilities[classIndex];
+
+    const width = box.box.x2 - box.box.x1;
+    const height = box.box.y2 - box.box.y1;
+
+    return {
+      id: Math.floor(Math.random() * 10000),
+      x: box.box.x1,
+      y: box.box.y1,
+      width: width,
+      height: height,
       rotation: 0,
       color: '#00FF00',
-      memorabiliaType: 'card', // Default to card type
-      confidence: 0.85, // High confidence example
-    },
-  ];
-  
-  return detectedCards;
+      memorabiliaType: label as MemorabiliaType,
+      confidence: confidence
+    };
+  });
+
+  return cropBoxes;
 };
 
-// Function for applying crop to an image
+// Non-Maximum Suppression (NMS)
+const nms = (
+  boxes: {
+    box: { x1: number; y1: number; x2: number; y2: number; };
+    classProbabilities: number[];
+  }[],
+  iouThreshold: number
+): {
+  box: { x1: number; y1: number; x2: number; y2: number; };
+  classProbabilities: number[];
+}[] => {
+  const selectedBoxes: {
+    box: { x1: number; y1: number; x2: number; y2: number; };
+    classProbabilities: number[];
+  }[] = [];
+
+  const sortedBoxes = boxes.sort((a, b) => Math.max(...b.classProbabilities) - Math.max(...a.classProbabilities));
+
+  while (sortedBoxes.length > 0) {
+    const bestBox = sortedBoxes.shift()!;
+    selectedBoxes.push(bestBox);
+
+    // Filter out boxes that overlap too much with the best box
+    for (let i = sortedBoxes.length - 1; i >= 0; i--) {
+      if (iou(bestBox.box, sortedBoxes[i].box) > iouThreshold) {
+        sortedBoxes.splice(i, 1);
+      }
+    }
+  }
+
+  return selectedBoxes;
+};
+
+// Intersection over Union (IoU)
+const iou = (box1: { x1: number; y1: number; x2: number; y2: number; }, box2: { x1: number; y1: number; x2: number; y2: number; }): number => {
+  const intersectionX1 = Math.max(box1.x1, box2.x1);
+  const intersectionY1 = Math.max(box1.y1, box2.y1);
+  const intersectionX2 = Math.min(box1.x2, box2.x2);
+  const intersectionY2 = Math.min(box1.y2, box2.y2);
+
+  const intersectionWidth = Math.max(0, intersectionX2 - intersectionX1);
+  const intersectionHeight = Math.max(0, intersectionY2 - intersectionY1);
+
+  const intersectionArea = intersectionWidth * intersectionHeight;
+
+  const box1Area = (box1.x2 - box1.x1) * (box1.y2 - box1.y1);
+  const box2Area = (box2.x2 - box2.x1) * (box2.y2 - box2.y1);
+
+  const unionArea = box1Area + box2Area - intersectionArea;
+
+  return intersectionArea / unionArea;
+};
+
+export type MemorabiliaType = 'card' | 'ticket' | 'program' | 'autograph' | 'face' | 'unknown';
+
+/**
+ * Applies crop to an image based on cropbox dimensions
+ */
 export const applyCrop = async (
-  cropBox: EnhancedCropBoxProps,
-  canvasRef: HTMLCanvasElement | null,
-  sourceFile: File,
-  imageElement: HTMLImageElement,
-  enhancementType?: MemorabiliaType
-): Promise<{ file: File; url: string } | null> => {
-  try {
-    if (!canvasRef) {
-      console.error("Canvas reference is null");
-      return null;
-    }
+  image: HTMLImageElement,
+  cropBox: { 
+    x: number; 
+    y: number; 
+    width: number; 
+    height: number; 
+    rotation: number; 
+    memorabiliaType?: MemorabiliaType 
+  },
+  canvasRef: React.RefObject<HTMLCanvasElement>,
+  autoEnhance: boolean = false
+): Promise<{ url: string; file: File }> => {
+  if (!canvasRef.current) {
+    throw new Error("Canvas reference not available");
+  }
 
-    const canvas = canvasRef;
-    const ctx = canvas.getContext('2d');
-    
-    if (!ctx) {
-      console.error("Failed to get canvas context");
-      return null;
-    }
-    
-    // Set canvas size to match the crop dimensions
-    canvas.width = cropBox.width;
-    canvas.height = cropBox.height;
-    
-    // Clear the canvas
-    ctx.fillStyle = 'white';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
-    // Save context state before transformations
-    ctx.save();
-    
-    // Apply rotation if needed (around center of the canvas)
-    if (cropBox.rotation) {
-      ctx.translate(canvas.width / 2, canvas.height / 2);
-      ctx.rotate((cropBox.rotation * Math.PI) / 180);
-      ctx.translate(-canvas.width / 2, -canvas.height / 2);
-    }
-    
-    // Draw the cropped portion
+  const canvas = canvasRef.current;
+  const ctx = canvas.getContext('2d');
+  
+  if (!ctx) {
+    throw new Error("Could not get canvas context");
+  }
+
+  // Set canvas size to the crop dimensions
+  canvas.width = cropBox.width;
+  canvas.height = cropBox.height;
+  
+  // Clear the canvas
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  
+  // Save the current context state
+  ctx.save();
+  
+  // If there's rotation, we need to handle it
+  if (cropBox.rotation && cropBox.rotation !== 0) {
+    // Translate to the center of the canvas
+    ctx.translate(canvas.width / 2, canvas.height / 2);
+    // Rotate by the negative of the crop box rotation (to straighten the card)
+    ctx.rotate(-cropBox.rotation * Math.PI / 180);
+    // Draw the image centered and cropped
     ctx.drawImage(
-      imageElement,
-      cropBox.x, // Source x
-      cropBox.y, // Source y
-      cropBox.width, // Source width
-      cropBox.height, // Source height
-      0, // Destination x
-      0, // Destination y
-      canvas.width, // Destination width
-      canvas.height // Destination height
+      image,
+      cropBox.x - canvas.width / 2 + cropBox.width / 2,
+      cropBox.y - canvas.height / 2 + cropBox.height / 2,
+      cropBox.width,
+      cropBox.height,
+      -cropBox.width / 2,
+      -cropBox.height / 2,
+      cropBox.width,
+      cropBox.height
     );
-    
-    // Restore context state
-    ctx.restore();
-    
-    // Apply enhancements based on type
-    if (enhancementType) {
-      applyEnhancements(ctx, canvas.width, canvas.height, enhancementType);
-    }
-    
-    // Convert canvas to blob
-    const blob = await new Promise<Blob | null>((resolve) => {
-      canvas.toBlob((blob) => resolve(blob), 'image/jpeg', 0.92);
-    });
-    
-    if (!blob) {
-      console.error("Failed to create blob from canvas");
-      return null;
-    }
-    
-    // Create a new File object
-    const fileName = `cropped_${sourceFile.name}`;
-    const newFile = new File([blob], fileName, { type: 'image/jpeg' });
-    
-    // Create an object URL for preview
-    const url = URL.createObjectURL(blob);
-    
-    return { file: newFile, url };
-  } catch (error) {
-    console.error("Error in applyCrop:", error);
-    return null;
-  }
-};
-
-// Helper function to apply different enhancements based on memorabilia type
-const applyEnhancements = (
-  ctx: CanvasRenderingContext2D,
-  width: number,
-  height: number,
-  type: MemorabiliaType
-) => {
-  // Apply different enhancements based on the type
-  switch (type) {
-    case 'card':
-      // Enhance colors for baseball cards
-      enhanceColors(ctx, width, height);
-      break;
-    case 'ticket':
-      // Improve contrast for ticket stubs
-      enhanceContrast(ctx, width, height);
-      break;
-    case 'program':
-      // Improve text legibility for programs
-      enhanceTextLegibility(ctx, width, height);
-      break;
-    case 'autograph':
-      // Optimize visibility for autographs
-      enhanceAutograph(ctx, width, height);
-      break;
-    case 'face':
-      // Enhance portraits
-      enhanceFace(ctx, width, height);
-      break;
-    default:
-      // Basic enhancements for unknown types
-      basicEnhance(ctx, width, height);
-  }
-};
-
-// Enhancement functions
-const enhanceColors = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
-  // For demo purposes: simple saturation enhancement
-  const imageData = ctx.getImageData(0, 0, width, height);
-  const data = imageData.data;
-  
-  // Simple saturation boost
-  for (let i = 0; i < data.length; i += 4) {
-    // Convert RGB to HSL, boost saturation, convert back
-    // This is a simplified placeholder - in a real implementation,
-    // more sophisticated image processing would be used
-    if (data[i] < 240 && data[i+1] < 240 && data[i+2] < 240) {
-      // Boost colors slightly if not white/near-white
-      data[i] = Math.min(255, data[i] * 1.1);     // R
-      data[i+1] = Math.min(255, data[i+1] * 1.1); // G
-      data[i+2] = Math.min(255, data[i+2] * 1.1); // B
-    }
-  }
-  
-  ctx.putImageData(imageData, 0, 0);
-};
-
-const enhanceContrast = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
-  // Simple contrast enhancement
-  const imageData = ctx.getImageData(0, 0, width, height);
-  const data = imageData.data;
-  
-  const factor = 1.2; // Contrast factor
-  const intercept = 128 * (1 - factor);
-  
-  for (let i = 0; i < data.length; i += 4) {
-    data[i] = factor * data[i] + intercept;     // R
-    data[i+1] = factor * data[i+1] + intercept; // G
-    data[i+2] = factor * data[i+2] + intercept; // B
-  }
-  
-  ctx.putImageData(imageData, 0, 0);
-};
-
-const enhanceTextLegibility = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
-  // Text legibility enhancement (increase contrast and sharpness)
-  const imageData = ctx.getImageData(0, 0, width, height);
-  const data = imageData.data;
-  
-  // Simple sharpen effect
-  // In a real implementation, a proper convolution kernel would be used
-  const factor = 1.3;
-  const intercept = 128 * (1 - factor);
-  
-  for (let i = 0; i < data.length; i += 4) {
-    // Increase contrast for text legibility
-    data[i] = factor * data[i] + intercept;     // R
-    data[i+1] = factor * data[i+1] + intercept; // G
-    data[i+2] = factor * data[i+2] + intercept; // B
-  }
-  
-  ctx.putImageData(imageData, 0, 0);
-};
-
-const enhanceAutograph = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
-  // Enhance autograph visibility
-  const imageData = ctx.getImageData(0, 0, width, height);
-  const data = imageData.data;
-  
-  // Increase contrast specifically for dark lines on light backgrounds
-  for (let i = 0; i < data.length; i += 4) {
-    const avg = (data[i] + data[i+1] + data[i+2]) / 3;
-    
-    // If pixel is dark (likely part of signature)
-    if (avg < 100) {
-      // Make it darker
-      data[i] = data[i] * 0.7;     // R
-      data[i+1] = data[i+1] * 0.7; // G
-      data[i+2] = data[i+2] * 0.7; // B
-    } 
-    // If pixel is light (likely background)
-    else if (avg > 180) {
-      // Make it lighter
-      data[i] = Math.min(255, data[i] * 1.1);     // R
-      data[i+1] = Math.min(255, data[i+1] * 1.1); // G
-      data[i+2] = Math.min(255, data[i+2] * 1.1); // B
-    }
-  }
-  
-  ctx.putImageData(imageData, 0, 0);
-};
-
-const enhanceFace = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
-  // Enhance portrait photos
-  const imageData = ctx.getImageData(0, 0, width, height);
-  const data = imageData.data;
-  
-  // Slight warming filter and soften
-  for (let i = 0; i < data.length; i += 4) {
-    // Add slight warm tone to image
-    data[i] = Math.min(255, data[i] * 1.05);     // R (slightly boosted)
-    data[i+1] = Math.min(255, data[i+1] * 1.02); // G (slightly boosted)
-    data[i+2] = Math.min(255, data[i+2] * 0.95); // B (slightly reduced)
-  }
-  
-  ctx.putImageData(imageData, 0, 0);
-};
-
-const basicEnhance = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
-  // Basic enhancement for unknown types
-  const imageData = ctx.getImageData(0, 0, width, height);
-  const data = imageData.data;
-  
-  // Very mild enhancements
-  for (let i = 0; i < data.length; i += 4) {
-    // Slightly boost contrast
-    data[i] = Math.min(255, data[i] * 1.05);     // R
-    data[i+1] = Math.min(255, data[i+1] * 1.05); // G
-    data[i+2] = Math.min(255, data[i+2] * 1.05); // B
-  }
-  
-  ctx.putImageData(imageData, 0, 0);
-};
-
-// Function to detect cards in an image (for the ImageHandling hook)
-export const detectCardsInImage = async (
-  imageElement: HTMLImageElement,
-  enabledTypes?: MemorabiliaType[]
-): Promise<EnhancedCropBoxProps[]> => {
-  // In a real app, this would use machine learning to detect cards
-  // For now, we'll use a simpler approach based on image divisions
-  
-  const imageWidth = imageElement.naturalWidth;
-  const imageHeight = imageElement.naturalHeight;
-  
-  // For simplicity, we'll return a single detected card
-  const detectedCard: EnhancedCropBoxProps = {
-    id: 1,
-    x: imageWidth * 0.1,
-    y: imageHeight * 0.1,
-    width: imageWidth * 0.8,
-    height: imageHeight * 0.8,
-    rotation: 0,
-    color: '#2563eb', // blue color
-    memorabiliaType: 'card',
-    confidence: 0.85
-  };
-  
-  return [detectedCard];
-};
-
-// Function to determine memorabilia type based on aspect ratio
-export const classifyMemorabiliaType = (
-  width: number,
-  height: number
-): { type: MemorabiliaType; confidence: number } => {
-  const aspectRatio = width / height;
-  
-  // Common aspect ratios for different memorabilia
-  // Baseball cards typically 2.5:3.5 ratio (~0.71)
-  // Tickets often wider, around 2:1 or 3:1
-  // Photos can vary but often 4:3 or 3:2
-  
-  if (aspectRatio >= 0.65 && aspectRatio <= 0.75) {
-    return { type: 'card', confidence: 0.9 };
-  } else if (aspectRatio >= 1.8 && aspectRatio <= 3.2) {
-    return { type: 'ticket', confidence: 0.85 };
-  } else if ((aspectRatio >= 1.3 && aspectRatio <= 1.5) || 
-             (aspectRatio >= 0.75 && aspectRatio <= 0.85)) {
-    return { type: 'photo', confidence: 0.7 };
   } else {
-    return { type: 'unknown', confidence: 0.5 };
+    // No rotation, just draw the cropped region
+    ctx.drawImage(
+      image,
+      cropBox.x,
+      cropBox.y,
+      cropBox.width,
+      cropBox.height,
+      0,
+      0,
+      cropBox.width,
+      cropBox.height
+    );
+  }
+  
+  // Restore the context state
+  ctx.restore();
+  
+  // Apply auto-enhancement if requested
+  if (autoEnhance) {
+    applyEnhancement(ctx, cropBox, canvas.width, canvas.height);
+  }
+  
+  // Convert canvas to blob
+  const blob = await new Promise<Blob>((resolve) => {
+    canvas.toBlob((blob) => resolve(blob!), 'image/jpeg', 0.95);
+  });
+  
+  // Create a file from the blob
+  const fileName = `cropped-${cropBox.memorabiliaType || 'image'}-${Date.now()}.jpg`;
+  const file = new File([blob], fileName, { type: 'image/jpeg' });
+  
+  // Create URL for preview
+  const url = URL.createObjectURL(blob);
+  
+  return { url, file };
+};
+
+/**
+ * Apply enhancement filters based on memorabilia type
+ */
+function applyEnhancement(
+  ctx: CanvasRenderingContext2D, 
+  cropBox: { memorabiliaType?: MemorabiliaType }, 
+  width: number, 
+  height: number
+) {
+  // Get image data to manipulate
+  const imageData = ctx.getImageData(0, 0, width, height);
+  const data = imageData.data;
+  
+  switch (cropBox.memorabiliaType) {
+    case 'card':
+      // Enhance card images - increase contrast and saturation
+      for (let i = 0; i < data.length; i += 4) {
+        // Increase contrast
+        data[i] = Math.min(255, Math.max(0, (data[i] - 128) * 1.2 + 128));
+        data[i+1] = Math.min(255, Math.max(0, (data[i+1] - 128) * 1.2 + 128));
+        data[i+2] = Math.min(255, Math.max(0, (data[i+2] - 128) * 1.2 + 128));
+      }
+      break;
+      
+    case 'autograph':
+      // Enhance autographs by increasing contrast and darkening lines
+      for (let i = 0; i < data.length; i += 4) {
+        const avg = (data[i] + data[i+1] + data[i+2]) / 3;
+        if (avg < 100) {
+          // Darken dark areas (signatures)
+          data[i] = data[i] * 0.7;
+          data[i+1] = data[i+1] * 0.7;
+          data[i+2] = data[i+2] * 0.7;
+        } else {
+          // Lighten light areas (background)
+          data[i] = Math.min(255, data[i] * 1.1);
+          data[i+1] = Math.min(255, data[i+1] * 1.1);
+          data[i+2] = Math.min(255, data[i+2] * 1.1);
+        }
+      }
+      break;
+      
+    case 'face':
+      // Subtle enhancement for faces - soften and slightly brighten
+      for (let i = 0; i < data.length; i += 4) {
+        // Slightly brighter
+        data[i] = Math.min(255, data[i] * 1.05);
+        data[i+1] = Math.min(255, data[i+1] * 1.05);
+        data[i+2] = Math.min(255, data[i+2] * 1.05);
+      }
+      break;
+      
+    default:
+      // Default enhancement - minor contrast adjustment
+      for (let i = 0; i < data.length; i += 4) {
+        data[i] = Math.min(255, Math.max(0, (data[i] - 128) * 1.1 + 128));
+        data[i+1] = Math.min(255, Math.max(0, (data[i+1] - 128) * 1.1 + 128));
+        data[i+2] = Math.min(255, Math.max(0, (data[i+2] - 128) * 1.1 + 128));
+      }
+      break;
+  }
+  
+  // Put modified image data back on canvas
+  ctx.putImageData(imageData, 0, 0);
+}
+
+// Detect cards in the image
+export const detectCardsInImage = async (image: HTMLImageElement): Promise<EnhancedCropBoxProps[]> => {
+  try {
+    // Load the model and metadata if not already loaded
+    if (!metadata) {
+      metadata = await loadMetadata();
+    }
+    const session = await loadModel();
+
+    // Preprocess the image
+    const inputTensor = preprocessImage(image);
+
+    // Run the inference session
+    const outputMap = await session.run({ images: inputTensor });
+    const outputTensor = outputMap.output0;
+
+    // Postprocess the output
+    const cropBoxes = postprocessOutput(outputTensor, image.width, image.height);
+    return cropBoxes;
+  } catch (error) {
+    console.error('Error detecting cards in image:', error);
+    return [];
   }
 };

@@ -1,10 +1,14 @@
 
 import React, { useState, useRef } from 'react';
 import { cn } from '@/lib/utils';
-import { Upload, X } from 'lucide-react';
+import { Upload, X, Image as ImageIcon, Camera } from 'lucide-react';
 import { toast } from 'sonner';
 import ImageDropzone from './ImageDropzone';
 import ImageEditor from './ImageEditor';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { useMobileOptimization } from '@/hooks/useMobileOptimization';
+import { MobileTouchButton } from '@/components/ui/mobile-controls';
+import { ResponsiveImage } from '@/components/ui/responsive-image';
 
 interface CardUploadProps {
   onImageUpload: (file: File, previewUrl: string, storagePath?: string) => void;
@@ -19,6 +23,17 @@ const CardUpload: React.FC<CardUploadProps> = ({ onImageUpload, className, initi
   const [currentFile, setCurrentFile] = useState<File | null>(null);
   const [editorImage, setEditorImage] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const isMobile = useIsMobile();
+  const { optimizeInteractions, getImageQuality } = useMobileOptimization();
+
+  // Function to handle camera capture for mobile devices
+  const handleCameraCapture = () => {
+    if (!inputRef.current) return;
+    
+    // Set the input to accept camera photos
+    inputRef.current.setAttribute('capture', 'environment');
+    inputRef.current.click();
+  };
 
   const processFile = async (file: File) => {
     // Check if the file is an image
@@ -41,11 +56,6 @@ const CardUpload: React.FC<CardUploadProps> = ({ onImageUpload, className, initi
     // Load the image to check dimensions and detect card content
     const img = new window.Image();
     img.onload = () => {
-      // Check if dimensions match standard card ratio (2.5:3.5)
-      const ratio = img.width / img.height;
-      const standardRatio = 2.5 / 3.5;
-      const isStandardRatio = Math.abs(ratio - standardRatio) < 0.1;
-      
       // Always show the editor for better user experience
       setEditorImage(localUrl);
       setShowEditor(true);
@@ -73,31 +83,52 @@ const CardUpload: React.FC<CardUploadProps> = ({ onImageUpload, className, initi
     setPreviewUrl(null);
     if (inputRef.current) {
       inputRef.current.value = '';
+      // Reset the capture attribute
+      inputRef.current.removeAttribute('capture');
     }
   };
 
   return (
     <div className={cn("w-full", className)}>
       {!previewUrl ? (
-        <ImageDropzone 
-          onFileSelected={processFile}
-          isUploading={isUploading}
-          inputRef={inputRef}
-        />
+        <div>
+          <ImageDropzone 
+            onFileSelected={processFile}
+            isUploading={isUploading}
+            inputRef={inputRef}
+          />
+          
+          {/* Mobile-specific camera button */}
+          {isMobile && (
+            <div className="mt-4 flex justify-center">
+              <MobileTouchButton
+                onClick={handleCameraCapture}
+                className="flex items-center gap-2"
+                size="lg"
+                hapticFeedback={optimizeInteractions}
+              >
+                <Camera className="h-5 w-5" />
+                Take a Photo
+              </MobileTouchButton>
+            </div>
+          )}
+        </div>
       ) : (
         <div className="relative w-full aspect-[2.5/3.5] rounded-xl overflow-hidden shadow-card">
-          <img 
+          <ResponsiveImage 
             src={previewUrl} 
             alt="Card preview" 
             className="w-full h-full object-cover" 
           />
-          <button
+          <MobileTouchButton
             onClick={clearImage}
             className="absolute top-2 right-2 p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-subtle hover:bg-gray-100 transition-colors"
-            type="button"
+            variant="icon"
+            size="sm"
+            hapticFeedback={optimizeInteractions}
           >
             <X className="h-4 w-4 text-cardshow-slate" />
-          </button>
+          </MobileTouchButton>
         </div>
       )}
 

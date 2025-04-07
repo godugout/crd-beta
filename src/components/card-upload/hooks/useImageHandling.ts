@@ -68,11 +68,11 @@ export const useImageHandling = ({
         const url = URL.createObjectURL(blob);
         
         // Update image data with rotated image
-        setImageData({
+        setImageData(prevData => ({
           url,
           width: canvas.width,
           height: canvas.height,
-        });
+        }));
 
         // Reset crop boxes and detect again
         setCropBoxes([]);

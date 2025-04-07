@@ -8,7 +8,7 @@ export interface CropBoxProps {
   y: number;
   width: number;
   height: number;
-  rotation?: number;
+  rotation: number; // Changed from optional to required
   color: string;
   memorabiliaType?: MemorabiliaType;
   confidence?: number;
@@ -41,7 +41,7 @@ const CropBox: React.FC<CropBoxComponentProps> = ({ box, isSelected, onClick }) 
     width: `${box.width}px`,
     height: `${box.height}px`,
     border: `2px solid ${box.color}`,
-    transform: box.rotation ? `rotate(${box.rotation}deg)` : 'none',
+    transform: `rotate(${box.rotation}deg)`,
     transformOrigin: 'center',
     cursor: 'pointer',
     boxShadow: isSelected ? '0 0 0 2px blue, 0 0 10px rgba(0, 0, 255, 0.5)' : 'none',
@@ -102,7 +102,7 @@ export const isPointInRotatedRect = (
 ): boolean => {
   // Implementation for point-in-rotated-rectangle detection
   // Convert rotation from degrees to radians
-  const rotation = (rotationDegrees || 0) * (Math.PI / 180);
+  const rotation = rotationDegrees * (Math.PI / 180);
   
   // Translate point to origin relative to rectangle center
   const centerX = boxX + boxWidth / 2;
