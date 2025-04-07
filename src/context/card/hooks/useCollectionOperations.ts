@@ -17,6 +17,8 @@ export const useCollectionOperations = () => {
       visibility: collectionData.visibility || 'public',
       allowComments: collectionData.allowComments !== undefined ? collectionData.allowComments : true,
       designMetadata: collectionData.designMetadata || {},
+      createdAt: new Date().toISOString(), // Add missing createdAt field
+      updatedAt: new Date().toISOString(), // Add missing updatedAt field
     };
 
     setCollections(prevCollections => [...prevCollections, newCollection]);

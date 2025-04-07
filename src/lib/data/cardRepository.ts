@@ -1,6 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { Card, DbCard } from '../schema/types';
+import { Card, DbCard } from '@/lib/types';
 import { toast } from 'sonner';
 
 /**

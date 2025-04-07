@@ -9,7 +9,10 @@ export type {
   TeamMember,
   Comment,
   Reaction,
-  FabricSwatch
+  FabricSwatch,
+  DbCard,
+  DbCollection,
+  DbReaction
 } from '@/lib/schema/types';
 
 // If additional type extensions are needed, they can be added below

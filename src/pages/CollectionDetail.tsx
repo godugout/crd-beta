@@ -20,7 +20,6 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 
-// Type for route params
 interface CollectionDetailParams {
   id: string;
 }
@@ -45,7 +44,6 @@ const CollectionDetail: React.FC = () => {
     async function fetchCollectionDetails() {
       setIsLoading(true);
       try {
-        // Fetch collection details
         const { data: collectionData, error: collectionError } = await supabase
           .from('collections')
           .select('*')
@@ -59,7 +57,6 @@ const CollectionDetail: React.FC = () => {
           return;
         }
 
-        // Transform the DB collection to our Collection type
         const fetchedCollection: Collection = {
           id: collectionData.id,
           name: collectionData.title || '',
@@ -81,7 +78,6 @@ const CollectionDetail: React.FC = () => {
         setEditedVisibility(fetchedCollection.visibility || 'public');
         setEditedAllowComments(fetchedCollection.allowComments !== undefined ? fetchedCollection.allowComments : true);
 
-        // Fetch cards in this collection
         const { data: cardsData, error: cardsError } = await supabase
           .from('cards')
           .select('*')
@@ -92,8 +88,7 @@ const CollectionDetail: React.FC = () => {
           console.error('Error fetching cards:', cardsError);
           toast.error('Failed to load cards');
         } else if (cardsData) {
-          // Transform DB cards to our Card type
-          const fetchedCards: Card[] = cardsData.map(card => ({
+          const processedCards: Card[] = cardsData.map(card => ({
             id: card.id,
             title: card.title || '',
             description: card.description || '',
@@ -108,7 +103,7 @@ const CollectionDetail: React.FC = () => {
             tags: card.tags || [],
             designMetadata: card.design_metadata || {}
           }));
-          setCards(fetchedCards);
+          setCards(processedCards);
         }
       } catch (err) {
         console.error('Error fetching collection details:', err);
@@ -141,7 +136,6 @@ const CollectionDetail: React.FC = () => {
         console.error('Error updating collection:', error);
         toast.error('Failed to update collection');
       } else {
-        // Optimistically update the local state
         setCollection({
           ...collection,
           name: editedName,
@@ -166,7 +160,6 @@ const CollectionDetail: React.FC = () => {
   };
 
   const handleCardClick = (cardId: string) => {
-    // Navigate to the card detail page
     navigate(`/card/${cardId}`);
   };
 
@@ -182,7 +175,6 @@ const CollectionDetail: React.FC = () => {
 
   return (
     <div className="container mx-auto p-6">
-      {/* Collection Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
         <div>
           {isEditing ? (
@@ -243,7 +235,6 @@ const CollectionDetail: React.FC = () => {
         )}
       </div>
 
-      {/* Collection Cover Image */}
       <div className="mb-8">
         {isEditing ? (
           <div className="mb-4">
@@ -313,7 +304,6 @@ const CollectionDetail: React.FC = () => {
         )}
       </div>
 
-      {/* Cards Grid */}
       <div className="mt-8">
         <h2 className="text-2xl font-semibold mb-6">Cards in this Collection</h2>
         {cards.length > 0 ? (

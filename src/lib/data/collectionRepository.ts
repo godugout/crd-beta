@@ -1,6 +1,5 @@
-
 import { supabase } from '@/integrations/supabase/client';
-import { Collection, DbCollection } from '../schema/types';
+import { Collection, DbCollection } from '@/lib/types';
 import { toast } from 'sonner';
 
 /**
@@ -90,7 +89,7 @@ export const collectionRepository = {
         title: collection.name, // Name is stored as title in DB
         description: collection.description,
         cover_image_url: collection.coverImageUrl,
-        owner_id: collection.userId || collection.ownerId,
+        owner_id: collection.userId, // Use userId instead of ownerId
         team_id: collection.teamId,
         visibility: collection.visibility || 'private',
         allow_comments: collection.allowComments !== undefined ? collection.allowComments : true,
@@ -291,8 +290,7 @@ function transformCollectionFromDb(record: DbCollection): Collection {
     name: record.title, // Title field in DB maps to name in our app
     description: record.description || '',
     coverImageUrl: record.cover_image_url,
-    userId: record.owner_id,
-    ownerId: record.owner_id, // For backward compatibility
+    userId: record.owner_id, // Map owner_id to userId consistently
     teamId: record.team_id,
     visibility: record.visibility as 'public' | 'private' | 'team',
     allowComments: record.allow_comments,

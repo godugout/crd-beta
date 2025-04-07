@@ -1,5 +1,7 @@
 
 // Update the part where the error occurs - the transformTeamMember function
+import { TeamMember, User } from '@/lib/types';
+
 function transformTeamMember(dbTeamMember: any): TeamMember {
   // Basic team member properties
   const teamMember: TeamMember = {

@@ -1,5 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
-import { Reaction, DbReaction } from '../schema/types';
+import { Reaction, DbReaction } from '@/lib/types';
 import { toast } from 'sonner';
 
 /**

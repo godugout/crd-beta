@@ -1,9 +1,9 @@
 
 import React, { useEffect, useState } from 'react';
 import { Container } from '@/components/ui/container';
-import { FeaturedCardsSection } from '@/components/card-showcase/FeaturedCardsSection';
-import { CollectionsSection } from '@/components/card-showcase/CollectionsSection';
-import { MemoryPacksSection } from '@/components/card-showcase/MemoryPacksSection';
+import FeaturedCardsSection from '@/components/card-showcase/FeaturedCardsSection';
+import CollectionsSection from '@/components/card-showcase/CollectionsSection';
+import MemoryPacksSection from '@/components/card-showcase/MemoryPacksSection';
 import { Separator } from '@/components/ui/separator';
 import { Collection } from '@/lib/types';
 import { supabase } from '@/integrations/supabase/client';
@@ -26,10 +26,8 @@ export function CardShowcase() {
           return;
         }
 
-        // Type the collections data properly
-        const typedCollections = data as unknown as CollectionRecord[];
-        
-        const formattedCollections: Collection[] = typedCollections.map(collection => ({
+        // Transform database records to our Collection type
+        const formattedCollections: Collection[] = (data as any[]).map(collection => ({
           id: collection.id,
           name: collection.title || '', // Use title instead of name
           description: collection.description || '',
@@ -65,23 +63,6 @@ export function CardShowcase() {
       <MemoryPacksSection collections={collections} isLoading={isLoading} />
     </Container>
   );
-}
-
-// Define interface for database collection records
-interface CollectionRecord {
-  id: string;
-  title?: string; // Make this optional to match with DB structure
-  description?: string;
-  cover_image_url?: string;
-  visibility?: 'public' | 'private' | 'team';
-  allow_comments?: boolean;
-  created_at: string;
-  updated_at: string;
-  design_metadata?: {
-    wrapperColor?: string;
-    wrapperPattern?: string;
-    packType?: 'memory-pack' | 'standard';
-  };
 }
 
 // Export default for proper importing

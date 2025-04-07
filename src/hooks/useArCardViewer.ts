@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { Card } from '@/lib/types';
@@ -58,7 +59,8 @@ export function useArCardViewer(id?: string) {
               imageUrl: "/lovable-uploads/a38aa501-ea2d-4416-9699-1e69b1826233.png",
               thumbnailUrl: "/lovable-uploads/a38aa501-ea2d-4416-9699-1e69b1826233.png",
               tags: ["baseball", "sample", "demo"],
-              createdAt: new Date().toISOString(), // Use string instead of Date
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(), // Add missing updatedAt field
             },
             {
               id: "sample-2",
@@ -67,7 +69,8 @@ export function useArCardViewer(id?: string) {
               imageUrl: "/lovable-uploads/667e6ad2-af96-40ac-bd16-a69778e14b21.png",
               thumbnailUrl: "/lovable-uploads/667e6ad2-af96-40ac-bd16-a69778e14b21.png",
               tags: ["trading", "sample", "demo"],
-              createdAt: new Date().toISOString(), // Use string instead of Date
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(), // Add missing updatedAt field
             }
           ];
           
@@ -87,7 +90,8 @@ export function useArCardViewer(id?: string) {
             imageUrl: card.image_url || '',
             thumbnailUrl: card.thumbnail_url || card.image_url || '',
             tags: card.tags || [],
-            createdAt: card.created_at,  // Use string directly
+            createdAt: card.created_at,
+            updatedAt: card.updated_at, // Add missing updatedAt field
             collectionId: card.collection_id
           }));
           

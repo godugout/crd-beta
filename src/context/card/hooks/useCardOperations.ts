@@ -15,6 +15,7 @@ export const useCardOperations = () => {
       imageUrl: cardData.imageUrl || '',
       thumbnailUrl: cardData.thumbnailUrl || cardData.imageUrl || '',
       createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(), // Add missing updatedAt field
       userId: cardData.userId || 'anonymous',
       collectionId: cardData.collectionId,
       designMetadata: cardData.designMetadata || {
