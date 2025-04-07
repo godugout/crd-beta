@@ -15,6 +15,7 @@ import TagField from './form-fields/TagField';
 import HistoricalContextField from './form-fields/HistoricalContextField';
 import PersonalSignificanceField from './form-fields/PersonalSignificanceField';
 import { format } from 'date-fns';
+import { OaklandMemoryData as OaklandMemoryDataType } from '@/lib/types';
 
 // Form schema for Oakland memories
 const formSchema = z.object({
@@ -34,12 +35,11 @@ const formSchema = z.object({
 });
 
 export type OaklandMemoryFormValues = z.infer<typeof formSchema>;
-export type OaklandMemoryData = z.infer<typeof formSchema>;
 
 // Component props
 interface OaklandMemoryFormProps {
-  onSubmit: (data: OaklandMemoryData) => void;
-  initialData?: Partial<OaklandMemoryData>;
+  onSubmit: (data: OaklandMemoryDataType) => void;
+  initialData?: Partial<OaklandMemoryDataType>;
 }
 
 // Memory form component
@@ -66,14 +66,14 @@ const OaklandMemoryForm: React.FC<OaklandMemoryFormProps> = ({ onSubmit, initial
 
   // Handle form submission
   const handleFormSubmit = (data: OaklandMemoryFormValues) => {
-    onSubmit(data);
+    onSubmit(data as OaklandMemoryDataType);
   };
 
   const selectedMemoryType = form.watch('memoryType');
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
+      <form onSubmit={form.handleFormSubmit(handleFormSubmit)} className="space-y-6">
         {/* Basic Fields: Title and Description */}
         <BasicMemoryFields form={form} />
 
@@ -119,4 +119,3 @@ const OaklandMemoryForm: React.FC<OaklandMemoryFormProps> = ({ onSubmit, initial
 };
 
 export { OaklandMemoryForm };
-export type { OaklandMemoryData };

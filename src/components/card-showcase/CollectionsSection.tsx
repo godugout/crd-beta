@@ -4,12 +4,32 @@ import { Collection } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { ArrowRightIcon } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { LoadingState } from '@/components/ui/loading-state';
 
 interface CollectionsSectionProps {
   collections: Collection[];
+  isLoading?: boolean;
+  handleViewCollection?: (id: string) => void;
 }
 
-const CollectionsSection: React.FC<CollectionsSectionProps> = ({ collections }) => {
+const CollectionsSection: React.FC<CollectionsSectionProps> = ({ 
+  collections,
+  isLoading = false,
+  handleViewCollection 
+}) => {
+  if (isLoading) {
+    return (
+      <section className="py-12 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-2xl font-bold">Collections</h2>
+          </div>
+          <LoadingState text="Loading collections..." />
+        </div>
+      </section>
+    );
+  }
+  
   if (!collections || collections.length === 0) {
     return (
       <section className="py-12 bg-gray-50">
@@ -49,6 +69,7 @@ const CollectionsSection: React.FC<CollectionsSectionProps> = ({ collections }) 
               key={collection.id} 
               to={`/collections/${collection.id}`} 
               className="block group"
+              onClick={() => handleViewCollection && handleViewCollection(collection.id)}
             >
               <div className="bg-white rounded-lg overflow-hidden border border-gray-200 h-full">
                 <div className="aspect-video bg-gray-100 overflow-hidden">
