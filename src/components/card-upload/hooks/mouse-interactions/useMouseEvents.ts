@@ -1,205 +1,161 @@
 
-import { useCallback } from 'react';
-import { CropBoxProps, getResizeHandle, isPointInRotatedRect } from '../../CropBox';
+import { useState } from 'react';
+import { CropBoxProps } from '../../CropBox';
+import { getResizeHandle, isPointInRotatedRect } from '../../CropBox';
 
-interface MouseEventProps {
-  canvasRef: React.RefObject<HTMLCanvasElement>;
-  cropBoxes: CropBoxProps[];
-  selectedCropIndex: number;
-  setSelectedCropIndex: (index: number) => void;
-  setCropBoxes: React.Dispatch<React.SetStateAction<CropBoxProps[]>>;
-  isDrawing: boolean;
-  setIsDrawing: React.Dispatch<React.SetStateAction<boolean>>;
-  startPos: { x: number, y: number } | null;
-  setStartPos: React.Dispatch<React.SetStateAction<{ x: number, y: number } | null>>;
-  currentPos: { x: number, y: number } | null;
-  setCurrentPos: React.Dispatch<React.SetStateAction<{ x: number, y: number } | null>>;
-  dragMode: string;
-  setDragMode: React.Dispatch<React.SetStateAction<string>>;
-  resizeHandle: string | null;
-  setResizeHandle: React.Dispatch<React.SetStateAction<string | null>>;
+interface MousePosition {
+  x: number;
+  y: number;
 }
 
-// Create crop box function (replacement for imported one)
-const createNewCropBox = (
-  x: number, 
-  y: number, 
-  width: number, 
-  height: number, 
-  cropBoxesLength: number
-): CropBoxProps => {
-  return {
-    id: cropBoxesLength + 1,
-    x,
-    y,
-    width,
-    height,
-    color: '#FF0000',
-    rotation: 0,
-    memorabiliaType: 'unknown',
-    confidence: 0.5
-  };
-};
-
-// Update cursor style function (replacement for imported one)
-const updateCursorStyle = (
+export const useMouseEvents = (
   canvasRef: React.RefObject<HTMLCanvasElement>,
-  resizeHandle: string | null,
-  dragMode: string
+  cropBoxes: CropBoxProps[],
+  setCropBoxes: React.Dispatch<React.SetStateAction<CropBoxProps[]>>,
+  selectedCropIndex: number,
+  setSelectedCropIndex: (index: number) => void
 ) => {
-  if (!canvasRef.current) return;
-  
-  if (dragMode === 'move') {
-    canvasRef.current.style.cursor = 'move';
-  } else if (resizeHandle) {
-    switch (resizeHandle) {
-      case 'n':
-      case 's':
-        canvasRef.current.style.cursor = 'ns-resize';
-        break;
-      case 'e':
-      case 'w':
-        canvasRef.current.style.cursor = 'ew-resize';
-        break;
-      case 'ne':
-      case 'sw':
-        canvasRef.current.style.cursor = 'nesw-resize';
-        break;
-      case 'nw':
-      case 'se':
-        canvasRef.current.style.cursor = 'nwse-resize';
-        break;
-      default:
-        canvasRef.current.style.cursor = 'default';
-    }
-  } else {
-    canvasRef.current.style.cursor = 'default';
-  }
-};
+  const [isDragging, setIsDragging] = useState(false);
+  const [isResizing, setIsResizing] = useState(false);
+  const [resizeHandle, setResizeHandle] = useState<string | null>(null);
+  const [startPos, setStartPos] = useState<MousePosition>({ x: 0, y: 0 });
+  const [startBox, setStartBox] = useState<CropBoxProps | null>(null);
 
-export const useMouseEvents = ({
-  canvasRef,
-  cropBoxes,
-  selectedCropIndex,
-  setSelectedCropIndex,
-  setCropBoxes,
-  isDrawing,
-  setIsDrawing,
-  startPos,
-  setStartPos,
-  currentPos,
-  setCurrentPos,
-  dragMode,
-  setDragMode,
-  resizeHandle,
-  setResizeHandle
-}: MouseEventProps) => {
-  // Handle mouse down
-  const handleMouseDown = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
+  // Mouse down handler - start dragging or resizing
+  const handleMouseDown = (event: React.MouseEvent) => {
     if (!canvasRef.current) return;
     
-    const rect = canvasRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    const canvas = canvasRef.current;
+    const rect = canvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
     
-    setStartPos({ x, y });
-    setCurrentPos({ x, y });
-    
-    // Check if clicking on an existing crop box
-    let found = false;
-    cropBoxes.forEach((box, index) => {
-      if (isPointInRotatedRect(x, y, box)) {
-        setSelectedCropIndex(index);
-        
-        // Check if we're on a resize handle
-        const handle = getResizeHandle(e, box);
-        if (handle) {
-          setDragMode('resize');
-          setResizeHandle(handle);
-        } else {
-          setDragMode('move');
-        }
-        
-        found = true;
+    // Check if clicked on a resize handle of the selected crop box
+    if (selectedCropIndex >= 0) {
+      const handle = getResizeHandle(x, y, cropBoxes[selectedCropIndex]);
+      if (handle) {
+        setIsResizing(true);
+        setResizeHandle(handle);
+        setStartPos({ x, y });
+        setStartBox({ ...cropBoxes[selectedCropIndex] });
+        return;
       }
-    });
+    }
     
-    if (!found) {
+    // Check if clicked inside any crop box
+    let clickedBoxIndex = -1;
+    for (let i = cropBoxes.length - 1; i >= 0; i--) {
+      const box = cropBoxes[i];
+      if (isPointInRotatedRect(
+        x, y, 
+        box.x, box.y, 
+        box.width, box.height,
+        box.rotation || 0
+      )) {
+        clickedBoxIndex = i;
+        break;
+      }
+    }
+    
+    if (clickedBoxIndex >= 0) {
+      setSelectedCropIndex(clickedBoxIndex);
+      setIsDragging(true);
+      setStartPos({ x, y });
+      setStartBox({ ...cropBoxes[clickedBoxIndex] });
+    } else {
       setSelectedCropIndex(-1);
-      setIsDrawing(true);
-      setDragMode('draw');
     }
-  }, [canvasRef, cropBoxes, setSelectedCropIndex, setStartPos, setCurrentPos, setIsDrawing, setDragMode, setResizeHandle]);
-  
-  // Handle mouse move
-  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (!canvasRef.current) return;
+  };
+
+  // Mouse move handler - handle dragging or resizing
+  const handleMouseMove = (event: React.MouseEvent) => {
+    if (!canvasRef.current || (!isDragging && !isResizing) || !startBox) return;
     
-    const rect = canvasRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    const canvas = canvasRef.current;
+    const rect = canvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
     
-    setCurrentPos({ x, y });
+    const deltaX = x - startPos.x;
+    const deltaY = y - startPos.y;
     
-    // Update cursor style based on position
-    if (!startPos) {
-      const hoveredBoxIndex = cropBoxes.findIndex(box => isPointInRotatedRect(x, y, box));
+    if (isResizing && resizeHandle && selectedCropIndex >= 0) {
+      // Handle resizing based on the resize handle
+      const newBoxes = [...cropBoxes];
+      const originalBox = { ...startBox };
+      const newBox = { ...newBoxes[selectedCropIndex] };
       
-      if (hoveredBoxIndex !== -1) {
-        const hoverResizeHandle = getResizeHandle(e, cropBoxes[hoveredBoxIndex]);
-        if (hoverResizeHandle) {
-          updateCursorStyle(canvasRef, hoverResizeHandle, '');
-        } else {
-          canvasRef.current.style.cursor = 'move';
-        }
-      } else {
-        canvasRef.current.style.cursor = 'default';
+      // Implement resizing logic based on which handle was grabbed
+      switch (resizeHandle) {
+        case 'tl': // top-left
+          newBox.x = originalBox.x + deltaX;
+          newBox.y = originalBox.y + deltaY;
+          newBox.width = originalBox.width - deltaX;
+          newBox.height = originalBox.height - deltaY;
+          break;
+        case 'tr': // top-right
+          newBox.y = originalBox.y + deltaY;
+          newBox.width = originalBox.width + deltaX;
+          newBox.height = originalBox.height - deltaY;
+          break;
+        case 'bl': // bottom-left
+          newBox.x = originalBox.x + deltaX;
+          newBox.width = originalBox.width - deltaX;
+          newBox.height = originalBox.height + deltaY;
+          break;
+        case 'br': // bottom-right
+          newBox.width = originalBox.width + deltaX;
+          newBox.height = originalBox.height + deltaY;
+          break;
+        case 't': // top
+          newBox.y = originalBox.y + deltaY;
+          newBox.height = originalBox.height - deltaY;
+          break;
+        case 'b': // bottom
+          newBox.height = originalBox.height + deltaY;
+          break;
+        case 'l': // left
+          newBox.x = originalBox.x + deltaX;
+          newBox.width = originalBox.width - deltaX;
+          break;
+        case 'r': // right
+          newBox.width = originalBox.width + deltaX;
+          break;
       }
-    }
-    
-  }, [canvasRef, startPos, cropBoxes, setCurrentPos]);
-  
-  // Handle mouse up
-  const handleMouseUp = useCallback(() => {
-    if (!startPos || !currentPos || !canvasRef.current) {
-      setIsDrawing(false);
-      setDragMode('');
-      setStartPos(null);
-      setCurrentPos(null);
-      setResizeHandle(null);
-      return;
-    }
-    
-    if (isDrawing) {
-      // Calculate the width and height
-      const width = Math.abs(currentPos.x - startPos.x);
-      const height = Math.abs(currentPos.y - startPos.y);
       
-      // Only create a box if it has meaningful dimensions
-      if (width > 10 && height > 10) {
-        // Determine top-left corner
-        const x = Math.min(startPos.x, currentPos.x);
-        const y = Math.min(startPos.y, currentPos.y);
-        
-        // Create and add the new crop box
-        const newBox = createNewCropBox(x, y, width, height, cropBoxes.length);
-        setCropBoxes(prev => [...prev, newBox]);
-        setSelectedCropIndex(cropBoxes.length);
-      }
+      // Ensure width and height are not negative
+      if (newBox.width < 10) newBox.width = 10;
+      if (newBox.height < 10) newBox.height = 10;
+      
+      newBoxes[selectedCropIndex] = newBox;
+      setCropBoxes(newBoxes);
+      
+    } else if (isDragging && selectedCropIndex >= 0) {
+      // Handle dragging
+      const newBoxes = [...cropBoxes];
+      const newBox = { ...newBoxes[selectedCropIndex] };
+      
+      newBox.x = startBox.x + deltaX;
+      newBox.y = startBox.y + deltaY;
+      
+      newBoxes[selectedCropIndex] = newBox;
+      setCropBoxes(newBoxes);
     }
-    
-    // Reset state
-    setIsDrawing(false);
-    setDragMode('');
-    setStartPos(null);
-    setCurrentPos(null);
+  };
+
+  // Mouse up handler - stop dragging or resizing
+  const handleMouseUp = () => {
+    setIsDragging(false);
+    setIsResizing(false);
     setResizeHandle(null);
-    
-  }, [startPos, currentPos, canvasRef, isDrawing, cropBoxes, setCropBoxes, setSelectedCropIndex, setIsDrawing, setDragMode, setStartPos, setCurrentPos, setResizeHandle]);
-  
+    setStartBox(null);
+  };
+
   return {
     handleMouseDown,
     handleMouseMove,
-    handleMouseUp
+    handleMouseUp,
+    isDragging,
+    isResizing
   };
 };

@@ -15,7 +15,6 @@ import TagField from './form-fields/TagField';
 import HistoricalContextField from './form-fields/HistoricalContextField';
 import PersonalSignificanceField from './form-fields/PersonalSignificanceField';
 import { format } from 'date-fns';
-import { OaklandMemoryData } from '@/lib/types';
 
 // Form schema for Oakland memories
 const formSchema = z.object({
@@ -35,6 +34,7 @@ const formSchema = z.object({
 });
 
 export type OaklandMemoryFormValues = z.infer<typeof formSchema>;
+export type OaklandMemoryData = z.infer<typeof formSchema>;
 
 // Component props
 interface OaklandMemoryFormProps {

@@ -1,4 +1,3 @@
-
 // Import the EnhancedCropBoxProps type we defined in CropBox.tsx
 import { EnhancedCropBoxProps } from './CropBox';
 
@@ -46,7 +45,7 @@ export const detectCards = async (
   return detectedCards;
 };
 
-// Added missing function for image cropping
+// Function for applying crop to an image
 export const applyCrop = async (
   cropBox: EnhancedCropBoxProps,
   canvasRef: HTMLCanvasElement | null,
@@ -285,30 +284,6 @@ const basicEnhance = (ctx: CanvasRenderingContext2D, width: number, height: numb
   ctx.putImageData(imageData, 0, 0);
 };
 
-// Function to determine memorabilia type based on aspect ratio
-export const classifyMemorabiliaType = (
-  width: number,
-  height: number
-): { type: MemorabiliaType; confidence: number } => {
-  const aspectRatio = width / height;
-  
-  // Common aspect ratios for different memorabilia
-  // Baseball cards typically 2.5:3.5 ratio (~0.71)
-  // Tickets often wider, around 2:1 or 3:1
-  // Photos can vary but often 4:3 or 3:2
-  
-  if (aspectRatio >= 0.65 && aspectRatio <= 0.75) {
-    return { type: 'card', confidence: 0.9 };
-  } else if (aspectRatio >= 1.8 && aspectRatio <= 3.2) {
-    return { type: 'ticket', confidence: 0.85 };
-  } else if ((aspectRatio >= 1.3 && aspectRatio <= 1.5) || 
-             (aspectRatio >= 0.75 && aspectRatio <= 0.85)) {
-    return { type: 'photo', confidence: 0.7 };
-  } else {
-    return { type: 'unknown', confidence: 0.5 };
-  }
-};
-
 // Function to detect cards in an image (for the ImageHandling hook)
 export const detectCardsInImage = async (
   imageElement: HTMLImageElement,
@@ -334,4 +309,28 @@ export const detectCardsInImage = async (
   };
   
   return [detectedCard];
+};
+
+// Function to determine memorabilia type based on aspect ratio
+export const classifyMemorabiliaType = (
+  width: number,
+  height: number
+): { type: MemorabiliaType; confidence: number } => {
+  const aspectRatio = width / height;
+  
+  // Common aspect ratios for different memorabilia
+  // Baseball cards typically 2.5:3.5 ratio (~0.71)
+  // Tickets often wider, around 2:1 or 3:1
+  // Photos can vary but often 4:3 or 3:2
+  
+  if (aspectRatio >= 0.65 && aspectRatio <= 0.75) {
+    return { type: 'card', confidence: 0.9 };
+  } else if (aspectRatio >= 1.8 && aspectRatio <= 3.2) {
+    return { type: 'ticket', confidence: 0.85 };
+  } else if ((aspectRatio >= 1.3 && aspectRatio <= 1.5) || 
+             (aspectRatio >= 0.75 && aspectRatio <= 0.85)) {
+    return { type: 'photo', confidence: 0.7 };
+  } else {
+    return { type: 'unknown', confidence: 0.5 };
+  }
 };

@@ -3,6 +3,17 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Card, Collection } from '../lib/types';
 import { useAuth } from './AuthContext';
 import { useCardOperations, useCollectionOperations } from './card/hooks';
+import { fetchCards, createCard, updateCard as updateCardOperation, deleteCard as deleteCardOperation } from './card/operations/cardOperations';
+import { 
+  fetchCollections, 
+  createCollection, 
+  updateCollection as updateCollectionOperation,
+  deleteCollection as deleteCollectionOperation
+} from './card/operations/collectionOperations';
+import { 
+  addCardToCollection as addCardToCollectionOperation, 
+  removeCardFromCollection as removeCardFromCollectionOperation
+} from './card/operations/cardCollectionOperations';
 
 type CardContextType = {
   cards: Card[];
@@ -19,7 +30,7 @@ type CardContextType = {
   removeCardFromCollection: (cardId: string, collectionId: string) => Promise<void>;
   refreshCards: () => Promise<void>;
   refreshCollections: () => Promise<void>;
-  getCard: (id: string) => Card | undefined; // Add the missing getCard method
+  getCard: (id: string) => Card | undefined;
 };
 
 const CardContext = createContext<CardContextType | undefined>(undefined);
@@ -38,37 +49,57 @@ export const CardProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
+  
+  const { getCard } = useCardOperations();
 
-  const { 
-    refreshCards,
-    addCard,
-    updateCard,
-    deleteCard
-  } = useCardOperations({
-    cards,
-    setCards,
-    setIsLoading,
-    setError
-  });
+  // Function to refresh cards from the data source
+  const refreshCards = async () => {
+    await fetchCards(setIsLoading, setError, setCards);
+  };
 
-  const {
-    refreshCollections,
-    addCollection,
-    updateCollection,
-    deleteCollection,
-    addCardToCollection,
-    removeCardFromCollection
-  } = useCollectionOperations({
-    collections,
-    setCollections,
-    setCards,
-    setIsLoading,
-    setError
-  });
+  // Function to add a new card
+  const addCard = async (cardData: Omit<Card, 'id' | 'createdAt' | 'updatedAt'>) => {
+    return await createCard(cardData as any, setIsLoading, setError, setCards);
+  };
 
-  // Implement the getCard method
-  const getCard = (id: string) => {
-    return cards.find(card => card.id === id);
+  // Function to update an existing card
+  const updateCardWrapper = async (id: string, updates: Partial<Omit<Card, 'id' | 'createdAt' | 'updatedAt'>>) => {
+    await updateCardOperation(id, updates, setIsLoading, setError, setCards);
+  };
+
+  // Function to delete a card
+  const deleteCardWrapper = async (id: string) => {
+    await deleteCardOperation(id, setIsLoading, setError, setCards);
+  };
+
+  // Function to refresh collections from the data source
+  const refreshCollections = async () => {
+    await fetchCollections(setIsLoading, setError, setCollections);
+  };
+
+  // Function to add a new collection
+  const addCollection = async (collectionData: Omit<Collection, 'id' | 'cards' | 'createdAt' | 'updatedAt'>) => {
+    return await createCollection(collectionData as any, setIsLoading, setError, setCollections);
+  };
+
+  // Function to update an existing collection
+  const updateCollectionWrapper = async (id: string, updates: Partial<Omit<Collection, 'id' | 'cards' | 'createdAt' | 'updatedAt'>>) => {
+    await updateCollectionOperation(id, updates, collections, setIsLoading, setError, setCollections);
+  };
+
+  // Function to delete a collection
+  const deleteCollectionWrapper = async (id: string) => {
+    await deleteCollectionOperation(id, setIsLoading, setError, setCards, setCollections);
+  };
+
+  // Function to add a card to a collection
+  const addCardToCollectionWrapper = async (cardId: string, collectionId: string) => {
+    await addCardToCollectionOperation(cardId, collectionId, collections, cards, setIsLoading, setError, setCards, setCollections);
+  };
+
+  // Function to remove a card from a collection
+  const removeCardFromCollectionWrapper = async (cardId: string, collectionId: string) => {
+    await removeCardFromCollectionOperation(cardId, collectionId, setIsLoading, setError, setCards, setCollections);
   };
 
   useEffect(() => {
@@ -81,22 +112,22 @@ export const CardProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [user]);
 
-  const value = {
+  const value: CardContextType = {
     cards,
     collections,
     isLoading,
     error,
     addCard,
-    updateCard,
-    deleteCard,
+    updateCard: updateCardWrapper,
+    deleteCard: deleteCardWrapper,
     addCollection,
-    updateCollection,
-    deleteCollection,
-    addCardToCollection,
-    removeCardFromCollection,
+    updateCollection: updateCollectionWrapper,
+    deleteCollection: deleteCollectionWrapper,
+    addCardToCollection: addCardToCollectionWrapper,
+    removeCardFromCollection: removeCardFromCollectionWrapper,
     refreshCards,
     refreshCollections,
-    getCard // Add getCard to context value
+    getCard
   };
 
   return <CardContext.Provider value={value}>{children}</CardContext.Provider>;

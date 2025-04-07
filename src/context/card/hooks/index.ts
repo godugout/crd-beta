@@ -2,6 +2,9 @@
 export * from './useCardOperations';
 export * from './useCollectionOperations';
 
+// Import the useCards hook first to avoid circular dependency issues
+import { useCards } from '@/context/CardContext';
+
 // This is a wrapper function that uses the CardContext to provide collection functionality
 // This fixes the circular dependency issue
 export const useCollection = () => {
@@ -17,6 +20,3 @@ export const useCollection = () => {
     removeCardFromCollection
   };
 };
-
-// Import the useCards hook to avoid circular dependency issues
-import { useCards } from '@/context/CardContext';
