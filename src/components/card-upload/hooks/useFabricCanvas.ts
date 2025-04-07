@@ -1,12 +1,12 @@
 
 import { useState } from 'react';
-import { CropBoxProps } from '../CropBox';
+import { EnhancedCropBoxProps } from '../CropBox';
 import { ImageData } from './useCropState';
 import { useInitFabricCanvas } from './fabric/useInitFabricCanvas';
 import { useBackgroundImage } from './fabric/useBackgroundImage';
 import { useCropRectangles } from './fabric/useCropRectangles';
 import { useCreateCropBox } from './fabric/useCreateCropBox';
-import { EnhancedCropBoxProps, MemorabiliaType } from '../cardDetection';
+import { MemorabiliaType } from '../cardDetection';
 
 interface UseFabricCanvasProps {
   fabricRef: React.RefObject<HTMLCanvasElement>;

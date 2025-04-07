@@ -1,111 +1,60 @@
 
+import { useState, useCallback } from 'react';
 import { CropBoxProps } from '../../CropBox';
 
-export const createNewCropBox = (
-  x: number, 
-  y: number, 
-  cropBoxes: CropBoxProps[],
-  setCropBoxes: React.Dispatch<React.SetStateAction<CropBoxProps[]>>,
-  setSelectedCropIndex: (index: number) => void,
-  setIsDragging: (isDragging: boolean) => void,
-  editorImgRef: React.RefObject<HTMLImageElement>
-) => {
-  if (editorImgRef.current) {
-    const newWidth = 150;
-    const newHeight = newWidth * (3.5 / 2.5);
-    
+export const useCropBox = () => {
+  const [cropBoxes, setCropBoxes] = useState<CropBoxProps[]>([]);
+  const [selectedCropIndex, setSelectedCropIndex] = useState<number>(-1);
+  
+  // Add a new crop box
+  const addCropBox = useCallback((x: number, y: number, width: number, height: number) => {
     const newBox: CropBoxProps = {
-      x: x - newWidth / 2,
-      y: y - newHeight / 2,
-      width: newWidth,
-      height: newHeight,
-      rotation: 0
+      id: cropBoxes.length + 1,
+      x,
+      y,
+      width,
+      height,
+      rotation: 0,
+      color: '#00FF00'
     };
     
-    const newBoxes = [...cropBoxes, newBox];
-    setCropBoxes(newBoxes);
-    setSelectedCropIndex(newBoxes.length - 1);
-    setIsDragging(true);
-    return { x, y };
-  }
-  return { x, y };
-};
-
-export const updateCursorStyle = (
-  e: React.MouseEvent<HTMLCanvasElement>,
-  canvasRef: React.RefObject<HTMLCanvasElement>,
-  cropBoxes: CropBoxProps[],
-  selectedCropIndex: number,
-  isDragging: boolean,
-  isResizing: string | null,
-  isRotating: boolean,
-  isRotationHandle: (x: number, y: number, box: CropBoxProps) => boolean,
-  getResizeHandle: (e: React.MouseEvent<HTMLCanvasElement>, box: CropBoxProps, handleSize?: number) => string | null,
-  isPointInRotatedRect: (x: number, y: number, box: CropBoxProps) => boolean
-) => {
-  const canvas = canvasRef.current;
-  if (!canvas) return;
+    setCropBoxes(prev => [...prev, newBox]);
+    setSelectedCropIndex(cropBoxes.length);
+    return newBox;
+  }, [cropBoxes]);
   
-  const rect = canvas.getBoundingClientRect();
-  const x = e.clientX - rect.left;
-  const y = e.clientY - rect.top;
+  // Update a crop box
+  const updateCropBox = useCallback((index: number, updates: Partial<CropBoxProps>) => {
+    setCropBoxes(prev => {
+      const newBoxes = [...prev];
+      if (newBoxes[index]) {
+        newBoxes[index] = { ...newBoxes[index], ...updates };
+      }
+      return newBoxes;
+    });
+  }, []);
   
-  if (isDragging) {
-    canvas.style.cursor = 'grabbing';
-    return;
-  }
-  
-  if (isResizing) {
-    // Use appropriate resize cursors based on which handle is being used
-    switch (isResizing) {
-      case 'tl': case 'br':
-        canvas.style.cursor = 'nwse-resize';
-        break;
-      case 'tr': case 'bl':
-        canvas.style.cursor = 'nesw-resize';
-        break;
-    }
-    return;
-  }
-  
-  if (isRotating) {
-    canvas.style.cursor = 'grabbing';
-    return;
-  }
-  
-  // Not actively dragging/resizing - just update cursor based on position
-  let cursorStyle = 'default';
-  
-  if (selectedCropIndex >= 0 && selectedCropIndex < cropBoxes.length) {
-    const selectedBox = cropBoxes[selectedCropIndex];
+  // Remove a crop box
+  const removeCropBox = useCallback((index: number) => {
+    setCropBoxes(prev => {
+      const newBoxes = prev.filter((_, i) => i !== index);
+      return newBoxes;
+    });
     
-    if (isRotationHandle(x, y, selectedBox)) {
-      cursorStyle = 'grab';
-    } else {
-      // Check resize handles first (higher priority than move)
-      const resizeHandle = getResizeHandle(e, selectedBox);
-      if (resizeHandle) {
-        switch (resizeHandle) {
-          case 'tl': case 'br':
-            cursorStyle = 'nwse-resize';
-            break;
-          case 'tr': case 'bl':
-            cursorStyle = 'nesw-resize';
-            break;
-        }
-      } else if (isPointInRotatedRect(x, y, selectedBox)) {
-        cursorStyle = 'move';
-      }
+    if (selectedCropIndex === index) {
+      setSelectedCropIndex(-1);
+    } else if (selectedCropIndex > index) {
+      setSelectedCropIndex(prev => prev - 1);
     }
-  } else {
-    // If no selection, check if hovering over any box
-    for (const box of cropBoxes) {
-      if (isPointInRotatedRect(x, y, box)) {
-        cursorStyle = 'move';
-        break;
-      }
-    }
-  }
+  }, [selectedCropIndex]);
   
-  canvas.style.cursor = cursorStyle;
+  return {
+    cropBoxes,
+    setCropBoxes,
+    selectedCropIndex,
+    setSelectedCropIndex,
+    addCropBox,
+    updateCropBox,
+    removeCropBox
+  };
 };

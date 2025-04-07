@@ -1,9 +1,9 @@
 
-import { fabric } from 'fabric';
+import { Canvas, Rect } from 'fabric'; // Updated import
 import { EnhancedCropBoxProps } from '../../CropBox';
 
 interface UseCreateCropBoxProps {
-  canvas: fabric.Canvas | null;
+  canvas: Canvas | null;
   setCropBoxes: React.Dispatch<React.SetStateAction<EnhancedCropBoxProps[]>>;
   setSelectedCropIndex: (index: number) => void;
   cropBoxesLength: number;

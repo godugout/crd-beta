@@ -1,13 +1,13 @@
 
 import { useEffect } from 'react';
-import { fabric } from 'fabric';
+import { Canvas, Rect } from 'fabric'; // Updated import
 import { EnhancedCropBoxProps } from '../../CropBox';
 
 // Type for fabric.js degree
 type TDegree = number;
 
 interface UseCropRectanglesProps {
-  canvas: fabric.Canvas | null;
+  canvas: Canvas | null;
   cropBoxes: EnhancedCropBoxProps[];
   setCropBoxes: React.Dispatch<React.SetStateAction<EnhancedCropBoxProps[]>>;
   selectedCropIndex: number;
@@ -37,7 +37,7 @@ export const useCropRectangles = ({
     
     // Create rectangles for each crop box
     cropBoxes.forEach((box, index) => {
-      const rect = new fabric.Rect({
+      const rect = new Rect({
         left: box.x,
         top: box.y,
         width: box.width,
@@ -61,7 +61,7 @@ export const useCropRectangles = ({
       
       // Add label if it has a memorabilia type
       if (box.memorabiliaType && box.memorabiliaType !== 'unknown') {
-        const label = new fabric.Text(box.memorabiliaType.charAt(0).toUpperCase() + box.memorabiliaType.slice(1), {
+        const label = new window.fabric.Text(box.memorabiliaType.charAt(0).toUpperCase() + box.memorabiliaType.slice(1), {
           left: box.x + 10,
           top: box.y + 10,
           fontSize: 14,
@@ -78,7 +78,7 @@ export const useCropRectangles = ({
         const checkboxSize = 20;
         const isSelected = batchSelections?.includes(index);
         
-        const checkbox = new fabric.Rect({
+        const checkbox = new Rect({
           left: box.x + box.width - checkboxSize - 10,
           top: box.y + 10,
           width: checkboxSize,
@@ -92,7 +92,7 @@ export const useCropRectangles = ({
         });
         
         if (isSelected) {
-          const check = new fabric.Text('✓', {
+          const check = new window.fabric.Text('✓', {
             left: box.x + box.width - checkboxSize - 5,
             top: box.y + 10,
             fontSize: 16,

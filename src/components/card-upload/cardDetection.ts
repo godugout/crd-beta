@@ -1,8 +1,8 @@
-
-import { EnhancedCropBoxProps } from './CropBox';
-
-// Define memorabilia types
+// Export the MemorabiliaType at the top for better clarity
 export type MemorabiliaType = 'card' | 'ticket' | 'program' | 'autograph' | 'face' | 'unknown';
+
+// Import the EnhancedCropBoxProps
+import { EnhancedCropBoxProps } from './CropBox';
 
 // Base detection function
 export const detectCardsInImage = (
@@ -128,7 +128,6 @@ const detectCards = (img: HTMLImageElement): EnhancedCropBoxProps[] => {
   return detections;
 };
 
-// Detect ticket stubs in the image
 const detectTickets = (img: HTMLImageElement): EnhancedCropBoxProps[] => {
   const detections: EnhancedCropBoxProps[] = [];
   const imgWidth = img.width;
@@ -159,7 +158,6 @@ const detectTickets = (img: HTMLImageElement): EnhancedCropBoxProps[] => {
   return detections;
 };
 
-// Detect programs and scorecards in the image
 const detectPrograms = (img: HTMLImageElement): EnhancedCropBoxProps[] => {
   const detections: EnhancedCropBoxProps[] = [];
   const imgWidth = img.width;
@@ -190,7 +188,6 @@ const detectPrograms = (img: HTMLImageElement): EnhancedCropBoxProps[] => {
   return detections;
 };
 
-// Detect autographed items in the image
 const detectAutographs = (img: HTMLImageElement): EnhancedCropBoxProps[] => {
   const detections: EnhancedCropBoxProps[] = [];
   const imgWidth = img.width;
@@ -215,7 +212,6 @@ const detectAutographs = (img: HTMLImageElement): EnhancedCropBoxProps[] => {
   return detections;
 };
 
-// Detect faces in the image
 const detectFacesInImage = (img: HTMLImageElement): EnhancedCropBoxProps[] => {
   const detections: EnhancedCropBoxProps[] = [];
   const imgWidth = img.width;
@@ -364,7 +360,6 @@ export const applyCrop = async (
   }
 };
 
-// Apply specialized enhancements based on memorabilia type
 const applyEnhancement = (
   ctx: CanvasRenderingContext2D,
   width: number,

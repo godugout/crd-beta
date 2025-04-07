@@ -16,6 +16,7 @@ export interface CropBoxProps {
   confidence?: number;
 }
 
+// Enhanced version with required memorabiliaType and confidence
 export interface EnhancedCropBoxProps {
   id: number;
   x: number;

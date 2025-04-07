@@ -38,7 +38,11 @@ const Navbar = () => {
 
           <div className="flex items-center">
             {user ? (
-              <UserDropdown user={user} />
+              <UserDropdown 
+                user={user} 
+                isOpen={false} 
+                onClose={() => {}} 
+              />
             ) : (
               <Link to="/auth">
                 <Button size="sm">Sign In</Button>
