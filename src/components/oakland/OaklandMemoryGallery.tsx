@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useCards } from '@/context/CardContext';
@@ -23,13 +22,11 @@ const OaklandMemoryGallery = () => {
   const [filterDateTo, setFilterDateTo] = useState<string | null>(null);
   const [showHistoricalOnly, setShowHistoricalOnly] = useState(false);
   
-  // Filter cards that have Oakland memory metadata
   const oaklandCards = cards.filter(card => 
     card.designMetadata && 
     card.designMetadata.oaklandMemory
   );
   
-  // Extract all unique opponents, locations, and dates for filters
   const allOpponents = Array.from(new Set(
     oaklandCards
       .map(card => card.designMetadata?.oaklandMemory?.opponent)
@@ -42,27 +39,22 @@ const OaklandMemoryGallery = () => {
       .filter(Boolean) as string[]
   )).sort();
   
-  // Apply filters and search
   const filteredCards = oaklandCards.filter(card => {
     const oaklandMemory = card.designMetadata?.oaklandMemory;
     if (!oaklandMemory) return false;
     
-    // Filter by memory type if filter is active
     if (filterType && oaklandMemory.memoryType !== filterType) {
       return false;
     }
     
-    // Filter by opponent
     if (filterOpponent && oaklandMemory.opponent !== filterOpponent) {
       return false;
     }
     
-    // Filter by location
     if (filterLocation && oaklandMemory.location !== filterLocation) {
       return false;
     }
     
-    // Filter by date range
     if (filterDateFrom || filterDateTo) {
       const memoryDate = oaklandMemory.date ? new Date(oaklandMemory.date) : null;
       
@@ -83,12 +75,10 @@ const OaklandMemoryGallery = () => {
       }
     }
     
-    // Filter by historical context presence
     if (showHistoricalOnly && !oaklandMemory.historicalContext) {
       return false;
     }
     
-    // Search by title, description, or tags
     if (searchTerm) {
       const searchLower = searchTerm.toLowerCase();
       const inTitle = card.title.toLowerCase().includes(searchLower);
@@ -113,9 +103,15 @@ const OaklandMemoryGallery = () => {
     setShowHistoricalOnly(false);
   };
   
+  const handleDialogClose = () => {
+    const closeButton = document.querySelector('button[aria-label="Close"]');
+    if (closeButton && 'click' in closeButton) {
+      (closeButton as HTMLButtonElement).click();
+    }
+  };
+  
   return (
     <div>
-      {/* Basic Search */}
       <div className="flex flex-wrap gap-4 mb-8 items-center">
         <div className="relative flex-grow max-w-md">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-400" />
@@ -148,7 +144,6 @@ const OaklandMemoryGallery = () => {
           </Select>
         </div>
         
-        {/* Advanced Filters Dialog */}
         <Dialog>
           <DialogTrigger asChild>
             <Button variant="outline" size="sm" className="gap-1">
@@ -162,7 +157,6 @@ const OaklandMemoryGallery = () => {
             </DialogHeader>
             
             <div className="grid gap-4 py-4">
-              {/* Opponent Filter */}
               <div className="grid grid-cols-4 items-center gap-4">
                 <label className="text-right text-sm">Opponent:</label>
                 <div className="col-span-3">
@@ -183,7 +177,6 @@ const OaklandMemoryGallery = () => {
                 </div>
               </div>
               
-              {/* Location Filter */}
               <div className="grid grid-cols-4 items-center gap-4">
                 <label className="text-right text-sm">Location:</label>
                 <div className="col-span-3">
@@ -204,7 +197,6 @@ const OaklandMemoryGallery = () => {
                 </div>
               </div>
               
-              {/* Date Range */}
               <div className="grid grid-cols-4 items-center gap-4">
                 <label className="text-right text-sm">Date from:</label>
                 <div className="col-span-3">
@@ -227,7 +219,6 @@ const OaklandMemoryGallery = () => {
                 </div>
               </div>
               
-              {/* Historical Context Filter */}
               <div className="grid grid-cols-4 items-center gap-4">
                 <label className="text-right text-sm">Content:</label>
                 <div className="col-span-3 flex items-center space-x-2">
@@ -249,14 +240,13 @@ const OaklandMemoryGallery = () => {
               <Button variant="outline" onClick={clearFilters}>
                 Clear Filters
               </Button>
-              <Button type="button" onClick={() => document.querySelector('button[aria-label="Close"]')?.click()}>
+              <Button type="button" onClick={handleDialogClose}>
                 Apply Filters
               </Button>
             </div>
           </DialogContent>
         </Dialog>
         
-        {/* Create Memory Button */}
         <Button asChild>
           <Link to="/oakland-memory-creator">
             <PlusCircle className="h-4 w-4 mr-2" />
@@ -265,7 +255,6 @@ const OaklandMemoryGallery = () => {
         </Button>
       </div>
       
-      {/* Active Filters Display */}
       {(filterType || filterOpponent || filterLocation || filterDateFrom || filterDateTo || showHistoricalOnly) && (
         <div className="mb-6 flex flex-wrap gap-2 items-center">
           <span className="text-sm text-gray-500">Active filters:</span>
@@ -344,15 +333,12 @@ const OaklandMemoryGallery = () => {
         </div>
       )}
       
-      {/* Memory Card Grid */}
       {filteredCards.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {filteredCards.map(card => {
             const oaklandMemory = card.designMetadata?.oaklandMemory;
-            // Early return if oaklandMemory is undefined
             if (!oaklandMemory) return null;
             
-            // Convert to expected OaklandMemoryData format
             const memoryData: OaklandMemoryData = {
               title: card.title,
               description: card.description,
