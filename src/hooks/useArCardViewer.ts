@@ -59,8 +59,8 @@ export function useArCardViewer(id?: string) {
               imageUrl: "/lovable-uploads/a38aa501-ea2d-4416-9699-1e69b1826233.png",
               thumbnailUrl: "/lovable-uploads/a38aa501-ea2d-4416-9699-1e69b1826233.png",
               tags: ["baseball", "sample", "demo"],
-              createdAt: new Date(),
-              updatedAt: new Date()
+              createdAt: new Date().toISOString(), // Fix: Convert Date to string
+              updatedAt: new Date().toISOString()  // Fix: Convert Date to string
             },
             {
               id: "sample-2",
@@ -69,8 +69,8 @@ export function useArCardViewer(id?: string) {
               imageUrl: "/lovable-uploads/667e6ad2-af96-40ac-bd16-a69778e14b21.png",
               thumbnailUrl: "/lovable-uploads/667e6ad2-af96-40ac-bd16-a69778e14b21.png",
               tags: ["trading", "sample", "demo"],
-              createdAt: new Date(),
-              updatedAt: new Date()
+              createdAt: new Date().toISOString(), // Fix: Convert Date to string
+              updatedAt: new Date().toISOString()  // Fix: Convert Date to string
             }
           ];
           
@@ -90,8 +90,8 @@ export function useArCardViewer(id?: string) {
             imageUrl: card.image_url || '',
             thumbnailUrl: card.thumbnail_url || card.image_url || '',
             tags: card.tags || [],
-            createdAt: new Date(card.created_at),
-            updatedAt: new Date(card.updated_at),
+            createdAt: card.created_at,  // Fix: Use string directly
+            updatedAt: card.updated_at,  // Fix: Use string directly
             collectionId: card.collection_id
           }));
           

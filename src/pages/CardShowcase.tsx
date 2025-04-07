@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -72,8 +73,8 @@ const CardShowcase = () => {
           imageUrl: card.image_url || '',
           thumbnailUrl: card.thumbnail_url || card.image_url || '',
           tags: card.tags || [],
-          createdAt: new Date(card.created_at),
-          updatedAt: new Date(card.updated_at),
+          createdAt: card.created_at, // Fix: Use string directly, not converting to Date
+          updatedAt: card.updated_at, // Fix: Use string directly, not converting to Date
           collectionId: card.collection_id || undefined
         }));
         
