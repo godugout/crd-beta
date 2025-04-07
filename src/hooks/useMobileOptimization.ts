@@ -52,6 +52,12 @@ interface MobileOptimizationResult {
    * Whether to optimize animations
    */
   shouldOptimizeAnimations: boolean;
+  
+  /**
+   * Whether to optimize interactions
+   * Used for haptic feedback, etc.
+   */
+  optimizeInteractions: boolean;
 }
 
 /**
@@ -115,6 +121,7 @@ export function useMobileOptimization({
     isLowBandwidth,
     lazyLoadImages: defaultLazyLoad || isLowBandwidth || isMobile,
     getImageQuality,
-    shouldOptimizeAnimations: isMobile || isLowBandwidth || preferReducedMotion
+    shouldOptimizeAnimations: isMobile || isLowBandwidth || preferReducedMotion,
+    optimizeInteractions: isMobile && !isLowBandwidth && !preferReducedMotion
   };
 }

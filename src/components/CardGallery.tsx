@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -13,6 +12,7 @@ import SearchInput from './gallery/SearchInput';
 import TagFilter from './gallery/TagFilter';
 import CardList from './gallery/CardList';
 import { useCardEffects } from './gallery/hooks/useCardEffects';
+import { Card } from '@/lib/types';
 
 interface CardGalleryProps {
   className?: string;
@@ -38,9 +38,7 @@ const CardGallery: React.FC<CardGalleryProps> = ({
     isLoading: isLoadingCards, 
     error: cardsError, 
     refetch: refreshCards 
-  } = useCardData({
-    autoFetch: !propCards,
-  });
+  } = useCardData();
   
   const cards = propCards || contextCards;
   

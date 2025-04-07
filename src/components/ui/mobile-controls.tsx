@@ -13,10 +13,10 @@ interface MobileTouchButtonProps extends React.ButtonHTMLAttributes<HTMLButtonEl
 
 export const MobileTouchButton = React.forwardRef<HTMLButtonElement, MobileTouchButtonProps>(
   ({ className, variant = 'primary', size = 'md', hapticFeedback = true, label, onClick, children, ...props }, ref) => {
-    const { optimizeInteractions } = useMobileOptimization();
+    const { isMobile } = useMobileOptimization();
     
     const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-      if (hapticFeedback && optimizeInteractions && navigator.vibrate) {
+      if (hapticFeedback && isMobile && navigator.vibrate) {
         navigator.vibrate(10); // Subtle vibration feedback
       }
       
@@ -76,6 +76,7 @@ export const MobileActionFab = React.forwardRef<HTMLButtonElement, MobileTouchBu
         ref={ref}
         variant="icon"
         size="lg"
+        hapticFeedback={false}
         {...props}
       >
         {children}

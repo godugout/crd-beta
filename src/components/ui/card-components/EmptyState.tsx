@@ -45,7 +45,7 @@ export const EmptyState = ({
   className = ""
 }: EmptyStateProps) => {
   // Dynamically get the icon component
-  const IconComponent = icon ? LucideIcons[icon as keyof typeof LucideIcons] : null;
+  const IconComponent = icon ? LucideIcons[icon] : null;
 
   return (
     <div className={cn(

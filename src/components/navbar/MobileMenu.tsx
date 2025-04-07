@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import {
@@ -29,7 +28,7 @@ interface MobileMenuProps {
 const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose, onSignOut, user }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isMobile, optimizeInteractions } = useMobileOptimization();
+  const { isMobile } = useMobileOptimization();
 
   const handleSignOut = async () => {
     await onSignOut();
@@ -41,14 +40,12 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose, onSignOut, use
     onClose();
   };
 
-  // Detect swipe gestures to close the menu
   const handleSwipe = (direction: 'left' | 'right' | 'up' | 'down') => {
     if (direction === 'left' && isOpen) {
       onClose();
     }
   };
 
-  // Organize navigation items into categories for better organization
   const mainNavItems = [
     { title: 'Home', path: '/', icon: HomeIcon },
     { title: 'Cards', path: '/gallery', icon: Image },
@@ -109,6 +106,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose, onSignOut, use
                       location.pathname === item.path && "bg-muted font-medium"
                     )}
                     onClick={() => handleNavigation(item.path)}
+                    hapticFeedback={false}
                   >
                     <item.icon className="h-5 w-5 mr-3" />
                     {item.title}
@@ -129,6 +127,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose, onSignOut, use
                       location.pathname === item.path && "bg-muted font-medium"
                     )}
                     onClick={() => handleNavigation(item.path)}
+                    hapticFeedback={false}
                   >
                     <item.icon className="h-5 w-5 mr-3" />
                     {item.title}
@@ -150,6 +149,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose, onSignOut, use
                       location.pathname === item.path && "bg-muted font-medium"
                     )}
                     onClick={() => handleNavigation(item.path)}
+                    hapticFeedback={false}
                   >
                     <item.icon className="h-5 w-5 mr-3" />
                     {item.title}
@@ -170,6 +170,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose, onSignOut, use
                       location.pathname === item.path && "bg-muted font-medium"
                     )}
                     onClick={() => handleNavigation(item.path)}
+                    hapticFeedback={false}
                   >
                     <item.icon className="h-5 w-5 mr-3" />
                     {item.title}
@@ -184,6 +185,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose, onSignOut, use
                   variant="ghost" 
                   className="w-full" 
                   onClick={handleSignOut}
+                  hapticFeedback={false}
                 >
                   Sign Out
                 </MobileTouchButton>
@@ -191,6 +193,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose, onSignOut, use
                 <MobileTouchButton 
                   className="w-full" 
                   onClick={() => handleNavigation("/auth")}
+                  hapticFeedback={false}
                 >
                   Sign In
                 </MobileTouchButton>

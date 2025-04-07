@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { X, ChevronLeft, ChevronRight, Camera, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -24,13 +23,10 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
   const [currentIndex, setCurrentIndex] = useState(0);
   const { shouldOptimizeAnimations } = useMobileOptimization();
   
-  // Store the current card ID in a ref to avoid closures in useEffect
   const currentCardIdRef = useRef<string>(cardId);
   
-  // Preload next and previous images for smoother navigation
   const preloadImagesRef = useRef<HTMLDivElement>(null);
   
-  // Optimize effects for performance
   const { 
     cardEffects, 
     toggleEffect, 
@@ -43,21 +39,18 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
   
   const activeEffects = selectedCard ? (cardEffects[selectedCard.id] || []) : [];
 
-  // Find the card and its index when the component mounts or cardId changes
   useEffect(() => {
     currentCardIdRef.current = cardId;
     
     const card = cards.find(c => c.id === cardId);
     if (card) {
       setSelectedCard(card);
-      // Find the index of the card in the collection
       const index = cards.findIndex(c => c.id === cardId);
       if (index !== -1) {
         setCurrentIndex(index);
       }
     }
     
-    // Add key event listeners to close on Escape
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         onClose();
@@ -66,7 +59,6 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
 
     window.addEventListener('keydown', handleKeyDown);
     
-    // Enter fullscreen mode if available
     const docElement = document.documentElement;
     if (docElement.requestFullscreen) {
       docElement.requestFullscreen()
@@ -78,7 +70,6 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
       
-      // Exit fullscreen when component unmounts if we're in fullscreen mode
       if (document.fullscreenElement) {
         document.exitFullscreen()
           .catch(err => {
@@ -88,23 +79,19 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
     };
   }, [cardId, cards, onClose]);
 
-  // Set up keyboard shortcuts for navigation
   useKeyboardShortcut('ArrowLeft', navigateToPrevious);
   useKeyboardShortcut('ArrowRight', navigateToNext);
   useKeyboardShortcut(' ', toggleFlip);
 
-  // Preload adjacent images when current index changes
   useEffect(() => {
     if (cards.length <= 1 || !preloadImagesRef.current) return;
     
     const preloadContainer = preloadImagesRef.current;
     preloadContainer.innerHTML = '';
     
-    // Get indices of previous and next cards with wraparound
     const prevIndex = (currentIndex - 1 + cards.length) % cards.length;
     const nextIndex = (currentIndex + 1) % cards.length;
     
-    // Create and append image elements for preloading
     [prevIndex, nextIndex].forEach(index => {
       if (index !== currentIndex && cards[index]) {
         const img = document.createElement('img');
@@ -125,7 +112,6 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
       setSelectedCard(nextCard);
       setCurrentIndex(currentIndex + 1);
     } else {
-      // Loop back to the first card
       const firstCard = cards[0];
       setSelectedCard(firstCard);
       setCurrentIndex(0);
@@ -138,7 +124,6 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
       setSelectedCard(prevCard);
       setCurrentIndex(currentIndex - 1);
     } else {
-      // Loop to the last card
       const lastCard = cards[cards.length - 1];
       setSelectedCard(lastCard);
       setCurrentIndex(cards.length - 1);
@@ -146,8 +131,6 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
   }
 
   const takeScreenshot = () => {
-    // This is just a placeholder - in a real app you would use 
-    // something like html2canvas to capture the card
     toast.success('Screenshot saved to your gallery', {
       description: 'Card image has been saved with current effects'
     });
@@ -159,7 +142,6 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
     }
   }, [selectedCard, toggleEffect]);
 
-  // Convert the card to the format expected by CardViewer
   const convertToCardData = useCallback((card: Card): CardData => {
     return {
       id: parseInt(card.id),
@@ -176,7 +158,7 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
       jersey: '',
       backgroundColor: '#000',
       textColor: '#fff',
-      fabricSwatches: card.designMetadata?.fabricSwatches || []
+      fabricSwatches: card.designMetadata?.cardStyle?.fabricSwatches || []
     };
   }, [activeEffects]);
 
@@ -190,7 +172,6 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
 
   return (
     <div className="fixed inset-0 bg-black z-50">
-      {/* Hidden container for preloading images */}
       <div ref={preloadImagesRef} className="hidden"></div>
       
       <ErrorBoundary>
@@ -204,7 +185,6 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
         </Button>
 
         <div className="h-screen w-screen flex items-center justify-center">
-          {/* Navigation buttons */}
           <Button
             variant="ghost"
             size="icon"
@@ -235,7 +215,6 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
           </div>
         </div>
 
-        {/* Bottom control bar */}
         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent p-4">
           <div className="container mx-auto max-w-5xl flex justify-between items-center">
             <div className="text-white">
@@ -267,7 +246,6 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
           </div>
         </div>
 
-        {/* Effects toolbar */}
         <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-10 flex gap-2">
           {['Refractor', 'Holographic', 'Shimmer', 'Vintage'].map(effect => (
             <Button

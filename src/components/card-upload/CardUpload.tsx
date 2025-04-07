@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { Upload, X, Image as ImageIcon, Camera } from 'lucide-react';
@@ -24,25 +23,21 @@ const CardUpload: React.FC<CardUploadProps> = ({ onImageUpload, className, initi
   const [editorImage, setEditorImage] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const isMobile = useIsMobile();
-  const { optimizeInteractions, getImageQuality } = useMobileOptimization();
+  const { shouldOptimizeAnimations, getImageQuality } = useMobileOptimization();
 
-  // Function to handle camera capture for mobile devices
   const handleCameraCapture = () => {
     if (!inputRef.current) return;
     
-    // Set the input to accept camera photos
     inputRef.current.setAttribute('capture', 'environment');
     inputRef.current.click();
   };
 
   const processFile = async (file: File) => {
-    // Check if the file is an image
     if (!file.type.match('image.*')) {
       toast.error('Please upload an image file');
       return;
     }
     
-    // Check file size (limit to 5MB)
     if (file.size > 5 * 1024 * 1024) {
       toast.error('File size should be less than 5MB');
       return;
@@ -50,13 +45,10 @@ const CardUpload: React.FC<CardUploadProps> = ({ onImageUpload, className, initi
 
     setCurrentFile(file);
     
-    // Create a temporary URL for the image
     const localUrl = URL.createObjectURL(file);
     
-    // Load the image to check dimensions and detect card content
     const img = new window.Image();
     img.onload = () => {
-      // Always show the editor for better user experience
       setEditorImage(localUrl);
       setShowEditor(true);
     };
@@ -68,7 +60,6 @@ const CardUpload: React.FC<CardUploadProps> = ({ onImageUpload, className, initi
       setIsUploading(true);
       setPreviewUrl(localUrl);
       
-      // Pass the file and local URL to the parent component
       onImageUpload(file, localUrl);
       toast.success('Image processed successfully');
     } catch (err: any) {
@@ -83,7 +74,6 @@ const CardUpload: React.FC<CardUploadProps> = ({ onImageUpload, className, initi
     setPreviewUrl(null);
     if (inputRef.current) {
       inputRef.current.value = '';
-      // Reset the capture attribute
       inputRef.current.removeAttribute('capture');
     }
   };
@@ -98,14 +88,13 @@ const CardUpload: React.FC<CardUploadProps> = ({ onImageUpload, className, initi
             inputRef={inputRef}
           />
           
-          {/* Mobile-specific camera button */}
           {isMobile && (
             <div className="mt-4 flex justify-center">
               <MobileTouchButton
                 onClick={handleCameraCapture}
                 className="flex items-center gap-2"
                 size="lg"
-                hapticFeedback={optimizeInteractions}
+                hapticFeedback={false}
               >
                 <Camera className="h-5 w-5" />
                 Take a Photo
@@ -125,7 +114,7 @@ const CardUpload: React.FC<CardUploadProps> = ({ onImageUpload, className, initi
             className="absolute top-2 right-2 p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-subtle hover:bg-gray-100 transition-colors"
             variant="icon"
             size="sm"
-            hapticFeedback={optimizeInteractions}
+            hapticFeedback={false}
           >
             <X className="h-4 w-4 text-cardshow-slate" />
           </MobileTouchButton>

@@ -59,6 +59,11 @@ interface CardGridProps {
 
 const MemoizedCardItem = memo(CardItem);
 
+interface ListComponentProps {
+  style?: React.CSSProperties;
+  children?: React.ReactNode;
+}
+
 export const CardGrid = ({
   cards,
   isLoading = false,
@@ -89,7 +94,7 @@ export const CardGrid = ({
       <EmptyState 
         title="Something went wrong"
         description={error.message || "Failed to load cards"}
-        icon="alert-triangle" 
+        icon="AlertTriangle" 
       />
     );
   }
@@ -100,7 +105,7 @@ export const CardGrid = ({
       <EmptyState 
         title="No cards found"
         description="Try adjusting your filters or create a new card"
-        icon="inbox"
+        icon="Inbox"
       />
     );
   }
@@ -121,13 +126,13 @@ export const CardGrid = ({
         )}
         className={className}
         components={{
-          List: React.forwardRef(({ style, children }, ref) => (
+          List: React.forwardRef((props: ListComponentProps, ref) => (
             <div 
               ref={ref as any} 
-              style={style} 
+              style={props.style} 
               className={cn(`grid gap-4 ${gridCols}`, className)}
             >
-              {children}
+              {props.children}
             </div>
           ))
         }}
