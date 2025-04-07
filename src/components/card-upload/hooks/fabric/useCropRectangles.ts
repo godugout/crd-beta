@@ -1,12 +1,15 @@
 
-import { useEffect, useState } from 'react';
-import { Canvas, Rect } from 'fabric';
-import { CropBoxProps } from '../../CropBox';
+import { useEffect } from 'react';
+import { fabric } from 'fabric';
+import { EnhancedCropBoxProps } from '../../CropBox';
+
+// Type for fabric.js degree
+type TDegree = number;
 
 interface UseCropRectanglesProps {
-  canvas: Canvas | null;
-  cropBoxes: CropBoxProps[];
-  setCropBoxes: React.Dispatch<React.SetStateAction<CropBoxProps[]>>;
+  canvas: fabric.Canvas | null;
+  cropBoxes: EnhancedCropBoxProps[];
+  setCropBoxes: React.Dispatch<React.SetStateAction<EnhancedCropBoxProps[]>>;
   selectedCropIndex: number;
   setSelectedCropIndex: (index: number) => void;
   batchMode?: boolean;
@@ -24,90 +27,158 @@ export const useCropRectangles = ({
   batchSelections = [],
   onToggleBatchSelection
 }: UseCropRectanglesProps) => {
-  const [cropRects, setCropRects] = useState<Rect[]>([]);
-
-  // Sync crop boxes with Fabric objects
+  
+  // Update or create crop rectangles when cropBoxes change
   useEffect(() => {
     if (!canvas) return;
     
-    // Remove existing crop rectangles
-    cropRects.forEach(rect => {
-      canvas.remove(rect);
-    });
+    // Clear existing objects
+    canvas.clear();
     
-    const newRects = cropBoxes.map((box, index) => {
-      // Create rectangle for each crop box
-      const isSelected = index === selectedCropIndex;
-      const isBatchSelected = batchMode && batchSelections?.includes(index);
-      
-      const rect = new Rect({
+    // Create rectangles for each crop box
+    cropBoxes.forEach((box, index) => {
+      const rect = new fabric.Rect({
         left: box.x,
         top: box.y,
         width: box.width,
         height: box.height,
-        angle: box.rotation,
-        fill: isBatchSelected 
-          ? 'rgba(37, 99, 235, 0.2)' 
-          : 'rgba(37, 99, 235, 0.1)',
-        stroke: isSelected 
-          ? '#2563eb' 
-          : isBatchSelected 
-            ? 'rgba(37, 99, 235, 0.8)'
-            : 'rgba(37, 99, 235, 0.5)',
-        strokeWidth: isSelected || isBatchSelected ? 2 : 1,
-        strokeUniform: true,
-        cornerColor: '#2563eb',
-        cornerSize: 10,
+        angle: box.rotation || 0,
+        fill: 'transparent',
+        stroke: index === selectedCropIndex ? '#FF0000' : box.color || '#00FF00',
+        strokeWidth: index === selectedCropIndex ? 3 : 2,
+        strokeDashArray: batchSelections?.includes(index) ? [5, 5] : undefined,
+        objectCaching: false,
         transparentCorners: false,
-        lockRotation: false,
+        cornerColor: '#FF0000',
+        cornerStrokeColor: '#FFFFFF',
+        borderColor: '#FF0000',
+        cornerSize: 12,
+        padding: 10,
+        cornerStyle: 'circle',
         hasRotatingPoint: true,
-        centeredRotation: true,
-        lockUniScaling: true,  // Maintain aspect ratio
-        noScaleCache: false,
-        objectCaching: true,
+        data: { boxIndex: index }
       });
       
-      // Handle selection
-      rect.on('selected', () => {
-        setSelectedCropIndex(index);
+      // Add label if it has a memorabilia type
+      if (box.memorabiliaType && box.memorabiliaType !== 'unknown') {
+        const label = new fabric.Text(box.memorabiliaType.charAt(0).toUpperCase() + box.memorabiliaType.slice(1), {
+          left: box.x + 10,
+          top: box.y + 10,
+          fontSize: 14,
+          fill: box.color || '#00FF00',
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          padding: 5,
+          data: { boxIndex: index, isLabel: true }
+        });
+        canvas.add(label);
+      }
+      
+      // Add selection checkbox for batch mode
+      if (batchMode) {
+        const checkboxSize = 20;
+        const isSelected = batchSelections?.includes(index);
         
-        if (batchMode && onToggleBatchSelection) {
-          onToggleBatchSelection(index);
+        const checkbox = new fabric.Rect({
+          left: box.x + box.width - checkboxSize - 10,
+          top: box.y + 10,
+          width: checkboxSize,
+          height: checkboxSize,
+          fill: isSelected ? box.color || '#00FF00' : 'rgba(255,255,255,0.8)',
+          stroke: box.color || '#00FF00',
+          strokeWidth: 2,
+          rx: 5,
+          ry: 5,
+          data: { boxIndex: index, isCheckbox: true }
+        });
+        
+        if (isSelected) {
+          const check = new fabric.Text('✓', {
+            left: box.x + box.width - checkboxSize - 5,
+            top: box.y + 10,
+            fontSize: 16,
+            fill: '#FFFFFF',
+            data: { boxIndex: index, isCheckmark: true }
+          });
+          canvas.add(check);
+        }
+        
+        canvas.add(checkbox);
+      }
+      
+      // Event handlers for the rectangle
+      rect.on('moving', function(e) {
+        const target = e.target;
+        const index = target.data?.boxIndex;
+        if (index !== undefined) {
+          setCropBoxes(prev => {
+            const newBoxes = [...prev];
+            newBoxes[index] = {
+              ...newBoxes[index],
+              x: target.left || 0,
+              y: target.top || 0
+            };
+            return newBoxes;
+          });
         }
       });
       
-      // Handle moving and resizing
-      rect.on('modified', () => {
-        const updatedCropBoxes = [...cropBoxes];
-        updatedCropBoxes[index] = {
-          x: rect.left || 0,
-          y: rect.top || 0,
-          width: rect.getScaledWidth(),
-          height: rect.getScaledHeight(),
-          rotation: rect.angle || 0
-        };
-        setCropBoxes(updatedCropBoxes);
+      rect.on('scaling', function(e) {
+        const target = e.target;
+        const index = target.data?.boxIndex;
+        if (index !== undefined) {
+          setCropBoxes(prev => {
+            const newBoxes = [...prev];
+            newBoxes[index] = {
+              ...newBoxes[index],
+              width: (target.width || 1) * (target.scaleX || 1),
+              height: (target.height || 1) * (target.scaleY || 1)
+            };
+            return newBoxes;
+          });
+        }
       });
       
-      // Set selectable only for this crop box if it's the selected one
-      rect.set({
-        selectable: true,
+      rect.on('rotating', function(e) {
+        const target = e.target;
+        const index = target.data?.boxIndex;
+        if (index !== undefined) {
+          setCropBoxes(prev => {
+            const newBoxes = [...prev];
+            newBoxes[index] = {
+              ...newBoxes[index],
+              rotation: target.angle as TDegree
+            };
+            return newBoxes;
+          });
+        }
+      });
+      
+      rect.on('selected', function(e) {
+        const target = e.target;
+        const index = target.data?.boxIndex;
+        if (index !== undefined) {
+          setSelectedCropIndex(index);
+        }
       });
       
       canvas.add(rect);
-      return rect;
     });
     
-    setCropRects(newRects);
-    
-    // Set the selected crop box as the active object
-    if (newRects[selectedCropIndex]) {
-      canvas.setActiveObject(newRects[selectedCropIndex]);
-    }
+    // Handle mouse down on canvas to detect clicks on checkboxes
+    canvas.on('mouse:down', function(opt) {
+      if (opt.target && opt.target.data) {
+        const { boxIndex, isCheckbox, isLabel } = opt.target.data;
+        
+        if (isCheckbox && boxIndex !== undefined && onToggleBatchSelection) {
+          onToggleBatchSelection(boxIndex);
+        } else if (!isLabel && boxIndex !== undefined) {
+          setSelectedCropIndex(boxIndex);
+        }
+      }
+    });
     
     canvas.renderAll();
-    
-  }, [canvas, cropBoxes, selectedCropIndex, setCropBoxes, setSelectedCropIndex, batchMode, batchSelections]);
-
-  return cropRects;
+  }, [canvas, cropBoxes, selectedCropIndex, batchMode, batchSelections]);
+  
+  return {};
 };

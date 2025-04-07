@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'sonner';
@@ -25,19 +26,16 @@ import MemoryPacks from './pages/MemoryPacks';
 import MemoryPackDetail from './pages/MemoryPackDetail';
 import MemoryPackCreator from './pages/MemoryPackCreator';
 
-// Oakland Pages
-import OaklandLanding from './pages/oakland/OaklandLanding';
-import OaklandMemories from './pages/oakland/OaklandMemories';
-import OaklandMemoryDetail from './pages/oakland/OaklandMemoryDetail';
-import OaklandMemoryCreator from './pages/oakland/OaklandMemoryCreator';
-
-// Demo Pages
-import PbrDemo from './pages/demos/PbrDemo';
-import BaseballCardViewer from './pages/demos/BaseballCardViewer';
-import SignatureDemo from './pages/demos/SignatureDemo';
-import ArCardViewer from './pages/demos/ArCardViewer';
-import CardComparison from './pages/demos/CardComparison';
-import CardAnimation from './pages/demos/CardAnimation';
+// Oakland Pages - Direct import from existing page
+import OaklandLanding from './pages/OaklandLanding';
+import OaklandMemories from './pages/OaklandMemories';
+// Demos - Direct import from existing pages
+import PbrDemo from './pages/PbrDemo';
+import BaseballCardViewer from './pages/BaseballCardViewer';
+import SignatureDemo from './pages/SignatureDemo';
+import ArCardViewer from './pages/ArCardViewer';
+import CardComparison from './pages/CardComparison';
+import CardAnimation from './pages/CardAnimation';
 
 const App = () => {
   return (
@@ -63,11 +61,16 @@ const App = () => {
             <Route path="/packs/new" element={<MemoryPackCreator />} />
             <Route path="/packs/:id/edit" element={<MemoryPackCreator />} />
             
-            {/* Other routes */}
+            {/* Oakland routes */}
             <Route path="/oakland" element={<OaklandLanding />} />
             <Route path="/oakland/memories" element={<OaklandMemories />} />
+            {/* Temporarily commenting these routes as their components don't exist yet */}
+            {/*
             <Route path="/oakland/memories/:id" element={<OaklandMemoryDetail />} />
             <Route path="/oakland/create" element={<OaklandMemoryCreator />} />
+            */}
+            
+            {/* Demo routes */}
             <Route path="/pbr" element={<PbrDemo />} />
             <Route path="/baseball-card-viewer" element={<BaseballCardViewer />} />
             <Route path="/signature" element={<SignatureDemo />} />

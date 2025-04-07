@@ -9,6 +9,20 @@ import MemoryPacksSection from '../components/card-showcase/MemoryPacksSection';
 import ArFeaturesSection from '../components/card-showcase/ArFeaturesSection';
 import SiteFooter from '../components/card-showcase/SiteFooter';
 import { useCards } from '../context/CardContext';
+import { Card, Collection } from '../lib/types';
+
+// Define the props types to match the component expectations
+interface FeaturedCardsSectionProps {
+  cards: Card[];
+  isLoading: boolean;
+}
+
+// Define the props types for CollectionSection
+interface CollectionsSectionProps {
+  collections: Collection[];
+  isLoading: boolean;
+  handleViewCollection: (id: string) => void;
+}
 
 const Index = () => {
   const { cards, collections, isLoading, refreshCards } = useCards();

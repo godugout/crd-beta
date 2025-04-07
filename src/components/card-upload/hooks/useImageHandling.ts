@@ -70,11 +70,13 @@ export const useImageHandling = ({
         } else {
           // In single mode, start with the first detection or default box
           setCropBoxes(filteredDetected.length > 0 ? [filteredDetected[0]] : [{
+            id: 1,
             x: 50,
             y: 50,
             width: 150,
             height: 210, // 3.5/2.5 ratio
             rotation: 0,
+            color: '#00FF00',
             memorabiliaType: 'unknown',
             confidence: 0.5
           }]);

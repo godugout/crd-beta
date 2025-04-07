@@ -5,8 +5,8 @@ import { Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useNavbar } from '@/hooks/use-navbar';
-import { DesktopMenu } from './navbar/DesktopMenu';
-import { MobileMenu } from './navbar/MobileMenu';
+import DesktopMenu from './navbar/DesktopMenu';
+import MobileMenu from './navbar/MobileMenu';
 import UserDropdown from './navbar/UserDropdown';
 import NavAvatar from './navbar/NavAvatar';
 

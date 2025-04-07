@@ -12,8 +12,22 @@ export interface CropBoxProps {
   rotation?: number;
   selected?: boolean;
   batchSelected?: boolean;
-  memorabiliaType?: MemorabiliaType; // Add this property
-  confidence?: number; // Add this property
+  memorabiliaType?: MemorabiliaType;
+  confidence?: number;
+}
+
+export interface EnhancedCropBoxProps {
+  id: number;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  color: string;
+  rotation?: number;
+  selected?: boolean;
+  batchSelected?: boolean;
+  memorabiliaType: MemorabiliaType;
+  confidence: number;
 }
 
 export interface CropBoxStyle {

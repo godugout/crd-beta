@@ -1,10 +1,10 @@
 
 import { toast } from 'sonner';
-import { CropBoxProps } from '../CropBox';
+import { EnhancedCropBoxProps } from '../CropBox';
 
 export interface UseCropBoxOperationsProps {
-  cropBoxes: CropBoxProps[];
-  setCropBoxes: React.Dispatch<React.SetStateAction<CropBoxProps[]>>;
+  cropBoxes: EnhancedCropBoxProps[];
+  setCropBoxes: React.Dispatch<React.SetStateAction<EnhancedCropBoxProps[]>>;
   selectedCropIndex: number;
   setSelectedCropIndex: (index: number) => void;
   canvasRef: React.RefObject<HTMLCanvasElement>;
@@ -24,7 +24,7 @@ export const useCropBoxOperations = ({
       const newBoxes = [...cropBoxes];
       newBoxes[selectedCropIndex] = {
         ...newBoxes[selectedCropIndex],
-        rotation: (newBoxes[selectedCropIndex].rotation + 15) % 360
+        rotation: (newBoxes[selectedCropIndex].rotation || 0) + 15
       };
       setCropBoxes(newBoxes);
     }
@@ -36,7 +36,7 @@ export const useCropBoxOperations = ({
       const newBoxes = [...cropBoxes];
       newBoxes[selectedCropIndex] = {
         ...newBoxes[selectedCropIndex],
-        rotation: (newBoxes[selectedCropIndex].rotation - 15 + 360) % 360
+        rotation: ((newBoxes[selectedCropIndex].rotation || 0) - 15 + 360) % 360
       };
       setCropBoxes(newBoxes);
     }
@@ -56,12 +56,16 @@ export const useCropBoxOperations = ({
     const newWidth = rect.width * 0.3;
     const newHeight = newWidth / cardRatio;
     
-    const newBox: CropBoxProps = {
+    const newBox: EnhancedCropBoxProps = {
+      id: cropBoxes.length + 1,
       x: (rect.width - newWidth) / 2,
       y: (rect.height - newHeight) / 2,
       width: newWidth,
       height: newHeight,
-      rotation: 0
+      rotation: 0,
+      color: '#00FF00',
+      memorabiliaType: 'unknown',
+      confidence: 0.5
     };
     
     const newBoxes = [...cropBoxes, newBox];
@@ -113,11 +117,11 @@ export const useCropBoxOperations = ({
     const currentBox = newBoxes[selectedCropIndex];
     
     newBoxes[selectedCropIndex] = {
+      ...currentBox,
       x: (rect.width - maxWidth) / 2,
       y: (rect.height - maxHeight) / 2,
       width: maxWidth,
-      height: maxHeight,
-      rotation: currentBox ? currentBox.rotation : 0
+      height: maxHeight
     };
     
     setCropBoxes(newBoxes);
