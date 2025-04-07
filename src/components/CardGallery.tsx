@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -46,10 +47,7 @@ const CardGallery: React.FC<CardGalleryProps> = ({
   const { isMobile, shouldOptimizeAnimations } = useMobileOptimization();
   
   // Get card effects with reduced animations based on device capabilities
-  const { cardEffects, isLoading: isLoadingEffects } = useCardEffects(
-    cards, 
-    shouldOptimizeAnimations
-  );
+  const { cardEffects, isLoading: isLoadingEffects } = useCardEffects(cards);
   
   // Memoize filtered cards to avoid recalculation on every render
   const filteredCards = useMemo(() => 
