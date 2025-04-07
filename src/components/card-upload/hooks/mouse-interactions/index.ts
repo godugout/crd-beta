@@ -37,22 +37,10 @@ export const useMouseInteractions = (props: UseMouseInteractionsProps): MouseHan
 
   // Combine all state and handlers into a single mouse events hook
   return useMouseEvents(
-    props,
-    {
-      dragStart,
-      setDragStart,
-      isDragging,
-      setIsDragging,
-      isResizing,
-      setIsResizing,
-      isRotating,
-      setIsRotating
-    },
-    {
-      handleDragging,
-      handleResizing,
-      handleRotation,
-      handleStopResizing
-    }
+    props.canvasRef,
+    props.cropBoxes,
+    props.setCropBoxes,
+    props.selectedCropIndex,
+    props.setSelectedCropIndex
   );
 };

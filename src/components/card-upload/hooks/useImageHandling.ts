@@ -1,8 +1,7 @@
 
 import { useState } from 'react';
-import { EnhancedCropBoxProps } from '../cardDetection';
+import { EnhancedCropBoxProps, detectCardsInImage, MemorabiliaType } from '../cardDetection';
 import { ImageData } from './useCropState';
-import { detectCardsInImage, MemorabiliaType } from '../cardDetection';
 
 interface UseImageHandlingProps {
   editorImage: string | null;
