@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { format } from 'date-fns';
-import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, Calendar, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';

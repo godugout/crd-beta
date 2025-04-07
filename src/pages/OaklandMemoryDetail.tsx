@@ -1,213 +1,186 @@
 
 import React from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { useCards } from '@/context/CardContext';
 import Navbar from '@/components/Navbar';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { ChevronLeft, Calendar, MapPin, Users, Share2, Trash, Edit, Heart } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { toast } from 'sonner';
+import { ChevronLeft, MapPin, Calendar, Users, Clock, Edit, Share2 } from 'lucide-react';
 import { format } from 'date-fns';
 import OaklandCardTemplate from '@/components/oakland/OaklandCardTemplates';
+import { toast } from 'sonner';
+import { OaklandTemplateType } from '@/components/oakland/OaklandCardTemplates';
 
 const OaklandMemoryDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
-  const { cards, deleteCard } = useCards();
+  const { getCard } = useCards();
+  const card = getCard(id || '');
   
-  // Find the card data
-  const card = id ? cards.find(c => c.id === id) : undefined;
-  const oaklandMemory = card?.designMetadata?.oaklandMemory;
-
-  if (!card || !oaklandMemory) {
+  if (!card) {
     return (
       <div className="min-h-screen bg-gray-50">
         <Navbar />
-        <main className="pt-24 pb-12 px-4 sm:px-6 max-w-7xl mx-auto">
-          <div className="text-center py-20">
-            <h1 className="text-2xl font-bold text-[#003831] mb-4">Memory Not Found</h1>
-            <p className="mb-6">The memory you're looking for doesn't exist or has been removed.</p>
-            <Link to="/oakland-memories">
-              <Button className="bg-[#006341] hover:bg-[#003831] text-white">
-                <ChevronLeft className="mr-2 h-4 w-4" />
-                Back to Memories
-              </Button>
-            </Link>
+        <main className="pt-24 pb-12 px-4">
+          <div className="max-w-4xl mx-auto text-center">
+            <h1 className="text-2xl font-bold text-gray-700">Memory not found</h1>
+            <p className="mt-2 text-gray-500">The memory you're looking for doesn't exist or has been removed.</p>
+            <Button asChild className="mt-6">
+              <Link to="/oakland-memories">Back to Memories</Link>
+            </Button>
           </div>
         </main>
       </div>
     );
   }
-
-  const handleDelete = () => {
-    if (window.confirm('Are you sure you want to delete this memory? This action cannot be undone.')) {
-      deleteCard(card.id);
-      toast.success('Memory deleted successfully');
-      navigate('/oakland-memories');
-    }
+  
+  const memory = card.designMetadata?.oaklandMemory;
+  
+  // Handle copy link functionality
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(window.location.href);
+    toast.success("Link copied to clipboard!");
   };
-
-  const handleShare = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: card.title,
-        text: card.description,
-        url: window.location.href,
-      })
-      .then(() => toast.success('Memory shared successfully'))
-      .catch(error => console.error('Error sharing memory:', error));
-    } else {
-      navigator.clipboard.writeText(window.location.href)
-        .then(() => toast.success('Link copied to clipboard'))
-        .catch(() => toast.error('Failed to copy link'));
-    }
-  };
-
+  
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
       
       <main className="pt-24 pb-12 px-4 sm:px-6 max-w-7xl mx-auto">
-        <Link to="/oakland-memories">
-          <Button variant="ghost" className="mb-4 -ml-4">
-            <ChevronLeft className="mr-2 h-4 w-4" />
-            Back to Memories
-          </Button>
-        </Link>
-        
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-          {/* Card Display */}
-          <div className="lg:col-span-2 flex justify-center">
-            <div className="max-w-xs w-full">
-              <OaklandCardTemplate
-                type={oaklandMemory.template || 'classic'}
-                className="shadow-xl"
+        <div className="mb-10">
+          <Link to="/oakland-memories">
+            <Button variant="ghost" className="mb-4 -ml-4">
+              <ChevronLeft className="mr-2 h-4 w-4" />
+              Back to Memories
+            </Button>
+          </Link>
+          
+          <div className="flex flex-wrap md:flex-nowrap justify-between gap-8">
+            {/* Card Display */}
+            <div className="w-full md:w-1/3 max-w-xs mx-auto md:mx-0">
+              <OaklandCardTemplate 
+                type={(memory?.template as OaklandTemplateType) || 'classic'} 
+                className="mx-auto md:mx-0 shadow-xl"
               >
-                <div className="relative w-full h-full">
-                  {/* Card Image */}
-                  <div className="absolute inset-0">
-                    <img
-                      src={card.imageUrl}
-                      alt={card.title}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
+                {card.imageUrl && (
+                  <img 
+                    src={memory?.imageUrl || card.imageUrl} 
+                    alt={card.title} 
+                    className="absolute inset-0 w-full h-full object-cover opacity-40"
+                  />
+                )}
+                
+                <div className="relative z-10 p-5 flex flex-col h-full text-white">
+                  <h2 className="text-xl font-bold text-[#EFB21E] mb-2">{card.title}</h2>
                   
-                  {/* Gradient Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#003831] via-[#00383180] to-transparent"></div>
+                  {memory?.date && (
+                    <div className="flex items-center text-sm mb-3">
+                      <Calendar className="h-4 w-4 mr-2 text-[#EFB21E]" />
+                      {format(new Date(memory.date), 'MMMM d, yyyy')}
+                    </div>
+                  )}
                   
-                  {/* Card Text */}
-                  <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
-                    <h2 className="text-xl font-bold text-[#EFB21E]">{card.title}</h2>
-                    <p className="text-sm mt-1 line-clamp-2">{card.description}</p>
-                  </div>
+                  <p className="flex-grow text-sm">{card.description}</p>
+                  
+                  {memory?.opponent && (
+                    <div className="mt-4 p-2 bg-[#003831]/50 rounded-md">
+                      <div className="font-semibold text-[#EFB21E]">vs {memory.opponent}</div>
+                      {memory.score && (
+                        <div className="text-sm mt-1">{memory.score}</div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </OaklandCardTemplate>
-            </div>
-          </div>
-          
-          {/* Memory Details */}
-          <div className="lg:col-span-3">
-            <div className="bg-white p-6 rounded-lg shadow-sm">
-              <h1 className="text-2xl font-bold text-[#003831] mb-2">{card.title}</h1>
               
-              <div className="flex flex-wrap gap-2 mb-4">
-                <Badge className="bg-[#006341]">
-                  {oaklandMemory.memoryType === 'game' ? 'Game Memory' : 
-                   oaklandMemory.memoryType === 'tailgate' ? 'Tailgate Memory' : 
-                   oaklandMemory.memoryType === 'memorabilia' ? 'Memorabilia' : 
-                   'Memory'}
-                </Badge>
-                
-                {oaklandMemory.opponent && (
-                  <Badge variant="outline" className="border-[#006341] text-[#006341]">
-                    vs {oaklandMemory.opponent}
-                  </Badge>
-                )}
-              </div>
-              
-              <div className="flex flex-wrap gap-x-6 gap-y-2 mb-6 text-sm text-gray-600">
-                {oaklandMemory.date && (
-                  <div className="flex items-center">
-                    <Calendar className="h-4 w-4 mr-2 text-[#006341]" />
-                    {format(new Date(oaklandMemory.date), 'MMMM d, yyyy')}
-                  </div>
-                )}
-                
-                {oaklandMemory.location && (
-                  <div className="flex items-center">
-                    <MapPin className="h-4 w-4 mr-2 text-[#006341]" />
-                    {oaklandMemory.location}
-                    {oaklandMemory.section && ` • ${oaklandMemory.section}`}
-                  </div>
-                )}
-                
-                {oaklandMemory.attendees && oaklandMemory.attendees.length > 0 && (
-                  <div className="flex items-center">
-                    <Users className="h-4 w-4 mr-2 text-[#006341]" />
-                    {oaklandMemory.attendees.join(', ')}
-                  </div>
-                )}
-              </div>
-              
-              <div className="mb-6">
-                <h3 className="font-medium text-gray-700 mb-2">Description</h3>
-                <p className="text-gray-600 whitespace-pre-line">{card.description}</p>
-              </div>
-              
-              {oaklandMemory.score && (
-                <div className="mb-6">
-                  <h3 className="font-medium text-gray-700 mb-2">Final Score</h3>
-                  <p className="text-xl font-bold text-[#003831]">{oaklandMemory.score}</p>
-                </div>
-              )}
-              
-              {card.tags && card.tags.length > 0 && (
-                <div className="mb-6">
-                  <h3 className="font-medium text-gray-700 mb-2">Tags</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {card.tags.map(tag => (
-                      <Badge key={tag} variant="outline" className="bg-[#EFB21E]/10 text-[#003831] border-[#EFB21E]/30">
-                        #{tag}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              )}
-              
-              <div className="flex flex-wrap gap-2 mt-8 border-t pt-6">
-                <Button 
-                  onClick={() => navigate(`/oakland-memories/edit/${card.id}`)}
-                  variant="outline"
-                  className="flex-1 sm:flex-none"
-                >
-                  <Edit className="mr-1 h-4 w-4" />
-                  Edit
-                </Button>
-                
-                <Button
-                  onClick={handleShare}
-                  variant="outline"
-                  className="flex-1 sm:flex-none"
-                >
-                  <Share2 className="mr-1 h-4 w-4" />
+              <div className="flex justify-center mt-4 gap-2">
+                <Button variant="outline" size="sm" onClick={handleCopyLink}>
+                  <Share2 className="h-4 w-4 mr-1" />
                   Share
                 </Button>
                 
-                <Button
-                  onClick={handleDelete}
-                  variant="outline"
-                  className="flex-1 sm:flex-none text-red-500 hover:text-red-700 hover:border-red-200 hover:bg-red-50"
-                >
-                  <Trash className="mr-1 h-4 w-4" />
-                  Delete
+                <Button asChild size="sm">
+                  <Link to={`/oakland-memory-editor/${card.id}`}>
+                    <Edit className="h-4 w-4 mr-1" />
+                    Edit
+                  </Link>
                 </Button>
+              </div>
+            </div>
+            
+            {/* Memory Details */}
+            <div className="flex-grow">
+              <h1 className="text-3xl font-bold text-[#003831]">{card.title}</h1>
+              
+              <div className="mt-6 space-y-6">
+                <div>
+                  <h3 className="text-lg font-semibold text-[#003831]">About this memory</h3>
+                  <p className="mt-2 text-gray-700 whitespace-pre-line">{card.description}</p>
+                </div>
                 
-                <Button className="flex-1 sm:flex-none bg-[#006341] hover:bg-[#003831] text-white ml-auto">
-                  <Heart className="mr-1 h-4 w-4" />
-                  Save to Collection
-                </Button>
+                {memory && (
+                  <>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                      {memory.location && (
+                        <div className="flex items-start">
+                          <MapPin className="h-5 w-5 text-[#006341] mr-2 mt-0.5" />
+                          <div>
+                            <div className="font-medium">Location</div>
+                            <div className="text-gray-600">
+                              {memory.location}
+                              {memory.section && <span className="block text-sm">{memory.section}</span>}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {memory.date && (
+                        <div className="flex items-start">
+                          <Calendar className="h-5 w-5 text-[#006341] mr-2 mt-0.5" />
+                          <div>
+                            <div className="font-medium">Date</div>
+                            <div className="text-gray-600">{format(new Date(memory.date), 'MMMM d, yyyy')}</div>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {memory.attendees && memory.attendees.length > 0 && (
+                        <div className="flex items-start">
+                          <Users className="h-5 w-5 text-[#006341] mr-2 mt-0.5" />
+                          <div>
+                            <div className="font-medium">With</div>
+                            <div className="text-gray-600">
+                              {memory.attendees.join(', ')}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {memory.memoryType && (
+                        <div className="flex items-start">
+                          <Clock className="h-5 w-5 text-[#006341] mr-2 mt-0.5" />
+                          <div>
+                            <div className="font-medium">Memory Type</div>
+                            <div className="text-gray-600">
+                              {memory.memoryType.charAt(0).toUpperCase() + memory.memoryType.slice(1)}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    
+                    {memory.tags && memory.tags.length > 0 && (
+                      <div>
+                        <h3 className="text-lg font-semibold text-[#003831]">Tags</h3>
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {memory.tags.map(tag => (
+                            <div key={tag} className="px-3 py-1 bg-[#EFB21E]/20 text-[#003831] rounded-full text-sm">
+                              #{tag}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
             </div>
           </div>

@@ -2,44 +2,53 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { useAuth } from '@/context/auth';
+import { User } from '@/lib/types';
 
-interface NavItemProps {
-  href: string;
-  text: string;
+interface NavLinkProps {
+  to: string;
   isActive: boolean;
+  children: React.ReactNode;
 }
 
-const NavItem: React.FC<NavItemProps> = ({ href, text, isActive }) => (
+const NavLink: React.FC<NavLinkProps> = ({ to, isActive, children }) => (
   <Link
-    to={href}
+    to={to}
     className={cn(
       'px-3 py-2 text-sm font-medium rounded-md transition-colors',
-      isActive 
-        ? 'bg-cardshow-blue-light text-cardshow-blue' 
-        : 'text-cardshow-dark hover:bg-gray-100'
+      isActive
+        ? 'text-cardshow-blue hover:text-cardshow-blue/90'
+        : 'text-cardshow-slate hover:text-cardshow-dark'
     )}
   >
-    {text}
+    {children}
   </Link>
 );
 
-export const DesktopMenu: React.FC = () => {
-  const location = useLocation();
-  const { user } = useAuth();
-  
-  const isActive = (path: string) => {
-    if (path === '/') return location.pathname === '/';
-    return location.pathname.startsWith(path);
-  };
+interface DesktopMenuProps {
+  user?: User;
+  isActive: (path: string) => boolean;
+}
 
+export const DesktopMenu: React.FC<DesktopMenuProps> = ({ user, isActive }) => {
   return (
-    <div className="hidden md:flex md:items-center md:space-x-1">
-      <NavItem href="/" text="Home" isActive={isActive('/')} />
-      <NavItem href="/gallery" text="Gallery" isActive={isActive('/gallery')} />
-      <NavItem href="/collections" text="Collections" isActive={isActive('/collections')} />
-      <NavItem href="/oakland-memories" text="A's Memories" isActive={isActive('/oakland-memories')} />
-      {user && <NavItem href="/editor" text="Create Card" isActive={isActive('/editor')} />}
+    <div className="hidden md:flex items-center space-x-1">
+      <NavLink to="/" isActive={isActive('/')}>
+        Home
+      </NavLink>
+      <NavLink to="/gallery" isActive={isActive('/gallery')}>
+        Gallery
+      </NavLink>
+      <NavLink to="/collections" isActive={isActive('/collections')}>
+        Collections
+      </NavLink>
+      <NavLink to="/oakland-memories" isActive={isActive('/oakland-memories')}>
+        A's Memories
+      </NavLink>
+      {user && (
+        <NavLink to="/editor" isActive={isActive('/editor')}>
+          Create Card
+        </NavLink>
+      )}
     </div>
   );
 };

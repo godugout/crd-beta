@@ -1,14 +1,55 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
+import { Baseball, Trophy, ChartBar, Stadium, Users } from 'lucide-react';
 
 export type OaklandTemplateType = 'classic' | 'moneyball' | 'dynasty' | 'coliseum' | 'tailgate';
+
+export interface OaklandTemplateMetadata {
+  name: string;
+  description: string;
+  icon: React.ReactNode;
+  years: string;
+}
+
+export const oaklandTemplates: Record<OaklandTemplateType, OaklandTemplateMetadata> = {
+  classic: {
+    name: 'Classic A\'s',
+    description: 'Traditional green and gold design with clean borders',
+    icon: <Baseball className="h-5 w-5" />,
+    years: '1968-Present'
+  },
+  dynasty: {
+    name: '70s Dynasty',
+    description: 'Celebrating the championship era of the 1970s',
+    icon: <Trophy className="h-5 w-5" />,
+    years: '1972-1974'
+  },
+  moneyball: {
+    name: 'Moneyball',
+    description: 'Minimal design inspired by the analytical revolution',
+    icon: <ChartBar className="h-5 w-5" />,
+    years: '2002'
+  },
+  coliseum: {
+    name: 'Coliseum',
+    description: 'Tribute to the Oakland Coliseum and its history',
+    icon: <Stadium className="h-5 w-5" />,
+    years: '1968-2024'
+  },
+  tailgate: {
+    name: 'Tailgate',
+    description: 'Celebrating the fan experience in the parking lot',
+    icon: <Users className="h-5 w-5" />,
+    years: 'All Years'
+  }
+};
 
 interface OaklandCardTemplateProps {
   type: OaklandTemplateType;
   className?: string;
   children?: React.ReactNode;
-  onClick?: () => void; // Add onClick handler prop
+  onClick?: () => void;
 }
 
 const OaklandCardTemplate: React.FC<OaklandCardTemplateProps> = ({
@@ -41,7 +82,7 @@ const OaklandCardTemplate: React.FC<OaklandCardTemplateProps> = ({
         getTemplateStyles(),
         className
       )}
-      onClick={onClick} // Add onClick handler
+      onClick={onClick}
     >
       {children}
     </div>

@@ -15,6 +15,7 @@ import {
   Box,
   Trophy
 } from 'lucide-react';
+import { User } from '@/lib/types';
 
 interface NavItemProps {
   href: string;
@@ -43,11 +44,17 @@ const NavItem: React.FC<NavItemProps> = ({ href, text, icon, isActive, onClick }
 interface MobileMenuProps {
   isOpen: boolean;
   onClose: () => void;
+  onSignOut?: () => Promise<void>;
+  user?: User;
 }
 
-export const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose }) => {
+export const MobileMenu: React.FC<MobileMenuProps> = ({ 
+  isOpen, 
+  onClose,
+  onSignOut,
+  user
+}) => {
   const location = useLocation();
-  const { user } = useAuth();
   
   const isActive = (path: string) => {
     if (path === '/') return location.pathname === '/';
@@ -149,4 +156,3 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose }) => {
     </div>
   );
 };
-

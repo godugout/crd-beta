@@ -1,21 +1,38 @@
 
 import React from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { User as UserType } from '@/lib/types';
+import { User } from '@/lib/types';
 
 interface NavAvatarProps {
-  user: UserType;
-  onClick: () => void;
+  user: User;
+  onClick?: () => void;
 }
 
 const NavAvatar: React.FC<NavAvatarProps> = ({ user, onClick }) => {
+  // Generate initials from user name or email
+  const getInitials = () => {
+    if (user.name) {
+      return user.name
+        .split(' ')
+        .map(n => n[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 2);
+    }
+    return user.email.substring(0, 2).toUpperCase();
+  };
+
   return (
     <Avatar 
+      className="h-8 w-8 cursor-pointer border-2 border-transparent hover:border-cardshow-blue transition-colors"
       onClick={onClick}
-      className="h-9 w-9 cursor-pointer ring-2 ring-white"
     >
-      <AvatarImage src={user.avatarUrl || undefined} alt={user.name} />
-      <AvatarFallback>{user.name.charAt(0).toUpperCase()}</AvatarFallback>
+      {user.avatarUrl ? (
+        <AvatarImage src={user.avatarUrl} alt={user.name || user.email} />
+      ) : null}
+      <AvatarFallback className="bg-cardshow-blue-light text-cardshow-blue text-xs font-medium">
+        {getInitials()}
+      </AvatarFallback>
     </Avatar>
   );
 };
