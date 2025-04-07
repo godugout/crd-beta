@@ -51,27 +51,42 @@ export const CardProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { user } = useAuth();
   const isRefreshing = useRef(false);
   const lastRefreshTime = useRef(0);
+  const refreshAttempts = useRef(0);
   
   const { getCard } = useCardOperations();
 
-  // Function to refresh cards from the data source with debouncing
+  // Function to refresh cards from the data source with debouncing and rate limiting
   const refreshCards = async () => {
     const now = Date.now();
     
     // Prevent multiple simultaneous refreshes
     if (isRefreshing.current) {
+      console.log('A refresh operation is already in progress, skipping...');
       return;
     }
     
     // Prevent excessive refreshes (limit to once every 5 seconds)
     if (now - lastRefreshTime.current < 5000) {
+      console.log('Refresh rate limited, skipping...');
       return;
     }
     
     try {
       isRefreshing.current = true;
       lastRefreshTime.current = now;
+      refreshAttempts.current += 1;
+      
+      // After 3 attempts, increase the wait time to prevent hammering the server
+      if (refreshAttempts.current > 3) {
+        await new Promise(resolve => setTimeout(resolve, 5000));
+      }
+      
       await fetchCards(setIsLoading, setError, setCards);
+      
+      // Reset attempt counter on success
+      refreshAttempts.current = 0;
+    } catch (err) {
+      console.error('Error in refreshCards:', err);
     } finally {
       isRefreshing.current = false;
     }
@@ -123,9 +138,15 @@ export const CardProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   useEffect(() => {
+    let isFirstLoad = true;
+    
     if (user) {
-      refreshCards();
-      refreshCollections();
+      // On initial load or user change, fetch data
+      if (isFirstLoad) {
+        refreshCards();
+        refreshCollections();
+        isFirstLoad = false;
+      }
     } else {
       setCards([]);
       setCollections([]);

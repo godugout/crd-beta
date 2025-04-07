@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
-import { Loader2, AlertCircle } from 'lucide-react';
+import { Loader2, AlertCircle, RefreshCw } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export const PopulateDatabase = () => {
@@ -21,7 +21,16 @@ export const PopulateDatabase = () => {
     setResult(null);
     
     try {
-      const { data, error } = await supabase.functions.invoke('populate-cards');
+      // Add a timeout to the request to prevent hanging indefinitely
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Request timed out after 15 seconds')), 15000);
+      });
+      
+      // Call the edge function with a race against the timeout
+      const responsePromise = supabase.functions.invoke('populate-cards');
+      const result = await Promise.race([responsePromise, timeoutPromise]);
+      
+      const { data, error } = result as any; // Cast the result of the race
       
       if (error) {
         console.error('Error populating database:', error);
@@ -36,10 +45,21 @@ export const PopulateDatabase = () => {
     } catch (err: any) {
       console.error('Unexpected error:', err);
       toast.error('An unexpected error occurred');
-      setResult({ success: false, error: err.message });
+      setResult({ 
+        success: false, 
+        error: err.message || 'Connection error or timeout occurred' 
+      });
     } finally {
       setIsLoading(false);
     }
+  };
+  
+  // Function to retry connection
+  const handleRetry = () => {
+    // Clear any cached error states
+    setResult(null);
+    // Try again
+    handlePopulateDatabase();
   };
   
   return (
@@ -58,23 +78,40 @@ export const PopulateDatabase = () => {
             {result.error}
             <div className="mt-2 text-sm">
               Make sure your Supabase Edge Function is deployed and configured correctly.
+              {result.error.includes('fetch') && (
+                <div className="mt-1">
+                  This could be a connection issue. Check your network and Supabase project status.
+                </div>
+              )}
             </div>
           </AlertDescription>
         </Alert>
       )}
       
-      <Button 
-        onClick={handlePopulateDatabase} 
-        disabled={isLoading}
-        className="w-full"
-      >
-        {isLoading ? (
-          <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Populating Database...
-          </>
-        ) : 'Populate Database with Sample Cards'}
-      </Button>
+      <div className="flex space-x-3">
+        <Button 
+          onClick={handlePopulateDatabase} 
+          disabled={isLoading}
+          className="flex-1"
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Populating Database...
+            </>
+          ) : 'Populate Database with Sample Cards'}
+        </Button>
+        
+        {result?.error && (
+          <Button 
+            onClick={handleRetry}
+            variant="outline" 
+            className="px-3"
+          >
+            <RefreshCw className="h-4 w-4" />
+          </Button>
+        )}
+      </div>
       
       {result?.success && (
         <div className="mt-4 p-4 rounded bg-green-50">

@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card } from '@/lib/types';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -23,8 +23,9 @@ export const useCardData = () => {
   const [cards, setCards] = useState<Card[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
 
-  const fetchCards = async () => {
+  const fetchCards = useCallback(async () => {
     setIsLoading(true);
     setError(null);
 
@@ -38,6 +39,9 @@ export const useCardData = () => {
         console.error('Error fetching cards:', error);
         setError(error.message);
         toast.error('Failed to load cards');
+        
+        // Increment retry count for auto-retry mechanism
+        setRetryCount(prevCount => prevCount + 1);
         return;
       }
 
@@ -55,18 +59,39 @@ export const useCardData = () => {
       }));
 
       setCards(formattedCards);
-    } catch (err) {
+      setRetryCount(0); // Reset retry count on success
+    } catch (err: any) {
       console.error('Unexpected error fetching cards:', err);
-      setError('An unexpected error occurred');
+      setError(err?.message || 'An unexpected error occurred');
       toast.error('Failed to load cards');
+      
+      // Increment retry count for auto-retry mechanism
+      setRetryCount(prevCount => prevCount + 1);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
+  // Initial fetch
   useEffect(() => {
     fetchCards();
-  }, []);
+  }, [fetchCards]);
+
+  // Add auto-retry with exponential backoff
+  useEffect(() => {
+    if (error && retryCount > 0 && retryCount < 4) {
+      // Exponential backoff: 2s, 4s, 8s
+      const delay = Math.min(1000 * Math.pow(2, retryCount), 8000);
+      
+      console.log(`Retrying fetch in ${delay / 1000}s (attempt ${retryCount})...`);
+      
+      const retryTimer = setTimeout(() => {
+        fetchCards();
+      }, delay);
+      
+      return () => clearTimeout(retryTimer);
+    }
+  }, [error, retryCount, fetchCards]);
 
   return {
     cards,
