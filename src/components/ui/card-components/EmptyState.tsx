@@ -44,17 +44,17 @@ export const EmptyState = ({
   onAction,
   className = ""
 }: EmptyStateProps) => {
-  // Correctly access the icon component from Lucide
-  const IconComponent = icon ? LucideIcons[icon] : null;
+  // Get the icon component from the Lucide library
+  const LucideIcon = icon ? LucideIcons[icon] : null;
 
   return (
     <div className={cn(
       "flex flex-col items-center justify-center text-center p-8 rounded-lg border border-dashed border-gray-300",
       className
     )}>
-      {IconComponent && (
+      {LucideIcon && (
         <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-4">
-          {React.createElement(IconComponent, { className: "h-6 w-6 text-gray-500" })}
+          <LucideIcon className="h-6 w-6 text-gray-500" />
         </div>
       )}
       
