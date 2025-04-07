@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { Comment } from '../schema/types';
 import { toast } from 'sonner';
@@ -212,21 +211,22 @@ function transformCommentFromDb(record: any): Comment {
   
   const comment: Comment = {
     id: record.id,
-    content: record.content,
     userId: record.user_id,
     cardId: record.card_id,
     collectionId: record.collection_id,
     teamId: record.team_id,
     parentId: record.parent_id,
+    content: record.content,
     createdAt: record.created_at,
     updatedAt: record.updated_at,
   };
-  
-  // Add user data if available
+
+  // Add user info if available
   if (record.profiles) {
     comment.user = {
       id: record.profiles.id,
-      name: record.profiles.full_name, 
+      email: record.profiles.email || '', // Add default empty email
+      name: record.profiles.full_name,
       avatarUrl: record.profiles.avatar_url,
       username: record.profiles.username
     };

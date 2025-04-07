@@ -1,7 +1,30 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { Team, TeamMember, User } from '../schema/types';
 import { toast } from 'sonner';
+
+function transformTeamMember(memberData: any, userData?: any): TeamMember {
+  const role = memberData.role as "owner" | "admin" | "member" | "viewer"; 
+  
+  const member: TeamMember = {
+    id: memberData.id,
+    teamId: memberData.team_id,
+    userId: memberData.user_id,
+    role: role,
+    joinedAt: memberData.joined_at
+  };
+  
+  if (userData) {
+    member.user = {
+      id: userData.id || '',
+      email: userData.email || '',
+      name: userData.full_name || '',
+      avatarUrl: userData.avatar_url || null,
+      username: userData.username || ''
+    };
+  }
+  
+  return member;
+}
 
 /**
  * Repository for team-related data operations
@@ -157,65 +180,41 @@ export const teamRepository = {
   },
   
   /**
-   * Get team members
+   * Get team members for a specific team
    */
-  getTeamMembers: async (teamId: string): Promise<{ data: TeamMember[] | null; error: any }> => {
+  getTeamMembers: async (teamId: string): Promise<TeamMember[]> => {
     try {
       const { data, error } = await supabase
         .from('team_members')
         .select(`
-          id, 
-          team_id, 
-          user_id, 
-          role, 
+          id,
+          team_id,
+          user_id,
+          role,
           joined_at,
-          profiles:user_id (
-            id, 
-            full_name, 
-            avatar_url, 
-            username
-          )
+          profiles:user_id (id, email, full_name, avatar_url, username)
         `)
         .eq('team_id', teamId);
       
       if (error) {
         console.error('Error fetching team members:', error);
-        return { data: null, error };
+        return [];
       }
       
       if (!data) {
-        return { data: [], error: null };
+        return [];
       }
       
-      const members: TeamMember[] = data.map(record => {
-        const userData = record.profiles;
-        let user: User | undefined = undefined;
-        
-        // Check if userData is valid before accessing it
-        if (userData && typeof userData === 'object' && 'id' in userData) {
-          user = {
-            id: userData.id,
-            email: '', // Email isn't returned from profiles for security
-            name: userData.full_name,
-            avatarUrl: userData.avatar_url,
-            username: userData.username
-          };
-        }
-        
-        return {
-          id: record.id,
-          teamId: record.team_id,
-          userId: record.user_id,
-          role: record.role,
-          joinedAt: record.joined_at,
-          user
-        };
+      // Map data to TeamMember array with proper type handling
+      const members: TeamMember[] = data.map((item) => {
+        const userData = item.profiles;
+        return transformTeamMember(item, userData);
       });
       
-      return { data: members, error: null };
-    } catch (err) {
-      console.error('Unexpected error in getTeamMembers:', err);
-      return { data: null, error: err };
+      return members;
+    } catch (error) {
+      console.error('Unexpected error in getTeamMembers:', error);
+      return [];
     }
   },
   

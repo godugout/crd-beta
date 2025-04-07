@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { Reaction, DbReaction } from '../schema/types';
 import { toast } from 'sonner';
@@ -196,6 +195,7 @@ function transformReactionFromDb(record: any): Reaction {
   if (record.profiles) {
     reaction.user = {
       id: record.profiles.id,
+      email: record.profiles.email || '',
       name: record.profiles.full_name,
       avatarUrl: record.profiles.avatar_url,
       username: record.profiles.username

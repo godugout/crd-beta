@@ -29,13 +29,12 @@ interface CardRecord {
 
 interface CollectionRecord {
   id: string;
-  name: string;
   title?: string;
   description?: string;
-  coverImageUrl?: string;
-  visibility?: 'public' | 'private';
-  allowComments?: boolean;
-  designMetadata?: {
+  cover_image_url?: string;
+  visibility?: 'public' | 'private' | 'team';
+  allow_comments?: boolean;
+  design_metadata?: {
     wrapperColor?: string;
     wrapperPattern?: string;
     packType?: 'memory-pack' | 'standard';
@@ -79,14 +78,24 @@ const CardShowcase = () => {
           collectionId: card.collection_id || undefined
         }));
         
-        const formattedCollections: Collection[] = (collectionsData as CollectionRecord[]).map(collection => ({
+        const typedCollections = collectionsData as unknown as { 
+          id: string;
+          title: string; 
+          description?: string;
+          cover_image_url?: string;
+          visibility?: 'public' | 'private' | 'team';
+          allow_comments?: boolean;
+          design_metadata?: any;
+        }[];
+        
+        const formattedCollections: Collection[] = typedCollections.map(collection => ({
           id: collection.id,
-          name: collection.name || collection.title,
+          name: collection.title || '',
           description: collection.description || '',
-          coverImageUrl: collection.coverImageUrl || '',
+          coverImageUrl: collection.cover_image_url || '',
           visibility: collection.visibility || 'public',
-          allowComments: collection.allowComments !== undefined ? collection.allowComments : true,
-          designMetadata: collection.designMetadata || {}
+          allowComments: collection.allow_comments !== undefined ? collection.allow_comments : true,
+          designMetadata: collection.design_metadata || {}
         }));
         
         setFeaturedCards(formattedCards);

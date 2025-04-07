@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { Card } from '@/lib/schema/types';
 import { useAuth } from '@/context/AuthContext';
@@ -70,7 +69,7 @@ export function useCards(options: UseCardsOptions = {}) {
           collectionId: card.collection_id,
           isPublic: card.is_public || false,
           tags: card.tags || [],
-          designMetadata: card.design_metadata || {},
+          designMetadata: card.design_metadata ? card.design_metadata : {},
           reactions: []
         }));
 
@@ -142,7 +141,7 @@ export function useCards(options: UseCardsOptions = {}) {
           collectionId: data.collection_id,
           isPublic: data.is_public || false,
           tags: data.tags || [],
-          designMetadata: data.design_metadata || {},
+          designMetadata: data.design_metadata ? data.design_metadata : {},
           reactions: []
         };
 
@@ -201,7 +200,7 @@ export function useCards(options: UseCardsOptions = {}) {
           collectionId: data.collection_id,
           isPublic: data.is_public || false,
           tags: data.tags || [],
-          designMetadata: data.design_metadata || {},
+          designMetadata: data.design_metadata ? data.design_metadata : {},
           reactions: []
         };
         

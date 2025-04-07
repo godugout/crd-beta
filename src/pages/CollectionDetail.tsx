@@ -21,7 +21,7 @@ import { Separator } from "@/components/ui/separator"
 import { Link } from 'react-router-dom';
 
 interface CollectionDetailParams {
-  collectionId: string;
+  collectionId?: string;
 }
 
 const CollectionDetail: React.FC = () => {
@@ -35,8 +35,12 @@ const CollectionDetail: React.FC = () => {
   const [description, setDescription] = useState(collection?.description || '');
   const [coverImageUrl, setCoverImageUrl] = useState(collection?.coverImageUrl || '');
   const [fetchedCards, setFetchedCards] = useState<Card[]>([]);
-  const [visibility, setVisibility] = useState(collection?.visibility || 'private');
-  const [allowComments, setAllowComments] = useState(collection?.allowComments || true);
+  const [visibility, setVisibility] = useState<'public' | 'private' | 'team'>(
+    (collection?.visibility as 'public' | 'private' | 'team') || 'private'
+  );
+  const [allowComments, setAllowComments] = useState<boolean>(
+    collection?.allowComments !== undefined ? !!collection.allowComments : true
+  );
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
   
   useEffect(() => {
@@ -127,12 +131,10 @@ const CollectionDetail: React.FC = () => {
 
   const cardItems: Card[] = fetchedCards.map(card => ({
     ...card,
-    // Ensure oaklandMemory has title and description if it exists
     designMetadata: {
       ...card.designMetadata,
       oaklandMemory: card.designMetadata?.oaklandMemory ? {
         ...card.designMetadata.oaklandMemory,
-        // Use default values for required fields if they don't exist
         title: card.designMetadata.oaklandMemory.title || card.title || '',
         description: card.designMetadata.oaklandMemory.description || card.description || ''
       } : undefined
@@ -198,7 +200,8 @@ const CollectionDetail: React.FC = () => {
               </div>
               <div className="flex items-center space-x-2">
                 <Label htmlFor="visibility">Visibility</Label>
-                <select id="visibility" className="border rounded px-2 py-1" value={visibility} onChange={(e) => setVisibility(e.target.value as 'public' | 'private' | 'team')}>
+                <select id="visibility" className="border rounded px-2 py-1" value={visibility} 
+                  onChange={(e) => setVisibility(e.target.value as 'public' | 'private' | 'team')}>
                   <option value="public">Public</option>
                   <option value="private">Private</option>
                   <option value="team">Team</option>

@@ -1,12 +1,8 @@
 
+// Import types from schema but don't re-export them directly to avoid conflicts
 import { Card as SchemaCard, OaklandMemoryData as SchemaOaklandMemoryData } from '@/lib/schema/types';
 
-// Re-export compatible types to make sure they align with the schema
-export type { Card as Card } from '@/lib/schema/types';
-export type { OaklandMemoryData as OaklandMemoryData } from '@/lib/schema/types';
-export type { Collection, User, Team, TeamMember, Comment, Reaction } from '@/lib/schema/types';
-
-// Ensure fabric swatch is compatible
+// Define our own types that extend or are compatible with schema types
 export interface FabricSwatch {
   type: string;
   team: string;
@@ -16,6 +12,7 @@ export interface FabricSwatch {
   size: string;
 }
 
+// User interface that's compatible with schema User
 export interface User {
   id: string;
   email: string;
@@ -24,6 +21,7 @@ export interface User {
   username?: string;
 }
 
+// Collection interface compatible with schema Collection
 export interface Collection {
   id: string;
   name: string;
@@ -31,7 +29,7 @@ export interface Collection {
   coverImageUrl?: string;
   userId?: string;
   cards?: SchemaCard[];
-  visibility?: 'public' | 'private'; 
+  visibility?: 'public' | 'private' | 'team'; 
   allowComments?: boolean;
   designMetadata?: {
     wrapperColor?: string;
@@ -40,14 +38,16 @@ export interface Collection {
   };
 }
 
-// Make this type exactly match the schema Card type
+// Card interface that extends SchemaCard to ensure compatibility
 export interface Card extends SchemaCard {
-  // Add any additional fields here that might be needed for compatibility
+  // Any additional fields needed for compatibility
 }
 
-// Fix the OaklandMemoryData to include title and description
+// OaklandMemoryData that ensures title and description are present
 export interface OaklandMemoryData extends SchemaOaklandMemoryData {
-  // Ensure all required fields are present
   title: string;
   description: string;
 }
+
+// Re-export other types from schema as needed
+export type { Collection as Collection, User as User, Team, TeamMember, Comment, Reaction } from '@/lib/schema/types';
