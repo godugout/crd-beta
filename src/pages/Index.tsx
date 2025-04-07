@@ -25,14 +25,17 @@ const Index = () => {
         
         {/* Featured Cards */}
         <FeaturedCardsSection 
-          title="Featured Cards" 
-          cardsData={cards.slice(0, 6)}
           isLoading={isLoading}
+          featuredCards={cards.slice(0, 6)}
+          handleViewCard={(id) => console.log('View card', id)}
+          handleCreateCard={() => console.log('Create card')}
         />
         
         {/* Collections */}
         <CollectionsSection 
           collections={collections}
+          isLoading={false}
+          handleViewCollection={(id) => console.log('View collection', id)}
         />
         
         {/* Memory Packs */}

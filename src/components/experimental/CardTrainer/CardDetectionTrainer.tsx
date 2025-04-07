@@ -72,6 +72,13 @@ const CardDetectionTrainer: React.FC<CardTrainerProps> = () => {
   const handleSelectImage = (img: HTMLImageElement) => {
     setUploadedImage(img);
   };
+
+  // Type-safe wrapper for setActiveTool
+  const handleSetActiveTool = (tool: string) => {
+    if (tool === 'select' || tool === 'trace') {
+      setActiveTool(tool);
+    }
+  };
   
   return (
     <div className="container mx-auto py-6">
@@ -109,7 +116,7 @@ const CardDetectionTrainer: React.FC<CardTrainerProps> = () => {
                   displayWidth={displayWidth}
                   displayHeight={displayHeight}
                   activeTool={activeTool}
-                  setActiveTool={setActiveTool}
+                  setActiveTool={handleSetActiveTool}
                   manualTraces={manualTraces}
                   onAddTrace={handleAddTrace}
                   onClearTraces={handleClearTraces}

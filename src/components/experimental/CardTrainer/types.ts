@@ -29,6 +29,19 @@ export interface DetectionTabProps {
   detectedCards: DetectedCard[];
 }
 
+// Add properties needed by TabContent
+export interface DetectionTabContentProps {
+  image: string | null;
+  detectedCards: DetectedCard[];
+  isProcessing: boolean;
+  showEdges: boolean;
+  showContours: boolean;
+  onDetectCards: () => void;
+  onClearDetection: () => void;
+  onToggleEdges: (value: boolean) => void;
+  onToggleContours: (value: boolean) => void;
+}
+
 export interface TracingTabProps {
   uploadedImage: HTMLImageElement;
   canvasRef: React.RefObject<HTMLCanvasElement>;
@@ -42,8 +55,44 @@ export interface TracingTabProps {
   onClearTraces: () => void;
 }
 
+// Add properties needed by TabContent
+export interface TracingTabContentProps {
+  image: string | null;
+  manualTraces: DetectedCard[];
+  onAddTrace: () => void;
+  onClearTraces: () => void;
+  onCompareResults: () => void;
+}
+
 export interface ComparisonTabProps {
   uploadedImage: HTMLImageElement;
   detectedCards: DetectedCard[];
   manualTraces: DetectedCard[];
+}
+
+// Add properties needed by TabContent
+export interface ComparisonTabContentProps {
+  detectedCards: DetectedCard[];
+  manualTraces: DetectedCard[];
+  uploadedImage?: HTMLImageElement | null;
+}
+
+export interface TabContentProps {
+  activeTab: string;
+  setActiveTab: (tab: string) => void;
+  image: string | null;
+  fileInputRef: React.RefObject<HTMLInputElement>;
+  detectedCards: DetectedCard[];
+  manualTraces: DetectedCard[];
+  isProcessing: boolean;
+  showEdges: boolean;
+  showContours: boolean;
+  onImageChange: (imageUrl: string) => void;
+  onDetectCards: () => void;
+  onAddTrace: () => void;
+  onClearTraces: () => void;
+  onCompareResults: () => void;
+  onToggleEdges: (value: boolean) => void;
+  onToggleContours: (value: boolean) => void;
+  onClearDetection: () => void;
 }

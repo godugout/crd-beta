@@ -72,7 +72,7 @@ const OaklandMemoryCreator: React.FC<OaklandMemoryCreatorProps> = ({ className }
         description: memoryData.description,
         imageUrl: imageUrl,
         thumbnailUrl: imageUrl,
-        tags: memoryData.tags,
+        tags: memoryData.tags || [],
         designMetadata: {
           cardStyle: {
             effect: selectedTemplate,
@@ -160,7 +160,21 @@ const OaklandMemoryCreator: React.FC<OaklandMemoryCreatorProps> = ({ className }
               <div className="flex justify-center">
                 <div className="max-w-[300px] w-full">
                   <OaklandMemoryCard
-                    memory={{...memoryData, imageUrl}}
+                    memory={{
+                      title: memoryData.title,
+                      description: memoryData.description,
+                      date: memoryData.date || '',
+                      memoryType: memoryData.memoryType || '',
+                      opponent: memoryData.opponent,
+                      score: memoryData.score,
+                      location: memoryData.location,
+                      section: memoryData.section,
+                      attendees: memoryData.attendees || [],
+                      tags: memoryData.tags || [],
+                      imageUrl: imageUrl,
+                      historicalContext: memoryData.historicalContext,
+                      personalSignificance: memoryData.personalSignificance
+                    }}
                     templateType={selectedTemplate}
                   />
                 </div>

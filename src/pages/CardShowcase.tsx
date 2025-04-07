@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { Card } from '@/lib/types';
+import { Card, Collection } from '@/lib/types';
 import Navbar from '@/components/Navbar';
 import { toast } from 'sonner';
 
@@ -38,11 +38,20 @@ interface CollectionRecord {
   owner_id?: string;
   created_at: string;
   updated_at: string;
+  name: string; // Added to match Collection type
+  coverImageUrl?: string; // Added to match Collection type
+  visibility?: 'public' | 'private'; // Added to match Collection type
+  allowComments?: boolean; // Added to match Collection type
+  designMetadata?: {
+    wrapperColor?: string;
+    wrapperPattern?: string;
+    packType?: 'memory-pack' | 'standard';
+  }; // Added to match Collection type
 }
 
 const CardShowcase = () => {
   const [featuredCards, setFeaturedCards] = useState<Card[]>([]);
-  const [collections, setCollections] = useState<CollectionRecord[]>([]);
+  const [collections, setCollections] = useState<Collection[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -79,9 +88,20 @@ const CardShowcase = () => {
           createdAt: card.created_at, // Use string directly, not converting to Date
           collectionId: card.collection_id || undefined
         }));
+
+        // Ensure collections have all required fields from the Collection type
+        const formattedCollections: Collection[] = (collectionsData as CollectionRecord[]).map(collection => ({
+          id: collection.id,
+          name: collection.name || collection.title, // Use name or fallback to title
+          description: collection.description || '',
+          coverImageUrl: collection.coverImageUrl || '',
+          visibility: collection.visibility || 'public',
+          allowComments: collection.allowComments !== undefined ? collection.allowComments : true,
+          designMetadata: collection.designMetadata || {}
+        }));
         
         setFeaturedCards(formattedCards);
-        setCollections(collectionsData as CollectionRecord[]);
+        setCollections(formattedCollections);
       } catch (error) {
         console.error('Error fetching data:', error);
         toast.error('Failed to load content');

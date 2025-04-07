@@ -66,7 +66,7 @@ const OaklandMemoryForm: React.FC<OaklandMemoryFormProps> = ({ onSubmit, initial
 
   // Handle form submission
   const handleFormSubmit = (data: OaklandMemoryFormValues) => {
-    onSubmit(data as OaklandMemoryData);
+    onSubmit(data);
   };
 
   const selectedMemoryType = form.watch('memoryType');
@@ -119,3 +119,4 @@ const OaklandMemoryForm: React.FC<OaklandMemoryFormProps> = ({ onSubmit, initial
 };
 
 export { OaklandMemoryForm };
+export type { OaklandMemoryData };
