@@ -1,13 +1,13 @@
 
 import { useState } from 'react';
-import { CropBoxProps, EnhancedCropBoxProps } from '../CropBox';
+import { EnhancedCropBoxProps } from '../cardDetection';
 import { ImageData } from './useCropState';
 import { detectCardsInImage, MemorabiliaType } from '../cardDetection';
 
 interface UseImageHandlingProps {
   editorImage: string | null;
   showEditor: boolean;
-  setImageData: React.Dispatch<React.SetStateAction<ImageData | null>>;
+  setImageData: React.Dispatch<React.SetStateAction<ImageData>>;
   setCropBoxes: React.Dispatch<React.SetStateAction<EnhancedCropBoxProps[]>>;
   setDetectedCards: React.Dispatch<React.SetStateAction<EnhancedCropBoxProps[]>>;
   setSelectedCropIndex: (index: number) => void;
@@ -69,6 +69,7 @@ export const useImageHandling = ({
         
         // Update image data with rotated image
         setImageData(prevData => ({
+          ...prevData,
           url,
           width: canvas.width,
           height: canvas.height,
