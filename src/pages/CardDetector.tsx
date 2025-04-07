@@ -115,8 +115,8 @@ const CardDetector = () => {
                       <h2 className="text-xl font-semibold mb-2">Upload an image with {detectionMode === 'group' ? 'people' : 'a person or card'}</h2>
                       <p className="text-cardshow-slate text-center max-w-md mb-6">
                         {detectionMode === 'group' 
-                          ? 'Upload a group photo, and we'll automatically detect faces and let you create cards for each person.'
-                          : 'Upload an image containing a person or trading card, and we'll automatically detect and extract it for you.'}
+                          ? "Upload a group photo, and we'll automatically detect faces and let you create cards for each person."
+                          : "Upload an image containing a person or trading card, and we'll automatically detect and extract it for you."}
                       </p>
                       <Button
                         size="lg"
@@ -214,7 +214,7 @@ const CardDetector = () => {
                         placeholder="Person {index} - {date}"
                       />
                       <p className="text-xs text-gray-500 mt-1">
-                        Use {'{index}'} for numbering and {'{date}'} to include today's date
+                        Use {"{index}"} for numbering and {"{date}"} to include today's date
                       </p>
                     </div>
                   </div>
