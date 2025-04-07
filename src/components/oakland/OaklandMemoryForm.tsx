@@ -73,7 +73,7 @@ const OaklandMemoryForm: React.FC<OaklandMemoryFormProps> = ({ onSubmit, initial
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleFormSubmit(handleFormSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
         {/* Basic Fields: Title and Description */}
         <BasicMemoryFields form={form} />
 

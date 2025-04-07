@@ -1,6 +1,6 @@
 
 import { OaklandTemplateType } from './OaklandCardTemplates';
-import { OaklandMemoryData } from './OaklandMemoryForm';
+import { OaklandMemoryData } from '@/lib/types';
 
 export const getTemplateForMemoryType = (
   memoryType?: string

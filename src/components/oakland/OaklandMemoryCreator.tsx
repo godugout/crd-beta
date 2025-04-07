@@ -4,10 +4,11 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useCards } from '@/context/CardContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { OaklandMemoryForm, OaklandMemoryData } from './OaklandMemoryForm';
+import { OaklandMemoryForm } from './OaklandMemoryForm';
 import CardUpload from '@/components/card-upload/CardUpload';
 import OaklandMemoryCard from './OaklandMemoryCard';
 import { OaklandTemplateType } from './OaklandCardTemplates';
+import { OaklandMemoryData } from '@/lib/types';
 
 interface OaklandMemoryCreatorProps {
   className?: string;
