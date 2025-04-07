@@ -48,7 +48,7 @@ export function CollectionDetail() {
           name: collectionData.title || '',
           description: collectionData.description || '',
           coverImageUrl: collectionData.cover_image_url || '',
-          visibility: collectionData.visibility || 'public',
+          visibility: (collectionData.visibility as 'public' | 'private' | 'team') || 'private',
           allowComments: collectionData.allow_comments !== undefined ? collectionData.allow_comments : true,
           designMetadata: collectionData.design_metadata || {},
           createdAt: collectionData.created_at,

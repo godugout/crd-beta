@@ -10,11 +10,25 @@ import SiteFooter from '@/components/card-showcase/SiteFooter';
 import { useCards } from '@/context/CardContext';
 import { useAuth } from '@/context/auth/useAuth';
 import { useCardData } from '@/components/gallery/useCardData';
+import { useNavigate } from 'react-router-dom';
 
 const Index = () => {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { cards, isLoading } = useCardData();
   const { collections } = useCards();
+  
+  const handleViewCard = (id: string) => {
+    navigate(`/card/${id}`);
+  };
+  
+  const handleCreateCard = () => {
+    navigate('/card/create');
+  };
+  
+  const handleViewPack = (id: string) => {
+    navigate(`/pack/${id}`);
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -27,22 +41,21 @@ const Index = () => {
         <FeaturedCardsSection 
           isLoading={isLoading}
           featuredCards={cards.slice(0, 6)}
-          handleViewCard={(id) => console.log('View card', id)}
-          handleCreateCard={() => console.log('Create card')}
+          handleViewCard={handleViewCard}
+          handleCreateCard={handleCreateCard}
         />
         
         {/* Collections */}
         <CollectionsSection 
           collections={collections}
           isLoading={false}
-          handleViewCollection={(id) => console.log('View collection', id)}
         />
         
         {/* Memory Packs */}
         <MemoryPacksSection 
           isLoading={isLoading}
           packs={[]}
-          handleViewPack={() => {}}
+          handleViewPack={handleViewPack}
         />
         
         {/* AR Features */}
