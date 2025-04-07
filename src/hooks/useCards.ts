@@ -1,6 +1,5 @@
-
 import { useState, useEffect, useCallback } from 'react';
-import { Card } from '@/lib/schema/types';
+import { Card } from '@/lib/types';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -71,7 +70,7 @@ export function useCards(options: UseCardsOptions = {}) {
           collectionId: card.collection_id,
           isPublic: card.is_public || false,
           tags: card.tags || [],
-          designMetadata: card.design_metadata ? card.design_metadata : {},
+          designMetadata: card.design_metadata || {},
           reactions: []
         }));
 
@@ -113,7 +112,8 @@ export function useCards(options: UseCardsOptions = {}) {
         user_id: user.id,
         creator_id: user.id, // Required by current db schema
         rarity: 'common', // Required by current db schema
-        design_metadata: cardData.designMetadata || {}
+        design_metadata: cardData.designMetadata || {},
+        edition_size: 1 // Required by current db schema
       };
 
       const { data, error } = await supabase
@@ -144,7 +144,7 @@ export function useCards(options: UseCardsOptions = {}) {
           collectionId: dbCard.collection_id,
           isPublic: dbCard.is_public || false,
           tags: dbCard.tags || [],
-          designMetadata: dbCard.design_metadata ? dbCard.design_metadata : {},
+          designMetadata: dbCard.design_metadata || {},
           reactions: []
         };
 
@@ -365,10 +365,10 @@ export function useCards(options: UseCardsOptions = {}) {
     error,
     fetchCards,
     addCard,
-    updateCard,
-    deleteCard,
-    getCard,
-    addReaction,
-    removeReaction
+    updateCard: () => {},
+    deleteCard: () => {},
+    getCard: () => {},
+    addReaction: () => {},
+    removeReaction: () => {}
   };
 }
