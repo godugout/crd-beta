@@ -2,116 +2,77 @@
 import React from 'react';
 import { Collection } from '@/lib/types';
 import { Button } from '@/components/ui/button';
-import { ArrowRightIcon } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { LoadingState } from '@/components/ui/loading-state';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import { useNavigate } from 'react-router-dom';
 
-interface CollectionsSectionProps {
+export interface CollectionsSectionProps {
   collections: Collection[];
-  isLoading?: boolean;
-  handleViewCollection?: (id: string) => void;
+  isLoading: boolean;
 }
 
-const CollectionsSection: React.FC<CollectionsSectionProps> = ({ 
+const CollectionsSection: React.FC<CollectionsSectionProps> = ({
   collections,
-  isLoading = false,
-  handleViewCollection 
+  isLoading
 }) => {
-  if (isLoading) {
-    return (
-      <section className="py-12 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-2xl font-bold">Collections</h2>
-          </div>
-          <LoadingState text="Loading collections..." />
-        </div>
-      </section>
-    );
-  }
+  const navigate = useNavigate();
   
-  if (!collections || collections.length === 0) {
-    return (
-      <section className="py-12 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-2xl font-bold">Collections</h2>
-            <Link to="/collections/new">
-              <Button>Create Collection</Button>
-            </Link>
-          </div>
-          <div className="text-center py-12">
-            <p className="text-gray-500 mb-4">You don't have any collections yet</p>
-            <Link to="/collections/new">
-              <Button>Create Your First Collection</Button>
-            </Link>
-          </div>
-        </div>
-      </section>
-    );
-  }
-
+  const handleCreateCollection = () => {
+    navigate('/collection/create');
+  };
+  
+  const handleViewCollection = (collectionId: string) => {
+    navigate(`/collection/${collectionId}`);
+  };
+  
   return (
-    <section className="py-12 bg-gray-50">
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between mb-8">
-          <h2 className="text-2xl font-bold">Your Collections</h2>
-          <Link to="/collections">
-            <Button variant="outline" className="flex items-center gap-1">
-              View All <ArrowRightIcon size={16} />
-            </Button>
-          </Link>
+    <section>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold">Collections</h2>
+        <Button onClick={handleCreateCollection}>Create Collection</Button>
+      </div>
+
+      {isLoading ? (
+        <div className="flex justify-center items-center h-64">
+          <LoadingSpinner size={40} />
         </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {collections.slice(0, 3).map((collection) => (
-            <Link 
+      ) : collections.length === 0 ? (
+        <div className="text-center py-12 border border-dashed border-gray-300 rounded-lg">
+          <p className="text-gray-500 mb-4">No collections yet.</p>
+          <Button onClick={handleCreateCollection}>Create Your First Collection</Button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {collections.map(collection => (
+            <div 
               key={collection.id} 
-              to={`/collections/${collection.id}`} 
-              className="block group"
-              onClick={() => handleViewCollection && handleViewCollection(collection.id)}
+              className="border border-gray-200 rounded-lg overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
+              onClick={() => handleViewCollection(collection.id)}
             >
-              <div className="bg-white rounded-lg overflow-hidden border border-gray-200 h-full">
-                <div className="aspect-video bg-gray-100 overflow-hidden">
-                  {collection.coverImageUrl ? (
-                    <img 
-                      src={collection.coverImageUrl} 
-                      alt={collection.name} 
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <span className="text-gray-300 text-xl">No Cover Image</span>
-                    </div>
-                  )}
-                </div>
-                <div className="p-4">
-                  <h3 className="text-lg font-medium mb-2">{collection.name}</h3>
-                  <p className="text-sm text-gray-600 line-clamp-2">
-                    {collection.description || 'No description'}
-                  </p>
-                  <div className="mt-4 flex justify-between items-center">
-                    <span className="text-sm text-gray-500">
-                      {collection.cards?.length || 0} cards
-                    </span>
-                    <Button variant="link" className="p-0 h-auto text-cardshow-blue">
-                      View Collection
-                    </Button>
+              <div className="h-40 bg-gray-100 overflow-hidden">
+                {collection.coverImageUrl ? (
+                  <img 
+                    src={collection.coverImageUrl} 
+                    alt={collection.name}
+                    className="w-full h-full object-cover" 
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-gray-400">
+                    No Cover Image
                   </div>
-                </div>
+                )}
               </div>
-            </Link>
+              <div className="p-4">
+                <h3 className="font-medium">{collection.name}</h3>
+                {collection.description && (
+                  <p className="text-sm text-gray-600 line-clamp-2 mt-1">
+                    {collection.description}
+                  </p>
+                )}
+              </div>
+            </div>
           ))}
         </div>
-        
-        {collections.length > 3 && (
-          <div className="mt-10 text-center">
-            <Link to="/collections">
-              <Button>View All Collections</Button>
-            </Link>
-          </div>
-        )}
-      </div>
+      )}
     </section>
   );
 };

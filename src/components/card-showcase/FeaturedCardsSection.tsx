@@ -2,6 +2,7 @@
 import React from 'react';
 import { Card } from '@/lib/types';
 import { Button } from '@/components/ui/button';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
 
 export interface FeaturedCardsSectionProps {
   isLoading: boolean;
@@ -10,65 +11,78 @@ export interface FeaturedCardsSectionProps {
   handleCreateCard: () => void;
 }
 
-const FeaturedCardsSection: React.FC<FeaturedCardsSectionProps> = ({ 
+const FeaturedCardsSection: React.FC<FeaturedCardsSectionProps> = ({
   isLoading,
   featuredCards,
   handleViewCard,
   handleCreateCard
 }) => {
   return (
-    <section className="py-12 bg-white">
-      <div className="container mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <h2 className="text-2xl font-bold text-gray-900">Featured Cards</h2>
-          <Button onClick={handleCreateCard} variant="outline">
-            Create Your Own
-          </Button>
+    <section>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold">Featured Cards</h2>
+        <Button onClick={handleCreateCard}>Create Card</Button>
+      </div>
+
+      {isLoading ? (
+        <div className="flex justify-center items-center h-64">
+          <LoadingSpinner size={40} />
         </div>
-        
-        {isLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[1, 2, 3, 4].map(i => (
-              <div key={i} className="bg-gray-100 rounded-lg aspect-[2.5/3.5] animate-pulse" />
-            ))}
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {featuredCards.map(card => (
-              <div 
-                key={card.id} 
-                className="relative rounded-lg overflow-hidden aspect-[2.5/3.5] cursor-pointer group"
-                onClick={() => handleViewCard(card.id)}
-              >
-                <img 
-                  src={card.imageUrl} 
-                  alt={card.title} 
-                  className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end">
-                  <div className="p-4 text-white">
-                    <h3 className="font-medium text-lg">{card.title}</h3>
-                    {card.tags && card.tags.length > 0 && (
-                      <div className="flex gap-1 mt-1 flex-wrap">
-                        {card.tags.slice(0, 2).map(tag => (
-                          <span key={tag} className="text-xs bg-white/20 px-2 py-0.5 rounded-full">
-                            {tag}
-                          </span>
-                        ))}
-                        {card.tags.length > 2 && (
-                          <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full">
-                            +{card.tags.length - 2}
-                          </span>
-                        )}
-                      </div>
+      ) : featuredCards.length === 0 ? (
+        <div className="text-center py-12 border border-dashed border-gray-300 rounded-lg">
+          <p className="text-gray-500 mb-4">No featured cards yet.</p>
+          <Button onClick={handleCreateCard}>Create Your First Card</Button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {featuredCards.map(card => (
+            <div 
+              key={card.id} 
+              className="border border-gray-200 rounded-lg overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
+              onClick={() => handleViewCard(card.id)}
+            >
+              <div className="h-40 bg-gray-100 overflow-hidden">
+                {card.thumbnailUrl ? (
+                  <img 
+                    src={card.thumbnailUrl} 
+                    alt={card.title}
+                    className="w-full h-full object-cover" 
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-gray-400">
+                    No Image
+                  </div>
+                )}
+              </div>
+              <div className="p-4">
+                <h3 className="font-medium">{card.title}</h3>
+                {card.description && (
+                  <p className="text-sm text-gray-600 line-clamp-2 mt-1">
+                    {card.description}
+                  </p>
+                )}
+                {card.tags && card.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    {card.tags.slice(0, 2).map(tag => (
+                      <span 
+                        key={tag} 
+                        className="px-2 py-1 bg-gray-100 text-xs rounded-full"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                    {card.tags.length > 2 && (
+                      <span className="px-2 py-1 bg-gray-100 text-xs rounded-full">
+                        +{card.tags.length - 2}
+                      </span>
                     )}
                   </div>
-                </div>
+                )}
               </div>
-            ))}
-          </div>
-        )}
-      </div>
+            </div>
+          ))}
+        </div>
+      )}
     </section>
   );
 };
