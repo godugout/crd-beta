@@ -1,63 +1,58 @@
 
-import React, { useState } from 'react';
-import Navbar from '@/components/Navbar';
-import { useAuth } from '@/context/AuthContext';
-import { cardData } from '@/data/cardData';
-import CardShowcase from '@/components/home/CardShowcase';
-import CardCollection from '@/components/home/CardCollection';
-import CardUpload from '@/components/home/CardUpload';
-import Footer from '@/components/home/Footer';
+import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import Navbar from '../components/Navbar';
+import HeroSection from '../components/card-showcase/HeroSection';
+import FeaturedCardsSection from '../components/card-showcase/FeaturedCardsSection';
+import CollectionsSection from '../components/card-showcase/CollectionsSection';
+import MemoryPacksSection from '../components/card-showcase/MemoryPacksSection';
+import ArFeaturesSection from '../components/card-showcase/ArFeaturesSection';
+import SiteFooter from '../components/card-showcase/SiteFooter';
+import { useCards } from '../context/CardContext';
 
 const Index = () => {
-  const { user } = useAuth();
-  const [activeCard, setActiveCard] = useState(0);
-  const [isFlipped, setIsFlipped] = useState(false);
-  const [view, setView] = useState<'showcase' | 'collection' | 'upload'>('showcase');
+  const { cards, collections, isLoading, refreshCards } = useCards();
+  const navigate = useNavigate();
 
-  // Function to handle card selection
-  const selectCard = (index: number) => {
-    setActiveCard(index);
-    setIsFlipped(false);
+  // Find memory packs (collections with packType === 'memory-pack')
+  const memoryPacks = collections.filter(collection => 
+    collection.designMetadata?.packType === 'memory-pack'
+  );
+  
+  // Find standard collections (those without packType or packType !== 'memory-pack')
+  const standardCollections = collections.filter(collection => 
+    !collection.designMetadata?.packType || collection.designMetadata?.packType !== 'memory-pack'
+  );
+  
+  useEffect(() => {
+    refreshCards();
+  }, [refreshCards]);
+
+  const handleViewCollection = (collectionId: string) => {
+    navigate(`/collections/${collectionId}`);
   };
   
-  // Function to flip card
-  const flipCard = () => {
-    setIsFlipped(!isFlipped);
+  const handleViewPack = (packId: string) => {
+    navigate(`/packs/${packId}`);
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      {/* Header with Navbar */}
+    <div className="min-h-screen bg-white">
       <Navbar />
-      
-      {/* Main content - Added top padding to account for fixed navbar */}
-      <main className="pt-16 pb-6 px-4">
-        {view === 'showcase' && (
-          <CardShowcase 
-            cardData={cardData}
-            activeCard={activeCard}
-            isFlipped={isFlipped}
-            selectCard={selectCard}
-            flipCard={flipCard}
-            setView={setView}
-          />
-        )}
-        {view === 'collection' && (
-          <CardCollection 
-            cardData={cardData}
-            selectCard={selectCard}
-            setView={setView}
-          />
-        )}
-        {view === 'upload' && (
-          <CardUpload 
-            setView={setView}
-          />
-        )}
-      </main>
-      
-      {/* Footer */}
-      <Footer />
+      <HeroSection />
+      <FeaturedCardsSection cards={cards} isLoading={isLoading} />
+      <CollectionsSection 
+        collections={standardCollections} 
+        isLoading={isLoading} 
+        handleViewCollection={handleViewCollection} 
+      />
+      <MemoryPacksSection 
+        packs={memoryPacks} 
+        isLoading={isLoading} 
+        handleViewPack={handleViewPack} 
+      />
+      <ArFeaturesSection />
+      <SiteFooter />
     </div>
   );
 };

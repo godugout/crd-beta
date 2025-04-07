@@ -22,6 +22,13 @@ export interface Collection {
   coverImageUrl?: string;
   userId?: string;
   cards?: Card[];
+  visibility?: 'public' | 'private'; // Add visibility
+  allowComments?: boolean; // Add comment permission
+  designMetadata?: {
+    wrapperColor?: string; // Add wrapper color for memory packs
+    wrapperPattern?: string; // Add wrapper pattern
+    packType?: 'memory-pack' | 'standard'; // Add pack type
+  };
 }
 
 export interface Card {

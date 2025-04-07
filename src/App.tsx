@@ -1,56 +1,85 @@
+import React from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { Toaster } from 'sonner';
 
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Index from './pages/Index';
+// Auth
+import { AuthProvider } from './context/AuthContext';
 import Auth from './pages/Auth';
+
+// Card Context
+import { CardProvider } from './context/CardContext';
+
+// Main Pages
+import Index from './pages/Index';
 import Gallery from './pages/Gallery';
+import CardShowcase from './pages/CardShowcase';
 import Editor from './pages/Editor';
+import CardDetector from './pages/CardDetector';
 import Collections from './pages/Collections';
 import CollectionDetail from './pages/CollectionDetail';
 import CollectionForm from './pages/CollectionForm';
 import NotFound from './pages/NotFound';
-import PbrDemo from './pages/PbrDemo';
-import SignatureDemo from './pages/SignatureDemo';
-import CardDetector from './pages/CardDetector';
-import BaseballCardViewer from './pages/BaseballCardViewer';
-import ArCardViewer from './pages/ArCardViewer';
-import CardComparison from './pages/CardComparison';
-import CardAnimation from './pages/CardAnimation';
-import CardShowcase from './pages/CardShowcase';
-import OaklandMemories from './pages/OaklandMemories';
-import OaklandMemoryCreator from './pages/OaklandMemoryCreator';
-import OaklandMemoryDetail from './pages/OaklandMemoryDetail';
-import OaklandLanding from './pages/OaklandLanding';
 
-function App() {
+// Memory Pack Pages
+import MemoryPacks from './pages/MemoryPacks';
+import MemoryPackDetail from './pages/MemoryPackDetail';
+import MemoryPackCreator from './pages/MemoryPackCreator';
+
+// Oakland Pages
+import OaklandLanding from './pages/oakland/OaklandLanding';
+import OaklandMemories from './pages/oakland/OaklandMemories';
+import OaklandMemoryDetail from './pages/oakland/OaklandMemoryDetail';
+import OaklandMemoryCreator from './pages/oakland/OaklandMemoryCreator';
+
+// Demo Pages
+import PbrDemo from './pages/demos/PbrDemo';
+import BaseballCardViewer from './pages/demos/BaseballCardViewer';
+import SignatureDemo from './pages/demos/SignatureDemo';
+import ArCardViewer from './pages/demos/ArCardViewer';
+import CardComparison from './pages/demos/CardComparison';
+import CardAnimation from './pages/demos/CardAnimation';
+
+const App = () => {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<CardShowcase />} />
-        <Route path="/auth" element={<Auth />} />
-        <Route path="/gallery" element={<Gallery />} />
-        <Route path="/editor" element={<Editor />} />
-        <Route path="/collections" element={<Collections />} />
-        <Route path="/collections/:id" element={<CollectionDetail />} />
-        <Route path="/collections/new" element={<CollectionForm />} />
-        <Route path="/collections/:id/edit" element={<CollectionForm />} />
-        <Route path="/pbr" element={<PbrDemo />} />
-        <Route path="/signature" element={<SignatureDemo />} />
-        <Route path="/card-detector" element={<CardDetector />} />
-        <Route path="/baseball-card-viewer" element={<BaseballCardViewer />} />
-        <Route path="/baseball-card-viewer/:id" element={<BaseballCardViewer />} />
-        <Route path="/ar-card-viewer" element={<ArCardViewer />} />
-        <Route path="/ar-card-viewer/:id" element={<ArCardViewer />} />
-        <Route path="/card-comparison" element={<CardComparison />} />
-        <Route path="/card-animation" element={<CardAnimation />} />
-        <Route path="/showcase" element={<CardShowcase />} />
-        <Route path="/oakland" element={<OaklandLanding />} />
-        <Route path="/oakland-memories" element={<OaklandMemories />} />
-        <Route path="/oakland-memories/create" element={<OaklandMemoryCreator />} />
-        <Route path="/oakland-memories/:id" element={<OaklandMemoryDetail />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </Router>
+    <BrowserRouter>
+      <AuthProvider>
+        <CardProvider>
+          <Toaster richColors />
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/gallery" element={<Gallery />} />
+            <Route path="/card/:id" element={<CardShowcase />} />
+            <Route path="/editor" element={<Editor />} />
+            <Route path="/card-detector" element={<CardDetector />} />
+            <Route path="/collections" element={<Collections />} />
+            <Route path="/collections/:id" element={<CollectionDetail />} />
+            <Route path="/collections/:id/edit" element={<CollectionForm />} />
+            <Route path="/collections/new" element={<CollectionForm />} />
+            <Route path="/auth" element={<Auth />} />
+            
+            {/* Memory Pack Routes */}
+            <Route path="/packs" element={<MemoryPacks />} />
+            <Route path="/packs/:id" element={<MemoryPackDetail />} />
+            <Route path="/packs/new" element={<MemoryPackCreator />} />
+            <Route path="/packs/:id/edit" element={<MemoryPackCreator />} />
+            
+            {/* Other routes */}
+            <Route path="/oakland" element={<OaklandLanding />} />
+            <Route path="/oakland/memories" element={<OaklandMemories />} />
+            <Route path="/oakland/memories/:id" element={<OaklandMemoryDetail />} />
+            <Route path="/oakland/create" element={<OaklandMemoryCreator />} />
+            <Route path="/pbr" element={<PbrDemo />} />
+            <Route path="/baseball-card-viewer" element={<BaseballCardViewer />} />
+            <Route path="/signature" element={<SignatureDemo />} />
+            <Route path="/ar" element={<ArCardViewer />} />
+            <Route path="/card-comparison" element={<CardComparison />} />
+            <Route path="/animation" element={<CardAnimation />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </CardProvider>
+      </AuthProvider>
+    </BrowserRouter>
   );
-}
+};
 
 export default App;

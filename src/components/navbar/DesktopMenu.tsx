@@ -1,54 +1,55 @@
-
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { cn } from '@/lib/utils';
-import { User } from '@/lib/types';
+import { NavLink } from 'react-router-dom';
+import { Package } from 'lucide-react';
 
-interface NavLinkProps {
-  to: string;
-  isActive: boolean;
-  children: React.ReactNode;
-}
-
-const NavLink: React.FC<NavLinkProps> = ({ to, isActive, children }) => (
-  <Link
-    to={to}
-    className={cn(
-      'px-3 py-2 text-sm font-medium rounded-md transition-colors',
-      isActive
-        ? 'text-cardshow-blue hover:text-cardshow-blue/90'
-        : 'text-cardshow-slate hover:text-cardshow-dark'
-    )}
-  >
-    {children}
-  </Link>
-);
-
-interface DesktopMenuProps {
-  user?: User;
-  isActive: (path: string) => boolean;
-}
-
-export const DesktopMenu: React.FC<DesktopMenuProps> = ({ user, isActive }) => {
+const DesktopMenu = () => {
   return (
-    <div className="hidden md:flex items-center space-x-1">
-      <NavLink to="/" isActive={isActive('/')}>
-        Home
-      </NavLink>
-      <NavLink to="/gallery" isActive={isActive('/gallery')}>
+    <nav className="flex items-center space-x-6 text-sm">
+      
+      <NavLink 
+        to="/gallery" 
+        className={({ isActive }) => 
+          isActive ? "font-medium text-cardshow-blue" : "text-cardshow-dark hover:text-cardshow-blue transition-colors"
+        }
+      >
         Gallery
       </NavLink>
-      <NavLink to="/collections" isActive={isActive('/collections')}>
+      <NavLink 
+        to="/collections" 
+        className={({ isActive }) => 
+          isActive ? "font-medium text-cardshow-blue" : "text-cardshow-dark hover:text-cardshow-blue transition-colors"
+        }
+      >
         Collections
       </NavLink>
-      <NavLink to="/oakland-memories" isActive={isActive('/oakland-memories')}>
-        A's Memories
+      
+      <NavLink 
+        to="/packs" 
+        className={({ isActive }) => 
+          isActive ? "font-medium text-cardshow-blue flex items-center" : "text-cardshow-dark hover:text-cardshow-blue transition-colors flex items-center"
+        }
+      >
+        <Package className="h-4 w-4 mr-1" />
+        Memory Packs
       </NavLink>
-      {user && (
-        <NavLink to="/editor" isActive={isActive('/editor')}>
-          Create Card
-        </NavLink>
-      )}
-    </div>
+      <NavLink 
+        to="/editor" 
+        className={({ isActive }) => 
+          isActive ? "font-medium text-cardshow-blue" : "text-cardshow-dark hover:text-cardshow-blue transition-colors"
+        }
+      >
+        Create Card
+      </NavLink>
+      <NavLink 
+        to="/card-detector" 
+        className={({ isActive }) => 
+          isActive ? "font-medium text-cardshow-blue" : "text-cardshow-dark hover:text-cardshow-blue transition-colors"
+        }
+      >
+        Card Detector
+      </NavLink>
+    </nav>
   );
 };
+
+export default DesktopMenu;

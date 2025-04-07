@@ -1,12 +1,28 @@
 
 import React from 'react';
+import { MemorabiliaType } from './cardDetection';
 
 export interface CropBoxProps {
+  id: number;
   x: number;
   y: number;
   width: number;
   height: number;
-  rotation: number;
+  color: string;
+  rotation?: number;
+  selected?: boolean;
+  batchSelected?: boolean;
+  memorabiliaType?: MemorabiliaType; // Add this property
+  confidence?: number; // Add this property
+}
+
+export interface CropBoxStyle {
+  left: string;
+  top: string;
+  width: string;
+  height: string;
+  borderColor: string;
+  transform?: string;
 }
 
 // This component no longer renders anything as Fabric.js handles rendering
