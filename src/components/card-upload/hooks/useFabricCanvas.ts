@@ -16,6 +16,9 @@ interface UseFabricCanvasProps {
   setSelectedCropIndex: (index: number) => void;
   imageData: ImageData;
   editorImgRef: React.RefObject<HTMLImageElement>;
+  batchMode?: boolean;
+  batchSelections?: number[];
+  onToggleBatchSelection?: (index: number) => void;
 }
 
 export const useFabricCanvas = ({
@@ -26,7 +29,10 @@ export const useFabricCanvas = ({
   selectedCropIndex,
   setSelectedCropIndex,
   imageData,
-  editorImgRef
+  editorImgRef,
+  batchMode = false,
+  batchSelections = [],
+  onToggleBatchSelection
 }: UseFabricCanvasProps) => {
   
   // Initialize the canvas
@@ -55,7 +61,10 @@ export const useFabricCanvas = ({
     cropBoxes,
     setCropBoxes,
     selectedCropIndex,
-    setSelectedCropIndex
+    setSelectedCropIndex,
+    batchMode,
+    batchSelections,
+    onToggleBatchSelection
   });
   
   return { addNewCropBox };

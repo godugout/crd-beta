@@ -10,6 +10,7 @@ interface EditorToolbarProps {
   onRotateCounterClockwise?: () => void;
   onZoomIn?: () => void;
   onZoomOut?: () => void;
+  batchMode?: boolean;
 }
 
 const EditorToolbar: React.FC<EditorToolbarProps> = ({
@@ -19,7 +20,8 @@ const EditorToolbar: React.FC<EditorToolbarProps> = ({
   onRotateClockwise,
   onRotateCounterClockwise,
   onZoomIn,
-  onZoomOut
+  onZoomOut,
+  batchMode = false
 }) => {
   return (
     <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-sm rounded-lg shadow-lg p-2 flex items-center space-x-2">

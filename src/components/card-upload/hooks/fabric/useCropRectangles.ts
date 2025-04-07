@@ -9,6 +9,9 @@ interface UseCropRectanglesProps {
   setCropBoxes: React.Dispatch<React.SetStateAction<CropBoxProps[]>>;
   selectedCropIndex: number;
   setSelectedCropIndex: (index: number) => void;
+  batchMode?: boolean;
+  batchSelections?: number[];
+  onToggleBatchSelection?: (index: number) => void;
 }
 
 export const useCropRectangles = ({
@@ -16,7 +19,10 @@ export const useCropRectangles = ({
   cropBoxes,
   setCropBoxes,
   selectedCropIndex,
-  setSelectedCropIndex
+  setSelectedCropIndex,
+  batchMode = false,
+  batchSelections = [],
+  onToggleBatchSelection
 }: UseCropRectanglesProps) => {
   const [cropRects, setCropRects] = useState<Rect[]>([]);
 
@@ -31,15 +37,24 @@ export const useCropRectangles = ({
     
     const newRects = cropBoxes.map((box, index) => {
       // Create rectangle for each crop box
+      const isSelected = index === selectedCropIndex;
+      const isBatchSelected = batchMode && batchSelections?.includes(index);
+      
       const rect = new Rect({
         left: box.x,
         top: box.y,
         width: box.width,
         height: box.height,
         angle: box.rotation,
-        fill: 'rgba(37, 99, 235, 0.1)',
-        stroke: index === selectedCropIndex ? '#2563eb' : 'rgba(37, 99, 235, 0.5)',
-        strokeWidth: index === selectedCropIndex ? 2 : 1,
+        fill: isBatchSelected 
+          ? 'rgba(37, 99, 235, 0.2)' 
+          : 'rgba(37, 99, 235, 0.1)',
+        stroke: isSelected 
+          ? '#2563eb' 
+          : isBatchSelected 
+            ? 'rgba(37, 99, 235, 0.8)'
+            : 'rgba(37, 99, 235, 0.5)',
+        strokeWidth: isSelected || isBatchSelected ? 2 : 1,
         strokeUniform: true,
         cornerColor: '#2563eb',
         cornerSize: 10,
@@ -55,6 +70,10 @@ export const useCropRectangles = ({
       // Handle selection
       rect.on('selected', () => {
         setSelectedCropIndex(index);
+        
+        if (batchMode && onToggleBatchSelection) {
+          onToggleBatchSelection(index);
+        }
       });
       
       // Handle moving and resizing
@@ -88,7 +107,7 @@ export const useCropRectangles = ({
     
     canvas.renderAll();
     
-  }, [canvas, cropBoxes, selectedCropIndex, setCropBoxes, setSelectedCropIndex]);
+  }, [canvas, cropBoxes, selectedCropIndex, setCropBoxes, setSelectedCropIndex, batchMode, batchSelections]);
 
   return cropRects;
 };

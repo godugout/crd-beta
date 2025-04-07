@@ -12,6 +12,9 @@ interface EditorCanvasProps {
   setSelectedCropIndex: (index: number) => void;
   imageData: ImageData;
   editorImgRef: React.RefObject<HTMLImageElement>;
+  batchMode?: boolean;
+  batchSelections?: number[];
+  onToggleBatchSelection?: (index: number) => void;
 }
 
 const EditorCanvas: React.FC<EditorCanvasProps> = ({
@@ -21,7 +24,10 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({
   selectedCropIndex,
   setSelectedCropIndex,
   imageData,
-  editorImgRef
+  editorImgRef,
+  batchMode = false,
+  batchSelections = [],
+  onToggleBatchSelection
 }) => {
   const fabricRef = useRef<HTMLCanvasElement>(null);
   
@@ -34,7 +40,10 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({
     selectedCropIndex,
     setSelectedCropIndex,
     imageData,
-    editorImgRef
+    editorImgRef,
+    batchMode,
+    batchSelections,
+    onToggleBatchSelection
   });
 
   return (
