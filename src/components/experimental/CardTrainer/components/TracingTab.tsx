@@ -1,64 +1,76 @@
 
 import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Plus, Trash, Layers } from 'lucide-react';
-import { DetectedCard } from '../types';
+import { TracingTabProps } from '../types';
 
-interface TracingTabProps {
-  image: string | null;
-  manualTraces: DetectedCard[];
-  onAddTrace: () => void;
-  onClearTraces: () => void;
-  onCompareResults: () => void;
-}
-
-const TracingTab: React.FC<TracingTabProps> = ({ 
-  image, 
-  manualTraces, 
-  onAddTrace, 
-  onClearTraces, 
-  onCompareResults 
+const TracingTab: React.FC<TracingTabProps> = ({
+  uploadedImage,
+  canvasRef,
+  fabricCanvasRef,
+  displayWidth,
+  displayHeight,
+  activeTool,
+  setActiveTool,
+  manualTraces,
+  onAddTrace,
+  onClearTraces
 }) => {
   return (
-    <>
-      <div className="flex flex-wrap gap-3 mb-6">
-        <Button 
-          variant="outline" 
-          onClick={onAddTrace}
-          disabled={!image}
+    <div className="p-4">
+      <h3 className="font-medium text-lg mb-4">Manual Card Tracing</h3>
+      
+      <div className="mb-4 flex space-x-2">
+        <button
+          onClick={() => setActiveTool('rect')}
+          className={`px-3 py-1 rounded ${activeTool === 'rect' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
         >
-          <Plus className="mr-2 h-4 w-4" />
-          Add Card Frame
-        </Button>
-        
-        <Button 
-          variant="outline" 
+          Rectangle
+        </button>
+        <button
+          onClick={() => setActiveTool('select')}
+          className={`px-3 py-1 rounded ${activeTool === 'select' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+        >
+          Select
+        </button>
+        <button
           onClick={onClearTraces}
-          disabled={!image || manualTraces.length === 0}
+          className="px-3 py-1 rounded bg-red-100 hover:bg-red-200 ml-auto"
         >
-          <Trash className="mr-2 h-4 w-4" />
-          Clear Traces
-        </Button>
-        
-        <Button 
-          variant="default" 
-          onClick={onCompareResults}
-          disabled={!image || manualTraces.length === 0}
-        >
-          <Layers className="mr-2 h-4 w-4" />
-          Compare with Detection
-        </Button>
+          Clear All
+        </button>
       </div>
       
-      {manualTraces.length > 0 && (
-        <div className="mt-6">
-          <h3 className="text-sm font-medium mb-2">Traces ({manualTraces.length}):</h3>
-          <pre className="text-xs bg-neutral-100 p-4 rounded-md overflow-x-auto">
-            {JSON.stringify(manualTraces, null, 2)}
-          </pre>
+      <div className="relative border rounded-md overflow-hidden" style={{ height: `${displayHeight}px` }}>
+        <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}>
+          <img 
+            src={uploadedImage.src} 
+            alt="Uploaded" 
+            style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+          />
         </div>
-      )}
-    </>
+        <canvas 
+          ref={canvasRef} 
+          style={{ 
+            position: 'absolute', 
+            top: 0, 
+            left: 0, 
+            width: '100%', 
+            height: '100%',
+            zIndex: 10 
+          }} 
+          width={displayWidth} 
+          height={displayHeight}
+        />
+      </div>
+      
+      <div className="mt-4">
+        <h4 className="font-medium">Manual Traces ({manualTraces.length})</h4>
+        {manualTraces.length === 0 && (
+          <p className="text-sm text-gray-500 mt-2">
+            No manual traces yet. Draw rectangles around cards in the image.
+          </p>
+        )}
+      </div>
+    </div>
   );
 };
 

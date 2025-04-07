@@ -7,8 +7,8 @@ export interface StagedCardProps {
   id: string;
   cropBox: EnhancedCropBoxProps;
   previewUrl: string;
-  file?: File;
-  url?: string; // Added url property to match expected type
+  file: File; // Changed from optional to required to match expected type
+  url: string; // Added url property to match expected type
 }
 
 export interface UseEditorProps {
@@ -69,7 +69,7 @@ export const useEditor = ({
           },
           previewUrl: result.url,
           file: result.file,
-          url: result.url // Add the url property to match expected type
+          url: result.url
         };
         
         setStagedCards(prev => [...prev, newStagedCard]);
@@ -111,20 +111,12 @@ export const useEditor = ({
   const selectStagedCard = (cardId: string | number) => {
     const idStr = cardId.toString();
     const stagedCard = stagedCards.find(card => card.id === idStr);
-    if (stagedCard) {
-      if (stagedCard.file) {
-        onCropComplete(
-          stagedCard.file, 
-          stagedCard.previewUrl, 
-          stagedCard.cropBox.memorabiliaType
-        );
-      } else if (currentFile) {
-        onCropComplete(
-          new File([currentFile], currentFile.name), 
-          stagedCard.previewUrl,
-          stagedCard.cropBox.memorabiliaType
-        );
-      }
+    if (stagedCard && stagedCard.file) {
+      onCropComplete(
+        stagedCard.file, 
+        stagedCard.previewUrl, 
+        stagedCard.cropBox.memorabiliaType
+      );
       setShowEditor(false);
     }
   };

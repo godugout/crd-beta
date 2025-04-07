@@ -1,84 +1,54 @@
 
 import React from 'react';
-import { Button } from '@/components/ui/button';
-import { RefreshCw, Trash } from 'lucide-react';
-import { Toggle } from '@/components/ui/toggle';
-import { DetectedCard } from '../types';
+import { DetectionTabProps } from '../types';
 
-interface DetectionTabProps {
-  image: string | null;
-  detectedCards: DetectedCard[];
-  isProcessing: boolean;
-  showEdges: boolean;
-  showContours: boolean;
-  onDetectCards: () => void;
-  onClearDetection: () => void;
-  onToggleEdges: (value: boolean) => void;
-  onToggleContours: (value: boolean) => void;
-}
-
-const DetectionTab: React.FC<DetectionTabProps> = ({
-  image,
-  detectedCards,
-  isProcessing,
-  showEdges,
-  showContours,
-  onDetectCards,
-  onClearDetection,
-  onToggleEdges,
-  onToggleContours
-}) => {
+const DetectionTab: React.FC<DetectionTabProps> = ({ uploadedImage, detectedCards }) => {
   return (
-    <>
-      <div className="flex flex-wrap gap-3 mb-6">
-        <Button 
-          variant="default" 
-          onClick={onDetectCards}
-          disabled={!image || isProcessing}
-        >
-          <RefreshCw className={`mr-2 h-4 w-4 ${isProcessing ? 'animate-spin' : ''}`} />
-          Detect Cards
-        </Button>
+    <div className="p-4">
+      <h3 className="font-medium text-lg mb-4">Card Detection Results</h3>
+      
+      <div className="relative border rounded-md overflow-hidden mb-4">
+        <img 
+          src={uploadedImage.src} 
+          alt="Uploaded" 
+          className="max-w-full h-auto"
+        />
         
-        <Button 
-          variant="outline" 
-          onClick={onClearDetection}
-          disabled={!image || detectedCards.length === 0}
-        >
-          <Trash className="mr-2 h-4 w-4" />
-          Clear Detection
-        </Button>
+        {detectedCards.map((card, index) => (
+          <div 
+            key={index}
+            className="absolute border-2 border-green-500"
+            style={{
+              left: `${card.x}px`,
+              top: `${card.y}px`,
+              width: `${card.width}px`,
+              height: `${card.height}px`,
+              transform: `rotate(${card.rotation}deg)`,
+              transformOrigin: 'center'
+            }}
+          >
+            <div className="absolute top-0 left-0 bg-green-500 text-white text-xs px-1">
+              {((card.confidence || 0) * 100).toFixed(0)}%
+            </div>
+          </div>
+        ))}
       </div>
       
-      <div className="flex flex-wrap gap-2 mb-6">
-        <Toggle
-          pressed={showEdges}
-          onPressedChange={onToggleEdges}
-          variant="outline"
-          aria-label="Show edges"
-        >
-          Show Edges
-        </Toggle>
-        
-        <Toggle
-          pressed={showContours}
-          onPressedChange={onToggleContours}
-          variant="outline"
-          aria-label="Show contours"
-        >
-          Show Contours
-        </Toggle>
+      <div className="space-y-2">
+        <h4 className="font-medium">Detection Details</h4>
+        <ul className="text-sm space-y-1">
+          {detectedCards.map((card, index) => (
+            <li key={index} className="flex justify-between p-2 bg-gray-50 rounded">
+              <span>Card {index + 1}</span>
+              <span className="font-mono">
+                {card.width.toFixed(0)}×{card.height.toFixed(0)}
+              </span>
+              <span>{((card.confidence || 0) * 100).toFixed(0)}%</span>
+            </li>
+          ))}
+        </ul>
       </div>
-      
-      {detectedCards.length > 0 && (
-        <div className="mt-6">
-          <h3 className="text-sm font-medium mb-2">Detection Results:</h3>
-          <pre className="text-xs bg-neutral-100 p-4 rounded-md overflow-x-auto">
-            {JSON.stringify(detectedCards, null, 2)}
-          </pre>
-        </div>
-      )}
-    </>
+    </div>
   );
 };
 

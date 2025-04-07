@@ -2,79 +2,70 @@
 import React from 'react';
 import { Card } from '@/lib/types';
 import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
 
-interface FeaturedCardsSectionProps {
-  title: string;
-  cardsData: Card[];
+export interface FeaturedCardsSectionProps {
   isLoading: boolean;
-  onCardClick?: (cardId: string) => void;
-  onAddClick?: () => void;
+  featuredCards: Card[];
+  handleViewCard: (cardId: string) => void;
+  handleCreateCard: () => void;
 }
 
-const FeaturedCardsSection: React.FC<FeaturedCardsSectionProps> = ({
-  title,
-  cardsData,
+const FeaturedCardsSection: React.FC<FeaturedCardsSectionProps> = ({ 
   isLoading,
-  onCardClick,
-  onAddClick
+  featuredCards,
+  handleViewCard,
+  handleCreateCard
 }) => {
   return (
     <section className="py-12 bg-white">
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between mb-8">
-          <h2 className="text-2xl font-bold">{title}</h2>
-          {onAddClick && (
-            <Button variant="outline" onClick={onAddClick}>
-              Add Card
-            </Button>
-          )}
+      <div className="container mx-auto">
+        <div className="flex justify-between items-center mb-8">
+          <h2 className="text-2xl font-bold text-gray-900">Featured Cards</h2>
+          <Button onClick={handleCreateCard} variant="outline">
+            Create Your Own
+          </Button>
         </div>
         
         {isLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="flex flex-col">
-                <Skeleton className="aspect-[2.5/3.5] w-full rounded-md mb-3" />
-                <Skeleton className="h-4 w-3/4 mb-2" />
-                <Skeleton className="h-3 w-1/2" />
-              </div>
-            ))}
-          </div>
-        ) : cardsData.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
-            {cardsData.map((card) => (
-              <div 
-                key={card.id} 
-                className="group cursor-pointer"
-                onClick={() => onCardClick && onCardClick(card.id)}
-              >
-                <div className="aspect-[2.5/3.5] overflow-hidden rounded-lg border border-gray-200 mb-3 bg-gray-50 relative">
-                  {card.imageUrl ? (
-                    <img 
-                      src={card.thumbnailUrl || card.imageUrl} 
-                      alt={card.title} 
-                      className="w-full h-full object-contain group-hover:scale-105 transition-transform"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-gray-50">
-                      <span className="text-gray-300 text-xl">No Image</span>
-                    </div>
-                  )}
-                </div>
-                <h3 className="font-medium text-gray-900 truncate">{card.title}</h3>
-                <p className="text-sm text-gray-500">
-                  {card.tags?.join(', ') || 'No tags'}
-                </p>
-              </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} className="bg-gray-100 rounded-lg aspect-[2.5/3.5] animate-pulse" />
             ))}
           </div>
         ) : (
-          <div className="text-center py-12">
-            <p className="text-gray-500 mb-4">No cards available</p>
-            {onAddClick && (
-              <Button onClick={onAddClick}>Create Your First Card</Button>
-            )}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {featuredCards.map(card => (
+              <div 
+                key={card.id} 
+                className="relative rounded-lg overflow-hidden aspect-[2.5/3.5] cursor-pointer group"
+                onClick={() => handleViewCard(card.id)}
+              >
+                <img 
+                  src={card.imageUrl} 
+                  alt={card.title} 
+                  className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end">
+                  <div className="p-4 text-white">
+                    <h3 className="font-medium text-lg">{card.title}</h3>
+                    {card.tags && card.tags.length > 0 && (
+                      <div className="flex gap-1 mt-1 flex-wrap">
+                        {card.tags.slice(0, 2).map(tag => (
+                          <span key={tag} className="text-xs bg-white/20 px-2 py-0.5 rounded-full">
+                            {tag}
+                          </span>
+                        ))}
+                        {card.tags.length > 2 && (
+                          <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full">
+                            +{card.tags.length - 2}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </div>
