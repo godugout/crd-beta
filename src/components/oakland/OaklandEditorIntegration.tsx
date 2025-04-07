@@ -1,12 +1,11 @@
-
 import React from 'react';
 import { OaklandTemplateType, oaklandTemplates } from './OaklandCardTemplates';
 import OaklandTemplateSelector from './OaklandTemplateSelector';
 import OaklandTemplatePreview from './OaklandTemplatePreview';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { OaklandMemoryData } from './OaklandMemoryForm';
-import { formatISO } from 'date-fns';
+import { OaklandMemoryData } from '@/lib/types';
+import { format } from 'date-fns';
 
 interface OaklandEditorIntegrationProps {
   selectedTemplate: OaklandTemplateType;
@@ -25,7 +24,7 @@ const OaklandEditorIntegration: React.FC<OaklandEditorIntegrationProps> = ({
   const previewData: OaklandMemoryData = {
     title: memoryData.title || 'My Oakland Memory',
     description: memoryData.description || 'What happened at this memorable A\'s moment?',
-    date: memoryData.date || formatISO(new Date()),
+    date: memoryData.date || format(new Date(), 'yyyy-MM-dd'),
     memoryType: memoryData.memoryType || 'game',
     opponent: memoryData.opponent || 'Giants',
     score: memoryData.score || 'A\'s 5 - 3',

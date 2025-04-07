@@ -49,8 +49,8 @@ export const useCardData = () => {
         imageUrl: card.image_url || '',
         thumbnailUrl: card.thumbnail_url || card.image_url || '',
         tags: card.tags || [],
-        createdAt: new Date(card.created_at),
-        updatedAt: new Date(card.updated_at),
+        createdAt: card.created_at, // Now using string directly
+        updatedAt: card.updated_at, // Now using string directly
         collectionId: card.collection_id
       }));
 

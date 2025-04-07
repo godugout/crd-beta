@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Card, Collection } from '../lib/types';
 import { useAuth } from './AuthContext';
@@ -18,6 +19,7 @@ type CardContextType = {
   removeCardFromCollection: (cardId: string, collectionId: string) => Promise<void>;
   refreshCards: () => Promise<void>;
   refreshCollections: () => Promise<void>;
+  getCard: (id: string) => Card | undefined; // Add the missing getCard method
 };
 
 const CardContext = createContext<CardContextType | undefined>(undefined);
@@ -64,6 +66,11 @@ export const CardProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setError
   });
 
+  // Implement the getCard method
+  const getCard = (id: string) => {
+    return cards.find(card => card.id === id);
+  };
+
   useEffect(() => {
     if (user) {
       refreshCards();
@@ -88,7 +95,8 @@ export const CardProvider: React.FC<{ children: React.ReactNode }> = ({ children
     addCardToCollection,
     removeCardFromCollection,
     refreshCards,
-    refreshCollections
+    refreshCollections,
+    getCard // Add getCard to context value
   };
 
   return <CardContext.Provider value={value}>{children}</CardContext.Provider>;

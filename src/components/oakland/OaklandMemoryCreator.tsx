@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useCards } from '@/context/CardContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import OaklandMemoryForm, { OaklandMemoryData } from './OaklandMemoryForm';
+import { OaklandMemoryForm, OaklandMemoryData } from './OaklandMemoryForm';
 import CardUpload from '@/components/card-upload/CardUpload';
 import OaklandMemoryCard from './OaklandMemoryCard';
 import { OaklandTemplateType } from './OaklandCardTemplates';
@@ -27,7 +27,12 @@ const OaklandMemoryCreator: React.FC<OaklandMemoryCreatorProps> = ({ className }
   };
 
   const handleMemoryDataSubmit = (data: OaklandMemoryData) => {
-    setMemoryData(data);
+    // Update with the imageUrl
+    const updatedData = {
+      ...data,
+      imageUrl: imageUrl
+    };
+    setMemoryData(updatedData);
   };
 
   const templateOptions: Array<{id: OaklandTemplateType, name: string}> = [
@@ -47,7 +52,7 @@ const OaklandMemoryCreator: React.FC<OaklandMemoryCreatorProps> = ({ className }
     try {
       // Prepare the metadata for storage
       const oaklandMetadata = {
-        date: memoryData.date ? memoryData.date.toISOString() : null,
+        date: memoryData.date,
         opponent: memoryData.opponent,
         score: memoryData.score,
         location: memoryData.location,
@@ -56,6 +61,7 @@ const OaklandMemoryCreator: React.FC<OaklandMemoryCreatorProps> = ({ className }
         attendees: memoryData.attendees,
         template: selectedTemplate,
         teamId: 'oakland-athletics',
+        imageUrl: imageUrl,
       };
 
       // Create card with Oakland specific metadata

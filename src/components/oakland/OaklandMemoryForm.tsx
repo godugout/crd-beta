@@ -1,133 +1,145 @@
+
 import React, { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { format } from 'date-fns';
-import { Calendar as CalendarIcon, Plus, X } from 'lucide-react';
-
+import * as z from 'zod';
 import { Button } from '@/components/ui/button';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
+import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { CalendarIcon, PlusCircle, X } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { OaklandMemoryData } from '@/lib/types';
 
-// Add imageUrl to OaklandMemoryData type
-export interface OaklandMemoryData {
-  title: string;
-  description: string;
-  date: Date | null;
-  memoryType: string;
-  opponent?: string;
-  score?: string;
-  location?: string;
-  section?: string;
-  attendees?: string[];
-  tags?: string[];
-  imageUrl?: string; // Add this field
-}
+// Form schema for Oakland memories
+const formSchema = z.object({
+  title: z.string().min(2, { message: 'Please enter a title' }).max(100),
+  description: z.string().min(10, { message: 'Please enter a description' }).max(1000),
+  date: z.string().optional(),
+  memoryType: z.string().optional(),
+  opponent: z.string().optional(),
+  score: z.string().optional(),
+  location: z.string().optional(),
+  section: z.string().optional(),
+  attendees: z.array(z.string()).default([]),
+  tags: z.array(z.string()).default([]),
+  imageUrl: z.string().optional(),
+});
 
+export type OaklandMemoryFormValues = z.infer<typeof formSchema>;
+
+// Memory type options
+const memoryTypes = [
+  { value: 'game', label: 'Game Day' },
+  { value: 'tailgate', label: 'Tailgate Party' },
+  { value: 'memorabilia', label: 'Memorabilia' },
+  { value: 'historical', label: 'Historical Moment' },
+  { value: 'fan_experience', label: 'Fan Experience' },
+  { value: 'stats', label: 'Stats & Analysis' },
+];
+
+// Component props
 interface OaklandMemoryFormProps {
   onSubmit: (data: OaklandMemoryData) => void;
   initialData?: Partial<OaklandMemoryData>;
 }
 
-const formSchema = z.object({
-  title: z.string().min(2, {
-    message: "Title must be at least 2 characters.",
-  }),
-  description: z.string().min(10, {
-    message: "Description must be at least 10 characters.",
-  }),
-  date: z.date().nullable(),
-  memoryType: z.enum(['game', 'tailgate', 'memorabilia', 'other']),
-  opponent: z.string().optional(),
-  score: z.string().optional(),
-  location: z.string().optional(),
-  section: z.string().optional(),
-  attendees: z.string().transform(value => value.split(',').map(s => s.trim()).filter(s => s.length > 0)),
-  tags: z.string().transform(value => value.split(',').map(s => s.trim()).filter(s => s.length > 0)),
-});
-
+// Memory form component
 const OaklandMemoryForm: React.FC<OaklandMemoryFormProps> = ({ onSubmit, initialData }) => {
-  const form = useForm<OaklandMemoryData>({
+  const [newAttendee, setNewAttendee] = useState<string>('');
+  const [newTag, setNewTag] = useState<string>('');
+
+  // Initialize form
+  const form = useForm<OaklandMemoryFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      title: initialData?.title || "",
-      description: initialData?.description || "",
-      date: initialData?.date || null,
-      memoryType: initialData?.memoryType || "game",
-      opponent: initialData?.opponent || "",
-      score: initialData?.score || "",
-      location: initialData?.location || "",
-      section: initialData?.section || "",
+      title: initialData?.title || '',
+      description: initialData?.description || '',
+      date: initialData?.date || format(new Date(), 'yyyy-MM-dd'),
+      memoryType: initialData?.memoryType || 'game',
+      opponent: initialData?.opponent || '',
+      score: initialData?.score || '',
+      location: initialData?.location || '',
+      section: initialData?.section || '',
       attendees: initialData?.attendees || [],
       tags: initialData?.tags || [],
+      imageUrl: initialData?.imageUrl || '',
     },
   });
 
-  const { watch } = form;
-  const memoryType = watch("memoryType");
-  const [attendeeInputs, setAttendeeInputs] = useState(initialData?.attendees || ['']);
-  const [tagInputs, setTagInputs] = useState(initialData?.tags || ['']);
+  // Handle form submission
+  const handleFormSubmit = (data: OaklandMemoryFormValues) => {
+    onSubmit(data as OaklandMemoryData);
+  };
 
+  // Add attendee to list
   const handleAddAttendee = () => {
-    setAttendeeInputs([...attendeeInputs, '']);
+    if (newAttendee.trim() === '') return;
+    
+    const currentAttendees = form.getValues().attendees || [];
+    form.setValue('attendees', [...currentAttendees, newAttendee]);
+    setNewAttendee('');
   };
 
+  // Remove attendee from list
   const handleRemoveAttendee = (index: number) => {
-    const newInputs = [...attendeeInputs];
-    newInputs.splice(index, 1);
-    setAttendeeInputs(newInputs);
+    const currentAttendees = form.getValues().attendees || [];
+    form.setValue('attendees', currentAttendees.filter((_, i) => i !== index));
   };
 
-  const handleAttendeeChange = (index: number, value: string) => {
-    const newInputs = [...attendeeInputs];
-    newInputs[index] = value;
-    setAttendeeInputs(newInputs);
-    form.setValue("attendees", newInputs);
-  };
-
+  // Add tag to list
   const handleAddTag = () => {
-    setTagInputs([...tagInputs, '']);
+    if (newTag.trim() === '') return;
+    
+    const currentTags = form.getValues().tags || [];
+    form.setValue('tags', [...currentTags, newTag.toLowerCase()]);
+    setNewTag('');
   };
 
+  // Remove tag from list
   const handleRemoveTag = (index: number) => {
-    const newInputs = [...tagInputs];
-    newInputs.splice(index, 1);
-    setTagInputs(newInputs);
+    const currentTags = form.getValues().tags || [];
+    form.setValue('tags', currentTags.filter((_, i) => i !== index));
   };
 
-  const handleTagChange = (index: number, value: string) => {
-    const newInputs = [...tagInputs];
-    newInputs[index] = value;
-    setTagInputs(newInputs);
-    form.setValue("tags", newInputs);
-  };
-
-  const onSubmitHandler = (values: OaklandMemoryData) => {
-    onSubmit(values);
-  };
+  const selectedMemoryType = form.watch('memoryType');
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmitHandler)} className="space-y-8">
+      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
+        {/* Title */}
         <FormField
           control={form.control}
           name="title"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Title</FormLabel>
+              <FormLabel>Memory Title</FormLabel>
               <FormControl>
-                <Input placeholder="My favorite A's memory" {...field} />
+                <Input placeholder="What would you call this memory?" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        
+
+        {/* Description */}
         <FormField
           control={form.control}
           name="description"
@@ -135,17 +147,18 @@ const OaklandMemoryForm: React.FC<OaklandMemoryFormProps> = ({ onSubmit, initial
             <FormItem>
               <FormLabel>Description</FormLabel>
               <FormControl>
-                <Textarea
-                  placeholder="Share the details of your memory..."
-                  className="resize-none"
-                  {...field}
+                <Textarea 
+                  placeholder="Tell us about this memory..." 
+                  className="min-h-[120px]" 
+                  {...field} 
                 />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        
+
+        {/* Date Picker */}
         <FormField
           control={form.control}
           name="date"
@@ -158,12 +171,12 @@ const OaklandMemoryForm: React.FC<OaklandMemoryFormProps> = ({ onSubmit, initial
                     <Button
                       variant={"outline"}
                       className={cn(
-                        "w-[240px] pl-3 text-left font-normal",
+                        "w-full pl-3 text-left font-normal",
                         !field.value && "text-muted-foreground"
                       )}
                     >
                       {field.value ? (
-                        format(field.value, "PPP")
+                        format(new Date(field.value), "PPP")
                       ) : (
                         <span>Pick a date</span>
                       )}
@@ -174,11 +187,9 @@ const OaklandMemoryForm: React.FC<OaklandMemoryFormProps> = ({ onSubmit, initial
                 <PopoverContent className="w-auto p-0" align="start">
                   <Calendar
                     mode="single"
-                    selected={field.value}
-                    onSelect={field.onChange}
-                    disabled={(date) =>
-                      date > new Date() || date < new Date("1900-01-01")
-                    }
+                    selected={field.value ? new Date(field.value) : undefined}
+                    onSelect={(date) => field.onChange(date ? format(date, 'yyyy-MM-dd') : '')}
+                    disabled={(date) => date > new Date()}
                     initialFocus
                   />
                 </PopoverContent>
@@ -188,23 +199,29 @@ const OaklandMemoryForm: React.FC<OaklandMemoryFormProps> = ({ onSubmit, initial
           )}
         />
 
+        {/* Memory Type */}
         <FormField
           control={form.control}
           name="memoryType"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Memory Type</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select 
+                onValueChange={field.onChange} 
+                defaultValue={field.value}
+                value={field.value}
+              >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select a type" />
+                    <SelectValue placeholder="Select memory type" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="game">Game</SelectItem>
-                  <SelectItem value="tailgate">Tailgate</SelectItem>
-                  <SelectItem value="memorabilia">Memorabilia</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
+                  {memoryTypes.map(type => (
+                    <SelectItem key={type.value} value={type.value}>
+                      {type.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               <FormMessage />
@@ -212,8 +229,9 @@ const OaklandMemoryForm: React.FC<OaklandMemoryFormProps> = ({ onSubmit, initial
           )}
         />
 
-        {memoryType === 'game' && (
-          <>
+        {/* Game Specific Fields */}
+        {(selectedMemoryType === 'game' || !selectedMemoryType) && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField
               control={form.control}
               name="opponent"
@@ -221,120 +239,156 @@ const OaklandMemoryForm: React.FC<OaklandMemoryFormProps> = ({ onSubmit, initial
                 <FormItem>
                   <FormLabel>Opponent</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g., New York Yankees" {...field} />
+                    <Input placeholder="Which team?" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
+            
             <FormField
               control={form.control}
               name="score"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Score</FormLabel>
+                  <FormLabel>Final Score</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g., A's 5, Yankees 3" {...field} />
+                    <Input placeholder="A's 5 - Angels 3" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-          </>
+          </div>
         )}
 
-        <FormField
-          control={form.control}
-          name="location"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Location</FormLabel>
-              <FormControl>
-                <Input placeholder="e.g., Oakland Coliseum" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="section"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Section</FormLabel>
-              <FormControl>
-                <Input placeholder="e.g., Section 102" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <div>
-          <FormLabel>Attendees</FormLabel>
-          {attendeeInputs.map((input, index) => (
-            <div key={index} className="flex items-center space-x-2 mb-2">
-              <FormField
-                control={form.control}
-                name={`attendees[${index}]`}
-                render={() => (
-                  <FormItem className="w-full">
-                    <FormControl>
-                      <Input
-                        placeholder="Name"
-                        value={input}
-                        onChange={(e) => handleAttendeeChange(index, e.target.value)}
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-              <Button variant="ghost" size="sm" onClick={() => handleRemoveAttendee(index)}>
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-          ))}
-          <Button type="button" variant="outline" size="sm" onClick={handleAddAttendee}>
-            <Plus className="h-4 w-4 mr-2" />
-            Add Attendee
-          </Button>
+        {/* Location Fields */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="location"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Location</FormLabel>
+                <FormControl>
+                  <Input placeholder="Oakland Coliseum" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <FormField
+            control={form.control}
+            name="section"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Section/Area</FormLabel>
+                <FormControl>
+                  <Input placeholder="Section 112 / Bleachers / Parking Lot" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
 
+        {/* Attendees */}
         <div>
-          <FormLabel>Tags</FormLabel>
-          {tagInputs.map((input, index) => (
-            <div key={index} className="flex items-center space-x-2 mb-2">
-              <FormField
-                control={form.control}
-                name={`tags[${index}]`}
-                render={() => (
-                  <FormItem className="w-full">
-                    <FormControl>
-                      <Input
-                        placeholder="Tag"
-                        value={input}
-                        onChange={(e) => handleTagChange(index, e.target.value)}
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-              <Button variant="ghost" size="sm" onClick={() => handleRemoveTag(index)}>
-                <X className="h-4 w-4" />
-              </Button>
+          <FormLabel className="block mb-2">Attendees</FormLabel>
+          <div className="flex gap-2 mb-2">
+            <Input 
+              value={newAttendee}
+              onChange={e => setNewAttendee(e.target.value)}
+              placeholder="Friend or family name"
+              className="flex-grow"
+              onKeyPress={e => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  handleAddAttendee();
+                }
+              }}
+            />
+            <Button type="button" onClick={handleAddAttendee} size="sm">
+              <PlusCircle className="h-4 w-4 mr-1" />
+              Add
+            </Button>
+          </div>
+          
+          {form.watch('attendees')?.length > 0 && (
+            <div className="flex flex-wrap gap-2 mt-2">
+              {form.watch('attendees').map((attendee, index) => (
+                <div 
+                  key={index}
+                  className="bg-gray-100 px-3 py-1 rounded-full flex items-center text-sm"
+                >
+                  <span>{attendee}</span>
+                  <button 
+                    type="button"
+                    onClick={() => handleRemoveAttendee(index)}
+                    className="ml-1 text-gray-500 hover:text-red-500"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              ))}
             </div>
-          ))}
-          <Button type="button" variant="outline" size="sm" onClick={handleAddTag}>
-            <Plus className="h-4 w-4 mr-2" />
-            Add Tag
-          </Button>
+          )}
+          <FormMessage name={`attendees`} />
         </div>
 
-        <Button type="submit">Submit</Button>
+        {/* Tags */}
+        <div>
+          <FormLabel className="block mb-2">Tags</FormLabel>
+          <div className="flex gap-2 mb-2">
+            <Input 
+              value={newTag}
+              onChange={e => setNewTag(e.target.value)}
+              placeholder="Add tags (e.g. no-hitter, walkoff)"
+              className="flex-grow"
+              onKeyPress={e => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  handleAddTag();
+                }
+              }}
+            />
+            <Button type="button" onClick={handleAddTag} size="sm">
+              <PlusCircle className="h-4 w-4 mr-1" />
+              Add
+            </Button>
+          </div>
+          
+          {form.watch('tags')?.length > 0 && (
+            <div className="flex flex-wrap gap-2 mt-2">
+              {form.watch('tags').map((tag, index) => (
+                <div 
+                  key={index}
+                  className="bg-[#003831] text-[#EFB21E] px-3 py-1 rounded-full flex items-center text-sm"
+                >
+                  <span>#{tag}</span>
+                  <button 
+                    type="button"
+                    onClick={() => handleRemoveTag(index)}
+                    className="ml-1 text-[#EFB21E]/70 hover:text-[#EFB21E]"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+          <FormMessage name={`tags`} />
+        </div>
+
+        {/* Submit Button */}
+        <Button type="submit" className="w-full bg-[#006341] hover:bg-[#003831]">
+          Save Memory Details
+        </Button>
       </form>
     </Form>
   );
 };
 
-export default OaklandMemoryForm;
+export { OaklandMemoryForm };
+export type { OaklandMemoryData };

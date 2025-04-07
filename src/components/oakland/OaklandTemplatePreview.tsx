@@ -3,7 +3,7 @@ import React from 'react';
 import { OaklandTemplateType } from './OaklandCardTemplates';
 import OaklandCardTemplate from './OaklandCardTemplates';
 import { cn } from '@/lib/utils';
-import { Calendar, MapPin, Users, Award, Info } from 'lucide-react';
+import { Calendar, MapPin, Users, Award, Info, Trophy } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface OaklandTemplatePreviewProps {

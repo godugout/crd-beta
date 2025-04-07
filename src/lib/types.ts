@@ -1,4 +1,3 @@
-
 export interface FabricSwatch {
   type: string;
   team: string;
@@ -31,7 +30,7 @@ export interface Card {
   imageUrl: string;
   thumbnailUrl?: string;
   uploadDate?: string;
-  createdAt?: string;
+  createdAt?: string; // Changed from Date to string to match usage
   userId?: string;
   collectionId?: string;
   designMetadata?: {
@@ -57,7 +56,7 @@ export interface Card {
 export interface OaklandMemoryData {
   title: string;
   description: string;
-  date?: string;
+  date?: string; // Changed from Date to string to match usage
   memoryType?: string;
   opponent?: string;
   score?: string;

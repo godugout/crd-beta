@@ -1,7 +1,8 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { Baseball, Trophy, ChartBar, Stadium, Users } from 'lucide-react';
+// Fix imports by replacing missing icons with available alternatives
+import { CircleDollarSign, Trophy, BarChart3, Building2, Users } from 'lucide-react';
 
 export type OaklandTemplateType = 'classic' | 'moneyball' | 'dynasty' | 'coliseum' | 'tailgate';
 
@@ -16,7 +17,7 @@ export const oaklandTemplates: Record<OaklandTemplateType, OaklandTemplateMetada
   classic: {
     name: 'Classic A\'s',
     description: 'Traditional green and gold design with clean borders',
-    icon: <Baseball className="h-5 w-5" />,
+    icon: <CircleDollarSign className="h-5 w-5" />,
     years: '1968-Present'
   },
   dynasty: {
@@ -28,13 +29,13 @@ export const oaklandTemplates: Record<OaklandTemplateType, OaklandTemplateMetada
   moneyball: {
     name: 'Moneyball',
     description: 'Minimal design inspired by the analytical revolution',
-    icon: <ChartBar className="h-5 w-5" />,
+    icon: <BarChart3 className="h-5 w-5" />,
     years: '2002'
   },
   coliseum: {
     name: 'Coliseum',
     description: 'Tribute to the Oakland Coliseum and its history',
-    icon: <Stadium className="h-5 w-5" />,
+    icon: <Building2 className="h-5 w-5" />,
     years: '1968-2024'
   },
   tailgate: {
