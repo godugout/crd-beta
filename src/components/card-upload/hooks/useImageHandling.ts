@@ -64,7 +64,7 @@ export const useImageHandling = ({
   };
 
   // Rotate the current image
-  const rotateImage = async (direction: 'clockwise' | 'counterclockwise') => {
+  const rotateImage = async (direction: 'clockwise' | 'counterclockwise' = 'clockwise') => {
     setIsLoading(true);
 
     try {

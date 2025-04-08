@@ -102,7 +102,7 @@ const ImageEditorDialog: React.FC<ImageEditorDialogProps> = ({
               selectedCropIndex={selectedCropIndex}
               setSelectedCropIndex={setSelectedCropIndex}
               imageData={imageData}
-              onRotateImage={rotateImage}
+              onRotateImage={() => rotateImage('clockwise')}
               onMaximizeCrop={maximizeCrop}
               onAddCropBox={addNewCropBox}
               onRemoveCropBox={removeCropBox}
