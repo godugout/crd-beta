@@ -2,13 +2,14 @@
 import React, { useState } from 'react';
 import { useCards } from '@/context/CardContext';
 import { toast } from 'sonner';
-import CardUpload from '@/components/card-upload/CardUpload';
 import { Button } from '@/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { CameraIcon, Users, ImageIcon, UploadCloud } from 'lucide-react';
+import { CameraIcon, Users, ImageIcon, UploadCloud, Plus, X } from 'lucide-react';
 import { MemorabiliaType } from '../card-upload/cardDetection';
+import BatchImageEditor from './BatchImageEditor';
+import { useImageProcessing } from '@/hooks/useImageProcessing';
 
 interface GroupImageUploaderProps {
   onComplete?: (cardIds: string[]) => void;
@@ -17,9 +18,13 @@ interface GroupImageUploaderProps {
 
 const GroupImageUploader: React.FC<GroupImageUploaderProps> = ({ onComplete, className }) => {
   const { addCard } = useCards();
+  const { createThumbnail } = useImageProcessing();
   const [uploadType, setUploadType] = useState<'group' | 'memorabilia' | 'mixed'>('group');
   const [uploadedFiles, setUploadedFiles] = useState<Array<{ file: File; url: string; type?: MemorabiliaType }>>([]);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showEditor, setShowEditor] = useState(false);
+  const [currentFile, setCurrentFile] = useState<File | null>(null);
+  const [currentImageUrl, setCurrentImageUrl] = useState<string | null>(null);
   
   // Get the appropriate memorabilia types based on the upload type
   const getMemorabiliaTypes = (): MemorabiliaType[] => {
@@ -35,13 +40,35 @@ const GroupImageUploader: React.FC<GroupImageUploaderProps> = ({ onComplete, cla
     }
   };
   
-  // Handle single image upload
-  const handleImageUpload = (file: File, url: string) => {
-    setUploadedFiles([...uploadedFiles, { file, url }]);
-    toast.success('Image added to processing queue');
+  // Handle file selection
+  const handleFileSelected = async (file: File) => {
+    try {
+      if (!file.type.match('image.*')) {
+        toast.error('Please upload an image file');
+        return;
+      }
+      
+      if (file.size > 15 * 1024 * 1024) {
+        toast.error('File size should be less than 15MB');
+        return;
+      }
+      
+      // Create a URL for the file
+      const imageUrl = URL.createObjectURL(file);
+      
+      // Store the current file and URL
+      setCurrentFile(file);
+      setCurrentImageUrl(imageUrl);
+      
+      // Show the editor
+      setShowEditor(true);
+    } catch (error) {
+      console.error('Error processing file:', error);
+      toast.error('Error processing file');
+    }
   };
   
-  // Handle batch image upload
+  // Handle batch upload from editor
   const handleBatchUpload = (files: File[], urls: string[], types?: MemorabiliaType[]) => {
     const newUploads = files.map((file, index) => ({
       file,
@@ -90,12 +117,15 @@ const GroupImageUploader: React.FC<GroupImageUploaderProps> = ({ onComplete, cla
             title = 'Memory Item';
         }
         
+        // Generate a thumbnail for better performance
+        const thumbnailUrl = await createThumbnail(upload.file, 300);
+        
         // Create the card
         const card = await addCard({
           title,
           description: `Automatically created from group memory upload (${cardType})`,
           imageUrl: upload.url,
-          thumbnailUrl: upload.url,
+          thumbnailUrl: thumbnailUrl,
           tags: ['auto-generated', cardType],
           isPublic: false,
           designMetadata: {
@@ -124,6 +154,14 @@ const GroupImageUploader: React.FC<GroupImageUploaderProps> = ({ onComplete, cla
       toast.error('Failed to process uploads: ' + err.message);
     } finally {
       setIsProcessing(false);
+    }
+  };
+
+  // File input change handler
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      handleFileSelected(files[0]);
     }
   };
 
@@ -170,13 +208,33 @@ const GroupImageUploader: React.FC<GroupImageUploaderProps> = ({ onComplete, cla
       
       <div className="mb-6">
         <h3 className="text-lg font-medium mb-4">Upload Images</h3>
-        <CardUpload 
-          onImageUpload={handleImageUpload}
-          onBatchUpload={handleBatchUpload}
-          batchProcessingEnabled={true}
-          enabledMemorabiliaTypes={getMemorabiliaTypes()}
-          autoEnhance={true}
-        />
+        
+        <div className="grid place-items-center border-2 border-dashed border-gray-300 rounded-lg p-12 text-center hover:bg-gray-50 transition-colors cursor-pointer"
+          onClick={() => document.getElementById('file-upload')?.click()}
+        >
+          <input
+            id="file-upload"
+            type="file"
+            className="hidden"
+            accept="image/*"
+            onChange={handleFileInputChange}
+          />
+          <div className="space-y-2">
+            <div className="bg-gray-100 rounded-full p-4 mx-auto w-16 h-16 grid place-items-center">
+              <UploadCloud className="h-8 w-8 text-gray-500" />
+            </div>
+            <div>
+              <p className="text-lg font-semibold">Click to upload or drag and drop</p>
+              <p className="text-sm text-gray-500 mt-1">
+                Upload photos to detect faces and memorabilia
+              </p>
+            </div>
+            <Button type="button">
+              <Plus className="mr-1 h-4 w-4" />
+              Select Image
+            </Button>
+          </div>
+        </div>
       </div>
       
       {uploadedFiles.length > 0 && (
@@ -196,6 +254,21 @@ const GroupImageUploader: React.FC<GroupImageUploaderProps> = ({ onComplete, cla
                   alt={`Upload ${index + 1}`} 
                   className="w-full h-full object-cover"
                 />
+                <div className="absolute top-0 right-0 p-1">
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-6 w-6 bg-white/80 hover:bg-white rounded-full"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const newFiles = [...uploadedFiles];
+                      newFiles.splice(index, 1);
+                      setUploadedFiles(newFiles);
+                    }}
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                </div>
                 {upload.type && (
                   <div className="absolute bottom-1 right-1 bg-black/70 text-white text-xs px-2 py-1 rounded-full">
                     {upload.type}
@@ -215,6 +288,16 @@ const GroupImageUploader: React.FC<GroupImageUploaderProps> = ({ onComplete, cla
           </Button>
         </div>
       )}
+      
+      {/* Batch Image Editor */}
+      <BatchImageEditor
+        open={showEditor}
+        onClose={() => setShowEditor(false)}
+        imageUrl={currentImageUrl}
+        originalFile={currentFile}
+        onProcessComplete={handleBatchUpload}
+        detectionType={uploadType}
+      />
     </div>
   );
 };

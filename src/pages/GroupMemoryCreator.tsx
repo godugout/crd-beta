@@ -1,12 +1,34 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import Navbar from '@/components/Navbar';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import GroupImageUploader from '@/components/group-memory/GroupImageUploader';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import CommentSection from '@/components/CommentSection';
+import { useImageProcessing } from '@/hooks/useImageProcessing';
+import { toast } from 'sonner';
 
 const GroupMemoryCreator = () => {
+  const [activeTab, setActiveTab] = useState<string>("upload");
+  const [processedImages, setProcessedImages] = useState<Array<{url: string, id: string}>>([]);
+  const { isProcessing } = useImageProcessing();
+  
+  const handleProcessingComplete = (cardIds: string[]) => {
+    if (cardIds.length > 0) {
+      // Convert card IDs to a format we can use for display
+      const newImages = cardIds.map(id => ({
+        id,
+        url: `/cards/${id}/preview` // This would be replaced with actual image URLs in production
+      }));
+      
+      setProcessedImages([...processedImages, ...newImages]);
+      setActiveTab("results");
+      toast.success(`Successfully processed ${cardIds.length} images`);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
@@ -40,9 +62,40 @@ const GroupMemoryCreator = () => {
           <div className="h-1 bg-gradient-to-r from-[#003831] via-[#006341] to-[#EFB21E] mt-4"></div>
         </div>
         
-        <div className="bg-white p-6 rounded-lg shadow-sm">
-          <GroupImageUploader />
-        </div>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid grid-cols-2 mb-6">
+            <TabsTrigger value="upload">Upload & Process</TabsTrigger>
+            <TabsTrigger value="results" disabled={processedImages.length === 0}>Results</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="upload" className="bg-white p-6 rounded-lg shadow-sm">
+            <GroupImageUploader 
+              onComplete={handleProcessingComplete} 
+              className="max-w-4xl mx-auto"
+            />
+          </TabsContent>
+          
+          <TabsContent value="results" className="space-y-6">
+            {processedImages.length > 0 && (
+              <div className="bg-white p-6 rounded-lg shadow-sm">
+                <h2 className="text-xl font-bold mb-4">Processed Images</h2>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                  {processedImages.map((image, index) => (
+                    <div key={image.id || index} className="aspect-square rounded-lg border overflow-hidden">
+                      <img 
+                        src={image.url} 
+                        alt={`Processed image ${index + 1}`} 
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            <CommentSection />
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   );
