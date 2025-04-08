@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCards } from '@/context/CardContext';
@@ -31,14 +30,14 @@ const CardEditorForm: React.FC<CardEditorFormProps> = ({ card, className }) => {
   const [newTag, setNewTag] = useState('');
   const [fabricSwatches, setFabricSwatches] = useState<any[]>(card?.fabricSwatches || []);
   
-  // Card design customization state
+  // Card design customization state - fix borderRadius from number to string
   const [cardStyle, setCardStyle] = useState<CardStyle>({
     effect: 'classic',
     brightness: 100,
     contrast: 100,
     saturation: 100,
     borderWidth: 0,
-    borderRadius: 8,
+    borderRadius: '8px', // Changed from number to string
     borderColor: '#ffffff',
     backgroundColor: '#ffffff'
   });
@@ -112,7 +111,7 @@ const CardEditorForm: React.FC<CardEditorFormProps> = ({ card, className }) => {
         designMetadata: {
           cardStyle,
           textStyle
-        } as any // Type assertion to bypass TypeScript error
+        }
       });
       toast.success('Card updated successfully');
     } else {
@@ -127,7 +126,7 @@ const CardEditorForm: React.FC<CardEditorFormProps> = ({ card, className }) => {
         designMetadata: {
           cardStyle,
           textStyle
-        } as any // Type assertion to bypass TypeScript error
+        }
       });
       toast.success('Card created successfully');
     }
@@ -180,7 +179,6 @@ const CardEditorForm: React.FC<CardEditorFormProps> = ({ card, className }) => {
   );
 };
 
-// Extracted step content logic
 interface StepContentProps {
   currentStep: number;
   title: string;
@@ -279,7 +277,6 @@ const StepContent: React.FC<StepContentProps> = (props) => {
   }
 };
 
-// Extracted navigation buttons
 interface NavigationButtonsProps {
   currentStep: number;
   totalSteps: number;

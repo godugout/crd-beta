@@ -57,8 +57,8 @@ const Gallery = () => {
       ...card.designMetadata,
       oaklandMemory: card.designMetadata?.oaklandMemory ? {
         ...card.designMetadata.oaklandMemory,
-        title: card.designMetadata.oaklandMemory.title || card.title || '',
-        description: card.designMetadata.oaklandMemory.description || card.description || ''
+        title: card.title || '',
+        description: card.description || ''
       } : undefined
     }
   }));

@@ -1,3 +1,4 @@
+
 import React from 'react';
 
 export interface CardStyle {
@@ -6,7 +7,7 @@ export interface CardStyle {
   contrast: number;
   saturation: number;
   borderWidth: number;
-  borderRadius: string; // Changed from number to string to match Card interface
+  borderRadius: string; // Ensuring this is string type to match Card interface
   borderColor: string;
   backgroundColor: string;
 }

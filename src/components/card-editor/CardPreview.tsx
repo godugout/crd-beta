@@ -56,6 +56,14 @@ const CardPreview: React.FC<CardPreviewProps> = ({
     }
   };
   
+  // Convert cardStyle.borderRadius to a number if it's a string for calculations
+  const borderRadiusNum = typeof cardStyle.borderRadius === 'string' 
+    ? parseInt(cardStyle.borderRadius, 10) 
+    : cardStyle.borderRadius;
+  
+  // Calculate inner border radius (fixes the arithmetic operation error)
+  const innerBorderRadius = Math.max(0, borderRadiusNum - cardStyle.borderWidth);
+  
   return (
     <div className="w-full max-w-xl mx-auto">
       <h2 className="text-2xl font-bold mb-6 text-center">Final Card Preview</h2>
@@ -72,7 +80,7 @@ const CardPreview: React.FC<CardPreviewProps> = ({
               cardStyle.effect === 'vintage' && "bg-amber-800/30 p-[2px]"
             )}
             style={{ 
-              borderRadius: `${cardStyle.borderRadius}px`,
+              borderRadius: cardStyle.borderRadius,
               borderWidth: `${cardStyle.borderWidth}px`,
               borderColor: cardStyle.borderColor,
               borderStyle: 'solid'
@@ -81,7 +89,7 @@ const CardPreview: React.FC<CardPreviewProps> = ({
             <div 
               className="w-full h-full relative overflow-hidden"
               style={{ 
-                borderRadius: `${Math.max(0, cardStyle.borderRadius - cardStyle.borderWidth)}px`,
+                borderRadius: `${innerBorderRadius}px`,
                 backgroundColor: cardStyle.backgroundColor
               }}
             >

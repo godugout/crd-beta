@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { CardStyle } from '../CardDesignCustomization';
 import { TextStyle } from '../CardTextCustomization';
@@ -17,14 +16,14 @@ export const useCardEditorState = ({ initialCard }: UseCardEditorStateProps = {}
   const [newTag, setNewTag] = useState('');
   const [fabricSwatches, setFabricSwatches] = useState<FabricSwatch[]>(initialCard?.fabricSwatches || []);
   
-  // Card design customization state
+  // Card design customization state - ensure borderRadius is string type
   const [cardStyle, setCardStyle] = useState<CardStyle>({
     effect: 'classic',
     brightness: 100,
     contrast: 100,
     saturation: 100,
     borderWidth: 0,
-    borderRadius: '8px', // Changed from number to string
+    borderRadius: '8px', // Using string instead of number
     borderColor: '#ffffff',
     backgroundColor: '#ffffff'
   });
@@ -45,36 +44,6 @@ export const useCardEditorState = ({ initialCard }: UseCardEditorStateProps = {}
     overlayColor: '#000000',
     overlayPosition: 'bottom'
   });
-
-  const handleImageUpload = (file: File, url: string) => {
-    setImageFile(file);
-    setImageUrl(url);
-  };
-
-  const getCardData = () => {
-    // Format the fabric swatches data
-    const fabricMetadata = fabricSwatches.map(swatch => ({
-      type: swatch.type,
-      team: swatch.team,
-      year: swatch.year,
-      manufacturer: swatch.manufacturer,
-      position: swatch.position,
-      size: swatch.size
-    }));
-
-    return {
-      title,
-      description,
-      imageUrl,
-      thumbnailUrl: imageUrl, // In a real app, we'd generate a thumbnail
-      tags,
-      fabricSwatches: fabricMetadata,
-      designMetadata: {
-        cardStyle,
-        textStyle
-      }
-    };
-  };
 
   return {
     // State
@@ -100,7 +69,33 @@ export const useCardEditorState = ({ initialCard }: UseCardEditorStateProps = {}
     setTextStyle,
     
     // Helpers
-    handleImageUpload,
-    getCardData
+    handleImageUpload: (file: File, url: string) => {
+      setImageFile(file);
+      setImageUrl(url);
+    },
+    getCardData: () => {
+      // Format the fabric swatches data
+      const fabricMetadata = fabricSwatches.map(swatch => ({
+        type: swatch.type,
+        team: swatch.team,
+        year: swatch.year,
+        manufacturer: swatch.manufacturer,
+        position: swatch.position,
+        size: swatch.size
+      }));
+
+      return {
+        title,
+        description,
+        imageUrl,
+        thumbnailUrl: imageUrl,
+        tags,
+        fabricSwatches: fabricMetadata,
+        designMetadata: {
+          cardStyle,
+          textStyle
+        }
+      };
+    }
   };
 };
