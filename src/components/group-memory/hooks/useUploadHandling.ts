@@ -62,6 +62,16 @@ export const useUploadHandling = ({ onComplete }: UseUploadHandlingProps) => {
       return;
     }
     
+    // Create proper upload file items
+    const newUploadItems: UploadFileItem[] = files.map((file, index) => ({
+      file,
+      url: urls[index] || '',
+      type: types?.[index]
+    }));
+    
+    // Add to uploaded files
+    setUploadedFiles(prev => [...prev, ...newUploadItems]);
+    
     // Generate fake card IDs for demo
     const cardIds = files.map((_, index) => `card-${Date.now()}-${index}`);
     
