@@ -35,6 +35,21 @@ export interface OaklandMemoryData {
   personalSignificance?: string;
 }
 
+export interface Collection {
+  id: string;
+  name: string;
+  description?: string;
+  coverImageUrl?: string;
+  userId?: string;
+  teamId?: string;
+  visibility: 'public' | 'private' | 'team';  // Now required with these specific values
+  allowComments?: boolean;
+  createdAt: string;
+  updatedAt: string;
+  designMetadata?: any;
+  cards?: Card[];
+}
+
 export interface FabricSwatch {
   type: string;
   team: string;
@@ -76,7 +91,6 @@ export interface GroupMemory {
 
 // Re-export types from schema/types, excluding those we've defined locally
 export type {
-  Collection,
   User,
   Team,
   TeamMember,

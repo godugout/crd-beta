@@ -1,71 +1,87 @@
 
-import { useState } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Card } from '@/lib/types';
 import { v4 as uuidv4 } from 'uuid';
 
-export const useCardOperations = () => {
-  const [cards, setCards] = useState<Card[]>([]);
+// Mock data for development
+const initialCards: Card[] = [
+  {
+    id: '1',
+    title: 'Sample Card',
+    description: 'This is a sample card for development',
+    imageUrl: '/placeholder.svg',
+    userId: 'user1',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+];
 
-  const addCard = async (cardData: Partial<Card>): Promise<Card> => {
-    // Generate a new ID if one isn't provided
+export const useCardOperations = () => {
+  const [cards, setCards] = useState<Card[]>(initialCards);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Load cards from localStorage on initial render
+  useEffect(() => {
+    const loadCards = () => {
+      try {
+        const savedCards = localStorage.getItem('cards');
+        if (savedCards) {
+          setCards(JSON.parse(savedCards));
+        }
+      } catch (err) {
+        console.error('Error loading cards from storage:', err);
+      }
+    };
+
+    loadCards();
+  }, []);
+
+  // Update localStorage whenever cards change
+  useEffect(() => {
+    localStorage.setItem('cards', JSON.stringify(cards));
+  }, [cards]);
+
+  const getCardById = useCallback((id: string): Card | undefined => {
+    return cards.find(card => card.id === id);
+  }, [cards]);
+
+  const addCard = useCallback((card: Omit<Card, 'id' | 'createdAt' | 'updatedAt'>) => {
     const newCard: Card = {
-      id: cardData.id || uuidv4(),
-      title: cardData.title || 'Untitled Card',
-      description: cardData.description || '',
-      imageUrl: cardData.imageUrl || '',
-      thumbnailUrl: cardData.thumbnailUrl || cardData.imageUrl || '',
+      ...card,
+      id: uuidv4(),
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(), // Add missing updatedAt field
-      userId: cardData.userId || 'anonymous',
-      collectionId: cardData.collectionId,
-      designMetadata: cardData.designMetadata || {
-        cardStyle: {},
-        textStyle: {}
-      },
-      tags: cardData.tags || [],
+      updatedAt: new Date().toISOString(),
     };
 
     setCards(prevCards => [...prevCards, newCard]);
     return newCard;
-  };
+  }, []);
 
-  const updateCard = (id: string, updates: Partial<Card>): Card | null => {
-    let updatedCard: Card | null = null;
+  const updateCard = useCallback((id: string, updates: Partial<Card>) => {
+    setCards(prevCards =>
+      prevCards.map(card =>
+        card.id === id
+          ? { ...card, ...updates, updatedAt: new Date().toISOString() }
+          : card
+      )
+    );
+  }, []);
 
-    setCards(prevCards => {
-      return prevCards.map(card => {
-        if (card.id === id) {
-          updatedCard = { ...card, ...updates };
-          return updatedCard;
-        }
-        return card;
-      });
-    });
-
-    return updatedCard;
-  };
-
-  const getCard = (id: string): Card | undefined => {
-    return cards.find(card => card.id === id);
-  };
-
-  const deleteCard = (id: string): boolean => {
-    const cardExists = cards.some(card => card.id === id);
-    
-    if (cardExists) {
-      setCards(prevCards => prevCards.filter(card => card.id !== id));
-      return true;
-    }
-    
-    return false;
-  };
+  const deleteCard = useCallback((id: string) => {
+    setCards(prevCards => prevCards.filter(card => card.id !== id));
+  }, []);
 
   return {
     cards,
+    isLoading,
+    error,
+    getCardById,
     addCard,
     updateCard,
-    getCard,
     deleteCard,
-    setCards,
   };
 };
+
+// Export types for consumers
+export type CardOperations = ReturnType<typeof useCardOperations>;

@@ -6,7 +6,7 @@ import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { useConnectivity } from '@/hooks/useConnectivity';
 import { MobileTouchButton } from '@/components/ui/mobile-controls';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import Navbar from '@/components/Navbar';
+import AppHeader from '@/components/navigation/AppHeader';
 import Notifications from '@/components/Notifications';
 
 interface MobileLayoutProps {
@@ -36,7 +36,7 @@ const MobileLayout: React.FC<MobileLayoutProps> = ({ children }) => {
       <div className={`fixed top-0 left-0 right-0 bg-white border-b z-50 transition-transform ${
         isMobile && isScrolled ? '-translate-y-full' : 'translate-y-0'
       }`}>
-        <Navbar />
+        <AppHeader />
       </div>
       
       {/* Main Content */}
