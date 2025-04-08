@@ -20,7 +20,7 @@ interface BatchImageEditorProps {
   imageUrl: string | null;
   originalFile: File | null;
   onProcessComplete: (files: File[], urls: string[], types?: MemorabiliaType[]) => void;
-  detectionType: 'face' | 'memorabilia' | 'mixed';
+  detectionType: 'face' | 'memorabilia' | 'mixed' | 'group';
 }
 
 const BatchImageEditor: React.FC<BatchImageEditorProps> = ({
@@ -146,7 +146,7 @@ const BatchImageEditor: React.FC<BatchImageEditorProps> = ({
     try {
       // Determine detection types based on the selected mode
       const detectionTypes: MemorabiliaType[] = 
-        detectionType === 'face' ? ['face'] :
+        detectionType === 'face' || detectionType === 'group' ? ['face'] :
         detectionType === 'memorabilia' ? ['card', 'ticket', 'program', 'autograph'] :
         ['face', 'card', 'ticket', 'program', 'autograph'];
       
@@ -404,7 +404,7 @@ const BatchImageEditor: React.FC<BatchImageEditorProps> = ({
       <DialogContent className="max-w-6xl max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>
-            {detectionType === 'face' ? 'Group Photo Processor' : 
+            {detectionType === 'face' || detectionType === 'group' ? 'Group Photo Processor' : 
              detectionType === 'memorabilia' ? 'Memorabilia Detector' : 
              'Photo Content Detection'}
           </DialogTitle>

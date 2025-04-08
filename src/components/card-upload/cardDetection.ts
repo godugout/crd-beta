@@ -1,11 +1,20 @@
-
 import { CropBoxProps } from './CropBox';
 
 // Define all memorabilia types
-export type MemorabiliaType = 'card' | 'ticket' | 'program' | 'autograph' | 'face' | 'unknown';
+export type MemorabiliaType = 'card' | 'ticket' | 'program' | 'autograph' | 'face' | 'unknown' | 'group';
 
 // Enhanced version with required memorabiliaType field for cropped items
-export interface EnhancedCropBoxProps extends CropBoxProps {}
+export interface EnhancedCropBoxProps {
+  id: number;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  rotation?: number;
+  color?: string;
+  memorabiliaType?: MemorabiliaType;
+  confidence?: number;
+}
 
 // Detect cards in an uploaded image
 export async function detectCardsInImage(
