@@ -1,4 +1,5 @@
 
+
 // Define base types used throughout the application
 
 export interface Card {
@@ -44,6 +45,9 @@ export interface FabricSwatch {
   size: string;
 }
 
+// Import User interface before using it in the Reaction interface
+import { User as SchemaUser } from '@/lib/schema/types';
+
 export interface Reaction {
   id: string;
   userId: string;
@@ -52,7 +56,7 @@ export interface Reaction {
   commentId?: string;
   type: 'like' | 'love' | 'wow' | 'haha' | 'sad' | 'angry';
   createdAt: string;
-  user?: User;
+  user?: SchemaUser;
 }
 
 // Re-export types from schema/types, excluding those we've defined locally
@@ -66,3 +70,4 @@ export type {
   DbCollection,
   DbReaction
 } from '@/lib/schema/types';
+
