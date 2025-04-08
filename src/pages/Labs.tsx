@@ -1,11 +1,11 @@
 
 import React from 'react';
-import { Beaker, Sparkles, FlaskConical, Atom, TestTube, Wand, Zap, Flask } from 'lucide-react';
+import { Beaker, Sparkles, FlaskConical, Atom, TestTube, Wand, Zap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { MobileLayout } from '@/components/layout/MobileLayout';
+import MobileLayout from '@/components/layout/MobileLayout';
 import { motion } from 'framer-motion';
 
 interface LabFeature {
