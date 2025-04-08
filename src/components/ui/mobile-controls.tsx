@@ -1,18 +1,20 @@
-
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from './button';
 import { useMobileOptimization } from '@/hooks/useMobileOptimization';
+import { Link } from 'react-router-dom';
 
 interface MobileTouchButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'ghost' | 'icon';
   size?: 'sm' | 'md' | 'lg';
   hapticFeedback?: boolean;
   label?: string;
+  href?: string;
+  'aria-current'?: 'page' | 'step' | 'location' | 'date' | 'time' | boolean;
 }
 
 export const MobileTouchButton = React.forwardRef<HTMLButtonElement, MobileTouchButtonProps>(
-  ({ className, variant = 'primary', size = 'md', hapticFeedback = true, label, onClick, children, ...props }, ref) => {
+  ({ className, variant = 'primary', size = 'md', hapticFeedback = true, label, onClick, href, children, ...props }, ref) => {
     const { isMobile } = useMobileOptimization();
     
     const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -23,16 +25,31 @@ export const MobileTouchButton = React.forwardRef<HTMLButtonElement, MobileTouch
       onClick?.(e);
     };
 
+    const buttonClassName = cn(
+      'touch-manipulation relative',
+      size === 'lg' && 'p-5 text-lg min-h-14',
+      size === 'md' && 'p-4 text-base min-h-12',
+      size === 'sm' && 'p-3 text-sm min-h-10',
+      variant === 'icon' && 'aspect-square flex items-center justify-center',
+      className
+    );
+
+    if (href) {
+      return (
+        <Link 
+          to={href}
+          className={buttonClassName}
+          aria-current={props['aria-current']}
+        >
+          {children}
+          {label && <span className="sr-only">{label}</span>}
+        </Link>
+      );
+    }
+
     return (
       <Button
-        className={cn(
-          'touch-manipulation relative',
-          size === 'lg' && 'p-5 text-lg min-h-14',
-          size === 'md' && 'p-4 text-base min-h-12',
-          size === 'sm' && 'p-3 text-sm min-h-10',
-          variant === 'icon' && 'aspect-square flex items-center justify-center',
-          className
-        )}
+        className={buttonClassName}
         onClick={handleClick}
         ref={ref}
         {...props}

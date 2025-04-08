@@ -30,7 +30,7 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({
   handlePointerMove,
   handlePointerUp
 }) => {
-  const { isMobile } = useIsMobile();
+  const isMobile = useIsMobile();
   const { optimizeInteractions } = useMobileOptimization();
   const [showControls, setShowControls] = useState(false);
   

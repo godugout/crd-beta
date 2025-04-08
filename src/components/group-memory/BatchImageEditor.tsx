@@ -4,15 +4,15 @@ import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { MemorabiliaType } from '@/components/card-upload/cardDetection';
 import EditorCanvas from './components/EditorCanvas';
-import EditorToolbar from './components/EditorToolbar';
-import DetectionPanel from './components/DetectionPanel';
-import AdjustmentsPanel from './components/AdjustmentsPanel';
-import { useBatchImageProcessing } from './hooks/useBatchImageProcessing';
 import { useEditorState } from './hooks/useEditorState';
 import { useCanvasManager } from './hooks/useCanvasManager';
+import { useBatchImageProcessing } from './hooks/useBatchImageProcessing';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useOfflineStorage } from '@/hooks/useOfflineStorage';
 import { useConnectivity } from '@/hooks/useConnectivity';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import AdjustmentsPanel from './components/AdjustmentsPanel';
+import DetectionPanel from './components/DetectionPanel';
 
 interface BatchImageEditorProps {
   open: boolean;
@@ -40,12 +40,14 @@ const BatchImageEditor: React.FC<BatchImageEditorProps> = ({
   
   // Editor state
   const {
-    isDetecting,
-    isProcessing,
     selectedAreas,
     setSelectedAreas,
     activePanel,
-    setActivePanel
+    setActivePanel,
+    isDetecting,
+    setIsDetecting,
+    isProcessing,
+    setIsProcessing
   } = useEditorState({ detectionType });
   
   // Canvas interaction handlers
@@ -84,8 +86,8 @@ const BatchImageEditor: React.FC<BatchImageEditorProps> = ({
     selectedAreas,
     detectionType,
     setSelectedAreas,
-    setIsDetecting: (value) => useEditorState.getState().setIsDetecting(value),
-    setIsProcessing: (value) => useEditorState.getState().setIsProcessing(value)
+    setIsDetecting,
+    setIsProcessing
   });
   
   // Run detection when image loads
@@ -96,7 +98,7 @@ const BatchImageEditor: React.FC<BatchImageEditorProps> = ({
       if (img.complete) {
         detectObjects();
       } else {
-        img.onload = detectObjects;
+        img.onload = () => detectObjects();
       }
     }
   }, [open, imageUrl, originalFile]);
@@ -106,7 +108,7 @@ const BatchImageEditor: React.FC<BatchImageEditorProps> = ({
     if (!originalFile || !canvasRef.current) return;
     
     try {
-      useEditorState.getState().setIsProcessing(true);
+      setIsProcessing(true);
       
       // Extract all selected areas
       const extractedFiles = await extractSelectedAreas();
@@ -126,7 +128,7 @@ const BatchImageEditor: React.FC<BatchImageEditorProps> = ({
     } catch (error) {
       console.error('Error completing batch processing:', error);
     } finally {
-      useEditorState.getState().setIsProcessing(false);
+      setIsProcessing(false);
       onClose();
     }
   };
@@ -136,7 +138,7 @@ const BatchImageEditor: React.FC<BatchImageEditorProps> = ({
     if (!originalFile || !canvasRef.current) return;
     
     try {
-      useEditorState.getState().setIsProcessing(true);
+      setIsProcessing(true);
       
       // Extract all selected areas
       const extractedFiles = await extractSelectedAreas([index]);
@@ -147,7 +149,7 @@ const BatchImageEditor: React.FC<BatchImageEditorProps> = ({
     } catch (error) {
       console.error('Error processing single area:', error);
     } finally {
-      useEditorState.getState().setIsProcessing(false);
+      setIsProcessing(false);
       onClose();
     }
   };
@@ -156,16 +158,27 @@ const BatchImageEditor: React.FC<BatchImageEditorProps> = ({
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-screen-lg w-[95vw] max-h-[90vh] p-0 overflow-hidden">
         <div className="flex flex-col h-[80vh]">
-          <EditorToolbar 
-            hasAreas={selectedAreas.length > 0}
-            onComplete={handleComplete}
-            onClose={onClose}
-            activePanel={activePanel}
-            setActivePanel={setActivePanel}
-            onAutoDetect={detectObjects}
-            isDetecting={isDetecting}
-            isProcessing={isProcessing}
-          />
+          <div className="p-4 border-b flex items-center justify-between">
+            <h2 className="text-lg font-semibold">
+              Batch Editor - {selectedAreas.length} areas detected
+            </h2>
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={detectObjects}
+                disabled={isDetecting}
+              >
+                {isDetecting ? "Detecting..." : "Re-detect"}
+              </Button>
+              <Tabs value={activePanel} onValueChange={setActivePanel}>
+                <TabsList>
+                  <TabsTrigger value="detect">Detection</TabsTrigger>
+                  <TabsTrigger value="adjust">Adjustments</TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </div>
+          </div>
           
           <div className="flex flex-col md:flex-row h-full">
             <div className="w-full md:w-3/4 h-1/2 md:h-full p-4 flex flex-col">
@@ -196,29 +209,26 @@ const BatchImageEditor: React.FC<BatchImageEditorProps> = ({
             </div>
             
             <div className="w-full md:w-1/4 h-1/2 md:h-full border-t md:border-t-0 md:border-l p-4 overflow-auto">
-              {activePanel === 'detect' ? (
-                <DetectionPanel 
-                  selectedAreas={selectedAreas}
-                  setSelectedAreas={setSelectedAreas}
-                  onProcessArea={handleProcessSingleArea}
-                />
-              ) : (
-                <AdjustmentsPanel 
-                  zoom={zoom}
-                  setZoom={setZoom}
-                  onZoomIn={handleZoomIn}
-                  onZoomOut={handleZoomOut}
-                  rotation={rotation}
-                  setRotation={setRotation}
-                  onRotate={rotateImage}
-                  brightness={brightness}
-                  setBrightness={setBrightness}
-                  contrast={contrast}
-                  setContrast={setContrast}
-                  onEnhance={enhanceImage}
-                  onReset={resetAdjustments}
-                />
-              )}
+              <Tabs value={activePanel} className="w-full">
+                <TabsContent value="detect" className="mt-0">
+                  <DetectionPanel 
+                    selectedAreas={selectedAreas}
+                    onProcessArea={handleProcessSingleArea}
+                  />
+                </TabsContent>
+                <TabsContent value="adjust" className="mt-0">
+                  <AdjustmentsPanel 
+                    brightness={brightness}
+                    setBrightness={setBrightness}
+                    contrast={contrast}
+                    setContrast={setContrast}
+                    rotation={rotation}
+                    setRotation={setRotation}
+                    onEnhanceImage={enhanceImage}
+                    onResetAdjustments={resetAdjustments}
+                  />
+                </TabsContent>
+              </Tabs>
             </div>
           </div>
           

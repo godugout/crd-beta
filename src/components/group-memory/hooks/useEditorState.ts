@@ -1,18 +1,25 @@
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { EnhancedCropBoxProps, MemorabiliaType } from '@/components/card-upload/cardDetection';
 import { useMobileOptimization } from '@/hooks/useMobileOptimization';
 import { toast } from 'sonner';
 
 interface UseEditorStateProps {
-  isDetecting: boolean;
-  isProcessing: boolean;
+  isDetecting?: boolean;
+  isProcessing?: boolean;
+  detectionType?: 'group' | 'memorabilia' | 'mixed';
 }
 
-export const useEditorState = ({ isDetecting, isProcessing }: UseEditorStateProps) => {
+export const useEditorState = ({ 
+  isDetecting: initialIsDetecting = false, 
+  isProcessing: initialIsProcessing = false,
+  detectionType = 'group'
+}: UseEditorStateProps = {}) => {
   const [selectedAreas, setSelectedAreas] = useState<EnhancedCropBoxProps[]>([]);
-  const [selectedTab, setSelectedTab] = useState<string>("detection");
+  const [activePanel, setActivePanel] = useState<string>("detect");
   const [autoEnhance, setAutoEnhance] = useState<boolean>(true);
+  const [isDetecting, setIsDetecting] = useState<boolean>(initialIsDetecting);
+  const [isProcessing, setIsProcessing] = useState<boolean>(initialIsProcessing);
   const { isMobile } = useMobileOptimization();
   
   // Add a new selection area
@@ -50,13 +57,15 @@ export const useEditorState = ({ isDetecting, isProcessing }: UseEditorStateProp
   return {
     selectedAreas,
     setSelectedAreas,
-    selectedTab,
-    setSelectedTab,
+    activePanel,
+    setActivePanel,
     autoEnhance,
     setAutoEnhance,
     addSelectionArea,
     removeArea,
     isDetecting,
-    isProcessing
+    setIsDetecting,
+    isProcessing,
+    setIsProcessing
   };
 };

@@ -5,16 +5,28 @@ import { detectCardsInImage } from '@/components/card-upload/cardDetection';
 import { toast } from 'sonner';
 
 export interface BatchProcessingProps {
+  canvasRef?: React.RefObject<HTMLCanvasElement>;
+  editorImgRef?: React.RefObject<HTMLImageElement>;
+  selectedAreas?: EnhancedCropBoxProps[];
+  detectionType?: 'group' | 'memorabilia' | 'mixed';
+  setSelectedAreas?: React.Dispatch<React.SetStateAction<EnhancedCropBoxProps[]>>;
+  setIsDetecting?: (value: boolean) => void;
+  setIsProcessing?: (value: boolean) => void;
   onComplete?: (files: File[], urls: string[], types?: MemorabiliaType[]) => void;
   autoEnhance?: boolean;
 }
 
 export const useBatchImageProcessing = ({ 
+  canvasRef,
+  editorImgRef,
+  selectedAreas = [],
+  detectionType = 'group',
+  setSelectedAreas,
+  setIsDetecting,
+  setIsProcessing,
   onComplete, 
   autoEnhance = true 
-}: BatchProcessingProps) => {
-  const [isDetecting, setIsDetecting] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
+}: BatchProcessingProps = {}) => {
   const [stagedItems, setStagedItems] = useState<Array<{
     file: File;
     url: string;
@@ -27,25 +39,19 @@ export const useBatchImageProcessing = ({
   };
 
   // Run detection on an image element
-  const runDetection = async (
-    imgRef: React.RefObject<HTMLImageElement>,
-    detectionType: 'face' | 'group' | 'memorabilia' | 'mixed'
-  ): Promise<EnhancedCropBoxProps[]> => {
-    if (!imgRef.current || !imgRef.current.complete) {
+  const detectObjects = async (): Promise<EnhancedCropBoxProps[]> => {
+    if (!editorImgRef?.current || !editorImgRef.current.complete) {
       toast.error("Image not loaded");
       return [];
     }
 
-    setIsDetecting(true);
+    if (setIsDetecting) setIsDetecting(true);
     
     try {
       // Determine which detection types to enable based on the selected mode
       let enabledTypes: MemorabiliaType[] = [];
       
       switch (detectionType) {
-        case 'face':
-          enabledTypes = ['face'];
-          break;
         case 'group':
           enabledTypes = ['face', 'group'];
           break;
@@ -59,11 +65,15 @@ export const useBatchImageProcessing = ({
       
       // Run detection with appropriate types
       const detectedItems = await detectCardsInImage(
-        imgRef.current,
+        editorImgRef.current,
         autoEnhance,
         null,
         enabledTypes
       );
+      
+      if (setSelectedAreas) {
+        setSelectedAreas(detectedItems);
+      }
       
       return detectedItems;
     } catch (error) {
@@ -71,24 +81,22 @@ export const useBatchImageProcessing = ({
       toast.error("Failed to detect content in image");
       return [];
     } finally {
-      setIsDetecting(false);
+      if (setIsDetecting) setIsDetecting(false);
     }
   };
 
   // Process batch selections
-  const processBatchSelections = async (
+  const processDetections = async (
     originalFile: File,
     cropBoxes: EnhancedCropBoxProps[],
-    batchSelections: number[],
-    imgRef: React.RefObject<HTMLImageElement>,
-    canvasRef: React.RefObject<HTMLCanvasElement>
-  ) => {
-    if (!imgRef.current || !canvasRef.current || !originalFile) {
+    batchSelections: number[]
+  ): Promise<boolean> => {
+    if (!canvasRef?.current || !editorImgRef?.current || !originalFile) {
       toast.error("Missing required elements for processing");
       return false;
     }
 
-    setIsProcessing(true);
+    if (setIsProcessing) setIsProcessing(true);
     
     try {
       const files: File[] = [];
@@ -104,7 +112,7 @@ export const useBatchImageProcessing = ({
             box,
             canvasRef.current,
             originalFile,
-            imgRef.current,
+            editorImgRef.current,
             autoEnhance ? box.memorabiliaType : undefined
           );
           
@@ -142,94 +150,91 @@ export const useBatchImageProcessing = ({
       toast.error("Failed to process selected areas");
       return false;
     } finally {
-      setIsProcessing(false);
+      if (setIsProcessing) setIsProcessing(false);
     }
   };
 
-  // Process selected areas
-  const processSelectedAreas = async (
-    selectedAreas: EnhancedCropBoxProps[],
-    imgRef: React.RefObject<HTMLImageElement>,
-    originalFile: File,
-    applyEnhancement: boolean = true
-  ) => {
-    if (!originalFile || !imgRef.current) {
-      toast.error("Missing file or image reference");
-      return { success: false };
+  // Extract selected areas from the image
+  const extractSelectedAreas = async (specificIndices?: number[]): Promise<File[]> => {
+    if (!canvasRef?.current || !editorImgRef?.current) {
+      toast.error("Missing required elements for extraction");
+      return [];
     }
     
-    setIsProcessing(true);
+    const originalFile = new File([""], "temp.jpg", { type: "image/jpeg" });
+    const indicesToProcess = specificIndices || selectedAreas.map((_, index) => index);
+    
+    if (setIsProcessing) setIsProcessing(true);
     
     try {
-      // Create a temporary canvas for processing
-      const tempCanvas = document.createElement('canvas');
-      const ctx = tempCanvas.getContext('2d');
-      
-      if (!ctx) {
-        throw new Error("Could not get canvas context");
-      }
-      
       const files: File[] = [];
-      const urls: string[] = [];
-      const types: MemorabiliaType[] = [];
       
-      // Process each area
-      for (const area of selectedAreas) {
-        const result = await applyCrop(
-          area,
-          tempCanvas,
-          originalFile,
-          imgRef.current,
-          applyEnhancement ? area.memorabiliaType : undefined
-        );
-        
-        if (result?.file && result?.url) {
-          files.push(result.file);
-          urls.push(result.url);
-          types.push(area.memorabiliaType || 'unknown');
+      // Process each selected area
+      for (const index of indicesToProcess) {
+        if (index >= 0 && index < selectedAreas.length) {
+          const box = selectedAreas[index];
+          
+          const result = await applyCrop(
+            box,
+            canvasRef.current,
+            originalFile,
+            editorImgRef.current,
+            autoEnhance ? box.memorabiliaType : undefined
+          );
+          
+          if (result?.file) {
+            files.push(result.file);
+          }
         }
       }
       
-      if (files.length > 0) {
-        // Add to staged items
-        const newStagedItems = files.map((file, i) => ({
-          file,
-          url: urls[i],
-          type: types[i]
-        }));
-        
-        setStagedItems([...stagedItems, ...newStagedItems]);
-        
-        // Call the completion callback if provided
-        if (onComplete) {
-          onComplete(files, urls, types);
-        }
-        
-        return { 
-          success: true, 
-          files, 
-          urls, 
-          types 
-        };
-      } else {
-        return { success: false };
-      }
+      return files;
     } catch (error) {
-      console.error("Processing error:", error);
-      return { success: false, error };
+      console.error("Extraction error:", error);
+      return [];
     } finally {
-      setIsProcessing(false);
+      if (setIsProcessing) setIsProcessing(false);
     }
+  };
+
+  // Get preview URLs for selected areas
+  const getPreviewUrls = (specificIndices?: number[]): string[] => {
+    const indicesToProcess = specificIndices || selectedAreas.map((_, index) => index);
+    
+    return indicesToProcess.map((index) => {
+      if (canvasRef?.current && index >= 0 && index < selectedAreas.length) {
+        const box = selectedAreas[index];
+        
+        // Create a temporary canvas for the preview
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = box.width;
+        tempCanvas.height = box.height;
+        const ctx = tempCanvas.getContext('2d');
+        
+        if (ctx) {
+          ctx.drawImage(
+            canvasRef.current,
+            box.x, box.y, box.width, box.height,
+            0, 0, box.width, box.height
+          );
+          
+          return tempCanvas.toDataURL('image/jpeg', 0.7);
+        }
+      }
+      
+      return '';
+    }).filter(url => url !== '');
   };
 
   return {
-    isDetecting,
-    isProcessing,
     stagedItems,
     setStagedItems,
     clearStaged,
-    processBatchSelections,
-    runDetection,
-    processSelectedAreas
+    processDetections,
+    detectObjects,
+    extractSelectedAreas,
+    getPreviewUrls,
+    isDetecting: false,
+    isProcessing: false
   };
 };
