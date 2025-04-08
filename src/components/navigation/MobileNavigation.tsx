@@ -137,9 +137,8 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({ isOpen, onClose }) 
                     )}
                     onClick={() => handleNavigate(item.path)}
                     hapticFeedback={false}
-                    asChild
                   >
-                    <Link to={item.path}>
+                    <Link to={item.path} className="flex items-center w-full">
                       <item.icon className="h-5 w-5 mr-3" />
                       {item.title}
                     </Link>
@@ -168,9 +167,10 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({ isOpen, onClose }) 
               <MobileTouchButton 
                 className="w-full" 
                 hapticFeedback={false}
-                asChild
               >
-                <Link to="/auth" onClick={onClose}>Sign In</Link>
+                <Link to="/auth" onClick={onClose} className="w-full block text-center">
+                  Sign In
+                </Link>
               </MobileTouchButton>
             )}
           </SheetFooter>
