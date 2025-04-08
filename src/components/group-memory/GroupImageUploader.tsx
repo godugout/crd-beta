@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import AssetManager from '@/components/asset-manager/AssetManager';
 import { DigitalAsset } from '@/services/digitalAssetService';
-import { OptimizedImage } from '@/components/ui/optimized-image';
 import { File, Upload } from 'lucide-react';
 import { useDigitalAssets } from '@/hooks/useDigitalAssets';
 import { toast } from 'sonner';
@@ -57,7 +56,7 @@ const GroupImageUploader: React.FC<GroupImageUploaderProps> = ({ onComplete, cla
   
   const handleFileSelected = async (file: File) => {
     try {
-      // Create a URL for preview - Fix for the problem in line 76
+      // Create a URL for preview
       const url = URL.createObjectURL(file);
       
       // Add to uploaded files

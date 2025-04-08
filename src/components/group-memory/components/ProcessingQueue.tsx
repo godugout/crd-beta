@@ -6,18 +6,20 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 
-interface ProcessingQueueProps {
+export interface ProcessingQueueProps {
   queue: any[];
   onRemoveFromQueue: (index: number) => void;
   onClearQueue: () => void;
   onProcessAll: () => void;
+  isProcessing?: boolean;
 }
 
 const ProcessingQueue = ({ 
   queue, 
   onRemoveFromQueue, 
   onClearQueue, 
-  onProcessAll 
+  onProcessAll,
+  isProcessing = false
 }: ProcessingQueueProps) => {
   const hasItems = queue.length > 0;
 
@@ -45,7 +47,7 @@ const ProcessingQueue = ({
             <Card key={index} className="flex items-center justify-between p-2">
               <div className="flex items-center gap-2">
                 <Info className="h-4 w-4 text-muted-foreground" />
-                <span className="text-xs line-clamp-1">{item.name || 'Item'}</span>
+                <span className="text-xs line-clamp-1">{item.name || item.file?.name || 'Item'}</span>
                 <Badge variant="secondary" className="text-[0.6rem]">+1 Point</Badge>
               </div>
               <Button 
@@ -70,11 +72,20 @@ const ProcessingQueue = ({
       <div className="flex justify-end">
         <Button
           onClick={onProcessAll}
-          disabled={!hasItems}
+          disabled={!hasItems || isProcessing}
           className="w-full sm:w-auto text-xs"
         >
-          <Edit className="h-3 w-3 mr-1" /> 
-          Process All
+          {isProcessing ? (
+            <>
+              <span className="animate-spin mr-2">⏳</span>
+              Processing...
+            </>
+          ) : (
+            <>
+              <Edit className="h-3 w-3 mr-1" /> 
+              Process All
+            </>
+          )}
         </Button>
       </div>
     </div>
