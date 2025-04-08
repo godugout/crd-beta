@@ -74,6 +74,38 @@ export type Database = {
         }
         Relationships: []
       }
+      asset_usages: {
+        Row: {
+          asset_id: string
+          created_at: string
+          id: string
+          reference_id: string
+          usage_type: string
+        }
+        Insert: {
+          asset_id: string
+          created_at?: string
+          id?: string
+          reference_id: string
+          usage_type: string
+        }
+        Update: {
+          asset_id?: string
+          created_at?: string
+          id?: string
+          reference_id?: string
+          usage_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "asset_usages_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "digital_assets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bbs_posts: {
         Row: {
           author_id: string
@@ -420,6 +452,60 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      digital_assets: {
+        Row: {
+          created_at: string
+          description: string | null
+          file_size: number
+          height: number | null
+          id: string
+          metadata: Json | null
+          mime_type: string
+          original_filename: string
+          storage_path: string
+          tags: string[] | null
+          thumbnail_path: string | null
+          title: string | null
+          updated_at: string
+          user_id: string
+          width: number | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          file_size: number
+          height?: number | null
+          id?: string
+          metadata?: Json | null
+          mime_type: string
+          original_filename: string
+          storage_path: string
+          tags?: string[] | null
+          thumbnail_path?: string | null
+          title?: string | null
+          updated_at?: string
+          user_id: string
+          width?: number | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          file_size?: number
+          height?: number | null
+          id?: string
+          metadata?: Json | null
+          mime_type?: string
+          original_filename?: string
+          storage_path?: string
+          tags?: string[] | null
+          thumbnail_path?: string | null
+          title?: string | null
+          updated_at?: string
+          user_id?: string
+          width?: number | null
+        }
+        Relationships: []
       }
       fan_feeds: {
         Row: {
