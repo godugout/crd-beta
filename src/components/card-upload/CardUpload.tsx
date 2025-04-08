@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { Upload, X, Image as ImageIcon, Camera, Users, CopyCheck } from 'lucide-react';
@@ -67,7 +66,6 @@ const CardUpload: React.FC<CardUploadProps> = ({
     img.onload = () => {
       setEditorImage(localUrl);
       setShowEditor(true);
-      // If this is a group photo or we have batch processing enabled, set batch mode
       if (batchProcessingEnabled) {
         setBatchMode(true);
       }
@@ -95,11 +93,9 @@ const CardUpload: React.FC<CardUploadProps> = ({
       setIsUploading(true);
       setPreviewUrls(urls);
       
-      // If only one image was processed, set it as the preview
       if (urls.length === 1) {
         setPreviewUrl(urls[0]);
       } else {
-        // Show the first image from the batch as preview
         setPreviewUrl(urls[0]);
       }
       
@@ -107,7 +103,6 @@ const CardUpload: React.FC<CardUploadProps> = ({
         onBatchUpload(files, urls, types);
         toast.success(`${files.length} images processed successfully`);
       } else {
-        // Fall back to single image upload if batch upload not supported
         handleImageUpload(files[0], urls[0]);
       }
     } catch (err: any) {
@@ -147,7 +142,7 @@ const CardUpload: React.FC<CardUploadProps> = ({
                 onClick={toggleBatchMode}
                 className="flex items-center gap-2"
                 size="lg"
-                variant={batchMode ? "default" : "outline"}
+                variant={batchMode ? "primary" : "secondary"}
                 hapticFeedback={false}
               >
                 <Users className="h-5 w-5" />
@@ -209,7 +204,7 @@ const CardUpload: React.FC<CardUploadProps> = ({
                 <MobileTouchButton
                   onClick={clearImage}
                   className="flex items-center gap-2"
-                  variant="outline"
+                  variant="secondary"
                   size="sm"
                   hapticFeedback={false}
                 >
