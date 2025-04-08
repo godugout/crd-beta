@@ -21,6 +21,7 @@ import CommentSection from './components/CommentSection';
 import CardGallery from './pages/CardGallery';
 import GameDayMode from './pages/GameDayMode';
 import MobileLayout from './components/layout/MobileLayout';
+import CommunityFeed from './pages/CommunityFeed';
 
 function App() {
   return (
@@ -45,6 +46,7 @@ function App() {
           <Route path="/teams/:id/edit" element={<MobileLayout><TeamEditor /></MobileLayout>} />
           <Route path="/comments" element={<MobileLayout><CommentSection /></MobileLayout>} />
           <Route path="/experiences/gameday" element={<GameDayMode />} />
+          <Route path="/community" element={<MobileLayout><CommunityFeed /></MobileLayout>} />
         </Routes>
       </Router>
       <Toaster />

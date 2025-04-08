@@ -1,86 +1,83 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { LogOut, User as UserIcon, Settings, CreditCard, HelpCircle, ChevronRight } from 'lucide-react';
-import { User } from '@/lib/types';
+import { User } from '@/context/AuthContext';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { User as UserIcon, Settings, LogOut } from 'lucide-react';
 
-interface UserDropdownProps {
+export interface UserDropdownProps {
   user: User;
-  isOpen: boolean;
-  onClose: () => void;
-  onSignOut?: () => Promise<void>;
+  onSignOut: () => Promise<void>;
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
 const UserDropdown: React.FC<UserDropdownProps> = ({ 
   user, 
-  isOpen, 
-  onClose,
-  onSignOut
+  onSignOut,
+  isOpen = false,
+  onClose = () => {}
 }) => {
-  if (!isOpen) return null;
-
+  const [open, setOpen] = useState(isOpen);
+  
+  const handleOpenChange = (newOpen: boolean) => {
+    setOpen(newOpen);
+    if (!newOpen && onClose) {
+      onClose();
+    }
+  };
+  
+  const handleSignOut = async () => {
+    await onSignOut();
+    setOpen(false);
+  };
+  
   return (
-    <div className="absolute right-4 top-16 w-64 bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200 z-50">
-      {/* User info */}
-      <div className="p-4 border-b border-gray-100">
-        <div className="font-medium text-cardshow-dark">{user.name || 'User'}</div>
-        <div className="text-sm text-cardshow-slate truncate">{user.email}</div>
-      </div>
-
-      {/* Menu items */}
-      <div className="py-1">
-        <Link 
-          to="/profile" 
-          className="flex items-center px-4 py-2 text-sm text-cardshow-slate hover:bg-gray-50"
-          onClick={onClose}
-        >
-          <UserIcon className="h-4 w-4 mr-2" />
-          My Profile
-          <ChevronRight className="h-4 w-4 ml-auto" />
-        </Link>
-
-        <Link 
-          to="/account/settings" 
-          className="flex items-center px-4 py-2 text-sm text-cardshow-slate hover:bg-gray-50"
-          onClick={onClose}
-        >
-          <Settings className="h-4 w-4 mr-2" />
-          Settings
-          <ChevronRight className="h-4 w-4 ml-auto" />
-        </Link>
-
-        <Link 
-          to="/account/billing" 
-          className="flex items-center px-4 py-2 text-sm text-cardshow-slate hover:bg-gray-50"
-          onClick={onClose}
-        >
-          <CreditCard className="h-4 w-4 mr-2" />
-          Billing
-          <ChevronRight className="h-4 w-4 ml-auto" />
-        </Link>
-
-        <Link 
-          to="/help" 
-          className="flex items-center px-4 py-2 text-sm text-cardshow-slate hover:bg-gray-50"
-          onClick={onClose}
-        >
-          <HelpCircle className="h-4 w-4 mr-2" />
-          Help Center
-          <ChevronRight className="h-4 w-4 ml-auto" />
-        </Link>
-      </div>
-
-      {/* Sign out */}
-      <div className="border-t border-gray-100">
-        <button
-          onClick={onSignOut}
-          className="flex w-full items-center px-4 py-3 text-sm text-red-600 hover:bg-gray-50"
-        >
-          <LogOut className="h-4 w-4 mr-2" />
-          Sign out
-        </button>
-      </div>
-    </div>
+    <DropdownMenu open={open} onOpenChange={handleOpenChange}>
+      <DropdownMenuTrigger className="outline-none">
+        <Avatar className="h-8 w-8">
+          <AvatarImage src={user.avatarUrl} alt={user.name} />
+          <AvatarFallback className="bg-primary/10">
+            {user.name ? user.name.charAt(0).toUpperCase() : (user.email ? user.email.charAt(0).toUpperCase() : 'U')}
+          </AvatarFallback>
+        </Avatar>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-56">
+        <DropdownMenuLabel>
+          <div className="font-medium">{user.name || 'User'}</div>
+          <div className="text-xs text-muted-foreground truncate">{user.email}</div>
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuGroup>
+          <DropdownMenuItem asChild>
+            <Link to="/profile">
+              <UserIcon className="mr-2 h-4 w-4" />
+              <span>Profile</span>
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link to="/settings">
+              <Settings className="mr-2 h-4 w-4" />
+              <span>Settings</span>
+            </Link>
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={handleSignOut}>
+          <LogOut className="mr-2 h-4 w-4" />
+          <span>Log out</span>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };
 

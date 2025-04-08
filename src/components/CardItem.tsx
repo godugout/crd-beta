@@ -7,21 +7,28 @@ import { useCards } from '@/context/CardContext';
 import '../components/home/card-effects/index.css';
 import { CardFront } from './card/CardFront';
 import { CardBack } from './card/CardBack';
+import ReactionButtons from './ReactionButtons';
+import CommentSection from './CommentSection';
 
 interface CardItemProps {
   card: Card;
   className?: string;
   onClick?: () => void;
   activeEffects?: string[];
+  showReactions?: boolean;
+  showComments?: boolean;
 }
 
 const CardItem: React.FC<CardItemProps> = ({ 
   card, 
   className, 
   onClick, 
-  activeEffects = [] 
+  activeEffects = [],
+  showReactions = true,
+  showComments = false
 }) => {
   const [isFlipped, setIsFlipped] = useState(false);
+  const [displayComments, setDisplayComments] = useState(showComments);
   const { deleteCard } = useCards();
   
   const handleFlip = (e: React.MouseEvent) => {
@@ -55,26 +62,46 @@ const CardItem: React.FC<CardItemProps> = ({
   };
   
   return (
-    <div 
-      className={cn(
-        "card-container relative w-full aspect-[2.5/3.5] cursor-pointer group",
-        className
-      )}
-      onClick={onClick}
-    >
-      <div className={cn("card-inner w-full h-full", isFlipped ? "flipped" : "")}>
-        {/* Card Front */}
-        <CardFront 
-          card={card}
-          activeEffects={activeEffects}
-          onFlip={handleFlip}
-          onShare={handleShare}
-          onDelete={handleDelete}
-        />
-        
-        {/* Card Back */}
-        <CardBack card={card} />
+    <div className="space-y-4">
+      <div 
+        className={cn(
+          "card-container relative w-full aspect-[2.5/3.5] cursor-pointer group",
+          className
+        )}
+        onClick={onClick}
+      >
+        <div className={cn("card-inner w-full h-full", isFlipped ? "flipped" : "")}>
+          {/* Card Front */}
+          <CardFront 
+            card={card}
+            activeEffects={activeEffects}
+            onFlip={handleFlip}
+            onShare={handleShare}
+            onDelete={handleDelete}
+          />
+          
+          {/* Card Back */}
+          <CardBack card={card} />
+        </div>
       </div>
+      
+      {/* Reactions and Comments */}
+      {showReactions && (
+        <div className="px-2">
+          <ReactionButtons 
+            cardId={card.id} 
+            initialReactions={card.reactions}
+            showComments={displayComments}
+            onShowComments={() => setDisplayComments(!displayComments)}
+          />
+          
+          {displayComments && (
+            <div className="mt-4">
+              <CommentSection cardId={card.id} />
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };
