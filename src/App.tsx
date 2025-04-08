@@ -25,6 +25,7 @@ import CommunityFeed from './pages/CommunityFeed';
 import Labs from './pages/Labs';
 import PbrDemo from './pages/PbrDemo';
 import SignatureDemo from './pages/SignatureDemo';
+import Experiences from './pages/Experiences';
 
 function App() {
   return (
@@ -48,9 +49,10 @@ function App() {
           <Route path="/teams/:id" element={<MobileLayout><TeamDetail /></MobileLayout>} />
           <Route path="/teams/:id/edit" element={<MobileLayout><TeamEditor /></MobileLayout>} />
           <Route path="/comments" element={<MobileLayout><CommentSection /></MobileLayout>} />
+          <Route path="/experiences" element={<Experiences />} />
           <Route path="/experiences/gameday" element={<GameDayMode />} />
           <Route path="/community" element={<MobileLayout><CommunityFeed /></MobileLayout>} />
-          {/* New Labs routes */}
+          {/* Labs routes */}
           <Route path="/labs" element={<Labs />} />
           <Route path="/labs/pbr" element={<MobileLayout><PbrDemo /></MobileLayout>} />
           <Route path="/labs/signature" element={<MobileLayout><SignatureDemo /></MobileLayout>} />
