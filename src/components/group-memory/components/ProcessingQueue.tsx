@@ -1,93 +1,81 @@
 
 import React from 'react';
+import { Trash2, Info, Edit } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Trash2, Play } from 'lucide-react';
-import { UploadFileItem } from '../hooks/useUploadHandling';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 
 interface ProcessingQueueProps {
-  queue: UploadFileItem[];
+  queue: any[];
   onRemoveFromQueue: (index: number) => void;
   onClearQueue: () => void;
   onProcessAll: () => void;
-  isProcessing: boolean;
 }
 
-const ProcessingQueue: React.FC<ProcessingQueueProps> = ({
-  queue,
-  onRemoveFromQueue,
-  onClearQueue,
-  onProcessAll,
-  isProcessing
-}) => {
-  if (queue.length === 0) {
-    return null;
-  }
+const ProcessingQueue = ({ 
+  queue, 
+  onRemoveFromQueue, 
+  onClearQueue, 
+  onProcessAll 
+}: ProcessingQueueProps) => {
+  const hasItems = queue.length > 0;
 
   return (
-    <div className="border rounded-lg p-4">
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-medium">Processing Queue</h3>
+    <div className="space-y-2">
+      <div className="flex justify-between items-center">
+        <h3 className="text-sm font-medium">Processing Queue</h3>
         <div className="flex gap-2">
           <Button 
-            variant="outline" 
+            variant="ghost" 
             size="sm" 
-            onClick={onClearQueue}
-            disabled={isProcessing || queue.length === 0}
+            onClick={onClearQueue} 
+            className="text-xs" 
+            aria-label="Clear all items from queue"
           >
-            Clear All
-          </Button>
-          <Button 
-            size="sm" 
-            onClick={onProcessAll}
-            disabled={isProcessing || queue.length === 0}
-            className="flex items-center gap-1"
-          >
-            {isProcessing ? (
-              <>
-                <span className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                <span>Processing...</span>
-              </>
-            ) : (
-              <>
-                <Play className="h-3 w-3 fill-current" />
-                <span>Process {queue.length} {queue.length === 1 ? 'Image' : 'Images'}</span>
-              </>
-            )}
+            <Trash2 className="h-3 w-3 mr-1" />
+            Clear
           </Button>
         </div>
       </div>
       
-      <div className="overflow-x-auto">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+      <ScrollArea className="h-40 rounded-md border">
+        <div className="p-2 space-y-1">
           {queue.map((item, index) => (
-            <div 
-              key={index} 
-              className="relative group border rounded-md overflow-hidden"
-            >
-              <div className="aspect-square">
-                <img 
-                  src={item.url} 
-                  alt={`Upload ${index + 1}`}
-                  className="w-full h-full object-cover"
-                />
+            <Card key={index} className="flex items-center justify-between p-2">
+              <div className="flex items-center gap-2">
+                <Info className="h-4 w-4 text-muted-foreground" />
+                <span className="text-xs line-clamp-1">{item.name || 'Item'}</span>
+                <Badge variant="secondary" className="text-[0.6rem]">+1 Point</Badge>
               </div>
-              
-              <Button
-                variant="destructive"
-                size="icon"
-                className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity"
+              <Button 
+                variant="ghost" 
+                size="icon" 
                 onClick={() => onRemoveFromQueue(index)}
-                disabled={isProcessing}
+                className="h-6 w-6"
+                aria-label="Remove item from queue"
               >
-                <Trash2 className="h-4 w-4" />
+                <Trash2 className="h-3 w-3" />
               </Button>
-              
-              <div className="absolute bottom-0 left-0 right-0 bg-black/70 px-2 py-1 text-white text-xs truncate">
-                {item.file.name}
-              </div>
-            </div>
+            </Card>
           ))}
+          {!hasItems && (
+            <div className="text-center text-muted-foreground text-xs p-4">
+              Queue is empty
+            </div>
+          )}
         </div>
+      </ScrollArea>
+      
+      <div className="flex justify-end">
+        <Button
+          onClick={onProcessAll}
+          disabled={!hasItems}
+          className="w-full sm:w-auto text-xs"
+        >
+          <Edit className="h-3 w-3 mr-1" /> 
+          Process All
+        </Button>
       </div>
     </div>
   );

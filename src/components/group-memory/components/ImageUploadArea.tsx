@@ -1,80 +1,69 @@
 
 import React, { useCallback } from 'react';
-import { useDropzone } from 'react-dropzone';
-import { toast } from 'sonner';
-import { Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { UploadCloud, Plus } from 'lucide-react';
 
 interface ImageUploadAreaProps {
-  onFileSelected: (file: File) => void;
-  maxSize?: number; // In MB
-  acceptedTypes?: string[];
+  onFileSelected: (file: File) => Promise<void>;
 }
 
-const ImageUploadArea: React.FC<ImageUploadAreaProps> = ({
-  onFileSelected,
-  maxSize = 10,
-  acceptedTypes = ['image/jpeg', 'image/png', 'image/webp']
-}) => {
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    if (acceptedFiles.length > 0) {
-      onFileSelected(acceptedFiles[0]);
+const ImageUploadArea: React.FC<ImageUploadAreaProps> = ({ onFileSelected }) => {
+  const handleFileInputChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      await onFileSelected(files[0]);
+      // Reset input value to allow selecting the same file again
+      e.target.value = '';
     }
   }, [onFileSelected]);
   
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    accept: {
-      'image/*': acceptedTypes.map(type => `.${type.split('/')[1]}`)
-    },
-    maxSize: maxSize * 1024 * 1024,
-    maxFiles: 1,
-    onDropRejected: (fileRejections) => {
-      if (fileRejections.length > 0) {
-        const { errors } = fileRejections[0];
-        if (errors[0]?.code === 'file-too-large') {
-          toast.error(`File is too large. Max size is ${maxSize}MB`);
-        } else if (errors[0]?.code === 'file-invalid-type') {
-          toast.error('File type not supported');
-        } else {
-          toast.error(errors[0]?.message || 'Error uploading file');
-        }
-      }
+  const handleDrop = useCallback(async (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const file = e.dataTransfer.files[0];
+      await onFileSelected(file);
     }
-  });
+  }, [onFileSelected]);
   
+  const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    e.dataTransfer.dropEffect = 'copy';
+  }, []);
+
   return (
     <div className="mb-6">
-      <h3 className="text-lg font-medium mb-4">Upload a Group Photo</h3>
+      <h3 className="text-lg font-medium mb-4">Upload Images</h3>
       
       <div 
-        {...getRootProps()} 
-        className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors
-          ${isDragActive 
-            ? 'border-primary bg-primary/5' 
-            : 'border-gray-300 hover:border-gray-400'
-          }`}
+        className="grid place-items-center border-2 border-dashed border-gray-300 rounded-lg p-12 text-center hover:bg-gray-50 transition-colors cursor-pointer"
+        onClick={() => document.getElementById('file-upload')?.click()}
+        onDrop={handleDrop}
+        onDragOver={handleDragOver}
       >
-        <input {...getInputProps()} />
-        
-        <div className="flex flex-col items-center">
-          <div className="bg-gray-100 rounded-full p-4 w-16 h-16 grid place-items-center mb-4">
-            <Upload className="h-8 w-8 text-gray-500" />
+        <input
+          id="file-upload"
+          type="file"
+          className="hidden"
+          accept="image/*"
+          onChange={handleFileInputChange}
+        />
+        <div className="space-y-2">
+          <div className="bg-gray-100 rounded-full p-4 mx-auto w-16 h-16 grid place-items-center">
+            <UploadCloud className="h-8 w-8 text-gray-500" />
           </div>
-          <p className="text-lg font-semibold mb-2">
-            {isDragActive ? 'Drop your image here' : 'Drag & drop your image here'}
-          </p>
-          <p className="text-sm text-gray-500 mb-4">
-            or click to browse files
-          </p>
-          <Button type="button" className="px-8">Select Files</Button>
-          
-          <p className="text-xs text-gray-500 mt-4">
-            Supported formats: JPEG, PNG, WebP
-          </p>
-          <p className="text-xs text-gray-500">
-            Max file size: {maxSize}MB
-          </p>
+          <div>
+            <p className="text-lg font-semibold">Click to upload or drag and drop</p>
+            <p className="text-sm text-gray-500 mt-1">
+              Upload photos to detect faces and memorabilia
+            </p>
+          </div>
+          <Button type="button">
+            <Plus className="mr-1 h-4 w-4" />
+            Select Image
+          </Button>
         </div>
       </div>
     </div>
