@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { UploadFileItem } from './hooks/useUploadHandling';
 import ProcessingQueue from './components/ProcessingQueue';
@@ -35,10 +34,8 @@ const GroupImageUploader: React.FC<GroupImageUploaderProps> = ({ onComplete, cla
     try {
       setIsProcessing(true);
       // Processing logic here
-      // Fix: Don't use 'new' with Promise.resolve, use a proper Promise constructor
-      await new Promise<void>(resolve => {
-        setTimeout(resolve, 1000);
-      });
+      // Fix: Use Promise constructor correctly without 'new' keyword
+      await Promise.resolve(setTimeout(() => {}, 1000));
       
       // If onComplete is provided, call it with the processed card IDs
       if (onComplete) {
