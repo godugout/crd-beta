@@ -35,7 +35,7 @@ const GroupImageUploader: React.FC<GroupImageUploaderProps> = ({ onComplete, cla
     try {
       setIsProcessing(true);
       // Processing logic here
-      // Fixed: corrected Promise creation syntax - don't use 'new' with void function
+      // Fix: Don't use 'new' with Promise.resolve, use a proper Promise constructor
       await new Promise<void>(resolve => {
         setTimeout(resolve, 1000);
       });
