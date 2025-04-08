@@ -8,10 +8,10 @@ interface ImageUploadAreaProps {
 }
 
 const ImageUploadArea: React.FC<ImageUploadAreaProps> = ({ onFileSelected }) => {
-  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
-      onFileSelected(files[0]);
+      await onFileSelected(files[0]);
     }
   };
 

@@ -14,6 +14,7 @@ import DetectionPanel from './components/DetectionPanel';
 import AdjustmentsPanel from './components/AdjustmentsPanel';
 import EditorToolbar from './components/EditorToolbar';
 import EditorCanvas from './components/EditorCanvas';
+import { GroupUploadType } from './hooks/useUploadHandling';
 
 interface BatchImageEditorProps {
   open: boolean;
@@ -21,7 +22,7 @@ interface BatchImageEditorProps {
   imageUrl: string | null;
   originalFile: File | null;
   onProcessComplete: (files: File[], urls: string[], types?: MemorabiliaType[]) => void;
-  detectionType: 'face' | 'memorabilia' | 'mixed' | 'group';
+  detectionType: GroupUploadType | 'face';
 }
 
 const BatchImageEditor: React.FC<BatchImageEditorProps> = ({
@@ -30,7 +31,7 @@ const BatchImageEditor: React.FC<BatchImageEditorProps> = ({
   imageUrl,
   originalFile,
   onProcessComplete,
-  detectionType = 'face'
+  detectionType = 'group'
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const editorImgRef = useRef<HTMLImageElement>(null);
@@ -41,7 +42,10 @@ const BatchImageEditor: React.FC<BatchImageEditorProps> = ({
     isProcessing,
     runDetection,
     processSelectedAreas
-  } = useBatchImageProcessing({ onProcessComplete });
+  } = useBatchImageProcessing({ 
+    onComplete: onProcessComplete,
+    autoEnhance: true 
+  });
   
   const {
     selectedAreas,
@@ -75,7 +79,7 @@ const BatchImageEditor: React.FC<BatchImageEditorProps> = ({
   // Run detection on the current image
   const handleRunDetection = async () => {
     if (!editorImgRef.current) return;
-    const detectedItems = await runDetection(editorImgRef, detectionType);
+    const detectedItems = await runDetection(editorImgRef, detectionType as 'face' | 'group' | 'memorabilia' | 'mixed');
     setSelectedAreas(detectedItems);
   };
   

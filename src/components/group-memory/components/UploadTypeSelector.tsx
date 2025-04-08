@@ -3,10 +3,11 @@ import React from 'react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Users, ImageIcon, CameraIcon } from 'lucide-react';
+import { GroupUploadType } from '../hooks/useUploadHandling';
 
 interface UploadTypeSelectorProps {
-  uploadType: 'group' | 'memorabilia' | 'mixed';
-  onUploadTypeChange: (value: 'group' | 'memorabilia' | 'mixed') => void;
+  uploadType: GroupUploadType;
+  onUploadTypeChange: (value: GroupUploadType) => void;
 }
 
 const UploadTypeSelector: React.FC<UploadTypeSelectorProps> = ({ 
@@ -19,7 +20,7 @@ const UploadTypeSelector: React.FC<UploadTypeSelectorProps> = ({
       <RadioGroup 
         defaultValue="group" 
         value={uploadType}
-        onValueChange={(value) => onUploadTypeChange(value as 'group' | 'memorabilia' | 'mixed')}
+        onValueChange={(value) => onUploadTypeChange(value as GroupUploadType)}
         className="flex flex-col space-y-3"
       >
         <div className="flex items-center space-x-3 p-3 rounded-md border hover:bg-gray-50">

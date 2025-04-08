@@ -1,18 +1,114 @@
-
 import { useState } from 'react';
-import { EnhancedCropBoxProps, MemorabiliaType } from '@/components/card-upload/cardDetection';
+import { EnhancedCropBoxProps, MemorabiliaType, detectCardsInImage, applyCrop } from '@/components/card-upload/cardDetection';
 import useImageProcessing from '@/hooks/useImageProcessing';
 import { toast } from 'sonner';
 
 interface BatchProcessingProps {
+  /**
+   * Callback when processing is complete
+   */
   onComplete?: (files: File[], urls: string[], types?: MemorabiliaType[]) => void;
+  /**
+   * Whether to auto enhance images after processing
+   */
   autoEnhance?: boolean;
 }
 
 export const useBatchImageProcessing = ({ onComplete, autoEnhance = true }: BatchProcessingProps = {}) => {
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isDetecting, setIsDetecting] = useState(false);
   const [stagedItems, setStagedItems] = useState<{ file: File, url: string, type?: MemorabiliaType }[]>([]);
   const imageProcessor = useImageProcessing();
+  
+  // Run detection on an image
+  const runDetection = async (
+    imageRef: React.RefObject<HTMLImageElement>,
+    detectionType: 'face' | 'memorabilia' | 'mixed' | 'group' = 'face'
+  ): Promise<EnhancedCropBoxProps[]> => {
+    if (!imageRef.current) return [];
+    
+    setIsDetecting(true);
+    try {
+      // Map detection type to array of memorabilia types to detect
+      const typesToDetect: MemorabiliaType[] = 
+        detectionType === 'face' || detectionType === 'group' ? ['face'] :
+        detectionType === 'memorabilia' ? ['card', 'ticket', 'program', 'autograph'] :
+        ['face', 'card', 'ticket', 'program', 'autograph'];
+        
+      // Run detection
+      const detectedItems = await detectCardsInImage(
+        imageRef.current,
+        autoEnhance,
+        null,
+        typesToDetect
+      );
+      
+      return detectedItems;
+    } catch (error) {
+      console.error('Error detecting items:', error);
+      toast.error('Failed to detect items in image');
+      return [];
+    } finally {
+      setIsDetecting(false);
+    }
+  };
+  
+  // Process selected areas in an image
+  const processSelectedAreas = async (
+    cropBoxes: EnhancedCropBoxProps[],
+    imageRef: React.RefObject<HTMLImageElement>,
+    originalFile: File | null,
+    enhanceImage: boolean = true
+  ) => {
+    if (!originalFile || !imageRef.current) {
+      toast.error('Missing image data');
+      return { success: false };
+    }
+    
+    // Process all crop boxes
+    setIsProcessing(true);
+    
+    try {
+      const processedFiles: File[] = [];
+      const processedUrls: string[] = [];
+      const processedTypes: MemorabiliaType[] = [];
+      
+      const canvas = document.createElement('canvas');
+      
+      for (const cropBox of cropBoxes) {
+        const result = await applyCrop(
+          cropBox,
+          canvas,
+          originalFile,
+          imageRef.current,
+          enhanceImage ? cropBox.memorabiliaType : undefined
+        );
+        
+        if (result) {
+          processedFiles.push(result.file);
+          processedUrls.push(result.url);
+          processedTypes.push(cropBox.memorabiliaType || 'unknown');
+        }
+      }
+      
+      // Clear canvas
+      canvas.width = 1;
+      canvas.height = 1;
+      
+      // Call completion callback
+      if (processedFiles.length > 0 && onComplete) {
+        onComplete(processedFiles, processedUrls, processedTypes);
+      }
+      
+      return { success: true, files: processedFiles };
+    } catch (error) {
+      console.error('Error processing areas:', error);
+      toast.error('Failed to process selected areas');
+      return { success: false };
+    } finally {
+      setIsProcessing(false);
+    }
+  };
   
   // Process a batch of selected crop areas
   const processBatchSelections = async (
@@ -187,10 +283,13 @@ export const useBatchImageProcessing = ({ onComplete, autoEnhance = true }: Batc
   
   return {
     isProcessing,
+    isDetecting,
     stagedItems,
     setStagedItems,
     clearStaged,
     processBatchSelections,
-    processCropArea
+    processCropArea,
+    runDetection,
+    processSelectedAreas
   };
 };

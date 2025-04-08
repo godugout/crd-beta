@@ -6,7 +6,7 @@ import BatchImageEditor from './BatchImageEditor';
 import UploadTypeSelector from './components/UploadTypeSelector';
 import ImageUploadArea from './components/ImageUploadArea';
 import ProcessingQueue from './components/ProcessingQueue';
-import { useUploadHandling } from './hooks/useUploadHandling';
+import { useUploadHandling, UseUploadHandlingProps, GroupUploadType } from './hooks/useUploadHandling';
 
 interface GroupImageUploaderProps {
   onComplete?: (cardIds: string[]) => void;
@@ -27,13 +27,13 @@ const GroupImageUploader: React.FC<GroupImageUploaderProps> = ({ onComplete, cla
     handleBatchUpload,
     handleRemoveFile,
     processUploads
-  } = useUploadHandling(onComplete);
+  } = useUploadHandling({ onComplete });
   
   return (
     <div className={className}>
       <UploadTypeSelector 
         uploadType={uploadType}
-        onUploadTypeChange={(value) => setUploadType(value)}
+        onUploadTypeChange={(value) => setUploadType(value as GroupUploadType)}
       />
       
       <Separator className="my-6" />

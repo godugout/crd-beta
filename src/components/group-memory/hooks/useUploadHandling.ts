@@ -1,16 +1,18 @@
 
 import { useState, useRef } from 'react';
-import { EnhancedCropBoxProps, MemorabiliaType } from '@/components/card-upload/cardDetection';
+import { MemorabiliaType } from '@/components/card-upload/cardDetection';
 import { toast } from 'sonner';
 import { useOfflineStorage } from '@/hooks/useOfflineStorage';
 
-interface UseUploadHandlingProps {
+export interface UseUploadHandlingProps {
   onComplete?: (cardIds: string[]) => void;
 }
 
+export type GroupUploadType = 'group' | 'memorabilia' | 'mixed';
+
 export const useUploadHandling = ({ onComplete }: UseUploadHandlingProps = {}) => {
-  const [uploadType, setUploadType] = useState<MemorabiliaType>('face');
-  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [uploadType, setUploadType] = useState<GroupUploadType>('group');
+  const [uploadedFiles, setUploadedFiles] = useState<{file: File, url: string, type?: MemorabiliaType}[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [showEditor, setShowEditor] = useState(false);
   const [currentFile, setCurrentFile] = useState<File | null>(null);
@@ -18,7 +20,7 @@ export const useUploadHandling = ({ onComplete }: UseUploadHandlingProps = {}) =
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { saveMemory, isSaving } = useOfflineStorage();
 
-  const handleFileSelected = (file: File | null) => {
+  const handleFileSelected = async (file: File) => {
     if (!file) return;
     
     // Validate file
@@ -32,24 +34,25 @@ export const useUploadHandling = ({ onComplete }: UseUploadHandlingProps = {}) =
       return;
     }
     
-    setUploadedFiles(prev => [...prev, file]);
+    const imageUrl = URL.createObjectURL(file);
+    
+    setUploadedFiles(prev => [...prev, { file, url: imageUrl }]);
     
     // Open editor for the first file
     if (uploadedFiles.length === 0) {
-      openEditor(file);
+      openEditor(file, imageUrl);
     }
   };
   
-  const openEditor = (file: File) => {
+  const openEditor = (file: File, url: string) => {
     setCurrentFile(file);
-    const imageUrl = URL.createObjectURL(file);
-    setCurrentImageUrl(imageUrl);
+    setCurrentImageUrl(url);
     setShowEditor(true);
   };
   
   const processNextFile = () => {
     if (uploadedFiles.length > 0) {
-      openEditor(uploadedFiles[0]);
+      openEditor(uploadedFiles[0].file, uploadedFiles[0].url);
     }
   };
   
@@ -71,7 +74,7 @@ export const useUploadHandling = ({ onComplete }: UseUploadHandlingProps = {}) =
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
         const url = urls[i];
-        const type = types?.[i] || uploadType;
+        const type = types?.[i] || convertGroupTypeToMemorabiliaType(uploadType);
         
         // Save to memory - this works with offline storage
         const result = await saveMemory(
@@ -121,6 +124,20 @@ export const useUploadHandling = ({ onComplete }: UseUploadHandlingProps = {}) =
     }
   };
   
+  // Helper function to convert group type to memorabilia type
+  const convertGroupTypeToMemorabiliaType = (groupType: GroupUploadType): MemorabiliaType => {
+    switch(groupType) {
+      case 'group':
+        return 'face';
+      case 'memorabilia':
+        return 'card';
+      case 'mixed':
+        return 'unknown';
+      default:
+        return 'unknown';
+    }
+  }
+  
   const processUploads = async () => {
     if (uploadedFiles.length === 0) return;
     
@@ -144,6 +161,7 @@ export const useUploadHandling = ({ onComplete }: UseUploadHandlingProps = {}) =
     handleFileSelected,
     handleBatchUpload,
     handleRemoveFile,
-    processUploads
+    processUploads,
+    convertGroupTypeToMemorabiliaType
   };
 };
