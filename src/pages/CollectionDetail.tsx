@@ -24,7 +24,10 @@ const CollectionDetail = () => {
       
       // Filter cards that belong to this collection
       const collectionCardIds = found.cards || [];
-      const filteredCards = cards.filter(card => collectionCardIds.includes(card.id));
+      // Convert the array of card IDs to actual Card objects
+      const filteredCards = cards.filter(card => 
+        collectionCardIds.includes(card.id)
+      );
       setCollectionCards(filteredCards);
     }
   }, [id, collections, cards]);
