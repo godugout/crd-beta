@@ -1,6 +1,7 @@
 
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabase/client';
 import { v4 as uuidv4 } from 'uuid';
+import { DbDigitalAsset, DbAssetUsage } from '@/integrations/supabase/types-digital-assets';
 
 export interface DigitalAsset {
   id: string;
@@ -35,6 +36,50 @@ export interface AssetUsage {
   referenceId: string;
   createdAt: string;
 }
+
+// Helper to map database record to interface
+const mapDbAssetToAsset = (dbAsset: DbDigitalAsset, publicUrl?: string, thumbnailUrl?: string): DigitalAsset => {
+  return {
+    id: dbAsset.id,
+    userId: dbAsset.user_id,
+    storagePath: dbAsset.storage_path,
+    originalFilename: dbAsset.original_filename,
+    fileSize: dbAsset.file_size,
+    mimeType: dbAsset.mime_type,
+    width: dbAsset.width || undefined,
+    height: dbAsset.height || undefined,
+    thumbnailPath: dbAsset.thumbnail_path || undefined,
+    title: dbAsset.title || undefined,
+    description: dbAsset.description || undefined,
+    tags: dbAsset.tags || undefined,
+    metadata: dbAsset.metadata || undefined,
+    createdAt: dbAsset.created_at,
+    updatedAt: dbAsset.updated_at,
+    url: publicUrl,
+    thumbnailUrl: thumbnailUrl || publicUrl
+  };
+};
+
+// Helper to map interface to database record
+const mapAssetToDbAsset = (asset: Partial<DigitalAsset>): Partial<DbDigitalAsset> => {
+  return {
+    title: asset.title,
+    description: asset.description,
+    tags: asset.tags,
+    metadata: asset.metadata
+  };
+};
+
+// Helper to map database asset usage to interface
+const mapDbAssetUsageToAssetUsage = (dbAssetUsage: DbAssetUsage): AssetUsage => {
+  return {
+    id: dbAssetUsage.id,
+    assetId: dbAssetUsage.asset_id,
+    usageType: dbAssetUsage.usage_type,
+    referenceId: dbAssetUsage.reference_id,
+    createdAt: dbAssetUsage.created_at
+  };
+};
 
 /**
  * Service for managing digital assets
@@ -161,25 +206,7 @@ export const digitalAssetService = {
       }
 
       // Transform the response to match our interface
-      const asset: DigitalAsset = {
-        id: assetData.id,
-        userId: assetData.user_id,
-        storagePath: assetData.storage_path,
-        originalFilename: assetData.original_filename,
-        fileSize: assetData.file_size,
-        mimeType: assetData.mime_type,
-        width: assetData.width,
-        height: assetData.height,
-        thumbnailPath: assetData.thumbnail_path,
-        title: assetData.title,
-        description: assetData.description,
-        tags: assetData.tags,
-        metadata: assetData.metadata,
-        createdAt: assetData.created_at,
-        updatedAt: assetData.updated_at,
-        url: publicUrl,
-        thumbnailUrl: thumbnailUrl
-      };
+      const asset = mapDbAssetToAsset(assetData as DbDigitalAsset, publicUrl, thumbnailUrl);
 
       return {
         success: true,
@@ -249,8 +276,9 @@ export const digitalAssetService = {
 
       // Transform data to our interface and add URLs
       const assets: DigitalAsset[] = await Promise.all(
-        (data || []).map(async (item) => {
-          const [bucketId, ...pathParts] = item.storage_path.split('/');
+        (data || []).map(async (item: any) => {
+          const dbAsset = item as DbDigitalAsset;
+          const [bucketId, ...pathParts] = dbAsset.storage_path.split('/');
           const path = pathParts.join('/');
 
           // Get public URL
@@ -260,8 +288,8 @@ export const digitalAssetService = {
 
           // Get thumbnail URL if available
           let thumbnailUrl;
-          if (item.thumbnail_path) {
-            const [thumbBucketId, ...thumbPathParts] = item.thumbnail_path.split('/');
+          if (dbAsset.thumbnail_path) {
+            const [thumbBucketId, ...thumbPathParts] = dbAsset.thumbnail_path.split('/');
             const thumbPath = thumbPathParts.join('/');
             const { data: { publicUrl: thumbUrl } } = supabase.storage
               .from(thumbBucketId)
@@ -269,25 +297,7 @@ export const digitalAssetService = {
             thumbnailUrl = thumbUrl;
           }
 
-          return {
-            id: item.id,
-            userId: item.user_id,
-            storagePath: item.storage_path,
-            originalFilename: item.original_filename,
-            fileSize: item.file_size,
-            mimeType: item.mime_type,
-            width: item.width,
-            height: item.height,
-            thumbnailPath: item.thumbnail_path,
-            title: item.title,
-            description: item.description,
-            tags: item.tags,
-            metadata: item.metadata,
-            createdAt: item.created_at,
-            updatedAt: item.updated_at,
-            url: publicUrl,
-            thumbnailUrl: thumbnailUrl || publicUrl
-          };
+          return mapDbAssetToAsset(dbAsset, publicUrl, thumbnailUrl);
         })
       );
 
@@ -313,7 +323,8 @@ export const digitalAssetService = {
         return null;
       }
 
-      const [bucketId, ...pathParts] = data.storage_path.split('/');
+      const dbAsset = data as DbDigitalAsset;
+      const [bucketId, ...pathParts] = dbAsset.storage_path.split('/');
       const path = pathParts.join('/');
 
       // Get public URL
@@ -323,8 +334,8 @@ export const digitalAssetService = {
 
       // Get thumbnail URL if available
       let thumbnailUrl;
-      if (data.thumbnail_path) {
-        const [thumbBucketId, ...thumbPathParts] = data.thumbnail_path.split('/');
+      if (dbAsset.thumbnail_path) {
+        const [thumbBucketId, ...thumbPathParts] = dbAsset.thumbnail_path.split('/');
         const thumbPath = thumbPathParts.join('/');
         const { data: { publicUrl: thumbUrl } } = supabase.storage
           .from(thumbBucketId)
@@ -332,25 +343,7 @@ export const digitalAssetService = {
         thumbnailUrl = thumbUrl;
       }
 
-      return {
-        id: data.id,
-        userId: data.user_id,
-        storagePath: data.storage_path,
-        originalFilename: data.original_filename,
-        fileSize: data.file_size,
-        mimeType: data.mime_type,
-        width: data.width,
-        height: data.height,
-        thumbnailPath: data.thumbnail_path,
-        title: data.title,
-        description: data.description,
-        tags: data.tags,
-        metadata: data.metadata,
-        createdAt: data.created_at,
-        updatedAt: data.updated_at,
-        url: publicUrl,
-        thumbnailUrl: thumbnailUrl || publicUrl
-      };
+      return mapDbAssetToAsset(dbAsset, publicUrl, thumbnailUrl);
     } catch (err) {
       console.error('Error in getAsset:', err);
       return null;
@@ -362,14 +355,8 @@ export const digitalAssetService = {
    */
   async updateAsset(id: string, updates: Partial<DigitalAsset>): Promise<boolean> {
     try {
-      const updateData: Record<string, any> = {};
+      const updateData = mapAssetToDbAsset(updates);
       
-      // Map fields from our interface to database columns
-      if (updates.title !== undefined) updateData.title = updates.title;
-      if (updates.description !== undefined) updateData.description = updates.description;
-      if (updates.tags !== undefined) updateData.tags = updates.tags;
-      if (updates.metadata !== undefined) updateData.metadata = updates.metadata;
-
       const { error } = await supabase
         .from('digital_assets')
         .update(updateData)
@@ -404,9 +391,11 @@ export const digitalAssetService = {
         return false;
       }
 
+      const dbAsset = data as DbDigitalAsset;
+
       // Delete from storage
-      if (data.storage_path) {
-        const [bucketId, ...pathParts] = data.storage_path.split('/');
+      if (dbAsset.storage_path) {
+        const [bucketId, ...pathParts] = dbAsset.storage_path.split('/');
         const path = pathParts.join('/');
         
         const { error: storageError } = await supabase.storage
@@ -419,8 +408,8 @@ export const digitalAssetService = {
       }
 
       // Delete thumbnail if exists
-      if (data.thumbnail_path) {
-        const [thumbBucketId, ...thumbPathParts] = data.thumbnail_path.split('/');
+      if (dbAsset.thumbnail_path) {
+        const [thumbBucketId, ...thumbPathParts] = dbAsset.thumbnail_path.split('/');
         const thumbPath = thumbPathParts.join('/');
         
         const { error: thumbStorageError } = await supabase.storage
@@ -474,13 +463,7 @@ export const digitalAssetService = {
         return null;
       }
 
-      return {
-        id: data.id,
-        assetId: data.asset_id,
-        usageType: data.usage_type,
-        referenceId: data.reference_id,
-        createdAt: data.created_at
-      };
+      return mapDbAssetUsageToAssetUsage(data as DbAssetUsage);
     } catch (err) {
       console.error('Error in createAssetUsage:', err);
       return null;
@@ -502,13 +485,9 @@ export const digitalAssetService = {
         return [];
       }
 
-      return (data || []).map(item => ({
-        id: item.id,
-        assetId: item.asset_id,
-        usageType: item.usage_type,
-        referenceId: item.reference_id,
-        createdAt: item.created_at
-      }));
+      return (data || []).map((item: any) => 
+        mapDbAssetUsageToAssetUsage(item as DbAssetUsage)
+      );
     } catch (err) {
       console.error('Error in getAssetUsages:', err);
       return [];
