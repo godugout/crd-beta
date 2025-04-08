@@ -44,7 +44,7 @@ const CollectionGrid: React.FC<CollectionGridProps> = ({ collections, isLoading 
               {collection.coverImageUrl ? (
                 <img
                   src={collection.coverImageUrl}
-                  alt={collection.title || 'Collection'}
+                  alt={collection.name || 'Collection'}
                   className="w-full h-full object-cover"
                 />
               ) : (
@@ -54,14 +54,14 @@ const CollectionGrid: React.FC<CollectionGridProps> = ({ collections, isLoading 
               )}
             </div>
             <CardContent className="p-4">
-              <h3 className="font-medium text-lg mb-1">{collection.title}</h3>
+              <h3 className="font-medium text-lg mb-1">{collection.name}</h3>
               {collection.description && (
                 <p className="text-sm text-gray-600 line-clamp-2">{collection.description}</p>
               )}
             </CardContent>
             <CardFooter className="px-4 pb-4 pt-0 flex justify-between">
               <span className="text-xs text-gray-500">
-                {collection.cardIds?.length || 0} cards
+                {collection.cards?.length || 0} cards
               </span>
               <span className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-700">
                 {collection.visibility}
