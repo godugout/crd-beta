@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { Upload, X, Image as ImageIcon, Camera, Users, CopyCheck } from 'lucide-react';
 import { toast } from 'sonner';

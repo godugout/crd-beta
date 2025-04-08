@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom'; 
 import { Menu, X, ChevronLeft } from 'lucide-react';
@@ -6,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import MainNavigation from './MainNavigation';
 import MobileNavigation from './MobileNavigation';
 import UserDropdown from '@/components/navbar/UserDropdown';
-import { useAuth } from '@/context/auth';
+import { useAuth } from '@/context/auth'; // Updated import
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 
 const AppHeader: React.FC = () => {

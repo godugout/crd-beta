@@ -1,217 +1,202 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useCards } from '@/context/CardContext';
+import { useParams } from 'react-router-dom';
+import { Container } from '@/components/ui/container';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { toast } from 'sonner';
-import { Card } from '@/lib/types';
+import { Card } from '@/components/ui/card';
 import CardGrid from '@/components/gallery/CardGrid';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Edit, Plus, Trash2 } from 'lucide-react';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
+import { useAuth } from '@/context/auth';
+import { Collection, Card as CardType } from '@/lib/types';
+import { supabase } from '@/lib/supabase';
+
+interface CollectionDetailParams {
+  id: string;
+}
 
 const CollectionDetail: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
-  const { 
-    collections, 
-    cards, 
-    updateCollection, 
-    deleteCollection,
-    addCardToCollection,
-    removeCardFromCollection
-  } = useCards();
-  
-  const collection = collections.find(c => c.id === id);
-  const [name, setName] = useState(collection?.name || '');
-  const [description, setDescription] = useState(collection?.description || '');
-  const [visibility, setVisibility] = useState<"public" | "private" | "team">(collection?.visibility || "public");
-  const [isEditing, setIsEditing] = useState(false);
-  const [cardEffects, setCardEffects] = useState<Record<string, string[]>>({});
-  const [selectedCard, setSelectedCard] = useState<Card | null>(null);
-  
+  const { id } = useParams<CollectionDetailParams>();
+  const { user } = useAuth();
+  const [collection, setCollection] = useState<Collection | null>(null);
+  const [cards, setCards] = useState<CardType[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   useEffect(() => {
-    if (collection) {
-      setName(collection.name);
-      setDescription(collection.description);
-      setVisibility(collection.visibility);
-    }
-  }, [collection]);
-  
-  if (!collection) {
-    return <div>Collection not found</div>;
-  }
-  
-  const handleEdit = () => {
-    setIsEditing(true);
-  };
-  
-  const handleSave = async () => {
-    if (id) {
-      await updateCollection(id, { name, description, visibility });
-      setIsEditing(false);
-      toast.success('Collection updated');
-    }
-  };
-  
-  const handleDelete = async () => {
-    if (id) {
-      await deleteCollection(id);
-      navigate('/collections');
-      toast.success('Collection deleted');
-    }
-  };
-  
-  const handleAddCard = async (cardId: string) => {
-    if (id) {
-      await addCardToCollection(cardId, id);
-      toast.success('Card added to collection');
-    }
-  };
-  
-  const handleRemoveCard = async (cardId: string) => {
-    if (id) {
-      await removeCardFromCollection(cardId, id);
-      toast.success('Card removed from collection');
-    }
-  };
-  
-  const availableCards = cards.filter(card => !collection.cards?.includes(card.id));
-  const collectionCards = cards.filter(card => collection.cards?.includes(card.id));
-  
-  return (
-    <div className="container mx-auto py-8">
-      <div className="mb-4 flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold">{isEditing ? 'Edit Collection' : collection.name}</h1>
-        </div>
-        <div>
-          {!isEditing && (
-            <Button variant="outline" size="sm" onClick={handleEdit}>
-              <Edit className="mr-2 h-4 w-4" />
-              Edit
-            </Button>
-          )}
-        </div>
-      </div>
+    const fetchCollection = async () => {
+      setIsLoading(true);
+      setError(null);
       
-      {isEditing ? (
-        <div className="bg-white shadow-md rounded-lg p-4">
-          <div className="grid gap-4">
-            <div>
-              <Label htmlFor="name">Name</Label>
-              <Input 
-                type="text" 
-                id="name" 
-                value={name} 
-                onChange={(e) => setName(e.target.value)} 
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor="visibility">Visibility</Label>
-              <Select value={visibility} onValueChange={(value) => setVisibility(value as "public" | "private" | "team")}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select visibility" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="public">Public</SelectItem>
-                  <SelectItem value="private">Private</SelectItem>
-                  <SelectItem value="team">Team</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="flex justify-end gap-2">
-              <Button variant="default" size="sm" onClick={handleSave}>
-                Save
-              </Button>
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button variant="destructive" size="sm">
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    Delete
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      This action cannot be undone. This will permanently delete this collection and remove all of its data.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleDelete}>Continue</AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </div>
-          </div>
-        </div>
-      ) : (
-        <div className="bg-white shadow-md rounded-lg p-4">
+      try {
+        if (!id) {
+          setError('Collection ID is missing');
+          return;
+        }
+        
+        const { data: collectionData, error: collectionError } = await supabase
+          .from('collections')
+          .select('*')
+          .eq('id', id)
+          .single();
+        
+        if (collectionError) {
+          console.error('Error fetching collection:', collectionError);
+          setError('Failed to load collection');
+          return;
+        }
+        
+        if (!collectionData) {
+          setError('Collection not found');
+          return;
+        }
+        
+        const formattedCollection: Collection = {
+          id: collectionData.id,
+          name: collectionData.title || '',
+          description: collectionData.description || '',
+          coverImageUrl: collectionData.cover_image_url || '',
+          userId: collectionData.owner_id,
+          visibility: collectionData.visibility || 'public',
+          allowComments: collectionData.allow_comments !== undefined ? collectionData.allow_comments : true,
+          createdAt: collectionData.created_at,
+          updatedAt: collectionData.updated_at
+        };
+        
+        setCollection(formattedCollection);
+        
+        const { data: cardData, error: cardError } = await supabase
+          .from('cards')
+          .select('*')
+          .eq('collection_id', id);
+        
+        if (cardError) {
+          console.error('Error fetching cards:', cardError);
+          setError('Failed to load cards in collection');
+          return;
+        }
+        
+        if (cardData) {
+          const formattedCards = cardData.map(item => ({
+            id: item.id,
+            title: item.title || '',
+            description: item.description || '',
+            imageUrl: item.image_url || '',
+            thumbnailUrl: item.thumbnail_url || item.image_url || '',
+            userId: item.user_id,
+            teamId: item.team_id,
+            collectionId: item.collection_id,
+            createdAt: item.created_at,
+            updatedAt: item.updated_at,
+            isPublic: item.is_public || false,
+            tags: item.tags || [],
+            designMetadata: item.design_metadata || {},
+            reactions: item.reactions || []
+          }));
+          
+          setCards(formattedCards);
+        }
+      } catch (err) {
+        console.error('Error fetching data:', err);
+        setError('Failed to load data');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchCollection();
+  }, [id, user]);
+
+  // Update collection visibility to use proper type
+  const updateVisibility = async (visibility: 'public' | 'private' | 'team') => {
+    if (!collection) return;
+    setIsLoading(true);
+    try {
+      const { error } = await supabase
+        .from('collections')
+        .update({ visibility: visibility })
+        .eq('id', collection.id);
+      
+      if (error) {
+        console.error('Error updating visibility:', error);
+        setError('Failed to update visibility');
+      } else {
+        setCollection({ ...collection, visibility: visibility });
+      }
+    } catch (err) {
+      console.error('Error updating visibility:', err);
+      setError('Failed to update visibility');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Fix the addCardToCollection to use proper Card type
+  const addCardToCollection = async (cardId: CardType) => {
+    // Use cardId.id if CardType object is passed
+    const id = typeof cardId === 'string' ? cardId : cardId.id;
+    if (!collection) return;
+    setIsLoading(true);
+    try {
+      const { error } = await supabase
+        .from('cards')
+        .update({ collection_id: collection.id })
+        .eq('id', id);
+      
+      if (error) {
+        console.error('Error adding card to collection:', error);
+        setError('Failed to add card to collection');
+      } else {
+        setCards(prevCards => [...prevCards, cardId]);
+      }
+    } catch (err) {
+      console.error('Error adding card to collection:', err);
+      setError('Failed to add card to collection');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Fix the removeCardFromCollection to use proper Card type  
+  const removeCardFromCollection = async (cardId: CardType) => {
+    // Use cardId.id if CardType object is passed
+    const id = typeof cardId === 'string' ? cardId : cardId.id;
+    if (!collection) return;
+    setIsLoading(true);
+    try {
+      const { error } = await supabase
+        .from('cards')
+        .update({ collection_id: null })
+        .eq('id', id);
+      
+      if (error) {
+        console.error('Error removing card from collection:', error);
+        setError('Failed to remove card from collection');
+      } else {
+        setCards(prevCards => prevCards.filter(card => card.id !== id));
+      }
+    } catch (err) {
+      console.error('Error removing card from collection:', err);
+      setError('Failed to remove card from collection');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <Container>
+      {isLoading && <div>Loading...</div>}
+      {error && <div>Error: {error}</div>}
+      
+      {collection && (
+        <div>
+          <h1>{collection.name}</h1>
           <p>{collection.description}</p>
-          <p className="mt-2">Visibility: {collection.visibility}</p>
+          
+          {/* Add card to collection */}
+          {/* Remove card from collection */}
+          
+          <CardGrid cards={cards} />
         </div>
       )}
-      
-      <div className="mt-8">
-        <h2 className="text-xl font-bold mb-4">Cards in this Collection</h2>
-        {collectionCards.length > 0 ? (
-          <CardGrid 
-            cards={collectionCards} 
-            cardEffects={cardEffects}
-            onCardClick={(cardId) => {
-              const card = collectionCards.find(c => c.id === cardId);
-              setSelectedCard(card || null);
-            }}
-          />
-        ) : (
-          <p>No cards in this collection yet.</p>
-        )}
-      </div>
-      
-      <div className="mt-8">
-        <h2 className="text-xl font-bold mb-4">Add Cards to Collection</h2>
-        {availableCards.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {availableCards.map(card => (
-              <div key={card.id} className="bg-white shadow-md rounded-lg p-4">
-                <h3 className="text-lg font-bold mb-2">{card.title}</h3>
-                <Button variant="default" size="sm" onClick={() => handleAddCard(card.id)}>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Add to Collection
-                </Button>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <p>No more cards available to add.</p>
-        )}
-      </div>
-    </div>
+    </Container>
   );
 };
 

@@ -1,9 +1,10 @@
+
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import DesktopMenu from './navbar/DesktopMenu';
 import MobileMenu from './navbar/MobileMenu';
 import UserDropdown from './navbar/UserDropdown';
-import { useAuth } from '@/context/auth';
+import { useAuth } from '@/context/auth'; // Updated import
 import Notifications from './Notifications';
 
 const Navbar = () => {
@@ -42,7 +43,12 @@ const Navbar = () => {
             {/* User menu - depends on auth state */}
             <div className="ml-2 md:ml-4">
               {user ? (
-                <UserDropdown user={user} onSignOut={handleSignOut} isOpen={false} onClose={() => {}} />
+                <UserDropdown 
+                  user={user} 
+                  onSignOut={handleSignOut} 
+                  isOpen={false} 
+                  onClose={() => {}} 
+                />
               ) : (
                 <div className="flex space-x-2">
                   <Link
@@ -106,7 +112,12 @@ const Navbar = () => {
       </div>
 
       {/* Mobile menu panel */}
-      <MobileMenu isOpen={isOpen} onClose={() => setIsOpen(false)} onSignOut={handleSignOut} user={user} />
+      <MobileMenu 
+        isOpen={isOpen} 
+        onClose={() => setIsOpen(false)} 
+        onSignOut={handleSignOut} 
+        user={user} 
+      />
     </nav>
   );
 };
