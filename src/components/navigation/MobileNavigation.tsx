@@ -23,7 +23,8 @@ import {
   PlayCircle, 
   Sparkles,
   ArrowLeft,
-  Menu
+  Menu,
+  FlaskConical
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/context/auth/useAuth';
@@ -70,6 +71,15 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({ isOpen, onClose }) 
       items: [
         { title: 'Oakland A\'s', path: '/teams/oakland', icon: Users },
         { title: 'Game Day Mode', path: '/experiences/gameday', icon: PlayCircle, highlight: true },
+      ]
+    },
+    {
+      title: "LABS",
+      items: [
+        { title: 'Dugout Labs', path: '/labs', icon: FlaskConical, highlight: true },
+        { title: 'Card Detection', path: '/labs/card-detection', icon: Sparkles },
+        { title: 'PBR Rendering', path: '/labs/pbr', icon: PlayCircle },
+        { title: 'Signature Analyzer', path: '/labs/signature', icon: Image },
       ]
     },
     {
@@ -133,6 +143,7 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({ isOpen, onClose }) 
                     className={cn(
                       "w-full justify-start mb-1",
                       item.highlight && "bg-[#EFB21E]/10 text-[#006341] font-medium",
+                      item.title === 'Dugout Labs' && "bg-amber-50 text-amber-700",
                       isActive(item.path) && "bg-muted font-medium"
                     )}
                     onClick={() => handleNavigate(item.path)}

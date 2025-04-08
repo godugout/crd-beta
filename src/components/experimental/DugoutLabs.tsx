@@ -1,17 +1,25 @@
 
 import React, { useState } from 'react';
-import { FlaskConical, X } from 'lucide-react';
+import { FlaskConical, X, Link as LinkIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger } from '@/components/ui/sheet';
 import CardDetectionTrainer from './CardTrainer/CardDetectionTrainer';
+import { useNavigate } from 'react-router-dom';
 
 enum LabExperiment {
   CARD_DETECTION = 'card-detection',
+  PBR_RENDERING = 'pbr-rendering',
+  SIGNATURE_ANALYZER = 'signature-analyzer',
   NONE = 'none'
 }
 
 const DugoutLabs = () => {
   const [currentExperiment, setCurrentExperiment] = useState<LabExperiment>(LabExperiment.NONE);
+  const navigate = useNavigate();
+
+  const handleNavigateToLabs = () => {
+    navigate('/labs');
+  };
 
   const renderExperiment = () => {
     switch (currentExperiment) {
@@ -26,7 +34,7 @@ const DugoutLabs = () => {
             <h3 className="text-xl font-semibold">Welcome to Dugout Labs</h3>
             <p className="text-muted-foreground max-w-md">
               This is where we experiment with new features and improvements.
-              Choose an experiment from the options below.
+              Choose an experiment from the options below or explore all labs.
             </p>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-lg mt-6">
@@ -35,11 +43,38 @@ const DugoutLabs = () => {
                 className="h-auto p-4 flex flex-col items-center justify-center"
                 onClick={() => setCurrentExperiment(LabExperiment.CARD_DETECTION)}
               >
-                <span className="font-medium mb-1">Card Tracing Trainer</span>
+                <span className="font-medium mb-1">Card Detection Trainer</span>
                 <span className="text-xs text-muted-foreground">Help improve auto-detection of cards by tracing them</span>
               </Button>
               
-              {/* More experiment buttons can be added here */}
+              <Button 
+                variant="outline" 
+                className="h-auto p-4 flex flex-col items-center justify-center"
+                onClick={() => navigate('/labs/pbr')}
+              >
+                <span className="font-medium mb-1">PBR Rendering</span>
+                <span className="text-xs text-muted-foreground">Experience physically-based rendering for cards</span>
+              </Button>
+
+              <Button 
+                variant="outline" 
+                className="h-auto p-4 flex flex-col items-center justify-center"
+                onClick={() => navigate('/labs/signature')}
+              >
+                <span className="font-medium mb-1">Signature Analyzer</span>
+                <span className="text-xs text-muted-foreground">Analyze and authenticate player signatures</span>
+              </Button>
+              
+              <Button 
+                variant="default" 
+                className="h-auto p-4 flex flex-col items-center justify-center bg-amber-500 hover:bg-amber-600"
+                onClick={handleNavigateToLabs}
+              >
+                <span className="font-medium mb-1 flex items-center">
+                  View All Labs <LinkIcon className="h-4 w-4 ml-2" />
+                </span>
+                <span className="text-xs opacity-80">Explore the full labs gallery</span>
+              </Button>
             </div>
           </div>
         );

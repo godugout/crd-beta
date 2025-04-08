@@ -22,6 +22,9 @@ import CardGallery from './pages/CardGallery';
 import GameDayMode from './pages/GameDayMode';
 import MobileLayout from './components/layout/MobileLayout';
 import CommunityFeed from './pages/CommunityFeed';
+import Labs from './pages/Labs';
+import PbrDemo from './pages/PbrDemo';
+import SignatureDemo from './pages/SignatureDemo';
 
 function App() {
   return (
@@ -47,6 +50,11 @@ function App() {
           <Route path="/comments" element={<MobileLayout><CommentSection /></MobileLayout>} />
           <Route path="/experiences/gameday" element={<GameDayMode />} />
           <Route path="/community" element={<MobileLayout><CommunityFeed /></MobileLayout>} />
+          {/* New Labs routes */}
+          <Route path="/labs" element={<Labs />} />
+          <Route path="/labs/pbr" element={<MobileLayout><PbrDemo /></MobileLayout>} />
+          <Route path="/labs/signature" element={<MobileLayout><SignatureDemo /></MobileLayout>} />
+          <Route path="/labs/card-detection" element={<MobileLayout><CardDetector /></MobileLayout>} />
         </Routes>
       </Router>
       <Toaster />

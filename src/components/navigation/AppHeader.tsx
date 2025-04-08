@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom'; 
 import { Menu, X, ChevronLeft } from 'lucide-react';
@@ -7,6 +8,8 @@ import MobileNavigation from './MobileNavigation';
 import UserDropdown from '@/components/navbar/UserDropdown';
 import { useAuth } from '@/context/auth'; // Updated import
 import { useMediaQuery } from '@/hooks/useMediaQuery';
+import LabsButton from '../LabsButton';
+import DugoutLabs from '../experimental/DugoutLabs';
 
 const AppHeader: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -70,6 +73,15 @@ const AppHeader: React.FC = () => {
           </div>
 
           <div className="flex items-center">
+            {/* Add Labs button */}
+            <div className="mr-2">
+              {isMobile ? (
+                <LabsButton variant="icon" />
+              ) : (
+                <DugoutLabs />
+              )}
+            </div>
+            
             {user ? (
               <UserDropdown 
                 user={user} 
