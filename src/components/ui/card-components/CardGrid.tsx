@@ -1,4 +1,3 @@
-
 import React, { memo } from 'react';
 import { Card } from '@/lib/types';
 import { cn } from '@/lib/utils';
@@ -94,7 +93,10 @@ export const CardGrid = ({
       <EmptyState 
         title="Something went wrong"
         description={error.message || "Failed to load cards"}
-        icon="AlertTriangle" 
+        icon="AlertTriangle"
+        isEmpty={false}
+        isFiltered={false}
+        onRefresh={() => {}}
       />
     );
   }
@@ -106,6 +108,9 @@ export const CardGrid = ({
         title="No cards found"
         description="Try adjusting your filters or create a new card"
         icon="Inbox"
+        isEmpty={true}
+        isFiltered={false}
+        onRefresh={() => {}}
       />
     );
   }
@@ -139,10 +144,10 @@ export const CardGrid = ({
       />
     );
   }
-
+  
   // Standard grid for smaller lists
   return (
-    <div className={cn(`grid gap-4 ${gridCols}`, className)}>
+    <div className={cn(`grid gap-4 ${columns ? `grid-cols-${columns}` : 'grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4'}`, className)}>
       {cards.map((card) => (
         <MemoizedCardItem
           key={card.id}
@@ -154,3 +159,5 @@ export const CardGrid = ({
     </div>
   );
 };
+
+export { CardGrid as default };

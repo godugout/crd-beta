@@ -3,17 +3,13 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useCards } from '@/context/CardContext';
 import { Button } from '@/components/ui/button';
-import CardGrid from '@/components/ui/card-components/CardGrid';
+import { CardGrid } from '@/components/ui/card-components/CardGrid';
 import { Card, Collection } from '@/lib/types';
-
-// Define the param type correctly
-interface Params {
-  id: string;
-}
+import { Badge } from '@/components/ui/badge';
 
 const CollectionDetail = () => {
-  // Use the correct type for useParams
-  const { id } = useParams<Params>();
+  // Fix the type for useParams
+  const { id } = useParams<{ id: string }>();
   const { collections, cards, isLoading } = useCards();
   const [collection, setCollection] = useState<Collection | null>(null);
   const [collectionCards, setCollectionCards] = useState<Card[]>([]);
@@ -58,8 +54,10 @@ const CollectionDetail = () => {
       {collectionCards.length > 0 ? (
         <CardGrid 
           cards={collectionCards} 
-          cardEffects={[]} 
+          isLoading={false}
+          error={null}
           onCardClick={() => {}}
+          getCardEffects={() => []}
         />
       ) : (
         <div className="text-center p-12 border border-dashed rounded-lg">
@@ -70,8 +68,5 @@ const CollectionDetail = () => {
     </div>
   );
 };
-
-// Need to import Badge
-import { Badge } from '@/components/ui/badge';
 
 export default CollectionDetail;

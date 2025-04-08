@@ -6,8 +6,6 @@ import { Card } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 
-// No need to import MobileSwipeAction as it's not used or doesn't exist
-
 export interface CardGridProps {
   cards: Card[];
   cardEffects: string[];
@@ -15,11 +13,15 @@ export interface CardGridProps {
   className?: string;
 }
 
-const CardGrid: React.FC<CardGridProps> = ({ cards, cardEffects, onCardClick, className }) => {
+export const CardGrid: React.FC<CardGridProps> = ({ cards, cardEffects, onCardClick, className }) => {
   const isMobile = useMediaQuery('(max-width: 640px)');
   
   if (cards.length === 0) {
-    return <EmptyState />;
+    return <EmptyState 
+      isEmpty={true} 
+      isFiltered={false} 
+      onRefresh={() => {}} 
+    />;
   }
 
   return (
@@ -28,8 +30,8 @@ const CardGrid: React.FC<CardGridProps> = ({ cards, cardEffects, onCardClick, cl
         <CardMedia
           key={card.id}
           card={card}
-          onClick={() => onCardClick(card.id)}
-          activeEffects={cardEffects}
+          onView={() => onCardClick(card.id)}
+          className=""
         />
       ))}
     </div>

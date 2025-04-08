@@ -4,10 +4,11 @@ import ProcessingQueue from './components/ProcessingQueue';
 
 // Update props for ProcessingQueue
 interface GroupImageUploaderProps {
-  // Add any props needed
+  onComplete?: (cardIds: string[]) => void;
+  className?: string;
 }
 
-const GroupImageUploader: React.FC<GroupImageUploaderProps> = () => {
+const GroupImageUploader: React.FC<GroupImageUploaderProps> = ({ onComplete, className }) => {
   const [uploadedFiles, setUploadedFiles] = useState<UploadFileItem[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -20,6 +21,12 @@ const GroupImageUploader: React.FC<GroupImageUploaderProps> = () => {
       setIsProcessing(true);
       // Processing logic here
       await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate processing
+      
+      // If onComplete is provided, call it with the processed card IDs
+      if (onComplete) {
+        onComplete(['sample-card-id-1', 'sample-card-id-2']); // Replace with actual IDs
+      }
+      
       setUploadedFiles([]); // Clear after processing
     } catch (error) {
       console.error('Error processing uploads:', error);
@@ -29,7 +36,7 @@ const GroupImageUploader: React.FC<GroupImageUploaderProps> = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className={`space-y-6 ${className || ''}`}>
       {/* Other components */}
       
       <ProcessingQueue 
