@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 import { AuthContext } from './AuthContext';
 import { AuthState } from './types';
 
-export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [authState, setAuthState] = useState<AuthState>({
     user: null,
     isLoading: true,

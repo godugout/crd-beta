@@ -1,12 +1,10 @@
+
 import React from 'react';
 import { Trash2, Info, Edit } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-
-// Fix the imports for MobileTouchButton
-import { MobileTouchButton } from '@/components/ui/mobile-controls';
 
 interface ProcessingQueueProps {
   queue: any[];
@@ -28,7 +26,6 @@ const ProcessingQueue = ({
       <div className="flex justify-between items-center">
         <h3 className="text-sm font-medium">Processing Queue</h3>
         <div className="flex gap-2">
-          {/* Replace hapticFeedback prop with regular button */}
           <Button 
             variant="ghost" 
             size="sm" 
@@ -71,7 +68,6 @@ const ProcessingQueue = ({
       </ScrollArea>
       
       <div className="flex justify-end">
-        {/* Replace hapticFeedback prop with regular button */}
         <Button
           onClick={onProcessAll}
           disabled={!hasItems}

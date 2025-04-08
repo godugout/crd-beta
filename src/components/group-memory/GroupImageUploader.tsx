@@ -1,60 +1,42 @@
-
-import React from 'react';
-import { Separator } from '@/components/ui/separator';
-import { MemorabiliaType } from '../card-upload/cardDetection';
-import BatchImageEditor from './BatchImageEditor';
-import UploadTypeSelector from './components/UploadTypeSelector';
-import ImageUploadArea from './components/ImageUploadArea';
+import React, { useState } from 'react';
+import { UploadFileItem } from './hooks/useUploadHandling';
 import ProcessingQueue from './components/ProcessingQueue';
-import { useUploadHandling, GroupUploadType, UploadFileItem } from './hooks/useUploadHandling';
 
+// Update props for ProcessingQueue
 interface GroupImageUploaderProps {
-  onComplete?: (cardIds: string[]) => void;
-  className?: string;
+  // Add any props needed
 }
 
-const GroupImageUploader: React.FC<GroupImageUploaderProps> = ({ onComplete, className }) => {
-  const {
-    uploadType,
-    setUploadType,
-    uploadedFiles,
-    isProcessing,
-    showEditor,
-    setShowEditor,
-    currentFile,
-    currentImageUrl,
-    handleFileSelected,
-    handleBatchUpload,
-    handleRemoveFile,
-    processUploads
-  } = useUploadHandling({ onComplete });
-  
+const GroupImageUploader: React.FC<GroupImageUploaderProps> = () => {
+  const [uploadedFiles, setUploadedFiles] = useState<UploadFileItem[]>([]);
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const handleRemoveFile = (index: number) => {
+    setUploadedFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleProcessUploads = async () => {
+    try {
+      setIsProcessing(true);
+      // Processing logic here
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate processing
+      setUploadedFiles([]); // Clear after processing
+    } catch (error) {
+      console.error('Error processing uploads:', error);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   return (
-    <div className={className}>
-      <UploadTypeSelector 
-        uploadType={uploadType}
-        onUploadTypeChange={(value) => setUploadType(value as GroupUploadType)}
-      />
-      
-      <Separator className="my-6" />
-      
-      <ImageUploadArea onFileSelected={handleFileSelected} />
+    <div className="space-y-6">
+      {/* Other components */}
       
       <ProcessingQueue 
-        uploadedFiles={uploadedFiles}
-        onRemoveFile={handleRemoveFile}
-        onProcessUploads={processUploads}
-        isProcessing={isProcessing}
-      />
-      
-      {/* Batch Image Editor */}
-      <BatchImageEditor
-        open={showEditor}
-        onClose={() => setShowEditor(false)}
-        imageUrl={currentImageUrl}
-        originalFile={currentFile}
-        onProcessComplete={handleBatchUpload}
-        detectionType={uploadType}
+        queue={uploadedFiles}
+        onRemoveFromQueue={handleRemoveFile}
+        onClearQueue={() => setUploadedFiles([])}
+        onProcessAll={handleProcessUploads}
       />
     </div>
   );

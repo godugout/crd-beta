@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { HelmetProvider } from 'react-helmet-async';
 import App from './App.tsx';
 import './index.css';
-import { AuthProvider } from './context/auth';
+import { AuthProvider } from './context/auth/AuthProvider';
 import { CardProvider } from './context/CardContext';
 
 createRoot(document.getElementById("root")!).render(

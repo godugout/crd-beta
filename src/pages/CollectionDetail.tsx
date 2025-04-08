@@ -1,203 +1,77 @@
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { Container } from '@/components/ui/container';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import CardGrid from '@/components/gallery/CardGrid';
-import { useAuth } from '@/context/auth';
-import { Collection, Card as CardType } from '@/lib/types';
-import { supabase } from '@/lib/supabase';
 
-interface CollectionDetailParams {
+import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { useCards } from '@/context/CardContext';
+import { Button } from '@/components/ui/button';
+import CardGrid from '@/components/ui/card-components/CardGrid';
+import { Card, Collection } from '@/lib/types';
+
+// Define the param type correctly
+interface Params {
   id: string;
 }
 
-const CollectionDetail: React.FC = () => {
-  const { id } = useParams<CollectionDetailParams>();
-  const { user } = useAuth();
+const CollectionDetail = () => {
+  // Use the correct type for useParams
+  const { id } = useParams<Params>();
+  const { collections, cards, isLoading } = useCards();
   const [collection, setCollection] = useState<Collection | null>(null);
-  const [cards, setCards] = useState<CardType[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [collectionCards, setCollectionCards] = useState<Card[]>([]);
 
+  // Find the collection and its cards when the component mounts
   useEffect(() => {
-    const fetchCollection = async () => {
-      setIsLoading(true);
-      setError(null);
-      
-      try {
-        if (!id) {
-          setError('Collection ID is missing');
-          return;
-        }
-        
-        const { data: collectionData, error: collectionError } = await supabase
-          .from('collections')
-          .select('*')
-          .eq('id', id)
-          .single();
-        
-        if (collectionError) {
-          console.error('Error fetching collection:', collectionError);
-          setError('Failed to load collection');
-          return;
-        }
-        
-        if (!collectionData) {
-          setError('Collection not found');
-          return;
-        }
-        
-        const formattedCollection: Collection = {
-          id: collectionData.id,
-          name: collectionData.title || '',
-          description: collectionData.description || '',
-          coverImageUrl: collectionData.cover_image_url || '',
-          userId: collectionData.owner_id,
-          visibility: collectionData.visibility || 'public',
-          allowComments: collectionData.allow_comments !== undefined ? collectionData.allow_comments : true,
-          createdAt: collectionData.created_at,
-          updatedAt: collectionData.updated_at
-        };
-        
-        setCollection(formattedCollection);
-        
-        const { data: cardData, error: cardError } = await supabase
-          .from('cards')
-          .select('*')
-          .eq('collection_id', id);
-        
-        if (cardError) {
-          console.error('Error fetching cards:', cardError);
-          setError('Failed to load cards in collection');
-          return;
-        }
-        
-        if (cardData) {
-          const formattedCards = cardData.map(item => ({
-            id: item.id,
-            title: item.title || '',
-            description: item.description || '',
-            imageUrl: item.image_url || '',
-            thumbnailUrl: item.thumbnail_url || item.image_url || '',
-            userId: item.user_id,
-            teamId: item.team_id,
-            collectionId: item.collection_id,
-            createdAt: item.created_at,
-            updatedAt: item.updated_at,
-            isPublic: item.is_public || false,
-            tags: item.tags || [],
-            designMetadata: item.design_metadata || {},
-            reactions: item.reactions || []
-          }));
-          
-          setCards(formattedCards);
-        }
-      } catch (err) {
-        console.error('Error fetching data:', err);
-        setError('Failed to load data');
-      } finally {
-        setIsLoading(false);
-      }
-    };
+    if (!id || !collections.length) return;
     
-    fetchCollection();
-  }, [id, user]);
-
-  // Update collection visibility to use proper type
-  const updateVisibility = async (visibility: 'public' | 'private' | 'team') => {
-    if (!collection) return;
-    setIsLoading(true);
-    try {
-      const { error } = await supabase
-        .from('collections')
-        .update({ visibility: visibility })
-        .eq('id', collection.id);
+    const found = collections.find(c => c.id === id);
+    if (found) {
+      setCollection(found);
       
-      if (error) {
-        console.error('Error updating visibility:', error);
-        setError('Failed to update visibility');
-      } else {
-        setCollection({ ...collection, visibility: visibility });
-      }
-    } catch (err) {
-      console.error('Error updating visibility:', err);
-      setError('Failed to update visibility');
-    } finally {
-      setIsLoading(false);
+      // Filter cards that belong to this collection
+      const collectionCardIds = found.cards || [];
+      const filteredCards = cards.filter(card => collectionCardIds.includes(card.id));
+      setCollectionCards(filteredCards);
     }
-  };
+  }, [id, collections, cards]);
 
-  // Fix the addCardToCollection to use proper Card type
-  const addCardToCollection = async (cardId: CardType) => {
-    // Use cardId.id if CardType object is passed
-    const id = typeof cardId === 'string' ? cardId : cardId.id;
-    if (!collection) return;
-    setIsLoading(true);
-    try {
-      const { error } = await supabase
-        .from('cards')
-        .update({ collection_id: collection.id })
-        .eq('id', id);
-      
-      if (error) {
-        console.error('Error adding card to collection:', error);
-        setError('Failed to add card to collection');
-      } else {
-        setCards(prevCards => [...prevCards, cardId]);
-      }
-    } catch (err) {
-      console.error('Error adding card to collection:', err);
-      setError('Failed to add card to collection');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  if (isLoading) {
+    return <div className="p-8 text-center">Loading collection...</div>;
+  }
 
-  // Fix the removeCardFromCollection to use proper Card type  
-  const removeCardFromCollection = async (cardId: CardType) => {
-    // Use cardId.id if CardType object is passed
-    const id = typeof cardId === 'string' ? cardId : cardId.id;
-    if (!collection) return;
-    setIsLoading(true);
-    try {
-      const { error } = await supabase
-        .from('cards')
-        .update({ collection_id: null })
-        .eq('id', id);
-      
-      if (error) {
-        console.error('Error removing card from collection:', error);
-        setError('Failed to remove card from collection');
-      } else {
-        setCards(prevCards => prevCards.filter(card => card.id !== id));
-      }
-    } catch (err) {
-      console.error('Error removing card from collection:', err);
-      setError('Failed to remove card from collection');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  if (!collection) {
+    return <div className="p-8 text-center">Collection not found</div>;
+  }
 
   return (
-    <Container>
-      {isLoading && <div>Loading...</div>}
-      {error && <div>Error: {error}</div>}
+    <div className="container mx-auto p-4 pt-20">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold">{collection.name}</h1>
+        <p className="text-gray-500 mt-1">{collection.description}</p>
+        
+        <div className="flex mt-4 space-x-2">
+          <Badge variant={collection.visibility === 'private' ? 'secondary' : 'default'}>
+            {collection.visibility === 'private' ? 'Private' : 'Public'}
+          </Badge>
+          <Badge variant="outline">{collectionCards.length} cards</Badge>
+        </div>
+      </div>
       
-      {collection && (
-        <div>
-          <h1>{collection.name}</h1>
-          <p>{collection.description}</p>
-          
-          {/* Add card to collection */}
-          {/* Remove card from collection */}
-          
-          <CardGrid cards={cards} />
+      {collectionCards.length > 0 ? (
+        <CardGrid 
+          cards={collectionCards} 
+          cardEffects={[]} 
+          onCardClick={() => {}}
+        />
+      ) : (
+        <div className="text-center p-12 border border-dashed rounded-lg">
+          <p className="text-gray-500 mb-4">This collection has no cards yet</p>
+          <Button>Add Cards to Collection</Button>
         </div>
       )}
-    </Container>
+    </div>
   );
 };
+
+// Need to import Badge
+import { Badge } from '@/components/ui/badge';
 
 export default CollectionDetail;
