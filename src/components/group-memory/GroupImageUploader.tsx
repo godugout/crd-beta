@@ -32,7 +32,7 @@ const GroupImageUploader: React.FC<GroupImageUploaderProps> = ({ onComplete, cla
     setUploadedFiles(prev => prev.filter((_, i) => i !== index));
   };
 
-  const handleProcessUploads = async () => {
+  const handleProcessUploads = () => {
     try {
       setIsProcessing(true);
       
