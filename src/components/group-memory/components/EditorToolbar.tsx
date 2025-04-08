@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { RotateCcw, RotateCw, ZoomIn, ZoomOut, Users, Crop } from 'lucide-react';
+import { RotateCcw, RotateCw, ZoomIn, ZoomOut, Users, Crop, Sun, Layers } from 'lucide-react';
 
 interface EditorToolbarProps {
   zoom: number;
