@@ -36,7 +36,7 @@ const GroupImageUploader: React.FC<GroupImageUploaderProps> = ({ onComplete, cla
     try {
       setIsProcessing(true);
       
-      // Simple timeout instead of Promise constructor
+      // Use setTimeout instead of Promise constructor
       setTimeout(() => {
         if (onComplete) {
           const cardIds = uploadedFiles.map((_, index) => `processed-file-${Date.now()}-${index}`);
@@ -57,8 +57,19 @@ const GroupImageUploader: React.FC<GroupImageUploaderProps> = ({ onComplete, cla
   
   const handleFileSelected = async (file: File) => {
     try {
-      const url = URL.createObjectURL(file);
-      setUploadedFiles(prev => [...prev, { file, url }]);
+      // Upload to digital asset service
+      const result = await uploadAsset(file);
+      
+      if (result.success && result.asset) {
+        // Use the asset URL from the upload result
+        setUploadedFiles(prev => [...prev, { file, url: result.asset!.url || URL.createObjectURL(file) }]);
+        toast.success('File uploaded to media library');
+      } else {
+        // Fallback to local URL if upload fails
+        const url = URL.createObjectURL(file);
+        setUploadedFiles(prev => [...prev, { file, url }]);
+        toast.warning('File added to queue but not uploaded to media library');
+      }
     } catch (error) {
       console.error('Error handling file:', error);
       toast.error('Failed to process file');
