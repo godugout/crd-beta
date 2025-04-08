@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -21,6 +20,7 @@ import { Switch } from "@/components/ui/switch";
 import CardUpload from '@/components/card-upload/CardUpload';
 import { useCards } from '@/context/CardContext';
 import { cn } from '@/lib/utils';
+import { Plus } from 'lucide-react';
 
 // Card template definitions
 const CARD_TEMPLATES = [
