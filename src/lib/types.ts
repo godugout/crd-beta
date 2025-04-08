@@ -1,3 +1,4 @@
+
 // Define base types used throughout the application
 
 export interface Card {
@@ -34,20 +35,34 @@ export interface OaklandMemoryData {
   personalSignificance?: string;
 }
 
-// Export all types directly from schema/types to maintain consistent interfaces
+export interface FabricSwatch {
+  type: string;
+  team: string;
+  year: string;
+  manufacturer: string;
+  position: string;
+  size: string;
+}
+
+export interface Reaction {
+  id: string;
+  userId: string;
+  cardId?: string;
+  collectionId?: string;
+  commentId?: string;
+  type: 'like' | 'love' | 'wow' | 'haha' | 'sad' | 'angry';
+  createdAt: string;
+  user?: User;
+}
+
+// Re-export types from schema/types, excluding those we've defined locally
 export type {
-  Card,
-  OaklandMemoryData,
   Collection,
   User,
   Team,
   TeamMember,
   Comment,
-  Reaction,
-  FabricSwatch,
   DbCard,
   DbCollection,
   DbReaction
 } from '@/lib/schema/types';
-
-// If additional type extensions are needed, they can be added below
