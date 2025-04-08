@@ -3,6 +3,8 @@ import { useState } from 'react';
 import { MemorabiliaType } from '@/components/card-upload/cardDetection';
 import { useImageProcessing } from '@/hooks/useImageProcessing';
 import { toast } from 'sonner';
+import { useMobileOptimization } from '@/hooks/useMobileOptimization';
+import { useConnectivity } from '@/hooks/useConnectivity';
 
 export type GroupUploadType = 'group' | 'memorabilia' | 'mixed';
 
@@ -25,6 +27,8 @@ export const useUploadHandling = ({ onComplete }: UseUploadHandlingProps) => {
   const [currentImageUrl, setCurrentImageUrl] = useState<string | null>(null);
   
   const { resizeImage, createThumbnail } = useImageProcessing();
+  const { isOnline } = useConnectivity();
+  const { shouldOptimizeAnimations, getImageQuality } = useMobileOptimization();
   
   // Handle file selection
   const handleFileSelected = async (file: File): Promise<void> => {
@@ -35,8 +39,9 @@ export const useUploadHandling = ({ onComplete }: UseUploadHandlingProps) => {
         return;
       }
       
-      // Resize image for preview
-      const dataUrl = await createThumbnail(file, 800);
+      // Resize image for preview with mobile-optimized quality
+      const quality = getImageQuality();
+      const dataUrl = await createThumbnail(file, 800, quality);
       
       // Add to uploaded files
       setUploadedFiles(prev => [...prev, { file, url: dataUrl }]);
@@ -105,6 +110,12 @@ export const useUploadHandling = ({ onComplete }: UseUploadHandlingProps) => {
     setIsProcessing(true);
     
     try {
+      // Check online status
+      if (!isOnline) {
+        toast.warning('You are offline. Files will sync when connection is restored.');
+        // In a real app, save to IndexedDB or other offline storage
+      }
+      
       // In a real app, we would upload each file to the server here
       // For demo purposes, we'll just simulate server processing
       await new Promise(resolve => setTimeout(resolve, 1500));

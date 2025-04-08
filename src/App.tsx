@@ -1,3 +1,4 @@
+
 import React from 'react';
 import './App.css';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
@@ -18,29 +19,32 @@ import TeamDetail from './pages/TeamDetail';
 import TeamEditor from './pages/TeamEditor';
 import CommentSection from './components/CommentSection';
 import CardGallery from './pages/CardGallery';
+import GameDayMode from './pages/GameDayMode';
+import MobileLayout from './components/layout/MobileLayout';
 
 function App() {
   return (
     <div className="App">
       <Router>
         <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/detector" element={<CardDetector />} />
-          <Route path="/teams/oakland" element={<OaklandLanding />} />
-          <Route path="/teams/oakland/memories" element={<OaklandMemories />} />
-          <Route path="/teams/oakland/memories/:id" element={<OaklandMemoryDetail />} />
-          <Route path="/teams/oakland/create" element={<OaklandMemoryCreator />} />
-          <Route path="/group-memory-creator" element={<GroupMemoryCreator />} />
-          <Route path="/editor" element={<CardEditor />} />
-          <Route path="/editor/:id" element={<CardEditor />} />
-          <Route path="/gallery" element={<CardGallery />} />
-          <Route path="/collections" element={<CollectionGallery />} />
-          <Route path="/collections/:id" element={<CollectionDetail />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/teams" element={<TeamGallery />} />
-          <Route path="/teams/:id" element={<TeamDetail />} />
-          <Route path="/teams/:id/edit" element={<TeamEditor />} />
-          <Route path="/comments" element={<CommentSection />} />
+          <Route path="/" element={<MobileLayout><Index /></MobileLayout>} />
+          <Route path="/detector" element={<MobileLayout><CardDetector /></MobileLayout>} />
+          <Route path="/teams/oakland" element={<MobileLayout><OaklandLanding /></MobileLayout>} />
+          <Route path="/teams/oakland/memories" element={<MobileLayout><OaklandMemories /></MobileLayout>} />
+          <Route path="/teams/oakland/memories/:id" element={<MobileLayout><OaklandMemoryDetail /></MobileLayout>} />
+          <Route path="/teams/oakland/create" element={<MobileLayout><OaklandMemoryCreator /></MobileLayout>} />
+          <Route path="/group-memory-creator" element={<MobileLayout><GroupMemoryCreator /></MobileLayout>} />
+          <Route path="/editor" element={<MobileLayout><CardEditor /></MobileLayout>} />
+          <Route path="/editor/:id" element={<MobileLayout><CardEditor /></MobileLayout>} />
+          <Route path="/gallery" element={<MobileLayout><CardGallery /></MobileLayout>} />
+          <Route path="/collections" element={<MobileLayout><CollectionGallery /></MobileLayout>} />
+          <Route path="/collections/:id" element={<MobileLayout><CollectionDetail /></MobileLayout>} />
+          <Route path="/profile" element={<MobileLayout><Profile /></MobileLayout>} />
+          <Route path="/teams" element={<MobileLayout><TeamGallery /></MobileLayout>} />
+          <Route path="/teams/:id" element={<MobileLayout><TeamDetail /></MobileLayout>} />
+          <Route path="/teams/:id/edit" element={<MobileLayout><TeamEditor /></MobileLayout>} />
+          <Route path="/comments" element={<MobileLayout><CommentSection /></MobileLayout>} />
+          <Route path="/experiences/gameday" element={<GameDayMode />} />
         </Routes>
       </Router>
       <Toaster />
