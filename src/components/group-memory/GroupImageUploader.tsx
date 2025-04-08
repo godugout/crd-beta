@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { UploadFileItem } from './hooks/useUploadHandling';
 import ProcessingQueue from './components/ProcessingQueue';
@@ -35,19 +36,21 @@ const GroupImageUploader: React.FC<GroupImageUploaderProps> = ({ onComplete, cla
     try {
       setIsProcessing(true);
       
-      await new Promise<void>(resolve => setTimeout(resolve, 1000));
+      // Simple timeout instead of Promise constructor
+      setTimeout(() => {
+        if (onComplete) {
+          const cardIds = uploadedFiles.map((_, index) => `processed-file-${Date.now()}-${index}`);
+          onComplete(cardIds);
+        }
+        
+        setUploadedFiles([]);
+        toast.success(`Successfully processed ${uploadedFiles.length} images`);
+        setIsProcessing(false);
+      }, 1000);
       
-      if (onComplete) {
-        const cardIds = uploadedFiles.map((_, index) => `processed-file-${Date.now()}-${index}`);
-        onComplete(cardIds);
-      }
-      
-      setUploadedFiles([]);
-      toast.success(`Successfully processed ${uploadedFiles.length} images`);
     } catch (error) {
       console.error('Error processing uploads:', error);
       toast.error('Error processing uploads');
-    } finally {
       setIsProcessing(false);
     }
   };
