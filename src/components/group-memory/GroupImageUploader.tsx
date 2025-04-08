@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { UploadFileItem } from './hooks/useUploadHandling';
 import ProcessingQueue from './components/ProcessingQueue';
@@ -5,10 +6,11 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import AssetManager from '@/components/asset-manager/AssetManager';
 import { DigitalAsset } from '@/services/digitalAssetService';
-import { File, Upload } from 'lucide-react';
+import { File, Upload, Users } from 'lucide-react';
 import { useDigitalAssets } from '@/hooks/useDigitalAssets';
 import { toast } from 'sonner';
 import ImageUploadArea from './components/ImageUploadArea';
+import { FaceDetectionService } from '@/services/faceDetectionService';
 
 // Update props for ProcessingQueue
 interface GroupImageUploaderProps {
@@ -20,6 +22,7 @@ const GroupImageUploader: React.FC<GroupImageUploaderProps> = ({ onComplete, cla
   const [uploadedFiles, setUploadedFiles] = useState<UploadFileItem[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [showAssetManager, setShowAssetManager] = useState(false);
+  const [faceDetectionEnabled, setFaceDetectionEnabled] = useState(true);
   
   const { uploadAsset, isUploading } = useDigitalAssets({
     folder: 'user-uploads',
@@ -33,9 +36,10 @@ const GroupImageUploader: React.FC<GroupImageUploaderProps> = ({ onComplete, cla
   const handleProcessUploads = async () => {
     try {
       setIsProcessing(true);
-      // Processing logic here
-      // Fix: Use Promise constructor correctly without 'new' keyword
-      await Promise.resolve(setTimeout(() => {}, 1000));
+      // Processing logic here - fixed Promise usage
+      await new Promise<void>(resolve => {
+        setTimeout(resolve, 1000);
+      });
       
       // If onComplete is provided, call it with the processed card IDs
       if (onComplete) {
@@ -56,7 +60,7 @@ const GroupImageUploader: React.FC<GroupImageUploaderProps> = ({ onComplete, cla
   
   const handleFileSelected = async (file: File) => {
     try {
-      // Create a URL for preview - using URL.createObjectURL correctly
+      // Create a URL for preview
       const url = URL.createObjectURL(file);
       
       // Add to uploaded files
@@ -68,7 +72,6 @@ const GroupImageUploader: React.FC<GroupImageUploaderProps> = ({ onComplete, cla
   };
   
   const handleAssetSelected = async (asset: DigitalAsset) => {
-    // Download the image and convert it to a File object
     try {
       const response = await fetch(asset.url);
       const blob = await response.blob();
@@ -86,8 +89,32 @@ const GroupImageUploader: React.FC<GroupImageUploaderProps> = ({ onComplete, cla
     }
   };
 
+  // Load face detection models on component mount
+  React.useEffect(() => {
+    if (faceDetectionEnabled) {
+      FaceDetectionService.loadModels().catch(err => {
+        console.error('Failed to load face detection models:', err);
+        // Fallback to disable face detection if models fail to load
+        setFaceDetectionEnabled(false);
+      });
+    }
+  }, [faceDetectionEnabled]);
+
   return (
     <div className={`space-y-6 ${className || ''}`}>
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-medium">Upload Group Photos</h3>
+        <Button 
+          variant={faceDetectionEnabled ? "default" : "outline"}
+          size="sm"
+          onClick={() => setFaceDetectionEnabled(!faceDetectionEnabled)}
+          className="flex items-center gap-2"
+        >
+          <Users className="h-4 w-4" />
+          {faceDetectionEnabled ? "Face Detection On" : "Face Detection Off"}
+        </Button>
+      </div>
+      
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <ImageUploadArea onFileSelected={handleFileSelected} />
         

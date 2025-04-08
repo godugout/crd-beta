@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { EnhancedCropBoxProps, MemorabiliaType, applyCrop } from '@/components/card-upload/cardDetection';
 import { detectCardsInImage } from '@/components/card-upload/cardDetection';
+import { detectFacesInImage, groupPhotoUtils } from '@/components/card-upload/facesDetection';
 import { toast } from 'sonner';
 
 export interface BatchProcessingProps {
@@ -48,28 +49,64 @@ export const useBatchImageProcessing = ({
     if (setIsDetecting) setIsDetecting(true);
     
     try {
-      // Determine which detection types to enable based on the selected mode
-      let enabledTypes: MemorabiliaType[] = [];
+      let detectedItems: EnhancedCropBoxProps[] = [];
       
-      switch (detectionType) {
-        case 'group':
-          enabledTypes = ['face', 'group'];
-          break;
-        case 'memorabilia':
-          enabledTypes = ['card', 'ticket', 'program', 'autograph'];
-          break;
-        case 'mixed':
-          enabledTypes = ['face', 'group', 'card', 'ticket', 'program', 'autograph'];
-          break;
+      // Choose detection method based on type
+      if (detectionType === 'group' || detectionType === 'mixed') {
+        // Run face detection
+        const detectedFaces = await detectFacesInImage(
+          editorImgRef.current,
+          autoEnhance
+        );
+        
+        if (detectedFaces.length > 0) {
+          detectedItems = [...detectedItems, ...detectedFaces];
+          
+          // If we found faces, also suggest a group crop
+          const groupCrop = groupPhotoUtils.suggestGroupCrop(
+            detectedFaces,
+            editorImgRef.current.naturalWidth,
+            editorImgRef.current.naturalHeight
+          );
+          
+          if (groupCrop) {
+            detectedItems.push(groupCrop);
+          }
+        }
       }
       
-      // Run detection with appropriate types
-      const detectedItems = await detectCardsInImage(
-        editorImgRef.current,
-        autoEnhance,
-        null,
-        enabledTypes
-      );
+      if (detectionType === 'memorabilia' || detectionType === 'mixed') {
+        // Determine which memorabilia types to enable
+        const enabledTypes: MemorabiliaType[] = ['card', 'ticket', 'program', 'autograph'];
+        
+        // Run memorabilia detection
+        const detectedMemorabilia = await detectCardsInImage(
+          editorImgRef.current,
+          autoEnhance,
+          null,
+          enabledTypes
+        );
+        
+        detectedItems = [...detectedItems, ...detectedMemorabilia];
+      }
+      
+      // If we didn't find anything, return a default selection
+      if (detectedItems.length === 0 && detectionType !== 'group') {
+        const width = editorImgRef.current.naturalWidth;
+        const height = editorImgRef.current.naturalHeight;
+        
+        detectedItems.push({
+          id: 1,
+          x: width * 0.25,
+          y: height * 0.25,
+          width: width * 0.5,
+          height: height * 0.5,
+          rotation: 0,
+          color: '#FFFF33',
+          memorabiliaType: 'unknown',
+          confidence: 0.7
+        });
+      }
       
       if (setSelectedAreas) {
         setSelectedAreas(detectedItems);
