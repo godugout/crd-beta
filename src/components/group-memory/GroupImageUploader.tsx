@@ -36,7 +36,7 @@ const GroupImageUploader: React.FC<GroupImageUploaderProps> = ({ onComplete, cla
   const handleProcessUploads = async () => {
     try {
       setIsProcessing(true);
-      // Processing logic here - fixed Promise usage
+      // Processing logic here - using proper Promise syntax
       await new Promise<void>(resolve => {
         setTimeout(resolve, 1000);
       });
