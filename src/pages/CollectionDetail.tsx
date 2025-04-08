@@ -24,10 +24,13 @@ const CollectionDetail = () => {
       
       // Filter cards that belong to this collection
       const collectionCardIds = found.cards || [];
+      
       // Convert the array of card IDs to actual Card objects
       const filteredCards = cards.filter(card => 
-        collectionCardIds.includes(card.id)
+        // Make sure we're comparing string to string - convert both to strings if needed
+        collectionCardIds.includes(typeof card.id === 'string' ? card.id : String(card.id))
       );
+      
       setCollectionCards(filteredCards);
     }
   }, [id, collections, cards]);
