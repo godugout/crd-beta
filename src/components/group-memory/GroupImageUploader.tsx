@@ -35,7 +35,9 @@ const GroupImageUploader: React.FC<GroupImageUploaderProps> = ({ onComplete, cla
     try {
       setIsProcessing(true);
       // Processing logic here
-      await new Promise<void>(resolve => setTimeout(resolve, 1000)); // Correctly typed Promise
+      await new Promise<void>((resolve) => {
+        setTimeout(() => resolve(), 1000);
+      });
       
       // If onComplete is provided, call it with the processed card IDs
       if (onComplete) {
