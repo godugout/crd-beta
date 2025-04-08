@@ -291,7 +291,7 @@ const MainNavigation: React.FC = () => {
 
       {/* Game Day Mode prominent link */}
       <Link
-        to="/experiences/gameday"
+        to="/features/gameday"
         className={cn(
           "text-[#006341] bg-[#EFB21E]/10 hover:bg-[#EFB21E]/20",
           "px-3 py-2 rounded-md text-sm font-medium transition-colors"

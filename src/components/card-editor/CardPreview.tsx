@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { CardStyle } from './CardDesignCustomization';
@@ -56,10 +55,10 @@ const CardPreview: React.FC<CardPreviewProps> = ({
     }
   };
   
-  // Convert cardStyle.borderRadius to a number if it's a string for calculations
+  // Convert borderRadius from string to number for calculations
   const borderRadiusNum = typeof cardStyle.borderRadius === 'string' 
     ? parseInt(cardStyle.borderRadius, 10) 
-    : cardStyle.borderRadius;
+    : 0;
   
   // Calculate inner border radius (fixes the arithmetic operation error)
   const innerBorderRadius = Math.max(0, borderRadiusNum - cardStyle.borderWidth);

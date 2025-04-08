@@ -70,7 +70,7 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({ isOpen, onClose }) 
       title: "TEAMS",
       items: [
         { title: 'Oakland A\'s', path: '/teams/oakland', icon: Users },
-        { title: 'Game Day Mode', path: '/experiences/gameday', icon: PlayCircle, highlight: true },
+        { title: 'Game Day Mode', path: '/features/gameday', icon: PlayCircle, highlight: true },
       ]
     },
     {

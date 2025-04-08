@@ -1,19 +1,39 @@
 
 import React from 'react';
-import { Container } from '@/components/ui/container';
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { PlusCircle } from 'lucide-react';
+import Navbar from '@/components/Navbar';
+import CardGalleryComponent from '@/components/CardGallery';
 
-const CardGallery: React.FC = () => {
+const CardGallery = () => {
   return (
-    <Container>
-      <h1 className="text-3xl font-bold mt-8 mb-4">Card Gallery</h1>
-      <p className="text-gray-600 mb-4">Browse through available cards.</p>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
-        {/* Card items will go here */}
-        <div className="bg-gray-100 aspect-[2.5/3.5] rounded-lg flex items-center justify-center">
-          <p className="text-gray-500">Cards coming soon</p>
+    <div className="min-h-screen flex flex-col">
+      <Navbar />
+      
+      <main className="flex-1 pt-16 pb-16">
+        <div className="container mx-auto max-w-6xl px-4 py-8">
+          <div className="flex justify-between items-center mb-8">
+            <div>
+              <h1 className="text-3xl font-bold text-cardshow-dark mb-2">Card Gallery</h1>
+              <p className="text-cardshow-slate">
+                Browse your digital cards and collections
+              </p>
+            </div>
+            <div>
+              <Button asChild>
+                <Link to="/cards/create" className="flex items-center">
+                  <PlusCircle className="mr-2 h-5 w-5" />
+                  New Card
+                </Link>
+              </Button>
+            </div>
+          </div>
+          
+          <CardGalleryComponent />
         </div>
-      </div>
-    </Container>
+      </main>
+    </div>
   );
 };
 
