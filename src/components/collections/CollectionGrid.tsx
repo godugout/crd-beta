@@ -61,7 +61,7 @@ const CollectionGrid: React.FC<CollectionGridProps> = ({ collections, isLoading 
             </CardContent>
             <CardFooter className="px-4 pb-4 pt-0 flex justify-between">
               <span className="text-xs text-gray-500">
-                {collection.cards?.length || 0} cards
+                {collection.cardIds?.length || 0} cards
               </span>
               <span className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-700">
                 {collection.visibility}
