@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { HelmetProvider } from 'react-helmet-async';
 import PageLayout from './components/navigation/PageLayout';
@@ -49,6 +49,14 @@ import CardAnimation from './pages/CardAnimation';
 
 // Admin Page
 import AdminPage from './pages/Admin';
+
+// Custom wrapper for legacy route redirects
+const LegacyRedirect = ({ from, to }: { from: string, to: string }) => {
+  const location = useLocation();
+  const currentPath = location.pathname;
+  const redirectPath = currentPath.replace(from, to);
+  return <Navigate to={redirectPath} replace />;
+};
 
 const App = () => {
   return (
@@ -119,12 +127,12 @@ const App = () => {
               <Route path="/auth" element={<Auth />} />
               
               {/* Legacy route redirects */}
-              <Route path="/card/:id" element={<Navigate to={(location) => `/cards/${location.pathname.split('/card/')[1]}`} replace />} />
+              <Route path="/card/:id" element={<LegacyRedirect from="/card/" to="/cards/" />} />
               <Route path="/editor" element={<Navigate to="/cards/create" replace />} />
               <Route path="/card-detector" element={<Navigate to="/cards/detect" replace />} />
               <Route path="/oakland" element={<Navigate to="/teams/oakland" replace />} />
               <Route path="/oakland/memories" element={<Navigate to="/teams/oakland/memories" replace />} />
-              <Route path="/oakland/memories/:id" element={<Navigate to={(location) => `/teams/oakland/memories/${location.pathname.split('/oakland/memories/')[1]}`} replace />} />
+              <Route path="/oakland/memories/:id" element={<LegacyRedirect from="/oakland/memories/" to="/teams/oakland/memories/" />} />
               <Route path="/oakland/create" element={<Navigate to="/teams/oakland/create" replace />} />
               <Route path="/gameday" element={<Navigate to="/experiences/gameday" replace />} />
               <Route path="/pbr" element={<Navigate to="/features/pbr" replace />} />
