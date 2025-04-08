@@ -1,18 +1,19 @@
 
-import React, { useRef, useState } from 'react';
+import React, { useRef } from 'react';
 import { 
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { EnhancedCropBoxProps, MemorabiliaType } from '../card-upload/cardDetection';
-import { toast } from 'sonner';
+import { MemorabiliaType } from '../card-upload/cardDetection';
 
 import { useBatchImageProcessing } from './hooks/useBatchImageProcessing';
 import { useCanvasManager } from './hooks/useCanvasManager';
+import { useEditorState } from './hooks/useEditorState';
 import DetectionPanel from './components/DetectionPanel';
 import AdjustmentsPanel from './components/AdjustmentsPanel';
 import EditorToolbar from './components/EditorToolbar';
+import EditorCanvas from './components/EditorCanvas';
 
 interface BatchImageEditorProps {
   open: boolean;
@@ -33,9 +34,6 @@ const BatchImageEditor: React.FC<BatchImageEditorProps> = ({
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const editorImgRef = useRef<HTMLImageElement>(null);
-  const [selectedAreas, setSelectedAreas] = useState<EnhancedCropBoxProps[]>([]);
-  const [selectedTab, setSelectedTab] = useState<string>("detection");
-  const [autoEnhance, setAutoEnhance] = useState<boolean>(true);
 
   // Use our custom hooks for processing and canvas management
   const {
@@ -44,6 +42,17 @@ const BatchImageEditor: React.FC<BatchImageEditorProps> = ({
     runDetection,
     processSelectedAreas
   } = useBatchImageProcessing({ onProcessComplete });
+  
+  const {
+    selectedAreas,
+    setSelectedAreas,
+    selectedTab,
+    setSelectedTab,
+    autoEnhance,
+    setAutoEnhance,
+    addSelectionArea,
+    removeArea
+  } = useEditorState({ isDetecting, isProcessing });
   
   const {
     zoom,
@@ -70,42 +79,9 @@ const BatchImageEditor: React.FC<BatchImageEditorProps> = ({
     setSelectedAreas(detectedItems);
   };
   
-  // Add a new selection area
-  const addSelectionArea = () => {
-    if (!canvasRef.current || !editorImgRef.current) return;
-    
-    const canvas = canvasRef.current;
-    const img = editorImgRef.current;
-    
-    // Create a new area in the center
-    const newArea: EnhancedCropBoxProps = {
-      id: selectedAreas.length + 1,
-      x: img.naturalWidth / 2 - 100,
-      y: img.naturalHeight / 2 - 100,
-      width: 200,
-      height: 200,
-      rotation: 0,
-      color: '#00AAFF',
-      memorabiliaType: 'face',
-      confidence: 0.5
-    };
-    
-    setSelectedAreas([...selectedAreas, newArea]);
-  };
-  
-  // Remove an area by index
-  const removeArea = (index: number) => {
-    const updatedAreas = [...selectedAreas];
-    updatedAreas.splice(index, 1);
-    setSelectedAreas(updatedAreas);
-  };
-  
-  // Handle image enhancement
-  const handleEnhanceImage = () => {
-    const success = enhanceImage();
-    if (success) {
-      toast.success("Image enhanced for stadium lighting conditions");
-    }
+  // Handle adding a new selection area
+  const handleAddSelectionArea = () => {
+    addSelectionArea(canvasRef, editorImgRef);
   };
   
   // Process selected areas
@@ -146,31 +122,14 @@ const BatchImageEditor: React.FC<BatchImageEditorProps> = ({
             </Tabs>
             
             {/* Canvas Container */}
-            <div className="relative flex-grow border rounded-md overflow-hidden bg-gray-100">
-              {/* Hidden image for reference */}
-              <img 
-                ref={editorImgRef}
-                src={imageUrl || ''}
-                alt="Editor reference"
-                className="hidden"
-              />
-              
-              {/* Canvas for interactive editing */}
-              <canvas 
-                ref={canvasRef}
-                className="w-full h-full"
-              />
-              
-              {/* Loading overlay */}
-              {(isDetecting || isProcessing) && (
-                <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                  <div className="text-white text-center">
-                    <div className="animate-spin h-12 w-12 border-4 border-white border-t-transparent rounded-full mx-auto mb-2"></div>
-                    <p>{isDetecting ? "Detecting..." : "Processing..."}</p>
-                  </div>
-                </div>
-              )}
-            </div>
+            <EditorCanvas
+              canvasRef={canvasRef}
+              editorImgRef={editorImgRef}
+              imageUrl={imageUrl}
+              selectedAreas={selectedAreas}
+              isDetecting={isDetecting}
+              isProcessing={isProcessing}
+            />
             
             {/* Bottom Toolbar */}
             <EditorToolbar
@@ -181,8 +140,8 @@ const BatchImageEditor: React.FC<BatchImageEditorProps> = ({
               onRotateCounterClockwise={() => rotateImage('counterclockwise')}
               selectedTab={selectedTab}
               onRunDetection={handleRunDetection}
-              onAddSelection={addSelectionArea}
-              onEnhanceImage={handleEnhanceImage}
+              onAddSelection={handleAddSelectionArea}
+              onEnhanceImage={enhanceImage}
               onResetAdjustments={resetAdjustments}
               isDetecting={isDetecting}
               imageUrl={imageUrl}
@@ -197,7 +156,7 @@ const BatchImageEditor: React.FC<BatchImageEditorProps> = ({
                 autoEnhance={autoEnhance}
                 setAutoEnhance={setAutoEnhance}
                 onRunDetection={handleRunDetection}
-                onAddSelection={addSelectionArea}
+                onAddSelection={handleAddSelectionArea}
                 onProcessAreas={handleProcessSelectedAreas}
                 onRemoveArea={removeArea}
                 isDetecting={isDetecting}
@@ -213,7 +172,7 @@ const BatchImageEditor: React.FC<BatchImageEditorProps> = ({
                 setContrast={setContrast}
                 rotation={rotation}
                 setRotation={setRotation}
-                onEnhanceImage={handleEnhanceImage}
+                onEnhanceImage={enhanceImage}
                 onResetAdjustments={resetAdjustments}
               />
             )}
