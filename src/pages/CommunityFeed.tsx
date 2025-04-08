@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Container } from '@/components/ui/container';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -12,7 +11,7 @@ import CardItem from '@/components/CardItem';
 import { Link } from 'react-router-dom';
 import { Search, TrendingUp, Clock, Users, Hash, Filter } from 'lucide-react';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/auth';
 
 const CommunityFeed: React.FC = () => {
   const { user } = useAuth();
@@ -47,8 +46,6 @@ const CommunityFeed: React.FC = () => {
         }
         
         if (activeTab === 'trending') {
-          // For trending, we would ideally order by reaction count or views
-          // This is a simplified implementation
           const { data, error } = await query.order('created_at', { ascending: false });
           
           if (error) {
@@ -58,7 +55,6 @@ const CommunityFeed: React.FC = () => {
             setCards(formattedCards);
           }
         } else {
-          // For recent, just order by creation date
           const { data, error } = await query.order('created_at', { ascending: false });
           
           if (error) {
@@ -98,7 +94,6 @@ const CommunityFeed: React.FC = () => {
         }
       }
       
-      // Fetch available tags for filtering
       const { data: tagsData, error: tagsError } = await supabase
         .from('cards')
         .select('tags')
@@ -134,7 +129,6 @@ const CommunityFeed: React.FC = () => {
       isPublic: item.is_public || false,
       tags: item.tags || [],
       designMetadata: item.design_metadata || {},
-      // Add reaction count if available
       reactions: item.reactions || []
     }));
   };
@@ -248,7 +242,6 @@ const CommunityFeed: React.FC = () => {
     <Container className="py-8">
       <h1 className="text-3xl font-bold mb-8">Community Feed</h1>
       
-      {/* Search and filter controls */}
       <div className="flex flex-col md:flex-row gap-4 mb-8">
         <div className="flex-1 flex gap-2">
           <Input 
@@ -281,7 +274,6 @@ const CommunityFeed: React.FC = () => {
         </div>
       </div>
       
-      {/* Tabs for different views */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList>
           <TabsTrigger value="trending">

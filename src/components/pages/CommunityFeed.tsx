@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/auth';
 import { Card } from '@/lib/types';
@@ -23,8 +24,8 @@ const CommunityFeed: React.FC = () => {
             title: 'Amazing Baseball Card',
             description: 'Check out this rare find!',
             imageUrl: 'https://placekitten.com/200/300',
-            createdAt: new Date(),
-            updatedAt: new Date(),
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
             userId: 'user123'
           },
           {
@@ -32,8 +33,8 @@ const CommunityFeed: React.FC = () => {
             title: 'Vintage Football Card',
             description: 'Just pulled this from an old collection.',
             imageUrl: 'https://placekitten.com/200/301',
-            createdAt: new Date(),
-            updatedAt: new Date(),
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
             userId: 'user456'
           }
         ];

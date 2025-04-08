@@ -1,7 +1,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { Card, Collection } from '../lib/types';
-import { useAuth } from './AuthContext';
+import { useAuth } from './auth';
 import { useCardOperations, useCollectionOperations } from './card/hooks';
 import { fetchCards, createCard, updateCard as updateCardOperation, deleteCard as deleteCardOperation } from './card/operations/cardOperations';
 import { 

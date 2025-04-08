@@ -1,6 +1,7 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { Card } from '@/lib/types';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/auth';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { DbCard } from '@/lib/supabase/typeHelpers';
