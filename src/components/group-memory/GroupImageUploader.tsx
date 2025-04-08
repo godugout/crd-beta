@@ -36,7 +36,7 @@ const GroupImageUploader: React.FC<GroupImageUploaderProps> = ({ onComplete, cla
     try {
       setIsProcessing(true);
       
-      // Use setTimeout instead of Promise constructor
+      // Fix: Use setTimeout instead of trying to use the Promise constructor incorrectly
       setTimeout(() => {
         if (onComplete) {
           const cardIds = uploadedFiles.map((_, index) => `processed-file-${Date.now()}-${index}`);

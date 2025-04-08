@@ -34,7 +34,7 @@ const GroupMemoryGallery: React.FC<GroupMemoryGalleryProps> = ({ teamId }) => {
       let query = supabase
         .from('cards')
         .select('*')
-        .eq('tags', 'group-memory')
+        .contains('tags', ['group-memory']) // Fix: Use array for contains
         .order('created_at', { ascending: false });
       
       if (teamId) {
@@ -53,15 +53,21 @@ const GroupMemoryGallery: React.FC<GroupMemoryGalleryProps> = ({ teamId }) => {
         return;
       }
 
-      // Map database results to our interface
-      const processedMemories = data.map(item => ({
-        id: item.id,
-        title: item.title || 'Untitled Group Memory',
-        created_at: item.created_at,
-        image_url: item.image_url || '',
-        processed: true,
-        face_count: item.design_metadata?.face_count || 0
-      }));
+      // Map database results to our interface, safely handle JSON data
+      const processedMemories = data.map(item => {
+        // Fix: Safely access face_count property from design_metadata
+        const designMetadata = item.design_metadata as Record<string, any> | null;
+        const faceCount = designMetadata?.face_count || 0;
+        
+        return {
+          id: item.id,
+          title: item.title || 'Untitled Group Memory',
+          created_at: item.created_at,
+          image_url: item.image_url || '',
+          processed: true,
+          face_count: faceCount
+        };
+      });
 
       setMemories(processedMemories);
     } catch (err) {
