@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { UploadFileItem } from './hooks/useUploadHandling';
 import ProcessingQueue from './components/ProcessingQueue';
@@ -12,7 +11,6 @@ import { toast } from 'sonner';
 import ImageUploadArea from './components/ImageUploadArea';
 import { FaceDetectionService } from '@/services/faceDetectionService';
 
-// Update props for ProcessingQueue
 interface GroupImageUploaderProps {
   onComplete?: (cardIds: string[]) => void;
   className?: string;
@@ -36,19 +34,15 @@ const GroupImageUploader: React.FC<GroupImageUploaderProps> = ({ onComplete, cla
   const handleProcessUploads = async () => {
     try {
       setIsProcessing(true);
-      // Processing logic here - using proper Promise syntax
-      await new Promise<void>(resolve => {
-        setTimeout(resolve, 1000);
-      });
       
-      // If onComplete is provided, call it with the processed card IDs
+      await new Promise<void>(resolve => setTimeout(resolve, 1000));
+      
       if (onComplete) {
-        // In a real implementation, we would get actual IDs from the server
         const cardIds = uploadedFiles.map((_, index) => `processed-file-${Date.now()}-${index}`);
         onComplete(cardIds);
       }
       
-      setUploadedFiles([]); // Clear after processing
+      setUploadedFiles([]);
       toast.success(`Successfully processed ${uploadedFiles.length} images`);
     } catch (error) {
       console.error('Error processing uploads:', error);
@@ -60,10 +54,7 @@ const GroupImageUploader: React.FC<GroupImageUploaderProps> = ({ onComplete, cla
   
   const handleFileSelected = async (file: File) => {
     try {
-      // Create a URL for preview
       const url = URL.createObjectURL(file);
-      
-      // Add to uploaded files
       setUploadedFiles(prev => [...prev, { file, url }]);
     } catch (error) {
       console.error('Error handling file:', error);
@@ -77,10 +68,8 @@ const GroupImageUploader: React.FC<GroupImageUploaderProps> = ({ onComplete, cla
       const blob = await response.blob();
       const file = new File([blob], asset.originalFilename, { type: asset.mimeType });
       
-      // Add to uploaded files
       setUploadedFiles(prev => [...prev, { file, url: asset.url }]);
       
-      // Close the asset manager
       setShowAssetManager(false);
       toast.success('Asset added to queue');
     } catch (error) {
@@ -89,12 +78,10 @@ const GroupImageUploader: React.FC<GroupImageUploaderProps> = ({ onComplete, cla
     }
   };
 
-  // Load face detection models on component mount
   React.useEffect(() => {
     if (faceDetectionEnabled) {
       FaceDetectionService.loadModels().catch(err => {
         console.error('Failed to load face detection models:', err);
-        // Fallback to disable face detection if models fail to load
         setFaceDetectionEnabled(false);
       });
     }
