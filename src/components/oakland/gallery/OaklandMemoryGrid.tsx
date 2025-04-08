@@ -58,7 +58,7 @@ const OaklandMemoryGrid: React.FC<OaklandMemoryGridProps> = ({ cards }) => {
         };
         
         return (
-          <Link key={card.id} to={`/oakland-memory/${card.id}`}>
+          <Link key={card.id} to={`/teams/oakland/memories/${card.id}`}>
             <OaklandMemoryCard 
               memory={memoryData}
               templateType={(oaklandMemory.template as OaklandTemplateType) || 'classic'}

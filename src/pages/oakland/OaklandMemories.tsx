@@ -17,20 +17,22 @@ const OaklandMemories: React.FC = () => {
       
       <div className="container mx-auto max-w-6xl px-4 pt-8 pb-24">
         <div className="py-6">
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
             <div>
               <h1 className="text-3xl font-bold text-[#003831] mb-2">Oakland A's Memories</h1>
               <p className="text-gray-600">
-                Your personal collection of Oakland Athletics baseball memories
+                Preserve your Oakland Athletics baseball memories from 1968 to today
               </p>
             </div>
             
-            <Button asChild className="bg-[#006341] hover:bg-[#003831]">
-              <Link to="/teams/oakland/create">
-                <PlusCircle className="h-4 w-4 mr-2" />
-                Create Memory
-              </Link>
-            </Button>
+            <div className="flex items-center gap-3">
+              <Button asChild className="bg-[#006341] hover:bg-[#003831]">
+                <Link to="/teams/oakland/create">
+                  <PlusCircle className="h-4 w-4 mr-2" />
+                  Create Memory
+                </Link>
+              </Button>
+            </div>
           </div>
           
           <OaklandMemoryGallery />

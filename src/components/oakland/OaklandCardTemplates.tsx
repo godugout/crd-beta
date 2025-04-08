@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
-// Fix imports by replacing missing icons with available alternatives
 import { CircleDollarSign, Trophy, BarChart3, Building2, Users } from 'lucide-react';
 
 export type OaklandTemplateType = 'classic' | 'moneyball' | 'dynasty' | 'coliseum' | 'tailgate';
@@ -50,7 +49,7 @@ interface OaklandCardTemplateProps {
   type: OaklandTemplateType;
   className?: string;
   children?: React.ReactNode;
-  onClick?: () => void; // Added onClick prop to fix type error
+  onClick?: () => void;
 }
 
 const OaklandCardTemplate: React.FC<OaklandCardTemplateProps> = ({
