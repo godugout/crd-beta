@@ -8,7 +8,6 @@ import { Card, Collection } from '@/lib/types';
 import { Badge } from '@/components/ui/badge';
 
 const CollectionDetail = () => {
-  // Fix the type for useParams
   const { id } = useParams<{ id: string }>();
   const { collections, cards, isLoading } = useCards();
   const [collection, setCollection] = useState<Collection | null>(null);
@@ -23,13 +22,9 @@ const CollectionDetail = () => {
       setCollection(found);
       
       // Filter cards that belong to this collection
-      const collectionCardIds = found.cards || [];
-      
-      // Convert the array of card IDs to actual Card objects
-      const filteredCards = cards.filter(card => 
-        // Make sure we're comparing string to string - convert both to strings if needed
-        collectionCardIds.includes(typeof card.id === 'string' ? card.id : String(card.id))
-      );
+      // Instead of using the cards array from the collection, which might contain
+      // only IDs, we filter the cards from the global state that have this collection ID
+      const filteredCards = cards.filter(card => card.collectionId === id);
       
       setCollectionCards(filteredCards);
     }
