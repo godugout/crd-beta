@@ -16,6 +16,14 @@ export interface Card {
   userId: string;
   collectionId?: string;
   tags: string[];
+  fabricSwatches?: Array<{
+    type: string;
+    team: string;
+    year: string;
+    manufacturer: string;
+    position: string;
+    size: string;
+  }>;
   designMetadata?: {
     cardStyle?: {
       template?: string;
@@ -42,22 +50,82 @@ export interface Card {
       cardType?: string;
       series?: string;
     };
+    oaklandMemory?: {
+      date?: string;
+      opponent?: string;
+      score?: string;
+      location?: string;
+      section?: string;
+      memoryType?: string;
+      attendees?: string[];
+      template?: string;
+      teamId?: string;
+      historicalContext?: string;
+      personalSignificance?: string;
+    };
   };
+}
+
+// Define Collection type
+export interface Collection {
+  id: string;
+  name: string;
+  description: string;
+  coverImageUrl?: string;
+  createdAt: string;
+  updatedAt: string;
+  userId: string;
+  cardIds: string[];
 }
 
 type CardContextType = {
   cards: Card[];
+  collections: Collection[];
+  isLoading?: boolean;
   addCard: (cardData: Partial<Card>) => Promise<Card>;
   updateCard: (id: string, cardData: Partial<Card>) => Card | null;
   getCard: (id: string) => Card | undefined;
   deleteCard: (id: string) => boolean;
+  // Collection methods
+  addCollection: (collectionData: Partial<Collection>) => Collection;
+  updateCollection: (id: string, collectionData: Partial<Collection>) => Collection | null;
+  deleteCollection: (id: string) => boolean;
+  addCardToCollection: (cardId: string, collectionId: string) => boolean;
+  removeCardFromCollection: (cardId: string, collectionId: string) => boolean;
+  refreshCards?: () => Promise<void>;
 };
 
 const CardContext = createContext<CardContextType | undefined>(undefined);
 
+// Sample collections for demo purposes
+const sampleCollections: Collection[] = [
+  {
+    id: 'collection-001',
+    name: 'Pop Art Cards',
+    description: 'A collection of pop art style cards',
+    coverImageUrl: '/lovable-uploads/fa55173e-d864-41b2-865d-144d94507dc1.png',
+    createdAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
+    updatedAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
+    userId: 'demo-user',
+    cardIds: ['card-001', 'card-005']
+  },
+  {
+    id: 'collection-002',
+    name: 'Sports Legends',
+    description: 'Collection of legendary sports figures',
+    coverImageUrl: '/lovable-uploads/fa55173e-d864-41b2-865d-144d94507dc1.png',
+    createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+    updatedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+    userId: 'demo-user',
+    cardIds: ['card-002', 'card-003', 'card-004', 'card-006']
+  }
+];
+
 export const CardProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // Initialize with sample cards
   const [cards, setCards] = useState<Card[]>(sampleCards);
+  const [collections, setCollections] = useState<Collection[]>(sampleCollections);
+  const [isLoading, setIsLoading] = useState(false);
 
   const addCard = async (cardData: Partial<Card>): Promise<Card> => {
     try {
@@ -79,9 +147,16 @@ export const CardProvider: React.FC<{ children: React.ReactNode }> = ({ children
           cardMetadata: {}
         },
         tags: cardData.tags || [],
+        fabricSwatches: cardData.fabricSwatches || [],
       };
 
       setCards(prevCards => [newCard, ...prevCards]);
+      
+      // If collection ID is provided, add card to the collection
+      if (newCard.collectionId) {
+        addCardToCollection(newCard.id, newCard.collectionId);
+      }
+      
       return newCard;
     } catch (error) {
       console.error("Error adding card:", error);
@@ -119,14 +194,147 @@ export const CardProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     if (cardExists) {
       setCards(prevCards => prevCards.filter(card => card.id !== id));
+      
+      // Remove card from all collections
+      setCollections(prevCollections => {
+        return prevCollections.map(collection => ({
+          ...collection,
+          cardIds: collection.cardIds.filter(cardId => cardId !== id)
+        }));
+      });
+      
       return true;
     }
     
     return false;
   };
 
+  // Collection methods
+  const addCollection = (collectionData: Partial<Collection>): Collection => {
+    const newCollection: Collection = {
+      id: collectionData.id || uuidv4(),
+      name: collectionData.name || 'Untitled Collection',
+      description: collectionData.description || '',
+      coverImageUrl: collectionData.coverImageUrl || '',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      userId: collectionData.userId || 'anonymous',
+      cardIds: collectionData.cardIds || [],
+    };
+
+    setCollections(prev => [newCollection, ...prev]);
+    return newCollection;
+  };
+
+  const updateCollection = (id: string, updates: Partial<Collection>): Collection | null => {
+    let updatedCollection: Collection | null = null;
+
+    setCollections(prevCollections => {
+      return prevCollections.map(collection => {
+        if (collection.id === id) {
+          updatedCollection = { 
+            ...collection, 
+            ...updates,
+            updatedAt: new Date().toISOString()
+          };
+          return updatedCollection;
+        }
+        return collection;
+      });
+    });
+
+    return updatedCollection;
+  };
+
+  const deleteCollection = (id: string): boolean => {
+    const collectionExists = collections.some(collection => collection.id === id);
+    
+    if (collectionExists) {
+      setCollections(prevCollections => 
+        prevCollections.filter(collection => collection.id !== id)
+      );
+      return true;
+    }
+    
+    return false;
+  };
+
+  const addCardToCollection = (cardId: string, collectionId: string): boolean => {
+    const collection = collections.find(c => c.id === collectionId);
+    if (!collection) return false;
+    
+    if (collection.cardIds.includes(cardId)) return true; // Card already in collection
+    
+    setCollections(prevCollections => {
+      return prevCollections.map(c => {
+        if (c.id === collectionId) {
+          return {
+            ...c,
+            cardIds: [...c.cardIds, cardId],
+            updatedAt: new Date().toISOString()
+          };
+        }
+        return c;
+      });
+    });
+    
+    return true;
+  };
+
+  const removeCardFromCollection = (cardId: string, collectionId: string): boolean => {
+    const collection = collections.find(c => c.id === collectionId);
+    if (!collection) return false;
+    
+    if (!collection.cardIds.includes(cardId)) return true; // Card not in collection
+    
+    setCollections(prevCollections => {
+      return prevCollections.map(c => {
+        if (c.id === collectionId) {
+          return {
+            ...c,
+            cardIds: c.cardIds.filter(id => id !== cardId),
+            updatedAt: new Date().toISOString()
+          };
+        }
+        return c;
+      });
+    });
+    
+    return true;
+  };
+  
+  // Fetch/refresh cards - this would be used if fetching from an API
+  const refreshCards = async (): Promise<void> => {
+    try {
+      setIsLoading(true);
+      // In a real app, we'd fetch from an API here
+      // For now, just simulate a delay
+      await new Promise(resolve => setTimeout(resolve, 500));
+      // No need to update cards since we're using static sample data
+    } catch (error) {
+      console.error("Error refreshing cards:", error);
+      toast.error("Failed to refresh cards");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
-    <CardContext.Provider value={{ cards, addCard, updateCard, getCard, deleteCard }}>
+    <CardContext.Provider value={{ 
+      cards, 
+      addCard, 
+      updateCard, 
+      getCard, 
+      deleteCard,
+      collections,
+      addCollection,
+      updateCollection,
+      deleteCollection,
+      addCardToCollection,
+      removeCardFromCollection,
+      isLoading,
+      refreshCards
+    }}>
       {children}
     </CardContext.Provider>
   );

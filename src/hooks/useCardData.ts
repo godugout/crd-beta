@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
-import { Card } from '@/lib/types';
+import { Card } from '@/context/CardContext';
 import { useCards } from '@/context/CardContext';
 
 interface UseCardDataOptions {
@@ -109,7 +109,9 @@ export function useCardData({
     setLastRefreshTime(now);
     setIsLoading(true);
     try {
-      await refreshCards();
+      if (refreshCards) {
+        await refreshCards();
+      }
       // Reset retry count on success
       setRetryCount(0);
     } catch (err) {

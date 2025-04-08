@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { CardStyle } from '../CardDesignCustomization';
 import { TextStyle } from '../CardTextCustomization';
-import { CardEditorState, FabricSwatch } from '../types';
+import { FabricSwatch } from '../types';
 
 interface UseCardEditorStateProps {
   initialCard?: any;
@@ -24,7 +24,7 @@ export const useCardEditorState = ({ initialCard }: UseCardEditorStateProps = {}
     contrast: 100,
     saturation: 100,
     borderWidth: 0,
-    borderRadius: 8,
+    borderRadius: '8px', // Changed from number to string
     borderColor: '#ffffff',
     backgroundColor: '#ffffff'
   });

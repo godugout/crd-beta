@@ -2,11 +2,11 @@
 export * from './useCardOperations';
 export * from './useCollectionOperations';
 
-// Import the useCards hook first to avoid circular dependency issues
+// Import the useCards hook directly from the CardContext
 import { useCards } from '@/context/CardContext';
+export { useCards };
 
 // This is a wrapper function that uses the CardContext to provide collection functionality
-// This fixes the circular dependency issue
 export const useCollection = () => {
   // Using useCards() context to provide collection functionality
   const { collections, addCollection, updateCollection, deleteCollection, addCardToCollection, removeCardFromCollection } = useCards();

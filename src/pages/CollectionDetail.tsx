@@ -1,71 +1,26 @@
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useParams } from 'react-router-dom';
 import { useCards } from '@/context/CardContext';
-import { Button } from '@/components/ui/button';
-import CardGrid from '@/components/ui/card-components/CardGrid';
-import { Card, Collection } from '@/lib/types';
-import { Badge } from '@/components/ui/badge';
 
 const CollectionDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const { collections, cards, isLoading } = useCards();
-  const [collection, setCollection] = useState<Collection | null>(null);
-  const [collectionCards, setCollectionCards] = useState<Card[]>([]);
-
-  // Find the collection and its cards when the component mounts
-  useEffect(() => {
-    if (!id || !collections.length) return;
-    
-    const found = collections.find(c => c.id === id);
-    if (found) {
-      setCollection(found);
-      
-      // Filter cards that belong to this collection
-      // Instead of using the cards array from the collection, which might contain
-      // only IDs, we filter the cards from the global state that have this collection ID
-      const filteredCards = cards.filter(card => card.collectionId === id);
-      
-      setCollectionCards(filteredCards);
-    }
-  }, [id, collections, cards]);
-
+  const { collections, isLoading } = useCards();
+  
+  const collection = collections.find(c => c.id === id);
+  
   if (isLoading) {
-    return <div className="p-8 text-center">Loading collection...</div>;
+    return <div>Loading collection...</div>;
   }
-
+  
   if (!collection) {
-    return <div className="p-8 text-center">Collection not found</div>;
+    return <div>Collection not found</div>;
   }
-
+  
   return (
-    <div className="container mx-auto p-4 pt-20">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold">{collection.name}</h1>
-        <p className="text-gray-500 mt-1">{collection.description}</p>
-        
-        <div className="flex mt-4 space-x-2">
-          <Badge variant={collection.visibility === 'private' ? 'secondary' : 'default'}>
-            {collection.visibility === 'private' ? 'Private' : 'Public'}
-          </Badge>
-          <Badge variant="outline">{collectionCards.length} cards</Badge>
-        </div>
-      </div>
-      
-      {collectionCards.length > 0 ? (
-        <CardGrid 
-          cards={collectionCards} 
-          isLoading={false}
-          error={null}
-          onCardClick={() => {}}
-          getCardEffects={() => []}
-        />
-      ) : (
-        <div className="text-center p-12 border border-dashed rounded-lg">
-          <p className="text-gray-500 mb-4">This collection has no cards yet</p>
-          <Button>Add Cards to Collection</Button>
-        </div>
-      )}
+    <div>
+      <h1>{collection.name}</h1>
+      <p>{collection.description}</p>
     </div>
   );
 };

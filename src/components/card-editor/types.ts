@@ -26,3 +26,17 @@ export interface CardMetadata {
   cardStyle: CardStyle;
   textStyle: TextStyle;
 }
+
+export interface OaklandMemoryMetadata {
+  date?: string;
+  opponent?: string;
+  score?: string;
+  location?: string;
+  section?: string;
+  memoryType?: string;
+  attendees?: string[];
+  template?: string;
+  teamId?: string;
+  historicalContext?: string;
+  personalSignificance?: string;
+}
