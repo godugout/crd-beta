@@ -1,15 +1,12 @@
 
-import React, { useState } from 'react';
-import { useCards } from '@/context/CardContext';
-import { toast } from 'sonner';
-import { Button } from '@/components/ui/button';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Label } from '@/components/ui/label';
+import React from 'react';
 import { Separator } from '@/components/ui/separator';
-import { CameraIcon, Users, ImageIcon, UploadCloud, Plus, X } from 'lucide-react';
 import { MemorabiliaType } from '../card-upload/cardDetection';
 import BatchImageEditor from './BatchImageEditor';
-import { useImageProcessing } from '@/hooks/useImageProcessing';
+import UploadTypeSelector from './components/UploadTypeSelector';
+import ImageUploadArea from './components/ImageUploadArea';
+import ProcessingQueue from './components/ProcessingQueue';
+import { useUploadHandling } from './hooks/useUploadHandling';
 
 interface GroupImageUploaderProps {
   onComplete?: (cardIds: string[]) => void;
@@ -17,277 +14,38 @@ interface GroupImageUploaderProps {
 }
 
 const GroupImageUploader: React.FC<GroupImageUploaderProps> = ({ onComplete, className }) => {
-  const { addCard } = useCards();
-  const { createThumbnail } = useImageProcessing();
-  const [uploadType, setUploadType] = useState<'group' | 'memorabilia' | 'mixed'>('group');
-  const [uploadedFiles, setUploadedFiles] = useState<Array<{ file: File; url: string; type?: MemorabiliaType }>>([]);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [showEditor, setShowEditor] = useState(false);
-  const [currentFile, setCurrentFile] = useState<File | null>(null);
-  const [currentImageUrl, setCurrentImageUrl] = useState<string | null>(null);
+  const {
+    uploadType,
+    setUploadType,
+    uploadedFiles,
+    isProcessing,
+    showEditor,
+    setShowEditor,
+    currentFile,
+    currentImageUrl,
+    handleFileSelected,
+    handleBatchUpload,
+    handleRemoveFile,
+    processUploads
+  } = useUploadHandling(onComplete);
   
-  // Get the appropriate memorabilia types based on the upload type
-  const getMemorabiliaTypes = (): MemorabiliaType[] => {
-    switch (uploadType) {
-      case 'group':
-        return ['face'];
-      case 'memorabilia':
-        return ['card', 'ticket', 'program', 'autograph'];
-      case 'mixed':
-        return ['face', 'card', 'ticket', 'program', 'autograph'];
-      default:
-        return ['face', 'card', 'ticket', 'program', 'autograph'];
-    }
-  };
-  
-  // Handle file selection
-  const handleFileSelected = async (file: File) => {
-    try {
-      if (!file.type.match('image.*')) {
-        toast.error('Please upload an image file');
-        return;
-      }
-      
-      if (file.size > 15 * 1024 * 1024) {
-        toast.error('File size should be less than 15MB');
-        return;
-      }
-      
-      // Create a URL for the file
-      const imageUrl = URL.createObjectURL(file);
-      
-      // Store the current file and URL
-      setCurrentFile(file);
-      setCurrentImageUrl(imageUrl);
-      
-      // Show the editor
-      setShowEditor(true);
-    } catch (error) {
-      console.error('Error processing file:', error);
-      toast.error('Error processing file');
-    }
-  };
-  
-  // Handle batch upload from editor
-  const handleBatchUpload = (files: File[], urls: string[], types?: MemorabiliaType[]) => {
-    const newUploads = files.map((file, index) => ({
-      file,
-      url: urls[index],
-      type: types ? types[index] : undefined
-    }));
-    
-    setUploadedFiles([...uploadedFiles, ...newUploads]);
-    toast.success(`${files.length} images added to processing queue`);
-  };
-  
-  // Process all uploaded files to create cards
-  const processUploads = async () => {
-    if (uploadedFiles.length === 0) {
-      toast.error('Please upload at least one image');
-      return;
-    }
-    
-    setIsProcessing(true);
-    const cardIds: string[] = [];
-    
-    try {
-      // Process each uploaded file
-      for (const upload of uploadedFiles) {
-        const cardType = upload.type || 'face';
-        let title = '';
-        
-        // Set title based on type
-        switch (cardType) {
-          case 'face':
-            title = 'Group Photo';
-            break;
-          case 'card':
-            title = 'Baseball Card';
-            break;
-          case 'ticket':
-            title = 'Game Ticket';
-            break;
-          case 'program':
-            title = 'Game Program';
-            break;
-          case 'autograph':
-            title = 'Autograph';
-            break;
-          default:
-            title = 'Memory Item';
-        }
-        
-        // Generate a thumbnail for better performance
-        const thumbnailUrl = await createThumbnail(upload.file, 300);
-        
-        // Create the card
-        const card = await addCard({
-          title,
-          description: `Automatically created from group memory upload (${cardType})`,
-          imageUrl: upload.url,
-          thumbnailUrl: thumbnailUrl,
-          tags: ['auto-generated', cardType],
-          isPublic: false,
-          designMetadata: {
-            memorabiliaType: cardType,
-            autoGenerated: true
-          }
-        });
-        
-        if (card?.id) {
-          cardIds.push(card.id);
-        }
-      }
-      
-      toast.success(`Successfully created ${cardIds.length} cards`);
-      
-      // Clear the uploads after processing
-      setUploadedFiles([]);
-      
-      // Call the onComplete callback with the created card IDs
-      if (onComplete && cardIds.length > 0) {
-        onComplete(cardIds);
-      }
-      
-    } catch (err: any) {
-      console.error('Error processing uploads:', err);
-      toast.error('Failed to process uploads: ' + err.message);
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  // File input change handler
-  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files && files.length > 0) {
-      handleFileSelected(files[0]);
-    }
-  };
-
   return (
     <div className={className}>
-      <div className="mb-6">
-        <h3 className="text-lg font-medium mb-2">What type of photos are you uploading?</h3>
-        <RadioGroup 
-          defaultValue="group" 
-          value={uploadType}
-          onValueChange={(value) => setUploadType(value as 'group' | 'memorabilia' | 'mixed')}
-          className="flex flex-col space-y-3"
-        >
-          <div className="flex items-center space-x-3 p-3 rounded-md border hover:bg-gray-50">
-            <RadioGroupItem value="group" id="group" />
-            <Label htmlFor="group" className="flex items-center cursor-pointer">
-              <Users className="h-5 w-5 mr-2 text-green-600" />
-              Group Photos
-              <span className="ml-2 text-sm text-gray-500">(Face detection enabled)</span>
-            </Label>
-          </div>
-          
-          <div className="flex items-center space-x-3 p-3 rounded-md border hover:bg-gray-50">
-            <RadioGroupItem value="memorabilia" id="memorabilia" />
-            <Label htmlFor="memorabilia" className="flex items-center cursor-pointer">
-              <ImageIcon className="h-5 w-5 mr-2 text-blue-600" />
-              Memorabilia
-              <span className="ml-2 text-sm text-gray-500">(Cards, tickets, programs)</span>
-            </Label>
-          </div>
-          
-          <div className="flex items-center space-x-3 p-3 rounded-md border hover:bg-gray-50">
-            <RadioGroupItem value="mixed" id="mixed" />
-            <Label htmlFor="mixed" className="flex items-center cursor-pointer">
-              <CameraIcon className="h-5 w-5 mr-2 text-purple-600" />
-              Mixed Content
-              <span className="ml-2 text-sm text-gray-500">(All detection types enabled)</span>
-            </Label>
-          </div>
-        </RadioGroup>
-      </div>
+      <UploadTypeSelector 
+        uploadType={uploadType}
+        onUploadTypeChange={(value) => setUploadType(value)}
+      />
       
       <Separator className="my-6" />
       
-      <div className="mb-6">
-        <h3 className="text-lg font-medium mb-4">Upload Images</h3>
-        
-        <div className="grid place-items-center border-2 border-dashed border-gray-300 rounded-lg p-12 text-center hover:bg-gray-50 transition-colors cursor-pointer"
-          onClick={() => document.getElementById('file-upload')?.click()}
-        >
-          <input
-            id="file-upload"
-            type="file"
-            className="hidden"
-            accept="image/*"
-            onChange={handleFileInputChange}
-          />
-          <div className="space-y-2">
-            <div className="bg-gray-100 rounded-full p-4 mx-auto w-16 h-16 grid place-items-center">
-              <UploadCloud className="h-8 w-8 text-gray-500" />
-            </div>
-            <div>
-              <p className="text-lg font-semibold">Click to upload or drag and drop</p>
-              <p className="text-sm text-gray-500 mt-1">
-                Upload photos to detect faces and memorabilia
-              </p>
-            </div>
-            <Button type="button">
-              <Plus className="mr-1 h-4 w-4" />
-              Select Image
-            </Button>
-          </div>
-        </div>
-      </div>
+      <ImageUploadArea onFileSelected={handleFileSelected} />
       
-      {uploadedFiles.length > 0 && (
-        <div className="mt-8">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-medium">Processing Queue</h3>
-            <span className="text-sm bg-green-100 text-green-800 px-2 py-1 rounded-full">
-              {uploadedFiles.length} item{uploadedFiles.length !== 1 ? 's' : ''}
-            </span>
-          </div>
-          
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-            {uploadedFiles.map((upload, index) => (
-              <div key={index} className="relative aspect-square rounded-md overflow-hidden border">
-                <img 
-                  src={upload.url} 
-                  alt={`Upload ${index + 1}`} 
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute top-0 right-0 p-1">
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-6 w-6 bg-white/80 hover:bg-white rounded-full"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      const newFiles = [...uploadedFiles];
-                      newFiles.splice(index, 1);
-                      setUploadedFiles(newFiles);
-                    }}
-                  >
-                    <X className="h-3 w-3" />
-                  </Button>
-                </div>
-                {upload.type && (
-                  <div className="absolute bottom-1 right-1 bg-black/70 text-white text-xs px-2 py-1 rounded-full">
-                    {upload.type}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-          
-          <Button 
-            onClick={processUploads} 
-            disabled={isProcessing} 
-            className="w-full"
-          >
-            <UploadCloud className="h-5 w-5 mr-2" />
-            {isProcessing ? 'Processing...' : 'Create Cards from Uploads'}
-          </Button>
-        </div>
-      )}
+      <ProcessingQueue 
+        uploadedFiles={uploadedFiles}
+        onRemoveFile={handleRemoveFile}
+        onProcessUploads={processUploads}
+        isProcessing={isProcessing}
+      />
       
       {/* Batch Image Editor */}
       <BatchImageEditor
