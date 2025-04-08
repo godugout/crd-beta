@@ -1,6 +1,8 @@
 
-import { useState } from 'react';
-import { EnhancedCropBoxProps } from '@/components/card-upload/cardDetection';
+import { useState, useRef, useEffect } from 'react';
+import { EnhancedCropBoxProps, MemorabiliaType } from '@/components/card-upload/cardDetection';
+import { useMobileOptimization } from '@/hooks/useMobileOptimization';
+import { toast } from 'sonner';
 
 interface UseEditorStateProps {
   isDetecting: boolean;
@@ -11,6 +13,7 @@ export const useEditorState = ({ isDetecting, isProcessing }: UseEditorStateProp
   const [selectedAreas, setSelectedAreas] = useState<EnhancedCropBoxProps[]>([]);
   const [selectedTab, setSelectedTab] = useState<string>("detection");
   const [autoEnhance, setAutoEnhance] = useState<boolean>(true);
+  const { isMobile } = useMobileOptimization();
   
   // Add a new selection area
   const addSelectionArea = (

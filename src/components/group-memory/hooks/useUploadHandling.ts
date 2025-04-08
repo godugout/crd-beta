@@ -1,173 +1,149 @@
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+import { EnhancedCropBoxProps, MemorabiliaType } from '@/components/card-upload/cardDetection';
 import { toast } from 'sonner';
-import { MemorabiliaType } from '@/components/card-upload/cardDetection';
-import { useImageProcessing } from '@/hooks/useImageProcessing';
-import { useCards } from '@/context/CardContext';
+import { useOfflineStorage } from '@/hooks/useOfflineStorage';
 
-export const useUploadHandling = (onComplete?: (cardIds: string[]) => void) => {
-  const [uploadType, setUploadType] = useState<'group' | 'memorabilia' | 'mixed'>('group');
-  const [uploadedFiles, setUploadedFiles] = useState<Array<{ file: File; url: string; type?: MemorabiliaType }>>([]);
+interface UseUploadHandlingProps {
+  onComplete?: (cardIds: string[]) => void;
+}
+
+export const useUploadHandling = ({ onComplete }: UseUploadHandlingProps = {}) => {
+  const [uploadType, setUploadType] = useState<MemorabiliaType>('face');
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [showEditor, setShowEditor] = useState(false);
   const [currentFile, setCurrentFile] = useState<File | null>(null);
   const [currentImageUrl, setCurrentImageUrl] = useState<string | null>(null);
-  
-  const { addCard } = useCards();
-  const { createThumbnail } = useImageProcessing();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { saveMemory, isSaving } = useOfflineStorage();
 
-  // Get the appropriate memorabilia types based on the upload type
-  const getMemorabiliaTypes = (): MemorabiliaType[] => {
-    switch (uploadType) {
-      case 'group':
-        return ['face'];
-      case 'memorabilia':
-        return ['card', 'ticket', 'program', 'autograph'];
-      case 'mixed':
-        return ['face', 'card', 'ticket', 'program', 'autograph'];
-      default:
-        return ['face', 'card', 'ticket', 'program', 'autograph'];
-    }
-  };
-  
-  // Handle file selection
-  const handleFileSelected = async (file: File) => {
-    try {
-      if (!file.type.match('image.*')) {
-        toast.error('Please upload an image file');
-        return;
-      }
-      
-      if (file.size > 15 * 1024 * 1024) {
-        toast.error('File size should be less than 15MB');
-        return;
-      }
-      
-      // Create a URL for the file
-      const imageUrl = URL.createObjectURL(file);
-      
-      // Store the current file and URL
-      setCurrentFile(file);
-      setCurrentImageUrl(imageUrl);
-      
-      // Show the editor
-      setShowEditor(true);
-    } catch (error) {
-      console.error('Error processing file:', error);
-      toast.error('Error processing file');
-    }
-  };
-  
-  // Handle batch upload from editor
-  const handleBatchUpload = (files: File[], urls: string[], types?: MemorabiliaType[]) => {
-    const newUploads = files.map((file, index) => ({
-      file,
-      url: urls[index],
-      type: types ? types[index] : undefined
-    }));
+  const handleFileSelected = (file: File | null) => {
+    if (!file) return;
     
-    setUploadedFiles([...uploadedFiles, ...newUploads]);
-    toast.success(`${files.length} images added to processing queue`);
-  };
-  
-  // Remove a file from the upload queue
-  const handleRemoveFile = (index: number) => {
-    const newFiles = [...uploadedFiles];
-    newFiles.splice(index, 1);
-    setUploadedFiles(newFiles);
-  };
-  
-  // Process all uploaded files to create cards
-  const processUploads = async () => {
-    if (uploadedFiles.length === 0) {
-      toast.error('Please upload at least one image');
+    // Validate file
+    if (!file.type.match('image.*')) {
+      toast.error('Please select an image file');
       return;
     }
     
+    if (file.size > 25 * 1024 * 1024) {
+      toast.error('File size must be under 25MB');
+      return;
+    }
+    
+    setUploadedFiles(prev => [...prev, file]);
+    
+    // Open editor for the first file
+    if (uploadedFiles.length === 0) {
+      openEditor(file);
+    }
+  };
+  
+  const openEditor = (file: File) => {
+    setCurrentFile(file);
+    const imageUrl = URL.createObjectURL(file);
+    setCurrentImageUrl(imageUrl);
+    setShowEditor(true);
+  };
+  
+  const processNextFile = () => {
+    if (uploadedFiles.length > 0) {
+      openEditor(uploadedFiles[0]);
+    }
+  };
+  
+  const handleRemoveFile = (index: number) => {
+    setUploadedFiles(prev => prev.filter((_, i) => i !== index));
+  };
+  
+  const handleBatchUpload = async (
+    files: File[], 
+    urls: string[], 
+    types?: MemorabiliaType[]
+  ) => {
     setIsProcessing(true);
-    const cardIds: string[] = [];
     
     try {
-      // Process each uploaded file
-      for (const upload of uploadedFiles) {
-        const cardType = upload.type || 'face';
-        let title = '';
+      const cardIds: string[] = [];
+      
+      // Process each file
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const url = urls[i];
+        const type = types?.[i] || uploadType;
         
-        // Set title based on type
-        switch (cardType) {
-          case 'face':
-            title = 'Group Photo';
-            break;
-          case 'card':
-            title = 'Baseball Card';
-            break;
-          case 'ticket':
-            title = 'Game Ticket';
-            break;
-          case 'program':
-            title = 'Game Program';
-            break;
-          case 'autograph':
-            title = 'Autograph';
-            break;
-          default:
-            title = 'Memory Item';
-        }
+        // Save to memory - this works with offline storage
+        const result = await saveMemory(
+          {
+            title: `Group Image ${i + 1}`,
+            description: `Auto-detected ${type}`,
+            type: type,
+            tags: [type, 'auto-detected']
+          },
+          file
+        );
         
-        // Generate a thumbnail for better performance
-        const thumbnailUrl = await createThumbnail(upload.file, 300);
-        
-        // Create the card
-        const card = await addCard({
-          title,
-          description: `Automatically created from group memory upload (${cardType})`,
-          imageUrl: upload.url,
-          thumbnailUrl: thumbnailUrl,
-          tags: ['auto-generated', cardType],
-          isPublic: false,
-          designMetadata: {
-            memorabiliaType: cardType,
-            autoGenerated: true
-          }
-        });
-        
-        if (card?.id) {
-          cardIds.push(card.id);
+        if (result.success && result.id) {
+          cardIds.push(result.id);
+          toast.success(`Processed image ${i + 1} of ${files.length}`, {
+            duration: 2000
+          });
         }
       }
       
-      toast.success(`Successfully created ${cardIds.length} cards`);
+      setUploadedFiles(prev => {
+        // Remove processed files
+        const newFiles = [...prev];
+        newFiles.splice(0, 1);
+        return newFiles;
+      });
       
-      // Clear the uploads after processing
-      setUploadedFiles([]);
+      setShowEditor(false);
       
-      // Call the onComplete callback with the created card IDs
+      // Process next file if available
+      if (uploadedFiles.length > 1) {
+        processNextFile();
+      }
+      
+      // Call completion callback
       if (onComplete && cardIds.length > 0) {
         onComplete(cardIds);
       }
       
-    } catch (err: any) {
-      console.error('Error processing uploads:', err);
-      toast.error('Failed to process uploads: ' + err.message);
+      return cardIds;
+    } catch (error) {
+      console.error('Error in batch upload:', error);
+      toast.error('Failed to process images');
+      return [];
     } finally {
       setIsProcessing(false);
     }
   };
-
+  
+  const processUploads = async () => {
+    if (uploadedFiles.length === 0) return;
+    
+    if (!showEditor) {
+      processNextFile();
+    }
+  };
+  
   return {
     uploadType,
     setUploadType,
     uploadedFiles,
     setUploadedFiles,
     isProcessing,
+    isSaving,
     showEditor,
     setShowEditor,
     currentFile,
     currentImageUrl,
+    fileInputRef,
     handleFileSelected,
     handleBatchUpload,
     handleRemoveFile,
-    processUploads,
-    getMemorabiliaTypes
+    processUploads
   };
 };
