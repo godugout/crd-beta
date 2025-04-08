@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import Navbar from '@/components/Navbar';
+import PageLayout from '@/components/navigation/PageLayout';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -30,10 +30,11 @@ const GroupMemoryCreator = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar />
-      
-      <main className="pt-24 pb-12 px-4 sm:px-6 max-w-7xl mx-auto">
+    <PageLayout
+      title="Group Memory Creator"
+      description="Capture and preserve group experiences at the Coliseum"
+    >
+      <main className="pt-6 pb-12 px-4 sm:px-6 max-w-7xl mx-auto">
         <div className="mb-10">
           <Link to="/teams/oakland/memories">
             <Button variant="ghost" className="mb-4 -ml-4">
@@ -97,7 +98,7 @@ const GroupMemoryCreator = () => {
           </TabsContent>
         </Tabs>
       </main>
-    </div>
+    </PageLayout>
   );
 };
 

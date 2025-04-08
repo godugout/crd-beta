@@ -6,13 +6,19 @@ import { toast } from 'sonner';
 
 export type GroupUploadType = 'group' | 'memorabilia' | 'mixed';
 
+export interface UploadFileItem {
+  file: File;
+  url: string;
+  type?: MemorabiliaType;
+}
+
 export interface UseUploadHandlingProps {
   onComplete?: (cardIds: string[]) => void;
 }
 
 export const useUploadHandling = ({ onComplete }: UseUploadHandlingProps) => {
   const [uploadType, setUploadType] = useState<GroupUploadType>('group');
-  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [uploadedFiles, setUploadedFiles] = useState<UploadFileItem[]>([]); // Updated type
   const [isProcessing, setIsProcessing] = useState(false);
   const [showEditor, setShowEditor] = useState(false);
   const [currentFile, setCurrentFile] = useState<File | null>(null);
@@ -33,7 +39,7 @@ export const useUploadHandling = ({ onComplete }: UseUploadHandlingProps) => {
       const dataUrl = await createThumbnail(file, 800);
       
       // Add to uploaded files
-      setUploadedFiles(prev => [...prev, file]);
+      setUploadedFiles(prev => [...prev, { file, url: dataUrl }]);
       
       // Open editor with current file
       setCurrentFile(file);
