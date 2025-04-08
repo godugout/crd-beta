@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, Users } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import OaklandMemoryGallery from '@/components/oakland/OaklandMemoryGallery';
 import MetaTags from '@/components/shared/MetaTags';
@@ -25,11 +25,18 @@ const OaklandMemories: React.FC = () => {
               </p>
             </div>
             
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 flex-wrap">
               <Button asChild className="bg-[#006341] hover:bg-[#003831]">
                 <Link to="/teams/oakland/create">
                   <PlusCircle className="h-4 w-4 mr-2" />
                   Create Memory
+                </Link>
+              </Button>
+              
+              <Button asChild variant="outline" className="border-[#006341] text-[#006341] hover:bg-[#003831]/10">
+                <Link to="/group-memory-creator">
+                  <Users className="h-4 w-4 mr-2" />
+                  Group Memory
                 </Link>
               </Button>
             </div>

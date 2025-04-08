@@ -1,5 +1,4 @@
 
-
 // Define base types used throughout the application
 
 export interface Card {
@@ -59,6 +58,22 @@ export interface Reaction {
   user?: SchemaUser;
 }
 
+// Define group memory types
+export interface GroupMemory {
+  id: string;
+  title: string;
+  description: string;
+  event?: string;
+  date?: string;
+  location?: string;
+  attendees?: string[];
+  createdBy: string;
+  collaborators?: string[];
+  imageUrls: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
 // Re-export types from schema/types, excluding those we've defined locally
 export type {
   Collection,
@@ -70,4 +85,3 @@ export type {
   DbCollection,
   DbReaction
 } from '@/lib/schema/types';
-
