@@ -185,7 +185,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const value = {
-    ...authState,
+    user: authState.user,
+    isLoading: authState.isLoading,
+    error: authState.error,
     signIn,
     signUp,
     signOut

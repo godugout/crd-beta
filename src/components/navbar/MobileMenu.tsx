@@ -7,7 +7,7 @@ interface MobileMenuProps {
   isOpen: boolean;
   onClose: () => void;
   onSignOut: () => Promise<void>;
-  user?: User;
+  user?: User | null;
 }
 
 const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose, onSignOut, user }) => {

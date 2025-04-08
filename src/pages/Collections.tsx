@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Navbar from '@/components/Navbar';
 import { useNavigate, Link } from 'react-router-dom';
@@ -7,7 +6,7 @@ import { ChevronRight, FolderOpen, PlusCircle, Settings, ArrowUpRight, Search, G
 import { Button } from '@/components/ui/button';
 import { Card } from '@/lib/types';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { MobileTouchButton, MobileBottomBar, MobileActionFab } from '@/components/ui/mobile-controls';
+import { MobileBottomBar, MobileActionFab } from '@/components/ui/mobile-controls';
 import { ResponsiveImage } from '@/components/ui/responsive-image';
 import { useMobileOptimization } from '@/hooks/useMobileOptimization';
 

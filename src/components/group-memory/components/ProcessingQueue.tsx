@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { X, Upload, WifiOff, Image, CheckCircle2 } from 'lucide-react';
@@ -81,7 +80,6 @@ const ProcessingQueue: React.FC<ProcessingQueueProps> = ({
               onClick={() => onRemoveFile(index)}
               className="h-8 w-8 p-0"
               aria-label="Remove file"
-              hapticFeedback={optimizeInteractions}
             >
               <X className="h-4 w-4" />
             </ButtonComponent>
@@ -103,7 +101,6 @@ const ProcessingQueue: React.FC<ProcessingQueueProps> = ({
           onClick={onProcessUploads}
           disabled={isProcessing}
           className="flex items-center"
-          hapticFeedback={optimizeInteractions}
         >
           {isProcessing ? (
             <>

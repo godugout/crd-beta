@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom'; 
 import { Menu, X, ChevronLeft } from 'lucide-react';
@@ -5,14 +6,18 @@ import { Button } from '@/components/ui/button';
 import MainNavigation from './MainNavigation';
 import MobileNavigation from './MobileNavigation';
 import UserDropdown from '@/components/navbar/UserDropdown';
-import { useAuth } from '@/context/auth/useAuth';
+import { useAuth } from '@/context/auth';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 
 const AppHeader: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const location = useLocation();
   const isMobile = useMediaQuery('(max-width: 768px)');
+  
+  const handleSignOut = async () => {
+    await signOut();
+  };
   
   const shouldShowBackButton = () => {
     const pathParts = location.pathname.split('/').filter(Boolean);
@@ -69,6 +74,7 @@ const AppHeader: React.FC = () => {
             {user ? (
               <UserDropdown 
                 user={user} 
+                onSignOut={handleSignOut}
                 isOpen={false} 
                 onClose={() => {}} 
               />

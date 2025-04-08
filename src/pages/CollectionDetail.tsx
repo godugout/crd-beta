@@ -1,272 +1,217 @@
-
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { Container } from '@/components/ui/container';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useCards } from '@/context/CardContext';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Separator } from '@/components/ui/separator';
-import { Collection } from '@/lib/types';
-import { supabase } from '@/integrations/supabase/client';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
-import CardItem from '@/components/CardItem';
-import ReactionButtons from '@/components/ReactionButtons';
-import CommentSection from '@/components/CommentSection';
-import { Share, Users, Plus, ArrowLeft } from 'lucide-react';
-import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import { Card } from '@/lib/types';
+import CardGrid from '@/components/gallery/CardGrid';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Edit, Plus, Trash2 } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 const CollectionDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const [collection, setCollection] = useState<Collection | null>(null);
-  const [cards, setCards] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('cards');
-  const [showComments, setShowComments] = useState(false);
+  const navigate = useNavigate();
+  const { 
+    collections, 
+    cards, 
+    updateCollection, 
+    deleteCollection,
+    addCardToCollection,
+    removeCardFromCollection
+  } = useCards();
+  
+  const collection = collections.find(c => c.id === id);
+  const [name, setName] = useState(collection?.name || '');
+  const [description, setDescription] = useState(collection?.description || '');
+  const [visibility, setVisibility] = useState<"public" | "private" | "team">(collection?.visibility || "public");
+  const [isEditing, setIsEditing] = useState(false);
+  const [cardEffects, setCardEffects] = useState<Record<string, string[]>>({});
+  const [selectedCard, setSelectedCard] = useState<Card | null>(null);
   
   useEffect(() => {
-    if (id) {
-      fetchCollectionData(id);
+    if (collection) {
+      setName(collection.name);
+      setDescription(collection.description);
+      setVisibility(collection.visibility);
     }
-  }, [id]);
-  
-  const fetchCollectionData = async (collectionId: string) => {
-    setIsLoading(true);
-    try {
-      // Fetch collection details
-      const { data: collectionData, error: collectionError } = await supabase
-        .from('collections')
-        .select('*, profiles:owner_id(id, full_name, avatar_url, username)')
-        .eq('id', collectionId)
-        .single();
-      
-      if (collectionError) {
-        toast.error('Failed to load collection');
-        console.error('Error fetching collection:', collectionError);
-        return;
-      }
-      
-      if (collectionData) {
-        const formattedCollection: Collection = {
-          id: collectionData.id,
-          name: collectionData.title,
-          description: collectionData.description || '',
-          coverImageUrl: collectionData.cover_image_url || '',
-          userId: collectionData.owner_id,
-          teamId: collectionData.team_id,
-          visibility: collectionData.visibility || 'private',
-          allowComments: collectionData.allow_comments !== undefined ? collectionData.allow_comments : true,
-          createdAt: collectionData.created_at,
-          updatedAt: collectionData.updated_at,
-          designMetadata: collectionData.design_metadata || {}
-        };
-        
-        setCollection(formattedCollection);
-        
-        // Fetch cards in this collection
-        const { data: cardsData, error: cardsError } = await supabase
-          .from('cards')
-          .select('*')
-          .eq('collection_id', collectionId);
-        
-        if (cardsError) {
-          console.error('Error fetching cards:', cardsError);
-        } else if (cardsData) {
-          setCards(cardsData.map(card => ({
-            id: card.id,
-            title: card.title || '',
-            description: card.description || '',
-            imageUrl: card.image_url || '',
-            thumbnailUrl: card.thumbnail_url || card.image_url || '',
-            createdAt: card.created_at,
-            updatedAt: card.updated_at,
-            userId: card.user_id,
-            teamId: card.team_id,
-            collectionId: card.collection_id,
-            isPublic: card.is_public || false,
-            tags: card.tags || [],
-            designMetadata: card.design_metadata || {}
-          })));
-        }
-      }
-    } catch (error) {
-      console.error('Error fetching collection data:', error);
-      toast.error('An error occurred while loading data');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  
-  const handleShare = async () => {
-    if (!collection) return;
-    
-    try {
-      if (navigator.share) {
-        await navigator.share({
-          title: `Check out the ${collection.name} collection`,
-          text: collection.description || `View the ${collection.name} collection`,
-          url: window.location.href,
-        });
-        toast.success('Collection shared successfully');
-      } else {
-        await navigator.clipboard.writeText(window.location.href);
-        toast.success('Collection link copied to clipboard');
-      }
-    } catch (error) {
-      if ((error as Error).name !== 'AbortError') {
-        console.error('Error sharing:', error);
-        toast.error('Failed to share collection');
-      }
-    }
-  };
-  
-  if (isLoading) {
-    return (
-      <Container className="py-8">
-        <div className="flex justify-center items-center h-64">
-          <LoadingSpinner size={40} />
-        </div>
-      </Container>
-    );
-  }
+  }, [collection]);
   
   if (!collection) {
-    return (
-      <Container className="py-8">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <h2 className="text-xl font-semibold mb-2">Collection Not Found</h2>
-              <p className="text-muted-foreground mb-4">
-                The collection you're looking for doesn't exist or you don't have permission to view it.
-              </p>
-              <Button asChild>
-                <Link to="/collections">Browse Collections</Link>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </Container>
-    );
+    return <div>Collection not found</div>;
   }
   
+  const handleEdit = () => {
+    setIsEditing(true);
+  };
+  
+  const handleSave = async () => {
+    if (id) {
+      await updateCollection(id, { name, description, visibility });
+      setIsEditing(false);
+      toast.success('Collection updated');
+    }
+  };
+  
+  const handleDelete = async () => {
+    if (id) {
+      await deleteCollection(id);
+      navigate('/collections');
+      toast.success('Collection deleted');
+    }
+  };
+  
+  const handleAddCard = async (cardId: string) => {
+    if (id) {
+      await addCardToCollection(cardId, id);
+      toast.success('Card added to collection');
+    }
+  };
+  
+  const handleRemoveCard = async (cardId: string) => {
+    if (id) {
+      await removeCardFromCollection(cardId, id);
+      toast.success('Card removed from collection');
+    }
+  };
+  
+  const availableCards = cards.filter(card => !collection.cards?.includes(card.id));
+  const collectionCards = cards.filter(card => collection.cards?.includes(card.id));
+  
   return (
-    <Container className="py-8">
-      {/* Back button */}
-      <Button variant="ghost" asChild className="mb-4">
-        <Link to="/collections">
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Collections
-        </Link>
-      </Button>
+    <div className="container mx-auto py-8">
+      <div className="mb-4 flex justify-between items-center">
+        <div>
+          <h1 className="text-2xl font-bold">{isEditing ? 'Edit Collection' : collection.name}</h1>
+        </div>
+        <div>
+          {!isEditing && (
+            <Button variant="outline" size="sm" onClick={handleEdit}>
+              <Edit className="mr-2 h-4 w-4" />
+              Edit
+            </Button>
+          )}
+        </div>
+      </div>
       
-      {/* Collection header */}
-      <Card className="mb-8 overflow-hidden">
-        {collection.coverImageUrl && (
-          <div className="w-full h-48 relative">
-            <img
-              src={collection.coverImageUrl}
-              alt={collection.name}
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-            <div className="absolute bottom-0 left-0 p-6">
-              <h1 className="text-2xl font-bold text-white">{collection.name}</h1>
-              {collection.description && (
-                <p className="text-white/90 mt-2">{collection.description}</p>
-              )}
-            </div>
-          </div>
-        )}
-        
-        {!collection.coverImageUrl && (
-          <CardHeader>
-            <CardTitle>{collection.name}</CardTitle>
-            {collection.description && (
-              <CardDescription>{collection.description}</CardDescription>
-            )}
-          </CardHeader>
-        )}
-        
-        <CardContent>
-          <div className="flex flex-wrap items-center justify-between gap-4 pt-4">
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" onClick={handleShare}>
-                <Share className="h-4 w-4 mr-2" />
-                Share
-              </Button>
-              
-              {collection.visibility === 'team' && (
-                <Button variant="outline" size="sm">
-                  <Users className="h-4 w-4 mr-2" />
-                  Team Collection
-                </Button>
-              )}
-              
-              <Button variant="outline" size="sm" asChild>
-                <Link to={`/card/create?collectionId=${collection.id}`}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Card
-                </Link>
-              </Button>
+      {isEditing ? (
+        <div className="bg-white shadow-md rounded-lg p-4">
+          <div className="grid gap-4">
+            <div>
+              <Label htmlFor="name">Name</Label>
+              <Input 
+                type="text" 
+                id="name" 
+                value={name} 
+                onChange={(e) => setName(e.target.value)} 
+              />
             </div>
             
-            <ReactionButtons collectionId={collection.id} />
-          </div>
-        </CardContent>
-      </Card>
-      
-      {/* Tabs for cards and comments */}
-      <Tabs
-        value={activeTab}
-        onValueChange={setActiveTab}
-        className="space-y-6"
-      >
-        <TabsList>
-          <TabsTrigger value="cards">Cards</TabsTrigger>
-          <TabsTrigger value="comments">Comments</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="cards" className="space-y-8">
-          {cards.length === 0 ? (
-            <Card>
-              <CardContent className="flex flex-col items-center justify-center py-12">
-                <p className="text-muted-foreground mb-4">No cards in this collection yet</p>
-                <Button asChild>
-                  <Link to={`/card/create?collectionId=${collection.id}`}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add First Card
-                  </Link>
-                </Button>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {cards.map(card => (
-                <CardItem 
-                  key={card.id} 
-                  card={card} 
-                  activeEffects={[]}
-                  showReactions={false}
-                  onClick={() => { /* Navigate to card detail */ }}
-                />
-              ))}
+            <div>
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+              />
             </div>
-          )}
-        </TabsContent>
-        
-        <TabsContent value="comments">
-          {collection.allowComments ? (
-            <CommentSection collectionId={collection.id} />
-          ) : (
-            <Card>
-              <CardContent className="py-12 text-center">
-                <p className="text-muted-foreground">Comments are disabled for this collection</p>
-              </CardContent>
-            </Card>
-          )}
-        </TabsContent>
-      </Tabs>
-    </Container>
+            
+            <div>
+              <Label htmlFor="visibility">Visibility</Label>
+              <Select value={visibility} onValueChange={(value) => setVisibility(value as "public" | "private" | "team")}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select visibility" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="public">Public</SelectItem>
+                  <SelectItem value="private">Private</SelectItem>
+                  <SelectItem value="team">Team</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="flex justify-end gap-2">
+              <Button variant="default" size="sm" onClick={handleSave}>
+                Save
+              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive" size="sm">
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Delete
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This action cannot be undone. This will permanently delete this collection and remove all of its data.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleDelete}>Continue</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="bg-white shadow-md rounded-lg p-4">
+          <p>{collection.description}</p>
+          <p className="mt-2">Visibility: {collection.visibility}</p>
+        </div>
+      )}
+      
+      <div className="mt-8">
+        <h2 className="text-xl font-bold mb-4">Cards in this Collection</h2>
+        {collectionCards.length > 0 ? (
+          <CardGrid 
+            cards={collectionCards} 
+            cardEffects={cardEffects}
+            onCardClick={(cardId) => {
+              const card = collectionCards.find(c => c.id === cardId);
+              setSelectedCard(card || null);
+            }}
+          />
+        ) : (
+          <p>No cards in this collection yet.</p>
+        )}
+      </div>
+      
+      <div className="mt-8">
+        <h2 className="text-xl font-bold mb-4">Add Cards to Collection</h2>
+        {availableCards.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {availableCards.map(card => (
+              <div key={card.id} className="bg-white shadow-md rounded-lg p-4">
+                <h3 className="text-lg font-bold mb-2">{card.title}</h3>
+                <Button variant="default" size="sm" onClick={() => handleAddCard(card.id)}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add to Collection
+                </Button>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p>No more cards available to add.</p>
+        )}
+      </div>
+    </div>
   );
 };
 

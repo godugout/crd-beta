@@ -142,7 +142,7 @@ const CardUpload: React.FC<CardUploadProps> = ({
                 onClick={toggleBatchMode}
                 className="flex items-center gap-2"
                 size="lg"
-                variant={batchMode ? "primary" : "secondary"}
+                variant={batchMode ? "default" : "secondary"}
                 hapticFeedback={false}
               >
                 <Users className="h-5 w-5" />
@@ -175,7 +175,7 @@ const CardUpload: React.FC<CardUploadProps> = ({
               <MobileTouchButton
                 onClick={clearImage}
                 className="absolute top-2 right-2 p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-subtle hover:bg-gray-100 transition-colors"
-                variant="icon"
+                variant="outline"
                 size="sm"
                 hapticFeedback={false}
               >
