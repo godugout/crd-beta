@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { UploadCloud, Plus } from 'lucide-react';
 
@@ -8,19 +8,40 @@ interface ImageUploadAreaProps {
 }
 
 const ImageUploadArea: React.FC<ImageUploadAreaProps> = ({ onFileSelected }) => {
-  const handleFileInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileInputChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
       await onFileSelected(files[0]);
+      // Reset input value to allow selecting the same file again
+      e.target.value = '';
     }
-  };
+  }, [onFileSelected]);
+  
+  const handleDrop = useCallback(async (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const file = e.dataTransfer.files[0];
+      await onFileSelected(file);
+    }
+  }, [onFileSelected]);
+  
+  const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    e.dataTransfer.dropEffect = 'copy';
+  }, []);
 
   return (
     <div className="mb-6">
       <h3 className="text-lg font-medium mb-4">Upload Images</h3>
       
-      <div className="grid place-items-center border-2 border-dashed border-gray-300 rounded-lg p-12 text-center hover:bg-gray-50 transition-colors cursor-pointer"
+      <div 
+        className="grid place-items-center border-2 border-dashed border-gray-300 rounded-lg p-12 text-center hover:bg-gray-50 transition-colors cursor-pointer"
         onClick={() => document.getElementById('file-upload')?.click()}
+        onDrop={handleDrop}
+        onDragOver={handleDragOver}
       >
         <input
           id="file-upload"

@@ -1,3 +1,4 @@
+
 import { useEffect, useState, useRef } from 'react';
 import { EnhancedCropBoxProps } from '@/components/card-upload/cardDetection';
 import { useMobileOptimization } from '@/hooks/useMobileOptimization';
@@ -28,7 +29,10 @@ export const useCanvasManager = ({
   const lastTouchDistance = useRef<number | null>(null);
   const { isMobile, optimizeInteractions } = useMobileOptimization();
   
-  // Redraw the canvas with current state
+  // Track if image has been loaded to prevent flickering
+  const imageLoadedRef = useRef(false);
+  
+  // Redraw the canvas with current state - debounced to prevent flickering
   const redrawCanvas = () => {
     const canvas = canvasRef.current;
     const img = editorImgRef?.current;
@@ -40,31 +44,47 @@ export const useCanvasManager = ({
     // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
+    // Apply transformations
+    ctx.save();
+    
+    // Apply rotation if needed
+    if (rotation !== 0) {
+      ctx.translate(canvas.width / 2, canvas.height / 2);
+      ctx.rotate((rotation * Math.PI) / 180);
+      ctx.translate(-canvas.width / 2, -canvas.height / 2);
+    }
+    
     // Draw the image with current settings
-    const scaledWidth = img.naturalWidth * scale;
-    const scaledHeight = img.naturalHeight * scale;
+    const scaledWidth = img.naturalWidth * (scale * zoom / 100);
+    const scaledHeight = img.naturalHeight * (scale * zoom / 100);
+    
+    // Calculate centered position
+    const centerX = (canvas.width - scaledWidth) / 2;
+    const centerY = (canvas.height - scaledHeight) / 2;
     
     // Apply brightness and contrast
     ctx.filter = `brightness(${brightness}%) contrast(${contrast}%)`;
     
     ctx.drawImage(
       img, 
-      offset.x, 
-      offset.y, 
+      centerX + offset.x, 
+      centerY + offset.y, 
       scaledWidth, 
       scaledHeight
     );
     
+    ctx.restore();
     ctx.filter = 'none';
     
     // Draw selection areas
     selectedAreas.forEach((area, index) => {
       // Apply scaling and offset to box coordinates
+      const areaScale = scale * zoom / 100;
       const scaledBox = {
-        x: area.x * scale + offset.x,
-        y: area.y * scale + offset.y,
-        width: area.width * scale,
-        height: area.height * scale
+        x: centerX + offset.x + area.x * areaScale,
+        y: centerY + offset.y + area.y * areaScale,
+        width: area.width * areaScale,
+        height: area.height * areaScale
       };
       
       // Draw box
@@ -87,17 +107,41 @@ export const useCanvasManager = ({
     });
   };
   
-  // Setup canvas and draw content
+  // Setup canvas and draw content when image changes
   useEffect(() => {
-    if (!canvasRef.current || !editorImgRef?.current || !editorImgRef.current.complete) return;
+    if (!editorImgRef?.current) return;
+    
+    const img = editorImgRef.current;
+    
+    // Wait for image to load
+    if (!img.complete) {
+      img.onload = () => {
+        imageLoadedRef.current = true;
+        initializeCanvas();
+      };
+    } else if (!imageLoadedRef.current) {
+      imageLoadedRef.current = true;
+      initializeCanvas();
+    }
+    
+    // Cleanup
+    return () => {
+      imageLoadedRef.current = false;
+      if (img) img.onload = null;
+    };
+  }, [editorImgRef?.current?.src]);
+  
+  // Initialize canvas with proper dimensions
+  const initializeCanvas = () => {
+    if (!canvasRef.current || !editorImgRef?.current) return;
     
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     
     // Resize canvas to match container while maintaining aspect ratio
-    const containerWidth = canvas.clientWidth;
-    const containerHeight = canvas.clientHeight;
+    const containerWidth = canvas.parentElement?.clientWidth || 600;
+    const containerHeight = canvas.parentElement?.clientHeight || 400;
     const img = editorImgRef.current;
     
     const imgAspectRatio = img.naturalWidth / img.naturalHeight;
@@ -120,16 +164,28 @@ export const useCanvasManager = ({
     const scaleY = canvasHeight / img.naturalHeight;
     setScale(Math.min(scaleX, scaleY));
     
+    // Reset transformations when loading a new image
+    setRotation(0);
+    setBrightness(100);
+    setContrast(100);
+    setZoom(100);
+    setOffset({ x: 0, y: 0 });
+    
+    // Draw the canvas
     redrawCanvas();
-  }, [canvasRef, editorImgRef, selectedAreas]);
+  };
+  
+  // Re-render canvas when parameters change
+  useEffect(() => {
+    if (imageLoadedRef.current) {
+      redrawCanvas();
+    }
+  }, [zoom, rotation, brightness, contrast, scale, offset.x, offset.y, selectedAreas]);
   
   // Handle rotation
   const rotateImage = (direction: 'clockwise' | 'counterclockwise') => {
     const rotationAmount = direction === 'clockwise' ? 90 : -90;
     setRotation(prevRotation => (prevRotation + rotationAmount) % 360);
-    
-    // Would need to adjust canvas and redraw
-    redrawCanvas();
   };
   
   // Handle image enhancement
@@ -137,8 +193,6 @@ export const useCanvasManager = ({
     // Enhance brightness and contrast slightly
     setBrightness(prev => Math.min(150, prev + 10));
     setContrast(prev => Math.min(150, prev + 10));
-    
-    redrawCanvas();
   };
   
   // Reset adjustments
@@ -147,11 +201,10 @@ export const useCanvasManager = ({
     setContrast(100);
     setRotation(0);
     setZoom(100);
-    
-    redrawCanvas();
+    setOffset({ x: 0, y: 0 });
   };
   
-  // Handle pointer events
+  // Handle pointer events for canvas interaction
   const handlePointerDown = (e: React.MouseEvent | React.TouchEvent) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -161,9 +214,6 @@ export const useCanvasManager = ({
     if ('touches' in e) {
       // Touch event
       e.preventDefault();
-      const touch = e.touches[0];
-      clientX = touch.clientX;
-      clientY = touch.clientY;
       
       // Handle multi-touch for pinch zoom
       if (e.touches.length === 2) {
@@ -175,6 +225,10 @@ export const useCanvasManager = ({
         );
         return;
       }
+      
+      const touch = e.touches[0];
+      clientX = touch.clientX;
+      clientY = touch.clientY;
     } else {
       // Mouse event
       clientX = e.clientX;
@@ -185,8 +239,8 @@ export const useCanvasManager = ({
     const x = clientX - rect.left;
     const y = clientY - rect.top;
     
-    // Start drawing new box
-    setIsDrawing(true);
+    // Start dragging canvas
+    setIsDragging(true);
     setStartPoint({ x, y });
   };
   
@@ -209,7 +263,7 @@ export const useCanvasManager = ({
         );
         
         const zoomFactor = currentDistance / lastTouchDistance.current;
-        handleZoom(zoomFactor);
+        setZoom(prev => Math.max(50, Math.min(200, prev * zoomFactor)));
         lastTouchDistance.current = currentDistance;
         return;
       }
@@ -227,19 +281,33 @@ export const useCanvasManager = ({
     const x = clientX - rect.left;
     const y = clientY - rect.top;
     
+    // Handle canvas dragging
+    if (isDragging) {
+      const deltaX = x - startPoint.x;
+      const deltaY = y - startPoint.y;
+      
+      setOffset(prev => ({
+        x: prev.x + deltaX,
+        y: prev.y + deltaY
+      }));
+      
+      setStartPoint({ x, y });
+    }
   };
   
   // Handle mouse/touch up event
   const handlePointerUp = () => {
-    setIsDrawing(false);
     setIsDragging(false);
     lastTouchDistance.current = null;
   };
-
-  const handleZoom = (factor: number) => {
-    const newScale = Math.max(0.1, Math.min(5, scale * factor));
-    setScale(newScale);
-    redrawCanvas();
+  
+  // Handle zoom adjustment
+  const handleZoomIn = () => {
+    setZoom(prev => Math.min(200, prev + 10));
+  };
+  
+  const handleZoomOut = () => {
+    setZoom(prev => Math.max(50, prev - 10));
   };
 
   return {
@@ -248,6 +316,8 @@ export const useCanvasManager = ({
     handlePointerUp,
     zoom,
     setZoom,
+    handleZoomIn,
+    handleZoomOut,
     rotation,
     setRotation,
     brightness,

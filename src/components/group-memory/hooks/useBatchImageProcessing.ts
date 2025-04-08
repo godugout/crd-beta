@@ -1,294 +1,234 @@
+
 import { useState } from 'react';
-import { EnhancedCropBoxProps, MemorabiliaType, detectCardsInImage, applyCrop } from '@/components/card-upload/cardDetection';
-import useImageProcessing from '@/hooks/useImageProcessing';
+import { EnhancedCropBoxProps, MemorabiliaType, applyCrop } from '@/components/card-upload/cardDetection';
+import { detectCardsInImage } from '@/components/card-upload/cardDetection';
 import { toast } from 'sonner';
 
-interface BatchProcessingProps {
-  /**
-   * Callback when processing is complete
-   */
+export interface BatchProcessingProps {
   onComplete?: (files: File[], urls: string[], types?: MemorabiliaType[]) => void;
-  /**
-   * Whether to auto enhance images after processing
-   */
   autoEnhance?: boolean;
 }
 
-export const useBatchImageProcessing = ({ onComplete, autoEnhance = true }: BatchProcessingProps = {}) => {
-  const [isProcessing, setIsProcessing] = useState(false);
+export const useBatchImageProcessing = ({ 
+  onComplete, 
+  autoEnhance = true 
+}: BatchProcessingProps) => {
   const [isDetecting, setIsDetecting] = useState(false);
-  const [stagedItems, setStagedItems] = useState<{ file: File, url: string, type?: MemorabiliaType }[]>([]);
-  const imageProcessor = useImageProcessing();
-  
-  // Run detection on an image
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [stagedItems, setStagedItems] = useState<Array<{
+    file: File;
+    url: string;
+    type?: MemorabiliaType;
+  }>>([]);
+
+  // Clear staged items
+  const clearStaged = () => {
+    setStagedItems([]);
+  };
+
+  // Run detection on an image element
   const runDetection = async (
-    imageRef: React.RefObject<HTMLImageElement>,
-    detectionType: 'face' | 'memorabilia' | 'mixed' | 'group' = 'face'
+    imgRef: React.RefObject<HTMLImageElement>,
+    detectionType: 'face' | 'group' | 'memorabilia' | 'mixed'
   ): Promise<EnhancedCropBoxProps[]> => {
-    if (!imageRef.current) return [];
-    
+    if (!imgRef.current || !imgRef.current.complete) {
+      toast.error("Image not loaded");
+      return [];
+    }
+
     setIsDetecting(true);
+    
     try {
-      // Map detection type to array of memorabilia types to detect
-      const typesToDetect: MemorabiliaType[] = 
-        detectionType === 'face' || detectionType === 'group' ? ['face'] :
-        detectionType === 'memorabilia' ? ['card', 'ticket', 'program', 'autograph'] :
-        ['face', 'card', 'ticket', 'program', 'autograph'];
-        
-      // Run detection
+      // Determine which detection types to enable based on the selected mode
+      let enabledTypes: MemorabiliaType[] = [];
+      
+      switch (detectionType) {
+        case 'face':
+          enabledTypes = ['face'];
+          break;
+        case 'group':
+          enabledTypes = ['face', 'group'];
+          break;
+        case 'memorabilia':
+          enabledTypes = ['card', 'ticket', 'program', 'autograph'];
+          break;
+        case 'mixed':
+          enabledTypes = ['face', 'group', 'card', 'ticket', 'program', 'autograph'];
+          break;
+      }
+      
+      // Run detection with appropriate types
       const detectedItems = await detectCardsInImage(
-        imageRef.current,
+        imgRef.current,
         autoEnhance,
         null,
-        typesToDetect
+        enabledTypes
       );
       
       return detectedItems;
     } catch (error) {
-      console.error('Error detecting items:', error);
-      toast.error('Failed to detect items in image');
+      console.error("Detection error:", error);
+      toast.error("Failed to detect content in image");
       return [];
     } finally {
       setIsDetecting(false);
     }
   };
-  
-  // Process selected areas in an image
-  const processSelectedAreas = async (
-    cropBoxes: EnhancedCropBoxProps[],
-    imageRef: React.RefObject<HTMLImageElement>,
-    originalFile: File | null,
-    enhanceImage: boolean = true
-  ) => {
-    if (!originalFile || !imageRef.current) {
-      toast.error('Missing image data');
-      return { success: false };
-    }
-    
-    // Process all crop boxes
-    setIsProcessing(true);
-    
-    try {
-      const processedFiles: File[] = [];
-      const processedUrls: string[] = [];
-      const processedTypes: MemorabiliaType[] = [];
-      
-      const canvas = document.createElement('canvas');
-      
-      for (const cropBox of cropBoxes) {
-        const result = await applyCrop(
-          cropBox,
-          canvas,
-          originalFile,
-          imageRef.current,
-          enhanceImage ? cropBox.memorabiliaType : undefined
-        );
-        
-        if (result) {
-          processedFiles.push(result.file);
-          processedUrls.push(result.url);
-          processedTypes.push(cropBox.memorabiliaType || 'unknown');
-        }
-      }
-      
-      // Clear canvas
-      canvas.width = 1;
-      canvas.height = 1;
-      
-      // Call completion callback
-      if (processedFiles.length > 0 && onComplete) {
-        onComplete(processedFiles, processedUrls, processedTypes);
-      }
-      
-      return { success: true, files: processedFiles };
-    } catch (error) {
-      console.error('Error processing areas:', error);
-      toast.error('Failed to process selected areas');
-      return { success: false };
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-  
-  // Process a batch of selected crop areas
+
+  // Process batch selections
   const processBatchSelections = async (
-    originalFile: File | null,
+    originalFile: File,
     cropBoxes: EnhancedCropBoxProps[],
-    batchSelections: number[]
-  ): Promise<boolean> => {
-    if (!originalFile || batchSelections.length === 0) return false;
-    
+    batchSelections: number[],
+    imgRef: React.RefObject<HTMLImageElement>,
+    canvasRef: React.RefObject<HTMLCanvasElement>
+  ) => {
+    if (!imgRef.current || !canvasRef.current || !originalFile) {
+      toast.error("Missing required elements for processing");
+      return false;
+    }
+
     setIsProcessing(true);
-    const processedFiles: File[] = [];
-    const processedUrls: string[] = [];
-    const processedTypes: MemorabiliaType[] = [];
     
     try {
-      // Sort selections by index to maintain order
-      const sortedSelections = [...batchSelections].sort((a, b) => a - b);
+      const files: File[] = [];
+      const urls: string[] = [];
+      const types: MemorabiliaType[] = [];
       
-      for (const index of sortedSelections) {
+      // Process each selected area
+      for (const index of batchSelections) {
         if (index >= 0 && index < cropBoxes.length) {
-          const cropBox = cropBoxes[index];
-          const cropResult = await cropAndProcessImage(originalFile, cropBox);
+          const box = cropBoxes[index];
           
-          if (cropResult) {
-            processedFiles.push(cropResult.file);
-            processedUrls.push(cropResult.url);
-            processedTypes.push(cropBox.memorabiliaType || 'unknown');
+          const result = await applyCrop(
+            box,
+            canvasRef.current,
+            originalFile,
+            imgRef.current,
+            autoEnhance ? box.memorabiliaType : undefined
+          );
+          
+          if (result?.file && result?.url) {
+            files.push(result.file);
+            urls.push(result.url);
+            types.push(box.memorabiliaType || 'unknown');
           }
         }
       }
       
-      // Add to staged items
-      const newItems = processedFiles.map((file, idx) => ({
-        file: processedFiles[idx],
-        url: processedUrls[idx],
-        type: processedTypes[idx]
-      }));
-      
-      setStagedItems(prev => [...prev, ...newItems]);
-      
-      if (processedFiles.length > 0 && onComplete) {
-        onComplete(processedFiles, processedUrls, processedTypes);
+      if (files.length > 0) {
+        // Add to staged items
+        const newStagedItems = files.map((file, i) => ({
+          file,
+          url: urls[i],
+          type: types[i]
+        }));
+        
+        setStagedItems([...stagedItems, ...newStagedItems]);
+        
+        // Call the completion callback if provided
+        if (onComplete) {
+          onComplete(files, urls, types);
+        }
+        
+        toast.success(`Successfully processed ${files.length} items`);
+        return true;
+      } else {
+        toast.error("No items were processed");
+        return false;
       }
-      
-      return processedFiles.length > 0;
     } catch (error) {
-      console.error('Error processing batch selections:', error);
-      toast.error('Failed to process selected items');
+      console.error("Processing error:", error);
+      toast.error("Failed to process selected areas");
       return false;
     } finally {
       setIsProcessing(false);
     }
   };
-  
-  // Process a single crop area
-  const processCropArea = async (
-    originalFile: File | null,
-    cropBox: EnhancedCropBoxProps
+
+  // Process selected areas
+  const processSelectedAreas = async (
+    selectedAreas: EnhancedCropBoxProps[],
+    imgRef: React.RefObject<HTMLImageElement>,
+    originalFile: File,
+    applyEnhancement: boolean = true
   ) => {
-    if (!originalFile) return null;
+    if (!originalFile || !imgRef.current) {
+      toast.error("Missing file or image reference");
+      return { success: false };
+    }
     
     setIsProcessing(true);
     
     try {
-      const result = await cropAndProcessImage(originalFile, cropBox);
-      if (result) {
-        setStagedItems(prev => [...prev, { 
-          file: result.file, 
-          url: result.url,
-          type: cropBox.memorabiliaType
-        }]);
+      // Create a temporary canvas for processing
+      const tempCanvas = document.createElement('canvas');
+      const ctx = tempCanvas.getContext('2d');
+      
+      if (!ctx) {
+        throw new Error("Could not get canvas context");
       }
-      return result;
+      
+      const files: File[] = [];
+      const urls: string[] = [];
+      const types: MemorabiliaType[] = [];
+      
+      // Process each area
+      for (const area of selectedAreas) {
+        const result = await applyCrop(
+          area,
+          tempCanvas,
+          originalFile,
+          imgRef.current,
+          applyEnhancement ? area.memorabiliaType : undefined
+        );
+        
+        if (result?.file && result?.url) {
+          files.push(result.file);
+          urls.push(result.url);
+          types.push(area.memorabiliaType || 'unknown');
+        }
+      }
+      
+      if (files.length > 0) {
+        // Add to staged items
+        const newStagedItems = files.map((file, i) => ({
+          file,
+          url: urls[i],
+          type: types[i]
+        }));
+        
+        setStagedItems([...stagedItems, ...newStagedItems]);
+        
+        // Call the completion callback if provided
+        if (onComplete) {
+          onComplete(files, urls, types);
+        }
+        
+        return { 
+          success: true, 
+          files, 
+          urls, 
+          types 
+        };
+      } else {
+        return { success: false };
+      }
     } catch (error) {
-      console.error('Error processing crop area:', error);
-      toast.error('Failed to process image section');
-      return null;
+      console.error("Processing error:", error);
+      return { success: false, error };
     } finally {
       setIsProcessing(false);
     }
   };
-  
-  // Helper to crop and process image
-  const cropAndProcessImage = async (
-    originalFile: File,
-    cropBox: EnhancedCropBoxProps
-  ): Promise<{ file: File, url: string } | null> => {
-    // Create a canvas for cropping
-    const canvas = document.createElement('canvas');
-    canvas.width = cropBox.width;
-    canvas.height = cropBox.height;
-    const ctx = canvas.getContext('2d');
-    
-    if (!ctx) return null;
-    
-    try {
-      // Load the original image
-      const img = await createImageFromFile(originalFile);
-      
-      // Apply the crop
-      ctx.save();
-      if (cropBox.rotation !== 0) {
-        ctx.translate(canvas.width / 2, canvas.height / 2);
-        ctx.rotate((cropBox.rotation * Math.PI) / 180);
-        ctx.translate(-canvas.width / 2, -canvas.height / 2);
-      }
-      
-      ctx.drawImage(
-        img,
-        cropBox.x, 
-        cropBox.y,
-        cropBox.width,
-        cropBox.height,
-        0,
-        0,
-        cropBox.width,
-        cropBox.height
-      );
-      ctx.restore();
-      
-      // Apply enhancement if enabled
-      if (autoEnhance) {
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        
-        // Basic enhancement suitable for stadium lighting conditions
-        for (let i = 0; i < imageData.data.length; i += 4) {
-          // Increase contrast slightly
-          imageData.data[i] = Math.min(255, Math.max(0, (imageData.data[i] - 128) * 1.1 + 128));
-          imageData.data[i+1] = Math.min(255, Math.max(0, (imageData.data[i+1] - 128) * 1.1 + 128));
-          imageData.data[i+2] = Math.min(255, Math.max(0, (imageData.data[i+2] - 128) * 1.1 + 128));
-        }
-        
-        ctx.putImageData(imageData, 0, 0);
-      }
-      
-      // Convert canvas to blob
-      const blob = await new Promise<Blob>((resolve) => {
-        canvas.toBlob(blob => {
-          if (blob) resolve(blob);
-          else throw new Error('Failed to create image blob');
-        }, 'image/jpeg', 0.92);
-      });
-      
-      // Create a File from the blob
-      const fileName = originalFile.name.replace(/\.[^/.]+$/, '') + '_cropped_' + Date.now() + '.jpg';
-      const newFile = new File([blob], fileName, { type: 'image/jpeg' });
-      
-      return {
-        file: newFile,
-        url: URL.createObjectURL(blob)
-      };
-    } catch (error) {
-      console.error('Error in cropAndProcessImage:', error);
-      return null;
-    }
-  };
-  
-  // Helper to create an image from a file
-  const createImageFromFile = (file: File): Promise<HTMLImageElement> => {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      img.onload = () => resolve(img);
-      img.onerror = () => reject(new Error('Failed to load image'));
-      img.src = URL.createObjectURL(file);
-    });
-  };
-  
-  // Clear all staged items
-  const clearStaged = () => {
-    setStagedItems([]);
-  };
-  
+
   return {
-    isProcessing,
     isDetecting,
+    isProcessing,
     stagedItems,
     setStagedItems,
     clearStaged,
     processBatchSelections,
-    processCropArea,
     runDetection,
     processSelectedAreas
   };

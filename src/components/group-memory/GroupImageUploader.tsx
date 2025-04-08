@@ -6,7 +6,7 @@ import BatchImageEditor from './BatchImageEditor';
 import UploadTypeSelector from './components/UploadTypeSelector';
 import ImageUploadArea from './components/ImageUploadArea';
 import ProcessingQueue from './components/ProcessingQueue';
-import { useUploadHandling, UseUploadHandlingProps, GroupUploadType } from './hooks/useUploadHandling';
+import { useUploadHandling, GroupUploadType } from './hooks/useUploadHandling';
 
 interface GroupImageUploaderProps {
   onComplete?: (cardIds: string[]) => void;

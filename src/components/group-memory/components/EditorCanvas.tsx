@@ -9,6 +9,9 @@ interface EditorCanvasProps {
   selectedAreas: EnhancedCropBoxProps[];
   isDetecting: boolean;
   isProcessing: boolean;
+  handlePointerDown?: (e: React.MouseEvent | React.TouchEvent) => void;
+  handlePointerMove?: (e: React.MouseEvent | React.TouchEvent) => void;
+  handlePointerUp?: () => void;
 }
 
 const EditorCanvas: React.FC<EditorCanvasProps> = ({
@@ -17,8 +20,28 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({
   imageUrl,
   selectedAreas,
   isDetecting,
-  isProcessing
+  isProcessing,
+  handlePointerDown,
+  handlePointerMove,
+  handlePointerUp
 }) => {
+  // Setup event handlers
+  useEffect(() => {
+    // Make sure we clean up event listeners if component unmounts
+    return () => {
+      const canvas = canvasRef.current;
+      if (canvas) {
+        canvas.onmousedown = null;
+        canvas.onmousemove = null;
+        canvas.onmouseup = null;
+        canvas.onmouseleave = null;
+        canvas.ontouchstart = null;
+        canvas.ontouchmove = null;
+        canvas.ontouchend = null;
+      }
+    };
+  }, []);
+
   return (
     <div className="relative flex-grow border rounded-md overflow-hidden bg-gray-100">
       {/* Hidden image for reference */}
@@ -27,12 +50,20 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({
         src={imageUrl || ''}
         alt="Editor reference"
         className="hidden"
+        crossOrigin="anonymous"
       />
       
       {/* Canvas for interactive editing */}
       <canvas 
         ref={canvasRef}
-        className="w-full h-full"
+        className="w-full h-full cursor-grab touch-none"
+        onMouseDown={handlePointerDown}
+        onMouseMove={handlePointerMove}
+        onMouseUp={handlePointerUp}
+        onMouseLeave={handlePointerUp}
+        onTouchStart={handlePointerDown}
+        onTouchMove={handlePointerMove}
+        onTouchEnd={handlePointerUp}
       />
       
       {/* Loading overlay */}

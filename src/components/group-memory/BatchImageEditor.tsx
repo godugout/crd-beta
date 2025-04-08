@@ -1,5 +1,5 @@
 
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { 
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter
 } from '@/components/ui/dialog';
@@ -15,6 +15,7 @@ import AdjustmentsPanel from './components/AdjustmentsPanel';
 import EditorToolbar from './components/EditorToolbar';
 import EditorCanvas from './components/EditorCanvas';
 import { GroupUploadType } from './hooks/useUploadHandling';
+import { toast } from 'sonner';
 
 interface BatchImageEditorProps {
   open: boolean;
@@ -59,8 +60,13 @@ const BatchImageEditor: React.FC<BatchImageEditorProps> = ({
   } = useEditorState({ isDetecting, isProcessing });
   
   const {
+    handlePointerDown,
+    handlePointerMove,
+    handlePointerUp,
     zoom,
     setZoom,
+    handleZoomIn,
+    handleZoomOut,
     rotation,
     setRotation,
     brightness,
@@ -69,18 +75,46 @@ const BatchImageEditor: React.FC<BatchImageEditorProps> = ({
     setContrast,
     enhanceImage,
     rotateImage,
-    resetAdjustments
+    resetAdjustments,
+    redrawCanvas
   } = useCanvasManager({
     canvasRef,
     editorImgRef,
     selectedAreas
   });
   
+  // Load image and initialize canvas
+  useEffect(() => {
+    if (open && imageUrl && editorImgRef.current) {
+      editorImgRef.current.onload = () => {
+        setTimeout(() => {
+          redrawCanvas();
+        }, 100); // Small delay to ensure image is fully loaded
+      };
+      editorImgRef.current.src = imageUrl;
+    }
+  }, [open, imageUrl]);
+  
   // Run detection on the current image
   const handleRunDetection = async () => {
-    if (!editorImgRef.current) return;
-    const detectedItems = await runDetection(editorImgRef, detectionType as 'face' | 'group' | 'memorabilia' | 'mixed');
-    setSelectedAreas(detectedItems);
+    if (!editorImgRef.current) {
+      toast.error("Image not loaded properly");
+      return;
+    }
+    
+    try {
+      const detectedItems = await runDetection(editorImgRef, detectionType as 'face' | 'group' | 'memorabilia' | 'mixed');
+      setSelectedAreas(detectedItems);
+      
+      if (detectedItems.length === 0) {
+        toast.warning("No items detected. Try manually adding selection areas.");
+      } else {
+        toast.success(`Detected ${detectedItems.length} items`);
+      }
+    } catch (error) {
+      console.error("Detection error:", error);
+      toast.error("Failed to run detection");
+    }
   };
   
   // Handle adding a new selection area
@@ -90,17 +124,33 @@ const BatchImageEditor: React.FC<BatchImageEditorProps> = ({
   
   // Process selected areas
   const handleProcessSelectedAreas = async () => {
-    if (!originalFile) return;
+    if (!originalFile) {
+      toast.error("No file to process");
+      return;
+    }
     
-    const result = await processSelectedAreas(
-      selectedAreas,
-      editorImgRef,
-      originalFile,
-      autoEnhance
-    );
+    if (selectedAreas.length === 0) {
+      toast.warning("No areas selected for processing");
+      return;
+    }
     
-    if (result?.success) {
-      onClose();
+    try {
+      const result = await processSelectedAreas(
+        selectedAreas,
+        editorImgRef,
+        originalFile,
+        autoEnhance
+      );
+      
+      if (result?.success) {
+        toast.success(`Processed ${selectedAreas.length} items`);
+        onClose();
+      } else {
+        toast.error("Failed to process selections");
+      }
+    } catch (error) {
+      console.error("Processing error:", error);
+      toast.error("Error during processing");
     }
   };
 
@@ -133,13 +183,16 @@ const BatchImageEditor: React.FC<BatchImageEditorProps> = ({
               selectedAreas={selectedAreas}
               isDetecting={isDetecting}
               isProcessing={isProcessing}
+              handlePointerDown={handlePointerDown}
+              handlePointerMove={handlePointerMove}
+              handlePointerUp={handlePointerUp}
             />
             
             {/* Bottom Toolbar */}
             <EditorToolbar
               zoom={zoom}
-              onZoomIn={() => setZoom(z => Math.min(z + 10, 200))}
-              onZoomOut={() => setZoom(z => Math.max(z - 10, 50))}
+              onZoomIn={handleZoomIn}
+              onZoomOut={handleZoomOut}
               onRotateClockwise={() => rotateImage('clockwise')}
               onRotateCounterClockwise={() => rotateImage('counterclockwise')}
               selectedTab={selectedTab}
