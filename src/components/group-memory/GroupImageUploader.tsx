@@ -56,7 +56,7 @@ const GroupImageUploader: React.FC<GroupImageUploaderProps> = ({ onComplete, cla
   
   const handleFileSelected = async (file: File) => {
     try {
-      // Create a URL for preview
+      // Create a URL for preview - using URL.createObjectURL correctly
       const url = URL.createObjectURL(file);
       
       // Add to uploaded files
