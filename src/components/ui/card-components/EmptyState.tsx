@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import * as LucideIcons from 'lucide-react';
 import { LucideProps } from 'lucide-react';
 
-interface EmptyStateProps {
+export interface EmptyStateProps {
   /**
    * Title text
    */
@@ -32,6 +32,21 @@ interface EmptyStateProps {
   onAction?: () => void;
   
   /**
+   * Whether this is an empty state due to no items
+   */
+  isEmpty?: boolean;
+  
+  /**
+   * Whether this is an empty state due to filtering
+   */
+  isFiltered?: boolean;
+  
+  /**
+   * Optional refresh callback
+   */
+  onRefresh?: () => Promise<void>;
+  
+  /**
    * Optional class names to apply
    */
   className?: string;
@@ -43,6 +58,9 @@ export const EmptyState = ({
   icon = 'Inbox',
   actionLabel,
   onAction,
+  isEmpty,
+  isFiltered, 
+  onRefresh,
   className = ""
 }: EmptyStateProps) => {
   // Dynamically get the icon component from Lucide
@@ -67,6 +85,18 @@ export const EmptyState = ({
           {actionLabel}
         </Button>
       )}
+      
+      {onRefresh && (
+        <Button 
+          variant="outline"
+          onClick={() => onRefresh()}
+          className="mt-2"
+        >
+          Refresh
+        </Button>
+      )}
     </div>
   );
 };
+
+export default EmptyState;

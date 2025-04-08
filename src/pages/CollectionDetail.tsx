@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useCards } from '@/context/CardContext';
 import { Button } from '@/components/ui/button';
-import { CardGrid } from '@/components/ui/card-components/CardGrid';
+import CardGrid from '@/components/ui/card-components/CardGrid';
 import { Card, Collection } from '@/lib/types';
 import { Badge } from '@/components/ui/badge';
 

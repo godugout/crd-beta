@@ -20,7 +20,10 @@ export const CardGrid: React.FC<CardGridProps> = ({ cards, cardEffects, onCardCl
     return <EmptyState 
       isEmpty={true} 
       isFiltered={false} 
-      onRefresh={() => {}} 
+      onRefresh={async () => {
+        // Return a Promise
+        return Promise.resolve();
+      }} 
     />;
   }
 

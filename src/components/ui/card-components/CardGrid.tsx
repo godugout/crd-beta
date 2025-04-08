@@ -1,3 +1,4 @@
+
 import React, { memo } from 'react';
 import { Card } from '@/lib/types';
 import { cn } from '@/lib/utils';
@@ -94,9 +95,10 @@ export const CardGrid = ({
         title="Something went wrong"
         description={error.message || "Failed to load cards"}
         icon="AlertTriangle"
-        isEmpty={false}
-        isFiltered={false}
-        onRefresh={() => {}}
+        onRefresh={async () => {
+          // Return a Promise
+          return Promise.resolve();
+        }}
       />
     );
   }
@@ -108,9 +110,10 @@ export const CardGrid = ({
         title="No cards found"
         description="Try adjusting your filters or create a new card"
         icon="Inbox"
-        isEmpty={true}
-        isFiltered={false}
-        onRefresh={() => {}}
+        onRefresh={async () => {
+          // Return a Promise
+          return Promise.resolve();
+        }}
       />
     );
   }
