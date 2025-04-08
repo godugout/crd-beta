@@ -1,9 +1,16 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import PageLayout from '@/components/navigation/PageLayout';
 import CardUpload from '@/components/card-upload/CardUpload';
 
 const CardDetector = () => {
+  const [processedImageUrl, setProcessedImageUrl] = useState<string | null>(null);
+  
+  const handleImageUpload = (file: File, previewUrl: string, storagePath?: string) => {
+    console.log('Image uploaded:', file.name, storagePath);
+    setProcessedImageUrl(previewUrl);
+  };
+  
   return (
     <PageLayout
       title="Card Detector"
@@ -17,7 +24,20 @@ const CardDetector = () => {
           </p>
         </div>
         
-        <CardUpload />
+        <CardUpload 
+          onImageUpload={handleImageUpload}
+          batchProcessingEnabled 
+          enabledMemorabiliaTypes={['card', 'ticket', 'program']}
+        />
+        
+        {processedImageUrl && (
+          <div className="mt-8">
+            <h2 className="text-xl font-semibold mb-4">Processed Image</h2>
+            <div className="border rounded-lg overflow-hidden shadow-md">
+              <img src={processedImageUrl} alt="Processed card" className="w-full h-auto" />
+            </div>
+          </div>
+        )}
       </div>
     </PageLayout>
   );

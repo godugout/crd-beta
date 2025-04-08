@@ -9,6 +9,7 @@ import PageLayout from '@/components/navigation/PageLayout';
 import { useCards } from '@/context/CardContext';
 import CollectionGrid from '@/components/collections/CollectionGrid';
 import CollectionList from '@/components/collections/CollectionList';
+import { Collection } from '@/context/CardContext';
 
 const CollectionGallery = () => {
   const { collections, isLoading } = useCards();

@@ -3,7 +3,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Collection } from '@/lib/types';
+import { Collection } from '@/context/CardContext';
 
 interface CollectionGridProps {
   collections: Collection[];

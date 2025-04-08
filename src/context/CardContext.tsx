@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from 'sonner';
@@ -76,6 +75,10 @@ export interface Collection {
   updatedAt: string;
   userId: string;
   cardIds: string[];
+  visibility: 'public' | 'private' | 'team';
+  allowComments?: boolean;
+  teamId?: string;
+  designMetadata?: any;
 }
 
 type CardContextType = {
@@ -107,7 +110,9 @@ const sampleCollections: Collection[] = [
     createdAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
     updatedAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
     userId: 'demo-user',
-    cardIds: ['card-001', 'card-005']
+    cardIds: ['card-001', 'card-005'],
+    visibility: 'public',
+    allowComments: true
   },
   {
     id: 'collection-002',
@@ -117,7 +122,9 @@ const sampleCollections: Collection[] = [
     createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
     updatedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
     userId: 'demo-user',
-    cardIds: ['card-002', 'card-003', 'card-004', 'card-006']
+    cardIds: ['card-002', 'card-003', 'card-004', 'card-006'],
+    visibility: 'private',
+    allowComments: true
   }
 ];
 
@@ -220,6 +227,10 @@ export const CardProvider: React.FC<{ children: React.ReactNode }> = ({ children
       updatedAt: new Date().toISOString(),
       userId: collectionData.userId || 'anonymous',
       cardIds: collectionData.cardIds || [],
+      visibility: collectionData.visibility || 'private',
+      allowComments: collectionData.allowComments !== undefined ? collectionData.allowComments : true,
+      teamId: collectionData.teamId,
+      designMetadata: collectionData.designMetadata
     };
 
     setCollections(prev => [newCollection, ...prev]);

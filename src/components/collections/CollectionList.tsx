@@ -2,7 +2,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Collection } from '@/lib/types';
+import { Collection } from '@/context/CardContext';
 import { ChevronRight, Lock, Globe } from 'lucide-react';
 
 interface CollectionListProps {
