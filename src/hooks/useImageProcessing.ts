@@ -92,6 +92,9 @@ export const useImageProcessing = () => {
   
   /**
    * Creates a thumbnail from an image
+   * @param imgOrUrl - The image or URL to create a thumbnail from
+   * @param size - The maximum size of the thumbnail (default: 200)
+   * @returns A promise that resolves to the thumbnail data URL
    */
   const createThumbnail = async (
     imgOrUrl: string | HTMLImageElement | File,

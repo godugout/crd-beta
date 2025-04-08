@@ -41,7 +41,8 @@ export const useUploadHandling = ({ onComplete }: UseUploadHandlingProps) => {
       
       // Resize image for preview with mobile-optimized quality
       const quality = getImageQuality();
-      const dataUrl = await createThumbnail(file, 800, quality);
+      // Fix here - createThumbnail expects at most 2 arguments (file and size)
+      const dataUrl = await createThumbnail(file, 800);
       
       // Add to uploaded files
       setUploadedFiles(prev => [...prev, { file, url: dataUrl }]);
