@@ -24,7 +24,7 @@ const TeamNavigation: React.FC<TeamNavigationProps> = ({ showLabel = true }) => 
         setLoading(true);
         const { data, error } = await supabase
           .from('teams')
-          .select('id, name, primary_color')
+          .select('id, name')
           .order('name');
           
         if (error) {
@@ -33,7 +33,12 @@ const TeamNavigation: React.FC<TeamNavigationProps> = ({ showLabel = true }) => 
         }
         
         if (data) {
-          setTeams(data);
+          // Use a default primary_color since the column doesn't exist
+          const teamsWithColor = data.map(team => ({
+            ...team,
+            primary_color: '#888'
+          }));
+          setTeams(teamsWithColor);
         }
       } catch (err) {
         console.error('Failed to fetch teams:', err);

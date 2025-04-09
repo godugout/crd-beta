@@ -101,7 +101,7 @@ const GameDayMode = () => {
         />
         
         <Tabs value={activeTab}>
-          <AnimatePresence mode="wait" initial={false}>
+          <AnimatePresence initial={false}>
             <motion.div
               key={activeTab}
               variants={tabContentVariants}
