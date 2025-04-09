@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Collection } from '@/lib/types';
+import { Collection } from '@/context/CardContext';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 
 export interface MemoryPacksSectionProps {
