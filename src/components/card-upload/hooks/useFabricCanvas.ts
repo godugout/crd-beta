@@ -111,7 +111,7 @@ export const useFabricCanvas = ({
   
   // Load background image when image data changes
   useEffect(() => {
-    if (!canvasInstance.current || !editorImgRef.current || !imageData.url) return;
+    if (!canvasInstance.current || !editorImgRef.current || !imageData?.url) return;
     
     const canvas = canvasInstance.current;
     const img = editorImgRef.current;
@@ -127,49 +127,54 @@ export const useFabricCanvas = ({
       if (!canvas || !img) return;
       
       // Create Fabric image object from the HTML img
-      FabricImage.fromURL(img.src, (fImg) => {
-        // Remove existing background if any
-        if (backgroundImage.current) {
-          canvas.remove(backgroundImage.current);
-        }
-        
-        // Set image as background
-        canvas.setDimensions({
-          width: img.naturalWidth,
-          height: img.naturalHeight
-        });
-        
-        fImg.set({
-          selectable: false,
-          evented: false,
-          left: 0,
-          top: 0
-        });
-        
-        canvas.setBackgroundImage(fImg, canvas.renderAll.bind(canvas));
-        backgroundImage.current = fImg;
-        
-        // Create crop boxes if none exist yet
-        if (cropBoxes.length === 0) {
-          const defaultBox: EnhancedCropBoxProps = {
-            id: 1,
-            x: img.naturalWidth * 0.15,
-            y: img.naturalHeight * 0.15,
-            width: img.naturalWidth * 0.7,
-            height: img.naturalHeight * 0.7,
-            memorabiliaType: 'card',
-            color: '#00FF00'
-          };
+      // In Fabric.js v6, fromURL returns a Promise
+      FabricImage.fromURL(img.src)
+        .then((fImg) => {
+          // Remove existing background if any
+          if (backgroundImage.current) {
+            canvas.remove(backgroundImage.current);
+          }
           
-          setCropBoxes([defaultBox]);
-          setSelectedCropIndex(0);
-        }
-        
-        // Render the crop boxes
-        renderCropBoxes();
-      });
+          // Set image as background
+          canvas.setDimensions({
+            width: img.naturalWidth,
+            height: img.naturalHeight
+          });
+          
+          fImg.set({
+            selectable: false,
+            evented: false,
+            left: 0,
+            top: 0
+          });
+          
+          // In Fabric.js v6, we need to add the image and make sure it's in the background
+          canvas.add(fImg);
+          canvas.sendToBack(fImg);
+          backgroundImage.current = fImg;
+          
+          // Create crop boxes if none exist yet
+          if (cropBoxes.length === 0) {
+            const defaultBox: EnhancedCropBoxProps = {
+              id: 1,
+              x: img.naturalWidth * 0.15,
+              y: img.naturalHeight * 0.15,
+              width: img.naturalWidth * 0.7,
+              height: img.naturalHeight * 0.7,
+              memorabiliaType: 'card',
+              color: '#00FF00'
+            };
+            
+            setCropBoxes([defaultBox]);
+            setSelectedCropIndex(0);
+          }
+          
+          // Render the crop boxes
+          renderCropBoxes();
+          canvas.renderAll();
+        });
     }
-  }, [imageData.url, editorImgRef, canvasInstance.current]);
+  }, [imageData?.url, editorImgRef, canvasInstance.current]);
   
   // Render crop boxes when they change
   useEffect(() => {
@@ -207,7 +212,6 @@ export const useFabricCanvas = ({
         transparentCorners: false,
         hasControls: isSelected,
         hasBorders: true,
-        selectable: true,
         lockRotation: false,
         lockScalingFlip: true,
         padding: 5,
@@ -218,7 +222,11 @@ export const useFabricCanvas = ({
       });
       
       // Store reference to the crop box index
-      rect.data = { cropBoxIndex: index, memorabiliaType: box.memorabiliaType };
+      // We need to use type assertion since Fabric.js v6 doesn't have data property by default
+      (rect as any).data = { 
+        cropBoxIndex: index, 
+        memorabiliaType: box.memorabiliaType 
+      };
       
       canvas.add(rect);
       cropRects.current.push(rect);
@@ -236,7 +244,6 @@ export const useFabricCanvas = ({
     if (!canvasInstance.current || !backgroundImage.current) return;
     
     const canvas = canvasInstance.current;
-    const bgImage = backgroundImage.current;
     
     const canvasWidth = canvas.getWidth();
     const canvasHeight = canvas.getHeight();

@@ -1,4 +1,3 @@
-
 import React, { useRef, useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -93,9 +92,11 @@ const ImageEditorDialog: React.FC<ImageEditorDialogProps> = ({
   useEffect(() => {
     if (editorImage && showEditor) {
       setImageData({ 
-        url: editorImage, 
         width: 0, 
-        height: 0 
+        height: 0, 
+        scale: 1,
+        rotation: 0,
+        url: editorImage 
       });
     }
   }, [editorImage, showEditor, setImageData]);

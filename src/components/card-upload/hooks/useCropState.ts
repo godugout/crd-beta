@@ -7,6 +7,7 @@ export interface ImageData {
   height: number;
   scale: number;
   rotation: number;
+  url?: string; // Added url property
 }
 
 export const useCropState = () => {
