@@ -7,3 +7,5 @@ export * from './fabric/useInitFabricCanvas';
 export * from './fabric/useBackgroundImage';
 export * from './fabric/useCropRectangles';
 export * from './fabric/useCreateCropBox';
+export * from './fabric/useEventHandlers';
+export * from './fabric/index';
