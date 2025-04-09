@@ -1,10 +1,14 @@
 
-import React, { ReactNode, useState } from 'react';
+import React, { ReactNode, useState, useEffect } from 'react';
 import AppHeader from './AppHeader';
 import BreadcrumbNav from './Breadcrumb';
 import MobileNavigation from './MobileNavigation';
 import MobileBottomNav from './MobileBottomNav';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
+import MetaTags from '@/components/shared/MetaTags';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Team } from '@/lib/types/TeamTypes';
+import { useNavigationState } from '@/hooks/useNavigationState';
 
 interface PageLayoutProps {
   title: string;
@@ -14,7 +18,14 @@ interface PageLayoutProps {
   hideBreadcrumb?: boolean;
   canonicalPath?: string;
   imageUrl?: string;
-  type?: string;
+  type?: 'website' | 'article' | 'profile' | 'product';
+  team?: Team;
+  contentId?: string;
+  publishedTime?: string;
+  modifiedTime?: string;
+  section?: string;
+  keywords?: string[];
+  transitions?: boolean;
 }
 
 const PageLayout: React.FC<PageLayoutProps> = ({ 
@@ -25,10 +36,22 @@ const PageLayout: React.FC<PageLayoutProps> = ({
   hideBreadcrumb = false,
   canonicalPath,
   imageUrl,
-  type
+  type = 'website',
+  team,
+  contentId,
+  publishedTime,
+  modifiedTime,
+  section,
+  keywords,
+  transitions = true
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const isMobile = useMediaQuery('(max-width: 768px)');
+  const [scrollPosition, setScrollPosition] = useNavigationState({
+    key: 'scrollPosition',
+    defaultState: 0,
+    sessionOnly: true
+  });
 
   const handleOpenMenu = () => {
     setIsMenuOpen(true);
@@ -38,71 +61,68 @@ const PageLayout: React.FC<PageLayoutProps> = ({
     setIsMenuOpen(false);
   };
 
-  // Update document title when component mounts
-  React.useEffect(() => {
-    const previousTitle = document.title;
-    document.title = title ? `${title} | CardShow` : 'CardShow';
-    
-    // Set meta description if provided
-    let metaDescription = document.querySelector('meta[name="description"]');
-    if (description) {
-      if (!metaDescription) {
-        metaDescription = document.createElement('meta');
-        metaDescription.setAttribute('name', 'description');
-        document.head.appendChild(metaDescription);
-      }
-      metaDescription.setAttribute('content', description);
+  // Restore scroll position when navigating back
+  useEffect(() => {
+    if (scrollPosition > 0) {
+      window.scrollTo({
+        top: scrollPosition,
+        behavior: 'instant'
+      });
     }
-    
-    // Set canonical link if provided
-    let canonicalLink = document.querySelector('link[rel="canonical"]');
-    if (canonicalPath) {
-      if (!canonicalLink) {
-        canonicalLink = document.createElement('link');
-        canonicalLink.setAttribute('rel', 'canonical');
-        document.head.appendChild(canonicalLink);
-      }
-      // Base URL handling
-      const baseUrl = window.location.origin;
-      canonicalLink.setAttribute('href', `${baseUrl}${canonicalPath}`);
-    }
-    
-    // Set Open Graph metadata
-    const updateOgTag = (property: string, content: string) => {
-      let ogTag = document.querySelector(`meta[property="og:${property}"]`);
-      if (!ogTag) {
-        ogTag = document.createElement('meta');
-        ogTag.setAttribute('property', `og:${property}`);
-        document.head.appendChild(ogTag);
-      }
-      ogTag.setAttribute('content', content);
+  }, [scrollPosition]);
+
+  // Save scroll position before navigating away
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrollPosition(window.scrollY);
     };
-    
-    if (title) updateOgTag('title', title);
-    if (description) updateOgTag('description', description);
-    if (imageUrl) updateOgTag('image', imageUrl);
-    if (type) updateOgTag('type', type);
-    updateOgTag('url', window.location.href);
-    
-    return () => {
-      document.title = previousTitle;
-      
-      // Clean up canonical link when component unmounts
-      if (canonicalLink && canonicalPath) {
-        document.head.removeChild(canonicalLink);
-      }
-    };
-  }, [title, description, canonicalPath, imageUrl, type]);
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [setScrollPosition]);
+
+  const pageTransition = {
+    initial: { opacity: 0, y: 10 },
+    animate: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: -10 },
+    transition: { duration: 0.3 }
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
+      <MetaTags 
+        title={title}
+        description={description}
+        canonicalPath={canonicalPath}
+        imageUrl={imageUrl}
+        type={type}
+        teamName={team?.name}
+        contentId={contentId}
+        publishedTime={publishedTime}
+        modifiedTime={modifiedTime}
+        section={section}
+        keywords={keywords}
+      />
+      
       <AppHeader />
       
-      {!hideBreadcrumb && <BreadcrumbNav />}
+      {!hideBreadcrumb && <BreadcrumbNav currentTeam={team} />}
       
-      <main className={`flex-1 ${fullWidth ? '' : 'container mx-auto px-4 py-6'}`}>
-        {children}
-      </main>
+      <AnimatePresence mode="wait">
+        {transitions ? (
+          <motion.main
+            className={`flex-1 ${fullWidth ? '' : 'container mx-auto px-4 py-6'}`}
+            key={canonicalPath || location.pathname}
+            {...pageTransition}
+          >
+            {children}
+          </motion.main>
+        ) : (
+          <main className={`flex-1 ${fullWidth ? '' : 'container mx-auto px-4 py-6'}`}>
+            {children}
+          </main>
+        )}
+      </AnimatePresence>
       
       {/* Mobile menu and bottom navigation */}
       <MobileNavigation isOpen={isMenuOpen} onClose={handleCloseMenu} />

@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { Tabs, TabsContent } from '@/components/ui/tabs';
+import { AnimatePresence, motion } from 'framer-motion';
 import Navbar from '@/components/Navbar';
 import QuickCapture from '@/components/game-day/QuickCapture';
 import GameDetails from '@/components/game-day/GameDetails';
@@ -12,9 +13,17 @@ import GameDayActionBar from '@/components/game-day/GameDayActionBar';
 import SavedItemsTab from '@/components/game-day/SavedItemsTab';
 import { useLocationService } from '@/hooks/useLocationService';
 import { useConnectivity } from '@/hooks/useConnectivity';
+import { useNavigationState } from '@/hooks/useNavigationState';
+import MetaTags from '@/components/shared/MetaTags';
 
 const GameDayMode = () => {
-  const [activeTab, setActiveTab] = useState('capture');
+  // Use navigation state to persist tab selection across page navigations
+  const [activeTab, setActiveTab] = useNavigationState({ 
+    key: 'gameDayTab',
+    defaultState: 'capture',
+    sessionOnly: false // Remember tab across sessions
+  });
+  
   const { 
     location, 
     nearbyStadium,
@@ -45,7 +54,7 @@ const GameDayMode = () => {
         }
       });
     }
-  }, [isOnline, offlineItems]);
+  }, [isOnline, offlineItems, syncOfflineItems]);
 
   // Get today's game info
   const todayGameInfo = nearbyStadium?.todayGame || {
@@ -55,8 +64,23 @@ const GameDayMode = () => {
     isHomeGame: true
   };
 
+  // Animation variants
+  const tabContentVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.3 } },
+    exit: { opacity: 0, y: -20, transition: { duration: 0.2 } }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
+      <MetaTags 
+        title="Game Day Mode" 
+        description="Capture live game moments and memories with CardShow's Game Day Mode"
+        type="article"
+        section="Features"
+        keywords={['game day', 'live capture', 'baseball memories', 'stadium experience', 'sports']}
+      />
+      
       <Navbar />
       
       {!isOnline && <OfflineIndicator itemCount={offlineItems.length} />}
@@ -77,27 +101,43 @@ const GameDayMode = () => {
         />
         
         <Tabs value={activeTab}>
-          <TabsContent value="capture">
-            <QuickCapture 
-              stadiumContext={nearbyStadium} 
-              isOnline={isOnline}
-            />
-          </TabsContent>
-          
-          <TabsContent value="gameinfo">
-            <GameDetails 
-              gameInfo={todayGameInfo} 
-              stadiumInfo={nearbyStadium}
-            />
-          </TabsContent>
-          
-          <TabsContent value="saved">
-            <SavedItemsTab 
-              items={offlineItems}
-              isOnline={isOnline}
-              onSync={syncOfflineItems}
-            />
-          </TabsContent>
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={activeTab}
+              variants={tabContentVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+            >
+              <TabsContent value="capture" forceMount>
+                {activeTab === 'capture' && (
+                  <QuickCapture 
+                    stadiumContext={nearbyStadium} 
+                    isOnline={isOnline}
+                  />
+                )}
+              </TabsContent>
+              
+              <TabsContent value="gameinfo" forceMount>
+                {activeTab === 'gameinfo' && (
+                  <GameDetails 
+                    gameInfo={todayGameInfo} 
+                    stadiumInfo={nearbyStadium}
+                  />
+                )}
+              </TabsContent>
+              
+              <TabsContent value="saved" forceMount>
+                {activeTab === 'saved' && (
+                  <SavedItemsTab 
+                    items={offlineItems}
+                    isOnline={isOnline}
+                    onSync={syncOfflineItems}
+                  />
+                )}
+              </TabsContent>
+            </motion.div>
+          </AnimatePresence>
         </Tabs>
       </main>
       

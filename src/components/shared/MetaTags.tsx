@@ -7,10 +7,15 @@ interface MetaTagsProps {
   title?: string;
   description?: string;
   imageUrl?: string;
-  type?: 'website' | 'article' | 'profile';
+  type?: 'website' | 'article' | 'profile' | 'product';
   canonicalPath?: string;
   keywords?: string[];
   author?: string;
+  publishedTime?: string;
+  modifiedTime?: string;
+  section?: string;
+  teamName?: string;
+  contentId?: string;
 }
 
 const DEFAULT_TITLE = 'CardShow - Digital Trading Card Platform';
@@ -26,6 +31,11 @@ const MetaTags: React.FC<MetaTagsProps> = ({
   canonicalPath,
   keywords = [],
   author = 'CardShow Team',
+  publishedTime,
+  modifiedTime,
+  section,
+  teamName,
+  contentId,
 }) => {
   const location = useLocation();
   const currentPath = canonicalPath || location.pathname;
@@ -46,7 +56,37 @@ const MetaTags: React.FC<MetaTagsProps> = ({
     'card collection'
   ];
   
-  const allKeywords = [...new Set([...defaultKeywords, ...keywords])].join(', ');
+  // Add team name to keywords if available
+  const allKeywords = [...new Set([
+    ...defaultKeywords, 
+    ...keywords,
+    ...(teamName ? [teamName, 'sports memorabilia', teamName + ' memorabilia'] : [])
+  ])].join(', ');
+
+  // Structured data for search engines
+  const structuredData = {
+    '@context': 'https://schema.org',
+    '@type': type === 'article' ? 'Article' : 
+             type === 'product' ? 'Product' : 'WebPage',
+    headline: title,
+    description: description,
+    image: pageImage,
+    author: {
+      '@type': 'Organization',
+      name: author
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: 'CardShow',
+      logo: {
+        '@type': 'ImageObject',
+        url: `${BASE_URL}/logo.png`
+      }
+    },
+    url: canonicalUrl,
+    ...(publishedTime && { datePublished: publishedTime }),
+    ...(modifiedTime && { dateModified: modifiedTime })
+  };
   
   return (
     <Helmet>
@@ -65,6 +105,20 @@ const MetaTags: React.FC<MetaTagsProps> = ({
       <meta property="og:image" content={pageImage} />
       <meta property="og:site_name" content="CardShow" />
       
+      {/* Additional Open Graph tags for articles */}
+      {type === 'article' && publishedTime && (
+        <meta property="article:published_time" content={publishedTime} />
+      )}
+      {type === 'article' && modifiedTime && (
+        <meta property="article:modified_time" content={modifiedTime} />
+      )}
+      {type === 'article' && section && (
+        <meta property="article:section" content={section} />
+      )}
+      {teamName && (
+        <meta property="article:tag" content={teamName} />
+      )}
+      
       {/* Twitter */}
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:url" content={canonicalUrl} />
@@ -76,6 +130,11 @@ const MetaTags: React.FC<MetaTagsProps> = ({
       <meta name="robots" content="index, follow" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <meta httpEquiv="Content-Type" content="text/html; charset=utf-8" />
+      
+      {/* Structured Data for Search Engines */}
+      <script type="application/ld+json">
+        {JSON.stringify(structuredData)}
+      </script>
     </Helmet>
   );
 };

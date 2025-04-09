@@ -36,16 +36,12 @@ const TeamNavigation: React.FC<TeamNavigationProps> = ({ activeSection }) => {
   useEffect(() => {
     const fetchTeams = async () => {
       try {
-        // Use explicit type annotation and avoid deep type instantiation
-        const result = await supabase
+        const { data, error } = await supabase
           .from('teams')
           .select('id, name')
           .eq('is_active', true)
           .order('name')
           .limit(4);
-          
-        const teamData = result.data as TeamRecord[] | null;
-        const error = result.error;
           
         if (error) {
           console.error('Error fetching team navigation:', error);
@@ -54,9 +50,9 @@ const TeamNavigation: React.FC<TeamNavigationProps> = ({ activeSection }) => {
           return;
         }
           
-        if (teamData && Array.isArray(teamData)) {
+        if (data && Array.isArray(data)) {
           // Map the raw data to our TeamNavigationItem format
-          const mappedTeams: TeamNavigationItem[] = teamData.map((team) => ({
+          const mappedTeams: TeamNavigationItem[] = data.map((team: TeamRecord) => ({
             id: team.id || '',
             name: team.name || '',
             slug: team.name ? team.name.toLowerCase().replace(/\s+/g, '-') : '',
