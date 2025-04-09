@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 import { useCards } from '@/context/CardContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { OaklandMemoryForm } from './OaklandMemoryForm';
-import CardUpload from '@/components/card-upload/CardUpload';
+import ImageUploader from '@/components/dam/ImageUploader';
 import OaklandMemoryCard from './OaklandMemoryCard';
 import { OaklandTemplateType } from './OaklandCardTemplates';
 import { OaklandMemoryData } from '@/lib/types';
@@ -17,14 +17,14 @@ interface OaklandMemoryCreatorProps {
 const OaklandMemoryCreator: React.FC<OaklandMemoryCreatorProps> = ({ className }) => {
   const navigate = useNavigate();
   const { addCard } = useCards();
-  const [imageFile, setImageFile] = useState<File | null>(null);
   const [imageUrl, setImageUrl] = useState<string>('');
   const [memoryData, setMemoryData] = useState<OaklandMemoryData | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<OaklandTemplateType>('classic');
+  const [activeTab, setActiveTab] = useState<string>('upload');
 
-  const handleImageUpload = (file: File, url: string) => {
-    setImageFile(file);
+  const handleImageUpload = (url: string) => {
     setImageUrl(url);
+    setActiveTab('details');
   };
 
   const handleMemoryDataSubmit = (data: OaklandMemoryData) => {
@@ -34,6 +34,7 @@ const OaklandMemoryCreator: React.FC<OaklandMemoryCreatorProps> = ({ className }
       imageUrl: imageUrl
     };
     setMemoryData(updatedData);
+    setActiveTab('preview');
   };
 
   const templateOptions: Array<{id: OaklandTemplateType, name: string}> = [
@@ -97,7 +98,7 @@ const OaklandMemoryCreator: React.FC<OaklandMemoryCreatorProps> = ({ className }
 
   return (
     <div className={className}>
-      <Tabs defaultValue="upload" className="max-w-5xl mx-auto">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="max-w-5xl mx-auto">
         <TabsList className="grid grid-cols-3 mb-6">
           <TabsTrigger value="upload">1. Upload Image</TabsTrigger>
           <TabsTrigger value="details" disabled={!imageUrl}>2. Memory Details</TabsTrigger>
@@ -110,9 +111,10 @@ const OaklandMemoryCreator: React.FC<OaklandMemoryCreatorProps> = ({ className }
             <p className="text-center text-gray-600 mb-6">
               Upload a photo of your Oakland A's memory. It could be from a game, tailgate, or memorabilia.
             </p>
-            <CardUpload 
-              onImageUpload={handleImageUpload}
-              initialImageUrl={imageUrl}
+            <ImageUploader 
+              onUploadComplete={handleImageUpload}
+              title="Upload A's Memory"
+              maxSizeMB={5}
             />
           </div>
         </TabsContent>

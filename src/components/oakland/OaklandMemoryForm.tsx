@@ -1,121 +1,208 @@
 
 import React from 'react';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import * as z from 'zod';
 import { Button } from '@/components/ui/button';
-import { Form } from '@/components/ui/form';
-import BasicMemoryFields from './form-fields/BasicMemoryFields';
-import DatePickerField from './form-fields/DatePickerField';
-import MemoryTypeField from './form-fields/MemoryTypeField';
-import GameDetailsFields from './form-fields/GameDetailsFields';
-import LocationFields from './form-fields/LocationFields';
-import AttendeeField from './form-fields/AttendeeField';
-import TagField from './form-fields/TagField';
-import HistoricalContextField from './form-fields/HistoricalContextField';
-import PersonalSignificanceField from './form-fields/PersonalSignificanceField';
-import { format } from 'date-fns';
-import { OaklandMemoryData as OaklandMemoryDataType } from '@/lib/types';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { OaklandMemoryData } from '@/lib/types';
+import ImageUploader from '@/components/dam/ImageUploader';
 
-// Form schema for Oakland memories
-const formSchema = z.object({
-  title: z.string().min(2, { message: 'Please enter a title' }).max(100),
-  description: z.string().min(10, { message: 'Please enter a description' }).max(1000),
-  date: z.string().optional(),
-  memoryType: z.string().optional(),
-  opponent: z.string().optional(),
-  score: z.string().optional(),
-  location: z.string().optional(),
-  section: z.string().optional(),
-  attendees: z.array(z.string()).default([]),
-  tags: z.array(z.string()).default([]),
-  imageUrl: z.string().optional(),
-  historicalContext: z.string().optional(),
-  personalSignificance: z.string().optional(),
-});
-
-export type OaklandMemoryFormValues = z.infer<typeof formSchema>;
-
-// Component props
 interface OaklandMemoryFormProps {
-  onSubmit: (data: OaklandMemoryDataType) => void;
-  initialData?: Partial<OaklandMemoryDataType>;
+  initialData?: OaklandMemoryData;
+  onSubmit: (data: OaklandMemoryData) => void;
 }
 
-// Memory form component
-const OaklandMemoryForm: React.FC<OaklandMemoryFormProps> = ({ onSubmit, initialData }) => {
-  // Initialize form
-  const form = useForm<OaklandMemoryFormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      title: initialData?.title || '',
-      description: initialData?.description || '',
-      date: initialData?.date || format(new Date(), 'yyyy-MM-dd'),
-      memoryType: initialData?.memoryType || 'game',
-      opponent: initialData?.opponent || '',
-      score: initialData?.score || '',
-      location: initialData?.location || '',
-      section: initialData?.section || '',
-      attendees: initialData?.attendees || [],
-      tags: initialData?.tags || [],
-      imageUrl: initialData?.imageUrl || '',
-      historicalContext: initialData?.historicalContext || '',
-      personalSignificance: initialData?.personalSignificance || '',
-    },
+export const OaklandMemoryForm: React.FC<OaklandMemoryFormProps> = ({
+  initialData,
+  onSubmit
+}) => {
+  const { register, handleSubmit, setValue, formState: { errors }, watch } = useForm<OaklandMemoryData>({
+    defaultValues: initialData || {
+      title: '',
+      description: '',
+      tags: []
+    }
   });
-
-  // Handle form submission
-  const handleFormSubmit = (data: OaklandMemoryFormValues) => {
-    onSubmit(data as OaklandMemoryDataType);
+  
+  const watchTags = watch('tags') || [];
+  
+  const handleAddTag = (tag: string) => {
+    if (tag.trim() && !watchTags.includes(tag.trim())) {
+      setValue('tags', [...watchTags, tag.trim()]);
+      return true;
+    }
+    return false;
+  };
+  
+  const handleRemoveTag = (tagToRemove: string) => {
+    setValue('tags', watchTags.filter(tag => tag !== tagToRemove));
+  };
+  
+  const handleTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const input = e.currentTarget;
+      if (handleAddTag(input.value)) {
+        input.value = '';
+      }
+    }
+  };
+  
+  const handleImageUploadComplete = (imageUrl: string) => {
+    setValue('imageUrl', imageUrl);
   };
 
-  const selectedMemoryType = form.watch('memoryType');
-
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
-        {/* Basic Fields: Title and Description */}
-        <BasicMemoryFields form={form} />
-
-        {/* Date Picker */}
-        <DatePickerField form={form} />
-
-        {/* Memory Type */}
-        <MemoryTypeField form={form} />
-
-        {/* Game Specific Fields */}
-        {(selectedMemoryType === 'game' || !selectedMemoryType) && (
-          <GameDetailsFields form={form} />
-        )}
-
-        {/* Location Fields */}
-        <LocationFields form={form} />
-
-        {/* Historical Context */}
-        <HistoricalContextField form={form} />
-
-        {/* Personal Significance */}
-        <PersonalSignificanceField form={form} />
-
-        {/* Attendees */}
-        <AttendeeField 
-          attendees={form.watch('attendees')} 
-          onAttendeeChange={(attendees) => form.setValue('attendees', attendees)}
-        />
-
-        {/* Tags */}
-        <TagField 
-          tags={form.watch('tags')} 
-          onTagsChange={(tags) => form.setValue('tags', tags)}
-        />
-
-        {/* Submit Button */}
-        <Button type="submit" className="w-full bg-[#006341] hover:bg-[#003831]">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="space-y-4">
+          <div>
+            <Label htmlFor="title">Memory Title</Label>
+            <Input
+              id="title"
+              {...register('title', { required: 'Title is required' })}
+              placeholder="e.g. First A's Game"
+              className="mt-1"
+            />
+            {errors.title && (
+              <p className="text-red-500 text-sm mt-1">{errors.title.message}</p>
+            )}
+          </div>
+          
+          <div>
+            <Label htmlFor="date">Date</Label>
+            <Input
+              id="date"
+              type="date"
+              {...register('date')}
+              className="mt-1"
+            />
+          </div>
+          
+          <div>
+            <Label htmlFor="location">Location</Label>
+            <Input
+              id="location"
+              {...register('location')}
+              placeholder="e.g. Oakland Coliseum"
+              className="mt-1"
+            />
+          </div>
+          
+          <div>
+            <Label htmlFor="opponent">Opponent (if applicable)</Label>
+            <Input
+              id="opponent"
+              {...register('opponent')}
+              placeholder="e.g. Los Angeles Angels"
+              className="mt-1"
+            />
+          </div>
+          
+          <div>
+            <Label htmlFor="score">Score (if applicable)</Label>
+            <Input
+              id="score"
+              {...register('score')}
+              placeholder="e.g. A's 5, Angels 3"
+              className="mt-1"
+            />
+          </div>
+          
+          <div>
+            <Label htmlFor="section">Section/Seats (if applicable)</Label>
+            <Input
+              id="section"
+              {...register('section')}
+              placeholder="e.g. Section 120, Row 5"
+              className="mt-1"
+            />
+          </div>
+        </div>
+        
+        <div className="space-y-4">
+          <div>
+            <Label htmlFor="description">Description</Label>
+            <Textarea
+              id="description"
+              {...register('description', { required: 'Description is required' })}
+              rows={4}
+              placeholder="Share your memory..."
+              className="mt-1"
+            />
+            {errors.description && (
+              <p className="text-red-500 text-sm mt-1">{errors.description.message}</p>
+            )}
+          </div>
+          
+          <div>
+            <Label htmlFor="memoryType">Type of Memory</Label>
+            <Input
+              id="memoryType"
+              {...register('memoryType')}
+              placeholder="e.g. Game, Event, Memorabilia"
+              className="mt-1"
+            />
+          </div>
+          
+          <div>
+            <Label htmlFor="tags">Tags</Label>
+            <div className="flex items-center gap-2">
+              <Input
+                id="tagInput"
+                placeholder="Add a tag..."
+                onKeyDown={handleTagKeyDown}
+                className="mt-1"
+              />
+              <Button 
+                type="button"
+                onClick={(e) => {
+                  const input = document.getElementById('tagInput') as HTMLInputElement;
+                  if (handleAddTag(input.value)) {
+                    input.value = '';
+                  }
+                }}
+              >
+                Add
+              </Button>
+            </div>
+            {watchTags.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-2">
+                {watchTags.map((tag, index) => (
+                  <div key={index} className="flex items-center bg-green-100 text-green-800 px-2 py-1 rounded-full text-sm">
+                    {tag}
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveTag(tag)}
+                      className="ml-1 text-green-600 hover:text-green-800"
+                    >
+                      &times;
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          
+          <div>
+            <Label>Memory Image</Label>
+            <div className="mt-1">
+              <ImageUploader
+                onUploadComplete={handleImageUploadComplete}
+                title="Upload Your Memory Image"
+                maxSizeMB={5}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div className="flex justify-end">
+        <Button type="submit" className="bg-[#006341] hover:bg-[#003831]">
           Save Memory Details
         </Button>
-      </form>
-    </Form>
+      </div>
+    </form>
   );
 };
-
-export { OaklandMemoryForm };

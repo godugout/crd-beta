@@ -18,7 +18,7 @@ const CardMedia: React.FC<CardMediaProps> = ({ card, onView, className = '' }) =
   const [isLoaded, setIsLoaded] = useState(false);
   const [isError, setIsError] = useState(false);
 
-  // Use the best available image source
+  // Use the best available image source or fallback
   const imageSource = card.imageUrl || card.thumbnailUrl || '/placeholder.svg';
 
   // Handle image load success
