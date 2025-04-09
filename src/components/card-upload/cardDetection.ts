@@ -125,24 +125,78 @@ export async function detectText(
   team?: string;
   year?: string;
   tags: string[];
+  position?: string;
+  sport?: string;
+  manufacturer?: string;
+  condition?: string;
+  cardNumber?: string;
+  setName?: string;
+  confidence?: number;
 } | null> {
   try {
     // In a real implementation, this would call an OCR API
-    // For now, we'll simulate text detection with placeholder logic
+    // For now, we'll enhance our simulated text detection with more card-specific fields
     
-    // Create a simple object with detected text fields
+    // Create a more comprehensive object with detected text fields
     // In production this would use OCR to extract actual text from the card image
+    
+    // Analyze image content to make better guesses about card type
+    const isBaseballCard = Math.random() > 0.3; // Would be based on actual image analysis
+    const isVintage = Math.random() > 0.5; // Would detect vintage vs modern styles
+    
+    let tags = ["card"];
+    let sport = "baseball";
+    let year = "1989";
+    let team = "Oakland Athletics";
+    let playerName = "John Smith";
+    let position = "Pitcher";
+    let setName = "Topps";
+    let manufacturer = "Topps";
+    let cardNumber = "152";
+    
+    if (isBaseballCard) {
+      tags.push("baseball");
+      
+      if (isVintage) {
+        tags.push("vintage");
+        year = String(1950 + Math.floor(Math.random() * 40)); // Random year between 1950-1990
+        manufacturer = ["Topps", "Bowman", "Fleer"][Math.floor(Math.random() * 3)];
+      } else {
+        tags.push("modern");
+        year = String(1990 + Math.floor(Math.random() * 33)); // Random year between 1990-2023
+        manufacturer = ["Topps", "Upper Deck", "Panini", "Fleer Ultra"][Math.floor(Math.random() * 4)];
+      }
+      
+      // More common teams for better simulation
+      team = ["New York Yankees", "Boston Red Sox", "Chicago Cubs", "Los Angeles Dodgers", 
+              "San Francisco Giants", "Oakland Athletics", "Atlanta Braves"][Math.floor(Math.random() * 7)];
+      
+      // Common baseball positions
+      position = ["Pitcher", "Catcher", "First Base", "Second Base", "Shortstop", 
+                 "Third Base", "Left Field", "Center Field", "Right Field"][Math.floor(Math.random() * 9)];
+    }
+    
+    // Put relevant data in title format
+    const title = `${year} ${manufacturer} ${playerName} #${cardNumber}`;
+    
     const extractedText = {
-      text: "This is the full text detected on the card",
-      title: "Vintage Baseball Card",
-      player: "John Smith",
-      team: "Oakland Athletics",
-      year: "1989",
-      tags: ["baseball", "vintage", "athletics"]
+      text: `${playerName}, ${position}, ${team}, ${year} ${setName} Baseball Card #${cardNumber}`,
+      title: title,
+      player: playerName,
+      team: team,
+      year: year,
+      position: position,
+      sport: sport,
+      manufacturer: manufacturer,
+      cardNumber: cardNumber,
+      setName: setName,
+      condition: ["Mint", "Near Mint", "Excellent", "Very Good", "Good"][Math.floor(Math.random() * 5)],
+      tags: tags,
+      confidence: 0.75 + (Math.random() * 0.2) // Random confidence between 0.75-0.95
     };
     
-    // Simulate processing time
-    await new Promise(resolve => setTimeout(resolve, 500));
+    // Simulate processing time for realism
+    await new Promise(resolve => setTimeout(resolve, 800));
     
     return extractedText;
   } catch (error) {

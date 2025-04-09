@@ -6,6 +6,8 @@ import ImageEditor from '../card-upload/ImageEditor';
 import PageLayout from '../navigation/PageLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { MemorabiliaType } from '../card-upload/cardDetection';
+import { useNavigate } from 'react-router-dom';
+import { toast } from "sonner";
 
 const CardDetectorPage = () => {
   const [showEditor, setShowEditor] = useState(false);
@@ -13,6 +15,7 @@ const CardDetectorPage = () => {
   const [currentFile, setCurrentFile] = useState<File | null>(null);
   const [detectionResults, setDetectionResults] = useState<any>(null);
   const [activeTab, setActiveTab] = useState('upload');
+  const navigate = useNavigate();
   
   // Enable all memorabilia types
   const enabledMemorabiliaTypes: MemorabiliaType[] = [
@@ -41,6 +44,23 @@ const CardDetectorPage = () => {
     setDetectionResults({ file, url, memorabiliaType, metadata });
     setActiveTab('results');
     console.log('Crop complete with metadata:', metadata);
+  };
+
+  const handleCreateCard = () => {
+    if (!detectionResults) {
+      toast.error("No card detected to edit");
+      return;
+    }
+
+    // Navigate to card editor with the extracted data
+    navigate("/cards/create", {
+      state: {
+        imageUrl: detectionResults.url,
+        file: detectionResults.file,
+        metadata: detectionResults.metadata,
+        cardType: detectionResults.memorabiliaType
+      }
+    });
   };
   
   return (
@@ -98,12 +118,20 @@ const CardDetectorPage = () => {
                             <dd>{detectionResults.metadata?.year || 'Not detected'}</dd>
                           </dl>
                         </div>
-                        <Button 
-                          onClick={() => setActiveTab('upload')}
-                          variant="outline"
-                        >
-                          Upload Another
-                        </Button>
+                        <div className="flex gap-2">
+                          <Button 
+                            onClick={() => setActiveTab('upload')}
+                            variant="outline"
+                          >
+                            Upload Another
+                          </Button>
+                          <Button 
+                            onClick={handleCreateCard}
+                            variant="default"
+                          >
+                            Create Card
+                          </Button>
+                        </div>
                       </div>
                     )}
                   </TabsContent>
@@ -137,7 +165,10 @@ const CardDetectorPage = () => {
                 </div>
                 
                 {detectionResults && (
-                  <Button className="w-full">
+                  <Button 
+                    className="w-full"
+                    onClick={handleCreateCard}
+                  >
                     Create Card
                   </Button>
                 )}

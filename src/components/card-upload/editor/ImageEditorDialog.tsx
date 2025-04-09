@@ -2,7 +2,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Loader2, Info } from "lucide-react";
+import { Loader2, Info, Tag, User, Calendar, Jersey } from 'lucide-react';
 import { useCropState } from '../hooks/useCropState';
 import { useEditor } from '../hooks/useEditor';
 import { useCropBoxOperations } from '../hooks/useCropBoxOperations';
@@ -12,6 +12,7 @@ import EditorContent from './EditorContent';
 import CardTypeSelector from '../components/CardTypeSelector';
 import { toast } from "sonner";
 import { storageOperations } from '@/lib/supabase/storage';
+import { Badge } from '@/components/ui/badge';
 
 interface ImageEditorDialogProps {
   showEditor: boolean;
@@ -41,6 +42,7 @@ const ImageEditorDialog: React.FC<ImageEditorDialogProps> = ({
   
   const [isExtractingSaving, setIsExtractingSaving] = useState(false);
   const [extractedMetadata, setExtractedMetadata] = useState<any>(null);
+  const [isExtractingMetadata, setIsExtractingMetadata] = useState(false);
   
   // Card selection state
   const { imageData, setImageData, cropBoxes, setCropBoxes, detectedCards, setDetectedCards } = useCropState();
@@ -122,12 +124,18 @@ const ImageEditorDialog: React.FC<ImageEditorDialogProps> = ({
         memorabiliaType: type
       };
       setCropBoxes(newBoxes);
+      
+      // When type changes, clear previous metadata and extract again
+      setExtractedMetadata(null);
+      extractCardMetadata();
     }
   };
   
   // Extract text from image when a crop box is selected
   const extractCardMetadata = async () => {
     if (selectedCropIndex < 0 || !editorImgRef.current) return null;
+    
+    setIsExtractingMetadata(true);
     
     try {
       const selectedBox = cropBoxes[selectedCropIndex];
@@ -149,12 +157,22 @@ const ImageEditorDialog: React.FC<ImageEditorDialogProps> = ({
       
       // Extract text from the cropped area
       const textData = await detectText(tempCanvas);
+      setExtractedMetadata(textData);
       return textData;
     } catch (error) {
       console.error('Error extracting metadata:', error);
       return null;
+    } finally {
+      setIsExtractingMetadata(false);
     }
   };
+  
+  // Extract metadata when crop box is selected
+  useEffect(() => {
+    if (selectedCropIndex >= 0 && !extractedMetadata) {
+      extractCardMetadata();
+    }
+  }, [selectedCropIndex]);
   
   // Extract and save card to catalog
   const handleExtractAndSaveCard = async () => {
@@ -169,9 +187,8 @@ const ImageEditorDialog: React.FC<ImageEditorDialogProps> = ({
       // Extract the card
       const selectedBox = cropBoxes[selectedCropIndex];
       
-      // Extract metadata before cropping
-      const metadata = await extractCardMetadata();
-      setExtractedMetadata(metadata);
+      // Extract metadata before cropping if not already done
+      const metadata = extractedMetadata || await extractCardMetadata();
       
       const result = await stageSelectedCrop(
         selectedBox, 
@@ -195,6 +212,12 @@ const ImageEditorDialog: React.FC<ImageEditorDialogProps> = ({
         year: metadata?.year,
         player: metadata?.player,
         team: metadata?.team,
+        position: metadata?.position,
+        sport: metadata?.sport,
+        manufacturer: metadata?.manufacturer,
+        cardNumber: metadata?.cardNumber,
+        setName: metadata?.setName,
+        condition: metadata?.condition
       };
       
       try {
@@ -292,6 +315,23 @@ const ImageEditorDialog: React.FC<ImageEditorDialogProps> = ({
                 >
                   Fit to Card Dimensions
                 </Button>
+                
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={extractCardMetadata}
+                  disabled={selectedCropIndex < 0 || isExtractingMetadata}
+                  className="w-full"
+                >
+                  {isExtractingMetadata ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Extracting Text...
+                    </>
+                  ) : (
+                    "Extract Text"
+                  )}
+                </Button>
               </div>
               
               {selectedCropIndex >= 0 && cropBoxes[selectedCropIndex] && (
@@ -301,7 +341,9 @@ const ImageEditorDialog: React.FC<ImageEditorDialogProps> = ({
                     <div className="w-full bg-gray-200 rounded-full h-2.5">
                       <div 
                         className="bg-green-600 h-2.5 rounded-full" 
-                        style={{ width: `${(cropBoxes[selectedCropIndex].confidence || 0) * 100}%` }}
+                        style={{ 
+                          width: `${((cropBoxes[selectedCropIndex].confidence || 0) * 100)}%` 
+                        }}
                       ></div>
                     </div>
                     <span className="ml-2 text-xs font-medium">
@@ -327,6 +369,76 @@ const ImageEditorDialog: React.FC<ImageEditorDialogProps> = ({
                   onSelect={(type) => handleMemorabiliaTypeChange(selectedCropIndex, type as MemorabiliaType)}
                   types={['card', 'autograph']}
                 />
+              </div>
+            )}
+            
+            {extractedMetadata && (
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h3 className="text-sm font-medium mb-2 flex items-center justify-between">
+                  <span>Detected Info</span>
+                  <Badge variant="outline" className="text-xs">
+                    {Math.round((extractedMetadata?.confidence || 0) * 100)}% accuracy
+                  </Badge>
+                </h3>
+                
+                <div className="space-y-2 text-sm">
+                  {extractedMetadata.title && (
+                    <div className="flex items-start gap-2">
+                      <Tag className="h-4 w-4 text-gray-500 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <p className="font-medium">Title</p>
+                        <p className="text-gray-700">{extractedMetadata.title}</p>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {extractedMetadata.player && (
+                    <div className="flex items-start gap-2">
+                      <User className="h-4 w-4 text-gray-500 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <p className="font-medium">Player</p>
+                        <p className="text-gray-700">
+                          {extractedMetadata.player}
+                          {extractedMetadata.position ? ` • ${extractedMetadata.position}` : ''}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {extractedMetadata.team && (
+                    <div className="flex items-start gap-2">
+                      <Jersey className="h-4 w-4 text-gray-500 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <p className="font-medium">Team</p>
+                        <p className="text-gray-700">{extractedMetadata.team}</p>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {extractedMetadata.year && (
+                    <div className="flex items-start gap-2">
+                      <Calendar className="h-4 w-4 text-gray-500 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <p className="font-medium">Year</p>
+                        <p className="text-gray-700">
+                          {extractedMetadata.year}
+                          {extractedMetadata.manufacturer ? ` ${extractedMetadata.manufacturer}` : ''}
+                          {extractedMetadata.cardNumber ? ` #${extractedMetadata.cardNumber}` : ''}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {extractedMetadata.tags && extractedMetadata.tags.length > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-1">
+                      {extractedMetadata.tags.map((tag: string, i: number) => (
+                        <Badge key={i} variant="secondary" className="text-xs">
+                          {tag}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             )}
             
