@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
@@ -35,6 +36,7 @@ const TeamNavigation: React.FC<TeamNavigationProps> = ({ activeSection }) => {
   useEffect(() => {
     const fetchTeams = async () => {
       try {
+        // Explicitly type the response to avoid deep type instantiation
         const { data: teamData, error } = await supabase
           .from('teams')
           .select('id, name')
@@ -51,7 +53,7 @@ const TeamNavigation: React.FC<TeamNavigationProps> = ({ activeSection }) => {
           
         if (teamData && Array.isArray(teamData)) {
           // Map the raw data to our TeamNavigationItem format
-          const mappedTeams: TeamNavigationItem[] = teamData.map((team: TeamRecord) => ({
+          const mappedTeams: TeamNavigationItem[] = teamData.map((team) => ({
             id: team.id || '',
             name: team.name || '',
             slug: team.name ? team.name.toLowerCase().replace(/\s+/g, '-') : '',
