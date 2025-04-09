@@ -46,6 +46,16 @@ const CardUploadInfo: React.FC<CardUploadInfoProps> = ({
     onFileChange(file);
   };
 
+  const handleAddTag = (tag: string) => {
+    if (!tags.includes(tag)) {
+      setTags([...tags, tag]);
+    }
+  };
+
+  const handleRemoveTag = (tag: string) => {
+    setTags(tags.filter(t => t !== tag));
+  };
+
   return (
     <div className="space-y-8">
       <h2 className="text-2xl font-bold mb-4">Upload & Card Info</h2>
@@ -116,9 +126,10 @@ const CardUploadInfo: React.FC<CardUploadInfoProps> = ({
           <div className="space-y-2">
             <Label htmlFor="tags">Tags</Label>
             <TagInput
-              value={tags}
-              onChange={setTags}
-              placeholder="Add tags and press Enter"
+              tags={tags}
+              onAddTag={handleAddTag}
+              onRemoveTag={handleRemoveTag}
+              className=""
             />
           </div>
         </div>
