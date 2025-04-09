@@ -14,6 +14,7 @@ import OaklandMemoryCreatorPage from '@/pages/OaklandMemoryCreator';
 import Experiences from '@/pages/Experiences';
 import MediaLibrary from '@/pages/MediaLibrary';
 import BaseballCardViewer from '@/pages/BaseballCardViewer';
+import GameDayMode from '@/pages/GameDayMode';
 import NotFound from '@/pages/NotFound';
 
 const router = createBrowserRouter([
@@ -68,6 +69,16 @@ const router = createBrowserRouter([
   {
     path: '/features/baseball-viewer',
     element: <BaseballCardViewer />,
+  },
+  
+  // Add Game Day Mode routes
+  {
+    path: '/features/gameday',
+    element: <GameDayMode />,
+  },
+  {
+    path: '/gameday',
+    element: <GameDayMode />,
   },
   
   // Fallback 404 route
