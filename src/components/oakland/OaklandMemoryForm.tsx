@@ -8,6 +8,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { OaklandMemoryData } from '@/lib/types';
 import ImageUploader from '@/components/dam/ImageUploader';
 
+export interface OaklandMemoryFormValues extends OaklandMemoryData {}
+
 interface OaklandMemoryFormProps {
   initialData?: OaklandMemoryData;
   onSubmit: (data: OaklandMemoryData) => void;

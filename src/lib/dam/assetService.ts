@@ -62,21 +62,28 @@ export const assetService = {
         .getPublicUrl(filePath);
         
       // 4. Create asset record in database
+      const insertData = {
+        title: options.title || file.name,
+        description: options.description,
+        mime_type: file.type,
+        storage_path: filePath,
+        file_size: file.size,
+        tags: options.tags || [],
+        metadata: options.metadata || {},
+        original_filename: file.name,
+        card_id: options.cardId,
+        collection_id: options.collectionId,
+        asset_type: file.type.startsWith('image/') ? 'image' : 'document'
+      };
+      
+      // Add the public URL separately if it exists
+      const publicUrl = urlData?.publicUrl || '';
+      
       const { data: asset, error: dbError } = await supabase
         .from('digital_assets')
         .insert({
-          title: options.title || file.name,
-          description: options.description,
-          mime_type: file.type,
-          storage_path: filePath,
-          public_url: urlData?.publicUrl,
-          file_size: file.size,
-          tags: options.tags || [],
-          metadata: options.metadata || {},
-          original_filename: file.name,
-          card_id: options.cardId,
-          collection_id: options.collectionId,
-          asset_type: file.type.startsWith('image/') ? 'image' : 'document'
+          ...insertData,
+          public_url: publicUrl
         })
         .select('*')
         .single();
