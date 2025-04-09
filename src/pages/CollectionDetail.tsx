@@ -1,10 +1,10 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useCards } from '@/context/CardContext';
 import PageLayout from '@/components/navigation/PageLayout';
 import CardGrid from '@/components/gallery/CardGrid';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, Grid, List, Share2 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -16,10 +16,23 @@ const CollectionDetail = () => {
   const { collections, cards, isLoading } = useCards();
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   
+  // Find the collection by ID
   const collection = collections.find(c => c.id === id);
-  const collectionCards = collection 
-    ? cards.filter(card => collection.cardIds.includes(card.id))
-    : [];
+  
+  // Get cards that belong to this collection
+  const collectionCards = React.useMemo(() => {
+    if (!collection) return [];
+    return cards.filter(card => collection.cardIds.includes(card.id));
+  }, [collection, cards]);
+  
+  // Log for debugging
+  useEffect(() => {
+    console.log('Collection ID:', id);
+    console.log('Collection found:', collection);
+    console.log('Collection cards:', collectionCards);
+    console.log('All cards:', cards);
+    console.log('All collections:', collections);
+  }, [id, collection, collectionCards, cards, collections]);
   
   if (isLoading) {
     return (
@@ -55,6 +68,7 @@ const CollectionDetail = () => {
 
   const handleCardClick = (cardId: string) => {
     // Navigate to card detail view
+    console.log('Card clicked:', cardId);
   };
 
   const handleShareCollection = () => {

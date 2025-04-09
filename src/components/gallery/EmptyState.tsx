@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { RefreshCw, Search, Plus } from 'lucide-react';
+import { RefreshCw, Search, Plus, Image } from 'lucide-react';
 
 interface EmptyStateProps {
   isEmpty: boolean;
@@ -39,7 +39,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({
           <Search className="h-8 w-8 text-gray-400" />
         ) : (
           <div className="rounded-full bg-gray-200 p-3">
-            <Plus className="h-6 w-6 text-gray-500" />
+            <Image className="h-6 w-6 text-gray-500" />
           </div>
         )}
       </div>

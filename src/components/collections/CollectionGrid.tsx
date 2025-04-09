@@ -2,9 +2,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Collection } from '@/context/CardContext';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Lock, Globe, Users } from 'lucide-react';
+import { Lock, Globe, Users, Image } from 'lucide-react';
 
 interface CollectionGridProps {
   collections: Collection[];
@@ -42,18 +42,21 @@ const CollectionGrid: React.FC<CollectionGridProps> = ({ collections, isLoading,
       {collections.map((collection) => (
         <Link key={collection.id} to={`/collections/${collection.id}`}>
           <Card className="overflow-hidden hover:shadow-md transition-shadow h-full">
-            <div className="h-40 bg-gray-100">
+            <div className="h-40 bg-gray-100 relative">
               {collection.coverImageUrl ? (
                 <img
                   src={collection.coverImageUrl}
                   alt={collection.name}
                   className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                    e.currentTarget.parentElement?.classList.add('fallback-active');
+                  }}
                 />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-200 to-gray-100">
-                  <span className="text-gray-400">No Cover Image</span>
-                </div>
-              )}
+              ) : null}
+              <div className={`w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-200 to-gray-100 ${collection.coverImageUrl ? 'absolute top-0 left-0 opacity-0 fallback' : ''}`}>
+                <Image className="h-12 w-12 text-gray-400" />
+              </div>
             </div>
             <CardContent className="p-4">
               <h3 className="font-medium text-lg mb-1">{collection.name}</h3>

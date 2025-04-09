@@ -30,14 +30,16 @@ const CardGrid: React.FC<CardGridProps> = ({
     );
   }
   
-  if (cards.length === 0) {
+  if (!cards || cards.length === 0) {
     return <EmptyState 
       isEmpty={true} 
       isFiltered={false} 
       onRefresh={async () => {
-        // Return a Promise
+        console.log("Refreshing cards");
         return Promise.resolve();
       }} 
+      title="No cards found"
+      description="There are no cards in this collection yet."
     />;
   }
 

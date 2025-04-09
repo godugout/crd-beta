@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Eye, ZoomIn } from 'lucide-react';
+import { Eye, ZoomIn, Image } from 'lucide-react';
 import { Card } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -18,10 +18,15 @@ const CardMedia: React.FC<CardMediaProps> = ({ card, onView, className = '' }) =
   const [isLoaded, setIsLoaded] = useState(false);
   const [isError, setIsError] = useState(false);
 
+  // Use the best available image source
+  const imageSource = card.imageUrl || card.thumbnailUrl || '/placeholder.svg';
+
+  // Handle image load success
   const handleImageLoad = () => {
     setIsLoaded(true);
   };
 
+  // Handle image load error
   const handleImageError = () => {
     setIsError(true);
   };
@@ -37,20 +42,7 @@ const CardMedia: React.FC<CardMediaProps> = ({ card, onView, className = '' }) =
       {isError && (
         <div className="w-full h-0 pb-[140%] bg-slate-100 flex items-center justify-center">
           <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-400">
-            <svg 
-              xmlns="http://www.w3.org/2000/svg" 
-              className="h-12 w-12 mb-2" 
-              fill="none" 
-              viewBox="0 0 24 24" 
-              stroke="currentColor"
-            >
-              <path 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                strokeWidth={2} 
-                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" 
-              />
-            </svg>
+            <Image className="h-12 w-12 mb-2" />
             <div className="text-center px-4">
               <div className="mb-1">Image not available</div>
               <div className="text-xs opacity-75">{card.title}</div>
@@ -61,7 +53,7 @@ const CardMedia: React.FC<CardMediaProps> = ({ card, onView, className = '' }) =
       
       {/* Actual image */}
       <img
-        src={card.imageUrl || card.thumbnailUrl}
+        src={imageSource}
         alt={card.title}
         className={cn(
           "w-full aspect-[3/4] object-cover transition-all duration-300",
