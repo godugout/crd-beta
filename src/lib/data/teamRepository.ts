@@ -31,6 +31,7 @@ export const teamRepository = {
       
       const teamMembers: TeamMember[] = data.map(member => {
         // Create a user object with the profile data
+        // The issue is here - profiles is an object, not an array
         const user: User | undefined = member.profiles ? {
           id: member.profiles.id,
           email: member.profiles.email || '',
