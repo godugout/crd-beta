@@ -3,6 +3,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useCards } from '@/context/CardContext';
 import { Card } from '@/lib/types';
+import { toast } from 'sonner';
 
 export const useGalleryCards = () => {
   const [sortOrder, setSortOrder] = useState<string>('newest');
@@ -36,6 +37,9 @@ export const useGalleryCards = () => {
   // Process cards for display
   const displayCards = useMemo(() => sortedCards.map(card => ({
     ...card,
+    // Ensure imageUrl is actually present or use thumbnailUrl as fallback
+    imageUrl: card.imageUrl || card.thumbnailUrl || '',
+    // Process other card data
     designMetadata: {
       ...card.designMetadata,
       oaklandMemory: card.designMetadata?.oaklandMemory ? {
@@ -48,10 +52,12 @@ export const useGalleryCards = () => {
 
   // Effect to refresh cards when component mounts or when directed from another page
   useEffect(() => {
+    console.log("Fetching gallery cards...");
     refreshCards?.();
     
     const queryParams = new URLSearchParams(location.search);
     if (queryParams.get('refresh') === 'true') {
+      console.log("Refresh parameter detected, refreshing cards...");
       refreshCards?.();
       queryParams.delete('refresh');
       navigate({
@@ -60,6 +66,14 @@ export const useGalleryCards = () => {
       }, { replace: true });
     }
   }, [location.search, refreshCards, navigate]);
+  
+  // Log image URLs to help with debugging
+  useEffect(() => {
+    if (displayCards.length > 0) {
+      console.log("Available cards:", displayCards.length);
+      console.log("First card imageUrl:", displayCards[0].imageUrl);
+    }
+  }, [displayCards]);
 
   return {
     displayCards,

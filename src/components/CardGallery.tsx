@@ -21,6 +21,7 @@ interface CardGalleryProps {
   teamId?: string;
   collectionId?: string;
   tags?: string[];
+  isLoading?: boolean;
 }
 
 const CardGallery: React.FC<CardGalleryProps> = ({ 
@@ -30,7 +31,8 @@ const CardGallery: React.FC<CardGalleryProps> = ({
   cards: propCards,
   teamId,
   collectionId,
-  tags: initialTags
+  tags: initialTags,
+  isLoading: propIsLoading = false
 }) => {
   const navigate = useNavigate();
   const [viewMode, setViewMode] = useState(initialViewMode);
@@ -39,11 +41,12 @@ const CardGallery: React.FC<CardGalleryProps> = ({
   
   const { 
     cards: contextCards, 
-    isLoading: isLoadingCards,
+    isLoading: contextIsLoading,
     refreshCards 
   } = useCards();
   
   const cards = propCards || contextCards;
+  const isLoading = propIsLoading || contextIsLoading;
   
   const { isMobile, shouldOptimizeAnimations } = useMobileOptimization();
   
@@ -59,7 +62,8 @@ const CardGallery: React.FC<CardGalleryProps> = ({
     [cards]
   );
   
-  const isLoading = isLoadingCards || isLoadingEffects;
+  // Combined loading state
+  const isLoadingAny = isLoading || isLoadingEffects;
   
   const handleTagSelect = (tag: string) => {
     setSelectedTags(prev => 
@@ -78,47 +82,51 @@ const CardGallery: React.FC<CardGalleryProps> = ({
     if (onCardClick) {
       onCardClick(cardId);
     } else {
-      navigate(`/card/${cardId}`);
+      navigate(`/cards/${cardId}`);
     }
   };
   
-  const handleCreateCard = () => {
-    navigate('/editor');
-  };
+  // Debug log
+  console.log("CardGallery rendering with cards:", cards.length, "filtered:", filteredCards.length, "loading:", isLoadingAny);
 
   return (
-    <div className={cn("", className)}>
+    <div className={className}>
       <ErrorBoundary>
-        <GalleryToolbar
+        <GalleryToolbar 
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
-          viewMode={viewMode}
-          onViewModeChange={setViewMode}
-          onCreateCard={handleCreateCard}
+          selectedTagCount={selectedTags.length}
+          onClearFilters={clearFilters}
         />
         
-        <TagFilter 
-          allTags={allTags}
-          selectedTags={selectedTags}
-          onTagSelect={handleTagSelect}
-          onClearFilters={(selectedTags.length > 0 || searchQuery) ? clearFilters : undefined}
-        />
+        {allTags.length > 0 && (
+          <TagFilter 
+            tags={allTags}
+            selectedTags={selectedTags}
+            onTagSelect={handleTagSelect}
+          />
+        )}
         
         {viewMode === 'grid' ? (
           <CardGridWrapper 
             cards={filteredCards}
-            isLoading={isLoading}
-            error={null}
-            onCardClick={handleCardItemClick}
-            getCardEffects={(cardId) => cardEffects[cardId] || []}
-            useVirtualization={!isMobile && filteredCards.length > 20}
+            onCardClick={handleCardItemClick} 
+            isLoading={isLoadingAny}
+            cardEffects={cardEffects}
           />
         ) : (
-          <CardList 
+          <CardList
             cards={filteredCards}
-            isLoading={isLoading}
             onCardClick={handleCardItemClick}
+            isLoading={isLoadingAny}
           />
+        )}
+        
+        {filteredCards.length === 0 && !isLoadingAny && (
+          <div className="text-center py-12">
+            <p className="text-gray-500">No cards found</p>
+            <p className="text-sm text-gray-400 mt-1">Try changing your filters or search term</p>
+          </div>
         )}
       </ErrorBoundary>
     </div>

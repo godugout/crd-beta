@@ -22,16 +22,19 @@ const Gallery = () => {
     displayCards,
     hasBaseballCards,
     sortOrder,
-    setSortOrder
+    setSortOrder,
+    isLoading
   } = useGalleryCards();
 
   const handleCardClick = (cardId: string) => {
+    console.log('Card clicked:', cardId);
     setSelectedCardId(cardId);
     setIsFullscreen(true);
   };
   
   const handleCloseFullscreen = () => {
     setIsFullscreen(false);
+    setSelectedCardId(null);
   };
   
   const handleSortChange = (order: string) => {
@@ -67,7 +70,8 @@ const Gallery = () => {
           <CardGallery 
             viewMode={viewMode} 
             onCardClick={handleCardClick} 
-            cards={displayCards} 
+            cards={displayCards}
+            isLoading={isLoading}
           />
         </ErrorBoundary>
       </div>
