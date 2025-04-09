@@ -88,6 +88,7 @@ type CardContextType = {
   addCard: (cardData: Partial<Card>) => Promise<Card>;
   updateCard: (id: string, cardData: Partial<Card>) => Card | null;
   getCard: (id: string) => Card | undefined;
+  getCardById: (id: string) => Card | undefined;
   deleteCard: (id: string) => boolean;
   // Collection methods
   addCollection: (collectionData: Partial<Collection>) => Collection;
@@ -193,6 +194,10 @@ export const CardProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const getCard = (id: string): Card | undefined => {
+    return cards.find(card => card.id === id);
+  };
+
+  const getCardById = (id: string): Card | undefined => {
     return cards.find(card => card.id === id);
   };
 
@@ -336,6 +341,7 @@ export const CardProvider: React.FC<{ children: React.ReactNode }> = ({ children
       addCard, 
       updateCard, 
       getCard, 
+      getCardById,
       deleteCard,
       collections,
       addCollection,

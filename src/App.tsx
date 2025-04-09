@@ -1,26 +1,16 @@
+
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes, Link, useLocation } from 'react-router-dom';
-import { Auth } from '@supabase/auth-ui-react';
-import { ThemeSupa } from '@supabase/auth-ui-shared';
-import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react';
-import Account from '@/pages/Account';
+import Account from './components/Account'; // Changed from @/pages/Account
 import Home from '@/pages/Home';
 import Editor from '@/pages/Editor';
 import CardGallery from '@/pages/CardGallery';
-import BaseballCard from '@/pages/BaseballCard';
-import OaklandPage from '@/pages/OaklandPage';
-import GroupMemoryPage from '@/pages/GroupMemoryPage';
-import { SiteHeader } from '@/components/navigation/SiteHeader';
-import { SiteFooter } from '@/components/navigation/SiteFooter';
 import { Toaster } from 'sonner';
 import { useNavigationState } from '@/hooks/useNavigationState';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
-import { CardTrainer } from '@/components/experimental/CardTrainer';
 import './App.css';
 
 function App() {
-  const session = useSession();
-  const supabase = useSupabaseClient();
   const [scrollPosition, setScrollPosition] = useNavigationState({
     key: 'scrollPosition',
     defaultState: 0,
@@ -49,38 +39,32 @@ function App() {
   return (
     <Router>
       <div className="App">
-        <SiteHeader />
+        <header className="bg-white shadow-sm">
+          <div className="container mx-auto px-4 py-4">
+            <nav className="flex justify-between items-center">
+              <Link to="/" className="text-xl font-bold text-cardshow-blue">Cardshow</Link>
+              <div className="space-x-4">
+                <Link to="/gallery" className="text-cardshow-dark hover:text-cardshow-blue transition-colors">Gallery</Link>
+                <Link to="/cards/create" className="text-cardshow-dark hover:text-cardshow-blue transition-colors">Create</Link>
+              </div>
+            </nav>
+          </div>
+        </header>
 
         <main className="container mx-auto px-4 py-6">
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route
-              path="/account"
-              element={
-                session ? (
-                  <Account session={session} />
-                ) : (
-                  <div className="flex justify-center">
-                    <Auth
-                      supabaseClient={supabase}
-                      appearance={{ theme: ThemeSupa }}
-                      providers={['google', 'github']}
-                    />
-                  </div>
-                )
-              }
-            />
             <Route path="/cards/create" element={<Editor />} />
             <Route path="/cards/edit/:id" element={<Editor />} />
             <Route path="/gallery" element={<CardGallery />} />
-            <Route path="/baseball" element={<BaseballCard />} />
-            <Route path="/oakland" element={<OaklandPage />} />
-            <Route path="/group-memory" element={<GroupMemoryPage />} />
-            <Route path="/card-trainer" element={<CardTrainer />} />
           </Routes>
         </main>
 
-        <SiteFooter />
+        <footer className="bg-gray-100 py-6 mt-8">
+          <div className="container mx-auto px-4 text-center text-cardshow-slate">
+            <p>© {new Date().getFullYear()} Cardshow. All rights reserved.</p>
+          </div>
+        </footer>
         <Toaster position="bottom-right" />
       </div>
     </Router>

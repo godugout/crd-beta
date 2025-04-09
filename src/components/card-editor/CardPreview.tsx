@@ -104,9 +104,9 @@ const CardPreview: React.FC<CardPreviewProps> = ({
         
         const overlayY = textStyle.overlayPosition === 'top' 
           ? 0 
-          : textStyle.overlayPosition === 'middle' 
-            ? canvas.height / 3 
-            : canvas.height - overlayHeight;
+          : textStyle.overlayPosition === 'bottom' 
+            ? canvas.height - overlayHeight 
+            : canvas.height / 3; // Middle position
         
         // Draw semi-transparent overlay
         ctx.fillStyle = `${textStyle.overlayColor}${Math.round(textStyle.overlayOpacity / 100 * 255).toString(16).padStart(2, '0')}`;
@@ -338,9 +338,9 @@ const CardPreview: React.FC<CardPreviewProps> = ({
                       <div 
                         className={`absolute ${
                           textStyle.overlayPosition === 'top' ? 'top-0' :
-                          textStyle.overlayPosition === 'middle' ? 'top-1/3' :
+                          textStyle.overlayPosition === 'bottom' ? 'bottom-0' :
                           textStyle.overlayPosition === 'full' ? 'inset-0' :
-                          'bottom-0'
+                          'top-1/3' // Middle position
                         } left-0 right-0 ${
                           textStyle.overlayPosition === 'full' ? 'h-full' : 'h-1/3'
                         }`}
@@ -354,8 +354,9 @@ const CardPreview: React.FC<CardPreviewProps> = ({
                     {/* Card text */}
                     <div className={`absolute p-4 ${
                       textStyle.overlayPosition === 'top' ? 'top-0' :
-                      textStyle.overlayPosition === 'middle' ? 'top-1/3' :
-                      'bottom-0'
+                      textStyle.overlayPosition === 'bottom' ? 'bottom-0' :
+                      textStyle.overlayPosition === 'full' ? 'inset-0' :
+                      'top-1/3' // Middle position
                     } left-0 right-0`}>
                       {title && (
                         <h3 
