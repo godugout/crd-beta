@@ -79,11 +79,11 @@ export const assetService = {
       // Add the public URL separately if it exists
       const publicUrl = urlData?.publicUrl || '';
       
+      // Create the database record
       const { data: asset, error: dbError } = await supabase
         .from('digital_assets')
         .insert({
-          ...insertData,
-          public_url: publicUrl
+          ...insertData
         })
         .select('*')
         .single();
@@ -107,7 +107,7 @@ export const assetService = {
         description: asset.description || undefined,
         mimeType: asset.mime_type,
         storagePath: asset.storage_path,
-        publicUrl: asset.public_url || urlData.publicUrl,
+        publicUrl: publicUrl, // Use the separately obtained public URL
         thumbnailPath: asset.thumbnail_path || undefined,
         fileSize: asset.file_size,
         width: asset.width || undefined,
@@ -154,23 +154,30 @@ export const assetService = {
         return [];
       }
       
-      return data.map(asset => ({
-        id: asset.id,
-        title: asset.title,
-        description: asset.description || undefined,
-        mimeType: asset.mime_type,
-        storagePath: asset.storage_path,
-        publicUrl: asset.public_url || '',
-        thumbnailPath: asset.thumbnail_path || undefined,
-        fileSize: asset.file_size,
-        width: asset.width || undefined,
-        height: asset.height || undefined,
-        userId: asset.user_id,
-        tags: asset.tags || [],
-        metadata: asset.metadata || {},
-        createdAt: asset.created_at,
-        updatedAt: asset.updated_at
-      }));
+      // Get public URLs for all assets
+      return data.map(asset => {
+        const { data: urlData } = supabase.storage
+          .from('card-images')
+          .getPublicUrl(asset.storage_path);
+          
+        return {
+          id: asset.id,
+          title: asset.title,
+          description: asset.description || undefined,
+          mimeType: asset.mime_type,
+          storagePath: asset.storage_path,
+          publicUrl: urlData?.publicUrl || '', // Use the storage URL
+          thumbnailPath: asset.thumbnail_path || undefined,
+          fileSize: asset.file_size,
+          width: asset.width || undefined,
+          height: asset.height || undefined,
+          userId: asset.user_id,
+          tags: asset.tags || [],
+          metadata: asset.metadata || {},
+          createdAt: asset.created_at,
+          updatedAt: asset.updated_at
+        };
+      });
     } catch (err) {
       console.error('Error fetching assets:', err);
       return [];
