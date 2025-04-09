@@ -8,11 +8,13 @@ import MetaTags from '@/components/shared/MetaTags';
 import TeamBreadcrumb from '@/components/navigation/components/TeamBreadcrumb';
 import { supabase } from '@/integrations/supabase/client';
 
+interface TeamColors {
+  primaryColor: string;
+  secondaryColor?: string;
+}
+
 const OaklandMemories: React.FC = () => {
-  const [teamData, setTeamData] = useState<{
-    primaryColor: string;
-    secondaryColor?: string;
-  }>({
+  const [teamData, setTeamData] = useState<TeamColors>({
     primaryColor: '#006341',
   });
   

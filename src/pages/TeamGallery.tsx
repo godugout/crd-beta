@@ -41,6 +41,7 @@ const TeamGallery = () => {
         
         if (error) {
           console.error('Error fetching teams:', error);
+          setTeams([]);
         } else if (data) {
           // Transform the data to match our interface
           const transformedTeams: TeamDisplayData[] = (data as DbTeam[]).map(team => ({
@@ -69,6 +70,7 @@ const TeamGallery = () => {
         }
       } catch (err) {
         console.error('Error fetching teams:', err);
+        setTeams([]);
       } finally {
         setLoading(false);
       }

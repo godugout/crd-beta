@@ -3,15 +3,19 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ChevronRight, Home, Users } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { DbTeam } from '@/lib/types/TeamTypes';
 
 interface TeamBreadcrumbProps {
   currentPage?: string;
 }
 
+interface TeamInfo {
+  name: string;
+  color?: string;
+}
+
 const TeamBreadcrumb: React.FC<TeamBreadcrumbProps> = ({ currentPage }) => {
   const { teamSlug } = useParams<{ teamSlug?: string }>();
-  const [teamInfo, setTeamInfo] = useState<{ name: string; color?: string }>({ name: '' });
+  const [teamInfo, setTeamInfo] = useState<TeamInfo>({ name: '' });
   
   useEffect(() => {
     const fetchTeamInfo = async () => {

@@ -7,7 +7,7 @@ import {
   NavigationMenuContent,
   NavigationMenuLink,
 } from "@/components/ui/navigation-menu";
-import { Users, PlayCircle, Plus, Loader2 } from 'lucide-react';
+import { Users, PlayCircle, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Team, DbTeam } from '@/lib/types/TeamTypes';
 
@@ -33,6 +33,7 @@ const TeamNavigation: React.FC<TeamNavigationProps> = ({ activeSection }) => {
           
         if (error) {
           console.error('Error fetching team navigation:', error);
+          setTeams([]);
         } else if (data) {
           const dbTeams = data as DbTeam[];
           setTeams(dbTeams.map(team => ({
@@ -45,6 +46,7 @@ const TeamNavigation: React.FC<TeamNavigationProps> = ({ activeSection }) => {
         }
       } catch (err) {
         console.error('Error in team navigation:', err);
+        setTeams([]);
       } finally {
         setLoading(false);
       }
