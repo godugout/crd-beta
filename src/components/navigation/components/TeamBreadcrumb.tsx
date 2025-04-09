@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ChevronRight, Home, Baseball } from 'lucide-react';
+import { ChevronRight, Home, Users } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { DbTeam } from '@/lib/types/TeamTypes';
 
@@ -30,10 +30,9 @@ const TeamBreadcrumb: React.FC<TeamBreadcrumbProps> = ({ currentPage }) => {
         }
           
         if (data) {
-          const teamData = data as DbTeam;
           setTeamInfo({
-            name: teamData.name,
-            color: teamData.primary_color || undefined
+            name: data.name,
+            color: data.primary_color || undefined
           });
         }
       } catch (err) {
@@ -56,7 +55,7 @@ const TeamBreadcrumb: React.FC<TeamBreadcrumbProps> = ({ currentPage }) => {
       <ChevronRight className="h-4 w-4 mx-2 text-gray-400" />
       
       <Link to="/teams" className="text-gray-500 hover:text-gray-700 flex items-center">
-        <Baseball className="w-4 h-4 mr-1" />
+        <Users className="w-4 h-4 mr-1" />
         <span>Teams</span>
       </Link>
       

@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button';
 import { Package, Plus } from 'lucide-react';
 import MemoryPacksSection from '@/components/card-showcase/MemoryPacksSection';
 import { supabase } from '@/integrations/supabase/client';
-import { DbTeam } from '@/lib/types/TeamTypes';
 
 interface TeamInfo {
   primary_color?: string;
@@ -37,10 +36,9 @@ const MemoryPacks = () => {
         }
           
         if (data) {
-          const teamData = data as DbTeam;
           setTeamInfo({
-            primary_color: teamData.primary_color || undefined,
-            name: teamData.name
+            primary_color: data.primary_color || undefined,
+            name: data.name
           });
         }
       } catch (err) {

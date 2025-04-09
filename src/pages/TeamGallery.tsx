@@ -7,8 +7,12 @@ import { Users, Filter, Info, Calendar } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Team, DbTeam } from '@/lib/types/TeamTypes';
 
+interface TeamDisplayData extends Team {
+  memberCount?: number;
+}
+
 const TeamGallery = () => {
-  const [teams, setTeams] = useState<Team[]>([]);
+  const [teams, setTeams] = useState<TeamDisplayData[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [activeLeague, setActiveLeague] = useState<string>('all');
   const [activeDivision, setActiveDivision] = useState<string>('all');
@@ -39,15 +43,14 @@ const TeamGallery = () => {
           console.error('Error fetching teams:', error);
         } else if (data) {
           // Transform the data to match our interface
-          const transformedTeams: Team[] = (data as DbTeam[]).map(team => ({
+          const transformedTeams: TeamDisplayData[] = (data as DbTeam[]).map(team => ({
             id: team.id,
             name: team.name,
             slug: team.team_code ? team.team_code.toLowerCase() : team.name.toLowerCase().replace(/\s+/g, '-'),
             description: team.description || '',
             owner_id: team.owner_id,
-            color: team.primary_color || '#cccccc',
+            primary_color: team.primary_color || '#cccccc',
             memberCount: Math.floor(Math.random() * 1500) + 500, // Placeholder member count
-            primary_color: team.primary_color,
             secondary_color: team.secondary_color,
             tertiary_color: team.tertiary_color,
             founded_year: team.founded_year,
@@ -75,13 +78,13 @@ const TeamGallery = () => {
   }, [activeLeague, activeDivision]);
 
   // If we don't have team data yet, use the hardcoded data as a fallback
-  const fallbackTeams: Team[] = [
+  const fallbackTeams: TeamDisplayData[] = [
     { 
       id: '1', 
       name: 'Oakland A\'s', 
       slug: 'oakland', 
       description: 'Memories and cards for Oakland Athletics fans',
-      color: '#006341',
+      primary_color: '#006341',
       memberCount: 1243,
       owner_id: 'system'
     },
@@ -90,7 +93,7 @@ const TeamGallery = () => {
       name: 'San Francisco Giants', 
       slug: 'sf-giants', 
       description: 'A community for SF Giants fans to share their memories',
-      color: '#FD5A1E',
+      primary_color: '#FD5A1E',
       memberCount: 984,
       owner_id: 'system'
     },
@@ -99,7 +102,7 @@ const TeamGallery = () => {
       name: 'Los Angeles Dodgers', 
       slug: 'la-dodgers', 
       description: 'Dodgers memories and moments from fans',
-      color: '#005A9C',
+      primary_color: '#005A9C',
       memberCount: 756,
       owner_id: 'system'
     }
@@ -168,7 +171,7 @@ const TeamGallery = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {!loading && displayTeams.map(team => {
             // Use either primary_color from DB or fallback to color field
-            const backgroundColor = team.primary_color || team.color;
+            const backgroundColor = team.primary_color || '#cccccc';
             const textColor = isLightColor(backgroundColor) ? '#000000' : '#FFFFFF';
             
             return (
@@ -222,7 +225,7 @@ const TeamGallery = () => {
                     <Button 
                       asChild
                       style={{ 
-                        backgroundColor: team.primary_color || team.color,
+                        backgroundColor: backgroundColor,
                         color: textColor,
                         border: 'none'
                       }}

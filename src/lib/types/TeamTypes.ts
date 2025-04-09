@@ -23,6 +23,9 @@ export interface Team {
   league?: string;
   division?: string;
   is_active?: boolean;
+  
+  // For display purposes in TeamGallery
+  memberCount?: number;
 }
 
 // Interface for team data coming from Supabase
@@ -43,6 +46,7 @@ export interface DbTeam {
   state?: string | null;
   country?: string | null;
   stadium?: string | null;
+  mascot?: string | null;
   league?: string | null;
   division?: string | null;
   is_active?: boolean | null;

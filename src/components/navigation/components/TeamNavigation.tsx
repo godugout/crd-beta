@@ -39,7 +39,7 @@ const TeamNavigation: React.FC<TeamNavigationProps> = ({ activeSection }) => {
             id: team.id,
             name: team.name,
             slug: team.team_code ? team.team_code.toLowerCase() : team.name.toLowerCase().replace(/\s+/g, '-'),
-            color: team.primary_color || undefined,
+            primary_color: team.primary_color || undefined,
             owner_id: team.owner_id
           })));
         }
@@ -58,29 +58,29 @@ const TeamNavigation: React.FC<TeamNavigationProps> = ({ activeSection }) => {
     { 
       id: '1', 
       name: 'Oakland A\'s', 
-      slug: 'oakland', 
-      color: '#006341',
+      slug: 'oakland',
+      primary_color: '#006341',
       owner_id: 'system'
     },
     { 
       id: '2', 
       name: 'San Francisco Giants', 
-      slug: 'sf-giants', 
-      color: '#FD5A1E',
+      slug: 'sf-giants',
+      primary_color: '#FD5A1E',
       owner_id: 'system'
     },
     { 
       id: '3', 
       name: 'Los Angeles Dodgers', 
-      slug: 'la-dodgers', 
-      color: '#005A9C',
+      slug: 'la-dodgers',
+      primary_color: '#005A9C',
       owner_id: 'system'
     },
     {
       id: '4',
       name: 'New York Yankees',
       slug: 'nyy',
-      color: '#003087',
+      primary_color: '#003087',
       owner_id: 'system'
     }
   ];
@@ -117,8 +117,8 @@ const TeamNavigation: React.FC<TeamNavigationProps> = ({ activeSection }) => {
                     to={`/teams/${team.slug}`}
                   >
                     <div className="flex items-center gap-2 mb-2">
-                      <Users className="h-5 w-5" style={{ color: team.color }} />
-                      <span className="text-md font-medium" style={{ color: team.color }}>
+                      <Users className="h-5 w-5" style={{ color: team.primary_color }} />
+                      <span className="text-md font-medium" style={{ color: team.primary_color }}>
                         {team.name}
                       </span>
                     </div>
