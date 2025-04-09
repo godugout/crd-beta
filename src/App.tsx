@@ -11,7 +11,7 @@ import OaklandMemoriesPage from './pages/oakland/OaklandMemories';
 import OaklandMemoryDetailsPage from './pages/oakland/OaklandMemoryDetail';
 import GameDayCapturePage from './pages/GameDayMode';
 import GroupMemoryPage from './pages/GroupMemoryCreator';
-import { CardContext } from './context/CardContext';
+import { CardProvider } from './context/CardContext';
 import { AuthProvider } from './context/auth/AuthProvider';
 import { useMobileOptimization } from './hooks/useMobileOptimization';
 import { useConnectivity } from './hooks/useConnectivity';
@@ -35,7 +35,7 @@ function App() {
       <ConnectivityProvider>
         <MobileOptimizationProvider>
           <AuthProvider>
-            <CardContext>
+            <CardProvider>
               <Routes>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/media-library" element={<MediaLibrary />} />
@@ -51,7 +51,7 @@ function App() {
                 <Route path="/experimental" element={<ExperimentalPage />} />
                 <Route path="*" element={<NotFoundPage />} />
               </Routes>
-            </CardContext>
+            </CardProvider>
           </AuthProvider>
         </MobileOptimizationProvider>
       </ConnectivityProvider>
