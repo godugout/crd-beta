@@ -36,7 +36,7 @@ const TeamNavigation: React.FC<TeamNavigationProps> = ({ activeSection }) => {
   useEffect(() => {
     const fetchTeams = async () => {
       try {
-        const { data, error } = await supabase
+        const { data: teamData, error } = await supabase
           .from('teams')
           .select('id, name')
           .eq('is_active', true)
@@ -50,16 +50,18 @@ const TeamNavigation: React.FC<TeamNavigationProps> = ({ activeSection }) => {
           return;
         }
           
-        if (data && Array.isArray(data)) {
+        if (teamData && Array.isArray(teamData)) {
           // Map the raw data to our TeamNavigationItem format
-          const teamData: TeamNavigationItem[] = data.map((team: TeamRecord) => ({
-            id: team.id || '',
-            name: team.name || '',
-            slug: team.name ? team.name.toLowerCase().replace(/\s+/g, '-') : '',
-            primary_color: undefined
-          }));
+          const mappedTeams: TeamNavigationItem[] = teamData.map((team: TeamRecord) => {
+            return {
+              id: team.id || '',
+              name: team.name || '',
+              slug: team.name ? team.name.toLowerCase().replace(/\s+/g, '-') : '',
+              primary_color: undefined
+            };
+          });
           
-          setTeams(teamData);
+          setTeams(mappedTeams);
         } else {
           setTeams([]);
         }
