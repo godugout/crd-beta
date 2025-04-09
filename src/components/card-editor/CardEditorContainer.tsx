@@ -15,7 +15,7 @@ interface CardEditorContainerProps {
   initialMetadata?: any;
 }
 
-const steps = ["Upload & Info", "Card Design", "Card Text", "Preview"];
+const steps = ["Upload & Info", "Card Design", "Effects", "Text Overlay", "Preview"];
 
 const CardEditorContainer: React.FC<CardEditorContainerProps> = ({ card, className, initialMetadata }) => {
   const navigate = useNavigate();

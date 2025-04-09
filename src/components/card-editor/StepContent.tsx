@@ -51,6 +51,12 @@ const StepContent: React.FC<StepContentProps> = ({ currentStep, cardState }) => 
       );
     case 3:
       return (
+        <CardTextOverlay
+          imageUrl={cardState.imageUrl}
+        />
+      );
+    case 4:
+      return (
         <CardPreview
           title={cardState.title}
           description={cardState.description}
