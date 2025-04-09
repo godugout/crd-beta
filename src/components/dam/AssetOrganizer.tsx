@@ -24,7 +24,7 @@ const AssetOrganizer: React.FC<AssetOrganizerProps> = ({
   collectionId,
   teamId
 }) => {
-  // Sample assets and tags for demonstration
+  // Sample assets that match the complete DigitalAsset interface
   const [assets] = useState<DigitalAsset[]>(
     Array.from({ length: 12 }).map((_, i) => ({
       id: `asset-${i}`,

@@ -1,10 +1,9 @@
-
 import React, { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { X, Upload, Image as ImageIcon } from 'lucide-react';
 import { toast } from 'sonner';
-import { assetService } from '@/lib/dam/assetService';
+import { assetService, AssetUploadOptions } from '@/lib/dam/assetService';
 
 interface BatchImageUploaderProps {
   onComplete?: (urls: string[], assetIds: string[]) => void;
@@ -109,12 +108,14 @@ const BatchImageUploader: React.FC<BatchImageUploaderProps> = ({
           // Simulate progress updates
           const interval = setInterval(simulateProgress, 300);
           
-          // Actual upload - removed teamId since it's not in AssetUploadOptions
-          const result = await assetService.uploadAsset(file, {
+          // Create upload options object that matches the AssetUploadOptions interface
+          const uploadOptions: AssetUploadOptions = {
             title: file.name,
             collectionId,
             metadata: teamId ? { teamId } : undefined // Store teamId in metadata instead
-          });
+          };
+          
+          const result = await assetService.uploadAsset(file, uploadOptions);
           
           clearInterval(interval);
           

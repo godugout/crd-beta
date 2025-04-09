@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import PageLayout from '@/components/navigation/PageLayout';
@@ -92,23 +93,6 @@ const BatchOperationsPage = () => {
         </Tabs>
       </div>
     </PageLayout>
-  );
-};
-
-const AssetOrganizer = () => {
-  return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-xl font-semibold mb-4">Asset Organization</h2>
-        <p className="text-gray-600">
-          Organize your assets by tagging, categorizing, and grouping them for easier management.
-        </p>
-      </div>
-      
-      <div className="p-12 border-2 border-dashed border-gray-300 rounded-lg text-center">
-        <p className="text-gray-500">Asset organization tools will be available soon.</p>
-      </div>
-    </div>
   );
 };
 
