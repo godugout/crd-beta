@@ -1,102 +1,49 @@
-
-import React from 'react';
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import { Toaster } from 'sonner';
-import { AuthProvider } from '@/context/auth';
-import { CardProvider } from '@/context/CardContext';
-import Home from '@/pages/Home';
-import Editor from '@/pages/Editor';
-import CardGallery from '@/pages/CardGallery';
-import CollectionDetail from '@/pages/CollectionDetail';
-import Collections from '@/pages/Collections';
-import OaklandMemories from '@/pages/OaklandMemories';
-import OaklandMemoryCreatorPage from '@/pages/OaklandMemoryCreator';
-import Experiences from '@/pages/Experiences';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import HomePage from '@/pages/HomePage';
+import NotFoundPage from '@/pages/NotFoundPage';
 import MediaLibrary from '@/pages/MediaLibrary';
-import BaseballCardViewer from '@/pages/BaseballCardViewer';
-import GameDayMode from '@/pages/GameDayMode';
-import NotFound from '@/pages/NotFound';
+import CardGallery from '@/pages/CardGallery';
+import BatchOperationsPage from '@/pages/BatchOperationsPage';
+import CardEditor from './components/CardEditor';
+import BaseballCardViewer from './pages/BaseballCardViewer';
+import OaklandMemoriesPage from './pages/OaklandMemoriesPage';
+import OaklandMemoryDetailsPage from './pages/OaklandMemoryDetailsPage';
+import GameDayCapturePage from './pages/GameDayCapturePage';
+import GroupMemoryPage from './pages/GroupMemoryPage';
+import { CardContextProvider } from './context/CardContext';
+import { AuthContextProvider } from './context/auth';
+import { MobileOptimizationProvider } from './hooks/useMobileOptimization';
+import { ConnectivityProvider } from './hooks/useConnectivity';
+import ExperimentalPage from './pages/ExperimentalPage';
 
-const router = createBrowserRouter([
-  {
-    path: '/',
-    element: <Home />,
-  },
-  {
-    path: '/cards/create',
-    element: <Editor />,
-  },
-  {
-    path: '/gallery',
-    element: <CardGallery />,
-  },
-  {
-    path: '/collections/:id',
-    element: <CollectionDetail />,
-  },
-  {
-    path: '/collections',
-    element: <Collections />,
-  },
-  {
-    path: '/oakland-memories',
-    element: <OaklandMemories />,
-  },
-  {
-    path: '/oakland-memories/create',
-    element: <OaklandMemoryCreatorPage />,
-  },
-  {
-    path: '/experiences',
-    element: <Experiences />,
-  },
-  
-  // Add Media Library route
-  {
-    path: '/media',
-    element: <MediaLibrary />,
-  },
-  
-  // Add Baseball Card Viewer routes
-  {
-    path: '/baseball-card-viewer',
-    element: <BaseballCardViewer />,
-  },
-  {
-    path: '/baseball-card-viewer/:id',
-    element: <BaseballCardViewer />,
-  },
-  {
-    path: '/features/baseball-viewer',
-    element: <BaseballCardViewer />,
-  },
-  
-  // Add Game Day Mode routes
-  {
-    path: '/features/gameday',
-    element: <GameDayMode />,
-  },
-  {
-    path: '/gameday',
-    element: <GameDayMode />,
-  },
-  
-  // Fallback 404 route
-  {
-    path: '*',
-    element: <NotFound />,
-  },
-]);
-
-const App = () => {
+function App() {
   return (
-    <AuthProvider>
-      <CardProvider>
-        <RouterProvider router={router} />
-        <Toaster position="top-right" />
-      </CardProvider>
-    </AuthProvider>
+    <BrowserRouter>
+      <ConnectivityProvider>
+        <MobileOptimizationProvider>
+          <AuthContextProvider>
+            <CardContextProvider>
+              <Routes>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/media-library" element={<MediaLibrary />} />
+                <Route path="/batch-operations" element={<BatchOperationsPage />} />
+                <Route path="/cards" element={<CardGallery />} />
+                <Route path="/cards/create" element={<CardEditor />} />
+                <Route path="/cards/:id/edit" element={<CardEditor />} />
+                <Route path="/baseball-card-viewer/:id" element={<BaseballCardViewer />} />
+                <Route path="/teams/oakland/memories" element={<OaklandMemoriesPage />} />
+                <Route path="/teams/oakland/memories/:id" element={<OaklandMemoryDetailsPage />} />
+                <Route path="/game-day" element={<GameDayCapturePage />} />
+                <Route path="/group-memory" element={<GroupMemoryPage />} />
+                <Route path="/experimental" element={<ExperimentalPage />} />
+                <Route path="*" element={<NotFoundPage />} />
+              </Routes>
+            </CardContextProvider>
+          </AuthContextProvider>
+        </MobileOptimizationProvider>
+      </ConnectivityProvider>
+    </BrowserRouter>
   );
-};
+}
 
 export default App;

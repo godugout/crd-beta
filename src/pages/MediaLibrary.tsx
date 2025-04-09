@@ -5,7 +5,7 @@ import PageLayout from '@/components/navigation/PageLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AssetGallery from '@/components/dam/AssetGallery';
 import ImageUploader from '@/components/dam/ImageUploader';
-import { ChevronLeft, Plus } from 'lucide-react';
+import { ChevronLeft, Plus, Images } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
@@ -35,10 +35,18 @@ const MediaLibrary = () => {
               <h1 className="text-3xl font-bold mb-2">Media Library</h1>
               <p className="text-gray-600">Upload and manage images for your cards and collections</p>
             </div>
-            <Button onClick={() => setActiveTab('upload')}>
-              <Plus className="h-4 w-4 mr-2" />
-              Upload New
-            </Button>
+            <div className="flex gap-2">
+              <Button onClick={() => setActiveTab('upload')}>
+                <Plus className="h-4 w-4 mr-2" />
+                Upload New
+              </Button>
+              <Button variant="outline" asChild>
+                <Link to="/batch-operations">
+                  <Images className="h-4 w-4 mr-2" />
+                  Batch Operations
+                </Link>
+              </Button>
+            </div>
           </div>
         </div>
         

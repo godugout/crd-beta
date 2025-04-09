@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Upload, X, Image as ImageIcon } from 'lucide-react';
 import { toast } from 'sonner';
@@ -29,9 +29,25 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [preloadedImage, setPreloadedImage] = useState<HTMLImageElement | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   
   const maxSizeBytes = maxSizeMB * 1024 * 1024; // Convert MB to bytes
+  
+  // Preload the image to improve performance
+  useEffect(() => {
+    if (preview && showPreview) {
+      const img = new Image();
+      img.src = preview;
+      img.onload = () => setPreloadedImage(img);
+    } else {
+      setPreloadedImage(null);
+    }
+    
+    return () => {
+      setPreloadedImage(null);
+    };
+  }, [preview, showPreview]);
   
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -54,6 +70,42 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
     }
   };
   
+  // Handle drag and drop
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+  
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      const droppedFile = e.dataTransfer.files[0];
+      
+      // Validate file type
+      if (!droppedFile.type.match('image.*')) {
+        toast.error('Please upload an image file');
+        return;
+      }
+      
+      // Validate file size
+      if (droppedFile.size > maxSizeBytes) {
+        toast.error(`File is too large. Maximum size is ${maxSizeMB}MB.`);
+        return;
+      }
+      
+      setFile(droppedFile);
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setPreview(event.target?.result as string);
+      };
+      reader.readAsDataURL(droppedFile);
+    }
+  };
+  
   const handleUpload = async () => {
     if (!file) {
       toast.error('Please select a file first');
@@ -71,9 +123,9 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
       
       const asset = await assetService.uploadAsset(file, options);
       
-      if (asset && asset.url) {  // Changed from publicUrl to url
+      if (asset && asset.url) {
         if (onUploadComplete) {
-          onUploadComplete(asset.url, asset.id);  // Changed from publicUrl to url
+          onUploadComplete(asset.url, asset.id);
         }
         
         // Reset state
@@ -106,6 +158,8 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
           <div 
             className="border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors"
             onClick={() => fileInputRef.current?.click()}
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
           >
             <Upload className="h-8 w-8 text-gray-400 mb-2" />
             <p className="text-sm text-gray-600 mb-1">{title}</p>
@@ -117,6 +171,11 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
               src={preview || ''} 
               alt="Preview" 
               className="max-h-64 rounded-lg" 
+              loading="lazy"
+              onError={() => {
+                toast.error('Failed to load image preview');
+                clearSelection();
+              }}
             />
             <Button 
               size="sm" 
