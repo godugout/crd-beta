@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Route, Routes, Link, useLocation } from 'react-router-dom';
-import Account from './components/Account'; // Changed from @/pages/Account
+import { Route, Routes, Link, useLocation } from 'react-router-dom';
+import Account from './components/Account';
 import Home from '@/pages/Home';
 import Editor from '@/pages/Editor';
 import CardGallery from '@/pages/CardGallery';
@@ -37,37 +37,35 @@ function App() {
   }, [setScrollPosition]);
 
   return (
-    <Router>
-      <div className="App">
-        <header className="bg-white shadow-sm">
-          <div className="container mx-auto px-4 py-4">
-            <nav className="flex justify-between items-center">
-              <Link to="/" className="text-xl font-bold text-cardshow-blue">Cardshow</Link>
-              <div className="space-x-4">
-                <Link to="/gallery" className="text-cardshow-dark hover:text-cardshow-blue transition-colors">Gallery</Link>
-                <Link to="/cards/create" className="text-cardshow-dark hover:text-cardshow-blue transition-colors">Create</Link>
-              </div>
-            </nav>
-          </div>
-        </header>
+    <div className="App">
+      <header className="bg-white shadow-sm">
+        <div className="container mx-auto px-4 py-4">
+          <nav className="flex justify-between items-center">
+            <Link to="/" className="text-xl font-bold text-cardshow-blue">Cardshow</Link>
+            <div className="space-x-4">
+              <Link to="/gallery" className="text-cardshow-dark hover:text-cardshow-blue transition-colors">Gallery</Link>
+              <Link to="/cards/create" className="text-cardshow-dark hover:text-cardshow-blue transition-colors">Create</Link>
+            </div>
+          </nav>
+        </div>
+      </header>
 
-        <main className="container mx-auto px-4 py-6">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/cards/create" element={<Editor />} />
-            <Route path="/cards/edit/:id" element={<Editor />} />
-            <Route path="/gallery" element={<CardGallery />} />
-          </Routes>
-        </main>
+      <main className="container mx-auto px-4 py-6">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/cards/create" element={<Editor />} />
+          <Route path="/cards/edit/:id" element={<Editor />} />
+          <Route path="/gallery" element={<CardGallery />} />
+        </Routes>
+      </main>
 
-        <footer className="bg-gray-100 py-6 mt-8">
-          <div className="container mx-auto px-4 text-center text-cardshow-slate">
-            <p>© {new Date().getFullYear()} Cardshow. All rights reserved.</p>
-          </div>
-        </footer>
-        <Toaster position="bottom-right" />
-      </div>
-    </Router>
+      <footer className="bg-gray-100 py-6 mt-8">
+        <div className="container mx-auto px-4 text-center text-cardshow-slate">
+          <p>© {new Date().getFullYear()} Cardshow. All rights reserved.</p>
+        </div>
+      </footer>
+      <Toaster position="bottom-right" />
+    </div>
   );
 }
 
