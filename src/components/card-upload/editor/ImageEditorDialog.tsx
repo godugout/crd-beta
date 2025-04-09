@@ -1,14 +1,14 @@
+
 import React, { useRef, useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, Info } from "lucide-react";
 import { useCropState } from '../hooks/useCropState';
 import { useEditor } from '../hooks/useEditor';
 import { useCropBoxOperations } from '../hooks/useCropBoxOperations';
 import { useImageHandling } from '../hooks/useImageHandling';
 import { MemorabiliaType } from '../cardDetection';
-import EditorContent from '../components/EditorContent';
+import EditorContent from './EditorContent';
 import CardTypeSelector from '../components/CardTypeSelector';
 import { toast } from "sonner";
 import { storageOperations } from '@/lib/supabase/storage';
@@ -39,7 +39,6 @@ const ImageEditorDialog: React.FC<ImageEditorDialogProps> = ({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const editorImgRef = useRef<HTMLImageElement>(null);
   
-  const [currentTab, setCurrentTab] = useState('crop');
   const [isExtractingSaving, setIsExtractingSaving] = useState(false);
   
   // Card selection state
@@ -93,12 +92,11 @@ const ImageEditorDialog: React.FC<ImageEditorDialogProps> = ({
   // Update image data when editor image changes
   useEffect(() => {
     if (editorImage && showEditor) {
-      setImageData(prev => ({ 
-        ...prev,
+      setImageData({ 
         url: editorImage, 
         width: 0, 
         height: 0 
-      }));
+      });
     }
   }, [editorImage, showEditor, setImageData]);
   
@@ -188,8 +186,8 @@ const ImageEditorDialog: React.FC<ImageEditorDialogProps> = ({
           <DialogTitle>Card Extractor</DialogTitle>
         </DialogHeader>
         
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 max-h-[calc(90vh-8rem)] overflow-auto">
-          <div className="md:col-span-3 h-[50vh] md:h-auto">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 h-[calc(90vh-8rem)] overflow-hidden">
+          <div className="md:col-span-3 h-[50vh] md:h-full overflow-hidden flex flex-col">
             <EditorContent
               canvasRef={canvasRef}
               editorImgRef={editorImgRef}
@@ -209,7 +207,7 @@ const ImageEditorDialog: React.FC<ImageEditorDialogProps> = ({
             />
           </div>
           
-          <div className="flex flex-col space-y-4">
+          <div className="flex flex-col space-y-4 overflow-auto">
             <div className="bg-gray-50 p-4 rounded-lg">
               <h3 className="text-sm font-medium mb-2">Card Detection</h3>
               <div className="flex flex-col gap-2">

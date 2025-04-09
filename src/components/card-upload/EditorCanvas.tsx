@@ -1,9 +1,8 @@
 
-import React, { useRef } from 'react';
-import { CropBoxProps } from './CropBox';
+import React from 'react';
+import { EnhancedCropBoxProps, MemorabiliaType } from './cardDetection';
 import { ImageData } from './hooks/useCropState';
 import { useFabricCanvas } from './hooks/useFabricCanvas';
-import { EnhancedCropBoxProps, MemorabiliaType } from './cardDetection';
 
 interface EditorCanvasProps {
   canvasRef: React.RefObject<HTMLCanvasElement>;
@@ -32,10 +31,15 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({
   onToggleBatchSelection,
   onMemorabiliaTypeChange
 }) => {
-  const fabricRef = useRef<HTMLCanvasElement>(null);
+  const fabricRef = canvasRef; // We'll use the same ref
   
-  // Use our refactored Fabric.js canvas hook
-  useFabricCanvas({
+  // Use our enhanced Fabric.js canvas hook
+  const { 
+    addNewCropBox,
+    removeCropBox,
+    updateCropBoxType,
+    canvasInstance
+  } = useFabricCanvas({
     fabricRef,
     canvasRef,
     cropBoxes, 
