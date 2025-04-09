@@ -15,7 +15,7 @@ interface CardPreviewProps {
   tags: string[];
   imageUrl: string;
   cardStyle: CardStyle;
-  selectedEffect: string;
+  selectedEffects: string[];
 }
 
 const CardPreview: React.FC<CardPreviewProps> = ({
@@ -27,7 +27,7 @@ const CardPreview: React.FC<CardPreviewProps> = ({
   tags,
   imageUrl,
   cardStyle,
-  selectedEffect
+  selectedEffects
 }) => {
   const [isFlipped, setIsFlipped] = useState(false);
 
@@ -43,22 +43,24 @@ const CardPreview: React.FC<CardPreviewProps> = ({
     toast.success('Card downloaded');
   };
 
-  // Get effect class based on selected effect
-  const getEffectClass = () => {
-    switch (selectedEffect) {
-      case 'refractor':
-        return 'card-refractor-effect';
-      case 'prism':
-        return 'card-prism-effect';
-      case 'chrome':
-        return 'card-chrome-effect';
-      case 'gold':
-        return 'card-gold-effect';
-      case 'vintage':
-        return 'card-vintage-effect';
-      default:
-        return '';
-    }
+  // Get effect classes based on selected effects
+  const getEffectClasses = () => {
+    const effectMap: Record<string, string> = {
+      'refractor': 'card-refractor-effect',
+      'prism': 'card-prism-effect',
+      'chrome': 'card-chrome-effect',
+      'gold': 'card-gold-effect',
+      'vintage': 'card-vintage-effect',
+      'standard': '',
+      'modern': 'card-style-modern',
+      'bold': 'card-style-bold',
+      'minimal': 'card-style-minimal'
+    };
+    
+    return selectedEffects
+      .map(effect => effectMap[effect] || '')
+      .filter(className => className)
+      .join(' ');
   };
 
   return (
@@ -98,10 +100,20 @@ const CardPreview: React.FC<CardPreviewProps> = ({
                         filter: `brightness(${cardStyle.brightness}%) contrast(${cardStyle.contrast}%) saturate(${cardStyle.saturation}%)`
                       }}
                     />
-                    <div className={`absolute inset-0 ${getEffectClass()}`}></div>
+                    {/* Apply all selected effects */}
+                    {selectedEffects.map((effect, idx) => {
+                      const effectClass = effect === 'refractor' ? 'card-refractor-effect' : 
+                                          effect === 'prism' ? 'card-prism-effect' :
+                                          effect === 'chrome' ? 'card-chrome-effect' :
+                                          effect === 'gold' ? 'card-gold-effect' :
+                                          effect === 'vintage' ? 'card-vintage-effect' : '';
+                      return effectClass ? (
+                        <div key={effect} className={`absolute inset-0 ${effectClass}`} style={{zIndex: 10 + idx}}></div>
+                      ) : null;
+                    })}
                     
                     {/* Card info overlay at bottom */}
-                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 z-20">
                       <h3 className="font-bold text-white text-lg leading-tight">{title}</h3>
                       
                       {player && (
@@ -213,10 +225,18 @@ const CardPreview: React.FC<CardPreviewProps> = ({
                 </div>
               )}
               
-              {selectedEffect !== 'none' && (
+              {selectedEffects.length > 0 && (
                 <div>
-                  <dt className="text-sm font-medium text-gray-500">Special Effect</dt>
-                  <dd className="text-gray-900 mt-1 capitalize">{selectedEffect}</dd>
+                  <dt className="text-sm font-medium text-gray-500">Special Effects</dt>
+                  <dd className="text-gray-900 mt-1">
+                    <div className="flex flex-wrap gap-1">
+                      {selectedEffects.map((effect, index) => (
+                        <span key={effect} className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">
+                          {effect.charAt(0).toUpperCase() + effect.slice(1)}
+                        </span>
+                      ))}
+                    </div>
+                  </dd>
                 </div>
               )}
               

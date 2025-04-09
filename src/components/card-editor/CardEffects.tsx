@@ -1,10 +1,9 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Check } from 'lucide-react';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import '../card-editor/cardEffects.css';
 
@@ -32,17 +31,49 @@ const effectOptions: Record<string, EffectOption[]> = {
 };
 
 interface CardEffectsProps {
-  selectedEffect: string;
-  onEffectChange: (effect: string) => void;
+  selectedEffects: string[];
+  onEffectsChange: (effects: string[]) => void;
   imageUrl: string;
 }
 
-const CardEffects: React.FC<CardEffectsProps> = ({ selectedEffect, onEffectChange, imageUrl }) => {
+const CardEffects: React.FC<CardEffectsProps> = ({ selectedEffects, onEffectsChange, imageUrl }) => {
+  const [activeTab, setActiveTab] = useState<'finish' | 'style'>('finish');
+
+  const toggleEffect = (effectId: string) => {
+    if (selectedEffects.includes(effectId)) {
+      // Remove effect
+      onEffectsChange(selectedEffects.filter(id => id !== effectId));
+    } else {
+      // Add effect (limiting to 2 active effects)
+      const newEffects = [...selectedEffects];
+      if (newEffects.length >= 2) {
+        newEffects.shift(); // Remove the oldest effect
+      }
+      newEffects.push(effectId);
+      onEffectsChange(newEffects);
+    }
+  };
+
+  const getEffectClassNames = () => {
+    return selectedEffects
+      .map(effectId => {
+        const allOptions = [...effectOptions.finish, ...effectOptions.style];
+        return allOptions.find(opt => opt.id === effectId)?.className || '';
+      })
+      .filter(Boolean)
+      .join(' ');
+  };
+
   return (
     <div className="space-y-8">
       <h2 className="text-2xl font-bold mb-4">Card Effects</h2>
       
-      <Tabs defaultValue="finish" className="w-full">
+      <Tabs 
+        defaultValue="finish" 
+        className="w-full"
+        value={activeTab}
+        onValueChange={(value) => setActiveTab(value as 'finish' | 'style')}
+      >
         <TabsList className="grid grid-cols-2 mb-6">
           <TabsTrigger value="finish">Card Finish</TabsTrigger>
           <TabsTrigger value="style">Style</TabsTrigger>
@@ -51,31 +82,34 @@ const CardEffects: React.FC<CardEffectsProps> = ({ selectedEffect, onEffectChang
         <TabsContent value="finish" className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div>
-              <RadioGroup 
-                value={selectedEffect} 
-                onValueChange={onEffectChange}
-                className="space-y-3"
-              >
+              <p className="text-sm text-gray-500 mb-3">Select up to 2 effects (currently selected: {selectedEffects.length}/2)</p>
+              <div className="grid grid-cols-2 gap-3">
                 {effectOptions.finish.map((effect) => (
-                  <div key={effect.id} className="flex items-start space-x-2">
-                    <RadioGroupItem value={effect.id} id={effect.id} className="mt-1" />
-                    <div className="grid gap-1.5">
-                      <Label htmlFor={effect.id} className="font-medium">
-                        {effect.name}
-                      </Label>
-                      <p className="text-sm text-muted-foreground">{effect.description}</p>
+                  <Button
+                    key={effect.id}
+                    variant={selectedEffects.includes(effect.id) ? "default" : "outline"}
+                    className="flex flex-col items-center justify-center p-4 h-auto"
+                    onClick={() => toggleEffect(effect.id)}
+                  >
+                    <div className="flex items-center justify-center mb-2">
+                      {selectedEffects.includes(effect.id) && <Check className="w-4 h-4 mr-1" />}
+                      <span className="font-medium">{effect.name}</span>
                     </div>
-                  </div>
+                    <span className="text-xs text-center">{effect.description}</span>
+                  </Button>
                 ))}
-              </RadioGroup>
+              </div>
             </div>
             
             <div className="flex flex-col">
-              <p className="mb-2 text-gray-600 text-sm">Preview</p>
+              <p className="mb-2 text-gray-600 text-sm">Live Preview</p>
               <div className="relative aspect-[2.5/3.5] rounded-lg overflow-hidden border shadow-sm">
-                <div className={`absolute inset-0 ${
-                  effectOptions.finish.find(e => e.id === selectedEffect)?.className || ''
-                }`}></div>
+                {selectedEffects.map((effectId, index) => {
+                  const effect = [...effectOptions.finish, ...effectOptions.style].find(e => e.id === effectId);
+                  return effect && (
+                    <div key={effectId} className={`absolute inset-0 ${effect.className} z-${10 + index}`}></div>
+                  );
+                })}
                 
                 {imageUrl && (
                   <img 
@@ -92,31 +126,34 @@ const CardEffects: React.FC<CardEffectsProps> = ({ selectedEffect, onEffectChang
         <TabsContent value="style" className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div>
-              <RadioGroup 
-                value={selectedEffect.startsWith('style-') ? selectedEffect : 'style-standard'} 
-                onValueChange={(value) => onEffectChange(`style-${value}`)}
-                className="space-y-3"
-              >
+              <p className="text-sm text-gray-500 mb-3">Select up to 2 styles (currently selected: {selectedEffects.length}/2)</p>
+              <div className="grid grid-cols-2 gap-3">
                 {effectOptions.style.map((style) => (
-                  <div key={style.id} className="flex items-start space-x-2">
-                    <RadioGroupItem value={style.id} id={style.id} className="mt-1" />
-                    <div className="grid gap-1.5">
-                      <Label htmlFor={style.id} className="font-medium">
-                        {style.name}
-                      </Label>
-                      <p className="text-sm text-muted-foreground">{style.description}</p>
+                  <Button
+                    key={style.id}
+                    variant={selectedEffects.includes(style.id) ? "default" : "outline"}
+                    className="flex flex-col items-center justify-center p-4 h-auto"
+                    onClick={() => toggleEffect(style.id)}
+                  >
+                    <div className="flex items-center justify-center mb-2">
+                      {selectedEffects.includes(style.id) && <Check className="w-4 h-4 mr-1" />}
+                      <span className="font-medium">{style.name}</span>
                     </div>
-                  </div>
+                    <span className="text-xs text-center">{style.description}</span>
+                  </Button>
                 ))}
-              </RadioGroup>
+              </div>
             </div>
             
             <div className="flex flex-col">
               <p className="mb-2 text-gray-600 text-sm">Style Preview</p>
               <div className="relative aspect-[2.5/3.5] rounded-lg overflow-hidden border shadow-sm">
-                <div className={`absolute inset-0 ${
-                  effectOptions.style.find(e => `style-${e.id}` === selectedEffect)?.className || ''
-                }`}></div>
+                {selectedEffects.map((effectId, index) => {
+                  const effect = [...effectOptions.finish, ...effectOptions.style].find(e => e.id === effectId);
+                  return effect && (
+                    <div key={effectId} className={`absolute inset-0 ${effect.className} z-${10 + index}`}></div>
+                  );
+                })}
                 
                 {imageUrl && (
                   <img 

@@ -39,8 +39,10 @@ export const useCardEditorState = ({ initialCard, initialMetadata }: UseCardEdit
     backgroundColor: initialCard?.backgroundColor || '#ffffff',
   });
   
-  // Card effects
-  const [selectedEffect, setSelectedEffect] = useState<string>(initialCard?.selectedEffect || 'none');
+  // Card effects - updated to support multiple effects
+  const [selectedEffects, setSelectedEffects] = useState<string[]>(
+    initialCard?.selectedEffects || initialCard?.selectedEffect ? [initialCard.selectedEffect] : []
+  );
   
   // Handle image upload
   const handleFileChange = useCallback((file: File) => {
@@ -61,12 +63,12 @@ export const useCardEditorState = ({ initialCard, initialMetadata }: UseCardEdit
       year,
       tags,
       imageUrl,
-      effect: selectedEffect,
+      selectedEffects,
       ...cardStyle,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
-  }, [title, description, player, team, year, tags, imageUrl, selectedEffect, cardStyle]);
+  }, [title, description, player, team, year, tags, imageUrl, selectedEffects, cardStyle]);
   
   return {
     title,
@@ -85,8 +87,8 @@ export const useCardEditorState = ({ initialCard, initialMetadata }: UseCardEdit
     setImageUrl,
     cardStyle,
     setCardStyle,
-    selectedEffect,
-    setSelectedEffect,
+    selectedEffects,
+    setSelectedEffects,
     handleFileChange,
     getCardData,
   };

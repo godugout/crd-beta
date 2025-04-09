@@ -44,8 +44,8 @@ const StepContent: React.FC<StepContentProps> = ({ currentStep, cardState }) => 
     case 2:
       return (
         <CardEffects
-          selectedEffect={cardState.selectedEffect}
-          onEffectChange={cardState.setSelectedEffect}
+          selectedEffects={cardState.selectedEffects}
+          onEffectsChange={cardState.setSelectedEffects}
           imageUrl={cardState.imageUrl}
         />
       );
@@ -66,7 +66,7 @@ const StepContent: React.FC<StepContentProps> = ({ currentStep, cardState }) => 
           tags={cardState.tags}
           imageUrl={cardState.imageUrl}
           cardStyle={cardState.cardStyle}
-          selectedEffect={cardState.selectedEffect}
+          selectedEffects={cardState.selectedEffects}
         />
       );
     default:
