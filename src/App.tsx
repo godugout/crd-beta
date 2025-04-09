@@ -12,6 +12,8 @@ import OaklandMemoriesPage from './pages/oakland/OaklandMemories';
 import OaklandMemoryDetailsPage from './pages/oakland/OaklandMemoryDetail';
 import GameDayCapturePage from './pages/GameDayMode';
 import GroupMemoryPage from './pages/GroupMemoryCreator';
+import CollectionGallery from './pages/CollectionGallery';
+import MemoryPacks from './pages/MemoryPacks';
 import { CardProvider } from './context/CardContext';
 import { AuthProvider } from './context/auth/AuthProvider';
 import { useMobileOptimization } from './hooks/useMobileOptimization';
@@ -53,6 +55,8 @@ function App() {
                     <Route path="/teams/oakland/memories/:id" element={<OaklandMemoryDetailsPage />} />
                     <Route path="/game-day" element={<GameDayCapturePage />} />
                     <Route path="/group-memory" element={<GroupMemoryPage />} />
+                    <Route path="/collections" element={<CollectionGallery />} />
+                    <Route path="/memory-packs" element={<MemoryPacks />} />
                     <Route path="/experimental" element={<ExperimentalPage />} />
                     <Route path="*" element={<NotFoundPage />} />
                   </Routes>
