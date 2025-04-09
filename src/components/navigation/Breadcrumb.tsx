@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/breadcrumb';
 import { ChevronRight } from 'lucide-react';
 import { Team } from '@/lib/types/TeamTypes';
-import { useBreadcrumbs } from '@/hooks/breadcrumbs/useBreadcrumbs';
+import { useBreadcrumbs } from '@/hooks/breadcrumbs/BreadcrumbContext';
 import { BreadcrumbItemComponent } from './components/BreadcrumbItem';
 
 interface BreadcrumbNavProps {
@@ -16,7 +16,7 @@ interface BreadcrumbNavProps {
 }
 
 const BreadcrumbNav: React.FC<BreadcrumbNavProps> = ({ currentTeam }) => {
-  const breadcrumbs = useBreadcrumbs(currentTeam);
+  const { breadcrumbs } = useBreadcrumbs();
   const location = useLocation();
   
   // Hide breadcrumbs on homepage

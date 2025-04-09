@@ -9,6 +9,7 @@ import MetaTags from '@/components/shared/MetaTags';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Team } from '@/lib/types/TeamTypes';
 import { useNavigationState } from '@/hooks/useNavigationState';
+import { BreadcrumbProvider } from '@/hooks/breadcrumbs/BreadcrumbContext';
 
 interface PageLayoutProps {
   title: string;
@@ -89,48 +90,50 @@ const PageLayout: React.FC<PageLayoutProps> = ({
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <MetaTags 
-        title={title}
-        description={description}
-        canonicalPath={canonicalPath}
-        imageUrl={imageUrl}
-        type={type}
-        teamName={team?.name}
-        contentId={contentId}
-        publishedTime={publishedTime}
-        modifiedTime={modifiedTime}
-        section={section}
-        keywords={keywords}
-      />
-      
-      <AppHeader />
-      
-      {!hideBreadcrumb && <BreadcrumbNav currentTeam={team} />}
-      
-      <AnimatePresence>
-        {transitions ? (
-          <motion.main
-            className={`flex-1 ${fullWidth ? '' : 'container mx-auto px-4 py-6'}`}
-            key={canonicalPath || location.pathname}
-            {...pageTransition}
-          >
-            {children}
-          </motion.main>
-        ) : (
-          <main className={`flex-1 ${fullWidth ? '' : 'container mx-auto px-4 py-6'}`}>
-            {children}
-          </main>
+    <BreadcrumbProvider currentTeam={team}>
+      <div className="min-h-screen flex flex-col">
+        <MetaTags 
+          title={title}
+          description={description}
+          canonicalPath={canonicalPath}
+          imageUrl={imageUrl}
+          type={type}
+          teamName={team?.name}
+          contentId={contentId}
+          publishedTime={publishedTime}
+          modifiedTime={modifiedTime}
+          section={section}
+          keywords={keywords}
+        />
+        
+        <AppHeader />
+        
+        {!hideBreadcrumb && <BreadcrumbNav currentTeam={team} />}
+        
+        <AnimatePresence>
+          {transitions ? (
+            <motion.main
+              className={`flex-1 ${fullWidth ? '' : 'container mx-auto px-4 py-6'}`}
+              key={canonicalPath || location.pathname}
+              {...pageTransition}
+            >
+              {children}
+            </motion.main>
+          ) : (
+            <main className={`flex-1 ${fullWidth ? '' : 'container mx-auto px-4 py-6'}`}>
+              {children}
+            </main>
+          )}
+        </AnimatePresence>
+        
+        {/* Mobile menu and bottom navigation */}
+        <MobileNavigation isOpen={isMenuOpen} onClose={handleCloseMenu} />
+        
+        {isMobile && (
+          <MobileBottomNav onOpenMenu={handleOpenMenu} />
         )}
-      </AnimatePresence>
-      
-      {/* Mobile menu and bottom navigation */}
-      <MobileNavigation isOpen={isMenuOpen} onClose={handleCloseMenu} />
-      
-      {isMobile && (
-        <MobileBottomNav onOpenMenu={handleOpenMenu} />
-      )}
-    </div>
+      </div>
+    </BreadcrumbProvider>
   );
 };
 

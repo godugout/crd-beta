@@ -24,6 +24,7 @@ import ExperimentalPage from './pages/Labs';
 import { queryClient } from './lib/api/queryClient';
 import { DamProvider } from './providers/DamProvider';
 import TeamsGallery from './pages/TeamGallery';
+import { BreadcrumbProvider } from './hooks/breadcrumbs/BreadcrumbContext';
 
 // Create Provider components from hooks
 const MobileOptimizationProvider = ({ children }) => {
@@ -46,51 +47,53 @@ function App() {
             <AuthProvider>
               <CardProvider>
                 <DamProvider>
-                  <Routes>
-                    {/* Home */}
-                    <Route path="/" element={<HomePage />} />
-                    
-                    {/* Cards Routes */}
-                    <Route path="/cards" element={<CardGallery />} />
-                    <Route path="/cards/create" element={<CardEditor />} />
-                    <Route path="/cards/:id/edit" element={<CardEditor />} />
-                    <Route path="/cards/batch" element={<BatchOperationsPage />} />
-                    
-                    {/* Collections Routes */}
-                    <Route path="/collections" element={<CollectionGallery />} />
-                    <Route path="/collections/create" element={<MemoryPackCreator />} />
-                    
-                    {/* Memory Packs Routes */}
-                    <Route path="/packs" element={<MemoryPacks />} />
-                    <Route path="/packs/create" element={<MemoryPackCreator />} />
-                    <Route path="/packs/:id" element={<MemoryPackDetail />} />
-                    
-                    {/* Legacy Memory Packs Routes (for backward compatibility) */}
-                    <Route path="/memory-packs" element={<MemoryPacks />} />
-                    <Route path="/memory-packs/:id" element={<MemoryPackDetail />} />
-                    <Route path="/create-memory-pack" element={<MemoryPackCreator />} />
-                    
-                    {/* Teams Routes */}
-                    <Route path="/teams" element={<TeamsGallery />} />
-                    <Route path="/teams/oakland" element={<OaklandMemoriesPage />} />
-                    <Route path="/teams/oakland/memories" element={<OaklandMemoriesPage />} />
-                    <Route path="/teams/oakland/memories/:id" element={<OaklandMemoryDetailsPage />} />
-                    
-                    {/* Features Routes */}
-                    <Route path="/features/baseball-viewer/:id" element={<BaseballCardViewer />} />
-                    <Route path="/baseball-card-viewer/:id" element={<BaseballCardViewer />} />
-                    <Route path="/game-day" element={<GameDayCapturePage />} />
-                    <Route path="/group-memory" element={<GroupMemoryPage />} />
-                    
-                    {/* Media Library */}
-                    <Route path="/media-library" element={<MediaLibrary />} />
-                    
-                    {/* Experimental */}
-                    <Route path="/experimental" element={<ExperimentalPage />} />
-                    
-                    {/* 404 - Not Found */}
-                    <Route path="*" element={<NotFoundPage />} />
-                  </Routes>
+                  <BreadcrumbProvider currentTeam={null}>
+                    <Routes>
+                      {/* Home */}
+                      <Route path="/" element={<HomePage />} />
+                      
+                      {/* Cards Routes */}
+                      <Route path="/cards" element={<CardGallery />} />
+                      <Route path="/cards/create" element={<CardEditor />} />
+                      <Route path="/cards/:id/edit" element={<CardEditor />} />
+                      <Route path="/cards/batch" element={<BatchOperationsPage />} />
+                      
+                      {/* Collections Routes */}
+                      <Route path="/collections" element={<CollectionGallery />} />
+                      <Route path="/collections/create" element={<MemoryPackCreator />} />
+                      
+                      {/* Memory Packs Routes */}
+                      <Route path="/packs" element={<MemoryPacks />} />
+                      <Route path="/packs/create" element={<MemoryPackCreator />} />
+                      <Route path="/packs/:id" element={<MemoryPackDetail />} />
+                      
+                      {/* Legacy Memory Packs Routes (for backward compatibility) */}
+                      <Route path="/memory-packs" element={<MemoryPacks />} />
+                      <Route path="/memory-packs/:id" element={<MemoryPackDetail />} />
+                      <Route path="/create-memory-pack" element={<MemoryPackCreator />} />
+                      
+                      {/* Teams Routes */}
+                      <Route path="/teams" element={<TeamsGallery />} />
+                      <Route path="/teams/oakland" element={<OaklandMemoriesPage />} />
+                      <Route path="/teams/oakland/memories" element={<OaklandMemoriesPage />} />
+                      <Route path="/teams/oakland/memories/:id" element={<OaklandMemoryDetailsPage />} />
+                      
+                      {/* Features Routes */}
+                      <Route path="/features/baseball-viewer/:id" element={<BaseballCardViewer />} />
+                      <Route path="/baseball-card-viewer/:id" element={<BaseballCardViewer />} />
+                      <Route path="/game-day" element={<GameDayCapturePage />} />
+                      <Route path="/group-memory" element={<GroupMemoryPage />} />
+                      
+                      {/* Media Library */}
+                      <Route path="/media-library" element={<MediaLibrary />} />
+                      
+                      {/* Experimental */}
+                      <Route path="/experimental" element={<ExperimentalPage />} />
+                      
+                      {/* 404 - Not Found */}
+                      <Route path="*" element={<NotFoundPage />} />
+                    </Routes>
+                  </BreadcrumbProvider>
                 </DamProvider>
               </CardProvider>
             </AuthProvider>
