@@ -3,7 +3,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { BreadcrumbItem as UIBreadcrumbItem, BreadcrumbLink, BreadcrumbPage } from '@/components/ui/breadcrumb';
-import { BreadcrumbItem as BreadcrumbItemType } from '@/hooks/breadcrumbs/useBreadcrumbs';
+import { BreadcrumbItem as BreadcrumbItemType } from '@/hooks/breadcrumbs/types';
 
 interface BreadcrumbItemProps {
   crumb: BreadcrumbItemType;

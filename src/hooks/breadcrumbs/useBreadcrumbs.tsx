@@ -1,7 +1,7 @@
 
 import { useLocation } from 'react-router-dom';
 import { Team } from '@/lib/types/TeamTypes';
-import { BreadcrumbItem } from './types';
+import { BreadcrumbItem, BreadcrumbHandlerProps } from './types';
 import { 
   createHomeBreadcrumb, 
   createTeamsBreadcrumb, 
@@ -16,7 +16,11 @@ import {
   handleSemanticSegments, 
   handleIdSegment 
 } from './semanticHandlers';
+import { createHandlerChain } from './createHandlerChain';
 
+/**
+ * Hook to generate breadcrumbs based on current route
+ */
 export const useBreadcrumbs = (currentTeam?: Team | null): BreadcrumbItem[] => {
   const location = useLocation();
   const pathSegments = location.pathname.split('/').filter(Boolean);
@@ -29,6 +33,15 @@ export const useBreadcrumbs = (currentTeam?: Team | null): BreadcrumbItem[] => {
   if (pathSegments.length === 0) {
     return breadcrumbs;
   }
+  
+  // Create the handler chain
+  const combinedHandler = createHandlerChain([
+    handleTeamSegment,
+    handleMainSection,
+    handleComplexRoutes,
+    handleSemanticSegments,
+    handleIdSegment,
+  ]);
   
   // Build breadcrumbs based on path segments and route mappings
   let currentPath = '';
@@ -44,7 +57,7 @@ export const useBreadcrumbs = (currentTeam?: Team | null): BreadcrumbItem[] => {
     }
     
     // Create shared props for handlers
-    const handlerProps = {
+    const handlerProps: BreadcrumbHandlerProps = {
       index: i,
       pathSegments,
       segment,
@@ -52,28 +65,13 @@ export const useBreadcrumbs = (currentTeam?: Team | null): BreadcrumbItem[] => {
       currentTeam
     };
     
-    // Try each handler in sequence and use the first one that returns a breadcrumb
-    const handlers = [
-      () => handleTeamSegment(handlerProps),
-      () => handleMainSection(handlerProps),
-      () => handleComplexRoutes(handlerProps),
-      () => handleSemanticSegments(handlerProps),
-      () => handleIdSegment(handlerProps),
-    ];
+    // Try the combined handler
+    const breadcrumb = combinedHandler(handlerProps);
     
-    let handlerSucceeded = false;
-    
-    for (const handler of handlers) {
-      const breadcrumb = handler();
-      if (breadcrumb) {
-        breadcrumbs.push(breadcrumb);
-        handlerSucceeded = true;
-        break;
-      }
-    }
-    
-    // If no specialized handler worked, create a generic breadcrumb
-    if (!handlerSucceeded) {
+    if (breadcrumb) {
+      breadcrumbs.push(breadcrumb);
+    } else {
+      // If no specialized handler worked, create a generic breadcrumb
       breadcrumbs.push(createGenericBreadcrumb(segment, currentPath));
     }
   }
@@ -81,5 +79,5 @@ export const useBreadcrumbs = (currentTeam?: Team | null): BreadcrumbItem[] => {
   return breadcrumbs;
 };
 
-// Export types
+// Re-export types
 export type { BreadcrumbItem };
