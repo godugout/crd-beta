@@ -31,10 +31,15 @@ const AssetOrganizer: React.FC<AssetOrganizerProps> = ({
       title: `Asset ${i + 1}`,
       description: `Description for asset ${i + 1}`,
       publicUrl: `https://source.unsplash.com/random/300x300?sig=${i}`,
+      thumbnailUrl: `https://source.unsplash.com/random/300x300?sig=${i}`,
       mimeType: 'image/jpeg',
+      storagePath: `/assets/asset-${i}.jpg`,
+      fileSize: 1024 * 1024, // 1MB
+      tags: i % 3 === 0 ? ['landscape'] : i % 3 === 1 ? ['portrait'] : ['product'],
       createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
       userId: 'user-1',
-      tags: i % 3 === 0 ? ['landscape'] : i % 3 === 1 ? ['portrait'] : ['product']
+      originalFilename: `image-${i}.jpg`,
     }))
   );
   

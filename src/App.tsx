@@ -1,20 +1,33 @@
+
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import HomePage from '@/pages/HomePage';
-import NotFoundPage from '@/pages/NotFoundPage';
-import MediaLibrary from '@/pages/MediaLibrary';
-import CardGallery from '@/pages/CardGallery';
-import BatchOperationsPage from '@/pages/BatchOperationsPage';
+import HomePage from './pages/Home';
+import NotFoundPage from './pages/NotFound';
+import MediaLibrary from './pages/MediaLibrary';
+import CardGallery from './pages/CardGallery';
+import BatchOperationsPage from './pages/BatchOperationsPage';
 import CardEditor from './components/CardEditor';
 import BaseballCardViewer from './pages/BaseballCardViewer';
-import OaklandMemoriesPage from './pages/OaklandMemoriesPage';
-import OaklandMemoryDetailsPage from './pages/OaklandMemoryDetailsPage';
-import GameDayCapturePage from './pages/GameDayCapturePage';
-import GroupMemoryPage from './pages/GroupMemoryPage';
-import { CardContextProvider } from './context/CardContext';
-import { AuthContextProvider } from './context/auth';
-import { MobileOptimizationProvider } from './hooks/useMobileOptimization';
-import { ConnectivityProvider } from './hooks/useConnectivity';
-import ExperimentalPage from './pages/ExperimentalPage';
+import OaklandMemoriesPage from './pages/oakland/OaklandMemories';
+import OaklandMemoryDetailsPage from './pages/oakland/OaklandMemoryDetail';
+import GameDayCapturePage from './pages/GameDayMode';
+import GroupMemoryPage from './pages/GroupMemoryCreator';
+import { CardContext as CardContextProvider } from './context/CardContext';
+import { AuthProvider as AuthContextProvider } from './context/auth/AuthProvider';
+import { useMobileOptimization } from './hooks/useMobileOptimization';
+import { useConnectivity } from './hooks/useConnectivity';
+import ExperimentalPage from './pages/Labs';
+
+// Create Provider components from hooks
+const MobileOptimizationProvider = ({ children }) => {
+  useMobileOptimization();
+  return <>{children}</>;
+};
+
+// Create ConnectivityProvider
+const ConnectivityProvider = ({ children }) => {
+  useConnectivity();
+  return <>{children}</>;
+};
 
 function App() {
   return (

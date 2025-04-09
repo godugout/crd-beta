@@ -1,9 +1,8 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
-import { Check, X, Gallery, Image, Upload, Images } from 'lucide-react';
+import { Check, X, Image, Upload, Images } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DigitalAsset } from '@/lib/dam/assetService';
 import { useCardData } from '@/hooks/useCardData';
@@ -16,7 +15,6 @@ interface BatchOperationsProps {
 }
 
 const BatchOperations: React.FC<BatchOperationsProps> = ({ collectionId, onComplete }) => {
-  // Fetch cards from the collection
   const { cards, isLoading, error } = useCardData({
     filter: (card) => collectionId ? card.collectionId === collectionId : true,
   });
@@ -51,17 +49,12 @@ const BatchOperations: React.FC<BatchOperationsProps> = ({ collectionId, onCompl
     setIsProcessing(true);
     
     try {
-      // In a real implementation, this would call an API to update the cards
-      // For this example, we'll simulate a successful update
-      
       toast.success(`Updated ${selectedCards.length} cards with ${selectedAssets.length} images`);
       
-      // Reset selections
       setSelectedCards([]);
       setSelectedAssets([]);
       setShowAssetSelector(false);
       
-      // Refresh parent if needed
       if (onComplete) {
         onComplete();
       }
@@ -74,8 +67,6 @@ const BatchOperations: React.FC<BatchOperationsProps> = ({ collectionId, onCompl
   };
 
   const handleBatchUpload = () => {
-    // This would open a batch upload dialog
-    // For now, just show the asset selector
     setShowAssetSelector(true);
   };
 
@@ -203,15 +194,20 @@ const BatchAssetSelector: React.FC<BatchAssetSelectorProps> = ({
   onSelectAsset, 
   selectedAssets 
 }) => {
-  // This would normally fetch assets from your service
-  // For now, we'll use some mock assets
   const mockAssets: DigitalAsset[] = Array.from({ length: 8 }).map((_, i) => ({
     id: `asset-${i}`,
     title: `Asset ${i + 1}`,
+    description: '',
     publicUrl: `https://source.unsplash.com/random/300x400?sig=${i}`,
+    thumbnailUrl: `https://source.unsplash.com/random/300x400?sig=${i}`,
     mimeType: 'image/jpeg',
+    storagePath: `/assets/asset-${i}.jpg`,
+    fileSize: 1024 * 1024,
+    tags: [],
     createdAt: new Date().toISOString(),
-    userId: 'user-1'
+    updatedAt: new Date().toISOString(),
+    userId: 'user-1',
+    originalFilename: `image-${i}.jpg`
   }));
 
   return (

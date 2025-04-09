@@ -1,4 +1,3 @@
-
 import { supabase } from '@/lib/supabase';
 
 export interface DigitalAsset {
@@ -30,6 +29,7 @@ export interface AssetUploadOptions {
   tags?: string[];
   cardId?: string;
   collectionId?: string;
+  teamId?: string;
   assetType?: string;
   metadata?: any;
 }
@@ -92,7 +92,10 @@ export const assetService = {
         storage_path: filePath,
         file_size: file.size,
         tags: options.tags || [],
-        metadata: options.metadata || {},
+        metadata: {
+          ...options.metadata || {},
+          teamId: options.teamId
+        },
         original_filename: file.name,
         user_id: user.id,
         card_id: options.cardId,

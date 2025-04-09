@@ -109,11 +109,11 @@ const BatchImageUploader: React.FC<BatchImageUploaderProps> = ({
           // Simulate progress updates
           const interval = setInterval(simulateProgress, 300);
           
-          // Actual upload
+          // Actual upload - removed teamId since it's not in AssetUploadOptions
           const result = await assetService.uploadAsset(file, {
             title: file.name,
             collectionId,
-            teamId
+            metadata: teamId ? { teamId } : undefined // Store teamId in metadata instead
           });
           
           clearInterval(interval);

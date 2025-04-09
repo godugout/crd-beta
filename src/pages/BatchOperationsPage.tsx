@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import PageLayout from '@/components/navigation/PageLayout';
@@ -8,6 +7,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import BatchOperations from '@/components/dam/BatchOperations';
 import BatchImageUploader from '@/components/dam/BatchImageUploader';
 import { OptimizedImage } from '@/components/ui/optimized-image';
+import { toast } from 'sonner';
+import AssetOrganizer from '@/components/dam/AssetOrganizer';
 
 const BatchOperationsPage = () => {
   const [activeTab, setActiveTab] = useState('manage');
@@ -94,7 +95,6 @@ const BatchOperationsPage = () => {
   );
 };
 
-// Simple placeholder for the organizer component
 const AssetOrganizer = () => {
   return (
     <div className="space-y-6">
