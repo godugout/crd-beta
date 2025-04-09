@@ -11,6 +11,7 @@ import {
   FlaskConical,
   Sparkles,
 } from 'lucide-react';
+import { LucideIcon } from 'lucide-react';
 
 export interface NavigationItem {
   title: string;
@@ -149,35 +150,35 @@ export const featuresNavigation: NavigationSection = {
 };
 
 // Route mapping for breadcrumbs
-export const routeMappings: Record<string, { path: string; label: string; parent?: string }> = {
+export const routeMappings: Record<string, { path: string; label: string; parent?: string; icon?: React.ElementType }> = {
   // Root
-  '': { path: '/', label: 'Home', parent: undefined },
+  '': { path: '/', label: 'Home', parent: undefined, icon: Home },
   
   // Cards section
-  'cards': { path: '/cards', label: 'Cards', parent: '' },
-  'create': { path: '/cards/create', label: 'Create Card', parent: 'cards' },
-  'batch': { path: '/cards/batch', label: 'Batch Operations', parent: 'cards' },
+  'cards': { path: '/cards', label: 'Cards', parent: '', icon: Image },
+  'create': { path: '/cards/create', label: 'Create Card', parent: 'cards', icon: PlusSquare },
+  'batch': { path: '/cards/batch', label: 'Batch Operations', parent: 'cards', icon: Image },
   
   // Collections section
-  'collections': { path: '/collections', label: 'Collections', parent: '' },
-  'collections-create': { path: '/collections/create', label: 'Create Collection', parent: 'collections' },
+  'collections': { path: '/collections', label: 'Collections', parent: '', icon: Layers },
+  'collections-create': { path: '/collections/create', label: 'Create Collection', parent: 'collections', icon: PlusSquare },
   
   // Memory Packs section
-  'packs': { path: '/packs', label: 'Memory Packs', parent: '' },
-  'packs-create': { path: '/packs/create', label: 'Create Memory Pack', parent: 'packs' },
+  'packs': { path: '/packs', label: 'Memory Packs', parent: '', icon: Package },
+  'packs-create': { path: '/packs/create', label: 'Create Memory Pack', parent: 'packs', icon: PlusSquare },
   
   // Teams section
-  'teams': { path: '/teams', label: 'Teams', parent: '' },
+  'teams': { path: '/teams', label: 'Teams', parent: '', icon: Users },
   'oakland': { path: '/teams/oakland', label: 'Oakland A\'s', parent: 'teams' },
   'memories': { path: '/teams/oakland/memories', label: 'Memories', parent: 'oakland' },
   
   // Features section
-  'features': { path: '/features', label: 'Features', parent: '' },
+  'features': { path: '/features', label: 'Features', parent: '', icon: Sparkles },
   'ar-viewer': { path: '/features/ar-viewer', label: 'AR Viewer', parent: 'features' },
   'baseball-viewer': { path: '/features/baseball-viewer', label: 'Baseball Cards', parent: 'features' },
   
   // Game Day
-  'game-day': { path: '/game-day', label: 'Game Day Mode', parent: '' },
+  'game-day': { path: '/game-day', label: 'Game Day Mode', parent: '', icon: PlayCircle },
   
   // Media Library
   'media-library': { path: '/media-library', label: 'Media Library', parent: '' },
@@ -186,5 +187,5 @@ export const routeMappings: Record<string, { path: string; label: string; parent
   'account': { path: '/account', label: 'Account', parent: '' },
   
   // Experimental
-  'experimental': { path: '/experimental', label: 'Labs', parent: '' },
+  'experimental': { path: '/experimental', label: 'Labs', parent: '', icon: FlaskConical },
 };

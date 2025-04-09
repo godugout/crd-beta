@@ -13,6 +13,7 @@ import { Home, Users, ChevronRight } from 'lucide-react';
 import { routeMappings } from './components/NavigationItems';
 import { Team } from '@/lib/types/TeamTypes';
 import { motion } from 'framer-motion';
+import * as LucideIcons from 'lucide-react';
 
 interface BreadcrumbNavProps {
   currentTeam?: Team | null;
@@ -76,11 +77,18 @@ const useBreadcrumbs = (currentTeam?: Team | null) => {
     if (i === 0) {
       // First segment - check for main section
       if (routeMappings[segment]) {
-        breadcrumbs.push({
+        const item = {
           path: routeMappings[segment].path,
           label: routeMappings[segment].label,
-          icon: routeMappings[segment].icon && <routeMappings[segment].icon className="h-3.5 w-3.5" />
-        });
+        };
+
+        // Safely add icon if it exists
+        if (routeMappings[segment].icon) {
+          const IconComponent = routeMappings[segment].icon;
+          item['icon'] = <IconComponent className="h-3.5 w-3.5" />;
+        }
+
+        breadcrumbs.push(item);
         continue;
       }
     }
@@ -89,11 +97,18 @@ const useBreadcrumbs = (currentTeam?: Team | null) => {
     if (i === 1 && pathSegments[i-1] && segment) {
       const combinedKey = `${segment}`;
       if (routeMappings[combinedKey]) {
-        breadcrumbs.push({
+        const item = {
           path: routeMappings[combinedKey].path,
           label: routeMappings[combinedKey].label,
-          icon: routeMappings[combinedKey].icon && <routeMappings[combinedKey].icon className="h-3.5 w-3.5" />
-        });
+        };
+
+        // Safely add icon if it exists
+        if (routeMappings[combinedKey].icon) {
+          const IconComponent = routeMappings[combinedKey].icon;
+          item['icon'] = <IconComponent className="h-3.5 w-3.5" />;
+        }
+
+        breadcrumbs.push(item);
         continue;
       }
     }
