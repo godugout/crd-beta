@@ -35,6 +35,8 @@ const MemoryPacks = () => {
             primary_color: data.primary_color,
             name: data.name
           });
+        } else {
+          console.error('Error fetching team info:', error);
         }
       } catch (err) {
         console.error('Error fetching team info:', err);

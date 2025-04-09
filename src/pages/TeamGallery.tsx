@@ -3,27 +3,9 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import PageLayout from '@/components/navigation/PageLayout';
 import { Button } from '@/components/ui/button';
-import { Users, Filter, Info, Stadium, Calendar } from 'lucide-react';
+import { Users, Filter, Info, Calendar } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-
-interface Team {
-  id: string;
-  name: string;
-  slug: string;
-  description: string;
-  color: string;
-  memberCount?: number;
-  // Additional fields from our expanded team table
-  primary_color?: string;
-  secondary_color?: string;
-  tertiary_color?: string;
-  founded_year?: number;
-  city?: string;
-  state?: string;
-  stadium?: string;
-  league?: string;
-  division?: string;
-}
+import { Team } from '@/lib/types/TeamTypes';
 
 const TeamGallery = () => {
   const [teams, setTeams] = useState<Team[]>([]);
@@ -70,9 +52,11 @@ const TeamGallery = () => {
             founded_year: team.founded_year,
             city: team.city,
             state: team.state,
+            country: team.country,
             stadium: team.stadium,
             league: team.league,
-            division: team.division
+            division: team.division,
+            team_code: team.team_code
           }));
           setTeams(transformedTeams);
         }
@@ -218,7 +202,7 @@ const TeamGallery = () => {
                     
                     {team.stadium && (
                       <div className="flex items-center text-sm text-gray-500">
-                        <Stadium className="w-4 h-4 mr-2" />
+                        <Info className="w-4 h-4 mr-2" />
                         <span>{team.stadium}</span>
                       </div>
                     )}
