@@ -16,7 +16,7 @@ const CardDetectorPage = () => {
   
   // Enable all memorabilia types
   const enabledMemorabiliaTypes: MemorabiliaType[] = [
-    'baseball_card', 'ticket', 'program', 'photo', 'jersey', 'other'
+    'card', 'ticket', 'program', 'autograph', 'face', 'unknown'
   ];
   
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -62,20 +62,20 @@ const CardDetectorPage = () => {
                   <TabsContent value="upload">
                     <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-12 text-center">
                       <p className="text-gray-500 mb-4">Upload a card or memorabilia item to analyze</p>
-                      <Button
-                        as="label"
-                        htmlFor="file-upload"
-                        variant="default"
-                      >
-                        Select Image
-                        <input
-                          id="file-upload"
-                          type="file"
-                          className="sr-only"
-                          accept="image/*"
-                          onChange={handleFileSelect}
-                        />
-                      </Button>
+                      <div>
+                        <Button variant="default">
+                          <label htmlFor="file-upload" className="cursor-pointer">
+                            Select Image
+                            <input
+                              id="file-upload"
+                              type="file"
+                              className="sr-only"
+                              accept="image/*"
+                              onChange={handleFileSelect}
+                            />
+                          </label>
+                        </Button>
+                      </div>
                     </div>
                   </TabsContent>
                   
