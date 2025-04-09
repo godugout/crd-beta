@@ -8,7 +8,7 @@ interface ImageEditorProps {
   setShowEditor: (show: boolean) => void;
   editorImage: string | null;
   currentFile: File | null;
-  onCropComplete: (file: File, url: string, memorabiliaType?: MemorabiliaType) => void;
+  onCropComplete: (file: File, url: string, memorabiliaType?: MemorabiliaType, metadata?: any) => void;
   batchProcessingMode?: boolean;
   onBatchProcessComplete?: (files: File[], urls: string[], types?: MemorabiliaType[]) => void;
   enabledMemorabiliaTypes?: MemorabiliaType[];

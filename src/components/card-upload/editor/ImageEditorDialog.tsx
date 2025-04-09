@@ -1,12 +1,13 @@
+
 import React, { useRef, useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Loader2, Info } from "lucide-react";
 import { useCropState } from '../hooks/useCropState';
 import { useEditor } from '../hooks/useEditor';
 import { useCropBoxOperations } from '../hooks/useCropBoxOperations';
 import { useImageHandling } from '../hooks/useImageHandling';
-import { MemorabiliaType } from '../cardDetection';
+import { MemorabiliaType, detectText } from '../cardDetection';
 import EditorContent from './EditorContent';
 import CardTypeSelector from '../components/CardTypeSelector';
 import { toast } from "sonner";
@@ -17,7 +18,7 @@ interface ImageEditorDialogProps {
   setShowEditor: (show: boolean) => void;
   editorImage: string | null;
   currentFile: File | null;
-  onCropComplete: (file: File, url: string, memorabiliaType?: MemorabiliaType) => void;
+  onCropComplete: (file: File, url: string, memorabiliaType?: MemorabiliaType, metadata?: any) => void;
   batchProcessingMode?: boolean;
   onBatchProcessComplete?: (files: File[], urls: string[], types?: MemorabiliaType[]) => void;
   enabledMemorabiliaTypes?: MemorabiliaType[];
@@ -39,6 +40,7 @@ const ImageEditorDialog: React.FC<ImageEditorDialogProps> = ({
   const editorImgRef = useRef<HTMLImageElement>(null);
   
   const [isExtractingSaving, setIsExtractingSaving] = useState(false);
+  const [extractedMetadata, setExtractedMetadata] = useState<any>(null);
   
   // Card selection state
   const { imageData, setImageData, cropBoxes, setCropBoxes, detectedCards, setDetectedCards } = useCropState();
@@ -123,6 +125,37 @@ const ImageEditorDialog: React.FC<ImageEditorDialogProps> = ({
     }
   };
   
+  // Extract text from image when a crop box is selected
+  const extractCardMetadata = async () => {
+    if (selectedCropIndex < 0 || !editorImgRef.current) return null;
+    
+    try {
+      const selectedBox = cropBoxes[selectedCropIndex];
+      const img = editorImgRef.current;
+      
+      // Create a temporary canvas to extract just the cropped area
+      const tempCanvas = document.createElement('canvas');
+      const ctx = tempCanvas.getContext('2d');
+      if (!ctx) return null;
+      
+      tempCanvas.width = selectedBox.width;
+      tempCanvas.height = selectedBox.height;
+      
+      ctx.drawImage(
+        img,
+        selectedBox.x, selectedBox.y, selectedBox.width, selectedBox.height,
+        0, 0, selectedBox.width, selectedBox.height
+      );
+      
+      // Extract text from the cropped area
+      const textData = await detectText(tempCanvas);
+      return textData;
+    } catch (error) {
+      console.error('Error extracting metadata:', error);
+      return null;
+    }
+  };
+  
   // Extract and save card to catalog
   const handleExtractAndSaveCard = async () => {
     if (!currentFile || selectedCropIndex < 0) {
@@ -135,6 +168,11 @@ const ImageEditorDialog: React.FC<ImageEditorDialogProps> = ({
     try {
       // Extract the card
       const selectedBox = cropBoxes[selectedCropIndex];
+      
+      // Extract metadata before cropping
+      const metadata = await extractCardMetadata();
+      setExtractedMetadata(metadata);
+      
       const result = await stageSelectedCrop(
         selectedBox, 
         canvasRef, 
@@ -148,30 +186,43 @@ const ImageEditorDialog: React.FC<ImageEditorDialogProps> = ({
         return;
       }
       
-      // Save the extracted card to the catalog
-      const saveResult = await storageOperations.saveExtractedCard(
-        result.file,
-        {
-          title: "Extracted Card",
-          tags: ["baseball", "card", "extracted"],
-          cardType: selectedBox.memorabiliaType || 'card',
+      // Prepare the card data with extracted metadata
+      const cardData = {
+        title: metadata?.title || "Extracted Card",
+        tags: metadata?.tags || ["baseball", "card", "extracted"],
+        cardType: selectedBox.memorabiliaType || 'card',
+        text: metadata?.text,
+        year: metadata?.year,
+        player: metadata?.player,
+        team: metadata?.team,
+      };
+      
+      try {
+        // First try to save to catalog if possible
+        const saveResult = await storageOperations.saveExtractedCard(result.file, cardData);
+        
+        if (saveResult.error) {
+          console.error("Error saving to catalog:", saveResult.error);
+          // Continue with extraction even if catalog save fails
+          toast.warning("Card extracted but couldn't be saved to catalog. Using local version.");
+        } else {
+          toast.success("Card extracted and saved to your catalog");
         }
+      } catch (saveError) {
+        console.error("Error saving to catalog:", saveError);
+        // Continue with extraction even if catalog save fails
+        toast.warning("Card extracted but couldn't be saved to catalog. Using local version.");
+      }
+      
+      // Always pass extracted data to the callback to ensure the flow continues
+      onCropComplete(
+        result.file, 
+        result.url, 
+        selectedBox.memorabiliaType,
+        metadata
       );
       
-      if (saveResult.error) {
-        toast.error("Card extracted but couldn't be saved to catalog");
-      } else {
-        toast.success("Card extracted and saved to your catalog");
-        
-        // Pass both the file and the saved URL to the callback
-        onCropComplete(
-          result.file, 
-          result.url, 
-          selectedBox.memorabiliaType
-        );
-        
-        setShowEditor(false);
-      }
+      setShowEditor(false);
     } catch (error) {
       console.error("Error extracting card:", error);
       toast.error("Failed to extract card");
@@ -185,6 +236,9 @@ const ImageEditorDialog: React.FC<ImageEditorDialogProps> = ({
       <DialogContent className="max-w-5xl w-[95vw] max-h-[90vh] p-0 overflow-hidden">
         <DialogHeader className="p-4 border-b">
           <DialogTitle>Card Extractor</DialogTitle>
+          <DialogDescription className="text-sm text-muted-foreground">
+            Detect and extract trading cards from your images
+          </DialogDescription>
         </DialogHeader>
         
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 h-[calc(90vh-8rem)] overflow-hidden">
@@ -239,6 +293,23 @@ const ImageEditorDialog: React.FC<ImageEditorDialogProps> = ({
                   Fit to Card Dimensions
                 </Button>
               </div>
+              
+              {selectedCropIndex >= 0 && cropBoxes[selectedCropIndex] && (
+                <div className="mt-4 p-2 border border-gray-200 rounded bg-white">
+                  <p className="text-xs font-medium">Detection Confidence</p>
+                  <div className="flex items-center mt-1">
+                    <div className="w-full bg-gray-200 rounded-full h-2.5">
+                      <div 
+                        className="bg-green-600 h-2.5 rounded-full" 
+                        style={{ width: `${(cropBoxes[selectedCropIndex].confidence || 0) * 100}%` }}
+                      ></div>
+                    </div>
+                    <span className="ml-2 text-xs font-medium">
+                      {Math.round((cropBoxes[selectedCropIndex].confidence || 0) * 100)}%
+                    </span>
+                  </div>
+                </div>
+              )}
               
               <div className="mt-4">
                 <p className="text-xs text-gray-500 flex items-start">

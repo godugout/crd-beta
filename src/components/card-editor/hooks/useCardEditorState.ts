@@ -1,101 +1,101 @@
-import { useState } from 'react';
-import { CardStyle } from '../CardDesignCustomization';
-import { TextStyle } from '../CardTextCustomization';
-import { FabricSwatch } from '../types';
+
+import { useState, useCallback } from 'react';
 
 interface UseCardEditorStateProps {
   initialCard?: any;
+  initialMetadata?: any;
 }
 
-export const useCardEditorState = ({ initialCard }: UseCardEditorStateProps = {}) => {
+export const useCardEditorState = ({ 
+  initialCard, 
+  initialMetadata
+}: UseCardEditorStateProps = {}) => {
+  // Basic card info
+  const [title, setTitle] = useState(initialCard?.title || initialMetadata?.title || '');
+  const [description, setDescription] = useState(
+    initialCard?.description || initialMetadata?.text || ''
+  );
+  const [tags, setTags] = useState<string[]>(
+    initialCard?.tags || initialMetadata?.tags || []
+  );
+  const [newTag, setNewTag] = useState('');
+  
+  // Image data
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imageUrl, setImageUrl] = useState<string>(initialCard?.imageUrl || '');
-  const [title, setTitle] = useState(initialCard?.title || '');
-  const [description, setDescription] = useState(initialCard?.description || '');
-  const [tags, setTags] = useState<string[]>(initialCard?.tags || []);
-  const [newTag, setNewTag] = useState('');
-  const [fabricSwatches, setFabricSwatches] = useState<FabricSwatch[]>(initialCard?.fabricSwatches || []);
   
-  // Card design customization state - ensure borderRadius is string type
-  const [cardStyle, setCardStyle] = useState<CardStyle>({
-    effect: 'classic',
-    brightness: 100,
-    contrast: 100,
-    saturation: 100,
-    borderWidth: 0,
-    borderRadius: '8px', // Using string instead of number
-    borderColor: '#ffffff',
-    backgroundColor: '#ffffff'
+  // Card design - like borders, colors, effects
+  const [cardStyle, setCardStyle] = useState<any>({
+    borderColor: initialCard?.designMetadata?.borderColor || '#000000',
+    borderWidth: initialCard?.designMetadata?.borderWidth || 1,
+    borderRadius: initialCard?.designMetadata?.borderRadius || 8,
+    backgroundColor: initialCard?.designMetadata?.backgroundColor || '#ffffff',
+    effect: initialCard?.designMetadata?.effect || 'none'
   });
   
-  // Card text customization state
-  const [textStyle, setTextStyle] = useState<TextStyle>({
-    titleFont: 'sans',
-    titleSize: 24,
-    titleColor: '#ffffff',
-    titleAlignment: 'left',
-    titleWeight: 'bold',
-    titleStyle: 'normal',
-    descriptionFont: 'sans',
-    descriptionSize: 12,
-    descriptionColor: '#ffffff',
-    showOverlay: true,
-    overlayOpacity: 50,
-    overlayColor: '#000000',
-    overlayPosition: 'bottom'
+  // Text styling
+  const [textStyle, setTextStyle] = useState<any>({
+    titleColor: initialCard?.designMetadata?.titleColor || '#000000',
+    titleFont: initialCard?.designMetadata?.titleFont || 'sans-serif',
+    titleSize: initialCard?.designMetadata?.titleSize || 24,
+    descriptionColor: initialCard?.designMetadata?.descriptionColor || '#333333',
+    descriptionFont: initialCard?.designMetadata?.descriptionFont || 'sans-serif',
+    descriptionSize: initialCard?.designMetadata?.descriptionSize || 14,
   });
+  
+  // FabricJS swatches for textiles (jerseys, etc)
+  const [fabricSwatches, setFabricSwatches] = useState<any[]>(
+    initialCard?.designMetadata?.fabricSwatches || []
+  );
+
+  const handleImageUpload = useCallback((file: File, url: string, metadata?: any) => {
+    setImageFile(file);
+    setImageUrl(url);
+    
+    // If metadata is provided from OCR, update other fields
+    if (metadata) {
+      if (metadata.title && !title) setTitle(metadata.title);
+      if (metadata.text && !description) setDescription(metadata.text);
+      if (metadata.tags && tags.length === 0) setTags(metadata.tags);
+      // Could set other fields like year, player, team if they exist in metadata
+    }
+  }, [title, description, tags]);
+
+  const getCardData = useCallback(() => {
+    return {
+      title,
+      description,
+      tags,
+      imageUrl,
+      designMetadata: {
+        ...cardStyle,
+        ...textStyle,
+        fabricSwatches,
+      }
+    };
+  }, [
+    title, description, tags, imageUrl, 
+    cardStyle, textStyle, fabricSwatches
+  ]);
 
   return {
-    // State
-    imageFile,
-    imageUrl,
-    title,
-    description,
-    tags,
-    newTag,
-    fabricSwatches,
-    cardStyle,
-    textStyle,
+    // Basic info
+    title, setTitle,
+    description, setDescription,
+    tags, setTags,
+    newTag, setNewTag,
     
-    // Setters
-    setImageFile,
-    setImageUrl,
-    setTitle,
-    setDescription,
-    setTags,
-    setNewTag,
-    setFabricSwatches,
-    setCardStyle,
-    setTextStyle,
+    // Image
+    imageFile, setImageFile,
+    imageUrl, setImageUrl,
+    handleImageUpload,
     
-    // Helpers
-    handleImageUpload: (file: File, url: string) => {
-      setImageFile(file);
-      setImageUrl(url);
-    },
-    getCardData: () => {
-      // Format the fabric swatches data
-      const fabricMetadata = fabricSwatches.map(swatch => ({
-        type: swatch.type,
-        team: swatch.team,
-        year: swatch.year,
-        manufacturer: swatch.manufacturer,
-        position: swatch.position,
-        size: swatch.size
-      }));
-
-      return {
-        title,
-        description,
-        imageUrl,
-        thumbnailUrl: imageUrl,
-        tags,
-        fabricSwatches: fabricMetadata,
-        designMetadata: {
-          cardStyle,
-          textStyle
-        }
-      };
-    }
+    // Design
+    cardStyle, setCardStyle,
+    textStyle, setTextStyle,
+    fabricSwatches, setFabricSwatches,
+    
+    // Utilities
+    getCardData
   };
 };

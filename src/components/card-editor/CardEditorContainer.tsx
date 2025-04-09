@@ -12,14 +12,15 @@ import NavigationButtons from './NavigationButtons';
 interface CardEditorContainerProps {
   card?: any;
   className?: string;
+  initialMetadata?: any;
 }
 
 const steps = ["Upload & Info", "Card Design", "Card Text", "Preview"];
 
-const CardEditorContainer: React.FC<CardEditorContainerProps> = ({ card, className }) => {
+const CardEditorContainer: React.FC<CardEditorContainerProps> = ({ card, className, initialMetadata }) => {
   const navigate = useNavigate();
   const { addCard, updateCard } = useCards();
-  const cardState = useCardEditorState({ initialCard: card });
+  const cardState = useCardEditorState({ initialCard: card, initialMetadata });
   
   const validateCurrentStep = (step: number) => {
     if (step === 0) {

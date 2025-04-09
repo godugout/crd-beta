@@ -1,18 +1,19 @@
 
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { EnhancedCropBoxProps, MemorabiliaType, applyCrop } from '../cardDetection';
+import { EnhancedCropBoxProps, MemorabiliaType, applyCrop, detectText } from '../cardDetection';
 
 export interface StagedCardProps {
   id: string;
   cropBox: EnhancedCropBoxProps;
   previewUrl: string;
-  file: File; // Changed from optional to required to match expected type
-  url: string; // Added url property to match expected type
+  file: File;
+  url: string;
+  metadata?: any;
 }
 
 export interface UseEditorProps {
-  onCropComplete: (file: File, url: string, memorabiliaType?: MemorabiliaType) => void;
+  onCropComplete: (file: File, url: string, memorabiliaType?: MemorabiliaType, metadata?: any) => void;
   currentFile: File | null;
   setShowEditor: (show: boolean) => void;
   autoEnhance?: boolean;
@@ -50,6 +51,23 @@ export const useEditor = ({
       const actualType = memorabiliaType || selectedBox.memorabiliaType || 'unknown';
       const enhancementType = autoEnhance ? actualType : undefined;
       
+      // Create a temporary canvas to extract just the cropped area for metadata detection
+      const tempCanvas = document.createElement('canvas');
+      const ctx = tempCanvas.getContext('2d');
+      if (ctx && editorImgRef.current) {
+        tempCanvas.width = selectedBox.width;
+        tempCanvas.height = selectedBox.height;
+        
+        ctx.drawImage(
+          editorImgRef.current,
+          selectedBox.x, selectedBox.y, selectedBox.width, selectedBox.height,
+          0, 0, selectedBox.width, selectedBox.height
+        );
+      }
+      
+      // Extract text data in parallel while cropping
+      const metadataPromise = detectText(tempCanvas);
+      
       // We're passing the canvas reference directly instead of accessing it here
       // This gives more control to the applyCrop function to handle null cases
       const result = await applyCrop(
@@ -60,6 +78,9 @@ export const useEditor = ({
         enhancementType
       );
       
+      // Wait for metadata extraction to complete
+      const metadata = await metadataPromise;
+      
       if (result && result.file && result.url) {
         const newStagedCard: StagedCardProps = {
           id: `card-${Date.now()}-${Math.random().toString(16).slice(2)}`,
@@ -69,7 +90,8 @@ export const useEditor = ({
           },
           previewUrl: result.url,
           file: result.file,
-          url: result.url
+          url: result.url,
+          metadata
         };
         
         setStagedCards(prev => [...prev, newStagedCard]);
@@ -94,7 +116,7 @@ export const useEditor = ({
           }
         }
         
-        return result;
+        return {...result, metadata};
       } else {
         console.error("Failed to crop the image, result:", result);
         showToast && toast.error("Failed to extract the item");
@@ -115,7 +137,8 @@ export const useEditor = ({
       onCropComplete(
         stagedCard.file, 
         stagedCard.previewUrl, 
-        stagedCard.cropBox.memorabiliaType
+        stagedCard.cropBox.memorabiliaType,
+        stagedCard.metadata
       );
       setShowEditor(false);
     }

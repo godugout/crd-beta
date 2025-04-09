@@ -115,6 +115,42 @@ export async function detectCardsInImage(
   return detectedItems;
 }
 
+// Extract text from a canvas or image element
+export async function detectText(
+  source: HTMLCanvasElement | HTMLImageElement
+): Promise<{ 
+  text: string; 
+  title?: string; 
+  player?: string;
+  team?: string;
+  year?: string;
+  tags: string[];
+} | null> {
+  try {
+    // In a real implementation, this would call an OCR API
+    // For now, we'll simulate text detection with placeholder logic
+    
+    // Create a simple object with detected text fields
+    // In production this would use OCR to extract actual text from the card image
+    const extractedText = {
+      text: "This is the full text detected on the card",
+      title: "Vintage Baseball Card",
+      player: "John Smith",
+      team: "Oakland Athletics",
+      year: "1989",
+      tags: ["baseball", "vintage", "athletics"]
+    };
+    
+    // Simulate processing time
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    return extractedText;
+  } catch (error) {
+    console.error('Error detecting text:', error);
+    return null;
+  }
+}
+
 // Apply crop to image and return cropped image
 export async function applyCrop(
   cropBox: EnhancedCropBoxProps,
