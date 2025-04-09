@@ -6,6 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Users, Filter, Info, Calendar } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Team } from '@/lib/types/TeamTypes';
+import { Database } from '@/integrations/supabase/types';
+
+type TeamRow = Database['public']['Tables']['teams']['Row'];
 
 const TeamGallery = () => {
   const [teams, setTeams] = useState<Team[]>([]);
@@ -37,9 +40,9 @@ const TeamGallery = () => {
         
         if (error) {
           console.error('Error fetching teams:', error);
-        } else {
+        } else if (data) {
           // Transform the data to match our interface
-          const transformedTeams: Team[] = data.map(team => ({
+          const transformedTeams: Team[] = data.map((team: any) => ({
             id: team.id,
             name: team.name,
             slug: team.team_code ? team.team_code.toLowerCase() : team.name.toLowerCase().replace(/\s+/g, '-'),

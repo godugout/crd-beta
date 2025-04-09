@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Package, Plus } from 'lucide-react';
 import MemoryPacksSection from '@/components/card-showcase/MemoryPacksSection';
 import { supabase } from '@/integrations/supabase/client';
+import { Team } from '@/lib/types/TeamTypes';
 
 interface TeamInfo {
   primary_color?: string;
