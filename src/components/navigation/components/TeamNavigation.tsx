@@ -36,13 +36,16 @@ const TeamNavigation: React.FC<TeamNavigationProps> = ({ activeSection }) => {
   useEffect(() => {
     const fetchTeams = async () => {
       try {
-        // Type annotation for the query result to avoid deep type instantiation
-        const { data: teamData, error } = await supabase
+        // Use explicit type annotation and avoid deep type instantiation
+        const result = await supabase
           .from('teams')
           .select('id, name')
           .eq('is_active', true)
           .order('name')
-          .limit(4) as { data: TeamRecord[] | null; error: any };
+          .limit(4);
+          
+        const teamData = result.data as TeamRecord[] | null;
+        const error = result.error;
           
         if (error) {
           console.error('Error fetching team navigation:', error);
