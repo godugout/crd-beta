@@ -1,11 +1,10 @@
-
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import PageLayout from '@/components/navigation/PageLayout';
 import { Button } from '@/components/ui/button';
 import { Users, Filter, Info, Calendar } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { Team, DbTeam } from '@/lib/types/TeamTypes';
+import { Team } from '@/lib/types/TeamTypes';
 
 interface TeamDisplayData extends Team {
   memberCount?: number;
@@ -44,7 +43,7 @@ const TeamGallery = () => {
           setTeams([]);
         } else if (data) {
           // Transform the data to match our interface
-          const transformedTeams: TeamDisplayData[] = (data as DbTeam[]).map(team => ({
+          const transformedTeams: TeamDisplayData[] = data.map(team => ({
             id: team.id,
             name: team.name,
             slug: team.team_code ? team.team_code.toLowerCase() : team.name.toLowerCase().replace(/\s+/g, '-'),

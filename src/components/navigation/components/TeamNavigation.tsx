@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/navigation-menu";
 import { Users, PlayCircle, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { Team, DbTeam } from '@/lib/types/TeamTypes';
+import { Team } from '@/lib/types/TeamTypes';
 
 interface TeamNavigationProps {
   activeSection: string;
@@ -26,7 +26,7 @@ const TeamNavigation: React.FC<TeamNavigationProps> = ({ activeSection }) => {
       try {
         const { data, error } = await supabase
           .from('teams')
-          .select('*')
+          .select('id, name, team_code, primary_color')
           .eq('is_active', true)
           .order('name')
           .limit(4);
@@ -35,13 +35,12 @@ const TeamNavigation: React.FC<TeamNavigationProps> = ({ activeSection }) => {
           console.error('Error fetching team navigation:', error);
           setTeams([]);
         } else if (data) {
-          const dbTeams = data as DbTeam[];
-          setTeams(dbTeams.map(team => ({
+          setTeams(data.map(team => ({
             id: team.id,
             name: team.name,
             slug: team.team_code ? team.team_code.toLowerCase() : team.name.toLowerCase().replace(/\s+/g, '-'),
             primary_color: team.primary_color || undefined,
-            owner_id: team.owner_id
+            owner_id: 'system'
           })));
         }
       } catch (err) {

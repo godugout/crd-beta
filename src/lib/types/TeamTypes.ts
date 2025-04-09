@@ -9,7 +9,7 @@ export interface Team {
   updated_at?: string;
   logo_url?: string;
   
-  // Enhanced team fields
+  // Team fields
   team_code?: string;
   primary_color?: string;
   secondary_color?: string;
