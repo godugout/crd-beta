@@ -11,7 +11,6 @@ interface TeamNavigationProps {
 interface Team {
   id: string;
   name: string;
-  slug: string;
   primary_color?: string;
 }
 
@@ -25,7 +24,7 @@ const TeamNavigation: React.FC<TeamNavigationProps> = ({ showLabel = true }) => 
         setLoading(true);
         const { data, error } = await supabase
           .from('teams')
-          .select('id, name, slug, primary_color')
+          .select('id, name, primary_color')
           .order('name');
           
         if (error) {
@@ -74,7 +73,7 @@ const TeamNavigation: React.FC<TeamNavigationProps> = ({ showLabel = true }) => 
       {teams.map(team => (
         <Link 
           key={team.id}
-          to={`/teams/${team.slug}`}
+          to={`/teams/${team.id}`}
           className="flex items-center space-x-2 px-3 py-2 hover:bg-gray-100 rounded-md ml-4"
         >
           <div 

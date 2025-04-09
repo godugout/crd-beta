@@ -12,6 +12,157 @@ export interface BreadcrumbItem {
   color?: string;
 }
 
+// Base helper to create a home breadcrumb
+const createHomeBreadcrumb = (): BreadcrumbItem => ({
+  path: '/', 
+  label: 'Home', 
+  icon: <Home className="h-3.5 w-3.5" /> 
+});
+
+// Helper for team segment handling
+const handleTeamSegment = (
+  index: number, 
+  pathSegments: string[], 
+  segment: string,
+  currentPath: string,
+  currentTeam?: Team | null
+): BreadcrumbItem | null => {
+  if (index === 1 && pathSegments[0] === 'teams') {
+    if (currentTeam) {
+      return {
+        path: currentPath,
+        label: currentTeam.name,
+        color: currentTeam.primary_color
+      };
+    } else {
+      // Prettier team slug display if no team object
+      const prettyName = segment.split('-').map(word => 
+        word.charAt(0).toUpperCase() + word.slice(1)
+      ).join(' ');
+      
+      return {
+        path: currentPath,
+        label: prettyName
+      };
+    }
+  }
+  return null;
+};
+
+// Helper for main section handling
+const handleMainSection = (
+  index: number,
+  segment: string
+): BreadcrumbItem | null => {
+  if (index === 0 && routeMappings[segment]) {
+    const item: BreadcrumbItem = {
+      path: routeMappings[segment].path,
+      label: routeMappings[segment].label,
+    };
+
+    // Safely add icon if it exists
+    if (routeMappings[segment].icon) {
+      const IconComponent = routeMappings[segment].icon;
+      item.icon = <IconComponent className="h-3.5 w-3.5" />;
+    }
+
+    return item;
+  }
+  return null;
+};
+
+// Helper for complex routes handling
+const handleComplexRoutes = (
+  index: number,
+  pathSegments: string[],
+  segment: string,
+  currentPath: string
+): BreadcrumbItem | null => {
+  if (index === 1 && pathSegments[index-1] && segment) {
+    const combinedKey = segment;
+    if (routeMappings[combinedKey]) {
+      const item: BreadcrumbItem = {
+        path: routeMappings[combinedKey].path,
+        label: routeMappings[combinedKey].label,
+      };
+
+      // Safely add icon if it exists
+      if (routeMappings[combinedKey].icon) {
+        const IconComponent = routeMappings[combinedKey].icon;
+        item.icon = <IconComponent className="h-3.5 w-3.5" />;
+      }
+
+      return item;
+    }
+  }
+  return null;
+};
+
+// Helper for semantic segments handling
+const handleSemanticSegments = (
+  index: number,
+  pathSegments: string[],
+  segment: string,
+  currentPath: string
+): BreadcrumbItem | null => {
+  if (segment === 'memories' && index > 1) {
+    return {
+      path: currentPath,
+      label: 'Memories'
+    };
+  }
+  
+  if (segment === 'new' && pathSegments[index-1] === 'memories') {
+    return {
+      path: currentPath,
+      label: 'Create Memory'
+    };
+  }
+  
+  return null;
+};
+
+// Helper for ID segments handling
+const handleIdSegment = (
+  index: number,
+  pathSegments: string[],
+  segment: string,
+  currentPath: string
+): BreadcrumbItem | null => {
+  if (segment.match(/^[0-9a-fA-F-]+$/)) {
+    const prevSegment = index > 0 ? pathSegments[index-1] : '';
+    
+    // Determine entity type from previous segment
+    let label = 'Details';
+    if (prevSegment === 'cards') label = 'Card Details';
+    else if (prevSegment === 'collections') label = 'Collection';
+    else if (prevSegment === 'memories') label = 'Memory Details';
+    else if (prevSegment === 'packs') label = 'Memory Pack';
+    
+    return {
+      path: currentPath,
+      label: label
+    };
+  }
+  return null;
+};
+
+// Helper for generating generic breadcrumb item
+const createGenericBreadcrumb = (segment: string, currentPath: string): BreadcrumbItem => {
+  const label = segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, ' ');
+  return {
+    path: currentPath,
+    label: label
+  };
+};
+
+// Helper for teams breadcrumb
+const createTeamsBreadcrumb = (): BreadcrumbItem => ({
+  path: '/teams',
+  label: 'Teams',
+  icon: <Users className="h-3.5 w-3.5" />
+});
+
 export const useBreadcrumbs = (currentTeam?: Team | null): BreadcrumbItem[] => {
   const location = useLocation();
   const pathSegments = location.pathname.split('/').filter(Boolean);
@@ -19,11 +170,7 @@ export const useBreadcrumbs = (currentTeam?: Team | null): BreadcrumbItem[] => {
   const breadcrumbs: BreadcrumbItem[] = [];
   
   // Always add home
-  breadcrumbs.push({ 
-    path: '/', 
-    label: 'Home', 
-    icon: <Home className="h-3.5 w-3.5" /> 
-  });
+  breadcrumbs.push(createHomeBreadcrumb());
   
   if (pathSegments.length === 0) {
     return breadcrumbs;
@@ -38,189 +185,35 @@ export const useBreadcrumbs = (currentTeam?: Team | null): BreadcrumbItem[] => {
     
     // Special handling for teams section
     if (segment === 'teams' && i === 0) {
-      breadcrumbs.push({
-        path: '/teams',
-        label: 'Teams',
-        icon: <Users className="h-3.5 w-3.5" />
-      });
+      breadcrumbs.push(createTeamsBreadcrumb());
       continue;
     }
     
-    // Handle team slugs - try to use currentTeam info if available
-    if (handleTeamSegment(breadcrumbs, i, pathSegments, segment, currentPath, currentTeam)) {
-      continue;
+    // Try each handler in sequence and use the first one that returns a breadcrumb
+    const handlers = [
+      () => handleTeamSegment(i, pathSegments, segment, currentPath, currentTeam),
+      () => handleMainSection(i, segment),
+      () => handleComplexRoutes(i, pathSegments, segment, currentPath),
+      () => handleSemanticSegments(i, pathSegments, segment, currentPath),
+      () => handleIdSegment(i, pathSegments, segment, currentPath),
+    ];
+    
+    let handlerSucceeded = false;
+    
+    for (const handler of handlers) {
+      const breadcrumb = handler();
+      if (breadcrumb) {
+        breadcrumbs.push(breadcrumb);
+        handlerSucceeded = true;
+        break;
+      }
     }
     
-    // Special handling for common path patterns
-    if (handleMainSection(breadcrumbs, i, segment)) {
-      continue;
+    // If no specialized handler worked, create a generic breadcrumb
+    if (!handlerSucceeded) {
+      breadcrumbs.push(createGenericBreadcrumb(segment, currentPath));
     }
-    
-    // Check for complex cases like collections/create or cards/batch
-    if (handleComplexRoutes(breadcrumbs, i, pathSegments, segment, currentPath)) {
-      continue;
-    }
-    
-    // Handle semantic path segments for memories and other content types
-    if (handleSemanticSegments(breadcrumbs, i, pathSegments, segment, currentPath)) {
-      continue;
-    }
-    
-    // Handle IDs - they're usually parameters like :id
-    if (handleIdSegment(breadcrumbs, i, pathSegments, segment, currentPath)) {
-      continue;
-    }
-    
-    // If no match found, create a readable label from the segment
-    const label = segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, ' ');
-    breadcrumbs.push({
-      path: currentPath,
-      label: label
-    });
   }
   
   return breadcrumbs;
-};
-
-// Helper function to handle team segments
-const handleTeamSegment = (
-  breadcrumbs: BreadcrumbItem[], 
-  index: number, 
-  pathSegments: string[], 
-  segment: string,
-  currentPath: string,
-  currentTeam?: Team | null
-): boolean => {
-  if (index === 1 && pathSegments[0] === 'teams') {
-    // This is a team slug path
-    if (currentTeam) {
-      breadcrumbs.push({
-        path: currentPath,
-        label: currentTeam.name,
-        color: currentTeam.primary_color
-      });
-    } else {
-      // Prettier team slug display if no team object
-      const prettyName = segment.split('-').map(word => 
-        word.charAt(0).toUpperCase() + word.slice(1)
-      ).join(' ');
-      
-      breadcrumbs.push({
-        path: currentPath,
-        label: prettyName
-      });
-    }
-    return true;
-  }
-  return false;
-};
-
-// Helper function to handle main section
-const handleMainSection = (
-  breadcrumbs: BreadcrumbItem[],
-  index: number,
-  segment: string
-): boolean => {
-  if (index === 0) {
-    // First segment - check for main section
-    if (routeMappings[segment]) {
-      const item = {
-        path: routeMappings[segment].path,
-        label: routeMappings[segment].label,
-      };
-
-      // Safely add icon if it exists
-      if (routeMappings[segment].icon) {
-        const IconComponent = routeMappings[segment].icon;
-        item['icon'] = <IconComponent className="h-3.5 w-3.5" />;
-      }
-
-      breadcrumbs.push(item);
-      return true;
-    }
-  }
-  return false;
-};
-
-// Helper function to handle complex routes
-const handleComplexRoutes = (
-  breadcrumbs: BreadcrumbItem[],
-  index: number,
-  pathSegments: string[],
-  segment: string,
-  currentPath: string
-): boolean => {
-  if (index === 1 && pathSegments[index-1] && segment) {
-    const combinedKey = `${segment}`;
-    if (routeMappings[combinedKey]) {
-      const item = {
-        path: routeMappings[combinedKey].path,
-        label: routeMappings[combinedKey].label,
-      };
-
-      // Safely add icon if it exists
-      if (routeMappings[combinedKey].icon) {
-        const IconComponent = routeMappings[combinedKey].icon;
-        item['icon'] = <IconComponent className="h-3.5 w-3.5" />;
-      }
-
-      breadcrumbs.push(item);
-      return true;
-    }
-  }
-  return false;
-};
-
-// Helper function to handle semantic segments
-const handleSemanticSegments = (
-  breadcrumbs: BreadcrumbItem[],
-  index: number,
-  pathSegments: string[],
-  segment: string,
-  currentPath: string
-): boolean => {
-  if (segment === 'memories' && index > 1) {
-    breadcrumbs.push({
-      path: currentPath,
-      label: 'Memories'
-    });
-    return true;
-  }
-  
-  if (segment === 'new' && pathSegments[index-1] === 'memories') {
-    breadcrumbs.push({
-      path: currentPath,
-      label: 'Create Memory'
-    });
-    return true;
-  }
-  
-  return false;
-};
-
-// Helper function to handle ID segments
-const handleIdSegment = (
-  breadcrumbs: BreadcrumbItem[],
-  index: number,
-  pathSegments: string[],
-  segment: string,
-  currentPath: string
-): boolean => {
-  if (segment.match(/^[0-9a-fA-F-]+$/)) {
-    const prevSegment = index > 0 ? pathSegments[index-1] : '';
-    
-    // Determine entity type from previous segment
-    let label = 'Details';
-    if (prevSegment === 'cards') label = 'Card Details';
-    else if (prevSegment === 'collections') label = 'Collection';
-    else if (prevSegment === 'memories') label = 'Memory Details';
-    else if (prevSegment === 'packs') label = 'Memory Pack';
-    
-    breadcrumbs.push({
-      path: currentPath,
-      label: label
-    });
-    return true;
-  }
-  return false;
 };

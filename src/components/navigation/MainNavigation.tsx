@@ -52,7 +52,7 @@ const MainNavigation: React.FC = () => {
           />
 
           {/* Teams Navigation - Custom component due to unique layout */}
-          <TeamNavigation activeSection={activeSection} />
+          <TeamNavigation />
 
           {/* Features Navigation */}
           <NavigationSection 
