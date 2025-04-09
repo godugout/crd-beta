@@ -57,12 +57,14 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({ isOpen, onClose }) 
         { title: 'Cards', path: '/cards', icon: Image },
         { title: 'Collections', path: '/collections', icon: Layers },
         { title: 'Media Library', path: '/media-library', icon: Image },
+        { title: 'Memory Packs', path: '/memory-packs', icon: PackageIcon },
       ]
     },
     {
       title: "CREATE",
       items: [
         { title: 'Create Card', path: '/cards/create', icon: PlusSquare },
+        { title: 'Create Collection', path: '/collections/new', icon: PlusSquare },
         { title: 'Batch Operations', path: '/batch-operations', icon: Layers },
       ]
     },

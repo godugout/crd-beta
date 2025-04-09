@@ -14,6 +14,8 @@ import GameDayCapturePage from './pages/GameDayMode';
 import GroupMemoryPage from './pages/GroupMemoryCreator';
 import CollectionGallery from './pages/CollectionGallery';
 import MemoryPacks from './pages/MemoryPacks';
+import MemoryPackCreator from './pages/MemoryPackCreator';
+import MemoryPackDetail from './pages/MemoryPackDetail';
 import { CardProvider } from './context/CardContext';
 import { AuthProvider } from './context/auth/AuthProvider';
 import { useMobileOptimization } from './hooks/useMobileOptimization';
@@ -56,7 +58,12 @@ function App() {
                     <Route path="/game-day" element={<GameDayCapturePage />} />
                     <Route path="/group-memory" element={<GroupMemoryPage />} />
                     <Route path="/collections" element={<CollectionGallery />} />
+                    <Route path="/collections/new" element={<MemoryPackCreator />} />
                     <Route path="/memory-packs" element={<MemoryPacks />} />
+                    <Route path="/packs" element={<MemoryPacks />} /> {/* Alias for memory-packs */}
+                    <Route path="/memory-packs/:id" element={<MemoryPackDetail />} />
+                    <Route path="/packs/:id" element={<MemoryPackDetail />} /> {/* Alias for memory-packs/:id */}
+                    <Route path="/create-memory-pack" element={<MemoryPackCreator />} /> {/* Additional route */}
                     <Route path="/experimental" element={<ExperimentalPage />} />
                     <Route path="*" element={<NotFoundPage />} />
                   </Routes>

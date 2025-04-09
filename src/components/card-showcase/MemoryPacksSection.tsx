@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Collection } from '@/lib/types';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 
@@ -35,8 +36,9 @@ const MemoryPacksSection: React.FC<MemoryPacksSectionProps> = ({
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {packs.map(pack => (
-          <div 
+          <Link 
             key={pack.id} 
+            to={`/memory-packs/${pack.id}`}
             className="rounded-lg overflow-hidden cursor-pointer hover:shadow-lg transition-shadow bg-gradient-to-br from-green-50 to-blue-100 border border-blue-200"
             onClick={() => handleViewPack(pack.id)}
           >
@@ -64,7 +66,7 @@ const MemoryPacksSection: React.FC<MemoryPacksSectionProps> = ({
                 Explore Pack
               </div>
             </div>
-          </div>
+          </Link>
         ))}
       </div>
     </section>

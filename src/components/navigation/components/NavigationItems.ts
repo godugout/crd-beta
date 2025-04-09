@@ -74,6 +74,12 @@ export const collectionsNavigation: NavigationSection = {
       path: '/collections/new',
       icon: PlusSquare,
       description: 'Create and organize a new collection of cards'
+    },
+    {
+      title: 'Memory Packs',
+      path: '/memory-packs',
+      icon: PackageIcon,
+      description: 'Explore themed memory card packs'
     }
   ]
 };

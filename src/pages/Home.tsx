@@ -41,10 +41,10 @@ const Home = () => {
           </div>
           
           <div className="bg-white p-6 rounded-lg shadow-sm">
-            <h2 className="text-xl font-bold mb-3">Media Library</h2>
-            <p className="mb-4">Manage images and assets for your cards</p>
+            <h2 className="text-xl font-bold mb-3">Memory Packs</h2>
+            <p className="mb-4">Explore themed memory packs</p>
             <Button asChild variant="outline" className="w-full">
-              <Link to="/media-library">Browse Media</Link>
+              <Link to="/memory-packs">Browse Packs</Link>
             </Button>
           </div>
         </div>
