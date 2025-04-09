@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { Toaster } from 'sonner';
@@ -11,9 +12,9 @@ import Collections from '@/pages/Collections';
 import OaklandMemories from '@/pages/OaklandMemories';
 import OaklandMemoryCreatorPage from '@/pages/OaklandMemoryCreator';
 import Experiences from '@/pages/Experiences';
-
-// Import our new Media Library page
 import MediaLibrary from '@/pages/MediaLibrary';
+import BaseballCardViewer from '@/pages/BaseballCardViewer';
+import NotFound from '@/pages/NotFound';
 
 const router = createBrowserRouter([
   {
@@ -53,6 +54,26 @@ const router = createBrowserRouter([
   {
     path: '/media',
     element: <MediaLibrary />,
+  },
+  
+  // Add Baseball Card Viewer routes
+  {
+    path: '/baseball-card-viewer',
+    element: <BaseballCardViewer />,
+  },
+  {
+    path: '/baseball-card-viewer/:id',
+    element: <BaseballCardViewer />,
+  },
+  {
+    path: '/features/baseball-viewer',
+    element: <BaseballCardViewer />,
+  },
+  
+  // Fallback 404 route
+  {
+    path: '*',
+    element: <NotFound />,
   },
 ]);
 

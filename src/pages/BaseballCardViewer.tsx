@@ -1,16 +1,29 @@
 
 import React from 'react';
+import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import PageLayout from '@/components/navigation/PageLayout';
+import BaseballCardRenderer from '@/components/baseball/BaseballCardRenderer';
+import BaseballCardSidebar from '@/components/baseball/BaseballCardSidebar';
 
 const BaseballCardViewer = () => {
   return (
     <PageLayout
       title="Baseball Card Viewer"
       description="Immersive baseball card viewing experience"
+      fullWidth={true}
     >
-      <div className="container mx-auto pt-24 px-4">
-        <h1 className="text-3xl font-bold mb-6">Baseball Card Viewer</h1>
-        <p>This is a placeholder for the Baseball Card Viewer page.</p>
+      <div className="flex h-screen bg-gray-900">
+        {/* Left sidebar */}
+        <div className="hidden md:block w-72 border-r border-gray-800">
+          <BaseballCardSidebar />
+        </div>
+        
+        {/* Main content area */}
+        <div className="flex-1 overflow-hidden">
+          <ErrorBoundary>
+            <BaseballCardRenderer />
+          </ErrorBoundary>
+        </div>
       </div>
     </PageLayout>
   );
