@@ -42,21 +42,26 @@ const CardEditorContainer: React.FC<CardEditorContainerProps> = ({ card, classNa
     validateCurrentStep
   );
   
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const cardData = cardState.getCardData();
     
-    if (card) {
-      // Update existing card
-      updateCard(card.id, cardData);
-      toast.success('Card updated successfully');
-    } else {
-      // Add new card
-      addCard(cardData);
-      toast.success('Card created successfully');
+    try {
+      if (card) {
+        // Update existing card
+        await updateCard(card.id, cardData);
+        toast.success('Card updated successfully');
+      } else {
+        // Add new card
+        await addCard(cardData);
+        toast.success('Card created successfully');
+      }
+      
+      // Navigate to gallery with a refresh parameter to ensure updated data is fetched
+      navigate('/gallery?refresh=true');
+    } catch (error) {
+      console.error('Error saving card:', error);
+      toast.error('Failed to save card. Please try again.');
     }
-    
-    // Navigate to gallery with a refresh parameter to ensure updated data is fetched
-    navigate('/gallery?refresh=true');
   };
 
   return (

@@ -12,7 +12,7 @@ import TagFilter from './gallery/TagFilter';
 import CardList from './gallery/CardList';
 import { useCardEffects } from './gallery/hooks/useCardEffects';
 import { Card } from '@/lib/types';
-import { useCards } from '@/hooks/useCards';
+import { useCards } from '@/context/CardContext';
 
 interface CardGalleryProps {
   className?: string;
@@ -39,9 +39,8 @@ const CardGallery: React.FC<CardGalleryProps> = ({
   const [selectedTags, setSelectedTags] = useState<string[]>(initialTags || []);
   
   const { 
-    cards: fetchedCards, 
+    cards: contextCards, 
     isLoading: isLoadingCards, 
-    error: cardsError, 
     fetchCards: refreshCards 
   } = useCards({
     teamId,
@@ -50,7 +49,7 @@ const CardGallery: React.FC<CardGalleryProps> = ({
     autoFetch: !propCards
   });
   
-  const cards: Card[] = propCards || fetchedCards;
+  const cards = propCards || contextCards;
   
   const { isMobile, shouldOptimizeAnimations } = useMobileOptimization();
   
@@ -150,7 +149,7 @@ const CardGallery: React.FC<CardGalleryProps> = ({
           <CardGridWrapper 
             cards={filteredCards}
             isLoading={isLoading}
-            error={cardsError ? (typeof cardsError === 'string' ? new Error(cardsError) : cardsError as Error) : null}
+            error={null}
             onCardClick={handleCardItemClick}
             getCardEffects={(cardId) => cardEffects[cardId] || []}
             useVirtualization={!isMobile && filteredCards.length > 20}

@@ -1,10 +1,11 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import PageLayout from '@/components/navigation/PageLayout';
 import CardGallery from '@/components/CardGallery';
 import { ChevronRight, Grid3X3, LayoutList, Tv2, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useCardData } from '@/hooks/useCardData';
+import { useCards } from '@/context/CardContext';
 import { useMobileOptimization } from '@/hooks/useMobileOptimization';
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import { 
@@ -15,7 +16,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import FullscreenViewer from '@/components/gallery/FullscreenViewer';
-import { Card } from '@/lib/types'; // Import from correct location
 
 const Gallery = () => {
   const { isMobile } = useMobileOptimization();
@@ -26,13 +26,16 @@ const Gallery = () => {
   const location = useLocation();
   const navigate = useNavigate();
   
+  // Use the CardContext directly instead of useCardData hook
   const { 
     cards, 
     isLoading, 
-    error, 
-    refetch 
-  } = useCardData({
-    sort: (a, b) => {
+    refreshCards
+  } = useCards();
+  
+  // Sort cards based on the selected sort order
+  const sortedCards = React.useMemo(() => {
+    return [...cards].sort((a, b) => {
       switch (sortOrder) {
         case 'newest':
           return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
@@ -45,27 +48,29 @@ const Gallery = () => {
         default:
           return 0;
       }
-    },
-    deps: [sortOrder]
-  });
+    });
+  }, [cards, sortOrder]);
 
   useEffect(() => {
+    // Refresh cards when component mounts
+    refreshCards?.();
+    
     const queryParams = new URLSearchParams(location.search);
     if (queryParams.get('refresh') === 'true') {
-      refetch();
+      refreshCards?.();
       queryParams.delete('refresh');
       navigate({
         pathname: location.pathname,
         search: queryParams.toString()
       }, { replace: true });
     }
-  }, [location.search, refetch, navigate]);
+  }, [location.search, refreshCards, navigate]);
   
   const hasBaseballCards = cards.some(card => 
     card.tags?.some(tag => ['baseball', 'vintage'].includes(tag.toLowerCase()))
   );
 
-  const displayCards: Card[] = cards.map(card => ({
+  const displayCards = sortedCards.map(card => ({
     ...card,
     designMetadata: {
       ...card.designMetadata,
