@@ -5,13 +5,19 @@ import App from './App.tsx';
 import './index.css';
 import { AuthProvider } from './context/auth/AuthProvider';
 import { CardProvider } from './context/CardContext';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+// Create a client
+const queryClient = new QueryClient();
 
 createRoot(document.getElementById("root")!).render(
   <HelmetProvider>
-    <AuthProvider>
-      <CardProvider>
-        <App />
-      </CardProvider>
-    </AuthProvider>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <CardProvider>
+          <App />
+        </CardProvider>
+      </AuthProvider>
+    </QueryClientProvider>
   </HelmetProvider>
 );

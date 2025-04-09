@@ -26,10 +26,11 @@ import CommunityFeed from './pages/CommunityFeed';
 import Labs from './pages/Labs';
 import PbrDemo from './pages/PbrDemo';
 import SignatureDemo from './pages/SignatureDemo';
+import MobileLayout from './components/layout/MobileLayout';
 
 function App() {
   return (
-    <div className="App">
+    <div className="App min-h-screen bg-background">
       <Router>
         <Routes>
           <Route path="/" element={<Index />} />
