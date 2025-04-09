@@ -1,30 +1,55 @@
-
-// Update the part where the error occurs - the transformTeamMember function
+import { supabase } from '@/lib/supabase';
 import { TeamMember, User } from '@/lib/types';
 
-function transformTeamMember(dbTeamMember: any): TeamMember {
-  // Basic team member properties
-  const teamMember: TeamMember = {
-    id: dbTeamMember.id,
-    teamId: dbTeamMember.team_id,
-    userId: dbTeamMember.user_id,
-    role: dbTeamMember.role as "owner" | "admin" | "member" | "viewer",
-    joinedAt: dbTeamMember.joined_at,
-  };
-  
-  // If user data is available, add it
-  if (dbTeamMember.profiles) {
-    const userData = dbTeamMember.profiles;
-    if (userData) {
-      teamMember.user = {
-        id: userData.id,
-        email: userData.email || '',
-        name: userData.full_name,
-        avatarUrl: userData.avatar_url,
-        username: userData.username
-      };
+export const teamRepository = {
+  /**
+   * Get team members for a specific team
+   */
+  async getTeamMembers(teamId: string) {
+    try {
+      const { data, error } = await supabase
+        .from('team_members')
+        .select(`
+          id,
+          team_id,
+          user_id,
+          role,
+          joined_at,
+          profiles:user_id (
+            id,
+            email,
+            full_name,
+            avatar_url
+          )
+        `)
+        .eq('team_id', teamId);
+      
+      if (error) {
+        return { data: null, error: error.message };
+      }
+      
+      const teamMembers: TeamMember[] = data.map(member => ({
+        id: member.id,
+        teamId: member.team_id,
+        userId: member.user_id,
+        role: member.role,
+        joinedAt: member.joined_at,
+        user: member.profiles ? {
+          id: member.profiles.id,
+          email: member.profiles.email || '',
+          displayName: member.profiles.full_name,
+          avatarUrl: member.profiles.avatar_url,
+          createdAt: '',  // These fields are required but not available from profiles
+          updatedAt: ''   // These fields are required but not available from profiles
+        } : undefined
+      }));
+      
+      return { data: teamMembers, error: null };
+    } catch (err) {
+      console.error('Error getting team members:', err);
+      return { data: null, error: 'Failed to get team members' };
     }
-  }
+  },
   
-  return teamMember;
-}
+  // Other team-related operations...
+};

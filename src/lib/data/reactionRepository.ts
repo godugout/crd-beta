@@ -1,206 +1,178 @@
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabase';
 import { Reaction, DbReaction } from '@/lib/types';
-import { toast } from 'sonner';
 
-/**
- * Repository for reaction-related data operations
- */
+const mapDbReactionToReaction = (dbReaction: DbReaction): Reaction => {
+  return {
+    id: dbReaction.id,
+    type: dbReaction.type,
+    userId: dbReaction.user_id,
+    cardId: dbReaction.card_id,
+    commentId: dbReaction.comment_id,
+    collectionId: dbReaction.collection_id,
+    createdAt: dbReaction.created_at
+  };
+};
+
 export const reactionRepository = {
   /**
    * Get reactions for a card
    */
-  getCardReactions: async (cardId: string): Promise<{ data: Reaction[] | null; error: any }> => {
+  async getCardReactions(cardId: string) {
     try {
       const { data, error } = await supabase
         .from('reactions')
-        .select('*, profiles:user_id(id, full_name, avatar_url, username)')
-        .eq('card_id', cardId)
-        .order('created_at', { ascending: false });
+        .select(`
+          *,
+          profiles:user_id (
+            id,
+            email:username,
+            displayName:full_name,
+            avatarUrl:avatar_url
+          )
+        `)
+        .eq('card_id', cardId);
       
       if (error) {
-        console.error('Error fetching reactions:', error);
-        return { data: null, error };
+        return { data: null, error: error.message };
       }
       
-      if (!data) {
-        return { data: [], error: null };
-      }
-      
-      const reactions = data.map((record: any) => transformReactionFromDb(record));
+      const reactions: Reaction[] = data.map(item => {
+        const reaction = mapDbReactionToReaction(item);
+        if (item.profiles) {
+          reaction.user = {
+            id: item.profiles.id,
+            email: item.profiles.email || '',
+            displayName: item.profiles.displayName || '',
+            avatarUrl: item.profiles.avatarUrl,
+            createdAt: '', // These are required but not available from profiles
+            updatedAt: ''  // These are required but not available from profiles
+          };
+        }
+        return reaction;
+      });
       
       return { data: reactions, error: null };
     } catch (err) {
-      console.error('Unexpected error in getCardReactions:', err);
-      return { data: null, error: err };
+      console.error('Error getting card reactions:', err);
+      return { data: null, error: 'Failed to get reactions' };
     }
   },
   
   /**
-   * Add a reaction to a card
+   * Add a new reaction
    */
-  addReaction: async (
-    userId: string, 
-    type: 'like' | 'love' | 'wow' | 'haha' | 'sad' | 'angry',
-    options: { cardId?: string; collectionId?: string; commentId?: string }
-  ): Promise<{ data: Reaction | null; error: any }> => {
+  async addReaction(
+    userId: string,
+    type: string,
+    target: {
+      cardId?: string;
+      collectionId?: string;
+      commentId?: string;
+    }
+  ) {
     try {
-      if (!userId) {
-        return { data: null, error: new Error('User ID is required') };
+      // First check if user already has a reaction
+      let existingQuery = supabase
+        .from('reactions')
+        .select('*')
+        .eq('user_id', userId);
+      
+      if (target.cardId) {
+        existingQuery = existingQuery.eq('card_id', target.cardId);
+      } else if (target.collectionId) {
+        existingQuery = existingQuery.eq('collection_id', target.collectionId);
+      } else if (target.commentId) {
+        existingQuery = existingQuery.eq('comment_id', target.commentId);
+      } else {
+        return { data: null, error: 'No valid target for reaction' };
       }
       
-      if (!options.cardId && !options.collectionId && !options.commentId) {
-        return { data: null, error: new Error('Target ID (card, collection, or comment) is required') };
+      const { data: existingData, error: existingError } = await existingQuery;
+      
+      if (existingError) {
+        return { data: null, error: existingError.message };
       }
-
-      // Check for existing reaction
-      let query = supabase.from('reactions').select('id');
       
-      if (options.cardId) query = query.eq('card_id', options.cardId);
-      if (options.collectionId) query = query.eq('collection_id', options.collectionId);
-      if (options.commentId) query = query.eq('comment_id', options.commentId);
-      
-      const { data: existingReaction } = await query
-        .eq('user_id', userId)
-        .maybeSingle();
-
-      let result;
-      if (existingReaction) {
-        // Update existing reaction
-        result = await supabase
+      // If user already has a reaction, update it
+      if (existingData && existingData.length > 0) {
+        const { data, error } = await supabase
           .from('reactions')
           .update({ type })
-          .eq('id', existingReaction.id)
-          .select('*, profiles:user_id(id, full_name, avatar_url, username)')
+          .eq('id', existingData[0].id)
+          .select()
           .single();
-      } else {
-        // Create new reaction
-        const reactionData = {
-          user_id: userId,
-          type,
-          card_id: options.cardId,
-          collection_id: options.collectionId,
-          comment_id: options.commentId
-        };
         
-        result = await supabase
-          .from('reactions')
-          .insert(reactionData)
-          .select('*, profiles:user_id(id, full_name, avatar_url, username)')
-          .single();
-      }
-
-      if (result.error) {
-        console.error('Error adding reaction:', result.error);
-        return { data: null, error: result.error };
+        if (error) {
+          return { data: null, error: error.message };
+        }
+        
+        return { data: mapDbReactionToReaction(data), error: null };
       }
       
-      const reaction = transformReactionFromDb(result.data);
+      // Otherwise, insert a new reaction
+      const reactionData: any = {
+        user_id: userId,
+        type
+      };
       
-      return { data: reaction, error: null };
+      if (target.cardId) reactionData.card_id = target.cardId;
+      if (target.collectionId) reactionData.collection_id = target.collectionId;
+      if (target.commentId) reactionData.comment_id = target.commentId;
+      
+      const { data, error } = await supabase
+        .from('reactions')
+        .insert(reactionData)
+        .select()
+        .single();
+      
+      if (error) {
+        return { data: null, error: error.message };
+      }
+      
+      return { data: mapDbReactionToReaction(data), error: null };
     } catch (err) {
-      console.error('Unexpected error in addReaction:', err);
-      return { data: null, error: err };
+      console.error('Error adding reaction:', err);
+      return { data: null, error: 'Failed to add reaction' };
     }
   },
   
   /**
    * Remove a reaction
    */
-  removeReaction: async (
-    userId: string, 
-    options: { cardId?: string; collectionId?: string; commentId?: string }
-  ): Promise<{ success: boolean; error: any }> => {
+  async removeReaction(
+    userId: string,
+    target: {
+      cardId?: string;
+      collectionId?: string;
+      commentId?: string;
+    }
+  ) {
     try {
-      let query = supabase.from('reactions').delete();
+      let query = supabase
+        .from('reactions')
+        .delete()
+        .eq('user_id', userId);
       
-      if (options.cardId) query = query.eq('card_id', options.cardId);
-      if (options.collectionId) query = query.eq('collection_id', options.collectionId);
-      if (options.commentId) query = query.eq('comment_id', options.commentId);
+      if (target.cardId) {
+        query = query.eq('card_id', target.cardId);
+      } else if (target.collectionId) {
+        query = query.eq('collection_id', target.collectionId);
+      } else if (target.commentId) {
+        query = query.eq('comment_id', target.commentId);
+      } else {
+        return { success: false, error: 'No valid target for reaction' };
+      }
       
-      const { error } = await query.eq('user_id', userId);
+      const { error } = await query;
       
       if (error) {
-        console.error('Error removing reaction:', error);
-        return { success: false, error };
+        return { success: false, error: error.message };
       }
       
       return { success: true, error: null };
     } catch (err) {
-      console.error('Unexpected error in removeReaction:', err);
-      return { success: false, error: err };
-    }
-  },
-  
-  /**
-   * Get reaction counts for multiple cards
-   * This is an optimized batch operation
-   */
-  getReactionCounts: async (cardIds: string[]): Promise<{ data: Record<string, Record<string, number>> | null; error: any }> => {
-    try {
-      const { data, error } = await supabase
-        .from('reactions')
-        .select('card_id, type')
-        .in('card_id', cardIds);
-      
-      if (error) {
-        console.error('Error fetching reaction counts:', error);
-        return { data: null, error };
-      }
-      
-      if (!data) {
-        return { data: {}, error: null };
-      }
-      
-      // Process the data to get counts by type for each card
-      const counts: Record<string, Record<string, number>> = {};
-      
-      data.forEach((reaction: any) => {
-        if (!reaction.card_id) return;
-        
-        if (!counts[reaction.card_id]) {
-          counts[reaction.card_id] = {};
-        }
-        
-        const cardCounts = counts[reaction.card_id];
-        const type = reaction.type;
-        
-        cardCounts[type] = (cardCounts[type] || 0) + 1;
-      });
-      
-      return { data: counts, error: null };
-    } catch (err) {
-      console.error('Unexpected error in getReactionCounts:', err);
-      return { data: null, error: err };
+      console.error('Error removing reaction:', err);
+      return { success: false, error: 'Failed to remove reaction' };
     }
   }
 };
-
-/**
- * Helper to transform database record to Reaction type
- */
-function transformReactionFromDb(record: any): Reaction {
-  if (!record) return {} as Reaction;
-  
-  const reaction: Reaction = {
-    id: record.id,
-    userId: record.user_id,
-    cardId: record.card_id,
-    collectionId: record.collection_id,
-    commentId: record.comment_id,
-    type: record.type,
-    createdAt: record.created_at,
-  };
-
-  // Add profile info if available
-  if (record.profiles) {
-    reaction.user = {
-      id: record.profiles.id,
-      email: record.profiles.email || '',
-      name: record.profiles.full_name,
-      avatarUrl: record.profiles.avatar_url,
-      username: record.profiles.username
-    };
-  }
-  
-  return reaction;
-}

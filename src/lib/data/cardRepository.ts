@@ -1,187 +1,287 @@
 
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabase';
 import { Card, DbCard } from '@/lib/types';
-import { toast } from 'sonner';
 
 /**
- * Repository for card-related data operations
+ * Maps a database card object to the app's Card interface
+ */
+const mapDbCardToCard = (dbCard: DbCard): Card => {
+  return {
+    id: dbCard.id,
+    title: dbCard.title,
+    description: dbCard.description || '',
+    imageUrl: dbCard.image_url || '',
+    thumbnailUrl: dbCard.thumbnail_url || undefined,
+    tags: dbCard.tags || [],
+    collectionId: dbCard.collection_id,
+    createdAt: dbCard.created_at,
+    updatedAt: dbCard.updated_at,
+    userId: dbCard.user_id,
+    isPublic: dbCard.is_public,
+    designMetadata: dbCard.design_metadata
+  };
+};
+
+/**
+ * Repository for card operations
  */
 export const cardRepository = {
   /**
-   * Get all cards with optional filtering
+   * Get all cards
    */
-  getCards: async (
-    options?: {
-      userId?: string;
-      teamId?: string;
-      collectionId?: string;
-      tags?: string[];
-      isPublic?: boolean;
-    }
-  ): Promise<{ data: Card[] | null; error: any }> => {
-    try {
-      let query = supabase
-        .from('cards')
-        .select('*');
-      
-      // Apply filters if provided
-      if (options?.userId) {
-        query = query.eq('user_id', options.userId);
-      }
-      
-      if (options?.teamId) {
-        query = query.eq('team_id', options.teamId);
-      }
-      
-      if (options?.collectionId) {
-        query = query.eq('collection_id', options.collectionId);
-      }
-      
-      if (options?.tags && options.tags.length > 0) {
-        query = query.contains('tags', options.tags);
-      }
-      
-      if (options?.isPublic !== undefined) {
-        query = query.eq('is_public', options.isPublic);
-      }
-      
-      const { data, error } = await query.order('created_at', { ascending: false });
-      
-      if (error) {
-        console.error('Error fetching cards:', error);
-        return { data: null, error };
-      }
-      
-      // Transform database records to our Card type
-      const cards = data.map(transformCardFromDb);
-      
-      return { data: cards, error: null };
-    } catch (err) {
-      console.error('Unexpected error in getCards:', err);
-      return { data: null, error: err };
-    }
-  },
-  
-  /**
-   * Get a single card by ID
-   */
-  getCard: async (id: string): Promise<{ data: Card | null; error: any }> => {
+  async getAllCards() {
     try {
       const { data, error } = await supabase
         .from('cards')
         .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) {
+        return { data: null, error: error.message };
+      }
+      
+      const cards: Card[] = data.map(mapDbCardToCard);
+      return { data: cards, error: null };
+    } catch (err) {
+      console.error('Error getting all cards:', err);
+      return { data: null, error: 'Failed to get cards' };
+    }
+  },
+  
+  /**
+   * Get a card by ID
+   */
+  async getCardById(id: string) {
+    try {
+      const { data, error } = await supabase
+        .from('cards')
+        .select(`
+          *,
+          reactions (*)
+        `)
         .eq('id', id)
         .single();
       
       if (error) {
-        console.error('Error fetching card:', error);
-        return { data: null, error };
+        return { data: null, error: error.message };
       }
       
-      const card = transformCardFromDb(data);
+      if (!data) {
+        return { data: null, error: 'Card not found' };
+      }
+      
+      const card: Card = {
+        ...mapDbCardToCard(data),
+        reactions: data.reactions
+      };
       
       return { data: card, error: null };
     } catch (err) {
-      console.error('Unexpected error in getCard:', err);
-      return { data: null, error: err };
+      console.error('Error getting card by ID:', err);
+      return { data: null, error: 'Failed to get card' };
+    }
+  },
+  
+  /**
+   * Get cards by collection ID
+   */
+  async getCardsByCollectionId(collectionId: string) {
+    try {
+      const { data, error } = await supabase
+        .from('cards')
+        .select('*')
+        .eq('collection_id', collectionId)
+        .order('created_at', { ascending: false });
+      
+      if (error) {
+        return { data: null, error: error.message };
+      }
+      
+      const cards: Card[] = data.map(mapDbCardToCard);
+      return { data: cards, error: null };
+    } catch (err) {
+      console.error('Error getting cards by collection ID:', err);
+      return { data: null, error: 'Failed to get cards' };
+    }
+  },
+  
+  /**
+   * Get cards by user ID
+   */
+  async getCardsByUserId(userId: string) {
+    try {
+      const { data, error } = await supabase
+        .from('cards')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
+      
+      if (error) {
+        return { data: null, error: error.message };
+      }
+      
+      const cards: Card[] = data.map(mapDbCardToCard);
+      return { data: cards, error: null };
+    } catch (err) {
+      console.error('Error getting cards by user ID:', err);
+      return { data: null, error: 'Failed to get cards' };
+    }
+  },
+  
+  /**
+   * Filter cards based on provided criteria
+   */
+  async filterCards({
+    userId,
+    collectionId,
+    teamId,
+    tags,
+    isPublic,
+    searchQuery
+  }: {
+    userId?: string;
+    collectionId?: string;
+    teamId?: string;
+    tags?: string[];
+    isPublic?: boolean;
+    searchQuery?: string;
+  }) {
+    try {
+      let query = supabase
+        .from('cards')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (userId) {
+        query = query.eq('user_id', userId);
+      }
+      
+      if (collectionId) {
+        query = query.eq('collection_id', collectionId);
+      }
+      
+      if (teamId && typeof teamId === 'string') {
+        query = query.eq('team_id', teamId);
+      }
+      
+      if (isPublic !== undefined) {
+        query = query.eq('is_public', isPublic);
+      }
+      
+      if (tags && tags.length > 0) {
+        // This will find cards that have ANY of the specified tags
+        query = query.contains('tags', tags);
+      }
+      
+      if (searchQuery) {
+        // Perform full-text search on title and description
+        query = query.or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%`);
+      }
+      
+      const { data, error } = await query;
+      
+      if (error) {
+        return { data: null, error: error.message };
+      }
+      
+      const cards: Card[] = data.map(dbCard => ({
+        id: dbCard.id,
+        title: dbCard.title,
+        description: dbCard.description || '',
+        imageUrl: dbCard.image_url || '',
+        thumbnailUrl: dbCard.thumbnail_url || undefined,
+        tags: dbCard.tags || [],
+        collectionId: dbCard.collection_id,
+        createdAt: dbCard.created_at,
+        updatedAt: dbCard.updated_at,
+        userId: dbCard.user_id,
+        teamId: dbCard.team_id,
+        isPublic: dbCard.is_public,
+        designMetadata: dbCard.design_metadata
+      }));
+      
+      return { data: cards, error: null };
+    } catch (err) {
+      console.error('Error filtering cards:', err);
+      return { data: null, error: 'Failed to filter cards' };
     }
   },
   
   /**
    * Create a new card
    */
-  createCard: async (card: Partial<Card>): Promise<{ data: Card | null; error: any }> => {
+  async createCard(cardData: Partial<Card>) {
     try {
-      // Prepare data for insertion
-      const cardData = {
-        title: card.title,
-        description: card.description || '',
-        image_url: card.imageUrl,
-        thumbnail_url: card.thumbnailUrl,
-        collection_id: card.collectionId,
-        team_id: card.teamId,
-        tags: card.tags || [],
-        is_public: card.isPublic || false,
-        user_id: card.userId,
-        // If database requires creator_id and rarity, include them
-        creator_id: card.userId,
-        rarity: 'common',
-        edition_size: 1,
-        design_metadata: card.designMetadata || {}
+      const dbCardData = {
+        title: cardData.title || '',
+        description: cardData.description,
+        image_url: cardData.imageUrl,
+        thumbnail_url: cardData.thumbnailUrl,
+        tags: cardData.tags,
+        collection_id: cardData.collectionId,
+        user_id: cardData.userId,
+        team_id: cardData.teamId,
+        is_public: cardData.isPublic !== undefined ? cardData.isPublic : false,
+        design_metadata: cardData.designMetadata
       };
       
       const { data, error } = await supabase
         .from('cards')
-        .insert(cardData)
+        .insert(dbCardData)
         .select()
         .single();
       
       if (error) {
-        console.error('Error creating card:', error);
-        toast.error('Failed to create card');
-        return { data: null, error };
+        return { data: null, error: error.message };
       }
       
-      const newCard = transformCardFromDb(data);
-      
-      toast.success('Card created successfully');
-      return { data: newCard, error: null };
+      const card: Card = mapDbCardToCard(data);
+      return { data: card, error: null };
     } catch (err) {
-      console.error('Unexpected error in createCard:', err);
-      toast.error('An unexpected error occurred');
-      return { data: null, error: err };
+      console.error('Error creating card:', err);
+      return { data: null, error: 'Failed to create card' };
     }
   },
   
   /**
    * Update an existing card
    */
-  updateCard: async (
-    id: string, 
-    updates: Partial<Card>
-  ): Promise<{ data: Card | null; error: any }> => {
+  async updateCard(id: string, updates: Partial<Card>) {
     try {
-      // Convert to database field names
-      const updateData: Record<string, any> = {};
+      const dbCardUpdates: any = {};
       
-      if (updates.title !== undefined) updateData.title = updates.title;
-      if (updates.description !== undefined) updateData.description = updates.description;
-      if (updates.imageUrl !== undefined) updateData.image_url = updates.imageUrl;
-      if (updates.thumbnailUrl !== undefined) updateData.thumbnail_url = updates.thumbnailUrl;
-      if (updates.collectionId !== undefined) updateData.collection_id = updates.collectionId;
-      if (updates.teamId !== undefined) updateData.team_id = updates.teamId;
-      if (updates.tags !== undefined) updateData.tags = updates.tags;
-      if (updates.isPublic !== undefined) updateData.is_public = updates.isPublic;
-      if (updates.designMetadata !== undefined) updateData.design_metadata = updates.designMetadata;
+      if (updates.title !== undefined) dbCardUpdates.title = updates.title;
+      if (updates.description !== undefined) dbCardUpdates.description = updates.description;
+      if (updates.imageUrl !== undefined) dbCardUpdates.image_url = updates.imageUrl;
+      if (updates.thumbnailUrl !== undefined) dbCardUpdates.thumbnail_url = updates.thumbnailUrl;
+      if (updates.tags !== undefined) dbCardUpdates.tags = updates.tags;
+      if (updates.collectionId !== undefined) dbCardUpdates.collection_id = updates.collectionId;
+      if (updates.isPublic !== undefined) dbCardUpdates.is_public = updates.isPublic;
+      if (updates.designMetadata !== undefined) dbCardUpdates.design_metadata = updates.designMetadata;
       
       const { data, error } = await supabase
         .from('cards')
-        .update(updateData)
+        .update(dbCardUpdates)
         .eq('id', id)
         .select()
         .single();
       
       if (error) {
-        console.error('Error updating card:', error);
-        toast.error('Failed to update card');
-        return { data: null, error };
+        return { data: null, error: error.message };
       }
       
-      const updatedCard = transformCardFromDb(data);
-      
-      toast.success('Card updated successfully');
+      const updatedCard: Card = mapDbCardToCard(data);
       return { data: updatedCard, error: null };
     } catch (err) {
-      console.error('Unexpected error in updateCard:', err);
-      toast.error('An unexpected error occurred');
-      return { data: null, error: err };
+      console.error('Error updating card:', err);
+      return { data: null, error: 'Failed to update card' };
     }
   },
   
   /**
-   * Delete a card
+   * Delete a card by ID
    */
-  deleteCard: async (id: string): Promise<{ success: boolean; error: any }> => {
+  async deleteCard(id: string) {
     try {
       const { error } = await supabase
         .from('cards')
@@ -189,125 +289,13 @@ export const cardRepository = {
         .eq('id', id);
       
       if (error) {
-        console.error('Error deleting card:', error);
-        toast.error('Failed to delete card');
-        return { success: false, error };
-      }
-      
-      toast.success('Card deleted successfully');
-      return { success: true, error: null };
-    } catch (err) {
-      console.error('Unexpected error in deleteCard:', err);
-      toast.error('An unexpected error occurred');
-      return { success: false, error: err };
-    }
-  },
-
-  /**
-   * Add a card to a team
-   */
-  assignToTeam: async (cardId: string, teamId: string): Promise<{ success: boolean; error: any }> => {
-    try {
-      const { error } = await supabase
-        .from('cards')
-        .update({ team_id: teamId })
-        .eq('id', cardId);
-      
-      if (error) {
-        console.error('Error assigning card to team:', error);
-        return { success: false, error };
+        return { success: false, error: error.message };
       }
       
       return { success: true, error: null };
     } catch (err) {
-      console.error('Unexpected error in assignToTeam:', err);
-      return { success: false, error: err };
-    }
-  },
-
-  /**
-   * Batch update multiple cards
-   */
-  batchUpdate: async (
-    cardIds: string[], 
-    updates: Partial<Card>
-  ): Promise<{ success: boolean; error: any }> => {
-    try {
-      // Convert to database field names
-      const updateData: Record<string, any> = {};
-      
-      if (updates.teamId !== undefined) updateData.team_id = updates.teamId;
-      if (updates.collectionId !== undefined) updateData.collection_id = updates.collectionId;
-      if (updates.isPublic !== undefined) updateData.is_public = updates.isPublic;
-      if (updates.tags !== undefined) updateData.tags = updates.tags;
-      
-      const { error } = await supabase
-        .from('cards')
-        .update(updateData)
-        .in('id', cardIds);
-      
-      if (error) {
-        console.error('Error batch updating cards:', error);
-        return { success: false, error };
-      }
-      
-      return { success: true, error: null };
-    } catch (err) {
-      console.error('Unexpected error in batchUpdate:', err);
-      return { success: false, error: err };
-    }
-  },
-
-  /**
-   * Get cards by team with efficient query
-   */
-  getTeamCards: async (teamId: string): Promise<{ data: Card[] | null; error: any }> => {
-    try {
-      const { data, error } = await supabase
-        .from('cards')
-        .select('*')
-        .eq('team_id', teamId)
-        .order('created_at', { ascending: false });
-      
-      if (error) {
-        console.error('Error fetching team cards:', error);
-        return { data: null, error };
-      }
-      
-      // Transform database records to our Card type
-      const cards = data.map(transformCardFromDb);
-      
-      return { data: cards, error: null };
-    } catch (err) {
-      console.error('Unexpected error in getTeamCards:', err);
-      return { data: null, error: err };
+      console.error('Error deleting card:', err);
+      return { success: false, error: 'Failed to delete card' };
     }
   }
 };
-
-/**
- * Helper to transform database record to Card type
- */
-function transformCardFromDb(record: DbCard): Card {
-  if (!record) return {} as Card;
-  
-  return {
-    id: record.id,
-    title: record.title || '',
-    description: record.description || '',
-    imageUrl: record.image_url || '',
-    thumbnailUrl: record.thumbnail_url || record.image_url || '',
-    createdAt: record.created_at,
-    updatedAt: record.updated_at,
-    userId: record.user_id,
-    teamId: record.team_id,
-    collectionId: record.collection_id,
-    isPublic: record.is_public,
-    tags: record.tags || [],
-    designMetadata: record.design_metadata || {
-      cardStyle: {},
-      textStyle: {}
-    },
-    reactions: [] // Reactions might need to be loaded separately
-  };
-}

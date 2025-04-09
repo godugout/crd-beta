@@ -32,8 +32,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const user: User = {
             id: data.user.id,
             email: data.user.email || '',
-            name: data.user.user_metadata.name || '',
-            avatarUrl: data.user.user_metadata.avatar_url
+            displayName: data.user.user_metadata.name || '',
+            avatarUrl: data.user.user_metadata.avatar_url,
+            createdAt: data.user.created_at,
+            updatedAt: data.user.updated_at
           };
           
           setAuthState({
@@ -82,8 +84,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const user: User = {
           id: data.user.id,
           email: data.user.email || '',
-          name: data.user.user_metadata.name || '',
-          avatarUrl: data.user.user_metadata.avatar_url
+          displayName: data.user.user_metadata.name || '',
+          avatarUrl: data.user.user_metadata.avatar_url,
+          createdAt: data.user.created_at,
+          updatedAt: data.user.updated_at
         };
         
         setAuthState({
@@ -126,8 +130,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const user: User = {
           id: data.user.id,
           email: data.user.email || '',
-          name: data.user.user_metadata.name || '',
-          avatarUrl: data.user.user_metadata.avatar_url
+          displayName: data.user.user_metadata.name || '',
+          avatarUrl: data.user.user_metadata.avatar_url,
+          createdAt: data.user.created_at,
+          updatedAt: data.user.updated_at
         };
         
         setAuthState({

@@ -1,245 +1,295 @@
 
-import { supabase } from '@/integrations/supabase/client';
-import { v4 as uuidv4 } from 'uuid';
-import { toast } from 'sonner';
+import { supabase } from '../supabase';
+import { PostgrestError } from '@supabase/supabase-js';
 
-export interface DigitalAsset {
+export interface Asset {
   id: string;
-  title?: string;
+  title: string;
   description?: string;
   mimeType: string;
   storagePath: string;
-  publicUrl: string;
-  thumbnailPath?: string;
   fileSize: number;
   width?: number;
   height?: number;
-  userId: string;
+  thumbnailPath?: string;
   tags?: string[];
   metadata?: any;
   createdAt: string;
-  updatedAt: string;
-}
-
-export interface AssetUploadOptions {
-  title?: string;
-  description?: string;
-  tags?: string[];
+  updatedAt?: string;
+  userId: string;
+  originalFilename: string;
   cardId?: string;
   collectionId?: string;
-  metadata?: any;
+  assetType?: string;
+}
+
+export interface AssetFilter {
+  userId?: string;
+  cardId?: string;
+  collectionId?: string;
+  assetType?: string;
+  tags?: string[];
+  mimeType?: string;
+}
+
+export interface AssetUploadResult {
+  asset?: Asset;
+  url?: string;
+  thumbnailUrl?: string;
+  error?: string;
 }
 
 /**
- * Service for managing digital assets in the DAM system
+ * Service for managing digital assets
  */
 export const assetService = {
   /**
-   * Upload a file to storage and create a database entry
+   * Upload an asset to storage and register it in the database
    */
-  uploadAsset: async (file: File, options: AssetUploadOptions = {}): Promise<DigitalAsset | null> => {
+  async uploadAsset(
+    file: File,
+    metadata: {
+      title: string;
+      description?: string;
+      tags?: string[];
+      userId: string;
+      cardId?: string;
+      collectionId?: string;
+      assetType?: string;
+      width?: number;
+      height?: number;
+    }
+  ): Promise<AssetUploadResult> {
     try {
-      // 1. Generate a unique file name to prevent collisions
+      // Generate a unique path for the file in storage
       const fileExt = file.name.split('.').pop();
-      const fileName = `${uuidv4()}.${fileExt}`;
-      const folderPath = 'cards'; // Organize assets by type
-      const filePath = `${folderPath}/${fileName}`;
+      const filePath = `uploads/${metadata.userId}/${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExt}`;
       
-      // 2. Upload to Supabase Storage
+      // Upload to storage
       const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('card-images')
+        .from('assets')
         .upload(filePath, file);
       
       if (uploadError) {
         console.error('Error uploading file:', uploadError);
-        toast.error('Failed to upload image: ' + uploadError.message);
-        return null;
+        return { error: uploadError.message };
       }
       
-      // 3. Get the public URL
-      const { data: urlData } = supabase.storage
-        .from('card-images')
-        .getPublicUrl(filePath);
-        
-      const publicUrl = urlData?.publicUrl || '';
-      
-      // Get the current user ID (required by the schema)
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        console.error('User must be authenticated to upload assets');
-        toast.error('Authentication required to upload files');
-        return null;
-      }
-      
-      // 4. Create asset record in database
-      const insertData = {
-        title: options.title || file.name,
-        description: options.description || null,
+      // Create database entry for the asset
+      const assetData = {
+        title: metadata.title,
+        description: metadata.description || '',
         mime_type: file.type,
         storage_path: filePath,
         file_size: file.size,
-        tags: options.tags || [],
-        metadata: options.metadata || {},
+        width: metadata.width,
+        height: metadata.height,
+        tags: metadata.tags || [],
+        metadata: {
+          originalName: file.name,
+          assetType: metadata.assetType || 'image'
+        },
         original_filename: file.name,
-        user_id: user.id, // Required field from schema
+        user_id: metadata.userId
       };
+
+      // We need to handle additional fields separately to avoid type errors
+      const dbInsertData: any = { ...assetData };
       
-      // Add optional fields if they exist
-      if (options.cardId) {
-        Object.assign(insertData, { card_id: options.cardId });
+      // Add optional fields conditionally
+      if (metadata.cardId) {
+        dbInsertData.card_id = metadata.cardId;
       }
       
-      if (options.collectionId) {
-        Object.assign(insertData, { collection_id: options.collectionId });
+      if (metadata.collectionId) {
+        dbInsertData.collection_id = metadata.collectionId;
       }
       
-      // Create the database record
-      const { data: asset, error: dbError } = await supabase
+      if (metadata.assetType) {
+        dbInsertData.asset_type = metadata.assetType;
+      }
+      
+      const { data: insertData, error: insertError } = await supabase
         .from('digital_assets')
-        .insert(insertData)
-        .select('*')
+        .insert(dbInsertData)
+        .select()
         .single();
       
-      if (dbError) {
-        console.error('Error creating asset record:', dbError);
-        // Try to clean up the uploaded file if database record fails
-        await supabase.storage
-          .from('card-images')
-          .remove([filePath]);
-        toast.error('Failed to save asset metadata');
-        return null;
+      if (insertError) {
+        console.error('Error creating asset record:', insertError);
+        // Try to clean up the uploaded file
+        await supabase.storage.from('assets').remove([filePath]);
+        return { error: insertError.message };
       }
       
-      toast.success('Asset uploaded successfully');
+      // Get public URL for the uploaded file
+      const { data: publicUrlData } = supabase.storage
+        .from('assets')
+        .getPublicUrl(filePath);
       
-      // 5. Transform database schema to our model
-      return {
-        id: asset.id,
-        title: asset.title,
-        description: asset.description || undefined,
-        mimeType: asset.mime_type,
-        storagePath: asset.storage_path,
-        publicUrl: publicUrl, // Use the separately obtained public URL
-        thumbnailPath: asset.thumbnail_path || undefined,
-        fileSize: asset.file_size,
-        width: asset.width || undefined,
-        height: asset.height || undefined,
-        userId: asset.user_id,
-        tags: asset.tags || [],
-        metadata: asset.metadata || {},
-        createdAt: asset.created_at,
-        updatedAt: asset.updated_at
+      const asset: Asset = {
+        id: insertData.id,
+        title: insertData.title,
+        description: insertData.description,
+        mimeType: insertData.mime_type,
+        storagePath: insertData.storage_path,
+        fileSize: insertData.file_size,
+        width: insertData.width,
+        height: insertData.height,
+        thumbnailPath: insertData.thumbnail_path,
+        tags: insertData.tags,
+        metadata: insertData.metadata,
+        createdAt: insertData.created_at,
+        updatedAt: insertData.updated_at,
+        userId: insertData.user_id,
+        originalFilename: insertData.original_filename,
+        cardId: insertData.card_id,
+        collectionId: insertData.collection_id,
+        assetType: insertData.asset_type
       };
-    } catch (err) {
-      console.error('Unexpected error during asset upload:', err);
-      toast.error('Failed to upload file');
-      return null;
+      
+      return {
+        asset,
+        url: publicUrlData.publicUrl,
+        thumbnailUrl: asset.thumbnailPath
+          ? supabase.storage.from('assets').getPublicUrl(asset.thumbnailPath).data.publicUrl
+          : undefined
+      };
+    } catch (err: any) {
+      console.error('Unexpected error uploading asset:', err);
+      return { error: err.message || 'Failed to upload asset' };
     }
   },
   
   /**
-   * Get all assets with optional filtering
+   * Get assets matching the filter criteria
    */
-  getAssets: async (options: { cardId?: string; collectionId?: string; tags?: string[] } = {}): Promise<DigitalAsset[]> => {
+  async getAssets(filter: AssetFilter = {}) {
     try {
       let query = supabase
         .from('digital_assets')
-        .select('*')
-        .order('created_at', { ascending: false });
+        .select('*');
       
-      if (options.cardId) {
-        query = query.eq('card_id', options.cardId);
+      // Apply filters
+      if (filter.userId) {
+        query = query.eq('user_id', filter.userId);
       }
       
-      if (options.collectionId) {
-        query = query.eq('collection_id', options.collectionId);
+      if (filter.cardId) {
+        query = query.eq('card_id', filter.cardId);
       }
       
-      if (options.tags && options.tags.length > 0) {
-        query = query.contains('tags', options.tags);
+      if (filter.collectionId) {
+        query = query.eq('collection_id', filter.collectionId);
       }
       
-      const { data, error } = await query;
+      if (filter.assetType) {
+        query = query.eq('asset_type', filter.assetType);
+      }
+      
+      if (filter.mimeType) {
+        query = query.eq('mime_type', filter.mimeType);
+      }
+      
+      if (filter.tags && filter.tags.length > 0) {
+        // For tags, look for assets that have ANY of the provided tags
+        query = query.contains('tags', filter.tags);
+      }
+      
+      const { data, error } = await query.order('created_at', { ascending: false });
       
       if (error) {
-        console.error('Error fetching assets:', error);
-        return [];
+        return { data: null, error: error.message };
       }
       
+      // Map to our Asset interface
+      const assets: Asset[] = data.map(item => ({
+        id: item.id,
+        title: item.title,
+        description: item.description,
+        mimeType: item.mime_type,
+        storagePath: item.storage_path,
+        fileSize: item.file_size,
+        width: item.width,
+        height: item.height,
+        thumbnailPath: item.thumbnail_path,
+        tags: item.tags,
+        metadata: item.metadata,
+        createdAt: item.created_at,
+        updatedAt: item.updated_at,
+        userId: item.user_id,
+        originalFilename: item.original_filename,
+        cardId: item.card_id,
+        collectionId: item.collection_id,
+        assetType: item.asset_type
+      }));
+      
       // Get public URLs for all assets
-      return data.map(asset => {
-        const { data: urlData } = supabase.storage
-          .from('card-images')
-          .getPublicUrl(asset.storage_path);
+      const assetsWithUrls = assets.map(asset => {
+        const url = supabase.storage.from('assets').getPublicUrl(asset.storagePath).data.publicUrl;
+        const thumbnailUrl = asset.thumbnailPath
+          ? supabase.storage.from('assets').getPublicUrl(asset.thumbnailPath).data.publicUrl
+          : undefined;
           
         return {
-          id: asset.id,
-          title: asset.title,
-          description: asset.description || undefined,
-          mimeType: asset.mime_type,
-          storagePath: asset.storage_path,
-          publicUrl: urlData?.publicUrl || '', 
-          thumbnailPath: asset.thumbnail_path || undefined,
-          fileSize: asset.file_size,
-          width: asset.width || undefined,
-          height: asset.height || undefined,
-          userId: asset.user_id,
-          tags: asset.tags || [],
-          metadata: asset.metadata || {},
-          createdAt: asset.created_at,
-          updatedAt: asset.updated_at
+          ...asset,
+          url,
+          thumbnailUrl
         };
       });
-    } catch (err) {
-      console.error('Error fetching assets:', err);
-      return [];
+      
+      return { data: assetsWithUrls, error: null };
+    } catch (err: any) {
+      console.error('Error getting assets:', err);
+      return { data: null, error: err.message || 'Failed to get assets' };
     }
   },
   
   /**
-   * Delete an asset and its storage file
+   * Delete an asset and its associated file
    */
-  deleteAsset: async (assetId: string): Promise<boolean> => {
+  async deleteAsset(assetId: string) {
     try {
-      // Get the asset to retrieve its storage path
-      const { data: asset, error: fetchError } = await supabase
+      // First, get the asset to find its storage path
+      const { data, error } = await supabase
         .from('digital_assets')
-        .select('storage_path')
+        .select('storage_path, thumbnail_path')
         .eq('id', assetId)
         .single();
       
-      if (fetchError || !asset) {
-        console.error('Error finding asset:', fetchError);
-        return false;
+      if (error) {
+        return { success: false, error: error.message };
       }
       
       // Delete the file from storage
+      const paths = [data.storage_path];
+      if (data.thumbnail_path) {
+        paths.push(data.thumbnail_path);
+      }
+      
       const { error: storageError } = await supabase.storage
-        .from('card-images')
-        .remove([asset.storage_path]);
+        .from('assets')
+        .remove(paths);
       
       if (storageError) {
-        console.error('Error removing file from storage:', storageError);
+        console.error('Error deleting files from storage:', storageError);
+        // Continue anyway to try to delete the database record
       }
       
       // Delete the database record
-      const { error: dbError } = await supabase
+      const { error: deleteError } = await supabase
         .from('digital_assets')
         .delete()
         .eq('id', assetId);
       
-      if (dbError) {
-        console.error('Error deleting asset record:', dbError);
-        return false;
+      if (deleteError) {
+        return { success: false, error: deleteError.message };
       }
       
-      toast.success('Asset deleted successfully');
-      return true;
-    } catch (err) {
+      return { success: true, error: null };
+    } catch (err: any) {
       console.error('Error deleting asset:', err);
-      toast.error('Failed to delete asset');
-      return false;
+      return { success: false, error: err.message || 'Failed to delete asset' };
     }
   }
 };

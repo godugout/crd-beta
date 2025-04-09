@@ -45,15 +45,15 @@ const UserDropdown: React.FC<UserDropdownProps> = ({
     <DropdownMenu open={open} onOpenChange={handleOpenChange}>
       <DropdownMenuTrigger className="outline-none">
         <Avatar className="h-8 w-8">
-          <AvatarImage src={user.avatarUrl} alt={user.name} />
+          <AvatarImage src={user.avatarUrl} alt={user.displayName} />
           <AvatarFallback className="bg-primary/10">
-            {user.name ? user.name.charAt(0).toUpperCase() : (user.email ? user.email.charAt(0).toUpperCase() : 'U')}
+            {user.displayName ? user.displayName.charAt(0).toUpperCase() : (user.email ? user.email.charAt(0).toUpperCase() : 'U')}
           </AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel>
-          <div className="font-medium">{user.name || 'User'}</div>
+          <div className="font-medium">{user.displayName || 'User'}</div>
           <div className="text-xs text-muted-foreground truncate">{user.email}</div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />

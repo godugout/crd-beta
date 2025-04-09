@@ -1,56 +1,53 @@
-import { supabase } from '@/integrations/supabase/client';
-import { Collection, DbCollection } from '@/lib/types';
-import { toast } from 'sonner';
+
+import { supabase } from '@/lib/supabase';
+import { Collection, DbCollection, Card } from '@/lib/types';
 
 /**
- * Repository for collection-related data operations
+ * Maps a database collection to our app's Collection interface
  */
+const mapDbCollectionToCollection = (dbCollection: DbCollection): Collection => {
+  return {
+    id: dbCollection.id,
+    name: dbCollection.title || '',
+    description: dbCollection.description || '',
+    coverImageUrl: dbCollection.cover_image_url,
+    visibility: (dbCollection.visibility as 'public' | 'private' | 'unlisted' | 'team') || 'private',
+    allowComments: dbCollection.allow_comments !== undefined ? dbCollection.allow_comments : true,
+    designMetadata: dbCollection.design_metadata,
+    createdAt: dbCollection.created_at,
+    updatedAt: dbCollection.updated_at,
+    userId: dbCollection.owner_id,
+    teamId: dbCollection.team_id
+  };
+};
+
 export const collectionRepository = {
   /**
    * Get all collections
    */
-  getCollections: async (userId?: string): Promise<{ data: Collection[] | null; error: any }> => {
+  async getAllCollections() {
     try {
-      let query = supabase
+      const { data, error } = await supabase
         .from('collections')
-        .select('*');
-      
-      if (userId) {
-        query = query.eq('owner_id', userId);
-      }
-      
-      const { data, error } = await query
+        .select('*')
         .order('created_at', { ascending: false });
       
       if (error) {
-        console.error('Error fetching collections:', error);
-        return { data: null, error };
+        return { data: null, error: error.message };
       }
       
-      if (!data) {
-        return { data: [], error: null };
-      }
-      
-      const collections: Collection[] = data.map(record => {
-        if (!record || typeof record === 'string') {
-          console.error('Invalid collection record:', record);
-          return null;
-        }
-        
-        return transformCollectionFromDb(record as DbCollection);
-      }).filter(Boolean) as Collection[];
-      
+      const collections: Collection[] = data.map(mapDbCollectionToCollection);
       return { data: collections, error: null };
     } catch (err) {
-      console.error('Unexpected error in getCollections:', err);
-      return { data: null, error: err };
+      console.error('Error getting all collections:', err);
+      return { data: null, error: 'Failed to get collections' };
     }
   },
   
   /**
    * Get a collection by ID
    */
-  getCollection: async (id: string): Promise<{ data: Collection | null; error: any }> => {
+  async getCollectionById(id: string) {
     try {
       const { data, error } = await supabase
         .from('collections')
@@ -59,118 +56,161 @@ export const collectionRepository = {
         .single();
       
       if (error) {
-        console.error('Error fetching collection:', error);
-        return { data: null, error };
+        return { data: null, error: error.message };
       }
       
-      if (!data) {
-        return { data: null, error: new Error('Collection not found') };
-      }
+      const collection: Collection = mapDbCollectionToCollection(data);
       
-      const collection = transformCollectionFromDb(data as DbCollection);
+      // Get cards in this collection
+      const { data: cardsData, error: cardsError } = await supabase
+        .from('cards')
+        .select('*')
+        .eq('collection_id', id)
+        .order('created_at', { ascending: false });
+      
+      if (!cardsError && cardsData) {
+        collection.cards = cardsData.map(card => ({
+          id: card.id,
+          title: card.title,
+          description: card.description || '',
+          imageUrl: card.image_url || '',
+          thumbnailUrl: card.thumbnail_url,
+          tags: card.tags,
+          collectionId: card.collection_id,
+          userId: card.user_id,
+          teamId: card.team_id,
+          createdAt: card.created_at,
+          updatedAt: card.updated_at,
+          isPublic: card.is_public,
+          designMetadata: card.design_metadata
+        }));
+      }
       
       return { data: collection, error: null };
     } catch (err) {
-      console.error('Unexpected error in getCollection:', err);
-      return { data: null, error: err };
+      console.error('Error getting collection by ID:', err);
+      return { data: null, error: 'Failed to get collection' };
+    }
+  },
+  
+  /**
+   * Get collections by user ID
+   */
+  async getCollectionsByUserId(userId: string) {
+    try {
+      const { data, error } = await supabase
+        .from('collections')
+        .select('*')
+        .eq('owner_id', userId)
+        .order('created_at', { ascending: false });
+      
+      if (error) {
+        return { data: null, error: error.message };
+      }
+      
+      const collections: Collection[] = data.map(mapDbCollectionToCollection);
+      return { data: collections, error: null };
+    } catch (err) {
+      console.error('Error getting collections by user ID:', err);
+      return { data: null, error: 'Failed to get collections' };
+    }
+  },
+  
+  /**
+   * Get collections by team ID
+   */
+  async getCollectionsByTeamId(teamId: string) {
+    try {
+      const { data, error } = await supabase
+        .from('collections')
+        .select('*')
+        .eq('team_id', teamId)
+        .order('created_at', { ascending: false });
+      
+      if (error) {
+        return { data: null, error: error.message };
+      }
+      
+      const collections: Collection[] = data.map(mapDbCollectionToCollection);
+      return { data: collections, error: null };
+    } catch (err) {
+      console.error('Error getting collections by team ID:', err);
+      return { data: null, error: 'Failed to get collections' };
     }
   },
   
   /**
    * Create a new collection
    */
-  createCollection: async (collection: Partial<Collection>): Promise<{ data: Collection | null; error: any }> => {
+  async createCollection(collectionData: Partial<Collection>) {
     try {
-      if (!collection.name) {
-        return { data: null, error: new Error('Collection name is required') };
-      }
-      
-      const collectionData = {
-        title: collection.name, // Name is stored as title in DB
-        description: collection.description,
-        cover_image_url: collection.coverImageUrl,
-        owner_id: collection.userId, // Use userId instead of ownerId
-        team_id: collection.teamId,
-        visibility: collection.visibility || 'private',
-        allow_comments: collection.allowComments !== undefined ? collection.allowComments : true,
-        design_metadata: collection.designMetadata || {}
+      const dbCollectionData = {
+        title: collectionData.name || '',
+        description: collectionData.description,
+        cover_image_url: collectionData.coverImageUrl,
+        visibility: collectionData.visibility || 'private',
+        allow_comments: collectionData.allowComments !== undefined ? collectionData.allowComments : true,
+        design_metadata: collectionData.designMetadata,
+        owner_id: collectionData.userId,
+        team_id: collectionData.teamId
       };
       
       const { data, error } = await supabase
         .from('collections')
-        .insert(collectionData)
+        .insert(dbCollectionData)
         .select()
         .single();
       
       if (error) {
-        console.error('Error creating collection:', error);
-        toast.error('Failed to create collection');
-        return { data: null, error };
+        return { data: null, error: error.message };
       }
       
-      if (!data) {
-        return { data: null, error: new Error('No data returned from collection creation') };
-      }
-      
-      const newCollection = transformCollectionFromDb(data as DbCollection);
-      toast.success('Collection created successfully');
-      
-      return { data: newCollection, error: null };
+      const collection: Collection = mapDbCollectionToCollection(data);
+      return { data: collection, error: null };
     } catch (err) {
-      console.error('Unexpected error in createCollection:', err);
-      toast.error('An unexpected error occurred');
-      return { data: null, error: err };
+      console.error('Error creating collection:', err);
+      return { data: null, error: 'Failed to create collection' };
     }
   },
   
   /**
-   * Update a collection
+   * Update an existing collection
    */
-  updateCollection: async (id: string, updates: Partial<Collection>): Promise<{ data: Collection | null; error: any }> => {
+  async updateCollection(id: string, updates: Partial<Collection>) {
     try {
-      // Convert to database field names
-      const updateData: Record<string, any> = {};
+      const dbCollectionUpdates: any = {};
       
-      if (updates.name !== undefined) updateData.title = updates.name;
-      if (updates.description !== undefined) updateData.description = updates.description;
-      if (updates.coverImageUrl !== undefined) updateData.cover_image_url = updates.coverImageUrl;
-      if (updates.visibility !== undefined) updateData.visibility = updates.visibility;
-      if (updates.allowComments !== undefined) updateData.allow_comments = updates.allowComments;
-      if (updates.teamId !== undefined) updateData.team_id = updates.teamId;
-      if (updates.designMetadata !== undefined) updateData.design_metadata = updates.designMetadata;
+      if (updates.name !== undefined) dbCollectionUpdates.title = updates.name;
+      if (updates.description !== undefined) dbCollectionUpdates.description = updates.description;
+      if (updates.coverImageUrl !== undefined) dbCollectionUpdates.cover_image_url = updates.coverImageUrl;
+      if (updates.visibility !== undefined) dbCollectionUpdates.visibility = updates.visibility;
+      if (updates.allowComments !== undefined) dbCollectionUpdates.allow_comments = updates.allowComments;
+      if (updates.designMetadata !== undefined) dbCollectionUpdates.design_metadata = updates.designMetadata;
+      if (updates.teamId !== undefined) dbCollectionUpdates.team_id = updates.teamId;
       
       const { data, error } = await supabase
         .from('collections')
-        .update(updateData)
+        .update(dbCollectionUpdates)
         .eq('id', id)
         .select()
         .single();
       
       if (error) {
-        console.error('Error updating collection:', error);
-        toast.error('Failed to update collection');
-        return { data: null, error };
+        return { data: null, error: error.message };
       }
       
-      if (!data) {
-        return { data: null, error: new Error('No data returned from collection update') };
-      }
-      
-      const updatedCollection = transformCollectionFromDb(data as DbCollection);
-      toast.success('Collection updated successfully');
-      
+      const updatedCollection: Collection = mapDbCollectionToCollection(data);
       return { data: updatedCollection, error: null };
     } catch (err) {
-      console.error('Unexpected error in updateCollection:', err);
-      toast.error('An unexpected error occurred');
-      return { data: null, error: err };
+      console.error('Error updating collection:', err);
+      return { data: null, error: 'Failed to update collection' };
     }
   },
   
   /**
    * Delete a collection by ID
    */
-  deleteCollection: async (id: string): Promise<{ success: boolean; error: any }> => {
+  async deleteCollection(id: string) {
     try {
       const { error } = await supabase
         .from('collections')
@@ -178,24 +218,64 @@ export const collectionRepository = {
         .eq('id', id);
       
       if (error) {
-        console.error('Error deleting collection:', error);
-        toast.error('Failed to delete collection');
-        return { success: false, error };
+        return { success: false, error: error.message };
       }
       
-      toast.success('Collection deleted successfully');
       return { success: true, error: null };
     } catch (err) {
-      console.error('Unexpected error in deleteCollection:', err);
-      toast.error('An unexpected error occurred');
-      return { success: false, error: err };
+      console.error('Error deleting collection:', err);
+      return { success: false, error: 'Failed to delete collection' };
+    }
+  },
+  
+  /**
+   * Add a card to a collection
+   */
+  async addCardToCollection(cardId: string, collectionId: string) {
+    try {
+      // First update the card's collection_id
+      const { error } = await supabase
+        .from('cards')
+        .update({ collection_id: collectionId })
+        .eq('id', cardId);
+      
+      if (error) {
+        return { success: false, error: error.message };
+      }
+      
+      return { success: true, error: null };
+    } catch (err) {
+      console.error('Error adding card to collection:', err);
+      return { success: false, error: 'Failed to add card to collection' };
+    }
+  },
+  
+  /**
+   * Remove a card from a collection
+   */
+  async removeCardFromCollection(cardId: string) {
+    try {
+      // Set the card's collection_id to null
+      const { error } = await supabase
+        .from('cards')
+        .update({ collection_id: null })
+        .eq('id', cardId);
+      
+      if (error) {
+        return { success: false, error: error.message };
+      }
+      
+      return { success: true, error: null };
+    } catch (err) {
+      console.error('Error removing card from collection:', err);
+      return { success: false, error: 'Failed to remove card from collection' };
     }
   },
   
   /**
    * Get public collections
    */
-  getPublicCollections: async (): Promise<{ data: Collection[] | null; error: any }> => {
+  async getPublicCollections() {
     try {
       const { data, error } = await supabase
         .from('collections')
@@ -204,98 +284,27 @@ export const collectionRepository = {
         .order('created_at', { ascending: false });
       
       if (error) {
-        console.error('Error fetching public collections:', error);
-        return { data: null, error };
+        return { data: null, error: error.message };
       }
       
-      if (!data) {
-        return { data: [], error: null };
-      }
-      
-      const collections: Collection[] = data.map(record => {
-        if (!record || typeof record === 'string') {
-          console.error('Invalid collection record:', record);
-          return null;
-        }
-        
-        return transformCollectionFromDb(record as DbCollection);
-      }).filter(Boolean) as Collection[];
+      const collections: Collection[] = data.map(dbCollection => ({
+        id: dbCollection.id,
+        name: dbCollection.title || '',
+        description: dbCollection.description || '',
+        coverImageUrl: dbCollection.cover_image_url,
+        visibility: (dbCollection.visibility as 'public' | 'private' | 'unlisted' | 'team') || 'private',
+        allowComments: dbCollection.allow_comments !== undefined ? dbCollection.allow_comments : true,
+        designMetadata: dbCollection.design_metadata,
+        createdAt: dbCollection.created_at,
+        updatedAt: dbCollection.updated_at,
+        userId: dbCollection.owner_id,
+        teamId: dbCollection.team_id
+      }));
       
       return { data: collections, error: null };
     } catch (err) {
-      console.error('Unexpected error in getPublicCollections:', err);
-      return { data: null, error: err };
-    }
-  },
-  
-  /**
-   * Add cards to a collection
-   */
-  addCardToCollection: async (
-    collectionId: string, 
-    cardId: string
-  ): Promise<{ success: boolean; error: any }> => {
-    try {
-      const { error } = await supabase
-        .from('collection_cards')
-        .insert({
-          collection_id: collectionId,
-          card_id: cardId
-        });
-      
-      if (error) {
-        console.error('Error adding card to collection:', error);
-        return { success: false, error };
-      }
-      
-      return { success: true, error: null };
-    } catch (err) {
-      console.error('Unexpected error in addCardToCollection:', err);
-      return { success: false, error: err };
-    }
-  },
-  
-  /**
-   * Get collection cards
-   */
-  getCollectionCards: async (collectionId: string): Promise<{ data: any[] | null; error: any }> => {
-    try {
-      const { data, error } = await supabase
-        .from('cards')
-        .select('*')
-        .eq('collection_id', collectionId)
-        .order('created_at', { ascending: false });
-        
-      if (error) {
-        console.error('Error fetching collection cards:', error);
-        return { data: null, error };
-      }
-      
-      return { data, error: null };
-    } catch (err) {
-      console.error('Unexpected error in getCollectionCards:', err);
-      return { data: null, error: err };
+      console.error('Error getting public collections:', err);
+      return { data: null, error: 'Failed to get collections' };
     }
   }
 };
-
-/**
- * Helper to transform database record to Collection type
- */
-function transformCollectionFromDb(record: DbCollection): Collection {
-  if (!record) return {} as Collection;
-
-  return {
-    id: record.id,
-    name: record.title, // Title field in DB maps to name in our app
-    description: record.description || '',
-    coverImageUrl: record.cover_image_url,
-    userId: record.owner_id, // Map owner_id to userId consistently
-    teamId: record.team_id,
-    visibility: record.visibility as 'public' | 'private' | 'team',
-    allowComments: record.allow_comments,
-    createdAt: record.created_at,
-    updatedAt: record.updated_at,
-    designMetadata: record.design_metadata
-  };
-}

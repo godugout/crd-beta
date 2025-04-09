@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/auth';
 import { Button } from '@/components/ui/button';
@@ -48,8 +47,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ cardId, collectionId, t
       }
       
       if (data) {
-        setComments(data);
-        // Pre-fetch replies for comments that have them
+        setComments(data as Comment[]);
         data.forEach(comment => {
           if (comment.id) {
             fetchReplies(comment.id);
@@ -77,7 +75,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ cardId, collectionId, t
       if (data && data.length > 0) {
         setRepliesByParentId(prev => ({
           ...prev,
-          [parentId]: data
+          [parentId]: data as Comment[]
         }));
       }
     } catch (err) {
@@ -110,16 +108,14 @@ const CommentSection: React.FC<CommentSectionProps> = ({ cardId, collectionId, t
         toast.success('Comment posted successfully');
         setNewComment('');
         
-        // If it's a reply, add it to the replies list
         if (replyTo) {
           setRepliesByParentId(prev => ({
             ...prev,
-            [replyTo]: [...(prev[replyTo] || []), data]
+            [replyTo]: [...(prev[replyTo] || []), data as Comment]
           }));
           setReplyTo(null);
         } else {
-          // Otherwise add to main comments list
-          setComments(prev => [...prev, data]);
+          setComments(prev => [...prev, data as Comment]);
         }
       }
     } catch (err) {
@@ -143,17 +139,16 @@ const CommentSection: React.FC<CommentSectionProps> = ({ cardId, collectionId, t
       if (data) {
         toast.success('Comment updated successfully');
         
-        // Update in the appropriate list
         if (data.parentId) {
           setRepliesByParentId(prev => ({
             ...prev,
             [data.parentId]: prev[data.parentId].map(c => 
-              c.id === id ? data : c
+              c.id === id ? (data as Comment) : c
             )
           }));
         } else {
           setComments(prev => prev.map(c => 
-            c.id === id ? data : c
+            c.id === id ? (data as Comment) : c
           ));
         }
         
@@ -179,7 +174,6 @@ const CommentSection: React.FC<CommentSectionProps> = ({ cardId, collectionId, t
       if (success) {
         toast.success('Comment deleted successfully');
         
-        // Remove from the appropriate list
         if (parentId) {
           setRepliesByParentId(prev => ({
             ...prev,
@@ -187,7 +181,6 @@ const CommentSection: React.FC<CommentSectionProps> = ({ cardId, collectionId, t
           }));
         } else {
           setComments(prev => prev.filter(c => c.id !== id));
-          // Also remove any replies
           setRepliesByParentId(prev => {
             const newReplies = { ...prev };
             delete newReplies[id];
@@ -220,9 +213,9 @@ const CommentSection: React.FC<CommentSectionProps> = ({ cardId, collectionId, t
       <div key={comment.id} className={`${isReply ? 'ml-8 mt-2' : 'mt-4'}`}>
         <div className="flex items-start gap-3">
           <Avatar className="h-8 w-8">
-            <AvatarImage src={comment.user?.avatarUrl} alt={comment.user?.name} />
+            <AvatarImage src={comment.user?.avatarUrl} alt={comment.user?.displayName} />
             <AvatarFallback>
-              {comment.user?.name?.charAt(0) || comment.user?.username?.charAt(0) || '?'}
+              {comment.user?.displayName?.charAt(0) || comment.user?.email?.charAt(0) || '?'}
             </AvatarFallback>
           </Avatar>
           
@@ -230,7 +223,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ cardId, collectionId, t
             <div className="flex items-center justify-between">
               <div>
                 <span className="font-medium text-sm">
-                  {comment.user?.name || comment.user?.username || 'Anonymous'}
+                  {comment.user?.displayName || comment.user?.username || 'Anonymous'}
                 </span>
                 <span className="text-muted-foreground text-xs ml-2">
                   {comment.createdAt && formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
@@ -312,7 +305,6 @@ const CommentSection: React.FC<CommentSectionProps> = ({ cardId, collectionId, t
           </div>
         </div>
         
-        {/* Render replies */}
         {replies.length > 0 && (
           <div className="replies mt-2">
             {replies.map(reply => renderCommentItem(reply, true))}
@@ -334,8 +326,8 @@ const CommentSection: React.FC<CommentSectionProps> = ({ cardId, collectionId, t
       {user ? (
         <div className="flex gap-3 items-start">
           <Avatar className="h-8 w-8">
-            <AvatarImage src={user.avatarUrl} alt={user.name} />
-            <AvatarFallback>{user.name?.charAt(0) || user.email?.charAt(0) || 'U'}</AvatarFallback>
+            <AvatarImage src={user.avatarUrl} alt={user.displayName} />
+            <AvatarFallback>{user.displayName?.charAt(0) || user.email?.charAt(0) || 'U'}</AvatarFallback>
           </Avatar>
           <div className="flex-1 flex gap-2">
             <Textarea

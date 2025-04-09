@@ -3,8 +3,10 @@
 export interface User {
   id: string;
   email: string;
+  name?: string; // Added name property
   displayName?: string;
   avatarUrl?: string;
+  username?: string; // Added username property
   createdAt: string;
   updatedAt: string;
 }
@@ -17,8 +19,8 @@ export interface Card {
   thumbnailUrl?: string;
   tags?: string[];
   collectionId?: string;
-  createdAt?: string;
-  updatedAt?: string;
+  createdAt: string; // Made required
+  updatedAt: string; // Made required
   userId?: string;
   teamId?: string;
   isPublic?: boolean;
@@ -39,7 +41,9 @@ export interface DbCard {
   created_at: string;
   updated_at: string;
   user_id?: string;
+  team_id?: string; // Added team_id property
   is_public?: boolean;
+  design_metadata?: any; // Added design_metadata property
 }
 
 export interface Collection {
@@ -47,13 +51,14 @@ export interface Collection {
   name: string;
   description: string;
   coverImageUrl?: string;
-  visibility: 'public' | 'private' | 'unlisted';
+  visibility: 'public' | 'private' | 'unlisted' | 'team'; // Added 'team' as valid visibility
   allowComments: boolean;
   designMetadata?: any;
   cards?: Card[];
   createdAt?: string;
   updatedAt?: string;
   userId?: string;
+  teamId?: string; // Added teamId property
 }
 
 export interface DbCollection {
@@ -67,6 +72,7 @@ export interface DbCollection {
   created_at: string;
   updated_at: string;
   owner_id: string;
+  team_id?: string; // Added team_id property
 }
 
 export interface Comment {
@@ -75,6 +81,7 @@ export interface Comment {
   userId: string;
   cardId?: string;
   collectionId?: string;
+  teamId?: string; // Added teamId property
   parentId?: string;
   createdAt: string;
   updatedAt: string;
@@ -90,6 +97,7 @@ export interface Reaction {
   commentId?: string;
   collectionId?: string;
   createdAt: string;
+  user?: User; // Added user property
 }
 
 export interface DbReaction {
@@ -135,7 +143,7 @@ export interface OaklandMemoryData {
   tags: string[];
   createdAt?: string;
   updatedAt?: string;
-  // Adding the missing properties that were causing errors
+  // Added the properties that were missing before
   attendees?: string[];
   historicalContext?: string;
   personalSignificance?: string;
