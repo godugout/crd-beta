@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
-import { TabsContent } from '@/components/ui/tabs';
+import { Tabs, TabsContent } from '@/components/ui/tabs';
 import Navbar from '@/components/Navbar';
 import QuickCapture from '@/components/game-day/QuickCapture';
 import GameDetails from '@/components/game-day/GameDetails';
@@ -76,27 +76,29 @@ const GameDayMode = () => {
           offlineItemsCount={offlineItems.length}
         />
         
-        <TabsContent value="capture">
-          <QuickCapture 
-            stadiumContext={nearbyStadium} 
-            isOnline={isOnline}
-          />
-        </TabsContent>
-        
-        <TabsContent value="gameinfo">
-          <GameDetails 
-            gameInfo={todayGameInfo} 
-            stadiumInfo={nearbyStadium}
-          />
-        </TabsContent>
-        
-        <TabsContent value="saved">
-          <SavedItemsTab 
-            items={offlineItems}
-            isOnline={isOnline}
-            onSync={syncOfflineItems}
-          />
-        </TabsContent>
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsContent value="capture">
+            <QuickCapture 
+              stadiumContext={nearbyStadium} 
+              isOnline={isOnline}
+            />
+          </TabsContent>
+          
+          <TabsContent value="gameinfo">
+            <GameDetails 
+              gameInfo={todayGameInfo} 
+              stadiumInfo={nearbyStadium}
+            />
+          </TabsContent>
+          
+          <TabsContent value="saved">
+            <SavedItemsTab 
+              items={offlineItems}
+              isOnline={isOnline}
+              onSync={syncOfflineItems}
+            />
+          </TabsContent>
+        </Tabs>
       </main>
       
       <GameDayActionBar 
