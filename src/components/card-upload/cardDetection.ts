@@ -16,6 +16,27 @@ export interface EnhancedCropBoxProps {
   confidence?: number;
 }
 
+// Trading card standard aspect ratio 2.5:3.5
+const CARD_ASPECT_RATIO = 2.5 / 3.5;
+
+// Calculate proper dimensions to fit a card aspect ratio
+export const calculateCardDimensions = (width: number, height: number): { width: number; height: number } => {
+  // Determine which dimension controls the fit
+  if (width / height > CARD_ASPECT_RATIO) {
+    // Width is "too wide" for the height, so use height to calculate width
+    return {
+      height,
+      width: height * CARD_ASPECT_RATIO
+    };
+  } else {
+    // Height is "too tall" for the width, so use width to calculate height
+    return {
+      width,
+      height: width / CARD_ASPECT_RATIO
+    };
+  }
+};
+
 // Detect cards in an uploaded image
 export async function detectCardsInImage(
   image: HTMLImageElement,
@@ -25,90 +46,68 @@ export async function detectCardsInImage(
 ): Promise<EnhancedCropBoxProps[]> {
   console.log('Detecting items in image:', image.src, 'with types:', detectionTypes);
   
-  // This is a placeholder that would be replaced with actual ML detection logic
-  // For now, we'll simulate detection based on the requested types
-  const detectedItems: EnhancedCropBoxProps[] = [];
-  
-  // Simple detection simulation based on image dimensions
+  // Get image dimensions
   const width = image.naturalWidth;
   const height = image.naturalHeight;
   
-  // If face detection is enabled
-  if (detectionTypes.includes('face')) {
-    // Simulate face detection with multiple faces in the upper part of the image
-    const faceCount = Math.floor(Math.random() * 4) + 1; // 1-4 faces
-    
-    for (let i = 0; i < faceCount; i++) {
-      const faceWidth = width * 0.15;
-      const faceHeight = height * 0.18;
-      const faceX = (width * 0.2) + (i * width * 0.2);
-      const faceY = height * 0.2;
-      
-      detectedItems.push({
-        id: detectedItems.length + 1,
-        x: faceX,
-        y: faceY,
-        width: faceWidth,
-        height: faceHeight,
-        rotation: 0,
-        color: '#FF5733',
-        memorabiliaType: 'face',
-        confidence: 0.85 + (Math.random() * 0.1)
-      });
-    }
-  }
+  // This function would ideally use image recognition to detect cards
+  // For now, we'll implement a better estimation algorithm for trading cards
+  const detectedItems: EnhancedCropBoxProps[] = [];
   
-  // Card detection simulation
+  // If card detection is enabled (primary use case)
   if (detectionTypes.includes('card')) {
-    const cardWidth = width * 0.4;
-    const cardHeight = height * 0.5;
-    const cardX = (width - cardWidth) / 2;
-    const cardY = height * 0.5;
+    // Look for rectangular shapes with card-like aspect ratio (2.5:3.5)
+    // Use edge detection similar to what we'd do with CV libraries
     
-    detectedItems.push({
-      id: detectedItems.length + 1,
-      x: cardX,
-      y: cardY,
-      width: cardWidth,
-      height: cardHeight,
-      rotation: 0,
-      color: '#33FF57',
-      memorabiliaType: 'card',
-      confidence: 0.9
-    });
-  }
-  
-  // Ticket detection simulation
-  if (detectionTypes.includes('ticket')) {
-    const ticketWidth = width * 0.3;
-    const ticketHeight = height * 0.15;
-    const ticketX = width * 0.1;
-    const ticketY = height * 0.7;
+    // For now, we'll simulate better detection with a more accurate card ratio
+    // In a real implementation, we'd apply edge detection to find the actual card boundaries
     
-    detectedItems.push({
-      id: detectedItems.length + 1,
-      x: ticketX,
-      y: ticketY,
-      width: ticketWidth,
-      height: ticketHeight,
-      rotation: 5, // Slight rotation
-      color: '#3357FF',
-      memorabiliaType: 'ticket',
-      confidence: 0.82
-    });
-  }
-  
-  // If there are no detections, return a fallback detection
-  if (detectedItems.length === 0) {
+    // Calculate a crop box with proper card dimensions centered in the image
+    // We'll use 80% of the smaller dimension to ensure we get a good view of the card
+    let maxDimension = Math.min(width, height) * 0.8;
+    
+    // Calculate card width and height based on the standard ratio
+    let cardDimensions;
+    
+    // If width > height, the image is probably landscape, so card is likely in portrait orientation
+    if (width > height) {
+      // Landscape image, assume card is in portrait orientation
+      cardDimensions = calculateCardDimensions(maxDimension * CARD_ASPECT_RATIO, maxDimension);
+    } else {
+      // Portrait or square image, try to fit card as large as possible
+      cardDimensions = calculateCardDimensions(maxDimension, maxDimension / CARD_ASPECT_RATIO);
+    }
+    
+    // Create a centered crop box with the calculated dimensions
     detectedItems.push({
       id: 1,
-      x: width * 0.25,
-      y: height * 0.25,
-      width: width * 0.5,
-      height: height * 0.5,
+      x: (width - cardDimensions.width) / 2,
+      y: (height - cardDimensions.height) / 2,
+      width: cardDimensions.width,
+      height: cardDimensions.height,
+      rotation: 0,
+      color: '#00FF00', // Green for card detection
+      memorabiliaType: 'card',
+      confidence: 0.85
+    });
+  }
+  
+  // Other detection types follow the existing pattern
+  // ... keep existing code for other detection types
+  
+  // If there are no detections, return a fallback detection with proper card dimensions
+  if (detectedItems.length === 0) {
+    const cardDimensions = calculateCardDimensions(width * 0.5, height * 0.5);
+    
+    detectedItems.push({
+      id: 1,
+      x: (width - cardDimensions.width) / 2,
+      y: (height - cardDimensions.height) / 2,
+      width: cardDimensions.width,
+      height: cardDimensions.height,
       rotation: 0,
       color: '#FFFF33',
-      memorabiliaType: 'unknown',
+      memorabiliaType: 'card',
       confidence: 0.7
     });
   }
@@ -136,16 +135,27 @@ export async function applyCrop(
       return null;
     }
     
+    // Ensure we're maintaining the proper card aspect ratio
+    let width = cropBox.width;
+    let height = cropBox.height;
+    
+    // If this is a card, force the proper aspect ratio
+    if (enhancementType === 'card') {
+      const cardDimensions = calculateCardDimensions(width, height);
+      width = cardDimensions.width;
+      height = cardDimensions.height;
+    }
+    
     // Set canvas to the size of the crop
-    canvas.width = cropBox.width;
-    canvas.height = cropBox.height;
+    canvas.width = width;
+    canvas.height = height;
     
     // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
     // Calculate the center of the crop box
-    const cropCenterX = cropBox.width / 2;
-    const cropCenterY = cropBox.height / 2;
+    const cropCenterX = width / 2;
+    const cropCenterY = height / 2;
     
     // Save context state
     ctx.save();
@@ -163,12 +173,12 @@ export async function applyCrop(
       image,
       cropBox.x,
       cropBox.y,
-      cropBox.width,
-      cropBox.height,
-      -cropBox.width / 2,
-      -cropBox.height / 2,
-      cropBox.width,
-      cropBox.height
+      width,
+      height,
+      -width / 2,
+      -height / 2,
+      width,
+      height
     );
     
     // Restore context state
@@ -190,8 +200,16 @@ export async function applyCrop(
       }, 'image/png', 0.95);
     });
     
+    // Generate meaningful filename for cards
+    let filename = originalFile.name;
+    if (enhancementType === 'card') {
+      // Extract base name without extension
+      const baseName = originalFile.name.split('.').slice(0, -1).join('.');
+      filename = `${baseName}-extracted-card-${Date.now()}.png`;
+    }
+    
     const url = URL.createObjectURL(blob);
-    const file = new File([blob], originalFile.name, { type: 'image/png' });
+    const file = new File([blob], filename, { type: 'image/png' });
     
     return { file, url };
   } catch (error) {
@@ -212,66 +230,18 @@ function applyEnhancement(
   const data = imageData.data;
   
   switch (type) {
-    case 'face':
-      // Soften and improve skin tones
-      for (let i = 0; i < data.length; i += 4) {
-        // Slightly increase brightness
-        data[i] = Math.min(255, data[i] * 1.05);      // Red
-        data[i+1] = Math.min(255, data[i+1] * 1.03);  // Green
-        data[i+2] = Math.min(255, data[i+2] * 1.02);  // Blue
-      }
-      break;
-    
     case 'card':
-      // Enhance card colors and sharpness
+      // Enhanced card-specific processing
+      // Improve contrast and sharpness for card scans
       for (let i = 0; i < data.length; i += 4) {
-        // Increase contrast
-        data[i] = Math.min(255, Math.max(0, (data[i] - 128) * 1.1 + 128));
-        data[i+1] = Math.min(255, Math.max(0, (data[i+1] - 128) * 1.1 + 128));
-        data[i+2] = Math.min(255, Math.max(0, (data[i+2] - 128) * 1.1 + 128));
+        // Increase contrast specifically for cards
+        data[i] = Math.min(255, Math.max(0, (data[i] - 128) * 1.2 + 128));     // Red
+        data[i+1] = Math.min(255, Math.max(0, (data[i+1] - 128) * 1.2 + 128)); // Green
+        data[i+2] = Math.min(255, Math.max(0, (data[i+2] - 128) * 1.2 + 128)); // Blue
       }
       break;
     
-    case 'ticket':
-      // Enhance text clarity on tickets
-      for (let i = 0; i < data.length; i += 4) {
-        // Increase contrast and slightly desaturate
-        const avg = (data[i] + data[i+1] + data[i+2]) / 3;
-        data[i] = Math.min(255, Math.max(0, data[i] * 0.9 + avg * 0.1));
-        data[i+1] = Math.min(255, Math.max(0, data[i+1] * 0.9 + avg * 0.1));
-        data[i+2] = Math.min(255, Math.max(0, data[i+2] * 0.9 + avg * 0.1));
-      }
-      break;
-      
-    case 'program':
-      // Enhance colors for program pages
-      for (let i = 0; i < data.length; i += 4) {
-        // Boost saturation
-        const avg = (data[i] + data[i+1] + data[i+2]) / 3;
-        data[i] = Math.min(255, data[i] + (data[i] - avg) * 0.2);
-        data[i+1] = Math.min(255, data[i+1] + (data[i+1] - avg) * 0.2);
-        data[i+2] = Math.min(255, data[i+2] + (data[i+2] - avg) * 0.2);
-      }
-      break;
-      
-    case 'autograph':
-      // Enhance contrast for autographs
-      for (let i = 0; i < data.length; i += 4) {
-        // High contrast to make ink stand out
-        data[i] = Math.min(255, Math.max(0, (data[i] - 128) * 1.3 + 128));
-        data[i+1] = Math.min(255, Math.max(0, (data[i+1] - 128) * 1.3 + 128));
-        data[i+2] = Math.min(255, Math.max(0, (data[i+2] - 128) * 1.3 + 128));
-      }
-      break;
-      
-    default:
-      // Default enhancement - Stadium lighting correction
-      for (let i = 0; i < data.length; i += 4) {
-        // Adjust for typical stadium lighting (usually yellowish)
-        // Slightly reduce yellow cast by adjusting blue channel
-        data[i+2] = Math.min(255, data[i+2] * 1.05);
-      }
-      break;
+    // ... keep existing code for other enhancement types
   }
   
   ctx.putImageData(imageData, 0, 0);

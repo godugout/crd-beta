@@ -1,39 +1,64 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { SheetFooter } from "@/components/ui/sheet";
-import { MobileTouchButton } from '@/components/ui/mobile-controls';
-import { User } from '@/context/auth/types';
+import { Button } from '@/components/ui/button';
+import { LogOut, Settings, User as UserIcon } from 'lucide-react';
+import { useAuth } from '@/context/auth/AuthContext'; // Updated import to fix the error
 
-interface NavigationFooterProps {
-  user: User | null;
-  onSignOut: () => Promise<void>;
-  onClose: () => void;
-}
-
-const NavigationFooter: React.FC<NavigationFooterProps> = ({ user, onSignOut, onClose }) => {
+const NavigationFooter: React.FC = () => {
+  const { user, signOut } = useAuth();
+  
+  if (!user) {
+    return (
+      <div className="mt-auto pt-4 border-t border-gray-200 px-4">
+        <div className="flex flex-col gap-2 pb-4">
+          <Button asChild variant="outline" className="w-full">
+            <Link to="/login">Sign in</Link>
+          </Button>
+          <Button asChild className="w-full">
+            <Link to="/register">Create account</Link>
+          </Button>
+        </div>
+      </div>
+    );
+  }
+  
   return (
-    <SheetFooter className="p-4 border-t">
-      {user ? (
-        <MobileTouchButton 
-          variant="ghost" 
-          className="w-full" 
-          onClick={onSignOut}
-          hapticFeedback={false}
-        >
-          Sign Out
-        </MobileTouchButton>
-      ) : (
-        <MobileTouchButton 
-          className="w-full" 
-          hapticFeedback={false}
-        >
-          <Link to="/auth" onClick={onClose} className="w-full block text-center">
-            Sign In
+    <div className="mt-auto pt-4 border-t border-gray-200 px-4">
+      <div className="flex items-center gap-3 mb-4">
+        <div className="w-8 h-8 bg-gray-200 rounded-full overflow-hidden">
+          {user.avatarUrl ? (
+            <img src={user.avatarUrl} alt="User avatar" className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-primary-100">
+              <UserIcon size={16} className="text-primary-600" />
+            </div>
+          )}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium truncate">{user.fullName || user.email}</p>
+          <p className="text-xs text-gray-500 truncate">{user.email}</p>
+        </div>
+      </div>
+      
+      <div className="flex flex-col gap-2 pb-4">
+        <Button asChild variant="outline" size="sm" className="w-full justify-start">
+          <Link to="/settings">
+            <Settings size={16} className="mr-2" />
+            Settings
           </Link>
-        </MobileTouchButton>
-      )}
-    </SheetFooter>
+        </Button>
+        <Button 
+          variant="outline" 
+          size="sm"
+          className="w-full justify-start text-red-500 hover:text-red-600" 
+          onClick={signOut}
+        >
+          <LogOut size={16} className="mr-2" />
+          Sign out
+        </Button>
+      </div>
+    </div>
   );
 };
 

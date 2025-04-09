@@ -1,185 +1,153 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
+import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import CardBasicInfo from './CardBasicInfo';
-import CardDesignCustomization from './CardDesignCustomization';
-import CardTextCustomization from './CardTextCustomization';
-import CardPreview from './CardPreview';
-import CardEditorHeader from './CardEditorHeader';
-import { CardStyle } from './CardDesignCustomization';
-import { TextStyle } from './CardTextCustomization';
-import { useCardEditorState } from './hooks/useCardEditorState';
-import { Card } from '@/lib/types';
+import ImageUploader from '@/components/dam/ImageUploader';
+import ImageEditor from '@/components/card-upload/ImageEditor';
+import { MemorabiliaType } from '@/components/card-upload/cardDetection';
+import { storageOperations } from '@/lib/supabase/storage';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { useCards } from '@/context/CardContext';
-import { FabricSwatch } from './types';
 
 interface CardCreationFlowProps {
-  card?: Card;
+  card?: any;
   className?: string;
 }
 
 const CardCreationFlow: React.FC<CardCreationFlowProps> = ({ card, className }) => {
+  const [activeTab, setActiveTab] = useState('upload');
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [currentFile, setCurrentFile] = useState<File | null>(null);
+  const [showEditor, setShowEditor] = useState(false);
+  const [extractedImage, setExtractedImage] = useState<string | null>(null);
+  const [extractedFile, setExtractedFile] = useState<File | null>(null);
+  const [cardType, setCardType] = useState<MemorabiliaType | undefined>('card');
+  const [formData, setFormData] = useState({
+    title: '',
+    description: '',
+    tags: [] as string[],
+    rarity: 'common',
+    isPublic: false,
+  });
+  
   const navigate = useNavigate();
-  const { addCard, updateCard } = useCards();
-  const [activeTab, setActiveTab] = useState('info');
-  const cardState = useCardEditorState({ initialCard: card });
-
-  const handleSave = async () => {
-    if (!cardState.title.trim()) {
-      toast.error('Please provide a title for your card');
-      return;
-    }
-
-    if (!cardState.imageUrl) {
-      toast.error('Please upload an image for your card');
-      return;
-    }
-
-    try {
-      const cardData = cardState.getCardData();
-      
-      if (card) {
-        // Update existing card
-        await updateCard(card.id, cardData);
-        toast.success('Card updated successfully');
-      } else {
-        // Create new card
-        await addCard(cardData);
-        toast.success('Card created successfully');
-      }
-      
-      // Navigate to gallery
-      navigate('/gallery');
-    } catch (error) {
-      console.error('Error saving card:', error);
-      toast.error('Failed to save card');
-    }
+  
+  // Handle image upload
+  const handleImageUpload = async (file: File) => {
+    setCurrentFile(file);
+    const url = URL.createObjectURL(file);
+    setUploadedImage(url);
+    
+    // Auto-open editor for extraction
+    setShowEditor(true);
   };
-
-  const handleCancel = () => {
-    navigate(-1);
+  
+  // Handle crop completion
+  const handleCropComplete = async (file: File, url: string, memType?: MemorabiliaType) => {
+    setExtractedFile(file);
+    setExtractedImage(url);
+    setCardType(memType);
+    
+    // Move to details tab after extraction
+    setActiveTab('details');
+    
+    toast.success("Card extracted successfully! Now add details about your card.");
   };
-
+  
   return (
-    <div className={`max-w-5xl mx-auto ${className || ''}`}>
-      <CardEditorHeader 
-        title={card ? 'Edit Card' : 'Create New Card'}
-        subtitle="Upload an image and customize your card"
-      />
-
-      <Tabs 
-        value={activeTab} 
-        onValueChange={setActiveTab}
-        className="mt-6"
-      >
-        <TabsList className="grid grid-cols-4 mb-8">
-          <TabsTrigger value="info" className="data-[state=active]:bg-cardshow-blue/10">
-            1. Card Info
-          </TabsTrigger>
-          <TabsTrigger value="design" className="data-[state=active]:bg-cardshow-blue/10">
-            2. Design
-          </TabsTrigger>
-          <TabsTrigger value="text" className="data-[state=active]:bg-cardshow-blue/10">
-            3. Text
-          </TabsTrigger>
-          <TabsTrigger value="preview" className="data-[state=active]:bg-cardshow-blue/10">
-            4. Preview
-          </TabsTrigger>
+    <div className={`space-y-6 ${className}`}>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid grid-cols-2 mb-6">
+          <TabsTrigger value="upload">Upload & Extract</TabsTrigger>
+          <TabsTrigger value="details" disabled={!extractedImage}>Card Details</TabsTrigger>
         </TabsList>
-
-        <div className="p-6 bg-white rounded-lg shadow-sm">
-          <TabsContent value="info" className="mt-0">
-            <CardBasicInfo 
-              title={cardState.title}
-              setTitle={cardState.setTitle}
-              description={cardState.description}
-              setDescription={cardState.setDescription}
-              tags={cardState.tags}
-              setTags={cardState.setTags}
-              newTag={cardState.newTag}
-              setNewTag={cardState.setNewTag}
-              fabricSwatches={cardState.fabricSwatches}
-              setFabricSwatches={cardState.setFabricSwatches}
-              imageFile={cardState.imageFile}
-              imageUrl={cardState.imageUrl}
-              onImageUpload={cardState.handleImageUpload}
+        
+        <TabsContent value="upload" className="space-y-4">
+          <div className="bg-white rounded-lg shadow p-6">
+            <h2 className="text-lg font-semibold mb-4">Upload Card Image</h2>
+            
+            {!uploadedImage ? (
+              <ImageUploader onUploadComplete={handleImageUpload} maxSizeMB={10} />
+            ) : (
+              <div className="space-y-4">
+                <div className="relative aspect-[2.5/3.5] max-w-xs mx-auto border rounded-md overflow-hidden">
+                  <img
+                    src={extractedImage || uploadedImage}
+                    alt="Uploaded card"
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+                
+                <div className="flex justify-center gap-3">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setShowEditor(true)}
+                  >
+                    {extractedImage ? "Re-extract Card" : "Extract Card"}
+                  </Button>
+                  
+                  <Button 
+                    variant="default"
+                    onClick={() => setActiveTab('details')}
+                    disabled={!extractedImage}
+                  >
+                    Continue to Details
+                  </Button>
+                </div>
+              </div>
+            )}
+            
+            {/* Card Editor Dialog */}
+            <ImageEditor
+              showEditor={showEditor}
+              setShowEditor={setShowEditor}
+              editorImage={uploadedImage}
+              currentFile={currentFile}
+              onCropComplete={handleCropComplete}
+              enabledMemorabiliaTypes={['card']}
+              autoEnhance={true}
             />
-          </TabsContent>
-
-          <TabsContent value="design" className="mt-0">
-            <CardDesignCustomization 
-              imageUrl={cardState.imageUrl}
-              cardStyle={cardState.cardStyle}
-              setCardStyle={cardState.setCardStyle}
-            />
-          </TabsContent>
-
-          <TabsContent value="text" className="mt-0">
-            <CardTextCustomization 
-              imageUrl={cardState.imageUrl}
-              textStyle={cardState.textStyle}
-              setTextStyle={cardState.setTextStyle}
-              cardTitle={cardState.title}
-              setCardTitle={cardState.setTitle}
-              cardDescription={cardState.description}
-              setCardDescription={cardState.setDescription}
-            />
-          </TabsContent>
-
-          <TabsContent value="preview" className="mt-0">
-            <CardPreview 
-              imageUrl={cardState.imageUrl}
-              title={cardState.title}
-              description={cardState.description}
-              fabricSwatches={cardState.fabricSwatches}
-              cardStyle={cardState.cardStyle}
-              textStyle={cardState.textStyle}
-            />
-          </TabsContent>
-
-          <div className="flex justify-between mt-8">
-            <Button 
-              variant="outline" 
-              onClick={handleCancel}
-            >
-              Cancel
-            </Button>
-
-            <div className="space-x-4">
-              {activeTab !== 'info' && (
-                <Button 
-                  variant="outline"
-                  onClick={() => {
-                    const tabs = ['info', 'design', 'text', 'preview'];
-                    const currentIndex = tabs.indexOf(activeTab);
-                    setActiveTab(tabs[currentIndex - 1]);
-                  }}
-                >
-                  Previous
-                </Button>
-              )}
-
-              {activeTab !== 'preview' ? (
-                <Button 
-                  onClick={() => {
-                    const tabs = ['info', 'design', 'text', 'preview'];
-                    const currentIndex = tabs.indexOf(activeTab);
-                    setActiveTab(tabs[currentIndex + 1]);
-                  }}
-                >
-                  Next
-                </Button>
-              ) : (
-                <Button onClick={handleSave}>
-                  {card ? 'Update Card' : 'Create Card'}
-                </Button>
-              )}
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="details" className="space-y-4">
+          <div className="bg-white rounded-lg shadow p-6">
+            <h2 className="text-lg font-semibold mb-4">Card Details</h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                {extractedImage && (
+                  <div className="relative aspect-[2.5/3.5] max-w-xs border rounded-md overflow-hidden">
+                    <img
+                      src={extractedImage}
+                      alt="Extracted card"
+                      className="w-full h-full object-contain"
+                    />
+                    <div className="absolute top-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded-full">
+                      {cardType || 'Card'}
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              {/* Card details form would go here */}
+              <div className="space-y-4">
+                {/* This would be expanded with proper form fields */}
+                <p className="text-sm text-gray-500">
+                  Card extracted and ready for details. Complete implementation would include form fields for:
+                </p>
+                <ul className="list-disc list-inside text-sm text-gray-500">
+                  <li>Player name</li>
+                  <li>Team</li>
+                  <li>Year</li>
+                  <li>Card set</li>
+                  <li>Card number</li>
+                  <li>Condition</li>
+                </ul>
+              </div>
             </div>
           </div>
-        </div>
+        </TabsContent>
       </Tabs>
     </div>
   );
