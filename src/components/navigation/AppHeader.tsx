@@ -14,12 +14,16 @@ import DugoutLabs from '../experimental/DugoutLabs';
 const AppHeader: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const { user, signOut } = useAuth();
+  const auth = useAuth();
+  const user = auth?.user;
+  const signOut = auth?.signOut;
   const location = useLocation();
   const isMobile = useMediaQuery('(max-width: 768px)');
   
   const handleSignOut = async () => {
-    await signOut();
+    if (signOut) {
+      await signOut();
+    }
   };
   
   useEffect(() => {
