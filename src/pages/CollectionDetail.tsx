@@ -6,15 +6,21 @@ import PageLayout from '@/components/navigation/PageLayout';
 import CardGrid from '@/components/gallery/CardGrid';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, Grid, List, Share2 } from 'lucide-react';
+import { ChevronLeft, Grid, List, Share2, Upload, Plus } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import CardList from '@/components/gallery/CardList';
 import { toast } from 'sonner';
+import { OptimizedImage } from '@/components/ui/optimized-image';
+import { LoadingState } from '@/components/ui/loading-state';
+import AssetGallery from '@/components/dam/AssetGallery';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 const CollectionDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const { collections, cards, isLoading } = useCards();
+  const { collections, cards, isLoading, updateCard } = useCards();
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [isAssetGalleryOpen, setIsAssetGalleryOpen] = useState(false);
+  const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   
   // Find the collection by ID
   const collection = collections.find(c => c.id === id);
@@ -22,31 +28,40 @@ const CollectionDetail = () => {
   // Get cards that belong to this collection
   const collectionCards = React.useMemo(() => {
     if (!collection) return [];
-    return cards.filter(card => collection.cardIds.includes(card.id));
+    return cards.filter(card => collection.cardIds?.includes(card.id));
   }, [collection, cards]);
+
+  // Handle asset selection from gallery
+  const handleAssetSelect = (asset: any) => {
+    if (selectedCardId) {
+      updateCard(selectedCardId, { 
+        imageUrl: asset.publicUrl,
+        thumbnailUrl: asset.thumbnailUrl || asset.publicUrl 
+      });
+      toast.success('Card image updated successfully');
+      setIsAssetGalleryOpen(false);
+      setSelectedCardId(null);
+    }
+  };
+
+  // Open asset gallery for a specific card
+  const openAssetGalleryForCard = (cardId: string) => {
+    setSelectedCardId(cardId);
+    setIsAssetGalleryOpen(true);
+  };
   
   // Log for debugging
   useEffect(() => {
     console.log('Collection ID:', id);
     console.log('Collection found:', collection);
     console.log('Collection cards:', collectionCards);
-    console.log('All cards:', cards);
-    console.log('All collections:', collections);
-  }, [id, collection, collectionCards, cards, collections]);
+  }, [id, collection, collectionCards]);
   
   if (isLoading) {
     return (
       <PageLayout title="Loading Collection..." description="Please wait">
         <div className="max-w-7xl mx-auto p-4">
-          <div className="animate-pulse space-y-4">
-            <div className="h-8 bg-gray-200 rounded w-1/4"></div>
-            <div className="h-4 bg-gray-200 rounded w-2/4"></div>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-8">
-              {[1, 2, 3, 4, 5, 6].map(i => (
-                <div key={i} className="h-64 bg-gray-200 rounded"></div>
-              ))}
-            </div>
-          </div>
+          <LoadingState text="Loading collection" size="lg" />
         </div>
       </PageLayout>
     );
@@ -135,6 +150,21 @@ const CollectionDetail = () => {
           </div>
         </div>
 
+        {/* Asset Gallery Dialog */}
+        <Dialog open={isAssetGalleryOpen} onOpenChange={setIsAssetGalleryOpen}>
+          <DialogContent className="max-w-4xl">
+            <DialogHeader>
+              <DialogTitle>Select Image from Gallery</DialogTitle>
+            </DialogHeader>
+            <AssetGallery 
+              onSelectAsset={handleAssetSelect}
+              collectionId={collection.id}
+              selectable={true}
+              showActions={true}
+            />
+          </DialogContent>
+        </Dialog>
+
         {collectionCards.length === 0 ? (
           <Card className="text-center py-12">
             <CardContent>
@@ -153,12 +183,39 @@ const CollectionDetail = () => {
             </TabsList>
             <TabsContent value="all">
               {viewMode === 'grid' ? (
-                <CardGrid 
-                  cards={collectionCards}
-                  onCardClick={handleCardClick}
-                  cardEffects={[]}
-                  className=""
-                />
+                <div>
+                  {/* Enhanced card grid with image update capabilities */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    {collectionCards.map(card => (
+                      <Card key={card.id} className="overflow-hidden">
+                        <div className="relative aspect-[3/4]">
+                          <OptimizedImage 
+                            src={card.imageUrl} 
+                            alt={card.title}
+                            className="w-full h-full object-cover"
+                            placeholderSrc="/placeholder.svg"
+                            fadeIn={true}
+                          />
+                          <Button 
+                            size="sm" 
+                            variant="ghost" 
+                            className="absolute top-2 right-2 bg-black/30 text-white hover:bg-black/50"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openAssetGalleryForCard(card.id);
+                            }}
+                          >
+                            <Upload className="h-4 w-4" />
+                          </Button>
+                        </div>
+                        <CardContent className="p-4">
+                          <h3 className="font-medium truncate">{card.title}</h3>
+                          <p className="text-gray-500 text-sm line-clamp-2 h-10">{card.description}</p>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
               ) : (
                 <CardList 
                   cards={collectionCards}

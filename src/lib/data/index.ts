@@ -1,7 +1,7 @@
 
-// Export all repositories for easier imports
+// Export repositories from a central location
 export * from './cardRepository';
 export * from './collectionRepository';
-export * from './teamRepository';
-export * from './reactionRepository';
 export * from './commentRepository';
+export * from './teamRepository';
+export { reactionRepository } from './reactionRepository';

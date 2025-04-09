@@ -31,13 +31,15 @@ export const teamRepository = {
       
       const teamMembers: TeamMember[] = data.map(member => {
         // Create a user object with the profile data
-        // The issue is here - profiles is an object, not an array
-        const user: User | undefined = member.profiles ? {
-          id: member.profiles.id,
-          email: member.profiles.email || '',
-          displayName: member.profiles.full_name || '',
-          name: member.profiles.full_name || '',
-          avatarUrl: member.profiles.avatar_url,
+        // The profiles field is an object, not an array
+        const profileData = member.profiles as any; // Type assertion to avoid type errors
+        
+        const user: User | undefined = profileData ? {
+          id: profileData.id,
+          email: profileData.email || '',
+          displayName: profileData.full_name || '',
+          name: profileData.full_name || '',
+          avatarUrl: profileData.avatar_url,
           createdAt: '',  // These fields are required but not available from profiles
           updatedAt: ''   // These fields are required but not available from profiles
         } : undefined;

@@ -9,6 +9,9 @@ import { Card } from '@/lib/types';
 import { useCards } from '@/context/CardContext';
 import { toast } from 'sonner';
 import ImageUploader from '@/components/dam/ImageUploader';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import AssetGallery from '@/components/dam/AssetGallery';
+import { Image, Upload, XCircle } from 'lucide-react';
 
 interface CardEditorFormProps {
   card?: Card;
@@ -30,11 +33,17 @@ const CardEditorForm: React.FC<CardEditorFormProps> = ({
   const [imageUrl, setImageUrl] = useState(card?.imageUrl || '');
   const [tags, setTags] = useState<string[]>(card?.tags || []);
   const [tagInput, setTagInput] = useState('');
+  const [isAssetGalleryOpen, setIsAssetGalleryOpen] = useState(false);
   
   const isEditing = !!card;
   
   const handleImageUploadComplete = (url: string) => {
     setImageUrl(url);
+  };
+
+  const handleAssetSelect = (asset: any) => {
+    setImageUrl(asset.publicUrl);
+    setIsAssetGalleryOpen(false);
   };
   
   const handleAddTag = () => {
@@ -93,6 +102,10 @@ const CardEditorForm: React.FC<CardEditorFormProps> = ({
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleRemoveImage = () => {
+    setImageUrl('');
   };
   
   return (
@@ -166,32 +179,73 @@ const CardEditorForm: React.FC<CardEditorFormProps> = ({
           <Label>Card Image</Label>
           <div className="flex flex-col items-center space-y-4">
             {imageUrl ? (
-              <div className="relative">
+              <div className="relative max-w-xs w-full">
                 <img 
                   src={imageUrl} 
                   alt={title || "Card image"}
-                  className="max-h-[300px] rounded-lg shadow-md"
+                  className="w-full rounded-lg shadow-md"
                 />
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="absolute top-2 right-2 bg-white/80"
-                  onClick={() => setImageUrl('')}
-                >
-                  Change
-                </Button>
+                <div className="absolute top-2 right-2 flex gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="bg-white/80 hover:bg-white"
+                    onClick={() => setIsAssetGalleryOpen(true)}
+                  >
+                    <Image className="h-4 w-4 mr-1" />
+                    Change
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="bg-white/80 hover:bg-white text-red-500"
+                    onClick={handleRemoveImage}
+                  >
+                    <XCircle className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             ) : (
-              <ImageUploader 
-                onUploadComplete={handleImageUploadComplete}
-                title="Upload Card Image"
-                maxSizeMB={10}
-              />
+              <div className="w-full">
+                <div className="space-y-4">
+                  <ImageUploader 
+                    onUploadComplete={handleImageUploadComplete}
+                    title="Upload Card Image"
+                    maxSizeMB={10}
+                  />
+
+                  <div className="text-center">
+                    <div className="text-sm text-gray-500 mb-2">or</div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setIsAssetGalleryOpen(true)}
+                    >
+                      <Image className="h-4 w-4 mr-2" />
+                      Select from Asset Gallery
+                    </Button>
+                  </div>
+                </div>
+              </div>
             )}
           </div>
         </div>
       </div>
+      
+      {/* Asset Gallery Dialog */}
+      <Dialog open={isAssetGalleryOpen} onOpenChange={setIsAssetGalleryOpen}>
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>Select Image from Gallery</DialogTitle>
+          </DialogHeader>
+          <AssetGallery 
+            onSelectAsset={handleAssetSelect}
+            selectable={true}
+          />
+        </DialogContent>
+      </Dialog>
       
       <div className="flex justify-end space-x-4">
         <Button 
