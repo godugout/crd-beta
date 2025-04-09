@@ -1,10 +1,9 @@
 
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import CardCreationFlow from '@/components/card-editor/CardCreationFlow';
+import CardEditorContainer from '@/components/card-editor/CardEditorContainer';
 import PageLayout from '@/components/navigation/PageLayout';
 import { useCards } from '@/context/CardContext';
-import '@/components/card-editor/cardEffects.css';
 
 const Editor = () => {
   const { id } = useParams<{ id?: string }>();
@@ -19,7 +18,7 @@ const Editor = () => {
       description={card ? "Edit your digital card" : "Upload an image and add details to create your digital card."}
     >
       <div className="container mx-auto max-w-6xl px-4">
-        <CardCreationFlow card={card} />
+        <CardEditorContainer card={card} />
       </div>
     </PageLayout>
   );

@@ -115,17 +115,17 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
     try {
       setIsUploading(true);
       
-      const options: AssetUploadOptions = {
-        title: file.name,
-        cardId,
-        collectionId
-      };
-      
-      const asset = await assetService.uploadAsset(file, options);
-      
-      if (asset && asset.url) {
+      // For demo purposes, we'll just use the file data URL directly
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const url = event.target?.result as string;
+        
+        // Generate a unique ID
+        const assetId = `asset-${Date.now()}`;
+        
+        // Call the callback with the URL and ID
         if (onUploadComplete) {
-          onUploadComplete(asset.url, asset.id);
+          onUploadComplete(url, assetId);
         }
         
         // Reset state
@@ -134,11 +134,20 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
         if (fileInputRef.current) {
           fileInputRef.current.value = '';
         }
-      }
+        
+        setIsUploading(false);
+        toast.success('Image uploaded successfully');
+      };
+      
+      reader.onerror = () => {
+        toast.error('Failed to process image');
+        setIsUploading(false);
+      };
+      
+      reader.readAsDataURL(file);
     } catch (error) {
       console.error('Error uploading image:', error);
       toast.error('Failed to upload image');
-    } finally {
       setIsUploading(false);
     }
   };

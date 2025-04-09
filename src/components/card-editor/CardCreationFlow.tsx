@@ -32,6 +32,13 @@ const CardCreationFlow: React.FC<CardCreationFlowProps> = ({ card, className }) 
   
   const navigate = useNavigate();
   
+  // Simulate file upload from image URL
+  const createFileFromUrl = async (url: string, fileName: string = 'image.jpg'): Promise<File> => {
+    const response = await fetch(url);
+    const blob = await response.blob();
+    return new File([blob], fileName, { type: blob.type });
+  };
+  
   // Handle image upload
   const handleImageUpload = async (file: File) => {
     setCurrentFile(file);
@@ -42,20 +49,17 @@ const CardCreationFlow: React.FC<CardCreationFlowProps> = ({ card, className }) 
     setShowEditor(true);
   };
   
-  // Adapter function to convert ImageUploader's expected format
-  const handleImageUploaderComplete = (url: string, assetId: string) => {
-    // Since we're not actually using the URL from ImageUploader directly,
-    // we can just trigger a file selection instead
-    const fileInput = document.createElement('input');
-    fileInput.type = 'file';
-    fileInput.accept = 'image/*';
-    fileInput.onchange = (e: Event) => {
-      const target = e.target as HTMLInputElement;
-      if (target.files && target.files[0]) {
-        handleImageUpload(target.files[0]);
-      }
-    };
-    fileInput.click();
+  // Adapter function for ImageUploader which expects a different signature
+  const handleImageUploaderComplete = async (url: string, assetId: string) => {
+    try {
+      // Convert the dataURL to a File object
+      const fileName = `upload-${Date.now()}.jpg`;
+      const file = await createFileFromUrl(url, fileName);
+      handleImageUpload(file);
+    } catch (error) {
+      console.error("Error converting image URL to file:", error);
+      toast.error("Failed to process the uploaded image");
+    }
   };
   
   // Handle crop completion
