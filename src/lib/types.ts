@@ -147,4 +147,14 @@ export interface OaklandMemoryData {
   personalSignificance?: string;     // Add missing properties
 }
 
+// Add AssetUploadResult interface
+export interface AssetUploadResult {
+  id: string;
+  url: string;  // Use url instead of publicUrl
+  title?: string;
+  fileName?: string;
+  mimeType?: string;
+  size?: number;
+}
+
 // Add any other types needed by the application

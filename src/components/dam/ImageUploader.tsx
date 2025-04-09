@@ -71,9 +71,9 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
       
       const asset = await assetService.uploadAsset(file, options);
       
-      if (asset && asset.publicUrl) {
+      if (asset && asset.url) {  // Changed from publicUrl to url
         if (onUploadComplete) {
-          onUploadComplete(asset.publicUrl, asset.id);
+          onUploadComplete(asset.url, asset.id);  // Changed from publicUrl to url
         }
         
         // Reset state

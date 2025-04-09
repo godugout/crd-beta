@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
-import { Comment } from '@/lib/types';
+import { Comment, User } from '@/lib/types';
 import { commentRepository } from '@/lib/data';
 import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';

@@ -34,8 +34,8 @@ export const teamRepository = {
         const user: User | undefined = member.profiles ? {
           id: member.profiles.id,
           email: member.profiles.email || '',
-          displayName: member.profiles.full_name,
-          name: member.profiles.full_name,
+          displayName: member.profiles.full_name || '',
+          name: member.profiles.full_name || '',
           avatarUrl: member.profiles.avatar_url,
           createdAt: '',  // These fields are required but not available from profiles
           updatedAt: ''   // These fields are required but not available from profiles
@@ -56,7 +56,5 @@ export const teamRepository = {
       console.error('Error getting team members:', err);
       return { data: null, error: 'Failed to get team members' };
     }
-  },
-  
-  // Other team-related operations...
+  }
 };
