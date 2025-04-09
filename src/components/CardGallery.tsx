@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -40,14 +41,9 @@ const CardGallery: React.FC<CardGalleryProps> = ({
   
   const { 
     cards: contextCards, 
-    isLoading: isLoadingCards, 
-    fetchCards: refreshCards 
-  } = useCards({
-    teamId,
-    collectionId,
-    tags: selectedTags.length > 0 ? selectedTags : undefined,
-    autoFetch: !propCards
-  });
+    isLoading: isLoadingCards,
+    refreshCards 
+  } = useCards();
   
   const cards = propCards || contextCards;
   
