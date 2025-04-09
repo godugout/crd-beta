@@ -3,10 +3,10 @@
 export interface User {
   id: string;
   email: string;
-  name?: string; // Added name property
-  displayName?: string;
+  displayName?: string;  // Keep displayName for backward compatibility
+  name?: string;         // Add name property
+  username?: string;     // Add username property
   avatarUrl?: string;
-  username?: string; // Added username property
   createdAt: string;
   updatedAt: string;
 }
@@ -19,8 +19,8 @@ export interface Card {
   thumbnailUrl?: string;
   tags?: string[];
   collectionId?: string;
-  createdAt: string; // Made required
-  updatedAt: string; // Made required
+  createdAt: string;     // Make required to match schema
+  updatedAt: string;     // Make required to match schema
   userId?: string;
   teamId?: string;
   isPublic?: boolean;
@@ -41,9 +41,9 @@ export interface DbCard {
   created_at: string;
   updated_at: string;
   user_id?: string;
-  team_id?: string; // Added team_id property
+  team_id?: string;      // Add team_id property
   is_public?: boolean;
-  design_metadata?: any; // Added design_metadata property
+  design_metadata?: any; // Add design_metadata property
 }
 
 export interface Collection {
@@ -51,14 +51,14 @@ export interface Collection {
   name: string;
   description: string;
   coverImageUrl?: string;
-  visibility: 'public' | 'private' | 'unlisted' | 'team'; // Added 'team' as valid visibility
+  visibility: 'public' | 'private' | 'unlisted' | 'team'; // Include 'team'
   allowComments: boolean;
   designMetadata?: any;
   cards?: Card[];
   createdAt?: string;
   updatedAt?: string;
   userId?: string;
-  teamId?: string; // Added teamId property
+  teamId?: string;       // Add teamId property
 }
 
 export interface DbCollection {
@@ -72,7 +72,7 @@ export interface DbCollection {
   created_at: string;
   updated_at: string;
   owner_id: string;
-  team_id?: string; // Added team_id property
+  team_id?: string;      // Add team_id property
 }
 
 export interface Comment {
@@ -81,12 +81,11 @@ export interface Comment {
   userId: string;
   cardId?: string;
   collectionId?: string;
-  teamId?: string; // Added teamId property
+  teamId?: string;       // Add teamId property
   parentId?: string;
   createdAt: string;
   updatedAt: string;
   user?: User;
-  reactions?: Reaction[];
 }
 
 export interface Reaction {
@@ -97,7 +96,7 @@ export interface Reaction {
   commentId?: string;
   collectionId?: string;
   createdAt: string;
-  user?: User; // Added user property
+  user?: User;           // Add user property
 }
 
 export interface DbReaction {
@@ -143,10 +142,9 @@ export interface OaklandMemoryData {
   tags: string[];
   createdAt?: string;
   updatedAt?: string;
-  // Added the properties that were missing before
-  attendees?: string[];
-  historicalContext?: string;
-  personalSignificance?: string;
+  attendees?: string[];              // Add missing properties
+  historicalContext?: string;        // Add missing properties
+  personalSignificance?: string;     // Add missing properties
 }
 
 // Add any other types needed by the application

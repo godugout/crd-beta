@@ -1,6 +1,6 @@
 
 // This test file requires Jest or Mocha types which are not currently installed.
-// Either install @types/jest or comment out the tests until test setup is complete.
+// Install @types/jest or uncomment the tests once test setup is complete.
 /*
 import { isCard, isCollection, isOaklandMemoryData, ensureValidOaklandMemoryData } from '../typeGuards';
 import { Card, Collection, OaklandMemoryData } from '@/lib/types';

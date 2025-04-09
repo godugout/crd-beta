@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { User } from '@/context/AuthContext';
+import { User } from '@/lib/types';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
@@ -41,19 +41,31 @@ const UserDropdown: React.FC<UserDropdownProps> = ({
     setOpen(false);
   };
   
+  // Get the display name with appropriate fallbacks
+  const getDisplayName = () => {
+    return user.displayName || user.name || 'User';
+  };
+
+  // Get the first letter of the name or email for avatar fallback
+  const getAvatarInitial = () => {
+    if (user.displayName) return user.displayName.charAt(0).toUpperCase();
+    if (user.name) return user.name.charAt(0).toUpperCase();
+    return user.email ? user.email.charAt(0).toUpperCase() : 'U';
+  };
+  
   return (
     <DropdownMenu open={open} onOpenChange={handleOpenChange}>
       <DropdownMenuTrigger className="outline-none">
         <Avatar className="h-8 w-8">
-          <AvatarImage src={user.avatarUrl} alt={user.displayName} />
+          <AvatarImage src={user.avatarUrl} alt={getDisplayName()} />
           <AvatarFallback className="bg-primary/10">
-            {user.displayName ? user.displayName.charAt(0).toUpperCase() : (user.email ? user.email.charAt(0).toUpperCase() : 'U')}
+            {getAvatarInitial()}
           </AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel>
-          <div className="font-medium">{user.displayName || 'User'}</div>
+          <div className="font-medium">{getDisplayName()}</div>
           <div className="text-xs text-muted-foreground truncate">{user.email}</div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />

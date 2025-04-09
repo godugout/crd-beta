@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -51,7 +50,7 @@ const CardGallery: React.FC<CardGalleryProps> = ({
     autoFetch: !propCards
   });
   
-  const cards = propCards || fetchedCards;
+  const cards: Card[] = propCards || fetchedCards;
   
   const { isMobile, shouldOptimizeAnimations } = useMobileOptimization();
   

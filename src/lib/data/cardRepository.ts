@@ -1,4 +1,3 @@
-
 import { supabase } from '@/lib/supabase';
 import { Card, DbCard } from '@/lib/types';
 
@@ -17,6 +16,7 @@ const mapDbCardToCard = (dbCard: DbCard): Card => {
     createdAt: dbCard.created_at,
     updatedAt: dbCard.updated_at,
     userId: dbCard.user_id,
+    teamId: dbCard.team_id,
     isPublic: dbCard.is_public,
     designMetadata: dbCard.design_metadata
   };
@@ -169,12 +169,10 @@ export const cardRepository = {
       }
       
       if (tags && tags.length > 0) {
-        // This will find cards that have ANY of the specified tags
         query = query.contains('tags', tags);
       }
       
       if (searchQuery) {
-        // Perform full-text search on title and description
         query = query.or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%`);
       }
       

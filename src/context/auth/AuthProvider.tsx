@@ -33,6 +33,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             id: data.user.id,
             email: data.user.email || '',
             displayName: data.user.user_metadata.name || '',
+            name: data.user.user_metadata.name || '',
             avatarUrl: data.user.user_metadata.avatar_url,
             createdAt: data.user.created_at,
             updatedAt: data.user.updated_at
@@ -85,6 +86,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           id: data.user.id,
           email: data.user.email || '',
           displayName: data.user.user_metadata.name || '',
+          name: data.user.user_metadata.name || '',
           avatarUrl: data.user.user_metadata.avatar_url,
           createdAt: data.user.created_at,
           updatedAt: data.user.updated_at
@@ -131,6 +133,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           id: data.user.id,
           email: data.user.email || '',
           displayName: data.user.user_metadata.name || '',
+          name: data.user.user_metadata.name || '',
           avatarUrl: data.user.user_metadata.avatar_url,
           createdAt: data.user.created_at,
           updatedAt: data.user.updated_at

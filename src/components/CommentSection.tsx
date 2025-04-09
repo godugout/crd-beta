@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/auth';
 import { Button } from '@/components/ui/button';
@@ -47,8 +48,10 @@ const CommentSection: React.FC<CommentSectionProps> = ({ cardId, collectionId, t
       }
       
       if (data) {
-        setComments(data as Comment[]);
-        data.forEach(comment => {
+        // Ensure we're using a consistent type
+        const typedComments = data as Comment[];
+        setComments(typedComments);
+        typedComments.forEach(comment => {
           if (comment.id) {
             fetchReplies(comment.id);
           }
@@ -73,9 +76,11 @@ const CommentSection: React.FC<CommentSectionProps> = ({ cardId, collectionId, t
       }
       
       if (data && data.length > 0) {
+        // Handle type consistency
+        const typedReplies = data as Comment[];
         setRepliesByParentId(prev => ({
           ...prev,
-          [parentId]: data as Comment[]
+          [parentId]: typedReplies
         }));
       }
     } catch (err) {
@@ -108,14 +113,17 @@ const CommentSection: React.FC<CommentSectionProps> = ({ cardId, collectionId, t
         toast.success('Comment posted successfully');
         setNewComment('');
         
+        // Ensure type consistency by casting
+        const typedComment = data as Comment;
+        
         if (replyTo) {
           setRepliesByParentId(prev => ({
             ...prev,
-            [replyTo]: [...(prev[replyTo] || []), data as Comment]
+            [replyTo]: [...(prev[replyTo] || []), typedComment]
           }));
           setReplyTo(null);
         } else {
-          setComments(prev => [...prev, data as Comment]);
+          setComments(prev => [...prev, typedComment]);
         }
       }
     } catch (err) {
@@ -139,16 +147,19 @@ const CommentSection: React.FC<CommentSectionProps> = ({ cardId, collectionId, t
       if (data) {
         toast.success('Comment updated successfully');
         
-        if (data.parentId) {
+        // Ensure type consistency by casting
+        const typedComment = data as Comment;
+        
+        if (typedComment.parentId) {
           setRepliesByParentId(prev => ({
             ...prev,
-            [data.parentId]: prev[data.parentId].map(c => 
-              c.id === id ? (data as Comment) : c
+            [typedComment.parentId!]: prev[typedComment.parentId!].map(c => 
+              c.id === id ? typedComment : c
             )
           }));
         } else {
           setComments(prev => prev.map(c => 
-            c.id === id ? (data as Comment) : c
+            c.id === id ? typedComment : c
           ));
         }
         
@@ -209,13 +220,27 @@ const CommentSection: React.FC<CommentSectionProps> = ({ cardId, collectionId, t
     const isOwnComment = user && comment.userId === user.id;
     const replies = repliesByParentId[comment.id] || [];
     
+    // Helper function to get display name
+    const getDisplayName = (user?: User) => {
+      if (!user) return 'Anonymous';
+      return user.displayName || user.name || user.username || 'Anonymous';
+    };
+    
+    // Helper function to get avatar initial
+    const getAvatarInitial = (user?: User) => {
+      if (!user) return '?';
+      if (user.displayName) return user.displayName.charAt(0);
+      if (user.name) return user.name.charAt(0);
+      return user.email?.charAt(0) || '?';
+    };
+    
     return (
       <div key={comment.id} className={`${isReply ? 'ml-8 mt-2' : 'mt-4'}`}>
         <div className="flex items-start gap-3">
           <Avatar className="h-8 w-8">
-            <AvatarImage src={comment.user?.avatarUrl} alt={comment.user?.displayName} />
+            <AvatarImage src={comment.user?.avatarUrl} alt={getDisplayName(comment.user)} />
             <AvatarFallback>
-              {comment.user?.displayName?.charAt(0) || comment.user?.email?.charAt(0) || '?'}
+              {getAvatarInitial(comment.user)}
             </AvatarFallback>
           </Avatar>
           
@@ -223,7 +248,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ cardId, collectionId, t
             <div className="flex items-center justify-between">
               <div>
                 <span className="font-medium text-sm">
-                  {comment.user?.displayName || comment.user?.username || 'Anonymous'}
+                  {getDisplayName(comment.user)}
                 </span>
                 <span className="text-muted-foreground text-xs ml-2">
                   {comment.createdAt && formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
@@ -326,8 +351,10 @@ const CommentSection: React.FC<CommentSectionProps> = ({ cardId, collectionId, t
       {user ? (
         <div className="flex gap-3 items-start">
           <Avatar className="h-8 w-8">
-            <AvatarImage src={user.avatarUrl} alt={user.displayName} />
-            <AvatarFallback>{user.displayName?.charAt(0) || user.email?.charAt(0) || 'U'}</AvatarFallback>
+            <AvatarImage src={user.avatarUrl} alt={user.displayName || user.name} />
+            <AvatarFallback>
+              {user.displayName?.charAt(0) || user.name?.charAt(0) || user.email?.charAt(0) || 'U'}
+            </AvatarFallback>
           </Avatar>
           <div className="flex-1 flex gap-2">
             <Textarea

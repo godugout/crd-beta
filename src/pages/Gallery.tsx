@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import PageLayout from '@/components/navigation/PageLayout';
@@ -16,7 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import FullscreenViewer from '@/components/gallery/FullscreenViewer';
-import { Card } from '@/lib/types';
+import { Card } from '@/lib/types'; // Import from correct location
 
 const Gallery = () => {
   const { isMobile } = useMobileOptimization();
@@ -52,6 +51,7 @@ const Gallery = () => {
     card.tags?.some(tag => ['baseball', 'vintage'].includes(tag.toLowerCase()))
   );
 
+  // Ensure consistent Card type
   const displayCards: Card[] = cards.map(card => ({
     ...card,
     designMetadata: {
