@@ -150,7 +150,12 @@ export const useFabricCanvas = ({
           
           // In Fabric.js v6, we need to add the image and make sure it's in the background
           canvas.add(fImg);
-          canvas.sendToBack(fImg);
+          
+          // Fix: Use the correct method to send to back in Fabric.js v6
+          if (canvas._objects && canvas._objects.length > 0) {
+            canvas.moveTo(fImg, 0); // Move to position 0 (back)
+          }
+          
           backgroundImage.current = fImg;
           
           // Create crop boxes if none exist yet
