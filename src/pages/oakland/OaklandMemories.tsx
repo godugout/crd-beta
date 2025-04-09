@@ -4,6 +4,7 @@ import { useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import PageLayout from '@/components/navigation/PageLayout';
 import TeamBreadcrumb from '@/components/navigation/components/TeamBreadcrumb';
+import { teamOperations } from '@/lib/supabase';
 
 interface TeamInfo {
   name?: string;
@@ -21,6 +22,32 @@ function OaklandMemories() {
       if (!teamSlug) return;
       
       try {
+        if (teamOperations.getTeamBySlug) {
+          // Use the teamOperations utility if available
+          const { data, error } = await teamOperations.getTeamBySlug(teamSlug);
+          
+          if (error) {
+            console.error('Error fetching team info:', error);
+            // Set default values if team is not found
+            setTeamInfo({
+              name: teamSlug.charAt(0).toUpperCase() + teamSlug.slice(1),
+              primary_color: '#006341',
+              secondary_color: '#EFB21E'
+            });
+            return;
+          }
+          
+          if (data) {
+            setTeamInfo({
+              name: data.name,
+              primary_color: data.primary_color,
+              secondary_color: data.secondary_color
+            });
+            return;
+          }
+        }
+        
+        // Fallback direct query
         const { data, error } = await supabase
           .from('teams')
           .select('name, primary_color, secondary_color')

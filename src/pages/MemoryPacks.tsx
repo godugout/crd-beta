@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Package, Plus } from 'lucide-react';
 import MemoryPacksSection from '@/components/card-showcase/MemoryPacksSection';
 import { supabase } from '@/integrations/supabase/client';
+import { teamOperations } from '@/lib/supabase';
 
 interface TeamInfo {
   primary_color?: string;
@@ -24,6 +25,25 @@ const MemoryPacks = () => {
       if (!teamSlug) return;
       
       try {
+        if (teamOperations.getTeamBySlug) {
+          // Use the teamOperations utility if available
+          const { data, error } = await teamOperations.getTeamBySlug(teamSlug);
+          
+          if (error) {
+            console.error('Error fetching team info:', error);
+            return;
+          }
+          
+          if (data) {
+            setTeamInfo({
+              primary_color: data.primary_color,
+              name: data.name
+            });
+            return;
+          }
+        }
+        
+        // Fallback to direct query if teamOperations is not available
         const { data, error } = await supabase
           .from('teams')
           .select('name, primary_color, secondary_color')

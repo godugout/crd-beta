@@ -5,9 +5,10 @@ import PageLayout from '@/components/navigation/PageLayout';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
-import { Team, DbTeam } from '@/lib/types/TeamTypes';
+import { Team } from '@/lib/types/TeamTypes';
 import { Users, Calendar, MapPin, Library, Pencil, Trophy, Settings } from 'lucide-react';
 import TeamBreadcrumb from '@/components/navigation/components/TeamBreadcrumb';
+import { teamOperations } from '@/lib/supabase';
 
 const TeamDetail = () => {
   const { teamSlug } = useParams<{ teamSlug?: string }>();
@@ -19,6 +20,18 @@ const TeamDetail = () => {
       if (!teamSlug) return;
       
       try {
+        // First try to use the teamOperations utility
+        if (teamOperations.getTeamBySlug) {
+          const { data, error } = await teamOperations.getTeamBySlug(teamSlug);
+          
+          if (!error && data) {
+            setTeam(data);
+            setLoading(false);
+            return;
+          }
+        }
+        
+        // Fallback to direct query
         const { data, error } = await supabase
           .from('teams')
           .select('*')
@@ -32,31 +45,29 @@ const TeamDetail = () => {
         }
         
         if (data) {
-          // Type cast data to our DbTeam interface and then map to Team interface
-          const dbTeam = data as DbTeam;
-          
+          // Map the data to our Team interface
           const formattedTeam: Team = {
-            id: dbTeam.id,
-            name: dbTeam.name,
-            description: dbTeam.description || undefined,
-            owner_id: dbTeam.owner_id,
-            created_at: dbTeam.created_at,
-            updated_at: dbTeam.updated_at,
-            logo_url: dbTeam.logo_url || undefined,
+            id: data.id,
+            name: data.name,
+            description: data.description || undefined,
+            owner_id: data.owner_id,
+            created_at: data.created_at,
+            updated_at: data.updated_at,
+            logo_url: data.logo_url || undefined,
             slug: teamSlug,
-            team_code: dbTeam.team_code || undefined,
-            primary_color: dbTeam.primary_color || undefined,
-            secondary_color: dbTeam.secondary_color || undefined,
-            tertiary_color: dbTeam.tertiary_color || undefined,
-            founded_year: dbTeam.founded_year || undefined,
-            city: dbTeam.city || undefined,
-            state: dbTeam.state || undefined,
-            country: dbTeam.country || undefined,
-            stadium: dbTeam.stadium || undefined,
-            mascot: dbTeam.mascot || undefined,
-            league: dbTeam.league || undefined,
-            division: dbTeam.division || undefined,
-            is_active: dbTeam.is_active || false
+            team_code: data.team_code || undefined,
+            primary_color: data.primary_color || undefined,
+            secondary_color: data.secondary_color || undefined,
+            tertiary_color: data.tertiary_color || undefined,
+            founded_year: data.founded_year || undefined,
+            city: data.city || undefined,
+            state: data.state || undefined,
+            country: data.country || undefined,
+            stadium: data.stadium || undefined,
+            mascot: data.mascot || undefined,
+            league: data.league || undefined,
+            division: data.division || undefined,
+            is_active: data.is_active || false
           };
           
           setTeam(formattedTeam);
