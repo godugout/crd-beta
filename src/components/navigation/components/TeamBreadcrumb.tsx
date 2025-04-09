@@ -25,8 +25,8 @@ const TeamBreadcrumb: React.FC<TeamBreadcrumbProps> = ({ currentPage }) => {
         // Get team information from the database
         const { data, error } = await supabase
           .from('teams')
-          .select('name, primary_color')
-          .eq('team_code', teamSlug.toUpperCase())
+          .select('name')
+          .eq('id', teamSlug)
           .maybeSingle();
           
         if (error) {
@@ -43,7 +43,7 @@ const TeamBreadcrumb: React.FC<TeamBreadcrumbProps> = ({ currentPage }) => {
           // If we have valid data, use it
           setTeamInfo({
             name: data.name || teamSlug,
-            color: data.primary_color || undefined
+            color: undefined
           });
         } else {
           // Fallback to using the slug if no data found

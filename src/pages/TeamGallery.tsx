@@ -4,10 +4,22 @@ import PageLayout from '@/components/navigation/PageLayout';
 import { Button } from '@/components/ui/button';
 import { Users, Filter, Info, Calendar } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { Team, DbTeam } from '@/lib/types/TeamTypes';
 
-interface TeamDisplayData extends Team {
+interface TeamDisplayData {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
   memberCount?: number;
+  owner_id: string;
+  primary_color?: string;
+  secondary_color?: string;
+  founded_year?: number;
+  city?: string;
+  state?: string;
+  stadium?: string;
+  league?: string;
+  division?: string;
 }
 
 const TeamGallery = () => {
@@ -22,24 +34,12 @@ const TeamGallery = () => {
       setLoading(true);
       
       try {
-        // Build query based on filters
+        // Build query based on filters - only select fields that exist in the database
         let query = supabase.from('teams').select(`
-          id, name, description, owner_id, created_at, updated_at, 
-          logo_url, team_code, primary_color, secondary_color, 
-          tertiary_color, founded_year, city, state, country, 
-          stadium, league, division, is_active
+          id, name, description, owner_id, created_at, updated_at, logo_url
         `);
         
-        if (activeLeague !== 'all') {
-          query = query.eq('league', activeLeague);
-        }
-        
-        if (activeDivision !== 'all') {
-          query = query.eq('division', activeDivision);
-        }
-        
-        // Always include active teams
-        query = query.eq('is_active', true);
+        // Filters would need to be adjusted based on what fields actually exist
         
         const { data, error } = await query.order('name');
         
@@ -51,30 +51,23 @@ const TeamGallery = () => {
         }
         
         if (data && Array.isArray(data)) {
-          // Transform the data to match our interface
+          // Transform the data to match our interface with safe defaults
           const transformedTeams: TeamDisplayData[] = data.map(teamData => {
-            // Safely access properties, providing defaults for missing ones
             return {
               id: teamData.id,
               name: teamData.name,
-              slug: teamData.team_code ? teamData.team_code.toLowerCase() : teamData.name.toLowerCase().replace(/\s+/g, '-'),
+              slug: teamData.name.toLowerCase().replace(/\s+/g, '-'),
               description: teamData.description || '',
               owner_id: teamData.owner_id,
-              primary_color: teamData.primary_color || '#cccccc',
               memberCount: Math.floor(Math.random() * 1500) + 500, // Placeholder member count
-              secondary_color: teamData.secondary_color || undefined,
-              tertiary_color: teamData.tertiary_color || undefined,
-              founded_year: teamData.founded_year || undefined,
-              city: teamData.city || undefined,
-              state: teamData.state || undefined,
-              country: teamData.country || undefined,
-              stadium: teamData.stadium || undefined,
-              league: teamData.league || undefined,
-              division: teamData.division || undefined,
-              team_code: teamData.team_code || undefined,
-              created_at: teamData.created_at,
-              updated_at: teamData.updated_at,
-              logo_url: teamData.logo_url || undefined
+              primary_color: '#cccccc', // Default color
+              secondary_color: undefined,
+              founded_year: undefined,
+              city: undefined,
+              state: undefined,
+              stadium: undefined,
+              league: undefined,
+              division: undefined
             };
           });
           setTeams(transformedTeams);

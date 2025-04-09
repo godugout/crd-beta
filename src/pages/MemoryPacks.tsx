@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useCards } from '@/context/CardContext';
@@ -7,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Package, Plus } from 'lucide-react';
 import MemoryPacksSection from '@/components/card-showcase/MemoryPacksSection';
 import { supabase } from '@/integrations/supabase/client';
-import { teamOperations } from '@/lib/supabase';
 
 interface TeamInfo {
   primary_color?: string;
@@ -19,35 +17,15 @@ const MemoryPacks = () => {
   const { teamSlug } = useParams<{ teamSlug?: string }>();
   const [teamInfo, setTeamInfo] = useState<TeamInfo>({});
   
-  // If we have a team slug, fetch the team's details
   useEffect(() => {
     const fetchTeamInfo = async () => {
       if (!teamSlug) return;
       
       try {
-        if (teamOperations.getTeamBySlug) {
-          // Use the teamOperations utility if available
-          const { data, error } = await teamOperations.getTeamBySlug(teamSlug);
-          
-          if (error) {
-            console.error('Error fetching team info:', error);
-            return;
-          }
-          
-          if (data) {
-            setTeamInfo({
-              primary_color: data.primary_color,
-              name: data.name
-            });
-            return;
-          }
-        }
-        
-        // Fallback to direct query if teamOperations is not available
         const { data, error } = await supabase
           .from('teams')
-          .select('name, primary_color, secondary_color')
-          .eq('team_code', teamSlug.toUpperCase())
+          .select('name')
+          .eq('id', teamSlug)
           .maybeSingle();
           
         if (error) {
@@ -57,8 +35,8 @@ const MemoryPacks = () => {
           
         if (data) {
           setTeamInfo({
-            primary_color: data.primary_color || undefined,
-            name: data.name
+            name: data.name,
+            primary_color: undefined
           });
         }
       } catch (err) {
@@ -130,16 +108,13 @@ const MemoryPacks = () => {
   );
 };
 
-// Helper function to determine contrast color (white or black) for a given background color
 const getContrastColor = (hexColor?: string): string => {
   if (!hexColor || hexColor.length < 7) return '#ffffff';
   
-  // Convert hex to RGB
   const r = parseInt(hexColor.substring(1, 3), 16);
   const g = parseInt(hexColor.substring(3, 5), 16);
   const b = parseInt(hexColor.substring(5, 7), 16);
   
-  // Calculate luminance (perceived brightness)
   const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
   return luminance > 0.5 ? '#000000' : '#ffffff';
 };

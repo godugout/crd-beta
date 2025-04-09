@@ -1,18 +1,27 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import PageLayout from '@/components/navigation/PageLayout';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
-import { Team } from '@/lib/types/TeamTypes';
 import { Users, Calendar, MapPin, Library, Pencil, Trophy, Settings } from 'lucide-react';
 import TeamBreadcrumb from '@/components/navigation/components/TeamBreadcrumb';
-import { teamOperations } from '@/lib/supabase';
+
+interface TeamData {
+  id: string;
+  name: string;
+  description?: string;
+  owner_id: string;
+  created_at?: string;
+  updated_at?: string;
+  logo_url?: string;
+  slug?: string;
+  primaryColor?: string;
+}
 
 const TeamDetail = () => {
   const { teamSlug } = useParams<{ teamSlug?: string }>();
-  const [team, setTeam] = useState<Team | null>(null);
+  const [team, setTeam] = useState<TeamData | null>(null);
   const [loading, setLoading] = useState(true);
   
   useEffect(() => {
@@ -20,22 +29,11 @@ const TeamDetail = () => {
       if (!teamSlug) return;
       
       try {
-        // First try to use the teamOperations utility
-        if (teamOperations.getTeamBySlug) {
-          const { data, error } = await teamOperations.getTeamBySlug(teamSlug);
-          
-          if (!error && data) {
-            setTeam(data);
-            setLoading(false);
-            return;
-          }
-        }
-        
-        // Fallback to direct query
+        // Fetch basic team information only
         const { data, error } = await supabase
           .from('teams')
-          .select('*')
-          .eq('team_code', teamSlug.toUpperCase())
+          .select('id, name, description, owner_id, created_at, updated_at, logo_url')
+          .eq('id', teamSlug)
           .maybeSingle();
         
         if (error) {
@@ -46,7 +44,7 @@ const TeamDetail = () => {
         
         if (data) {
           // Map the data to our Team interface
-          const formattedTeam: Team = {
+          const formattedTeam: TeamData = {
             id: data.id,
             name: data.name,
             description: data.description || undefined,
@@ -55,19 +53,7 @@ const TeamDetail = () => {
             updated_at: data.updated_at,
             logo_url: data.logo_url || undefined,
             slug: teamSlug,
-            team_code: data.team_code || undefined,
-            primary_color: data.primary_color || undefined,
-            secondary_color: data.secondary_color || undefined,
-            tertiary_color: data.tertiary_color || undefined,
-            founded_year: data.founded_year || undefined,
-            city: data.city || undefined,
-            state: data.state || undefined,
-            country: data.country || undefined,
-            stadium: data.stadium || undefined,
-            mascot: data.mascot || undefined,
-            league: data.league || undefined,
-            division: data.division || undefined,
-            is_active: data.is_active || false
+            primaryColor: '#333333' // Default color
           };
           
           setTeam(formattedTeam);
@@ -83,16 +69,16 @@ const TeamDetail = () => {
   }, [teamSlug]);
   
   // Fallback for when team data is not available
-  const fallbackTeam: Team = {
+  const fallbackTeam: TeamData = {
     id: '1',
     name: teamSlug ? teamSlug.charAt(0).toUpperCase() + teamSlug.slice(1) : 'Team',
     description: 'Team details are currently unavailable.',
     owner_id: 'system',
-    primary_color: '#333333'
+    primaryColor: '#333333'
   };
   
   const displayTeam = team || fallbackTeam;
-  const headerBgColor = displayTeam.primary_color || '#333';
+  const headerBgColor = displayTeam.primaryColor || '#333';
   const textColor = getContrastColor(headerBgColor);
   
   return (
@@ -215,7 +201,7 @@ const TeamDetail = () => {
                         <Library className="h-12 w-12 mx-auto text-gray-300 mb-2" />
                         <p>No memories have been shared yet.</p>
                         <Button asChild className="mt-4" 
-                          style={{ backgroundColor: displayTeam.primary_color || undefined }}
+                          style={{ backgroundColor: displayTeam.primaryColor || undefined }}
                         >
                           <Link to={`/teams/${teamSlug}/memories/new`}>Share a Memory</Link>
                         </Button>
@@ -229,7 +215,7 @@ const TeamDetail = () => {
                       <h2 className="text-lg font-medium mb-4">Team Actions</h2>
                       <div className="space-y-3">
                         <Button asChild className="w-full" 
-                          style={{ backgroundColor: displayTeam.primary_color || undefined }}
+                          style={{ backgroundColor: displayTeam.primaryColor || undefined }}
                         >
                           <Link to={`/teams/${teamSlug}/memories/new`}>
                             <Pencil className="mr-2 h-4 w-4" />
@@ -268,7 +254,7 @@ const TeamDetail = () => {
                   <h3 className="text-xl font-medium mb-2">No Memories Yet</h3>
                   <p className="text-gray-500 mb-6">Be the first to share a memory with this team</p>
                   <Button asChild 
-                    style={{ backgroundColor: displayTeam.primary_color || undefined }}
+                    style={{ backgroundColor: displayTeam.primaryColor || undefined }}
                   >
                     <Link to={`/teams/${teamSlug}/memories/new`}>Share a Memory</Link>
                   </Button>
@@ -280,7 +266,7 @@ const TeamDetail = () => {
                   <h3 className="text-xl font-medium mb-2">Memory Packs</h3>
                   <p className="text-gray-500 mb-6">No memory packs available for this team yet</p>
                   <Button asChild 
-                    style={{ backgroundColor: displayTeam.primary_color || undefined }}
+                    style={{ backgroundColor: displayTeam.primaryColor || undefined }}
                   >
                     <Link to={`/teams/${teamSlug}/packs/create`}>Create Memory Pack</Link>
                   </Button>
@@ -293,7 +279,7 @@ const TeamDetail = () => {
                   <h3 className="text-xl font-medium mb-2">Team Members</h3>
                   <p className="text-gray-500 mb-6">This team doesn't have any members yet</p>
                   <Button asChild 
-                    style={{ backgroundColor: displayTeam.primary_color || undefined }}
+                    style={{ backgroundColor: displayTeam.primaryColor || undefined }}
                   >
                     <Link to={`/teams/${teamSlug}/invite`}>Invite Members</Link>
                   </Button>

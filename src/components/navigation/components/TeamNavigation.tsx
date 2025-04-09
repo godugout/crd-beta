@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
@@ -31,7 +32,7 @@ const TeamNavigation: React.FC<TeamNavigationProps> = ({ activeSection }) => {
       try {
         const { data, error } = await supabase
           .from('teams')
-          .select('id, name, team_code, primary_color')
+          .select('id, name')
           .eq('is_active', true)
           .order('name')
           .limit(4);
@@ -48,8 +49,8 @@ const TeamNavigation: React.FC<TeamNavigationProps> = ({ activeSection }) => {
           const teamData = data.map(team => ({
             id: team.id,
             name: team.name,
-            slug: team.team_code ? team.team_code.toLowerCase() : team.name.toLowerCase().replace(/\s+/g, '-'),
-            primary_color: team.primary_color || undefined
+            slug: team.name.toLowerCase().replace(/\s+/g, '-'),
+            primary_color: undefined
           }));
           
           setTeams(teamData);
