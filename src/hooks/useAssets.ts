@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { assetApi } from '@/lib/api/assetApi';
 import { DigitalAsset, AssetUploadOptions } from '@/lib/dam/assetService';
+import React, { useState, useCallback } from 'react';
 
 export const ASSET_QUERY_KEYS = {
   all: ['assets'] as const,
@@ -69,9 +70,9 @@ export function useUpdateAssetTags() {
 
 // Custom hook for managing selected assets
 export function useSelectedAssets() {
-  const [selectedAssets, setSelectedAssets] = React.useState<DigitalAsset[]>([]);
+  const [selectedAssets, setSelectedAssets] = useState<DigitalAsset[]>([]);
   
-  const toggleSelect = React.useCallback((asset: DigitalAsset) => {
+  const toggleSelect = useCallback((asset: DigitalAsset) => {
     setSelectedAssets(prev => {
       const isSelected = prev.some(a => a.id === asset.id);
       return isSelected 
@@ -80,7 +81,7 @@ export function useSelectedAssets() {
     });
   }, []);
   
-  const clearSelection = React.useCallback(() => {
+  const clearSelection = useCallback(() => {
     setSelectedAssets([]);
   }, []);
   
@@ -88,7 +89,7 @@ export function useSelectedAssets() {
     selectedAssets,
     toggleSelect,
     clearSelection,
-    isSelected: React.useCallback((assetId: string) => 
+    isSelected: useCallback((assetId: string) => 
       selectedAssets.some(asset => asset.id === assetId), [selectedAssets])
   };
 }
