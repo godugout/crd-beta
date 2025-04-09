@@ -61,30 +61,43 @@ export const assetService = {
         .from('card-images')
         .getPublicUrl(filePath);
         
+      const publicUrl = urlData?.publicUrl || '';
+      
+      // Get the current user ID (required by the schema)
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        console.error('User must be authenticated to upload assets');
+        toast.error('Authentication required to upload files');
+        return null;
+      }
+      
       // 4. Create asset record in database
       const insertData = {
         title: options.title || file.name,
-        description: options.description,
+        description: options.description || null,
         mime_type: file.type,
         storage_path: filePath,
         file_size: file.size,
         tags: options.tags || [],
         metadata: options.metadata || {},
         original_filename: file.name,
-        card_id: options.cardId,
-        collection_id: options.collectionId,
-        asset_type: file.type.startsWith('image/') ? 'image' : 'document'
+        user_id: user.id, // Required field from schema
       };
       
-      // Add the public URL separately if it exists
-      const publicUrl = urlData?.publicUrl || '';
+      // Add optional fields if they exist
+      if (options.cardId) {
+        Object.assign(insertData, { card_id: options.cardId });
+      }
+      
+      if (options.collectionId) {
+        Object.assign(insertData, { collection_id: options.collectionId });
+      }
       
       // Create the database record
       const { data: asset, error: dbError } = await supabase
         .from('digital_assets')
-        .insert({
-          ...insertData
-        })
+        .insert(insertData)
         .select('*')
         .single();
       
@@ -166,7 +179,7 @@ export const assetService = {
           description: asset.description || undefined,
           mimeType: asset.mime_type,
           storagePath: asset.storage_path,
-          publicUrl: urlData?.publicUrl || '', // Use the storage URL
+          publicUrl: urlData?.publicUrl || '', 
           thumbnailPath: asset.thumbnail_path || undefined,
           fileSize: asset.file_size,
           width: asset.width || undefined,
