@@ -15,7 +15,7 @@ import { MobileTouchButton } from '@/components/ui/mobile-controls';
 import { 
   Home, 
   Image, 
-  PackageIcon,
+  Package,
   Layers, 
   PlusSquare,
   Users,
@@ -48,7 +48,7 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({ isOpen, onClose }) 
   const location = useLocation();
   const { user, signOut } = useAuth();
   
-  // Define navigation groups for better organization with corrected paths
+  // Define navigation groups for better organization with consistent paths
   const navigationGroups: NavigationGroup[] = [
     {
       title: "MAIN",
@@ -56,23 +56,30 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({ isOpen, onClose }) 
         { title: 'Home', path: '/', icon: Home },
         { title: 'Cards', path: '/cards', icon: Image },
         { title: 'Collections', path: '/collections', icon: Layers },
-        { title: 'Media Library', path: '/media-library', icon: Image },
-        { title: 'Memory Packs', path: '/memory-packs', icon: PackageIcon },
+        { title: 'Memory Packs', path: '/packs', icon: Package },
+        { title: 'Teams', path: '/teams', icon: Users },
       ]
     },
     {
       title: "CREATE",
       items: [
         { title: 'Create Card', path: '/cards/create', icon: PlusSquare },
-        { title: 'Create Collection', path: '/collections/new', icon: PlusSquare },
-        { title: 'Batch Operations', path: '/batch-operations', icon: Layers },
+        { title: 'Create Collection', path: '/collections/create', icon: PlusSquare },
+        { title: 'Create Memory Pack', path: '/packs/create', icon: PlusSquare },
+        { title: 'Batch Operations', path: '/cards/batch', icon: Layers },
       ]
     },
     {
       title: "TEAMS",
       items: [
-        { title: 'Oakland A\'s', path: '/teams/oakland/memories', icon: Users },
+        { title: 'Oakland A\'s', path: '/teams/oakland', icon: Users },
         { title: 'Game Day Mode', path: '/game-day', icon: PlayCircle, highlight: true },
+      ]
+    },
+    {
+      title: "MEDIA",
+      items: [
+        { title: 'Media Library', path: '/media-library', icon: Image },
       ]
     },
     {
@@ -86,7 +93,10 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({ isOpen, onClose }) 
 
   // Check if path is active
   const isActive = (path: string) => {
-    return location.pathname === path;
+    if (path === '/') {
+      return location.pathname === '/';
+    }
+    return location.pathname.startsWith(path);
   };
 
   // Handle navigation and closing menu
@@ -99,6 +109,23 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({ isOpen, onClose }) 
     await signOut();
     onClose();
   };
+  
+  // Get closest parent section for current location
+  const getCurrentSection = (): string => {
+    if (location.pathname === '/') return 'MAIN';
+    
+    for (const group of navigationGroups) {
+      for (const item of group.items) {
+        if (location.pathname.startsWith(item.path) && item.path !== '/') {
+          return group.title;
+        }
+      }
+    }
+    
+    return 'MAIN';
+  };
+  
+  const currentSection = getCurrentSection();
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
@@ -124,7 +151,11 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({ isOpen, onClose }) 
           {/* Navigation sections */}
           <div className="flex-1 overflow-auto py-2">
             {navigationGroups.map((group, groupIndex) => (
-              <div key={group.title} className="px-2 mb-4">
+              <div key={group.title} className={cn(
+                "px-2 mb-4",
+                // Highlight current section
+                group.title === currentSection ? "bg-muted/50 rounded-md" : ""
+              )}>
                 <p className="px-4 py-2 text-xs font-semibold text-muted-foreground">{group.title}</p>
                 
                 {group.items.map((item) => (

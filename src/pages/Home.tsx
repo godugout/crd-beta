@@ -44,7 +44,7 @@ const Home = () => {
             <h2 className="text-xl font-bold mb-3">Memory Packs</h2>
             <p className="mb-4">Explore themed memory packs</p>
             <Button asChild variant="outline" className="w-full">
-              <Link to="/memory-packs">Browse Packs</Link>
+              <Link to="/packs">Browse Packs</Link>
             </Button>
           </div>
         </div>

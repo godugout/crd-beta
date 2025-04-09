@@ -9,7 +9,7 @@ import { useMediaQuery } from '@/hooks/useMediaQuery';
 import NavigationSection from './components/NavigationSection';
 import TeamNavigation from './components/TeamNavigation';
 import GameDayButton from './components/GameDayButton';
-import { cardsNavigation, collectionsNavigation, featuresNavigation } from './components/NavigationItems';
+import { cardsNavigation, collectionsNavigation, featuresNavigation, teamsNavigation } from './components/NavigationItems';
 
 const MainNavigation: React.FC = () => {
   const isMobile = useMediaQuery('(max-width: 768px)');

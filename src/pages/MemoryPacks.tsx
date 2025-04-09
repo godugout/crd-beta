@@ -16,7 +16,11 @@ const MemoryPacks = () => {
   };
   
   return (
-    <PageLayout title="Memory Packs" description="Browse and collect memory packs">
+    <PageLayout 
+      title="Memory Packs" 
+      description="Browse and collect themed memory packs"
+      canonicalPath="/packs"
+    >
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">
           <div>
@@ -24,7 +28,7 @@ const MemoryPacks = () => {
             <p className="text-gray-600 mt-2">Browse and collect themed memory packs</p>
           </div>
           <Button asChild>
-            <Link to="/create-memory-pack">
+            <Link to="/packs/create">
               <Plus className="mr-2 h-4 w-4" /> Create Pack
             </Link>
           </Button>
@@ -38,7 +42,7 @@ const MemoryPacks = () => {
             <h2 className="mt-4 text-xl font-medium">No memory packs yet</h2>
             <p className="mt-2 text-gray-500">Create your first memory pack to get started</p>
             <Button asChild className="mt-4">
-              <Link to="/create-memory-pack">Create Memory Pack</Link>
+              <Link to="/packs/create">Create Memory Pack</Link>
             </Button>
           </div>
         ) : (

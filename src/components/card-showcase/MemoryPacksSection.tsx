@@ -38,7 +38,7 @@ const MemoryPacksSection: React.FC<MemoryPacksSectionProps> = ({
         {packs.map(pack => (
           <Link 
             key={pack.id} 
-            to={`/memory-packs/${pack.id}`}
+            to={`/packs/${pack.id}`}
             className="rounded-lg overflow-hidden cursor-pointer hover:shadow-lg transition-shadow bg-gradient-to-br from-green-50 to-blue-100 border border-blue-200"
             onClick={() => handleViewPack(pack.id)}
           >
