@@ -1,20 +1,34 @@
 
 import React from 'react';
-import CardMedia from './CardMedia';
-import EmptyState from './EmptyState';
 import { Card } from '@/lib/types';
 import { cn } from '@/lib/utils';
-import { useMediaQuery } from '@/hooks/useMediaQuery';
+import CardMedia from './CardMedia';
+import EmptyState from './EmptyState';
 
 export interface CardGridProps {
   cards: Card[];
-  cardEffects: string[];
-  onCardClick: (id: string) => void;
+  onCardClick: (cardId: string) => void;
+  cardEffects?: string[];
   className?: string;
+  isLoading?: boolean;
 }
 
-export const CardGrid: React.FC<CardGridProps> = ({ cards, cardEffects, onCardClick, className }) => {
-  const isMobile = useMediaQuery('(max-width: 640px)');
+const CardGrid: React.FC<CardGridProps> = ({ 
+  cards, 
+  cardEffects = [], 
+  onCardClick, 
+  className = '',
+  isLoading = false
+}) => {
+  if (isLoading) {
+    return (
+      <div className={cn(`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 ${className}`)}>
+        {[...Array(8)].map((_, index) => (
+          <div key={index} className="aspect-[3/4] bg-gray-100 rounded-lg animate-pulse"></div>
+        ))}
+      </div>
+    );
+  }
   
   if (cards.length === 0) {
     return <EmptyState 
@@ -28,13 +42,13 @@ export const CardGrid: React.FC<CardGridProps> = ({ cards, cardEffects, onCardCl
   }
 
   return (
-    <div className={cn("grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4", className)}>
+    <div className={cn(`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 ${className}`)}>
       {cards.map((card) => (
         <CardMedia
           key={card.id}
           card={card}
           onView={() => onCardClick(card.id)}
-          className=""
+          className="cursor-pointer hover:shadow-lg transition-all duration-300 hover:translate-y-[-4px]"
         />
       ))}
     </div>
