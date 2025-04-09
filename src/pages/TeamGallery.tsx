@@ -23,7 +23,12 @@ const TeamGallery = () => {
       
       try {
         // Build query based on filters
-        let query = supabase.from('teams').select('*');
+        let query = supabase.from('teams').select(`
+          id, name, description, owner_id, created_at, updated_at, 
+          logo_url, team_code, primary_color, secondary_color, 
+          tertiary_color, founded_year, city, state, country, 
+          stadium, league, division, is_active
+        `);
         
         if (activeLeague !== 'all') {
           query = query.eq('league', activeLeague);
@@ -43,7 +48,30 @@ const TeamGallery = () => {
           setTeams([]);
         } else if (data) {
           // Transform the data to match our interface
-          const transformedTeams: TeamDisplayData[] = data.map(team => ({
+          type TeamQueryResult = {
+            id: string;
+            name: string;
+            description: string | null;
+            owner_id: string;
+            created_at: string;
+            updated_at: string;
+            logo_url: string | null;
+            team_code: string | null;
+            primary_color: string | null;
+            secondary_color: string | null;
+            tertiary_color: string | null;
+            founded_year: number | null;
+            city: string | null;
+            state: string | null;
+            country: string | null;
+            stadium: string | null;
+            league: string | null;
+            division: string | null;
+            is_active: boolean | null;
+          };
+          
+          const teamsData = data as TeamQueryResult[];
+          const transformedTeams: TeamDisplayData[] = teamsData.map(team => ({
             id: team.id,
             name: team.name,
             slug: team.team_code ? team.team_code.toLowerCase() : team.name.toLowerCase().replace(/\s+/g, '-'),
@@ -51,19 +79,19 @@ const TeamGallery = () => {
             owner_id: team.owner_id,
             primary_color: team.primary_color || '#cccccc',
             memberCount: Math.floor(Math.random() * 1500) + 500, // Placeholder member count
-            secondary_color: team.secondary_color,
-            tertiary_color: team.tertiary_color,
-            founded_year: team.founded_year,
-            city: team.city,
-            state: team.state,
-            country: team.country,
-            stadium: team.stadium,
-            league: team.league,
-            division: team.division,
-            team_code: team.team_code,
+            secondary_color: team.secondary_color || undefined,
+            tertiary_color: team.tertiary_color || undefined,
+            founded_year: team.founded_year || undefined,
+            city: team.city || undefined,
+            state: team.state || undefined,
+            country: team.country || undefined,
+            stadium: team.stadium || undefined,
+            league: team.league || undefined,
+            division: team.division || undefined,
+            team_code: team.team_code || undefined,
             created_at: team.created_at,
             updated_at: team.updated_at,
-            logo_url: team.logo_url
+            logo_url: team.logo_url || undefined
           }));
           setTeams(transformedTeams);
         }

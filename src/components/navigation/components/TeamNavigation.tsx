@@ -35,7 +35,16 @@ const TeamNavigation: React.FC<TeamNavigationProps> = ({ activeSection }) => {
           console.error('Error fetching team navigation:', error);
           setTeams([]);
         } else if (data) {
-          setTeams(data.map(team => ({
+          // Cast data to avoid type issues
+          type QueryResult = {
+            id: string;
+            name: string;
+            team_code: string | null;
+            primary_color: string | null;
+          };
+          
+          const teamData = data as QueryResult[];
+          setTeams(teamData.map(team => ({
             id: team.id,
             name: team.name,
             slug: team.team_code ? team.team_code.toLowerCase() : team.name.toLowerCase().replace(/\s+/g, '-'),

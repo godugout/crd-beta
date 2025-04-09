@@ -1,58 +1,95 @@
 
-import React from 'react';
-import ResponsiveLayout from '@/components/layout/ResponsiveLayout';
+import React, { ReactNode, useState } from 'react';
+import AppHeader from './AppHeader';
 import BreadcrumbNav from './Breadcrumb';
-import { cn } from '@/lib/utils';
-import MetaTags from '@/components/shared/MetaTags';
+import MobileNavigation from './MobileNavigation';
+import MobileBottomNav from './MobileBottomNav';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
 
 interface PageLayoutProps {
-  children: React.ReactNode;
-  className?: string;
-  showBreadcrumbs?: boolean;
-  title?: string;
+  title: string;
   description?: string;
-  imageUrl?: string;
-  type?: 'website' | 'article' | 'profile';
-  canonicalPath?: string;
+  children: ReactNode;
   fullWidth?: boolean;
-  maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '7xl';
+  hideBreadcrumb?: boolean;
+  canonicalPath?: string;
 }
 
 const PageLayout: React.FC<PageLayoutProps> = ({ 
+  title, 
+  description, 
   children, 
-  className,
-  showBreadcrumbs = true,
-  title,
-  description,
-  imageUrl,
-  type = 'website',
-  canonicalPath,
   fullWidth = false,
-  maxWidth = '7xl'
+  hideBreadcrumb = false,
+  canonicalPath 
 }) => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const isMobile = useMediaQuery('(max-width: 768px)');
+
+  const handleOpenMenu = () => {
+    setIsMenuOpen(true);
+  };
+
+  const handleCloseMenu = () => {
+    setIsMenuOpen(false);
+  };
+
+  // Update document title when component mounts
+  React.useEffect(() => {
+    const previousTitle = document.title;
+    document.title = title ? `${title} | CardShow` : 'CardShow';
+    
+    // Set meta description if provided
+    let metaDescription = document.querySelector('meta[name="description"]');
+    if (description) {
+      if (!metaDescription) {
+        metaDescription = document.createElement('meta');
+        metaDescription.setAttribute('name', 'description');
+        document.head.appendChild(metaDescription);
+      }
+      metaDescription.setAttribute('content', description);
+    }
+    
+    // Set canonical link if provided
+    let canonicalLink = document.querySelector('link[rel="canonical"]');
+    if (canonicalPath) {
+      if (!canonicalLink) {
+        canonicalLink = document.createElement('link');
+        canonicalLink.setAttribute('rel', 'canonical');
+        document.head.appendChild(canonicalLink);
+      }
+      // Base URL handling
+      const baseUrl = window.location.origin;
+      canonicalLink.setAttribute('href', `${baseUrl}${canonicalPath}`);
+    }
+    
+    return () => {
+      document.title = previousTitle;
+      
+      // Clean up canonical link when component unmounts
+      if (canonicalLink && canonicalPath) {
+        document.head.removeChild(canonicalLink);
+      }
+    };
+  }, [title, description, canonicalPath]);
+
   return (
-    <ResponsiveLayout 
-      className={className}
-      fullWidth={fullWidth}
-      maxWidth={maxWidth}
-    >
-      {/* Add MetaTags for improved sharing and SEO */}
-      <MetaTags
-        title={title}
-        description={description}
-        imageUrl={imageUrl}
-        type={type}
-        canonicalPath={canonicalPath}
-      />
+    <div className="min-h-screen flex flex-col">
+      <AppHeader />
       
-      {showBreadcrumbs && !fullWidth && (
-        <div className="mb-4">
-          <BreadcrumbNav />
-        </div>
+      {!hideBreadcrumb && <BreadcrumbNav />}
+      
+      <main className={`flex-1 ${fullWidth ? '' : 'container mx-auto px-4 py-6'}`}>
+        {children}
+      </main>
+      
+      {/* Mobile menu and bottom navigation */}
+      <MobileNavigation isOpen={isMenuOpen} onClose={handleCloseMenu} />
+      
+      {isMobile && (
+        <MobileBottomNav onOpenMenu={handleOpenMenu} />
       )}
-      
-      {children}
-    </ResponsiveLayout>
+    </div>
   );
 };
 

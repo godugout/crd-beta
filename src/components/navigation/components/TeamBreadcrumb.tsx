@@ -22,6 +22,7 @@ const TeamBreadcrumb: React.FC<TeamBreadcrumbProps> = ({ currentPage }) => {
       if (!teamSlug) return;
       
       try {
+        // Make sure we're only selecting the columns we need
         const { data, error } = await supabase
           .from('teams')
           .select('name, primary_color')

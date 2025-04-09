@@ -1,93 +1,66 @@
 
 import React, { useEffect, useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { PlusCircle, Users } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import OaklandMemoryGallery from '@/components/oakland/OaklandMemoryGallery';
-import MetaTags from '@/components/shared/MetaTags';
-import TeamBreadcrumb from '@/components/navigation/components/TeamBreadcrumb';
+import { useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 
-interface TeamColors {
-  primaryColor: string;
-  secondaryColor?: string;
+interface TeamInfo {
+  name?: string;
+  primary_color?: string;
+  secondary_color?: string;
 }
 
-const OaklandMemories: React.FC = () => {
-  const [teamData, setTeamData] = useState<TeamColors>({
-    primaryColor: '#006341',
-  });
+function OaklandMemories() {
+  const { teamSlug } = useParams<{ teamSlug?: string }>();
+  const [teamInfo, setTeamInfo] = useState<TeamInfo>({});
   
+  // If we have a team slug, fetch the team's details
   useEffect(() => {
-    const fetchTeamColors = async () => {
+    const fetchTeamInfo = async () => {
+      if (!teamSlug) return;
+      
       try {
         const { data, error } = await supabase
           .from('teams')
-          .select('primary_color, secondary_color')
-          .eq('team_code', 'OAK')
+          .select('name, primary_color, secondary_color')
+          .eq('team_code', teamSlug.toUpperCase())
           .single();
           
         if (error) {
-          console.error('Error fetching team colors:', error);
+          console.error('Error fetching team info:', error);
           return;
         }
-        
+          
         if (data) {
-          setTeamData({
-            primaryColor: data.primary_color || '#006341',
-            secondaryColor: data.secondary_color || '#EFB21E',
+          setTeamInfo({
+            name: data.name,
+            primary_color: data.primary_color || undefined,
+            secondary_color: data.secondary_color || undefined
           });
         }
       } catch (err) {
-        console.error('Error:', err);
+        console.error('Error fetching team info:', err);
       }
     };
     
-    fetchTeamColors();
-  }, []);
+    fetchTeamInfo();
+  }, [teamSlug]);
   
   return (
-    <>
-      <MetaTags 
-        title="Oakland A's Memories"
-        description="Explore fan memories and experiences from Oakland Athletics baseball games."
-        canonicalPath="/teams/oakland/memories"
-      />
-      
-      <TeamBreadcrumb currentPage="Memories" />
-      
-      <div className="container mx-auto max-w-6xl px-4 pt-8 pb-24">
-        <div className="py-6">
-          <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
-            <div>
-              <h1 className="text-3xl font-bold" style={{ color: teamData.primaryColor }}>Oakland A's Memories</h1>
-              <p className="text-gray-600">
-                Preserve your Oakland Athletics baseball memories from 1968 to today
-              </p>
-            </div>
-            
-            <div className="flex items-center gap-3 flex-wrap">
-              <Button asChild style={{ backgroundColor: teamData.primaryColor, color: '#fff' }}>
-                <Link to="/teams/oakland/create">
-                  <PlusCircle className="h-4 w-4 mr-2" />
-                  Create Memory
-                </Link>
-              </Button>
-              
-              <Button asChild variant="outline" style={{ borderColor: teamData.primaryColor, color: teamData.primaryColor }}>
-                <Link to="/group-memory-creator">
-                  <Users className="h-4 w-4 mr-2" />
-                  Group Memory
-                </Link>
-              </Button>
-            </div>
+    <div>
+      <h1>Oakland Memories Page</h1>
+      {teamInfo.name && (
+        <div>
+          <p>Team: {teamInfo.name}</p>
+          <div style={{ 
+            backgroundColor: teamInfo.primary_color || '#ccc',
+            color: teamInfo.secondary_color || '#000'
+          }}>
+            Team Colors Sample
           </div>
-          
-          <OaklandMemoryGallery />
         </div>
-      </div>
-    </>
+      )}
+    </div>
   );
-};
+}
 
 export default OaklandMemories;
