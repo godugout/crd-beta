@@ -76,7 +76,7 @@ const GameDayMode = () => {
           offlineItemsCount={offlineItems.length}
         />
         
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <Tabs value={activeTab}>
           <TabsContent value="capture">
             <QuickCapture 
               stadiumContext={nearbyStadium} 

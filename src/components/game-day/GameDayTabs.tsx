@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 
 interface GameDayTabsProps {
@@ -15,18 +15,20 @@ const GameDayTabs: React.FC<GameDayTabsProps> = ({
   offlineItemsCount
 }) => {
   return (
-    <TabsList className="grid grid-cols-3 mb-4">
-      <TabsTrigger value="capture">Capture</TabsTrigger>
-      <TabsTrigger value="gameinfo">Game Info</TabsTrigger>
-      <TabsTrigger value="saved">
-        Saved
-        {offlineItemsCount > 0 && (
-          <Badge variant="destructive" className="ml-1 h-5 w-5 p-0 flex items-center justify-center">
-            {offlineItemsCount}
-          </Badge>
-        )}
-      </TabsTrigger>
-    </TabsList>
+    <Tabs value={activeTab} onValueChange={setActiveTab}>
+      <TabsList className="grid grid-cols-3 mb-4">
+        <TabsTrigger value="capture">Capture</TabsTrigger>
+        <TabsTrigger value="gameinfo">Game Info</TabsTrigger>
+        <TabsTrigger value="saved">
+          Saved
+          {offlineItemsCount > 0 && (
+            <Badge variant="destructive" className="ml-1 h-5 w-5 p-0 flex items-center justify-center">
+              {offlineItemsCount}
+            </Badge>
+          )}
+        </TabsTrigger>
+      </TabsList>
+    </Tabs>
   );
 };
 

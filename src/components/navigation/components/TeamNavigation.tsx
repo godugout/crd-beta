@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
@@ -52,14 +51,12 @@ const TeamNavigation: React.FC<TeamNavigationProps> = ({ activeSection }) => {
           
         if (teamData && Array.isArray(teamData)) {
           // Map the raw data to our TeamNavigationItem format
-          const mappedTeams: TeamNavigationItem[] = teamData.map((team: TeamRecord) => {
-            return {
-              id: team.id || '',
-              name: team.name || '',
-              slug: team.name ? team.name.toLowerCase().replace(/\s+/g, '-') : '',
-              primary_color: undefined
-            };
-          });
+          const mappedTeams: TeamNavigationItem[] = teamData.map((team: TeamRecord) => ({
+            id: team.id || '',
+            name: team.name || '',
+            slug: team.name ? team.name.toLowerCase().replace(/\s+/g, '-') : '',
+            primary_color: undefined
+          }));
           
           setTeams(mappedTeams);
         } else {
