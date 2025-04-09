@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 
 // Stadium location data
@@ -94,7 +95,7 @@ export const useLocationService = () => {
   const [nearbyStadium, setNearbyStadium] = useState<any>(null);
   const [stadiumSection, setStadiumSection] = useState<string | null>(null);
   const [isLocating, setIsLocating] = useState(false);
-  const [locationError, setLocationError] = useState<string | null>(null);
+  const [locationError, setLocationError] = useState<Error | null>(null);
 
   useEffect(() => {
     // For demo purposes, let's simulate finding the Coliseum location
@@ -151,13 +152,13 @@ export const useLocationService = () => {
             setIsLocating(false);
           },
           (error) => {
-            setLocationError(error.message);
+            setLocationError(error);
             setIsLocating(false);
           },
           { enableHighAccuracy: true }
         );
       } else {
-        setLocationError('Geolocation is not supported by your browser');
+        setLocationError(new Error('Geolocation is not supported by your browser'));
         setIsLocating(false);
       }
     };
