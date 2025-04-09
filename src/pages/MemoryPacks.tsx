@@ -33,8 +33,8 @@ const MemoryPacks = () => {
           
         if (!error && data) {
           setTeamInfo({
-            primary_color: data.primary_color,
-            name: data.name
+            primary_color: data.primary_color || undefined,
+            name: data.name || undefined
           });
         } else {
           console.error('Error fetching team info:', error);

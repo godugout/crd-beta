@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import PageLayout from '@/components/navigation/PageLayout';
@@ -6,9 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Users, Filter, Info, Calendar } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Team } from '@/lib/types/TeamTypes';
-import { Database } from '@/integrations/supabase/types';
-
-type TeamRow = Database['public']['Tables']['teams']['Row'];
 
 const TeamGallery = () => {
   const [teams, setTeams] = useState<Team[]>([]);
