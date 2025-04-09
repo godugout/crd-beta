@@ -34,7 +34,7 @@ const TeamNavigation: React.FC<TeamNavigationProps> = ({ showLabel = true }) => 
         
         if (data) {
           // Use a default primary_color since the column doesn't exist
-          const teamsWithColor = data.map(team => ({
+          const teamsWithColor: Team[] = data.map(team => ({
             ...team,
             primary_color: '#888'
           }));
