@@ -48,47 +48,36 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({ isOpen, onClose }) 
   const location = useLocation();
   const { user, signOut } = useAuth();
   
-  // Define navigation groups for better organization
+  // Define navigation groups for better organization with corrected paths
   const navigationGroups: NavigationGroup[] = [
     {
       title: "MAIN",
       items: [
         { title: 'Home', path: '/', icon: Home },
-        { title: 'Cards', path: '/cards/gallery', icon: Image },
+        { title: 'Cards', path: '/cards', icon: Image },
         { title: 'Collections', path: '/collections', icon: Layers },
-        { title: 'Memory Packs', path: '/packs', icon: PackageIcon },
+        { title: 'Media Library', path: '/media-library', icon: Image },
       ]
     },
     {
       title: "CREATE",
       items: [
         { title: 'Create Card', path: '/cards/create', icon: PlusSquare },
-        { title: 'Create Collection', path: '/collections/new', icon: Layers },
+        { title: 'Batch Operations', path: '/batch-operations', icon: Layers },
       ]
     },
     {
       title: "TEAMS",
       items: [
-        { title: 'Oakland A\'s', path: '/teams/oakland', icon: Users },
-        { title: 'Game Day Mode', path: '/features/gameday', icon: PlayCircle, highlight: true },
+        { title: 'Oakland A\'s', path: '/teams/oakland/memories', icon: Users },
+        { title: 'Game Day Mode', path: '/game-day', icon: PlayCircle, highlight: true },
       ]
     },
     {
       title: "LABS",
       items: [
-        { title: 'Dugout Labs', path: '/labs', icon: FlaskConical, highlight: true },
-        { title: 'Card Detection', path: '/labs/card-detection', icon: Sparkles },
-        { title: 'PBR Rendering', path: '/labs/pbr', icon: PlayCircle },
-        { title: 'Signature Analyzer', path: '/labs/signature', icon: Image },
-      ]
-    },
-    {
-      title: "FEATURES",
-      items: [
-        { title: 'AR Viewer', path: '/features/ar-viewer', icon: Sparkles },
-        { title: 'Baseball Cards', path: '/features/baseball-viewer', icon: Image },
-        { title: 'Card Comparison', path: '/features/card-comparison', icon: Layers },
-        { title: 'Card Animation', path: '/features/animation', icon: PlayCircle },
+        { title: 'Dugout Labs', path: '/experimental', icon: FlaskConical, highlight: true },
+        { title: 'Group Memory', path: '/group-memory', icon: Users },
       ]
     }
   ];

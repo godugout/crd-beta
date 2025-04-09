@@ -46,7 +46,7 @@ const TeamNavigation: React.FC<TeamNavigationProps> = ({ activeSection }) => {
               <NavigationMenuLink asChild>
                 <Link
                   className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md"
-                  to={`/teams/${team.slug}`}
+                  to={`/teams/${team.slug}/memories`}
                 >
                   <div className="flex items-center gap-2 mb-2">
                     <Users className="h-6 w-6" style={{ color: team.color }} />
@@ -65,7 +65,7 @@ const TeamNavigation: React.FC<TeamNavigationProps> = ({ activeSection }) => {
                       </p>
                     </Link>
                     <Link 
-                      to={`/teams/${team.slug}/create`}
+                      to={`/teams/${team.slug}/memories`}
                       className="block select-none space-y-1 rounded-md p-3 bg-white shadow-sm no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground"
                     >
                       <div className="text-sm font-medium">Create Memory</div>
@@ -81,7 +81,7 @@ const TeamNavigation: React.FC<TeamNavigationProps> = ({ activeSection }) => {
           <li>
             <NavigationMenuLink asChild>
               <Link
-                to="/experiences/gameday"
+                to="/game-day"
                 className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
               >
                 <div className="text-sm font-medium leading-none flex items-center gap-2">

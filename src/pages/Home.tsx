@@ -18,7 +18,7 @@ const Home = () => {
               <Link to="/cards/create">Create New Card</Link>
             </Button>
             <Button asChild size="lg" variant="outline">
-              <Link to="/gallery">Browse Gallery</Link>
+              <Link to="/cards">Browse Gallery</Link>
             </Button>
           </div>
         </div>
@@ -28,7 +28,7 @@ const Home = () => {
             <h2 className="text-xl font-bold mb-3">Card Gallery</h2>
             <p className="mb-4">Browse your collection of cards and memories</p>
             <Button asChild variant="outline" className="w-full">
-              <Link to="/gallery">View Cards</Link>
+              <Link to="/cards">View Cards</Link>
             </Button>
           </div>
           
@@ -44,7 +44,7 @@ const Home = () => {
             <h2 className="text-xl font-bold mb-3">Media Library</h2>
             <p className="mb-4">Manage images and assets for your cards</p>
             <Button asChild variant="outline" className="w-full">
-              <Link to="/media">Browse Media</Link>
+              <Link to="/media-library">Browse Media</Link>
             </Button>
           </div>
         </div>

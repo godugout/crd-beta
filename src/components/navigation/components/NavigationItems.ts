@@ -36,7 +36,7 @@ export const cardsNavigation: NavigationSection = {
   columns: 2,
   featuredItem: {
     title: 'Card Gallery',
-    path: '/cards/gallery',
+    path: '/cards',
     icon: Image,
     description: 'Browse and discover cards from various collections',
     bgGradient: true
@@ -49,10 +49,10 @@ export const cardsNavigation: NavigationSection = {
       description: 'Design and publish your own custom cards'
     },
     {
-      title: 'Detect Cards',
-      path: '/cards/detect',
+      title: 'Batch Operations',
+      path: '/batch-operations',
       icon: Image,
-      description: 'Automatically detect and crop cards from images'
+      description: 'Manage multiple assets and update cards in bulk'
     }
   ]
 };
@@ -86,23 +86,23 @@ export const featuresNavigation: NavigationSection = {
   items: [
     {
       title: 'AR Card Viewer',
-      path: '/features/ar-viewer',
+      path: '/experimental',
       description: 'View cards in augmented reality'
     },
     {
       title: 'Baseball Card Viewer',
-      path: '/features/baseball-viewer',
+      path: '/baseball-card-viewer/demo',
       description: 'Interactive baseball card experience'
     },
     {
-      title: 'Card Comparison',
-      path: '/features/card-comparison',
-      description: 'Compare cards side by side'
+      title: 'Media Library',
+      path: '/media-library',
+      description: 'Manage your media assets'
     },
     {
-      title: 'Card Animation',
-      path: '/features/animation',
-      description: 'Animate card designs and effects'
+      title: 'Game Day Mode',
+      path: '/game-day',
+      description: 'Capture and share memories during live games'
     }
   ]
 };
