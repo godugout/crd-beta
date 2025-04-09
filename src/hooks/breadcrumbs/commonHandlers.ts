@@ -7,14 +7,14 @@ import { Home, Users } from 'lucide-react';
 export const createHomeBreadcrumb = (): BreadcrumbItem => ({
   path: '/', 
   label: 'Home', 
-  icon: <Home className="h-3.5 w-3.5" /> 
+  icon: React.createElement(Home, { className: "h-3.5 w-3.5" }) 
 });
 
 // Helper for teams breadcrumb
 export const createTeamsBreadcrumb = (): BreadcrumbItem => ({
   path: '/teams',
   label: 'Teams',
-  icon: <Users className="h-3.5 w-3.5" />
+  icon: React.createElement(Users, { className: "h-3.5 w-3.5" })
 });
 
 // Helper for generating generic breadcrumb item

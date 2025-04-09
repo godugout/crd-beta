@@ -47,7 +47,7 @@ export const handleMainSection = ({
     // Safely add icon if it exists
     if (routeMappings[segment].icon) {
       const IconComponent = routeMappings[segment].icon;
-      item.icon = <IconComponent className="h-3.5 w-3.5" />;
+      item.icon = React.createElement(IconComponent, { className: "h-3.5 w-3.5" });
     }
 
     return item;
@@ -73,7 +73,7 @@ export const handleComplexRoutes = ({
       // Safely add icon if it exists
       if (routeMappings[combinedKey].icon) {
         const IconComponent = routeMappings[combinedKey].icon;
-        item.icon = <IconComponent className="h-3.5 w-3.5" />;
+        item.icon = React.createElement(IconComponent, { className: "h-3.5 w-3.5" });
       }
 
       return item;
