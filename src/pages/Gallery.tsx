@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import PageLayout from '@/components/navigation/PageLayout';
 import CardGallery from '@/components/CardGallery';
 import { ChevronRight, Grid3X3, LayoutList, Tv2, Filter } from 'lucide-react';
@@ -23,6 +23,8 @@ const Gallery = () => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   const [sortOrder, setSortOrder] = useState<string>('newest');
+  const location = useLocation();
+  const navigate = useNavigate();
   
   const { 
     cards, 
@@ -46,12 +48,23 @@ const Gallery = () => {
     },
     deps: [sortOrder]
   });
+
+  useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    if (queryParams.get('refresh') === 'true') {
+      refetch();
+      queryParams.delete('refresh');
+      navigate({
+        pathname: location.pathname,
+        search: queryParams.toString()
+      }, { replace: true });
+    }
+  }, [location.search, refetch, navigate]);
   
   const hasBaseballCards = cards.some(card => 
     card.tags?.some(tag => ['baseball', 'vintage'].includes(tag.toLowerCase()))
   );
 
-  // Ensure consistent Card type
   const displayCards: Card[] = cards.map(card => ({
     ...card,
     designMetadata: {

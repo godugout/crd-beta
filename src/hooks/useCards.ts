@@ -149,6 +149,7 @@ export function useCards(options: UseCardsOptions = {}) {
           reactions: []
         };
 
+        // Add the new card to the state immediately
         setCards(prev => [newCard, ...prev]);
         toast.success('Card created successfully');
         return newCard;
@@ -366,10 +367,10 @@ export function useCards(options: UseCardsOptions = {}) {
     error,
     fetchCards,
     addCard,
-    updateCard: () => {},
-    deleteCard: () => {},
-    getCard: () => {},
-    addReaction: () => {},
-    removeReaction: () => {}
+    updateCard,
+    deleteCard,
+    getCard,
+    addReaction,
+    removeReaction
   };
 }

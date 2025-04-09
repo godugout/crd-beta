@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCards } from '@/context/CardContext';
 import { toast } from 'sonner';
@@ -55,8 +55,8 @@ const CardEditorContainer: React.FC<CardEditorContainerProps> = ({ card, classNa
       toast.success('Card created successfully');
     }
     
-    // Navigate to gallery
-    navigate('/gallery');
+    // Navigate to gallery with a refresh parameter to ensure updated data is fetched
+    navigate('/gallery?refresh=true');
   };
 
   return (
