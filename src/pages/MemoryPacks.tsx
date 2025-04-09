@@ -26,17 +26,19 @@ const MemoryPacks = () => {
       try {
         const { data, error } = await supabase
           .from('teams')
-          .select('name, primary_color, secondary_color');
+          .select('name, primary_color, secondary_color')
+          .eq('team_code', teamSlug.toUpperCase())
+          .maybeSingle();
           
         if (error) {
           console.error('Error fetching team info:', error);
           return;
         }
           
-        if (data && data.length > 0) {
+        if (data) {
           setTeamInfo({
-            primary_color: data[0].primary_color || undefined,
-            name: data[0].name
+            primary_color: data.primary_color || undefined,
+            name: data.name
           });
         }
       } catch (err) {

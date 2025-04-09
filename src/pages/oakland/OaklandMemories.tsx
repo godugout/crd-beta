@@ -23,18 +23,26 @@ function OaklandMemories() {
       try {
         const { data, error } = await supabase
           .from('teams')
-          .select('name, primary_color, secondary_color');
+          .select('name, primary_color, secondary_color')
+          .eq('team_code', teamSlug.toUpperCase())
+          .maybeSingle();
           
         if (error) {
           console.error('Error fetching team info:', error);
+          // Set default values if team is not found
+          setTeamInfo({
+            name: teamSlug.charAt(0).toUpperCase() + teamSlug.slice(1),
+            primary_color: '#006341',
+            secondary_color: '#EFB21E'
+          });
           return;
         }
           
-        if (data && data.length > 0) {
+        if (data) {
           setTeamInfo({
-            name: data[0].name,
-            primary_color: data[0].primary_color || undefined,
-            secondary_color: data[0].secondary_color || undefined
+            name: data.name,
+            primary_color: data.primary_color || undefined,
+            secondary_color: data.secondary_color || undefined
           });
         } else {
           // Set default values if team is not found
@@ -46,6 +54,12 @@ function OaklandMemories() {
         }
       } catch (err) {
         console.error('Error fetching team info:', err);
+        // Set default values on error
+        setTeamInfo({
+          name: teamSlug.charAt(0).toUpperCase() + teamSlug.slice(1),
+          primary_color: '#006341',
+          secondary_color: '#EFB21E'
+        });
       }
     };
     

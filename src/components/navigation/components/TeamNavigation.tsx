@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/navigation-menu";
 import { Users, PlayCircle, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { Team } from '@/lib/types/TeamTypes';
 
 interface TeamNavigationProps {
   activeSection: string;
@@ -40,7 +41,11 @@ const TeamNavigation: React.FC<TeamNavigationProps> = ({ activeSection }) => {
         if (error) {
           console.error('Error fetching team navigation:', error);
           setTeams([]);
-        } else if (data) {
+          setLoading(false);
+          return;
+        }
+          
+        if (data && Array.isArray(data)) {
           // Transform data to expected format
           const teamData = data.map(team => ({
             id: team.id,
@@ -50,6 +55,8 @@ const TeamNavigation: React.FC<TeamNavigationProps> = ({ activeSection }) => {
           }));
           
           setTeams(teamData);
+        } else {
+          setTeams([]);
         }
       } catch (err) {
         console.error('Error in team navigation:', err);

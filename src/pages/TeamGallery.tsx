@@ -5,7 +5,7 @@ import PageLayout from '@/components/navigation/PageLayout';
 import { Button } from '@/components/ui/button';
 import { Users, Filter, Info, Calendar } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { Team } from '@/lib/types/TeamTypes';
+import { Team, DbTeam } from '@/lib/types/TeamTypes';
 
 interface TeamDisplayData extends Team {
   memberCount?: number;
@@ -47,30 +47,39 @@ const TeamGallery = () => {
         if (error) {
           console.error('Error fetching teams:', error);
           setTeams([]);
-        } else if (data) {
+          setLoading(false);
+          return;
+        }
+        
+        if (data && Array.isArray(data)) {
           // Transform the data to match our interface
-          const transformedTeams: TeamDisplayData[] = data.map(team => ({
-            id: team.id,
-            name: team.name,
-            slug: team.team_code ? team.team_code.toLowerCase() : team.name.toLowerCase().replace(/\s+/g, '-'),
-            description: team.description || '',
-            owner_id: team.owner_id,
-            primary_color: team.primary_color || '#cccccc',
-            memberCount: Math.floor(Math.random() * 1500) + 500, // Placeholder member count
-            secondary_color: team.secondary_color || undefined,
-            tertiary_color: team.tertiary_color || undefined,
-            founded_year: team.founded_year || undefined,
-            city: team.city || undefined,
-            state: team.state || undefined,
-            country: team.country || undefined,
-            stadium: team.stadium || undefined,
-            league: team.league || undefined,
-            division: team.division || undefined,
-            team_code: team.team_code || undefined,
-            created_at: team.created_at,
-            updated_at: team.updated_at,
-            logo_url: team.logo_url || undefined
-          }));
+          const transformedTeams: TeamDisplayData[] = data.map(team => {
+            // Type cast to DbTeam to ensure proper type safety
+            const dbTeam = team as DbTeam;
+            
+            return {
+              id: dbTeam.id,
+              name: dbTeam.name,
+              slug: dbTeam.team_code ? dbTeam.team_code.toLowerCase() : dbTeam.name.toLowerCase().replace(/\s+/g, '-'),
+              description: dbTeam.description || '',
+              owner_id: dbTeam.owner_id,
+              primary_color: dbTeam.primary_color || '#cccccc',
+              memberCount: Math.floor(Math.random() * 1500) + 500, // Placeholder member count
+              secondary_color: dbTeam.secondary_color || undefined,
+              tertiary_color: dbTeam.tertiary_color || undefined,
+              founded_year: dbTeam.founded_year || undefined,
+              city: dbTeam.city || undefined,
+              state: dbTeam.state || undefined,
+              country: dbTeam.country || undefined,
+              stadium: dbTeam.stadium || undefined,
+              league: dbTeam.league || undefined,
+              division: dbTeam.division || undefined,
+              team_code: dbTeam.team_code || undefined,
+              created_at: dbTeam.created_at,
+              updated_at: dbTeam.updated_at,
+              logo_url: dbTeam.logo_url || undefined
+            };
+          });
           setTeams(transformedTeams);
         }
       } catch (err) {
