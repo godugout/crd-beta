@@ -1,26 +1,25 @@
 
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import CardEditor from '@/components/CardEditor';
+import { useParams } from 'react-router-dom';
+import CardCreationFlow from '@/components/card-editor/CardCreationFlow';
 import PageLayout from '@/components/navigation/PageLayout';
+import { useCards } from '@/context/CardContext';
+import '@/components/card-editor/cardEffects.css';
 
 const Editor = () => {
-  const navigate = useNavigate();
+  const { id } = useParams<{ id?: string }>();
+  const { cards, getCardById } = useCards();
+  
+  // Get card data if editing an existing card
+  const card = id ? getCardById(id) : undefined;
   
   return (
     <PageLayout
-      title="Create New Card"
-      description="Upload an image and add details to create your digital card."
+      title={card ? "Edit Card" : "Create New Card"}
+      description={card ? "Edit your digital card" : "Upload an image and add details to create your digital card."}
     >
       <div className="container mx-auto max-w-6xl px-4">
-        <div className="py-8">
-          <h1 className="text-3xl font-bold text-cardshow-dark mb-2">Create New Card</h1>
-          <p className="text-cardshow-slate">
-            Upload an image and add details to create your digital card.
-          </p>
-        </div>
-        
-        <CardEditor />
+        <CardCreationFlow card={card} />
       </div>
     </PageLayout>
   );

@@ -1,106 +1,89 @@
-
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { QueryClientProvider } from '@tanstack/react-query';
-import HomePage from './pages/Home';
-import NotFoundPage from './pages/NotFound';
-import MediaLibrary from './pages/MediaLibrary';
-import CardGallery from './pages/CardGallery';
-import BatchOperationsPage from './pages/BatchOperationsPage';
-import CardEditor from './components/CardEditor';
-import BaseballCardViewer from './pages/BaseballCardViewer';
-import OaklandMemoriesPage from './pages/oakland/OaklandMemories';
-import OaklandMemoryDetailsPage from './pages/oakland/OaklandMemoryDetail';
-import GameDayCapturePage from './pages/GameDayMode';
-import GroupMemoryPage from './pages/GroupMemoryCreator';
-import CollectionGallery from './pages/CollectionGallery';
-import MemoryPacks from './pages/MemoryPacks';
-import MemoryPackCreator from './pages/MemoryPackCreator';
-import MemoryPackDetail from './pages/MemoryPackDetail';
-import { CardProvider } from './context/CardContext';
-import { AuthProvider } from './context/auth/AuthProvider';
-import { useMobileOptimization } from './hooks/useMobileOptimization';
-import { useConnectivity } from './hooks/useConnectivity';
-import ExperimentalPage from './pages/Labs';
-import { queryClient } from './lib/api/queryClient';
-import { DamProvider } from './providers/DamProvider';
-import TeamsGallery from './pages/TeamGallery';
-import { BreadcrumbProvider } from './hooks/breadcrumbs/BreadcrumbContext';
-
-// Create Provider components from hooks
-const MobileOptimizationProvider = ({ children }) => {
-  useMobileOptimization();
-  return <>{children}</>;
-};
-
-// Create ConnectivityProvider
-const ConnectivityProvider = ({ children }) => {
-  useConnectivity();
-  return <>{children}</>;
-};
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Route, Routes, Link, useLocation } from 'react-router-dom';
+import { Auth } from '@supabase/auth-ui-react';
+import { ThemeSupa } from '@supabase/auth-ui-shared';
+import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react';
+import Account from '@/pages/Account';
+import Home from '@/pages/Home';
+import Editor from '@/pages/Editor';
+import CardGallery from '@/pages/CardGallery';
+import BaseballCard from '@/pages/BaseballCard';
+import OaklandPage from '@/pages/OaklandPage';
+import GroupMemoryPage from '@/pages/GroupMemoryPage';
+import { SiteHeader } from '@/components/navigation/SiteHeader';
+import { SiteFooter } from '@/components/navigation/SiteFooter';
+import { Toaster } from 'sonner';
+import { useNavigationState } from '@/hooks/useNavigationState';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
+import { CardTrainer } from '@/components/experimental/CardTrainer';
+import './App.css';
 
 function App() {
+  const session = useSession();
+  const supabase = useSupabaseClient();
+  const [scrollPosition, setScrollPosition] = useNavigationState({
+    key: 'scrollPosition',
+    defaultState: 0,
+    sessionOnly: true
+  });
+  const isMobile = useMediaQuery('(max-width: 768px)');
+
+  useEffect(() => {
+    if (scrollPosition > 0) {
+      window.scrollTo({
+        top: scrollPosition,
+        behavior: 'instant'
+      });
+    }
+  }, [scrollPosition]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrollPosition(window.scrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [setScrollPosition]);
+
   return (
-    <BrowserRouter>
-      <QueryClientProvider client={queryClient}>
-        <ConnectivityProvider>
-          <MobileOptimizationProvider>
-            <AuthProvider>
-              <CardProvider>
-                <DamProvider>
-                  <BreadcrumbProvider currentTeam={null}>
-                    <Routes>
-                      {/* Home */}
-                      <Route path="/" element={<HomePage />} />
-                      
-                      {/* Cards Routes */}
-                      <Route path="/cards" element={<CardGallery />} />
-                      <Route path="/cards/create" element={<CardEditor />} />
-                      <Route path="/cards/:id/edit" element={<CardEditor />} />
-                      <Route path="/cards/batch" element={<BatchOperationsPage />} />
-                      
-                      {/* Collections Routes */}
-                      <Route path="/collections" element={<CollectionGallery />} />
-                      <Route path="/collections/create" element={<MemoryPackCreator />} />
-                      
-                      {/* Memory Packs Routes */}
-                      <Route path="/packs" element={<MemoryPacks />} />
-                      <Route path="/packs/create" element={<MemoryPackCreator />} />
-                      <Route path="/packs/:id" element={<MemoryPackDetail />} />
-                      
-                      {/* Legacy Memory Packs Routes (for backward compatibility) */}
-                      <Route path="/memory-packs" element={<MemoryPacks />} />
-                      <Route path="/memory-packs/:id" element={<MemoryPackDetail />} />
-                      <Route path="/create-memory-pack" element={<MemoryPackCreator />} />
-                      
-                      {/* Teams Routes */}
-                      <Route path="/teams" element={<TeamsGallery />} />
-                      <Route path="/teams/oakland" element={<OaklandMemoriesPage />} />
-                      <Route path="/teams/oakland/memories" element={<OaklandMemoriesPage />} />
-                      <Route path="/teams/oakland/memories/:id" element={<OaklandMemoryDetailsPage />} />
-                      
-                      {/* Features Routes */}
-                      <Route path="/features/baseball-viewer/:id" element={<BaseballCardViewer />} />
-                      <Route path="/baseball-card-viewer/:id" element={<BaseballCardViewer />} />
-                      <Route path="/game-day" element={<GameDayCapturePage />} />
-                      <Route path="/group-memory" element={<GroupMemoryPage />} />
-                      
-                      {/* Media Library */}
-                      <Route path="/media-library" element={<MediaLibrary />} />
-                      
-                      {/* Experimental */}
-                      <Route path="/experimental" element={<ExperimentalPage />} />
-                      
-                      {/* 404 - Not Found */}
-                      <Route path="*" element={<NotFoundPage />} />
-                    </Routes>
-                  </BreadcrumbProvider>
-                </DamProvider>
-              </CardProvider>
-            </AuthProvider>
-          </MobileOptimizationProvider>
-        </ConnectivityProvider>
-      </QueryClientProvider>
-    </BrowserRouter>
+    <Router>
+      <div className="App">
+        <SiteHeader />
+
+        <main className="container mx-auto px-4 py-6">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route
+              path="/account"
+              element={
+                session ? (
+                  <Account session={session} />
+                ) : (
+                  <div className="flex justify-center">
+                    <Auth
+                      supabaseClient={supabase}
+                      appearance={{ theme: ThemeSupa }}
+                      providers={['google', 'github']}
+                    />
+                  </div>
+                )
+              }
+            />
+            <Route path="/cards/create" element={<Editor />} />
+            <Route path="/cards/edit/:id" element={<Editor />} />
+            <Route path="/gallery" element={<CardGallery />} />
+            <Route path="/baseball" element={<BaseballCard />} />
+            <Route path="/oakland" element={<OaklandPage />} />
+            <Route path="/group-memory" element={<GroupMemoryPage />} />
+            <Route path="/card-trainer" element={<CardTrainer />} />
+          </Routes>
+        </main>
+
+        <SiteFooter />
+        <Toaster position="bottom-right" />
+      </div>
+    </Router>
   );
 }
 
