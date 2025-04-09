@@ -1,152 +1,87 @@
 
-import React, { useState, useEffect } from 'react';
-import { toast } from 'sonner';
-import { Tabs, TabsContent } from '@/components/ui/tabs';
-import { AnimatePresence, motion } from 'framer-motion';
-import Navbar from '@/components/Navbar';
-import QuickCapture from '@/components/game-day/QuickCapture';
-import GameDetails from '@/components/game-day/GameDetails';
-import OfflineIndicator from '@/components/game-day/OfflineIndicator';
-import GameDayHeader from '@/components/game-day/GameDayHeader';
-import GameDayTabs from '@/components/game-day/GameDayTabs';
-import GameDayActionBar from '@/components/game-day/GameDayActionBar';
-import SavedItemsTab from '@/components/game-day/SavedItemsTab';
-import { useLocationService } from '@/hooks/useLocationService';
-import { useConnectivity } from '@/hooks/useConnectivity';
-import { useNavigationState } from '@/hooks/useNavigationState';
-import MetaTags from '@/components/shared/MetaTags';
+import React, { useState } from 'react';
+import PageLayout from '@/components/navigation/PageLayout';
+import { Button } from '@/components/ui/button';
+import { Camera, Calendar, Map, Users } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 
 const GameDayMode = () => {
-  // Use navigation state to persist tab selection across page navigations
-  const [activeTab, setActiveTab] = useNavigationState({ 
-    key: 'gameDayTab',
-    defaultState: 'capture',
-    sessionOnly: false // Remember tab across sessions
-  });
+  const [activeMode, setActiveMode] = useState<string | null>(null);
   
-  const { 
-    location, 
-    nearbyStadium,
-    stadiumSection,
-    isLocating,
-    locationError 
-  } = useLocationService();
-
-  const { 
-    isOnline, 
-    offlineItems, 
-    syncOfflineItems 
-  } = useConnectivity();
-
-  // Auto-detect sections at Coliseum
-  useEffect(() => {
-    if (nearbyStadium?.name === 'Oakland Coliseum') {
-      toast.success(`Welcome to ${nearbyStadium.name}!`);
+  const modes = [
+    {
+      id: 'capture',
+      title: 'Capture Moments',
+      description: 'Take photos of game action, memorable plays, and stadium experiences',
+      icon: <Camera className="h-12 w-12 text-blue-500 mb-2" />,
+      action: 'Start Capturing'
+    },
+    {
+      id: 'schedule',
+      title: 'Game Schedule',
+      description: 'View upcoming games and set reminders for your favorite teams',
+      icon: <Calendar className="h-12 w-12 text-green-500 mb-2" />,
+      action: 'View Schedule'
+    },
+    {
+      id: 'stadium',
+      title: 'Stadium Map',
+      description: 'Interactive stadium maps with concessions, restrooms, and special features',
+      icon: <Map className="h-12 w-12 text-purple-500 mb-2" />,
+      action: 'Open Map'
+    },
+    {
+      id: 'social',
+      title: 'Fan Zone',
+      description: 'Connect with other fans, share your photos, and join the conversation',
+      icon: <Users className="h-12 w-12 text-orange-500 mb-2" />,
+      action: 'Join Now'
     }
-  }, [nearbyStadium]);
-
-  // Process sync when coming back online
-  useEffect(() => {
-    if (isOnline && offlineItems.length > 0) {
-      syncOfflineItems().then(syncedCount => {
-        if (syncedCount > 0) {
-          toast.success(`Synced ${syncedCount} memories from offline storage`);
-        }
-      });
-    }
-  }, [isOnline, offlineItems, syncOfflineItems]);
-
-  // Get today's game info
-  const todayGameInfo = nearbyStadium?.todayGame || {
-    opponent: 'Unknown Team',
-    date: new Date().toLocaleDateString(),
-    time: '1:05 PM',
-    isHomeGame: true
-  };
-
-  // Animation variants
-  const tabContentVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.3 } },
-    exit: { opacity: 0, y: -20, transition: { duration: 0.2 } }
+  ];
+  
+  const handleActivateMode = (modeId: string) => {
+    setActiveMode(modeId);
+    // In a real implementation, this would navigate to the specific mode or open a modal
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
-      <MetaTags 
-        title="Game Day Mode" 
-        description="Capture live game moments and memories with CardShow's Game Day Mode"
-        type="article"
-        section="Features"
-        keywords={['game day', 'live capture', 'baseball memories', 'stadium experience', 'sports']}
-      />
-      
-      <Navbar />
-      
-      {!isOnline && <OfflineIndicator itemCount={offlineItems.length} />}
-      
-      <main className="container mx-auto pt-20 px-4">
-        <GameDayHeader 
-          nearbyStadium={nearbyStadium}
-          stadiumSection={stadiumSection}
-          isLocating={isLocating}
-          locationError={locationError}
-          todayGameInfo={todayGameInfo}
-        />
-        
-        <GameDayTabs 
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          offlineItemsCount={offlineItems.length}
-        />
-        
-        <Tabs value={activeTab}>
-          <AnimatePresence initial={false}>
-            <motion.div
-              key={activeTab}
-              variants={tabContentVariants}
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-            >
-              <TabsContent value="capture" forceMount>
-                {activeTab === 'capture' && (
-                  <QuickCapture 
-                    stadiumContext={nearbyStadium} 
-                    isOnline={isOnline}
-                  />
-                )}
-              </TabsContent>
-              
-              <TabsContent value="gameinfo" forceMount>
-                {activeTab === 'gameinfo' && (
-                  <GameDetails 
-                    gameInfo={todayGameInfo} 
-                    stadiumInfo={nearbyStadium}
-                  />
-                )}
-              </TabsContent>
-              
-              <TabsContent value="saved" forceMount>
-                {activeTab === 'saved' && (
-                  <SavedItemsTab 
-                    items={offlineItems}
-                    isOnline={isOnline}
-                    onSync={syncOfflineItems}
-                  />
-                )}
-              </TabsContent>
-            </motion.div>
-          </AnimatePresence>
-        </Tabs>
-      </main>
-      
-      <GameDayActionBar 
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        offlineItemsCount={offlineItems.length}
-      />
-    </div>
+    <PageLayout
+      title="Game Day Mode"
+      description="Enhance your live game experience"
+    >
+      <div 
+        className="container mx-auto px-4 py-8"
+        style={{
+          background: 'linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.4)), url("/images/stadium-bg.jpg")',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          borderRadius: '0.5rem',
+          padding: '3rem 1rem',
+          marginTop: '1rem'
+        }}
+      >
+        <div className="max-w-4xl mx-auto text-center text-white">
+          <h1 className="text-4xl font-bold mb-4">Game Day Mode</h1>
+          <p className="text-xl mb-8">
+            Enhance your ballpark experience with special features for game day
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12">
+            {modes.map((mode) => (
+              <Card key={mode.id} className="bg-white/95 backdrop-blur transition-all hover:shadow-lg">
+                <CardHeader className="text-center pb-2">
+                  <div className="flex justify-center">{mode.icon}</div>
+                  <CardTitle>{mode.title}</CardTitle>
+                  <CardDescription>{mode.description}</CardDescription>
+                </CardHeader>
+                <CardFooter className="pt-2 flex justify-center">
+                  <Button onClick={() => handleActivateMode(mode.id)}>{mode.action}</Button>
+                </CardFooter>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </div>
+    </PageLayout>
   );
 };
 

@@ -1,88 +1,70 @@
 
 import React from 'react';
-import CardBasicInfo from './CardBasicInfo';
+import CardUploadInfo from './CardUploadInfo';
 import CardDesignCustomization from './CardDesignCustomization';
-import CardTextCustomization from './CardTextCustomization';
+import CardEffects from './CardEffects';
+import CardTextOverlay from './CardTextOverlay';
 import CardPreview from './CardPreview';
 
 interface StepContentProps {
   currentStep: number;
-  cardState: any; // Using any for brevity, but should be properly typed
+  cardState: any;
 }
 
 const StepContent: React.FC<StepContentProps> = ({ currentStep, cardState }) => {
-  const {
-    title,
-    setTitle,
-    description,
-    setDescription,
-    tags,
-    setTags,
-    newTag,
-    setNewTag,
-    fabricSwatches,
-    setFabricSwatches,
-    imageFile,
-    imageUrl,
-    handleImageUpload,
-    cardStyle,
-    setCardStyle,
-    textStyle,
-    setTextStyle
-  } = cardState;
-
   switch (currentStep) {
     case 0:
       return (
-        <CardBasicInfo 
-          title={title}
-          setTitle={setTitle}
-          description={description}
-          setDescription={setDescription}
-          tags={tags}
-          setTags={setTags}
-          newTag={newTag}
-          setNewTag={setNewTag}
-          fabricSwatches={fabricSwatches}
-          setFabricSwatches={setFabricSwatches}
-          imageFile={imageFile}
-          imageUrl={imageUrl}
-          onImageUpload={handleImageUpload}
+        <CardUploadInfo
+          title={cardState.title}
+          setTitle={cardState.setTitle}
+          description={cardState.description}
+          setDescription={cardState.setDescription}
+          player={cardState.player}
+          setPlayer={cardState.setPlayer}
+          team={cardState.team}
+          setTeam={cardState.setTeam}
+          year={cardState.year}
+          setYear={cardState.setYear}
+          tags={cardState.tags}
+          setTags={cardState.setTags}
+          imageUrl={cardState.imageUrl}
+          setImageUrl={cardState.setImageUrl}
+          onFileChange={cardState.handleFileChange}
         />
       );
     case 1:
       return (
-        <CardDesignCustomization 
-          imageUrl={imageUrl}
-          cardStyle={cardStyle}
-          setCardStyle={setCardStyle}
+        <CardDesignCustomization
+          imageUrl={cardState.imageUrl}
+          cardStyle={cardState.cardStyle}
+          setCardStyle={cardState.setCardStyle}
         />
       );
     case 2:
       return (
-        <CardTextCustomization 
-          imageUrl={imageUrl}
-          textStyle={textStyle}
-          setTextStyle={setTextStyle}
-          cardTitle={title}
-          setCardTitle={setTitle}
-          cardDescription={description}
-          setCardDescription={setDescription}
+        <CardEffects
+          selectedEffect={cardState.selectedEffect}
+          onEffectChange={cardState.setSelectedEffect}
+          imageUrl={cardState.imageUrl}
         />
       );
     case 3:
       return (
-        <CardPreview 
-          imageUrl={imageUrl}
-          title={title}
-          description={description}
-          fabricSwatches={fabricSwatches}
-          cardStyle={cardStyle}
-          textStyle={textStyle}
+        <CardPreview
+          title={cardState.title}
+          description={cardState.description}
+          player={cardState.player}
+          team={cardState.team}
+          year={cardState.year}
+          tags={cardState.tags}
+          imageUrl={cardState.imageUrl}
+          cardStyle={cardState.cardStyle}
+          selectedEffect={cardState.selectedEffect}
         />
       );
     default:
-      return null;
+      return <div>Unknown step</div>;
   }
 };
 

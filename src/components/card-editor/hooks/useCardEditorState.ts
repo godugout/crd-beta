@@ -1,101 +1,93 @@
 
 import { useState, useCallback } from 'react';
 
+export interface CardStyle {
+  effect: string;
+  brightness: number;
+  contrast: number;
+  saturation: number;
+  borderWidth: number;
+  borderRadius: string;
+  borderColor: string;
+  backgroundColor: string;
+}
+
 interface UseCardEditorStateProps {
   initialCard?: any;
   initialMetadata?: any;
 }
 
-export const useCardEditorState = ({ 
-  initialCard, 
-  initialMetadata
-}: UseCardEditorStateProps = {}) => {
+export const useCardEditorState = ({ initialCard, initialMetadata }: UseCardEditorStateProps) => {
   // Basic card info
   const [title, setTitle] = useState(initialCard?.title || initialMetadata?.title || '');
-  const [description, setDescription] = useState(
-    initialCard?.description || initialMetadata?.text || ''
-  );
-  const [tags, setTags] = useState<string[]>(
-    initialCard?.tags || initialMetadata?.tags || []
-  );
-  const [newTag, setNewTag] = useState('');
-  
-  // Image data
-  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [description, setDescription] = useState(initialCard?.description || initialMetadata?.description || '');
+  const [player, setPlayer] = useState(initialCard?.player || initialMetadata?.player || '');
+  const [team, setTeam] = useState(initialCard?.team || initialMetadata?.team || '');
+  const [year, setYear] = useState(initialCard?.year || initialMetadata?.year || '');
+  const [tags, setTags] = useState<string[]>(initialCard?.tags || initialMetadata?.tags || []);
   const [imageUrl, setImageUrl] = useState<string>(initialCard?.imageUrl || '');
   
-  // Card design - like borders, colors, effects
-  const [cardStyle, setCardStyle] = useState<any>({
-    borderColor: initialCard?.designMetadata?.borderColor || '#000000',
-    borderWidth: initialCard?.designMetadata?.borderWidth || 1,
-    borderRadius: initialCard?.designMetadata?.borderRadius || 8,
-    backgroundColor: initialCard?.designMetadata?.backgroundColor || '#ffffff',
-    effect: initialCard?.designMetadata?.effect || 'none'
+  // Card design customization
+  const [cardStyle, setCardStyle] = useState<CardStyle>({
+    effect: initialCard?.effect || 'classic',
+    brightness: initialCard?.brightness || 100,
+    contrast: initialCard?.contrast || 100,
+    saturation: initialCard?.saturation || 100,
+    borderWidth: initialCard?.borderWidth || 0,
+    borderRadius: initialCard?.borderRadius || '8px',
+    borderColor: initialCard?.borderColor || '#000000',
+    backgroundColor: initialCard?.backgroundColor || '#ffffff',
   });
   
-  // Text styling
-  const [textStyle, setTextStyle] = useState<any>({
-    titleColor: initialCard?.designMetadata?.titleColor || '#000000',
-    titleFont: initialCard?.designMetadata?.titleFont || 'sans-serif',
-    titleSize: initialCard?.designMetadata?.titleSize || 24,
-    descriptionColor: initialCard?.designMetadata?.descriptionColor || '#333333',
-    descriptionFont: initialCard?.designMetadata?.descriptionFont || 'sans-serif',
-    descriptionSize: initialCard?.designMetadata?.descriptionSize || 14,
-  });
+  // Card effects
+  const [selectedEffect, setSelectedEffect] = useState<string>(initialCard?.selectedEffect || 'none');
   
-  // FabricJS swatches for textiles (jerseys, etc)
-  const [fabricSwatches, setFabricSwatches] = useState<any[]>(
-    initialCard?.designMetadata?.fabricSwatches || []
-  );
-
-  const handleImageUpload = useCallback((file: File, url: string, metadata?: any) => {
-    setImageFile(file);
-    setImageUrl(url);
-    
-    // If metadata is provided from OCR, update other fields
-    if (metadata) {
-      if (metadata.title && !title) setTitle(metadata.title);
-      if (metadata.text && !description) setDescription(metadata.text);
-      if (metadata.tags && tags.length === 0) setTags(metadata.tags);
-      // Could set other fields like year, player, team if they exist in metadata
-    }
-  }, [title, description, tags]);
-
+  // Handle image upload
+  const handleFileChange = useCallback((file: File) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImageUrl(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  }, []);
+  
+  // Get final card data for saving
   const getCardData = useCallback(() => {
     return {
       title,
       description,
+      player,
+      team,
+      year,
       tags,
       imageUrl,
-      designMetadata: {
-        ...cardStyle,
-        ...textStyle,
-        fabricSwatches,
-      }
+      effect: selectedEffect,
+      ...cardStyle,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     };
-  }, [
-    title, description, tags, imageUrl, 
-    cardStyle, textStyle, fabricSwatches
-  ]);
-
+  }, [title, description, player, team, year, tags, imageUrl, selectedEffect, cardStyle]);
+  
   return {
-    // Basic info
-    title, setTitle,
-    description, setDescription,
-    tags, setTags,
-    newTag, setNewTag,
-    
-    // Image
-    imageFile, setImageFile,
-    imageUrl, setImageUrl,
-    handleImageUpload,
-    
-    // Design
-    cardStyle, setCardStyle,
-    textStyle, setTextStyle,
-    fabricSwatches, setFabricSwatches,
-    
-    // Utilities
-    getCardData
+    title,
+    setTitle,
+    description,
+    setDescription,
+    player, 
+    setPlayer,
+    team,
+    setTeam,
+    year,
+    setYear,
+    tags,
+    setTags,
+    imageUrl,
+    setImageUrl,
+    cardStyle,
+    setCardStyle,
+    selectedEffect,
+    setSelectedEffect,
+    handleFileChange,
+    getCardData,
   };
 };

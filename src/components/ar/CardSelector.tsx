@@ -1,7 +1,8 @@
 
 import React from 'react';
 import { Card } from '@/lib/types';
-import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
+import { PlusCircle } from 'lucide-react';
 
 interface CardSelectorProps {
   showCardSelector: boolean;
@@ -14,33 +15,37 @@ const CardSelector: React.FC<CardSelectorProps> = ({
   availableCards,
   onAddCard
 }) => {
-  const handleAddCard = (card: Card) => {
-    onAddCard(card);
-  };
-
-  if (!showCardSelector) return null;
-
   return (
-    <div className="absolute right-4 top-28 z-50 bg-white/90 backdrop-blur-sm rounded-lg shadow-lg p-4 w-64 max-h-80 overflow-y-auto card-selector animate-fadeIn">
-      <h3 className="font-semibold mb-3">Add Card to Scene</h3>
-      <div className="space-y-2">
-        {availableCards.map((card, index) => (
-          <div 
-            key={card.id}
-            className="flex items-center p-2 rounded-md hover:bg-gray-100 cursor-pointer transition-colors card-appear"
-            style={{ animationDelay: `${index * 0.05}s` }}
-            onClick={() => handleAddCard(card)}
-          >
-            <div className="w-8 h-12 bg-gray-200 rounded overflow-hidden mr-2">
-              <img 
-                src={card.imageUrl} 
-                alt={card.title}
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <div className="flex-1 text-sm truncate">{card.title}</div>
+    <div 
+      className={`card-selector fixed bottom-0 left-0 right-0 z-50 p-4 ${showCardSelector ? 'open' : ''}`}
+      style={{ maxHeight: '50vh' }}
+    >
+      <div className="bg-black/80 backdrop-blur-md rounded-lg p-4">
+        <h3 className="text-white font-semibold mb-4">Add Cards to Scene</h3>
+        
+        <div className="max-h-[30vh] overflow-y-auto">
+          <div className="grid grid-cols-3 gap-3">
+            {availableCards.map((card) => (
+              <div 
+                key={card.id}
+                className="relative bg-gray-900 rounded-md overflow-hidden"
+              >
+                <img 
+                  src={card.imageUrl} 
+                  alt={card.title}
+                  className="w-full aspect-[2.5/3.5] object-cover"
+                />
+                <Button
+                  size="icon"
+                  className="absolute bottom-1 right-1 h-8 w-8 rounded-full"
+                  onClick={() => onAddCard(card)}
+                >
+                  <PlusCircle className="h-5 w-5" />
+                </Button>
+              </div>
+            ))}
           </div>
-        ))}
+        </div>
       </div>
     </div>
   );

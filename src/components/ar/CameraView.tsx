@@ -1,15 +1,20 @@
 
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { Card } from '@/lib/types';
 import ArCardItem from './ArCardItem';
-import { motion } from 'framer-motion';
+
+interface CardPosition {
+  x: number;
+  y: number;
+  rotation: number;
+}
 
 interface CameraViewProps {
   activeCards: Card[];
   selectedCardId: string | null;
   onSelectCard: (id: string) => void;
   onError: (message: string) => void;
-  cardPositions?: Record<string, { x: number, y: number, rotation: number }>;
+  cardPositions: Record<string, CardPosition>;
 }
 
 const CameraView: React.FC<CameraViewProps> = ({
@@ -17,113 +22,98 @@ const CameraView: React.FC<CameraViewProps> = ({
   selectedCardId,
   onSelectCard,
   onError,
-  cardPositions = {}
+  cardPositions
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [cameraReady, setCameraReady] = useState(false);
-  
+
   // Initialize camera
   useEffect(() => {
-    let stream: MediaStream | null = null;
-    
-    const initCamera = async () => {
+    const setupCamera = async () => {
       try {
-        // Request camera access
-        stream = await navigator.mediaDevices.getUserMedia({
+        const stream = await navigator.mediaDevices.getUserMedia({
           video: { facingMode: 'environment' }
         });
         
-        // Set video source
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
-          setCameraReady(true);
+          videoRef.current.play().catch(error => {
+            console.error("Error playing video:", error);
+            onError("Could not start camera playback");
+          });
+          
+          videoRef.current.onloadeddata = () => {
+            setCameraReady(true);
+          };
         }
-      } catch (err) {
-        console.error("Camera error:", err);
-        onError(typeof err === 'object' && err !== null && 'message' in err 
-          ? (err as Error).message 
-          : 'Could not access camera');
+      } catch (error) {
+        console.error("Error accessing camera:", error);
+        onError("Could not access camera. Please allow camera access for AR features.");
       }
     };
     
-    initCamera();
+    setupCamera();
     
-    // Clean up
     return () => {
-      if (stream) {
-        stream.getTracks().forEach(track => track.stop());
+      // Cleanup camera stream when component unmounts
+      if (videoRef.current && videoRef.current.srcObject) {
+        const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
+        tracks.forEach(track => track.stop());
       }
     };
   }, [onError]);
 
-  console.log("Rendering CameraView with active cards:", activeCards);
-
   return (
     <div className="relative h-full w-full overflow-hidden">
-      {/* Camera background */}
+      {/* Camera feed */}
       <video
         ref={videoRef}
         autoPlay
         playsInline
         muted
-        className="absolute inset-0 min-w-full min-h-full object-cover"
-        style={{ filter: 'brightness(0.9)' }}
+        className="absolute inset-0 h-full w-full object-cover"
+        style={{ 
+          filter: !cameraReady ? 'blur(10px) brightness(0.5)' : 'none',
+          transition: 'filter 0.5s ease'
+        }}
       />
       
-      {/* AR overlay with cards - centered by default */}
-      <div className="absolute inset-0 pointer-events-none z-10">
+      {!cameraReady && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="text-white text-center">
+            <div className="animate-spin h-10 w-10 border-4 border-white border-t-transparent rounded-full mx-auto mb-4"></div>
+            <p>Initializing camera...</p>
+          </div>
+        </div>
+      )}
+      
+      {/* Cards overlaid on camera */}
+      <div className="absolute inset-0 pointer-events-none">
         {activeCards.map((card, index) => {
-          // Get position or use default centered position
           const position = cardPositions[card.id] || { x: 0, y: 0, rotation: 0 };
           
           return (
-            <motion.div
+            <div
               key={card.id}
               className="absolute pointer-events-auto"
               style={{
-                left: '50%',
-                top: '50%',
-                transformOrigin: 'center',
+                left: `calc(50% + ${position.x}px)`,
+                top: `calc(50% + ${position.y}px)`,
+                transform: `translate(-50%, -50%) rotate(${position.rotation}deg)`,
+                zIndex: selectedCardId === card.id ? 10 : 1,
+                transition: 'transform 0.15s ease-out'
               }}
-              initial={{ x: '-50%', y: '-50%' }}
-              animate={{
-                x: `calc(-50% + ${position.x}px)`,
-                y: `calc(-50% + ${position.y}px)`,
-                rotate: position.rotation
-              }}
-              transition={{ type: 'spring', damping: 20 }}
             >
               <ArCardItem
                 card={card}
                 index={index}
-                isSelected={card.id === selectedCardId}
-                onSelect={() => onSelectCard(card.id)}
+                isSelected={selectedCardId === card.id}
+                onSelect={onSelectCard}
               />
-            </motion.div>
+            </div>
           );
         })}
-        
-        {!cameraReady && (
-          <div className="absolute inset-0 bg-black flex flex-col items-center justify-center text-white">
-            <div className="animate-pulse flex flex-col items-center">
-              <div className="w-16 h-16 rounded-full border-4 border-t-blue-500 border-white/30 animate-spin mb-4 mx-auto"></div>
-              <p>Initializing camera...</p>
-            </div>
-          </div>
-        )}
       </div>
-      
-      {/* Augmented reality overlay effects */}
-      <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-black/40 to-transparent opacity-70"></div>
-      
-      {/* Grid pattern overlay for AR effect */}
-      <div 
-        className="absolute inset-0 pointer-events-none opacity-10"
-        style={{
-          backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)',
-          backgroundSize: '20px 20px'
-        }}
-      ></div>
     </div>
   );
 };

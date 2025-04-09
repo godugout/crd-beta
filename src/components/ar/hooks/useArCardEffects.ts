@@ -6,37 +6,36 @@ export const useArCardEffects = (
   isSelected: boolean,
   cardRef: React.RefObject<HTMLDivElement>
 ) => {
-  const [effectIndex, setEffectIndex] = useState(index % 4);
+  const [effectClass, setEffectClass] = useState('');
   
-  // Available effects
-  const effects = [
-    'card-holographic',
-    'card-refractor',
-    'spectral-hologram',
-    'card-gold-foil'
-  ];
-
-  // Double tap to change effect
-  const handleDoubleTap = (e: React.MouseEvent) => {
-    if (isSelected) {
-      setEffectIndex((effectIndex + 1) % effects.length);
-      e.stopPropagation();
-    }
-  };
-
-  // Apply floating animation when selected
+  // Apply different effects to each card to create variety
   useEffect(() => {
-    if (isSelected && cardRef.current) {
-      cardRef.current.style.animation = 'float 6s ease-in-out infinite';
-      
-      // Add shimmer effect
-      document.documentElement.style.setProperty('--shimmer-speed', '3s');
-      document.documentElement.style.setProperty('--hologram-intensity', '0.8');
-    }
-  }, [isSelected, cardRef]);
-
-  return {
-    effectClass: effects[effectIndex],
-    handleDoubleTap
+    const effects = [
+      'card-refractor-effect',
+      'card-chrome-effect', 
+      'card-gold-effect',
+      'card-prism-effect',
+      'card-vintage-effect'
+    ];
+    
+    // Use the index to pick an effect, distributing them among cards
+    const effect = effects[index % effects.length];
+    setEffectClass(effect);
+  }, [index]);
+  
+  const handleDoubleTap = () => {
+    if (!cardRef.current) return;
+    
+    // Add a quick animation class for double tap
+    cardRef.current.classList.add('animate-scaleIn');
+    
+    // Remove the animation class after it completes
+    setTimeout(() => {
+      if (cardRef.current) {
+        cardRef.current.classList.remove('animate-scaleIn');
+      }
+    }, 500);
   };
+  
+  return { effectClass, handleDoubleTap };
 };

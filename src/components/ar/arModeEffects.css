@@ -1,65 +1,124 @@
 
-/* Radio dial specific animations */
-@keyframes dial-glow {
-  0% {
-    box-shadow: 0 0 5px 0 rgba(59, 130, 246, 0.3);
-  }
-  50% {
-    box-shadow: 0 0 15px 2px rgba(59, 130, 246, 0.6);
-  }
-  100% {
-    box-shadow: 0 0 5px 0 rgba(59, 130, 246, 0.3);
-  }
+/* AR Mode Effects */
+.ar-card {
+  transition: transform 0.3s ease-out, box-shadow 0.3s ease-out;
+  transform-style: preserve-3d;
+  transform-origin: center center;
 }
 
-@keyframes appear {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.ar-card.selected {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5), 
+              0 10px 20px rgba(0, 0, 0, 0.3);
 }
 
-@keyframes float {
-  0% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-  100% {
-    transform: translateY(0);
-  }
+/* Card shine effect */
+.card-shine {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    125deg, 
+    rgba(255, 255, 255, 0) 0%, 
+    rgba(255, 255, 255, 0.3) 30%, 
+    rgba(255, 255, 255, 0.6) 47%, 
+    rgba(255, 255, 255, 0.3) 70%, 
+    rgba(255, 255, 255, 0) 100%
+  );
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.ar-card:hover .card-shine {
+  opacity: 1;
+}
+
+/* Selection indicator */
+.selection-indicator {
+  position: absolute;
+  inset: -3px;
+  border: 3px solid #3b82f6;
+  border-radius: 10px;
+  pointer-events: none;
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.7; }
+  50% { opacity: 1; }
+  100% { opacity: 0.7; }
+}
+
+/* Card selector */
+.card-selector {
+  background-color: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(10px);
+  transform: translateY(100%);
+  transition: transform 0.3s ease;
+}
+
+.card-selector.open {
+  transform: translateY(0);
+}
+
+/* Button animations */
+.ar-button {
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.ar-button:active {
+  transform: scale(0.95);
+}
+
+/* Animations */
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+.animate-scaleIn {
+  animation: scaleIn 0.3s ease-out forwards;
 }
 
 @keyframes fadeIn {
-  from {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { 
+    transform: scale(0.9); 
     opacity: 0;
   }
-  to {
+  to { 
+    transform: scale(1); 
     opacity: 1;
   }
 }
 
-.animate-fadeIn {
-  animation: fadeIn 0.3s ease forwards;
-}
-
-.card-appear {
-  opacity: 0;
-  animation: appear 0.3s ease forwards;
-}
-
-/* Mouse trail effect */
-.mouse-trail {
+/* Radio dial */
+.radio-dial {
   position: absolute;
-  width: 10px;
-  height: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 80px;
+  display: flex;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(5px);
+  border-radius: 999px;
+  z-index: 30;
+}
+
+.radio-dial-item {
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
-  pointer-events: none;
-  background: radial-gradient(circle, rgba(59, 130, 246, 0.6) 0%, rgba(59, 130, 246, 0) 70%);
-  transition: width 0.2s, height 0.2s;
+  background: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+}
+
+.radio-dial-item.active {
+  background: white;
+  transform: scale(1.2);
 }
