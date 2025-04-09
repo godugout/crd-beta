@@ -13,6 +13,8 @@ interface PageLayoutProps {
   fullWidth?: boolean;
   hideBreadcrumb?: boolean;
   canonicalPath?: string;
+  imageUrl?: string;
+  type?: string;
 }
 
 const PageLayout: React.FC<PageLayoutProps> = ({ 
@@ -21,7 +23,9 @@ const PageLayout: React.FC<PageLayoutProps> = ({
   children, 
   fullWidth = false,
   hideBreadcrumb = false,
-  canonicalPath 
+  canonicalPath,
+  imageUrl,
+  type
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const isMobile = useMediaQuery('(max-width: 768px)');
@@ -63,6 +67,23 @@ const PageLayout: React.FC<PageLayoutProps> = ({
       canonicalLink.setAttribute('href', `${baseUrl}${canonicalPath}`);
     }
     
+    // Set Open Graph metadata
+    const updateOgTag = (property: string, content: string) => {
+      let ogTag = document.querySelector(`meta[property="og:${property}"]`);
+      if (!ogTag) {
+        ogTag = document.createElement('meta');
+        ogTag.setAttribute('property', `og:${property}`);
+        document.head.appendChild(ogTag);
+      }
+      ogTag.setAttribute('content', content);
+    };
+    
+    if (title) updateOgTag('title', title);
+    if (description) updateOgTag('description', description);
+    if (imageUrl) updateOgTag('image', imageUrl);
+    if (type) updateOgTag('type', type);
+    updateOgTag('url', window.location.href);
+    
     return () => {
       document.title = previousTitle;
       
@@ -71,7 +92,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({
         document.head.removeChild(canonicalLink);
       }
     };
-  }, [title, description, canonicalPath]);
+  }, [title, description, canonicalPath, imageUrl, type]);
 
   return (
     <div className="min-h-screen flex flex-col">

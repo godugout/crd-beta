@@ -25,19 +25,23 @@ const TeamBreadcrumb: React.FC<TeamBreadcrumbProps> = ({ currentPage }) => {
         // Make sure we're only selecting the columns we need
         const { data, error } = await supabase
           .from('teams')
-          .select('name, primary_color')
-          .eq('team_code', teamSlug.toUpperCase())
-          .single();
+          .select('name, primary_color');
           
         if (error) {
           console.error('Error fetching team for breadcrumb:', error);
           return;
         }
           
-        if (data) {
+        if (data && data.length > 0) {
           setTeamInfo({
-            name: data.name,
-            color: data.primary_color || undefined
+            name: data[0].name || teamSlug,
+            color: data[0].primary_color || undefined
+          });
+        } else {
+          // Fallback to using the slug if no data found
+          setTeamInfo({
+            name: teamSlug.charAt(0).toUpperCase() + teamSlug.slice(1),
+            color: undefined
           });
         }
       } catch (err) {

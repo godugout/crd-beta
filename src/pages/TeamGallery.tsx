@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import PageLayout from '@/components/navigation/PageLayout';
@@ -48,30 +49,7 @@ const TeamGallery = () => {
           setTeams([]);
         } else if (data) {
           // Transform the data to match our interface
-          type TeamQueryResult = {
-            id: string;
-            name: string;
-            description: string | null;
-            owner_id: string;
-            created_at: string;
-            updated_at: string;
-            logo_url: string | null;
-            team_code: string | null;
-            primary_color: string | null;
-            secondary_color: string | null;
-            tertiary_color: string | null;
-            founded_year: number | null;
-            city: string | null;
-            state: string | null;
-            country: string | null;
-            stadium: string | null;
-            league: string | null;
-            division: string | null;
-            is_active: boolean | null;
-          };
-          
-          const teamsData = data as TeamQueryResult[];
-          const transformedTeams: TeamDisplayData[] = teamsData.map(team => ({
+          const transformedTeams: TeamDisplayData[] = data.map(team => ({
             id: team.id,
             name: team.name,
             slug: team.team_code ? team.team_code.toLowerCase() : team.name.toLowerCase().replace(/\s+/g, '-'),

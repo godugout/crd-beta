@@ -28,7 +28,7 @@ export interface Team {
   memberCount?: number;
 }
 
-// Interface for team data coming from Supabase
+// Interface for team data coming directly from Supabase
 export interface DbTeam {
   id: string;
   name: string;

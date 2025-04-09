@@ -9,14 +9,20 @@ import {
 } from "@/components/ui/navigation-menu";
 import { Users, PlayCircle, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { Team } from '@/lib/types/TeamTypes';
 
 interface TeamNavigationProps {
   activeSection: string;
 }
 
+interface TeamNavigationItem {
+  id: string;
+  name: string;
+  slug: string;
+  primary_color?: string;
+}
+
 const TeamNavigation: React.FC<TeamNavigationProps> = ({ activeSection }) => {
-  const [teams, setTeams] = useState<Team[]>([]);
+  const [teams, setTeams] = useState<TeamNavigationItem[]>([]);
   const [loading, setLoading] = useState(true);
   const location = useLocation();
   
@@ -35,22 +41,15 @@ const TeamNavigation: React.FC<TeamNavigationProps> = ({ activeSection }) => {
           console.error('Error fetching team navigation:', error);
           setTeams([]);
         } else if (data) {
-          // Cast data to avoid type issues
-          type QueryResult = {
-            id: string;
-            name: string;
-            team_code: string | null;
-            primary_color: string | null;
-          };
-          
-          const teamData = data as QueryResult[];
-          setTeams(teamData.map(team => ({
+          // Transform data to expected format
+          const teamData = data.map(team => ({
             id: team.id,
             name: team.name,
             slug: team.team_code ? team.team_code.toLowerCase() : team.name.toLowerCase().replace(/\s+/g, '-'),
-            primary_color: team.primary_color || undefined,
-            owner_id: 'system'
-          })));
+            primary_color: team.primary_color || undefined
+          }));
+          
+          setTeams(teamData);
         }
       } catch (err) {
         console.error('Error in team navigation:', err);
@@ -64,34 +63,30 @@ const TeamNavigation: React.FC<TeamNavigationProps> = ({ activeSection }) => {
   }, []);
 
   // Fallback teams if database fetch fails
-  const fallbackTeams: Team[] = [
+  const fallbackTeams: TeamNavigationItem[] = [
     { 
       id: '1', 
       name: 'Oakland A\'s', 
       slug: 'oakland',
-      primary_color: '#006341',
-      owner_id: 'system'
+      primary_color: '#006341'
     },
     { 
       id: '2', 
       name: 'San Francisco Giants', 
       slug: 'sf-giants',
-      primary_color: '#FD5A1E',
-      owner_id: 'system'
+      primary_color: '#FD5A1E'
     },
     { 
       id: '3', 
       name: 'Los Angeles Dodgers', 
       slug: 'la-dodgers',
-      primary_color: '#005A9C',
-      owner_id: 'system'
+      primary_color: '#005A9C'
     },
     {
       id: '4',
       name: 'New York Yankees',
       slug: 'nyy',
-      primary_color: '#003087',
-      owner_id: 'system'
+      primary_color: '#003087'
     }
   ];
 
