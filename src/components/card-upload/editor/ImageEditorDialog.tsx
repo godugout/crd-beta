@@ -1,8 +1,7 @@
-
 import React, { useRef, useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Loader2, Info, Tag, User, Calendar, Jersey } from 'lucide-react';
+import { Loader2, Info, Tag, User, Calendar, Shirt } from 'lucide-react';
 import { useCropState } from '../hooks/useCropState';
 import { useEditor } from '../hooks/useEditor';
 import { useCropBoxOperations } from '../hooks/useCropBoxOperations';
@@ -44,10 +43,8 @@ const ImageEditorDialog: React.FC<ImageEditorDialogProps> = ({
   const [extractedMetadata, setExtractedMetadata] = useState<any>(null);
   const [isExtractingMetadata, setIsExtractingMetadata] = useState(false);
   
-  // Card selection state
   const { imageData, setImageData, cropBoxes, setCropBoxes, detectedCards, setDetectedCards } = useCropState();
   
-  // Card extraction and staging
   const { stagedCards, stageSelectedCrop, selectStagedCard } = useEditor({
     onCropComplete,
     currentFile,
@@ -55,10 +52,8 @@ const ImageEditorDialog: React.FC<ImageEditorDialogProps> = ({
     autoEnhance,
   });
   
-  // Selection state
   const [selectedCropIndex, setSelectedCropIndex] = useState(-1);
   
-  // Crop box operations (rotate, resize, etc)
   const { 
     rotateClockwise, 
     rotateCounterClockwise, 
@@ -73,7 +68,6 @@ const ImageEditorDialog: React.FC<ImageEditorDialogProps> = ({
     canvasRef
   });
   
-  // Image handling operations
   const { 
     rotateImage, 
     detectItems, 
@@ -89,10 +83,9 @@ const ImageEditorDialog: React.FC<ImageEditorDialogProps> = ({
     canvasRef,
     editorImgRef,
     batchProcessingMode,
-    enabledMemorabiliaTypes: ['card'] // Force card detection
+    enabledMemorabiliaTypes: ['card']
   });
   
-  // Update image data when editor image changes
   useEffect(() => {
     if (editorImage && showEditor) {
       setImageData({ 
@@ -105,7 +98,6 @@ const ImageEditorDialog: React.FC<ImageEditorDialogProps> = ({
     }
   }, [editorImage, showEditor, setImageData]);
   
-  // Auto-run detection when image loads
   useEffect(() => {
     if (showEditor && editorImage && !detectionRunning && cropBoxes.length === 0) {
       const img = editorImgRef.current;
@@ -115,7 +107,6 @@ const ImageEditorDialog: React.FC<ImageEditorDialogProps> = ({
     }
   }, [showEditor, editorImage, editorImgRef.current?.complete, detectionRunning, cropBoxes.length, detectItems]);
   
-  // Handle memorabilia type change
   const handleMemorabiliaTypeChange = (index: number, type: MemorabiliaType) => {
     if (index >= 0 && index < cropBoxes.length) {
       const newBoxes = [...cropBoxes];
@@ -125,13 +116,11 @@ const ImageEditorDialog: React.FC<ImageEditorDialogProps> = ({
       };
       setCropBoxes(newBoxes);
       
-      // When type changes, clear previous metadata and extract again
       setExtractedMetadata(null);
       extractCardMetadata();
     }
   };
   
-  // Extract text from image when a crop box is selected
   const extractCardMetadata = async () => {
     if (selectedCropIndex < 0 || !editorImgRef.current) return null;
     
@@ -141,7 +130,6 @@ const ImageEditorDialog: React.FC<ImageEditorDialogProps> = ({
       const selectedBox = cropBoxes[selectedCropIndex];
       const img = editorImgRef.current;
       
-      // Create a temporary canvas to extract just the cropped area
       const tempCanvas = document.createElement('canvas');
       const ctx = tempCanvas.getContext('2d');
       if (!ctx) return null;
@@ -155,7 +143,6 @@ const ImageEditorDialog: React.FC<ImageEditorDialogProps> = ({
         0, 0, selectedBox.width, selectedBox.height
       );
       
-      // Extract text from the cropped area
       const textData = await detectText(tempCanvas);
       setExtractedMetadata(textData);
       return textData;
@@ -167,14 +154,12 @@ const ImageEditorDialog: React.FC<ImageEditorDialogProps> = ({
     }
   };
   
-  // Extract metadata when crop box is selected
   useEffect(() => {
     if (selectedCropIndex >= 0 && !extractedMetadata) {
       extractCardMetadata();
     }
   }, [selectedCropIndex]);
   
-  // Extract and save card to catalog
   const handleExtractAndSaveCard = async () => {
     if (!currentFile || selectedCropIndex < 0) {
       toast.error("Please select an area to extract");
@@ -184,10 +169,8 @@ const ImageEditorDialog: React.FC<ImageEditorDialogProps> = ({
     setIsExtractingSaving(true);
     
     try {
-      // Extract the card
       const selectedBox = cropBoxes[selectedCropIndex];
       
-      // Extract metadata before cropping if not already done
       const metadata = extractedMetadata || await extractCardMetadata();
       
       const result = await stageSelectedCrop(
@@ -203,7 +186,6 @@ const ImageEditorDialog: React.FC<ImageEditorDialogProps> = ({
         return;
       }
       
-      // Prepare the card data with extracted metadata
       const cardData = {
         title: metadata?.title || "Extracted Card",
         tags: metadata?.tags || ["baseball", "card", "extracted"],
@@ -221,23 +203,19 @@ const ImageEditorDialog: React.FC<ImageEditorDialogProps> = ({
       };
       
       try {
-        // First try to save to catalog if possible
         const saveResult = await storageOperations.saveExtractedCard(result.file, cardData);
         
         if (saveResult.error) {
           console.error("Error saving to catalog:", saveResult.error);
-          // Continue with extraction even if catalog save fails
           toast.warning("Card extracted but couldn't be saved to catalog. Using local version.");
         } else {
           toast.success("Card extracted and saved to your catalog");
         }
       } catch (saveError) {
         console.error("Error saving to catalog:", saveError);
-        // Continue with extraction even if catalog save fails
         toast.warning("Card extracted but couldn't be saved to catalog. Using local version.");
       }
       
-      // Always pass extracted data to the callback to ensure the flow continues
       onCropComplete(
         result.file, 
         result.url, 
@@ -407,7 +385,7 @@ const ImageEditorDialog: React.FC<ImageEditorDialogProps> = ({
                   
                   {extractedMetadata.team && (
                     <div className="flex items-start gap-2">
-                      <Jersey className="h-4 w-4 text-gray-500 mt-0.5 flex-shrink-0" />
+                      <Shirt className="h-4 w-4 text-gray-500 mt-0.5 flex-shrink-0" />
                       <div>
                         <p className="font-medium">Team</p>
                         <p className="text-gray-700">{extractedMetadata.team}</p>
