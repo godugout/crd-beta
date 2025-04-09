@@ -5,7 +5,7 @@ import { MoveRight, Image, Layers, Package, Users, Star, Play, Zap } from 'lucid
 export const cardsNavigation = {
   title: 'Cards',
   key: 'cards',
-  layout: 'grid',
+  layout: 'grid' as 'grid' | 'list',
   columns: 2,
   items: [
     {
@@ -45,7 +45,7 @@ export const cardsNavigation = {
 export const collectionsNavigation = {
   title: 'Collections',
   key: 'collections',
-  layout: 'list',
+  layout: 'list' as 'grid' | 'list',
   items: [
     {
       title: 'My Collections',
@@ -78,7 +78,7 @@ export const collectionsNavigation = {
 export const teamsNavigation = {
   title: 'Teams',
   key: 'teams',
-  layout: 'grid',
+  layout: 'grid' as 'grid' | 'list',
   columns: 2,
   items: [
     {
@@ -112,7 +112,7 @@ export const teamsNavigation = {
 export const featuresNavigation = {
   title: 'Features',
   key: 'features',
-  layout: 'grid',
+  layout: 'grid' as 'grid' | 'list',
   columns: 2,
   items: [
     {
@@ -141,4 +141,20 @@ export const featuresNavigation = {
       description: 'Enhanced experience for game day'
     }
   ]
+};
+
+// Route to section mappings for breadcrumbs
+export const routeMappings = {
+  '/': 'home',
+  '/cards': 'cards',
+  '/gallery': 'cards',
+  '/cards/create': 'cards',
+  '/cards/edit': 'cards',
+  '/collections': 'collections',
+  '/packs': 'collections',
+  '/teams': 'teams',
+  '/ar-viewer': 'features',
+  '/comparison': 'features',
+  '/animation': 'features',
+  '/game-day': 'features'
 };
