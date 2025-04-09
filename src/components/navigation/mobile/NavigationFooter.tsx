@@ -3,19 +3,32 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { LogOut, Settings, User as UserIcon } from 'lucide-react';
-import { useAuth } from '@/context/auth/AuthContext'; // Updated import to fix the error
+import { useAuth } from '@/context/auth/useAuth';
 
-const NavigationFooter: React.FC = () => {
-  const { user, signOut } = useAuth();
+interface NavigationFooterProps {
+  onSignOut?: () => void;
+  onClose?: () => void;
+}
+
+const NavigationFooter: React.FC<NavigationFooterProps> = ({ onSignOut, onClose }) => {
+  const { user, signOut: authSignOut } = useAuth();
+  
+  const handleSignOut = () => {
+    if (onSignOut) {
+      onSignOut();
+    } else if (authSignOut) {
+      authSignOut();
+    }
+  };
   
   if (!user) {
     return (
       <div className="mt-auto pt-4 border-t border-gray-200 px-4">
         <div className="flex flex-col gap-2 pb-4">
-          <Button asChild variant="outline" className="w-full">
+          <Button asChild variant="outline" className="w-full" onClick={onClose}>
             <Link to="/login">Sign in</Link>
           </Button>
-          <Button asChild className="w-full">
+          <Button asChild className="w-full" onClick={onClose}>
             <Link to="/register">Create account</Link>
           </Button>
         </div>
@@ -42,7 +55,7 @@ const NavigationFooter: React.FC = () => {
       </div>
       
       <div className="flex flex-col gap-2 pb-4">
-        <Button asChild variant="outline" size="sm" className="w-full justify-start">
+        <Button asChild variant="outline" size="sm" className="w-full justify-start" onClick={onClose}>
           <Link to="/settings">
             <Settings size={16} className="mr-2" />
             Settings
@@ -52,7 +65,7 @@ const NavigationFooter: React.FC = () => {
           variant="outline" 
           size="sm"
           className="w-full justify-start text-red-500 hover:text-red-600" 
-          onClick={signOut}
+          onClick={handleSignOut}
         >
           <LogOut size={16} className="mr-2" />
           Sign out

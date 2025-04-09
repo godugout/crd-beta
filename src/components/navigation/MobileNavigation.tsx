@@ -75,7 +75,6 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({ isOpen, onClose }) 
           
           {/* Footer with authentication */}
           <NavigationFooter
-            user={user}
             onSignOut={handleSignOut}
             onClose={onClose}
           />

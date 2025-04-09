@@ -1,4 +1,3 @@
-
 import React, { useRef, useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -94,9 +93,14 @@ const ImageEditorDialog: React.FC<ImageEditorDialogProps> = ({
   // Update image data when editor image changes
   useEffect(() => {
     if (editorImage && showEditor) {
-      setImageData({ url: editorImage, width: 0, height: 0 });
+      setImageData(prev => ({ 
+        ...prev,
+        url: editorImage, 
+        width: 0, 
+        height: 0 
+      }));
     }
-  }, [editorImage, showEditor]);
+  }, [editorImage, showEditor, setImageData]);
   
   // Auto-run detection when image loads
   useEffect(() => {
@@ -106,7 +110,7 @@ const ImageEditorDialog: React.FC<ImageEditorDialogProps> = ({
         detectItems();
       }
     }
-  }, [showEditor, editorImage, editorImgRef.current?.complete]);
+  }, [showEditor, editorImage, editorImgRef.current?.complete, detectionRunning, cropBoxes.length, detectItems]);
   
   // Handle memorabilia type change
   const handleMemorabiliaTypeChange = (index: number, type: MemorabiliaType) => {

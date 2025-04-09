@@ -42,6 +42,22 @@ const CardCreationFlow: React.FC<CardCreationFlowProps> = ({ card, className }) 
     setShowEditor(true);
   };
   
+  // Adapter function to convert ImageUploader's expected format
+  const handleImageUploaderComplete = (url: string, assetId: string) => {
+    // Since we're not actually using the URL from ImageUploader directly,
+    // we can just trigger a file selection instead
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/*';
+    fileInput.onchange = (e: Event) => {
+      const target = e.target as HTMLInputElement;
+      if (target.files && target.files[0]) {
+        handleImageUpload(target.files[0]);
+      }
+    };
+    fileInput.click();
+  };
+  
   // Handle crop completion
   const handleCropComplete = async (file: File, url: string, memType?: MemorabiliaType) => {
     setExtractedFile(file);
@@ -67,7 +83,7 @@ const CardCreationFlow: React.FC<CardCreationFlowProps> = ({ card, className }) 
             <h2 className="text-lg font-semibold mb-4">Upload Card Image</h2>
             
             {!uploadedImage ? (
-              <ImageUploader onUploadComplete={handleImageUpload} maxSizeMB={10} />
+              <ImageUploader onUploadComplete={handleImageUploaderComplete} maxSizeMB={10} />
             ) : (
               <div className="space-y-4">
                 <div className="relative aspect-[2.5/3.5] max-w-xs mx-auto border rounded-md overflow-hidden">
