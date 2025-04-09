@@ -30,6 +30,7 @@ const TeamNavigation: React.FC<TeamNavigationProps> = ({ activeSection }) => {
   useEffect(() => {
     const fetchTeams = async () => {
       try {
+        // Specify the return type of the data to avoid excessive type instantiation
         const { data, error } = await supabase
           .from('teams')
           .select('id, name')
@@ -47,9 +48,9 @@ const TeamNavigation: React.FC<TeamNavigationProps> = ({ activeSection }) => {
         if (data && Array.isArray(data)) {
           // Transform data to expected format
           const teamData = data.map(team => ({
-            id: team.id,
-            name: team.name,
-            slug: team.name.toLowerCase().replace(/\s+/g, '-'),
+            id: team.id || '',
+            name: team.name || '',
+            slug: team.name ? team.name.toLowerCase().replace(/\s+/g, '-') : '',
             primary_color: undefined
           }));
           

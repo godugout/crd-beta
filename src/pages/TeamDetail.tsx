@@ -17,6 +17,12 @@ interface TeamData {
   logo_url?: string;
   slug?: string;
   primaryColor?: string;
+  city?: string;
+  state?: string;
+  founded_year?: number;
+  stadium?: string;
+  league?: string;
+  division?: string;
 }
 
 const TeamDetail = () => {
@@ -29,7 +35,6 @@ const TeamDetail = () => {
       if (!teamSlug) return;
       
       try {
-        // Fetch basic team information only
         const { data, error } = await supabase
           .from('teams')
           .select('id, name, description, owner_id, created_at, updated_at, logo_url')
@@ -43,7 +48,6 @@ const TeamDetail = () => {
         }
         
         if (data) {
-          // Map the data to our Team interface
           const formattedTeam: TeamData = {
             id: data.id,
             name: data.name,
@@ -53,7 +57,13 @@ const TeamDetail = () => {
             updated_at: data.updated_at,
             logo_url: data.logo_url || undefined,
             slug: teamSlug,
-            primaryColor: '#333333' // Default color
+            primaryColor: '#333333',
+            city: undefined,
+            state: undefined,
+            founded_year: undefined,
+            stadium: undefined,
+            league: undefined,
+            division: undefined
           };
           
           setTeam(formattedTeam);
@@ -68,13 +78,18 @@ const TeamDetail = () => {
     fetchTeamDetails();
   }, [teamSlug]);
   
-  // Fallback for when team data is not available
   const fallbackTeam: TeamData = {
     id: '1',
     name: teamSlug ? teamSlug.charAt(0).toUpperCase() + teamSlug.slice(1) : 'Team',
     description: 'Team details are currently unavailable.',
     owner_id: 'system',
-    primaryColor: '#333333'
+    primaryColor: '#333333',
+    city: undefined,
+    state: undefined,
+    founded_year: undefined,
+    stadium: undefined,
+    league: undefined,
+    division: undefined
   };
   
   const displayTeam = team || fallbackTeam;
@@ -83,18 +98,13 @@ const TeamDetail = () => {
   
   return (
     <PageLayout 
-      title={displayTeam.name} 
-      description={displayTeam.description || `Information about ${displayTeam.name}`}
+      title={team?.name || teamSlug || 'Team'} 
+      description={team?.description || `Information about this team`}
     >
       <TeamBreadcrumb />
       
-      {loading ? (
-        <div className="flex justify-center items-center py-16">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-        </div>
-      ) : (
+      {!loading && (
         <>
-          {/* Team Header */}
           <div 
             className="py-12" 
             style={{ 
@@ -105,10 +115,10 @@ const TeamDetail = () => {
             <div className="container mx-auto px-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h1 className="text-4xl font-bold mb-2">{displayTeam.name}</h1>
-                  {displayTeam.city && (
+                  <h1 className="text-4xl font-bold mb-2">{team?.name || teamSlug}</h1>
+                  {team?.city && (
                     <p className="text-lg opacity-90">
-                      {displayTeam.city}, {displayTeam.state}
+                      {team.city}, {team.state}
                     </p>
                   )}
                 </div>
@@ -131,7 +141,6 @@ const TeamDetail = () => {
             </div>
           </div>
           
-          {/* Team Content */}
           <div className="container mx-auto px-4 py-8">
             <Tabs defaultValue="overview" className="w-full">
               <TabsList className="mb-8">
@@ -143,44 +152,42 @@ const TeamDetail = () => {
               
               <TabsContent value="overview" className="space-y-8">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                  {/* Left Column - Team Details */}
                   <div className="md:col-span-2 space-y-6">
                     <div className="bg-white p-6 rounded-lg shadow-sm border">
-                      <h2 className="text-xl font-semibold mb-4">About {displayTeam.name}</h2>
+                      <h2 className="text-xl font-semibold mb-4">About {team?.name || teamSlug}</h2>
                       <p className="text-gray-700 mb-4">
-                        {displayTeam.description || 'No team description available.'}
+                        {team?.description || 'No team description available.'}
                       </p>
                       
-                      {/* Team Metadata */}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-                        {displayTeam.founded_year && (
+                        {team?.founded_year && (
                           <div className="flex items-center">
                             <Calendar className="h-5 w-5 text-gray-500 mr-3" />
                             <div>
                               <p className="text-sm text-gray-500">Founded</p>
-                              <p className="font-medium">{displayTeam.founded_year}</p>
+                              <p className="font-medium">{team.founded_year}</p>
                             </div>
                           </div>
                         )}
                         
-                        {displayTeam.stadium && (
+                        {team?.stadium && (
                           <div className="flex items-center">
                             <MapPin className="h-5 w-5 text-gray-500 mr-3" />
                             <div>
                               <p className="text-sm text-gray-500">Stadium</p>
-                              <p className="font-medium">{displayTeam.stadium}</p>
+                              <p className="font-medium">{team.stadium}</p>
                             </div>
                           </div>
                         )}
                         
-                        {displayTeam.league && (
+                        {team?.league && (
                           <div className="flex items-center">
                             <Trophy className="h-5 w-5 text-gray-500 mr-3" />
                             <div>
                               <p className="text-sm text-gray-500">League</p>
                               <p className="font-medium">
-                                {displayTeam.league}
-                                {displayTeam.division && ` / ${displayTeam.division} Division`}
+                                {team.league}
+                                {team.division && ` / ${team.division} Division`}
                               </p>
                             </div>
                           </div>
@@ -188,7 +195,6 @@ const TeamDetail = () => {
                       </div>
                     </div>
                     
-                    {/* Recent Memories */}
                     <div className="bg-white p-6 rounded-lg shadow-sm border">
                       <div className="flex justify-between items-center mb-4">
                         <h2 className="text-xl font-semibold">Recent Memories</h2>
@@ -209,7 +215,6 @@ const TeamDetail = () => {
                     </div>
                   </div>
                   
-                  {/* Right Column - Team Stats & Actions */}
                   <div className="space-y-6">
                     <div className="bg-white p-6 rounded-lg shadow-sm border">
                       <h2 className="text-lg font-medium mb-4">Team Actions</h2>
@@ -293,18 +298,15 @@ const TeamDetail = () => {
   );
 };
 
-// Helper function to determine appropriate contrast color
 const getContrastColor = (backgroundColor?: string): string => {
   if (!backgroundColor || backgroundColor.length < 7) {
     return '#ffffff';
   }
   
-  // Convert hex to RGB
   const r = parseInt(backgroundColor.substring(1, 3), 16);
   const g = parseInt(backgroundColor.substring(3, 5), 16);
   const b = parseInt(backgroundColor.substring(5, 7), 16);
   
-  // Calculate luminance
   const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
   return luminance > 0.5 ? '#000000' : '#ffffff';
 };
