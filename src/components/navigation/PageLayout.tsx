@@ -108,7 +108,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({
       
       {!hideBreadcrumb && <BreadcrumbNav currentTeam={team} />}
       
-      <AnimatePresence mode="wait">
+      <AnimatePresence>
         {transitions ? (
           <motion.main
             className={`flex-1 ${fullWidth ? '' : 'container mx-auto px-4 py-6'}`}

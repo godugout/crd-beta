@@ -149,8 +149,13 @@ export const featuresNavigation: NavigationSection = {
   ]
 };
 
-// Route mapping for breadcrumbs
-export const routeMappings: Record<string, { path: string; label: string; parent?: string; icon?: React.ElementType }> = {
+// Route mapping for breadcrumbs - with proper typing
+export const routeMappings: Record<string, { 
+  path: string; 
+  label: string; 
+  parent?: string; 
+  icon?: React.ElementType;
+}> = {
   // Root
   '': { path: '/', label: 'Home', parent: undefined, icon: Home },
   

@@ -41,7 +41,7 @@ const CardDetail = () => {
       title={cardData.title} 
       description={`${cardData.year} ${cardData.player} ${cardData.team} baseball card`}
       imageUrl={cardData.imageUrl}
-      type="baseball.card"
+      type="product"
     >
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

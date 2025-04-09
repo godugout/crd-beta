@@ -24,7 +24,7 @@ const GameDayTabs: React.FC<GameDayTabsProps> = ({
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab}>
       <TabsList className="grid grid-cols-3 mb-4 relative">
-        <AnimatePresence initial={false}>
+        <AnimatePresence>
           <motion.div
             key={activeTab}
             className="absolute bottom-0 h-0.5 bg-primary rounded-full"
