@@ -1,5 +1,6 @@
 
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { QueryClientProvider } from '@tanstack/react-query';
 import HomePage from './pages/Home';
 import NotFoundPage from './pages/NotFound';
 import MediaLibrary from './pages/MediaLibrary';
@@ -16,6 +17,8 @@ import { AuthProvider } from './context/auth/AuthProvider';
 import { useMobileOptimization } from './hooks/useMobileOptimization';
 import { useConnectivity } from './hooks/useConnectivity';
 import ExperimentalPage from './pages/Labs';
+import { queryClient } from './lib/api/queryClient';
+import { DamProvider } from './providers/DamProvider';
 
 // Create Provider components from hooks
 const MobileOptimizationProvider = ({ children }) => {
@@ -32,29 +35,33 @@ const ConnectivityProvider = ({ children }) => {
 function App() {
   return (
     <BrowserRouter>
-      <ConnectivityProvider>
-        <MobileOptimizationProvider>
-          <AuthProvider>
-            <CardProvider>
-              <Routes>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/media-library" element={<MediaLibrary />} />
-                <Route path="/batch-operations" element={<BatchOperationsPage />} />
-                <Route path="/cards" element={<CardGallery />} />
-                <Route path="/cards/create" element={<CardEditor />} />
-                <Route path="/cards/:id/edit" element={<CardEditor />} />
-                <Route path="/baseball-card-viewer/:id" element={<BaseballCardViewer />} />
-                <Route path="/teams/oakland/memories" element={<OaklandMemoriesPage />} />
-                <Route path="/teams/oakland/memories/:id" element={<OaklandMemoryDetailsPage />} />
-                <Route path="/game-day" element={<GameDayCapturePage />} />
-                <Route path="/group-memory" element={<GroupMemoryPage />} />
-                <Route path="/experimental" element={<ExperimentalPage />} />
-                <Route path="*" element={<NotFoundPage />} />
-              </Routes>
-            </CardProvider>
-          </AuthProvider>
-        </MobileOptimizationProvider>
-      </ConnectivityProvider>
+      <QueryClientProvider client={queryClient}>
+        <ConnectivityProvider>
+          <MobileOptimizationProvider>
+            <AuthProvider>
+              <CardProvider>
+                <DamProvider>
+                  <Routes>
+                    <Route path="/" element={<HomePage />} />
+                    <Route path="/media-library" element={<MediaLibrary />} />
+                    <Route path="/batch-operations" element={<BatchOperationsPage />} />
+                    <Route path="/cards" element={<CardGallery />} />
+                    <Route path="/cards/create" element={<CardEditor />} />
+                    <Route path="/cards/:id/edit" element={<CardEditor />} />
+                    <Route path="/baseball-card-viewer/:id" element={<BaseballCardViewer />} />
+                    <Route path="/teams/oakland/memories" element={<OaklandMemoriesPage />} />
+                    <Route path="/teams/oakland/memories/:id" element={<OaklandMemoryDetailsPage />} />
+                    <Route path="/game-day" element={<GameDayCapturePage />} />
+                    <Route path="/group-memory" element={<GroupMemoryPage />} />
+                    <Route path="/experimental" element={<ExperimentalPage />} />
+                    <Route path="*" element={<NotFoundPage />} />
+                  </Routes>
+                </DamProvider>
+              </CardProvider>
+            </AuthProvider>
+          </MobileOptimizationProvider>
+        </ConnectivityProvider>
+      </QueryClientProvider>
     </BrowserRouter>
   );
 }

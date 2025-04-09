@@ -10,16 +10,19 @@ import BatchImageUploader from '@/components/dam/BatchImageUploader';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import { toast } from 'sonner';
 import AssetOrganizer from '@/components/dam/AssetOrganizer';
+import { useDam } from '@/providers/DamProvider';
 
 const BatchOperationsPage = () => {
   const [activeTab, setActiveTab] = useState('manage');
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
+  const { refreshAssets } = useDam(); // Use our new DAM context
 
   const handleBatchUploadComplete = (urls: string[]) => {
     setUploadedImages(urls);
     toast.success(`Successfully uploaded ${urls.length} images`);
     setRefreshTrigger(prev => prev + 1);
+    refreshAssets(); // Refresh assets after upload
   };
 
   return (
@@ -50,7 +53,10 @@ const BatchOperationsPage = () => {
               <CardContent className="pt-6">
                 <BatchOperations 
                   key={`operations-${refreshTrigger}`}
-                  onComplete={() => setRefreshTrigger(prev => prev + 1)}
+                  onComplete={() => {
+                    setRefreshTrigger(prev => prev + 1);
+                    refreshAssets(); // Refresh assets when operations complete
+                  }}
                 />
               </CardContent>
             </Card>
