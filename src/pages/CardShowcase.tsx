@@ -8,6 +8,7 @@ import { Separator } from '@/components/ui/separator';
 import { Card, Collection } from '@/lib/types';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
+import { Collection as ContextCollection } from '@/context/CardContext';
 
 // CardShowcase component to display featured cards and collections
 export function CardShowcase() {
@@ -103,6 +104,25 @@ export function CardShowcase() {
     navigate(`/pack/${packId}`);
   };
 
+  // Convert Collection type to ContextCollection type for memory packs display
+  const getMemoryPacks = (): ContextCollection[] => {
+    return collections
+      .filter(c => c.designMetadata?.type === 'memory-pack')
+      .map(collection => ({
+        id: collection.id,
+        name: collection.name,
+        description: collection.description,
+        coverImageUrl: collection.coverImageUrl,
+        visibility: collection.visibility as 'public' | 'private' | 'team',
+        allowComments: collection.allowComments || false,
+        designMetadata: collection.designMetadata,
+        createdAt: collection.createdAt || new Date().toISOString(),
+        updatedAt: collection.updatedAt || new Date().toISOString(),
+        userId: collection.userId || '',
+        cardIds: [] // Add required cardIds property as an empty array
+      }));
+  };
+
   return (
     <Container className="py-8">
       <FeaturedCardsSection 
@@ -120,7 +140,7 @@ export function CardShowcase() {
       
       <MemoryPacksSection 
         isLoading={isLoading} 
-        packs={collections.filter(c => c.designMetadata?.type === 'memory-pack')}
+        packs={getMemoryPacks()}
         handleViewPack={handleViewPack}
       />
     </Container>
