@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/breadcrumb';
 import { ChevronRight } from 'lucide-react';
 import { Team } from '@/lib/types/TeamTypes';
-import { useBreadcrumbs } from '@/hooks/useBreadcrumbs';
+import { useBreadcrumbs } from '@/hooks/breadcrumbs/useBreadcrumbs';
 import { BreadcrumbItemComponent } from './components/BreadcrumbItem';
 
 interface BreadcrumbNavProps {
