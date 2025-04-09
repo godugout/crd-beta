@@ -9,7 +9,6 @@ import {
 } from "@/components/ui/navigation-menu";
 import { Users, PlayCircle, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { Team } from '@/lib/types/TeamTypes';
 
 interface TeamNavigationProps {
   activeSection: string;
@@ -22,6 +21,12 @@ interface TeamNavigationItem {
   primary_color?: string;
 }
 
+// Define the shape of the raw data coming from Supabase
+interface TeamRecord {
+  id: string;
+  name: string;
+}
+
 const TeamNavigation: React.FC<TeamNavigationProps> = ({ activeSection }) => {
   const [teams, setTeams] = useState<TeamNavigationItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -31,7 +36,6 @@ const TeamNavigation: React.FC<TeamNavigationProps> = ({ activeSection }) => {
   useEffect(() => {
     const fetchTeams = async () => {
       try {
-        // Use explicit type annotation for data to avoid deep type instantiation
         const { data, error } = await supabase
           .from('teams')
           .select('id, name')
@@ -47,8 +51,8 @@ const TeamNavigation: React.FC<TeamNavigationProps> = ({ activeSection }) => {
         }
           
         if (data && Array.isArray(data)) {
-          // Transform data to expected format with explicit typing
-          const teamData: TeamNavigationItem[] = data.map(team => ({
+          // Map the raw data to our TeamNavigationItem format
+          const teamData: TeamNavigationItem[] = data.map((team: TeamRecord) => ({
             id: team.id || '',
             name: team.name || '',
             slug: team.name ? team.name.toLowerCase().replace(/\s+/g, '-') : '',
