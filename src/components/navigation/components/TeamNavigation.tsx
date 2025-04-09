@@ -1,51 +1,92 @@
 
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { 
   NavigationMenuItem,
   NavigationMenuTrigger, 
   NavigationMenuContent,
   NavigationMenuLink,
 } from "@/components/ui/navigation-menu";
-import { Users, PlayCircle, Plus } from 'lucide-react';
-
-// Team interface for team selection/filtering
-interface Team {
-  id: string;
-  name: string;
-  slug: string;
-  icon?: string;
-  color?: string;
-}
+import { Users, PlayCircle, Plus, Loader2 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { Team, DbTeam } from '@/lib/types/TeamTypes';
 
 interface TeamNavigationProps {
   activeSection: string;
 }
 
-// Available teams for selection
-const availableTeams: Team[] = [
-  { 
-    id: '1', 
-    name: 'Oakland A\'s', 
-    slug: 'oakland', 
-    color: '#006341' 
-  },
-  { 
-    id: '2', 
-    name: 'San Francisco Giants', 
-    slug: 'sf-giants', 
-    color: '#FD5A1E' 
-  },
-  { 
-    id: '3', 
-    name: 'Los Angeles Dodgers', 
-    slug: 'la-dodgers', 
-    color: '#005A9C' 
-  },
-  // Add more teams as needed
-];
-
 const TeamNavigation: React.FC<TeamNavigationProps> = ({ activeSection }) => {
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [loading, setLoading] = useState(true);
+  const location = useLocation();
+  
+  // Fetch teams from the database
+  useEffect(() => {
+    const fetchTeams = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('teams')
+          .select('*')
+          .eq('is_active', true)
+          .order('name')
+          .limit(4);
+          
+        if (error) {
+          console.error('Error fetching team navigation:', error);
+        } else if (data) {
+          const dbTeams = data as DbTeam[];
+          setTeams(dbTeams.map(team => ({
+            id: team.id,
+            name: team.name,
+            slug: team.team_code ? team.team_code.toLowerCase() : team.name.toLowerCase().replace(/\s+/g, '-'),
+            color: team.primary_color || undefined,
+            owner_id: team.owner_id
+          })));
+        }
+      } catch (err) {
+        console.error('Error in team navigation:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchTeams();
+  }, []);
+
+  // Fallback teams if database fetch fails
+  const fallbackTeams: Team[] = [
+    { 
+      id: '1', 
+      name: 'Oakland A\'s', 
+      slug: 'oakland', 
+      color: '#006341',
+      owner_id: 'system'
+    },
+    { 
+      id: '2', 
+      name: 'San Francisco Giants', 
+      slug: 'sf-giants', 
+      color: '#FD5A1E',
+      owner_id: 'system'
+    },
+    { 
+      id: '3', 
+      name: 'Los Angeles Dodgers', 
+      slug: 'la-dodgers', 
+      color: '#005A9C',
+      owner_id: 'system'
+    },
+    {
+      id: '4',
+      name: 'New York Yankees',
+      slug: 'nyy',
+      color: '#003087',
+      owner_id: 'system'
+    }
+  ];
+
+  const displayTeams = teams.length > 0 ? teams : fallbackTeams;
+
   return (
     <NavigationMenuItem>
       <NavigationMenuTrigger className={activeSection === 'teams' ? 'bg-accent' : ''}>
@@ -63,37 +104,43 @@ const TeamNavigation: React.FC<TeamNavigationProps> = ({ activeSection }) => {
             </Link>
           </div>
           
-          <div className="grid grid-cols-2 gap-4">
-            {availableTeams.slice(0, 4).map((team) => (
-              <div key={team.id} className="rounded-lg bg-white shadow-sm">
-                <Link
-                  className="flex h-full w-full select-none flex-col justify-end rounded-md p-4 no-underline outline-none focus:shadow-md"
-                  to={`/teams/${team.slug}`}
-                >
-                  <div className="flex items-center gap-2 mb-2">
-                    <Users className="h-5 w-5" style={{ color: team.color }} />
-                    <span className="text-md font-medium" style={{ color: team.color }}>
-                      {team.name}
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2 mt-3">
-                    <Link 
-                      to={`/teams/${team.slug}/memories`}
-                      className="block select-none space-y-1 rounded-md p-2 text-center bg-gray-50 hover:bg-gray-100 text-sm no-underline outline-none transition-colors"
-                    >
-                      <span>Memories</span>
-                    </Link>
-                    <Link 
-                      to={`/teams/${team.slug}/memories/new`}
-                      className="block select-none space-y-1 rounded-md p-2 text-center bg-gray-50 hover:bg-gray-100 text-sm no-underline outline-none transition-colors"
-                    >
-                      <span>Create Memory</span>
-                    </Link>
-                  </div>
-                </Link>
-              </div>
-            ))}
-          </div>
+          {loading ? (
+            <div className="flex justify-center items-center py-8">
+              <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-4">
+              {displayTeams.map((team) => (
+                <div key={team.id} className="rounded-lg bg-white shadow-sm">
+                  <Link
+                    className="flex h-full w-full select-none flex-col justify-end rounded-md p-4 no-underline outline-none focus:shadow-md"
+                    to={`/teams/${team.slug}`}
+                  >
+                    <div className="flex items-center gap-2 mb-2">
+                      <Users className="h-5 w-5" style={{ color: team.color }} />
+                      <span className="text-md font-medium" style={{ color: team.color }}>
+                        {team.name}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 mt-3">
+                      <Link 
+                        to={`/teams/${team.slug}/memories`}
+                        className="block select-none space-y-1 rounded-md p-2 text-center bg-gray-50 hover:bg-gray-100 text-sm no-underline outline-none transition-colors"
+                      >
+                        <span>Memories</span>
+                      </Link>
+                      <Link 
+                        to={`/teams/${team.slug}/memories/new`}
+                        className="block select-none space-y-1 rounded-md p-2 text-center bg-gray-50 hover:bg-gray-100 text-sm no-underline outline-none transition-colors"
+                      >
+                        <span>Create Memory</span>
+                      </Link>
+                    </div>
+                  </Link>
+                </div>
+              ))}
+            </div>
+          )}
           
           <div className="mt-4 pt-4 border-t">
             <Link

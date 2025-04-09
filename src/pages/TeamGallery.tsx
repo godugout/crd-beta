@@ -1,10 +1,11 @@
+
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import PageLayout from '@/components/navigation/PageLayout';
 import { Button } from '@/components/ui/button';
 import { Users, Filter, Info, Calendar } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { Team } from '@/lib/types/TeamTypes';
+import { Team, DbTeam } from '@/lib/types/TeamTypes';
 
 const TeamGallery = () => {
   const [teams, setTeams] = useState<Team[]>([]);
@@ -38,11 +39,12 @@ const TeamGallery = () => {
           console.error('Error fetching teams:', error);
         } else if (data) {
           // Transform the data to match our interface
-          const transformedTeams: Team[] = data.map((team: any) => ({
+          const transformedTeams: Team[] = (data as DbTeam[]).map(team => ({
             id: team.id,
             name: team.name,
             slug: team.team_code ? team.team_code.toLowerCase() : team.name.toLowerCase().replace(/\s+/g, '-'),
             description: team.description || '',
+            owner_id: team.owner_id,
             color: team.primary_color || '#cccccc',
             memberCount: Math.floor(Math.random() * 1500) + 500, // Placeholder member count
             primary_color: team.primary_color,
@@ -55,7 +57,10 @@ const TeamGallery = () => {
             stadium: team.stadium,
             league: team.league,
             division: team.division,
-            team_code: team.team_code
+            team_code: team.team_code,
+            created_at: team.created_at,
+            updated_at: team.updated_at,
+            logo_url: team.logo_url
           }));
           setTeams(transformedTeams);
         }
@@ -77,7 +82,8 @@ const TeamGallery = () => {
       slug: 'oakland', 
       description: 'Memories and cards for Oakland Athletics fans',
       color: '#006341',
-      memberCount: 1243
+      memberCount: 1243,
+      owner_id: 'system'
     },
     { 
       id: '2', 
@@ -85,7 +91,8 @@ const TeamGallery = () => {
       slug: 'sf-giants', 
       description: 'A community for SF Giants fans to share their memories',
       color: '#FD5A1E',
-      memberCount: 984
+      memberCount: 984,
+      owner_id: 'system'
     },
     { 
       id: '3', 
@@ -93,7 +100,8 @@ const TeamGallery = () => {
       slug: 'la-dodgers', 
       description: 'Dodgers memories and moments from fans',
       color: '#005A9C',
-      memberCount: 756
+      memberCount: 756,
+      owner_id: 'system'
     }
   ];
 

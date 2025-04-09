@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Package, Plus } from 'lucide-react';
 import MemoryPacksSection from '@/components/card-showcase/MemoryPacksSection';
 import { supabase } from '@/integrations/supabase/client';
-import { Team } from '@/lib/types/TeamTypes';
+import { DbTeam } from '@/lib/types/TeamTypes';
 
 interface TeamInfo {
   primary_color?: string;
@@ -31,13 +31,17 @@ const MemoryPacks = () => {
           .eq('team_code', teamSlug.toUpperCase())
           .single();
           
-        if (!error && data) {
-          setTeamInfo({
-            primary_color: data.primary_color || undefined,
-            name: data.name || undefined
-          });
-        } else {
+        if (error) {
           console.error('Error fetching team info:', error);
+          return;
+        }
+          
+        if (data) {
+          const teamData = data as DbTeam;
+          setTeamInfo({
+            primary_color: teamData.primary_color || undefined,
+            name: teamData.name
+          });
         }
       } catch (err) {
         console.error('Error fetching team info:', err);
