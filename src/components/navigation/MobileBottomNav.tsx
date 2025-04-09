@@ -12,11 +12,16 @@ interface MobileBottomNavProps {
 const MobileBottomNav: React.FC<MobileBottomNavProps> = ({ onOpenMenu }) => {
   const location = useLocation();
   
-  // Check if path is active
+  // Check if path is active - improved to handle nested routes
   const isActive = (path: string) => {
     if (path === '/') {
       return location.pathname === '/';
     }
+    
+    if (path === '/cards') {
+      return location.pathname.startsWith('/cards') || location.pathname === '/gallery';
+    }
+    
     return location.pathname.startsWith(path);
   };
   
@@ -52,12 +57,12 @@ const MobileBottomNav: React.FC<MobileBottomNavProps> = ({ onOpenMenu }) => {
         hapticFeedback
         variant="ghost"
         size="icon"
-        className={`rounded-full ${isActive('/packs') ? 'bg-accent text-accent-foreground' : ''}`}
+        className={`rounded-full ${isActive('/cards') ? 'bg-accent text-accent-foreground' : ''}`}
         asChild
       >
-        <Link to="/packs">
+        <Link to="/cards">
           <Package className="h-5 w-5" />
-          <span className="sr-only">Packs</span>
+          <span className="sr-only">Cards</span>
         </Link>
       </MobileTouchButton>
       

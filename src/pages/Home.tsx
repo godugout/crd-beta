@@ -6,7 +6,10 @@ import { Button } from '@/components/ui/button';
 
 const Home = () => {
   return (
-    <PageLayout title="Home" description="Welcome to your digital collection">
+    <PageLayout 
+      title="Home" 
+      description="Welcome to your digital collection"
+    >
       <div className="container mx-auto px-4 py-8">
         <div className="text-center max-w-2xl mx-auto mb-12">
           <h1 className="text-4xl font-bold mb-4">Welcome to Your Collection</h1>

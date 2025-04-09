@@ -17,8 +17,32 @@ const MainNavigation: React.FC = () => {
   
   // Determine active section from URL
   const getActiveSection = () => {
-    const pathParts = location.pathname.split('/');
-    return pathParts.length > 1 ? pathParts[1] : '';
+    const path = location.pathname;
+    
+    if (path === '/') return '';
+    
+    if (path.startsWith('/cards') || path === '/gallery' || path.startsWith('/detector')) {
+      return 'cards';
+    }
+    
+    if (path.startsWith('/collections') || path.startsWith('/packs')) {
+      return 'collections';
+    }
+    
+    if (path.startsWith('/teams')) {
+      return 'teams';
+    }
+    
+    if (
+      path.startsWith('/ar-viewer') || 
+      path.startsWith('/comparison') || 
+      path.startsWith('/animation') ||
+      path.startsWith('/game-day')
+    ) {
+      return 'features';
+    }
+    
+    return '';
   };
   
   const activeSection = getActiveSection();
@@ -52,7 +76,7 @@ const MainNavigation: React.FC = () => {
           />
 
           {/* Teams Navigation - Custom component due to unique layout */}
-          <TeamNavigation />
+          <TeamNavigation isActive={activeSection === teamsNavigation.key} />
 
           {/* Features Navigation */}
           <NavigationSection 

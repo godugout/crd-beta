@@ -1,13 +1,13 @@
 
-import React, { useState, useEffect } from 'react';
-import { Route, Routes, Link, useLocation } from 'react-router-dom';
-import Account from './components/Account';
+import React, { useEffect } from 'react';
+import { Route, Routes, useLocation } from 'react-router-dom';
 import Home from '@/pages/Home';
 import Editor from '@/pages/Editor';
 import CardGallery from '@/pages/CardGallery';
 import { Toaster } from 'sonner';
 import { useNavigationState } from '@/hooks/useNavigationState';
-import { useMediaQuery } from '@/hooks/useMediaQuery';
+import AppHeader from './components/navigation/AppHeader';
+import PageLayout from './components/navigation/PageLayout';
 import './App.css';
 
 function App() {
@@ -16,7 +16,6 @@ function App() {
     defaultState: 0,
     sessionOnly: true
   });
-  const isMobile = useMediaQuery('(max-width: 768px)');
 
   useEffect(() => {
     if (scrollPosition > 0) {
@@ -38,32 +37,22 @@ function App() {
 
   return (
     <div className="App">
-      <header className="bg-white shadow-sm">
-        <div className="container mx-auto px-4 py-4">
-          <nav className="flex justify-between items-center">
-            <Link to="/" className="text-xl font-bold text-cardshow-blue">Cardshow</Link>
-            <div className="space-x-4">
-              <Link to="/gallery" className="text-cardshow-dark hover:text-cardshow-blue transition-colors">Gallery</Link>
-              <Link to="/cards/create" className="text-cardshow-dark hover:text-cardshow-blue transition-colors">Create</Link>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/cards/create" element={<Editor />} />
+        <Route path="/cards/edit/:id" element={<Editor />} />
+        <Route path="/gallery" element={<CardGallery />} />
+        <Route path="/cards" element={<CardGallery />} />
+        <Route path="/admin" element={<PageLayout title="Admin"><div>Admin Page</div></PageLayout>} />
+        <Route path="*" element={
+          <PageLayout title="Page Not Found">
+            <div className="text-center py-12">
+              <h2 className="text-2xl font-bold">404 - Page Not Found</h2>
+              <p className="mt-4">The page you're looking for doesn't exist.</p>
             </div>
-          </nav>
-        </div>
-      </header>
-
-      <main className="container mx-auto px-4 py-6">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/cards/create" element={<Editor />} />
-          <Route path="/cards/edit/:id" element={<Editor />} />
-          <Route path="/gallery" element={<CardGallery />} />
-        </Routes>
-      </main>
-
-      <footer className="bg-gray-100 py-6 mt-8">
-        <div className="container mx-auto px-4 text-center text-cardshow-slate">
-          <p>© {new Date().getFullYear()} Cardshow. All rights reserved.</p>
-        </div>
-      </footer>
+          </PageLayout>
+        } />
+      </Routes>
       <Toaster position="bottom-right" />
     </div>
   );

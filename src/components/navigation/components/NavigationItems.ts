@@ -1,196 +1,144 @@
 
-import {
-  Image,
-  Layers,
-  PlusSquare,
-  PlayCircle,
-  Users,
-  Settings,
-  Home,
-  Package,
-  FlaskConical,
-  Sparkles,
-} from 'lucide-react';
-import { LucideIcon } from 'lucide-react';
+import { MoveRight, Image, Layers, Package, Users, Star, Play, Zap } from 'lucide-react';
 
-export interface NavigationItem {
-  title: string;
-  path: string;
-  icon?: React.ElementType;
-  description?: string;
-  highlight?: boolean;
-}
-
-export interface NavigationSection {
-  key: string;
-  title: string;
-  items: NavigationItem[];
-  featuredItem?: NavigationItem & { bgGradient?: boolean };
-  layout?: 'grid' | 'list';
-  columns?: number;
-}
-
-export const cardsNavigation: NavigationSection = {
-  key: 'cards',
+// Cards navigation items
+export const cardsNavigation = {
   title: 'Cards',
+  key: 'cards',
   layout: 'grid',
   columns: 2,
-  featuredItem: {
-    title: 'Card Gallery',
-    path: '/cards',
-    icon: Image,
-    description: 'Browse and discover cards from various collections',
-    bgGradient: true
-  },
   items: [
     {
-      title: 'Create New Card',
-      path: '/cards/create',
-      icon: PlusSquare,
-      description: 'Design and publish your own custom cards'
+      title: 'Card Gallery',
+      path: '/cards',
+      icon: Image,
+      description: 'Browse and view your cards'
     },
     {
-      title: 'Batch Operations',
-      path: '/cards/batch',
+      title: 'Create Card',
+      path: '/cards/create',
+      icon: MoveRight,
+      description: 'Create a new digital card'
+    },
+    {
+      title: 'Card Effects',
+      path: '/cards/effects',
+      icon: Zap,
+      description: 'Explore card visual effects'
+    },
+    {
+      title: 'Card Detector',
+      path: '/detector',
       icon: Image,
-      description: 'Manage multiple assets and update cards in bulk'
+      description: 'Scan physical cards'
     }
-  ]
+  ],
+  featuredItem: {
+    title: 'Card Animations',
+    path: '/animation',
+    description: 'Experience animated card effects',
+    icon: Play
+  }
 };
 
-export const collectionsNavigation: NavigationSection = {
-  key: 'collections',
+// Collections navigation items
+export const collectionsNavigation = {
   title: 'Collections',
+  key: 'collections',
   layout: 'list',
-  featuredItem: {
-    title: 'All Collections',
-    path: '/collections',
-    icon: Layers,
-    description: 'Browse all card collections and sets',
-    bgGradient: true
-  },
   items: [
+    {
+      title: 'My Collections',
+      path: '/collections',
+      icon: Layers,
+      description: 'View your card collections'
+    },
     {
       title: 'Create Collection',
       path: '/collections/create',
-      icon: PlusSquare,
-      description: 'Create and organize a new collection of cards'
+      icon: MoveRight,
+      description: 'Create a new collection'
     },
     {
       title: 'Memory Packs',
       path: '/packs',
       icon: Package,
-      description: 'Explore themed memory card packs'
-    },
-    {
-      title: 'Create Memory Pack',
-      path: '/packs/create',
-      icon: PlusSquare,
-      description: 'Create a new themed memory pack'
+      description: 'Themed collections of memories'
     }
-  ]
+  ],
+  featuredItem: {
+    title: 'Featured Collections',
+    path: '/collections/featured',
+    description: 'Discover curated collections',
+    icon: Star
+  }
 };
 
-export const teamsNavigation: NavigationSection = {
-  key: 'teams',
+// Teams navigation items
+export const teamsNavigation = {
   title: 'Teams',
+  key: 'teams',
   layout: 'grid',
   columns: 2,
-  featuredItem: {
-    title: 'All Teams',
-    path: '/teams',
-    icon: Users,
-    description: 'Browse all team collections and memories',
-    bgGradient: true
-  },
   items: [
+    {
+      title: 'All Teams',
+      path: '/teams',
+      icon: Users,
+      description: 'Browse all teams'
+    },
     {
       title: 'Oakland A\'s',
       path: '/teams/oakland',
-      description: 'Oakland Athletics team memories and collections'
+      icon: Users,
+      description: 'Oakland Athletics'
+    }
+  ],
+  featuredTeams: [
+    {
+      name: 'Oakland A\'s',
+      path: '/teams/oakland',
+      logo: '/logo-oak.png' // Make sure this path exists
     },
     {
-      title: 'Game Day Mode',
-      path: '/game-day',
-      icon: PlayCircle,
-      description: 'Capture and share memories during live games',
-      highlight: true
+      name: 'San Francisco Giants',
+      path: '/teams/sf-giants',
+      logo: '/logo-sfg.png' // Make sure this path exists
     }
   ]
 };
 
-export const featuresNavigation: NavigationSection = {
-  key: 'features',
+// Features navigation items
+export const featuresNavigation = {
   title: 'Features',
+  key: 'features',
   layout: 'grid',
   columns: 2,
   items: [
     {
       title: 'AR Card Viewer',
-      path: '/features/ar-viewer',
+      path: '/ar-viewer',
+      icon: Zap,
       description: 'View cards in augmented reality'
     },
     {
-      title: 'Baseball Card Viewer',
-      path: '/features/baseball-viewer',
-      description: 'Interactive baseball card experience'
+      title: 'Card Comparison',
+      path: '/comparison',
+      icon: Layers,
+      description: 'Compare cards side by side'
     },
     {
-      title: 'Media Library',
-      path: '/media-library',
-      description: 'Manage your media assets'
+      title: 'Card Animation',
+      path: '/animation',
+      icon: Play,
+      description: 'Animated card effects'
     },
     {
       title: 'Game Day Mode',
       path: '/game-day',
-      description: 'Capture and share memories during live games',
-      highlight: true
+      icon: Star,
+      highlight: true,
+      description: 'Enhanced experience for game day'
     }
   ]
-};
-
-// Route mapping for breadcrumbs - with proper typing
-export const routeMappings: Record<string, { 
-  path: string; 
-  label: string; 
-  parent?: string; 
-  icon?: React.ElementType;
-}> = {
-  // Root
-  '': { path: '/', label: 'Home', parent: undefined, icon: Home },
-  
-  // Cards section
-  'cards': { path: '/cards', label: 'Cards', parent: '', icon: Image },
-  'create': { path: '/cards/create', label: 'Create Card', parent: 'cards', icon: PlusSquare },
-  'batch': { path: '/cards/batch', label: 'Batch Operations', parent: 'cards', icon: Image },
-  
-  // Collections section
-  'collections': { path: '/collections', label: 'Collections', parent: '', icon: Layers },
-  'collections-create': { path: '/collections/create', label: 'Create Collection', parent: 'collections', icon: PlusSquare },
-  
-  // Memory Packs section
-  'packs': { path: '/packs', label: 'Memory Packs', parent: '', icon: Package },
-  'packs-create': { path: '/packs/create', label: 'Create Memory Pack', parent: 'packs', icon: PlusSquare },
-  
-  // Teams section
-  'teams': { path: '/teams', label: 'Teams', parent: '', icon: Users },
-  'oakland': { path: '/teams/oakland', label: 'Oakland A\'s', parent: 'teams' },
-  'memories': { path: '/teams/oakland/memories', label: 'Memories', parent: 'oakland' },
-  
-  // Features section
-  'features': { path: '/features', label: 'Features', parent: '', icon: Sparkles },
-  'ar-viewer': { path: '/features/ar-viewer', label: 'AR Viewer', parent: 'features' },
-  'baseball-viewer': { path: '/features/baseball-viewer', label: 'Baseball Cards', parent: 'features' },
-  
-  // Game Day
-  'game-day': { path: '/game-day', label: 'Game Day Mode', parent: '', icon: PlayCircle },
-  
-  // Media Library
-  'media-library': { path: '/media-library', label: 'Media Library', parent: '' },
-  
-  // Account section
-  'account': { path: '/account', label: 'Account', parent: '' },
-  
-  // Experimental
-  'experimental': { path: '/experimental', label: 'Labs', parent: '', icon: FlaskConical },
 };

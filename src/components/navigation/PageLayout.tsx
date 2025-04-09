@@ -27,6 +27,7 @@ interface PageLayoutProps {
   section?: string;
   keywords?: string[];
   transitions?: boolean;
+  hideFooter?: boolean;
 }
 
 const PageLayout: React.FC<PageLayoutProps> = ({ 
@@ -44,7 +45,8 @@ const PageLayout: React.FC<PageLayoutProps> = ({
   modifiedTime,
   section,
   keywords,
-  transitions = true
+  transitions = true,
+  hideFooter = false
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const isMobile = useMediaQuery('(max-width: 768px)');
@@ -125,6 +127,15 @@ const PageLayout: React.FC<PageLayoutProps> = ({
             </main>
           )}
         </AnimatePresence>
+        
+        {/* Footer */}
+        {!hideFooter && (
+          <footer className="bg-gray-100 py-6 mt-8">
+            <div className="container mx-auto px-4 text-center text-gray-600">
+              <p>© {new Date().getFullYear()} CardShow. All rights reserved.</p>
+            </div>
+          </footer>
+        )}
         
         {/* Mobile menu and bottom navigation */}
         <MobileNavigation isOpen={isMenuOpen} onClose={handleCloseMenu} />

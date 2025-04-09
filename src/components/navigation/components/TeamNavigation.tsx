@@ -1,94 +1,78 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
+import { 
+  NavigationMenuItem,
+  NavigationMenuTrigger, 
+  NavigationMenuContent,
+  NavigationMenuLink,
+} from "@/components/ui/navigation-menu";
 import { Users } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { teamsNavigation } from './NavigationItems';
 
 interface TeamNavigationProps {
-  showLabel?: boolean;
+  isActive?: boolean;
 }
 
-interface Team {
-  id: string;
-  name: string;
-  primary_color?: string;
-}
-
-const TeamNavigation: React.FC<TeamNavigationProps> = ({ showLabel = true }) => {
-  const [teams, setTeams] = useState<Team[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchTeams = async () => {
-      try {
-        setLoading(true);
-        const { data, error } = await supabase
-          .from('teams')
-          .select('id, name')
-          .order('name');
-          
-        if (error) {
-          console.error('Error fetching teams:', error);
-          return;
-        }
-        
-        if (data) {
-          // Use a default primary_color since the column doesn't exist
-          const teamsWithColor: Team[] = data.map(team => ({
-            ...team,
-            primary_color: '#888'
-          }));
-          setTeams(teamsWithColor);
-        }
-      } catch (err) {
-        console.error('Failed to fetch teams:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchTeams();
-  }, []);
-
-  if (loading) {
-    return (
-      <div className="flex items-center space-x-2 px-3 py-2">
-        <Users size={18} className="text-gray-500" />
-        {showLabel && <span className="text-gray-500">Loading teams...</span>}
-      </div>
-    );
-  }
-
-  if (teams.length === 0) {
-    return (
-      <Link to="/teams" className="flex items-center space-x-2 px-3 py-2 hover:bg-gray-100 rounded-md">
-        <Users size={18} />
-        {showLabel && <span>All Teams</span>}
-      </Link>
-    );
-  }
-
+const TeamNavigation: React.FC<TeamNavigationProps> = ({ isActive = false }) => {
   return (
-    <div className="space-y-1">
-      <Link to="/teams" className="flex items-center space-x-2 px-3 py-2 hover:bg-gray-100 rounded-md">
-        <Users size={18} />
-        {showLabel && <span>All Teams</span>}
-      </Link>
-      
-      {teams.map(team => (
-        <Link 
-          key={team.id}
-          to={`/teams/${team.id}`}
-          className="flex items-center space-x-2 px-3 py-2 hover:bg-gray-100 rounded-md ml-4"
-        >
-          <div 
-            className="w-2 h-2 rounded-full" 
-            style={{ backgroundColor: team.primary_color || '#888' }}
-          />
-          {showLabel && <span>{team.name}</span>}
-        </Link>
-      ))}
-    </div>
+    <NavigationMenuItem>
+      <NavigationMenuTrigger className={isActive ? 'bg-accent' : ''}>
+        Teams
+      </NavigationMenuTrigger>
+      <NavigationMenuContent>
+        <div className="w-[400px] gap-3 p-4 md:w-[500px] lg:w-[600px]">
+          {/* Teams grid/list */}
+          <div className="grid gap-4">
+            {/* Links to all teams and specific teams */}
+            <ul className="grid grid-cols-2 gap-3">
+              {teamsNavigation.items.map((item) => (
+                <li key={item.path}>
+                  <NavigationMenuLink asChild>
+                    <Link
+                      className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                      to={item.path}
+                    >
+                      <div className="text-sm font-medium leading-none flex items-center gap-2">
+                        {item.icon && <item.icon className="h-4 w-4" />} {item.title}
+                      </div>
+                      {item.description && (
+                        <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                          {item.description}
+                        </p>
+                      )}
+                    </Link>
+                  </NavigationMenuLink>
+                </li>
+              ))}
+            </ul>
+            
+            {/* Featured teams with logos */}
+            <div className="mt-4">
+              <h4 className="mb-2 text-sm font-medium leading-none">Featured Teams</h4>
+              <div className="flex gap-4 mt-3">
+                {teamsNavigation.featuredTeams.map((team) => (
+                  <Link
+                    key={team.path}
+                    to={team.path}
+                    className="flex flex-col items-center justify-center gap-1 text-center"
+                  >
+                    <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center overflow-hidden">
+                      {team.logo ? (
+                        <img src={team.logo} alt={team.name} className="h-10 w-10 object-contain" />
+                      ) : (
+                        <Users className="h-6 w-6" />
+                      )}
+                    </div>
+                    <span className="text-xs font-medium">{team.name}</span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </NavigationMenuContent>
+    </NavigationMenuItem>
   );
 };
 
