@@ -2,12 +2,13 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Home, Camera, Users, User, Menu } from 'lucide-react';
-import { useMediaQuery } from '@/hooks/useMediaQuery';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { useConnectivity } from '@/hooks/useConnectivity';
 import { MobileTouchButton } from '@/components/ui/mobile-controls';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import AppHeader from '@/components/navigation/AppHeader';
 import Notifications from '@/components/Notifications';
+import { Container } from '@/components/ui/container';
 
 interface MobileLayoutProps {
   children: React.ReactNode;
@@ -15,7 +16,7 @@ interface MobileLayoutProps {
 
 const MobileLayout: React.FC<MobileLayoutProps> = ({ children }) => {
   const location = useLocation();
-  const isMobile = useMediaQuery('(max-width: 768px)');
+  const isMobile = useIsMobile();
   const { isOnline } = useConnectivity();
   const [isScrolled, setIsScrolled] = useState(false);
   
@@ -33,7 +34,7 @@ const MobileLayout: React.FC<MobileLayoutProps> = ({ children }) => {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Desktop Navigation */}
-      <div className={`fixed top-0 left-0 right-0 bg-white border-b z-50 transition-transform ${
+      <div className={`fixed top-0 left-0 right-0 z-50 bg-white border-b transition-transform ${
         isMobile && isScrolled ? '-translate-y-full' : 'translate-y-0'
       }`}>
         <AppHeader />
@@ -46,7 +47,9 @@ const MobileLayout: React.FC<MobileLayoutProps> = ({ children }) => {
         {/* Offline Indicator */}
         {!isOnline && (
           <div className="fixed bottom-20 left-0 right-0 bg-yellow-500 text-white text-center py-2 z-50">
-            You are offline. Some features may be limited.
+            <Container>
+              You are offline. Some features may be limited.
+            </Container>
           </div>
         )}
       </main>
@@ -135,7 +138,7 @@ const MobileLayout: React.FC<MobileLayoutProps> = ({ children }) => {
                   <Link to="/teams" className="block py-2 px-4 hover:bg-muted rounded-md">
                     Teams
                   </Link>
-                  <Link to="/experiences/gameday" className="block py-2 px-4 hover:bg-muted rounded-md">
+                  <Link to="/features/gameday" className="block py-2 px-4 hover:bg-muted rounded-md">
                     Game Day Mode
                   </Link>
                   <Link to="/group-memory-creator" className="block py-2 px-4 hover:bg-muted rounded-md">

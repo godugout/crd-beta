@@ -17,11 +17,12 @@ const Index = () => {
     <PageLayout
       title="CardShow - Digital Card Collection"
       description="Create, collect and showcase your trading cards"
+      fullWidth={true}
     >
       <HeroSection />
       
       <Container className="py-12">
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
           <div>
             <h2 className="text-2xl font-bold text-gray-900">Your Collections</h2>
             <p className="text-gray-600 mt-1">Browse and manage your card collections</p>
@@ -37,7 +38,7 @@ const Index = () => {
         <div className="mt-16">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Latest Features</h2>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
             <div className="border rounded-lg p-6 bg-white shadow-sm">
               <h3 className="font-semibold text-lg mb-2">Card Detection</h3>
               <p className="text-gray-600 mb-4">Scan and digitize your physical trading cards</p>

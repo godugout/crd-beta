@@ -1,6 +1,6 @@
 
 import React from 'react';
-import AppHeader from './AppHeader';
+import ResponsiveLayout from '@/components/layout/ResponsiveLayout';
 import BreadcrumbNav from './Breadcrumb';
 import { cn } from '@/lib/utils';
 import MetaTags from '@/components/shared/MetaTags';
@@ -14,6 +14,8 @@ interface PageLayoutProps {
   imageUrl?: string;
   type?: 'website' | 'article' | 'profile';
   canonicalPath?: string;
+  fullWidth?: boolean;
+  maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '7xl';
 }
 
 const PageLayout: React.FC<PageLayoutProps> = ({ 
@@ -24,10 +26,16 @@ const PageLayout: React.FC<PageLayoutProps> = ({
   description,
   imageUrl,
   type = 'website',
-  canonicalPath
+  canonicalPath,
+  fullWidth = false,
+  maxWidth = '7xl'
 }) => {
   return (
-    <div className="min-h-screen flex flex-col">
+    <ResponsiveLayout 
+      className={className}
+      fullWidth={fullWidth}
+      maxWidth={maxWidth}
+    >
       {/* Add MetaTags for improved sharing and SEO */}
       <MetaTags
         title={title}
@@ -37,20 +45,14 @@ const PageLayout: React.FC<PageLayoutProps> = ({
         canonicalPath={canonicalPath}
       />
       
-      <AppHeader />
+      {showBreadcrumbs && !fullWidth && (
+        <div className="mb-4">
+          <BreadcrumbNav />
+        </div>
+      )}
       
-      <main className={cn(
-        "flex-grow pt-16", // Account for fixed header
-        className
-      )}>
-        {showBreadcrumbs && (
-          <div className="max-w-7xl mx-auto w-full">
-            <BreadcrumbNav />
-          </div>
-        )}
-        {children}
-      </main>
-    </div>
+      {children}
+    </ResponsiveLayout>
   );
 };
 

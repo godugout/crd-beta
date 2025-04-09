@@ -16,8 +16,8 @@ const CardDetector = () => {
       title="Card Detector"
       description="Detect and digitize physical cards"
     >
-      <div className="container max-w-7xl mx-auto px-4 py-8">
-        <div className="mb-8">
+      <div className="space-y-8">
+        <div>
           <h1 className="text-3xl font-bold">Card Detector</h1>
           <p className="text-gray-600 mt-2">
             Upload images of physical cards to detect and digitize them
@@ -31,7 +31,7 @@ const CardDetector = () => {
         />
         
         {processedImageUrl && (
-          <div className="mt-8">
+          <div>
             <h2 className="text-xl font-semibold mb-4">Processed Image</h2>
             <div className="border rounded-lg overflow-hidden shadow-md">
               <img src={processedImageUrl} alt="Processed card" className="w-full h-auto" />

@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom'; 
 import { Menu, X, ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -13,6 +13,7 @@ import DugoutLabs from '../experimental/DugoutLabs';
 
 const AppHeader: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const { user, signOut } = useAuth();
   const location = useLocation();
   const isMobile = useMediaQuery('(max-width: 768px)');
@@ -21,65 +22,66 @@ const AppHeader: React.FC = () => {
     await signOut();
   };
   
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+    
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+  
   const shouldShowBackButton = () => {
     const pathParts = location.pathname.split('/').filter(Boolean);
     return pathParts.length >= 3 || pathParts.some(part => part.match(/^[0-9a-fA-F-]+$/));
   };
   
-  const getBackUrl = () => {
-    const pathParts = location.pathname.split('/').filter(Boolean);
-    
-    if (pathParts.some(part => part.match(/^[0-9a-fA-F-]+$/))) {
-      return '/' + pathParts.filter(part => !part.match(/^[0-9a-fA-F-]+$/)).join('/');
-    }
-    
-    return '/' + pathParts.slice(0, -1).join('/');
-  };
-  
   return (
-    <header className="bg-white border-b border-gray-200 fixed w-full z-30 shadow-sm">
-      <div className="max-w-7xl mx-auto px-4">
-        <div className="flex justify-between h-16">
-          <div className="flex">
-            <div className="flex-shrink-0 flex items-center">
-              {isMobile && shouldShowBackButton() ? (
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="mr-2" 
-                  onClick={() => window.history.back()}
-                >
-                  <ChevronLeft className="h-5 w-5" />
-                  <span className="sr-only">Back</span>
-                </Button>
-              ) : (
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="lg:hidden mr-2" 
-                  onClick={() => setIsMenuOpen(true)}
-                >
-                  <Menu className="h-5 w-5" />
-                  <span className="sr-only">Open menu</span>
-                </Button>
-              )}
-              
-              <Link to="/" className="flex items-center">
-                <span className="font-bold text-xl text-gray-900">CardShow</span>
-              </Link>
-            </div>
+    <header className={`fixed top-0 left-0 right-0 z-30 bg-white border-b transition-shadow ${
+      isScrolled ? 'shadow-md' : 'shadow-sm'
+    }`}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
+        <div className="flex items-center justify-between h-16">
+          <div className="flex items-center">
+            {isMobile && shouldShowBackButton() ? (
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="mr-2" 
+                onClick={() => window.history.back()}
+              >
+                <ChevronLeft className="h-5 w-5" />
+                <span className="sr-only">Back</span>
+              </Button>
+            ) : (
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="lg:hidden mr-2" 
+                onClick={() => setIsMenuOpen(true)}
+              >
+                <Menu className="h-5 w-5" />
+                <span className="sr-only">Open menu</span>
+              </Button>
+            )}
             
-            <MainNavigation />
+            <Link to="/" className="flex items-center">
+              <span className="font-bold text-xl text-gray-900">CardShow</span>
+            </Link>
+            
+            <div className="hidden lg:ml-6 lg:flex">
+              <MainNavigation />
+            </div>
           </div>
 
-          <div className="flex items-center">
+          <div className="flex items-center space-x-2">
             {/* Add Labs button */}
-            <div className="mr-2">
-              {isMobile ? (
-                <LabsButton variant="icon" />
-              ) : (
-                <DugoutLabs />
-              )}
+            <div className="hidden md:block">
+              <DugoutLabs />
+            </div>
+            
+            <div className="md:hidden">
+              <LabsButton variant="icon" />
             </div>
             
             {user ? (
