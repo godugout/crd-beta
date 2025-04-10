@@ -6,8 +6,6 @@ import CardGallery from '@/components/CardGallery';
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import { useMobileOptimization } from '@/hooks/useMobileOptimization';
 import GalleryHeader from '@/components/gallery/GalleryHeader';
-import BaseballBanner from '@/components/gallery/BaseballBanner';
-import ViewModeSelector from '@/components/gallery/ViewModeSelector';
 import useGalleryCards from '@/components/gallery/useGalleryCards';
 import FullscreenViewer from '@/components/gallery/FullscreenViewer';
 
@@ -20,9 +18,6 @@ const Gallery = () => {
   
   const {
     displayCards,
-    hasBaseballCards,
-    sortOrder,
-    setSortOrder,
     isLoading
   } = useGalleryCards();
 
@@ -35,10 +30,6 @@ const Gallery = () => {
   const handleCloseFullscreen = () => {
     setIsFullscreen(false);
     setSelectedCardId(null);
-  };
-  
-  const handleSortChange = (order: string) => {
-    setSortOrder(order);
   };
   
   if (isFullscreen && selectedCardId) {
@@ -57,16 +48,8 @@ const Gallery = () => {
     >
       <div className="container mx-auto max-w-6xl px-4">
         <GalleryHeader />
-        <BaseballBanner isVisible={hasBaseballCards} />
         
         <ErrorBoundary>
-          <ViewModeSelector 
-            viewMode={viewMode}
-            setViewMode={setViewMode}
-            sortOrder={sortOrder}
-            onSortChange={handleSortChange}
-          />
-          
           <CardGallery 
             viewMode={viewMode} 
             onCardClick={handleCardClick} 

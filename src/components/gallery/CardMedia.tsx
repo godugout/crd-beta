@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Eye, ZoomIn, Image } from 'lucide-react';
 import { Card } from '@/lib/types';
@@ -18,14 +19,12 @@ const CardMedia: React.FC<CardMediaProps> = ({ card, onView, className = '' }) =
   const [isLoaded, setIsLoaded] = useState(false);
   const [isError, setIsError] = useState(false);
   const [imageSource, setImageSource] = useState('');
-  const [retryCount, setRetryCount] = useState(0);
-
+  
   // Select the best available image source with fallback
   useEffect(() => {
     // Reset states when card changes
     setIsLoaded(false);
     setIsError(false);
-    setRetryCount(0);
     
     // Try using the primary sources
     const primarySource = card.imageUrl || card.thumbnailUrl;
@@ -47,22 +46,9 @@ const CardMedia: React.FC<CardMediaProps> = ({ card, onView, className = '' }) =
     setIsError(false);
   };
 
-  // Handle image load error
+  // Handle image load error - use fallback immediately
   const handleImageError = () => {
     console.error('Failed to load image:', imageSource);
-    
-    // If we've reached the maximum retry count, show error state
-    if (retryCount >= 1) {
-      console.log('Max retries reached, showing error state for:', card.title);
-      setIsError(true);
-      
-      // Even though there's an error, we'll still show a placeholder and keep the card visible
-      // The error state will show a placeholder with the card title
-      return;
-    }
-    
-    // Otherwise, try the fallback
-    setRetryCount(prev => prev + 1);
     
     // Get a category-specific fallback
     const fallbackUrl = getFallbackImageUrl(card.tags, card.title);
@@ -81,12 +67,12 @@ const CardMedia: React.FC<CardMediaProps> = ({ card, onView, className = '' }) =
     <div className={cn("relative overflow-hidden rounded-lg", className)}>
       {/* Placeholder while loading */}
       {!isLoaded && !isError && (
-        <div className="w-full h-0 pb-[140%] bg-slate-200 animate-pulse flex items-center justify-center">
+        <div className="w-full h-0 pb-[140%] bg-slate-200 flex items-center justify-center">
           <Image className="h-12 w-12 text-slate-300 absolute" />
         </div>
       )}
       
-      {/* Error state - now shows card details in a nicer format */}
+      {/* Error state - shows card details in a nicer format */}
       {isError && (
         <div className="w-full h-0 pb-[140%] bg-gradient-to-b from-slate-200 to-slate-300 flex items-center justify-center">
           <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-600 p-4">
@@ -120,21 +106,19 @@ const CardMedia: React.FC<CardMediaProps> = ({ card, onView, className = '' }) =
       )}
       
       {/* Actual image */}
-      {imageSource && (
-        <img
-          src={imageSource}
-          alt={card.title}
-          className={cn(
-            "w-full h-full absolute top-0 left-0 object-cover transition-all duration-300",
-            isLoaded ? "opacity-100" : "opacity-0",
-            isError ? "hidden" : ""
-          )}
-          onLoad={handleImageLoad}
-          onError={handleImageError}
-          loading="lazy"
-          style={{ aspectRatio: "2.5/3.5" }}
-        />
-      )}
+      <img
+        src={imageSource}
+        alt={card.title}
+        className={cn(
+          "w-full h-full object-cover transition-all duration-300",
+          isLoaded ? "opacity-100" : "opacity-0",
+          isError ? "hidden" : ""
+        )}
+        onLoad={handleImageLoad}
+        onError={handleImageError}
+        loading="lazy"
+        style={{ aspectRatio: "2.5/3.5" }}
+      />
       
       {/* Overlay with actions */}
       {isLoaded && !isError && (
