@@ -4,6 +4,7 @@ import { Eye, ZoomIn, Image } from 'lucide-react';
 import { Card } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { getFallbackImageUrl, isValidImageUrl } from '@/lib/utils/imageUtils';
 
 interface CardMediaProps {
   card: Card;
@@ -17,15 +18,23 @@ interface CardMediaProps {
 const CardMedia: React.FC<CardMediaProps> = ({ card, onView, className = '' }) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isError, setIsError] = useState(false);
+  const [imageSource, setImageSource] = useState('');
 
-  // Prioritize image sources: imageUrl → thumbnailUrl → fallback
-  const imageSource = card.imageUrl || card.thumbnailUrl || '/placeholder.svg';
-
-  // Reset states when the image source changes
+  // Select the best available image source with fallback
   useEffect(() => {
+    const primarySource = card.imageUrl || card.thumbnailUrl;
+    
+    if (isValidImageUrl(primarySource)) {
+      setImageSource(primarySource as string);
+    } else {
+      // Use our fallback logic
+      setImageSource(getFallbackImageUrl(card.tags, card.title));
+    }
+    
+    // Reset states when image source changes
     setIsLoaded(false);
     setIsError(false);
-  }, [imageSource]);
+  }, [card.imageUrl, card.thumbnailUrl, card.tags, card.title]);
 
   // Handle image load success
   const handleImageLoad = () => {
@@ -36,7 +45,14 @@ const CardMedia: React.FC<CardMediaProps> = ({ card, onView, className = '' }) =
   // Handle image load error
   const handleImageError = () => {
     console.error('Failed to load image:', imageSource);
-    setIsError(true);
+    
+    // If we're not already using a fallback, switch to a fallback image
+    if (!imageSource.includes('unsplash.com')) {
+      console.log('Switching to fallback image for:', card.title);
+      setImageSource(getFallbackImageUrl(card.tags, card.title));
+    } else {
+      setIsError(true);
+    }
   };
 
   return (
