@@ -1,4 +1,3 @@
-
 /**
  * MemoryCache - A simple in-memory cache with TTL support
  * 
@@ -38,7 +37,7 @@ export class MemoryCache {
   private static instance: MemoryCache;
   private cache: Map<CacheKey, CacheItem<any>>;
   private cleanupInterval: number | null = null;
-  private offlineStore: LocalForage;
+  private offlineStore: ReturnType<typeof localforage.createInstance>;
   
   // Default TTL values
   private readonly DEFAULT_TTL_SECONDS = 300; // 5 minutes
@@ -287,4 +286,3 @@ export class MemoryCache {
 
 // Export a singleton instance
 export const memoryCache = MemoryCache.getInstance();
-

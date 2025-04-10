@@ -56,7 +56,7 @@ export const CacheExample: React.FC = () => {
         
         <div className="space-y-4">
           <div className="flex items-center space-x-2 mb-4">
-            <Badge variant={isOnline ? "success" : "destructive"} className="px-2 py-1">
+            <Badge variant={isOnline ? "default" : "destructive"} className="px-2 py-1">
               {isOnline ? (
                 <><Wifi className="h-3 w-3 mr-1" /> Online</>
               ) : (
