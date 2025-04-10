@@ -80,15 +80,21 @@ export const getReactions = async (
   if (commentId) query = query.eq('commentId', commentId)
   const { data, error } = await query
   if (error) throw error
+  
   const reactionCounts: Record<ReactionType, number> = {
     like: 0, love: 0, celebrate: 0, insightful: 0, baseball: 0
   }
-  (data||[]).forEach(r => {
-    if (r.type in reactionCounts) {
-      reactionCounts[r.type as ReactionType] += 1;
-    }
-  })
-  return { reactions: data||[], counts: reactionCounts }
+  
+  if (data) {
+    data.forEach(r => {
+      const reactionType = r.type as ReactionType;
+      if (reactionType in reactionCounts) {
+        reactionCounts[reactionType] += 1;
+      }
+    });
+  }
+  
+  return { reactions: data || [], counts: reactionCounts }
 }
 
 // Comments

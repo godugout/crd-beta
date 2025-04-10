@@ -1,3 +1,4 @@
+
 import React, { useRef, useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Loader2, AlertCircle, Upload } from 'lucide-react';
@@ -83,9 +84,9 @@ const FaceDetector: React.FC = () => {
         toast.success(`Detected ${faces.length} face${faces.length === 1 ? '' : 's'}`);
       }
       
-      // Draw faces on canvas
+      // Draw faces on canvas - fixing this line to use just canvas and image as arguments
       if (canvasRef.current && imageRef.current && imageRef.current.complete) {
-        drawDetectedFaces(canvasRef.current, imageRef.current, faces);
+        drawDetectedFaces(canvasRef.current, faces);
       }
     } catch (error) {
       console.error("Face detection error:", error);

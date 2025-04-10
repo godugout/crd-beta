@@ -124,7 +124,13 @@ export const getOfflineItems = async <T = any>(type?: string): Promise<OfflineIt
     if (item) items.push(item);
   }
   
-  return items.sort((a, b) => b.createdAt - a.createdAt);
+  // Fix the sorting by ensuring we're comparing numbers
+  return items.sort((a, b) => {
+    // Convert to numbers if they're not already
+    const aTime = typeof a.createdAt === 'string' ? new Date(a.createdAt).getTime() : a.createdAt;
+    const bTime = typeof b.createdAt === 'string' ? new Date(b.createdAt).getTime() : b.createdAt;
+    return bTime - aTime;
+  });
 };
 
 // Updated removeOfflineItem to accept a single ID parameter
