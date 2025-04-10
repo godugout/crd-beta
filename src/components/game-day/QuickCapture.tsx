@@ -67,7 +67,7 @@ const quickMoments = [
 
 const QuickCapture: React.FC<QuickCaptureProps> = ({ stadiumContext, isOnline }) => {
   const navigate = useNavigate();
-  const { saveOfflineItem } = useOfflineStorage();
+  const { saveData } = useOfflineStorage();
   const [captureMode, setCaptureMode] = useState<'quick' | 'custom'>('quick');
 
   const handleCreateMemory = (type: string = 'custom') => {
@@ -83,8 +83,7 @@ const QuickCapture: React.FC<QuickCaptureProps> = ({ stadiumContext, isOnline })
     
     // If offline, store locally
     if (!isOnline) {
-      saveOfflineItem({
-        id: `temp-${Date.now()}`,
+      saveData({
         title: moment?.title || 'Quick Moment',
         tags: moment?.tags || [],
         createdAt: new Date().toISOString(),
@@ -92,6 +91,9 @@ const QuickCapture: React.FC<QuickCaptureProps> = ({ stadiumContext, isOnline })
         location: stadiumContext?.name || '',
         section: stadiumContext?.section || '',
         // In a real implementation, we'd have the actual image data here
+      }, {
+        collectionName: 'quick-captures',
+        persistOffline: true
       });
       
       toast('Saved offline. Will upload when connection is available.', {

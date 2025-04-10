@@ -7,7 +7,8 @@ import {
   saveOfflineItem,
   getPendingItemCount,
   getOfflineItems,
-  removeOfflineItem
+  removeOfflineItem,
+  OfflineItem
 } from '@/lib/offlineStorage';
 import { v4 as uuidv4 } from 'uuid';
 
