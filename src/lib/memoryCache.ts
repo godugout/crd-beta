@@ -37,6 +37,16 @@ class MemoryCache {
     this.cache.clear()
   }
 
+  // Added remove as an alias for delete to fix the error in useMemoryCache.ts
+  remove(key: string): void {
+    this.delete(key);
+  }
+
+  // Add size getter for CacheExample component
+  get size(): number {
+    return this.cache.size;
+  }
+
   async getOrFetch<T>(key: string, fetchFn: () => Promise<T>, ttlSeconds = 300): Promise<T> {
     const cachedData = this.get(key)
     if (cachedData !== null) {
@@ -58,6 +68,13 @@ class MemoryCache {
 }
 
 export const memoryCache = new MemoryCache()
+
+// Add CacheKey and CacheOptions types for useMemoryCache.ts
+export type CacheKey = string;
+export type CacheOptions = {
+  ttl?: number;
+  background?: boolean;
+};
 
 // Cleanup every 5 min
 setInterval(() => {

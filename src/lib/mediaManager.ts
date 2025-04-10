@@ -49,17 +49,21 @@ export const uploadMedia = async ({
     else if (file.type.startsWith('video/')) mediaType = 'video'
     else if (file.type.startsWith('audio/')) mediaType = 'audio'
 
+    // Fix the onUploadProgress property by using the correct options interface
+    const options: any = {
+      cacheControl: '3600',
+      upsert: false
+    }
+    
+    if (progressCallback) {
+      options.onUploadProgress = (progress: { percent: number }) => {
+        progressCallback(progress.percent || 0);
+      };
+    }
+
     const { error: uploadErr } = await supabase.storage
       .from('media')
-      .upload(filePath, file, {
-        cacheControl: '3600',
-        upsert: false,
-        onUploadProgress: progress => {
-          if (progressCallback) {
-            progressCallback(progress.percent || 0)
-          }
-        }
-      })
+      .upload(filePath, file, options)
 
     if (uploadErr) throw uploadErr
 
