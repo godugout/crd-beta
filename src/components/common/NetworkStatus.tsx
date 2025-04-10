@@ -1,152 +1,52 @@
-import React, { useEffect, useState } from 'react';
-import { useConnectivity } from '@/hooks/useConnectivity';
-import { WifiOff, Upload, Wifi, RefreshCcw } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { SyncOptions } from '@/lib/syncService';
 
-interface NetworkStatusProps {
-  className?: string;
-  showControls?: boolean;
-  showStatus?: boolean;
-  variant?: 'full' | 'badge' | 'minimal';
-  onSync?: () => void;
-}
+import React, { useState, useEffect } from 'react'
+import { Wifi, WifiOff } from 'lucide-react'
 
-const NetworkStatus: React.FC<NetworkStatusProps> = ({
-  className = '',
-  showControls = true,
-  showStatus = true,
-  variant = 'full',
-  onSync
-}) => {
-  const { 
-    isOnline, 
-    pendingCount, 
-    isSyncing, 
-    syncOfflineItems, 
-    cancelSync 
-  } = useConnectivity();
+export const NetworkStatus: React.FC = () => {
+  const [isOnline, setIsOnline] = useState(navigator.onLine)
+  const [showStatus, setShowStatus] = useState(false)
   
-  const [syncProgress, setSyncProgress] = useState(0);
-  
-  // Reset progress when syncing stops
   useEffect(() => {
-    if (!isSyncing) {
-      setSyncProgress(0);
-    }
-  }, [isSyncing]);
-  
-  const handleSync = async () => {
-    // Call the onSync callback if provided
-    if (onSync) {
-      onSync();
+    const handleOnline = () => {
+      setIsOnline(true)
+      setShowStatus(true)
+      const timer = setTimeout(() => setShowStatus(false), 3000)
+      return () => clearTimeout(timer)
     }
     
-    await syncOfflineItems({
-      progressCallback: (current, total) => {
-        setSyncProgress(Math.round((current / total) * 100));
-      }
-    });
-  };
+    const handleOffline = () => {
+      setIsOnline(false)
+      setShowStatus(true)
+    }
+    
+    window.addEventListener('online', handleOnline)
+    window.addEventListener('offline', handleOffline)
+    
+    return () => {
+      window.removeEventListener('online', handleOnline)
+      window.removeEventListener('offline', handleOffline)
+    }
+  }, [])
   
-  if (variant === 'badge') {
-    return (
-      <Badge 
-        variant={isOnline ? "default" : "destructive"} 
-        className={`px-2 py-1 ${className}`}
-      >
-        {isOnline ? (
-          <><Wifi className="h-3 w-3 mr-1" /> Online</>
-        ) : (
-          <><WifiOff className="h-3 w-3 mr-1" /> Offline</>
-        )}
-        {!isOnline && pendingCount > 0 && (
-          <span className="ml-1">({pendingCount})</span>
-        )}
-      </Badge>
-    );
-  }
-  
-  if (variant === 'minimal') {
-    return (
-      <div className={`flex items-center text-sm ${className}`}>
-        {isOnline ? (
-          <Wifi className="h-4 w-4 text-green-500 mr-1" />
-        ) : (
-          <WifiOff className="h-4 w-4 text-amber-500 mr-1" />
-        )}
-        {pendingCount > 0 && (
-          <Badge variant="outline" className="ml-2">
-            {pendingCount} pending
-          </Badge>
-        )}
-      </div>
-    );
-  }
-
-  // Full variant default
-  if (!showStatus && pendingCount === 0 && isOnline) {
-    return null;
-  }
+  if (!showStatus && isOnline) return null
   
   return (
-    <div className={`${className} ${isOnline ? 'bg-green-50' : 'bg-amber-50'} border-b 
-      ${isOnline ? 'border-green-200' : 'border-amber-200'} p-2 text-sm 
-      ${isOnline ? 'text-green-800' : 'text-amber-800'} flex items-center justify-between`}
-    >
-      <div className="flex items-center">
+    <div className={`fixed bottom-4 right-4 z-50 rounded-md shadow-md transition-opacity duration-300 ${showStatus ? 'opacity-100' : 'opacity-0'}`}>
+      <div className={`flex items-center gap-2 px-4 py-2 rounded-md ${isOnline ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
         {isOnline ? (
-          <Wifi className="h-4 w-4 mr-2" />
+          <>
+            <Wifi size={16} />
+            <span>Back online</span>
+          </>
         ) : (
-          <WifiOff className="h-4 w-4 mr-2" />
+          <>
+            <WifiOff size={16} />
+            <span>You are offline</span>
+          </>
         )}
-        <span>
-          {isOnline ? 'You\'re online.' : 'You\'re offline.'}
-          {pendingCount > 0 && (
-            <span> {pendingCount} item{pendingCount !== 1 ? 's' : ''} will sync when connection is restored.</span>
-          )}
-        </span>
       </div>
-      
-      {showControls && pendingCount > 0 && isOnline && (
-        <div className="flex items-center space-x-2">
-          {isSyncing && syncProgress > 0 && (
-            <div className="w-24 mr-2">
-              <Progress value={syncProgress} />
-            </div>
-          )}
-          
-          <Button 
-            size="sm" 
-            variant="outline" 
-            className="text-xs h-7 bg-green-100 border-green-200 text-green-800 hover:bg-green-200 hover:text-green-900"
-            onClick={handleSync}
-            disabled={isSyncing}
-          >
-            {isSyncing ? (
-              <RefreshCcw className="h-3 w-3 mr-1 animate-spin" />
-            ) : (
-              <Upload className="h-3 w-3 mr-1" />
-            )}
-            {isSyncing ? 'Syncing...' : 'Sync Now'}
-          </Button>
-          
-          {isSyncing && (
-            <Button 
-              size="sm" 
-              variant="ghost" 
-              className="text-xs h-7 text-amber-800"
-              onClick={cancelSync}
-            >
-              Cancel
-            </Button>
-          )}
-        </div>
-      )}
     </div>
-  );
-};
+  )
+}
 
-export default NetworkStatus;
+export default NetworkStatus
