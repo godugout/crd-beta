@@ -123,6 +123,53 @@
   .crd-link-xsmall {
     @apply font-crd-text text-xs text-crd-primary underline;
   }
+  /* Typography System Based on Design Guidelines */
+  .display-large {
+    @apply font-display text-3xl md:text-4xl font-normal leading-tight;
+  }
+  .display-large-bold {
+    @apply font-display text-3xl md:text-4xl font-bold leading-tight;
+  }
+  
+  .display-medium {
+    @apply font-display text-2xl md:text-3xl font-normal leading-tight;
+  }
+  .display-medium-bold {
+    @apply font-display text-2xl md:text-3xl font-bold leading-tight;
+  }
+  
+  .display-small {
+    @apply font-display text-xl md:text-2xl font-normal leading-tight;
+  }
+  .display-small-bold {
+    @apply font-display text-xl md:text-2xl font-bold leading-tight;
+  }
+  
+  .text-large {
+    @apply font-sans text-base leading-normal;
+  }
+  .text-medium {
+    @apply font-sans text-sm leading-normal;
+  }
+  .text-small {
+    @apply font-sans text-xs leading-normal;
+  }
+  .text-x-small {
+    @apply font-sans text-[10px] leading-tight;
+  }
+  
+  .link-large {
+    @apply font-sans text-base text-crd-primary underline leading-normal;
+  }
+  .link-medium {
+    @apply font-sans text-sm text-crd-primary underline leading-normal;
+  }
+  .link-small {
+    @apply font-sans text-xs text-crd-primary underline leading-normal;
+  }
+  .link-x-small {
+    @apply font-sans text-[10px] text-crd-primary underline leading-tight;
+  }
 }
 
 /* 3D Card Effects */
@@ -365,6 +412,10 @@
   .crd-btn-ghost {
     @apply px-4 py-2 bg-transparent text-crd-primary font-medium rounded-md transition-all hover:bg-crd-primary hover:bg-opacity-10 focus:ring-2 focus:ring-crd-primary focus:ring-opacity-50;
   }
+  
+  .crd-btn-gradient {
+    @apply px-4 py-2 bg-gradient-to-r from-crd-primary to-blue-600 text-white font-medium rounded-md transition-all hover:shadow-lg focus:ring-2 focus:ring-crd-primary focus:ring-opacity-50 transform hover:scale-[1.03];
+  }
 }
 
 /* Special filter inputs */
@@ -378,4 +429,38 @@
 
 .filter-input svg {
   @apply absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400;
+}
+/* Keep existing base styles */
+  /* Keep existing CRD Design System Typography Classes */
+
+/* Add additional typography responsive classes */
+@layer components {
+  .text-adaptive {
+    @apply text-sm md:text-base;
+  }
+  
+  .heading-adaptive {
+    @apply text-2xl md:text-3xl lg:text-4xl font-semibold;
+  }
+  
+  /* CRD Button Styles - Update with new styles */
+  .crd-btn-primary {
+    @apply px-4 py-2 bg-crd-primary text-white font-medium rounded-md transition-all hover:bg-opacity-90 focus:ring-2 focus:ring-crd-primary focus:ring-opacity-50;
+  }
+  
+  .crd-btn-secondary {
+    @apply px-4 py-2 bg-crd-secondary text-crd-body font-medium rounded-md transition-all hover:bg-opacity-90 focus:ring-2 focus:ring-crd-secondary focus:ring-opacity-50;
+  }
+  
+  .crd-btn-outline {
+    @apply px-4 py-2 bg-transparent border border-crd-primary text-crd-primary font-medium rounded-md transition-all hover:bg-crd-primary hover:text-white focus:ring-2 focus:ring-crd-primary focus:ring-opacity-50;
+  }
+  
+  .crd-btn-ghost {
+    @apply px-4 py-2 bg-transparent text-crd-primary font-medium rounded-md transition-all hover:bg-crd-primary hover:bg-opacity-10 focus:ring-2 focus:ring-crd-primary focus:ring-opacity-50;
+  }
+  
+  .crd-btn-gradient {
+    @apply px-4 py-2 bg-gradient-to-r from-crd-primary to-blue-600 text-white font-medium rounded-md transition-all hover:shadow-lg focus:ring-2 focus:ring-crd-primary focus:ring-opacity-50 transform hover:scale-[1.03];
+  }
 }

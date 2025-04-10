@@ -4,6 +4,8 @@ import { Card } from '@/lib/types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ArPreviewPanel from '@/components/ar/ArPreviewPanel';
 import ArSettingsPanel from '@/components/ar/ArSettingsPanel';
+import { CrdButton } from '@/components/ui/crd-button';
+import { Smartphone } from 'lucide-react';
 
 interface ArViewerContainerProps {
   activeCard: Card | null;
@@ -38,6 +40,26 @@ const ArViewerContainer: React.FC<ArViewerContainerProps> = ({
 
   return (
     <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+      <div className="p-6 border-b bg-gradient-to-r from-crd-primary/10 to-blue-100/30">
+        <h1 className="display-medium mb-2">AR Card Experience</h1>
+        <p className="text-medium text-gray-600 mb-4">
+          Bring your cards to life with augmented reality. View, rotate, and interact with your cards in 3D space.
+        </p>
+        <CrdButton
+          variant="gradient"
+          size="lg"
+          className="w-full md:w-auto"
+          onClick={onLaunchAr}
+          disabled={!!cameraError || !activeCard}
+        >
+          <Smartphone className="h-5 w-5 mr-2" />
+          <span className="display-small">Launch AR Experience</span>
+        </CrdButton>
+        {cameraError && (
+          <p className="mt-2 text-small text-red-500">{cameraError}</p>
+        )}
+      </div>
+      
       <Tabs defaultValue="preview" className="w-full">
         <div className="border-b">
           <div className="px-6">

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
-import { X, ChevronLeft, ChevronRight, Camera, RefreshCw } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, Camera, RefreshCw, Smartphone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCards } from '@/context/CardContext';
 import { Card } from '@/lib/types';
@@ -162,6 +162,13 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
     };
   }, [activeEffects]);
 
+  const launchArMode = () => {
+    if (selectedCard) {
+      onClose();
+      window.location.href = `/ar-card-viewer/${selectedCard.id}`;
+    }
+  };
+
   if (!selectedCard) {
     return (
       <div className="fixed inset-0 bg-black z-50 flex items-center justify-center">
@@ -218,8 +225,8 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent p-4">
           <div className="container mx-auto max-w-5xl flex justify-between items-center">
             <div className="text-white">
-              <h3 className="font-medium">{selectedCard.title}</h3>
-              <p className="text-sm text-gray-300">
+              <h3 className="crd-display-medium">{selectedCard.title}</h3>
+              <p className="text-sm text-gray-300 crd-text-small">
                 {currentIndex + 1} of {cards.length}
               </p>
             </div>
@@ -231,7 +238,7 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
                 onClick={toggleFlip}
               >
                 <RefreshCw className="h-4 w-4 mr-2" />
-                Flip
+                <span className="crd-text-medium">Flip</span>
               </Button>
               
               <Button 
@@ -240,7 +247,16 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
                 onClick={takeScreenshot}
               >
                 <Camera className="h-4 w-4 mr-2" />
-                Screenshot
+                <span className="crd-text-medium">Screenshot</span>
+              </Button>
+              
+              <Button 
+                variant="default"
+                className="bg-crd-primary text-white hover:bg-crd-primary/90"
+                onClick={launchArMode}
+              >
+                <Smartphone className="h-4 w-4 mr-2" />
+                <span className="crd-text-medium">View in AR</span>
               </Button>
             </div>
           </div>

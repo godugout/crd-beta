@@ -27,6 +27,7 @@ const ArHeader: React.FC<ArHeaderProps> = ({
           size="icon"
           className="bg-black/50 text-white border-white/20 transition-all hover:bg-black/70"
           onClick={onToggleSelector}
+          aria-label="Add card"
         >
           <Plus className="h-4 w-4" />
         </CrdButton>
@@ -37,6 +38,7 @@ const ArHeader: React.FC<ArHeaderProps> = ({
             size="icon"
             className="bg-black/50 text-white border-white/20 transition-all hover:bg-black/70"
             onClick={onRemoveSelected}
+            aria-label="Remove card"
           >
             <Trash2 className="h-4 w-4" />
           </CrdButton>
@@ -51,7 +53,7 @@ const ArHeader: React.FC<ArHeaderProps> = ({
         onClick={onExitAr}
       >
         <ChevronLeft className="mr-1 h-4 w-4" />
-        Exit AR
+        <span className="crd-text-medium">Exit AR</span>
       </CrdButton>
       
       {/* Share Button */}
@@ -60,12 +62,13 @@ const ArHeader: React.FC<ArHeaderProps> = ({
         size="icon"
         className="absolute top-4 right-4 z-50 bg-black/50 text-white border-white/20 transition-all hover:bg-black/70"
         onClick={() => toast.success('Sharing options opened')}
+        aria-label="Share"
       >
         <Share2 className="h-4 w-4" />
       </CrdButton>
       
       {/* Mouse instructions */}
-      <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-40 bg-black/40 text-white text-xs px-3 py-1 rounded-full backdrop-blur-sm">
+      <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-40 bg-black/40 text-white text-xs px-3 py-1 rounded-full backdrop-blur-sm crd-text-small">
         Mouse drag to move • Fast mouse movement to spin cards
       </div>
     </>

@@ -26,45 +26,48 @@ const ArControls: React.FC<ArControlsProps> = ({
           <Button 
             variant="outline" 
             size="icon" 
-            className="bg-black/40 border-white/20 text-white hover:bg-black/60"
+            className="bg-black/50 border-white/20 text-white hover:bg-black/70"
             onClick={onZoomIn}
+            aria-label="Zoom in"
           >
             <ZoomIn className="h-5 w-5" />
           </Button>
           <Button 
             variant="outline" 
             size="icon" 
-            className="bg-black/40 border-white/20 text-white hover:bg-black/60"
+            className="bg-black/50 border-white/20 text-white hover:bg-black/70"
             onClick={onZoomOut}
+            aria-label="Zoom out"
           >
             <ZoomOut className="h-5 w-5" />
           </Button>
           <Button 
             variant="outline" 
             size="icon" 
-            className="bg-black/40 border-white/20 text-white hover:bg-black/60"
+            className="bg-black/50 border-white/20 text-white hover:bg-black/70"
             onClick={onRotate}
+            aria-label="Rotate"
           >
             <RotateCcw className="h-5 w-5" />
           </Button>
         </div>
         
         <CrdButton 
-          variant="default"
+          variant="gradient"
           onClick={onTakeSnapshot}
           className="shadow-lg"
         >
           <Camera className="h-5 w-5 mr-2" />
-          Snapshot
+          <span className="crd-text-medium font-medium">Capture</span>
         </CrdButton>
         
         <Button 
           variant="outline" 
-          className="bg-black/40 border-white/20 text-white hover:bg-black/60"
+          className="bg-black/50 border-white/20 text-white hover:bg-black/70"
           onClick={onFlip}
         >
           <FlipHorizontal className="h-5 w-5 mr-2" />
-          Flip Card
+          <span className="crd-text-medium">Flip Card</span>
         </Button>
       </div>
     </div>

@@ -1,7 +1,8 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Camera } from 'lucide-react';
+import { CrdButton } from '@/components/ui/crd-button';
+import { Camera, Smartphone, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Card } from '@/lib/types';
 
@@ -37,25 +38,41 @@ const ArPreviewPanel: React.FC<ArPreviewPanelProps> = ({
                 alt={activeCard.title}
                 className="w-full h-full object-contain"
               />
+              
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/30"></div>
+                <CrdButton 
+                  className="z-10 shadow-xl animate-pulse"
+                  size="lg"
+                  variant="gradient"
+                  onClick={onLaunchAr}
+                  disabled={!!cameraError}
+                >
+                  <Smartphone className="mr-2 h-5 w-5" />
+                  <span className="text-medium font-semibold">View in AR</span>
+                </CrdButton>
+              </div>
             </div>
           ) : (
             <div className="text-white">No card selected</div>
           )}
         </div>
         
-        <Button 
-          className="w-full bg-blue-600 hover:bg-blue-700"
-          size="lg"
-          onClick={onLaunchAr}
-          disabled={!!cameraError || !activeCard}
-        >
-          <Camera className="mr-2 h-5 w-5" />
-          Launch AR Experience
-        </Button>
+        <div className="flex gap-2">
+          <CrdButton 
+            className="flex-1 bg-blue-600 hover:bg-blue-700"
+            size="lg"
+            onClick={onLaunchAr}
+            disabled={!!cameraError || !activeCard}
+          >
+            <Camera className="mr-2 h-5 w-5" />
+            <span className="text-medium font-medium">Launch AR</span>
+          </CrdButton>
+        </div>
       </div>
       
       <div className="md:w-64">
-        <h3 className="font-semibold mb-4">Available Cards</h3>
+        <h3 className="font-semibold mb-4 display-small">Available Cards</h3>
         <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
           {availableCards.map(card => (
             <Link 
@@ -63,7 +80,7 @@ const ArPreviewPanel: React.FC<ArPreviewPanelProps> = ({
               to={`/ar-card-viewer/${card.id}`}
               className={`block p-3 rounded-md border transition-colors ${
                 activeCard?.id === card.id 
-                  ? 'border-blue-500 bg-blue-50' 
+                  ? 'border-crd-primary bg-crd-primary/5' 
                   : 'border-gray-200 hover:bg-gray-50'
               }`}
             >
@@ -83,6 +100,7 @@ const ArPreviewPanel: React.FC<ArPreviewPanelProps> = ({
                       : 'No tags'}
                   </div>
                 </div>
+                <ArrowRight className="h-4 w-4 text-gray-400" />
               </div>
             </Link>
           ))}

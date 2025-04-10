@@ -2,7 +2,9 @@
 import React from 'react';
 import { Card } from '@/lib/types';
 import { cn } from '@/lib/utils';
-import { MoreHorizontal, RefreshCw, Share2, Trash2 } from 'lucide-react';
+import { MoreHorizontal, RefreshCw, Share2, Trash2, Smartphone } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { CrdButton } from '@/components/ui/crd-button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,6 +28,8 @@ export const CardFront: React.FC<CardFrontProps> = ({
   onShare,
   onDelete
 }) => {
+  const navigate = useNavigate();
+  
   const effectClasses = activeEffects.map(effect => {
     switch (effect.toLowerCase()) {
       case 'holographic':
@@ -39,6 +43,11 @@ export const CardFront: React.FC<CardFrontProps> = ({
         return 'effect-refractor';
     }
   });
+
+  const handleLaunchAR = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigate(`/ar-card-viewer/${card.id}`);
+  };
   
   return (
     <div className="card-face card-front absolute inset-0 bg-white rounded-lg shadow-lg overflow-hidden select-none">
@@ -55,24 +64,35 @@ export const CardFront: React.FC<CardFrontProps> = ({
         
         {/* Card info overlay at bottom */}
         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
-          <h3 className="font-bold text-white text-lg leading-tight">{card.title}</h3>
+          <h3 className="crd-display-medium text-white text-lg leading-tight">{card.title}</h3>
           
           {card.tags && card.tags.length > 0 && (
             <div className="flex flex-wrap gap-1 mt-1">
               {card.tags.slice(0, 3).map((tag, index) => (
                 <span 
                   key={index}
-                  className="inline-flex text-xs bg-cardshow-blue/80 text-white px-1.5 py-0.5 rounded"
+                  className="inline-flex crd-text-small bg-cardshow-blue/80 text-white px-1.5 py-0.5 rounded"
                 >
                   {tag}
                 </span>
               ))}
               
               {card.tags.length > 3 && (
-                <span className="text-xs text-gray-300">+{card.tags.length - 3}</span>
+                <span className="crd-text-small text-gray-300">+{card.tags.length - 3}</span>
               )}
             </div>
           )}
+          
+          {/* AR View Button */}
+          <CrdButton
+            variant="gradient"
+            size="sm"
+            className="mt-3"
+            onClick={handleLaunchAR}
+          >
+            <Smartphone className="h-4 w-4 mr-1" />
+            <span className="crd-text-small font-medium">View in AR</span>
+          </CrdButton>
         </div>
         
         {/* Action buttons */}
