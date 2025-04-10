@@ -83,13 +83,18 @@ export const getReactions = async (
   const reactionCounts: Record<ReactionType, number> = {
     like: 0, love: 0, celebrate: 0, insightful: 0, baseball: 0
   }
+  
   (data||[]).forEach(r => {
-    // Make sure we're accessing the object correctly using bracket notation
-    // And ensure r.type is a valid key for reactionCounts
-    if (r.type && r.type in reactionCounts) {
-      reactionCounts[r.type as ReactionType] = (reactionCounts[r.type as ReactionType] || 0) + 1
+    // Ensure r.type exists and is a valid key for reactionCounts
+    if (r.type && typeof r.type === 'string') {
+      // Use type assertion to tell TypeScript this is a valid ReactionType
+      const reactionType = r.type as ReactionType;
+      if (reactionType in reactionCounts) {
+        reactionCounts[reactionType] += 1;
+      }
     }
   })
+  
   return { reactions: data||[], counts: reactionCounts }
 }
 
