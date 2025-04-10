@@ -1,5 +1,5 @@
 
-import { MoveRight, Image, Layers, Package, Users, Star, Play, Zap } from 'lucide-react';
+import { MoveRight, Image, Layers, Package, Users, Star, Play, Zap, MessageCircle } from 'lucide-react';
 
 // Cards navigation items
 export const cardsNavigation = {
@@ -92,6 +92,19 @@ export const teamsNavigation = {
       path: '/teams/oakland',
       icon: Users,
       description: 'Oakland Athletics'
+    },
+    {
+      title: 'San Francisco Giants',
+      path: '/teams/sf-giants',
+      icon: Users,
+      description: 'San Francisco Giants'
+    },
+    {
+      title: 'Game Day Mode',
+      path: '/game-day',
+      icon: Play,
+      description: 'Enhanced experience for game day',
+      highlight: true
     }
   ],
   featuredTeams: [
@@ -139,6 +152,19 @@ export const featuresNavigation = {
       icon: Star,
       highlight: true,
       description: 'Enhanced experience for game day'
+    },
+    {
+      title: 'Community',
+      path: '/community',
+      icon: MessageCircle,
+      description: 'Connect with other collectors'
+    },
+    {
+      title: 'Labs',
+      path: '/labs',
+      icon: Zap,
+      highlight: true,
+      description: 'Experimental features'
     }
   ]
 };
@@ -156,5 +182,7 @@ export const routeMappings = {
   '/ar-viewer': 'features',
   '/comparison': 'features',
   '/animation': 'features',
-  '/game-day': 'features'
+  '/game-day': 'features',
+  '/community': 'community',
+  '/labs': 'features'
 };

@@ -3,6 +3,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import PageLayout from '@/components/navigation/PageLayout';
 import { Button } from '@/components/ui/button';
+import { Image, Layers, Package, Users, Zap, PlayCircle } from 'lucide-react';
 
 const Home = () => {
   return (
@@ -28,6 +29,9 @@ const Home = () => {
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
           <div className="bg-white p-6 rounded-lg shadow-sm">
+            <div className="h-10 w-10 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+              <Image className="h-6 w-6 text-blue-600" />
+            </div>
             <h2 className="text-xl font-bold mb-3">Card Gallery</h2>
             <p className="mb-4">Browse your collection of cards and memories</p>
             <Button asChild variant="outline" className="w-full">
@@ -36,6 +40,9 @@ const Home = () => {
           </div>
           
           <div className="bg-white p-6 rounded-lg shadow-sm">
+            <div className="h-10 w-10 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
+              <Layers className="h-6 w-6 text-purple-600" />
+            </div>
             <h2 className="text-xl font-bold mb-3">Collections</h2>
             <p className="mb-4">Organize your cards into themed collections</p>
             <Button asChild variant="outline" className="w-full">
@@ -44,11 +51,89 @@ const Home = () => {
           </div>
           
           <div className="bg-white p-6 rounded-lg shadow-sm">
+            <div className="h-10 w-10 bg-green-100 rounded-lg flex items-center justify-center mb-4">
+              <Package className="h-6 w-6 text-green-600" />
+            </div>
             <h2 className="text-xl font-bold mb-3">Memory Packs</h2>
             <p className="mb-4">Explore themed memory packs</p>
             <Button asChild variant="outline" className="w-full">
               <Link to="/packs">Browse Packs</Link>
             </Button>
+          </div>
+        </div>
+
+        {/* Featured sections */}
+        <div className="mt-16">
+          <h2 className="text-2xl font-bold mb-6 text-center">Featured Experiences</h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-6 rounded-lg">
+              <div className="h-12 w-12 bg-white/80 rounded-full flex items-center justify-center mb-4">
+                <PlayCircle className="h-7 w-7 text-blue-600" />
+              </div>
+              <h3 className="text-xl font-bold mb-2">Game Day Mode</h3>
+              <p className="mb-4 text-gray-700">
+                Enhance your experience during live games with real-time updates and card creation
+              </p>
+              <Button asChild>
+                <Link to="/game-day">Try Game Day Mode</Link>
+              </Button>
+            </div>
+            
+            <div className="bg-gradient-to-r from-amber-50 to-amber-100 p-6 rounded-lg">
+              <div className="h-12 w-12 bg-white/80 rounded-full flex items-center justify-center mb-4">
+                <Zap className="h-7 w-7 text-amber-600" />
+              </div>
+              <h3 className="text-xl font-bold mb-2">Dugout Labs</h3>
+              <p className="mb-4 text-gray-700">
+                Preview experimental features and provide feedback to our team
+              </p>
+              <Button asChild>
+                <Link to="/labs">Explore Labs</Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+        
+        {/* Teams section */}
+        <div className="mt-16">
+          <div className="flex flex-col sm:flex-row justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold">Teams</h2>
+            <Button asChild variant="outline">
+              <Link to="/teams">View All Teams</Link>
+            </Button>
+          </div>
+          
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <Link 
+              to="/teams/oakland" 
+              className="bg-white p-4 rounded-lg shadow-sm flex flex-col items-center hover:shadow-md transition-shadow"
+            >
+              <div className="h-16 w-16 bg-[#006341]/10 rounded-full flex items-center justify-center mb-2">
+                <Users className="h-8 w-8 text-[#006341]" />
+              </div>
+              <span className="font-medium">Oakland A's</span>
+            </Link>
+            
+            <Link 
+              to="/teams/sf-giants" 
+              className="bg-white p-4 rounded-lg shadow-sm flex flex-col items-center hover:shadow-md transition-shadow"
+            >
+              <div className="h-16 w-16 bg-[#FD5A1E]/10 rounded-full flex items-center justify-center mb-2">
+                <Users className="h-8 w-8 text-[#FD5A1E]" />
+              </div>
+              <span className="font-medium">SF Giants</span>
+            </Link>
+            
+            <Link 
+              to="/teams" 
+              className="bg-white p-4 rounded-lg shadow-sm flex flex-col items-center hover:shadow-md transition-shadow col-span-2"
+            >
+              <div className="h-16 w-16 bg-gray-100 rounded-full flex items-center justify-center mb-2">
+                <span className="font-bold text-gray-400">+</span>
+              </div>
+              <span className="font-medium">More Teams</span>
+            </Link>
           </div>
         </div>
       </div>

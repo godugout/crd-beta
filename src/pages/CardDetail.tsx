@@ -1,137 +1,155 @@
 
-import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import React from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import PageLayout from '@/components/navigation/PageLayout';
-import { CardData } from '@/components/baseball/types/BaseballCard';
-import { useBaseballCard } from '@/components/baseball/hooks/useBaseballCard';
+import { Button } from '@/components/ui/button';
+import { useCards } from '@/context/CardContext';
+import { ArrowLeft, Share2, Edit, Trash2 } from 'lucide-react';
+import { Card as CardType } from '@/lib/types';
+import CardMedia from '@/components/gallery/CardMedia';
 
 const CardDetail = () => {
-  const { id } = useParams<{ id: string }>();
-  const { cardData, isLoading, error } = useBaseballCard();
-
-  if (isLoading) {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const { cards } = useCards();
+  
+  // Find the card with the matching ID
+  const card = cards.find(c => c.id === id);
+  
+  // Handle card not found
+  if (!card) {
     return (
-      <PageLayout 
-        title="Loading Card" 
-        description="Loading card details..."
+      <PageLayout
+        title="Card Not Found"
+        description="The requested card could not be found"
       >
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-gray-900"></div>
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex items-center mb-6">
+            <Button variant="ghost" onClick={() => navigate(-1)} className="mr-2">
+              <ArrowLeft className="h-5 w-5 mr-2" />
+              Back
+            </Button>
+          </div>
+          
+          <div className="text-center py-16">
+            <h1 className="text-3xl font-bold mb-4">Card Not Found</h1>
+            <p className="text-gray-600 mb-8">
+              The card you're looking for doesn't exist or has been removed.
+            </p>
+            <Button onClick={() => navigate('/cards')}>
+              Browse All Cards
+            </Button>
+          </div>
         </div>
       </PageLayout>
     );
   }
-
-  if (error || !cardData) {
-    return (
-      <PageLayout 
-        title="Card Not Found" 
-        description="The requested card could not be found."
-      >
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative">
-          <strong className="font-bold">Error:</strong>
-          <span className="block sm:inline"> {error || "Card not found"}</span>
-        </div>
-      </PageLayout>
-    );
-  }
-
+  
   return (
-    <PageLayout 
-      title={cardData.title} 
-      description={`${cardData.year} ${cardData.player} ${cardData.team} baseball card`}
-      imageUrl={cardData.imageUrl}
-      type="product"
+    <PageLayout
+      title={card.title || "Card Detail"}
+      description={card.description || "View card details"}
     >
       <div className="container mx-auto px-4 py-8">
+        <div className="flex items-center mb-6">
+          <Button variant="ghost" onClick={() => navigate(-1)} className="mr-2">
+            <ArrowLeft className="h-5 w-5 mr-2" />
+            Back
+          </Button>
+        </div>
+        
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Card Image */}
           <div className="flex justify-center">
-            <div className="max-w-md">
-              <img 
-                src={cardData.imageUrl} 
-                alt={cardData.title} 
-                className="rounded-lg shadow-lg"
-              />
+            <div className="max-w-md w-full">
+              <div className="aspect-[2.5/3.5] relative rounded-lg overflow-hidden shadow-lg">
+                <CardMedia 
+                  card={card} 
+                  onView={() => {}} 
+                  className="h-full w-full object-cover" 
+                />
+              </div>
             </div>
           </div>
           
           {/* Card Details */}
           <div>
-            <h1 className="text-3xl font-bold mb-2">{cardData.title}</h1>
-            <p className="text-gray-600 mb-6">{cardData.manufacturer}, {cardData.year}</p>
+            <h1 className="text-3xl font-bold mb-3">{card.title}</h1>
             
-            <div className="grid grid-cols-2 gap-4 mb-8">
-              <div>
-                <p className="text-sm text-gray-500">Player</p>
-                <p className="font-medium">{cardData.player}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Team</p>
-                <p className="font-medium">{cardData.team}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Position</p>
-                <p className="font-medium">{cardData.position}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Card Number</p>
-                <p className="font-medium">{cardData.cardNumber}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Condition</p>
-                <p className="font-medium">{cardData.condition}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Value</p>
-                <p className="font-medium">{cardData.value}</p>
-              </div>
-            </div>
-            
-            {/* Stats section */}
-            {cardData.stats && (
-              <div className="border-t pt-6 mt-6">
-                <h2 className="text-xl font-bold mb-4">Stats</h2>
-                <div className="grid grid-cols-3 gap-4">
-                  {cardData.stats.battingAverage && (
-                    <div>
-                      <p className="text-sm text-gray-500">Batting Average</p>
-                      <p className="font-medium">{cardData.stats.battingAverage}</p>
-                    </div>
-                  )}
-                  {cardData.stats.homeRuns && (
-                    <div>
-                      <p className="text-sm text-gray-500">Home Runs</p>
-                      <p className="font-medium">{cardData.stats.homeRuns}</p>
-                    </div>
-                  )}
-                  {cardData.stats.rbis && (
-                    <div>
-                      <p className="text-sm text-gray-500">RBIs</p>
-                      <p className="font-medium">{cardData.stats.rbis}</p>
-                    </div>
-                  )}
-                  {cardData.stats.era && (
-                    <div>
-                      <p className="text-sm text-gray-500">ERA</p>
-                      <p className="font-medium">{cardData.stats.era}</p>
-                    </div>
-                  )}
-                  {cardData.stats.wins && (
-                    <div>
-                      <p className="text-sm text-gray-500">Wins</p>
-                      <p className="font-medium">{cardData.stats.wins}</p>
-                    </div>
-                  )}
-                  {cardData.stats.strikeouts && (
-                    <div>
-                      <p className="text-sm text-gray-500">Strikeouts</p>
-                      <p className="font-medium">{cardData.stats.strikeouts}</p>
-                    </div>
-                  )}
-                </div>
+            {card.tags && card.tags.length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-4">
+                {card.tags.map((tag, i) => (
+                  <span key={i} className="bg-gray-100 text-gray-700 px-2 py-1 rounded text-sm">
+                    {tag}
+                  </span>
+                ))}
               </div>
             )}
+            
+            <p className="text-gray-600 mb-6">{card.description || "No description available"}</p>
+            
+            <div className="flex flex-wrap gap-3 mb-8">
+              <Button 
+                variant="outline" 
+                onClick={() => navigate(`/cards/edit/${card.id}`)}
+                className="flex items-center"
+              >
+                <Edit className="h-4 w-4 mr-2" />
+                Edit Card
+              </Button>
+              <Button 
+                variant="outline" 
+                className="flex items-center"
+              >
+                <Share2 className="h-4 w-4 mr-2" />
+                Share
+              </Button>
+              <Button 
+                variant="outline" 
+                className="flex items-center text-red-600 hover:bg-red-50"
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete
+              </Button>
+            </div>
+            
+            {/* Additional card info */}
+            <div className="space-y-4">
+              {card.createdAt && (
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500">Created</h3>
+                  <p>{new Date(card.createdAt).toLocaleDateString()}</p>
+                </div>
+              )}
+              
+              {card.updatedAt && card.updatedAt !== card.createdAt && (
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500">Last Updated</h3>
+                  <p>{new Date(card.updatedAt).toLocaleDateString()}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+        
+        {/* Related Cards (placeholder for now) */}
+        <div className="mt-16">
+          <h2 className="text-xl font-bold mb-4">Related Cards</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {cards.slice(0, 4).filter(c => c.id !== id).map((relatedCard) => (
+              <div 
+                key={relatedCard.id}
+                className="border rounded-lg overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
+                onClick={() => navigate(`/cards/${relatedCard.id}`)}
+              >
+                <div className="h-48">
+                  <CardMedia card={relatedCard} onView={() => {}} className="h-full" />
+                </div>
+                <div className="p-3">
+                  <h3 className="font-medium text-sm truncate">{relatedCard.title}</h3>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
