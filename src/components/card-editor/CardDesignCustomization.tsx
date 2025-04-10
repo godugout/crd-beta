@@ -3,18 +3,12 @@ import React from 'react';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Slider } from '@/components/ui/slider';
-
-interface CardStyleType {
-  borderRadius: string;
-  effect: string;
-  borderColor?: string;
-  backgroundColor?: string;
-}
+import { CardStyle } from './types';
 
 interface CardDesignCustomizationProps {
   imageUrl: string;
-  cardStyle: CardStyleType;
-  setCardStyle: (style: CardStyleType) => void;
+  cardStyle: CardStyle;
+  setCardStyle: (style: CardStyle) => void;
 }
 
 const CardDesignCustomization: React.FC<CardDesignCustomizationProps> = ({

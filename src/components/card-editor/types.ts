@@ -1,6 +1,18 @@
 
-import { CardStyle } from './CardDesignCustomization';
-import { TextStyle } from './CardTextCustomization';
+export interface CardStyle {
+  borderRadius: string;
+  effect: string;
+  borderColor?: string;
+  backgroundColor?: string;
+}
+
+export interface TextStyle {
+  fontFamily?: string;
+  fontSize?: string;
+  fontWeight?: string;
+  color?: string;
+  textShadow?: string;
+}
 
 export interface CardEditorState {
   imageFile: File | null;

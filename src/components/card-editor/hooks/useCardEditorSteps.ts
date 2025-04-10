@@ -35,5 +35,6 @@ export function useCardEditorSteps(totalSteps: number, validateStep?: StepValida
     goToStep,
     isFirstStep: currentStep === 0,
     isLastStep: currentStep === totalSteps - 1,
+    totalSteps,
   };
 }
