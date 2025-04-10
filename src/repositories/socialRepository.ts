@@ -1,4 +1,3 @@
-
 // repositories/socialRepository.ts
 import { createClient } from '@supabase/supabase-js'
 
@@ -85,13 +84,9 @@ export const getReactions = async (
   }
   
   (data||[]).forEach(r => {
-    // Ensure r.type exists and is a valid key for reactionCounts
-    if (r.type && typeof r.type === 'string') {
-      // Use type assertion to tell TypeScript this is a valid ReactionType
+    if (r.type && typeof r.type === 'string' && r.type in reactionCounts) {
       const reactionType = r.type as ReactionType;
-      if (reactionType in reactionCounts) {
-        reactionCounts[reactionType] += 1;
-      }
+      reactionCounts[reactionType] += 1;
     }
   })
   
