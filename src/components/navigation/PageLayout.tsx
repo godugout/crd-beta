@@ -28,6 +28,8 @@ interface PageLayoutProps {
   keywords?: string[];
   transitions?: boolean;
   hideFooter?: boolean;
+  gradient?: boolean;
+  darkMode?: boolean;
 }
 
 const PageLayout: React.FC<PageLayoutProps> = ({ 
@@ -46,7 +48,9 @@ const PageLayout: React.FC<PageLayoutProps> = ({
   section,
   keywords,
   transitions = true,
-  hideFooter = false
+  hideFooter = false,
+  gradient = false,
+  darkMode = false
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const isMobile = useMediaQuery('(max-width: 768px)');
@@ -84,6 +88,16 @@ const PageLayout: React.FC<PageLayoutProps> = ({
     return () => window.removeEventListener('scroll', handleScroll);
   }, [setScrollPosition]);
 
+  // Apply dark mode class if specified
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add('dark');
+      return () => {
+        document.documentElement.classList.remove('dark');
+      };
+    }
+  }, [darkMode]);
+
   const pageTransition = {
     initial: { opacity: 0, y: 10 },
     animate: { opacity: 1, y: 0 },
@@ -91,9 +105,11 @@ const PageLayout: React.FC<PageLayoutProps> = ({
     transition: { duration: 0.3 }
   };
 
+  const gradientClass = gradient ? 'bg-gradient-to-br from-white to-gray-100 dark:from-litmus-gray-900 dark:to-litmus-gray-800' : '';
+
   return (
     <BreadcrumbProvider currentTeam={team}>
-      <div className="min-h-screen flex flex-col">
+      <div className={`min-h-screen flex flex-col ${gradientClass}`}>
         <MetaTags 
           title={title}
           description={description}
@@ -130,9 +146,14 @@ const PageLayout: React.FC<PageLayoutProps> = ({
         
         {/* Footer */}
         {!hideFooter && (
-          <footer className="bg-gray-100 py-6 mt-8">
-            <div className="container mx-auto px-4 text-center text-gray-600">
-              <p>© {new Date().getFullYear()} CardShow. All rights reserved.</p>
+          <footer className="bg-white dark:bg-litmus-gray-900 py-6 mt-8 border-t border-gray-200 dark:border-litmus-gray-800">
+            <div className="container mx-auto px-4 text-center">
+              <div className="flex justify-center items-center mb-4">
+                <span className="text-2xl font-bold bg-gradient-to-r from-litmus-purple to-litmus-purple-secondary bg-clip-text text-transparent">
+                  CardShow
+                </span>
+              </div>
+              <p className="text-gray-600 dark:text-gray-400">© {new Date().getFullYear()} CardShow. All rights reserved.</p>
             </div>
           </footer>
         )}

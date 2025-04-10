@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { 
   Card, 
@@ -11,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { X } from 'lucide-react';
+import { X, PlusCircle, Tags, Users, Shield, Calendar } from 'lucide-react';
 import { 
   Select, 
   SelectTrigger, 
@@ -112,56 +113,67 @@ export const MemoryCreator: React.FC<MemoryCreatorProps> = ({
   
   if (!user) {
     return (
-      <Card>
+      <Card className="bg-white dark:bg-litmus-gray-800 shadow-md">
         <CardContent className="pt-6">
-          <p>You need to be logged in to create memories.</p>
+          <p className="text-center text-gray-500 dark:text-gray-400">You need to be logged in to create memories.</p>
         </CardContent>
       </Card>
     );
   }
   
   return (
-    <Card className="w-full max-w-2xl mx-auto">
-      <CardHeader>
-        <CardTitle>Create New Memory</CardTitle>
-        <CardDescription>
+    <Card className="w-full max-w-2xl mx-auto shadow-xl dark:shadow-litmus-purple/5 border border-gray-200 dark:border-litmus-gray-700">
+      <CardHeader className="bg-gradient-to-r from-litmus-purple/10 to-litmus-purple-secondary/5 dark:from-litmus-purple-dark/20 dark:to-litmus-purple/10 border-b border-gray-100 dark:border-litmus-gray-800">
+        <CardTitle className="text-litmus-purple-secondary dark:text-litmus-purple-light">Create New Memory</CardTitle>
+        <CardDescription className="dark:text-gray-400">
           Capture and preserve your baseball moments
         </CardDescription>
       </CardHeader>
       
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-6 pt-6">
         {!createdMemoryId ? (
-          <form className="space-y-4">
+          <form className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="title">Title</Label>
+              <Label htmlFor="title" className="text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                <Calendar size={16} className="text-litmus-purple" />
+                Title
+              </Label>
               <Input
                 id="title"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Give your memory a title"
                 required
+                className="border-gray-300 dark:border-litmus-gray-700"
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
+              <Label htmlFor="description" className="text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                <PlusCircle size={16} className="text-litmus-purple" />
+                Description
+              </Label>
               <Textarea
                 id="description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Describe this memory"
                 rows={3}
+                className="border-gray-300 dark:border-litmus-gray-700 rounded-lg resize-none focus:ring-litmus-purple focus:border-litmus-purple"
               />
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="team">Team</Label>
+                <Label htmlFor="team" className="text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                  <Users size={16} className="text-litmus-purple" />
+                  Team
+                </Label>
                 <Select value={teamId} onValueChange={setTeamId}>
-                  <SelectTrigger>
+                  <SelectTrigger className="border-gray-300 dark:border-litmus-gray-700 rounded-lg focus:ring-litmus-purple focus:border-litmus-purple">
                     <SelectValue placeholder="Select team" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-white dark:bg-litmus-gray-800">
                     <SelectItem value="">No team</SelectItem>
                     {teams?.map(team => (
                       <SelectItem key={team.id} value={team.id}>
@@ -173,12 +185,15 @@ export const MemoryCreator: React.FC<MemoryCreatorProps> = ({
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="visibility">Visibility</Label>
+                <Label htmlFor="visibility" className="text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                  <Shield size={16} className="text-litmus-purple" />
+                  Visibility
+                </Label>
                 <Select value={visibility} onValueChange={(value: 'public' | 'private' | 'shared') => setVisibility(value)}>
-                  <SelectTrigger>
+                  <SelectTrigger className="border-gray-300 dark:border-litmus-gray-700 rounded-lg focus:ring-litmus-purple focus:border-litmus-purple">
                     <SelectValue placeholder="Visibility" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-white dark:bg-litmus-gray-800">
                     <SelectItem value="private">Private</SelectItem>
                     <SelectItem value="shared">Shared</SelectItem>
                     <SelectItem value="public">Public</SelectItem>
@@ -187,16 +202,19 @@ export const MemoryCreator: React.FC<MemoryCreatorProps> = ({
               </div>
             </div>
             
-            <div className="space-y-2">
-              <Label htmlFor="tags">Tags</Label>
-              <div className="flex flex-wrap gap-2 mb-2">
+            <div className="space-y-3">
+              <Label htmlFor="tags" className="text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                <Tags size={16} className="text-litmus-purple" />
+                Tags
+              </Label>
+              <div className="flex flex-wrap gap-2 mb-3">
                 {tags.map(tag => (
-                  <div key={tag} className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm flex items-center gap-1">
-                    {tag}
+                  <div key={tag} className="bg-litmus-purple/10 text-litmus-purple dark:text-litmus-purple-light dark:bg-litmus-purple-dark/20 px-3 py-1 rounded-full text-sm flex items-center gap-1">
+                    #{tag}
                     <button 
                       type="button" 
                       onClick={() => removeTag(tag)}
-                      className="text-blue-800 hover:text-blue-900"
+                      className="text-litmus-purple hover:text-litmus-purple-secondary dark:text-litmus-purple-light dark:hover:text-white ml-1"
                     >
                       <X size={14} />
                     </button>
@@ -209,51 +227,93 @@ export const MemoryCreator: React.FC<MemoryCreatorProps> = ({
                 onChange={(e) => setTagsInput(e.target.value)}
                 onKeyDown={handleTagsChange}
                 placeholder="Add tags (press Enter or comma to add)"
+                className="border-gray-300 dark:border-litmus-gray-700"
               />
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Tags help others find your memory
+              </p>
             </div>
           </form>
         ) : (
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <h3 className="text-lg font-medium">Add Media</h3>
-              <p className="text-sm text-gray-500">
-                Upload photos or videos to your memory
+          <div className="space-y-6">
+            <div className="bg-litmus-teal/10 dark:bg-litmus-teal-dark/20 rounded-lg p-4 flex items-center">
+              <div className="w-8 h-8 rounded-full bg-litmus-teal/20 dark:bg-litmus-teal-dark/30 flex items-center justify-center mr-3">
+                <span className="text-litmus-teal">✓</span>
+              </div>
+              <div>
+                <h4 className="font-medium text-litmus-teal dark:text-litmus-teal-light">Memory Created!</h4>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Now add media to bring your memory to life
+                </p>
+              </div>
+            </div>
+            
+            <div className="space-y-3">
+              <h3 className="text-lg font-medium text-litmus-purple-secondary dark:text-litmus-purple-light">Add Media</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Upload photos or videos to make your memory more vivid
               </p>
             </div>
             
-            <BatchMediaUploader
-              memoryId={createdMemoryId}
-              userId={user.id}
-              onUploadComplete={handleMediaUploadComplete}
-              detectFaces={true}
-              maxFiles={20}
-            />
+            <div className="bg-gray-50 dark:bg-litmus-gray-900/50 rounded-lg p-6">
+              <BatchMediaUploader
+                memoryId={createdMemoryId}
+                userId={user.id}
+                onUploadComplete={handleMediaUploadComplete}
+                detectFaces={true}
+                maxFiles={20}
+              />
+            </div>
           </div>
         )}
       </CardContent>
       
-      <CardFooter className="flex justify-between">
+      <CardFooter className="flex justify-between border-t border-gray-100 dark:border-litmus-gray-800 py-4">
         {!createdMemoryId ? (
           <>
-            <Button variant="outline" onClick={() => onCreated?.('')}>Cancel</Button>
-            <Button onClick={handleCreate} disabled={isCreating || !title.trim()}>
-              {isCreating ? 'Creating...' : 'Create Memory'}
+            <Button 
+              variant="outline" 
+              onClick={() => onCreated?.('')}
+              className="border-gray-300 dark:border-litmus-gray-700 text-gray-600 dark:text-gray-400"
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleCreate} 
+              disabled={isCreating || !title.trim()}
+              variant="gradient"
+              className="relative"
+            >
+              <span className="relative z-10">
+                {isCreating ? 'Creating...' : 'Create Memory'}
+              </span>
             </Button>
           </>
         ) : (
-          <Button onClick={() => {
-            setCreatedMemoryId(null);
-            setTitle('');
-            setDescription('');
-            setTeamId(defaultTeamId || '');
-            setGameId(defaultGameId || '');
-            setVisibility(defaultVisibility);
-            setTags([]);
-            setTagsInput('');
-            setLocation({});
-          }}>
-            Create Another Memory
-          </Button>
+          <div className="w-full flex justify-between">
+            <Button
+              variant="outline"
+              onClick={() => onCreated?.(createdMemoryId)}
+            >
+              Finish
+            </Button>
+            <Button 
+              variant="ghost"
+              onClick={() => {
+                setCreatedMemoryId(null);
+                setTitle('');
+                setDescription('');
+                setTeamId(defaultTeamId || '');
+                setGameId(defaultGameId || '');
+                setVisibility(defaultVisibility);
+                setTags([]);
+                setTagsInput('');
+                setLocation({});
+              }}
+            >
+              Create Another Memory
+            </Button>
+          </div>
         )}
       </CardFooter>
     </Card>

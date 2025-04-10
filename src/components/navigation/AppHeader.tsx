@@ -1,113 +1,173 @@
 
-import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom'; 
-import { Menu, X, ChevronLeft } from 'lucide-react';
+import React, { useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { Menu, X, Search, PlusCircle, User } from 'lucide-react';
+import { useAuth } from '@/context/auth/useAuth';
 import { Button } from '@/components/ui/button';
-import MainNavigation from './MainNavigation';
-import MobileNavigation from './MobileNavigation';
-import UserDropdown from '@/components/navbar/UserDropdown';
-import { useAuth } from '@/context/auth'; // Updated import
-import { useMediaQuery } from '@/hooks/useMediaQuery';
-import LabsButton from '../LabsButton';
-import DugoutLabs from '../experimental/DugoutLabs';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 
 const AppHeader: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
-  const auth = useAuth();
-  const user = auth?.user;
-  const signOut = auth?.signOut;
   const location = useLocation();
-  const isMobile = useMediaQuery('(max-width: 768px)');
-  
-  const handleSignOut = async () => {
-    if (signOut) {
-      await signOut();
+  const { user, signIn, signOut } = useAuth();
+
+  const isHomePage = location.pathname === '/';
+  const isCardDetailPage = location.pathname.includes('/cards/') && !location.pathname.includes('/cards/create');
+
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
+
+  const closeMenu = () => {
+    setIsMenuOpen(false);
+  };
+
+  const handleSignInOut = async () => {
+    if (user) {
+      await signOut?.();
+    } else {
+      await signIn?.();
     }
+    closeMenu();
   };
-  
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
-    };
-    
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-  
-  const shouldShowBackButton = () => {
-    const pathParts = location.pathname.split('/').filter(Boolean);
-    return pathParts.length >= 3 || pathParts.some(part => part.match(/^[0-9a-fA-F-]+$/));
-  };
-  
+
   return (
-    <header className={`fixed top-0 left-0 right-0 z-30 bg-white border-b transition-shadow ${
-      isScrolled ? 'shadow-md' : 'shadow-sm'
-    }`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="flex items-center justify-between h-16">
+    <header className="sticky top-0 z-50 w-full bg-white/80 dark:bg-litmus-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-litmus-gray-800">
+      <div className="container mx-auto px-4">
+        <div className="flex h-16 items-center justify-between">
+          {/* Logo */}
           <div className="flex items-center">
-            {isMobile && shouldShowBackButton() ? (
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="mr-2" 
-                onClick={() => window.history.back()}
-              >
-                <ChevronLeft className="h-5 w-5" />
-                <span className="sr-only">Back</span>
-              </Button>
-            ) : (
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="lg:hidden mr-2" 
-                onClick={() => setIsMenuOpen(true)}
-              >
-                <Menu className="h-5 w-5" />
-                <span className="sr-only">Open menu</span>
-              </Button>
-            )}
-            
-            <Link to="/" className="flex items-center">
-              <span className="font-bold text-xl text-gray-900">CardShow</span>
+            <Link to="/" className="flex items-center" onClick={closeMenu}>
+              <span className="text-2xl font-bold bg-gradient-to-r from-litmus-purple to-litmus-purple-secondary bg-clip-text text-transparent">
+                CardShow
+              </span>
             </Link>
-            
-            <div className="hidden lg:ml-6 lg:flex">
-              <MainNavigation />
-            </div>
           </div>
 
-          <div className="flex items-center space-x-2">
-            {/* Add Labs button */}
-            <div className="hidden md:block">
-              <DugoutLabs />
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center space-x-4">
+            <Link 
+              to="/cards" 
+              className="text-gray-600 hover:text-litmus-purple dark:text-gray-200 dark:hover:text-litmus-purple-light px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-litmus-gray-800 transition-colors"
+            >
+              Explore
+            </Link>
+            <Link 
+              to="/collections" 
+              className="text-gray-600 hover:text-litmus-purple dark:text-gray-200 dark:hover:text-litmus-purple-light px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-litmus-gray-800 transition-colors"
+            >
+              Collections
+            </Link>
+            <Link 
+              to="/teams" 
+              className="text-gray-600 hover:text-litmus-purple dark:text-gray-200 dark:hover:text-litmus-purple-light px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-litmus-gray-800 transition-colors"
+            >
+              Teams
+            </Link>
+            <Link 
+              to="/community" 
+              className="text-gray-600 hover:text-litmus-purple dark:text-gray-200 dark:hover:text-litmus-purple-light px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-litmus-gray-800 transition-colors"
+            >
+              Community
+            </Link>
+
+            {/* Action Buttons */}
+            <div className="ml-4 flex items-center space-x-2">
+              <Button asChild variant="ghost" size="icon">
+                <Link to="/search">
+                  <Search className="h-5 w-5" />
+                </Link>
+              </Button>
+              
+              <ThemeToggle />
+              
+              {user ? (
+                <Button asChild variant="outline">
+                  <Link to="/profile">
+                    <User className="h-4 w-4 mr-2" />
+                    Profile
+                  </Link>
+                </Button>
+              ) : (
+                <Button onClick={handleSignInOut}>Sign In</Button>
+              )}
+              
+              <Button asChild className="btn-gradient">
+                <Link to="/cards/create">
+                  <PlusCircle className="h-4 w-4 mr-2" />
+                  <span>Create Card</span>
+                </Link>
+              </Button>
             </div>
+          </nav>
+
+          {/* Mobile Navigation */}
+          <div className="flex md:hidden items-center space-x-2">
+            <ThemeToggle />
             
-            <div className="md:hidden">
-              <LabsButton variant="icon" />
-            </div>
-            
-            {user ? (
-              <UserDropdown 
-                user={user} 
-                onSignOut={handleSignOut}
-                isOpen={false} 
-                onClose={() => {}} 
-              />
-            ) : (
-              <Link to="/auth">
-                <Button size="sm">Sign In</Button>
-              </Link>
-            )}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleMenu}
+              aria-label="Toggle menu"
+            >
+              {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </Button>
           </div>
         </div>
       </div>
-      
-      <MobileNavigation 
-        isOpen={isMenuOpen} 
-        onClose={() => setIsMenuOpen(false)} 
-      />
+
+      {/* Mobile Menu */}
+      {isMenuOpen && (
+        <div className="md:hidden bg-white dark:bg-litmus-gray-900 border-t border-gray-200 dark:border-litmus-gray-800 animate-fade-in">
+          <div className="container px-4 py-3 space-y-1">
+            <Link 
+              to="/cards" 
+              className="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-litmus-gray-800"
+              onClick={closeMenu}
+            >
+              Explore
+            </Link>
+            <Link 
+              to="/collections" 
+              className="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-litmus-gray-800"
+              onClick={closeMenu}
+            >
+              Collections
+            </Link>
+            <Link 
+              to="/teams" 
+              className="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-litmus-gray-800"
+              onClick={closeMenu}
+            >
+              Teams
+            </Link>
+            <Link 
+              to="/community" 
+              className="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-litmus-gray-800"
+              onClick={closeMenu}
+            >
+              Community
+            </Link>
+            
+            <div className="pt-4">
+              <Button
+                onClick={handleSignInOut}
+                className="w-full mb-2"
+              >
+                {user ? 'Sign Out' : 'Sign In'}
+              </Button>
+              
+              <Button asChild className="w-full btn-gradient">
+                <Link to="/cards/create" onClick={closeMenu}>
+                  <PlusCircle className="h-4 w-4 mr-2" />
+                  Create Card
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 };

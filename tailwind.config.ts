@@ -70,12 +70,75 @@ export default {
 					'slate-light': '#AEAEB2',
 					neutral: '#F2F2F7',
 					dark: '#1C1C1E',
-				}
+				},
+				// Litmus brand colors
+				litmus: {
+					purple: {
+						DEFAULT: '#9b87f5',
+						secondary: '#7E69AB',
+						tertiary: '#6E59A5',
+						dark: '#1A1F2C',
+						light: '#D6BCFA',
+					},
+					neutral: '#8E9196',
+					teal: {
+						DEFAULT: '#4FD1C5', 
+						light: '#E6FFFA',
+						dark: '#285E61',
+					},
+					orange: {
+						DEFAULT: '#F97316',
+						light: '#FFEDD5',
+					},
+					green: {
+						DEFAULT: '#48BB78',
+						light: '#F0FFF4',
+					},
+					red: {
+						DEFAULT: '#F56565',
+						light: '#FFF5F5',
+					},
+					gray: {
+						100: '#F7FAFC',
+						200: '#EDF2F7',
+						300: '#E2E8F0',
+						400: '#CBD5E0',
+						500: '#A0AEC0',
+						600: '#718096',
+						700: '#4A5568',
+						800: '#2D3748',
+						900: '#1A202C',
+					},
+					gradients: {
+						purple: 'linear-gradient(90deg, #9b87f5 0%, #D6BCFA 100%)',
+						blue: 'linear-gradient(90deg, #63B3ED 0%, #90CDF4 100%)',
+						green: 'linear-gradient(90deg, #48BB78 0%, #9AE6B4 100%)',
+						orange: 'linear-gradient(90deg, #F97316 0%, #FBD38D 100%)',
+						teal: 'linear-gradient(90deg, #4FD1C5 0%, #81E6D9 100%)',
+					}
+				},
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
 				md: 'calc(var(--radius) - 2px)',
 				sm: 'calc(var(--radius) - 4px)'
+			},
+			fontFamily: {
+				sans: [
+					'Inter',
+					'-apple-system',
+					'BlinkMacSystemFont',
+					'Segoe UI',
+					'Roboto',
+					'Helvetica Neue',
+					'Arial',
+					'sans-serif',
+				],
+				display: [
+					'Montserrat',
+					'Inter',
+					'sans-serif',
+				],
 			},
 			keyframes: {
 				'accordion-down': {
@@ -118,6 +181,10 @@ export default {
 					'0%': { transform: 'rotateY(0deg)' },
 					'100%': { transform: 'rotateY(180deg)' },
 				},
+				'shimmer': {
+					'0%': { backgroundPosition: '-200% 0' },
+					'100%': { backgroundPosition: '200% 0' },
+				},
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
@@ -130,23 +197,15 @@ export default {
 				'scale-out': 'scale-out 0.3s ease-out',
 				'card-hover': 'card-hover 0.3s ease-out forwards',
 				'card-flip': 'card-flip 0.6s ease-out forwards',
+				'shimmer': 'shimmer 2s infinite linear',
 			},
 			boxShadow: {
 				'card': '0 4px 20px -4px rgba(0, 0, 0, 0.1)',
 				'card-hover': '0 12px 24px -8px rgba(0, 0, 0, 0.15)',
 				'floating': '0 8px 30px rgba(0, 0, 0, 0.12)',
 				'subtle': '0 2px 8px rgba(0, 0, 0, 0.05)',
-			},
-			fontFamily: {
-				sans: [
-					'-apple-system',
-					'BlinkMacSystemFont',
-					'Segoe UI',
-					'Roboto',
-					'Helvetica Neue',
-					'Arial',
-					'sans-serif',
-				],
+				'glow': '0 0 15px rgba(155, 135, 245, 0.5)',
+				'glow-strong': '0 0 25px rgba(155, 135, 245, 0.8)',
 			},
 		}
 	},
