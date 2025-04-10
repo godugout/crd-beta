@@ -1,93 +1,168 @@
+import { supabase } from './supabaseClient';
+import { toast } from 'sonner';
 
-import { createClient } from '@supabase/supabase-js'
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-const supabase = createClient(supabaseUrl, supabaseKey)
-
-export type ReactionType = 'like' | 'love' | 'celebrate' | 'insightful' | 'baseball'
+export type ReactionType = 'like' | 'love' | 'celebrate' | 'insightful' | 'baseball';
 
 export interface Reaction {
-  id: string
-  userId: string
-  type: ReactionType
-  memoryId?: string
-  collectionId?: string
-  commentId?: string
-  createdAt: string
+  id: string;
+  userId: string;
+  contentId: string;
+  contentType: 'post' | 'card' | 'comment';
+  type: ReactionType;
+  createdAt: string;
 }
 
-// Add reaction
-export const addReaction = async (
-  userId: string,
-  type: ReactionType,
-  { memoryId, collectionId, commentId }: { memoryId?: string; collectionId?: string; commentId?: string }
-): Promise<Reaction> => {
-  // Validate
-  if ([memoryId, collectionId, commentId].filter(Boolean).length !== 1) {
-    throw new Error('Reaction must be tied to exactly one resource')
-  }
-  // Check if exists
-  let query = supabase.from('reactions').select('*').eq('userId', userId).eq('type', type)
-  if (memoryId) query = query.eq('memoryId', memoryId)
-  if (collectionId) query = query.eq('collectionId', collectionId)
-  if (commentId) query = query.eq('commentId', commentId)
-  const { data: existing } = await query
-  if (existing && existing.length > 0) return existing[0]
-
-  const { data, error } = await supabase
-    .from('reactions')
-    .insert({ userId, type, memoryId, collectionId, commentId })
-    .select('*')
-    .single()
-  if (error) throw error
-  return data
+interface ReactionCounts {
+  like: number;
+  love: number;
+  celebrate: number;
+  insightful: number;
+  baseball: number;
 }
 
-// Remove reaction
-export const removeReaction = async (
-  userId: string,
-  type: ReactionType,
-  { memoryId, collectionId, commentId }: { memoryId?: string; collectionId?: string; commentId?: string }
-) => {
-  let query = supabase.from('reactions').delete().eq('userId', userId).eq('type', type)
-  if (memoryId) query = query.eq('memoryId', memoryId)
-  if (collectionId) query = query.eq('collectionId', collectionId)
-  if (commentId) query = query.eq('commentId', commentId)
-  const { error } = await query
-  if (error) throw error
-}
+export const reactionRepository = {
+  addReaction: async (
+    contentId: string,
+    contentType: 'post' | 'card' | 'comment',
+    type: ReactionType,
+    userId: string
+  ): Promise<Reaction | null> => {
+    try {
+      // Check if reaction already exists
+      const { data: existingReaction } = await supabase
+        .from('reactions')
+        .select('*')
+        .eq('contentId', contentId)
+        .eq('userId', userId)
+        .eq('contentType', contentType)
+        .single();
 
-// Get reactions for an item
-export const getReactions = async (
-  { memoryId, collectionId, commentId }: { memoryId?: string; collectionId?: string; commentId?: string }
-) => {
-  let query = supabase.from('reactions').select('*')
-  if (memoryId) query = query.eq('memoryId', memoryId)
-  if (collectionId) query = query.eq('collectionId', collectionId)
-  if (commentId) query = query.eq('commentId', commentId)
-  const { data, error } = await query
-  if (error) throw error
-  
-  // Initialize reaction counts with all possible reaction types
-  const reactionCounts: Record<ReactionType, number> = {
-    like: 0, 
-    love: 0, 
-    celebrate: 0, 
-    insightful: 0, 
-    baseball: 0
-  }
-  
-  // Count reactions by type
-  (data || []).forEach(r => {
-    if (r.type && typeof r.type === 'string') {
-      // Validate that the reaction type is one we recognize
-      const reactionType = r.type as ReactionType;
-      if (reactionType in reactionCounts) {
-        reactionCounts[reactionType] += 1;
+      // If exists, update type
+      if (existingReaction) {
+        const { data, error } = await supabase
+          .from('reactions')
+          .update({ type, updatedAt: new Date().toISOString() })
+          .eq('id', existingReaction.id)
+          .select('*')
+          .single();
+
+        if (error) throw error;
+        return data;
       }
+
+      // Otherwise create new
+      const { data, error } = await supabase
+        .from('reactions')
+        .insert({
+          contentId,
+          contentType,
+          type,
+          userId,
+          createdAt: new Date().toISOString()
+        })
+        .select('*')
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error adding reaction:', error);
+      toast.error('Failed to add reaction');
+      return null;
     }
-  })
-  
-  return { reactions: data || [], counts: reactionCounts }
-}
+  },
+
+  removeReaction: async (contentId: string, userId: string): Promise<boolean> => {
+    try {
+      const { error } = await supabase
+        .from('reactions')
+        .delete()
+        .eq('contentId', contentId)
+        .eq('userId', userId);
+
+      if (error) throw error;
+      return true;
+    } catch (error) {
+      console.error('Error removing reaction:', error);
+      toast.error('Failed to remove reaction');
+      return false;
+    }
+  },
+
+  getReactions: async (contentId: string, contentType: string): Promise<Reaction[]> => {
+    try {
+      const { data, error } = await supabase
+        .from('reactions')
+        .select('*')
+        .eq('contentId', contentId)
+        .eq('contentType', contentType);
+
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error('Error fetching reactions:', error);
+      return [];
+    }
+  },
+
+  getReactionCounts: async (
+    contentId: string,
+    contentType: string
+  ): Promise<ReactionCounts> => {
+    try {
+      const { data, error } = await supabase
+        .from('reactions')
+        .select('type')
+        .eq('contentId', contentId)
+        .eq('contentType', contentType);
+
+      if (error) throw error;
+
+      const initialCounts: ReactionCounts = {
+        like: 0,
+        love: 0,
+        celebrate: 0,
+        insightful: 0,
+        baseball: 0
+      };
+
+      // Use reduce to count reaction types
+      return (data || []).reduce((counts, reaction) => {
+        const type = reaction.type as ReactionType;
+        if (type in counts) {
+          counts[type]++;
+        }
+        return counts;
+      }, initialCounts);
+    } catch (error) {
+      console.error('Error fetching reaction counts:', error);
+      return {
+        like: 0,
+        love: 0,
+        celebrate: 0,
+        insightful: 0,
+        baseball: 0
+      };
+    }
+  },
+
+  getUserReaction: async (
+    contentId: string, 
+    userId: string
+  ): Promise<ReactionType | null> => {
+    try {
+      const { data, error } = await supabase
+        .from('reactions')
+        .select('type')
+        .eq('contentId', contentId)
+        .eq('userId', userId)
+        .single();
+
+      if (error) throw error;
+      return data?.type as ReactionType || null;
+    } catch (error) {
+      // No reaction is expected sometimes, so don't report this as an error
+      return null;
+    }
+  }
+};
