@@ -1,237 +1,112 @@
 
-import { getOfflineItems, removeOfflineItem, getPendingUploadItems, removePendingUpload } from './offlineStorage';
-import { toast } from 'sonner';
+// lib/syncService.ts
+import { uploadMedia } from './mediaManager'
+import { createMemory } from '@/repositories/memoryRepository'
+import {
+  getPendingUploads,
+  removePendingUpload,
+  getPendingMemories,
+  removePendingMemory
+} from './offlineStorage'
 
-/**
- * Types of sync strategies for different data types
- */
-export type SyncStrategy = 'overwrite' | 'merge' | 'append';
-
-export interface SyncOptions {
-  /**
-   * Whether to notify the user of sync progress
-   */
-  notify?: boolean;
-  
-  /**
-   * Maximum number of items to sync in a single batch
-   */
-  batchSize?: number;
-  
-  /**
-   * Whether to continue syncing if an error occurs
-   */
-  continueOnError?: boolean;
-  
-  /**
-   * How to handle conflicts
-   */
-  conflictStrategy?: SyncStrategy;
-  
-  /**
-   * Callback for sync progress
-   */
-  progressCallback?: (current: number, total: number) => void;
+export interface SyncProgress {
+  total: number
+  completed: number
+  current: string
+  success: number
+  failed: number
 }
 
-interface SyncItem {
-  id: string;
-  endpoint: string;
-  method: string;
-  payload: any;
-  createdAt: string;
-  syncPriority?: number;
-}
+type ProgressCallback = (p: SyncProgress) => void
 
-/**
- * Responsible for synchronizing offline data to the server
- */
-export class SyncService {
-  private isRunning = false;
-  private abortController: AbortController | null = null;
-  
-  /**
-   * Sync all offline data to the server
-   */
-  async syncAll(options: SyncOptions = {}): Promise<number> {
-    if (this.isRunning) {
-      console.log('Sync already in progress');
-      return 0;
-    }
-    
-    try {
-      this.isRunning = true;
-      this.abortController = new AbortController();
-      
-      if (options.notify) {
-        toast.loading('Syncing offline data...');
-      }
-      
-      // Get all offline items
-      const items = await getOfflineItems();
-      const uploads = await getPendingUploadItems();
-      
-      const totalItems = items.length + uploads.length;
-      if (totalItems === 0) {
-        if (options.notify) {
-          toast.dismiss();
-          toast.info('No offline data to sync');
-        }
-        return 0;
-      }
-      
-      let syncedCount = 0;
-      
-      // Sync data items
-      if (items.length > 0) {
-        syncedCount += await this.syncDataItems(items, options);
-      }
-      
-      // Sync file uploads
-      if (uploads.length > 0) {
-        syncedCount += await this.syncFileUploads(uploads, options);
-      }
-      
-      if (options.notify) {
-        toast.dismiss();
-        if (syncedCount > 0) {
-          toast.success(`Successfully synced ${syncedCount} items`);
-        } else {
-          toast.error('Failed to sync offline data');
-        }
-      }
-      
-      return syncedCount;
-    } catch (error) {
-      console.error('Error during sync:', error);
-      if (options.notify) {
-        toast.dismiss();
-        toast.error('Sync failed');
-      }
-      return 0;
-    } finally {
-      this.isRunning = false;
-      this.abortController = null;
-    }
+export const syncOfflineData = async (
+  progressCallback?: ProgressCallback
+): Promise<{ success: boolean; syncedItems: number; failedItems: number }> => {
+  let syncProgress: SyncProgress = {
+    total: 0,
+    completed: 0,
+    current: '',
+    success: 0,
+    failed: 0
   }
-  
-  /**
-   * Cancel an ongoing sync operation
-   */
-  cancel(): void {
-    if (this.abortController) {
-      this.abortController.abort();
-      this.isRunning = false;
-      toast.info('Sync cancelled');
+  try {
+    const pendingMemories = await getPendingMemories()
+    const pendingUploads = await getPendingUploads()
+    syncProgress.total = pendingMemories.length + pendingUploads.length
+
+    if (progressCallback) {
+      progressCallback(syncProgress)
     }
-  }
-  
-  /**
-   * Sync offline data items
-   */
-  private async syncDataItems(
-    items: any[],
-    options: SyncOptions
-  ): Promise<number> {
-    let syncedCount = 0;
-    const batchSize = options.batchSize || 10;
-    
-    // Sort by priority if available
-    const sortedItems = items.sort((a, b) => 
-      (b.syncPriority || 0) - (a.syncPriority || 0)
-    );
-    
-    // Process in batches
-    for (let i = 0; i < sortedItems.length; i += batchSize) {
-      const batch = sortedItems.slice(i, i + batchSize);
-      
-      for (const item of batch) {
-        try {
-          // In a real app, this would make an API call
-          console.log('Syncing item:', item.id);
-          
-          // Simulate API call
-          await new Promise(resolve => setTimeout(resolve, 300));
-          
-          // Remove from offline storage after successful sync
-          await removeOfflineItem(item.id);
-          syncedCount++;
-          
-          // Update progress
-          if (options.progressCallback) {
-            options.progressCallback(syncedCount, items.length);
-          }
-        } catch (error) {
-          console.error(`Failed to sync item ${item.id}:`, error);
-          
-          if (!options.continueOnError) {
-            throw error;
-          }
-        }
-        
-        // Check if sync was cancelled
-        if (this.abortController?.signal.aborted) {
-          return syncedCount;
-        }
-      }
-    }
-    
-    return syncedCount;
-  }
-  
-  /**
-   * Sync pending file uploads
-   */
-  private async syncFileUploads(
-    uploads: any[],
-    options: SyncOptions
-  ): Promise<number> {
-    let syncedCount = 0;
-    
-    for (const upload of uploads) {
+
+    // Sync memories
+    for (const mem of pendingMemories) {
+      syncProgress.current = `Syncing memory: ${mem.title}`
+      if (progressCallback) progressCallback(syncProgress)
       try {
-        // In a real app, this would upload the file to storage
-        console.log('Uploading file:', upload.id);
-        
-        // Simulate upload
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        // Remove from offline storage
-        await removePendingUpload(upload.id);
-        syncedCount++;
-        
-        // Update progress
-        if (options.progressCallback) {
-          options.progressCallback(syncedCount, uploads.length);
-        }
-      } catch (error) {
-        console.error(`Failed to upload file ${upload.id}:`, error);
-        
-        if (!options.continueOnError) {
-          throw error;
-        }
-      }
-      
-      // Check if sync was cancelled
-      if (this.abortController?.signal.aborted) {
-        return syncedCount;
+        const { pendingSync, ...memToCreate } = mem
+        await createMemory(memToCreate)
+        await removePendingMemory(mem.id)
+        syncProgress.success++
+      } catch {
+        syncProgress.failed++
+      } finally {
+        syncProgress.completed++
+        if (progressCallback) progressCallback(syncProgress)
       }
     }
-    
-    return syncedCount;
+
+    // Sync uploads
+    for (const up of pendingUploads) {
+      syncProgress.current = `Uploading media: ${up.file.name}`
+      if (progressCallback) progressCallback(syncProgress)
+      try {
+        await uploadMedia({
+          file: up.file,
+          memoryId: up.memoryId,
+          userId: up.userId,
+          isPrivate: up.isPrivate,
+          metadata: up.metadata
+        })
+        await removePendingUpload(up.id)
+        syncProgress.success++
+      } catch {
+        syncProgress.failed++
+      } finally {
+        syncProgress.completed++
+        if (progressCallback) progressCallback(syncProgress)
+      }
+    }
+
+    return {
+      success: true,
+      syncedItems: syncProgress.success,
+      failedItems: syncProgress.failed
+    }
+  } catch (error) {
+    console.error('Sync error:', error)
+    return {
+      success: false,
+      syncedItems: syncProgress.success,
+      failedItems: syncProgress.failed
+    }
   }
 }
 
-// Create and export a singleton instance
-export const syncService = new SyncService();
+export const initializeAutoSync = (progressCallback?: ProgressCallback): () => void => {
+  let syncInProgress = false
 
-// Helper functions for common sync operations
-export const syncAllData = async (options: SyncOptions = {}): Promise<number> => {
-  return syncService.syncAll(options);
-};
-
-export const cancelSync = (): void => {
-  syncService.cancel();
-};
-
-export default syncService;
+  const handleOnline = async () => {
+    if (syncInProgress) return
+    syncInProgress = true
+    try {
+      await syncOfflineData(progressCallback)
+    } finally {
+      syncInProgress = false
+    }
+  }
+  window.addEventListener('online', handleOnline)
+  if (navigator.onLine) handleOnline()
+  return () => {
+    window.removeEventListener('online', handleOnline)
+  }
+}

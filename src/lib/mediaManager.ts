@@ -49,18 +49,17 @@ export const uploadMedia = async ({
     else if (file.type.startsWith('video/')) mediaType = 'video'
     else if (file.type.startsWith('audio/')) mediaType = 'audio'
 
-    // Upload file using correct options format
     const { error: uploadErr } = await supabase.storage
       .from('media')
       .upload(filePath, file, {
         cacheControl: '3600',
-        upsert: false
+        upsert: false,
+        onUploadProgress: progress => {
+          if (progressCallback) {
+            progressCallback(progress.percent || 0)
+          }
+        }
       })
-
-    // Handle upload progress separately if needed
-    if (progressCallback) {
-      progressCallback(100) // Since we can't track progress directly, just indicate completion
-    }
 
     if (uploadErr) throw uploadErr
 

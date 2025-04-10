@@ -1,4 +1,5 @@
 
+// lib/metadataExtractor.ts
 import exifr from 'exifr'
 
 export interface ImageMetadata {
