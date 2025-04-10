@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/lib/types';
 import { toast } from 'sonner';
@@ -10,6 +9,7 @@ import CardSelector from './CardSelector';
 import ArHeader from './ArHeader';
 import ArInfoOverlay from './ArInfoOverlay';
 import './arModeEffects.css';
+import './ar-animations.css';
 
 interface ArModeViewProps {
   activeCards: Card[];
@@ -50,7 +50,6 @@ const ArModeView: React.FC<ArModeViewProps> = ({
   const [showCardSelector, setShowCardSelector] = useState(false);
   const [cardPositions, setCardPositions] = useState<Record<string, CardPosition>>({});
 
-  // Update selected card when active cards change
   useEffect(() => {
     if (activeCards.length > 0 && !selectedCardId) {
       setSelectedCardId(activeCards[0].id);
@@ -75,13 +74,11 @@ const ArModeView: React.FC<ArModeViewProps> = ({
   };
 
   const handleAddCard = (card: Card) => {
-    // If the card is already in the scene, don't add it again
     if (activeCards.some(c => c.id === card.id)) {
       toast.info('Card already in scene');
       return;
     }
     
-    // Call the parent handler
     if (onAddCard) {
       onAddCard(card);
     }
@@ -89,23 +86,19 @@ const ArModeView: React.FC<ArModeViewProps> = ({
     setShowCardSelector(false);
     setSelectedCardId(card.id);
     
-    // Initialize position for the new card
     setCardPositions(prev => ({
       ...prev,
       [card.id]: { x: 0, y: 0, rotation: 0 }
     }));
     
-    // Provide feedback
     toast.success('Card added to scene');
   };
 
   const handleRemoveSelected = () => {
     if (!selectedCardId || !onRemoveCard) return;
     
-    // Call the parent handler
     onRemoveCard(selectedCardId);
     
-    // Select another card if available
     if (activeCards.length > 1) {
       const newSelectedId = activeCards.find(c => c.id !== selectedCardId)?.id || null;
       setSelectedCardId(newSelectedId);
@@ -113,7 +106,6 @@ const ArModeView: React.FC<ArModeViewProps> = ({
       setSelectedCardId(null);
     }
     
-    // Remove card position data
     setCardPositions(prev => {
       const newPositions = { ...prev };
       delete newPositions[selectedCardId];
@@ -123,7 +115,6 @@ const ArModeView: React.FC<ArModeViewProps> = ({
     toast.success('Card removed from scene');
   };
   
-  // Handle click outside card selector to close it
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (showCardSelector) {
@@ -143,7 +134,6 @@ const ArModeView: React.FC<ArModeViewProps> = ({
 
   return (
     <div className="relative h-screen w-screen bg-black">
-      {/* AR Camera View */}
       <CameraView 
         activeCards={activeCards}
         selectedCardId={selectedCardId}
@@ -152,21 +142,18 @@ const ArModeView: React.FC<ArModeViewProps> = ({
         cardPositions={cardPositions}
       />
       
-      {/* Mouse Interaction Layer */}
       <MouseInteractionLayer
         cards={activeCards}
         selectedCardId={selectedCardId}
         onUpdateCardPosition={handleUpdateCardPosition}
       />
       
-      {/* Radio Dial for card navigation */}
       <RadioDial
         cards={activeCards}
         activeCardId={selectedCardId}
         onSelectCard={handleSelectCard}
       />
       
-      {/* AR Controls */}
       <ArControls
         onTakeSnapshot={onTakeSnapshot}
         onFlip={onFlip}
@@ -175,7 +162,6 @@ const ArModeView: React.FC<ArModeViewProps> = ({
         onRotate={onRotate}
       />
       
-      {/* Header with exit, add/remove buttons */}
       <ArHeader 
         onExitAr={onExitAr}
         onToggleSelector={() => setShowCardSelector(!showCardSelector)}
@@ -183,14 +169,12 @@ const ArModeView: React.FC<ArModeViewProps> = ({
         selectedCardId={selectedCardId}
       />
       
-      {/* Card Selector */}
       <CardSelector
         showCardSelector={showCardSelector}
         availableCards={availableCards}
         onAddCard={handleAddCard}
       />
       
-      {/* Card Info Overlay */}
       <ArInfoOverlay 
         selectedCardId={selectedCardId}
         activeCards={activeCards}

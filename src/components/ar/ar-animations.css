@@ -1,0 +1,58 @@
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+@keyframes pulse-fast {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
+}
+
+@keyframes scale-bounce {
+  0% { transform: scale(0.9); }
+  70% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+@keyframes rotate-subtle {
+  0% { transform: rotate(-1deg); }
+  50% { transform: rotate(1deg); }
+  100% { transform: rotate(-1deg); }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-pulse-fast {
+  animation: pulse-fast 0.5s ease-in-out;
+}
+
+.animate-scaleIn {
+  animation: scale-bounce 0.5s ease-out forwards;
+}
+
+.animate-rotate-subtle {
+  animation: rotate-subtle 3s ease-in-out infinite;
+}
+
+/* Camera transition effects */
+.transition-filter {
+  transition-property: filter;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 1000ms;
+}
+
+/* Card grid effects */
+.card-grid-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  padding: 10px;
+}
+
+/* Shadow effect for AR card items */
+.ar-card-shadow {
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+}

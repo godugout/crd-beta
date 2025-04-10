@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FlaskConical } from 'lucide-react';
+import { FlaskConical, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Tooltip,
@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/tooltip";
 
 interface LabsButtonProps {
-  variant?: 'default' | 'subtle' | 'icon';
+  variant?: 'default' | 'subtle' | 'icon' | 'highlight';
   className?: string;
 }
 
@@ -58,6 +58,22 @@ const LabsButton: React.FC<LabsButtonProps> = ({
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
             <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
           </span>
+        </Button>
+      </Link>
+    );
+  }
+  
+  if (variant === 'highlight') {
+    return (
+      <Link to="/labs">
+        <Button 
+          variant="default" 
+          size="sm" 
+          className={`gap-2 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-white shadow-lg ${className}`}
+        >
+          <FlaskConical className="h-4 w-4" />
+          <span>Dugout Labs</span>
+          <Sparkles className="h-3 w-3 ml-1" />
         </Button>
       </Link>
     );
