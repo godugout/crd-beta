@@ -80,6 +80,10 @@ export const CardGridWrapper: React.FC<CardGridWrapperProps> = ({
         description="Try adjusting your filters or create a new card"
         isEmpty={true}
         isFiltered={false}
+        onRefresh={async () => {
+          window.location.reload();
+          return Promise.resolve();
+        }}
       />
     );
   }
