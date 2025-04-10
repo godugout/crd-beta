@@ -1,3 +1,4 @@
+
 import * as Sentry from '@sentry/react';
 
 export const initSentry = () => {
@@ -16,8 +17,7 @@ export const initSentry = () => {
     ],
     environment: import.meta.env.MODE,
     enabled: import.meta.env.PROD,
-    // Set these at the top level, not in BrowserTracing
-    tracesSampleRate: 0.5,
+    // Set these separately, not in BrowserTracing
     replaysSessionSampleRate: 0.1,
     replaysOnErrorSampleRate: 1.0,
   });
@@ -47,4 +47,3 @@ export const startTransaction = (name: string, op: string) => {
     op,
   });
 };
-
