@@ -14,6 +14,11 @@ interface NetworkStatusProps {
   onSync?: () => void;
 }
 
+// Define the SyncOptions interface to include progressCallback
+interface SyncOptions {
+  progressCallback?: (current: number, total: number) => void;
+}
+
 const NetworkStatus: React.FC<NetworkStatusProps> = ({
   className = '',
   showControls = true,
@@ -48,7 +53,7 @@ const NetworkStatus: React.FC<NetworkStatusProps> = ({
       progressCallback: (current, total) => {
         setSyncProgress(Math.round((current / total) * 100));
       }
-    });
+    } as SyncOptions);
   };
   
   if (variant === 'badge') {

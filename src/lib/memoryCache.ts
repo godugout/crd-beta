@@ -6,6 +6,8 @@ export type CacheKey = string;
 export type CacheOptions = {
   ttl?: number;
   background?: boolean;
+  ttlSeconds?: number; // Added to fix build errors
+  persistOffline?: boolean; // Added to fix build errors
 };
 
 class MemoryCache {
@@ -54,13 +56,18 @@ class MemoryCache {
     return this.cache.size;
   }
 
-  async getOrFetch<T>(key: string, fetchFn: () => Promise<T>, ttlSeconds = 300): Promise<T> {
+  async getOrFetch<T>(key: string, fetchFn: () => Promise<T>, ttlOrOptions: number | CacheOptions = 300): Promise<T> {
+    // Extract TTL from options if it's an object
+    const ttl = typeof ttlOrOptions === 'number' ? 
+      ttlOrOptions : 
+      (ttlOrOptions.ttlSeconds || ttlOrOptions.ttl || 300);
+    
     const cachedData = this.get(key)
     if (cachedData !== null) {
       return cachedData as T
     }
     const freshData = await fetchFn()
-    this.set(key, freshData, ttlSeconds)
+    this.set(key, freshData, ttl)
     return freshData
   }
 

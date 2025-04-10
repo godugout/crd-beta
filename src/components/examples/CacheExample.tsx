@@ -31,7 +31,7 @@ export const CacheExample: React.FC = () => {
   const { data, isLoading, error, refreshCache } = useMemoryCache(
     refreshKey,
     fetchUserData,
-    { ttlSeconds: 30, persistOffline: true } // Cache for 30 seconds with offline persistence
+    { ttl: 30, persistOffline: true } // Cache for 30 seconds with offline persistence
   );
   
   // Force a refresh 
@@ -66,7 +66,7 @@ export const CacheExample: React.FC = () => {
             
             <Badge variant="outline" className="px-2 py-1">
               <Database className="h-3 w-3 mr-1" /> 
-              {memoryCache.size()} items cached
+              {memoryCache.size} items cached
             </Badge>
           </div>
           
@@ -115,7 +115,7 @@ export const CacheExample: React.FC = () => {
           </div>
           
           <div className="text-xs bg-gray-100 p-2 rounded">
-            <p>Cache status: {memoryCache.size()} items in cache</p>
+            <p>Cache status: {memoryCache.size} items in cache</p>
             <p>Connection status: {isOnline ? 'Online' : 'Offline'}</p>
             <p>Pending sync items: {pendingCount}</p>
             

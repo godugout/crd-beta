@@ -12,7 +12,16 @@ interface ColorPickerProps {
 export function ColorPicker({
   value,
   onChange,
-  colors = ['#FFFFFF', '#000000', '#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF'],
+  colors = [
+    '#FF7E33', // design-primary-500
+    '#8970FF', // design-secondary-500
+    '#10B981', // design-success-500
+    '#F59E0B', // design-warning-500
+    '#EF4444', // design-error-500
+    '#6B7280', // design-neutral-500
+    '#FFFFFF', 
+    '#000000'
+  ],
   className,
   ...props
 }: ColorPickerProps & Omit<React.HTMLAttributes<HTMLDivElement>, 'onChange'>) {
