@@ -2,10 +2,11 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 
-interface ColorPickerProps extends React.HTMLAttributes<HTMLDivElement> {
+interface ColorPickerProps {
   value: string;
   onChange: (value: string) => void;
   colors?: string[];
+  className?: string;
 }
 
 export function ColorPicker({
@@ -14,7 +15,7 @@ export function ColorPicker({
   colors = ['#FFFFFF', '#000000', '#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF'],
   className,
   ...props
-}: ColorPickerProps) {
+}: ColorPickerProps & Omit<React.HTMLAttributes<HTMLDivElement>, 'onChange'>) {
   return (
     <div className={cn('flex flex-wrap gap-2', className)} {...props}>
       {colors.map((color) => (
