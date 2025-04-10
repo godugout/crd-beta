@@ -84,7 +84,8 @@ export const getReactions = async (
     like: 0, love: 0, celebrate: 0, insightful: 0, baseball: 0
   }
   (data||[]).forEach(r => {
-    reactionCounts[r.type] = (reactionCounts[r.type]||0) + 1
+    // Fix: Use bracket notation instead of trying to call the object
+    reactionCounts[r.type] = (reactionCounts[r.type] || 0) + 1
   })
   return { reactions: data||[], counts: reactionCounts }
 }

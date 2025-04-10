@@ -80,8 +80,8 @@ export const createMemory = async (params: CreateMemoryParams): Promise<Memory> 
   if (error) throw error
 
   // Clear caches for user's memories / public
-  memoryCache.delete(`memories:user:${params.userId}`)
-  memoryCache.delete(`memories:public`)
+  memoryCache.remove(`memories:user:${params.userId}`)
+  memoryCache.remove(`memories:public`)
   return data
 }
 
@@ -96,7 +96,7 @@ export const getMemoryById = async (id: string): Promise<Memory | null> => {
       .single()
     if (error && error.code !== 'PGRST116') throw error
     return data || null
-  }, 60)
+  }, { ttlSeconds: 60 })
 }
 
 // Update an existing Memory
@@ -120,16 +120,16 @@ export const updateMemory = async (params: UpdateMemoryParams): Promise<Memory> 
   if (error) throw error
 
   // Clear relevant caches
-  memoryCache.delete(`memory:${params.id}`)
+  memoryCache.remove(`memory:${params.id}`)
   const { data: mem } = await supabase
     .from('memories')
     .select('userId, visibility')
     .eq('id', params.id)
     .single()
   if (mem) {
-    memoryCache.delete(`memories:user:${mem.userId}`)
+    memoryCache.remove(`memories:user:${mem.userId}`)
     if (mem.visibility === 'public') {
-      memoryCache.delete(`memories:public`)
+      memoryCache.remove(`memories:public`)
     }
   }
   return data
@@ -172,11 +172,11 @@ export const deleteMemory = async (id: string) => {
   if (error) throw error
 
   // Clear caches
-  memoryCache.delete(`memory:${id}`)
+  memoryCache.remove(`memory:${id}`)
   if (mem) {
-    memoryCache.delete(`memories:user:${mem.userId}`)
+    memoryCache.remove(`memories:user:${mem.userId}`)
     if (mem.visibility === 'public') {
-      memoryCache.delete(`memories:public`)
+      memoryCache.remove(`memories:public`)
     }
   }
 }
@@ -206,7 +206,7 @@ export const getMemoriesByUserId = async (
     const { data, error, count } = await query
     if (error) throw error
     return { data: data || [], total: count || 0 }
-  }, 120)
+  }, { ttlSeconds: 120 })
 }
 
 // Paginated fetch: all public
@@ -235,5 +235,5 @@ export const getPublicMemories = async (
     const { data, error, count } = await query
     if (error) throw error
     return { data: data || [], total: count || 0 }
-  }, 180)
+  }, { ttlSeconds: 180 })
 }
