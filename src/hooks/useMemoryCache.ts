@@ -6,7 +6,7 @@ import { memoryCache, CacheKey, CacheOptions } from '@/lib/memoryCache';
  * React hook for using the memory cache with React components
  * @param key - Cache key
  * @param fetchFn - Function to fetch data if not in cache
- * @param options - Cache options including TTL
+ * @param options - Cache options including TTL and offline persistence
  */
 export function useMemoryCache<T>(
   key: CacheKey,
@@ -50,7 +50,24 @@ export function useMemoryCache<T>(
     };
   }, [key]);
   
-  return { data, isLoading, error };
+  // Function to manually refresh the cache
+  const refreshCache = async () => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      await memoryCache.remove(key);
+      const result = await memoryCache.getOrFetch<T>(key, fetchFn, options);
+      setData(result);
+    } catch (err) {
+      console.error(`Error refreshing cache for key "${key}":`, err);
+      setError(err instanceof Error ? err : new Error('Unknown error'));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  return { data, isLoading, error, refreshCache };
 }
 
 export default useMemoryCache;

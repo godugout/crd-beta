@@ -1,35 +1,35 @@
 
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
-
-interface OfflineItem {
-  id: string;
-  title?: string;
-  description?: string;
-  imageUrl?: string;
-  createdAt: string;
-  tags?: string[];
-  template?: string;
-  location?: string;
-  section?: string;
-  metadata?: Record<string, any>;
-}
+import { 
+  getOfflineItems, 
+  saveOfflineItem, 
+  removeOfflineItem, 
+  OfflineItem,
+  getPendingItemCount
+} from '@/lib/offlineStorage';
 
 export const useConnectivity = () => {
   const [isOnline, setIsOnline] = useState<boolean>(navigator.onLine);
   const [offlineItems, setOfflineItems] = useState<OfflineItem[]>([]);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [pendingCount, setPendingCount] = useState(0);
 
   // Load any stored offline items on mount
   useEffect(() => {
-    const storedItems = localStorage.getItem('offlineItems');
-    if (storedItems) {
+    const loadOfflineItems = async () => {
       try {
-        setOfflineItems(JSON.parse(storedItems));
+        const items = await getOfflineItems();
+        setOfflineItems(items);
+        
+        const count = await getPendingItemCount();
+        setPendingCount(count);
       } catch (e) {
-        console.error('Failed to parse stored offline items');
+        console.error('Failed to load stored offline items:', e);
       }
-    }
+    };
+    
+    loadOfflineItems();
   }, []);
 
   // Listen for online/offline events
@@ -55,20 +55,26 @@ export const useConnectivity = () => {
     };
   }, []);
 
-  // Save offline items whenever the list changes
-  useEffect(() => {
-    localStorage.setItem('offlineItems', JSON.stringify(offlineItems));
-  }, [offlineItems]);
-
   // Add an item to offline storage
-  const saveOfflineItem = (item: OfflineItem) => {
-    setOfflineItems(prev => [...prev, item]);
-    return item.id; // Return the ID for reference
+  const saveOfflineItemAndUpdate = async (item: OfflineItem) => {
+    const id = await saveOfflineItem(item);
+    const updatedItems = await getOfflineItems();
+    setOfflineItems(updatedItems);
+    
+    const count = await getPendingItemCount();
+    setPendingCount(count);
+    
+    return id;
   };
 
   // Remove an item from offline storage
-  const removeOfflineItem = (itemId: string) => {
-    setOfflineItems(prev => prev.filter(item => item.id !== itemId));
+  const removeOfflineItemAndUpdate = async (itemId: string) => {
+    await removeOfflineItem(itemId);
+    const updatedItems = await getOfflineItems();
+    setOfflineItems(updatedItems);
+    
+    const count = await getPendingItemCount();
+    setPendingCount(count);
   };
 
   // Sync offline items when back online
@@ -91,7 +97,7 @@ export const useConnectivity = () => {
           await new Promise(resolve => setTimeout(resolve, 500));
           
           // If successful, remove from offline storage
-          removeOfflineItem(item.id);
+          await removeOfflineItemAndUpdate(item.id);
           syncCount++;
         } catch (error) {
           console.error(`Failed to sync item ${item.id}:`, error);
@@ -108,8 +114,9 @@ export const useConnectivity = () => {
     isOnline,
     isSyncing,
     offlineItems,
-    saveOfflineItem,
-    removeOfflineItem,
+    pendingCount,
+    saveOfflineItem: saveOfflineItemAndUpdate,
+    removeOfflineItem: removeOfflineItemAndUpdate,
     syncOfflineItems
   };
 };

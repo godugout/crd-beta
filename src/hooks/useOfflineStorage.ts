@@ -1,9 +1,15 @@
 
 import { useState } from 'react';
 import { useConnectivity } from './useConnectivity';
+import { 
+  saveForOfflineUpload, 
+  storeFileAsDataUrl, 
+  saveOfflineItem 
+} from '@/lib/offlineStorage';
+import { v4 as uuidv4 } from 'uuid';
 
 export const useOfflineStorage = () => {
-  const { saveOfflineItem, removeOfflineItem, offlineItems, isOnline } = useConnectivity();
+  const { saveOfflineItem, removeOfflineItem, offlineItems, isOnline, pendingCount } = useConnectivity();
   const [isSaving, setIsSaving] = useState(false);
 
   // Save a memory item, handling both online and offline cases
@@ -16,17 +22,22 @@ export const useOfflineStorage = () => {
       
       // If we're offline, save locally
       if (!isOnline) {
-        // Process and save image data if available (in a real app)
+        // Process and save image data if available
         let localImageUrl = '';
         
         if (imageData) {
-          // In a real app, we'd store the blob in IndexedDB
-          // For this demo, we'll just create a temporary URL
-          localImageUrl = URL.createObjectURL(imageData);
+          const fileKey = `image-${tempId}`;
+          if (imageData instanceof File) {
+            await storeFileAsDataUrl(fileKey, imageData);
+          } else {
+            const file = new File([imageData], `${tempId}.jpg`, { type: 'image/jpeg' });
+            await storeFileAsDataUrl(fileKey, file);
+          }
+          localImageUrl = fileKey;
         }
         
         // Save to offline storage
-        saveOfflineItem({
+        await saveOfflineItem({
           id: tempId,
           ...data,
           imageUrl: localImageUrl,
@@ -64,7 +75,7 @@ export const useOfflineStorage = () => {
   const deleteMemory = async (id: string) => {
     if (!isOnline) {
       // If offline, just remove from local storage
-      removeOfflineItem(id);
+      await removeOfflineItem(id);
       return { success: true };
     } else {
       // Online would send a delete request to the server
@@ -72,17 +83,57 @@ export const useOfflineStorage = () => {
       await new Promise(resolve => setTimeout(resolve, 500));
       
       // Also remove from local cache if it exists
-      removeOfflineItem(id);
+      await removeOfflineItem(id);
       
       return { success: true };
+    }
+  };
+  
+  // Upload a file with offline support
+  const uploadFile = async (file: File, metadata: Record<string, any> = {}) => {
+    if (!isOnline) {
+      // Store for offline upload
+      const userId = metadata.userId || 'anonymous';
+      const memoryId = metadata.memoryId || uuidv4();
+      
+      // Save file for later upload
+      const uploadId = await saveForOfflineUpload(
+        file, 
+        memoryId, 
+        userId, 
+        metadata
+      );
+      
+      // Create a temporary URL for immediate display
+      const fileKey = `file-${uploadId}`;
+      await storeFileAsDataUrl(fileKey, file);
+      
+      return {
+        success: true,
+        id: uploadId,
+        url: fileKey,
+        mode: 'offline'
+      };
+    } else {
+      // Simulate online upload
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      return {
+        success: true,
+        id: `upload-${Date.now()}`,
+        url: URL.createObjectURL(file),
+        mode: 'online'
+      };
     }
   };
   
   return {
     saveMemory,
     deleteMemory,
+    uploadFile,
     isSaving,
     offlineItems,
-    saveOfflineItem
+    saveOfflineItem,
+    pendingCount
   };
 };
