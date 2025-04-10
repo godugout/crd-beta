@@ -1,33 +1,12 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { OaklandMemoryData } from '@/lib/types';
+import { OaklandMemoryData, Card } from '@/lib/types';
 import { OaklandTemplateType } from '../OaklandCardTemplates';
 import OaklandMemoryCard from '../OaklandMemoryCard';
 
 interface OaklandMemoryGridProps {
-  cards: Array<{
-    id: string;
-    title: string;
-    description: string;
-    tags?: string[];
-    imageUrl: string;
-    designMetadata?: {
-      oaklandMemory?: {
-        date?: string;
-        opponent?: string;
-        score?: string;
-        location?: string;
-        section?: string;
-        memoryType?: string;
-        attendees?: string[];
-        template?: string;
-        imageUrl?: string;
-        historicalContext?: string;
-        personalSignificance?: string;
-      };
-    };
-  }>;
+  cards: Array<Card>;
 }
 
 const OaklandMemoryGrid: React.FC<OaklandMemoryGridProps> = ({ cards }) => {
@@ -42,7 +21,7 @@ const OaklandMemoryGrid: React.FC<OaklandMemoryGridProps> = ({ cards }) => {
         if (!oaklandMemory) return null;
         
         const memoryData: OaklandMemoryData = {
-          title: card.title,
+          title: card.title || card.name || '',
           description: card.description,
           date: oaklandMemory.date,
           opponent: oaklandMemory.opponent,
@@ -52,7 +31,7 @@ const OaklandMemoryGrid: React.FC<OaklandMemoryGridProps> = ({ cards }) => {
           memoryType: oaklandMemory.memoryType,
           attendees: oaklandMemory.attendees || [],
           tags: card.tags || [],
-          imageUrl: oaklandMemory.imageUrl || card.imageUrl,
+          imageUrl: oaklandMemory.imageUrl || card.imageUrl || card.image || '',
           historicalContext: oaklandMemory.historicalContext,
           personalSignificance: oaklandMemory.personalSignificance,
         };

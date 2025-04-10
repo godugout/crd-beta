@@ -1,4 +1,3 @@
-
 import * as Sentry from '@sentry/react';
 
 export const initSentry = () => {
@@ -7,7 +6,6 @@ export const initSentry = () => {
     integrations: [
       new Sentry.BrowserTracing({
         // Set sampling rate for performance monitoring
-        tracesSampleRate: 0.5,
       }),
       new Sentry.Replay({
         // Capture session replay for error debugging
@@ -17,9 +15,11 @@ export const initSentry = () => {
     ],
     environment: import.meta.env.MODE,
     enabled: import.meta.env.PROD,
-    // Set these separately, not in BrowserTracing
+    // Set these outside of BrowserTracing
     replaysSessionSampleRate: 0.1,
     replaysOnErrorSampleRate: 1.0,
+    // Set tracesSampleRate at the top level
+    tracesSampleRate: 0.5,
   });
 };
 
