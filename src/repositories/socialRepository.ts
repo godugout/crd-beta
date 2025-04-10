@@ -84,8 +84,11 @@ export const getReactions = async (
     like: 0, love: 0, celebrate: 0, insightful: 0, baseball: 0
   }
   (data||[]).forEach(r => {
-    // Fix: Use bracket notation instead of trying to call the object
-    reactionCounts[r.type] = (reactionCounts[r.type] || 0) + 1
+    // Make sure we're accessing the object correctly using bracket notation
+    // And ensure r.type is a valid key for reactionCounts
+    if (r.type && r.type in reactionCounts) {
+      reactionCounts[r.type as ReactionType] = (reactionCounts[r.type as ReactionType] || 0) + 1
+    }
   })
   return { reactions: data||[], counts: reactionCounts }
 }
