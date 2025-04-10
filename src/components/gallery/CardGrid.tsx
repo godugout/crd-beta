@@ -8,17 +8,19 @@ import EmptyState from './EmptyState';
 export interface CardGridProps {
   cards: Card[];
   onCardClick: (cardId: string) => void;
-  cardEffects?: string[];
+  getCardEffects?: (cardId: string) => string[];
   className?: string;
   isLoading?: boolean;
+  error?: Error | null;
 }
 
 const CardGrid: React.FC<CardGridProps> = ({ 
   cards, 
-  cardEffects = [], 
+  getCardEffects,
   onCardClick, 
   className = '',
-  isLoading = false
+  isLoading = false,
+  error = null
 }) => {
   if (isLoading) {
     return (

@@ -58,14 +58,13 @@ const CardMedia: React.FC<CardMediaProps> = ({ card, onView, className = '' }) =
         src={imageSource}
         alt={card.title}
         className={cn(
-          "w-full h-0 pb-[140%] object-cover transition-all duration-300",
+          "w-full h-full absolute top-0 left-0 object-cover transition-all duration-300",
           isLoaded ? "opacity-100" : "opacity-0",
           isError ? "hidden" : ""
         )}
         onLoad={handleImageLoad}
         onError={handleImageError}
         loading="lazy"
-        style={{ position: isLoaded ? 'relative' : 'absolute', top: 0, left: 0 }}
       />
       
       {/* Overlay with actions */}
@@ -75,7 +74,10 @@ const CardMedia: React.FC<CardMediaProps> = ({ card, onView, className = '' }) =
             size="sm"
             variant="secondary"
             className="bg-white/80 hover:bg-white"
-            onClick={() => onView(card.id)}
+            onClick={(e) => {
+              e.stopPropagation();
+              onView(card.id);
+            }}
           >
             <Eye className="h-4 w-4 mr-1" />
             View
@@ -84,7 +86,10 @@ const CardMedia: React.FC<CardMediaProps> = ({ card, onView, className = '' }) =
             size="sm"
             variant="secondary"
             className="bg-white/80 hover:bg-white"
-            onClick={() => onView(card.id)}
+            onClick={(e) => {
+              e.stopPropagation();
+              onView(card.id);
+            }}
           >
             <ZoomIn className="h-4 w-4" />
           </Button>
