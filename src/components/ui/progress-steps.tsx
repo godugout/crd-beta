@@ -8,12 +8,14 @@ export interface ProgressStepsProps {
   steps: string[];
   currentStep: number;
   className?: string;
+  onStepClick?: (step: number) => void;
 }
 
 export const ProgressSteps = ({
   steps,
   currentStep,
   className,
+  onStepClick,
 }: ProgressStepsProps) => {
   const progress = (currentStep / (steps.length - 1)) * 100;
 
@@ -32,8 +34,10 @@ export const ProgressSteps = ({
               className={cn(
                 "flex flex-col items-center space-y-2",
                 isActive && "text-primary font-medium",
-                isCompleted && "text-primary"
+                isCompleted && "text-primary",
+                onStepClick && "cursor-pointer"
               )}
+              onClick={() => onStepClick && onStepClick(index)}
             >
               <div 
                 className={cn(
