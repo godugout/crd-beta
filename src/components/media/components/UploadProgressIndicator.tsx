@@ -6,9 +6,7 @@ interface UploadProgressIndicatorProps {
   progress: number;
 }
 
-const UploadProgressIndicator: React.FC<UploadProgressIndicatorProps> = ({
-  progress
-}) => {
+const UploadProgressIndicator: React.FC<UploadProgressIndicatorProps> = ({ progress }) => {
   return (
     <div className="flex flex-col gap-2">
       <Progress value={progress} />

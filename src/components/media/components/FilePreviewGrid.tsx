@@ -7,14 +7,14 @@ interface FilePreviewGridProps {
   files: File[];
   previews: string[];
   onRemoveFile: (index: number) => void;
-  disabled?: boolean;
+  disabled: boolean;
 }
 
 const FilePreviewGrid: React.FC<FilePreviewGridProps> = ({
   files,
   previews,
   onRemoveFile,
-  disabled = false
+  disabled
 }) => {
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
@@ -23,24 +23,26 @@ const FilePreviewGrid: React.FC<FilePreviewGridProps> = ({
           <Button
             variant="destructive"
             size="icon"
-            className="absolute top-2 right-2 w-6 h-6 rounded-full"
+            className="absolute top-2 right-2 w-6 h-6 rounded-full z-10"
             onClick={() => onRemoveFile(idx)}
             disabled={disabled}
           >
-            <X size={14} />
+            <X size={14}/>
           </Button>
           {idx < previews.length && (
             <div className="aspect-square bg-black flex items-center justify-center">
               {file.type.startsWith('image/') ? (
-                <img src={previews[idx]} className="w-full h-full object-cover" alt={file.name} />
+                <img src={previews[idx]} className="w-full h-full object-cover" alt={`Preview ${idx + 1}`}/>
               ) : file.type.startsWith('video/') ? (
-                <video src={previews[idx]} className="w-full h-full object-cover" />
+                <video src={previews[idx]} className="w-full h-full object-cover"/>
               ) : (
                 <div className="text-white">Unsupported</div>
               )}
             </div>
           )}
-          <div className="p-2 text-xs truncate">{file.name}</div>
+          <div className="p-2 text-xs truncate">
+            {file.name}
+          </div>
         </div>
       ))}
     </div>

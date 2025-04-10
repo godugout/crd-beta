@@ -10,7 +10,7 @@ interface FileUploadAreaProps {
   handleDrop: (e: React.DragEvent) => void;
   selectedFilesCount: number;
   maxFiles: number;
-  disabled?: boolean;
+  disabled: boolean;
 }
 
 const FileUploadArea: React.FC<FileUploadAreaProps> = ({
@@ -20,7 +20,7 @@ const FileUploadArea: React.FC<FileUploadAreaProps> = ({
   handleDrop,
   selectedFilesCount,
   maxFiles,
-  disabled = false
+  disabled
 }) => {
   return (
     <div
@@ -29,16 +29,16 @@ const FileUploadArea: React.FC<FileUploadAreaProps> = ({
       onDrop={handleDrop}
     >
       <p className="mb-2">
-        {selectedFilesCount > 0
+        {selectedFilesCount > 0 
           ? `Add more files (${selectedFilesCount}/${maxFiles})`
           : 'Drag & drop or click to select multiple files'}
       </p>
       <div className="flex justify-center gap-2">
         <Button variant="outline" onClick={onBrowseClick} disabled={disabled}>
-          <Upload size={16} /> Browse
+          <Upload size={16} className="mr-2"/> Browse
         </Button>
         <Button variant="outline" onClick={onCameraClick} disabled={disabled}>
-          <Camera size={16} /> Camera
+          <Camera size={16} className="mr-2"/> Camera
         </Button>
       </div>
     </div>

@@ -123,3 +123,5 @@ export const MediaGallery: React.FC<MediaGalleryProps> = ({
     </>
   )
 }
+
+export default MediaGallery;

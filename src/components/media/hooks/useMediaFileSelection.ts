@@ -1,12 +1,12 @@
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef } from 'react';
 
-export function useMediaFileSelection(maxFiles = 10) {
+export const useMediaFileSelection = (maxFiles = 10) => {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
     const newFiles = Array.from(e.target.files);
     const allowedFiles = newFiles.slice(0, maxFiles - selectedFiles.length);
@@ -18,13 +18,13 @@ export function useMediaFileSelection(maxFiles = 10) {
       reader.onloadend = () => setPreviews(prev => [...prev, reader.result as string]);
       reader.readAsDataURL(file);
     });
-  }, [selectedFiles.length, maxFiles]);
+  };
 
-  const handleDragOver = useCallback((e: React.DragEvent) => { 
+  const handleDragOver = (e: React.DragEvent) => { 
     e.preventDefault();
-  }, []);
+  };
   
-  const handleDrop = useCallback((e: React.DragEvent) => {
+  const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     if (!e.dataTransfer.files) return;
     
@@ -38,29 +38,28 @@ export function useMediaFileSelection(maxFiles = 10) {
       reader.onloadend = () => setPreviews(prev => [...prev, reader.result as string]);
       reader.readAsDataURL(file);
     });
-  }, [selectedFiles.length, maxFiles]);
+  };
 
-  const handleRemoveFile = useCallback((index: number) => {
+  const handleRemoveFile = (index: number) => {
     setSelectedFiles(prev => {
-      const updatedFiles = [...prev]; 
-      updatedFiles.splice(index, 1); 
-      return updatedFiles;
+      const newFiles = [...prev];
+      newFiles.splice(index, 1);
+      return newFiles;
     });
-    
     setPreviews(prev => {
-      const updatedPreviews = [...prev]; 
-      updatedPreviews.splice(index, 1); 
-      return updatedPreviews;
+      const newPreviews = [...prev];
+      newPreviews.splice(index, 1);
+      return newPreviews;
     });
-  }, []);
+  };
 
-  const clearFiles = useCallback(() => {
+  const clearFiles = () => {
     setSelectedFiles([]);
     setPreviews([]);
     if (fileRef.current) {
       fileRef.current.value = '';
     }
-  }, []);
+  };
 
   return {
     selectedFiles,
@@ -72,4 +71,4 @@ export function useMediaFileSelection(maxFiles = 10) {
     handleRemoveFile,
     clearFiles
   };
-}
+};
