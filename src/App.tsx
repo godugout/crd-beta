@@ -19,6 +19,10 @@ import CardDetail from '@/pages/CardDetail';
 import Collections from '@/pages/Collections';
 import TeamPage from '@/pages/TeamPage';
 import CommunityPage from '@/pages/CommunityPage';
+import OaklandLanding from '@/pages/oakland/OaklandLanding';
+import OaklandMemories from '@/pages/oakland/OaklandMemories';
+import OaklandMemoryDetail from '@/pages/oakland/OaklandMemoryDetail';
+import OaklandMemoryCreatorPage from '@/pages/OaklandMemoryCreator';
 import './App.css';
 
 function App() {
@@ -113,34 +117,15 @@ function App() {
           </div>
         </div></PageLayout>} />
         <Route path="/teams" element={<TeamPage />} />
-        <Route path="/teams/oakland" element={<PageLayout title="Oakland A's"><div className="container mx-auto px-4 py-8">
-          <h1 className="text-3xl font-bold mb-4">Oakland A's Team Page</h1>
-          <p className="mb-6">Team information, schedule, and memories</p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="bg-white p-6 rounded-lg shadow-sm">
-              <h2 className="text-xl font-bold mb-3">Team Info</h2>
-              <p className="text-gray-600">Oakland Athletics team details and history</p>
-            </div>
-            <div className="bg-white p-6 rounded-lg shadow-sm">
-              <h2 className="text-xl font-bold mb-3">Team Schedule</h2>
-              <p className="text-gray-600">Upcoming games and events</p>
-            </div>
-          </div>
-        </div></PageLayout>} />
-        <Route path="/teams/sf-giants" element={<PageLayout title="San Francisco Giants"><div className="container mx-auto px-4 py-8">
-          <h1 className="text-3xl font-bold mb-4">San Francisco Giants Team Page</h1>
-          <p className="mb-6">Team information, schedule, and memories</p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="bg-white p-6 rounded-lg shadow-sm">
-              <h2 className="text-xl font-bold mb-3">Team Info</h2>
-              <p className="text-gray-600">San Francisco Giants team details and history</p>
-            </div>
-            <div className="bg-white p-6 rounded-lg shadow-sm">
-              <h2 className="text-xl font-bold mb-3">Team Schedule</h2>
-              <p className="text-gray-600">Upcoming games and events</p>
-            </div>
-          </div>
-        </div></PageLayout>} />
+        <Route path="/teams/:teamId" element={<TeamPage />} />
+        
+        {/* Oakland specific routes */}
+        <Route path="/oakland-landing" element={<OaklandLanding />} />
+        <Route path="/oakland-memories" element={<OaklandMemories />} />
+        <Route path="/oakland-memories/:id" element={<OaklandMemoryDetail />} />
+        <Route path="/oakland-memory-creator" element={<OaklandMemoryCreatorPage />} />
+        <Route path="/oakland" element={<OaklandLanding />} />
+        
         <Route path="/community" element={<CommunityPage />} />
         <Route path="/game-day" element={<GameDayMode />} />
         <Route path="/baseball-card-viewer" element={<BaseballCardViewer />} />
