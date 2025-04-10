@@ -1,26 +1,70 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import PageLayout from '@/components/navigation/PageLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useCards } from '@/context/CardContext';
 import { Card } from '@/lib/types';
 import { Button } from '@/components/ui/button';
+import { CrdButton } from '@/components/ui/crd-button';
 import { Camera, Smartphone, Scan, Info } from 'lucide-react';
 import CardMedia from '@/components/gallery/CardMedia';
+import { toast } from 'sonner';
+import { useArCardViewer } from '@/hooks/useArCardViewer';
+import ArModeView from '@/components/ar/ArModeView';
 
 const ArCardViewer = () => {
   const { id } = useParams();
   const { cards } = useCards();
-  const [selectedCardId, setSelectedCardId] = useState<string | null>(id || null);
   const navigate = useNavigate();
-
-  // Get selected card from context
-  const selectedCard = cards.find(card => card.id === selectedCardId);
   
+  const {
+    activeCard,
+    arCards,
+    availableCards,
+    isArMode,
+    isFlipped,
+    cameraError,
+    isLoading,
+    handleLaunchAr,
+    handleExitAr,
+    handleCameraError,
+    handleTakeSnapshot,
+    handleFlip,
+    handleZoomIn,
+    handleZoomOut,
+    handleRotate,
+    handleAddCard,
+    handleRemoveCard
+  } = useArCardViewer(id);
+
+  if (isArMode) {
+    return (
+      <ArModeView
+        activeCards={arCards}
+        availableCards={availableCards}
+        onExitAr={handleExitAr}
+        onCameraError={handleCameraError}
+        onTakeSnapshot={handleTakeSnapshot}
+        onFlip={handleFlip}
+        onZoomIn={handleZoomIn}
+        onZoomOut={handleZoomOut}
+        onRotate={handleRotate}
+        onAddCard={handleAddCard}
+        onRemoveCard={handleRemoveCard}
+      />
+    );
+  }
+
+  // Handle card selection from the list
   const handleCardSelect = (card: Card) => {
-    setSelectedCardId(card.id);
     navigate(`/ar-viewer/${card.id}`);
+  };
+
+  const handleGenerateQR = () => {
+    toast.success('QR Code Generated', {
+      description: 'Scan this code to view this card in AR on your mobile device'
+    });
   };
   
   return (
@@ -59,7 +103,7 @@ const ArCardViewer = () => {
                       <div 
                         key={card.id} 
                         className={`cursor-pointer flex items-center gap-3 p-2 rounded-md
-                          ${selectedCardId === card.id ? 'bg-primary/10 border border-primary/30' : 'hover:bg-gray-50'}`}
+                          ${activeCard?.id === card.id ? 'bg-primary/10 border border-primary/30' : 'hover:bg-gray-50'}`}
                         onClick={() => handleCardSelect(card)}
                       >
                         <div className="h-16 w-12 flex-shrink-0">
@@ -89,31 +133,31 @@ const ArCardViewer = () => {
               {/* AR viewer main area */}
               <div className="md:col-span-2">
                 <div className="bg-white p-6 rounded-lg border h-full">
-                  {selectedCard ? (
+                  {activeCard ? (
                     <div className="space-y-6">
                       <div className="aspect-video bg-gray-100 rounded-lg flex items-center justify-center relative">
                         <div className="absolute inset-0 flex items-center justify-center">
                           <div className="max-h-full max-w-[50%]">
-                            <CardMedia card={selectedCard} onView={() => {}} className="h-full shadow-lg" />
+                            <CardMedia card={activeCard} onView={() => {}} className="h-full shadow-lg" />
                           </div>
                         </div>
                         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/20 rounded-lg pointer-events-none" />
                       </div>
                       
                       <div className="space-y-2">
-                        <h3 className="text-xl font-medium">{selectedCard.title}</h3>
-                        <p className="text-gray-600 text-sm">{selectedCard.description || 'No description available'}</p>
+                        <h3 className="text-xl font-medium">{activeCard.title}</h3>
+                        <p className="text-gray-600 text-sm">{activeCard.description || 'No description available'}</p>
                       </div>
                       
                       <div className="flex gap-3 flex-wrap">
-                        <Button className="flex items-center gap-2">
+                        <CrdButton onClick={handleLaunchAr} className="flex items-center gap-2">
                           <Camera className="h-4 w-4" />
                           View in AR
-                        </Button>
-                        <Button variant="outline" className="flex items-center gap-2">
+                        </CrdButton>
+                        <CrdButton variant="outline" onClick={handleGenerateQR} className="flex items-center gap-2">
                           <Scan className="h-4 w-4" />
                           Generate QR Code
-                        </Button>
+                        </CrdButton>
                       </div>
                     </div>
                   ) : (
@@ -143,10 +187,10 @@ const ArCardViewer = () => {
                 <p className="text-gray-500 max-w-md mx-auto mb-6">
                   Scan a CardShow QR code to instantly view the card in AR mode
                 </p>
-                <Button className="flex items-center gap-2 mx-auto">
+                <CrdButton className="flex items-center gap-2 mx-auto">
                   <Camera className="h-4 w-4" />
                   Launch Camera
-                </Button>
+                </CrdButton>
               </div>
             </div>
           </TabsContent>
@@ -157,7 +201,7 @@ const ArCardViewer = () => {
               
               <div className="space-y-6">
                 <div className="flex gap-4">
-                  <div className="flex-shrink-0 h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">1</div>
+                  <div className="flex-shrink-0 h-10 w-10 rounded-full bg-crd-primary/10 flex items-center justify-center text-crd-primary">1</div>
                   <div>
                     <h4 className="font-medium mb-1">Select a Card</h4>
                     <p className="text-gray-600 text-sm">Choose any card from your collection to view in AR mode</p>
@@ -165,7 +209,7 @@ const ArCardViewer = () => {
                 </div>
                 
                 <div className="flex gap-4">
-                  <div className="flex-shrink-0 h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">2</div>
+                  <div className="flex-shrink-0 h-10 w-10 rounded-full bg-crd-primary/10 flex items-center justify-center text-crd-primary">2</div>
                   <div>
                     <h4 className="font-medium mb-1">Launch AR Mode</h4>
                     <p className="text-gray-600 text-sm">Click the "View in AR" button to open the AR experience</p>
@@ -173,7 +217,7 @@ const ArCardViewer = () => {
                 </div>
                 
                 <div className="flex gap-4">
-                  <div className="flex-shrink-0 h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">3</div>
+                  <div className="flex-shrink-0 h-10 w-10 rounded-full bg-crd-primary/10 flex items-center justify-center text-crd-primary">3</div>
                   <div>
                     <h4 className="font-medium mb-1">Scan Your Surface</h4>
                     <p className="text-gray-600 text-sm">Point your camera at a flat surface where you want to place the card</p>
@@ -181,7 +225,7 @@ const ArCardViewer = () => {
                 </div>
                 
                 <div className="flex gap-4">
-                  <div className="flex-shrink-0 h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">4</div>
+                  <div className="flex-shrink-0 h-10 w-10 rounded-full bg-crd-primary/10 flex items-center justify-center text-crd-primary">4</div>
                   <div>
                     <h4 className="font-medium mb-1">Experience Your Card</h4>
                     <p className="text-gray-600 text-sm">Move around to see your card from different angles</p>

@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
+import { CrdButton } from '@/components/ui/crd-button';
 import { FlipHorizontal, ZoomIn, ZoomOut, RotateCcw, Camera } from 'lucide-react';
 
 interface ArControlsProps {
@@ -48,13 +49,14 @@ const ArControls: React.FC<ArControlsProps> = ({
           </Button>
         </div>
         
-        <Button 
-          className="bg-blue-600 hover:bg-blue-700"
+        <CrdButton 
+          variant="default"
           onClick={onTakeSnapshot}
+          className="shadow-lg"
         >
           <Camera className="h-5 w-5 mr-2" />
           Snapshot
-        </Button>
+        </CrdButton>
         
         <Button 
           variant="outline" 

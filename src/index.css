@@ -1,4 +1,3 @@
-
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@500;600;700;800&display=swap');
 
 @tailwind base;
@@ -13,42 +12,42 @@
     --card-foreground: 240 10% 3.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 240 10% 3.9%;
-    --primary: 142 76% 46%; /* Green color */
+    --primary: 240 100% 50%; /* Primary blue from the design system */
     --primary-foreground: 0 0% 98%;
-    --secondary: 240 4.8% 95.9%;
+    --secondary: 45 100% 50%; /* Secondary yellow from the design system */
     --secondary-foreground: 240 5.9% 10%;
     --muted: 240 4.8% 95.9%;
     --muted-foreground: 240 3.8% 46.1%;
-    --accent: 25 95% 53%;  /* Orange accent */
+    --accent: 270 60% 50%; /* Accent color based on gradient accent */
     --accent-foreground: 240 5.9% 10%;
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 0 100% 50%; /* Error red from the design system */
     --destructive-foreground: 0 0% 98%;
-    --border: 240 5.9% 90%;
+    --border: 225 10% 88%; /* Line color from design system */
     --input: 240 5.9% 90%;
-    --ring: 142 76% 46%; /* Green for focus rings */
+    --ring: 240 100% 50%; /* Primary blue for focus rings */
     --radius: 0.75rem;
   }
 
   .dark {
-    --background: 240 10% 3.9%;
+    --background: 0 0% 10%;
     --foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
+    --card: 0 0% 10%;
     --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
+    --popover: 0 0% 10%;
     --popover-foreground: 0 0% 98%;
-    --primary: 142 70% 40%; /* Slightly darker green for dark mode */
-    --primary-foreground: 240 5.9% 10%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
+    --primary: 240 100% 50%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 45 100% 50%;
+    --secondary-foreground: 0 0% 10%;
     --muted: 240 3.7% 15.9%;
     --muted-foreground: 240 5% 64.9%;
-    --accent: 25 95% 53%; /* Orange accent */
+    --accent: 270 60% 50%;
     --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 100% 50%;
     --destructive-foreground: 0 0% 98%;
     --border: 240 3.7% 15.9%;
     --input: 240 3.7% 15.9%;
-    --ring: 142 70% 40%; /* Green for focus rings in dark mode */
+    --ring: 240 100% 50%;
   }
 }
 
@@ -80,6 +79,49 @@
   }
   h6 {
     @apply text-base md:text-lg;
+  }
+  
+  /* CRD Design System Typography Classes */
+  .crd-display-regular {
+    @apply font-crd-display font-normal leading-tight;
+  }
+  .crd-display-bold {
+    @apply font-crd-display font-bold leading-tight;
+  }
+  .crd-display-medium {
+    @apply font-crd-display font-medium leading-tight;
+  }
+  .crd-display-semibold {
+    @apply font-crd-display font-semibold leading-tight;
+  }
+  .crd-display-small {
+    @apply font-crd-display text-sm leading-tight;
+  }
+  
+  .crd-text-large {
+    @apply font-crd-text text-base leading-normal;
+  }
+  .crd-text-medium {
+    @apply font-crd-text text-sm leading-normal;
+  }
+  .crd-text-small {
+    @apply font-crd-text text-xs leading-normal;
+  }
+  .crd-text-xsmall {
+    @apply font-crd-text text-xs leading-tight;
+  }
+  
+  .crd-link-large {
+    @apply font-crd-text text-base text-crd-primary underline;
+  }
+  .crd-link-medium {
+    @apply font-crd-text text-sm text-crd-primary underline;
+  }
+  .crd-link-small {
+    @apply font-crd-text text-xs text-crd-primary underline;
+  }
+  .crd-link-xsmall {
+    @apply font-crd-text text-xs text-crd-primary underline;
   }
 }
 
@@ -305,6 +347,23 @@
 
   .badge-secondary {
     @apply px-2 py-0.5 text-xs font-medium rounded-full bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300;
+  }
+
+  /* CRD Button Styles */
+  .crd-btn-primary {
+    @apply px-4 py-2 bg-crd-primary text-white font-medium rounded-md transition-all hover:bg-opacity-90 focus:ring-2 focus:ring-crd-primary focus:ring-opacity-50;
+  }
+  
+  .crd-btn-secondary {
+    @apply px-4 py-2 bg-crd-secondary text-crd-body font-medium rounded-md transition-all hover:bg-opacity-90 focus:ring-2 focus:ring-crd-secondary focus:ring-opacity-50;
+  }
+  
+  .crd-btn-outline {
+    @apply px-4 py-2 bg-transparent border border-crd-primary text-crd-primary font-medium rounded-md transition-all hover:bg-crd-primary hover:text-white focus:ring-2 focus:ring-crd-primary focus:ring-opacity-50;
+  }
+  
+  .crd-btn-ghost {
+    @apply px-4 py-2 bg-transparent text-crd-primary font-medium rounded-md transition-all hover:bg-crd-primary hover:bg-opacity-10 focus:ring-2 focus:ring-crd-primary focus:ring-opacity-50;
   }
 }
 

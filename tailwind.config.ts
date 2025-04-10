@@ -52,6 +52,24 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
+				crd: {
+					'title-active': '#1A1A1A',
+					'body': '#212121',
+					'label': '#3A3A3A',
+					'placeholder': '#6B6B6B',
+					'line': '#E1E1E1',
+					'input-bg': '#F5F5F5',
+					'background': '#F8F8F8',
+					'off-white': '#FAFAFA',
+					'primary': '#0000FF',
+					'secondary': '#FFC300',
+					'error': '#FF0000',
+					'success': '#00FF00',
+					'warning': '#FF6B00',
+					'gradient-primary': 'linear-gradient(90deg, #0000FF, #4040FF)',
+					'gradient-secondary': 'linear-gradient(90deg, #FFC300, #FFD700)',
+					'gradient-accent': 'linear-gradient(90deg, #8A2BE2, #9370DB)',
+				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
 					foreground: 'hsl(var(--sidebar-foreground))',
@@ -116,11 +134,6 @@ export default {
 					}
 				},
 			},
-			borderRadius: {
-				lg: 'var(--radius)',
-				md: 'calc(var(--radius) - 2px)',
-				sm: 'calc(var(--radius) - 4px)'
-			},
 			fontFamily: {
 				sans: [
 					'Inter',
@@ -137,6 +150,25 @@ export default {
 					'Inter',
 					'sans-serif',
 				],
+				'crd-display': [
+					'SF Pro Display',
+					'Roboto',
+					'Helvetica Neue',
+					'Arial',
+					'sans-serif'
+				],
+				'crd-text': [
+					'SF Pro Text',
+					'Roboto',
+					'Helvetica Neue',
+					'Arial',
+					'sans-serif'
+				],
+			},
+			borderRadius: {
+				lg: 'var(--radius)',
+				md: 'calc(var(--radius) - 2px)',
+				sm: 'calc(var(--radius) - 4px)'
 			},
 			keyframes: {
 				'accordion-down': {
@@ -183,6 +215,10 @@ export default {
 					'0%': { backgroundPosition: '-200% 0' },
 					'100%': { backgroundPosition: '200% 0' },
 				},
+				'pulse': {
+					'0%, 100%': { opacity: '1' },
+					'50%': { opacity: '0.5' },
+				},
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
@@ -196,6 +232,7 @@ export default {
 				'card-hover': 'card-hover 0.3s ease-out forwards',
 				'card-flip': 'card-flip 0.6s ease-out forwards',
 				'shimmer': 'shimmer 2s infinite linear',
+				'pulse': 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
 			},
 			boxShadow: {
 				'card': '0 4px 20px -4px rgba(0, 0, 0, 0.1)',
@@ -204,6 +241,9 @@ export default {
 				'subtle': '0 2px 8px rgba(0, 0, 0, 0.05)',
 				'glow': '0 0 15px rgba(72, 187, 120, 0.5)',
 				'glow-strong': '0 0 25px rgba(72, 187, 120, 0.8)',
+			},
+			backgroundImage: {
+				'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
 			},
 		}
 	},
