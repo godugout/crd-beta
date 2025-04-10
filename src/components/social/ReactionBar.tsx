@@ -18,22 +18,22 @@ type ReactionType = keyof typeof REACTIONS
 type ReactionsData = Record<ReactionType, string[]> // userId[]
 
 interface ReactionBarProps {
-  itemId: string
-  initialReactions?: Partial<ReactionsData>
-  onReactionChange: (itemId: string, reaction: ReactionType | null) => void
+  memoryId: string
+  initialReactions?: Partial<Record<string, any>>
+  onReactionChange?: (memoryId: string, reaction: ReactionType | null) => void
   onComment?: () => void
   commentCount?: number
 }
 
 export const ReactionBar: React.FC<ReactionBarProps> = ({
-  itemId,
+  memoryId,
   initialReactions = {},
   onReactionChange,
   onComment,
   commentCount = 0
 }) => {
   const { user } = useUser()
-  const [reactions, setReactions] = useState<Partial<ReactionsData>>(initialReactions)
+  const [reactions, setReactions] = useState<Partial<ReactionsData>>(initialReactions as any || {})
   
   // Find if the current user has reacted
   const getUserReaction = (): ReactionType | null => {
@@ -57,7 +57,7 @@ export const ReactionBar: React.FC<ReactionBarProps> = ({
       const newReactions = { ...reactions }
       newReactions[reaction] = newReactions[reaction]?.filter(id => id !== user.id) || []
       setReactions(newReactions)
-      onReactionChange(itemId, null)
+      if (onReactionChange) onReactionChange(memoryId, null)
       return
     }
     
@@ -72,7 +72,7 @@ export const ReactionBar: React.FC<ReactionBarProps> = ({
     // Add new reaction
     newReactions[reaction] = [...(newReactions[reaction] || []), user.id]
     setReactions(newReactions)
-    onReactionChange(itemId, reaction)
+    if (onReactionChange) onReactionChange(memoryId, reaction)
   }
   
   // Get total reaction count
@@ -176,5 +176,3 @@ export const ReactionBar: React.FC<ReactionBarProps> = ({
     </div>
   )
 }
-
-export default ReactionBar
