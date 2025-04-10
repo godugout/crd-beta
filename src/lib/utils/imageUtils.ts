@@ -1,4 +1,5 @@
 
+
 /**
  * Image loading utility functions
  */
@@ -57,6 +58,10 @@ export function getFallbackImageUrl(tags: string[] = [], title: string = ''): st
     return localImages.football;
   }
   
+  if (lowerCaseTitle.includes('gundam') || lowerCaseTitle.includes('anime')) {
+    return localImages.anime;
+  }
+  
   // Default fallback if nothing else matches
   return localImages.default;
 }
@@ -83,3 +88,4 @@ export function isValidImageUrl(url?: string): boolean {
      url.includes('lovable-uploads'))
   );
 }
+

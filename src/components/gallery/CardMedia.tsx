@@ -4,7 +4,6 @@ import { Card } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { getFallbackImageUrl, isValidImageUrl } from '@/lib/utils/imageUtils';
-import { toast } from 'sonner';
 
 interface CardMediaProps {
   card: Card;
@@ -56,6 +55,9 @@ const CardMedia: React.FC<CardMediaProps> = ({ card, onView, className = '' }) =
     if (retryCount >= 1) {
       console.log('Max retries reached, showing error state for:', card.title);
       setIsError(true);
+      
+      // Even though there's an error, we'll still show a placeholder and keep the card visible
+      // The error state will show a placeholder with the card title
       return;
     }
     
@@ -84,14 +86,34 @@ const CardMedia: React.FC<CardMediaProps> = ({ card, onView, className = '' }) =
         </div>
       )}
       
-      {/* Error state */}
+      {/* Error state - now shows card details in a nicer format */}
       {isError && (
-        <div className="w-full h-0 pb-[140%] bg-slate-100 flex items-center justify-center">
-          <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-400">
-            <Image className="h-12 w-12 mb-2" />
-            <div className="text-center px-4">
-              <div className="mb-1">Image not available</div>
-              <div className="text-xs opacity-75">{card.title}</div>
+        <div className="w-full h-0 pb-[140%] bg-gradient-to-b from-slate-200 to-slate-300 flex items-center justify-center">
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-600 p-4">
+            <Image className="h-10 w-10 mb-2" />
+            <div className="text-center">
+              <div className="font-medium truncate max-w-full">{card.title}</div>
+              {card.tags && card.tags.length > 0 && (
+                <div className="mt-2 flex justify-center flex-wrap gap-1">
+                  {card.tags.slice(0, 2).map((tag, i) => (
+                    <span key={i} className="text-xs bg-white/50 px-1.5 py-0.5 rounded-full">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
+              <Button
+                size="sm"
+                variant="secondary"
+                className="mt-3 bg-white/80 hover:bg-white"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onView(card.id);
+                }}
+              >
+                <Eye className="h-3 w-3 mr-1" />
+                View
+              </Button>
             </div>
           </div>
         </div>
@@ -143,24 +165,22 @@ const CardMedia: React.FC<CardMediaProps> = ({ card, onView, className = '' }) =
         </div>
       )}
       
-      {/* Card details at bottom */}
-      {isLoaded && !isError && (
-        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3 text-white">
-          <h3 className="font-medium text-sm line-clamp-1">{card.title}</h3>
-          {card.tags && card.tags.length > 0 && (
-            <div className="flex flex-wrap gap-1 mt-1">
+      {/* Card details at bottom - always show regardless of image state */}
+      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3 text-white">
+        <h3 className="font-medium text-sm line-clamp-1">{card.title}</h3>
+        {card.tags && card.tags.length > 0 && (
+          <div className="flex flex-wrap gap-1 mt-1">
+            <span className="text-xs bg-white/20 px-1.5 py-0.5 rounded-full">
+              {card.tags[0]}
+            </span>
+            {card.tags.length > 1 && (
               <span className="text-xs bg-white/20 px-1.5 py-0.5 rounded-full">
-                {card.tags[0]}
+                +{card.tags.length - 1}
               </span>
-              {card.tags.length > 1 && (
-                <span className="text-xs bg-white/20 px-1.5 py-0.5 rounded-full">
-                  +{card.tags.length - 1}
-                </span>
-              )}
-            </div>
-          )}
-        </div>
-      )}
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
