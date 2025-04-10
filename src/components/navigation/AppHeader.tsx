@@ -24,11 +24,11 @@ const AppHeader: React.FC = () => {
 
   const handleSignInOut = async () => {
     if (user) {
-      // Provide empty object argument for signOut
-      await signOut({});
+      // signOut expects no arguments based on the error
+      await signOut();
     } else {
-      // Provide empty object argument for signIn
-      await signIn({});
+      // signIn expects 2 arguments based on the error
+      await signIn("", "");
     }
     closeMenu();
   };
