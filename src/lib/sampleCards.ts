@@ -1,66 +1,84 @@
 
 import { Card } from '@/lib/types';
+import { v4 as uuidv4 } from 'uuid';
 
-// Sample card data to populate the gallery
-export const sampleCardData: Omit<Card, 'id' | 'createdAt' | 'updatedAt'>[] = [
-  {
-    title: "Vintage Baseball Card",
-    description: "A classic vintage baseball card featuring a legendary player from the golden era of baseball.",
-    imageUrl: "https://images.unsplash.com/photo-1588914307233-c6677d0b1354?q=80&w=1000",
-    thumbnailUrl: "https://images.unsplash.com/photo-1588914307233-c6677d0b1354?q=80&w=500",
-    tags: ["baseball", "vintage", "sports", "collectible"]
-  },
-  {
-    title: "Modern Art Exhibition",
-    description: "Abstract painting from a contemporary art exhibition showcasing bold colors and geometric shapes.",
-    imageUrl: "https://images.unsplash.com/photo-1547826039-bfc35e0f1ea8?q=80&w=1000",
-    thumbnailUrl: "https://images.unsplash.com/photo-1547826039-bfc35e0f1ea8?q=80&w=500",
-    tags: ["art", "modern", "abstract", "exhibition"]
-  },
-  {
-    title: "Mountain Landscape",
-    description: "Stunning view of snow-capped mountains with a crystal clear lake reflecting the beautiful scenery.",
-    imageUrl: "https://images.unsplash.com/photo-1483728642387-6c3bdd6c93e5?q=80&w=1000",
-    thumbnailUrl: "https://images.unsplash.com/photo-1483728642387-6c3bdd6c93e5?q=80&w=500", 
-    tags: ["nature", "mountains", "landscape", "photography"]
-  },
-  {
-    title: "Retro Gaming Card",
-    description: "A special edition card featuring classic video game characters from the 90s era of gaming.",
-    imageUrl: "https://images.unsplash.com/photo-1551103782-8ab07afd45c1?q=80&w=1000",
-    thumbnailUrl: "https://images.unsplash.com/photo-1551103782-8ab07afd45c1?q=80&w=500",
-    tags: ["gaming", "retro", "nostalgia", "collectible"]
-  },
-  {
-    title: "Luxury Watch Close-up",
-    description: "Detailed macro photography of a premium luxury watch showing intricate craftsmanship.",
-    imageUrl: "https://images.unsplash.com/photo-1587836374828-4dbafa94cf0e?q=80&w=1000",
-    thumbnailUrl: "https://images.unsplash.com/photo-1587836374828-4dbafa94cf0e?q=80&w=500",
-    tags: ["watch", "luxury", "macro", "timepiece"]
-  },
-  {
-    title: "Holographic Special Edition",
-    description: "Limited edition holographic card with special reflective properties that change in different lighting.",
-    imageUrl: "https://images.unsplash.com/photo-1599751449018-c7ce6fc09d2e?q=80&w=1000",
-    thumbnailUrl: "https://images.unsplash.com/photo-1599751449018-c7ce6fc09d2e?q=80&w=500",
-    tags: ["holographic", "limited", "special", "rare"]
-  }
+const createSampleCard = (data: Partial<Card>): Card => ({
+  id: uuidv4(),
+  title: data.title || 'Untitled Card',
+  name: data.name || data.title || 'Untitled Card', // Ensure name field is present
+  description: data.description || '',
+  imageUrl: data.imageUrl || '',
+  image: data.image || data.imageUrl || '', // Ensure image field is present
+  thumbnailUrl: data.thumbnailUrl || data.imageUrl || '',
+  creatorId: data.creatorId || 'sample-creator', // Ensure creatorId field is present
+  userId: data.userId || data.creatorId || 'sample-creator',
+  tags: data.tags || [],
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+  fabricSwatches: data.fabricSwatches || []
+});
+
+export const sampleCards: Card[] = [
+  createSampleCard({
+    title: 'Vintage Baseball Card',
+    description: 'A classic baseball trading card from the 1970s',
+    imageUrl: 'https://source.unsplash.com/random/300x400?baseball',
+    thumbnailUrl: 'https://source.unsplash.com/random/300x400?baseball',
+    tags: ['Baseball', 'Vintage', 'Trading Card']
+  }),
+  createSampleCard({
+    title: 'Basketball Legend',
+    description: 'An iconic player from basketball history',
+    imageUrl: 'https://source.unsplash.com/random/300x400?basketball',
+    thumbnailUrl: 'https://source.unsplash.com/random/300x400?basketball',
+    tags: ['Basketball', 'Legend', 'Sports Icon']
+  }),
+  createSampleCard({
+    title: 'Football Superstar',
+    description: 'One of the greatest football players of all time',
+    imageUrl: 'https://source.unsplash.com/random/300x400?football',
+    thumbnailUrl: 'https://source.unsplash.com/random/300x400?football',
+    tags: ['Football', 'Superstar', 'NFL']
+  }),
+  createSampleCard({
+    title: 'Soccer World Cup',
+    description: 'Memorable moment from a World Cup final',
+    imageUrl: 'https://source.unsplash.com/random/300x400?soccer',
+    thumbnailUrl: 'https://source.unsplash.com/random/300x400?soccer',
+    tags: ['Soccer', 'World Cup', 'FIFA']
+  }),
+  createSampleCard({
+    title: 'Tennis Champion',
+    description: 'Grand Slam winning tennis player',
+    imageUrl: 'https://source.unsplash.com/random/300x400?tennis',
+    thumbnailUrl: 'https://source.unsplash.com/random/300x400?tennis',
+    tags: ['Tennis', 'Grand Slam', 'Champion']
+  }),
+  createSampleCard({
+    title: 'Hockey Star',
+    description: 'Legendary hockey player on ice',
+    imageUrl: 'https://source.unsplash.com/random/300x400?hockey',
+    thumbnailUrl: 'https://source.unsplash.com/random/300x400?hockey',
+    tags: ['Hockey', 'NHL', 'Ice Sports']
+  })
 ];
 
-// Function to add sample cards
-export const addSampleCards = async (addCardFn: (card: Omit<Card, 'id' | 'createdAt' | 'updatedAt'>) => Promise<Card | undefined>) => {
-  const results = [];
+export const addSampleCards = async (addCardFn: (card: Partial<Card>) => Promise<Card>): Promise<Card[]> => {
+  const addedCards: Card[] = [];
   
-  for (const cardData of sampleCardData) {
-    try {
-      const result = await addCardFn(cardData);
-      if (result) {
-        results.push(result);
-      }
-    } catch (error) {
-      console.error("Error adding sample card:", error);
+  try {
+    for (const sampleCard of sampleCards) {
+      const cardToAdd = {
+        ...sampleCard,
+        id: undefined // Let the addCard function generate a new ID
+      };
+      
+      const newCard = await addCardFn(cardToAdd);
+      addedCards.push(newCard);
     }
+  } catch (error) {
+    console.error('Error adding sample cards:', error);
   }
   
-  return results;
+  return addedCards;
 };

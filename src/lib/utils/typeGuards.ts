@@ -9,9 +9,9 @@ export function isCard(obj: any): obj is Card {
     obj &&
     typeof obj === 'object' &&
     typeof obj.id === 'string' &&
-    typeof obj.title === 'string' &&
+    (typeof obj.title === 'string' || typeof obj.name === 'string') &&
     typeof obj.description === 'string' &&
-    typeof obj.imageUrl === 'string'
+    (typeof obj.imageUrl === 'string' || typeof obj.image === 'string')
   );
 }
 
@@ -23,7 +23,7 @@ export function isCollection(obj: any): obj is Collection {
     obj &&
     typeof obj === 'object' &&
     typeof obj.id === 'string' &&
-    typeof obj.name === 'string' &&
+    (typeof obj.name === 'string' || typeof obj.title === 'string') &&
     typeof obj.description === 'string'
   );
 }
@@ -49,7 +49,7 @@ export function isOaklandMemoryData(obj: any): obj is OaklandMemoryData {
     typeof obj === 'object' &&
     typeof obj.title === 'string' &&
     typeof obj.description === 'string' &&
-    Array.isArray(obj.tags)
+    (obj.tags === undefined || Array.isArray(obj.tags))
   );
 }
 
@@ -69,9 +69,6 @@ export function ensureValidOaklandMemoryData(obj: Partial<OaklandMemoryData>): O
     section: obj.section,
     imageUrl: obj.imageUrl,
     memoryType: obj.memoryType,
-    id: obj.id,
-    createdAt: obj.createdAt,
-    updatedAt: obj.updatedAt,
     attendees: obj.attendees || [],
     historicalContext: obj.historicalContext,
     personalSignificance: obj.personalSignificance

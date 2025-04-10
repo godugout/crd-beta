@@ -2,84 +2,11 @@ import React, { createContext, useContext, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from 'sonner';
 import { sampleCards } from '@/data/sampleCards';
+import { Card as LibCard, Collection as LibCollection } from '@/lib/types';
 
-// Define the Card type
-export interface Card {
-  id: string;
-  title: string;
-  description: string;
-  imageUrl: string;
-  thumbnailUrl: string;
-  createdAt: string;
-  updatedAt: string;
-  userId: string;
-  collectionId?: string;
-  tags: string[];
-  fabricSwatches?: Array<{
-    type: string;
-    team: string;
-    year: string;
-    manufacturer: string;
-    position: string;
-    size: string;
-  }>;
-  designMetadata?: {
-    cardStyle?: {
-      template?: string;
-      effect?: string;
-      borderRadius?: string;
-      borderColor?: string;
-      frameColor?: string;
-      frameWidth?: number;
-      shadowColor?: string;
-    };
-    textStyle?: {
-      titleColor?: string;
-      titleAlignment?: string;
-      titleWeight?: string;
-      descriptionColor?: string;
-    };
-    marketMetadata?: {
-      isPrintable?: boolean;
-      isForSale?: boolean;
-      includeInCatalog?: boolean;
-    };
-    cardMetadata?: {
-      category?: string;
-      cardType?: string;
-      series?: string;
-    };
-    oaklandMemory?: {
-      date?: string;
-      opponent?: string;
-      score?: string;
-      location?: string;
-      section?: string;
-      memoryType?: string;
-      attendees?: string[];
-      template?: string;
-      teamId?: string;
-      historicalContext?: string;
-      personalSignificance?: string;
-    };
-  };
-}
-
-// Define Collection type
-export interface Collection {
-  id: string;
-  name: string;
-  description: string;
-  coverImageUrl?: string;
-  createdAt: string;
-  updatedAt: string;
-  userId: string;
-  cardIds: string[];
-  visibility: 'public' | 'private' | 'team';
-  allowComments?: boolean;
-  teamId?: string;
-  designMetadata?: any;
-}
+// Use the existing Card type from lib/types.ts
+export type Card = LibCard;
+export type Collection = LibCollection;
 
 type CardContextType = {
   cards: Card[];
@@ -143,11 +70,11 @@ export const CardProvider: React.FC<{ children: React.ReactNode }> = ({ children
         id: cardData.id || uuidv4(),
         title: cardData.title || 'Untitled Card',
         description: cardData.description || '',
-        imageUrl: cardData.imageUrl || '',
-        thumbnailUrl: cardData.thumbnailUrl || cardData.imageUrl || '',
+        imageUrl: cardData.imageUrl || cardData.image || '',
+        thumbnailUrl: cardData.thumbnailUrl || cardData.imageUrl || cardData.image || '',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        userId: cardData.userId || 'anonymous',
+        userId: cardData.userId || cardData.creatorId || 'anonymous',
         collectionId: cardData.collectionId,
         designMetadata: cardData.designMetadata || {
           cardStyle: {},

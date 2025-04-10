@@ -1,38 +1,47 @@
+import { useAuth } from '@/hooks/useAuth';
+import { UserPermission, UserRole, ROLE_PERMISSIONS } from '@/lib/types';
 
-import { useUser } from '@/hooks/useUser';
-import { UserPermission, ROLE_PERMISSIONS } from '@/lib/types';
-
-export const usePermissions = () => {
-  const { user } = useUser();
+/**
+ * Hook to check user permissions based on their role or specific permissions
+ */
+export function usePermissions() {
+  const { user } = useAuth();
   
+  /**
+   * Check if user has a specific permission
+   */
   const hasPermission = (permission: UserPermission): boolean => {
-    if (!user) return false;
-    
-    // If user has explicit permissions array, check there first
-    if (user.permissions && Array.isArray(user.permissions) && user.permissions.includes(permission)) {
-      return true;
+    // If user has explicit permissions array, check that first
+    if (user?.permissions && Array.isArray(user.permissions)) {
+      return user.permissions.includes(permission);
     }
     
-    // Otherwise check role-based permissions
-    if (user.role && ROLE_PERMISSIONS[user.role]) {
-      return ROLE_PERMISSIONS[user.role].includes(permission);
+    // Otherwise, fall back to role-based permissions
+    if (user?.role) {
+      const rolePermissions = ROLE_PERMISSIONS[user.role as UserRole] || [];
+      return rolePermissions.includes(permission);
     }
     
-    // Default to regular user permissions if no role specified
-    return ROLE_PERMISSIONS.user.includes(permission);
+    return false;
   };
-
+  
+  /**
+   * Check if user has admin role
+   */
   const isAdmin = (): boolean => {
     return user?.role === 'admin';
   };
-
+  
+  /**
+   * Check if user has moderator role or higher
+   */
   const isModerator = (): boolean => {
-    return user?.role === 'moderator' || user?.role === 'admin';
+    return user?.role === 'admin' || user?.role === 'moderator';
   };
   
   return {
     hasPermission,
     isAdmin,
-    isModerator
+    isModerator,
   };
-};
+}
