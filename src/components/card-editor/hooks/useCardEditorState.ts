@@ -1,81 +1,62 @@
 
 import { useState, useCallback } from 'react';
 
-export interface CardStyle {
-  effect: string;
-  brightness: number;
-  contrast: number;
-  saturation: number;
-  borderWidth: number;
-  borderRadius: string;
-  borderColor: string;
-  backgroundColor: string;
-}
-
-interface UseCardEditorStateProps {
+interface CardEditorStateProps {
   initialCard?: any;
   initialMetadata?: any;
 }
 
-export const useCardEditorState = ({ initialCard, initialMetadata }: UseCardEditorStateProps) => {
-  // Basic card info
+export function useCardEditorState({ initialCard, initialMetadata }: CardEditorStateProps) {
+  // Basic info
   const [title, setTitle] = useState(initialCard?.title || initialMetadata?.title || '');
   const [description, setDescription] = useState(initialCard?.description || initialMetadata?.description || '');
   const [player, setPlayer] = useState(initialCard?.player || initialMetadata?.player || '');
   const [team, setTeam] = useState(initialCard?.team || initialMetadata?.team || '');
   const [year, setYear] = useState(initialCard?.year || initialMetadata?.year || '');
   const [tags, setTags] = useState<string[]>(initialCard?.tags || initialMetadata?.tags || []);
-  const [imageUrl, setImageUrl] = useState<string>(initialCard?.imageUrl || '');
   
-  // Card design customization
-  const [cardStyle, setCardStyle] = useState<CardStyle>({
-    effect: initialCard?.effect || 'classic',
-    brightness: initialCard?.brightness || 100,
-    contrast: initialCard?.contrast || 100,
-    saturation: initialCard?.saturation || 100,
-    borderWidth: initialCard?.borderWidth || 0,
-    borderRadius: initialCard?.borderRadius || '8px',
-    borderColor: initialCard?.borderColor || '#000000',
-    backgroundColor: initialCard?.backgroundColor || '#ffffff',
+  // Image
+  const [imageUrl, setImageUrl] = useState<string>(initialCard?.imageUrl || initialMetadata?.imageUrl || '');
+  
+  // Design options
+  const [cardStyle, setCardStyle] = useState<any>(initialCard?.designMetadata?.cardStyle || {
+    borderRadius: '8px',
+    effect: 'classic',
+    borderColor: '#48BB78',
+    backgroundColor: '#FFFFFF'
   });
   
-  // Card effects - updated to support multiple effects
-  const [selectedEffects, setSelectedEffects] = useState<string[]>(
-    initialCard?.selectedEffects || initialCard?.selectedEffect ? [initialCard.selectedEffect] : []
-  );
+  // Effects
+  const [selectedEffects, setSelectedEffects] = useState<string[]>(initialCard?.designMetadata?.effects || []);
   
-  // Handle image upload
   const handleFileChange = useCallback((file: File) => {
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setImageUrl(reader.result as string);
-    };
-    reader.readAsDataURL(file);
+    const url = URL.createObjectURL(file);
+    setImageUrl(url);
   }, []);
   
-  // Get final card data for saving
   const getCardData = useCallback(() => {
     return {
       title,
       description,
-      player,
-      team,
-      year,
-      tags,
       imageUrl,
-      selectedEffects,
-      ...cardStyle,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      tags,
+      designMetadata: {
+        cardStyle,
+        effects: selectedEffects,
+        player,
+        team,
+        year,
+      }
     };
-  }, [title, description, player, team, year, tags, imageUrl, selectedEffects, cardStyle]);
-  
+  }, [title, description, imageUrl, tags, cardStyle, selectedEffects, player, team, year]);
+
   return {
+    // Basic info
     title,
     setTitle,
     description,
     setDescription,
-    player, 
+    player,
     setPlayer,
     team,
     setTeam,
@@ -83,13 +64,21 @@ export const useCardEditorState = ({ initialCard, initialMetadata }: UseCardEdit
     setYear,
     tags,
     setTags,
+    
+    // Image
     imageUrl,
     setImageUrl,
+    handleFileChange,
+    
+    // Design
     cardStyle,
     setCardStyle,
+    
+    // Effects
     selectedEffects,
     setSelectedEffects,
-    handleFileChange,
-    getCardData,
+    
+    // Utils
+    getCardData
   };
-};
+}

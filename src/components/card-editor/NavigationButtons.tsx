@@ -18,33 +18,39 @@ const NavigationButtons: React.FC<NavigationButtonsProps> = ({
   onNext,
   onSubmit
 }) => {
+  const isFirstStep = currentStep === 0;
+  const isLastStep = currentStep === totalSteps - 1;
+
   return (
-    <div className="mt-8 flex justify-between">
+    <div className="flex justify-between mt-8">
       <Button
         type="button"
         variant="outline"
         onClick={onPrevious}
-        disabled={currentStep === 0}
+        disabled={isFirstStep}
+        className="flex items-center gap-1"
       >
-        <ChevronLeft className="mr-1 h-4 w-4" />
-        Back
+        <ChevronLeft className="h-4 w-4" />
+        Previous
       </Button>
       
-      {currentStep < totalSteps - 1 ? (
+      {isLastStep ? (
         <Button
           type="button"
-          onClick={onNext}
+          onClick={onSubmit}
+          className="flex items-center gap-1"
         >
-          Next
-          <ChevronRight className="ml-1 h-4 w-4" />
+          <Save className="h-4 w-4" />
+          Save CRD
         </Button>
       ) : (
         <Button
           type="button"
-          onClick={onSubmit}
+          onClick={onNext}
+          className="flex items-center gap-1"
         >
-          <Save className="mr-1 h-4 w-4" />
-          Save Card
+          Next
+          <ChevronRight className="h-4 w-4" />
         </Button>
       )}
     </div>

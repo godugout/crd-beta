@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 export interface CollectionsSectionProps {
   collections: Collection[];
   isLoading: boolean;
-  handleViewCollection?: (collectionId: string) => void; // Make this optional with '?'
+  handleViewCollection?: (collectionId: string) => void;
 }
 
 const CollectionsSection: React.FC<CollectionsSectionProps> = ({
@@ -34,7 +34,7 @@ const CollectionsSection: React.FC<CollectionsSectionProps> = ({
   return (
     <section>
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">Collections</h2>
+        <h2 className="text-2xl font-bold">CRD Collections</h2>
         <Button onClick={handleCreateCollection}>Create Collection</Button>
       </div>
 
@@ -44,7 +44,7 @@ const CollectionsSection: React.FC<CollectionsSectionProps> = ({
         </div>
       ) : collections.length === 0 ? (
         <div className="text-center py-12 border border-dashed border-gray-300 rounded-lg">
-          <p className="text-gray-500 mb-4">No collections yet.</p>
+          <p className="text-gray-500 mb-4">No CRD collections yet.</p>
           <Button onClick={handleCreateCollection}>Create Your First Collection</Button>
         </div>
       ) : (

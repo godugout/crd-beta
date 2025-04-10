@@ -25,12 +25,12 @@ const CardEditorContainer: React.FC<CardEditorContainerProps> = ({ card, classNa
   const validateCurrentStep = (step: number) => {
     if (step === 0) {
       if (!cardState.imageUrl) {
-        toast.error('Please upload an image');
+        toast.error('Please upload an image for your CRD');
         return false;
       }
       
       if (!cardState.title.trim()) {
-        toast.error('Please provide a title');
+        toast.error('Please provide a title for your CRD');
         return false;
       }
     }
@@ -49,31 +49,33 @@ const CardEditorContainer: React.FC<CardEditorContainerProps> = ({ card, classNa
       if (card) {
         // Update existing card
         await updateCard(card.id, cardData);
-        toast.success('Card updated successfully');
+        toast.success('CRD updated successfully');
       } else {
         // Add new card
         await addCard(cardData);
-        toast.success('Card created successfully');
+        toast.success('CRD created successfully');
       }
       
       // Navigate to gallery with a refresh parameter to ensure updated data is fetched
       navigate('/gallery?refresh=true');
     } catch (error) {
       console.error('Error saving card:', error);
-      toast.error('Failed to save card. Please try again.');
+      toast.error('Failed to save CRD. Please try again.');
     }
   };
 
   return (
     <div className={className}>
       <div className="max-w-4xl mx-auto mb-8">
+        <h1 className="text-2xl font-bold mb-4">{card ? "Edit CRD" : "Create New CRD"}</h1>
+        
         <ProgressSteps 
           steps={steps}
           currentStep={currentStep}
           className="mb-8"
         />
         
-        <div className="p-6 bg-white rounded-lg shadow-sm">
+        <div className="p-6 bg-white rounded-lg shadow-sm dark:bg-litmus-gray-800">
           <StepContent 
             currentStep={currentStep}
             cardState={cardState}

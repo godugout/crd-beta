@@ -1,40 +1,39 @@
 
-import { useState } from 'react';
-import { toast } from 'sonner';
+import { useState, useCallback } from 'react';
 
-export const useCardEditorSteps = (totalSteps: number, validateStepFn?: (step: number) => boolean) => {
+type StepValidator = (step: number) => boolean;
+
+export function useCardEditorSteps(totalSteps: number, validateStep?: StepValidator) {
   const [currentStep, setCurrentStep] = useState(0);
-
-  const goToNextStep = () => {
-    // If a validation function is provided, run it
-    if (validateStepFn && !validateStepFn(currentStep)) {
+  
+  const goToNextStep = useCallback(() => {
+    if (validateStep && !validateStep(currentStep)) {
       return;
     }
     
     if (currentStep < totalSteps - 1) {
       setCurrentStep(currentStep + 1);
-      window.scrollTo(0, 0);
     }
-  };
+  }, [currentStep, totalSteps, validateStep]);
   
-  const goToPreviousStep = () => {
+  const goToPreviousStep = useCallback(() => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
-      window.scrollTo(0, 0);
     }
-  };
-
-  const goToStep = (step: number) => {
+  }, [currentStep]);
+  
+  const goToStep = useCallback((step: number) => {
     if (step >= 0 && step < totalSteps) {
       setCurrentStep(step);
-      window.scrollTo(0, 0);
     }
-  };
+  }, [totalSteps]);
 
   return {
     currentStep,
     goToNextStep,
     goToPreviousStep,
-    goToStep
+    goToStep,
+    isFirstStep: currentStep === 0,
+    isLastStep: currentStep === totalSteps - 1,
   };
-};
+}
