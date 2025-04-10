@@ -9,7 +9,7 @@ import App from './App.tsx';
 import './index.css';
 import { queryClient } from './lib/api/queryClient';
 import { CardProvider } from './context/CardContext';
-import { AuthProvider } from './providers/AuthProvider';
+import { AuthProvider } from './providers/AuthProvider'; // Using one consistent AuthProvider
 import { GlobalErrorBoundary } from './components/error/GlobalErrorBoundary';
 import { initSentry } from './lib/monitoring/sentry';
 

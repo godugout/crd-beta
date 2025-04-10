@@ -1,4 +1,3 @@
-
 import * as Sentry from '@sentry/react';
 
 export const initSentry = () => {
@@ -48,3 +47,4 @@ export const startTransaction = (name: string, op: string) => {
     op,
   });
 };
+

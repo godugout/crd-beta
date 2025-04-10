@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Search, PlusCircle, User } from 'lucide-react';
-import { useAuth } from '@/context/auth/useAuth';
+import { useAuth } from '@/providers/AuthProvider'; // Updated to use the correct AuthProvider
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 

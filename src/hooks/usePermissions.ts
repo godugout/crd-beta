@@ -1,3 +1,4 @@
+
 import { useUser } from '@/hooks/useUser';
 import { UserPermission, ROLE_PERMISSIONS } from '@/lib/types';
 
@@ -8,7 +9,7 @@ export const usePermissions = () => {
     if (!user) return false;
     
     // If user has explicit permissions array, check there first
-    if (user.permissions && user.permissions.includes(permission)) {
+    if (user.permissions && Array.isArray(user.permissions) && user.permissions.includes(permission)) {
       return true;
     }
     
