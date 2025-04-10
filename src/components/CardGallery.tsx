@@ -86,6 +86,11 @@ const CardGallery: React.FC<CardGalleryProps> = ({
     }
   };
   
+  // Function to get card effects for a specific card
+  const getCardEffects = (cardId: string) => {
+    return cardEffects[cardId] || [];
+  };
+  
   // Debug log
   console.log("CardGallery rendering with cards:", cards.length, "filtered:", filteredCards.length, "loading:", isLoadingAny);
 
@@ -95,15 +100,17 @@ const CardGallery: React.FC<CardGalleryProps> = ({
         <GalleryToolbar 
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
-          selectedTagCount={selectedTags.length}
-          onClearFilters={clearFilters}
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+          onCreateCard={() => navigate('/cards/create')}
         />
         
         {allTags.length > 0 && (
           <TagFilter 
-            tags={allTags}
+            allTags={allTags}
             selectedTags={selectedTags}
             onTagSelect={handleTagSelect}
+            onClearFilters={clearFilters}
           />
         )}
         
@@ -112,7 +119,8 @@ const CardGallery: React.FC<CardGalleryProps> = ({
             cards={filteredCards}
             onCardClick={handleCardItemClick} 
             isLoading={isLoadingAny}
-            cardEffects={cardEffects}
+            getCardEffects={getCardEffects}
+            error={null}
           />
         ) : (
           <CardList

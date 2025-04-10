@@ -11,7 +11,7 @@ interface CardGridWrapperProps {
   isLoading: boolean;
   error: Error | null;
   onCardClick: (cardId: string) => void;
-  getCardEffects: (cardId: string) => any[];
+  getCardEffects: (cardId: string) => string[];
   useVirtualization?: boolean;
 }
 
