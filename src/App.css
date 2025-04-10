@@ -23,20 +23,20 @@
 
 /* Gradient text effect */
 .gradient-text {
-  @apply bg-gradient-to-r from-litmus-purple via-litmus-purple-secondary to-litmus-purple-tertiary bg-clip-text text-transparent;
+  @apply bg-gradient-to-r from-litmus-green via-litmus-green-secondary to-litmus-teal bg-clip-text text-transparent;
 }
 
 .dark .gradient-text {
-  @apply bg-gradient-to-r from-white via-litmus-purple-light to-litmus-purple bg-clip-text text-transparent;
+  @apply bg-gradient-to-r from-white via-litmus-green-light to-litmus-green bg-clip-text text-transparent;
 }
 
 /* Gradient background effects */
 .gradient-bg {
-  @apply bg-gradient-to-br from-white via-litmus-purple-light/5 to-litmus-teal-light/10;
+  @apply bg-gradient-to-br from-white via-litmus-green-light/5 to-litmus-teal-light/10;
 }
 
 .dark .gradient-bg {
-  @apply bg-gradient-to-br from-litmus-gray-900 via-litmus-purple-dark/20 to-litmus-gray-800;
+  @apply bg-gradient-to-br from-litmus-gray-900 via-litmus-green-dark/20 to-litmus-gray-800;
 }
 
 /* Glassmorphism */
@@ -78,7 +78,7 @@
 
 /* Enhanced focus styles */
 .focus-ring {
-  @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-litmus-purple focus-visible:ring-offset-2;
+  @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-litmus-green focus-visible:ring-offset-2;
 }
 
 /* Team colors override */
@@ -97,7 +97,7 @@
 /* Scrollbar styling */
 * {
   scrollbar-width: thin;
-  scrollbar-color: rgba(155, 135, 245, 0.5) transparent;
+  scrollbar-color: rgba(72, 187, 120, 0.5) transparent;
 }
 
 *::-webkit-scrollbar {
@@ -109,18 +109,18 @@
 }
 
 *::-webkit-scrollbar-thumb {
-  background-color: rgba(155, 135, 245, 0.5);
+  background-color: rgba(72, 187, 120, 0.5);
   border-radius: 20px;
   border: 2px solid transparent;
 }
 
 /* Dark mode scrollbar */
 .dark * {
-  scrollbar-color: rgba(155, 135, 245, 0.3) rgba(0, 0, 0, 0.1);
+  scrollbar-color: rgba(72, 187, 120, 0.3) rgba(0, 0, 0, 0.1);
 }
 
 .dark *::-webkit-scrollbar-thumb {
-  background-color: rgba(155, 135, 245, 0.3);
+  background-color: rgba(72, 187, 120, 0.3);
 }
 
 .dark *::-webkit-scrollbar-track {

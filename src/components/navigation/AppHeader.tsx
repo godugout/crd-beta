@@ -40,7 +40,7 @@ const AppHeader: React.FC = () => {
           {/* Logo */}
           <div className="flex items-center">
             <Link to="/" className="flex items-center" onClick={closeMenu}>
-              <span className="text-2xl font-bold bg-gradient-to-r from-litmus-purple to-litmus-purple-secondary bg-clip-text text-transparent">
+              <span className="text-2xl font-bold bg-gradient-to-r from-litmus-green to-litmus-green-secondary bg-clip-text text-transparent">
                 CardShow
               </span>
             </Link>
@@ -50,25 +50,25 @@ const AppHeader: React.FC = () => {
           <nav className="hidden md:flex items-center space-x-4">
             <Link 
               to="/cards" 
-              className="text-gray-600 hover:text-litmus-purple dark:text-gray-200 dark:hover:text-litmus-purple-light px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-litmus-gray-800 transition-colors"
+              className="text-gray-600 hover:text-litmus-green dark:text-gray-200 dark:hover:text-litmus-green-light px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-litmus-gray-800 transition-colors"
             >
               Explore
             </Link>
             <Link 
               to="/collections" 
-              className="text-gray-600 hover:text-litmus-purple dark:text-gray-200 dark:hover:text-litmus-purple-light px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-litmus-gray-800 transition-colors"
+              className="text-gray-600 hover:text-litmus-green dark:text-gray-200 dark:hover:text-litmus-green-light px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-litmus-gray-800 transition-colors"
             >
               Collections
             </Link>
             <Link 
               to="/teams" 
-              className="text-gray-600 hover:text-litmus-purple dark:text-gray-200 dark:hover:text-litmus-purple-light px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-litmus-gray-800 transition-colors"
+              className="text-gray-600 hover:text-litmus-green dark:text-gray-200 dark:hover:text-litmus-green-light px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-litmus-gray-800 transition-colors"
             >
               Teams
             </Link>
             <Link 
               to="/community" 
-              className="text-gray-600 hover:text-litmus-purple dark:text-gray-200 dark:hover:text-litmus-purple-light px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-litmus-gray-800 transition-colors"
+              className="text-gray-600 hover:text-litmus-green dark:text-gray-200 dark:hover:text-litmus-green-light px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-litmus-gray-800 transition-colors"
             >
               Community
             </Link>

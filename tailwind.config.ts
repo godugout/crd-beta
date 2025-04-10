@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -71,14 +70,13 @@ export default {
 					neutral: '#F2F2F7',
 					dark: '#1C1C1E',
 				},
-				// Litmus brand colors
 				litmus: {
-					purple: {
-						DEFAULT: '#9b87f5',
-						secondary: '#7E69AB',
-						tertiary: '#6E59A5',
-						dark: '#1A1F2C',
-						light: '#D6BCFA',
+					green: {
+						DEFAULT: '#48BB78',
+						secondary: '#38A169',
+						tertiary: '#2F855A',
+						dark: '#1C4532',
+						light: '#9AE6B4',
 					},
 					neutral: '#8E9196',
 					teal: {
@@ -89,8 +87,9 @@ export default {
 					orange: {
 						DEFAULT: '#F97316',
 						light: '#FFEDD5',
+						dark: '#9A3412',
 					},
-					green: {
+					success: {
 						DEFAULT: '#48BB78',
 						light: '#F0FFF4',
 					},
@@ -110,9 +109,8 @@ export default {
 						900: '#1A202C',
 					},
 					gradients: {
-						purple: 'linear-gradient(90deg, #9b87f5 0%, #D6BCFA 100%)',
-						blue: 'linear-gradient(90deg, #63B3ED 0%, #90CDF4 100%)',
 						green: 'linear-gradient(90deg, #48BB78 0%, #9AE6B4 100%)',
+						blue: 'linear-gradient(90deg, #63B3ED 0%, #90CDF4 100%)',
 						orange: 'linear-gradient(90deg, #F97316 0%, #FBD38D 100%)',
 						teal: 'linear-gradient(90deg, #4FD1C5 0%, #81E6D9 100%)',
 					}
@@ -204,8 +202,8 @@ export default {
 				'card-hover': '0 12px 24px -8px rgba(0, 0, 0, 0.15)',
 				'floating': '0 8px 30px rgba(0, 0, 0, 0.12)',
 				'subtle': '0 2px 8px rgba(0, 0, 0, 0.05)',
-				'glow': '0 0 15px rgba(155, 135, 245, 0.5)',
-				'glow-strong': '0 0 25px rgba(155, 135, 245, 0.8)',
+				'glow': '0 0 15px rgba(72, 187, 120, 0.5)',
+				'glow-strong': '0 0 25px rgba(72, 187, 120, 0.8)',
 			},
 		}
 	},

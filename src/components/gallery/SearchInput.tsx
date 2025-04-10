@@ -24,7 +24,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
         type="search"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-litmus-gray-700 rounded-lg focus:ring-2 focus:ring-litmus-purple/50 dark:focus:ring-litmus-purple/70 focus:border-litmus-purple dark:focus:border-litmus-purple bg-white dark:bg-litmus-gray-800 text-gray-900 dark:text-white transition-all duration-200"
+        className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-litmus-gray-700 rounded-lg focus:ring-2 focus:ring-litmus-green/50 dark:focus:ring-litmus-green/70 focus:border-litmus-green dark:focus:border-litmus-green bg-white dark:bg-litmus-gray-800 text-gray-900 dark:text-white transition-all duration-200"
         placeholder={placeholder}
       />
     </div>
