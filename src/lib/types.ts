@@ -1,4 +1,3 @@
-
 // Core models
 export interface User {
   id: string;
@@ -9,6 +8,8 @@ export interface User {
   avatarUrl?: string;
   createdAt: string;
   updatedAt: string;
+  role?: UserRole; // Add role property
+  permissions?: UserPermission[]; // Add permissions array
 }
 
 export interface Card {
@@ -158,3 +159,62 @@ export interface AssetUploadResult {
 }
 
 // Add any other types needed by the application
+
+// Enhanced User type with roles
+export interface User {
+  id: string;
+  email: string;
+  displayName?: string;
+  name?: string;
+  username?: string;
+  avatarUrl?: string;
+  createdAt: string;
+  updatedAt: string;
+  role?: UserRole; // Add role property
+  permissions?: UserPermission[]; // Add permissions array
+}
+
+// Define available user roles
+export type UserRole = 'admin' | 'moderator' | 'user';
+
+// Define available user permissions
+export type UserPermission = 
+  | 'create:memory'
+  | 'edit:memory'
+  | 'delete:memory'
+  | 'view:memory'
+  | 'create:comment'
+  | 'edit:comment'
+  | 'delete:comment'
+  | 'moderate:content'
+  | 'manage:users';
+
+// Role-based permission mapping
+export const ROLE_PERMISSIONS: Record<UserRole, UserPermission[]> = {
+  admin: [
+    'create:memory',
+    'edit:memory',
+    'delete:memory',
+    'view:memory',
+    'create:comment',
+    'edit:comment',
+    'delete:comment',
+    'moderate:content',
+    'manage:users'
+  ],
+  moderator: [
+    'create:memory',
+    'edit:memory',
+    'view:memory',
+    'create:comment',
+    'edit:comment',
+    'moderate:content'
+  ],
+  user: [
+    'create:memory',
+    'edit:memory', 
+    'view:memory',
+    'create:comment',
+    'edit:comment'
+  ]
+};
