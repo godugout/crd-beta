@@ -28,19 +28,22 @@ export interface PendingUpload {
   metadata: Record<string, any>;
   createdAt: number;
   isPrivate: boolean;
+  syncPriority?: number;
 }
 
 export interface OfflineItem {
   id: string;
-  title?: string;
-  description?: string;
-  imageUrl?: string;
+  collectionName?: string;
+  data: Record<string, any>;
   createdAt: string;
+  syncStatus: 'pending' | 'syncing' | 'error';
+  syncPriority?: number;
+  errorDetails?: string;
+  retryCount?: number;
+  title?: string;
+  description?: string | null;
+  imageUrl?: string;
   tags?: string[];
-  template?: string;
-  location?: string;
-  section?: string;
-  metadata?: Record<string, any>;
 }
 
 /**
@@ -51,7 +54,8 @@ export const saveForOfflineUpload = async (
   memoryId: string,
   userId: string,
   metadata: Record<string, any> = {},
-  isPrivate = false
+  isPrivate = false,
+  syncPriority = 1
 ): Promise<string> => {
   const id = uuidv4();
   const pendingUpload: PendingUpload = {
@@ -61,7 +65,8 @@ export const saveForOfflineUpload = async (
     userId,
     metadata,
     createdAt: Date.now(),
-    isPrivate
+    isPrivate,
+    syncPriority
   };
   
   await uploadsStorage.setItem(`upload-${id}`, pendingUpload);
@@ -85,6 +90,11 @@ export const getPendingUploads = async (): Promise<PendingUpload[]> => {
 };
 
 /**
+ * Alias for getPendingUploads used by SyncService
+ */
+export const getPendingUploadItems = getPendingUploads;
+
+/**
  * Remove a pending upload by ID
  */
 export const removePendingUpload = async (id: string) => {
@@ -99,8 +109,10 @@ export const saveOfflineItem = async (item: OfflineItem): Promise<string> => {
   const itemToSave = {
     ...item,
     id,
-    pendingSync: true,
+    syncStatus: item.syncStatus || 'pending',
+    syncPriority: item.syncPriority || 1,
     createdAt: item.createdAt || new Date().toISOString(),
+    retryCount: item.retryCount || 0
   };
   
   await memoriesStorage.setItem(`item-${id}`, itemToSave);
@@ -120,7 +132,10 @@ export const getOfflineItems = async (): Promise<OfflineItem[]> => {
     if (item) items.push(item);
   }
   
+  // Sort by priority (higher first) then by creation date (newer first)
   return items.sort((a, b) => {
+    const priorityDiff = (b.syncPriority || 0) - (a.syncPriority || 0);
+    if (priorityDiff !== 0) return priorityDiff;
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
 };
@@ -130,6 +145,32 @@ export const getOfflineItems = async (): Promise<OfflineItem[]> => {
  */
 export const removeOfflineItem = async (id: string) => {
   await memoriesStorage.removeItem(`item-${id}`);
+};
+
+/**
+ * Update the sync status of an offline item
+ */
+export const updateOfflineItemStatus = async (
+  id: string, 
+  status: 'pending' | 'syncing' | 'error',
+  errorDetails?: string
+) => {
+  const key = `item-${id}`;
+  const item = await memoriesStorage.getItem<OfflineItem>(key);
+  
+  if (item) {
+    const updatedItem = { 
+      ...item, 
+      syncStatus: status,
+      errorDetails: status === 'error' ? (errorDetails || 'Unknown error') : undefined,
+      retryCount: status === 'error' ? (item.retryCount || 0) + 1 : item.retryCount
+    };
+    
+    await memoriesStorage.setItem(key, updatedItem);
+    return updatedItem;
+  }
+  
+  return null;
 };
 
 /**
@@ -196,6 +237,7 @@ export default {
   saveOfflineItem,
   getOfflineItems,
   removeOfflineItem,
+  updateOfflineItemStatus,
   storeBlob,
   getBlob,
   storeFileAsDataUrl,

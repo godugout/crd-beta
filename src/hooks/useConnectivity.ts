@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
 import { 
   getOfflineItems, 
@@ -8,12 +8,28 @@ import {
   OfflineItem,
   getPendingItemCount
 } from '@/lib/offlineStorage';
+import { syncAllData, cancelSync, SyncOptions } from '@/lib/syncService';
 
-export const useConnectivity = () => {
-  const [isOnline, setIsOnline] = useState<boolean>(navigator.onLine);
+export interface ConnectivityOptions {
+  autoSync?: boolean;
+  notifySyncEvents?: boolean;
+  syncOnConnect?: boolean;
+}
+
+export const useConnectivity = (options: ConnectivityOptions = {}) => {
+  const [isOnline, setIsOnline] = useState<boolean>(
+    typeof navigator !== 'undefined' ? navigator.onLine : true
+  );
   const [offlineItems, setOfflineItems] = useState<OfflineItem[]>([]);
   const [isSyncing, setIsSyncing] = useState(false);
   const [pendingCount, setPendingCount] = useState(0);
+  const [lastSyncDate, setLastSyncDate] = useState<Date | null>(null);
+  
+  const {
+    autoSync = true,
+    notifySyncEvents = true,
+    syncOnConnect = true
+  } = options;
 
   // Load any stored offline items on mount
   useEffect(() => {
@@ -36,14 +52,25 @@ export const useConnectivity = () => {
   useEffect(() => {
     const handleOnline = () => {
       setIsOnline(true);
-      toast.success('You are back online');
+      
+      if (notifySyncEvents) {
+        toast.success('You are back online');
+      }
+      
+      // Automatically sync when coming back online
+      if (syncOnConnect) {
+        syncOfflineItems();
+      }
     };
 
     const handleOffline = () => {
       setIsOnline(false);
-      toast.error('You are offline - memories will be saved locally', {
-        duration: 5000
-      });
+      
+      if (notifySyncEvents) {
+        toast.error('You are offline - data will be saved locally', {
+          duration: 5000
+        });
+      }
     };
 
     window.addEventListener('online', handleOnline);
@@ -53,7 +80,7 @@ export const useConnectivity = () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };
-  }, []);
+  }, [notifySyncEvents, syncOnConnect]);
 
   // Add an item to offline storage
   const saveOfflineItemAndUpdate = async (item: OfflineItem) => {
@@ -78,45 +105,64 @@ export const useConnectivity = () => {
   };
 
   // Sync offline items when back online
-  const syncOfflineItems = async () => {
-    if (!isOnline || offlineItems.length === 0) return 0;
+  const syncOfflineItems = useCallback(async (syncOptions: SyncOptions = {}) => {
+    if (!isOnline || isSyncing || pendingCount === 0) return 0;
     
     setIsSyncing(true);
-    let syncCount = 0;
     
     try {
-      // Clone the current items to prevent mutation during processing
-      const itemsToSync = [...offlineItems];
-      
-      for (const item of itemsToSync) {
-        try {
-          // In a real implementation, this would call an API to upload the item
-          console.log(`Syncing item: ${item.id}`);
+      // Use the syncService to perform the sync
+      const syncCount = await syncAllData({
+        notify: notifySyncEvents,
+        continueOnError: true,
+        ...syncOptions,
+        progressCallback: (current, total) => {
+          // You can use this to update a progress UI
+          const progress = Math.round((current / total) * 100);
+          console.log(`Sync progress: ${progress}%`);
           
-          // Simulate API call
-          await new Promise(resolve => setTimeout(resolve, 500));
-          
-          // If successful, remove from offline storage
-          await removeOfflineItemAndUpdate(item.id);
-          syncCount++;
-        } catch (error) {
-          console.error(`Failed to sync item ${item.id}:`, error);
+          if (syncOptions.progressCallback) {
+            syncOptions.progressCallback(current, total);
+          }
         }
+      });
+      
+      if (syncCount > 0) {
+        // Refresh the offline items list
+        const items = await getOfflineItems();
+        setOfflineItems(items);
+        
+        // Update the pending count
+        const count = await getPendingItemCount();
+        setPendingCount(count);
+        
+        // Update last sync date
+        setLastSyncDate(new Date());
       }
       
       return syncCount;
     } finally {
       setIsSyncing(false);
     }
-  };
+  }, [isOnline, isSyncing, pendingCount, notifySyncEvents]);
+  
+  // Cancel an ongoing sync
+  const cancelSyncOperation = useCallback(() => {
+    cancelSync();
+    setIsSyncing(false);
+  }, []);
 
   return {
     isOnline,
     isSyncing,
     offlineItems,
     pendingCount,
+    lastSyncDate,
     saveOfflineItem: saveOfflineItemAndUpdate,
     removeOfflineItem: removeOfflineItemAndUpdate,
-    syncOfflineItems
+    syncOfflineItems,
+    cancelSync: cancelSyncOperation
   };
 };
+
+export default useConnectivity;
