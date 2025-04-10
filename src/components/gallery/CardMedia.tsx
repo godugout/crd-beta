@@ -1,10 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
 import { Eye, ZoomIn, Image } from 'lucide-react';
 import { Card } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { getFallbackImageUrl, isValidImageUrl } from '@/lib/utils/imageUtils';
+import { toast } from 'sonner';
 
 interface CardMediaProps {
   card: Card;
@@ -19,38 +19,58 @@ const CardMedia: React.FC<CardMediaProps> = ({ card, onView, className = '' }) =
   const [isLoaded, setIsLoaded] = useState(false);
   const [isError, setIsError] = useState(false);
   const [imageSource, setImageSource] = useState('');
+  const [retryCount, setRetryCount] = useState(0);
 
   // Select the best available image source with fallback
   useEffect(() => {
+    // Reset states when card changes
+    setIsLoaded(false);
+    setIsError(false);
+    setRetryCount(0);
+    
+    // Try using the primary sources
     const primarySource = card.imageUrl || card.thumbnailUrl;
     
     if (isValidImageUrl(primarySource)) {
       setImageSource(primarySource as string);
     } else {
-      // Use our fallback logic
-      setImageSource(getFallbackImageUrl(card.tags, card.title));
+      // Use our fallback logic based on tags and title
+      const fallbackUrl = getFallbackImageUrl(card.tags, card.title);
+      console.log(`Using fallback image for ${card.title}:`, fallbackUrl);
+      setImageSource(fallbackUrl);
     }
-    
-    // Reset states when image source changes
-    setIsLoaded(false);
-    setIsError(false);
   }, [card.imageUrl, card.thumbnailUrl, card.tags, card.title]);
 
   // Handle image load success
   const handleImageLoad = () => {
     console.log('Image loaded successfully:', imageSource);
     setIsLoaded(true);
+    setIsError(false);
   };
 
   // Handle image load error
   const handleImageError = () => {
     console.error('Failed to load image:', imageSource);
     
-    // If we're not already using a fallback, switch to a fallback image
-    if (!imageSource.includes('unsplash.com')) {
-      console.log('Switching to fallback image for:', card.title);
-      setImageSource(getFallbackImageUrl(card.tags, card.title));
+    // If we've reached the maximum retry count, show error state
+    if (retryCount >= 1) {
+      console.log('Max retries reached, showing error state for:', card.title);
+      setIsError(true);
+      return;
+    }
+    
+    // Otherwise, try the fallback
+    setRetryCount(prev => prev + 1);
+    
+    // Get a category-specific fallback
+    const fallbackUrl = getFallbackImageUrl(card.tags, card.title);
+    
+    // Only switch to fallback if we're not already using it
+    if (imageSource !== fallbackUrl) {
+      console.log('Switching to fallback image for:', card.title, fallbackUrl);
+      setImageSource(fallbackUrl);
     } else {
+      console.error('Fallback image also failed to load:', fallbackUrl);
       setIsError(true);
     }
   };
@@ -59,7 +79,9 @@ const CardMedia: React.FC<CardMediaProps> = ({ card, onView, className = '' }) =
     <div className={cn("relative overflow-hidden rounded-lg", className)}>
       {/* Placeholder while loading */}
       {!isLoaded && !isError && (
-        <div className="w-full h-0 pb-[140%] bg-slate-200 animate-pulse" />
+        <div className="w-full h-0 pb-[140%] bg-slate-200 animate-pulse flex items-center justify-center">
+          <Image className="h-12 w-12 text-slate-300 absolute" />
+        </div>
       )}
       
       {/* Error state */}
@@ -76,19 +98,21 @@ const CardMedia: React.FC<CardMediaProps> = ({ card, onView, className = '' }) =
       )}
       
       {/* Actual image */}
-      <img
-        src={imageSource}
-        alt={card.title}
-        className={cn(
-          "w-full h-full absolute top-0 left-0 object-cover transition-all duration-300",
-          isLoaded ? "opacity-100" : "opacity-0",
-          isError ? "hidden" : ""
-        )}
-        onLoad={handleImageLoad}
-        onError={handleImageError}
-        loading="lazy"
-        style={{ aspectRatio: "2.5/3.5" }}
-      />
+      {imageSource && (
+        <img
+          src={imageSource}
+          alt={card.title}
+          className={cn(
+            "w-full h-full absolute top-0 left-0 object-cover transition-all duration-300",
+            isLoaded ? "opacity-100" : "opacity-0",
+            isError ? "hidden" : ""
+          )}
+          onLoad={handleImageLoad}
+          onError={handleImageError}
+          loading="lazy"
+          style={{ aspectRatio: "2.5/3.5" }}
+        />
+      )}
       
       {/* Overlay with actions */}
       {isLoaded && !isError && (

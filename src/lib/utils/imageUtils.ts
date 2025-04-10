@@ -9,41 +9,56 @@
  * @param title Card title as backup for categorization
  */
 export function getFallbackImageUrl(tags: string[] = [], title: string = ''): string {
+  // Define a set of reliable local images we can use as fallbacks
+  const localImages = {
+    basketball: '/lovable-uploads/c381b388-5693-44a6-852b-93af5f0d5217.png',
+    football: '/lovable-uploads/7bb9f93e-4a42-4b96-9429-8b2966efd3a6.png',
+    baseball: '/lovable-uploads/38b125d7-2257-4d56-98fa-c1ff2a7be7ea.png',
+    anime: '/lovable-uploads/79a099b9-c77a-491e-9755-ba25419791f5.png',
+    vintage: '/lovable-uploads/a38aa501-ea2d-4416-9699-1e69b1826233.png',
+    default: '/lovable-uploads/93353027-d213-4314-8ab9-0d38bb552e8a.png'
+  };
+  
   // Prioritize certain tags if they exist
   const lowerCaseTags = tags.map(tag => tag.toLowerCase());
   const lowerCaseTitle = title.toLowerCase();
   
+  // Check for basketball-related content
   if (lowerCaseTags.some(tag => tag.includes('basketball') || tag.includes('nba') || tag.includes('lakers'))) {
-    return 'https://source.unsplash.com/random/400x600?basketball';
+    return localImages.basketball;
   }
   
+  // Check for football-related content
   if (lowerCaseTags.some(tag => tag.includes('football') || tag.includes('nfl'))) {
-    return 'https://source.unsplash.com/random/400x600?football';
+    return localImages.football;
   }
   
+  // Check for baseball-related content
   if (lowerCaseTags.some(tag => tag.includes('baseball') || tag.includes('mlb'))) {
-    return 'https://source.unsplash.com/random/400x600?baseball';
+    return localImages.baseball;
   }
   
+  // Check for anime-related content
   if (lowerCaseTags.some(tag => tag.includes('anime') || tag.includes('manga') || tag.includes('gundam'))) {
-    return 'https://source.unsplash.com/random/400x600?robot';
+    return localImages.anime;
   }
   
+  // Check for vintage-related content
   if (lowerCaseTags.some(tag => tag.includes('vintage') || tag.includes('retro'))) {
-    return 'https://source.unsplash.com/random/400x600?vintage';
+    return localImages.vintage;
   }
   
   // If no specific tag matches, try to extract a category from the title
   if (lowerCaseTitle.includes('basketball') || lowerCaseTitle.includes('nba') || lowerCaseTitle.includes('laker')) {
-    return 'https://source.unsplash.com/random/400x600?basketball';
+    return localImages.basketball;
   }
   
   if (lowerCaseTitle.includes('football') || lowerCaseTitle.includes('nfl')) {
-    return 'https://source.unsplash.com/random/400x600?football';
+    return localImages.football;
   }
   
-  // Default fallback
-  return 'https://source.unsplash.com/random/400x600?card';
+  // Default fallback if nothing else matches
+  return localImages.default;
 }
 
 /**
@@ -55,14 +70,16 @@ export function isValidImageUrl(url?: string): boolean {
   if (!url) return false;
   
   // Check if it's a valid URL format that points to an image
+  // Include support for local uploads
   return (
-    url.startsWith('http') && 
+    (url.startsWith('http') || url.startsWith('/')) && 
     (url.includes('.jpg') || 
      url.includes('.jpeg') || 
      url.includes('.png') || 
      url.includes('.webp') || 
      url.includes('.gif') ||
      url.includes('unsplash.com') || 
-     url.includes('source.unsplash.com'))
+     url.includes('source.unsplash.com') ||
+     url.includes('lovable-uploads'))
   );
 }
