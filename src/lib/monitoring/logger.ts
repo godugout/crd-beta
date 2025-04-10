@@ -55,7 +55,7 @@ class Logger {
   private sentryLog(level: LogLevel, message: string, options?: LogOptions): void {
     if (level === 'error') {
       Sentry.captureMessage(message, {
-        level: Sentry.Severity.Error,
+        level: 'error',
         contexts: options?.context ? { additional: options.context } : undefined,
         tags: options?.tags,
         user: options?.user ? {
@@ -65,7 +65,7 @@ class Logger {
       });
     } else if (level === 'warn') {
       Sentry.captureMessage(message, {
-        level: Sentry.Severity.Warning,
+        level: 'warning',
         contexts: options?.context ? { additional: options.context } : undefined,
         tags: options?.tags,
         user: options?.user ? {

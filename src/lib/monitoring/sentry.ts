@@ -17,6 +17,7 @@ export const initSentry = () => {
     ],
     environment: import.meta.env.MODE,
     enabled: import.meta.env.PROD,
+    // Set these at the top level, not in BrowserTracing
     tracesSampleRate: 0.5,
     replaysSessionSampleRate: 0.1,
     replaysOnErrorSampleRate: 1.0,

@@ -24,7 +24,7 @@ class PerformanceMonitor {
   public startMeasurement(name: string, metadata?: Record<string, any>): void {
     this.metrics.set(name, {
       name,
-      startTime: performance.now(),
+      startTime: window.performance.now(),
       metadata
     });
   }
@@ -37,7 +37,7 @@ class PerformanceMonitor {
       return;
     }
     
-    const duration = performance.now() - metric.startTime;
+    const duration = window.performance.now() - metric.startTime;
     metric.duration = duration;
     
     if (additionalMetadata) {

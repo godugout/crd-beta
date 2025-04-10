@@ -21,6 +21,22 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
+  // Convert Supabase profile to our User type
+  const mapProfileToUser = (profile: any): User => {
+    return {
+      id: profile.id,
+      email: profile.email || '',
+      displayName: profile.full_name || profile.username || '',
+      name: profile.full_name || '',
+      username: profile.username || '',
+      avatarUrl: profile.avatar_url || '',
+      createdAt: profile.created_at || new Date().toISOString(),
+      updatedAt: profile.updated_at || new Date().toISOString(),
+      role: profile.role || 'user',
+      permissions: profile.permissions || []
+    };
+  };
+
   useEffect(() => {
     // Check active session
     const getSession = async () => {
@@ -35,7 +51,7 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
             
           if (error) throw error;
           
-          setUser(userData as User);
+          setUser(mapProfileToUser(userData));
         }
       } catch (error) {
         console.error('Error getting session:', error);
@@ -57,7 +73,7 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
             .single();
             
           if (!error) {
-            setUser(userData as User);
+            setUser(mapProfileToUser(userData));
           }
         } else if (event === 'SIGNED_OUT') {
           setUser(null);
