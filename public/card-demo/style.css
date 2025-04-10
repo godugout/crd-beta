@@ -1,0 +1,112 @@
+
+/* Reset some browser defaults */
+* {
+  box-sizing: border-box;
+  margin: 0; 
+  padding: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+body {
+  background-color: #f5f7fa;
+  padding: 20px;
+}
+
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+/* Container for the card */
+.card-container {
+  display: flex;
+  justify-content: center;
+  margin: 1rem auto;
+  background-color: white;
+  padding: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}
+
+/* Canvas styling */
+#cardCanvas {
+  border: 2px solid #02483A; /* old school green, for nostalgia */
+  background-color: #FFFFFF; 
+  max-width: 100%;
+  height: auto;
+}
+
+/* Controls styling */
+.controls {
+  margin: 2rem auto;
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  max-width: 600px;
+}
+
+label {
+  display: block;
+  margin-bottom: 1rem;
+  font-weight: 500;
+}
+
+input[type="text"] {
+  width: 100%;
+  padding: 8px;
+  margin-top: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+input[type="file"] {
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+button {
+  margin-top: 1rem;
+  padding: 0.7rem 1.5rem;
+  background-color: #02483A;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  margin-right: 10px;
+}
+
+button:hover {
+  background-color: #033c30;
+}
+
+#downloadBtn {
+  background-color: #1a73e8;
+}
+
+#downloadBtn:hover {
+  background-color: #1557b0;
+}
+
+@media (max-width: 768px) {
+  .card-container {
+    padding: 10px;
+  }
+  
+  .controls {
+    padding: 15px;
+  }
+  
+  #cardCanvas {
+    width: 100%;
+    height: auto;
+  }
+}

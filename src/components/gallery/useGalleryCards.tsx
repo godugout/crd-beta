@@ -34,21 +34,41 @@ export const useGalleryCards = () => {
     });
   }, [cards, sortOrder]);
 
-  // Process cards for display
-  const displayCards = useMemo(() => sortedCards.map(card => ({
-    ...card,
-    // Ensure imageUrl is actually present or use thumbnailUrl as fallback
-    imageUrl: card.imageUrl || card.thumbnailUrl || '',
-    // Process other card data
-    designMetadata: {
-      ...card.designMetadata,
-      oaklandMemory: card.designMetadata?.oaklandMemory ? {
-        ...card.designMetadata.oaklandMemory,
-        title: card.title || '',
-        description: card.description || ''
-      } : undefined
+  // Process cards for display and validate image URLs
+  const displayCards = useMemo(() => {
+    // Log the raw cards and their image URLs
+    console.log("Raw cards from database:", cards.length);
+    console.log("Sample card data:", cards.length > 0 ? cards[0] : "No cards");
+    
+    // Filter out any cards without images and prepare for display
+    const validCards = sortedCards.map(card => {
+      // Ensure imageUrl exists or use thumbnailUrl as fallback
+      const imageUrl = card.imageUrl || card.thumbnailUrl || '/placeholder.svg';
+      
+      // Create a properly structured card object
+      return {
+        ...card,
+        imageUrl: imageUrl,
+        // Process other card data
+        designMetadata: {
+          ...card.designMetadata,
+          oaklandMemory: card.designMetadata?.oaklandMemory ? {
+            ...card.designMetadata.oaklandMemory,
+            title: card.title || '',
+            description: card.description || ''
+          } : undefined
+        }
+      };
+    });
+    
+    // Debug info
+    console.log(`Processed ${validCards.length} cards for display`);
+    if (validCards.length > 0) {
+      console.log("First card image URL:", validCards[0].imageUrl);
     }
-  })), [sortedCards]);
+    
+    return validCards;
+  }, [sortedCards]);
 
   // Effect to refresh cards when component mounts or when directed from another page
   useEffect(() => {
@@ -67,14 +87,6 @@ export const useGalleryCards = () => {
     }
   }, [location.search, refreshCards, navigate]);
   
-  // Log image URLs to help with debugging
-  useEffect(() => {
-    if (displayCards.length > 0) {
-      console.log("Available cards:", displayCards.length);
-      console.log("First card imageUrl:", displayCards[0].imageUrl);
-    }
-  }, [displayCards]);
-
   return {
     displayCards,
     isLoading,

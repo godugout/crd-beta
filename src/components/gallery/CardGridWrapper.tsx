@@ -3,8 +3,8 @@ import React from 'react';
 import { Card } from '@/lib/types';
 import { AlertOctagon, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { CardGrid } from '@/components/ui/card-components/CardGrid';
-import { EmptyState } from '@/components/ui/card-components/EmptyState';
+import CardGrid from './CardGrid';
+import EmptyState from './EmptyState';
 
 interface CardGridWrapperProps {
   cards: Card[];
@@ -27,10 +27,29 @@ export const CardGridWrapper: React.FC<CardGridWrapperProps> = ({
     window.location.reload();
   };
 
+  // Check for empty image URLs
+  React.useEffect(() => {
+    if (!isLoading && cards.length > 0) {
+      let missingImageCount = 0;
+      cards.forEach(card => {
+        if (!card.imageUrl && !card.thumbnailUrl) {
+          missingImageCount++;
+          console.warn(`Card missing image: ${card.id} - ${card.title}`);
+        }
+      });
+      if (missingImageCount > 0) {
+        console.warn(`${missingImageCount} cards are missing images`);
+      }
+    }
+  }, [cards, isLoading]);
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
-        <p>Loading cards...</p>
+        <div className="flex flex-col items-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mb-4"></div>
+          <p>Loading cards...</p>
+        </div>
       </div>
     );
   }
@@ -69,9 +88,10 @@ export const CardGridWrapper: React.FC<CardGridWrapperProps> = ({
       cards={cards}
       onCardClick={onCardClick}
       getCardEffects={getCardEffects}
-      useVirtualization={useVirtualization}
       isLoading={isLoading}
       error={error}
     />
   );
 };
+
+export default CardGridWrapper;

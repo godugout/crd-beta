@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Eye, ZoomIn, Image } from 'lucide-react';
 import { Card } from '@/lib/types';
 import { Button } from '@/components/ui/button';
@@ -20,6 +20,12 @@ const CardMedia: React.FC<CardMediaProps> = ({ card, onView, className = '' }) =
 
   // Prioritize image sources: imageUrl → thumbnailUrl → fallback
   const imageSource = card.imageUrl || card.thumbnailUrl || '/placeholder.svg';
+
+  // Reset states when the image source changes
+  useEffect(() => {
+    setIsLoaded(false);
+    setIsError(false);
+  }, [imageSource]);
 
   // Handle image load success
   const handleImageLoad = () => {
@@ -65,6 +71,7 @@ const CardMedia: React.FC<CardMediaProps> = ({ card, onView, className = '' }) =
         onLoad={handleImageLoad}
         onError={handleImageError}
         loading="lazy"
+        style={{ aspectRatio: "2.5/3.5" }}
       />
       
       {/* Overlay with actions */}

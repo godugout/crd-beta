@@ -1,0 +1,40 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Simple Card Creator</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div class="container">
+    <h1>Card Creator</h1>
+    
+    <!-- Container for the card preview -->
+    <div class="card-container">
+      <canvas id="cardCanvas" width="469" height="656"></canvas>
+    </div>
+  
+    <!-- Simple Form Inputs (Name, Team, Upload Image, etc.) -->
+    <div class="controls">
+      <label>
+        Player Name: 
+        <input type="text" id="playerName" placeholder="Jay Patel" />
+      </label>
+      <label>
+        Team / Theme:
+        <input type="text" id="playerTeam" placeholder="SF Giants / Beyonce" />
+      </label>
+      <label>
+        Upload Image: 
+        <input type="file" id="imageUpload" accept="image/*" />
+      </label>
+      <button id="renderBtn">Render Card</button>
+      <button id="downloadBtn">Download Card</button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

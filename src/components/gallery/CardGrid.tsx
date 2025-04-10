@@ -32,6 +32,19 @@ const CardGrid: React.FC<CardGridProps> = ({
     );
   }
   
+  if (error) {
+    return <EmptyState 
+      isEmpty={false}
+      isFiltered={false}
+      onRefresh={async () => {
+        window.location.reload();
+        return Promise.resolve();
+      }}
+      title="Failed to load cards" 
+      description={error.message || "An unexpected error occurred"} 
+    />;
+  }
+  
   if (!cards || cards.length === 0) {
     return <EmptyState 
       isEmpty={true} 
@@ -47,14 +60,22 @@ const CardGrid: React.FC<CardGridProps> = ({
 
   return (
     <div className={cn(`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 ${className}`)}>
-      {cards.map((card) => (
-        <CardMedia
-          key={card.id}
-          card={card}
-          onView={() => onCardClick(card.id)}
-          className="cursor-pointer hover:shadow-lg transition-all duration-300 hover:translate-y-[-4px]"
-        />
-      ))}
+      {cards.map((card) => {
+        // Skip cards without images
+        if (!card.imageUrl && !card.thumbnailUrl) {
+          console.warn(`Card ${card.id} has no image URL`);
+          return null;
+        }
+        
+        return (
+          <CardMedia
+            key={card.id}
+            card={card}
+            onView={() => onCardClick(card.id)}
+            className="cursor-pointer hover:shadow-lg transition-all duration-300 hover:translate-y-[-4px]"
+          />
+        );
+      }).filter(Boolean)}
     </div>
   );
 };

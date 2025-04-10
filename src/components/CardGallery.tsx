@@ -42,10 +42,11 @@ const CardGallery: React.FC<CardGalleryProps> = ({
   const { 
     cards: contextCards, 
     isLoading: contextIsLoading,
+    error: contextError,
     refreshCards 
   } = useCards();
   
-  const cards = propCards || contextCards;
+  const cards = propCards || contextCards || [];
   const isLoading = propIsLoading || contextIsLoading;
   
   const { isMobile, shouldOptimizeAnimations } = useMobileOptimization();
@@ -93,6 +94,21 @@ const CardGallery: React.FC<CardGalleryProps> = ({
   
   // Debug log
   console.log("CardGallery rendering with cards:", cards.length, "filtered:", filteredCards.length, "loading:", isLoadingAny);
+  
+  // Check for valid image URLs
+  React.useEffect(() => {
+    if (!isLoadingAny && cards.length > 0) {
+      let missingImageCount = 0;
+      cards.forEach(card => {
+        if (!card.imageUrl && !card.thumbnailUrl) {
+          missingImageCount++;
+        }
+      });
+      if (missingImageCount > 0) {
+        console.warn(`${missingImageCount} out of ${cards.length} cards are missing images`);
+      }
+    }
+  }, [cards, isLoadingAny]);
 
   return (
     <div className={className}>
@@ -120,7 +136,7 @@ const CardGallery: React.FC<CardGalleryProps> = ({
             onCardClick={handleCardItemClick} 
             isLoading={isLoadingAny}
             getCardEffects={getCardEffects}
-            error={null}
+            error={contextError}
           />
         ) : (
           <CardList
@@ -134,6 +150,12 @@ const CardGallery: React.FC<CardGalleryProps> = ({
           <div className="text-center py-12">
             <p className="text-gray-500">No cards found</p>
             <p className="text-sm text-gray-400 mt-1">Try changing your filters or search term</p>
+            <button 
+              onClick={() => window.open('/card-demo', '_blank')}
+              className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            >
+              Try Simple Card Creator
+            </button>
           </div>
         )}
       </ErrorBoundary>
