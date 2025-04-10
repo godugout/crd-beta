@@ -1,187 +1,113 @@
 
-import React, { useState } from 'react'
-import { useMemories } from '@/hooks/useMemories'
-import { MediaGallery } from '@/components/media/MediaGallery'
+import React, { useState, useEffect } from 'react'
+import { useUser } from '@/hooks/useUser'
+import { createClient } from '@supabase/supabase-js'
+import { Loader } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Label } from '@/components/ui/label'
-import { Search, Filter, Share2 } from 'lucide-react'
-import { ReactionBar } from '@/components/social/ReactionBar'
+import { MemoryCard } from '@/components/memory/MemoryCard'
 
-interface FeedPageProps {
-  userId?: string
-  teamId?: string
-  onCreateMemory?: () => void
-}
+// Using import.meta.env for Vite projects instead of process.env
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || ''
+const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || ''
+const supabase = createClient(supabaseUrl, supabaseKey)
 
-export const FeedPage: React.FC<FeedPageProps> = ({ 
-  userId,
-  teamId,
-  onCreateMemory
-}) => {
-  const [activeTab, setActiveTab] = useState<'all' | 'friends' | 'teams'>('all')
-  const [searchTerm, setSearchTerm] = useState('')
-  const [filter, setFilter] = useState<string>('recent')
+export const FeedPage: React.FC = () => {
+  const { user } = useUser()
+  const [feedType, setFeedType] = useState<'forYou'|'following'|'trending'>('forYou')
+  const [memories, setMemories] = useState<any[]>([])
+  const [page, setPage] = useState(1)
+  const [hasMore, setHasMore] = useState(true)
+  const [loading, setLoading] = useState(false)
 
-  // Get the visibility based on active tab
-  const getVisibility = () => {
-    switch (activeTab) {
-      case 'friends':
-        return 'shared'
-      case 'teams':
-        return teamId ? 'all' : 'public'
-      default:
-        return 'public'
+  const loadFeed = async (reset=false) => {
+    if (!user) return
+    if (reset) { setMemories([]); setPage(1); setHasMore(true) }
+    setLoading(true)
+    try {
+      const limit = 10
+      const offset = (reset ? 0 : (page-1)*limit)
+      let query = supabase
+        .from('memories')
+        .select(`
+          *,
+          user:users!memories_userId_fkey(*),
+          media:media(*),
+          reactions:reactions(*)
+        `, { count: 'exact' })
+        .eq('visibility','public')
+        .range(offset, offset+limit-1)
+        .order('createdAt', { ascending: false })
+
+      if (feedType==='following') {
+        const { data: following } = await supabase
+          .from('follows')
+          .select('followedId')
+          .eq('followerId', user.id)
+        const ids = following?.map(f=>f.followedId) || []
+        if (ids.length>0) {
+          query = query.in('userId', ids)
+        } else {
+          setMemories([])
+          setHasMore(false)
+          setLoading(false)
+          return
+        }
+      }
+      const { data, count } = await query
+      if (reset) {
+        setMemories(data||[])
+        setPage(1)
+      } else {
+        setMemories(prev=>[...prev, ...(data||[])])
+      }
+      if (data && data.length<limit) setHasMore(false)
+      if (count && (page*limit >= count)) setHasMore(false)
+    } catch (err) {
+      console.error('Error loading feed:', err)
+    } finally {
+      setLoading(false)
     }
   }
 
-  const {
-    memories,
-    loading,
-    error,
-    hasMore,
-    loadMore
-  } = useMemories({
-    userId,
-    teamId: activeTab === 'teams' ? teamId : undefined,
-    searchTerm: searchTerm || undefined,
-    visibility: getVisibility()
-  })
+  useEffect(()=> {
+    if (!user) return
+    loadFeed(true)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, feedType])
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault()
-    // The useMemories hook will refetch when searchTerm changes
+  const handleLoadMore = async () => {
+    if (loading || !hasMore) return
+    setPage(prev=>prev+1)
+    loadFeed(false)
   }
 
-  const handleShare = (memoryId: string) => {
-    // Implement sharing functionality
-    console.log('Share memory:', memoryId)
+  if (!user) {
+    return (
+      <div className="text-center p-8">
+        <p>You need to sign in to see the feed.</p>
+      </div>
+    )
   }
 
   return (
-    <div className="container mx-auto max-w-4xl p-4">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Memory Feed</h1>
-        {onCreateMemory && (
-          <Button onClick={onCreateMemory}>Create Memory</Button>
-        )}
+    <div className="max-w-lg mx-auto">
+      <div className="flex gap-2 mb-4">
+        <Button variant={feedType==='forYou'?'default':'outline'} onClick={()=>setFeedType('forYou')}>For You</Button>
+        <Button variant={feedType==='following'?'default':'outline'} onClick={()=>setFeedType('following')}>Following</Button>
+        <Button variant={feedType==='trending'?'default':'outline'} onClick={()=>setFeedType('trending')}>Trending</Button>
       </div>
-
-      <div className="mb-6">
-        <form onSubmit={handleSearch} className="flex gap-2">
-          <div className="relative flex-grow">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18}/>
-            <Input
-              placeholder="Search memories..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-          <div className="flex items-center gap-2">
-            <Filter size={18} className="text-gray-400"/>
-            <Select value={filter} onValueChange={setFilter}>
-              <SelectTrigger className="w-[120px]">
-                <SelectValue placeholder="Filter" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="recent">Most Recent</SelectItem>
-                <SelectItem value="popular">Most Popular</SelectItem>
-                <SelectItem value="oldest">Oldest First</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </form>
+      <div className="space-y-4">
+        {memories.map(mem => (
+          <MemoryCard key={mem.id} memory={mem} />
+        ))}
       </div>
-
-      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as any)}>
-        <TabsList className="mb-6">
-          <TabsTrigger value="all">All Memories</TabsTrigger>
-          <TabsTrigger value="friends">Friends</TabsTrigger>
-          <TabsTrigger value="teams">Teams</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="all" className="space-y-6">
-          {loading && <p className="text-center py-10">Loading memories...</p>}
-          {error && <p className="text-center py-10 text-red-500">Error loading memories</p>}
-          {!loading && memories.length === 0 && (
-            <div className="text-center py-10">
-              <p className="text-gray-500 mb-4">No memories found</p>
-              {onCreateMemory && (
-                <Button onClick={onCreateMemory}>Create Your First Memory</Button>
-              )}
-            </div>
-          )}
-          <div className="space-y-6">
-            {memories.map(memory => (
-              <div key={memory.id} className="border rounded-lg overflow-hidden bg-white">
-                <div className="p-4">
-                  <div className="flex justify-between">
-                    <div>
-                      <h3 className="text-lg font-medium">{memory.title}</h3>
-                      <p className="text-sm text-gray-500">
-                        {new Date(memory.date).toLocaleDateString()}
-                      </p>
-                    </div>
-                    <Button variant="ghost" size="icon" onClick={() => handleShare(memory.id)}>
-                      <Share2 size={18}/>
-                    </Button>
-                  </div>
-                  {memory.description && (
-                    <p className="mt-2">{memory.description}</p>
-                  )}
-                  {memory.tags && memory.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mt-2">
-                      {memory.tags.map(tag => (
-                        <span key={tag} className="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded">
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </div>
-                {memory.media && memory.media.length > 0 && (
-                  <MediaGallery media={memory.media} onShare={() => handleShare(memory.id)} />
-                )}
-                <div className="p-4 border-t">
-                  <ReactionBar 
-                    itemId={memory.id} 
-                    initialReactions={memory.reactions || {}}
-                    onReactionChange={() => {}} 
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-          {hasMore && (
-            <div className="flex justify-center mt-4">
-              <Button variant="outline" onClick={loadMore}>Load More</Button>
-            </div>
-          )}
-        </TabsContent>
-        
-        <TabsContent value="friends" className="space-y-6">
-          {/* Content similar to "all" tab but filtered for friends */}
-          {!loading && memories.length === 0 && (
-            <div className="text-center py-10">
-              <p className="text-gray-500">No memories from friends</p>
-            </div>
-          )}
-        </TabsContent>
-        
-        <TabsContent value="teams" className="space-y-6">
-          {/* Content similar to "all" tab but filtered for teams */}
-          {!loading && memories.length === 0 && (
-            <div className="text-center py-10">
-              <p className="text-gray-500">No team memories found</p>
-            </div>
-          )}
-        </TabsContent>
-      </Tabs>
+      {hasMore && (
+        <div className="flex justify-center mt-4">
+          <Button variant="outline" onClick={handleLoadMore} disabled={loading}>
+            {loading ? <Loader className="animate-spin"/> : 'Load More'}
+          </Button>
+        </div>
+      )}
     </div>
   )
 }
-
-export default FeedPage
