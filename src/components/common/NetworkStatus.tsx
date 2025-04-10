@@ -1,10 +1,10 @@
-
 import React, { useEffect, useState } from 'react';
 import { useConnectivity } from '@/hooks/useConnectivity';
 import { WifiOff, Upload, Wifi, RefreshCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { SyncOptions } from '@/lib/syncService';
 
 interface NetworkStatusProps {
   className?: string;
@@ -12,11 +12,6 @@ interface NetworkStatusProps {
   showStatus?: boolean;
   variant?: 'full' | 'badge' | 'minimal';
   onSync?: () => void;
-}
-
-// Define the SyncOptions interface to include progressCallback
-interface SyncOptions {
-  progressCallback?: (current: number, total: number) => void;
 }
 
 const NetworkStatus: React.FC<NetworkStatusProps> = ({
@@ -53,7 +48,7 @@ const NetworkStatus: React.FC<NetworkStatusProps> = ({
       progressCallback: (current, total) => {
         setSyncProgress(Math.round((current / total) * 100));
       }
-    } as SyncOptions);
+    });
   };
   
   if (variant === 'badge') {

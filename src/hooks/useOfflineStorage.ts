@@ -1,10 +1,8 @@
-
 import { useState, useCallback } from 'react';
 import { useConnectivity } from './useConnectivity';
 import { 
-  saveForOfflineUpload, 
+  saveOfflineItem, 
   storeFileAsDataUrl, 
-  saveOfflineItem,
   getPendingItemCount,
   getOfflineItems,
   removeOfflineItem,
@@ -41,9 +39,10 @@ export function useOfflineStorage(options?: UseOfflineStorageOptions) {
       if (!isOnline) {
         await saveOfflineItem({
           id: itemId,
-          collectionName,
+          type: collectionName,
           data,
           createdAt: new Date().toISOString(),
+          collectionName,
           syncStatus: 'pending',
           syncPriority: 1
         });
@@ -85,22 +84,26 @@ export function useOfflineStorage(options?: UseOfflineStorageOptions) {
   }, [isOnline]);
 
   // Function to upload a file with offline support
-  const uploadFile = useCallback(async (
+  async function uploadFile(
     file: File, 
     metadata: Record<string, any> = {}
-  ) => {
+  ) {
     if (!isOnline) {
       // Handle offline file upload
       const uploadId = uuidv4();
       const userId = metadata.userId || 'anonymous';
       
       // Save file metadata for later upload
-      await saveForOfflineUpload(
-        file, 
-        uploadId, 
-        userId, 
-        metadata
-      );
+      await saveOfflineItem({
+        id: uploadId,
+        type: 'file-upload',
+        data: {
+          file,
+          userId,
+          metadata
+        },
+        createdAt: Date.now()
+      });
       
       // Store the file as a data URL for immediate display
       const fileKey = `file-${uploadId}`;
@@ -129,7 +132,7 @@ export function useOfflineStorage(options?: UseOfflineStorageOptions) {
         message: 'File uploaded successfully'
       };
     }
-  }, [isOnline]);
+  }
 
   // Function to manually trigger sync
   const syncData = useCallback(async () => {
@@ -140,7 +143,7 @@ export function useOfflineStorage(options?: UseOfflineStorageOptions) {
       const result = await syncOfflineItems();
       const syncResult = { 
         success: true, 
-        syncedCount: result 
+        syncedCount: result
       };
       
       setLastSyncResult(syncResult);
@@ -195,7 +198,7 @@ export function useOfflineStorage(options?: UseOfflineStorageOptions) {
     
     // Functions
     saveData,
-    uploadFile,
+    uploadFile: uploadFile,
     syncData,
     getOfflineData,
     deleteOfflineItem

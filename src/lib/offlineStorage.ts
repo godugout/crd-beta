@@ -1,4 +1,3 @@
-
 // lib/offlineStorage.ts
 import localforage from 'localforage'
 import { v4 as uuidv4 } from 'uuid'
@@ -18,12 +17,15 @@ export interface PendingUpload {
   isPrivate: boolean
 }
 
-// Add OfflineItem interface for useConnectivity.ts
+// Updated OfflineItem interface to include all required fields
 export interface OfflineItem {
   id: string;
   type: string;
   data: any;
-  createdAt: number;
+  createdAt: number | string;
+  collectionName?: string;
+  syncStatus?: 'pending' | 'completed' | 'failed';
+  syncPriority?: number;
 }
 
 export const saveForOfflineUpload = async (
@@ -87,8 +89,21 @@ export const removePendingMemory = async (id: string) => {
   await localforage.removeItem(`pending-memory-${id}`)
 }
 
-// Additional functions for useConnectivity.ts and useOfflineStorage.ts
-export const storeFileAsDataUrl = async (file: File): Promise<string> => {
+// Updated saveOfflineItem function to accept proper parameters
+export const saveOfflineItem = async <T = any>(
+  item: OfflineItem
+): Promise<string> => {
+  const itemId = item.id || uuidv4();
+  if (!item.id) {
+    item.id = itemId;
+  }
+  
+  await localforage.setItem(`offline-${item.type || 'item'}-${itemId}`, item);
+  return itemId;
+};
+
+// Fixed storeFileAsDataUrl to accept key and file parameters
+export const storeFileAsDataUrl = async (key: string, file: File): Promise<string> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(reader.result as string);
@@ -112,25 +127,13 @@ export const getOfflineItems = async <T = any>(type?: string): Promise<OfflineIt
   return items.sort((a, b) => b.createdAt - a.createdAt);
 };
 
-export const saveOfflineItem = async <T = any>(
-  type: string,
-  data: T,
-  id?: string
-): Promise<string> => {
-  const itemId = id || uuidv4();
-  const offlineItem: OfflineItem = {
-    id: itemId,
-    type,
-    data,
-    createdAt: Date.now()
-  };
-  
-  await localforage.setItem(`offline-${type}-${itemId}`, offlineItem);
-  return itemId;
-};
-
-export const removeOfflineItem = async (type: string, id: string): Promise<void> => {
-  await localforage.removeItem(`offline-${type}-${id}`);
+// Updated removeOfflineItem to accept a single ID parameter
+export const removeOfflineItem = async (id: string): Promise<void> => {
+  const keys = await localforage.keys();
+  const matchingKey = keys.find(key => key.includes(`-${id}`));
+  if (matchingKey) {
+    await localforage.removeItem(matchingKey);
+  }
 };
 
 export const getPendingItemCount = async (): Promise<number> => {

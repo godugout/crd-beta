@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react'
 import { detectFaces, loadFaceDetectionModels, DetectedFace } from '@/lib/faceDetection'
 import { uploadMedia } from '@/lib/mediaManager'
@@ -31,7 +30,7 @@ export const GroupFaceDetection: React.FC<GroupFaceDetectionProps> = ({
   const [selectedFaces, setSelectedFaces] = useState<Record<string, boolean>>({})
 
   useEffect(()=> {
-    loadFaceDetectionModels('/models').then(()=> setModelsLoaded(true))
+    loadFaceDetectionModels().then(()=> setModelsLoaded(true))
   },[])
 
   useEffect(()=> {

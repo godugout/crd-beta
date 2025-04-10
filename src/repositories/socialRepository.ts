@@ -1,4 +1,3 @@
-
 // repositories/socialRepository.ts
 import { createClient } from '@supabase/supabase-js'
 

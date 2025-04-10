@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
 import { 
@@ -115,16 +114,7 @@ export const useConnectivity = (options: ConnectivityOptions = {}) => {
       const syncCount = await syncAllData({
         notify: notifySyncEvents,
         continueOnError: true,
-        ...syncOptions,
-        progressCallback: (current, total) => {
-          // You can use this to update a progress UI
-          const progress = Math.round((current / total) * 100);
-          console.log(`Sync progress: ${progress}%`);
-          
-          if (syncOptions.progressCallback) {
-            syncOptions.progressCallback(current, total);
-          }
-        }
+        ...syncOptions
       });
       
       if (syncCount > 0) {

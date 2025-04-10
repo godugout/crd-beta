@@ -1,4 +1,3 @@
-
 import React, { useRef, useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Loader2, AlertCircle, Upload } from 'lucide-react';
@@ -31,8 +30,7 @@ const FaceDetector: React.FC = () => {
         
         if (!loaded) {
           // Path to face-api.js models (should be in your public folder)
-          const modelUrl = '/models';
-          await loadFaceDetectionModels(modelUrl);
+          await loadFaceDetectionModels();
         }
         
         setModelsLoaded(true);

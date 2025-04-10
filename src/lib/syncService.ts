@@ -1,4 +1,3 @@
-
 // lib/syncService.ts
 import { uploadMedia } from './mediaManager'
 import { createMemory, CreateMemoryParams } from '@/repositories/memoryRepository'
@@ -19,10 +18,13 @@ export interface SyncProgress {
 
 type ProgressCallback = (p: SyncProgress) => void
 
-// Added for useConnectivity.ts
+// Updated SyncOptions interface to include progressCallback
 export interface SyncOptions {
   onProgress?: ProgressCallback;
   forceSync?: boolean;
+  progressCallback?: (current: number, total: number) => void;
+  notify?: boolean;
+  continueOnError?: boolean;
 }
 
 export const syncOfflineData = async (
@@ -110,9 +112,10 @@ export const syncOfflineData = async (
   }
 }
 
-// Add functions needed by useConnectivity.ts
-export const syncAllData = async (options?: SyncOptions) => {
-  return await syncOfflineData(options?.onProgress);
+// Fixed syncAllData function to return a number
+export const syncAllData = async (options?: SyncOptions): Promise<number> => {
+  const result = await syncOfflineData(options?.onProgress);
+  return result.syncedItems;
 };
 
 export const cancelSync = () => {
