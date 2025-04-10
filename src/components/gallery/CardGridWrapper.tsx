@@ -78,7 +78,8 @@ export const CardGridWrapper: React.FC<CardGridWrapperProps> = ({
       <EmptyState
         title="No cards found"
         description="Try adjusting your filters or create a new card"
-        icon="Inbox"
+        isEmpty={true}
+        isFiltered={false}
       />
     );
   }

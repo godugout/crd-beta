@@ -85,12 +85,12 @@ type CardContextType = {
   cards: Card[];
   collections: Collection[];
   isLoading?: boolean;
+  error?: Error | null;
   addCard: (cardData: Partial<Card>) => Promise<Card>;
   updateCard: (id: string, cardData: Partial<Card>) => Card | null;
   getCard: (id: string) => Card | undefined;
   getCardById: (id: string) => Card | undefined;
   deleteCard: (id: string) => boolean;
-  // Collection methods
   addCollection: (collectionData: Partial<Collection>) => Collection;
   updateCollection: (id: string, collectionData: Partial<Collection>) => Collection | null;
   deleteCollection: (id: string) => boolean;
@@ -134,6 +134,7 @@ export const CardProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [cards, setCards] = useState<Card[]>(sampleCards);
   const [collections, setCollections] = useState<Collection[]>(sampleCollections);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
 
   const addCard = async (cardData: Partial<Card>): Promise<Card> => {
     try {
@@ -323,6 +324,7 @@ export const CardProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const refreshCards = async (): Promise<void> => {
     try {
       setIsLoading(true);
+      setError(null);
       // In a real app, we'd fetch from an API here
       // For now, just simulate a delay
       await new Promise(resolve => setTimeout(resolve, 500));
@@ -330,6 +332,7 @@ export const CardProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (error) {
       console.error("Error refreshing cards:", error);
       toast.error("Failed to refresh cards");
+      setError(error instanceof Error ? error : new Error("Failed to refresh cards"));
     } finally {
       setIsLoading(false);
     }
@@ -350,6 +353,7 @@ export const CardProvider: React.FC<{ children: React.ReactNode }> = ({ children
       addCardToCollection,
       removeCardFromCollection,
       isLoading,
+      error,
       refreshCards
     }}>
       {children}
