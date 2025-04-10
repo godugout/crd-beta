@@ -1,6 +1,13 @@
 
 // lib/memoryCache.ts
 
+// Define the CacheKey and CacheOptions types needed for useMemoryCache.ts
+export type CacheKey = string;
+export type CacheOptions = {
+  ttl?: number;
+  background?: boolean;
+};
+
 class MemoryCache {
   private cache: Map<string, { data: any; expiry: number }> = new Map()
 
@@ -68,13 +75,6 @@ class MemoryCache {
 }
 
 export const memoryCache = new MemoryCache()
-
-// Add CacheKey and CacheOptions types for useMemoryCache.ts
-export type CacheKey = string;
-export type CacheOptions = {
-  ttl?: number;
-  background?: boolean;
-};
 
 // Cleanup every 5 min
 setInterval(() => {

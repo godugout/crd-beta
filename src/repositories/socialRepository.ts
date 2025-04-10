@@ -2,8 +2,9 @@
 // repositories/socialRepository.ts
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+// Replace process.env with import.meta.env for Vite projects
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || ''
+const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || ''
 const supabase = createClient(supabaseUrl, supabaseKey)
 
 export type ReactionType = 'like' | 'love' | 'celebrate' | 'insightful' | 'baseball'
@@ -84,7 +85,9 @@ export const getReactions = async (
     like: 0, love: 0, celebrate: 0, insightful: 0, baseball: 0
   }
   (data||[]).forEach(r => {
-    reactionCounts[r.type] = (reactionCounts[r.type]||0) + 1
+    if (r.type in reactionCounts) {
+      reactionCounts[r.type as ReactionType] += 1;
+    }
   })
   return { reactions: data||[], counts: reactionCounts }
 }
