@@ -22,6 +22,7 @@ import OaklandLanding from '@/pages/oakland/OaklandLanding';
 import OaklandMemories from '@/pages/oakland/OaklandMemories';
 import OaklandMemoryDetail from '@/pages/oakland/OaklandMemoryDetail';
 import OaklandMemoryCreatorPage from '@/pages/OaklandMemoryCreator';
+import Labs from '@/pages/Labs'; // Import the Labs page
 import { ThemeProvider } from '@/hooks/useTheme';
 import './App.css';
 
@@ -109,14 +110,6 @@ function App() {
               ))}
             </div>
           </div></PageLayout>} />
-          <Route path="/packs/create" element={<PageLayout title="Create Memory Pack"><div className="container mx-auto px-4 py-8">
-            <h1 className="text-3xl font-bold mb-4">Create Memory Pack</h1>
-            <p className="mb-6">Build your own themed memory pack</p>
-            {/* Memory pack creation form will be implemented here */}
-            <div className="bg-white p-6 rounded-lg shadow-sm">
-              <p className="text-center text-gray-500">Memory pack creation functionality coming soon</p>
-            </div>
-          </div></PageLayout>} />
           <Route path="/teams" element={<TeamPage />} />
           <Route path="/teams/:teamId" element={<TeamPage />} />
           
@@ -131,27 +124,9 @@ function App() {
           <Route path="/game-day" element={<GameDayMode />} />
           <Route path="/baseball-card-viewer" element={<BaseballCardViewer />} />
           <Route path="/admin" element={<PageLayout title="Admin"><div>Admin Page</div></PageLayout>} />
-          <Route path="/labs" element={<PageLayout title="Dugout Labs"><div className="container mx-auto px-4 py-8">
-            <h1 className="text-3xl font-bold mb-4">Dugout Labs</h1>
-            <p className="mb-6">Experimental features and beta testing</p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-white p-6 rounded-lg shadow-sm border border-amber-200">
-                <h2 className="text-xl font-bold mb-3 text-amber-600">AR Features</h2>
-                <p className="mb-4">Preview our upcoming AR experiences</p>
-                <a href="/ar-viewer" className="text-blue-600 hover:underline">Try AR Viewer →</a>
-              </div>
-              <div className="bg-white p-6 rounded-lg shadow-sm border border-amber-200">
-                <h2 className="text-xl font-bold mb-3 text-amber-600">Card Effects</h2>
-                <p className="mb-4">Test our newest card visual effects</p>
-                <a href="/animation" className="text-blue-600 hover:underline">Try Card Effects →</a>
-              </div>
-              <div className="bg-white p-6 rounded-lg shadow-sm border border-amber-200">
-                <h2 className="text-xl font-bold mb-3 text-amber-600">Group Memory</h2>
-                <p className="mb-4">Create shared memory collections</p>
-                <a href="/group-memory" className="text-blue-600 hover:underline">Try Group Memory →</a>
-              </div>
-            </div>
-          </div></PageLayout>} />
+          
+          {/* Updated Labs route */}
+          <Route path="/labs/*" element={<Labs />} />
           <Route path="/experimental" element={<PageLayout title="Experimental Features"><div className="container mx-auto px-4 py-8">
             <h1 className="text-3xl font-bold mb-4">Experimental Features</h1>
             <p className="mb-6">Try out our newest features still in development</p>

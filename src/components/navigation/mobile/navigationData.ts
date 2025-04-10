@@ -50,7 +50,7 @@ export const navigationGroups: NavigationGroup[] = [
   {
     title: "LABS",
     items: [
-      { title: 'Dugout Labs', path: '/experimental', icon: FlaskConical, highlight: true },
+      { title: 'Dugout Labs', path: '/labs', icon: FlaskConical, highlight: true },
       { title: 'Group Memory', path: '/group-memory', icon: Users },
     ]
   }
