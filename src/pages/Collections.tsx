@@ -3,7 +3,7 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import PageLayout from '@/components/navigation/PageLayout';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Grid3X3, Collection } from 'lucide-react';
+import { PlusCircle, Grid3X3, Layers } from 'lucide-react';
 import { useCards } from '@/context/CardContext';
 
 const Collections = () => {
@@ -48,7 +48,7 @@ const Collections = () => {
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-gray-400">
-                      <Collection className="h-10 w-10" />
+                      <Layers className="h-10 w-10" />
                     </div>
                   )}
                 </div>
@@ -59,10 +59,11 @@ const Collections = () => {
                       {collection.description}
                     </p>
                   )}
-                  {collection.cardCount > 0 && (
+                  {/* Check if collection.cardIds exists and use its length instead of cardCount */}
+                  {collection.cardIds && collection.cardIds.length > 0 && (
                     <div className="mt-2 flex items-center text-sm text-gray-500">
                       <Grid3X3 className="h-3 w-3 mr-1" />
-                      {collection.cardCount} cards
+                      {collection.cardIds.length} cards
                     </div>
                   )}
                 </div>
@@ -71,7 +72,7 @@ const Collections = () => {
           </div>
         ) : (
           <div className="text-center py-16 bg-gray-50 rounded-lg border border-dashed border-gray-300">
-            <Collection className="h-16 w-16 mx-auto text-gray-400 mb-4" />
+            <Layers className="h-16 w-16 mx-auto text-gray-400 mb-4" />
             <h2 className="text-xl font-medium mb-2">No collections yet</h2>
             <p className="text-gray-500 mb-6 max-w-md mx-auto">
               Create your first collection to organize your cards by theme, team, or any category you want.
@@ -89,7 +90,7 @@ const Collections = () => {
               <Link to="/collections/featured">
                 <div className="h-40 bg-blue-50 flex items-center justify-center">
                   <div className="text-blue-500 text-center">
-                    <Collection className="h-10 w-10 mx-auto mb-2" />
+                    <Layers className="h-10 w-10 mx-auto mb-2" />
                     <p>Featured Collections</p>
                   </div>
                 </div>
@@ -99,7 +100,7 @@ const Collections = () => {
               <Link to="/packs">
                 <div className="h-40 bg-green-50 flex items-center justify-center">
                   <div className="text-green-500 text-center">
-                    <Collection className="h-10 w-10 mx-auto mb-2" />
+                    <Layers className="h-10 w-10 mx-auto mb-2" />
                     <p>Memory Packs</p>
                   </div>
                 </div>
@@ -109,7 +110,7 @@ const Collections = () => {
               <Link to="/teams">
                 <div className="h-40 bg-purple-50 flex items-center justify-center">
                   <div className="text-purple-500 text-center">
-                    <Collection className="h-10 w-10 mx-auto mb-2" />
+                    <Layers className="h-10 w-10 mx-auto mb-2" />
                     <p>Team Collections</p>
                   </div>
                 </div>
