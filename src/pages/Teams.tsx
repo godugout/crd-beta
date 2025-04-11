@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Container } from '@/components/ui/container';
@@ -10,9 +9,8 @@ import { Badge } from '@/components/ui/badge';
 import { Plus, Search, Users, Grid3X3, List, Filter } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
-import { useAuth } from '@/context/auth';
+import { useAuth } from '@/hooks/useAuth';
 
-// Define Team type
 interface Team {
   id: string;
   name: string;
@@ -42,7 +40,6 @@ const Teams: React.FC = () => {
     setError(null);
     
     try {
-      // Fetch teams from the database
       const { data, error } = await supabase
         .from('teams')
         .select('*, team_members(count)')
@@ -52,7 +49,6 @@ const Teams: React.FC = () => {
         throw new Error(error.message);
       }
       
-      // Format the teams data
       const formattedTeams: Team[] = data.map((team: any) => ({
         id: team.id,
         name: team.name,
@@ -84,7 +80,6 @@ const Teams: React.FC = () => {
     return matchesSearch;
   });
   
-  // Example featured teams (normally would come from database)
   const featuredTeams = teams.slice(0, 3);
   
   const renderTeamGrid = () => {
@@ -145,7 +140,7 @@ const Teams: React.FC = () => {
   
   const renderTeamList = () => {
     if (isLoading || filteredTeams.length === 0) {
-      return renderTeamGrid(); // Reuse empty/loading states
+      return renderTeamGrid();
     }
     
     return (

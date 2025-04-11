@@ -6,7 +6,7 @@ import { routes } from './routes';
 import './App.css';
 import { Toaster } from 'sonner';
 import { ThemeProvider } from '@/hooks/useTheme';
-import { AuthProvider } from '@/providers/AuthProvider';
+import { AuthProvider } from './providers/AuthProvider';
 
 function App() {
   const router = createBrowserRouter(routes);

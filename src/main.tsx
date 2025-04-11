@@ -7,7 +7,6 @@ import App from './App.tsx';
 import './index.css';
 import { queryClient } from './lib/api/queryClient';
 import { CardProvider } from './context/CardContext';
-import { AuthProvider } from './providers/AuthProvider';
 import { GlobalErrorBoundary } from './components/error/GlobalErrorBoundary';
 
 // Make sure we have a valid DOM node before attempting to render
@@ -22,11 +21,9 @@ createRoot(rootElement).render(
     <GlobalErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <HelmetProvider>
-          <AuthProvider>
-            <CardProvider>
-              <App />
-            </CardProvider>
-          </AuthProvider>
+          <CardProvider>
+            <App />
+          </CardProvider>
         </HelmetProvider>
       </QueryClientProvider>
     </GlobalErrorBoundary>
