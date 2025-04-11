@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { ColorPicker } from '@/components/ui/color-picker';
 import { v4 as uuidv4 } from 'uuid';
-import { Plus, Save, Trash2, Copy, CheckCircle, Paint } from 'lucide-react';
+import { Plus, Save, Trash2, Copy, CheckCircle, Paintbrush } from 'lucide-react';
 import { toast } from 'sonner';
 
 const ThemeManager: React.FC = () => {
