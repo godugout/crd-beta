@@ -1,23 +1,21 @@
 
-import React, { useEffect } from 'react';
-import { RouterProvider } from 'react-router-dom';
-import router from './routes';
-import { Toaster } from 'sonner';
-import { ThemeProvider } from '@/hooks/useTheme';
-import { initSentry } from '@/lib/monitoring/sentry';
+import React from 'react';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { CardEnhancedProvider } from '@/context/CardEnhancedContext';
+import { routes } from './routes';
 import './App.css';
-
-// Initialize monitoring on app start
-if (import.meta.env.PROD) {
-  initSentry();
-}
+import { Toaster } from 'sonner';
 
 function App() {
+  const router = createBrowserRouter(routes);
+  
   return (
-    <ThemeProvider defaultTheme="light">
-      <RouterProvider router={router} />
-      <Toaster position="bottom-right" theme="system" />
-    </ThemeProvider>
+    <>
+      <CardEnhancedProvider>
+        <RouterProvider router={router} />
+      </CardEnhancedProvider>
+      <Toaster position="top-center" />
+    </>
   );
 }
 

@@ -1,0 +1,66 @@
+
+import { Card as BaseCard } from '@/lib/types';
+import { UserProfile } from './UserTypes';
+
+export type CardRarity = 'common' | 'uncommon' | 'rare' | 'ultra-rare' | 'legendary' | 'one-of-one';
+
+export interface HotspotData {
+  id: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  content: string;
+  type: 'text' | 'link' | 'image' | 'video';
+  visible: boolean;
+}
+
+export interface EnhancedCard extends BaseCard {
+  rarity: CardRarity;
+  cardNumber?: string;
+  seriesId?: string;
+  artistId?: string;
+  artist?: UserProfile;
+  edition?: number;
+  editionSize?: number;
+  releaseDate?: string;
+  qrCodeData?: string;
+  hotspots?: HotspotData[];
+  marketData?: {
+    price?: number;
+    currency?: string;
+    availableForSale?: boolean;
+    lastSoldPrice?: number;
+    lastSoldDate?: string;
+  };
+}
+
+export interface Series {
+  id: string;
+  title: string;
+  description: string;
+  coverImageUrl: string;
+  artistId: string;
+  artist?: UserProfile;
+  createdAt: string;
+  updatedAt: string;
+  releaseDate: string;
+  totalCards: number;
+  isPublished: boolean;
+  cardIds: string[];
+  cards?: EnhancedCard[];
+  releaseType: 'standard' | 'limited' | 'exclusive';
+}
+
+export interface Deck {
+  id: string;
+  name: string;
+  description: string;
+  coverImageUrl: string;
+  ownerId: string;
+  createdAt: string;
+  updatedAt: string;
+  cardIds: string[];
+  cards?: EnhancedCard[];
+  isPublic: boolean;
+}
