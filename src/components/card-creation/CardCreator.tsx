@@ -1,19 +1,85 @@
 
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import CardScanUpload from './CardScanUpload';
 import { useCardEffectsStack } from './hooks/useCardEffectsStack';
+import CardEditorSidebar from './CardEditorSidebar';
+import CardPreviewCanvas from './CardPreviewCanvas';
+import CardLayersPanel from './CardLayersPanel';
+import { useLayers } from './hooks/useLayers';
+
+// Define and export the types needed by other components
+export interface CardDesignState {
+  title: string;
+  description: string;
+  tags: string[];
+  borderColor: string;
+  backgroundColor: string;
+  borderRadius: string;
+  imageUrl: string | null;
+  player?: string;
+  team?: string;
+  year?: string;
+}
+
+export interface Position {
+  x: number;
+  y: number;
+  z: number;
+}
+
+export interface Size {
+  width: number | string;
+  height: number | string;
+}
+
+export interface CardLayer {
+  id: string;
+  type: 'image' | 'text' | 'shape';
+  content: string | object;
+  position: Position;
+  size: Size;
+  rotation: number;
+  opacity: number;
+  visible: boolean;
+  effectIds: string[];
+}
 
 const CardCreator: React.FC = () => {
   const [activeTab, setActiveTab] = React.useState('upload');
   const [currentStep, setCurrentStep] = React.useState(1);
   const [cardImage, setCardImage] = React.useState<string | null>(null);
   const { effectStack, addEffect, removeEffect, toggleEffect, getEffectClasses } = useCardEffectsStack();
+  const previewCanvasRef = useRef<HTMLDivElement>(null);
+
+  // Card design state
+  const [cardData, setCardData] = useState<CardDesignState>({
+    title: '',
+    description: '',
+    tags: [],
+    borderColor: '#000000',
+    backgroundColor: '#FFFFFF',
+    borderRadius: '8px',
+    imageUrl: null,
+  });
+
+  // Use the layers hook
+  const {
+    layers,
+    activeLayerId,
+    addLayer,
+    updateLayer,
+    deleteLayer,
+    moveLayerUp,
+    moveLayerDown,
+    setActiveLayer
+  } = useLayers();
 
   // Handle when an image is captured from the scanner or uploader
   const handleImageCaptured = (imageUrl: string) => {
     setCardImage(imageUrl);
+    setCardData(prev => ({ ...prev, imageUrl }));
     // Move to the next step after image is captured
     setCurrentStep(2);
     setActiveTab('design');
@@ -85,10 +151,25 @@ const CardCreator: React.FC = () => {
                 <h2 className="text-xl font-semibold mb-4">Design Your Card</h2>
                 {cardImage ? (
                   <div className="space-y-4">
-                    <p>Card design editor will be implemented here.</p>
-                    <div className="aspect-[2.5/3.5] max-w-xs mx-auto border rounded-md overflow-hidden">
-                      <img src={cardImage} alt="Card preview" className="w-full h-full object-cover" />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <CardEditorSidebar
+                        cardData={cardData}
+                        onChange={setCardData}
+                        onImageUpload={handleImageCaptured}
+                      />
+                      
+                      <CardLayersPanel
+                        layers={layers}
+                        activeLayerId={activeLayerId}
+                        onLayerSelect={setActiveLayer}
+                        onLayerUpdate={updateLayer}
+                        onAddLayer={addLayer}
+                        onDeleteLayer={deleteLayer}
+                        onMoveLayerUp={moveLayerUp}
+                        onMoveLayerDown={moveLayerDown}
+                      />
                     </div>
+
                     <div className="flex justify-end">
                       <button 
                         className="px-4 py-2 bg-litmus-green text-white rounded-md hover:bg-litmus-green-dark transition-colors"
@@ -133,11 +214,17 @@ const CardCreator: React.FC = () => {
               <h3 className="font-medium">Preview</h3>
               <span className="text-xs text-gray-400">Live view</span>
             </div>
-            <div className="flex-grow flex items-center justify-center p-6">
-              {cardImage ? (
-                <div className={`aspect-[2.5/3.5] w-full max-w-[220px] rounded-lg overflow-hidden shadow-lg ${getEffectClasses()}`}>
-                  <img src={cardImage} alt="Card preview" className="w-full h-full object-cover" />
-                </div>
+            <div className="flex-grow flex items-center justify-center p-6 relative">
+              {cardData.imageUrl ? (
+                <CardPreviewCanvas
+                  ref={previewCanvasRef}
+                  cardData={cardData}
+                  layers={layers}
+                  activeLayerId={activeLayerId}
+                  onLayerSelect={setActiveLayer}
+                  onLayerUpdate={updateLayer}
+                  effectClasses={getEffectClasses()}
+                />
               ) : (
                 <div className="text-center text-gray-400">
                   <p>Upload an image to preview</p>
@@ -146,8 +233,8 @@ const CardCreator: React.FC = () => {
             </div>
             <div className="bg-gray-800 p-4">
               <div className="space-y-1">
-                <h4 className="text-sm font-medium">No title yet</h4>
-                <p className="text-xs text-gray-400">Add a description to your CRD</p>
+                <h4 className="text-sm font-medium">{cardData.title || "No title yet"}</h4>
+                <p className="text-xs text-gray-400">{cardData.description || "Add a description to your CRD"}</p>
               </div>
             </div>
           </div>
