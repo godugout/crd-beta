@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { ChevronDown, ChevronUp, Maximize, Search, PlusCircle } from 'lucide-react';
 import { useLocation, Link } from 'react-router-dom';
@@ -50,7 +49,6 @@ export const SecondaryNavbar = ({
   const { breadcrumbs } = useBreadcrumbs();
   const location = useLocation();
   
-  // Hide on homepage
   if (location.pathname === '/') {
     return null;
   }
@@ -59,7 +57,6 @@ export const SecondaryNavbar = ({
     setIsCollapsed(!isCollapsed);
   };
 
-  // If breadcrumbs are hidden and there's no title or actions, don't render anything
   if (hideBreadcrumbs && !title && !actions) {
     return null;
   }
@@ -78,9 +75,7 @@ export const SecondaryNavbar = ({
     )}>
       <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
-          {/* Left side - Breadcrumbs and Title/Description */}
           <div className="flex flex-col min-w-0">
-            {/* Breadcrumbs */}
             {!hideBreadcrumbs && breadcrumbs.length > 1 && (
               <div className={cn("transition-all duration-300", 
                 isCollapsed ? "h-6 opacity-100" : "h-6 opacity-100"
@@ -107,7 +102,6 @@ export const SecondaryNavbar = ({
               </div>
             )}
             
-            {/* Title and Description */}
             {(title || description) && (
               <div className={cn(
                 "transition-all duration-300 overflow-hidden",
@@ -122,13 +116,11 @@ export const SecondaryNavbar = ({
             )}
           </div>
           
-          {/* Center section - Stats and Search */}
           <div className={cn(
             "flex-grow transition-all duration-300 md:mx-4 max-w-md",
             isCollapsed ? "h-8 opacity-100" : "opacity-100"
           )}>
             <div className="flex items-center gap-4">
-              {/* Stats display */}
               {stats.length > 0 && (
                 <div className="hidden md:flex items-center space-x-4">
                   {stats.map((stat, index) => (
@@ -143,7 +135,6 @@ export const SecondaryNavbar = ({
                 </div>
               )}
               
-              {/* Search input */}
               {onSearch !== undefined && (
                 <div className="relative flex-grow">
                   <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-400" />
@@ -158,9 +149,7 @@ export const SecondaryNavbar = ({
             </div>
           </div>
           
-          {/* Right side - Primary Action, Actions and Collapse Toggle */}
           <div className="flex items-center gap-2 mt-2 md:mt-0 justify-between md:justify-end">
-            {/* Primary Action Button */}
             {primaryAction && !isCollapsed && (
               <Button asChild className="bg-athletics-gold text-gray-900 hover:bg-athletics-gold-dark mr-2">
                 {primaryAction.href ? (
@@ -177,14 +166,12 @@ export const SecondaryNavbar = ({
               </Button>
             )}
             
-            {/* Actions */}
             {actions && (
               <div className="flex items-center gap-2">
                 {actions}
               </div>
             )}
             
-            {/* Collapse Toggle */}
             <Button 
               variant="ghost" 
               size="sm" 

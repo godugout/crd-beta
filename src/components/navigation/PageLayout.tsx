@@ -21,6 +21,12 @@ interface PageLayoutProps {
   stats?: Array<{count?: number; label?: string}>;
   onSearch?: (term: string) => void;
   searchPlaceholder?: string;
+  primaryAction?: {
+    label: string;
+    icon?: React.ReactNode;
+    onClick?: () => void;
+    href?: string;
+  };
 }
 
 const PageLayout: React.FC<PageLayoutProps> = ({
@@ -37,6 +43,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({
   stats,
   onSearch,
   searchPlaceholder,
+  primaryAction,
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -62,6 +69,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({
           stats={stats}
           onSearch={onSearch}
           searchPlaceholder={searchPlaceholder}
+          primaryAction={primaryAction}
         />
       )}
       
