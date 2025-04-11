@@ -2,7 +2,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { TeamDisplayData } from '@/types/teams';
-import { PostgrestError } from '@supabase/supabase-js';
 
 export const useTeamGalleryData = (
   activeLeague: string,
