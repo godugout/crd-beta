@@ -6,13 +6,14 @@ import TeamDetail from '@/pages/TeamDetail';
 import TeamGallery from '@/pages/TeamGallery';
 import OaklandMemories from '@/pages/oakland/OaklandMemories';
 import OaklandMemoryDetail from '@/pages/oakland/OaklandMemoryDetail';
+import TeamPage from '@/pages/TeamPage'; // Import TeamPage component
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 
 // Team-related routes
 export const teamRoutes: RouteObject[] = [
   {
     path: "/teams",
-    element: <Teams />,
+    element: <Teams />, // This will use the Teams component
   },
   {
     path: "/teams/sf-giants",

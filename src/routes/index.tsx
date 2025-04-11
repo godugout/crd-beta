@@ -8,6 +8,7 @@ import Dashboard from '@/pages/Dashboard';
 
 // Import the team-related routes
 import TeamDetail from '@/pages/TeamDetail';
+import { teamRoutes } from './teamRoutes';  // Import the team routes
 
 // Import admin page
 import Admin from '@/pages/Admin';
@@ -15,6 +16,7 @@ import Admin from '@/pages/Admin';
 // Import other route collections
 import { cardRoutes } from './cardRoutes';
 import { collectionRoutes } from './collectionRoutes';
+import { mainRoutes } from './mainRoutes';  // Import the main routes
 
 // Create new pages for deck and series management
 const DeckBuilderPage = React.lazy(() => import('@/pages/DeckBuilderPage'));
@@ -23,6 +25,8 @@ const DeckViewPage = React.lazy(() => import('@/pages/DeckViewPage'));
 const SeriesViewPage = React.lazy(() => import('@/pages/SeriesViewPage'));
 
 export const routes: RouteObject[] = [
+  ...mainRoutes, // Include main routes
+  ...teamRoutes, // Include team routes
   {
     path: "/",
     element: <Dashboard />,
