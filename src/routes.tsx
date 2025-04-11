@@ -10,41 +10,56 @@ import Profile from '@/pages/Profile';
 import CardDetail from '@/pages/CardDetail';
 import CollectionDetail from '@/pages/CollectionDetail';
 import CardDetector from '@/pages/CardDetector';
-import OaklandMemories from '@/pages/OaklandMemories';
-import OaklandMemoryDetail from '@/pages/OaklandMemoryDetail';
+import OaklandMemories from '@/pages/oakland/OaklandMemories';
+import OaklandMemoryDetail from '@/pages/oakland/OaklandMemoryDetail';
 import CardCreationFlow from '@/components/card-editor/CardCreationFlow';
 import CardCreatorPage from '@/pages/CardCreatorPage';
 import BaseballCardViewer from '@/pages/BaseballCardViewer';
 import NotFound from '@/pages/NotFound';
+import Auth from '@/pages/Auth';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import { GlobalErrorBoundary } from '@/components/error/GlobalErrorBoundary';
+import Unauthorized from '@/pages/Unauthorized';
 
 const router = createBrowserRouter([
+  // Public routes
   {
     path: "/",
     element: <Home />,
   },
   {
+    path: "/auth",
+    element: <Auth />,
+  },
+  {
+    path: "/unauthorized",
+    element: <Unauthorized />,
+  },
+  {
     path: "/gallery",
     element: <Gallery />,
   },
+  
+  // Protected routes
   {
     path: "/editor",
-    element: <Editor />,
+    element: <ProtectedRoute><Editor /></ProtectedRoute>,
   },
   {
     path: "/editor/:id",
-    element: <Editor />,
+    element: <ProtectedRoute><Editor /></ProtectedRoute>,
   },
   {
     path: "/teams/:teamId/gallery",
-    element: <TeamGallery />,
+    element: <ProtectedRoute><TeamGallery /></ProtectedRoute>,
   },
   {
     path: "/teams/:teamId",
-    element: <TeamDetail />,
+    element: <ProtectedRoute><TeamDetail /></ProtectedRoute>,
   },
   {
     path: "/profile",
-    element: <Profile />,
+    element: <ProtectedRoute><Profile /></ProtectedRoute>,
   },
   {
     path: "/card/:id",
@@ -56,7 +71,7 @@ const router = createBrowserRouter([
   },
   {
     path: "/card-detector",
-    element: <CardDetector />,
+    element: <ProtectedRoute><CardDetector /></ProtectedRoute>,
   },
   {
     path: "/teams/oakland/memories",
@@ -68,7 +83,7 @@ const router = createBrowserRouter([
   },
   {
     path: "/card-upload",
-    element: <CardCreationFlow />,
+    element: <ProtectedRoute><CardCreationFlow /></ProtectedRoute>,
   },
   
   // Card Creator routes
@@ -78,14 +93,14 @@ const router = createBrowserRouter([
   },
   {
     path: "/cards/create",
-    element: <CardCreatorPage />,
+    element: <ProtectedRoute><CardCreatorPage /></ProtectedRoute>,
   },
   {
     path: "/card/create",
-    element: <CardCreatorPage />,
+    element: <ProtectedRoute><CardCreatorPage /></ProtectedRoute>,
   },
   
-  // Baseball Card Viewer routes - add proper parameter handling
+  // Baseball Card Viewer routes
   {
     path: "/baseball-card-viewer",
     element: <BaseballCardViewer />,
@@ -100,6 +115,9 @@ const router = createBrowserRouter([
     path: "*",
     element: <NotFound />,
   }
-]);
+].map(route => ({
+  ...route,
+  element: <GlobalErrorBoundary>{route.element}</GlobalErrorBoundary>
+})));
 
 export default router;

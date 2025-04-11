@@ -1,24 +1,26 @@
 
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/context/auth';
-import Navbar from '@/components/Navbar';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import React, { useState, useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2 } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Loader2, Github, Mail } from "lucide-react";
+import { captureException } from '@/lib/monitoring/sentry';
+import { logger } from '@/lib/monitoring/logger';
+import { performance } from '@/lib/monitoring/performance';
 
 const Auth = () => {
   const navigate = useNavigate();
-  const { signIn, signUp, isLoading, error, user } = useAuth();
+  const { signIn, signUp, signInWithProvider, isLoading, error, user } = useAuth();
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   
   // Redirect if already logged in
-  React.useEffect(() => {
+  useEffect(() => {
     if (user) {
       navigate('/gallery');
     }
@@ -26,28 +28,111 @@ const Auth = () => {
   
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
-    await signIn(email, password);
+    
+    try {
+      performance.startMeasurement('sign-in', { email });
+      await signIn(email, password);
+      logger.info('User signed in successfully', { context: { userEmail: email } });
+    } catch (err: any) {
+      captureException(err, { context: { action: 'signin' } });
+      logger.error('Sign in failed', { context: { error: err.message } });
+    } finally {
+      performance.endMeasurement('sign-in');
+    }
   };
   
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    await signUp(email, password, name);
+    
+    try {
+      performance.startMeasurement('sign-up', { email });
+      await signUp(email, password, { name });
+      logger.info('User signed up successfully', { context: { userEmail: email } });
+    } catch (err: any) {
+      captureException(err, { context: { action: 'signup' } });
+      logger.error('Sign up failed', { context: { error: err.message } });
+    } finally {
+      performance.endMeasurement('sign-up');
+    }
+  };
+  
+  const handleGoogleSignIn = async () => {
+    try {
+      performance.startMeasurement('google-sign-in');
+      await signInWithProvider('google');
+      logger.info('Google sign in initiated');
+    } catch (err: any) {
+      captureException(err, { context: { action: 'google-signin' } });
+      logger.error('Google sign in failed', { context: { error: err.message } });
+    } finally {
+      performance.endMeasurement('google-sign-in');
+    }
+  };
+  
+  const handleGithubSignIn = async () => {
+    try {
+      performance.startMeasurement('github-sign-in');
+      await signInWithProvider('github');
+      logger.info('GitHub sign in initiated');
+    } catch (err: any) {
+      captureException(err, { context: { action: 'github-signin' } });
+      logger.error('GitHub sign in failed', { context: { error: err.message } });
+    } finally {
+      performance.endMeasurement('github-sign-in');
+    }
   };
   
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar />
+      <header className="h-16 flex items-center px-4 border-b">
+        <div className="container mx-auto flex justify-between items-center">
+          <Link to="/" className="text-xl font-bold">CardShow</Link>
+        </div>
+      </header>
       
       <main className="flex-1 pt-16 pb-24">
         <div className="container mx-auto max-w-md px-4 py-8">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-cardshow-dark">Welcome to Cardshow</h1>
-            <p className="text-cardshow-slate mt-2">
+            <h1 className="text-3xl font-bold">Welcome to CardShow</h1>
+            <p className="text-muted-foreground mt-2">
               Sign in or create an account to manage your digital cards
             </p>
           </div>
           
-          <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
+          <div className="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-sm border">
+            <div className="space-y-4 mb-6">
+              <Button 
+                variant="outline" 
+                className="w-full" 
+                disabled={isLoading}
+                onClick={handleGoogleSignIn}
+              >
+                <img src="https://authjs.dev/img/providers/google.svg" alt="Google" className="mr-2 h-4 w-4" />
+                Continue with Google
+              </Button>
+              
+              <Button 
+                variant="outline" 
+                className="w-full" 
+                disabled={isLoading}
+                onClick={handleGithubSignIn}
+              >
+                <Github className="mr-2 h-4 w-4" />
+                Continue with GitHub
+              </Button>
+              
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-white dark:bg-gray-800 px-2 text-muted-foreground">
+                    Or continue with
+                  </span>
+                </div>
+              </div>
+            </div>
+            
             <Tabs defaultValue="signin">
               <TabsList className="grid w-full grid-cols-2 mb-6">
                 <TabsTrigger value="signin">Sign In</TabsTrigger>
@@ -97,7 +182,10 @@ const Auth = () => {
                         Signing in...
                       </>
                     ) : (
-                      'Sign In'
+                      <>
+                        <Mail className="mr-2 h-4 w-4" />
+                        Sign In with Email
+                      </>
                     )}
                   </Button>
                 </form>
