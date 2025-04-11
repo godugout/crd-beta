@@ -1,56 +1,49 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { Card, CardHeader, CardContent, CardFooter, CardTitle, CardDescription } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Users } from 'lucide-react';
 
 interface TeamCardProps {
   team: {
     id: string;
     name: string;
-    logo?: string;
-    primaryColor: string;
-    description: string;
+    description?: string;
+    logoUrl?: string;
+    memberCount?: number;
+    tags?: string[];
   };
 }
 
-const TeamCard: React.FC<TeamCardProps> = ({ team }) => {
+const TeamCard = ({ team }: TeamCardProps) => {
   return (
-    <Link to={`/teams/${team.id}`}>
-      <div 
-        className="border rounded-lg overflow-hidden hover:shadow-md transition-shadow bg-white h-full"
-      >
-        <div 
-          className="h-40 flex items-center justify-center" 
-          style={{ 
-            backgroundColor: `${team.primaryColor}10` // 10% opacity version of primary color
-          }}
-        >
-          {team.logo ? (
-            <img 
-              src={team.logo} 
-              alt={team.name} 
-              className="h-24 w-24 object-contain"
-            />
-          ) : (
-            <div 
-              className="h-20 w-20 rounded-full flex items-center justify-center" 
-              style={{ backgroundColor: team.primaryColor }}
-            >
-              <Users className="h-10 w-10 text-white" />
-            </div>
-          )}
-        </div>
-        <div className="p-4">
-          <h3 
-            className="font-medium text-lg" 
-            style={{ color: team.primaryColor }}
-          >
-            {team.name}
-          </h3>
-          <p className="text-gray-600 mt-1">{team.description}</p>
-        </div>
+    <Card key={team.id} className="overflow-hidden h-full">
+      <div className="h-40 bg-gray-100 flex items-center justify-center">
+        {team.logoUrl ? (
+          <img 
+            src={team.logoUrl} 
+            alt={team.name} 
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <Users className="h-16 w-16 text-gray-300" />
+        )}
       </div>
-    </Link>
+      <CardHeader>
+        <CardTitle>{team.name}</CardTitle>
+        <CardDescription className="line-clamp-2">
+          {team.description || 'No description available'}
+        </CardDescription>
+      </CardHeader>
+      <CardFooter className="flex justify-between">
+        <Badge variant="outline">{team.memberCount} members</Badge>
+        <Button asChild>
+          <Link to={`/teams/${team.id}`}>View Team</Link>
+        </Button>
+      </CardFooter>
+    </Card>
   );
 };
 
