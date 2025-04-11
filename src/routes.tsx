@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { createBrowserRouter } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import Home from '@/pages/Home';
 import Gallery from '@/pages/Gallery'; 
 import CardGallery from '@/pages/CardGallery';
@@ -30,6 +30,8 @@ import Labs from '@/pages/Labs';
 import Packs from '@/pages/Packs';
 import Search from '@/pages/Search';
 import Index from '@/pages/Index';
+import MemoryPackDetail from '@/pages/MemoryPackDetail';
+import { BreadcrumbProvider } from '@/hooks/breadcrumbs/BreadcrumbContext';
 
 const router = createBrowserRouter([
   // Public routes
@@ -94,6 +96,10 @@ const router = createBrowserRouter([
     element: <Packs />,
   },
   {
+    path: "/packs/:id",
+    element: <MemoryPackDetail />,
+  },
+  {
     path: "/search",
     element: <Search />,
   },
@@ -135,7 +141,7 @@ const router = createBrowserRouter([
     path: "/card/:id",
     element: <CardDetail />,
   },
-  // Updated to support both routes for collections (singular and plural)
+  // Standardize to collections/id for consistency
   {
     path: "/collection/:id",
     element: <CollectionDetail />,
@@ -196,7 +202,11 @@ const router = createBrowserRouter([
   }
 ].map(route => ({
   ...route,
-  element: <GlobalErrorBoundary>{route.element}</GlobalErrorBoundary>
+  element: (
+    <BreadcrumbProvider>
+      <GlobalErrorBoundary>{route.element}</GlobalErrorBoundary>
+    </BreadcrumbProvider>
+  )
 })));
 
 export default router;

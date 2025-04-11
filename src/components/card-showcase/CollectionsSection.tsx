@@ -26,8 +26,8 @@ const CollectionsSection: React.FC<CollectionsSectionProps> = ({
     if (handleViewCollection) {
       handleViewCollection(collectionId);
     } else {
-      // Default behavior if not provided - using /collection/ singular form to match our routes
-      navigate(`/collection/${collectionId}`);
+      // Standardize to using the plural form for consistency
+      navigate(`/collections/${collectionId}`);
     }
   };
   

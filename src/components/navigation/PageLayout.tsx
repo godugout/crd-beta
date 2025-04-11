@@ -26,7 +26,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({
   hideNavigation = false,
   className = '',
   canonicalPath,
-  hideBreadcrumbs = true, // Default to hiding breadcrumbs unless explicitly shown
+  hideBreadcrumbs = false, // Changed default to show breadcrumbs by default
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
