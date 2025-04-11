@@ -10,25 +10,25 @@ import { NavigationItem } from './types';
 // Cards section navigation
 export const cardsNavItems: NavigationItem[] = [
   {
-    label: 'All Cards',
+    title: 'All Cards',
     path: '/cards',
     icon: Image,
     description: 'Browse your complete collection'
   },
   {
-    label: 'Create Card',
+    title: 'Create Card',
     path: '/cards/create',
     icon: PlusCircle,
     description: 'Create a new digital card'
   },
   {
-    label: 'Card Effects',
+    title: 'Card Effects',
     path: '/cards/effects',
     icon: Zap,
     description: 'Explore visual effects for cards'
   },
   {
-    label: 'Card Detector',
+    title: 'Card Detector',
     path: '/detector',
     icon: Eye,
     description: 'Scan and digitize physical cards'

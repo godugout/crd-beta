@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { Home, Image, Layers, Users, Menu } from 'lucide-react';
@@ -13,12 +14,7 @@ const MobileBottomNav: React.FC<MobileBottomNavProps> = ({ onOpenMenu }) => {
   const location = useLocation();
   
   // Primary navigation items for the bottom nav - using mainNavItems for consistency
-  const navItems = [
-    { path: '/', label: 'Home', icon: Home },
-    { path: '/cards', label: 'Cards', icon: Image },
-    { path: '/collections', label: 'Collections', icon: Layers },
-    { path: '/teams', label: 'Teams', icon: Users },
-  ];
+  const navItems = mainNavItems.slice(0, 4); // Only show the first 4 items
   
   // Check if path is active - improved to handle nested routes
   const isActive = (path: string) => {
@@ -42,7 +38,7 @@ const MobileBottomNav: React.FC<MobileBottomNavProps> = ({ onOpenMenu }) => {
         >
           <Link to={item.path}>
             <item.icon className="h-5 w-5" />
-            <span className="sr-only">{item.label}</span>
+            <span className="sr-only">{item.title}</span>
           </Link>
         </MobileTouchButton>
       ))}

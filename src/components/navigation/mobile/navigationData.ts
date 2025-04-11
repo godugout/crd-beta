@@ -5,7 +5,8 @@ import {
   cardsNavItems, 
   collectionsNavItems, 
   teamsNavItems, 
-  featuresNavItems 
+  featuresNavItems,
+  baseballNavItems
 } from '@/config/navigation';
 
 // Define navigation groups for better organization with consistent paths
@@ -13,7 +14,7 @@ export const navigationGroups: NavigationGroup[] = [
   {
     title: "MAIN",
     items: mainNavItems.map(item => ({
-      title: item.label,
+      title: item.title,
       path: item.path,
       icon: item.icon,
       highlight: item.highlight
@@ -22,7 +23,7 @@ export const navigationGroups: NavigationGroup[] = [
   {
     title: "CARDS",
     items: cardsNavItems.map(item => ({
-      title: item.label,
+      title: item.title || item.label,
       path: item.path,
       icon: item.icon,
       highlight: item.highlight
@@ -31,7 +32,7 @@ export const navigationGroups: NavigationGroup[] = [
   {
     title: "COLLECTIONS",
     items: collectionsNavItems.map(item => ({
-      title: item.label,
+      title: item.title || item.label,
       path: item.path,
       icon: item.icon,
       highlight: item.highlight
@@ -40,7 +41,7 @@ export const navigationGroups: NavigationGroup[] = [
   {
     title: "TEAMS",
     items: teamsNavItems.map(item => ({
-      title: item.label,
+      title: item.title || item.label,
       path: item.path,
       icon: item.icon,
       highlight: item.highlight
@@ -49,7 +50,16 @@ export const navigationGroups: NavigationGroup[] = [
   {
     title: "FEATURES",
     items: featuresNavItems.map(item => ({
-      title: item.label,
+      title: item.title || item.label,
+      path: item.path,
+      icon: item.icon,
+      highlight: item.highlight
+    }))
+  },
+  {
+    title: "BASEBALL",
+    items: baseballNavItems.map(item => ({
+      title: item.title || item.label,
       path: item.path,
       icon: item.icon,
       highlight: item.highlight

@@ -59,16 +59,10 @@ const MainNavigation: React.FC = () => {
     return null;
   }
 
-  // Updated mapNavItems function to handle optional description
-  const mapNavItems = (items: Array<{
-    label: string;
-    path: string;
-    icon: React.ElementType;
-    description?: string;
-    highlight?: boolean;
-  }>): NavigationItemProps[] => {
+  // Updated mapNavItems function to handle the updated NavigationItem type
+  const mapNavItems = (items: Array<any>): NavigationItemProps[] => {
     return items.map(item => ({
-      title: item.label,
+      title: item.title || item.label,
       path: item.path,
       icon: item.icon,
       description: item.description || '',

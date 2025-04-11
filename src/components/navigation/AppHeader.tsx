@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Search, PlusCircle, User, Menu, X } from 'lucide-react';
@@ -59,7 +60,7 @@ const AppHeader: React.FC = () => {
                   isActive(item.path) ? 'text-primary font-medium' : ''
                 }`}
               >
-                {item.label}
+                {item.title}
               </Link>
             ))}
 
@@ -124,7 +125,7 @@ const AppHeader: React.FC = () => {
               >
                 <span className="flex items-center">
                   {item.icon && <item.icon className="h-5 w-5 mr-2" />}
-                  {item.label}
+                  {item.title}
                 </span>
               </Link>
             ))}

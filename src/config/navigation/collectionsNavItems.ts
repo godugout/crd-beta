@@ -10,25 +10,25 @@ import { NavigationItem } from './types';
 // Collections section navigation
 export const collectionsNavItems: NavigationItem[] = [
   {
-    label: 'My Collections',
+    title: 'My Collections',
     path: '/collections',
     icon: Layers,
     description: 'View your organized collections'
   },
   {
-    label: 'Create Collection',
+    title: 'Create Collection',
     path: '/collections/create',
     icon: PlusCircle,
     description: 'Create a new collection'
   },
   {
-    label: 'Memory Packs',
+    title: 'Memory Packs',
     path: '/packs',
     icon: Package,
     description: 'Themed collections of memories'
   },
   {
-    label: 'Featured Collections',
+    title: 'Featured Collections',
     path: '/collections/featured',
     icon: Sparkles,
     description: 'Discover curated collections'

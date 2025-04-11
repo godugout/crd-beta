@@ -11,31 +11,31 @@ import { NavigationItem } from './types';
 // Main navigation items that appear in both desktop and mobile navigation
 export const mainNavItems: NavigationItem[] = [
   { 
-    label: 'Home', 
+    title: 'Home', 
     path: '/',
     icon: Home,
     description: 'Dashboard and overview'
   },
   { 
-    label: 'Cards', 
+    title: 'Cards', 
     path: '/cards',
     icon: Image,
     description: 'Your digital card collection'
   },
   { 
-    label: 'Collections', 
+    title: 'Collections', 
     path: '/collections',
     icon: Layers,
     description: 'Organized card collections'
   },
   { 
-    label: 'Teams', 
+    title: 'Teams', 
     path: '/teams',
     icon: Users,
     description: 'Team-based collections'
   },
   { 
-    label: 'Community', 
+    title: 'Community', 
     path: '/community',
     icon: MessageCircle,
     description: 'Connect with other collectors'

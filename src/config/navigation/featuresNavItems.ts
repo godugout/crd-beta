@@ -10,26 +10,26 @@ import { NavigationItem } from './types';
 // Features section navigation
 export const featuresNavItems: NavigationItem[] = [
   {
-    label: 'AR Card Viewer',
+    title: 'AR Card Viewer',
     path: '/ar-viewer',
     icon: Eye,
     description: 'View cards in augmented reality'
   },
   {
-    label: 'Card Animation',
+    title: 'Card Animation',
     path: '/animation',
     icon: Zap,
     description: 'Animated card effects'
   },
   {
-    label: 'Game Day Mode',
+    title: 'Game Day Mode',
     path: '/game-day',
     icon: PlayCircle,
     description: 'Enhanced experience for game day',
     highlight: true
   },
   {
-    label: 'Labs',
+    title: 'Labs',
     path: '/labs',
     icon: FlaskConical,
     description: 'Experimental features',

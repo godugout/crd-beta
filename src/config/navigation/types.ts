@@ -2,10 +2,10 @@
 import { LucideIcon } from 'lucide-react';
 
 export type NavigationItem = {
-  label: string;
+  title: string;
   path: string;
-  icon: React.ElementType;  // Changed from optional to required
+  icon: React.ElementType;
   description?: string;
   highlight?: boolean;
-  title?: string; // Added for compatibility with navigation components
+  label?: string; // Added for backward compatibility
 };
