@@ -1,18 +1,18 @@
 
 import React from 'react';
-import { ArrowUp, ArrowDown, Plus, Trash, Image, Type, Square, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Trash, ChevronUp, ChevronDown, Eye, EyeOff } from 'lucide-react';
 import { CardLayer } from './CardCreator';
 
 interface CardLayersPanelProps {
   layers: CardLayer[];
-  activeLayerId?: string;
-  onLayerSelect: (id: string) => void;
-  onLayerUpdate: (id: string, updates: Partial<CardLayer>) => void;
-  onAddLayer: (layer: Omit<CardLayer, 'id'>) => void;
-  onDeleteLayer: (id: string) => void;
-  onMoveLayerUp: (id: string) => void;
-  onMoveLayerDown: (id: string) => void;
+  activeLayerId: string | null;
+  onLayerSelect: (layerId: string) => void;
+  onLayerUpdate: (layerId: string, updates: Partial<CardLayer>) => void;
+  onAddLayer: (type: 'image' | 'text' | 'shape') => void;
+  onDeleteLayer: (layerId: string) => void;
+  onMoveLayerUp: (layerId: string) => void;
+  onMoveLayerDown: (layerId: string) => void;
 }
 
 const CardLayersPanel: React.FC<CardLayersPanelProps> = ({
@@ -25,178 +25,131 @@ const CardLayersPanel: React.FC<CardLayersPanelProps> = ({
   onMoveLayerUp,
   onMoveLayerDown
 }) => {
-  const handleAddImageLayer = () => {
-    // This would typically open a file picker
-    onAddLayer({
-      type: 'image',
-      content: 'https://via.placeholder.com/300',
-      position: { x: 50, y: 50, z: layers.length },
-      size: { width: 50, height: 50 },
-      rotation: 0,
-      opacity: 1,
-      visible: true,
-      effectIds: []
-    });
-  };
-
-  const handleAddTextLayer = () => {
-    onAddLayer({
-      type: 'text',
-      content: 'New Text Layer',
-      position: { x: 100, y: 100, z: layers.length },
-      size: { width: 200, height: 50 },
-      rotation: 0,
-      opacity: 1,
-      visible: true,
-      effectIds: []
-    });
-  };
-
-  const handleAddShapeLayer = () => {
-    onAddLayer({
-      type: 'shape',
-      content: '#48BB78', // Color
-      position: { x: 150, y: 150, z: layers.length },
-      size: { width: 100, height: 100 },
-      rotation: 0,
-      opacity: 1,
-      visible: true,
-      effectIds: []
-    });
-  };
-
-  const toggleLayerVisibility = (id: string, isCurrentlyVisible: boolean) => {
-    onLayerUpdate(id, { visible: !isCurrentlyVisible });
-  };
-
-  const getLayerIcon = (type: string) => {
-    switch (type) {
-      case 'image': return <Image size={16} />;
-      case 'text': return <Type size={16} />;
-      case 'shape': return <Square size={16} />;
-      default: return null;
+  // Render layer content preview based on type
+  const renderLayerContent = (layer: CardLayer) => {
+    switch (layer.type) {
+      case 'image':
+        return typeof layer.content === 'string' ? (
+          <div className="w-6 h-6 rounded overflow-hidden">
+            <img src={layer.content} alt="Layer" className="w-full h-full object-cover" />
+          </div>
+        ) : (
+          <div className="w-6 h-6 bg-gray-200 rounded"></div>
+        );
+      case 'text':
+        return <span>{typeof layer.content === 'string' ? layer.content : 'Text'}</span>;
+      case 'shape':
+        return <div className="w-6 h-6 bg-blue-500 rounded"></div>;
+      default:
+        return <div className="w-6 h-6 bg-gray-200 rounded"></div>;
     }
   };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h3 className="text-lg font-medium mb-2">Layers</h3>
-        <p className="text-sm text-gray-500">
-          Manage the elements that make up your card design.
-        </p>
-      </div>
-
-      {/* Layer stack */}
-      <div className="space-y-2">
+    <div className="bg-white rounded-lg border p-4">
+      <h3 className="font-medium mb-3">Layers</h3>
+      
+      <div className="space-y-2 mb-4">
         {layers.length === 0 ? (
-          <div className="text-center py-4 bg-gray-50 rounded-md">
-            <p className="text-gray-500">No layers added yet</p>
+          <div className="text-center py-3 text-gray-400 border border-dashed rounded-md">
+            No layers added yet
           </div>
         ) : (
-          <div className="space-y-1">
-            {[...layers].reverse().map((layer) => (
-              <div
-                key={layer.id}
-                className={`flex items-center justify-between p-2 rounded-md cursor-pointer ${
-                  layer.id === activeLayerId ? 'bg-primary/10 border border-primary' : 'bg-gray-50 hover:bg-gray-100'
-                }`}
-                onClick={() => onLayerSelect(layer.id)}
-              >
-                <div className="flex items-center space-x-2">
-                  <div className="p-1 bg-white rounded border">
-                    {getLayerIcon(layer.type)}
-                  </div>
-                  <span className="text-sm truncate max-w-[150px]">
-                    {layer.type === 'text' ? layer.content : `${layer.type} Layer`}
-                  </span>
-                </div>
-                <div className="flex items-center space-x-1">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-7 w-7"
+          layers.map((layer) => (
+            <div 
+              key={layer.id}
+              className={`flex items-center p-2 cursor-pointer rounded-md ${activeLayerId === layer.id ? 'bg-gray-100' : 'hover:bg-gray-50'}`}
+              onClick={() => onLayerSelect(layer.id)}
+            >
+              <div className="flex-1 flex items-center space-x-2">
+                {layer.visible ? (
+                  <Eye 
+                    className="h-4 w-4 text-gray-500 cursor-pointer" 
                     onClick={(e) => {
                       e.stopPropagation();
-                      toggleLayerVisibility(layer.id, layer.visible);
+                      onLayerUpdate(layer.id, { visible: false });
                     }}
-                  >
-                    {layer.visible ? <Eye size={16} /> : <EyeOff size={16} />}
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-7 w-7"
+                  />
+                ) : (
+                  <EyeOff 
+                    className="h-4 w-4 text-gray-300 cursor-pointer" 
                     onClick={(e) => {
                       e.stopPropagation();
-                      onMoveLayerUp(layer.id);
+                      onLayerUpdate(layer.id, { visible: true });
                     }}
-                  >
-                    <ArrowUp size={16} />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-7 w-7"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onMoveLayerDown(layer.id);
-                    }}
-                  >
-                    <ArrowDown size={16} />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-7 w-7 text-red-500"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onDeleteLayer(layer.id);
-                    }}
-                  >
-                    <Trash size={16} />
-                  </Button>
+                  />
+                )}
+                <div className="flex-1">
+                  {renderLayerContent(layer)}
                 </div>
               </div>
-            ))}
-          </div>
+              
+              <div className="flex items-center space-x-1">
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-6 w-6"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onMoveLayerUp(layer.id);
+                  }}
+                >
+                  <ChevronUp className="h-4 w-4" />
+                </Button>
+                
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-6 w-6"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onMoveLayerDown(layer.id);
+                  }}
+                >
+                  <ChevronDown className="h-4 w-4" />
+                </Button>
+                
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-6 w-6 text-red-500"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDeleteLayer(layer.id);
+                  }}
+                >
+                  <Trash className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          ))
         )}
       </div>
-
-      {/* Add layer controls */}
-      <div className="flex gap-2">
+      
+      <div className="flex justify-between">
         <Button 
           variant="outline" 
-          size="sm" 
-          className="flex-1" 
-          onClick={handleAddImageLayer}
+          size="sm"
+          onClick={() => onAddLayer('text')}
         >
-          <Image size={16} className="mr-1" />
-          Image
+          Add Text
         </Button>
+        
         <Button 
           variant="outline" 
-          size="sm" 
-          className="flex-1" 
-          onClick={handleAddTextLayer}
+          size="sm"
+          onClick={() => onAddLayer('image')}
         >
-          <Type size={16} className="mr-1" />
-          Text
+          Add Image
         </Button>
+        
         <Button 
           variant="outline" 
-          size="sm" 
-          className="flex-1" 
-          onClick={handleAddShapeLayer}
+          size="sm"
+          onClick={() => onAddLayer('shape')}
         >
-          <Square size={16} className="mr-1" />
-          Shape
+          Add Shape
         </Button>
-      </div>
-
-      {/* Help text */}
-      <div className="text-xs text-gray-500 mt-4">
-        <p>Tip: Click and drag layers in the preview to position them.</p>
       </div>
     </div>
   );
