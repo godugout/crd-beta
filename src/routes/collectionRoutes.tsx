@@ -2,7 +2,7 @@
 import React from 'react';
 import { RouteObject } from 'react-router-dom';
 import Collections from '@/pages/Collections';
-import CollectionDetail from '@/pages/CollectionDetail';
+import CollectionDetail from '@/pages/collections/detail';
 import Gallery from '@/pages/Gallery';
 import Packs from '@/pages/Packs';
 import MemoryPackDetail from '@/pages/MemoryPackDetail';
