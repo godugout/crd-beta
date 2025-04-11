@@ -64,17 +64,17 @@ const CardMedia: React.FC<CardMediaProps> = ({ card, onView, className = '' }) =
   };
 
   return (
-    <div className={cn("relative overflow-hidden rounded-lg", className)}>
+    <div className={cn("relative overflow-hidden rounded-lg aspect-[2.5/3.5]", className)}>
       {/* Placeholder while loading */}
       {!isLoaded && !isError && (
-        <div className="w-full h-0 pb-[140%] bg-slate-200 flex items-center justify-center">
-          <Image className="h-12 w-12 text-slate-300 absolute" />
+        <div className="absolute inset-0 bg-slate-200 flex items-center justify-center">
+          <Image className="h-12 w-12 text-slate-300" />
         </div>
       )}
       
       {/* Error state - shows card details in a nicer format */}
       {isError && (
-        <div className="w-full h-0 pb-[140%] bg-gradient-to-b from-slate-200 to-slate-300 flex items-center justify-center">
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-200 to-slate-300 flex items-center justify-center">
           <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-600 p-4">
             <Image className="h-10 w-10 mb-2" />
             <div className="text-center">
@@ -110,14 +110,13 @@ const CardMedia: React.FC<CardMediaProps> = ({ card, onView, className = '' }) =
         src={imageSource}
         alt={card.title}
         className={cn(
-          "w-full h-full object-cover transition-all duration-300",
+          "absolute inset-0 w-full h-full object-cover transition-opacity duration-300",
           isLoaded ? "opacity-100" : "opacity-0",
           isError ? "hidden" : ""
         )}
         onLoad={handleImageLoad}
         onError={handleImageError}
         loading="lazy"
-        style={{ aspectRatio: "2.5/3.5" }}
       />
       
       {/* Overlay with actions */}

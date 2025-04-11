@@ -26,7 +26,7 @@ const CardGrid: React.FC<CardGridProps> = ({
     return (
       <div className={cn(`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 ${className}`)}>
         {[...Array(8)].map((_, index) => (
-          <div key={index} className="aspect-[3/4] bg-gray-100 rounded-lg animate-pulse"></div>
+          <div key={index} className="aspect-[2.5/3.5] bg-gray-100 rounded-lg animate-pulse"></div>
         ))}
       </div>
     );
