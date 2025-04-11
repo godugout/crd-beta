@@ -1,0 +1,30 @@
+
+import React from 'react';
+import { Users } from 'lucide-react';
+
+interface TeamHeaderProps {
+  name: string;
+  description: string;
+  logo?: string;
+  primaryColor?: string;
+}
+
+const TeamHeader: React.FC<TeamHeaderProps> = ({ name, description, logo, primaryColor }) => {
+  return (
+    <div className="flex items-center mb-8">
+      {logo ? (
+        <img src={logo} alt={name} className="h-16 w-16 mr-4" />
+      ) : (
+        <div className="h-16 w-16 rounded-full bg-gray-100 flex items-center justify-center mr-4">
+          <Users className="h-8 w-8 text-gray-500" />
+        </div>
+      )}
+      <div>
+        <h1 className="text-3xl font-bold" style={{ color: primaryColor }}>{name}</h1>
+        <p className="text-gray-600">{description}</p>
+      </div>
+    </div>
+  );
+};
+
+export default TeamHeader;
