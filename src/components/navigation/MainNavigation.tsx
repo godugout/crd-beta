@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { 
@@ -9,7 +8,7 @@ import { useMediaQuery } from '@/hooks/useMediaQuery';
 import NavigationSection, { NavigationItemProps } from './components/NavigationSection';
 import TeamNavigation from './components/TeamNavigation';
 import GameDayButton from './components/GameDayButton';
-import { cardsNavItems, collectionsNavItems, featuresNavItems } from '@/config/navigationConfig';
+import { cardsNavItems, collectionsNavItems, featuresNavItems } from '@/config/navigation';
 
 const MainNavigation: React.FC = () => {
   const isMobile = useMediaQuery('(max-width: 768px)');

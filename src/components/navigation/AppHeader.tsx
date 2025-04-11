@@ -1,11 +1,10 @@
-
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Search, PlusCircle, User, Menu, X } from 'lucide-react';
 import { useAuth } from '@/providers/AuthProvider';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
-import { mainNavItems } from '@/config/navigationConfig';
+import { mainNavItems } from '@/config/navigation';
 
 const AppHeader: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);

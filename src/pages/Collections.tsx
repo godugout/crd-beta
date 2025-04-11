@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import PageLayout from '@/components/navigation/PageLayout';
@@ -8,7 +7,7 @@ import { Container } from '@/components/ui/container';
 import { PlusCircle, Filter } from 'lucide-react';
 import CollectionGrid from '@/components/collections/CollectionGrid';
 import ContentTypeNavigation from '@/components/navigation/ContentTypeNavigation';
-import { collectionsNavItems } from '@/config/navigationConfig';
+import { collectionsNavItems } from '@/config/navigation';
 
 const Collections = () => {
   const { collections, isLoading } = useCards();

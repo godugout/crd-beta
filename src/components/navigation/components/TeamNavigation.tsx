@@ -8,7 +8,7 @@ import {
   NavigationMenuLink,
 } from "@/components/ui/navigation-menu";
 import { Users } from 'lucide-react';
-import { teamsNavItems } from '@/config/navigationConfig';
+import { teamsNavItems } from '@/config/navigation';
 import { cn } from '@/lib/utils';
 
 interface TeamNavigationProps {

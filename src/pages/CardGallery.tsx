@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { PlusCircle, Grid3X3 } from 'lucide-react';
 import PageLayout from '@/components/navigation/PageLayout';
 import CardGalleryComponent from '@/components/CardGallery';
-import { cardsNavItems } from '@/config/navigationConfig';
+import { cardsNavItems } from '@/config/navigation';
 import ContentTypeNavigation from '@/components/navigation/ContentTypeNavigation';
 
 const CardGallery = () => {

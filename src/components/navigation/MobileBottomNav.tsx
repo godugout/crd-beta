@@ -1,10 +1,9 @@
-
 import React from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { Home, Image, Layers, Users, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { MobileBottomBar, MobileTouchButton } from '@/components/ui/mobile-controls';
-import { mainNavItems } from '@/config/navigationConfig';
+import { mainNavItems } from '@/config/navigation';
 
 interface MobileBottomNavProps {
   onOpenMenu: () => void;
