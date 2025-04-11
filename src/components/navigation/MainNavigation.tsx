@@ -53,13 +53,19 @@ const MainNavigation: React.FC = () => {
   }
 
   // Convert navigation items to the format expected by NavigationSection component
-  const mapNavItems = (items: typeof cardsNavItems): NavigationItemProps[] => {
+  const mapNavItems = (items: Array<{
+    label: string;
+    path: string;
+    icon: React.ElementType;
+    description: string;
+    highlight?: boolean;
+  }>): NavigationItemProps[] => {
     return items.map(item => ({
       title: item.label,  // Map label to title
       path: item.path,
       icon: item.icon,
       description: item.description,
-      highlight: 'highlight' in item ? item.highlight : undefined
+      highlight: item.highlight // Now properly typed as optional boolean
     }));
   };
 
