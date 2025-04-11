@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
@@ -7,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, SortDesc, Upload } from 'lucide-react';
+import { ArrowLeft, Upload, SortDesc } from 'lucide-react';
 import { Series } from '@/lib/types/CardTypes';
 import { useEnhancedCards } from '@/context/CardEnhancedContext';
 import { toast } from 'sonner';
@@ -68,7 +67,8 @@ const SeriesManager: React.FC<SeriesManagerProps> = ({ initialSeries }) => {
       
     // Save series
     if (initialSeries?.id) {
-      updateSeries(seriesWithId as Series);
+      // Fix: Pass series ID as the first argument and the updates as the second argument
+      updateSeries(initialSeries.id, seriesWithId as Series);
       toast.success('Series updated successfully');
     } else {
       addSeries(seriesWithId as Series);
