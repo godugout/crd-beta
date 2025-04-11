@@ -13,6 +13,7 @@ interface PageLayoutProps {
   fullWidth?: boolean;
   hideNavigation?: boolean;
   className?: string;
+  canonicalPath?: string;
 }
 
 const PageLayout: React.FC<PageLayoutProps> = ({
@@ -22,6 +23,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({
   fullWidth = false,
   hideNavigation = false,
   className = '',
+  canonicalPath,
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -30,6 +32,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({
       <Helmet>
         <title>{title}</title>
         <meta name="description" content={description} />
+        {canonicalPath && <link rel="canonical" href={`https://cardshow.app${canonicalPath}`} />}
       </Helmet>
       
       {!hideNavigation && (
