@@ -5,15 +5,16 @@ import PageLayout from '@/components/navigation/PageLayout';
 import CardGallery from '@/components/CardGallery';
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import { useMobileOptimization } from '@/hooks/useMobileOptimization';
-import GalleryHeader from '@/components/gallery/GalleryHeader';
 import useGalleryCards from '@/components/gallery/useGalleryCards';
 import FullscreenViewer from '@/components/gallery/FullscreenViewer';
+import { PlusCircle } from 'lucide-react';
 
 const Gallery = () => {
   const { isMobile } = useMobileOptimization();
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
   
   const {
@@ -44,24 +45,22 @@ const Gallery = () => {
   return (
     <PageLayout
       title="Card Gallery"
-      description="Browse your digital cards and collections"
+      onSearch={setSearchQuery}
+      searchPlaceholder="Search cards..."
+      primaryAction={{
+        label: "New Card",
+        icon: <PlusCircle className="mr-2 h-5 w-5" />,
+        href: "/cards/create"
+      }}
     >
-      <div className="container mx-auto max-w-6xl px-4">
-        <div className="py-6">
-          <div className="flex items-center gap-3 mb-2">
-            <h1 className="text-3xl font-bold text-foreground">Your Card Gallery</h1>
-          </div>
-          <p className="text-muted-foreground">
-            Browse, search, and manage your digital card collection
-          </p>
-        </div>
-        
+      <div className="container mx-auto max-w-6xl px-4">        
         <ErrorBoundary>
           <CardGallery 
             viewMode={viewMode} 
             onCardClick={handleCardClick} 
             cards={displayCards}
             isLoading={isLoading}
+            searchQuery={searchQuery}
           />
         </ErrorBoundary>
       </div>

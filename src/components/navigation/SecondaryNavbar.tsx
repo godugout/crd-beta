@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
-import { ChevronDown, ChevronUp, Maximize, Search } from 'lucide-react';
-import { useLocation } from 'react-router-dom';
+import { ChevronDown, ChevronUp, Maximize, Search, PlusCircle } from 'lucide-react';
+import { useLocation, Link } from 'react-router-dom';
 import { 
   Breadcrumb, 
   BreadcrumbList,
@@ -26,6 +26,12 @@ interface SecondaryNavbarProps {
   }[];
   searchPlaceholder?: string;
   onSearch?: (term: string) => void;
+  primaryAction?: {
+    label: string;
+    icon?: React.ReactNode;
+    onClick?: () => void;
+    href?: string;
+  };
 }
 
 export const SecondaryNavbar = ({
@@ -36,7 +42,8 @@ export const SecondaryNavbar = ({
   hideDescription = false,
   stats = [],
   searchPlaceholder = "Search...",
-  onSearch
+  onSearch,
+  primaryAction
 }: SecondaryNavbarProps) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -151,8 +158,25 @@ export const SecondaryNavbar = ({
             </div>
           </div>
           
-          {/* Right side - Actions and Collapse Toggle */}
+          {/* Right side - Primary Action, Actions and Collapse Toggle */}
           <div className="flex items-center gap-2 mt-2 md:mt-0 justify-between md:justify-end">
+            {/* Primary Action Button */}
+            {primaryAction && !isCollapsed && (
+              <Button asChild className="bg-athletics-gold text-gray-900 hover:bg-athletics-gold-dark mr-2">
+                {primaryAction.href ? (
+                  <Link to={primaryAction.href}>
+                    {primaryAction.icon}
+                    {primaryAction.label}
+                  </Link>
+                ) : (
+                  <button onClick={primaryAction.onClick}>
+                    {primaryAction.icon}
+                    {primaryAction.label}
+                  </button>
+                )}
+              </Button>
+            )}
+            
             {/* Actions */}
             {actions && (
               <div className="flex items-center gap-2">

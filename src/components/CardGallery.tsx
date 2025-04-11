@@ -17,6 +17,7 @@ interface CardGalleryProps {
   collectionId?: string;
   tags?: string[];
   isLoading?: boolean;
+  searchQuery?: string;
 }
 
 const CardGallery: React.FC<CardGalleryProps> = ({ 
@@ -27,7 +28,8 @@ const CardGallery: React.FC<CardGalleryProps> = ({
   teamId,
   collectionId,
   tags: initialTags,
-  isLoading: propIsLoading = false
+  isLoading: propIsLoading = false,
+  searchQuery = ''
 }) => {
   const navigate = useNavigate();
   const [viewMode, setViewMode] = useState(initialViewMode);
@@ -49,6 +51,17 @@ const CardGallery: React.FC<CardGalleryProps> = ({
   // Combined loading state
   const isLoadingAny = isLoading || isLoadingEffects;
 
+  // Filter cards based on search query
+  const filteredCards = useMemo(() => {
+    if (!searchQuery) return cards;
+    const lowerQuery = searchQuery.toLowerCase();
+    return cards.filter(card => 
+      card.title?.toLowerCase().includes(lowerQuery) || 
+      card.description?.toLowerCase().includes(lowerQuery) ||
+      card.tags?.some(tag => tag.toLowerCase().includes(lowerQuery))
+    );
+  }, [cards, searchQuery]);
+
   const handleCardItemClick = (cardId: string) => {
     if (onCardClick) {
       onCardClick(cardId);
@@ -61,29 +74,19 @@ const CardGallery: React.FC<CardGalleryProps> = ({
   const getCardEffects = (cardId: string) => {
     return [];
   };
-  
-  // Debug log
-  console.log("CardGallery rendering with cards:", cards.length, "loading:", isLoadingAny);
 
   return (
-    <div className={cn("p-4", className)}>
+    <div className={cn("", className)}>
       <ErrorBoundary>
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold text-center">Card Gallery</h2>
-          <p className="text-muted-foreground text-center text-sm mt-1">
-            Explore your digital card collection
-          </p>
-        </div>
-        
         <CardGridWrapper 
-          cards={cards}
+          cards={filteredCards}
           onCardClick={handleCardItemClick} 
           isLoading={isLoadingAny}
           getCardEffects={getCardEffects}
           error={contextError}
         />
         
-        {cards.length === 0 && !isLoadingAny && (
+        {filteredCards.length === 0 && !isLoadingAny && (
           <div className="text-center py-12">
             <p className="text-muted-foreground">No cards found</p>
           </div>
