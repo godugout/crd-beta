@@ -2,7 +2,7 @@
 import { useContext } from 'react';
 import { useAuth as useAuthFromProvider } from '@/providers/AuthProvider';
 import { AuthContext } from '@/context/auth/AuthContext';
-import { AuthContextType as OldAuthContextType } from '@/context/auth/types';
+import { AuthContextType } from '@/context/auth/types';
 import { User } from '@/lib/types';
 
 // Define a unified type that encompasses both auth context types
@@ -26,7 +26,7 @@ export interface UnifiedAuthContextType {
 export const useAuth = (): UnifiedAuthContextType => {
   try {
     // Try to use the new AuthProvider
-    return useAuthFromProvider();
+    return useAuthFromProvider() as UnifiedAuthContextType;
   } catch (error) {
     // Fall back to the old AuthContext
     const context = useContext(AuthContext);
@@ -36,13 +36,13 @@ export const useAuth = (): UnifiedAuthContextType => {
     
     // Add compatibility layer for old context
     const compatContext: UnifiedAuthContextType = {
-      ...context,
+      ...context as AuthContextType,
       // Map properties from old context to match new context properties
       isAuthenticated: !!context.user,
-      signInWithProvider: async () => {
+      signInWithProvider: async (provider: 'google' | 'github' | 'facebook') => {
         throw new Error('Social login not supported with old auth provider');
       },
-      updateUserProfile: async () => {
+      updateUserProfile: async (data: Partial<User>) => {
         throw new Error('Profile updates not supported with old auth provider');
       }
     };

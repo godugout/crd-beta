@@ -14,4 +14,9 @@ export interface AuthContextType {
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, name?: string) => Promise<void>;
   signOut: () => Promise<void>;
+  // Adding optional properties to make it compatible with the new context
+  isAuthenticated?: boolean;
+  signInWithProvider?: (provider: 'google' | 'github' | 'facebook') => Promise<void>;
+  updateUserProfile?: (data: Partial<User>) => Promise<void>;
 }
+
