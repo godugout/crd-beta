@@ -16,41 +16,72 @@ export const useTeamMembers = (teamId?: string) => {
       setError(null);
 
       try {
-        const { data, error } = await supabase
+        // First query to properly get team members
+        const { data: memberData, error: memberError } = await supabase
           .from('team_members')
           .select(`
             id,
             team_id,
             user_id,
             role,
-            joined_at,
-            profiles:user_id (
+            joined_at
+          `)
+          .eq('team_id', teamId);
+
+        if (memberError) {
+          throw memberError;
+        }
+
+        // If we have team members, fetch their profile data separately
+        if (memberData && memberData.length > 0) {
+          const userIds = memberData.map(member => member.user_id);
+          
+          // Query profiles for these users
+          const { data: profilesData, error: profilesError } = await supabase
+            .from('profiles')
+            .select(`
               id,
               full_name,
               avatar_url,
               username
-            )
-          `)
-          .eq('team_id', teamId);
+            `)
+            .in('id', userIds);
 
-        if (error) {
-          throw error;
+          if (profilesError) {
+            throw profilesError;
+          }
+
+          // Create a map of profile data by user ID for easy lookup
+          const profilesMap = new Map();
+          if (profilesData) {
+            profilesData.forEach(profile => {
+              profilesMap.set(profile.id, profile);
+            });
+          }
+
+          // Combine member data with profile data
+          const formattedMembers: TeamMember[] = memberData.map((member) => {
+            const profile = profilesMap.get(member.user_id);
+            
+            return {
+              id: member.id,
+              teamId: member.team_id,
+              userId: member.user_id,
+              role: member.role,
+              joinedAt: member.joined_at,
+              user: profile ? {
+                id: profile.id,
+                displayName: profile.full_name || profile.username || 'Unknown User',
+                avatarUrl: profile.avatar_url
+              } : undefined
+            };
+          });
+
+          setMembers(formattedMembers);
+        } else {
+          // No members found
+          setMembers([]);
         }
-
-        const formattedMembers: TeamMember[] = data.map((member) => ({
-          id: member.id,
-          teamId: member.team_id,
-          userId: member.user_id,
-          role: member.role,
-          joinedAt: member.joined_at,
-          user: member.profiles ? {
-            id: member.profiles.id,
-            displayName: member.profiles.full_name || member.profiles.username || 'Unknown User',
-            avatarUrl: member.profiles.avatar_url
-          } : undefined
-        }));
-
-        setMembers(formattedMembers);
       } catch (err: any) {
         console.error('Error fetching team members:', err);
         setError(err.message || 'Failed to fetch team members');

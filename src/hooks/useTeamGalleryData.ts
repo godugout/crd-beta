@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { TeamDisplayData } from '@/types/teams';
+import { PostgrestError } from '@supabase/supabase-js';
 
 export const useTeamGalleryData = (
   activeLeague: string,
@@ -24,7 +25,7 @@ export const useTeamGalleryData = (
             id, name, description, owner_id, created_at, updated_at, 
             logo_url, primary_color, secondary_color, founded_year, 
             city, state, stadium, league, division,
-            team_members (count)
+            team_members!team_id (count)
           `);
         
         // Apply filters if provided
@@ -42,20 +43,21 @@ export const useTeamGalleryData = (
           console.error('Error fetching teams:', error);
           setError('Failed to load teams. Please try again later.');
           setTeams([]);
-          setLoading(false);
           return;
         }
         
         if (data && Array.isArray(data)) {
           // Transform the data to match our interface
           const transformedTeams: TeamDisplayData[] = data.map(teamData => {
+            const memberCount = teamData.team_members?.[0]?.count || 0;
+            
             return {
               id: teamData.id,
               name: teamData.name,
-              slug: teamData.name.toLowerCase().replace(/\s+/g, '-'),
+              slug: teamData.name?.toLowerCase().replace(/\s+/g, '-') || '',
               description: teamData.description || '',
               owner_id: teamData.owner_id,
-              memberCount: teamData.team_members?.[0]?.count || 0,
+              memberCount: memberCount,
               primary_color: teamData.primary_color || '#cccccc',
               secondary_color: teamData.secondary_color,
               founded_year: teamData.founded_year,
