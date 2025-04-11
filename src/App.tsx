@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
 import Home from '@/pages/Home';
@@ -22,9 +23,10 @@ import OaklandLanding from '@/pages/oakland/OaklandLanding';
 import OaklandMemories from '@/pages/oakland/OaklandMemories';
 import OaklandMemoryDetail from '@/pages/oakland/OaklandMemoryDetail';
 import OaklandMemoryCreatorPage from '@/pages/OaklandMemoryCreator';
-import Labs from '@/pages/Labs'; // Import the Labs page
+import Labs from '@/pages/Labs'; 
 import { ThemeProvider } from '@/hooks/useTheme';
 import './App.css';
+import CardCreatorPage from '@/pages/CardCreatorPage';
 
 function App() {
   const [scrollPosition, setScrollPosition] = useNavigationState({
@@ -56,11 +58,18 @@ function App() {
       <div className="App">
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/cards/create" element={<Editor />} />
+          
+          {/* Card creation and editing routes */}
+          <Route path="/cards/create" element={<CardCreatorPage />} />
+          <Route path="/card/create" element={<CardCreatorPage />} />
           <Route path="/cards/edit/:id" element={<Editor />} />
+          
+          {/* Gallery and card detail routes */}
           <Route path="/gallery" element={<CardGallery />} />
           <Route path="/cards" element={<CardGallery />} />
           <Route path="/cards/:id" element={<CardDetail />} />
+          
+          {/* Card experience routes */}
           <Route path="/detector" element={<CardDetector />} />
           <Route path="/ar-viewer" element={<ArCardViewer />} />
           <Route path="/ar-viewer/:id" element={<ArCardViewer />} />
@@ -122,10 +131,14 @@ function App() {
           
           <Route path="/community" element={<CommunityPage />} />
           <Route path="/game-day" element={<GameDayMode />} />
+          
+          {/* Baseball card viewer routes */}
           <Route path="/baseball-card-viewer" element={<BaseballCardViewer />} />
+          <Route path="/baseball-card-viewer/:id" element={<BaseballCardViewer />} />
+          
           <Route path="/admin" element={<PageLayout title="Admin"><div>Admin Page</div></PageLayout>} />
           
-          {/* Updated Labs route */}
+          {/* Labs route */}
           <Route path="/labs/*" element={<Labs />} />
           <Route path="/experimental" element={<PageLayout title="Experimental Features"><div className="container mx-auto px-4 py-8">
             <h1 className="text-3xl font-bold mb-4">Experimental Features</h1>
@@ -150,6 +163,8 @@ function App() {
               <p className="text-center text-gray-500">Group Memory feature coming soon</p>
             </div>
           </div></PageLayout>} />
+          
+          {/* 404 route */}
           <Route path="*" element={<NotFound />} />
         </Routes>
         <Toaster position="bottom-right" theme="system" />

@@ -14,6 +14,8 @@ import OaklandMemories from '@/pages/OaklandMemories';
 import OaklandMemoryDetail from '@/pages/OaklandMemoryDetail';
 import CardCreationFlow from '@/components/card-editor/CardCreationFlow';
 import CardCreatorPage from '@/pages/CardCreatorPage';
+import BaseballCardViewer from '@/pages/BaseballCardViewer';
+import NotFound from '@/pages/NotFound';
 
 const router = createBrowserRouter([
   {
@@ -69,7 +71,7 @@ const router = createBrowserRouter([
     element: <CardCreationFlow />,
   },
   
-  // Card Creator routes - make sure they're properly configured
+  // Card Creator routes
   {
     path: "/card-creator",
     element: <CardCreatorPage />,
@@ -78,10 +80,25 @@ const router = createBrowserRouter([
     path: "/cards/create",
     element: <CardCreatorPage />,
   },
-  // Add a singular version too to match the navigation in the screenshot
   {
     path: "/card/create",
     element: <CardCreatorPage />,
+  },
+  
+  // Baseball Card Viewer routes - add proper parameter handling
+  {
+    path: "/baseball-card-viewer",
+    element: <BaseballCardViewer />,
+  },
+  {
+    path: "/baseball-card-viewer/:id",
+    element: <BaseballCardViewer />,
+  },
+  
+  // 404 catch-all route
+  {
+    path: "*",
+    element: <NotFound />,
   }
 ]);
 
