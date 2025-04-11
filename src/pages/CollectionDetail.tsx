@@ -6,21 +6,30 @@ import PageLayout from '@/components/navigation/PageLayout';
 import CardGrid from '@/components/gallery/CardGrid';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, Grid, List, Share2, Upload, Plus } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { ChevronLeft, Grid, List, Share2, Upload, Plus, Edit, Trash2 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import CardList from '@/components/gallery/CardList';
 import { toast } from 'sonner';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import { LoadingState } from '@/components/ui/loading-state';
 import AssetGallery from '@/components/dam/AssetGallery';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 const CollectionDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const { collections, cards, isLoading, updateCard } = useCards();
+  const { collections, cards, isLoading, updateCard, updateCollection, deleteCollection } = useCards();
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [isAssetGalleryOpen, setIsAssetGalleryOpen] = useState(false);
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [editFormData, setEditFormData] = useState({
+    name: '',
+    description: ''
+  });
   
   // Find the collection by ID
   const collection = collections.find(c => c.id === id);
@@ -30,6 +39,16 @@ const CollectionDetail = () => {
     if (!collection) return [];
     return cards.filter(card => collection.cardIds?.includes(card.id));
   }, [collection, cards]);
+
+  // Initialize edit form data when collection changes
+  useEffect(() => {
+    if (collection) {
+      setEditFormData({
+        name: collection.name,
+        description: collection.description || ''
+      });
+    }
+  }, [collection]);
 
   // Handle asset selection from gallery
   const handleAssetSelect = (asset: any) => {
@@ -48,6 +67,28 @@ const CollectionDetail = () => {
   const openAssetGalleryForCard = (cardId: string) => {
     setSelectedCardId(cardId);
     setIsAssetGalleryOpen(true);
+  };
+  
+  // Update collection details
+  const handleUpdateCollection = () => {
+    if (id) {
+      updateCollection(id, {
+        name: editFormData.name,
+        description: editFormData.description
+      });
+      setIsEditDialogOpen(false);
+      toast.success('Collection updated successfully');
+    }
+  };
+
+  // Delete collection and navigate back
+  const handleDeleteCollection = () => {
+    if (id) {
+      deleteCollection(id);
+      toast.success('Collection deleted successfully');
+      // Navigate back to collections list
+      window.location.href = '/collections';
+    }
   };
   
   // Log for debugging
@@ -146,9 +187,71 @@ const CollectionDetail = () => {
               >
                 <Share2 className="h-4 w-4" />
               </Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setIsEditDialogOpen(true)}
+              >
+                <Edit className="h-4 w-4" />
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setIsDeleteDialogOpen(true)}
+                className="text-red-500 hover:text-red-600"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
             </div>
           </div>
         </div>
+
+        {/* Edit Collection Dialog */}
+        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Edit Collection</DialogTitle>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <Label htmlFor="name">Name</Label>
+                <Input 
+                  id="name" 
+                  value={editFormData.name} 
+                  onChange={(e) => setEditFormData({...editFormData, name: e.target.value})}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="description">Description</Label>
+                <Textarea 
+                  id="description" 
+                  value={editFormData.description} 
+                  onChange={(e) => setEditFormData({...editFormData, description: e.target.value})}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>Cancel</Button>
+              <Button onClick={handleUpdateCollection}>Save Changes</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Collection Dialog */}
+        <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Delete Collection</DialogTitle>
+            </DialogHeader>
+            <div className="py-4">
+              <p>Are you sure you want to delete this collection? This action cannot be undone.</p>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={handleDeleteCollection}>Delete</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {/* Asset Gallery Dialog */}
         <Dialog open={isAssetGalleryOpen} onOpenChange={setIsAssetGalleryOpen}>
