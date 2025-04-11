@@ -2,7 +2,8 @@
 import React from 'react';
 import { createBrowserRouter } from 'react-router-dom';
 import Home from '@/pages/Home';
-import Gallery from '@/pages/Gallery';
+import Gallery from '@/pages/Gallery'; 
+import CardGallery from '@/pages/CardGallery';
 import Editor from '@/pages/Editor';
 import TeamGallery from '@/pages/TeamGallery';
 import TeamDetail from '@/pages/TeamDetail';
@@ -54,7 +55,7 @@ const router = createBrowserRouter([
   },
   {
     path: "/cards",
-    element: <CardShowcase />,
+    element: <CardGallery />,  // Using the updated CardGallery component
   },
   {
     path: "/collections",

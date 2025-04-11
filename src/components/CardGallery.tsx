@@ -42,7 +42,7 @@ const CardGallery: React.FC<CardGalleryProps> = ({
   const cards = propCards || contextCards || [];
   const isLoading = propIsLoading || contextIsLoading;
   
-  const { isMobile, shouldOptimizeAnimations } = useMobileOptimization();
+  const { isMobile } = useMobileOptimization();
   
   const { cardEffects, isLoading: isLoadingEffects } = { cardEffects: {}, isLoading: false };
   
@@ -66,11 +66,13 @@ const CardGallery: React.FC<CardGalleryProps> = ({
   console.log("CardGallery rendering with cards:", cards.length, "loading:", isLoadingAny);
 
   return (
-    <div className={className}>
+    <div className={cn("p-4", className)}>
       <ErrorBoundary>
-        <div className="mb-8 text-center">
-          <h2 className="text-xl font-semibold">Card Gallery</h2>
-          <p className="text-gray-500">Filters and tags are temporarily disabled for better image display</p>
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold text-center">Card Gallery</h2>
+          <p className="text-muted-foreground text-center text-sm mt-1">
+            Explore your digital card collection
+          </p>
         </div>
         
         <CardGridWrapper 
@@ -83,7 +85,7 @@ const CardGallery: React.FC<CardGalleryProps> = ({
         
         {cards.length === 0 && !isLoadingAny && (
           <div className="text-center py-12">
-            <p className="text-gray-500">No cards found</p>
+            <p className="text-muted-foreground">No cards found</p>
           </div>
         )}
       </ErrorBoundary>
