@@ -22,7 +22,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 }) => {
   const auth = useAuth();
   // Safely access isAuthenticated property with fallback
-  const isAuthenticated = typeof auth.isAuthenticated !== 'undefined' 
+  const isAuthenticated = 'isAuthenticated' in auth 
     ? auth.isAuthenticated 
     : !!auth.user;
   const { isLoading, user } = auth;

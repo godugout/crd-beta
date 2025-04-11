@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -21,7 +22,9 @@ const Auth = () => {
   const signInWithProvider = typeof auth.signInWithProvider === 'function' 
     ? auth.signInWithProvider 
     : () => Promise.resolve();
-  const error = auth.error || null;
+  
+  // Safely access error property which might not exist in all auth context implementations
+  const errorMessage = auth.error || null;
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -160,9 +163,9 @@ const Auth = () => {
                 <TabsTrigger value="signup">Sign Up</TabsTrigger>
               </TabsList>
               
-              {error && (
+              {errorMessage && (
                 <div className="bg-red-50 text-red-500 p-3 rounded-md mb-4 text-sm">
-                  {error}
+                  {errorMessage}
                 </div>
               )}
               
