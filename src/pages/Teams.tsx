@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Container } from '@/components/ui/container';
@@ -10,6 +11,7 @@ import { Plus, Search, Users, Grid3X3, List, Filter } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { useAuth } from '@/hooks/useAuth';
+import { toast } from 'sonner';
 
 interface Team {
   id: string;
@@ -61,9 +63,13 @@ const Teams: React.FC = () => {
       }));
       
       setTeams(formattedTeams);
+      if (formattedTeams.length > 0) {
+        toast.success(`Loaded ${formattedTeams.length} teams`);
+      }
     } catch (err: any) {
       console.error('Error fetching teams:', err);
       setError(err.message || 'Failed to fetch teams');
+      toast.error('Failed to fetch teams');
     } finally {
       setIsLoading(false);
     }
