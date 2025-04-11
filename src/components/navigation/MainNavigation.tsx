@@ -14,7 +14,6 @@ const MainNavigation: React.FC = () => {
   const isMobile = useMediaQuery('(max-width: 768px)');
   const location = useLocation();
   
-  // Determine active section from URL
   const getActiveSection = () => {
     const path = location.pathname;
     
@@ -46,12 +45,10 @@ const MainNavigation: React.FC = () => {
   
   const activeSection = getActiveSection();
   
-  // Hide desktop navigation on mobile devices
   if (isMobile) {
     return null;
   }
 
-  // Convert navigation items to the format expected by NavigationSection component
   const mapNavItems = (items: Array<{
     label: string;
     path: string;
@@ -60,11 +57,11 @@ const MainNavigation: React.FC = () => {
     highlight?: boolean;
   }>): NavigationItemProps[] => {
     return items.map(item => ({
-      title: item.label,  // Map label to title
+      title: item.label,
       path: item.path,
       icon: item.icon,
       description: item.description,
-      highlight: item.highlight // Now properly typed as optional boolean
+      highlight: item.highlight
     }));
   };
 
@@ -72,7 +69,6 @@ const MainNavigation: React.FC = () => {
     <div className="hidden lg:flex items-center gap-6">
       <NavigationMenu>
         <NavigationMenuList>
-          {/* Cards Navigation */}
           <NavigationSection 
             title="Cards"
             items={mapNavItems(cardsNavItems)}
@@ -87,7 +83,6 @@ const MainNavigation: React.FC = () => {
             }}
           />
 
-          {/* Collections Navigation */}
           <NavigationSection 
             title="Collections"
             items={mapNavItems(collectionsNavItems)}
@@ -95,10 +90,8 @@ const MainNavigation: React.FC = () => {
             layout="list"
           />
 
-          {/* Teams Navigation - Custom component due to unique layout */}
           <TeamNavigation isActive={activeSection === 'teams'} />
 
-          {/* Features Navigation */}
           <NavigationSection 
             title="Features"
             items={mapNavItems(featuresNavItems)}
@@ -109,7 +102,6 @@ const MainNavigation: React.FC = () => {
         </NavigationMenuList>
       </NavigationMenu>
 
-      {/* Game Day Mode prominent link */}
       <GameDayButton />
     </div>
   );
