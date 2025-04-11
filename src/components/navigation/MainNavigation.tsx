@@ -9,7 +9,7 @@ import { useMediaQuery } from '@/hooks/useMediaQuery';
 import NavigationSection from './components/NavigationSection';
 import TeamNavigation from './components/TeamNavigation';
 import GameDayButton from './components/GameDayButton';
-import { cardsNavigation, collectionsNavigation, featuresNavigation, teamsNavigation } from './components/NavigationItems';
+import { cardsNavItems, collectionsNavItems, featuresNavItems } from '@/config/navigationConfig';
 
 const MainNavigation: React.FC = () => {
   const isMobile = useMediaQuery('(max-width: 768px)');
@@ -35,9 +35,9 @@ const MainNavigation: React.FC = () => {
     
     if (
       path.startsWith('/ar-viewer') || 
-      path.startsWith('/comparison') || 
       path.startsWith('/animation') ||
-      path.startsWith('/game-day')
+      path.startsWith('/game-day') ||
+      path.startsWith('/labs')
     ) {
       return 'features';
     }
@@ -58,33 +58,37 @@ const MainNavigation: React.FC = () => {
         <NavigationMenuList>
           {/* Cards Navigation */}
           <NavigationSection 
-            title={cardsNavigation.title}
-            items={cardsNavigation.items}
-            isActive={activeSection === cardsNavigation.key}
-            layout={cardsNavigation.layout}
-            columns={cardsNavigation.columns}
-            featuredItem={cardsNavigation.featuredItem}
+            title="Cards"
+            items={cardsNavItems}
+            isActive={activeSection === 'cards'}
+            layout="grid"
+            columns={2}
+            featuredItem={{
+              title: 'Card Animations',
+              path: '/animation',
+              description: 'Experience animated card effects',
+              icon: featuresNavItems[1].icon
+            }}
           />
 
           {/* Collections Navigation */}
           <NavigationSection 
-            title={collectionsNavigation.title}
-            items={collectionsNavigation.items}
-            isActive={activeSection === collectionsNavigation.key}
-            layout={collectionsNavigation.layout}
-            featuredItem={collectionsNavigation.featuredItem}
+            title="Collections"
+            items={collectionsNavItems}
+            isActive={activeSection === 'collections'}
+            layout="list"
           />
 
           {/* Teams Navigation - Custom component due to unique layout */}
-          <TeamNavigation isActive={activeSection === teamsNavigation.key} />
+          <TeamNavigation isActive={activeSection === 'teams'} />
 
           {/* Features Navigation */}
           <NavigationSection 
-            title={featuresNavigation.title}
-            items={featuresNavigation.items}
-            isActive={activeSection === featuresNavigation.key}
-            layout={featuresNavigation.layout}
-            columns={featuresNavigation.columns}
+            title="Features"
+            items={featuresNavItems}
+            isActive={activeSection === 'features'}
+            layout="grid"
+            columns={2}
           />
         </NavigationMenuList>
       </NavigationMenu>

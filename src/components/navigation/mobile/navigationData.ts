@@ -9,7 +9,10 @@ import {
   Settings,
   PlayCircle, 
   Sparkles,
-  FlaskConical
+  FlaskConical,
+  Eye,
+  Zap,
+  MessageCircle
 } from 'lucide-react';
 import { NavigationGroup } from './types';
 
@@ -21,37 +24,42 @@ export const navigationGroups: NavigationGroup[] = [
       { title: 'Home', path: '/', icon: Home },
       { title: 'Cards', path: '/cards', icon: Image },
       { title: 'Collections', path: '/collections', icon: Layers },
-      { title: 'Memory Packs', path: '/packs', icon: Package },
       { title: 'Teams', path: '/teams', icon: Users },
+      { title: 'Community', path: '/community', icon: MessageCircle },
     ]
   },
   {
-    title: "CREATE",
+    title: "CARDS",
     items: [
+      { title: 'All Cards', path: '/cards', icon: Image },
       { title: 'Create Card', path: '/cards/create', icon: PlusSquare },
+      { title: 'Card Effects', path: '/cards/effects', icon: Zap },
+      { title: 'Card Detector', path: '/detector', icon: Eye },
+    ]
+  },
+  {
+    title: "COLLECTIONS",
+    items: [
+      { title: 'My Collections', path: '/collections', icon: Layers },
       { title: 'Create Collection', path: '/collections/create', icon: PlusSquare },
-      { title: 'Create Memory Pack', path: '/packs/create', icon: PlusSquare },
-      { title: 'Batch Operations', path: '/cards/batch', icon: Layers },
+      { title: 'Memory Packs', path: '/packs', icon: Package },
     ]
   },
   {
     title: "TEAMS",
     items: [
+      { title: 'All Teams', path: '/teams', icon: Users },
       { title: 'Oakland A\'s', path: '/teams/oakland', icon: Users },
       { title: 'Game Day Mode', path: '/game-day', icon: PlayCircle, highlight: true },
     ]
   },
   {
-    title: "MEDIA",
+    title: "FEATURES",
     items: [
-      { title: 'Media Library', path: '/media-library', icon: Image },
-    ]
-  },
-  {
-    title: "LABS",
-    items: [
+      { title: 'AR Card Viewer', path: '/ar-viewer', icon: Eye },
+      { title: 'Card Animation', path: '/animation', icon: Zap },
+      { title: 'Game Day Mode', path: '/game-day', icon: PlayCircle, highlight: true },
       { title: 'Dugout Labs', path: '/labs', icon: FlaskConical, highlight: true },
-      { title: 'Group Memory', path: '/group-memory', icon: Users },
     ]
   }
 ];

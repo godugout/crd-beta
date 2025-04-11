@@ -55,15 +55,27 @@ const router = createBrowserRouter([
   },
   {
     path: "/cards",
-    element: <CardGallery />,  // Using the updated CardGallery component
+    element: <CardGallery />,
+  },
+  {
+    path: "/cards/effects",
+    element: <CardGallery />, // Should be implemented as a dedicated page
   },
   {
     path: "/collections",
     element: <Collections />,
   },
   {
+    path: "/collections/featured",
+    element: <Collections />, // Should be implemented as a dedicated page
+  },
+  {
     path: "/teams",
     element: <Teams />,
+  },
+  {
+    path: "/teams/sf-giants",
+    element: <TeamDetail />, // Should be updated with proper ID
   },
   {
     path: "/community",
@@ -84,6 +96,18 @@ const router = createBrowserRouter([
   {
     path: "/search",
     element: <Search />,
+  },
+  {
+    path: "/detector",
+    element: <CardDetector />,
+  },
+  {
+    path: "/ar-viewer",
+    element: <BaseballCardViewer />,
+  },
+  {
+    path: "/animation",
+    element: <CardShowcase />, // Should be implemented as a dedicated page
   },
   
   // Protected routes
@@ -116,10 +140,6 @@ const router = createBrowserRouter([
     element: <CollectionDetail />,
   },
   {
-    path: "/card-detector",
-    element: <ProtectedRoute><CardDetector /></ProtectedRoute>,
-  },
-  {
     path: "/teams/oakland/memories",
     element: <OaklandMemories />,
   },
@@ -144,6 +164,14 @@ const router = createBrowserRouter([
   {
     path: "/card/create",
     element: <ProtectedRoute><CardCreatorPage /></ProtectedRoute>,
+  },
+  {
+    path: "/collections/create",
+    element: <ProtectedRoute><Collections /></ProtectedRoute>, // Should be updated with proper create view
+  },
+  {
+    path: "/collections/new",
+    element: <ProtectedRoute><Collections /></ProtectedRoute>, // Should be updated with proper create view
   },
   
   // Baseball Card Viewer routes

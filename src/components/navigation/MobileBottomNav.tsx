@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useLocation, Link } from 'react-router-dom';
-import { Home, Users, Package, PlayCircle, Menu } from 'lucide-react';
+import { Home, Image, Layers, Users, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { MobileBottomBar, MobileTouchButton } from '@/components/ui/mobile-controls';
 
@@ -12,14 +12,18 @@ interface MobileBottomNavProps {
 const MobileBottomNav: React.FC<MobileBottomNavProps> = ({ onOpenMenu }) => {
   const location = useLocation();
   
+  // Primary navigation items for the bottom nav
+  const navItems = [
+    { path: '/', label: 'Home', icon: Home },
+    { path: '/cards', label: 'Cards', icon: Image },
+    { path: '/collections', label: 'Collections', icon: Layers },
+    { path: '/teams', label: 'Teams', icon: Users },
+  ];
+  
   // Check if path is active - improved to handle nested routes
   const isActive = (path: string) => {
     if (path === '/') {
       return location.pathname === '/';
-    }
-    
-    if (path === '/cards') {
-      return location.pathname.startsWith('/cards') || location.pathname === '/gallery';
     }
     
     return location.pathname.startsWith(path);
@@ -27,57 +31,21 @@ const MobileBottomNav: React.FC<MobileBottomNavProps> = ({ onOpenMenu }) => {
   
   return (
     <MobileBottomBar className="flex items-center justify-around bg-background/90 backdrop-blur-sm border-t px-1 py-1.5">
-      <MobileTouchButton
-        hapticFeedback
-        variant="ghost"
-        size="icon"
-        className={`rounded-full ${isActive('/') ? 'bg-accent text-accent-foreground' : ''}`}
-        asChild
-      >
-        <Link to="/">
-          <Home className="h-5 w-5" />
-          <span className="sr-only">Home</span>
-        </Link>
-      </MobileTouchButton>
-      
-      <MobileTouchButton
-        hapticFeedback
-        variant="ghost"
-        size="icon"
-        className={`rounded-full ${isActive('/teams') ? 'bg-accent text-accent-foreground' : ''}`}
-        asChild
-      >
-        <Link to="/teams">
-          <Users className="h-5 w-5" />
-          <span className="sr-only">Teams</span>
-        </Link>
-      </MobileTouchButton>
-      
-      <MobileTouchButton
-        hapticFeedback
-        variant="ghost"
-        size="icon"
-        className={`rounded-full ${isActive('/cards') ? 'bg-accent text-accent-foreground' : ''}`}
-        asChild
-      >
-        <Link to="/cards">
-          <Package className="h-5 w-5" />
-          <span className="sr-only">Cards</span>
-        </Link>
-      </MobileTouchButton>
-      
-      <MobileTouchButton
-        hapticFeedback
-        variant="ghost"
-        size="icon"
-        className={`rounded-full ${isActive('/game-day') ? 'bg-accent text-accent-foreground' : ''}`}
-        asChild
-      >
-        <Link to="/game-day">
-          <PlayCircle className="h-5 w-5" />
-          <span className="sr-only">Game Day</span>
-        </Link>
-      </MobileTouchButton>
+      {navItems.map((item) => (
+        <MobileTouchButton
+          key={item.path}
+          hapticFeedback
+          variant="ghost"
+          size="icon"
+          className={`rounded-full ${isActive(item.path) ? 'bg-accent text-accent-foreground' : ''}`}
+          asChild
+        >
+          <Link to={item.path}>
+            <item.icon className="h-5 w-5" />
+            <span className="sr-only">{item.label}</span>
+          </Link>
+        </MobileTouchButton>
+      ))}
       
       <Button
         onClick={onOpenMenu}

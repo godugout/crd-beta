@@ -1,10 +1,11 @@
 
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Search, PlusCircle, User } from 'lucide-react';
+import { Search, PlusCircle, User, Menu, X } from 'lucide-react';
 import { useAuth } from '@/providers/AuthProvider';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
+import { mainNavItems } from '@/config/navigationConfig';
 
 const AppHeader: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -12,7 +13,12 @@ const AppHeader: React.FC = () => {
   const { user, signIn, signOut } = useAuth();
 
   const isHomePage = location.pathname === '/';
-  const isCardDetailPage = location.pathname.includes('/cards/') && !location.pathname.includes('/cards/create');
+  const isActive = (path: string) => {
+    if (path === '/') {
+      return location.pathname === '/';
+    }
+    return location.pathname.startsWith(path);
+  };
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -32,13 +38,13 @@ const AppHeader: React.FC = () => {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-white/80 dark:bg-litmus-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-litmus-gray-800">
+    <header className="sticky top-0 z-50 w-full bg-background/80 backdrop-blur-md border-b border-border">
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <div className="flex items-center">
             <Link to="/" className="flex items-center" onClick={closeMenu}>
-              <span className="text-2xl font-bold bg-gradient-to-r from-litmus-green to-litmus-green-secondary bg-clip-text text-transparent">
+              <span className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
                 CardShow
               </span>
             </Link>
@@ -46,30 +52,17 @@ const AppHeader: React.FC = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-4">
-            <Link 
-              to="/cards" 
-              className="text-gray-600 hover:text-litmus-green dark:text-gray-200 dark:hover:text-litmus-green-light px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-litmus-gray-800 transition-colors"
-            >
-              Explore
-            </Link>
-            <Link 
-              to="/collections" 
-              className="text-gray-600 hover:text-litmus-green dark:text-gray-200 dark:hover:text-litmus-green-light px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-litmus-gray-800 transition-colors"
-            >
-              Collections
-            </Link>
-            <Link 
-              to="/teams" 
-              className="text-gray-600 hover:text-litmus-green dark:text-gray-200 dark:hover:text-litmus-green-light px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-litmus-gray-800 transition-colors"
-            >
-              Teams
-            </Link>
-            <Link 
-              to="/community" 
-              className="text-gray-600 hover:text-litmus-green dark:text-gray-200 dark:hover:text-litmus-green-light px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-litmus-gray-800 transition-colors"
-            >
-              Community
-            </Link>
+            {mainNavItems.map((item) => (
+              <Link 
+                key={item.path}
+                to={item.path} 
+                className={`text-foreground/70 hover:text-primary dark:text-foreground/70 dark:hover:text-primary px-3 py-2 rounded-lg hover:bg-accent/50 transition-colors ${
+                  isActive(item.path) ? 'text-primary font-medium' : ''
+                }`}
+              >
+                {item.label}
+              </Link>
+            ))}
 
             {/* Action Buttons */}
             <div className="ml-4 flex items-center space-x-2">
@@ -92,8 +85,8 @@ const AppHeader: React.FC = () => {
                 <Button onClick={handleSignInOut}>Sign In</Button>
               )}
               
-              <Button asChild className="btn-gradient">
-                <Link to="/card/create">
+              <Button asChild className="bg-primary hover:bg-primary/90">
+                <Link to="/cards/create">
                   <PlusCircle className="h-4 w-4 mr-2" />
                   <span>Create Card</span>
                 </Link>
@@ -101,7 +94,7 @@ const AppHeader: React.FC = () => {
             </div>
           </nav>
 
-          {/* Mobile Navigation */}
+          {/* Mobile Navigation Button */}
           <div className="flex md:hidden items-center space-x-2">
             <ThemeToggle />
             
@@ -119,36 +112,23 @@ const AppHeader: React.FC = () => {
 
       {/* Mobile Menu */}
       {isMenuOpen && (
-        <div className="md:hidden bg-white dark:bg-litmus-gray-900 border-t border-gray-200 dark:border-litmus-gray-800 animate-fade-in">
+        <div className="md:hidden bg-background border-t border-border animate-in fade-in slide-in-from-top-5 duration-300">
           <div className="container px-4 py-3 space-y-1">
-            <Link 
-              to="/cards" 
-              className="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-litmus-gray-800"
-              onClick={closeMenu}
-            >
-              Explore
-            </Link>
-            <Link 
-              to="/collections" 
-              className="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-litmus-gray-800"
-              onClick={closeMenu}
-            >
-              Collections
-            </Link>
-            <Link 
-              to="/teams" 
-              className="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-litmus-gray-800"
-              onClick={closeMenu}
-            >
-              Teams
-            </Link>
-            <Link 
-              to="/community" 
-              className="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-litmus-gray-800"
-              onClick={closeMenu}
-            >
-              Community
-            </Link>
+            {mainNavItems.map((item) => (
+              <Link 
+                key={item.path}
+                to={item.path} 
+                className={`block px-3 py-2 text-base font-medium rounded-lg hover:bg-accent/50 ${
+                  isActive(item.path) ? 'text-primary bg-accent/30' : 'text-foreground/70'
+                }`}
+                onClick={closeMenu}
+              >
+                <span className="flex items-center">
+                  {item.icon && <item.icon className="h-5 w-5 mr-2" />}
+                  {item.label}
+                </span>
+              </Link>
+            ))}
             
             <div className="pt-4">
               <Button
@@ -158,8 +138,8 @@ const AppHeader: React.FC = () => {
                 {user ? 'Sign Out' : 'Sign In'}
               </Button>
               
-              <Button asChild className="w-full btn-gradient">
-                <Link to="/card/create" onClick={closeMenu}>
+              <Button asChild className="w-full bg-primary hover:bg-primary/90">
+                <Link to="/cards/create" onClick={closeMenu}>
                   <PlusCircle className="h-4 w-4 mr-2" />
                   Create Card
                 </Link>

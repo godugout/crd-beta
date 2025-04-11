@@ -8,13 +8,27 @@ import {
   NavigationMenuLink,
 } from "@/components/ui/navigation-menu";
 import { Users } from 'lucide-react';
-import { teamsNavigation } from './NavigationItems';
+import { teamsNavItems } from '@/config/navigationConfig';
 
 interface TeamNavigationProps {
   isActive?: boolean;
 }
 
 const TeamNavigation: React.FC<TeamNavigationProps> = ({ isActive = false }) => {
+  // Featured teams with logos
+  const featuredTeams = [
+    {
+      name: 'Oakland A\'s',
+      path: '/teams/oakland',
+      logo: '/logo-oak.png' // Make sure this path exists
+    },
+    {
+      name: 'San Francisco Giants',
+      path: '/teams/sf-giants',
+      logo: '/logo-sfg.png' // Make sure this path exists
+    }
+  ];
+
   return (
     <NavigationMenuItem>
       <NavigationMenuTrigger className={isActive ? 'bg-accent' : ''}>
@@ -26,15 +40,17 @@ const TeamNavigation: React.FC<TeamNavigationProps> = ({ isActive = false }) => 
           <div className="grid gap-4">
             {/* Links to all teams and specific teams */}
             <ul className="grid grid-cols-2 gap-3">
-              {teamsNavigation.items.map((item) => (
+              {teamsNavItems.map((item) => (
                 <li key={item.path}>
                   <NavigationMenuLink asChild>
                     <Link
-                      className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                      className={`block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground ${
+                        item.highlight ? 'bg-[#EFB21E]/10 text-[#006341] font-medium' : ''
+                      }`}
                       to={item.path}
                     >
                       <div className="text-sm font-medium leading-none flex items-center gap-2">
-                        {item.icon && <item.icon className="h-4 w-4" />} {item.title}
+                        {item.icon && <item.icon className="h-4 w-4" />} {item.label}
                       </div>
                       {item.description && (
                         <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
@@ -51,7 +67,7 @@ const TeamNavigation: React.FC<TeamNavigationProps> = ({ isActive = false }) => 
             <div className="mt-4">
               <h4 className="mb-2 text-sm font-medium leading-none">Featured Teams</h4>
               <div className="flex gap-4 mt-3">
-                {teamsNavigation.featuredTeams.map((team) => (
+                {featuredTeams.map((team) => (
                   <Link
                     key={team.path}
                     to={team.path}
