@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { ChevronDown, ChevronUp, Maximize } from 'lucide-react';
+import { ChevronDown, ChevronUp, Maximize, Search } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import { 
   Breadcrumb, 
@@ -12,6 +12,7 @@ import { useBreadcrumbs } from '@/hooks/breadcrumbs/BreadcrumbContext';
 import { BreadcrumbItemComponent } from '@/components/navigation/components/BreadcrumbItem';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { Input } from '@/components/ui/input';
 
 interface SecondaryNavbarProps {
   title?: string;
@@ -19,6 +20,12 @@ interface SecondaryNavbarProps {
   actions?: React.ReactNode;
   hideBreadcrumbs?: boolean;
   hideDescription?: boolean;
+  stats?: {
+    count?: number;
+    label?: string;
+  }[];
+  searchPlaceholder?: string;
+  onSearch?: (term: string) => void;
 }
 
 export const SecondaryNavbar = ({
@@ -26,9 +33,13 @@ export const SecondaryNavbar = ({
   description,
   actions,
   hideBreadcrumbs = false,
-  hideDescription = false
+  hideDescription = false,
+  stats = [],
+  searchPlaceholder = "Search...",
+  onSearch
 }: SecondaryNavbarProps) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
   const { breadcrumbs } = useBreadcrumbs();
   const location = useLocation();
   
@@ -46,6 +57,13 @@ export const SecondaryNavbar = ({
     return null;
   }
 
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+    if (onSearch) {
+      onSearch(e.target.value);
+    }
+  };
+
   return (
     <div className={cn(
       "bg-white dark:bg-athletics-green-dark/20 border-b border-gray-200 dark:border-athletics-green-dark/30 transition-all duration-300",
@@ -54,7 +72,7 @@ export const SecondaryNavbar = ({
       <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
           {/* Left side - Breadcrumbs and Title/Description */}
-          <div className="flex flex-col flex-grow min-w-0">
+          <div className="flex flex-col min-w-0">
             {/* Breadcrumbs */}
             {!hideBreadcrumbs && breadcrumbs.length > 1 && (
               <div className={cn("transition-all duration-300", 
@@ -95,6 +113,42 @@ export const SecondaryNavbar = ({
                 )}
               </div>
             )}
+          </div>
+          
+          {/* Center section - Stats and Search */}
+          <div className={cn(
+            "flex-grow transition-all duration-300 md:mx-4 max-w-md",
+            isCollapsed ? "h-8 opacity-100" : "opacity-100"
+          )}>
+            <div className="flex items-center gap-4">
+              {/* Stats display */}
+              {stats.length > 0 && (
+                <div className="hidden md:flex items-center space-x-4">
+                  {stats.map((stat, index) => (
+                    <div key={index} className="text-sm text-gray-600 dark:text-gray-300">
+                      {stat.count !== undefined && (
+                        <span className="font-medium">{stat.count}</span>
+                      )}
+                      {" "}
+                      {stat.label}
+                    </div>
+                  ))}
+                </div>
+              )}
+              
+              {/* Search input */}
+              {onSearch !== undefined && (
+                <div className="relative flex-grow">
+                  <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-400" />
+                  <Input
+                    placeholder={searchPlaceholder}
+                    className="pl-8"
+                    value={searchTerm}
+                    onChange={handleSearchChange}
+                  />
+                </div>
+              )}
+            </div>
           </div>
           
           {/* Right side - Actions and Collapse Toggle */}

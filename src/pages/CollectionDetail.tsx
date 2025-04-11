@@ -26,6 +26,7 @@ const CollectionDetail = () => {
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
   const [editFormData, setEditFormData] = useState({
     name: '',
     description: ''
@@ -39,6 +40,17 @@ const CollectionDetail = () => {
     if (!collection) return [];
     return cards.filter(card => collection.cardIds?.includes(card.id));
   }, [collection, cards]);
+
+  // Filter cards based on search term
+  const filteredCards = React.useMemo(() => {
+    if (!searchTerm.trim()) return collectionCards;
+    
+    const lowerSearchTerm = searchTerm.toLowerCase();
+    return collectionCards.filter(card => 
+      card.title.toLowerCase().includes(lowerSearchTerm) || 
+      (card.description && card.description.toLowerCase().includes(lowerSearchTerm))
+    );
+  }, [collectionCards, searchTerm]);
 
   // Initialize edit form data when collection changes
   useEffect(() => {
@@ -89,6 +101,10 @@ const CollectionDetail = () => {
       // Navigate back to collections list
       window.location.href = '/collections';
     }
+  };
+
+  const handleSearch = (term: string) => {
+    setSearchTerm(term);
   };
   
   // Log for debugging
@@ -177,21 +193,22 @@ const CollectionDetail = () => {
     </>
   );
 
+  // Collection stats for secondary navbar
+  const collectionStats = [
+    { count: collectionCards.length, label: `card${collectionCards.length !== 1 ? 's' : ''}` },
+    { label: collection.visibility }
+  ];
+
   return (
     <PageLayout 
       title={collection.name} 
       description={collection.description || 'View cards in this collection'}
       actions={actionButtons}
+      stats={collectionStats}
+      onSearch={handleSearch}
+      searchPlaceholder="Search cards..."
     >
       <div className="container mx-auto px-4 py-4">
-        {/* Collection metadata display */}
-        <div className="flex items-center mt-2 text-sm text-gray-500 mb-4">
-          <span className="inline-flex items-center mr-4">
-            {collectionCards.length} card{collectionCards.length !== 1 ? 's' : ''}
-          </span>
-          <span className="capitalize">{collection.visibility}</span>
-        </div>
-
         {/* Edit Collection Dialog */}
         <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
           <DialogContent>
@@ -254,7 +271,15 @@ const CollectionDetail = () => {
           </DialogContent>
         </Dialog>
 
-        {collectionCards.length === 0 ? (
+        {filteredCards.length === 0 && collectionCards.length > 0 ? (
+          <Card className="text-center py-12">
+            <CardContent>
+              <h2 className="text-xl font-semibold mb-2">No matching cards found</h2>
+              <p className="text-gray-600 mb-6">Try a different search term</p>
+              <Button onClick={() => setSearchTerm('')}>Clear Search</Button>
+            </CardContent>
+          </Card>
+        ) : filteredCards.length === 0 ? (
           <Card className="text-center py-12">
             <CardContent>
               <h2 className="text-xl font-semibold mb-2">No cards in this collection yet</h2>
@@ -275,7 +300,7 @@ const CollectionDetail = () => {
                 <div>
                   {/* Enhanced card grid with image update capabilities */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                    {collectionCards.map(card => (
+                    {filteredCards.map(card => (
                       <Card key={card.id} className="overflow-hidden">
                         <div className="relative aspect-[3/4]">
                           <OptimizedImage 
@@ -307,7 +332,7 @@ const CollectionDetail = () => {
                 </div>
               ) : (
                 <CardList 
-                  cards={collectionCards}
+                  cards={filteredCards}
                   onCardClick={handleCardClick}
                   className=""
                 />

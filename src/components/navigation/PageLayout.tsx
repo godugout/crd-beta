@@ -18,6 +18,9 @@ interface PageLayoutProps {
   hideBreadcrumbs?: boolean;
   actions?: React.ReactNode;
   hideDescription?: boolean;
+  stats?: Array<{count?: number; label?: string}>;
+  onSearch?: (term: string) => void;
+  searchPlaceholder?: string;
 }
 
 const PageLayout: React.FC<PageLayoutProps> = ({
@@ -31,6 +34,9 @@ const PageLayout: React.FC<PageLayoutProps> = ({
   hideBreadcrumbs = false,
   actions,
   hideDescription = false,
+  stats,
+  onSearch,
+  searchPlaceholder,
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -53,6 +59,9 @@ const PageLayout: React.FC<PageLayoutProps> = ({
           hideBreadcrumbs={hideBreadcrumbs}
           actions={actions}
           hideDescription={hideDescription}
+          stats={stats}
+          onSearch={onSearch}
+          searchPlaceholder={searchPlaceholder}
         />
       )}
       
