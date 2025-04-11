@@ -1,127 +1,56 @@
 
 import React from 'react';
-import { useLocation } from 'react-router-dom';
-import { 
-  NavigationMenu, 
-  NavigationMenuList,
-} from "@/components/ui/navigation-menu";
-import { useMediaQuery } from '@/hooks/useMediaQuery';
-import NavigationSection, { NavigationItemProps } from './components/NavigationSection';
-import TeamNavigation from './components/TeamNavigation';
-import GameDayButton from './components/GameDayButton';
-import { 
-  cardsNavItems, 
-  collectionsNavItems, 
-  featuresNavItems,
-  baseballNavItems
-} from '@/config/navigation';
+import { Link, useLocation } from 'react-router-dom';
+import { Home, LayoutGrid, Library, Album, PlusCircle, Settings, Users, Shield } from 'lucide-react';
+import { useAuth } from '@/providers/AuthProvider';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
+
+const NavItem = ({ to, icon: Icon, label, isActive }: { to: string; icon: React.ElementType; label: string; isActive: boolean }) => (
+  <Link
+    to={to}
+    className={`flex items-center px-3 py-2 rounded-md transition-colors ${
+      isActive
+        ? 'bg-primary/10 text-primary'
+        : 'hover:bg-gray-100 dark:hover:bg-gray-800'
+    }`}
+  >
+    <Icon className="h-5 w-5 mr-2" />
+    <span>{label}</span>
+  </Link>
+);
 
 const MainNavigation: React.FC = () => {
-  const isMobile = useMediaQuery('(max-width: 768px)');
   const location = useLocation();
+  const { user } = useAuth();
   
-  const getActiveSection = () => {
-    const path = location.pathname;
-    
-    if (path === '/') return '';
-    
-    if (path.startsWith('/cards') || path === '/gallery' || path.startsWith('/detector')) {
-      return 'cards';
-    }
-    
-    if (path.startsWith('/collections') || path.startsWith('/packs')) {
-      return 'collections';
-    }
-    
-    if (path.startsWith('/teams')) {
-      return 'teams';
-    }
-    
-    if (
-      path.startsWith('/ar-viewer') || 
-      path.startsWith('/animation') ||
-      path.startsWith('/game-day') ||
-      path.startsWith('/labs')
-    ) {
-      return 'features';
-    }
-
-    if (path.startsWith('/baseball-archive')) {
-      return 'baseball';
-    }
-    
-    return '';
+  const isActive = (path: string) => {
+    if (path === '/' && location.pathname === '/') return true;
+    if (path !== '/' && location.pathname.startsWith(path)) return true;
+    return false;
   };
   
-  const activeSection = getActiveSection();
-  
-  if (isMobile) {
-    return null;
-  }
-
-  // Updated mapNavItems function to handle the updated NavigationItem type
-  const mapNavItems = (items: Array<any>): NavigationItemProps[] => {
-    return items.map(item => ({
-      title: item.title || item.label,
-      path: item.path,
-      icon: item.icon,
-      description: item.description || '',
-      highlight: item.highlight
-    }));
-  };
-
   return (
-    <div className="hidden lg:flex items-center gap-6">
-      <NavigationMenu>
-        <NavigationMenuList>
-          <NavigationSection 
-            title="Cards"
-            items={mapNavItems(cardsNavItems)}
-            isActive={activeSection === 'cards'}
-            layout="grid"
-            columns={2}
-            featuredItem={{
-              title: 'Card Animations',
-              path: '/animation',
-              description: 'Experience animated card effects',
-              icon: featuresNavItems[1].icon
-            }}
-          />
-
-          <NavigationSection 
-            title="Collections"
-            items={mapNavItems(collectionsNavItems)}
-            isActive={activeSection === 'collections'}
-            layout="list"
-          />
-
-          <TeamNavigation isActive={activeSection === 'teams'} />
-
-          <NavigationSection 
-            title="Features"
-            items={mapNavItems(featuresNavItems)}
-            isActive={activeSection === 'features'}
-            layout="grid"
-            columns={2}
-          />
-          
-          <NavigationSection 
-            title="Baseball Archive"
-            items={mapNavItems(baseballNavItems)}
-            isActive={activeSection === 'baseball'}
-            layout="list"
-            featuredItem={{
-              title: 'Team Color History',
-              path: '/baseball-archive',
-              description: 'Explore MLB team color changes through history',
-              icon: baseballNavItems[0].icon
-            }}
-          />
-        </NavigationMenuList>
-      </NavigationMenu>
-
-      <GameDayButton />
-    </div>
+    <nav className="hidden md:block">
+      <div className="space-y-1">
+        <NavItem to="/" icon={Home} label="Home" isActive={isActive('/')} />
+        <NavItem to="/cards" icon={LayoutGrid} label="Cards" isActive={isActive('/cards')} />
+        <NavItem to="/collections" icon={Library} label="Collections" isActive={isActive('/collections')} />
+        <NavItem to="/series" icon={Album} label="Series" isActive={isActive('/series')} />
+        <NavItem to="/decks" icon={Library} label="Decks" isActive={isActive('/decks')} />
+        <NavItem to="/create-card" icon={PlusCircle} label="Create Card" isActive={isActive('/create-card')} />
+        <NavItem to="/teams" icon={Users} label="Teams" isActive={isActive('/teams')} />
+      </div>
+      
+      <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700 space-y-1">
+        {user?.role === 'admin' && (
+          <NavItem to="/admin" icon={Shield} label="Admin" isActive={isActive('/admin')} />
+        )}
+        <NavItem to="/settings" icon={Settings} label="Settings" isActive={isActive('/settings')} />
+        <div className="px-3 py-2">
+          <ThemeToggle />
+        </div>
+      </div>
+    </nav>
   );
 };
 

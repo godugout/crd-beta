@@ -6,6 +6,7 @@ import { routes } from './routes';
 import './App.css';
 import { Toaster } from 'sonner';
 import { ThemeProvider } from '@/hooks/useTheme';
+import { AuthProvider } from '@/providers/AuthProvider';
 
 function App() {
   const router = createBrowserRouter(routes);
@@ -13,9 +14,11 @@ function App() {
   return (
     <>
       <ThemeProvider>
-        <CardEnhancedProvider>
-          <RouterProvider router={router} />
-        </CardEnhancedProvider>
+        <AuthProvider autoLogin={true}>
+          <CardEnhancedProvider>
+            <RouterProvider router={router} />
+          </CardEnhancedProvider>
+        </AuthProvider>
         <Toaster position="top-center" />
       </ThemeProvider>
     </>

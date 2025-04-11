@@ -9,6 +9,9 @@ import Dashboard from '@/pages/Dashboard';
 // Import the team-related routes
 import TeamDetail from '@/pages/TeamDetail';
 
+// Import admin page
+import Admin from '@/pages/Admin';
+
 // Import other route collections
 import { cardRoutes } from './cardRoutes';
 import { collectionRoutes } from './collectionRoutes';
@@ -31,6 +34,10 @@ export const routes: RouteObject[] = [
   {
     path: "/profile",
     element: <Profile />,
+  },
+  {
+    path: "/admin",
+    element: <Admin />,
   },
   {
     path: "/teams/:teamId",

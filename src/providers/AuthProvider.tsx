@@ -1,13 +1,14 @@
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User } from '@/lib/types';
-import { toast } from 'sonner';
+import { UserRole } from '@/lib/types/UserTypes';
 
+// Define auth context type
 interface AuthContextType {
-  isAuthenticated: boolean;
-  isLoading: boolean;
   user: User | null;
+  isLoading: boolean;
+  isAuthenticated: boolean;
+  error: string | null;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, userData: Partial<User>) => Promise<void>;
   signOut: () => Promise<void>;
@@ -17,164 +18,150 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
+// Mock admin user for development
+const MOCK_ADMIN_USER: User = {
+  id: 'admin-user-id',
+  email: 'admin@example.com',
+  name: 'Admin User',
+  displayName: 'System Admin',
+  role: 'admin' as UserRole,
+  avatarUrl: 'https://api.dicebear.com/7.x/initials/svg?seed=Admin',
+  bio: 'System administrator with full access to all features.',
+  signature: 'Admin',
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+};
+
+export const AuthProvider: React.FC<{ children: React.ReactNode; autoLogin?: boolean }> = ({ 
+  children,
+  autoLogin = true // Default to auto login
+}) => {
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Convert Supabase profile to our User type
-  const mapProfileToUser = (profile: any): User => {
-    return {
-      id: profile.id,
-      email: profile.email || '',
-      displayName: profile.full_name || profile.username || '',
-      name: profile.full_name || '',
-      username: profile.username || '',
-      avatarUrl: profile.avatar_url || '',
-      createdAt: profile.created_at || new Date().toISOString(),
-      updatedAt: profile.updated_at || new Date().toISOString(),
-      role: profile.role || 'user',
-      permissions: profile.permissions || []
-    };
-  };
-
+  // Auto login for development
   useEffect(() => {
-    // Check active session
-    const getSession = async () => {
+    const initAuth = async () => {
+      setIsLoading(true);
+      
       try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session) {
-          const { data: userData, error } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', session.user.id)
-            .single();
-            
-          if (error) throw error;
-          
-          setUser(mapProfileToUser(userData));
+        // For development: auto login as admin
+        if (autoLogin) {
+          console.log('🔑 Auto-logging in as admin for development');
+          setUser(MOCK_ADMIN_USER);
+          localStorage.setItem('auth-user', JSON.stringify(MOCK_ADMIN_USER));
+        } else {
+          // Check if there's a stored user
+          const storedUser = localStorage.getItem('auth-user');
+          if (storedUser) {
+            setUser(JSON.parse(storedUser));
+          }
         }
-      } catch (error) {
-        console.error('Error getting session:', error);
+      } catch (err) {
+        console.error('Auth initialization error:', err);
+        setError('Failed to initialize authentication');
       } finally {
         setIsLoading(false);
       }
     };
 
-    getSession();
+    initAuth();
+  }, [autoLogin]);
 
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (event === 'SIGNED_IN' && session) {
-          const { data: userData, error } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', session.user.id)
-            .single();
-            
-          if (!error) {
-            setUser(mapProfileToUser(userData));
-          }
-        } else if (event === 'SIGNED_OUT') {
-          setUser(null);
-        }
-      }
-    );
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
-
+  // Authentication methods
   const signIn = async (email: string, password: string) => {
+    setIsLoading(true);
+    setError(null);
+    
     try {
-      setIsLoading(true);
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) throw error;
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to sign in');
-      throw error;
+      // In a real app, you'd call your auth service here
+      // For now, simulate login with mock admin
+      setUser(MOCK_ADMIN_USER);
+      localStorage.setItem('auth-user', JSON.stringify(MOCK_ADMIN_USER));
+    } catch (err: any) {
+      setError(err.message || 'Failed to sign in');
+      throw err;
     } finally {
       setIsLoading(false);
     }
   };
 
   const signUp = async (email: string, password: string, userData: Partial<User>) => {
+    setIsLoading(true);
+    setError(null);
+    
     try {
-      setIsLoading(true);
-      const { error } = await supabase.auth.signUp({ 
-        email, 
-        password,
-        options: {
-          data: {
-            name: userData.name,
-            username: userData.username,
-          }
-        }
-      });
-      
-      if (error) throw error;
-      toast.success('Signup successful! Check your email to confirm your account.');
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to sign up');
-      throw error;
+      // In a real app, you'd call your auth service here
+      // For now, just log the action
+      console.log('Sign up called with', { email, userData });
+      setUser(MOCK_ADMIN_USER);
+      localStorage.setItem('auth-user', JSON.stringify(MOCK_ADMIN_USER));
+    } catch (err: any) {
+      setError(err.message || 'Failed to sign up');
+      throw err;
     } finally {
       setIsLoading(false);
     }
   };
 
   const signOut = async () => {
+    setIsLoading(true);
+    setError(null);
+    
     try {
-      setIsLoading(true);
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
+      // In a real app, you'd call your auth service here
       setUser(null);
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to sign out');
+      localStorage.removeItem('auth-user');
+    } catch (err: any) {
+      setError(err.message || 'Failed to sign out');
+      throw err;
     } finally {
       setIsLoading(false);
     }
   };
 
   const signInWithProvider = async (provider: 'google' | 'github' | 'facebook') => {
+    setIsLoading(true);
+    setError(null);
+    
     try {
-      setIsLoading(true);
-      const { error } = await supabase.auth.signInWithOAuth({ provider });
-      if (error) throw error;
-    } catch (error: any) {
-      toast.error(error.message || `Failed to sign in with ${provider}`);
-      throw error;
+      // In a real app, you'd call your auth service here
+      console.log(`Sign in with ${provider} called`);
+      setUser(MOCK_ADMIN_USER);
+      localStorage.setItem('auth-user', JSON.stringify(MOCK_ADMIN_USER));
+    } catch (err: any) {
+      setError(err.message || `Failed to sign in with ${provider}`);
+      throw err;
     } finally {
       setIsLoading(false);
     }
   };
 
   const updateUserProfile = async (data: Partial<User>) => {
+    setIsLoading(true);
+    setError(null);
+    
     try {
-      if (!user?.id) return;
-      
-      setIsLoading(true);
-      const { error } = await supabase
-        .from('profiles')
-        .update(data)
-        .eq('id', user.id);
-        
-      if (error) throw error;
-      
-      setUser(prev => prev ? { ...prev, ...data } : null);
-      toast.success('Profile updated successfully');
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to update profile');
-      throw error;
+      // In a real app, you'd call your auth service here
+      if (user) {
+        const updatedUser = { ...user, ...data };
+        setUser(updatedUser);
+        localStorage.setItem('auth-user', JSON.stringify(updatedUser));
+      }
+    } catch (err: any) {
+      setError(err.message || 'Failed to update profile');
+      throw err;
     } finally {
       setIsLoading(false);
     }
   };
 
   const value = {
-    isAuthenticated: !!user,
-    isLoading,
     user,
+    isLoading,
+    isAuthenticated: !!user,
+    error,
     signIn,
     signUp,
     signOut,
@@ -182,9 +169,14 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
     updateUserProfile
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
 };
 
+// Custom hook to use the auth context
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
