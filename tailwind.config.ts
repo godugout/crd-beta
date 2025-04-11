@@ -52,6 +52,18 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
+				athletics: {
+					green: {
+						DEFAULT: '#006341', // Kelly Green main color
+						dark: '#004F33',
+						light: '#007A50',
+					},
+					gold: {
+						DEFAULT: '#EFB21E', // A's gold color
+						dark: '#D9A31B',
+						light: '#FFCC3D',
+					},
+				},
 				design: {
 					primary: {
 						'50': '#FFF9F0',

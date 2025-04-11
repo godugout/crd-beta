@@ -26,12 +26,12 @@ const PageLayout: React.FC<PageLayoutProps> = ({
   hideNavigation = false,
   className = '',
   canonicalPath,
-  hideBreadcrumbs = false, // Changed default to show breadcrumbs by default
+  hideBreadcrumbs = false,
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <>
+    <div className="flex flex-col min-h-screen bg-background">
       <Helmet>
         <title>{title}</title>
         <meta name="description" content={description} />
@@ -46,7 +46,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({
         <BreadcrumbNav />
       )}
       
-      <main className={`min-h-[calc(100vh-4rem)] ${className}`}>
+      <main className={`flex-grow ${className}`}>
         {children}
       </main>
       
@@ -60,7 +60,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({
           />
         </>
       )}
-    </>
+    </div>
   );
 };
 
