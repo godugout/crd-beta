@@ -23,7 +23,7 @@ export const navigationGroups: NavigationGroup[] = [
   {
     title: "CARDS",
     items: cardsNavItems.map(item => ({
-      title: item.title || item.label,
+      title: item.title,
       path: item.path,
       icon: item.icon,
       highlight: item.highlight
@@ -32,7 +32,7 @@ export const navigationGroups: NavigationGroup[] = [
   {
     title: "COLLECTIONS",
     items: collectionsNavItems.map(item => ({
-      title: item.title || item.label,
+      title: item.title,
       path: item.path,
       icon: item.icon,
       highlight: item.highlight
@@ -41,7 +41,7 @@ export const navigationGroups: NavigationGroup[] = [
   {
     title: "TEAMS",
     items: teamsNavItems.map(item => ({
-      title: item.title || item.label,
+      title: item.title,
       path: item.path,
       icon: item.icon,
       highlight: item.highlight
@@ -50,7 +50,7 @@ export const navigationGroups: NavigationGroup[] = [
   {
     title: "FEATURES",
     items: featuresNavItems.map(item => ({
-      title: item.title || item.label,
+      title: item.title,
       path: item.path,
       icon: item.icon,
       highlight: item.highlight
@@ -59,7 +59,7 @@ export const navigationGroups: NavigationGroup[] = [
   {
     title: "BASEBALL",
     items: baseballNavItems.map(item => ({
-      title: item.title || item.label,
+      title: item.title,
       path: item.path,
       icon: item.icon,
       highlight: item.highlight
