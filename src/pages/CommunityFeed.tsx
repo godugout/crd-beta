@@ -87,7 +87,8 @@ const CommunityFeed: React.FC = () => {
             visibility: collection.visibility || 'public',
             allowComments: collection.allow_comments !== undefined ? collection.allow_comments : true,
             createdAt: collection.created_at,
-            updatedAt: collection.updated_at
+            updatedAt: collection.updated_at,
+            cardIds: []
           }));
           
           setCollections(formattedCollections);

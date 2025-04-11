@@ -41,7 +41,8 @@ export function CardShowcase() {
           designMetadata: collection.design_metadata || {},
           createdAt: collection.created_at,
           updatedAt: collection.updated_at,
-          userId: collection.owner_id
+          userId: collection.owner_id,
+          cardIds: [] // Add the required cardIds property
         }));
 
         setCollections(formattedCollections);
@@ -119,7 +120,7 @@ export function CardShowcase() {
         createdAt: collection.createdAt || new Date().toISOString(),
         updatedAt: collection.updatedAt || new Date().toISOString(),
         userId: collection.userId || '',
-        cardIds: [] // Add required cardIds property as an empty array
+        cardIds: [] // Add required cardIds property
       }));
   };
 
