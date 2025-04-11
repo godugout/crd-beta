@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { createBrowserRouter } from 'react-router-dom';
 import Home from '@/pages/Home';
@@ -9,7 +10,6 @@ import Profile from '@/pages/Profile';
 import CardDetail from '@/pages/CardDetail';
 import CollectionDetail from '@/pages/CollectionDetail';
 import CardDetector from '@/pages/CardDetector';
-import ArMode from '@/pages/ArMode';
 import OaklandMemories from '@/pages/OaklandMemories';
 import OaklandMemoryDetail from '@/pages/OaklandMemoryDetail';
 import CardCreationFlow from '@/components/card-editor/CardCreationFlow';
@@ -59,10 +59,6 @@ const router = createBrowserRouter([
     element: <CardDetector />,
   },
   {
-    path: "/ar",
-    element: <ArMode />,
-  },
-  {
     path: "/teams/oakland/memories",
     element: <OaklandMemories />,
   },
@@ -75,11 +71,15 @@ const router = createBrowserRouter([
     element: <CardCreationFlow />,
   },
   
-  // Add our new Card Creator route
+  // Add our Card Creator route
   {
     path: "/card-creator",
     element: <CardCreatorPage />,
   },
+  {
+    path: "/cards/create",
+    element: <CardCreatorPage />,
+  }
 ]);
 
 export default router;

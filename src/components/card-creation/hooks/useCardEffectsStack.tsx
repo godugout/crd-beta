@@ -5,138 +5,80 @@ import { v4 as uuidv4 } from 'uuid';
 export interface CardEffect {
   id: string;
   name: string;
-  settings: {
-    enabled: boolean;
-    intensity: number;
-    speed: number;
-    [key: string]: any;
-  };
+  settings: any;
+  active: boolean;
 }
 
 interface UseCardEffectsStackResult {
   effectStack: CardEffect[];
-  addEffect: (effectName: string) => void;
-  removeEffect: (effectId: string) => void;
-  updateEffectSettings: (effectId: string, settings: any) => void;
+  addEffect: (name: string, settings?: any) => void;
+  removeEffect: (id: string) => void;
+  updateEffectSettings: (id: string, settings: any) => void;
+  toggleEffect: (id: string) => void;
   getEffectClasses: () => string;
 }
 
-const getDefaultSettings = (effectName: string) => {
-  const baseSettings = {
-    enabled: true,
-    intensity: 1.0,
-    speed: 1.0
-  };
-  
-  switch (effectName) {
-    case 'Holographic':
-      return {
-        ...baseSettings,
-        rainbowStrength: 1.0
-      };
-    case 'Refractor':
-      return {
-        ...baseSettings,
-        angle: 45
-      };
-    case 'Chrome':
-      return {
-        ...baseSettings,
-        reflectionStrength: 0.8
-      };
-    case 'Gold':
-      return {
-        ...baseSettings,
-        shimmerIntensity: 0.8
-      };
-    case 'Spectral':
-      return {
-        ...baseSettings,
-        hologramIntensity: 0.7,
-        particleCount: 50
-      };
-    case 'Electric':
-      return {
-        ...baseSettings,
-        pulseIntensity: 0.8,
-        glowColor: '#e60073'
-      };
-    case 'Vintage':
-      return {
-        ...baseSettings,
-        sepiaAmount: 0.5,
-        grainAmount: 0.2
-      };
-    case 'Prismatic':
-      return {
-        ...baseSettings,
-        colorShift: 1.0,
-        saturation: 1.2
-      };
-    default:
-      return baseSettings;
-  }
-};
-
 export const useCardEffectsStack = (): UseCardEffectsStackResult => {
   const [effectStack, setEffectStack] = useState<CardEffect[]>([]);
-
-  // Add an effect to the stack
-  const addEffect = useCallback((effectName: string) => {
-    // Check if effect already exists
-    if (effectStack.some(effect => effect.name === effectName)) {
-      return;
-    }
-    
+  
+  // Add a new effect to the stack
+  const addEffect = useCallback((name: string, settings: any = {}) => {
     const newEffect: CardEffect = {
       id: uuidv4(),
-      name: effectName,
-      settings: getDefaultSettings(effectName)
+      name,
+      settings,
+      active: true
     };
     
-    setEffectStack(prevStack => [...prevStack, newEffect]);
-  }, [effectStack]);
-  
-  // Remove an effect from the stack
-  const removeEffect = useCallback((effectId: string) => {
-    setEffectStack(prevStack => prevStack.filter(effect => effect.id !== effectId));
+    setEffectStack(prev => [...prev, newEffect]);
   }, []);
   
-  // Update effect settings
-  const updateEffectSettings = useCallback((effectId: string, settings: any) => {
-    setEffectStack(prevStack =>
-      prevStack.map(effect =>
-        effect.id === effectId
-          ? { ...effect, settings: { ...effect.settings, ...settings } }
-          : effect
+  // Remove an effect from the stack
+  const removeEffect = useCallback((id: string) => {
+    setEffectStack(prev => prev.filter(effect => effect.id !== id));
+  }, []);
+  
+  // Update an effect's settings
+  const updateEffectSettings = useCallback((id: string, settings: any) => {
+    setEffectStack(prev => 
+      prev.map(effect => 
+        effect.id === id ? { ...effect, settings: { ...effect.settings, ...settings } } : effect
       )
     );
   }, []);
   
-  // Generate CSS classes for active effects
+  // Toggle an effect's active state
+  const toggleEffect = useCallback((id: string) => {
+    setEffectStack(prev => 
+      prev.map(effect => 
+        effect.id === id ? { ...effect, active: !effect.active } : effect
+      )
+    );
+  }, []);
+  
+  // Get CSS classes for all active effects
   const getEffectClasses = useCallback(() => {
     return effectStack
-      .filter(effect => effect.settings.enabled)
+      .filter(effect => effect.active)
       .map(effect => {
-        switch (effect.name) {
-          case 'Holographic':
-            return 'card-holographic';
-          case 'Refractor':
-            return 'card-refractor';
-          case 'Chrome':
-            return 'card-chrome';
-          case 'Gold':
-            return 'card-gold-foil';
-          case 'Spectral':
-            return 'spectral-hologram';
-          case 'Electric':
-            return 'card-electric';
-          case 'Vintage':
-            return 'card-vintage';
-          case 'Prismatic':
-            return 'card-prismatic';
+        const baseName = effect.name.toLowerCase().replace(/\s/g, '-');
+        
+        // Special handling for certain effects
+        switch (baseName) {
+          case 'refractor':
+            return `effect-refractor ${effect.settings?.intensity || 'medium'}`;
+          case 'holographic':
+            return `effect-holographic ${effect.settings?.pattern || 'lines'}`;
+          case 'glossy':
+            return `effect-glossy ${effect.settings?.level || 'medium'}`;
+          case 'matte':
+            return 'effect-matte';
+          case 'foil':
+            return `effect-foil ${effect.settings?.color || 'rainbow'}`;
+          case 'shadow':
+            return `effect-shadow ${effect.settings?.depth || 'medium'}`;
           default:
-            return '';
+            return `effect-${baseName}`;
         }
       })
       .join(' ');
@@ -147,6 +89,7 @@ export const useCardEffectsStack = (): UseCardEffectsStackResult => {
     addEffect,
     removeEffect,
     updateEffectSettings,
+    toggleEffect,
     getEffectClasses
   };
 };

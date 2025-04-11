@@ -1,233 +1,223 @@
 
-import React, { forwardRef, useRef, useState, useEffect } from 'react';
+import React, { forwardRef, useEffect, useState } from 'react';
 import { CardDesignState, CardLayer } from './CardCreator';
-import { motion } from 'framer-motion';
-import { cn } from '@/lib/utils';
 
 interface CardPreviewCanvasProps {
   cardData: CardDesignState;
   layers: CardLayer[];
   activeLayerId?: string;
-  effectClasses: string;
   onLayerSelect: (id: string) => void;
-  onLayerUpdate: (id: string, layer: Partial<CardLayer>) => void;
+  onLayerUpdate: (id: string, updates: Partial<CardLayer>) => void;
+  effectClasses: string;
 }
 
 const CardPreviewCanvas = forwardRef<HTMLDivElement, CardPreviewCanvasProps>(
-  ({ cardData, layers, activeLayerId, effectClasses, onLayerSelect, onLayerUpdate }, ref) => {
-    const [isMoving, setIsMoving] = useState(false);
-    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-    const cardRef = useRef<HTMLDivElement>(null);
-    const containerRef = useRef<HTMLDivElement>(null);
+  ({ cardData, layers, activeLayerId, onLayerSelect, onLayerUpdate, effectClasses }, ref) => {
+    const [scale, setScale] = useState(1);
+    const [isDragging, setIsDragging] = useState(false);
+    const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
 
-    // 3D effect movement - from existing useCardEffects hook
-    const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-      if (!cardRef.current || !containerRef.current) return;
+    // Standard trading card dimensions (2.5" x 3.5" in pixels at 300dpi)
+    const cardWidth = 750;
+    const cardHeight = 1050;
+
+    // Handle layer drag start
+    const handleLayerMouseDown = (e: React.MouseEvent, layer: CardLayer) => {
+      if (e.button !== 0) return; // Only left mouse button
       
-      setIsMoving(true);
+      e.stopPropagation();
       
-      const rect = containerRef.current.getBoundingClientRect();
-      const centerX = rect.left + rect.width / 2;
-      const centerY = rect.top + rect.height / 2;
+      // Select the layer
+      onLayerSelect(layer.id);
       
-      const relativeX = (e.clientX - centerX) / (rect.width / 2);
-      const relativeY = (e.clientY - centerY) / (rect.height / 2);
+      // Get mouse position relative to card
+      const cardRect = (e.currentTarget.parentNode as HTMLElement).getBoundingClientRect();
+      const offsetX = e.clientX - (cardRect.left + (layer.position.x * scale));
+      const offsetY = e.clientY - (cardRect.top + (layer.position.y * scale));
       
-      setMousePosition({ x: relativeX, y: relativeY });
-      
-      // Apply 3D rotation effect
-      const rotateY = relativeX * 15 * 0.7;
-      const rotateX = -relativeY * 15 * 0.7;
-      
-      cardRef.current.style.transform = 
-        `perspective(1000px) rotateY(${rotateY}deg) rotateX(${rotateX}deg)`;
-      
-      if (cardRef.current) {
-        const mouseX = ((e.clientX - rect.left) / rect.width) * 100;
-        const mouseY = ((e.clientY - rect.top) / rect.height) * 100;
-        
-        cardRef.current.style.setProperty('--mouse-x', `${mouseX}%`);
-        cardRef.current.style.setProperty('--mouse-y', `${mouseY}%`);
-      }
+      setIsDragging(true);
+      setDragOffset({ x: offsetX, y: offsetY });
     };
 
-    const handleMouseLeave = () => {
-      if (cardRef.current) {
-        setIsMoving(false);
-        cardRef.current.style.transition = 'transform 0.8s cubic-bezier(0.23, 1, 0.32, 1)';
-        cardRef.current.style.transform = '';
-        setTimeout(() => {
-          if (cardRef.current) {
-            cardRef.current.style.transition = '';
-          }
-        }, 800);
-      }
-    };
-    
-    // Function to render a single layer
-    const renderLayer = (layer: CardLayer) => {
-      if (!layer.visible) return null;
+    // Handle layer drag
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isDragging || !activeLayerId) return;
       
-      const isActive = layer.id === activeLayerId;
-      const layerStyle = {
-        position: 'absolute',
-        left: `${layer.position.x}%`,
-        top: `${layer.position.y}%`,
-        zIndex: layer.position.z,
-        width: `${layer.size.width}%`,
-        height: `${layer.size.height}%`,
-        transform: `rotate(${layer.rotation}deg)`,
-        opacity: layer.opacity,
-      } as React.CSSProperties;
+      const cardRect = (ref as React.RefObject<HTMLDivElement>).current?.getBoundingClientRect();
+      if (!cardRect) return;
       
-      // Render different layer types
-      switch (layer.type) {
-        case 'image':
-          return (
-            <motion.div
-              className={cn(
-                "absolute cursor-move rounded overflow-hidden border-2",
-                isActive ? "border-blue-500" : "border-transparent"
-              )}
-              key={layer.id}
-              style={layerStyle}
-              drag
-              dragMomentum={false}
-              onDragStart={() => onLayerSelect(layer.id)}
-              onDragEnd={(e, info) => {
-                // Calculate new position as percentage of container
-                if (containerRef.current) {
-                  const rect = containerRef.current.getBoundingClientRect();
-                  const newX = layer.position.x + (info.offset.x / rect.width * 100);
-                  const newY = layer.position.y + (info.offset.y / rect.height * 100);
-                  onLayerUpdate(layer.id, {
-                    position: { ...layer.position, x: newX, y: newY }
-                  });
-                }
-              }}
-            >
-              <img 
-                src={layer.content as string} 
-                alt="Layer" 
-                className="w-full h-full object-cover"
-              />
-            </motion.div>
-          );
-          
-        case 'text':
-          return (
-            <motion.div
-              className={cn(
-                "absolute cursor-move",
-                isActive ? "border-2 border-blue-500" : ""
-              )}
-              key={layer.id}
-              style={layerStyle}
-              drag
-              dragMomentum={false}
-              onDragStart={() => onLayerSelect(layer.id)}
-              onDragEnd={(e, info) => {
-                // Calculate new position as percentage of container
-                if (containerRef.current) {
-                  const rect = containerRef.current.getBoundingClientRect();
-                  const newX = layer.position.x + (info.offset.x / rect.width * 100);
-                  const newY = layer.position.y + (info.offset.y / rect.height * 100);
-                  onLayerUpdate(layer.id, {
-                    position: { ...layer.position, x: newX, y: newY }
-                  });
-                }
-              }}
-            >
-              <div className="w-full h-full flex items-center justify-center">
-                {layer.content}
-              </div>
-            </motion.div>
-          );
-          
-        case 'shape':
-        case 'decoration':
-          return (
-            <motion.div
-              className={cn(
-                "absolute cursor-move",
-                isActive ? "border-2 border-blue-500" : ""
-              )}
-              key={layer.id}
-              style={layerStyle}
-              drag
-              dragMomentum={false}
-              onDragStart={() => onLayerSelect(layer.id)}
-              onDragEnd={(e, info) => {
-                // Calculate new position as percentage of container
-                if (containerRef.current) {
-                  const rect = containerRef.current.getBoundingClientRect();
-                  const newX = layer.position.x + (info.offset.x / rect.width * 100);
-                  const newY = layer.position.y + (info.offset.y / rect.height * 100);
-                  onLayerUpdate(layer.id, {
-                    position: { ...layer.position, x: newX, y: newY }
-                  });
-                }
-              }}
-            >
-              <div className="w-full h-full flex items-center justify-center">
-                {layer.content}
-              </div>
-            </motion.div>
-          );
-          
-        case 'effect':
-          return (
-            <div
-              className="absolute pointer-events-none"
-              key={layer.id}
-              style={layerStyle}
-            >
-              <div className="w-full h-full">
-                {layer.content}
-              </div>
-            </div>
-          );
-            
-        default:
-          return null;
-      }
+      // Get new position
+      const newX = (e.clientX - cardRect.left - dragOffset.x) / scale;
+      const newY = (e.clientY - cardRect.top - dragOffset.y) / scale;
+      
+      // Update layer position
+      onLayerUpdate(activeLayerId, {
+        position: { 
+          x: Math.max(0, Math.min(cardWidth - 50, newX)),
+          y: Math.max(0, Math.min(cardHeight - 50, newY)),
+          z: 0 
+        }
+      });
     };
-    
+
+    // Handle layer drag end
+    const handleMouseUp = () => {
+      setIsDragging(false);
+    };
+
+    // Setup global event listeners
+    useEffect(() => {
+      if (isDragging) {
+        window.addEventListener('mousemove', handleMouseMove);
+        window.addEventListener('mouseup', handleMouseUp);
+      }
+      
+      return () => {
+        window.removeEventListener('mousemove', handleMouseMove);
+        window.removeEventListener('mouseup', handleMouseUp);
+      };
+    }, [isDragging, activeLayerId, dragOffset, scale]);
+
     return (
-      <div 
-        ref={ref}
-        className="w-full h-full flex items-center justify-center"
-      >
-        <div
-          ref={containerRef}
-          className="card-3d-container w-80 h-[30rem]"
-          onMouseMove={handleMouseMove}
-          onMouseLeave={handleMouseLeave}
+      <div className="w-full h-full overflow-hidden flex items-center justify-center">
+        {/* Card preview container */}
+        <div 
+          ref={ref}
+          className={`relative bg-white overflow-hidden ${effectClasses}`}
+          style={{
+            width: cardWidth,
+            height: cardHeight,
+            borderRadius: cardData.borderRadius,
+            border: `8px solid ${cardData.borderColor}`,
+            backgroundColor: cardData.backgroundColor,
+            transform: `scale(${scale})`,
+            boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+            transition: 'transform 0.2s ease'
+          }}
         >
-          <div
-            ref={cardRef}
-            className={cn(
-              "relative w-full h-full transition-all duration-300 shadow-xl rounded-lg overflow-hidden",
-              isMoving ? "mouse-move" : "animation-active",
-              effectClasses
-            )}
-            style={{
-              borderRadius: cardData.borderRadius,
-              backgroundColor: cardData.backgroundColor
-            }}
-          >
-            {/* Base Card Styling */}
-            <div className="absolute inset-0 border-2 rounded-lg" style={{ borderColor: cardData.borderColor }}></div>
+          {/* Background image if available */}
+          {cardData.imageUrl && !layers.some(layer => layer.type === 'image') && (
+            <img 
+              src={cardData.imageUrl}
+              alt={cardData.title}
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+          )}
+          
+          {/* Render all layers */}
+          {layers.map((layer) => {
+            // Skip hidden layers
+            if (!layer.visible) return null;
             
-            {/* Render all layers */}
-            {layers.map(renderLayer)}
-          </div>
+            const isActive = layer.id === activeLayerId;
+            
+            // Render based on layer type
+            switch (layer.type) {
+              case 'image':
+                return (
+                  <div
+                    key={layer.id}
+                    className={`absolute cursor-move ${isActive ? 'ring-2 ring-blue-500 ring-offset-2' : ''}`}
+                    style={{
+                      left: layer.position.x,
+                      top: layer.position.y,
+                      width: layer.size.width + '%',
+                      height: layer.size.height + '%',
+                      opacity: layer.opacity,
+                      transform: `rotate(${layer.rotation}deg)`,
+                      zIndex: layer.position.z,
+                    }}
+                    onMouseDown={(e) => handleLayerMouseDown(e, layer)}
+                  >
+                    <img
+                      src={layer.content as string}
+                      alt="Layer"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                );
+              
+              case 'text':
+                return (
+                  <div
+                    key={layer.id}
+                    className={`absolute cursor-move ${isActive ? 'ring-2 ring-blue-500' : ''}`}
+                    style={{
+                      left: layer.position.x,
+                      top: layer.position.y,
+                      opacity: layer.opacity,
+                      transform: `rotate(${layer.rotation}deg)`,
+                      zIndex: layer.position.z,
+                    }}
+                    onMouseDown={(e) => handleLayerMouseDown(e, layer)}
+                  >
+                    <div className="text-xl font-bold">
+                      {layer.content}
+                    </div>
+                  </div>
+                );
+              
+              case 'shape':
+                return (
+                  <div
+                    key={layer.id}
+                    className={`absolute cursor-move ${isActive ? 'ring-2 ring-blue-500' : ''}`}
+                    style={{
+                      left: layer.position.x,
+                      top: layer.position.y,
+                      width: layer.size.width,
+                      height: layer.size.height,
+                      opacity: layer.opacity,
+                      transform: `rotate(${layer.rotation}deg)`,
+                      zIndex: layer.position.z,
+                      backgroundColor: typeof layer.content === 'string' ? layer.content : 'black',
+                      borderRadius: '4px'
+                    }}
+                    onMouseDown={(e) => handleLayerMouseDown(e, layer)}
+                  />
+                );
+                
+              default:
+                return null;
+            }
+          })}
+          
+          {/* Card title */}
+          {cardData.title && (
+            <div className="absolute bottom-8 left-0 right-0 text-center">
+              <h3 className="text-xl font-bold text-white text-shadow-sm bg-black/30 py-1">
+                {cardData.title}
+              </h3>
+            </div>
+          )}
+        </div>
+        
+        {/* Zoom controls */}
+        <div className="absolute bottom-4 right-4 flex gap-2">
+          <button 
+            onClick={() => setScale(s => Math.max(0.1, s - 0.1))}
+            className="bg-white p-2 rounded-full shadow-md"
+          >
+            -
+          </button>
+          <button 
+            onClick={() => setScale(1)} 
+            className="bg-white p-2 rounded-md shadow-md text-sm"
+          >
+            {Math.round(scale * 100)}%
+          </button>
+          <button 
+            onClick={() => setScale(s => Math.min(2, s + 0.1))}
+            className="bg-white p-2 rounded-full shadow-md"
+          >
+            +
+          </button>
         </div>
       </div>
     );
   }
 );
 
-CardPreviewCanvas.displayName = 'CardPreviewCanvas';
+CardPreviewCanvas.displayName = "CardPreviewCanvas";
 
 export default CardPreviewCanvas;

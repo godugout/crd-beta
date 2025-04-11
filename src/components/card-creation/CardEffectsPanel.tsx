@@ -1,251 +1,258 @@
 
-import React from 'react';
-import { Badge } from '@/components/ui/badge';
-import { Slider } from '@/components/ui/slider';
-import { Label } from '@/components/ui/label';
+import React, { useState } from 'react';
+import { Plus, X, Settings, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Switch } from '@/components/ui/switch';
+import { Slider } from '@/components/ui/slider';
 import { CardEffect } from './hooks/useCardEffectsStack';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
+const AVAILABLE_EFFECTS = [
+  { name: 'Refractor', description: 'Adds a refractive, prismatic effect to the card' },
+  { name: 'Holographic', description: 'Adds holographic patterns that shift with perspective' },
+  { name: 'Glossy', description: 'Adds a glossy, reflective finish to the card' },
+  { name: 'Matte', description: 'Gives the card a premium matte finish' },
+  { name: 'Foil', description: 'Adds foil accents to the card' },
+  { name: 'Shadow', description: 'Adds depth with shadow effects' }
+];
 
 interface CardEffectsPanelProps {
   effectStack: CardEffect[];
-  onAddEffect: (effectName: string) => void;
-  onRemoveEffect: (effectId: string) => void;
-  onUpdateSettings: (effectId: string, settings: any) => void;
+  onAddEffect: (name: string, settings?: any) => void;
+  onRemoveEffect: (id: string) => void;
+  onUpdateSettings: (id: string, settings: any) => void;
 }
 
-const AVAILABLE_EFFECTS = [
-  { name: 'Holographic', description: 'Classic rainbow pattern that shifts with light angle' },
-  { name: 'Refractor', description: 'Prismatic effect with light diffraction' },
-  { name: 'Chrome', description: 'Metallic chrome finish with reflections' },
-  { name: 'Gold', description: 'Luxury gold foil effect that catches light' },
-  { name: 'Vintage', description: 'Nostalgic worn texture and color fading' },
-  { name: 'Spectral', description: 'Advanced hologram with multiple layers' },
-  { name: 'Electric', description: 'Dynamic glow with light pulses' },
-  { name: 'Prismatic', description: 'Color-shifting rainbow refraction' }
-];
-
-const CardEffectsPanel: React.FC<CardEffectsPanelProps> = ({ 
-  effectStack, 
-  onAddEffect, 
+const CardEffectsPanel: React.FC<CardEffectsPanelProps> = ({
+  effectStack,
+  onAddEffect,
   onRemoveEffect,
   onUpdateSettings
 }) => {
-  // Get active effect names for filtering available effects
-  const activeEffectNames = effectStack.map(effect => effect.name);
+  const [selectedEffect, setSelectedEffect] = useState<string | null>(null);
+  const [expandedEffectId, setExpandedEffectId] = useState<string | null>(null);
   
-  // Filter available effects to show only those not already active
-  const availableEffects = AVAILABLE_EFFECTS.filter(
-    effect => !activeEffectNames.includes(effect.name)
-  );
+  const handleAddEffect = () => {
+    if (!selectedEffect) return;
+    
+    // Define default settings based on effect type
+    const defaultSettings: any = {};
+    
+    switch (selectedEffect) {
+      case 'Refractor':
+        defaultSettings.intensity = 'medium';
+        defaultSettings.angle = 45;
+        break;
+      case 'Holographic':
+        defaultSettings.pattern = 'lines';
+        defaultSettings.speed = 0.5;
+        break;
+      case 'Glossy':
+        defaultSettings.level = 'medium';
+        defaultSettings.highlight = '#ffffff';
+        break;
+      case 'Foil':
+        defaultSettings.color = 'rainbow';
+        defaultSettings.coverage = 0.5;
+        break;
+      case 'Shadow':
+        defaultSettings.depth = 'medium';
+        defaultSettings.blur = 10;
+        defaultSettings.color = 'rgba(0,0,0,0.5)';
+        break;
+    }
+    
+    onAddEffect(selectedEffect, defaultSettings);
+    setSelectedEffect(null);
+  };
+  
+  const toggleEffectExpansion = (id: string) => {
+    setExpandedEffectId(prevId => prevId === id ? null : id);
+  };
+  
+  // Render settings for an effect
+  const renderEffectSettings = (effect: CardEffect) => {
+    switch (effect.name.toLowerCase()) {
+      case 'refractor':
+        return (
+          <div className="space-y-3">
+            <div className="space-y-1">
+              <div className="flex items-center justify-between">
+                <label className="text-sm">Intensity</label>
+                <span className="text-xs text-gray-500">{effect.settings.intensity}</span>
+              </div>
+              <Select
+                value={effect.settings.intensity || 'medium'}
+                onValueChange={(value) => onUpdateSettings(effect.id, { intensity: value })}
+              >
+                <SelectTrigger className="w-full h-8">
+                  <SelectValue placeholder="Intensity" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="subtle">Subtle</SelectItem>
+                  <SelectItem value="medium">Medium</SelectItem>
+                  <SelectItem value="intense">Intense</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1">
+              <div className="flex items-center justify-between">
+                <label className="text-sm">Angle</label>
+                <span className="text-xs text-gray-500">{effect.settings.angle}°</span>
+              </div>
+              <Slider
+                value={[effect.settings.angle || 45]}
+                min={0}
+                max={360}
+                step={5}
+                onValueChange={(value) => onUpdateSettings(effect.id, { angle: value[0] })}
+              />
+            </div>
+          </div>
+        );
+        
+      case 'holographic':
+        return (
+          <div className="space-y-3">
+            <div className="space-y-1">
+              <div className="flex items-center justify-between">
+                <label className="text-sm">Pattern</label>
+                <span className="text-xs text-gray-500">{effect.settings.pattern}</span>
+              </div>
+              <Select
+                value={effect.settings.pattern || 'lines'}
+                onValueChange={(value) => onUpdateSettings(effect.id, { pattern: value })}
+              >
+                <SelectTrigger className="w-full h-8">
+                  <SelectValue placeholder="Pattern" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="lines">Lines</SelectItem>
+                  <SelectItem value="dots">Dots</SelectItem>
+                  <SelectItem value="waves">Waves</SelectItem>
+                  <SelectItem value="grid">Grid</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1">
+              <div className="flex items-center justify-between">
+                <label className="text-sm">Animation Speed</label>
+                <span className="text-xs text-gray-500">{effect.settings.speed}</span>
+              </div>
+              <Slider
+                value={[effect.settings.speed || 0.5]}
+                min={0}
+                max={1}
+                step={0.1}
+                onValueChange={(value) => onUpdateSettings(effect.id, { speed: value[0] })}
+              />
+            </div>
+          </div>
+        );
+        
+      case 'glossy':
+      case 'matte':
+      case 'foil':
+      case 'shadow':
+      default:
+        return (
+          <div className="text-sm text-gray-500 italic">
+            Settings for this effect type will be available soon.
+          </div>
+        );
+    }
+  };
 
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-medium mb-2">Active Effects</h3>
-        
+        <h3 className="text-lg font-medium mb-2">Card Effects</h3>
+        <p className="text-sm text-gray-500">
+          Add special effects to enhance your card's appearance and make it stand out.
+        </p>
+      </div>
+      
+      {/* Current effects */}
+      <div className="space-y-3">
         {effectStack.length === 0 ? (
-          <div className="text-sm text-gray-500 italic">
-            No effects applied. Add an effect below.
+          <div className="text-center py-4 bg-gray-50 rounded-md">
+            <p className="text-gray-500">No effects added yet</p>
           </div>
         ) : (
-          <div className="space-y-4">
-            {effectStack.map((effect) => (
-              <div key={effect.id} className="bg-gray-50 p-3 rounded-md">
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-2">
-                    <Badge variant="default">{effect.name}</Badge>
-                    <Switch 
-                      checked={effect.settings.enabled || false}
-                      onCheckedChange={(checked) => 
-                        onUpdateSettings(effect.id, { ...effect.settings, enabled: checked })
-                      }
-                    />
-                  </div>
+          effectStack.map(effect => (
+            <div 
+              key={effect.id} 
+              className="border rounded-md overflow-hidden"
+            >
+              <div className="flex items-center justify-between p-3 bg-gray-50">
+                <div className="flex items-center">
+                  <span className="font-medium">{effect.name}</span>
+                </div>
+                <div className="flex items-center gap-1">
                   <Button 
                     variant="ghost" 
-                    size="sm" 
-                    onClick={() => onRemoveEffect(effect.id)}
-                    className="h-8 w-8 p-0"
+                    size="icon" 
+                    onClick={() => toggleEffectExpansion(effect.id)}
+                    className="h-8 w-8"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M18 6 6 18"/>
-                      <path d="m6 6 12 12"/>
-                    </svg>
-                    <span className="sr-only">Remove</span>
+                    <Settings size={16} />
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    className="h-8 w-8 text-red-500"
+                    onClick={() => onRemoveEffect(effect.id)}
+                  >
+                    <X size={16} />
                   </Button>
                 </div>
-                
-                <div className="mt-3 space-y-3">
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <Label className="text-xs">Intensity</Label>
-                      <span className="text-xs text-gray-500">
-                        {effect.settings.intensity.toFixed(1)}
-                      </span>
-                    </div>
-                    <Slider
-                      value={[effect.settings.intensity]}
-                      min={0}
-                      max={1}
-                      step={0.1}
-                      onValueChange={(value) => 
-                        onUpdateSettings(effect.id, { ...effect.settings, intensity: value[0] })
-                      }
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <Label className="text-xs">Speed</Label>
-                      <span className="text-xs text-gray-500">
-                        {effect.settings.speed.toFixed(1)}
-                      </span>
-                    </div>
-                    <Slider
-                      value={[effect.settings.speed]}
-                      min={0.1}
-                      max={2}
-                      step={0.1}
-                      onValueChange={(value) => 
-                        onUpdateSettings(effect.id, { ...effect.settings, speed: value[0] })
-                      }
-                    />
-                  </div>
-                  
-                  {/* Additional settings specific to effect type */}
-                  {effect.name === 'Holographic' && (
-                    <div className="space-y-2">
-                      <div className="flex justify-between">
-                        <Label className="text-xs">Rainbow Strength</Label>
-                        <span className="text-xs text-gray-500">
-                          {(effect.settings.rainbowStrength || 1).toFixed(1)}
-                        </span>
-                      </div>
-                      <Slider
-                        value={[effect.settings.rainbowStrength || 1]}
-                        min={0}
-                        max={2}
-                        step={0.1}
-                        onValueChange={(value) => 
-                          onUpdateSettings(effect.id, { ...effect.settings, rainbowStrength: value[0] })
-                        }
-                      />
-                    </div>
-                  )}
-                  
-                  {effect.name === 'Refractor' && (
-                    <div className="space-y-2">
-                      <div className="flex justify-between">
-                        <Label className="text-xs">Refraction Angle</Label>
-                        <span className="text-xs text-gray-500">
-                          {(effect.settings.angle || 45)}°
-                        </span>
-                      </div>
-                      <Slider
-                        value={[effect.settings.angle || 45]}
-                        min={0}
-                        max={90}
-                        step={5}
-                        onValueChange={(value) => 
-                          onUpdateSettings(effect.id, { ...effect.settings, angle: value[0] })
-                        }
-                      />
-                    </div>
-                  )}
-                </div>
               </div>
-            ))}
-          </div>
+              
+              {expandedEffectId === effect.id && (
+                <div className="p-3 border-t bg-gray-50/50">
+                  {renderEffectSettings(effect)}
+                </div>
+              )}
+            </div>
+          ))
         )}
       </div>
       
-      <div className="border-t border-gray-200 pt-4">
-        <h3 className="text-lg font-medium mb-2">Available Effects</h3>
-        
-        <div className="grid grid-cols-2 gap-2">
-          {availableEffects.map((effect) => (
-            <Button
-              key={effect.name}
-              variant="outline"
-              className="h-auto justify-start flex-col items-start p-3"
-              onClick={() => onAddEffect(effect.name)}
-            >
-              <span className="font-medium">{effect.name}</span>
-              <span className="text-xs text-gray-500 mt-1 text-left">
-                {effect.description}
-              </span>
-            </Button>
-          ))}
-          
-          {availableEffects.length === 0 && (
-            <div className="col-span-2 text-sm text-gray-500 italic">
-              All effects have been added.
-            </div>
-          )}
+      {/* Add new effect */}
+      <div className="space-y-2">
+        <div>
+          <Select
+            value={selectedEffect || ''}
+            onValueChange={setSelectedEffect}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select an effect" />
+            </SelectTrigger>
+            <SelectContent>
+              {AVAILABLE_EFFECTS.map(effect => (
+                <SelectItem key={effect.name} value={effect.name}>
+                  {effect.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
+        
+        <Button
+          onClick={handleAddEffect}
+          disabled={!selectedEffect}
+          className="w-full"
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          Add Effect
+        </Button>
       </div>
       
-      <div className="border-t border-gray-200 pt-4">
-        <h3 className="text-lg font-medium mb-2">Effect Combinations</h3>
-        <div className="grid grid-cols-2 gap-2">
-          <Button
-            variant="outline"
-            className="h-auto text-xs"
-            onClick={() => {
-              onAddEffect('Holographic');
-              onAddEffect('Refractor');
-            }}
-            disabled={
-              activeEffectNames.includes('Holographic') && 
-              activeEffectNames.includes('Refractor')
-            }
-          >
-            Holographic Refractor
-          </Button>
-          <Button
-            variant="outline"
-            className="h-auto text-xs"
-            onClick={() => {
-              onAddEffect('Chrome');
-              onAddEffect('Gold');
-            }}
-            disabled={
-              activeEffectNames.includes('Chrome') && 
-              activeEffectNames.includes('Gold')
-            }
-          >
-            Gold Chrome
-          </Button>
-          <Button
-            variant="outline"
-            className="h-auto text-xs"
-            onClick={() => {
-              onAddEffect('Vintage');
-              onAddEffect('Holographic');
-            }}
-            disabled={
-              activeEffectNames.includes('Vintage') && 
-              activeEffectNames.includes('Holographic')
-            }
-          >
-            Vintage Holographic
-          </Button>
-          <Button
-            variant="outline"
-            className="h-auto text-xs"
-            onClick={() => {
-              onAddEffect('Spectral');
-              onAddEffect('Electric');
-            }}
-            disabled={
-              activeEffectNames.includes('Spectral') && 
-              activeEffectNames.includes('Electric')
-            }
-          >
-            Electric Spectral
-          </Button>
-        </div>
+      <div className="border-t pt-4">
+        <h4 className="font-medium mb-2 text-sm">About Effects</h4>
+        <p className="text-xs text-gray-500">
+          Effects apply visual enhancements to your card. Multiple effects can be combined for unique looks.
+          Some effects may only be visible when viewing the finished card.
+        </p>
       </div>
     </div>
   );

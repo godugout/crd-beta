@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/lib/types';
@@ -8,6 +7,7 @@ import CardEditorSidebar from './CardEditorSidebar';
 import CardEffectsPanel from './CardEffectsPanel';
 import CardPreviewCanvas from './CardPreviewCanvas';
 import CardLayersPanel from './CardLayersPanel';
+import CardScanUpload from './CardScanUpload';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { useLayers } from './hooks/useLayers';
@@ -44,6 +44,7 @@ const CardCreator: React.FC = () => {
   const { addCard } = useCards();
   const [saving, setSaving] = useState(false);
   const canvasRef = useRef<HTMLDivElement>(null);
+  const [currentStep, setCurrentStep] = useState<'upload' | 'design'>('upload');
   
   // Card data state
   const [cardData, setCardData] = useState<CardDesignState>({
@@ -108,6 +109,9 @@ const CardCreator: React.FC = () => {
         effectIds: []
       });
     }
+    
+    // Move to design step after upload
+    setCurrentStep('design');
   };
 
   const handleSave = async () => {
@@ -169,6 +173,17 @@ const CardCreator: React.FC = () => {
     }
   };
 
+  // If we're in the upload step, show the CardScanUpload component
+  if (currentStep === 'upload') {
+    return (
+      <div className="max-w-3xl mx-auto">
+        <h1 className="text-2xl font-bold mb-6">Start Creating Your Card</h1>
+        <CardScanUpload onImageCaptured={handleImageUpload} />
+      </div>
+    );
+  }
+
+  // Otherwise, show the card editor interface
   return (
     <div className="grid grid-cols-12 gap-4 h-[calc(100vh-6rem)] max-h-[calc(100vh-6rem)] overflow-hidden">
       {/* Main editing canvas - 8 cols */}
@@ -255,8 +270,8 @@ const CardCreator: React.FC = () => {
 
         <div className="p-4 border-t mt-auto">
           <div className="flex justify-between">
-            <Button variant="outline" onClick={() => navigate(-1)}>
-              Cancel
+            <Button variant="outline" onClick={() => setCurrentStep('upload')}>
+              Back to Upload
             </Button>
             <Button onClick={handleSave} disabled={saving}>
               {saving ? 'Saving...' : 'Save Card'}
