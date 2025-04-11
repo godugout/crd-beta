@@ -5,6 +5,7 @@ import AppHeader from './AppHeader';
 import MobileBottomNav from './MobileBottomNav';
 import { useState } from 'react';
 import MobileMenu from '../navbar/MobileMenu';
+import BreadcrumbNav from './Breadcrumb';
 
 interface PageLayoutProps {
   children: ReactNode;
@@ -14,6 +15,7 @@ interface PageLayoutProps {
   hideNavigation?: boolean;
   className?: string;
   canonicalPath?: string;
+  hideBreadcrumbs?: boolean;
 }
 
 const PageLayout: React.FC<PageLayoutProps> = ({
@@ -24,6 +26,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({
   hideNavigation = false,
   className = '',
   canonicalPath,
+  hideBreadcrumbs = false,
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -37,6 +40,10 @@ const PageLayout: React.FC<PageLayoutProps> = ({
       
       {!hideNavigation && (
         <AppHeader />
+      )}
+      
+      {!hideBreadcrumbs && !hideNavigation && (
+        <BreadcrumbNav />
       )}
       
       <main className={`min-h-[calc(100vh-4rem)] ${className}`}>

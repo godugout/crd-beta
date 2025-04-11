@@ -15,8 +15,8 @@ const CardGallery = () => {
       <div className="container mx-auto max-w-6xl px-4 py-8">
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-cardshow-dark mb-2">Card Gallery</h1>
-            <p className="text-cardshow-slate">
+            <h1 className="text-3xl font-bold text-foreground mb-2">Card Gallery</h1>
+            <p className="text-muted-foreground">
               Browse your digital cards and collections
             </p>
           </div>

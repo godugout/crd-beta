@@ -19,7 +19,7 @@ const Collections = () => {
       <Container className="py-8">
         <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-8">
           <div>
-            <h1 className="text-3xl font-bold">Collections</h1>
+            <h1 className="text-3xl font-bold text-foreground">Collections</h1>
             <p className="text-muted-foreground mt-1">Organize your cards into themed collections</p>
           </div>
 

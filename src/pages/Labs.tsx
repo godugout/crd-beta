@@ -50,13 +50,13 @@ const Labs = () => {
     >
       <Container className="py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold">Dugout Labs</h1>
+          <h1 className="text-3xl font-bold text-foreground">Dugout Labs</h1>
           <p className="text-muted-foreground mt-1">Preview experimental features and provide feedback to our team</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
           {labFeatures.map(feature => (
-            <Card key={feature.id} className="overflow-hidden">
+            <Card key={feature.id} className="overflow-hidden dark:border-gray-700">
               <CardHeader>
                 <div className="flex items-center justify-between mb-2">
                   {feature.icon}
@@ -83,8 +83,8 @@ const Labs = () => {
           ))}
         </div>
 
-        <div className="bg-slate-50 dark:bg-slate-900 p-6 rounded-xl border">
-          <h2 className="text-xl font-semibold mb-4">Submit Your Idea</h2>
+        <div className="bg-slate-50 dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-gray-700">
+          <h2 className="text-xl font-semibold mb-4 text-foreground">Submit Your Idea</h2>
           <p className="mb-6 text-muted-foreground">Have an idea for a new feature? We'd love to hear it!</p>
           <Button>
             <Lightbulb className="h-4 w-4 mr-2" />

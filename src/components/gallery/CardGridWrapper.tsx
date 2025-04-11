@@ -47,8 +47,8 @@ export const CardGridWrapper: React.FC<CardGridWrapperProps> = ({
     return (
       <div className="flex items-center justify-center p-8">
         <div className="flex flex-col items-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mb-4"></div>
-          <p>Loading cards...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
+          <p className="text-foreground">Loading cards...</p>
         </div>
       </div>
     );
@@ -57,11 +57,11 @@ export const CardGridWrapper: React.FC<CardGridWrapperProps> = ({
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center p-8 text-center">
-        <div className="mb-4 text-red-500">
+        <div className="mb-4 text-destructive">
           <AlertOctagon className="h-12 w-12 mx-auto" />
         </div>
-        <h3 className="text-xl font-semibold mb-2">Failed to load cards</h3>
-        <p className="text-gray-600 mb-4">
+        <h3 className="text-xl font-semibold mb-2 text-foreground">Failed to load cards</h3>
+        <p className="text-muted-foreground mb-4">
           {error?.message || 'An unexpected error occurred'}
         </p>
         <Button onClick={onRetry} variant="outline">

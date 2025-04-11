@@ -47,7 +47,14 @@ const Gallery = () => {
       description="Browse your digital cards and collections"
     >
       <div className="container mx-auto max-w-6xl px-4">
-        <GalleryHeader />
+        <div className="py-6">
+          <div className="flex items-center gap-3 mb-2">
+            <h1 className="text-3xl font-bold text-foreground">Your Card Gallery</h1>
+          </div>
+          <p className="text-muted-foreground">
+            Browse, search, and manage your digital card collection
+          </p>
+        </div>
         
         <ErrorBoundary>
           <CardGallery 
