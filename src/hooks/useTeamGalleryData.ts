@@ -9,30 +9,45 @@ export const useTeamGalleryData = (
 ) => {
   const [teams, setTeams] = useState<TeamDisplayData[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchTeams = async () => {
       setLoading(true);
+      setError(null);
       
       try {
-        // Build query based on filters - only select fields that exist in the database
-        let query = supabase.from('teams').select(`
-          id, name, description, owner_id, created_at, updated_at, logo_url
-        `);
+        // Build query based on filters
+        let query = supabase
+          .from('teams')
+          .select(`
+            id, name, description, owner_id, created_at, updated_at, 
+            logo_url, primary_color, secondary_color, founded_year, 
+            city, state, stadium, league, division,
+            team_members (count)
+          `);
         
-        // Filters would need to be adjusted based on what fields actually exist
+        // Apply filters if provided
+        if (activeLeague && activeLeague !== 'all') {
+          query = query.eq('league', activeLeague);
+        }
+        
+        if (activeDivision && activeDivision !== 'all') {
+          query = query.eq('division', activeDivision);
+        }
         
         const { data, error } = await query.order('name');
         
         if (error) {
           console.error('Error fetching teams:', error);
+          setError('Failed to load teams. Please try again later.');
           setTeams([]);
           setLoading(false);
           return;
         }
         
         if (data && Array.isArray(data)) {
-          // Transform the data to match our interface with safe defaults
+          // Transform the data to match our interface
           const transformedTeams: TeamDisplayData[] = data.map(teamData => {
             return {
               id: teamData.id,
@@ -40,21 +55,22 @@ export const useTeamGalleryData = (
               slug: teamData.name.toLowerCase().replace(/\s+/g, '-'),
               description: teamData.description || '',
               owner_id: teamData.owner_id,
-              memberCount: Math.floor(Math.random() * 1500) + 500, // Placeholder member count
-              primary_color: '#cccccc', // Default color
-              secondary_color: undefined,
-              founded_year: undefined,
-              city: undefined,
-              state: undefined,
-              stadium: undefined,
-              league: undefined,
-              division: undefined
+              memberCount: teamData.team_members?.[0]?.count || 0,
+              primary_color: teamData.primary_color || '#cccccc',
+              secondary_color: teamData.secondary_color,
+              founded_year: teamData.founded_year,
+              city: teamData.city,
+              state: teamData.state,
+              stadium: teamData.stadium,
+              league: teamData.league,
+              division: teamData.division
             };
           });
           setTeams(transformedTeams);
         }
       } catch (err) {
         console.error('Error fetching teams:', err);
+        setError('An unexpected error occurred. Please try again later.');
         setTeams([]);
       } finally {
         setLoading(false);
@@ -73,7 +89,9 @@ export const useTeamGalleryData = (
       description: 'Memories and cards for Oakland Athletics fans',
       primary_color: '#006341',
       memberCount: 1243,
-      owner_id: 'system'
+      owner_id: 'system',
+      league: 'American League',
+      division: 'West'
     },
     { 
       id: '2', 
@@ -82,7 +100,9 @@ export const useTeamGalleryData = (
       description: 'A community for SF Giants fans to share their memories',
       primary_color: '#FD5A1E',
       memberCount: 984,
-      owner_id: 'system'
+      owner_id: 'system',
+      league: 'National League',
+      division: 'West'
     },
     { 
       id: '3', 
@@ -91,15 +111,19 @@ export const useTeamGalleryData = (
       description: 'Dodgers memories and moments from fans',
       primary_color: '#005A9C',
       memberCount: 756,
-      owner_id: 'system'
+      owner_id: 'system',
+      league: 'National League',
+      division: 'West'
     }
   ];
 
-  const displayTeams = teams.length > 0 ? teams : fallbackTeams;
+  // Only use fallback if we have no teams and no error
+  const displayTeams = teams.length > 0 || error ? teams : fallbackTeams;
 
   return {
     teams: displayTeams,
-    loading
+    loading,
+    error
   };
 };
 

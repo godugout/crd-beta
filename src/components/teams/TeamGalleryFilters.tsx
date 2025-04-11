@@ -16,8 +16,17 @@ const TeamGalleryFilters: React.FC<TeamGalleryFiltersProps> = ({
   activeDivision,
   setActiveDivision
 }) => {
+  // Define available leagues and divisions
   const leagues = ['all', 'American League', 'National League'];
   const divisions = ['all', 'East', 'Central', 'West'];
+
+  // Reset division to 'all' when league changes
+  const handleLeagueChange = (league: string) => {
+    setActiveLeague(league);
+    if (league === 'all') {
+      setActiveDivision('all');
+    }
+  };
 
   return (
     <div className="mb-6 flex flex-wrap gap-4 items-center">
@@ -32,13 +41,14 @@ const TeamGalleryFilters: React.FC<TeamGalleryFiltersProps> = ({
             key={league}
             variant={activeLeague === league ? "default" : "outline"}
             size="sm"
-            onClick={() => setActiveLeague(league)}
+            onClick={() => handleLeagueChange(league)}
           >
             {league === 'all' ? 'All Leagues' : league}
           </Button>
         ))}
       </div>
       
+      {/* Only show divisions if a specific league is selected */}
       {activeLeague !== 'all' && (
         <div className="space-x-2">
           {divisions.map(division => (
