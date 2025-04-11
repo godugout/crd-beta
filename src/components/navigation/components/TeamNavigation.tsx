@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/navigation-menu";
 import { Users } from 'lucide-react';
 import { teamsNavItems } from '@/config/navigationConfig';
+import { cn } from '@/lib/utils';
 
 interface TeamNavigationProps {
   isActive?: boolean;
@@ -44,9 +45,11 @@ const TeamNavigation: React.FC<TeamNavigationProps> = ({ isActive = false }) => 
                 <li key={item.path}>
                   <NavigationMenuLink asChild>
                     <Link
-                      className={`block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground ${
+                      className={cn(
+                        "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none",
+                        "hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
                         item.highlight ? 'bg-[#EFB21E]/10 text-[#006341] font-medium' : ''
-                      }`}
+                      )}
                       to={item.path}
                     >
                       <div className="text-sm font-medium leading-none flex items-center gap-2">

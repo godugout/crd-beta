@@ -6,6 +6,7 @@ export interface NavigationItem {
   path: string;
   icon: React.ElementType;
   highlight?: boolean;
+  label?: string; // Add label as an optional property to maintain compatibility
 }
 
 export interface NavigationGroup {

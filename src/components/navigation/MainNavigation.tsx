@@ -6,7 +6,7 @@ import {
   NavigationMenuList,
 } from "@/components/ui/navigation-menu";
 import { useMediaQuery } from '@/hooks/useMediaQuery';
-import NavigationSection from './components/NavigationSection';
+import NavigationSection, { NavigationItemProps } from './components/NavigationSection';
 import TeamNavigation from './components/TeamNavigation';
 import GameDayButton from './components/GameDayButton';
 import { cardsNavItems, collectionsNavItems, featuresNavItems } from '@/config/navigationConfig';
@@ -52,6 +52,17 @@ const MainNavigation: React.FC = () => {
     return null;
   }
 
+  // Convert navigation items to the format expected by NavigationSection component
+  const mapNavItems = (items: typeof cardsNavItems): NavigationItemProps[] => {
+    return items.map(item => ({
+      title: item.label,  // Map label to title
+      path: item.path,
+      icon: item.icon,
+      description: item.description,
+      highlight: item.highlight
+    }));
+  };
+
   return (
     <div className="hidden lg:flex items-center gap-6">
       <NavigationMenu>
@@ -59,7 +70,7 @@ const MainNavigation: React.FC = () => {
           {/* Cards Navigation */}
           <NavigationSection 
             title="Cards"
-            items={cardsNavItems}
+            items={mapNavItems(cardsNavItems)}
             isActive={activeSection === 'cards'}
             layout="grid"
             columns={2}
@@ -74,7 +85,7 @@ const MainNavigation: React.FC = () => {
           {/* Collections Navigation */}
           <NavigationSection 
             title="Collections"
-            items={collectionsNavItems}
+            items={mapNavItems(collectionsNavItems)}
             isActive={activeSection === 'collections'}
             layout="list"
           />
@@ -85,7 +96,7 @@ const MainNavigation: React.FC = () => {
           {/* Features Navigation */}
           <NavigationSection 
             title="Features"
-            items={featuresNavItems}
+            items={mapNavItems(featuresNavItems)}
             isActive={activeSection === 'features'}
             layout="grid"
             columns={2}

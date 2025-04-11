@@ -212,4 +212,5 @@ export type NavigationItem = {
   icon?: React.ElementType;
   description?: string;
   highlight?: boolean;
+  title?: string; // Added for compatibility with navigation components
 };

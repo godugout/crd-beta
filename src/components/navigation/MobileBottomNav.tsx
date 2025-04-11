@@ -4,6 +4,7 @@ import { useLocation, Link } from 'react-router-dom';
 import { Home, Image, Layers, Users, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { MobileBottomBar, MobileTouchButton } from '@/components/ui/mobile-controls';
+import { mainNavItems } from '@/config/navigationConfig';
 
 interface MobileBottomNavProps {
   onOpenMenu: () => void;
@@ -12,7 +13,7 @@ interface MobileBottomNavProps {
 const MobileBottomNav: React.FC<MobileBottomNavProps> = ({ onOpenMenu }) => {
   const location = useLocation();
   
-  // Primary navigation items for the bottom nav
+  // Primary navigation items for the bottom nav - using mainNavItems for consistency
   const navItems = [
     { path: '/', label: 'Home', icon: Home },
     { path: '/cards', label: 'Cards', icon: Image },

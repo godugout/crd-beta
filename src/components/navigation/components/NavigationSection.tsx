@@ -10,8 +10,9 @@ import {
 import { LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-interface NavigationItemProps {
-  title: string;
+export interface NavigationItemProps {
+  title?: string;
+  label?: string;
   path: string;
   icon?: React.ElementType;
   description?: string;
@@ -45,7 +46,7 @@ const NavigationSection: React.FC<NavigationSectionProps> = ({
           to={featuredItem.path}
         >
           {featuredItem.icon && <featuredItem.icon className="h-6 w-6 mb-2" />}
-          <div className="mb-2 mt-4 text-lg font-medium">{featuredItem.title}</div>
+          <div className="mb-2 mt-4 text-lg font-medium">{featuredItem.title || featuredItem.label}</div>
           {featuredItem.description && (
             <p className="text-sm leading-tight text-muted-foreground">
               {featuredItem.description}
@@ -86,6 +87,9 @@ const NavigationSection: React.FC<NavigationSectionProps> = ({
 };
 
 const NavigationItem: React.FC<{ item: NavigationItemProps }> = ({ item }) => {
+  // Get the display title from either title or label property
+  const displayTitle = item.title || item.label;
+  
   return (
     <li className="row-span-1">
       <NavigationMenuLink asChild>
@@ -98,7 +102,7 @@ const NavigationItem: React.FC<{ item: NavigationItemProps }> = ({ item }) => {
           )}
         >
           <div className="text-sm font-medium leading-none flex items-center gap-2">
-            {item.icon && <item.icon className="h-4 w-4" />} {item.title}
+            {item.icon && <item.icon className="h-4 w-4" />} {displayTitle}
           </div>
           {item.description && (
             <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
