@@ -13,7 +13,13 @@ import { performance } from '@/lib/monitoring/performance';
 
 const Auth = () => {
   const navigate = useNavigate();
-  const { signIn, signUp, signInWithProvider, isLoading, error, user } = useAuth();
+  const auth = useAuth();
+  const { user, isLoading } = auth;
+  // Handle older and newer auth context structures
+  const signIn = auth.signIn;
+  const signUp = auth.signUp;
+  const signInWithProvider = auth.signInWithProvider || (() => Promise.resolve());
+  const error = auth.error || null;
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -46,7 +52,16 @@ const Auth = () => {
     
     try {
       performance.startMeasurement('sign-up', { email });
-      await signUp(email, password, { name });
+      // Handle different signUp method signatures
+      if (typeof signUp === 'function') {
+        if (signUp.length === 3) {
+          // Old auth context: signUp(email, password, name)
+          await signUp(email, password, name);
+        } else {
+          // New auth context: signUp(email, password, userData)
+          await signUp(email, password, { name });
+        }
+      }
       logger.info('User signed up successfully', { context: { userEmail: email } });
     } catch (err: any) {
       captureException(err, { context: { action: 'signup' } });
@@ -59,7 +74,11 @@ const Auth = () => {
   const handleGoogleSignIn = async () => {
     try {
       performance.startMeasurement('google-sign-in');
-      await signInWithProvider('google');
+      if (typeof signInWithProvider === 'function') {
+        await signInWithProvider('google');
+      } else {
+        throw new Error('Social sign-in not configured');
+      }
       logger.info('Google sign in initiated');
     } catch (err: any) {
       captureException(err, { context: { action: 'google-signin' } });
@@ -72,7 +91,11 @@ const Auth = () => {
   const handleGithubSignIn = async () => {
     try {
       performance.startMeasurement('github-sign-in');
-      await signInWithProvider('github');
+      if (typeof signInWithProvider === 'function') {
+        await signInWithProvider('github');
+      } else {
+        throw new Error('Social sign-in not configured');
+      }
       logger.info('GitHub sign in initiated');
     } catch (err: any) {
       captureException(err, { context: { action: 'github-signin' } });

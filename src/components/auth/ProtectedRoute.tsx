@@ -20,7 +20,9 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   adminOnly = false,
   redirectTo = '/auth'
 }) => {
-  const { isAuthenticated, isLoading, user } = useAuth();
+  const auth = useAuth();
+  const isAuthenticated = auth.isAuthenticated ?? !!auth.user;
+  const { isLoading, user } = auth;
   const { hasPermission, isAdmin } = usePermissions();
   const location = useLocation();
 

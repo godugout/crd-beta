@@ -2,6 +2,7 @@
 import { useContext } from 'react';
 import { useAuth as useAuthFromProvider } from '@/providers/AuthProvider';
 import { AuthContext } from '@/context/auth/AuthContext';
+import { AuthContextType as OldAuthContextType } from '@/context/auth/types';
 
 /**
  * Custom hook for accessing auth context.
@@ -18,7 +19,21 @@ export const useAuth = () => {
     if (!context) {
       throw new Error('useAuth must be used within an AuthProvider');
     }
-    return context;
+    
+    // Add compatibility layer for old context
+    const compatContext: any = {
+      ...context,
+      // Map properties from old context to match new context properties
+      isAuthenticated: !!context.user,
+      signInWithProvider: async () => {
+        throw new Error('Social login not supported with old auth provider');
+      },
+      updateUserProfile: async () => {
+        throw new Error('Profile updates not supported with old auth provider');
+      }
+    };
+    
+    return compatContext;
   }
 };
 
