@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from 'sonner';
@@ -75,6 +76,7 @@ export const CardProvider: React.FC<{ children: React.ReactNode }> = ({ children
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         userId: cardData.userId || cardData.creatorId || 'anonymous',
+        creatorId: cardData.creatorId || cardData.userId || 'anonymous', // Handle creatorId
         collectionId: cardData.collectionId,
         designMetadata: cardData.designMetadata || {
           cardStyle: {},

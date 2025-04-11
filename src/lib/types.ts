@@ -25,6 +25,7 @@ export interface Card {
   thumbnailUrl?: string;
   tags?: string[];
   userId?: string;
+  creatorId?: string;  // Add creatorId property
   teamId?: string;
   collectionId?: string;
   isPublic?: boolean;
@@ -65,7 +66,6 @@ export interface Collection {
   description?: string;
   cardIds: string[];
   imageUrl?: string;
-  isPublic?: boolean;
   createdAt: string;
   updatedAt: string;
   
@@ -76,6 +76,7 @@ export interface Collection {
   visibility?: 'public' | 'private' | 'team' | 'unlisted';
   allowComments?: boolean;
   designMetadata?: any;
+  isPublic?: boolean;
   cards?: Card[]; // Referenced in some collection operations
 }
 

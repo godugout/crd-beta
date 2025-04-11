@@ -14,11 +14,12 @@ export const useCollectionOperations = () => {
       coverImageUrl: collectionData.coverImageUrl || '',
       userId: collectionData.userId || 'anonymous',
       cards: collectionData.cards || [],
+      cardIds: collectionData.cardIds || [], // Add cardIds field
       visibility: collectionData.visibility || 'public',
       allowComments: collectionData.allowComments !== undefined ? collectionData.allowComments : true,
       designMetadata: collectionData.designMetadata || {},
-      createdAt: new Date().toISOString(), // Add missing createdAt field
-      updatedAt: new Date().toISOString(), // Add missing updatedAt field
+      createdAt: new Date().toISOString(), 
+      updatedAt: new Date().toISOString(),
     };
 
     setCollections(prevCollections => [...prevCollections, newCollection]);

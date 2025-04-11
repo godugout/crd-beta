@@ -34,7 +34,8 @@ export const collectionRepository = {
         createdAt: dbCollection.created_at,
         updatedAt: dbCollection.updated_at,
         userId: dbCollection.owner_id,
-        teamId: dbCollection.team_id
+        teamId: dbCollection.team_id,
+        cardIds: [], // Add empty cardIds array as default
       };
       
       return { data: collection, error: null };
@@ -84,7 +85,8 @@ export const collectionRepository = {
         createdAt: dbCollection.created_at,
         updatedAt: dbCollection.updated_at,
         userId: dbCollection.owner_id,
-        teamId: dbCollection.team_id
+        teamId: dbCollection.team_id,
+        cardIds: [], // Add empty cardIds array as default
       };
       
       return { data: collection, error: null };
@@ -137,7 +139,8 @@ export const collectionRepository = {
         createdAt: dbCollection.created_at,
         updatedAt: dbCollection.updated_at,
         userId: dbCollection.owner_id,
-        teamId: dbCollection.team_id
+        teamId: dbCollection.team_id,
+        cardIds: [], // Add empty cardIds array as default
       }));
       
       return { data: collections, error: null };
@@ -185,7 +188,8 @@ export const collectionRepository = {
         createdAt: dbCollection.created_at,
         updatedAt: dbCollection.updated_at,
         userId: dbCollection.owner_id,
-        teamId: dbCollection.team_id
+        teamId: dbCollection.team_id,
+        cardIds: [], // Add empty cardIds array as default
       };
       
       return { data: newCollection, error: null };

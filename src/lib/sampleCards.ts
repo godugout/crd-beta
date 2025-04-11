@@ -10,8 +10,8 @@ const createSampleCard = (data: Partial<Card>): Card => ({
   imageUrl: data.imageUrl || '',
   image: data.image || data.imageUrl || '', // Ensure image field is present
   thumbnailUrl: data.thumbnailUrl || data.imageUrl || '',
-  creatorId: data.creatorId || 'sample-creator', // Ensure creatorId field is present
-  userId: data.userId || data.creatorId || 'sample-creator',
+  userId: data.userId || 'sample-creator',
+  creatorId: data.userId || 'sample-creator', // Use userId as creatorId for consistency
   tags: data.tags || [],
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
