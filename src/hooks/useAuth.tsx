@@ -3,13 +3,27 @@ import { useContext } from 'react';
 import { useAuth as useAuthFromProvider } from '@/providers/AuthProvider';
 import { AuthContext } from '@/context/auth/AuthContext';
 import { AuthContextType as OldAuthContextType } from '@/context/auth/types';
+import { User } from '@/lib/types';
+
+// Define a unified type that encompasses both auth context types
+export interface UnifiedAuthContextType {
+  user: User | null;
+  isLoading: boolean;
+  isAuthenticated?: boolean;
+  error?: string | null;
+  signIn: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string, nameOrUserData: string | Partial<User>) => Promise<void>;
+  signOut: () => Promise<void>;
+  signInWithProvider?: (provider: 'google' | 'github' | 'facebook') => Promise<void>;
+  updateUserProfile?: (data: Partial<User>) => Promise<void>;
+}
 
 /**
  * Custom hook for accessing auth context.
  * It tries to get auth from the new provider first, 
  * and falls back to the old context if needed.
  */
-export const useAuth = () => {
+export const useAuth = (): UnifiedAuthContextType => {
   try {
     // Try to use the new AuthProvider
     return useAuthFromProvider();
@@ -21,7 +35,7 @@ export const useAuth = () => {
     }
     
     // Add compatibility layer for old context
-    const compatContext: any = {
+    const compatContext: UnifiedAuthContextType = {
       ...context,
       // Map properties from old context to match new context properties
       isAuthenticated: !!context.user,

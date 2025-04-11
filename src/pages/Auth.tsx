@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -15,10 +14,13 @@ const Auth = () => {
   const navigate = useNavigate();
   const auth = useAuth();
   const { user, isLoading } = auth;
-  // Handle older and newer auth context structures
+  
+  // Handle older and newer auth context structures safely with proper type checking
   const signIn = auth.signIn;
   const signUp = auth.signUp;
-  const signInWithProvider = auth.signInWithProvider || (() => Promise.resolve());
+  const signInWithProvider = typeof auth.signInWithProvider === 'function' 
+    ? auth.signInWithProvider 
+    : () => Promise.resolve();
   const error = auth.error || null;
   
   const [email, setEmail] = useState('');
@@ -54,13 +56,9 @@ const Auth = () => {
       performance.startMeasurement('sign-up', { email });
       // Handle different signUp method signatures
       if (typeof signUp === 'function') {
-        if (signUp.length === 3) {
-          // Old auth context: signUp(email, password, name)
-          await signUp(email, password, name);
-        } else {
-          // New auth context: signUp(email, password, userData)
-          await signUp(email, password, { name });
-        }
+        // Since we're accepting either string or object, we need to handle both cases
+        // The old context expects a string, the new one expects an object
+        await signUp(email, password, name);
       }
       logger.info('User signed up successfully', { context: { userEmail: email } });
     } catch (err: any) {

@@ -21,7 +21,10 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   redirectTo = '/auth'
 }) => {
   const auth = useAuth();
-  const isAuthenticated = auth.isAuthenticated ?? !!auth.user;
+  // Safely access isAuthenticated property with fallback
+  const isAuthenticated = typeof auth.isAuthenticated !== 'undefined' 
+    ? auth.isAuthenticated 
+    : !!auth.user;
   const { isLoading, user } = auth;
   const { hasPermission, isAdmin } = usePermissions();
   const location = useLocation();
