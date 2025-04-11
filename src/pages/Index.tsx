@@ -18,6 +18,7 @@ const Index = () => {
       title="CardShow - CRD Collection"
       description="Cards Rendered Digitally™ - Create, collect and showcase your trading cards"
       fullWidth={true}
+      hideBreadcrumbs={true}
     >
       <HeroSection />
       

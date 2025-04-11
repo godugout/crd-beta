@@ -5,7 +5,7 @@ import AppHeader from './AppHeader';
 import MobileBottomNav from './MobileBottomNav';
 import { useState } from 'react';
 import MobileMenu from '../navbar/MobileMenu';
-import BreadcrumbNav from './Breadcrumb';
+import { SecondaryNavbar } from './SecondaryNavbar';
 
 interface PageLayoutProps {
   children: ReactNode;
@@ -16,6 +16,8 @@ interface PageLayoutProps {
   className?: string;
   canonicalPath?: string;
   hideBreadcrumbs?: boolean;
+  actions?: React.ReactNode;
+  hideDescription?: boolean;
 }
 
 const PageLayout: React.FC<PageLayoutProps> = ({
@@ -27,6 +29,8 @@ const PageLayout: React.FC<PageLayoutProps> = ({
   className = '',
   canonicalPath,
   hideBreadcrumbs = false,
+  actions,
+  hideDescription = false,
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -42,8 +46,14 @@ const PageLayout: React.FC<PageLayoutProps> = ({
         <AppHeader />
       )}
       
-      {!hideBreadcrumbs && !hideNavigation && (
-        <BreadcrumbNav />
+      {!hideNavigation && (
+        <SecondaryNavbar
+          title={title}
+          description={description}
+          hideBreadcrumbs={hideBreadcrumbs}
+          actions={actions}
+          hideDescription={hideDescription}
+        />
       )}
       
       <main className={`flex-grow ${className}`}>

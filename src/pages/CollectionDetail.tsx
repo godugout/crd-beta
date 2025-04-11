@@ -133,77 +133,63 @@ const CollectionDetail = () => {
       .catch(() => toast.error('Failed to copy collection link'));
   };
 
+  // Create action buttons for secondary navigation
+  const actionButtons = (
+    <>
+      <Button 
+        variant="outline" 
+        size="sm" 
+        onClick={() => setViewMode('grid')}
+        className={viewMode === 'grid' ? 'bg-gray-100' : ''}
+      >
+        <Grid className="h-4 w-4" />
+      </Button>
+      <Button 
+        variant="outline" 
+        size="sm"
+        onClick={() => setViewMode('list')}
+        className={viewMode === 'list' ? 'bg-gray-100' : ''}
+      >
+        <List className="h-4 w-4" />
+      </Button>
+      <Button 
+        variant="outline" 
+        size="sm"
+        onClick={handleShareCollection}
+      >
+        <Share2 className="h-4 w-4" />
+      </Button>
+      <Button 
+        variant="outline" 
+        size="sm"
+        onClick={() => setIsEditDialogOpen(true)}
+      >
+        <Edit className="h-4 w-4" />
+      </Button>
+      <Button 
+        variant="outline" 
+        size="sm"
+        onClick={() => setIsDeleteDialogOpen(true)}
+        className="text-red-500 hover:text-red-600"
+      >
+        <Trash2 className="h-4 w-4" />
+      </Button>
+    </>
+  );
+
   return (
     <PageLayout 
       title={collection.name} 
       description={collection.description || 'View cards in this collection'}
+      actions={actionButtons}
     >
-      <div className="container mx-auto px-4 py-8">
-        {/* Collection header */}
-        <div className="mb-8">
-          <Link 
-            to="/collections" 
-            className="inline-flex items-center text-sm text-gray-500 hover:text-gray-900 mb-4"
-          >
-            <ChevronLeft className="h-4 w-4 mr-1" />
-            Back to collections
-          </Link>
-          
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-              <h1 className="text-3xl font-bold">{collection.name}</h1>
-              {collection.description && (
-                <p className="text-gray-600 mt-2">{collection.description}</p>
-              )}
-              <div className="flex items-center mt-2 text-sm text-gray-500">
-                <span className="inline-flex items-center mr-4">
-                  {collectionCards.length} card{collectionCards.length !== 1 ? 's' : ''}
-                </span>
-                <span className="capitalize">{collection.visibility}</span>
-              </div>
-            </div>
-            
-            <div className="flex gap-2">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => setViewMode('grid')}
-                className={viewMode === 'grid' ? 'bg-gray-100' : ''}
-              >
-                <Grid className="h-4 w-4" />
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => setViewMode('list')}
-                className={viewMode === 'list' ? 'bg-gray-100' : ''}
-              >
-                <List className="h-4 w-4" />
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={handleShareCollection}
-              >
-                <Share2 className="h-4 w-4" />
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => setIsEditDialogOpen(true)}
-              >
-                <Edit className="h-4 w-4" />
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => setIsDeleteDialogOpen(true)}
-                className="text-red-500 hover:text-red-600"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
+      <div className="container mx-auto px-4 py-4">
+        {/* Collection metadata display */}
+        <div className="flex items-center mt-2 text-sm text-gray-500 mb-4">
+          <span className="inline-flex items-center mr-4">
+            {collectionCards.length} card{collectionCards.length !== 1 ? 's' : ''}
+          </span>
+          <span className="capitalize">{collection.visibility}</span>
         </div>
 
         {/* Edit Collection Dialog */}
