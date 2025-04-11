@@ -9,7 +9,12 @@ import { useMediaQuery } from '@/hooks/useMediaQuery';
 import NavigationSection, { NavigationItemProps } from './components/NavigationSection';
 import TeamNavigation from './components/TeamNavigation';
 import GameDayButton from './components/GameDayButton';
-import { cardsNavItems, collectionsNavItems, featuresNavItems } from '@/config/navigation';
+import { 
+  cardsNavItems, 
+  collectionsNavItems, 
+  featuresNavItems,
+  baseballNavItems
+} from '@/config/navigation';
 
 const MainNavigation: React.FC = () => {
   const isMobile = useMediaQuery('(max-width: 768px)');
@@ -39,6 +44,10 @@ const MainNavigation: React.FC = () => {
       path.startsWith('/labs')
     ) {
       return 'features';
+    }
+
+    if (path.startsWith('/baseball-archive')) {
+      return 'baseball';
     }
     
     return '';
@@ -100,6 +109,19 @@ const MainNavigation: React.FC = () => {
             isActive={activeSection === 'features'}
             layout="grid"
             columns={2}
+          />
+          
+          <NavigationSection 
+            title="Baseball Archive"
+            items={mapNavItems(baseballNavItems)}
+            isActive={activeSection === 'baseball'}
+            layout="list"
+            featuredItem={{
+              title: 'Team Color History',
+              path: '/baseball-archive',
+              description: 'Explore MLB team color changes through history',
+              icon: baseballNavItems[0].icon
+            }}
           />
         </NavigationMenuList>
       </NavigationMenu>

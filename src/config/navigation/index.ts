@@ -1,20 +1,5 @@
-
-import { mainNavItems } from './mainNavItems';
-import { cardsNavItems } from './cardsNavItems';
-import { collectionsNavItems } from './collectionsNavItems';
-import { teamsNavItems } from './teamsNavItems';
-import { featuresNavItems } from './featuresNavItems';
-import { footerLinks } from './footerLinks';
-import { routeMappings } from './routeMappings';
-import { type NavigationItem } from './types';
-
-export {
-  mainNavItems,
-  cardsNavItems,
-  collectionsNavItems,
-  teamsNavItems,
-  featuresNavItems,
-  footerLinks,
-  routeMappings,
-  type NavigationItem,
-};
+export { cardsNavItems } from './cardsNavItems';
+export { collectionsNavItems } from './collectionsNavItems';
+export { featuresNavItems } from './featuresNavItems';
+export { teamsNavItems } from './teamsNavItems';
+export { baseballNavItems } from './baseballNavItems';

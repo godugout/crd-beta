@@ -1,314 +1,179 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+
+import React, { useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import PageLayout from '@/components/navigation/PageLayout';
+import { getTeamById, getTeamColorsForYear } from '@/data/baseballTeamColors';
+import TeamColorHistory from '@/components/baseball/TeamColorHistory';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { ArrowLeft, Calendar, Clock, PaintBucket } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { supabase } from '@/integrations/supabase/client';
-import { Users, Calendar, MapPin, Library, Pencil, Trophy, Settings } from 'lucide-react';
-import TeamBreadcrumb from '@/components/navigation/components/TeamBreadcrumb';
 
-interface TeamData {
-  id: string;
-  name: string;
-  description?: string;
-  owner_id: string;
-  created_at?: string;
-  updated_at?: string;
-  logo_url?: string;
-  slug?: string;
-  primaryColor?: string;
-  city?: string;
-  state?: string;
-  founded_year?: number;
-  stadium?: string;
-  league?: string;
-  division?: string;
-}
-
-const TeamDetail = () => {
-  const { teamSlug } = useParams<{ teamSlug?: string }>();
-  const [team, setTeam] = useState<TeamData | null>(null);
-  const [loading, setLoading] = useState(true);
+const TeamDetail: React.FC = () => {
+  const { teamId } = useParams<{ teamId: string }>();
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState('colors');
   
-  useEffect(() => {
-    const fetchTeamDetails = async () => {
-      if (!teamSlug) return;
-      
-      try {
-        const { data, error } = await supabase
-          .from('teams')
-          .select('id, name, description, owner_id, created_at, updated_at, logo_url')
-          .eq('id', teamSlug)
-          .maybeSingle();
-        
-        if (error) {
-          console.error('Error fetching team details:', error);
-          setLoading(false);
-          return;
-        }
-        
-        if (data) {
-          const formattedTeam: TeamData = {
-            id: data.id,
-            name: data.name,
-            description: data.description || undefined,
-            owner_id: data.owner_id,
-            created_at: data.created_at,
-            updated_at: data.updated_at,
-            logo_url: data.logo_url || undefined,
-            slug: teamSlug,
-            primaryColor: '#333333',
-            city: undefined,
-            state: undefined,
-            founded_year: undefined,
-            stadium: undefined,
-            league: undefined,
-            division: undefined
-          };
+  const team = teamId ? getTeamById(teamId) : undefined;
+  
+  if (!team) {
+    return (
+      <PageLayout title="Team Not Found" description="The requested team could not be found">
+        <div className="container mx-auto px-4 py-8">
+          <Button variant="outline" onClick={() => navigate('/baseball-archive')}>
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Archive
+          </Button>
           
-          setTeam(formattedTeam);
-        }
-      } catch (err) {
-        console.error('Error in team details:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchTeamDetails();
-  }, [teamSlug]);
-  
-  const fallbackTeam: TeamData = {
-    id: '1',
-    name: teamSlug ? teamSlug.charAt(0).toUpperCase() + teamSlug.slice(1) : 'Team',
-    description: 'Team details are currently unavailable.',
-    owner_id: 'system',
-    primaryColor: '#333333',
-    city: undefined,
-    state: undefined,
-    founded_year: undefined,
-    stadium: undefined,
-    league: undefined,
-    division: undefined
-  };
-  
-  const displayTeam = team || fallbackTeam;
-  const headerBgColor = displayTeam.primaryColor || '#333';
-  const textColor = getContrastColor(headerBgColor);
-  
-  return (
-    <PageLayout 
-      title={team?.name || teamSlug || 'Team'} 
-      description={team?.description || `Information about this team`}
-    >
-      <TeamBreadcrumb />
-      
-      {!loading && (
-        <>
-          <div 
-            className="py-12" 
-            style={{ 
-              backgroundColor: headerBgColor,
-              color: textColor
-            }}
-          >
-            <div className="container mx-auto px-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h1 className="text-4xl font-bold mb-2">{team?.name || teamSlug}</h1>
-                  {team?.city && (
-                    <p className="text-lg opacity-90">
-                      {team.city}, {team.state}
-                    </p>
-                  )}
-                </div>
-                
-                <div className="space-x-3">
-                  <Button variant="outline" asChild
-                    style={{
-                      backgroundColor: 'transparent',
-                      borderColor: textColor,
-                      color: textColor
-                    }}
-                  >
-                    <Link to={`/teams/${teamSlug}/edit`}>
-                      <Settings className="mr-2 h-4 w-4" />
-                      Manage
-                    </Link>
-                  </Button>
-                </div>
-              </div>
-            </div>
+          <div className="mt-8 text-center">
+            <h1 className="text-2xl font-bold">Team Not Found</h1>
+            <p className="mt-2 text-gray-600">The team you're looking for doesn't exist.</p>
           </div>
-          
-          <div className="container mx-auto px-4 py-8">
-            <Tabs defaultValue="overview" className="w-full">
-              <TabsList className="mb-8">
-                <TabsTrigger value="overview">Overview</TabsTrigger>
-                <TabsTrigger value="memories">Memories</TabsTrigger>
-                <TabsTrigger value="packs">Memory Packs</TabsTrigger>
-                <TabsTrigger value="members">Members</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="overview" className="space-y-8">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                  <div className="md:col-span-2 space-y-6">
-                    <div className="bg-white p-6 rounded-lg shadow-sm border">
-                      <h2 className="text-xl font-semibold mb-4">About {team?.name || teamSlug}</h2>
-                      <p className="text-gray-700 mb-4">
-                        {team?.description || 'No team description available.'}
-                      </p>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-                        {team?.founded_year && (
-                          <div className="flex items-center">
-                            <Calendar className="h-5 w-5 text-gray-500 mr-3" />
-                            <div>
-                              <p className="text-sm text-gray-500">Founded</p>
-                              <p className="font-medium">{team.founded_year}</p>
-                            </div>
-                          </div>
-                        )}
-                        
-                        {team?.stadium && (
-                          <div className="flex items-center">
-                            <MapPin className="h-5 w-5 text-gray-500 mr-3" />
-                            <div>
-                              <p className="text-sm text-gray-500">Stadium</p>
-                              <p className="font-medium">{team.stadium}</p>
-                            </div>
-                          </div>
-                        )}
-                        
-                        {team?.league && (
-                          <div className="flex items-center">
-                            <Trophy className="h-5 w-5 text-gray-500 mr-3" />
-                            <div>
-                              <p className="text-sm text-gray-500">League</p>
-                              <p className="font-medium">
-                                {team.league}
-                                {team.division && ` / ${team.division} Division`}
-                              </p>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    
-                    <div className="bg-white p-6 rounded-lg shadow-sm border">
-                      <div className="flex justify-between items-center mb-4">
-                        <h2 className="text-xl font-semibold">Recent Memories</h2>
-                        <Button asChild variant="outline" size="sm">
-                          <Link to={`/teams/${teamSlug}/memories`}>View All</Link>
-                        </Button>
-                      </div>
-                      
-                      <div className="text-center py-8 text-gray-500">
-                        <Library className="h-12 w-12 mx-auto text-gray-300 mb-2" />
-                        <p>No memories have been shared yet.</p>
-                        <Button asChild className="mt-4" 
-                          style={{ backgroundColor: displayTeam.primaryColor || undefined }}
-                        >
-                          <Link to={`/teams/${teamSlug}/memories/new`}>Share a Memory</Link>
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-6">
-                    <div className="bg-white p-6 rounded-lg shadow-sm border">
-                      <h2 className="text-lg font-medium mb-4">Team Actions</h2>
-                      <div className="space-y-3">
-                        <Button asChild className="w-full" 
-                          style={{ backgroundColor: displayTeam.primaryColor || undefined }}
-                        >
-                          <Link to={`/teams/${teamSlug}/memories/new`}>
-                            <Pencil className="mr-2 h-4 w-4" />
-                            Create Memory
-                          </Link>
-                        </Button>
-                        
-                        <Button asChild variant="outline" className="w-full">
-                          <Link to={`/teams/${teamSlug}/packs/new`}>
-                            Create Memory Pack
-                          </Link>
-                        </Button>
-                      </div>
-                    </div>
-                    
-                    <div className="bg-white p-6 rounded-lg shadow-sm border">
-                      <h2 className="text-lg font-medium mb-4">Team Members</h2>
-                      <div className="flex items-center mb-4">
-                        <Users className="h-5 w-5 text-gray-500 mr-3" />
-                        <div>
-                          <p className="text-sm text-gray-500">Total Members</p>
-                          <p className="font-medium">0 members</p>
-                        </div>
-                      </div>
-                      <Button asChild variant="outline" size="sm" className="w-full">
-                        <Link to={`/teams/${teamSlug}/members`}>View Members</Link>
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </TabsContent>
-              
-              <TabsContent value="memories">
-                <div className="text-center py-12">
-                  <Library className="h-12 w-12 mx-auto text-gray-300 mb-2" />
-                  <h3 className="text-xl font-medium mb-2">No Memories Yet</h3>
-                  <p className="text-gray-500 mb-6">Be the first to share a memory with this team</p>
-                  <Button asChild 
-                    style={{ backgroundColor: displayTeam.primaryColor || undefined }}
-                  >
-                    <Link to={`/teams/${teamSlug}/memories/new`}>Share a Memory</Link>
-                  </Button>
-                </div>
-              </TabsContent>
-              
-              <TabsContent value="packs">
-                <div className="text-center py-12">
-                  <h3 className="text-xl font-medium mb-2">Memory Packs</h3>
-                  <p className="text-gray-500 mb-6">No memory packs available for this team yet</p>
-                  <Button asChild 
-                    style={{ backgroundColor: displayTeam.primaryColor || undefined }}
-                  >
-                    <Link to={`/teams/${teamSlug}/packs/create`}>Create Memory Pack</Link>
-                  </Button>
-                </div>
-              </TabsContent>
-              
-              <TabsContent value="members">
-                <div className="text-center py-12">
-                  <Users className="h-12 w-12 mx-auto text-gray-300 mb-2" />
-                  <h3 className="text-xl font-medium mb-2">Team Members</h3>
-                  <p className="text-gray-500 mb-6">This team doesn't have any members yet</p>
-                  <Button asChild 
-                    style={{ backgroundColor: displayTeam.primaryColor || undefined }}
-                  >
-                    <Link to={`/teams/${teamSlug}/invite`}>Invite Members</Link>
-                  </Button>
-                </div>
-              </TabsContent>
-            </Tabs>
-          </div>
-        </>
-      )}
-    </PageLayout>
-  );
-};
-
-const getContrastColor = (backgroundColor?: string): string => {
-  if (!backgroundColor || backgroundColor.length < 7) {
-    return '#ffffff';
+        </div>
+      </PageLayout>
+    );
   }
   
-  const r = parseInt(backgroundColor.substring(1, 3), 16);
-  const g = parseInt(backgroundColor.substring(3, 5), 16);
-  const b = parseInt(backgroundColor.substring(5, 7), 16);
+  // Get current colors (most recent in history)
+  const currentColors = team.colorHistory.length > 0 
+    ? team.colorHistory.reduce((latest, current) => current.year > latest.year ? current : latest) 
+    : null;
   
-  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-  return luminance > 0.5 ? '#000000' : '#ffffff';
+  return (
+    <PageLayout title={team.fullName || team.name} description={`${team.fullName} team history and statistics`}>
+      <div className="container mx-auto px-4 py-6">
+        <Button variant="outline" onClick={() => navigate('/baseball-archive')}>
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back to Archive
+        </Button>
+        
+        <div className="mt-6">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+            <div>
+              <h1 className="text-3xl font-bold">{team.fullName || team.name}</h1>
+              <div className="flex items-center gap-2 mt-1 text-gray-500">
+                <Calendar className="h-4 w-4" />
+                <span>Founded {team.founded}</span>
+              </div>
+            </div>
+            
+            {currentColors && (
+              <div className="flex items-center mt-4 md:mt-0 gap-3">
+                <div className="flex items-center">
+                  <div 
+                    className="w-5 h-5 rounded mr-2" 
+                    style={{ backgroundColor: currentColors.background }}
+                  />
+                  <span className="text-sm font-mono">{currentColors.background}</span>
+                </div>
+                <div className="flex items-center">
+                  <div 
+                    className="w-5 h-5 rounded mr-2" 
+                    style={{ backgroundColor: currentColors.text }}
+                  />
+                  <span className="text-sm font-mono">{currentColors.text}</span>
+                </div>
+              </div>
+            )}
+          </div>
+          
+          <div 
+            className="h-48 mt-6 rounded-lg flex items-center justify-center"
+            style={currentColors ? { 
+              backgroundColor: currentColors.background
+            } : undefined}
+          >
+            <h2 
+              className="text-6xl font-bold tracking-tight"
+              style={currentColors ? { color: currentColors.text } : undefined}
+            >
+              {team.nickname || team.name}
+            </h2>
+          </div>
+        </div>
+        
+        <div className="mt-8">
+          <Tabs defaultValue="colors" value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="grid w-full md:w-[400px] grid-cols-3">
+              <TabsTrigger value="colors">
+                <PaintBucket className="h-4 w-4 mr-2" />
+                Colors
+              </TabsTrigger>
+              <TabsTrigger value="history">
+                <Clock className="h-4 w-4 mr-2" />
+                History
+              </TabsTrigger>
+              <TabsTrigger value="stats">
+                <Clock className="h-4 w-4 mr-2" />
+                Stats
+              </TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="colors" className="mt-6">
+              <TeamColorHistory team={team} />
+              
+              <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {team.colorHistory.map((color, index) => (
+                  <Card key={`${color.year}-${index}`} className="overflow-hidden">
+                    <div 
+                      className="h-24 flex items-center justify-center"
+                      style={{ backgroundColor: color.background }}
+                    >
+                      <h3 
+                        className="text-2xl font-bold"
+                        style={{ color: color.text }}
+                      >
+                        {team.nickname || team.name}
+                      </h3>
+                    </div>
+                    <CardContent className="p-4">
+                      <p className="font-medium">{color.year}</p>
+                      <div className="grid grid-cols-2 gap-2 mt-2 text-sm">
+                        <div>
+                          <p className="text-xs text-gray-500">Background</p>
+                          <div className="flex items-center">
+                            <div 
+                              className="w-3 h-3 rounded-full mr-1" 
+                              style={{ backgroundColor: color.background }}
+                            />
+                            <span className="font-mono">{color.background}</span>
+                          </div>
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500">Text</p>
+                          <div className="flex items-center">
+                            <div 
+                              className="w-3 h-3 rounded-full mr-1" 
+                              style={{ backgroundColor: color.text }}
+                            />
+                            <span className="font-mono">{color.text}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="history" className="mt-6">
+              <div className="bg-gray-50 p-8 rounded-lg text-center">
+                <h3 className="text-xl font-medium text-gray-500">Team History</h3>
+                <p className="mt-2 text-gray-500">Coming soon...</p>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="stats" className="mt-6">
+              <div className="bg-gray-50 p-8 rounded-lg text-center">
+                <h3 className="text-xl font-medium text-gray-500">Team Statistics</h3>
+                <p className="mt-2 text-gray-500">Coming soon...</p>
+              </div>
+            </TabsContent>
+          </Tabs>
+        </div>
+      </div>
+    </PageLayout>
+  );
 };
 
 export default TeamDetail;
