@@ -14,7 +14,7 @@ const SiteFooter = () => {
               CardShow
             </h3>
             <p className="text-white/80 max-w-xs">
-              The ultimate platform for digital card collectors and enthusiasts.
+              Cards Rendered Digitally<sup className="text-xs">TM</sup> - The ultimate platform for card collectors.
             </p>
             <div className="flex space-x-4">
               <a href="#" className="text-white/60 hover:text-athletics-gold transition-colors">
@@ -81,7 +81,7 @@ const SiteFooter = () => {
               </Link>
             ))}
           </div>
-          <p>© {new Date().getFullYear()} CardShow. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} CardShow. Cards Rendered Digitally<sup className="text-xs">TM</sup>. All rights reserved.</p>
         </div>
       </div>
     </footer>
