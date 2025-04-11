@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Search, PlusCircle, User } from 'lucide-react';
-import { useAuth } from '@/providers/AuthProvider'; // Updated to use the correct AuthProvider
+import { useAuth } from '@/providers/AuthProvider';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 
@@ -24,10 +24,8 @@ const AppHeader: React.FC = () => {
 
   const handleSignInOut = async () => {
     if (user) {
-      // signOut expects no arguments based on the error
       await signOut();
     } else {
-      // signIn expects 2 arguments based on the error
       await signIn("", "");
     }
     closeMenu();
@@ -95,7 +93,7 @@ const AppHeader: React.FC = () => {
               )}
               
               <Button asChild className="btn-gradient">
-                <Link to="/cards/create">
+                <Link to="/card/create">
                   <PlusCircle className="h-4 w-4 mr-2" />
                   <span>Create Card</span>
                 </Link>
@@ -161,7 +159,7 @@ const AppHeader: React.FC = () => {
               </Button>
               
               <Button asChild className="w-full btn-gradient">
-                <Link to="/cards/create" onClick={closeMenu}>
+                <Link to="/card/create" onClick={closeMenu}>
                   <PlusCircle className="h-4 w-4 mr-2" />
                   Create Card
                 </Link>
