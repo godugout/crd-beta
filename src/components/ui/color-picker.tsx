@@ -1,45 +1,61 @@
 
-import React from 'react';
+import React, { useState } from 'react';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 interface ColorPickerProps {
   value: string;
-  onChange: (value: string) => void;
+  onChange: (color: string) => void;
   colors?: string[];
   className?: string;
 }
 
-export function ColorPicker({
+export const ColorPicker: React.FC<ColorPickerProps> = ({
   value,
   onChange,
-  colors = [
-    '#FF7E33', // design-primary-500
-    '#8970FF', // design-secondary-500
-    '#10B981', // design-success-500
-    '#F59E0B', // design-warning-500
-    '#EF4444', // design-error-500
-    '#6B7280', // design-neutral-500
-    '#FFFFFF', 
-    '#000000'
-  ],
+  colors = ['#000000', '#FFFFFF', '#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF'],
   className,
-  ...props
-}: ColorPickerProps & Omit<React.HTMLAttributes<HTMLDivElement>, 'onChange'>) {
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+
   return (
-    <div className={cn('flex flex-wrap gap-2', className)} {...props}>
-      {colors.map((color) => (
-        <button
-          key={color}
-          type="button"
-          aria-label={`Select color ${color}`}
-          style={{ backgroundColor: color }}
-          className={cn(
-            'h-6 w-6 rounded-full cursor-pointer transition-all',
-            value === color ? 'ring-2 ring-black dark:ring-white ring-offset-2' : 'hover:scale-110'
-          )}
-          onClick={() => onChange(color)}
+    <div className={cn('relative', className)}>
+      <div className="flex gap-2 items-center">
+        <div
+          className="w-10 h-10 rounded-md border border-gray-200 cursor-pointer"
+          style={{ backgroundColor: value }}
+          onClick={() => setIsOpen(!isOpen)}
         />
-      ))}
+        
+        <div className="flex-1">
+          <input
+            type="text"
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            className="w-full border border-gray-200 rounded-md px-3 py-1 text-sm"
+          />
+        </div>
+      </div>
+      
+      {isOpen && (
+        <div className="absolute z-10 mt-2 p-2 bg-white rounded-md shadow-md border border-gray-100">
+          <div className="grid grid-cols-4 gap-2">
+            {colors.map((color) => (
+              <Button
+                key={color}
+                type="button"
+                className="w-8 h-8 rounded-md p-0 m-0 border border-gray-200"
+                style={{ backgroundColor: color }}
+                onClick={() => {
+                  onChange(color);
+                  setIsOpen(false);
+                }}
+                variant="ghost"
+              />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
-}
+};
