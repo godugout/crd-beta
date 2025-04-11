@@ -8,9 +8,6 @@ const CardCreatorPage: React.FC = () => {
   const currentPath = window.location.pathname;
   const isNewExperience = currentPath.includes('/card/create') || currentPath.includes('/cards/create');
   
-  // Log the current path to help with debugging
-  console.log("Current path:", currentPath);
-  
   return (
     <PageLayout
       title="Welcome to your <span className='text-litmus-green'>CRD</span> collection!"

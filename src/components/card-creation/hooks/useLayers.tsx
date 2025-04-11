@@ -48,7 +48,7 @@ export const useLayers = (initialLayers: CardLayer[] = []): UseLayersResult => {
     if (activeLayerId === id) {
       setActiveLayerId(prevLayers => {
         const filteredLayers = layers.filter(layer => layer.id !== id);
-        return filteredLayers.length > 0 ? filteredLayers[0].id : undefined;
+        return filteredLayers.length > 0 ? filteredLayers[0].id : null;
       });
     }
   }, [layers, activeLayerId]);
