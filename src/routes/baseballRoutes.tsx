@@ -2,17 +2,16 @@
 import React from 'react';
 import { RouteObject } from 'react-router-dom';
 import BaseballArchive from '@/pages/BaseballArchive';
-import TeamDetail from '@/pages/TeamDetail';
+import BaseballCardViewer from '@/pages/BaseballCardViewer';
 
-const baseballRoutes: RouteObject[] = [
+// Baseball-related routes
+export const baseballRoutes: RouteObject[] = [
   {
     path: "/baseball-archive",
     element: <BaseballArchive />,
   },
   {
-    path: "/baseball-archive/team/:teamId",
-    element: <TeamDetail />,
-  }
+    path: "/baseball-card-viewer/:id?",
+    element: <BaseballCardViewer />,
+  },
 ];
-
-export default baseballRoutes;
