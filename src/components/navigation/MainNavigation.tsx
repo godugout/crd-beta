@@ -59,7 +59,7 @@ const MainNavigation: React.FC = () => {
       path: item.path,
       icon: item.icon,
       description: item.description,
-      highlight: item.highlight
+      highlight: 'highlight' in item ? item.highlight : undefined
     }));
   };
 
