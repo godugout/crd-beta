@@ -5,16 +5,19 @@ import { CardEnhancedProvider } from '@/context/CardEnhancedContext';
 import { routes } from './routes';
 import './App.css';
 import { Toaster } from 'sonner';
+import { ThemeProvider } from '@/hooks/useTheme';
 
 function App() {
   const router = createBrowserRouter(routes);
   
   return (
     <>
-      <CardEnhancedProvider>
-        <RouterProvider router={router} />
-      </CardEnhancedProvider>
-      <Toaster position="top-center" />
+      <ThemeProvider>
+        <CardEnhancedProvider>
+          <RouterProvider router={router} />
+        </CardEnhancedProvider>
+        <Toaster position="top-center" />
+      </ThemeProvider>
     </>
   );
 }

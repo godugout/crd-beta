@@ -1,9 +1,12 @@
 
-import { User } from '@/lib/types';
-
 export type UserRole = 'artist' | 'fan' | 'admin';
 
-export interface UserProfile extends User {
+export interface UserProfile {
+  id: string;
+  email: string;
+  avatarUrl?: string;
+  name?: string;
+  displayName?: string;
   role: UserRole;
   bio?: string;
   website?: string;
