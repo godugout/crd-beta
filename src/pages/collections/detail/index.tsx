@@ -4,7 +4,7 @@ import { useParams, Link } from 'react-router-dom';
 import PageLayout from '@/components/navigation/PageLayout';
 import { Button } from '@/components/ui/button';
 import { useCollectionDetail } from './hooks/useCollectionDetail';
-import { CollectionHeader } from './CollectionHeader';
+import { useCollectionHeader } from './CollectionHeader';
 import CollectionContent from './CollectionContent';
 import { EditDialog, DeleteDialog, AssetGalleryDialog } from './CollectionDialogs';
 import { LoadingState } from '@/components/ui/loading-state';
@@ -64,7 +64,7 @@ const CollectionDetail = () => {
     );
   }
 
-  const { actionButtons, collectionStats } = CollectionHeader({
+  const { actionButtons, collectionStats } = useCollectionHeader({
     collection,
     onShareCollection: handleShareCollection,
     onEditCollection: () => setIsEditDialogOpen(true),

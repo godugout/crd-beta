@@ -2,7 +2,6 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Share2, Edit, Trash2 } from 'lucide-react';
-import { toast } from 'sonner';
 import { Collection } from '@/lib/types';
 
 interface CollectionHeaderProps {
@@ -14,18 +13,24 @@ interface CollectionHeaderProps {
   setViewMode: (mode: 'grid' | 'list') => void;
 }
 
-export const CollectionHeader: React.FC<CollectionHeaderProps> = ({
+interface CollectionHeaderResult {
+  actionButtons: React.ReactNode;
+  collectionStats: Array<{ count?: number; label: string }>;
+}
+
+// Change the function to return CollectionHeaderResult instead of being a React component
+export const useCollectionHeader = ({
   collection,
   onShareCollection,
   onEditCollection,
   onDeleteCollection,
   viewMode,
   setViewMode
-}) => {
+}: CollectionHeaderProps): CollectionHeaderResult => {
   // Collection stats for secondary navbar
   const collectionStats = [
     { count: collection.cardIds.length, label: `card${collection.cardIds.length !== 1 ? 's' : ''}` },
-    { label: collection.visibility }
+    { label: collection.visibility || 'private' }
   ];
 
   // Action buttons for secondary navigation
