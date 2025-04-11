@@ -31,9 +31,9 @@
   .dark {
     --background: 0 0% 10%;
     --foreground: 0 0% 98%;
-    --card: 0 0% 10%;
+    --card: 222 18% 15%; /* Updated for better contrast in dark mode */
     --card-foreground: 0 0% 98%;
-    --popover: 0 0% 10%;
+    --popover: 222 18% 15%; /* Matched with card */
     --popover-foreground: 0 0% 98%;
     --primary: 240 100% 50%;
     --primary-foreground: 0 0% 98%;
@@ -430,8 +430,6 @@
 .filter-input svg {
   @apply absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400;
 }
-/* Keep existing base styles */
-  /* Keep existing CRD Design System Typography Classes */
 
 /* Add additional typography responsive classes */
 @layer components {
@@ -463,4 +461,44 @@
   .crd-btn-gradient {
     @apply px-4 py-2 bg-gradient-to-r from-crd-primary to-blue-600 text-white font-medium rounded-md transition-all hover:shadow-lg focus:ring-2 focus:ring-crd-primary focus:ring-opacity-50 transform hover:scale-[1.03];
   }
+}
+
+/* Card component enhancements for dark mode */
+.card-litmus {
+  @apply rounded-xl overflow-hidden bg-white dark:bg-litmus-gray-800 border border-gray-200 dark:border-litmus-gray-700 shadow-md hover:shadow-xl transition-shadow duration-300;
+}
+
+/* Improved dark mode card styling */
+.dark .card,
+.dark [class*="card-"] {
+  background-color: #1A1F2C; /* Darker background for cards in dark mode */
+  border-color: #2D3748; /* Slightly lighter border for definition */
+}
+
+/* Special dark mode card variants */
+.dark .card-alt {
+  background-color: #221F26; /* Alternative dark background */
+}
+
+.dark .card-gradient {
+  background: linear-gradient(to bottom right, #1A1F2C, #2D3748);
+}
+
+.dark .card-hover:hover {
+  background-color: #2D3748;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Card content in dark mode needs proper contrast */
+.dark .card-content {
+  color: #E2E8F0;
+}
+
+/* Card sections in dark mode */
+.dark .card-header {
+  border-bottom-color: #2D3748;
+}
+
+.dark .card-footer {
+  border-top-color: #2D3748;
 }

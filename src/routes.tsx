@@ -20,11 +20,24 @@ import Auth from '@/pages/Auth';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { GlobalErrorBoundary } from '@/components/error/GlobalErrorBoundary';
 import Unauthorized from '@/pages/Unauthorized';
+import CardShowcase from '@/pages/CardShowcase';
+import Collections from '@/pages/Collections';
+import Teams from '@/pages/Teams';
+import Community from '@/pages/Community';
+import GameDay from '@/pages/GameDay';
+import Labs from '@/pages/Labs';
+import Packs from '@/pages/Packs';
+import Search from '@/pages/Search';
+import Index from '@/pages/Index';
 
 const router = createBrowserRouter([
   // Public routes
   {
     path: "/",
+    element: <Index />,
+  },
+  {
+    path: "/home",
     element: <Home />,
   },
   {
@@ -38,6 +51,38 @@ const router = createBrowserRouter([
   {
     path: "/gallery",
     element: <Gallery />,
+  },
+  {
+    path: "/cards",
+    element: <CardShowcase />,
+  },
+  {
+    path: "/collections",
+    element: <Collections />,
+  },
+  {
+    path: "/teams",
+    element: <Teams />,
+  },
+  {
+    path: "/community",
+    element: <Community />,
+  },
+  {
+    path: "/game-day",
+    element: <GameDay />,
+  },
+  {
+    path: "/labs",
+    element: <Labs />,
+  },
+  {
+    path: "/packs",
+    element: <Packs />,
+  },
+  {
+    path: "/search",
+    element: <Search />,
   },
   
   // Protected routes

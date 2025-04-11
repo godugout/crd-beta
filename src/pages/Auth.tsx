@@ -24,7 +24,7 @@ const Auth = () => {
     : () => Promise.resolve();
   
   // Safely access error property which might not exist in all auth context implementations
-  const errorMessage = auth.error || null;
+  const errorMessage = 'error' in auth ? auth.error : null;
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
