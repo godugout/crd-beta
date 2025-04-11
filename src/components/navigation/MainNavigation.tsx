@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { 
@@ -49,18 +50,19 @@ const MainNavigation: React.FC = () => {
     return null;
   }
 
+  // Updated mapNavItems function to handle optional description
   const mapNavItems = (items: Array<{
     label: string;
     path: string;
     icon: React.ElementType;
-    description: string;
+    description?: string;
     highlight?: boolean;
   }>): NavigationItemProps[] => {
     return items.map(item => ({
       title: item.label,
       path: item.path,
       icon: item.icon,
-      description: item.description,
+      description: item.description || '',
       highlight: item.highlight
     }));
   };

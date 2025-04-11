@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { 
@@ -7,7 +6,6 @@ import {
   NavigationMenuContent,
   NavigationMenuLink,
 } from "@/components/ui/navigation-menu";
-import { LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export interface NavigationItemProps {
@@ -87,7 +85,6 @@ const NavigationSection: React.FC<NavigationSectionProps> = ({
 };
 
 const NavigationItem: React.FC<{ item: NavigationItemProps }> = ({ item }) => {
-  // Get the display title from either title or label property
   const displayTitle = item.title || item.label;
   
   return (
