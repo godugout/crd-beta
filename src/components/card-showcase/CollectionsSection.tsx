@@ -19,14 +19,14 @@ const CollectionsSection: React.FC<CollectionsSectionProps> = ({
   const navigate = useNavigate();
   
   const handleCreateCollection = () => {
-    navigate('/collection/create');
+    navigate('/collections/create');
   };
   
   const onViewCollection = (collectionId: string) => {
     if (handleViewCollection) {
       handleViewCollection(collectionId);
     } else {
-      // Default behavior if not provided
+      // Default behavior if not provided - using /collection/ singular form to match our routes
       navigate(`/collection/${collectionId}`);
     }
   };

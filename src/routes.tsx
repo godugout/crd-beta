@@ -135,8 +135,13 @@ const router = createBrowserRouter([
     path: "/card/:id",
     element: <CardDetail />,
   },
+  // Updated to support both routes for collections (singular and plural)
   {
     path: "/collection/:id",
+    element: <CollectionDetail />,
+  },
+  {
+    path: "/collections/:id",
     element: <CollectionDetail />,
   },
   {

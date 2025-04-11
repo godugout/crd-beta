@@ -41,7 +41,7 @@ const CollectionList: React.FC<CollectionListProps> = ({ collections, isLoading 
       {collections.map((collection) => (
         <Link 
           key={collection.id} 
-          to={`/collections/${collection.id}`}
+          to={`/collection/${collection.id}`}
           className="flex items-center p-4 border rounded-md hover:bg-gray-50 transition-colors"
         >
           <div className="h-12 w-12 bg-gray-100 rounded-md mr-4 overflow-hidden flex-shrink-0">
