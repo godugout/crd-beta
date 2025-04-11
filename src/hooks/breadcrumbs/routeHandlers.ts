@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { BreadcrumbHandlerProps, BreadcrumbItem } from './types';
-import { routeMappings } from '@/components/navigation/components/NavigationItems';
+import { routeMappings } from '@/config/navigation/routeMappings';
 
 // Helper for team segment handling
 export const handleTeamSegment = ({
