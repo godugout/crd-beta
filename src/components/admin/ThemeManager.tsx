@@ -110,7 +110,7 @@ const ThemeManager: React.FC = () => {
               variant="ghost"
               title="Edit theme"
             >
-              <Paint className="h-4 w-4" />
+              <Paintbrush className="h-4 w-4" />
             </Button>
             <Button 
               onClick={() => handleDuplicateTheme(theme)} 
