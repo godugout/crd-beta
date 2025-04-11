@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
@@ -9,7 +8,6 @@ import CardPreviewCanvas from './CardPreviewCanvas';
 import CardLayersPanel from './CardLayersPanel';
 import { useLayers } from './hooks/useLayers';
 
-// Define and export the types needed by other components
 export interface CardDesignState {
   title: string;
   description: string;
@@ -53,7 +51,6 @@ const CardCreator: React.FC = () => {
   const { effectStack, addEffect, removeEffect, toggleEffect, getEffectClasses } = useCardEffectsStack();
   const previewCanvasRef = useRef<HTMLDivElement>(null);
 
-  // Card design state
   const [cardData, setCardData] = useState<CardDesignState>({
     title: '',
     description: '',
@@ -64,7 +61,6 @@ const CardCreator: React.FC = () => {
     imageUrl: null,
   });
 
-  // Use the layers hook
   const {
     layers,
     activeLayerId,
@@ -76,21 +72,32 @@ const CardCreator: React.FC = () => {
     setActiveLayer
   } = useLayers();
 
-  // Handle when an image is captured from the scanner or uploader
   const handleImageCaptured = (imageUrl: string) => {
     setCardImage(imageUrl);
     setCardData(prev => ({ ...prev, imageUrl }));
-    // Move to the next step after image is captured
     setCurrentStep(2);
     setActiveTab('design');
   };
 
-  // Calculate progress based on current step (5 steps total)
+  const handleAddLayer = (type: 'image' | 'text' | 'shape') => {
+    const newLayer: Omit<CardLayer, 'id'> = {
+      type,
+      content: type === 'text' ? 'New Text' : (type === 'image' ? '' : {}),
+      position: { x: 50, y: 50, z: layers.length + 1 },
+      size: { width: type === 'text' ? 'auto' : 100, height: type === 'text' ? 'auto' : 100 },
+      rotation: 0,
+      opacity: 1,
+      visible: true,
+      effectIds: []
+    };
+    
+    addLayer(newLayer);
+  };
+
   const progressPercentage = (currentStep / 5) * 100;
 
   return (
     <div className="space-y-8">
-      {/* Progress indicator */}
       <div className="space-y-2">
         <h1 className="text-3xl font-bold text-center">Create a <span className="text-litmus-green">CRD</span></h1>
         
@@ -131,7 +138,6 @@ const CardCreator: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Left panel - Tabs for different steps */}
         <div className="md:col-span-2">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid grid-cols-5 mb-6">
@@ -163,7 +169,7 @@ const CardCreator: React.FC = () => {
                         activeLayerId={activeLayerId}
                         onLayerSelect={setActiveLayer}
                         onLayerUpdate={updateLayer}
-                        onAddLayer={addLayer}
+                        onAddLayer={handleAddLayer}
                         onDeleteLayer={deleteLayer}
                         onMoveLayerUp={moveLayerUp}
                         onMoveLayerDown={moveLayerDown}
@@ -207,7 +213,6 @@ const CardCreator: React.FC = () => {
           </Tabs>
         </div>
         
-        {/* Right panel - Card preview */}
         <div>
           <div className="bg-gray-900 text-white rounded-lg overflow-hidden h-full flex flex-col">
             <div className="bg-gray-800 p-4 flex justify-between items-center">

@@ -5,7 +5,7 @@ import { CardLayer } from '../CardCreator';
 
 export interface UseLayersResult {
   layers: CardLayer[];
-  activeLayerId?: string;
+  activeLayerId: string | null;
   addLayer: (layer: Omit<CardLayer, 'id'>) => void;
   updateLayer: (id: string, updates: Partial<CardLayer>) => void;
   deleteLayer: (id: string) => void;
@@ -16,8 +16,8 @@ export interface UseLayersResult {
 
 export const useLayers = (initialLayers: CardLayer[] = []): UseLayersResult => {
   const [layers, setLayers] = useState<CardLayer[]>(initialLayers);
-  const [activeLayerId, setActiveLayerId] = useState<string | undefined>(
-    initialLayers.length > 0 ? initialLayers[0].id : undefined
+  const [activeLayerId, setActiveLayerId] = useState<string | null>(
+    initialLayers.length > 0 ? initialLayers[0].id : null
   );
   
   // Add a new layer
