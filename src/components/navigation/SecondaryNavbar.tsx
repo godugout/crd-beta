@@ -1,17 +1,13 @@
+
 import React, { useState } from 'react';
-import { ChevronDown, ChevronUp, Maximize, Search, PlusCircle } from 'lucide-react';
-import { useLocation, Link } from 'react-router-dom';
-import { 
-  Breadcrumb, 
-  BreadcrumbList,
-  BreadcrumbSeparator
-} from '@/components/ui/breadcrumb';
-import { ChevronRight } from 'lucide-react';
-import { useBreadcrumbs } from '@/hooks/breadcrumbs/BreadcrumbContext';
-import { BreadcrumbItemComponent } from '@/components/navigation/components/BreadcrumbItem';
-import { Button } from '@/components/ui/button';
+import { useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { Input } from '@/components/ui/input';
+import { BreadcrumbsNavigation } from './secondary-navbar/BreadcrumbsNavigation';
+import { TitleDescription } from './secondary-navbar/TitleDescription';
+import { SearchInput } from './secondary-navbar/SearchInput';
+import { StatsList } from './secondary-navbar/StatsList';
+import { PrimaryActionButton } from './secondary-navbar/PrimaryActionButton';
+import { CollapseButton } from './secondary-navbar/CollapseButton';
 
 interface SecondaryNavbarProps {
   title?: string;
@@ -46,7 +42,6 @@ export const SecondaryNavbar = ({
 }: SecondaryNavbarProps) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const { breadcrumbs } = useBreadcrumbs();
   const location = useLocation();
   
   if (location.pathname === '/') {
@@ -76,44 +71,16 @@ export const SecondaryNavbar = ({
       <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
           <div className="flex flex-col min-w-0">
-            {!hideBreadcrumbs && breadcrumbs.length > 1 && (
-              <div className={cn("transition-all duration-300", 
-                isCollapsed ? "h-6 opacity-100" : "h-6 opacity-100"
-              )}>
-                <Breadcrumb className="text-sm">
-                  <BreadcrumbList>
-                    {breadcrumbs.map((crumb, index) => {
-                      const isLast = index === breadcrumbs.length - 1;
-                      
-                      return (
-                        <React.Fragment key={crumb.path}>
-                          <BreadcrumbItemComponent crumb={crumb} isLast={isLast} />
-                          
-                          {!isLast && (
-                            <BreadcrumbSeparator>
-                              <ChevronRight className="h-3.5 w-3.5" />
-                            </BreadcrumbSeparator>
-                          )}
-                        </React.Fragment>
-                      );
-                    })}
-                  </BreadcrumbList>
-                </Breadcrumb>
-              </div>
+            {!hideBreadcrumbs && (
+              <BreadcrumbsNavigation isCollapsed={isCollapsed} />
             )}
             
-            {(title || description) && (
-              <div className={cn(
-                "transition-all duration-300 overflow-hidden",
-                isCollapsed ? "h-0 opacity-0" : "opacity-100 mt-1",
-                hideDescription ? "h-auto" : ""
-              )}>
-                {title && <h1 className="text-xl font-semibold text-gray-800 dark:text-white truncate">{title}</h1>}
-                {!hideDescription && description && (
-                  <p className="text-sm text-gray-500 dark:text-gray-300 line-clamp-1">{description}</p>
-                )}
-              </div>
-            )}
+            <TitleDescription 
+              title={title}
+              description={description}
+              isCollapsed={isCollapsed}
+              hideDescription={hideDescription}
+            />
           </div>
           
           <div className={cn(
@@ -121,49 +88,24 @@ export const SecondaryNavbar = ({
             isCollapsed ? "h-8 opacity-100" : "opacity-100"
           )}>
             <div className="flex items-center gap-4">
-              {stats.length > 0 && (
-                <div className="hidden md:flex items-center space-x-4">
-                  {stats.map((stat, index) => (
-                    <div key={index} className="text-sm text-gray-600 dark:text-gray-300">
-                      {stat.count !== undefined && (
-                        <span className="font-medium">{stat.count}</span>
-                      )}
-                      {" "}
-                      {stat.label}
-                    </div>
-                  ))}
-                </div>
-              )}
+              <StatsList stats={stats} />
               
               {onSearch !== undefined && (
-                <div className="relative flex-grow">
-                  <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-400" />
-                  <Input
-                    placeholder={searchPlaceholder}
-                    className="pl-8"
-                    value={searchTerm}
-                    onChange={handleSearchChange}
-                  />
-                </div>
+                <SearchInput 
+                  placeholder={searchPlaceholder}
+                  value={searchTerm}
+                  onChange={handleSearchChange}
+                />
               )}
             </div>
           </div>
           
           <div className="flex items-center gap-2 mt-2 md:mt-0 justify-between md:justify-end">
-            {primaryAction && !isCollapsed && (
-              <Button asChild className="bg-athletics-gold text-gray-900 hover:bg-athletics-gold-dark mr-2">
-                {primaryAction.href ? (
-                  <Link to={primaryAction.href}>
-                    {primaryAction.icon}
-                    {primaryAction.label}
-                  </Link>
-                ) : (
-                  <button onClick={primaryAction.onClick}>
-                    {primaryAction.icon}
-                    {primaryAction.label}
-                  </button>
-                )}
-              </Button>
+            {primaryAction && (
+              <PrimaryActionButton 
+                action={primaryAction} 
+                isCollapsed={isCollapsed} 
+              />
             )}
             
             {actions && (
@@ -172,19 +114,10 @@ export const SecondaryNavbar = ({
               </div>
             )}
             
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={toggleCollapse}
-              className="ml-2 h-8 w-8 p-0"
-              aria-label={isCollapsed ? "Expand navigation" : "Collapse navigation"}
-            >
-              {isCollapsed ? (
-                <ChevronDown className="h-4 w-4" />
-              ) : (
-                <ChevronUp className="h-4 w-4" />
-              )}
-            </Button>
+            <CollapseButton 
+              isCollapsed={isCollapsed}
+              onToggle={toggleCollapse}
+            />
           </div>
         </div>
       </div>
