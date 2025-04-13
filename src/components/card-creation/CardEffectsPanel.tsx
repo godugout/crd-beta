@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Plus, X, Settings, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
-import { CardEffect } from './hooks/useCardEffectsStack';
+import { CardEffect } from './hooks/useCardEffectsStack.tsx';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const AVAILABLE_EFFECTS = [
