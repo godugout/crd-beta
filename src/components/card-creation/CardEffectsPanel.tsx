@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Plus, X, Settings, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -34,7 +33,6 @@ const CardEffectsPanel: React.FC<CardEffectsPanelProps> = ({
   const handleAddEffect = () => {
     if (!selectedEffect) return;
     
-    // Define default settings based on effect type
     const defaultSettings: any = {};
     
     switch (selectedEffect) {
@@ -69,7 +67,6 @@ const CardEffectsPanel: React.FC<CardEffectsPanelProps> = ({
     setExpandedEffectId(prevId => prevId === id ? null : id);
   };
   
-  // Render settings for an effect
   const renderEffectSettings = (effect: CardEffect) => {
     switch (effect.name.toLowerCase()) {
       case 'refractor':
@@ -171,7 +168,6 @@ const CardEffectsPanel: React.FC<CardEffectsPanelProps> = ({
         </p>
       </div>
       
-      {/* Current effects */}
       <div className="space-y-3">
         {effectStack.length === 0 ? (
           <div className="text-center py-4 bg-gray-50 rounded-md">
@@ -217,7 +213,6 @@ const CardEffectsPanel: React.FC<CardEffectsPanelProps> = ({
         )}
       </div>
       
-      {/* Add new effect */}
       <div className="space-y-2">
         <div>
           <Select
