@@ -58,7 +58,6 @@ const CardMakerWizard: React.FC<CardMakerWizardProps> = ({ initialStep = 0 }) =>
     setActiveLayer
   } = useLayers();
 
-  // Handle navigation between steps based on the URL
   useEffect(() => {
     if (step) {
       const stepIndex = steps.findIndex(s => s.path === step);
@@ -66,7 +65,6 @@ const CardMakerWizard: React.FC<CardMakerWizardProps> = ({ initialStep = 0 }) =>
         setCurrentStep(stepIndex);
       }
     } else if (location.pathname === '/card-creator') {
-      // Default to the first step if no specific step is in URL
       navigate('/card-creator/upload', { replace: true });
     }
   }, [step, location, navigate]);
@@ -76,7 +74,6 @@ const CardMakerWizard: React.FC<CardMakerWizardProps> = ({ initialStep = 0 }) =>
   };
 
   const goToStep = (step: number) => {
-    // Validate current step before proceeding
     if (currentStep === 0 && !cardData.imageUrl && step > 0) {
       toast.error('Please upload an image first');
       return;
@@ -84,7 +81,6 @@ const CardMakerWizard: React.FC<CardMakerWizardProps> = ({ initialStep = 0 }) =>
     
     if (step < 0 || step >= steps.length) return;
     
-    // Navigate to the appropriate route
     navigate(`/card-creator/${steps[step].path}`);
     setCurrentStep(step);
   };
@@ -108,10 +104,8 @@ const CardMakerWizard: React.FC<CardMakerWizardProps> = ({ initialStep = 0 }) =>
   };
   
   const handleSaveCard = () => {
-    // Generate a unique ID for the card
     const cardId = uuid();
     
-    // Prepare the card data for saving
     const cardToSave = {
       id: cardId,
       title: cardData.title || 'Untitled Card',
@@ -129,19 +123,15 @@ const CardMakerWizard: React.FC<CardMakerWizardProps> = ({ initialStep = 0 }) =>
       updatedAt: new Date().toISOString()
     };
     
-    // You would typically save this to your backend or state management
     console.log('Saving card:', cardToSave);
     
-    // Show a success message
     toast.success('Card saved successfully!');
     
-    // Navigate to gallery or another appropriate page
     setTimeout(() => {
       navigate('/cards');
     }, 1500);
   };
 
-  // Render the current step content
   const renderStepContent = () => {
     switch (currentStep) {
       case 0:
@@ -195,7 +185,6 @@ const CardMakerWizard: React.FC<CardMakerWizardProps> = ({ initialStep = 0 }) =>
   return (
     <div className="flex h-full w-full flex-col items-start gap-4 bg-default-background px-6 py-6">
       <div className="flex w-full grow shrink-0 basis-0 flex-wrap items-start gap-4 md:flex-row md:flex-wrap md:gap-6">
-        {/* Left panel - Card preview & info */}
         <div className="flex max-w-[576px] grow shrink-0 basis-0 flex-col items-start gap-2 self-stretch rounded-md bg-card px-8 py-8 shadow-lg">
           <div className="mb-4 flex items-center">
             <Sparkles className="mr-2 h-6 w-6 text-litmus-green" />
@@ -237,7 +226,6 @@ const CardMakerWizard: React.FC<CardMakerWizardProps> = ({ initialStep = 0 }) =>
           </div>
         </div>
         
-        {/* Right panel - Step content */}
         <div className="flex grow shrink-0 basis-0 flex-col items-start justify-center gap-6 self-stretch px-6 py-6 md:px-0 md:py-0">
           <Stepper>
             {steps.map((step, index) => (
