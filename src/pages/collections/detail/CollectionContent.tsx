@@ -7,6 +7,8 @@ import { Link } from 'react-router-dom';
 import { Card as CardType } from '@/lib/types';
 import CardGrid from '@/components/gallery/CardGrid';
 import CardList from '@/components/gallery/CardList';
+import { OptimizedImage } from '@/components/ui/optimized-image';
+import { Upload } from 'lucide-react';
 
 interface CollectionContentProps {
   filteredCards: CardType[];
@@ -110,9 +112,6 @@ interface CardGridItemProps {
 }
 
 const CardGridItem: React.FC<CardGridItemProps> = ({ card, onClick, onUpdateImage }) => {
-  const { OptimizedImage } = require('@/components/ui/optimized-image');
-  const { Upload } = require('lucide-react');
-
   return (
     <Card key={card.id} className="overflow-hidden">
       <div className="relative aspect-[3/4]">
