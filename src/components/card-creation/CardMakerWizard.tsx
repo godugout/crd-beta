@@ -34,7 +34,6 @@ const CardMakerWizard: React.FC<CardMakerWizardProps> = ({ initialStep = 0 }) =>
   const { step } = useParams<{ step?: string }>();
   const previewCanvasRef = React.useRef<HTMLDivElement>(null);
   
-  // Initialize card state
   const [cardData, setCardData] = useState<CardDesignState>({
     title: '',
     description: '',
@@ -45,7 +44,6 @@ const CardMakerWizard: React.FC<CardMakerWizardProps> = ({ initialStep = 0 }) =>
     imageUrl: null,
   });
 
-  // Initialize card effects and layers
   const { effectStack, addEffect, removeEffect, updateEffectSettings, getEffectClasses } = useCardEffectsStack();
   const {
     layers,
