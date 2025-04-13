@@ -9,6 +9,7 @@ import CardCreatorPage from '@/pages/CardCreatorPage';
 import CardShowcase from '@/pages/CardShowcase';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import CardCreationFlow from '@/components/card-editor/CardCreationFlow';
+import CardMakerWizard from '@/components/card-creation/CardMakerWizard';
 
 // Card-related routes
 export const cardRoutes: RouteObject[] = [
@@ -54,6 +55,12 @@ export const cardRoutes: RouteObject[] = [
   },
   {
     path: "/card-creator",
-    element: <CardCreatorPage />,
+    element: <CardMakerWizard />,
+  },
+  {
+    path: "/card-creator/:step",
+    element: <CardMakerWizard />,
   },
 ];
+
+export default cardRoutes;

@@ -9,7 +9,8 @@ import {
   Pencil, 
   PencilRuler, 
   RotateCw, 
-  Sparkles 
+  Sparkles,
+  Wand2 
 } from 'lucide-react';
 import { NavigationItem } from './types';
 
@@ -26,6 +27,12 @@ export const featuresNavItems: NavigationItem[] = [
     path: '/features/experiences',
     icon: Compass,
     description: 'Interactive card-based experiences'
+  },
+  {
+    title: 'Card Creator Wizard',
+    path: '/card-creator',
+    icon: Wand2,
+    description: 'Create custom digital trading cards'
   },
   {
     title: 'Dugout Labs',

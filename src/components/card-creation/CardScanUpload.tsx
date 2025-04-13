@@ -1,146 +1,125 @@
 
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
+import { Upload, Camera, Image as ImageIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Upload, Camera, Plus, Scan } from 'lucide-react';
 import { toast } from 'sonner';
-import CardUpload from '@/components/card-upload/CardUpload';
-import ImageEditor from '@/components/card-upload/ImageEditor';
-import { MemorabiliaType } from '@/components/card-upload/cardDetection';
-import useImageProcessing from '@/hooks/useImageProcessing';
 
 interface CardScanUploadProps {
   onImageCaptured: (imageUrl: string) => void;
 }
 
 const CardScanUpload: React.FC<CardScanUploadProps> = ({ onImageCaptured }) => {
-  const [activeTab, setActiveTab] = useState<string>('scan');
-  const [showEditor, setShowEditor] = useState<boolean>(false);
-  const [editorImage, setEditorImage] = useState<string | null>(null);
-  const [currentFile, setCurrentFile] = useState<File | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const { isProcessing } = useImageProcessing();
-
-  // Handle card scanning/photo capture
-  const handleCameraCapture = () => {
+  const [dragActive, setDragActive] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  
+  const handleDrag = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (e.type === 'dragenter' || e.type === 'dragover') {
+      setDragActive(true);
+    } else if (e.type === 'dragleave') {
+      setDragActive(false);
+    }
+  };
+  
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      handleFiles(e.dataTransfer.files[0]);
+    }
+  };
+  
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    
+    if (e.target.files && e.target.files[0]) {
+      handleFiles(e.target.files[0]);
+    }
+  };
+  
+  const handleFiles = (file: File) => {
+    if (file.type.startsWith('image/')) {
+      setIsLoading(true);
+      
+      try {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          if (e.target?.result) {
+            onImageCaptured(e.target.result.toString());
+            toast.success('Image uploaded successfully');
+          }
+          setIsLoading(false);
+        };
+        reader.onerror = () => {
+          toast.error('Error reading file');
+          setIsLoading(false);
+        };
+        reader.readAsDataURL(file);
+      } catch (error) {
+        toast.error('Error processing image');
+        setIsLoading(false);
+      }
+    } else {
+      toast.error('Please upload an image file');
+    }
+  };
+  
+  const openFileDialog = () => {
     if (fileInputRef.current) {
-      fileInputRef.current.setAttribute('capture', 'environment');
       fileInputRef.current.click();
     }
   };
-
-  // Handle image upload from device
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      setCurrentFile(file);
-      
-      // Create a preview URL
-      const url = URL.createObjectURL(file);
-      setEditorImage(url);
-      
-      // Show the editor for cropping and processing
-      setShowEditor(true);
-    }
-  };
-
-  // Handle image upload via drag and drop or file browser
-  const handleImageUpload = (file: File, previewUrl: string) => {
-    onImageCaptured(previewUrl);
-    toast.success("Card image uploaded successfully! Ready to customize.");
-  };
-
-  // Handle crop completion from the editor
-  const handleCropComplete = (file: File, url: string, memorabiliaType?: MemorabiliaType) => {
-    onImageCaptured(url);
-    setShowEditor(false);
-    toast.success("Card extracted successfully! Ready to customize.");
-  };
-
+  
   return (
-    <div className="space-y-6">
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid grid-cols-3 w-full">
-          <TabsTrigger value="scan">
-            <Scan className="h-4 w-4 mr-2" />
-            Scan Card
-          </TabsTrigger>
-          <TabsTrigger value="upload">
-            <Upload className="h-4 w-4 mr-2" />
-            Upload Image
-          </TabsTrigger>
-          <TabsTrigger value="create">
-            <Plus className="h-4 w-4 mr-2" />
-            Create Custom
-          </TabsTrigger>
-        </TabsList>
+    <div 
+      className={`relative border-2 border-dashed rounded-lg p-6 text-center transition-colors
+        ${dragActive ? 'border-litmus-green bg-litmus-green/10' : 'border-gray-300 hover:border-litmus-green/50'}
+      `}
+      onDragEnter={handleDrag}
+      onDragOver={handleDrag}
+      onDragLeave={handleDrag}
+      onDrop={handleDrop}
+    >
+      <input 
+        ref={fileInputRef}
+        type="file" 
+        accept="image/*"
+        className="hidden"
+        onChange={handleChange}
+      />
+      
+      <div className="flex flex-col items-center justify-center py-4">
+        <div className="bg-litmus-green/10 p-3 rounded-full mb-4">
+          <Upload className="h-8 w-8 text-litmus-green" />
+        </div>
+        <p className="text-sm font-medium mb-2">Drag and drop your card image here</p>
+        <p className="text-xs text-gray-500 mb-4">or click to browse files</p>
         
-        <TabsContent value="scan" className="space-y-4 py-4">
-          <div className="text-center">
-            <p className="mb-4 text-gray-600">
-              Use your camera to scan a trading card. 
-              Position the card on a flat surface with good lighting for best results.
-            </p>
-            
-            <input 
-              type="file"
-              accept="image/*"
-              className="hidden"
-              ref={fileInputRef}
-              onChange={handleFileChange}
-            />
-            
-            <Button 
-              onClick={handleCameraCapture}
-              className="w-full max-w-xs"
-              size="lg"
-            >
-              <Camera className="h-5 w-5 mr-2" />
-              Capture Card
-            </Button>
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="upload" className="py-4">
-          <CardUpload 
-            onImageUpload={handleImageUpload}
-            enabledMemorabiliaTypes={['card']}
-            autoEnhance={true}
-          />
-        </TabsContent>
-        
-        <TabsContent value="create" className="py-4">
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-            {/* Template placeholders - these would be dynamically loaded in a real implementation */}
-            {['Vintage', 'Modern', 'Sports', 'Art', 'Gaming', 'Collectible'].map((template) => (
-              <div 
-                key={template}
-                className="aspect-[2.5/3.5] border rounded-lg bg-gray-100 hover:bg-gray-200 flex flex-col items-center justify-center cursor-pointer transition-colors"
-                onClick={() => {
-                  toast.info(`${template} template selected! This will be implemented in the future.`);
-                  setActiveTab('upload');
-                }}
-              >
-                <div className="text-lg font-medium">{template}</div>
-                <div className="text-xs text-gray-600">Template</div>
-              </div>
-            ))}
-          </div>
-        </TabsContent>
-      </Tabs>
-
-      {/* Image Editor Modal */}
-      {showEditor && (
-        <ImageEditor
-          showEditor={showEditor}
-          setShowEditor={setShowEditor}
-          editorImage={editorImage}
-          currentFile={currentFile}
-          onCropComplete={handleCropComplete}
-          enabledMemorabiliaTypes={['card']}
-          autoEnhance={true}
-        />
-      )}
+        <div className="flex flex-wrap gap-2 justify-center">
+          <Button
+            onClick={openFileDialog}
+            variant="outline"
+            className="flex items-center"
+            size="sm"
+          >
+            <ImageIcon className="mr-1 h-4 w-4" /> Choose File
+          </Button>
+          
+          <Button
+            onClick={() => toast.info('Camera capture coming soon')}
+            variant="outline"
+            className="flex items-center"
+            size="sm"
+          >
+            <Camera className="mr-1 h-4 w-4" /> Take Photo
+          </Button>
+        </div>
+      </div>
     </div>
   );
 };
