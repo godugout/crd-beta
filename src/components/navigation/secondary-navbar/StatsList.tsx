@@ -9,7 +9,7 @@ interface StatsListProps {
 }
 
 export const StatsList: React.FC<StatsListProps> = ({ stats }) => {
-  if (stats.length === 0) return null;
+  if (!stats || stats.length === 0) return null;
   
   return (
     <div className="hidden md:flex items-center space-x-4">
