@@ -4,11 +4,12 @@ import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import { v4 as uuid } from 'uuid';
 import { toast } from 'sonner';
 import { CardDesignState } from '../CardCreator';
+import { LucideIcon } from 'lucide-react';
 
 export interface Step {
   name: string;
   path: string;
-  icon: React.ComponentType<{ size?: number }>;
+  icon: LucideIcon;
 }
 
 export const useCardWizard = (steps: Step[], initialState: CardDesignState) => {

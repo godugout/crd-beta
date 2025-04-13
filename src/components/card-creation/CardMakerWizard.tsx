@@ -5,7 +5,7 @@ import Stepper from '@/components/ui/stepper';
 import { CardDesignState } from './CardCreator';
 import { useCardEffectsStack } from './hooks/useCardEffectsStack';
 import { useLayers } from './hooks/useLayers';
-import { useCardWizard } from './hooks/useCardWizard';
+import { useCardWizard, Step } from './hooks/useCardWizard';
 import CardPreviewSidebar from './components/CardPreviewSidebar';
 import CardWizardHeader from './components/CardWizardHeader';
 import CardWizardFeatures from './components/CardWizardFeatures';
@@ -16,7 +16,7 @@ export interface CardMakerWizardProps {
   initialStep?: number;
 }
 
-const steps = [
+const steps: Step[] = [
   { name: 'Upload', icon: Upload, path: 'upload' },
   { name: 'Design', icon: Palette, path: 'design' },
   { name: 'Effects', icon: Sparkles, path: 'effects' },

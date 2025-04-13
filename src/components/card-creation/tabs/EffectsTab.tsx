@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { ChevronRight } from 'lucide-react';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import CardEffectsPanel from '../CardEffectsPanel';
-import { useCardEffectsStack } from '../hooks/useCardEffectsStack';
+import { useCardEffectsStack, CardEffect } from '../hooks/useCardEffectsStack';
 
 interface EffectsTabProps {
   onContinue: () => void;
