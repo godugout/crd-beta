@@ -1,9 +1,9 @@
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import { Sparkles, Upload, Palette, Type, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
-import Stepper from '@/components/ui/stepper';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 import CardPreviewSidebar from './components/CardPreviewSidebar';
 import UploadTab from './tabs/UploadTab';
 import DesignTab from './tabs/DesignTab';
@@ -13,23 +13,26 @@ import PreviewTab from './tabs/PreviewTab';
 import { CardDesignState } from './CardCreator';
 import { useCardEffectsStack } from './hooks/useCardEffectsStack';
 import { useLayers } from './hooks/useLayers';
+import Stepper from '@/components/ui/stepper';
+import { v4 as uuid } from 'uuid';
 
 export interface CardMakerWizardProps {
   initialStep?: number;
 }
 
 const steps = [
-  { name: 'Upload', icon: Upload },
-  { name: 'Design', icon: Palette },
-  { name: 'Effects', icon: Sparkles },
-  { name: 'Text', icon: Type },
-  { name: 'Preview', icon: Eye },
+  { name: 'Upload', icon: Upload, path: 'upload' },
+  { name: 'Design', icon: Palette, path: 'design' },
+  { name: 'Effects', icon: Sparkles, path: 'effects' },
+  { name: 'Text', icon: Type, path: 'text' },
+  { name: 'Preview', icon: Eye, path: 'preview' },
 ];
 
 const CardMakerWizard: React.FC<CardMakerWizardProps> = ({ initialStep = 0 }) => {
   const [currentStep, setCurrentStep] = useState(initialStep);
   const navigate = useNavigate();
   const location = useLocation();
+  const { step } = useParams<{ step?: string }>();
   const previewCanvasRef = React.useRef<HTMLDivElement>(null);
   
   // Initialize card state
@@ -44,7 +47,7 @@ const CardMakerWizard: React.FC<CardMakerWizardProps> = ({ initialStep = 0 }) =>
   });
 
   // Initialize card effects and layers
-  const { effectStack, addEffect, removeEffect, toggleEffect, getEffectClasses } = useCardEffectsStack();
+  const { effectStack, addEffect, removeEffect, updateEffectSettings, getEffectClasses } = useCardEffectsStack();
   const {
     layers,
     activeLayerId,
@@ -56,26 +59,34 @@ const CardMakerWizard: React.FC<CardMakerWizardProps> = ({ initialStep = 0 }) =>
     setActiveLayer
   } = useLayers();
 
-  // Handle navigation between steps
+  // Handle navigation between steps based on the URL
   useEffect(() => {
-    const path = location.pathname;
-    if (path.includes('upload')) setCurrentStep(0);
-    else if (path.includes('design')) setCurrentStep(1);
-    else if (path.includes('effects')) setCurrentStep(2);
-    else if (path.includes('text')) setCurrentStep(3);
-    else if (path.includes('preview')) setCurrentStep(4);
-  }, [location]);
+    if (step) {
+      const stepIndex = steps.findIndex(s => s.path === step);
+      if (stepIndex >= 0) {
+        setCurrentStep(stepIndex);
+      }
+    } else if (location.pathname === '/card-creator') {
+      // Default to the first step if no specific step is in URL
+      navigate('/card-creator/upload', { replace: true });
+    }
+  }, [step, location, navigate]);
 
   const handleImageCaptured = (imageUrl: string) => {
     setCardData(prev => ({ ...prev, imageUrl }));
   };
 
   const goToStep = (step: number) => {
+    // Validate current step before proceeding
+    if (currentStep === 0 && !cardData.imageUrl && step > 0) {
+      toast.error('Please upload an image first');
+      return;
+    }
+    
     if (step < 0 || step >= steps.length) return;
     
     // Navigate to the appropriate route
-    const routes = ['upload', 'design', 'effects', 'text', 'preview'];
-    navigate(`/card-creator/${routes[step]}`);
+    navigate(`/card-creator/${steps[step].path}`);
     setCurrentStep(step);
   };
 
@@ -95,6 +106,40 @@ const CardMakerWizard: React.FC<CardMakerWizardProps> = ({ initialStep = 0 }) =>
     };
     
     addLayer(newLayer);
+  };
+  
+  const handleSaveCard = () => {
+    // Generate a unique ID for the card
+    const cardId = uuid();
+    
+    // Prepare the card data for saving
+    const cardToSave = {
+      id: cardId,
+      title: cardData.title || 'Untitled Card',
+      description: cardData.description || '',
+      imageUrl: cardData.imageUrl || '',
+      tags: cardData.tags,
+      designMetadata: {
+        borderColor: cardData.borderColor,
+        backgroundColor: cardData.backgroundColor,
+        borderRadius: cardData.borderRadius,
+        layers,
+        effects: effectStack
+      },
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    
+    // You would typically save this to your backend or state management
+    console.log('Saving card:', cardToSave);
+    
+    // Show a success message
+    toast.success('Card saved successfully!');
+    
+    // Navigate to gallery or another appropriate page
+    setTimeout(() => {
+      navigate('/cards');
+    }, 1500);
   };
 
   // Render the current step content
@@ -127,11 +172,22 @@ const CardMakerWizard: React.FC<CardMakerWizardProps> = ({ initialStep = 0 }) =>
           />
         );
       case 2:
-        return <EffectsTab onContinue={handleNext} />;
+        return (
+          <EffectsTab onContinue={handleNext} />
+        );
       case 3:
-        return <TextTab onContinue={handleNext} />;
+        return (
+          <TextTab onContinue={handleNext} />
+        );
       case 4:
-        return <PreviewTab onSave={() => console.log('Saving card:', cardData, layers)} />;
+        return (
+          <PreviewTab 
+            onSave={handleSaveCard}
+            cardImage={cardData.imageUrl || undefined}
+            cardTitle={cardData.title}
+            cardEffect={getEffectClasses()}
+          />
+        );
       default:
         return <div>Unknown step</div>;
     }
@@ -216,14 +272,24 @@ const CardMakerWizard: React.FC<CardMakerWizardProps> = ({ initialStep = 0 }) =>
             >
               <ChevronLeft size={16} /> Back
             </Button>
-            <Button
-              variant="default"
-              onClick={handleNext}
-              disabled={currentStep === steps.length - 1 || (currentStep === 0 && !cardData.imageUrl)}
-              className="flex items-center gap-1"
-            >
-              Next <ChevronRight size={16} />
-            </Button>
+            {currentStep < steps.length - 1 ? (
+              <Button
+                variant="default"
+                onClick={handleNext}
+                disabled={currentStep === 0 && !cardData.imageUrl}
+                className="flex items-center gap-1"
+              >
+                Next <ChevronRight size={16} />
+              </Button>
+            ) : (
+              <Button
+                variant="default"
+                onClick={handleSaveCard}
+                className="flex items-center gap-1"
+              >
+                Save Card
+              </Button>
+            )}
           </div>
         </div>
       </div>
