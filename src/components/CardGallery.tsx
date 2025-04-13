@@ -78,15 +78,24 @@ const CardGallery: React.FC<CardGalleryProps> = ({
   return (
     <div className={cn("", className)}>
       <ErrorBoundary>
-        <CardGridWrapper 
-          cards={filteredCards}
-          onCardClick={handleCardItemClick} 
-          isLoading={isLoadingAny}
-          getCardEffects={getCardEffects}
-          error={contextError}
-        />
+        {isLoadingAny ? (
+          <div className="flex items-center justify-center p-8">
+            <div className="flex flex-col items-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
+              <p className="text-foreground">Loading cards...</p>
+            </div>
+          </div>
+        ) : (
+          <CardGridWrapper 
+            cards={filteredCards}
+            onCardClick={handleCardItemClick} 
+            isLoading={false}
+            getCardEffects={getCardEffects}
+            error={contextError}
+          />
+        )}
         
-        {filteredCards.length === 0 && !isLoadingAny && (
+        {filteredCards.length === 0 && !isLoadingAny && !contextError && (
           <div className="text-center py-12">
             <p className="text-muted-foreground">No cards found</p>
           </div>

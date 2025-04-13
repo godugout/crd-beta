@@ -73,7 +73,7 @@ export const CardGridWrapper: React.FC<CardGridWrapperProps> = ({
   }
 
   // If no cards, show empty state
-  if (cards.length === 0) {
+  if (!cards || cards.length === 0) {
     return (
       <EmptyState
         title="No cards found"
