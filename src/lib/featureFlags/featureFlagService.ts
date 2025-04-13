@@ -1,4 +1,3 @@
-
 import { 
   FeatureFlag,
   UserAttributes,
@@ -157,7 +156,7 @@ class FeatureFlagService {
     flagId: string, 
     defaultValue: T | boolean = false
   ): boolean {
-    const result = this.evaluate<T>(flagId, defaultValue);
+    const result = this.evaluate<T | boolean>(flagId, defaultValue as T);
     return result.enabled && (
       typeof result.value === 'boolean' ? result.value : true
     );
@@ -171,7 +170,7 @@ class FeatureFlagService {
     defaultValue: T
   ): T {
     const result = this.evaluate<T>(flagId, defaultValue);
-    return result.value;
+    return result.value as T;
   }
 
   /**

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -174,7 +173,9 @@ const EndpointSection: React.FC<{
                       <p className="mb-2 text-sm">{endpoint.requestBody.description}</p>
                       <div className="bg-muted p-2 rounded font-mono text-xs whitespace-pre overflow-x-auto">
                         {JSON.stringify(
-                          Object.values(endpoint.requestBody.content)[0].schema,
+                          endpoint.requestBody.content && 
+                          Object.values(endpoint.requestBody.content)[0] && 
+                          (Object.values(endpoint.requestBody.content)[0] as any).schema || {},
                           null,
                           2
                         )}
@@ -196,7 +197,9 @@ const EndpointSection: React.FC<{
                         {response.content && (
                           <div className="bg-muted p-2 rounded font-mono text-xs whitespace-pre overflow-x-auto">
                             {JSON.stringify(
-                              Object.values(response.content)[0].schema,
+                              response.content && 
+                              Object.values(response.content)[0] && 
+                              (Object.values(response.content)[0] as any).schema || {},
                               null,
                               2
                             )}
@@ -481,7 +484,6 @@ const FeatureDisabledCard: React.FC<{
   );
 };
 
-// Helper functions
 const getMethodColor = (method: string): string => {
   switch (method.toUpperCase()) {
     case 'GET': return 'bg-blue-500';
@@ -518,9 +520,16 @@ const getExampleCode = (endpoint: any): string => {
     code += `      'Authorization': 'Bearer YOUR_TOKEN'\n`;
     code += `    },\n`;
     code += `    body: JSON.stringify({\n`;
-    if (endpoint.requestBody) {
-      const schema = Object.values(endpoint.requestBody.content)[0].schema;
-      if (schema.$ref) {
+    if (endpoint.requestBody && endpoint.requestBody.content) {
+      const contentValues = Object.values(endpoint.requestBody.content);
+      if (contentValues.length > 0 && (contentValues[0] as any).schema) {
+        const schema = (contentValues[0] as any).schema;
+        if (schema.$ref) {
+          code += `      // Example request data\n`;
+          code += `      "title": "Example Title",\n`;
+          code += `      "description": "Example description"\n`;
+        }
+      } else {
         code += `      // Example request data\n`;
         code += `      "title": "Example Title",\n`;
         code += `      "description": "Example description"\n`;
