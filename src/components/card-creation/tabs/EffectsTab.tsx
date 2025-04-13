@@ -12,7 +12,7 @@ interface EffectsTabProps {
 
 const EffectsTab: React.FC<EffectsTabProps> = ({ onContinue }) => {
   const isMobile = useMediaQuery('(max-width: 768px)');
-  const { effectStack, addEffect, removeEffect, updateEffectSettings } = useCardEffectsStack();
+  const { effectStack, addEffect, removeEffect, updateEffectSettings, getEffectClasses } = useCardEffectsStack();
   
   return (
     <div>

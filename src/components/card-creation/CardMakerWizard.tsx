@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import { Sparkles, Upload, Palette, Type, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
