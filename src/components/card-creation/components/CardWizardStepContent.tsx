@@ -6,6 +6,7 @@ import DesignTab from '../tabs/DesignTab';
 import EffectsTab from '../tabs/EffectsTab';
 import TextTab from '../tabs/TextTab';
 import PreviewTab from '../tabs/PreviewTab';
+import { CardEffect } from '../hooks/useCardEffectsStack';
 
 interface CardWizardStepContentProps {
   currentStep: number;
@@ -23,6 +24,10 @@ interface CardWizardStepContentProps {
   moveLayerDown: (layerId: string) => void;
   onAddLayer: (type: 'image' | 'text' | 'shape') => void;
   effectClasses: string;
+  effectStack: CardEffect[];
+  addEffect: (name: string, settings?: any) => void;
+  removeEffect: (id: string) => void;
+  updateEffectSettings: (id: string, settings: any) => void;
 }
 
 const CardWizardStepContent: React.FC<CardWizardStepContentProps> = ({
@@ -40,7 +45,11 @@ const CardWizardStepContent: React.FC<CardWizardStepContentProps> = ({
   moveLayerUp,
   moveLayerDown,
   onAddLayer,
-  effectClasses
+  effectClasses,
+  effectStack,
+  addEffect,
+  removeEffect,
+  updateEffectSettings
 }) => {
   switch (currentStep) {
     case 0:
@@ -71,7 +80,13 @@ const CardWizardStepContent: React.FC<CardWizardStepContentProps> = ({
       );
     case 2:
       return (
-        <EffectsTab onContinue={onNext} />
+        <EffectsTab 
+          onContinue={onNext} 
+          effectStack={effectStack}
+          addEffect={addEffect}
+          removeEffect={removeEffect}
+          updateEffectSettings={updateEffectSettings}
+        />
       );
     case 3:
       return (

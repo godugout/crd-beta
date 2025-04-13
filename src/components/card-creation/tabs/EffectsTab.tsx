@@ -4,15 +4,24 @@ import { Button } from '@/components/ui/button';
 import { ChevronRight } from 'lucide-react';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import CardEffectsPanel from '../CardEffectsPanel';
-import { useCardEffectsStack, CardEffect } from '../hooks/useCardEffectsStack';
+import { CardEffect } from '../hooks/useCardEffectsStack';
 
 interface EffectsTabProps {
   onContinue: () => void;
+  effectStack: CardEffect[];
+  addEffect: (name: string, settings?: any) => void;
+  removeEffect: (id: string) => void;
+  updateEffectSettings: (id: string, settings: any) => void;
 }
 
-const EffectsTab: React.FC<EffectsTabProps> = ({ onContinue }) => {
+const EffectsTab: React.FC<EffectsTabProps> = ({
+  onContinue,
+  effectStack,
+  addEffect,
+  removeEffect,
+  updateEffectSettings
+}) => {
   const isMobile = useMediaQuery('(max-width: 768px)');
-  const { effectStack, addEffect, removeEffect, updateEffectSettings, getEffectClasses } = useCardEffectsStack();
   
   return (
     <div>
