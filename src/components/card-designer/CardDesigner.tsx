@@ -52,7 +52,7 @@ const CardDesigner: React.FC<CardDesignerProps> = ({
     removeEffect,
     updateEffectSettings,
     getEffectClasses
-  } = useCardEffectsStack(initialData?.effects);
+  } = useCardEffectsStack();
   
   // Mark as dirty when changes are made
   useEffect(() => {

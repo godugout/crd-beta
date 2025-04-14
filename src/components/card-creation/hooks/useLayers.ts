@@ -3,22 +3,18 @@ import { useState, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { CardLayer } from '../CardCreator';
 
-export interface UseLayersResult {
-  layers: CardLayer[];
-  activeLayerId: string | null;
-  setActiveLayer: (layerId: string) => void;
-  addLayer: (layer: Omit<CardLayer, 'id'>) => string;
-  updateLayer: (layerId: string, updates: Partial<CardLayer>) => void;
-  deleteLayer: (layerId: string) => void;
-  moveLayerUp: (layerId: string) => void;
-  moveLayerDown: (layerId: string) => void;
-  setLayers: (layers: CardLayer[]) => void;  // Explicitly include setLayers in the interface
-}
-
-export function useLayers(): UseLayersResult {
-  const [layers, setLayers] = useState<CardLayer[]>([]);
-  const [activeLayerId, setActiveLayerId] = useState<string | null>(null);
+export const useLayers = (initialLayers: Omit<CardLayer, 'id'>[] = []) => {
+  const [layers, setLayers] = useState<CardLayer[]>(
+    initialLayers.map(layer => ({
+      ...layer,
+      id: uuidv4()
+    }))
+  );
   
+  const [activeLayerId, setActiveLayerId] = useState<string | null>(
+    layers.length > 0 ? layers[0].id : null
+  );
+
   const addLayer = useCallback((layer: Omit<CardLayer, 'id'>) => {
     const newLayer = {
       ...layer,
@@ -27,52 +23,55 @@ export function useLayers(): UseLayersResult {
     
     setLayers(prev => [...prev, newLayer]);
     setActiveLayerId(newLayer.id);
-    return newLayer.id;
   }, []);
   
-  const updateLayer = useCallback((layerId: string, updates: Partial<CardLayer>) => {
-    setLayers(prev => 
-      prev.map(layer => 
-        layer.id === layerId ? { ...layer, ...updates } : layer
+  const updateLayer = useCallback((id: string, updates: Partial<CardLayer>) => {
+    setLayers(prev =>
+      prev.map(layer =>
+        layer.id === id ? { ...layer, ...updates } : layer
       )
     );
   }, []);
   
-  const deleteLayer = useCallback((layerId: string) => {
-    setLayers(prev => prev.filter(layer => layer.id !== layerId));
+  const deleteLayer = useCallback((id: string) => {
+    setLayers(prev => prev.filter(layer => layer.id !== id));
     
-    // Reset active layer if the deleted layer was active
-    if (activeLayerId === layerId) {
-      setActiveLayerId(null);
+    if (activeLayerId === id) {
+      setActiveLayerId(prev => {
+        const remainingLayers = layers.filter(layer => layer.id !== id);
+        return remainingLayers.length > 0 ? remainingLayers[0].id : null;
+      });
     }
-  }, [activeLayerId]);
+  }, [activeLayerId, layers]);
   
-  const moveLayerUp = useCallback((layerId: string) => {
+  const moveLayerUp = useCallback((id: string) => {
     setLayers(prev => {
-      const index = prev.findIndex(layer => layer.id === layerId);
-      if (index <= 0) return prev; // Already at the top
+      const index = prev.findIndex(layer => layer.id === id);
+      if (index <= 0) return prev;
       
       const newLayers = [...prev];
-      [newLayers[index - 1], newLayers[index]] = [newLayers[index], newLayers[index - 1]];
+      newLayers[index].position.z = prev[index - 1].position.z - 1;
       
-      return newLayers;
+      // Sort by z-index
+      return newLayers.sort((a, b) => b.position.z - a.position.z);
     });
   }, []);
   
-  const moveLayerDown = useCallback((layerId: string) => {
+  const moveLayerDown = useCallback((id: string) => {
     setLayers(prev => {
-      const index = prev.findIndex(layer => layer.id === layerId);
-      if (index === -1 || index === prev.length - 1) return prev; // Not found or already at the bottom
+      const index = prev.findIndex(layer => layer.id === id);
+      if (index === -1 || index >= prev.length - 1) return prev;
       
       const newLayers = [...prev];
-      [newLayers[index], newLayers[index + 1]] = [newLayers[index + 1], newLayers[index]];
+      newLayers[index].position.z = prev[index + 1].position.z + 1;
       
-      return newLayers;
+      // Sort by z-index
+      return newLayers.sort((a, b) => b.position.z - a.position.z);
     });
   }, []);
   
-  const setActiveLayer = useCallback((layerId: string) => {
-    setActiveLayerId(layerId);
+  const setActiveLayer = useCallback((id: string) => {
+    setActiveLayerId(id || null);
   }, []);
 
   return {
@@ -84,6 +83,6 @@ export function useLayers(): UseLayersResult {
     moveLayerUp,
     moveLayerDown,
     setActiveLayer,
-    setLayers  // Export the setLayers function
+    setLayers
   };
-}
+};

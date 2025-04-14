@@ -1,6 +1,7 @@
 
 import { Card } from '@/lib/types';
 import { debounce } from 'lodash-es';
+import { PremiumCardEffect } from './types';
 
 /**
  * Get default effects based on card metadata
@@ -73,7 +74,7 @@ export async function processCardsBatch(
 /**
  * Predefined premium effects for cards
  */
-export const premiumEffects = {
+export const premiumEffects: Record<string, PremiumCardEffect> = {
   'Holographic': {
     id: 'holographic',
     name: 'Holographic',
@@ -82,7 +83,9 @@ export const premiumEffects = {
       intensity: 0.8,
       speed: 1.0
     },
-    description: 'Classic rainbow holographic effect that shifts colors as the card moves'
+    description: 'Classic rainbow holographic effect that shifts colors as the card moves',
+    premium: false,
+    iconUrl: '/icons/effects/holographic.svg'
   },
   'Refractor': {
     id: 'refractor',
@@ -92,7 +95,9 @@ export const premiumEffects = {
       intensity: 1.0,
       speed: 0.8
     },
-    description: 'Light-refracting pattern that creates a prism effect'
+    description: 'Light-refracting pattern that creates a prism effect',
+    premium: false,
+    iconUrl: '/icons/effects/refractor.svg'
   },
   'Superfractor': {
     id: 'superfractor',
@@ -104,7 +109,8 @@ export const premiumEffects = {
       pattern: 'extreme'
     },
     description: 'Extreme rainbow refractor pattern with intense light diffraction',
-    premium: true
+    premium: true,
+    iconUrl: '/icons/effects/superfractor.svg'
   },
   'Cracked Ice': {
     id: 'cracked-ice',
@@ -116,7 +122,8 @@ export const premiumEffects = {
       pattern: 'geometric'
     },
     description: 'Geometric pattern with multi-layered reflective surfaces',
-    premium: true
+    premium: true,
+    iconUrl: '/icons/effects/cracked-ice.svg'
   },
   'Mojo': {
     id: 'mojo',
@@ -128,7 +135,8 @@ export const premiumEffects = {
       pattern: 'spiral'
     },
     description: 'Spiral pattern with contrasting color shifting properties',
-    premium: true
+    premium: true,
+    iconUrl: '/icons/effects/mojo.svg'
   },
   'Pulsar': {
     id: 'pulsar',
@@ -141,7 +149,8 @@ export const premiumEffects = {
       animationEnabled: true
     },
     description: 'Pulsating radial pattern with animated glow',
-    premium: true
+    premium: true,
+    iconUrl: '/icons/effects/pulsar.svg'
   },
   'Scope': {
     id: 'scope',
@@ -153,7 +162,8 @@ export const premiumEffects = {
       pattern: 'circular'
     },
     description: 'Lens-like circular patterns with magnification effects',
-    premium: true
+    premium: true,
+    iconUrl: '/icons/effects/scope.svg'
   },
   'Gold Foil': {
     id: 'gold-foil',
@@ -164,7 +174,9 @@ export const premiumEffects = {
       speed: 0.5,
       color: '#FFD700'
     },
-    description: 'Metallic gold foil effect with subtle light reflection'
+    description: 'Metallic gold foil effect with subtle light reflection',
+    premium: false,
+    iconUrl: '/icons/effects/gold-foil.svg'
   },
   'Silver Foil': {
     id: 'silver-foil',
@@ -175,7 +187,9 @@ export const premiumEffects = {
       speed: 0.5,
       color: '#C0C0C0'
     },
-    description: 'Metallic silver foil effect with subtle light reflection'
+    description: 'Metallic silver foil effect with subtle light reflection',
+    premium: false,
+    iconUrl: '/icons/effects/silver-foil.svg'
   },
   'Chrome': {
     id: 'chrome',
@@ -185,7 +199,9 @@ export const premiumEffects = {
       intensity: 0.9,
       speed: 0.6
     },
-    description: 'Chrome-style metallic finish with realistic reflections'
+    description: 'Chrome-style metallic finish with realistic reflections',
+    premium: false,
+    iconUrl: '/icons/effects/chrome.svg'
   },
   'Prizm': {
     id: 'prizm',
@@ -196,7 +212,9 @@ export const premiumEffects = {
       speed: 0.9,
       pattern: 'geometric'
     },
-    description: 'Prizm-inspired geometric patterns with refractor capability'
+    description: 'Prizm-inspired geometric patterns with refractor capability',
+    premium: false,
+    iconUrl: '/icons/effects/prizm.svg'
   },
   'Vintage': {
     id: 'vintage',
@@ -206,7 +224,9 @@ export const premiumEffects = {
       intensity: 0.6,
       speed: 0.3
     },
-    description: 'Classic vintage card look with subtle texture'
+    description: 'Classic vintage card look with subtle texture',
+    premium: false,
+    iconUrl: '/icons/effects/vintage.svg'
   },
   'Canvas': {
     id: 'canvas',
@@ -216,7 +236,9 @@ export const premiumEffects = {
       intensity: 0.7,
       speed: 0.4
     },
-    description: 'Canvas texture for a classic art card feel'
+    description: 'Canvas texture for a classic art card feel',
+    premium: false,
+    iconUrl: '/icons/effects/canvas.svg'
   },
   'Linen': {
     id: 'linen',
@@ -226,7 +248,9 @@ export const premiumEffects = {
       intensity: 0.65,
       speed: 0.4
     },
-    description: 'Subtle linen texture for vintage card designs'
+    description: 'Subtle linen texture for vintage card designs',
+    premium: false,
+    iconUrl: '/icons/effects/linen.svg'
   },
   'Spectral': {
     id: 'spectral',
@@ -238,9 +262,10 @@ export const premiumEffects = {
       animationEnabled: true
     },
     description: 'Advanced holographic effect with depth and motion',
-    premium: true
+    premium: true,
+    iconUrl: '/icons/effects/spectral.svg'
   }
-} as const;
+};
 
 /**
  * Get the CSS class for a specific effect
