@@ -75,7 +75,10 @@ const TypographyPanel: React.FC<TypographyPanelProps> = ({
             <Select
               value={(activeLayer.textStyle?.fontFamily || fontFamilies[0].value) as string}
               onValueChange={(value) => onUpdateLayer(activeLayerId!, { 
-                textStyle: { ...activeLayer.textStyle, fontFamily: value } 
+                textStyle: { 
+                  ...activeLayer.textStyle,
+                  fontFamily: value 
+                } 
               })}
             >
               <SelectTrigger id="font-family" className="mt-1">
@@ -101,7 +104,10 @@ const TypographyPanel: React.FC<TypographyPanelProps> = ({
                 max={72}
                 step={1}
                 onValueChange={(value) => onUpdateLayer(activeLayerId!, { 
-                  textStyle: { ...activeLayer.textStyle, fontSize: value[0] } 
+                  textStyle: { 
+                    ...activeLayer.textStyle,
+                    fontSize: value[0] 
+                  } 
                 })}
                 className="flex-1"
               />
@@ -116,7 +122,10 @@ const TypographyPanel: React.FC<TypographyPanelProps> = ({
             <Select
               value={(activeLayer.textStyle?.fontWeight || fontWeights[0].value) as string}
               onValueChange={(value) => onUpdateLayer(activeLayerId!, { 
-                textStyle: { ...activeLayer.textStyle, fontWeight: value } 
+                textStyle: { 
+                  ...activeLayer.textStyle,
+                  fontWeight: value 
+                } 
               })}
             >
               <SelectTrigger id="font-weight" className="mt-1">
@@ -139,7 +148,10 @@ const TypographyPanel: React.FC<TypographyPanelProps> = ({
                 type="color"
                 value={activeLayer.textStyle?.color || "#000000"}
                 onChange={(e) => onUpdateLayer(activeLayerId!, { 
-                  textStyle: { ...activeLayer.textStyle, color: e.target.value } 
+                  textStyle: { 
+                    ...activeLayer.textStyle,
+                    color: e.target.value 
+                  } 
                 })}
                 className="w-12 h-9 p-1 rounded-l-md"
               />
@@ -147,7 +159,10 @@ const TypographyPanel: React.FC<TypographyPanelProps> = ({
                 type="text"
                 value={activeLayer.textStyle?.color || "#000000"}
                 onChange={(e) => onUpdateLayer(activeLayerId!, { 
-                  textStyle: { ...activeLayer.textStyle, color: e.target.value } 
+                  textStyle: { 
+                    ...activeLayer.textStyle,
+                    color: e.target.value 
+                  } 
                 })}
                 className="flex-1 rounded-l-none"
               />
@@ -162,7 +177,10 @@ const TypographyPanel: React.FC<TypographyPanelProps> = ({
                 variant={activeLayer.textStyle?.textAlign === 'left' ? 'default' : 'outline'}
                 className="flex-1"
                 onClick={() => onUpdateLayer(activeLayerId!, { 
-                  textStyle: { ...activeLayer.textStyle, textAlign: 'left' } 
+                  textStyle: { 
+                    ...activeLayer.textStyle,
+                    textAlign: 'left' 
+                  } 
                 })}
               >
                 <AlignLeft className="h-4 w-4" />
@@ -172,7 +190,10 @@ const TypographyPanel: React.FC<TypographyPanelProps> = ({
                 variant={activeLayer.textStyle?.textAlign === 'center' ? 'default' : 'outline'}
                 className="flex-1"
                 onClick={() => onUpdateLayer(activeLayerId!, { 
-                  textStyle: { ...activeLayer.textStyle, textAlign: 'center' } 
+                  textStyle: { 
+                    ...activeLayer.textStyle,
+                    textAlign: 'center' 
+                  } 
                 })}
               >
                 <AlignCenter className="h-4 w-4" />
@@ -182,7 +203,10 @@ const TypographyPanel: React.FC<TypographyPanelProps> = ({
                 variant={activeLayer.textStyle?.textAlign === 'right' ? 'default' : 'outline'}
                 className="flex-1"
                 onClick={() => onUpdateLayer(activeLayerId!, { 
-                  textStyle: { ...activeLayer.textStyle, textAlign: 'right' } 
+                  textStyle: { 
+                    ...activeLayer.textStyle,
+                    textAlign: 'right' 
+                  } 
                 })}
               >
                 <AlignRight className="h-4 w-4" />

@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -55,17 +54,14 @@ const CardDesigner: React.FC<CardDesignerProps> = ({
     getEffectClasses
   } = useCardEffectsStack();
   
-  // Mark as dirty when changes are made
   useEffect(() => {
     if (layers.length > 0 || effectStack.length > 0) {
       setIsDirty(true);
     }
   }, [layers, effectStack]);
   
-  // Initialize with template if provided
   useEffect(() => {
     if (selectedTemplate && !initialData) {
-      // Apply template-specific effects
       if (selectedTemplate.name.includes('Chrome')) {
         addEffect('Chrome');
       } else if (selectedTemplate.name.includes('Prizm')) {
@@ -74,13 +70,9 @@ const CardDesigner: React.FC<CardDesignerProps> = ({
         addEffect('Cracked Ice');
       }
       
-      // Add the user image as the base layer if available
       if (userImage) {
         addLayer('image');
       }
-      
-      // Add template-specific layers
-      // This would come from a template database in a real implementation
     }
   }, [selectedTemplate, userImage, initialData, addEffect, addLayer]);
   
@@ -132,7 +124,6 @@ const CardDesigner: React.FC<CardDesignerProps> = ({
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-0">
-        {/* Left Panel - Design Tools */}
         <div className="border-r">
           <Tabs value={activePanel} onValueChange={setActivePanel} className="w-full">
             <TabsList className="w-full grid grid-cols-5">
@@ -211,7 +202,6 @@ const CardDesigner: React.FC<CardDesignerProps> = ({
           </Tabs>
         </div>
         
-        {/* Right Side - Canvas Area */}
         <div className="col-span-1 lg:col-span-3 bg-gray-100 p-4">
           <div className="mb-4 flex items-center justify-between">
             <div className="flex gap-2 items-center">

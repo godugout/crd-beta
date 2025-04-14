@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -10,7 +9,7 @@ interface LayersPanelProps {
   layers: CardLayer[];
   activeLayerId: string | null;
   onSelectLayer: (id: string) => void;
-  onAddLayer: (layer: Omit<CardLayer, 'id'>) => void;
+  onAddLayer: (layerType: 'image' | 'text' | 'shape') => void;
   onUpdateLayer: (id: string, updates: Partial<CardLayer>) => void;
   onDeleteLayer: (id: string) => void;
   onMoveLayerUp: (id: string) => void;
@@ -30,18 +29,7 @@ const LayersPanel: React.FC<LayersPanelProps> = ({
   onDuplicateLayer
 }) => {
   const handleAddLayer = (type: 'image' | 'text' | 'shape') => {
-    const newLayer: Omit<CardLayer, 'id'> = {
-      type,
-      content: type === 'text' ? 'New Text' : (type === 'image' ? '' : {}),
-      position: { x: 50, y: 50, z: layers.length + 1 },
-      size: { width: type === 'text' ? 'auto' : 100, height: type === 'text' ? 'auto' : 100 },
-      rotation: 0,
-      opacity: 1,
-      visible: true,
-      effectIds: []
-    };
-    
-    onAddLayer(newLayer);
+    onAddLayer(type);
   };
   
   const toggleLayerVisibility = (layerId: string) => {
@@ -54,19 +42,6 @@ const LayersPanel: React.FC<LayersPanelProps> = ({
   const duplicateLayer = (layerId: string) => {
     if (onDuplicateLayer) {
       onDuplicateLayer(layerId);
-    } else {
-      const layer = layers.find(l => l.id === layerId);
-      if (layer) {
-        onAddLayer({
-          ...layer,
-          position: {
-            ...layer.position,
-            x: layer.position.x + 10,
-            y: layer.position.y + 10,
-            z: layers.length + 1
-          }
-        });
-      }
     }
   };
   

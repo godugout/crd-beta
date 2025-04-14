@@ -38,14 +38,24 @@ export const useLayers = (initialLayers: CardLayer[] = []): UseLayersResult => {
       rotation: 0,
       opacity: 1,
       visible: true,
-      locked: false
+      locked: false,
+      position: { x: 50, y: 50, z: 1 },
+      size: { width: layerType === 'text' ? 'auto' : 200, height: layerType === 'text' ? 'auto' : 100 },
+      effectIds: []
     };
 
     // Add type-specific defaults
     if (layerType === 'text') {
       newLayer = {
         ...newLayer,
-        content: 'New Text'
+        content: 'New Text',
+        textStyle: {
+          fontFamily: 'Inter, sans-serif',
+          fontSize: 16,
+          fontWeight: '400',
+          color: '#000000',
+          textAlign: 'left'
+        }
       };
     } else if (layerType === 'image') {
       newLayer = {
@@ -59,14 +69,6 @@ export const useLayers = (initialLayers: CardLayer[] = []): UseLayersResult => {
         color: '#e2e2e2'
       };
     }
-
-    // Add position and size information
-    newLayer = {
-      ...newLayer,
-      position: { x: 50, y: 50, z: 1 },
-      size: { width: layerType === 'text' ? 'auto' : 200, height: layerType === 'text' ? 'auto' : 100 },
-      effectIds: []
-    };
     
     const id = uuidv4();
     const layerWithId = {
