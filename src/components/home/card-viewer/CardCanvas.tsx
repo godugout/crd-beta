@@ -25,6 +25,8 @@ interface CardCanvasProps {
     holographicSparklesEnabled?: boolean;
     holographicBorderWidth?: number;
   };
+  // Debug mode to help troubleshoot rendering issues
+  debug?: boolean;
 }
 
 const CardCanvas: React.FC<CardCanvasProps> = ({
@@ -35,59 +37,74 @@ const CardCanvas: React.FC<CardCanvasProps> = ({
   cardRef,
   onMouseMove,
   onMouseLeave,
-  effectSettings = {}
+  effectSettings = {},
+  debug = false
 }) => {
-  const cardElementRef = useRef<HTMLDivElement>(null);
-  const [mousePos, setMousePos] = useState({ x: 0.5, y: 0.5 });
-  const [animationActive, setAnimationActive] = useState(true);
-  
-  // Check if effects are active
-  const hasRefractorEffect = activeEffects.includes('Refractor');
-  const hasHolographicEffect = activeEffects.includes('Holographic');
-  const hasSpectralEffect = activeEffects.includes('Spectral');
-  
+  // Simplified component with better structure for effects
   return (
     <div
       ref={cardRef}
-      className={`dynamic-card ${animationActive ? 'animation-active' : 'animation-slowing'}`}
+      className="dynamic-card"
       style={{ 
         position: 'relative',
         width: '100%',
         height: '100%',
         borderRadius: '12px',
-        overflow: 'hidden'
+        overflow: 'hidden',
+        transformStyle: 'preserve-3d',
+        transition: 'transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+        transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0)'
       }}
       onMouseMove={onMouseMove}
       onMouseLeave={onMouseLeave}
     >
       <div 
-        ref={cardElementRef}
         className="card-inner relative w-full h-full"
       >
-        {/* Ensure card faces are at the top of the stacking context */}
-        <div style={{ position: 'relative', zIndex: 20, width: '100%', height: '100%' }}>
-          {/* Front face of the card */}
-          {!isFlipped && <CardFront card={card} activeEffects={activeEffects} />}
-          
-          {/* Back face of the card */}
-          {isFlipped && <CardBack card={card} />}
+        {/* Front face */}
+        <div 
+          style={{ 
+            position: 'absolute', 
+            width: '100%', 
+            height: '100%', 
+            backfaceVisibility: 'hidden',
+            transform: 'rotateY(0deg)'
+          }}
+        >
+          <CardFront card={card} activeEffects={activeEffects} />
+        </div>
+        
+        {/* Back face */}
+        <div 
+          style={{ 
+            position: 'absolute', 
+            width: '100%', 
+            height: '100%', 
+            backfaceVisibility: 'hidden',
+            transform: 'rotateY(180deg)'
+          }}
+        >
+          <CardBack card={card} />
         </div>
 
-        {/* Debug overlay to confirm card image is loading - this is temporary and can be removed later */}
-        <div style={{ 
-          position: 'absolute', 
-          top: '5px', 
-          left: '5px', 
-          zIndex: 100,
-          background: 'rgba(0,0,0,0.5)',
-          color: 'white',
-          padding: '2px 5px',
-          fontSize: '10px',
-          borderRadius: '3px',
-          display: 'none' // Set to 'block' to show debug info
-        }}>
-          Image: {card.imageUrl ? '✓' : '✗'}
-        </div>
+        {/* Debug overlay */}
+        {debug && (
+          <div style={{ 
+            position: 'absolute', 
+            top: '5px', 
+            left: '5px', 
+            zIndex: 1000,
+            background: 'rgba(0,0,0,0.7)',
+            color: 'white',
+            padding: '4px 8px',
+            fontSize: '10px',
+            borderRadius: '3px',
+            pointerEvents: 'none'
+          }}>
+            Image: {card.imageUrl ? '✓' : '✗'}<br/>
+            Effects: {activeEffects.join(', ') || 'None'}
+          </div>
+        )}
       </div>
     </div>
   );

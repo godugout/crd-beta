@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { CardData } from '@/types/card';
 
@@ -13,10 +14,10 @@ const CardFront: React.FC<CardFrontProps> = ({ card, activeEffects = [] }) => {
   return (
     <div className="card-face absolute inset-0 flex items-center justify-center rounded-lg overflow-hidden">
       {/* Card background */}
-      <div className="absolute inset-0 bg-gradient-to-b from-gray-700/10 to-gray-900/20" />
+      <div className="absolute inset-0 bg-gradient-to-b from-gray-700/10 to-gray-900/20 z-0" />
       
-      {/* Card image with effects - adjusted z-index and opacity */}
-      <div className={`relative w-full h-full ${effectClasses}`} style={{ zIndex: 1 }}>
+      {/* Card image - ensure it's always visible */}
+      <div className="relative w-full h-full z-10">
         <img 
           src={card.imageUrl} 
           alt={card.name || 'Card'} 
@@ -25,8 +26,11 @@ const CardFront: React.FC<CardFrontProps> = ({ card, activeEffects = [] }) => {
         />
       </div>
       
-      {/* Card info overlay - adjusted z-index */}
-      <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/70 to-transparent" style={{ zIndex: 2 }}>
+      {/* Effects layer - positioned above the image but below text */}
+      <div className={`absolute inset-0 pointer-events-none z-20 ${effectClasses}`} />
+      
+      {/* Card info overlay - highest z-index to ensure visibility */}
+      <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/70 to-transparent z-30">
         <h3 className="font-bold text-white text-lg truncate">{card.name}</h3>
         {card.team && (
           <p className="text-white/80 text-sm truncate">
