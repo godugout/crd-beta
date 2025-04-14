@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { User, UserRole } from '@/lib/types';
@@ -29,8 +30,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   
   const getUserProfile = async (userId: string): Promise<User | null> => {
     try {
+      // Instead of querying users table directly, query profiles table
       const { data, error } = await supabase
-        .from('users')
+        .from('profiles')
         .select('*')
         .eq('id', userId)
         .single();
@@ -40,18 +42,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return null;
       }
       
-      const userData = data;
+      // Get auth user data
+      const { data: authUser } = await supabase.auth.getUser();
+      if (!authUser?.user) {
+        return null;
+      }
       
-      // Make sure to include the role
+      // Combine auth data with profile data
       return {
         id: userId,
-        email: userData?.email || '',
-        displayName: userData?.user_metadata?.full_name,
-        name: userData?.user_metadata?.name,
-        avatarUrl: userData?.user_metadata?.avatar_url,
+        email: authUser.user.email || '',
+        displayName: data?.full_name || authUser.user.user_metadata?.full_name,
+        name: data?.full_name || authUser.user.user_metadata?.name,
+        avatarUrl: data?.avatar_url || authUser.user.user_metadata?.avatar_url,
         role: UserRole.USER, // Add default role 
-        createdAt: userData?.created_at || new Date().toISOString(),
-        updatedAt: userData?.updated_at || new Date().toISOString(),
+        createdAt: authUser.user.created_at || new Date().toISOString(),
+        updatedAt: data?.updated_at || new Date().toISOString(),
       };
     } catch (error) {
       console.error('Error fetching user profile:', error);
@@ -59,41 +65,42 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Update remaining getUserProfile instances to include role
   useEffect(() => {
-    supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_IN' && session) {
-        getUserProfile(session.user.id).then(profile => {
-          if (profile) {
-            setUser(profile);
-            setIsAuthenticated(true);
-          }
-        });
-      } else if (event === 'SIGNED_OUT') {
-        setUser(null);
-        setIsAuthenticated(false);
+    const setupAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (session && session.user) {
+        const profile = await getUserProfile(session.user.id);
+        if (profile) {
+          setUser(profile);
+          setIsAuthenticated(true);
+        }
       }
-    });
-    
-    const session = supabase.auth.getSession();
-    session.then(({ data: { session } }) => {
-      if (session) {
-        getUserProfile(session.user.id).then(profile => {
-          if (profile) {
-            setUser(profile);
-            setIsAuthenticated(true);
-          }
-        });
-      }
+      
       setIsLoading(false);
-    });
-    
-    return () => {
-      supabase.auth.signOut();
+      
+      // Set up auth state change listener
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+        if (event === 'SIGNED_IN' && session) {
+          const profile = await getUserProfile(session.user.id);
+          if (profile) {
+            setUser(profile);
+            setIsAuthenticated(true);
+          }
+        } else if (event === 'SIGNED_OUT') {
+          setUser(null);
+          setIsAuthenticated(false);
+        }
+      });
+      
+      return () => {
+        subscription.unsubscribe();
+      };
     };
+    
+    setupAuth();
   }, []);
 
-  // Update the login function to include role
   const login = async (email: string, password: string): Promise<User | null> => {
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -106,20 +113,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw error;
       }
       
-      const user = {
-        id: data.user.id,
-        email: data.user.email || '',
-        displayName: data.user.user_metadata?.full_name,
-        name: data.user.user_metadata?.name,
-        avatarUrl: data.user.user_metadata?.avatar_url,
-        role: UserRole.USER, // Add default role
-        createdAt: data.user.created_at,
-        updatedAt: data.user.created_at,
-      };
+      if (!data.user) {
+        return null;
+      }
       
-      setUser(user);
-      setIsAuthenticated(true);
-      return user;
+      const profile = await getUserProfile(data.user.id);
+      
+      if (profile) {
+        setUser(profile);
+        setIsAuthenticated(true);
+        return profile;
+      }
+      
+      return null;
     } catch (error) {
       console.error('Login error:', error);
       return null;
@@ -139,7 +145,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Update the register function to include role
   const register = async (email: string, password: string, metadata?: { [key: string]: any }): Promise<User | null> => {
     try {
       const { data, error } = await supabase.auth.signUp({
@@ -156,21 +161,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       
       if (data.user) {
-        const user = {
-          id: data.user.id,
-          email: data.user.email || '',
-          displayName: metadata?.full_name,
-          name: metadata?.name,
-          avatarUrl: metadata?.avatar_url,
-          role: UserRole.USER, // Add default role
-          createdAt: data.user.created_at,
-          updatedAt: data.user.created_at,
-        };
+        // The profile will be created by a database trigger
+        // Wait a moment for the trigger to complete
+        await new Promise(resolve => setTimeout(resolve, 500));
         
-        setUser(user);
-        setIsAuthenticated(true);
-        return user;
+        const profile = await getUserProfile(data.user.id);
+        
+        if (profile) {
+          setUser(profile);
+          setIsAuthenticated(true);
+          return profile;
+        }
       }
+      
       return null;
     } catch (error) {
       console.error('Registration error:', error);
@@ -179,22 +182,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const updateUser = async (updates: Partial<User>): Promise<User | null> => {
+    if (!user) return null;
+    
     try {
-      const { data, error } = await supabase
-        .from('users')
-        .update(updates)
-        .eq('id', user?.id)
-        .select('*')
-        .single();
+      // Convert User updates to profile updates
+      const profileUpdates: Record<string, any> = {};
       
-      if (error) {
-        console.error('Error updating user:', error);
-        return null;
+      if (updates.displayName) profileUpdates.full_name = updates.displayName;
+      if (updates.avatarUrl) profileUpdates.avatar_url = updates.avatarUrl;
+      
+      // Only update if we have changes
+      if (Object.keys(profileUpdates).length > 0) {
+        const { error } = await supabase
+          .from('profiles')
+          .update(profileUpdates)
+          .eq('id', user.id);
+        
+        if (error) {
+          console.error('Error updating user profile:', error);
+          return null;
+        }
       }
       
+      // Update local user state
       const updatedUser: User = {
-        ...user!,
-        ...data,
+        ...user,
+        ...updates,
       };
       
       setUser(updatedUser);
@@ -213,7 +226,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     register,
     logout,
     updateUser,
-  }), [user, isAuthenticated, isLoading, login, register, logout, updateUser]);
+  }), [user, isAuthenticated, isLoading]);
 
   return (
     <AuthContext.Provider value={value}>

@@ -1,9 +1,9 @@
-
 import React from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { OaklandMemoryData } from '@/lib/types';
 import ImageUploader from '@/components/dam/ImageUploader';
+import { UserProfile } from '@/lib/types/profiles';
 
 // Import form field components
 import BasicMemoryFields from './form-fields/BasicMemoryFields';
@@ -19,13 +19,17 @@ import PersonalSignificanceField from './form-fields/PersonalSignificanceField';
 export interface OaklandMemoryFormValues extends OaklandMemoryData {}
 
 interface OaklandMemoryFormProps {
-  initialData?: OaklandMemoryData;
+  initialData?: Partial<OaklandMemoryData>;
   onSubmit: (data: OaklandMemoryData) => void;
+  onCancel?: () => void;
+  currentUser?: UserProfile;
 }
 
 export const OaklandMemoryForm: React.FC<OaklandMemoryFormProps> = ({
   initialData,
-  onSubmit
+  onSubmit,
+  onCancel,
+  currentUser
 }) => {
   const form = useForm<OaklandMemoryData>({
     defaultValues: initialData || {
