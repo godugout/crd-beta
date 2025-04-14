@@ -54,7 +54,10 @@ export const useCardEffects = ({
   };
 
   const getFilterStyle = () => {
-    let filterStyle: CSSProperties = {};
+    let filterStyle: CSSProperties = {
+      position: 'relative', // Ensure the card has position context
+      zIndex: 1, // Base z-index for the card
+    };
     
     // Apply filters based on active effects
     if (activeEffects.includes('Classic Holographic')) {

@@ -8,7 +8,7 @@ interface SelectionIndicatorProps {
 const SelectionIndicator: React.FC<SelectionIndicatorProps> = ({ pulseIntensity = 0.8 }) => {
   return (
     <div 
-      className="absolute inset-0 pointer-events-none z-20"
+      className="absolute inset-0 pointer-events-none z-30"
       style={{ 
         boxShadow: `0 0 0 2px rgba(59, 130, 246, ${pulseIntensity})`, 
         borderRadius: 'inherit',

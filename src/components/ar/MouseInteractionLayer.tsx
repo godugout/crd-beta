@@ -125,7 +125,7 @@ const MouseInteractionLayer: React.FC<MouseInteractionLayerProps> = ({
     <>
       <div 
         ref={layerRef}
-        className="absolute inset-0 z-20"
+        className="absolute inset-0 z-40"
         style={{ touchAction: "none", pointerEvents: selectedCardId ? "auto" : "none" }}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
@@ -136,7 +136,7 @@ const MouseInteractionLayer: React.FC<MouseInteractionLayerProps> = ({
       {/* Reset button - appears when card moves out of view with improved animation */}
       {showResetButton && (
         <button
-          className="absolute bottom-6 right-6 z-30 bg-black/60 hover:bg-black/80 text-white p-3 rounded-full transition-all animate-fade-in hover:scale-110"
+          className="absolute bottom-6 right-6 z-50 bg-black/60 hover:bg-black/80 text-white p-3 rounded-full transition-all animate-fade-in hover:scale-110"
           onClick={handleReset}
           title="Reset card position"
         >

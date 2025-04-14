@@ -95,3 +95,65 @@
 .ar-card-shadow:hover {
   box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.4);
 }
+
+/* New styles for proper effect layering */
+.effect-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+  mix-blend-mode: overlay;
+}
+
+.card-inner {
+  position: relative;
+  z-index: 1;
+}
+
+.card-face {
+  z-index: 2;
+}
+
+.effect-surface {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+
+/* Improved shine effect that appears on top of the card */
+.card-shine-effect {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    rgba(255, 255, 255, 0.8) 0%,
+    rgba(255, 255, 255, 0) 60%
+  );
+  opacity: 0;
+  mix-blend-mode: soft-light;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  z-index: 15;
+}
+
+.interactive-card:hover .card-shine-effect {
+  opacity: 0.7;
+}
+
+/* Card glow effect that shows on top */
+.card-glow-effect {
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  box-shadow: 0 0 15px 2px rgba(78, 130, 255, 0.7);
+  opacity: 0;
+  z-index: 5;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.card-active .card-glow-effect {
+  opacity: 1;
+}

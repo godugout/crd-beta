@@ -71,7 +71,7 @@ const ArCardItem: React.FC<ArCardItemProps> = ({
   return (
     <div 
       ref={cardRef}
-      className={`pointer-events-auto transition-all duration-300 
+      className={`pointer-events-auto relative transition-all duration-300 
                  ${isSelected ? 'shadow-xl ring-4 ring-blue-500 scale-110 z-10' : 'shadow-md hover:scale-105 hover:shadow-lg'} 
                  ${effectClass}
                  ${isAnimating ? 'animate-pulse-fast' : ''}
@@ -90,29 +90,38 @@ const ArCardItem: React.FC<ArCardItemProps> = ({
         '--shimmer-speed': '3s',
         '--hologram-intensity': effectIntensity.toString(),
         '--motion-speed': '1',
-        filter: isSelected ? 'brightness(1.1) contrast(1.05)' : 'none'
+        filter: isSelected ? 'brightness(1.1) contrast(1.05)' : 'none',
+        position: 'relative', // Ensure proper stacking context
       } as React.CSSProperties}
       onClick={handleSelect}
       onDoubleClick={handleDoubleTap}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
-      <img 
-        src={card.imageUrl} 
-        alt={card.title}
-        className="w-full h-full object-contain pointer-events-none"
-        draggable={false}
-      />
-      
-      {/* Add shine effect that follows pointer */}
-      <CardShineEffect intensity={isSelected ? 0.9 : 0.6} />
-      
-      {/* Selection highlight */}
-      {isSelected && <SelectionIndicator pulseIntensity={0.8} />}
+      <div className="relative z-10 w-full h-full">
+        <img 
+          src={card.imageUrl} 
+          alt={card.title}
+          className="w-full h-full object-contain pointer-events-none"
+          draggable={false}
+        />
+        
+        {/* Add shine effect that follows pointer - moved to overlay on top of card */}
+        <CardShineEffect intensity={isSelected ? 0.9 : 0.6} />
+        
+        {/* Selection highlight - now with higher z-index */}
+        {isSelected && <SelectionIndicator pulseIntensity={0.8} />}
+        
+        {/* Effect layer that sits on top of the card */}
+        <div className="absolute inset-0 z-15 pointer-events-none effect-surface">
+          {/* This layer will contain any dynamic effects */}
+          <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent opacity-50"></div>
+        </div>
+      </div>
       
       {/* Card info tooltip on hover - only visible when not selected */}
       {!isSelected && (
-        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-1 text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-1 text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity z-20">
           <p className="truncate font-medium">{card.title}</p>
         </div>
       )}
