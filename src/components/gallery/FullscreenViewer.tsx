@@ -1,4 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
+
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCards } from '@/context/CardContext';
 import { useMobileOptimization } from '@/hooks/useMobileOptimization';
@@ -19,104 +20,129 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
   const { cards, getCardById } = useCards();
   const card = getCardById ? getCardById(cardId) : cards.find(c => c.id === cardId);
   const navigate = useNavigate();
+  const { isMobile } = useMobileOptimization();
+  
   const [isFlipped, setIsFlipped] = useState(false);
   const [isAutoRotating, setIsAutoRotating] = useState(true);
   const [showInfo, setShowInfo] = useState(false);
-  const cardRef = useRef<HTMLDivElement>(null);
-  const { isMobile } = useMobileOptimization();
-  const [rotation, setRotation] = useState({ x: 0, y: 0 });
-  const [lastPosition, setLastPosition] = useState({ x: 0, y: 0 });
+  const [cardPosition, setCardPosition] = useState({ x: 0, y: 0, rotation: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [mousePosition, setMousePosition] = useState({ x: 0.5, y: 0.5 });
   const [isDragging, setIsDragging] = useState(false);
+  
+  const containerRef = useRef<HTMLDivElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
 
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!cardRef.current || isAutoRotating) return;
-    
-    const cardElement = cardRef.current;
-    const rect = cardElement.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-    
-    const rotateY = ((e.clientX - centerX) / (rect.width / 2)) * 15;
-    const rotateX = -((e.clientY - centerY) / (rect.height / 2)) * 15;
-    
-    setRotation({ x: rotateX, y: rotateY });
-  };
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    const moveStep = 10;
+    const rotationStep = 5;
+    const zoomStep = 0.1;
+    const maxZoom = 3.0;
+    const minZoom = 0.5;
 
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (!cardRef.current || isAutoRotating || !isDragging) return;
-    
-    const touch = e.touches[0];
-    const deltaX = touch.clientX - lastPosition.x;
-    const deltaY = touch.clientY - lastPosition.y;
-    
-    setRotation(prev => ({
-      x: prev.x - deltaY / 5,
-      y: prev.y + deltaX / 5
-    }));
-    
-    setLastPosition({ x: touch.clientX, y: touch.clientY });
-  };
+    switch (e.key) {
+      case 'ArrowUp':
+        setCardPosition(prev => ({ ...prev, y: prev.y - moveStep }));
+        e.preventDefault();
+        break;
+      case 'ArrowDown':
+        setCardPosition(prev => ({ ...prev, y: prev.y + moveStep }));
+        e.preventDefault();
+        break;
+      case 'ArrowLeft':
+        setCardPosition(prev => ({ ...prev, x: prev.x - moveStep }));
+        e.preventDefault();
+        break;
+      case 'ArrowRight':
+        setCardPosition(prev => ({ ...prev, x: prev.x + moveStep }));
+        e.preventDefault();
+        break;
+      case '[':
+        setCardPosition(prev => ({ ...prev, rotation: prev.rotation - rotationStep }));
+        e.preventDefault();
+        break;
+      case ']':
+        setCardPosition(prev => ({ ...prev, rotation: prev.rotation + rotationStep }));
+        e.preventDefault();
+        break;
+      case 'r':
+      case 'R':
+        handleCardReset();
+        e.preventDefault();
+        break;
+      case 'f':
+      case 'F':
+        setIsFlipped(prev => !prev);
+        e.preventDefault();
+        break;
+      case 'i':
+      case 'I':
+        setShowInfo(prev => !prev);
+        e.preventDefault();
+        break;
+      case '+':
+      case '=':
+        setZoom(prev => Math.min(maxZoom, prev + zoomStep));
+        e.preventDefault();
+        break;
+      case '-':
+      case '_':
+        setZoom(prev => Math.max(minZoom, prev - zoomStep));
+        e.preventDefault();
+        break;
+      case 'a':
+      case 'A':
+        setIsAutoRotating(prev => !prev);
+        e.preventDefault();
+        break;
+      case 'Escape':
+        if (showInfo) {
+          setShowInfo(false);
+        } else {
+          handleClose();
+        }
+        e.preventDefault();
+        break;
+    }
+  }, []);
 
-  const handleTouchStart = (e: React.TouchEvent) => {
-    setIsDragging(true);
-    setLastPosition({ x: e.touches[0].clientX, y: e.touches[0].clientY });
-    setIsAutoRotating(false);
-  };
+  useEffect(() => {
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [handleKeyDown]);
 
-  const handleTouchEnd = () => {
-    setIsDragging(false);
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    if (!containerRef.current || !isAutoRotating) return;
+    
+    const rect = containerRef.current.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width;
+    const y = (e.clientY - rect.top) / rect.height;
+    
+    setMousePosition({ x, y });
+    
+    if (cardRef.current) {
+      const rotationX = (y - 0.5) * -10;
+      const rotationY = (x - 0.5) * 10;
+      
+      cardRef.current.style.transform = `
+        perspective(1000px) 
+        rotateX(${rotationX}deg) 
+        rotateY(${rotationY}deg)
+        scale(${zoom})
+      `;
+    }
+  }, [zoom, isAutoRotating]);
+
+  const handleCardReset = () => {
+    setCardPosition({ x: 0, y: 0, rotation: 0 });
+    setZoom(1);
+    toast.info('Card position reset');
   };
 
   const handleCardClick = (newCardId: string) => {
     navigate(`/view/${newCardId}`);
-  };
-
-  const handleFlipCard = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setIsFlipped(!isFlipped);
-  };
-
-  const handleShare = async (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (navigator.share && card) {
-      try {
-        await navigator.share({
-          title: card.title || 'Check out this card',
-          text: card.description || 'I found this amazing card!',
-          url: window.location.href
-        });
-        toast.success('Shared successfully');
-      } catch (error) {
-        console.error('Error sharing:', error);
-      }
-    } else {
-      navigator.clipboard.writeText(window.location.href)
-        .then(() => toast.success('Link copied to clipboard'))
-        .catch(() => toast.error('Failed to copy link'));
-    }
-  };
-
-  const toggleAutoRotation = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setIsAutoRotating(!isAutoRotating);
-  };
-
-  const toggleInfo = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setShowInfo(!showInfo);
-  };
-
-  const toggleFullscreen = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().catch(err => {
-        console.error(`Error attempting to enable full-screen mode: ${err.message}`);
-      });
-    } else {
-      if (document.exitFullscreen) {
-        document.exitFullscreen();
-      }
-    }
   };
 
   if (!card) {
@@ -137,29 +163,26 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
     <div 
       className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50"
       onMouseMove={handleMouseMove}
-      onTouchMove={handleTouchMove}
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
     >
       <CardDisplay
         card={card}
-        rotation={rotation}
+        rotation={cardPosition}
         isFlipped={isFlipped}
-        onMouseMove={handleMouseMove}
-        onTouchMove={handleTouchMove}
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
+        zoom={zoom}
+        isDragging={isDragging}
+        setIsDragging={setIsDragging}
+        cardRef={cardRef}
+        containerRef={containerRef}
+        isAutoRotating={isAutoRotating}
       />
 
       <ViewerControls
         isFlipped={isFlipped}
         isAutoRotating={isAutoRotating}
         showInfo={showInfo}
-        onFlipCard={handleFlipCard}
-        onToggleAutoRotation={toggleAutoRotation}
-        onToggleInfo={toggleInfo}
-        onToggleFullscreen={toggleFullscreen}
-        onShare={handleShare}
+        onFlipCard={() => setIsFlipped(!isFlipped)}
+        onToggleAutoRotation={() => setIsAutoRotating(!isAutoRotating)}
+        onToggleInfo={() => setShowInfo(!showInfo)}
         onClose={onClose}
       />
 
