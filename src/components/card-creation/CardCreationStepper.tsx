@@ -41,13 +41,14 @@ const CardCreationStepper: React.FC<CardCreationStepperProps> = ({
                   onStepClick && "cursor-pointer"
                 )}
               >
-                <span className="flex items-center justify-center w-10 h-10 rounded-full shrink-0 transition-colors duration-300 ease-in-out mb-2",
+                <span className={cn(
+                  "flex items-center justify-center w-10 h-10 rounded-full shrink-0 transition-colors duration-300 ease-in-out mb-2",
                   isActive 
                     ? "bg-primary text-white" 
                     : isCompleted 
                       ? "bg-primary text-white" 
                       : "bg-gray-100"
-                }>
+                )}>
                   {isCompleted ? (
                     <Check className="w-5 h-5" />
                   ) : (
