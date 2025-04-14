@@ -2,7 +2,7 @@
 import { useState, useCallback } from 'react';
 import { EnhancedCropBoxProps, MemorabiliaType } from '@/components/card-upload/cardDetection';
 import { useMobileOptimization } from '@/hooks/useMobileOptimization';
-import { toast } from 'sonner';
+import { useToast } from '@/hooks/use-toast'; // Updated to use our enhanced toast
 
 interface UseEditorStateProps {
   isDetecting?: boolean;
@@ -21,38 +21,100 @@ export const useEditorState = ({
   const [isDetecting, setIsDetecting] = useState<boolean>(initialIsDetecting);
   const [isProcessing, setIsProcessing] = useState<boolean>(initialIsProcessing);
   const { isMobile } = useMobileOptimization();
+  const { toast } = useToast();
   
   // Add a new selection area
-  const addSelectionArea = (
-    canvasRef: React.RefObject<HTMLCanvasElement>,
-    editorImgRef: React.RefObject<HTMLImageElement>
-  ) => {
-    if (!canvasRef.current || !editorImgRef.current) return;
-    
-    const img = editorImgRef.current;
-    
-    // Create a new area in the center
-    const newArea: EnhancedCropBoxProps = {
-      id: selectedAreas.length + 1,
-      x: img.naturalWidth / 2 - 100,
-      y: img.naturalHeight / 2 - 100,
-      width: 200,
-      height: 200,
-      rotation: 0,
-      color: '#00AAFF',
-      memorabiliaType: 'face',
-      confidence: 0.5
-    };
-    
-    setSelectedAreas([...selectedAreas, newArea]);
-  };
+  const addSelectionArea = useCallback(
+    (
+      canvasRef: React.RefObject<HTMLCanvasElement>,
+      editorImgRef: React.RefObject<HTMLImageElement>
+    ) => {
+      if (!canvasRef.current || !editorImgRef.current) {
+        toast({
+          variant: "warning",
+          title: "Cannot add selection",
+          description: "Canvas or image reference is not available"
+        });
+        return;
+      }
+      
+      const img = editorImgRef.current;
+      
+      // Create a new area in the center
+      const newArea: EnhancedCropBoxProps = {
+        id: selectedAreas.length + 1,
+        x: img.naturalWidth / 2 - 100,
+        y: img.naturalHeight / 2 - 100,
+        width: 200,
+        height: 200,
+        rotation: 0,
+        color: '#00AAFF',
+        memorabiliaType: 'face',
+        confidence: 0.5
+      };
+      
+      setSelectedAreas(prev => [...prev, newArea]);
+      
+      toast({
+        variant: "success",
+        title: "Selection area added",
+        description: `Added new selection area (#${selectedAreas.length + 1})`,
+      });
+    },
+    [selectedAreas.length, toast]
+  );
   
   // Remove an area by index
-  const removeArea = (index: number) => {
-    const updatedAreas = [...selectedAreas];
-    updatedAreas.splice(index, 1);
-    setSelectedAreas(updatedAreas);
-  };
+  const removeArea = useCallback((index: number) => {
+    setSelectedAreas(prev => {
+      const updated = [...prev];
+      const removed = updated.splice(index, 1)[0];
+      
+      toast({
+        variant: "info",
+        title: "Selection area removed",
+        description: `Removed selection area (#${removed.id})`,
+      });
+      
+      return updated;
+    });
+  }, [toast]);
+  
+  // Start detection process
+  const startDetection = useCallback(() => {
+    setIsDetecting(true);
+    
+    toast({
+      variant: "info",
+      title: "Detection started",
+      description: "Analyzing image for face detection...",
+      duration: 3000,
+    });
+    
+    // In a real implementation, this would be connected to an actual detection API
+  }, [toast]);
+  
+  // Handle processing state
+  const startProcessing = useCallback(() => {
+    setIsProcessing(true);
+    
+    toast({
+      variant: "info",
+      title: "Processing started",
+      description: "Enhancing selected areas...",
+    });
+    
+    // Simulate processing completion after a delay
+    setTimeout(() => {
+      setIsProcessing(false);
+      
+      toast({
+        variant: "success",
+        title: "Processing complete",
+        description: `Successfully enhanced ${selectedAreas.length} selection areas`,
+      });
+    }, 2000);
+  }, [selectedAreas.length, toast]);
 
   return {
     selectedAreas,
@@ -66,6 +128,8 @@ export const useEditorState = ({
     isDetecting,
     setIsDetecting,
     isProcessing,
-    setIsProcessing
+    setIsProcessing,
+    startDetection,
+    startProcessing
   };
 };

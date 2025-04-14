@@ -1,9 +1,10 @@
 
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { X, Lightbulb, Sparkles, Rainbow, RefreshCw, Palette } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
+import { useToast } from '@/hooks/use-toast';
 
 interface CardEffectsPanelProps {
   activeEffects: string[];
@@ -26,6 +27,34 @@ const CardEffectsPanel: React.FC<CardEffectsPanelProps> = ({
   onEffectIntensityChange,
   onClose
 }) => {
+  const { toast } = useToast();
+  const panelRef = useRef<HTMLDivElement>(null);
+  
+  // Handle keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+  
+  // Focus trap for accessibility
+  useEffect(() => {
+    if (panelRef.current) {
+      const focusableElements = panelRef.current.querySelectorAll(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      
+      if (focusableElements.length > 0) {
+        (focusableElements[0] as HTMLElement).focus();
+      }
+    }
+  }, []);
+
   const availableEffects = [
     { 
       id: 'Holographic',
@@ -64,13 +93,41 @@ const CardEffectsPanel: React.FC<CardEffectsPanelProps> = ({
     }
   ];
 
+  const handleToggleEffect = (effectId: string) => {
+    onToggleEffect(effectId);
+    
+    // Show toast notification for better user feedback
+    const isActive = activeEffects.includes(effectId);
+    const effect = availableEffects.find(e => e.id === effectId);
+    
+    if (effect) {
+      toast({
+        variant: isActive ? "info" : "success",
+        title: isActive ? "Effect removed" : "Effect applied",
+        description: `${effect.name} effect has been ${isActive ? 'disabled' : 'enabled'}`,
+        duration: 2000,
+      });
+    }
+  };
+
+  const handleIntensityChange = (effect: string, value: number) => {
+    onEffectIntensityChange(effect, value);
+  };
+
   return (
-    <div className="p-6 mt-16">
+    <div 
+      ref={panelRef} 
+      className="p-6 mt-16"
+      role="dialog" 
+      aria-modal="true" 
+      aria-labelledby="effects-panel-title"
+    >
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-white">Visual Effects</h2>
+        <h2 id="effects-panel-title" className="text-2xl font-bold text-white">Visual Effects</h2>
         <button 
           onClick={onClose}
-          className="p-2 rounded-full bg-gray-800 hover:bg-gray-700 text-gray-400"
+          className="p-2 rounded-full bg-gray-800 hover:bg-gray-700 text-gray-400 focus:outline-none focus:ring-2 focus:ring-white/20"
+          aria-label="Close effects panel"
         >
           <X size={18} />
         </button>
@@ -86,7 +143,7 @@ const CardEffectsPanel: React.FC<CardEffectsPanelProps> = ({
           <div key={effect.id} className="bg-gray-800/60 p-4 rounded-lg">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center">
-                <div className="mr-3 text-blue-400">
+                <div className="mr-3 text-blue-400" aria-hidden="true">
                   {effect.icon}
                 </div>
                 <div>
@@ -96,23 +153,35 @@ const CardEffectsPanel: React.FC<CardEffectsPanelProps> = ({
               </div>
               
               <Switch 
+                id={`effect-toggle-${effect.id}`}
                 checked={activeEffects.includes(effect.id)} 
-                onCheckedChange={() => onToggleEffect(effect.id)}
+                onCheckedChange={() => handleToggleEffect(effect.id)}
+                aria-label={`Toggle ${effect.name} effect`}
               />
             </div>
             
             {activeEffects.includes(effect.id) && (
               <div className="mt-4">
                 <div className="flex items-center justify-between mb-2">
-                  <Label className="text-gray-300 text-sm">Intensity</Label>
+                  <Label 
+                    htmlFor={`intensity-${effect.id}`} 
+                    className="text-gray-300 text-sm"
+                  >
+                    Intensity
+                  </Label>
                   <span className="text-gray-400 text-xs">{Math.round(effect.intensity * 100)}%</span>
                 </div>
                 <Slider
+                  id={`intensity-${effect.id}`}
                   value={[effect.intensity * 100]}
                   max={100}
                   step={1}
-                  onValueChange={value => onEffectIntensityChange(effect.id, value[0] / 100)}
+                  onValueChange={value => handleIntensityChange(effect.id, value[0] / 100)}
                   className="mt-2"
+                  aria-label={`${effect.name} intensity`}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-valuenow={Math.round(effect.intensity * 100)}
                 />
               </div>
             )}
