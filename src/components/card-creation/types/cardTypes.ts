@@ -20,6 +20,7 @@ export interface CardLayer {
   position: {
     x: number;
     y: number;
+    z: number;
   };
   size: {
     width: number;
@@ -28,6 +29,15 @@ export interface CardLayer {
   rotation: number;
   opacity: number;
   zIndex: number;
+  visible?: boolean;
   style?: Record<string, any>;
   [key: string]: any;
+}
+
+export interface CardEffect {
+  id: string;
+  name: string;
+  enabled: boolean;
+  settings: Record<string, any>;
+  className?: string;
 }
