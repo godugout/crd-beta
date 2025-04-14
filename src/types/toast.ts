@@ -15,4 +15,5 @@ export interface ToasterToast {
 export interface ToasterToastWithStatus extends ToasterToast {
   open?: boolean
   ariaLive?: 'assertive' | 'off' | 'polite'
+  onOpenChange?: (open: boolean) => void
 }
