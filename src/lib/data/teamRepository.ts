@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
-import { Team, TeamMember, User, UserRole } from '@/lib/types';
+import { TeamMember, User, UserRole } from '@/lib/types';
+import { Team } from '@/lib/types/TeamTypes';
 
 const mapTeamFromDb = (team: any): Team => ({
   id: team.id,
@@ -122,7 +123,6 @@ const getTeamMembers = async (teamId: string): Promise<TeamMember[]> => {
   return data ? data.map(mapTeamMemberFromDb) : [];
 };
 
-// Update the mapTeamMemberFromDb function to include role
 const mapTeamMemberFromDb = (member: any): TeamMember => {
   const user: User = {
     id: member.user_id,
@@ -130,7 +130,7 @@ const mapTeamMemberFromDb = (member: any): TeamMember => {
     displayName: member.users?.display_name,
     name: member.users?.full_name,
     avatarUrl: member.users?.avatar_url,
-    role: UserRole.USER, // Add default role
+    role: UserRole.USER,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };

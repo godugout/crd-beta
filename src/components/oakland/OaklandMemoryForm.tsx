@@ -16,7 +16,23 @@ import AttendeeField from './form-fields/AttendeeField';
 import HistoricalContextField from './form-fields/HistoricalContextField';
 import PersonalSignificanceField from './form-fields/PersonalSignificanceField';
 
-export interface OaklandMemoryFormValues extends OaklandMemoryData {}
+// Define form values interface without extending OaklandMemoryData to avoid circular references
+export interface OaklandMemoryFormValues {
+  title: string;
+  description: string;
+  date?: string;
+  opponent?: string;
+  score?: string;
+  location?: string;
+  section?: string;
+  memoryType?: string;
+  attendees?: string[];
+  tags?: string[];
+  imageUrl?: string;
+  historicalContext?: string;
+  personalSignificance?: string;
+  template?: string;
+}
 
 interface OaklandMemoryFormProps {
   initialData?: Partial<OaklandMemoryData>;
@@ -31,7 +47,7 @@ export const OaklandMemoryForm: React.FC<OaklandMemoryFormProps> = ({
   onCancel,
   currentUser
 }) => {
-  const form = useForm<OaklandMemoryData>({
+  const form = useForm<OaklandMemoryFormValues>({
     defaultValues: initialData || {
       title: '',
       description: '',
