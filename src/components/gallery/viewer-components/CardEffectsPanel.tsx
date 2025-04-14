@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card } from '@/lib/types';
 import { Sparkles, Layers, Palette, ToggleLeft, Sliders } from 'lucide-react';
 import { toast } from 'sonner';
@@ -9,20 +9,30 @@ interface CardEffectsPanelProps {
   activeEffects: string[];
   onToggleEffect: (effect: string) => void;
   onEffectIntensityChange?: (effect: string, intensity: number) => void;
+  effectIntensities?: Record<string, number>;
 }
 
 const CardEffectsPanel: React.FC<CardEffectsPanelProps> = ({
   activeEffects,
   onToggleEffect,
-  onEffectIntensityChange
+  onEffectIntensityChange,
+  effectIntensities = {}
 }) => {
   const [expandedEffect, setExpandedEffect] = useState<string | null>(null);
-  const [effectIntensities, setEffectIntensities] = useState<Record<string, number>>({
-    Holographic: 0.7,
-    Refractor: 0.8,
-    Chrome: 0.6,
-    Vintage: 0.5,
+  const [localIntensities, setLocalIntensities] = useState<Record<string, number>>({
+    Holographic: effectIntensities.Holographic || 0.7,
+    Refractor: effectIntensities.Refractor || 0.8,
+    Chrome: effectIntensities.Chrome || 0.6,
+    Vintage: effectIntensities.Vintage || 0.5,
   });
+  
+  // Sync with external intensities when they change
+  useEffect(() => {
+    setLocalIntensities(prev => ({
+      ...prev,
+      ...effectIntensities
+    }));
+  }, [effectIntensities]);
 
   const availableEffects = [
     { id: 'Holographic', name: 'Holographic', icon: <Sparkles size={18} /> },
@@ -38,7 +48,10 @@ const CardEffectsPanel: React.FC<CardEffectsPanelProps> = ({
     if (!activeEffects.includes(effectId)) {
       setExpandedEffect(effectId);
     } else {
-      setExpandedEffect(null);
+      // Only collapse if this was the expanded effect
+      if (expandedEffect === effectId) {
+        setExpandedEffect(null);
+      }
     }
     
     toast.info(`${effectId} effect ${activeEffects.includes(effectId) ? 'disabled' : 'enabled'}`);
@@ -46,7 +59,7 @@ const CardEffectsPanel: React.FC<CardEffectsPanelProps> = ({
 
   const handleIntensityChange = (effectId: string, value: number[]) => {
     const intensity = value[0];
-    setEffectIntensities(prev => ({
+    setLocalIntensities(prev => ({
       ...prev,
       [effectId]: intensity
     }));
@@ -54,6 +67,12 @@ const CardEffectsPanel: React.FC<CardEffectsPanelProps> = ({
     if (onEffectIntensityChange) {
       onEffectIntensityChange(effectId, intensity);
     }
+  };
+
+  // Function to handle expand/collapse of intensity controls
+  const toggleExpandEffect = (e: React.MouseEvent, effectId: string) => {
+    e.stopPropagation();
+    setExpandedEffect(expandedEffect === effectId ? null : effectId);
   };
 
   return (
@@ -76,10 +95,7 @@ const CardEffectsPanel: React.FC<CardEffectsPanelProps> = ({
                 <Sliders 
                   size={14} 
                   className="ml-1 cursor-pointer" 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setExpandedEffect(expandedEffect === effect.id ? null : effect.id);
-                  }}
+                  onClick={(e) => toggleExpandEffect(e, effect.id)}
                 />
               )}
             </button>
@@ -88,10 +104,10 @@ const CardEffectsPanel: React.FC<CardEffectsPanelProps> = ({
               <div className="mt-2 px-2 py-1 bg-gray-800 rounded-md w-full">
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-xs">Intensity</span>
-                  <span className="text-xs">{effectIntensities[effect.id].toFixed(1)}</span>
+                  <span className="text-xs">{localIntensities[effect.id].toFixed(1)}</span>
                 </div>
                 <Slider 
-                  value={[effectIntensities[effect.id]]}
+                  value={[localIntensities[effect.id]]}
                   min={0.1}
                   max={1.0}
                   step={0.1}

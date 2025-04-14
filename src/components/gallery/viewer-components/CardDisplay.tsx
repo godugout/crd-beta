@@ -20,7 +20,7 @@ interface CardDisplayProps {
   touchImprintAreas?: Array<{ id: string; active: boolean }>;
 }
 
-const CardDisplay = ({
+const CardDisplay: React.FC<CardDisplayProps> = ({
   card,
   rotation,
   isFlipped,
@@ -65,6 +65,9 @@ const CardDisplay = ({
     return style;
   };
 
+  console.log('Active effects in CardDisplay:', activeEffects);
+  console.log('Effect classes:', effectClasses);
+
   return (
     <div 
       className="flex items-center justify-center gap-8 px-8"
@@ -72,7 +75,7 @@ const CardDisplay = ({
     >
       <div 
         ref={cardRef}
-        className="relative transition-all duration-700 transform-gpu card-effect preserve-3d"
+        className={`relative transition-all duration-700 transform-gpu card-effect preserve-3d`}
         style={{
           transformStyle: 'preserve-3d',
           transform: `
@@ -113,9 +116,12 @@ const CardDisplay = ({
               </div>
               
               {/* Apply visual effects to front face */}
-              <div className={`absolute inset-0 pointer-events-none ${effectClasses}`}
-                 style={generateEffectStyles()}>
-              </div>
+              {activeEffects.length > 0 && (
+                <div 
+                  className={`absolute inset-0 pointer-events-none z-10 ${effectClasses}`} 
+                  style={generateEffectStyles()}
+                ></div>
+              )}
             </div>
           </div>
 
@@ -167,15 +173,17 @@ const CardDisplay = ({
               )}
               
               {/* Apply visual effects to back face - slightly different effect */}
-              <div 
-                className={`absolute inset-0 pointer-events-none ${effectClasses.replace('holographic', 'chrome')}`}
-                style={generateEffectStyles()}
-              >
-                {/* Holographic elements specific to card back */}
-                {activeEffects.includes('Holographic') && (
-                  <div className="absolute inset-0 bg-gradient-to-tr from-purple-500/10 to-blue-500/10 mix-blend-overlay"></div>
-                )}
-              </div>
+              {activeEffects.length > 0 && (
+                <div 
+                  className={`absolute inset-0 pointer-events-none ${effectClasses.replace('holographic', 'chrome')}`}
+                  style={generateEffectStyles()}
+                >
+                  {/* Holographic elements specific to card back */}
+                  {activeEffects.includes('Holographic') && (
+                    <div className="absolute inset-0 bg-gradient-to-tr from-purple-500/10 to-blue-500/10 mix-blend-overlay"></div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>
