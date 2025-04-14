@@ -1,4 +1,9 @@
 
-import useCardEffects from './card-effects/useCardEffects';
-export { useCardEffects };
-export type { CardEffectsResult, EffectSettings, CardEffect } from './card-effects/useCardEffects';
+import { useCardEffectsContext } from '@/providers/CardEffectsProvider';
+import { CardEffect, CardEffectsResult } from '@/lib/types';
+
+export function useCardEffects(): CardEffectsResult {
+  return useCardEffectsContext();
+}
+
+export default useCardEffects;

@@ -1,6 +1,6 @@
 
 import { supabase } from '@/lib/supabase';
-import { Collection, DbCollection } from '@/lib/types';
+import { Collection, DbCollection, serializeMetadata } from '@/lib/types';
 
 export const collectionRepository = {
   /**
@@ -28,7 +28,7 @@ export const collectionRepository = {
         name: dbCollection.title,
         description: dbCollection.description || '',
         coverImageUrl: dbCollection.cover_image_url || undefined,
-        visibility: dbCollection.visibility as 'public' | 'private' | 'unlisted' | 'team',
+        visibility: dbCollection.visibility as 'public' | 'private' | 'team' | 'unlisted',
         allowComments: dbCollection.allow_comments || false,
         designMetadata: dbCollection.design_metadata,
         createdAt: dbCollection.created_at,
@@ -55,11 +55,13 @@ export const collectionRepository = {
       if (collectionUpdates.description !== undefined) updateCollectionData.description = collectionUpdates.description;
       if (collectionUpdates.coverImageUrl !== undefined) updateCollectionData.cover_image_url = collectionUpdates.coverImageUrl;
       if (collectionUpdates.visibility !== undefined) {
-        // Handle 'team' visibility which is valid in our code but needs mapping
+        // Handle all visibility types including 'unlisted'
         updateCollectionData.visibility = collectionUpdates.visibility;
       }
       if (collectionUpdates.allowComments !== undefined) updateCollectionData.allow_comments = collectionUpdates.allowComments;
-      if (collectionUpdates.designMetadata !== undefined) updateCollectionData.design_metadata = collectionUpdates.designMetadata;
+      if (collectionUpdates.designMetadata !== undefined) {
+        updateCollectionData.design_metadata = serializeMetadata(collectionUpdates.designMetadata);
+      }
       if (collectionUpdates.teamId !== undefined) updateCollectionData.team_id = collectionUpdates.teamId;
       
       const { data, error } = await supabase
@@ -79,7 +81,7 @@ export const collectionRepository = {
         name: dbCollection.title,
         description: dbCollection.description || '',
         coverImageUrl: dbCollection.cover_image_url || undefined,
-        visibility: dbCollection.visibility as 'public' | 'private' | 'unlisted' | 'team',
+        visibility: dbCollection.visibility as 'public' | 'private' | 'team' | 'unlisted',
         allowComments: dbCollection.allow_comments || false,
         designMetadata: dbCollection.design_metadata,
         createdAt: dbCollection.created_at,
@@ -133,7 +135,7 @@ export const collectionRepository = {
         name: dbCollection.title,
         description: dbCollection.description || '',
         coverImageUrl: dbCollection.cover_image_url || undefined,
-        visibility: dbCollection.visibility as 'public' | 'private' | 'unlisted' | 'team',
+        visibility: dbCollection.visibility as 'public' | 'private' | 'team' | 'unlisted',
         allowComments: dbCollection.allow_comments || false,
         designMetadata: dbCollection.design_metadata,
         createdAt: dbCollection.created_at,
@@ -163,7 +165,7 @@ export const collectionRepository = {
         allow_comments: collection.allowComments !== undefined ? collection.allowComments : true,
         owner_id: collection.userId,
         team_id: collection.teamId || null,
-        design_metadata: collection.designMetadata || {}
+        design_metadata: collection.designMetadata ? serializeMetadata(collection.designMetadata) : {}
       };
       
       const { data, error } = await supabase
@@ -182,7 +184,7 @@ export const collectionRepository = {
         name: dbCollection.title,
         description: dbCollection.description || '',
         coverImageUrl: dbCollection.cover_image_url || undefined,
-        visibility: dbCollection.visibility as 'public' | 'private' | 'unlisted' | 'team',
+        visibility: dbCollection.visibility as 'public' | 'private' | 'team' | 'unlisted',
         allowComments: dbCollection.allow_comments || false,
         designMetadata: dbCollection.design_metadata,
         createdAt: dbCollection.created_at,

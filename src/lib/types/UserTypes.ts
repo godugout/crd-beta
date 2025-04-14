@@ -1,11 +1,7 @@
 
-export enum UserRole {
-  ADMIN = 'admin',
-  USER = 'user',
-  PREMIUM = 'premium',
-  CREATOR = 'creator',
-  MODERATOR = 'moderator'
-}
+import { UserRole } from '../types';
+
+export { UserRole };
 
 export interface UserProfile {
   id: string;

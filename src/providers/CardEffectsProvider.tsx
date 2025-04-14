@@ -1,6 +1,7 @@
 
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import useCardEffects, { CardEffectsResult } from '@/hooks/card-effects/useCardEffects';
+import useCardEffectsHook from '@/hooks/card-effects/useCardEffects';
+import { CardEffectsResult } from '@/lib/types';
 
 // Create context with default value
 const CardEffectsContext = createContext<CardEffectsResult | undefined>(undefined);
@@ -11,7 +12,7 @@ interface CardEffectsProviderProps {
 
 export const CardEffectsProvider: React.FC<CardEffectsProviderProps> = ({ children }) => {
   // Use the hook
-  const cardEffects = useCardEffects();
+  const cardEffects = useCardEffectsHook();
   
   return (
     <CardEffectsContext.Provider value={cardEffects}>

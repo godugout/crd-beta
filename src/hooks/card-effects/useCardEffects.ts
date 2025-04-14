@@ -1,131 +1,73 @@
 
 import { useState, useCallback } from 'react';
-
-export interface CardEffect {
-  id: string;
-  name: string;
-  enabled: boolean;
-  settings: {
-    motionSpeed?: number;
-    pulseIntensity?: number;
-    shimmerSpeed?: number;
-    goldIntensity?: number;
-    chromeIntensity?: number;
-    vintageIntensity?: number;
-    refractorIntensity?: number;
-    spectralIntensity?: number;
-    [key: string]: any;
-  };
-  className?: string;
-}
-
-export type EffectSettings = {
-  motionSpeed: number;
-  pulseIntensity: number;
-  shimmerSpeed: number;
-  goldIntensity: number;
-  chromeIntensity: number;
-  vintageIntensity: number;
-  refractorIntensity: number;
-  spectralIntensity: number;
-};
-
-export type CardEffectsResult = {
-  activeEffects: string[];
-  setActiveEffects: React.Dispatch<React.SetStateAction<string[]>>;
-  addEffect: (effect: string) => void;
-  removeEffect: (effect: string) => void;
-  toggleEffect: (effect: string) => void;
-  updateEffectSettings: (effect: string, settings: Partial<CardEffect>) => void;
-  getEffectSettings: (effect: string) => CardEffect | undefined;
-  effectStack: CardEffect[];
-  getEffectClasses: () => string;
-};
-
-const DEFAULT_EFFECT_SETTINGS = {
-  motionSpeed: 1.0,
-  pulseIntensity: 0.7,
-  shimmerSpeed: 3.0,
-  goldIntensity: 0.8,
-  chromeIntensity: 0.8,
-  vintageIntensity: 0.6,
-  refractorIntensity: 0.85,
-  spectralIntensity: 0.75
-};
+import { CardEffectsResult } from '@/lib/types';
 
 const useCardEffects = (): CardEffectsResult => {
-  const [activeEffects, setActiveEffects] = useState<string[]>([]);
-  const [effectSettings, setEffectSettings] = useState<Record<string, CardEffect>>({});
-  
-  const addEffect = useCallback((effect: string) => {
-    setActiveEffects(prev => {
-      if (prev.includes(effect)) return prev;
-      return [...prev, effect];
+  const [cardEffects, setCardEffects] = useState<Record<string, string[]>>({});
+  const [isLoading, setIsLoading] = useState(false);
+
+  const addEffect = useCallback((cardId: string, effect: string) => {
+    setCardEffects(prev => {
+      const currentEffects = prev[cardId] || [];
+      if (!currentEffects.includes(effect)) {
+        return {
+          ...prev,
+          [cardId]: [...currentEffects, effect]
+        };
+      }
+      return prev;
     });
   }, []);
 
-  const removeEffect = useCallback((effect: string) => {
-    setActiveEffects(prev => prev.filter(e => e !== effect));
+  const removeEffect = useCallback((cardId: string, effect: string) => {
+    setCardEffects(prev => {
+      const currentEffects = prev[cardId] || [];
+      return {
+        ...prev,
+        [cardId]: currentEffects.filter(e => e !== effect)
+      };
+    });
   }, []);
 
-  const toggleEffect = useCallback((effect: string) => {
-    setActiveEffects(prev => {
-      if (prev.includes(effect)) {
-        return prev.filter(e => e !== effect);
+  const toggleEffect = useCallback((cardId: string, effect: string) => {
+    setCardEffects(prev => {
+      const currentEffects = prev[cardId] || [];
+      if (currentEffects.includes(effect)) {
+        return {
+          ...prev,
+          [cardId]: currentEffects.filter(e => e !== effect)
+        };
       } else {
-        return [...prev, effect];
+        return {
+          ...prev,
+          [cardId]: [...currentEffects, effect]
+        };
       }
     });
   }, []);
 
-  const updateEffectSettings = useCallback((effect: string, settings: Partial<CardEffect>) => {
-    setEffectSettings(prev => ({
+  const clearEffects = useCallback((cardId: string) => {
+    setCardEffects(prev => ({
       ...prev,
-      [effect]: {
-        ...(prev[effect] || { 
-          id: effect,
-          name: effect,
-          enabled: true,
-          settings: DEFAULT_EFFECT_SETTINGS,
-          className: `effect-${effect.toLowerCase()}`
-        }),
-        ...settings
-      }
+      [cardId]: []
     }));
   }, []);
 
-  const getEffectSettings = useCallback((effect: string) => {
-    return effectSettings[effect];
-  }, [effectSettings]);
-
-  // Calculate effectStack from active effects and settings
-  const effectStack = activeEffects.map(effectName => {
-    return effectSettings[effectName] || {
-      id: effectName,
-      name: effectName,
-      enabled: true,
-      settings: DEFAULT_EFFECT_SETTINGS,
-      className: `effect-${effectName.toLowerCase()}`
-    };
-  });
-
-  // Generate classes for all active effects
-  const getEffectClasses = useCallback(() => {
-    return activeEffects
-      .map(effect => `effect-${effect.toLowerCase()}`)
-      .join(' ');
-  }, [activeEffects]);
+  const setCardEffects = useCallback((cardId: string, effects: string[]) => {
+    setCardEffects(prev => ({
+      ...prev,
+      [cardId]: effects
+    }));
+  }, []);
 
   return {
-    activeEffects,
-    setActiveEffects,
+    cardEffects,
+    isLoading,
     addEffect,
     removeEffect,
     toggleEffect,
-    updateEffectSettings,
-    getEffectSettings,
-    effectStack,
-    getEffectClasses
+    clearEffects,
+    setCardEffects
   };
 };
 

@@ -1,5 +1,6 @@
+
 import { useState, useCallback, useEffect } from 'react';
-import { Card } from '@/lib/types';
+import { Card, serializeMetadata } from '@/lib/types';
 import { useAuth } from '@/context/auth';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -96,7 +97,12 @@ export function useCards(options: UseCardsOptions = {}) {
     }
 
     try {
-      const cardToInsert: any = {
+      // Properly serialize design metadata for Supabase
+      const serializedDesignMetadata = cardData.designMetadata 
+        ? serializeMetadata(cardData.designMetadata)
+        : {};
+        
+      const cardToInsert = {
         title: cardData.title,
         description: cardData.description,
         image_url: cardData.imageUrl,
@@ -108,7 +114,7 @@ export function useCards(options: UseCardsOptions = {}) {
         user_id: user.id,
         creator_id: user.id,
         rarity: 'common',
-        design_metadata: cardData.designMetadata ? JSON.parse(JSON.stringify(cardData.designMetadata)) : {},
+        design_metadata: serializedDesignMetadata,
         edition_size: 1
       };
 
@@ -167,7 +173,11 @@ export function useCards(options: UseCardsOptions = {}) {
       if (updates.teamId !== undefined) updateData.team_id = updates.teamId;
       if (updates.tags !== undefined) updateData.tags = updates.tags;
       if (updates.isPublic !== undefined) updateData.is_public = updates.isPublic;
-      if (updates.designMetadata !== undefined) updateData.design_metadata = updates.designMetadata;
+      
+      // Properly serialize design metadata for Supabase
+      if (updates.designMetadata !== undefined) {
+        updateData.design_metadata = serializeMetadata(updates.designMetadata);
+      }
       
       const { data, error } = await supabase
         .from('cards')

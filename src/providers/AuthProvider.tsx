@@ -27,7 +27,6 @@ const MOCK_ADMIN_USER: User = {
   role: UserRole.ADMIN,
   avatarUrl: 'https://api.dicebear.com/7.x/initials/svg?seed=Admin',
   bio: 'System administrator with full access to all features.',
-  signature: 'Admin',
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
 };
