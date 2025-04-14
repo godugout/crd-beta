@@ -10,7 +10,7 @@ import MaterialSimulator from '@/components/pbr/MaterialSimulator';
 
 const UniformTextureDemo: React.FC = () => {
   const [generatedTexture, setGeneratedTexture] = useState<string | null>(null);
-  const [activeSport, setActiveSport] = useState<SportType>('basketball');
+  const [activeSport, setActiveSport] = useState<SportType | 'all'>('basketball');
   const [selectedUniform, setSelectedUniform] = useState<UniformPreset | null>(null);
   
   // Material simulation configuration

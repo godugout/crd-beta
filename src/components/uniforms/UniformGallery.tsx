@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
@@ -11,7 +10,7 @@ interface UniformGalleryProps {
   onSelectUniform: (uniform: UniformPreset) => void;
   onSaveCustomUniform?: (name: string, textureUrl: string, sport: SportType) => void;
   customTexture?: string;
-  sportType?: SportType;
+  sportType?: SportType | 'all';
 }
 
 export interface UniformPreset {
@@ -141,13 +140,13 @@ const UniformGallery: React.FC<UniformGalleryProps> = ({
     const newCustomUniform: UniformPreset = {
       id: `custom-${Date.now()}`,
       name: newUniformName,
-      sport: sportType,
+      sport: sportType as SportType,
       team: 'Custom',
       textureUrl: customTexture,
       isCustom: true
     };
     
-    onSaveCustomUniform(newUniformName, customTexture, sportType);
+    onSaveCustomUniform(newUniformName, customTexture, sportType as SportType);
     setCustomUniforms(prev => [newCustomUniform, ...prev]);
     setNewUniformName('');
     setActiveTab('custom');
