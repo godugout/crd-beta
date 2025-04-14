@@ -14,13 +14,15 @@ interface UseCardPhysicsProps {
   rotationDampingFactor?: number;
   sensitivity?: number;
   autoRotate?: boolean;
+  boundaryConstraints?: boolean;
 }
 
 export function useCardPhysics({
   dampingFactor = 0.95,
   rotationDampingFactor = 0.92,
   sensitivity = 0.15,
-  autoRotate = false
+  autoRotate = false,
+  boundaryConstraints = false
 }: UseCardPhysicsProps = {}) {
   const [state, setState] = useState<PhysicsState>({
     position: { x: 0, y: 0 },
@@ -67,6 +69,22 @@ export function useCardPhysics({
           y: prevState.position.y + newVelocity.y
         };
 
+        // Apply boundary constraints if enabled
+        if (boundaryConstraints) {
+          const maxDistance = 300; // Maximum distance from center
+          const distance = Math.sqrt(newPosition.x * newPosition.x + newPosition.y * newPosition.y);
+          
+          if (distance > maxDistance) {
+            const scale = maxDistance / distance;
+            newPosition.x *= scale;
+            newPosition.y *= scale;
+            
+            // Dampen velocity when hitting boundaries
+            newVelocity.x *= 0.8;
+            newVelocity.y *= 0.8;
+          }
+        }
+
         // Update rotation based on angular velocity
         const newRotation = {
           x: prevState.rotation.x + newAngularVelocity.x,
@@ -111,7 +129,7 @@ export function useCardPhysics({
         cancelAnimationFrame(frameRef.current);
       }
     };
-  }, [dampingFactor, rotationDampingFactor, autoRotate]);
+  }, [dampingFactor, rotationDampingFactor, autoRotate, boundaryConstraints]);
 
   // Handle pointer interactions
   const handlePointerDown = (e: React.PointerEvent) => {
@@ -183,15 +201,47 @@ export function useCardPhysics({
     }));
   };
 
-  // Reset card to neutral position
+  // Reset card to neutral position with smooth animation
   const resetCard = () => {
-    setState({
-      position: { x: 0, y: 0 },
-      rotation: { x: 0, y: 0, z: 0 },
+    // First stop all current motion
+    setState(prev => ({
+      ...prev,
       velocity: { x: 0, y: 0 },
       angularVelocity: { x: 0, y: 0, z: 0 },
-      isMoving: false
-    });
+      isMoving: true
+    }));
+    
+    // Then animate back to center
+    const duration = 300; // ms
+    const startTime = Date.now();
+    const startPos = { ...state.position };
+    const startRot = { ...state.rotation };
+    
+    const animate = () => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const easeProgress = 1 - Math.pow(1 - progress, 2); // Ease out quad
+      
+      setState(prev => ({
+        ...prev,
+        position: {
+          x: startPos.x * (1 - easeProgress),
+          y: startPos.y * (1 - easeProgress)
+        },
+        rotation: {
+          x: startRot.x * (1 - easeProgress),
+          y: startRot.y * (1 - easeProgress),
+          z: startRot.z * (1 - easeProgress)
+        },
+        isMoving: progress < 1
+      }));
+      
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      }
+    };
+    
+    requestAnimationFrame(animate);
   };
 
   // Apply an impulse force to set the card in motion

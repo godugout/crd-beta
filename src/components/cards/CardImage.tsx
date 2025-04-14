@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Card } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { useCardPhysics } from '@/hooks/useCardPhysics';
+import '../../styles/card-interactions.css';
 
 interface CardImageProps {
   /**
@@ -50,13 +51,15 @@ export const CardImage: React.FC<CardImageProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const [isFlipped, setIsFlipped] = useState(false);
   const [containerDimensions, setContainerDimensions] = useState({ width: 0, height: 0 });
+  const [isOutOfBounds, setIsOutOfBounds] = useState(false);
   
   // Use our physics engine for smooth movement
   const physics = useCardPhysics({
     dampingFactor: 0.96,
     rotationDampingFactor: 0.94,
     sensitivity: 0.12,
-    autoRotate
+    autoRotate,
+    boundaryConstraints: true
   });
 
   // Measure container size for proper 3D perspective
@@ -79,6 +82,17 @@ export const CardImage: React.FC<CardImageProps> = ({
     };
   }, []);
 
+  // Check if card is far from center
+  useEffect(() => {
+    const threshold = 300; // Adjust as needed
+    const distance = Math.sqrt(
+      physics.position.x * physics.position.x + 
+      physics.position.y * physics.position.y
+    );
+    
+    setIsOutOfBounds(distance > threshold);
+  }, [physics.position.x, physics.position.y]);
+
   // Handle card flip
   const handleCardClick = (e: React.MouseEvent) => {
     if (!flippable) return;
@@ -98,6 +112,17 @@ export const CardImage: React.FC<CardImageProps> = ({
     
     // Add a small bounce effect on flip
     physics.applyImpulse(0, 0, isFlipped ? -0.5 : 0.5);
+    
+    // Create ripple effect
+    const ripple = document.createElement('div');
+    ripple.className = 'touch-ripple ripple-animation';
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (rect) {
+      ripple.style.left = `${e.clientX - rect.left}px`;
+      ripple.style.top = `${e.clientY - rect.top}px`;
+      containerRef.current?.appendChild(ripple);
+      setTimeout(() => ripple.remove(), 800);
+    }
   };
 
   // Calculate 3D transforms for the card
@@ -133,12 +158,14 @@ export const CardImage: React.FC<CardImageProps> = ({
       ref={containerRef}
       className={cn(
         "card-container relative aspect-[2.5/3.5] overflow-visible",
+        isOutOfBounds && "boundary-warning",
         className
       )}
       onPointerDown={physics.handlePointerDown}
       onPointerMove={physics.handlePointerMove}
       onPointerUp={physics.handlePointerUp}
       onPointerLeave={physics.handlePointerUp}
+      onDoubleClick={() => physics.resetCard()}
     >
       <div
         className="card-inner relative w-full h-full rounded-lg overflow-hidden shadow-lg"
@@ -154,13 +181,26 @@ export const CardImage: React.FC<CardImageProps> = ({
             draggable={false}
           />
           
-          {/* Dynamic lighting effect overlay */}
-          <div 
-            className="absolute inset-0 bg-gradient-to-tr from-black/10 via-transparent to-white/20 opacity-50 pointer-events-none"
-            style={{
-              backgroundPosition: `${50 + physics.rotation.y * 2}% ${50 - physics.rotation.x * 2}%`
-            }}
-          ></div>
+          {/* Card Effects Layer - positioned on top of the card face */}
+          <div className="card-effects-layer">
+            {/* Lighting effect overlay */}
+            <div 
+              className="absolute inset-0 bg-gradient-to-tr from-black/10 via-transparent to-white/20 opacity-50 pointer-events-none"
+              style={{
+                backgroundPosition: `${50 + physics.rotation.y * 2}% ${50 - physics.rotation.x * 2}%`,
+                mixBlendMode: 'overlay'
+              }}
+            ></div>
+            
+            {/* Shine effect that follows pointer */}
+            <div 
+              className="absolute inset-0 bg-gradient-radial from-white/30 to-transparent pointer-events-none"
+              style={{ 
+                opacity: Math.min(0.7, Math.abs(physics.rotation.x) / 20 + Math.abs(physics.rotation.y) / 20),
+                mixBlendMode: 'overlay' 
+              }}
+            />
+          </div>
         </div>
         
         {/* Back face of the card */}
@@ -213,14 +253,23 @@ export const CardImage: React.FC<CardImageProps> = ({
             )}
           </div>
           
-          {/* Similar lighting effect for the back */}
-          <div 
-            className="absolute inset-0 bg-gradient-to-tr from-black/20 via-transparent to-white/10 opacity-50 pointer-events-none"
-            style={{
-              backgroundPosition: `${50 + physics.rotation.y * 2}% ${50 - physics.rotation.x * 2}%`
-            }}
-          ></div>
+          {/* Similar card effects layer for the back */}
+          <div className="card-effects-layer">
+            <div 
+              className="absolute inset-0 bg-gradient-to-tr from-black/20 via-transparent to-white/10 opacity-50 pointer-events-none"
+              style={{
+                backgroundPosition: `${50 + physics.rotation.y * 2}% ${50 - physics.rotation.x * 2}%`,
+                mixBlendMode: 'overlay'
+              }}
+            ></div>
+          </div>
         </div>
+
+        {/* Hover effects for desktop */}
+        <div className="card-highlight hidden md:block"></div>
+        
+        {/* Flip indicator */}
+        {flippable && <div className="flip-indicator hidden md:block"></div>}
       </div>
       
       {/* Add a subtle shadow below the card that moves with the card */}
@@ -232,23 +281,12 @@ export const CardImage: React.FC<CardImageProps> = ({
         }}
       ></div>
       
-      {/* Add CSS for backface visibility */}
-      <style jsx>{`
-        .card-container {
-          perspective: 1200px;
-          cursor: grab;
-          touch-action: none;
-        }
-        
-        .card-container:active {
-          cursor: grabbing;
-        }
-        
-        .backface-hidden {
-          backface-visibility: hidden;
-          -webkit-backface-visibility: hidden;
-        }
-      `}</style>
+      {/* Reset hint text for out-of-bounds cards */}
+      {isOutOfBounds && (
+        <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 text-white/70 text-xs px-2 py-1 bg-black/50 rounded whitespace-nowrap">
+          Double-click to reset position
+        </div>
+      )}
     </div>
   );
 };

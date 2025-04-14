@@ -17,6 +17,7 @@ const ImmersiveCardViewer = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [activeEffects, setActiveEffects] = useState<string[]>([]);
   const [isFlipped, setIsFlipped] = useState(false);
+  const [cardPosition, setCardPosition] = useState({ x: 0, y: 0, rotation: 0 });
   
   // Get the current card and prepare effects
   useEffect(() => {
@@ -42,6 +43,19 @@ const ImmersiveCardViewer = () => {
   
   const handleCardClick = (cardId: string) => {
     navigate(`/view/${cardId}`);
+  };
+  
+  const handleCardFlip = (flipped: boolean) => {
+    setIsFlipped(flipped);
+  };
+  
+  const handleUpdateCardPosition = (x: number, y: number, rotation: number) => {
+    setCardPosition({ x, y, rotation });
+  };
+  
+  const handleCardReset = () => {
+    setCardPosition({ x: 0, y: 0, rotation: 0 });
+    toast.info('Card position reset');
   };
   
   // Find related cards based on tags, artist, or year
@@ -123,6 +137,20 @@ const ImmersiveCardViewer = () => {
         </svg>
       </button>
       
+      {/* Reset button (visible when card is far from center) */}
+      {(Math.abs(cardPosition.x) > 100 || Math.abs(cardPosition.y) > 100) && (
+        <button
+          className="absolute top-4 left-4 z-50 bg-black/40 hover:bg-black/60 text-white p-2 rounded-full"
+          onClick={handleCardReset}
+          title="Reset card position"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 2v6h6"></path>
+            <path d="M3 13a9 9 0 1 0 3-7.7L3 8"></path>
+          </svg>
+        </button>
+      )}
+      
       {/* Main content area */}
       <div className="relative flex-1 flex items-center justify-center overflow-hidden">
         {/* Card with improved physics */}
@@ -133,7 +161,7 @@ const ImmersiveCardViewer = () => {
             flippable={true}
             enable3D={true}
             autoRotate={false}
-            onFlip={setIsFlipped}
+            onFlip={handleCardFlip}
           />
           
           <div className="mt-4 text-center text-white/70 text-sm">

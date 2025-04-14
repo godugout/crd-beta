@@ -2,6 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Card } from '@/lib/types';
 import { useCardPhysics } from '@/hooks/useCardPhysics';
+import { RefreshCw } from 'lucide-react';
 
 interface MouseInteractionLayerProps {
   cards: Card[];
@@ -20,7 +21,8 @@ const MouseInteractionLayer: React.FC<MouseInteractionLayerProps> = ({
   const physics = useCardPhysics({
     dampingFactor: 0.97,
     rotationDampingFactor: 0.96,
-    sensitivity: 0.1
+    sensitivity: 0.1,
+    boundaryConstraints: true // Enable boundary constraints
   });
   
   // Track if user tapped rather than dragged (for flipping)
@@ -79,17 +81,44 @@ const MouseInteractionLayer: React.FC<MouseInteractionLayerProps> = ({
     // Release the physics engine
     physics.handlePointerUp(e);
   };
+
+  // Reset card position when it's off-screen or user wants to reset
+  const handleResetCard = () => {
+    if (!selectedCardId) return;
+    
+    physics.resetCard();
+    onUpdateCardPosition(selectedCardId, 0, 0, 0);
+  };
+  
+  // Check if card is potentially off-screen
+  const isCardOffScreen = (
+    Math.abs(physics.position.x) > 500 || 
+    Math.abs(physics.position.y) > 500
+  );
   
   return (
-    <div 
-      ref={layerRef}
-      className="absolute inset-0 z-20"
-      style={{ touchAction: "none", pointerEvents: selectedCardId ? "auto" : "none" }}
-      onPointerDown={handlePointerDown}
-      onPointerMove={handlePointerMove}
-      onPointerUp={handlePointerUp}
-      onPointerCancel={handlePointerUp}
-    />
+    <>
+      <div 
+        ref={layerRef}
+        className="absolute inset-0 z-20"
+        style={{ touchAction: "none", pointerEvents: selectedCardId ? "auto" : "none" }}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerUp}
+      />
+
+      {/* Reset Button */}
+      <button 
+        className={`absolute top-4 left-4 z-50 p-2 rounded-full bg-black/50 text-white transition-opacity duration-300 ${
+          isCardOffScreen ? 'opacity-100' : 'opacity-60 hover:opacity-100'
+        }`}
+        onClick={handleResetCard}
+        title="Reset card position"
+      >
+        <RefreshCw size={20} />
+      </button>
+    </>
   );
 };
 
