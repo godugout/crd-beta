@@ -5,6 +5,7 @@ import CardFront from './card-elements/CardFront';
 import CardBack from './card-elements/CardBack';
 import CardEffectsLayer, { useCardEffects } from './card-elements/CardEffectsLayer';
 import RefractorEffect from '@/components/card-effects/RefractorEffect';
+import HolographicEffect from '@/components/card-effects/HolographicEffect';
 import HolographicEngine from '../card-effects/HolographicEngine';
 
 interface CardCanvasProps {
@@ -21,6 +22,12 @@ interface CardCanvasProps {
     animationEnabled?: boolean;
     refractorSpeed?: number;
     refractorAngle?: number;
+    holographicIntensity?: number;
+    holographicPattern?: 'linear' | 'circular' | 'angular' | 'geometric';
+    holographicColorMode?: 'rainbow' | 'blue-purple' | 'gold-green' | 'custom';
+    holographicCustomColors?: string[];
+    holographicSparklesEnabled?: boolean;
+    holographicBorderWidth?: number;
   };
 }
 
@@ -46,7 +53,13 @@ const CardCanvas: React.FC<CardCanvasProps> = ({
     refractorColors,
     animationEnabled = true,
     refractorSpeed = 1.0,
-    refractorAngle
+    refractorAngle,
+    holographicIntensity = 0.8,
+    holographicPattern = 'linear',
+    holographicColorMode = 'rainbow',
+    holographicCustomColors,
+    holographicSparklesEnabled = true,
+    holographicBorderWidth = 1
   } = effectSettings;
   
   // Set CSS variables for mouse position to use in the refractor effect
@@ -124,6 +137,7 @@ const CardCanvas: React.FC<CardCanvasProps> = ({
   
   // Check if effects are active
   const hasRefractorEffect = activeEffects.includes('Refractor');
+  const hasHolographicEffect = activeEffects.includes('Holographic');
   const hasSpectralEffect = activeEffects.includes('Spectral');
   
   // Create parallax layers for 3D effect
@@ -196,14 +210,30 @@ const CardCanvas: React.FC<CardCanvasProps> = ({
           angle={refractorAngle}
         />
         
+        {/* Holographic effect overlay */}
+        <HolographicEffect 
+          isActive={hasHolographicEffect}
+          intensity={holographicIntensity}
+          pattern={holographicPattern}
+          colorScheme={holographicColorMode as 'rainbow' | 'blue-purple' | 'gold-green' | 'custom'}
+          customColors={holographicCustomColors}
+          mousePosition={mousePos}
+          animationEnabled={animationEnabled}
+          sparklesEnabled={holographicSparklesEnabled}
+          borderWidth={holographicBorderWidth}
+        />
+        
         {/* Advanced Holographic Engine */}
         <HolographicEngine 
-          active={hasSpectralEffect}
-          intensity={0.7}
-          colorMode="rainbow"
+          active={hasHolographicEffect}
+          intensity={holographicIntensity}
+          pattern={holographicPattern as 'linear' | 'circular' | 'angular' | 'geometric'}
+          colorMode={holographicColorMode as 'rainbow' | 'blue-purple' | 'gold-green' | 'custom'}
+          customColors={holographicCustomColors}
           animated={animationActive}
           microtext={`CARD-${card.id} AUTHENTIC HOLOGRAM `}
-          particleCount={hasSpectralEffect ? 50 : 0}
+          particleCount={hasHolographicEffect ? 25 : 0}
+          borderWidth={holographicBorderWidth}
         />
       </div>
     </div>

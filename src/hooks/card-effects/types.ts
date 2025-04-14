@@ -1,3 +1,4 @@
+
 export interface PremiumCardEffect {
   id: string;
   name: string;
@@ -27,6 +28,13 @@ export interface CardEffectSettings {
   refractorSpeed?: number;
   refractorColors?: string[];
   refractorAngle?: number;
+  holographicIntensity?: number;
+  holographicPattern?: 'linear' | 'circular' | 'angular' | 'geometric';
+  holographicColorMode?: 'rainbow' | 'blue-purple' | 'gold-green' | 'custom';
+  holographicCustomColors?: string[];
+  holographicSparklesEnabled?: boolean;
+  holographicBorderWidth?: number;
+  holographicMicrotext?: string;
 }
 
 export interface CardEffectsOptions {
@@ -49,7 +57,7 @@ export interface CardEffectsResult {
 export type CardEffectLibrary = Record<string, PremiumCardEffect>;
 
 export interface MaterialSimulation {
-  type: 'metal' | 'canvas' | 'glossy' | 'matte' | 'embossed' | 'refractor';
+  type: 'metal' | 'canvas' | 'glossy' | 'matte' | 'embossed' | 'refractor' | 'holographic';
   baseColor?: string;
   textureUrl?: string;
   normalMapUrl?: string;
@@ -61,5 +69,14 @@ export interface MaterialSimulation {
     speed: number;
     colors: string[];
     angle?: number;
+  };
+  holographicProperties?: {
+    intensity: number;
+    pattern: 'linear' | 'circular' | 'angular' | 'geometric';
+    colorMode: 'rainbow' | 'blue-purple' | 'gold-green' | 'custom';
+    customColors?: string[];
+    sparklesEnabled: boolean;
+    borderWidth: number;
+    microtext?: string;
   };
 }

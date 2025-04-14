@@ -19,6 +19,12 @@ interface EffectControlsProps {
   onRefractorColorChange?: (colorIndex: number, color: string) => void;
   onRefractorAngleChange?: (value: number[]) => void;
   onSpectralIntensityChange?: (value: number[]) => void;
+  onHolographicIntensityChange?: (value: number[]) => void;
+  onHolographicPatternChange?: (pattern: string) => void;
+  onHolographicColorModeChange?: (mode: string) => void;
+  onHolographicCustomColorChange?: (colorIndex: number, color: string) => void;
+  onHolographicSparklesToggle?: (enabled: boolean) => void;
+  onHolographicBorderWidthChange?: (value: number[]) => void;
   motionSpeed: number;
   pulseIntensity: number;
   shimmerSpeed: number;
@@ -31,6 +37,12 @@ interface EffectControlsProps {
   refractorAngle?: number;
   refractorAnimationEnabled?: boolean;
   spectralIntensity?: number;
+  holographicIntensity?: number;
+  holographicPattern?: string;
+  holographicColorMode?: string;
+  holographicCustomColors?: string[];
+  holographicSparklesEnabled?: boolean;
+  holographicBorderWidth?: number;
 }
 
 const EffectControls: React.FC<EffectControlsProps> = ({
@@ -50,6 +62,12 @@ const EffectControls: React.FC<EffectControlsProps> = ({
   onRefractorColorChange = () => {},
   onRefractorAngleChange = () => {},
   onSpectralIntensityChange = () => {},
+  onHolographicIntensityChange = () => {},
+  onHolographicPatternChange = () => {},
+  onHolographicColorModeChange = () => {},
+  onHolographicCustomColorChange = () => {},
+  onHolographicSparklesToggle = () => {},
+  onHolographicBorderWidthChange = () => {},
   motionSpeed,
   pulseIntensity,
   shimmerSpeed,
@@ -61,12 +79,20 @@ const EffectControls: React.FC<EffectControlsProps> = ({
   refractorColors = ['rgba(255, 0, 128, 0.2)', 'rgba(0, 255, 255, 0.2)', 'rgba(255, 255, 0, 0.2)'],
   refractorAngle,
   refractorAnimationEnabled = true,
-  spectralIntensity = 1.0
+  spectralIntensity = 1.0,
+  holographicIntensity = 0.8,
+  holographicPattern = 'linear',
+  holographicColorMode = 'rainbow',
+  holographicCustomColors = ['#ff0080', '#00ffff', '#ffff00'],
+  holographicSparklesEnabled = true,
+  holographicBorderWidth = 1
 }) => {
   // Create local state for color picker
   const [activeColorIndex, setActiveColorIndex] = useState<number | null>(null);
+  const [activeHolographicColorIndex, setActiveHolographicColorIndex] = useState<number | null>(null);
   
   const showRefractorControls = activeEffects.includes('Refractor');
+  const showHolographicControls = activeEffects.includes('Holographic');
   
   return (
     <EffectControlPanel
@@ -86,7 +112,14 @@ const EffectControls: React.FC<EffectControlsProps> = ({
       refractorAngle={refractorAngle}
       refractorAnimationEnabled={refractorAnimationEnabled}
       spectralIntensity={spectralIntensity}
+      holographicIntensity={holographicIntensity}
+      holographicPattern={holographicPattern}
+      holographicColorMode={holographicColorMode}
+      holographicCustomColors={holographicCustomColors}
+      holographicSparklesEnabled={holographicSparklesEnabled}
+      holographicBorderWidth={holographicBorderWidth}
       showRefractorControls={showRefractorControls}
+      showHolographicControls={showHolographicControls}
       onMotionSpeedChange={onMotionSpeedChange}
       onPulseIntensityChange={onPulseIntensityChange}
       onShimmerSpeedChange={onShimmerSpeedChange}
@@ -99,8 +132,16 @@ const EffectControls: React.FC<EffectControlsProps> = ({
       onRefractorColorChange={onRefractorColorChange}
       onRefractorAngleChange={onRefractorAngleChange}
       onSpectralIntensityChange={onSpectralIntensityChange}
+      onHolographicIntensityChange={onHolographicIntensityChange}
+      onHolographicPatternChange={onHolographicPatternChange}
+      onHolographicColorModeChange={onHolographicColorModeChange}
+      onHolographicCustomColorChange={onHolographicCustomColorChange}
+      onHolographicSparklesToggle={onHolographicSparklesToggle}
+      onHolographicBorderWidthChange={onHolographicBorderWidthChange}
       activeColorIndex={activeColorIndex}
       onActiveColorChange={setActiveColorIndex}
+      activeHolographicColorIndex={activeHolographicColorIndex}
+      onActiveHolographicColorChange={setActiveHolographicColorIndex}
     />
   );
 };
