@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 
 // Define the SportType type
@@ -22,6 +23,8 @@ const UniformTextureMapper: React.FC<UniformTextureMapperProps> = ({
   const [team, setTeam] = useState(initialTeam);
   const [playerNumber, setPlayerNumber] = useState(initialPlayerNumber);
   const [playerName, setPlayerName] = useState(initialPlayerName);
+  const [fabricType, setFabricType] = useState<'mesh' | 'canvas' | 'synthetic'>('mesh');
+  const [weathering, setWeathering] = useState<'new' | 'game-worn' | 'vintage'>('new');
   const [isGenerating, setIsGenerating] = useState(false);
   
   // Mock function to generate texture URL
@@ -140,6 +143,35 @@ const UniformTextureMapper: React.FC<UniformTextureMapperProps> = ({
             </div>
           </div>
           
+          {/* New material options */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Fabric Type</label>
+              <select 
+                value={fabricType}
+                onChange={(e) => setFabricType(e.target.value as 'mesh' | 'canvas' | 'synthetic')}
+                className="w-full p-2 border rounded-md"
+              >
+                <option value="mesh">Mesh</option>
+                <option value="canvas">Canvas/Cotton</option>
+                <option value="synthetic">Synthetic</option>
+              </select>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium mb-1">Condition</label>
+              <select 
+                value={weathering}
+                onChange={(e) => setWeathering(e.target.value as 'new' | 'game-worn' | 'vintage')}
+                className="w-full p-2 border rounded-md"
+              >
+                <option value="new">New</option>
+                <option value="game-worn">Game-Worn</option>
+                <option value="vintage">Vintage</option>
+              </select>
+            </div>
+          </div>
+          
           <button
             onClick={handleGenerateTexture}
             disabled={isGenerating}
@@ -160,6 +192,9 @@ const UniformTextureMapper: React.FC<UniformTextureMapperProps> = ({
                   <div className="text-lg font-bold">{team}</div>
                   <div className="text-3xl font-bold">{playerNumber}</div>
                   <div className="text-md">{playerName}</div>
+                  <div className="text-xs mt-2 text-gray-400">
+                    {fabricType} fabric · {weathering} condition
+                  </div>
                 </div>
               )}
             </div>

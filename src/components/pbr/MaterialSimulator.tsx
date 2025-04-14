@@ -1,29 +1,27 @@
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { MaterialSimulation } from '@/hooks/card-effects/types';
+import './fabric-materials.css';
 
 interface MaterialSimulatorProps {
   material: MaterialSimulation;
   width?: number;
   height?: number;
   className?: string;
-  onTextureLoad?: () => void;
 }
 
 /**
- * MaterialSimulator renders physically-based materials for cards
- * Uses WebGL to simulate different material properties like fabric textures
+ * A component that simulates different fabric materials for uniform textures
  */
 const MaterialSimulator: React.FC<MaterialSimulatorProps> = ({
   material,
-  width = 300,
-  height = 420,
-  className = '',
-  onTextureLoad
+  width = 256,
+  height = 256,
+  className = ''
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [isLoaded, setIsLoaded] = useState(false);
-  
+
+  // Render the material effect onto the canvas
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -31,377 +29,322 @@ const MaterialSimulator: React.FC<MaterialSimulatorProps> = ({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
+    // Set canvas dimensions
+    canvas.width = width;
+    canvas.height = height;
+
     // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Apply base material color
-    ctx.fillStyle = material.baseColor || '#ffffff';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // Draw the base color or texture
+    if (material.textureUrl) {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        // Draw the image
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        
+        // Apply material-specific effects
+        applyMaterialEffect(ctx, canvas.width, canvas.height, material);
+      };
+      img.src = material.textureUrl;
+    } else {
+      // Fill with base color if no texture
+      ctx.fillStyle = material.baseColor || '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      applyMaterialEffect(ctx, canvas.width, canvas.height, material);
+    }
+  }, [material, width, height]);
 
-    // Simulate material texture based on type
-    switch(material.type) {
+  // Apply different effects based on material type
+  const applyMaterialEffect = (
+    ctx: CanvasRenderingContext2D,
+    width: number,
+    height: number,
+    material: MaterialSimulation
+  ) => {
+    // Save context state
+    ctx.save();
+    
+    // Apply different patterns based on material type
+    switch (material.type) {
+      case 'mesh':
+        // Create mesh pattern
+        drawMeshPattern(ctx, width, height, material);
+        break;
+      case 'synthetic':
+        // Create synthetic fabric pattern
+        drawSyntheticPattern(ctx, width, height, material);
+        break;
       case 'canvas':
-        renderCanvasTexture(ctx, canvas.width, canvas.height);
-        break;
-      case 'metal':
-        renderMetalTexture(ctx, canvas.width, canvas.height);
-        break;
-      case 'glossy':
-        renderGlossyTexture(ctx, canvas.width, canvas.height);
-        break;
-      case 'matte':
-        renderMatteTexture(ctx, canvas.width, canvas.height);
-        break;
-      case 'embossed':
-        renderEmbossedTexture(ctx, canvas.width, canvas.height);
-        break;
-      case 'refractor':
-        renderRefractorTexture(ctx, canvas.width, canvas.height, material.refractorProperties);
-        break;
-      case 'holographic':
-        renderHolographicTexture(ctx, canvas.width, canvas.height, material.holographicProperties);
-        break;
       default:
-        // Default texture
+        // Create canvas/cotton pattern
+        drawCanvasPattern(ctx, width, height, material);
         break;
     }
-
-    setIsLoaded(true);
-    if (onTextureLoad) onTextureLoad();
     
-  }, [material, width, height, onTextureLoad]);
-
-  // Canvas texture renderer (for sports jersey fabric)
-  const renderCanvasTexture = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
-    // Create a subtle canvas/fabric pattern
-    ctx.globalAlpha = 0.3;
-    for (let y = 0; y < height; y += 3) {
-      for (let x = 0; x < width; x += 3) {
-        if ((x + y) % 6 === 0) {
-          ctx.fillStyle = 'rgba(0,0,0,0.05)';
+    // Apply weathering if specified
+    if (material.weathering) {
+      applyWeatheringEffect(ctx, width, height, material.weathering);
+    }
+    
+    // Apply lighting effects
+    applyLightingEffect(ctx, width, height, material);
+    
+    // Restore context
+    ctx.restore();
+  };
+  
+  // Create mesh pattern (basketball jerseys, etc.)
+  const drawMeshPattern = (
+    ctx: CanvasRenderingContext2D,
+    width: number,
+    height: number,
+    material: MaterialSimulation
+  ) => {
+    const meshSize = 4;
+    const opacity = 0.2;
+    
+    // Add mesh texture overlay
+    ctx.globalCompositeOperation = 'multiply';
+    ctx.globalAlpha = opacity;
+    
+    // Draw horizontal lines
+    for (let y = 0; y < height; y += meshSize) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(width, y);
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.1)';
+      ctx.lineWidth = 0.5;
+      ctx.stroke();
+    }
+    
+    // Draw vertical lines
+    for (let x = 0; x < width; x += meshSize) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, height);
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.1)';
+      ctx.lineWidth = 0.5;
+      ctx.stroke();
+    }
+    
+    // Reset composite operation and alpha
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.globalAlpha = 1.0;
+    
+    // Add subtle highlights
+    ctx.globalCompositeOperation = 'overlay';
+    const gradient = ctx.createLinearGradient(0, 0, width, height);
+    gradient.addColorStop(0, 'rgba(255, 255, 255, 0.1)');
+    gradient.addColorStop(0.5, 'rgba(255, 255, 255, 0)');
+    gradient.addColorStop(1, 'rgba(255, 255, 255, 0.1)');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, width, height);
+    ctx.globalCompositeOperation = 'source-over';
+  };
+  
+  // Create synthetic fabric pattern
+  const drawSyntheticPattern = (
+    ctx: CanvasRenderingContext2D,
+    width: number,
+    height: number,
+    material: MaterialSimulation
+  ) => {
+    // Add smooth gradient sheen
+    ctx.globalCompositeOperation = 'overlay';
+    const gradient = ctx.createLinearGradient(0, 0, width, height / 2);
+    gradient.addColorStop(0, 'rgba(255, 255, 255, 0.2)');
+    gradient.addColorStop(0.5, 'rgba(255, 255, 255, 0)');
+    gradient.addColorStop(1, 'rgba(255, 255, 255, 0.1)');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, width, height);
+    
+    // Add fine diagonal pattern
+    ctx.globalCompositeOperation = 'multiply';
+    ctx.globalAlpha = 0.05;
+    
+    const patternSize = 2;
+    for (let i = 0; i < width + height; i += patternSize * 2) {
+      ctx.beginPath();
+      ctx.moveTo(0, i);
+      ctx.lineTo(i, 0);
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
+      ctx.lineWidth = 0.5;
+      ctx.stroke();
+    }
+    
+    // Reset composite operation and alpha
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.globalAlpha = 1.0;
+  };
+  
+  // Create canvas/cotton pattern
+  const drawCanvasPattern = (
+    ctx: CanvasRenderingContext2D,
+    width: number,
+    height: number,
+    material: MaterialSimulation
+  ) => {
+    // Apply canvas texture
+    ctx.globalCompositeOperation = 'multiply';
+    ctx.globalAlpha = 0.1;
+    
+    // Create canvas texture with small dots/noise
+    for (let x = 0; x < width; x += 3) {
+      for (let y = 0; y < height; y += 3) {
+        if (Math.random() > 0.5) {
+          ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
           ctx.fillRect(x, y, 1, 1);
         }
       }
     }
+    
+    // Reset composite operation and alpha
+    ctx.globalCompositeOperation = 'source-over';
     ctx.globalAlpha = 1.0;
     
-    // Add subtle weave pattern
-    ctx.strokeStyle = 'rgba(255,255,255,0.1)';
-    ctx.lineWidth = 0.5;
-    for (let i = 0; i < width; i += 8) {
+    // Add subtle fabric grain diagonal lines
+    ctx.globalCompositeOperation = 'overlay';
+    ctx.globalAlpha = 0.05;
+    
+    for (let i = -height; i < width; i += 8) {
       ctx.beginPath();
       ctx.moveTo(i, 0);
-      ctx.lineTo(i, height);
+      ctx.lineTo(i + height, height);
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+      ctx.lineWidth = 1;
       ctx.stroke();
     }
     
-    for (let i = 0; i < height; i += 8) {
-      ctx.beginPath();
-      ctx.moveTo(0, i);
-      ctx.lineTo(width, i);
-      ctx.stroke();
-    }
-  };
-
-  // Metal texture renderer
-  const renderMetalTexture = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
-    // Create a gradient for metallic effect
-    const gradient = ctx.createLinearGradient(0, 0, width, height);
-    gradient.addColorStop(0, 'rgba(255,255,255,0.8)');
-    gradient.addColorStop(0.5, 'rgba(220,220,220,0.2)');
-    gradient.addColorStop(1, 'rgba(255,255,255,0.8)');
-    
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, width, height);
-    
-    // Add metallic scratches
-    ctx.strokeStyle = 'rgba(255,255,255,0.1)';
-    ctx.lineWidth = 0.5;
-    for (let i = 0; i < 20; i++) {
-      const x1 = Math.random() * width;
-      const y1 = Math.random() * height;
-      const x2 = x1 + (Math.random() * 100 - 50);
-      const y2 = y1 + (Math.random() * 100 - 50);
-      
-      ctx.beginPath();
-      ctx.moveTo(x1, y1);
-      ctx.lineTo(x2, y2);
-      ctx.stroke();
-    }
-  };
-
-  // Glossy texture renderer
-  const renderGlossyTexture = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
-    // Create a glossy highlight
-    const gradient = ctx.createRadialGradient(
-      width * 0.3, height * 0.3, 10,
-      width * 0.3, height * 0.3, width * 0.8
-    );
-    gradient.addColorStop(0, 'rgba(255,255,255,0.8)');
-    gradient.addColorStop(0.5, 'rgba(255,255,255,0)');
-    gradient.addColorStop(1, 'rgba(255,255,255,0)');
-    
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, width, height);
-  };
-
-  // Matte texture renderer
-  const renderMatteTexture = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
-    // Create a subtle noise texture for matte finish
-    for (let y = 0; y < height; y += 2) {
-      for (let x = 0; x < width; x += 2) {
-        const value = Math.random() * 10;
-        ctx.fillStyle = `rgba(0,0,0,${value / 200})`;
-        ctx.fillRect(x, y, 2, 2);
-      }
-    }
-  };
-
-  // Embossed texture renderer
-  const renderEmbossedTexture = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
-    // Simulate embossing with shadows and highlights
-    for (let y = 10; y < height - 10; y += 20) {
-      for (let x = 10; x < width - 10; x += 20) {
-        // Highlight
-        ctx.fillStyle = 'rgba(255,255,255,0.2)';
-        ctx.fillRect(x - 1, y - 1, 10, 10);
-        
-        // Shadow
-        ctx.fillStyle = 'rgba(0,0,0,0.2)';
-        ctx.fillRect(x + 1, y + 1, 10, 10);
-      }
-    }
-  };
-
-  // Refractor texture renderer
-  const renderRefractorTexture = (
-    ctx: CanvasRenderingContext2D, 
-    width: number, 
-    height: number, 
-    properties?: { intensity: number; speed: number; colors: string[]; angle?: number; }
-  ) => {
-    if (!properties) return;
-    
-    const { intensity = 0.5, colors = ['#ff0000', '#00ff00', '#0000ff'] } = properties;
-    
-    // Create rainbow gradient
-    const gradient = ctx.createLinearGradient(0, 0, width, height);
-    colors.forEach((color, index) => {
-      gradient.addColorStop(index / (colors.length - 1), color);
-    });
-    
-    ctx.globalCompositeOperation = 'overlay';
-    ctx.globalAlpha = intensity;
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, width, height);
     ctx.globalCompositeOperation = 'source-over';
     ctx.globalAlpha = 1.0;
-  };
-
-  // Holographic texture renderer
-  const renderHolographicTexture = (
-    ctx: CanvasRenderingContext2D, 
-    width: number, 
-    height: number,
-    properties?: { 
-      intensity: number; 
-      pattern: 'linear' | 'circular' | 'angular' | 'geometric';
-      colorMode: 'rainbow' | 'blue-purple' | 'gold-green' | 'custom';
-      customColors?: string[];
-      sparklesEnabled: boolean;
-      borderWidth: number;
-    }
-  ) => {
-    if (!properties) return;
-    
-    const { 
-      intensity = 0.8, 
-      pattern = 'linear', 
-      colorMode = 'rainbow',
-      sparklesEnabled = true,
-      borderWidth = 1
-    } = properties;
-    
-    let colors: string[];
-    
-    // Determine colors based on colorMode
-    switch (colorMode) {
-      case 'blue-purple':
-        colors = ['#0033cc', '#6600cc', '#cc00cc', '#6600cc', '#0033cc'];
-        break;
-      case 'gold-green':
-        colors = ['#ffcc00', '#ccff00', '#00ffcc', '#ccff00', '#ffcc00'];
-        break;
-      case 'custom':
-        colors = properties.customColors || ['#ff0080', '#00ffff', '#ffff00'];
-        break;
-      case 'rainbow':
-      default:
-        colors = ['#ff0000', '#ff9900', '#ffff00', '#00ff00', '#0099ff', '#6633ff', '#ff0099', '#ff0000'];
-    }
-    
-    // Apply pattern
-    switch (pattern) {
-      case 'circular':
-        renderHolographicCircularPattern(ctx, width, height, colors, intensity);
-        break;
-      case 'angular':
-        renderHolographicAngularPattern(ctx, width, height, colors, intensity);
-        break;
-      case 'geometric':
-        renderHolographicGeometricPattern(ctx, width, height, colors, intensity);
-        break;
-      case 'linear':
-      default:
-        renderHolographicLinearPattern(ctx, width, height, colors, intensity);
-    }
-    
-    // Add sparkles if enabled
-    if (sparklesEnabled) {
-      renderSparkles(ctx, width, height, intensity);
-    }
-    
-    // Add border if width > 0
-    if (borderWidth > 0) {
-      ctx.strokeStyle = colors[0];
-      ctx.lineWidth = borderWidth;
-      ctx.strokeRect(borderWidth / 2, borderWidth / 2, width - borderWidth, height - borderWidth);
-    }
-  };
-
-  // Helper functions for holographic patterns
-  const renderHolographicLinearPattern = (
-    ctx: CanvasRenderingContext2D, 
-    width: number, 
-    height: number, 
-    colors: string[], 
-    intensity: number
-  ) => {
-    const gradient = ctx.createLinearGradient(0, 0, width, height);
-    colors.forEach((color, index) => {
-      gradient.addColorStop(index / (colors.length - 1), color);
-    });
-    
-    ctx.globalCompositeOperation = 'overlay';
-    ctx.globalAlpha = intensity;
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, width, height);
-    ctx.globalCompositeOperation = 'source-over';
-    ctx.globalAlpha = 1.0;
-  };
-
-  const renderHolographicCircularPattern = (
-    ctx: CanvasRenderingContext2D, 
-    width: number, 
-    height: number, 
-    colors: string[], 
-    intensity: number
-  ) => {
-    const gradient = ctx.createRadialGradient(
-      width / 2, height / 2, 0,
-      width / 2, height / 2, width / 1.5
-    );
-    colors.forEach((color, index) => {
-      gradient.addColorStop(index / (colors.length - 1), color);
-    });
-    
-    ctx.globalCompositeOperation = 'overlay';
-    ctx.globalAlpha = intensity;
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, width, height);
-    ctx.globalCompositeOperation = 'source-over';
-    ctx.globalAlpha = 1.0;
-  };
-
-  const renderHolographicAngularPattern = (
-    ctx: CanvasRenderingContext2D, 
-    width: number, 
-    height: number, 
-    colors: string[], 
-    intensity: number
-  ) => {
-    const centerX = width / 2;
-    const centerY = height / 2;
-    const radius = Math.max(width, height);
-    
-    for (let i = 0; i < 360; i += 15) {
-      const angle = i * Math.PI / 180;
-      const color = colors[Math.floor((i / 360) * colors.length)];
-      
-      ctx.globalAlpha = intensity * 0.5;
-      ctx.strokeStyle = color;
-      ctx.lineWidth = 10;
-      ctx.beginPath();
-      ctx.moveTo(centerX, centerY);
-      ctx.lineTo(centerX + radius * Math.cos(angle), centerY + radius * Math.sin(angle));
-      ctx.stroke();
-    }
-    ctx.globalAlpha = 1.0;
-  };
-
-  const renderHolographicGeometricPattern = (
-    ctx: CanvasRenderingContext2D, 
-    width: number, 
-    height: number, 
-    colors: string[], 
-    intensity: number
-  ) => {
-    const size = 20;
-    for (let y = 0; y < height; y += size) {
-      for (let x = 0; x < width; x += size) {
-        const colorIndex = Math.floor((x + y) / size) % colors.length;
-        ctx.globalAlpha = intensity * 0.5;
-        ctx.fillStyle = colors[colorIndex];
-        if ((x + y) % (size * 2) === 0) {
-          // Draw triangle
-          ctx.beginPath();
-          ctx.moveTo(x, y);
-          ctx.lineTo(x + size, y);
-          ctx.lineTo(x + size / 2, y + size);
-          ctx.closePath();
-          ctx.fill();
-        } else {
-          // Draw diamond
-          ctx.beginPath();
-          ctx.moveTo(x + size / 2, y);
-          ctx.lineTo(x + size, y + size / 2);
-          ctx.lineTo(x + size / 2, y + size);
-          ctx.lineTo(x, y + size / 2);
-          ctx.closePath();
-          ctx.fill();
-        }
-      }
-    }
-    ctx.globalAlpha = 1.0;
-  };
-
-  const renderSparkles = (
-    ctx: CanvasRenderingContext2D, 
-    width: number, 
-    height: number, 
-    intensity: number
-  ) => {
-    const numSparkles = Math.floor(width * height / 1000 * intensity);
-    
-    for (let i = 0; i < numSparkles; i++) {
-      const x = Math.random() * width;
-      const y = Math.random() * height;
-      const size = Math.random() * 2 + 1;
-      
-      ctx.fillStyle = 'rgba(255,255,255,0.8)';
-      ctx.beginPath();
-      ctx.arc(x, y, size, 0, Math.PI * 2);
-      ctx.fill();
-    }
   };
   
+  // Apply weathering effects (new, game-worn, vintage)
+  const applyWeatheringEffect = (
+    ctx: CanvasRenderingContext2D,
+    width: number,
+    height: number,
+    weathering: string
+  ) => {
+    switch (weathering) {
+      case 'game-worn':
+        // Add some scuffs and wear marks
+        ctx.globalCompositeOperation = 'multiply';
+        for (let i = 0; i < 10; i++) {
+          const x = Math.random() * width;
+          const y = Math.random() * height;
+          const radius = 5 + Math.random() * 15;
+          const gradient = ctx.createRadialGradient(x, y, 0, x, y, radius);
+          gradient.addColorStop(0, 'rgba(0, 0, 0, 0.2)');
+          gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+          ctx.fillStyle = gradient;
+          ctx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
+        }
+        break;
+        
+      case 'vintage':
+        // Add yellowing/aging effect
+        ctx.globalCompositeOperation = 'multiply';
+        ctx.fillStyle = 'rgba(255, 240, 200, 0.2)';
+        ctx.fillRect(0, 0, width, height);
+        
+        // Add some fading
+        ctx.globalCompositeOperation = 'overlay';
+        const gradient = ctx.createLinearGradient(0, 0, width, height);
+        gradient.addColorStop(0, 'rgba(255, 255, 255, 0.1)');
+        gradient.addColorStop(1, 'rgba(200, 200, 160, 0.2)');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, width, height);
+        
+        // Add some random aging spots
+        ctx.globalCompositeOperation = 'multiply';
+        for (let i = 0; i < 20; i++) {
+          const x = Math.random() * width;
+          const y = Math.random() * height;
+          const radius = 1 + Math.random() * 5;
+          ctx.fillStyle = 'rgba(139, 69, 19, 0.05)';
+          ctx.beginPath();
+          ctx.arc(x, y, radius, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        break;
+        
+      case 'new':
+      default:
+        // New uniforms just have a slight sheen
+        ctx.globalCompositeOperation = 'overlay';
+        const newGradient = ctx.createLinearGradient(0, 0, width, height);
+        newGradient.addColorStop(0, 'rgba(255, 255, 255, 0.2)');
+        newGradient.addColorStop(0.5, 'rgba(255, 255, 255, 0)');
+        newGradient.addColorStop(1, 'rgba(255, 255, 255, 0.1)');
+        ctx.fillStyle = newGradient;
+        ctx.fillRect(0, 0, width, height);
+        break;
+    }
+    
+    // Reset composite operation
+    ctx.globalCompositeOperation = 'source-over';
+  };
+  
+  // Apply lighting effect based on material properties
+  const applyLightingEffect = (
+    ctx: CanvasRenderingContext2D, 
+    width: number, 
+    height: number, 
+    material: MaterialSimulation
+  ) => {
+    // Apply reflections based on metalness/roughness
+    const reflectionIntensity = material.metalness ? Math.min(0.5, material.metalness * 0.5) : 0.1;
+    const roughness = material.roughness || 0.5;
+    
+    // Less roughness = sharper reflections
+    const blurAmount = roughness * 20;
+    
+    // Create a diagonal highlight that mimics environmental lighting
+    ctx.globalCompositeOperation = 'overlay';
+    const x = width * 0.2;
+    const y = height * 0.2;
+    const radius = Math.max(width, height) * (1 - roughness * 0.5);
+    
+    const gradient = ctx.createRadialGradient(x, y, 0, x, y, radius);
+    gradient.addColorStop(0, `rgba(255, 255, 255, ${reflectionIntensity})`);
+    gradient.addColorStop(0.5, `rgba(255, 255, 255, ${reflectionIntensity * 0.5})`);
+    gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+    
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, width, height);
+    
+    // If it's a synthetic material, add a second highlight point
+    if (material.type === 'synthetic') {
+      const x2 = width * 0.8;
+      const y2 = height * 0.8;
+      const radius2 = Math.max(width, height) * 0.7;
+      
+      const gradient2 = ctx.createRadialGradient(x2, y2, 0, x2, y2, radius2);
+      gradient2.addColorStop(0, `rgba(255, 255, 255, ${reflectionIntensity * 0.7})`);
+      gradient2.addColorStop(0.5, `rgba(255, 255, 255, ${reflectionIntensity * 0.2})`);
+      gradient2.addColorStop(1, 'rgba(255, 255, 255, 0)');
+      
+      ctx.fillStyle = gradient2;
+      ctx.fillRect(0, 0, width, height);
+    }
+    
+    // Reset composite operation
+    ctx.globalCompositeOperation = 'source-over';
+  };
+
   return (
-    <canvas 
-      ref={canvasRef} 
-      width={width} 
-      height={height} 
-      className={`material-simulator ${className} ${isLoaded ? 'loaded' : 'loading'}`}
-    />
+    <div className={`material-simulator ${className}`}>
+      <canvas 
+        ref={canvasRef} 
+        width={width} 
+        height={height}
+        className="material-canvas"
+      />
+      <div className={`material-overlay material-${material.type}`} />
+    </div>
   );
 };
 

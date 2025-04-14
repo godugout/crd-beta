@@ -7,6 +7,9 @@ import UniformTextureMapper, { SportType } from '@/components/uniforms/UniformTe
 import UniformGallery, { UniformPreset } from '@/components/uniforms/UniformGallery';
 import { MaterialSimulation } from '@/hooks/card-effects/types';
 import MaterialSimulator from '@/components/pbr/MaterialSimulator';
+import MiniActionBar from '@/components/ui/MiniActionBar';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
 
 const UniformTextureDemo: React.FC = () => {
   const [generatedTexture, setGeneratedTexture] = useState<string | null>(null);
@@ -16,10 +19,11 @@ const UniformTextureDemo: React.FC = () => {
   
   // Material simulation configuration
   const [material, setMaterial] = useState<MaterialSimulation>({
-    type: 'canvas',  // Bulls red by default
+    type: 'mesh',  // Basketball jersey mesh by default
     baseColor: '#CE1141',
     roughness: 0.7,
-    metalness: 0.1
+    metalness: 0.1,
+    weathering: 'new'
   });
   
   // Handle texture generation from mapper
@@ -29,11 +33,8 @@ const UniformTextureDemo: React.FC = () => {
     // Update material simulation properties
     setMaterial(prev => ({
       ...prev,
-      type: 'canvas',  // Canvas material for fabric
-      baseColor: extractDominantColor(textureUrl),
       textureUrl: textureUrl,
-      roughness: 0.7,
-      metalness: 0.1
+      baseColor: extractDominantColor(textureUrl)
     }));
   };
   
@@ -46,9 +47,8 @@ const UniformTextureDemo: React.FC = () => {
     // Update material simulation properties
     setMaterial(prev => ({
       ...prev,
-      type: 'canvas',
-      baseColor: extractDominantColor(uniform.textureUrl),
       textureUrl: uniform.textureUrl,
+      baseColor: extractDominantColor(uniform.textureUrl),
     }));
   };
   
@@ -80,7 +80,7 @@ const UniformTextureDemo: React.FC = () => {
               <CardContent>
                 <UniformTextureMapper
                   onTextureGenerated={handleTextureGenerated}
-                  initialSportType={activeSport}
+                  initialSportType={activeSport === 'all' ? 'basketball' : activeSport}
                   initialTeam={selectedUniform?.team}
                   initialPlayerNumber="23"
                   initialPlayerName="JORDAN"
@@ -107,7 +107,7 @@ const UniformTextureDemo: React.FC = () => {
             <Tabs defaultValue="preview">
               <TabsList className="grid grid-cols-3 mb-4">
                 <TabsTrigger value="preview">3D Preview</TabsTrigger>
-                <TabsTrigger value="texture">Material</TabsTrigger>
+                <TabsTrigger value="material">Material</TabsTrigger>
                 <TabsTrigger value="data">Data</TabsTrigger>
               </TabsList>
               
@@ -153,38 +153,58 @@ const UniformTextureDemo: React.FC = () => {
                     </div>
                   </TabsContent>
                   
-                  <TabsContent value="texture">
-                    <div className="flex flex-col items-center gap-4">
-                      <h3 className="text-lg font-medium">Material Texture</h3>
+                  <TabsContent value="material">
+                    <div className="flex flex-col gap-4">
+                      <h3 className="text-lg font-medium">Material Properties</h3>
                       
-                      {/* Raw texture display */}
-                      <div className="w-full aspect-square rounded-lg overflow-hidden border">
-                        {generatedTexture ? (
-                          <img 
-                            src={generatedTexture} 
-                            alt="Uniform texture" 
-                            className="w-full h-full object-contain"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400">
-                            No texture generated
+                      {/* Material controls */}
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium mb-1">Material Type</label>
+                          <div className="grid grid-cols-3 gap-2">
+                            {['mesh', 'canvas', 'synthetic'].map(type => (
+                              <Button
+                                key={type}
+                                variant={material.type === type ? "default" : "outline"} 
+                                onClick={() => setMaterial(prev => ({ ...prev, type: type as any }))}
+                                className="capitalize"
+                                size="sm"
+                              >
+                                {type}
+                              </Button>
+                            ))}
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <label className="block text-sm font-medium mb-1">Condition</label>
+                          <div className="grid grid-cols-3 gap-2">
+                            {['new', 'game-worn', 'vintage'].map(cond => (
+                              <Button
+                                key={cond}
+                                variant={material.weathering === cond ? "default" : "outline"} 
+                                onClick={() => setMaterial(prev => ({ ...prev, weathering: cond as any }))}
+                                className="capitalize"
+                                size="sm"
+                              >
+                                {cond}
+                              </Button>
+                            ))}
+                          </div>
+                        </div>
+                        
+                        {generatedTexture && (
+                          <div>
+                            <label className="block text-sm font-medium mb-1">Raw Texture</label>
+                            <div className="border rounded-md overflow-hidden h-40">
+                              <img 
+                                src={generatedTexture} 
+                                alt="Uniform texture" 
+                                className="w-full h-full object-contain"
+                              />
+                            </div>
                           </div>
                         )}
-                      </div>
-                      
-                      <div className="w-full">
-                        <p className="text-sm font-medium mb-1">Material Type</p>
-                        <div className="grid grid-cols-3 gap-2 mb-4">
-                          {['canvas', 'mesh', 'synthetic'].map(type => (
-                            <button
-                              key={type}
-                              className={`py-1 px-3 text-sm rounded-md ${material.type === type ? 'bg-primary text-white' : 'bg-gray-100'}`}
-                              onClick={() => setMaterial(prev => ({ ...prev, type: type as any }))}
-                            >
-                              {type.charAt(0).toUpperCase() + type.slice(1)}
-                            </button>
-                          ))}
-                        </div>
                       </div>
                     </div>
                   </TabsContent>
@@ -210,6 +230,49 @@ const UniformTextureDemo: React.FC = () => {
             </Tabs>
           </div>
         </div>
+        
+        {/* Implementation Progress */}
+        <Card className="mt-8">
+          <CardHeader>
+            <CardTitle>Implementation Progress</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h3 className="text-lg font-medium mb-2">Completed Features</h3>
+                  <ul className="list-disc pl-5 space-y-1 text-sm">
+                    <li>Uniform texture mapper component</li>
+                    <li>Sport type selection (basketball, baseball, football, etc.)</li>
+                    <li>Team customization</li>
+                    <li>Player name and number customization</li>
+                    <li>Uniform gallery with professional team presets</li>
+                    <li>Recent and favorites management</li>
+                    <li>Fabric type simulation (mesh, canvas, synthetic)</li>
+                    <li>Weathering effects (new, game-worn, vintage)</li>
+                    <li>Basic material property visualization</li>
+                  </ul>
+                </div>
+                <div>
+                  <h3 className="text-lg font-medium mb-2">Upcoming Features</h3>
+                  <ul className="list-disc pl-5 space-y-1 text-sm">
+                    <li>Improved normal maps for stitching details</li>
+                    <li>Enhanced cloth physics simulation</li>
+                    <li>Advanced lighting response</li>
+                    <li>Custom logo upload and placement</li>
+                    <li>Additional uniform templates</li>
+                    <li>Color extraction from source cards</li>
+                    <li>Uniform draping on 3D figures</li>
+                    <li>Team-specific font styles</li>
+                    <li>Performance optimization for mobile devices</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <MiniActionBar />
       </div>
     </PageLayout>
   );
