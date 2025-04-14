@@ -1,7 +1,7 @@
 
-import { UserRole } from '../types';
+import { UserRole as BaseUserRole } from '../types';
 
-export { UserRole };
+export { BaseUserRole as UserRole };
 
 export interface UserProfile {
   id: string;
@@ -9,7 +9,7 @@ export interface UserProfile {
   avatarUrl?: string;
   name?: string;
   displayName?: string;
-  role: UserRole;
+  role: BaseUserRole;
   bio?: string;
   website?: string;
   socialLinks?: {

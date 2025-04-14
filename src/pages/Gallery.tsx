@@ -59,7 +59,7 @@ const Gallery = () => {
           <CardGallery 
             viewMode={viewMode} 
             onCardClick={handleCardClick} 
-            cards={displayCards as Card[]} // Cast to ensure proper typing
+            cards={(displayCards || []) as Card[]} // Safe casting with fallback
             isLoading={isLoading}
             searchQuery={searchQuery}
           />

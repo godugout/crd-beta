@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { CardEffect } from './hooks/useCardEffectsStack';
+import { CardEffect, CardEffectSettings } from './types/cardTypes';
 import EffectItem from './effects/EffectItem';
 import EffectSelector from './effects/EffectSelector';
 import EffectSettings from './effects/EffectSettings';
@@ -9,9 +9,9 @@ import { AVAILABLE_EFFECTS, getDefaultEffectSettings } from './effects/constants
 
 interface CardEffectsPanelProps {
   effectStack: CardEffect[];
-  onAddEffect: (name: string, settings?: any) => void;
+  onAddEffect: (name: string, settings?: CardEffectSettings) => void;
   onRemoveEffect: (id: string) => void;
-  onUpdateSettings: (id: string, settings: any) => void;
+  onUpdateSettings: (id: string, settings: Partial<CardEffectSettings>) => void;
 }
 
 const CardEffectsPanel: React.FC<CardEffectsPanelProps> = ({

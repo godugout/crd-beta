@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { CardEffect } from '@/components/card-creation/hooks/useCardEffectsStack';
+import { CardEffect } from '@/components/card-creation/types/cardTypes';
 import { Info, X } from 'lucide-react';
 
 interface EffectsPanelProps {

@@ -1,4 +1,10 @@
 
+/**
+ * Core card creation types for the CRD application
+ */
+
+import { JsonValue } from '@/lib/types';
+
 export interface CardDesignState {
   title: string;
   description: string;
@@ -52,4 +58,13 @@ export interface CardEffect {
   enabled: boolean;
   settings: Record<string, any>;
   className?: string;
+}
+
+export interface CardEffectSettings {
+  intensity?: number;
+  speed?: number;
+  pattern?: string;
+  color?: string;
+  animationEnabled?: boolean;
+  [key: string]: any;
 }

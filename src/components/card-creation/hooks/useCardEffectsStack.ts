@@ -1,16 +1,8 @@
 
 import { useState, useCallback } from 'react';
-import { CardEffectSettings, PremiumCardEffect } from '@/hooks/card-effects/types';
+import { CardEffectSettings } from '@/hooks/card-effects/types';
 import { toast } from 'sonner';
-
-// Export the CardEffect interface for use in other components
-export interface CardEffect {
-  id: string;
-  name: string;
-  enabled: boolean;
-  settings: CardEffectSettings;
-  className?: string;
-}
+import { CardEffect } from '../types/cardTypes';
 
 export const useCardEffectsStack = (initialEffects: string[] = []) => {
   const [activeEffects, setActiveEffects] = useState<string[]>(initialEffects);

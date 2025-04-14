@@ -1,4 +1,6 @@
 
+import { CardEffectSettings as BaseCardEffectSettings } from '@/components/card-creation/types/cardTypes';
+
 export interface MaterialSimulation {
   /**
    * Type of material to simulate
@@ -49,14 +51,7 @@ export interface PremiumCardEffect {
   iconUrl?: string;
 }
 
-export interface CardEffectSettings {
-  intensity?: number;
-  speed?: number;
-  pattern?: string;
-  color?: string;
-  animationEnabled?: boolean;
-  [key: string]: any;
-}
+export type CardEffectSettings = BaseCardEffectSettings;
 
 export interface CardEffectsOptions {
   initialEffects?: Record<string, string[]>;
@@ -73,4 +68,5 @@ export interface CardEffectsResult {
   toggleEffect: (cardId: string, effect: string) => void;
   clearEffects: (cardId: string) => void;
   setCardEffects: (cardId: string, effects: string[]) => void;
+  setActiveEffects?: (effects: string[]) => void;  // Add optional method for ImmersiveCardViewer
 }

@@ -1,8 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { UserRole } from '@/lib/types';
-import { User } from '@/lib/types';
+import { User, UserRole } from '@/lib/types';
 
 // Import dashboard components based on user role
 import AdminDashboard from '@/components/dashboard/AdminDashboard';
