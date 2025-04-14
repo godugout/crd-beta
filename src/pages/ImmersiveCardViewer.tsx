@@ -6,6 +6,7 @@ import PageLayout from '@/components/navigation/PageLayout';
 import { toast } from 'sonner';
 import CardBackground from '@/components/home/card-viewer/CardBackground';
 import { CardImage } from '@/components/cards/CardImage';
+import CardShopBackground from '@/components/home/card-viewer/CardShopBackground';
 
 // Import the updated RelatedCards
 import RelatedCardsSlider from '@/components/card-viewer/RelatedCardsSlider';
@@ -18,6 +19,7 @@ const ImmersiveCardViewer = () => {
   const [activeEffects, setActiveEffects] = useState<string[]>([]);
   const [isFlipped, setIsFlipped] = useState(false);
   const [cardPosition, setCardPosition] = useState({ x: 0, y: 0, rotation: 0 });
+  const [showCartoonBackground, setShowCartoonBackground] = useState(true);
   
   // Get the current card and prepare effects
   useEffect(() => {
@@ -56,6 +58,11 @@ const ImmersiveCardViewer = () => {
   const handleCardReset = () => {
     setCardPosition({ x: 0, y: 0, rotation: 0 });
     toast.info('Card position reset');
+  };
+
+  const toggleBackgroundStyle = () => {
+    setShowCartoonBackground(prev => !prev);
+    toast.success(showCartoonBackground ? 'Switched to abstract background' : 'Switched to card shop background');
   };
   
   // Find related cards based on tags, artist, or year
@@ -121,9 +128,13 @@ const ImmersiveCardViewer = () => {
   
   return (
     <div className="fixed inset-0 bg-black flex flex-col">
-      {/* Background effects */}
-      <div className="absolute inset-0 overflow-hidden">
-        <CardBackground activeEffects={activeEffects} />
+      {/* Background effect layers */}
+      <div className="absolute inset-0 overflow-hidden z-0">
+        {showCartoonBackground ? (
+          <CardShopBackground />
+        ) : (
+          <CardBackground activeEffects={activeEffects} />
+        )}
       </div>
       
       {/* Close button */}
@@ -151,8 +162,21 @@ const ImmersiveCardViewer = () => {
         </button>
       )}
       
+      {/* Toggle background button */}
+      <button
+        className="absolute top-4 left-16 z-50 bg-black/40 hover:bg-black/60 text-white p-2 rounded-full"
+        onClick={toggleBackgroundStyle}
+        title={showCartoonBackground ? "Switch to abstract background" : "Switch to card shop background"}
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+          <circle cx="8.5" cy="8.5" r="1.5"></circle>
+          <polyline points="21 15 16 10 5 21"></polyline>
+        </svg>
+      </button>
+      
       {/* Main content area */}
-      <div className="relative flex-1 flex items-center justify-center overflow-hidden">
+      <div className="relative flex-1 flex items-center justify-center overflow-hidden z-10">
         {/* Card with improved physics */}
         <div className="w-full max-w-lg">
           <CardImage
