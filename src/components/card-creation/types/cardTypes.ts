@@ -7,6 +7,9 @@ export interface CardDesignState {
   backgroundColor: string;
   borderRadius: string;
   imageUrl: string | null;
+  player?: string;
+  team?: string;
+  year?: string;
 }
 
 export interface CardLayer {
@@ -29,4 +32,16 @@ export interface CardLayer {
   textAlign?: 'left' | 'center' | 'right'; // For text layers
   visible: boolean;    // Whether layer is visible
   locked: boolean;     // Whether layer can be edited
+  
+  // Adding the missing properties that caused the errors
+  position?: {
+    x: number;
+    y: number;
+    z: number;
+  };
+  size?: {
+    width: number | string;
+    height: number | string;
+  };
+  effectIds?: string[];
 }

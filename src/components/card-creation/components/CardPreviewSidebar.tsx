@@ -1,5 +1,6 @@
+
 import React from 'react';
-import { CardDesignState, CardLayer } from '../CardCreator';
+import { CardDesignState, CardLayer } from '../types/cardTypes';
 
 interface CardPreviewSidebarProps {
   cardData: CardDesignState;
@@ -56,11 +57,11 @@ const CardPreviewSidebar: React.FC<CardPreviewSidebarProps> = ({
                   key={layer.id}
                   className="absolute text-white text-shadow-sm"
                   style={{
-                    top: `${layer.position.y}%`,
-                    left: `${layer.position.x}%`,
+                    top: `${layer.position?.y ?? layer.y}%`,
+                    left: `${layer.position?.x ?? layer.x}%`,
                     transform: `translate(-50%, -50%) rotate(${layer.rotation}deg)`,
                     opacity: layer.opacity,
-                    zIndex: layer.position.z,
+                    zIndex: layer.position?.z ?? 1,
                   }}
                 >
                   {typeof layer.content === 'string' ? layer.content : ''}
@@ -73,18 +74,18 @@ const CardPreviewSidebar: React.FC<CardPreviewSidebarProps> = ({
                   key={layer.id}
                   className="absolute"
                   style={{
-                    top: `${layer.position.y}%`,
-                    left: `${layer.position.x}%`,
-                    width: typeof layer.size.width === 'number' ? `${layer.size.width}px` : layer.size.width,
-                    height: typeof layer.size.height === 'number' ? `${layer.size.height}px` : layer.size.height,
+                    top: `${layer.position?.y ?? layer.y}%`,
+                    left: `${layer.position?.x ?? layer.x}%`,
+                    width: layer.size?.width ?? layer.width,
+                    height: layer.size?.height ?? layer.height,
                     transform: `translate(-50%, -50%) rotate(${layer.rotation}deg)`,
                     opacity: layer.opacity,
-                    zIndex: layer.position.z,
+                    zIndex: layer.position?.z ?? 1,
                   }}
                 >
-                  {typeof layer.content === 'string' && layer.content && (
+                  {layer.content && (
                     <img 
-                      src={layer.content.toString()} 
+                      src={typeof layer.content === 'string' ? layer.content : layer.imageUrl} 
                       alt="Layer" 
                       className="w-full h-full object-contain"
                     />
@@ -98,13 +99,14 @@ const CardPreviewSidebar: React.FC<CardPreviewSidebarProps> = ({
                   key={layer.id}
                   className="absolute bg-white"
                   style={{
-                    top: `${layer.position.y}%`,
-                    left: `${layer.position.x}%`,
-                    width: typeof layer.size.width === 'number' ? `${layer.size.width}px` : layer.size.width,
-                    height: typeof layer.size.height === 'number' ? `${layer.size.height}px` : layer.size.height,
+                    top: `${layer.position?.y ?? layer.y}%`,
+                    left: `${layer.position?.x ?? layer.x}%`,
+                    width: layer.size?.width ?? layer.width,
+                    height: layer.size?.height ?? layer.height,
                     transform: `translate(-50%, -50%) rotate(${layer.rotation}deg)`,
                     opacity: layer.opacity,
-                    zIndex: layer.position.z,
+                    zIndex: layer.position?.z ?? 1,
+                    backgroundColor: layer.color,
                   }}
                 >
                   {/* Shape content would be rendered here */}

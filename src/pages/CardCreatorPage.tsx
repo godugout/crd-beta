@@ -15,6 +15,9 @@ const CardCreatorPage: React.FC = () => {
     backgroundColor: '#FFFFFF',
     borderRadius: '8px',
     imageUrl: null,
+    player: '',
+    team: '',
+    year: '',
   });
   
   const {

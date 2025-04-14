@@ -1,7 +1,7 @@
 
 import { useState, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { CardLayer } from '../CardCreator';
+import { CardLayer } from '../types/cardTypes';
 
 export const useLayers = (initialLayers: Omit<CardLayer, 'id'>[] = []) => {
   const [layers, setLayers] = useState<CardLayer[]>(
@@ -15,14 +15,30 @@ export const useLayers = (initialLayers: Omit<CardLayer, 'id'>[] = []) => {
     layers.length > 0 ? layers[0].id : null
   );
 
-  const addLayer = useCallback((layer: Omit<CardLayer, 'id'>) => {
-    const newLayer = {
-      ...layer,
+  const addLayer = useCallback((layerType: 'image' | 'text' | 'shape') => {
+    // Create default layer based on type
+    const newLayer: Omit<CardLayer, 'id'> = {
+      type: layerType,
+      x: 100,
+      y: 100,
+      width: 200,
+      height: 100,
+      rotation: 0,
+      opacity: 1,
+      visible: true,
+      locked: false,
+      position: { x: 50, y: 50, z: 1 },
+      size: { width: 200, height: 100 },
+      effectIds: []
+    };
+    
+    const layerWithId = {
+      ...newLayer,
       id: uuidv4()
     };
     
-    setLayers(prev => [...prev, newLayer]);
-    setActiveLayerId(newLayer.id);
+    setLayers(prev => [...prev, layerWithId]);
+    setActiveLayerId(layerWithId.id);
   }, []);
   
   const updateLayer = useCallback((id: string, updates: Partial<CardLayer>) => {
@@ -50,10 +66,15 @@ export const useLayers = (initialLayers: Omit<CardLayer, 'id'>[] = []) => {
       if (index <= 0) return prev;
       
       const newLayers = [...prev];
-      newLayers[index].position.z = prev[index - 1].position.z - 1;
       
-      // Sort by z-index
-      return newLayers.sort((a, b) => b.position.z - a.position.z);
+      if (newLayers[index].position && newLayers[index-1].position) {
+        newLayers[index].position.z = prev[index - 1].position.z - 1;
+      }
+      
+      // Sort by z-index if position exists
+      return newLayers.sort((a, b) => 
+        (b.position?.z ?? 0) - (a.position?.z ?? 0)
+      );
     });
   }, []);
   
@@ -63,10 +84,15 @@ export const useLayers = (initialLayers: Omit<CardLayer, 'id'>[] = []) => {
       if (index === -1 || index >= prev.length - 1) return prev;
       
       const newLayers = [...prev];
-      newLayers[index].position.z = prev[index + 1].position.z + 1;
       
-      // Sort by z-index
-      return newLayers.sort((a, b) => b.position.z - a.position.z);
+      if (newLayers[index].position && newLayers[index+1].position) {
+        newLayers[index].position.z = prev[index + 1].position.z + 1;
+      }
+      
+      // Sort by z-index if position exists
+      return newLayers.sort((a, b) => 
+        (b.position?.z ?? 0) - (a.position?.z ?? 0)
+      );
     });
   }, []);
   

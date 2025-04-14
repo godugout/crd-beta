@@ -16,6 +16,7 @@ import CardPreviewStep from '@/components/card-creation/steps/CardPreviewStep';
 import CardPreview from '@/components/card-creation/CardPreview';
 import { useCardEffectsStack } from '@/components/card-creation/hooks/useCardEffectsStack';
 import { useLayers } from '@/components/card-creation/hooks/useLayers';
+import { CardDesignState, CardLayer } from '@/components/card-creation/types/cardTypes';
 
 /**
  * Unified Card Creator page that combines the functionality of the current
@@ -30,24 +31,17 @@ const CardCreator: React.FC = () => {
   
   // Card data state
   const [currentStep, setCurrentStep] = useState(0);
-  const [cardData, setCardData] = useState({
-    id: id || `card-${Date.now()}`,
+  const [cardData, setCardData] = useState<CardDesignState>({
     title: '',
     description: '',
-    player: '',
-    team: '',
-    year: '',
     tags: [] as string[],
     imageUrl: null as string | null,
-    backImageUrl: null as string | null,
-    cardType: 'standard',
     borderColor: '#000000',
     backgroundColor: '#FFFFFF',
     borderRadius: '8px',
-    category: '',
-    series: '',
-    makePrintAvailable: false,
-    includeInCatalog: false,
+    player: '',
+    team: '',
+    year: '',
   });
 
   // Initialize layers and effects hooks
@@ -101,7 +95,6 @@ const CardCreator: React.FC = () => {
           team: metadata?.team || '',
           year: metadata?.year || '',
           tags: metadata?.tags || [],
-          cardType: cardType || 'standard',
         }));
         
         toast({
