@@ -276,6 +276,8 @@ export function supportsAdvancedEffects(): boolean {
 /**
  * Optimized debounced function for updating effects
  */
-export const debouncedEffectUpdate = debounce((
-  callback: () => void
-), 100);
+export const debouncedEffectUpdate = debounce(
+  (callback: () => void) => {
+    callback();
+  }, 100
+);
