@@ -54,6 +54,16 @@ const EffectControls: React.FC<EffectControlsProps> = ({
 
   if (!isOpen) return null;
 
+  // Handler functions that convert array values to single values for the parent component
+  const handleMotionSpeedChange = (values: number[]) => onMotionSpeedChange(values[0] / 100);
+  const handlePulseIntensityChange = (values: number[]) => onPulseIntensityChange(values[0] / 100);
+  const handleShimmerSpeedChange = (values: number[]) => onShimmerSpeedChange(values[0] / 10);
+  const handleGoldIntensityChange = (values: number[]) => onGoldIntensityChange(values[0] / 100);
+  const handleChromeIntensityChange = (values: number[]) => onChromeIntensityChange(values[0] / 100);
+  const handleVintageIntensityChange = (values: number[]) => onVintageIntensityChange(values[0] / 100);
+  const handleRefractorIntensityChange = (values: number[]) => onRefractorIntensityChange(values[0] / 100);
+  const handleSpectralIntensityChange = (values: number[]) => onSpectralIntensityChange(values[0] / 100);
+
   return (
     <div className="absolute top-16 right-0 h-full max-h-[calc(100%-4rem)] w-80 bg-gray-900/95 backdrop-blur-md text-white z-30 shadow-lg transition-transform duration-300 transform-gpu overflow-y-auto">
       <div className="p-5">
@@ -82,7 +92,7 @@ const EffectControls: React.FC<EffectControlsProps> = ({
                   value={[motionSpeed * 100]}
                   max={100}
                   step={1}
-                  onValueChange={(value) => onMotionSpeedChange(value[0] / 100)}
+                  onValueChange={handleMotionSpeedChange}
                 />
               </div>
               
@@ -95,7 +105,7 @@ const EffectControls: React.FC<EffectControlsProps> = ({
                   value={[pulseIntensity * 100]}
                   max={100}
                   step={1}
-                  onValueChange={(value) => onPulseIntensityChange(value[0] / 100)}
+                  onValueChange={handlePulseIntensityChange}
                 />
               </div>
             </div>
@@ -117,7 +127,7 @@ const EffectControls: React.FC<EffectControlsProps> = ({
                       value={[shimmerSpeed * 10]}
                       max={50}
                       step={1}
-                      onValueChange={(value) => onShimmerSpeedChange(value[0] / 10)}
+                      onValueChange={handleShimmerSpeedChange}
                     />
                   </div>
                 )}
@@ -132,7 +142,7 @@ const EffectControls: React.FC<EffectControlsProps> = ({
                       value={[goldIntensity * 100]}
                       max={100}
                       step={1}
-                      onValueChange={(value) => onGoldIntensityChange(value[0] / 100)}
+                      onValueChange={handleGoldIntensityChange}
                     />
                   </div>
                 )}
@@ -147,7 +157,7 @@ const EffectControls: React.FC<EffectControlsProps> = ({
                       value={[chromeIntensity * 100]}
                       max={100}
                       step={1}
-                      onValueChange={(value) => onChromeIntensityChange(value[0] / 100)}
+                      onValueChange={handleChromeIntensityChange}
                     />
                   </div>
                 )}
@@ -162,7 +172,7 @@ const EffectControls: React.FC<EffectControlsProps> = ({
                       value={[vintageIntensity * 100]}
                       max={100}
                       step={1}
-                      onValueChange={(value) => onVintageIntensityChange(value[0] / 100)}
+                      onValueChange={handleVintageIntensityChange}
                     />
                   </div>
                 )}
@@ -177,7 +187,7 @@ const EffectControls: React.FC<EffectControlsProps> = ({
                       value={[refractorIntensity * 100]}
                       max={100}
                       step={1}
-                      onValueChange={(value) => onRefractorIntensityChange(value[0] / 100)}
+                      onValueChange={handleRefractorIntensityChange}
                     />
                   </div>
                 )}
@@ -192,7 +202,7 @@ const EffectControls: React.FC<EffectControlsProps> = ({
                       value={[spectralIntensity * 100]}
                       max={100}
                       step={1}
-                      onValueChange={(value) => onSpectralIntensityChange(value[0] / 100)}
+                      onValueChange={handleSpectralIntensityChange}
                     />
                   </div>
                 )}

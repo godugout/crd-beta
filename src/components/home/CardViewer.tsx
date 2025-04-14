@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useEffect } from 'react';
 import { CardData } from '@/types/card';
 import { toast } from 'sonner';
@@ -62,7 +61,6 @@ const CardViewer = ({
     });
   });
   
-  // Auto-rotation effect
   useEffect(() => {
     if (!autoRotate || !containerRef.current || isBeingDragged) return;
     
@@ -81,12 +79,9 @@ const CardViewer = ({
     return () => clearInterval(autoRotateInterval);
   }, [autoRotate, isMoving, isBeingDragged, containerRef, cardRef]);
   
-  // Adjust effect settings to ensure the original image remains visible with combined effects
   useEffect(() => {
-    // Improve transparency when multiple effects are active
     const intensityMultiplier = Math.max(0.5, 1 - (activeEffects.length * 0.05));
     
-    // Enhance original image visibility based on active effects count
     const enhancedSettings = {
       refractorIntensity: activeEffects.includes('Refractor') ? 0.7 * intensityMultiplier : effectSettings.refractorIntensity,
       holographicIntensity: activeEffects.includes('Holographic') ? 0.65 * intensityMultiplier : effectSettings.spectralIntensity,
@@ -137,7 +132,6 @@ const CardViewer = ({
   };
 
   const handleApplyPreset = (preset: any) => {
-    // Apply the preset settings
     effectSettings.applySettings(preset.settings);
     
     toast.success(`"${preset.name}" applied!`, {
@@ -145,7 +139,38 @@ const CardViewer = ({
     });
   };
   
-  // Handle drag and flick gestures
+  const handleMotionSpeedChange = (value: number) => {
+    effectSettings.handleMotionSpeedChange([value]);
+  };
+
+  const handlePulseIntensityChange = (value: number) => {
+    effectSettings.handlePulseIntensityChange([value]);
+  };
+
+  const handleShimmerSpeedChange = (value: number) => {
+    effectSettings.handleShimmerSpeedChange([value]);
+  };
+
+  const handleGoldIntensityChange = (value: number) => {
+    effectSettings.handleGoldIntensityChange([value]);
+  };
+
+  const handleChromeIntensityChange = (value: number) => {
+    effectSettings.handleChromeIntensityChange([value]);
+  };
+
+  const handleVintageIntensityChange = (value: number) => {
+    effectSettings.handleVintageIntensityChange([value]);
+  };
+
+  const handleRefractorIntensityChange = (value: number) => {
+    effectSettings.handleRefractorIntensityChange([value]);
+  };
+
+  const handleSpectralIntensityChange = (value: number) => {
+    effectSettings.handleSpectralIntensityChange([value]);
+  };
+
   const handleDragStart = () => {
     setIsBeingDragged(true);
   };
@@ -153,11 +178,9 @@ const CardViewer = ({
   const handleDragEnd = (info: any) => {
     setIsBeingDragged(false);
     
-    // Calculate velocity for flick effect
     const velocity = Math.abs(info.velocity.x) + Math.abs(info.velocity.y);
     
     if (velocity > 500) {
-      // User flicked the card
       const angle = Math.atan2(info.velocity.y, info.velocity.x) * (180 / Math.PI);
       const direction = 
         angle > -45 && angle < 45 ? 'right' :
@@ -170,7 +193,6 @@ const CardViewer = ({
       });
     }
     
-    // Reset position
     setDragPosition({ x: 0, y: 0 });
   };
 
@@ -181,10 +203,8 @@ const CardViewer = ({
       onMouseMove={handleCanvasMouseMove}
       onMouseLeave={handleMouseLeave}
     >
-      {/* Dynamic background with improved lighting effects */}
       <CardBackground activeEffects={activeEffects} />
       
-      {/* Make canvas draggable for mobile interactions */}
       <motion.div
         drag
         dragConstraints={{ left: -100, right: 100, top: -50, bottom: 50 }}
@@ -195,7 +215,6 @@ const CardViewer = ({
         animate={dragPosition}
         className="absolute inset-0 flex items-center justify-center z-10"
       >
-        {/* Card container with 3D perspective */}
         <CardContainer
           containerRef={containerRef}
           onMouseMove={handleMouseMove}
@@ -203,7 +222,6 @@ const CardViewer = ({
           effectSettings={effectSettings.getCurrentSettings()}
           activeEffects={activeEffects}
         >
-          {/* Card representation with improved layer visibility */}
           <CardCanvas 
             card={card}
             isFlipped={isFlipped}
@@ -226,7 +244,6 @@ const CardViewer = ({
         </CardContainer>
       </motion.div>
       
-      {/* Controls */}
       <CardControls 
         flipCard={flipCard}
         onBackToCollection={onBackToCollection}
@@ -238,20 +255,19 @@ const CardViewer = ({
         showPresetsPanel={showPresetsPanel}
       />
 
-      {/* Advanced Effect Controls */}
       <EffectControls 
         isOpen={showAdvancedControls}
         onClose={() => setShowAdvancedControls(false)}
         onSaveEffectsCombination={handleSaveEffectsCombination}
         activeEffects={activeEffects}
-        onMotionSpeedChange={effectSettings.handleMotionSpeedChange}
-        onPulseIntensityChange={effectSettings.handlePulseIntensityChange}
-        onShimmerSpeedChange={effectSettings.handleShimmerSpeedChange}
-        onGoldIntensityChange={effectSettings.handleGoldIntensityChange}
-        onChromeIntensityChange={effectSettings.handleChromeIntensityChange}
-        onVintageIntensityChange={effectSettings.handleVintageIntensityChange}
-        onRefractorIntensityChange={effectSettings.handleRefractorIntensityChange}
-        onSpectralIntensityChange={effectSettings.handleSpectralIntensityChange}
+        onMotionSpeedChange={handleMotionSpeedChange}
+        onPulseIntensityChange={handlePulseIntensityChange}
+        onShimmerSpeedChange={handleShimmerSpeedChange}
+        onGoldIntensityChange={handleGoldIntensityChange}
+        onChromeIntensityChange={handleChromeIntensityChange}
+        onVintageIntensityChange={handleVintageIntensityChange}
+        onRefractorIntensityChange={handleRefractorIntensityChange}
+        onSpectralIntensityChange={handleSpectralIntensityChange}
         motionSpeed={effectSettings.motionSpeed}
         pulseIntensity={effectSettings.pulseIntensity}
         shimmerSpeed={effectSettings.shimmerSpeed}
@@ -262,7 +278,6 @@ const CardViewer = ({
         spectralIntensity={effectSettings.spectralIntensity}
       />
 
-      {/* Effects Presets Panel */}
       <EffectsPresets
         isOpen={showPresetsPanel}
         onClose={() => setShowPresetsPanel(false)}
@@ -272,7 +287,6 @@ const CardViewer = ({
         onToggleFavorite={handleToggleFavorite}
       />
       
-      {/* Spotlight effects for better visibility */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="spotlight spotlight-1" style={{
           backgroundImage: 'radial-gradient(circle at 20% 20%, rgba(255,255,255,0.2) 0%, transparent 40%)'

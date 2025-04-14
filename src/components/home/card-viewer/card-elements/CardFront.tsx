@@ -15,17 +15,17 @@ const CardFront: React.FC<CardFrontProps> = ({ card }) => {
       {/* Card image */}
       <img 
         src={card.imageUrl} 
-        alt={card.title || 'Card'} 
+        alt={card.name || 'Card'} 
         className="w-full h-full object-cover z-10" 
       />
       
       {/* Card info overlay */}
       <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 to-transparent z-20">
-        <h3 className="font-bold text-white text-lg truncate">{card.title}</h3>
-        {card.player && (
+        <h3 className="font-bold text-white text-lg truncate">{card.name}</h3>
+        {card.team && (
           <p className="text-white/80 text-sm truncate">
-            {card.player}
-            {card.team && ` • ${card.team}`}
+            {card.team}
+            {card.jersey && ` • ${card.jersey}`}
           </p>
         )}
         {card.year && (
