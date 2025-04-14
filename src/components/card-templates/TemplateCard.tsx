@@ -76,7 +76,7 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
           ) : null}
           
           <img 
-            src={template.thumbnailUrl || '/templates/default.png'} 
+            src={template.previewUrl} 
             alt={template.name}
             className={cn(
               "w-full h-full object-cover transition-transform",
@@ -106,11 +106,11 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3 text-white">
           <div className="flex justify-between items-center">
             <h3 className="font-bold text-sm">{template.name}</h3>
-            {template.premium && (
+            {template.style === "premium" && (
               <Badge variant="default" className="bg-amber-500 hover:bg-amber-600">Premium</Badge>
             )}
           </div>
-          <p className="text-xs opacity-90">{template.brand}</p>
+          <p className="text-xs opacity-90">{template.sport || "All Sports"}</p>
         </div>
       </CardContent>
     </Card>

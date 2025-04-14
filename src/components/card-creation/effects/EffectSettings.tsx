@@ -20,7 +20,7 @@ const EffectSettings: React.FC<EffectSettingsProps> = ({ effect, onUpdateSetting
               <span className="text-xs text-gray-500">{effect.settings.intensity}</span>
             </div>
             <Select
-              value={effect.settings.intensity || 'medium'}
+              value={String(effect.settings.intensity || 'medium')}
               onValueChange={(value) => onUpdateSettings(effect.id, { intensity: value })}
             >
               <SelectTrigger className="w-full h-8">
@@ -58,7 +58,7 @@ const EffectSettings: React.FC<EffectSettingsProps> = ({ effect, onUpdateSetting
               <span className="text-xs text-gray-500">{effect.settings.pattern}</span>
             </div>
             <Select
-              value={effect.settings.pattern || 'lines'}
+              value={String(effect.settings.pattern || 'lines')}
               onValueChange={(value) => onUpdateSettings(effect.id, { pattern: value })}
             >
               <SelectTrigger className="w-full h-8">

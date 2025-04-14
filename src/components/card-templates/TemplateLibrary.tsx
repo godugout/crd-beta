@@ -27,7 +27,7 @@ const TemplateLibrary: React.FC<TemplateLibraryProps> = ({
       name: 'Topps Chrome',
       previewUrl: '/assets/templates/topps-chrome.jpg',
       sport: 'baseball',
-      style: 'modern',
+      style: 'premium',
       effects: ['Chrome']
     },
     {
@@ -35,7 +35,7 @@ const TemplateLibrary: React.FC<TemplateLibraryProps> = ({
       name: 'Panini Prizm',
       previewUrl: '/assets/templates/panini-prizm.jpg',
       sport: 'basketball',
-      style: 'modern',
+      style: 'premium',
       effects: ['Refractor']
     },
     {
