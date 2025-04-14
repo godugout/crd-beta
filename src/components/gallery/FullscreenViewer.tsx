@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { X, ChevronLeft, ChevronRight, Share2, Maximize, Star, Rotate3D, Info } from 'lucide-react';
@@ -25,29 +24,10 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
   const [lastPosition, setLastPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
 
-  useEffect(() => {
-    let animationFrame: number;
-    let angle = 0;
-    
-    const rotateCard = () => {
-      if (!isAutoRotating || isDragging) return;
-      
-      angle += 0.3;
-      if (cardRef.current) {
-        const newY = 5 * Math.sin(angle / 20);
-        const newX = 3 * Math.cos(angle / 30);
-        setRotation({ x: newX, y: newY });
-      }
-      
-      animationFrame = requestAnimationFrame(rotateCard);
-    };
-    
-    animationFrame = requestAnimationFrame(rotateCard);
-    
-    return () => {
-      cancelAnimationFrame(animationFrame);
-    };
-  }, [isAutoRotating, isDragging]);
+  const handleCardClick = (event: React.MouseEvent, newCardId: string) => {
+    event.preventDefault();
+    navigate(`/view/${newCardId}`);
+  };
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!cardRef.current || isAutoRotating) return;
@@ -86,11 +66,6 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
 
   const handleTouchEnd = () => {
     setIsDragging(false);
-  };
-
-  // Fix: Update handleCardClick to accept an event parameter and navigate to the card
-  const handleCardClick = (newCardId: string) => {
-    navigate(`/view/${newCardId}`);
   };
 
   const handleFlipCard = (e: React.MouseEvent) => {
@@ -309,11 +284,10 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
         </div>
       )}
       
-      {/* Add the ScrollableGallery component to show all cards at the bottom */}
       <ScrollableGallery 
         cards={cards}
         currentCardId={card.id}
-        onCardClick={handleCardClick}
+        onCardClick={(newCardId) => handleCardClick({ preventDefault: () => {} } as React.MouseEvent, newCardId)}
         className="fixed bottom-0 left-0 right-0 z-40"
       />
     </div>
