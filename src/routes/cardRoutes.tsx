@@ -24,6 +24,10 @@ export const cardRoutes: RouteObject[] = [
     element: <CardDetail />,
   },
   {
+    path: "/cards/create",
+    element: <ProtectedRoute><CardCreator /></ProtectedRoute>,
+  },
+  {
     path: "/create",
     element: <ProtectedRoute><CardCreator /></ProtectedRoute>,
   },
@@ -50,4 +54,3 @@ export const cardRoutes: RouteObject[] = [
 ];
 
 export default cardRoutes;
-
