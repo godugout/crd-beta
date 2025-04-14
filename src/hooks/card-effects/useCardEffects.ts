@@ -1,6 +1,23 @@
 
 import { useState, useCallback } from 'react';
-import { CardEffect } from '@/components/card-creation/types/cardTypes';
+
+export interface CardEffect {
+  id: string;
+  name: string;
+  enabled: boolean;
+  settings: {
+    motionSpeed?: number;
+    pulseIntensity?: number;
+    shimmerSpeed?: number;
+    goldIntensity?: number;
+    chromeIntensity?: number;
+    vintageIntensity?: number;
+    refractorIntensity?: number;
+    spectralIntensity?: number;
+    [key: string]: any;
+  };
+  className?: string;
+}
 
 export type EffectSettings = {
   motionSpeed: number;
