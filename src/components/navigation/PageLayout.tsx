@@ -48,11 +48,13 @@ const PageLayout: React.FC<PageLayoutProps> = ({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Convert ReactNode title to a string for the Helmet component
-  const stringTitle = typeof title === 'string' 
-    ? title 
-    : React.isValidElement(title)
-      ? title.props.children?.toString() || 'CardShow'
-      : String(title);
+  const stringTitle = React.isValidElement(title)
+    ? String(title.props.children || 'CardShow')
+    : typeof title === 'string'
+      ? title
+      : title !== null && title !== undefined
+        ? String(title)
+        : 'CardShow';
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
