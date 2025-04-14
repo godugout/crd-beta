@@ -1,8 +1,9 @@
+
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Card } from '@/lib/types';
 import { throttle } from 'lodash-es';
 import { CardEffectsOptions, CardEffectsResult } from './types';
-import { processCardsBatch, getDefaultEffectsForCard } from './utils';
+import { processCardsBatch, getDefaultEffectsForCard, generateEffectClasses, supportsAdvancedEffects } from './utils';
 
 /**
  * Hook for managing card visual effects
@@ -19,6 +20,8 @@ export function useCardEffects(
   
   // Keep track of previous card length for optimization
   const prevCardLengthRef = useRef<number>(0);
+  // Store device capability for advanced effects
+  const supportsAdvancedRef = useRef<boolean | null>(null);
 
   // Initialize effects map with default effects based on card metadata
   useEffect(() => {
@@ -26,6 +29,11 @@ export function useCardEffects(
     if (prevCardLengthRef.current === cards.length && Object.keys(cardEffects).length > 0) {
       setIsLoading(false);
       return;
+    }
+    
+    // Check device capabilities once
+    if (supportsAdvancedRef.current === null) {
+      supportsAdvancedRef.current = supportsAdvancedEffects();
     }
     
     prevCardLengthRef.current = cards.length;
