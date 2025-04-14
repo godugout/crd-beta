@@ -64,7 +64,9 @@ const ImmersiveCardViewer = () => {
         if (card.designMetadata?.cardStyle?.effect === 'gold') effects.push('Gold Foil');
         if (card.designMetadata?.cardStyle?.effect === 'vintage') effects.push('Vintage');
         setActiveEffects(effects);
-        cardEffects.setActiveEffects(effects);
+        if (card.id) {
+          cardEffects.setCardEffects(card.id, effects);
+        }
       }
       setIsLoading(false);
     }
@@ -317,16 +319,18 @@ const ImmersiveCardViewer = () => {
   };
   
   const handleToggleEffect = (effect: string) => {
-    cardEffects.toggleEffect(effect);
-    setActiveEffects(prev => {
-      if (prev.includes(effect)) {
-        return prev.filter(e => e !== effect);
-      } else {
-        return [...prev, effect];
-      }
-    });
-    
-    toast.info(`${effect} effect ${activeEffects.includes(effect) ? 'disabled' : 'enabled'}`);
+    if (id) {
+      cardEffects.toggleEffect(id, effect);
+      setActiveEffects(prev => {
+        if (prev.includes(effect)) {
+          return prev.filter(e => e !== effect);
+        } else {
+          return [...prev, effect];
+        }
+      });
+      
+      toast.info(`${effect} effect ${activeEffects.includes(effect) ? 'disabled' : 'enabled'}`);
+    }
   };
   
   const handleEffectIntensityChange = (effect: string, value: number) => {

@@ -8,6 +8,7 @@ import { useMobileOptimization } from '@/hooks/useMobileOptimization';
 import useGalleryCards from '@/components/gallery/useGalleryCards';
 import FullscreenViewer from '@/components/gallery/FullscreenViewer';
 import { PlusCircle } from 'lucide-react';
+import { Card } from '@/lib/types';
 
 const Gallery = () => {
   const { isMobile } = useMobileOptimization();
@@ -58,7 +59,7 @@ const Gallery = () => {
           <CardGallery 
             viewMode={viewMode} 
             onCardClick={handleCardClick} 
-            cards={displayCards}
+            cards={displayCards as Card[]} // Cast to ensure proper typing
             isLoading={isLoading}
             searchQuery={searchQuery}
           />

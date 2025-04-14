@@ -1,4 +1,3 @@
-
 /**
  * Core Types for CRD (Collector's Republic Digital) App
  * Single source of truth for all type definitions
@@ -27,7 +26,7 @@ export type UserPermission =
   | 'moderate:content'
   | 'all';
 
-export const ROLE_PERMISSIONS: Record<UserRole, string[]> = {
+export const ROLE_PERMISSIONS: Record<UserRole, UserPermission[]> = {
   [UserRole.ADMIN]: ['all'],
   [UserRole.USER]: ['read:own', 'write:own', 'delete:own'],
   [UserRole.PREMIUM]: ['read:own', 'write:own', 'delete:own', 'premium:features'],
@@ -48,7 +47,7 @@ export interface User {
   bio?: string;
   createdAt?: string;
   updatedAt?: string;
-  role?: UserRole;
+  role: UserRole;  // Make role required for compatibility with UserProfile
   permissions?: UserPermission[];
   preferences?: Record<string, any>;
 }
@@ -74,6 +73,7 @@ export interface CardStyle {
   shadowColor?: string;
   frameWidth?: number;
   frameColor?: string;
+  [key: string]: JsonValue | undefined;  // Add index signature
 }
 
 /**
@@ -87,6 +87,7 @@ export interface TextStyle {
   titleAlignment?: string;
   titleWeight?: string;
   descriptionColor?: string;
+  [key: string]: JsonValue | undefined;  // Add index signature
 }
 
 /**
@@ -100,6 +101,7 @@ export interface CardMetadata {
   category?: string;
   series?: string;
   cardType?: string;
+  [key: string]: JsonValue | undefined;  // Add index signature
 }
 
 /**
@@ -112,6 +114,7 @@ export interface MarketMetadata {
   isPrintable?: boolean;
   isForSale?: boolean;
   includeInCatalog?: boolean;
+  [key: string]: JsonValue | undefined;  // Add index signature
 }
 
 /**
@@ -132,6 +135,7 @@ export interface OaklandMemoryData {
   historicalContext?: string;
   personalSignificance?: string;
   template?: string;
+  [key: string]: JsonValue | undefined;  // Add index signature
 }
 
 /**
@@ -146,7 +150,7 @@ export interface DesignMetadata {
   effects?: string[];
   layers?: CardLayer[];
   effectClasses?: string;
-  [key: string]: JsonValue | undefined;
+  [key: string]: JsonValue | undefined;  // Add index signature
 }
 
 /**
@@ -498,6 +502,7 @@ export interface CardEffectsResult {
   toggleEffect: (cardId: string, effect: string) => void;
   clearEffects: (cardId: string) => void;
   setCardEffects: (cardId: string, effects: string[]) => void;
+  setActiveEffects?: (effects: string[]) => void;  // Add optional method for ImmersiveCardViewer
 }
 
 /**

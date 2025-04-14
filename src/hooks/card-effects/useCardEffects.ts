@@ -3,11 +3,11 @@ import { useState, useCallback } from 'react';
 import { CardEffectsResult } from '@/lib/types';
 
 const useCardEffects = (): CardEffectsResult => {
-  const [cardEffects, setCardEffects] = useState<Record<string, string[]>>({});
+  const [cardEffects, setCardEffectsState] = useState<Record<string, string[]>>({});
   const [isLoading, setIsLoading] = useState(false);
 
   const addEffect = useCallback((cardId: string, effect: string) => {
-    setCardEffects(prev => {
+    setCardEffectsState(prev => {
       const currentEffects = prev[cardId] || [];
       if (!currentEffects.includes(effect)) {
         return {
@@ -20,7 +20,7 @@ const useCardEffects = (): CardEffectsResult => {
   }, []);
 
   const removeEffect = useCallback((cardId: string, effect: string) => {
-    setCardEffects(prev => {
+    setCardEffectsState(prev => {
       const currentEffects = prev[cardId] || [];
       return {
         ...prev,
@@ -30,7 +30,7 @@ const useCardEffects = (): CardEffectsResult => {
   }, []);
 
   const toggleEffect = useCallback((cardId: string, effect: string) => {
-    setCardEffects(prev => {
+    setCardEffectsState(prev => {
       const currentEffects = prev[cardId] || [];
       if (currentEffects.includes(effect)) {
         return {
@@ -47,14 +47,14 @@ const useCardEffects = (): CardEffectsResult => {
   }, []);
 
   const clearEffects = useCallback((cardId: string) => {
-    setCardEffects(prev => ({
+    setCardEffectsState(prev => ({
       ...prev,
       [cardId]: []
     }));
   }, []);
 
   const setCardEffects = useCallback((cardId: string, effects: string[]) => {
-    setCardEffects(prev => ({
+    setCardEffectsState(prev => ({
       ...prev,
       [cardId]: effects
     }));
