@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useCards } from '@/context/CardContext';
 import PageLayout from '@/components/navigation/PageLayout';
@@ -8,11 +7,18 @@ import CardBackground from '@/components/home/card-viewer/CardBackground';
 import { CardImage } from '@/components/cards/CardImage';
 import CardShopBackground from '@/components/home/card-viewer/CardShopBackground';
 import MiniActionBar from '@/components/ui/MiniActionBar';
-import { ChevronDown, BarChart2, Info, X, PieChart, Award, Clock, Calendar, Users } from 'lucide-react';
+import { 
+  ChevronDown, BarChart2, Info, X, PieChart, Award, 
+  Clock, Calendar, Users, ZoomIn, ZoomOut, Lightbulb,
+  Layers, Undo, Redo, Share2, Grid, Book, Mail, Shuffle,
+  ChevronsLeft, ChevronsRight, Fullscreen
+} from 'lucide-react';
 import { useSettings } from '@/context/SettingsContext';
-
-// Import the updated RelatedCards
 import RelatedCardsSlider from '@/components/card-viewer/RelatedCardsSlider';
+import { Button } from '@/components/ui/button';
+import CardEffectsPanel from '@/components/immersive-viewer/CardEffectsPanel';
+import MultiCardView from '@/components/immersive-viewer/MultiCardView';
+import { useCardEffects } from '@/hooks/useCardEffects';
 
 const ImmersiveCardViewer = () => {
   const { id } = useParams<{ id: string }>();
@@ -21,35 +27,78 @@ const ImmersiveCardViewer = () => {
   const { visualEffectsEnabled } = useSettings();
   
   const [isLoading, setIsLoading] = useState(true);
-  const [activeEffects, setActiveEffects] = useState<string[]>([]);
   const [isFlipped, setIsFlipped] = useState(false);
   const [cardPosition, setCardPosition] = useState({ x: 0, y: 0, rotation: 0 });
   const [showCartoonBackground, setShowCartoonBackground] = useState(true);
   const [showStatsPanel, setShowStatsPanel] = useState(false);
   const [activeStat, setActiveStat] = useState<'overview' | 'career' | 'rankings' | 'recent'>('overview');
+  const [zoom, setZoom] = useState(1);
+  const [mousePosition, setMousePosition] = useState({ x: 0.5, y: 0.5 });
+  const [multiCardMode, setMultiCardMode] = useState(false);
+  const [showEffectsPanel, setShowEffectsPanel] = useState(false);
+  const [isAutoMoving, setIsAutoMoving] = useState(true);
+  const [showCardBack, setShowCardBack] = useState(false);
+  const [selectedCardBack, setSelectedCardBack] = useState<string | null>(null);
   
-  // Get the current card and prepare effects
+  const containerRef = useRef<HTMLDivElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
+  
+  const cardEffects = useCardEffects();
+  const [activeEffects, setActiveEffects] = useState<string[]>([]);
+  const [effectIntensity, setEffectIntensity] = useState({
+    refractor: 0.6,
+    holographic: 0.7,
+    shimmer: 0.5,
+    vintage: 0.4,
+    gold: 0.65
+  });
+
   useEffect(() => {
     if (id) {
       const card = getCardById ? getCardById(id) : cards.find(c => c.id === id);
       
       if (card) {
-        // Extract effects from card metadata
         const effects = [];
         if (card.designMetadata?.cardStyle?.effect === 'holographic') effects.push('Holographic');
         if (card.designMetadata?.cardStyle?.effect === 'refractor') effects.push('Refractor');
         if (card.designMetadata?.cardStyle?.effect === 'gold') effects.push('Gold Foil');
         if (card.designMetadata?.cardStyle?.effect === 'vintage') effects.push('Vintage');
         setActiveEffects(effects);
+        cardEffects.setActiveEffects(effects);
       }
       setIsLoading(false);
     }
-  }, [id, cards, getCardById]);
+  }, [id, cards, getCardById, cardEffects]);
 
-  // Add keyboard controls for moving the card
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    if (!containerRef.current || !isAutoMoving) return;
+    
+    const rect = containerRef.current.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width;
+    const y = (e.clientY - rect.top) / rect.height;
+    
+    const rotationX = (y - 0.5) * -10;
+    const rotationY = (x - 0.5) * 10;
+    
+    setMousePosition({ x, y });
+    
+    if (cardRef.current) {
+      cardRef.current.style.transition = 'transform 0.3s ease-out';
+      cardRef.current.style.transform = `
+        perspective(1000px) 
+        rotateX(${rotationX}deg) 
+        rotateY(${rotationY}deg)
+        scale(${zoom})
+      `;
+    }
+  }, [zoom, isAutoMoving]);
+
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     const moveStep = 10;
     const rotationStep = 5;
+    const zoomStep = 0.1;
+    const maxZoom = 3.0;
+    const minZoom = 0.5;
 
     switch (e.key) {
       case 'ArrowUp':
@@ -91,16 +140,50 @@ const ImmersiveCardViewer = () => {
         setShowStatsPanel(prev => !prev);
         e.preventDefault();
         break;
+      case '+':
+      case '=':
+        setZoom(prev => Math.min(maxZoom, prev + zoomStep));
+        e.preventDefault();
+        break;
+      case '-':
+      case '_':
+        setZoom(prev => Math.max(minZoom, prev - zoomStep));
+        e.preventDefault();
+        break;
+      case 'm':
+      case 'M':
+        setMultiCardMode(prev => !prev);
+        e.preventDefault();
+        break;
+      case 'e':
+      case 'E':
+        setShowEffectsPanel(prev => !prev);
+        e.preventDefault();
+        break;
+      case 'b':
+      case 'B':
+        setShowCardBack(prev => !prev);
+        e.preventDefault();
+        break;
+      case 'a':
+      case 'A':
+        setIsAutoMoving(prev => !prev);
+        e.preventDefault();
+        break;
       case 'Escape':
-        if (showStatsPanel) {
+        if (showEffectsPanel) {
+          setShowEffectsPanel(false);
+        } else if (showStatsPanel) {
           setShowStatsPanel(false);
+        } else if (multiCardMode) {
+          setMultiCardMode(false);
         } else {
           handleClose();
         }
         e.preventDefault();
         break;
     }
-  }, [setCardPosition, setIsFlipped]);
+  }, [setCardPosition, setIsFlipped, setZoom]);
 
   useEffect(() => {
     window.addEventListener('keydown', handleKeyDown);
@@ -108,6 +191,21 @@ const ImmersiveCardViewer = () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [handleKeyDown]);
+  
+  useEffect(() => {
+    const handleWheel = (e: WheelEvent) => {
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
+        const delta = -Math.sign(e.deltaY) * 0.1;
+        setZoom(prev => Math.min(3.0, Math.max(0.5, prev + delta)));
+      }
+    };
+    
+    window.addEventListener('wheel', handleWheel, { passive: false });
+    return () => {
+      window.removeEventListener('wheel', handleWheel);
+    };
+  }, []);
   
   const handleClose = () => {
     navigate('/cards');
@@ -127,6 +225,7 @@ const ImmersiveCardViewer = () => {
   
   const handleCardReset = () => {
     setCardPosition({ x: 0, y: 0, rotation: 0 });
+    setZoom(1);
     toast.info('Card position reset');
   };
 
@@ -137,6 +236,10 @@ const ImmersiveCardViewer = () => {
 
   const toggleStatsPanel = () => {
     setShowStatsPanel(prev => !prev);
+    if (showEffectsPanel && !showStatsPanel) {
+      setShowEffectsPanel(false);
+    }
+    
     if (!showStatsPanel) {
       toast.info('Stats panel opened', {
         description: 'Use keyboard shortcuts for more options'
@@ -144,7 +247,53 @@ const ImmersiveCardViewer = () => {
     }
   };
   
-  // Find related cards based on tags, artist, or year
+  const toggleEffectsPanel = () => {
+    setShowEffectsPanel(prev => !prev);
+    if (showStatsPanel && !showEffectsPanel) {
+      setShowStatsPanel(false);
+    }
+    
+    if (!showEffectsPanel) {
+      toast.info('Effects panel opened', {
+        description: 'Customize card visual effects'
+      });
+    }
+  };
+  
+  const toggleMultiCardMode = () => {
+    setMultiCardMode(prev => !prev);
+    if (!multiCardMode) {
+      toast.info('Multi-card view activated', {
+        description: 'Compare cards side by side'
+      });
+    }
+  };
+  
+  const toggleAutoMoving = () => {
+    setIsAutoMoving(prev => !prev);
+    toast.info(isAutoMoving ? 'Auto movement disabled' : 'Auto movement enabled');
+  };
+  
+  const handleZoomIn = () => {
+    setZoom(prev => Math.min(3.0, prev + 0.1));
+  };
+  
+  const handleZoomOut = () => {
+    setZoom(prev => Math.max(0.5, prev - 0.1));
+  };
+  
+  const toggleCardBack = () => {
+    setShowCardBack(prev => !prev);
+    if (!showCardBack) {
+      toast.info('Card back customization enabled');
+    }
+  };
+  
+  const handleSelectCardBack = (backId: string | null) => {
+    setSelectedCardBack(backId);
+    toast.success('Card back updated');
+  };
+  
   const getRelatedCards = () => {
     if (!id) return [];
     
@@ -157,16 +306,34 @@ const ImmersiveCardViewer = () => {
     return cards
       .filter(card => 
         card.id !== id && (
-          // Match by tags
           (currentCard.tags && card.tags && 
             currentCard.tags.some(tag => card.tags?.includes(tag))) ||
-          // Match by player/artist
           (currentCard.player && card.player && currentCard.player === card.player) ||
-          // Match by year
-          (currentCard.year && card.year && currentCard.year === card.year)
+          (currentCard.year && card.year && currentCard.year === card.year) ||
+          (currentCard.team && card.team && currentCard.team === card.team)
         )
       )
-      .slice(0, 8); // Limit to 8 related cards
+      .slice(0, 8);
+  };
+  
+  const handleToggleEffect = (effect: string) => {
+    cardEffects.toggleEffect(effect);
+    setActiveEffects(prev => {
+      if (prev.includes(effect)) {
+        return prev.filter(e => e !== effect);
+      } else {
+        return [...prev, effect];
+      }
+    });
+    
+    toast.info(`${effect} effect ${activeEffects.includes(effect) ? 'disabled' : 'enabled'}`);
+  };
+  
+  const handleEffectIntensityChange = (effect: string, value: number) => {
+    setEffectIntensity(prev => ({
+      ...prev,
+      [effect.toLowerCase()]: value
+    }));
   };
   
   if (!id) {
@@ -205,7 +372,6 @@ const ImmersiveCardViewer = () => {
     );
   }
 
-  // Card data for the stats panel
   const cardStats = {
     battingAverage: currentCard.battingAverage || '0.342',
     homeRuns: currentCard.homeRuns || '101',
@@ -221,7 +387,6 @@ const ImmersiveCardViewer = () => {
   
   return (
     <div className="fixed inset-0 bg-black flex flex-col">
-      {/* Background effect layers */}
       <div className="absolute inset-0 overflow-hidden z-0">
         {showCartoonBackground ? (
           <CardShopBackground />
@@ -230,7 +395,6 @@ const ImmersiveCardViewer = () => {
         )}
       </div>
       
-      {/* Close button */}
       <button
         className="absolute top-4 right-4 z-50 bg-black/40 hover:bg-black/60 text-white p-2 rounded-full"
         onClick={handleClose}
@@ -238,67 +402,177 @@ const ImmersiveCardViewer = () => {
         <X size={24} />
       </button>
       
-      {/* Reset button (visible when card is far from center) */}
-      {(Math.abs(cardPosition.x) > 100 || Math.abs(cardPosition.y) > 100) && (
+      <div className="absolute top-4 left-4 z-50 flex space-x-2">
         <button
-          className="absolute top-4 left-4 z-50 bg-black/40 hover:bg-black/60 text-white p-2 rounded-full"
+          className="bg-black/40 hover:bg-black/60 text-white p-2 rounded-full"
           onClick={handleCardReset}
-          title="Reset card position"
+          title="Reset card position (R)"
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M3 2v6h6"></path>
             <path d="M3 13a9 9 0 1 0 3-7.7L3 8"></path>
           </svg>
         </button>
-      )}
+        
+        <button
+          className="bg-black/40 hover:bg-black/60 text-white p-2 rounded-full"
+          onClick={toggleBackgroundStyle}
+          title={showCartoonBackground ? "Switch to abstract background" : "Switch to card shop background"}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+            <polyline points="21 15 16 10 5 21"></polyline>
+          </svg>
+        </button>
+        
+        <button
+          className={`bg-black/40 hover:bg-black/60 text-white p-2 rounded-full ${
+            showStatsPanel ? "bg-blue-600/70" : ""
+          }`}
+          onClick={toggleStatsPanel}
+          title="Toggle stats panel (I)"
+        >
+          <BarChart2 size={24} />
+        </button>
+        
+        <button
+          className={`bg-black/40 hover:bg-black/60 text-white p-2 rounded-full ${
+            showEffectsPanel ? "bg-blue-600/70" : ""
+          }`}
+          onClick={toggleEffectsPanel}
+          title="Toggle effects panel (E)"
+        >
+          <Lightbulb size={24} />
+        </button>
+        
+        <button
+          className={`bg-black/40 hover:bg-black/60 text-white p-2 rounded-full ${
+            multiCardMode ? "bg-blue-600/70" : ""
+          }`}
+          onClick={toggleMultiCardMode}
+          title="Toggle multi-card view (M)"
+        >
+          <Grid size={24} />
+        </button>
+        
+        <button
+          className={`bg-black/40 hover:bg-black/60 text-white p-2 rounded-full ${
+            isAutoMoving ? "bg-blue-600/70" : ""
+          }`}
+          onClick={toggleAutoMoving}
+          title="Toggle auto movement (A)"
+        >
+          <Shuffle size={24} />
+        </button>
+        
+        <button
+          className={`bg-black/40 hover:bg-black/60 text-white p-2 rounded-full ${
+            showCardBack ? "bg-blue-600/70" : ""
+          }`}
+          onClick={toggleCardBack}
+          title="Customize card back (B)"
+        >
+          <ChevronsLeft size={24} className={isFlipped ? "" : "hidden"} />
+          <ChevronsRight size={24} className={isFlipped ? "hidden" : ""} />
+        </button>
+        
+        <button
+          className="bg-black/40 hover:bg-black/60 text-white p-2 rounded-full"
+          onClick={handleZoomIn}
+          title="Zoom in (+)"
+        >
+          <ZoomIn size={24} />
+        </button>
+        
+        <button
+          className="bg-black/40 hover:bg-black/60 text-white p-2 rounded-full"
+          onClick={handleZoomOut}
+          title="Zoom out (-)"
+        >
+          <ZoomOut size={24} />
+        </button>
+        
+        <button
+          className="bg-black/40 hover:bg-black/60 text-white p-2 rounded-full"
+          onClick={() => {
+            if (!document.fullscreenElement) {
+              document.documentElement.requestFullscreen();
+            } else {
+              document.exitFullscreen();
+            }
+          }}
+          title="Toggle fullscreen"
+        >
+          <Fullscreen size={24} />
+        </button>
+      </div>
       
-      {/* Toggle background button */}
-      <button
-        className="absolute top-4 left-16 z-50 bg-black/40 hover:bg-black/60 text-white p-2 rounded-full"
-        onClick={toggleBackgroundStyle}
-        title={showCartoonBackground ? "Switch to abstract background" : "Switch to card shop background"}
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-          <circle cx="8.5" cy="8.5" r="1.5"></circle>
-          <polyline points="21 15 16 10 5 21"></polyline>
-        </svg>
-      </button>
-      
-      {/* Toggle stats panel button */}
-      <button
-        className="absolute top-4 left-28 z-50 bg-black/40 hover:bg-black/60 text-white p-2 rounded-full"
-        onClick={toggleStatsPanel}
-        title="Toggle stats panel"
-      >
-        <BarChart2 size={24} />
-      </button>
-      
-      {/* Main content area */}
       <div 
+        ref={containerRef}
         className={`relative flex-1 flex items-center justify-center overflow-hidden z-10 transition-all duration-300 ease-in-out ${
           showStatsPanel ? 'md:mr-96' : ''
-        }`}
+        } ${showEffectsPanel ? 'md:ml-96' : ''}`}
+        onMouseMove={handleMouseMove}
       >
-        {/* Card with improved physics */}
-        <div 
-          className="w-full max-w-lg transform transition-transform duration-300"
-          style={{
-            transform: `translate(${cardPosition.x}px, ${cardPosition.y}px) rotate(${cardPosition.rotation}deg)`
-          }}
-        >
-          <CardImage
-            card={currentCard}
-            className="mx-auto transform-gpu"
-            flippable={true}
-            enable3D={visualEffectsEnabled}
-            autoRotate={!showStatsPanel && visualEffectsEnabled}
-            onFlip={handleCardFlip}
+        {multiCardMode ? (
+          <MultiCardView 
+            mainCardId={id}
+            relatedCards={relatedCards}
+            onCardClick={handleCardClick}
+            zoom={zoom}
+            activeEffects={activeEffects}
+            effectIntensity={effectIntensity}
+            autoMove={isAutoMoving}
           />
+        ) : (
+          <div 
+            ref={cardRef}
+            className="w-full max-w-lg transform transition-transform duration-300"
+            style={{
+              transform: `translate(${cardPosition.x}px, ${cardPosition.y}px) rotate(${cardPosition.rotation}deg) scale(${zoom})`,
+              transformStyle: 'preserve-3d',
+              transition: 'transform 0.3s ease-out'
+            }}
+          >
+            <CardImage
+              card={currentCard}
+              className={`mx-auto transform-gpu ${activeEffects.join(' ').toLowerCase()}`}
+              flippable={true}
+              enable3D={visualEffectsEnabled}
+              autoRotate={false}
+              onFlip={handleCardFlip}
+            />
+          </div>
+        )}
+        
+        <div className="absolute inset-0 pointer-events-none z-20">
+          {activeEffects.includes('Holographic') && (
+            <div 
+              className="absolute inset-0 bg-gradient-radial from-white/20 to-transparent" 
+              style={{
+                opacity: effectIntensity.holographic * 0.3,
+                backgroundPosition: `${mousePosition.x * 100}% ${mousePosition.y * 100}%`,
+                backgroundSize: '200% 200%',
+                mixBlendMode: 'overlay'
+              }}
+            />
+          )}
+          
+          {activeEffects.includes('Refractor') && (
+            <div 
+              className="absolute inset-0 bg-gradient-conic from-cyan-500 via-blue-500 to-purple-500" 
+              style={{
+                opacity: effectIntensity.refractor * 0.2,
+                backgroundPosition: `${mousePosition.x * 100}% ${mousePosition.y * 100}%`,
+                backgroundSize: '200% 200%',
+                mixBlendMode: 'color-dodge'
+              }}
+            />
+          )}
         </div>
       </div>
 
-      {/* Stats Panel - Slide in from right */}
       <div 
         className={`fixed top-0 right-0 bottom-0 w-full md:w-96 bg-gray-900/95 backdrop-blur-md shadow-2xl z-30 overflow-y-auto transition-transform duration-300 transform ${
           showStatsPanel ? 'translate-x-0' : 'translate-x-full'
@@ -339,7 +613,6 @@ const ImmersiveCardViewer = () => {
             </div>
           </div>
           
-          {/* Tabs for different stat views */}
           <div className="mb-4 border-b border-gray-800">
             <div className="flex space-x-2">
               {[
@@ -509,7 +782,6 @@ const ImmersiveCardViewer = () => {
                   </div>
                 </div>
                 <div className="h-24 bg-gray-900 rounded-lg overflow-hidden">
-                  {/* This would be a chart - placeholder for now */}
                   <div className="h-full flex items-end">
                     <div className="flex-1 h-[30%] bg-blue-500 mx-0.5"></div>
                     <div className="flex-1 h-[40%] bg-blue-500 mx-0.5"></div>
@@ -585,19 +857,86 @@ const ImmersiveCardViewer = () => {
         </div>
       </div>
       
-      {/* Related cards section */}
-      {relatedCards.length > 0 && !showStatsPanel && (
+      <div 
+        className={`fixed top-0 left-0 bottom-0 w-full md:w-96 bg-gray-900/95 backdrop-blur-md shadow-2xl z-30 overflow-y-auto transition-transform duration-300 transform ${
+          showEffectsPanel ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
+        <CardEffectsPanel 
+          activeEffects={activeEffects}
+          onToggleEffect={handleToggleEffect}
+          effectIntensity={effectIntensity}
+          onEffectIntensityChange={handleEffectIntensityChange}
+          onClose={() => setShowEffectsPanel(false)}
+        />
+      </div>
+      
+      <div 
+        className={`fixed left-0 right-0 bottom-0 h-64 bg-gray-900/95 backdrop-blur-md shadow-2xl z-30 overflow-x-auto transition-transform duration-300 transform ${
+          showCardBack ? 'translate-y-0' : 'translate-y-full'
+        }`}
+      >
+        <div className="p-4">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-bold text-white">Card Back Options</h3>
+            <button 
+              onClick={() => setShowCardBack(false)}
+              className="p-2 rounded-full bg-gray-800 hover:bg-gray-700 text-gray-400"
+            >
+              <X size={18} />
+            </button>
+          </div>
+          
+          <div className="flex space-x-4 overflow-x-auto pb-4">
+            <div 
+              className={`relative flex-shrink-0 h-40 w-28 bg-gray-800 rounded-lg cursor-pointer border-2 ${
+                selectedCardBack === null ? 'border-blue-500' : 'border-transparent'
+              }`}
+              onClick={() => handleSelectCardBack(null)}
+            >
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="text-white text-xs text-center p-2">Default Card Back</span>
+              </div>
+            </div>
+            
+            {['classic', 'modern', 'premium', 'vintage', 'custom'].map((style) => (
+              <div 
+                key={style}
+                className={`relative flex-shrink-0 h-40 w-28 bg-gray-800 rounded-lg cursor-pointer border-2 ${
+                  selectedCardBack === style ? 'border-blue-500' : 'border-transparent'
+                }`}
+                onClick={() => handleSelectCardBack(style)}
+              >
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-white capitalize text-xs text-center p-2">{style} Style</span>
+                </div>
+              </div>
+            ))}
+          </div>
+          
+          <div className="flex justify-center mt-2">
+            <Button
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+              onClick={() => {
+                setShowCardBack(false);
+                setIsFlipped(true);
+                toast.success('Card back updated! Card flipped to show back.');
+              }}
+            >
+              Apply & View Back
+            </Button>
+          </div>
+        </div>
+      </div>
+      
+      {relatedCards.length > 0 && !showStatsPanel && !multiCardMode && (
         <div className="p-4 bg-black/90 z-10">
           <h3 className="text-white text-lg font-medium mb-3">Related Cards</h3>
           <RelatedCardsSlider cards={relatedCards} onCardClick={handleCardClick} />
         </div>
       )}
 
-      {/* Mini Action Bar with instructions and keyboard shortcuts */}
-      <MiniActionBar />
-      
-      {/* Keyboard shortcuts tooltip */}
-      <div className="fixed bottom-4 left-4 z-20 bg-black/70 backdrop-blur-sm rounded-lg p-3 text-white text-xs max-w-xs">
+      <div className="fixed bottom-4 right-4 z-20 bg-black/70 backdrop-blur-sm rounded-lg p-3 text-white text-xs max-w-xs">
         <h4 className="font-medium mb-2">Keyboard Controls:</h4>
         <div className="grid grid-cols-2 gap-x-4 gap-y-1">
           <div>
@@ -617,13 +956,36 @@ const ImmersiveCardViewer = () => {
             <span className="ml-1">Stats panel</span>
           </div>
           <div>
+            <kbd className="bg-gray-800 px-1 rounded">E</kbd> 
+            <span className="ml-1">Effects panel</span>
+          </div>
+          <div>
+            <kbd className="bg-gray-800 px-1 rounded">M</kbd> 
+            <span className="ml-1">Multi-card view</span>
+          </div>
+          <div>
+            <kbd className="bg-gray-800 px-1 rounded">+</kbd>/<kbd className="bg-gray-800 px-1 rounded">-</kbd> 
+            <span className="ml-1">Zoom in/out</span>
+          </div>
+          <div>
+            <kbd className="bg-gray-800 px-1 rounded">A</kbd> 
+            <span className="ml-1">Auto movement</span>
+          </div>
+          <div>
+            <kbd className="bg-gray-800 px-1 rounded">B</kbd> 
+            <span className="ml-1">Card back</span>
+          </div>
+          <div>
             <kbd className="bg-gray-800 px-1 rounded">R</kbd> 
             <span className="ml-1">Reset position</span>
           </div>
           <div>
             <kbd className="bg-gray-800 px-1 rounded">Esc</kbd> 
-            <span className="ml-1">Exit</span>
+            <span className="ml-1">Close panels</span>
           </div>
+        </div>
+        <div className="mt-2 text-gray-400 text-[10px]">
+          Scroll with Ctrl/⌘ + wheel to zoom. Mouse over to see card effects.
         </div>
       </div>
     </div>

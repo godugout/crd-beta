@@ -1,3 +1,4 @@
+
 import { useState, useCallback } from 'react';
 import { CardEffect } from '@/components/card-creation/types/cardTypes';
 
@@ -24,9 +25,21 @@ export type CardEffectsResult = {
   getEffectClasses: () => string;
 };
 
+const DEFAULT_EFFECT_SETTINGS = {
+  motionSpeed: 1.0,
+  pulseIntensity: 0.7,
+  shimmerSpeed: 3.0,
+  goldIntensity: 0.8,
+  chromeIntensity: 0.8,
+  vintageIntensity: 0.6,
+  refractorIntensity: 0.85,
+  spectralIntensity: 0.75
+};
+
 const useCardEffects = (): CardEffectsResult => {
   const [activeEffects, setActiveEffects] = useState<string[]>([]);
-
+  const [effectSettings, setEffectSettings] = useState<Record<string, CardEffect>>({});
+  
   const addEffect = useCallback((effect: string) => {
     setActiveEffects(prev => {
       if (prev.includes(effect)) return prev;
@@ -49,17 +62,43 @@ const useCardEffects = (): CardEffectsResult => {
   }, []);
 
   const updateEffectSettings = useCallback((effect: string, settings: Partial<CardEffect>) => {
-    // Implementation depends on how you store and manage effect settings
-    console.log(`Updating settings for effect ${effect}`, settings);
+    setEffectSettings(prev => ({
+      ...prev,
+      [effect]: {
+        ...(prev[effect] || { 
+          id: effect,
+          name: effect,
+          enabled: true,
+          settings: DEFAULT_EFFECT_SETTINGS,
+          className: `effect-${effect.toLowerCase()}`
+        }),
+        ...settings
+      }
+    }));
   }, []);
 
   const getEffectSettings = useCallback((effect: string) => {
-    // Implementation depends on how you store and manage effect settings
-    console.log(`Getting settings for effect ${effect}`);
-    return undefined;
-  }, []);
+    return effectSettings[effect];
+  }, [effectSettings]);
 
-  // Return the hook result including the missing properties
+  // Calculate effectStack from active effects and settings
+  const effectStack = activeEffects.map(effectName => {
+    return effectSettings[effectName] || {
+      id: effectName,
+      name: effectName,
+      enabled: true,
+      settings: DEFAULT_EFFECT_SETTINGS,
+      className: `effect-${effectName.toLowerCase()}`
+    };
+  });
+
+  // Generate classes for all active effects
+  const getEffectClasses = useCallback(() => {
+    return activeEffects
+      .map(effect => `effect-${effect.toLowerCase()}`)
+      .join(' ');
+  }, [activeEffects]);
+
   return {
     activeEffects,
     setActiveEffects,
@@ -68,9 +107,8 @@ const useCardEffects = (): CardEffectsResult => {
     toggleEffect,
     updateEffectSettings,
     getEffectSettings,
-    // Add the missing properties
-    effectStack: [], // This should be replaced with your actual effect stack
-    getEffectClasses: () => activeEffects.map(effect => `effect-${effect.toLowerCase()}`).join(' ')
+    effectStack,
+    getEffectClasses
   };
 };
 

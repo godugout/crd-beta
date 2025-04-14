@@ -1,5 +1,3 @@
 
-export * from './useCardEffects';
-export * from './types';
-export * from './utils';
-export * from './useEffectsLibrary';
+export { default as useCardEffects } from './useCardEffects';
+export type { CardEffectsResult, EffectSettings } from './useCardEffects';
