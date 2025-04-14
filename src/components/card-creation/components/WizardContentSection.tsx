@@ -1,4 +1,3 @@
-
 import React from 'react';
 import CardWizardSteps from './CardWizardSteps';
 import CardWizardStepContent from './CardWizardStepContent';
@@ -6,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { WIZARD_STEPS } from '../constants/wizardSteps';
 import { CardDesignState, CardLayer } from '../types/cardTypes';
-import { CardEffect } from '../hooks/useCardEffectsStack';
+import { CardEffect } from '../types/cardTypes';
 import WizardNavigationButtons from './WizardNavigationButtons';
 
 interface WizardContentSectionProps {

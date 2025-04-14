@@ -4,7 +4,7 @@ import { CardDesignState, CardLayer } from '../types/cardTypes';
 import CardWizardStepContent from './CardWizardStepContent';
 import CardWizardNavigation from './CardWizardNavigation';
 import { WizardStep } from '../constants/wizardSteps';
-import { CardEffect } from '../hooks/useCardEffectsStack';
+import { CardEffect } from '../types/cardTypes';
 
 interface CardWizardSectionProps {
   wizardSteps: WizardStep[];

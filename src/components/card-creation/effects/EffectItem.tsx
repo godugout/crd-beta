@@ -1,8 +1,7 @@
-
 import React, { useState } from 'react';
 import { Settings, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { CardEffect } from '../hooks/useCardEffectsStack';
+import { CardEffect } from '../types/cardTypes';
 
 interface EffectItemProps {
   effect: CardEffect;

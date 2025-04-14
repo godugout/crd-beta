@@ -1,10 +1,10 @@
-
 import { useState, useCallback } from 'react';
 import { CardEffectsResult } from '@/lib/types';
 
 const useCardEffects = (): CardEffectsResult => {
   const [cardEffects, setCardEffectsState] = useState<Record<string, string[]>>({});
   const [isLoading, setIsLoading] = useState(false);
+  const [activeEffects, setActiveEffects] = useState<string[]>([]);
 
   const addEffect = useCallback((cardId: string, effect: string) => {
     setCardEffectsState(prev => {
@@ -67,7 +67,8 @@ const useCardEffects = (): CardEffectsResult => {
     removeEffect,
     toggleEffect,
     clearEffects,
-    setCardEffects
+    setCardEffects,
+    setActiveEffects
   };
 };
 

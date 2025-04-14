@@ -1,9 +1,11 @@
 
 import { useState, useCallback } from 'react';
-import { CardEffectSettings, PremiumCardEffect } from '@/hooks/card-effects/types';
+import { CardEffectSettings } from '@/hooks/card-effects/types';
 import { toast } from 'sonner';
 
-export interface CardEffect {
+// Move the CardEffect interface to types/cardTypes.ts for a single source of truth
+// This is just a local reference for the hook implementation
+interface CardEffect {
   id: string;
   name: string;
   enabled: boolean;

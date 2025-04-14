@@ -1,9 +1,8 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ChevronRight, Plus } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-import { CardEffect } from '@/components/card-creation/hooks/useCardEffectsStack';
+import { CardEffect } from '@/components/card-creation/types/cardTypes';
 
 interface CardEffectsStepProps {
   effectStack: CardEffect[];
@@ -13,7 +12,6 @@ interface CardEffectsStepProps {
   onContinue: () => void;
 }
 
-// A list of available effects
 const AVAILABLE_EFFECTS = [
   { name: 'Holographic', description: 'Rainbow holographic pattern effect' },
   { name: 'Refractor', description: 'Prismatic light refraction effect' },

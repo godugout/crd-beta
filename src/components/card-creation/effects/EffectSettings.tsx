@@ -1,8 +1,7 @@
-
 import React from 'react';
 import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { CardEffect } from '../hooks/useCardEffectsStack';
+import { CardEffect } from '../types/cardTypes';
 
 interface EffectSettingsProps {
   effect: CardEffect;

@@ -52,6 +52,7 @@ export interface CardLayer {
   [key: string]: any; // Add index signature for flexibility
 }
 
+// Define CardEffect here as the canonical source
 export interface CardEffect {
   id: string;
   name: string;

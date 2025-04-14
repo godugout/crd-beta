@@ -1,16 +1,14 @@
-
 import React, { useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
-import { CardEffect } from './hooks/useCardEffectsStack';
+import { CardEffect, CardDesignState, CardLayer } from './types/cardTypes';
 import { WIZARD_STEPS } from './constants/wizardSteps';
 import CardWizardStepContent from './components/CardWizardStepContent';
 import CardPreviewSidebar from './components/CardPreviewSidebar';
 import CardWizardSteps from './components/CardWizardSteps';
 import CardWizardHeader from './components/CardWizardHeader';
 import CardWizardFeatures from './components/CardWizardFeatures';
-import { CardDesignState, CardLayer } from './types/cardTypes';
 import CardPreviewSection from './components/CardPreviewSection';
 import WizardContentSection from './components/WizardContentSection';
 

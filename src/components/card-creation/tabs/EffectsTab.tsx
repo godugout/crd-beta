@@ -1,10 +1,9 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ChevronRight } from 'lucide-react';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import CardEffectsPanel from '../CardEffectsPanel';
-import { CardEffect } from '../hooks/useCardEffectsStack';
+import { CardEffect } from '../types/cardTypes';
 
 interface EffectsTabProps {
   onContinue: () => void;

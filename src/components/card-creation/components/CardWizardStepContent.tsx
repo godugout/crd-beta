@@ -4,8 +4,7 @@ import DesignTab from '../tabs/DesignTab';
 import EffectsTab from '../tabs/EffectsTab';
 import TextTab from '../tabs/TextTab';
 import PreviewTab from '../tabs/PreviewTab';
-import { CardEffect } from '../hooks/useCardEffectsStack';
-import { CardDesignState, CardLayer } from '../types/cardTypes';
+import { CardEffect } from '../types/cardTypes';
 
 interface CardWizardStepContentProps {
   currentStep: number;

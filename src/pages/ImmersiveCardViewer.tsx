@@ -255,7 +255,7 @@ const ImmersiveCardViewer = () => {
       setShowStatsPanel(false);
     }
     
-    if (!showEffectsPanel) {
+    if (!showStatsPanel) {
       toast.info('Effects panel opened', {
         description: 'Customize card visual effects'
       });
@@ -318,19 +318,19 @@ const ImmersiveCardViewer = () => {
       .slice(0, 8);
   };
   
-  const handleToggleEffect = (effect: string) => {
-    if (id) {
-      cardEffects.toggleEffect(id, effect);
-      setActiveEffects(prev => {
-        if (prev.includes(effect)) {
-          return prev.filter(e => e !== effect);
-        } else {
-          return [...prev, effect];
-        }
-      });
-      
-      toast.info(`${effect} effect ${activeEffects.includes(effect) ? 'disabled' : 'enabled'}`);
+  const handleApplyEffect = (effect: string) => {
+    if (cardEffects.setActiveEffects) {
+      cardEffects.setActiveEffects([effect]);
     }
+    setActiveEffects(prev => {
+      if (prev.includes(effect)) {
+        return prev.filter(e => e !== effect);
+      } else {
+        return [...prev, effect];
+      }
+    });
+    
+    toast.info(`${effect} effect ${activeEffects.includes(effect) ? 'disabled' : 'enabled'}`);
   };
   
   const handleEffectIntensityChange = (effect: string, value: number) => {
@@ -868,7 +868,7 @@ const ImmersiveCardViewer = () => {
       >
         <CardEffectsPanel 
           activeEffects={activeEffects}
-          onToggleEffect={handleToggleEffect}
+          onToggleEffect={handleApplyEffect}
           effectIntensity={effectIntensity}
           onEffectIntensityChange={handleEffectIntensityChange}
           onClose={() => setShowEffectsPanel(false)}

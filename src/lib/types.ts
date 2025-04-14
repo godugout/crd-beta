@@ -153,41 +153,8 @@ export interface DesignMetadata {
   [key: string]: JsonValue | undefined;  // Add index signature
 }
 
-/**
- * Card Layer Definition - For the card designer/editor
- */
-export interface CardLayer {
-  id: string;
-  type: 'image' | 'text' | 'shape' | 'effect';
-  content: string | JsonValue;
-  position: {
-    x: number;
-    y: number;
-    z: number;
-  };
-  size: {
-    width: number | 'auto';
-    height: number | 'auto';
-  };
-  rotation: number;
-  opacity: number;
-  zIndex: number;
-  visible?: boolean;
-  style?: Record<string, JsonValue>;
-  locked?: boolean;
-  effectIds?: string[];
-  textStyle?: {
-    fontFamily?: string;
-    fontSize?: number;
-    fontWeight?: string;
-    color?: string;
-    textAlign?: string;
-  };
-  imageUrl?: string;
-  shapeType?: string;
-  color?: string;
-  [key: string]: JsonValue | undefined;
-}
+// Import CardLayer from the canonical source
+import { CardLayer } from '@/components/card-creation/types/cardTypes';
 
 /**
  * Card Effect Definition
