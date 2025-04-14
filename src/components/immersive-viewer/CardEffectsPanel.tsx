@@ -65,7 +65,7 @@ const CardEffectsPanel: React.FC<CardEffectsPanelProps> = ({
   ];
 
   return (
-    <div className="p-6">
+    <div className="p-6 mt-16"> {/* Added mt-16 to position below the navigation bar */}
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-white">Visual Effects</h2>
         <button 

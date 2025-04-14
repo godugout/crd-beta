@@ -1,30 +1,15 @@
 
 import React, { useState } from 'react';
-import EffectControlPanel from './controls/EffectControlPanel';
+import { X, Save } from 'lucide-react';
+import { Slider } from '@/components/ui/slider';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
 interface EffectControlsProps {
   isOpen: boolean;
   onClose: () => void;
   onSaveEffectsCombination: (name: string) => void;
   activeEffects: string[];
-  onMotionSpeedChange: (value: number[]) => void;
-  onPulseIntensityChange: (value: number[]) => void;
-  onShimmerSpeedChange: (value: number[]) => void;
-  onGoldIntensityChange: (value: number[]) => void;
-  onChromeIntensityChange: (value: number[]) => void;
-  onVintageIntensityChange: (value: number[]) => void;
-  onRefractorIntensityChange: (value: number[]) => void;
-  onRefractorSpeedChange?: (value: number[]) => void;
-  onRefractorAnimationToggle?: (enabled: boolean) => void;
-  onRefractorColorChange?: (colorIndex: number, color: string) => void;
-  onRefractorAngleChange?: (value: number[]) => void;
-  onSpectralIntensityChange?: (value: number[]) => void;
-  onHolographicIntensityChange?: (value: number[]) => void;
-  onHolographicPatternChange?: (pattern: string) => void;
-  onHolographicColorModeChange?: (mode: string) => void;
-  onHolographicCustomColorChange?: (colorIndex: number, color: string) => void;
-  onHolographicSparklesToggle?: (enabled: boolean) => void;
-  onHolographicBorderWidthChange?: (value: number[]) => void;
   motionSpeed: number;
   pulseIntensity: number;
   shimmerSpeed: number;
@@ -32,17 +17,15 @@ interface EffectControlsProps {
   chromeIntensity: number;
   vintageIntensity: number;
   refractorIntensity: number;
-  refractorSpeed?: number;
-  refractorColors?: string[];
-  refractorAngle?: number;
-  refractorAnimationEnabled?: boolean;
-  spectralIntensity?: number;
-  holographicIntensity?: number;
-  holographicPattern?: string;
-  holographicColorMode?: string;
-  holographicCustomColors?: string[];
-  holographicSparklesEnabled?: boolean;
-  holographicBorderWidth?: number;
+  spectralIntensity: number;
+  onMotionSpeedChange: (value: number) => void;
+  onPulseIntensityChange: (value: number) => void;
+  onShimmerSpeedChange: (value: number) => void;
+  onGoldIntensityChange: (value: number) => void;
+  onChromeIntensityChange: (value: number) => void;
+  onVintageIntensityChange: (value: number) => void;
+  onRefractorIntensityChange: (value: number) => void;
+  onSpectralIntensityChange: (value: number) => void;
 }
 
 const EffectControls: React.FC<EffectControlsProps> = ({
@@ -50,24 +33,6 @@ const EffectControls: React.FC<EffectControlsProps> = ({
   onClose,
   onSaveEffectsCombination,
   activeEffects,
-  onMotionSpeedChange,
-  onPulseIntensityChange,
-  onShimmerSpeedChange,
-  onGoldIntensityChange,
-  onChromeIntensityChange,
-  onVintageIntensityChange,
-  onRefractorIntensityChange,
-  onRefractorSpeedChange = () => {},
-  onRefractorAnimationToggle = () => {},
-  onRefractorColorChange = () => {},
-  onRefractorAngleChange = () => {},
-  onSpectralIntensityChange = () => {},
-  onHolographicIntensityChange = () => {},
-  onHolographicPatternChange = () => {},
-  onHolographicColorModeChange = () => {},
-  onHolographicCustomColorChange = () => {},
-  onHolographicSparklesToggle = () => {},
-  onHolographicBorderWidthChange = () => {},
   motionSpeed,
   pulseIntensity,
   shimmerSpeed,
@@ -75,74 +40,194 @@ const EffectControls: React.FC<EffectControlsProps> = ({
   chromeIntensity,
   vintageIntensity,
   refractorIntensity,
-  refractorSpeed = 1.0,
-  refractorColors = ['rgba(255, 0, 128, 0.2)', 'rgba(0, 255, 255, 0.2)', 'rgba(255, 255, 0, 0.2)'],
-  refractorAngle,
-  refractorAnimationEnabled = true,
-  spectralIntensity = 1.0,
-  holographicIntensity = 0.8,
-  holographicPattern = 'linear',
-  holographicColorMode = 'rainbow',
-  holographicCustomColors = ['#ff0080', '#00ffff', '#ffff00'],
-  holographicSparklesEnabled = true,
-  holographicBorderWidth = 1
+  spectralIntensity,
+  onMotionSpeedChange,
+  onPulseIntensityChange,
+  onShimmerSpeedChange,
+  onGoldIntensityChange,
+  onChromeIntensityChange,
+  onVintageIntensityChange,
+  onRefractorIntensityChange,
+  onSpectralIntensityChange
 }) => {
-  // Create local state for color picker
-  const [activeColorIndex, setActiveColorIndex] = useState<number | null>(null);
-  const [activeHolographicColorIndex, setActiveHolographicColorIndex] = useState<number | null>(null);
-  
-  const showRefractorControls = activeEffects.includes('Refractor');
-  const showHolographicControls = activeEffects.includes('Holographic');
-  
+  const [combinationName, setCombinationName] = useState('');
+
+  if (!isOpen) return null;
+
   return (
-    <EffectControlPanel
-      isOpen={isOpen}
-      onClose={onClose}
-      onSaveEffectsCombination={onSaveEffectsCombination}
-      activeEffects={activeEffects}
-      motionSpeed={motionSpeed}
-      pulseIntensity={pulseIntensity}
-      shimmerSpeed={shimmerSpeed}
-      goldIntensity={goldIntensity}
-      chromeIntensity={chromeIntensity}
-      vintageIntensity={vintageIntensity}
-      refractorIntensity={refractorIntensity}
-      refractorSpeed={refractorSpeed}
-      refractorColors={refractorColors}
-      refractorAngle={refractorAngle}
-      refractorAnimationEnabled={refractorAnimationEnabled}
-      spectralIntensity={spectralIntensity}
-      holographicIntensity={holographicIntensity}
-      holographicPattern={holographicPattern}
-      holographicColorMode={holographicColorMode}
-      holographicCustomColors={holographicCustomColors}
-      holographicSparklesEnabled={holographicSparklesEnabled}
-      holographicBorderWidth={holographicBorderWidth}
-      showRefractorControls={showRefractorControls}
-      showHolographicControls={showHolographicControls}
-      onMotionSpeedChange={onMotionSpeedChange}
-      onPulseIntensityChange={onPulseIntensityChange}
-      onShimmerSpeedChange={onShimmerSpeedChange}
-      onGoldIntensityChange={onGoldIntensityChange}
-      onChromeIntensityChange={onChromeIntensityChange}
-      onVintageIntensityChange={onVintageIntensityChange}
-      onRefractorIntensityChange={onRefractorIntensityChange}
-      onRefractorSpeedChange={onRefractorSpeedChange}
-      onRefractorAnimationToggle={onRefractorAnimationToggle}
-      onRefractorColorChange={onRefractorColorChange}
-      onRefractorAngleChange={onRefractorAngleChange}
-      onSpectralIntensityChange={onSpectralIntensityChange}
-      onHolographicIntensityChange={onHolographicIntensityChange}
-      onHolographicPatternChange={onHolographicPatternChange}
-      onHolographicColorModeChange={onHolographicColorModeChange}
-      onHolographicCustomColorChange={onHolographicCustomColorChange}
-      onHolographicSparklesToggle={onHolographicSparklesToggle}
-      onHolographicBorderWidthChange={onHolographicBorderWidthChange}
-      activeColorIndex={activeColorIndex}
-      onActiveColorChange={setActiveColorIndex}
-      activeHolographicColorIndex={activeHolographicColorIndex}
-      onActiveHolographicColorChange={setActiveHolographicColorIndex}
-    />
+    <div className="absolute top-16 right-0 h-full max-h-[calc(100%-4rem)] w-80 bg-gray-900/95 backdrop-blur-md text-white z-30 shadow-lg transition-transform duration-300 transform-gpu overflow-y-auto">
+      <div className="p-5">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-xl font-bold">Advanced Controls</h3>
+          <button 
+            onClick={onClose} 
+            className="p-2 rounded-full bg-gray-800 hover:bg-gray-700 text-gray-400"
+          >
+            <X size={18} />
+          </button>
+        </div>
+        
+        <div className="space-y-6">
+          {/* Base motion controls */}
+          <div>
+            <h4 className="text-gray-300 mb-4 pb-2 border-b border-gray-800">Base Motion</h4>
+            
+            <div className="space-y-4">
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm">Motion Speed</span>
+                  <span className="text-xs text-gray-400">{Math.round(motionSpeed * 100)}%</span>
+                </div>
+                <Slider
+                  value={[motionSpeed * 100]}
+                  max={100}
+                  step={1}
+                  onValueChange={(value) => onMotionSpeedChange(value[0] / 100)}
+                />
+              </div>
+              
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm">Pulse Intensity</span>
+                  <span className="text-xs text-gray-400">{Math.round(pulseIntensity * 100)}%</span>
+                </div>
+                <Slider
+                  value={[pulseIntensity * 100]}
+                  max={100}
+                  step={1}
+                  onValueChange={(value) => onPulseIntensityChange(value[0] / 100)}
+                />
+              </div>
+            </div>
+          </div>
+          
+          {/* Effect specific controls */}
+          {activeEffects.length > 0 && (
+            <div>
+              <h4 className="text-gray-300 mb-4 pb-2 border-b border-gray-800">Effect Parameters</h4>
+              
+              <div className="space-y-4">
+                {activeEffects.includes('Shimmer') && (
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm">Shimmer Speed</span>
+                      <span className="text-xs text-gray-400">{shimmerSpeed.toFixed(1)}s</span>
+                    </div>
+                    <Slider
+                      value={[shimmerSpeed * 10]}
+                      max={50}
+                      step={1}
+                      onValueChange={(value) => onShimmerSpeedChange(value[0] / 10)}
+                    />
+                  </div>
+                )}
+                
+                {activeEffects.includes('Gold Foil') && (
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm">Gold Intensity</span>
+                      <span className="text-xs text-gray-400">{Math.round(goldIntensity * 100)}%</span>
+                    </div>
+                    <Slider
+                      value={[goldIntensity * 100]}
+                      max={100}
+                      step={1}
+                      onValueChange={(value) => onGoldIntensityChange(value[0] / 100)}
+                    />
+                  </div>
+                )}
+                
+                {activeEffects.includes('Chrome') && (
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm">Chrome Intensity</span>
+                      <span className="text-xs text-gray-400">{Math.round(chromeIntensity * 100)}%</span>
+                    </div>
+                    <Slider
+                      value={[chromeIntensity * 100]}
+                      max={100}
+                      step={1}
+                      onValueChange={(value) => onChromeIntensityChange(value[0] / 100)}
+                    />
+                  </div>
+                )}
+                
+                {activeEffects.includes('Vintage') && (
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm">Vintage Intensity</span>
+                      <span className="text-xs text-gray-400">{Math.round(vintageIntensity * 100)}%</span>
+                    </div>
+                    <Slider
+                      value={[vintageIntensity * 100]}
+                      max={100}
+                      step={1}
+                      onValueChange={(value) => onVintageIntensityChange(value[0] / 100)}
+                    />
+                  </div>
+                )}
+                
+                {activeEffects.includes('Refractor') && (
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm">Refractor Intensity</span>
+                      <span className="text-xs text-gray-400">{Math.round(refractorIntensity * 100)}%</span>
+                    </div>
+                    <Slider
+                      value={[refractorIntensity * 100]}
+                      max={100}
+                      step={1}
+                      onValueChange={(value) => onRefractorIntensityChange(value[0] / 100)}
+                    />
+                  </div>
+                )}
+                
+                {activeEffects.includes('Holographic') && (
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm">Holographic Intensity</span>
+                      <span className="text-xs text-gray-400">{Math.round(spectralIntensity * 100)}%</span>
+                    </div>
+                    <Slider
+                      value={[spectralIntensity * 100]}
+                      max={100}
+                      step={1}
+                      onValueChange={(value) => onSpectralIntensityChange(value[0] / 100)}
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+          
+          {/* Save combination */}
+          <div className="mt-6 pt-4 border-t border-gray-800">
+            <div className="flex flex-col space-y-3">
+              <h4 className="text-sm font-medium">Save This Combination</h4>
+              <Input
+                placeholder="Enter a name for this preset"
+                value={combinationName}
+                onChange={(e) => setCombinationName(e.target.value)}
+                className="bg-gray-800 border-gray-700"
+              />
+              <Button 
+                onClick={() => {
+                  if (combinationName.trim()) {
+                    onSaveEffectsCombination(combinationName);
+                    setCombinationName('');
+                  }
+                }}
+                disabled={!combinationName.trim()}
+                className="w-full bg-blue-600 hover:bg-blue-700"
+              >
+                <Save className="h-4 w-4 mr-2" />
+                Save Preset
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 
