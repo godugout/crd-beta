@@ -1,95 +1,154 @@
 
 import { useState, useCallback } from 'react';
+import { v4 as uuidv4 } from 'uuid';
+import { CardLayer } from '../types/cardTypes';
 
-export interface CardLayer {
-  id: string;
-  type: 'image' | 'text' | 'shape' | 'effect';
-  content: string;
-  position: { x: number; y: number };
-  size: { width: number; height: number };
-  rotation: number;
-  zIndex: number;
-  style?: Record<string, any>;
-  opacity?: number; // Add opacity property
+export interface UseLayersResult {
+  layers: CardLayer[];
+  activeLayerId: string | null;
+  setActiveLayer: (layerId: string) => void;
+  addLayer: (layerType: 'image' | 'text' | 'shape' | 'effect') => string;
+  updateLayer: (layerId: string, updates: Partial<CardLayer>) => void;
+  deleteLayer: (layerId: string) => void;
+  moveLayerUp: (layerId: string) => void;
+  moveLayerDown: (layerId: string) => void;
+  setLayers: (layers: CardLayer[]) => void;
 }
 
-export const useLayers = () => {
-  const [layers, setLayers] = useState<CardLayer[]>([]);
-  const [activeLayerId, setActiveLayerId] = useState<string | null>(null);
+export const useLayers = (initialLayers: CardLayer[] = []): UseLayersResult => {
+  const [layers, setLayers] = useState<CardLayer[]>(
+    initialLayers.map(layer => ({
+      ...layer,
+      id: layer.id || uuidv4()
+    }))
+  );
   
-  const addLayer = useCallback((layer: Omit<CardLayer, 'id'> & { id?: string }) => {
-    const newLayer: CardLayer = {
-      id: layer.id || `layer-${Date.now()}`,
-      type: layer.type,
-      content: layer.content,
-      position: layer.position,
-      size: layer.size,
-      rotation: layer.rotation,
-      zIndex: layer.zIndex,
-      style: layer.style,
-      opacity: layer.opacity || 1 // Default opacity to 1
+  const [activeLayerId, setActiveLayerId] = useState<string | null>(
+    layers.length > 0 ? layers[0].id : null
+  );
+
+  const addLayer = (layerType: 'image' | 'text' | 'shape' | 'effect'): string => {
+    // Create default layer based on type
+    let newLayer: Omit<CardLayer, 'id'> = {
+      type: layerType,
+      content: '',
+      position: { x: 50, y: 50, z: layers.length },
+      size: { width: layerType === 'text' ? 'auto' : 200, height: layerType === 'text' ? 'auto' : 100 },
+      rotation: 0,
+      opacity: 1,
+      zIndex: layers.length,
+      visible: true,
+      locked: false,
+      effectIds: []
     };
+
+    // Add type-specific defaults
+    if (layerType === 'text') {
+      newLayer = {
+        ...newLayer,
+        content: 'New Text',
+        textStyle: {
+          fontFamily: 'Inter, sans-serif',
+          fontSize: 16,
+          fontWeight: '400',
+          color: '#000000',
+          textAlign: 'left'
+        }
+      };
+    } else if (layerType === 'image') {
+      newLayer = {
+        ...newLayer,
+        imageUrl: ''
+      };
+    } else if (layerType === 'shape') {
+      newLayer = {
+        ...newLayer,
+        shapeType: 'rect',
+        color: '#e2e2e2'
+      };
+    }
     
-    setLayers(prevLayers => [...prevLayers, newLayer]);
-    return newLayer.id;
-  }, []);
+    const id = uuidv4();
+    const layerWithId = {
+      ...newLayer,
+      id
+    } as CardLayer;
+    
+    setLayers(prev => [...prev, layerWithId]);
+    setActiveLayerId(id);
+    return id;
+  };
   
-  const updateLayer = useCallback((id: string, updates: Partial<CardLayer>) => {
-    setLayers(prevLayers =>
-      prevLayers.map(layer =>
+  const updateLayer = (id: string, updates: Partial<CardLayer>) => {
+    setLayers(prev =>
+      prev.map(layer =>
         layer.id === id ? { ...layer, ...updates } : layer
       )
     );
-  }, []);
+  };
   
-  const deleteLayer = useCallback((id: string) => {
-    setLayers(prevLayers => prevLayers.filter(layer => layer.id !== id));
+  const deleteLayer = (id: string) => {
+    setLayers(prev => prev.filter(layer => layer.id !== id));
+    
     if (activeLayerId === id) {
-      setActiveLayerId(null);
+      setActiveLayerId(prev => {
+        const remainingLayers = layers.filter(layer => layer.id !== id);
+        return remainingLayers.length > 0 ? remainingLayers[0].id : null;
+      });
     }
-  }, [activeLayerId]);
+  };
   
-  const moveLayerUp = useCallback((id: string) => {
-    setLayers(prevLayers => {
-      const index = prevLayers.findIndex(layer => layer.id === id);
-      if (index === -1 || index === prevLayers.length - 1) return prevLayers;
+  const moveLayerUp = (id: string) => {
+    setLayers(prev => {
+      const index = prev.findIndex(layer => layer.id === id);
+      if (index <= 0) return prev;
       
-      const newLayers = [...prevLayers];
-      const temp = newLayers[index];
-      newLayers[index] = newLayers[index + 1];
-      newLayers[index + 1] = temp;
+      const newLayers = [...prev];
       
-      return newLayers;
+      if (newLayers[index].position && newLayers[index-1].position) {
+        newLayers[index].position.z = prev[index - 1].position.z - 1;
+      }
+      
+      // Sort by z-index if position exists
+      return newLayers.sort((a, b) => 
+        (b.position?.z ?? 0) - (a.position?.z ?? 0)
+      );
     });
-  }, []);
+  };
   
-  const moveLayerDown = useCallback((id: string) => {
-    setLayers(prevLayers => {
-      const index = prevLayers.findIndex(layer => layer.id === id);
-      if (index <= 0) return prevLayers;
+  const moveLayerDown = (id: string) => {
+    setLayers(prev => {
+      const index = prev.findIndex(layer => layer.id === id);
+      if (index === -1 || index >= prev.length - 1) return prev;
       
-      const newLayers = [...prevLayers];
-      const temp = newLayers[index];
-      newLayers[index] = newLayers[index - 1];
-      newLayers[index - 1] = temp;
+      const newLayers = [...prev];
       
-      return newLayers;
+      if (newLayers[index].position && newLayers[index+1].position) {
+        newLayers[index].position.z = prev[index + 1].position.z + 1;
+      }
+      
+      // Sort by z-index if position exists
+      return newLayers.sort((a, b) => 
+        (b.position?.z ?? 0) - (a.position?.z ?? 0)
+      );
     });
-  }, []);
+  };
   
-  const setActiveLayer = useCallback((id: string | null) => {
-    setActiveLayerId(id);
-  }, []);
-  
+  const setActiveLayer = (id: string) => {
+    setActiveLayerId(id || null);
+  };
+
   return {
     layers,
     activeLayerId,
-    setActiveLayer,
     addLayer,
     updateLayer,
     deleteLayer,
     moveLayerUp,
     moveLayerDown,
+    setActiveLayer,
     setLayers
   };
 };
+
+export default useLayers;

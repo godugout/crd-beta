@@ -169,6 +169,7 @@ export interface OaklandMemoryData {
   imageUrl?: string;
   historicalContext?: string;
   personalSignificance?: string;
+  template?: string;
 }
 
 export interface TeamMember {

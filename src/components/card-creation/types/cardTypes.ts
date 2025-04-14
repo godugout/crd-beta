@@ -16,7 +16,7 @@ export interface CardDesignState {
 export interface CardLayer {
   id: string;
   type: 'image' | 'text' | 'shape' | 'effect';
-  content: string;
+  content: string | any; // Allow content to be more flexible
   position: {
     x: number;
     y: number;
@@ -43,7 +43,7 @@ export interface CardLayer {
   imageUrl?: string;
   shapeType?: string;
   color?: string;
-  [key: string]: any;
+  [key: string]: any; // Add index signature for flexibility
 }
 
 export interface CardEffect {

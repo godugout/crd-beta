@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { CardLayer } from '../types/cardTypes';
 
@@ -7,7 +7,7 @@ export interface UseLayersResult {
   layers: CardLayer[];
   activeLayerId: string | null;
   setActiveLayer: (layerId: string) => void;
-  addLayer: (layerType: 'image' | 'text' | 'shape') => string;
+  addLayer: (layerType: 'image' | 'text' | 'shape' | 'effect') => string;
   updateLayer: (layerId: string, updates: Partial<CardLayer>) => void;
   deleteLayer: (layerId: string) => void;
   moveLayerUp: (layerId: string) => void;
@@ -27,7 +27,7 @@ export const useLayers = (initialLayers: CardLayer[] = []): UseLayersResult => {
     layers.length > 0 ? layers[0].id : null
   );
 
-  const addLayer = (layerType: 'image' | 'text' | 'shape'): string => {
+  const addLayer = (layerType: 'image' | 'text' | 'shape' | 'effect'): string => {
     // Create default layer based on type
     let newLayer: Omit<CardLayer, 'id'> = {
       type: layerType,

@@ -74,7 +74,7 @@ const CardDesigner: React.FC<CardDesignerProps> = ({
       }
       
       if (userImage) {
-        const newLayer: Omit<CardLayer, 'id'> = {
+        const newLayer: Partial<CardLayer> = {
           type: 'image',
           content: userImage,
           position: { x: 50, y: 50, z: 0 },
@@ -84,7 +84,9 @@ const CardDesigner: React.FC<CardDesignerProps> = ({
           zIndex: 0,
           visible: true
         };
-        addLayer('image');
+        
+        // Add the new layer
+        const layerId = addLayer('image');
         // Update the newly created layer with the image
         const layers = document.querySelectorAll('[data-layer-id]');
         if (layers.length > 0) {
@@ -112,6 +114,15 @@ const CardDesigner: React.FC<CardDesignerProps> = ({
     // Implementation for exporting the card design as an image
     // This would typically use html-to-image or a similar library
     // to capture the canvas and download it
+  };
+  
+  const handleAddElement = (element: {url: string, type: 'image' | 'shape' | 'icon', name: string}) => {
+    const layerId = addLayer(element.type === 'icon' ? 'image' : element.type);
+    updateLayer(layerId, { 
+      content: element.url,
+      position: { x: 50, y: 50, z: layers.length },
+      size: { width: 100, height: 100 },
+    });
   };
 
   return (
@@ -208,10 +219,7 @@ const CardDesigner: React.FC<CardDesignerProps> = ({
               
               <TabsContent value="elements" className="m-0">
                 <ElementsPanel 
-                  onAddElement={(element) => {
-                    const layerId = addLayer('image');
-                    updateLayer(layerId, { content: element });
-                  }}
+                  onAddElement={handleAddElement}
                   sportType={selectedTemplate?.sport}
                 />
               </TabsContent>

@@ -129,5 +129,4 @@ export const useCardEffectsStack = (initialEffects: string[] = []) => {
   };
 };
 
-// Default export
 export default useCardEffectsStack;
