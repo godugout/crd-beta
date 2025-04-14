@@ -15,16 +15,12 @@ const CardBack: React.FC<CardBackProps> = ({ card }) => {
   const cardAttributes = {
     year: card.year,
     cardNumber: card.cardNumber
-    // No need to spread card.attributes as it doesn't exist in the type
   };
   
   return (
-    <div className="absolute inset-0 flex flex-col p-6 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900" style={{ zIndex: 1 }}>
-      {/* Holographic pattern overlay - reduced opacity */}
-      <div className="absolute inset-0 effect-holographic opacity-10" />
-      
-      {/* Content - increased z-index */}
-      <div className="relative z-10 flex flex-col h-full text-white" style={{ zIndex: 5 }}>
+    <div className="absolute inset-0 flex flex-col p-6 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900" style={{ zIndex: 5 }}>
+      {/* Card content - ensure it's highly visible */}
+      <div className="relative z-10 flex flex-col h-full text-white">
         <div className="text-center mb-6">
           <h2 className="text-2xl font-bold bg-gradient-to-r from-yellow-200 via-yellow-400 to-yellow-200 bg-clip-text text-transparent">
             {card.name}
