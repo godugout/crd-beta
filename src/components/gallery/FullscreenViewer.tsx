@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { X, ChevronLeft, ChevronRight, Share2, Maximize, Star, Rotate3D } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, Share2, Maximize, Star, Rotate3D, Info } from 'lucide-react';
 import { useCards } from '@/context/CardContext';
 import { useMobileOptimization } from '@/hooks/useMobileOptimization';
 import { toast } from 'sonner';
@@ -16,6 +16,7 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
   const card = getCardById(cardId);
   const [isFlipped, setIsFlipped] = useState(false);
   const [isAutoRotating, setIsAutoRotating] = useState(true);
+  const [showInfo, setShowInfo] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
   const { isMobile } = useMobileOptimization();
   const navigate = useNavigate();
@@ -95,6 +96,11 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
     }
   };
   
+  const handleFlipCard = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsFlipped(!isFlipped);
+  };
+  
   const handleShare = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (navigator.share && card) {
@@ -118,6 +124,11 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
     setIsAutoRotating(!isAutoRotating);
   };
   
+  const toggleInfo = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowInfo(!showInfo);
+  };
+  
   const toggleFullscreen = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!document.fullscreenElement) {
@@ -133,7 +144,7 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
   
   if (!card) {
     return (
-      <div className="fixed inset-0 bg-black flex items-center justify-center">
+      <div className="fixed inset-0 bg-black flex items-center justify-center z-50">
         <div className="text-white text-lg">Card not found</div>
         <button 
           className="absolute top-4 right-4 text-white p-2 rounded-full bg-black/50"
@@ -147,7 +158,7 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
   
   return (
     <div 
-      className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50"
+      className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50"
       onMouseMove={handleMouseMove}
       onTouchMove={handleTouchMove}
       onTouchStart={handleTouchStart}
@@ -181,7 +192,6 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
           
           {/* Overlay layers for effects */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none"></div>
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-white/10 via-transparent to-transparent opacity-70 pointer-events-none"></div>
           
           {/* Shine effect */}
           <div 
@@ -259,10 +269,27 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
       <div className="absolute top-4 right-4 flex space-x-3">
         <button 
           className="text-white p-2 rounded-full bg-black/50 hover:bg-black/70 transition"
+          onClick={handleFlipCard}
+          title="Flip card"
+        >
+          <ChevronLeft size={20} className={isFlipped ? "hidden" : ""} />
+          <ChevronRight size={20} className={isFlipped ? "" : "hidden"} />
+        </button>
+        
+        <button 
+          className="text-white p-2 rounded-full bg-black/50 hover:bg-black/70 transition"
           onClick={toggleAutoRotation}
           title={isAutoRotating ? "Stop auto rotation" : "Start auto rotation"}
         >
           <Rotate3D size={20} className={isAutoRotating ? "text-primary" : "text-white"} />
+        </button>
+        
+        <button 
+          className="text-white p-2 rounded-full bg-black/50 hover:bg-black/70 transition"
+          onClick={toggleInfo}
+          title="Show card info"
+        >
+          <Info size={20} className={showInfo ? "text-primary" : "text-white"} />
         </button>
         
         <button 
@@ -289,6 +316,66 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
           <X size={20} />
         </button>
       </div>
+      
+      {/* Mini Action Bar */}
+      <div className="absolute bottom-6 right-6">
+        <div className="bg-black/70 backdrop-blur-sm rounded-lg p-3 shadow-lg text-white text-xs max-w-xs">
+          <h4 className="font-medium mb-2">Keyboard Shortcuts:</h4>
+          <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+            <div>
+              <kbd className="bg-gray-800 px-1 rounded">Arrow keys</kbd> 
+              <span className="ml-1">Rotate</span>
+            </div>
+            <div>
+              <kbd className="bg-gray-800 px-1 rounded">F</kbd> 
+              <span className="ml-1">Flip card</span>
+            </div>
+            <div>
+              <kbd className="bg-gray-800 px-1 rounded">R</kbd> 
+              <span className="ml-1">Auto-rotate</span>
+            </div>
+            <div>
+              <kbd className="bg-gray-800 px-1 rounded">Esc</kbd> 
+              <span className="ml-1">Close</span>
+            </div>
+          </div>
+          <div className="mt-3 text-gray-400 text-[10px]">
+            Click and drag to manually rotate the card
+          </div>
+        </div>
+      </div>
+      
+      {/* Card info panel */}
+      {showInfo && (
+        <div className="absolute left-6 top-1/2 -translate-y-1/2 bg-black/70 backdrop-blur-sm rounded-lg p-4 shadow-lg text-white max-w-xs">
+          <h3 className="text-lg font-bold mb-3">{card.title}</h3>
+          <div className="space-y-2 text-sm">
+            {card.description && (
+              <p className="text-gray-300">{card.description}</p>
+            )}
+            <div className="pt-2">
+              {card.rarity && (
+                <div className="flex justify-between mb-1">
+                  <span className="text-gray-400">Rarity:</span>
+                  <span>{card.rarity}</span>
+                </div>
+              )}
+              {card.year && (
+                <div className="flex justify-between mb-1">
+                  <span className="text-gray-400">Year:</span>
+                  <span>{card.year}</span>
+                </div>
+              )}
+              {card.collectionId && (
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Collection:</span>
+                  <span>{card.collectionId}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

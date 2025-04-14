@@ -37,3 +37,40 @@ export interface MaterialSimulation {
    */
   teamColors?: string[];
 }
+
+// Add missing types that were causing build errors
+export interface PremiumCardEffect {
+  id: string;
+  name: string;
+  category: string;
+  settings: CardEffectSettings;
+  description: string;
+  premium: boolean;
+  iconUrl?: string;
+}
+
+export interface CardEffectSettings {
+  intensity?: number;
+  speed?: number;
+  pattern?: string;
+  color?: string;
+  animationEnabled?: boolean;
+  [key: string]: any;
+}
+
+export interface CardEffectsOptions {
+  initialEffects?: Record<string, string[]>;
+  presets?: Record<string, string[]>;
+  defaultIntensity?: number;
+  performanceMode?: 'high' | 'medium' | 'low';
+}
+
+export interface CardEffectsResult {
+  cardEffects: Record<string, string[]>;
+  isLoading: boolean;
+  addEffect: (cardId: string, effect: string) => void;
+  removeEffect: (cardId: string, effect: string) => void;
+  toggleEffect: (cardId: string, effect: string) => void;
+  clearEffects: (cardId: string) => void;
+  setCardEffects: (cardId: string, effects: string[]) => void;
+}
