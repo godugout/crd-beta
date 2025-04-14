@@ -1,5 +1,5 @@
 
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCards } from '@/context/CardContext';
 import { toast } from 'sonner';
@@ -9,6 +9,7 @@ import ViewerControls from './viewer-components/ViewerControls';
 import InfoPanel from './viewer-components/InfoPanel';
 import KeyboardShortcuts from './viewer-components/KeyboardShortcuts';
 import { useCardInteraction } from '@/hooks/useCardInteraction';
+import CardEffectsPanel from './viewer-components/CardEffectsPanel';
 
 interface FullscreenViewerProps {
   cardId: string;
@@ -38,8 +39,9 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
     toggleAutoRotation
   } = useCardInteraction({ containerRef, cardRef });
 
-  const [isFlipped, setIsFlipped] = React.useState(false);
-  const [showInfo, setShowInfo] = React.useState(false);
+  const [isFlipped, setIsFlipped] = useState(false);
+  const [showInfo, setShowInfo] = useState(false);
+  const [activeEffects, setActiveEffects] = useState<string[]>(['Refractor', 'Holographic']);
 
   useEffect(() => {
     window.addEventListener('keydown', handleKeyboardControls);
@@ -54,6 +56,14 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
 
   const handleShare = () => {
     toast.info('Share feature coming soon');
+  };
+
+  const handleToggleEffect = (effectId: string) => {
+    setActiveEffects(prev => 
+      prev.includes(effectId) 
+        ? prev.filter(id => id !== effectId)
+        : [...prev, effectId]
+    );
   };
 
   if (!card) {
@@ -88,6 +98,12 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
           containerRef={containerRef}
           isAutoRotating={isAutoRotating}
         />
+        
+        {/* Effects panel */}
+        <CardEffectsPanel 
+          activeEffects={activeEffects}
+          onToggleEffect={handleToggleEffect}
+        />
       </div>
 
       <ViewerControls
@@ -110,4 +126,3 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
 };
 
 export default FullscreenViewer;
-

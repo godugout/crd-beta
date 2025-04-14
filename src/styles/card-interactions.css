@@ -1,3 +1,4 @@
+
 /* Core 3D card styles */
 .card-container {
   perspective: 1200px;
@@ -86,7 +87,8 @@
   z-index: 3; /* Ensure highlight is on top */
 }
 
-.card-container:hover .card-highlight {
+.card-container:hover .card-highlight,
+*:hover > .card-highlight {
   opacity: 1;
 }
 
@@ -107,7 +109,7 @@
   z-index: 4; /* Above highlight */
 }
 
-.card-container:hover .flip-indicator {
+*:hover > .flip-indicator {
   opacity: 0.7;
   animation: edge-pulse 2s ease-in-out infinite;
 }
@@ -156,4 +158,52 @@
 .boundary-warning {
   animation: boundary-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   border: 1px solid rgba(239, 68, 68, 0.5);
+}
+
+/* Enhanced 3D card effect */
+.card-effect {
+  transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+
+/* Improved card flip animation */
+.card-flip-enter {
+  transform: rotateY(0deg);
+}
+
+.card-flip-enter-active {
+  transform: rotateY(180deg);
+  transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.card-flip-exit {
+  transform: rotateY(180deg);
+}
+
+.card-flip-exit-active {
+  transform: rotateY(0deg);
+  transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Card shine effect that follows mouse */
+.card-shine {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at var(--mouse-x, 50%) var(--mouse-y, 50%), 
+    rgba(255,255,255,0.4) 0%, 
+    transparent 50%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+  z-index: 3;
+}
+
+*:hover > .card-shine {
+  opacity: 1;
 }
