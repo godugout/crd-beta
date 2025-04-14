@@ -4,7 +4,7 @@ import { CardData } from '@/types/card';
 import CardFront from './card-elements/CardFront';
 import CardBack from './card-elements/CardBack';
 import CardEffectsLayer, { useCardEffects } from './card-elements/CardEffectsLayer';
-import RefractorEffect from '../card-effects/RefractorEffect';
+import RefractorEffect from '@/components/card-effects/RefractorEffect';
 import HolographicEngine from '../card-effects/HolographicEngine';
 
 interface CardCanvasProps {
@@ -15,6 +15,13 @@ interface CardCanvasProps {
   cardRef: React.RefObject<HTMLDivElement>;
   onMouseMove: (e: React.MouseEvent<HTMLDivElement>) => void;
   onMouseLeave: () => void;
+  effectSettings?: {
+    refractorIntensity?: number;
+    refractorColors?: string[];
+    animationEnabled?: boolean;
+    refractorSpeed?: number;
+    refractorAngle?: number;
+  };
 }
 
 const CardCanvas: React.FC<CardCanvasProps> = ({
@@ -24,13 +31,23 @@ const CardCanvas: React.FC<CardCanvasProps> = ({
   containerRef,
   cardRef,
   onMouseMove,
-  onMouseLeave
+  onMouseLeave,
+  effectSettings = {}
 }) => {
   // Use the hook directly instead of trying to access methods on a React component
   const effectsLayer = useCardEffects({ activeEffects, isFlipped });
   const cardElementRef = useRef<HTMLDivElement>(null);
   const [mousePos, setMousePos] = useState({ x: 0.5, y: 0.5 });
   const [animationActive, setAnimationActive] = useState(true);
+  
+  // Extract refractor settings with defaults
+  const {
+    refractorIntensity = 1.0,
+    refractorColors,
+    animationEnabled = true,
+    refractorSpeed = 1.0,
+    refractorAngle
+  } = effectSettings;
   
   // Set CSS variables for mouse position to use in the refractor effect
   useEffect(() => {
@@ -67,6 +84,40 @@ const CardCanvas: React.FC<CardCanvasProps> = ({
       window.removeEventListener('mousemove', handleMouseMove);
       if (cardElementRef.current) {
         cardElementRef.current.removeEventListener('mouseleave', handleMouseLeave);
+      }
+    };
+  }, []);
+  
+  // Handle touch events for mobile devices
+  useEffect(() => {
+    const handleTouchMove = (e: TouchEvent) => {
+      if (!cardElementRef.current || e.touches.length === 0) return;
+      
+      const touch = e.touches[0];
+      const rect = cardElementRef.current.getBoundingClientRect();
+      const x = (touch.clientX - rect.left) / rect.width;
+      const y = (touch.clientY - rect.top) / rect.height;
+      
+      cardElementRef.current.style.setProperty('--mouse-x', `${x * 100}%`);
+      cardElementRef.current.style.setProperty('--mouse-y', `${y * 100}%`);
+      
+      setMousePos({ x, y });
+      setAnimationActive(true);
+    };
+    
+    const handleTouchEnd = () => {
+      setAnimationActive(false);
+    };
+    
+    if (cardElementRef.current) {
+      cardElementRef.current.addEventListener('touchmove', handleTouchMove);
+      cardElementRef.current.addEventListener('touchend', handleTouchEnd);
+    }
+    
+    return () => {
+      if (cardElementRef.current) {
+        cardElementRef.current.removeEventListener('touchmove', handleTouchMove);
+        cardElementRef.current.removeEventListener('touchend', handleTouchEnd);
       }
     };
   }, []);
@@ -134,11 +185,15 @@ const CardCanvas: React.FC<CardCanvasProps> = ({
           ></div>
         )}
         
-        {/* Refractor WebGL effect overlay */}
+        {/* Enhanced Refractor WebGL effect overlay */}
         <RefractorEffect 
           isActive={hasRefractorEffect} 
-          intensity={1.0}
+          intensity={refractorIntensity}
+          speed={refractorSpeed}
+          colors={refractorColors}
           mousePosition={mousePos}
+          animationEnabled={animationEnabled}
+          angle={refractorAngle}
         />
         
         {/* Advanced Holographic Engine */}

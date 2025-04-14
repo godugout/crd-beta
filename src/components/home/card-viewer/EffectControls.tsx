@@ -14,6 +14,10 @@ interface EffectControlsProps {
   onChromeIntensityChange: (value: number[]) => void;
   onVintageIntensityChange: (value: number[]) => void;
   onRefractorIntensityChange: (value: number[]) => void;
+  onRefractorSpeedChange?: (value: number[]) => void;
+  onRefractorAnimationToggle?: (enabled: boolean) => void;
+  onRefractorColorChange?: (colorIndex: number, color: string) => void;
+  onRefractorAngleChange?: (value: number[]) => void;
   onSpectralIntensityChange?: (value: number[]) => void;
   motionSpeed: number;
   pulseIntensity: number;
@@ -22,6 +26,10 @@ interface EffectControlsProps {
   chromeIntensity: number;
   vintageIntensity: number;
   refractorIntensity: number;
+  refractorSpeed?: number;
+  refractorColors?: string[];
+  refractorAngle?: number;
+  refractorAnimationEnabled?: boolean;
   spectralIntensity?: number;
 }
 
@@ -37,6 +45,10 @@ const EffectControls: React.FC<EffectControlsProps> = ({
   onChromeIntensityChange,
   onVintageIntensityChange,
   onRefractorIntensityChange,
+  onRefractorSpeedChange = () => {},
+  onRefractorAnimationToggle = () => {},
+  onRefractorColorChange = () => {},
+  onRefractorAngleChange = () => {},
   onSpectralIntensityChange = () => {},
   motionSpeed,
   pulseIntensity,
@@ -45,8 +57,17 @@ const EffectControls: React.FC<EffectControlsProps> = ({
   chromeIntensity,
   vintageIntensity,
   refractorIntensity,
+  refractorSpeed = 1.0,
+  refractorColors = ['rgba(255, 0, 128, 0.2)', 'rgba(0, 255, 255, 0.2)', 'rgba(255, 255, 0, 0.2)'],
+  refractorAngle,
+  refractorAnimationEnabled = true,
   spectralIntensity = 1.0
 }) => {
+  // Create local state for color picker
+  const [activeColorIndex, setActiveColorIndex] = useState<number | null>(null);
+  
+  const showRefractorControls = activeEffects.includes('Refractor');
+  
   return (
     <EffectControlPanel
       isOpen={isOpen}
@@ -60,7 +81,12 @@ const EffectControls: React.FC<EffectControlsProps> = ({
       chromeIntensity={chromeIntensity}
       vintageIntensity={vintageIntensity}
       refractorIntensity={refractorIntensity}
+      refractorSpeed={refractorSpeed}
+      refractorColors={refractorColors}
+      refractorAngle={refractorAngle}
+      refractorAnimationEnabled={refractorAnimationEnabled}
       spectralIntensity={spectralIntensity}
+      showRefractorControls={showRefractorControls}
       onMotionSpeedChange={onMotionSpeedChange}
       onPulseIntensityChange={onPulseIntensityChange}
       onShimmerSpeedChange={onShimmerSpeedChange}
@@ -68,7 +94,13 @@ const EffectControls: React.FC<EffectControlsProps> = ({
       onChromeIntensityChange={onChromeIntensityChange}
       onVintageIntensityChange={onVintageIntensityChange}
       onRefractorIntensityChange={onRefractorIntensityChange}
+      onRefractorSpeedChange={onRefractorSpeedChange}
+      onRefractorAnimationToggle={onRefractorAnimationToggle}
+      onRefractorColorChange={onRefractorColorChange}
+      onRefractorAngleChange={onRefractorAngleChange}
       onSpectralIntensityChange={onSpectralIntensityChange}
+      activeColorIndex={activeColorIndex}
+      onActiveColorChange={setActiveColorIndex}
     />
   );
 };

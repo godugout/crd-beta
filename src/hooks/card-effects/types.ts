@@ -1,4 +1,3 @@
-
 export interface PremiumCardEffect {
   id: string;
   name: string;
@@ -24,6 +23,10 @@ export interface CardEffectSettings {
   pattern?: string;
   blend?: 'normal' | 'multiply' | 'screen' | 'overlay';
   animationEnabled?: boolean;
+  refractorIntensity?: number;
+  refractorSpeed?: number;
+  refractorColors?: string[];
+  refractorAngle?: number;
 }
 
 export interface CardEffectsOptions {
@@ -46,11 +49,17 @@ export interface CardEffectsResult {
 export type CardEffectLibrary = Record<string, PremiumCardEffect>;
 
 export interface MaterialSimulation {
-  type: 'metal' | 'canvas' | 'glossy' | 'matte' | 'embossed';
+  type: 'metal' | 'canvas' | 'glossy' | 'matte' | 'embossed' | 'refractor';
   baseColor?: string;
   textureUrl?: string;
   normalMapUrl?: string;
   roughness?: number;
   metalness?: number;
   reflectivity?: number;
+  refractorProperties?: {
+    intensity: number;
+    speed: number;
+    colors: string[];
+    angle?: number;
+  };
 }
