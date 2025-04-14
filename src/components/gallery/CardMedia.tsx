@@ -21,6 +21,9 @@ const CardMedia: React.FC<CardMediaProps> = ({ card, onView, className = '' }) =
   // Determine image URL with fallback
   const imageUrl = card.imageUrl || card.thumbnailUrl;
 
+  // Log image loading attempt for debugging
+  console.log(`Attempting to load image for card ${card.id}: ${imageUrl}`);
+
   return (
     <div 
       className={cn("relative overflow-hidden rounded-lg aspect-[2.5/3.5] cursor-pointer group", className)}
@@ -69,14 +72,26 @@ const CardMedia: React.FC<CardMediaProps> = ({ card, onView, className = '' }) =
         </div>
       )}
 
+      {/* Placeholder background */}
+      <div className="absolute inset-0 bg-gray-200 z-0"></div>
+
       {/* The card image */}
       {imageUrl && (
         <img 
           src={imageUrl} 
           alt={card.title || "Card"} 
-          className="absolute inset-0 w-full h-full object-cover"
-          onLoad={() => setIsLoaded(true)}
-          onError={() => setIsError(true)}
+          className={cn(
+            "absolute inset-0 w-full h-full object-cover z-5",
+            isLoaded ? "opacity-100" : "opacity-0"
+          )}
+          onLoad={() => {
+            console.log(`Image loaded successfully for card ${card.id}`);
+            setIsLoaded(true);
+          }}
+          onError={() => {
+            console.error(`Failed to load image for card ${card.id}: ${imageUrl}`);
+            setIsError(true);
+          }}
           loading="lazy"
         />
       )}

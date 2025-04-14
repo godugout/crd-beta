@@ -55,6 +55,9 @@ export const CardThumbnail: React.FC<CardThumbnailProps> = ({
     return style;
   }, [card.designMetadata]);
 
+  // Log image loading attempt for debugging
+  console.log(`CardThumbnail: Attempting to load image for card ${card.id}: ${card.imageUrl}`);
+
   return (
     <CardBase
       card={card}
@@ -65,6 +68,9 @@ export const CardThumbnail: React.FC<CardThumbnailProps> = ({
       style={{ ...styleFromMetadata, ...cardStyle }}
       {...props}
     >
+      {/* Base background color */}
+      <div className="absolute inset-0 bg-gray-200 z-0"></div>
+      
       {/* Loading state */}
       {!isImageLoaded && !isImageError && (
         <div className="absolute inset-0 bg-gray-100 animate-pulse flex items-center justify-center z-20">
@@ -108,14 +114,23 @@ export const CardThumbnail: React.FC<CardThumbnailProps> = ({
         </div>
       )}
       
-      {/* Card image */}
+      {/* Card image with improved visibility */}
       {card.imageUrl && (
         <img 
           src={card.imageUrl} 
           alt={card.title || "Card"} 
-          className="absolute inset-0 w-full h-full object-cover z-10"
-          onLoad={() => setIsImageLoaded(true)}
-          onError={() => setIsImageError(true)}
+          className={cn(
+            "absolute inset-0 w-full h-full object-cover z-10", 
+            isImageLoaded ? "opacity-100" : "opacity-0"
+          )}
+          onLoad={() => {
+            console.log(`CardThumbnail: Image loaded successfully for card ${card.id}`);
+            setIsImageLoaded(true);
+          }}
+          onError={() => {
+            console.error(`CardThumbnail: Failed to load image for card ${card.id}: ${card.imageUrl}`);
+            setIsImageError(true);
+          }}
           loading="lazy"
         />
       )}
@@ -127,6 +142,7 @@ export const CardThumbnail: React.FC<CardThumbnailProps> = ({
         </div>
       )}
       
+      {/* Card information overlay */}
       {showInfo && (
         <CardInfoOverlay card={card} showOnHover={infoOnHover} />
       )}

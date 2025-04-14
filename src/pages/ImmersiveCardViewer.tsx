@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import CardBackground from '@/components/home/card-viewer/CardBackground';
 import { CardImage } from '@/components/cards/CardImage';
 import CardShopBackground from '@/components/home/card-viewer/CardShopBackground';
+import MiniActionBar from '@/components/ui/MiniActionBar';
 
 // Import the updated RelatedCards
 import RelatedCardsSlider from '@/components/card-viewer/RelatedCardsSlider';
@@ -187,10 +188,6 @@ const ImmersiveCardViewer = () => {
             autoRotate={false}
             onFlip={handleCardFlip}
           />
-          
-          <div className="mt-4 text-center text-white/70 text-sm">
-            <p>Click the card to flip • Drag to move • Flick to spin</p>
-          </div>
         </div>
       </div>
       
@@ -201,6 +198,9 @@ const ImmersiveCardViewer = () => {
           <RelatedCardsSlider cards={relatedCards} onCardClick={handleCardClick} />
         </div>
       )}
+
+      {/* Mini Action Bar with instructions and keyboard shortcuts */}
+      <MiniActionBar />
     </div>
   );
 };

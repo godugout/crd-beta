@@ -155,6 +155,7 @@ export const CardImage: React.FC<CardImageProps> = ({
   const imageUrl = card.imageUrl || card.thumbnailUrl;
 
   const handleImageLoad = () => {
+    console.log("Image loaded successfully:", imageUrl);
     setImageLoaded(true);
     setImageError(false);
   };
@@ -186,9 +187,9 @@ export const CardImage: React.FC<CardImageProps> = ({
       >
         {/* Front face of the card */}
         <div className="card-face card-front absolute inset-0 backface-hidden bg-white">
-          {/* Loading placeholder */}
-          {!imageLoaded && !imageError && imageUrl && (
-            <div className="absolute inset-0 bg-gray-100 animate-pulse flex items-center justify-center">
+          {/* Loading placeholder - show only if image is still loading */}
+          {!imageLoaded && !imageError && (
+            <div className="absolute inset-0 bg-gray-100 animate-pulse flex items-center justify-center z-10">
               <svg className="h-8 w-8 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
@@ -197,7 +198,7 @@ export const CardImage: React.FC<CardImageProps> = ({
           
           {/* Error state */}
           {imageError && (
-            <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
+            <div className="absolute inset-0 flex items-center justify-center bg-gray-100 z-20">
               <div className="text-center text-gray-400">
                 <svg className="h-8 w-8 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
@@ -212,19 +213,20 @@ export const CardImage: React.FC<CardImageProps> = ({
             <img 
               src={imageUrl} 
               alt={card.title || "Card"} 
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover z-0"
               onLoad={handleImageLoad}
               onError={handleImageError}
               draggable={false}
+              style={{ display: imageLoaded ? 'block' : 'none' }}
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-400">
+            <div className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-400 z-0">
               No Image
             </div>
           )}
           
           {/* Card Effects Layer - positioned on top of the card face */}
-          <div className="card-effects-layer pointer-events-none">
+          <div className="card-effects-layer pointer-events-none z-10">
             {/* Lighting effect overlay */}
             <div 
               className="absolute inset-0 bg-gradient-to-tr from-black/10 via-transparent to-white/20 opacity-50 pointer-events-none"
