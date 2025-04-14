@@ -53,7 +53,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({
     : typeof title === 'string'
       ? title
       : typeof title === 'number'
-        ? title.toString()
+        ? String(title)
         : title !== null && title !== undefined
           ? String(title)
           : 'CardShow';
@@ -62,7 +62,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({
   const stringDescription = typeof description === 'string'
     ? description
     : typeof description === 'number'
-      ? description.toString()
+      ? String(description)
       : description !== null && description !== undefined
         ? String(description)
         : 'Digital card collection platform';
