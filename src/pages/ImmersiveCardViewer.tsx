@@ -5,8 +5,11 @@ import { useCards } from '@/context/CardContext';
 import FullscreenViewer from '@/components/gallery/FullscreenViewer';
 import PageLayout from '@/components/navigation/PageLayout';
 import { toast } from 'sonner';
-import RelatedCardsSlider from '@/components/card-viewer/RelatedCardsSlider';
 import CardBackground from '@/components/home/card-viewer/CardBackground';
+import { CardImage } from '@/components/cards/CardImage';
+
+// Import the updated RelatedCards
+import RelatedCardsSlider from '@/components/card-viewer/RelatedCardsSlider';
 
 const ImmersiveCardViewer = () => {
   const { id } = useParams<{ id: string }>();
@@ -18,7 +21,8 @@ const ImmersiveCardViewer = () => {
   // Get the current card and prepare effects
   useEffect(() => {
     if (id) {
-      const card = getCardById(id);
+      const card = getCardById ? getCardById(id) : cards.find(c => c.id === id);
+      
       if (card) {
         // Extract effects from card metadata
         const effects = [];
@@ -30,7 +34,7 @@ const ImmersiveCardViewer = () => {
       }
       setIsLoading(false);
     }
-  }, [id, getCardById]);
+  }, [id, cards, getCardById]);
   
   const handleClose = () => {
     navigate('/cards');
@@ -43,7 +47,11 @@ const ImmersiveCardViewer = () => {
   // Find related cards based on tags, artist, or year
   const getRelatedCards = () => {
     if (!id) return [];
-    const currentCard = getCardById(id);
+    
+    const currentCard = getCardById ? 
+      getCardById(id) : 
+      cards.find(card => card.id === id);
+      
     if (!currentCard) return [];
     
     return cards
