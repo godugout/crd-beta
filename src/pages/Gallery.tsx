@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PageLayout from '@/components/navigation/PageLayout';
@@ -28,7 +27,6 @@ const Gallery = () => {
     isLoading
   } = useGalleryCards();
 
-  // Check if this is user's first visit
   useEffect(() => {
     const hasSeenTutorial = localStorage.getItem('hasSeenGalleryTutorial');
     if (!hasSeenTutorial) {
@@ -52,14 +50,12 @@ const Gallery = () => {
     setSelectedCardId(cardId);
     setIsFullscreen(true);
     
-    // Guide users who haven't seen the tutorial
     const hasSeenViewer = localStorage.getItem('hasSeenViewerTutorial');
     if (!hasSeenViewer) {
       toast({
         variant: "info",
         title: "Tip: Interactive Card Viewer",
         description: "Try dragging the card or using the effect controls for an immersive experience",
-        duration: 6000,
       });
     }
   };

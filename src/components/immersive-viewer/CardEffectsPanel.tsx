@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect } from 'react';
 import { X, Lightbulb, Sparkles, Rainbow, RefreshCw, Palette } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
@@ -30,7 +29,6 @@ const CardEffectsPanel: React.FC<CardEffectsPanelProps> = ({
   const { toast } = useToast();
   const panelRef = useRef<HTMLDivElement>(null);
   
-  // Handle keyboard navigation
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
@@ -42,7 +40,6 @@ const CardEffectsPanel: React.FC<CardEffectsPanelProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [onClose]);
   
-  // Focus trap for accessibility
   useEffect(() => {
     if (panelRef.current) {
       const focusableElements = panelRef.current.querySelectorAll(
@@ -96,7 +93,6 @@ const CardEffectsPanel: React.FC<CardEffectsPanelProps> = ({
   const handleToggleEffect = (effectId: string) => {
     onToggleEffect(effectId);
     
-    // Show toast notification for better user feedback
     const isActive = activeEffects.includes(effectId);
     const effect = availableEffects.find(e => e.id === effectId);
     
@@ -105,7 +101,6 @@ const CardEffectsPanel: React.FC<CardEffectsPanelProps> = ({
         variant: isActive ? "info" : "success",
         title: isActive ? "Effect removed" : "Effect applied",
         description: `${effect.name} effect has been ${isActive ? 'disabled' : 'enabled'}`,
-        duration: 2000,
       });
     }
   };

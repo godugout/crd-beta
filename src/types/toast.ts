@@ -9,9 +9,10 @@ export interface ToasterToast {
   description?: React.ReactNode
   action?: React.ReactElement
   variant?: ToastVariant
+  duration?: number
 }
 
 export interface ToasterToastWithStatus extends ToasterToast {
-  duration?: number
+  open?: boolean
   ariaLive?: 'assertive' | 'off' | 'polite'
 }

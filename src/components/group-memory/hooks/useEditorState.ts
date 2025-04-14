@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import { EnhancedCropBoxProps, MemorabiliaType } from '@/components/card-upload/cardDetection';
 import { useMobileOptimization } from '@/hooks/useMobileOptimization';
@@ -88,7 +87,6 @@ export const useEditorState = ({
       variant: "info",
       title: "Detection started",
       description: "Analyzing image for face detection...",
-      duration: 3000,
     });
     
     // In a real implementation, this would be connected to an actual detection API

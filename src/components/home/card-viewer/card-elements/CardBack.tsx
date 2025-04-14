@@ -14,8 +14,8 @@ const CardBack: React.FC<CardBackProps> = ({ card }) => {
   const cardSeries = card.set || 'Core Set';
   const cardAttributes = {
     year: card.year,
-    cardNumber: card.cardNumber,
-    ...(card.attributes || {})
+    cardNumber: card.cardNumber
+    // No need to spread card.attributes as it doesn't exist in the type
   };
   
   return (
