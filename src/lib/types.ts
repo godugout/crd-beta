@@ -1,3 +1,4 @@
+
 // Card interface - extend with baseball stats
 export interface Card {
   id: string;
@@ -47,11 +48,17 @@ export interface Card {
       serialNumber?: string;
       certification?: string;
       gradeScore?: string;
+      category?: string;
+      series?: string;
+      cardType?: string;
     },
     marketMetadata?: {
       lastSoldPrice?: number;
       currentAskingPrice?: number;
       estimatedMarketValue?: number;
+      isPrintable?: boolean;
+      isForSale?: boolean;
+      includeInCatalog?: boolean;
     }
   },
   
@@ -87,6 +94,7 @@ export interface Collection {
   updatedAt: string;
   designMetadata?: any;
   cards?: Card[];
+  cardIds?: string[]; // Added for backward compatibility
   instagramSource?: {
     username: string;
     lastFetched?: string;
@@ -187,6 +195,20 @@ export const ROLE_PERMISSIONS: Record<UserRole, string[]> = {
   [UserRole.CREATOR]: ['read:own', 'write:own', 'delete:own', 'create:premium']
 };
 
+// Instagram CRD specific interfaces
+export interface InstagramPost {
+  id: string;
+  mediaType: string;
+  mediaUrl: string;
+  thumbnailUrl?: string;
+  permalink: string;
+  caption?: string;
+  timestamp: string;
+  // Legacy properties for backward compatibility
+  media_url?: string;
+  thumbnail_url?: string;
+}
+
 // Database representation types
 export interface DbCard {
   id: string;
@@ -230,15 +252,4 @@ export interface DbReaction {
   comment_id?: string;
   type: 'like' | 'love' | 'wow' | 'haha' | 'sad' | 'angry';
   created_at: string;
-}
-
-// Instagram CRD specific interfaces
-export interface InstagramPost {
-  id: string;
-  mediaType: string;
-  mediaUrl: string;
-  permalink: string;
-  caption?: string;
-  timestamp: string;
-  thumbnailUrl?: string;
 }

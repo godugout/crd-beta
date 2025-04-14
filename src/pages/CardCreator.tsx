@@ -57,11 +57,12 @@ const CardCreator: React.FC = () => {
   } = useLayers();
   
   const { 
-    effectStack, 
+    activeEffects,
     addEffect, 
     removeEffect, 
     updateEffectSettings,
-    getEffectClasses 
+    effectStack = [],
+    getEffectClasses = () => ""
   } = useCardEffectsStack();
   
   // Load card data for editing if ID is provided

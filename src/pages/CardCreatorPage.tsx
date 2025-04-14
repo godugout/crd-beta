@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import PageLayout from '@/components/navigation/PageLayout';
 import CardMakerWizard from '@/components/card-creation/CardMakerWizard';
@@ -33,11 +32,12 @@ const CardCreatorPage: React.FC = () => {
   } = useLayers();
   
   const { 
-    effectStack, 
+    activeEffects,
     addEffect, 
     removeEffect, 
     updateEffectSettings,
-    getEffectClasses 
+    effectStack = [],
+    getEffectClasses = () => ""
   } = useCardEffectsStack();
 
   const activeLayer = layers.find(layer => layer.id === activeLayerId) || null;

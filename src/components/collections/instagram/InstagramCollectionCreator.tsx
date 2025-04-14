@@ -74,7 +74,7 @@ const InstagramCollectionCreator = () => {
       const newCollection = addCollection({
         name: values.collectionName,
         description: `Instagram collection for @${username}`,
-        coverImageUrl: data.posts[0].media_url || data.posts[0].thumbnail_url,
+        coverImageUrl: data.posts[0].mediaUrl || data.posts[0].thumbnailUrl,
         instagramSource: {
           username,
           lastFetched: new Date().toISOString(),
@@ -87,8 +87,8 @@ const InstagramCollectionCreator = () => {
         id: uuidv4(),
         title: `Instagram post by @${username}`,
         description: post.caption || '',
-        imageUrl: post.media_url || post.thumbnail_url,
-        thumbnailUrl: post.thumbnail_url || post.media_url,
+        imageUrl: post.mediaUrl || post.thumbnailUrl,
+        thumbnailUrl: post.thumbnailUrl || post.mediaUrl,
         collectionId: newCollection.id,
         tags: ['instagram', username],
         instagramUsername: username,
@@ -173,8 +173,8 @@ const InstagramCollectionCreator = () => {
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? (
                 <>
-                  <LoadingSpinner size={16} className="mr-2" />
-                  Fetching posts...
+                  <LoadingSpinner size={16} />
+                  <span className="ml-2">Fetching posts...</span>
                 </>
               ) : (
                 "Create InstaCRD Collection"

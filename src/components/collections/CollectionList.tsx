@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -75,7 +74,7 @@ const CollectionList: React.FC<CollectionListProps> = ({ collections, isLoading 
           
           <div className="flex items-center ml-4">
             <span className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-700 mr-3">
-              {collection.cardIds?.length || 0} cards
+              {collection.cards ? collection.cards.length : 0} cards
             </span>
             <ChevronRight className="h-5 w-5 text-gray-400" />
           </div>

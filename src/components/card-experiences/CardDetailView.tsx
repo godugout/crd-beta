@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useCards } from '@/context/CardContext';
 import { Button } from "@/components/ui/button";
@@ -27,9 +26,9 @@ const CardDetailView: React.FC<CardDetailViewProps> = ({ cardId, onBack }) => {
   const { getCard, deleteCard } = useCards();
   const [liked, setLiked] = useState(false);
   
-  const card = getCard(cardId);
+  const cardData = getCard(cardId);
   
-  if (!card) {
+  if (!cardData) {
     return (
       <div className="p-8 text-center">
         <p>Card not found</p>
@@ -47,7 +46,7 @@ const CardDetailView: React.FC<CardDetailViewProps> = ({ cardId, onBack }) => {
   
   const handleShare = () => {
     // In a real app, implement sharing functionality
-    navigator.clipboard.writeText(`Check out this card: ${card.title}`);
+    navigator.clipboard.writeText(`Check out this card: ${cardData.title}`);
     toast.success('Link copied to clipboard');
   };
   
@@ -91,14 +90,14 @@ const CardDetailView: React.FC<CardDetailViewProps> = ({ cardId, onBack }) => {
             <div 
               className="aspect-[2.5/3.5] w-full max-w-md rounded-lg overflow-hidden"
               style={{
-                borderRadius: card.designMetadata?.cardStyle?.borderRadius || '8px',
-                boxShadow: `0 0 20px ${card.designMetadata?.cardStyle?.shadowColor || 'rgba(0,0,0,0.2)'}`,
-                border: `${card.designMetadata?.cardStyle?.frameWidth || 2}px solid ${card.designMetadata?.cardStyle?.frameColor || '#000'}`,
+                borderRadius: cardData.designMetadata?.cardStyle?.borderRadius || '8px',
+                boxShadow: `0 0 20px ${cardData.designMetadata?.cardStyle?.shadowColor || 'rgba(0,0,0,0.2)'}`,
+                border: `${cardData.designMetadata?.cardStyle?.frameWidth || 2}px solid ${cardData.designMetadata?.cardStyle?.frameColor || '#000'}`,
               }}
             >
               <img 
-                src={card.imageUrl} 
-                alt={card.title} 
+                src={cardData.imageUrl} 
+                alt={cardData.title} 
                 className="w-full h-full object-cover"
               />
             </div>
@@ -143,7 +142,7 @@ const CardDetailView: React.FC<CardDetailViewProps> = ({ cardId, onBack }) => {
           <Card className="bg-gray-900 border-gray-700 text-white">
             <CardContent className="p-6">
               <div className="flex justify-between items-start">
-                <h1 className="text-2xl font-bold">{card.title}</h1>
+                <h1 className="text-2xl font-bold">{cardData.title}</h1>
                 <div className="flex gap-2">
                   <Button
                     variant="ghost"
@@ -164,34 +163,34 @@ const CardDetailView: React.FC<CardDetailViewProps> = ({ cardId, onBack }) => {
               </div>
               
               <div className="mt-4">
-                <p className="text-gray-300">{card.description}</p>
+                <p className="text-gray-300">{cardData.description}</p>
               </div>
               
               <div className="mt-6 space-y-4">
                 <div>
                   <h3 className="text-sm text-gray-400 uppercase">Card Type</h3>
-                  <p className="text-white">{card.designMetadata?.cardMetadata?.cardType || 'Unknown'}</p>
+                  <p className="text-white">{cardData.designMetadata?.cardMetadata?.cardType || 'Standard'}</p>
                 </div>
                 
                 <div>
                   <h3 className="text-sm text-gray-400 uppercase">Category</h3>
-                  <p className="text-white">{card.designMetadata?.cardMetadata?.category || 'Uncategorized'}</p>
+                  <p className="text-white">{cardData.designMetadata?.cardMetadata?.category || 'General'}</p>
                 </div>
                 
                 <div>
                   <h3 className="text-sm text-gray-400 uppercase">Series</h3>
-                  <p className="text-white">{card.designMetadata?.cardMetadata?.series || 'None'}</p>
+                  <p className="text-white">{cardData.designMetadata?.cardMetadata?.series || 'Base'}</p>
                 </div>
                 
                 <div>
                   <h3 className="text-sm text-gray-400 uppercase">Created</h3>
-                  <p className="text-white">{formatDate(card.createdAt)}</p>
+                  <p className="text-white">{formatDate(cardData.createdAt)}</p>
                 </div>
                 
                 <div>
                   <h3 className="text-sm text-gray-400 uppercase">Tags</h3>
                   <div className="flex flex-wrap gap-2 mt-1">
-                    {card.tags.map((tag, index) => (
+                    {cardData.tags.map((tag, index) => (
                       <Badge key={index} variant="secondary" className="bg-gray-800 hover:bg-gray-700">
                         {tag}
                       </Badge>
@@ -205,15 +204,15 @@ const CardDetailView: React.FC<CardDetailViewProps> = ({ cardId, onBack }) => {
                 <div className="grid grid-cols-3 gap-2">
                   <div className="text-center p-2 bg-gray-800 rounded">
                     <p className="text-xs text-gray-400">Printable</p>
-                    <p className="font-medium">{card.designMetadata?.marketMetadata?.isPrintable ? 'Yes' : 'No'}</p>
+                    <p className="font-medium">{cardData.designMetadata?.marketMetadata?.isPrintable || false}</p>
                   </div>
                   <div className="text-center p-2 bg-gray-800 rounded">
                     <p className="text-xs text-gray-400">For Sale</p>
-                    <p className="font-medium">{card.designMetadata?.marketMetadata?.isForSale ? 'Yes' : 'No'}</p>
+                    <p className="font-medium">{cardData.designMetadata?.marketMetadata?.isForSale || false}</p>
                   </div>
                   <div className="text-center p-2 bg-gray-800 rounded">
                     <p className="text-xs text-gray-400">In Catalog</p>
-                    <p className="font-medium">{card.designMetadata?.marketMetadata?.includeInCatalog ? 'Yes' : 'No'}</p>
+                    <p className="font-medium">{cardData.designMetadata?.marketMetadata?.includeInCatalog || false}</p>
                   </div>
                 </div>
               </div>

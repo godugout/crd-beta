@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Collection } from '@/context/CardContext';
@@ -66,7 +65,7 @@ const CollectionGrid: React.FC<CollectionGridProps> = ({ collections, isLoading,
             </CardContent>
             <CardFooter className="px-4 pb-4 pt-0 flex justify-between">
               <span className="text-xs text-gray-500">
-                {collection.cardIds?.length || 0} card{collection.cardIds?.length !== 1 ? 's' : ''}
+                {collection.cards ? collection.cards.length : 0} card{collection.cards?.length !== 1 ? 's' : ''}
               </span>
               <span className="text-xs flex items-center gap-1 px-2 py-1 rounded-full bg-gray-100 text-gray-700">
                 {collection.visibility === 'private' ? (

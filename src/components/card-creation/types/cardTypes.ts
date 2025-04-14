@@ -15,7 +15,7 @@ export interface CardDesignState {
 
 export interface CardLayer {
   id: string;
-  type: 'image' | 'text' | 'shape';
+  type: 'image' | 'text' | 'shape' | 'effect';
   content: string;
   position: {
     x: number;

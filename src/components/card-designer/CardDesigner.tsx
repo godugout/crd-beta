@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -47,11 +48,13 @@ const CardDesigner: React.FC<CardDesignerProps> = ({
   } = useLayers(initialData?.layers);
   
   const {
-    effectStack,
+    activeEffects,
     addEffect,
     removeEffect,
     updateEffectSettings,
-    getEffectClasses
+    getEffectSettings,
+    effectStack = [],
+    getEffectClasses = () => ''
   } = useCardEffectsStack();
   
   useEffect(() => {
@@ -71,7 +74,16 @@ const CardDesigner: React.FC<CardDesignerProps> = ({
       }
       
       if (userImage) {
-        addLayer('image');
+        addLayer({
+          type: 'image',
+          content: userImage,
+          position: { x: 50, y: 50, z: 0 },
+          size: { width: 300, height: 400 },
+          rotation: 0,
+          opacity: 1,
+          zIndex: 0,
+          visible: true
+        });
       }
     }
   }, [selectedTemplate, userImage, initialData, addEffect, addLayer]);
@@ -155,7 +167,18 @@ const CardDesigner: React.FC<CardDesignerProps> = ({
                   layers={layers}
                   activeLayerId={activeLayerId}
                   onSelectLayer={setActiveLayer}
-                  onAddLayer={addLayer}
+                  onAddLayer={(layerType) => {
+                    addLayer({
+                      type: layerType,
+                      content: layerType === 'text' ? 'Add text here' : '',
+                      position: { x: 50, y: 50, z: layers.length },
+                      size: { width: 200, height: 100 },
+                      rotation: 0,
+                      opacity: 1,
+                      zIndex: layers.length,
+                      visible: true
+                    });
+                  }}
                   onUpdateLayer={updateLayer}
                   onDeleteLayer={deleteLayer}
                   onMoveLayerUp={moveLayerUp}
@@ -166,7 +189,7 @@ const CardDesigner: React.FC<CardDesignerProps> = ({
               <TabsContent value="effects" className="m-0">
                 <EffectsPanel 
                   effectStack={effectStack}
-                  onAddEffect={addEffect}
+                  onAddEffect={(effectName) => addEffect(effectName)}
                   onRemoveEffect={removeEffect}
                   onUpdateEffectSettings={updateEffectSettings}
                 />
@@ -177,14 +200,41 @@ const CardDesigner: React.FC<CardDesignerProps> = ({
                   layers={layers}
                   activeLayerId={activeLayerId}
                   onUpdateLayer={updateLayer}
-                  onAddTextLayer={() => addLayer('text')}
+                  onAddTextLayer={() => {
+                    addLayer({
+                      type: 'text',
+                      content: 'Add text here',
+                      position: { x: 50, y: 50, z: layers.length },
+                      size: { width: 200, height: 60 },
+                      rotation: 0,
+                      opacity: 1,
+                      zIndex: layers.length,
+                      visible: true,
+                      textStyle: {
+                        fontFamily: 'sans-serif',
+                        fontSize: 16,
+                        color: '#000000',
+                        textAlign: 'center',
+                        fontWeight: 'normal'
+                      }
+                    });
+                  }}
                 />
               </TabsContent>
               
               <TabsContent value="elements" className="m-0">
                 <ElementsPanel 
                   onAddElement={(element) => {
-                    addLayer('image');
+                    addLayer({
+                      type: 'image',
+                      content: element,
+                      position: { x: 50, y: 50, z: layers.length },
+                      size: { width: 100, height: 100 },
+                      rotation: 0,
+                      opacity: 1,
+                      zIndex: layers.length,
+                      visible: true
+                    });
                   }}
                   sportType={selectedTemplate?.sport}
                 />
