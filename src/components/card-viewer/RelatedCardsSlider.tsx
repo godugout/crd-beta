@@ -101,10 +101,10 @@ const RelatedCardsSlider: React.FC<RelatedCardsSliderProps> = ({ cards, onCardCl
                   loading="lazy"
                 />
                 
-                {/* Card info overlay that appears on hover */}
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-2 transform translate-y-full opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
+                {/* Glass drawer effect for card info */}
+                <div className="absolute bottom-0 left-0 right-0 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300 bg-black/30 backdrop-blur-sm p-2">
                   <h4 className="text-sm text-white font-medium truncate">{card.title}</h4>
-                  <p className="text-xs text-gray-400 truncate">
+                  <p className="text-xs text-gray-200 truncate">
                     {card.player || (card.tags && card.tags[0]) || 'No tags'}
                   </p>
                 </div>

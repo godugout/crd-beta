@@ -93,24 +93,22 @@ const CardMedia: React.FC<CardMediaProps> = ({ card, onView, className = '' }) =
         loading="lazy"
       />
       
-      {/* Hover overlay with card info */}
+      {/* Glass drawer overlay with card info - slides up on hover */}
       {isLoaded && !isError && (
-        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-end">
-          <div className="w-full bg-gradient-to-t from-black/80 to-transparent p-3 text-white">
-            <h3 className="font-medium text-sm line-clamp-1">{card.title}</h3>
-            {card.tags && card.tags.length > 0 && (
-              <div className="flex flex-wrap gap-1 mt-1">
+        <div className="absolute bottom-0 left-0 right-0 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300 bg-black/30 backdrop-blur-sm p-3 text-white">
+          <h3 className="font-medium text-sm line-clamp-1">{card.title}</h3>
+          {card.tags && card.tags.length > 0 && (
+            <div className="flex flex-wrap gap-1 mt-1">
+              <span className="text-xs bg-white/20 px-1.5 py-0.5 rounded-full">
+                {card.tags[0]}
+              </span>
+              {card.tags.length > 1 && (
                 <span className="text-xs bg-white/20 px-1.5 py-0.5 rounded-full">
-                  {card.tags[0]}
+                  +{card.tags.length - 1}
                 </span>
-                {card.tags.length > 1 && (
-                  <span className="text-xs bg-white/20 px-1.5 py-0.5 rounded-full">
-                    +{card.tags.length - 1}
-                  </span>
-                )}
-              </div>
-            )}
-          </div>
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>
