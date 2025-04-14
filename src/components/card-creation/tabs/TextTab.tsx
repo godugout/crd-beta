@@ -1,122 +1,63 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { ChevronRight } from 'lucide-react';
-import { useMediaQuery } from '@/hooks/useMediaQuery';
+import { CardDesignState } from '../CardMakerWizard';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 
 interface TextTabProps {
   onContinue: () => void;
+  cardData?: CardDesignState;
+  setCardData?: (data: CardDesignState) => void;
 }
 
-const TextTab: React.FC<TextTabProps> = ({ onContinue }) => {
-  const isMobile = useMediaQuery('(max-width: 768px)');
-  const [titleText, setTitleText] = useState('');
-  const [descriptionText, setDescriptionText] = useState('');
-  const [titleFont, setTitleFont] = useState('Inter');
-  const [descriptionFont, setDescriptionFont] = useState('Inter');
-  const [titleColor, setTitleColor] = useState('#000000');
-  const [descriptionColor, setDescriptionColor] = useState('#000000');
+const TextTab: React.FC<TextTabProps> = ({
+  onContinue,
+  cardData = {
+    title: '',
+    description: '',
+    tags: [],
+    borderColor: '#000000',
+    backgroundColor: '#FFFFFF',
+    borderRadius: '8px',
+    imageUrl: null,
+  },
+  setCardData = () => {}
+}) => {
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCardData({...cardData, title: e.target.value});
+  };
+
+  const handleDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setCardData({...cardData, description: e.target.value});
+  };
   
   return (
     <div>
-      <h2 className={`text-xl font-semibold mb-4 ${isMobile ? 'text-center' : 'text-left'}`}>Add Text & Details</h2>
+      <h2 className="text-xl font-semibold mb-6">Add Card Text</h2>
       
       <div className="space-y-6">
-        {/* Title Text */}
-        <div className="space-y-2">
-          <Label htmlFor="title-text">Card Title</Label>
-          <Input 
-            id="title-text"
-            value={titleText}
-            onChange={(e) => setTitleText(e.target.value)}
-            placeholder="Enter card title"
+        <div className="space-y-3">
+          <Label htmlFor="title">Card Title</Label>
+          <Input
+            id="title"
+            placeholder="Enter a title for your card"
+            value={cardData.title}
+            onChange={handleTitleChange}
           />
         </div>
         
-        {/* Title Font */}
-        <div className="space-y-2">
-          <Label>Title Font</Label>
-          <Select value={titleFont} onValueChange={setTitleFont}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select font" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Inter">Inter</SelectItem>
-              <SelectItem value="Roboto">Roboto</SelectItem>
-              <SelectItem value="Montserrat">Montserrat</SelectItem>
-              <SelectItem value="PlayfairDisplay">Playfair Display</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        
-        {/* Title Color */}
-        <div className="space-y-2">
-          <Label htmlFor="title-color">Title Color</Label>
-          <div className="flex items-center gap-3">
-            <Input 
-              id="title-color"
-              type="color"
-              value={titleColor}
-              onChange={(e) => setTitleColor(e.target.value)}
-              className="w-12 h-8 p-1"
-            />
-            <Input 
-              value={titleColor}
-              onChange={(e) => setTitleColor(e.target.value)}
-              className="flex-1"
-            />
-          </div>
-        </div>
-        
-        {/* Description */}
-        <div className="space-y-2">
-          <Label htmlFor="description-text">Description</Label>
-          <Textarea 
-            id="description-text"
-            value={descriptionText}
-            onChange={(e) => setDescriptionText(e.target.value)}
-            placeholder="Enter card description"
+        <div className="space-y-3">
+          <Label htmlFor="description">Card Description</Label>
+          <Textarea
+            id="description"
+            placeholder="Enter a description for your card"
             rows={4}
+            value={cardData.description}
+            onChange={handleDescriptionChange}
           />
-        </div>
-        
-        {/* Description Font */}
-        <div className="space-y-2">
-          <Label>Description Font</Label>
-          <Select value={descriptionFont} onValueChange={setDescriptionFont}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select font" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Inter">Inter</SelectItem>
-              <SelectItem value="Roboto">Roboto</SelectItem>
-              <SelectItem value="Montserrat">Montserrat</SelectItem>
-              <SelectItem value="PlayfairDisplay">Playfair Display</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        
-        {/* Description Color */}
-        <div className="space-y-2">
-          <Label htmlFor="description-color">Description Color</Label>
-          <div className="flex items-center gap-3">
-            <Input 
-              id="description-color"
-              type="color"
-              value={descriptionColor}
-              onChange={(e) => setDescriptionColor(e.target.value)}
-              className="w-12 h-8 p-1"
-            />
-            <Input 
-              value={descriptionColor}
-              onChange={(e) => setDescriptionColor(e.target.value)}
-              className="flex-1"
-            />
-          </div>
         </div>
       </div>
       

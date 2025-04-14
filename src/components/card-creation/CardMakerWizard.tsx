@@ -152,6 +152,7 @@ const CardMakerWizard: React.FC<CardMakerWizardProps> = ({
             removeEffect={removeEffect}
             updateEffectSettings={updateEffectSettings}
             onContinue={goToNextStep}
+            effectClasses={effectClasses}
           />
         </div>
         
@@ -192,6 +193,7 @@ interface CardWizardStepContentProps {
   removeEffect: (id: string) => void;
   updateEffectSettings: (id: string, settings: any) => void;
   onContinue: () => void;
+  effectClasses: string;
 }
 
 const CardWizardStepContent: React.FC<CardWizardStepContentProps> = ({
@@ -207,7 +209,8 @@ const CardWizardStepContent: React.FC<CardWizardStepContentProps> = ({
   addEffect,
   removeEffect,
   updateEffectSettings,
-  onContinue
+  onContinue,
+  effectClasses
 }) => {
   switch (currentStep) {
     case 0:
@@ -253,6 +256,8 @@ const CardWizardStepContent: React.FC<CardWizardStepContentProps> = ({
       return (
         <TextTab
           onContinue={onContinue}
+          cardData={cardData}
+          setCardData={setCardData}
         />
       );
     case 4:

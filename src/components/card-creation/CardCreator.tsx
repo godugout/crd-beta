@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useCardEffectsStack } from './hooks/useCardEffectsStack';
@@ -11,7 +10,6 @@ import TextTab from './tabs/TextTab';
 import PreviewTab from './tabs/PreviewTab';
 import CardPreviewSidebar from './components/CardPreviewSidebar';
 
-// Export types so other files can import them
 export interface CardDesignState {
   title: string;
   description: string;
@@ -52,7 +50,14 @@ const CardCreator: React.FC = () => {
   const [activeTab, setActiveTab] = useState('upload');
   const [currentStep, setCurrentStep] = useState(1);
   const [cardImage, setCardImage] = useState<string | null>(null);
-  const { effectStack, addEffect, removeEffect, toggleEffect, getEffectClasses } = useCardEffectsStack();
+  const { 
+    effectStack, 
+    addEffect, 
+    removeEffect, 
+    updateEffectSettings,
+    toggleEffect, 
+    getEffectClasses 
+  } = useCardEffectsStack();
   const previewCanvasRef = useRef<HTMLDivElement>(null);
 
   const [cardData, setCardData] = useState<CardDesignState>({
@@ -83,7 +88,6 @@ const CardCreator: React.FC = () => {
     setActiveTab('design');
   };
 
-  // Create a handler function for adding layers
   const handleAddLayer = (type: 'image' | 'text' | 'shape') => {
     const newLayer: Omit<CardLayer, 'id'> = {
       type,
@@ -99,7 +103,6 @@ const CardCreator: React.FC = () => {
     addLayer(newLayer);
   };
 
-  // Navigation handlers
   const handleContinueToDesign = () => {
     setCurrentStep(2);
     setActiveTab('design');
@@ -121,7 +124,6 @@ const CardCreator: React.FC = () => {
   };
 
   const handleSaveCRD = () => {
-    // Implement save functionality
     console.log('Saving CRD', { cardData, layers });
   };
 
@@ -205,7 +207,13 @@ const CardCreator: React.FC = () => {
               </TabsContent>
               
               <TabsContent value="effects" className="m-0">
-                <EffectsTab onContinue={handleContinueToText} />
+                <EffectsTab 
+                  onContinue={handleContinueToText} 
+                  effectStack={effectStack}
+                  addEffect={addEffect}
+                  removeEffect={removeEffect}
+                  updateEffectSettings={updateEffectSettings}
+                />
               </TabsContent>
               
               <TabsContent value="text" className="m-0">
@@ -213,7 +221,12 @@ const CardCreator: React.FC = () => {
               </TabsContent>
               
               <TabsContent value="preview" className="m-0">
-                <PreviewTab onSave={handleSaveCRD} />
+                <PreviewTab 
+                  onSave={handleSaveCRD} 
+                  cardImage={cardData.imageUrl || undefined}
+                  cardTitle={cardData.title}
+                  cardEffect={getEffectClasses()}
+                />
               </TabsContent>
             </div>
           </Tabs>

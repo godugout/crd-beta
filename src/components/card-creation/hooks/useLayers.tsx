@@ -1,101 +1,87 @@
 
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { CardLayer } from '../CardCreator';
+import { CardLayer } from '../CardCreator'; // Assuming CardLayer type is defined here
 
 export interface UseLayersResult {
   layers: CardLayer[];
   activeLayerId: string | null;
-  addLayer: (layer: Omit<CardLayer, 'id'>) => void;
-  updateLayer: (id: string, updates: Partial<CardLayer>) => void;
-  deleteLayer: (id: string) => void;
-  moveLayerUp: (id: string) => void;
-  moveLayerDown: (id: string) => void;
-  setActiveLayer: (id: string) => void;
+  setActiveLayer: (layerId: string) => void;
+  addLayer: (layer: Omit<CardLayer, 'id'>) => string;
+  updateLayer: (layerId: string, updates: Partial<CardLayer>) => void;
+  deleteLayer: (layerId: string) => void;
+  moveLayerUp: (layerId: string) => void;
+  moveLayerDown: (layerId: string) => void;
+  setLayers: (layers: CardLayer[]) => void;  // Added this property to match usage
 }
 
-export const useLayers = (initialLayers: CardLayer[] = []): UseLayersResult => {
-  const [layers, setLayers] = useState<CardLayer[]>(initialLayers);
-  const [activeLayerId, setActiveLayerId] = useState<string | null>(
-    initialLayers.length > 0 ? initialLayers[0].id : null
-  );
-  
-  // Add a new layer
-  const addLayer = useCallback((layer: Omit<CardLayer, 'id'>) => {
-    const newLayer: CardLayer = {
-      ...layer,
-      id: uuidv4()
-    };
-    
+export const useLayers = (): UseLayersResult => {
+  const [layers, setLayers] = useState<CardLayer[]>([]);
+  const [activeLayerId, setActiveLayerId] = useState<string | null>(null);
+
+  const setActiveLayer = (layerId: string) => {
+    setActiveLayerId(layerId);
+  };
+
+  const addLayer = (layer: Omit<CardLayer, 'id'>) => {
+    const id = uuidv4();
+    const newLayer = { ...layer, id };
     setLayers(prevLayers => [...prevLayers, newLayer]);
-    setActiveLayerId(newLayer.id);
-  }, []);
-  
-  // Update an existing layer
-  const updateLayer = useCallback((id: string, updates: Partial<CardLayer>) => {
-    setLayers(prevLayers => 
+    setActiveLayerId(id);
+    return id;
+  };
+
+  const updateLayer = (layerId: string, updates: Partial<CardLayer>) => {
+    setLayers(prevLayers =>
       prevLayers.map(layer => 
-        layer.id === id ? { ...layer, ...updates } : layer
+        layer.id === layerId ? { ...layer, ...updates } : layer
       )
     );
-  }, []);
-  
-  // Delete a layer
-  const deleteLayer = useCallback((id: string) => {
-    setLayers(prevLayers => prevLayers.filter(layer => layer.id !== id));
-    
-    // If the active layer is deleted, select another one
-    if (activeLayerId === id) {
-      setActiveLayerId(prevLayers => {
-        const filteredLayers = layers.filter(layer => layer.id !== id);
-        return filteredLayers.length > 0 ? filteredLayers[0].id : null;
-      });
+  };
+
+  const deleteLayer = (layerId: string) => {
+    setLayers(prevLayers => prevLayers.filter(layer => layer.id !== layerId));
+    if (activeLayerId === layerId) {
+      const remainingLayers = layers.filter(layer => layer.id !== layerId);
+      setActiveLayerId(remainingLayers.length > 0 ? remainingLayers[0].id : null);
     }
-  }, [layers, activeLayerId]);
-  
-  // Move a layer up in the stack (visually, but down in the array)
-  const moveLayerUp = useCallback((id: string) => {
+  };
+
+  const moveLayerUp = (layerId: string) => {
     setLayers(prevLayers => {
-      const index = prevLayers.findIndex(layer => layer.id === id);
-      if (index <= 0) return prevLayers; // Already at the top
+      const index = prevLayers.findIndex(layer => layer.id === layerId);
+      if (index <= 0) return prevLayers;
       
       const newLayers = [...prevLayers];
-      const layer = newLayers[index];
-      newLayers[index] = newLayers[index - 1];
-      newLayers[index - 1] = layer;
-      
+      const temp = newLayers[index - 1];
+      newLayers[index - 1] = newLayers[index];
+      newLayers[index] = temp;
       return newLayers;
     });
-  }, []);
-  
-  // Move a layer down in the stack (visually, but up in the array)
-  const moveLayerDown = useCallback((id: string) => {
+  };
+
+  const moveLayerDown = (layerId: string) => {
     setLayers(prevLayers => {
-      const index = prevLayers.findIndex(layer => layer.id === id);
-      if (index === -1 || index >= prevLayers.length - 1) return prevLayers; // Not found or already at the bottom
+      const index = prevLayers.findIndex(layer => layer.id === layerId);
+      if (index === -1 || index >= prevLayers.length - 1) return prevLayers;
       
       const newLayers = [...prevLayers];
-      const layer = newLayers[index];
-      newLayers[index] = newLayers[index + 1];
-      newLayers[index + 1] = layer;
-      
+      const temp = newLayers[index + 1];
+      newLayers[index + 1] = newLayers[index];
+      newLayers[index] = temp;
       return newLayers;
     });
-  }, []);
-  
-  // Set active layer
-  const setActiveLayer = useCallback((id: string) => {
-    setActiveLayerId(id);
-  }, []);
-  
+  };
+
   return {
     layers,
     activeLayerId,
+    setActiveLayer,
     addLayer,
     updateLayer,
     deleteLayer,
     moveLayerUp,
     moveLayerDown,
-    setActiveLayer
+    setLayers  // Exporting this function to match usage
   };
 };
