@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { X, Star } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -44,7 +43,7 @@ const EffectsPresets: React.FC<EffectsPresetsProps> = ({
   if (!isOpen) return null;
   
   return (
-    <div className="absolute top-16 right-0 h-full max-h-[calc(100%-4rem)] w-80 bg-gray-900/95 backdrop-blur-md text-white z-30 shadow-lg transition-transform duration-300 transform-gpu overflow-hidden">
+    <div className="fixed top-16 right-0 h-[calc(100%-4rem)] w-80 bg-gray-900/95 backdrop-blur-md text-white z-30 shadow-lg transition-transform duration-300 transform-gpu overflow-hidden">
       <div className="p-5">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-bold">Effects Presets</h3>

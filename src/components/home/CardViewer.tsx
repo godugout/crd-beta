@@ -196,104 +196,116 @@ const CardViewer = ({
     setDragPosition({ x: 0, y: 0 });
   };
 
+  const [localActiveEffects, setLocalActiveEffects] = useState<string[]>(activeEffects);
+
+  const handleToggleEffect = useCallback((effect: string) => {
+    setLocalActiveEffects(prev => 
+      prev.includes(effect) 
+        ? prev.filter(e => e !== effect)
+        : [...prev, effect]
+    );
+  }, []);
+
   return (
-    <div 
-      ref={canvasRef}
-      className="relative w-full h-96 md:h-[500px] flex items-center justify-center p-4 bg-gradient-to-br from-gray-900 to-gray-800 rounded-lg overflow-hidden"
-      onMouseMove={handleCanvasMouseMove}
-      onMouseLeave={handleMouseLeave}
-    >
-      <CardBackground activeEffects={activeEffects} />
-      
-      <motion.div
-        drag
-        dragConstraints={{ left: -100, right: 100, top: -50, bottom: 50 }}
-        dragElastic={0.2}
-        dragTransition={{ bounceStiffness: 600, bounceDamping: 20 }}
-        onDragStart={handleDragStart}
-        onDragEnd={handleDragEnd}
-        animate={dragPosition}
-        className="absolute inset-0 flex items-center justify-center z-10"
+    <div>
+      <div 
+        ref={canvasRef}
+        className="relative w-full h-96 md:h-[500px] flex items-center justify-center p-4 bg-gradient-to-br from-gray-900 to-gray-800 rounded-lg overflow-hidden"
+        onMouseMove={handleCanvasMouseMove}
+        onMouseLeave={handleMouseLeave}
       >
-        <CardContainer
-          containerRef={containerRef}
-          onMouseMove={handleMouseMove}
-          isMoving={isMoving}
-          effectSettings={effectSettings.getCurrentSettings()}
-          activeEffects={activeEffects}
+        <CardBackground activeEffects={localActiveEffects} />
+        
+        <motion.div
+          drag
+          dragConstraints={{ left: -100, right: 100, top: -50, bottom: 50 }}
+          dragElastic={0.2}
+          dragTransition={{ bounceStiffness: 600, bounceDamping: 20 }}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+          animate={dragPosition}
+          className="absolute inset-0 flex items-center justify-center z-10"
         >
-          <CardCanvas 
-            card={card}
-            isFlipped={isFlipped}
-            activeEffects={activeEffects}
+          <CardContainer
             containerRef={containerRef}
-            cardRef={cardRef}
             onMouseMove={handleMouseMove}
-            onMouseLeave={handleMouseLeave}
-            effectSettings={{
-              refractorIntensity: effectSettings.refractorIntensity,
-              refractorColors: ['#00ffff', '#ff00ff', '#ffff00'],
-              animationEnabled: true,
-              refractorSpeed: effectSettings.shimmerSpeed,
-              holographicIntensity: effectSettings.spectralIntensity,
-              holographicPattern: 'linear',
-              holographicColorMode: 'rainbow',
-              holographicSparklesEnabled: true
-            }}
-          />
-        </CardContainer>
-      </motion.div>
-      
-      <CardControls 
-        flipCard={flipCard}
-        onBackToCollection={onBackToCollection}
-        onSnapshot={handleSnapshot}
-        activeEffectsCount={activeEffects.length}
-        onToggleAdvancedControls={toggleAdvancedControls}
-        showAdvancedControls={showAdvancedControls}
-        onTogglePresetsPanel={togglePresetsPanel}
-        showPresetsPanel={showPresetsPanel}
-      />
+            isMoving={isMoving}
+            effectSettings={effectSettings.getCurrentSettings()}
+            activeEffects={localActiveEffects}
+          >
+            <CardCanvas 
+              card={card}
+              isFlipped={isFlipped}
+              activeEffects={localActiveEffects}
+              containerRef={containerRef}
+              cardRef={cardRef}
+              onMouseMove={handleMouseMove}
+              onMouseLeave={handleMouseLeave}
+              effectSettings={{
+                refractorIntensity: effectSettings.refractorIntensity,
+                refractorColors: ['#00ffff', '#ff00ff', '#ffff00'],
+                animationEnabled: true,
+                refractorSpeed: effectSettings.shimmerSpeed,
+                holographicIntensity: effectSettings.spectralIntensity,
+                holographicPattern: 'linear',
+                holographicColorMode: 'rainbow',
+                holographicSparklesEnabled: true
+              }}
+            />
+          </CardContainer>
+        </motion.div>
+        
+        <CardControls 
+          flipCard={flipCard}
+          onBackToCollection={onBackToCollection}
+          onSnapshot={handleSnapshot}
+          activeEffectsCount={localActiveEffects.length}
+          onToggleAdvancedControls={toggleAdvancedControls}
+          showAdvancedControls={showAdvancedControls}
+          onTogglePresetsPanel={togglePresetsPanel}
+          showPresetsPanel={showPresetsPanel}
+        />
 
-      <EffectControls 
-        isOpen={showAdvancedControls}
-        onClose={() => setShowAdvancedControls(false)}
-        onSaveEffectsCombination={handleSaveEffectsCombination}
-        activeEffects={activeEffects}
-        onMotionSpeedChange={handleMotionSpeedChange}
-        onPulseIntensityChange={handlePulseIntensityChange}
-        onShimmerSpeedChange={handleShimmerSpeedChange}
-        onGoldIntensityChange={handleGoldIntensityChange}
-        onChromeIntensityChange={handleChromeIntensityChange}
-        onVintageIntensityChange={handleVintageIntensityChange}
-        onRefractorIntensityChange={handleRefractorIntensityChange}
-        onSpectralIntensityChange={handleSpectralIntensityChange}
-        motionSpeed={effectSettings.motionSpeed}
-        pulseIntensity={effectSettings.pulseIntensity}
-        shimmerSpeed={effectSettings.shimmerSpeed}
-        goldIntensity={effectSettings.goldIntensity}
-        chromeIntensity={effectSettings.chromeIntensity}
-        vintageIntensity={effectSettings.vintageIntensity}
-        refractorIntensity={effectSettings.refractorIntensity}
-        spectralIntensity={effectSettings.spectralIntensity}
-      />
+        <EffectControls 
+          isOpen={showAdvancedControls}
+          onClose={() => setShowAdvancedControls(false)}
+          onSaveEffectsCombination={handleSaveEffectsCombination}
+          activeEffects={localActiveEffects}
+          onMotionSpeedChange={handleMotionSpeedChange}
+          onPulseIntensityChange={handlePulseIntensityChange}
+          onShimmerSpeedChange={handleShimmerSpeedChange}
+          onGoldIntensityChange={handleGoldIntensityChange}
+          onChromeIntensityChange={handleChromeIntensityChange}
+          onVintageIntensityChange={handleVintageIntensityChange}
+          onRefractorIntensityChange={handleRefractorIntensityChange}
+          onSpectralIntensityChange={handleSpectralIntensityChange}
+          motionSpeed={effectSettings.motionSpeed}
+          pulseIntensity={effectSettings.pulseIntensity}
+          shimmerSpeed={effectSettings.shimmerSpeed}
+          goldIntensity={effectSettings.goldIntensity}
+          chromeIntensity={effectSettings.chromeIntensity}
+          vintageIntensity={effectSettings.vintageIntensity}
+          refractorIntensity={effectSettings.refractorIntensity}
+          spectralIntensity={effectSettings.spectralIntensity}
+        />
 
-      <EffectsPresets
-        isOpen={showPresetsPanel}
-        onClose={() => setShowPresetsPanel(false)}
-        presets={builtInPresets}
-        userPresets={userPresets}
-        onApplyPreset={handleApplyPreset}
-        onToggleFavorite={handleToggleFavorite}
-      />
-      
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="spotlight spotlight-1" style={{
-          backgroundImage: 'radial-gradient(circle at 20% 20%, rgba(255,255,255,0.2) 0%, transparent 40%)'
-        }}></div>
-        <div className="spotlight spotlight-2" style={{
-          backgroundImage: 'radial-gradient(circle at 80% 80%, rgba(255,255,255,0.15) 0%, transparent 35%)'
-        }}></div>
+        <EffectsPresets
+          isOpen={showPresetsPanel}
+          onClose={() => setShowPresetsPanel(false)}
+          presets={builtInPresets}
+          userPresets={userPresets}
+          onApplyPreset={handleApplyPreset}
+          onToggleFavorite={handleToggleFavorite}
+        />
+        
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="spotlight spotlight-1" style={{
+            backgroundImage: 'radial-gradient(circle at 20% 20%, rgba(255,255,255,0.2) 0%, transparent 40%)'
+          }}></div>
+          <div className="spotlight spotlight-2" style={{
+            backgroundImage: 'radial-gradient(circle at 80% 80%, rgba(255,255,255,0.15) 0%, transparent 35%)'
+          }}></div>
+        </div>
       </div>
     </div>
   );

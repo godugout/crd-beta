@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { X, Save } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
@@ -54,18 +53,8 @@ const EffectControls: React.FC<EffectControlsProps> = ({
 
   if (!isOpen) return null;
 
-  // Handler functions that convert array values to single values for the parent component
-  const handleMotionSpeedChange = (values: number[]) => onMotionSpeedChange(values[0] / 100);
-  const handlePulseIntensityChange = (values: number[]) => onPulseIntensityChange(values[0] / 100);
-  const handleShimmerSpeedChange = (values: number[]) => onShimmerSpeedChange(values[0] / 10);
-  const handleGoldIntensityChange = (values: number[]) => onGoldIntensityChange(values[0] / 100);
-  const handleChromeIntensityChange = (values: number[]) => onChromeIntensityChange(values[0] / 100);
-  const handleVintageIntensityChange = (values: number[]) => onVintageIntensityChange(values[0] / 100);
-  const handleRefractorIntensityChange = (values: number[]) => onRefractorIntensityChange(values[0] / 100);
-  const handleSpectralIntensityChange = (values: number[]) => onSpectralIntensityChange(values[0] / 100);
-
   return (
-    <div className="absolute top-16 right-0 h-full max-h-[calc(100%-4rem)] w-80 bg-gray-900/95 backdrop-blur-md text-white z-30 shadow-lg transition-transform duration-300 transform-gpu overflow-y-auto">
+    <div className="fixed top-16 right-0 h-[calc(100%-4rem)] w-80 bg-gray-900/95 backdrop-blur-md text-white z-30 shadow-lg transition-transform duration-300 transform-gpu overflow-y-auto">
       <div className="p-5">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-xl font-bold">Advanced Controls</h3>
