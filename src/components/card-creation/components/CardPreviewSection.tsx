@@ -1,31 +1,31 @@
 
 import React from 'react';
-import { CardDesignState, CardLayer } from '../CardCreator';
-import CardPreviewSidebar from './CardPreviewSidebar';
 import CardWizardHeader from './CardWizardHeader';
+import CardPreviewSidebar from './CardPreviewSidebar';
 import CardWizardFeatures from './CardWizardFeatures';
+import { CardDesignState, CardLayer } from '../types/cardTypes';
 
 interface CardPreviewSectionProps {
   cardData: CardDesignState;
   layers: CardLayer[];
-  activeLayerId: string | null;
-  effectClasses: string;
-  setActiveLayer: (layerId: string) => void;
+  activeLayer: CardLayer | null;
+  setActiveLayerId: (layerId: string) => void;
   updateLayer: (layerId: string, updates: Partial<CardLayer>) => void;
+  effectClasses: string;
   previewCanvasRef: React.RefObject<HTMLDivElement>;
 }
 
 const CardPreviewSection: React.FC<CardPreviewSectionProps> = ({
   cardData,
   layers,
-  activeLayerId,
-  effectClasses,
-  setActiveLayer,
+  activeLayer,
+  setActiveLayerId,
   updateLayer,
+  effectClasses,
   previewCanvasRef
 }) => {
   return (
-    <div className="flex max-w-[576px] grow shrink-0 basis-0 flex-col items-start gap-2 self-stretch rounded-md bg-card px-8 py-8 shadow-lg">
+    <div className="md:col-span-2 flex max-w-[576px] grow shrink-0 basis-0 flex-col items-start gap-2 self-stretch rounded-md bg-card px-8 py-8 shadow-lg">
       <CardWizardHeader />
       
       <div className="flex w-full grow shrink-0 basis-0 flex-col items-start justify-center gap-4">
@@ -33,9 +33,9 @@ const CardPreviewSection: React.FC<CardPreviewSectionProps> = ({
           <CardPreviewSidebar
             cardData={cardData}
             layers={layers}
-            activeLayerId={activeLayerId}
+            activeLayerId={activeLayer?.id || null}
             effectClasses={effectClasses}
-            onLayerSelect={setActiveLayer}
+            onLayerSelect={setActiveLayerId}
             onLayerUpdate={updateLayer}
             previewCanvasRef={previewCanvasRef}
             hideControls={true}

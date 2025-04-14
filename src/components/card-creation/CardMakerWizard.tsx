@@ -1,56 +1,16 @@
 
-import React, { useState, useRef } from 'react';
+import React, { useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { CardEffect } from './hooks/useCardEffectsStack';
 import { WIZARD_STEPS } from './constants/wizardSteps';
-import UploadTab from './tabs/UploadTab';
-import DesignTab from './tabs/DesignTab';
-import EffectsTab from './tabs/EffectsTab';
-import TextTab from './tabs/TextTab';
-import PreviewTab from './tabs/PreviewTab';
+import CardWizardStepContent from './components/CardWizardStepContent';
 import CardPreviewSidebar from './components/CardPreviewSidebar';
 import CardWizardSteps from './components/CardWizardSteps';
 import CardWizardHeader from './components/CardWizardHeader';
 import CardWizardFeatures from './components/CardWizardFeatures';
-
-// Define these types directly here since we're having import issues
-export interface CardDesignState {
-  title: string;
-  description: string;
-  tags: string[];
-  borderColor: string;
-  backgroundColor: string;
-  borderRadius: string;
-  imageUrl: string | null;
-  player?: string;
-  team?: string;
-  year?: string;
-}
-
-export interface Position {
-  x: number;
-  y: number;
-  z: number;
-}
-
-export interface Size {
-  width: number | string;
-  height: number | string;
-}
-
-export interface CardLayer {
-  id: string;
-  type: 'image' | 'text' | 'shape';
-  content: string | object;
-  position: Position;
-  size: Size;
-  rotation: number;
-  opacity: number;
-  visible: boolean;
-  effectIds: string[];
-}
+import { CardDesignState, CardLayer } from './types/cardTypes';
 
 interface CardMakerWizardProps {
   cardData?: CardDesignState;
@@ -89,7 +49,7 @@ const CardMakerWizard: React.FC<CardMakerWizardProps> = ({
   updateEffectSettings = () => {},
   effectClasses = '',
 }) => {
-  const [currentStep, setCurrentStep] = useState(0);
+  const [currentStep, setCurrentStep] = React.useState(0);
   const isMobile = useMediaQuery('(max-width: 768px)');
   const previewCanvasRef = useRef<HTMLDivElement>(null);
   
@@ -107,172 +67,36 @@ const CardMakerWizard: React.FC<CardMakerWizardProps> = ({
 
   return (
     <div className="grid md:grid-cols-5 gap-8">
-      {/* Card Preview Section */}
-      <div className="md:col-span-2 flex max-w-[576px] grow shrink-0 basis-0 flex-col items-start gap-2 self-stretch rounded-md bg-card px-8 py-8 shadow-lg">
-        <CardWizardHeader />
-        
-        <div className="flex w-full grow shrink-0 basis-0 flex-col items-start justify-center gap-4">
-          <div className="relative w-full aspect-[2.5/3.5] rounded-lg overflow-hidden shadow-lg">
-            <CardPreviewSidebar
-              cardData={cardData}
-              layers={layers}
-              activeLayerId={activeLayer?.id || null}
-              effectClasses={effectClasses}
-              onLayerSelect={setActiveLayerId}
-              onLayerUpdate={updateLayer}
-              previewCanvasRef={previewCanvasRef}
-              hideControls={true}
-            />
-          </div>
-        </div>
-        
-        <CardWizardFeatures />
-      </div>
+      <CardPreviewSection 
+        cardData={cardData}
+        layers={layers}
+        activeLayer={activeLayer}
+        setActiveLayerId={setActiveLayerId}
+        updateLayer={updateLayer}
+        effectClasses={effectClasses}
+        previewCanvasRef={previewCanvasRef}
+      />
 
-      {/* Wizard Content Section */}
-      <div className="md:col-span-3">
-        <CardWizardSteps 
-          steps={WIZARD_STEPS} 
-          currentStep={currentStep} 
-          setCurrentStep={setCurrentStep}
-        />
-        
-        <div className="mt-8">
-          <CardWizardStepContent 
-            currentStep={currentStep}
-            cardData={cardData}
-            setCardData={setCardData}
-            layers={layers}
-            setLayers={setLayers}
-            activeLayer={activeLayer}
-            setActiveLayerId={setActiveLayerId}
-            updateLayer={updateLayer}
-            effectStack={effectStack}
-            addEffect={addEffect}
-            removeEffect={removeEffect}
-            updateEffectSettings={updateEffectSettings}
-            onContinue={goToNextStep}
-            effectClasses={effectClasses}
-          />
-        </div>
-        
-        <div className={`flex ${currentStep === 0 ? 'justify-end' : 'justify-between'} mt-6`}>
-          {currentStep > 0 && (
-            <Button 
-              variant="outline"
-              onClick={goToPreviousStep}
-            >
-              <ArrowLeft size={16} className="mr-1" /> Back
-            </Button>
-          )}
-          {currentStep < WIZARD_STEPS.length - 1 && (
-            <Button 
-              className="bg-litmus-green hover:bg-litmus-green/90 text-white px-6"
-              onClick={goToNextStep}
-            >
-              Continue <ArrowRight size={16} className="ml-1" />
-            </Button>
-          )}
-        </div>
-      </div>
+      <WizardContentSection
+        currentStep={currentStep}
+        setCurrentStep={setCurrentStep}
+        cardData={cardData}
+        setCardData={setCardData}
+        layers={layers}
+        setLayers={setLayers}
+        activeLayer={activeLayer}
+        setActiveLayerId={setActiveLayerId}
+        updateLayer={updateLayer}
+        effectStack={effectStack}
+        addEffect={addEffect}
+        removeEffect={removeEffect}
+        updateEffectSettings={updateEffectSettings}
+        effectClasses={effectClasses}
+        goToNextStep={goToNextStep}
+        goToPreviousStep={goToPreviousStep}
+      />
     </div>
   );
-};
-
-interface CardWizardStepContentProps {
-  currentStep: number;
-  cardData: CardDesignState;
-  setCardData: (cardData: CardDesignState) => void;
-  layers: CardLayer[];
-  setLayers: (layers: CardLayer[]) => void;
-  activeLayer: CardLayer | null;
-  setActiveLayerId: (layerId: string) => void;
-  updateLayer: (layerId: string, updates: Partial<CardLayer>) => void;
-  effectStack: CardEffect[];
-  addEffect: (name: string, settings?: any) => void;
-  removeEffect: (id: string) => void;
-  updateEffectSettings: (id: string, settings: any) => void;
-  onContinue: () => void;
-  effectClasses: string;
-}
-
-const CardWizardStepContent: React.FC<CardWizardStepContentProps> = ({
-  currentStep,
-  cardData,
-  setCardData,
-  layers,
-  setLayers,
-  activeLayer,
-  setActiveLayerId,
-  updateLayer,
-  effectStack,
-  addEffect,
-  removeEffect,
-  updateEffectSettings,
-  onContinue,
-  effectClasses
-}) => {
-  switch (currentStep) {
-    case 0:
-      return (
-        <UploadTab
-          cardData={cardData}
-          setCardData={setCardData}
-          onImageCaptured={(url: string) => {
-            setCardData({...cardData, imageUrl: url});
-            onContinue();
-          }}
-          onContinue={onContinue}
-        />
-      );
-    case 1:
-      return (
-        <DesignTab
-          cardData={cardData}
-          setCardData={setCardData}
-          layers={layers}
-          activeLayerId={activeLayer?.id || null}
-          onImageUpload={(url: string) => setCardData({...cardData, imageUrl: url})}
-          onLayerSelect={setActiveLayerId}
-          onLayerUpdate={updateLayer}
-          onAddLayer={() => {}}
-          onDeleteLayer={() => {}}
-          onMoveLayerUp={() => {}}
-          onMoveLayerDown={() => {}}
-          onContinue={onContinue}
-        />
-      );
-    case 2:
-      return (
-        <EffectsTab
-          onContinue={onContinue}
-          effectStack={effectStack}
-          addEffect={addEffect}
-          removeEffect={removeEffect}
-          updateEffectSettings={updateEffectSettings}
-        />
-      );
-    case 3:
-      return (
-        <TextTab
-          onContinue={onContinue}
-          cardData={cardData}
-          setCardData={setCardData}
-        />
-      );
-    case 4:
-      return (
-        <PreviewTab
-          onSave={() => {console.log('Saving card:', cardData)}}
-          cardImage={cardData.imageUrl}
-          cardTitle={cardData.title}
-          cardEffect={effectClasses}
-          cardData={cardData}
-        />
-      );
-    default:
-      return null;
-  }
 };
 
 export default CardMakerWizard;

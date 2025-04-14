@@ -1,64 +1,57 @@
 
 import React from 'react';
-import { CardDesignState, CardLayer } from '../CardCreator';
 import UploadTab from '../tabs/UploadTab';
 import DesignTab from '../tabs/DesignTab';
 import EffectsTab from '../tabs/EffectsTab';
 import TextTab from '../tabs/TextTab';
 import PreviewTab from '../tabs/PreviewTab';
 import { CardEffect } from '../hooks/useCardEffectsStack';
+import { CardDesignState, CardLayer } from '../types/cardTypes';
 
 interface CardWizardStepContentProps {
   currentStep: number;
   cardData: CardDesignState;
-  setCardData: React.Dispatch<React.SetStateAction<CardDesignState>>;
-  onImageCaptured: (imageUrl: string) => void;
-  onNext: () => void;
-  onSaveCard: () => void;
+  setCardData: (cardData: CardDesignState) => void;
   layers: CardLayer[];
-  activeLayerId: string | null;
-  setActiveLayer: (layerId: string) => void;
+  setLayers: (layers: CardLayer[]) => void;
+  activeLayer: CardLayer | null;
+  setActiveLayerId: (layerId: string) => void;
   updateLayer: (layerId: string, updates: Partial<CardLayer>) => void;
-  deleteLayer: (layerId: string) => void;
-  moveLayerUp: (layerId: string) => void;
-  moveLayerDown: (layerId: string) => void;
-  onAddLayer: (type: 'image' | 'text' | 'shape') => void;
-  effectClasses: string;
   effectStack: CardEffect[];
   addEffect: (name: string, settings?: any) => void;
   removeEffect: (id: string) => void;
   updateEffectSettings: (id: string, settings: any) => void;
+  onContinue: () => void;
+  effectClasses: string;
 }
 
 const CardWizardStepContent: React.FC<CardWizardStepContentProps> = ({
   currentStep,
   cardData,
   setCardData,
-  onImageCaptured,
-  onNext,
-  onSaveCard,
   layers,
-  activeLayerId,
-  setActiveLayer,
+  setLayers,
+  activeLayer,
+  setActiveLayerId,
   updateLayer,
-  deleteLayer,
-  moveLayerUp,
-  moveLayerDown,
-  onAddLayer,
-  effectClasses,
   effectStack,
   addEffect,
   removeEffect,
-  updateEffectSettings
+  updateEffectSettings,
+  onContinue,
+  effectClasses
 }) => {
   switch (currentStep) {
     case 0:
       return (
-        <UploadTab 
+        <UploadTab
           cardData={cardData}
           setCardData={setCardData}
-          onImageCaptured={onImageCaptured}
-          onContinue={onNext}
+          onImageCaptured={(url: string) => {
+            setCardData({...cardData, imageUrl: url});
+            onContinue();
+          }}
+          onContinue={onContinue}
         />
       );
     case 1:
@@ -67,21 +60,21 @@ const CardWizardStepContent: React.FC<CardWizardStepContentProps> = ({
           cardData={cardData}
           setCardData={setCardData}
           layers={layers}
-          activeLayerId={activeLayerId}
-          onImageUpload={onImageCaptured}
-          onLayerSelect={setActiveLayer}
+          activeLayerId={activeLayer?.id || null}
+          onImageUpload={(url: string) => setCardData({...cardData, imageUrl: url})}
+          onLayerSelect={setActiveLayerId}
           onLayerUpdate={updateLayer}
-          onAddLayer={onAddLayer}
-          onDeleteLayer={deleteLayer}
-          onMoveLayerUp={moveLayerUp}
-          onMoveLayerDown={moveLayerDown}
-          onContinue={onNext}
+          onAddLayer={() => {}}
+          onDeleteLayer={() => {}}
+          onMoveLayerUp={() => {}}
+          onMoveLayerDown={() => {}}
+          onContinue={onContinue}
         />
       );
     case 2:
       return (
-        <EffectsTab 
-          onContinue={onNext} 
+        <EffectsTab
+          onContinue={onContinue}
           effectStack={effectStack}
           addEffect={addEffect}
           removeEffect={removeEffect}
@@ -90,19 +83,24 @@ const CardWizardStepContent: React.FC<CardWizardStepContentProps> = ({
       );
     case 3:
       return (
-        <TextTab onContinue={onNext} />
+        <TextTab
+          onContinue={onContinue}
+          cardData={cardData}
+          setCardData={setCardData}
+        />
       );
     case 4:
       return (
-        <PreviewTab 
-          onSave={onSaveCard}
-          cardImage={cardData.imageUrl || undefined}
+        <PreviewTab
+          onSave={() => {console.log('Saving card:', cardData)}}
+          cardImage={cardData.imageUrl}
           cardTitle={cardData.title}
           cardEffect={effectClasses}
+          cardData={cardData}
         />
       );
     default:
-      return <div>Unknown step</div>;
+      return null;
   }
 };
 

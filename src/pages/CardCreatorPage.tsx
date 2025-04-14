@@ -1,9 +1,10 @@
 
 import React, { useState } from 'react';
 import PageLayout from '@/components/navigation/PageLayout';
-import CardMakerWizard, { CardDesignState, CardLayer } from '@/components/card-creation/CardMakerWizard';
+import CardMakerWizard from '@/components/card-creation/CardMakerWizard';
 import { useCardEffectsStack } from '@/components/card-creation/hooks/useCardEffectsStack';
 import { useLayers } from '@/components/card-creation/hooks/useLayers';
+import { CardDesignState, CardLayer } from '@/components/card-creation/types/cardTypes';
 
 const CardCreatorPage: React.FC = () => {
   const [cardData, setCardData] = useState<CardDesignState>({
