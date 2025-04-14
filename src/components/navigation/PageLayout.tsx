@@ -51,8 +51,8 @@ const PageLayout: React.FC<PageLayoutProps> = ({
   const stringTitle = typeof title === 'string' 
     ? title 
     : React.isValidElement(title)
-      ? 'CardShow' // If it's a React element, use a default title
-      : String(title); // Convert other types to string
+      ? title.props.children?.toString() || 'CardShow'
+      : String(title);
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
