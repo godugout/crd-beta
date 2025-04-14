@@ -9,7 +9,6 @@ import ViewerControls from './viewer-components/ViewerControls';
 import InfoPanel from './viewer-components/InfoPanel';
 import KeyboardShortcuts from './viewer-components/KeyboardShortcuts';
 import { useCardInteraction } from '@/hooks/useCardInteraction';
-import CardEffectsPanel from './viewer-components/CardEffectsPanel';
 
 interface FullscreenViewerProps {
   cardId: string;
@@ -41,20 +40,6 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
 
   const [isFlipped, setIsFlipped] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
-  const [activeEffects, setActiveEffects] = useState<string[]>([]);
-  const [effectIntensities, setEffectIntensities] = useState<Record<string, number>>({
-    Holographic: 0.7,
-    Refractor: 0.8,
-    Chrome: 0.6,
-    Vintage: 0.5,
-  });
-  const [touchImprintAreas, setTouchImprintAreas] = useState([
-    { id: 'flip-corner', active: false },
-    { id: 'zoom-center', active: false },
-    { id: 'rotate-edges', active: false }
-  ]);
-
-  // Track mouse position for effect rendering
   const [cardMousePosition, setCardMousePosition] = useState({ x: 0.5, y: 0.5 });
 
   useEffect(() => {
@@ -65,30 +50,6 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
     };
   }, [handleKeyboardControls]);
 
-  // Apply effects CSS variables when effects or their intensities change
-  useEffect(() => {
-    if (!document.documentElement) return;
-
-    console.log("Applying effect intensities to CSS variables:", {activeEffects, effectIntensities});
-    
-    // First, reset all effect variables to ensure clean state
-    document.documentElement.style.setProperty('--holographic-intensity', '0');
-    document.documentElement.style.setProperty('--refractor-intensity', '0');
-    document.documentElement.style.setProperty('--chrome-intensity', '0');
-    document.documentElement.style.setProperty('--vintage-intensity', '0');
-    
-    // Then set CSS variables for active effect intensities
-    activeEffects.forEach(effect => {
-      const intensity = effectIntensities[effect] || 0.7;
-      document.documentElement.style.setProperty(
-        `--${effect.toLowerCase()}-intensity`, 
-        intensity.toString()
-      );
-      console.log(`Applied ${effect} effect with intensity ${intensity}`);
-    });
-    
-  }, [activeEffects, effectIntensities]);
-
   const handleToggleFullscreen = () => {
     toast.info('Fullscreen toggle - feature coming soon');
   };
@@ -97,56 +58,7 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
     toast.info('Share feature coming soon');
   };
 
-  const handleToggleEffect = (effectId: string) => {
-    console.log(`Toggling effect ${effectId}`);
-    
-    setActiveEffects(prev => {
-      const newEffects = prev.includes(effectId) 
-        ? prev.filter(id => id !== effectId)
-        : [...prev, effectId];
-      
-      console.log("Updated active effects:", newEffects);
-      return newEffects;
-    });
-    
-    // When toggling an effect on, apply its CSS variable immediately
-    const isActivating = !activeEffects.includes(effectId);
-    if (isActivating && document.documentElement) {
-      const intensity = effectIntensities[effectId] || 0.7;
-      document.documentElement.style.setProperty(
-        `--${effectId.toLowerCase()}-intensity`, 
-        intensity.toString()
-      );
-      console.log(`Directly applied ${effectId} effect with intensity ${intensity}`);
-    } else if (!isActivating && document.documentElement) {
-      // Remove effect by setting intensity to 0
-      document.documentElement.style.setProperty(
-        `--${effectId.toLowerCase()}-intensity`, 
-        '0'
-      );
-      console.log(`Removed ${effectId} effect`);
-    }
-  };
-
-  const handleEffectIntensityChange = (effectId: string, intensity: number) => {
-    console.log(`Changing ${effectId} intensity to ${intensity}`);
-    
-    setEffectIntensities(prev => ({
-      ...prev,
-      [effectId]: intensity
-    }));
-    
-    // Apply CSS variable immediately when intensity changes
-    if (document.documentElement) {
-      document.documentElement.style.setProperty(
-        `--${effectId.toLowerCase()}-intensity`, 
-        intensity.toString()
-      );
-    }
-  };
-
   const handleCardMouseMove = (e: React.MouseEvent) => {
-    // Handle mouse movement on the card for interactive effects
     if (!cardRef.current) return;
     
     const rect = cardRef.current.getBoundingClientRect();
@@ -154,34 +66,6 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
     const y = (e.clientY - rect.top) / rect.height;
     
     setCardMousePosition({ x, y });
-    
-    // Apply mouse position CSS variables
-    if (document.documentElement) {
-      document.documentElement.style.setProperty('--mouse-x', `${x * 100}%`);
-      document.documentElement.style.setProperty('--mouse-y', `${y * 100}%`);
-    }
-    
-    // Detect touch imprint areas
-    const cornerSize = rect.width * 0.2;
-    const isCorner = x > 0.8 && y < 0.2; // Top right corner
-    const isCenter = x > 0.4 && x < 0.6 && y > 0.4 && y < 0.6; // Center
-    
-    // Update active touch areas
-    setTouchImprintAreas(prev => prev.map(area => {
-      if (area.id === 'flip-corner') return { ...area, active: isCorner };
-      if (area.id === 'zoom-center') return { ...area, active: isCenter };
-      return area;
-    }));
-    
-    // Trigger actions based on touch areas
-    if (isCorner) {
-      // Highlight the corner as an interactive element
-      cardRef.current.classList.add('corner-highlight');
-    } else {
-      cardRef.current.classList.remove('corner-highlight');
-    }
-    
-    // Pass the original event to the card movement handler
     handleMouseMove(e);
   };
 
@@ -192,17 +76,13 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
     const x = (e.clientX - rect.left) / rect.width;
     const y = (e.clientY - rect.top) / rect.height;
     
-    // Detect click on touch imprint areas
-    const cornerSize = rect.width * 0.2;
-    const isCorner = x > 0.8 && y < 0.2; // Top right corner
-    const isCenter = x > 0.4 && x < 0.6 && y > 0.4 && y < 0.6; // Center
+    const isCorner = x > 0.8 && y < 0.2;
+    const isCenter = x > 0.4 && x < 0.6 && y > 0.4 && y < 0.6;
     
     if (isCorner) {
-      // Flip card on corner tap
       setIsFlipped(!isFlipped);
       toast.info(`Card ${isFlipped ? 'front' : 'back'} view`);
     } else if (isCenter) {
-      // Zoom on center tap
       handleZoomIn();
     }
   };
@@ -239,18 +119,7 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
           cardRef={cardRef}
           containerRef={containerRef}
           isAutoRotating={isAutoRotating}
-          activeEffects={activeEffects}
-          effectIntensities={effectIntensities}
           mousePosition={cardMousePosition}
-          touchImprintAreas={touchImprintAreas}
-        />
-        
-        {/* Effects panel */}
-        <CardEffectsPanel 
-          activeEffects={activeEffects}
-          onToggleEffect={handleToggleEffect}
-          onEffectIntensityChange={handleEffectIntensityChange}
-          effectIntensities={effectIntensities}
         />
       </div>
 
