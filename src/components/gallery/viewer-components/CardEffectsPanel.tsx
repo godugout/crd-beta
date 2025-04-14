@@ -18,7 +18,8 @@ const CardEffectsPanel: React.FC<CardEffectsPanelProps> = ({
   onEffectIntensityChange,
   effectIntensities = {}
 }) => {
-  const [expandedEffect, setExpandedEffect] = useState<string | null>(null);
+  // Use an array of expanded effects instead of just one
+  const [expandedEffects, setExpandedEffects] = useState<string[]>([]);
   const [localIntensities, setLocalIntensities] = useState<Record<string, number>>({
     Holographic: effectIntensities.Holographic || 0.7,
     Refractor: effectIntensities.Refractor || 0.8,
@@ -26,8 +27,12 @@ const CardEffectsPanel: React.FC<CardEffectsPanelProps> = ({
     Vintage: effectIntensities.Vintage || 0.5,
   });
   
+  // Debug logging
+  console.log("CardEffectsPanel rendered with:", { activeEffects, effectIntensities });
+  
   // Sync with external intensities when they change
   useEffect(() => {
+    console.log("Effect intensities updated:", effectIntensities);
     setLocalIntensities(prev => ({
       ...prev,
       ...effectIntensities
@@ -44,13 +49,16 @@ const CardEffectsPanel: React.FC<CardEffectsPanelProps> = ({
   const handleEffectToggle = (effectId: string) => {
     onToggleEffect(effectId);
     
-    // If we're enabling an effect, expand its intensity controls
+    // If toggling on, always expand
     if (!activeEffects.includes(effectId)) {
-      setExpandedEffect(effectId);
-    } else {
-      // Only collapse if this was the expanded effect
-      if (expandedEffect === effectId) {
-        setExpandedEffect(null);
+      setExpandedEffects(prev => [...prev, effectId]);
+      
+      // Immediately apply the intensity through CSS variables
+      if (document.documentElement) {
+        document.documentElement.style.setProperty(
+          `--${effectId.toLowerCase()}-intensity`, 
+          localIntensities[effectId]?.toString() || '0.7'
+        );
       }
     }
     
@@ -59,6 +67,8 @@ const CardEffectsPanel: React.FC<CardEffectsPanelProps> = ({
 
   const handleIntensityChange = (effectId: string, value: number[]) => {
     const intensity = value[0];
+    console.log(`Changing ${effectId} intensity to ${intensity}`);
+    
     setLocalIntensities(prev => ({
       ...prev,
       [effectId]: intensity
@@ -67,12 +77,25 @@ const CardEffectsPanel: React.FC<CardEffectsPanelProps> = ({
     if (onEffectIntensityChange) {
       onEffectIntensityChange(effectId, intensity);
     }
+    
+    // Directly apply to CSS variables for immediate effect
+    if (document.documentElement) {
+      document.documentElement.style.setProperty(
+        `--${effectId.toLowerCase()}-intensity`, 
+        intensity.toString()
+      );
+    }
   };
 
   // Function to handle expand/collapse of intensity controls
   const toggleExpandEffect = (e: React.MouseEvent, effectId: string) => {
     e.stopPropagation();
-    setExpandedEffect(expandedEffect === effectId ? null : effectId);
+    
+    setExpandedEffects(prev => 
+      prev.includes(effectId)
+        ? prev.filter(id => id !== effectId)
+        : [...prev, effectId]
+    );
   };
 
   return (
@@ -80,7 +103,7 @@ const CardEffectsPanel: React.FC<CardEffectsPanelProps> = ({
       <h3 className="text-sm font-medium mb-2">Visual Effects</h3>
       <div className="flex flex-wrap gap-2">
         {availableEffects.map(effect => (
-          <div key={effect.id} className="flex flex-col">
+          <div key={effect.id} className="flex flex-col mb-2">
             <button
               className={`flex items-center gap-1.5 px-2 py-1 rounded-md text-xs ${
                 activeEffects.includes(effect.id)
@@ -94,20 +117,20 @@ const CardEffectsPanel: React.FC<CardEffectsPanelProps> = ({
               {activeEffects.includes(effect.id) && (
                 <Sliders 
                   size={14} 
-                  className="ml-1 cursor-pointer" 
+                  className={`ml-1 cursor-pointer ${expandedEffects.includes(effect.id) ? 'text-yellow-300' : ''}`}
                   onClick={(e) => toggleExpandEffect(e, effect.id)}
                 />
               )}
             </button>
             
-            {expandedEffect === effect.id && activeEffects.includes(effect.id) && (
+            {expandedEffects.includes(effect.id) && activeEffects.includes(effect.id) && (
               <div className="mt-2 px-2 py-1 bg-gray-800 rounded-md w-full">
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-xs">Intensity</span>
-                  <span className="text-xs">{localIntensities[effect.id].toFixed(1)}</span>
+                  <span className="text-xs">{localIntensities[effect.id]?.toFixed(1) || '0.7'}</span>
                 </div>
                 <Slider 
-                  value={[localIntensities[effect.id]]}
+                  value={[localIntensities[effect.id] || 0.7]}
                   min={0.1}
                   max={1.0}
                   step={0.1}

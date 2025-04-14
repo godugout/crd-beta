@@ -45,6 +45,12 @@ const CardDisplay: React.FC<CardDisplayProps> = ({
     return () => clearTimeout(timer);
   }, [isFlipped]);
 
+  // Debug effect changes
+  useEffect(() => {
+    console.log("CardDisplay activeEffects changed:", activeEffects);
+    console.log("CardDisplay effectIntensities:", effectIntensities);
+  }, [activeEffects, effectIntensities]);
+  
   // Generate effect classes based on active effects
   const effectClasses = activeEffects
     .map(effect => `effect-${effect.toLowerCase()}`)
@@ -59,14 +65,18 @@ const CardDisplay: React.FC<CardDisplayProps> = ({
     
     // Add intensity variables for each effect
     Object.entries(effectIntensities).forEach(([effect, intensity]) => {
-      style[`--${effect.toLowerCase()}-intensity`] = intensity.toString();
+      if (activeEffects.includes(effect)) {
+        style[`--${effect.toLowerCase()}-intensity`] = intensity.toString();
+      } else {
+        // Set to 0 for inactive effects
+        style[`--${effect.toLowerCase()}-intensity`] = "0";
+      }
     });
     
     return style;
   };
 
-  console.log('Active effects in CardDisplay:', activeEffects);
-  console.log('Effect classes:', effectClasses);
+  console.log("Rendering CardDisplay with effects:", effectClasses);
 
   return (
     <div 
@@ -75,7 +85,7 @@ const CardDisplay: React.FC<CardDisplayProps> = ({
     >
       <div 
         ref={cardRef}
-        className={`relative transition-all duration-700 transform-gpu card-effect preserve-3d`}
+        className={`relative transition-all duration-700 transform-gpu card-effect preserve-3d ${effectClasses}`}
         style={{
           transformStyle: 'preserve-3d',
           transform: `
@@ -84,6 +94,7 @@ const CardDisplay: React.FC<CardDisplayProps> = ({
             rotateY(${rotation.y}deg) 
             scale(${zoom})
           `,
+          ...generateEffectStyles()
         }}
       >
         <div className="relative w-72 sm:w-80 md:w-96 aspect-[2.5/3.5] rounded-xl overflow-hidden shadow-2xl preserve-3d">
@@ -114,14 +125,6 @@ const CardDisplay: React.FC<CardDisplayProps> = ({
                 {card.player && <p className="text-sm opacity-90">{card.player}</p>}
                 {card.team && <p className="text-xs opacity-80">{card.team}</p>}
               </div>
-              
-              {/* Apply visual effects to front face */}
-              {activeEffects.length > 0 && (
-                <div 
-                  className={`absolute inset-0 pointer-events-none z-10 ${effectClasses}`} 
-                  style={generateEffectStyles()}
-                ></div>
-              )}
             </div>
           </div>
 
@@ -171,22 +174,17 @@ const CardDisplay: React.FC<CardDisplayProps> = ({
                   </div>
                 </div>
               )}
-              
-              {/* Apply visual effects to back face - slightly different effect */}
-              {activeEffects.length > 0 && (
-                <div 
-                  className={`absolute inset-0 pointer-events-none ${effectClasses.replace('holographic', 'chrome')}`}
-                  style={generateEffectStyles()}
-                >
-                  {/* Holographic elements specific to card back */}
-                  {activeEffects.includes('Holographic') && (
-                    <div className="absolute inset-0 bg-gradient-to-tr from-purple-500/10 to-blue-500/10 mix-blend-overlay"></div>
-                  )}
-                </div>
-              )}
             </div>
           </div>
         </div>
+
+        {/* Apply visual effects to the entire card */}
+        {activeEffects.length > 0 && (
+          <div 
+            className={`absolute inset-0 pointer-events-none z-10 ${effectClasses}`}
+            style={generateEffectStyles()}
+          ></div>
+        )}
 
         {/* Card effects layer - shared by both sides */}
         <div className="absolute inset-0 pointer-events-none">

@@ -59,6 +59,7 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
 
   useEffect(() => {
     window.addEventListener('keydown', handleKeyboardControls);
+    
     return () => {
       window.removeEventListener('keydown', handleKeyboardControls);
     };
@@ -68,17 +69,23 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
   useEffect(() => {
     if (!document.documentElement) return;
 
-    // Set CSS variables for effect intensities
-    Object.entries(effectIntensities).forEach(([effect, intensity]) => {
+    console.log("Applying effect intensities to CSS variables:", {activeEffects, effectIntensities});
+    
+    // First, reset all effect variables to ensure clean state
+    document.documentElement.style.setProperty('--holographic-intensity', '0');
+    document.documentElement.style.setProperty('--refractor-intensity', '0');
+    document.documentElement.style.setProperty('--chrome-intensity', '0');
+    document.documentElement.style.setProperty('--vintage-intensity', '0');
+    
+    // Then set CSS variables for active effect intensities
+    activeEffects.forEach(effect => {
+      const intensity = effectIntensities[effect] || 0.7;
       document.documentElement.style.setProperty(
         `--${effect.toLowerCase()}-intensity`, 
         intensity.toString()
       );
+      console.log(`Applied ${effect} effect with intensity ${intensity}`);
     });
-    
-    // Log the effects for debugging
-    console.log('Active effects:', activeEffects);
-    console.log('Effect intensities:', effectIntensities);
     
   }, [activeEffects, effectIntensities]);
 
@@ -91,22 +98,39 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
   };
 
   const handleToggleEffect = (effectId: string) => {
-    setActiveEffects(prev => 
-      prev.includes(effectId) 
+    console.log(`Toggling effect ${effectId}`);
+    
+    setActiveEffects(prev => {
+      const newEffects = prev.includes(effectId) 
         ? prev.filter(id => id !== effectId)
-        : [...prev, effectId]
-    );
+        : [...prev, effectId];
+      
+      console.log("Updated active effects:", newEffects);
+      return newEffects;
+    });
     
     // When toggling an effect on, apply its CSS variable immediately
-    if (!activeEffects.includes(effectId) && document.documentElement) {
+    const isActivating = !activeEffects.includes(effectId);
+    if (isActivating && document.documentElement) {
+      const intensity = effectIntensities[effectId] || 0.7;
       document.documentElement.style.setProperty(
         `--${effectId.toLowerCase()}-intensity`, 
-        effectIntensities[effectId]?.toString() || '0.7'
+        intensity.toString()
       );
+      console.log(`Directly applied ${effectId} effect with intensity ${intensity}`);
+    } else if (!isActivating && document.documentElement) {
+      // Remove effect by setting intensity to 0
+      document.documentElement.style.setProperty(
+        `--${effectId.toLowerCase()}-intensity`, 
+        '0'
+      );
+      console.log(`Removed ${effectId} effect`);
     }
   };
 
   const handleEffectIntensityChange = (effectId: string, intensity: number) => {
+    console.log(`Changing ${effectId} intensity to ${intensity}`);
+    
     setEffectIntensities(prev => ({
       ...prev,
       [effectId]: intensity
