@@ -193,20 +193,20 @@ export function useCardPhysics({
     const dy = e.clientY - lastMousePosRef.current.y;
     
     // Short, fast movements result in stronger flicks
-    const flickMultiplier = moveDuration < 100 ? 2.0 : moveDuration < 200 ? 1.5 : 1.2;
+    const flickMultiplier = moveDuration < 100 ? 2.5 : moveDuration < 200 ? 1.8 : 1.2;
     
     // Boost velocity for a more satisfying flick effect, with increased weightlessness
     setState(prev => ({
       ...prev,
       velocity: {
-        x: prev.velocity.x * flickMultiplier * (1 + weightlessness),
-        y: prev.velocity.y * flickMultiplier * (1 + weightlessness)
+        x: prev.velocity.x * flickMultiplier * (1 + weightlessness * 1.2),
+        y: prev.velocity.y * flickMultiplier * (1 + weightlessness * 1.2)
       },
       // Also boost angular velocity on release for better spin
       angularVelocity: {
-        x: prev.angularVelocity.x * flickMultiplier * (1 + weightlessness * 0.5),
-        y: prev.angularVelocity.y * flickMultiplier * (1 + weightlessness * 0.5),
-        z: prev.angularVelocity.z * flickMultiplier * (1 + weightlessness * 0.3)
+        x: prev.angularVelocity.x * flickMultiplier * (1 + weightlessness * 0.8),
+        y: prev.angularVelocity.y * flickMultiplier * (1 + weightlessness * 0.8),
+        z: prev.angularVelocity.z * flickMultiplier * (1 + weightlessness * 0.5)
       }
     }));
   };

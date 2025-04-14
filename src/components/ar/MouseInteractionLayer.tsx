@@ -24,7 +24,8 @@ const MouseInteractionLayer: React.FC<MouseInteractionLayerProps> = ({
     dampingFactor: 0.95, // Increased from 0.97 for smoother deceleration
     rotationDampingFactor: 0.94, // Increased from 0.96 for more natural rotation
     sensitivity: 0.15,  // Increased from 0.1 for more responsive movement
-    autoRotate: false
+    autoRotate: false,
+    weightlessness: 0.7 // Add weightlessness for more fluid, space-like movement
   });
   
   // Track if user tapped rather than dragged (for flipping)
@@ -85,7 +86,7 @@ const MouseInteractionLayer: React.FC<MouseInteractionLayerProps> = ({
     const deltaY = Math.abs(e.clientY - startPosition.y);
     
     // If interaction was a short tap without much movement, treat as a flip request
-    if (tapDuration < 300 && deltaX < 10 && deltaY < 10 && onFlipCard) {
+    if (tapDuration < 300 && deltaX < 15 && deltaY < 15 && onFlipCard) {
       onFlipCard(selectedCardId);
     }
     
@@ -104,14 +105,14 @@ const MouseInteractionLayer: React.FC<MouseInteractionLayerProps> = ({
       
       // Add a spin effect based on the movement direction and speed
       physics.applyImpulse(
-        directionX * velocity * 10, 
-        directionY * velocity * 10,
-        (directionX + directionY) * velocity * 5
+        directionX * velocity * 15, 
+        directionY * velocity * 15,
+        (directionX + directionY) * velocity * 8
       );
     }
   };
   
-  // Handle reset button click
+  // Handle reset button click with animation
   const handleReset = () => {
     if (onResetCard) {
       onResetCard();
@@ -132,10 +133,10 @@ const MouseInteractionLayer: React.FC<MouseInteractionLayerProps> = ({
         onPointerCancel={handlePointerUp}
       />
       
-      {/* Reset button - appears when card moves out of view */}
+      {/* Reset button - appears when card moves out of view with improved animation */}
       {showResetButton && (
         <button
-          className="absolute bottom-6 right-6 z-30 bg-black/60 hover:bg-black/80 text-white p-3 rounded-full transition-all"
+          className="absolute bottom-6 right-6 z-30 bg-black/60 hover:bg-black/80 text-white p-3 rounded-full transition-all animate-fade-in hover:scale-110"
           onClick={handleReset}
           title="Reset card position"
         >
