@@ -8,6 +8,7 @@ import CardShowcase from '@/pages/CardShowcase';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import CardCreator from '@/pages/CardCreator';
 import UniformTextureDemo from '@/pages/UniformTextureDemo';
+import ImmersiveCardViewer from '@/pages/ImmersiveCardViewer';
 
 // Card-related routes
 export const cardRoutes: RouteObject[] = [
@@ -51,6 +52,10 @@ export const cardRoutes: RouteObject[] = [
     path: "/uniforms",
     element: <UniformTextureDemo />,
   },
+  {
+    path: "/view/:id",
+    element: <ImmersiveCardViewer />,
+  }
 ];
 
 export default cardRoutes;

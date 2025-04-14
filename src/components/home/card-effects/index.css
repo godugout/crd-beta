@@ -1,8 +1,406 @@
 
-@import './BaseEffects.css';
-@import './HolographicEffects.css';
-@import './RefractorEffects.css';
-@import './SpectralEffects.css';
-@import './PremiumEffects.css';
-@import './VintageEffects.css';
-@import './AnimationKeyframes.css';
+/* Base card styles */
+.card-3d-container {
+  perspective: 1000px;
+  transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+  will-change: transform;
+}
+
+.dynamic-card {
+  transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.card-inner {
+  transform-style: preserve-3d;
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.card-front,
+.card-back {
+  backface-visibility: hidden;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.card-back {
+  transform: rotateY(180deg);
+}
+
+/* Lighting and reflection effects */
+.card-shine {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    125deg,
+    rgba(255, 255, 255, 0.3) 0%,
+    rgba(255, 255, 255, 0.1) 20%,
+    rgba(255, 255, 255, 0) 60%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+  pointer-events: none;
+}
+
+.card-container:hover .card-shine {
+  opacity: 1;
+}
+
+/* Animation classes */
+.animation-active {
+  animation-play-state: running;
+}
+
+.animation-slowing {
+  animation-play-state: paused;
+  transition: all 1.5s ease-out;
+}
+
+.floating-card {
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-15px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+/* Refractor effect */
+.card-refractor {
+  position: relative;
+  overflow: hidden;
+}
+
+.card-refractor::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    var(--refractor-angle, 45deg),
+    transparent 20%, 
+    rgba(255, 255, 255, 0.1) 30%,
+    rgba(255, 255, 255, 0.1) 40%,
+    transparent 50%
+  );
+  transform: translateY(-100%);
+  animation: refractor-shine calc(var(--shimmer-speed, 5) * 1s) linear infinite;
+  opacity: var(--refractor-intensity, 1);
+}
+
+@keyframes refractor-shine {
+  0% {
+    transform: translateY(-100%) rotate(0deg);
+  }
+  100% {
+    transform: translateY(100%) rotate(0deg);
+  }
+}
+
+/* Holographic effect */
+.card-holographic {
+  position: relative;
+  overflow: hidden;
+}
+
+.card-holographic::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    125deg,
+    transparent 0%,
+    rgba(255, 0, 255, calc(0.05 * var(--hologram-intensity, 0.7))) 10%,
+    rgba(0, 255, 255, calc(0.05 * var(--hologram-intensity, 0.7))) 20%,
+    rgba(255, 255, 0, calc(0.05 * var(--hologram-intensity, 0.7))) 30%,
+    transparent 40%
+  );
+  mix-blend-mode: overlay;
+  opacity: var(--hologram-intensity, 0.7);
+  animation: holographic-shift 8s linear infinite;
+}
+
+@keyframes holographic-shift {
+  0% {
+    background-position: 0% 0%;
+    filter: hue-rotate(0deg);
+  }
+  50% {
+    background-position: 100% 100%;
+    filter: hue-rotate(180deg);
+  }
+  100% {
+    background-position: 0% 0%;
+    filter: hue-rotate(360deg);
+  }
+}
+
+/* Gold foil effect */
+.card-gold-foil {
+  position: relative;
+  overflow: hidden;
+}
+
+.card-gold-foil::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    45deg,
+    rgba(255, 215, 0, calc(0.1 * var(--gold-intensity, 0.8))) 0%,
+    rgba(255, 230, 128, calc(0.1 * var(--gold-intensity, 0.8))) 20%,
+    rgba(255, 215, 0, calc(0.1 * var(--gold-intensity, 0.8))) 40%,
+    rgba(255, 230, 128, calc(0.1 * var(--gold-intensity, 0.8))) 60%,
+    rgba(255, 215, 0, calc(0.1 * var(--gold-intensity, 0.8))) 80%
+  );
+  mix-blend-mode: overlay;
+  opacity: var(--gold-intensity, 0.8);
+  animation: gold-shine 4s ease-in-out infinite;
+}
+
+@keyframes gold-shine {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Chrome effect */
+.card-chrome {
+  position: relative;
+  overflow: hidden;
+}
+
+.card-chrome::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, calc(0.2 * var(--chrome-intensity, 0.8))) 0%,
+    rgba(120, 120, 120, calc(0.05 * var(--chrome-intensity, 0.8))) 50%,
+    rgba(255, 255, 255, calc(0.2 * var(--chrome-intensity, 0.8))) 100%
+  );
+  mix-blend-mode: overlay;
+  opacity: var(--chrome-intensity, 0.8);
+  animation: chrome-shift 6s ease-in-out infinite;
+}
+
+@keyframes chrome-shift {
+  0% {
+    background-position: 0% 0%;
+  }
+  50% {
+    background-position: 100% 100%;
+  }
+  100% {
+    background-position: 0% 0%;
+  }
+}
+
+/* Vintage effect */
+.card-vintage {
+  position: relative;
+  overflow: hidden;
+}
+
+.card-vintage::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAAAXNSR0IArs4c6QAABBBJREFUaEPtmUFrXUUYht9zk9jY2KK0XdhuXIjFhUjAQrduXbhVEESkCzcKilYsuBJcCO5cuPQPuHMjFDd2JeJWcOlSsNBFu3AhWLW0sa25Oe/xvDNnJufeOefOvSftJR3IwM3MfPO9z/fNmZk79OrqKi7jj14BJBKstR6IFj21WiB44LlwREQmAHaJ6HFr7b/W2gCAi0BmuVwOiqJ4gIj2iKg0xsQLAxljJkT0NYD7YTJnQJxz1lq7Wi6XyxACETnnrLV2BmCXiPYB3CGiL5xz37UOxBgzIKI9IvoMwA6ATSKaALgBYA7gFQBvE1FfKTVtrR1EgHNuZq0dABD6wHp2BeC2MeZhB4CbRDRMGTHGDIno41HrQZxzM+fcgIjuAvirCOhFvZg3iOhtAG8lnHLOrcbj8enh4eFRb7FYTA8ODo5S4wZgo9/vg+dKVEv+J28R0eSMMcYJpRefnJ6efo/xePzTYrH4ZDabPQPweid0uVz+MRgM3jw5OXl5NBq9rrU+VkqtJaAoimdEtNYWtBaiiIgRkW4K89bpdPouv2CtfdVae8p/K6UOmXnbOfcnsaalm4IWF3vW2j/XHVMUxT4R3SOiN8uy5ODfqQUtY8zSWpt8J4K4ule3tjuADgB8Q0TDBmg3fI+IPgDwYeIR59yKiDpZK7U+XuFyASRPiQdE9DmAe4ld8c/PMpE3EWSkIZZF/lKLoiiuEtGnAD7ircbgfQrgJyL6OYGwc/YB3AXwKhFdT4DehUd4CxL+3SWiD4joplLq2Dl36pzj/7e6WBrxSfF2egcvGmHkuzVdO0q01hwiOi3L8u/BYDDXWvNVdCZdoS0KLU6nVTum+2NLgdxUSn3UJbeUZZnbqlx3VmXsSC9yQ+/KZJ0MhGBCKW4cIgeR86ZMVFFcy5ptc7YyOVLXVVVtENGIMxSXUq21J95XNes25Ug4h5gjCfR2dXwvFsztlr1/DiIHUeMIr5ZMtJZidYnHpcps3zpImy9N41p3riQ5wrk/Go0+b8r4/PlWukRDhxNxq74+f4V7nd+bOpxo5E7unay7NYt2VWotaV0S1WrNi3lnTudyCu8I50z8nO+J8KQ6b9IQCUcyRjuXIzkHE47kbhijhbYMkdDcb+zgauXpr+UeqdVIMPQ53x3Cr7XeVUodhaU4PCuytbNBmLZ/VXWCaHEkLK9NW/MwIbfxwG8zDrd8XSy1tpYj8UKY+RkzbMPL6bcKEtqbtw7i3r4XpV+Ntea11n5wZH/FWxxOT0ZrTR0/VBPR7abvWrk67bu3OzMW3iNy+J3pd1oZP79KI+1E4rplrcpIwy5ZeytRtasxIN6NnCNcnaJMl0stLtVEVG00LLv9zBUekNabO6BtnYC09aYgWlzJrnal7UwKBC+2k15+t7/Mc+RPXRz5D2u+c2pBjtKwAAAAAElFTkSuQmCC');
+  opacity: calc(0.05 * var(--vintage-intensity, 0.8));
+  mix-blend-mode: multiply;
+  filter: sepia(var(--vintage-intensity, 0.8));
+}
+
+/* Spectral hologram effect */
+.spectral-hologram {
+  position: relative;
+  overflow: hidden;
+}
+
+.spectral-hologram::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(255, 0, 255, 0.1),
+    rgba(0, 255, 255, 0.1) 5px,
+    rgba(255, 255, 0, 0.1) 10px
+  );
+  opacity: var(--hologram-intensity, 0.7);
+  mix-blend-mode: overlay;
+  animation: spectral-shift 10s linear infinite;
+}
+
+.spectral-hologram-layer {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    rgba(255, 255, 255, 0.3) 0%,
+    transparent 70%
+  );
+  mix-blend-mode: overlay;
+  opacity: var(--hologram-intensity, 0.7);
+  pointer-events: none;
+}
+
+@keyframes spectral-shift {
+  0% {
+    background-position: 0% 0%;
+    filter: hue-rotate(0deg);
+  }
+  50% {
+    background-position: 100% 100%;
+    filter: hue-rotate(180deg);
+  }
+  100% {
+    background-position: 0% 0%;
+    filter: hue-rotate(360deg);
+  }
+}
+
+/* Parallax layers for spectral effect */
+.parallax-layer {
+  position: absolute;
+  inset: 0;
+  background-size: 400% 400%;
+  opacity: 0.07;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+
+.parallax-layer-1 {
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 10px,
+    rgba(255, 255, 255, 0.5) 10px,
+    rgba(255, 255, 255, 0.5) 20px
+  );
+  animation: parallax-shift-1 20s linear infinite;
+}
+
+.parallax-layer-2 {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 15px,
+    rgba(255, 255, 255, 0.3) 15px,
+    rgba(255, 255, 255, 0.3) 30px
+  );
+  animation: parallax-shift-2 15s linear infinite;
+}
+
+@keyframes parallax-shift-1 {
+  0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 100% 100%;
+  }
+}
+
+@keyframes parallax-shift-2 {
+  0% {
+    background-position: 100% 0%;
+  }
+  100% {
+    background-position: 0% 100%;
+  }
+}
+
+/* Microtext security feature */
+.microtext-layer {
+  position: absolute;
+  inset: 0;
+  font-size: 3px;
+  color: rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+}
+
+/* Spotlight effects */
+.spotlight {
+  position: absolute;
+  inset: 0;
+  opacity: 0.5;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+}
+
+/* Card particles effect */
+.card-particles {
+  position: absolute;
+  inset: 0;
+  opacity: 0.6;
+  animation: particles-float 20s infinite linear;
+  background-image: radial-gradient(circle, white 1px, transparent 1px);
+  background-size: 15px 15px;
+}
+
+@keyframes particles-float {
+  0% {
+    transform: translateY(0) rotate(0deg);
+  }
+  100% {
+    transform: translateY(-100%) rotate(20deg);
+  }
+}
+
+/* Card flip animation */
+.flipped {
+  transform: rotateY(180deg);
+}
+
+.card-inner {
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+}
+
+/* Ensure card effects don't obscure original image */
+.has-premium-effects .card-refractor::before,
+.has-premium-effects .card-holographic::before,
+.has-premium-effects .card-chrome::before,
+.has-premium-effects .card-gold-foil::before {
+  mix-blend-mode: overlay;
+  opacity: 0.7;
+}
+
+/* Add entrance animation */
+@keyframes card-entrance {
+  0% {
+    opacity: 0;
+    transform: scale(0.9) translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.card-entrance {
+  animation: card-entrance 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
