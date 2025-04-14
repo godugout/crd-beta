@@ -10,13 +10,14 @@ import MaterialSimulator from '@/components/pbr/MaterialSimulator';
 
 const UniformTextureDemo: React.FC = () => {
   const [generatedTexture, setGeneratedTexture] = useState<string | null>(null);
+  // Define activeSport to be of type that accepts SportType and 'all'
   const [activeSport, setActiveSport] = useState<SportType | 'all'>('basketball');
   const [selectedUniform, setSelectedUniform] = useState<UniformPreset | null>(null);
   
   // Material simulation configuration
   const [material, setMaterial] = useState<MaterialSimulation>({
-    type: 'canvas',
-    baseColor: '#CE1141',  // Bulls red by default
+    type: 'canvas',  // Bulls red by default
+    baseColor: '#CE1141',
     roughness: 0.7,
     metalness: 0.1
   });

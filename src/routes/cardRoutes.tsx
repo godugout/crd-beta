@@ -4,11 +4,10 @@ import { RouteObject } from 'react-router-dom';
 import CardGallery from '@/pages/CardGallery';
 import CardDetail from '@/pages/CardDetail';
 import CardDetector from '@/pages/CardDetector';
-import Editor from '@/pages/Editor';
-import CardCreatorPage from '@/pages/CardCreatorPage';
 import CardShowcase from '@/pages/CardShowcase';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
-import CardCreationFlow from '@/components/card-editor/CardCreationFlow';
+import CardCreator from '@/pages/CardCreator';
+import UniformTextureDemo from '@/pages/UniformTextureDemo';
 
 // Card-related routes
 export const cardRoutes: RouteObject[] = [
@@ -21,16 +20,20 @@ export const cardRoutes: RouteObject[] = [
     element: <CardGallery />, // Should be implemented as a dedicated page
   },
   {
-    path: "/cards/create",
-    element: <ProtectedRoute><CardCreatorPage /></ProtectedRoute>,
-  },
-  {
     path: "/card/:id",
     element: <CardDetail />,
   },
   {
-    path: "/card/create",
-    element: <ProtectedRoute><CardCreatorPage /></ProtectedRoute>,
+    path: "/create",
+    element: <ProtectedRoute><CardCreator /></ProtectedRoute>,
+  },
+  {
+    path: "/edit/:id",
+    element: <ProtectedRoute><CardCreator /></ProtectedRoute>,
+  },
+  {
+    path: "/card-creator",
+    element: <ProtectedRoute><CardCreator /></ProtectedRoute>,
   },
   {
     path: "/detector",
@@ -41,25 +44,10 @@ export const cardRoutes: RouteObject[] = [
     element: <CardShowcase />, // Should be implemented as a dedicated page
   },
   {
-    path: "/editor",
-    element: <ProtectedRoute><Editor /></ProtectedRoute>,
-  },
-  {
-    path: "/editor/:id",
-    element: <ProtectedRoute><Editor /></ProtectedRoute>,
-  },
-  {
-    path: "/card-upload",
-    element: <ProtectedRoute><CardCreationFlow /></ProtectedRoute>,
-  },
-  {
-    path: "/card-creator",
-    element: <CardCreatorPage />,
-  },
-  {
-    path: "/card-creator/:step",
-    element: <CardCreatorPage />,
+    path: "/uniforms",
+    element: <UniformTextureDemo />,
   },
 ];
 
 export default cardRoutes;
+
