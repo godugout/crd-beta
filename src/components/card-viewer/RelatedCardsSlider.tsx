@@ -1,17 +1,21 @@
 
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Card } from '@/lib/types';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import { cn } from '@/lib/utils';
 
 interface RelatedCardsSliderProps {
   cards: Card[];
   onCardClick: (cardId: string) => void;
+  className?: string;
 }
 
-const RelatedCardsSlider: React.FC<RelatedCardsSliderProps> = ({ cards, onCardClick }) => {
+const RelatedCardsSlider: React.FC<RelatedCardsSliderProps> = ({ cards, onCardClick, className }) => {
   const scrollRef = React.useRef<HTMLDivElement>(null);
+  const [visibleCardIndex, setVisibleCardIndex] = useState(0);
+  const [isHovering, setIsHovering] = useState(false);
 
   const scrollLeft = () => {
     if (scrollRef.current) {
@@ -25,16 +29,41 @@ const RelatedCardsSlider: React.FC<RelatedCardsSliderProps> = ({ cards, onCardCl
     }
   };
 
+  // Auto-scroll functionality
+  useEffect(() => {
+    if (cards.length <= 1 || isHovering) return;
+    
+    const interval = setInterval(() => {
+      if (visibleCardIndex >= cards.length - 1) {
+        setVisibleCardIndex(0);
+        if (scrollRef.current) {
+          scrollRef.current.scrollTo({ left: 0, behavior: 'smooth' });
+        }
+      } else {
+        setVisibleCardIndex(prev => prev + 1);
+        if (scrollRef.current) {
+          scrollRef.current.scrollBy({ left: 200, behavior: 'smooth' });
+        }
+      }
+    }, 5000);
+    
+    return () => clearInterval(interval);
+  }, [visibleCardIndex, cards.length, isHovering]);
+
   if (cards.length === 0) {
     return (
-      <div className="text-white/50 text-center py-12">
+      <div className="text-white/50 text-center py-6">
         No related cards found
       </div>
     );
   }
 
   return (
-    <div className="relative group">
+    <div 
+      className={cn("relative group", className)}
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => setIsHovering(false)}
+    >
       <Button
         variant="ghost"
         size="icon"
@@ -45,22 +74,39 @@ const RelatedCardsSlider: React.FC<RelatedCardsSliderProps> = ({ cards, onCardCl
       </Button>
 
       <ScrollArea className="w-full whitespace-nowrap" ref={scrollRef}>
-        <div className="flex gap-4 py-4">
-          {cards.map((card) => (
+        <div className="flex gap-4 py-4 px-2">
+          {cards.map((card, index) => (
             <div
               key={card.id}
-              className="inline-block w-[180px] flex-shrink-0 cursor-pointer transform transition-transform hover:scale-105"
+              className={cn(
+                "inline-block w-[180px] flex-shrink-0 cursor-pointer transform transition-all duration-300",
+                index === visibleCardIndex 
+                  ? "scale-105 opacity-100" 
+                  : "hover:scale-105 opacity-80 hover:opacity-100"
+              )}
               onClick={() => onCardClick(card.id)}
             >
-              <div className="aspect-[2.5/3.5] rounded-lg overflow-hidden border border-white/10">
+              <div 
+                className="aspect-[2.5/3.5] rounded-lg overflow-hidden border shadow-lg"
+                style={{
+                  borderColor: card.designMetadata?.cardStyle?.borderColor || 'rgba(255,255,255,0.1)',
+                  borderWidth: card.designMetadata?.cardStyle?.borderWidth || 1,
+                  borderRadius: card.designMetadata?.cardStyle?.borderRadius || '0.5rem',
+                }}
+              >
                 <img
                   src={card.imageUrl}
                   alt={card.title}
                   className="w-full h-full object-cover"
+                  loading="lazy"
                 />
               </div>
-              <h4 className="mt-2 text-sm text-white truncate">{card.title}</h4>
-              <p className="text-xs text-gray-400 truncate">{card.tags?.[0] || 'No tags'}</p>
+              <div className="mt-2 text-center">
+                <h4 className="text-sm text-white font-medium truncate">{card.title}</h4>
+                <p className="text-xs text-gray-400 truncate">
+                  {card.player || card.tags?.[0] || 'No tags'}
+                </p>
+              </div>
             </div>
           ))}
         </div>

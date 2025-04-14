@@ -9,11 +9,17 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import CardCreator from '@/pages/CardCreator';
 import UniformTextureDemo from '@/pages/UniformTextureDemo';
 import ImmersiveCardViewer from '@/pages/ImmersiveCardViewer';
+import Editor from '@/pages/Editor';
+import CardCreatorPage from '@/pages/CardCreatorPage';
 
 // Card-related routes
 export const cardRoutes: RouteObject[] = [
   {
     path: "/cards",
+    element: <CardGallery />,
+  },
+  {
+    path: "/gallery",
     element: <CardGallery />,
   },
   {
@@ -30,11 +36,19 @@ export const cardRoutes: RouteObject[] = [
   },
   {
     path: "/create",
-    element: <ProtectedRoute><CardCreator /></ProtectedRoute>,
+    element: <ProtectedRoute><Editor /></ProtectedRoute>,
+  },
+  {
+    path: "/card-maker",
+    element: <ProtectedRoute><CardCreatorPage /></ProtectedRoute>,
   },
   {
     path: "/edit/:id",
-    element: <ProtectedRoute><CardCreator /></ProtectedRoute>,
+    element: <ProtectedRoute><Editor /></ProtectedRoute>,
+  },
+  {
+    path: "/card-editor/:id?",
+    element: <ProtectedRoute><Editor /></ProtectedRoute>,
   },
   {
     path: "/card-creator",
