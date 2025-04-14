@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Card } from '@/lib/types';
 import { throttle } from 'lodash-es';
@@ -124,6 +123,10 @@ export function useCardEffects(
     }));
   }, []);
 
+  // Mock implementation for missing methods
+  const effectStack = [];
+  const getEffectClasses = () => '';
+
   return {
     cardEffects,
     isLoading,
@@ -131,6 +134,9 @@ export function useCardEffects(
     removeEffect,
     toggleEffect,
     clearEffects,
-    setCardEffects: setCardEffectsFn
+    setCardEffects: setCardEffectsFn,
+    // Adding these properties to fix the type errors
+    effectStack,
+    getEffectClasses
   };
 }

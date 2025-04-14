@@ -16,10 +16,13 @@ interface UseCardEffectsStackResult {
   updateEffectSettings: (id: string, settings: any) => void;
   toggleEffect: (id: string) => void;
   getEffectClasses: () => string;
+  activeEffects: string[];
+  setActiveEffects: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
 export const useCardEffectsStack = (): UseCardEffectsStackResult => {
   const [effectStack, setEffectStack] = useState<CardEffect[]>([]);
+  const [activeEffects, setActiveEffects] = useState<string[]>([]);
   
   // Add a new effect to the stack
   const addEffect = useCallback((name: string, settings: any = {}) => {
@@ -90,6 +93,8 @@ export const useCardEffectsStack = (): UseCardEffectsStackResult => {
     removeEffect,
     updateEffectSettings,
     toggleEffect,
-    getEffectClasses
+    getEffectClasses,
+    activeEffects,
+    setActiveEffects
   };
 };

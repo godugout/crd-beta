@@ -1,94 +1,104 @@
 
 /**
- * Main function to draw the card shop background
+ * Draws the card shop background on a canvas
+ * @param ctx - Canvas rendering context
+ * @param width - Canvas width
+ * @param height - Canvas height
  */
-export function drawCardShopBackground(ctx: CanvasRenderingContext2D, width: number, height: number): void {
-  // Clear canvas
+export const drawCardShopBackground = (
+  ctx: CanvasRenderingContext2D,
+  width: number,
+  height: number
+) => {
+  // Clear the canvas
   ctx.clearRect(0, 0, width, height);
   
-  // Draw background layers
-  drawGradientBackground(ctx, width, height);
-  drawSoftParticles(ctx, width, height);
-  drawSoftLighting(ctx, width, height);
-  drawPatternGrid(ctx, width, height);
-}
-
-/**
- * Draw a soft gradient background
- */
-export function drawGradientBackground(ctx: CanvasRenderingContext2D, width: number, height: number): void {
-  const bgGradient = ctx.createLinearGradient(0, 0, 0, height);
-  bgGradient.addColorStop(0, '#1a1a2e');    // Dark blue
-  bgGradient.addColorStop(1, '#16213e');    // Slightly lighter blue
-  ctx.fillStyle = bgGradient;
-  ctx.fillRect(0, 0, width, height);
-}
-
-/**
- * Draw subtle ambient particles
- */
-export function drawSoftParticles(ctx: CanvasRenderingContext2D, width: number, height: number): void {
-  ctx.globalAlpha = 0.2;
-  for (let i = 0; i < 70; i++) {
-    const x = Math.random() * width;
-    const y = Math.random() * height;
-    const size = Math.random() * 1.5 + 0.5;
-    
-    ctx.beginPath();
-    ctx.arc(x, y, size, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-    ctx.fill();
-  }
-  ctx.globalAlpha = 1;
-}
-
-/**
- * Draw soft lighting effects
- */
-export function drawSoftLighting(ctx: CanvasRenderingContext2D, width: number, height: number): void {
-  // Main spotlight
-  const lightGradient = ctx.createRadialGradient(
-    width * 0.5, height * 0.3, 0,
-    width * 0.5, height * 0.3, width * 0.7
-  );
-  lightGradient.addColorStop(0, 'rgba(65, 105, 225, 0.08)');
-  lightGradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+  // Create a gradient background
+  const gradient = ctx.createLinearGradient(0, 0, 0, height);
+  gradient.addColorStop(0, 'rgba(15, 23, 42, 0.9)');
+  gradient.addColorStop(1, 'rgba(23, 36, 64, 0.95)');
   
-  ctx.fillStyle = lightGradient;
+  ctx.fillStyle = gradient;
   ctx.fillRect(0, 0, width, height);
   
-  // Secondary spotlight
-  const spotlightGradient = ctx.createRadialGradient(
-    width * 0.7, height * 0.7, 0,
-    width * 0.7, height * 0.7, width * 0.5
-  );
-  spotlightGradient.addColorStop(0, 'rgba(70, 130, 180, 0.05)');
-  spotlightGradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+  // Draw subtle grid pattern
+  drawGrid(ctx, width, height);
   
-  ctx.fillStyle = spotlightGradient;
-  ctx.fillRect(0, 0, width, height);
-}
+  // Add a few particles
+  drawParticles(ctx, width, height);
+  
+  // Add some vignette effect
+  drawVignette(ctx, width, height);
+};
 
 /**
- * Draw subtle grid pattern
+ * Draws a subtle grid pattern
  */
-export function drawPatternGrid(ctx: CanvasRenderingContext2D, width: number, height: number): void {
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
+const drawGrid = (
+  ctx: CanvasRenderingContext2D,
+  width: number,
+  height: number
+) => {
+  const gridSize = 40;
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
   ctx.lineWidth = 1;
   
-  // Draw horizontal lines
-  for (let y = 0; y < height; y += 40) {
-    ctx.beginPath();
-    ctx.moveTo(0, y);
-    ctx.lineTo(width, y);
-    ctx.stroke();
-  }
-  
   // Draw vertical lines
-  for (let x = 0; x < width; x += 40) {
+  for (let x = 0; x < width; x += gridSize) {
     ctx.beginPath();
     ctx.moveTo(x, 0);
     ctx.lineTo(x, height);
     ctx.stroke();
   }
-}
+  
+  // Draw horizontal lines
+  for (let y = 0; y < height; y += gridSize) {
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(width, y);
+    ctx.stroke();
+  }
+};
+
+/**
+ * Draws particles on the background
+ */
+const drawParticles = (
+  ctx: CanvasRenderingContext2D,
+  width: number,
+  height: number
+) => {
+  const particleCount = width < 600 ? 20 : 40;
+  
+  for (let i = 0; i < particleCount; i++) {
+    const x = Math.random() * width;
+    const y = Math.random() * height;
+    const radius = Math.random() * 2 + 0.5;
+    const opacity = Math.random() * 0.15;
+    
+    ctx.beginPath();
+    ctx.arc(x, y, radius, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(255, 255, 255, ${opacity})`;
+    ctx.fill();
+  }
+};
+
+/**
+ * Adds a vignette effect to the background
+ */
+const drawVignette = (
+  ctx: CanvasRenderingContext2D,
+  width: number,
+  height: number
+) => {
+  const gradient = ctx.createRadialGradient(
+    width / 2, height / 2, 0,
+    width / 2, height / 2, Math.max(width, height) / 1.5
+  );
+  
+  gradient.addColorStop(0, 'rgba(0, 0, 0, 0)');
+  gradient.addColorStop(1, 'rgba(0, 0, 0, 0.4)');
+  
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, width, height);
+};
