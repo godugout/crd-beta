@@ -4,17 +4,16 @@ import { useParams, useNavigate } from 'react-router-dom';
 import PageLayout from '@/components/navigation/PageLayout';
 import { Button } from '@/components/ui/button';
 import { useCards } from '@/context/CardContext';
-import { ArrowLeft, Share2, Edit, Trash2 } from 'lucide-react';
-import { Card as CardType } from '@/lib/types';
+import { ArrowLeft, Share2, Edit, Trash2, Eye } from 'lucide-react';
 import CardMedia from '@/components/gallery/CardMedia';
 
 const CardDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { cards } = useCards();
+  const { cards, getCard } = useCards();
   
   // Find the card with the matching ID
-  const card = cards.find(c => c.id === id);
+  const card = getCard ? getCard(id || '') : cards.find(c => c.id === id);
   
   // Handle card not found
   if (!card) {
@@ -62,7 +61,10 @@ const CardDetail = () => {
           {/* Card Image */}
           <div className="flex justify-center">
             <div className="max-w-md w-full">
-              <div className="aspect-[2.5/3.5] relative rounded-lg overflow-hidden shadow-lg">
+              <div 
+                className="aspect-[2.5/3.5] relative rounded-lg overflow-hidden shadow-lg group cursor-pointer"
+                onClick={() => navigate(`/view/${card.id}`)}
+              >
                 <CardMedia 
                   card={card} 
                   onView={() => {}} 
@@ -91,12 +93,22 @@ const CardDetail = () => {
             <div className="flex flex-wrap gap-3 mb-8">
               <Button 
                 variant="outline" 
-                onClick={() => navigate(`/cards/edit/${card.id}`)}
+                onClick={() => navigate(`/view/${card.id}`)}
+                className="flex items-center"
+              >
+                <Eye className="h-4 w-4 mr-2" />
+                View Full Screen
+              </Button>
+              
+              <Button 
+                variant="outline" 
+                onClick={() => navigate(`/edit/${card.id}`)}
                 className="flex items-center"
               >
                 <Edit className="h-4 w-4 mr-2" />
                 Edit Card
               </Button>
+              
               <Button 
                 variant="outline" 
                 className="flex items-center"
@@ -104,6 +116,7 @@ const CardDetail = () => {
                 <Share2 className="h-4 w-4 mr-2" />
                 Share
               </Button>
+              
               <Button 
                 variant="outline" 
                 className="flex items-center text-red-600 hover:bg-red-50"
@@ -132,21 +145,18 @@ const CardDetail = () => {
           </div>
         </div>
         
-        {/* Related Cards (placeholder for now) */}
+        {/* Related Cards */}
         <div className="mt-16">
           <h2 className="text-xl font-bold mb-4">Related Cards</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {cards.slice(0, 4).filter(c => c.id !== id).map((relatedCard) => (
               <div 
                 key={relatedCard.id}
-                className="border rounded-lg overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
-                onClick={() => navigate(`/cards/${relatedCard.id}`)}
+                className="border rounded-lg overflow-hidden cursor-pointer hover:shadow-md transition-shadow group"
+                onClick={() => navigate(`/card/${relatedCard.id}`)}
               >
-                <div className="h-48">
+                <div className="aspect-[2.5/3.5]">
                   <CardMedia card={relatedCard} onView={() => {}} className="h-full" />
-                </div>
-                <div className="p-3">
-                  <h3 className="font-medium text-sm truncate">{relatedCard.title}</h3>
                 </div>
               </div>
             ))}
