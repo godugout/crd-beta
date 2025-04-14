@@ -76,10 +76,12 @@ const CardDisplay = ({
                 {card.year && (
                   <p className="text-sm opacity-80">Year: {card.year}</p>
                 )}
-                {/* Fix the cardNumber access by checking if it exists */}
-                {card.designMetadata?.cardMetadata?.cardNumber ? (
-                  <p className="text-sm opacity-80">Card #: {card.designMetadata.cardMetadata.cardNumber}</p>
-                ) : null}
+                {/* Fix the cardNumber access by ensuring it's properly converted to string */}
+                {card.designMetadata?.cardMetadata?.cardNumber && (
+                  <p className="text-sm opacity-80">
+                    Card #: {String(card.designMetadata.cardMetadata.cardNumber)}
+                  </p>
+                )}
               </div>
             </div>
           </div>
