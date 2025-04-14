@@ -1,5 +1,11 @@
 
-export type UserRole = 'artist' | 'fan' | 'admin';
+export enum UserRole {
+  ADMIN = 'admin',
+  USER = 'user',
+  PREMIUM = 'premium',
+  CREATOR = 'creator',
+  MODERATOR = 'moderator'
+}
 
 export interface UserProfile {
   id: string;

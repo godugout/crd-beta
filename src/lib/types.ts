@@ -1,4 +1,6 @@
 // Card interface - extend with baseball stats
+import { UserRole } from './types/UserTypes';
+
 export interface Card {
   id: string;
   title: string;
@@ -93,7 +95,7 @@ export interface Collection {
   coverImageUrl?: string;
   userId?: string;
   teamId?: string;
-  visibility?: 'public' | 'private' | 'team';
+  visibility?: 'public' | 'private' | 'team' | 'unlisted';
   allowComments?: boolean;
   createdAt: string;
   updatedAt: string;
@@ -181,13 +183,17 @@ export interface TeamMember {
   user?: User;
 }
 
-export enum UserRole {
-  ADMIN = 'admin',
-  USER = 'user',
-  PREMIUM = 'premium',
-  CREATOR = 'creator',
-  MODERATOR = 'moderator'
-}
+export type UserPermission = 
+  | 'read:own' 
+  | 'write:own' 
+  | 'delete:own' 
+  | 'read:all' 
+  | 'write:all' 
+  | 'delete:all' 
+  | 'premium:features'
+  | 'create:premium'
+  | 'moderate:content'
+  | 'all';
 
 export const ROLE_PERMISSIONS: Record<UserRole | string, string[]> = {
   [UserRole.ADMIN]: ['all'],
