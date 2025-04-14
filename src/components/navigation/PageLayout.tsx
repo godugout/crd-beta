@@ -52,16 +52,12 @@ const PageLayout: React.FC<PageLayoutProps> = ({
     ? String(title.props.children || 'CardShow')
     : typeof title === 'string'
       ? title
-      : title !== null && title !== undefined
-        ? String(title)
-        : 'CardShow';
+      : String(title || 'CardShow');
         
   // Convert description to string for the meta tag
   const stringDescription = typeof description === 'string'
     ? description
-    : description !== null && description !== undefined
-      ? String(description)
-      : 'Digital card collection platform';
+    : String(description || 'Digital card collection platform');
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
