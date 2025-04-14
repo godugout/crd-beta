@@ -47,25 +47,21 @@ const PageLayout: React.FC<PageLayoutProps> = ({
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // Convert ReactNode title to a string
+  // Robust title conversion
   const stringTitle = React.isValidElement(title)
     ? String(title.props.children || 'CardShow')
     : typeof title === 'string'
       ? title
-      : typeof title === 'number'
-        ? String(title)
-        : title !== null && title !== undefined
-          ? String(title)
-          : 'CardShow';
+    : typeof title === 'number'
+      ? String(title)
+      : 'CardShow';
         
-  // Convert description to string for the meta tag
+  // Robust description conversion
   const stringDescription = typeof description === 'string'
     ? description
     : typeof description === 'number'
       ? String(description)
-      : description !== null && description !== undefined
-        ? String(description)
-        : 'Digital card collection platform';
+      : 'Digital card collection platform';
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
@@ -81,8 +77,8 @@ const PageLayout: React.FC<PageLayoutProps> = ({
       
       {!hideNavigation && (
         <SecondaryNavbar
-          title={title}
-          description={stringDescription}
+          title={stringTitle}  // Use stringTitle instead of title
+          description={stringDescription}  // Use stringDescription
           hideBreadcrumbs={hideBreadcrumbs}
           actions={actions}
           hideDescription={hideDescription}
