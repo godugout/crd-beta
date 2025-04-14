@@ -1,4 +1,3 @@
-
 import React, { ReactNode } from 'react';
 import { Helmet } from 'react-helmet-async';
 import AppHeader from './AppHeader';
@@ -48,7 +47,11 @@ const PageLayout: React.FC<PageLayoutProps> = ({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Convert ReactNode title to a string for the Helmet component
-  const stringTitle = typeof title === 'string' ? title : 'CardShow';
+  const stringTitle = typeof title === 'string' 
+    ? title 
+    : React.isValidElement(title)
+      ? 'CardShow' // If it's a React element, use a default title
+      : String(title); // Convert other types to string
 
   return (
     <div className="flex flex-col min-h-screen bg-background">

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Stepper from '@/components/ui/stepper';
 import { CardDesignState, CardLayer } from '../types/cardTypes';
@@ -18,6 +17,7 @@ interface CardWizardSectionProps {
   onSaveCard: () => void;
   canProceedToNextStep: boolean;
   layers: CardLayer[];
+  setLayers: (layers: CardLayer[]) => void;
   activeLayerId: string | null;
   setActiveLayer: (layerId: string) => void;
   updateLayer: (layerId: string, updates: Partial<CardLayer>) => void;
@@ -43,6 +43,7 @@ const CardWizardSection: React.FC<CardWizardSectionProps> = ({
   onSaveCard,
   canProceedToNextStep,
   layers,
+  setLayers,
   activeLayerId,
   setActiveLayer,
   updateLayer,
