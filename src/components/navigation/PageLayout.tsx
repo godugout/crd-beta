@@ -9,7 +9,7 @@ import { SecondaryNavbar } from './SecondaryNavbar';
 
 interface PageLayoutProps {
   children: ReactNode;
-  title?: string;
+  title?: ReactNode;
   description?: string;
   fullWidth?: boolean;
   hideNavigation?: boolean;
@@ -47,10 +47,13 @@ const PageLayout: React.FC<PageLayoutProps> = ({
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  // Convert ReactNode title to a string for the Helmet component
+  const stringTitle = typeof title === 'string' ? title : 'CardShow';
+
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <Helmet>
-        <title>{title}</title>
+        <title>{stringTitle}</title>
         <meta name="description" content={description} />
         {canonicalPath && <link rel="canonical" href={`https://cardshow.app${canonicalPath}`} />}
       </Helmet>
