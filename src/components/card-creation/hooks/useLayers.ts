@@ -3,7 +3,19 @@ import { useState, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { CardLayer } from '../CardCreator';
 
-export function useLayers() {
+export interface UseLayersResult {
+  layers: CardLayer[];
+  activeLayerId: string | null;
+  setActiveLayer: (layerId: string) => void;
+  addLayer: (layer: Omit<CardLayer, 'id'>) => string;
+  updateLayer: (layerId: string, updates: Partial<CardLayer>) => void;
+  deleteLayer: (layerId: string) => void;
+  moveLayerUp: (layerId: string) => void;
+  moveLayerDown: (layerId: string) => void;
+  setLayers: (layers: CardLayer[]) => void;  // Explicitly include setLayers in the interface
+}
+
+export function useLayers(): UseLayersResult {
   const [layers, setLayers] = useState<CardLayer[]>([]);
   const [activeLayerId, setActiveLayerId] = useState<string | null>(null);
   
@@ -71,6 +83,7 @@ export function useLayers() {
     deleteLayer,
     moveLayerUp,
     moveLayerDown,
-    setActiveLayer
+    setActiveLayer,
+    setLayers  // Export the setLayers function
   };
 }
