@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import { Card } from '@/lib/types';
 import { cn } from '@/lib/utils';
-import { CardImage } from '@/components/cards/CardImage';
 import { CardInfoOverlay } from '@/components/cards/CardInfoOverlay';
 
 interface CardMediaProps {

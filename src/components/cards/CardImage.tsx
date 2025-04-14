@@ -53,6 +53,7 @@ export const CardImage: React.FC<CardImageProps> = ({
   const [containerDimensions, setContainerDimensions] = useState({ width: 0, height: 0 });
   const [isOutOfBounds, setIsOutOfBounds] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
   
   // Use our physics engine for smooth movement
   const physics = useCardPhysics({
@@ -155,10 +156,13 @@ export const CardImage: React.FC<CardImageProps> = ({
 
   const handleImageLoad = () => {
     setImageLoaded(true);
+    setImageError(false);
   };
 
   const handleImageError = () => {
     console.error(`Failed to load image for card: ${card.id}`);
+    setImageError(true);
+    setImageLoaded(false);
   };
 
   return (
@@ -181,13 +185,25 @@ export const CardImage: React.FC<CardImageProps> = ({
         onClick={handleCardClick}
       >
         {/* Front face of the card */}
-        <div className="card-face card-front absolute inset-0 backface-hidden">
+        <div className="card-face card-front absolute inset-0 backface-hidden bg-white">
           {/* Loading placeholder */}
-          {!imageLoaded && imageUrl && (
+          {!imageLoaded && !imageError && imageUrl && (
             <div className="absolute inset-0 bg-gray-100 animate-pulse flex items-center justify-center">
               <svg className="h-8 w-8 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
+            </div>
+          )}
+          
+          {/* Error state */}
+          {imageError && (
+            <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
+              <div className="text-center text-gray-400">
+                <svg className="h-8 w-8 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <p>Failed to load image</p>
+              </div>
             </div>
           )}
           
@@ -208,7 +224,7 @@ export const CardImage: React.FC<CardImageProps> = ({
           )}
           
           {/* Card Effects Layer - positioned on top of the card face */}
-          <div className="card-effects-layer">
+          <div className="card-effects-layer pointer-events-none">
             {/* Lighting effect overlay */}
             <div 
               className="absolute inset-0 bg-gradient-to-tr from-black/10 via-transparent to-white/20 opacity-50 pointer-events-none"
@@ -230,10 +246,9 @@ export const CardImage: React.FC<CardImageProps> = ({
         </div>
         
         {/* Back face of the card */}
-        <div className="card-face card-back absolute inset-0 backface-hidden"
+        <div className="card-face card-back absolute inset-0 backface-hidden bg-[#2a3042]"
           style={{
             transform: 'rotateY(180deg)',
-            backgroundColor: '#2a3042',
             backgroundSize: 'cover'
           }}
         >
