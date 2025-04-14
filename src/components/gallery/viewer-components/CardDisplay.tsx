@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card } from '@/lib/types';
 
@@ -6,7 +5,7 @@ interface CardDisplayProps {
   card: Card;
   rotation: { x: number; y: number; rotation?: number };
   isFlipped: boolean;
-  zoom?: number;
+  zoom: number;
   isDragging?: boolean;
   setIsDragging?: React.Dispatch<React.SetStateAction<boolean>>;
   cardRef?: React.RefObject<HTMLDivElement>;
