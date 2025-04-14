@@ -9,6 +9,15 @@ interface CardBackProps {
 }
 
 const CardBack: React.FC<CardBackProps> = ({ card }) => {
+  // Extract data safely with fallbacks
+  const cardRarity = card.cardType || 'Standard';
+  const cardSeries = card.set || 'Core Set';
+  const cardAttributes = {
+    year: card.year,
+    cardNumber: card.cardNumber,
+    ...(card.attributes || {})
+  };
+  
   return (
     <div className="absolute inset-0 flex flex-col p-6 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
       {/* Holographic pattern overlay */}
@@ -46,34 +55,34 @@ const CardBack: React.FC<CardBackProps> = ({ card }) => {
               </div>
             )}
             
-            {card.rarity && (
+            {cardRarity && (
               <div>
                 <Star className="w-5 h-5 mx-auto mb-1 text-yellow-400" />
-                <span className="text-xs text-gray-400 block">Rarity</span>
-                <span className="text-sm">{card.rarity}</span>
+                <span className="text-xs text-gray-400 block">Type</span>
+                <span className="text-sm">{cardRarity}</span>
               </div>
             )}
             
-            {card.series && (
+            {cardSeries && (
               <div>
                 <Trophy className="w-5 h-5 mx-auto mb-1 text-purple-400" />
-                <span className="text-xs text-gray-400 block">Series</span>
-                <span className="text-sm">{card.series}</span>
+                <span className="text-xs text-gray-400 block">Set</span>
+                <span className="text-sm">{cardSeries}</span>
               </div>
             )}
           </div>
           
-          {card.attributes && (
+          {Object.keys(cardAttributes).length > 0 && (
             <div className="mt-4">
               <h3 className="text-sm font-medium text-gray-400 mb-2">Attributes</h3>
               <div className="flex flex-wrap gap-2">
-                {Object.entries(card.attributes).map(([key, value]) => (
+                {Object.entries(cardAttributes).map(([key, value]) => (
                   <Badge 
                     key={key}
                     variant="secondary" 
                     className="bg-white/10 backdrop-blur-sm"
                   >
-                    {key}: {value}
+                    {key}: {String(value)}
                   </Badge>
                 ))}
               </div>

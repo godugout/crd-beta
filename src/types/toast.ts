@@ -3,7 +3,7 @@ import { type ToastProps } from "@radix-ui/react-toast"
 
 export type ToastVariant = 'default' | 'destructive' | 'success' | 'warning' | 'info'
 
-export interface ToasterToast extends Omit<ToastProps, "type"> {
+export interface ToasterToast {
   id: string
   title?: React.ReactNode
   description?: React.ReactNode
