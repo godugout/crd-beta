@@ -232,8 +232,8 @@ export const CardImage: React.FC<CardImageProps> = ({
         }}
       ></div>
       
-      {/* Add CSS for backface visibility */}
-      <style jsx>{`
+      {/* Add CSS for backface visibility - Fixed the TypeScript error by removing 'jsx: true' */}
+      <style>{`
         .card-container {
           perspective: 1200px;
           cursor: grab;
