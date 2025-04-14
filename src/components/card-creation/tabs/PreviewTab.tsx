@@ -1,99 +1,111 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
-import { useMediaQuery } from '@/hooks/useMediaQuery';
-import { Download, Share2, Save } from 'lucide-react';
-import SimpleCardRenderer from '@/components/card/SimpleCardRenderer';
-import { toast } from 'sonner';
+import { CardDesignState } from '../CardMakerWizard';
+import { Badge } from '@/components/ui/badge';
+import { Label } from '@/components/ui/label';
 
 interface PreviewTabProps {
   onSave: () => void;
-  cardImage?: string | null;
+  cardImage?: string;
   cardTitle?: string;
   cardEffect?: string;
+  cardData?: CardDesignState;
 }
 
-const PreviewTab: React.FC<PreviewTabProps> = ({ 
-  onSave, 
-  cardImage = '',
-  cardTitle = 'My Card',
-  cardEffect = ''
+const PreviewTab: React.FC<PreviewTabProps> = ({
+  onSave,
+  cardImage,
+  cardTitle,
+  cardEffect,
+  cardData
 }) => {
-  const isMobile = useMediaQuery('(max-width: 768px)');
-  const [isExporting, setIsExporting] = useState(false);
-  
-  const handleExport = () => {
-    setIsExporting(true);
-    setTimeout(() => {
-      setIsExporting(false);
-      toast.success('Card exported successfully!');
-    }, 1500);
-  };
-  
-  const handleShare = () => {
-    toast.info('Sharing functionality will be implemented soon!');
-  };
-  
   return (
-    <div>
-      <h2 className={`text-xl font-semibold mb-4 ${isMobile ? 'text-center' : 'text-left'}`}>Preview Your Card</h2>
+    <div className="space-y-8">
+      <div className="text-center mb-6">
+        <h2 className="text-2xl font-bold">Preview Your CRD</h2>
+        <p className="text-gray-500">Review your card before saving</p>
+      </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div>
-          <div className="aspect-[2.5/3.5] w-full max-w-[300px] mx-auto">
-            <SimpleCardRenderer 
-              imageUrl={cardImage || 'https://images.unsplash.com/photo-1614315517650-3771cf72d18a?q=80&w=2070&auto=format&fit=crop'}
-              title={cardTitle}
-              tags={['Custom', 'CRD']}
-              className={`shadow-lg ${cardEffect}`}
-            />
+        <div className="flex flex-col items-center">
+          <div className={`aspect-[2.5/3.5] max-w-xs w-full border-2 border-litmus-green overflow-hidden rounded-lg shadow-lg ${cardEffect}`}>
+            {cardImage ? (
+              <img 
+                src={cardImage} 
+                alt={cardTitle || "Card preview"} 
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-gray-100 flex items-center justify-center text-gray-400">
+                No image uploaded
+              </div>
+            )}
           </div>
         </div>
         
         <div className="space-y-6">
           <div>
-            <h3 className="font-medium mb-2">Card Details</h3>
-            <div className="bg-gray-50 p-4 rounded-md space-y-2">
-              <p><span className="font-medium">Title:</span> {cardTitle}</p>
-              <p><span className="font-medium">Effects:</span> {cardEffect || 'None'}</p>
-              <p><span className="font-medium">Created:</span> {new Date().toLocaleDateString()}</p>
-            </div>
+            <Label className="text-sm text-gray-500">Title</Label>
+            <h3 className="text-xl font-bold">{cardTitle || "Untitled CRD"}</h3>
           </div>
           
-          <div>
-            <h3 className="font-medium mb-2">Export Options</h3>
-            <div className="flex flex-wrap gap-2">
+          {cardData?.description && (
+            <div>
+              <Label className="text-sm text-gray-500">Description</Label>
+              <p className="text-gray-700">{cardData.description}</p>
+            </div>
+          )}
+          
+          {cardData?.tags && cardData.tags.length > 0 && (
+            <div>
+              <Label className="text-sm text-gray-500">Tags</Label>
+              <div className="flex flex-wrap gap-2 mt-1">
+                {cardData.tags.map(tag => (
+                  <Badge key={tag} variant="outline">{tag}</Badge>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          <div className="grid grid-cols-3 gap-4">
+            {cardData?.player && (
+              <div>
+                <Label className="text-sm text-gray-500">Player</Label>
+                <p>{cardData.player}</p>
+              </div>
+            )}
+            
+            {cardData?.team && (
+              <div>
+                <Label className="text-sm text-gray-500">Team</Label>
+                <p>{cardData.team}</p>
+              </div>
+            )}
+            
+            {cardData?.year && (
+              <div>
+                <Label className="text-sm text-gray-500">Year</Label>
+                <p>{cardData.year}</p>
+              </div>
+            )}
+          </div>
+          
+          <div className="pt-6 border-t">
+            <div className="flex justify-between items-center">
+              <div>
+                <h4 className="text-sm font-medium">Ready to save your CRD?</h4>
+                <p className="text-sm text-gray-500">Click Save to add this card to your collection</p>
+              </div>
               <Button 
-                variant="outline"
-                className="flex items-center gap-2"
-                onClick={handleExport}
-                disabled={isExporting}
+                onClick={onSave}
+                className="bg-litmus-green hover:bg-litmus-green/90 text-white"
               >
-                <Download size={16} />
-                {isExporting ? 'Exporting...' : 'Export as Image'}
-              </Button>
-              
-              <Button
-                variant="outline"
-                className="flex items-center gap-2"
-                onClick={handleShare}
-              >
-                <Share2 size={16} />
-                Share
+                Save CRD
               </Button>
             </div>
           </div>
         </div>
-      </div>
-      
-      <div className="flex justify-end mt-8">
-        <Button 
-          className="bg-litmus-green hover:bg-litmus-green/90 text-white px-6 flex items-center gap-2"
-          onClick={onSave}
-        >
-          <Save size={16} />
-          Save CRD
-        </Button>
       </div>
     </div>
   );

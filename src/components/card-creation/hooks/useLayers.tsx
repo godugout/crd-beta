@@ -12,7 +12,7 @@ export interface UseLayersResult {
   deleteLayer: (layerId: string) => void;
   moveLayerUp: (layerId: string) => void;
   moveLayerDown: (layerId: string) => void;
-  setLayers: (layers: CardLayer[]) => void;  // Added this property to match usage
+  setLayers: (layers: CardLayer[]) => void;  // Make sure this is defined
 }
 
 export const useLayers = (): UseLayersResult => {
@@ -82,6 +82,6 @@ export const useLayers = (): UseLayersResult => {
     deleteLayer,
     moveLayerUp,
     moveLayerDown,
-    setLayers  // Exporting this function to match usage
+    setLayers  // Explicitly return the setLayers function
   };
 };

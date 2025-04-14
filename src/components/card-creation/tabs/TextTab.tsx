@@ -6,6 +6,7 @@ import { CardDesignState } from '../CardMakerWizard';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import TagInput from '../elements/TagInput';
 
 interface TextTabProps {
   onContinue: () => void;
@@ -33,9 +34,13 @@ const TextTab: React.FC<TextTabProps> = ({
   const handleDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setCardData({...cardData, description: e.target.value});
   };
+
+  const handleTagsChange = (tags: string[]) => {
+    setCardData({...cardData, tags});
+  };
   
   return (
-    <div>
+    <div className="space-y-6">
       <h2 className="text-xl font-semibold mb-6">Add Card Text</h2>
       
       <div className="space-y-6">
@@ -58,6 +63,16 @@ const TextTab: React.FC<TextTabProps> = ({
             value={cardData.description}
             onChange={handleDescriptionChange}
           />
+        </div>
+
+        <div className="space-y-3">
+          <Label htmlFor="tags">Tags</Label>
+          <TagInput 
+            tags={cardData.tags} 
+            setTags={(tags) => handleTagsChange(tags)}
+            placeholder="Add tags and press Enter"
+          />
+          <p className="text-xs text-gray-500">Add relevant tags to help organize and find your card</p>
         </div>
       </div>
       

@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { WizardStep } from '../constants/wizardSteps';
+import { Check } from 'lucide-react';
 
 interface CardWizardStepsProps {
   steps: WizardStep[];
@@ -8,43 +9,52 @@ interface CardWizardStepsProps {
   setCurrentStep: (step: number) => void;
 }
 
-const CardWizardSteps: React.FC<CardWizardStepsProps> = ({ 
-  steps, 
-  currentStep, 
-  setCurrentStep 
+const CardWizardSteps: React.FC<CardWizardStepsProps> = ({
+  steps,
+  currentStep,
+  setCurrentStep
 }) => {
   return (
-    <div className="flex items-center mb-4 w-full">
+    <div className="flex flex-wrap justify-between items-center mb-8">
       {steps.map((step, index) => (
         <div 
-          key={step.path} 
-          className="flex items-center"
-          onClick={() => index <= currentStep ? setCurrentStep(index) : null}
+          key={index} 
+          className="flex flex-col items-center"
+          onClick={() => {
+            if (index <= currentStep) {
+              setCurrentStep(index);
+            }
+          }}
         >
           <div 
-            className={`w-8 h-8 flex items-center justify-center rounded-full cursor-pointer ${
-              currentStep === index 
+            className={`
+              flex items-center justify-center w-10 h-10 rounded-full
+              ${index === currentStep 
                 ? 'bg-litmus-green text-white' 
                 : index < currentStep 
-                  ? 'bg-green-100 text-litmus-green border-2 border-litmus-green' 
-                  : 'bg-gray-100 text-gray-400'
-            }`}
+                  ? 'bg-green-100 text-litmus-green border border-litmus-green' 
+                  : 'bg-gray-100 text-gray-400'}
+              ${index <= currentStep ? 'cursor-pointer' : 'cursor-not-allowed'}
+              transition-colors duration-200
+            `}
           >
-            {index + 1}
+            {index < currentStep ? (
+              <Check size={20} />
+            ) : (
+              <span className="text-sm font-medium">{index + 1}</span>
+            )}
           </div>
           <span 
-            className={`ml-2 ${
-              currentStep === index 
-                ? 'font-medium text-litmus-green' 
-                : index < currentStep 
-                  ? 'text-litmus-green' 
-                  : 'text-gray-400'
-            } ${index === steps.length - 1 ? '' : 'hidden md:block'}`}
+            className={`
+              text-xs mt-2 hidden md:block
+              ${index === currentStep ? 'text-litmus-green font-medium' : 'text-gray-500'}
+            `}
           >
             {step.name}
           </span>
+          
           {index < steps.length - 1 && (
-            <div className="w-8 md:w-12 h-px bg-gray-300 mx-1 md:mx-3"></div>
+            <div className="hidden md:block w-8 h-0.5 mx-1 bg-gray-200"></div>
           )}
         </div>
       ))}

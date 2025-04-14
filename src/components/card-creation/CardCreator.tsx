@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useCardEffectsStack } from './hooks/useCardEffectsStack';
@@ -78,7 +79,8 @@ const CardCreator: React.FC = () => {
     deleteLayer,
     moveLayerUp,
     moveLayerDown,
-    setActiveLayer
+    setActiveLayer,
+    setLayers
   } = useLayers();
 
   const handleImageCaptured = (imageUrl: string) => {
@@ -217,7 +219,11 @@ const CardCreator: React.FC = () => {
               </TabsContent>
               
               <TabsContent value="text" className="m-0">
-                <TextTab onContinue={handleContinueToPreview} />
+                <TextTab 
+                  onContinue={handleContinueToPreview} 
+                  cardData={cardData}
+                  setCardData={setCardData}
+                />
               </TabsContent>
               
               <TabsContent value="preview" className="m-0">
@@ -226,6 +232,7 @@ const CardCreator: React.FC = () => {
                   cardImage={cardData.imageUrl || undefined}
                   cardTitle={cardData.title}
                   cardEffect={getEffectClasses()}
+                  cardData={cardData}
                 />
               </TabsContent>
             </div>

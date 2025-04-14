@@ -267,6 +267,7 @@ const CardWizardStepContent: React.FC<CardWizardStepContentProps> = ({
           cardImage={cardData.imageUrl}
           cardTitle={cardData.title}
           cardEffect={effectClasses}
+          cardData={cardData}
         />
       );
     default:

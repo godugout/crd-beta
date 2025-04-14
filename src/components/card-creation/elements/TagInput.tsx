@@ -1,84 +1,63 @@
 
 import React, { useState, KeyboardEvent } from 'react';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { X } from 'lucide-react';
+import { XCircle } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 
 interface TagInputProps {
-  value: string[];
-  onChange: (tags: string[]) => void;
+  tags: string[];
+  setTags: (tags: string[]) => void;
   placeholder?: string;
-  maxTags?: number;
 }
 
 const TagInput: React.FC<TagInputProps> = ({ 
-  value, 
-  onChange, 
-  placeholder = 'Add a tag...', 
-  maxTags = 10
+  tags, 
+  setTags, 
+  placeholder = "Add tags and press Enter" 
 }) => {
   const [inputValue, setInputValue] = useState('');
-  
+
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    // If Enter is pressed and we have text, add tag
-    if (e.key === 'Enter' && inputValue.trim() !== '') {
+    if (e.key === 'Enter' && inputValue.trim()) {
       e.preventDefault();
-      
-      // Check if we've reached max tags
-      if (value.length >= maxTags) {
-        return;
+      if (!tags.includes(inputValue.trim())) {
+        setTags([...tags, inputValue.trim()]);
       }
-      
-      // Normalize tag: trim whitespace & convert to lowercase
-      const normalizedTag = inputValue.trim().toLowerCase();
-      
-      // Only add if not already present
-      if (!value.includes(normalizedTag)) {
-        onChange([...value, normalizedTag]);
-      }
-      
-      // Clear the input
       setInputValue('');
-    }
-    
-    // If Backspace is pressed and input is empty, remove last tag
-    if (e.key === 'Backspace' && inputValue === '' && value.length > 0) {
-      onChange(value.slice(0, -1));
+    } else if (e.key === 'Backspace' && !inputValue && tags.length > 0) {
+      // Remove last tag when backspace is pressed and input is empty
+      setTags(tags.slice(0, -1));
     }
   };
-  
+
   const removeTag = (tagToRemove: string) => {
-    onChange(value.filter(tag => tag !== tagToRemove));
+    setTags(tags.filter(tag => tag !== tagToRemove));
   };
-  
+
   return (
-    <div className="flex flex-wrap gap-2 p-2 border rounded-md focus-within:ring-2 focus-within:ring-primary focus-within:border-primary">
-      {value.map(tag => (
-        <Badge 
-          key={tag} 
-          variant="secondary"
-          className="flex items-center gap-1"
-        >
-          {tag}
-          <button 
-            type="button" 
-            onClick={() => removeTag(tag)}
-            className="rounded-full hover:bg-gray-200 p-0.5"
+    <div className="border rounded-md p-2 focus-within:ring-1 focus-within:ring-litmus-green focus-within:border-litmus-green">
+      <div className="flex flex-wrap gap-2 mb-2">
+        {tags.map(tag => (
+          <Badge 
+            key={tag} 
+            variant="secondary"
+            className="flex items-center gap-1 bg-litmus-green/10 text-litmus-green"
           >
-            <X size={12} />
-            <span className="sr-only">Remove tag {tag}</span>
-          </button>
-        </Badge>
-      ))}
-      
+            {tag}
+            <XCircle 
+              className="h-3 w-3 cursor-pointer hover:text-red-500" 
+              onClick={() => removeTag(tag)}
+            />
+          </Badge>
+        ))}
+      </div>
       <Input
         type="text"
         value={inputValue}
         onChange={(e) => setInputValue(e.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder={value.length === 0 ? placeholder : ''}
-        className="flex-grow w-auto min-w-[8rem] border-0 focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-7"
-        disabled={value.length >= maxTags}
+        placeholder={placeholder}
+        className="border-none focus:ring-0 p-0 focus-visible:ring-0 focus-visible:ring-offset-0"
       />
     </div>
   );
