@@ -10,6 +10,7 @@ export interface CardLayer {
   rotation: number;
   zIndex: number;
   style?: Record<string, any>;
+  opacity?: number; // Add opacity property
 }
 
 export const useLayers = () => {
@@ -25,7 +26,8 @@ export const useLayers = () => {
       size: layer.size,
       rotation: layer.rotation,
       zIndex: layer.zIndex,
-      style: layer.style
+      style: layer.style,
+      opacity: layer.opacity || 1 // Default opacity to 1
     };
     
     setLayers(prevLayers => [...prevLayers, newLayer]);

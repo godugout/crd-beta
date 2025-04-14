@@ -1,4 +1,3 @@
-
 // Card interface - extend with baseball stats
 export interface Card {
   id: string;
@@ -67,6 +66,11 @@ export interface Card {
   oaklandMemory?: OaklandMemoryData;
   image?: string; // Backward compatibility for some components
   name?: string; // Backward compatibility for some components
+  
+  // Instagram card specific fields
+  instagramUsername?: string;
+  instagramPostId?: string;
+  instagramPost?: InstagramPost;
 }
 
 export interface Collection {
@@ -83,6 +87,11 @@ export interface Collection {
   updatedAt: string;
   designMetadata?: any;
   cards?: Card[];
+  instagramSource?: {
+    username: string;
+    lastFetched?: string;
+    autoUpdate?: boolean;
+  };
 }
 
 export interface User {
@@ -223,3 +232,13 @@ export interface DbReaction {
   created_at: string;
 }
 
+// Instagram CRD specific interfaces
+export interface InstagramPost {
+  id: string;
+  mediaType: string;
+  mediaUrl: string;
+  permalink: string;
+  caption?: string;
+  timestamp: string;
+  thumbnailUrl?: string;
+}
