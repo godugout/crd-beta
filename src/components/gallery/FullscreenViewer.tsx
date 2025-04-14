@@ -99,12 +99,12 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
         if (showInfo) {
           setShowInfo(false);
         } else {
-          handleClose();
+          onClose();
         }
         e.preventDefault();
         break;
     }
-  }, []);
+  }, [showInfo, onClose]);
 
   useEffect(() => {
     window.addEventListener('keydown', handleKeyDown);
@@ -145,6 +145,17 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
     navigate(`/view/${newCardId}`);
   };
 
+  // Add these functions for the new required props
+  const handleToggleFullscreen = () => {
+    // Implement fullscreen toggle functionality if needed
+    toast.info('Fullscreen toggle - feature coming soon');
+  };
+
+  const handleShare = () => {
+    // Implement share functionality if needed
+    toast.info('Share feature coming soon');
+  };
+
   if (!card) {
     return (
       <div className="fixed inset-0 bg-black flex items-center justify-center z-50">
@@ -162,7 +173,6 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
   return (
     <div 
       className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50"
-      onMouseMove={handleMouseMove}
     >
       <CardDisplay
         card={card}
@@ -174,6 +184,7 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
         cardRef={cardRef}
         containerRef={containerRef}
         isAutoRotating={isAutoRotating}
+        onMouseMove={handleMouseMove}
       />
 
       <ViewerControls
@@ -183,6 +194,8 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
         onFlipCard={() => setIsFlipped(!isFlipped)}
         onToggleAutoRotation={() => setIsAutoRotating(!isAutoRotating)}
         onToggleInfo={() => setShowInfo(!showInfo)}
+        onToggleFullscreen={handleToggleFullscreen}
+        onShare={handleShare}
         onClose={onClose}
       />
 

@@ -4,30 +4,50 @@ import { Card } from '@/lib/types';
 
 interface CardDisplayProps {
   card: Card;
-  rotation: { x: number; y: number };
+  rotation: { x: number; y: number; rotation?: number };
   isFlipped: boolean;
-  onMouseMove: (e: React.MouseEvent) => void;
-  onTouchMove: (e: React.TouchEvent) => void;
-  onTouchStart: (e: React.TouchEvent) => void;
-  onTouchEnd: () => void;
+  zoom?: number;
+  isDragging?: boolean;
+  setIsDragging?: React.Dispatch<React.SetStateAction<boolean>>;
+  cardRef?: React.RefObject<HTMLDivElement>;
+  containerRef?: React.RefObject<HTMLDivElement>;
+  isAutoRotating?: boolean;
+  onMouseMove?: (e: React.MouseEvent) => void;
+  onTouchMove?: (e: React.TouchEvent) => void;
+  onTouchStart?: (e: React.TouchEvent) => void;
+  onTouchEnd?: () => void;
 }
 
 const CardDisplay = ({
   card,
   rotation,
   isFlipped,
+  zoom = 1,
+  isDragging,
+  setIsDragging,
+  cardRef,
+  containerRef,
+  isAutoRotating,
   onMouseMove,
   onTouchMove,
   onTouchStart,
   onTouchEnd,
 }: CardDisplayProps) => {
   return (
-    <div className="flex items-center justify-center gap-8 px-8">
+    <div 
+      className="flex items-center justify-center gap-8 px-8"
+      ref={containerRef}
+      onMouseMove={onMouseMove}
+      onTouchMove={onTouchMove}
+      onTouchStart={onTouchStart}
+      onTouchEnd={onTouchEnd}
+    >
       <div 
+        ref={cardRef}
         className="relative transition-transform duration-700 transform-gpu"
         style={{
           transformStyle: 'preserve-3d',
-          transform: `perspective(1000px) rotateX(${rotation.x}deg) rotateY(${rotation.y}deg)`,
+          transform: `perspective(1000px) rotateX(${rotation.x}deg) rotateY(${rotation.y}deg) scale(${zoom})`,
         }}
       >
         <div className="relative w-72 sm:w-80 md:w-96 aspect-[2.5/3.5] rounded-xl overflow-hidden shadow-2xl">

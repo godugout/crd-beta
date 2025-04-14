@@ -6,11 +6,11 @@ interface ViewerControlsProps {
   isFlipped: boolean;
   isAutoRotating: boolean;
   showInfo: boolean;
-  onFlipCard: (e: React.MouseEvent) => void;
-  onToggleAutoRotation: (e: React.MouseEvent) => void;
-  onToggleInfo: (e: React.MouseEvent) => void;
-  onToggleFullscreen: (e: React.MouseEvent) => void;
-  onShare: (e: React.MouseEvent) => void;
+  onFlipCard: () => void;
+  onToggleAutoRotation: () => void;
+  onToggleInfo: () => void;
+  onToggleFullscreen: () => void;
+  onShare: () => void;
   onClose: () => void;
 }
 
