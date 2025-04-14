@@ -1,11 +1,9 @@
-
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from 'sonner';
 import { sampleCards } from '@/data/sampleCards';
 import { Card as LibCard, Collection as LibCollection } from '@/lib/types';
 
-// Use the existing Card type from lib/types.ts
 export type Card = LibCard;
 export type Collection = LibCollection;
 
@@ -29,7 +27,6 @@ type CardContextType = {
 
 const CardContext = createContext<CardContextType | undefined>(undefined);
 
-// Sample collections for demo purposes
 const sampleCollections: Collection[] = [
   {
     id: 'collection-001',
@@ -58,39 +55,37 @@ const sampleCollections: Collection[] = [
 ];
 
 export const CardProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Initialize with sample cards
   const [cards, setCards] = useState<Card[]>(sampleCards);
   const [collections, setCollections] = useState<Collection[]>(sampleCollections);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  const addCard = async (cardData: Partial<Card>): Promise<Card> => {
+  const addCard = useCallback(async (cardData: Partial<Card>) => {
     try {
-      // Generate a new ID if one isn't provided
+      const cardId = cardData.id || uuidv4();
       const newCard: Card = {
-        id: cardData.id || uuidv4(),
+        id: cardId,
         title: cardData.title || 'Untitled Card',
         description: cardData.description || '',
         imageUrl: cardData.imageUrl || cardData.image || '',
         thumbnailUrl: cardData.thumbnailUrl || cardData.imageUrl || cardData.image || '',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        userId: cardData.userId || cardData.creatorId || 'anonymous',
-        creatorId: cardData.creatorId || cardData.userId || 'anonymous', // Handle creatorId
-        collectionId: cardData.collectionId,
+        tags: cardData.tags || [],
+        userId: cardData.userId || 'anonymous',
+        creatorId: cardData.userId || 'anonymous',
         designMetadata: cardData.designMetadata || {
           cardStyle: {},
           textStyle: {},
           marketMetadata: {},
           cardMetadata: {}
         },
-        tags: cardData.tags || [],
         fabricSwatches: cardData.fabricSwatches || [],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        collectionId: cardData.collectionId
       };
 
       setCards(prevCards => [newCard, ...prevCards]);
       
-      // If collection ID is provided, add card to the collection
       if (newCard.collectionId) {
         addCardToCollection(newCard.id, newCard.collectionId);
       }
@@ -101,7 +96,7 @@ export const CardProvider: React.FC<{ children: React.ReactNode }> = ({ children
       toast.error("Failed to add card");
       throw error;
     }
-  };
+  }, []);
 
   const updateCard = (id: string, updates: Partial<Card>): Card | null => {
     let updatedCard: Card | null = null;
@@ -137,7 +132,6 @@ export const CardProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (cardExists) {
       setCards(prevCards => prevCards.filter(card => card.id !== id));
       
-      // Remove card from all collections
       setCollections(prevCollections => {
         return prevCollections.map(collection => ({
           ...collection,
@@ -151,7 +145,6 @@ export const CardProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return false;
   };
 
-  // Collection methods
   const addCollection = (collectionData: Partial<Collection>): Collection => {
     const newCollection: Collection = {
       id: collectionData.id || uuidv4(),
@@ -248,16 +241,14 @@ export const CardProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     return true;
   };
-  
-  // Fetch/refresh cards - this would be used if fetching from an API
+
   const refreshCards = async (): Promise<void> => {
     try {
       setIsLoading(true);
       setError(null);
-      // In a real app, we'd fetch from an API here
-      // For now, just simulate a delay
       await new Promise(resolve => setTimeout(resolve, 500));
-      // No need to update cards since we're using static sample data
+      setCards(sampleCards);
+      setCollections(sampleCollections);
     } catch (error) {
       console.error("Error refreshing cards:", error);
       toast.error("Failed to refresh cards");
@@ -297,3 +288,5 @@ export const useCards = () => {
   }
   return context;
 };
+
+export const useCardContext = () => useContext(CardContext);

@@ -31,16 +31,14 @@ export const useLayers = (initialLayers: CardLayer[] = []): UseLayersResult => {
     // Create default layer based on type
     let newLayer: Omit<CardLayer, 'id'> = {
       type: layerType,
-      x: 100,
-      y: 100,
-      width: 200,
-      height: 100,
+      content: '',
+      position: { x: 50, y: 50, z: layers.length },
+      size: { width: layerType === 'text' ? 'auto' : 200, height: layerType === 'text' ? 'auto' : 100 },
       rotation: 0,
       opacity: 1,
+      zIndex: layers.length,
       visible: true,
       locked: false,
-      position: { x: 50, y: 50, z: 1 },
-      size: { width: layerType === 'text' ? 'auto' : 200, height: layerType === 'text' ? 'auto' : 100 },
       effectIds: []
     };
 
@@ -74,7 +72,7 @@ export const useLayers = (initialLayers: CardLayer[] = []): UseLayersResult => {
     const layerWithId = {
       ...newLayer,
       id
-    };
+    } as CardLayer;
     
     setLayers(prev => [...prev, layerWithId]);
     setActiveLayerId(id);

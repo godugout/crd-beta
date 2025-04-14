@@ -23,14 +23,26 @@ export interface CardLayer {
     z: number;
   };
   size: {
-    width: number;
-    height: number;
+    width: number | 'auto';
+    height: number | 'auto';
   };
   rotation: number;
   opacity: number;
   zIndex: number;
   visible?: boolean;
   style?: Record<string, any>;
+  locked?: boolean;
+  effectIds?: string[];
+  textStyle?: {
+    fontFamily?: string;
+    fontSize?: number;
+    fontWeight?: string;
+    color?: string;
+    textAlign?: string;
+  };
+  imageUrl?: string;
+  shapeType?: string;
+  color?: string;
   [key: string]: any;
 }
 

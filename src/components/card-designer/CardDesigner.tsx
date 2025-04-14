@@ -12,7 +12,7 @@ import TypographyPanel from './panels/TypographyPanel';
 import ElementsPanel from './panels/ElementsPanel';
 import SettingsPanel from './panels/SettingsPanel';
 import { useLayers } from '@/components/card-creation/hooks/useLayers';
-import { useCardEffectsStack } from '@/components/card-creation/hooks/useCardEffectsStack';
+import useCardEffectsStack from '@/components/card-creation/hooks/useCardEffectsStack';
 import { CardLayer } from '@/components/card-creation/types/cardTypes';
 
 interface CardDesignerProps {
@@ -53,8 +53,8 @@ const CardDesigner: React.FC<CardDesignerProps> = ({
     removeEffect,
     updateEffectSettings,
     getEffectSettings,
-    effectStack = [],
-    getEffectClasses = () => ''
+    effectStack,
+    getEffectClasses
   } = useCardEffectsStack();
   
   useEffect(() => {
@@ -74,7 +74,7 @@ const CardDesigner: React.FC<CardDesignerProps> = ({
       }
       
       if (userImage) {
-        addLayer({
+        const newLayer: Omit<CardLayer, 'id'> = {
           type: 'image',
           content: userImage,
           position: { x: 50, y: 50, z: 0 },
@@ -83,10 +83,19 @@ const CardDesigner: React.FC<CardDesignerProps> = ({
           opacity: 1,
           zIndex: 0,
           visible: true
-        });
+        };
+        addLayer('image');
+        // Update the newly created layer with the image
+        const layers = document.querySelectorAll('[data-layer-id]');
+        if (layers.length > 0) {
+          const lastLayerId = layers[layers.length - 1].getAttribute('data-layer-id');
+          if (lastLayerId) {
+            updateLayer(lastLayerId, { content: userImage });
+          }
+        }
       }
     }
-  }, [selectedTemplate, userImage, initialData, addEffect, addLayer]);
+  }, [selectedTemplate, userImage, initialData, addEffect, addLayer, updateLayer]);
   
   const handleSave = () => {
     if (onSave) {
@@ -168,16 +177,7 @@ const CardDesigner: React.FC<CardDesignerProps> = ({
                   activeLayerId={activeLayerId}
                   onSelectLayer={setActiveLayer}
                   onAddLayer={(layerType) => {
-                    addLayer({
-                      type: layerType,
-                      content: layerType === 'text' ? 'Add text here' : '',
-                      position: { x: 50, y: 50, z: layers.length },
-                      size: { width: 200, height: 100 },
-                      rotation: 0,
-                      opacity: 1,
-                      zIndex: layers.length,
-                      visible: true
-                    });
+                    addLayer(layerType);
                   }}
                   onUpdateLayer={updateLayer}
                   onDeleteLayer={deleteLayer}
@@ -201,23 +201,7 @@ const CardDesigner: React.FC<CardDesignerProps> = ({
                   activeLayerId={activeLayerId}
                   onUpdateLayer={updateLayer}
                   onAddTextLayer={() => {
-                    addLayer({
-                      type: 'text',
-                      content: 'Add text here',
-                      position: { x: 50, y: 50, z: layers.length },
-                      size: { width: 200, height: 60 },
-                      rotation: 0,
-                      opacity: 1,
-                      zIndex: layers.length,
-                      visible: true,
-                      textStyle: {
-                        fontFamily: 'sans-serif',
-                        fontSize: 16,
-                        color: '#000000',
-                        textAlign: 'center',
-                        fontWeight: 'normal'
-                      }
-                    });
+                    addLayer('text');
                   }}
                 />
               </TabsContent>
@@ -225,16 +209,8 @@ const CardDesigner: React.FC<CardDesignerProps> = ({
               <TabsContent value="elements" className="m-0">
                 <ElementsPanel 
                   onAddElement={(element) => {
-                    addLayer({
-                      type: 'image',
-                      content: element,
-                      position: { x: 50, y: 50, z: layers.length },
-                      size: { width: 100, height: 100 },
-                      rotation: 0,
-                      opacity: 1,
-                      zIndex: layers.length,
-                      visible: true
-                    });
+                    const layerId = addLayer('image');
+                    updateLayer(layerId, { content: element });
                   }}
                   sportType={selectedTemplate?.sport}
                 />

@@ -1,4 +1,3 @@
-
 // Card interface - extend with baseball stats
 export interface Card {
   id: string;
@@ -42,6 +41,10 @@ export interface Card {
       fontFamily?: string;
       fontSize?: string;
       color?: string;
+      titleColor?: string;
+      titleAlignment?: string;
+      titleWeight?: string;
+      descriptionColor?: string;
     },
     cardMetadata?: {
       edition?: string;
@@ -59,13 +62,15 @@ export interface Card {
       isPrintable?: boolean;
       isForSale?: boolean;
       includeInCatalog?: boolean;
-    }
+    },
+    oaklandMemory?: OaklandMemoryData
   },
   
   // Additional properties for component compatibility
   createdAt?: string;
   updatedAt?: string;
   userId?: string;
+  creatorId?: string;
   teamId?: string;
   isPublic?: boolean;
   reactions?: Reaction[];
@@ -204,9 +209,6 @@ export interface InstagramPost {
   permalink: string;
   caption?: string;
   timestamp: string;
-  // Legacy properties for backward compatibility
-  media_url?: string;
-  thumbnail_url?: string;
 }
 
 // Database representation types

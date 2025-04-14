@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
@@ -15,7 +14,6 @@ import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { v4 as uuidv4 } from 'uuid';
 import { useCollection } from '@/context/card/hooks';
 
-// Form schema
 const formSchema = z.object({
   collectionName: z.string().min(1, 'Collection name is required'),
   instagramInput: z.string().min(1, 'Instagram username or URL is required'),
@@ -41,14 +39,12 @@ const InstagramCollectionCreator = () => {
     setIsLoading(true);
 
     try {
-      // Parse the input to determine if it's a URL or username
       const isUrl = values.instagramInput.includes('instagram.com');
       
       const payload = isUrl 
         ? { url: values.instagramInput } 
         : { username: values.instagramInput };
 
-      // Call our edge function to fetch Instagram posts
       const { data, error } = await supabase.functions.invoke('instagram-scraper', {
         body: payload,
       });
@@ -61,7 +57,6 @@ const InstagramCollectionCreator = () => {
         throw new Error('No posts found for this Instagram account');
       }
 
-      // Extract username from input
       let username = values.instagramInput;
       if (isUrl) {
         const match = values.instagramInput.match(/instagram\.com\/([^\/\?]+)/);
@@ -70,7 +65,6 @@ const InstagramCollectionCreator = () => {
         }
       }
 
-      // Create a new collection
       const newCollection = addCollection({
         name: values.collectionName,
         description: `Instagram collection for @${username}`,
@@ -82,7 +76,6 @@ const InstagramCollectionCreator = () => {
         },
       });
 
-      // Convert Instagram posts to cards
       const cards = data.posts.map((post: InstagramPost) => ({
         id: uuidv4(),
         title: `Instagram post by @${username}`,
@@ -98,7 +91,6 @@ const InstagramCollectionCreator = () => {
         updatedAt: new Date().toISOString(),
       }));
 
-      // Add cards to the collection
       cards.forEach(card => {
         if (newCollection) {
           addCardToCollection(newCollection.id, card);
@@ -110,7 +102,6 @@ const InstagramCollectionCreator = () => {
         description: `Created collection with ${cards.length} posts from @${username}`,
       });
 
-      // Navigate to the new collection
       navigate(`/collections/${newCollection.id}`);
 
     } catch (error) {
@@ -173,8 +164,8 @@ const InstagramCollectionCreator = () => {
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? (
                 <>
-                  <LoadingSpinner size={16} />
-                  <span className="ml-2">Fetching posts...</span>
+                  <LoadingSpinner size={16} className="mr-2" />
+                  <span>Fetching posts...</span>
                 </>
               ) : (
                 "Create InstaCRD Collection"
@@ -193,8 +184,6 @@ const InstagramCollectionCreator = () => {
 };
 
 const addCardToCollection = (collectionId: string, card: any) => {
-  // In a real implementation, this would call the addCardToCollection function
-  // from context or a repository
   console.log('Adding card to collection:', collectionId, card);
   return true;
 };
