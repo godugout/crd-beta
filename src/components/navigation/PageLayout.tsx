@@ -55,12 +55,19 @@ const PageLayout: React.FC<PageLayoutProps> = ({
       : title !== null && title !== undefined
         ? String(title)
         : 'CardShow';
+        
+  // Convert description to string for the meta tag
+  const stringDescription = typeof description === 'string'
+    ? description
+    : description !== null && description !== undefined
+      ? String(description)
+      : 'Digital card collection platform';
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <Helmet>
         <title>{stringTitle}</title>
-        <meta name="description" content={description} />
+        <meta name="description" content={stringDescription} />
         {canonicalPath && <link rel="canonical" href={`https://cardshow.app${canonicalPath}`} />}
       </Helmet>
       
