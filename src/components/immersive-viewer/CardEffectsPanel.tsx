@@ -1,6 +1,9 @@
+
 import React from 'react';
 import { X, Lightbulb, Sparkles, Rainbow, RefreshCw, Palette } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { Slider } from '@/components/ui/slider';
 
 interface CardEffectsPanelProps {
   activeEffects: string[];

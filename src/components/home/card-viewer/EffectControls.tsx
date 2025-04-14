@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { X, Save } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
@@ -81,7 +82,7 @@ const EffectControls: React.FC<EffectControlsProps> = ({
                   value={[motionSpeed * 100]}
                   max={100}
                   step={1}
-                  onValueChange={handleMotionSpeedChange}
+                  onValueChange={(value) => onMotionSpeedChange(value[0] / 100)}
                 />
               </div>
               
@@ -94,7 +95,7 @@ const EffectControls: React.FC<EffectControlsProps> = ({
                   value={[pulseIntensity * 100]}
                   max={100}
                   step={1}
-                  onValueChange={handlePulseIntensityChange}
+                  onValueChange={(value) => onPulseIntensityChange(value[0] / 100)}
                 />
               </div>
             </div>
@@ -116,7 +117,7 @@ const EffectControls: React.FC<EffectControlsProps> = ({
                       value={[shimmerSpeed * 10]}
                       max={50}
                       step={1}
-                      onValueChange={handleShimmerSpeedChange}
+                      onValueChange={(value) => onShimmerSpeedChange(value[0] / 10)}
                     />
                   </div>
                 )}
@@ -131,7 +132,7 @@ const EffectControls: React.FC<EffectControlsProps> = ({
                       value={[goldIntensity * 100]}
                       max={100}
                       step={1}
-                      onValueChange={handleGoldIntensityChange}
+                      onValueChange={(value) => onGoldIntensityChange(value[0] / 100)}
                     />
                   </div>
                 )}
@@ -146,7 +147,7 @@ const EffectControls: React.FC<EffectControlsProps> = ({
                       value={[chromeIntensity * 100]}
                       max={100}
                       step={1}
-                      onValueChange={handleChromeIntensityChange}
+                      onValueChange={(value) => onChromeIntensityChange(value[0] / 100)}
                     />
                   </div>
                 )}
@@ -161,7 +162,7 @@ const EffectControls: React.FC<EffectControlsProps> = ({
                       value={[vintageIntensity * 100]}
                       max={100}
                       step={1}
-                      onValueChange={handleVintageIntensityChange}
+                      onValueChange={(value) => onVintageIntensityChange(value[0] / 100)}
                     />
                   </div>
                 )}
@@ -176,7 +177,7 @@ const EffectControls: React.FC<EffectControlsProps> = ({
                       value={[refractorIntensity * 100]}
                       max={100}
                       step={1}
-                      onValueChange={handleRefractorIntensityChange}
+                      onValueChange={(value) => onRefractorIntensityChange(value[0] / 100)}
                     />
                   </div>
                 )}
@@ -191,7 +192,7 @@ const EffectControls: React.FC<EffectControlsProps> = ({
                       value={[spectralIntensity * 100]}
                       max={100}
                       step={1}
-                      onValueChange={handleSpectralIntensityChange}
+                      onValueChange={(value) => onSpectralIntensityChange(value[0] / 100)}
                     />
                   </div>
                 )}
