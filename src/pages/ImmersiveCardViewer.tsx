@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useCards } from '@/context/CardContext';
-import FullscreenViewer from '@/components/gallery/FullscreenViewer';
 import PageLayout from '@/components/navigation/PageLayout';
 import { toast } from 'sonner';
 import CardBackground from '@/components/home/card-viewer/CardBackground';
@@ -17,6 +16,7 @@ const ImmersiveCardViewer = () => {
   const { cards, getCardById } = useCards();
   const [isLoading, setIsLoading] = useState(true);
   const [activeEffects, setActiveEffects] = useState<string[]>([]);
+  const [isFlipped, setIsFlipped] = useState(false);
   
   // Get the current card and prepare effects
   useEffect(() => {
@@ -94,17 +94,57 @@ const ImmersiveCardViewer = () => {
     );
   }
   
+  const currentCard = getCardById ? getCardById(id) : cards.find(card => card.id === id);
   const relatedCards = getRelatedCards();
+  
+  if (!currentCard) {
+    return (
+      <div className="fixed inset-0 bg-black flex items-center justify-center">
+        <div className="text-white text-lg">Card not found</div>
+      </div>
+    );
+  }
   
   return (
     <div className="fixed inset-0 bg-black flex flex-col">
-      <div className="relative flex-1 overflow-hidden">
+      {/* Background effects */}
+      <div className="absolute inset-0 overflow-hidden">
         <CardBackground activeEffects={activeEffects} />
-        <FullscreenViewer cardId={id} onClose={handleClose} />
       </div>
       
+      {/* Close button */}
+      <button
+        className="absolute top-4 right-4 z-50 bg-black/40 hover:bg-black/60 text-white p-2 rounded-full"
+        onClick={handleClose}
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+      
+      {/* Main content area */}
+      <div className="relative flex-1 flex items-center justify-center overflow-hidden">
+        {/* Card with improved physics */}
+        <div className="w-full max-w-lg">
+          <CardImage
+            card={currentCard}
+            className="mx-auto transform-gpu"
+            flippable={true}
+            enable3D={true}
+            autoRotate={false}
+            onFlip={setIsFlipped}
+          />
+          
+          <div className="mt-4 text-center text-white/70 text-sm">
+            <p>Click the card to flip • Drag to move • Flick to spin</p>
+          </div>
+        </div>
+      </div>
+      
+      {/* Related cards section */}
       {relatedCards.length > 0 && (
-        <div className="p-4 bg-black/90">
+        <div className="p-4 bg-black/90 z-10">
           <h3 className="text-white text-lg font-medium mb-3">Related Cards</h3>
           <RelatedCardsSlider cards={relatedCards} onCardClick={handleCardClick} />
         </div>

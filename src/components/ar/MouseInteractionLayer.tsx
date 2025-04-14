@@ -1,109 +1,88 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { Card } from '@/lib/types';
+import { useCardPhysics } from '@/hooks/useCardPhysics';
 
 interface MouseInteractionLayerProps {
   cards: Card[];
   selectedCardId: string | null;
   onUpdateCardPosition: (cardId: string, x: number, y: number, rotation: number) => void;
+  onFlipCard?: (cardId: string) => void;
 }
 
 const MouseInteractionLayer: React.FC<MouseInteractionLayerProps> = ({
   cards,
   selectedCardId,
-  onUpdateCardPosition
+  onUpdateCardPosition,
+  onFlipCard
 }) => {
-  const [isDragging, setIsDragging] = useState(false);
+  // Using our new physics hook for better movement
+  const physics = useCardPhysics({
+    dampingFactor: 0.97,
+    rotationDampingFactor: 0.96,
+    sensitivity: 0.1
+  });
+  
+  // Track if user tapped rather than dragged (for flipping)
+  const [tapStartTime, setTapStartTime] = useState(0);
   const [startPosition, setStartPosition] = useState({ x: 0, y: 0 });
-  const [currentPosition, setCurrentPosition] = useState({ x: 0, y: 0 });
-  const [lastVelocity, setLastVelocity] = useState({ x: 0, y: 0 });
-  const [cardRotation, setCardRotation] = useState(0);
+  const layerRef = useRef<HTMLDivElement>(null);
   
-  const lastPositionRef = useRef({ x: 0, y: 0 });
-  const lastMoveTimeRef = useRef(0);
+  // Update the card position based on physics state
+  useEffect(() => {
+    if (!selectedCardId || !physics.isMoving) return;
+    
+    // Calculate total rotation angle from all axes
+    const totalRotation = physics.rotation.x + physics.rotation.y + physics.rotation.z;
+    
+    // Send position updates to parent component
+    onUpdateCardPosition(
+      selectedCardId,
+      physics.position.x,
+      physics.position.y,
+      totalRotation
+    );
+  }, [physics.position, physics.rotation, physics.isMoving, selectedCardId, onUpdateCardPosition]);
   
-  // Handle mouse/touch down
+  // Handle pointer down - start tracking for tap/drag
   const handlePointerDown = (e: React.PointerEvent) => {
     if (!selectedCardId) return;
     
-    setIsDragging(true);
-    setStartPosition({
-      x: e.clientX,
-      y: e.clientY
-    });
+    // Record start time and position for tap detection
+    setTapStartTime(Date.now());
+    setStartPosition({ x: e.clientX, y: e.clientY });
     
-    lastPositionRef.current = {
-      x: e.clientX,
-      y: e.clientY
-    };
-    
-    lastMoveTimeRef.current = Date.now();
+    // Pass to physics engine
+    physics.handlePointerDown(e);
   };
   
-  // Handle mouse/touch move
+  // Handle pointer move - update physics
   const handlePointerMove = (e: React.PointerEvent) => {
-    if (!isDragging || !selectedCardId) return;
-    
-    const deltaX = e.clientX - startPosition.x;
-    const deltaY = e.clientY - startPosition.y;
-    
-    setCurrentPosition({
-      x: deltaX,
-      y: deltaY
-    });
-    
-    // Calculate velocity for card rotation effect
-    const now = Date.now();
-    const dt = now - lastMoveTimeRef.current;
-    
-    if (dt > 0) {
-      const velocityX = (e.clientX - lastPositionRef.current.x) / dt;
-      const velocityY = (e.clientY - lastPositionRef.current.y) / dt;
-      
-      setLastVelocity({ x: velocityX, y: velocityY });
-      
-      // Apply rotation based on velocity
-      if (Math.abs(velocityX) > 0.1 || Math.abs(velocityY) > 0.1) {
-        // Calculate rotation angle based on velocity
-        const speed = Math.sqrt(velocityX * velocityX + velocityY * velocityY);
-        const rotationDelta = speed * 5 * (velocityX > 0 ? 1 : -1);
-        
-        setCardRotation(prev => prev + rotationDelta);
-      }
-    }
-    
-    // Update the card position (debounced to improve performance)
-    onUpdateCardPosition(selectedCardId, deltaX, deltaY, cardRotation);
-    
-    // Update references for next velocity calculation
-    lastPositionRef.current = {
-      x: e.clientX,
-      y: e.clientY
-    };
-    lastMoveTimeRef.current = now;
+    if (!selectedCardId) return;
+    physics.handlePointerMove(e);
   };
   
-  // Handle mouse/touch up
+  // Handle pointer up - check for tap and release physics
   const handlePointerUp = (e: React.PointerEvent) => {
     if (!selectedCardId) return;
     
-    setIsDragging(false);
+    // Check if this was a tap (quick click without much movement)
+    const tapDuration = Date.now() - tapStartTime;
+    const deltaX = Math.abs(e.clientX - startPosition.x);
+    const deltaY = Math.abs(e.clientY - startPosition.y);
     
-    // Final position update
-    const deltaX = e.clientX - startPosition.x;
-    const deltaY = e.clientY - startPosition.y;
+    // If interaction was a short tap without much movement, treat as a flip request
+    if (tapDuration < 300 && deltaX < 10 && deltaY < 10 && onFlipCard) {
+      onFlipCard(selectedCardId);
+    }
     
-    onUpdateCardPosition(selectedCardId, deltaX, deltaY, cardRotation);
+    // Release the physics engine
+    physics.handlePointerUp(e);
   };
-  
-  // Reset velocity when card changes
-  useEffect(() => {
-    setLastVelocity({ x: 0, y: 0 });
-    setCardRotation(0);
-  }, [selectedCardId]);
   
   return (
     <div 
+      ref={layerRef}
       className="absolute inset-0 z-20"
       style={{ touchAction: "none", pointerEvents: selectedCardId ? "auto" : "none" }}
       onPointerDown={handlePointerDown}
