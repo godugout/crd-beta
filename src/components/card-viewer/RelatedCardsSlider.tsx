@@ -87,7 +87,7 @@ const RelatedCardsSlider: React.FC<RelatedCardsSliderProps> = ({ cards, onCardCl
               onClick={() => onCardClick(card.id)}
             >
               <div 
-                className="aspect-[2.5/3.5] rounded-lg overflow-hidden border shadow-lg"
+                className="aspect-[2.5/3.5] rounded-lg overflow-hidden border shadow-lg group relative"
                 style={{
                   borderColor: card.designMetadata?.cardStyle?.borderColor || 'rgba(255,255,255,0.1)',
                   borderWidth: card.designMetadata?.cardStyle?.borderWidth || 1,
@@ -100,12 +100,14 @@ const RelatedCardsSlider: React.FC<RelatedCardsSliderProps> = ({ cards, onCardCl
                   className="w-full h-full object-cover"
                   loading="lazy"
                 />
-              </div>
-              <div className="mt-2 text-center">
-                <h4 className="text-sm text-white font-medium truncate">{card.title}</h4>
-                <p className="text-xs text-gray-400 truncate">
-                  {card.player || (card.tags && card.tags[0]) || 'No tags'}
-                </p>
+                
+                {/* Card info overlay that appears on hover */}
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-2 transform translate-y-full opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
+                  <h4 className="text-sm text-white font-medium truncate">{card.title}</h4>
+                  <p className="text-xs text-gray-400 truncate">
+                    {card.player || (card.tags && card.tags[0]) || 'No tags'}
+                  </p>
+                </div>
               </div>
             </div>
           ))}
