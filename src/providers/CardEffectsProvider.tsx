@@ -1,41 +1,32 @@
 
-import React, { createContext, useContext, ReactNode } from 'react';
-import { useCardEffects } from '@/hooks/card-effects/useCardEffects';
-import { CardEffectsOptions, CardEffectsResult } from '@/hooks/card-effects/types';
-import { Card } from '@/lib/types';
+import React, { createContext, useContext, useState, ReactNode } from 'react';
+import useCardEffects, { CardEffectsResult } from '@/hooks/card-effects/useCardEffects';
+
+// Create context with default value
+const CardEffectsContext = createContext<CardEffectsResult | undefined>(undefined);
 
 interface CardEffectsProviderProps {
   children: ReactNode;
-  cards: Card[];
-  options?: CardEffectsOptions;
-  optimizeForPerformance?: boolean;
 }
 
-// Create context
-const CardEffectsContext = createContext<CardEffectsResult | undefined>(undefined);
-
-export function CardEffectsProvider({
-  children,
-  cards,
-  options = {},
-  optimizeForPerformance = false
-}: CardEffectsProviderProps) {
-  const cardEffects = useCardEffects(cards, optimizeForPerformance, options);
+export const CardEffectsProvider: React.FC<CardEffectsProviderProps> = ({ children }) => {
+  // Use the hook
+  const cardEffects = useCardEffects();
   
   return (
     <CardEffectsContext.Provider value={cardEffects}>
       {children}
     </CardEffectsContext.Provider>
   );
-}
+};
 
-// Hook for consuming the context
-export function useCardEffectsContext() {
+// Hook to use the card effects context
+export const useCardEffectsContext = () => {
   const context = useContext(CardEffectsContext);
-  
   if (context === undefined) {
     throw new Error('useCardEffectsContext must be used within a CardEffectsProvider');
   }
-  
   return context;
-}
+};
+
+export default CardEffectsProvider;

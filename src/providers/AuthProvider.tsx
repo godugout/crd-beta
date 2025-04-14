@@ -31,6 +31,19 @@ const MOCK_ADMIN_USER: User = {
   updatedAt: new Date().toISOString(),
 };
 
+// Default user for development
+const DEFAULT_USER: User = {
+  id: 'mock-user-id',
+  email: 'user@example.com',
+  name: 'Demo User',
+  role: UserRole.ADMIN,
+  permissions: ['all'],
+  preferences: {
+    theme: 'light',
+    notifications: true
+  }
+};
+
 export const AuthProvider: React.FC<{ children: React.ReactNode; autoLogin?: boolean }> = ({ 
   children,
   autoLogin = true // Default to auto login

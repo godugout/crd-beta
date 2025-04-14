@@ -185,20 +185,16 @@ export enum UserRole {
   ADMIN = 'admin',
   USER = 'user',
   PREMIUM = 'premium',
-  CREATOR = 'creator'
+  CREATOR = 'creator',
+  MODERATOR = 'moderator'
 }
 
-export interface UserPermission {
-  id: string;
-  name: string;
-  description: string;
-}
-
-export const ROLE_PERMISSIONS: Record<UserRole, string[]> = {
+export const ROLE_PERMISSIONS: Record<UserRole | string, string[]> = {
   [UserRole.ADMIN]: ['all'],
   [UserRole.USER]: ['read:own', 'write:own', 'delete:own'],
   [UserRole.PREMIUM]: ['read:own', 'write:own', 'delete:own', 'premium:features'],
-  [UserRole.CREATOR]: ['read:own', 'write:own', 'delete:own', 'create:premium']
+  [UserRole.CREATOR]: ['read:own', 'write:own', 'delete:own', 'create:premium'],
+  [UserRole.MODERATOR]: ['read:own', 'write:own', 'delete:own', 'moderate:content']
 };
 
 // Instagram CRD specific interfaces
