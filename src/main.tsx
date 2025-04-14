@@ -8,6 +8,7 @@ import './index.css';
 import { queryClient } from './lib/api/queryClient';
 import { CardProvider } from './context/CardContext';
 import { GlobalErrorBoundary } from './components/error/GlobalErrorBoundary';
+import { AuthProvider } from './providers/AuthProvider'; // Import AuthProvider
 
 // Make sure we have a valid DOM node before attempting to render
 const rootElement = document.getElementById("root");
@@ -22,7 +23,9 @@ createRoot(rootElement).render(
       <QueryClientProvider client={queryClient}>
         <HelmetProvider>
           <CardProvider>
-            <App />
+            <AuthProvider autoLogin={true}>
+              <App />
+            </AuthProvider>
           </CardProvider>
         </HelmetProvider>
       </QueryClientProvider>
