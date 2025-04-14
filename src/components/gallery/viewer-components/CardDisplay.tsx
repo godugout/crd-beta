@@ -1,8 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/lib/types';
-import '../../card-effects/effects.css';
 import '../../../styles/card-interactions.css';
+import '../../../styles/card-effects.css';
 
 interface CardDisplayProps {
   card: Card;
@@ -14,6 +14,10 @@ interface CardDisplayProps {
   cardRef?: React.RefObject<HTMLDivElement>;
   containerRef?: React.RefObject<HTMLDivElement>;
   isAutoRotating?: boolean;
+  activeEffects: string[];
+  effectIntensities?: Record<string, number>;
+  mousePosition: { x: number; y: number };
+  touchImprintAreas?: Array<{ id: string; active: boolean }>;
 }
 
 const CardDisplay = ({
@@ -26,9 +30,11 @@ const CardDisplay = ({
   cardRef,
   containerRef,
   isAutoRotating,
+  activeEffects,
+  effectIntensities = {},
+  mousePosition,
+  touchImprintAreas = [],
 }: CardDisplayProps) => {
-  const [activeEffects, setActiveEffects] = useState<string[]>(['Refractor', 'Holographic']);
-  const [mousePosition, setMousePosition] = useState({ x: 0.5, y: 0.5 });
   const [flipProgress, setFlipProgress] = useState(0);
   
   // Update flip progress when isFlipped changes for smooth animation
@@ -38,27 +44,31 @@ const CardDisplay = ({
     }, 50); // Small delay to ensure CSS transition works
     return () => clearTimeout(timer);
   }, [isFlipped]);
-  
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!containerRef?.current) return;
-    
-    const rect = containerRef.current.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width;
-    const y = (e.clientY - rect.top) / rect.height;
-    
-    setMousePosition({ x, y });
-  };
 
   // Generate effect classes based on active effects
   const effectClasses = activeEffects
     .map(effect => `effect-${effect.toLowerCase()}`)
     .join(' ');
   
+  // Generate CSS variables for effect intensities
+  const generateEffectStyles = () => {
+    const style: React.CSSProperties = {
+      '--mouse-x': `${mousePosition.x * 100}%`,
+      '--mouse-y': `${mousePosition.y * 100}%`,
+    } as React.CSSProperties;
+    
+    // Add intensity variables for each effect
+    Object.entries(effectIntensities).forEach(([effect, intensity]) => {
+      style[`--${effect.toLowerCase()}-intensity`] = intensity.toString();
+    });
+    
+    return style;
+  };
+
   return (
     <div 
       className="flex items-center justify-center gap-8 px-8"
-      ref={containerRef}
-      onMouseMove={handleMouseMove}
+      style={{ perspective: '2000px' }}
     >
       <div 
         ref={cardRef}
@@ -68,7 +78,7 @@ const CardDisplay = ({
           transform: `
             perspective(1000px) 
             rotateX(${rotation.x}deg) 
-            rotateY(${rotation.y + (isFlipped ? 180 : 0)}deg) 
+            rotateY(${rotation.y}deg) 
             scale(${zoom})
           `,
         }}
@@ -76,69 +86,103 @@ const CardDisplay = ({
         <div className="relative w-72 sm:w-80 md:w-96 aspect-[2.5/3.5] rounded-xl overflow-hidden shadow-2xl preserve-3d">
           {/* Front face */}
           <div 
-            className="absolute inset-0 backface-hidden"
+            className={`absolute inset-0 backface-hidden ${!isFlipped ? 'z-10' : 'z-0'}`}
             style={{ transform: 'rotateY(0deg)' }}
           >
-            <img 
-              src={card.imageUrl} 
-              alt={card.title || 'Card'} 
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none"></div>
-            <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
-              <h2 className="font-bold text-xl mb-1">{card.title}</h2>
-              {card.player && <p className="text-sm opacity-90">{card.player}</p>}
-              {card.team && <p className="text-xs opacity-80">{card.team}</p>}
-            </div>
-            
-            {/* Apply visual effects to front face */}
-            <div className={`absolute inset-0 pointer-events-none ${effectClasses}`}
-                 style={{
-                   '--mouse-x': `${mousePosition.x * 100}%`,
-                   '--mouse-y': `${mousePosition.y * 100}%`,
-                   '--holographic-intensity': '0.8',
-                   '--refractor-intensity': '1.0'
-                 } as React.CSSProperties}>
+            <div className="relative w-full h-full overflow-hidden">
+              <img 
+                src={card.imageUrl} 
+                alt={card.title || 'Card'} 
+                className="w-full h-full object-cover"
+              />
+              
+              {/* Touch imprint indicators */}
+              <div className={`absolute top-0 right-0 w-16 h-16 rounded-bl-3xl ${touchImprintAreas.find(a => a.id === 'flip-corner')?.active ? 'bg-white/30' : 'bg-transparent'}`}>
+                <span className="absolute top-3 right-3 text-2xl text-white/80 transform -rotate-45">↺</span>
+              </div>
+              
+              <div className={`absolute left-1/2 top-1/2 w-16 h-16 -translate-x-1/2 -translate-y-1/2 rounded-full ${touchImprintAreas.find(a => a.id === 'zoom-center')?.active ? 'bg-white/20' : 'bg-transparent'}`}>
+                <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-2xl text-white/80">+</span>
+              </div>
+              
+              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none"></div>
+              <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
+                <h2 className="font-bold text-xl mb-1">{card.title}</h2>
+                {card.player && <p className="text-sm opacity-90">{card.player}</p>}
+                {card.team && <p className="text-xs opacity-80">{card.team}</p>}
+              </div>
+              
+              {/* Apply visual effects to front face */}
+              <div className={`absolute inset-0 pointer-events-none ${effectClasses}`}
+                 style={generateEffectStyles()}>
+              </div>
             </div>
           </div>
 
           {/* Back face */}
           <div 
-            className="absolute inset-0 backface-hidden bg-gray-900"
+            className={`absolute inset-0 backface-hidden ${isFlipped ? 'z-10' : 'z-0'}`}
             style={{ transform: 'rotateY(180deg)' }}
           >
-            <div className="absolute inset-0 p-6 text-white">
-              <h3 className="text-xl font-bold mb-4">{card.title}</h3>
+            <div className="absolute inset-0 p-6 text-white bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+              <h3 className="text-xl font-bold mb-4 bg-gradient-to-r from-blue-300 to-purple-300 bg-clip-text text-transparent">
+                {card.title}
+              </h3>
+              
               {card.description && (
                 <p className="text-sm mb-4 opacity-90">{card.description}</p>
               )}
-              <div className="mt-auto">
+              
+              {/* Card stats */}
+              <div className="grid grid-cols-2 gap-3 my-4">
                 {card.year && (
-                  <p className="text-sm opacity-80">Year: {card.year}</p>
+                  <div className="bg-white/10 backdrop-blur-sm rounded p-2 text-center">
+                    <span className="text-xs text-blue-300 block">Year</span>
+                    <span className="text-md font-semibold">{card.year}</span>
+                  </div>
                 )}
-                {/* Fix the cardNumber access by ensuring it's properly converted to string */}
+                
                 {card.designMetadata?.cardMetadata?.cardNumber && (
-                  <p className="text-sm opacity-80">
-                    Card #: {String(card.designMetadata.cardMetadata.cardNumber)}
-                  </p>
+                  <div className="bg-white/10 backdrop-blur-sm rounded p-2 text-center">
+                    <span className="text-xs text-blue-300 block">Card #</span>
+                    <span className="text-md font-semibold">
+                      {String(card.designMetadata.cardMetadata.cardNumber)}
+                    </span>
+                  </div>
                 )}
               </div>
-            </div>
-            
-            {/* Apply visual effects to back face - slightly different effect */}
-            <div className={`absolute inset-0 pointer-events-none ${effectClasses.replace('holographic', 'chrome')}`}
-                 style={{
-                   '--mouse-x': `${mousePosition.x * 100}%`,
-                   '--mouse-y': `${mousePosition.y * 100}%`,
-                   '--refractor-intensity': '0.7',
-                   '--chrome-intensity': '0.9'
-                 } as React.CSSProperties}>
+              
+              {/* Card tags */}
+              {card.tags && card.tags.length > 0 && (
+                <div className="my-4">
+                  <p className="text-xs text-blue-300 mb-1">Tags</p>
+                  <div className="flex flex-wrap gap-2">
+                    {card.tags.map((tag, index) => (
+                      <span key={index} className="bg-white/10 text-xs px-2 py-1 rounded-full">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {/* Apply visual effects to back face - slightly different effect */}
+              <div 
+                className={`absolute inset-0 pointer-events-none ${effectClasses.replace('holographic', 'chrome')}`}
+                style={generateEffectStyles()}
+              >
+                {/* Holographic elements specific to card back */}
+                {activeEffects.includes('Holographic') && (
+                  <div className="absolute inset-0 bg-gradient-to-tr from-purple-500/10 to-blue-500/10 mix-blend-overlay"></div>
+                )}
+              </div>
             </div>
           </div>
         </div>
 
         {/* Card effects layer - shared by both sides */}
         <div className="absolute inset-0 pointer-events-none">
+          {/* Auto-rotation indicator */}
           <div 
             className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent transition-opacity duration-300"
             style={{
@@ -164,13 +208,25 @@ const CardDisplay = ({
         </div>
       </div>
 
-      {/* Side view card (desktop only) */}
-      <div className="relative w-72 sm:w-80 md:w-96 aspect-[2.5/3.5] rounded-xl overflow-hidden shadow-2xl hidden md:block">
-        <img 
-          src={card.imageUrl} 
-          alt={card.title || 'Card Side View'} 
-          className="w-full h-full object-cover"
-        />
+      {/* Side view card (desktop only) - shows card back for preview when in back view mode */}
+      <div className="relative w-72 sm:w-80 md:w-96 aspect-[2.5/3.5] rounded-xl overflow-hidden shadow-2xl hidden md:block scale-75">
+        {!isFlipped ? (
+          <img 
+            src={card.imageUrl} 
+            alt={card.title || 'Card Side View'} 
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div className="absolute inset-0 p-6 text-white bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+            <h3 className="text-xl font-bold mb-4 bg-gradient-to-r from-blue-300 to-purple-300 bg-clip-text text-transparent">
+              {card.title} - Preview
+            </h3>
+            {card.description && (
+              <p className="text-sm mb-4 opacity-90">{card.description}</p>
+            )}
+            <p className="text-sm opacity-80">Tap to apply changes</p>
+          </div>
+        )}
         <div className="absolute inset-0 bg-gradient-to-tr from-black/30 to-transparent"></div>
       </div>
     </div>

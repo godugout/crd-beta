@@ -207,3 +207,85 @@
 *:hover > .card-shine {
   opacity: 1;
 }
+
+/* Touch imprint areas */
+.corner-highlight {
+  position: relative;
+}
+
+.corner-highlight::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 60px;
+  height: 60px;
+  background: radial-gradient(circle at top right, rgba(255,255,255,0.4), transparent 70%);
+  border-radius: 0 0 0 100%;
+  animation: pulse-corner 2s infinite ease-in-out;
+  z-index: 10;
+  pointer-events: none;
+}
+
+@keyframes pulse-corner {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.7; }
+}
+
+/* Center touch area for zooming */
+.touch-area-zoom {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.3);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+*:hover > .touch-area-zoom {
+  opacity: 0.6;
+}
+
+/* Edge touch areas for rotation */
+.touch-area-rotate {
+  position: absolute;
+  width: 30px;
+  height: 100px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.touch-area-rotate.left {
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.touch-area-rotate.right {
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+*:hover > .touch-area-rotate {
+  opacity: 0.4;
+  animation: pulse-edge 2s infinite ease-in-out;
+}
+
+@keyframes pulse-edge {
+  0%, 100% { opacity: 0.2; }
+  50% { opacity: 0.5; }
+}
+
+/* CSS Variables for effect intensities */
+:root {
+  --holographic-intensity: 0.8;
+  --refractor-intensity: 1.0;
+  --chrome-intensity: 0.6;
+  --vintage-intensity: 0.5;
+}
