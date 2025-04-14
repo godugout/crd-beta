@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { CardDesignState, CardLayer } from './types/cardTypes';
 
@@ -11,5 +12,8 @@ const CardCreator: React.FC = () => {
     </div>
   );
 };
+
+// Re-export types for backward compatibility
+export type { CardDesignState, CardLayer };
 
 export default CardCreator;

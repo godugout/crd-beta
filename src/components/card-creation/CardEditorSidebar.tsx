@@ -3,7 +3,7 @@ import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { CardDesignState } from './CardCreator';
+import { CardDesignState } from './types/cardTypes';
 import { Upload } from 'lucide-react';
 
 interface CardEditorSidebarProps {

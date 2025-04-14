@@ -1,87 +1,152 @@
 
 import { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { CardLayer } from '../CardCreator'; // Assuming CardLayer type is defined here
+import { CardLayer } from '../types/cardTypes';
 
 export interface UseLayersResult {
   layers: CardLayer[];
   activeLayerId: string | null;
   setActiveLayer: (layerId: string) => void;
-  addLayer: (layer: Omit<CardLayer, 'id'>) => string;
+  addLayer: (layerType: 'image' | 'text' | 'shape') => string;
   updateLayer: (layerId: string, updates: Partial<CardLayer>) => void;
   deleteLayer: (layerId: string) => void;
   moveLayerUp: (layerId: string) => void;
   moveLayerDown: (layerId: string) => void;
-  setLayers: (layers: CardLayer[]) => void;  // Make sure this is defined
+  setLayers: (layers: CardLayer[]) => void;
 }
 
-export const useLayers = (): UseLayersResult => {
-  const [layers, setLayers] = useState<CardLayer[]>([]);
-  const [activeLayerId, setActiveLayerId] = useState<string | null>(null);
+export const useLayers = (initialLayers: CardLayer[] = []): UseLayersResult => {
+  const [layers, setLayers] = useState<CardLayer[]>(
+    initialLayers.map(layer => ({
+      ...layer,
+      id: layer.id || uuidv4()
+    }))
+  );
+  
+  const [activeLayerId, setActiveLayerId] = useState<string | null>(
+    layers.length > 0 ? layers[0].id : null
+  );
 
-  const setActiveLayer = (layerId: string) => {
-    setActiveLayerId(layerId);
-  };
+  const addLayer = (layerType: 'image' | 'text' | 'shape'): string => {
+    // Create default layer based on type
+    let newLayer: Omit<CardLayer, 'id'> = {
+      type: layerType,
+      x: 100,
+      y: 100,
+      width: 200,
+      height: 100,
+      rotation: 0,
+      opacity: 1,
+      visible: true,
+      locked: false
+    };
 
-  const addLayer = (layer: Omit<CardLayer, 'id'>) => {
+    // Add type-specific defaults
+    if (layerType === 'text') {
+      newLayer = {
+        ...newLayer,
+        content: 'New Text'
+      };
+    } else if (layerType === 'image') {
+      newLayer = {
+        ...newLayer,
+        imageUrl: ''
+      };
+    } else if (layerType === 'shape') {
+      newLayer = {
+        ...newLayer,
+        shapeType: 'rect',
+        color: '#e2e2e2'
+      };
+    }
+
+    // Add position and size information
+    newLayer = {
+      ...newLayer,
+      position: { x: 50, y: 50, z: 1 },
+      size: { width: layerType === 'text' ? 'auto' : 200, height: layerType === 'text' ? 'auto' : 100 },
+      effectIds: []
+    };
+    
     const id = uuidv4();
-    const newLayer = { ...layer, id };
-    setLayers(prevLayers => [...prevLayers, newLayer]);
+    const layerWithId = {
+      ...newLayer,
+      id
+    };
+    
+    setLayers(prev => [...prev, layerWithId]);
     setActiveLayerId(id);
     return id;
   };
-
-  const updateLayer = (layerId: string, updates: Partial<CardLayer>) => {
-    setLayers(prevLayers =>
-      prevLayers.map(layer => 
-        layer.id === layerId ? { ...layer, ...updates } : layer
+  
+  const updateLayer = (id: string, updates: Partial<CardLayer>) => {
+    setLayers(prev =>
+      prev.map(layer =>
+        layer.id === id ? { ...layer, ...updates } : layer
       )
     );
   };
-
-  const deleteLayer = (layerId: string) => {
-    setLayers(prevLayers => prevLayers.filter(layer => layer.id !== layerId));
-    if (activeLayerId === layerId) {
-      const remainingLayers = layers.filter(layer => layer.id !== layerId);
-      setActiveLayerId(remainingLayers.length > 0 ? remainingLayers[0].id : null);
+  
+  const deleteLayer = (id: string) => {
+    setLayers(prev => prev.filter(layer => layer.id !== id));
+    
+    if (activeLayerId === id) {
+      setActiveLayerId(prev => {
+        const remainingLayers = layers.filter(layer => layer.id !== id);
+        return remainingLayers.length > 0 ? remainingLayers[0].id : null;
+      });
     }
   };
-
-  const moveLayerUp = (layerId: string) => {
-    setLayers(prevLayers => {
-      const index = prevLayers.findIndex(layer => layer.id === layerId);
-      if (index <= 0) return prevLayers;
+  
+  const moveLayerUp = (id: string) => {
+    setLayers(prev => {
+      const index = prev.findIndex(layer => layer.id === id);
+      if (index <= 0) return prev;
       
-      const newLayers = [...prevLayers];
-      const temp = newLayers[index - 1];
-      newLayers[index - 1] = newLayers[index];
-      newLayers[index] = temp;
-      return newLayers;
+      const newLayers = [...prev];
+      
+      if (newLayers[index].position && newLayers[index-1].position) {
+        newLayers[index].position.z = prev[index - 1].position.z - 1;
+      }
+      
+      // Sort by z-index if position exists
+      return newLayers.sort((a, b) => 
+        (b.position?.z ?? 0) - (a.position?.z ?? 0)
+      );
     });
   };
-
-  const moveLayerDown = (layerId: string) => {
-    setLayers(prevLayers => {
-      const index = prevLayers.findIndex(layer => layer.id === layerId);
-      if (index === -1 || index >= prevLayers.length - 1) return prevLayers;
+  
+  const moveLayerDown = (id: string) => {
+    setLayers(prev => {
+      const index = prev.findIndex(layer => layer.id === id);
+      if (index === -1 || index >= prev.length - 1) return prev;
       
-      const newLayers = [...prevLayers];
-      const temp = newLayers[index + 1];
-      newLayers[index + 1] = newLayers[index];
-      newLayers[index] = temp;
-      return newLayers;
+      const newLayers = [...prev];
+      
+      if (newLayers[index].position && newLayers[index+1].position) {
+        newLayers[index].position.z = prev[index + 1].position.z + 1;
+      }
+      
+      // Sort by z-index if position exists
+      return newLayers.sort((a, b) => 
+        (b.position?.z ?? 0) - (a.position?.z ?? 0)
+      );
     });
+  };
+  
+  const setActiveLayer = (id: string) => {
+    setActiveLayerId(id || null);
   };
 
   return {
     layers,
     activeLayerId,
-    setActiveLayer,
     addLayer,
     updateLayer,
     deleteLayer,
     moveLayerUp,
     moveLayerDown,
-    setLayers  // Explicitly return the setLayers function
+    setActiveLayer,
+    setLayers
   };
 };

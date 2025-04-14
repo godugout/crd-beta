@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { CardLayer } from '@/components/card-creation/CardCreator';
+import { CardLayer } from '@/components/card-creation/types/cardTypes';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';

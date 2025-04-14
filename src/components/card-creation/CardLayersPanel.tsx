@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { CardLayer } from './CardCreator';
+import { CardLayer } from './types/cardTypes';
 import { Eye, EyeOff, Image, Type, Square, ChevronUp, ChevronDown, Trash2 } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 

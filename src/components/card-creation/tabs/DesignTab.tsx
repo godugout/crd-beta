@@ -1,10 +1,9 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ChevronRight } from 'lucide-react';
 import CardEditorSidebar from '../CardEditorSidebar';
 import CardLayersPanel from '../CardLayersPanel';
-import { CardDesignState, CardLayer } from '../CardCreator';
+import { CardDesignState, CardLayer } from '../types/cardTypes';
 
 interface DesignTabProps {
   cardData: CardDesignState;

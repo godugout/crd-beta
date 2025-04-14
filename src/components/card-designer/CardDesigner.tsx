@@ -13,6 +13,7 @@ import ElementsPanel from './panels/ElementsPanel';
 import SettingsPanel from './panels/SettingsPanel';
 import { useLayers } from '@/components/card-creation/hooks/useLayers';
 import { useCardEffectsStack } from '@/components/card-creation/hooks/useCardEffectsStack';
+import { CardLayer } from '@/components/card-creation/types/cardTypes';
 
 interface CardDesignerProps {
   selectedTemplate?: CardTemplate;
@@ -75,16 +76,7 @@ const CardDesigner: React.FC<CardDesignerProps> = ({
       
       // Add the user image as the base layer if available
       if (userImage) {
-        addLayer({
-          type: 'image',
-          content: userImage,
-          position: { x: 0, y: 0, z: 1 },
-          size: { width: '100%', height: '100%' },
-          rotation: 0,
-          opacity: 1,
-          visible: true,
-          effectIds: []
-        });
+        addLayer('image');
       }
       
       // Add template-specific layers
@@ -194,32 +186,14 @@ const CardDesigner: React.FC<CardDesignerProps> = ({
                   layers={layers}
                   activeLayerId={activeLayerId}
                   onUpdateLayer={updateLayer}
-                  onAddTextLayer={() => addLayer({
-                    type: 'text',
-                    content: 'New Text',
-                    position: { x: 50, y: 50, z: layers.length + 1 },
-                    size: { width: 'auto', height: 'auto' },
-                    rotation: 0,
-                    opacity: 1,
-                    visible: true,
-                    effectIds: []
-                  })}
+                  onAddTextLayer={() => addLayer('text')}
                 />
               </TabsContent>
               
               <TabsContent value="elements" className="m-0">
                 <ElementsPanel 
                   onAddElement={(element) => {
-                    addLayer({
-                      type: 'image',
-                      content: element.url,
-                      position: { x: 50, y: 50, z: layers.length + 1 },
-                      size: { width: 100, height: 100 },
-                      rotation: 0,
-                      opacity: 1,
-                      visible: true,
-                      effectIds: []
-                    });
+                    addLayer('image');
                   }}
                   sportType={selectedTemplate?.sport}
                 />

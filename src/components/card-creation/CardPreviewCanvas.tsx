@@ -1,6 +1,5 @@
-
 import React, { forwardRef, useEffect, useState } from 'react';
-import { CardDesignState, CardLayer } from './CardCreator';
+import { CardDesignState, CardLayer } from './types/cardTypes';
 
 interface CardPreviewCanvasProps {
   cardData: CardDesignState;

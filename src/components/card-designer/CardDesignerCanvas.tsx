@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { CardLayer } from '@/components/card-creation/CardCreator';
+import { CardLayer } from '@/components/card-creation/types/cardTypes';
 
 interface CardDesignerCanvasProps {
   layers: CardLayer[];

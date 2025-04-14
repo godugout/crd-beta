@@ -3,7 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Plus, Image, Type, Square, ChevronUp, ChevronDown, Trash2, Eye, EyeOff, Copy, CopyPlus } from 'lucide-react';
-import { CardLayer } from '@/components/card-creation/CardCreator';
+import { CardLayer } from '@/components/card-creation/types/cardTypes';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 interface LayersPanelProps {

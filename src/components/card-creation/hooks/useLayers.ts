@@ -3,11 +3,11 @@ import { useState, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { CardLayer } from '../types/cardTypes';
 
-export const useLayers = (initialLayers: Omit<CardLayer, 'id'>[] = []) => {
+export const useLayers = (initialLayers: CardLayer[] = []) => {
   const [layers, setLayers] = useState<CardLayer[]>(
     initialLayers.map(layer => ({
       ...layer,
-      id: uuidv4()
+      id: layer.id || uuidv4()
     }))
   );
   
@@ -39,6 +39,8 @@ export const useLayers = (initialLayers: Omit<CardLayer, 'id'>[] = []) => {
     
     setLayers(prev => [...prev, layerWithId]);
     setActiveLayerId(layerWithId.id);
+    
+    return layerWithId.id;
   }, []);
   
   const updateLayer = useCallback((id: string, updates: Partial<CardLayer>) => {
