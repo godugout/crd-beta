@@ -41,13 +41,13 @@ const CardShopBackground: React.FC<CardShopBackgroundProps> = ({ className = '' 
   }, []);
   
   return (
-    <div className={`absolute inset-0 overflow-hidden pointer-events-none ${className}`}>
+    <div className={`fixed inset-0 overflow-hidden pointer-events-none ${className}`}>
       <canvas 
         ref={canvasRef} 
         className="w-full h-full"
-        style={{ position: 'absolute', inset: 0 }}
+        style={{ position: 'fixed', inset: 0, zIndex: -1 }}
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/10 opacity-30"></div>
+      <div className="fixed inset-0 bg-gradient-to-b from-transparent via-transparent to-black/10 opacity-30" style={{ zIndex: -1 }}></div>
     </div>
   );
 };
