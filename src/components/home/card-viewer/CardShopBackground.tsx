@@ -1,5 +1,6 @@
 
 import React, { useEffect, useRef } from 'react';
+import { drawCardShopBackground } from './background-utils/backgroundRenderer';
 
 interface CardShopBackgroundProps {
   className?: string;
@@ -15,6 +16,7 @@ const CardShopBackground: React.FC<CardShopBackgroundProps> = ({ className = '' 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     
+    // Setup canvas with device pixel ratio
     const dpr = window.devicePixelRatio || 1;
     const rect = canvas.getBoundingClientRect();
     
@@ -22,8 +24,10 @@ const CardShopBackground: React.FC<CardShopBackgroundProps> = ({ className = '' 
     canvas.height = rect.height * dpr;
     ctx.scale(dpr, dpr);
     
+    // Initial draw
     drawCardShopBackground(ctx, rect.width, rect.height);
     
+    // Handle window resize
     const handleResize = () => {
       const rect = canvas.getBoundingClientRect();
       canvas.width = rect.width * dpr;
@@ -35,51 +39,6 @@ const CardShopBackground: React.FC<CardShopBackgroundProps> = ({ className = '' 
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
-  
-  const drawCardShopBackground = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
-    // Clear canvas
-    ctx.clearRect(0, 0, width, height);
-    
-    // Soft, muted gradient background
-    const bgGradient = ctx.createLinearGradient(0, 0, 0, height);
-    bgGradient.addColorStop(0, '#F1F0FB');    // Soft Gray
-    bgGradient.addColorStop(1, '#D3E4FD');    // Soft Blue
-    ctx.fillStyle = bgGradient;
-    ctx.fillRect(0, 0, width, height);
-    
-    // Subtle ambient particles
-    drawSoftParticles(ctx, width, height);
-    
-    // Soft light effects
-    drawSoftLighting(ctx, width, height);
-  };
-  
-  const drawSoftParticles = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
-    ctx.globalAlpha = 0.1;
-    for (let i = 0; i < 50; i++) {
-      const x = Math.random() * width;
-      const y = Math.random() * height;
-      const size = Math.random() * 2 + 1;
-      
-      ctx.beginPath();
-      ctx.arc(x, y, size, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
-      ctx.fill();
-    }
-    ctx.globalAlpha = 1;
-  };
-  
-  const drawSoftLighting = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
-    const lightGradient = ctx.createRadialGradient(
-      width * 0.7, height * 0.3, 0,
-      width * 0.7, height * 0.3, width * 0.5
-    );
-    lightGradient.addColorStop(0, 'rgba(255, 255, 255, 0.05)');
-    lightGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
-    
-    ctx.fillStyle = lightGradient;
-    ctx.fillRect(0, 0, width, height);
-  };
   
   return (
     <div className={`absolute inset-0 overflow-hidden pointer-events-none ${className}`}>
