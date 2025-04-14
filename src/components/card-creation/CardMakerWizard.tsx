@@ -3,9 +3,8 @@ import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
-import { CardDesignState, CardLayer } from '../CardCreator';
-import { WIZARD_STEPS } from './constants/wizardSteps';
 import { CardEffect } from './hooks/useCardEffectsStack';
+import { WIZARD_STEPS } from './constants/wizardSteps';
 import UploadTab from './tabs/UploadTab';
 import DesignTab from './tabs/DesignTab';
 import EffectsTab from './tabs/EffectsTab';
@@ -16,34 +15,79 @@ import CardWizardSteps from './components/CardWizardSteps';
 import CardWizardHeader from './components/CardWizardHeader';
 import CardWizardFeatures from './components/CardWizardFeatures';
 
+// Define these types directly here since we're having import issues
+export interface CardDesignState {
+  title: string;
+  description: string;
+  tags: string[];
+  borderColor: string;
+  backgroundColor: string;
+  borderRadius: string;
+  imageUrl: string | null;
+  player?: string;
+  team?: string;
+  year?: string;
+}
+
+export interface Position {
+  x: number;
+  y: number;
+  z: number;
+}
+
+export interface Size {
+  width: number | string;
+  height: number | string;
+}
+
+export interface CardLayer {
+  id: string;
+  type: 'image' | 'text' | 'shape';
+  content: string | object;
+  position: Position;
+  size: Size;
+  rotation: number;
+  opacity: number;
+  visible: boolean;
+  effectIds: string[];
+}
+
 interface CardMakerWizardProps {
-  cardData: CardDesignState;
-  setCardData: (cardData: CardDesignState) => void;
-  layers: CardLayer[];
-  setLayers: (layers: CardLayer[]) => void;
-  activeLayer: CardLayer | null;
-  setActiveLayerId: (layerId: string) => void;
-  updateLayer: (layerId: string, updates: Partial<CardLayer>) => void;
-  effectStack: CardEffect[];
-  addEffect: (name: string, settings?: any) => void;
-  removeEffect: (id: string) => void;
-  updateEffectSettings: (id: string, settings: any) => void;
-  effectClasses: string;
+  cardData?: CardDesignState;
+  setCardData?: (cardData: CardDesignState) => void;
+  layers?: CardLayer[];
+  setLayers?: (layers: CardLayer[]) => void;
+  activeLayer?: CardLayer | null;
+  setActiveLayerId?: (layerId: string) => void;
+  updateLayer?: (layerId: string, updates: Partial<CardLayer>) => void;
+  effectStack?: CardEffect[];
+  addEffect?: (name: string, settings?: any) => void;
+  removeEffect?: (id: string) => void;
+  updateEffectSettings?: (id: string, settings: any) => void;
+  effectClasses?: string;
 }
 
 const CardMakerWizard: React.FC<CardMakerWizardProps> = ({
-  cardData,
-  setCardData,
-  layers,
-  setLayers,
-  activeLayer,
-  setActiveLayerId,
-  updateLayer,
-  effectStack,
-  addEffect,
-  removeEffect,
-  updateEffectSettings,
-  effectClasses,
+  cardData = {
+    title: '',
+    description: '',
+    tags: [],
+    borderColor: '#000000',
+    backgroundColor: '#FFFFFF',
+    borderRadius: '8px',
+    imageUrl: null,
+  },
+  setCardData = () => {},
+  layers = [],
+  setLayers = () => {},
+  activeLayer = null,
+  setActiveLayerId = () => {},
+  updateLayer = () => {},
+  effectStack = [],
+  addEffect = () => {},
+  removeEffect = () => {},
+  updateEffectSettings = () => {},
+  effectClasses = '',
 }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const isMobile = useMediaQuery('(max-width: 768px)');
@@ -169,21 +213,30 @@ const CardWizardStepContent: React.FC<CardWizardStepContentProps> = ({
     case 0:
       return (
         <UploadTab
+          cardData={cardData}
+          setCardData={setCardData}
+          onImageCaptured={(url: string) => {
+            setCardData({...cardData, imageUrl: url});
+            onContinue();
+          }}
           onContinue={onContinue}
-          layers={layers}
-          setLayers={setLayers}
-          activeLayerId={activeLayer?.id || null}
-          setActiveLayerId={setActiveLayerId}
-          updateLayer={updateLayer}
         />
       );
     case 1:
       return (
         <DesignTab
-          onContinue={onContinue}
           cardData={cardData}
           setCardData={setCardData}
           layers={layers}
+          activeLayerId={activeLayer?.id || null}
+          onImageUpload={(url: string) => setCardData({...cardData, imageUrl: url})}
+          onLayerSelect={setActiveLayerId}
+          onLayerUpdate={updateLayer}
+          onAddLayer={() => {}}
+          onDeleteLayer={() => {}}
+          onMoveLayerUp={() => {}}
+          onMoveLayerDown={() => {}}
+          onContinue={onContinue}
         />
       );
     case 2:
@@ -200,14 +253,15 @@ const CardWizardStepContent: React.FC<CardWizardStepContentProps> = ({
       return (
         <TextTab
           onContinue={onContinue}
-          cardData={cardData}
-          setCardData={setCardData}
         />
       );
     case 4:
       return (
         <PreviewTab
-          cardData={cardData}
+          onSave={() => {console.log('Saving card:', cardData)}}
+          cardImage={cardData.imageUrl}
+          cardTitle={cardData.title}
+          cardEffect={effectClasses}
         />
       );
     default:
