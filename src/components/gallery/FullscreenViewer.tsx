@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { X, ChevronLeft, ChevronRight, Share2, Maximize, Star, Rotate3D, Info } from 'lucide-react';
@@ -12,20 +11,18 @@ interface FullscreenViewerProps {
 }
 
 const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) => {
-  const { getCardById } = useCards();
-  const card = getCardById(cardId);
+  const { cards, getCardById } = useCards();
+  const card = getCardById ? getCardById(cardId) : cards.find(c => c.id === cardId);
+  const navigate = useNavigate();
   const [isFlipped, setIsFlipped] = useState(false);
   const [isAutoRotating, setIsAutoRotating] = useState(true);
   const [showInfo, setShowInfo] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
   const { isMobile } = useMobileOptimization();
-  const navigate = useNavigate();
-  
   const [rotation, setRotation] = useState({ x: 0, y: 0 });
   const [lastPosition, setLastPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
-  
-  // Auto rotation effect
+
   useEffect(() => {
     let animationFrame: number;
     let angle = 0;
@@ -49,7 +46,7 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
       cancelAnimationFrame(animationFrame);
     };
   }, [isAutoRotating, isDragging]);
-  
+
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!cardRef.current || isAutoRotating) return;
     
@@ -58,13 +55,12 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + rect.height / 2;
     
-    // Calculate rotation based on mouse position relative to card center
     const rotateY = ((e.clientX - centerX) / (rect.width / 2)) * 15;
     const rotateX = -((e.clientY - centerY) / (rect.height / 2)) * 15;
     
     setRotation({ x: rotateX, y: rotateY });
   };
-  
+
   const handleTouchMove = (e: React.TouchEvent) => {
     if (!cardRef.current || isAutoRotating || !isDragging) return;
     
@@ -79,28 +75,26 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
     
     setLastPosition({ x: touch.clientX, y: touch.clientY });
   };
-  
+
   const handleTouchStart = (e: React.TouchEvent) => {
     setIsDragging(true);
     setLastPosition({ x: e.touches[0].clientX, y: e.touches[0].clientY });
     setIsAutoRotating(false);
   };
-  
+
   const handleTouchEnd = () => {
     setIsDragging(false);
   };
-  
-  const handleCardClick = () => {
-    if (isMobile) {
-      setIsFlipped(!isFlipped);
-    }
+
+  const handleCardClick = (newCardId: string) => {
+    navigate(`/view/${newCardId}`);
   };
-  
+
   const handleFlipCard = (e: React.MouseEvent) => {
     e.stopPropagation();
     setIsFlipped(!isFlipped);
   };
-  
+
   const handleShare = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (navigator.share && card) {
@@ -112,23 +106,22 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
       .then(() => toast.success('Shared successfully'))
       .catch((error) => console.error('Error sharing:', error));
     } else {
-      // Fallback for browsers without Web Share API
       navigator.clipboard.writeText(window.location.href)
         .then(() => toast.success('Link copied to clipboard'))
         .catch(() => toast.error('Failed to copy link'));
     }
   };
-  
+
   const toggleAutoRotation = (e: React.MouseEvent) => {
     e.stopPropagation();
     setIsAutoRotating(!isAutoRotating);
   };
-  
+
   const toggleInfo = (e: React.MouseEvent) => {
     e.stopPropagation();
     setShowInfo(!showInfo);
   };
-  
+
   const toggleFullscreen = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!document.fullscreenElement) {
@@ -141,7 +134,7 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
       }
     }
   };
-  
+
   if (!card) {
     return (
       <div className="fixed inset-0 bg-black flex items-center justify-center z-50">
@@ -155,7 +148,7 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
       </div>
     );
   }
-  
+
   return (
     <div 
       className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50"
@@ -164,108 +157,47 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
-      {/* Card container */}
-      <div 
-        ref={cardRef}
-        className={`relative transition-transform duration-700 transform-gpu ${isFlipped ? 'rotate-y-180' : ''}`}
-        style={{
-          transformStyle: 'preserve-3d',
-          transform: `perspective(1000px) rotateX(${rotation.x}deg) rotateY(${rotation.y}deg)`,
-        }}
-        onClick={handleCardClick}
-      >
-        {/* Front of card */}
+      <div className="flex items-center justify-center gap-8 px-8">
         <div 
-          className="relative w-72 sm:w-80 md:w-96 aspect-[2.5/3.5] rounded-xl overflow-hidden shadow-2xl transform-gpu backface-hidden"
+          ref={cardRef}
+          className="relative transition-transform duration-700 transform-gpu"
           style={{
-            borderRadius: card.designMetadata?.cardStyle?.borderRadius || '12px',
-            border: `${card.designMetadata?.cardStyle?.borderWidth || 2}px solid ${card.designMetadata?.cardStyle?.borderColor || 'rgba(255,255,255,0.2)'}`,
-            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.9)'
+            transformStyle: 'preserve-3d',
+            transform: `perspective(1000px) rotateX(${rotation.x}deg) rotateY(${rotation.y}deg)`,
           }}
+          onClick={handleCardClick}
         >
-          {/* Card image */}
-          <img 
-            src={card.imageUrl} 
-            alt={card.title || 'Card'} 
-            className="w-full h-full object-cover"
-          />
-          
-          {/* Overlay layers for effects */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none"></div>
-          
-          {/* Shine effect */}
-          <div 
-            className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
-            style={{
-              backgroundPosition: `${50 + rotation.y * 2}% ${50 - rotation.x * 2}%`
-            }}
-          ></div>
-          
-          {/* Card information overlay */}
-          <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
-            <h2 className="font-bold text-xl mb-1">{card.title}</h2>
-            {card.player && <p className="text-sm opacity-90">{card.player}</p>}
-            {card.team && <p className="text-xs opacity-80">{card.team}</p>}
-          </div>
-        </div>
-        
-        {/* Back of card */}
-        <div 
-          className="absolute inset-0 w-72 sm:w-80 md:w-96 aspect-[2.5/3.5] rounded-xl bg-gray-800 p-4 transform-gpu rotate-y-180 backface-hidden"
-          style={{
-            borderRadius: card.designMetadata?.cardStyle?.borderRadius || '12px',
-            border: `${card.designMetadata?.cardStyle?.borderWidth || 2}px solid ${card.designMetadata?.cardStyle?.borderColor || 'rgba(255,255,255,0.2)'}`,
-            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.9)'
-          }}
-        >
-          <div className="flex flex-col h-full">
-            <h3 className="text-xl font-bold text-white mb-2">{card.title}</h3>
-            
-            <div className="flex-1 overflow-y-auto text-white/80 text-sm">
-              <p className="mb-3">{card.description}</p>
-              
-              {card.player && (
-                <div className="mb-2">
-                  <span className="text-white/60 font-medium">Player: </span>
-                  <span>{card.player}</span>
-                </div>
-              )}
-              
-              {card.team && (
-                <div className="mb-2">
-                  <span className="text-white/60 font-medium">Team: </span>
-                  <span>{card.team}</span>
-                </div>
-              )}
-              
-              {card.year && (
-                <div className="mb-2">
-                  <span className="text-white/60 font-medium">Year: </span>
-                  <span>{card.year}</span>
-                </div>
-              )}
-              
-              {card.tags && card.tags.length > 0 && (
-                <div className="mt-4">
-                  <span className="text-white/60 font-medium mb-1 block">Tags:</span>
-                  <div className="flex flex-wrap gap-2">
-                    {card.tags.map((tag, index) => (
-                      <span 
-                        key={index}
-                        className="px-2 py-1 bg-white/10 rounded-full text-xs"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
+          <div className="relative w-72 sm:w-80 md:w-96 aspect-[2.5/3.5] rounded-xl overflow-hidden shadow-2xl">
+            <img 
+              src={card.imageUrl} 
+              alt={card.title || 'Card'} 
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none"></div>
+            <div 
+              className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+              style={{
+                backgroundPosition: `${50 + rotation.y * 2}% ${50 - rotation.x * 2}%`
+              }}
+            ></div>
+            <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
+              <h2 className="font-bold text-xl mb-1">{card.title}</h2>
+              {card.player && <p className="text-sm opacity-90">{card.player}</p>}
+              {card.team && <p className="text-xs opacity-80">{card.team}</p>}
             </div>
           </div>
         </div>
+
+        <div className="relative w-72 sm:w-80 md:w-96 aspect-[2.5/3.5] rounded-xl overflow-hidden shadow-2xl hidden md:block">
+          <img 
+            src={card.imageUrl} 
+            alt={card.title || 'Card Side View'} 
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-tr from-black/30 to-transparent"></div>
+        </div>
       </div>
-      
-      {/* Controls */}
+
       <div className="absolute top-4 right-4 flex space-x-3">
         <button 
           className="text-white p-2 rounded-full bg-black/50 hover:bg-black/70 transition"
@@ -275,7 +207,7 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
           <ChevronLeft size={20} className={isFlipped ? "hidden" : ""} />
           <ChevronRight size={20} className={isFlipped ? "" : "hidden"} />
         </button>
-        
+
         <button 
           className="text-white p-2 rounded-full bg-black/50 hover:bg-black/70 transition"
           onClick={toggleAutoRotation}
@@ -283,7 +215,7 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
         >
           <Rotate3D size={20} className={isAutoRotating ? "text-primary" : "text-white"} />
         </button>
-        
+
         <button 
           className="text-white p-2 rounded-full bg-black/50 hover:bg-black/70 transition"
           onClick={toggleInfo}
@@ -291,7 +223,7 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
         >
           <Info size={20} className={showInfo ? "text-primary" : "text-white"} />
         </button>
-        
+
         <button 
           className="text-white p-2 rounded-full bg-black/50 hover:bg-black/70 transition"
           onClick={toggleFullscreen}
@@ -299,7 +231,7 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
         >
           <Maximize size={20} />
         </button>
-        
+
         <button 
           className="text-white p-2 rounded-full bg-black/50 hover:bg-black/70 transition"
           onClick={handleShare}
@@ -307,7 +239,7 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
         >
           <Share2 size={20} />
         </button>
-        
+
         <button 
           className="text-white p-2 rounded-full bg-black/50 hover:bg-black/70 transition"
           onClick={onClose}
@@ -316,8 +248,7 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
           <X size={20} />
         </button>
       </div>
-      
-      {/* Mini Action Bar */}
+
       <div className="absolute bottom-6 right-6">
         <div className="bg-black/70 backdrop-blur-sm rounded-lg p-3 shadow-lg text-white text-xs max-w-xs">
           <h4 className="font-medium mb-2">Keyboard Shortcuts:</h4>
@@ -344,8 +275,7 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
           </div>
         </div>
       </div>
-      
-      {/* Card info panel */}
+
       {showInfo && (
         <div className="absolute left-6 top-1/2 -translate-y-1/2 bg-black/70 backdrop-blur-sm rounded-lg p-4 shadow-lg text-white max-w-xs">
           <h3 className="text-lg font-bold mb-3">{card.title}</h3>
