@@ -5,13 +5,16 @@ import { Toaster } from 'sonner';
 import HomePage from './pages/HomePage';
 import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
-import NotFoundPage from './pages/NotFoundPage';
+import NotFound from './pages/NotFound';
 import CardCollectionPage from './pages/CardCollectionPage';
 import ImmersiveCardViewer from './pages/ImmersiveCardViewer';
 import BaseballCardViewer from './pages/BaseballCardViewer';
 import BaseballActionFigure from './pages/BaseballActionFigure';
 import { CardProvider } from './context/CardContext';
 import { SettingsProvider } from './context/SettingsContext';
+
+// Import route configurations
+import { routes } from './routes/index';
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -41,6 +44,34 @@ function App() {
       <CardProvider>
         <Router>
           <Routes>
+            {/* Import all routes from the routes configuration */}
+            {routes.map((route, index) => {
+              // Handle nested routes
+              if (route.children) {
+                return (
+                  <Route key={`parent-${index}`} path={route.path} element={route.element}>
+                    {route.children.map((childRoute, childIndex) => (
+                      <Route 
+                        key={`child-${childIndex}`}
+                        path={childRoute.path}
+                        element={childRoute.element}
+                      />
+                    ))}
+                  </Route>
+                );
+              }
+              
+              // Handle standard routes
+              return (
+                <Route 
+                  key={`route-${index}`} 
+                  path={route.path} 
+                  element={route.element} 
+                />
+              );
+            })}
+
+            {/* Legacy routes for backward compatibility */}
             <Route path="/" element={<HomePage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/contact" element={<ContactPage />} />
@@ -48,8 +79,9 @@ function App() {
             <Route path="/view/:id" element={<ImmersiveCardViewer />} />
             <Route path="/baseball-card-viewer" element={<BaseballCardViewer />} />
             <Route path="/baseball-action-figure" element={<BaseballActionFigure />} />
-            <Route path="/404" element={<NotFoundPage />} />
-            <Route path="*" element={<Navigate to="/404" />} />
+            
+            {/* 404 Route */}
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </Router>
         <Toaster position="top-center" />
