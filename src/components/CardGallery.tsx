@@ -62,7 +62,8 @@ const CardGallery: React.FC<CardGalleryProps> = ({
     if (onCardClick) {
       onCardClick(cardId);
     } else {
-      cardOperations.showCardDetails(cardId);
+      // Route to immersive card viewer
+      navigate(`/view/${cardId}`);
     }
   };
 
@@ -86,7 +87,7 @@ const CardGallery: React.FC<CardGalleryProps> = ({
                 {viewMode === 'grid' ? (
                   <CardThumbnail
                     card={card}
-                    onClick={handleCardItemClick}
+                    onClick={() => handleCardItemClick(card.id)}
                     className="transition-all duration-200 hover:shadow-md"
                   />
                 ) : (

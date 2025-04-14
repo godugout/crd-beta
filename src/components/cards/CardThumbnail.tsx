@@ -55,14 +55,18 @@ export const CardThumbnail: React.FC<CardThumbnailProps> = ({
   return (
     <CardBase
       card={card}
-      className={cn("group", className)}
+      className={cn("group relative overflow-hidden", className)}
       onClick={onClick}
       enableEffects={enableEffects}
       activeEffects={activeEffects}
       style={{ ...styleFromMetadata, ...cardStyle }}
       {...props}
     >
-      <CardImage card={card} />
+      <CardImage 
+        card={card} 
+        enable3D={false} 
+        flippable={false}
+      />
       
       {showInfo && (
         <CardInfoOverlay card={card} showOnHover={infoOnHover} />

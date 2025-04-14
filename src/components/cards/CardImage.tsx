@@ -52,6 +52,7 @@ export const CardImage: React.FC<CardImageProps> = ({
   const [isFlipped, setIsFlipped] = useState(false);
   const [containerDimensions, setContainerDimensions] = useState({ width: 0, height: 0 });
   const [isOutOfBounds, setIsOutOfBounds] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
   
   // Use our physics engine for smooth movement
   const physics = useCardPhysics({
@@ -131,11 +132,7 @@ export const CardImage: React.FC<CardImageProps> = ({
     
     // For non-3D mode, use simpler styling
     if (!enable3D) {
-      return {
-        backgroundImage: `url(${card.imageUrl})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center'
-      };
+      return {};
     }
     
     // Full 3D transform incorporating both position and rotation
@@ -153,6 +150,17 @@ export const CardImage: React.FC<CardImageProps> = ({
     };
   };
 
+  // Get image URL with fallback to thumbnail
+  const imageUrl = card.imageUrl || card.thumbnailUrl;
+
+  const handleImageLoad = () => {
+    setImageLoaded(true);
+  };
+
+  const handleImageError = () => {
+    console.error(`Failed to load image for card: ${card.id}`);
+  };
+
   return (
     <div
       ref={containerRef}
@@ -161,10 +169,10 @@ export const CardImage: React.FC<CardImageProps> = ({
         isOutOfBounds && "boundary-warning",
         className
       )}
-      onPointerDown={physics.handlePointerDown}
-      onPointerMove={physics.handlePointerMove}
-      onPointerUp={physics.handlePointerUp}
-      onPointerLeave={physics.handlePointerUp}
+      onPointerDown={enable3D ? physics.handlePointerDown : undefined}
+      onPointerMove={enable3D ? physics.handlePointerMove : undefined}
+      onPointerUp={enable3D ? physics.handlePointerUp : undefined}
+      onPointerLeave={enable3D ? physics.handlePointerUp : undefined}
       onDoubleClick={() => physics.resetCard()}
     >
       <div
@@ -174,12 +182,30 @@ export const CardImage: React.FC<CardImageProps> = ({
       >
         {/* Front face of the card */}
         <div className="card-face card-front absolute inset-0 backface-hidden">
-          <img 
-            src={card.imageUrl} 
-            alt={card.title || "Card"} 
-            className="w-full h-full object-cover"
-            draggable={false}
-          />
+          {/* Loading placeholder */}
+          {!imageLoaded && imageUrl && (
+            <div className="absolute inset-0 bg-gray-100 animate-pulse flex items-center justify-center">
+              <svg className="h-8 w-8 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            </div>
+          )}
+          
+          {/* Image with proper error handling */}
+          {imageUrl ? (
+            <img 
+              src={imageUrl} 
+              alt={card.title || "Card"} 
+              className="w-full h-full object-cover"
+              onLoad={handleImageLoad}
+              onError={handleImageError}
+              draggable={false}
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-400">
+              No Image
+            </div>
+          )}
           
           {/* Card Effects Layer - positioned on top of the card face */}
           <div className="card-effects-layer">
