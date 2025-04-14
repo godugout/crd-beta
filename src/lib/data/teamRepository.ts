@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { TeamMember, User, UserRole } from '@/lib/types';
 import { Team } from '@/lib/types/TeamTypes';
@@ -6,15 +7,15 @@ const mapTeamFromDb = (team: any): Team => ({
   id: team.id,
   name: team.name,
   description: team.description,
-  logoUrl: team.logo_url,
+  logo_url: team.logo_url,
   bannerUrl: team.banner_url,
-  ownerId: team.owner_id,
+  owner_id: team.owner_id,
   status: team.status,
   website: team.website,
   email: team.email,
   specialties: team.specialties,
-  createdAt: team.created_at,
-  updatedAt: team.updated_at
+  created_at: team.created_at,
+  updated_at: team.updated_at
 });
 
 const getTeamById = async (teamId: string): Promise<Team | null> => {
@@ -45,15 +46,15 @@ const getAllTeams = async (): Promise<Team[]> => {
   return data ? data.map(mapTeamFromDb) : [];
 };
 
-const createTeam = async (team: Omit<Team, 'id' | 'createdAt' | 'updatedAt'>): Promise<Team | null> => {
+const createTeam = async (team: Omit<Team, 'id' | 'created_at' | 'updated_at'>): Promise<Team | null> => {
   const { data, error } = await supabase
     .from('teams')
     .insert({
       name: team.name,
       description: team.description,
-      logo_url: team.logoUrl,
+      logo_url: team.logo_url,
       banner_url: team.bannerUrl,
-      owner_id: team.ownerId,
+      owner_id: team.owner_id,
       status: team.status,
       website: team.website,
       email: team.email,
@@ -76,7 +77,7 @@ const updateTeam = async (teamId: string, updates: Partial<Team>): Promise<Team 
     .update({
       name: updates.name,
       description: updates.description,
-      logo_url: updates.logoUrl,
+      logo_url: updates.logo_url,
       banner_url: updates.bannerUrl,
       status: updates.status,
       website: updates.website,
