@@ -7,6 +7,7 @@ import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { WIZARD_STEPS } from '../constants/wizardSteps';
 import { CardDesignState, CardLayer } from '../types/cardTypes';
 import { CardEffect } from '../hooks/useCardEffectsStack';
+import WizardNavigationButtons from './WizardNavigationButtons';
 
 interface WizardContentSectionProps {
   currentStep: number;

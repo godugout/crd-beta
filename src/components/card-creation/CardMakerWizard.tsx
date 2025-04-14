@@ -11,6 +11,8 @@ import CardWizardSteps from './components/CardWizardSteps';
 import CardWizardHeader from './components/CardWizardHeader';
 import CardWizardFeatures from './components/CardWizardFeatures';
 import { CardDesignState, CardLayer } from './types/cardTypes';
+import CardPreviewSection from './components/CardPreviewSection';
+import WizardContentSection from './components/WizardContentSection';
 
 interface CardMakerWizardProps {
   cardData?: CardDesignState;

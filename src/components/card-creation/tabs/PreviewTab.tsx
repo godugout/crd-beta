@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { CardDesignState } from '../CardMakerWizard';
+import { CardDesignState } from '../types/cardTypes';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 

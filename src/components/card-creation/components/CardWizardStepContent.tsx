@@ -1,4 +1,3 @@
-
 import React from 'react';
 import UploadTab from '../tabs/UploadTab';
 import DesignTab from '../tabs/DesignTab';
@@ -23,6 +22,7 @@ interface CardWizardStepContentProps {
   updateEffectSettings: (id: string, settings: any) => void;
   onContinue: () => void;
   effectClasses: string;
+  onImageCaptured?: (url: string) => void;
 }
 
 const CardWizardStepContent: React.FC<CardWizardStepContentProps> = ({
@@ -39,7 +39,10 @@ const CardWizardStepContent: React.FC<CardWizardStepContentProps> = ({
   removeEffect,
   updateEffectSettings,
   onContinue,
-  effectClasses
+  effectClasses,
+  onImageCaptured = (url: string) => {
+    setCardData({...cardData, imageUrl: url});
+  }
 }) => {
   switch (currentStep) {
     case 0:
@@ -47,10 +50,7 @@ const CardWizardStepContent: React.FC<CardWizardStepContentProps> = ({
         <UploadTab
           cardData={cardData}
           setCardData={setCardData}
-          onImageCaptured={(url: string) => {
-            setCardData({...cardData, imageUrl: url});
-            onContinue();
-          }}
+          onImageCaptured={onImageCaptured}
           onContinue={onContinue}
         />
       );

@@ -1,7 +1,7 @@
 
 import React from 'react';
 import Stepper from '@/components/ui/stepper';
-import { CardDesignState, CardLayer } from '../CardCreator';
+import { CardDesignState, CardLayer } from '../types/cardTypes';
 import CardWizardStepContent from './CardWizardStepContent';
 import CardWizardNavigation from './CardWizardNavigation';
 import { WizardStep } from '../constants/wizardSteps';
@@ -81,22 +81,18 @@ const CardWizardSection: React.FC<CardWizardSectionProps> = ({
             currentStep={currentStep}
             cardData={cardData}
             setCardData={setCardData}
-            onImageCaptured={onImageCaptured}
-            onNext={onNext}
-            onSaveCard={onSaveCard}
             layers={layers}
-            activeLayerId={activeLayerId}
-            setActiveLayer={setActiveLayer}
+            setLayers={setLayers}
+            activeLayer={layers.find(layer => layer.id === activeLayerId) || null}
+            setActiveLayerId={setActiveLayer}
             updateLayer={updateLayer}
-            deleteLayer={deleteLayer}
-            moveLayerUp={moveLayerUp}
-            moveLayerDown={moveLayerDown}
-            onAddLayer={onAddLayer}
-            effectClasses={effectClasses}
             effectStack={effectStack}
             addEffect={addEffect}
             removeEffect={removeEffect}
             updateEffectSettings={updateEffectSettings}
+            onContinue={onNext}
+            effectClasses={effectClasses}
+            onImageCaptured={onImageCaptured}
           />
         </div>
       </div>
