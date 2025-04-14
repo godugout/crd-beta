@@ -36,6 +36,7 @@ const CardViewer = ({
   const [showPresetsPanel, setShowPresetsPanel] = useState(false);
   const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 });
   const [isBeingDragged, setIsBeingDragged] = useState(false);
+  const [localActiveEffects, setLocalActiveEffects] = useState<string[]>([]);
 
   const { 
     cardRef,
@@ -62,6 +63,11 @@ const CardViewer = ({
   });
   
   useEffect(() => {
+    const initialEffects = activeEffects.length > 0 ? [activeEffects[0]] : [];
+    setLocalActiveEffects(initialEffects);
+  }, []);
+  
+  useEffect(() => {
     if (!autoRotate || !containerRef.current || isBeingDragged) return;
     
     const autoRotateInterval = setInterval(() => {
@@ -78,31 +84,6 @@ const CardViewer = ({
     
     return () => clearInterval(autoRotateInterval);
   }, [autoRotate, isMoving, isBeingDragged, containerRef, cardRef]);
-  
-  useEffect(() => {
-    const intensityMultiplier = Math.max(0.5, 1 - (activeEffects.length * 0.05));
-    
-    const enhancedSettings = {
-      refractorIntensity: activeEffects.includes('Refractor') ? 0.7 * intensityMultiplier : effectSettings.refractorIntensity,
-      holographicIntensity: activeEffects.includes('Holographic') ? 0.65 * intensityMultiplier : effectSettings.spectralIntensity,
-      goldIntensity: activeEffects.includes('Gold Foil') ? 0.6 * intensityMultiplier : effectSettings.goldIntensity,
-      chromeIntensity: activeEffects.includes('Chrome') ? 0.65 * intensityMultiplier : effectSettings.chromeIntensity,
-      shimmerSpeed: activeEffects.includes('Shimmer') ? 4 : effectSettings.shimmerSpeed,
-      pulseIntensity: 0.85,
-      motionSpeed: 0.85
-    };
-    
-    setAnimationSpeed({
-      ...enhancedSettings,
-      motion: enhancedSettings.motionSpeed,
-      pulse: enhancedSettings.pulseIntensity,
-      shimmer: enhancedSettings.shimmerSpeed,
-      gold: enhancedSettings.goldIntensity,
-      chrome: enhancedSettings.chromeIntensity,
-      refractor: enhancedSettings.refractorIntensity,
-      spectral: enhancedSettings.holographicIntensity,
-    });
-  }, [activeEffects, setAnimationSpeed]);
   
   const { userPresets, builtInPresets, handleToggleFavorite, saveUserPreset } = usePresetsState();
   
@@ -196,8 +177,6 @@ const CardViewer = ({
     setDragPosition({ x: 0, y: 0 });
   };
 
-  const [localActiveEffects, setLocalActiveEffects] = useState<string[]>(activeEffects);
-
   const handleToggleEffect = useCallback((effect: string) => {
     setLocalActiveEffects(prev => 
       prev.includes(effect) 
@@ -210,7 +189,7 @@ const CardViewer = ({
     <div>
       <div 
         ref={canvasRef}
-        className="relative w-full h-96 md:h-[500px] flex items-center justify-center p-4 bg-gradient-to-br from-gray-900 to-gray-800 rounded-lg overflow-hidden"
+        className="relative w-full h-96 md:h-[500px] flex items-center justify-center p-4 bg-gradient-to-br from-gray-900 to-gray-800 rounded-lg overflow-visible"
         onMouseMove={handleCanvasMouseMove}
         onMouseLeave={handleMouseLeave}
       >
@@ -225,6 +204,7 @@ const CardViewer = ({
           onDragEnd={handleDragEnd}
           animate={dragPosition}
           className="absolute inset-0 flex items-center justify-center z-10"
+          style={{ overflow: 'visible' }}
         >
           <CardContainer
             containerRef={containerRef}
@@ -242,11 +222,11 @@ const CardViewer = ({
               onMouseMove={handleMouseMove}
               onMouseLeave={handleMouseLeave}
               effectSettings={{
-                refractorIntensity: effectSettings.refractorIntensity,
+                refractorIntensity: 0.3,
                 refractorColors: ['#00ffff', '#ff00ff', '#ffff00'],
                 animationEnabled: true,
-                refractorSpeed: effectSettings.shimmerSpeed,
-                holographicIntensity: effectSettings.spectralIntensity,
+                refractorSpeed: 0.5,
+                holographicIntensity: 0.3,
                 holographicPattern: 'linear',
                 holographicColorMode: 'rainbow',
                 holographicSparklesEnabled: true

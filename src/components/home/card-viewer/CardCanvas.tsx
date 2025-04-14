@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect, useState } from 'react';
 import { CardData } from '@/types/card';
 import CardFront from './card-elements/CardFront';

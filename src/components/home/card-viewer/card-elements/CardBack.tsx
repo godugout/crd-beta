@@ -19,12 +19,12 @@ const CardBack: React.FC<CardBackProps> = ({ card }) => {
   };
   
   return (
-    <div className="absolute inset-0 flex flex-col p-6 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
-      {/* Holographic pattern overlay */}
-      <div className="absolute inset-0 effect-holographic opacity-20" />
+    <div className="absolute inset-0 flex flex-col p-6 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900" style={{ zIndex: 1 }}>
+      {/* Holographic pattern overlay - reduced opacity */}
+      <div className="absolute inset-0 effect-holographic opacity-10" />
       
-      {/* Content */}
-      <div className="relative z-10 flex flex-col h-full text-white">
+      {/* Content - increased z-index */}
+      <div className="relative z-10 flex flex-col h-full text-white" style={{ zIndex: 5 }}>
         <div className="text-center mb-6">
           <h2 className="text-2xl font-bold bg-gradient-to-r from-yellow-200 via-yellow-400 to-yellow-200 bg-clip-text text-transparent">
             {card.name}
@@ -77,13 +77,15 @@ const CardBack: React.FC<CardBackProps> = ({ card }) => {
               <h3 className="text-sm font-medium text-gray-400 mb-2">Attributes</h3>
               <div className="flex flex-wrap gap-2">
                 {Object.entries(cardAttributes).map(([key, value]) => (
-                  <Badge 
-                    key={key}
-                    variant="secondary" 
-                    className="bg-white/10 backdrop-blur-sm"
-                  >
-                    {key}: {String(value)}
-                  </Badge>
+                  value && (
+                    <Badge 
+                      key={key}
+                      variant="secondary" 
+                      className="bg-white/10 backdrop-blur-sm"
+                    >
+                      {key}: {String(value)}
+                    </Badge>
+                  )
                 ))}
               </div>
             </div>
