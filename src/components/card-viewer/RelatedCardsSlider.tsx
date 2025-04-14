@@ -104,7 +104,7 @@ const RelatedCardsSlider: React.FC<RelatedCardsSliderProps> = ({ cards, onCardCl
               <div className="mt-2 text-center">
                 <h4 className="text-sm text-white font-medium truncate">{card.title}</h4>
                 <p className="text-xs text-gray-400 truncate">
-                  {card.player || card.tags?.[0] || 'No tags'}
+                  {card.player || (card.tags && card.tags[0]) || 'No tags'}
                 </p>
               </div>
             </div>

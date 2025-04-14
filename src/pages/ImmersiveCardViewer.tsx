@@ -51,7 +51,7 @@ const ImmersiveCardViewer = () => {
         card.id !== id && (
           // Match by tags
           (currentCard.tags && card.tags && 
-            currentCard.tags.some(tag => card.tags.includes(tag))) ||
+            currentCard.tags.some(tag => card.tags?.includes(tag))) ||
           // Match by player/artist
           (currentCard.player && card.player && currentCard.player === card.player) ||
           // Match by year

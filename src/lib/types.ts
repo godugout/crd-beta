@@ -1,4 +1,3 @@
-
 export type CardRarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary' | 'ultra-rare' | 'one-of-one';
 export type CardType = 'character' | 'item' | 'event';
 export type UserPermission = 'create_card' | 'edit_card' | 'delete_card' | 'view_admin_dashboard';
@@ -25,7 +24,7 @@ export interface Card {
   thumbnailUrl?: string;
   tags?: string[];
   userId?: string;
-  creatorId?: string;  // Add creatorId property
+  creatorId?: string;
   teamId?: string;
   collectionId?: string;
   isPublic?: boolean;
@@ -33,6 +32,11 @@ export interface Card {
   reactions?: Reaction[];
   fabricSwatches?: FabricSwatch[];
   image?: string; // Some components use image instead of imageUrl
+  
+  // Adding the missing properties that are being used in components
+  player?: string;
+  team?: string;
+  year?: string;
 }
 
 export interface Series {
