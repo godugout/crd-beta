@@ -14,21 +14,25 @@ export function useCardInteraction({ containerRef, cardRef }: UseCardInteraction
   const { zoom, handleZoomIn, handleZoomOut, handleKeyboardZoom, resetZoom } = useZoom();
   const { isAutoRotating, mousePosition, handleMouseMove, toggleAutoRotation } = useAutoRotate({ containerRef, cardRef });
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      handleKeyboardRotation(e);
-      handleKeyboardZoom(e);
-      
-      if (e.key === 'r' || e.key === 'R') {
-        resetPosition();
-        resetZoom();
-        e.preventDefault();
-      }
-    };
+  const handleKeyboardControls = (e: KeyboardEvent) => {
+    handleKeyboardRotation(e);
+    handleKeyboardZoom(e);
+    
+    if (e.key === 'r' || e.key === 'R') {
+      handleCardReset();
+      e.preventDefault();
+    }
+  };
 
-    window.addEventListener('keydown', handleKeyDown);
+  const handleCardReset = () => {
+    resetPosition();
+    resetZoom();
+  };
+
+  useEffect(() => {
+    window.addEventListener('keydown', handleKeyboardControls);
     return () => {
-      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keydown', handleKeyboardControls);
     };
   }, [handleKeyboardRotation, handleKeyboardZoom, resetPosition, resetZoom]);
 
@@ -46,5 +50,7 @@ export function useCardInteraction({ containerRef, cardRef }: UseCardInteraction
     handleZoomOut,
     toggleAutoRotation,
     resetPosition,
+    handleCardReset,
+    handleKeyboardControls
   };
 }
