@@ -1,9 +1,11 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { X, ChevronLeft, ChevronRight, Share2, Maximize, Star, Rotate3D, Info } from 'lucide-react';
 import { useCards } from '@/context/CardContext';
 import { useMobileOptimization } from '@/hooks/useMobileOptimization';
 import { toast } from 'sonner';
+import ScrollableGallery from '../immersive-viewer/ScrollableGallery';
 
 interface FullscreenViewerProps {
   cardId: string;
@@ -86,6 +88,7 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
     setIsDragging(false);
   };
 
+  // Fix: Update handleCardClick to accept an event parameter and navigate to the card
   const handleCardClick = (newCardId: string) => {
     navigate(`/view/${newCardId}`);
   };
@@ -165,7 +168,6 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
             transformStyle: 'preserve-3d',
             transform: `perspective(1000px) rotateX(${rotation.x}deg) rotateY(${rotation.y}deg)`,
           }}
-          onClick={handleCardClick}
         >
           <div className="relative w-72 sm:w-80 md:w-96 aspect-[2.5/3.5] rounded-xl overflow-hidden shadow-2xl">
             <img 
@@ -306,6 +308,14 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
           </div>
         </div>
       )}
+      
+      {/* Add the ScrollableGallery component to show all cards at the bottom */}
+      <ScrollableGallery 
+        cards={cards}
+        currentCardId={card.id}
+        onCardClick={handleCardClick}
+        className="fixed bottom-0 left-0 right-0 z-40"
+      />
     </div>
   );
 };
