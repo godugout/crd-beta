@@ -43,3 +43,4 @@ const InfoPanel = ({ card, showInfo }: InfoPanelProps) => {
 };
 
 export default InfoPanel;
+

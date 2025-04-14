@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card } from '@/lib/types';
 
@@ -11,35 +12,23 @@ interface CardDisplayProps {
   cardRef?: React.RefObject<HTMLDivElement>;
   containerRef?: React.RefObject<HTMLDivElement>;
   isAutoRotating?: boolean;
-  onMouseMove?: (e: React.MouseEvent) => void;
-  onTouchMove?: (e: React.TouchEvent) => void;
-  onTouchStart?: (e: React.TouchEvent) => void;
-  onTouchEnd?: () => void;
 }
 
 const CardDisplay = ({
   card,
   rotation,
   isFlipped,
-  zoom = 1,
+  zoom,
   isDragging,
   setIsDragging,
   cardRef,
   containerRef,
   isAutoRotating,
-  onMouseMove,
-  onTouchMove,
-  onTouchStart,
-  onTouchEnd,
 }: CardDisplayProps) => {
   return (
     <div 
       className="flex items-center justify-center gap-8 px-8"
       ref={containerRef}
-      onMouseMove={onMouseMove}
-      onTouchMove={onTouchMove}
-      onTouchStart={onTouchStart}
-      onTouchEnd={onTouchEnd}
     >
       <div 
         ref={cardRef}
@@ -77,3 +66,4 @@ const CardDisplay = ({
 };
 
 export default CardDisplay;
+

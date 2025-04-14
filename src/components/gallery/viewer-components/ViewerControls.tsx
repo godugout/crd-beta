@@ -80,3 +80,4 @@ const ViewerControls = ({
 };
 
 export default ViewerControls;
+

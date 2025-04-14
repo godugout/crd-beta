@@ -3,6 +3,7 @@ import React, { useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCards } from '@/context/CardContext';
 import { toast } from 'sonner';
+import { X } from 'lucide-react';
 import CardDisplay from './viewer-components/CardDisplay';
 import ViewerControls from './viewer-components/ViewerControls';
 import InfoPanel from './viewer-components/InfoPanel';
@@ -109,3 +110,4 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
 };
 
 export default FullscreenViewer;
+
