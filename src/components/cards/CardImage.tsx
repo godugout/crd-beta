@@ -50,15 +50,13 @@ export const CardImage: React.FC<CardImageProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const [isFlipped, setIsFlipped] = useState(false);
   const [containerDimensions, setContainerDimensions] = useState({ width: 0, height: 0 });
-  const [mousePosition, setMousePosition] = useState({ x: 0.5, y: 0.5 });
   
   // Use our physics engine for smooth movement
   const physics = useCardPhysics({
     dampingFactor: 0.96,
     rotationDampingFactor: 0.94,
     sensitivity: 0.12,
-    autoRotate,
-    weightlessness: 0.7 // Increase weightlessness for more fluid movement
+    autoRotate
   });
 
   // Measure container size for proper 3D perspective
@@ -101,16 +99,6 @@ export const CardImage: React.FC<CardImageProps> = ({
     // Add a small bounce effect on flip
     physics.applyImpulse(0, 0, isFlipped ? -0.5 : 0.5);
   };
-  
-  // Track mouse position for lighting effects
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!containerRef.current) return;
-    
-    const rect = containerRef.current.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width;
-    const y = (e.clientY - rect.top) / rect.height;
-    setMousePosition({ x, y });
-  };
 
   // Calculate 3D transforms for the card
   const getCardStyle = (): React.CSSProperties => {
@@ -136,24 +124,21 @@ export const CardImage: React.FC<CardImageProps> = ({
         ${isFlipped ? 'rotateY(180deg)' : ''}
       `,
       transformStyle: 'preserve-3d',
-      transition: isFlipped ? 'transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)' : 'none',
-      '--mouse-x': `${mousePosition.x * 100}%`,
-      '--mouse-y': `${mousePosition.y * 100}%`
-    } as React.CSSProperties;
+      transition: isFlipped ? 'transform 0.6s' : 'none'
+    };
   };
 
   return (
     <div
       ref={containerRef}
       className={cn(
-        "card-container relative aspect-[2.5/3.5] overflow-visible interactive-card",
+        "card-container relative aspect-[2.5/3.5] overflow-visible",
         className
       )}
       onPointerDown={physics.handlePointerDown}
       onPointerMove={physics.handlePointerMove}
       onPointerUp={physics.handlePointerUp}
       onPointerLeave={physics.handlePointerUp}
-      onMouseMove={handleMouseMove}
     >
       <div
         className="card-inner relative w-full h-full rounded-lg overflow-hidden shadow-lg"
@@ -161,7 +146,7 @@ export const CardImage: React.FC<CardImageProps> = ({
         onClick={handleCardClick}
       >
         {/* Front face of the card */}
-        <div className="card-face card-front absolute inset-0 backface-hidden z-2">
+        <div className="card-face card-front absolute inset-0 backface-hidden">
           <img 
             src={card.imageUrl} 
             alt={card.title || "Card"} 
@@ -169,45 +154,26 @@ export const CardImage: React.FC<CardImageProps> = ({
             draggable={false}
           />
           
-          {/* Enhanced dynamic lighting effect overlay with increased opacity and color contrast */}
+          {/* Dynamic lighting effect overlay */}
           <div 
-            className="card-shine-effect absolute inset-0 z-10"
+            className="absolute inset-0 bg-gradient-to-tr from-black/10 via-transparent to-white/20 opacity-50 pointer-events-none"
             style={{
-              backgroundPosition: `${50 + physics.rotation.y * 2}% ${50 - physics.rotation.x * 2}%`,
-              opacity: 0.7,
-              transition: 'background-position 0.2s ease-out, opacity 0.3s ease'
+              backgroundPosition: `${50 + physics.rotation.y * 2}% ${50 - physics.rotation.x * 2}%`
             }}
           ></div>
-          
-          {/* Add subtle edge highlighting for depth */}
-          <div className="absolute inset-0 border-2 border-white/10 rounded-lg pointer-events-none z-5"></div>
-          
-          {/* Add a hint that the card is clickable */}
-          {flippable && (
-            <div className="absolute inset-x-0 bottom-3 flex justify-center pointer-events-none opacity-0 hover:opacity-100 transition-opacity z-20">
-              <div className="bg-black/40 text-white text-xs px-2 py-1 rounded-full">
-                Click to flip
-              </div>
-            </div>
-          )}
-          
-          {/* Effect layer on top of card */}
-          <div className="effect-layer absolute inset-0 z-15 pointer-events-none">
-            <div className="holographic-overlay absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent opacity-30 mix-blend-mode-screen"></div>
-          </div>
         </div>
         
         {/* Back face of the card */}
-        <div className="card-face card-back absolute inset-0 backface-hidden z-2"
+        <div className="card-face card-back absolute inset-0 backface-hidden"
           style={{
             transform: 'rotateY(180deg)',
             backgroundColor: '#2a3042',
             backgroundSize: 'cover'
           }}
         >
-          {/* Card back content with improved styling */}
-          <div className="absolute inset-0 flex flex-col p-4 text-white z-5">
-            <h3 className="text-lg font-medium mb-2 text-white/90">{card.title}</h3>
+          {/* Card back content */}
+          <div className="absolute inset-0 flex flex-col p-4 text-white">
+            <h3 className="text-lg font-medium mb-2">{card.title}</h3>
             
             {card.description && (
               <p className="text-sm mb-4 line-clamp-4 text-white/80">{card.description}</p>
@@ -238,7 +204,7 @@ export const CardImage: React.FC<CardImageProps> = ({
               <div className="mt-auto pt-2">
                 <div className="flex flex-wrap gap-1">
                   {card.tags.map((tag, idx) => (
-                    <span key={idx} className="text-xs bg-white/15 px-2 py-0.5 rounded-full hover:bg-white/20 transition-colors">
+                    <span key={idx} className="text-xs bg-white/10 px-2 py-0.5 rounded-full">
                       {tag}
                     </span>
                   ))}
@@ -247,46 +213,27 @@ export const CardImage: React.FC<CardImageProps> = ({
             )}
           </div>
           
-          {/* Enhanced lighting effect for the back with more noticeable gradients */}
+          {/* Similar lighting effect for the back */}
           <div 
-            className="card-shine-effect absolute inset-0 z-10"
+            className="absolute inset-0 bg-gradient-to-tr from-black/20 via-transparent to-white/10 opacity-50 pointer-events-none"
             style={{
-              backgroundPosition: `${50 + physics.rotation.y * 2}% ${50 - physics.rotation.x * 2}%`,
-              opacity: 0.5,
-              transition: 'background-position 0.2s ease-out'
+              backgroundPosition: `${50 + physics.rotation.y * 2}% ${50 - physics.rotation.x * 2}%`
             }}
           ></div>
-          
-          {/* Add subtle edge highlighting for depth */}
-          <div className="absolute inset-0 border-2 border-white/10 rounded-lg pointer-events-none z-5"></div>
-          
-          {/* Effect layer on top of back face */}
-          <div className="effect-layer absolute inset-0 z-15 pointer-events-none">
-            <div className="holographic-overlay absolute inset-0 bg-gradient-to-tr from-transparent via-blue-500/10 to-transparent opacity-30 mix-blend-mode-screen"></div>
-          </div>
         </div>
       </div>
       
-      {/* Card glow effect when active */}
-      <div 
-        className="card-glow-effect"
-        style={{
-          opacity: physics.isMoving ? 0.6 : 0,
-        }}
-      ></div>
-      
-      {/* Enhanced shadow below the card that moves with the card */}
+      {/* Add a subtle shadow below the card that moves with the card */}
       <div 
         className="absolute -bottom-8 left-1/2 w-[80%] h-[20%] rounded-full bg-black/20 blur-md -z-10 transform -translate-x-1/2"
         style={{
           transform: `translateX(calc(-50% + ${physics.position.x * 0.5}px)) scale(${1 - Math.abs(physics.rotation.x) / 100}, ${1 - Math.abs(physics.rotation.y) / 100})`,
-          opacity: 0.7 - (Math.abs(physics.rotation.x) + Math.abs(physics.rotation.y)) / 120,
-          transition: 'transform 0.1s ease-out, opacity 0.2s ease-out'
+          opacity: 0.6 - (Math.abs(physics.rotation.x) + Math.abs(physics.rotation.y)) / 120
         }}
       ></div>
       
-      {/* Add CSS for backface visibility with enhanced transitions and animations */}
-      <style>{`
+      {/* Add CSS for backface visibility */}
+      <style jsx>{`
         .card-container {
           perspective: 1200px;
           cursor: grab;
@@ -300,33 +247,6 @@ export const CardImage: React.FC<CardImageProps> = ({
         .backface-hidden {
           backface-visibility: hidden;
           -webkit-backface-visibility: hidden;
-        }
-        
-        .card-inner {
-          transition: box-shadow 0.3s ease;
-        }
-        
-        .card-inner:hover {
-          box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
-        }
-        
-        .card-shine-effect {
-          background: radial-gradient(
-            circle at var(--mouse-x, 50%) var(--mouse-y, 50%), 
-            rgba(255, 255, 255, 0.8) 0%,
-            rgba(255, 255, 255, 0) 60%
-          );
-          mix-blend-mode: soft-light;
-          pointer-events: none;
-        }
-        
-        .mix-blend-mode-screen {
-          mix-blend-mode: screen;
-        }
-        
-        @keyframes card-glow {
-          0%, 100% { box-shadow: 0 0 10px rgba(255, 255, 255, 0.5); }
-          50% { box-shadow: 0 0 20px rgba(255, 255, 255, 0.8); }
         }
       `}</style>
     </div>
