@@ -1,17 +1,17 @@
 
-import { type ToastActionElement, type ToastProps } from "@/components/ui/toast"
+import { type ToastProps } from "@radix-ui/react-toast"
 
-export type ToastVariant = 'default' | 'destructive' | 'success' | 'warning' | 'info';
+export type ToastVariant = 'default' | 'destructive' | 'success' | 'warning' | 'info'
 
-export type ToasterToast = ToastProps & {
+export interface ToasterToast extends Omit<ToastProps, "type"> {
   id: string
   title?: React.ReactNode
   description?: React.ReactNode
-  action?: ToastActionElement
+  action?: React.ReactElement
   variant?: ToastVariant
 }
 
-export type ToasterToastWithStatus = ToasterToast & {
+export interface ToasterToastWithStatus extends ToasterToast {
   duration?: number
   ariaLive?: 'assertive' | 'off' | 'polite'
 }

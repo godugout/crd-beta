@@ -1,3 +1,4 @@
+
 import * as React from "react"
 import { useToast } from "@/hooks/use-toast"
 import {
@@ -9,15 +10,8 @@ import {
   ToastViewport,
 } from "@/components/ui/toast"
 import { toastIconConfig } from "@/config/toast"
-import { AlertCircle, AlertTriangle, CheckCircle, Info } from "lucide-react"
+import { ToastIcons } from "./toast/icons"
 import type { ToasterToastWithStatus } from "@/types/toast"
-
-const IconComponents = {
-  CheckCircle,
-  AlertTriangle,
-  AlertCircle,
-  Info
-}
 
 export function Toaster() {
   const { toasts } = useToast()
@@ -25,8 +19,8 @@ export function Toaster() {
   return (
     <ToastProvider>
       {toasts.map(function ({ id, title, description, action, variant = "default", ...props }) {
-        const IconName = toastIconConfig[variant as keyof typeof toastIconConfig]
-        const Icon = IconName ? IconComponents[IconName as keyof typeof IconComponents] : null
+        const IconName = toastIconConfig[variant]
+        const Icon = IconName ? ToastIcons[IconName] : null
 
         return (
           <Toast key={id} variant={variant} {...props}>

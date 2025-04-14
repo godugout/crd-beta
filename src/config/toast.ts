@@ -1,5 +1,6 @@
-import { cva } from "class-variance-authority"
 import type { ToastVariant } from "@/types/toast"
+import { cva } from "class-variance-authority"
+import type { ToastIconName } from "@/components/ui/toast/icons"
 
 export const toastViewportStyles = "fixed top-4 right-4 z-[100] flex max-h-screen w-full max-w-[420px] flex-col-reverse p-4"
 
@@ -43,7 +44,7 @@ export const toastAccessibilityConfig = {
   longDuration: 8000    // 8 seconds for more complex information
 }
 
-export const toastIconConfig: Record<ToastVariant, keyof typeof IconComponents | null> = {
+export const toastIconConfig: Record<ToastVariant, ToastIconName | null> = {
   default: null,
   success: "CheckCircle",
   warning: "AlertTriangle",
