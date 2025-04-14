@@ -1,4 +1,3 @@
-
 import * as React from "react"
 import { useToast } from "@/hooks/use-toast"
 import {
@@ -11,8 +10,8 @@ import {
 } from "@/components/ui/toast"
 import { toastIconConfig } from "@/config/toast"
 import { AlertCircle, AlertTriangle, CheckCircle, Info } from "lucide-react"
+import type { ToasterToastWithStatus } from "@/types/toast"
 
-// Map of icon components
 const IconComponents = {
   CheckCircle,
   AlertTriangle,
@@ -26,7 +25,6 @@ export function Toaster() {
   return (
     <ToastProvider>
       {toasts.map(function ({ id, title, description, action, variant = "default", ...props }) {
-        // Get icon component based on variant
         const IconName = toastIconConfig[variant as keyof typeof toastIconConfig]
         const Icon = IconName ? IconComponents[IconName as keyof typeof IconComponents] : null
 

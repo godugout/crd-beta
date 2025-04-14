@@ -1,10 +1,10 @@
-
 import * as React from "react"
 import * as ToastPrimitives from "@radix-ui/react-toast"
-import { cva, type VariantProps } from "class-variance-authority"
+import { cva } from "class-variance-authority"
 import { X } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { toastStyles, toastAccessibilityConfig } from "@/config/toast"
+import { toastStyles } from "@/config/toast"
+import type { ToasterToastWithStatus } from "@/types/toast"
 
 const ToastProvider = ToastPrimitives.Provider
 
@@ -25,16 +25,12 @@ ToastViewport.displayName = ToastPrimitives.Viewport.displayName
 
 const Toast = React.forwardRef<
   React.ElementRef<typeof ToastPrimitives.Root>,
-  React.ComponentPropsWithoutRef<typeof ToastPrimitives.Root> &
-    VariantProps<typeof toastStyles>
+  React.ComponentPropsWithoutRef<typeof ToastPrimitives.Root> & Pick<ToasterToastWithStatus, "variant">
 >(({ className, variant, ...props }, ref) => {
   return (
     <ToastPrimitives.Root
       ref={ref}
       className={cn(toastStyles({ variant }), className)}
-      // Add accessibility attributes
-      role={toastAccessibilityConfig.role}
-      aria-live={toastAccessibilityConfig["aria-live"]}
       {...props}
     />
   )
@@ -104,8 +100,7 @@ type ToastProps = React.ComponentPropsWithoutRef<typeof Toast>
 type ToastActionElement = React.ReactElement<typeof ToastAction>
 
 export {
-  type ToastProps,
-  type ToastActionElement,
+  type ToasterToastWithStatus as ToastProps,
   ToastProvider,
   ToastViewport,
   Toast,

@@ -1,5 +1,5 @@
-
 import { cva } from "class-variance-authority"
+import type { ToastVariant } from "@/types/toast"
 
 export const toastViewportStyles = "fixed top-4 right-4 z-[100] flex max-h-screen w-full max-w-[420px] flex-col-reverse p-4"
 
@@ -14,7 +14,7 @@ export const toastStyles = cva(
     "data-[state=open]:animate-in data-[state=closed]:animate-out",
     "data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full",
     "data-[state=open]:slide-in-from-top-full",
-    "focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20" // Add focus styles for accessibility
+    "focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20"
   ].join(" "),
   {
     variants: {
@@ -35,19 +35,17 @@ export const toastStyles = cva(
 export const toastTitleStyles = "text-white/80 text-sm font-semibold"
 export const toastDescriptionStyles = "text-white/60 text-sm"
 
-// Add role information and timing configurations for accessibility
 export const toastAccessibilityConfig = {
   role: "status", 
   "aria-live": "polite",
   defaultDuration: 5000, // 5 seconds for standard notifications
   shortDuration: 3000,   // 3 seconds for simple notifications
-  longDuration: 8000,    // 8 seconds for more complex information
+  longDuration: 8000    // 8 seconds for more complex information
 }
 
-// Icons for different toast types
-export const toastIconConfig = {
+export const toastIconConfig: Record<ToastVariant, keyof typeof IconComponents | null> = {
   default: null,
-  success: "CheckCircle", 
+  success: "CheckCircle",
   warning: "AlertTriangle",
   destructive: "AlertCircle",
   info: "Info"
