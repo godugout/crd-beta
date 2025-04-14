@@ -15,6 +15,12 @@ interface ThemeContextValue {
 
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
+// Default mock theme context for when the hook is used outside the provider
+const mockThemeContext: ThemeContextValue = {
+  theme: "system",
+  setTheme: () => console.warn("Using mock theme context. ThemeProvider not found."),
+};
+
 export function ThemeProvider({
   children,
   defaultTheme = "system",
@@ -56,7 +62,8 @@ export const useTheme = () => {
   const context = useContext(ThemeContext);
   
   if (context === undefined) {
-    throw new Error("useTheme must be used within a ThemeProvider");
+    console.warn("useTheme used outside of ThemeProvider, using mock theme context");
+    return mockThemeContext;
   }
   
   return context;
