@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import { Card } from '@/lib/types';
 import * as THREE from 'three';
 import { useFrame, useThree } from '@react-three/fiber';
-import { useTexture } from '@react-three/drei';
+import { useTexture, Html } from '@react-three/drei';
 import { toast } from 'sonner';
 import CardDiagnostics from './CardDiagnostics';
 import { useCardMaterials } from '@/hooks/card-effects/useCardMaterials';
@@ -37,11 +37,9 @@ const Card3DRenderer: React.FC<Card3DRendererProps> = ({
     transformations: [] as string[]
   });
   
-  // Define paths for textures with proper fallback handling
   const frontTexturePath = card.imageUrl || '/images/card-placeholder.png';
   const backTexturePath = card.thumbnailUrl || '/images/card-back-placeholder.png';
 
-  // Load textures
   const [frontTexture, backTexture] = useTexture([frontTexturePath, backTexturePath], (textures) => {
     console.log('Card textures loaded:', textures);
     setRenderingStats(prev => ({
@@ -102,27 +100,22 @@ const Card3DRenderer: React.FC<Card3DRendererProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [showDiagnostics]);
 
-  // Update card rotation and shader uniforms
   useFrame((state, delta) => {
     if (meshRef.current) {
-      // Record the transformation before applying changes
       const currentTransform = {
         position: meshRef.current.position.clone(),
         rotation: new THREE.Euler().copy(meshRef.current.rotation),
         scale: meshRef.current.scale.clone()
       };
       
-      // Apply rotation
       meshRef.current.rotation.y += rotationSpeed * delta;
       setRotationSpeed(prev => prev * 0.95);
       
-      // Update material uniforms
       if (materialRef.current) {
         materialRef.current.uniforms.time.value = state.clock.getElapsedTime();
         materialRef.current.uniforms.isFlipped.value = isFlipped;
       }
       
-      // Update glow material and sync with card
       if (edgeGlowRef.current?.material) {
         const glowMaterial = edgeGlowRef.current.material as THREE.ShaderMaterial;
         glowMaterial.uniforms.time.value = state.clock.getElapsedTime();
@@ -131,7 +124,6 @@ const Card3DRenderer: React.FC<Card3DRendererProps> = ({
         edgeGlowRef.current.rotation.copy(meshRef.current.rotation);
       }
       
-      // Log significant transformations (throttled to avoid flooding console)
       if (state.clock.getElapsedTime() % 1 < delta) {
         setRenderingStats(prev => {
           const newTransformations = [...prev.transformations];
@@ -139,7 +131,6 @@ const Card3DRenderer: React.FC<Card3DRendererProps> = ({
             `Time: ${state.clock.getElapsedTime().toFixed(2)}, Pos: (${meshRef.current?.position.x.toFixed(2)},${meshRef.current?.position.y.toFixed(2)}), Rot: (${meshRef.current?.rotation.x.toFixed(2)},${meshRef.current?.rotation.y.toFixed(2)})`
           );
           
-          // Keep only most recent 10 transformations
           if (newTransformations.length > 10) {
             newTransformations.shift();
           }
@@ -148,21 +139,19 @@ const Card3DRenderer: React.FC<Card3DRendererProps> = ({
             ...prev,
             transformations: newTransformations,
             meshCount: state.scene.children.filter(child => child instanceof THREE.Mesh).length,
-            renderTime: state.clock.getDelta() * 1000 // in ms
+            renderTime: state.clock.getDelta() * 1000
           };
         });
       }
     }
   });
 
-  // Card dimensions with increased thickness
   const cardWidth = 2.5;
   const cardHeight = 3.5;
-  const cardThickness = 0.15; // Thicker card as requested
+  const cardThickness = 0.15;
 
   return (
     <>
-      {/* Debug overlay that shows mesh count */}
       {showDiagnostics && (
         <group position={[0, 3.5, 0]}>
           <mesh>
@@ -177,7 +166,6 @@ const Card3DRenderer: React.FC<Card3DRendererProps> = ({
         </group>
       )}
 
-      {/* Main card mesh */}
       <mesh 
         ref={meshRef} 
         rotation={[0, isFlipped ? Math.PI : 0, 0]}
@@ -187,7 +175,6 @@ const Card3DRenderer: React.FC<Card3DRendererProps> = ({
         <primitive object={shaderMaterial} ref={materialRef} attach="material" />
       </mesh>
       
-      {/* Glowing edge mesh that wraps around main card */}
       <mesh 
         ref={edgeGlowRef} 
         rotation={[0, isFlipped ? Math.PI : 0, 0]}
