@@ -1,6 +1,6 @@
 
 import React, { useRef, useState, useEffect } from 'react';
-import { useSprings, animated } from '@react-spring/web';
+import { useSpring, animated } from '@react-spring/web';
 import { useDrag } from '@use-gesture/react';
 import { cn } from '@/lib/utils';
 
@@ -38,8 +38,8 @@ export const CardInteraction: React.FC<CardInteractionProps> = ({
   const isFlickDetected = useRef(false);
   const velocity = useRef<[number, number]>([0, 0]);
   
-  // Set up the spring animation for the card
-  const [{ rotateX, rotateY, scale, zIndex }, api] = useSprings(() => ({
+  // Set up the spring animation for the card - using useSpring instead of useSprings
+  const [springProps, api] = useSpring(() => ({
     rotateX: initialRotation[0],
     rotateY: initialRotation[1],
     scale: 1,
@@ -157,12 +157,7 @@ export const CardInteraction: React.FC<CardInteractionProps> = ({
       )}
       style={{
         transform: 'perspective(1000px)',
-        rotateX,
-        rotateY,
-        scale,
-        zIndex,
-        transformStyle: 'preserve-3d',
-        userSelect: 'none'
+        ...springProps
       }}
       {...(disabled ? {} : bind())}
     >
