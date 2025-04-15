@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useEffect } from 'react';
+import React, { createContext, useContext } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { cardService } from '@/lib/api/services/cardService';
 import type { Card } from '@/lib/types';
@@ -56,19 +56,22 @@ export function CardStateProvider({ children }: { children: React.ReactNode }) {
     },
   });
 
-  const value = {
+  const value: CardContextType = {
     cards,
     isLoading,
     error,
     addCard: async (card: Omit<Card, 'id' | 'createdAt' | 'updatedAt'>) => {
       const result = await addCardMutation.mutateAsync(card);
-      return result.createCard; // Extract the Card from the response
+      return result.createCard;
     },
     updateCard: async (id: string, updates: Partial<Card>) => {
       const result = await updateCardMutation.mutateAsync({ id, updates });
-      return result.updateCard; // Extract the Card from the response
+      return result.updateCard;
     },
-    deleteCard: deleteCardMutation.mutateAsync,
+    deleteCard: async (id: string) => {
+      const result = await deleteCardMutation.mutateAsync(id);
+      return result.deleteCard; // Extract the boolean from the response
+    },
   };
 
   return <CardContext.Provider value={value}>{children}</CardContext.Provider>;

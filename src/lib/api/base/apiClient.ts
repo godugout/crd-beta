@@ -13,7 +13,7 @@ class ApiClient {
 
   constructor(config = DEFAULT_CONFIG) {
     this.client = new GraphQLClient(config.baseUrl, {
-      timeout: config.timeout,
+      // Remove timeout from the GraphQLClient options since it's not supported
       headers: {
         'Content-Type': 'application/json',
       },
