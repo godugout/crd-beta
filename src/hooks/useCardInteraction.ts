@@ -1,56 +1,159 @@
 
-import { RefObject, useEffect } from 'react';
-import { useRotation } from './card-interactions/useRotation';
-import { useZoom } from './card-interactions/useZoom';
-import { useAutoRotate } from './card-interactions/useAutoRotate';
+import { useState, useRef, useCallback, RefObject } from 'react';
 
 interface UseCardInteractionProps {
   containerRef: RefObject<HTMLDivElement>;
   cardRef: RefObject<HTMLDivElement>;
 }
 
-export function useCardInteraction({ containerRef, cardRef }: UseCardInteractionProps) {
-  const { position, isDragging, setIsDragging, handleKeyboardRotation, resetPosition } = useRotation({ containerRef, cardRef });
-  const { zoom, handleZoomIn, handleZoomOut, handleKeyboardZoom, resetZoom } = useZoom();
-  const { isAutoRotating, mousePosition, handleMouseMove, toggleAutoRotation } = useAutoRotate({ containerRef, cardRef });
+export const useCardInteraction = ({ containerRef, cardRef }: UseCardInteractionProps) => {
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [isDragging, setIsDragging] = useState(false);
+  const [isAutoRotating, setIsAutoRotating] = useState(false);
+  const [mousePosition, setMousePosition] = useState({ x: 0.5, y: 0.5 });
+  
+  const dragStartPos = useRef({ x: 0, y: 0 });
+  const cardStartRotation = useRef({ x: 0, y: 0 });
 
-  const handleKeyboardControls = (e: KeyboardEvent) => {
-    handleKeyboardRotation(e);
-    handleKeyboardZoom(e);
+  // Auto rotation
+  const autoRotationRef = useRef<number | null>(null);
+  
+  const startAutoRotation = useCallback(() => {
+    if (autoRotationRef.current !== null) return;
     
-    if (e.key === 'r' || e.key === 'R') {
-      handleCardReset();
-      e.preventDefault();
+    let angle = 0;
+    autoRotationRef.current = window.setInterval(() => {
+      angle += 0.5;
+      setPosition(prev => ({ ...prev, y: 5 * Math.sin(angle / 20) }));
+    }, 16);
+    
+    setIsAutoRotating(true);
+  }, []);
+  
+  const stopAutoRotation = useCallback(() => {
+    if (autoRotationRef.current !== null) {
+      clearInterval(autoRotationRef.current);
+      autoRotationRef.current = null;
     }
-  };
+    
+    setIsAutoRotating(false);
+  }, []);
+  
+  const toggleAutoRotation = useCallback(() => {
+    if (isAutoRotating) {
+      stopAutoRotation();
+    } else {
+      startAutoRotation();
+    }
+  }, [isAutoRotating, startAutoRotation, stopAutoRotation]);
 
-  const handleCardReset = () => {
-    resetPosition();
-    resetZoom();
-  };
+  // Mouse handlers
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    if (!containerRef.current) return;
+    
+    setIsDragging(true);
+    dragStartPos.current = { x: e.clientX, y: e.clientY };
+    cardStartRotation.current = { ...position };
+    
+    // Stop auto rotation when user interacts with card
+    stopAutoRotation();
+    
+    // Prevent text selection during dragging
+    e.preventDefault();
+  }, [position, containerRef, stopAutoRotation]);
+  
+  const handleMouseUp = useCallback(() => {
+    setIsDragging(false);
+  }, []);
+  
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    if (!containerRef.current) return;
+    
+    // Update mouse position for effects
+    const rect = containerRef.current.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width;
+    const y = (e.clientY - rect.top) / rect.height;
+    
+    setMousePosition({ x, y });
+    
+    if (isDragging) {
+      const deltaX = e.clientX - dragStartPos.current.x;
+      const deltaY = e.clientY - dragStartPos.current.y;
+      
+      const rotationSpeed = 0.5;
+      setPosition({
+        x: cardStartRotation.current.x + (deltaY * rotationSpeed),
+        y: cardStartRotation.current.y - (deltaX * rotationSpeed),
+      });
+    }
+  }, [containerRef, isDragging]);
 
-  useEffect(() => {
-    window.addEventListener('keydown', handleKeyboardControls);
-    return () => {
-      window.removeEventListener('keydown', handleKeyboardControls);
-    };
-  }, [handleKeyboardRotation, handleKeyboardZoom, resetPosition, resetZoom]);
+  const handleCardReset = useCallback(() => {
+    setPosition({ x: 0, y: 0 });
+    setZoom(1);
+    stopAutoRotation();
+  }, [stopAutoRotation]);
+
+  const handleZoomIn = useCallback(() => {
+    setZoom(prev => Math.min(prev + 0.1, 2.0));
+  }, []);
+  
+  const handleZoomOut = useCallback(() => {
+    setZoom(prev => Math.max(prev - 0.1, 0.5));
+  }, []);
+
+  const handleKeyboardControls = useCallback((e: KeyboardEvent) => {
+    const rotationStep = 15;
+    const zoomStep = 0.1;
+    
+    switch (e.key) {
+      case 'ArrowUp':
+        setPosition(prev => ({ ...prev, x: prev.x - rotationStep }));
+        break;
+      case 'ArrowDown':
+        setPosition(prev => ({ ...prev, x: prev.x + rotationStep }));
+        break;
+      case 'ArrowLeft':
+        setPosition(prev => ({ ...prev, y: prev.y - rotationStep }));
+        break;
+      case 'ArrowRight':
+        setPosition(prev => ({ ...prev, y: prev.y + rotationStep }));
+        break;
+      case '+':
+        setZoom(prev => Math.min(prev + zoomStep, 2.0));
+        break;
+      case '-':
+        setZoom(prev => Math.max(prev - zoomStep, 0.5));
+        break;
+      case 'r':
+      case 'R':
+        handleCardReset();
+        break;
+      case 'a':
+      case 'A':
+        toggleAutoRotation();
+        break;
+    }
+  }, [handleCardReset, toggleAutoRotation]);
 
   return {
     position,
+    setPosition, // Expose the setPosition function
     zoom,
     isAutoRotating,
     isDragging,
     mousePosition,
     setIsDragging,
+    handleMouseDown,
+    handleMouseUp,
     handleMouseMove,
-    handleKeyboardRotation,
-    handleKeyboardZoom,
+    handleCardReset,
     handleZoomIn,
     handleZoomOut,
+    handleKeyboardControls,
     toggleAutoRotation,
-    resetPosition,
-    handleCardReset,
-    handleKeyboardControls
+    startAutoRotation,
+    stopAutoRotation
   };
-}
+};

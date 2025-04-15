@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCards } from '@/context/CardContext';
@@ -36,7 +35,8 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
     handleKeyboardControls,
     handleZoomIn,
     handleZoomOut,
-    toggleAutoRotation
+    toggleAutoRotation,
+    setPosition
   } = useCardInteraction({ containerRef, cardRef });
 
   const [isFlipped, setIsFlipped] = useState(false);
@@ -56,6 +56,12 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
 
   // Track mouse position for effect rendering
   const [cardMousePosition, setCardMousePosition] = useState({ x: 0.5, y: 0.5 });
+  
+  // Set initial rotation to make stacked cards visible
+  useEffect(() => {
+    // Apply a slight initial rotation so users can see the stacked cards
+    setPosition({ x: 10, y: 15 });
+  }, []);
 
   useEffect(() => {
     window.addEventListener('keydown', handleKeyboardControls);

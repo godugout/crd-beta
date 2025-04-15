@@ -101,7 +101,7 @@ const CardDisplay: React.FC<CardDisplayProps> = ({
 
   // Card dimensions and stack settings
   const CARD_THICKNESS = 8; // 8px thickness for each card
-  const STACK_GAP = 8; // 8px gap between cards
+  const STACK_GAP = 8; // 8px gap between cards in the stack
   const edgeColor = 'var(--edge-color, #e4e4e4)';
   const edgeShadow = 'var(--edge-shadow, rgba(0,0,0,0.2))';
 
@@ -208,7 +208,7 @@ const CardDisplay: React.FC<CardDisplayProps> = ({
         aria-hidden="true"
         style={{
           height: `${CARD_THICKNESS}px`,
-          transform: `rotateX(-90deg) translateZ(${CARD_THICKNESS / 2}px)`,
+          transform: `rotateX(-90deg) translateZ(${175 - CARD_THICKNESS / 2}px)`,
           backgroundColor: edgeColor,
           boxShadow: `inset 0 -1px 2px ${edgeShadow}`
         }}
@@ -218,7 +218,7 @@ const CardDisplay: React.FC<CardDisplayProps> = ({
         aria-hidden="true"
         style={{
           width: `${CARD_THICKNESS}px`,
-          transform: `rotateY(-90deg) translateZ(${CARD_THICKNESS / 2}px)`,
+          transform: `rotateY(-90deg) translateZ(${125 - CARD_THICKNESS / 2}px)`,
           backgroundColor: edgeColor,
           boxShadow: `inset 1px 0 2px ${edgeShadow}`
         }}
@@ -256,6 +256,8 @@ const CardDisplay: React.FC<CardDisplayProps> = ({
             rotateY(${rotation.y}deg) 
             scale(${zoom})
           `,
+          width: '250px', 
+          height: '350px',
           ...generateEffectStyles()
         }}
       >
