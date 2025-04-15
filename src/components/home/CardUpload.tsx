@@ -1,13 +1,22 @@
 
 import React, { useState } from 'react';
 import { Upload } from 'lucide-react';
+import { CardData } from '@/types/card';
 
 interface CardUploadProps {
-  setView: (view: 'showcase' | 'collection' | 'upload') => void;
+  setView: (view: 'showcase' | 'collection' | 'upload' | 'welcome') => void;
 }
 
 const CardUpload = ({ setView }: CardUploadProps) => {
   const [file, setFile] = useState<File | null>(null);
+  const [formData, setFormData] = useState<Partial<CardData>>({
+    name: '',
+    year: '',
+    set: '',
+    cardNumber: '',
+    description: '',
+    specialEffect: 'Classic Holographic',
+  });
   
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -15,9 +24,29 @@ const CardUpload = ({ setView }: CardUploadProps) => {
     }
   };
   
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+  
   const handleUpload = () => {
     // In a real app, we would upload the file to a server here
+    // Create card data
+    const newCard: CardData = {
+      id: Date.now(),
+      name: formData.name || 'Untitled Card',
+      description: formData.description || '',
+      imageUrl: file ? URL.createObjectURL(file) : undefined,
+      metadata: {
+        year: formData.year,
+        cardNumber: formData.cardNumber,
+        set: formData.set,
+      },
+      effects: formData.specialEffect ? [formData.specialEffect] : [],
+    };
+    
     // For now, just navigate to the collection view
+    console.log('New card data:', newCard);
     setView('collection');
   };
   
@@ -51,28 +80,59 @@ const CardUpload = ({ setView }: CardUploadProps) => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <label className="block text-gray-700 font-medium mb-2">Card Name</label>
-          <input type="text" className="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="e.g. Michael Jordan Rookie" />
+          <input 
+            type="text" 
+            name="name"
+            value={formData.name}
+            onChange={handleInputChange}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md" 
+            placeholder="e.g. Michael Jordan Rookie" 
+          />
         </div>
         
         <div>
           <label className="block text-gray-700 font-medium mb-2">Year</label>
-          <input type="text" className="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="e.g. 1986" />
+          <input 
+            type="text" 
+            name="year"
+            value={formData.year}
+            onChange={handleInputChange}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md" 
+            placeholder="e.g. 1986" 
+          />
         </div>
         
         <div>
           <label className="block text-gray-700 font-medium mb-2">Set/Brand</label>
-          <input type="text" className="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="e.g. Fleer" />
+          <input 
+            type="text" 
+            name="set"
+            value={formData.set}
+            onChange={handleInputChange}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md" 
+            placeholder="e.g. Fleer" 
+          />
         </div>
         
         <div>
           <label className="block text-gray-700 font-medium mb-2">Card Number</label>
-          <input type="text" className="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="e.g. 57" />
+          <input 
+            type="text" 
+            name="cardNumber"
+            value={formData.cardNumber}
+            onChange={handleInputChange}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md" 
+            placeholder="e.g. 57" 
+          />
         </div>
       </div>
       
       <div className="mt-6">
         <label className="block text-gray-700 font-medium mb-2">Description</label>
         <textarea 
+          name="description"
+          value={formData.description}
+          onChange={handleInputChange}
           className="w-full px-3 py-2 border border-gray-300 rounded-md h-24" 
           placeholder="Add any details about your card's condition, history, or why it's special to you"
         ></textarea>
@@ -80,7 +140,12 @@ const CardUpload = ({ setView }: CardUploadProps) => {
       
       <div className="mt-6">
         <label className="block text-gray-700 font-medium mb-2">Special Effect</label>
-        <select className="w-full px-3 py-2 border border-gray-300 rounded-md">
+        <select 
+          name="specialEffect"
+          value={formData.specialEffect}
+          onChange={handleInputChange}
+          className="w-full px-3 py-2 border border-gray-300 rounded-md"
+        >
           <option>Classic Holographic</option>
           <option>Refractor</option>
           <option>Prism</option>
