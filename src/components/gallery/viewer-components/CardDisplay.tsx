@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/lib/types';
 import '../../../styles/card-interactions.css';
@@ -14,6 +13,7 @@ interface CardDisplayProps {
   containerRef?: React.RefObject<HTMLDivElement>;
   isAutoRotating?: boolean;
   mousePosition: { x: number; y: number };
+  onLayerLoad: (layerName: string, loaded: boolean) => void;
 }
 
 const CardDisplay: React.FC<CardDisplayProps> = ({
@@ -27,6 +27,7 @@ const CardDisplay: React.FC<CardDisplayProps> = ({
   containerRef,
   isAutoRotating,
   mousePosition,
+  onLayerLoad
 }: CardDisplayProps) => {
   const [flipProgress, setFlipProgress] = useState(0);
   
@@ -36,6 +37,16 @@ const CardDisplay: React.FC<CardDisplayProps> = ({
     }, 50);
     return () => clearTimeout(timer);
   }, [isFlipped]);
+
+  useEffect(() => {
+    // Report base layer loaded
+    onLayerLoad('Base Card', true);
+  }, [onLayerLoad]);
+
+  const handleImageLoad = () => {
+    onLayerLoad('Texture', true);
+    onLayerLoad('Overlay', true);
+  };
 
   return (
     <div 
@@ -64,8 +75,9 @@ const CardDisplay: React.FC<CardDisplayProps> = ({
             <div className="relative w-full h-full overflow-hidden">
               <img 
                 src={card.imageUrl} 
-                alt={card.title || 'Card'} 
+                alt={card.title || 'Card'}
                 className="w-full h-full object-cover"
+                onLoad={handleImageLoad}
               />
               
               <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none"></div>
@@ -89,39 +101,6 @@ const CardDisplay: React.FC<CardDisplayProps> = ({
               
               {card.description && (
                 <p className="text-sm mb-4 opacity-90">{card.description}</p>
-              )}
-              
-              {/* Card stats */}
-              <div className="grid grid-cols-2 gap-3 my-4">
-                {card.year && (
-                  <div className="bg-white/10 backdrop-blur-sm rounded p-2 text-center">
-                    <span className="text-xs text-blue-300 block">Year</span>
-                    <span className="text-md font-semibold">{card.year}</span>
-                  </div>
-                )}
-                
-                {card.designMetadata?.cardMetadata?.cardNumber && (
-                  <div className="bg-white/10 backdrop-blur-sm rounded p-2 text-center">
-                    <span className="text-xs text-blue-300 block">Card #</span>
-                    <span className="text-md font-semibold">
-                      {String(card.designMetadata.cardMetadata.cardNumber)}
-                    </span>
-                  </div>
-                )}
-              </div>
-              
-              {/* Card tags */}
-              {card.tags && card.tags.length > 0 && (
-                <div className="my-4">
-                  <p className="text-xs text-blue-300 mb-1">Tags</p>
-                  <div className="flex flex-wrap gap-2">
-                    {card.tags.map((tag, index) => (
-                      <span key={index} className="bg-white/10 text-xs px-2 py-1 rounded-full">
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                </div>
               )}
             </div>
           </div>

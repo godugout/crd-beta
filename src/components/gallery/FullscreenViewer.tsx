@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCards } from '@/context/CardContext';
@@ -6,8 +5,8 @@ import { toast } from 'sonner';
 import { X } from 'lucide-react';
 import CardDisplay from './viewer-components/CardDisplay';
 import ViewerControls from './viewer-components/ViewerControls';
-import InfoPanel from './viewer-components/InfoPanel';
 import KeyboardShortcuts from './viewer-components/KeyboardShortcuts';
+import LayerMonitor from './viewer-components/LayerMonitor';
 import { useCardInteraction } from '@/hooks/useCardInteraction';
 
 interface FullscreenViewerProps {
@@ -41,6 +40,12 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
   const [isFlipped, setIsFlipped] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
   const [cardMousePosition, setCardMousePosition] = useState({ x: 0.5, y: 0.5 });
+  const [showControls, setShowControls] = useState(false);
+  const [layerStatus, setLayerStatus] = useState([
+    { name: 'Base Card', loaded: false, timestamp: 0 },
+    { name: 'Texture', loaded: false, timestamp: 0 },
+    { name: 'Overlay', loaded: false, timestamp: 0 }
+  ]);
 
   useEffect(() => {
     window.addEventListener('keydown', handleKeyboardControls);
@@ -87,6 +92,24 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
     }
   };
 
+  const updateLayerStatus = (layerName: string, loaded: boolean) => {
+    setLayerStatus(prev => prev.map(layer => {
+      if (layer.name === layerName) {
+        return {
+          ...layer,
+          loaded,
+          timestamp: performance.now()
+        };
+      }
+      return layer;
+    }));
+  };
+
+  const toggleControls = () => {
+    setShowControls(prev => !prev);
+    toast.info(showControls ? 'Controls hidden' : 'Controls visible');
+  };
+
   if (!card) {
     return (
       <div className="fixed inset-0 bg-black flex items-center justify-center z-50">
@@ -119,25 +142,29 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
           cardRef={cardRef}
           containerRef={containerRef}
           isAutoRotating={isAutoRotating}
-          mousePosition={cardMousePosition}
+          mousePosition={mousePosition}
+          onLayerLoad={updateLayerStatus}
         />
       </div>
 
       <ViewerControls
         isFlipped={isFlipped}
         isAutoRotating={isAutoRotating}
-        showInfo={showInfo}
         onFlipCard={() => setIsFlipped(!isFlipped)}
         onToggleAutoRotation={toggleAutoRotation}
-        onToggleInfo={() => setShowInfo(!showInfo)}
-        onToggleFullscreen={handleToggleFullscreen}
-        onShare={handleShare}
+        onToggleControls={toggleControls}
         onClose={onClose}
       />
 
-      <InfoPanel card={card} showInfo={showInfo} />
-      
-      <KeyboardShortcuts />
+      {showControls && (
+        <>
+          <KeyboardShortcuts />
+          <LayerMonitor 
+            isVisible={true}
+            layers={layerStatus}
+          />
+        </>
+      )}
     </div>
   );
 };
