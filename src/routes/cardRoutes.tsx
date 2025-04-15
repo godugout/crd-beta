@@ -9,6 +9,7 @@ import CardCreatorPage from '@/pages/CardCreatorPage';
 import CardShowcase from '@/pages/CardShowcase';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import CardCreationFlow from '@/components/card-editor/CardCreationFlow';
+import ImmersiveCardViewerDemo from '@/pages/ImmersiveCardViewerDemo';
 
 // Card-related routes
 export const cardRoutes: RouteObject[] = [
@@ -55,5 +56,14 @@ export const cardRoutes: RouteObject[] = [
   {
     path: "/card-creator",
     element: <CardCreatorPage />,
+  },
+  // New immersive viewer routes
+  {
+    path: "/immersive-viewer",
+    element: <ImmersiveCardViewerDemo />,
+  },
+  {
+    path: "/immersive-viewer/:id",
+    element: <ImmersiveCardViewerDemo />,
   },
 ];

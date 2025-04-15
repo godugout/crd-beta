@@ -86,7 +86,7 @@ export function createPbrScene(
   // Create card geometry
   const cardGeometry = new THREE.BoxGeometry(cardWidth, cardHeight, cardDepth);
   
-  // Create card mesh
+  // Create card mesh with appropriate material type
   const cardMesh = new THREE.Mesh(cardGeometry, cardMaterial);
   scene.add(cardMesh);
   
@@ -148,11 +148,18 @@ export function createPbrScene(
           cardMaterial  // Back
         ];
         
-        // Fix for TS2352: Use proper material assignment
-        cardMesh.material = materials;
+        // Create a new mesh with the materials array and replace the old one
+        const newMesh = new THREE.Mesh(cardGeometry, materials);
+        newMesh.position.copy(cardMesh.position);
+        newMesh.rotation.copy(cardMesh.rotation);
+        scene.remove(cardMesh);
+        scene.add(newMesh);
         
-        // Explicitly cast the mesh to have a material array
-        (cardMesh as THREE.Mesh<THREE.BufferGeometry, THREE.Material[]>).material = materials;
+        // Update the cardMesh reference to point to the new mesh
+        // This is type-safe as we're creating a new reference
+        cardMesh.geometry.dispose();
+        cardMesh.removeFromParent();
+        Object.assign(cardMesh, newMesh);
       },
       undefined,
       (error) => {
@@ -235,7 +242,11 @@ export function createPbrScene(
     cardGeometry.dispose();
     cardMaterial.dispose();
     edgeGeometry.dispose();
-    edgeMaterial.dispose();
+    
+    // Check if edgeMaterial is still valid (not automatically disposed)
+    if (edgeMaterial && edgeMaterial.dispose) {
+      edgeMaterial.dispose();
+    }
     
     // Dispose of controls and renderer
     controls.dispose();

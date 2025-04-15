@@ -1,7 +1,8 @@
+
 import React from 'react';
 import { Card } from '@/lib/types';
 import { cn } from '@/lib/utils';
-import { MoreHorizontal, RefreshCw, Share2, Trash2, Smartphone, Layers } from 'lucide-react';
+import { MoreHorizontal, RefreshCw, Share2, Trash2, Smartphone, Layers, Maximize2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { CrdButton } from '@/components/ui/crd-button';
 import {
@@ -53,6 +54,11 @@ export const CardFront: React.FC<CardFrontProps> = ({
     navigate(`/labs/card-viewer/${card.id}`);
   };
   
+  const handleViewImmersive = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigate(`/immersive-viewer/${card.id}`);
+  };
+  
   return (
     <div className="card-face card-front absolute inset-0 bg-white rounded-lg shadow-lg overflow-hidden select-none">
       {/* Card image */}
@@ -93,10 +99,10 @@ export const CardFront: React.FC<CardFrontProps> = ({
               variant="gradient"
               size="sm"
               className="flex-1"
-              onClick={handleViewIn3D}
+              onClick={handleViewImmersive}
             >
-              <Layers className="h-4 w-4 mr-1" />
-              <span className="crd-text-small font-medium">3D View</span>
+              <Maximize2 className="h-4 w-4 mr-1" />
+              <span className="crd-text-small font-medium">Immersive</span>
             </CrdButton>
             
             <CrdButton
@@ -138,6 +144,10 @@ export const CardFront: React.FC<CardFrontProps> = ({
               <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleViewIn3D(e); }}>
                 <Layers className="mr-2 h-4 w-4" />
                 <span>View in 3D</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleViewImmersive(e); }}>
+                <Maximize2 className="mr-2 h-4 w-4" />
+                <span>Immersive View</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem 

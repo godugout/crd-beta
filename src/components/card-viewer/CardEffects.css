@@ -1,0 +1,381 @@
+
+/* Card Effects CSS */
+
+/* Base card styling */
+.card-3d {
+  transform-style: preserve-3d;
+  will-change: transform;
+  transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.3);
+}
+
+/* Backface visibility */
+.backface-hidden {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.transform-style-preserve-3d {
+  transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
+}
+
+/* Holographic Effect */
+.effect-holographic {
+  position: relative;
+  overflow: hidden;
+}
+
+.effect-holographic::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    125deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.1) 10%, 
+    rgba(255, 255, 255, 0.4) 20%, 
+    rgba(255, 255, 255, 0.5) 30%,
+    rgba(255, 255, 255, 0) 50%
+  );
+  pointer-events: none;
+  z-index: 2;
+  animation: shine var(--shimmer-speed, 4s) infinite linear;
+  background-size: 200% 100%;
+  opacity: 0.8;
+  mix-blend-mode: overlay;
+}
+
+/* Refractor Effect */
+.effect-refractor {
+  position: relative;
+  overflow: hidden;
+}
+
+.effect-refractor::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.2) 25%,
+    rgba(255, 255, 255, 0.3) 50%,
+    rgba(255, 255, 255, 0.2) 75%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  z-index: 1;
+  mix-blend-mode: overlay;
+}
+
+/* Shimmer Effect */
+.effect-shimmer {
+  position: relative;
+}
+
+.effect-shimmer::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.4) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 3s infinite linear;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Vintage Effect */
+.effect-vintage {
+  position: relative;
+  filter: sepia(0.3) contrast(0.95) brightness(0.9);
+}
+
+.effect-vintage::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.95' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+
+/* Animation keyframes */
+@keyframes shine {
+  0% {
+    background-position: -100% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -100% 0;
+  }
+  100% {
+    background-position: 100% 0;
+  }
+}
+
+/* Spectral hologram effect */
+.spectral-hologram {
+  position: relative;
+  overflow: hidden;
+  transform-style: preserve-3d;
+}
+
+.spectral-hologram::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    125deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.1) 10%, 
+    rgba(255, 255, 255, 0.4) 20%, 
+    rgba(255, 255, 255, 0.5) 30%,
+    rgba(255, 255, 255, 0) 50%
+  );
+  pointer-events: none;
+  z-index: 2;
+  animation: spectral-shine var(--shimmer-speed, 4s) infinite linear;
+  background-size: 200% 100%;
+  opacity: 0.9;
+  border-radius: 12px;
+  mix-blend-mode: overlay;
+}
+
+.spectral-hologram::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    45deg,
+    hsla(var(--dynamic-hue, 0), var(--dynamic-saturation, 100%), var(--dynamic-lightness, 50%), 0.2) 0%,
+    hsla(calc(var(--dynamic-hue, 0) + 60), var(--dynamic-saturation, 100%), var(--dynamic-lightness, 50%), 0.2) 25%,
+    hsla(calc(var(--dynamic-hue, 0) + 120), var(--dynamic-saturation, 100%), var(--dynamic-lightness, 50%), 0.2) 50%,
+    hsla(calc(var(--dynamic-hue, 0) + 180), var(--dynamic-saturation, 100%), var(--dynamic-lightness, 50%), 0.2) 75%,
+    hsla(calc(var(--dynamic-hue, 0) + 240), var(--dynamic-saturation, 100%), var(--dynamic-lightness, 50%), 0.2) 100%
+  );
+  background-size: 400% 400%;
+  animation: spectral-gradient calc(var(--effect-speed, 3s)) ease infinite;
+  z-index: 1;
+  border-radius: 12px;
+  mix-blend-mode: screen;
+  opacity: var(--hologram-intensity, 0.5);
+}
+
+.spectral-hologram-layer {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    rgba(255, 255, 255, 0.8) 0%,
+    rgba(255, 255, 255, 0) 60%
+  );
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  opacity: 0.3;
+  filter: blur(1px);
+  transform: translateZ(20px);
+}
+
+/* Parallax effect for 3D layers */
+.parallax-layer {
+  position: absolute;
+  inset: 0;
+  will-change: transform;
+  transition: transform 0.1s ease-out;
+}
+
+.parallax-layer-1 {
+  background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='rgba(255,255,255,0.05)' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E");
+  opacity: 0.1;
+  transform: translateZ(5px);
+}
+
+.parallax-layer-2 {
+  background-image: linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0) 85%,
+    rgba(255, 255, 255, 0.15) 90%,
+    rgba(255, 255, 255, 0) 95%
+  );
+  transform: translateZ(10px);
+}
+
+/* Gold foil effect */
+.card-gold-foil {
+  position: relative;
+  overflow: hidden;
+}
+
+.card-gold-foil::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    125deg,
+    rgba(253, 252, 251, 0) 0%,
+    rgba(253, 252, 251, 0.05) 10%, 
+    rgba(255, 215, 0, 0.2) 20%, 
+    rgba(212, 175, 55, 0.3) 30%,
+    rgba(218, 165, 32, 0.2) 40%,
+    rgba(253, 252, 251, 0) 50%
+  );
+  pointer-events: none;
+  z-index: 2;
+  animation: gold-shimmer calc(4s) infinite linear;
+  background-size: 200% 100%;
+  opacity: calc(0.7 * var(--gold-intensity, 0.7));
+  mix-blend-mode: overlay;
+}
+
+.card-gold-foil::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(255, 215, 0, 0.2),
+    rgba(212, 175, 55, 0.1),
+    rgba(253, 252, 251, 0)
+  );
+  z-index: 1;
+  mix-blend-mode: color-dodge;
+  opacity: calc(0.5 * var(--gold-intensity, 0.7));
+}
+
+/* Chrome effect */
+.card-chrome {
+  position: relative;
+  overflow: hidden;
+}
+
+.card-chrome::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    125deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(200, 200, 201, 0.3) 20%, 
+    rgba(255, 255, 255, 0.4) 40%, 
+    rgba(159, 158, 161, 0.3) 60%,
+    rgba(255, 255, 255, 0) 80%
+  );
+  pointer-events: none;
+  z-index: 3;
+  animation: chrome-reflection calc(3s) infinite linear;
+  background-size: 300% 100%;
+  opacity: calc(0.8 * var(--chrome-intensity, 0.7));
+  mix-blend-mode: soft-light;
+}
+
+.card-chrome::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(255, 255, 255, 0.3),
+    rgba(200, 200, 201, 0.2),
+    rgba(159, 158, 161, 0.1)
+  );
+  z-index: 2;
+  opacity: calc(0.7 * var(--chrome-intensity, 0.7));
+}
+
+/* Additional animation keyframes */
+@keyframes spectral-shine {
+  0% {
+    background-position: -100% 0;
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 0.9;
+  }
+  100% {
+    background-position: 200% 0;
+    opacity: 0.6;
+  }
+}
+
+@keyframes spectral-gradient {
+  0% {
+    background-position: 0% 50%;
+    opacity: var(--hologram-intensity, 0.5);
+  }
+  50% {
+    background-position: 100% 50%;
+    opacity: calc(var(--hologram-intensity, 0.5) * 0.7);
+  }
+  100% {
+    background-position: 0% 50%;
+    opacity: var(--hologram-intensity, 0.5);
+  }
+}
+
+@keyframes gold-shimmer {
+  0% {
+    background-position: -100% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes chrome-reflection {
+  0% {
+    background-position: -100% 0;
+  }
+  100% {
+    background-position: 100% 0;
+  }
+}
+
+/* Add card background pattern */
+.bg-card-pattern {
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* Perspective utilities */
+.perspective-800 {
+  perspective: 800px;
+}
+
+.perspective-900 {
+  perspective: 900px;
+}
+
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.perspective-1200 {
+  perspective: 1200px;
+}
+
+/* Rotate utilities */
+.rotate-x-60 {
+  transform: rotateX(60deg);
+}
+
+.rotate-x-90 {
+  transform: rotateX(90deg);
+}
+
+/* Combat Safari backface-visibility issues */
+@supports (-webkit-touch-callout: none) {
+  .backface-hidden {
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+}
