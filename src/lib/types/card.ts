@@ -1,5 +1,7 @@
 
 import { BaseEntity } from './index';
+import { Reaction } from './interaction';
+import { Comment } from './interaction';
 
 export interface FabricSwatch {
   type: string;

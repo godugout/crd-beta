@@ -7,6 +7,7 @@ interface CardEditorActionsProps {
   onPrevious: () => void;
   onNext: () => void;
   onSubmit: () => void;
+  onCancel?: () => void;  // Add this optional property
   isFirstStep: boolean;
   isLastStep: boolean;
 }
@@ -15,20 +16,32 @@ const CardEditorActions: React.FC<CardEditorActionsProps> = ({
   onPrevious,
   onNext,
   onSubmit,
+  onCancel,
   isFirstStep,
   isLastStep
 }) => {
   return (
     <div className="mt-6 flex justify-between items-center">
-      <Button
-        variant="outline"
-        onClick={onPrevious}
-        disabled={isFirstStep}
-        className="flex items-center gap-2"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Back
-      </Button>
+      <div>
+        {onCancel && (
+          <Button
+            variant="ghost"
+            onClick={onCancel}
+            className="mr-2"
+          >
+            Cancel
+          </Button>
+        )}
+        <Button
+          variant="outline"
+          onClick={onPrevious}
+          disabled={isFirstStep}
+          className="flex items-center gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back
+        </Button>
+      </div>
       
       {isLastStep ? (
         <Button 
