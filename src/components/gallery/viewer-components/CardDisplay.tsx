@@ -41,16 +41,10 @@ const CardDisplay: React.FC<CardDisplayProps> = ({
   useEffect(() => {
     const timer = setTimeout(() => {
       setFlipProgress(isFlipped ? 100 : 0);
-    }, 50); // Small delay to ensure CSS transition works
+    }, 50);
     return () => clearTimeout(timer);
   }, [isFlipped]);
 
-  // Debug effect changes
-  useEffect(() => {
-    console.log("CardDisplay activeEffects changed:", activeEffects);
-    console.log("CardDisplay effectIntensities:", effectIntensities);
-  }, [activeEffects, effectIntensities]);
-  
   // Generate effect classes based on active effects
   const effectClasses = activeEffects
     .map(effect => `effect-${effect.toLowerCase()}`)
@@ -63,12 +57,10 @@ const CardDisplay: React.FC<CardDisplayProps> = ({
       '--mouse-y': `${mousePosition.y * 100}%`,
     } as React.CSSProperties;
     
-    // Add intensity variables for each effect
     Object.entries(effectIntensities).forEach(([effect, intensity]) => {
       if (activeEffects.includes(effect)) {
         style[`--${effect.toLowerCase()}-intensity`] = intensity.toString();
       } else {
-        // Set to 0 for inactive effects
         style[`--${effect.toLowerCase()}-intensity`] = "0";
       }
     });
@@ -76,9 +68,6 @@ const CardDisplay: React.FC<CardDisplayProps> = ({
     return style;
   };
 
-  console.log("Rendering CardDisplay with effects:", effectClasses);
-
-  // Handle keyboard navigation
   const { handleKeyDown } = useCardKeyboardNavigation({
     onFlip: () => setFlipProgress(isFlipped ? 0 : 100),
     onReset: () => {
@@ -109,10 +98,142 @@ const CardDisplay: React.FC<CardDisplayProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleKeyDown]);
 
-  // Card dimensions and thickness
-  const CARD_THICKNESS = 8; // 8px thickness for the card
+  // Card dimensions and stack settings
+  const CARD_THICKNESS = 8; // 8px thickness for each card
+  const STACK_GAP = 8; // 8px gap between cards
   const edgeColor = 'var(--edge-color, #e4e4e4)';
   const edgeShadow = 'var(--edge-shadow, rgba(0,0,0,0.2))';
+
+  const renderCard = (zOffset: number, opacity: number = 1) => (
+    <div 
+      className={`absolute inset-0 transition-all duration-700 transform-gpu card-effect preserve-3d ${effectClasses}`}
+      style={{
+        transform: `translateZ(${zOffset}px)`,
+        opacity
+      }}
+    >
+      {/* Front face */}
+      <div 
+        className={`absolute inset-0 backface-hidden ${!isFlipped ? 'z-10' : 'z-0'}`}
+        aria-hidden={isFlipped}
+        style={{ 
+          transform: `translateZ(${CARD_THICKNESS / 2}px) rotateY(0deg)`,
+          boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+        }}
+      >
+        <div className="relative w-full h-full overflow-hidden">
+          <img 
+            src={card.imageUrl} 
+            alt={card.title || 'Card'} 
+            className="w-full h-full object-cover"
+          />
+          
+          {/* Card info overlay */}
+          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none"></div>
+          <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
+            <h2 className="font-bold text-xl mb-1">{card.title}</h2>
+            {card.player && <p className="text-sm opacity-90">{card.player}</p>}
+            {card.team && <p className="text-xs opacity-80">{card.team}</p>}
+          </div>
+        </div>
+      </div>
+
+      {/* Back face */}
+      <div 
+        className={`absolute inset-0 backface-hidden ${isFlipped ? 'z-10' : 'z-0'}`}
+        aria-hidden={!isFlipped}
+        style={{ 
+          transform: `translateZ(${CARD_THICKNESS / 2}px) rotateY(180deg)`,
+          boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+        }}
+      >
+        <div className="absolute inset-0 p-6 text-white bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+          <h3 className="text-xl font-bold mb-4 bg-gradient-to-r from-blue-300 to-purple-300 bg-clip-text text-transparent">
+            {card.title}
+          </h3>
+          
+          {card.description && (
+            <p className="text-sm mb-4 opacity-90">{card.description}</p>
+          )}
+          
+          {/* Card stats */}
+          <div className="grid grid-cols-2 gap-3 my-4">
+            {card.year && (
+              <div className="bg-white/10 backdrop-blur-sm rounded p-2 text-center">
+                <span className="text-xs text-blue-300 block">Year</span>
+                <span className="text-md font-semibold">{card.year}</span>
+              </div>
+            )}
+            
+            {card.designMetadata?.cardMetadata?.cardNumber && (
+              <div className="bg-white/10 backdrop-blur-sm rounded p-2 text-center">
+                <span className="text-xs text-blue-300 block">Card #</span>
+                <span className="text-md font-semibold">
+                  {String(card.designMetadata.cardMetadata.cardNumber)}
+                </span>
+              </div>
+            )}
+          </div>
+          
+          {/* Card tags */}
+          {card.tags && card.tags.length > 0 && (
+            <div className="my-4">
+              <p className="text-xs text-blue-300 mb-1">Tags</p>
+              <div className="flex flex-wrap gap-2">
+                {card.tags.map((tag, index) => (
+                  <span key={index} className="bg-white/10 text-xs px-2 py-1 rounded-full">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Card edges */}
+      <div
+        className="absolute w-full"
+        aria-hidden="true"
+        style={{
+          height: `${CARD_THICKNESS}px`,
+          transform: `rotateX(90deg) translateZ(${175 - CARD_THICKNESS / 2}px)`,
+          backgroundColor: edgeColor,
+          boxShadow: `inset 0 1px 2px ${edgeShadow}`
+        }}
+      />
+      <div
+        className="absolute w-full"
+        aria-hidden="true"
+        style={{
+          height: `${CARD_THICKNESS}px`,
+          transform: `rotateX(-90deg) translateZ(${CARD_THICKNESS / 2}px)`,
+          backgroundColor: edgeColor,
+          boxShadow: `inset 0 -1px 2px ${edgeShadow}`
+        }}
+      />
+      <div
+        className="absolute h-full"
+        aria-hidden="true"
+        style={{
+          width: `${CARD_THICKNESS}px`,
+          transform: `rotateY(-90deg) translateZ(${CARD_THICKNESS / 2}px)`,
+          backgroundColor: edgeColor,
+          boxShadow: `inset 1px 0 2px ${edgeShadow}`
+        }}
+      />
+      <div
+        className="absolute h-full"
+        aria-hidden="true"
+        style={{
+          width: `${CARD_THICKNESS}px`,
+          transform: `rotateY(90deg) translateZ(${125 - CARD_THICKNESS / 2}px)`,
+          backgroundColor: edgeColor,
+          boxShadow: `inset -1px 0 2px ${edgeShadow}`
+        }}
+      />
+    </div>
+  );
 
   return (
     <div 
@@ -125,7 +246,7 @@ const CardDisplay: React.FC<CardDisplayProps> = ({
         tabIndex={0}
         aria-label={`${card.title} trading card. Press F to flip, arrow keys to rotate, plus and minus to zoom.`}
         aria-pressed={isFlipped}
-        className={`relative transition-all duration-700 transform-gpu card-effect preserve-3d ${effectClasses}`}
+        className="relative transition-all duration-700 transform-gpu"
         style={{
           transformStyle: 'preserve-3d',
           transform: `
@@ -137,177 +258,11 @@ const CardDisplay: React.FC<CardDisplayProps> = ({
           ...generateEffectStyles()
         }}
       >
-        {/* Front face */}
-        <div 
-          className={`absolute inset-0 backface-hidden ${!isFlipped ? 'z-10' : 'z-0'}`}
-          aria-hidden={isFlipped}
-          style={{ 
-            transform: `translateZ(${CARD_THICKNESS / 2}px) rotateY(0deg)`,
-            boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
-          }}
-        >
-          <div className="relative w-full h-full overflow-hidden">
-            <img 
-              src={card.imageUrl} 
-              alt={card.title || 'Card'} 
-              className="w-full h-full object-cover"
-            />
-            
-            {/* Touch imprint indicators */}
-            <div className={`absolute top-0 right-0 w-16 h-16 rounded-bl-3xl ${touchImprintAreas.find(a => a.id === 'flip-corner')?.active ? 'bg-white/30' : 'bg-transparent'}`}>
-              <span className="absolute top-3 right-3 text-2xl text-white/80 transform -rotate-45">↺</span>
-            </div>
-            
-            <div className={`absolute left-1/2 top-1/2 w-16 h-16 -translate-x-1/2 -translate-y-1/2 rounded-full ${touchImprintAreas.find(a => a.id === 'zoom-center')?.active ? 'bg-white/20' : 'bg-transparent'}`}>
-              <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-2xl text-white/80">+</span>
-            </div>
-            
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none"></div>
-            <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
-              <h2 className="font-bold text-xl mb-1">{card.title}</h2>
-              {card.player && <p className="text-sm opacity-90">{card.player}</p>}
-              {card.team && <p className="text-xs opacity-80">{card.team}</p>}
-            </div>
-          </div>
-        </div>
-
-        {/* Back face */}
-        <div 
-          className={`absolute inset-0 backface-hidden ${isFlipped ? 'z-10' : 'z-0'}`}
-          aria-hidden={!isFlipped}
-          style={{ 
-            transform: `translateZ(${CARD_THICKNESS / 2}px) rotateY(180deg)`,
-            boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
-          }}
-        >
-          <div className="absolute inset-0 p-6 text-white bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
-            <h3 className="text-xl font-bold mb-4 bg-gradient-to-r from-blue-300 to-purple-300 bg-clip-text text-transparent">
-              {card.title}
-            </h3>
-            
-            {card.description && (
-              <p className="text-sm mb-4 opacity-90">{card.description}</p>
-            )}
-            
-            {/* Card stats */}
-            <div className="grid grid-cols-2 gap-3 my-4">
-              {card.year && (
-                <div className="bg-white/10 backdrop-blur-sm rounded p-2 text-center">
-                  <span className="text-xs text-blue-300 block">Year</span>
-                  <span className="text-md font-semibold">{card.year}</span>
-                </div>
-              )}
-              
-              {card.designMetadata?.cardMetadata?.cardNumber && (
-                <div className="bg-white/10 backdrop-blur-sm rounded p-2 text-center">
-                  <span className="text-xs text-blue-300 block">Card #</span>
-                  <span className="text-md font-semibold">
-                    {String(card.designMetadata.cardMetadata.cardNumber)}
-                  </span>
-                </div>
-              )}
-            </div>
-            
-            {/* Card tags */}
-            {card.tags && card.tags.length > 0 && (
-              <div className="my-4">
-                <p className="text-xs text-blue-300 mb-1">Tags</p>
-                <div className="flex flex-wrap gap-2">
-                  {card.tags.map((tag, index) => (
-                    <span key={index} className="bg-white/10 text-xs px-2 py-1 rounded-full">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Card edges */}
-        {/* Top edge */}
-        <div
-          className="absolute w-full"
-          aria-hidden="true"
-          style={{
-            height: `${CARD_THICKNESS}px`,
-            transform: `rotateX(90deg) translateZ(${175 - CARD_THICKNESS / 2}px)`,
-            backgroundColor: edgeColor,
-            boxShadow: `inset 0 1px 2px ${edgeShadow}`
-          }}
-        />
-
-        {/* Bottom edge */}
-        <div
-          className="absolute w-full bg-gradient-to-t from-gray-200 to-white"
-          aria-hidden="true"
-          style={{
-            height: `${CARD_THICKNESS}px`,
-            transform: `rotateX(-90deg) translateZ(${CARD_THICKNESS / 2}px)`,
-            backgroundColor: edgeColor,
-            boxShadow: `inset 0 -1px 2px ${edgeShadow}`
-          }}
-        />
-
-        {/* Left edge */}
-        <div
-          className="absolute h-full bg-gradient-to-r from-gray-200 to-white"
-          aria-hidden="true"
-          style={{
-            width: `${CARD_THICKNESS}px`,
-            transform: `rotateY(-90deg) translateZ(${CARD_THICKNESS / 2}px)`,
-            backgroundColor: edgeColor,
-            boxShadow: `inset 1px 0 2px ${edgeShadow}`
-          }}
-        />
-
-        {/* Right edge */}
-        <div
-          className="absolute h-full bg-gradient-to-l from-gray-200 to-white"
-          aria-hidden="true"
-          style={{
-            width: `${CARD_THICKNESS}px`,
-            transform: `rotateY(90deg) translateZ(${125 - CARD_THICKNESS / 2}px)`,
-            backgroundColor: edgeColor,
-            boxShadow: `inset -1px 0 2px ${edgeShadow}`
-          }}
-        />
-
-        {/* Apply visual effects to the entire card */}
-        {activeEffects.length > 0 && (
-          <div 
-            className={`absolute inset-0 pointer-events-none z-10 ${effectClasses}`}
-            aria-hidden="true"
-            style={generateEffectStyles()}
-          ></div>
-        )}
-
-        {/* Card effects layer - shared by both sides */}
-        <div className="absolute inset-0 pointer-events-none">
-          {/* Auto-rotation indicator */}
-          <div 
-            className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent transition-opacity duration-300"
-            style={{
-              opacity: isAutoRotating ? 0.5 : 0,
-              transform: `rotate(${rotation.y}deg)`,
-            }}
-          />
-          
-          {/* Light reflection effect that follows mouse */}
-          <div 
-            className="card-highlight absolute inset-0 pointer-events-none"
-            style={{
-              '--mouse-x': `${mousePosition.x * 100}%`, 
-              '--mouse-y': `${mousePosition.y * 100}%`
-            } as React.CSSProperties}
-          />
-          
-          {/* Edge glow effect for when card is being flipped */}
-          <div 
-            className="flip-indicator absolute inset-0 pointer-events-none"
-            style={{ opacity: flipProgress > 0 && flipProgress < 100 ? 0.7 : 0 }}
-          />
-        </div>
+        {/* Bottom card (slightly darker) */}
+        {renderCard(-STACK_GAP, 0.95)}
+        
+        {/* Top card */}
+        {renderCard(0)}
       </div>
 
       {/* Accessibility description */}
