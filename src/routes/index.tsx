@@ -6,9 +6,11 @@ import CardGallery from '@/pages/CardGallery';
 import Profile from '@/pages/Profile';
 import Dashboard from '@/pages/Dashboard';
 
-// Import the team-related routes
+// Import the town-related routes
 import TeamDetail from '@/pages/TeamDetail';
-import { teamRoutes } from './teamRoutes';  // Import the team routes
+import TownDetail from '@/pages/TownDetail';
+import { teamRoutes } from './teamRoutes';  // Keep for backward compatibility
+import { townRoutes } from './townRoutes';  // Add new town routes
 
 // Import admin page
 import Admin from '@/pages/Admin';
@@ -16,9 +18,9 @@ import Admin from '@/pages/Admin';
 // Import other route collections
 import { cardRoutes } from './cardRoutes';
 import { collectionRoutes } from './collectionRoutes';
-import { mainRoutes } from './mainRoutes';  // Import the main routes
-import { baseballRoutes } from './baseballRoutes';  // Import the baseball routes
-import featureRoutes from './featureRoutes';  // Import the feature routes
+import { mainRoutes } from './mainRoutes';
+import { baseballRoutes } from './baseballRoutes';
+import featureRoutes from './featureRoutes';
 
 // Create new pages for deck and series management
 const DeckBuilderPage = React.lazy(() => import('@/pages/DeckBuilderPage'));
@@ -27,10 +29,11 @@ const DeckViewPage = React.lazy(() => import('@/pages/DeckViewPage'));
 const SeriesViewPage = React.lazy(() => import('@/pages/SeriesViewPage'));
 
 export const routes: RouteObject[] = [
-  ...mainRoutes, // Include main routes
-  ...teamRoutes, // Include team routes
-  ...baseballRoutes, // Include baseball routes
-  ...featureRoutes, // Include feature routes
+  ...mainRoutes,
+  ...teamRoutes, // Keep for backward compatibility
+  ...townRoutes, // Add new town routes
+  ...baseballRoutes,
+  ...featureRoutes,
   {
     path: "/",
     element: <Dashboard />,
@@ -50,6 +53,10 @@ export const routes: RouteObject[] = [
   {
     path: "/teams/:teamId",
     element: <TeamDetail />,
+  },
+  {
+    path: "/towns/:townId",
+    element: <TownDetail />,
   },
   
   // Deck routes

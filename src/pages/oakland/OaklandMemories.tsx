@@ -1,37 +1,36 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import PageLayout from '@/components/navigation/PageLayout';
-import TeamBreadcrumb from '@/components/navigation/components/TeamBreadcrumb';
+import TownBreadcrumb from '@/components/navigation/components/TownBreadcrumb';
 
-interface TeamInfo {
+interface TownInfo {
   name?: string;
   primary_color?: string;
   secondary_color?: string;
 }
 
 function OaklandMemories() {
-  const { teamSlug } = useParams<{ teamSlug?: string }>();
-  const [teamInfo, setTeamInfo] = useState<TeamInfo>({});
+  const { townId } = useParams<{ townId?: string }>();
+  const [townInfo, setTownInfo] = useState<TownInfo>({});
   
-  // If we have a team slug, fetch the team's details
+  // If we have a town ID, fetch the town's details
   useEffect(() => {
-    const fetchTeamInfo = async () => {
-      if (!teamSlug) return;
-      
+    const fetchTownInfo = async () => {
       try {
         // Only fetch data we know exists in the database
         const { data, error } = await supabase
           .from('teams')
-          .select('name')
-          .eq('id', teamSlug)
+          .select('name, primary_color, secondary_color')
+          .eq('id', 'oakland')
           .maybeSingle();
           
         if (error) {
-          console.error('Error fetching team info:', error);
-          // Set default values if team is not found
-          setTeamInfo({
-            name: teamSlug.charAt(0).toUpperCase() + teamSlug.slice(1),
+          console.error('Error fetching town info:', error);
+          // Set default values if town is not found
+          setTownInfo({
+            name: 'Oakland',
             primary_color: '#006341',
             secondary_color: '#EFB21E'
           });
@@ -39,53 +38,53 @@ function OaklandMemories() {
         }
           
         if (data) {
-          setTeamInfo({
+          setTownInfo({
             name: data.name,
-            primary_color: '#006341', // Default Oakland A's colors
-            secondary_color: '#EFB21E'
+            primary_color: data.primary_color || '#006341',
+            secondary_color: data.secondary_color || '#EFB21E'
           });
           return;
         } else {
-          // Set default values if team is not found
-          setTeamInfo({
-            name: teamSlug.charAt(0).toUpperCase() + teamSlug.slice(1),
+          // Set default values if town is not found
+          setTownInfo({
+            name: 'Oakland',
             primary_color: '#006341',
             secondary_color: '#EFB21E'
           });
         }
       } catch (err) {
-        console.error('Error fetching team info:', err);
+        console.error('Error fetching town info:', err);
         // Set default values on error
-        setTeamInfo({
-          name: teamSlug.charAt(0).toUpperCase() + teamSlug.slice(1),
+        setTownInfo({
+          name: 'Oakland',
           primary_color: '#006341',
           secondary_color: '#EFB21E'
         });
       }
     };
     
-    fetchTeamInfo();
-  }, [teamSlug]);
+    fetchTownInfo();
+  }, []);
   
   return (
     <PageLayout 
-      title={teamInfo.name ? `${teamInfo.name} Memories` : 'Team Memories'}
-      description={teamInfo.name ? `Browse memories for ${teamInfo.name} fans` : 'Browse team memories'}
+      title={townInfo.name ? `${townInfo.name} Memories` : 'Town Memories'}
+      description={townInfo.name ? `Browse memories for ${townInfo.name}` : 'Browse town memories'}
     >
-      <TeamBreadcrumb currentPage="Memories" />
+      <TownBreadcrumb currentPage="Memories" />
       
       <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-6">{teamInfo.name || 'Team'} Memories</h1>
+        <h1 className="text-3xl font-bold mb-6">{townInfo.name || 'Town'} Memories</h1>
         
         <div style={{ 
-          backgroundColor: teamInfo.primary_color || '#ccc',
-          color: teamInfo.secondary_color || '#000',
+          backgroundColor: townInfo.primary_color || '#ccc',
+          color: '#fff',
           padding: '2rem',
           borderRadius: '0.5rem',
           marginBottom: '2rem'
         }}>
           <p className="text-lg">
-            Browse and explore memories from {teamInfo.name || 'this team'}'s rich history.
+            Browse and explore memories from {townInfo.name || 'this town'}'s rich history.
           </p>
         </div>
         

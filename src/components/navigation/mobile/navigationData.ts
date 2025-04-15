@@ -4,7 +4,8 @@ import {
   mainNavItems, 
   cardsNavItems, 
   collectionsNavItems, 
-  teamsNavItems, 
+  teamsNavItems,
+  townsNavItems, 
   featuresNavItems,
   baseballNavItems
 } from '@/config/navigation';
@@ -32,6 +33,15 @@ export const navigationGroups: NavigationGroup[] = [
   {
     title: "COLLECTIONS",
     items: collectionsNavItems.map(item => ({
+      title: item.title,
+      path: item.path,
+      icon: item.icon,
+      highlight: item.highlight
+    }))
+  },
+  {
+    title: "TOWNS",
+    items: townsNavItems.map(item => ({
       title: item.title,
       path: item.path,
       icon: item.icon,

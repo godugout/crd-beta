@@ -3,5 +3,6 @@
 export * from './cardRepository';
 export * from './collectionRepository';
 export * from './commentRepository';
-export * from './teams';
+export * from './teamRepository'; // Keep for backwards compatibility
+export * from './townRepository';
 export { reactionRepository } from './reactionRepository';
