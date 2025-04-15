@@ -74,7 +74,7 @@ const InfoPanel = ({ card, showInfo }: InfoPanelProps) => {
             </div>
           )}
           
-          {/* Check for artist in designMetadata since 'artist' is not directly on Card type */}
+          {/* Check for artist in cardMetadata since 'artist' is not directly on Card type */}
           {cardMetadata.artist && (
             <div className="flex flex-col col-span-2">
               <span className="text-gray-400 text-xs">Artist</span>

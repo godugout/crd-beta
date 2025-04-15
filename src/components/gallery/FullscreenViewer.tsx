@@ -1,3 +1,4 @@
+
 import React, { useRef, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCards } from '@/context/CardContext';
@@ -64,6 +65,7 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
     setPosition({ x: 10, y: 15 });
   }, []);
 
+  // Setup keyboard controls
   useEffect(() => {
     window.addEventListener('keydown', handleKeyboardControls);
     
@@ -71,6 +73,14 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
       window.removeEventListener('keydown', handleKeyboardControls);
     };
   }, [handleKeyboardControls]);
+
+  // Setup wheel event listener for zoom/rotation
+  useEffect(() => {
+    const cleanup = setupWheelListener();
+    return () => {
+      if (cleanup) cleanup();
+    };
+  }, [setupWheelListener]);
 
   // Apply effects CSS variables when effects or their intensities change
   useEffect(() => {

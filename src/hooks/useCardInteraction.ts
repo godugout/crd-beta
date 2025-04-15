@@ -1,3 +1,4 @@
+
 import { useState, useRef, useCallback, RefObject } from 'react';
 
 interface UseCardInteractionProps {
@@ -88,7 +89,7 @@ export const useCardInteraction = ({ containerRef, cardRef }: UseCardInteraction
     setIsDragging(false);
   }, []);
 
-  // New scroll wheel handler
+  // Wheel handler for zoom and rotation
   const handleWheel = useCallback((e: WheelEvent) => {
     e.preventDefault();
     
@@ -106,7 +107,7 @@ export const useCardInteraction = ({ containerRef, cardRef }: UseCardInteraction
     }
   }, []);
 
-  // Add and remove wheel event listener
+  // Setup wheel event listener
   const setupWheelListener = useCallback(() => {
     const container = containerRef.current;
     if (container) {
@@ -115,11 +116,56 @@ export const useCardInteraction = ({ containerRef, cardRef }: UseCardInteraction
     }
   }, [handleWheel]);
 
+  // Card reset handler
   const handleCardReset = useCallback(() => {
     setPosition({ x: 0, y: 0 });
     setZoom(1);
     stopAutoRotation();
   }, [stopAutoRotation]);
+
+  // Add back the zoom handlers
+  const handleZoomIn = useCallback(() => {
+    setZoom(prev => Math.min(prev + 0.1, 2.0));
+  }, []);
+  
+  const handleZoomOut = useCallback(() => {
+    setZoom(prev => Math.max(prev - 0.1, 0.5));
+  }, []);
+
+  // Add back the keyboard controls handler
+  const handleKeyboardControls = useCallback((e: KeyboardEvent) => {
+    const rotationStep = 15;
+    const zoomStep = 0.1;
+    
+    switch (e.key) {
+      case 'ArrowUp':
+        setPosition(prev => ({ ...prev, x: prev.x - rotationStep }));
+        break;
+      case 'ArrowDown':
+        setPosition(prev => ({ ...prev, x: prev.x + rotationStep }));
+        break;
+      case 'ArrowLeft':
+        setPosition(prev => ({ ...prev, y: prev.y - rotationStep }));
+        break;
+      case 'ArrowRight':
+        setPosition(prev => ({ ...prev, y: prev.y + rotationStep }));
+        break;
+      case '+':
+        setZoom(prev => Math.min(prev + zoomStep, 2.0));
+        break;
+      case '-':
+        setZoom(prev => Math.max(prev - zoomStep, 0.5));
+        break;
+      case 'r':
+      case 'R':
+        handleCardReset();
+        break;
+      case 'a':
+      case 'A':
+        toggleAutoRotation();
+        break;
+    }
+  }, [handleCardReset, toggleAutoRotation]);
 
   return {
     position,
@@ -135,6 +181,9 @@ export const useCardInteraction = ({ containerRef, cardRef }: UseCardInteraction
     handleCardReset,
     handleWheel,
     setupWheelListener,
+    handleZoomIn,
+    handleZoomOut,
+    handleKeyboardControls,
     toggleAutoRotation,
     startAutoRotation,
     stopAutoRotation
