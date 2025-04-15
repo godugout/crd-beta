@@ -9,10 +9,10 @@ export interface FabricSwatch {
 }
 
 export interface CardData {
-  id: string; // Changed from number to string to match how it's used
+  id: string;
   name?: string;
-  title: string; // Added title property
-  player?: string; // Added player property
+  title?: string;
+  player?: string;
   team?: string;
   jersey?: string;
   year?: string;
@@ -26,5 +26,5 @@ export interface CardData {
   specialEffect?: string;
   imageUrl?: string;
   fabricSwatches?: FabricSwatch[];
-  tags?: string[]; // Added tags property
+  tags?: string[];
 }

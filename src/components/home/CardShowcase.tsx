@@ -16,10 +16,10 @@ interface CardShowcaseProps {
 }
 
 interface Snapshot {
-  id: number;
+  id: string;
   timestamp: Date;
   effects: string[];
-  cardId: number;
+  cardId: string;
 }
 
 const CardShowcase = ({ 
@@ -52,7 +52,7 @@ const CardShowcase = ({
   
   const handleTakeSnapshot = () => {
     const newSnapshot: Snapshot = {
-      id: Date.now(),
+      id: Date.now().toString(),
       timestamp: new Date(),
       effects: [...activeEffects],
       cardId: cardData[activeCard].id
@@ -61,7 +61,7 @@ const CardShowcase = ({
     setSnapshots(prev => [newSnapshot, ...prev]);
   };
   
-  const handleSelectSnapshot = (snapshotId: number) => {
+  const handleSelectSnapshot = (snapshotId: string) => {
     const snapshot = snapshots.find(s => s.id === snapshotId);
     if (snapshot) {
       setActiveEffects(snapshot.effects);
