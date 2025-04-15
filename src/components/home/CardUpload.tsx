@@ -1,72 +1,186 @@
 
 import React, { useState } from 'react';
 import { Upload } from 'lucide-react';
+import ImageUploader from '@/components/dam/ImageUploader';
+import { useNavigate } from 'react-router-dom';
+import { useCards } from '@/context/CardContext';
+import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
 
 interface CardUploadProps {
-  setView: (view: 'showcase' | 'collection' | 'upload') => void;
+  setView: (view: 'showcase' | 'collection' | 'upload' | 'welcome') => void;
+  onCardCreated?: (cardId: string) => void;
 }
 
-const CardUpload = ({ setView }: CardUploadProps) => {
-  const [file, setFile] = useState<File | null>(null);
+const CardUpload = ({ setView, onCardCreated }: CardUploadProps) => {
+  const navigate = useNavigate();
+  const { addCard } = useCards();
   
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setFile(e.target.files[0]);
-    }
+  const [file, setFile] = useState<File | null>(null);
+  const [imageUrl, setImageUrl] = useState<string>('');
+  const [name, setName] = useState('');
+  const [year, setYear] = useState('');
+  const [set, setSet] = useState('');
+  const [cardNumber, setCardNumber] = useState('');
+  const [description, setDescription] = useState('');
+  const [specialEffect, setSpecialEffect] = useState('Classic Holographic');
+  const [team, setTeam] = useState('');
+  
+  const handleImageUpload = (url: string, assetId: string) => {
+    setImageUrl(url);
+    toast.success('Image uploaded successfully!');
   };
   
-  const handleUpload = () => {
-    // In a real app, we would upload the file to a server here
-    // For now, just navigate to the collection view
-    setView('collection');
+  const handleUpload = async () => {
+    if (!imageUrl) {
+      toast.error('Please upload an image first');
+      return;
+    }
+    
+    if (!name) {
+      toast.error('Please provide a card name');
+      return;
+    }
+    
+    try {
+      // Create a unique ID
+      const cardId = `card-${Date.now()}`;
+      
+      // Add the card to the context
+      await addCard({
+        id: cardId,
+        name,
+        team,
+        year,
+        backgroundColor: "#5B23A9",
+        textColor: "white",
+        cardType: "Custom Card",
+        set,
+        cardNumber,
+        description,
+        specialEffect,
+        imageUrl,
+        tags: ["custom", "digital"]
+      });
+      
+      toast.success('Card created successfully!');
+      
+      // Navigate to immersive view or call callback
+      if (onCardCreated) {
+        onCardCreated(cardId);
+      } else {
+        navigate(`/immersive/${cardId}`);
+      }
+    } catch (error) {
+      console.error('Error creating card:', error);
+      toast.error('Failed to create card');
+    }
   };
   
   return (
     <div className="max-w-3xl mx-auto bg-white p-6 rounded-lg shadow-lg">
-      <h2 className="text-2xl font-bold mb-6">Upload Your Card</h2>
+      <h2 className="text-2xl font-bold mb-6">Create Your Card</h2>
       
       <div className="mb-6">
         <label className="block text-gray-700 font-medium mb-2">Card Image</label>
-        <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-          <div className="flex flex-col items-center">
-            <Upload className="h-12 w-12 text-gray-400" />
-            <p className="mt-2 text-sm text-gray-500">Drag and drop your card image here, or click to browse</p>
-            <input 
-              type="file" 
-              className="hidden" 
-              id="card-upload" 
-              accept="image/*" 
-              onChange={handleFileSelect}
+        {imageUrl ? (
+          <div className="relative w-48 h-64 mx-auto mb-4">
+            <img 
+              src={imageUrl}
+              alt="Card preview"
+              className="w-full h-full object-cover rounded-lg"
             />
-            <label htmlFor="card-upload" className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition cursor-pointer">
-              Select Image
-            </label>
-            {file && (
-              <p className="mt-2 text-sm text-green-600">{file.name} selected</p>
-            )}
+            <Button 
+              variant="outline"
+              size="sm"
+              className="absolute top-2 right-2"
+              onClick={() => setImageUrl('')}
+            >
+              Change
+            </Button>
           </div>
-        </div>
+        ) : (
+          <div className="max-w-sm mx-auto">
+            <ImageUploader
+              onUploadComplete={handleImageUpload}
+              title="Upload Card Image"
+              showPreview={true}
+            />
+          </div>
+        )}
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
         <div>
           <label className="block text-gray-700 font-medium mb-2">Card Name</label>
-          <input type="text" className="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="e.g. Michael Jordan Rookie" />
+          <input 
+            type="text" 
+            className="w-full px-3 py-2 border border-gray-300 rounded-md" 
+            placeholder="e.g. Michael Jordan Rookie" 
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+        </div>
+        
+        <div>
+          <label className="block text-gray-700 font-medium mb-2">Team/Club</label>
+          <input 
+            type="text" 
+            className="w-full px-3 py-2 border border-gray-300 rounded-md" 
+            placeholder="e.g. Chicago Bulls" 
+            value={team}
+            onChange={(e) => setTeam(e.target.value)}
+          />
         </div>
         
         <div>
           <label className="block text-gray-700 font-medium mb-2">Year</label>
-          <input type="text" className="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="e.g. 1986" />
+          <input 
+            type="text" 
+            className="w-full px-3 py-2 border border-gray-300 rounded-md" 
+            placeholder="e.g. 1986" 
+            value={year}
+            onChange={(e) => setYear(e.target.value)}
+          />
         </div>
         
         <div>
           <label className="block text-gray-700 font-medium mb-2">Set/Brand</label>
-          <input type="text" className="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="e.g. Fleer" />
+          <input 
+            type="text" 
+            className="w-full px-3 py-2 border border-gray-300 rounded-md" 
+            placeholder="e.g. Fleer" 
+            value={set}
+            onChange={(e) => setSet(e.target.value)}
+          />
         </div>
         
         <div>
           <label className="block text-gray-700 font-medium mb-2">Card Number</label>
-          <input type="text" className="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="e.g. 57" />
+          <input 
+            type="text" 
+            className="w-full px-3 py-2 border border-gray-300 rounded-md" 
+            placeholder="e.g. 57" 
+            value={cardNumber}
+            onChange={(e) => setCardNumber(e.target.value)}
+          />
+        </div>
+        
+        <div>
+          <label className="block text-gray-700 font-medium mb-2">Special Effect</label>
+          <select 
+            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+            value={specialEffect}
+            onChange={(e) => setSpecialEffect(e.target.value)}
+          >
+            <option>Classic Holographic</option>
+            <option>Refractor</option>
+            <option>Prismatic</option>
+            <option>Electric</option>
+            <option>Gold Foil</option>
+            <option>Chrome</option>
+            <option>Vintage</option>
+          </select>
         </div>
       </div>
       
@@ -75,34 +189,25 @@ const CardUpload = ({ setView }: CardUploadProps) => {
         <textarea 
           className="w-full px-3 py-2 border border-gray-300 rounded-md h-24" 
           placeholder="Add any details about your card's condition, history, or why it's special to you"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
         ></textarea>
       </div>
       
-      <div className="mt-6">
-        <label className="block text-gray-700 font-medium mb-2">Special Effect</label>
-        <select className="w-full px-3 py-2 border border-gray-300 rounded-md">
-          <option>Classic Holographic</option>
-          <option>Refractor</option>
-          <option>Prism</option>
-          <option>Chrome</option>
-          <option>Gold Foil</option>
-          <option>Vintage</option>
-        </select>
-      </div>
-      
       <div className="mt-8 flex justify-end">
-        <button 
-          className="px-6 py-2 bg-gray-200 text-gray-800 rounded-lg mr-4 hover:bg-gray-300 transition"
-          onClick={() => setView('collection')}
+        <Button 
+          variant="outline"
+          className="mr-4"
+          onClick={() => setView('welcome')}
         >
           Cancel
-        </button>
-        <button 
-          className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+        </Button>
+        <Button 
           onClick={handleUpload}
+          disabled={!imageUrl || !name}
         >
-          Upload Card
-        </button>
+          Create Card
+        </Button>
       </div>
     </div>
   );

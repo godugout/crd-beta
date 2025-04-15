@@ -1,149 +1,163 @@
 
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import PageLayout from '@/components/navigation/PageLayout';
-import { Button } from '@/components/ui/button';
-import { Image, Layers, Package, Users, Zap, PlayCircle, Eye, MessageCircle } from 'lucide-react';
+import ImageUploader from '@/components/dam/ImageUploader';
+import { cardData } from '@/data/cardData';
+import CardShowcase from '@/components/home/CardShowcase';
+import CardUpload from '@/components/home/CardUpload';
+import { toast } from 'sonner';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Upload, Eye, Sparkles, Plus, ArrowRight } from 'lucide-react';
 
 const Home = () => {
+  const navigate = useNavigate();
+  const [view, setView] = useState<'welcome' | 'showcase' | 'collection' | 'upload'>('welcome');
+  const [activeCard, setActiveCard] = useState(0);
+  const [isFlipped, setIsFlipped] = useState(false);
+
+  const handleSelectCard = (index: number) => {
+    setActiveCard(index);
+  };
+
+  const handleFlipCard = () => {
+    setIsFlipped(!isFlipped);
+  };
+
+  const handleCardCreated = (cardId: string) => {
+    toast.success('Card created successfully!');
+    navigate(`/immersive/${cardId}`);
+  };
+
+  if (view === 'showcase') {
+    return (
+      <PageLayout>
+        <CardShowcase
+          cardData={cardData}
+          activeCard={activeCard}
+          isFlipped={isFlipped}
+          selectCard={handleSelectCard}
+          flipCard={handleFlipCard}
+          setView={setView}
+        />
+      </PageLayout>
+    );
+  }
+
+  if (view === 'upload') {
+    return (
+      <PageLayout>
+        <CardUpload 
+          setView={setView} 
+          onCardCreated={handleCardCreated} 
+        />
+      </PageLayout>
+    );
+  }
+
+  // Welcome/Home view
   return (
-    <PageLayout 
-      title="Home | CardShow" 
-      description="Create, manage, and share your digital card collection"
-    >
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center max-w-2xl mx-auto mb-12">
-          <h1 className="text-4xl font-bold mb-4">Welcome to Your Collection</h1>
-          <p className="text-lg text-muted-foreground mb-8">
-            Create, manage, and share your digital card collection
+    <PageLayout>
+      <div className="max-w-6xl mx-auto px-4 py-10">
+        <div className="text-center mb-12">
+          <h1 className="text-5xl font-bold tracking-tight mb-4">Welcome to CardShow</h1>
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            Create, collect, and experience digital trading cards with stunning visual effects and immersive viewing modes
           </p>
-          <div className="flex flex-wrap gap-4 justify-center">
-            <Button asChild size="lg">
-              <Link to="/cards/create">Create New Card</Link>
-            </Button>
-            <Button asChild size="lg" variant="outline">
-              <Link to="/cards">Browse Gallery</Link>
-            </Button>
-          </div>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
-          <div className="bg-card p-6 rounded-lg shadow-sm border">
-            <div className="h-10 w-10 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
-              <Image className="h-6 w-6 text-blue-600" />
-            </div>
-            <h2 className="text-xl font-bold mb-3">Card Gallery</h2>
-            <p className="mb-4 text-muted-foreground">Browse your collection of cards and memories</p>
-            <Button asChild variant="outline" className="w-full">
-              <Link to="/cards">View Cards</Link>
-            </Button>
-          </div>
-          
-          <div className="bg-card p-6 rounded-lg shadow-sm border">
-            <div className="h-10 w-10 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
-              <Layers className="h-6 w-6 text-purple-600" />
-            </div>
-            <h2 className="text-xl font-bold mb-3">Collections</h2>
-            <p className="mb-4 text-muted-foreground">Organize your cards into themed collections</p>
-            <Button asChild variant="outline" className="w-full">
-              <Link to="/collections">View Collections</Link>
-            </Button>
-          </div>
-          
-          <div className="bg-card p-6 rounded-lg shadow-sm border">
-            <div className="h-10 w-10 bg-green-100 rounded-lg flex items-center justify-center mb-4">
-              <Package className="h-6 w-6 text-green-600" />
-            </div>
-            <h2 className="text-xl font-bold mb-3">Memory Packs</h2>
-            <p className="mb-4 text-muted-foreground">Explore themed memory packs</p>
-            <Button asChild variant="outline" className="w-full">
-              <Link to="/packs">Browse Packs</Link>
-            </Button>
-          </div>
         </div>
 
-        {/* Featured sections */}
-        <div className="mt-16">
-          <h2 className="text-2xl font-bold mb-6 text-center">Featured Experiences</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+          <Card className="hover:shadow-lg transition-shadow">
+            <CardHeader>
+              <CardTitle>
+                <Upload className="h-6 w-6 mb-1" />
+                Upload & Create
+              </CardTitle>
+              <CardDescription>Upload an image and create your card</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                Start from scratch with your own image and create custom cards with stunning visual effects.
+              </p>
+            </CardContent>
+            <CardFooter>
+              <Button onClick={() => setView('upload')} className="w-full">
+                Create a Card <ArrowRight className="h-4 w-4 ml-2" />
+              </Button>
+            </CardFooter>
+          </Card>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-950/30 dark:to-blue-900/20 p-6 rounded-lg border">
-              <div className="h-12 w-12 bg-white/80 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
-                <PlayCircle className="h-7 w-7 text-blue-600 dark:text-blue-400" />
-              </div>
-              <h3 className="text-xl font-bold mb-2">Game Day Mode</h3>
-              <p className="mb-4 text-muted-foreground">
-                Enhance your experience during live games with real-time updates and card creation
+          <Card className="hover:shadow-lg transition-shadow">
+            <CardHeader>
+              <CardTitle>
+                <Eye className="h-6 w-6 mb-1" />
+                Browse Collection
+              </CardTitle>
+              <CardDescription>View your card collection</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                Browse through your existing card collection and view details on any card.
               </p>
-              <Button asChild>
-                <Link to="/game-day">Try Game Day Mode</Link>
+            </CardContent>
+            <CardFooter>
+              <Button onClick={() => navigate('/cards')} variant="outline" className="w-full">
+                View Collection <ArrowRight className="h-4 w-4 ml-2" />
               </Button>
-            </div>
-            
-            <div className="bg-gradient-to-r from-amber-50 to-amber-100 dark:from-amber-950/30 dark:to-amber-900/20 p-6 rounded-lg border">
-              <div className="h-12 w-12 bg-white/80 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
-                <Zap className="h-7 w-7 text-amber-600 dark:text-amber-400" />
-              </div>
-              <h3 className="text-xl font-bold mb-2">Dugout Labs</h3>
-              <p className="mb-4 text-muted-foreground">
-                Preview experimental features and provide feedback to our team
+            </CardFooter>
+          </Card>
+          
+          <Card className="hover:shadow-lg transition-shadow">
+            <CardHeader>
+              <CardTitle>
+                <Sparkles className="h-6 w-6 mb-1" />
+                Interactive Showcase
+              </CardTitle>
+              <CardDescription>Experience card effects</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                Try out our showcase demo with interactive visual effects and 3D transformations.
               </p>
-              <Button asChild>
-                <Link to="/labs">Explore Labs</Link>
+            </CardContent>
+            <CardFooter>
+              <Button onClick={() => setView('showcase')} variant="outline" className="w-full">
+                Try Showcase <ArrowRight className="h-4 w-4 ml-2" />
               </Button>
-            </div>
-          </div>
+            </CardFooter>
+          </Card>
         </div>
         
-        {/* Teams section */}
-        <div className="mt-16">
-          <div className="flex flex-col sm:flex-row justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold">Teams</h2>
-            <Button asChild variant="outline">
-              <Link to="/teams">View All Teams</Link>
-            </Button>
-          </div>
-          
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Link 
-              to="/teams/oakland" 
-              className="bg-card p-4 rounded-lg shadow-sm flex flex-col items-center hover:shadow-md transition-shadow border"
-            >
-              <div className="h-16 w-16 bg-[#006341]/10 rounded-full flex items-center justify-center mb-2">
-                <Users className="h-8 w-8 text-[#006341]" />
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-lg mb-12">
+          <h2 className="text-2xl font-bold mb-4">Featured Cards</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {cardData.slice(0, 4).map((card, index) => (
+              <div 
+                key={card.id} 
+                className="bg-white rounded-lg overflow-hidden shadow hover:shadow-md transition cursor-pointer"
+                onClick={() => navigate(`/immersive/${card.id}`)}
+              >
+                <div className="h-48 overflow-hidden">
+                  <img 
+                    src={card.imageUrl} 
+                    alt={card.name} 
+                    className="w-full h-full object-cover object-center"
+                  />
+                </div>
+                <div className="p-4">
+                  <h3 className="font-bold truncate">{card.name}</h3>
+                  <p className="text-sm text-gray-500 truncate">{card.team}</p>
+                </div>
               </div>
-              <span className="font-medium">Oakland A's</span>
-            </Link>
-            
-            <Link 
-              to="/teams/sf-giants" 
-              className="bg-card p-4 rounded-lg shadow-sm flex flex-col items-center hover:shadow-md transition-shadow border"
-            >
-              <div className="h-16 w-16 bg-[#FD5A1E]/10 rounded-full flex items-center justify-center mb-2">
-                <Users className="h-8 w-8 text-[#FD5A1E]" />
-              </div>
-              <span className="font-medium">SF Giants</span>
-            </Link>
-            
-            <Link 
-              to="/community" 
-              className="bg-card p-4 rounded-lg shadow-sm flex flex-col items-center hover:shadow-md transition-shadow border"
-            >
-              <div className="h-16 w-16 bg-purple-100 dark:bg-purple-900/20 rounded-full flex items-center justify-center mb-2">
-                <MessageCircle className="h-8 w-8 text-purple-600 dark:text-purple-400" />
-              </div>
-              <span className="font-medium">Community</span>
-            </Link>
-            
-            <Link 
-              to="/detector" 
-              className="bg-card p-4 rounded-lg shadow-sm flex flex-col items-center hover:shadow-md transition-shadow border"
-            >
-              <div className="h-16 w-16 bg-teal-100 dark:bg-teal-900/20 rounded-full flex items-center justify-center mb-2">
-                <Eye className="h-8 w-8 text-teal-600 dark:text-teal-400" />
-              </div>
-              <span className="font-medium">Card Detector</span>
-            </Link>
+            ))}
           </div>
         </div>
       </div>
