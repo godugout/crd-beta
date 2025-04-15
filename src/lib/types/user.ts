@@ -1,5 +1,7 @@
 
 import { BaseEntity } from './index';
+import { Collection } from './collection';
+import { Card } from './card';
 
 export interface User extends BaseEntity {
   email: string;
@@ -8,7 +10,9 @@ export interface User extends BaseEntity {
   avatarUrl?: string;
   bio?: string;
   isVerified?: boolean;
-  preferences?: Record<string, any>;
-  socialLinks?: Record<string, string>;
-  role?: 'user' | 'admin' | 'moderator';
+  isPremium?: boolean;
+  collections?: Collection[];
+  cards?: Card[];
+  followingCount?: number;
+  followerCount?: number;
 }

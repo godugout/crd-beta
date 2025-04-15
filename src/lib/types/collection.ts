@@ -4,13 +4,12 @@ import { Card } from './card';
 
 export interface Collection extends BaseEntity {
   title: string;
-  description: string;
+  description?: string;
   coverImageUrl?: string;
   userId: string;
   cards?: Card[];
   isPublic?: boolean;
-  tags?: string[];
-  featured?: boolean;
+  isFeature?: boolean;
   viewCount?: number;
-  name?: string; // For backward compatibility
+  tags?: string[];
 }

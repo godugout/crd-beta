@@ -3,7 +3,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/lib/types';
-import { Cube } from 'lucide-react';
+import { Box } from 'lucide-react';
 
 interface ImmersiveViewerLinkProps {
   card: Card;
@@ -31,7 +31,7 @@ const ImmersiveViewerLink: React.FC<ImmersiveViewerLinkProps> = ({
       className={className}
       onClick={handleViewIn3D}
     >
-      <Cube className="mr-2 h-4 w-4" />
+      <Box className="mr-2 h-4 w-4" />
       View in 3D
     </Button>
   );
