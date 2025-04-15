@@ -5,7 +5,7 @@ import GameDay from '@/pages/GameDay';
 import Labs from '@/pages/Labs';
 import BaseballCardViewer from '@/pages/BaseballCardViewer';
 import PbrDemo from '@/pages/PbrDemo';
-import { lazy } from 'react';
+import CardViewerExperimental from '@/pages/CardViewerExperimental';
 
 // Feature-specific routes
 export const featureRoutes: RouteObject[] = [
@@ -20,6 +20,10 @@ export const featureRoutes: RouteObject[] = [
   {
     path: "/labs/pbr",
     element: <PbrDemo />,
+  },
+  {
+    path: "/labs/card-viewer/:id",
+    element: <CardViewerExperimental />,
   },
   {
     path: "/ar-viewer",

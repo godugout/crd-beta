@@ -148,8 +148,8 @@ export function createPbrScene(
           cardMaterial  // Back
         ];
         
-        // Fix for TS2740: Correctly type the material assignment
-        cardMesh.material = materials as unknown as THREE.Material;
+        // Fix for TS2740: Explicitly assert the type as THREE.Material[]
+        cardMesh.material = materials as THREE.Material[];
       },
       undefined,
       (error) => {
@@ -202,36 +202,46 @@ export function createPbrScene(
   const cleanup = () => {
     window.removeEventListener('resize', handleResize);
     
-    // Properly clean up Three.js objects
-    while(scene.children.length > 0) { 
-      const object = scene.children[0];
-      scene.remove(object);
-      
-      // Type-safe disposal of geometries and materials
-      if ('geometry' in object && object.geometry && typeof object.geometry.dispose === 'function') {
-        object.geometry.dispose();
-      }
-      
-      if ('material' in object) {
-        const material = object.material;
-        if (Array.isArray(material)) {
-          material.forEach(m => {
-            if (m && typeof m.dispose === 'function') {
-              m.dispose();
+    // Properly dispose of scene objects
+    scene.traverse((object) => {
+      // Handle mesh objects with geometry and material
+      if (object instanceof THREE.Mesh) {
+        if (object.geometry) {
+          object.geometry.dispose();
+        }
+        
+        // Handle materials (could be a single material or an array)
+        if (Array.isArray(object.material)) {
+          object.material.forEach((material) => {
+            if (material && typeof material.dispose === 'function') {
+              material.dispose();
             }
           });
-        } else if (material && typeof material.dispose === 'function') {
-          material.dispose();
+        } else if (object.material && typeof object.material.dispose === 'function') {
+          object.material.dispose();
         }
       }
+    });
+    
+    // Clear the scene
+    while (scene.children.length > 0) {
+      scene.remove(scene.children[0]);
     }
     
+    // Dispose of specific resources
     cardGeometry.dispose();
     cardMaterial.dispose();
     edgeGeometry.dispose();
     edgeMaterial.dispose();
+    
+    // Dispose of controls and renderer
     controls.dispose();
     renderer.dispose();
+    
+    // If environment map was loaded, dispose it too
+    if (envMap) {
+      envMap.dispose();
+    }
   };
   
   return { cleanup };
