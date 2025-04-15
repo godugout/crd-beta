@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/lib/types';
 import { useCardKeyboardNavigation } from '@/hooks/card-interactions/useCardKeyboardNavigation';
@@ -186,8 +187,8 @@ const CardDisplay: React.FC<CardDisplayProps> = ({
                   </span>
                 ))}
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </div>
 
