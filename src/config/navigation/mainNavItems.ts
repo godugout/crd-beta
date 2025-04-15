@@ -1,43 +1,31 @@
 
-import { 
-  Home, 
-  Image, 
-  Layers, 
-  Users, 
-  MessageCircle 
-} from 'lucide-react';
-import { NavigationItem } from './types';
+import { Home, LayoutGrid, Collection, Users, Newspaper } from 'lucide-react';
+import type { NavItem } from './types';
 
-// Main navigation items that appear in both desktop and mobile navigation
-export const mainNavItems: NavigationItem[] = [
-  { 
-    title: 'Home', 
+export const mainNavItems: NavItem[] = [
+  {
+    title: 'Home',
     path: '/',
     icon: Home,
-    description: 'Dashboard and overview'
   },
-  { 
-    title: 'Cards', 
+  {
+    title: 'Cards',
     path: '/cards',
-    icon: Image,
-    description: 'Your digital card collection'
+    icon: LayoutGrid,
   },
-  { 
-    title: 'Collections', 
+  {
+    title: 'Collections',
     path: '/collections',
-    icon: Layers,
-    description: 'Organized card collections'
+    icon: Collection,
   },
-  { 
-    title: 'Teams', 
+  {
+    title: 'Teams',
     path: '/teams',
     icon: Users,
-    description: 'Team-based collections'
   },
-  { 
-    title: 'Community', 
+  {
+    title: 'Community',
     path: '/community',
-    icon: MessageCircle,
-    description: 'Connect with other collectors'
-  }
+    icon: Newspaper,
+  },
 ];

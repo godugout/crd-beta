@@ -1,19 +1,20 @@
 
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Search, PlusCircle, User, Menu, X } from 'lucide-react';
+import { Search, PlusCircle, Menu, X } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { mainNavItems } from '@/config/navigation';
 import LabsButton from '@/components/navigation/components/LabsButton';
+import MobileNavigation from '@/components/navigation/MobileNavigation';
+import UserDropdown from '@/components/navbar/UserDropdown';
 
 const AppHeader: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
-  const { user, signIn, signOut } = useAuth();
+  const { user, signOut } = useAuth();
 
-  const isHomePage = location.pathname === '/';
   const isActive = (path: string) => {
     if (path === '/') {
       return location.pathname === '/';
@@ -27,15 +28,6 @@ const AppHeader: React.FC = () => {
 
   const closeMenu = () => {
     setIsMenuOpen(false);
-  };
-
-  const handleSignInOut = async () => {
-    if (user) {
-      await signOut();
-    } else {
-      await signIn("", "");
-    }
-    closeMenu();
   };
 
   return (
@@ -78,14 +70,11 @@ const AppHeader: React.FC = () => {
               <LabsButton variant="icon" />
               
               {user ? (
-                <Button asChild variant="outline">
-                  <Link to="/profile">
-                    <User className="h-4 w-4 mr-2" />
-                    Profile
-                  </Link>
-                </Button>
+                <UserDropdown user={user} onSignOut={signOut} />
               ) : (
-                <Button onClick={handleSignInOut}>Sign In</Button>
+                <Button asChild>
+                  <Link to="/auth">Sign In</Link>
+                </Button>
               )}
               
               <Button asChild className="bg-primary hover:bg-primary/90">
@@ -115,43 +104,7 @@ const AppHeader: React.FC = () => {
       </div>
 
       {/* Mobile Menu */}
-      {isMenuOpen && (
-        <div className="md:hidden bg-background border-t border-border animate-in fade-in slide-in-from-top-5 duration-300">
-          <div className="container px-4 py-3 space-y-1">
-            {mainNavItems.map((item) => (
-              <Link 
-                key={item.path}
-                to={item.path} 
-                className={`block px-3 py-2 text-base font-medium rounded-lg hover:bg-accent/50 ${
-                  isActive(item.path) ? 'text-primary bg-accent/30' : 'text-foreground/70'
-                }`}
-                onClick={closeMenu}
-              >
-                <span className="flex items-center">
-                  {item.icon && <item.icon className="h-5 w-5 mr-2" />}
-                  {item.title}
-                </span>
-              </Link>
-            ))}
-            
-            <div className="pt-4">
-              <Button
-                onClick={handleSignInOut}
-                className="w-full mb-2"
-              >
-                {user ? 'Sign Out' : 'Sign In'}
-              </Button>
-              
-              <Button asChild className="w-full bg-primary hover:bg-primary/90">
-                <Link to="/cards/create" onClick={closeMenu}>
-                  <PlusCircle className="h-4 w-4 mr-2" />
-                  Create Card
-                </Link>
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+      <MobileNavigation isOpen={isMenuOpen} onClose={closeMenu} />
     </header>
   );
 };
