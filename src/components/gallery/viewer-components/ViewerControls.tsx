@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { X, Rotate3d, RefreshCcw, Flip, Settings } from 'lucide-react';
+import { X, Rotate3d, RefreshCcw, FlipHorizontal, Settings } from 'lucide-react';
 
 export interface ViewerControlsProps {
   isFlipped: boolean;
@@ -34,7 +34,7 @@ const ViewerControls: React.FC<ViewerControlsProps> = ({
         onClick={onFlipCard}
         aria-label="Flip card"
       >
-        <Flip size={20} />
+        <FlipHorizontal size={20} />
       </button>
       
       <button

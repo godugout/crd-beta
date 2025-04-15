@@ -2,7 +2,7 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { useCards } from './CardContext';
 import { Card } from '@/lib/types';
-import { Deck, EnhancedCard, Series } from '@/lib/types/CardTypes';
+import { Deck, EnhancedCard, Series, CardRarity } from '@/lib/types/CardTypes';
 
 interface CardEnhancedContextType {
   enhancedCards: EnhancedCard[];
@@ -35,12 +35,12 @@ export const CardEnhancedProvider: React.FC<{ children: React.ReactNode }> = ({ 
     if (cards.length > 0) {
       const enhanced = cards.map(card => ({
         ...card,
-        rarity: card.rarity || 'common',
+        rarity: (card.rarity || 'common') as CardRarity, // Type assertion to CardRarity
         cardNumber: card.id.substring(0, 6),
         editionSize: 100,
       }));
       
-      setEnhancedCards(enhanced);
+      setEnhancedCards(enhanced as EnhancedCard[]); // Type assertion to EnhancedCard[]
       setIsLoading(false);
     }
   }, [cards]);
