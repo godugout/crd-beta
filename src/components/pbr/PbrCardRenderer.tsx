@@ -21,17 +21,18 @@ const PbrCardRenderer: React.FC<PbrCardRendererProps> = ({ cardId }) => {
   const [settings, setSettings] = useState<PbrSettings>({
     roughness: 0.2,
     metalness: 0.8,
-    exposure: 1.0,
-    envMapIntensity: 1.0,
-    reflectionStrength: 0.5,
+    exposure: 1.2,            // Increased from 1.0 for better visibility
+    envMapIntensity: 1.5,     // Increased from 1.0 for stronger reflections
+    reflectionStrength: 0.8,  // Increased from 0.5 for more noticeable reflections
+    holographicEffect: 0.7,   // New setting for holographic effect
+    chromeEffect: 0.5,        // New setting for chrome effect
+    vintageEffect: 0.3        // New setting for vintage effect
   });
   const [activeTab, setActiveTab] = useState('preview');
   
   useEffect(() => {
-    // Determine which card ID to use - from props or URL params
     const targetCardId = cardId || id;
     
-    // Find the card in the context
     if (targetCardId && cards) {
       const foundCard = cards.find(card => card.id === targetCardId);
       setCurrentCard(foundCard || null);
@@ -41,14 +42,13 @@ const PbrCardRenderer: React.FC<PbrCardRendererProps> = ({ cardId }) => {
   useEffect(() => {
     if (!canvasRef.current || !containerRef.current) return;
     
-    // Get the card image URL for texture mapping
     const cardImageUrl = currentCard?.imageUrl;
     
     const { cleanup } = createPbrScene(
       canvasRef.current, 
       containerRef.current, 
       settings,
-      cardImageUrl // Pass the image URL to apply as a texture
+      cardImageUrl
     );
     
     return () => {
@@ -65,7 +65,7 @@ const PbrCardRenderer: React.FC<PbrCardRendererProps> = ({ cardId }) => {
       <Tabs defaultValue="preview" value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
           <TabsTrigger value="preview">Preview</TabsTrigger>
-          <TabsTrigger value="settings">PBR Settings</TabsTrigger>
+          <TabsTrigger value="settings">Material Settings</TabsTrigger>
         </TabsList>
         
         <TabsContent value="preview" className="pt-4">
@@ -79,14 +79,29 @@ const PbrCardRenderer: React.FC<PbrCardRendererProps> = ({ cardId }) => {
                 className="w-full h-full"
               />
               
-              {/* CSS backdrop-filter for card surface interactions */}
-              <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-black/20 to-transparent backdrop-blur-[1px] opacity-30" />
-              
-              {!currentCard && (
-                <div className="absolute inset-0 flex items-center justify-center text-white">
-                  <p>No card selected</p>
+              {/* Visual indicator for effect intensity */}
+              <div className="absolute bottom-4 left-4 right-4 bg-black/50 backdrop-blur-sm rounded-lg p-4 text-white text-sm">
+                <div className="flex justify-between items-center">
+                  <span>Effect Intensity:</span>
+                  <div className="flex gap-2">
+                    {settings.holographicEffect > 0 && (
+                      <span className="px-2 py-1 rounded bg-blue-500/50">
+                        Holo: {Math.round(settings.holographicEffect * 100)}%
+                      </span>
+                    )}
+                    {settings.chromeEffect > 0 && (
+                      <span className="px-2 py-1 rounded bg-gray-500/50">
+                        Chrome: {Math.round(settings.chromeEffect * 100)}%
+                      </span>
+                    )}
+                    {settings.vintageEffect > 0 && (
+                      <span className="px-2 py-1 rounded bg-amber-500/50">
+                        Vintage: {Math.round(settings.vintageEffect * 100)}%
+                      </span>
+                    )}
+                  </div>
                 </div>
-              )}
+              </div>
             </div>
           </div>
         </TabsContent>
