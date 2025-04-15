@@ -10,6 +10,8 @@ interface RenderingStats {
   errors: string[];
   warnings: string[];
   renderTime: number;
+  meshCount?: number;
+  transformations?: string[];
 }
 
 interface CardDiagnosticsProps {
@@ -18,69 +20,79 @@ interface CardDiagnosticsProps {
   renderingStats: RenderingStats;
 }
 
-const CardDiagnostics: React.FC<CardDiagnosticsProps> = ({ card, isVisible, renderingStats }) => {
+const CardDiagnostics: React.FC<CardDiagnosticsProps> = ({ 
+  card, 
+  isVisible, 
+  renderingStats 
+}) => {
   if (!isVisible) return null;
   
   return (
-    <Html position={[3, 0, 0]} transform>
-      <div className="bg-black/90 p-4 rounded text-white font-mono" style={{ width: '300px' }}>
-        <h3 className="font-bold text-lg mb-2">Diagnostics</h3>
+    <Html position={[-2, 0, 0]} transform>
+      <div style={{
+        background: 'rgba(0,0,0,0.7)',
+        color: 'white',
+        padding: '10px',
+        borderRadius: '5px',
+        fontSize: '12px',
+        width: '300px',
+        maxHeight: '400px',
+        overflowY: 'auto',
+        fontFamily: 'monospace'
+      }}>
+        <h3 style={{ margin: '0 0 10px 0', borderBottom: '1px solid #555' }}>Card Diagnostics</h3>
         
-        <div className="mb-3">
-          <p className="text-xs text-gray-400">Card Info:</p>
-          <p className="text-sm">ID: {card.id}</p>
-          <p className="text-sm">Title: {card.title}</p>
-          <p className="text-sm truncate">Image: {card.imageUrl || 'N/A'}</p>
+        <div style={{ marginBottom: '10px' }}>
+          <div>Card ID: {card.id}</div>
+          <div>Title: {card.title || 'Untitled'}</div>
+          <div>Image: {card.imageUrl ? '✓' : '✗'}</div>
+          <div>Effects: {renderingStats.effectsApplied.join(', ') || 'None'}</div>
         </div>
         
-        <div className="mb-3">
-          <p className="text-xs text-gray-400">Status:</p>
-          <p className="text-sm flex justify-between">
-            <span>Image Loaded:</span> 
-            <span className={renderingStats.imageLoaded ? "text-green-400" : "text-red-400"}>
-              {renderingStats.imageLoaded ? "✓" : "✗"}
-            </span>
-          </p>
-          <p className="text-sm flex justify-between">
-            <span>Texture Applied:</span>
-            <span className={renderingStats.textureApplied ? "text-green-400" : "text-red-400"}>
-              {renderingStats.textureApplied ? "✓" : "✗"}
-            </span>
-          </p>
-        </div>
-        
-        <div className="mb-3">
-          <p className="text-xs text-gray-400">Effects:</p>
-          {renderingStats.effectsApplied.length === 0 ? (
-            <p className="text-sm text-yellow-400">No active effects</p>
-          ) : (
-            renderingStats.effectsApplied.map((effect, i) => (
-              <p key={i} className="text-sm text-green-400">• {effect}</p>
-            ))
+        <div style={{ marginBottom: '10px' }}>
+          <div>Textures Loaded: {renderingStats.imageLoaded ? '✓' : '✗'}</div>
+          <div>Textures Applied: {renderingStats.textureApplied ? '✓' : '✗'}</div>
+          <div>Render Time: {renderingStats.renderTime.toFixed(2)} ms</div>
+          {renderingStats.meshCount !== undefined && (
+            <div>Mesh Count: {renderingStats.meshCount}</div>
           )}
         </div>
+
+        {renderingStats.transformations && renderingStats.transformations.length > 0 && (
+          <div style={{ marginBottom: '10px' }}>
+            <h4 style={{ margin: '5px 0', borderBottom: '1px solid #555' }}>Recent Transformations</h4>
+            <div style={{ fontSize: '10px', maxHeight: '100px', overflowY: 'auto' }}>
+              {renderingStats.transformations.map((transform, index) => (
+                <div key={index} style={{ marginBottom: '2px' }}>{transform}</div>
+              ))}
+            </div>
+          </div>
+        )}
         
         {renderingStats.errors.length > 0 && (
-          <div className="mb-3">
-            <p className="text-xs text-gray-400">Errors:</p>
-            {renderingStats.errors.map((error, i) => (
-              <p key={i} className="text-sm text-red-400">{error}</p>
-            ))}
+          <div style={{ marginBottom: '10px' }}>
+            <h4 style={{ margin: '5px 0', color: '#ff6b6b' }}>Errors</h4>
+            <ul style={{ margin: '0', paddingLeft: '15px' }}>
+              {renderingStats.errors.map((error, index) => (
+                <li key={index} style={{ color: '#ff6b6b' }}>{error}</li>
+              ))}
+            </ul>
           </div>
         )}
         
         {renderingStats.warnings.length > 0 && (
-          <div className="mb-3">
-            <p className="text-xs text-gray-400">Warnings:</p>
-            {renderingStats.warnings.map((warning, i) => (
-              <p key={i} className="text-sm text-yellow-400">{warning}</p>
-            ))}
+          <div>
+            <h4 style={{ margin: '5px 0', color: '#ffd166' }}>Warnings</h4>
+            <ul style={{ margin: '0', paddingLeft: '15px' }}>
+              {renderingStats.warnings.map((warning, index) => (
+                <li key={index} style={{ color: '#ffd166' }}>{warning}</li>
+              ))}
+            </ul>
           </div>
         )}
         
-        <div className="mt-2">
-          <p className="text-xs text-gray-400">Performance:</p>
-          <p className="text-sm">Render Time: {renderingStats.renderTime.toFixed(2)}ms</p>
+        <div style={{ marginTop: '10px', fontSize: '10px', opacity: 0.7 }}>
+          Press 'D' to toggle diagnostics
         </div>
       </div>
     </Html>
