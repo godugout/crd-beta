@@ -1,4 +1,3 @@
-
 /* Base card effects */
 .card-effect {
   position: relative;
@@ -80,7 +79,7 @@
   mix-blend-mode: overlay;
   pointer-events: none;
   z-index: 2;
-  opacity: var(--gold-intensity, 0.5); /* Use CSS variable */
+  opacity: calc(0.05 * var(--gold-intensity, 0.05)); /* Use CSS variable */
 }
 
 /* Shimmer effect */
@@ -147,9 +146,9 @@
 
 /* Vintage effect with variable intensity */
 .effect-vintage {
-  filter: sepia(calc(0.5 * var(--vintage-intensity, 0.5))) 
-          contrast(calc(1.0 + 0.2 * var(--vintage-intensity, 0.5))) 
-          brightness(calc(1.0 - 0.1 * var(--vintage-intensity, 0.5)));
+  filter: sepia(calc(0.05 * var(--vintage-intensity, 0.05))) 
+          contrast(calc(1.0 + 0.2 * var(--vintage-intensity, 0.05))) 
+          brightness(calc(1.0 - 0.1 * var(--vintage-intensity, 0.05)));
   position: relative;
 }
 
@@ -283,10 +282,11 @@
 
 /* CSS Variables for effect intensities - default values */
 :root {
-  --holographic-intensity: 0;
-  --refractor-intensity: 0;
-  --chrome-intensity: 0;
-  --vintage-intensity: 0;
+  --holographic-intensity: 0.05;
+  --refractor-intensity: 0.05;
+  --chrome-intensity: 0.05;
+  --vintage-intensity: 0.05;
+  --gold-intensity: 0.05;
   --mouse-x: 50%;
   --mouse-y: 50%;
 }

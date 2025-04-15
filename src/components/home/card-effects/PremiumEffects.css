@@ -1,84 +1,12 @@
 
-.card-gold-foil {
-  position: relative;
-  overflow: hidden;
-}
-
 .card-gold-foil::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    125deg,
-    rgba(253, 252, 251, 0) 0%,
-    rgba(253, 252, 251, 0.05) 10%, 
-    rgba(255, 215, 0, 0.2) 20%, 
-    rgba(212, 175, 55, 0.3) 30%,
-    rgba(218, 165, 32, 0.2) 40%,
-    rgba(253, 252, 251, 0) 50%
-  );
-  pointer-events: none;
-  z-index: 2;
-  animation: gold-shimmer calc(4s / var(--motion-speed)) infinite linear;
-  background-size: 200% 100%;
-  opacity: calc(0.7 * var(--gold-intensity));
-  border-radius: 12px;
-  mix-blend-mode: overlay;
+  opacity: calc(0.05 * var(--gold-intensity));
 }
 
 .card-gold-foil::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(
-    ellipse at center,
-    rgba(255, 215, 0, 0.2),
-    rgba(212, 175, 55, 0.1),
-    rgba(253, 252, 251, 0)
-  );
-  z-index: 1;
-  mix-blend-mode: color-dodge;
-  opacity: calc(0.5 * var(--gold-intensity));
-  border-radius: 12px;
-}
-
-.card-chrome {
-  position: relative;
-  overflow: hidden;
+  opacity: calc(0.05 * var(--gold-intensity));
 }
 
 .card-chrome::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    125deg,
-    rgba(255, 255, 255, 0) 0%,
-    rgba(200, 200, 201, 0.3) 20%, 
-    rgba(255, 255, 255, 0.4) 40%, 
-    rgba(159, 158, 161, 0.3) 60%,
-    rgba(255, 255, 255, 0) 80%
-  );
-  pointer-events: none;
-  z-index: 3;
-  animation: chrome-reflection calc(3s / var(--motion-speed)) infinite linear;
-  background-size: 300% 100%;
-  opacity: calc(0.8 * var(--chrome-intensity));
-  border-radius: 12px;
-  mix-blend-mode: soft-light;
-}
-
-.card-chrome::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(
-    ellipse at center,
-    rgba(255, 255, 255, 0.3),
-    rgba(200, 200, 201, 0.2),
-    rgba(159, 158, 161, 0.1)
-  );
-  z-index: 2;
-  opacity: calc(0.7 * var(--chrome-intensity));
-  border-radius: 12px;
+  opacity: calc(0.05 * var(--chrome-intensity));
 }
