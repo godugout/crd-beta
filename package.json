@@ -11,6 +11,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@apollo/client": "^3.13.7",
     "@hookform/resolvers": "^3.9.0",
     "@radix-ui/react-accordion": "^1.2.0",
     "@radix-ui/react-alert-dialog": "^1.1.1",
@@ -57,6 +58,7 @@
     "fabric": "^6.0.0-beta20",
     "face-api.js": "^0.22.2",
     "framer-motion": "^6.5.1",
+    "graphql": "^16.10.0",
     "input-otp": "^1.2.4",
     "localforage": "^1.10.0",
     "lodash-es": "^4.17.21",
