@@ -9,51 +9,62 @@ interface CardFrontProps {
 const CardFront: React.FC<CardFrontProps> = ({ card }) => {
   return (
     <div className="card-face card-front w-full h-full rounded-lg overflow-hidden">
-      {/* Main card image */}
+      {/* Card image background */}
       {card.imageUrl && (
-        <img
-          src={card.imageUrl}
-          alt={card.title}
-          className="absolute inset-0 w-full h-full object-cover"
-          loading="lazy"
-        />
+        <div className="absolute inset-0">
+          <img 
+            src={card.imageUrl} 
+            alt={card.title || 'Card Image'} 
+            className="w-full h-full object-cover"
+          />
+        </div>
       )}
       
       {/* Card content overlay */}
-      <div className="absolute inset-0 flex flex-col justify-between p-4 bg-gradient-to-t from-black/60 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-200">
-        {/* Top area with title */}
-        <div>
-          <h3 className="text-white text-lg font-bold">{card.title}</h3>
+      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 flex flex-col p-4">
+        {/* Card header */}
+        <div className="text-center mb-4">
+          <h3 className="text-white text-lg font-bold">{card.title || card.name || 'Untitled'}</h3>
           {card.player && (
             <p className="text-white/80 text-sm">{card.player}</p>
           )}
         </div>
         
-        {/* Bottom area with additional details */}
+        {/* Card body - flex-grow to push footer to bottom */}
+        <div className="flex-grow"></div>
+        
+        {/* Card footer */}
         <div className="mt-auto">
-          {card.team && (
-            <p className="text-white/80 text-sm mb-1">{card.team}</p>
-          )}
-          
-          {card.year && (
-            <p className="text-white/80 text-xs">{card.year}</p>
-          )}
-          
           {/* Tags */}
           {card.tags && card.tags.length > 0 && (
-            <div className="flex flex-wrap gap-1 mt-2">
-              {card.tags.slice(0, 3).map((tag) => (
-                <span key={tag} className="text-xs bg-white/20 text-white px-1.5 py-0.5 rounded">
-                  #{tag}
+            <div className="flex flex-wrap gap-1 mb-2">
+              {card.tags.map((tag, index) => (
+                <span 
+                  key={index} 
+                  className="text-xs bg-white/20 text-white px-2 py-0.5 rounded-full"
+                >
+                  {tag}
                 </span>
               ))}
-              {card.tags.length > 3 && (
-                <span className="text-xs bg-white/20 text-white px-1.5 py-0.5 rounded">
-                  +{card.tags.length - 3}
-                </span>
-              )}
             </div>
           )}
+          
+          {/* Card attributes */}
+          <div className="grid grid-cols-2 gap-2 text-sm">
+            {card.team && (
+              <div>
+                <span className="text-white/60 text-xs block">Team</span>
+                <span className="text-white">{card.team}</span>
+              </div>
+            )}
+            
+            {card.year && (
+              <div>
+                <span className="text-white/60 text-xs block">Year</span>
+                <span className="text-white">{card.year}</span>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

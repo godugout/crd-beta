@@ -1,4 +1,3 @@
-
 import { CardLayer, Position, Size } from '@/components/card-creation/CardCreator';
 
 // Card editor state types
@@ -102,3 +101,20 @@ export interface LoadCardPayload {
 }
 
 // No payload for UNDO, REDO, RESET_EDITOR
+
+// Card effects types
+export interface CardEffect {
+  id: string;
+  name: string;
+  description: string;
+  intensity: number;
+  thumbnailUrl: string;
+}
+
+export interface EffectLayer {
+  id: string;
+  effectId: string;
+  intensity: number;
+  visible: boolean;
+  settings?: Record<string, any>;
+}

@@ -13,7 +13,7 @@ const CardBack: React.FC<CardBackProps> = ({ card }) => {
       <div className="flex flex-col h-full">
         {/* Title and details */}
         <div className="text-center mb-4">
-          <h3 className="text-white text-lg font-bold">{card.title}</h3>
+          <h3 className="text-white text-lg font-bold">{card.title || card.name || 'Untitled'}</h3>
           {card.player && (
             <p className="text-white/80 text-sm">{card.player}</p>
           )}
@@ -44,7 +44,7 @@ const CardBack: React.FC<CardBackProps> = ({ card }) => {
           
           {/* Card ID/Serial number */}
           <div className="mt-3 text-center">
-            <span className="text-white/40 text-xs">Card #{card.id.substring(0, 8)}</span>
+            <span className="text-white/40 text-xs">Card #{typeof card.id === 'string' ? card.id.substring(0, 8) : card.id}</span>
           </div>
         </div>
       </div>
