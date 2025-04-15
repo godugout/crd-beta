@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useApiMutation, ApiMutationOptions } from './useApiMutation';
 
 export interface OptimisticUpdateOptions<TData, TVariables, TContext> 
-  extends ApiMutationOptions<TData, TVariables> {
+  extends Omit<ApiMutationOptions<TData, TVariables>, 'onError'> {
   // Function to generate optimistic data from variables
   getOptimisticData: (variables: TVariables) => TData;
   
@@ -12,6 +12,9 @@ export interface OptimisticUpdateOptions<TData, TVariables, TContext>
   
   // Function to rollback changes if mutation fails
   rollbackCache: (context: TContext) => void;
+  
+  // Custom error handler that accepts context
+  onError?: (error: Error, variables: TVariables, context?: TContext) => void;
 }
 
 /**
@@ -28,6 +31,7 @@ export function useOptimisticUpdate<TData, TVariables, TContext = unknown>(
     updateCache, 
     rollbackCache, 
     onMutate: userOnMutate,
+    onError: userOnError,
     ...restOptions
   } = options;
 
@@ -60,15 +64,15 @@ export function useOptimisticUpdate<TData, TVariables, TContext = unknown>(
     }
     
     // Call user-provided onError if it exists
-    if (options.onError) {
-      options.onError(error, variables);
+    if (userOnError) {
+      userOnError(error, variables, context);
     }
   };
 
   const mutation = useApiMutation(mutationFn, {
     ...restOptions,
     onMutate,
-    onError,
+    onError: onError as (error: Error, variables: TVariables) => void,
   });
 
   return {

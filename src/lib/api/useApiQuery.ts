@@ -85,12 +85,17 @@ export function useApiQuery<T>(
     return () => clearInterval(id);
   }, [refetchInterval, fetch, enabled]);
 
+  // Adjust the return type to match the interface
+  const refetch = useCallback(async (): Promise<void> => {
+    await fetch();
+  }, [fetch]);
+
   return {
     data,
     error,
     isLoading,
     isSuccess,
     isError,
-    refetch: fetch,
+    refetch,
   };
 }

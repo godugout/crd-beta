@@ -9,6 +9,6 @@ export * from './card-editor/types';
 export * from './card-editor/actions';
 
 // API utilities
-export * from './api/useApiQuery';
-export * from './api/useApiMutation';
-export * from './api/useOptimisticUpdate';
+export * from '../api/useApiQuery';
+export * from '../api/useApiMutation';
+export * from '../api/useOptimisticUpdate';
