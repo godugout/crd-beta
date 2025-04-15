@@ -1,11 +1,12 @@
-
 // Re-export all types from the new location
 // This provides backward compatibility with existing code
 export * from '@/types/card';
-export * from '@/lib/types/card';
-export * from '@/lib/types/collection';
-export * from '@/lib/types/user';
-export * from '@/lib/types/interaction';
+
+// Export from our newly created type files
+export * from './card';
+export * from './collection';
+export * from './user';
+export * from './interaction';
 
 // Base types that might be used across modules
 export type JsonValue = 

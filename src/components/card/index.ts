@@ -1,28 +1,32 @@
 
-import CardBase from "./CardBase";
-import CardImage from "./CardImage";
-import CardFrame from "./CardFrame";
-import CardContent from "./CardContent";
-import CardEffectsLayer from "./effects/CardEffectsLayer";
-import { CardFront } from "./CardFront";
-import { CardBack } from "./CardBack";
-import { CardThumbnail } from "./CardThumbnail";
+// Import components from the cards directory instead
+// This resolves the missing module errors by using components from the cards folder
+
+// Import components from cards directory
+import CardBase from '../cards/CardBase';
+import { CardImage } from '../cards/CardImage';
+import { CardInfoOverlay } from '../cards/CardInfoOverlay';
+import CardThumbnail from '../cards/CardThumbnail';
+import CardDetailed from '../cards/CardDetailed';
+import RelatedCards from '../cards/RelatedCards';
+
+// Import our local components
+import { CardFront } from './CardFront';
+import { CardBack } from './CardBack';
 
 // Export components
 export { 
   CardBase, 
   CardImage, 
-  CardFrame, 
-  CardContent, 
-  CardEffectsLayer,
+  CardInfoOverlay,
   CardFront,
   CardBack,
-  CardThumbnail
+  CardThumbnail,
+  CardDetailed,
+  RelatedCards
 };
 
-// Re-export props types for components that have them
-export type { default as CardBaseProps } from "./CardBase";
-export type { default as CardImageProps } from "./CardImage";
-export type { default as CardFrameProps } from "./CardFrame";
-export type { default as CardContentProps } from "./CardContent";
-export type { default as CardEffectsLayerProps } from "./effects/CardEffectsLayer";
+// Re-export props types from cards directory
+export type { CardBaseProps } from '../cards/CardBase';
+export type { CardThumbnailProps } from '../cards/CardThumbnail';
+export type { CardDetailedProps } from '../cards/CardDetailed';

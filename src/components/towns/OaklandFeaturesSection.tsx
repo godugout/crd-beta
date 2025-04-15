@@ -3,7 +3,13 @@ import React from 'react';
 import { Users, Calendar, Award, Camera } from 'lucide-react';
 import FeatureCard from './FeatureCard';
 
-const OaklandFeaturesSection: React.FC = () => {
+interface OaklandFeaturesSectionProps {
+  primaryColor?: string; // Add this prop to the interface
+}
+
+const OaklandFeaturesSection: React.FC<OaklandFeaturesSectionProps> = ({ 
+  primaryColor = "#006341" // Default to Oakland's color
+}) => {
   const features = [
     {
       title: 'Community',
@@ -27,6 +33,10 @@ const OaklandFeaturesSection: React.FC = () => {
     }
   ];
   
+  // Use the primary color for styling if provided
+  const iconBgClass = primaryColor ? `bg-${primaryColor}-100` : 'bg-blue-100';
+  const iconTextClass = primaryColor ? `text-${primaryColor}-600` : 'text-blue-600';
+  
   return (
     <div className="py-12">
       <h2 className="text-2xl font-bold mb-8 text-center">Oakland Town Features</h2>
@@ -37,6 +47,7 @@ const OaklandFeaturesSection: React.FC = () => {
             title={feature.title}
             description={feature.description}
             icon={feature.icon}
+            primaryColor={primaryColor}
           />
         ))}
       </div>
