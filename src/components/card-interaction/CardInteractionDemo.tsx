@@ -1,190 +1,225 @@
-import React, { useState, useRef, useCallback, useEffect } from 'react';
-import { CardBase } from '@/components/card';
-import { CardInteraction } from './CardInteraction';
-import { Card3DTransform } from './Card3DTransform';
-import { CardFlip } from './CardFlip';
-import { CardViewControls } from './CardViewControls';
-import { ImmersiveBackground } from './ImmersiveBackground';
-import { toast } from 'sonner';
+
+import React, { useState, useCallback, useRef } from 'react';
+import CardInteraction from './CardInteraction';
+import Card3DTransform from './Card3DTransform';
+import CardFlip from './CardFlip';
+import CardViewControls from './CardViewControls';
+import ImmersiveBackground from './ImmersiveBackground';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 interface CardInteractionDemoProps {
-  cardFront: React.ReactNode;
-  cardBack: React.ReactNode;
   className?: string;
 }
 
-const CardInteractionDemo: React.FC<CardInteractionDemoProps> = ({
-  cardFront,
-  cardBack,
-  className
-}) => {
-  // State for interactions
+const CardInteractionDemo: React.FC<CardInteractionDemoProps> = ({ className }) => {
+  // State for controlling card interactions
   const [isFlipped, setIsFlipped] = useState(false);
   const [isRotationLocked, setIsRotationLocked] = useState(false);
   const [isAutoRotating, setIsAutoRotating] = useState(false);
-  const [zoomLevel, setZoomLevel] = useState(1);
-  const [backgroundTheme, setBackgroundTheme] = useState<'modern' | 'vintage' | 'premium' | 'stadium' | 'custom'>('modern');
+  const [backgroundTheme, setBackgroundTheme] = useState<'modern' | 'vintage' | 'premium' | 'default'>('default');
   
-  // Refs
-  const cardRef = useRef<HTMLDivElement>(null);
-  const autoRotateIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const rotationRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  // Card container ref for taking screenshots
+  const cardContainerRef = useRef<HTMLDivElement>(null);
   
-  // Handle flipping the card
+  // Handle card flipping
   const handleFlip = useCallback(() => {
     setIsFlipped(prev => !prev);
-    toast.info(isFlipped ? 'Showing front side' : 'Showing back side');
-  }, [isFlipped]);
+  }, []);
   
-  // Handle resetting position
+  // Reset card position and rotation
   const handleReset = useCallback(() => {
-    rotationRef.current = { x: 0, y: 0 };
-    setZoomLevel(1);
-    if (isFlipped) {
-      setIsFlipped(false);
-    }
-    toast.success('Card position reset');
-  }, [isFlipped]);
-  
-  // Handle zoom controls
-  const handleZoomIn = useCallback(() => {
-    setZoomLevel(prev => Math.min(prev + 0.25, 2.5));
+    setIsFlipped(false);
+    // If we had a ref to the CardInteraction component, we could reset its position here
   }, []);
   
-  const handleZoomOut = useCallback(() => {
-    setZoomLevel(prev => Math.max(prev - 0.25, 0.5));
-  }, []);
-  
-  // Handle rotation lock
-  const handleToggleRotationLock = useCallback(() => {
+  // Toggle rotation lock
+  const toggleRotationLock = useCallback(() => {
     setIsRotationLocked(prev => !prev);
-    toast.info(isRotationLocked ? 'Rotation unlocked' : 'Rotation locked');
-  }, [isRotationLocked]);
-  
-  // Handle auto-rotate
-  const handleToggleAutoRotate = useCallback(() => {
-    setIsAutoRotating(prev => !prev);
-    if (!isAutoRotating) {
-      toast.info('Auto-rotation started');
-    } else {
-      toast.info('Auto-rotation stopped');
-    }
-  }, [isAutoRotating]);
-  
-  // Handle screenshot
-  const handleScreenshot = useCallback(() => {
-    // In a real implementation, this would use html2canvas or similar to capture the card
-    console.log('Taking screenshot of card');
   }, []);
   
-  // Handle share
-  const handleShare = useCallback(() => {
+  // Toggle auto-rotation
+  const toggleAutoRotate = useCallback(() => {
+    setIsAutoRotating(prev => !prev);
+  }, []);
+  
+  // Take screenshot (simplified implementation)
+  const takeScreenshot = useCallback(() => {
+    // In a real implementation, you would use html2canvas or a similar library
+    alert('Screenshot functionality would capture the current card state');
+  }, []);
+  
+  // Share card (simplified implementation)
+  const shareCard = useCallback(() => {
     if (navigator.share) {
       navigator.share({
-        title: 'Check out my baseball card!',
-        text: 'I created this amazing baseball card on CardShow.',
+        title: 'Check out this baseball card!',
+        text: 'I created this amazing baseball card with the Cardshow app!',
         url: window.location.href,
       }).catch(err => {
-        console.error('Error sharing:', err);
+        console.error('Error sharing card:', err);
       });
     } else {
-      navigator.clipboard.writeText(window.location.href)
-        .then(() => {
-          toast.success('Link copied to clipboard');
-        })
-        .catch(err => {
-          console.error('Error copying to clipboard:', err);
-          toast.error('Failed to copy link');
-        });
+      alert('Sharing is not supported on this browser');
     }
   }, []);
-  
-  // Handle auto-rotation
-  useEffect(() => {
-    if (isAutoRotating && !isRotationLocked) {
-      autoRotateIntervalRef.current = setInterval(() => {
-        rotationRef.current = {
-          x: rotationRef.current.x + 0.2,
-          y: rotationRef.current.y + 0.3,
-        };
-        
-        // Keep the rotation within bounds
-        if (rotationRef.current.x > 15) rotationRef.current.x = -15;
-        if (rotationRef.current.y > 15) rotationRef.current.y = -15;
-        
-        // In a real implementation, this would update the rotation state
-      }, 50);
-    } else if (autoRotateIntervalRef.current) {
-      clearInterval(autoRotateIntervalRef.current);
-      autoRotateIntervalRef.current = null;
-    }
-    
-    return () => {
-      if (autoRotateIntervalRef.current) {
-        clearInterval(autoRotateIntervalRef.current);
-      }
-    };
-  }, [isAutoRotating, isRotationLocked]);
-  
+
   return (
-    <div className="w-full h-full">
-      <ImmersiveBackground
-        theme={backgroundTheme}
-        showThemeSelector={true}
-        animationIntensity={0.8}
-        className="w-full h-full rounded-lg overflow-hidden"
+    <div className={cn("card-interaction-demo", className)}>
+      <ImmersiveBackground 
+        theme={backgroundTheme} 
+        intensity="medium" 
+        className="p-8 min-h-[600px] rounded-xl"
       >
-        <div className="flex flex-col items-center justify-center w-full h-full p-4">
-          <div 
-            className="relative w-full max-w-xs md:max-w-sm aspect-[2.5/3.5]"
-            style={{
-              transform: `scale(${zoomLevel})`,
-              transition: 'transform 0.3s ease-out'
-            }}
-          >
-            <CardInteraction
-              disabled={isRotationLocked}
-              onFlip={handleFlip}
-              className="w-full h-full"
-              damping={0.85}
-              maxRotation={15}
+        <div className="flex flex-col items-center gap-8">
+          <div className="flex flex-wrap gap-2 justify-center">
+            <Button 
+              variant={backgroundTheme === 'default' ? "default" : "outline"} 
+              size="sm"
+              onClick={() => setBackgroundTheme('default')}
             >
-              <Card3DTransform
-                rotateX={0}
-                rotateY={0}
-                lightIntensity={0.4}
-                enableDeformation={true}
-                shadowOpacity={0.3}
-                className="w-full h-full"
-              >
-                <CardFlip
-                  front={cardFront}
-                  back={cardBack}
-                  isFlipped={isFlipped}
-                  onFlip={() => setIsFlipped(prev => !prev)}
-                  flipDirection="horizontal"
-                  enableSound={true}
-                  className="w-full h-full"
-                />
-              </Card3DTransform>
-            </CardInteraction>
+              Default
+            </Button>
+            <Button 
+              variant={backgroundTheme === 'modern' ? "default" : "outline"} 
+              size="sm"
+              onClick={() => setBackgroundTheme('modern')}
+            >
+              Modern
+            </Button>
+            <Button 
+              variant={backgroundTheme === 'vintage' ? "default" : "outline"} 
+              size="sm"
+              onClick={() => setBackgroundTheme('vintage')}
+            >
+              Vintage
+            </Button>
+            <Button 
+              variant={backgroundTheme === 'premium' ? "default" : "outline"} 
+              size="sm"
+              onClick={() => setBackgroundTheme('premium')}
+            >
+              Premium
+            </Button>
           </div>
           
-          <div className="mt-6">
+          <div 
+            ref={cardContainerRef} 
+            className="relative w-80 h-[448px] perspective-1000"
+          >
+            <CardFlip
+              front={
+                <Card3DTransform
+                  disabled={isFlipped || isRotationLocked}
+                  maxRotation={22}
+                  bendFactor={0.1}
+                  shadow={true}
+                  className="w-full h-full"
+                >
+                  <CardInteraction
+                    disabled={isFlipped || isRotationLocked || isAutoRotating}
+                    onFlip={handleFlip}
+                    maxRotation={15}
+                    className="w-full h-full"
+                  >
+                    <div className="card-front w-full h-full rounded-xl overflow-hidden bg-white shadow-xl border-4 border-white">
+                      <div className="relative h-full">
+                        <img 
+                          src="https://storage.googleapis.com/pai-images/6c54daa7570e4349a79659ecfca0f14c.jpeg" 
+                          alt="Baseball Card Front" 
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+                          <h3 className="text-white font-bold text-xl">Mickey Mantle</h3>
+                          <p className="text-white/80 text-sm">New York Yankees • 1952</p>
+                          <Badge className="mt-2 bg-amber-500">Hall of Fame</Badge>
+                        </div>
+                      </div>
+                    </div>
+                  </CardInteraction>
+                </Card3DTransform>
+              }
+              back={
+                <Card3DTransform
+                  disabled={!isFlipped || isRotationLocked}
+                  maxRotation={22}
+                  bendFactor={0.1}
+                  shadow={true}
+                  className="w-full h-full"
+                >
+                  <CardInteraction
+                    disabled={!isFlipped || isRotationLocked || isAutoRotating}
+                    onFlip={handleFlip}
+                    maxRotation={15}
+                    className="w-full h-full"
+                  >
+                    <div className="card-back w-full h-full rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 p-6 shadow-xl border-4 border-white">
+                      <div className="flex flex-col h-full">
+                        <h3 className="font-bold text-lg text-center border-b border-gray-300 pb-2 mb-4">
+                          Player Statistics
+                        </h3>
+                        
+                        <div className="space-y-3 text-sm mb-auto">
+                          <div className="flex justify-between">
+                            <span className="font-medium">Position:</span>
+                            <span>Center Field</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="font-medium">Batting Avg:</span>
+                            <span>.298</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="font-medium">Home Runs:</span>
+                            <span>536</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="font-medium">RBI:</span>
+                            <span>1,509</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="font-medium">Career:</span>
+                            <span>1951-1968</span>
+                          </div>
+                        </div>
+                        
+                        <div className="mt-4 pt-4 border-t border-gray-300">
+                          <p className="text-xs text-gray-600 italic">
+                            "The Commerce Comet" is regarded as the greatest switch-hitter in baseball history. 
+                            A 20-time All-Star and 7-time World Series champion.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </CardInteraction>
+                </Card3DTransform>
+              }
+              isFlipped={isFlipped}
+              onFlip={setIsFlipped}
+              flipDirection="horizontal"
+              enableSound={true}
+              disableFlip={isRotationLocked && !isFlipped}
+            />
+          </div>
+          
+          <div className="mt-2">
             <CardViewControls
               onReset={handleReset}
-              onZoomIn={handleZoomIn}
-              onZoomOut={handleZoomOut}
-              onToggleRotationLock={handleToggleRotationLock}
-              onToggleAutoRotate={handleToggleAutoRotate}
-              onScreenshot={handleScreenshot}
-              onShare={handleShare}
+              onToggleRotationLock={toggleRotationLock}
+              onToggleAutoRotate={toggleAutoRotate}
+              onScreenshot={takeScreenshot}
+              onShare={shareCard}
               isRotationLocked={isRotationLocked}
               isAutoRotating={isAutoRotating}
-              zoomLevel={zoomLevel}
-              maxZoom={2.5}
-              minZoom={0.5}
+              className="bg-white/30 backdrop-blur-sm p-2 rounded-lg"
             />
+          </div>
+          
+          <div className="max-w-md text-center mt-4">
+            <p className="text-sm text-gray-600 bg-white/50 backdrop-blur-sm p-3 rounded-lg">
+              Interact with the card using your mouse or touch. Click to flip, drag to rotate, 
+              and use the controls to lock rotation or take a screenshot.
+            </p>
           </div>
         </div>
       </ImmersiveBackground>

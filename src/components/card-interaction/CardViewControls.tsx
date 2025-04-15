@@ -1,215 +1,208 @@
 
-import React, { useState } from 'react';
-import { cn } from '@/lib/utils';
+import React, { useState, useCallback } from 'react';
+import { Button } from '@/components/ui/button';
 import {
-  RotateCw,
-  RefreshCw,
   ZoomIn,
   ZoomOut,
+  RotateCw,
+  Maximize,
   Lock,
-  Unlock,
+  LockOpen,
+  RefreshCw,
+  Share,
   Camera,
-  Share2,
-  Play,
-  Pause
+  Home,
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { toast } from 'sonner';
 
 export interface CardViewControlsProps {
-  className?: string;
   onReset: () => void;
   onZoomIn?: () => void;
   onZoomOut?: () => void;
-  onToggleRotationLock: () => void;
-  onToggleAutoRotate: () => void;
-  onScreenshot: () => void;
-  onShare: () => void;
-  isRotationLocked: boolean;
-  isAutoRotating: boolean;
-  isZoomAvailable?: boolean;
-  zoomLevel?: number;
+  onRotateClockwise?: () => void;
+  onToggleRotationLock?: () => void;
+  onToggleAutoRotate?: () => void;
+  onScreenshot?: () => void;
+  onShare?: () => void;
+  className?: string;
+  defaultZoom?: number;
   maxZoom?: number;
   minZoom?: number;
+  isRotationLocked?: boolean;
+  isAutoRotating?: boolean;
   vertical?: boolean;
 }
 
 export const CardViewControls: React.FC<CardViewControlsProps> = ({
-  className,
   onReset,
   onZoomIn,
   onZoomOut,
+  onRotateClockwise,
   onToggleRotationLock,
   onToggleAutoRotate,
   onScreenshot,
   onShare,
-  isRotationLocked,
-  isAutoRotating,
-  isZoomAvailable = true,
-  zoomLevel = 1,
-  maxZoom = 2.5,
+  className,
+  defaultZoom = 1,
+  maxZoom = 2,
   minZoom = 0.5,
+  isRotationLocked = false,
+  isAutoRotating = false,
   vertical = false,
 }) => {
-  const [isVisible, setIsVisible] = useState(true);
+  const [zoom, setZoom] = useState(defaultZoom);
   
-  const handleScreenshot = () => {
-    onScreenshot();
-    toast.success('Screenshot captured!', {
-      description: 'Image saved to your gallery'
-    });
-  };
+  const handleZoomIn = useCallback(() => {
+    const newZoom = Math.min(zoom + 0.1, maxZoom);
+    setZoom(newZoom);
+    onZoomIn?.();
+  }, [zoom, maxZoom, onZoomIn]);
   
-  const handleShare = () => {
-    onShare();
-    toast.success('Card ready to share', {
-      description: 'Share menu opened'
-    });
-  };
-  
-  const isZoomInDisabled = zoomLevel >= maxZoom;
-  const isZoomOutDisabled = zoomLevel <= minZoom;
-  
+  const handleZoomOut = useCallback(() => {
+    const newZoom = Math.max(zoom - 0.1, minZoom);
+    setZoom(newZoom);
+    onZoomOut?.();
+  }, [zoom, minZoom, onZoomOut]);
+
+  const containerClass = vertical
+    ? "flex flex-col space-y-2"
+    : "flex flex-row space-x-2";
+
   return (
-    <TooltipProvider delayDuration={300}>
-      <div 
-        className={cn(
-          "card-view-controls transition-opacity duration-300",
-          isVisible ? "opacity-100" : "opacity-0 pointer-events-none",
-          vertical 
-            ? "flex flex-col items-center justify-center space-y-2 p-2" 
-            : "flex items-center justify-center space-x-2 p-2",
-          "backdrop-blur-md bg-background/80 rounded-lg border shadow-sm",
-          className
-        )}
-        onMouseEnter={() => setIsVisible(true)}
-        onMouseLeave={() => setTimeout(() => setIsVisible(false), 2000)}
-      >
+    <TooltipProvider>
+      <div className={cn("card-view-controls", containerClass, className)}>
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
-              variant="ghost"
+              variant="outline"
               size="icon"
+              className="bg-white/80 backdrop-blur-sm"
               onClick={onReset}
-              className="h-8 w-8"
-              aria-label="Reset card position"
             >
-              <RefreshCw className="h-4 w-4" />
+              <Home className="h-4 w-4" />
             </Button>
           </TooltipTrigger>
-          <TooltipContent>Reset position</TooltipContent>
+          <TooltipContent>Reset View</TooltipContent>
         </Tooltip>
         
-        {isZoomAvailable && (
-          <>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={onZoomIn}
-                  disabled={isZoomInDisabled}
-                  className="h-8 w-8"
-                  aria-label="Zoom in"
-                >
-                  <ZoomIn className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Zoom in</TooltipContent>
-            </Tooltip>
-            
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={onZoomOut}
-                  disabled={isZoomOutDisabled}
-                  className="h-8 w-8"
-                  aria-label="Zoom out"
-                >
-                  <ZoomOut className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Zoom out</TooltipContent>
-            </Tooltip>
-          </>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="outline"
+              size="icon"
+              className="bg-white/80 backdrop-blur-sm"
+              onClick={handleZoomIn}
+              disabled={zoom >= maxZoom}
+            >
+              <ZoomIn className="h-4 w-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Zoom In</TooltipContent>
+        </Tooltip>
+        
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="outline"
+              size="icon"
+              className="bg-white/80 backdrop-blur-sm"
+              onClick={handleZoomOut}
+              disabled={zoom <= minZoom}
+            >
+              <ZoomOut className="h-4 w-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Zoom Out</TooltipContent>
+        </Tooltip>
+        
+        {onRotateClockwise && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                className="bg-white/80 backdrop-blur-sm"
+                onClick={onRotateClockwise}
+              >
+                <RotateCw className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Rotate</TooltipContent>
+          </Tooltip>
         )}
         
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onToggleRotationLock}
-              className={cn(
-                "h-8 w-8",
-                isRotationLocked && "bg-muted"
-              )}
-              aria-label={isRotationLocked ? "Unlock rotation" : "Lock rotation"}
-            >
-              {isRotationLocked ? (
-                <Lock className="h-4 w-4" />
-              ) : (
-                <Unlock className="h-4 w-4" />
-              )}
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>{isRotationLocked ? "Unlock rotation" : "Lock rotation"}</TooltipContent>
-        </Tooltip>
+        {onToggleRotationLock && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                className={cn("bg-white/80 backdrop-blur-sm", isRotationLocked && "bg-blue-100")}
+                onClick={onToggleRotationLock}
+              >
+                {isRotationLocked ? (
+                  <Lock className="h-4 w-4" />
+                ) : (
+                  <LockOpen className="h-4 w-4" />
+                )}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              {isRotationLocked ? "Unlock Rotation" : "Lock Rotation"}
+            </TooltipContent>
+          </Tooltip>
+        )}
         
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onToggleAutoRotate}
-              className={cn(
-                "h-8 w-8",
-                isAutoRotating && "bg-muted"
-              )}
-              aria-label={isAutoRotating ? "Stop auto-rotate" : "Start auto-rotate"}
-            >
-              {isAutoRotating ? (
-                <Pause className="h-4 w-4" />
-              ) : (
-                <Play className="h-4 w-4" />
-              )}
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>{isAutoRotating ? "Stop auto-rotate" : "Start auto-rotate"}</TooltipContent>
-        </Tooltip>
+        {onToggleAutoRotate && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                className={cn("bg-white/80 backdrop-blur-sm", isAutoRotating && "bg-blue-100")}
+                onClick={onToggleAutoRotate}
+              >
+                <RefreshCw className={cn("h-4 w-4", isAutoRotating && "animate-spin")} />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              {isAutoRotating ? "Stop Auto-Rotate" : "Start Auto-Rotate"}
+            </TooltipContent>
+          </Tooltip>
+        )}
         
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleScreenshot}
-              className="h-8 w-8"
-              aria-label="Take screenshot"
-            >
-              <Camera className="h-4 w-4" />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>Screenshot</TooltipContent>
-        </Tooltip>
+        {onScreenshot && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                className="bg-white/80 backdrop-blur-sm"
+                onClick={onScreenshot}
+              >
+                <Camera className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Take Screenshot</TooltipContent>
+          </Tooltip>
+        )}
         
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleShare}
-              className="h-8 w-8"
-              aria-label="Share card"
-            >
-              <Share2 className="h-4 w-4" />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>Share</TooltipContent>
-        </Tooltip>
+        {onShare && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                className="bg-white/80 backdrop-blur-sm"
+                onClick={onShare}
+              >
+                <Share className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Share</TooltipContent>
+          </Tooltip>
+        )}
       </div>
     </TooltipProvider>
   );

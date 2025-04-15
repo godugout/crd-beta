@@ -1,275 +1,237 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
-import { Button } from '@/components/ui/button';
-import { Paintbrush } from 'lucide-react';
-import { useTheme } from 'next-themes';
 
 export interface ImmersiveBackgroundProps {
   children: React.ReactNode;
+  theme?: 'modern' | 'vintage' | 'premium' | 'default';
+  intensity?: 'low' | 'medium' | 'high';
+  animated?: boolean;
   className?: string;
-  theme?: 'modern' | 'vintage' | 'premium' | 'stadium' | 'custom';
-  showThemeSelector?: boolean;
-  customBackground?: string;
-  customLighting?: string;
-  animationIntensity?: number;
 }
 
 export const ImmersiveBackground: React.FC<ImmersiveBackgroundProps> = ({
   children,
+  theme = 'default',
+  intensity = 'medium',
+  animated = true,
   className,
-  theme: initialTheme = 'modern',
-  showThemeSelector = true,
-  customBackground,
-  customLighting,
-  animationIntensity = 1.0,
 }) => {
-  const [theme, setTheme] = useState<'modern' | 'vintage' | 'premium' | 'stadium' | 'custom'>(initialTheme);
-  const [animationEnabled, setAnimationEnabled] = useState(true);
-  const { theme: systemTheme } = useTheme();
-  const isDarkMode = systemTheme === 'dark';
-  const backgroundRef = useRef<HTMLDivElement>(null);
-  const particlesRef = useRef<HTMLDivElement>(null);
+  const [mounted, setMounted] = useState(false);
   
-  // Handle theme switch
-  const handleThemeChange = (newTheme: 'modern' | 'vintage' | 'premium' | 'stadium' | 'custom') => {
-    setTheme(newTheme);
+  useEffect(() => {
+    setMounted(true);
+    return () => setMounted(false);
+  }, []);
+
+  // Calculate intensity values
+  const getIntensityValue = () => {
+    switch (intensity) {
+      case 'low': return 0.3;
+      case 'medium': return 0.6;
+      case 'high': return 1;
+      default: return 0.6;
+    }
   };
   
-  // Get background styles based on theme
-  const getBackgroundStyles = () => {
+  const intensityValue = getIntensityValue();
+  
+  // Generate theme-specific styles
+  const getThemeStyles = () => {
     switch (theme) {
       case 'modern':
         return {
-          background: isDarkMode 
-            ? 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)'
-            : 'linear-gradient(135deg, #e0e5ec 0%, #f5f7fa 50%, #dbe7fd 100%)',
-          gridOpacity: isDarkMode ? 0.15 : 0.07,
-          gridSize: '40px',
-          lightIntensity: 0.6,
-          effectColor: isDarkMode ? 'rgba(90, 140, 250, 0.05)' : 'rgba(120, 170, 255, 0.07)'
+          background: `linear-gradient(120deg, #f6f8fa ${100 - intensityValue * 20}%, #e3e9f0)`,
+          boxShadow: `0 0 ${30 * intensityValue}px rgba(0, 0, 0, 0.1) inset`,
+          animationClass: 'bg-modern-animation'
         };
+      
       case 'vintage':
         return {
-          background: isDarkMode
-            ? 'linear-gradient(135deg, #2c2923 0%, #3b3632 50%, #433d36 100%)'
-            : 'linear-gradient(135deg, #f5f5f0 0%, #ece9e1 50%, #d6cfc2 100%)',
-          gridOpacity: 0.08,
-          gridSize: '15px',
-          lightIntensity: 0.4,
-          effectColor: isDarkMode ? 'rgba(255, 230, 150, 0.03)' : 'rgba(210, 180, 140, 0.08)'
+          background: `linear-gradient(120deg, #f8f4e9 ${100 - intensityValue * 20}%, #e7deca)`,
+          boxShadow: `0 0 ${30 * intensityValue}px rgba(139, 69, 19, 0.1) inset`,
+          animationClass: 'bg-vintage-animation'
         };
+      
       case 'premium':
         return {
-          background: isDarkMode
-            ? 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%)'
-            : 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%)',
-          gridOpacity: 0.1,
-          gridSize: '25px',
-          lightIntensity: 0.7,
-          effectColor: isDarkMode ? 'rgba(220, 190, 255, 0.05)' : 'rgba(180, 130, 255, 0.04)'
+          background: `linear-gradient(120deg, #1a1a2e ${100 - intensityValue * 20}%, #16213e)`,
+          boxShadow: `0 0 ${30 * intensityValue}px rgba(255, 215, 0, 0.05) inset`,
+          animationClass: 'bg-premium-animation'
         };
-      case 'stadium':
-        return {
-          background: isDarkMode
-            ? 'linear-gradient(135deg, #1c3122 0%, #215037 50%, #12372a 100%)'
-            : 'linear-gradient(135deg, #e3f2e9 0%, #c6ebd9 50%, #a3d9bf 100%)',
-          gridOpacity: 0.1,
-          gridSize: '50px',
-          lightIntensity: 0.5,
-          effectColor: isDarkMode ? 'rgba(150, 255, 180, 0.04)' : 'rgba(100, 240, 130, 0.05)'
-        };
-      case 'custom':
-        return {
-          background: customBackground || 'transparent',
-          gridOpacity: 0,
-          gridSize: '0px',
-          lightIntensity: 0.5,
-          effectColor: 'transparent'
-        };
+      
       default:
         return {
-          background: isDarkMode 
-            ? 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)'
-            : 'linear-gradient(135deg, #e0e5ec 0%, #f5f7fa 50%, #dbe7fd 100%)',
-          gridOpacity: isDarkMode ? 0.15 : 0.07,
-          gridSize: '40px',
-          lightIntensity: 0.6,
-          effectColor: isDarkMode ? 'rgba(90, 140, 250, 0.05)' : 'rgba(120, 170, 255, 0.07)'
+          background: 'linear-gradient(120deg, #ffffff, #f8f9fa)',
+          boxShadow: 'none',
+          animationClass: ''
         };
     }
   };
   
-  const bgStyles = getBackgroundStyles();
+  const themeStyles = getThemeStyles();
   
-  // Create mouse-following gradient effect
-  useEffect(() => {
-    if (!animationEnabled || !backgroundRef.current) return;
+  // Generate ambient elements based on theme
+  const renderAmbientElements = () => {
+    if (!animated) return null;
     
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!backgroundRef.current) return;
+    switch (theme) {
+      case 'modern':
+        return (
+          <>
+            <div className="ambient-element ambient-circle" style={{ 
+              background: 'radial-gradient(circle, rgba(173, 216, 230, 0.3), rgba(173, 216, 230, 0))',
+              animationDuration: '18s'
+            }} />
+            <div className="ambient-element ambient-circle" style={{ 
+              background: 'radial-gradient(circle, rgba(135, 206, 250, 0.2), rgba(135, 206, 250, 0))',
+              animationDuration: '24s',
+              animationDelay: '2s'
+            }} />
+          </>
+        );
       
-      const { clientX, clientY } = e;
-      const { width, height, left, top } = backgroundRef.current.getBoundingClientRect();
+      case 'vintage':
+        return (
+          <>
+            <div className="ambient-element ambient-dust" />
+            <div className="ambient-element ambient-dust" style={{ animationDelay: '3s' }} />
+            <div className="ambient-element ambient-dust" style={{ animationDelay: '7s' }} />
+          </>
+        );
       
-      // Calculate mouse position relative to background element
-      const x = clientX - left;
-      const y = clientY - top;
+      case 'premium':
+        return (
+          <>
+            <div className="ambient-element ambient-sparkle" />
+            <div className="ambient-element ambient-sparkle" style={{ animationDelay: '2s' }} />
+            <div className="ambient-element ambient-sparkle" style={{ animationDelay: '4s' }} />
+            <div className="ambient-element ambient-sparkle" style={{ animationDelay: '6s' }} />
+          </>
+        );
       
-      // Convert to percentage
-      const xPercent = (x / width) * 100;
-      const yPercent = (y / height) * 100;
-      
-      // Apply gradient to follow mouse
-      backgroundRef.current.style.setProperty('--x-pos', `${xPercent}%`);
-      backgroundRef.current.style.setProperty('--y-pos', `${yPercent}%`);
-    };
-    
-    window.addEventListener('mousemove', handleMouseMove);
-    
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-    };
-  }, [animationEnabled, theme]);
-  
-  // Create floating particles effect
-  useEffect(() => {
-    if (!animationEnabled || !particlesRef.current || theme === 'custom') return;
-    
-    // Clear existing particles
-    particlesRef.current.innerHTML = '';
-    
-    // Create new particles
-    const particleCount = Math.floor(10 * animationIntensity);
-    
-    for (let i = 0; i < particleCount; i++) {
-      const particle = document.createElement('div');
-      
-      // Randomize particle properties
-      const size = Math.random() * 50 + 20;
-      const posX = Math.random() * 100;
-      const posY = Math.random() * 100;
-      const duration = Math.random() * 20 + 40;
-      const delay = Math.random() * 10;
-      
-      // Apply styles
-      particle.className = 'absolute rounded-full bg-current opacity-30 blur-xl';
-      particle.style.width = `${size}px`;
-      particle.style.height = `${size}px`;
-      particle.style.left = `${posX}%`;
-      particle.style.top = `${posY}%`;
-      particle.style.animation = `float ${duration}s ease-in-out ${delay}s infinite alternate`;
-      particle.style.color = bgStyles.effectColor;
-      
-      // Add to container
-      particlesRef.current.appendChild(particle);
+      default:
+        return null;
     }
-    
-    return () => {
-      if (particlesRef.current) {
-        particlesRef.current.innerHTML = '';
-      }
-    };
-  }, [animationEnabled, theme, animationIntensity, bgStyles.effectColor]);
-  
+  };
+
   return (
-    <div
-      ref={backgroundRef}
+    <div 
       className={cn(
-        "immersive-background relative overflow-hidden w-full h-full",
+        "immersive-background relative overflow-hidden transition-all duration-700",
+        animated && themeStyles.animationClass,
+        mounted && "fade-in", // Apply fade-in when mounted
         className
       )}
       style={{
-        background: bgStyles.background,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        '--x-pos': '50%',
-        '--y-pos': '50%',
-        '--grid-size': bgStyles.gridSize,
-        '--grid-opacity': bgStyles.gridOpacity,
-        '--light-intensity': bgStyles.lightIntensity,
-      } as React.CSSProperties}
+        background: themeStyles.background,
+        boxShadow: themeStyles.boxShadow,
+      }}
     >
-      {/* Grid overlay */}
-      <div 
-        className="absolute inset-0 pointer-events-none z-0"
-        style={{
-          backgroundImage: `
-            linear-gradient(to right, rgba(255,255,255,var(--grid-opacity)) 1px, transparent 1px),
-            linear-gradient(to bottom, rgba(255,255,255,var(--grid-opacity)) 1px, transparent 1px)
-          `,
-          backgroundSize: 'var(--grid-size) var(--grid-size)',
-        }}
-      />
-      
-      {/* Light effect */}
-      <div 
-        className="absolute inset-0 pointer-events-none z-0"
-        style={{
-          background: `radial-gradient(
-            circle at var(--x-pos) var(--y-pos),
-            rgba(255,255,255,calc(var(--light-intensity) * 0.5)),
-            transparent 80%
-          )`,
-          opacity: animationEnabled ? 1 : 0,
-          transition: 'opacity 0.5s ease',
-        }}
-      />
-      
-      {/* Animated particles */}
-      <div 
-        ref={particlesRef}
-        className="particles absolute inset-0 pointer-events-none z-0 overflow-hidden"
-      />
-      
-      {/* Theme selector */}
-      {showThemeSelector && (
-        <div className="absolute top-4 right-4 z-10">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="h-8 gap-1">
-                <Paintbrush className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">Background</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => handleThemeChange('modern')}>
-                Modern
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleThemeChange('vintage')}>
-                Vintage
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleThemeChange('premium')}>
-                Premium
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleThemeChange('stadium')}>
-                Stadium
-              </DropdownMenuItem>
-              {customBackground && (
-                <DropdownMenuItem onClick={() => handleThemeChange('custom')}>
-                  Custom
-                </DropdownMenuItem>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
+      {/* Ambient background elements */}
+      {animated && mounted && (
+        <div className="ambient-container absolute inset-0 overflow-hidden pointer-events-none">
+          {renderAmbientElements()}
         </div>
       )}
       
-      {/* Content */}
-      <div className="relative z-1 w-full h-full">{children}</div>
+      {/* Main content */}
+      <div className="immersive-content relative z-10">
+        {children}
+      </div>
       
-      {/* Animation keyframes */}
+      {/* Add dynamic styling */}
       <style dangerouslySetInnerHTML={{ __html: `
+        .immersive-background {
+          min-height: 100%;
+        }
+        
+        .fade-in {
+          animation: fadeIn 0.5s ease-out forwards;
+        }
+        
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        
+        .ambient-container {
+          z-index: 1;
+        }
+        
+        .ambient-element {
+          position: absolute;
+          pointer-events: none;
+        }
+        
+        .ambient-circle {
+          width: 50vw;
+          height: 50vw;
+          border-radius: 50%;
+          opacity: 0.7;
+          filter: blur(30px);
+          animation: float 20s infinite ease-in-out;
+        }
+        
+        .ambient-dust {
+          width: 100%;
+          height: 100%;
+          background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23d2c8b6' fill-opacity='0.2'%3E%3Ccircle cx='10' cy='10' r='1'/%3E%3Ccircle cx='30' cy='50' r='1'/%3E%3Ccircle cx='50' cy='20' r='1'/%3E%3Ccircle cx='70' cy='80' r='1'/%3E%3Ccircle cx='90' cy='40' r='1'/%3E%3C/g%3E%3C/svg%3E");
+          animation: dust 60s infinite linear;
+          opacity: ${intensityValue * 0.5};
+        }
+        
+        .ambient-sparkle {
+          width: 100%;
+          height: 100%;
+          background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.3'%3E%3Ccircle cx='10' cy='10' r='1'/%3E%3Ccircle cx='30' cy='50' r='0.5'/%3E%3Ccircle cx='50' cy='20' r='0.75'/%3E%3Ccircle cx='70' cy='80' r='0.5'/%3E%3Ccircle cx='90' cy='40' r='1'/%3E%3C/g%3E%3C/svg%3E");
+          animation: sparkle 90s infinite linear;
+          opacity: ${intensityValue * 0.7};
+        }
+        
         @keyframes float {
-          0% {
-            transform: translateY(0) translateX(0) scale(1);
-            opacity: 0.2;
-          }
-          100% {
-            transform: translateY(-100px) translateX(50px) scale(1.5);
-            opacity: 0.05;
-          }
+          0%, 100% { transform: translate(0, 0); }
+          25% { transform: translate(5%, 5%); }
+          50% { transform: translate(10%, -5%); }
+          75% { transform: translate(-5%, 10%); }
+        }
+        
+        @keyframes dust {
+          0% { transform: translate(0, 0); }
+          100% { transform: translate(50px, 50px); }
+        }
+        
+        @keyframes sparkle {
+          0% { opacity: ${intensityValue * 0.4}; }
+          50% { opacity: ${intensityValue * 0.7}; }
+          100% { opacity: ${intensityValue * 0.4}; }
+        }
+        
+        .bg-modern-animation {
+          animation: modernPulse 15s infinite alternate;
+        }
+        
+        .bg-vintage-animation {
+          animation: vintageEffect 20s infinite alternate;
+        }
+        
+        .bg-premium-animation {
+          animation: premiumGlow 15s infinite alternate;
+        }
+        
+        @keyframes modernPulse {
+          0% { background-position: 0% 50%; }
+          100% { background-position: 100% 50%; }
+        }
+        
+        @keyframes vintageEffect {
+          0% { filter: sepia(0.2) brightness(1.02); }
+          100% { filter: sepia(0.3) brightness(0.98); }
+        }
+        
+        @keyframes premiumGlow {
+          0% { box-shadow: 0 0 ${20 * intensityValue}px rgba(255, 215, 0, 0.1) inset; }
+          100% { box-shadow: 0 0 ${30 * intensityValue}px rgba(255, 215, 0, 0.2) inset; }
         }
       `}} />
     </div>
