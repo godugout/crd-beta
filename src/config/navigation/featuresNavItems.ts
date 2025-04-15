@@ -1,38 +1,62 @@
 
-import { 
-  Eye,
-  Zap,
-  PlayCircle,
-  FlaskConical 
-} from 'lucide-react';
+import { Archive, Compass, Grid, Layers, Lightbulb, Microscope, Palette, Smartphone } from 'lucide-react';
 import { NavigationItem } from './types';
 
-// Features section navigation
 export const featuresNavItems: NavigationItem[] = [
   {
-    title: 'AR Card Viewer',
-    path: '/ar-viewer',
-    icon: Eye,
-    description: 'View cards in augmented reality'
+    title: "Cards",
+    path: "/cards",
+    icon: Grid,
+    description: "Browse your card collection"
   },
   {
-    title: 'Card Animation',
-    path: '/animation',
-    icon: Zap,
-    description: 'Animated card effects'
+    title: "Collections", 
+    path: "/collections",
+    icon: Archive,
+    description: "Manage your card collections"
   },
   {
-    title: 'Game Day Mode',
-    path: '/game-day',
-    icon: PlayCircle,
-    description: 'Enhanced experience for game day',
-    highlight: true
+    title: "Create",
+    path: "/create",
+    icon: Layers,
+    description: "Create new cards"
   },
   {
-    title: 'Labs',
-    path: '/labs',
-    icon: FlaskConical,
-    description: 'Experimental features',
-    highlight: true
+    title: "Card Effects",
+    path: "/effects",
+    icon: Palette,
+    description: "Explore card visual effects"
+  },
+  {
+    title: "AR Experience",
+    path: "/ar",
+    icon: Smartphone,
+    description: "Experience cards in augmented reality"
+  },
+  {
+    title: "Discover",
+    path: "/discover",
+    icon: Compass,
+    description: "Discover new cards and collections"
+  },
+  {
+    title: "Labs",
+    path: "/labs",
+    icon: Microscope,
+    description: "Experimental features",
+    subItems: [
+      {
+        title: "PBR Demo",
+        path: "/labs/pbr",
+        icon: Lightbulb,
+        description: "Physically Based Rendering demonstration"
+      },
+      {
+        title: "Baseball Cards",
+        path: "/labs/baseball",
+        icon: Lightbulb,
+        description: "Baseball card experience"
+      }
+    ]
   }
 ];

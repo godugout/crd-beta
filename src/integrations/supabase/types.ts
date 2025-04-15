@@ -1370,30 +1370,69 @@ export type Database = {
       }
       teams: {
         Row: {
+          city: string | null
+          country: string | null
           created_at: string
           description: string | null
+          division: string | null
+          founded_year: number | null
           id: string
+          is_active: boolean | null
+          league: string | null
           logo_url: string | null
+          mascot: string | null
           name: string
           owner_id: string
+          primary_color: string | null
+          secondary_color: string | null
+          stadium: string | null
+          state: string | null
+          team_code: string | null
+          tertiary_color: string | null
           updated_at: string
         }
         Insert: {
+          city?: string | null
+          country?: string | null
           created_at?: string
           description?: string | null
+          division?: string | null
+          founded_year?: number | null
           id?: string
+          is_active?: boolean | null
+          league?: string | null
           logo_url?: string | null
+          mascot?: string | null
           name: string
           owner_id: string
+          primary_color?: string | null
+          secondary_color?: string | null
+          stadium?: string | null
+          state?: string | null
+          team_code?: string | null
+          tertiary_color?: string | null
           updated_at?: string
         }
         Update: {
+          city?: string | null
+          country?: string | null
           created_at?: string
           description?: string | null
+          division?: string | null
+          founded_year?: number | null
           id?: string
+          is_active?: boolean | null
+          league?: string | null
           logo_url?: string | null
+          mascot?: string | null
           name?: string
           owner_id?: string
+          primary_color?: string | null
+          secondary_color?: string | null
+          stadium?: string | null
+          state?: string | null
+          team_code?: string | null
+          tertiary_color?: string | null
           updated_at?: string
         }
         Relationships: []

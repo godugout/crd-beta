@@ -1,11 +1,11 @@
-
 import { PbrSettings, PbrSceneOptions } from './types';
 import { pbrFragmentShader, pbrVertexShader } from './shaders';
 
 export function createPbrScene(
   canvas: HTMLCanvasElement,
   container: HTMLDivElement,
-  settings: PbrSettings
+  settings: PbrSettings,
+  cardImageUrl?: string
 ): PbrSceneOptions {
   // Initialize WebGL context
   const gl = canvas.getContext('webgl2');
@@ -80,8 +80,12 @@ export function createPbrScene(
   const metalnessTexture = gl.createTexture();
   const envMapTexture = gl.createTexture();
   
-  // Load default blank textures for now
-  createDefaultTexture(gl, albedoTexture);
+  // Load the card texture if available, otherwise use a default texture
+  if (cardImageUrl) {
+    loadImageTexture(gl, albedoTexture, cardImageUrl);
+  } else {
+    createDefaultTexture(gl, albedoTexture);
+  }
   createDefaultTexture(gl, normalTexture);
   createDefaultTexture(gl, roughnessTexture);
   createDefaultTexture(gl, metalnessTexture);
@@ -393,4 +397,50 @@ function createModelMatrix(rotationX: number, rotationY: number) {
     rotY[2] * rotX[12] + rotY[6] * rotX[13] + rotY[10] * rotX[14] + rotY[14] * rotX[15],
     rotY[3] * rotX[12] + rotY[7] * rotX[13] + rotY[11] * rotX[14] + rotY[15] * rotX[15]
   ]);
+}
+
+function loadImageTexture(gl: WebGL2RenderingContext, texture: WebGLTexture | null, url: string) {
+  if (!texture) return;
+  
+  gl.bindTexture(gl.TEXTURE_2D, texture);
+  
+  // Fill with a placeholder color until the image loads
+  const pixel = new Uint8Array([200, 200, 200, 255]); // Light gray
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, pixel);
+  
+  // Set texture parameters
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  
+  // Load the image
+  const image = new Image();
+  image.crossOrigin = "anonymous"; // Enable cross-origin image loading
+  
+  image.onload = function() {
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+    
+    // Check if the image dimensions are powers of 2
+    if (isPowerOf2(image.width) && isPowerOf2(image.height)) {
+      gl.generateMipmap(gl.TEXTURE_2D);
+    } else {
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    }
+  };
+  
+  image.onerror = function() {
+    console.error('Error loading texture from URL:', url);
+    // Use default texture on error
+    createDefaultTexture(gl, texture);
+  };
+  
+  image.src = url;
+}
+
+function isPowerOf2(value: number): boolean {
+  return (value & (value - 1)) === 0;
 }

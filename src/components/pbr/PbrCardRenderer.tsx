@@ -4,10 +4,20 @@ import { createPbrScene } from './pbrEngine';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import PbrControls from './PbrControls';
 import { PbrSettings } from './types';
+import { Card } from '@/lib/types';
+import { useParams } from 'react-router-dom';
+import { useCards } from '@/context/CardContext';
 
-const PbrCardRenderer: React.FC = () => {
+interface PbrCardRendererProps {
+  cardId?: string;
+}
+
+const PbrCardRenderer: React.FC<PbrCardRendererProps> = ({ cardId }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const { id } = useParams();
+  const { cards } = useCards();
+  const [currentCard, setCurrentCard] = useState<Card | null>(null);
   const [settings, setSettings] = useState<PbrSettings>({
     roughness: 0.2,
     metalness: 0.8,
@@ -18,14 +28,33 @@ const PbrCardRenderer: React.FC = () => {
   const [activeTab, setActiveTab] = useState('preview');
   
   useEffect(() => {
+    // Determine which card ID to use - from props or URL params
+    const targetCardId = cardId || id;
+    
+    // Find the card in the context
+    if (targetCardId && cards) {
+      const foundCard = cards.find(card => card.id === targetCardId);
+      setCurrentCard(foundCard || null);
+    }
+  }, [cardId, id, cards]);
+  
+  useEffect(() => {
     if (!canvasRef.current || !containerRef.current) return;
     
-    const { cleanup } = createPbrScene(canvasRef.current, containerRef.current, settings);
+    // Get the card image URL for texture mapping
+    const cardImageUrl = currentCard?.imageUrl;
+    
+    const { cleanup } = createPbrScene(
+      canvasRef.current, 
+      containerRef.current, 
+      settings,
+      cardImageUrl // Pass the image URL to apply as a texture
+    );
     
     return () => {
       cleanup();
     };
-  }, [settings]);
+  }, [settings, currentCard]);
   
   const handleSettingsChange = (newSettings: Partial<PbrSettings>) => {
     setSettings(prev => ({ ...prev, ...newSettings }));
@@ -52,6 +81,12 @@ const PbrCardRenderer: React.FC = () => {
               
               {/* CSS backdrop-filter for card surface interactions */}
               <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-black/20 to-transparent backdrop-blur-[1px] opacity-30" />
+              
+              {!currentCard && (
+                <div className="absolute inset-0 flex items-center justify-center text-white">
+                  <p>No card selected</p>
+                </div>
+              )}
             </div>
           </div>
         </TabsContent>

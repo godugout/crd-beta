@@ -8,4 +8,5 @@ export type NavigationItem = {
   description?: string;
   highlight?: boolean;
   label?: string; // Added for backward compatibility
+  subItems?: NavigationItem[]; // Added to support nested navigation items
 };
