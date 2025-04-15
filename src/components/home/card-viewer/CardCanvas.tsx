@@ -69,7 +69,7 @@ const CardCanvas: React.FC<CardCanvasProps> = ({
       position: 'absolute',
       width: '100%',
       height: '100%',
-      boxSizing: 'border-box',
+      boxSizing: 'border-box' as 'border-box', // Type assertion to satisfy BoxSizing type
       borderStyle: 'solid',
       borderWidth: '0px',
       borderColor: edgeColor,
