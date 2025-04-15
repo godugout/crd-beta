@@ -1,5 +1,7 @@
+@import './edge-animations.css';
 
 .card-edges {
+  --edge-thickness: var(--thickness, 12px);
   position: absolute;
   width: 100%;
   height: 100%;

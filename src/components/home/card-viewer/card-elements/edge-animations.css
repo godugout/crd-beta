@@ -1,0 +1,42 @@
+
+@keyframes edge-glow {
+  0%, 100% {
+    box-shadow: 0 0 8px var(--edge-color-alpha);
+  }
+  50% {
+    box-shadow: 0 0 12px var(--edge-color-alpha);
+  }
+}
+
+@keyframes edge-rotate {
+  from {
+    transform: rotateX(0deg) rotateY(0deg);
+  }
+  to {
+    transform: rotateX(360deg) rotateY(360deg);
+  }
+}
+
+.card-edges {
+  animation: edge-glow 3s ease-in-out infinite;
+}
+
+.edge-top, .edge-bottom, .edge-left, .edge-right {
+  transition: transform 0.3s ease-out;
+}
+
+.card-edges:hover .edge-top {
+  transform: rotateX(90deg) translateZ(calc(-1.2 * var(--edge-thickness)));
+}
+
+.card-edges:hover .edge-bottom {
+  transform: rotateX(90deg) translateZ(calc(100% - var(--edge-thickness)/1.2));
+}
+
+.card-edges:hover .edge-left {
+  transform: rotateY(90deg) translateZ(calc(-1.2 * var(--edge-thickness)));
+}
+
+.card-edges:hover .edge-right {
+  transform: rotateY(90deg) translateZ(calc(100% - var(--edge-thickness)/1.2));
+}

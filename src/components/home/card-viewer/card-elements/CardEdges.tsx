@@ -9,10 +9,10 @@ interface CardEdgesProps {
 }
 
 const CardEdges: React.FC<CardEdgesProps> = ({ edgeColor, thickness }) => {
-  // Set CSS variables for the edge color
   const edgeStyles = {
     '--edge-color': edgeColor,
     '--edge-color-alpha': `${edgeColor}33`,
+    '--thickness': thickness,
     borderColor: edgeColor,
   } as React.CSSProperties;
 
