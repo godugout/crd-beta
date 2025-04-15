@@ -1,6 +1,6 @@
 
-import React, { useState, useEffect, useRef } from 'react';
-import { X, RefreshCw, KeyboardIcon, Camera, FlipHorizontal, Grid3X3, Layers } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, RefreshCw, KeyboardIcon } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card } from '@/lib/types';
 import { useCards } from '@/context/CardContext';
@@ -10,7 +10,6 @@ import CardShopBackground from './CardShopBackground';
 import CardControlsPanel from './CardControlsPanel';
 import CardMetadataPanel from './CardMetadataPanel';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { toast } from 'sonner';
 
 interface ImmersiveCardViewerProps {
   isOpen: boolean;
@@ -68,16 +67,12 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
         case 'B':
           cycleBackground();
           break;
-        case 's':
-        case 'S':
-          takeScreenshot();
-          break;
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, currentCardIndex, cards]);
+  }, [isOpen, currentCardIndex]);
 
   const navigateToNext = () => {
     if (!cards || cards.length <= 1) return;
@@ -95,13 +90,11 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
 
   const toggleFlip = () => {
     setIsFlipped(prev => !prev);
-    toast.info(isFlipped ? 'Showing front side' : 'Showing back side');
   };
 
   const resetCardPosition = () => {
     // This will trigger a reset in the Card3DRenderer component
     setIsOffCenter(false);
-    toast.info('Card position reset');
   };
 
   const toggleKeyboardShortcuts = () => {
@@ -110,15 +103,16 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
 
   const cycleBackground = () => {
     setBackgroundStyle(prev => {
-      const next = prev === 'grid' ? 'shop' : prev === 'shop' ? 'minimal' : 'grid';
-      toast.info(`Background style: ${next}`);
-      return next;
+      switch (prev) {
+        case 'grid':
+          return 'shop';
+        case 'shop':
+          return 'minimal';
+        case 'minimal':
+        default:
+          return 'grid';
+      }
     });
-  };
-
-  const takeScreenshot = () => {
-    // This is a placeholder for actual screenshot functionality
-    toast.success('Screenshot saved to your gallery');
   };
 
   const toggleEffect = (effect: string) => {
@@ -182,7 +176,6 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
           onShowKeyboardShortcuts={toggleKeyboardShortcuts}
           backgroundStyle={backgroundStyle}
           onCycleBackground={cycleBackground}
-          onTakeScreenshot={takeScreenshot}
         />
       </div>
       
@@ -241,10 +234,6 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
               <div className="flex justify-between px-2 py-1 bg-muted/50 rounded">
                 <span>B</span>
                 <span className="text-muted-foreground">Change background</span>
-              </div>
-              <div className="flex justify-between px-2 py-1 bg-muted/50 rounded">
-                <span>S</span>
-                <span className="text-muted-foreground">Take screenshot</span>
               </div>
               <div className="flex justify-between px-2 py-1 bg-muted/50 rounded">
                 <span>K</span>

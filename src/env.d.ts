@@ -8,8 +8,6 @@ declare namespace NodeJS {
     VITE_SUPABASE_URL: string
     VITE_SUPABASE_ANON_KEY: string
     VITE_SENTRY_DSN: string
-    VITE_GRAPHQL_API_URL: string
-    VITE_GRAPHQL_WS_URL: string
   }
 }
 
@@ -21,7 +19,5 @@ interface ImportMeta {
     VITE_SUPABASE_URL: string;
     VITE_SUPABASE_ANON_KEY: string;
     VITE_SENTRY_DSN: string;
-    VITE_GRAPHQL_API_URL?: string;
-    VITE_GRAPHQL_WS_URL?: string;
   };
 }

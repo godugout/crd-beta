@@ -1,28 +1,37 @@
 
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import PageLayout from '@/components/navigation/PageLayout';
+import { useLocation } from "react-router-dom";
+import { useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
-const NotFound: React.FC = () => {
+const NotFound = () => {
+  const location = useLocation();
+
+  useEffect(() => {
+    console.error(
+      "404 Error: User attempted to access non-existent route:",
+      location.pathname
+    );
+  }, [location.pathname]);
+
   return (
-    <PageLayout title="Page Not Found" description="The page you're looking for doesn't exist">
-      <div className="container mx-auto flex flex-col items-center justify-center px-4 py-16 text-center">
-        <h1 className="text-8xl font-bold text-primary mb-4">404</h1>
-        <h2 className="text-3xl font-bold mb-6">Page Not Found</h2>
-        <p className="text-lg text-muted-foreground max-w-md mb-8">
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
+      <div className="text-center max-w-lg p-6">
+        <h1 className="text-6xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-litmus-green to-litmus-green-secondary">404</h1>
+        <p className="text-xl text-gray-600 dark:text-gray-300 mb-6">Oops! Page not found</p>
+        <p className="text-gray-500 dark:text-gray-400 mb-8">
           The page you're looking for doesn't exist or has been moved.
         </p>
-        <div className="space-x-4">
-          <Button asChild>
-            <Link to="/">Go to Home</Link>
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <Button asChild className="bg-litmus-green hover:bg-litmus-green/90">
+            <Link to="/">Return Home</Link>
           </Button>
-          <Button variant="outline" asChild>
-            <Link to="/cards">Browse Cards</Link>
+          <Button asChild variant="outline">
+            <Link to="/gallery">Browse Cards</Link>
           </Button>
         </div>
       </div>
-    </PageLayout>
+    </div>
   );
 };
 

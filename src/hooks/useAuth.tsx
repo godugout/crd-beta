@@ -12,7 +12,7 @@ export interface UnifiedAuthContextType {
   isAuthenticated?: boolean;
   error?: string | null;
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, userData: Partial<User> | string) => Promise<void>;
+  signUp: (email: string, password: string, nameOrUserData: string | Partial<User>) => Promise<void>;
   signOut: () => Promise<void>;
   signInWithProvider?: (provider: 'google' | 'github' | 'facebook') => Promise<void>;
   updateUserProfile?: (data: Partial<User>) => Promise<void>;

@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
 
-export interface CardImageProps {
+interface CardImageProps {
   src: string;
   alt: string;
   fit?: 'cover' | 'contain';

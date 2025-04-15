@@ -2,7 +2,7 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 
-export interface CardEffectsLayerProps {
+interface CardEffectsLayerProps {
   children: React.ReactNode;
   activeEffects: string[];
   intensity?: number;

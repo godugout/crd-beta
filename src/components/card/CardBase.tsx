@@ -2,7 +2,7 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 
-export interface CardBaseProps {
+interface CardBaseProps {
   children: React.ReactNode;
   className?: string;
   isFlipped?: boolean;

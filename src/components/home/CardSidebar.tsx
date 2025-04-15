@@ -10,8 +10,8 @@ interface CardSidebarProps {
   onSelectCard: (index: number) => void;
   activeEffects: string[];
   toggleEffect: (effect: string) => void;
-  snapshots: { id: string, timestamp: Date, effects: string[] }[];
-  onSelectSnapshot: (snapshotId: string) => void;
+  snapshots: { id: number, timestamp: Date, effects: string[] }[];
+  onSelectSnapshot: (snapshotId: number) => void;
   onClearEffects: () => void;
 }
 

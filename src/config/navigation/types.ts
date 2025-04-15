@@ -10,6 +10,3 @@ export type NavigationItem = {
   label?: string; // Added for backward compatibility
   subItems?: NavigationItem[]; // Added to support nested navigation items
 };
-
-// Alias for backward compatibility
-export type NavItem = NavigationItem;

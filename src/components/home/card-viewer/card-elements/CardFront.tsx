@@ -1,68 +1,57 @@
 
 import React from 'react';
 import { CardData } from '@/types/card';
+import FabricSwatch from '@/components/home/card-effects/FabricSwatch';
 
 interface CardFrontProps {
   card: CardData;
 }
 
 const CardFront: React.FC<CardFrontProps> = ({ card }) => {
+  // Check if the card has fabric swatches (added in the metadata)
+  const hasFabricSwatches = card.fabricSwatches && card.fabricSwatches.length > 0;
+  
   return (
-    <div className="card-face card-front w-full h-full rounded-lg overflow-hidden">
-      {/* Card image background */}
-      {card.imageUrl && (
-        <div className="absolute inset-0">
+    <div className="card-front absolute inset-0 flex flex-col">
+      {/* Card image */}
+      <div className="relative w-full h-full overflow-hidden">
+        {card.imageUrl ? (
           <img 
             src={card.imageUrl} 
-            alt={card.title || 'Card Image'} 
+            alt={card.name} 
             className="w-full h-full object-cover"
           />
-        </div>
-      )}
-      
-      {/* Card content overlay */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 flex flex-col p-4">
-        {/* Card header */}
-        <div className="text-center mb-4">
-          <h3 className="text-white text-lg font-bold">{card.title || card.name || 'Untitled'}</h3>
-          {card.player && (
-            <p className="text-white/80 text-sm">{card.player}</p>
-          )}
-        </div>
+        ) : (
+          <div 
+            className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-400"
+            style={{ backgroundColor: card.backgroundColor || '#f0f0f0' }}
+          >
+            No Image
+          </div>
+        )}
         
-        {/* Card body - flex-grow to push footer to bottom */}
-        <div className="flex-grow"></div>
+        {/* Render fabric swatches if available */}
+        {hasFabricSwatches && card.fabricSwatches.map((swatch, index) => (
+          <FabricSwatch
+            key={index}
+            fabricType={swatch.type}
+            year={swatch.year}
+            team={swatch.team}
+            manufacturer={swatch.manufacturer}
+            position={swatch.position as "top-left" | "top-right" | "bottom-left" | "bottom-right" | "center"}
+            size={swatch.size as "small" | "medium" | "large"}
+          />
+        ))}
         
-        {/* Card footer */}
-        <div className="mt-auto">
-          {/* Tags */}
-          {card.tags && card.tags.length > 0 && (
-            <div className="flex flex-wrap gap-1 mb-2">
-              {card.tags.map((tag, index) => (
-                <span 
-                  key={index} 
-                  className="text-xs bg-white/20 text-white px-2 py-0.5 rounded-full"
-                >
-                  {tag}
-                </span>
-              ))}
+        {/* Card info overlay at bottom */}
+        <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/70 to-transparent text-white">
+          <div className="flex justify-between items-end">
+            <div>
+              <h3 className="text-lg font-bold truncate">{card.name}</h3>
+              <div className="text-xs opacity-90">{card.team}</div>
             </div>
-          )}
-          
-          {/* Card attributes */}
-          <div className="grid grid-cols-2 gap-2 text-sm">
-            {card.team && (
-              <div>
-                <span className="text-white/60 text-xs block">Team</span>
-                <span className="text-white">{card.team}</span>
-              </div>
-            )}
-            
-            {card.year && (
-              <div>
-                <span className="text-white/60 text-xs block">Year</span>
-                <span className="text-white">{card.year}</span>
-              </div>
+            {card.jersey && (
+              <div className="text-2xl font-bold">#{card.jersey}</div>
             )}
           </div>
         </div>

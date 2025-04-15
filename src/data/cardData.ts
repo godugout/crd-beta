@@ -3,7 +3,7 @@ import { CardData } from '@/types/card';
 
 export const cardData: CardData[] = [
   {
-    id: "1",
+    id: 1,
     name: "Prince",
     team: "Minnesota Wolves",
     jersey: "72",
@@ -19,7 +19,7 @@ export const cardData: CardData[] = [
     imageUrl: "/lovable-uploads/667e6ad2-af96-40ac-bd16-a69778e14b21.png"
   },
   {
-    id: "2",
+    id: 2,
     name: "Michael Jordan",
     team: "Chicago Bulls",
     jersey: "23",
@@ -35,7 +35,7 @@ export const cardData: CardData[] = [
     imageUrl: "/lovable-uploads/371b81a2-cafa-4637-9358-218d4120c658.png"
   },
   {
-    id: "3",
+    id: 3,
     name: "Elvis Presley",
     team: "Memphis Grizzlies",
     jersey: "15",
@@ -51,7 +51,7 @@ export const cardData: CardData[] = [
     imageUrl: "/lovable-uploads/236e3ad9-f7c2-4e5b-b29a-ca52a49ff3ed.png"
   },
   {
-    id: "4",
+    id: 4,
     name: "Bob Marley",
     team: "Los Angeles Lakers",
     jersey: "23",
@@ -67,7 +67,7 @@ export const cardData: CardData[] = [
     imageUrl: "/lovable-uploads/a38aa501-ea2d-4416-9699-1e69b1826233.png"
   },
   {
-    id: "5",
+    id: 5,
     name: "Tupac Shakur",
     team: "Duke",
     jersey: "2",
@@ -83,7 +83,7 @@ export const cardData: CardData[] = [
     imageUrl: "/lovable-uploads/79a099b9-c77a-491e-9755-ba25419791f5.png"
   },
   {
-    id: "6",
+    id: 6,
     name: "Notorious B.I.G.",
     team: "Brooklyn Nets",
     jersey: "72",

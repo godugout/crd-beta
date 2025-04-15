@@ -1,72 +1,55 @@
 
-import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import { CardStateProvider } from './lib/state/providers/CardStateProvider';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { ThemeProvider } from './components/ui/ThemeProvider';
+import { Toaster } from './components/ui/toaster';
+import { Toaster as SonnerToaster } from 'sonner';
 import { CardProvider } from './context/CardContext';
+import { CardEnhancedProvider } from './context/CardEnhancedProvider';
+
+// Core pages
 import Home from './pages/Home';
 import Gallery from './pages/Gallery';
+import CardEditor from './pages/CardEditor';
 import CardDetail from './pages/CardDetail';
-import CardViewerExperimental from './pages/CardViewerExperimental';
-import ImmersiveCardViewerDemo from './pages/ImmersiveCardViewerDemo';
-import { Toaster } from 'sonner';
-import ImmersiveViewer from './pages/ImmersiveViewer';
-import { ThemeProvider } from './components/ui/ThemeProvider';
-import { AuthProvider } from './providers/AuthProvider';
-import Profile from './pages/Profile';
-import Settings from './pages/Settings';
-import Dashboard from './pages/Dashboard';
-import Auth from './pages/Auth';
 import NotFound from './pages/NotFound';
-import { CardEnhancedProvider } from './context/CardEnhancedProvider';
+import Collections from './pages/Collections';
+import CardGallery from './pages/CardGallery';
+import CollectionDetail from './pages/CollectionDetail';
+
+// Lab features
+import Labs from './pages/Labs';
+import CardViewerExperimental from './pages/CardViewerExperimental';
+import ArCardViewer from './pages/ArCardViewer';
 
 function App() {
   return (
-    <ThemeProvider defaultTheme="light" storageKey="cardshow-theme">
-      <AuthProvider autoLogin={true}>
-        <CardProvider>
-          <CardEnhancedProvider>
-            <CardStateProvider>
-              <Router>
-                <Toaster />
-                <Routes>
-                  {/* Main Routes */}
-                  <Route path="/" element={<Home />} />
-                  <Route path="/dashboard" element={<Dashboard />} />
-                  
-                  {/* Card Routes */}
-                  <Route path="/cards" element={<Gallery />} />
-                  <Route path="/card/:id" element={<CardDetail />} />
-                  <Route path="/card/create" element={<CardDetail />} />
-                  
-                  {/* Profile Routes */}
-                  <Route path="/profile" element={<Profile />} />
-                  <Route path="/settings" element={<Settings />} />
-                  <Route path="/auth/*" element={<Auth />} />
-                  
-                  {/* Collections */}
-                  <Route path="/collections" element={<Gallery />} />
-                  <Route path="/collections/:id" element={<Gallery />} />
-                  
-                  {/* Teams */}
-                  <Route path="/teams" element={<Gallery />} />
-                  <Route path="/teams/:id" element={<Gallery />} />
-                  
-                  {/* Immersive Experience */}
-                  <Route path="/immersive/:id?" element={<ImmersiveViewer />} />
-                  <Route path="/immersive-viewer/:id?" element={<ImmersiveViewer />} />
-                  
-                  {/* Labs/Experimental Routes */}
-                  <Route path="/labs/card-viewer/:id" element={<CardViewerExperimental />} />
-                  <Route path="/labs/immersive/:id?" element={<ImmersiveCardViewerDemo />} />
-                  
-                  {/* 404 Not Found */}
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </Router>
-            </CardStateProvider>
-          </CardEnhancedProvider>
-        </CardProvider>
-      </AuthProvider>
+    <ThemeProvider defaultTheme="dark" storageKey="cardshow-theme">
+      <CardProvider>
+        <CardEnhancedProvider>
+          <Router>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/gallery" element={<Gallery />} />
+              <Route path="/cards" element={<CardGallery />} />
+              <Route path="/cards/:id" element={<CardDetail />} />
+              <Route path="/cards/create" element={<CardEditor />} />
+              <Route path="/cards/edit/:id" element={<CardEditor />} />
+              <Route path="/collections" element={<Collections />} />
+              <Route path="/collections/:id" element={<CollectionDetail />} />
+              
+              {/* Lab Features */}
+              <Route path="/labs" element={<Labs />} />
+              <Route path="/labs/card-viewer/:id" element={<CardViewerExperimental />} />
+              <Route path="/ar-card-viewer/:id" element={<ArCardViewer />} />
+              <Route path="/ar-viewer" element={<ArCardViewer />} />
+              
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Router>
+          <Toaster />
+          <SonnerToaster position="top-center" />
+        </CardEnhancedProvider>
+      </CardProvider>
     </ThemeProvider>
   );
 }

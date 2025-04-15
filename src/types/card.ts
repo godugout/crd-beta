@@ -9,22 +9,19 @@ export interface FabricSwatch {
 }
 
 export interface CardData {
-  id: string;
-  name?: string;
-  title?: string;
-  player?: string;
-  team?: string;
-  jersey?: string;
-  year?: string;
-  backgroundColor?: string;
-  textColor?: string;
-  cardType?: string;
-  artist?: string;
-  set?: string;
-  cardNumber?: string;
-  description?: string;
-  specialEffect?: string;
+  id: number;
+  name: string;
+  team: string;
+  jersey: string;
+  year: string;
+  backgroundColor: string;
+  textColor: string;
+  cardType: string;
+  artist: string;
+  set: string;
+  cardNumber: string;
+  description: string;
+  specialEffect: string;
   imageUrl?: string;
   fabricSwatches?: FabricSwatch[];
-  tags?: string[];
 }

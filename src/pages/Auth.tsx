@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -6,81 +7,104 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, Github, Mail } from "lucide-react";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { captureException } from '@/lib/monitoring/sentry';
+import { logger } from '@/lib/monitoring/logger';
+import { performance } from '@/lib/monitoring/performance';
 
-const Auth: React.FC = () => {
+const Auth = () => {
   const navigate = useNavigate();
-  const { user, isLoading, signIn, signUp, signInWithProvider } = useAuth();
+  const auth = useAuth();
+  const { user, isLoading } = auth;
+  
+  // Handle older and newer auth context structures safely with proper type checking
+  const signIn = auth.signIn;
+  const signUp = auth.signUp;
+  const signInWithProvider = typeof auth.signInWithProvider === 'function' 
+    ? auth.signInWithProvider 
+    : () => Promise.resolve();
+  
+  // Safely access error property which might not exist in all auth context implementations
+  const errorMessage = 'error' in auth ? auth.error : null;
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
-  const [authLoading, setAuthLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   
+  // Redirect if already logged in
   useEffect(() => {
     if (user) {
-      navigate('/dashboard');
+      navigate('/gallery');
     }
   }, [user, navigate]);
   
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
-    setAuthLoading(true);
-    setErrorMsg(null);
     
     try {
+      performance.startMeasurement('sign-in', { email });
       await signIn(email, password);
-      navigate('/dashboard');
+      logger.info('User signed in successfully', { context: { userEmail: email } });
     } catch (err: any) {
-      setErrorMsg(err.message || "Failed to sign in");
+      captureException(err, { context: { action: 'signin' } });
+      logger.error('Sign in failed', { context: { error: err.message } });
     } finally {
-      setAuthLoading(false);
+      performance.endMeasurement('sign-in');
     }
   };
   
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    setAuthLoading(true);
-    setErrorMsg(null);
-    
-    if (!name.trim()) {
-      setErrorMsg("Name is required");
-      setAuthLoading(false);
-      return;
-    }
     
     try {
-      await signUp(email, password, name);
-      navigate('/dashboard');
+      performance.startMeasurement('sign-up', { email });
+      // Handle different signUp method signatures
+      if (typeof signUp === 'function') {
+        // Since we're accepting either string or object, we need to handle both cases
+        // The old context expects a string, the new one expects an object
+        await signUp(email, password, name);
+      }
+      logger.info('User signed up successfully', { context: { userEmail: email } });
     } catch (err: any) {
-      setErrorMsg(err.message || "Failed to sign up");
+      captureException(err, { context: { action: 'signup' } });
+      logger.error('Sign up failed', { context: { error: err.message } });
     } finally {
-      setAuthLoading(false);
+      performance.endMeasurement('sign-up');
     }
   };
   
-  const handleSocialSignIn = async (provider: 'google' | 'github' | 'facebook') => {
-    setAuthLoading(true);
-    setErrorMsg(null);
-    
+  const handleGoogleSignIn = async () => {
     try {
-      await signInWithProvider(provider);
-      navigate('/dashboard');
+      performance.startMeasurement('google-sign-in');
+      if (typeof signInWithProvider === 'function') {
+        await signInWithProvider('google');
+      } else {
+        throw new Error('Social sign-in not configured');
+      }
+      logger.info('Google sign in initiated');
     } catch (err: any) {
-      setErrorMsg(err.message || `Failed to sign in with ${provider}`);
+      captureException(err, { context: { action: 'google-signin' } });
+      logger.error('Google sign in failed', { context: { error: err.message } });
     } finally {
-      setAuthLoading(false);
+      performance.endMeasurement('google-sign-in');
     }
   };
   
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
-  }
+  const handleGithubSignIn = async () => {
+    try {
+      performance.startMeasurement('github-sign-in');
+      if (typeof signInWithProvider === 'function') {
+        await signInWithProvider('github');
+      } else {
+        throw new Error('Social sign-in not configured');
+      }
+      logger.info('GitHub sign in initiated');
+    } catch (err: any) {
+      captureException(err, { context: { action: 'github-signin' } });
+      logger.error('GitHub sign in failed', { context: { error: err.message } });
+    } finally {
+      performance.endMeasurement('github-sign-in');
+    }
+  };
   
   return (
     <div className="min-h-screen flex flex-col">
@@ -90,177 +114,164 @@ const Auth: React.FC = () => {
         </div>
       </header>
       
-      <main className="flex-1 flex items-center justify-center p-4">
-        <div className="w-full max-w-md space-y-8">
-          <div className="text-center">
+      <main className="flex-1 pt-16 pb-24">
+        <div className="container mx-auto max-w-md px-4 py-8">
+          <div className="text-center mb-8">
             <h1 className="text-3xl font-bold">Welcome to CardShow</h1>
             <p className="text-muted-foreground mt-2">
               Sign in or create an account to manage your digital cards
             </p>
           </div>
           
-          <Card>
-            <CardContent className="pt-6">
-              <div className="space-y-4 mb-6">
-                <Button 
-                  variant="outline" 
-                  className="w-full" 
-                  disabled={authLoading}
-                  onClick={() => handleSocialSignIn('google')}
-                >
-                  <img src="https://authjs.dev/img/providers/google.svg" alt="Google" className="mr-2 h-4 w-4" />
-                  Continue with Google
-                </Button>
-                
-                <Button 
-                  variant="outline" 
-                  className="w-full" 
-                  disabled={authLoading}
-                  onClick={() => handleSocialSignIn('github')}
-                >
-                  <Github className="mr-2 h-4 w-4" />
-                  Continue with GitHub
-                </Button>
-                
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t" />
-                  </div>
-                  <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-background px-2 text-muted-foreground">
-                      Or continue with
-                    </span>
-                  </div>
+          <div className="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-sm border">
+            <div className="space-y-4 mb-6">
+              <Button 
+                variant="outline" 
+                className="w-full" 
+                disabled={isLoading}
+                onClick={handleGoogleSignIn}
+              >
+                <img src="https://authjs.dev/img/providers/google.svg" alt="Google" className="mr-2 h-4 w-4" />
+                Continue with Google
+              </Button>
+              
+              <Button 
+                variant="outline" 
+                className="w-full" 
+                disabled={isLoading}
+                onClick={handleGithubSignIn}
+              >
+                <Github className="mr-2 h-4 w-4" />
+                Continue with GitHub
+              </Button>
+              
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-white dark:bg-gray-800 px-2 text-muted-foreground">
+                    Or continue with
+                  </span>
                 </div>
               </div>
-              
-              <Tabs defaultValue="signin">
-                <TabsList className="grid w-full grid-cols-2 mb-6">
-                  <TabsTrigger value="signin">Sign In</TabsTrigger>
-                  <TabsTrigger value="signup">Sign Up</TabsTrigger>
-                </TabsList>
-                
-                {errorMsg && (
-                  <div className="bg-destructive/10 text-destructive p-3 rounded-md mb-4 text-sm">
-                    {errorMsg}
-                  </div>
-                )}
-                
-                <TabsContent value="signin">
-                  <form onSubmit={handleSignIn} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="signin-email">Email address</Label>
-                      <Input 
-                        id="signin-email" 
-                        type="email" 
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        placeholder="Enter your email" 
-                        required 
-                      />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <Label htmlFor="signin-password">Password</Label>
-                        <Link to="/auth/reset-password" className="text-xs text-primary hover:underline">
-                          Forgot password?
-                        </Link>
-                      </div>
-                      <Input 
-                        id="signin-password" 
-                        type="password" 
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        placeholder="Enter your password" 
-                        required 
-                      />
-                    </div>
-                    
-                    <Button 
-                      type="submit" 
-                      className="w-full" 
-                      disabled={authLoading}
-                    >
-                      {authLoading ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Signing in...
-                        </>
-                      ) : (
-                        <>
-                          <Mail className="mr-2 h-4 w-4" />
-                          Sign In with Email
-                        </>
-                      )}
-                    </Button>
-                  </form>
-                </TabsContent>
-                
-                <TabsContent value="signup">
-                  <form onSubmit={handleSignUp} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="signup-name">Name</Label>
-                      <Input 
-                        id="signup-name" 
-                        type="text" 
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        placeholder="Enter your name" 
-                        required 
-                      />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="signup-email">Email address</Label>
-                      <Input 
-                        id="signup-email" 
-                        type="email" 
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        placeholder="Enter your email" 
-                        required 
-                      />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="signup-password">Password</Label>
-                      <Input 
-                        id="signup-password" 
-                        type="password" 
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        placeholder="Create a password (min. 6 characters)" 
-                        required 
-                        minLength={6}
-                      />
-                    </div>
-                    
-                    <Button 
-                      type="submit" 
-                      className="w-full" 
-                      disabled={authLoading}
-                    >
-                      {authLoading ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Creating account...
-                        </>
-                      ) : (
-                        'Create Account'
-                      )}
-                    </Button>
-                  </form>
-                </TabsContent>
-              </Tabs>
-            </CardContent>
+            </div>
             
-            <CardFooter className="border-t px-6 py-4 flex justify-between">
-              <p className="text-xs text-muted-foreground">
-                By continuing, you agree to our Terms of Service and Privacy Policy.
-              </p>
-            </CardFooter>
-          </Card>
+            <Tabs defaultValue="signin">
+              <TabsList className="grid w-full grid-cols-2 mb-6">
+                <TabsTrigger value="signin">Sign In</TabsTrigger>
+                <TabsTrigger value="signup">Sign Up</TabsTrigger>
+              </TabsList>
+              
+              {errorMessage && (
+                <div className="bg-red-50 text-red-500 p-3 rounded-md mb-4 text-sm">
+                  {errorMessage}
+                </div>
+              )}
+              
+              <TabsContent value="signin">
+                <form onSubmit={handleSignIn} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="signin-email">Email address</Label>
+                    <Input 
+                      id="signin-email" 
+                      type="email" 
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="Enter your email" 
+                      required 
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="signin-password">Password</Label>
+                    <Input 
+                      id="signin-password" 
+                      type="password" 
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Enter your password" 
+                      required 
+                    />
+                  </div>
+                  
+                  <Button 
+                    type="submit" 
+                    className="w-full" 
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Signing in...
+                      </>
+                    ) : (
+                      <>
+                        <Mail className="mr-2 h-4 w-4" />
+                        Sign In with Email
+                      </>
+                    )}
+                  </Button>
+                </form>
+              </TabsContent>
+              
+              <TabsContent value="signup">
+                <form onSubmit={handleSignUp} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-name">Name</Label>
+                    <Input 
+                      id="signup-name" 
+                      type="text" 
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="Enter your name" 
+                      required 
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-email">Email address</Label>
+                    <Input 
+                      id="signup-email" 
+                      type="email" 
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="Enter your email" 
+                      required 
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-password">Password</Label>
+                    <Input 
+                      id="signup-password" 
+                      type="password" 
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Create a password (min. 6 characters)" 
+                      required 
+                      minLength={6}
+                    />
+                  </div>
+                  
+                  <Button 
+                    type="submit" 
+                    className="w-full" 
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Creating account...
+                      </>
+                    ) : (
+                      'Create Account'
+                    )}
+                  </Button>
+                </form>
+              </TabsContent>
+            </Tabs>
+          </div>
         </div>
       </main>
     </div>
