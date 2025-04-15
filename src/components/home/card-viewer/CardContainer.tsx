@@ -28,11 +28,13 @@ const CardContainer: React.FC<CardContainerProps> = ({
   children
 }) => {
   const spotlightRef = useRef<HTMLDivElement>(null);
+  const backgroundRef = useRef<HTMLDivElement>(null);
   
   // Handle spotlight movement to enhance visual effects
   useEffect(() => {
     const spotlight = spotlightRef.current;
-    if (!spotlight) return;
+    const background = backgroundRef.current;
+    if (!spotlight || !background) return;
     
     const handleMouseMove = (e: MouseEvent) => {
       const rect = spotlight.getBoundingClientRect();
@@ -47,8 +49,11 @@ const CardContainer: React.FC<CardContainerProps> = ({
       const moveX = relativeX * 30;
       const moveY = relativeY * 30;
       
-      // Apply smooth movement to spotlight
+      // Apply smooth movement to both spotlight and background
       spotlight.style.transform = `translate(${moveX}px, ${moveY}px)`;
+      
+      // Make sure background moves with the card
+      background.style.transform = `translate(${moveX/2}px, ${moveY/2}px)`;
     };
     
     document.addEventListener('mousemove', handleMouseMove);
@@ -94,6 +99,17 @@ const CardContainer: React.FC<CardContainerProps> = ({
       onMouseMove={onMouseMove}
       style={containerStyle}
     >
+      {/* Background element that moves with the card */}
+      <div 
+        ref={backgroundRef} 
+        className="absolute inset-0 pointer-events-none overflow-hidden"
+        style={{
+          transition: 'transform 0.5s ease-out',
+        }}
+      >
+        <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 opacity-20"></div>
+      </div>
+      
       {/* Enhanced lighting effects */}
       <div ref={spotlightRef} className="absolute inset-0 pointer-events-none overflow-hidden">
         {/* Primary spotlight for dynamic lighting */}

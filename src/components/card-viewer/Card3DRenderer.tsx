@@ -1,3 +1,4 @@
+
 import React, { useRef, useEffect, useState } from 'react';
 import { Card } from '@/lib/types';
 import * as THREE from 'three';
@@ -24,6 +25,7 @@ const Card3DRenderer: React.FC<Card3DRendererProps> = ({
   const meshRef = useRef<THREE.Mesh>(null);
   const materialRef = useRef<THREE.ShaderMaterial | null>(null);
   const edgeGlowRef = useRef<THREE.Mesh>(null);
+  const edgesRef = useRef<THREE.Mesh>(null);
   const { gl } = useThree();
   const [showDiagnostics, setShowDiagnostics] = useState(false);
   const [renderingStats, setRenderingStats] = useState({
@@ -50,7 +52,7 @@ const Card3DRenderer: React.FC<Card3DRendererProps> = ({
   });
 
   const { rotationSpeed, setRotationSpeed, handleWheel } = useCardRotation();
-  const { shaderMaterial, glowMaterial } = useCardMaterials(frontTexture, backTexture, isFlipped);
+  const { shaderMaterial, glowMaterial, edgeMaterial } = useCardMaterials(frontTexture, backTexture, isFlipped);
 
   useEffect(() => {
     if (frontTexture && backTexture) {
@@ -116,12 +118,20 @@ const Card3DRenderer: React.FC<Card3DRendererProps> = ({
         materialRef.current.uniforms.isFlipped.value = isFlipped;
       }
       
-      if (edgeGlowRef.current?.material) {
-        const glowMaterial = edgeGlowRef.current.material as THREE.ShaderMaterial;
-        glowMaterial.uniforms.time.value = state.clock.getElapsedTime();
-        
+      // Synchronize position and rotation of all card elements
+      if (edgeGlowRef.current) {
         edgeGlowRef.current.position.copy(meshRef.current.position);
         edgeGlowRef.current.rotation.copy(meshRef.current.rotation);
+        
+        if (edgeGlowRef.current.material) {
+          const glowMaterial = edgeGlowRef.current.material as THREE.ShaderMaterial;
+          glowMaterial.uniforms.time.value = state.clock.getElapsedTime();
+        }
+      }
+      
+      if (edgesRef.current) {
+        edgesRef.current.position.copy(meshRef.current.position);
+        edgesRef.current.rotation.copy(meshRef.current.rotation);
       }
       
       if (state.clock.getElapsedTime() % 1 < delta) {
@@ -148,7 +158,7 @@ const Card3DRenderer: React.FC<Card3DRendererProps> = ({
 
   const cardWidth = 2.5;
   const cardHeight = 3.5;
-  const cardThickness = 0.15;
+  const cardThickness = 0.25; // Increased thickness for better visibility
 
   return (
     <>
@@ -166,15 +176,20 @@ const Card3DRenderer: React.FC<Card3DRendererProps> = ({
         </group>
       )}
 
+      {/* Main card face with textures */}
       <mesh 
         ref={meshRef} 
         rotation={[0, isFlipped ? Math.PI : 0, 0]}
         onClick={() => console.log('Card clicked, isFlipped:', isFlipped)}
+        visible={true}
+        castShadow
+        receiveShadow
       >
         <boxGeometry args={[cardWidth, cardHeight, cardThickness]} />
         <primitive object={shaderMaterial} ref={materialRef} attach="material" />
       </mesh>
       
+      {/* Edge glow effect */}
       <mesh 
         ref={edgeGlowRef} 
         rotation={[0, isFlipped ? Math.PI : 0, 0]}
@@ -182,6 +197,16 @@ const Card3DRenderer: React.FC<Card3DRendererProps> = ({
       >
         <boxGeometry args={[cardWidth + 0.05, cardHeight + 0.05, cardThickness + 0.05]} />
         <primitive object={glowMaterial} attach="material" />
+      </mesh>
+      
+      {/* Colored edges for the card */}
+      <mesh
+        ref={edgesRef}
+        rotation={[0, isFlipped ? Math.PI : 0, 0]}
+      >
+        {/* Use a slightly larger size for the edges to make them visible */}
+        <boxGeometry args={[cardWidth + 0.01, cardHeight + 0.01, cardThickness + 0.01]} />
+        <primitive object={edgeMaterial} attach="material" />
       </mesh>
       
       <CardDiagnostics
