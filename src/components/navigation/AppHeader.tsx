@@ -6,6 +6,7 @@ import { useAuth } from '@/providers/AuthProvider';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { mainNavItems } from '@/config/navigation';
+import LabsButton from '@/components/navigation/components/LabsButton';
 
 const AppHeader: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -73,6 +74,8 @@ const AppHeader: React.FC = () => {
               </Button>
               
               <ThemeToggle />
+
+              <LabsButton variant="icon" />
               
               {user ? (
                 <Button asChild variant="outline">
@@ -97,6 +100,7 @@ const AppHeader: React.FC = () => {
           {/* Mobile Navigation Button */}
           <div className="flex md:hidden items-center space-x-2">
             <ThemeToggle />
+            <LabsButton variant="icon" />
             
             <Button
               variant="ghost"

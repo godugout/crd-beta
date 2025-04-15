@@ -5,6 +5,7 @@ import GameDay from '@/pages/GameDay';
 import Labs from '@/pages/Labs';
 import BaseballCardViewer from '@/pages/BaseballCardViewer';
 import PbrDemo from '@/pages/PbrDemo';
+import { lazy } from 'react';
 
 // Feature-specific routes
 export const featureRoutes: RouteObject[] = [

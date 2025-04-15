@@ -148,7 +148,7 @@ export function createPbrScene(
           cardMaterial  // Back
         ];
         
-        // Fix for TS2740: Use proper typing for multiple materials
+        // Fix for TS2740: Correctly type the material assignment
         cardMesh.material = materials as unknown as THREE.Material;
       },
       undefined,
@@ -202,21 +202,24 @@ export function createPbrScene(
   const cleanup = () => {
     window.removeEventListener('resize', handleResize);
     
-    // Fix for TS2339: Use proper THREE Scene cleanup
-    // THREE.Scene doesn't have dispose, so we clean up children manually
+    // Properly clean up Three.js objects
     while(scene.children.length > 0) { 
       const object = scene.children[0];
       scene.remove(object);
       
-      // Dispose geometries and materials when possible
+      // Type-safe disposal of geometries and materials
       if ('geometry' in object && object.geometry && typeof object.geometry.dispose === 'function') {
         object.geometry.dispose();
       }
       
       if ('material' in object) {
-        const material = object.material as THREE.Material | THREE.Material[];
+        const material = object.material;
         if (Array.isArray(material)) {
-          material.forEach(m => m.dispose());
+          material.forEach(m => {
+            if (m && typeof m.dispose === 'function') {
+              m.dispose();
+            }
+          });
         } else if (material && typeof material.dispose === 'function') {
           material.dispose();
         }

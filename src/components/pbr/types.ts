@@ -1,5 +1,4 @@
 
-// Basic settings for PBR rendering
 export interface PbrSettings {
   roughness: number;
   metalness: number;
