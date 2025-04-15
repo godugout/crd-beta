@@ -1,6 +1,7 @@
 
 import React from 'react';
-import { Position, Property } from 'csstype';
+import { calculateEdgeStyle } from './edgeUtils';
+import './card-edges.css';
 
 interface CardEdgesProps {
   edgeColor: string;
@@ -8,71 +9,32 @@ interface CardEdgesProps {
 }
 
 const CardEdges: React.FC<CardEdgesProps> = ({ edgeColor, thickness }) => {
-  // Base styles for edges with proper TypeScript types
-  const edgeStyles: React.CSSProperties = {
-    position: 'absolute' as Position,
-    width: '100%',
-    height: '100%',
-    boxSizing: 'border-box' as Property.BoxSizing,
-    borderStyle: 'solid',
-    borderWidth: '0px',
+  // Set CSS variables for the edge color
+  const edgeStyles = {
+    '--edge-color': edgeColor,
+    '--edge-color-alpha': `${edgeColor}33`,
     borderColor: edgeColor,
-    borderRadius: '12px',
-    transformStyle: 'preserve-3d' as Property.TransformStyle,
-    boxShadow: `0 0 8px ${edgeColor}33`
-  };
+  } as React.CSSProperties;
 
-  const commonEdgeStyle: React.CSSProperties = {
-    position: 'absolute' as Position,
-    backgroundColor: edgeColor,
-    opacity: 0.95
+  const renderEdge = (position: 'top' | 'bottom' | 'left' | 'right') => {
+    const style = {
+      ...calculateEdgeStyle(position, thickness),
+    } as React.CSSProperties;
+
+    return (
+      <div 
+        className={`card-edge edge-${position}`}
+        style={style}
+      />
+    );
   };
 
   return (
     <div className="card-edges" style={edgeStyles}>
-      {/* Top edge */}
-      <div 
-        style={{ 
-          ...commonEdgeStyle,
-          width: '100%',
-          height: thickness,
-          transform: `rotateX(90deg) translateZ(calc(-${thickness}/2))`,
-          top: `-${thickness}/2`
-        }}
-      />
-      
-      {/* Bottom edge */}
-      <div 
-        style={{ 
-          ...commonEdgeStyle,
-          width: '100%',
-          height: thickness,
-          transform: `rotateX(90deg) translateZ(calc(100% - ${thickness}/2))`,
-          bottom: `-${thickness}/2`
-        }}
-      />
-      
-      {/* Left edge */}
-      <div 
-        style={{ 
-          ...commonEdgeStyle,
-          width: thickness,
-          height: '100%',
-          transform: `rotateY(90deg) translateZ(calc(-${thickness}/2))`,
-          left: `-${thickness}/2`
-        }}
-      />
-      
-      {/* Right edge */}
-      <div 
-        style={{ 
-          ...commonEdgeStyle,
-          width: thickness,
-          height: '100%',
-          transform: `rotateY(90deg) translateZ(calc(100% - ${thickness}/2))`,
-          right: `-${thickness}/2`
-        }}
-      />
+      {renderEdge('top')}
+      {renderEdge('bottom')}
+      {renderEdge('left')}
+      {renderEdge('right')}
     </div>
   );
 };
