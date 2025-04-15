@@ -36,7 +36,8 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
     handleZoomIn,
     handleZoomOut,
     toggleAutoRotation,
-    setPosition
+    setPosition,
+    setupWheelListener
   } = useCardInteraction({ containerRef, cardRef });
 
   const [isFlipped, setIsFlipped] = useState(false);
