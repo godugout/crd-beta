@@ -1,3 +1,4 @@
+
 import React, { useRef, useState } from 'react';
 import { CardData } from '@/types/card';
 import CardFront from './card-elements/CardFront';
@@ -37,7 +38,7 @@ const CardCanvas: React.FC<CardCanvasProps> = ({
   onMouseMove,
   onMouseLeave,
   effectSettings = {},
-  debug = false
+  debug = true // Temporarily enable debug by default
 }) => {
   // Calculate card thickness based on the active effects
   const getCardThickness = () => {
@@ -53,24 +54,31 @@ const CardCanvas: React.FC<CardCanvasProps> = ({
   
   // Function to determine edge color
   const getEdgeColor = () => {
-    // Base color for edges
-    let edgeColor = '#9b87f5'; // Primary purple
+    // Brighter colors for better visibility
+    let edgeColor = '#b09dff'; // Brighter purple
     
     if (activeEffects.includes('Refractor')) {
-      edgeColor = '#0EA5E9'; // Ocean blue
+      edgeColor = '#25c4ff'; // Brighter blue
     } else if (activeEffects.includes('Holographic')) {
-      edgeColor = '#D946EF'; // Magenta pink
+      edgeColor = '#ff5af7'; // Brighter pink
     } else if (activeEffects.includes('Gold Foil')) {
-      edgeColor = '#F97316'; // Bright orange
+      edgeColor = '#ffa040'; // Brighter orange
     }
     
     return edgeColor;
   };
 
+  // Add artificial light sources
+  const lightSources = [
+    { position: 'top-0 left-0', color: 'rgba(255, 255, 255, 0.4)' },
+    { position: 'top-0 right-0', color: 'rgba(200, 220, 255, 0.3)' },
+    { position: 'bottom-0 left-0', color: 'rgba(255, 240, 220, 0.3)' }
+  ];
+
   return (
     <div
       ref={cardRef}
-      className="dynamic-card"
+      className={`dynamic-card ${debug ? 'debug-mode' : ''}`}
       style={{ 
         position: 'relative' as const,
         width: '100%',
@@ -84,6 +92,18 @@ const CardCanvas: React.FC<CardCanvasProps> = ({
       onMouseMove={onMouseMove}
       onMouseLeave={onMouseLeave}
     >
+      {/* Artificial light sources */}
+      {lightSources.map((light, index) => (
+        <div 
+          key={`light-${index}`}
+          className={`absolute w-64 h-64 rounded-full blur-3xl pointer-events-none ${light.position} -z-10`}
+          style={{
+            background: `radial-gradient(circle, ${light.color} 0%, transparent 70%)`,
+            transform: 'translateZ(-50px)'
+          }}
+        />
+      ))}
+      
       <div 
         className="card-inner relative w-full h-full"
         style={{
@@ -140,7 +160,9 @@ const CardCanvas: React.FC<CardCanvasProps> = ({
             pointerEvents: 'none'
           }}>
             Image: {card.imageUrl ? '✓' : '✗'}<br/>
-            Effects: {activeEffects.join(', ') || 'None'}
+            Effects: {activeEffects.join(', ') || 'None'}<br/>
+            Edge Color: {getEdgeColor()}<br/>
+            Thickness: {getCardThickness()}
           </div>
         )}
       </div>

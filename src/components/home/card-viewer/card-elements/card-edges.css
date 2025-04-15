@@ -1,3 +1,4 @@
+
 @import './edge-animations.css';
 
 .card-edges {
@@ -10,7 +11,7 @@
   border-width: 0px;
   border-radius: 12px;
   transform-style: preserve-3d;
-  box-shadow: 0 0 8px var(--edge-color-alpha);
+  box-shadow: 0 0 8px var(--edge-color-alpha), inset 0 0 15px rgba(255, 255, 255, 0.5);
 }
 
 .card-edge {
@@ -37,4 +38,9 @@
 .edge-right {
   height: 100%;
   transform-origin: right;
+}
+
+/* Debug outlines */
+.debug-mode .card-edges {
+  border: 1px dashed red;
 }
