@@ -26,7 +26,8 @@ export function createPbrScene(
   renderer.setSize(container.clientWidth, container.clientHeight);
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = settings.exposure;
-  renderer.outputEncoding = THREE.sRGBEncoding;
+  // Replace deprecated outputEncoding with outputColorSpace
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
   
   // Set up camera
   const camera = new THREE.PerspectiveCamera(
@@ -147,8 +148,8 @@ export function createPbrScene(
           cardMaterial  // Back
         ];
         
-        // Update card with materials
-        cardMesh.material = materials;
+        // Fix for TS2740: Use proper typing for multiple materials
+        cardMesh.material = materials as unknown as THREE.Material;
       },
       undefined,
       (error) => {
@@ -200,7 +201,28 @@ export function createPbrScene(
   // Clean up function
   const cleanup = () => {
     window.removeEventListener('resize', handleResize);
-    scene.dispose();
+    
+    // Fix for TS2339: Use proper THREE Scene cleanup
+    // THREE.Scene doesn't have dispose, so we clean up children manually
+    while(scene.children.length > 0) { 
+      const object = scene.children[0];
+      scene.remove(object);
+      
+      // Dispose geometries and materials when possible
+      if ('geometry' in object && object.geometry && typeof object.geometry.dispose === 'function') {
+        object.geometry.dispose();
+      }
+      
+      if ('material' in object) {
+        const material = object.material as THREE.Material | THREE.Material[];
+        if (Array.isArray(material)) {
+          material.forEach(m => m.dispose());
+        } else if (material && typeof material.dispose === 'function') {
+          material.dispose();
+        }
+      }
+    }
+    
     cardGeometry.dispose();
     cardMaterial.dispose();
     edgeGeometry.dispose();

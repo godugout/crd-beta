@@ -21,12 +21,12 @@ const PbrCardRenderer: React.FC<PbrCardRendererProps> = ({ cardId }) => {
   const [settings, setSettings] = useState<PbrSettings>({
     roughness: 0.2,
     metalness: 0.8,
-    exposure: 1.2,            // Increased from 1.0 for better visibility
-    envMapIntensity: 1.5,     // Increased from 1.0 for stronger reflections
-    reflectionStrength: 0.8,  // Increased from 0.5 for more noticeable reflections
-    holographicEffect: 0.7,   // New setting for holographic effect
-    chromeEffect: 0.5,        // New setting for chrome effect
-    vintageEffect: 0.3        // New setting for vintage effect
+    exposure: 1.2,
+    envMapIntensity: 1.5,
+    reflectionStrength: 0.8,
+    holographicEffect: 0.7,
+    chromeEffect: 0.5,
+    vintageEffect: 0.3
   });
   const [activeTab, setActiveTab] = useState('preview');
   
@@ -44,15 +44,24 @@ const PbrCardRenderer: React.FC<PbrCardRendererProps> = ({ cardId }) => {
     
     const cardImageUrl = currentCard?.imageUrl;
     
-    const { cleanup } = createPbrScene(
-      canvasRef.current, 
-      containerRef.current, 
-      settings,
-      cardImageUrl
-    );
+    // Clean up previous scene if it exists
+    let cleanup: (() => void) | undefined;
+    
+    try {
+      const result = createPbrScene(
+        canvasRef.current, 
+        containerRef.current, 
+        settings,
+        cardImageUrl
+      );
+      
+      cleanup = result.cleanup;
+    } catch (error) {
+      console.error('Error creating PBR scene:', error);
+    }
     
     return () => {
-      cleanup();
+      if (cleanup) cleanup();
     };
   }, [settings, currentCard]);
   

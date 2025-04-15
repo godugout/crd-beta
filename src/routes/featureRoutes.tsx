@@ -4,6 +4,7 @@ import { RouteObject } from 'react-router-dom';
 import GameDay from '@/pages/GameDay';
 import Labs from '@/pages/Labs';
 import BaseballCardViewer from '@/pages/BaseballCardViewer';
+import PbrDemo from '@/pages/PbrDemo';
 
 // Feature-specific routes
 export const featureRoutes: RouteObject[] = [
@@ -14,6 +15,10 @@ export const featureRoutes: RouteObject[] = [
   {
     path: "/labs",
     element: <Labs />,
+  },
+  {
+    path: "/labs/pbr",
+    element: <PbrDemo />,
   },
   {
     path: "/ar-viewer",
