@@ -22,6 +22,7 @@ const Card3DRenderer: React.FC<Card3DRendererProps> = ({
 }) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const materialRef = useRef<THREE.ShaderMaterial | null>(null);
+  const edgeGlowRef = useRef<THREE.Mesh>(null);
   const [rotationSpeed, setRotationSpeed] = useState(0);
   const [lastScrollTime, setLastScrollTime] = useState(0);
   const { gl } = useThree();
@@ -52,6 +53,28 @@ const Card3DRenderer: React.FC<Card3DRendererProps> = ({
   // Separate the front and back textures from the loaded array
   const frontTexture = textures[0];
   const backTexture = textures[1];
+  
+  useEffect(() => {
+    // Ensure textures load correctly and apply proper settings
+    if (frontTexture && backTexture) {
+      console.log("Configuring textures:", { frontTexture, backTexture });
+      
+      // Configure texture settings for best appearance
+      [frontTexture, backTexture].forEach(texture => {
+        texture.encoding = THREE.sRGBEncoding;
+        texture.needsUpdate = true;
+        texture.wrapS = THREE.ClampToEdgeWrapping;
+        texture.wrapT = THREE.ClampToEdgeWrapping;
+        texture.minFilter = THREE.LinearFilter;
+        texture.magFilter = THREE.LinearFilter;
+      });
+      
+      setRenderingStats(prev => ({
+        ...prev,
+        textureApplied: true
+      }));
+    }
+  }, [frontTexture, backTexture]);
 
   // Handle scroll events for card spinning
   useEffect(() => {
@@ -75,13 +98,26 @@ const Card3DRenderer: React.FC<Card3DRendererProps> = ({
     }
   }, [gl, lastScrollTime]);
 
-  // Create metallic shader for card back
+  // Handle keyboard for diagnostics
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'd' || e.key === 'D') {
+        setShowDiagnostics(prev => !prev);
+        toast.info(showDiagnostics ? 'Diagnostics hidden' : 'Diagnostics shown');
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showDiagnostics]);
+
+  // Create improved shader for card front and back
   const cardShader = useMemo(() => ({
     vertexShader: `
       varying vec2 vUv;
       varying vec3 vNormal;
       varying vec3 vViewPosition;
-
+      
       void main() {
         vUv = uv;
         vNormal = normalize(normalMatrix * normal);
@@ -105,25 +141,32 @@ const Card3DRenderer: React.FC<Card3DRendererProps> = ({
         vec3 normal = normalize(vNormal);
         vec3 viewDir = normalize(vViewPosition);
         
-        // Calculate metallic reflection
-        float fresnel = pow(1.0 - abs(dot(normal, viewDir)), 3.0);
-        vec3 metalColor = vec3(0.7, 0.7, 0.8); // Slight blue-ish silver
+        // Calculate metallic reflection effect
+        float fresnel = pow(1.0 - abs(dot(normal, viewDir)), 2.0);
+        vec3 metalColor = vec3(0.8, 0.8, 0.9); // Slight blue-ish silver
         
         if (isFlipped) {
-          // Back of card - metallic effect
+          // Back of card - metallic effect with etched details
           vec4 backTex = texture2D(backTexture, vUv);
           float etching = 1.0 - (backTex.r + backTex.g + backTex.b) / 3.0;
           
-          // Create metallic surface with etched details
+          // Create dynamic light patterns
+          float pattern1 = sin(vUv.x * 20.0 + time) * 0.5 + 0.5;
+          float pattern2 = cos(vUv.y * 15.0 - time * 0.7) * 0.5 + 0.5;
+          
+          // Create metallic surface with etched details and dynamic patterns
           vec3 baseMetallic = mix(metalColor * 0.6, metalColor, fresnel);
           vec3 etchedColor = mix(baseMetallic * 0.3, baseMetallic, etching);
+          vec3 finalColor = mix(etchedColor, etchedColor * 1.2, pattern1 * pattern2);
           
-          // Add subtle light movement
-          float lightIntensity = sin(time * 2.0 + vUv.x * 10.0) * 0.1 + 0.9;
-          texColor = vec4(etchedColor * lightIntensity, 1.0);
+          texColor = vec4(finalColor, 1.0);
         } else {
-          // Front of card - regular texture
-          texColor = texture2D(frontTexture, vUv);
+          // Front of card - apply the front texture with enhanced lighting
+          vec4 frontTex = texture2D(frontTexture, vUv);
+          
+          // Add subtle light reflections
+          vec3 enhancedColor = frontTex.rgb * (1.0 + fresnel * 0.3);
+          texColor = vec4(enhancedColor, frontTex.a);
         }
         
         gl_FragColor = texColor;
@@ -131,7 +174,44 @@ const Card3DRenderer: React.FC<Card3DRendererProps> = ({
     `
   }), []);
 
-  // Update card rotation based on scroll speed
+  // Create glow shader for the card edges
+  const glowShader = useMemo(() => ({
+    vertexShader: `
+      varying vec2 vUv;
+      varying vec3 vPosition;
+      
+      void main() {
+        vUv = uv;
+        vPosition = position;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }
+    `,
+    fragmentShader: `
+      uniform float time;
+      uniform vec3 glowColor;
+      varying vec2 vUv;
+      varying vec3 vPosition;
+      
+      void main() {
+        // Create pulsating neon effect
+        float intensity = 0.8 + sin(time * 2.0) * 0.2;
+        
+        // Edge detection - only glow near the edges of the card
+        float edgeFactorX = smoothstep(0.0, 0.1, vUv.x) * smoothstep(0.0, 0.1, 1.0 - vUv.x);
+        float edgeFactorY = smoothstep(0.0, 0.1, vUv.y) * smoothstep(0.0, 0.1, 1.0 - vUv.y);
+        float edgeFactor = 1.0 - (edgeFactorX * edgeFactorY);
+        
+        // Make the edge glow brighter
+        float glowFactor = pow(edgeFactor, 2.0) * intensity;
+        
+        // Final color with pulsating neon
+        vec3 finalColor = glowColor * glowFactor;
+        gl_FragColor = vec4(finalColor, glowFactor * 0.8);
+      }
+    `
+  }), []);
+
+  // Update card rotation based on scroll speed and apply shader effects
   useFrame((state, delta) => {
     if (meshRef.current) {
       // Apply rotation from scroll/swipe
@@ -140,15 +220,25 @@ const Card3DRenderer: React.FC<Card3DRendererProps> = ({
       // Apply damping to slow down rotation
       setRotationSpeed(prev => prev * 0.95);
       
-      // Update shader uniforms
+      // Update shader uniforms for card
       if (materialRef.current) {
         materialRef.current.uniforms.time.value = state.clock.getElapsedTime();
         materialRef.current.uniforms.isFlipped.value = isFlipped;
       }
+      
+      // Also update glow edge effect
+      if (edgeGlowRef.current?.material) {
+        const glowMaterial = edgeGlowRef.current.material as THREE.ShaderMaterial;
+        glowMaterial.uniforms.time.value = state.clock.getElapsedTime();
+        
+        // Position the glow mesh to match the card position and rotation
+        edgeGlowRef.current.position.copy(meshRef.current.position);
+        edgeGlowRef.current.rotation.copy(meshRef.current.rotation);
+      }
     }
   });
 
-  // Create shader material with uniforms
+  // Create shader material with uniforms for the card
   const shaderMaterial = useMemo(() => {
     return new THREE.ShaderMaterial({
       vertexShader: cardShader.vertexShader,
@@ -163,29 +253,52 @@ const Card3DRenderer: React.FC<Card3DRendererProps> = ({
     });
   }, [cardShader, frontTexture, backTexture, isFlipped]);
 
-  // Card dimensions with proper aspect ratio (2.5 x 3.5)
+  // Create glow material for edges
+  const glowMaterial = useMemo(() => {
+    return new THREE.ShaderMaterial({
+      vertexShader: glowShader.vertexShader,
+      fragmentShader: glowShader.fragmentShader,
+      side: THREE.DoubleSide,
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      uniforms: {
+        time: { value: 0 },
+        glowColor: { value: new THREE.Color(0x00ffff) } // Cyan neon color
+      }
+    });
+  }, [glowShader]);
+
+  // Card dimensions with increased thickness
   const cardWidth = 2.5;
   const cardHeight = 3.5;
-  const cardThickness = 0.05; // Subtle thickness for 3D effect
+  const cardThickness = 0.15; // Increased thickness for more 3D effect
 
   return (
     <>
+      {/* Main card mesh */}
       <mesh 
         ref={meshRef}
         rotation={[0, isFlipped ? Math.PI : 0, 0]}
       >
-        <boxGeometry args={[2.5, 3.5, 0.05]} />
+        <boxGeometry args={[cardWidth, cardHeight, cardThickness]} />
         <primitive 
           object={shaderMaterial} 
           ref={materialRef}
           attach="material"
         />
-        
-        {/* Add subtle edge highlight */}
-        <lineSegments>
-          <edgesGeometry attach="geometry" args={[new THREE.BoxGeometry(2.5, 3.5, 0.05)]} />
-          <lineBasicMaterial attach="material" color="#ffffff" transparent opacity={0.2} />
-        </lineSegments>
+      </mesh>
+      
+      {/* Glowing edge effect slightly larger than the card */}
+      <mesh
+        ref={edgeGlowRef}
+        rotation={[0, isFlipped ? Math.PI : 0, 0]}
+      >
+        <boxGeometry args={[cardWidth + 0.05, cardHeight + 0.05, cardThickness + 0.05]} />
+        <primitive
+          object={glowMaterial}
+          attach="material"
+        />
       </mesh>
       
       {/* Diagnostics panel */}
@@ -199,4 +312,3 @@ const Card3DRenderer: React.FC<Card3DRendererProps> = ({
 };
 
 export default Card3DRenderer;
-
