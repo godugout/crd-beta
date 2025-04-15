@@ -17,9 +17,7 @@ const CardEdges: React.FC<CardEdgesProps> = ({ edgeColor, thickness }) => {
   } as React.CSSProperties;
 
   const renderEdge = (position: 'top' | 'bottom' | 'left' | 'right') => {
-    const style = {
-      ...calculateEdgeStyle(position, thickness),
-    } as React.CSSProperties;
+    const style = calculateEdgeStyle(position, thickness) as React.CSSProperties;
 
     return (
       <div 

@@ -10,6 +10,7 @@ import Search from '@/pages/Search';
 import Profile from '@/pages/Profile';
 import Community from '@/pages/Community';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import EmergencyPage from '@/pages/EmergencyPage';
 
 // Main application routes (home, auth, etc.)
 export const mainRoutes: RouteObject[] = [
@@ -20,6 +21,10 @@ export const mainRoutes: RouteObject[] = [
   {
     path: "/home",
     element: <Home />,
+  },
+  {
+    path: "/emergency",
+    element: <EmergencyPage />,
   },
   {
     path: "/auth",

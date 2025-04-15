@@ -19,6 +19,8 @@ const CardViewer: React.FC<CardViewerProps> = ({
   activeEffects,
   onSnapshot
 }) => {
+  console.log('CardViewer rendering:', { card, isFlipped, activeEffects });
+  
   return (
     <div className="relative bg-gray-100 rounded-lg shadow-lg overflow-hidden aspect-[3/4] w-full">
       <div className="h-full w-full flex items-center justify-center relative">
@@ -29,6 +31,8 @@ const CardViewer: React.FC<CardViewerProps> = ({
             className={`max-h-full max-w-full object-contain transition-all duration-300 ${
               activeEffects.length > 0 ? activeEffects.join(' ') : ''
             }`}
+            onError={() => console.error('Failed to load image:', card.imageUrl)}
+            onLoad={() => console.log('Image loaded successfully:', card.imageUrl)}
           />
         ) : (
           <div className="bg-gray-200 h-96 w-72 rounded flex items-center justify-center text-gray-500">

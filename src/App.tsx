@@ -18,15 +18,38 @@ import { routes } from './routes/index';
 
 function App() {
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     // Simulate loading time
     const timer = setTimeout(() => {
       setLoading(false);
     }, 600);
+    
+    // Log that the app is starting
+    console.log('App is initializing', { routes });
 
     return () => clearTimeout(timer);
   }, []);
+
+  // Add error boundary for the entire app
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-red-100">
+        <div className="text-center p-8 max-w-md bg-white rounded-lg shadow-lg">
+          <div className="text-red-600 text-4xl mb-4">❌</div>
+          <h1 className="text-xl font-bold mb-2">Something went wrong</h1>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <button 
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            onClick={() => window.location.reload()}
+          >
+            Reload App
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
@@ -43,6 +66,10 @@ function App() {
     <SettingsProvider>
       <CardProvider>
         <Router>
+          <div className="debug-info fixed top-0 left-0 bg-black/80 text-white p-2 text-xs z-50">
+            App Loaded | {new Date().toLocaleTimeString()}
+          </div>
+          
           <Routes>
             {/* Import all routes from the routes configuration */}
             {routes.map((route, index) => {
