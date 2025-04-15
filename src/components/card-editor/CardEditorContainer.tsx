@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCards } from '@/context/CardContext';
@@ -15,11 +14,19 @@ interface CardEditorContainerProps {
   card?: any;
   className?: string;
   initialMetadata?: any;
+  onSave?: (card: any) => void;
+  onCancel?: () => void;
 }
 
 const steps = ["Upload", "Design", "Effects", "Text", "Preview"];
 
-const CardEditorContainer: React.FC<CardEditorContainerProps> = ({ card, className, initialMetadata }) => {
+const CardEditorContainer: React.FC<CardEditorContainerProps> = ({ 
+  card, 
+  className, 
+  initialMetadata,
+  onSave,
+  onCancel
+}) => {
   const navigate = useNavigate();
   const { addCard, updateCard } = useCards();
   const cardState = useCardEditorState({ initialCard: card, initialMetadata });
@@ -48,6 +55,12 @@ const CardEditorContainer: React.FC<CardEditorContainerProps> = ({ card, classNa
     const cardData = cardState.getCardData();
     
     try {
+      // If onSave prop is provided, use it
+      if (onSave) {
+        onSave(cardData);
+        return;
+      }
+      
       if (card) {
         // Update existing card
         await updateCard(card.id, cardData);
@@ -64,6 +77,17 @@ const CardEditorContainer: React.FC<CardEditorContainerProps> = ({ card, classNa
       console.error('Error saving card:', error);
       toast.error('Failed to save CRD. Please try again.');
     }
+  };
+
+  const handleCancel = () => {
+    // If onCancel prop is provided, use it
+    if (onCancel) {
+      onCancel();
+      return;
+    }
+    
+    // Default cancel behavior - navigate back
+    navigate(-1);
   };
 
   return (
@@ -90,6 +114,7 @@ const CardEditorContainer: React.FC<CardEditorContainerProps> = ({ card, classNa
             onPrevious={goToPreviousStep}
             onNext={goToNextStep}
             onSubmit={handleSubmit}
+            onCancel={handleCancel}
             isFirstStep={isFirstStep}
             isLastStep={isLastStep}
           />

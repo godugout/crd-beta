@@ -24,4 +24,8 @@ export interface CardData {
   specialEffect: string;
   imageUrl?: string;
   fabricSwatches?: FabricSwatch[];
+  title?: string;
+  tags?: string[];
+  thumbnailUrl?: string;
+  reactions?: any[];
 }
