@@ -1,72 +1,53 @@
 
-import { CardEffectSettings as BaseCardEffectSettings } from '@/components/card-creation/types/cardTypes';
-
-export interface MaterialSimulation {
-  /**
-   * Type of material to simulate
-   */
-  type: 'canvas' | 'mesh' | 'synthetic';
-  
-  /**
-   * Base color of the material
-   */
-  baseColor?: string;
-  
-  /**
-   * URL to a texture image
-   */
-  textureUrl?: string;
-  
-  /**
-   * Roughness of the material (0-1)
-   * 0 = mirror-like, 1 = completely diffuse
-   */
-  roughness?: number;
-  
-  /**
-   * Metalness of the material (0-1)
-   * 0 = non-metal, 1 = metal
-   */
-  metalness?: number;
-  
-  /**
-   * Weathering effect to apply
-   */
-  weathering?: 'new' | 'game-worn' | 'vintage';
-  
-  /**
-   * Team colors for auto-extraction
-   */
-  teamColors?: string[];
-}
-
-// Add missing types that were causing build errors
-export interface PremiumCardEffect {
-  id: string;
-  name: string;
-  category: string;
-  settings: CardEffectSettings;
-  description: string;
-  premium: boolean;
-  iconUrl?: string;
-}
-
-export type CardEffectSettings = BaseCardEffectSettings;
+import { Card } from '@/lib/types';
 
 export interface CardEffectsOptions {
+  /**
+   * Whether to optimize effects for performance
+   * @default false
+   */
+  optimizeForPerformance?: boolean;
+  
+  /**
+   * Initial effects to apply
+   * @default {}
+   */
   initialEffects?: Record<string, string[]>;
-  presets?: Record<string, string[]>;
-  defaultIntensity?: number;
-  performanceMode?: 'high' | 'medium' | 'low';
 }
 
 export interface CardEffectsResult {
+  /**
+   * Map of card IDs to active effects
+   */
   cardEffects: Record<string, string[]>;
+  
+  /**
+   * Whether effects are loading
+   */
   isLoading: boolean;
+  
+  /**
+   * Add an effect to a card
+   */
   addEffect: (cardId: string, effect: string) => void;
+  
+  /**
+   * Remove an effect from a card
+   */
   removeEffect: (cardId: string, effect: string) => void;
+  
+  /**
+   * Toggle an effect on a card
+   */
   toggleEffect: (cardId: string, effect: string) => void;
+  
+  /**
+   * Clear all effects from a card
+   */
   clearEffects: (cardId: string) => void;
+  
+  /**
+   * Set all effects for a card
+   */
   setCardEffects: (cardId: string, effects: string[]) => void;
-  setActiveEffects?: (effects: string[]) => void;  // Add optional method for ImmersiveCardViewer
 }

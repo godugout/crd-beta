@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { useCards } from '@/context/CardContext';
 import { Card as CardType } from '@/context/CardContext';
@@ -33,7 +34,7 @@ const CardCollectionView: React.FC<CardCollectionViewProps> = ({ onCardClick }) 
     const seriesGroups: Record<string, CardType[]> = {};
     
     cards.forEach(card => {
-      const category = card.designMetadata?.cardMetadata?.category || 'N/A';
+      const category = card.designMetadata?.cardMetadata?.category;
       if (category) {
         if (!categoryGroups[category]) {
           categoryGroups[category] = [];
@@ -41,7 +42,7 @@ const CardCollectionView: React.FC<CardCollectionViewProps> = ({ onCardClick }) 
         categoryGroups[category].push(card);
       }
       
-      const series = card.designMetadata?.cardMetadata?.series || '';
+      const series = card.designMetadata?.cardMetadata?.series;
       if (series) {
         if (!seriesGroups[series]) {
           seriesGroups[series] = [];

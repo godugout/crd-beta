@@ -5,28 +5,17 @@ import AppHeader from './AppHeader';
 import MobileBottomNav from './MobileBottomNav';
 import { useState } from 'react';
 import MobileMenu from '../navbar/MobileMenu';
-import { SecondaryNavbar } from './SecondaryNavbar';
+import BreadcrumbNav from './Breadcrumb';
 
 interface PageLayoutProps {
   children: ReactNode;
-  title?: ReactNode;
+  title?: string;
   description?: string;
   fullWidth?: boolean;
   hideNavigation?: boolean;
   className?: string;
   canonicalPath?: string;
   hideBreadcrumbs?: boolean;
-  actions?: React.ReactNode;
-  hideDescription?: boolean;
-  stats?: Array<{count?: number; label?: string}>;
-  onSearch?: (term: string) => void;
-  searchPlaceholder?: string;
-  primaryAction?: {
-    label: string;
-    icon?: React.ReactNode;
-    onClick?: () => void;
-    href?: string;
-  };
 }
 
 const PageLayout: React.FC<PageLayoutProps> = ({
@@ -37,37 +26,15 @@ const PageLayout: React.FC<PageLayoutProps> = ({
   hideNavigation = false,
   className = '',
   canonicalPath,
-  hideBreadcrumbs = false,
-  actions,
-  hideDescription = false,
-  stats,
-  onSearch,
-  searchPlaceholder,
-  primaryAction,
+  hideBreadcrumbs = false, // Changed default to show breadcrumbs by default
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // Robust title conversion
-  const stringTitle = React.isValidElement(title)
-    ? String(title.props.children || 'CardShow')
-    : typeof title === 'string'
-      ? title
-    : typeof title === 'number'
-      ? String(title)
-      : 'CardShow';
-        
-  // Robust description conversion
-  const stringDescription = typeof description === 'string'
-    ? description
-    : typeof description === 'number'
-      ? String(description)
-      : 'Digital card collection platform';
-
   return (
-    <div className="flex flex-col min-h-screen bg-background">
+    <>
       <Helmet>
-        <title>{stringTitle}</title>
-        <meta name="description" content={stringDescription} />
+        <title>{title}</title>
+        <meta name="description" content={description} />
         {canonicalPath && <link rel="canonical" href={`https://cardshow.app${canonicalPath}`} />}
       </Helmet>
       
@@ -75,21 +42,11 @@ const PageLayout: React.FC<PageLayoutProps> = ({
         <AppHeader />
       )}
       
-      {!hideNavigation && (
-        <SecondaryNavbar
-          title={stringTitle}  // Use stringTitle instead of title
-          description={stringDescription}  // Use stringDescription
-          hideBreadcrumbs={hideBreadcrumbs}
-          actions={actions}
-          hideDescription={hideDescription}
-          stats={stats}
-          onSearch={onSearch}
-          searchPlaceholder={searchPlaceholder}
-          primaryAction={primaryAction}
-        />
+      {!hideBreadcrumbs && !hideNavigation && (
+        <BreadcrumbNav />
       )}
       
-      <main className={`flex-grow ${className}`}>
+      <main className={`min-h-[calc(100vh-4rem)] ${className}`}>
         {children}
       </main>
       
@@ -103,7 +60,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({
           />
         </>
       )}
-    </div>
+    </>
   );
 };
 

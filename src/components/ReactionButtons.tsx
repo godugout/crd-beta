@@ -57,9 +57,9 @@ const ReactionButtons: React.FC<ReactionButtonsProps> = ({
       let error: any = null;
       
       if (cardId) {
-        const result = await reactionRepository.getAllByCardId(cardId);
-        data = result;
-        // If the API returns an error property, handle it here
+        const result = await reactionRepository.getCardReactions(cardId);
+        data = result.data;
+        error = result.error;
       }
       
       // Additional endpoints for collection and comment reactions could be added here
@@ -119,37 +119,45 @@ const ReactionButtons: React.FC<ReactionButtonsProps> = ({
       
       if (userReaction && isSameType) {
         // Remove reaction if clicking the same type again
-        const success = await reactionRepository.remove(userReaction.id);
-        
-        if (!success) {
-          toast.error('Failed to update reaction');
-          return;
-        }
-        
-        setReactions(prev => prev.filter(r => r.userId !== user.id));
-      } else {
-        // Add or update reaction
-        const data = await reactionRepository.add(
-          user.id,
+        const { success, error } = await reactionRepository.removeReaction(user.id, {
           cardId,
           collectionId,
-          commentId,
-          type
-        );
+          commentId
+        });
         
-        if (!data) {
+        if (error) {
+          console.error('Error removing reaction:', error);
           toast.error('Failed to update reaction');
           return;
         }
         
-        if (userReaction) {
-          // Update existing reaction
-          setReactions(prev => 
-            prev.map(r => r.userId === user.id ? data : r)
-          );
-        } else {
-          // Add new reaction
-          setReactions(prev => [...prev, data]);
+        if (success) {
+          setReactions(prev => prev.filter(r => r.userId !== user.id));
+        }
+      } else {
+        // Add or update reaction
+        const { data, error } = await reactionRepository.addReaction(user.id, type, {
+          cardId,
+          collectionId,
+          commentId
+        });
+        
+        if (error) {
+          console.error('Error adding reaction:', error);
+          toast.error('Failed to update reaction');
+          return;
+        }
+        
+        if (data) {
+          if (userReaction) {
+            // Update existing reaction
+            setReactions(prev => 
+              prev.map(r => r.userId === user.id ? data : r)
+            );
+          } else {
+            // Add new reaction
+            setReactions(prev => [...prev, data]);
+          }
         }
       }
     } catch (err) {

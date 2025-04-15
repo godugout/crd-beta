@@ -1,47 +1,30 @@
 
 import React from 'react';
 import { RouteObject } from 'react-router-dom';
-import DeveloperDocs from '@/pages/DeveloperDocs';
-import ProtectedRoute from '@/components/auth/ProtectedRoute';
-import CacheExample from '@/components/examples/CacheExample';
-import CardShowcase from '@/pages/CardShowcase';
-import Experiences from '@/pages/Experiences';
+import GameDay from '@/pages/GameDay';
 import Labs from '@/pages/Labs';
+import BaseballCardViewer from '@/pages/BaseballCardViewer';
 
-const featureRoutes: RouteObject[] = [
+// Feature-specific routes
+export const featureRoutes: RouteObject[] = [
   {
-    path: 'features',
-    children: [
-      {
-        path: 'card-showcase',
-        element: <CardShowcase />
-      },
-      {
-        path: 'experiences',
-        element: (
-          <ProtectedRoute>
-            <Experiences />
-          </ProtectedRoute>
-        )
-      },
-      {
-        path: 'labs',
-        element: (
-          <ProtectedRoute>
-            <Labs />
-          </ProtectedRoute>
-        )
-      },
-      {
-        path: 'cache-example',
-        element: <CacheExample />
-      },
-      {
-        path: 'developer',
-        element: <DeveloperDocs />
-      }
-    ]
-  }
+    path: "/game-day",
+    element: <GameDay />,
+  },
+  {
+    path: "/labs",
+    element: <Labs />,
+  },
+  {
+    path: "/ar-viewer",
+    element: <BaseballCardViewer />,
+  },
+  {
+    path: "/baseball-card-viewer",
+    element: <BaseballCardViewer />,
+  },
+  {
+    path: "/baseball-card-viewer/:id",
+    element: <BaseballCardViewer />,
+  },
 ];
-
-export default featureRoutes;

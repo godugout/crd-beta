@@ -1,13 +1,15 @@
-import React, { useRef, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
+import { X, ChevronLeft, ChevronRight, Camera, RefreshCw, Smartphone } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { useCards } from '@/context/CardContext';
+import { Card } from '@/lib/types';
+import { CardData } from '@/types/card';
 import { toast } from 'sonner';
-import { X } from 'lucide-react';
-import CardDisplay from './viewer-components/CardDisplay';
-import ViewerControls from './viewer-components/ViewerControls';
-import KeyboardShortcuts from './viewer-components/KeyboardShortcuts';
-import LayerMonitor from './viewer-components/LayerMonitor';
-import { useCardInteraction } from '@/hooks/useCardInteraction';
+import CardViewer from '@/components/home/CardViewer';
+import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
+import { useCardEffects } from '@/hooks/useCardEffects';
+import { useMobileOptimization } from '@/hooks/useMobileOptimization';
+import { useKeyboardShortcut } from '@/hooks/useKeyboardShortcut';
 
 interface FullscreenViewerProps {
   cardId: string;
@@ -15,156 +17,267 @@ interface FullscreenViewerProps {
 }
 
 const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) => {
-  const { cards, getCardById } = useCards();
-  const card = getCardById ? getCardById(cardId) : cards.find(c => c.id === cardId);
-  const navigate = useNavigate();
-
-  const containerRef = useRef<HTMLDivElement>(null);
-  const cardRef = useRef<HTMLDivElement>(null);
-  
-  const {
-    position,
-    zoom,
-    isAutoRotating,
-    isDragging,
-    mousePosition,
-    setIsDragging,
-    handleMouseMove,
-    handleCardReset,
-    handleKeyboardControls,
-    handleZoomIn,
-    handleZoomOut,
-    toggleAutoRotation
-  } = useCardInteraction({ containerRef, cardRef });
-
+  const { cards } = useCards();
+  const [selectedCard, setSelectedCard] = useState<Card | null>(null);
   const [isFlipped, setIsFlipped] = useState(false);
-  const [showInfo, setShowInfo] = useState(false);
-  const [cardMousePosition, setCardMousePosition] = useState({ x: 0.5, y: 0.5 });
-  const [showControls, setShowControls] = useState(false);
-  const [layerStatus, setLayerStatus] = useState([
-    { name: 'Base Card', loaded: false, timestamp: 0 },
-    { name: 'Texture', loaded: false, timestamp: 0 },
-    { name: 'Overlay', loaded: false, timestamp: 0 }
-  ]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const { shouldOptimizeAnimations } = useMobileOptimization();
+  
+  const currentCardIdRef = useRef<string>(cardId);
+  
+  const preloadImagesRef = useRef<HTMLDivElement>(null);
+  
+  const { 
+    cardEffects, 
+    toggleEffect, 
+    setCardEffects
+  } = useCardEffects(
+    cards, 
+    shouldOptimizeAnimations,
+    { initialEffects: { [cardId]: ['Refractor'] } }
+  );
+  
+  const activeEffects = selectedCard ? (cardEffects[selectedCard.id] || []) : [];
 
   useEffect(() => {
-    window.addEventListener('keydown', handleKeyboardControls);
+    currentCardIdRef.current = cardId;
     
-    return () => {
-      window.removeEventListener('keydown', handleKeyboardControls);
+    const card = cards.find(c => c.id === cardId);
+    if (card) {
+      setSelectedCard(card);
+      const index = cards.findIndex(c => c.id === cardId);
+      if (index !== -1) {
+        setCurrentIndex(index);
+      }
+    }
+    
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
     };
-  }, [handleKeyboardControls]);
 
-  const handleToggleFullscreen = () => {
-    toast.info('Fullscreen toggle - feature coming soon');
+    window.addEventListener('keydown', handleKeyDown);
+    
+    const docElement = document.documentElement;
+    if (docElement.requestFullscreen) {
+      docElement.requestFullscreen()
+        .catch(err => {
+          console.warn('Error attempting to enable fullscreen:', err);
+        });
+    }
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      
+      if (document.fullscreenElement) {
+        document.exitFullscreen()
+          .catch(err => {
+            console.warn('Error attempting to exit fullscreen:', err);
+          });
+      }
+    };
+  }, [cardId, cards, onClose]);
+
+  useKeyboardShortcut('ArrowLeft', navigateToPrevious);
+  useKeyboardShortcut('ArrowRight', navigateToNext);
+  useKeyboardShortcut(' ', toggleFlip);
+
+  useEffect(() => {
+    if (cards.length <= 1 || !preloadImagesRef.current) return;
+    
+    const preloadContainer = preloadImagesRef.current;
+    preloadContainer.innerHTML = '';
+    
+    const prevIndex = (currentIndex - 1 + cards.length) % cards.length;
+    const nextIndex = (currentIndex + 1) % cards.length;
+    
+    [prevIndex, nextIndex].forEach(index => {
+      if (index !== currentIndex && cards[index]) {
+        const img = document.createElement('img');
+        img.src = cards[index].imageUrl;
+        img.style.display = 'none';
+        preloadContainer.appendChild(img);
+      }
+    });
+  }, [currentIndex, cards]);
+
+  function toggleFlip() {
+    setIsFlipped(!isFlipped);
+  }
+
+  function navigateToNext() {
+    if (currentIndex < cards.length - 1) {
+      const nextCard = cards[currentIndex + 1];
+      setSelectedCard(nextCard);
+      setCurrentIndex(currentIndex + 1);
+    } else {
+      const firstCard = cards[0];
+      setSelectedCard(firstCard);
+      setCurrentIndex(0);
+    }
+  }
+
+  function navigateToPrevious() {
+    if (currentIndex > 0) {
+      const prevCard = cards[currentIndex - 1];
+      setSelectedCard(prevCard);
+      setCurrentIndex(currentIndex - 1);
+    } else {
+      const lastCard = cards[cards.length - 1];
+      setSelectedCard(lastCard);
+      setCurrentIndex(cards.length - 1);
+    }
+  }
+
+  const takeScreenshot = () => {
+    toast.success('Screenshot saved to your gallery', {
+      description: 'Card image has been saved with current effects'
+    });
   };
 
-  const handleShare = () => {
-    toast.info('Share feature coming soon');
-  };
+  const handleToggleEffect = useCallback((effect: string) => {
+    if (selectedCard) {
+      toggleEffect(selectedCard.id, effect);
+    }
+  }, [selectedCard, toggleEffect]);
 
-  const handleCardMouseMove = (e: React.MouseEvent) => {
-    if (!cardRef.current) return;
-    
-    const rect = cardRef.current.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width;
-    const y = (e.clientY - rect.top) / rect.height;
-    
-    setCardMousePosition({ x, y });
-    handleMouseMove(e);
-  };
+  const convertToCardData = useCallback((card: Card): CardData => {
+    return {
+      id: parseInt(card.id),
+      name: card.title,
+      imageUrl: card.imageUrl,
+      description: card.description,
+      team: card.tags?.[0] || '',
+      year: new Date(card.createdAt).getFullYear().toString(),
+      cardType: card.tags?.[1] || 'Standard',
+      artist: card.userId || 'Unknown',
+      set: card.collectionId || 'Personal Collection',
+      cardNumber: card.id.slice(0, 6),
+      specialEffect: activeEffects[0] || 'Standard',
+      jersey: '',
+      backgroundColor: '#000',
+      textColor: '#fff',
+      fabricSwatches: card.designMetadata?.cardStyle?.fabricSwatches || []
+    };
+  }, [activeEffects]);
 
-  const handleCardClick = (e: React.MouseEvent) => {
-    if (!cardRef.current) return;
-    
-    const rect = cardRef.current.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width;
-    const y = (e.clientY - rect.top) / rect.height;
-    
-    const isCorner = x > 0.8 && y < 0.2;
-    const isCenter = x > 0.4 && x < 0.6 && y > 0.4 && y < 0.6;
-    
-    if (isCorner) {
-      setIsFlipped(!isFlipped);
-      toast.info(`Card ${isFlipped ? 'front' : 'back'} view`);
-    } else if (isCenter) {
-      handleZoomIn();
+  const launchArMode = () => {
+    if (selectedCard) {
+      onClose();
+      window.location.href = `/ar-card-viewer/${selectedCard.id}`;
     }
   };
 
-  const updateLayerStatus = (layerName: string, loaded: boolean) => {
-    setLayerStatus(prev => prev.map(layer => {
-      if (layer.name === layerName) {
-        return {
-          ...layer,
-          loaded,
-          timestamp: performance.now()
-        };
-      }
-      return layer;
-    }));
-  };
-
-  const toggleControls = () => {
-    setShowControls(prev => !prev);
-    toast.info(showControls ? 'Controls hidden' : 'Controls visible');
-  };
-
-  if (!card) {
+  if (!selectedCard) {
     return (
-      <div className="fixed inset-0 bg-black flex items-center justify-center z-50">
-        <div className="text-white text-lg">Card not found</div>
-        <button 
-          className="absolute top-4 right-4 text-white p-2 rounded-full bg-black/50"
-          onClick={onClose}
-        >
-          <X size={24} />
-        </button>
+      <div className="fixed inset-0 bg-black z-50 flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-4 border-gray-300 border-t-white rounded-full"></div>
       </div>
     );
   }
 
   return (
-    <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50">
-      <div 
-        ref={containerRef}
-        className="relative flex-1 flex items-center justify-center overflow-hidden z-10"
-        onMouseMove={handleCardMouseMove}
-        onClick={handleCardClick}
-      >
-        <CardDisplay
-          card={card}
-          rotation={position}
-          isFlipped={isFlipped}
-          zoom={zoom}
-          isDragging={isDragging}
-          setIsDragging={setIsDragging}
-          cardRef={cardRef}
-          containerRef={containerRef}
-          isAutoRotating={isAutoRotating}
-          mousePosition={mousePosition}
-          onLayerLoad={updateLayerStatus}
-        />
-      </div>
+    <div className="fixed inset-0 bg-black z-50">
+      <div ref={preloadImagesRef} className="hidden"></div>
+      
+      <ErrorBoundary>
+        <Button 
+          variant="ghost" 
+          size="icon"
+          onClick={onClose}
+          className="absolute top-4 right-4 z-10 text-white hover:bg-white/10"
+        >
+          <X className="h-6 w-6" />
+        </Button>
 
-      <ViewerControls
-        isFlipped={isFlipped}
-        isAutoRotating={isAutoRotating}
-        onFlipCard={() => setIsFlipped(!isFlipped)}
-        onToggleAutoRotation={toggleAutoRotation}
-        onToggleControls={toggleControls}
-        onClose={onClose}
-      />
+        <div className="h-screen w-screen flex items-center justify-center">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={navigateToPrevious}
+            className="absolute left-4 md:left-8 text-white hover:bg-white/10 h-12 w-12"
+          >
+            <ChevronLeft className="h-8 w-8" />
+          </Button>
 
-      {showControls && (
-        <>
-          <KeyboardShortcuts />
-          <LayerMonitor 
-            isVisible={true}
-            layers={layerStatus}
-          />
-        </>
-      )}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={navigateToNext}
+            className="absolute right-4 md:right-8 text-white hover:bg-white/10 h-12 w-12"
+          >
+            <ChevronRight className="h-8 w-8" />
+          </Button>
+
+          <div className="w-full max-w-5xl">
+            <CardViewer
+              card={convertToCardData(selectedCard)}
+              isFlipped={isFlipped}
+              flipCard={toggleFlip}
+              onBackToCollection={onClose}
+              activeEffects={activeEffects}
+              onSnapshot={takeScreenshot}
+            />
+          </div>
+        </div>
+
+        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent p-4">
+          <div className="container mx-auto max-w-5xl flex justify-between items-center">
+            <div className="text-white">
+              <h3 className="crd-display-medium">{selectedCard.title}</h3>
+              <p className="text-sm text-gray-300 crd-text-small">
+                {currentIndex + 1} of {cards.length}
+              </p>
+            </div>
+
+            <div className="flex gap-2">
+              <Button 
+                variant="outline"
+                className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+                onClick={toggleFlip}
+              >
+                <RefreshCw className="h-4 w-4 mr-2" />
+                <span className="crd-text-medium">Flip</span>
+              </Button>
+              
+              <Button 
+                variant="outline"
+                className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+                onClick={takeScreenshot}
+              >
+                <Camera className="h-4 w-4 mr-2" />
+                <span className="crd-text-medium">Screenshot</span>
+              </Button>
+              
+              <Button 
+                variant="default"
+                className="bg-crd-primary text-white hover:bg-crd-primary/90"
+                onClick={launchArMode}
+              >
+                <Smartphone className="h-4 w-4 mr-2" />
+                <span className="crd-text-medium">View in AR</span>
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-10 flex gap-2">
+          {['Refractor', 'Holographic', 'Shimmer', 'Vintage'].map(effect => (
+            <Button
+              key={effect}
+              variant={activeEffects.includes(effect) ? "default" : "outline"}
+              size="sm"
+              onClick={() => handleToggleEffect(effect)}
+              className={activeEffects.includes(effect) 
+                ? "bg-cardshow-blue text-white" 
+                : "bg-white/10 border-white/20 text-white hover:bg-white/20"}
+            >
+              {effect}
+            </Button>
+          ))}
+        </div>
+      </ErrorBoundary>
     </div>
   );
 };

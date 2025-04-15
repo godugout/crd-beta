@@ -1,7 +1,5 @@
-
 import { useAuth } from '@/hooks/useAuth';
-import { UserPermission, ROLE_PERMISSIONS } from '@/lib/types';
-import { UserRole } from '@/lib/types/UserTypes';
+import { UserPermission, UserRole, ROLE_PERMISSIONS } from '@/lib/types';
 
 /**
  * Hook to check user permissions based on their role or specific permissions
@@ -31,14 +29,14 @@ export function usePermissions() {
    * Check if user has admin role
    */
   const isAdmin = (): boolean => {
-    return user?.role === UserRole.ADMIN;
+    return user?.role === 'admin';
   };
   
   /**
    * Check if user has moderator role or higher
    */
   const isModerator = (): boolean => {
-    return user?.role === UserRole.ADMIN || user?.role === UserRole.MODERATOR;
+    return user?.role === 'admin' || user?.role === 'moderator';
   };
   
   return {

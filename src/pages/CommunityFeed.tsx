@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Container } from '@/components/ui/container';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -89,7 +88,7 @@ const CommunityFeed: React.FC = () => {
             allowComments: collection.allow_comments !== undefined ? collection.allow_comments : true,
             createdAt: collection.created_at,
             updatedAt: collection.updated_at,
-            cardIds: [] // Add required cardIds property
+            cardIds: []
           }));
           
           setCollections(formattedCollections);

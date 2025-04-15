@@ -3,8 +3,7 @@ import {
   Layers, 
   PlusCircle,
   Package,
-  Sparkles,
-  Instagram
+  Sparkles 
 } from 'lucide-react';
 import { NavigationItem } from './types';
 
@@ -21,12 +20,6 @@ export const collectionsNavItems: NavigationItem[] = [
     path: '/collections/create',
     icon: PlusCircle,
     description: 'Create a new collection'
-  },
-  {
-    title: 'Instagram Collection',
-    path: '/collections/instagram',
-    icon: Instagram,
-    description: 'Create collection from Instagram posts'
   },
   {
     title: 'Memory Packs',

@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useCards } from '@/context/CardContext';
 import PageLayout from '@/components/navigation/PageLayout';
@@ -9,23 +9,11 @@ import { ArrowLeft, Calendar, MapPin, Users } from 'lucide-react';
 const MemoryPackDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { collections, isLoading, cards } = useCards();
-  const [searchTerm, setSearchTerm] = useState('');
   
   const collection = collections.find(c => c.id === id);
   const collectionCards = collection 
     ? cards.filter(card => collection.cardIds.includes(card.id))
     : [];
-
-  // Filter cards based on search term  
-  const filteredCards = React.useMemo(() => {
-    if (!searchTerm.trim()) return collectionCards;
-    
-    const lowerSearchTerm = searchTerm.toLowerCase();
-    return collectionCards.filter(card => 
-      card.title.toLowerCase().includes(lowerSearchTerm) || 
-      (card.description && card.description.toLowerCase().includes(lowerSearchTerm))
-    );
-  }, [collectionCards, searchTerm]);
   
   if (isLoading) {
     return (
@@ -48,26 +36,9 @@ const MemoryPackDetail = () => {
       </PageLayout>
     );
   }
-
-  // Memory pack stats for secondary navbar
-  const packStats = [
-    { count: collectionCards.length, label: `card${collectionCards.length !== 1 ? 's' : ''}` }
-  ];
-
-  // Actions for the secondary navbar
-  const actions = (
-    <Button variant="outline" size="sm">Edit Pack</Button>
-  );
   
   return (
-    <PageLayout 
-      title={collection.name} 
-      description={collection.description || 'Memory pack details'}
-      stats={packStats}
-      actions={actions}
-      onSearch={setSearchTerm}
-      searchPlaceholder="Search memories..."
-    >
+    <PageLayout title={collection.name} description={collection.description || 'Memory pack details'}>
       <div className="container mx-auto px-4 py-8">
         <div className="mb-6">
           <Button variant="ghost" asChild className="mb-4">
@@ -75,19 +46,25 @@ const MemoryPackDetail = () => {
               <ArrowLeft className="mr-2 h-4 w-4" /> Back to Memory Packs
             </Link>
           </Button>
+          
+          <div className="flex flex-col md:flex-row md:justify-between md:items-center">
+            <div>
+              <h1 className="text-3xl font-bold">{collection.name}</h1>
+              {collection.description && (
+                <p className="text-gray-600 mt-2">{collection.description}</p>
+              )}
+            </div>
+            
+            <div className="mt-4 md:mt-0">
+              <Button variant="outline">Edit Pack</Button>
+            </div>
+          </div>
         </div>
         
         <div className="mt-8">
           <h2 className="text-xl font-semibold mb-4">Cards in this pack</h2>
           
-          {filteredCards.length === 0 && collectionCards.length > 0 ? (
-            <div className="text-center p-8 border rounded-lg bg-gray-50">
-              <p>No matching cards found. Try a different search term.</p>
-              <Button className="mt-4" onClick={() => setSearchTerm('')}>
-                Clear Search
-              </Button>
-            </div>
-          ) : filteredCards.length === 0 ? (
+          {collectionCards.length === 0 ? (
             <div className="text-center p-8 border rounded-lg bg-gray-50">
               <p>No cards in this memory pack yet.</p>
               <Button asChild className="mt-4">
@@ -96,7 +73,7 @@ const MemoryPackDetail = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {filteredCards.map(card => (
+              {collectionCards.map(card => (
                 <div key={card.id} className="border rounded-lg overflow-hidden">
                   {card.imageUrl ? (
                     <div className="h-48 bg-gray-100 overflow-hidden">

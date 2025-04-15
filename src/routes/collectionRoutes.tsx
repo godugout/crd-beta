@@ -2,12 +2,11 @@
 import React from 'react';
 import { RouteObject } from 'react-router-dom';
 import Collections from '@/pages/Collections';
-import CollectionDetail from '@/pages/collections/detail';
+import CollectionDetail from '@/pages/CollectionDetail';
 import Gallery from '@/pages/Gallery';
 import Packs from '@/pages/Packs';
 import MemoryPackDetail from '@/pages/MemoryPackDetail';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
-import InstagramCollectionPage from '@/pages/collections/instagram';
 
 // Collection-related routes
 export const collectionRoutes: RouteObject[] = [
@@ -34,11 +33,6 @@ export const collectionRoutes: RouteObject[] = [
   {
     path: "/collections/new",
     element: <ProtectedRoute><Collections /></ProtectedRoute>, // Should be updated with proper create view
-  },
-  // Add the Instagram collection creator route
-  {
-    path: "/collections/instagram",
-    element: <ProtectedRoute><InstagramCollectionPage /></ProtectedRoute>,
   },
   {
     path: "/gallery",

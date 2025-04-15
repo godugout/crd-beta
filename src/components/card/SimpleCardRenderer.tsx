@@ -41,23 +41,23 @@ const SimpleCardRenderer: React.FC<SimpleCardRendererProps> = ({
 
   return (
     <div 
-      className={cn("card-container relative overflow-hidden rounded-lg aspect-[2.5/3.5]", className)}
+      className={cn("card-container relative overflow-hidden rounded-lg", className)}
       onClick={onClick}
     >
       {/* Loading state */}
       {!isLoaded && !isError && (
-        <div className="absolute inset-0 bg-slate-200 animate-pulse flex items-center justify-center">
-          <ImageIcon className="h-12 w-12 text-slate-300" />
-        </div>
+        <div className="w-full h-0 pb-[140%] bg-slate-200 animate-pulse" />
       )}
       
       {/* Error state */}
       {isError && (
-        <div className="absolute inset-0 bg-slate-100 flex items-center justify-center">
-          <div className="text-center px-4 text-slate-400">
-            <ImageIcon className="h-12 w-12 mb-2 mx-auto" />
-            <div className="mb-1">Image not available</div>
-            <div className="text-xs opacity-75">{title}</div>
+        <div className="w-full h-0 pb-[140%] bg-slate-100 flex items-center justify-center">
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-400">
+            <ImageIcon className="h-12 w-12 mb-2" />
+            <div className="text-center px-4">
+              <div className="mb-1">Image not available</div>
+              <div className="text-xs opacity-75">{title}</div>
+            </div>
           </div>
         </div>
       )}
@@ -67,13 +67,14 @@ const SimpleCardRenderer: React.FC<SimpleCardRendererProps> = ({
         src={imageUrl}
         alt={title}
         className={cn(
-          "absolute inset-0 w-full h-full object-cover transition-opacity duration-300",
+          "w-full h-full object-cover transition-all duration-300",
           isLoaded ? "opacity-100" : "opacity-0",
           isError ? "hidden" : ""
         )}
         onLoad={handleImageLoad}
         onError={handleImageError}
         loading="lazy"
+        style={{ aspectRatio: "2.5/3.5" }}
       />
       
       {/* Card details at bottom */}

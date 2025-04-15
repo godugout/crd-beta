@@ -1,14 +1,17 @@
 
 import React from 'react';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { CardDesignState } from './types/cardTypes';
-import { Upload } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Camera, Upload } from 'lucide-react';
+import { ColorPicker } from '@/components/ui/color-picker';
+import TagInput from '@/components/card-creation/elements/TagInput';
+import { CardDesignState } from './CardCreator';
 
 interface CardEditorSidebarProps {
   cardData: CardDesignState;
-  onChange: React.Dispatch<React.SetStateAction<CardDesignState>>;
+  onChange: (data: CardDesignState) => void;
   onImageUpload: (imageUrl: string) => void;
 }
 
@@ -17,143 +20,150 @@ const CardEditorSidebar: React.FC<CardEditorSidebarProps> = ({
   onChange,
   onImageUpload
 }) => {
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    onChange(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-  
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = () => {
-      const imageUrl = reader.result as string;
-      onChange(prev => ({ ...prev, imageUrl }));
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      const imageUrl = URL.createObjectURL(file);
       onImageUpload(imageUrl);
-    };
-    reader.readAsDataURL(file);
+    }
   };
-  
+
   return (
     <div className="space-y-6">
-      <div>
-        <h3 className="font-medium mb-3">Card Design</h3>
-        
-        {/* Image Upload */}
-        <div className="space-y-2 mb-4">
-          <Label htmlFor="image-upload">Card Image</Label>
-          <div className="relative">
-            {cardData.imageUrl ? (
-              <div className="relative w-full aspect-[2.5/3.5] rounded-lg overflow-hidden border">
-                <img 
-                  src={cardData.imageUrl} 
-                  alt="Card" 
-                  className="w-full h-full object-cover"
+      {/* Basic Card Details Section */}
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="title">Card Title</Label>
+          <Input
+            id="title"
+            value={cardData.title}
+            onChange={(e) => onChange({ ...cardData, title: e.target.value })}
+            placeholder="Enter card title"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="description">Description</Label>
+          <Textarea
+            id="description"
+            value={cardData.description}
+            onChange={(e) => onChange({ ...cardData, description: e.target.value })}
+            placeholder="Enter card description"
+            rows={3}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="tags">Tags</Label>
+          <TagInput
+            value={cardData.tags}
+            onChange={(tags) => onChange({ ...cardData, tags })}
+            placeholder="Add tags..."
+            maxTags={10}
+          />
+        </div>
+      </div>
+
+      {/* Card Appearance Section */}
+      <div className="space-y-4 pt-4 border-t">
+        <h3 className="font-medium">Card Appearance</h3>
+
+        <div className="space-y-2">
+          <Label htmlFor="border-color">Border Color</Label>
+          <ColorPicker
+            value={cardData.borderColor}
+            onChange={(color) => onChange({ ...cardData, borderColor: color })}
+            colors={['#000000', '#48BB78', '#4299E1', '#F56565', '#ED8936', '#ECC94B', '#9F7AEA', '#ED64A6']}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="background-color">Background Color</Label>
+          <ColorPicker
+            value={cardData.backgroundColor}
+            onChange={(color) => onChange({ ...cardData, backgroundColor: color })}
+            colors={['#FFFFFF', '#F7FAFC', '#E2E8F0', '#EDF2F7', '#EBF4FF', '#E6FFFA', '#F0FFF4', '#FFF5F5']}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="border-radius">Border Radius</Label>
+          <div className="flex gap-2">
+            {['0px', '4px', '8px', '12px', '16px', '20px'].map((radius) => (
+              <button
+                key={radius}
+                className={`flex-1 border py-1 px-2 text-xs rounded hover:bg-gray-100 ${
+                  cardData.borderRadius === radius ? 'border-primary bg-primary/10' : 'border-gray-200'
+                }`}
+                onClick={() => onChange({ ...cardData, borderRadius: radius })}
+              >
+                {radius}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Image Upload Section */}
+      <div className="space-y-4 pt-4 border-t">
+        <h3 className="font-medium">Card Image</h3>
+
+        <div>
+          <input
+            type="file"
+            id="image-upload"
+            className="hidden"
+            accept="image/*"
+            onChange={handleImageUpload}
+          />
+
+          {cardData.imageUrl ? (
+            <div className="space-y-2">
+              <div className="aspect-[2.5/3.5] rounded-md overflow-hidden bg-gray-100">
+                <img
+                  src={cardData.imageUrl}
+                  alt="Card"
+                  className="w-full h-full object-contain"
                 />
-                <div className="absolute inset-0 bg-black bg-opacity-30 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center">
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => document.getElementById('image-upload')?.click()}
-                  >
-                    Change Image
-                  </Button>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => document.getElementById('image-upload')?.click()}
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  Change
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <div className="aspect-[2.5/3.5] rounded-md border-2 border-dashed border-gray-200 flex flex-col items-center justify-center p-4">
+                <div className="text-gray-400 text-center">
+                  <Upload className="mx-auto h-8 w-8 mb-2" />
+                  <p className="text-sm">Upload an image for your card</p>
                 </div>
               </div>
-            ) : (
-              <div
-                className="w-full aspect-[2.5/3.5] border-2 border-dashed rounded-lg flex flex-col items-center justify-center p-4 cursor-pointer"
-                onClick={() => document.getElementById('image-upload')?.click()}
-              >
-                <Upload className="h-8 w-8 text-gray-400 mb-2" />
-                <p className="text-sm font-medium">Upload Card Image</p>
-                <p className="text-xs text-gray-500">Click to browse</p>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => document.getElementById('image-upload')?.click()}
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  Upload
+                </Button>
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                >
+                  <Camera className="h-4 w-4 mr-2" />
+                  Capture
+                </Button>
               </div>
-            )}
-            <input 
-              id="image-upload" 
-              type="file" 
-              accept="image/*" 
-              className="hidden" 
-              onChange={handleFileChange}
-            />
-          </div>
-        </div>
-        
-        {/* Border Color */}
-        <div className="space-y-2 mb-4">
-          <Label htmlFor="borderColor">Border Color</Label>
-          <div className="flex gap-2">
-            <div
-              className="w-10 h-10 rounded-md overflow-hidden border"
-              style={{ backgroundColor: cardData.borderColor }}
-            >
-              <input
-                type="color"
-                id="borderColor"
-                name="borderColor"
-                value={cardData.borderColor}
-                onChange={handleInputChange}
-                className="opacity-0 w-full h-full cursor-pointer"
-              />
             </div>
-            <Input
-              type="text"
-              name="borderColor"
-              value={cardData.borderColor}
-              onChange={handleInputChange}
-              className="flex-1"
-            />
-          </div>
-        </div>
-        
-        {/* Background Color */}
-        <div className="space-y-2 mb-4">
-          <Label htmlFor="backgroundColor">Background Color</Label>
-          <div className="flex gap-2">
-            <div
-              className="w-10 h-10 rounded-md overflow-hidden border"
-              style={{ backgroundColor: cardData.backgroundColor }}
-            >
-              <input
-                type="color"
-                id="backgroundColor"
-                name="backgroundColor"
-                value={cardData.backgroundColor}
-                onChange={handleInputChange}
-                className="opacity-0 w-full h-full cursor-pointer"
-              />
-            </div>
-            <Input
-              type="text"
-              name="backgroundColor"
-              value={cardData.backgroundColor}
-              onChange={handleInputChange}
-              className="flex-1"
-            />
-          </div>
-        </div>
-        
-        {/* Border Radius */}
-        <div className="space-y-2">
-          <Label htmlFor="borderRadius">Border Radius</Label>
-          <div className="flex items-center gap-2">
-            <Input
-              type="range"
-              min="0"
-              max="30"
-              step="1"
-              name="borderRadius"
-              value={parseInt(cardData.borderRadius) || "0"}
-              onChange={(e) => onChange(prev => ({ ...prev, borderRadius: `${e.target.value}px` }))}
-              className="flex-1"
-            />
-            <span className="text-sm w-10 text-center">{parseInt(cardData.borderRadius) || "0"}px</span>
-          </div>
+          )}
         </div>
       </div>
     </div>

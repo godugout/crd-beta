@@ -3,10 +3,12 @@ import React from 'react';
 import { RouteObject } from 'react-router-dom';
 import CardGallery from '@/pages/CardGallery';
 import CardDetail from '@/pages/CardDetail';
-import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
-import CardCreator from '@/pages/CardCreator';
+import CardDetector from '@/pages/CardDetector';
 import Editor from '@/pages/Editor';
-import ImmersiveCardViewer from '@/pages/ImmersiveCardViewer';
+import CardCreatorPage from '@/pages/CardCreatorPage';
+import CardShowcase from '@/pages/CardShowcase';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import CardCreationFlow from '@/components/card-editor/CardCreationFlow';
 
 // Card-related routes
 export const cardRoutes: RouteObject[] = [
@@ -15,29 +17,43 @@ export const cardRoutes: RouteObject[] = [
     element: <CardGallery />,
   },
   {
-    path: "/gallery",
-    element: <CardGallery />,
+    path: "/cards/effects",
+    element: <CardGallery />, // Should be implemented as a dedicated page
+  },
+  {
+    path: "/cards/create",
+    element: <ProtectedRoute><CardCreatorPage /></ProtectedRoute>,
   },
   {
     path: "/card/:id",
     element: <CardDetail />,
   },
   {
-    path: "/cards/create",
-    element: <ProtectedRoute><CardCreator /></ProtectedRoute>,
+    path: "/card/create",
+    element: <ProtectedRoute><CardCreatorPage /></ProtectedRoute>,
   },
   {
-    path: "/create",
+    path: "/detector",
+    element: <CardDetector />,
+  },
+  {
+    path: "/animation",
+    element: <CardShowcase />, // Should be implemented as a dedicated page
+  },
+  {
+    path: "/editor",
     element: <ProtectedRoute><Editor /></ProtectedRoute>,
   },
   {
-    path: "/edit/:id",
+    path: "/editor/:id",
     element: <ProtectedRoute><Editor /></ProtectedRoute>,
   },
   {
-    path: "/view/:id",
-    element: <ImmersiveCardViewer />,
-  }
+    path: "/card-upload",
+    element: <ProtectedRoute><CardCreationFlow /></ProtectedRoute>,
+  },
+  {
+    path: "/card-creator",
+    element: <CardCreatorPage />,
+  },
 ];
-
-export default cardRoutes;

@@ -30,9 +30,9 @@ const defaultThemes: TeamTheme[] = [
   {
     id: 'default',
     name: 'Default Theme',
-    primary: '#006341', // A's Kelly Green
-    secondary: '#EFB21E', // A's Gold
-    accent: '#004F33', // Dark Kelly Green
+    primary: '#48BB78', // Green
+    secondary: '#38A169',
+    accent: '#4FD1C5', // Teal
     neutral: '#8E9196',
     background: '#FFFFFF',
     text: '#1A202C',
@@ -40,7 +40,7 @@ const defaultThemes: TeamTheme[] = [
   {
     id: 'oakland',
     name: 'Oakland A\'s',
-    primary: '#006341', // Kelly Green
+    primary: '#006341', // Green
     secondary: '#EFB21E', // Gold
     accent: '#003831', // Dark green
     neutral: '#CCCCCC',
@@ -60,9 +60,9 @@ const defaultThemes: TeamTheme[] = [
   {
     id: 'dark',
     name: 'Dark Theme',
-    primary: '#006341', // A's Kelly Green (changed from purple)
-    secondary: '#EFB21E', // A's Gold
-    accent: '#004F33', // Dark kelly green
+    primary: '#9b87f5', // Purple
+    secondary: '#7E69AB',
+    accent: '#D946EF', // Pink
     neutral: '#8E9196',
     background: '#1A1F2C',
     text: '#FFFFFF',

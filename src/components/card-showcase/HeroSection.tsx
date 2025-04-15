@@ -19,11 +19,11 @@ const HeroSection = () => {
       <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-3xl mx-auto text-center">
           <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-litmus-purple via-litmus-purple-secondary to-litmus-purple-tertiary dark:from-white dark:to-litmus-purple-light bg-clip-text text-transparent">
-            Your CRD Collection
+            Your Digital Card Collection
           </h1>
           
           <p className="text-xl text-gray-700 dark:text-gray-300 mb-10 leading-relaxed">
-            Cards Rendered Digitally<sup className="text-xs">TM</sup> with advanced AR features
+            Create, collect, and showcase your trading cards with advanced AR features
             and stunning visual effects.
           </p>
           

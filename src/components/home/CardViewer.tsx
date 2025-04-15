@@ -1,6 +1,17 @@
 
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import { CardData } from '@/types/card';
+import { toast } from 'sonner';
+import './card-effects/index.css';
+import CardCanvas from './card-viewer/CardCanvas';
+import CardControls from './card-viewer/CardControls';
+import EffectControls from './card-viewer/EffectControls';
+import EffectsPresets from './card-viewer/EffectsPresets';
+import { useCardEffects } from './card-viewer/useCardEffects';
+import { useEffectSettings } from './card-viewer/useEffectSettings';
+import { usePresetsState } from './card-viewer/usePresetsState';
+import CardBackground from './card-viewer/CardBackground';
+import CardContainer from './card-viewer/CardContainer';
 
 interface CardViewerProps {
   card: CardData;
@@ -11,70 +22,151 @@ interface CardViewerProps {
   onSnapshot: () => void;
 }
 
-const CardViewer: React.FC<CardViewerProps> = ({
-  card,
-  isFlipped,
-  flipCard,
-  onBackToCollection,
+const CardViewer = ({ 
+  card, 
+  isFlipped, 
+  flipCard, 
+  onBackToCollection, 
   activeEffects,
   onSnapshot
-}) => {
+}: CardViewerProps) => {
+  const [showAdvancedControls, setShowAdvancedControls] = useState(false);
+  const [showPresetsPanel, setShowPresetsPanel] = useState(false);
+
+  const { 
+    cardRef,
+    containerRef,
+    canvasRef,
+    isMoving,
+    handleCanvasMouseMove,
+    handleMouseMove,
+    handleMouseLeave,
+    setAnimationSpeed
+  } = useCardEffects();
+
+  const effectSettings = useEffectSettings((settings) => {
+    setAnimationSpeed({
+      motion: settings.motionSpeed,
+      pulse: settings.pulseIntensity,
+      shimmer: settings.shimmerSpeed,
+      gold: settings.goldIntensity,
+      chrome: settings.chromeIntensity,
+      vintage: settings.vintageIntensity,
+      refractor: settings.refractorIntensity,
+      spectral: settings.spectralIntensity || 1.0
+    });
+  });
+  
+  const { userPresets, builtInPresets, handleToggleFavorite, saveUserPreset } = usePresetsState();
+  
+  const handleSnapshot = () => {
+    onSnapshot();
+    toast.success('Snapshot captured!', {
+      description: 'Effect combination saved to gallery'
+    });
+  };
+
+  const toggleAdvancedControls = () => {
+    setShowAdvancedControls(prev => !prev);
+    if (showPresetsPanel) setShowPresetsPanel(false);
+  };
+
+  const togglePresetsPanel = () => {
+    setShowPresetsPanel(prev => !prev);
+    if (showAdvancedControls) setShowAdvancedControls(false);
+  };
+
+  const handleSaveEffectsCombination = (name: string) => {
+    const newPreset = saveUserPreset(name, activeEffects, effectSettings.getCurrentSettings());
+    
+    toast.success('Effect combination saved!', {
+      description: `"${name}" added to your presets library`
+    });
+  };
+
+  const handleApplyPreset = (preset: any) => {
+    // Apply the preset settings
+    effectSettings.applySettings(preset.settings);
+    
+    toast.success(`"${preset.name}" applied!`, {
+      description: `Effects combination applied to the current card`
+    });
+  };
+
   return (
-    <div className="relative bg-gray-100 rounded-lg shadow-lg overflow-hidden aspect-[3/4] w-full">
-      <div className="h-full w-full flex items-center justify-center relative">
-        {card.imageUrl ? (
-          <img
-            src={card.imageUrl}
-            alt={card.name}
-            className={`max-h-full max-w-full object-contain transition-all duration-300 ${
-              activeEffects.length > 0 ? activeEffects.join(' ') : ''
-            }`}
-          />
-        ) : (
-          <div className="bg-gray-200 h-96 w-72 rounded flex items-center justify-center text-gray-500">
-            No Image Available
-          </div>
-        )}
-        
-        {/* Card info overlay */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent text-white">
-          <h3 className="font-bold text-xl">{card.name}</h3>
-          <div className="flex flex-wrap gap-2 text-sm mt-1">
-            {card.team && <span className="opacity-90">{card.team}</span>}
-            {card.year && <span className="opacity-80">• {card.year}</span>}
-            {card.jersey && <span className="opacity-80">• #{card.jersey}</span>}
-          </div>
-        </div>
-        
-        {/* Control buttons */}
-        <button 
-          className="absolute top-4 right-4 bg-white bg-opacity-80 text-gray-800 p-2 rounded-full hover:bg-opacity-100 transition shadow-sm"
-          onClick={flipCard}
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-          </svg>
-        </button>
-        
-        <button 
-          className="absolute top-4 left-4 bg-white bg-opacity-80 text-gray-800 p-2 rounded-full hover:bg-opacity-100 transition shadow-sm"
-          onClick={onBackToCollection}
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-          </svg>
-        </button>
-        
-        <button 
-          className="absolute bottom-4 right-4 bg-white bg-opacity-80 text-gray-800 p-2 rounded-full hover:bg-opacity-100 transition shadow-sm"
-          onClick={onSnapshot}
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-          </svg>
-        </button>
-      </div>
+    <div 
+      ref={canvasRef}
+      className="relative w-full h-96 md:h-[500px] flex items-center justify-center p-4 bg-gradient-to-br from-gray-900 to-gray-800 rounded-lg overflow-hidden"
+      onMouseMove={handleCanvasMouseMove}
+      onMouseLeave={handleMouseLeave}
+    >
+      {/* Dynamic background */}
+      <CardBackground />
+      
+      {/* Card container with 3D perspective */}
+      <CardContainer
+        containerRef={containerRef}
+        onMouseMove={handleMouseMove}
+        isMoving={isMoving}
+        effectSettings={effectSettings.getCurrentSettings()}
+      >
+        {/* Card representation */}
+        <CardCanvas 
+          card={card}
+          isFlipped={isFlipped}
+          activeEffects={activeEffects}
+          containerRef={containerRef}
+          cardRef={cardRef}
+          onMouseMove={handleMouseMove}
+          onMouseLeave={handleMouseLeave}
+        />
+      </CardContainer>
+      
+      {/* Controls */}
+      <CardControls 
+        flipCard={flipCard}
+        onBackToCollection={onBackToCollection}
+        onSnapshot={handleSnapshot}
+        activeEffectsCount={activeEffects.length}
+        onToggleAdvancedControls={toggleAdvancedControls}
+        showAdvancedControls={showAdvancedControls}
+        onTogglePresetsPanel={togglePresetsPanel}
+        showPresetsPanel={showPresetsPanel}
+      />
+
+      {/* Advanced Effect Controls */}
+      <EffectControls 
+        isOpen={showAdvancedControls}
+        onClose={() => setShowAdvancedControls(false)}
+        onSaveEffectsCombination={handleSaveEffectsCombination}
+        activeEffects={activeEffects}
+        onMotionSpeedChange={effectSettings.handleMotionSpeedChange}
+        onPulseIntensityChange={effectSettings.handlePulseIntensityChange}
+        onShimmerSpeedChange={effectSettings.handleShimmerSpeedChange}
+        onGoldIntensityChange={effectSettings.handleGoldIntensityChange}
+        onChromeIntensityChange={effectSettings.handleChromeIntensityChange}
+        onVintageIntensityChange={effectSettings.handleVintageIntensityChange}
+        onRefractorIntensityChange={effectSettings.handleRefractorIntensityChange}
+        onSpectralIntensityChange={effectSettings.handleSpectralIntensityChange}
+        motionSpeed={effectSettings.motionSpeed}
+        pulseIntensity={effectSettings.pulseIntensity}
+        shimmerSpeed={effectSettings.shimmerSpeed}
+        goldIntensity={effectSettings.goldIntensity}
+        chromeIntensity={effectSettings.chromeIntensity}
+        vintageIntensity={effectSettings.vintageIntensity}
+        refractorIntensity={effectSettings.refractorIntensity}
+        spectralIntensity={effectSettings.spectralIntensity}
+      />
+
+      {/* Effects Presets Panel */}
+      <EffectsPresets
+        isOpen={showPresetsPanel}
+        onClose={() => setShowPresetsPanel(false)}
+        presets={builtInPresets}
+        userPresets={userPresets}
+        onApplyPreset={handleApplyPreset}
+        onToggleFavorite={handleToggleFavorite}
+      />
     </div>
   );
 };

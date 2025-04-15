@@ -18,7 +18,7 @@ export const useCardEffects = ({
     ];
     
     // Apply all active effects to the card
-    if (activeEffects.includes('Holographic')) {
+    if (activeEffects.includes('Classic Holographic')) {
       classes.push('card-holographic');
     }
     
@@ -47,32 +47,68 @@ export const useCardEffects = ({
     }
     
     if (activeEffects.includes('Spectral')) {
-      classes.push('card-spectral');
+      classes.push('spectral-hologram');
     }
     
-    // Join all classes
     return classes.join(' ');
   };
-  
-  const getFilterStyle = (): CSSProperties => {
-    const style: CSSProperties = {};
+
+  const getFilterStyle = () => {
+    let filterStyle: CSSProperties = {};
     
-    // Apply filter styles based on active effects
+    // Apply filters based on active effects
+    if (activeEffects.includes('Classic Holographic')) {
+      filterStyle = {
+        ...filterStyle,
+        filter: 'contrast(1.1) brightness(1.1) saturate(1.3)',
+      };
+    }
+    
+    // Add filter modifications for refractor effect
+    if (activeEffects.includes('Refractor')) {
+      filterStyle = {
+        ...filterStyle,
+        filter: `${filterStyle.filter || ''} contrast(1.15) brightness(1.05) saturate(1.2)`.trim(),
+      };
+    }
+    
+    // Add filter modifications for spectral effect
+    if (activeEffects.includes('Spectral')) {
+      filterStyle = {
+        ...filterStyle,
+        filter: `${filterStyle.filter || ''} contrast(1.2) brightness(1.1) saturate(1.4)`.trim(),
+        '--hologram-intensity': '0.7'
+      } as CSSProperties;
+    }
+    
+    // Add filter modifications for new effects
     if (activeEffects.includes('Vintage')) {
-      style.filter = 'sepia(0.5) contrast(1.1)';
+      filterStyle = {
+        ...filterStyle,
+        filter: `${filterStyle.filter || ''} sepia(0.3) contrast(0.95) brightness(0.9)`.trim(),
+      };
     }
     
-    if (activeEffects.includes('Chrome')) {
-      style.filter = (style.filter || '') + ' brightness(1.2) contrast(1.2)';
+    if (activeEffects.includes('Refractor') || activeEffects.includes('Gold Foil') || 
+        activeEffects.includes('Chrome') || activeEffects.includes('Prismatic') ||
+        activeEffects.includes('Spectral')) {
+      filterStyle = {
+        ...filterStyle,
+        borderRadius: '12px',
+      };
     }
     
-    return style;
+    return filterStyle;
   };
-  
-  return {
-    getCardClasses,
-    getFilterStyle
-  };
+
+  return { getCardClasses, getFilterStyle };
 };
 
-export default useCardEffects;
+// Keep the original component for backward compatibility but use the hook internally
+const CardEffectsLayer: React.FC<CardEffectsLayerProps> = (props) => {
+  // This component doesn't render anything visible
+  // It just provides the effect utilities via the hook
+  return null;
+};
+
+export default CardEffectsLayer;

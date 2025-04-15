@@ -1,7 +1,5 @@
 
-import { UserRole as BaseUserRole } from '../types';
-
-export { BaseUserRole as UserRole };
+export type UserRole = 'artist' | 'fan' | 'admin';
 
 export interface UserProfile {
   id: string;
@@ -9,7 +7,7 @@ export interface UserProfile {
   avatarUrl?: string;
   name?: string;
   displayName?: string;
-  role: BaseUserRole;
+  role: UserRole;
   bio?: string;
   website?: string;
   socialLinks?: {

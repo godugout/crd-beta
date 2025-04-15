@@ -4,16 +4,10 @@ import { useParams } from 'react-router-dom';
 import TeamNotFound from '@/components/teams/TeamNotFound';
 import OaklandTeamPage from '@/components/teams/OaklandTeamPage';
 import StandardTeamPage from '@/components/teams/StandardTeamPage';
+import TeamsOverview from '@/components/teams/TeamsOverview';
 
-interface TeamPageProps {
-  teamId?: string;
-}
-
-const TeamPage: React.FC<TeamPageProps> = ({ teamId: propTeamId }) => {
-  const { teamId: paramTeamId } = useParams<{ teamId?: string }>();
-  
-  // Use teamId from props if provided, otherwise from URL params
-  const teamId = propTeamId || paramTeamId;
+const TeamPage = () => {
+  const { teamId } = useParams<{ teamId?: string }>();
   
   const teams = [
     {
@@ -34,7 +28,7 @@ const TeamPage: React.FC<TeamPageProps> = ({ teamId: propTeamId }) => {
     }
   ];
 
-  // If we have a team ID, find the matching team
+  // If we are viewing a specific team page
   if (teamId) {
     const team = teams.find(t => t.id === teamId);
     
@@ -48,12 +42,12 @@ const TeamPage: React.FC<TeamPageProps> = ({ teamId: propTeamId }) => {
       return <OaklandTeamPage team={team} />;
     }
     
-    // Regular team page for other teams (just SF Giants for now)
+    // Regular team page
     return <StandardTeamPage team={team} />;
   }
   
-  // Fallback to TeamNotFound if no teamId is provided
-  return <TeamNotFound />;
+  // Teams overview page (when no specific team is selected)
+  return <TeamsOverview teams={teams} />;
 };
 
 export default TeamPage;

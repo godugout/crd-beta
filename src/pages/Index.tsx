@@ -15,10 +15,9 @@ const Index = () => {
   
   return (
     <PageLayout
-      title="CardShow - CRD Collection"
-      description="Cards Rendered Digitally™ - Create, collect and showcase your trading cards"
+      title="CardShow - Digital Card Collection"
+      description="Create, collect and showcase your trading cards"
       fullWidth={true}
-      hideBreadcrumbs={true}
     >
       <HeroSection />
       

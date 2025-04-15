@@ -3,7 +3,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { LogOut, Settings, User as UserIcon } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth'; // Use our modified hook
+import { useAuth } from '@/providers/AuthProvider'; // Updated import to use the correct AuthProvider
 
 interface NavigationFooterProps {
   onSignOut?: () => void;
@@ -11,8 +11,7 @@ interface NavigationFooterProps {
 }
 
 const NavigationFooter: React.FC<NavigationFooterProps> = ({ onSignOut, onClose }) => {
-  const auth = useAuth();
-  const { user, signOut: authSignOut } = auth;
+  const { user, signOut: authSignOut } = useAuth();
   
   const handleSignOut = () => {
     if (onSignOut) {

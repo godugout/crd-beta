@@ -1,8 +1,11 @@
 
-import React, { useRef, useState } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { CardData } from '@/types/card';
 import CardFront from './card-elements/CardFront';
 import CardBack from './card-elements/CardBack';
+import CardEffectsLayer, { useCardEffects } from './card-elements/CardEffectsLayer';
+import RefractorEffect from '../card-effects/RefractorEffect';
+import HolographicEngine from '../card-effects/HolographicEngine';
 
 interface CardCanvasProps {
   card: CardData;
@@ -12,21 +15,6 @@ interface CardCanvasProps {
   cardRef: React.RefObject<HTMLDivElement>;
   onMouseMove: (e: React.MouseEvent<HTMLDivElement>) => void;
   onMouseLeave: () => void;
-  effectSettings?: {
-    refractorIntensity?: number;
-    refractorColors?: string[];
-    animationEnabled?: boolean;
-    refractorSpeed?: number;
-    refractorAngle?: number;
-    holographicIntensity?: number;
-    holographicPattern?: 'linear' | 'circular' | 'angular' | 'geometric';
-    holographicColorMode?: 'rainbow' | 'blue-purple' | 'gold-green' | 'custom';
-    holographicCustomColors?: string[];
-    holographicSparklesEnabled?: boolean;
-    holographicBorderWidth?: number;
-  };
-  // Debug mode to help troubleshoot rendering issues
-  debug?: boolean;
 }
 
 const CardCanvas: React.FC<CardCanvasProps> = ({
@@ -36,75 +24,132 @@ const CardCanvas: React.FC<CardCanvasProps> = ({
   containerRef,
   cardRef,
   onMouseMove,
-  onMouseLeave,
-  effectSettings = {},
-  debug = false
+  onMouseLeave
 }) => {
-  // Simplified component with better structure for effects
+  // Use the hook directly instead of trying to access methods on a React component
+  const effectsLayer = useCardEffects({ activeEffects, isFlipped });
+  const cardElementRef = useRef<HTMLDivElement>(null);
+  const [mousePos, setMousePos] = useState({ x: 0.5, y: 0.5 });
+  const [animationActive, setAnimationActive] = useState(true);
+  
+  // Set CSS variables for mouse position to use in the refractor effect
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!cardElementRef.current) return;
+      
+      // Set animation to active when mouse moves
+      setAnimationActive(true);
+      
+      const rect = cardElementRef.current.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width;
+      const y = (e.clientY - rect.top) / rect.height;
+      
+      cardElementRef.current.style.setProperty('--mouse-x', `${x * 100}%`);
+      cardElementRef.current.style.setProperty('--mouse-y', `${y * 100}%`);
+      
+      setMousePos({ x, y });
+    };
+    
+    // Mouse leave handler to gradually slow down animation
+    const handleMouseLeave = () => {
+      // Start fading out animation
+      setAnimationActive(false);
+    };
+    
+    window.addEventListener('mousemove', handleMouseMove);
+    
+    // Add mouse leave event listener to the card element
+    if (cardElementRef.current) {
+      cardElementRef.current.addEventListener('mouseleave', handleMouseLeave);
+    }
+    
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      if (cardElementRef.current) {
+        cardElementRef.current.removeEventListener('mouseleave', handleMouseLeave);
+      }
+    };
+  }, []);
+  
+  // Check if effects are active
+  const hasRefractorEffect = activeEffects.includes('Refractor');
+  const hasSpectralEffect = activeEffects.includes('Spectral');
+  
+  // Create parallax layers for 3D effect
+  const renderParallaxLayers = () => {
+    if (!hasSpectralEffect) return null;
+    
+    return (
+      <>
+        <div className="parallax-layer parallax-layer-1"></div>
+        <div className="parallax-layer parallax-layer-2"></div>
+        {/* Microtext layer - only on desktop for performance */}
+        <div className="microtext-layer hidden md:block">
+          {Array(20).fill(0).map((_, i) => (
+            <div key={i} style={{ 
+              position: 'absolute', 
+              top: `${i * 5}%`, 
+              left: 0, 
+              width: '100%',
+              transform: `rotate(${i % 2 === 0 ? 0 : 180}deg)`,
+              opacity: 0.1
+            }}>
+              {Array(100).fill(`card-${card.id}-spectral-`).join(' ')}
+            </div>
+          ))}
+        </div>
+      </>
+    );
+  };
+  
   return (
     <div
       ref={cardRef}
-      className="dynamic-card"
-      style={{ 
-        position: 'relative',
-        width: '100%',
-        height: '100%',
-        borderRadius: '12px',
-        overflow: 'hidden',
-        transformStyle: 'preserve-3d',
-        transition: 'transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-        transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0)'
-      }}
+      className={`dynamic-card ${effectsLayer.getCardClasses()} ${hasSpectralEffect ? 'spectral-hologram' : ''} ${animationActive ? 'animation-active' : 'animation-slowing'}`}
+      style={effectsLayer.getFilterStyle()}
       onMouseMove={onMouseMove}
       onMouseLeave={onMouseLeave}
     >
       <div 
+        ref={cardElementRef}
         className="card-inner relative w-full h-full"
       >
-        {/* Front face */}
-        <div 
-          style={{ 
-            position: 'absolute', 
-            width: '100%', 
-            height: '100%', 
-            backfaceVisibility: 'hidden',
-            transform: 'rotateY(0deg)'
-          }}
-        >
-          <CardFront card={card} activeEffects={activeEffects} />
-        </div>
+        {/* Front face of the card */}
+        {!isFlipped && <CardFront card={card} />}
         
-        {/* Back face */}
-        <div 
-          style={{ 
-            position: 'absolute', 
-            width: '100%', 
-            height: '100%', 
-            backfaceVisibility: 'hidden',
-            transform: 'rotateY(180deg)'
-          }}
-        >
-          <CardBack card={card} />
-        </div>
-
-        {/* Debug overlay */}
-        {debug && (
-          <div style={{ 
-            position: 'absolute', 
-            top: '5px', 
-            left: '5px', 
-            zIndex: 1000,
-            background: 'rgba(0,0,0,0.7)',
-            color: 'white',
-            padding: '4px 8px',
-            fontSize: '10px',
-            borderRadius: '3px',
-            pointerEvents: 'none'
-          }}>
-            Image: {card.imageUrl ? '✓' : '✗'}<br/>
-            Effects: {activeEffects.join(', ') || 'None'}
-          </div>
+        {/* Back face of the card */}
+        {isFlipped && <CardBack card={card} />}
+        
+        {/* Parallax layers for spectral effect */}
+        {renderParallaxLayers()}
+        
+        {/* Dynamic light reflection layer */}
+        {hasSpectralEffect && (
+          <div 
+            className="spectral-hologram-layer" 
+            style={{ 
+              '--mouse-x': `${mousePos.x * 100}%`, 
+              '--mouse-y': `${mousePos.y * 100}%` 
+            } as React.CSSProperties}
+          ></div>
         )}
+        
+        {/* Refractor WebGL effect overlay */}
+        <RefractorEffect 
+          isActive={hasRefractorEffect} 
+          intensity={1.0}
+          mousePosition={mousePos}
+        />
+        
+        {/* Advanced Holographic Engine */}
+        <HolographicEngine 
+          active={hasSpectralEffect}
+          intensity={0.7}
+          colorMode="rainbow"
+          animated={animationActive}
+          microtext={`CARD-${card.id} AUTHENTIC HOLOGRAM `}
+          particleCount={hasSpectralEffect ? 50 : 0}
+        />
       </div>
     </div>
   );

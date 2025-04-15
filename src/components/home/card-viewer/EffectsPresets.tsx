@@ -1,9 +1,10 @@
-import React from 'react';
-import { X, Star } from 'lucide-react';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Button } from '@/components/ui/button';
 
-// Define and export the EffectPreset type
+import React from 'react';
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Sparkles, Heart } from 'lucide-react';
+
 export interface EffectPreset {
   id: string;
   name: string;
@@ -16,76 +17,70 @@ export interface EffectPreset {
     goldIntensity: number;
     chromeIntensity: number;
     vintageIntensity: number;
-    refractorIntensity?: number;
-    spectralIntensity?: number;
   };
-  thumbnail?: string;
+  thumbnail: string;
   isFavorite?: boolean;
 }
 
 interface EffectsPresetsProps {
-  isOpen: boolean;
-  onClose: () => void;
   presets: EffectPreset[];
-  userPresets: EffectPreset[];
   onApplyPreset: (preset: EffectPreset) => void;
   onToggleFavorite: (presetId: string) => void;
+  isOpen: boolean;
+  onClose: () => void;
+  userPresets: EffectPreset[];
 }
 
 const EffectsPresets: React.FC<EffectsPresetsProps> = ({
+  presets,
+  onApplyPreset,
+  onToggleFavorite,
   isOpen,
   onClose,
-  presets,
-  userPresets,
-  onApplyPreset,
-  onToggleFavorite
+  userPresets
 }) => {
   if (!isOpen) return null;
-  
+
   return (
-    <div className="fixed top-16 right-0 h-[calc(100%-4rem)] w-80 bg-gray-900/95 backdrop-blur-md text-white z-30 shadow-lg transition-transform duration-300 transform-gpu overflow-hidden">
-      <div className="p-5">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-bold">Effects Presets</h3>
-          <button 
-            onClick={onClose} 
-            className="p-2 rounded-full bg-gray-800 hover:bg-gray-700 text-gray-400"
-          >
-            <X size={18} />
-          </button>
-        </div>
-        
-        <ScrollArea className="h-[calc(100vh-8rem)] pr-3">
-          {userPresets.length > 0 && (
-            <div className="mb-6">
-              <h4 className="text-sm font-medium text-gray-300 mb-2">Your Presets</h4>
-              <div className="space-y-2">
-                {userPresets.map((preset) => (
-                  <PresetCard
-                    key={preset.id}
-                    preset={preset}
-                    onApply={onApplyPreset}
-                    onToggleFavorite={onToggleFavorite}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-          
-          <div>
-            <h4 className="text-sm font-medium text-gray-300 mb-2">Standard Presets</h4>
-            <div className="space-y-2">
-              {presets.map((preset) => (
-                <PresetCard
-                  key={preset.id}
-                  preset={preset}
-                  onApply={onApplyPreset}
-                  onToggleFavorite={onToggleFavorite}
-                />
-              ))}
-            </div>
+    <div className="absolute bottom-16 left-4 w-72 bg-white rounded-lg shadow-lg p-4 animate-fade-in max-h-[80vh] overflow-y-auto">
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-sm font-semibold">Effect Presets</h3>
+        <button 
+          onClick={onClose}
+          className="text-gray-500 hover:text-gray-700"
+        >
+          <span className="sr-only">Close</span>
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+      </div>
+
+      {userPresets.length > 0 && (
+        <>
+          <h4 className="text-xs font-medium text-gray-500 mb-2">Your Combinations</h4>
+          <div className="grid grid-cols-1 gap-2 mb-4">
+            {userPresets.map((preset) => (
+              <PresetCard 
+                key={preset.id} 
+                preset={preset} 
+                onApply={() => onApplyPreset(preset)} 
+                onToggleFavorite={() => onToggleFavorite(preset.id)}
+                isUserPreset
+              />
+            ))}
           </div>
-        </ScrollArea>
+        </>
+      )}
+
+      <h4 className="text-xs font-medium text-gray-500 mb-2">Built-in Presets</h4>
+      <div className="grid grid-cols-1 gap-2">
+        {presets.map((preset) => (
+          <PresetCard 
+            key={preset.id} 
+            preset={preset} 
+            onApply={() => onApplyPreset(preset)} 
+            onToggleFavorite={() => onToggleFavorite(preset.id)}
+          />
+        ))}
       </div>
     </div>
   );
@@ -93,57 +88,66 @@ const EffectsPresets: React.FC<EffectsPresetsProps> = ({
 
 interface PresetCardProps {
   preset: EffectPreset;
-  onApply: (preset: EffectPreset) => void;
-  onToggleFavorite: (presetId: string) => void;
+  onApply: () => void;
+  onToggleFavorite: () => void;
+  isUserPreset?: boolean;
 }
 
-const PresetCard: React.FC<PresetCardProps> = ({ preset, onApply, onToggleFavorite }) => {
+const PresetCard: React.FC<PresetCardProps> = ({ preset, onApply, onToggleFavorite, isUserPreset }) => {
   return (
-    <div className="bg-gray-800 rounded-lg overflow-hidden">
-      <div className="flex items-start">
-        {preset.thumbnail && (
-          <div className="w-16 h-16 bg-gray-700">
-            <img 
-              src={preset.thumbnail} 
-              alt={preset.name} 
-              className="w-full h-full object-cover"
-            />
-          </div>
-        )}
-        <div className="flex-1 p-3">
-          <div className="flex items-start justify-between">
-            <div>
-              <h5 className="font-medium text-white">{preset.name}</h5>
-              <p className="text-xs text-gray-400 mt-0.5">{preset.description}</p>
+    <Card className="p-3 relative hover:shadow-md transition-shadow">
+      <div className="flex space-x-3">
+        <div 
+          className="w-12 h-16 rounded-md overflow-hidden bg-gray-100 flex-shrink-0"
+          style={{
+            backgroundImage: `url(${preset.thumbnail})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center'
+          }}
+        >
+          {!preset.thumbnail && (
+            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
+              <Sparkles className="h-5 w-5 text-blue-400" />
             </div>
-            <button
-              onClick={() => onToggleFavorite(preset.id)}
-              className="text-gray-400 hover:text-yellow-400 transition-colors"
+          )}
+        </div>
+        
+        <div className="flex-1 min-w-0">
+          <div className="flex justify-between items-start">
+            <h3 className="text-sm font-medium truncate pr-6">{preset.name}</h3>
+            <button 
+              onClick={onToggleFavorite} 
+              className={`absolute top-2 right-2 text-gray-400 hover:text-red-500 ${preset.isFavorite ? 'text-red-500' : ''}`}
             >
-              <Star size={16} fill={preset.isFavorite ? 'currentColor' : 'none'} />
+              <Heart className="h-4 w-4" fill={preset.isFavorite ? "currentColor" : "none"} />
             </button>
           </div>
-          <div className="mt-2 flex flex-wrap gap-1">
-            {preset.effects.map((effect, idx) => (
-              <span 
-                key={idx} 
-                className="inline-block px-1.5 py-0.5 bg-blue-900/50 text-blue-300 text-xs rounded"
-              >
+          
+          <p className="text-xs text-gray-500 mt-0.5 mb-1.5 line-clamp-1">{preset.description}</p>
+          
+          <div className="flex flex-wrap gap-1 mb-2">
+            {preset.effects.slice(0, 2).map((effect, idx) => (
+              <Badge key={idx} variant="outline" className="text-[10px] py-0 px-1.5">
                 {effect}
-              </span>
+              </Badge>
             ))}
+            {preset.effects.length > 2 && (
+              <Badge variant="outline" className="text-[10px] py-0 px-1.5">
+                +{preset.effects.length - 2}
+              </Badge>
+            )}
           </div>
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => onApply(preset)}
-            className="mt-2 w-full bg-blue-600/80 hover:bg-blue-600 text-white"
+          
+          <Button 
+            onClick={onApply} 
+            variant="secondary" 
+            className="w-full h-7 text-xs py-0"
           >
             Apply
           </Button>
         </div>
       </div>
-    </div>
+    </Card>
   );
 };
 

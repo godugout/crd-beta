@@ -1,60 +1,116 @@
-import { useState, useCallback } from 'react';
-import { CardEffectsResult } from '@/lib/types';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { Card } from '@/lib/types';
+import { throttle } from 'lodash-es';
+import { CardEffectsOptions, CardEffectsResult } from './types';
+import { processCardsBatch, getDefaultEffectsForCard } from './utils';
 
-const useCardEffects = (): CardEffectsResult => {
-  const [cardEffects, setCardEffectsState] = useState<Record<string, string[]>>({});
-  const [isLoading, setIsLoading] = useState(false);
-  const [activeEffects, setActiveEffects] = useState<string[]>([]);
+/**
+ * Hook for managing card visual effects
+ */
+export function useCardEffects(
+  cards: Card[],
+  optimizeForPerformance = false,
+  options: CardEffectsOptions = {}
+): CardEffectsResult {
+  const [isLoading, setIsLoading] = useState(true);
+  const [cardEffects, setCardEffects] = useState<Record<string, string[]>>(
+    options.initialEffects || {}
+  );
+  
+  // Keep track of previous card length for optimization
+  const prevCardLengthRef = useRef<number>(0);
 
-  const addEffect = useCallback((cardId: string, effect: string) => {
-    setCardEffectsState(prev => {
-      const currentEffects = prev[cardId] || [];
-      if (!currentEffects.includes(effect)) {
-        return {
-          ...prev,
-          [cardId]: [...currentEffects, effect]
-        };
+  // Initialize effects map with default effects based on card metadata
+  useEffect(() => {
+    // Skip if no cards changed
+    if (prevCardLengthRef.current === cards.length && Object.keys(cardEffects).length > 0) {
+      setIsLoading(false);
+      return;
+    }
+    
+    prevCardLengthRef.current = cards.length;
+    
+    const initialEffects: Record<string, string[]> = { ...options.initialEffects };
+    
+    // Apply optimized processing for many cards
+    const processCards = async () => {
+      setIsLoading(true);
+      
+      // Process in batches if we have many cards and are optimizing for performance
+      if (optimizeForPerformance && cards.length > 20) {
+        const updatedEffects = await processCardsBatch(cards, initialEffects);
+        setCardEffects(updatedEffects);
+      } else {
+        // Process all at once for smaller collections
+        cards.forEach(card => {
+          // Skip if already processed
+          if (initialEffects[card.id]) return;
+          
+          const defaultEffects = getDefaultEffectsForCard(card);
+          
+          // Only add non-empty effects
+          if (defaultEffects.length > 0) {
+            initialEffects[card.id] = defaultEffects;
+          }
+        });
+        
+        setCardEffects(initialEffects);
       }
-      return prev;
-    });
-  }, []);
+      
+      setIsLoading(false);
+    };
+    
+    processCards();
+  }, [cards, optimizeForPerformance, options.initialEffects]);
 
-  const removeEffect = useCallback((cardId: string, effect: string) => {
-    setCardEffectsState(prev => {
+  // Throttled functions to prevent excessive rerenders
+  const addEffect = useCallback(throttle((cardId: string, effect: string) => {
+    setCardEffects(prev => {
       const currentEffects = prev[cardId] || [];
+      if (currentEffects.includes(effect)) return prev;
+      
+      return {
+        ...prev,
+        [cardId]: [...currentEffects, effect]
+      };
+    });
+  }, 100), []);
+  
+  const removeEffect = useCallback(throttle((cardId: string, effect: string) => {
+    setCardEffects(prev => {
+      const currentEffects = prev[cardId] || [];
+      if (!currentEffects.includes(effect)) return prev;
+      
       return {
         ...prev,
         [cardId]: currentEffects.filter(e => e !== effect)
       };
     });
-  }, []);
-
-  const toggleEffect = useCallback((cardId: string, effect: string) => {
-    setCardEffectsState(prev => {
+  }, 100), []);
+  
+  const toggleEffect = useCallback(throttle((cardId: string, effect: string) => {
+    setCardEffects(prev => {
       const currentEffects = prev[cardId] || [];
-      if (currentEffects.includes(effect)) {
-        return {
-          ...prev,
-          [cardId]: currentEffects.filter(e => e !== effect)
-        };
-      } else {
-        return {
-          ...prev,
-          [cardId]: [...currentEffects, effect]
-        };
-      }
+      const hasEffect = currentEffects.includes(effect);
+      
+      return {
+        ...prev,
+        [cardId]: hasEffect 
+          ? currentEffects.filter(e => e !== effect)
+          : [...currentEffects, effect]
+      };
     });
-  }, []);
-
-  const clearEffects = useCallback((cardId: string) => {
-    setCardEffectsState(prev => ({
+  }, 100), []);
+  
+  const clearEffects = useCallback(throttle((cardId: string) => {
+    setCardEffects(prev => ({
       ...prev,
       [cardId]: []
     }));
-  }, []);
-
-  const setCardEffects = useCallback((cardId: string, effects: string[]) => {
-    setCardEffectsState(prev => ({
+  }, 100), []);
+  
+  const setCardEffectsFn = useCallback((cardId: string, effects: string[]) => {
+    setCardEffects(prev => ({
       ...prev,
       [cardId]: effects
     }));
@@ -67,9 +123,6 @@ const useCardEffects = (): CardEffectsResult => {
     removeEffect,
     toggleEffect,
     clearEffects,
-    setCardEffects,
-    setActiveEffects
+    setCardEffects: setCardEffectsFn
   };
-};
-
-export default useCardEffects;
+}

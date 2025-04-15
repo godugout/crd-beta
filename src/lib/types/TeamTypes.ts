@@ -8,11 +8,6 @@ export interface Team {
   created_at?: string;
   updated_at?: string;
   logo_url?: string;
-  banner_url?: string;
-  status?: string;
-  website?: string;
-  email?: string;
-  specialties?: string[];
   
   // Team fields
   team_code?: string;
@@ -42,11 +37,6 @@ export interface DbTeam {
   created_at: string;
   updated_at: string;
   logo_url?: string | null;
-  banner_url?: string | null;
-  status?: string | null;
-  website?: string | null;
-  email?: string | null;
-  specialties?: string[] | null;
   team_code?: string | null;
   primary_color?: string | null;
   secondary_color?: string | null;

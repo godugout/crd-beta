@@ -10,7 +10,6 @@ export const useGalleryCards = () => {
   const { cards, isLoading, refreshCards } = useCards();
   const location = useLocation();
   const navigate = useNavigate();
-  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   // Check if there are baseball cards
   const hasBaseballCards = useMemo(() => cards.some(card => 
@@ -74,11 +73,10 @@ export const useGalleryCards = () => {
   // Effect to refresh cards when component mounts or when directed from another page
   useEffect(() => {
     console.log("Fetching gallery cards...");
+    refreshCards?.();
     
     const queryParams = new URLSearchParams(location.search);
-    const shouldRefresh = queryParams.get('refresh') === 'true';
-    
-    if (shouldRefresh) {
+    if (queryParams.get('refresh') === 'true') {
       console.log("Refresh parameter detected, refreshing cards...");
       refreshCards?.();
       queryParams.delete('refresh');
@@ -86,12 +84,8 @@ export const useGalleryCards = () => {
         pathname: location.pathname,
         search: queryParams.toString()
       }, { replace: true });
-    } else if (refreshTrigger === 0) {
-      // Only refresh once on initial mount
-      refreshCards?.();
-      setRefreshTrigger(1);
     }
-  }, [location.search, refreshCards, navigate, refreshTrigger]);
+  }, [location.search, refreshCards, navigate]);
   
   return {
     displayCards,
