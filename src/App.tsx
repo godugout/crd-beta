@@ -2,7 +2,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { CardStateProvider } from './lib/state/providers/CardStateProvider';
-import { CardProvider } from './context/CardContext'; // Add this import
+import { CardProvider } from './context/CardContext';
 import Home from './pages/Home';
 import Gallery from './pages/Gallery';
 import CardDetail from './pages/CardDetail';
@@ -22,7 +22,7 @@ function App() {
   return (
     <ThemeProvider defaultTheme="light" storageKey="cardshow-theme">
       <AuthProvider autoLogin={true}>
-        <CardProvider> {/* Add CardProvider wrapper */}
+        <CardProvider>
           <CardStateProvider>
             <Router>
               <Toaster />
