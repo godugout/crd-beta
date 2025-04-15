@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -21,35 +20,69 @@ const CardCreationIndex: React.FC<CardCreationIndexProps> = ({
   const navigate = useNavigate();
   const [formData, setFormData] = useState(initialData);
   
+  const updateFormData = (data: any) => {
+    setFormData(prev => ({ ...prev, ...data }));
+  };
+  
   // Define the steps for the wizard
   const steps: CardCreationStep[] = [
     {
       id: 'upload',
       label: 'Upload Image',
-      component: <ImageUploadStep />
+      component: (
+        <ImageUploadStep 
+          formData={formData}
+          updateFormData={updateFormData}
+          completeStep={() => console.log('Upload complete')}
+        />
+      )
     },
     {
       id: 'template',
       label: 'Select Template',
-      component: <TemplateSelectionStep />
+      component: (
+        <TemplateSelectionStep 
+          formData={formData}
+          updateFormData={updateFormData}
+          completeStep={() => console.log('Template selected')}
+        />
+      )
     },
     {
       id: 'details',
       label: 'Player Details',
-      component: <PlayerDetailsStep />
+      component: (
+        <PlayerDetailsStep 
+          formData={formData}
+          updateFormData={updateFormData}
+          completeStep={() => console.log('Details added')}
+        />
+      )
     },
     {
       id: 'effects',
       label: 'Add Effects',
-      component: <EffectsSelectionStep />
+      component: (
+        <EffectsSelectionStep 
+          formData={formData}
+          updateFormData={updateFormData}
+          completeStep={() => console.log('Effects applied')}
+        />
+      )
     },
     {
       id: 'publish',
       label: 'Review & Publish',
-      component: <ReviewPublishStep />
+      component: (
+        <ReviewPublishStep 
+          formData={formData}
+          updateFormData={updateFormData}
+          completeStep={() => console.log('Publishing complete')}
+        />
+      )
     }
   ];
-  
+
   // Handle save functionality
   const handleSave = async (data: any) => {
     try {
