@@ -1,0 +1,20 @@
+
+@import './base.css';
+@import './holographic.css';
+@import './refractor.css';
+@import './metallic.css';
+@import './special.css';
+@import './vintage.css';
+
+/* Media query for larger screens */
+@media (min-width: 768px) {
+  .effect-holographic::before,
+  .effect-holographic::after,
+  .effect-refractor::before,
+  .effect-refractor::after,
+  .effect-chrome::before,
+  .effect-chrome::after,
+  .effect-vintage::before {
+    opacity: calc(1.2 * var(--holographic-intensity, 0.8));
+  }
+}

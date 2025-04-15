@@ -1,0 +1,45 @@
+
+/* Refractor effect with variable intensity */
+.effect-refractor {
+  position: relative;
+}
+
+.effect-refractor::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.4) 25%,
+    rgba(255, 255, 255, 0.6) 50%,
+    rgba(255, 255, 255, 0.4) 75%,
+    transparent 100%
+  );
+  mix-blend-mode: screen;
+  pointer-events: none;
+  animation: refractor 3s ease infinite;
+  z-index: 2;
+  opacity: calc(0.8 * var(--refractor-intensity, 1.0));
+}
+
+.effect-refractor::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    rgba(0, 150, 255, 0.6) 0%,
+    transparent 70%
+  );
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  z-index: 3;
+  opacity: calc(0.7 * var(--refractor-intensity, 1.0));
+}
+
+@keyframes refractor {
+  0% { opacity: 0.4; }
+  50% { opacity: 0.8; }
+  100% { opacity: 0.4; }
+}

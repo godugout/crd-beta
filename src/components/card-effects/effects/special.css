@@ -1,0 +1,54 @@
+
+/* Shimmer effect */
+.effect-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.effect-shimmer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.5),
+    transparent
+  );
+  transform: translateX(-100%);
+  animation: shimmer 2s infinite;
+  z-index: 2;
+  opacity: 0.8;
+}
+
+/* Electric effect */
+.effect-electric {
+  position: relative;
+  overflow: hidden;
+}
+
+.effect-electric::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(135, 206, 250, 0.4) 0%,
+    rgba(30, 144, 255, 0.3) 100%
+  );
+  mix-blend-mode: screen;
+  pointer-events: none;
+  animation: pulse 2s ease-in-out infinite;
+  z-index: 2;
+  opacity: 0.8;
+}
+
+@keyframes shimmer {
+  100% { transform: translateX(100%); }
+}
+
+@keyframes pulse {
+  0% { opacity: 0.5; }
+  50% { opacity: 0.8; }
+  100% { opacity: 0.5; }
+}

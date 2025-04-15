@@ -1,0 +1,19 @@
+
+/* Vintage effect with variable intensity */
+.effect-vintage {
+  filter: sepia(calc(0.05 * var(--vintage-intensity, 0.05))) 
+          contrast(calc(1.0 + 0.2 * var(--vintage-intensity, 0.05))) 
+          brightness(calc(1.0 - 0.1 * var(--vintage-intensity, 0.05)));
+  position: relative;
+}
+
+.effect-vintage::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, transparent 60%, rgba(0,0,0,0.3));
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  z-index: 2;
+  opacity: calc(0.7 * var(--vintage-intensity, 0.5));
+}

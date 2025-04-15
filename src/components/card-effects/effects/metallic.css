@@ -1,0 +1,59 @@
+
+/* Gold foil effect with variable intensity */
+.effect-gold-foil {
+  position: relative;
+}
+
+.effect-gold-foil::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    45deg,
+    rgba(255, 215, 0, 0.4) 0%,
+    rgba(255, 215, 0, 0.5) 35%,
+    rgba(255, 255, 215, 0.6) 50%,
+    rgba(255, 215, 0, 0.5) 65%,
+    rgba(255, 215, 0, 0.4) 100%
+  );
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  z-index: 2;
+  opacity: calc(0.05 * var(--gold-intensity, 0.05));
+}
+
+/* Chrome effect with variable intensity */
+.effect-chrome {
+  position: relative;
+}
+
+.effect-chrome::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    45deg,
+    rgba(192, 192, 192, 0.4) 0%,
+    rgba(255, 255, 255, 0.6) 50%,
+    rgba(192, 192, 192, 0.4) 100%
+  );
+  mix-blend-mode: screen;
+  pointer-events: none;
+  z-index: 2;
+  opacity: calc(0.8 * var(--chrome-intensity, 0.6));
+}
+
+.effect-chrome::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    rgba(255, 255, 255, 0.7) 0%,
+    transparent 60%
+  );
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  z-index: 3;
+  opacity: calc(0.6 * var(--chrome-intensity, 0.6));
+}
