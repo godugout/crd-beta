@@ -1,4 +1,3 @@
-
 /* Card Effects Main Stylesheet */
 
 /* Import all card effect styles */
@@ -19,6 +18,13 @@
   --vintage-intensity: 0.5;
   --mouse-x: 50%;
   --mouse-y: 50%;
+  
+  /* Edge effect variables */
+  --edge-color: #e4e4e4;
+  --edge-shadow: rgba(0,0,0,0.2);
+  --edge-highlight: rgba(255,255,255,0.8);
+  --edge-gradient-start: #f0f0f0;
+  --edge-gradient-end: #ffffff;
 }
 
 /* Basic card effect class */
