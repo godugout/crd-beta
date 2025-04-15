@@ -1,8 +1,8 @@
-
 import React, { useRef, useState } from 'react';
 import { CardData } from '@/types/card';
 import CardFront from './card-elements/CardFront';
 import CardBack from './card-elements/CardBack';
+import CardEdges from './card-elements/CardEdges';
 
 interface CardCanvasProps {
   card: CardData;
@@ -25,7 +25,6 @@ interface CardCanvasProps {
     holographicSparklesEnabled?: boolean;
     holographicBorderWidth?: number;
   };
-  // Debug mode to help troubleshoot rendering issues
   debug?: boolean;
 }
 
@@ -52,8 +51,8 @@ const CardCanvas: React.FC<CardCanvasProps> = ({
     return baseThickness;
   };
   
-  // Function to generate edge styles
-  const getEdgeStyles = () => {
+  // Function to determine edge color
+  const getEdgeColor = () => {
     // Base color for edges
     let edgeColor = '#9b87f5'; // Primary purple
     
@@ -65,53 +64,40 @@ const CardCanvas: React.FC<CardCanvasProps> = ({
       edgeColor = '#F97316'; // Bright orange
     }
     
-    return {
-      position: 'absolute',
-      width: '100%',
-      height: '100%',
-      boxSizing: 'border-box' as 'border-box', // Type assertion to satisfy BoxSizing type
-      borderStyle: 'solid',
-      borderWidth: '0px',
-      borderColor: edgeColor,
-      borderRadius: '12px',
-      transformStyle: 'preserve-3d',
-      boxShadow: `0 0 8px ${edgeColor}33` // Add a subtle glow
-    };
+    return edgeColor;
   };
-  
-  // Structure for a 3D card with visible edges
+
   return (
     <div
       ref={cardRef}
       className="dynamic-card"
       style={{ 
-        position: 'relative',
+        position: 'relative' as const,
         width: '100%',
         height: '100%',
         borderRadius: '12px',
-        overflow: 'visible', // Changed from hidden to visible for edges
-        transformStyle: 'preserve-3d',
+        overflow: 'visible',
+        transformStyle: 'preserve-3d' as const,
         transition: 'transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
         transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0)'
       }}
       onMouseMove={onMouseMove}
       onMouseLeave={onMouseLeave}
     >
-      {/* Card with thickness */}
       <div 
         className="card-inner relative w-full h-full"
         style={{
-          transformStyle: 'preserve-3d',
+          transformStyle: 'preserve-3d' as const,
           transform: `translateZ(0)`
         }}
       >
         {/* Front face */}
         <div 
           style={{ 
-            position: 'absolute', 
+            position: 'absolute' as const, 
             width: '100%', 
             height: '100%', 
-            backfaceVisibility: 'hidden',
+            backfaceVisibility: 'hidden' as const,
             transform: 'rotateY(0deg) translateZ(0)',
             zIndex: 2
           }}
@@ -122,10 +108,10 @@ const CardCanvas: React.FC<CardCanvasProps> = ({
         {/* Back face */}
         <div 
           style={{ 
-            position: 'absolute', 
+            position: 'absolute' as const, 
             width: '100%', 
             height: '100%', 
-            backfaceVisibility: 'hidden',
+            backfaceVisibility: 'hidden' as const,
             transform: 'rotateY(180deg) translateZ(0)',
             zIndex: 2
           }}
@@ -133,65 +119,16 @@ const CardCanvas: React.FC<CardCanvasProps> = ({
           <CardBack card={card} />
         </div>
 
-        {/* Card edges - these create the visible thickness */}
-        <div className="card-edges" style={getEdgeStyles()}>
-          {/* Top edge */}
-          <div 
-            style={{ 
-              position: 'absolute', 
-              width: '100%', 
-              height: getCardThickness(),
-              transform: `rotateX(90deg) translateZ(calc(-${getCardThickness()}/2))`,
-              top: `-${getCardThickness()}/2`,
-              backgroundColor: getEdgeStyles().borderColor,
-              opacity: 0.95
-            }}
-          />
-          
-          {/* Bottom edge */}
-          <div 
-            style={{ 
-              position: 'absolute', 
-              width: '100%', 
-              height: getCardThickness(),
-              transform: `rotateX(90deg) translateZ(calc(100% - ${getCardThickness()}/2))`,
-              bottom: `-${getCardThickness()}/2`,
-              backgroundColor: getEdgeStyles().borderColor,
-              opacity: 0.95
-            }}
-          />
-          
-          {/* Left edge */}
-          <div 
-            style={{ 
-              position: 'absolute', 
-              width: getCardThickness(),
-              height: '100%',
-              transform: `rotateY(90deg) translateZ(calc(-${getCardThickness()}/2))`,
-              left: `-${getCardThickness()}/2`,
-              backgroundColor: getEdgeStyles().borderColor,
-              opacity: 0.95
-            }}
-          />
-          
-          {/* Right edge */}
-          <div 
-            style={{ 
-              position: 'absolute', 
-              width: getCardThickness(),
-              height: '100%',
-              transform: `rotateY(90deg) translateZ(calc(100% - ${getCardThickness()}/2))`,
-              right: `-${getCardThickness()}/2`,
-              backgroundColor: getEdgeStyles().borderColor,
-              opacity: 0.95
-            }}
-          />
-        </div>
+        {/* Card edges */}
+        <CardEdges 
+          edgeColor={getEdgeColor()} 
+          thickness={getCardThickness()} 
+        />
 
         {/* Debug overlay */}
         {debug && (
           <div style={{ 
-            position: 'absolute', 
+            position: 'absolute' as const, 
             top: '5px', 
             left: '5px', 
             zIndex: 1000,
