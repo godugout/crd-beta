@@ -49,7 +49,7 @@ const InfoPanel = ({ card, showInfo }: InfoPanelProps) => {
           {cardMetadata.cardNumber && (
             <div className="flex flex-col">
               <span className="text-gray-400 text-xs">Card #</span>
-              <span className="font-medium">{cardMetadata.cardNumber}</span>
+              <span className="font-medium">{String(cardMetadata.cardNumber)}</span>
             </div>
           )}
           
@@ -63,21 +63,22 @@ const InfoPanel = ({ card, showInfo }: InfoPanelProps) => {
           {cardMetadata.cardType && (
             <div className="flex flex-col">
               <span className="text-gray-400 text-xs">Type</span>
-              <span className="font-medium">{cardMetadata.cardType}</span>
+              <span className="font-medium">{String(cardMetadata.cardType)}</span>
             </div>
           )}
           
           {cardMetadata.series && (
             <div className="flex flex-col">
               <span className="text-gray-400 text-xs">Series</span>
-              <span className="font-medium">{cardMetadata.series}</span>
+              <span className="font-medium">{String(cardMetadata.series)}</span>
             </div>
           )}
           
-          {card.artist && (
+          {/* Check for artist in designMetadata since 'artist' is not directly on Card type */}
+          {cardMetadata.artist && (
             <div className="flex flex-col col-span-2">
               <span className="text-gray-400 text-xs">Artist</span>
-              <span className="font-medium">{card.artist}</span>
+              <span className="font-medium">{String(cardMetadata.artist)}</span>
             </div>
           )}
         </div>
