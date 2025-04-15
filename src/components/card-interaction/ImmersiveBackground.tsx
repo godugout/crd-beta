@@ -260,7 +260,7 @@ export const ImmersiveBackground: React.FC<ImmersiveBackgroundProps> = ({
       <div className="relative z-1 w-full h-full">{children}</div>
       
       {/* Animation keyframes */}
-      <style jsx global>{`
+      <style dangerouslySetInnerHTML={{ __html: `
         @keyframes float {
           0% {
             transform: translateY(0) translateX(0) scale(1);
@@ -271,7 +271,7 @@ export const ImmersiveBackground: React.FC<ImmersiveBackgroundProps> = ({
             opacity: 0.05;
           }
         }
-      `}</style>
+      `}} />
     </div>
   );
 };

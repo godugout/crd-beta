@@ -71,8 +71,18 @@ export const CardInteraction: React.FC<CardInteractionProps> = ({
       const centerY = rect.top + rect.height / 2;
       
       // Calculate mouse/touch position relative to card center
-      const clientX = 'touches' in event ? event.touches[0].clientX : event.clientX;
-      const clientY = 'touches' in event ? event.touches[0].clientY : event.clientY;
+      // Type guard to ensure we have the correct event type with clientX/Y properties
+      const clientX = 'touches' in event 
+        ? event.touches[0].clientX 
+        : 'clientX' in event 
+          ? event.clientX 
+          : centerX;
+          
+      const clientY = 'touches' in event 
+        ? event.touches[0].clientY 
+        : 'clientY' in event 
+          ? event.clientY 
+          : centerY;
       
       const relativeX = (clientX - centerX) / (rect.width / 2);
       const relativeY = (clientY - centerY) / (rect.height / 2);

@@ -123,11 +123,11 @@ export const CardFlip: React.FC<CardFlipProps> = ({
         {back}
       </animated.div>
       
-      <style jsx global>{`
+      <style dangerouslySetInnerHTML={{ __html: `
         .backface-hidden {
           backface-visibility: hidden;
         }
-      `}</style>
+      `}} />
     </div>
   );
 };
