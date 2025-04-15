@@ -148,8 +148,8 @@ export function createPbrScene(
           cardMaterial  // Back
         ];
         
-        // Fix for TS2740: Use proper typing for material assignment
-        cardMesh.material = materials as THREE.MeshStandardMaterial[];
+        // Fix for TS2740: Use property assignment with proper type
+        (cardMesh.material as THREE.Material[]) = materials;
       },
       undefined,
       (error) => {
@@ -212,11 +212,13 @@ export function createPbrScene(
         
         // Handle materials (could be a single material or an array)
         if (Array.isArray(object.material)) {
-          object.material.forEach((material: THREE.Material) => {
-            material.dispose();
+          object.material.forEach((material) => {
+            if (material instanceof THREE.Material) {
+              material.dispose();
+            }
           });
-        } else if (object.material) {
-          (object.material as THREE.Material).dispose();
+        } else if (object.material instanceof THREE.Material) {
+          object.material.dispose();
         }
       }
     });
