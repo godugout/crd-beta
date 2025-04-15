@@ -1,102 +1,102 @@
 
 import React from 'react';
-import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import * as LucideIcons from 'lucide-react';
-import { LucideProps } from 'lucide-react';
+import { 
+  AlertTriangle, Inbox, RefreshCw, Search, 
+  PlusCircle, ImageOff, Loader2 
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
 
-export interface EmptyStateProps {
-  /**
-   * Title text
-   */
+type IconType = 
+  | 'Inbox' 
+  | 'AlertTriangle' 
+  | 'Search' 
+  | 'ImageOff' 
+  | 'RefreshCw';
+
+interface EmptyStateProps {
   title: string;
-  
-  /**
-   * Description text
-   */
   description: string;
-  
-  /**
-   * Optional icon to display (from Lucide icons)
-   */
-  icon?: keyof typeof LucideIcons;
-  
-  /**
-   * Optional action button text
-   */
-  actionLabel?: string;
-  
-  /**
-   * Optional action button callback
-   */
-  onAction?: () => void;
-  
-  /**
-   * Whether this is an empty state due to no items
-   */
-  isEmpty?: boolean;
-  
-  /**
-   * Whether this is an empty state due to filtering
-   */
-  isFiltered?: boolean;
-  
-  /**
-   * Optional refresh callback
-   */
+  icon?: IconType;
   onRefresh?: () => Promise<void>;
-  
-  /**
-   * Optional class names to apply
-   */
+  actionLabel?: string;
+  onAction?: () => void;
   className?: string;
 }
 
-export const EmptyState = ({
+export const EmptyState: React.FC<EmptyStateProps> = ({
   title,
   description,
   icon = 'Inbox',
+  onRefresh,
   actionLabel,
   onAction,
-  isEmpty,
-  isFiltered, 
-  onRefresh,
-  className = ""
-}: EmptyStateProps) => {
-  // Dynamically get the icon component from Lucide
-  const IconComponent = icon ? (LucideIcons[icon] as React.ComponentType<LucideProps>) : null;
+  className
+}) => {
+  const [isRefreshing, setIsRefreshing] = React.useState(false);
 
+  const handleRefresh = async () => {
+    if (!onRefresh) return;
+    
+    setIsRefreshing(true);
+    try {
+      await onRefresh();
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+  
+  // Map icon string to component
+  const IconComponent = {
+    'Inbox': Inbox,
+    'AlertTriangle': AlertTriangle,
+    'Search': Search,
+    'ImageOff': ImageOff,
+    'RefreshCw': RefreshCw
+  }[icon];
+  
   return (
     <div className={cn(
-      "flex flex-col items-center justify-center text-center p-8 rounded-lg border border-dashed border-gray-300",
+      "flex flex-col items-center justify-center py-12 px-4 text-center",
       className
     )}>
       {IconComponent && (
-        <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-4">
-          <IconComponent className="h-6 w-6 text-gray-500" />
+        <div className="rounded-full bg-muted p-3 mb-4">
+          <IconComponent className="h-6 w-6 text-muted-foreground" />
         </div>
       )}
       
-      <h3 className="text-lg font-medium text-gray-900 mb-1">{title}</h3>
-      <p className="text-sm text-gray-500 max-w-md mb-6">{description}</p>
+      <h3 className="font-semibold text-lg mb-1">{title}</h3>
+      <p className="text-muted-foreground max-w-sm mb-6">{description}</p>
       
-      {actionLabel && onAction && (
-        <Button onClick={onAction}>
-          {actionLabel}
-        </Button>
-      )}
-      
-      {onRefresh && (
-        <Button 
-          variant="outline"
-          onClick={() => onRefresh()}
-          className="mt-2"
-        >
-          Refresh
-        </Button>
-      )}
+      <div className="flex gap-4">
+        {onRefresh && (
+          <Button 
+            variant="outline" 
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+          >
+            {isRefreshing ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Refreshing...
+              </>
+            ) : (
+              <>
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Refresh
+              </>
+            )}
+          </Button>
+        )}
+        
+        {onAction && actionLabel && (
+          <Button onClick={onAction}>
+            <PlusCircle className="h-4 w-4 mr-2" />
+            {actionLabel}
+          </Button>
+        )}
+      </div>
     </div>
   );
 };
-
-export default EmptyState;

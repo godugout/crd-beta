@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Card } from '@/lib/types';
 import { throttle } from 'lodash-es';
@@ -126,3 +127,5 @@ export function useCardEffects(
     setCardEffects: setCardEffectsFn
   };
 }
+
+export default useCardEffects;

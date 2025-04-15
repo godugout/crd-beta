@@ -2,55 +2,60 @@
 import { Card } from '@/lib/types';
 
 /**
- * Determines default effects for a card based on its metadata
+ * Get default effects for a card based on its metadata
  */
 export function getDefaultEffectsForCard(card: Card): string[] {
-  const defaultEffects: string[] = [];
+  const effects: string[] = [];
   
-  // Use card metadata to determine default effects
-  if (card.designMetadata?.cardStyle?.effect === 'refractor') {
-    defaultEffects.push('Refractor');
+  // Apply effects based on card tags
+  if (card.tags) {
+    if (card.tags.includes('rare') || card.tags.includes('ultra-rare')) {
+      effects.push('Holographic');
+    }
+    
+    if (card.tags.includes('vintage') || card.tags.includes('classic')) {
+      effects.push('Vintage');
+    }
+    
+    if (card.tags.includes('chrome') || card.tags.includes('refractor')) {
+      effects.push('Chrome');
+    }
+    
+    if (card.tags.includes('special') || card.tags.includes('limited')) {
+      effects.push('Refractor');
+    }
   }
   
-  if (card.designMetadata?.cardStyle?.effect === 'holographic') {
-    defaultEffects.push('Holographic');
-  }
-  
-  if (card.designMetadata?.cardStyle?.effect === 'vintage') {
-    defaultEffects.push('Vintage');
-  }
-  
-  return defaultEffects;
+  return effects;
 }
 
 /**
- * Process cards in batches to avoid UI blocking
+ * Process cards in batches to avoid blocking the main thread
  */
 export async function processCardsBatch(
   cards: Card[], 
-  initialEffects: Record<string, string[]>,
-  batchSize: number = 20
+  initialEffects: Record<string, string[]>
 ): Promise<Record<string, string[]>> {
-  const updatedEffects = { ...initialEffects };
+  const batchSize = 10;
+  const results = { ...initialEffects };
   
+  // Process in batches
   for (let i = 0; i < cards.length; i += batchSize) {
     const batch = cards.slice(i, i + batchSize);
     
-    // Allow UI to update between batches
+    // Small delay to allow UI updates
     await new Promise(resolve => setTimeout(resolve, 0));
     
+    // Process this batch
     batch.forEach(card => {
-      // Skip if already processed
-      if (updatedEffects[card.id]) return;
-      
-      const defaultEffects = getDefaultEffectsForCard(card);
-      
-      // Only add non-empty effects
-      if (defaultEffects.length > 0) {
-        updatedEffects[card.id] = defaultEffects;
+      if (!results[card.id]) {
+        const defaultEffects = getDefaultEffectsForCard(card);
+        if (defaultEffects.length > 0) {
+          results[card.id] = defaultEffects;
+        }
       }
     });
   }
   
-  return updatedEffects;
+  return results;
 }

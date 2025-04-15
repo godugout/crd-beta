@@ -1,8 +1,218 @@
 
-@import './BaseEffects.css';
-@import './HolographicEffects.css';
-@import './RefractorEffects.css';
-@import './SpectralEffects.css';
-@import './PremiumEffects.css';
-@import './VintageEffects.css';
-@import './AnimationKeyframes.css';
+/* Base card effect styles */
+.card-effect {
+  position: relative;
+  transition: transform 0.3s ease;
+}
+
+/* Holographic effect */
+.effect-holographic {
+  position: relative;
+  overflow: hidden;
+  --hologram-intensity: 0.6;
+}
+
+.effect-holographic::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 0, 0, 0.2) 0%,
+    rgba(255, 165, 0, 0.2) 20%,
+    rgba(255, 255, 0, 0.2) 40%,
+    rgba(0, 128, 0, 0.2) 60%,
+    rgba(0, 0, 255, 0.2) 80%,
+    rgba(128, 0, 128, 0.2) 100%
+  );
+  opacity: var(--hologram-intensity);
+  mix-blend-mode: color-dodge;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Shimmer effect */
+.effect-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.effect-shimmer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.3) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: skewX(-25deg);
+  animation: shimmer var(--shimmer-speed, 2s) infinite;
+  pointer-events: none;
+  z-index: 2;
+}
+
+@keyframes shimmer {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 200%;
+  }
+}
+
+/* Vintage effect */
+.effect-vintage {
+  filter: sepia(0.4) contrast(0.9) brightness(0.85) saturate(0.8);
+}
+
+.effect-vintage::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.07;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Chrome effect */
+.effect-chrome {
+  position: relative;
+}
+
+.effect-chrome::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.4) 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0.4) 100%
+  );
+  opacity: var(--chrome-intensity, 0.8);
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Refractor effect */
+.effect-refractor {
+  position: relative;
+  overflow: hidden;
+}
+
+.effect-refractor::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: 
+    radial-gradient(
+      circle at var(--mouse-x, 50%) var(--mouse-y, 50%), 
+      rgba(255, 255, 255, 0.4) 0%, 
+      rgba(255, 255, 255, 0) 60%
+    );
+  opacity: var(--refractor-intensity, 0.7);
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Spectral hologram effect */
+.spectral-hologram {
+  position: relative;
+  overflow: hidden;
+}
+
+.spectral-hologram::before,
+.spectral-hologram::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: conic-gradient(
+    from calc(var(--mouse-x, 0.5) * 360deg),
+    rgba(255, 0, 0, 0.2),
+    rgba(255, 165, 0, 0.2),
+    rgba(255, 255, 0, 0.2),
+    rgba(0, 128, 0, 0.2),
+    rgba(0, 0, 255, 0.2),
+    rgba(128, 0, 128, 0.2),
+    rgba(255, 0, 0, 0.2)
+  );
+  opacity: var(--hologram-intensity, 0.5);
+  mix-blend-mode: color-dodge;
+  transform: translateZ(0);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.spectral-hologram-layer {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    rgba(255, 255, 255, 0.8) 0%,
+    rgba(255, 255, 255, 0) 60%
+  );
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* Card animation classes */
+.animation-active {
+  transition: transform 0.1s ease;
+}
+
+.animation-slowing {
+  transition: transform 2s ease-out;
+}
+
+/* Card effects container */
+.card-3d-container {
+  perspective: 1000px;
+  transform-style: preserve-3d;
+}
+
+/* Parallax layers for 3D effect */
+.parallax-layer {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.05) 25%, rgba(255, 255, 255, 0) 50%);
+  pointer-events: none;
+  z-index: 3;
+}
+
+.parallax-layer-1 {
+  transform: translateZ(5px);
+  opacity: 0.7;
+}
+
+.parallax-layer-2 {
+  transform: translateZ(10px);
+  opacity: 0.5;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.1) 50%, rgba(255, 255, 255, 0) 100%);
+}
+
+.microtext-layer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  font-size: 2px;
+  color: rgba(255, 255, 255, 0.1);
+  line-height: 1;
+  pointer-events: none;
+  z-index: 2;
+  transform: translateZ(2px);
+}
+
+/* Shadow Glow */
+.shadow-glow {
+  box-shadow: 
+    0 0 10px rgba(80, 230, 80, 0.5),
+    0 0 20px rgba(80, 230, 80, 0.3);
+}
