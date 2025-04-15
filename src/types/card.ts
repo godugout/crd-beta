@@ -1,7 +1,42 @@
 
-/**
- * Core card type definitions used throughout the application
- */
+export type CardRarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary' | 'ultra-rare' | 'one-of-one';
+export type CardType = 'character' | 'item' | 'event';
+
+export interface Card {
+  id: string;
+  name?: string;
+  title?: string;
+  description: string;
+  imageUrl: string;
+  thumbnailUrl?: string;
+  rarity?: CardRarity;
+  type?: CardType;
+  attack?: number;
+  defense?: number;
+  manaCost?: number;
+  seriesId?: string;
+  artistId?: string;
+  isPublished?: boolean;
+  createdAt: string;
+  updatedAt: string;
+  tags?: string[];
+  team?: string;
+  jersey?: string;
+  year?: string;
+  cardNumber?: string;
+  set?: string;
+  artist?: string;
+  specialEffect?: string;
+  userId?: string;
+  creatorId?: string;
+  teamId?: string;
+  collectionId?: string;
+  isPublic?: boolean;
+  designMetadata?: any;
+  reactions?: Reaction[];
+  fabricSwatches?: FabricSwatch[];
+  image?: string;
+}
 
 export interface FabricSwatch {
   type: string;
@@ -11,44 +46,3 @@ export interface FabricSwatch {
   position: string;
   size: string;
 }
-
-export interface CardStyle {
-  backgroundColor?: string;
-  textColor?: string;
-  borderColor?: string;
-  borderRadius?: string;
-  specialEffect?: string;
-}
-
-export interface CardMetadata {
-  player?: string;
-  team?: string;
-  year?: string;
-  set?: string;
-  cardNumber?: string;
-  position?: string;
-  artist?: string;
-}
-
-export interface CardData {
-  id: string | number;
-  name?: string;
-  title?: string;
-  description: string;
-  imageUrl?: string;
-  backgroundColor?: string;
-  textColor?: string;
-  borderColor?: string;
-  cardType?: string;
-  rarity?: 'common' | 'uncommon' | 'rare' | 'ultra-rare' | 'legendary' | 'one-of-one';
-  style?: CardStyle;
-  metadata?: CardMetadata;
-  tags?: string[];
-  fabricSwatches?: FabricSwatch[];
-  effects?: string[];
-  createdAt?: string;
-  updatedAt?: string;
-}
-
-// For backward compatibility
-export type Card = CardData;
