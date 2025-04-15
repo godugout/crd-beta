@@ -1,11 +1,10 @@
-
 import React from 'react';
 import { Container } from '@/components/ui/container';
 import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { PlusCircle, Image, Collection, Users, Star } from 'lucide-react';
+import { PlusCircle, Image, Library, Users, Star } from 'lucide-react';
 import PageLayout from '@/components/navigation/PageLayout';
 
 const Dashboard: React.FC = () => {
@@ -95,7 +94,7 @@ const Dashboard: React.FC = () => {
           <Link to="/collections/create" className="no-underline">
             <Card className="hover:bg-accent/50 transition-colors cursor-pointer h-full">
               <CardHeader>
-                <Collection className="h-6 w-6 text-primary" />
+                <Library className="h-6 w-6 text-primary" />
                 <CardTitle className="text-lg">Start a Collection</CardTitle>
                 <CardDescription>Organize your cards into collections</CardDescription>
               </CardHeader>

@@ -9,7 +9,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   error: string | null;
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, userData: Partial<User>) => Promise<void>;
+  signUp: (email: string, password: string, userData: Partial<User> | string) => Promise<void>;
   signOut: () => Promise<void>;
   signInWithProvider: (provider: 'google' | 'github' | 'facebook') => Promise<void>;
   updateUserProfile: (data: Partial<User>) => Promise<void>;
@@ -87,14 +87,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode; autoLogin?: boo
     }
   };
 
-  const signUp = async (email: string, password: string, userData: Partial<User>) => {
+  const signUp = async (email: string, password: string, userData: Partial<User> | string) => {
     setIsLoading(true);
     setError(null);
     
     try {
+      // If userData is a string, create an object with the name property
+      const userDataObj = typeof userData === 'string' 
+        ? { name: userData } 
+        : userData;
+        
       // In a real app, you'd call your auth service here
       // For now, just log the action
-      console.log('Sign up called with', { email, userData });
+      console.log('Sign up called with', { email, userData: userDataObj });
       setUser(TEST_USER);
       localStorage.setItem('auth-user', JSON.stringify(TEST_USER));
     } catch (err: any) {

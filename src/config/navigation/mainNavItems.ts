@@ -1,8 +1,8 @@
 
-import { Home, LayoutGrid, Collection, Users, Newspaper } from 'lucide-react';
-import type { NavItem } from './types';
+import { Home, LayoutGrid, Library, Users, Newspaper } from 'lucide-react';
+import { NavigationItem } from './types';
 
-export const mainNavItems: NavItem[] = [
+export const mainNavItems: NavigationItem[] = [
   {
     title: 'Home',
     path: '/',
@@ -16,7 +16,7 @@ export const mainNavItems: NavItem[] = [
   {
     title: 'Collections',
     path: '/collections',
-    icon: Collection,
+    icon: Library,
   },
   {
     title: 'Teams',

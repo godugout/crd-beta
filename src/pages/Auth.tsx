@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -19,7 +18,6 @@ const Auth: React.FC = () => {
   const [authLoading, setAuthLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   
-  // Redirect if already logged in
   useEffect(() => {
     if (user) {
       navigate('/dashboard');
@@ -53,7 +51,7 @@ const Auth: React.FC = () => {
     }
     
     try {
-      await signUp(email, password, { name });
+      await signUp(email, password, name);
       navigate('/dashboard');
     } catch (err: any) {
       setErrorMsg(err.message || "Failed to sign up");
@@ -76,7 +74,6 @@ const Auth: React.FC = () => {
     }
   };
   
-  // Show loading state while checking auth status
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
