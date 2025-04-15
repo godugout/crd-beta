@@ -60,9 +60,14 @@ export function CardStateProvider({ children }: { children: React.ReactNode }) {
     cards,
     isLoading,
     error,
-    addCard: addCardMutation.mutateAsync,
-    updateCard: (id: string, updates: Partial<Card>) =>
-      updateCardMutation.mutateAsync({ id, updates }),
+    addCard: async (card: Omit<Card, 'id' | 'createdAt' | 'updatedAt'>) => {
+      const result = await addCardMutation.mutateAsync(card);
+      return result.createCard; // Extract the Card from the response
+    },
+    updateCard: async (id: string, updates: Partial<Card>) => {
+      const result = await updateCardMutation.mutateAsync({ id, updates });
+      return result.updateCard; // Extract the Card from the response
+    },
     deleteCard: deleteCardMutation.mutateAsync,
   };
 
