@@ -29,9 +29,12 @@ const authLink = new ApolloLink((operation, forward) => {
   return forward(operation);
 });
 
+// Default GraphQL API URL (fallback if env variable is not set)
+const DEFAULT_GRAPHQL_API_URL = '/graphql';
+
 // HTTP link for queries and mutations
 const httpLink = new HttpLink({
-  uri: import.meta.env.VITE_GRAPHQL_API_URL || '/graphql',
+  uri: import.meta.env.VITE_GRAPHQL_API_URL || DEFAULT_GRAPHQL_API_URL,
 });
 
 // WebSocket link for subscriptions
@@ -39,10 +42,13 @@ let wsLink: GraphQLWsLink | null = null;
 
 // Only create the WebSocket link on the client
 if (typeof window !== 'undefined') {
+  const wsUrl = import.meta.env.VITE_GRAPHQL_WS_URL || 
+                (import.meta.env.VITE_GRAPHQL_API_URL && 
+                 import.meta.env.VITE_GRAPHQL_API_URL.replace('http', 'ws')) || 
+                'ws://localhost:4000/graphql';
+                
   wsLink = new GraphQLWsLink(createClient({
-    url: import.meta.env.VITE_GRAPHQL_WS_URL || 
-         import.meta.env.VITE_GRAPHQL_API_URL?.replace('http', 'ws') || 
-         'ws://localhost:4000/graphql',
+    url: wsUrl,
     connectionParams: () => {
       const token = localStorage.getItem('authToken');
       return {

@@ -5,6 +5,17 @@ import { assetService } from '@/lib/dam/assetService';
 import { toast } from 'sonner';
 import localforage from 'localforage';
 
+// Define a type for the stored item to fix TypeScript errors
+interface StoredItem {
+  file: Blob;
+  metadata: {
+    fileName: string;
+    contentType: string;
+    stored: string;
+    [key: string]: any;
+  };
+}
+
 // Configure localstorage fallback
 const localStore = localforage.createInstance({
   name: 'cardshow',
@@ -151,7 +162,7 @@ export class StorageManager {
       }
       
       // Try local storage fallback
-      const localData = await localStore.getItem(id);
+      const localData = await localStore.getItem<StoredItem>(id);
       if (localData && localData.file) {
         return localData.file;
       }
@@ -270,7 +281,7 @@ export class StorageManager {
       const results = [];
       
       for (const key of keys) {
-        const data = await localStore.getItem(key);
+        const data = await localStore.getItem<StoredItem>(key);
         if (data && data.file) {
           results.push({
             name: data.metadata?.fileName || key,
