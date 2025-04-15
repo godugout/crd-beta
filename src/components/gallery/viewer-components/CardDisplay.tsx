@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/lib/types';
 import '../../../styles/card-interactions.css';
@@ -32,8 +33,8 @@ const CardDisplay: React.FC<CardDisplayProps> = ({
   activeEffects,
   effectIntensities = {},
   mousePosition,
-  touchImprintAreas = [],
-}: CardDisplayProps) => {
+  touchImprintAreas = []
+}) => {
   const [flipProgress, setFlipProgress] = useState(0);
   
   // Update flip progress when isFlipped changes for smooth animation
