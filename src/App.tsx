@@ -12,8 +12,9 @@ import BaseballCardViewer from './pages/BaseballCardViewer';
 import BaseballActionFigure from './pages/BaseballActionFigure';
 import { CardProvider } from './context/CardContext';
 import { SettingsProvider } from './context/SettingsContext';
+import EmergencyPage from './pages/EmergencyPage';
 
-// Import route configurations
+// Import all routes
 import { routes } from './routes/index';
 
 function App() {
@@ -28,6 +29,23 @@ function App() {
     
     // Log that the app is starting
     console.log('App is initializing', { routes });
+
+    try {
+      // Check if any critical dependencies are missing
+      const requiredDeps = [
+        { name: 'React Router', check: () => !!Router },
+        { name: 'Routes Component', check: () => !!Routes },
+        { name: 'CardProvider', check: () => !!CardProvider },
+      ];
+      
+      const missingDeps = requiredDeps.filter(dep => !dep.check());
+      if (missingDeps.length > 0) {
+        throw new Error(`Missing dependencies: ${missingDeps.map(d => d.name).join(', ')}`);
+      }
+    } catch (err: any) {
+      console.error('Dependency check failed:', err);
+      setError(err.message || 'Failed to initialize app dependencies');
+    }
 
     return () => clearTimeout(timer);
   }, []);
@@ -62,6 +80,8 @@ function App() {
     );
   }
 
+  console.log('Rendering App with routes:', routes);
+
   return (
     <SettingsProvider>
       <CardProvider>
@@ -71,6 +91,12 @@ function App() {
           </div>
           
           <Routes>
+            {/* Root fallback to Index */}
+            <Route path="/" element={<Navigate to="/home" replace />} />
+            
+            {/* Emergency route */}
+            <Route path="/emergency" element={<EmergencyPage />} />
+
             {/* Import all routes from the routes configuration */}
             {routes.map((route, index) => {
               // Handle nested routes
@@ -99,7 +125,7 @@ function App() {
             })}
 
             {/* Legacy routes for backward compatibility */}
-            <Route path="/" element={<HomePage />} />
+            <Route path="/home" element={<HomePage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/cards" element={<CardCollectionPage />} />

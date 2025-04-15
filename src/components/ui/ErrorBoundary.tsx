@@ -1,92 +1,71 @@
 
-import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { AlertTriangle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import React, { Component, ErrorInfo, ReactNode } from "react";
 
-interface ErrorBoundaryProps {
-  /**
-   * Child components to render
-   */
+interface Props {
   children: ReactNode;
-  
-  /**
-   * Optional fallback component to render on error
-   */
   fallback?: ReactNode;
-  
-  /**
-   * Optional callback when an error occurs
-   */
-  onError?: (error: Error, errorInfo: ErrorInfo) => void;
 }
 
-interface ErrorBoundaryState {
+interface State {
   hasError: boolean;
   error: Error | null;
+  errorInfo: ErrorInfo | null;
 }
 
-/**
- * Error boundary component that catches JavaScript errors in its child component tree
- */
-export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
-  constructor(props: ErrorBoundaryProps) {
-    super(props);
-    this.state = {
-      hasError: false,
-      error: null
-    };
-  }
-
-  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
-    return {
-      hasError: true,
-      error
-    };
-  }
-
-  componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
-    // Log error to console
-    console.error('Error caught by ErrorBoundary:', error, errorInfo);
-    
-    // Call onError callback if provided
-    if (this.props.onError) {
-      this.props.onError(error, errorInfo);
-    }
-  }
-
-  handleReset = (): void => {
-    this.setState({
-      hasError: false,
-      error: null
-    });
+export class ErrorBoundary extends Component<Props, State> {
+  public state: State = {
+    hasError: false,
+    error: null,
+    errorInfo: null
   };
 
-  render() {
+  public static getDerivedStateFromError(error: Error): State {
+    // Update state so the next render will show the fallback UI.
+    return { hasError: true, error, errorInfo: null };
+  }
+
+  public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error("Uncaught error:", error, errorInfo);
+    this.setState({
+      error,
+      errorInfo
+    });
+  }
+
+  public render() {
     if (this.state.hasError) {
-      // Render custom fallback if provided
       if (this.props.fallback) {
         return this.props.fallback;
       }
-      
-      // Default error UI
+
       return (
-        <div className="p-6 border border-red-200 bg-red-50 rounded-lg text-center">
-          <div className="flex justify-center mb-4">
-            <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
-              <AlertTriangle className="h-6 w-6 text-red-500" />
-            </div>
+        <div className="p-6 bg-red-50 border border-red-200 rounded-lg max-w-2xl mx-auto my-8">
+          <h2 className="text-xl font-bold text-red-800 mb-4">Something went wrong</h2>
+          <div className="mb-4">
+            <p className="text-red-700">{this.state.error?.message}</p>
           </div>
-          <h3 className="text-lg font-medium text-red-800 mb-2">Something went wrong</h3>
-          <p className="text-sm text-red-600 mb-4 max-w-md mx-auto">
-            {this.state.error?.message || "An unexpected error occurred"}
-          </p>
-          <Button 
-            variant="outline" 
-            onClick={this.handleReset}
-            className="border-red-300 text-red-700 hover:bg-red-100"
-          >
-            Try again
-          </Button>
+          <div className="bg-white p-4 rounded overflow-auto max-h-96 text-xs font-mono">
+            <pre>{this.state.error?.stack}</pre>
+            {this.state.errorInfo && (
+              <pre className="mt-4 pt-4 border-t border-red-100">
+                {this.state.errorInfo.componentStack}
+              </pre>
+            )}
+          </div>
+          <div className="mt-4">
+            <button
+              className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+              onClick={() => this.setState({ hasError: false, error: null, errorInfo: null })}
+            >
+              Try Again
+            </button>
+            <a
+              href="/"
+              className="ml-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            >
+              Go to Home
+            </a>
+          </div>
         </div>
       );
     }
