@@ -12,6 +12,7 @@ import BaseballCardViewer from './pages/BaseballCardViewer';
 import BaseballActionFigure from './pages/BaseballActionFigure';
 import { CardProvider } from './context/CardContext';
 import { SettingsProvider } from './context/SettingsContext';
+import { CardEnhancedProvider } from './context/CardEnhancedProvider';
 
 // Import route configurations
 import { routes } from './routes/index';
@@ -42,49 +43,51 @@ function App() {
   return (
     <SettingsProvider>
       <CardProvider>
-        <Router>
-          <Routes>
-            {/* Import all routes from the routes configuration */}
-            {routes.map((route, index) => {
-              // Handle nested routes
-              if (route.children) {
+        <CardEnhancedProvider>
+          <Router>
+            <Routes>
+              {/* Import all routes from the routes configuration */}
+              {routes.map((route, index) => {
+                // Handle nested routes
+                if (route.children) {
+                  return (
+                    <Route key={`parent-${index}`} path={route.path} element={route.element}>
+                      {route.children.map((childRoute, childIndex) => (
+                        <Route 
+                          key={`child-${childIndex}`}
+                          path={childRoute.path}
+                          element={childRoute.element}
+                        />
+                      ))}
+                    </Route>
+                  );
+                }
+                
+                // Handle standard routes
                 return (
-                  <Route key={`parent-${index}`} path={route.path} element={route.element}>
-                    {route.children.map((childRoute, childIndex) => (
-                      <Route 
-                        key={`child-${childIndex}`}
-                        path={childRoute.path}
-                        element={childRoute.element}
-                      />
-                    ))}
-                  </Route>
+                  <Route 
+                    key={`route-${index}`} 
+                    path={route.path} 
+                    element={route.element} 
+                  />
                 );
-              }
-              
-              // Handle standard routes
-              return (
-                <Route 
-                  key={`route-${index}`} 
-                  path={route.path} 
-                  element={route.element} 
-                />
-              );
-            })}
+              })}
 
-            {/* Legacy routes for backward compatibility */}
-            <Route path="/" element={<HomePage />} />
-            <Route path="/about" element={<AboutPage />} />
-            <Route path="/contact" element={<ContactPage />} />
-            <Route path="/cards" element={<CardCollectionPage />} />
-            <Route path="/view/:id" element={<ImmersiveCardViewer />} />
-            <Route path="/baseball-card-viewer" element={<BaseballCardViewer />} />
-            <Route path="/baseball-action-figure" element={<BaseballActionFigure />} />
-            
-            {/* 404 Route */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </Router>
-        <Toaster />
+              {/* Legacy routes for backward compatibility */}
+              <Route path="/" element={<HomePage />} />
+              <Route path="/about" element={<AboutPage />} />
+              <Route path="/contact" element={<ContactPage />} />
+              <Route path="/cards" element={<CardCollectionPage />} />
+              <Route path="/view/:id" element={<ImmersiveCardViewer />} />
+              <Route path="/baseball-card-viewer" element={<BaseballCardViewer />} />
+              <Route path="/baseball-action-figure" element={<BaseballActionFigure />} />
+              
+              {/* 404 Route */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Router>
+          <Toaster />
+        </CardEnhancedProvider>
       </CardProvider>
     </SettingsProvider>
   );

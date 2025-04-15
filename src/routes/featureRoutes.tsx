@@ -7,9 +7,6 @@ import CacheExample from '@/components/examples/CacheExample';
 import CardShowcase from '@/pages/CardShowcase';
 import Experiences from '@/pages/Experiences';
 import Labs from '@/pages/Labs';
-import PbrDemo from '@/pages/PbrDemo';
-import SignatureDemo from '@/pages/SignatureDemo';
-import CardAnimation from '@/pages/CardAnimation';
 
 const featureRoutes: RouteObject[] = [
   {
@@ -36,28 +33,8 @@ const featureRoutes: RouteObject[] = [
         )
       },
       {
-        path: 'pbr',
-        element: (
-          <ProtectedRoute>
-            <PbrDemo />
-          </ProtectedRoute>
-        )
-      },
-      {
-        path: 'signature',
-        element: (
-          <ProtectedRoute>
-            <SignatureDemo />
-          </ProtectedRoute>
-        )
-      },
-      {
         path: 'cache-example',
         element: <CacheExample />
-      },
-      {
-        path: 'animation',
-        element: <CardAnimation />
       },
       {
         path: 'developer',

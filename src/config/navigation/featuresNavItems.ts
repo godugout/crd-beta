@@ -2,14 +2,14 @@
 import { 
   Beaker, 
   BookOpen, 
-  CaseSensitive, 
-  Code, 
+  Camera,
   Compass, 
+  Layers,
   Orbit, 
   Pencil, 
-  PencilRuler, 
   RotateCw, 
-  Sparkles,
+  Shirt,
+  SparkleIcon,
   Wand2 
 } from 'lucide-react';
 import { NavigationItem } from './types';
@@ -19,7 +19,7 @@ export const featuresNavItems: NavigationItem[] = [
   {
     title: 'Card Showcase',
     path: '/features/card-showcase',
-    icon: Sparkles,
+    icon: SparkleIcon,
     description: 'Visual showcase of card design features'
   },
   {
@@ -29,39 +29,59 @@ export const featuresNavItems: NavigationItem[] = [
     description: 'Interactive card-based experiences'
   },
   {
-    title: 'Card Creator Wizard',
-    path: '/card-creator',
+    title: 'Card Creator',
+    path: '/cards/create',
     icon: Wand2,
     description: 'Create custom digital trading cards'
   },
   {
     title: 'Dugout Labs',
-    path: '/features/labs',
+    path: '/labs',
     icon: Beaker,
-    description: 'Experimental card features in development'
-  },
-  {
-    title: 'PBR Rendering',
-    path: '/features/pbr',
-    icon: Orbit,
-    description: 'Physically-based rendering for cards'
-  },
-  {
-    title: 'Card Animations',
-    path: '/features/animation',
-    icon: RotateCw,
-    description: 'Card animation and interaction effects'
-  },
-  {
-    title: 'Signature Technology',
-    path: '/features/signature',
-    icon: Pencil,
-    description: 'Digital signature authentication'
+    description: 'Experimental card features in development',
+    children: [
+      {
+        title: 'Card Detector',
+        path: '/labs/detector',
+        icon: Camera,
+        description: 'Detect and extract cards from photos'
+      },
+      {
+        title: 'PBR Rendering',
+        path: '/labs/pbr',
+        icon: Orbit,
+        description: 'Physically-based rendering for cards'
+      },
+      {
+        title: 'Card Animations',
+        path: '/labs/animation',
+        icon: RotateCw,
+        description: 'Card animation and interaction effects'
+      },
+      {
+        title: 'Signature Technology',
+        path: '/labs/signature',
+        icon: Pencil,
+        description: 'Digital signature authentication'
+      },
+      {
+        title: 'Uniform Textures',
+        path: '/labs/uniforms',
+        icon: Shirt, 
+        description: 'Texture generation for uniforms'
+      },
+      {
+        title: 'Advanced Card Creator',
+        path: '/labs/card-creator',
+        icon: Layers,
+        description: 'Professional card creation tool'
+      }
+    ]
   },
   {
     title: 'Developer Docs',
     path: '/features/developer',
-    icon: Code,
+    icon: BookOpen,
     description: 'API documentation and developer resources'
   },
   {

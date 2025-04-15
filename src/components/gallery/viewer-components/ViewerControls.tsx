@@ -1,83 +1,59 @@
 
 import React from 'react';
-import { ChevronLeft, ChevronRight, Share2, Maximize, Rotate3D, Info, X } from 'lucide-react';
+import { X, Rotate3d, RefreshCcw, Flip, Settings } from 'lucide-react';
 
-interface ViewerControlsProps {
+export interface ViewerControlsProps {
   isFlipped: boolean;
   isAutoRotating: boolean;
-  showInfo: boolean;
   onFlipCard: () => void;
   onToggleAutoRotation: () => void;
-  onToggleInfo: () => void;
-  onToggleFullscreen: () => void;
-  onShare: () => void;
+  onToggleControls: () => void;
   onClose: () => void;
 }
 
-const ViewerControls = ({
+const ViewerControls: React.FC<ViewerControlsProps> = ({
   isFlipped,
   isAutoRotating,
-  showInfo,
   onFlipCard,
   onToggleAutoRotation,
-  onToggleInfo,
-  onToggleFullscreen,
-  onShare,
-  onClose,
-}: ViewerControlsProps) => {
+  onToggleControls,
+  onClose
+}) => {
   return (
-    <div className="absolute top-4 right-4 flex space-x-3">
-      <button 
-        className="text-white p-2 rounded-full bg-black/50 hover:bg-black/70 transition"
-        onClick={onFlipCard}
-        title="Flip card"
-      >
-        <ChevronLeft size={20} className={isFlipped ? "hidden" : ""} />
-        <ChevronRight size={20} className={isFlipped ? "" : "hidden"} />
-      </button>
-
-      <button 
-        className="text-white p-2 rounded-full bg-black/50 hover:bg-black/70 transition"
-        onClick={onToggleAutoRotation}
-        title={isAutoRotating ? "Stop auto rotation" : "Start auto rotation"}
-      >
-        <Rotate3D size={20} className={isAutoRotating ? "text-primary" : "text-white"} />
-      </button>
-
-      <button 
-        className="text-white p-2 rounded-full bg-black/50 hover:bg-black/70 transition"
-        onClick={onToggleInfo}
-        title="Show card info"
-      >
-        <Info size={20} className={showInfo ? "text-primary" : "text-white"} />
-      </button>
-
-      <button 
-        className="text-white p-2 rounded-full bg-black/50 hover:bg-black/70 transition"
-        onClick={onToggleFullscreen}
-        title="Toggle fullscreen"
-      >
-        <Maximize size={20} />
-      </button>
-
-      <button 
-        className="text-white p-2 rounded-full bg-black/50 hover:bg-black/70 transition"
-        onClick={onShare}
-        title="Share card"
-      >
-        <Share2 size={20} />
-      </button>
-
-      <button 
-        className="text-white p-2 rounded-full bg-black/50 hover:bg-black/70 transition"
+    <div className="fixed top-4 right-4 flex flex-col gap-2">
+      <button
+        className="p-2 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors"
         onClick={onClose}
-        title="Close viewer"
+        aria-label="Close viewer"
       >
         <X size={20} />
+      </button>
+      
+      <button
+        className={`p-2 rounded-full ${isFlipped ? 'bg-white/20 text-white' : 'bg-black/50 text-white'} hover:bg-black/70 transition-colors`}
+        onClick={onFlipCard}
+        aria-label="Flip card"
+      >
+        <Flip size={20} />
+      </button>
+      
+      <button
+        className={`p-2 rounded-full ${isAutoRotating ? 'bg-purple-600 text-white' : 'bg-black/50 text-white'} hover:bg-black/70 transition-colors`}
+        onClick={onToggleAutoRotation}
+        aria-label="Toggle auto rotation"
+      >
+        <Rotate3d size={20} />
+      </button>
+      
+      <button
+        className="p-2 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors"
+        onClick={onToggleControls}
+        aria-label="Toggle controls"
+      >
+        <Settings size={20} />
       </button>
     </div>
   );
 };
 
 export default ViewerControls;
-

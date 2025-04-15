@@ -17,12 +17,12 @@ const LayerMonitor: React.FC<LayerMonitorProps> = ({ isVisible, layers }) => {
   if (!isVisible) return null;
 
   return (
-    <div className="fixed bottom-4 left-4 bg-black/70 backdrop-blur-sm rounded-lg p-3 text-white text-xs">
+    <div className="fixed bottom-4 left-4 bg-black/70 backdrop-blur-sm rounded-lg p-3 text-white text-xs shadow-xl">
       <div className="flex items-center gap-2 mb-2">
         <Layers size={14} />
         <span className="font-medium">Layer Monitor</span>
       </div>
-      <div className="space-y-1">
+      <div className="space-y-1 max-h-32 overflow-auto">
         {layers.map((layer, index) => (
           <div key={index} className="flex items-center gap-2">
             <div 
@@ -33,7 +33,7 @@ const LayerMonitor: React.FC<LayerMonitorProps> = ({ isVisible, layers }) => {
             <span>{layer.name}</span>
             {layer.loaded && (
               <span className="text-gray-400 ml-auto">
-                {layer.timestamp}ms
+                {layer.timestamp.toFixed(0)}ms
               </span>
             )}
           </div>
