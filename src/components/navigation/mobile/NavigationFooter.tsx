@@ -1,9 +1,8 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { LogOut, Settings, User as UserIcon } from 'lucide-react';
-import { useAuth } from '@/providers/AuthProvider'; // Updated import to use the correct AuthProvider
+import { useAuth } from '@/hooks/useAuth'; // Updated import to use our unified hook
 
 interface NavigationFooterProps {
   onSignOut?: () => void;

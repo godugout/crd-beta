@@ -11,23 +11,26 @@ import { CardProvider } from './context/CardContext';
 import { Toaster } from 'sonner';
 import ImmersiveViewer from './pages/ImmersiveViewer';
 import { ThemeProvider } from './components/ui/ThemeProvider';
+import { AuthProvider } from './providers/AuthProvider';
 
 function App() {
   return (
     <ThemeProvider defaultTheme="light" storageKey="cardshow-theme">
-      <CardStateProvider>
-        <Router>
-          <Toaster />
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/gallery" element={<Gallery />} />
-            <Route path="/card/:id" element={<CardDetail />} />
-            <Route path="/immersive-viewer/:id?" element={<ImmersiveViewer />} />
-            <Route path="/labs/card-viewer/:id" element={<CardViewerExperimental />} />
-            <Route path="/labs/immersive-viewer/:id?" element={<ImmersiveCardViewerDemo />} />
-          </Routes>
-        </Router>
-      </CardStateProvider>
+      <AuthProvider>
+        <CardStateProvider>
+          <Router>
+            <Toaster />
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/gallery" element={<Gallery />} />
+              <Route path="/card/:id" element={<CardDetail />} />
+              <Route path="/immersive-viewer/:id?" element={<ImmersiveViewer />} />
+              <Route path="/labs/card-viewer/:id" element={<CardViewerExperimental />} />
+              <Route path="/labs/immersive-viewer/:id?" element={<ImmersiveCardViewerDemo />} />
+            </Routes>
+          </Router>
+        </CardStateProvider>
+      </AuthProvider>
     </ThemeProvider>
   );
 }
