@@ -1,0 +1,46 @@
+
+/* Card Effects Main Stylesheet */
+
+/* Import all card effect styles */
+@import '../components/card-effects/effects/base.css';
+@import '../components/card-effects/effects/holographic.css';
+@import '../components/card-effects/effects/refractor.css';
+@import '../components/card-effects/effects/metallic.css';
+@import '../components/card-effects/effects/special.css';
+@import '../components/card-effects/effects/vintage.css';
+
+/* This file acts as a centralized import for all card effect styles */
+
+/* Default card effect settings */
+:root {
+  --holographic-intensity: 0.8;
+  --refractor-intensity: 0.8;
+  --chrome-intensity: 0.6;
+  --vintage-intensity: 0.5;
+  --mouse-x: 50%;
+  --mouse-y: 50%;
+}
+
+/* Basic card effect class */
+.card-effect {
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/* Custom card effects specific to this project */
+.effect-premium::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 215, 0, 0.2) 0%,
+    rgba(255, 255, 255, 0.4) 50%,
+    rgba(255, 215, 0, 0.2) 100%
+  );
+  border-radius: inherit;
+  z-index: 2;
+  opacity: calc(0.7 * var(--premium-intensity, 0.8));
+  pointer-events: none;
+}
