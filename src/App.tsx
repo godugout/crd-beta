@@ -1,6 +1,6 @@
-
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { CardStateProvider } from './lib/state/providers/CardStateProvider';
 import Home from './pages/Home';
 import Gallery from './pages/Gallery';
 import CardDetail from './pages/CardDetail';
@@ -12,7 +12,7 @@ import ImmersiveViewer from './pages/ImmersiveViewer';
 
 function App() {
   return (
-    <CardProvider>
+    <CardStateProvider>
       <Router>
         <Toaster />
         <Routes>
@@ -24,7 +24,7 @@ function App() {
           <Route path="/labs/immersive-viewer/:id?" element={<ImmersiveCardViewerDemo />} />
         </Routes>
       </Router>
-    </CardProvider>
+    </CardStateProvider>
   );
 }
 
