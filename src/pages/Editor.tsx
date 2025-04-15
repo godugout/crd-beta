@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import CardEditorContainer from '@/components/card-editor/CardEditorContainer';
 import PageLayout from '@/components/navigation/PageLayout';
@@ -10,7 +10,7 @@ const Editor = () => {
   const { id } = useParams<{ id?: string }>();
   const { cards, getCardById } = useCards();
   const location = useLocation();
-  const [initialData, setInitialData] = useState<any>(null);
+  const [initialData, setInitialData] = React.useState<any>(null);
   
   // Process data passed from CardDetector
   useEffect(() => {
@@ -37,7 +37,6 @@ const Editor = () => {
   
   // Get card data if editing an existing card
   const card = id ? getCardById(id) : undefined;
-  const editorData = card || initialData;
   
   return (
     <PageLayout
@@ -45,7 +44,10 @@ const Editor = () => {
       description={card ? "Edit your digital card" : "Upload an image and add details to create your digital card."}
     >
       <div className="container mx-auto max-w-6xl px-4">
-        <CardEditorContainer card={editorData} />
+        <CardEditorContainer 
+          card={card} 
+          initialMetadata={initialData && !card ? initialData : undefined} 
+        />
       </div>
     </PageLayout>
   );

@@ -1,15 +1,14 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCards } from '@/context/CardContext';
 import { toast } from 'sonner';
-import { useCardEditorState } from './hooks/useCardEditorState';
-import { useCardEditorSteps } from './hooks/useCardEditorSteps';
 import StepContent from './StepContent';
 import CardEditorHeader from './components/CardEditorHeader';
 import CardEditorNavigation from './components/CardEditorNavigation';
 import CardEditorPreview from './components/CardEditorPreview';
 import CardEditorActions from './components/CardEditorActions';
+import { CardEditorProvider, useCardEditor } from '@/lib/state/card-editor/context';
 
 interface CardEditorContainerProps {
   card?: any;
@@ -17,21 +16,63 @@ interface CardEditorContainerProps {
   initialMetadata?: any;
 }
 
+// Steps in the card editor process
 const steps = ["Upload", "Design", "Effects", "Text", "Preview"];
 
+// Container component for the card editor
 const CardEditorContainer: React.FC<CardEditorContainerProps> = ({ card, className, initialMetadata }) => {
+  // Wrap the editor components with our provider
+  return (
+    <CardEditorProvider initialCard={card}>
+      <CardEditorContainerInner className={className} initialMetadata={initialMetadata} />
+    </CardEditorProvider>
+  );
+};
+
+// Inner component that uses the card editor context
+const CardEditorContainerInner: React.FC<Omit<CardEditorContainerProps, 'card'>> = ({ 
+  className, 
+  initialMetadata 
+}) => {
   const navigate = useNavigate();
   const { addCard, updateCard } = useCards();
-  const cardState = useCardEditorState({ initialCard: card, initialMetadata });
+  
+  // Use our new card editor context
+  const { 
+    id,
+    design,
+    layers,
+    activeLayer,
+    currentStep,
+    setCurrentStep,
+    updateDesign,
+    isSaving,
+    setSaving,
+    getCardData
+  } = useCardEditor();
+  
+  // Apply initial metadata if provided (from image detection, etc)
+  useEffect(() => {
+    if (initialMetadata && !id) {
+      updateDesign({
+        title: initialMetadata.title || '',
+        description: initialMetadata.text || '',
+        tags: initialMetadata.tags || [],
+        player: initialMetadata.player || '',
+        team: initialMetadata.team || '',
+        year: initialMetadata.year || ''
+      });
+    }
+  }, [initialMetadata, id, updateDesign]);
   
   const validateCurrentStep = (step: number) => {
     if (step === 0) {
-      if (!cardState.imageUrl) {
+      if (!design.imageUrl) {
         toast.error('Please upload an image for your CRD');
         return false;
       }
       
-      if (!cardState.title.trim()) {
+      if (!design.title.trim()) {
         toast.error('Please provide a title for your CRD');
         return false;
       }
@@ -39,18 +80,36 @@ const CardEditorContainer: React.FC<CardEditorContainerProps> = ({ card, classNa
     return true;
   };
   
-  const { currentStep, goToNextStep, goToPreviousStep, goToStep, isFirstStep, isLastStep } = useCardEditorSteps(
-    steps.length, 
-    validateCurrentStep
-  );
+  const goToNextStep = () => {
+    if (currentStep < steps.length - 1 && validateCurrentStep(currentStep)) {
+      setCurrentStep(currentStep + 1);
+    }
+  };
+  
+  const goToPreviousStep = () => {
+    if (currentStep > 0) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+  
+  const goToStep = (step: number) => {
+    if (step >= 0 && step < steps.length && (step <= currentStep || validateCurrentStep(currentStep))) {
+      setCurrentStep(step);
+    }
+  };
+  
+  const isFirstStep = currentStep === 0;
+  const isLastStep = currentStep === steps.length - 1;
   
   const handleSubmit = async () => {
-    const cardData = cardState.getCardData();
+    const cardData = getCardData();
     
     try {
-      if (card) {
+      setSaving(true);
+      
+      if (id) {
         // Update existing card
-        await updateCard(card.id, cardData);
+        await updateCard(id, cardData);
         toast.success('CRD updated successfully');
       } else {
         // Add new card
@@ -63,12 +122,14 @@ const CardEditorContainer: React.FC<CardEditorContainerProps> = ({ card, classNa
     } catch (error) {
       console.error('Error saving card:', error);
       toast.error('Failed to save CRD. Please try again.');
+    } finally {
+      setSaving(false);
     }
   };
 
   return (
     <div className={`max-w-7xl mx-auto ${className}`}>
-      <CardEditorHeader title={card ? "Edit" : "Create a"} />
+      <CardEditorHeader title={id ? "Edit" : "Create a"} />
       
       <CardEditorNavigation 
         steps={steps} 
@@ -80,10 +141,7 @@ const CardEditorContainer: React.FC<CardEditorContainerProps> = ({ card, classNa
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
         <div className="lg:col-span-2">
           <div className="bg-white rounded-lg shadow-sm border p-4 md:p-6">
-            <StepContent 
-              currentStep={currentStep}
-              cardState={cardState}
-            />
+            <StepContent currentStep={currentStep} />
           </div>
           
           <CardEditorActions 
@@ -92,6 +150,7 @@ const CardEditorContainer: React.FC<CardEditorContainerProps> = ({ card, classNa
             onSubmit={handleSubmit}
             isFirstStep={isFirstStep}
             isLastStep={isLastStep}
+            isSaving={isSaving}
           />
           
           <div className="mt-4 flex justify-center md:justify-end">
@@ -99,16 +158,7 @@ const CardEditorContainer: React.FC<CardEditorContainerProps> = ({ card, classNa
           </div>
         </div>
         
-        <CardEditorPreview 
-          imageUrl={cardState.imageUrl}
-          title={cardState.title}
-          description={cardState.description}
-          tags={cardState.tags}
-          player={cardState.player}
-          team={cardState.team}
-          year={cardState.year}
-          cardStyle={cardState.cardStyle}
-        />
+        <CardEditorPreview />
       </div>
     </div>
   );
