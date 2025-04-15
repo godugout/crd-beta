@@ -1,81 +1,160 @@
 
-import { useState, useCallback, useEffect } from 'react';
-import { EffectSettings } from './types';
+import { useState, useCallback } from 'react';
 
-// Default settings
-const DEFAULT_SETTINGS: EffectSettings = {
-  motionSpeed: 1.0,
-  pulseIntensity: 0.5,
-  shimmerSpeed: 1.0,
-  goldIntensity: 0.7,
-  chromeIntensity: 0.8,
-  vintageIntensity: 0.6,
-  refractorIntensity: 0.7,
-  spectralIntensity: 0.5
-};
+interface EffectSettings {
+  motionSpeed: number;
+  pulseIntensity: number;
+  shimmerSpeed: number;
+  goldIntensity: number;
+  chromeIntensity: number;
+  vintageIntensity: number;
+  refractorIntensity: number;
+  spectralIntensity: number;
+}
 
-/**
- * Hook for managing effect settings
- * 
- * @param onChange Optional callback for when settings change
- * @returns Effect settings and update methods
- */
-export function useEffectSettings(onChange?: (settings: EffectSettings) => void) {
-  const [motionSpeed, setMotionSpeed] = useState(DEFAULT_SETTINGS.motionSpeed);
-  const [pulseIntensity, setPulseIntensity] = useState(DEFAULT_SETTINGS.pulseIntensity);
-  const [shimmerSpeed, setShimmerSpeed] = useState(DEFAULT_SETTINGS.shimmerSpeed);
-  const [goldIntensity, setGoldIntensity] = useState(DEFAULT_SETTINGS.goldIntensity);
-  const [chromeIntensity, setChromeIntensity] = useState(DEFAULT_SETTINGS.chromeIntensity);
-  const [vintageIntensity, setVintageIntensity] = useState(DEFAULT_SETTINGS.vintageIntensity);
-  const [refractorIntensity, setRefractorIntensity] = useState(DEFAULT_SETTINGS.refractorIntensity);
-  const [spectralIntensity, setSpectralIntensity] = useState(DEFAULT_SETTINGS.spectralIntensity);
+type EffectSettingsUpdater = (settings: EffectSettings) => void;
 
-  // Handlers for each setting
+export const useEffectSettings = (onSettingsChange?: EffectSettingsUpdater) => {
+  const [motionSpeed, setMotionSpeed] = useState<number>(1);
+  const [pulseIntensity, setPulseIntensity] = useState<number>(1);
+  const [shimmerSpeed, setShimmerSpeed] = useState<number>(1);
+  const [goldIntensity, setGoldIntensity] = useState<number>(1);
+  const [chromeIntensity, setChromeIntensity] = useState<number>(1);
+  const [vintageIntensity, setVintageIntensity] = useState<number>(1);
+  const [refractorIntensity, setRefractorIntensity] = useState<number>(1);
+  const [spectralIntensity, setSpectralIntensity] = useState<number>(1);
+  
+  // Helper functions for handling different sliders
   const handleMotionSpeedChange = useCallback((value: number) => {
     setMotionSpeed(value);
-  }, []);
+    if (onSettingsChange) {
+      onSettingsChange({
+        motionSpeed: value,
+        pulseIntensity,
+        shimmerSpeed,
+        goldIntensity,
+        chromeIntensity,
+        vintageIntensity,
+        refractorIntensity,
+        spectralIntensity
+      });
+    }
+  }, [onSettingsChange, pulseIntensity, shimmerSpeed, goldIntensity, chromeIntensity, vintageIntensity, refractorIntensity, spectralIntensity]);
   
   const handlePulseIntensityChange = useCallback((value: number) => {
     setPulseIntensity(value);
-  }, []);
+    if (onSettingsChange) {
+      onSettingsChange({
+        motionSpeed,
+        pulseIntensity: value,
+        shimmerSpeed,
+        goldIntensity,
+        chromeIntensity,
+        vintageIntensity,
+        refractorIntensity,
+        spectralIntensity
+      });
+    }
+  }, [onSettingsChange, motionSpeed, shimmerSpeed, goldIntensity, chromeIntensity, vintageIntensity, refractorIntensity, spectralIntensity]);
   
   const handleShimmerSpeedChange = useCallback((value: number) => {
     setShimmerSpeed(value);
-  }, []);
+    if (onSettingsChange) {
+      onSettingsChange({
+        motionSpeed,
+        pulseIntensity,
+        shimmerSpeed: value,
+        goldIntensity,
+        chromeIntensity,
+        vintageIntensity,
+        refractorIntensity,
+        spectralIntensity
+      });
+    }
+  }, [onSettingsChange, motionSpeed, pulseIntensity, goldIntensity, chromeIntensity, vintageIntensity, refractorIntensity, spectralIntensity]);
   
   const handleGoldIntensityChange = useCallback((value: number) => {
     setGoldIntensity(value);
-  }, []);
+    if (onSettingsChange) {
+      onSettingsChange({
+        motionSpeed,
+        pulseIntensity,
+        shimmerSpeed,
+        goldIntensity: value,
+        chromeIntensity,
+        vintageIntensity,
+        refractorIntensity,
+        spectralIntensity
+      });
+    }
+  }, [onSettingsChange, motionSpeed, pulseIntensity, shimmerSpeed, chromeIntensity, vintageIntensity, refractorIntensity, spectralIntensity]);
   
   const handleChromeIntensityChange = useCallback((value: number) => {
     setChromeIntensity(value);
-  }, []);
+    if (onSettingsChange) {
+      onSettingsChange({
+        motionSpeed,
+        pulseIntensity,
+        shimmerSpeed,
+        goldIntensity,
+        chromeIntensity: value,
+        vintageIntensity,
+        refractorIntensity,
+        spectralIntensity
+      });
+    }
+  }, [onSettingsChange, motionSpeed, pulseIntensity, shimmerSpeed, goldIntensity, vintageIntensity, refractorIntensity, spectralIntensity]);
   
   const handleVintageIntensityChange = useCallback((value: number) => {
     setVintageIntensity(value);
-  }, []);
+    if (onSettingsChange) {
+      onSettingsChange({
+        motionSpeed,
+        pulseIntensity,
+        shimmerSpeed,
+        goldIntensity,
+        chromeIntensity,
+        vintageIntensity: value,
+        refractorIntensity,
+        spectralIntensity
+      });
+    }
+  }, [onSettingsChange, motionSpeed, pulseIntensity, shimmerSpeed, goldIntensity, chromeIntensity, refractorIntensity, spectralIntensity]);
   
   const handleRefractorIntensityChange = useCallback((value: number) => {
     setRefractorIntensity(value);
-  }, []);
+    if (onSettingsChange) {
+      onSettingsChange({
+        motionSpeed,
+        pulseIntensity,
+        shimmerSpeed,
+        goldIntensity,
+        chromeIntensity,
+        vintageIntensity,
+        refractorIntensity: value,
+        spectralIntensity
+      });
+    }
+  }, [onSettingsChange, motionSpeed, pulseIntensity, shimmerSpeed, goldIntensity, chromeIntensity, vintageIntensity, spectralIntensity]);
   
   const handleSpectralIntensityChange = useCallback((value: number) => {
     setSpectralIntensity(value);
-  }, []);
-
-  // Get current settings
-  const getCurrentSettings = useCallback((): EffectSettings => {
-    return {
-      motionSpeed,
-      pulseIntensity,
-      shimmerSpeed,
-      goldIntensity,
-      chromeIntensity,
-      vintageIntensity,
-      refractorIntensity,
-      spectralIntensity
-    };
-  }, [
+    if (onSettingsChange) {
+      onSettingsChange({
+        motionSpeed,
+        pulseIntensity,
+        shimmerSpeed,
+        goldIntensity,
+        chromeIntensity,
+        vintageIntensity,
+        refractorIntensity,
+        spectralIntensity: value
+      });
+    }
+  }, [onSettingsChange, motionSpeed, pulseIntensity, shimmerSpeed, goldIntensity, chromeIntensity, vintageIntensity, refractorIntensity]);
+  
+  // Methods to get and apply settings
+  const getCurrentSettings = useCallback(() => ({
     motionSpeed,
     pulseIntensity,
     shimmerSpeed,
@@ -84,9 +163,8 @@ export function useEffectSettings(onChange?: (settings: EffectSettings) => void)
     vintageIntensity,
     refractorIntensity,
     spectralIntensity
-  ]);
-
-  // Apply settings from external source
+  }), [motionSpeed, pulseIntensity, shimmerSpeed, goldIntensity, chromeIntensity, vintageIntensity, refractorIntensity, spectralIntensity]);
+  
   const applySettings = useCallback((settings: Partial<EffectSettings>) => {
     if (settings.motionSpeed !== undefined) setMotionSpeed(settings.motionSpeed);
     if (settings.pulseIntensity !== undefined) setPulseIntensity(settings.pulseIntensity);
@@ -96,28 +174,26 @@ export function useEffectSettings(onChange?: (settings: EffectSettings) => void)
     if (settings.vintageIntensity !== undefined) setVintageIntensity(settings.vintageIntensity);
     if (settings.refractorIntensity !== undefined) setRefractorIntensity(settings.refractorIntensity);
     if (settings.spectralIntensity !== undefined) setSpectralIntensity(settings.spectralIntensity);
-  }, []);
-
-  // Notify on settings change
-  useEffect(() => {
-    if (onChange) {
-      onChange(getCurrentSettings());
+    
+    if (onSettingsChange) {
+      onSettingsChange({
+        motionSpeed: settings.motionSpeed ?? motionSpeed,
+        pulseIntensity: settings.pulseIntensity ?? pulseIntensity,
+        shimmerSpeed: settings.shimmerSpeed ?? shimmerSpeed,
+        goldIntensity: settings.goldIntensity ?? goldIntensity,
+        chromeIntensity: settings.chromeIntensity ?? chromeIntensity,
+        vintageIntensity: settings.vintageIntensity ?? vintageIntensity,
+        refractorIntensity: settings.refractorIntensity ?? refractorIntensity,
+        spectralIntensity: settings.spectralIntensity ?? spectralIntensity
+      });
     }
   }, [
-    motionSpeed,
-    pulseIntensity,
-    shimmerSpeed,
-    goldIntensity,
-    chromeIntensity,
-    vintageIntensity,
-    refractorIntensity,
-    spectralIntensity,
-    onChange,
-    getCurrentSettings
+    motionSpeed, pulseIntensity, shimmerSpeed, goldIntensity, 
+    chromeIntensity, vintageIntensity, refractorIntensity, spectralIntensity, 
+    onSettingsChange
   ]);
-
+  
   return {
-    // Current values
     motionSpeed,
     pulseIntensity,
     shimmerSpeed,
@@ -126,8 +202,6 @@ export function useEffectSettings(onChange?: (settings: EffectSettings) => void)
     vintageIntensity,
     refractorIntensity,
     spectralIntensity,
-    
-    // Handlers
     handleMotionSpeedChange,
     handlePulseIntensityChange,
     handleShimmerSpeedChange,
@@ -136,14 +210,9 @@ export function useEffectSettings(onChange?: (settings: EffectSettings) => void)
     handleVintageIntensityChange,
     handleRefractorIntensityChange,
     handleSpectralIntensityChange,
-    
-    // Utility functions
     getCurrentSettings,
-    applySettings,
-    
-    // Constants
-    DEFAULT_SETTINGS
+    applySettings
   };
-}
+};
 
 export default useEffectSettings;

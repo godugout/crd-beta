@@ -1,0 +1,115 @@
+
+.spectral-effect {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: 12px;
+}
+
+.spectral-effect::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: var(--spectral-pattern);
+  opacity: calc(0.6 * var(--spectral-intensity));
+  mix-blend-mode: overlay;
+  animation: spectral-shift 8s infinite alternate;
+  filter: saturate(1.5) contrast(1.2);
+}
+
+.spectral-effect::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.4) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  background-size: 200% 200%;
+  mix-blend-mode: soft-light;
+  opacity: calc(0.5 * var(--spectral-intensity));
+  animation: spectral-sweep 4s ease-in-out infinite alternate;
+}
+
+@keyframes spectral-shift {
+  0% {
+    background-position: 0% 0%;
+    filter: hue-rotate(0deg) saturate(1.5) contrast(1.2);
+  }
+  33% {
+    background-position: 100% 0%;
+    filter: hue-rotate(60deg) saturate(2) contrast(1.3);
+  }
+  66% {
+    background-position: 100% 100%;
+    filter: hue-rotate(120deg) saturate(1.8) contrast(1.2);
+  }
+  100% {
+    background-position: 0% 100%;
+    filter: hue-rotate(180deg) saturate(1.5) contrast(1.1);
+  }
+}
+
+@keyframes spectral-sweep {
+  0% {
+    transform: translateX(-100%) rotate(-10deg);
+    opacity: calc(0.3 * var(--spectral-intensity));
+  }
+  50% {
+    opacity: calc(0.5 * var(--spectral-intensity));
+  }
+  100% {
+    transform: translateX(100%) rotate(10deg);
+    opacity: calc(0.3 * var(--spectral-intensity));
+  }
+}
+
+/* Microtext pattern for authenticity */
+.spectral-microtext {
+  position: absolute;
+  inset: 0;
+  opacity: 0.05;
+  font-size: 3px;
+  overflow: hidden;
+  line-height: 4px;
+  color: white;
+}
+
+.spectral-hologram {
+  position: relative;
+}
+
+.spectral-hologram-layer {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    rgba(255, 255, 255, 0.8) 0%,
+    rgba(255, 255, 255, 0) 50%
+  );
+  mix-blend-mode: overlay;
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+/* Enhanced performance for mobile devices */
+@media (max-width: 768px) {
+  .spectral-effect::before,
+  .spectral-effect::after {
+    animation-duration: 12s;
+  }
+  
+  .spectral-microtext {
+    display: none;
+  }
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion) {
+  .spectral-effect::before,
+  .spectral-effect::after {
+    animation: none;
+  }
+}
