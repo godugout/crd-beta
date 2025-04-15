@@ -36,6 +36,8 @@ const Card3DRenderer: React.FC<Card3DRendererProps> = ({
   const frontTexturePath = card.imageUrl || '/images/card-placeholder.png';
   const backTexturePath = card.thumbnailUrl || '/images/card-back-placeholder.png';
   
+  console.log('Attempting to load textures:', { frontTexturePath, backTexturePath });
+  
   // Load textures with error handling
   const [frontTexture, backTexture] = useTexture(
     [frontTexturePath, backTexturePath],
@@ -56,6 +58,25 @@ const Card3DRenderer: React.FC<Card3DRendererProps> = ({
       toast.error('Failed to load card textures');
     }
   );
+
+  // Configure texture settings for proper rendering
+  useEffect(() => {
+    if (frontTexture && backTexture) {
+      // Configure texture settings for proper rendering
+      [frontTexture, backTexture].forEach(texture => {
+        texture.wrapS = THREE.ClampToEdgeWrapping;
+        texture.wrapT = THREE.ClampToEdgeWrapping;
+        texture.minFilter = THREE.LinearFilter;
+        texture.magFilter = THREE.LinearFilter;
+        texture.needsUpdate = true;
+      });
+      
+      console.log('Textures configured:', { 
+        frontSize: `${frontTexture.image?.width}x${frontTexture.image?.height}`, 
+        backSize: `${backTexture.image?.width}x${backTexture.image?.height}`
+      });
+    }
+  }, [frontTexture, backTexture]);
   
   // Update diagnostics for effect changes
   useEffect(() => {
@@ -185,11 +206,16 @@ const Card3DRenderer: React.FC<Card3DRendererProps> = ({
           // Choose texture based on flip state
           // The flip animation is mathematically determined for realistic card flip
           if (isFlipped) {
-            // Back texture is applied when flipped
+            // Back texture is applied when flipped - fix the UV coordinates
             color = texture2D(backTexture, vec2(1.0 - vUv.x, vUv.y));
           } else {
             // Front texture is applied when not flipped
             color = texture2D(frontTexture, vUv);
+          }
+          
+          // Check if the color is actually loaded - if not, use a debug color
+          if (color.a < 0.1) {
+            color = vec4(1.0, 0.0, 0.0, 1.0); // Red for missing texture
           }
           
           // Apply effects in sequence based on active flags

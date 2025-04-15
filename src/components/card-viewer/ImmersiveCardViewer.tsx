@@ -33,6 +33,7 @@ interface ImmersiveCardViewerProps {
 const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({ card, onClose }) => {
   const [isFlipped, setIsFlipped] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showMetadata, setShowMetadata] = useState(false);
   const [activeEffects, setActiveEffects] = useState<string[]>([]);
   const [effectIntensities, setEffectIntensities] = useState<Record<string, number>>({
     Holographic: 0.7,
@@ -80,6 +81,12 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({ card, onClose
     toast.info(`Showing card ${isFlipped ? 'front' : 'back'}`);
   };
 
+  // Toggle metadata display
+  const toggleMetadata = () => {
+    setShowMetadata(!showMetadata);
+    toast.info(showMetadata ? 'Metadata hidden' : 'Metadata displayed');
+  };
+
   // Toggle effects on/off
   const toggleEffect = (effectId: string) => {
     setActiveEffects(prev => {
@@ -99,10 +106,15 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({ card, onClose
     }));
   };
 
+  // Log that the component has mounted with the current card
+  useEffect(() => {
+    console.log('ImmersiveCardViewer mounted with card:', card);
+  }, [card]);
+
   return (
     <div ref={containerRef} className="relative w-full h-full min-h-[500px] bg-gray-900 overflow-hidden rounded-lg">
       {/* 3D Canvas with improved lighting and environment */}
-      <Canvas shadows gl={{ antialias: true }}>
+      <Canvas shadows gl={{ antialias: true, alpha: false }}>
         <color attach="background" args={[0x0a0a0a]} />
         
         {/* Camera with optimal positioning */}
@@ -135,6 +147,12 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({ card, onClose
             activeEffects={activeEffects}
             effectIntensities={effectIntensities}
           />
+          
+          {/* Metadata panel that can be toggled */}
+          <CardMetadataPanel
+            card={card}
+            isVisible={showMetadata}
+          />
         </Suspense>
       </Canvas>
 
@@ -144,7 +162,7 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({ card, onClose
         <div className="flex mb-4">
           <div className="w-16 h-24 mr-3">
             <img 
-              src={card.imageUrl} 
+              src={card.imageUrl || '/images/card-placeholder.png'} 
               alt={card.title}
               className="w-full h-full object-cover rounded"
             />
@@ -198,6 +216,7 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({ card, onClose
           size="icon"
           className="bg-black/30 text-white hover:bg-black/50"
           onClick={handleFlip}
+          title="Flip Card"
         >
           <RefreshCw className="h-4 w-4" />
         </Button>
@@ -206,7 +225,18 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({ card, onClose
           variant="outline" 
           size="icon"
           className="bg-black/30 text-white hover:bg-black/50"
+          onClick={toggleMetadata}
+          title="Show Card Metadata"
+        >
+          <Sparkles className="h-4 w-4" />
+        </Button>
+        
+        <Button 
+          variant="outline" 
+          size="icon"
+          className="bg-black/30 text-white hover:bg-black/50"
           onClick={toggleFullscreen}
+          title="Toggle Fullscreen"
         >
           {isFullscreen ? (
             <Minimize2 className="h-4 w-4" />
@@ -221,6 +251,7 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({ card, onClose
             size="icon"
             className="bg-black/30 text-white hover:bg-black/50"
             onClick={onClose}
+            title="Close Viewer"
           >
             <X className="h-4 w-4" />
           </Button>
@@ -228,8 +259,14 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({ card, onClose
       </div>
       
       {/* Keyboard shortcuts help */}
-      <div className="absolute bottom-4 right-4 text-xs text-white/50">
-        Press <kbd className="px-1.5 py-0.5 bg-white/20 rounded text-white">D</kbd> for diagnostics
+      <div className="absolute bottom-4 right-4 z-20 bg-black/70 backdrop-blur-sm rounded-lg p-3 text-white text-xs max-w-xs">
+        <h4 className="font-medium mb-2">Keyboard Controls:</h4>
+        <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+          <div><kbd className="bg-gray-800 px-1 rounded">F</kbd> <span className="ml-1">Flip card</span></div>
+          <div><kbd className="bg-gray-800 px-1 rounded">D</kbd> <span className="ml-1">Show diagnostics</span></div>
+          <div><kbd className="bg-gray-800 px-1 rounded">M</kbd> <span className="ml-1">Show metadata</span></div>
+          <div><kbd className="bg-gray-800 px-1 rounded">ESC</kbd> <span className="ml-1">Close fullscreen</span></div>
+        </div>
       </div>
     </div>
   );
