@@ -10,6 +10,7 @@ export const useGalleryCards = () => {
   const { cards, isLoading, refreshCards } = useCards();
   const location = useLocation();
   const navigate = useNavigate();
+  const [hasInitiallyFetched, setHasInitiallyFetched] = useState(false);
 
   // Check if there are baseball cards
   const hasBaseballCards = useMemo(() => cards.some(card => 
@@ -70,22 +71,26 @@ export const useGalleryCards = () => {
     return validCards;
   }, [sortedCards]);
 
-  // Effect to refresh cards when component mounts or when directed from another page
+  // Effect to refresh cards only once when component mounts or when explicitly directed
   useEffect(() => {
-    console.log("Fetching gallery cards...");
-    refreshCards?.();
-    
     const queryParams = new URLSearchParams(location.search);
-    if (queryParams.get('refresh') === 'true') {
-      console.log("Refresh parameter detected, refreshing cards...");
+    const shouldRefresh = queryParams.get('refresh') === 'true';
+    
+    if (!hasInitiallyFetched || shouldRefresh) {
+      console.log("Fetching gallery cards...");
       refreshCards?.();
-      queryParams.delete('refresh');
-      navigate({
-        pathname: location.pathname,
-        search: queryParams.toString()
-      }, { replace: true });
+      setHasInitiallyFetched(true);
+      
+      // Remove the refresh parameter from URL if present
+      if (shouldRefresh) {
+        queryParams.delete('refresh');
+        navigate({
+          pathname: location.pathname,
+          search: queryParams.toString()
+        }, { replace: true });
+      }
     }
-  }, [location.search, refreshCards, navigate]);
+  }, [location.search, refreshCards, navigate, hasInitiallyFetched]);
   
   return {
     displayCards,

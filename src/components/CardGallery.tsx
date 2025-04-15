@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
@@ -35,34 +35,31 @@ const CardGallery: React.FC<CardGalleryProps> = ({
   const { 
     cards: contextCards, 
     isLoading: contextIsLoading,
-    error: contextError,
-    refreshCards 
+    error: contextError
   } = useCards();
   
-  const cards = propCards || contextCards || [];
+  const cards = useMemo(() => propCards || contextCards || [], [propCards, contextCards]);
   const isLoading = propIsLoading || contextIsLoading;
   
   const { isMobile } = useMobileOptimization();
   
-  const { cardEffects, isLoading: isLoadingEffects } = { cardEffects: {}, isLoading: false };
-  
   // Combined loading state
-  const isLoadingAny = isLoading || isLoadingEffects;
+  const isLoadingAny = isLoading;
 
-  const handleCardItemClick = (cardId: string) => {
+  const handleCardItemClick = useCallback((cardId: string) => {
     if (onCardClick) {
       onCardClick(cardId);
     } else {
       navigate(`/cards/${cardId}`);
     }
-  };
+  }, [onCardClick, navigate]);
   
   // Function to get card effects for a specific card
-  const getCardEffects = (cardId: string) => {
+  const getCardEffects = useCallback((cardId: string) => {
     return [];
-  };
+  }, []);
   
-  // Debug log
+  // Debug log - limit this to prevent flooding the console
   console.log("CardGallery rendering with cards:", cards.length, "loading:", isLoadingAny);
 
   return (

@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PageLayout from '@/components/navigation/PageLayout';
 import CardGallery from '@/components/CardGallery';
@@ -21,16 +21,16 @@ const Gallery = () => {
     isLoading
   } = useGalleryCards();
 
-  const handleCardClick = (cardId: string) => {
+  const handleCardClick = useCallback((cardId: string) => {
     console.log('Card clicked:', cardId);
     setSelectedCardId(cardId);
     setIsFullscreen(true);
-  };
+  }, []);
   
-  const handleCloseFullscreen = () => {
+  const handleCloseFullscreen = useCallback(() => {
     setIsFullscreen(false);
     setSelectedCardId(null);
-  };
+  }, []);
   
   if (isFullscreen && selectedCardId) {
     return (
