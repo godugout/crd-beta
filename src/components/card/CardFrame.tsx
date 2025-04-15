@@ -2,7 +2,7 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 
-interface CardFrameProps {
+export interface CardFrameProps {
   children: React.ReactNode;
   className?: string;
   borderWidth?: 'thin' | 'medium' | 'thick';

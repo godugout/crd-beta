@@ -2,7 +2,7 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 
-interface CardContentProps {
+export interface CardContentProps {
   playerName: string;
   team: string;
   position: string;
