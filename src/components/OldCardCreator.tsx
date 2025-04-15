@@ -6,7 +6,7 @@ import CardShowcase from './home/CardShowcase';
 import { cardData } from '@/data/cardData';
 
 const OldCardCreator: React.FC = () => {
-  const [view, setView] = useState<'showcase' | 'collection' | 'upload'>('collection');
+  const [view, setView] = useState<'showcase' | 'collection' | 'upload' | 'welcome'>('collection');
   const [activeCard, setActiveCard] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   

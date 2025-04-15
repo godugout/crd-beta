@@ -1,18 +1,20 @@
-
 import React, { ReactNode } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, Grid, Upload, Eye3d, Settings, Menu, X } from 'lucide-react';
+import { Home, Grid, Upload, Eye, Settings, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { ThemeToggle } from '@/components/ui/ThemeToggle';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 
 interface PageLayoutProps {
   title?: string | React.ReactNode;
   description?: string;
   children: ReactNode;
+  fullWidth?: boolean;
+  hideBreadcrumbs?: boolean;
+  canonicalPath?: string;
 }
 
-const PageLayout = ({ title, description, children }: PageLayoutProps) => {
+const PageLayout = ({ title, description, children, fullWidth = false, hideBreadcrumbs = true, canonicalPath }: PageLayoutProps) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
@@ -21,7 +23,7 @@ const PageLayout = ({ title, description, children }: PageLayoutProps) => {
     { path: '/', icon: <Home className="h-5 w-5" />, label: 'Home' },
     { path: '/cards', icon: <Grid className="h-5 w-5" />, label: 'Gallery' },
     { path: '/card/create', icon: <Upload className="h-5 w-5" />, label: 'Create' },
-    { path: '/immersive-viewer', icon: <Eye3d className="h-5 w-5" />, label: '3D Viewer' },
+    { path: '/immersive-viewer', icon: <Eye className="h-5 w-5" />, label: '3D Viewer' },
     { path: '/settings', icon: <Settings className="h-5 w-5" />, label: 'Settings' },
   ];
   
@@ -121,7 +123,7 @@ const PageLayout = ({ title, description, children }: PageLayoutProps) => {
       )}
       
       {/* Main content */}
-      <main className="flex-1 bg-muted/30">
+      <main className={`flex-1 bg-muted/30 ${fullWidth ? '' : 'container mx-auto px-4 py-6'}`}>
         {children}
       </main>
       

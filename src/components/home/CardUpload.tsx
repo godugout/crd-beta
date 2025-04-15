@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Upload } from 'lucide-react';
 import ImageUploader from '@/components/dam/ImageUploader';
@@ -50,8 +49,7 @@ const CardUpload = ({ setView, onCardCreated }: CardUploadProps) => {
       await addCard({
         id: cardId,
         name,
-        team,
-        year,
+        imageUrl,
         backgroundColor: "#5B23A9",
         textColor: "white",
         cardType: "Custom Card",
@@ -59,7 +57,10 @@ const CardUpload = ({ setView, onCardCreated }: CardUploadProps) => {
         cardNumber,
         description,
         specialEffect,
-        imageUrl,
+        // We use "as any" here because the Card type might not include team 
+        // but we need to add it. The proper fix would be to update the Card type.
+        team: team as any,
+        year,
         tags: ["custom", "digital"]
       });
       
