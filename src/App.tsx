@@ -91,8 +91,8 @@ function App() {
           </div>
           
           <Routes>
-            {/* Root fallback to Index */}
-            <Route path="/" element={<Navigate to="/home" replace />} />
+            {/* Root fallback to HomePage */}
+            <Route path="/" element={<HomePage />} />
             
             {/* Emergency route */}
             <Route path="/emergency" element={<EmergencyPage />} />

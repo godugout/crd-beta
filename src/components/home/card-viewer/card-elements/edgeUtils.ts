@@ -1,53 +1,47 @@
 
-interface EdgeStyleResult {
-  width?: string;
-  height?: string;
-  left?: string;
-  right?: string;
-  top?: string;
-  bottom?: string;
-  transform?: string;
-}
+import React from 'react';
 
-/**
- * Calculate the CSS styles for a card edge based on its position and thickness
- */
-export const calculateEdgeStyle = (
-  position: 'top' | 'bottom' | 'left' | 'right',
-  thickness: string
-): EdgeStyleResult => {
-  const style: EdgeStyleResult = {};
-  
+export const calculateEdgeStyle = (position: 'top' | 'bottom' | 'left' | 'right', thickness: string): React.CSSProperties => {
+  const baseStyle: React.CSSProperties = {
+    position: 'absolute',
+    background: 'var(--edge-color)',
+    boxShadow: `0 0 10px 0 var(--edge-color-alpha)`,
+  };
+
   switch (position) {
     case 'top':
-      style.height = thickness;
-      style.width = '100%';
-      style.left = '0';
-      style.top = '0';
-      style.transform = `rotateX(-90deg) translateZ(${thickness})`;
-      break;
+      return {
+        ...baseStyle,
+        top: 0,
+        left: 0,
+        right: 0,
+        height: thickness,
+      };
     case 'bottom':
-      style.height = thickness;
-      style.width = '100%';
-      style.left = '0';
-      style.bottom = '0';
-      style.transform = `rotateX(90deg) translateZ(${thickness})`;
-      break;
+      return {
+        ...baseStyle,
+        bottom: 0,
+        left: 0,
+        right: 0,
+        height: thickness,
+      };
     case 'left':
-      style.width = thickness;
-      style.height = '100%';
-      style.left = '0';
-      style.top = '0';
-      style.transform = `rotateY(90deg) translateZ(${thickness})`;
-      break;
+      return {
+        ...baseStyle,
+        top: thickness,
+        bottom: thickness,
+        left: 0,
+        width: thickness,
+      };
     case 'right':
-      style.width = thickness;
-      style.height = '100%';
-      style.right = '0';
-      style.top = '0';
-      style.transform = `rotateY(-90deg) translateZ(${thickness})`;
-      break;
+      return {
+        ...baseStyle,
+        top: thickness,
+        bottom: thickness,
+        right: 0,
+        width: thickness,
+      };
+    default:
+      return baseStyle;
   }
-  
-  return style;
 };
