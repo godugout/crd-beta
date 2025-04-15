@@ -148,8 +148,11 @@ export function createPbrScene(
           cardMaterial  // Back
         ];
         
-        // Fix for TS2740: Use property assignment with proper type
-        (cardMesh.material as THREE.Material[]) = materials;
+        // Fix for TS2352: Use proper material assignment
+        cardMesh.material = materials;
+        
+        // Explicitly cast the mesh to have a material array
+        (cardMesh as THREE.Mesh<THREE.BufferGeometry, THREE.Material[]>).material = materials;
       },
       undefined,
       (error) => {
