@@ -1,3 +1,4 @@
+
 import React, { useRef, useEffect, useState, useMemo } from 'react';
 import { Card } from '@/lib/types';
 import * as THREE from 'three';
@@ -38,17 +39,19 @@ const Card3DRenderer: React.FC<Card3DRendererProps> = ({
   const frontTexturePath = card.imageUrl || '/images/card-placeholder.png';
   const backTexturePath = card.thumbnailUrl || '/images/card-back-placeholder.png';
 
-  const [frontTexture, backTexture] = useTexture(
-    [frontTexturePath, backTexturePath],
-    (textures) => {
-      console.log('Textures loaded successfully:', textures);
-      setRenderingStats(prev => ({
-        ...prev,
-        imageLoaded: true,
-        warnings: prev.warnings.filter(w => !w.includes('texture loading'))
-      }));
-    }
-  );
+  // Fix the useTexture hook usage - it should receive an array of paths and a callback
+  const textures = useTexture([frontTexturePath, backTexturePath], (loadedTextures) => {
+    console.log('Textures loaded successfully:', loadedTextures);
+    setRenderingStats(prev => ({
+      ...prev,
+      imageLoaded: true,
+      warnings: prev.warnings.filter(w => !w.includes('texture loading'))
+    }));
+  });
+
+  // Separate the front and back textures from the loaded array
+  const frontTexture = textures[0];
+  const backTexture = textures[1];
 
   // Handle scroll events for card spinning
   useEffect(() => {
@@ -196,3 +199,4 @@ const Card3DRenderer: React.FC<Card3DRendererProps> = ({
 };
 
 export default Card3DRenderer;
+
