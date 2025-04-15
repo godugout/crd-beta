@@ -1,9 +1,9 @@
-
 import React from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { OaklandMemoryData } from '@/lib/types';
 import ImageUploader from '@/components/dam/ImageUploader';
+import { UserProfile } from '@/lib/types/profiles';
 
 // Import form field components
 import BasicMemoryFields from './form-fields/BasicMemoryFields';
@@ -16,18 +16,38 @@ import AttendeeField from './form-fields/AttendeeField';
 import HistoricalContextField from './form-fields/HistoricalContextField';
 import PersonalSignificanceField from './form-fields/PersonalSignificanceField';
 
-export interface OaklandMemoryFormValues extends OaklandMemoryData {}
+// Define form values interface without extending OaklandMemoryData to avoid circular references
+export interface OaklandMemoryFormValues {
+  title: string;
+  description: string;
+  date?: string;
+  opponent?: string;
+  score?: string;
+  location?: string;
+  section?: string;
+  memoryType?: string;
+  attendees?: string[];
+  tags?: string[];
+  imageUrl?: string;
+  historicalContext?: string;
+  personalSignificance?: string;
+  template?: string;
+}
 
 interface OaklandMemoryFormProps {
-  initialData?: OaklandMemoryData;
+  initialData?: Partial<OaklandMemoryData>;
   onSubmit: (data: OaklandMemoryData) => void;
+  onCancel?: () => void;
+  currentUser?: UserProfile;
 }
 
 export const OaklandMemoryForm: React.FC<OaklandMemoryFormProps> = ({
   initialData,
-  onSubmit
+  onSubmit,
+  onCancel,
+  currentUser
 }) => {
-  const form = useForm<OaklandMemoryData>({
+  const form = useForm<OaklandMemoryFormValues>({
     defaultValues: initialData || {
       title: '',
       description: '',

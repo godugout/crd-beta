@@ -1,3 +1,4 @@
+
 // Basic PBR shaders for our proof of concept
 
 // Vertex shader
@@ -54,9 +55,6 @@ uniform float u_exposure;
 uniform float u_envMapIntensity;
 uniform float u_reflectionStrength;
 uniform float u_time;
-uniform float u_holographicEffect;
-uniform float u_chromeEffect;
-uniform float u_vintageEffect;
 
 out vec4 outColor;
 
@@ -202,26 +200,10 @@ void main() {
   float pulse = sin(u_time * 0.5) * 0.05 + 0.95;
   color *= pulse;
   
-  // Apply holographic effect
-  if (u_holographicEffect > 0.0) {
-      float holoPattern = sin(v_texcoord.x * 50.0 + u_time) * sin(v_texcoord.y * 50.0 + u_time);
-      vec3 holoColor = vec3(0.5 + 0.5 * sin(u_time), 0.5 + 0.5 * sin(u_time + 2.0), 1.0);
-      color = mix(color, color * (1.0 + holoPattern) * holoColor, u_holographicEffect);
-  }
-  
-  // Apply chrome effect
-  if (u_chromeEffect > 0.0) {
-      float fresnel = pow(1.0 - max(dot(N, V), 0.0), 5.0);
-      vec3 chromeColor = mix(vec3(0.8), vec3(1.0), fresnel);
-      color = mix(color, color * chromeColor, u_chromeEffect);
-  }
-  
-  // Apply vintage effect
-  if (u_vintageEffect > 0.0) {
-      float luminance = dot(color, vec3(0.299, 0.587, 0.114));
-      vec3 sepiaColor = vec3(luminance * 1.2, luminance, luminance * 0.8);
-      color = mix(color, sepiaColor, u_vintageEffect);
-  }
+  // Add a holographic card effect with subtle color shifts at glancing angles
+  float rimLight = 1.0 - max(dot(N, V), 0.0);
+  rimLight = pow(rimLight, 3.0);
+  vec3 rimColor = vec3(0.3, 0.7, 1.0) * rimLight;
   
   // Mix in the rim effect based on metalness
   color = mix(color, color + rimColor, metalness * 0.5);

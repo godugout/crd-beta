@@ -26,6 +26,7 @@ export interface OfflineItem {
   collectionName?: string;
   syncStatus?: 'pending' | 'completed' | 'failed';
   syncPriority?: number;
+  retryCount?: number; // Added this field to fix the TypeScript error
 }
 
 export const saveForOfflineUpload = async (

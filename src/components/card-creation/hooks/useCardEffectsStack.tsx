@@ -1,95 +1,133 @@
 
 import { useState, useCallback } from 'react';
-import { v4 as uuidv4 } from 'uuid';
+import { CardEffectSettings } from '@/hooks/card-effects/types';
+import { toast } from 'sonner';
 
-export interface CardEffect {
+// Move the CardEffect interface to types/cardTypes.ts for a single source of truth
+// This is just a local reference for the hook implementation
+interface CardEffect {
   id: string;
   name: string;
-  settings: any;
-  active: boolean;
+  enabled: boolean;
+  settings: CardEffectSettings;
+  className?: string;
 }
 
-interface UseCardEffectsStackResult {
-  effectStack: CardEffect[];
-  addEffect: (name: string, settings?: any) => void;
-  removeEffect: (id: string) => void;
-  updateEffectSettings: (id: string, settings: any) => void;
-  toggleEffect: (id: string) => void;
-  getEffectClasses: () => string;
-}
-
-export const useCardEffectsStack = (): UseCardEffectsStackResult => {
+export const useCardEffectsStack = (initialEffects: string[] = []) => {
+  const [activeEffects, setActiveEffects] = useState<string[]>(initialEffects);
+  const [effectSettings, setEffectSettings] = useState<Record<string, CardEffectSettings>>({});
   const [effectStack, setEffectStack] = useState<CardEffect[]>([]);
-  
-  // Add a new effect to the stack
-  const addEffect = useCallback((name: string, settings: any = {}) => {
-    const newEffect: CardEffect = {
-      id: uuidv4(),
-      name,
-      settings,
-      active: true
-    };
-    
-    setEffectStack(prev => [...prev, newEffect]);
-  }, []);
-  
-  // Remove an effect from the stack
-  const removeEffect = useCallback((id: string) => {
-    setEffectStack(prev => prev.filter(effect => effect.id !== id));
-  }, []);
-  
-  // Update an effect's settings
-  const updateEffectSettings = useCallback((id: string, settings: any) => {
-    setEffectStack(prev => 
-      prev.map(effect => 
-        effect.id === id ? { ...effect, settings: { ...effect.settings, ...settings } } : effect
-      )
-    );
-  }, []);
-  
-  // Toggle an effect's active state
-  const toggleEffect = useCallback((id: string) => {
-    setEffectStack(prev => 
-      prev.map(effect => 
-        effect.id === id ? { ...effect, active: !effect.active } : effect
-      )
-    );
-  }, []);
-  
-  // Get CSS classes for all active effects
-  const getEffectClasses = useCallback(() => {
-    return effectStack
-      .filter(effect => effect.active)
-      .map(effect => {
-        const baseName = effect.name.toLowerCase().replace(/\s/g, '-');
-        
-        // Special handling for certain effects
-        switch (baseName) {
-          case 'refractor':
-            return `effect-refractor ${effect.settings?.intensity || 'medium'}`;
-          case 'holographic':
-            return `effect-holographic ${effect.settings?.pattern || 'lines'}`;
-          case 'glossy':
-            return `effect-glossy ${effect.settings?.level || 'medium'}`;
-          case 'matte':
-            return 'effect-matte';
-          case 'foil':
-            return `effect-foil ${effect.settings?.color || 'rainbow'}`;
-          case 'shadow':
-            return `effect-shadow ${effect.settings?.depth || 'medium'}`;
-          default:
-            return `effect-${baseName}`;
+
+  const addEffect = useCallback((effect: string, settings?: CardEffectSettings) => {
+    setActiveEffects(prev => {
+      if (prev.includes(effect)) return prev;
+      
+      // Initialize with default settings for this effect
+      const defaultSettings: CardEffectSettings = {
+        intensity: 1.0,
+        speed: 1.0,
+        pattern: undefined,
+        color: undefined,
+        animationEnabled: true,
+        ...settings
+      };
+      
+      setEffectSettings(prevSettings => ({
+        ...prevSettings,
+        [effect]: defaultSettings
+      }));
+      
+      // Add to effect stack
+      setEffectStack(prev => [
+        ...prev, 
+        { 
+          id: `${effect}-${Date.now()}`, 
+          name: effect, 
+          enabled: true, 
+          settings: defaultSettings,
+          className: `effect-${effect.toLowerCase()}`
         }
-      })
-      .join(' ');
+      ]);
+      
+      toast.success(`${effect} effect added`);
+      return [...prev, effect];
+    });
+  }, []);
+
+  const removeEffect = useCallback((id: string) => {
+    setEffectStack(prev => {
+      const effectToRemove = prev.find(effect => effect.id === id);
+      
+      if (effectToRemove) {
+        setActiveEffects(activeEffects => activeEffects.filter(name => name !== effectToRemove.name));
+        toast.success(`${effectToRemove.name} effect removed`);
+      }
+      
+      return prev.filter(effect => effect.id !== id);
+    });
+  }, []);
+
+  const toggleEffect = useCallback((effect: string) => {
+    if (activeEffects.includes(effect)) {
+      const effectToRemove = effectStack.find(e => e.name === effect);
+      if (effectToRemove) {
+        removeEffect(effectToRemove.id);
+      }
+    } else {
+      addEffect(effect);
+    }
+  }, [activeEffects, effectStack, addEffect, removeEffect]);
+
+  const updateEffectSettings = useCallback((id: string, settings: Partial<CardEffectSettings>) => {
+    setEffectStack(prev => {
+      return prev.map(effect => {
+        if (effect.id === id) {
+          return {
+            ...effect,
+            settings: {
+              ...effect.settings,
+              ...settings
+            }
+          };
+        }
+        return effect;
+      });
+    });
+    
+    // Also update in the effectSettings record
+    const effect = effectStack.find(e => e.id === id);
+    if (effect) {
+      setEffectSettings(prev => ({
+        ...prev,
+        [effect.name]: {
+          ...(prev[effect.name] || {}),
+          ...settings
+        }
+      }));
+    }
   }, [effectStack]);
+
+  const getEffectSettings = useCallback((effect: string): CardEffectSettings => {
+    return effectSettings[effect] || { intensity: 1.0, speed: 1.0 };
+  }, [effectSettings]);
   
+  const getEffectClasses = useCallback(() => {
+    return activeEffects
+      .map(effect => `effect-${effect.toLowerCase()}`)
+      .join(' ');
+  }, [activeEffects]);
+
   return {
-    effectStack,
+    activeEffects,
+    setActiveEffects,
     addEffect,
     removeEffect,
-    updateEffectSettings,
     toggleEffect,
+    updateEffectSettings,
+    getEffectSettings,
+    effectStack,
     getEffectClasses
   };
 };
+
+export default useCardEffectsStack;

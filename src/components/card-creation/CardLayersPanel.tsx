@@ -1,18 +1,19 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Trash, ChevronUp, ChevronDown, Eye, EyeOff } from 'lucide-react';
-import { CardLayer } from './CardCreator';
+import { CardLayer } from './types/cardTypes';
+import { Eye, EyeOff, Image, Type, Square, ChevronUp, ChevronDown, Trash2 } from 'lucide-react';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 interface CardLayersPanelProps {
   layers: CardLayer[];
   activeLayerId: string | null;
-  onLayerSelect: (layerId: string) => void;
-  onLayerUpdate: (layerId: string, updates: Partial<CardLayer>) => void;
+  onLayerSelect: (id: string) => void;
+  onLayerUpdate: (id: string, updates: Partial<CardLayer>) => void;
   onAddLayer: (type: 'image' | 'text' | 'shape') => void;
-  onDeleteLayer: (layerId: string) => void;
-  onMoveLayerUp: (layerId: string) => void;
-  onMoveLayerDown: (layerId: string) => void;
+  onDeleteLayer: (id: string) => void;
+  onMoveLayerUp: (id: string) => void;
+  onMoveLayerDown: (id: string) => void;
 }
 
 const CardLayersPanel: React.FC<CardLayersPanelProps> = ({
@@ -25,131 +26,138 @@ const CardLayersPanel: React.FC<CardLayersPanelProps> = ({
   onMoveLayerUp,
   onMoveLayerDown
 }) => {
-  // Render layer content preview based on type
-  const renderLayerContent = (layer: CardLayer) => {
-    switch (layer.type) {
-      case 'image':
-        return typeof layer.content === 'string' ? (
-          <div className="w-6 h-6 rounded overflow-hidden">
-            <img src={layer.content} alt="Layer" className="w-full h-full object-cover" />
-          </div>
-        ) : (
-          <div className="w-6 h-6 bg-gray-200 rounded"></div>
-        );
-      case 'text':
-        return <span>{typeof layer.content === 'string' ? layer.content : 'Text'}</span>;
-      case 'shape':
-        return <div className="w-6 h-6 bg-blue-500 rounded"></div>;
-      default:
-        return <div className="w-6 h-6 bg-gray-200 rounded"></div>;
-    }
-  };
-
   return (
-    <div className="bg-white rounded-lg border p-4">
-      <h3 className="font-medium mb-3">Layers</h3>
-      
-      <div className="space-y-2 mb-4">
-        {layers.length === 0 ? (
-          <div className="text-center py-3 text-gray-400 border border-dashed rounded-md">
-            No layers added yet
-          </div>
-        ) : (
-          layers.map((layer) => (
-            <div 
-              key={layer.id}
-              className={`flex items-center p-2 cursor-pointer rounded-md ${activeLayerId === layer.id ? 'bg-gray-100' : 'hover:bg-gray-50'}`}
-              onClick={() => onLayerSelect(layer.id)}
-            >
-              <div className="flex-1 flex items-center space-x-2">
-                {layer.visible ? (
-                  <Eye 
-                    className="h-4 w-4 text-gray-500 cursor-pointer" 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onLayerUpdate(layer.id, { visible: false });
-                    }}
-                  />
-                ) : (
-                  <EyeOff 
-                    className="h-4 w-4 text-gray-300 cursor-pointer" 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onLayerUpdate(layer.id, { visible: true });
-                    }}
-                  />
-                )}
-                <div className="flex-1">
-                  {renderLayerContent(layer)}
-                </div>
-              </div>
-              
-              <div className="flex items-center space-x-1">
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="h-6 w-6"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onMoveLayerUp(layer.id);
-                  }}
-                >
-                  <ChevronUp className="h-4 w-4" />
-                </Button>
-                
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="h-6 w-6"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onMoveLayerDown(layer.id);
-                  }}
-                >
-                  <ChevronDown className="h-4 w-4" />
-                </Button>
-                
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="h-6 w-6 text-red-500"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onDeleteLayer(layer.id);
-                  }}
-                >
-                  <Trash className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          ))
-        )}
+    <div className="w-full space-y-4">
+      <div className="flex items-center justify-between">
+        <h3 className="font-medium">Layers</h3>
+        <div className="flex space-x-1">
+          <Button
+            variant="outline" 
+            size="sm" 
+            className="h-8 w-8 p-1"
+            onClick={() => onAddLayer('text')}
+          >
+            <Type size={16} />
+          </Button>
+          <Button
+            variant="outline" 
+            size="sm" 
+            className="h-8 w-8 p-1"
+            onClick={() => onAddLayer('image')}
+          >
+            <Image size={16} />
+          </Button>
+          <Button
+            variant="outline" 
+            size="sm" 
+            className="h-8 w-8 p-1"
+            onClick={() => onAddLayer('shape')}
+          >
+            <Square size={16} />
+          </Button>
+        </div>
       </div>
       
-      <div className="flex justify-between">
-        <Button 
-          variant="outline" 
-          size="sm"
-          onClick={() => onAddLayer('text')}
-        >
-          Add Text
-        </Button>
-        
-        <Button 
-          variant="outline" 
-          size="sm"
-          onClick={() => onAddLayer('image')}
-        >
-          Add Image
-        </Button>
-        
-        <Button 
-          variant="outline" 
-          size="sm"
-          onClick={() => onAddLayer('shape')}
-        >
-          Add Shape
-        </Button>
+      <div className="space-y-1">
+        <Accordion type="single" collapsible defaultValue="layers">
+          <AccordionItem value="layers" className="border-0">
+            <AccordionTrigger className="py-2 px-3 hover:bg-gray-100 rounded-md">
+              <span className="text-sm font-medium">Layer List ({layers.length})</span>
+            </AccordionTrigger>
+            <AccordionContent>
+              {layers.length === 0 ? (
+                <div className="text-sm text-gray-500 py-2 px-3">
+                  No layers added yet
+                </div>
+              ) : (
+                <div className="space-y-1 p-1">
+                  {layers.map((layer) => (
+                    <div 
+                      key={layer.id}
+                      className={`
+                        flex items-center justify-between p-2 rounded-md hover:bg-gray-50 cursor-pointer
+                        ${activeLayerId === layer.id ? 'bg-gray-100' : ''}
+                      `}
+                      onClick={() => onLayerSelect(layer.id)}
+                    >
+                      <div className="flex items-center gap-2">
+                        {/* Layer type icon */}
+                        <span className="flex-none">
+                          {layer.type === 'text' && <Type size={14} />}
+                          {layer.type === 'image' && <Image size={14} />}
+                          {layer.type === 'shape' && <Square size={14} />}
+                        </span>
+                        
+                        {/* Layer name/content */}
+                        <span className="text-sm truncate max-w-[100px]">
+                          {layer.type === 'text' ? 
+                            (typeof layer.content === 'string' ? layer.content : 'Text') : 
+                            `${layer.type.charAt(0).toUpperCase() + layer.type.slice(1)} Layer`
+                          }
+                        </span>
+                      </div>
+                      
+                      {/* Layer actions */}
+                      <div className="flex items-center gap-1">
+                        {/* Visibility toggle */}
+                        <Button
+                          variant="ghost" 
+                          size="sm"
+                          className="h-6 w-6 p-0"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onLayerUpdate(layer.id, { visible: !layer.visible });
+                          }}
+                        >
+                          {layer.visible ? <Eye size={14} /> : <EyeOff size={14} />}
+                        </Button>
+                        
+                        {/* Move Up */}
+                        <Button
+                          variant="ghost" 
+                          size="sm"
+                          className="h-6 w-6 p-0"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onMoveLayerUp(layer.id);
+                          }}
+                        >
+                          <ChevronUp size={14} />
+                        </Button>
+                        
+                        {/* Move Down */}
+                        <Button
+                          variant="ghost" 
+                          size="sm"
+                          className="h-6 w-6 p-0"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onMoveLayerDown(layer.id);
+                          }}
+                        >
+                          <ChevronDown size={14} />
+                        </Button>
+                        
+                        {/* Delete */}
+                        <Button
+                          variant="ghost" 
+                          size="sm"
+                          className="h-6 w-6 p-0 text-red-500 hover:text-red-600 hover:bg-red-50"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onDeleteLayer(layer.id);
+                          }}
+                        >
+                          <Trash2 size={14} />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
       </div>
     </div>
   );

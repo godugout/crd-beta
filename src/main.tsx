@@ -7,8 +7,10 @@ import App from './App.tsx';
 import './index.css';
 import { queryClient } from './lib/api/queryClient';
 import { CardProvider } from './context/CardContext';
-import { AuthProvider } from './providers/AuthProvider';
 import { GlobalErrorBoundary } from './components/error/GlobalErrorBoundary';
+import { AuthProvider } from './providers/AuthProvider';
+import { ThemeProvider } from './hooks/useTheme';
+import { CardEffectsProvider } from './providers/CardEffectsProvider';
 
 // Make sure we have a valid DOM node before attempting to render
 const rootElement = document.getElementById("root");
@@ -22,11 +24,15 @@ createRoot(rootElement).render(
     <GlobalErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <HelmetProvider>
-          <AuthProvider>
+          <ThemeProvider defaultTheme="system">
             <CardProvider>
-              <App />
+              <CardEffectsProvider>
+                <AuthProvider autoLogin={true}>
+                  <App />
+                </AuthProvider>
+              </CardEffectsProvider>
             </CardProvider>
-          </AuthProvider>
+          </ThemeProvider>
         </HelmetProvider>
       </QueryClientProvider>
     </GlobalErrorBoundary>

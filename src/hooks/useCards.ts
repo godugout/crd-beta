@@ -1,6 +1,6 @@
 
-import { useState, useEffect, useCallback } from 'react';
-import { Card } from '@/lib/types';
+import { useState, useCallback, useEffect } from 'react';
+import { Card, serializeMetadata } from '@/lib/types';
 import { useAuth } from '@/context/auth';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -34,7 +34,6 @@ export function useCards(options: UseCardsOptions = {}) {
         .from('cards')
         .select('*');
       
-      // Apply filters if provided
       if (options.teamId) {
         query = query.eq('team_id', options.teamId);
       }
@@ -57,7 +56,6 @@ export function useCards(options: UseCardsOptions = {}) {
       }
 
       if (data) {
-        // Transform database records to our Card type
         const transformedCards: Card[] = (data as DbCard[]).map(card => ({
           id: card.id,
           title: card.title || '',
@@ -86,7 +84,6 @@ export function useCards(options: UseCardsOptions = {}) {
     }
   }, [user, options.teamId, options.collectionId, options.tags]);
 
-  // Initial fetch
   useEffect(() => {
     if (options.autoFetch !== false) {
       fetchCards();
@@ -100,7 +97,11 @@ export function useCards(options: UseCardsOptions = {}) {
     }
 
     try {
-      // Transform Card type to database schema
+      // Properly serialize design metadata for Supabase
+      const serializedDesignMetadata = cardData.designMetadata 
+        ? serializeMetadata(cardData.designMetadata)
+        : {};
+        
       const cardToInsert = {
         title: cardData.title,
         description: cardData.description,
@@ -111,10 +112,10 @@ export function useCards(options: UseCardsOptions = {}) {
         tags: cardData.tags || [],
         is_public: cardData.isPublic || false,
         user_id: user.id,
-        creator_id: user.id, // Required by current db schema
-        rarity: 'common', // Required by current db schema
-        design_metadata: cardData.designMetadata || {},
-        edition_size: 1 // Required by current db schema
+        creator_id: user.id,
+        rarity: 'common',
+        design_metadata: serializedDesignMetadata,
+        edition_size: 1
       };
 
       const { data, error } = await supabase
@@ -130,7 +131,6 @@ export function useCards(options: UseCardsOptions = {}) {
       }
 
       if (data) {
-        // Transform back to our Card type
         const dbCard = data as DbCard;
         const newCard: Card = {
           id: dbCard.id,
@@ -149,7 +149,6 @@ export function useCards(options: UseCardsOptions = {}) {
           reactions: []
         };
 
-        // Add the new card to the state immediately
         setCards(prev => [newCard, ...prev]);
         toast.success('Card created successfully');
         return newCard;
@@ -164,7 +163,6 @@ export function useCards(options: UseCardsOptions = {}) {
 
   const updateCard = useCallback(async (id: string, updates: Partial<Card>) => {
     try {
-      // Convert to database field names
       const updateData: Record<string, any> = {};
       
       if (updates.title !== undefined) updateData.title = updates.title;
@@ -175,7 +173,11 @@ export function useCards(options: UseCardsOptions = {}) {
       if (updates.teamId !== undefined) updateData.team_id = updates.teamId;
       if (updates.tags !== undefined) updateData.tags = updates.tags;
       if (updates.isPublic !== undefined) updateData.is_public = updates.isPublic;
-      if (updates.designMetadata !== undefined) updateData.design_metadata = updates.designMetadata;
+      
+      // Properly serialize design metadata for Supabase
+      if (updates.designMetadata !== undefined) {
+        updateData.design_metadata = serializeMetadata(updates.designMetadata);
+      }
       
       const { data, error } = await supabase
         .from('cards')
@@ -191,7 +193,6 @@ export function useCards(options: UseCardsOptions = {}) {
       }
 
       if (data) {
-        // Transform back to our Card type
         const dbCard = data as DbCard;
         const updatedCard: Card = {
           id: dbCard.id,
@@ -259,7 +260,6 @@ export function useCards(options: UseCardsOptions = {}) {
     }
 
     try {
-      // First check if user already reacted
       const { data: existingReaction } = await supabase
         .from('reactions')
         .select('id')
@@ -270,13 +270,11 @@ export function useCards(options: UseCardsOptions = {}) {
       let result;
       
       if (existingReaction) {
-        // Update existing reaction
         result = await supabase
           .from('reactions')
           .update({ type })
           .eq('id', existingReaction.id);
       } else {
-        // Add new reaction
         result = await supabase
           .from('reactions')
           .insert({
@@ -292,7 +290,6 @@ export function useCards(options: UseCardsOptions = {}) {
         return false;
       }
       
-      // Optimistic update
       setCards(prev => prev.map(card => {
         if (card.id !== cardId) return card;
         
@@ -300,13 +297,11 @@ export function useCards(options: UseCardsOptions = {}) {
         const reactions = [...(card.reactions || [])];
         
         if (existingReactionIndex !== undefined && existingReactionIndex >= 0) {
-          // Update existing reaction
           reactions[existingReactionIndex] = {
             ...reactions[existingReactionIndex],
             type
           };
         } else {
-          // Add new reaction
           reactions.push({
             id: 'temp-' + Date.now(),
             userId: user.id,
@@ -344,7 +339,6 @@ export function useCards(options: UseCardsOptions = {}) {
         return false;
       }
       
-      // Optimistic update
       setCards(prev => prev.map(card => {
         if (card.id !== cardId) return card;
         

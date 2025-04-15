@@ -1,8 +1,6 @@
 
 import React from 'react';
-import { Upload } from 'lucide-react';
-import { CardDesignState, CardLayer } from '../CardCreator';
-import CardPreviewCanvas from '../CardPreviewCanvas';
+import { CardDesignState, CardLayer } from '../types/cardTypes';
 
 interface CardPreviewSidebarProps {
   cardData: CardDesignState;
@@ -12,61 +10,122 @@ interface CardPreviewSidebarProps {
   onLayerSelect: (layerId: string) => void;
   onLayerUpdate: (layerId: string, updates: Partial<CardLayer>) => void;
   previewCanvasRef: React.RefObject<HTMLDivElement>;
+  hideControls?: boolean;
 }
 
 const CardPreviewSidebar: React.FC<CardPreviewSidebarProps> = ({
   cardData,
   layers,
-  activeLayerId,
   effectClasses,
-  onLayerSelect,
-  onLayerUpdate,
-  previewCanvasRef
+  previewCanvasRef,
+  hideControls = false
 }) => {
   return (
-    <div className="bg-gray-900 text-white rounded-lg overflow-hidden h-full flex flex-col shadow-lg">
-      <div className="bg-gray-800 p-4 flex justify-between items-center">
-        <h3 className="font-medium">Preview</h3>
-        <span className="text-xs text-gray-400">Live view</span>
-      </div>
-      <div className="flex-grow flex items-center justify-center p-6 relative bg-gray-950">
+    <div className="w-full h-full flex flex-col">
+      <div className="text-sm font-medium mb-2">Preview</div>
+      
+      <div 
+        ref={previewCanvasRef}
+        className={`relative aspect-[2.5/3.5] w-full rounded-lg overflow-hidden border ${effectClasses}`} 
+        style={{
+          borderRadius: cardData.borderRadius,
+          borderColor: cardData.borderColor,
+          backgroundColor: cardData.backgroundColor,
+        }}
+      >
         {cardData.imageUrl ? (
-          <CardPreviewCanvas
-            ref={previewCanvasRef}
-            cardData={cardData}
-            layers={layers}
-            activeLayerId={activeLayerId}
-            onLayerSelect={onLayerSelect}
-            onLayerUpdate={onLayerUpdate}
-            effectClasses={effectClasses}
+          <img 
+            src={cardData.imageUrl} 
+            alt="Card preview" 
+            className="w-full h-full object-cover"
           />
         ) : (
-          <div className="text-center text-gray-400 p-10 w-full">
-            <div className="border-2 border-dashed border-gray-700 rounded-lg p-8 flex flex-col items-center justify-center">
-              <Upload className="h-12 w-12 mb-4 text-gray-600" />
-              <p className="mb-2">Upload an image to preview</p>
-              <p className="text-xs text-gray-500">Your CRD will appear here</p>
-            </div>
+          <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400">
+            No image uploaded
           </div>
         )}
-      </div>
-      <div className="bg-gray-800 p-4">
-        <div className="space-y-1">
-          <h4 className="text-sm font-medium">{cardData.title || "No title yet"}</h4>
-          <p className="text-xs text-gray-400">{cardData.description || "Add a description to your CRD"}</p>
-        </div>
         
-        <div className="mt-4 pt-3 border-t border-gray-700 flex justify-between items-center">
-          <span className="text-xs text-gray-500">Auto saving</span>
-          <div className="flex space-x-1">
-            {cardData.tags.map((tag, index) => (
-              <span key={index} className="text-xs bg-gray-700 px-2 py-0.5 rounded">
-                {tag}
-              </span>
-            ))}
+        {/* Render layers */}
+        {layers.map(layer => {
+          if (!layer.visible) return null;
+
+          // Different rendering based on layer type
+          switch (layer.type) {
+            case 'text':
+              return (
+                <div 
+                  key={layer.id}
+                  className="absolute text-white text-shadow-sm"
+                  style={{
+                    top: `${layer.position?.y ?? layer.y}%`,
+                    left: `${layer.position?.x ?? layer.x}%`,
+                    transform: `translate(-50%, -50%) rotate(${layer.rotation}deg)`,
+                    opacity: layer.opacity,
+                    zIndex: layer.position?.z ?? 1,
+                  }}
+                >
+                  {typeof layer.content === 'string' ? layer.content : ''}
+                </div>
+              );
+            
+            case 'image':
+              return (
+                <div 
+                  key={layer.id}
+                  className="absolute"
+                  style={{
+                    top: `${layer.position?.y ?? layer.y}%`,
+                    left: `${layer.position?.x ?? layer.x}%`,
+                    width: layer.size?.width ?? layer.width,
+                    height: layer.size?.height ?? layer.height,
+                    transform: `translate(-50%, -50%) rotate(${layer.rotation}deg)`,
+                    opacity: layer.opacity,
+                    zIndex: layer.position?.z ?? 1,
+                  }}
+                >
+                  {layer.content && (
+                    <img 
+                      src={typeof layer.content === 'string' ? layer.content : layer.imageUrl} 
+                      alt="Layer" 
+                      className="w-full h-full object-contain"
+                    />
+                  )}
+                </div>
+              );
+            
+            case 'shape':
+              return (
+                <div 
+                  key={layer.id}
+                  className="absolute bg-white"
+                  style={{
+                    top: `${layer.position?.y ?? layer.y}%`,
+                    left: `${layer.position?.x ?? layer.x}%`,
+                    width: layer.size?.width ?? layer.width,
+                    height: layer.size?.height ?? layer.height,
+                    transform: `translate(-50%, -50%) rotate(${layer.rotation}deg)`,
+                    opacity: layer.opacity,
+                    zIndex: layer.position?.z ?? 1,
+                    backgroundColor: layer.color,
+                  }}
+                >
+                  {/* Shape content would be rendered here */}
+                </div>
+              );
+              
+            default:
+              return null;
+          }
+        })}
+      </div>
+      
+      {!hideControls && (
+        <div className="mt-4">
+          <div className="text-xs text-gray-500">
+            {layers.length} layers • {effectClasses ? 'Effects applied' : 'No effects'}
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

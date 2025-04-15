@@ -1,7 +1,70 @@
 
-// This file is maintained for backward compatibility
-// Re-export from the centralized ThemeProvider implementation
-import { useTheme as useThemeInternal, ThemeProvider } from "@/components/ui/ThemeProvider";
+import { createContext, useContext, useEffect, useState } from "react";
 
-export { ThemeProvider };
-export const useTheme = useThemeInternal;
+type Theme = "dark" | "light" | "system";
+
+interface ThemeProviderProps {
+  children: React.ReactNode;
+  defaultTheme?: Theme;
+}
+
+interface ThemeContextValue {
+  theme: Theme;
+  setTheme: React.Dispatch<React.SetStateAction<Theme>>;
+}
+
+const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
+
+// Default mock theme context for when the hook is used outside the provider
+const mockThemeContext: ThemeContextValue = {
+  theme: "system",
+  setTheme: () => console.warn("Using mock theme context. ThemeProvider not found."),
+};
+
+export function ThemeProvider({
+  children,
+  defaultTheme = "system",
+}: ThemeProviderProps) {
+  const [theme, setTheme] = useState<Theme>(
+    () => (localStorage.getItem("ui-theme") as Theme) || defaultTheme
+  );
+
+  useEffect(() => {
+    const root = window.document.documentElement;
+    
+    root.classList.remove("light", "dark");
+    
+    if (theme === "system") {
+      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
+        .matches
+        ? "dark"
+        : "light";
+      
+      root.classList.add(systemTheme);
+      return;
+    }
+    
+    root.classList.add(theme);
+  }, [theme]);
+  
+  useEffect(() => {
+    localStorage.setItem("ui-theme", theme);
+  }, [theme]);
+
+  return (
+    <ThemeContext.Provider value={{ theme, setTheme }}>
+      {children}
+    </ThemeContext.Provider>
+  );
+}
+
+export const useTheme = () => {
+  const context = useContext(ThemeContext);
+  
+  if (context === undefined) {
+    console.warn("useTheme used outside of ThemeProvider, using mock theme context");
+    return mockThemeContext;
+  }
+  
+  return context;
+};

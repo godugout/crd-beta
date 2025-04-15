@@ -5,7 +5,14 @@ export interface PbrSettings {
   exposure: number;
   envMapIntensity: number;
   reflectionStrength: number;
-  holographicEffect: number;
-  chromeEffect: number;
-  vintageEffect: number;
+}
+
+export interface ShaderMaterial {
+  vertexShader: string;
+  fragmentShader: string;
+  uniforms: Record<string, any>;
+}
+
+export interface PbrSceneOptions {
+  cleanup: () => void;
 }

@@ -5,14 +5,8 @@ import {
 } from 'lucide-react';
 import { NavigationItem } from './types';
 
-// Teams section navigation
+// Teams section navigation - simplified to only include Oakland and SF Giants
 export const teamsNavItems: NavigationItem[] = [
-  {
-    title: 'All Teams',
-    path: '/teams',
-    icon: Users,
-    description: 'Browse all teams'
-  },
   {
     title: 'Oakland A\'s',
     path: '/teams/oakland',

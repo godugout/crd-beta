@@ -1,0 +1,291 @@
+
+/* Core 3D card styles */
+.card-container {
+  perspective: 1200px;
+  cursor: grab;
+  touch-action: none;
+  will-change: transform;
+  position: relative; /* Ensure proper stacking context */
+}
+
+.card-container:active {
+  cursor: grabbing;
+}
+
+.card-inner {
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+  position: relative; /* Create stacking context */
+}
+
+.card-face {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
+  position: relative; /* Create stacking context for effects */
+  z-index: 1; /* Ensure card face is above background but below effects */
+}
+
+.card-back {
+  transform: rotateY(180deg);
+}
+
+/* Backface visibility fix for better flipping */
+.backface-hidden {
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Card face transitions */
+.card-face {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Card effects layer - positioned above the card face */
+.card-effects-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 2; /* Above card face */
+  pointer-events: none; /* Allow clicks to pass through */
+  transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
+}
+
+/* Smooth motion and momentum effects */
+@keyframes card-float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+.floating-card {
+  animation: card-float 4s ease-in-out infinite;
+}
+
+/* Interactive highlight effect */
+.card-highlight {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), 
+                              rgba(255,255,255,0.3) 0%, 
+                              transparent 60%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+  z-index: 3; /* Ensure highlight is on top */
+}
+
+.card-container:hover .card-highlight,
+*:hover > .card-highlight {
+  opacity: 1;
+}
+
+/* Edge-glow for flip indicator */
+.flip-indicator {
+  position: absolute;
+  inset: 0;
+  border: 2px solid transparent;
+  border-radius: inherit;
+  background: linear-gradient(to right, 
+    transparent, rgba(255,255,255,0.5), transparent) border-box;
+  -webkit-mask: linear-gradient(#fff 0 0) padding-box, 
+                linear-gradient(#fff 0 0);
+  -webkit-mask-composite: destination-out;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 4; /* Above highlight */
+}
+
+*:hover > .flip-indicator {
+  opacity: 0.7;
+  animation: edge-pulse 2s ease-in-out infinite;
+}
+
+@keyframes edge-pulse {
+  0%, 100% { opacity: 0.2; }
+  50% { opacity: 0.7; }
+}
+
+/* Touch ripple effect */
+.touch-ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0) 70%);
+  transform: scale(0);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 5; /* Above all other effects */
+}
+
+.ripple-animation {
+  animation: ripple 0.8s ease-out;
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+/* Out-of-bounds indicator */
+@keyframes boundary-pulse {
+  0%, 100% { 
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); 
+  }
+  50% { 
+    box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); 
+  }
+}
+
+.boundary-warning {
+  animation: boundary-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  border: 1px solid rgba(239, 68, 68, 0.5);
+}
+
+/* Enhanced 3D card effect */
+.card-effect {
+  transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+
+/* Improved card flip animation */
+.card-flip-enter {
+  transform: rotateY(0deg);
+}
+
+.card-flip-enter-active {
+  transform: rotateY(180deg);
+  transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.card-flip-exit {
+  transform: rotateY(180deg);
+}
+
+.card-flip-exit-active {
+  transform: rotateY(0deg);
+  transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Card shine effect that follows mouse */
+.card-shine {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at var(--mouse-x, 50%) var(--mouse-y, 50%), 
+    rgba(255,255,255,0.4) 0%, 
+    transparent 50%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+  z-index: 3;
+}
+
+*:hover > .card-shine {
+  opacity: 1;
+}
+
+/* Touch imprint areas */
+.corner-highlight {
+  position: relative;
+}
+
+.corner-highlight::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 60px;
+  height: 60px;
+  background: radial-gradient(circle at top right, rgba(255,255,255,0.4), transparent 70%);
+  border-radius: 0 0 0 100%;
+  animation: pulse-corner 2s infinite ease-in-out;
+  z-index: 10;
+  pointer-events: none;
+}
+
+@keyframes pulse-corner {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.7; }
+}
+
+/* Center touch area for zooming */
+.touch-area-zoom {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.3);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+*:hover > .touch-area-zoom {
+  opacity: 0.6;
+}
+
+/* Edge touch areas for rotation */
+.touch-area-rotate {
+  position: absolute;
+  width: 30px;
+  height: 100px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.touch-area-rotate.left {
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.touch-area-rotate.right {
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+*:hover > .touch-area-rotate {
+  opacity: 0.4;
+  animation: pulse-edge 2s infinite ease-in-out;
+}
+
+@keyframes pulse-edge {
+  0%, 100% { opacity: 0.2; }
+  50% { opacity: 0.5; }
+}
+
+/* CSS Variables for effect intensities */
+:root {
+  --holographic-intensity: 0.8;
+  --refractor-intensity: 1.0;
+  --chrome-intensity: 0.6;
+  --vintage-intensity: 0.5;
+}

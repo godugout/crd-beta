@@ -1,109 +1,107 @@
 
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { Container } from '@/components/ui/container';
-import { 
-  Home, 
-  Image, 
-  Layers, 
-  Users, 
-  MessageCircle, 
-  Eye 
-} from 'lucide-react';
-import { ThemeToggle } from '@/components/ui/theme-toggle';
-import { cn } from '@/lib/utils';
-import Breadcrumb from './Breadcrumb';
+import React, { ReactNode } from 'react';
+import { Helmet } from 'react-helmet-async';
+import AppHeader from './AppHeader';
+import MobileBottomNav from './MobileBottomNav';
+import { useState } from 'react';
+import MobileMenu from '../navbar/MobileMenu';
+import { SecondaryNavbar } from './SecondaryNavbar';
 
-export interface PageLayoutProps {
-  children: React.ReactNode;
-  title: string;
+interface PageLayoutProps {
+  children: ReactNode;
+  title?: ReactNode;
   description?: string;
-  showNavigation?: boolean;
   fullWidth?: boolean;
-  hideBreadcrumbs?: boolean;
-  canonicalPath?: string;
+  hideNavigation?: boolean;
   className?: string;
-  headerClassName?: string;
+  canonicalPath?: string;
+  hideBreadcrumbs?: boolean;
+  actions?: React.ReactNode;
+  hideDescription?: boolean;
+  stats?: Array<{count?: number; label?: string}>;
+  onSearch?: (term: string) => void;
+  searchPlaceholder?: string;
+  primaryAction?: {
+    label: string;
+    icon?: React.ReactNode;
+    onClick?: () => void;
+    href?: string;
+  };
 }
 
 const PageLayout: React.FC<PageLayoutProps> = ({
   children,
-  title,
-  description,
-  showNavigation = true,
+  title = 'CardShow',
+  description = 'Digital card collection platform',
   fullWidth = false,
-  hideBreadcrumbs = false,
+  hideNavigation = false,
+  className = '',
   canonicalPath,
-  className,
-  headerClassName,
+  hideBreadcrumbs = false,
+  actions,
+  hideDescription = false,
+  stats,
+  onSearch,
+  searchPlaceholder,
+  primaryAction,
 }) => {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Robust title conversion
+  const stringTitle = React.isValidElement(title)
+    ? String(title.props.children || 'CardShow')
+    : typeof title === 'string'
+      ? title
+    : typeof title === 'number'
+      ? String(title)
+      : 'CardShow';
+        
+  // Robust description conversion
+  const stringDescription = typeof description === 'string'
+    ? description
+    : typeof description === 'number'
+      ? String(description)
+      : 'Digital card collection platform';
+
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      {/* Header */}
-      <header className={cn("py-4 border-b", headerClassName)}>
-        <Container className={fullWidth ? "max-w-full px-4" : undefined}>
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 
-                className="text-2xl font-bold"
-                dangerouslySetInnerHTML={{ __html: title }}
-              />
-              {description && (
-                <p className="text-muted-foreground mt-1">{description}</p>
-              )}
-            </div>
-            <div className="flex items-center gap-4">
-              <ThemeToggle />
-            </div>
-          </div>
-          
-          {!hideBreadcrumbs && (
-            <div className="mt-4">
-              <Breadcrumb />
-            </div>
-          )}
-        </Container>
-      </header>
+    <div className="flex flex-col min-h-screen bg-background">
+      <Helmet>
+        <title>{stringTitle}</title>
+        <meta name="description" content={stringDescription} />
+        {canonicalPath && <link rel="canonical" href={`https://cardshow.app${canonicalPath}`} />}
+      </Helmet>
       
-      {/* Main content */}
-      <main className={cn("flex-1", className)}>
+      {!hideNavigation && (
+        <AppHeader />
+      )}
+      
+      {!hideNavigation && (
+        <SecondaryNavbar
+          title={stringTitle}  // Use stringTitle instead of title
+          description={stringDescription}  // Use stringDescription
+          hideBreadcrumbs={hideBreadcrumbs}
+          actions={actions}
+          hideDescription={hideDescription}
+          stats={stats}
+          onSearch={onSearch}
+          searchPlaceholder={searchPlaceholder}
+          primaryAction={primaryAction}
+        />
+      )}
+      
+      <main className={`flex-grow ${className}`}>
         {children}
       </main>
       
-      {/* Navigation */}
-      {showNavigation && (
-        <nav className="py-2 border-t bg-background">
-          <Container>
-            <div className="flex justify-between items-center">
-              <div className="flex gap-6">
-                <Link to="/" className="flex flex-col items-center text-xs text-muted-foreground hover:text-foreground transition">
-                  <Home size={20} />
-                  <span className="mt-1">Home</span>
-                </Link>
-                <Link to="/cards" className="flex flex-col items-center text-xs text-muted-foreground hover:text-foreground transition">
-                  <Image size={20} />
-                  <span className="mt-1">Cards</span>
-                </Link>
-                <Link to="/collections" className="flex flex-col items-center text-xs text-muted-foreground hover:text-foreground transition">
-                  <Layers size={20} />
-                  <span className="mt-1">Collections</span>
-                </Link>
-                <Link to="/teams" className="flex flex-col items-center text-xs text-muted-foreground hover:text-foreground transition">
-                  <Users size={20} />
-                  <span className="mt-1">Teams</span>
-                </Link>
-                <Link to="/community" className="flex flex-col items-center text-xs text-muted-foreground hover:text-foreground transition">
-                  <MessageCircle size={20} />
-                  <span className="mt-1">Community</span>
-                </Link>
-              </div>
-              <Link to="/immersive-viewer" className="flex items-center gap-2 text-sm text-primary hover:text-primary/90 transition">
-                <Eye size={18} />
-                <span>3D Viewer</span>
-              </Link>
-            </div>
-          </Container>
-        </nav>
+      {!hideNavigation && (
+        <>
+          <MobileBottomNav onOpenMenu={() => setMobileMenuOpen(true)} />
+          <MobileMenu 
+            isOpen={mobileMenuOpen} 
+            onClose={() => setMobileMenuOpen(false)} 
+            onSignOut={async () => {}} 
+          />
+        </>
       )}
     </div>
   );

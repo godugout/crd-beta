@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/sheet";
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
-import { useAuth } from '@/providers/AuthProvider'; // Updated import to use the correct AuthProvider
+import { useAuth } from '@/hooks/useAuth'; // Use our modified hook
 
 import { navigationGroups } from './mobile/navigationData';
 import NavigationGroup from './mobile/NavigationGroup';
@@ -22,7 +22,8 @@ interface MobileNavigationProps {
 }
 
 const MobileNavigation: React.FC<MobileNavigationProps> = ({ isOpen, onClose }) => {
-  const { user, signOut } = useAuth();
+  const auth = useAuth();
+  const { user, signOut } = auth;
   const { isActive, currentSection } = useNavigationSection();
   
   // Handle navigation and closing menu

@@ -1,139 +1,140 @@
+import { supabase } from '@/integrations/supabase/client';
+import { Reaction, User, UserRole } from '@/lib/types';
 
-import { supabase } from '@/lib/supabase';
-import { Reaction, DbReaction, User } from '@/lib/types';
+const reactionTable = 'reactions';
 
-// Support the user property in mapDbReactionToReaction:
-const mapDbReactionToReaction = (dbReaction: DbReaction, userData?: any): Reaction => {
-  const reaction: Reaction = {
-    id: dbReaction.id,
-    type: dbReaction.type,
-    userId: dbReaction.user_id,
-    cardId: dbReaction.card_id,
-    commentId: dbReaction.comment_id,
-    collectionId: dbReaction.collection_id,
-    createdAt: dbReaction.created_at
+const mapReactionFromDb = (reaction: any): Reaction => {
+  const user: User = {
+    id: reaction.user_id,
+    email: reaction.user.email,
+    displayName: reaction.user.display_name,
+    name: reaction.user.full_name, 
+    avatarUrl: reaction.user.avatar_url,
+    role: UserRole.USER, // Add default role
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   };
 
-  // Add user data if provided
-  if (userData) {
-    reaction.user = {
-      id: userData.id,
-      email: userData.email || '',
-      displayName: userData.displayName || '',
-      name: userData.name || '',
-      avatarUrl: userData.avatarUrl,
-      createdAt: '',  // Required by type but may not be available
-      updatedAt: ''   // Required by type but may not be available
-    };
-  }
+  return {
+    id: reaction.id,
+    userId: reaction.user_id,
+    cardId: reaction.card_id,
+    collectionId: reaction.collection_id,
+    commentId: reaction.comment_id,
+    type: reaction.type,
+    createdAt: reaction.created_at,
+    user
+  };
+};
 
-  return reaction;
+const getAllByCardId = async (cardId: string): Promise<Reaction[]> => {
+  const { data, error } = await supabase
+    .from(reactionTable)
+    .select(`
+      id,
+      user_id,
+      card_id,
+      type,
+      created_at,
+      users (
+        id,
+        email,
+        display_name,
+        full_name,
+        username,
+        avatar_url
+      )
+    `)
+    .eq('card_id', cardId);
+  
+  if (error) {
+    console.error('Error fetching reactions by card ID:', error);
+    return [];
+  }
+  
+  return data.map((item: any) => ({
+    id: item.id,
+    userId: item.user_id,
+    cardId: item.card_id,
+    type: item.type,
+    createdAt: item.created_at,
+    user: item.users ? {
+      id: item.users.id,
+      email: item.users.email,
+      displayName: item.users.display_name,
+      name: item.users.full_name,
+      username: item.users.username,
+      avatarUrl: item.users.avatar_url,
+      role: UserRole.USER, // Add default role
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    } : undefined
+  }));
+};
+
+const getAllByCollectionId = async (collectionId: string): Promise<Reaction[]> => {
+  const { data, error } = await supabase
+    .from(reactionTable)
+    .select('*')
+    .eq('collection_id', collectionId);
+  
+  if (error) {
+    console.error('Error fetching reactions by collection ID:', error);
+    return [];
+  }
+  
+  return data.map(mapReactionFromDb);
+};
+
+const getAllByCommentId = async (commentId: string): Promise<Reaction[]> => {
+  const { data, error } = await supabase
+    .from(reactionTable)
+    .select('*')
+    .eq('comment_id', commentId);
+  
+  if (error) {
+    console.error('Error fetching reactions by comment ID:', error);
+    return [];
+  }
+  
+  return data.map(mapReactionFromDb);
+};
+
+const add = async (userId: string, cardId?: string, collectionId?: string, commentId?: string, type?: string): Promise<Reaction | null> => {
+  const { data, error } = await supabase
+    .from(reactionTable)
+    .insert([
+      { user_id: userId, card_id: cardId, collection_id: collectionId, comment_id: commentId, type: type }
+    ])
+    .select('*')
+    .single();
+  
+  if (error) {
+    console.error('Error adding reaction:', error);
+    return null;
+  }
+  
+  return mapReactionFromDb(data);
+};
+
+const remove = async (id: string): Promise<boolean> => {
+  const { error } = await supabase
+    .from(reactionTable)
+    .delete()
+    .eq('id', id);
+  
+  if (error) {
+    console.error('Error removing reaction:', error);
+    return false;
+  }
+  
+  return true;
 };
 
 export const reactionRepository = {
-  // Methods for handling reactions
-  getCardReactions: async (cardId: string) => {
-    try {
-      const { data: dbReactions, error } = await supabase
-        .from('reactions')
-        .select(`
-          *,
-          profiles:user_id (*)
-        `)
-        .eq('card_id', cardId);
-      
-      if (error) {
-        return { data: null, error: error.message };
-      }
-      
-      const reactions: Reaction[] = dbReactions.map((item: any) => {
-        const reaction = mapDbReactionToReaction(item);
-        if (item.profiles) {
-          reaction.user = {
-            id: item.profiles.id,
-            email: item.profiles.email || '',
-            displayName: item.profiles.displayName || '',
-            name: item.profiles.full_name || '',
-            username: item.profiles.username,
-            avatarUrl: item.profiles.avatarUrl,
-            createdAt: '',  // Required fields but not available from profiles
-            updatedAt: ''   // Required fields but not available from profiles
-          };
-        }
-        return reaction;
-      });
-      
-      return { data: reactions, error: null };
-    } catch (err) {
-      return { data: null, error: err };
-    }
-  },
-  
-  // More methods as needed...
-  addReaction: async (userId: string, type: string, target: {
-    cardId?: string;
-    collectionId?: string;
-    commentId?: string;
-  }) => {
-    try {
-      // Logic to add reaction
-      const reactionData = {
-        user_id: userId,
-        type,
-        card_id: target.cardId,
-        collection_id: target.collectionId,
-        comment_id: target.commentId
-      };
-      
-      const { data: dbReaction, error } = await supabase
-        .from('reactions')
-        .insert(reactionData)
-        .select()
-        .single();
-      
-      if (error) {
-        return { data: null, error: error.message };
-      }
-      
-      const reaction = mapDbReactionToReaction(dbReaction);
-      return { data: reaction, error: null };
-    } catch (err) {
-      return { data: null, error: err };
-    }
-  },
-  
-  removeReaction: async (userId: string, target: {
-    cardId?: string;
-    collectionId?: string;
-    commentId?: string;
-  }) => {
-    try {
-      let query = supabase
-        .from('reactions')
-        .delete()
-        .eq('user_id', userId);
-      
-      if (target.cardId) {
-        query = query.eq('card_id', target.cardId);
-      }
-      
-      if (target.collectionId) {
-        query = query.eq('collection_id', target.collectionId);
-      }
-      
-      if (target.commentId) {
-        query = query.eq('comment_id', target.commentId);
-      }
-      
-      const { error } = await query;
-      
-      if (error) {
-        return { success: false, error: error.message };
-      }
-      
-      return { success: true, error: null };
-    } catch (err) {
-      return { success: false, error: err };
-    }
-  }
+  getAllByCardId,
+  getAllByCollectionId,
+  getAllByCommentId,
+  add,
+  remove
 };

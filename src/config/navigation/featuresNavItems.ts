@@ -1,62 +1,75 @@
 
-import { Archive, Compass, Grid, Layers, Lightbulb, Microscope, Palette, Smartphone } from 'lucide-react';
+import { 
+  Beaker, 
+  BookOpen, 
+  CaseSensitive, 
+  Code, 
+  Compass, 
+  Orbit, 
+  Pencil, 
+  PencilRuler, 
+  RotateCw, 
+  Sparkles,
+  Wand2 
+} from 'lucide-react';
 import { NavigationItem } from './types';
 
+// Features section navigation
 export const featuresNavItems: NavigationItem[] = [
   {
-    title: "Cards",
-    path: "/cards",
-    icon: Grid,
-    description: "Browse your card collection"
+    title: 'Card Showcase',
+    path: '/features/card-showcase',
+    icon: Sparkles,
+    description: 'Visual showcase of card design features'
   },
   {
-    title: "Collections", 
-    path: "/collections",
-    icon: Archive,
-    description: "Manage your card collections"
-  },
-  {
-    title: "Create",
-    path: "/create",
-    icon: Layers,
-    description: "Create new cards"
-  },
-  {
-    title: "Card Effects",
-    path: "/effects",
-    icon: Palette,
-    description: "Explore card visual effects"
-  },
-  {
-    title: "AR Experience",
-    path: "/ar",
-    icon: Smartphone,
-    description: "Experience cards in augmented reality"
-  },
-  {
-    title: "Discover",
-    path: "/discover",
+    title: 'Interactive Experiences',
+    path: '/features/experiences',
     icon: Compass,
-    description: "Discover new cards and collections"
+    description: 'Interactive card-based experiences'
   },
   {
-    title: "Labs",
-    path: "/labs",
-    icon: Microscope,
-    description: "Experimental features",
-    subItems: [
-      {
-        title: "PBR Demo",
-        path: "/labs/pbr",
-        icon: Lightbulb,
-        description: "Physically Based Rendering demonstration"
-      },
-      {
-        title: "Baseball Cards",
-        path: "/labs/baseball",
-        icon: Lightbulb,
-        description: "Baseball card experience"
-      }
-    ]
+    title: 'Card Creator Wizard',
+    path: '/card-creator',
+    icon: Wand2,
+    description: 'Create custom digital trading cards'
+  },
+  {
+    title: 'Dugout Labs',
+    path: '/features/labs',
+    icon: Beaker,
+    description: 'Experimental card features in development'
+  },
+  {
+    title: 'PBR Rendering',
+    path: '/features/pbr',
+    icon: Orbit,
+    description: 'Physically-based rendering for cards'
+  },
+  {
+    title: 'Card Animations',
+    path: '/features/animation',
+    icon: RotateCw,
+    description: 'Card animation and interaction effects'
+  },
+  {
+    title: 'Signature Technology',
+    path: '/features/signature',
+    icon: Pencil,
+    description: 'Digital signature authentication'
+  },
+  {
+    title: 'Developer Docs',
+    path: '/features/developer',
+    icon: Code,
+    description: 'API documentation and developer resources'
+  },
+  {
+    title: 'Caching Example',
+    path: '/features/cache-example',
+    icon: BookOpen,
+    description: 'Memory cache system demonstration'
   }
 ];
+
+export default featuresNavItems;

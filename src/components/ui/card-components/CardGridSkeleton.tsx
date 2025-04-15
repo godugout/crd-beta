@@ -1,37 +1,44 @@
 
 import React from 'react';
-import { Skeleton } from '@/components/ui/skeleton';
+import { cn } from '@/lib/utils';
 
 interface CardGridSkeletonProps {
+  /**
+   * Number of skeleton items to display
+   * @default 8
+   */
   count?: number;
+  
+  /**
+   * Number of columns in the grid
+   */
   columns?: number;
+  
+  /**
+   * Optional class names to apply to the container
+   */
+  className?: string;
 }
 
-export const CardGridSkeleton = ({ count = 8, columns }: CardGridSkeletonProps) => {
-  // Default grid classes based on screen size if not specified
+export const CardGridSkeleton = ({
+  count = 8,
+  columns,
+  className = ""
+}: CardGridSkeletonProps) => {
+  // Default grid columns based on screen size if not specified
   const gridCols = columns 
     ? `grid-cols-${columns}` 
     : 'grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4';
-  
+
   return (
-    <div className={`grid gap-4 ${gridCols}`}>
-      {Array(count).fill(0).map((_, i) => (
-        <div key={i} className="flex flex-col gap-2">
-          {/* Card skeleton with aspect ratio */}
-          <Skeleton className="aspect-[2.5/3.5] w-full rounded-lg" />
-          
-          {/* Title skeleton */}
-          <Skeleton className="h-4 w-3/4" />
-          
-          {/* Tags skeleton */}
-          <div className="flex gap-1">
-            <Skeleton className="h-3 w-12" />
-            <Skeleton className="h-3 w-8" />
-          </div>
+    <div className={cn(`grid gap-4 ${gridCols}`, className)}>
+      {Array.from({ length: count }).map((_, i) => (
+        <div key={i} className="space-y-2">
+          <div className="aspect-[2.5/3.5] rounded-lg bg-gray-200 animate-pulse" />
+          <div className="h-4 bg-gray-200 rounded animate-pulse w-3/4" />
+          <div className="h-3 bg-gray-100 rounded animate-pulse w-1/2" />
         </div>
       ))}
     </div>
   );
 };
-
-export default CardGridSkeleton;

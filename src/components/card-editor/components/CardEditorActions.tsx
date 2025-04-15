@@ -1,8 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, ArrowRight, Save, Undo, Redo } from 'lucide-react';
-import { useCardEditor } from '@/lib/state/card-editor/context';
+import { ArrowRight, ArrowLeft, Save } from 'lucide-react';
 
 interface CardEditorActionsProps {
   onPrevious: () => void;
@@ -10,7 +9,6 @@ interface CardEditorActionsProps {
   onSubmit: () => void;
   isFirstStep: boolean;
   isLastStep: boolean;
-  isSaving?: boolean;
 }
 
 const CardEditorActions: React.FC<CardEditorActionsProps> = ({
@@ -18,70 +16,37 @@ const CardEditorActions: React.FC<CardEditorActionsProps> = ({
   onNext,
   onSubmit,
   isFirstStep,
-  isLastStep,
-  isSaving = false
+  isLastStep
 }) => {
-  const { canUndo, canRedo, undo, redo } = useCardEditor();
-  
   return (
-    <div className="flex items-center justify-between mt-6">
-      <div className="flex space-x-2">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={undo}
-          disabled={!canUndo}
-        >
-          <Undo className="h-4 w-4 mr-1" />
-          Undo
-        </Button>
-        
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={redo}
-          disabled={!canRedo}
-        >
-          <Redo className="h-4 w-4 mr-1" />
-          Redo
-        </Button>
-      </div>
+    <div className="mt-6 flex justify-between items-center">
+      <Button
+        variant="outline"
+        onClick={onPrevious}
+        disabled={isFirstStep}
+        className="flex items-center gap-2"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Back
+      </Button>
       
-      <div className="flex space-x-2">
-        {!isFirstStep && (
-          <Button
-            variant="outline"
-            onClick={onPrevious}
-          >
-            <ArrowLeft className="h-4 w-4 mr-1" />
-            Previous
-          </Button>
-        )}
-        
-        {isLastStep ? (
-          <Button 
-            onClick={onSubmit}
-            disabled={isSaving}
-          >
-            {isSaving ? (
-              <>
-                <div className="h-4 w-4 mr-2 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                Saving...
-              </>
-            ) : (
-              <>
-                <Save className="h-4 w-4 mr-1" />
-                Save Card
-              </>
-            )}
-          </Button>
-        ) : (
-          <Button onClick={onNext}>
-            Next
-            <ArrowRight className="h-4 w-4 ml-1" />
-          </Button>
-        )}
-      </div>
+      {isLastStep ? (
+        <Button 
+          onClick={onSubmit}
+          className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-2 rounded-md flex items-center gap-2"
+        >
+          Create Card
+          <Save className="h-5 w-5" />
+        </Button>
+      ) : (
+        <Button
+          onClick={onNext}
+          className="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-md flex items-center gap-2"
+        >
+          Continue
+          <ArrowRight className="h-4 w-4" />
+        </Button>
+      )}
     </div>
   );
 };

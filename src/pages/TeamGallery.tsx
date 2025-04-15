@@ -1,124 +1,18 @@
-import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import PageLayout from '@/components/navigation/PageLayout';
-import { Button } from '@/components/ui/button';
-import { Users, Filter, Info, Calendar } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 
-interface TeamDisplayData {
-  id: string;
-  name: string;
-  slug: string;
-  description?: string;
-  memberCount?: number;
-  owner_id: string;
-  primary_color?: string;
-  secondary_color?: string;
-  founded_year?: number;
-  city?: string;
-  state?: string;
-  stadium?: string;
-  league?: string;
-  division?: string;
-}
+import React, { useState } from 'react';
+import PageLayout from '@/components/navigation/PageLayout';
+import TeamGalleryCard from '@/components/teams/TeamGalleryCard';
+import TeamGalleryFilters from '@/components/teams/TeamGalleryFilters';
+import TeamGalleryLoading from '@/components/teams/TeamGalleryLoading';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Users } from 'lucide-react';
+import useTeamGalleryData from '@/hooks/useTeamGalleryData';
 
 const TeamGallery = () => {
-  const [teams, setTeams] = useState<TeamDisplayData[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
   const [activeLeague, setActiveLeague] = useState<string>('all');
   const [activeDivision, setActiveDivision] = useState<string>('all');
-
-  // Fetch teams from Supabase
-  useEffect(() => {
-    const fetchTeams = async () => {
-      setLoading(true);
-      
-      try {
-        // Build query based on filters - only select fields that exist in the database
-        let query = supabase.from('teams').select(`
-          id, name, description, owner_id, created_at, updated_at, logo_url
-        `);
-        
-        // Filters would need to be adjusted based on what fields actually exist
-        
-        const { data, error } = await query.order('name');
-        
-        if (error) {
-          console.error('Error fetching teams:', error);
-          setTeams([]);
-          setLoading(false);
-          return;
-        }
-        
-        if (data && Array.isArray(data)) {
-          // Transform the data to match our interface with safe defaults
-          const transformedTeams: TeamDisplayData[] = data.map(teamData => {
-            return {
-              id: teamData.id,
-              name: teamData.name,
-              slug: teamData.name.toLowerCase().replace(/\s+/g, '-'),
-              description: teamData.description || '',
-              owner_id: teamData.owner_id,
-              memberCount: Math.floor(Math.random() * 1500) + 500, // Placeholder member count
-              primary_color: '#cccccc', // Default color
-              secondary_color: undefined,
-              founded_year: undefined,
-              city: undefined,
-              state: undefined,
-              stadium: undefined,
-              league: undefined,
-              division: undefined
-            };
-          });
-          setTeams(transformedTeams);
-        }
-      } catch (err) {
-        console.error('Error fetching teams:', err);
-        setTeams([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchTeams();
-  }, [activeLeague, activeDivision]);
-
-  // If we don't have team data yet, use the hardcoded data as a fallback
-  const fallbackTeams: TeamDisplayData[] = [
-    { 
-      id: '1', 
-      name: 'Oakland A\'s', 
-      slug: 'oakland', 
-      description: 'Memories and cards for Oakland Athletics fans',
-      primary_color: '#006341',
-      memberCount: 1243,
-      owner_id: 'system'
-    },
-    { 
-      id: '2', 
-      name: 'San Francisco Giants', 
-      slug: 'sf-giants', 
-      description: 'A community for SF Giants fans to share their memories',
-      primary_color: '#FD5A1E',
-      memberCount: 984,
-      owner_id: 'system'
-    },
-    { 
-      id: '3', 
-      name: 'Los Angeles Dodgers', 
-      slug: 'la-dodgers', 
-      description: 'Dodgers memories and moments from fans',
-      primary_color: '#005A9C',
-      memberCount: 756,
-      owner_id: 'system'
-    }
-  ];
-
-  const displayTeams = teams.length > 0 ? teams : fallbackTeams;
+  const { teams, loading, error } = useTeamGalleryData(activeLeague, activeDivision);
   
-  const leagues = ['all', 'American League', 'National League'];
-  const divisions = ['all', 'East', 'Central', 'West'];
-
   return (
     <PageLayout title="Teams" description="Browse team memories and collections">
       <div className="container mx-auto px-4 py-8">
@@ -130,144 +24,43 @@ const TeamGallery = () => {
         </div>
         
         {/* Filters */}
-        <div className="mb-6 flex flex-wrap gap-4 items-center">
-          <div className="flex items-center gap-2">
-            <Filter className="h-4 w-4 text-gray-500" />
-            <span className="text-sm text-gray-700">Filter:</span>
-          </div>
-          
-          <div className="space-x-2">
-            {leagues.map(league => (
-              <Button 
-                key={league}
-                variant={activeLeague === league ? "default" : "outline"}
-                size="sm"
-                onClick={() => setActiveLeague(league)}
-              >
-                {league === 'all' ? 'All Leagues' : league}
-              </Button>
-            ))}
-          </div>
-          
-          {activeLeague !== 'all' && (
-            <div className="space-x-2">
-              {divisions.map(division => (
-                <Button 
-                  key={division}
-                  variant={activeDivision === division ? "default" : "outline"} 
-                  size="sm"
-                  onClick={() => setActiveDivision(division)}
-                >
-                  {division === 'all' ? 'All Divisions' : division}
-                </Button>
-              ))}
-            </div>
-          )}
-        </div>
+        <TeamGalleryFilters
+          activeLeague={activeLeague}
+          setActiveLeague={setActiveLeague}
+          activeDivision={activeDivision}
+          setActiveDivision={setActiveDivision}
+        />
+        
+        {/* Error message */}
+        {error && (
+          <Alert variant="destructive" className="mb-6">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
         
         {/* Loading state */}
-        {loading && (
-          <div className="text-center py-12">
-            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]" />
-            <p className="mt-4 text-gray-600">Loading teams...</p>
+        {loading && <TeamGalleryLoading />}
+        
+        {/* Team grid */}
+        {!loading && teams.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {teams.map(team => (
+              <TeamGalleryCard key={team.id} team={team} />
+            ))}
           </div>
         )}
         
-        {/* Team grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {!loading && displayTeams.map(team => {
-            // Use either primary_color from DB or fallback to color field
-            const backgroundColor = team.primary_color || '#cccccc';
-            const textColor = isLightColor(backgroundColor) ? '#000000' : '#FFFFFF';
-            
-            return (
-              <div key={team.id} className="border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-                <div 
-                  className="h-24 flex items-center justify-center text-xl font-bold p-4" 
-                  style={{ 
-                    backgroundColor: backgroundColor,
-                    color: textColor,
-                    backgroundImage: team.secondary_color ? 
-                      `linear-gradient(135deg, ${backgroundColor} 60%, ${team.secondary_color})` : undefined
-                  }}
-                >
-                  {team.name}
-                </div>
-                <div className="p-6">
-                  <p className="text-gray-600 mb-4">{team.description}</p>
-                  
-                  <div className="space-y-3 mb-4">
-                    <div className="flex items-center text-sm text-gray-500">
-                      <Users className="w-4 h-4 mr-2" />
-                      <span>{team.memberCount?.toLocaleString() || 0} fans</span>
-                    </div>
-                    
-                    {team.founded_year && (
-                      <div className="flex items-center text-sm text-gray-500">
-                        <Calendar className="w-4 h-4 mr-2" />
-                        <span>Founded {team.founded_year}</span>
-                      </div>
-                    )}
-                    
-                    {team.city && (
-                      <div className="flex items-center text-sm text-gray-500">
-                        <Info className="w-4 h-4 mr-2" />
-                        <span>{team.city}, {team.state}</span>
-                      </div>
-                    )}
-                    
-                    {team.stadium && (
-                      <div className="flex items-center text-sm text-gray-500">
-                        <Info className="w-4 h-4 mr-2" />
-                        <span>{team.stadium}</span>
-                      </div>
-                    )}
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-3">
-                    <Button asChild variant="outline">
-                      <Link to={`/teams/${team.slug}/memories`}>View Memories</Link>
-                    </Button>
-                    <Button 
-                      asChild
-                      style={{ 
-                        backgroundColor: backgroundColor,
-                        color: textColor,
-                        border: 'none'
-                      }}
-                    >
-                      <Link to={`/teams/${team.slug}/memories/new`}>Create Memory</Link>
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+        {/* Empty state */}
+        {!loading && teams.length === 0 && !error && (
+          <div className="text-center py-12 border border-dashed border-gray-300 rounded-lg">
+            <Users className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+            <p className="text-gray-500 text-lg mb-2">No teams found</p>
+            <p className="text-gray-400">Try adjusting your filters or check back later</p>
+          </div>
+        )}
       </div>
     </PageLayout>
   );
-};
-
-// Helper function to determine if a color is light or dark
-const isLightColor = (color: string): boolean => {
-  // Handle empty or invalid colors
-  if (!color || color === '#') return true;
-  
-  // Convert hex to RGB
-  let hex = color.replace('#', '');
-  if (hex.length === 3) {
-    hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
-  }
-  
-  // Convert to RGB values
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  
-  // Calculate luminance
-  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-  return luminance > 0.5;
 };
 
 export default TeamGallery;

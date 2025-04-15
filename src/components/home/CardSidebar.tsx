@@ -2,7 +2,8 @@
 import React from 'react';
 import { CardData } from '@/types/card';
 import CardItem from './CardItem';
-import { Sparkles, Flame, PaintBucket, Zap, Clock, XCircle, Award, PackageOpen, Palmtree } from 'lucide-react';
+import { Clock } from 'lucide-react';
+import CardEffectController from './CardEffectController';
 
 interface CardSidebarProps {
   cardData: CardData[];
@@ -13,6 +14,9 @@ interface CardSidebarProps {
   snapshots: { id: number, timestamp: Date, effects: string[] }[];
   onSelectSnapshot: (snapshotId: number) => void;
   onClearEffects: () => void;
+  onSaveSnapshot?: () => void;
+  effectIntensity?: Record<string, number>;
+  onEffectIntensityChange?: (effect: string, value: number) => void;
 }
 
 const CardSidebar = ({ 
@@ -23,71 +27,43 @@ const CardSidebar = ({
   toggleEffect,
   snapshots,
   onSelectSnapshot,
-  onClearEffects
+  onClearEffects,
+  onSaveSnapshot = () => {},
+  effectIntensity = {},
+  onEffectIntensityChange
 }: CardSidebarProps) => {
-  const effectOptions = [
-    { name: 'Classic Holographic', icon: <Sparkles className="h-4 w-4" /> },
-    { name: 'Refractor', icon: <Flame className="h-4 w-4" /> },
-    { name: 'Prismatic', icon: <PaintBucket className="h-4 w-4" /> },
-    { name: 'Electric', icon: <Zap className="h-4 w-4" /> },
-    // Add new effects
-    { name: 'Gold Foil', icon: <Award className="h-4 w-4" /> },
-    { name: 'Chrome', icon: <PackageOpen className="h-4 w-4" /> },
-    { name: 'Vintage', icon: <Palmtree className="h-4 w-4" /> }
-  ];
-
   return (
-    <div className="w-full lg:w-1/3 bg-gray-50 p-4 mt-6 lg:mt-0 lg:ml-6 rounded-lg">
-      <h3 className="font-bold text-lg mb-4">More Cards</h3>
-      
-      <div className="space-y-3">
-        {cardData.map((card, index) => (
-          <CardItem 
-            key={card.id}
-            card={card}
-            isActive={activeCard === index}
-            onClick={() => onSelectCard(index)}
-          />
-        ))}
-      </div>
-      
-      <div className="mt-8">
-        <h3 className="font-bold text-lg mb-4">Effect Options</h3>
+    <div className="w-full lg:w-1/3 p-4 mt-6 lg:mt-0 lg:ml-6 space-y-6">
+      {/* Card selection section */}
+      <div className="bg-gray-50 p-4 rounded-lg">
+        <h3 className="font-bold text-lg mb-4">Collection</h3>
         
-        <div className="space-y-2">
-          {effectOptions.map((effect, index) => (
-            <button 
-              key={index}
-              className={`w-full text-left px-4 py-2 rounded-lg border transition flex items-center
-                ${activeEffects.includes(effect.name) 
-                  ? 'bg-blue-50 border-blue-200 text-blue-600' 
-                  : 'bg-white border-gray-200 hover:bg-gray-50'}`}
-              onClick={() => toggleEffect(effect.name)}
-            >
-              <span className={`mr-2 ${activeEffects.includes(effect.name) ? 'text-blue-500' : 'text-gray-400'}`}>
-                {effect.icon}
-              </span>
-              {effect.name}
-            </button>
+        <div className="space-y-3">
+          {cardData.map((card, index) => (
+            <CardItem 
+              key={card.id}
+              card={card}
+              isActive={activeCard === index}
+              onClick={() => onSelectCard(index)}
+            />
           ))}
-          
-          {activeEffects.length > 0 && (
-            <button 
-              className="w-full mt-2 text-left px-4 py-2 rounded-lg border border-red-200 hover:bg-red-50 transition flex items-center text-red-600"
-              onClick={onClearEffects}
-            >
-              <span className="mr-2 text-red-500">
-                <XCircle className="h-4 w-4" />
-              </span>
-              Clear All Effects
-            </button>
-          )}
         </div>
       </div>
+      
+      {/* Card effects controller - new component */}
+      <CardEffectController 
+        activeEffects={activeEffects}
+        toggleEffect={toggleEffect}
+        clearEffects={onClearEffects}
+        onSaveSnapshot={onSaveSnapshot}
+        effectIntensity={effectIntensity}
+        onEffectIntensityChange={onEffectIntensityChange}
+      />
 
+      {/* Snapshots section */}
       {snapshots.length > 0 && (
-        <div className="mt-8">
-          <h3 className="font-bold text-lg mb-4">Snapshots</h3>
+        <div className="bg-gray-50 p-4 rounded-lg">
+          <h3 className="font-bold text-lg mb-4">Saved Combinations</h3>
           
           <div className="space-y-2">
             {snapshots.map((snapshot) => (
@@ -115,7 +91,8 @@ const CardSidebar = ({
         </div>
       )}
       
-      <div className="mt-8 p-4 bg-blue-50 rounded-lg border border-blue-100">
+      {/* Pro tip section */}
+      <div className="p-4 bg-blue-50 rounded-lg border border-blue-100">
         <h3 className="font-bold text-md mb-2">Pro Tip</h3>
         <p className="text-sm text-blue-800">
           Apply multiple effects at once for unique combinations. Use the camera button to save snapshots of your favorite combinations!

@@ -1,111 +1,95 @@
 
-import React, { useState } from 'react';
+import React, { memo } from 'react';
 import { Card } from '@/lib/types';
 import { cn } from '@/lib/utils';
-import { Eye, Heart } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { CardMedia } from './CardMedia';
 
 interface CardItemProps {
+  /**
+   * Card data to display
+   */
   card: Card;
+  
+  /**
+   * Optional callback for when the card is clicked
+   */
   onClick?: () => void;
+  
+  /**
+   * Optional active effects to apply to the card
+   */
   activeEffects?: string[];
-  showActions?: boolean;
-  isSelected?: boolean;
+  
+  /**
+   * Optional class names to apply to the container
+   */
   className?: string;
+  
+  /**
+   * Optional highlight behavior
+   */
+  highlight?: boolean;
 }
 
-export const CardItem = React.memo(({ 
-  card, 
-  onClick, 
-  activeEffects = [], 
-  showActions = true,
-  isSelected = false,
-  className = ""
+export const CardItem = memo(({
+  card,
+  onClick,
+  activeEffects = [],
+  className = "",
+  highlight = false
 }: CardItemProps) => {
-  const [isHovered, setIsHovered] = useState(false);
-  
-  // Calculate css classes based on active effects
-  const effectClasses = activeEffects.map(effect => 
-    `effect-${effect.toLowerCase().replace(/\s+/g, '-')}`
-  ).join(' ');
-  
+  // Combine all active effect classes
+  const effectClasses = activeEffects.map(effect => {
+    switch (effect) {
+      case 'Holographic':
+        return 'card-holographic';
+      case 'Refractor':
+        return 'card-refractor';
+      case 'Shimmer':
+        return 'card-shimmer';
+      case 'Vintage':
+        return 'card-vintage';
+      default:
+        return '';
+    }
+  }).join(' ');
+
   return (
-    <div 
+    <div
       className={cn(
-        "relative group cursor-pointer transition-all duration-300",
-        isSelected && "ring-2 ring-primary ring-offset-2 ring-offset-background",
+        'card-container relative transition-transform duration-300 hover:scale-[1.02]',
+        highlight && 'ring-2 ring-cardshow-blue ring-offset-2',
+        effectClasses,
         className
       )}
       onClick={onClick}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
     >
-      <div className={cn(
-        "aspect-[2.5/3.5] rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800",
-        effectClasses
-      )}>
-        <img 
-          src={card.imageUrl || card.thumbnailUrl} 
-          alt={card.title}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-          loading="lazy"
-        />
-      </div>
+      <CardMedia
+        src={card.imageUrl}
+        alt={card.title}
+      />
       
-      {/* Card info */}
-      <div className={cn(
-        "absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-black/80 to-transparent text-white",
-        "opacity-100 md:opacity-80 group-hover:opacity-100 transition-opacity duration-300"
-      )}>
-        <h3 className="font-medium text-sm truncate">{card.title}</h3>
+      <div className="p-2 mt-1">
+        <h3 className="font-medium text-sm line-clamp-1">{card.title}</h3>
         
         {card.tags && card.tags.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-1">
-            {card.tags.slice(0, 2).map((tag, idx) => (
-              <span key={idx} className="text-xs bg-white/20 px-1.5 py-0.5 rounded-sm">
+            {card.tags.slice(0, 2).map((tag, i) => (
+              <span 
+                key={i} 
+                className="text-xs px-1.5 py-0.5 bg-cardshow-blue/10 text-cardshow-blue rounded-full"
+              >
                 {tag}
               </span>
             ))}
             {card.tags.length > 2 && (
-              <span className="text-xs bg-white/20 px-1.5 py-0.5 rounded-sm">
-                +{card.tags.length - 2}
-              </span>
+              <span className="text-xs text-cardshow-slate">+{card.tags.length - 2}</span>
             )}
           </div>
         )}
       </div>
-      
-      {/* Action buttons shown on hover */}
-      {showActions && isHovered && (
-        <div className="absolute top-2 right-2 flex gap-2 animate-fade-in">
-          <Button 
-            size="icon" 
-            variant="secondary" 
-            className="h-8 w-8 rounded-full bg-white/80 hover:bg-white text-black"
-            onClick={(e) => {
-              e.stopPropagation();
-              // Like functionality would go here
-            }}
-          >
-            <Heart className="h-4 w-4" />
-          </Button>
-          <Button 
-            size="icon" 
-            variant="secondary" 
-            className="h-8 w-8 rounded-full bg-white/80 hover:bg-white text-black"
-            onClick={(e) => {
-              e.stopPropagation();
-              // View details functionality 
-              onClick?.();
-            }}
-          >
-            <Eye className="h-4 w-4" />
-          </Button>
-        </div>
-      )}
     </div>
   );
 });
 
-// Add display name for React Developer Tools
 CardItem.displayName = 'CardItem';

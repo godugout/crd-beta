@@ -1,4 +1,0 @@
-
-/* This is a placeholder for the HDR file. In a real implementation, this would be a binary HDR file.
-   Since we can't add binary content directly, we'll create a directory structure and inform the user
-   they need to place an actual HDR file here. */

@@ -1,56 +1,92 @@
 
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { ThemeProvider } from './components/ui/ThemeProvider';
-import { Toaster } from './components/ui/toaster';
-import { Toaster as SonnerToaster } from 'sonner';
-import { CardProvider } from './context/CardContext';
-import { CardEnhancedProvider } from './context/CardEnhancedProvider';
-
-// Core pages
-import Home from './pages/Home';
-import Gallery from './pages/Gallery';
-import CardEditor from './pages/CardEditor';
-import CardDetail from './pages/CardDetail';
+import { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Toaster } from '@/components/ui/toaster'; // Updated to use shadcn's Toaster
+import HomePage from './pages/HomePage';
+import AboutPage from './pages/AboutPage';
+import ContactPage from './pages/ContactPage';
 import NotFound from './pages/NotFound';
-import Collections from './pages/Collections';
-import CardGallery from './pages/CardGallery';
-import CollectionDetail from './pages/CollectionDetail';
+import CardCollectionPage from './pages/CardCollectionPage';
+import ImmersiveCardViewer from './pages/ImmersiveCardViewer';
+import BaseballCardViewer from './pages/BaseballCardViewer';
+import BaseballActionFigure from './pages/BaseballActionFigure';
+import { CardProvider } from './context/CardContext';
+import { SettingsProvider } from './context/SettingsContext';
 
-// Lab features
-import Labs from './pages/Labs';
-import CardViewerExperimental from './pages/CardViewerExperimental';
-import ArCardViewer from './pages/ArCardViewer';
+// Import route configurations
+import { routes } from './routes/index';
 
 function App() {
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Simulate loading time
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 600);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-b from-cardshow-dark to-black">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="mt-4 text-lg text-white">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <ThemeProvider defaultTheme="dark" storageKey="cardshow-theme">
+    <SettingsProvider>
       <CardProvider>
-        <CardEnhancedProvider>
-          <Router>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/gallery" element={<Gallery />} />
-              <Route path="/cards" element={<CardGallery />} />
-              <Route path="/cards/:id" element={<CardDetail />} />
-              <Route path="/cards/create" element={<CardEditor />} />
-              <Route path="/cards/edit/:id" element={<CardEditor />} />
-              <Route path="/collections" element={<Collections />} />
-              <Route path="/collections/:id" element={<CollectionDetail />} />
+        <Router>
+          <Routes>
+            {/* Import all routes from the routes configuration */}
+            {routes.map((route, index) => {
+              // Handle nested routes
+              if (route.children) {
+                return (
+                  <Route key={`parent-${index}`} path={route.path} element={route.element}>
+                    {route.children.map((childRoute, childIndex) => (
+                      <Route 
+                        key={`child-${childIndex}`}
+                        path={childRoute.path}
+                        element={childRoute.element}
+                      />
+                    ))}
+                  </Route>
+                );
+              }
               
-              {/* Lab Features */}
-              <Route path="/labs" element={<Labs />} />
-              <Route path="/labs/card-viewer/:id" element={<CardViewerExperimental />} />
-              <Route path="/ar-card-viewer/:id" element={<ArCardViewer />} />
-              <Route path="/ar-viewer" element={<ArCardViewer />} />
-              
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Router>
-          <Toaster />
-          <SonnerToaster position="top-center" />
-        </CardEnhancedProvider>
+              // Handle standard routes
+              return (
+                <Route 
+                  key={`route-${index}`} 
+                  path={route.path} 
+                  element={route.element} 
+                />
+              );
+            })}
+
+            {/* Legacy routes for backward compatibility */}
+            <Route path="/" element={<HomePage />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/contact" element={<ContactPage />} />
+            <Route path="/cards" element={<CardCollectionPage />} />
+            <Route path="/view/:id" element={<ImmersiveCardViewer />} />
+            <Route path="/baseball-card-viewer" element={<BaseballCardViewer />} />
+            <Route path="/baseball-action-figure" element={<BaseballActionFigure />} />
+            
+            {/* 404 Route */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Router>
+        <Toaster />
       </CardProvider>
-    </ThemeProvider>
+    </SettingsProvider>
   );
 }
 

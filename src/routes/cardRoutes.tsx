@@ -4,12 +4,13 @@ import { RouteObject } from 'react-router-dom';
 import CardGallery from '@/pages/CardGallery';
 import CardDetail from '@/pages/CardDetail';
 import CardDetector from '@/pages/CardDetector';
-import Editor from '@/pages/Editor';
-import CardCreatorPage from '@/pages/CardCreatorPage';
 import CardShowcase from '@/pages/CardShowcase';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
-import CardCreationFlow from '@/components/card-editor/CardCreationFlow';
-import ImmersiveCardViewerDemo from '@/pages/ImmersiveCardViewerDemo';
+import CardCreator from '@/pages/CardCreator';
+import UniformTextureDemo from '@/pages/UniformTextureDemo';
+import ImmersiveCardViewer from '@/pages/ImmersiveCardViewer';
+import Editor from '@/pages/Editor';
+import CardCreatorPage from '@/pages/CardCreatorPage';
 
 // Card-related routes
 export const cardRoutes: RouteObject[] = [
@@ -18,20 +19,40 @@ export const cardRoutes: RouteObject[] = [
     element: <CardGallery />,
   },
   {
-    path: "/cards/effects",
-    element: <CardGallery />, // Should be implemented as a dedicated page
+    path: "/gallery",
+    element: <CardGallery />,
   },
   {
-    path: "/cards/create",
-    element: <ProtectedRoute><CardCreatorPage /></ProtectedRoute>,
+    path: "/cards/effects",
+    element: <CardGallery />, // Should be implemented as a dedicated page
   },
   {
     path: "/card/:id",
     element: <CardDetail />,
   },
   {
-    path: "/card/create",
+    path: "/cards/create",
+    element: <ProtectedRoute><CardCreator /></ProtectedRoute>,
+  },
+  {
+    path: "/create",
+    element: <ProtectedRoute><Editor /></ProtectedRoute>,
+  },
+  {
+    path: "/card-maker",
     element: <ProtectedRoute><CardCreatorPage /></ProtectedRoute>,
+  },
+  {
+    path: "/edit/:id",
+    element: <ProtectedRoute><Editor /></ProtectedRoute>,
+  },
+  {
+    path: "/card-editor/:id?",
+    element: <ProtectedRoute><Editor /></ProtectedRoute>,
+  },
+  {
+    path: "/card-creator",
+    element: <ProtectedRoute><CardCreator /></ProtectedRoute>,
   },
   {
     path: "/detector",
@@ -42,28 +63,13 @@ export const cardRoutes: RouteObject[] = [
     element: <CardShowcase />, // Should be implemented as a dedicated page
   },
   {
-    path: "/editor",
-    element: <ProtectedRoute><Editor /></ProtectedRoute>,
+    path: "/uniforms",
+    element: <UniformTextureDemo />,
   },
   {
-    path: "/editor/:id",
-    element: <ProtectedRoute><Editor /></ProtectedRoute>,
-  },
-  {
-    path: "/card-upload",
-    element: <ProtectedRoute><CardCreationFlow /></ProtectedRoute>,
-  },
-  {
-    path: "/card-creator",
-    element: <CardCreatorPage />,
-  },
-  // New immersive viewer routes
-  {
-    path: "/immersive-viewer",
-    element: <ImmersiveCardViewerDemo />,
-  },
-  {
-    path: "/immersive-viewer/:id",
-    element: <ImmersiveCardViewerDemo />,
-  },
+    path: "/view/:id",
+    element: <ImmersiveCardViewer />,
+  }
 ];
+
+export default cardRoutes;
