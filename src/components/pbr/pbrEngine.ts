@@ -138,7 +138,7 @@ export function createPbrScene(
           frontFaceMaterial.roughness = Math.min(cardMaterial.roughness, 0.4 - settings.chromeEffect * 0.2);
         }
         
-        // Create materials array to apply texture only to front/back faces
+        // Create materials array for each face of the box
         const materials = [
           cardMaterial, // Right
           cardMaterial, // Left
@@ -148,8 +148,8 @@ export function createPbrScene(
           cardMaterial  // Back
         ];
         
-        // Fix for TS2740: Explicitly assert the type as THREE.Material[]
-        cardMesh.material = materials as THREE.Material[];
+        // Fix for TS2740: Use proper typing for material assignment
+        cardMesh.material = materials as THREE.MeshStandardMaterial[];
       },
       undefined,
       (error) => {
@@ -203,7 +203,7 @@ export function createPbrScene(
     window.removeEventListener('resize', handleResize);
     
     // Properly dispose of scene objects
-    scene.traverse((object) => {
+    scene.traverse((object: THREE.Object3D) => {
       // Handle mesh objects with geometry and material
       if (object instanceof THREE.Mesh) {
         if (object.geometry) {
@@ -212,13 +212,11 @@ export function createPbrScene(
         
         // Handle materials (could be a single material or an array)
         if (Array.isArray(object.material)) {
-          object.material.forEach((material) => {
-            if (material && typeof material.dispose === 'function') {
-              material.dispose();
-            }
+          object.material.forEach((material: THREE.Material) => {
+            material.dispose();
           });
-        } else if (object.material && typeof object.material.dispose === 'function') {
-          object.material.dispose();
+        } else if (object.material) {
+          (object.material as THREE.Material).dispose();
         }
       }
     });

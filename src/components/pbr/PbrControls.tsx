@@ -1,165 +1,154 @@
 
 import React from 'react';
 import { PbrSettings } from './types';
-import { Card, CardContent } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
-import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent } from '@/components/ui/card';
 
 interface PbrControlsProps {
   settings: PbrSettings;
-  onChange: (settings: Partial<PbrSettings>) => void;
+  onChange: (newSettings: Partial<PbrSettings>) => void;
 }
 
 const PbrControls: React.FC<PbrControlsProps> = ({ settings, onChange }) => {
-  const handleSliderChange = (key: keyof PbrSettings) => {
-    return (value: number[]) => {
-      onChange({ [key]: value[0] });
-    };
+  const handleSliderChange = (key: keyof PbrSettings, value: number[]) => {
+    onChange({ [key]: value[0] });
   };
 
   return (
-    <Card>
-      <CardContent className="p-4">
-        <Tabs defaultValue="materials">
-          <TabsList className="w-full mb-4">
-            <TabsTrigger value="materials" className="flex-1">
-              Material Properties
-            </TabsTrigger>
-            <TabsTrigger value="effects" className="flex-1">
-              Card Effects
-            </TabsTrigger>
-            <TabsTrigger value="lighting" className="flex-1">
-              Lighting
-            </TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="materials">
-            <div className="space-y-6">
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="roughness">Roughness: {settings.roughness.toFixed(2)}</Label>
-                </div>
-                <Slider
-                  id="roughness"
-                  min={0}
-                  max={1}
-                  step={0.01}
-                  value={[settings.roughness]}
-                  onValueChange={handleSliderChange('roughness')}
-                />
+    <div className="space-y-6">
+      <Card>
+        <CardContent className="pt-6">
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <label className="text-sm font-medium">Surface Roughness</label>
+                <span className="text-sm text-muted-foreground">{settings.roughness.toFixed(2)}</span>
               </div>
-              
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="metalness">Metalness: {settings.metalness.toFixed(2)}</Label>
-                </div>
-                <Slider
-                  id="metalness"
-                  min={0}
-                  max={1}
-                  step={0.01}
-                  value={[settings.metalness]}
-                  onValueChange={handleSliderChange('metalness')}
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="reflectionStrength">Reflection: {settings.reflectionStrength.toFixed(2)}</Label>
-                </div>
-                <Slider
-                  id="reflectionStrength"
-                  min={0}
-                  max={2}
-                  step={0.01}
-                  value={[settings.reflectionStrength]}
-                  onValueChange={handleSliderChange('reflectionStrength')}
-                />
-              </div>
+              <Slider 
+                value={[settings.roughness]} 
+                min={0} 
+                max={1} 
+                step={0.01} 
+                onValueChange={(value) => handleSliderChange('roughness', value)} 
+              />
+              <p className="text-xs text-muted-foreground">Controls how smooth or rough the card surface appears</p>
             </div>
-          </TabsContent>
-          
-          <TabsContent value="effects">
-            <div className="space-y-6">
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="holographicEffect">Holographic: {Math.round(settings.holographicEffect * 100)}%</Label>
-                </div>
-                <Slider
-                  id="holographicEffect"
-                  min={0}
-                  max={1}
-                  step={0.01}
-                  value={[settings.holographicEffect]}
-                  onValueChange={handleSliderChange('holographicEffect')}
-                />
+
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <label className="text-sm font-medium">Metalness</label>
+                <span className="text-sm text-muted-foreground">{settings.metalness.toFixed(2)}</span>
               </div>
-              
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="chromeEffect">Chrome: {Math.round(settings.chromeEffect * 100)}%</Label>
-                </div>
-                <Slider
-                  id="chromeEffect"
-                  min={0}
-                  max={1}
-                  step={0.01}
-                  value={[settings.chromeEffect]}
-                  onValueChange={handleSliderChange('chromeEffect')}
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="vintageEffect">Vintage: {Math.round(settings.vintageEffect * 100)}%</Label>
-                </div>
-                <Slider
-                  id="vintageEffect"
-                  min={0}
-                  max={1}
-                  step={0.01}
-                  value={[settings.vintageEffect]}
-                  onValueChange={handleSliderChange('vintageEffect')}
-                />
-              </div>
+              <Slider 
+                value={[settings.metalness]} 
+                min={0} 
+                max={1} 
+                step={0.01} 
+                onValueChange={(value) => handleSliderChange('metalness', value)} 
+              />
+              <p className="text-xs text-muted-foreground">Determines how metallic the card material appears</p>
             </div>
-          </TabsContent>
-          
-          <TabsContent value="lighting">
-            <div className="space-y-6">
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="exposure">Exposure: {settings.exposure.toFixed(2)}</Label>
-                </div>
-                <Slider
-                  id="exposure"
-                  min={0.5}
-                  max={2}
-                  step={0.01}
-                  value={[settings.exposure]}
-                  onValueChange={handleSliderChange('exposure')}
-                />
+
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <label className="text-sm font-medium">Light Exposure</label>
+                <span className="text-sm text-muted-foreground">{settings.exposure.toFixed(1)}</span>
               </div>
-              
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="envMapIntensity">Environment: {settings.envMapIntensity.toFixed(2)}</Label>
-                </div>
-                <Slider
-                  id="envMapIntensity"
-                  min={0}
-                  max={3}
-                  step={0.01}
-                  value={[settings.envMapIntensity]}
-                  onValueChange={handleSliderChange('envMapIntensity')}
-                />
-              </div>
+              <Slider 
+                value={[settings.exposure]} 
+                min={0.5} 
+                max={2.5} 
+                step={0.1} 
+                onValueChange={(value) => handleSliderChange('exposure', value)} 
+              />
+              <p className="text-xs text-muted-foreground">Adjusts overall scene brightness</p>
             </div>
-          </TabsContent>
-        </Tabs>
-      </CardContent>
-    </Card>
+
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <label className="text-sm font-medium">Reflection Strength</label>
+                <span className="text-sm text-muted-foreground">{settings.reflectionStrength.toFixed(2)}</span>
+              </div>
+              <Slider 
+                value={[settings.reflectionStrength]} 
+                min={0} 
+                max={1} 
+                step={0.01} 
+                onValueChange={(value) => handleSliderChange('reflectionStrength', value)} 
+              />
+              <p className="text-xs text-muted-foreground">Controls how much environment reflects on the card</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent className="pt-6">
+          <h3 className="text-sm font-medium mb-4">Special Effects</h3>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <label className="text-sm font-medium">Holographic Effect</label>
+                <span className="text-sm text-muted-foreground">{Math.round(settings.holographicEffect * 100)}%</span>
+              </div>
+              <Slider 
+                value={[settings.holographicEffect]} 
+                min={0} 
+                max={1} 
+                step={0.01} 
+                onValueChange={(value) => handleSliderChange('holographicEffect', value)} 
+              />
+              <p className="text-xs text-muted-foreground">Rainbow-like edge glow effect</p>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <label className="text-sm font-medium">Chrome Effect</label>
+                <span className="text-sm text-muted-foreground">{Math.round(settings.chromeEffect * 100)}%</span>
+              </div>
+              <Slider 
+                value={[settings.chromeEffect]} 
+                min={0} 
+                max={1} 
+                step={0.01} 
+                onValueChange={(value) => handleSliderChange('chromeEffect', value)} 
+              />
+              <p className="text-xs text-muted-foreground">Metallic sheen and reflectivity</p>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <label className="text-sm font-medium">Vintage Effect</label>
+                <span className="text-sm text-muted-foreground">{Math.round(settings.vintageEffect * 100)}%</span>
+              </div>
+              <Slider 
+                value={[settings.vintageEffect]} 
+                min={0} 
+                max={1} 
+                step={0.01} 
+                onValueChange={(value) => handleSliderChange('vintageEffect', value)} 
+              />
+              <p className="text-xs text-muted-foreground">Slight color aging and worn appearance</p>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <label className="text-sm font-medium">Environment Map Intensity</label>
+                <span className="text-sm text-muted-foreground">{settings.envMapIntensity.toFixed(1)}</span>
+              </div>
+              <Slider 
+                value={[settings.envMapIntensity]} 
+                min={0} 
+                max={3} 
+                step={0.1} 
+                onValueChange={(value) => handleSliderChange('envMapIntensity', value)} 
+              />
+              <p className="text-xs text-muted-foreground">Strength of environment lighting reflection</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 
