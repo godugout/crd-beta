@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { BreadcrumbItem } from './types';
@@ -12,11 +13,20 @@ const BreadcrumbContext = createContext<BreadcrumbContextType | undefined>(undef
 
 export const BreadcrumbProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [breadcrumbs, setBreadcrumbs] = useState<BreadcrumbItem[]>([]);
-  const location = useLocation();
-
-  useEffect(() => {
-    setBreadcrumbs([]);
-  }, [location.pathname]);
+  
+  // Get location from react-router
+  let location;
+  try {
+    location = useLocation();
+    
+    // Reset breadcrumbs when path changes
+    useEffect(() => {
+      setBreadcrumbs([]);
+    }, [location.pathname]);
+  } catch (error) {
+    console.warn('BreadcrumbProvider: useLocation hook failed, router context might be missing');
+    // Provide a fallback if not in a router context
+  }
 
   const value: BreadcrumbContextType = {
     breadcrumbs,

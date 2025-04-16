@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
@@ -13,6 +14,7 @@ import { CardProvider } from './context/CardContext';
 import { SettingsProvider } from './context/SettingsContext';
 import EmergencyPage from './pages/EmergencyPage';
 import { useAuth } from './hooks/useAuth';
+import { BreadcrumbProvider } from './hooks/breadcrumbs/BreadcrumbContext';
 
 import { routes } from './routes/index';
 
@@ -81,70 +83,72 @@ function App() {
   return (
     <SettingsProvider>
       <Router>
-        <div className="debug-info fixed top-0 left-0 bg-black/80 text-white p-2 text-xs z-50">
-          App Loaded | {new Date().toLocaleTimeString()} | {isAuthenticated ? 'Authenticated' : 'Not Authenticated'}
-        </div>
-        
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/emergency" element={<EmergencyPage />} />
-
-          {routes.map((route, index) => {
-            if (route.children) {
-              return (
-                <Route key={`parent-${index}`} path={route.path} element={route.element}>
-                  {route.children.map((childRoute, childIndex) => (
-                    <Route 
-                      key={`child-${childIndex}`}
-                      path={childRoute.path}
-                      element={childRoute.element}
-                    />
-                  ))}
-                </Route>
-              );
-            }
-            
-            return (
-              <Route 
-                key={`route-${index}`} 
-                path={route.path} 
-                element={route.element} 
-              />
-            );
-          })}
-
-          <Route path="/home" element={<HomePage />} />
-          <Route path="/about" element={<AboutPage />} />
-          <Route path="/contact" element={<ContactPage />} />
-          <Route path="/cards" element={<CardCollectionPage />} />
-          <Route path="/view/:id" element={
-            <ImmersiveCardViewer card={{
-              id: "",
-              title: "",
-              imageUrl: "",
-              effects: [],
-              userId: "",
-              createdAt: "",
-              updatedAt: "",
-              description: "",
-              stats: {
-                battingAverage: "",
-                homeRuns: "",
-                rbis: "",
-                era: "",
-                wins: "",
-                strikeouts: "",
-                careerYears: "",
-                ranking: ""
-              }
-            }} />
-          } />
-          <Route path="/baseball-card-viewer" element={<BaseballCardViewer />} />
-          <Route path="/baseball-action-figure" element={<BaseballActionFigure />} />
+        <BreadcrumbProvider>
+          <div className="debug-info fixed top-0 left-0 bg-black/80 text-white p-2 text-xs z-50">
+            App Loaded | {new Date().toLocaleTimeString()} | {isAuthenticated ? 'Authenticated' : 'Not Authenticated'}
+          </div>
           
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-        <Toaster />
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/emergency" element={<EmergencyPage />} />
+
+            {routes.map((route, index) => {
+              if (route.children) {
+                return (
+                  <Route key={`parent-${index}`} path={route.path} element={route.element}>
+                    {route.children.map((childRoute, childIndex) => (
+                      <Route 
+                        key={`child-${childIndex}`}
+                        path={childRoute.path}
+                        element={childRoute.element}
+                      />
+                    ))}
+                  </Route>
+                );
+              }
+              
+              return (
+                <Route 
+                  key={`route-${index}`} 
+                  path={route.path} 
+                  element={route.element} 
+                />
+              );
+            })}
+
+            <Route path="/home" element={<HomePage />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/contact" element={<ContactPage />} />
+            <Route path="/cards" element={<CardCollectionPage />} />
+            <Route path="/view/:id" element={
+              <ImmersiveCardViewer card={{
+                id: "",
+                title: "",
+                imageUrl: "",
+                effects: [],
+                userId: "",
+                createdAt: "",
+                updatedAt: "",
+                description: "",
+                stats: {
+                  battingAverage: "",
+                  homeRuns: "",
+                  rbis: "",
+                  era: "",
+                  wins: "",
+                  strikeouts: "",
+                  careerYears: "",
+                  ranking: ""
+                }
+              }} />
+            } />
+            <Route path="/baseball-card-viewer" element={<BaseballCardViewer />} />
+            <Route path="/baseball-action-figure" element={<BaseballActionFigure />} />
+            
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+          <Toaster />
+        </BreadcrumbProvider>
       </Router>
     </SettingsProvider>
   );
