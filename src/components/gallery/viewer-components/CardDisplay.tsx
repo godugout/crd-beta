@@ -9,7 +9,7 @@ import { toast } from 'sonner';
 
 interface CardDisplayProps {
   card: Card;
-  rotation: { x: number; y: number };
+  rotation: { x: number; y: number; z: number };
   isFlipped: boolean;
   zoom: number;
   isDragging: boolean;

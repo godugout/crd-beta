@@ -50,7 +50,6 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
     setupWheelListener
   } = useCardInteraction({ containerRef, cardRef });
 
-  // Add lighting system
   const {
     lightingSettings,
     updateLightPosition,
@@ -60,7 +59,6 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
     applyPreset
   } = useCardLighting('display_case');
 
-  // Add particle effects system
   const {
     particleState,
     toggleEffect,
@@ -74,7 +72,6 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
     shouldAutoDetectCardType: true
   });
   
-  // Add exploded view system
   const {
     settings: explodedViewSettings,
     layers,
@@ -108,11 +105,9 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
   const [showLighting, setShowLighting] = useState(false);
   const [showParticles, setShowParticles] = useState(false);
 
-  // Handle mouse move for both card interaction and lighting
   const handleCombinedMouseMove = (e: React.MouseEvent) => {
     handleMouseMove(e);
     
-    // Update lighting if container ref exists
     if (containerRef.current) {
       const rect = containerRef.current.getBoundingClientRect();
       const x = (e.clientX - rect.left) / rect.width;
@@ -122,7 +117,6 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
   };
 
   useEffect(() => {
-    // Update position to include z coordinate
     setPosition({ x: 10, y: 15, z: 0 });
   }, [setPosition]);
 
@@ -140,7 +134,6 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
     };
   }, [setupWheelListener]);
 
-  // Sync the internal exploded view state with component state
   useEffect(() => {
     setShowExplodedView(explodedViewSettings.active);
   }, [explodedViewSettings.active]);
@@ -285,7 +278,6 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
         className="relative flex-1 flex items-center justify-center overflow-hidden z-10"
         onMouseMove={handleCombinedMouseMove}
       >
-        {/* Regular card display when exploded view is not active */}
         {!showExplodedView && (
           <CardDisplay
             card={card}
@@ -306,7 +298,6 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
           />
         )}
         
-        {/* Exploded view when active */}
         {showExplodedView && (
           <div 
             className="relative w-80 h-120"
@@ -328,7 +319,6 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
           </div>
         )}
         
-        {/* Particle Effects System */}
         {!showExplodedView && (
           <CardParticleSystem
             containerRef={containerRef}
