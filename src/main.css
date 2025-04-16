@@ -13,6 +13,9 @@
 /* Import our particle effect styles */
 @import './styles/card-particles.css';
 
+/* Import our exploded view styles */
+@import './styles/card-exploded-view.css';
+
 /* Other global styles */
 .root {
   width: 100%;

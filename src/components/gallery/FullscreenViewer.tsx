@@ -3,7 +3,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCards } from '@/context/CardContext';
 import { toast } from 'sonner';
-import { X, ChevronDown, ChevronUp, Lightbulb, Sparkles } from 'lucide-react';
+import { X, ChevronDown, ChevronUp, Lightbulb, Sparkles, Layers } from 'lucide-react';
 import CardDisplay from './viewer-components/CardDisplay';
 import ViewerControls from './viewer-components/ViewerControls';
 import InfoPanel from './viewer-components/InfoPanel';
@@ -17,6 +17,9 @@ import { useCardLighting } from '@/hooks/useCardLighting';
 import { useParticleEffects } from '@/hooks/useParticleEffects';
 import CardParticleSystem from '@/components/particles/CardParticleSystem';
 import ParticleEffectsControls from './viewer-components/ParticleEffectsControls';
+import { useExplodedView } from '@/hooks/useExplodedView';
+import ExplodedViewControls from './viewer-components/ExplodedViewControls';
+import ExplodedCardView from './viewer-components/ExplodedCardView';
 
 interface FullscreenViewerProps {
   cardId: string;
@@ -71,6 +74,20 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
     card,
     shouldAutoDetectCardType: true
   });
+  
+  // Add exploded view system
+  const {
+    settings: explodedViewSettings,
+    layers,
+    layerGroups,
+    layerPositions,
+    toggleExplodedView,
+    setExplosionDistance,
+    setExplosionType,
+    toggleLayerVisibility,
+    selectLayer,
+    setSpecialView
+  } = useExplodedView({ card });
 
   const [isFlipped, setIsFlipped] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
@@ -124,6 +141,11 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
     };
   }, [setupWheelListener]);
 
+  // Sync the internal exploded view state with component state
+  useEffect(() => {
+    setShowExplodedView(explodedViewSettings.active);
+  }, [explodedViewSettings.active]);
+
   const handleToggleFullscreen = () => {
     toast.info('Fullscreen toggle - feature coming soon');
   };
@@ -133,9 +155,9 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
   };
 
   const handleToggleExplodedView = () => {
-    setShowExplodedView(prev => !prev);
+    toggleExplodedView();
     
-    if (!showExplodedView) {
+    if (!explodedViewSettings.active) {
       toast.info('Exploded view activated', {
         description: 'Explore the card layers in 3D'
       });
@@ -148,11 +170,6 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
     setActiveEffects(prev => 
       prev.includes(effect) ? prev.filter(e => e !== effect) : [...prev, effect]
     );
-    
-    setShowExplodedView(false);
-    setTimeout(() => {
-      setShowExplodedView(true);
-    }, 100);
   };
 
   const handleToggleLighting = () => {
@@ -233,7 +250,7 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
                 className={`text-white hover:text-blue-300 transition-colors ${showExplodedView ? 'text-blue-400' : ''}`}
                 title="Exploded View"
               >
-                Exploded View
+                <Layers size={16} className="inline mr-1" /> Exploded View
               </button>
               
               <button 
@@ -269,32 +286,59 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
         className="relative flex-1 flex items-center justify-center overflow-hidden z-10"
         onMouseMove={handleCombinedMouseMove}
       >
-        <CardDisplay
-          card={card}
-          rotation={{ x: position.x, y: position.y, z: position.z || 0 }}
-          isFlipped={isFlipped}
-          zoom={zoom}
-          isDragging={isDragging}
-          setIsDragging={setIsDragging}
-          cardRef={cardRef}
-          containerRef={containerRef}
-          isAutoRotating={isAutoRotating}
-          activeEffects={activeEffects}
-          effectIntensities={effectIntensities}
-          mousePosition={mousePosition}
-          touchImprintAreas={touchImprintAreas}
-          showExplodedView={showExplodedView}
-          lightingSettings={lightingSettings}
-        />
+        {/* Regular card display when exploded view is not active */}
+        {!showExplodedView && (
+          <CardDisplay
+            card={card}
+            rotation={{ x: position.x, y: position.y, z: position.z || 0 }}
+            isFlipped={isFlipped}
+            zoom={zoom}
+            isDragging={isDragging}
+            setIsDragging={setIsDragging}
+            cardRef={cardRef}
+            containerRef={containerRef}
+            isAutoRotating={isAutoRotating}
+            activeEffects={activeEffects}
+            effectIntensities={effectIntensities}
+            mousePosition={mousePosition}
+            touchImprintAreas={touchImprintAreas}
+            showExplodedView={showExplodedView}
+            lightingSettings={lightingSettings}
+          />
+        )}
+        
+        {/* Exploded view when active */}
+        {showExplodedView && (
+          <div 
+            className="relative w-80 h-120"
+            style={{
+              transformStyle: 'preserve-3d',
+              transform: `rotateY(${position.x}deg) rotateX(${position.y}deg) scale(${zoom})`,
+            }}
+          >
+            <ExplodedCardView
+              card={card}
+              isActive={showExplodedView}
+              layers={layers}
+              layerPositions={layerPositions}
+              visibleLayerIds={explodedViewSettings.visibleLayerIds}
+              selectedLayerId={explodedViewSettings.selectedLayerId}
+              specialView={explodedViewSettings.specialView}
+              showAnnotations={true}
+            />
+          </div>
+        )}
         
         {/* Particle Effects System */}
-        <CardParticleSystem
-          containerRef={containerRef}
-          particleState={particleState}
-          cardRotation={{ x: position.x, y: position.y, z: position.z || 0 }}
-          isFlipped={isFlipped}
-          isMoving={isDragging || isAutoRotating}
-        />
+        {!showExplodedView && (
+          <CardParticleSystem
+            containerRef={containerRef}
+            particleState={particleState}
+            cardRotation={{ x: position.x, y: position.y, z: position.z || 0 }}
+            isFlipped={isFlipped}
+            isMoving={isDragging || isAutoRotating}
+          />
+        )}
         
         <div className="absolute left-4 top-20 bottom-4 w-80 pointer-events-auto flex flex-col gap-4 overflow-y-auto">
           {showLighting && (
@@ -319,14 +363,35 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
             />
           )}
           
-          <CardEffectsPanel 
-            activeEffects={activeEffects}
-            onToggleEffect={handleEffectToggle}
-            onEffectIntensityChange={(effect, intensity) => {
-              setEffectIntensities(prev => ({ ...prev, [effect]: intensity }));
-            }}
-            effectIntensities={effectIntensities}
-          />
+          {showExplodedView && (
+            <ExplodedViewControls
+              isActive={showExplodedView}
+              layers={layers}
+              layerGroups={layerGroups}
+              explosionDistance={explodedViewSettings.explosionDistance}
+              explosionType={explodedViewSettings.explosionType}
+              selectedLayerId={explodedViewSettings.selectedLayerId}
+              visibleLayerIds={explodedViewSettings.visibleLayerIds}
+              specialView={explodedViewSettings.specialView}
+              onExplosionDistanceChange={setExplosionDistance}
+              onExplosionTypeChange={setExplosionType}
+              onLayerVisibilityToggle={toggleLayerVisibility}
+              onLayerSelect={selectLayer}
+              onSpecialViewChange={setSpecialView}
+              onClose={handleToggleExplodedView}
+            />
+          )}
+          
+          {!showExplodedView && (
+            <CardEffectsPanel 
+              activeEffects={activeEffects}
+              onToggleEffect={handleEffectToggle}
+              onEffectIntensityChange={(effect, intensity) => {
+                setEffectIntensities(prev => ({ ...prev, [effect]: intensity }));
+              }}
+              effectIntensities={effectIntensities}
+            />
+          )}
         </div>
       </div>
 
