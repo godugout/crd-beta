@@ -1,8 +1,18 @@
 
-
 /**
  * Image loading utility functions
  */
+
+// Define a set of reliable images from Unsplash that we know work
+const RELIABLE_IMAGES = {
+  basketball: 'https://images.unsplash.com/photo-1518063319789-7217e6706b04?q=80&w=1000',
+  football: 'https://images.unsplash.com/photo-1566577739112-5180d4bf9390?q=80&w=1000',
+  baseball: 'https://images.unsplash.com/photo-1508344928928-7165b67de128?q=80&w=1000',
+  anime: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?q=80&w=1000',
+  vintage: 'https://images.unsplash.com/photo-1637666589313-f22b900e9c2d?q=80&w=1000',
+  pokemon: 'https://images.unsplash.com/photo-1613771404273-1bound29e8d20?q=80&w=1000',
+  default: 'https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=1000'
+};
 
 /**
  * Get a fallback image URL based on category or tag
@@ -10,60 +20,59 @@
  * @param title Card title as backup for categorization
  */
 export function getFallbackImageUrl(tags: string[] = [], title: string = ''): string {
-  // Define a set of reliable local images we can use as fallbacks
-  const localImages = {
-    basketball: '/lovable-uploads/c381b388-5693-44a6-852b-93af5f0d5217.png',
-    football: '/lovable-uploads/7bb9f93e-4a42-4b96-9429-8b2966efd3a6.png',
-    baseball: '/lovable-uploads/38b125d7-2257-4d56-98fa-c1ff2a7be7ea.png',
-    anime: '/lovable-uploads/79a099b9-c77a-491e-9755-ba25419791f5.png',
-    vintage: '/lovable-uploads/a38aa501-ea2d-4416-9699-1e69b1826233.png',
-    default: '/lovable-uploads/93353027-d213-4314-8ab9-0d38bb552e8a.png'
-  };
-  
   // Prioritize certain tags if they exist
   const lowerCaseTags = tags.map(tag => tag.toLowerCase());
   const lowerCaseTitle = title.toLowerCase();
   
   // Check for basketball-related content
   if (lowerCaseTags.some(tag => tag.includes('basketball') || tag.includes('nba') || tag.includes('lakers'))) {
-    return localImages.basketball;
+    return RELIABLE_IMAGES.basketball;
   }
   
   // Check for football-related content
   if (lowerCaseTags.some(tag => tag.includes('football') || tag.includes('nfl'))) {
-    return localImages.football;
+    return RELIABLE_IMAGES.football;
   }
   
   // Check for baseball-related content
   if (lowerCaseTags.some(tag => tag.includes('baseball') || tag.includes('mlb'))) {
-    return localImages.baseball;
+    return RELIABLE_IMAGES.baseball;
   }
   
   // Check for anime-related content
   if (lowerCaseTags.some(tag => tag.includes('anime') || tag.includes('manga') || tag.includes('gundam'))) {
-    return localImages.anime;
+    return RELIABLE_IMAGES.anime;
   }
   
   // Check for vintage-related content
   if (lowerCaseTags.some(tag => tag.includes('vintage') || tag.includes('retro'))) {
-    return localImages.vintage;
+    return RELIABLE_IMAGES.vintage;
+  }
+  
+  // Check for pokemon-related content
+  if (lowerCaseTags.some(tag => tag.includes('pokemon') || tag.includes('tcg'))) {
+    return RELIABLE_IMAGES.pokemon;
   }
   
   // If no specific tag matches, try to extract a category from the title
   if (lowerCaseTitle.includes('basketball') || lowerCaseTitle.includes('nba') || lowerCaseTitle.includes('laker')) {
-    return localImages.basketball;
+    return RELIABLE_IMAGES.basketball;
   }
   
   if (lowerCaseTitle.includes('football') || lowerCaseTitle.includes('nfl')) {
-    return localImages.football;
+    return RELIABLE_IMAGES.football;
+  }
+  
+  if (lowerCaseTitle.includes('pokemon') || lowerCaseTitle.includes('tcg')) {
+    return RELIABLE_IMAGES.pokemon;
   }
   
   if (lowerCaseTitle.includes('gundam') || lowerCaseTitle.includes('anime')) {
-    return localImages.anime;
+    return RELIABLE_IMAGES.anime;
   }
   
   // Default fallback if nothing else matches
-  return localImages.default;
+  return RELIABLE_IMAGES.default;
 }
 
 /**
@@ -75,7 +84,6 @@ export function isValidImageUrl(url?: string): boolean {
   if (!url) return false;
   
   // Check if it's a valid URL format that points to an image
-  // Include support for local uploads
   return (
     (url.startsWith('http') || url.startsWith('/')) && 
     (url.includes('.jpg') || 
@@ -88,4 +96,3 @@ export function isValidImageUrl(url?: string): boolean {
      url.includes('lovable-uploads'))
   );
 }
-
