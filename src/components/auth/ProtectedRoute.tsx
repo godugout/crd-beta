@@ -23,7 +23,8 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const auth = useAuth();
   // Safely access isAuthenticated property with fallback
   const isAuthenticated = auth.isAuthenticated ?? !!auth.user;
-  const { loading, user } = auth;
+  const isLoading = 'loading' in auth ? auth.loading : auth.isLoading; // Handle both property names
+  const { user } = auth;
   const { hasPermission, isAdmin } = usePermissions();
   const location = useLocation();
 
@@ -41,7 +42,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     }
   }, [location.pathname, user, requiredPermission, adminOnly]);
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex justify-center items-center h-screen">
         <Loader className="animate-spin h-8 w-8 text-primary" />

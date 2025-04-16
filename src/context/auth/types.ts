@@ -4,7 +4,7 @@ import { User } from '@/lib/types';
 export interface AuthState {
   isAuthenticated: boolean;
   user: User | null;
-  loading: boolean;
+  loading: boolean;  // Ensure this property exists
   error: string | null;
 }
 

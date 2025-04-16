@@ -9,7 +9,8 @@ import { UserRole } from '@/lib/types/UserTypes';
 // Define a unified type that encompasses both auth context types
 export interface UnifiedAuthContextType {
   user: User | null;
-  isLoading: boolean;
+  isLoading?: boolean;
+  loading?: boolean;  // Support both naming conventions
   isAuthenticated?: boolean;
   error?: string | null;
   signIn: (email: string, password: string) => Promise<void>;
@@ -35,6 +36,7 @@ const MOCK_USER: User = {
 const mockAuthContext: UnifiedAuthContextType = {
   user: MOCK_USER,
   isLoading: false,
+  loading: false,  // Added for compatibility
   isAuthenticated: true,
   error: null,
   signIn: async () => Promise.resolve(),
@@ -51,7 +53,13 @@ const mockAuthContext: UnifiedAuthContextType = {
 export const useAuth = (): UnifiedAuthContextType => {
   try {
     // Try to use the new AuthProvider
-    return useAuthFromProvider() as UnifiedAuthContextType;
+    const providerAuth = useAuthFromProvider();
+    return {
+      ...providerAuth,
+      // Ensure both loading properties exist
+      loading: providerAuth.isLoading || providerAuth.loading,
+      isLoading: providerAuth.isLoading || providerAuth.loading
+    } as UnifiedAuthContextType;
   } catch (error) {
     try {
       // Try to use the old AuthContext
@@ -62,6 +70,8 @@ export const useAuth = (): UnifiedAuthContextType => {
           ...context as AuthContextType,
           // Map properties from old context to match new context properties
           isAuthenticated: !!context.user,
+          isLoading: context.loading,  // Map loading to isLoading
+          loading: context.loading,    // Keep original loading
           signInWithProvider: async () => {
             console.log('Social login not supported with old auth provider');
             return Promise.resolve();
