@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { RouteObject } from 'react-router-dom';
 import CardDetail from '@/pages/CardDetail';
@@ -14,7 +13,7 @@ export const cardRoutes: RouteObject[] = [
   },
   {
     path: "/cards/:id",
-    element: <ImmersiveCardViewerPage />,
+    element: <CardDetail />,
   },
   {
     path: "/cards/create",
@@ -23,5 +22,9 @@ export const cardRoutes: RouteObject[] = [
   {
     path: "/cards/detector",
     element: <CardDetector />,
+  },
+  {
+    path: "/cards/immersive/:id",
+    element: <ImmersiveCardViewerPage />,
   },
 ];

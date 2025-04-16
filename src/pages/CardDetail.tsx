@@ -31,20 +31,23 @@ const CardDetail = () => {
     }, 300);
     return () => clearTimeout(timer);
   }, []);
+
+  console.log('CardDetail: Rendering for ID:', id);
   
   // Find the card with the matching ID - first try from context, then fallback to sampleCards
   let card = getCard ? getCard(id || '') : cards.find(c => c.id === id);
   
   // If card is not found in the context, try to find it in sampleCards
   if (!card && id) {
-    console.log('Card not found in context, checking sampleCards for ID:', id);
+    console.log('CardDetail: Card not found in context, checking sampleCards for ID:', id);
     card = sampleCards.find(c => c.id === id);
   }
   
   // Ensure card has valid image URLs
   if (card) {
-    if (!card.imageUrl || card.imageUrl === 'undefined') {
-      console.warn('Card has invalid imageUrl, applying fallback', card);
+    console.log('CardDetail: Found card:', card.title, 'with imageUrl:', card.imageUrl);
+    if (!card.imageUrl || card.imageUrl === 'undefined' || typeof card.imageUrl !== 'string') {
+      console.warn('CardDetail: Card has invalid imageUrl, applying fallback', card);
       card = {
         ...card,
         imageUrl: FALLBACK_IMAGE,
@@ -52,8 +55,23 @@ const CardDetail = () => {
       };
     }
   } else {
-    console.error('Card not found at all for ID:', id);
+    console.error('CardDetail: Card not found at all for ID:', id);
   }
+  
+  // Pre-load the image to ensure it exists
+  useEffect(() => {
+    if (card && card.imageUrl && card.imageUrl !== FALLBACK_IMAGE) {
+      const img = new Image();
+      img.onerror = () => {
+        console.error('CardDetail: Image failed to preload:', card?.imageUrl);
+        if (card) {
+          card.imageUrl = FALLBACK_IMAGE;
+          card.thumbnailUrl = FALLBACK_IMAGE;
+        }
+      };
+      img.src = card.imageUrl;
+    }
+  }, [card]);
   
   // Handle card not found
   if (!card) {

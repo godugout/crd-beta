@@ -19,6 +19,7 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
   const [currentCard, setCurrentCard] = useState<Card | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [validImageUrl, setValidImageUrl] = useState<string>(FALLBACK_IMAGE);
   
   useEffect(() => {
     if (!cardId) {
@@ -44,17 +45,30 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
       
       if (card) {
         // Validate and ensure card has valid image URLs
-        let validCard = { ...card };
+        const validCard = { ...card };
         
-        if (!validCard.imageUrl || 
-            validCard.imageUrl === 'undefined' || 
-            validCard.imageUrl.includes('undefined')) {
-          console.warn('FullscreenViewer: Card has invalid imageUrl, applying fallback');
-          validCard.imageUrl = FALLBACK_IMAGE;
-          validCard.thumbnailUrl = FALLBACK_IMAGE;
+        // Always initialize with fallback first, then update if the real image loads
+        setValidImageUrl(FALLBACK_IMAGE);
+        
+        if (validCard.imageUrl && 
+            validCard.imageUrl !== 'undefined' && 
+            typeof validCard.imageUrl === 'string') {
+          // Validate the image URL by preloading it
+          const img = new Image();
+          img.onload = () => {
+            console.log('FullscreenViewer: Image validated successfully:', validCard.imageUrl);
+            setValidImageUrl(validCard.imageUrl || FALLBACK_IMAGE);
+          };
+          img.onerror = () => {
+            console.warn('FullscreenViewer: Image validation failed, using fallback');
+            setValidImageUrl(FALLBACK_IMAGE);
+          };
+          img.src = validCard.imageUrl;
+        } else {
+          console.warn('FullscreenViewer: Card has invalid imageUrl, using fallback');
         }
         
-        console.log('FullscreenViewer: Card loaded successfully with image:', validCard.imageUrl);
+        console.log('FullscreenViewer: Card loaded successfully');
         setCurrentCard(validCard);
       } else {
         console.error('FullscreenViewer: Card not found with ID:', cardId);
@@ -79,18 +93,6 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
     console.log('Next card requested');
   };
 
-  // Preload the image to make sure it exists before rendering
-  useEffect(() => {
-    if (currentCard?.imageUrl && currentCard.imageUrl !== FALLBACK_IMAGE) {
-      const img = new Image();
-      img.onerror = () => {
-        console.error('FullscreenViewer: Image failed to preload:', currentCard.imageUrl);
-        setCurrentCard(prev => prev ? { ...prev, imageUrl: FALLBACK_IMAGE } : null);
-      };
-      img.src = currentCard.imageUrl;
-    }
-  }, [currentCard?.imageUrl]);
-
   if (isLoading) {
     return (
       <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50">
@@ -109,9 +111,6 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
       </div>
     );
   }
-  
-  // Get final image URL with fallback
-  const imageUrl = currentCard.imageUrl || FALLBACK_IMAGE;
 
   return (
     <div className="fixed inset-0 bg-black/90 flex flex-col items-center justify-center z-50">
@@ -131,16 +130,16 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
         <div className="w-full h-full flex items-center justify-center p-4">
           <div className="relative w-full h-full max-h-[70vh] flex items-center justify-center">
             <img
-              src={imageUrl}
+              src={validImageUrl}
               alt={currentCard.title || "Card"}
               className="max-w-full max-h-full object-contain"
               onError={(e) => {
-                console.error('FullscreenViewer: Failed to load image:', imageUrl);
-                if (imageUrl !== FALLBACK_IMAGE) {
+                console.error('FullscreenViewer: Failed to load image:', validImageUrl);
+                if (validImageUrl !== FALLBACK_IMAGE) {
                   e.currentTarget.src = FALLBACK_IMAGE;
                 }
               }}
-              onLoad={() => console.log('FullscreenViewer: Image loaded successfully:', imageUrl)}
+              onLoad={() => console.log('FullscreenViewer: Image loaded successfully:', validImageUrl)}
             />
           </div>
         </div>
