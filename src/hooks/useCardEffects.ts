@@ -45,6 +45,7 @@ export function useCardEffects(options: CardEffectsOptions = {}) {
   const [isMoving, setIsMoving] = useState(false);
   const [zoom, setZoom] = useState(1);
   const [isFlipped, setIsFlipped] = useState(false);
+  const [cardEffectsState, setCardEffectsState] = useState<Record<string, string[]>>({});
   
   const cardRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -78,6 +79,24 @@ export function useCardEffects(options: CardEffectsOptions = {}) {
           : effect
       )
     );
+  }, []);
+
+  // Set active effects array - adds this missing method
+  const setActiveEffects = useCallback((effectIds: string[]) => {
+    setEffects(prev => 
+      prev.map(effect => ({
+        ...effect,
+        active: effectIds.includes(effect.id)
+      }))
+    );
+  }, []);
+
+  // Set card effects - adds this missing method
+  const setCardEffects = useCallback((cardId: string, effectIds: string[]) => {
+    setCardEffectsState(prev => ({
+      ...prev,
+      [cardId]: effectIds
+    }));
   }, []);
 
   // Update effect property (generic function)
@@ -261,6 +280,9 @@ export function useCardEffects(options: CardEffectsOptions = {}) {
     setRotation,
     generateEffectStyles,
     generateEffectClasses,
-    activeEffects: effects.filter(e => e.active).map(e => e.id)
+    activeEffects: effects.filter(e => e.active).map(e => e.id),
+    cardEffects: cardEffectsState,
+    setCardEffects,
+    setActiveEffects
   };
 }

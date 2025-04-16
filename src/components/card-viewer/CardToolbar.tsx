@@ -50,6 +50,16 @@ const CardToolbar: React.FC<CardToolbarProps> = ({
       active: activePanel === 'effects'
     },
     {
+      id: 'camera',
+      label: 'Take Photo',
+      icon: <Camera size={18} />
+    },
+    {
+      id: 'share',
+      label: 'Share Card',
+      icon: <Share2 size={18} />
+    },
+    {
       id: 'fullscreen',
       label: fullscreen ? 'Exit Fullscreen' : 'Fullscreen',
       icon: fullscreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />,
