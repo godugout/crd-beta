@@ -1,8 +1,9 @@
 import { Card } from './types';
 import { v4 as uuidv4 } from 'uuid';
+import { adaptToCard } from './adapters/cardAdapter';
 
 export const sampleCards: Card[] = [
-  {
+  adaptToCard({
     id: '1',
     title: 'Willie Mays',
     description: 'The "Say Hey Kid" was a legendary center fielder known for his incredible catches and all-around excellence.',
@@ -30,8 +31,8 @@ export const sampleCards: Card[] = [
     updatedAt: new Date().toISOString(),
     isPublic: true,
     creatorId: 'user123'
-  },
-  {
+  }),
+  adaptToCard({
     id: '2',
     title: 'Babe Ruth',
     description: 'The Sultan of Swat, Babe Ruth revolutionized baseball with his prodigious home run hitting.',
@@ -59,8 +60,8 @@ export const sampleCards: Card[] = [
     updatedAt: new Date().toISOString(),
     isPublic: true,
     creatorId: 'user123'
-  },
-  {
+  }),
+  adaptToCard({
     id: '3',
     title: 'Jackie Robinson',
     description: 'Jackie Robinson broke the color barrier and became an icon of courage and perseverance.',
@@ -88,8 +89,8 @@ export const sampleCards: Card[] = [
     updatedAt: new Date().toISOString(),
     isPublic: true,
     creatorId: 'user123'
-  },
-  {
+  }),
+  adaptToCard({
     id: '4',
     title: 'Roberto Clemente',
     description: 'Roberto Clemente was a humanitarian and baseball superstar known for his strong arm and community involvement.',
@@ -117,8 +118,8 @@ export const sampleCards: Card[] = [
     updatedAt: new Date().toISOString(),
     isPublic: true,
     creatorId: 'user123'
-  },
-  {
+  }),
+  adaptToCard({
     id: '5',
     title: 'Sandy Koufax',
     description: 'Sandy Koufax was a dominant pitcher with a blazing fastball and a curveball that baffled hitters.',
@@ -146,8 +147,8 @@ export const sampleCards: Card[] = [
     updatedAt: new Date().toISOString(),
     isPublic: true,
     creatorId: 'user123'
-  },
-  {
+  }),
+  adaptToCard({
     id: '6',
     title: 'Hank Aaron',
     description: 'Henry "Hank" Aaron was a right fielder whose MLB career spanned from 1954 through 1976.',
@@ -175,8 +176,8 @@ export const sampleCards: Card[] = [
     updatedAt: new Date().toISOString(),
     isPublic: true,
     creatorId: 'user123'
-  },
-  {
+  }),
+  adaptToCard({
     id: '7',
     title: 'Lou Gehrig',
     description: 'Lou Gehrig, nicknamed "The Iron Horse", was a first baseman who played 17 seasons in MLB for the New York Yankees.',
@@ -204,8 +205,8 @@ export const sampleCards: Card[] = [
     updatedAt: new Date().toISOString(),
     isPublic: true,
     creatorId: 'user123'
-  },
-  {
+  }),
+  adaptToCard({
     id: '8',
     title: 'Ty Cobb',
     description: 'Tyrus Raymond "Ty" Cobb, nicknamed "The Georgia Peach", was an American Major League Baseball (MLB) outfielder.',
@@ -233,7 +234,7 @@ export const sampleCards: Card[] = [
     updatedAt: new Date().toISOString(),
     isPublic: true,
     creatorId: 'user123'
-  }
+  })
 ];
 
 export const addSampleCards = async (addCardFunction: (card: Partial<Card>) => Promise<Card>) => {

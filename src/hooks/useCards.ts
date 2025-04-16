@@ -3,6 +3,7 @@ import { supabase } from '@/lib/supabase';
 import { Card, Collection } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { sampleCards } from '@/lib/data/sampleCards';
+import { adaptToCard } from '@/lib/adapters/cardAdapter';
 
 export function useCards() {
   const [cards, setCards] = useState<Card[]>([]);
@@ -15,23 +16,10 @@ export function useCards() {
     try {
       setLoading(true);
       
-      // Process sampleCards to ensure they have valid image URLs
+      // Process sampleCards and ensure they have valid image URLs and all required properties
       const processedCards = sampleCards.map(card => {
-        // Ensure imageUrl exists or use fallback
-        const fallbackImageUrl = 'https://images.unsplash.com/photo-1518770660439-4636190af475';
-        const imageUrl = card.imageUrl 
-          ? (card.imageUrl.includes('undefined') ? fallbackImageUrl : card.imageUrl)
-          : fallbackImageUrl;
-        
-        const thumbnailUrl = card.thumbnailUrl 
-          ? (card.thumbnailUrl.includes('undefined') ? fallbackImageUrl : card.thumbnailUrl)
-          : imageUrl;
-        
-        return {
-          ...card,
-          imageUrl,
-          thumbnailUrl
-        };
+        // Use our adapter to ensure all required properties exist
+        return adaptToCard(card);
       });
       
       setCards(processedCards);
@@ -99,7 +87,7 @@ export function useCards() {
 
   const createCard = useCallback(async (cardData: Partial<Card>) => {
     try {
-      const newCard: Card = {
+      const newCard = adaptToCard({
         id: `card-${Date.now()}`,
         title: cardData.title || 'Untitled Card',
         description: cardData.description || '',
@@ -112,10 +100,9 @@ export function useCards() {
         collectionId: cardData.collectionId || '',
         isPublic: cardData.isPublic !== undefined ? cardData.isPublic : true,
         tags: cardData.tags || [],
-        designMetadata: cardData.designMetadata || {},
-        reactions: [],
-        effects: cardData.effects || [] // Add required effects property
-      };
+        effects: cardData.effects || [],
+        ...cardData
+      });
       
       setCards(prev => [newCard, ...prev]);
       
@@ -137,7 +124,7 @@ export function useCards() {
       setCards(prev => 
         prev.map(card => 
           card.id === id 
-            ? { ...card, ...updates, updatedAt: new Date().toISOString() } 
+            ? adaptToCard({ ...card, ...updates, updatedAt: new Date().toISOString() })
             : card
         )
       );
@@ -213,7 +200,7 @@ export function useCards() {
       const sampleCard = sampleCards.find(card => card.id === id);
       if (sampleCard) {
         console.log(`Found card with ID ${id} in sampleCards`);
-        return sampleCard;
+        return adaptToCard(sampleCard);
       }
     }
     return foundCard;

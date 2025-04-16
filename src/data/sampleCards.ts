@@ -1,16 +1,17 @@
+import { adaptToCard } from '@/lib/adapters/cardAdapter';
 
 // Sample cards for demo purposes
 export const sampleCards = [
-  {
+  adaptToCard({
     id: 'card-001',
     title: 'Prince',
     description: 'Special tribute artwork celebrating the Minneapolis legend in Wolves colors. Fan-created artwork reimagining Prince as a basketball player for his hometown team.',
     imageUrl: '/lovable-uploads/667e6ad2-af96-40ac-bd16-a69778e14b21.png', 
     thumbnailUrl: '/lovable-uploads/667e6ad2-af96-40ac-bd16-a69778e14b21.png',
     tags: ['music', 'prince', 'wolves', 'minneapolis'],
+    userId: 'demo-user',
     createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
     updatedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-    userId: 'demo-user',
     effects: ['Holographic'],
     designMetadata: {
       cardStyle: {
@@ -39,8 +40,8 @@ export const sampleCards = [
         series: 'artist-reimagined'
       }
     }
-  },
-  {
+  }),
+  adaptToCard({
     id: 'card-002',
     title: 'Michael Jordan',
     description: 'Classic illustration of the GOAT in his legendary Bulls uniform. This fan art captures the iconic silhouette and spirit of Jordan\'s tremendous impact on the game.',
@@ -78,8 +79,8 @@ export const sampleCards = [
         series: 'basketball-legends'
       }
     }
-  },
-  {
+  }),
+  adaptToCard({
     id: 'card-003',
     title: 'Elvis Presley',
     description: 'Memphis legend reimagined as a Grizzlies player. This creative interpretation connects Elvis to his hometown through the lens of basketball culture.',
@@ -117,8 +118,8 @@ export const sampleCards = [
         series: 'memphis-icons'
       }
     }
-  },
-  {
+  }),
+  adaptToCard({
     id: 'card-004',
     title: 'Bob Marley',
     description: 'Reggae icon in Lakers gold. This fan creation reimagines what Bob Marley might look like as an LA Laker, combining music and basketball culture.',
@@ -156,8 +157,8 @@ export const sampleCards = [
         series: 'gold-edition'
       }
     }
-  },
-  {
+  }),
+  adaptToCard({
     id: 'card-005',
     title: 'Tupac Shakur',
     description: 'Hip-hop legend reimagined as a Blue Devil. This creative fan art brings Tupac\'s intensity to the basketball court as a Duke University player.',
@@ -195,8 +196,8 @@ export const sampleCards = [
         series: 'hip-hop-icons'
       }
     }
-  },
-  {
+  }),
+  adaptToCard({
     id: 'card-006',
     title: 'Notorious B.I.G.',
     description: 'Brooklyn\'s finest in his hometown jersey. This fan creation honors Biggie by visualizing him as a player for his hometown Brooklyn Nets.',
@@ -234,5 +235,5 @@ export const sampleCards = [
         series: 'brooklyn-icons'
       }
     }
-  }
+  })
 ];

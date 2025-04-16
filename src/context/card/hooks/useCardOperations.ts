@@ -1,20 +1,23 @@
 
 import { useState, useCallback, useEffect } from 'react';
-import { Card } from '@/lib/types';
+import { Card } from '@/lib/types/card';
 import { v4 as uuidv4 } from 'uuid';
+import { adaptToCard } from '@/lib/adapters/cardAdapter';
 
 // Mock data for development
 const initialCards: Card[] = [
-  {
+  adaptToCard({
     id: '1',
     title: 'Sample Card',
     description: 'This is a sample card for development',
     imageUrl: '/placeholder.svg',
+    thumbnailUrl: '/placeholder.svg',
+    tags: ['sample', 'development'],
     userId: 'user1',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     effects: [], // Add required effects property
-  },
+  }),
 ];
 
 export const useCardOperations = () => {
@@ -28,7 +31,9 @@ export const useCardOperations = () => {
       try {
         const savedCards = localStorage.getItem('cards');
         if (savedCards) {
-          setCards(JSON.parse(savedCards));
+          // Parse stored cards and ensure they match the current Card type requirements
+          const parsedCards = JSON.parse(savedCards);
+          setCards(parsedCards.map((card: Partial<Card>) => adaptToCard(card)));
         }
       } catch (err) {
         console.error('Error loading cards from storage:', err);
@@ -48,13 +53,12 @@ export const useCardOperations = () => {
   }, [cards]);
 
   const addCard = useCallback((card: Omit<Card, 'id' | 'createdAt' | 'updatedAt'>) => {
-    const newCard: Card = {
+    const newCard: Card = adaptToCard({
       ...card,
       id: uuidv4(),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      effects: card.effects || [], // Ensure effects property exists
-    };
+    });
 
     setCards(prevCards => [...prevCards, newCard]);
     return newCard;
@@ -64,7 +68,7 @@ export const useCardOperations = () => {
     setCards(prevCards =>
       prevCards.map(card =>
         card.id === id
-          ? { ...card, ...updates, updatedAt: new Date().toISOString() }
+          ? adaptToCard({ ...card, ...updates, updatedAt: new Date().toISOString() })
           : card
       )
     );

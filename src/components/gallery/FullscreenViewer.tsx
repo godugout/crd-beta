@@ -5,6 +5,7 @@ import { useCards } from '@/context/CardContext';
 import { Card } from '@/lib/types';
 import { sampleCards } from '@/lib/data/sampleCards';
 import { toast } from '@/hooks/use-toast';
+import { adaptToCard } from '@/lib/adapters/cardAdapter';
 
 interface FullscreenViewerProps {
   cardId: string;
@@ -44,28 +45,13 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
       }
       
       if (foundCard) {
-        // Create a processed card with all required fields
-        const processedCard: Card = {
+        // Create a processed card with all required fields using our adapter
+        const processedCard = adaptToCard({
           ...foundCard,
-          // Ensure required properties exist with default values
-          description: foundCard.description || '',
-          effects: foundCard.effects || [],
-          title: foundCard.title || 'Untitled Card',
-          tags: foundCard.tags || [],
-          createdAt: foundCard.createdAt || new Date().toISOString(),
-          updatedAt: foundCard.updatedAt || new Date().toISOString(),
-          userId: foundCard.userId || '',
           // Make sure image URLs are present
           imageUrl: foundCard.imageUrl || FALLBACK_IMAGE,
           thumbnailUrl: foundCard.thumbnailUrl || foundCard.imageUrl || FALLBACK_IMAGE,
-          // Add any other required fields with default values
-          designMetadata: foundCard.designMetadata || {
-            cardStyle: {},
-            textStyle: {},
-            marketMetadata: {},
-            cardMetadata: {}
-          }
-        };
+        });
         
         // Always initialize with fallback first, then update if the real image loads
         setValidImageUrl(FALLBACK_IMAGE);

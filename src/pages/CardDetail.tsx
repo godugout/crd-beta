@@ -11,6 +11,7 @@ import FullscreenViewer from '@/components/gallery/FullscreenViewer';
 import { Card } from '@/lib/types';
 import { sampleCards } from '@/lib/data/sampleCards';
 import { toast } from '@/hooks/use-toast';
+import { adaptToCard } from '@/lib/adapters/cardAdapter';
 
 // Fallback image to use when card image is not available
 const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1518770660439-4636190af475';
@@ -51,39 +52,17 @@ const CardDetail = () => {
       foundCard = getCard ? getCard(id) : cards.find(c => c.id === id);
     }
     
-    // If we found a card, ensure it has valid image URLs
+    // If we found a card, ensure it has valid image URLs and all required properties
     if (foundCard) {
       console.log('CardDetail: Found card:', foundCard.title, 'with imageUrl:', foundCard.imageUrl);
       
-      // Create a new object to avoid mutating the original with all required properties
-      const processedCard: Card = { 
+      // Create a processed card using our adapter to ensure all required properties exist
+      const processedCard = adaptToCard({
         ...foundCard,
-        // Ensure required properties exist
-        description: foundCard.description || '',
-        effects: foundCard.effects || [],
-        title: foundCard.title || 'Untitled Card',
-        tags: foundCard.tags || [],
-        createdAt: foundCard.createdAt || new Date().toISOString(),
-        updatedAt: foundCard.updatedAt || new Date().toISOString(),
-        userId: foundCard.userId || '',
-        // Make sure imageUrl is present
+        // Ensure imageUrl is present
         imageUrl: foundCard.imageUrl || FALLBACK_IMAGE,
         thumbnailUrl: foundCard.thumbnailUrl || foundCard.imageUrl || FALLBACK_IMAGE,
-        // Add any other required fields with default values
-        designMetadata: foundCard.designMetadata || {
-          cardStyle: {},
-          textStyle: {},
-          marketMetadata: {},
-          cardMetadata: {}
-        }
-      };
-      
-      // Validate image URLs
-      if (!processedCard.imageUrl || processedCard.imageUrl === 'undefined' || typeof processedCard.imageUrl !== 'string') {
-        console.warn('CardDetail: Card has invalid imageUrl, applying fallback');
-        processedCard.imageUrl = FALLBACK_IMAGE;
-        processedCard.thumbnailUrl = FALLBACK_IMAGE;
-      }
+      });
       
       setResolvedCard(processedCard);
       
@@ -92,11 +71,11 @@ const CardDetail = () => {
         const img = new Image();
         img.onerror = () => {
           console.error('CardDetail: Image failed to preload:', processedCard.imageUrl);
-          setResolvedCard(prev => prev ? { 
+          setResolvedCard(prev => prev ? adaptToCard({ 
             ...prev, 
             imageUrl: FALLBACK_IMAGE,
             thumbnailUrl: FALLBACK_IMAGE 
-          } : null);
+          }) : null);
         };
         img.src = processedCard.imageUrl;
       }
@@ -156,8 +135,8 @@ const CardDetail = () => {
   
   return (
     <PageLayout
-      title={resolvedCard.title || "Card Detail"}
-      description={resolvedCard.description || "View card details"}
+      title={resolvedCard?.title || "Card Detail"}
+      description={resolvedCard?.description || "View card details"}
     >
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center mb-6">

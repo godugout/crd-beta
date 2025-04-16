@@ -10,6 +10,7 @@ import { Loader, Instagram, AlertCircle } from 'lucide-react';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { adaptToCard } from '@/lib/adapters/cardAdapter';
 
 const InstagramCollectionCreator: React.FC = () => {
   const [isConnecting, setIsConnecting] = useState(false);
@@ -96,7 +97,7 @@ const InstagramCollectionCreator: React.FC = () => {
         id: `instagram-${Date.now()}`,
         name: `${username}'s Instagram Collection`,
         description: `Photos imported from Instagram account @${username}`,
-        cards: instagramPosts.map((post, index) => ({
+        cards: instagramPosts.map((post, index) => adaptToCard({
           id: `instagram-card-${post.postId || index}`,
           title: post.caption?.substring(0, 50) || `Instagram post ${index + 1}`,
           description: post.caption || '',

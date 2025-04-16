@@ -1,9 +1,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/auth';
-import { Card } from '@/lib/types';
+import { Card } from '@/lib/types/card';
 import CardItem from '@/components/CardItem';
 import { toast } from 'sonner';
+import { adaptToCard } from '@/lib/adapters/cardAdapter';
 
 const CommunityFeed: React.FC = () => {
   const { user } = useAuth();
@@ -19,26 +20,30 @@ const CommunityFeed: React.FC = () => {
       try {
         // Mock data - replace with actual API call later
         const mockFeed: Card[] = [
-          {
+          adaptToCard({
             id: '1',
             title: 'Amazing Baseball Card',
             description: 'Check out this rare find!',
             imageUrl: 'https://placekitten.com/200/300',
+            thumbnailUrl: 'https://placekitten.com/200/300',
+            tags: ['baseball', 'rare'],
+            userId: 'user123',
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
-            userId: 'user123',
             effects: [] // Add required effects property
-          },
-          {
+          }),
+          adaptToCard({
             id: '2',
             title: 'Vintage Football Card',
             description: 'Just pulled this from an old collection.',
             imageUrl: 'https://placekitten.com/200/301',
+            thumbnailUrl: 'https://placekitten.com/200/301',
+            tags: ['football', 'vintage'],
+            userId: 'user456',
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
-            userId: 'user456',
             effects: [] // Add required effects property
-          }
+          })
         ];
         
         setFeed(mockFeed);
