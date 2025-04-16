@@ -11,7 +11,7 @@ interface InfoPanelProps {
 const InfoPanel = ({ card, showInfo }: InfoPanelProps) => {
   if (!showInfo) return null;
 
-  // Extract card metadata for display
+  // Extract card metadata for display, with safe default values
   const cardMetadata = card.designMetadata?.cardMetadata || {};
   const marketMetadata = card.designMetadata?.marketMetadata || {};
   
@@ -46,7 +46,7 @@ const InfoPanel = ({ card, showInfo }: InfoPanelProps) => {
             </div>
           )}
           
-          {cardMetadata.cardNumber && (
+          {cardMetadata && cardMetadata.cardNumber && (
             <div className="flex flex-col">
               <span className="text-gray-400 text-xs">Card #</span>
               <span className="font-medium">{String(cardMetadata.cardNumber)}</span>
@@ -60,14 +60,14 @@ const InfoPanel = ({ card, showInfo }: InfoPanelProps) => {
             </div>
           )}
           
-          {cardMetadata.cardType && (
+          {cardMetadata && cardMetadata.cardType && (
             <div className="flex flex-col">
               <span className="text-gray-400 text-xs">Type</span>
               <span className="font-medium">{String(cardMetadata.cardType)}</span>
             </div>
           )}
           
-          {cardMetadata.series && (
+          {cardMetadata && cardMetadata.series && (
             <div className="flex flex-col">
               <span className="text-gray-400 text-xs">Series</span>
               <span className="font-medium">{String(cardMetadata.series)}</span>
@@ -75,7 +75,7 @@ const InfoPanel = ({ card, showInfo }: InfoPanelProps) => {
           )}
           
           {/* Check for artist in cardMetadata since 'artist' is not directly on Card type */}
-          {cardMetadata.artist && (
+          {cardMetadata && cardMetadata.artist && (
             <div className="flex flex-col col-span-2">
               <span className="text-gray-400 text-xs">Artist</span>
               <span className="font-medium">{String(cardMetadata.artist)}</span>
@@ -83,7 +83,7 @@ const InfoPanel = ({ card, showInfo }: InfoPanelProps) => {
           )}
         </div>
         
-        {marketMetadata.isPrintable !== undefined && (
+        {marketMetadata && marketMetadata.isPrintable !== undefined && (
           <div className="flex gap-2 flex-wrap pt-2">
             {marketMetadata.isPrintable && 
               <Badge variant="outline" className="bg-blue-900/40 text-xs">Printable</Badge>

@@ -2,6 +2,7 @@
 import { supabase } from '@/lib/supabase';
 import { Card, Collection, JsonObject, serializeMetadata } from '@/lib/types';
 import { v4 as uuidv4 } from 'uuid';
+import { DEFAULT_DESIGN_METADATA } from '@/lib/utils/cardDefaults';
 
 // Demo function to create a card (for development)
 export const createCard = async (card: Omit<Card, 'id' | 'createdAt' | 'updatedAt'>): Promise<Card> => {
@@ -18,7 +19,7 @@ export const createCard = async (card: Omit<Card, 'id' | 'createdAt' | 'updatedA
     userId: card.userId || 'anonymous',
     teamId: card.teamId,
     isPublic: card.isPublic !== undefined ? card.isPublic : true,
-    designMetadata: card.designMetadata || {},
+    designMetadata: card.designMetadata || DEFAULT_DESIGN_METADATA,
     effects: card.effects || [], // Add required effects property
   };
 
@@ -70,7 +71,7 @@ const mapDbCardToCard = (dbCard: any): Card => {
     userId: dbCard.user_id,
     teamId: dbCard.team_id,
     isPublic: dbCard.is_public,
-    designMetadata: dbCard.design_metadata,
+    designMetadata: dbCard.design_metadata || DEFAULT_DESIGN_METADATA,
     effects: dbCard.effects || [], // Add required effects property
   };
 };
@@ -128,7 +129,7 @@ export const fetchCards = async (options?: {
         userId: 'user1',
         teamId: 'team1',
         isPublic: true,
-        designMetadata: {},
+        designMetadata: DEFAULT_DESIGN_METADATA,
         effects: [], // Add required effects property
       },
       {
@@ -144,7 +145,7 @@ export const fetchCards = async (options?: {
         userId: 'user1',
         teamId: 'team1',
         isPublic: true,
-        designMetadata: {},
+        designMetadata: DEFAULT_DESIGN_METADATA,
         effects: ['Holographic'], // Add required effects property
       },
     ];
@@ -169,7 +170,7 @@ export const convertDbRecordsToCards = (records: any[]): Card[] => {
     userId: record.userId,
     teamId: record.teamId,
     isPublic: record.isPublic,
-    designMetadata: record.designMetadata,
+    designMetadata: record.designMetadata || DEFAULT_DESIGN_METADATA,
     effects: record.effects || [], // Add required effects property
   }));
 };

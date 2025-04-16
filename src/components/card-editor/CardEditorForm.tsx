@@ -10,6 +10,7 @@ import { useCards } from '@/context/CardContext';
 import { toast } from 'sonner';
 import TagInput from './TagInput';
 import ImageSelector from './ImageSelector';
+import { DEFAULT_DESIGN_METADATA } from '@/lib/utils/cardDefaults';
 
 interface CardEditorFormProps {
   card?: Card;
@@ -58,11 +59,7 @@ const CardEditorForm: React.FC<CardEditorFormProps> = ({
         imageUrl,
         thumbnailUrl: imageUrl,
         tags,
-        designMetadata: card?.designMetadata || {
-          cardStyle: {
-            effect: 'classic'
-          }
-        }
+        designMetadata: card?.designMetadata || DEFAULT_DESIGN_METADATA
       };
       
       let savedCard;
