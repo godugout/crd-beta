@@ -3,10 +3,31 @@ import { Card } from '@/lib/types/card';
 
 // Default design metadata structure for cards that don't have it
 const DEFAULT_DESIGN_METADATA = {
-  cardStyle: {},
-  textStyle: {},
-  marketMetadata: {},
-  cardMetadata: {}
+  cardStyle: {
+    template: 'classic',
+    effect: 'classic',
+    borderRadius: '4px',
+    borderColor: '#000000',
+    frameColor: '#000000',
+    frameWidth: 2,
+    shadowColor: 'rgba(0, 0, 0, 0.4)'
+  },
+  textStyle: {
+    titleColor: '#000000',
+    titleAlignment: 'left',
+    titleWeight: 'bold',
+    descriptionColor: '#444444'
+  },
+  marketMetadata: {
+    isPrintable: false,
+    isForSale: false,
+    includeInCatalog: false
+  },
+  cardMetadata: {
+    category: 'general',
+    cardType: 'standard',
+    series: 'base'
+  }
 };
 
 /**
@@ -37,7 +58,7 @@ export function adaptToCard(data: Partial<Card>): Card {
     set: data.set,
     cardNumber: data.cardNumber,
     cardType: data.cardType,
-    artist: data.artist || data.artistName, // Support for artistName property
+    artist: data.artist, // Use artist property directly
     backgroundColor: data.backgroundColor,
     textColor: data.textColor,
     specialEffect: data.specialEffect,
@@ -45,6 +66,8 @@ export function adaptToCard(data: Partial<Card>): Card {
     name: data.name,
     cardStyle: data.cardStyle,
     backTemplate: data.backTemplate,
+    // Handle creatorId as an optional property
+    creatorId: data.creatorId,
     // Ensure designMetadata is always present with default structure if not provided
     designMetadata: data.designMetadata || DEFAULT_DESIGN_METADATA
   };

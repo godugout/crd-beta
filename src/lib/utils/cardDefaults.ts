@@ -1,51 +1,44 @@
 
 /**
- * Default values for Card objects across the application
- * This centralizes the default values to ensure consistency
+ * Default card design metadata for use across the application
  */
 
-// Default designMetadata structure for new cards
-export const DEFAULT_DESIGN_METADATA = {
+import { DesignMetadata } from '@/lib/types/cardTypes';
+
+// Default design metadata structure for cards that don't have it
+export const DEFAULT_DESIGN_METADATA: DesignMetadata = {
   cardStyle: {
     template: 'classic',
     effect: 'classic',
     borderRadius: '4px',
-    borderColor: '#333333',
-    frameColor: '#333333',
+    borderColor: '#000000',
+    frameColor: '#000000',
     frameWidth: 2,
-    shadowColor: 'rgba(0, 0, 0, 0.2)',
+    shadowColor: 'rgba(0, 0, 0, 0.4)'
   },
   textStyle: {
-    titleColor: '#FFFFFF',
+    titleColor: '#000000',
     titleAlignment: 'left',
     titleWeight: 'bold',
-    descriptionColor: '#FFFFFF',
+    descriptionColor: '#444444'
   },
   marketMetadata: {
-    isPrintable: true,
+    isPrintable: false,
     isForSale: false,
-    includeInCatalog: true
+    includeInCatalog: false
   },
   cardMetadata: {
     category: 'general',
     cardType: 'standard',
-    series: 'default'
+    series: 'base'
   }
 };
 
-// Fallback image to use when a card image is invalid or missing
-export const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1518770660439-4636190af475';
-
-// Function to ensure a card has all required fields with default values
-export const getCardDefaults = () => ({
-  title: 'Untitled Card',
-  description: '',
-  imageUrl: FALLBACK_IMAGE,
-  thumbnailUrl: FALLBACK_IMAGE,
-  tags: [],
-  userId: 'anonymous',
+// Default card property values
+export const DEFAULT_CARD_VALUES = {
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
-  effects: [],
-  designMetadata: DEFAULT_DESIGN_METADATA
-});
+  userId: 'anonymous',
+  tags: [],
+  effects: []
+};

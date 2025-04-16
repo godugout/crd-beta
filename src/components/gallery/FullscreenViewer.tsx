@@ -7,7 +7,7 @@ import { Card } from '@/lib/types';
 import { sampleCards } from '@/lib/data/sampleCards';
 import { toast } from '@/hooks/use-toast';
 import { adaptToCard } from '@/lib/adapters/cardAdapter';
-import { DEFAULT_DESIGN_METADATA } from '@/lib/utils/cardDefaults';
+import { DEFAULT_DESIGN_METADATA } from '@/lib/adapters/cardAdapter';
 
 interface FullscreenViewerProps {
   cardId: string;
@@ -47,10 +47,10 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
       }
       
       if (foundCard) {
-        // Create a processed card with all required fields using our adapter
+        // Always use adaptToCard to ensure the card has all required properties
         const processedCard = adaptToCard({
           ...foundCard,
-          // Make sure image URLs are present
+          // Ensure imageUrl is present
           imageUrl: foundCard.imageUrl || FALLBACK_IMAGE,
           thumbnailUrl: foundCard.thumbnailUrl || foundCard.imageUrl || FALLBACK_IMAGE,
           // Ensure all required fields are present

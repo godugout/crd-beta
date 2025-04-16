@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import PageLayout from '@/components/navigation/PageLayout';
@@ -12,7 +13,7 @@ import { Card } from '@/lib/types';
 import { sampleCards } from '@/lib/data/sampleCards';
 import { toast } from '@/hooks/use-toast';
 import { adaptToCard } from '@/lib/adapters/cardAdapter';
-import { DEFAULT_DESIGN_METADATA } from '@/lib/utils/cardDefaults';
+import { DEFAULT_DESIGN_METADATA } from '@/lib/adapters/cardAdapter';
 
 // Fallback image to use when card image is not available
 const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1518770660439-4636190af475';

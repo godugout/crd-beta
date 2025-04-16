@@ -5,7 +5,7 @@ import { Card } from '@/lib/types/cardTypes';
 import { Reaction } from '@/lib/types/interaction';
 import { useToast } from '@/hooks/use-toast';
 import { adaptToCard } from '@/lib/adapters/cardAdapter';
-import { DEFAULT_DESIGN_METADATA } from '@/lib/utils/cardDefaults';
+import { DEFAULT_DESIGN_METADATA } from '@/lib/adapters/cardAdapter';
 
 const CommunityFeed = () => {
   const [feedCards, setFeedCards] = useState<Card[]>([]);

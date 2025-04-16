@@ -38,11 +38,12 @@ export interface CardStats {
  * Card style definition for visual appearance
  */
 export interface CardStyle {
+  template?: string;      // Added template property
+  effect?: string;        // Added effect property
   borderRadius?: string;
   borderWidth?: number;
   borderColor?: string;
   backgroundColor?: string;
-  effect?: string;
   shadowColor?: string;
   frameWidth?: number;
   frameColor?: string;
@@ -258,96 +259,15 @@ export interface BaseCard extends BaseEntity {
   rarity?: CardRarity;
   
   // Additional fields needed by some components
-  creatorId?: string;
-  createdAt: string; // Changed from optional to required
-  updatedAt: string; // Changed from optional to required
+  creatorId?: string;  // Added creatorId as an optional field
+  createdAt: string;   // Required field
+  updatedAt: string;   // Required field
 }
 
 /**
  * Main Card interface that can be extended for specific use cases
  */
 export interface Card extends BaseCard {}
-
-/**
- * Enhanced Card with additional fields for premium features
- */
-export interface EnhancedCard extends Card {
-  cardNumber?: string;
-  seriesId?: string;
-  artistId?: string;
-  artistProfile?: User; // Use artistProfile instead of artist
-  edition?: number;
-  editionSize?: number;
-  releaseDate?: string;
-  qrCodeData?: string;
-  hotspots?: HotspotData[];
-  marketData?: {
-    price?: number;
-    currency?: string;
-    availableForSale?: boolean;
-    lastSoldPrice?: number;
-    lastSoldDate?: string;
-  };
-}
-
-/**
- * Series definition for card collections
- */
-export interface Series {
-  id: string;
-  title: string;
-  description: string;
-  coverImageUrl: string;
-  artistId: string;
-  artist?: User;
-  createdAt: string;
-  updatedAt: string;
-  releaseDate: string;
-  totalCards: number;
-  isPublished: boolean;
-  cardIds: string[];
-  cards?: EnhancedCard[];
-  releaseType: 'standard' | 'limited' | 'exclusive';
-}
-
-/**
- * Deck definition for card collections
- */
-export interface Deck {
-  id: string;
-  name: string;
-  description: string;
-  coverImageUrl: string;
-  ownerId: string;
-  createdAt: string;
-  updatedAt: string;
-  cardIds: string[];
-  cards?: EnhancedCard[];
-  isPublic: boolean;
-}
-
-/**
- * Database representation of Card for Supabase mapping
- */
-export interface DbCard {
-  id: string;
-  title: string;
-  description?: string;
-  image_url: string;
-  thumbnail_url?: string;
-  collection_id?: string;
-  user_id?: string;
-  team_id?: string;
-  created_at: string;
-  updated_at: string;
-  is_public?: boolean;
-  tags?: string[];
-  design_metadata?: any;
-  creator_id: string;
-  price?: number;
-  edition_size: number;
-  rarity: string;
-}
 
 // Do not re-export the Reaction type here - fix this line
 export type { Reaction as CardReaction } from './interaction';
