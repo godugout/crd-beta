@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { User, UserRole } from '@/lib/types';
+import { CardEnhancedProvider } from '@/context/CardEnhancedContext';
 
 // Import dashboard components based on user role
 import AdminDashboard from '@/components/dashboard/AdminDashboard';
@@ -46,15 +47,17 @@ const Dashboard: React.FC = () => {
 
   // Render the appropriate dashboard based on user role
   return (
-    <div className="container mx-auto p-6">
-      {dashboardUser.role === UserRole.ADMIN && <AdminDashboard user={dashboardUser} />}
-      
-      {dashboardUser.role === UserRole.CREATOR && <ArtistDashboard user={dashboardUser} />}
-      
-      {dashboardUser.role === UserRole.USER && <FanDashboard user={dashboardUser} />}
-      
-      {!dashboardUser.role && <FanDashboard user={dashboardUser} />}
-    </div>
+    <CardEnhancedProvider>
+      <div className="container mx-auto p-6">
+        {dashboardUser.role === UserRole.ADMIN && <AdminDashboard user={dashboardUser} />}
+        
+        {dashboardUser.role === UserRole.CREATOR && <ArtistDashboard user={dashboardUser} />}
+        
+        {dashboardUser.role === UserRole.USER && <FanDashboard user={dashboardUser} />}
+        
+        {!dashboardUser.role && <FanDashboard user={dashboardUser} />}
+      </div>
+    </CardEnhancedProvider>
   );
 };
 

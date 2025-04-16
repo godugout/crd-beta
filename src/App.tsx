@@ -10,6 +10,7 @@ import CardCollectionPage from './pages/CardCollectionPage';
 import BaseballCardViewer from './pages/BaseballCardViewer';
 import BaseballActionFigure from './pages/BaseballActionFigure';
 import { CardProvider } from './context/CardContext';
+import { CardEnhancedProvider } from './context/CardEnhancedContext';
 import { SettingsProvider } from './context/SettingsContext';
 import EmergencyPage from './pages/EmergencyPage';
 import { useAuth } from './hooks/useAuth';
@@ -82,48 +83,50 @@ function App() {
   return (
     <SettingsProvider>
       <BreadcrumbProvider>
-        <div className="debug-info fixed bottom-4 left-4 bg-black/80 text-white p-2 text-xs z-50 rounded-md">
-          App Loaded | {new Date().toLocaleTimeString()} | {isAuthenticated ? 'Authenticated' : 'Not Authenticated'}
-        </div>
-        
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/emergency" element={<EmergencyPage />} />
-
-          {routes.map((route, index) => {
-            if (route.children) {
-              return (
-                <Route key={`parent-${index}`} path={route.path} element={route.element}>
-                  {route.children.map((childRoute, childIndex) => (
-                    <Route 
-                      key={`child-${childIndex}`}
-                      path={childRoute.path}
-                      element={childRoute.element}
-                    />
-                  ))}
-                </Route>
-              );
-            }
-            
-            return (
-              <Route 
-                key={`route-${index}`} 
-                path={route.path} 
-                element={route.element} 
-              />
-            );
-          })}
-
-          <Route path="/home" element={<HomePage />} />
-          <Route path="/about" element={<AboutPage />} />
-          <Route path="/contact" element={<ContactPage />} />
-          <Route path="/cards" element={<CardCollectionPage />} />
-          <Route path="/baseball-card-viewer" element={<BaseballCardViewer />} />
-          <Route path="/baseball-action-figure" element={<BaseballActionFigure />} />
+        <CardEnhancedProvider>
+          <div className="debug-info fixed bottom-4 left-4 bg-black/80 text-white p-2 text-xs z-50 rounded-md">
+            App Loaded | {new Date().toLocaleTimeString()} | {isAuthenticated ? 'Authenticated' : 'Not Authenticated'}
+          </div>
           
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-        <Toaster />
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/emergency" element={<EmergencyPage />} />
+
+            {routes.map((route, index) => {
+              if (route.children) {
+                return (
+                  <Route key={`parent-${index}`} path={route.path} element={route.element}>
+                    {route.children.map((childRoute, childIndex) => (
+                      <Route 
+                        key={`child-${childIndex}`}
+                        path={childRoute.path}
+                        element={childRoute.element}
+                      />
+                    ))}
+                  </Route>
+                );
+              }
+              
+              return (
+                <Route 
+                  key={`route-${index}`} 
+                  path={route.path} 
+                  element={route.element} 
+                />
+              );
+            })}
+
+            <Route path="/home" element={<HomePage />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/contact" element={<ContactPage />} />
+            <Route path="/cards" element={<CardCollectionPage />} />
+            <Route path="/baseball-card-viewer" element={<BaseballCardViewer />} />
+            <Route path="/baseball-action-figure" element={<BaseballActionFigure />} />
+            
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+          <Toaster />
+        </CardEnhancedProvider>
       </BreadcrumbProvider>
     </SettingsProvider>
   );
