@@ -81,7 +81,6 @@ export const CardDetailed: React.FC<CardDetailedProps> = ({
             onClick={() => onView && onView(card.id)}
             enableEffects={enableEffects}
             activeEffects={activeEffects} 
-            showInfo={false}
             className="shadow-lg"
           />
           

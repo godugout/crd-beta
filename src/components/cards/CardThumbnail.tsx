@@ -30,6 +30,12 @@ export interface CardThumbnailProps {
    * List of effects to apply to the card
    */
   activeEffects?: string[];
+  
+  /**
+   * Whether to show info overlay
+   * @default false
+   */
+  showInfo?: boolean;
 }
 
 const CardThumbnail: React.FC<CardThumbnailProps> = ({
@@ -37,7 +43,8 @@ const CardThumbnail: React.FC<CardThumbnailProps> = ({
   className,
   onClick,
   enableEffects = false,
-  activeEffects = []
+  activeEffects = [],
+  showInfo = false
 }) => {
   // Handle click on the card
   const handleClick = () => {
@@ -66,7 +73,10 @@ const CardThumbnail: React.FC<CardThumbnailProps> = ({
         />
         
         {/* Info Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-3">
+        <div className={cn(
+          "absolute inset-0 bg-gradient-to-t from-black/70 to-transparent transition-opacity duration-300 flex flex-col justify-end p-3",
+          showInfo ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+        )}>
           {/* Tags */}
           {card.tags && card.tags.length > 0 && (
             <div className="flex flex-wrap gap-1 mb-2">

@@ -12,6 +12,35 @@ const RELIABLE_IMAGES = {
   default: 'https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=1000'
 };
 
+// Create a base design metadata with all required fields
+const createDesignMetadata = (borderColor: string, frameColor: string) => ({
+  cardStyle: {
+    template: 'classic',
+    effect: 'classic',
+    borderRadius: '8px',
+    borderColor,
+    frameColor,
+    frameWidth: 3,
+    shadowColor: `rgba(${parseInt(borderColor.slice(1, 3), 16)}, ${parseInt(borderColor.slice(3, 5), 16)}, ${parseInt(borderColor.slice(5, 7), 16)}, 0.5)`,
+  },
+  textStyle: {
+    titleColor: '#FFFFFF',
+    titleAlignment: 'left',
+    titleWeight: 'bold',
+    descriptionColor: '#FFFFFF',
+  },
+  cardMetadata: {
+    category: 'sports',
+    cardType: 'collectible',
+    series: 'standard'
+  },
+  marketMetadata: {
+    isPrintable: false,
+    isForSale: false,
+    includeInCatalog: true
+  }
+});
+
 export const sampleCardData: Card[] = [
   {
     id: 'card-001',
@@ -26,23 +55,7 @@ export const sampleCardData: Card[] = [
     teamId: 'team-001',
     collectionId: 'collection-001',
     isPublic: true,
-    designMetadata: {
-      cardStyle: {
-        template: 'classic',
-        effect: 'classic',
-        borderRadius: '4px',
-        borderColor: '#f43f5e',
-        frameColor: '#f43f5e',
-        frameWidth: 2,
-        shadowColor: 'rgba(244, 63, 94, 0.4)',
-      },
-      textStyle: {
-        titleColor: '#FFFFFF',
-        titleAlignment: 'left',
-        titleWeight: 'bold',
-        descriptionColor: '#FFFFFF',
-      }
-    },
+    designMetadata: createDesignMetadata('#f43f5e', '#f43f5e'),
     effects: ['Holographic', 'Refractor']
   },
   {
@@ -58,23 +71,7 @@ export const sampleCardData: Card[] = [
     teamId: 'team-001',
     collectionId: 'collection-001',
     isPublic: true,
-    designMetadata: {
-      cardStyle: {
-        template: 'nifty',
-        effect: 'nifty',
-        borderRadius: '12px',
-        borderColor: '#a855f7',
-        frameColor: '#a855f7',
-        frameWidth: 4,
-        shadowColor: 'rgba(168, 85, 247, 0.6)',
-      },
-      textStyle: {
-        titleColor: '#FFFFFF',
-        titleAlignment: 'left',
-        titleWeight: 'bold',
-        descriptionColor: '#FFFFFF',
-      }
-    },
+    designMetadata: createDesignMetadata('#a855f7', '#a855f7'),
     effects: ['Chrome', 'Shimmer']
   },
   {
@@ -90,23 +87,7 @@ export const sampleCardData: Card[] = [
     teamId: 'team-002',
     collectionId: 'collection-002',
     isPublic: true,
-    designMetadata: {
-      cardStyle: {
-        template: 'nostalgic',
-        effect: 'nostalgic',
-        borderRadius: '8px',
-        borderColor: '#22c55e',
-        frameColor: '#22c55e',
-        frameWidth: 3,
-        shadowColor: 'rgba(34, 197, 94, 0.5)',
-      },
-      textStyle: {
-        titleColor: '#FFFFFF',
-        titleAlignment: 'left',
-        titleWeight: 'bold',
-        descriptionColor: '#FFFFFF',
-      }
-    },
+    designMetadata: createDesignMetadata('#22c55e', '#22c55e'),
     effects: ['Vintage']
   },
   {
@@ -122,23 +103,7 @@ export const sampleCardData: Card[] = [
     teamId: 'team-002',
     collectionId: 'collection-002',
     isPublic: true,
-    designMetadata: {
-      cardStyle: {
-        template: 'futuristic',
-        effect: 'futuristic',
-        borderRadius: '16px',
-        borderColor: '#0ea5e9',
-        frameColor: '#0ea5e9',
-        frameWidth: 4,
-        shadowColor: 'rgba(14, 165, 233, 0.6)',
-      },
-      textStyle: {
-        titleColor: '#FFFFFF',
-        titleAlignment: 'left',
-        titleWeight: 'bold',
-        descriptionColor: '#FFFFFF',
-      }
-    },
+    designMetadata: createDesignMetadata('#0ea5e9', '#0ea5e9'),
     effects: ['Holographic', 'Gold']
   },
   {
@@ -154,23 +119,7 @@ export const sampleCardData: Card[] = [
     teamId: 'team-003',
     collectionId: 'collection-003',
     isPublic: true,
-    designMetadata: {
-      cardStyle: {
-        template: 'retro',
-        effect: 'retro',
-        borderRadius: '8px',
-        borderColor: '#fbbf24',
-        frameColor: '#fbbf24',
-        frameWidth: 3,
-        shadowColor: 'rgba(251, 191, 36, 0.5)',
-      },
-      textStyle: {
-        titleColor: '#FFFFFF',
-        titleAlignment: 'left',
-        titleWeight: 'bold',
-        descriptionColor: '#FFFFFF',
-      }
-    },
+    designMetadata: createDesignMetadata('#fbbf24', '#fbbf24'),
     effects: ['Refractor', 'Shimmer']
   },
   {
@@ -186,23 +135,7 @@ export const sampleCardData: Card[] = [
     teamId: 'team-003',
     collectionId: 'collection-003',
     isPublic: true,
-    designMetadata: {
-      cardStyle: {
-        template: 'antique',
-        effect: 'antique',
-        borderRadius: '4px',
-        borderColor: '#92400e',
-        frameColor: '#92400e',
-        frameWidth: 2,
-        shadowColor: 'rgba(146, 64, 14, 0.4)',
-      },
-      textStyle: {
-        titleColor: '#FFFFFF',
-        titleAlignment: 'left',
-        titleWeight: 'bold',
-        descriptionColor: '#FFFFFF',
-      }
-    },
+    designMetadata: createDesignMetadata('#92400e', '#92400e'),
     effects: ['Vintage', 'Gold']
   }
 ];

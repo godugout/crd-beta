@@ -83,7 +83,7 @@ const InfoPanel = ({ card, showInfo }: InfoPanelProps) => {
           )}
         </div>
         
-        {marketMetadata && marketMetadata.isPrintable !== undefined && (
+        {marketMetadata && (
           <div className="flex gap-2 flex-wrap pt-2">
             {marketMetadata.isPrintable && 
               <Badge variant="outline" className="bg-blue-900/40 text-xs">Printable</Badge>

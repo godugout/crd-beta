@@ -7,8 +7,9 @@ import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { DEFAULT_DESIGN_METADATA } from '@/lib/utils/cardDefaults';
+import { Card } from '@/lib/types';
 
-const sampleCards = [
+const sampleCards: Card[] = [
   {
     id: '1',
     title: 'Michael Jordan',

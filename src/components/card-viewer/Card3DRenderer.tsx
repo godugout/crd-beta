@@ -40,17 +40,13 @@ const Card3DRenderer: React.FC<Card3DRendererProps> = ({
     console.log(`Back texture URL: ${backTextureUrl}`);
   }, [card.id, frontTextureUrl, backTextureUrl]);
 
-  // Only load textures once we have valid URLs
+  // Only load textures once we have valid URLs - Fix the argument count issue here
   const [frontTexture, backTexture] = useTexture(
     [frontTextureUrl, backTextureUrl],
     (textures) => {
       console.log('Textures loaded successfully:', textures);
       setTextureLoaded(true);
       setTextureError(false);
-    },
-    (error) => {
-      console.error('Error loading textures:', error);
-      setTextureError(true);
     }
   );
   
