@@ -1,4 +1,3 @@
-
 /**
  * Core Types for CRD (Collector's Republic Digital) App
  * Single source of truth for all type definitions
@@ -217,6 +216,8 @@ export interface Reaction {
   type: 'like' | 'love' | 'wow' | 'haha' | 'sad' | 'angry';
   createdAt: string;
   user?: User;
+  targetType: 'card' | 'comment' | string;
+  targetId: string;
 }
 
 /**
@@ -487,4 +488,3 @@ export interface EffectSettings {
   animationEnabled?: boolean;
   [key: string]: any;
 }
-

@@ -40,7 +40,7 @@ const CommunityFeed = () => {
                 targetId: 'community-1'
               }
             ],
-            effects: ['Holographic'], // Add required effects property
+            effects: ['Holographic'],
           },
           {
             id: 'community-2',
@@ -57,7 +57,7 @@ const CommunityFeed = () => {
             tags: ['community', 'trending'],
             designMetadata: {},
             reactions: [],
-            effects: ['Chrome', 'Refractor'], // Add required effects property
+            effects: ['Chrome', 'Refractor'],
           },
         ];
         
