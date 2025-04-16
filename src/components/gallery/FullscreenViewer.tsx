@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCards } from '@/context/CardContext';
@@ -123,7 +122,7 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
   };
 
   useEffect(() => {
-    // Update position to include z coordinate to match the type requirements
+    // Update position to include z coordinate
     setPosition({ x: 10, y: 15, z: 0 });
   }, [setPosition]);
 
@@ -290,7 +289,7 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
         {!showExplodedView && (
           <CardDisplay
             card={card}
-            rotation={{ x: position.x, y: position.y, z: position.z || 0 }}
+            rotation={{ x: position.x, y: position.y, z: position.z }}
             isFlipped={isFlipped}
             zoom={zoom}
             isDragging={isDragging}
@@ -334,7 +333,7 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
           <CardParticleSystem
             containerRef={containerRef}
             particleState={particleState}
-            cardRotation={{ x: position.x, y: position.y, z: position.z || 0 }}
+            cardRotation={{ x: position.x, y: position.y, z: position.z }}
             isFlipped={isFlipped}
             isMoving={isDragging || isAutoRotating}
           />
