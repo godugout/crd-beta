@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { TeamThemeProvider } from '@/context/ThemeContext'; // Already corrected from ThemeProvider to TeamThemeProvider
+import { TeamThemeProvider } from '@/context/ThemeContext';
 import { CardProvider } from '@/context/CardContext';
 import { Toaster } from '@/components/ui/toaster';
 import { mainRoutes } from '@/routes/mainRoutes';

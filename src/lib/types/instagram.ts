@@ -11,6 +11,13 @@ export interface InstagramPost extends BaseEntity {
   timestamp: string;
   location?: string;
   tags?: string[];
+  
+  // Add missing properties used in components
+  mediaType?: 'IMAGE' | 'VIDEO' | 'CAROUSEL_ALBUM';
+  postId?: string;
+  mediaUrl: string;
+  thumbnailUrl?: string;
+  permalink?: string;
 }
 
 export interface InstagramCollection {
@@ -21,4 +28,11 @@ export interface InstagramCollection {
   createdAt: string;
   updatedAt: string;
   userId: string;
+  
+  // Add any additional properties needed
+  instagramSource?: {
+    username: string;
+    lastFetched: string;
+    autoUpdate: boolean;
+  };
 }

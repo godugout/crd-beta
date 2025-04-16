@@ -1,8 +1,8 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Card, Collection } from '@/lib/types';
 import { toast } from 'sonner';
 import { adaptToCard } from '@/lib/adapters/cardAdapter';
-import { sampleCards } from '@/lib/sampleCards';
 import { 
   createCard, 
   updateCard, 
@@ -24,15 +24,14 @@ interface CardContextProps {
   isLoading: boolean;
   error: string | null;
   getCardById: (id: string) => Card | undefined;
-  addCard: (card: Partial<Card>) => Card;
-  updateCard: (id: string, updates: Partial<Card>) => boolean;
-  deleteCard: (id: string) => boolean;
-  createCollection: (collection: Partial<Collection>) => Collection;
-  updateCollection: (id: string, updates: Partial<Collection>) => Collection | null;
-  deleteCollection: (id: string) => boolean;
-  addCardToCollection: (cardId: string, collectionId: string) => boolean;
-  removeCardFromCollection: (cardId: string, collectionId: string) => boolean;
-  getCard?: (id: string) => Card | undefined;
+  addCard: (card: Partial<Card>) => Promise<Card>;
+  updateCard: (id: string, updates: Partial<Card>) => Promise<boolean>;
+  deleteCard: (id: string) => Promise<boolean>;
+  createCollection: (collection: Partial<Collection>) => Promise<Collection>;
+  updateCollection: (id: string, updates: Partial<Collection>) => Promise<Collection | null>;
+  deleteCollection: (id: string) => Promise<boolean>;
+  addCardToCollection: (cardId: string, collectionId: string) => Promise<boolean>;
+  removeCardFromCollection: (cardId: string, collectionId: string) => Promise<boolean>;
 }
 
 const CardContext = createContext<CardContextProps | undefined>(undefined);
@@ -133,8 +132,34 @@ export const CardProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return cards.find(card => card.id === id);
   };
 
-  const handleAddCard = (card: Partial<Card>): Card => {
+  const handleAddCard = async (card: Partial<Card>): Promise<Card> => {
     try {
+      // Make sure required fields are present
+      if (!card.title) {
+        card.title = 'Untitled Card';
+      }
+      if (!card.description) {
+        card.description = '';
+      }
+      if (!card.thumbnailUrl && card.imageUrl) {
+        card.thumbnailUrl = card.imageUrl;
+      }
+      if (!card.tags) {
+        card.tags = [];
+      }
+      if (!card.userId) {
+        card.userId = 'anonymous';
+      }
+      if (card.isPublic === undefined) {
+        card.isPublic = true;
+      }
+      if (!card.effects) {
+        card.effects = [];
+      }
+      if (!card.rarity) {
+        card.rarity = 'common';
+      }
+      
       const newCard = createCard(card);
       setCards(prevCards => [...prevCards, newCard]);
       return newCard;
@@ -257,7 +282,6 @@ export const CardProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isLoading,
     error,
     getCardById,
-    getCard: getCardById,
     addCard: handleAddCard,
     updateCard: handleUpdateCard,
     deleteCard: handleDeleteCard,

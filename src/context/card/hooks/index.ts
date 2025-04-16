@@ -1,25 +1,31 @@
 
-export * from './useCardOperations';
-export * from './useCollectionOperations';
+export { default as useCardOperations } from './useCardOperations';
+export { default as useCollectionOperations } from './useCollectionOperations';
 
-// Import the useCards hook directly from the CardContext
+import { useContext } from 'react';
 import { useCards } from '@/context/CardContext';
-// Use proper type export syntax
-import type { Card, Collection } from '@/context/CardContext';
-export { useCards };
-export type { Card, Collection };
 
-// This is a wrapper function that uses the CardContext to provide collection functionality
+/**
+ * Hook for card-related operations
+ */
+export const useCard = () => {
+  return useCards();
+};
+
+/**
+ * Hook for collection-related operations
+ */
 export const useCollection = () => {
-  // Using useCards() context to provide collection functionality
-  const { collections, addCollection, updateCollection, deleteCollection, addCardToCollection, removeCardFromCollection } = useCards();
+  const cardContext = useCards();
   
+  // Return all the collection-related operations from the CardContext
   return {
-    collections,
-    addCollection,
-    updateCollection,
-    deleteCollection,
-    addCardToCollection,
-    removeCardFromCollection
+    collections: cardContext.collections,
+    createCollection: cardContext.createCollection,
+    updateCollection: cardContext.updateCollection,
+    deleteCollection: cardContext.deleteCollection,
+    addCollection: cardContext.createCollection, // Alias for createCollection
+    addCardToCollection: cardContext.addCardToCollection,
+    removeCardFromCollection: cardContext.removeCardFromCollection
   };
 };

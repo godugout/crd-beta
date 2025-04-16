@@ -1,4 +1,3 @@
-
 export interface Card {
   id: string;
   title: string;
@@ -22,7 +21,7 @@ export interface Card {
   team?: string;
   year?: string;
   artist?: string;
-  set?: string; // Added for CardDetailPanel
+  set?: string;
   stats?: {
     battingAverage?: string;
     homeRuns?: string;
@@ -30,9 +29,11 @@ export interface Card {
     era?: string;
     wins?: string;
     strikeouts?: string;
+    careerYears?: string;
+    ranking?: string;
   };
-  fabricSwatches?: any[]; // Added for CardBack
-  viewCount?: number; // Added for CardGrid
+  fabricSwatches?: any[];
+  viewCount?: number;
   name?: string; // Alternative to title in some components
 }
 
@@ -45,13 +46,20 @@ export interface Collection {
   teamId?: string;
   cards: Card[];
   cardIds: string[];
-  visibility: 'public' | 'private' | 'unlisted' | 'team'; // Added 'team' to fix CollectionGrid error
+  visibility: 'public' | 'private' | 'unlisted' | 'team'; // Includes 'team'
   allowComments: boolean;
   isPublic: boolean;
   createdAt: string;
   updatedAt: string;
   designMetadata: Record<string, any>;
-  tags?: string[]; // Added for InstagramCollectionCreator
+  tags?: string[];
+  
+  // Add instagramSource property
+  instagramSource?: {
+    username: string;
+    lastFetched: string;
+    autoUpdate: boolean;
+  };
 }
 
 export interface OaklandMemoryData {
@@ -70,14 +78,12 @@ export interface OaklandMemoryData {
   personalSignificance?: string;
 }
 
-// Add BaseEntity for common fields
 export interface BaseEntity {
   id: string;
   createdAt: string;
   updatedAt: string;
 }
 
-// Define JsonValue for use in other files
 export type JsonValue = 
   | string
   | number

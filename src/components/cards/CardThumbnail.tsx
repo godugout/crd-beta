@@ -1,107 +1,60 @@
 
 import React from 'react';
-import { Card } from '@/lib/types';
 import { cn } from '@/lib/utils';
-import CardBase from './CardBase';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export interface CardThumbnailProps {
-  /**
-   * Card data to display
-   */
-  card: Card;
-  
-  /**
-   * Optional className for styling
-   */
+  src: string;
+  alt: string;
   className?: string;
-  
-  /**
-   * Function to call when the card is clicked
-   */
-  onClick?: (cardId: string) => void;
-  
-  /**
-   * Whether to apply special effects to the card
-   * @default false
-   */
-  enableEffects?: boolean;
-  
-  /**
-   * List of effects to apply to the card
-   */
-  activeEffects?: string[];
-  
-  /**
-   * Whether to show info overlay
-   * @default false
-   */
-  showInfo?: boolean;
+  onClick?: () => void;
+  priority?: boolean;
 }
 
 const CardThumbnail: React.FC<CardThumbnailProps> = ({
-  card,
+  src,
+  alt,
   className,
   onClick,
-  enableEffects = false,
-  activeEffects = [],
-  showInfo = false
+  priority = false
 }) => {
-  // Handle click on the card
-  const handleClick = () => {
-    if (onClick) {
-      onClick(card.id);
-    }
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [hasError, setHasError] = React.useState(false);
+  
+  const handleLoad = () => {
+    setIsLoading(false);
   };
-
-  // Use a fallback image if the card image is not available
-  const imageUrl = card.thumbnailUrl || card.imageUrl || '/placeholder-card.png';
-
+  
+  const handleError = () => {
+    setIsLoading(false);
+    setHasError(true);
+  };
+  
   return (
-    <div
-      className={cn(
-        "group relative overflow-hidden rounded-lg shadow-md hover:shadow-lg transition-all duration-300",
-        className
+    <div className={cn('relative overflow-hidden', className)}>
+      {isLoading && (
+        <Skeleton className="absolute inset-0 z-10 bg-gray-200" />
       )}
-      onClick={handleClick}
-    >
-      {/* Card Image */}
-      <div className="aspect-[2.5/3.5] bg-gray-200 dark:bg-gray-800 relative overflow-hidden">
-        <img
-          src={imageUrl}
-          alt={card.title}
-          className="w-full h-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
-        />
-        
-        {/* Info Overlay */}
-        <div className={cn(
-          "absolute inset-0 bg-gradient-to-t from-black/70 to-transparent transition-opacity duration-300 flex flex-col justify-end p-3",
-          showInfo ? "opacity-100" : "opacity-0 group-hover:opacity-100"
-        )}>
-          {/* Tags */}
-          {card.tags && card.tags.length > 0 && (
-            <div className="flex flex-wrap gap-1 mb-2">
-              {card.tags.slice(0, 3).map((tag, index) => (
-                <span key={index} className="text-xs bg-white/20 text-white px-1.5 py-0.5 rounded-full">
-                  {tag}
-                </span>
-              ))}
-              {card.tags.length > 3 && (
-                <span className="text-xs bg-white/20 text-white px-1.5 py-0.5 rounded-full">
-                  +{card.tags.length - 3}
-                </span>
-              )}
-            </div>
-          )}
-          
-          {/* Title */}
-          <h3 className="text-white font-semibold line-clamp-1">{card.title}</h3>
-          
-          {/* Description */}
-          {card.description && (
-            <p className="text-white/80 text-xs line-clamp-2 mt-1">{card.description}</p>
-          )}
+      
+      {hasError ? (
+        <div className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-400">
+          <span className="text-sm">Image unavailable</span>
         </div>
-      </div>
+      ) : (
+        <img
+          src={src}
+          alt={alt}
+          className={cn(
+            'w-full h-full object-cover transition-opacity duration-300',
+            isLoading ? 'opacity-0' : 'opacity-100',
+            onClick ? 'cursor-pointer' : ''
+          )}
+          loading={priority ? 'eager' : 'lazy'}
+          onLoad={handleLoad}
+          onError={handleError}
+          onClick={onClick}
+        />
+      )}
     </div>
   );
 };

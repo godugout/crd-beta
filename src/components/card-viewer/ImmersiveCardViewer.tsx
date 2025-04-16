@@ -1,16 +1,44 @@
 
 import React, { useRef, useEffect, useState } from 'react';
-import { Card as IndexCard } from '@/lib/types';
-import { Card as CardTypesCard } from '@/lib/types/cardTypes';
+import { Card } from '@/lib/types';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
 import Card3DRenderer from './Card3DRenderer';
 import { useToast } from '@/hooks/use-toast';
-import { DEFAULT_DESIGN_METADATA, FALLBACK_IMAGE_URL } from '@/lib/utils/cardDefaults';
 import { convertIndexCardToCardTypesCard } from '@/lib/adapters/typeAdapters';
 
+// Define fallback constants
+const FALLBACK_IMAGE_URL = 'https://images.unsplash.com/photo-1518770660439-4636190af475';
+const DEFAULT_DESIGN_METADATA = {
+  cardStyle: {
+    template: 'standard',
+    effect: 'standard',
+    borderRadius: '8px',
+    borderColor: '#000000',
+    shadowColor: '#000000',
+    frameWidth: 5,
+    frameColor: '#000000'
+  },
+  textStyle: {
+    titleColor: '#000000',
+    titleAlignment: 'center',
+    titleWeight: 'bold',
+    descriptionColor: '#333333'
+  },
+  cardMetadata: {
+    category: 'standard',
+    series: 'default',
+    cardType: 'standard'
+  },
+  marketMetadata: {
+    isPrintable: true,
+    isForSale: false,
+    includeInCatalog: false
+  }
+};
+
 interface ImmersiveCardViewerProps {
-  card: IndexCard;
+  card: Card;
   isFlipped?: boolean;
   activeEffects: string[];
   effectIntensities?: Record<string, number>;
@@ -24,66 +52,73 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
-  const [processedCard, setProcessedCard] = useState<CardTypesCard | null>(null);
+  const [processedCard, setProcessedCard] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   
   // Convert IndexCard to CardTypesCard and validate images
   useEffect(() => {
-    const validateCardImages = async () => {
-      setIsLoading(true);
-      
-      try {
-        // Convert the index card to card types card
-        const cardTypesCard = convertIndexCardToCardTypesCard(card);
-
-        // Ensure we have valid image URL
-        if (!cardTypesCard.imageUrl || cardTypesCard.imageUrl === 'undefined') {
-          console.warn(`Card ${cardTypesCard.id} is missing an image URL, using fallback`);
-          cardTypesCard.imageUrl = FALLBACK_IMAGE_URL;
-          
-          toast({
-            title: "Using fallback image",
-            description: "The original card image couldn't be loaded",
-            variant: "default",
-            duration: 3000
-          });
-        }
-        
-        // Also ensure we have a thumbnail URL
-        if (!cardTypesCard.thumbnailUrl || cardTypesCard.thumbnailUrl === 'undefined') {
-          cardTypesCard.thumbnailUrl = cardTypesCard.imageUrl || FALLBACK_IMAGE_URL;
-        }
-
-        // Set up imagePreload to validate that images actually load
-        const image = new Image();
-        image.onload = () => {
-          console.log(`Image loaded successfully: ${cardTypesCard.imageUrl}`);
-          setProcessedCard(cardTypesCard);
-          setIsLoading(false);
-        };
-        image.onerror = () => {
-          console.error(`Failed to load image: ${cardTypesCard.imageUrl}, using fallback`);
-          cardTypesCard.imageUrl = FALLBACK_IMAGE_URL;
-          cardTypesCard.thumbnailUrl = FALLBACK_IMAGE_URL;
-          setProcessedCard(cardTypesCard);
-          setIsLoading(false);
-        };
-        image.src = cardTypesCard.imageUrl;
-        
-      } catch (error) {
-        console.error("Error during card processing:", error);
-        // Create a minimal valid card with fallback image
-        const fallbackCard = convertIndexCardToCardTypesCard({
-          ...card,
-          imageUrl: FALLBACK_IMAGE_URL,
-          thumbnailUrl: FALLBACK_IMAGE_URL
-        });
-        setProcessedCard(fallbackCard);
-        setIsLoading(false);
-      }
-    };
+    setIsLoading(true);
     
-    validateCardImages();
+    try {
+      // Make sure the card has the required properties
+      const cardWithDefaults = {
+        ...card,
+        isPublic: card.isPublic !== false, // Default to true if not explicitly set to false
+        effects: card.effects || [],
+        rarity: card.rarity || 'common'
+      };
+
+      // Convert the card to compatible format for Card3DRenderer
+      const convertedCard = convertIndexCardToCardTypesCard(cardWithDefaults);
+
+      // Ensure we have valid image URL
+      if (!convertedCard.imageUrl || convertedCard.imageUrl === 'undefined') {
+        console.warn(`Card ${convertedCard.id} is missing an image URL, using fallback`);
+        convertedCard.imageUrl = FALLBACK_IMAGE_URL;
+        
+        toast({
+          title: "Using fallback image",
+          description: "The original card image couldn't be loaded",
+          variant: "default",
+          duration: 3000
+        });
+      }
+      
+      // Also ensure we have a thumbnail URL
+      if (!convertedCard.thumbnailUrl || convertedCard.thumbnailUrl === 'undefined') {
+        convertedCard.thumbnailUrl = convertedCard.imageUrl || FALLBACK_IMAGE_URL;
+      }
+
+      // Set up imagePreload to validate that images actually load
+      const image = new Image();
+      image.onload = () => {
+        console.log(`Image loaded successfully: ${convertedCard.imageUrl}`);
+        setProcessedCard(convertedCard);
+        setIsLoading(false);
+      };
+      image.onerror = () => {
+        console.error(`Failed to load image: ${convertedCard.imageUrl}, using fallback`);
+        convertedCard.imageUrl = FALLBACK_IMAGE_URL;
+        convertedCard.thumbnailUrl = FALLBACK_IMAGE_URL;
+        setProcessedCard(convertedCard);
+        setIsLoading(false);
+      };
+      image.src = convertedCard.imageUrl;
+      
+    } catch (error) {
+      console.error("Error during card processing:", error);
+      // Create a minimal valid card with fallback image
+      const fallbackCard = convertIndexCardToCardTypesCard({
+        ...card,
+        imageUrl: FALLBACK_IMAGE_URL,
+        thumbnailUrl: FALLBACK_IMAGE_URL,
+        isPublic: true,
+        effects: [],
+        rarity: 'common'
+      });
+      setProcessedCard(fallbackCard);
+      setIsLoading(false);
+    }
   }, [card, toast]);
   
   if (isLoading || !processedCard) {
