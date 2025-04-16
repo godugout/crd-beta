@@ -14,7 +14,17 @@ interface TownInfo {
 }
 
 const TownBreadcrumb: React.FC<TownBreadcrumbProps> = ({ currentPage }) => {
-  const { townId } = useParams<{ townId?: string }>();
+  let townId;
+  
+  try {
+    // Wrap in try/catch to handle usage outside Router context
+    const params = useParams<{ townId?: string }>();
+    townId = params.townId;
+  } catch (error) {
+    console.warn('TownBreadcrumb: useParams hook failed, router context might be missing');
+    return null;
+  }
+  
   const [townInfo, setTownInfo] = useState<TownInfo>({ name: '' });
   
   useEffect(() => {

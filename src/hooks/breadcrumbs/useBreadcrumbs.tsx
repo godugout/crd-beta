@@ -22,9 +22,16 @@ import { createHandlerChain } from './createHandlerChain';
  * Hook to generate breadcrumbs based on current route
  */
 export const useBreadcrumbs = (currentTeam?: Team | null): BreadcrumbItem[] => {
-  const location = useLocation();
-  const pathSegments = location.pathname.split('/').filter(Boolean);
+  // Wrap useLocation in try/catch to handle usage outside Router context
+  let location;
+  try {
+    location = useLocation();
+  } catch (error) {
+    console.warn('useBreadcrumbs: useLocation hook failed, router context might be missing');
+    return [createHomeBreadcrumb()]; // Default to just home breadcrumb when no router
+  }
   
+  const pathSegments = location.pathname.split('/').filter(Boolean);
   const breadcrumbs: BreadcrumbItem[] = [];
   
   // Always add home

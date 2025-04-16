@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useLocation } from 'react-router-dom';
 import { ChevronRight, Home, Users } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -14,7 +14,17 @@ interface TeamInfo {
 }
 
 const TeamBreadcrumb: React.FC<TeamBreadcrumbProps> = ({ currentPage }) => {
-  const { teamSlug } = useParams<{ teamSlug?: string }>();
+  let teamSlug;
+  
+  try {
+    // Wrap in try/catch to handle usage outside Router context
+    const params = useParams<{ teamSlug?: string }>();
+    teamSlug = params.teamSlug;
+  } catch (error) {
+    console.warn('TeamBreadcrumb: useParams hook failed, router context might be missing');
+    return null;
+  }
+  
   const [teamInfo, setTeamInfo] = useState<TeamInfo>({ name: '' });
   
   useEffect(() => {

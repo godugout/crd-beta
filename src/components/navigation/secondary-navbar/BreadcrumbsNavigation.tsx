@@ -15,7 +15,15 @@ interface BreadcrumbsNavigationProps {
 }
 
 export const BreadcrumbsNavigation: React.FC<BreadcrumbsNavigationProps> = ({ isCollapsed }) => {
-  const { breadcrumbs } = useBreadcrumbs();
+  let breadcrumbs = [];
+  
+  try {
+    const context = useBreadcrumbs();
+    breadcrumbs = context.breadcrumbs;
+  } catch (error) {
+    console.warn('BreadcrumbsNavigation: useBreadcrumbs failed, context might be missing');
+    return null;
+  }
   
   if (breadcrumbs.length <= 1) return null;
   
@@ -29,7 +37,7 @@ export const BreadcrumbsNavigation: React.FC<BreadcrumbsNavigationProps> = ({ is
             const isLast = index === breadcrumbs.length - 1;
             
             return (
-              <React.Fragment key={crumb.path}>
+              <React.Fragment key={crumb.path || index}>
                 <BreadcrumbItemComponent crumb={crumb} isLast={isLast} />
                 
                 {!isLast && (
