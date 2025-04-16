@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Card, Collection } from '@/lib/types';
 import { toast } from 'sonner';
@@ -15,6 +14,7 @@ import {
   updateCollection,
   deleteCollection 
 } from '@/lib/card/collectionOperations';
+import sampleCards from '@/data/sampleCards';
 
 export type { Card, Collection };
 
@@ -24,7 +24,7 @@ interface CardContextProps {
   isLoading: boolean;
   error: string | null;
   getCardById: (id: string) => Card | undefined;
-  addCard: (card: Partial<Card>) => Promise<Card>;
+  addCard: (card: Omit<Card, "id" | "createdAt" | "updatedAt">) => Promise<Card>;
   updateCard: (id: string, updates: Partial<Card>) => Promise<boolean>;
   deleteCard: (id: string) => Promise<boolean>;
   createCollection: (collection: Partial<Collection>) => Promise<Collection>;
@@ -132,35 +132,9 @@ export const CardProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return cards.find(card => card.id === id);
   };
 
-  const handleAddCard = async (card: Partial<Card>): Promise<Card> => {
+  const handleAddCard = async (cardData: Omit<Card, "id" | "createdAt" | "updatedAt">): Promise<Card> => {
     try {
-      // Make sure required fields are present
-      if (!card.title) {
-        card.title = 'Untitled Card';
-      }
-      if (!card.description) {
-        card.description = '';
-      }
-      if (!card.thumbnailUrl && card.imageUrl) {
-        card.thumbnailUrl = card.imageUrl;
-      }
-      if (!card.tags) {
-        card.tags = [];
-      }
-      if (!card.userId) {
-        card.userId = 'anonymous';
-      }
-      if (card.isPublic === undefined) {
-        card.isPublic = true;
-      }
-      if (!card.effects) {
-        card.effects = [];
-      }
-      if (!card.rarity) {
-        card.rarity = 'common';
-      }
-      
-      const newCard = createCard(card);
+      const newCard = createCard(cardData);
       setCards(prevCards => [...prevCards, newCard]);
       return newCard;
     } catch (error: any) {
@@ -169,25 +143,25 @@ export const CardProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const handleUpdateCard = (id: string, updates: Partial<Card>): boolean => {
+  const handleUpdateCard = async (id: string, updates: Partial<Card>): Promise<boolean> => {
     try {
       const updatedCards = updateCard(id, updates, cards);
       setCards(updatedCards);
-      return true;
+      return Promise.resolve(true);
     } catch (error: any) {
       setError(error.message || 'Failed to update card');
-      return false;
+      return Promise.resolve(false);
     }
   };
 
-  const handleDeleteCard = (id: string): boolean => {
+  const handleDeleteCard = async (id: string): Promise<boolean> => {
     try {
       const filteredCards = deleteCard(id, cards);
       setCards(filteredCards);
-      return true;
+      return Promise.resolve(true);
     } catch (error: any) {
       setError(error.message || 'Failed to delete card');
-      return false;
+      return Promise.resolve(false);
     }
   };
 
@@ -276,7 +250,7 @@ export const CardProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const value = {
+  const value: CardContextProps = {
     cards,
     collections,
     isLoading,

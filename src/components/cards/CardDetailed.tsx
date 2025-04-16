@@ -52,7 +52,7 @@ export interface CardDetailedProps {
 /**
  * Detailed card component that displays card with actions and detailed info
  */
-export const CardDetailed: React.FC<CardDetailedProps> = ({
+const CardDetailed: React.FC<CardDetailedProps> = ({
   card,
   className,
   onView,
@@ -77,11 +77,13 @@ export const CardDetailed: React.FC<CardDetailedProps> = ({
       <div className="flex justify-center">
         <div className="max-w-md w-full">
           <CardThumbnail 
-            card={card} 
-            onClick={() => onView && onView(card.id)}
+            src={card.thumbnailUrl || card.imageUrl}
+            alt={card.title}
+            card={card}
             enableEffects={enableEffects}
             activeEffects={activeEffects} 
             className="shadow-lg"
+            onClick={() => onView && onView(card.id)}
           />
           
           {/* Action Buttons */}
@@ -185,6 +187,20 @@ export const CardDetailed: React.FC<CardDetailedProps> = ({
             <div>
               <h3 className="text-sm font-medium text-gray-500">Year</h3>
               <p>{card.year}</p>
+            </div>
+          )}
+          
+          {card.artist && (
+            <div>
+              <h3 className="text-sm font-medium text-gray-500">Artist</h3>
+              <p>{card.artist}</p>
+            </div>
+          )}
+          
+          {card.set && (
+            <div>
+              <h3 className="text-sm font-medium text-gray-500">Set</h3>
+              <p>{card.set}</p>
             </div>
           )}
         </div>

@@ -51,8 +51,10 @@ const CardGrid: React.FC<CardGridProps> = ({
         case 'alphabetical':
           return a.title.localeCompare(b.title);
         case 'popularity':
-          // Assuming viewCount is a metric for popularity
-          return (b.viewCount || 0) - (a.viewCount || 0);
+          // Safely handle viewCount which might be undefined
+          const viewCountA = a.viewCount || 0;
+          const viewCountB = b.viewCount || 0;
+          return viewCountB - viewCountA;
         default:
           return 0;
       }
@@ -78,9 +80,10 @@ const CardGrid: React.FC<CardGridProps> = ({
       {filteredCards.map(card => (
         <CardThumbnail
           key={card.id}
-          card={card}
+          src={card.thumbnailUrl || card.imageUrl}
+          alt={card.title}
           onClick={() => onCardClick(card.id)}
-          className="transition-all duration-300 hover:shadow-lg hover:scale-[1.02]"
+          className="transition-all duration-300 hover:shadow-lg hover:scale-[1.02] aspect-[2.5/3.5]"
         />
       ))}
     </div>

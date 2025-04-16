@@ -2,6 +2,7 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Card as CardType } from '@/lib/types';
 
 export interface CardThumbnailProps {
   src: string;
@@ -9,6 +10,9 @@ export interface CardThumbnailProps {
   className?: string;
   onClick?: () => void;
   priority?: boolean;
+  card?: CardType; // Added card prop to support both usage patterns
+  enableEffects?: boolean; // Added for compatibility with other components
+  activeEffects?: string[]; // Added for compatibility with other components
 }
 
 const CardThumbnail: React.FC<CardThumbnailProps> = ({
@@ -16,10 +20,17 @@ const CardThumbnail: React.FC<CardThumbnailProps> = ({
   alt,
   className,
   onClick,
-  priority = false
+  priority = false,
+  card, // New card prop
+  enableEffects = false,
+  activeEffects = []
 }) => {
   const [isLoading, setIsLoading] = React.useState(true);
   const [hasError, setHasError] = React.useState(false);
+  
+  // If card prop is provided, use its imageUrl or thumbnailUrl
+  const imageUrl = card ? (card.thumbnailUrl || card.imageUrl) : src;
+  const imageAlt = card ? card.title : alt;
   
   const handleLoad = () => {
     setIsLoading(false);
@@ -28,6 +39,12 @@ const CardThumbnail: React.FC<CardThumbnailProps> = ({
   const handleError = () => {
     setIsLoading(false);
     setHasError(true);
+  };
+  
+  const handleClick = () => {
+    if (onClick) {
+      onClick();
+    }
   };
   
   return (
@@ -42,8 +59,8 @@ const CardThumbnail: React.FC<CardThumbnailProps> = ({
         </div>
       ) : (
         <img
-          src={src}
-          alt={alt}
+          src={imageUrl}
+          alt={imageAlt}
           className={cn(
             'w-full h-full object-cover transition-opacity duration-300',
             isLoading ? 'opacity-0' : 'opacity-100',
@@ -52,8 +69,15 @@ const CardThumbnail: React.FC<CardThumbnailProps> = ({
           loading={priority ? 'eager' : 'lazy'}
           onLoad={handleLoad}
           onError={handleError}
-          onClick={onClick}
+          onClick={handleClick}
         />
+      )}
+      
+      {/* Apply effects if enabled */}
+      {enableEffects && activeEffects && activeEffects.length > 0 && (
+        <div className="absolute inset-0 pointer-events-none">
+          {/* Effects would be rendered here */}
+        </div>
       )}
     </div>
   );

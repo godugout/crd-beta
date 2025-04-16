@@ -1,54 +1,39 @@
 
 import { Card } from '@/lib/types';
 
-export const adaptToCard = (data: Partial<Card>): Card => {
-  // Create a valid Card object from potentially incomplete data
+/**
+ * Adapts a raw card object to the Card type
+ * @param cardData Raw card data
+ * @returns Properly typed Card object
+ */
+export const adaptToCard = (cardData: any): Card => {
   return {
-    id: data.id || '',
-    title: data.title || data.name || 'Untitled Card',
-    description: data.description || '',
-    imageUrl: data.imageUrl || '',
-    thumbnailUrl: data.thumbnailUrl || data.imageUrl || '',
-    tags: Array.isArray(data.tags) ? data.tags : [],
-    userId: data.userId || 'anonymous',
-    teamId: data.teamId || undefined,
-    collectionId: data.collectionId || undefined,
-    isPublic: data.isPublic !== undefined ? data.isPublic : true,
-    createdAt: data.createdAt || new Date().toISOString(),
-    updatedAt: data.updatedAt || new Date().toISOString(),
-    effects: Array.isArray(data.effects) ? data.effects : [],
-    designMetadata: data.designMetadata || {},
-    rarity: data.rarity || 'common',
+    id: cardData.id || '',
+    title: cardData.title || cardData.name || 'Untitled Card',
+    description: cardData.description || '',
+    imageUrl: cardData.imageUrl || '',
+    thumbnailUrl: cardData.thumbnailUrl || cardData.imageUrl || '',
+    tags: Array.isArray(cardData.tags) ? cardData.tags : [],
+    userId: cardData.userId || 'anonymous',
+    teamId: cardData.teamId,
+    collectionId: cardData.collectionId,
+    isPublic: cardData.isPublic !== undefined ? cardData.isPublic : true,
+    createdAt: cardData.createdAt || new Date().toISOString(),
+    updatedAt: cardData.updatedAt || new Date().toISOString(),
+    effects: Array.isArray(cardData.effects) ? cardData.effects : [],
+    designMetadata: cardData.designMetadata || {},
+    rarity: cardData.rarity || 'common',
     
-    // Add new properties needed by components
-    reactions: data.reactions || [],
-    player: data.player || data.designMetadata?.player || undefined,
-    team: data.team || data.designMetadata?.team || undefined,
-    year: data.year || data.designMetadata?.year || undefined,
-    artist: data.artist || data.designMetadata?.artist || undefined,
-    set: data.set || data.designMetadata?.set || undefined,
-    stats: data.stats || undefined,
-    fabricSwatches: data.fabricSwatches || undefined,
-    viewCount: data.viewCount || 0,
-    name: data.name || data.title // Ensure we have a name property for backward compatibility
+    // Optional properties
+    player: cardData.player,
+    team: cardData.team,
+    year: cardData.year,
+    artist: cardData.artist,
+    set: cardData.set,
+    stats: cardData.stats,
+    fabricSwatches: cardData.fabricSwatches,
+    viewCount: cardData.viewCount,
+    name: cardData.name,
+    reactions: cardData.reactions,
   };
-};
-
-// Add helper functions for handling specific card properties
-export const getCardPlayer = (card: Card): string | undefined => {
-  return card.player || 
-    card.designMetadata?.player || 
-    card.designMetadata?.cardMetadata?.player;
-};
-
-export const getCardTeam = (card: Card): string | undefined => {
-  return card.team || 
-    card.designMetadata?.team || 
-    card.designMetadata?.cardMetadata?.team;
-};
-
-export const getCardYear = (card: Card): string | undefined => {
-  return card.year || 
-    card.designMetadata?.year || 
-    card.designMetadata?.cardMetadata?.year;
 };
