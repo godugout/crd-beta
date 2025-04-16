@@ -62,8 +62,8 @@ const CardGallery: React.FC<CardGalleryProps> = ({
     if (onCardClick) {
       onCardClick(cardId);
     } else {
-      // Route to immersive card viewer
-      navigate(`/view/${cardId}`);
+      // Navigate to card detail page
+      navigate(`/cards/${cardId}`);
     }
   };
 

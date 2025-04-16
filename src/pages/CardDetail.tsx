@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import PageLayout from '@/components/navigation/PageLayout';
 import { Button } from '@/components/ui/button';
@@ -8,12 +8,14 @@ import { ArrowLeft } from 'lucide-react';
 import CardDetailed from '@/components/cards/CardDetailed';
 import RelatedCards from '@/components/cards/RelatedCards';
 import { useCardOperations } from '@/hooks/useCardOperations';
+import FullscreenViewer from '@/components/gallery/FullscreenViewer';
 
 const CardDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { cards, getCard } = useCards();
   const cardOperations = useCardOperations();
+  const [showViewer, setShowViewer] = useState(true);
   
   // Find the card with the matching ID
   const card = getCard ? getCard(id || '') : cards.find(c => c.id === id);
@@ -51,6 +53,16 @@ const CardDetail = () => {
   const handleDeleteSuccess = () => {
     navigate('/cards');
   };
+
+  // If showing the viewer, render it as an overlay
+  if (showViewer) {
+    return (
+      <FullscreenViewer 
+        cardId={id || ''} 
+        onClose={() => setShowViewer(false)} 
+      />
+    );
+  }
   
   return (
     <PageLayout
@@ -67,7 +79,7 @@ const CardDetail = () => {
         
         <CardDetailed 
           card={card}
-          onView={cardOperations.viewCard}
+          onView={() => setShowViewer(true)}
           onEdit={cardOperations.editCard}
           onShare={() => cardOperations.shareCard(card)}
           onDelete={(id) => cardOperations.removeCard(id, handleDeleteSuccess)}

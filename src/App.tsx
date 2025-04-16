@@ -7,7 +7,6 @@ import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
 import NotFound from './pages/NotFound';
 import CardCollectionPage from './pages/CardCollectionPage';
-import ImmersiveCardViewer from './pages/ImmersiveCardViewer';
 import BaseballCardViewer from './pages/BaseballCardViewer';
 import BaseballActionFigure from './pages/BaseballActionFigure';
 import { CardProvider } from './context/CardContext';
@@ -120,28 +119,6 @@ function App() {
             <Route path="/about" element={<AboutPage />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/cards" element={<CardCollectionPage />} />
-            <Route path="/view/:id" element={
-              <ImmersiveCardViewer card={{
-                id: "",
-                title: "",
-                imageUrl: "",
-                effects: [],
-                userId: "",
-                createdAt: "",
-                updatedAt: "",
-                description: "",
-                stats: {
-                  battingAverage: "",
-                  homeRuns: "",
-                  rbis: "",
-                  era: "",
-                  wins: "",
-                  strikeouts: "",
-                  careerYears: "",
-                  ranking: ""
-                }
-              }} />
-            } />
             <Route path="/baseball-card-viewer" element={<BaseballCardViewer />} />
             <Route path="/baseball-action-figure" element={<BaseballActionFigure />} />
             
