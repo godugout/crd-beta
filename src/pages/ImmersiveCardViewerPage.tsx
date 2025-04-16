@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -9,11 +8,25 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
+import KeyboardControls from '@/components/card-viewer/KeyboardControls';
+import CardEffectsPanel from '@/components/gallery/viewer-components/CardEffectsPanel';
+import { useCardEffects } from '@/hooks/useCardEffects';
 
 const ImmersiveCardViewerPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
+  
+  const [isFlipped, setIsFlipped] = useState(false);
+  const [showEffects, setShowEffects] = useState(true);
+  const [activeEffects, setActiveEffects] = useState<string[]>([]);
+  const [effectIntensities, setEffectIntensities] = useState({
+    Holographic: 0.7,
+    Refractor: 0.8,
+    Shimmer: 0.6,
+    Gold: 0.7,
+    Vintage: 0.5
+  });
 
   const { data: card, isLoading, error } = useQuery({
     queryKey: ['card', id],
@@ -21,31 +34,41 @@ const ImmersiveCardViewerPage = () => {
     enabled: !!id
   });
 
-  // Log card data to help with debugging
   useEffect(() => {
-    if (card) {
-      console.log("Card loaded successfully:", card);
-      console.log("Image URL:", card.imageUrl);
-    } else if (error) {
-      console.error("Error loading card:", error);
-    }
-  }, [card, error]);
+    const handleKeyPress = (e: KeyboardEvent) => {
+      switch(e.key.toLowerCase()) {
+        case 'f':
+          setIsFlipped(prev => !prev);
+          break;
+        case 'e':
+          setShowEffects(prev => !prev);
+          break;
+        case 'escape':
+          setShowEffects(false);
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, []);
 
   const handleBack = () => {
     navigate(-1);
   };
 
-  // Add fallback images if card data is available but image URL is missing
-  useEffect(() => {
-    if (card && !card.imageUrl) {
-      console.log("Adding fallback image to card");
-      card.imageUrl = "https://images.unsplash.com/photo-1518770660439-4636190af475";
-      toast({
-        title: "Using fallback image",
-        description: "The original card image couldn't be loaded",
-      });
-    }
-  }, [card, toast]);
+  const handleEffectToggle = (effect: string) => {
+    setActiveEffects(prev => 
+      prev.includes(effect) ? prev.filter(e => e !== effect) : [...prev, effect]
+    );
+  };
+
+  const handleEffectIntensityChange = (effect: string, intensity: number) => {
+    setEffectIntensities(prev => ({
+      ...prev,
+      [effect]: intensity
+    }));
+  };
 
   if (isLoading) {
     return (
@@ -89,16 +112,38 @@ const ImmersiveCardViewerPage = () => {
   }
 
   return (
-    <PageLayout title={`3D View: ${card.title}`} fullWidth>
-      <div className="p-6">
-        <Button variant="ghost" onClick={handleBack} className="mb-6">
+    <PageLayout title={`3D View: ${card.title}`} fullWidth className="bg-gray-900">
+      <div className="relative min-h-screen">
+        <Button 
+          variant="ghost" 
+          onClick={handleBack} 
+          className="absolute top-4 left-4 z-50 text-white"
+        >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back
         </Button>
         
-        <div className="h-[600px] w-full bg-gray-900 rounded-lg">
-          <ImmersiveCardViewer card={card} />
+        <div className="absolute inset-0 flex items-center justify-center">
+          <ImmersiveCardViewer 
+            card={card}
+            isFlipped={isFlipped}
+            activeEffects={activeEffects}
+            effectIntensities={effectIntensities}
+          />
         </div>
+
+        {showEffects && (
+          <div className="absolute left-4 top-20 bottom-4 w-80 pointer-events-auto">
+            <CardEffectsPanel 
+              activeEffects={activeEffects}
+              onToggleEffect={handleEffectToggle}
+              onEffectIntensityChange={handleEffectIntensityChange}
+              effectIntensities={effectIntensities}
+            />
+          </div>
+        )}
+
+        <KeyboardControls />
       </div>
     </PageLayout>
   );
