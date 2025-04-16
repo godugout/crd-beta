@@ -18,7 +18,33 @@ export const adaptCard = (card: any): Card => {
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     effects: [],
-    designMetadata: {},
+    designMetadata: {
+      cardStyle: {
+        template: 'standard',
+        effect: 'standard',
+        borderRadius: '8px',
+        borderColor: '#000000',
+        shadowColor: '#000000',
+        frameWidth: 5,
+        frameColor: '#000000'
+      },
+      textStyle: {
+        titleColor: '#000000',
+        titleAlignment: 'center',
+        titleWeight: 'bold',
+        descriptionColor: '#333333'
+      },
+      cardMetadata: {
+        category: 'standard',
+        series: 'default',
+        cardType: 'standard'
+      },
+      marketMetadata: {
+        isPrintable: true,
+        isForSale: false,
+        includeInCatalog: false
+      }
+    },
     rarity: 'common',
   };
   
@@ -28,8 +54,11 @@ export const adaptCard = (card: any): Card => {
     ...card,
     // Ensure thumbnailUrl has a value if not provided
     thumbnailUrl: card.thumbnailUrl || card.imageUrl || defaultCardData.thumbnailUrl,
-    // Ensure designMetadata is an object
-    designMetadata: card.designMetadata || {},
+    // Ensure designMetadata is an object with required properties
+    designMetadata: {
+      ...defaultCardData.designMetadata,
+      ...card.designMetadata
+    },
     // Ensure tags is an array
     tags: Array.isArray(card.tags) ? card.tags : [],
     // Ensure effects is an array
@@ -49,4 +78,12 @@ export const isCard = (obj: any): obj is Card => {
     typeof obj.imageUrl === 'string' &&
     Array.isArray(obj.tags)
   );
+};
+
+/**
+ * Converts an index card to a card types card
+ * This handles compatibility between different card schemas
+ */
+export const convertIndexCardToCardTypesCard = (card: any): Card => {
+  return adaptCard(card);
 };

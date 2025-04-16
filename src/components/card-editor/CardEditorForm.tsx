@@ -53,16 +53,17 @@ const CardEditorForm: React.FC<CardEditorFormProps> = ({
     try {
       setIsLoading(true);
       
-      const cardData: Partial<Card> = {
-        title,
+      // Ensure all required fields are present for the Card type
+      const cardData = {
+        title, // Non-optional now
         description,
         imageUrl,
         thumbnailUrl: imageUrl,
         tags,
-        isPublic: true, // Set default value for required field
-        userId: 'anonymous', // Set default value for required field
-        effects: [], // Set default value for required field
-        rarity: 'common', // Set default value for required field
+        isPublic: true,
+        userId: 'anonymous',
+        effects: [],
+        rarity: 'common',
         designMetadata: card?.designMetadata || DEFAULT_DESIGN_METADATA
       };
       

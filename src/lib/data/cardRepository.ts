@@ -1,3 +1,4 @@
+
 import { supabase } from '@/lib/supabase';
 import { Card, Collection } from '@/lib/types';
 import { v4 as uuidv4 } from 'uuid';
@@ -50,7 +51,7 @@ export const createCard = async (card: Partial<Card>): Promise<Card> => {
 
 // Helper function to map database structure to Card interface
 const mapDbCardToCard = (dbCard: any): Card => {
-  return {
+  return adaptToCard({
     id: dbCard.id,
     title: dbCard.title,
     description: dbCard.description,
@@ -64,8 +65,9 @@ const mapDbCardToCard = (dbCard: any): Card => {
     teamId: dbCard.team_id,
     isPublic: dbCard.is_public,
     designMetadata: dbCard.design_metadata || DEFAULT_DESIGN_METADATA,
-    effects: dbCard.effects || [], // Add required effects property
-  };
+    effects: dbCard.effects || [],
+    rarity: dbCard.rarity || 'common',
+  });
 };
 
 // Demo function to fetch cards (for development)
@@ -108,7 +110,7 @@ export const fetchCards = async (options?: {
     
     // For development, return mock data
     return [
-      {
+      adaptToCard({
         id: '1',
         title: 'Sample Card 1',
         description: 'This is a sample card',
@@ -122,9 +124,10 @@ export const fetchCards = async (options?: {
         teamId: 'team1',
         isPublic: true,
         designMetadata: DEFAULT_DESIGN_METADATA,
-        effects: [], // Add required effects property
-      },
-      {
+        effects: [],
+        rarity: 'common',
+      }),
+      adaptToCard({
         id: '2',
         title: 'Sample Card 2',
         description: 'Another sample card',
@@ -138,8 +141,9 @@ export const fetchCards = async (options?: {
         teamId: 'team1',
         isPublic: true,
         designMetadata: DEFAULT_DESIGN_METADATA,
-        effects: ['Holographic'], // Add required effects property
-      },
+        effects: ['Holographic'],
+        rarity: 'rare',
+      }),
     ];
   } catch (error) {
     console.error('Error fetching cards:', error);
@@ -149,7 +153,7 @@ export const fetchCards = async (options?: {
 
 // Function to convert database records to Card objects
 export const convertDbRecordsToCards = (records: any[]): Card[] => {
-  return records.map(record => ({
+  return records.map(record => adaptToCard({
     id: record.id,
     title: record.title,
     description: record.description,
@@ -163,6 +167,7 @@ export const convertDbRecordsToCards = (records: any[]): Card[] => {
     teamId: record.teamId,
     isPublic: record.isPublic,
     designMetadata: record.designMetadata || DEFAULT_DESIGN_METADATA,
-    effects: record.effects || [], // Add required effects property
+    effects: record.effects || [],
+    rarity: record.rarity || 'common',
   }));
 };

@@ -1,92 +1,88 @@
 
-import { Card } from '@/lib/types';
+import { v4 as uuidv4 } from 'uuid';
 
-const sampleCards: Card[] = [
+const sampleCards = [
   {
-    id: 'card-001',
-    title: 'Oakland Athletics - Classic Card',
-    description: 'A classic baseball card featuring the Oakland Athletics team from the golden era.',
-    imageUrl: '/lovable-uploads/236e3ad9-f7c2-4e5b-b29a-ca52a49ff3ed.png',
-    thumbnailUrl: '/lovable-uploads/236e3ad9-f7c2-4e5b-b29a-ca52a49ff3ed.png',
-    tags: ['Baseball', 'Oakland', 'Historic'],
-    userId: 'user-1',
-    teamId: 'team-oakland',
+    id: uuidv4(),
+    title: 'Vintage Baseball Card',
+    description: 'A classic baseball card from the golden era',
+    imageUrl: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=200',
+    tags: ['baseball', 'vintage', 'collectible'],
+    userId: 'anonymous',
     isPublic: true,
-    createdAt: '2023-04-15T10:30:00Z',
-    updatedAt: '2023-04-15T10:30:00Z',
-    effects: ['Vintage'],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    effects: [],
+    rarity: 'common',
     designMetadata: {
       cardStyle: {
-        template: 'classic',
-        effect: 'vintage',
-        borderRadius: '12px'
-      }
-    },
-    rarity: 'rare',
-    player: 'Team Card',
-    team: 'Oakland Athletics',
-    year: '1989',
-    artist: 'CRD Design Team',
-    set: 'Classic Series'
-  },
-  {
-    id: 'card-002',
-    title: 'Modern Baseball Star',
-    description: 'A modern baseball card featuring one of today\'s star players.',
-    imageUrl: '/lovable-uploads/38b125d7-2257-4d56-98fa-c1ff2a7be7ea.png',
-    thumbnailUrl: '/lovable-uploads/38b125d7-2257-4d56-98fa-c1ff2a7be7ea.png',
-    tags: ['Baseball', 'Modern', 'Star'],
-    userId: 'user-1',
-    teamId: 'team-modern',
-    isPublic: true,
-    createdAt: '2023-05-20T14:45:00Z',
-    updatedAt: '2023-05-22T09:15:00Z',
-    effects: ['Holographic'],
-    designMetadata: {
-      cardStyle: {
-        template: 'modern',
-        effect: 'holographic',
-        borderRadius: '8px'
-      }
-    },
-    rarity: 'uncommon',
-    player: 'Michael Johnson',
-    team: 'San Francisco Giants',
-    year: '2023',
-    artist: 'Digital Creations',
-    set: 'Modern Heroes'
-  },
-  {
-    id: 'card-003',
-    title: 'Vintage Oakland Memory',
-    description: 'A special card commemorating a memorable day at the Oakland Coliseum.',
-    imageUrl: '/lovable-uploads/79a099b9-c77a-491e-9755-ba25419791f5.png',
-    thumbnailUrl: '/lovable-uploads/79a099b9-c77a-491e-9755-ba25419791f5.png',
-    tags: ['Oakland', 'Memory', 'Vintage'],
-    userId: 'user-2',
-    teamId: 'team-oakland',
-    isPublic: true,
-    createdAt: '2023-03-10T11:20:00Z',
-    updatedAt: '2023-03-10T11:20:00Z',
-    effects: ['Sepia', 'GoldFoil'],
-    designMetadata: {
-      cardStyle: {
-        template: 'memory',
-        effect: 'sepia',
-        borderRadius: '12px'
+        template: 'standard',
+        effect: 'standard',
+        borderRadius: '8px',
+        borderColor: '#000000',
+        shadowColor: '#000000',
+        frameWidth: 5,
+        frameColor: '#000000'
       },
-      oaklandMemory: {
-        date: '1989-10-28',
-        location: 'Oakland Coliseum',
-        event: 'World Series Game'
+      textStyle: {
+        titleColor: '#000000',
+        titleAlignment: 'center',
+        titleWeight: 'bold',
+        descriptionColor: '#333333'
+      },
+      cardMetadata: {
+        category: 'sports',
+        series: 'baseball',
+        cardType: 'standard'
+      },
+      marketMetadata: {
+        isPrintable: true,
+        isForSale: false,
+        includeInCatalog: false
       }
-    },
+    }
+  },
+  {
+    id: uuidv4(),
+    title: 'Basketball Legend',
+    description: 'Limited edition basketball trading card',
+    imageUrl: 'https://images.unsplash.com/photo-1612872087720-bb876e2e67d1',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1612872087720-bb876e2e67d1?w=200',
+    tags: ['basketball', 'limited', 'sports'],
+    userId: 'anonymous',
+    isPublic: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    effects: ['Holographic'],
     rarity: 'rare',
-    player: 'Historic Game',
-    team: 'Oakland Athletics',
-    year: '1989',
-    artist: 'Memory Archive',
-    set: 'Oakland Memories'
+    designMetadata: {
+      cardStyle: {
+        template: 'premium',
+        effect: 'holographic',
+        borderRadius: '8px',
+        borderColor: '#000000',
+        shadowColor: '#000000',
+        frameWidth: 5,
+        frameColor: '#000000'
+      },
+      textStyle: {
+        titleColor: '#000000',
+        titleAlignment: 'center',
+        titleWeight: 'bold',
+        descriptionColor: '#333333'
+      },
+      cardMetadata: {
+        category: 'sports',
+        series: 'basketball',
+        cardType: 'premium'
+      },
+      marketMetadata: {
+        isPrintable: true,
+        isForSale: false,
+        includeInCatalog: false
+      }
+    }
   }
 ];
 

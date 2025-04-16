@@ -1,29 +1,36 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useAuth } from '@/hooks/useAuth';
-import { toast } from 'sonner';
-import { v4 as uuidv4 } from 'uuid';
-import { Card } from '@/lib/types/cardTypes';
-import { EnhancedCard, Series, Deck } from '@/lib/types/enhancedCardTypes';
-import { sampleCards } from '@/data/sampleCards';
 
-// Convert sample cards to enhanced cards
+import React, { createContext, useContext, useState } from 'react';
+import { Card } from '@/lib/types';
+import { EnhancedCard, Series, Deck } from '@/lib/types/cardTypes';
+import { adaptCard } from '@/lib/adapters/typeAdapters';
+import sampleCards from '@/data/sampleCards';
+
+// Sample enhanced cards for development
 const enhancedSampleCards: EnhancedCard[] = sampleCards.map(card => ({
-  ...card,
-  rarity: Math.random() > 0.8 ? 'rare' : Math.random() > 0.5 ? 'uncommon' : 'common',
-  cardNumber: `${Math.floor(Math.random() * 100)}/100`,
-  seriesId: Math.random() > 0.5 ? 'series-001' : 'series-002',
-  artistId: 'artist-001',
+  ...adaptCard(card),
+  rarity: card.rarity || 'common',
+  cardNumber: '001',
+  seriesId: 'base-set-1',
+  artistId: 'artist-1',
   edition: 1,
-  editionSize: 100,
+  editionSize: 1000,
   releaseDate: new Date().toISOString(),
-  qrCodeData: `https://example.com/card/${card.id}`,
+  qrCodeData: 'https://example.com/verify/001',
   hotspots: [],
-  effects: card.effects || [],
-  marketData: {
-    price: Math.floor(Math.random() * 100) + 10,
-    currency: 'USD',
-    availableForSale: Math.random() > 0.5,
-  },
+  price: 9.99,
+  estimatedValue: '10.00',
+  condition: 'mint',
+  lastSoldPrice: 8.99,
+  marketValue: 9.99,
+  hasCaseBreaking: false,
+  lastScanDate: new Date().toISOString(),
+  owners: ['user-1'],
+  authenticity: {
+    verified: true,
+    certificateId: 'cert-001',
+    verificationDate: new Date().toISOString(),
+    verifier: 'Certified Verifications Inc.'
+  }
 }));
 
 // Sample series
