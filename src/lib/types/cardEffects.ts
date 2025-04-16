@@ -50,4 +50,3 @@ export interface CardEffectsResult {
  * Additional effect settings for premium effects
  */
 export type EffectSettings = CardEffectSettings;
-

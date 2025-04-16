@@ -5,4 +5,3 @@ export type {
   EffectSettings, 
   CardEffect 
 } from '@/lib/types/cardEffects';
-

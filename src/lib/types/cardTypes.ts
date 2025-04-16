@@ -331,5 +331,5 @@ export interface DbCard {
   rarity: string;
 }
 
-// Re-export Reaction for components that need it
-export { Reaction } from './interaction';
+// Do not re-export the Reaction type here - fix this line
+export type { Reaction as CardReaction } from './interaction';
