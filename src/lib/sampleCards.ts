@@ -1,12 +1,12 @@
-import { Card } from './types/cardTypes';
+import { Card } from './types';
+import { v4 as uuidv4 } from 'uuid';
 
-// Replace 'image' property with 'imageUrl' in all sample cards
 export const sampleCards: Card[] = [
   {
     id: '1',
     title: 'Willie Mays',
     description: 'The "Say Hey Kid" was a legendary center fielder known for his incredible catches and all-around excellence.',
-    imageUrl: '/lovable-uploads/fa55173e-d864-41b2-865d-144d94507dc1.png', // Changed from 'image' to 'imageUrl'
+    imageUrl: '/lovable-uploads/fa55173e-d864-41b2-865d-144d94507dc1.png',
     thumbnailUrl: '/lovable-uploads/fa55173e-d864-41b2-865d-144d94507dc1.png',
     tags: ['baseball', 'hall of fame', 'new york giants'],
     userId: 'user123',
@@ -35,7 +35,7 @@ export const sampleCards: Card[] = [
     id: '2',
     title: 'Babe Ruth',
     description: 'The Sultan of Swat, Babe Ruth revolutionized baseball with his prodigious home run hitting.',
-    imageUrl: '/lovable-uploads/baberuth.jpeg', // Changed from 'image' to 'imageUrl'
+    imageUrl: '/lovable-uploads/baberuth.jpeg',
     thumbnailUrl: '/lovable-uploads/baberuth.jpeg',
     tags: ['baseball', 'hall of fame', 'new york yankees'],
     userId: 'user123',
@@ -64,7 +64,7 @@ export const sampleCards: Card[] = [
     id: '3',
     title: 'Jackie Robinson',
     description: 'Jackie Robinson broke the color barrier and became an icon of courage and perseverance.',
-    imageUrl: '/lovable-uploads/jackierobinson.jpeg', // Changed from 'image' to 'imageUrl'
+    imageUrl: '/lovable-uploads/jackierobinson.jpeg',
     thumbnailUrl: '/lovable-uploads/jackierobinson.jpeg',
     tags: ['baseball', 'hall of fame', 'brooklyn dodgers', 'civil rights'],
     userId: 'user123',
@@ -93,7 +93,7 @@ export const sampleCards: Card[] = [
     id: '4',
     title: 'Roberto Clemente',
     description: 'Roberto Clemente was a humanitarian and baseball superstar known for his strong arm and community involvement.',
-    imageUrl: '/lovable-uploads/robertoclemente.jpeg', // Changed from 'image' to 'imageUrl'
+    imageUrl: '/lovable-uploads/robertoclemente.jpeg',
     thumbnailUrl: '/lovable-uploads/robertoclemente.jpeg',
     tags: ['baseball', 'hall of fame', 'pittsburgh pirates', 'humanitarian'],
     userId: 'user123',
@@ -122,7 +122,7 @@ export const sampleCards: Card[] = [
     id: '5',
     title: 'Sandy Koufax',
     description: 'Sandy Koufax was a dominant pitcher with a blazing fastball and a curveball that baffled hitters.',
-    imageUrl: '/lovable-uploads/sandykoufax.jpeg', // Changed from 'image' to 'imageUrl'
+    imageUrl: '/lovable-uploads/sandykoufax.jpeg',
     thumbnailUrl: '/lovable-uploads/sandykoufax.jpeg',
     tags: ['baseball', 'hall of fame', 'los angeles dodgers', 'pitcher'],
     userId: 'user123',
@@ -151,7 +151,7 @@ export const sampleCards: Card[] = [
     id: '6',
     title: 'Hank Aaron',
     description: 'Henry "Hank" Aaron was a right fielder whose MLB career spanned from 1954 through 1976.',
-    imageUrl: '/lovable-uploads/hankAaron.jpeg', // Changed from 'image' to 'imageUrl'
+    imageUrl: '/lovable-uploads/hankAaron.jpeg',
     thumbnailUrl: '/lovable-uploads/hankAaron.jpeg',
     tags: ['baseball', 'hall of fame', 'atlanta braves', 'home run king'],
     userId: 'user123',
@@ -180,7 +180,7 @@ export const sampleCards: Card[] = [
     id: '7',
     title: 'Lou Gehrig',
     description: 'Lou Gehrig, nicknamed "The Iron Horse", was a first baseman who played 17 seasons in MLB for the New York Yankees.',
-    imageUrl: '/lovable-uploads/louGehrig.jpeg', // Changed from 'image' to 'imageUrl'
+    imageUrl: '/lovable-uploads/louGehrig.jpeg',
     thumbnailUrl: '/lovable-uploads/louGehrig.jpeg',
     tags: ['baseball', 'hall of fame', 'new york yankees', 'iron horse'],
     userId: 'user123',
@@ -209,7 +209,7 @@ export const sampleCards: Card[] = [
     id: '8',
     title: 'Ty Cobb',
     description: 'Tyrus Raymond "Ty" Cobb, nicknamed "The Georgia Peach", was an American Major League Baseball (MLB) outfielder.',
-    imageUrl: '/lovable-uploads/tyCobb.jpeg', // Changed from 'image' to 'imageUrl'
+    imageUrl: '/lovable-uploads/tyCobb.jpeg',
     thumbnailUrl: '/lovable-uploads/tyCobb.jpeg',
     tags: ['baseball', 'hall of fame', 'detroit tigers', 'georgia peach'],
     userId: 'user123',
@@ -235,3 +235,21 @@ export const sampleCards: Card[] = [
     creatorId: 'user123'
   }
 ];
+
+export const addSampleCards = async (addCardFunction: (card: Partial<Card>) => Promise<Card>) => {
+  const addedCards: Card[] = [];
+  
+  try {
+    for (const sampleCard of sampleCards) {
+      const newCard = await addCardFunction({
+        ...sampleCard,
+        id: uuidv4()
+      });
+      addedCards.push(newCard);
+    }
+  } catch (error) {
+    console.error('Error adding sample cards:', error);
+  }
+  
+  return addedCards;
+};

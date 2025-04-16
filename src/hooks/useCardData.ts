@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
-import { Card } from '@/context/CardContext';
+import { Card } from '@/lib/types'; // Import from lib/types instead
 import { useCards } from '@/context/CardContext';
 
 interface UseCardDataOptions {

@@ -16,7 +16,7 @@ export interface HotspotData {
 }
 
 export interface EnhancedCard extends Omit<Card, 'artist'> {
-  rarity: CardRarity;
+  rarity?: CardRarity; // Make rarity optional to match cardTypes.ts
   cardNumber?: string;
   seriesId?: string;
   artistId?: string;
