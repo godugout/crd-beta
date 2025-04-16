@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import PageLayout from '@/components/navigation/PageLayout';
 import { Card } from '@/lib/types';

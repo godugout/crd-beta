@@ -1,6 +1,7 @@
+
 import React from 'react';
 import { Card } from '@/lib/types';
-import { X, Camera, RotateCw, ZoomIn, ZoomOut, Flip } from 'lucide-react';
+import { X, Camera, RotateCw, ZoomIn, ZoomOut, FlipHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface ArModeViewProps {
@@ -72,7 +73,7 @@ const ArModeView: React.FC<ArModeViewProps> = ({
           {activeCards.length > 0 && (
             <div className="flex flex-wrap gap-2 justify-center mb-6">
               {activeCards.map(card => (
-                <div key={card.id} className="relative bg-gray-800 rounded p-2 w-24">
+                <div key={card.id} className="relative bg-gray-800 rounded p-2 w-24 card-container">
                   <button 
                     className="absolute -top-2 -right-2 bg-red-500 rounded-full p-1"
                     onClick={() => onRemoveCard(card.id)}
@@ -98,7 +99,7 @@ const ArModeView: React.FC<ArModeViewProps> = ({
           
           <div className="flex justify-center gap-4 mb-6">
             <Button variant="outline" size="icon" onClick={onFlip}>
-              <Flip size={18} />
+              <FlipHorizontal size={18} />
             </Button>
             <Button variant="outline" size="icon" onClick={onZoomIn}>
               <ZoomIn size={18} />
