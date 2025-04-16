@@ -1,12 +1,15 @@
 
 import React, { useRef, useEffect, useState } from 'react';
-import { Card } from '@/lib/types';
+import { Card } from '@/lib/types/cardTypes';
 import * as THREE from 'three';
 import { useFrame, useThree } from '@react-three/fiber';
 import { useTexture } from '@react-three/drei';
 import { cardVertexShader, cardFragmentShader } from '@/shaders/cardShader';
 import { glowVertexShader, glowFragmentShader } from '@/shaders/glowShader';
 import { edgeVertexShader, edgeFragmentShader } from '@/shaders/edgeShader';
+
+// Define a fallback texture URL to use when image loading fails
+const FALLBACK_TEXTURE = 'https://images.unsplash.com/photo-1518770660439-4636190af475';
 
 interface Card3DRendererProps {
   card: Card;
@@ -23,34 +26,31 @@ const Card3DRenderer: React.FC<Card3DRendererProps> = ({
 }) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const { gl, camera } = useThree();
-  const [textureUrls, setTextureUrls] = useState({
-    front: '',
-    back: ''
-  });
+  const [textureLoaded, setTextureLoaded] = useState(false);
+  const [textureError, setTextureError] = useState(false);
   
-  // Fallback image to use if the card image is missing
-  const fallbackImage = 'https://images.unsplash.com/photo-1518770660439-4636190af475';
+  // Ensure we have valid texture URLs before loading
+  const frontTextureUrl = card?.imageUrl && card.imageUrl !== 'undefined' ? card.imageUrl : FALLBACK_TEXTURE;
+  const backTextureUrl = card?.thumbnailUrl && card.thumbnailUrl !== 'undefined' ? card.thumbnailUrl : frontTextureUrl;
   
-  // Make sure we have valid texture URLs
+  // Log texture loading for debugging
   useEffect(() => {
-    // Ensure we have valid image URLs before creating textures
-    const frontUrl = card.imageUrl || fallbackImage;
-    const backUrl = card.thumbnailUrl || frontUrl;
-    
-    console.log(`Card3DRenderer: Using front texture ${frontUrl}`);
-    console.log(`Card3DRenderer: Using back texture ${backUrl}`);
-    
-    setTextureUrls({
-      front: frontUrl,
-      back: backUrl
-    });
-  }, [card]);
+    console.log(`Card3DRenderer: Loading textures for card ID ${card.id}`);
+    console.log(`Front texture URL: ${frontTextureUrl}`);
+    console.log(`Back texture URL: ${backTextureUrl}`);
+  }, [card.id, frontTextureUrl, backTextureUrl]);
 
-  // Only load textures after we have valid URLs
+  // Only load textures once we have valid URLs
   const [frontTexture, backTexture] = useTexture(
-    [textureUrls.front, textureUrls.back],
-    (loadedTextures) => {
-      console.log('Card textures loaded successfully:', loadedTextures);
+    [frontTextureUrl, backTextureUrl],
+    (textures) => {
+      console.log('Textures loaded successfully:', textures);
+      setTextureLoaded(true);
+      setTextureError(false);
+    },
+    (error) => {
+      console.error('Error loading textures:', error);
+      setTextureError(true);
     }
   );
   

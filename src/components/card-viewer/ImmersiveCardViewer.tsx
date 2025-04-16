@@ -1,11 +1,14 @@
 
 import React, { useRef, useEffect, useState } from 'react';
-import { Card } from '@/lib/types';
+import { Card } from '@/lib/types/cardTypes';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
 import Card3DRenderer from './Card3DRenderer';
 import { useToast } from '@/hooks/use-toast';
-import { getFallbackImageUrl } from '@/lib/utils/imageUtils';
+import { DEFAULT_DESIGN_METADATA } from '@/lib/utils/cardDefaults';
+
+// Define a fallback image for cards with missing images
+const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1518770660439-4636190af475';
 
 interface ImmersiveCardViewerProps {
   card: Card;
@@ -30,13 +33,19 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
     const validateCardImages = async () => {
       setIsLoading(true);
       
-      // Create a copy of the card to avoid modifying the original
-      const cardCopy = { ...card };
+      // Create a deep copy of the card to avoid mutating the original
+      const cardCopy: Card = JSON.parse(JSON.stringify(card));
+      
+      // Ensure designMetadata is always present with required fields
+      if (!cardCopy.designMetadata || !cardCopy.designMetadata.cardStyle) {
+        console.warn(`Card ${cardCopy.id} is missing designMetadata or cardStyle, using default values`);
+        cardCopy.designMetadata = DEFAULT_DESIGN_METADATA;
+      }
       
       // Check if card has valid image URL
-      if (!cardCopy.imageUrl) {
+      if (!cardCopy.imageUrl || cardCopy.imageUrl === 'undefined') {
         console.warn(`Card ${cardCopy.id} is missing an image URL, using fallback`);
-        cardCopy.imageUrl = getFallbackImageUrl(cardCopy.tags, cardCopy.title);
+        cardCopy.imageUrl = FALLBACK_IMAGE;
         
         toast({
           title: "Using fallback image",
@@ -47,13 +56,38 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
       }
       
       // Also ensure we have a thumbnail URL
-      if (!cardCopy.thumbnailUrl) {
-        cardCopy.thumbnailUrl = cardCopy.imageUrl;
+      if (!cardCopy.thumbnailUrl || cardCopy.thumbnailUrl === 'undefined') {
+        cardCopy.thumbnailUrl = cardCopy.imageUrl || FALLBACK_IMAGE;
       }
       
-      // Update the processed card
-      setProcessedCard(cardCopy);
-      setIsLoading(false);
+      // Ensure other required fields are present
+      if (!cardCopy.effects) {
+        cardCopy.effects = [];
+      }
+      
+      // Set up imagePreload to validate that images actually load
+      try {
+        const image = new Image();
+        image.onload = () => {
+          console.log(`Image loaded successfully: ${cardCopy.imageUrl}`);
+          setProcessedCard(cardCopy);
+          setIsLoading(false);
+        };
+        image.onerror = () => {
+          console.error(`Failed to load image: ${cardCopy.imageUrl}, using fallback`);
+          cardCopy.imageUrl = FALLBACK_IMAGE;
+          cardCopy.thumbnailUrl = FALLBACK_IMAGE;
+          setProcessedCard(cardCopy);
+          setIsLoading(false);
+        };
+        image.src = cardCopy.imageUrl;
+      } catch (error) {
+        console.error("Error during image validation:", error);
+        cardCopy.imageUrl = FALLBACK_IMAGE;
+        cardCopy.thumbnailUrl = FALLBACK_IMAGE;
+        setProcessedCard(cardCopy);
+        setIsLoading(false);
+      }
     };
     
     validateCardImages();

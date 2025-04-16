@@ -1,4 +1,3 @@
-
 /**
  * Consolidated Card Types for Cardshow (CRD)
  * This file serves as the central source of truth for all card-related types
@@ -58,10 +57,10 @@ export interface TextStyle {
   fontSize?: string;
   fontWeight?: string;
   color?: string;
-  titleColor?: string;
-  titleAlignment?: string;
-  titleWeight?: string;
-  descriptionColor?: string;
+  titleColor: string;      // Required
+  titleAlignment: string;  // Required
+  titleWeight: string;     // Required
+  descriptionColor: string; // Required
   [key: string]: JsonValue | undefined;
 }
 
@@ -132,9 +131,9 @@ export interface CardMetadata {
   serialNumber?: string;
   certification?: string;
   gradeScore?: string;
-  category?: string;
-  series?: string;
-  cardType?: string;
+  category: string;      // Required
+  series: string;        // Required
+  cardType: string;      // Required
   cardStyle?: CardStyle;
   textStyle?: TextStyle;
   effects?: string[];
@@ -150,9 +149,9 @@ export interface MarketMetadata {
   lastSoldPrice?: number;
   currentAskingPrice?: number;
   estimatedMarketValue?: number;
-  isPrintable?: boolean;
-  isForSale?: boolean;
-  includeInCatalog?: boolean;
+  isPrintable: boolean;      // Required
+  isForSale: boolean;        // Required
+  includeInCatalog: boolean; // Required
   [key: string]: JsonValue | undefined;
 }
 
@@ -181,10 +180,10 @@ export interface OaklandMemoryData {
  * Design metadata for card design information
  */
 export interface DesignMetadata {
-  cardStyle?: CardStyle;
-  textStyle?: TextStyle;
-  cardMetadata?: CardMetadata;
-  marketMetadata?: MarketMetadata;
+  cardStyle: CardStyle;            // Required
+  textStyle: TextStyle;            // Required
+  cardMetadata: CardMetadata;      // Required
+  marketMetadata: MarketMetadata;  // Required
   oaklandMemory?: OaklandMemoryData;
   effects?: string[];
   layers?: CardLayer[];

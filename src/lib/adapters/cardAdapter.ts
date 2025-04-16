@@ -1,34 +1,6 @@
 
 import { Card } from '@/lib/types/cardTypes';
-
-// Default design metadata structure for cards that don't have it
-export const DEFAULT_DESIGN_METADATA = {
-  cardStyle: {
-    template: 'classic',
-    effect: 'classic',
-    borderRadius: '4px',
-    borderColor: '#000000',
-    frameColor: '#000000',
-    frameWidth: 2,
-    shadowColor: 'rgba(0, 0, 0, 0.4)'
-  },
-  textStyle: {
-    titleColor: '#000000',
-    titleAlignment: 'left',
-    titleWeight: 'bold',
-    descriptionColor: '#444444'
-  },
-  marketMetadata: {
-    isPrintable: false,
-    isForSale: false,
-    includeInCatalog: false
-  },
-  cardMetadata: {
-    category: 'general',
-    cardType: 'standard',
-    series: 'base'
-  }
-};
+import { DEFAULT_DESIGN_METADATA } from '@/lib/utils/cardDefaults';
 
 /**
  * Card adapter function to ensure all Card objects have the required properties
@@ -79,6 +51,3 @@ export function adaptToCard(data: Partial<Card>): Card {
 export function adaptArrayToCards(dataArray: Array<Partial<Card>>): Card[] {
   return dataArray.map(adaptToCard);
 }
-
-// Export the default design metadata for reuse in other files
-export { DEFAULT_DESIGN_METADATA };
