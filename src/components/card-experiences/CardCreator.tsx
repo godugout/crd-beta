@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useCards } from '@/context/CardContext';
 import { Button } from '@/components/ui/button';
@@ -58,6 +57,10 @@ const CardCreator: React.FC<CardCreatorProps> = ({ onComplete }) => {
         imageUrl: imagePreview,
         thumbnailUrl: imagePreview,
         tags: [],
+        isPublic: true, // Add required field
+        userId: 'anonymous', // Add required field
+        effects: [], // Add required field
+        rarity: 'common', // Add required field
         designMetadata: {
           ...DEFAULT_DESIGN_METADATA,
           cardStyle: {
@@ -75,15 +78,9 @@ const CardCreator: React.FC<CardCreatorProps> = ({ onComplete }) => {
       if (onComplete) {
         onComplete(newCard);
       }
-      
-      // Reset form
-      setTitle('');
-      setDescription('');
-      setImage(null);
-      setImagePreview(null);
     } catch (error) {
       console.error('Error creating card:', error);
-      toast.error('Failed to create card');
+      toast.error('Failed to create card. Please try again.');
     } finally {
       setIsLoading(false);
     }

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -21,9 +20,24 @@ const OaklandMemoryCreator: React.FC<OaklandMemoryCreatorProps> = ({ className }
   const [memoryData, setMemoryData] = useState<OaklandMemoryData | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<OaklandTemplateType>('classic');
   const [activeTab, setActiveTab] = useState<string>('upload');
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [title, setTitle] = useState<string>('');
+  const [description, setDescription] = useState<string>('');
+  const [date, setDate] = useState<string>('');
+  const [opponent, setOpponent] = useState<string>('');
+  const [score, setScore] = useState<string>('');
+  const [location, setLocation] = useState<string>('');
+  const [section, setSection] = useState<string>('');
+  const [memoryType, setMemoryType] = useState<string>('');
+  const [attendees, setAttendees] = useState<string[]>([]);
+  const [tags, setTags] = useState<string[]>([]);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [historicalContext, setHistoricalContext] = useState<string>('');
+  const [personalSignificance, setPersonalSignificance] = useState<string>('');
 
   const handleImageUpload = (url: string) => {
     setImageUrl(url);
+    setSelectedImage(url);
     setActiveTab('details');
   };
 
@@ -35,6 +49,18 @@ const OaklandMemoryCreator: React.FC<OaklandMemoryCreatorProps> = ({ className }
     };
     setMemoryData(updatedData);
     setActiveTab('preview');
+    setTitle(data.title);
+    setDescription(data.description);
+    setDate(data.date || '');
+    setOpponent(data.opponent || '');
+    setScore(data.score || '');
+    setLocation(data.location || '');
+    setSection(data.section || '');
+    setMemoryType(data.memoryType || '');
+    setAttendees(data.attendees || []);
+    setTags(data.tags || []);
+    setHistoricalContext(data.historicalContext || '');
+    setPersonalSignificance(data.personalSignificance || '');
   };
 
   const templateOptions: Array<{id: OaklandTemplateType, name: string}> = [
@@ -52,8 +78,12 @@ const OaklandMemoryCreator: React.FC<OaklandMemoryCreatorProps> = ({ className }
     }
 
     try {
+      setIsSubmitting(true);
+      
       // Prepare the metadata for storage
       const oaklandMetadata = {
+        title: memoryData.title,
+        description: memoryData.description,
         date: memoryData.date,
         opponent: memoryData.opponent,
         score: memoryData.score,
@@ -61,8 +91,7 @@ const OaklandMemoryCreator: React.FC<OaklandMemoryCreatorProps> = ({ className }
         section: memoryData.section,
         memoryType: memoryData.memoryType,
         attendees: memoryData.attendees,
-        template: selectedTemplate,
-        teamId: 'oakland-athletics',
+        tags: memoryData.tags,
         imageUrl: imageUrl,
         historicalContext: memoryData.historicalContext,
         personalSignificance: memoryData.personalSignificance,
@@ -75,14 +104,36 @@ const OaklandMemoryCreator: React.FC<OaklandMemoryCreatorProps> = ({ className }
         imageUrl: imageUrl,
         thumbnailUrl: imageUrl,
         tags: memoryData.tags || [],
+        isPublic: true, // Add required field
+        userId: 'anonymous', // Add required field
+        effects: [], // Add required field
+        rarity: 'common', // Add required field
         designMetadata: {
           cardStyle: {
             effect: selectedTemplate,
             teamSpecific: true,
+            template: 'oakland',
+            borderRadius: '8px',
+            borderColor: '#000000',
+            shadowColor: '#000000',
+            frameWidth: 5,
+            frameColor: '#000000',
           },
           textStyle: {
             titleColor: '#EFB21E',
             descriptionColor: '#FFFFFF',
+            titleAlignment: 'center',
+            titleWeight: 'bold',
+          },
+          cardMetadata: {
+            category: 'memory',
+            series: 'oakland',
+            cardType: 'memory',
+          },
+          marketMetadata: {
+            isPrintable: true,
+            isForSale: false,
+            includeInCatalog: false,
           },
           oaklandMemory: oaklandMetadata
         } as any
@@ -93,6 +144,8 @@ const OaklandMemoryCreator: React.FC<OaklandMemoryCreatorProps> = ({ className }
     } catch (error) {
       console.error('Error creating memory card:', error);
       toast.error('Failed to create memory card');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 

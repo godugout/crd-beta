@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Card, Collection } from '@/lib/types';
 import { toast } from 'sonner';
@@ -17,13 +16,15 @@ import {
   deleteCollection 
 } from '@/lib/card/collectionOperations';
 
+export type { Card, Collection };
+
 interface CardContextProps {
   cards: Card[];
   collections: Collection[];
   isLoading: boolean;
   error: string | null;
   getCardById: (id: string) => Card | undefined;
-  addCard: (card: Omit<Card, 'id' | 'createdAt' | 'updatedAt'>) => Card;
+  addCard: (card: Partial<Card>) => Card;
   updateCard: (id: string, updates: Partial<Card>) => boolean;
   deleteCard: (id: string) => boolean;
   createCollection: (collection: Partial<Collection>) => Collection;
@@ -31,6 +32,7 @@ interface CardContextProps {
   deleteCollection: (id: string) => boolean;
   addCardToCollection: (cardId: string, collectionId: string) => boolean;
   removeCardFromCollection: (cardId: string, collectionId: string) => boolean;
+  getCard?: (id: string) => Card | undefined;
 }
 
 const CardContext = createContext<CardContextProps | undefined>(undefined);
@@ -41,13 +43,11 @@ export const CardProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Load initial data
   useEffect(() => {
     const loadInitialData = () => {
       try {
         setIsLoading(true);
         
-        // Load cards from localStorage or use sample data
         const savedCards = localStorage.getItem('cards');
         let initialCards: Card[] = [];
         
@@ -57,22 +57,18 @@ export const CardProvider: React.FC<{ children: React.ReactNode }> = ({ children
             initialCards = parsedCards.map((card: any) => adaptToCard(card));
           } catch (e) {
             console.error('Error parsing saved cards:', e);
-            // Fallback to sample cards
             initialCards = sampleCards.map(card => adaptToCard(card));
           }
         } else {
-          // Use sample cards
           initialCards = sampleCards.map(card => adaptToCard(card));
         }
         
         setCards(initialCards);
         
-        // Load collections
         const savedCollections = localStorage.getItem('collections');
         if (savedCollections) {
           setCollections(JSON.parse(savedCollections));
         } else {
-          // Demo collections
           const demoCollections = [
             {
               id: 'collection-1',
@@ -121,7 +117,6 @@ export const CardProvider: React.FC<{ children: React.ReactNode }> = ({ children
     loadInitialData();
   }, []);
   
-  // Save data to localStorage when it changes
   useEffect(() => {
     if (!isLoading && cards.length > 0) {
       localStorage.setItem('cards', JSON.stringify(cards));
@@ -134,13 +129,11 @@ export const CardProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [collections, isLoading]);
 
-  // Get card by ID
   const getCardById = (id: string): Card | undefined => {
     return cards.find(card => card.id === id);
   };
 
-  // Add a new card
-  const handleAddCard = (card: Omit<Card, 'id' | 'createdAt' | 'updatedAt'>): Card => {
+  const handleAddCard = (card: Partial<Card>): Card => {
     try {
       const newCard = createCard(card);
       setCards(prevCards => [...prevCards, newCard]);
@@ -151,7 +144,6 @@ export const CardProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Update an existing card
   const handleUpdateCard = (id: string, updates: Partial<Card>): boolean => {
     try {
       const updatedCards = updateCard(id, updates, cards);
@@ -163,7 +155,6 @@ export const CardProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Delete a card
   const handleDeleteCard = (id: string): boolean => {
     try {
       const filteredCards = deleteCard(id, cards);
@@ -175,7 +166,6 @@ export const CardProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Create a new collection
   const handleCreateCollection = (collectionData: Partial<Collection>): Collection => {
     try {
       const newCollection = createCollection(collectionData);
@@ -187,7 +177,6 @@ export const CardProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Update an existing collection
   const handleUpdateCollection = (id: string, updates: Partial<Collection>): Collection | null => {
     try {
       const updatedCollection = updateCollection(id, updates, collections);
@@ -207,7 +196,6 @@ export const CardProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Delete a collection
   const handleDeleteCollection = (id: string): boolean => {
     try {
       const success = deleteCollection(id, collections);
@@ -225,7 +213,6 @@ export const CardProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Add card to collection
   const handleAddCardToCollection = (cardId: string, collectionId: string): boolean => {
     try {
       const { updatedCards, updatedCollections } = addCardToCollection(
@@ -245,7 +232,6 @@ export const CardProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Remove card from collection
   const handleRemoveCardFromCollection = (cardId: string, collectionId: string): boolean => {
     try {
       const { updatedCards, updatedCollections } = removeCardFromCollection(
@@ -271,6 +257,7 @@ export const CardProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isLoading,
     error,
     getCardById,
+    getCard: getCardById,
     addCard: handleAddCard,
     updateCard: handleUpdateCard,
     deleteCard: handleDeleteCard,

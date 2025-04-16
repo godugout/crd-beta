@@ -55,7 +55,15 @@ const CardEditorContainer: React.FC<CardEditorContainerProps> = ({
   
   const handleSubmit = async () => {
     const cardData = {
-      ...cardState.getCardData(),
+      title: cardState.title,
+      description: cardState.description,
+      imageUrl: cardState.imageUrl || '',
+      thumbnailUrl: cardState.imageUrl || '',
+      tags: cardState.tags || [],
+      isPublic: true, // Add required fields
+      userId: 'anonymous', // Add required fields
+      effects: cardState.selectedEffects || [], // Add required fields
+      rarity: 'common', // Add required fields
       designMetadata: {
         cardStyle: cardState.cardStyle || DEFAULT_DESIGN_METADATA.cardStyle,
         textStyle: DEFAULT_DESIGN_METADATA.textStyle,

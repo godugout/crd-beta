@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card } from '@/lib/types';
 import { format } from 'date-fns';
@@ -39,13 +38,16 @@ export const CardBack: React.FC<CardBackProps> = ({ card }) => {
           </div>
           
           {card.fabricSwatches && card.fabricSwatches.length > 0 && (
-            <div className="border-t border-gray-200 pt-2">
-              <p className="font-medium text-cardshow-dark mb-1">Fabric Swatches:</p>
-              {card.fabricSwatches.map((swatch, index) => (
-                <div key={index} className="text-xs ml-2">
-                  • {swatch.type} {swatch.year} {swatch.team} {swatch.position}
-                </div>
-              ))}
+            <div className="mt-4">
+              <h3 className="text-sm font-medium text-gray-300 mb-2">Fabric Swatches</h3>
+              <div className="grid grid-cols-2 gap-2">
+                {card.fabricSwatches.map((swatch, index) => (
+                  <div key={index} className="bg-gray-700 p-2 rounded text-sm">
+                    <span className="block text-xs text-gray-400">{swatch.type}</span>
+                    <span>{swatch.team} - {swatch.year}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </div>

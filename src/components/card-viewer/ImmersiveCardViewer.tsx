@@ -1,88 +1,84 @@
 
 import React, { useRef, useEffect, useState } from 'react';
-import { Card } from '@/lib/types/cardTypes';
+import { Card as IndexCard } from '@/lib/types';
+import { Card as CardTypesCard } from '@/lib/types/cardTypes';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
 import Card3DRenderer from './Card3DRenderer';
 import { useToast } from '@/hooks/use-toast';
 import { DEFAULT_DESIGN_METADATA, FALLBACK_IMAGE_URL } from '@/lib/utils/cardDefaults';
+import { convertIndexCardToCardTypesCard } from '@/lib/adapters/typeAdapters';
 
 interface ImmersiveCardViewerProps {
-  card: Card;
-  isFlipped: boolean;
+  card: IndexCard;
+  isFlipped?: boolean;
   activeEffects: string[];
   effectIntensities?: Record<string, number>;
 }
 
 const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
   card,
-  isFlipped,
+  isFlipped = false,
   activeEffects,
   effectIntensities
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
-  const [processedCard, setProcessedCard] = useState<Card>(card);
+  const [processedCard, setProcessedCard] = useState<CardTypesCard | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   
-  // Ensure we have valid image URLs before rendering
+  // Convert IndexCard to CardTypesCard and validate images
   useEffect(() => {
     const validateCardImages = async () => {
       setIsLoading(true);
       
-      // Create a deep copy of the card to avoid mutating the original
-      const cardCopy: Card = JSON.parse(JSON.stringify(card));
-      
-      // Ensure designMetadata is always present with required fields
-      if (!cardCopy.designMetadata || !cardCopy.designMetadata.cardStyle) {
-        console.warn(`Card ${cardCopy.id} is missing designMetadata or cardStyle, using default values`);
-        cardCopy.designMetadata = DEFAULT_DESIGN_METADATA;
-      }
-      
-      // Check if card has valid image URL
-      if (!cardCopy.imageUrl || cardCopy.imageUrl === 'undefined') {
-        console.warn(`Card ${cardCopy.id} is missing an image URL, using fallback`);
-        cardCopy.imageUrl = FALLBACK_IMAGE_URL;
-        
-        toast({
-          title: "Using fallback image",
-          description: "The original card image couldn't be loaded",
-          variant: "default",
-          duration: 3000
-        });
-      }
-      
-      // Also ensure we have a thumbnail URL
-      if (!cardCopy.thumbnailUrl || cardCopy.thumbnailUrl === 'undefined') {
-        cardCopy.thumbnailUrl = cardCopy.imageUrl || FALLBACK_IMAGE_URL;
-      }
-      
-      // Ensure other required fields are present
-      if (!cardCopy.effects) {
-        cardCopy.effects = [];
-      }
-      
-      // Set up imagePreload to validate that images actually load
       try {
+        // Convert the index card to card types card
+        const cardTypesCard = convertIndexCardToCardTypesCard(card);
+
+        // Ensure we have valid image URL
+        if (!cardTypesCard.imageUrl || cardTypesCard.imageUrl === 'undefined') {
+          console.warn(`Card ${cardTypesCard.id} is missing an image URL, using fallback`);
+          cardTypesCard.imageUrl = FALLBACK_IMAGE_URL;
+          
+          toast({
+            title: "Using fallback image",
+            description: "The original card image couldn't be loaded",
+            variant: "default",
+            duration: 3000
+          });
+        }
+        
+        // Also ensure we have a thumbnail URL
+        if (!cardTypesCard.thumbnailUrl || cardTypesCard.thumbnailUrl === 'undefined') {
+          cardTypesCard.thumbnailUrl = cardTypesCard.imageUrl || FALLBACK_IMAGE_URL;
+        }
+
+        // Set up imagePreload to validate that images actually load
         const image = new Image();
         image.onload = () => {
-          console.log(`Image loaded successfully: ${cardCopy.imageUrl}`);
-          setProcessedCard(cardCopy);
+          console.log(`Image loaded successfully: ${cardTypesCard.imageUrl}`);
+          setProcessedCard(cardTypesCard);
           setIsLoading(false);
         };
         image.onerror = () => {
-          console.error(`Failed to load image: ${cardCopy.imageUrl}, using fallback`);
-          cardCopy.imageUrl = FALLBACK_IMAGE_URL;
-          cardCopy.thumbnailUrl = FALLBACK_IMAGE_URL;
-          setProcessedCard(cardCopy);
+          console.error(`Failed to load image: ${cardTypesCard.imageUrl}, using fallback`);
+          cardTypesCard.imageUrl = FALLBACK_IMAGE_URL;
+          cardTypesCard.thumbnailUrl = FALLBACK_IMAGE_URL;
+          setProcessedCard(cardTypesCard);
           setIsLoading(false);
         };
-        image.src = cardCopy.imageUrl;
+        image.src = cardTypesCard.imageUrl;
+        
       } catch (error) {
-        console.error("Error during image validation:", error);
-        cardCopy.imageUrl = FALLBACK_IMAGE_URL;
-        cardCopy.thumbnailUrl = FALLBACK_IMAGE_URL;
-        setProcessedCard(cardCopy);
+        console.error("Error during card processing:", error);
+        // Create a minimal valid card with fallback image
+        const fallbackCard = convertIndexCardToCardTypesCard({
+          ...card,
+          imageUrl: FALLBACK_IMAGE_URL,
+          thumbnailUrl: FALLBACK_IMAGE_URL
+        });
+        setProcessedCard(fallbackCard);
         setIsLoading(false);
       }
     };
@@ -90,7 +86,7 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
     validateCardImages();
   }, [card, toast]);
   
-  if (isLoading) {
+  if (isLoading || !processedCard) {
     return (
       <div 
         className="w-full h-full min-h-[600px] bg-gray-900 rounded-lg overflow-hidden flex items-center justify-center"

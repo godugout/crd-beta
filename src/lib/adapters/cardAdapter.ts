@@ -5,7 +5,7 @@ export const adaptToCard = (data: Partial<Card>): Card => {
   // Create a valid Card object from potentially incomplete data
   return {
     id: data.id || '',
-    title: data.title || 'Untitled Card',
+    title: data.title || data.name || 'Untitled Card',
     description: data.description || '',
     imageUrl: data.imageUrl || '',
     thumbnailUrl: data.thumbnailUrl || data.imageUrl || '',
@@ -26,7 +26,11 @@ export const adaptToCard = (data: Partial<Card>): Card => {
     team: data.team || data.designMetadata?.team || undefined,
     year: data.year || data.designMetadata?.year || undefined,
     artist: data.artist || data.designMetadata?.artist || undefined,
-    stats: data.stats || undefined
+    set: data.set || data.designMetadata?.set || undefined,
+    stats: data.stats || undefined,
+    fabricSwatches: data.fabricSwatches || undefined,
+    viewCount: data.viewCount || 0,
+    name: data.name || data.title // Ensure we have a name property for backward compatibility
   };
 };
 

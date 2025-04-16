@@ -59,12 +59,17 @@ const CardEditorForm: React.FC<CardEditorFormProps> = ({
         imageUrl,
         thumbnailUrl: imageUrl,
         tags,
+        isPublic: true, // Set default value for required field
+        userId: 'anonymous', // Set default value for required field
+        effects: [], // Set default value for required field
+        rarity: 'common', // Set default value for required field
         designMetadata: card?.designMetadata || DEFAULT_DESIGN_METADATA
       };
       
       let savedCard;
       if (isEditing && card?.id) {
-        savedCard = await updateCard(card.id, cardData);
+        const updated = await updateCard(card.id, cardData);
+        savedCard = updated ? card : null;
         toast.success('Card updated successfully');
       } else {
         savedCard = await addCard(cardData);

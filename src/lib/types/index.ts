@@ -22,6 +22,7 @@ export interface Card {
   team?: string;
   year?: string;
   artist?: string;
+  set?: string; // Added for CardDetailPanel
   stats?: {
     battingAverage?: string;
     homeRuns?: string;
@@ -30,6 +31,9 @@ export interface Card {
     wins?: string;
     strikeouts?: string;
   };
+  fabricSwatches?: any[]; // Added for CardBack
+  viewCount?: number; // Added for CardGrid
+  name?: string; // Alternative to title in some components
 }
 
 export interface Collection {
@@ -41,12 +45,13 @@ export interface Collection {
   teamId?: string;
   cards: Card[];
   cardIds: string[];
-  visibility: 'public' | 'private' | 'unlisted';
+  visibility: 'public' | 'private' | 'unlisted' | 'team'; // Added 'team' to fix CollectionGrid error
   allowComments: boolean;
   isPublic: boolean;
   createdAt: string;
   updatedAt: string;
   designMetadata: Record<string, any>;
+  tags?: string[]; // Added for InstagramCollectionCreator
 }
 
 export interface OaklandMemoryData {

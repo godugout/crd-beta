@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card } from '@/lib/types';
 import CardEffectsPanel from '@/components/immersive-viewer/CardEffectsPanel';
@@ -43,7 +44,7 @@ const CardDetailPanel: React.FC<CardDetailPanelProps> = ({
       <div className="mb-6">
         <h3 className="text-xl font-semibold mb-3">Card Details</h3>
         <dl className="grid grid-cols-2 gap-2">
-          {card.artist || (card.designMetadata?.cardMetadata?.artist) && (
+          {(card.artist || (card.designMetadata?.cardMetadata?.artist)) && (
             <>
               <dt className="text-gray-400">Artist</dt>
               <dd>{card.artist || card.designMetadata?.cardMetadata?.artist}</dd>

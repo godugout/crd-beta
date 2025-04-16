@@ -1,26 +1,18 @@
-
 import { supabase } from '@/lib/supabase';
-import { Card, Collection, JsonObject, serializeMetadata } from '@/lib/types';
+import { Card, Collection } from '@/lib/types';
 import { v4 as uuidv4 } from 'uuid';
 import { DEFAULT_DESIGN_METADATA } from '@/lib/utils/cardDefaults';
+import { adaptToCard } from '@/lib/adapters/cardAdapter';
 
 // Demo function to create a card (for development)
-export const createCard = async (card: Omit<Card, 'id' | 'createdAt' | 'updatedAt'>): Promise<Card> => {
+export const createCard = async (card: Partial<Card>): Promise<Card> => {
+  // Use the adapter to ensure all required fields are present
+  const adaptedCard = adaptToCard(card);
   const newCard: Card = {
+    ...adaptedCard,
     id: uuidv4(),
-    title: card.title,
-    description: card.description || '',
-    imageUrl: card.imageUrl,
-    thumbnailUrl: card.thumbnailUrl || card.imageUrl,
-    tags: card.tags || [],
-    collectionId: card.collectionId,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
-    userId: card.userId || 'anonymous',
-    teamId: card.teamId,
-    isPublic: card.isPublic !== undefined ? card.isPublic : true,
-    designMetadata: card.designMetadata || DEFAULT_DESIGN_METADATA,
-    effects: card.effects || [], // Add required effects property
   };
 
   try {
