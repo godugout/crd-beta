@@ -14,15 +14,13 @@ export function useCards() {
     try {
       setLoading(true);
       
-      // Here we would normally fetch from Supabase
-      // In this demo, we'll create some sample data
       const demoCards: Card[] = [
         {
           id: 'card-1',
           title: 'Demo Card 1',
           description: 'This is a sample card',
-          imageUrl: '/card1.jpg',
-          thumbnailUrl: '/card1-thumb.jpg',
+          imageUrl: '/lovable-uploads/0edc670d-08ee-42a5-b42a-b2a3bea81c04.png',
+          thumbnailUrl: '/lovable-uploads/0edc670d-08ee-42a5-b42a-b2a3bea81c04.png',
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
           userId: 'user-1',
@@ -38,8 +36,8 @@ export function useCards() {
           id: 'card-2',
           title: 'Demo Card 2',
           description: 'Another sample card',
-          imageUrl: '/card2.jpg',
-          thumbnailUrl: '/card2-thumb.jpg',
+          imageUrl: '/lovable-uploads/0edc670d-08ee-42a5-b42a-b2a3bea81c04.png',
+          thumbnailUrl: '/lovable-uploads/0edc670d-08ee-42a5-b42a-b2a3bea81c04.png',
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
           userId: 'user-1',
@@ -147,7 +145,6 @@ export function useCards() {
 
   const updateCard = useCallback(async (id: string, updates: Partial<Card>) => {
     try {
-      // In a real app, this would go to Supabase
       setCards(prev => 
         prev.map(card => 
           card.id === id 
@@ -171,7 +168,6 @@ export function useCards() {
 
   const deleteCard = useCallback(async (id: string) => {
     try {
-      // In a real app, this would go to Supabase
       setCards(prev => prev.filter(card => card.id !== id));
       return true;
     } catch (err) {
