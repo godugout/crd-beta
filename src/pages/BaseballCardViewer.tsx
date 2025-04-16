@@ -12,7 +12,7 @@ const BaseballCardViewer = () => {
       description="Immersive baseball card viewing experience"
       fullWidth={true}
     >
-      <div className="flex h-screen bg-gray-900">
+      <div className="flex h-[calc(100vh-4rem)] mt-16 bg-gray-900">
         {/* Left sidebar */}
         <div className="hidden md:block w-72 border-r border-gray-800">
           <BaseballCardSidebar />
