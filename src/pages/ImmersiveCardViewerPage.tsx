@@ -1,25 +1,24 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+
+import React, { useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { fetchCardById } from '@/lib/api/cards';
 import ImmersiveCardViewer from '@/components/card-viewer/ImmersiveCardViewer';
 import PageLayout from '@/components/navigation/PageLayout';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, ChevronUp, ChevronDown } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import KeyboardControls from '@/components/card-viewer/KeyboardControls';
 import CardEffectsPanel from '@/components/gallery/viewer-components/CardEffectsPanel';
-import { useCardEffects } from '@/hooks/useCardEffects';
+import { cn } from '@/lib/utils';
 
 const ImmersiveCardViewerPage = () => {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
-  const { toast } = useToast();
-  
   const [isFlipped, setIsFlipped] = useState(false);
   const [showEffects, setShowEffects] = useState(true);
   const [activeEffects, setActiveEffects] = useState<string[]>([]);
+  const [showFullInfo, setShowFullInfo] = useState(false);
   const [effectIntensities, setEffectIntensities] = useState({
     Holographic: 0.7,
     Refractor: 0.8,
@@ -28,84 +27,16 @@ const ImmersiveCardViewerPage = () => {
     Vintage: 0.5
   });
 
-  const { data: card, isLoading, error } = useQuery({
+  const { data: card, isLoading } = useQuery({
     queryKey: ['card', id],
     queryFn: () => fetchCardById(id as string),
-    enabled: !!id
   });
 
-  useEffect(() => {
-    const handleKeyPress = (e: KeyboardEvent) => {
-      switch(e.key.toLowerCase()) {
-        case 'f':
-          setIsFlipped(prev => !prev);
-          break;
-        case 'e':
-          setShowEffects(prev => !prev);
-          break;
-        case 'escape':
-          setShowEffects(false);
-          break;
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
-  }, []);
-
-  const handleBack = () => {
-    navigate(-1);
-  };
-
-  const handleEffectToggle = (effect: string) => {
-    setActiveEffects(prev => 
-      prev.includes(effect) ? prev.filter(e => e !== effect) : [...prev, effect]
-    );
-  };
-
-  const handleEffectIntensityChange = (effect: string, intensity: number) => {
-    setEffectIntensities(prev => ({
-      ...prev,
-      [effect]: intensity
-    }));
-  };
-
-  if (isLoading) {
+  if (isLoading || !card) {
     return (
       <PageLayout title="Loading Card..." fullWidth>
-        <div className="p-6">
-          <Button variant="ghost" onClick={handleBack} className="mb-6">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back
-          </Button>
-          
-          <div className="h-[600px] w-full bg-gray-900 rounded-lg flex items-center justify-center">
-            <div className="flex flex-col items-center">
-              <Skeleton className="w-24 h-24 rounded-full" />
-              <Skeleton className="w-48 h-6 mt-4" />
-            </div>
-          </div>
-        </div>
-      </PageLayout>
-    );
-  }
-
-  if (error || !card) {
-    return (
-      <PageLayout title="Error" fullWidth>
-        <div className="p-6">
-          <Button variant="ghost" onClick={handleBack} className="mb-6">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back
-          </Button>
-          
-          <div className="h-[600px] w-full bg-gray-900 rounded-lg flex items-center justify-center">
-            <div className="text-center text-white">
-              <h2 className="text-2xl font-bold mb-2">Card Not Found</h2>
-              <p className="text-gray-400">The card you're looking for doesn't exist or couldn't be loaded.</p>
-              <Button className="mt-4" onClick={handleBack}>Return to Collection</Button>
-            </div>
-          </div>
+        <div className="h-[600px] w-full bg-gray-900 flex items-center justify-center">
+          <Skeleton className="w-96 h-[500px] rounded-xl" />
         </div>
       </PageLayout>
     );
@@ -116,13 +47,14 @@ const ImmersiveCardViewerPage = () => {
       <div className="relative min-h-screen">
         <Button 
           variant="ghost" 
-          onClick={handleBack} 
+          onClick={() => window.history.back()} 
           className="absolute top-4 left-4 z-50 text-white"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back
         </Button>
         
+        {/* Main 3D Viewer */}
         <div className="absolute inset-0 flex items-center justify-center">
           <ImmersiveCardViewer 
             card={card}
@@ -132,18 +64,79 @@ const ImmersiveCardViewerPage = () => {
           />
         </div>
 
+        {/* Effects Panel */}
         {showEffects && (
           <div className="absolute left-4 top-20 bottom-4 w-80 pointer-events-auto">
             <CardEffectsPanel 
               activeEffects={activeEffects}
-              onToggleEffect={handleEffectToggle}
-              onEffectIntensityChange={handleEffectIntensityChange}
+              onToggleEffect={(effect) => {
+                setActiveEffects(prev => 
+                  prev.includes(effect) ? prev.filter(e => e !== effect) : [...prev, effect]
+                );
+              }}
+              onEffectIntensityChange={(effect, intensity) => {
+                setEffectIntensities(prev => ({ ...prev, [effect]: intensity }));
+              }}
               effectIntensities={effectIntensities}
             />
           </div>
         )}
 
+        {/* Keyboard Controls */}
         <KeyboardControls />
+
+        {/* Sticky Info Footer */}
+        <div className={cn(
+          "fixed bottom-0 left-0 right-0 bg-gray-900/95 backdrop-blur-md text-white transition-all duration-300 border-t border-gray-800",
+          showFullInfo ? "h-96" : "h-20"
+        )}>
+          <div className="container mx-auto px-4 py-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-bold">{card.title}</h2>
+                <p className="text-sm text-gray-400">{card.team} • {card.year}</p>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowFullInfo(!showFullInfo)}
+                className="text-white"
+              >
+                {showFullInfo ? (
+                  <ChevronDown className="h-5 w-5" />
+                ) : (
+                  <ChevronUp className="h-5 w-5" />
+                )}
+              </Button>
+            </div>
+
+            {/* Expanded Info */}
+            {showFullInfo && (
+              <div className="mt-4 space-y-4">
+                {card.description && (
+                  <div>
+                    <h3 className="text-sm font-semibold text-gray-400">Description</h3>
+                    <p className="mt-1">{card.description}</p>
+                  </div>
+                )}
+                
+                {card.stats && (
+                  <div>
+                    <h3 className="text-sm font-semibold text-gray-400">Stats</h3>
+                    <div className="mt-2 grid grid-cols-2 md:grid-cols-4 gap-4">
+                      {Object.entries(card.stats).map(([key, value]) => (
+                        <div key={key}>
+                          <div className="text-sm text-gray-400">{key}</div>
+                          <div className="font-semibold">{value}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </PageLayout>
   );
