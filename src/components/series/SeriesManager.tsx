@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
@@ -7,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { ArrowLeft, Upload, SortDesc } from 'lucide-react';
-import { Series } from '@/lib/types/cardTypes';
+import { Series } from '@/lib/types/enhancedCardTypes';
 import { useEnhancedCards } from '@/context/CardEnhancedContext';
 import { toast } from 'sonner';
 

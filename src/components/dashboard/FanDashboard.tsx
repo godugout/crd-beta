@@ -8,7 +8,7 @@ import {
   Heart, Grid, Package, Bookmark, Clock, Plus, Star 
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { EnhancedCard } from '@/lib/types/cardTypes';
+import { EnhancedCard } from '@/lib/types/enhancedCardTypes';
 
 interface FanDashboardProps {
   user: UserProfile;

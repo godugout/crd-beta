@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useEnhancedCards } from '@/context/CardEnhancedContext';
-import { Deck } from '@/lib/types/cardTypes';
+import { Deck } from '@/lib/types/enhancedCardTypes';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -41,10 +41,8 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck, onSave }) => {
   const [rarityFilter, setRarityFilter] = useState('');
   const [seriesFilter, setSeriesFilter] = useState('');
   
-  // Get deck cards
   const deckCards = cards.filter(card => formData.cardIds?.includes(card.id));
   
-  // Get available cards for filtering
   const getFilteredCards = () => {
     let filtered = cards.filter(card => !formData.cardIds?.includes(card.id));
     
@@ -63,7 +61,6 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck, onSave }) => {
   
   const filteredCards = getFilteredCards();
   
-  // Sample series for demo
   const sampleSeries = [
     { id: 'series-001', title: 'First Edition Collection' },
     { id: 'series-002', title: 'Limited Edition Memorabilia' }
@@ -73,11 +70,9 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck, onSave }) => {
     'common', 'uncommon', 'rare', 'ultra-rare', 'legendary', 'one-of-one'
   ];
   
-  // Handle image upload for cover
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      // In a real app, upload to server
       const url = URL.createObjectURL(file);
       setFormData({ ...formData, coverImageUrl: url });
     }
@@ -124,7 +119,6 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck, onSave }) => {
     }
   };
   
-  // Select a card as cover
   const setCardAsCover = (card: any) => {
     setFormData({
       ...formData,

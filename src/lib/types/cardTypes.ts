@@ -38,8 +38,8 @@ export interface CardStats {
  * Card style definition for visual appearance
  */
 export interface CardStyle {
-  template?: string;      // Added template property
-  effect?: string;        // Added effect property
+  template: string;      // Now required
+  effect: string;        // Now required
   borderRadius?: string;
   borderWidth?: number;
   borderColor?: string;
@@ -259,7 +259,7 @@ export interface BaseCard extends BaseEntity {
   rarity?: CardRarity;
   
   // Additional fields needed by some components
-  creatorId?: string;  // Added creatorId as an optional field
+  creatorId?: string;  // Added creatorId as proper optional field
   createdAt: string;   // Required field
   updatedAt: string;   // Required field
 }
@@ -269,5 +269,9 @@ export interface BaseCard extends BaseEntity {
  */
 export interface Card extends BaseCard {}
 
+// Export enhanced types from enhancedCardTypes to fix import issues
+export { EnhancedCard, Series, Deck } from './enhancedCardTypes';
+
 // Do not re-export the Reaction type here - fix this line
 export type { Reaction as CardReaction } from './interaction';
+
