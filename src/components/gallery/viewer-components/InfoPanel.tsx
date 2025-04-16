@@ -11,8 +11,8 @@ interface InfoPanelProps {
 const InfoPanel: React.FC<InfoPanelProps> = ({ card, showInfo = true }) => {
   // Ensure we have valid metadata by using defaults when needed
   const designMetadata = card.designMetadata || DEFAULT_DESIGN_METADATA;
-  const cardMetadata = designMetadata.cardMetadata || {};
-  const marketMetadata = designMetadata.marketMetadata || {};
+  const cardMetadata = designMetadata.cardMetadata || DEFAULT_DESIGN_METADATA.cardMetadata;
+  const marketMetadata = designMetadata.marketMetadata || DEFAULT_DESIGN_METADATA.marketMetadata;
 
   if (!showInfo) {
     return null;
