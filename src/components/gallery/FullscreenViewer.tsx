@@ -35,13 +35,13 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
     try {
       console.log('FullscreenViewer: Loading card with ID:', cardId);
       
-      // First try to get card from context
-      let card = getCard ? getCard(cardId) : cards.find(c => c.id === cardId);
+      // First try to find card directly from sampleCards
+      let card = sampleCards.find(c => c.id === cardId);
       
-      // If not found in context, try in sampleCards
+      // If not found in sampleCards, try the cards context
       if (!card) {
-        console.log('FullscreenViewer: Card not found in context, checking sampleCards');
-        card = sampleCards.find(c => c.id === cardId);
+        console.log('FullscreenViewer: Card not found in sampleCards, checking context');
+        card = getCard ? getCard(cardId) : cards.find(c => c.id === cardId);
       }
       
       if (card) {
@@ -88,8 +88,8 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
     }
   }, [cardId, cards, getCard]);
   
-  // Find all card indices to enable navigation between cards
-  const allCardIds = [...cards, ...sampleCards].map(card => card.id);
+  // Find all card indices from sampleCards to enable navigation between cards
+  const allCardIds = sampleCards.map(card => card.id);
   const currentIndex = allCardIds.indexOf(cardId);
   
   // Handle previous/next card navigation

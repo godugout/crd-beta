@@ -43,13 +43,13 @@ const CardDetail = () => {
     
     console.log('CardDetail: Rendering for ID:', id);
     
-    // First try to find card from context
-    let foundCard = getCard ? getCard(id) : cards.find(c => c.id === id);
+    // Find card directly from sampleCards first, which contains the original card data
+    let foundCard = sampleCards.find(c => c.id === id);
     
-    // If card is not found in the context, try to find it in sampleCards
+    // If not found in sampleCards, try the cards context
     if (!foundCard) {
-      console.log('CardDetail: Card not found in context, checking sampleCards for ID:', id);
-      foundCard = sampleCards.find(c => c.id === id);
+      console.log('CardDetail: Card not found in sampleCards, checking context for ID:', id);
+      foundCard = getCard ? getCard(id) : cards.find(c => c.id === id);
     }
     
     // If we found a card, ensure it has valid image URLs
@@ -157,9 +157,9 @@ const CardDetail = () => {
         />
         
         <RelatedCards 
-          cards={cards}
+          cards={sampleCards.filter(card => card.id !== resolvedCard.id)}
           currentCardId={resolvedCard.id}
-          onCardClick={cardOperations.showCardDetails}
+          onCardClick={(id) => navigate(`/cards/${id}`)}
           className="mt-16"
         />
       </div>
