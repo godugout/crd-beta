@@ -1,6 +1,7 @@
 import { Card } from './types';
 import { v4 as uuidv4 } from 'uuid';
 import { adaptToCard } from './adapters/cardAdapter';
+import { DEFAULT_DESIGN_METADATA } from './utils/cardDefaults';
 
 export const sampleCards: Card[] = [
   adaptToCard({
@@ -20,7 +21,7 @@ export const sampleCards: Card[] = [
     set: 'Topps',
     cardNumber: '47',
     cardType: 'Baseball Card',
-    artistName: 'Topps',
+    artist: 'Topps',
     backgroundColor: '#ffffff',
     textColor: '#000000',
     specialEffect: 'None',
@@ -30,6 +31,7 @@ export const sampleCards: Card[] = [
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     isPublic: true,
+    designMetadata: DEFAULT_DESIGN_METADATA,
     creatorId: 'user123'
   }),
   adaptToCard({
@@ -49,7 +51,7 @@ export const sampleCards: Card[] = [
     set: 'Fleer',
     cardNumber: '1',
     cardType: 'Baseball Card',
-    artistName: 'Fleer',
+    artist: 'Fleer',
     backgroundColor: '#ffffff',
     textColor: '#000000',
     specialEffect: 'None',
@@ -59,6 +61,7 @@ export const sampleCards: Card[] = [
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     isPublic: true,
+    designMetadata: DEFAULT_DESIGN_METADATA,
     creatorId: 'user123'
   }),
   adaptToCard({
@@ -78,7 +81,7 @@ export const sampleCards: Card[] = [
     set: 'Bowman',
     cardNumber: '36',
     cardType: 'Baseball Card',
-    artistName: 'Bowman',
+    artist: 'Bowman',
     backgroundColor: '#ffffff',
     textColor: '#000000',
     specialEffect: 'None',
@@ -88,6 +91,7 @@ export const sampleCards: Card[] = [
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     isPublic: true,
+    designMetadata: DEFAULT_DESIGN_METADATA,
     creatorId: 'user123'
   }),
   adaptToCard({
@@ -107,7 +111,7 @@ export const sampleCards: Card[] = [
     set: 'Topps',
     cardNumber: '305',
     cardType: 'Baseball Card',
-    artistName: 'Topps',
+    artist: 'Topps',
     backgroundColor: '#ffffff',
     textColor: '#000000',
     specialEffect: 'None',
@@ -117,6 +121,7 @@ export const sampleCards: Card[] = [
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     isPublic: true,
+    designMetadata: DEFAULT_DESIGN_METADATA,
     creatorId: 'user123'
   }),
   adaptToCard({
@@ -136,7 +141,7 @@ export const sampleCards: Card[] = [
     set: 'Topps',
     cardNumber: '1',
     cardType: 'Baseball Card',
-    artistName: 'Topps',
+    artist: 'Topps',
     backgroundColor: '#ffffff',
     textColor: '#000000',
     specialEffect: 'None',
@@ -146,6 +151,7 @@ export const sampleCards: Card[] = [
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     isPublic: true,
+    designMetadata: DEFAULT_DESIGN_METADATA,
     creatorId: 'user123'
   }),
   adaptToCard({
@@ -165,7 +171,7 @@ export const sampleCards: Card[] = [
     set: 'Topps',
     cardNumber: '1',
     cardType: 'Baseball Card',
-    artistName: 'Topps',
+    artist: 'Topps',
     backgroundColor: '#ffffff',
     textColor: '#000000',
     specialEffect: 'None',
@@ -175,6 +181,7 @@ export const sampleCards: Card[] = [
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     isPublic: true,
+    designMetadata: DEFAULT_DESIGN_METADATA,
     creatorId: 'user123'
   }),
   adaptToCard({
@@ -194,7 +201,7 @@ export const sampleCards: Card[] = [
     set: 'Goudey',
     cardNumber: '149',
     cardType: 'Baseball Card',
-    artistName: 'Goudey',
+    artist: 'Goudey',
     backgroundColor: '#ffffff',
     textColor: '#000000',
     specialEffect: 'None',
@@ -204,6 +211,7 @@ export const sampleCards: Card[] = [
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     isPublic: true,
+    designMetadata: DEFAULT_DESIGN_METADATA,
     creatorId: 'user123'
   }),
   adaptToCard({
@@ -223,7 +231,7 @@ export const sampleCards: Card[] = [
     set: 'T205',
     cardNumber: null,
     cardType: 'Baseball Card',
-    artistName: 'American Tobacco Co.',
+    artist: 'American Tobacco Co.',
     backgroundColor: '#ffffff',
     textColor: '#000000',
     specialEffect: 'None',
@@ -233,6 +241,7 @@ export const sampleCards: Card[] = [
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     isPublic: true,
+    designMetadata: DEFAULT_DESIGN_METADATA,
     creatorId: 'user123'
   })
 ];

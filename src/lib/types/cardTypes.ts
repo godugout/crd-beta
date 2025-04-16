@@ -1,3 +1,4 @@
+
 /**
  * Consolidated Card Types for Cardshow (CRD)
  * This file serves as the central source of truth for all card-related types
@@ -237,7 +238,6 @@ export interface BaseCard extends BaseEntity {
   set?: string;
   cardNumber?: string;
   cardType?: string;
-  artistName?: string; // Use artistName instead of artist to avoid conflicts
   artist?: string; // For backward compatibility
   backgroundColor?: string;
   textColor?: string;
@@ -259,6 +259,8 @@ export interface BaseCard extends BaseEntity {
   
   // Additional fields needed by some components
   creatorId?: string;
+  createdAt: string; // Changed from optional to required
+  updatedAt: string; // Changed from optional to required
 }
 
 /**

@@ -8,7 +8,8 @@ import { BaseEntity } from './index';
 import { Reaction, Comment } from './interaction';
 import { 
   Card as CardType, 
-  FabricSwatch as FabricSwatchType 
+  FabricSwatch as FabricSwatchType,
+  DesignMetadata 
 } from './cardTypes';
 
 export interface FabricSwatch extends FabricSwatchType {}
@@ -17,14 +18,14 @@ export interface FabricSwatch extends FabricSwatchType {}
 export interface BaseCard {
   id: string;
   title: string;
-  description: string; // Changed from optional to required
-  imageUrl: string; // Changed from optional to required
-  thumbnailUrl: string; // Changed from optional to required
-  tags: string[]; // Changed from optional to required
-  userId: string; // Changed from optional to required
+  description: string;
+  imageUrl: string;
+  thumbnailUrl: string;
+  tags: string[];
+  userId: string;
   collectionId?: string;
   metadata?: Record<string, any>;
-  effects: string[]; // Required for card viewer
+  effects: string[];
   reactions?: Reaction[];
   comments?: Comment[];
   viewCount?: number;
@@ -44,9 +45,9 @@ export interface BaseCard {
   name?: string;
   cardStyle?: string;
   backTemplate?: string;
-  createdAt: string; // Changed from optional to required
-  updatedAt: string; // Changed from optional to required
-  designMetadata: any; // Changed from optional to required
+  createdAt: string;
+  updatedAt: string;
+  designMetadata: DesignMetadata;
 }
 
 export interface Card extends BaseCard {}

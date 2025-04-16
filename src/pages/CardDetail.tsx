@@ -12,6 +12,7 @@ import { Card } from '@/lib/types';
 import { sampleCards } from '@/lib/data/sampleCards';
 import { toast } from '@/hooks/use-toast';
 import { adaptToCard } from '@/lib/adapters/cardAdapter';
+import { DEFAULT_DESIGN_METADATA } from '@/lib/utils/cardDefaults';
 
 // Fallback image to use when card image is not available
 const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1518770660439-4636190af475';
@@ -62,6 +63,12 @@ const CardDetail = () => {
         // Ensure imageUrl is present
         imageUrl: foundCard.imageUrl || FALLBACK_IMAGE,
         thumbnailUrl: foundCard.thumbnailUrl || foundCard.imageUrl || FALLBACK_IMAGE,
+        // Ensure other required fields are present
+        designMetadata: foundCard.designMetadata || DEFAULT_DESIGN_METADATA,
+        createdAt: foundCard.createdAt || new Date().toISOString(),
+        updatedAt: foundCard.updatedAt || new Date().toISOString(),
+        userId: foundCard.userId || 'anonymous',
+        effects: foundCard.effects || []
       });
       
       setResolvedCard(processedCard);

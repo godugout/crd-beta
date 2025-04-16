@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -6,6 +7,7 @@ import { Card } from '@/lib/types';
 import { sampleCards } from '@/lib/data/sampleCards';
 import { toast } from '@/hooks/use-toast';
 import { adaptToCard } from '@/lib/adapters/cardAdapter';
+import { DEFAULT_DESIGN_METADATA } from '@/lib/utils/cardDefaults';
 
 interface FullscreenViewerProps {
   cardId: string;
@@ -51,6 +53,12 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
           // Make sure image URLs are present
           imageUrl: foundCard.imageUrl || FALLBACK_IMAGE,
           thumbnailUrl: foundCard.thumbnailUrl || foundCard.imageUrl || FALLBACK_IMAGE,
+          // Ensure all required fields are present
+          designMetadata: foundCard.designMetadata || DEFAULT_DESIGN_METADATA,
+          createdAt: foundCard.createdAt || new Date().toISOString(),
+          updatedAt: foundCard.updatedAt || new Date().toISOString(),
+          userId: foundCard.userId || 'anonymous',
+          effects: foundCard.effects || []
         });
         
         // Always initialize with fallback first, then update if the real image loads

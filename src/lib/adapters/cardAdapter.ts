@@ -37,7 +37,7 @@ export function adaptToCard(data: Partial<Card>): Card {
     set: data.set,
     cardNumber: data.cardNumber,
     cardType: data.cardType,
-    artist: data.artist,
+    artist: data.artist || data.artistName, // Support for artistName property
     backgroundColor: data.backgroundColor,
     textColor: data.textColor,
     specialEffect: data.specialEffect,

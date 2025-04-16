@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Card } from '@/lib/types';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { adaptToCard } from '@/lib/adapters/cardAdapter';
 
 // Define an interface that matches the actual database schema
 interface CardRecord {
@@ -45,8 +46,8 @@ export const useCardData = () => {
         return;
       }
 
-      // Transform the database records into our Card type
-      const formattedCards: Card[] = (data as CardRecord[]).map(card => ({
+      // Transform the database records into our Card type using the adapter
+      const formattedCards: Card[] = (data as CardRecord[]).map(card => adaptToCard({
         id: card.id,
         title: card.title,
         description: card.description || '',
@@ -56,7 +57,8 @@ export const useCardData = () => {
         createdAt: card.created_at,
         updatedAt: card.updated_at,
         collectionId: card.collection_id,
-        effects: [] // Add default empty effects array
+        userId: card.user_id || 'anonymous',
+        effects: []
       }));
 
       setCards(formattedCards);

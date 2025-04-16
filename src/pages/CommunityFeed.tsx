@@ -4,6 +4,8 @@ import PageLayout from '@/components/navigation/PageLayout';
 import { Card } from '@/lib/types/cardTypes';
 import { Reaction } from '@/lib/types/interaction';
 import { useToast } from '@/hooks/use-toast';
+import { adaptToCard } from '@/lib/adapters/cardAdapter';
+import { DEFAULT_DESIGN_METADATA } from '@/lib/utils/cardDefaults';
 
 const CommunityFeed = () => {
   const [feedCards, setFeedCards] = useState<Card[]>([]);
@@ -17,7 +19,7 @@ const CommunityFeed = () => {
         
         // In a production app, fetch from API
         const communityCards: Card[] = [
-          {
+          adaptToCard({
             id: 'community-1',
             title: 'Community Card 1',
             description: 'This is a community-created card',
@@ -40,8 +42,9 @@ const CommunityFeed = () => {
               }
             ],
             effects: ['Holographic'],
-          },
-          {
+            designMetadata: DEFAULT_DESIGN_METADATA
+          }),
+          adaptToCard({
             id: 'community-2',
             title: 'Community Card 2',
             description: 'Another community-created card',
@@ -55,7 +58,8 @@ const CommunityFeed = () => {
             tags: ['community', 'trending'],
             reactions: [],
             effects: ['Chrome', 'Refractor'],
-          },
+            designMetadata: DEFAULT_DESIGN_METADATA
+          }),
         ];
         
         setFeedCards(communityCards);
