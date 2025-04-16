@@ -10,6 +10,13 @@ interface OptimizedRenderingConfig {
   disableShadows: boolean;
 }
 
+// Define the network connection interface
+interface NetworkInformation {
+  effectiveType: string;
+  addEventListener: (type: string, listener: EventListener) => void;
+  removeEventListener: (type: string, listener: EventListener) => void;
+}
+
 export const useMobileOptimization = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [viewportWidth, setViewportWidth] = useState(window.innerWidth);
@@ -29,8 +36,11 @@ export const useMobileOptimization = () => {
     // Check network conditions
     const checkNetworkCondition = () => {
       if ('connection' in navigator) {
-        // @ts-ignore - Connection API not fully typed in TypeScript
-        const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+        // Cast to our defined interface to handle the properties correctly
+        const connection = (
+          navigator as any
+        ).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection as NetworkInformation | undefined;
+        
         if (connection) {
           const type = connection.effectiveType;
           setConnectionType(type);
@@ -50,8 +60,10 @@ export const useMobileOptimization = () => {
     return () => {
       window.removeEventListener('resize', checkMobile);
       if ('connection' in navigator) {
-        // @ts-ignore - Connection API not fully typed in TypeScript
-        const connection = navigator.connection;
+        const connection = (
+          navigator as any
+        ).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection as NetworkInformation | undefined;
+        
         if (connection && connection.removeEventListener) {
           connection.removeEventListener('change', checkNetworkCondition);
         }
