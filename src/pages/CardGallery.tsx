@@ -1,12 +1,15 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PageLayout from '@/components/navigation/PageLayout';
 import CardGalleryComponent from '@/components/CardGallery';
 import { cardsNavItems } from '@/config/navigation';
 import ContentTypeNavigation from '@/components/navigation/ContentTypeNavigation';
+import { useCards } from '@/hooks/useCards';
+import { Card } from '@/lib/types';
 
 const CardGallery = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  const { cards, loading, error } = useCards();
 
   // Create navigation items for content type navigation
   const navigationItems = cardsNavItems.map(item => ({
@@ -33,6 +36,8 @@ const CardGallery = () => {
         
         <CardGalleryComponent 
           searchQuery={searchQuery}
+          cards={cards as Card[]} 
+          isLoading={loading}
         />
       </div>
     </PageLayout>

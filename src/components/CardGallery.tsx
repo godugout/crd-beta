@@ -5,8 +5,6 @@ import { cn } from '@/lib/utils';
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import { useMobileOptimization } from '@/hooks/useMobileOptimization';
 import { Card } from '@/lib/types';
-import { useCards } from '@/context/CardContext';
-import { CardThumbnail } from '@/components/cards';
 import { useCardOperations } from '@/hooks/useCardOperations';
 
 interface CardGalleryProps {
@@ -36,15 +34,9 @@ const CardGallery: React.FC<CardGalleryProps> = ({
   const [viewMode, setViewMode] = useState(initialViewMode);
   const cardOperations = useCardOperations();
   
-  const { 
-    cards: contextCards, 
-    isLoading: contextIsLoading,
-    error: contextError,
-    refreshCards 
-  } = useCards();
-  
-  const cards = propCards || contextCards || [];
-  const isLoading = propIsLoading || contextIsLoading;
+  // Use the provided cards directly without depending on CardContext
+  const cards = propCards || [];
+  const isLoading = propIsLoading;
   const { isMobile } = useMobileOptimization();
 
   // Filter cards based on search query
@@ -85,18 +77,41 @@ const CardGallery: React.FC<CardGalleryProps> = ({
             {filteredCards.map(card => (
               <div key={card.id} className={viewMode === 'list' ? "bg-background rounded-lg shadow" : ""}>
                 {viewMode === 'grid' ? (
-                  <CardThumbnail
-                    card={card}
+                  <div 
+                    className="cursor-pointer transition-all duration-200 hover:shadow-md"
                     onClick={() => handleCardItemClick(card.id)}
-                    className="transition-all duration-200 hover:shadow-md"
-                  />
+                  >
+                    <div className="aspect-[2.5/3.5] rounded-lg overflow-hidden mb-2 bg-gray-100">
+                      {card.imageUrl && (
+                        <img 
+                          src={card.imageUrl}
+                          alt={card.title || 'Card image'}
+                          className="w-full h-full object-cover"
+                        />
+                      )}
+                    </div>
+                    <h3 className="font-medium text-sm truncate">{card.title || 'Untitled Card'}</h3>
+                    {card.tags && card.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {card.tags.slice(0, 2).map((tag, index) => (
+                          <span key={index} className="text-xs text-muted-foreground">#{tag}</span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 ) : (
                   <div className="flex items-center p-3 gap-4 cursor-pointer" onClick={() => handleCardItemClick(card.id)}>
-                    <div className="w-16 h-24">
-                      <CardThumbnail card={card} className="w-full h-full" />
+                    <div className="w-16 h-24 bg-gray-100">
+                      {card.imageUrl && (
+                        <img 
+                          src={card.imageUrl}
+                          alt={card.title || 'Card thumbnail'}
+                          className="w-full h-full object-cover"
+                        />
+                      )}
                     </div>
                     <div className="flex-1">
-                      <h3 className="font-medium">{card.title}</h3>
+                      <h3 className="font-medium">{card.title || 'Untitled Card'}</h3>
                       <p className="text-sm text-muted-foreground line-clamp-1">{card.description}</p>
                       {card.tags && card.tags.length > 0 && (
                         <div className="flex flex-wrap gap-1 mt-1">
@@ -113,7 +128,7 @@ const CardGallery: React.FC<CardGalleryProps> = ({
           </div>
         )}
         
-        {filteredCards.length === 0 && !isLoading && !contextError && (
+        {filteredCards.length === 0 && !isLoading && (
           <div className="text-center py-12">
             <p className="text-muted-foreground">No cards found</p>
           </div>
