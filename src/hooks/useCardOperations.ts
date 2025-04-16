@@ -11,25 +11,8 @@ import { Card } from '@/lib/types';
 export function useCardOperations() {
   const navigate = useNavigate();
   
-  // Try to use the CardProvider, but provide fallbacks if it's not available
-  let deleteCard = (id: string) => {
-    console.warn('CardProvider not found, deleteCard operation not available');
-    return Promise.resolve(false);
-  };
-  
-  let updateCard = (id: string, data: any) => {
-    console.warn('CardProvider not found, updateCard operation not available');
-    return Promise.resolve(false);
-  };
-  
-  try {
-    // This will throw an error if CardProvider is not in the component tree
-    const cardContext = useCards();
-    deleteCard = cardContext.deleteCard;
-    updateCard = cardContext.updateCard;
-  } catch (error) {
-    console.warn('CardProvider not available, using fallback card operations');
-  }
+  // Get functions from CardContext
+  const { deleteCard, updateCard } = useCards();
   
   /**
    * View a card in the full screen viewer
@@ -87,9 +70,14 @@ export function useCardOperations() {
    */
   const removeCard = useCallback((cardId: string, onSuccess?: () => void) => {
     if (window.confirm('Are you sure you want to delete this card?')) {
-      deleteCard(cardId);
-      toast.success('Card deleted successfully');
-      if (onSuccess) onSuccess();
+      deleteCard(cardId).then(success => {
+        if (success) {
+          toast.success('Card deleted successfully');
+          if (onSuccess) onSuccess();
+        } else {
+          toast.error('Failed to delete card');
+        }
+      });
     }
   }, [deleteCard]);
   

@@ -7,7 +7,8 @@ import { toast } from 'sonner';
 
 export const useGalleryCards = () => {
   const [sortOrder, setSortOrder] = useState<string>('newest');
-  const { cards, isLoading, refreshCards } = useCards();
+  const { cards } = useCards();
+  const [isLoading, setIsLoading] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const [refreshTrigger, setRefreshTrigger] = useState(0);
@@ -80,25 +81,43 @@ export const useGalleryCards = () => {
     
     if (shouldRefresh) {
       console.log("Refresh parameter detected, refreshing cards...");
-      refreshCards?.();
-      queryParams.delete('refresh');
-      navigate({
-        pathname: location.pathname,
-        search: queryParams.toString()
-      }, { replace: true });
+      setIsLoading(true);
+      setTimeout(() => {
+        setIsLoading(false);
+        queryParams.delete('refresh');
+        navigate({
+          pathname: location.pathname,
+          search: queryParams.toString()
+        }, { replace: true });
+      }, 500);
     } else if (refreshTrigger === 0) {
       // Only refresh once on initial mount
-      refreshCards?.();
       setRefreshTrigger(1);
     }
-  }, [location.search, refreshCards, navigate, refreshTrigger]);
+  }, [location.search, navigate, refreshTrigger]);
+  
+  // Function to refresh cards
+  const refreshCards = async () => {
+    setIsLoading(true);
+    try {
+      // This would typically call an API to refresh data
+      // For now, we just simulate a delay
+      await new Promise(resolve => setTimeout(resolve, 500));
+    } catch (error) {
+      console.error('Error refreshing cards:', error);
+      toast.error('Failed to refresh cards');
+    } finally {
+      setIsLoading(false);
+    }
+  };
   
   return {
     displayCards,
     isLoading,
     hasBaseballCards,
     sortOrder,
-    setSortOrder
+    setSortOrder,
+    refreshCards
   };
 };
 

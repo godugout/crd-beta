@@ -1,49 +1,45 @@
 
-import { DesignMetadata } from '@/lib/types/cardTypes';
+import { DesignMetadata, CardStyle, TextStyle } from '@/lib/types';
 
-// Default design metadata structure for cards
+// Default CardStyle
+export const DEFAULT_CARD_STYLE: CardStyle = {
+  template: 'standard',
+  effect: 'none',
+  borderRadius: '8px',
+  borderColor: '#000000',
+  borderWidth: 1,
+  shadowColor: 'rgba(0,0,0,0.2)',
+  frameWidth: 2,
+  frameColor: '#000000',
+  backgroundColor: '#ffffff'
+};
+
+// Default TextStyle
+export const DEFAULT_TEXT_STYLE: TextStyle = {
+  fontFamily: 'Inter',
+  fontSize: '14px',
+  fontWeight: '400',
+  color: '#000000',
+  titleColor: '#000000',
+  titleAlignment: 'center',
+  titleWeight: 'bold',
+  descriptionColor: '#333333'
+};
+
+// Complete default DesignMetadata
 export const DEFAULT_DESIGN_METADATA: DesignMetadata = {
-  cardStyle: {
-    template: 'classic',
-    effect: 'classic',
-    borderRadius: '4px',
-    borderColor: '#000000',
-    frameColor: '#000000',
-    frameWidth: 2,
-    shadowColor: 'rgba(0, 0, 0, 0.4)'
-  },
-  textStyle: {
-    titleColor: '#000000',
-    titleAlignment: 'left',
-    titleWeight: 'bold',
-    descriptionColor: '#444444'
+  cardStyle: DEFAULT_CARD_STYLE,
+  textStyle: DEFAULT_TEXT_STYLE,
+  cardMetadata: {
+    category: 'Standard',
+    series: 'Base',
+    cardType: 'Standard',
+    cardNumber: '1',
+    artist: 'Unknown'
   },
   marketMetadata: {
     isPrintable: false,
     isForSale: false,
     includeInCatalog: false
-  },
-  cardMetadata: {
-    category: 'general',
-    cardType: 'standard',
-    series: 'base'
   }
 };
-
-// Default card property values
-export const DEFAULT_CARD_VALUES = {
-  createdAt: new Date().toISOString(),
-  updatedAt: new Date().toISOString(),
-  userId: 'anonymous',
-  tags: [],
-  effects: []
-};
-
-// Fallback image URL for missing card images
-export const FALLBACK_IMAGE_URL = 'https://images.unsplash.com/photo-1518770660439-4636190af475';
-
-// Helper function to get a fallback image URL based on card tags or title
-export function getFallbackImageUrl(tags?: string[], title?: string): string {
-  // In a real app, you might use tags or title to get a more relevant fallback image
-  return FALLBACK_IMAGE_URL;
-}

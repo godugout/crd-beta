@@ -2,6 +2,7 @@
 import React from 'react';
 import { Card } from '@/lib/types';
 import { Badge } from '@/components/ui/badge';
+import { DEFAULT_DESIGN_METADATA } from '@/lib/utils/cardDefaults';
 
 interface InfoPanelProps {
   card: Card;
@@ -11,9 +12,10 @@ interface InfoPanelProps {
 const InfoPanel = ({ card, showInfo }: InfoPanelProps) => {
   if (!showInfo) return null;
 
-  // Extract card metadata for display, with safe default values
-  const cardMetadata = card.designMetadata?.cardMetadata || {};
-  const marketMetadata = card.designMetadata?.marketMetadata || {};
+  // Extract card metadata for display with safe defaults
+  const designMetadata = card.designMetadata || DEFAULT_DESIGN_METADATA;
+  const cardMetadata = designMetadata.cardMetadata || DEFAULT_DESIGN_METADATA.cardMetadata;
+  const marketMetadata = designMetadata.marketMetadata || DEFAULT_DESIGN_METADATA.marketMetadata;
   
   return (
     <div className="absolute left-6 top-1/2 -translate-y-1/2 bg-black/70 backdrop-blur-sm rounded-lg p-4 shadow-lg text-white max-w-xs">
@@ -74,7 +76,6 @@ const InfoPanel = ({ card, showInfo }: InfoPanelProps) => {
             </div>
           )}
           
-          {/* Check for artist in cardMetadata since 'artist' is not directly on Card type */}
           {cardMetadata && cardMetadata.artist && (
             <div className="flex flex-col col-span-2">
               <span className="text-gray-400 text-xs">Artist</span>
