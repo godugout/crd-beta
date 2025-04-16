@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, ReactNode, useCallback, useEffect } from 'react';
 import { Card, Collection, DesignMetadata } from '@/lib/types';
 import { DEFAULT_DESIGN_METADATA } from '@/lib/utils/cardDefaults';
@@ -9,10 +10,11 @@ export interface CardContextType {
   collections: Collection[];
   isLoading: boolean;
   getCard: (id: string) => Card | undefined;
-  addCard: (card: Card) => Promise<Card>;
+  getCardById: (id: string) => Card | undefined; // Added this method
+  addCard: (card: Partial<Card>) => Promise<Card>; // Changed to accept Partial<Card>
   updateCard: (id: string, cardData: Partial<Card>) => Promise<Card>;
   deleteCard: (id: string) => Promise<boolean>;
-  addCollection: (collection: Collection) => Promise<Collection>;
+  addCollection: (collection: Partial<Collection>) => Promise<Collection>; // Changed to accept Partial<Collection>
   updateCollection: (id: string, collectionData: Partial<Collection>) => Promise<Collection>;
   deleteCollection: (id: string) => Promise<boolean>;
   addCardToCollection: (cardId: string, collectionId: string) => Promise<Collection>;
@@ -25,6 +27,7 @@ const CardContext = createContext<CardContextType>({
   collections: [],
   isLoading: false,
   getCard: () => undefined,
+  getCardById: () => undefined, // Added this method
   addCard: async () => ({} as Card),
   updateCard: async () => ({} as Card),
   deleteCard: async () => false,
@@ -66,12 +69,33 @@ export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const getCard = useCallback((id: string) => {
     return cards.find(card => card.id === id);
   }, [cards]);
+  
+  // Add alias for getCardById to match getCard
+  const getCardById = useCallback((id: string) => {
+    return cards.find(card => card.id === id);
+  }, [cards]);
 
-  const addCard = useCallback(async (card: Card) => {
+  const addCard = useCallback(async (cardData: Partial<Card>) => {
     setIsLoading(true);
     return new Promise<Card>((resolve) => {
       setTimeout(() => {
-        const newCard = { ...card, id: uuidv4() };
+        // Create a complete card from partial data
+        const now = new Date().toISOString();
+        const newCard: Card = {
+          id: uuidv4(),
+          title: cardData.title || 'Untitled Card',
+          description: cardData.description || '',
+          imageUrl: cardData.imageUrl || '',
+          thumbnailUrl: cardData.thumbnailUrl || cardData.imageUrl || '',
+          userId: cardData.userId || 'default-user',
+          tags: cardData.tags || [],
+          effects: cardData.effects || [],
+          createdAt: now,
+          updatedAt: now,
+          designMetadata: cardData.designMetadata || DEFAULT_DESIGN_METADATA,
+          ...cardData
+        };
+        
         setCards(prevCards => [...prevCards, newCard]);
         setIsLoading(false);
         resolve(newCard);
@@ -83,21 +107,27 @@ export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setIsLoading(true);
     return new Promise<Card>((resolve) => {
       setTimeout(() => {
+        let updatedCard: Card = {} as Card;
+        
         setCards(prevCards =>
           prevCards.map(card => {
             if (card.id === id) {
-              const updatedCard = { ...card, ...cardData };
+              updatedCard = { 
+                ...card, 
+                ...cardData, 
+                updatedAt: new Date().toISOString() 
+              };
               return updatedCard;
             }
             return card;
           })
         );
-        const updatedCard = cards.find(card => card.id === id);
+        
         setIsLoading(false);
-        resolve(updatedCard as Card);
+        resolve(updatedCard);
       }, 300);
     });
-  }, [cards]);
+  }, []);
 
   const deleteCard = useCallback(async (id: string) => {
     setIsLoading(true);
@@ -110,11 +140,28 @@ export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     });
   }, []);
 
-  const addCollection = useCallback(async (collection: Collection) => {
+  const addCollection = useCallback(async (collection: Partial<Collection>) => {
     setIsLoading(true);
     return new Promise<Collection>((resolve) => {
       setTimeout(() => {
-        const newCollection = { ...collection, id: uuidv4() };
+        const now = new Date().toISOString();
+        const newCollection: Collection = {
+          id: uuidv4(),
+          name: collection.name || 'Untitled Collection',
+          description: collection.description || '',
+          userId: collection.userId || 'default-user',
+          cards: collection.cards || [],
+          coverImageUrl: collection.coverImageUrl || '',
+          isPublic: collection.isPublic !== undefined ? collection.isPublic : true,
+          cardIds: collection.cardIds || [],
+          createdAt: now,
+          updatedAt: now,
+          visibility: collection.visibility || 'public',
+          allowComments: collection.allowComments !== undefined ? collection.allowComments : true,
+          designMetadata: collection.designMetadata || {},
+          ...collection
+        };
+        
         setCollections(prevCollections => [...prevCollections, newCollection]);
         setIsLoading(false);
         resolve(newCollection);
@@ -126,20 +173,27 @@ export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setIsLoading(true);
     return new Promise<Collection>((resolve) => {
       setTimeout(() => {
+        let updatedCollection: Collection = {} as Collection;
+        
         setCollections(prevCollections =>
           prevCollections.map(collection => {
             if (collection.id === id) {
-              return { ...collection, ...collectionData };
+              updatedCollection = { 
+                ...collection, 
+                ...collectionData, 
+                updatedAt: new Date().toISOString() 
+              };
+              return updatedCollection;
             }
             return collection;
           })
         );
-        const updatedCollection = collections.find(collection => collection.id === id);
+        
         setIsLoading(false);
-        resolve(updatedCollection as Collection);
+        resolve(updatedCollection);
       }, 300);
     });
-  }, [collections]);
+  }, []);
 
   const deleteCollection = useCallback(async (id: string) => {
     setIsLoading(true);
@@ -156,47 +210,58 @@ export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setIsLoading(true);
     return new Promise<Collection>((resolve) => {
       setTimeout(() => {
+        let updatedCollection: Collection = {} as Collection;
+        
         setCollections(prevCollections =>
           prevCollections.map(collection => {
             if (collection.id === collectionId) {
-              const updatedCollection: Collection = {
-                ...collection,
-                cardIds: collection.cardIds ? [...collection.cardIds, cardId] : [cardId],
-              };
-              return updatedCollection;
+              const cardExists = collection.cardIds ? collection.cardIds.includes(cardId) : false;
+              
+              if (!cardExists) {
+                updatedCollection = {
+                  ...collection,
+                  cardIds: collection.cardIds ? [...collection.cardIds, cardId] : [cardId],
+                  updatedAt: new Date().toISOString()
+                };
+                return updatedCollection;
+              }
+              updatedCollection = collection;
             }
             return collection;
           })
         );
-        const updatedCollection = collections.find(collection => collection.id === collectionId);
+        
         setIsLoading(false);
-        resolve(updatedCollection as Collection);
+        resolve(updatedCollection);
       }, 300);
     });
-  }, [collections]);
+  }, []);
 
   const removeCardFromCollection = useCallback(async (cardId: string, collectionId: string) => {
     setIsLoading(true);
     return new Promise<Collection>((resolve) => {
       setTimeout(() => {
+        let updatedCollection: Collection = {} as Collection;
+        
         setCollections(prevCollections =>
           prevCollections.map(collection => {
             if (collection.id === collectionId) {
-              const updatedCollection: Collection = {
+              updatedCollection = {
                 ...collection,
                 cardIds: collection.cardIds ? collection.cardIds.filter(id => id !== cardId) : [],
+                updatedAt: new Date().toISOString()
               };
               return updatedCollection;
             }
             return collection;
           })
         );
-        const updatedCollection = collections.find(collection => collection.id === collectionId);
+        
         setIsLoading(false);
-        resolve(updatedCollection as Collection);
+        resolve(updatedCollection);
       }, 300);
     });
-  }, [collections]);
+  }, []);
 
   const refreshCards = useCallback(async () => {
     setIsLoading(true);
@@ -213,6 +278,7 @@ export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     collections,
     isLoading,
     getCard,
+    getCardById, // Added this method
     addCard,
     updateCard,
     deleteCard,
@@ -234,4 +300,5 @@ export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 export const useCards = () => useContext(CardContext);
 export const useCardContext = () => useContext(CardContext);
 
-export { Card, Collection };
+// Use 'export type' for types to fix the isolatedModules issue
+export type { Card, Collection };

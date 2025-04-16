@@ -5,12 +5,18 @@ import { DEFAULT_DESIGN_METADATA } from '@/lib/utils/cardDefaults';
 
 interface InfoPanelProps {
   card: Card;
+  showInfo?: boolean; // Add the showInfo property
 }
 
-const InfoPanel: React.FC<InfoPanelProps> = ({ card }) => {
-  const metadata = card.designMetadata || DEFAULT_DESIGN_METADATA;
-  const cardMetadata = metadata.cardMetadata || {};
-  const marketMetadata = metadata.marketMetadata || {};
+const InfoPanel: React.FC<InfoPanelProps> = ({ card, showInfo = true }) => {
+  // Ensure we have valid metadata by using defaults when needed
+  const designMetadata = card.designMetadata || DEFAULT_DESIGN_METADATA;
+  const cardMetadata = designMetadata.cardMetadata || {};
+  const marketMetadata = designMetadata.marketMetadata || {};
+
+  if (!showInfo) {
+    return null;
+  }
 
   return (
     <div className="p-4 bg-gray-900 text-white rounded-lg">
