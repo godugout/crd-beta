@@ -23,24 +23,28 @@ export const LIGHTING_PRESETS = {
   display_case: {
     primaryLight: { x: 0, y: 10, z: 10, intensity: 1.2, color: '#ffffff', castShadow: true },
     ambientLight: { intensity: 0.5, color: '#f0f0ff' },
+    environmentType: 'display_case' as const,
     followPointer: false,
     autoRotate: false
   },
   natural: {
     primaryLight: { x: 5, y: 10, z: 5, intensity: 0.8, color: '#fff6e0', castShadow: true },
     ambientLight: { intensity: 0.6, color: '#e0f0ff' },
+    environmentType: 'natural' as const,
     followPointer: false,
     autoRotate: false
   },
   dramatic: {
     primaryLight: { x: -10, y: 5, z: 10, intensity: 1.5, color: '#ff9900', castShadow: true },
     ambientLight: { intensity: 0.2, color: '#000033' },
+    environmentType: 'dramatic' as const,
     followPointer: false,
     autoRotate: false
   },
   studio: {
     primaryLight: { x: 0, y: 5, z: 10, intensity: 1.0, color: '#ffffff', castShadow: true },
     ambientLight: { intensity: 0.7, color: '#f8f8f8' },
+    environmentType: 'studio' as const,
     followPointer: false,
     autoRotate: false
   }
