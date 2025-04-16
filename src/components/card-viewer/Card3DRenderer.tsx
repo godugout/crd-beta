@@ -3,12 +3,10 @@ import React, { useRef, useEffect, useState } from 'react';
 import { Card } from '@/lib/types';
 import * as THREE from 'three';
 import { useFrame, useThree } from '@react-three/fiber';
-import { useTexture, Html } from '@react-three/drei';
-import { toast } from 'sonner';
-import CardDiagnostics from './CardDiagnostics';
-import { useCardMaterials } from '@/hooks/card-effects/useCardMaterials';
-import { useCardRotation } from '@/hooks/card-effects/useCardRotation';
-import { getFallbackImageUrl } from '@/lib/utils/imageUtils';
+import { useTexture } from '@react-three/drei';
+import { cardVertexShader, cardFragmentShader } from '@/shaders/cardShader';
+import { glowVertexShader, glowFragmentShader } from '@/shaders/glowShader';
+import { edgeVertexShader, edgeFragmentShader } from '@/shaders/edgeShader';
 
 interface Card3DRendererProps {
   card: Card;
@@ -24,31 +22,18 @@ const Card3DRenderer: React.FC<Card3DRendererProps> = ({
   effectIntensities = {}
 }) => {
   const meshRef = useRef<THREE.Mesh>(null);
-  const materialRef = useRef<THREE.ShaderMaterial | null>(null);
-  const edgeGlowRef = useRef<THREE.Mesh>(null);
-  const edgesRef = useRef<THREE.Mesh>(null);
-  const { gl } = useThree();
-  const [showDiagnostics, setShowDiagnostics] = useState(false);
-  const [renderingStats, setRenderingStats] = useState({
-    imageLoaded: false,
-    textureApplied: false,
-    effectsApplied: activeEffects,
-    errors: [] as string[],
-    warnings: [] as string[],
-    renderTime: 0,
-    meshCount: 0,
-    transformations: [] as string[]
-  });
+  const { gl, camera } = useThree();
   const [textureUrls, setTextureUrls] = useState({
     front: '',
     back: ''
   });
   
+  // Fallback image to use if the card image is missing
+  const fallbackImage = 'https://images.unsplash.com/photo-1518770660439-4636190af475';
+  
   // Make sure we have valid texture URLs
   useEffect(() => {
-    // Get reliable fallback images from unsplash if needed
-    const fallbackImage = 'https://images.unsplash.com/photo-1518770660439-4636190af475';
-    
+    // Ensure we have valid image URLs before creating textures
     const frontUrl = card.imageUrl || fallbackImage;
     const backUrl = card.thumbnailUrl || frontUrl;
     
@@ -65,79 +50,70 @@ const Card3DRenderer: React.FC<Card3DRendererProps> = ({
   const [frontTexture, backTexture] = useTexture(
     [textureUrls.front, textureUrls.back],
     (loadedTextures) => {
-      console.log('Card textures loaded:', loadedTextures);
-      setRenderingStats(prev => ({
-        ...prev,
-        imageLoaded: true,
-        warnings: prev.warnings.filter(w => !w.includes('texture loading'))
-      }));
+      console.log('Card textures loaded successfully:', loadedTextures);
     }
   );
   
-  const { rotationSpeed, setRotationSpeed, handleWheel } = useCardRotation();
-  const { shaderMaterial, glowMaterial, edgeMaterial } = useCardMaterials(frontTexture, backTexture, isFlipped);
-
-  useEffect(() => {
-    if (frontTexture && backTexture) {
-      console.log('Setting up textures for card:', card.id);
-      [frontTexture, backTexture].forEach(texture => {
-        texture.encoding = THREE.sRGBEncoding;
-        texture.needsUpdate = true;
-        texture.wrapS = THREE.ClampToEdgeWrapping;
-        texture.wrapT = THREE.ClampToEdgeWrapping;
-        texture.minFilter = THREE.LinearFilter;
-        texture.magFilter = THREE.LinearFilter;
-      });
-      
-      setRenderingStats(prev => ({
-        ...prev,
-        textureApplied: true
-      }));
+  // Set up shader materials
+  const shaderMaterial = new THREE.ShaderMaterial({
+    vertexShader: cardVertexShader,
+    fragmentShader: cardFragmentShader,
+    uniforms: {
+      frontTexture: { value: frontTexture },
+      backTexture: { value: backTexture },
+      isFlipped: { value: isFlipped },
+      time: { value: 0 },
+    },
+    side: THREE.DoubleSide
+  });
+  
+  // Glow effect material
+  const glowColor = new THREE.Color(0.2, 0.8, 1.0);
+  const glowMaterial = new THREE.ShaderMaterial({
+    vertexShader: glowVertexShader,
+    fragmentShader: glowFragmentShader,
+    uniforms: {
+      time: { value: 0 },
+      glowColor: { value: glowColor }
+    },
+    transparent: true,
+    side: THREE.FrontSide,
+    blending: THREE.AdditiveBlending
+  });
+  
+  // Edge material
+  const edgeMaterial = new THREE.ShaderMaterial({
+    vertexShader: edgeVertexShader,
+    fragmentShader: edgeFragmentShader,
+    uniforms: {
+      time: { value: 0 },
+      baseColor: { value: new THREE.Color(0.1, 0.1, 0.15) }
+    },
+    transparent: true,
+    side: THREE.FrontSide
+  });
+  
+  // Update uniforms on animation frame
+  useFrame((state) => {
+    if (shaderMaterial) {
+      shaderMaterial.uniforms.time.value = state.clock.getElapsedTime();
+      shaderMaterial.uniforms.isFlipped.value = isFlipped;
     }
-  }, [frontTexture, backTexture, card.id]);
-
-  useEffect(() => {
-    console.log('Card3DRenderer mounted with card:', card.id, 'and effects:', activeEffects);
-    return () => {
-      console.log('Card3DRenderer unmounting for card:', card.id);
-    };
-  }, [card.id, activeEffects]);
-
-  useEffect(() => {
-    const container = gl.domElement.parentElement;
-    if (container) {
-      container.addEventListener('wheel', handleWheel, { passive: false });
-      return () => container.removeEventListener('wheel', handleWheel);
-    }
-  }, [gl, handleWheel]);
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'd' || e.key === 'D') {
-        setShowDiagnostics(prev => !prev);
-        toast.info(showDiagnostics ? 'Diagnostics hidden' : 'Diagnostics shown', {
-          id: 'diagnostics-toggle'
-        });
-      }
-    };
     
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [showDiagnostics]);
-
-  // Only render the card if we have valid textures
-  if (!textureUrls.front || !textureUrls.back) {
-    return (
-      <Html center>
-        <div className="bg-red-900/80 text-white p-4 rounded-lg">
-          <div className="text-center">
-            <p className="font-bold mb-2">Loading card textures...</p>
-            <div className="w-8 h-8 border-4 border-t-transparent animate-spin rounded-full mx-auto"></div>
-          </div>
-        </div>
-      </Html>
-    );
-  }
+    if (glowMaterial) {
+      glowMaterial.uniforms.time.value = state.clock.getElapsedTime();
+    }
+    
+    if (edgeMaterial) {
+      edgeMaterial.uniforms.time.value = state.clock.getElapsedTime();
+    }
+    
+    // Add subtle rotation animation
+    if (meshRef.current) {
+      meshRef.current.rotation.y = Math.sin(state.clock.getElapsedTime() * 0.2) * 0.1;
+      meshRef.current.rotation.x = Math.sin(state.clock.getElapsedTime() * 0.3) * 0.05;
+    }
+  });
 
   return (
     <group>
@@ -147,36 +123,55 @@ const Card3DRenderer: React.FC<Card3DRendererProps> = ({
       >
         {/* Card mesh */}
         <boxGeometry args={[3, 4, 0.05]} />
-        <primitive object={shaderMaterial} attach="material" />
+        <shaderMaterial 
+          vertexShader={cardVertexShader}
+          fragmentShader={cardFragmentShader}
+          uniforms={{
+            frontTexture: { value: frontTexture },
+            backTexture: { value: backTexture },
+            isFlipped: { value: isFlipped },
+            time: { value: 0 }
+          }}
+          side={THREE.DoubleSide}
+        />
       </mesh>
       
       {/* Edge glow for effects */}
       <mesh 
-        ref={edgeGlowRef}
         scale={[3.05, 4.05, 0.1]}
         position={[0, 0, -0.01]}
       >
         <boxGeometry args={[1, 1, 1]} />
-        <primitive object={glowMaterial} attach="material" />
+        <shaderMaterial 
+          vertexShader={glowVertexShader}
+          fragmentShader={glowFragmentShader}
+          uniforms={{
+            time: { value: 0 },
+            glowColor: { value: glowColor }
+          }}
+          transparent={true}
+          side={THREE.FrontSide}
+          blending={THREE.AdditiveBlending}
+        />
       </mesh>
       
       {/* Card edges */}
       <mesh 
-        ref={edgesRef}
         scale={[3.05, 4.05, 0.15]}
         position={[0, 0, 0]}
       >
         <boxGeometry args={[1, 1, 1]} />
-        <primitive object={edgeMaterial} attach="material" />
-      </mesh>
-      
-      {/* Diagnostics overlay - position moved to bottom left with proper typing */}
-      {showDiagnostics && (
-        <CardDiagnostics 
-          stats={renderingStats}
-          position={[0, -2.5, 0.5]} 
+        <shaderMaterial 
+          vertexShader={edgeVertexShader}
+          fragmentShader={edgeFragmentShader}
+          uniforms={{
+            time: { value: 0 },
+            baseColor: { value: new THREE.Color(0.1, 0.1, 0.15) }
+          }}
+          transparent={true}
+          side={THREE.FrontSide}
         />
-      )}
+      </mesh>
     </group>
   );
 };
