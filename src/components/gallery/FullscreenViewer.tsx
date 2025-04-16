@@ -3,13 +3,14 @@ import React, { useRef, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCards } from '@/context/CardContext';
 import { toast } from 'sonner';
-import { X } from 'lucide-react';
+import { X, ChevronDown, ChevronUp } from 'lucide-react';
 import CardDisplay from './viewer-components/CardDisplay';
 import ViewerControls from './viewer-components/ViewerControls';
 import InfoPanel from './viewer-components/InfoPanel';
 import MiniActionBar from '@/components/ui/MiniActionBar';
 import { useCardInteraction } from '@/hooks/useCardInteraction';
 import CardEffectsPanel from './viewer-components/CardEffectsPanel';
+import { useFeatureEnabled } from '@/hooks/useFeatureFlag';
 
 interface FullscreenViewerProps {
   cardId: string;
@@ -56,6 +57,11 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
     { id: 'rotate-edges', active: false }
   ]);
 
+  // New state for features bar minimization
+  const [featuresBarMinimized, setFeaturesBarMinimized] = useState(false);
+  // New state for exploded view animation
+  const [showExplodedView, setShowExplodedView] = useState(false);
+
   // Set initial rotation to make stacked cards visible
   useEffect(() => {
     setPosition({ x: 10, y: 15 });
@@ -85,6 +91,32 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
     toast.info('Share feature coming soon');
   };
 
+  // Toggle exploded view animation
+  const handleToggleExplodedView = () => {
+    setShowExplodedView(prev => !prev);
+    
+    if (!showExplodedView) {
+      toast.info('Exploded view activated', {
+        description: 'Explore the card layers in 3D'
+      });
+    } else {
+      toast.info('Exploded view deactivated');
+    }
+  };
+
+  // Function to handle effect toggle that also triggers exploded view
+  const handleEffectToggle = (effect: string) => {
+    setActiveEffects(prev => 
+      prev.includes(effect) ? prev.filter(e => e !== effect) : [...prev, effect]
+    );
+    
+    // Trigger exploded view animation when effect is toggled
+    setShowExplodedView(false);
+    setTimeout(() => {
+      setShowExplodedView(true);
+    }, 100);
+  };
+
   if (!card) {
     return (
       <div className="fixed inset-0 bg-black flex items-center justify-center z-50">
@@ -101,6 +133,70 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
 
   return (
     <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50">
+      {/* Minimizable Features Bar */}
+      <div className="absolute top-0 left-0 right-0 z-30 flex justify-center">
+        <div className={`${featuresBarMinimized ? 'w-20' : 'w-auto px-6'} transition-all duration-300 bg-gray-900/80 backdrop-blur-md rounded-b-lg`}>
+          {featuresBarMinimized ? (
+            <button 
+              onClick={() => setFeaturesBarMinimized(false)}
+              className="w-full py-2 text-white font-bold flex items-center justify-center hover:bg-gray-800/50 transition-colors"
+            >
+              CRD <ChevronDown size={16} className="ml-1" />
+            </button>
+          ) : (
+            <div className="py-3 flex items-center space-x-4 relative">
+              <button 
+                onClick={() => setFeaturesBarMinimized(true)}
+                className="absolute right-1 top-1 text-gray-400 hover:text-white p-1"
+                aria-label="Minimize"
+              >
+                <ChevronUp size={18} />
+              </button>
+              
+              <button 
+                onClick={handleCardReset} 
+                className="text-white hover:text-blue-300 transition-colors"
+                title="Reset View"
+              >
+                Reset View
+              </button>
+              
+              <button 
+                onClick={() => setIsFlipped(!isFlipped)} 
+                className={`text-white hover:text-blue-300 transition-colors ${isFlipped ? 'text-blue-400' : ''}`}
+                title="Flip Card"
+              >
+                Flip Card
+              </button>
+              
+              <button 
+                onClick={toggleAutoRotation}
+                className={`text-white hover:text-blue-300 transition-colors ${isAutoRotating ? 'text-blue-400' : ''}`}
+                title="Auto Rotate"
+              >
+                Auto Rotate
+              </button>
+              
+              <button 
+                onClick={handleToggleExplodedView}
+                className={`text-white hover:text-blue-300 transition-colors ${showExplodedView ? 'text-blue-400' : ''}`}
+                title="Exploded View"
+              >
+                Exploded View
+              </button>
+              
+              <button 
+                onClick={() => setShowInfo(!showInfo)}
+                className={`text-white hover:text-blue-300 transition-colors ${showInfo ? 'text-blue-400' : ''}`}
+                title="Info"
+              >
+                Info
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
       <div 
         ref={containerRef}
         className="relative flex-1 flex items-center justify-center overflow-hidden z-10"
@@ -120,15 +216,12 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
           effectIntensities={effectIntensities}
           mousePosition={mousePosition}
           touchImprintAreas={touchImprintAreas}
+          showExplodedView={showExplodedView}
         />
         
         <CardEffectsPanel 
           activeEffects={activeEffects}
-          onToggleEffect={effect => {
-            setActiveEffects(prev => 
-              prev.includes(effect) ? prev.filter(e => e !== effect) : [...prev, effect]
-            );
-          }}
+          onToggleEffect={handleEffectToggle}
           onEffectIntensityChange={(effect, intensity) => {
             setEffectIntensities(prev => ({ ...prev, [effect]: intensity }));
           }}

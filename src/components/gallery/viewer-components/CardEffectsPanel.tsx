@@ -40,10 +40,10 @@ const CardEffectsPanel: React.FC<CardEffectsPanelProps> = ({
   }, [effectIntensities]);
 
   const availableEffects = [
-    { id: 'Holographic', name: 'Holographic', icon: <Sparkles size={18} /> },
-    { id: 'Refractor', name: 'Refractor', icon: <Palette size={18} /> },
-    { id: 'Chrome', name: 'Chrome', icon: <Layers size={18} /> },
-    { id: 'Vintage', name: 'Vintage', icon: <ToggleLeft size={18} /> },
+    { id: 'Holographic', name: 'Holographic', icon: <Sparkles size={18} />, color: 'bg-purple-600' },
+    { id: 'Refractor', name: 'Refractor', icon: <Palette size={18} />, color: 'bg-blue-600' },
+    { id: 'Chrome', name: 'Chrome', icon: <Layers size={18} />, color: 'bg-cyan-600' },
+    { id: 'Vintage', name: 'Vintage', icon: <ToggleLeft size={18} />, color: 'bg-amber-600' },
   ];
 
   const handleEffectToggle = (effectId: string) => {
@@ -100,31 +100,31 @@ const CardEffectsPanel: React.FC<CardEffectsPanelProps> = ({
 
   return (
     <div className="absolute bottom-4 left-4 right-4 z-20 bg-black/60 backdrop-blur-md rounded-lg p-3 text-white max-h-[calc(100vh-32rem)] overflow-y-auto">
-      <h3 className="text-sm font-medium mb-2">Visual Effects</h3>
-      <div className="flex flex-wrap gap-2">
+      <h3 className="text-sm font-medium mb-3">Visual Effects</h3>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {availableEffects.map(effect => (
-          <div key={effect.id} className="flex flex-col mb-2">
+          <div key={effect.id} className="flex flex-col">
             <button
-              className={`flex items-center gap-1.5 px-2 py-1 rounded-md text-xs ${
+              className={`flex flex-col items-center justify-center aspect-square rounded-lg text-xs p-4 transition-all ${
                 activeEffects.includes(effect.id)
-                  ? 'bg-blue-600 text-white'
+                  ? `${effect.color} text-white shadow-lg shadow-${effect.color}/20`
                   : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
               }`}
               onClick={() => handleEffectToggle(effect.id)}
             >
-              <span>{effect.icon}</span>
-              <span>{effect.name}</span>
+              <span className="mb-2">{effect.icon}</span>
+              <span className="text-center font-medium">{effect.name}</span>
               {activeEffects.includes(effect.id) && (
                 <Sliders 
                   size={14} 
-                  className={`ml-1 cursor-pointer ${expandedEffects.includes(effect.id) ? 'text-yellow-300' : ''}`}
+                  className={`mt-2 cursor-pointer ${expandedEffects.includes(effect.id) ? 'text-yellow-300' : ''}`}
                   onClick={(e) => toggleExpandEffect(e, effect.id)}
                 />
               )}
             </button>
             
             {expandedEffects.includes(effect.id) && activeEffects.includes(effect.id) && (
-              <div className="mt-2 px-2 py-1 bg-gray-800 rounded-md w-full">
+              <div className="mt-2 px-2 py-3 bg-gray-800 rounded-md w-full">
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-xs">Intensity</span>
                   <span className="text-xs">{localIntensities[effect.id]?.toFixed(1) || '0.7'}</span>

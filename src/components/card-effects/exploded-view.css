@@ -1,0 +1,103 @@
+
+/* Exploded view CSS effects */
+.exploded-layer {
+  transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  will-change: transform;
+}
+
+.card-museum-display {
+  --light-angle: 135deg;
+  --light-color: rgba(255, 255, 255, 0.8);
+  --base-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  
+  position: relative;
+  perspective: 1000px;
+}
+
+.card-museum-display::before {
+  content: '';
+  position: absolute;
+  inset: -20px;
+  background: radial-gradient(
+    circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    rgba(255, 255, 255, 0.1),
+    transparent 40%
+  );
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.museum-label {
+  position: absolute;
+  bottom: -40px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1a1a1a;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.exploded-layer:hover .museum-label {
+  opacity: 1;
+}
+
+/* Different effect styles */
+.holographic-overlay {
+  background: linear-gradient(var(--light-angle), #83f7ff, #7745FF, #FF45E2);
+  opacity: 0.7;
+  mix-blend-mode: overlay;
+}
+
+.refractor-pattern {
+  background: radial-gradient(circle, transparent 30%, #3D5AFE 70%, #00B0FF 100%);
+  opacity: 0.5;
+  mix-blend-mode: color-dodge;
+}
+
+.chrome-finish {
+  background: linear-gradient(var(--light-angle), #DEDEDE, #8C8C8C);
+  opacity: 0.6;
+  mix-blend-mode: overlay;
+}
+
+.vintage-texture {
+  background-color: #D4C19C;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' viewBox='0 0 4 4'%3E%3Cpath fill='%23000000' fill-opacity='0.1' d='M1 3h1v1H1V3zm2-2h1v1H3V1z'%3E%3C/path%3E%3C/svg%3E");
+  opacity: 0.4;
+  mix-blend-mode: multiply;
+}
+
+/* Animation for different effects */
+@keyframes shimmer {
+  0% {
+    background-position: -100% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.holographic-overlay, .refractor-pattern {
+  animation: shimmer 3s infinite linear;
+  background-size: 200% 100%;
+}
+
+/* Museum display lighting effect */
+.museum-lighting {
+  position: absolute;
+  top: -100px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, transparent 70%);
+  opacity: 0.6;
+  pointer-events: none;
+  filter: blur(20px);
+}
