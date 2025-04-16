@@ -1,19 +1,27 @@
-
 .glitch-overlay {
   background: linear-gradient(45deg, transparent 65%, rgba(255, 255, 255, 0.2) 70%, transparent 75%);
   background-size: 200% 200%;
   animation: glitch 0.5s ease infinite;
 }
 
-.light-rays {
-  background: radial-gradient(circle at 50% 50%, 
-    rgba(255, 255, 255, 0.8) 0%,
-    transparent 20%,
-    rgba(255, 255, 255, 0.4) 30%,
-    transparent 40%
-  );
-  transform-origin: center;
-  animation: rotate 2s linear infinite;
+.effect-preview {
+  animation: trophy-presentation 2s ease-in-out;
+  transform-style: preserve-3d;
+}
+
+@keyframes trophy-presentation {
+  0% {
+    transform: scale(0.8) rotateY(0deg);
+    filter: brightness(0.5);
+  }
+  50% {
+    transform: scale(1.1) rotateY(180deg);
+    filter: brightness(1.2);
+  }
+  100% {
+    transform: scale(1) rotateY(360deg);
+    filter: brightness(1);
+  }
 }
 
 @keyframes glitch {
@@ -28,4 +36,15 @@
 @keyframes rotate {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
+}
+
+.light-rays {
+  background: radial-gradient(circle at 50% 50%, 
+    rgba(255, 255, 255, 0.8) 0%,
+    transparent 20%,
+    rgba(255, 255, 255, 0.4) 30%,
+    transparent 40%
+  );
+  transform-origin: center;
+  animation: rotate 2s linear infinite;
 }

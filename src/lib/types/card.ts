@@ -20,7 +20,7 @@ export interface Card extends BaseEntity {
   userId?: string;
   collectionId?: string;
   metadata?: Record<string, any>;
-  effects?: string[];
+  effects: string[];
   reactions?: Reaction[];
   comments?: Comment[];
   viewCount?: number;
