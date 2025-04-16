@@ -49,7 +49,7 @@ const Card3DRenderer: React.FC<Card3DRendererProps> = ({
     // Get reliable fallback images from unsplash if needed
     const fallbackImage = 'https://images.unsplash.com/photo-1518770660439-4636190af475';
     
-    const frontUrl = card.imageUrl || getFallbackImageUrl(card.tags, card.title);
+    const frontUrl = card.imageUrl || fallbackImage;
     const backUrl = card.thumbnailUrl || frontUrl;
     
     console.log(`Card3DRenderer: Using front texture ${frontUrl}`);
@@ -62,8 +62,8 @@ const Card3DRenderer: React.FC<Card3DRendererProps> = ({
   }, [card]);
 
   // Only load textures after we have valid URLs
-  const textures = useTexture(
-    [textureUrls.front, textureUrls.back],  // Using an array instead of separate params
+  const [frontTexture, backTexture] = useTexture(
+    [textureUrls.front, textureUrls.back],
     (loadedTextures) => {
       console.log('Card textures loaded:', loadedTextures);
       setRenderingStats(prev => ({
@@ -74,10 +74,6 @@ const Card3DRenderer: React.FC<Card3DRendererProps> = ({
     }
   );
   
-  // Handle textures as an array
-  const frontTexture = textures[0];
-  const backTexture = textures[1];
-
   const { rotationSpeed, setRotationSpeed, handleWheel } = useCardRotation();
   const { shaderMaterial, glowMaterial, edgeMaterial } = useCardMaterials(frontTexture, backTexture, isFlipped);
 
@@ -174,11 +170,11 @@ const Card3DRenderer: React.FC<Card3DRendererProps> = ({
         <primitive object={edgeMaterial} attach="material" />
       </mesh>
       
-      {/* Diagnostics overlay - position moved to bottom left */}
+      {/* Diagnostics overlay - position moved to bottom left with proper typing */}
       {showDiagnostics && (
         <CardDiagnostics 
           stats={renderingStats}
-          position={[0, -2.5, 0.5]}
+          position={[0, -2.5, 0.5]} 
         />
       )}
     </group>

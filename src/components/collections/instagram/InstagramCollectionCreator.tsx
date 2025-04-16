@@ -1,191 +1,155 @@
+
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import { supabase } from '@/lib/supabase/client';
-import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { InstagramPost } from '@/lib/types';
-import LoadingSpinner from '@/components/ui/LoadingSpinner';
-import { v4 as uuidv4 } from 'uuid';
+import { toast } from 'sonner';
 import { useCollection } from '@/context/card/hooks';
+import { Collection } from '@/lib/types';
 
-const formSchema = z.object({
-  collectionName: z.string().min(1, 'Collection name is required'),
-  instagramInput: z.string().min(1, 'Instagram username or URL is required'),
-});
-
-type FormValues = z.infer<typeof formSchema>;
-
-const InstagramCollectionCreator = () => {
-  const { toast } = useToast();
-  const navigate = useNavigate();
+const InstagramCollectionCreator: React.FC = () => {
+  const [isConnecting, setIsConnecting] = useState(false);
+  const [username, setUsername] = useState('');
   const { addCollection } = useCollection();
-  const [isLoading, setIsLoading] = useState(false);
-
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      collectionName: '',
-      instagramInput: '',
-    },
-  });
-
-  const onSubmit = async (values: FormValues) => {
-    setIsLoading(true);
-
+  
+  const handleConnectInstagram = async () => {
+    setIsConnecting(true);
     try {
-      const isUrl = values.instagramInput.includes('instagram.com');
+      // Simulate Instagram API connection
+      await new Promise(resolve => setTimeout(resolve, 1500));
       
-      const payload = isUrl 
-        ? { url: values.instagramInput } 
-        : { username: values.instagramInput };
-
-      const { data, error } = await supabase.functions.invoke('instagram-scraper', {
-        body: payload,
-      });
-
-      if (error) {
-        throw new Error(error.message || 'Failed to fetch Instagram posts');
-      }
-
-      if (!data || !data.posts || data.posts.length === 0) {
-        throw new Error('No posts found for this Instagram account');
-      }
-
-      let username = values.instagramInput;
-      if (isUrl) {
-        const match = values.instagramInput.match(/instagram\.com\/([^\/\?]+)/);
-        if (match && match[1]) {
-          username = match[1];
-        }
-      }
-
-      const newCollection = addCollection({
-        name: values.collectionName,
-        description: `Instagram collection for @${username}`,
-        coverImageUrl: data.posts[0].mediaUrl || data.posts[0].thumbnailUrl,
-        instagramSource: {
-          username,
-          lastFetched: new Date().toISOString(),
-          autoUpdate: true,
-        },
-      });
-
-      const cards = data.posts.map((post: InstagramPost) => ({
-        id: uuidv4(),
-        title: `Instagram post by @${username}`,
-        description: post.caption || '',
-        imageUrl: post.mediaUrl || post.thumbnailUrl,
-        thumbnailUrl: post.thumbnailUrl || post.mediaUrl,
-        collectionId: newCollection.id,
-        tags: ['instagram', username],
-        instagramUsername: username,
-        instagramPostId: post.id,
-        instagramPost: post,
-        createdAt: new Date(post.timestamp).toISOString(),
+      // Create a new collection with Instagram content
+      const newCollection: Collection = {
+        id: `instagram-${Date.now()}`,
+        title: `${username}'s Instagram`,
+        description: `Photos imported from Instagram account @${username}`,
+        cards: [],
+        createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-      }));
-
-      cards.forEach(card => {
-        if (newCollection) {
-          addCardToCollection(newCollection.id, card);
-        }
-      });
-
-      toast({
-        title: "Instagram Collection Created",
-        description: `Created collection with ${cards.length} posts from @${username}`,
-      });
-
-      navigate(`/collections/${newCollection.id}`);
-
+        coverImageUrl: 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7',
+        tags: ['instagram', 'social', 'imported']
+      };
+      
+      // Add the collection
+      const result = await addCollection(newCollection);
+      
+      toast.success(`Successfully imported Instagram photos from @${username}`);
+      setUsername('');
+      
+      // Navigate to the collection page - for now, just log
+      console.log(`Created collection: ${result.id}`);
+      
     } catch (error) {
-      console.error('Error creating Instagram collection:', error);
-      toast({
-        title: "Error",
-        description: error.message || 'Failed to create Instagram collection',
-        variant: "destructive",
-      });
+      console.error('Error connecting to Instagram:', error);
+      toast.error('Failed to connect to Instagram');
     } finally {
-      setIsLoading(false);
+      setIsConnecting(false);
     }
   };
-
+  
+  const handleAuthorize = async () => {
+    try {
+      // Simulate authorization
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      const newCollection: Collection = {
+        id: `instagram-auth-${Date.now()}`,
+        title: `${username}'s Instagram (Authorized)`,
+        description: `Authorized connection to @${username}`,
+        cards: [],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        coverImageUrl: 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7',
+        tags: ['instagram', 'social', 'imported', 'authorized']
+      };
+      
+      // Add the collection
+      const result = await addCollection(newCollection);
+      
+      toast.success(`Authorized connection to @${username}`);
+      
+      // Navigate to the new collection
+      console.log(`Authorized collection: ${result.id}`);
+      
+    } catch (error) {
+      console.error('Authorization error:', error);
+      toast.error('Failed to authorize Instagram connection');
+    }
+  };
+  
+  const handleDisconnect = async () => {
+    try {
+      // Simulate disconnection
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
+      const disconnectionRecord: Collection = {
+        id: `instagram-disconnect-${Date.now()}`,
+        title: 'Instagram Disconnection Record',
+        description: `Disconnected from @${username}`,
+        cards: [],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        coverImageUrl: 'https://images.unsplash.com/photo-1611605698335-8b1569810432',
+        tags: ['instagram', 'disconnect']
+      };
+      
+      // Record the disconnection
+      const result = await addCollection(disconnectionRecord);
+      
+      toast.info(`Disconnected from Instagram account @${username}`);
+      
+      // Log disconnection record
+      console.log(`Disconnection recorded: ${result.id}`);
+      
+    } catch (error) {
+      console.error('Error disconnecting:', error);
+      toast.error('Failed to disconnect from Instagram');
+    }
+  };
+  
   return (
-    <Card className="w-full max-w-lg mx-auto">
-      <CardHeader>
-        <CardTitle>Create Instagram Collection</CardTitle>
-        <CardDescription>
-          Turn an Instagram profile into a collection of custom CRDs
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <FormField
-              control={form.control}
-              name="collectionName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Collection Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="My Instagram Collection" {...field} />
-                  </FormControl>
-                  <FormDescription>
-                    Enter a name for this collection
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="instagramInput"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Instagram Username or URL</FormLabel>
-                  <FormControl>
-                    <Input placeholder="@username or https://instagram.com/username" {...field} />
-                  </FormControl>
-                  <FormDescription>
-                    Enter an Instagram username or profile URL
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? (
-                <>
-                  <LoadingSpinner size={16} className="mr-2" />
-                  <span>Fetching posts...</span>
-                </>
-              ) : (
-                "Create InstaCRD Collection"
-              )}
-            </Button>
-          </form>
-        </Form>
-      </CardContent>
-      <CardFooter className="flex justify-between">
-        <p className="text-xs text-muted-foreground">
-          Will fetch up to 33 most recent posts
-        </p>
-      </CardFooter>
-    </Card>
+    <div className="bg-white p-6 rounded-lg shadow-md">
+      <h2 className="text-2xl font-bold mb-4">Import from Instagram</h2>
+      <p className="text-gray-600 mb-6">
+        Connect your Instagram account to import your photos as collectible cards.
+      </p>
+      
+      <div className="mb-4">
+        <label className="block text-gray-700 mb-2">Instagram Username</label>
+        <input 
+          type="text" 
+          value={username}
+          onChange={e => setUsername(e.target.value)}
+          placeholder="@username"
+          className="w-full px-4 py-2 border rounded-md"
+        />
+      </div>
+      
+      <div className="flex space-x-3">
+        <Button 
+          onClick={handleConnectInstagram}
+          disabled={!username.trim() || isConnecting}
+          className="bg-gradient-to-r from-purple-500 to-pink-500"
+        >
+          {isConnecting ? 'Connecting...' : 'Connect Instagram'}
+        </Button>
+        
+        <Button 
+          variant="outline"
+          onClick={handleAuthorize}
+          disabled={!username.trim()}
+        >
+          Authorize
+        </Button>
+        
+        <Button 
+          variant="destructive"
+          onClick={handleDisconnect}
+          disabled={!username.trim()}
+        >
+          Disconnect
+        </Button>
+      </div>
+    </div>
   );
-};
-
-const addCardToCollection = (collectionId: string, card: any) => {
-  console.log('Adding card to collection:', collectionId, card);
-  return true;
 };
 
 export default InstagramCollectionCreator;

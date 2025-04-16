@@ -1,98 +1,50 @@
 
 /**
- * Image loading utility functions
+ * Returns a fallback image URL based on card tags or title
  */
-
-// Define a set of reliable images from Unsplash that we know work
-const RELIABLE_IMAGES = {
-  basketball: 'https://images.unsplash.com/photo-1518063319789-7217e6706b04?q=80&w=1000',
-  football: 'https://images.unsplash.com/photo-1566577739112-5180d4bf9390?q=80&w=1000',
-  baseball: 'https://images.unsplash.com/photo-1508344928928-7165b67de128?q=80&w=1000',
-  anime: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?q=80&w=1000',
-  vintage: 'https://images.unsplash.com/photo-1637666589313-f22b900e9c2d?q=80&w=1000',
-  pokemon: 'https://images.unsplash.com/photo-1613771404273-1bound29e8d20?q=80&w=1000',
-  default: 'https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=1000'
+export const getFallbackImageUrl = (tags?: string[], title?: string): string => {
+  // Default fallback image
+  const defaultFallback = 'https://images.unsplash.com/photo-1518770660439-4636190af475';
+  
+  if (!tags || tags.length === 0) {
+    return defaultFallback;
+  }
+  
+  // Try to get a relevant image based on tags
+  const tag = tags[0].toLowerCase();
+  
+  // Map of categories to fallback images
+  const fallbackImages: Record<string, string> = {
+    'baseball': 'https://images.unsplash.com/photo-1508344928928-7165b5c2cb0d',
+    'basketball': 'https://images.unsplash.com/photo-1546519638-68e109498ffc',
+    'football': 'https://images.unsplash.com/photo-1566577134770-3d85bb3a9cc4',
+    'soccer': 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55',
+    'hockey': 'https://images.unsplash.com/photo-1580138593486-3cc436fec3d4',
+    'vintage': 'https://images.unsplash.com/photo-1594736292631-6df61984a1a8',
+    'modern': 'https://images.unsplash.com/photo-1618022649120-ab48d3c5ab0e',
+    'rare': 'https://images.unsplash.com/photo-1597538015050-2f28c13d5bc3',
+    'collectible': 'https://images.unsplash.com/photo-1606068498010-465e7fdccae6',
+    'game': 'https://images.unsplash.com/photo-1594122230689-45899d9e6f69'
+  };
+  
+  // Check if any tag matches our categories
+  for (const t of tags) {
+    const lowercaseTag = t.toLowerCase();
+    if (fallbackImages[lowercaseTag]) {
+      return fallbackImages[lowercaseTag];
+    }
+  }
+  
+  // If no matching tag, try to use title
+  if (title) {
+    const lowercaseTitle = title.toLowerCase();
+    for (const [category, url] of Object.entries(fallbackImages)) {
+      if (lowercaseTitle.includes(category)) {
+        return url;
+      }
+    }
+  }
+  
+  // If all else fails, return default fallback
+  return defaultFallback;
 };
-
-/**
- * Get a fallback image URL based on category or tag
- * @param tags Array of tags for the card
- * @param title Card title as backup for categorization
- */
-export function getFallbackImageUrl(tags: string[] = [], title: string = ''): string {
-  // Prioritize certain tags if they exist
-  const lowerCaseTags = tags.map(tag => tag.toLowerCase());
-  const lowerCaseTitle = title.toLowerCase();
-  
-  // Check for basketball-related content
-  if (lowerCaseTags.some(tag => tag.includes('basketball') || tag.includes('nba') || tag.includes('lakers'))) {
-    return RELIABLE_IMAGES.basketball;
-  }
-  
-  // Check for football-related content
-  if (lowerCaseTags.some(tag => tag.includes('football') || tag.includes('nfl'))) {
-    return RELIABLE_IMAGES.football;
-  }
-  
-  // Check for baseball-related content
-  if (lowerCaseTags.some(tag => tag.includes('baseball') || tag.includes('mlb'))) {
-    return RELIABLE_IMAGES.baseball;
-  }
-  
-  // Check for anime-related content
-  if (lowerCaseTags.some(tag => tag.includes('anime') || tag.includes('manga') || tag.includes('gundam'))) {
-    return RELIABLE_IMAGES.anime;
-  }
-  
-  // Check for vintage-related content
-  if (lowerCaseTags.some(tag => tag.includes('vintage') || tag.includes('retro'))) {
-    return RELIABLE_IMAGES.vintage;
-  }
-  
-  // Check for pokemon-related content
-  if (lowerCaseTags.some(tag => tag.includes('pokemon') || tag.includes('tcg'))) {
-    return RELIABLE_IMAGES.pokemon;
-  }
-  
-  // If no specific tag matches, try to extract a category from the title
-  if (lowerCaseTitle.includes('basketball') || lowerCaseTitle.includes('nba') || lowerCaseTitle.includes('laker')) {
-    return RELIABLE_IMAGES.basketball;
-  }
-  
-  if (lowerCaseTitle.includes('football') || lowerCaseTitle.includes('nfl')) {
-    return RELIABLE_IMAGES.football;
-  }
-  
-  if (lowerCaseTitle.includes('pokemon') || lowerCaseTitle.includes('tcg')) {
-    return RELIABLE_IMAGES.pokemon;
-  }
-  
-  if (lowerCaseTitle.includes('gundam') || lowerCaseTitle.includes('anime')) {
-    return RELIABLE_IMAGES.anime;
-  }
-  
-  // Default fallback if nothing else matches
-  return RELIABLE_IMAGES.default;
-}
-
-/**
- * Check if an image URL is valid
- * @param url The URL to check
- * @returns Boolean indicating if the URL seems valid
- */
-export function isValidImageUrl(url?: string): boolean {
-  if (!url) return false;
-  
-  // Check if it's a valid URL format that points to an image
-  return (
-    (url.startsWith('http') || url.startsWith('/')) && 
-    (url.includes('.jpg') || 
-     url.includes('.jpeg') || 
-     url.includes('.png') || 
-     url.includes('.webp') || 
-     url.includes('.gif') ||
-     url.includes('unsplash.com') || 
-     url.includes('source.unsplash.com') ||
-     url.includes('lovable-uploads'))
-  );
-}

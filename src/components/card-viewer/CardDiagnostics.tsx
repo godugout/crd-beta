@@ -34,10 +34,9 @@ const CardDiagnostics: React.FC<CardDiagnosticsProps> = ({
         maxHeight: '400px',
         overflowY: 'auto',
         fontFamily: 'monospace',
-        // Position at bottom left
-        position: 'absolute',
-        bottom: '20px',
-        left: '20px'
+        position: 'relative',
+        bottom: '10px',
+        left: '10px'
       }}>
         <h3 style={{ margin: '0 0 10px 0', borderBottom: '1px solid #555' }}>Card Diagnostics</h3>
         
