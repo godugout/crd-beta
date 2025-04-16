@@ -45,12 +45,27 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
       }
       
       if (card) {
-        // Create a processed card with required fields
+        // Create a processed card with required fields and ensure all properties exist
         const processedCard: Card = {
           ...card,
           // Ensure required properties exist
           description: card.description || '',
-          effects: card.effects || []
+          effects: card.effects || [],
+          title: card.title || 'Untitled Card',
+          tags: card.tags || [],
+          createdAt: card.createdAt || new Date().toISOString(),
+          updatedAt: card.updatedAt || new Date().toISOString(),
+          userId: card.userId || '',
+          // Make sure imageUrl is present
+          imageUrl: card.imageUrl || FALLBACK_IMAGE,
+          thumbnailUrl: card.thumbnailUrl || card.imageUrl || FALLBACK_IMAGE,
+          // Add any other required fields with default values
+          designMetadata: card.designMetadata || {
+            cardStyle: {},
+            textStyle: {},
+            marketMetadata: {},
+            cardMetadata: {}
+          }
         };
         
         // Always initialize with fallback first, then update if the real image loads

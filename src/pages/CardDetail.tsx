@@ -56,12 +56,27 @@ const CardDetail = () => {
     if (foundCard) {
       console.log('CardDetail: Found card:', foundCard.title, 'with imageUrl:', foundCard.imageUrl);
       
-      // Create a new object to avoid mutating the original
+      // Create a new object to avoid mutating the original with all required properties
       const processedCard: Card = { 
         ...foundCard,
         // Ensure required properties exist
         description: foundCard.description || '',
-        effects: foundCard.effects || []
+        effects: foundCard.effects || [],
+        title: foundCard.title || 'Untitled Card',
+        tags: foundCard.tags || [],
+        createdAt: foundCard.createdAt || new Date().toISOString(),
+        updatedAt: foundCard.updatedAt || new Date().toISOString(),
+        userId: foundCard.userId || '',
+        // Make sure imageUrl is present
+        imageUrl: foundCard.imageUrl || FALLBACK_IMAGE,
+        thumbnailUrl: foundCard.thumbnailUrl || foundCard.imageUrl || FALLBACK_IMAGE,
+        // Add any other required fields with default values
+        designMetadata: foundCard.designMetadata || {
+          cardStyle: {},
+          textStyle: {},
+          marketMetadata: {},
+          cardMetadata: {}
+        }
       };
       
       // Validate image URLs
