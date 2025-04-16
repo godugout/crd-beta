@@ -1,8 +1,7 @@
-
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
 import { CircleUser, Shirt, Shield, Rotate3d } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import BaseballModel from './model-viewer/BaseballModel';
 
 interface ActionFigurePart {
   id: string;
@@ -98,27 +97,13 @@ const ActionFigure: React.FC<ActionFigureProps> = ({
     <div className="flex flex-col h-full">
       <div className="flex-1 relative bg-gray-900/50 backdrop-blur-sm rounded-lg overflow-hidden">
         <div 
-          className="absolute inset-0 flex items-center justify-center"
+          className="absolute inset-0"
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseUp}
         >
-          <motion.div
-            className="w-80 h-80 relative"
-            animate={{ rotateY: rotationY }}
-            transition={{ type: "spring", stiffness: 100 }}
-            style={{ 
-              transformStyle: 'preserve-3d',
-              cursor: dragging ? 'grabbing' : 'grab'
-            }}
-          >
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <Rotate3d className="w-16 h-16 text-gray-400 mb-4" />
-              <div className="text-xl font-medium text-gray-300">Dusty Diamond</div>
-              <div className="text-sm text-gray-400 mt-2">Drag to rotate</div>
-            </div>
-          </motion.div>
+          <BaseballModel />
         </div>
         
         <div className="absolute bottom-4 left-0 right-0 flex justify-center">
