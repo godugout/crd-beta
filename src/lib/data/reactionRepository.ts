@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { Reaction, User, UserRole } from '@/lib/types';
 
@@ -23,7 +24,9 @@ const mapReactionFromDb = (reaction: any): Reaction => {
     commentId: reaction.comment_id,
     type: reaction.type,
     createdAt: reaction.created_at,
-    user
+    user,
+    targetType: reaction.target_type || 'card', // Add default targetType
+    targetId: reaction.target_id || reaction.card_id || '' // Use card_id as default targetId if available
   };
 };
 
@@ -58,6 +61,8 @@ const getAllByCardId = async (cardId: string): Promise<Reaction[]> => {
     cardId: item.card_id,
     type: item.type,
     createdAt: item.created_at,
+    targetType: 'card', // Add targetType
+    targetId: item.card_id, // Use card_id as targetId
     user: item.users ? {
       id: item.users.id,
       email: item.users.email,
@@ -101,10 +106,22 @@ const getAllByCommentId = async (commentId: string): Promise<Reaction[]> => {
 };
 
 const add = async (userId: string, cardId?: string, collectionId?: string, commentId?: string, type?: string): Promise<Reaction | null> => {
+  // Determine the target type and ID based on which ID is provided
+  const targetType = cardId ? 'card' : (commentId ? 'comment' : 'collection');
+  const targetId = cardId || commentId || collectionId || '';
+  
   const { data, error } = await supabase
     .from(reactionTable)
     .insert([
-      { user_id: userId, card_id: cardId, collection_id: collectionId, comment_id: commentId, type: type }
+      { 
+        user_id: userId, 
+        card_id: cardId, 
+        collection_id: collectionId, 
+        comment_id: commentId, 
+        type: type,
+        target_type: targetType,  // Add target_type field
+        target_id: targetId       // Add target_id field
+      }
     ])
     .select('*')
     .single();

@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCards } from '@/context/CardContext';
@@ -211,7 +210,6 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
           showExplodedView={showExplodedView}
         />
         
-        {/* Move the effects panel to the left side so it doesn't cover the card */}
         <div className="absolute left-4 top-20 bottom-4 w-80 pointer-events-auto">
           <CardEffectsPanel 
             activeEffects={activeEffects}

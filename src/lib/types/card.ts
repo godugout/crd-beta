@@ -42,8 +42,8 @@ export interface BaseCard {
   name?: string;
   cardStyle?: string;
   backTemplate?: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt?: string; // Make this optional to match other Card definitions
+  updatedAt?: string; // Make this optional too for consistency
 }
 
 export interface Card extends BaseCard {}
