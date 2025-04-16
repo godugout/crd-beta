@@ -6,9 +6,18 @@ import * as THREE from 'three';
 interface Card3DRendererProps {
   card: Card;
   className?: string;
+  isFlipped?: boolean;
+  activeEffects?: string[];
+  effectIntensities?: Record<string, number>;
 }
 
-const Card3DRenderer: React.FC<Card3DRendererProps> = ({ card, className }) => {
+const Card3DRenderer: React.FC<Card3DRendererProps> = ({ 
+  card, 
+  className,
+  isFlipped = false,
+  activeEffects = [],
+  effectIntensities = {}
+}) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const renderer = useRef<THREE.WebGLRenderer | null>(null);
   const scene = useRef<THREE.Scene | null>(null);
@@ -67,7 +76,12 @@ const Card3DRenderer: React.FC<Card3DRendererProps> = ({ card, className }) => {
       requestAnimationFrame(animate);
       
       if (cardMesh.current) {
-        cardMesh.current.rotation.y = Math.sin(Date.now() * 0.001) * 0.3;
+        // Apply flipping effect if needed
+        if (isFlipped) {
+          cardMesh.current.rotation.y = Math.PI;
+        } else {
+          cardMesh.current.rotation.y = Math.sin(Date.now() * 0.001) * 0.3;
+        }
       }
       
       if (renderer.current && scene.current && camera.current) {
@@ -109,7 +123,7 @@ const Card3DRenderer: React.FC<Card3DRendererProps> = ({ card, className }) => {
         renderer.current.dispose();
       }
     };
-  }, [card.imageUrl]);
+  }, [card.imageUrl, isFlipped]);
 
   return (
     <div 

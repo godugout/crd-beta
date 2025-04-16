@@ -5,10 +5,7 @@ import { Canvas } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
 import Card3DRenderer from './Card3DRenderer';
 import { useToast } from '@/hooks/use-toast';
-import { DEFAULT_DESIGN_METADATA } from '@/lib/utils/cardDefaults';
-
-// Define a fallback image for cards with missing images
-const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1518770660439-4636190af475';
+import { DEFAULT_DESIGN_METADATA, FALLBACK_IMAGE_URL } from '@/lib/utils/cardDefaults';
 
 interface ImmersiveCardViewerProps {
   card: Card;
@@ -45,7 +42,7 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
       // Check if card has valid image URL
       if (!cardCopy.imageUrl || cardCopy.imageUrl === 'undefined') {
         console.warn(`Card ${cardCopy.id} is missing an image URL, using fallback`);
-        cardCopy.imageUrl = FALLBACK_IMAGE;
+        cardCopy.imageUrl = FALLBACK_IMAGE_URL;
         
         toast({
           title: "Using fallback image",
@@ -57,7 +54,7 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
       
       // Also ensure we have a thumbnail URL
       if (!cardCopy.thumbnailUrl || cardCopy.thumbnailUrl === 'undefined') {
-        cardCopy.thumbnailUrl = cardCopy.imageUrl || FALLBACK_IMAGE;
+        cardCopy.thumbnailUrl = cardCopy.imageUrl || FALLBACK_IMAGE_URL;
       }
       
       // Ensure other required fields are present
@@ -75,16 +72,16 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
         };
         image.onerror = () => {
           console.error(`Failed to load image: ${cardCopy.imageUrl}, using fallback`);
-          cardCopy.imageUrl = FALLBACK_IMAGE;
-          cardCopy.thumbnailUrl = FALLBACK_IMAGE;
+          cardCopy.imageUrl = FALLBACK_IMAGE_URL;
+          cardCopy.thumbnailUrl = FALLBACK_IMAGE_URL;
           setProcessedCard(cardCopy);
           setIsLoading(false);
         };
         image.src = cardCopy.imageUrl;
       } catch (error) {
         console.error("Error during image validation:", error);
-        cardCopy.imageUrl = FALLBACK_IMAGE;
-        cardCopy.thumbnailUrl = FALLBACK_IMAGE;
+        cardCopy.imageUrl = FALLBACK_IMAGE_URL;
+        cardCopy.thumbnailUrl = FALLBACK_IMAGE_URL;
         setProcessedCard(cardCopy);
         setIsLoading(false);
       }
