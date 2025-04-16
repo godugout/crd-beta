@@ -1,59 +1,60 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
-import { Canvas, Image as FabricImage, Text, IImageOptions } from 'fabric';
-import FabricCanvas from './FabricCanvas';
+import { Canvas as FabricCanvas, Image as FabricImage, Text, IImageOptions } from 'fabric';
+import Canvas from './FabricCanvas';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
 interface CardEditorProps {
   initialImage?: string;
-  onSave?: (canvas: Canvas) => void;
+  onSave?: (canvas: FabricCanvas) => void;
 }
 
 const CardEditor: React.FC<CardEditorProps> = ({
   initialImage,
   onSave,
 }) => {
-  const [canvas, setCanvas] = useState<Canvas | null>(null);
+  const [canvas, setCanvas] = useState<FabricCanvas | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
 
   // Initialize canvas with image if provided
-  const handleCanvasReady = useCallback((fabricCanvas: Canvas) => {
+  const handleCanvasReady = useCallback((fabricCanvas: FabricCanvas) => {
     console.log("Canvas is ready");
     setCanvas(fabricCanvas);
     
     if (initialImage) {
       setLoading(true);
       
-      // In Fabric.js v6, fromURL returns a Promise
-      FabricImage.fromURL(initialImage, (img) => {
-        // Scale image to fit canvas
-        const canvasWidth = fabricCanvas.getWidth();
-        const canvasHeight = fabricCanvas.getHeight();
-        
-        const scale = Math.min(
-          (canvasWidth - 40) / img.width,
-          (canvasHeight - 40) / img.height
-        );
-        
-        img.scale(scale);
-        
-        // Center image on canvas
-        img.set({
-          left: canvasWidth / 2,
-          top: canvasHeight / 2,
-          originX: 'center',
-          originY: 'center',
+      FabricImage.fromURL(initialImage)
+        .then((img) => {
+          // Scale image to fit canvas
+          const canvasWidth = fabricCanvas.getWidth();
+          const canvasHeight = fabricCanvas.getHeight();
+          
+          const scale = Math.min(
+            (canvasWidth - 40) / img.width,
+            (canvasHeight - 40) / img.height
+          );
+          
+          img.scale(scale);
+          
+          // Center image on canvas
+          img.set({
+            left: canvasWidth / 2,
+            top: canvasHeight / 2,
+            originX: 'center',
+            originY: 'center',
+          });
+          
+          fabricCanvas.add(img);
+          fabricCanvas.renderAll();
+          setLoading(false);
+        })
+        .catch(err => {
+          console.error("Error loading image:", err);
+          toast.error("Failed to load image");
+          setLoading(false);
         });
-        
-        fabricCanvas.add(img);
-        fabricCanvas.renderAll();
-        setLoading(false);
-      }).catch(err => {
-        console.error("Error loading image:", err);
-        toast.error("Failed to load image");
-        setLoading(false);
-      });
     }
   }, [initialImage]);
 
@@ -93,35 +94,36 @@ const CardEditor: React.FC<CardEditorProps> = ({
       // Clear existing objects
       canvas.clear();
       
-      // In Fabric.js v6, fromURL returns a Promise
-      FabricImage.fromURL(event.target.result.toString(), (img) => {
-        // Scale image to fit canvas
-        const canvasWidth = canvas.getWidth();
-        const canvasHeight = canvas.getHeight();
-        
-        const scale = Math.min(
-          (canvasWidth - 40) / img.width,
-          (canvasHeight - 40) / img.height
-        );
-        
-        img.scale(scale);
-        
-        // Center image on canvas
-        img.set({
-          left: canvasWidth / 2,
-          top: canvasHeight / 2,
-          originX: 'center',
-          originY: 'center',
+      FabricImage.fromURL(event.target.result.toString())
+        .then((img) => {
+          // Scale image to fit canvas
+          const canvasWidth = canvas.getWidth();
+          const canvasHeight = canvas.getHeight();
+          
+          const scale = Math.min(
+            (canvasWidth - 40) / img.width,
+            (canvasHeight - 40) / img.height
+          );
+          
+          img.scale(scale);
+          
+          // Center image on canvas
+          img.set({
+            left: canvasWidth / 2,
+            top: canvasHeight / 2,
+            originX: 'center',
+            originY: 'center',
+          });
+          
+          canvas.add(img);
+          canvas.renderAll();
+          setLoading(false);
+        })
+        .catch(err => {
+          console.error("Error loading image:", err);
+          toast.error("Failed to load image");
+          setLoading(false);
         });
-        
-        canvas.add(img);
-        canvas.renderAll();
-        setLoading(false);
-      }).catch(err => {
-        console.error("Error loading image:", err);
-        toast.error("Failed to load image");
-        setLoading(false);
-      });
     };
     
     reader.readAsDataURL(file);
@@ -182,7 +184,7 @@ const CardEditor: React.FC<CardEditorProps> = ({
             <div className="animate-spin h-8 w-8 border-4 border-blue-600 border-t-transparent rounded-full"></div>
           </div>
         )}
-        <FabricCanvas 
+        <Canvas 
           width={500} 
           height={700} 
           onReady={handleCanvasReady}
