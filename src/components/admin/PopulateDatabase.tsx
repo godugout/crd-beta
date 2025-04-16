@@ -40,7 +40,7 @@ export const PopulateDatabase = () => {
       }
       
       console.log('Database populated successfully:', data);
-      toast.success(data.message || 'Database populated successfully');
+      toast.success(data.message || 'Commons Cards collection created/updated successfully');
       setResult({ ...data, success: true });
     } catch (err: any) {
       console.error('Unexpected error:', err);
@@ -63,15 +63,16 @@ export const PopulateDatabase = () => {
   };
   
   return (
-    <Card className="p-6 shadow-md max-w-lg mx-auto">
-      <h2 className="text-xl font-bold mb-4">Populate Database with Sample Cards</h2>
-      <p className="text-gray-600 mb-6">
-        This will add sample trading cards to your database for testing. The cards include sports
-        memorabilia and trading card game collectibles with images sourced from Wikimedia Commons.
+    <Card className="p-6 shadow-md max-w-lg mx-auto bg-gray-900 border-gray-800">
+      <h2 className="text-xl font-bold mb-4 text-purple-300">Populate Database with Commons Cards</h2>
+      <p className="text-gray-400 mb-6">
+        This will create or update the "Commons Cards" collection with sample trading cards 
+        featuring public domain images from Wikimedia Commons. Perfect for testing and 
+        demonstration purposes without affecting any of your existing collections.
       </p>
       
       {!result?.success && result?.error && (
-        <Alert variant="destructive" className="mb-6">
+        <Alert variant="destructive" className="mb-6 bg-red-900 border-red-800">
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Error</AlertTitle>
           <AlertDescription>
@@ -92,21 +93,21 @@ export const PopulateDatabase = () => {
         <Button 
           onClick={handlePopulateDatabase} 
           disabled={isLoading}
-          className="flex-1"
+          className="flex-1 bg-purple-600 hover:bg-purple-700"
         >
           {isLoading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Populating Database...
+              Populating Commons Cards...
             </>
-          ) : 'Populate Database with Sample Cards'}
+          ) : 'Create/Update Commons Cards Collection'}
         </Button>
         
         {result?.error && (
           <Button 
             onClick={handleRetry}
             variant="outline" 
-            className="px-3"
+            className="px-3 border-purple-700 text-purple-300"
           >
             <RefreshCw className="h-4 w-4" />
           </Button>
@@ -114,10 +115,10 @@ export const PopulateDatabase = () => {
       </div>
       
       {result?.success && (
-        <div className="mt-4 p-4 rounded bg-green-50">
-          <p className="font-medium text-green-700">{result.message}</p>
+        <div className="mt-4 p-4 rounded bg-purple-900/30 border border-purple-700/50">
+          <p className="font-medium text-purple-300">{result.message}</p>
           {result.collectionId && (
-            <p className="text-sm text-green-600 mt-2">Collection ID: {result.collectionId}</p>
+            <p className="text-sm text-purple-400 mt-2">Collection ID: {result.collectionId}</p>
           )}
         </div>
       )}
