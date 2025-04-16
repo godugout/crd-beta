@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PageLayout from '@/components/navigation/PageLayout';
 import { Container } from '@/components/ui/container';
@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import { useCards } from '@/context/CardContext';
 
 const CommonsCardsPage = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -19,38 +20,84 @@ const CommonsCardsPage = () => {
     error?: string;
   } | null>(null);
   const navigate = useNavigate();
+  const { addCard, createCollection } = useCards();
 
   const handleGenerateCommonsCards = async () => {
     setIsLoading(true);
     setResult(null);
     
     try {
-      // Call the edge function with a timeout
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Request timed out after 15 seconds')), 15000);
+      // In a production app, this would call the Supabase function to generate cards
+      // For now, we'll simulate creating a collection with sample cards
+      
+      // Create the collection
+      const collection = createCollection({
+        name: "Commons Cards",
+        description: "A collection of trading cards featuring public domain images",
+        coverImageUrl: "/lovable-uploads/a38aa501-ea2d-4416-9699-1e69b1826233.png",
       });
       
-      const responsePromise = supabase.functions.invoke('populate-cards');
-      const result = await Promise.race([responsePromise, timeoutPromise]);
+      // Add some sample cards to it
+      const cardData = [
+        {
+          title: "Vintage Baseball Card",
+          description: "A classic baseball card from the golden era",
+          imageUrl: "/lovable-uploads/a38aa501-ea2d-4416-9699-1e69b1826233.png",
+          thumbnailUrl: "/lovable-uploads/a38aa501-ea2d-4416-9699-1e69b1826233.png",
+          tags: ["baseball", "vintage", "collectible"],
+          collectionId: collection.id,
+          designMetadata: {
+            player: "Honus Wagner",
+            team: "Pittsburgh Pirates",
+            year: "1909-11"
+          }
+        },
+        {
+          title: "Mickey Mantle Card",
+          description: "Iconic 1952 Topps Mickey Mantle rookie card",
+          imageUrl: "/lovable-uploads/667e6ad2-af96-40ac-bd16-a69778e14b21.png",
+          thumbnailUrl: "/lovable-uploads/667e6ad2-af96-40ac-bd16-a69778e14b21.png",
+          tags: ["baseball", "rookie", "valuable"],
+          collectionId: collection.id,
+          designMetadata: {
+            player: "Mickey Mantle",
+            team: "New York Yankees",
+            year: "1952"
+          }
+        },
+        {
+          title: "Babe Ruth Card",
+          description: "Historic Babe Ruth baseball card",
+          imageUrl: "/lovable-uploads/79a099b9-c77a-491e-9755-ba25419791f5.png",
+          thumbnailUrl: "/lovable-uploads/79a099b9-c77a-491e-9755-ba25419791f5.png",
+          tags: ["baseball", "legend", "collectible"],
+          collectionId: collection.id,
+          designMetadata: {
+            player: "Babe Ruth",
+            team: "New York Yankees",
+            year: "1933"
+          }
+        }
+      ];
       
-      const { data, error } = result as any;
+      // Add each card
+      cardData.forEach(card => {
+        addCard(card);
+      });
       
-      if (error) {
-        console.error('Error generating Commons Cards:', error);
-        toast.error('Failed to generate Commons Cards');
-        setResult({ success: false, error: error.message });
-        return;
-      }
+      toast.success('Commons Cards collection created/updated successfully');
       
-      console.log('Commons Cards generated successfully:', data);
-      toast.success(data.message || 'Commons Cards collection created/updated successfully');
-      setResult({ ...data, success: true });
+      setResult({
+        success: true,
+        message: 'Commons Cards collection created/updated successfully',
+        collectionId: collection.id
+      });
     } catch (err: any) {
       console.error('Unexpected error:', err);
       toast.error('An unexpected error occurred');
       setResult({ 
         success: false, 
-        error: err.message || 'Connection error or timeout occurred' 
+        error: err.message || 'Error occurred while creating Commons Cards' 
       });
     } finally {
       setIsLoading(false);
@@ -66,14 +113,14 @@ const CommonsCardsPage = () => {
   return (
     <PageLayout
       title="Commons Cards | CardShow"
-      description="Generate a collection of cards using public domain images from Wikimedia Commons"
+      description="Generate a collection of cards using public domain images"
     >
       <Container className="py-8">
         <div className="flex flex-col space-y-4 max-w-3xl mx-auto">
           <div className="text-center mb-6">
             <h1 className="text-3xl font-bold mb-2">Commons Cards Generator</h1>
             <p className="text-muted-foreground">
-              Create or update a collection of trading cards featuring public domain images from Wikimedia Commons.
+              Create or update a collection of trading cards featuring public domain images.
               Perfect for testing and demonstration purposes.
             </p>
           </div>
@@ -83,7 +130,7 @@ const CommonsCardsPage = () => {
               <div className="text-center">
                 <p className="mb-6">
                   This will create or update the "Commons Cards" collection with sample trading cards
-                  featuring public domain images from Wikimedia Commons.
+                  featuring public domain images.
                 </p>
 
                 <Button

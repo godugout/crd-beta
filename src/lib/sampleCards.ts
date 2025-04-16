@@ -1,265 +1,99 @@
+
 import { Card } from './types';
 import { v4 as uuidv4 } from 'uuid';
-import { adaptToCard } from './adapters/cardAdapter';
-import { DEFAULT_DESIGN_METADATA } from './utils/cardDefaults';
 
-export const sampleCards: Card[] = [
-  adaptToCard({
-    id: '1',
-    title: 'Willie Mays',
-    description: 'The "Say Hey Kid" was a legendary center fielder known for his incredible catches and all-around excellence.',
-    imageUrl: '/lovable-uploads/fa55173e-d864-41b2-865d-144d94507dc1.png',
-    thumbnailUrl: '/lovable-uploads/fa55173e-d864-41b2-865d-144d94507dc1.png',
-    tags: ['baseball', 'hall of fame', 'new york giants'],
-    userId: 'user123',
-    collectionId: 'collection456',
-    effects: [],
-    player: 'Willie Mays',
-    team: 'New York Giants',
-    year: '1954',
-    jersey: '24',
-    set: 'Topps',
-    cardNumber: '47',
-    cardType: 'Baseball Card',
-    artist: 'Topps',
-    backgroundColor: '#ffffff',
-    textColor: '#000000',
-    specialEffect: 'None',
-    name: 'Willie Mays 1954 Topps',
-    cardStyle: 'Classic',
-    backTemplate: 'Standard',
+export const sampleCards = [
+  {
+    id: 'card-001',
+    title: 'Vintage Baseball Card',
+    description: 'A classic baseball card from the golden era',
+    imageUrl: '/lovable-uploads/a38aa501-ea2d-4416-9699-1e69b1826233.png',
+    thumbnailUrl: '/lovable-uploads/a38aa501-ea2d-4416-9699-1e69b1826233.png',
+    tags: ['baseball', 'vintage', 'collectible'],
+    userId: 'user1',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
-    isPublic: true,
-    designMetadata: DEFAULT_DESIGN_METADATA,
-    creatorId: 'user123'
-  }),
-  adaptToCard({
-    id: '2',
-    title: 'Babe Ruth',
-    description: 'The Sultan of Swat, Babe Ruth revolutionized baseball with his prodigious home run hitting.',
-    imageUrl: '/lovable-uploads/baberuth.jpeg',
-    thumbnailUrl: '/lovable-uploads/baberuth.jpeg',
-    tags: ['baseball', 'hall of fame', 'new york yankees'],
-    userId: 'user123',
-    collectionId: 'collection456',
     effects: [],
-    player: 'Babe Ruth',
-    team: 'New York Yankees',
-    year: '1927',
-    jersey: '3',
-    set: 'Fleer',
-    cardNumber: '1',
-    cardType: 'Baseball Card',
-    artist: 'Fleer',
-    backgroundColor: '#ffffff',
-    textColor: '#000000',
-    specialEffect: 'None',
-    name: 'Babe Ruth 1927 Fleer',
-    cardStyle: 'Classic',
-    backTemplate: 'Standard',
+    designMetadata: {
+      player: 'Honus Wagner',
+      team: 'Pittsburgh Pirates',
+      year: '1909-11'
+    }
+  },
+  {
+    id: 'card-002',
+    title: 'Mickey Mantle Card',
+    description: 'Iconic 1952 Topps Mickey Mantle rookie card',
+    imageUrl: '/lovable-uploads/667e6ad2-af96-40ac-bd16-a69778e14b21.png',
+    thumbnailUrl: '/lovable-uploads/667e6ad2-af96-40ac-bd16-a69778e14b21.png',
+    tags: ['baseball', 'rookie', 'valuable'],
+    userId: 'user1',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
-    isPublic: true,
-    designMetadata: DEFAULT_DESIGN_METADATA,
-    creatorId: 'user123'
-  }),
-  adaptToCard({
-    id: '3',
-    title: 'Jackie Robinson',
-    description: 'Jackie Robinson broke the color barrier and became an icon of courage and perseverance.',
-    imageUrl: '/lovable-uploads/jackierobinson.jpeg',
-    thumbnailUrl: '/lovable-uploads/jackierobinson.jpeg',
-    tags: ['baseball', 'hall of fame', 'brooklyn dodgers', 'civil rights'],
-    userId: 'user123',
-    collectionId: 'collection456',
     effects: [],
-    player: 'Jackie Robinson',
-    team: 'Brooklyn Dodgers',
-    year: '1947',
-    jersey: '42',
-    set: 'Bowman',
-    cardNumber: '36',
-    cardType: 'Baseball Card',
-    artist: 'Bowman',
-    backgroundColor: '#ffffff',
-    textColor: '#000000',
-    specialEffect: 'None',
-    name: 'Jackie Robinson 1947 Bowman',
-    cardStyle: 'Classic',
-    backTemplate: 'Standard',
+    designMetadata: {
+      player: 'Mickey Mantle',
+      team: 'New York Yankees',
+      year: '1952'
+    }
+  },
+  {
+    id: 'card-003',
+    title: 'Babe Ruth Card',
+    description: 'Historic Babe Ruth baseball card',
+    imageUrl: '/lovable-uploads/79a099b9-c77a-491e-9755-ba25419791f5.png',
+    thumbnailUrl: '/lovable-uploads/79a099b9-c77a-491e-9755-ba25419791f5.png',
+    tags: ['baseball', 'legend', 'collectible'],
+    userId: 'user1',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
-    isPublic: true,
-    designMetadata: DEFAULT_DESIGN_METADATA,
-    creatorId: 'user123'
-  }),
-  adaptToCard({
-    id: '4',
-    title: 'Roberto Clemente',
-    description: 'Roberto Clemente was a humanitarian and baseball superstar known for his strong arm and community involvement.',
-    imageUrl: '/lovable-uploads/robertoclemente.jpeg',
-    thumbnailUrl: '/lovable-uploads/robertoclemente.jpeg',
-    tags: ['baseball', 'hall of fame', 'pittsburgh pirates', 'humanitarian'],
-    userId: 'user123',
-    collectionId: 'collection456',
     effects: [],
-    player: 'Roberto Clemente',
-    team: 'Pittsburgh Pirates',
-    year: '1972',
-    jersey: '21',
-    set: 'Topps',
-    cardNumber: '305',
-    cardType: 'Baseball Card',
-    artist: 'Topps',
-    backgroundColor: '#ffffff',
-    textColor: '#000000',
-    specialEffect: 'None',
-    name: 'Roberto Clemente 1972 Topps',
-    cardStyle: 'Classic',
-    backTemplate: 'Standard',
+    designMetadata: {
+      player: 'Babe Ruth',
+      team: 'New York Yankees',
+      year: '1933'
+    }
+  },
+  {
+    id: 'card-004',
+    title: 'Oakland A\'s Memory Card',
+    description: 'Custom card from Oakland Athletics game',
+    imageUrl: '/lovable-uploads/c23d9e1a-4645-4f50-a9e4-2a325e3b4a4d.png',
+    thumbnailUrl: '/lovable-uploads/c23d9e1a-4645-4f50-a9e4-2a325e3b4a4d.png',
+    tags: ['baseball', 'oakland', 'memory'],
+    userId: 'user1',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
-    isPublic: true,
-    designMetadata: DEFAULT_DESIGN_METADATA,
-    creatorId: 'user123'
-  }),
-  adaptToCard({
-    id: '5',
-    title: 'Sandy Koufax',
-    description: 'Sandy Koufax was a dominant pitcher with a blazing fastball and a curveball that baffled hitters.',
-    imageUrl: '/lovable-uploads/sandykoufax.jpeg',
-    thumbnailUrl: '/lovable-uploads/sandykoufax.jpeg',
-    tags: ['baseball', 'hall of fame', 'los angeles dodgers', 'pitcher'],
-    userId: 'user123',
-    collectionId: 'collection456',
     effects: [],
-    player: 'Sandy Koufax',
-    team: 'Los Angeles Dodgers',
-    year: '1965',
-    jersey: '32',
-    set: 'Topps',
-    cardNumber: '1',
-    cardType: 'Baseball Card',
-    artist: 'Topps',
-    backgroundColor: '#ffffff',
-    textColor: '#000000',
-    specialEffect: 'None',
-    name: 'Sandy Koufax 1965 Topps',
-    cardStyle: 'Classic',
-    backTemplate: 'Standard',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    isPublic: true,
-    designMetadata: DEFAULT_DESIGN_METADATA,
-    creatorId: 'user123'
-  }),
-  adaptToCard({
-    id: '6',
-    title: 'Hank Aaron',
-    description: 'Henry "Hank" Aaron was a right fielder whose MLB career spanned from 1954 through 1976.',
-    imageUrl: '/lovable-uploads/hankAaron.jpeg',
-    thumbnailUrl: '/lovable-uploads/hankAaron.jpeg',
-    tags: ['baseball', 'hall of fame', 'atlanta braves', 'home run king'],
-    userId: 'user123',
-    collectionId: 'collection456',
-    effects: [],
-    player: 'Hank Aaron',
-    team: 'Atlanta Braves',
-    year: '1974',
-    jersey: '44',
-    set: 'Topps',
-    cardNumber: '1',
-    cardType: 'Baseball Card',
-    artist: 'Topps',
-    backgroundColor: '#ffffff',
-    textColor: '#000000',
-    specialEffect: 'None',
-    name: 'Hank Aaron 1974 Topps',
-    cardStyle: 'Classic',
-    backTemplate: 'Standard',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    isPublic: true,
-    designMetadata: DEFAULT_DESIGN_METADATA,
-    creatorId: 'user123'
-  }),
-  adaptToCard({
-    id: '7',
-    title: 'Lou Gehrig',
-    description: 'Lou Gehrig, nicknamed "The Iron Horse", was a first baseman who played 17 seasons in MLB for the New York Yankees.',
-    imageUrl: '/lovable-uploads/louGehrig.jpeg',
-    thumbnailUrl: '/lovable-uploads/louGehrig.jpeg',
-    tags: ['baseball', 'hall of fame', 'new york yankees', 'iron horse'],
-    userId: 'user123',
-    collectionId: 'collection456',
-    effects: [],
-    player: 'Lou Gehrig',
-    team: 'New York Yankees',
-    year: '1933',
-    jersey: '4',
-    set: 'Goudey',
-    cardNumber: '149',
-    cardType: 'Baseball Card',
-    artist: 'Goudey',
-    backgroundColor: '#ffffff',
-    textColor: '#000000',
-    specialEffect: 'None',
-    name: 'Lou Gehrig 1933 Goudey',
-    cardStyle: 'Classic',
-    backTemplate: 'Standard',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    isPublic: true,
-    designMetadata: DEFAULT_DESIGN_METADATA,
-    creatorId: 'user123'
-  }),
-  adaptToCard({
-    id: '8',
-    title: 'Ty Cobb',
-    description: 'Tyrus Raymond "Ty" Cobb, nicknamed "The Georgia Peach", was an American Major League Baseball (MLB) outfielder.',
-    imageUrl: '/lovable-uploads/tyCobb.jpeg',
-    thumbnailUrl: '/lovable-uploads/tyCobb.jpeg',
-    tags: ['baseball', 'hall of fame', 'detroit tigers', 'georgia peach'],
-    userId: 'user123',
-    collectionId: 'collection456',
-    effects: [],
-    player: 'Ty Cobb',
-    team: 'Detroit Tigers',
-    year: '1911',
-    jersey: null,
-    set: 'T205',
-    cardNumber: null,
-    cardType: 'Baseball Card',
-    artist: 'American Tobacco Co.',
-    backgroundColor: '#ffffff',
-    textColor: '#000000',
-    specialEffect: 'None',
-    name: 'Ty Cobb 1911 T205',
-    cardStyle: 'Classic',
-    backTemplate: 'Standard',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    isPublic: true,
-    designMetadata: DEFAULT_DESIGN_METADATA,
-    creatorId: 'user123'
-  })
+    designMetadata: {
+      team: 'Oakland Athletics',
+      year: '2023'
+    }
+  }
 ];
 
-export const addSampleCards = async (addCardFunction: (card: Partial<Card>) => Promise<Card>) => {
+export const addSampleCards = async (
+  addCardFunction: (card: Omit<Card, 'id' | 'createdAt' | 'updatedAt'>) => Card
+): Promise<Card[]> => {
   const addedCards: Card[] = [];
   
   try {
     for (const sampleCard of sampleCards) {
-      const newCard = await addCardFunction({
-        ...sampleCard,
-        id: uuidv4()
+      // Remove the properties that should be generated by the addCard function
+      const { id, createdAt, updatedAt, ...cardData } = sampleCard;
+      
+      // Add the card
+      const newCard = addCardFunction({
+        ...cardData,
+        id: uuidv4() // Generate a new UUID for this card to avoid conflicts
       });
+      
       addedCards.push(newCard);
     }
+    
+    return addedCards;
   } catch (error) {
     console.error('Error adding sample cards:', error);
+    throw error;
   }
-  
-  return addedCards;
 };

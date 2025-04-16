@@ -1,40 +1,51 @@
-// Base types that might be used across modules
-export type JsonValue = 
-  | string 
-  | number 
-  | boolean 
-  | null 
-  | JsonValue[] 
-  | { [key: string]: JsonValue };
 
-export interface BaseEntity {
+export interface Card {
   id: string;
-  createdAt?: string;
-  updatedAt?: string;
+  title: string;
+  description: string;
+  imageUrl: string;
+  thumbnailUrl: string;
+  tags: string[];
+  userId: string;
+  teamId?: string;
+  collectionId?: string;
+  isPublic: boolean;
+  createdAt: string;
+  updatedAt: string;
+  effects: any[];
+  designMetadata: Record<string, any>;
+  rarity: string;
 }
 
-// For backward compatibility with JsonObject
-export type JsonObject = Record<string, JsonValue>;
+export interface Collection {
+  id: string;
+  name: string;
+  description: string;
+  coverImageUrl: string;
+  userId: string;
+  teamId?: string;
+  cards: Card[];
+  cardIds: string[];
+  visibility: 'public' | 'private' | 'unlisted';
+  allowComments: boolean;
+  isPublic: boolean;
+  createdAt: string;
+  updatedAt: string;
+  designMetadata: Record<string, any>;
+}
 
-// Export updated type definitions
-export * from './cardTypes';
-export * from './interaction';
-export * from './user';
-export * from './collection';
-export * from './instagram';
-export * from './teamTypes';
-export type { CardEffect, CardEffectSettings } from './cardEffects';
-
-// Don't re-export enhancedCardTypes directly to avoid ambiguity
-import * as EnhancedCardTypes from './enhancedCardTypes';
-export type { 
-  CardRarity as EnhancedCardRarity,
-  HotspotData as EnhancedHotspotData,
-  EnhancedCard as ExtendedCard,
-  Series as EnhancedSeries,
-} from './enhancedCardTypes';
-
-// For backward compatibility, keep the old imports as well
-// But we should gradually migrate to using the centralized types
-import * as OldTypes from '@/types/card';
-export const oldTypes = OldTypes;
+export interface OaklandMemoryData {
+  title: string;
+  description: string;
+  date: string;
+  memoryType?: string;
+  opponent?: string;
+  score?: string;
+  location?: string;
+  section?: string;
+  attendees?: string[];
+  tags?: string[];
+  imageUrl?: string;
+  historicalContext?: string;
+  personalSignificance?: string;
+}
