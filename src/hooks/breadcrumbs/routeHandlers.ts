@@ -1,6 +1,6 @@
 
 import { useLocation } from 'react-router-dom';
-import { Team } from '@/lib/types/teamTypes'; // Correct casing
+import { Team } from '@/lib/types/teamTypes'; 
 import { BreadcrumbItem, BreadcrumbHandlerProps } from './types';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -20,8 +20,8 @@ export const handleTeamSegment = ({
         id: `team-${currentTeam.id}`,
         path: currentPath,
         label: currentTeam.name,
-        // Only include color if it exists on team
-        ...(currentTeam.brandColor && { color: currentTeam.brandColor })
+        // Use primary_color instead of brandColor if it exists
+        ...(currentTeam.primary_color && { color: currentTeam.primary_color })
       };
     }
     

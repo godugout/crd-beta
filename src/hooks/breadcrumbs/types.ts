@@ -1,6 +1,6 @@
 
 import { BaseEntity } from '@/lib/types';
-import { Team } from '@/lib/types/teamTypes'; // Correct casing
+import { Team } from '@/lib/types/teamTypes'; // Consistent casing
 
 export interface BreadcrumbItem {
   id: string;

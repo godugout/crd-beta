@@ -5,4 +5,4 @@ export { auth } from './auth';
 export { cardOperations } from './cards';
 export { collectionOperations } from './collections';
 export { storageOperations } from './storage';
-export { teamOperations } from './teams';
+export * as teamOperations from './teams';
