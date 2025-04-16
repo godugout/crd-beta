@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import PageLayout from '@/components/navigation/PageLayout';
 import { Card } from '@/lib/types/cardTypes';
@@ -40,7 +41,8 @@ const CommunityFeed = () => {
                 targetId: 'community-1'
               }
             ],
-            effects: ['Holographic']
+            effects: ['Holographic'],
+            designMetadata: DEFAULT_DESIGN_METADATA
           }),
           adaptToCard({
             id: 'community-2',
@@ -55,7 +57,8 @@ const CommunityFeed = () => {
             isPublic: true,
             tags: ['community', 'trending'],
             reactions: [],
-            effects: ['Chrome', 'Refractor']
+            effects: ['Chrome', 'Refractor'],
+            designMetadata: DEFAULT_DESIGN_METADATA
           }),
         ];
         

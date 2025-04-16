@@ -38,15 +38,15 @@ export interface CardStats {
  * Card style definition for visual appearance
  */
 export interface CardStyle {
-  template: string;      // Now required
-  effect: string;        // Now required
-  borderRadius?: string;
+  template: string;      // Required
+  effect: string;        // Required
+  borderRadius: string;  // Required
   borderWidth?: number;
-  borderColor?: string;
+  borderColor: string;   // Required
   backgroundColor?: string;
-  shadowColor?: string;
-  frameWidth?: number;
-  frameColor?: string;
+  shadowColor: string;   // Required
+  frameWidth: number;    // Required
+  frameColor: string;    // Required
   [key: string]: JsonValue | undefined;
 }
 
@@ -259,9 +259,9 @@ export interface BaseCard extends BaseEntity {
   rarity?: CardRarity;
   
   // Additional fields needed by some components
-  creatorId?: string;  // Added creatorId as proper optional field
-  createdAt: string;   // Required field
-  updatedAt: string;   // Required field
+  creatorId?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 /**
@@ -269,9 +269,8 @@ export interface BaseCard extends BaseEntity {
  */
 export interface Card extends BaseCard {}
 
-// Export enhanced types from enhancedCardTypes to fix import issues
-export { EnhancedCard, Series, Deck } from './enhancedCardTypes';
+// Export types from enhancedCardTypes using export type for isolatedModules compatibility
+export type { EnhancedCard, Series, Deck } from './enhancedCardTypes';
 
-// Do not re-export the Reaction type here - fix this line
+// Export renamed Reaction type to avoid conflicts
 export type { Reaction as CardReaction } from './interaction';
-

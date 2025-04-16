@@ -1,8 +1,8 @@
 
-import { Card } from '@/lib/types/card';
+import { Card } from '@/lib/types/cardTypes';
 
 // Default design metadata structure for cards that don't have it
-const DEFAULT_DESIGN_METADATA = {
+export const DEFAULT_DESIGN_METADATA = {
   cardStyle: {
     template: 'classic',
     effect: 'classic',
@@ -66,7 +66,7 @@ export function adaptToCard(data: Partial<Card>): Card {
     name: data.name,
     cardStyle: data.cardStyle,
     backTemplate: data.backTemplate,
-    // Handle creatorId as an optional property
+    // Add creatorId from data or undefined, since it's optional in BaseCard
     creatorId: data.creatorId,
     // Ensure designMetadata is always present with default structure if not provided
     designMetadata: data.designMetadata || DEFAULT_DESIGN_METADATA

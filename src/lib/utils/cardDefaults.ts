@@ -1,11 +1,7 @@
 
-/**
- * Default card design metadata for use across the application
- */
-
 import { DesignMetadata } from '@/lib/types/cardTypes';
 
-// Default design metadata structure for cards that don't have it
+// Default design metadata structure for cards
 export const DEFAULT_DESIGN_METADATA: DesignMetadata = {
   cardStyle: {
     template: 'classic',
@@ -32,13 +28,4 @@ export const DEFAULT_DESIGN_METADATA: DesignMetadata = {
     cardType: 'standard',
     series: 'base'
   }
-};
-
-// Default card property values
-export const DEFAULT_CARD_VALUES = {
-  createdAt: new Date().toISOString(),
-  updatedAt: new Date().toISOString(),
-  userId: 'anonymous',
-  tags: [],
-  effects: []
 };
