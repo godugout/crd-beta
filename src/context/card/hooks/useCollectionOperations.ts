@@ -14,10 +14,11 @@ export const useCollectionOperations = () => {
       coverImageUrl: collectionData.coverImageUrl || '',
       userId: collectionData.userId || 'anonymous',
       cards: collectionData.cards || [],
-      cardIds: collectionData.cardIds || [], // Add cardIds field
+      cardIds: collectionData.cardIds || [],
       visibility: collectionData.visibility || 'public',
       allowComments: collectionData.allowComments !== undefined ? collectionData.allowComments : true,
       designMetadata: collectionData.designMetadata || {},
+      isPublic: collectionData.isPublic !== undefined ? collectionData.isPublic : true,
       createdAt: new Date().toISOString(), 
       updatedAt: new Date().toISOString(),
     };

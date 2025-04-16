@@ -1,3 +1,4 @@
+
 import { BaseEntity } from '@/lib/types';
 import { Team } from '@/lib/types/teamTypes'; // Correct casing
 
@@ -8,4 +9,13 @@ export interface BreadcrumbItem {
   icon?: React.ReactNode;
   parentId?: string;
   isActive?: boolean;
+  color?: string; // Added color property
+}
+
+export interface BreadcrumbHandlerProps {
+  index: number;
+  pathSegments: string[];
+  segment: string;
+  currentPath: string;
+  currentTeam?: Team | null;
 }

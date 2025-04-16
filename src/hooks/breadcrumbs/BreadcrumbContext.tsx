@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { BreadcrumbItem } from './types';
-import { Team } from '@/lib/types/teamTypes'; // Correct casing
+import { Team } from '@/lib/types/teamTypes';
 
 interface BreadcrumbContextType {
   breadcrumbs: BreadcrumbItem[];
@@ -15,7 +15,6 @@ export const BreadcrumbProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const location = useLocation();
 
   useEffect(() => {
-    // Clear breadcrumbs on route change
     setBreadcrumbs([]);
   }, [location.pathname]);
 
@@ -39,13 +38,11 @@ export const useBreadcrumbs = () => {
   return context;
 };
 
-// Helper functions to add breadcrumbs
 export const useAddBreadcrumb = () => {
   const { breadcrumbs, setBreadcrumbs } = useBreadcrumbs();
 
   const addBreadcrumb = (item: BreadcrumbItem) => {
     setBreadcrumbs(prev => {
-      // Check if the breadcrumb already exists
       if (prev.find(b => b.id === item.id)) {
         return prev;
       }
@@ -56,8 +53,6 @@ export const useAddBreadcrumb = () => {
   return addBreadcrumb;
 };
 
-// Function to convert a team object to a breadcrumb item
-// Fix the team property to match required fields
 const teamToBreadcrumb = (team: Team): BreadcrumbItem => {
   return {
     id: `team-${team.id}`,
@@ -67,7 +62,6 @@ const teamToBreadcrumb = (team: Team): BreadcrumbItem => {
   };
 };
 
-// Hook to add a team breadcrumb
 export const useTeamBreadcrumb = (teamId: string) => {
   const addBreadcrumb = useAddBreadcrumb();
   const [loading, setLoading] = useState(true);
@@ -77,11 +71,11 @@ export const useTeamBreadcrumb = (teamId: string) => {
     const fetchTeam = async () => {
       setLoading(true);
       try {
-        // Simulate fetching team data
         const mockTeam: Team = {
           id: teamId,
           name: `Team ${teamId}`,
           ownerId: 'user123',
+          visibility: 'public',
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         };

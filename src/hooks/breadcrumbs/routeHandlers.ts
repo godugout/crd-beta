@@ -1,83 +1,82 @@
 
-import React from 'react';
-import { BreadcrumbHandlerProps, BreadcrumbItem } from './types';
-import { routeMappings } from '@/config/navigation/routeMappings';
+import { useLocation } from 'react-router-dom';
+import { Team } from '@/lib/types/teamTypes'; // Correct casing
+import { BreadcrumbItem, BreadcrumbHandlerProps } from './types';
+import { v4 as uuidv4 } from 'uuid';
 
-// Helper for team segment handling
+// Handle team segment in routes
 export const handleTeamSegment = ({
-  index, 
-  pathSegments, 
+  index,
+  pathSegments,
   segment,
   currentPath,
   currentTeam
 }: BreadcrumbHandlerProps): BreadcrumbItem | null => {
-  if (index === 1 && pathSegments[0] === 'teams') {
-    if (currentTeam) {
+  // If segment follows 'teams' and looks like an ID
+  if (index > 0 && pathSegments[index-1] === 'teams' && segment.match(/^[0-9a-zA-Z-]+$/)) {
+    // If we have the current team data, use it
+    if (currentTeam && currentTeam.id === segment) {
       return {
+        id: `team-${currentTeam.id}`,
         path: currentPath,
         label: currentTeam.name,
-        color: currentTeam.primary_color
-      };
-    } else {
-      // Prettier team slug display if no team object
-      const prettyName = segment.split('-').map(word => 
-        word.charAt(0).toUpperCase() + word.slice(1)
-      ).join(' ');
-      
-      return {
-        path: currentPath,
-        label: prettyName
+        // Only include color if it exists on team
+        ...(currentTeam.brandColor && { color: currentTeam.brandColor })
       };
     }
-  }
-  return null;
-};
-
-// Helper for main section handling
-export const handleMainSection = ({
-  index,
-  segment
-}: BreadcrumbHandlerProps): BreadcrumbItem | null => {
-  if (index === 0 && routeMappings[segment]) {
-    const item: BreadcrumbItem = {
-      path: routeMappings[segment].path,
-      label: routeMappings[segment].label,
+    
+    // Fallback if no team data
+    return {
+      id: `team-${segment}`,
+      path: `${segment}`,
+      label: `Team ${segment.substring(0, 6)}...`
     };
-
-    // Safely add icon if it exists
-    if (routeMappings[segment].icon) {
-      const IconComponent = routeMappings[segment].icon;
-      item.icon = React.createElement(IconComponent, { className: "h-3.5 w-3.5" });
-    }
-
-    return item;
   }
+  
   return null;
 };
 
-// Helper for complex routes handling
-export const handleComplexRoutes = ({
-  index,
-  pathSegments,
+// Handle main navigation sections
+export const handleMainSection = ({
   segment,
-  currentPath
+  currentPath,
 }: BreadcrumbHandlerProps): BreadcrumbItem | null => {
-  if (index === 1 && pathSegments[index-1] && segment) {
-    const combinedKey = segment;
-    if (routeMappings[combinedKey]) {
-      const item: BreadcrumbItem = {
-        path: routeMappings[combinedKey].path,
-        label: routeMappings[combinedKey].label,
-      };
-
-      // Safely add icon if it exists
-      if (routeMappings[combinedKey].icon) {
-        const IconComponent = routeMappings[combinedKey].icon;
-        item.icon = React.createElement(IconComponent, { className: "h-3.5 w-3.5" });
-      }
-
-      return item;
-    }
+  const mainSections = ['cards', 'collections', 'series', 'decks', 'gallery', 'packs'];
+  
+  if (mainSections.includes(segment)) {
+    return {
+      id: `section-${segment}`,
+      path: currentPath,
+      label: segment.charAt(0).toUpperCase() + segment.slice(1)
+    };
   }
+  
+  return null;
+};
+
+// Handle complex routes that require special breadcrumb naming
+export const handleComplexRoutes = ({
+  pathSegments,
+  currentPath,
+}: BreadcrumbHandlerProps): BreadcrumbItem | null => {
+  const routePath = pathSegments.join('/');
+  
+  // Special case handling
+  if (routePath === 'teams/new') {
+    return {
+      id: 'new-team',
+      path: currentPath,
+      label: 'Create Team'
+    };
+  }
+  
+  if (routePath === 'teams/join') {
+    return {
+      id: 'join-team',
+      path: currentPath,
+      label: 'Join Team'
+    };
+  }
+  
   return null;
 };

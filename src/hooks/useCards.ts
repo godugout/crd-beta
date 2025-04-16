@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Card, Collection } from '@/lib/types';
@@ -67,6 +66,8 @@ export function useCards() {
           teamId: 'team-1',
           visibility: 'public' as const,
           allowComments: true,
+          isPublic: true,
+          cards: [],
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
           designMetadata: {},
@@ -81,6 +82,8 @@ export function useCards() {
           teamId: 'team-1',
           visibility: 'public' as const,
           allowComments: true,
+          isPublic: true,
+          cards: [],
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
           designMetadata: {},
@@ -191,7 +194,9 @@ export function useCards() {
         description: collectionData.description || '',
         coverImageUrl: collectionData.coverImageUrl || '',
         userId: 'user-1',
-        teamId: 'team-1',
+        teamId: collectionData.teamId || 'team-1',
+        cards: [],
+        isPublic: collectionData.isPublic !== undefined ? collectionData.isPublic : true,
         visibility: collectionData.visibility || 'public',
         allowComments: collectionData.allowComments !== undefined ? collectionData.allowComments : true,
         createdAt: new Date().toISOString(),

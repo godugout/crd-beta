@@ -24,7 +24,15 @@ export * from './collection';
 export * from './instagram';
 export * from './teamTypes';
 export type { CardEffect, CardEffectSettings } from './cardEffects';
-export * from './enhancedCardTypes';
+
+// Don't re-export enhancedCardTypes directly to avoid ambiguity
+import * as EnhancedCardTypes from './enhancedCardTypes';
+export type { 
+  CardRarity as EnhancedCardRarity,
+  HotspotData as EnhancedHotspotData,
+  EnhancedCard as ExtendedCard,
+  Series as EnhancedSeries,
+} from './enhancedCardTypes';
 
 // For backward compatibility, keep the old imports as well
 // But we should gradually migrate to using the centralized types

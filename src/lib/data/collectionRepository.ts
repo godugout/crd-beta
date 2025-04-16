@@ -1,6 +1,5 @@
-
 import { supabase } from '@/lib/supabase';
-import { Collection, DbCollection, serializeMetadata } from '@/lib/types';
+import { Collection, serializeMetadata } from '@/lib/types';
 
 export const collectionRepository = {
   /**
@@ -35,7 +34,9 @@ export const collectionRepository = {
         updatedAt: dbCollection.updated_at,
         userId: dbCollection.owner_id,
         teamId: dbCollection.team_id,
-        cardIds: [], // Add empty cardIds array as default
+        cardIds: [],
+        cards: [],
+        isPublic: dbCollection.visibility === 'public',
       };
       
       return { data: collection, error: null };
@@ -55,7 +56,6 @@ export const collectionRepository = {
       if (collectionUpdates.description !== undefined) updateCollectionData.description = collectionUpdates.description;
       if (collectionUpdates.coverImageUrl !== undefined) updateCollectionData.cover_image_url = collectionUpdates.coverImageUrl;
       if (collectionUpdates.visibility !== undefined) {
-        // Handle all visibility types including 'unlisted'
         updateCollectionData.visibility = collectionUpdates.visibility;
       }
       if (collectionUpdates.allowComments !== undefined) updateCollectionData.allow_comments = collectionUpdates.allowComments;
@@ -88,7 +88,9 @@ export const collectionRepository = {
         updatedAt: dbCollection.updated_at,
         userId: dbCollection.owner_id,
         teamId: dbCollection.team_id,
-        cardIds: [], // Add empty cardIds array as default
+        cardIds: [],
+        cards: [],
+        isPublic: dbCollection.visibility === 'public',
       };
       
       return { data: collection, error: null };
@@ -111,7 +113,6 @@ export const collectionRepository = {
         .from('collections')
         .select('*');
       
-      // When filtering collections, support teamId:
       if (filterOptions.teamId) {
         queryBuilder = queryBuilder.eq('team_id', filterOptions.teamId);
       }
@@ -142,7 +143,9 @@ export const collectionRepository = {
         updatedAt: dbCollection.updated_at,
         userId: dbCollection.owner_id,
         teamId: dbCollection.team_id,
-        cardIds: [], // Add empty cardIds array as default
+        cardIds: [],
+        cards: [],
+        isPublic: dbCollection.visibility === 'public',
       }));
       
       return { data: collections, error: null };
@@ -191,7 +194,9 @@ export const collectionRepository = {
         updatedAt: dbCollection.updated_at,
         userId: dbCollection.owner_id,
         teamId: dbCollection.team_id,
-        cardIds: [], // Add empty cardIds array as default
+        cardIds: [],
+        cards: [],
+        isPublic: dbCollection.visibility === 'public',
       };
       
       return { data: newCollection, error: null };

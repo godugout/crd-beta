@@ -309,6 +309,22 @@ export interface Series {
 }
 
 /**
+ * Deck definition for card collections
+ */
+export interface Deck {
+  id: string;
+  name: string;
+  description: string;
+  coverImageUrl: string;
+  ownerId: string;
+  createdAt: string;
+  updatedAt: string;
+  cardIds: string[];
+  cards?: EnhancedCard[];
+  isPublic: boolean;
+}
+
+/**
  * Database representation of Card for Supabase mapping
  */
 export interface DbCard {

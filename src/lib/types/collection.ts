@@ -2,6 +2,12 @@
 import { BaseEntity } from './index';
 import { Card } from './cardTypes';
 
+export interface InstagramSource {
+  username: string;
+  lastFetched: string;
+  autoUpdate: boolean;
+}
+
 export interface Collection extends BaseEntity {
   name: string;
   description?: string;
@@ -11,7 +17,7 @@ export interface Collection extends BaseEntity {
   isPublic: boolean;
   tags?: string[];
   popularity?: number;
-  instagramSource?: string;
+  instagramSource?: InstagramSource;
   
   // Additional properties needed by other components
   visibility?: 'public' | 'private' | 'team' | 'unlisted';

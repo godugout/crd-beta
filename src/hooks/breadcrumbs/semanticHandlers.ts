@@ -10,6 +10,7 @@ export const handleSemanticSegments = ({
 }: BreadcrumbHandlerProps): BreadcrumbItem | null => {
   if (segment === 'memories' && index > 1) {
     return {
+      id: `memories-${currentPath}`,
       path: currentPath,
       label: 'Memories'
     };
@@ -17,6 +18,7 @@ export const handleSemanticSegments = ({
   
   if (segment === 'new' && pathSegments[index-1] === 'memories') {
     return {
+      id: `new-memory-${currentPath}`,
       path: currentPath,
       label: 'Create Memory'
     };
@@ -43,6 +45,7 @@ export const handleIdSegment = ({
     else if (prevSegment === 'packs') label = 'Memory Pack';
     
     return {
+      id: `details-${currentPath}`,
       path: currentPath,
       label: label
     };

@@ -1,11 +1,10 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { Card, Collection } from '@/lib/types';
 import { useAuth } from '@/hooks/useAuth';
 import { sampleCards } from '@/lib/sampleCards';
 
-export { Card, Collection }; // Export these types for use in other components
+export type { Card, Collection }; // Export these types for use in other components
 
 interface CardContextType {
   cards: Card[];
