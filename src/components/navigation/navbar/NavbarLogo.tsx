@@ -32,7 +32,7 @@ const NavbarLogo: React.FC<NavbarLogoProps> = ({ minimal = false }) => {
   };
 
   return (
-    <div className="flex items-center mr-4">
+    <div className="flex items-center flex-shrink-0">
       <Link to="/" className="flex items-center">
         {getLogo()}
         {!isMinimized && !isMobile && !minimal && (

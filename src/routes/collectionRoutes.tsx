@@ -7,6 +7,7 @@ import Packs from '@/pages/Packs';
 import MemoryPackDetail from '@/pages/MemoryPackDetail';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import InstagramCollectionPage from '@/pages/collections/instagram';
+import CommonsCardsPage from '@/pages/collections/commons';
 
 // Collection-related routes
 export const collectionRoutes: RouteObject[] = [
@@ -33,6 +34,10 @@ export const collectionRoutes: RouteObject[] = [
   {
     path: "/collections/instagram",
     element: <ProtectedRoute><InstagramCollectionPage /></ProtectedRoute>,
+  },
+  {
+    path: "/collections/commons",
+    element: <CommonsCardsPage />,
   },
   {
     path: "/packs",

@@ -4,7 +4,8 @@ import {
   PlusCircle,
   Package,
   Sparkles,
-  Instagram
+  Instagram,
+  Globe
 } from 'lucide-react';
 import { NavigationItem } from './types';
 
@@ -21,6 +22,12 @@ export const collectionsNavItems: NavigationItem[] = [
     path: '/collections/create',
     icon: PlusCircle,
     description: 'Create a new collection'
+  },
+  {
+    title: 'Commons Cards',
+    path: '/collections/commons',
+    icon: Globe,
+    description: 'Public domain card collection'
   },
   {
     title: 'Instagram Collection',

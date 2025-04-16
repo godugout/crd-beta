@@ -5,16 +5,27 @@ import { toast } from 'sonner';
 import { useCards } from '@/context/CardContext';
 import { addSampleCards } from '@/lib/sampleCards';
 import { Sparkles } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface SampleCardsButtonProps {
   onComplete?: () => void;
+  variant?: "default" | "commonsLink";
 }
 
-const SampleCardsButton: React.FC<SampleCardsButtonProps> = ({ onComplete }) => {
+const SampleCardsButton: React.FC<SampleCardsButtonProps> = ({ 
+  onComplete,
+  variant = "default" 
+}) => {
   const { addCard } = useCards();
   const [isLoading, setIsLoading] = React.useState(false);
+  const navigate = useNavigate();
   
   const handleAddSampleCards = async () => {
+    if (variant === "commonsLink") {
+      navigate('/collections/commons');
+      return;
+    }
+    
     setIsLoading(true);
     
     try {
@@ -44,7 +55,7 @@ const SampleCardsButton: React.FC<SampleCardsButtonProps> = ({ onComplete }) => 
       size="lg"
     >
       <Sparkles className="h-4 w-4" />
-      {isLoading ? 'Adding Sample Cards...' : 'Add Sample Cards'}
+      {isLoading ? 'Adding Sample Cards...' : variant === "commonsLink" ? 'Generate Commons Cards' : 'Add Sample Cards'}
     </Button>
   );
 };
