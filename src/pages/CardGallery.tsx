@@ -1,8 +1,5 @@
 
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { PlusCircle } from 'lucide-react';
 import PageLayout from '@/components/navigation/PageLayout';
 import CardGalleryComponent from '@/components/CardGallery';
 import { cardsNavItems } from '@/config/navigation';
@@ -25,14 +22,8 @@ const CardGallery = () => {
       hideBreadcrumbs={false}
       onSearch={setSearchQuery}
       searchPlaceholder="Search cards..."
-      primaryAction={{
-        label: "New Card",
-        icon: <PlusCircle className="mr-2 h-5 w-5" />,
-        href: "/cards/create"
-      }}
     >
       <div className="container mx-auto max-w-6xl px-4 py-4">
-        {/* Content type navigation */}
         <div className="mb-8">
           <ContentTypeNavigation 
             items={navigationItems}

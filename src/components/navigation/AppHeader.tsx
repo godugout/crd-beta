@@ -1,8 +1,7 @@
-
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Search, PlusCircle, User, Menu, X } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth'; // Use our modified hook
+import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { mainNavItems } from '@/config/navigation';
@@ -87,8 +86,8 @@ const AppHeader: React.FC = () => {
               
               <Button asChild className="bg-athletics-gold text-gray-900 hover:bg-athletics-gold-dark">
                 <Link to="/cards/create">
-                  <PlusCircle className="h-4 w-4 mr-2" />
-                  <span>Create Card</span>
+                  <PlusCircle className="h-4 w-4 mr-1" />
+                  <span>+ Card</span>
                 </Link>
               </Button>
             </div>
@@ -141,8 +140,8 @@ const AppHeader: React.FC = () => {
               
               <Button asChild className="w-full bg-athletics-gold text-gray-900 hover:bg-athletics-gold-dark">
                 <Link to="/cards/create" onClick={closeMenu}>
-                  <PlusCircle className="h-4 w-4 mr-2" />
-                  Create Card
+                  <PlusCircle className="h-4 w-4 mr-1" />
+                  <span>+ Card</span>
                 </Link>
               </Button>
             </div>

@@ -17,25 +17,20 @@ export const collectionRoutes: RouteObject[] = [
   },
   {
     path: "/collections/featured",
-    element: <Collections />, // Should be implemented as a dedicated page
+    element: <Collections />,
   },
   {
     path: "/collections/:id",
     element: <CollectionDetail />,
   },
   {
-    path: "/collection/:id", // Kept for backwards compatibility
-    element: <CollectionDetail />,
-  },
-  {
     path: "/collections/create",
-    element: <ProtectedRoute><Collections /></ProtectedRoute>, // Should be updated with proper create view
+    element: <ProtectedRoute><Collections /></ProtectedRoute>,
   },
   {
     path: "/collections/new",
-    element: <ProtectedRoute><Collections /></ProtectedRoute>, // Should be updated with proper create view
+    element: <ProtectedRoute><Collections /></ProtectedRoute>,
   },
-  // Add the Instagram collection creator route
   {
     path: "/collections/instagram",
     element: <ProtectedRoute><InstagramCollectionPage /></ProtectedRoute>,
@@ -53,3 +48,4 @@ export const collectionRoutes: RouteObject[] = [
     element: <MemoryPackDetail />,
   },
 ];
+

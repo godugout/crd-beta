@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCards } from '@/context/CardContext';
@@ -57,17 +56,13 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
     { id: 'rotate-edges', active: false }
   ]);
 
-  // New state for features bar minimization
   const [featuresBarMinimized, setFeaturesBarMinimized] = useState(false);
-  // New state for exploded view animation
   const [showExplodedView, setShowExplodedView] = useState(false);
 
-  // Set initial rotation to make stacked cards visible
   useEffect(() => {
     setPosition({ x: 10, y: 15 });
   }, [setPosition]);
 
-  // Setup keyboard controls
   useEffect(() => {
     window.addEventListener('keydown', handleKeyboardControls);
     return () => {
@@ -75,7 +70,6 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
     };
   }, [handleKeyboardControls]);
 
-  // Setup wheel event listener for zoom/rotation
   useEffect(() => {
     const cleanup = setupWheelListener();
     return () => {
@@ -91,7 +85,6 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
     toast.info('Share feature coming soon');
   };
 
-  // Toggle exploded view animation
   const handleToggleExplodedView = () => {
     setShowExplodedView(prev => !prev);
     
@@ -104,13 +97,11 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
     }
   };
 
-  // Function to handle effect toggle that also triggers exploded view
   const handleEffectToggle = (effect: string) => {
     setActiveEffects(prev => 
       prev.includes(effect) ? prev.filter(e => e !== effect) : [...prev, effect]
     );
     
-    // Trigger exploded view animation when effect is toggled
     setShowExplodedView(false);
     setTimeout(() => {
       setShowExplodedView(true);
@@ -133,7 +124,6 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
 
   return (
     <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50">
-      {/* Minimizable Features Bar */}
       <div className="absolute top-0 left-0 right-0 z-30 flex justify-center">
         <div className={`${featuresBarMinimized ? 'w-20' : 'w-auto px-6'} transition-all duration-300 bg-gray-900/80 backdrop-blur-md rounded-b-lg`}>
           {featuresBarMinimized ? (
@@ -219,14 +209,16 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
           showExplodedView={showExplodedView}
         />
         
-        <CardEffectsPanel 
-          activeEffects={activeEffects}
-          onToggleEffect={handleEffectToggle}
-          onEffectIntensityChange={(effect, intensity) => {
-            setEffectIntensities(prev => ({ ...prev, [effect]: intensity }));
-          }}
-          effectIntensities={effectIntensities}
-        />
+        <div className="absolute right-4 top-20 bottom-4 w-80">
+          <CardEffectsPanel 
+            activeEffects={activeEffects}
+            onToggleEffect={handleEffectToggle}
+            onEffectIntensityChange={(effect, intensity) => {
+              setEffectIntensities(prev => ({ ...prev, [effect]: intensity }));
+            }}
+            effectIntensities={effectIntensities}
+          />
+        </div>
       </div>
 
       <ViewerControls
