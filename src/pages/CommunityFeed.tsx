@@ -1,6 +1,8 @@
+
 import React, { useState, useEffect } from 'react';
 import PageLayout from '@/components/navigation/PageLayout';
-import { Card, Reaction } from '@/lib/types/cardTypes';
+import { Card } from '@/lib/types/cardTypes';
+import { Reaction } from '@/lib/types/interaction';
 import { useToast } from '@/hooks/use-toast';
 
 const CommunityFeed = () => {

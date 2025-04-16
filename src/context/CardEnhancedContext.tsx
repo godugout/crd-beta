@@ -1,7 +1,9 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
+import { Card } from '@/lib/types/cardTypes';
 import { EnhancedCard, Series, Deck } from '@/lib/types/CardTypes';
 import { sampleCards } from '@/data/sampleCards';
 

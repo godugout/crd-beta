@@ -1,4 +1,5 @@
-import { Card } from './cardTypes';
+
+import { Card as BaseCard } from './cardTypes';
 import { User } from './user';
 
 export type CardRarity = 'common' | 'uncommon' | 'rare' | 'ultra-rare' | 'legendary' | 'one-of-one';
@@ -14,13 +15,12 @@ export interface HotspotData {
   visible: boolean;
 }
 
-export interface EnhancedCard extends Omit<Card, 'artist'> {
+export interface EnhancedCard extends BaseCard {
   rarity: CardRarity;
   cardNumber?: string;
   seriesId?: string;
   artistId?: string;
-  artist?: User;
-  artistName?: string;
+  artistProfile?: User;
   edition?: number;
   editionSize?: number;
   releaseDate?: string;

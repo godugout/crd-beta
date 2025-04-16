@@ -1,5 +1,6 @@
+
 import { useState, useCallback } from 'react';
-import { CardEffectsResult } from '@/lib/types';
+import { CardEffectsResult } from '@/lib/types/cardEffects';
 
 const useCardEffects = (): CardEffectsResult => {
   const [cardEffects, setCardEffectsState] = useState<Record<string, string[]>>({});

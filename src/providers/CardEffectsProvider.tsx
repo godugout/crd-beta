@@ -1,7 +1,7 @@
 
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import useCardEffectsHook from '@/hooks/card-effects/useCardEffects';
-import { CardEffectsResult } from '@/lib/types';
+import { CardEffectsResult } from '@/lib/types/cardEffects';
 
 // Create context with default value
 const CardEffectsContext = createContext<CardEffectsResult | undefined>(undefined);

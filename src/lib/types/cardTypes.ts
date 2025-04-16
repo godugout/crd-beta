@@ -1,4 +1,3 @@
-
 /**
  * Consolidated Card Types for Cardshow (CRD)
  * This file serves as the central source of truth for all card-related types
@@ -217,6 +216,7 @@ export interface BaseCard extends BaseEntity {
   title: string;
   description?: string;
   imageUrl: string;
+  image?: string; // Legacy support for older components
   thumbnailUrl?: string;
   tags?: string[];
   collectionId?: string;
@@ -237,7 +237,8 @@ export interface BaseCard extends BaseEntity {
   set?: string;
   cardNumber?: string;
   cardType?: string;
-  artist?: string;
+  artistName?: string; // Use artistName instead of artist to avoid conflicts
+  artist?: string; // For backward compatibility
   backgroundColor?: string;
   textColor?: string;
   specialEffect?: string;
@@ -255,6 +256,9 @@ export interface BaseCard extends BaseEntity {
   estimatedValue?: string;
   condition?: string;
   rarity?: CardRarity;
+  
+  // Additional fields needed by some components
+  creatorId?: string;
 }
 
 /**
@@ -269,7 +273,7 @@ export interface EnhancedCard extends Card {
   cardNumber?: string;
   seriesId?: string;
   artistId?: string;
-  artist?: User;
+  artistProfile?: User; // Use artistProfile instead of artist
   edition?: number;
   editionSize?: number;
   releaseDate?: string;
@@ -326,3 +330,6 @@ export interface DbCard {
   edition_size: number;
   rarity: string;
 }
+
+// Re-export Reaction for components that need it
+export { Reaction } from './interaction';

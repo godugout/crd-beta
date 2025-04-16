@@ -6,7 +6,10 @@
 
 import { BaseEntity } from './index';
 import { Reaction, Comment } from './interaction';
-import { Card as CardType, FabricSwatch as FabricSwatchType } from './cardTypes';
+import { 
+  Card as CardType, 
+  FabricSwatch as FabricSwatchType 
+} from './cardTypes';
 
 export interface FabricSwatch extends FabricSwatchType {}
 
@@ -48,4 +51,5 @@ export interface BaseCard {
 export interface Card extends BaseCard {}
 
 // Re-export the new types for gradual migration
-export { CardType as CardNew, FabricSwatchType as FabricSwatchNew };
+export type { CardType as CardNew, FabricSwatchType as FabricSwatchNew };
+

@@ -13,11 +13,17 @@ export interface BaseEntity {
   updatedAt?: string;
 }
 
+// For backward compatibility with JsonObject
+export type JsonObject = Record<string, JsonValue>;
+
 // Export updated type definitions
 export * from './cardTypes';
 export * from './interaction';
 export * from './user';
 export * from './collection';
+export * from './instagram';
+export * from './teamTypes';
+export * from './cardEffects';
 
 // For backward compatibility, keep the old imports as well
 // But we should gradually migrate to using the centralized types

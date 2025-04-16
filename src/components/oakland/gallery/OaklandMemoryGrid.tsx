@@ -31,7 +31,7 @@ const OaklandMemoryGrid: React.FC<OaklandMemoryGridProps> = ({ cards }) => {
           memoryType: oaklandMemory.memoryType,
           attendees: oaklandMemory.attendees || [],
           tags: card.tags || [],
-          imageUrl: oaklandMemory.imageUrl || card.imageUrl || card.image || '',
+          imageUrl: oaklandMemory.imageUrl || card.imageUrl || '',
           historicalContext: oaklandMemory.historicalContext,
           personalSignificance: oaklandMemory.personalSignificance,
         };

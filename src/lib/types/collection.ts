@@ -3,6 +3,7 @@ import { BaseEntity } from './index';
 import { Card } from './cardTypes';
 import { User } from './user';
 import { Reaction, Comment } from './interaction';
+import { InstagramSource } from './instagram';
 
 /**
  * Collection definition for groups of cards
@@ -22,6 +23,7 @@ export interface Collection extends BaseEntity {
   reactions?: Reaction[];
   comments?: Comment[];
   owner?: User;
+  instagramSource?: InstagramSource; // Add support for Instagram collections
 }
 
 /**
@@ -40,3 +42,4 @@ export interface DbCollection {
   updated_at: string;
   design_metadata?: any;
 }
+
