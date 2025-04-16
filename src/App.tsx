@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
@@ -83,7 +82,7 @@ function App() {
     <SettingsProvider>
       <Router>
         <BreadcrumbProvider>
-          <div className="debug-info fixed top-0 left-0 bg-black/80 text-white p-2 text-xs z-50">
+          <div className="debug-info fixed bottom-4 left-4 bg-black/80 text-white p-2 text-xs z-50 rounded-md">
             App Loaded | {new Date().toLocaleTimeString()} | {isAuthenticated ? 'Authenticated' : 'Not Authenticated'}
           </div>
           
