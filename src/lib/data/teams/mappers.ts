@@ -1,4 +1,3 @@
-
 import { TeamMember, User, UserRole } from '@/lib/types';
 import { Team } from '@/lib/types/teamTypes';
 
@@ -12,7 +11,7 @@ export const mapTeamFromDb = (team: any): Team => ({
   logoUrl: team.logo_url,
   logo_url: team.logo_url,
   banner_url: team.banner_url,
-  ownerId: team.owner_id,
+  ownerId: team.owner_id, // Changed from owner_id to ownerId
   owner_id: team.owner_id,
   status: team.status,
   website: team.website,
