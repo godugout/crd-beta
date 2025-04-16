@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card } from '@/lib/types';
 import { X, Camera, RotateCw, ZoomIn, ZoomOut, Flip } from 'lucide-react';
@@ -46,6 +45,17 @@ const ArModeView: React.FC<ArModeViewProps> = ({
       console.log('Cleaning up AR resources');
     };
   }, [activeCards, onCameraError]);
+
+  const handleEffectActivate = () => {
+    // Add glow effect instead of explosion
+    const cardElement = document.querySelector('.card-container');
+    if (cardElement) {
+      cardElement.classList.add('effect-glow');
+      setTimeout(() => {
+        cardElement.classList.remove('effect-glow');
+      }, 1500); // Match animation duration
+    }
+  };
 
   return (
     <div className="fixed inset-0 bg-black z-50 flex flex-col">

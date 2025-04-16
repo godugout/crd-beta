@@ -1,43 +1,21 @@
 
-import { BaseEntity } from './index';
-
-export interface Reaction extends BaseEntity {
+export interface Reaction {
+  id: string;
   userId: string;
-  type: 'like' | 'heart' | 'wow' | 'fire' | 'clap' | string;
+  cardId?: string;
+  collectionId?: string;
+  commentId?: string;
+  type: 'like' | 'love' | 'wow' | 'haha' | 'sad' | 'angry';
+  createdAt: string;
   targetType: 'card' | 'comment' | string;
   targetId: string;
 }
 
-export interface Comment extends BaseEntity {
-  userId: string;
+export interface Comment {
+  id: string;
   content: string;
-  targetType: 'card' | 'collection' | string;
-  targetId: string;
+  userId: string;
+  cardId?: string;
   parentId?: string;
-  reactions?: Reaction[];
-}
-
-export interface CardEffectsResult {
-  cardEffects: Record<string, string[]>;
-  isLoading: boolean;
-  addEffect: (cardId: string, effect: string) => void;
-  removeEffect: (cardId: string, effect: string) => void;
-  toggleEffect: (cardId: string, effect: string) => void;
-  clearEffects: (cardId: string) => void;
-  setCardEffects: (cardId: string, effects: string[]) => void;
-  setActiveEffects?: (effects: string[]) => void;
-}
-
-export interface EffectSettings {
-  intensity?: number;
-  color?: string;
-  speed?: number;
-  pattern?: string;
-  opacity?: number;
-}
-
-export interface CardEffect {
-  name: string;
-  enabled: boolean;
-  settings: EffectSettings;
+  createdAt: string;
 }
