@@ -1,15 +1,19 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import PageLayout from '@/components/navigation/PageLayout';
 import CardGalleryComponent from '@/components/CardGallery';
 import { cardsNavItems } from '@/config/navigation';
 import ContentTypeNavigation from '@/components/navigation/ContentTypeNavigation';
 import { useCards } from '@/hooks/useCards';
+import { sampleCards } from '@/data/sampleCards';
 import { Card } from '@/lib/types';
 
 const CardGallery = () => {
   const [searchQuery, setSearchQuery] = useState('');
-  const { cards, loading, error } = useCards();
+  const { cards, loading } = useCards();
+  
+  console.log('CardGallery page received cards:', cards);
+  console.log('Sample cards available:', sampleCards.length);
 
   // Create navigation items for content type navigation
   const navigationItems = cardsNavItems.map(item => ({
@@ -18,6 +22,9 @@ const CardGallery = () => {
     icon: item.icon ? <item.icon className="h-4 w-4" /> : undefined,
     description: item.description
   }));
+
+  // Determine which cards to use - if useCards() returns empty, use sampleCards directly
+  const cardsToDisplay = cards && cards.length > 0 ? cards : sampleCards;
 
   return (
     <PageLayout
@@ -36,8 +43,8 @@ const CardGallery = () => {
         
         <CardGalleryComponent 
           searchQuery={searchQuery}
-          cards={cards as Card[]} 
-          isLoading={loading}
+          cards={cardsToDisplay as Card[]} 
+          isLoading={loading && cardsToDisplay.length === 0}
         />
       </div>
     </PageLayout>

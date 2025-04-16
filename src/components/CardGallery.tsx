@@ -59,6 +59,8 @@ const CardGallery: React.FC<CardGalleryProps> = ({
     }
   };
 
+  console.log('CardGallery received cards:', cards);
+
   return (
     <div className={cn("", className)}>
       <ErrorBoundary>
@@ -74,7 +76,7 @@ const CardGallery: React.FC<CardGalleryProps> = ({
             "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4" : 
             "space-y-4"
           }>
-            {filteredCards.map(card => (
+            {filteredCards.length > 0 ? filteredCards.map(card => (
               <div key={card.id} className={viewMode === 'list' ? "bg-background rounded-lg shadow" : ""}>
                 {viewMode === 'grid' ? (
                   <div 
@@ -87,6 +89,10 @@ const CardGallery: React.FC<CardGalleryProps> = ({
                           src={card.imageUrl}
                           alt={card.title || 'Card image'}
                           className="w-full h-full object-cover"
+                          onError={(e) => {
+                            console.error(`Failed to load image: ${card.imageUrl}`);
+                            e.currentTarget.src = 'https://images.unsplash.com/photo-1518770660439-4636190af475';
+                          }}
                         />
                       )}
                     </div>
@@ -107,6 +113,10 @@ const CardGallery: React.FC<CardGalleryProps> = ({
                           src={card.imageUrl}
                           alt={card.title || 'Card thumbnail'}
                           className="w-full h-full object-cover"
+                          onError={(e) => {
+                            console.error(`Failed to load image: ${card.imageUrl}`);
+                            e.currentTarget.src = 'https://images.unsplash.com/photo-1518770660439-4636190af475';
+                          }}
                         />
                       )}
                     </div>
@@ -124,7 +134,11 @@ const CardGallery: React.FC<CardGalleryProps> = ({
                   </div>
                 )}
               </div>
-            ))}
+            )) : (
+              <div className="col-span-full text-center py-8">
+                <p className="text-muted-foreground">No cards found matching your criteria</p>
+              </div>
+            )}
           </div>
         )}
         

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Card, Collection } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
+import { sampleCards } from '@/data/sampleCards';
 
 export function useCards() {
   const [cards, setCards] = useState<Card[]>([]);
@@ -14,44 +15,8 @@ export function useCards() {
     try {
       setLoading(true);
       
-      const demoCards: Card[] = [
-        {
-          id: 'card-1',
-          title: 'Demo Card 1',
-          description: 'This is a sample card',
-          imageUrl: '/lovable-uploads/0edc670d-08ee-42a5-b42a-b2a3bea81c04.png',
-          thumbnailUrl: '/lovable-uploads/0edc670d-08ee-42a5-b42a-b2a3bea81c04.png',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          userId: 'user-1',
-          teamId: 'team-1',
-          collectionId: 'collection-1',
-          isPublic: true,
-          tags: ['sample', 'demo'],
-          designMetadata: {},
-          reactions: [],
-          effects: [] // Add required effects property
-        },
-        {
-          id: 'card-2',
-          title: 'Demo Card 2',
-          description: 'Another sample card',
-          imageUrl: '/lovable-uploads/0edc670d-08ee-42a5-b42a-b2a3bea81c04.png',
-          thumbnailUrl: '/lovable-uploads/0edc670d-08ee-42a5-b42a-b2a3bea81c04.png',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          userId: 'user-1',
-          teamId: 'team-1',
-          collectionId: 'collection-2',
-          isPublic: true,
-          tags: ['sample', 'featured'],
-          designMetadata: {},
-          reactions: [],
-          effects: ['Holographic'] // Add required effects property
-        }
-      ];
-      
-      setCards(demoCards);
+      // Use the sample cards data that has proper image URLs
+      setCards(sampleCards);
 
       // Demo collections
       const demoCollections = [
@@ -59,7 +24,7 @@ export function useCards() {
           id: 'collection-1',
           name: 'Demo Collection 1',
           description: 'A sample collection',
-          coverImageUrl: '/collection1.jpg',
+          coverImageUrl: '/lovable-uploads/667e6ad2-af96-40ac-bd16-a69778e14b21.png',
           userId: 'user-1',
           teamId: 'team-1',
           visibility: 'public' as const,
@@ -69,13 +34,13 @@ export function useCards() {
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
           designMetadata: {},
-          cardIds: ['card-1']
+          cardIds: ['card-001']
         },
         {
           id: 'collection-2',
           name: 'Demo Collection 2',
           description: 'Another sample collection',
-          coverImageUrl: '/collection2.jpg',
+          coverImageUrl: '/lovable-uploads/371b81a2-cafa-4637-9358-218d4120c658.png',
           userId: 'user-1',
           teamId: 'team-1',
           visibility: 'public' as const,
@@ -85,11 +50,17 @@ export function useCards() {
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
           designMetadata: {},
-          cardIds: ['card-2']
+          cardIds: ['card-002']
         }
       ];
       
       setCollections(demoCollections);
+      
+      toast({
+        title: "Cards loaded",
+        description: `Loaded ${sampleCards.length} cards`,
+        variant: "default",
+      });
     } catch (err) {
       const error = err as Error;
       console.error('Error fetching cards:', error);
@@ -114,8 +85,8 @@ export function useCards() {
         id: `card-${Date.now()}`,
         title: cardData.title || 'Untitled Card',
         description: cardData.description || '',
-        imageUrl: cardData.imageUrl || '',
-        thumbnailUrl: cardData.thumbnailUrl || '',
+        imageUrl: cardData.imageUrl || '/lovable-uploads/667e6ad2-af96-40ac-bd16-a69778e14b21.png',
+        thumbnailUrl: cardData.thumbnailUrl || cardData.imageUrl || '/lovable-uploads/667e6ad2-af96-40ac-bd16-a69778e14b21.png',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         userId: 'user-1',
