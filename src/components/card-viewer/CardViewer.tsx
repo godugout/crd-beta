@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Lightbulb } from 'lucide-react';
@@ -11,11 +12,27 @@ import { useToast } from "@/hooks/use-toast";
 
 interface CardViewerProps {
   card: Card;
-  onUpdateCard: (card: Card) => void;
-  onDeleteCard: (cardId: string) => void;
+  onUpdateCard?: (card: Card) => void;
+  onDeleteCard?: (cardId: string) => void;
+  fullscreen?: boolean;
+  onFullscreenToggle?: () => void;
+  onShare?: () => void;
+  onCapture?: () => void;
+  onBack?: () => void;
+  onClose?: () => void;
 }
 
-const CardViewer: React.FC<CardViewerProps> = ({ card, onUpdateCard, onDeleteCard }) => {
+const CardViewer: React.FC<CardViewerProps> = ({ 
+  card, 
+  onUpdateCard, 
+  onDeleteCard,
+  fullscreen = false,
+  onFullscreenToggle,
+  onShare,
+  onCapture,
+  onBack,
+  onClose
+}) => {
   const [isFlipped, setIsFlipped] = useState(false);
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
@@ -28,7 +45,11 @@ const CardViewer: React.FC<CardViewerProps> = ({ card, onUpdateCard, onDeleteCar
   };
 
   const handleShare = () => {
-    setIsShareOpen(true);
+    if (onShare) {
+      onShare();
+    } else {
+      setIsShareOpen(true);
+    }
   };
 
   const handleDelete = () => {
@@ -42,6 +63,28 @@ const CardViewer: React.FC<CardViewerProps> = ({ card, onUpdateCard, onDeleteCar
       }
       return [...prev, effect];
     });
+    
+    // If we have an onUpdateCard handler, update the card with the new effects
+    if (onUpdateCard) {
+      onUpdateCard({
+        ...card,
+        effects: activeEffects.includes(effect) 
+          ? activeEffects.filter(e => e !== effect)
+          : [...activeEffects, effect]
+      });
+    }
+  };
+
+  const handleDeleteCard = (cardId: string) => {
+    if (onDeleteCard) {
+      onDeleteCard(cardId);
+    } else {
+      toast({
+        title: "Action not available",
+        description: "Delete functionality is not available in this view.",
+        variant: "destructive"
+      });
+    }
   };
 
   return (
@@ -95,7 +138,7 @@ const CardViewer: React.FC<CardViewerProps> = ({ card, onUpdateCard, onDeleteCar
         isOpen={isDeleteOpen}
         onClose={() => setIsDeleteOpen(false)}
         card={card}
-        onDelete={onDeleteCard}
+        onDelete={handleDeleteCard}
       />
     </div>
   );
