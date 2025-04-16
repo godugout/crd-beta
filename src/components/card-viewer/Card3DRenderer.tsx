@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import CardDiagnostics from './CardDiagnostics';
 import { useCardMaterials } from '@/hooks/card-effects/useCardMaterials';
 import { useCardRotation } from '@/hooks/card-effects/useCardRotation';
+import { getFallbackImageUrl } from '@/lib/utils/imageUtils';
 
 interface Card3DRendererProps {
   card: Card;
@@ -38,18 +39,52 @@ const Card3DRenderer: React.FC<Card3DRendererProps> = ({
     meshCount: 0,
     transformations: [] as string[]
   });
-  
-  const frontTexturePath = card.imageUrl || '/images/card-placeholder.png';
-  const backTexturePath = card.thumbnailUrl || '/images/card-back-placeholder.png';
-
-  const [frontTexture, backTexture] = useTexture([frontTexturePath, backTexturePath], (textures) => {
-    console.log('Card textures loaded:', textures);
-    setRenderingStats(prev => ({
-      ...prev,
-      imageLoaded: true,
-      warnings: prev.warnings.filter(w => !w.includes('texture loading'))
-    }));
+  const [textureUrls, setTextureUrls] = useState({
+    front: '',
+    back: ''
   });
+  
+  // Make sure we have valid texture URLs
+  useEffect(() => {
+    // Get reliable fallback images from unsplash if needed
+    const fallbackImage = 'https://images.unsplash.com/photo-1518770660439-4636190af475';
+    
+    const frontUrl = card.imageUrl || getFallbackImageUrl(card.tags, card.title);
+    const backUrl = card.thumbnailUrl || frontUrl;
+    
+    console.log(`Card3DRenderer: Using front texture ${frontUrl}`);
+    console.log(`Card3DRenderer: Using back texture ${backUrl}`);
+    
+    setTextureUrls({
+      front: frontUrl,
+      back: backUrl
+    });
+  }, [card]);
+
+  // Only load textures after we have valid URLs
+  const [frontTexture, backTexture] = useTexture(
+    [textureUrls.front, textureUrls.back], 
+    (textures) => {
+      console.log('Card textures loaded:', textures);
+      setRenderingStats(prev => ({
+        ...prev,
+        imageLoaded: true,
+        warnings: prev.warnings.filter(w => !w.includes('texture loading'))
+      }));
+    },
+    (error) => {
+      console.error('Error loading textures:', error);
+      setRenderingStats(prev => ({
+        ...prev,
+        errors: [...prev.errors, `Failed to load textures: ${error.message}`]
+      }));
+      
+      // Display error message
+      toast.error("Problem loading card textures", {
+        description: "Using fallback images instead"
+      });
+    }
+  );
 
   const { rotationSpeed, setRotationSpeed, handleWheel } = useCardRotation();
   const { shaderMaterial, glowMaterial, edgeMaterial } = useCardMaterials(frontTexture, backTexture, isFlipped);
@@ -102,119 +137,59 @@ const Card3DRenderer: React.FC<Card3DRendererProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [showDiagnostics]);
 
-  useFrame((state, delta) => {
-    if (meshRef.current) {
-      const currentTransform = {
-        position: meshRef.current.position.clone(),
-        rotation: new THREE.Euler().copy(meshRef.current.rotation),
-        scale: meshRef.current.scale.clone()
-      };
-      
-      meshRef.current.rotation.y += rotationSpeed * delta;
-      setRotationSpeed(prev => prev * 0.95);
-      
-      if (materialRef.current) {
-        materialRef.current.uniforms.time.value = state.clock.getElapsedTime();
-        materialRef.current.uniforms.isFlipped.value = isFlipped;
-      }
-      
-      // Synchronize position and rotation of all card elements
-      if (edgeGlowRef.current) {
-        edgeGlowRef.current.position.copy(meshRef.current.position);
-        edgeGlowRef.current.rotation.copy(meshRef.current.rotation);
-        
-        if (edgeGlowRef.current.material) {
-          const glowMaterial = edgeGlowRef.current.material as THREE.ShaderMaterial;
-          glowMaterial.uniforms.time.value = state.clock.getElapsedTime();
-        }
-      }
-      
-      if (edgesRef.current) {
-        edgesRef.current.position.copy(meshRef.current.position);
-        edgesRef.current.rotation.copy(meshRef.current.rotation);
-      }
-      
-      if (state.clock.getElapsedTime() % 1 < delta) {
-        setRenderingStats(prev => {
-          const newTransformations = [...prev.transformations];
-          newTransformations.push(
-            `Time: ${state.clock.getElapsedTime().toFixed(2)}, Pos: (${meshRef.current?.position.x.toFixed(2)},${meshRef.current?.position.y.toFixed(2)}), Rot: (${meshRef.current?.rotation.x.toFixed(2)},${meshRef.current?.rotation.y.toFixed(2)})`
-          );
-          
-          if (newTransformations.length > 10) {
-            newTransformations.shift();
-          }
-          
-          return {
-            ...prev,
-            transformations: newTransformations,
-            meshCount: state.scene.children.filter(child => child instanceof THREE.Mesh).length,
-            renderTime: state.clock.getDelta() * 1000
-          };
-        });
-      }
-    }
-  });
-
-  const cardWidth = 2.5;
-  const cardHeight = 3.5;
-  const cardThickness = 0.25; // Increased thickness for better visibility
+  // Only render the card if we have valid textures
+  if (!textureUrls.front || !textureUrls.back) {
+    return (
+      <Html center>
+        <div className="bg-red-900/80 text-white p-4 rounded-lg">
+          <div className="text-center">
+            <p className="font-bold mb-2">Loading card textures...</p>
+            <div className="w-8 h-8 border-4 border-t-transparent animate-spin rounded-full mx-auto"></div>
+          </div>
+        </div>
+      </Html>
+    );
+  }
 
   return (
-    <>
-      {showDiagnostics && (
-        <group position={[0, 3.5, 0]}>
-          <mesh>
-            <planeGeometry args={[4, 1]} />
-            <meshBasicMaterial color="black" transparent opacity={0.7} />
-          </mesh>
-          <Html position={[0, 0, 0.1]}>
-            <div style={{ color: 'white', fontSize: '12px', padding: '5px', width: '300px', textAlign: 'center' }}>
-              Meshes: {renderingStats.meshCount} | Render: {renderingStats.renderTime.toFixed(2)}ms | Card ID: {card.id}
-            </div>
-          </Html>
-        </group>
-      )}
-
-      {/* Main card face with textures */}
+    <group>
       <mesh 
-        ref={meshRef} 
+        ref={meshRef}
         rotation={[0, isFlipped ? Math.PI : 0, 0]}
-        onClick={() => console.log('Card clicked, isFlipped:', isFlipped)}
-        visible={true}
-        castShadow
-        receiveShadow
       >
-        <boxGeometry args={[cardWidth, cardHeight, cardThickness]} />
-        <primitive object={shaderMaterial} ref={materialRef} attach="material" />
+        {/* Card mesh */}
+        <boxGeometry args={[3, 4, 0.05]} />
+        <primitive object={shaderMaterial} attach="material" />
       </mesh>
       
-      {/* Edge glow effect */}
+      {/* Edge glow for effects */}
       <mesh 
-        ref={edgeGlowRef} 
-        rotation={[0, isFlipped ? Math.PI : 0, 0]}
-        onClick={() => console.log('Edge glow clicked')}
+        ref={edgeGlowRef}
+        scale={[3.05, 4.05, 0.1]}
+        position={[0, 0, -0.01]}
       >
-        <boxGeometry args={[cardWidth + 0.05, cardHeight + 0.05, cardThickness + 0.05]} />
+        <boxGeometry args={[1, 1, 1]} />
         <primitive object={glowMaterial} attach="material" />
       </mesh>
       
-      {/* Colored edges for the card */}
-      <mesh
+      {/* Card edges */}
+      <mesh 
         ref={edgesRef}
-        rotation={[0, isFlipped ? Math.PI : 0, 0]}
+        scale={[3.05, 4.05, 0.15]}
+        position={[0, 0, 0]}
       >
-        {/* Use a slightly larger size for the edges to make them visible */}
-        <boxGeometry args={[cardWidth + 0.01, cardHeight + 0.01, cardThickness + 0.01]} />
+        <boxGeometry args={[1, 1, 1]} />
         <primitive object={edgeMaterial} attach="material" />
       </mesh>
       
-      <CardDiagnostics
-        card={card}
-        isVisible={showDiagnostics}
-        renderingStats={renderingStats}
-      />
-    </>
+      {/* Diagnostics overlay */}
+      {showDiagnostics && (
+        <CardDiagnostics 
+          stats={renderingStats}
+          position={[0, 2.5, 0.5]}
+        />
+      )}
+    </group>
   );
 };
 

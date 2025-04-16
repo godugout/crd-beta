@@ -5,6 +5,8 @@ import { Canvas } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
 import Card3DRenderer from './Card3DRenderer';
 import { useCardEffects } from '@/hooks/useCardEffects';
+import { useToast } from '@/hooks/use-toast';
+import { getFallbackImageUrl } from '@/lib/utils/imageUtils';
 
 interface ImmersiveCardViewerProps {
   card: Card;
@@ -20,6 +22,27 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
   effectIntensities
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
+  
+  // Ensure we have valid image URLs before rendering
+  useEffect(() => {
+    const validateCardImages = () => {
+      // Check if card has valid image URLs
+      if (!card.imageUrl) {
+        console.warn(`Card ${card.id} is missing an image URL, using fallback`);
+        card.imageUrl = getFallbackImageUrl(card.tags, card.title);
+        
+        toast({
+          title: "Using fallback image",
+          description: "The original card image couldn't be loaded",
+          variant: "default",
+          duration: 3000
+        });
+      }
+    };
+    
+    validateCardImages();
+  }, [card, toast]);
   
   return (
     <div 

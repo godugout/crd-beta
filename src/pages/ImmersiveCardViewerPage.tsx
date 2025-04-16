@@ -12,6 +12,8 @@ import { useToast } from '@/hooks/use-toast';
 import KeyboardControls from '@/components/card-viewer/KeyboardControls';
 import CardEffectsPanel from '@/components/gallery/viewer-components/CardEffectsPanel';
 import { cn } from '@/lib/utils';
+import { useCards } from '@/context/CardContext';
+import { getFallbackImageUrl } from '@/lib/utils/imageUtils';
 
 const ImmersiveCardViewerPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -27,12 +29,41 @@ const ImmersiveCardViewerPage = () => {
     Vintage: 0.5
   });
 
-  const { data: card, isLoading } = useQuery({
+  // Get card from context if available
+  const { cards, getCardById } = useCards();
+  const cardFromContext = getCardById ? getCardById(id || '') : cards.find(c => c.id === id);
+
+  // Use query as backup but use context data if available
+  const { data: cardFromQuery, isLoading: isQueryLoading } = useQuery({
     queryKey: ['card', id],
     queryFn: () => fetchCardById(id as string),
+    // Skip query if we have the card from context
+    enabled: !cardFromContext,
   });
 
-  if (isLoading || !card) {
+  // Use either the card from context or the one from the query
+  const card = cardFromContext || cardFromQuery;
+  const isLoading = !card && isQueryLoading;
+
+  // Ensure we have valid image URLs
+  const processCardData = () => {
+    if (!card) return null;
+    
+    // Make a copy of the card to avoid mutating the original
+    const processedCard = { ...card };
+    
+    // Ensure imageUrl has a valid fallback
+    if (!processedCard.imageUrl) {
+      processedCard.imageUrl = getFallbackImageUrl(processedCard.tags, processedCard.title);
+      console.log('Using fallback image URL:', processedCard.imageUrl);
+    }
+    
+    return processedCard;
+  };
+
+  const processedCard = processCardData();
+
+  if (isLoading || !processedCard) {
     return (
       <PageLayout title="Loading Card..." fullWidth>
         <div className="h-[600px] w-full bg-gray-900 flex items-center justify-center">
@@ -43,7 +74,7 @@ const ImmersiveCardViewerPage = () => {
   }
 
   return (
-    <PageLayout title={`3D View: ${card.title}`} fullWidth className="bg-gray-900">
+    <PageLayout title={`3D View: ${processedCard.title}`} fullWidth className="bg-gray-900">
       <div className="relative min-h-screen">
         <Button 
           variant="ghost" 
@@ -57,7 +88,7 @@ const ImmersiveCardViewerPage = () => {
         {/* Main 3D Viewer */}
         <div className="absolute inset-0 flex items-center justify-center">
           <ImmersiveCardViewer 
-            card={card}
+            card={processedCard}
             isFlipped={isFlipped}
             activeEffects={activeEffects}
             effectIntensities={effectIntensities}
@@ -93,8 +124,11 @@ const ImmersiveCardViewerPage = () => {
           <div className="container mx-auto px-4 py-4">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-bold">{card.title}</h2>
-                <p className="text-sm text-gray-400">{card.team} • {card.year}</p>
+                <h2 className="text-xl font-bold">{processedCard.title}</h2>
+                <p className="text-sm text-gray-400">
+                  {processedCard.team ? `${processedCard.team} • ` : ''}
+                  {processedCard.year || ''}
+                </p>
               </div>
               <Button
                 variant="ghost"
@@ -113,18 +147,18 @@ const ImmersiveCardViewerPage = () => {
             {/* Expanded Info */}
             {showFullInfo && (
               <div className="mt-4 space-y-4">
-                {card.description && (
+                {processedCard.description && (
                   <div>
                     <h3 className="text-sm font-semibold text-gray-400">Description</h3>
-                    <p className="mt-1">{card.description}</p>
+                    <p className="mt-1">{processedCard.description}</p>
                   </div>
                 )}
                 
-                {card.stats && (
+                {processedCard.stats && (
                   <div>
                     <h3 className="text-sm font-semibold text-gray-400">Stats</h3>
                     <div className="mt-2 grid grid-cols-2 md:grid-cols-4 gap-4">
-                      {Object.entries(card.stats).map(([key, value]) => (
+                      {Object.entries(processedCard.stats).map(([key, value]) => (
                         <div key={key}>
                           <div className="text-sm text-gray-400">{key}</div>
                           <div className="font-semibold">{value}</div>
