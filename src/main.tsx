@@ -11,6 +11,7 @@ import { GlobalErrorBoundary } from './components/error/GlobalErrorBoundary';
 import { AuthProvider } from './providers/AuthProvider';
 import { ThemeProvider } from './hooks/useTheme';
 import { CardEffectsProvider } from './providers/CardEffectsProvider';
+import { BreadcrumbProvider } from './hooks/breadcrumbs/BreadcrumbContext';
 
 // Make sure we have a valid DOM node before attempting to render
 const rootElement = document.getElementById("root");
@@ -28,7 +29,9 @@ createRoot(rootElement).render(
             <AuthProvider autoLogin={true}>
               <CardProvider>
                 <CardEffectsProvider>
-                  <App />
+                  <BreadcrumbProvider>
+                    <App />
+                  </BreadcrumbProvider>
                 </CardEffectsProvider>
               </CardProvider>
             </AuthProvider>
