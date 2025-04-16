@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import PageLayout from '@/components/navigation/PageLayout';
 import { Button } from '@/components/ui/button';
@@ -9,14 +9,28 @@ import CardDetailed from '@/components/cards/CardDetailed';
 import RelatedCards from '@/components/cards/RelatedCards';
 import { useCardOperations } from '@/hooks/useCardOperations';
 import FullscreenViewer from '@/components/gallery/FullscreenViewer';
-import { sampleCards } from '@/lib/data/sampleCards'; // Import sampleCards
+import { sampleCards } from '@/lib/data/sampleCards';
+
+// Fallback image to use when card image is not available
+const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1518770660439-4636190af475';
 
 const CardDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { cards, getCard } = useCards();
   const cardOperations = useCardOperations();
-  const [showViewer, setShowViewer] = useState(true);
+  const [showViewer, setShowViewer] = useState(false);
+  
+  // Wait for context to load before trying to show the viewer
+  const [isLoaded, setIsLoaded] = useState(false);
+  
+  useEffect(() => {
+    // Short delay to ensure context is loaded
+    const timer = setTimeout(() => {
+      setIsLoaded(true);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, []);
   
   // Find the card with the matching ID - first try from context, then fallback to sampleCards
   let card = getCard ? getCard(id || '') : cards.find(c => c.id === id);
@@ -28,13 +42,17 @@ const CardDetail = () => {
   }
   
   // Ensure card has valid image URLs
-  if (card && (!card.imageUrl || card.imageUrl === 'undefined')) {
-    console.warn('Card has invalid imageUrl, applying fallback', card);
-    card = {
-      ...card,
-      imageUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475',
-      thumbnailUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475'
-    };
+  if (card) {
+    if (!card.imageUrl || card.imageUrl === 'undefined') {
+      console.warn('Card has invalid imageUrl, applying fallback', card);
+      card = {
+        ...card,
+        imageUrl: FALLBACK_IMAGE,
+        thumbnailUrl: FALLBACK_IMAGE
+      };
+    }
+  } else {
+    console.error('Card not found at all for ID:', id);
   }
   
   // Handle card not found
@@ -71,8 +89,8 @@ const CardDetail = () => {
     navigate('/cards');
   };
 
-  // If showing the viewer, render it as an overlay
-  if (showViewer) {
+  // If showing the viewer, render it as an overlay, but only after context is loaded
+  if (showViewer && isLoaded) {
     return (
       <FullscreenViewer 
         cardId={id || ''} 

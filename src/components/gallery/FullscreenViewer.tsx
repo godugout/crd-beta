@@ -4,12 +4,15 @@ import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCards } from '@/context/CardContext';
 import { Card } from '@/lib/types';
-import { sampleCards } from '@/lib/data/sampleCards'; // Import sampleCards
+import { sampleCards } from '@/lib/data/sampleCards';
 
 interface FullscreenViewerProps {
   cardId: string;
   onClose: () => void;
 }
+
+// Fallback image to use when card image is not available
+const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1518770660439-4636190af475';
 
 const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) => {
   const { cards, getCard } = useCards();
@@ -17,9 +20,6 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
-  // Fallback image to use when card image is not available
-  const fallbackImage = 'https://images.unsplash.com/photo-1518770660439-4636190af475';
-
   useEffect(() => {
     if (!cardId) {
       setError("No card ID provided");
@@ -31,32 +31,37 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
     setError(null);
 
     try {
+      console.log('FullscreenViewer: Loading card with ID:', cardId);
+      
       // First try to get card from context
       let card = getCard ? getCard(cardId) : cards.find(c => c.id === cardId);
       
       // If not found in context, try in sampleCards
       if (!card) {
-        console.log('Card not found in context, checking sampleCards for ID:', cardId);
+        console.log('FullscreenViewer: Card not found in context, checking sampleCards');
         card = sampleCards.find(c => c.id === cardId);
       }
       
       if (card) {
-        // Ensure image URLs are valid
-        if (!card.imageUrl || card.imageUrl === 'undefined') {
-          console.warn('Card has invalid imageUrl, applying fallback');
-          card = {
-            ...card,
-            imageUrl: fallbackImage,
-            thumbnailUrl: fallbackImage
-          };
+        // Validate and ensure card has valid image URLs
+        let validCard = { ...card };
+        
+        if (!validCard.imageUrl || 
+            validCard.imageUrl === 'undefined' || 
+            validCard.imageUrl.includes('undefined')) {
+          console.warn('FullscreenViewer: Card has invalid imageUrl, applying fallback');
+          validCard.imageUrl = FALLBACK_IMAGE;
+          validCard.thumbnailUrl = FALLBACK_IMAGE;
         }
         
-        setCurrentCard(card);
+        console.log('FullscreenViewer: Card loaded successfully with image:', validCard.imageUrl);
+        setCurrentCard(validCard);
       } else {
+        console.error('FullscreenViewer: Card not found with ID:', cardId);
         setError(`Card with ID ${cardId} not found`);
       }
     } catch (err) {
-      console.error('Error loading card:', err);
+      console.error('FullscreenViewer: Error loading card:', err);
       setError('Failed to load card');
     } finally {
       setIsLoading(false);
@@ -73,6 +78,18 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
     // Implementation for next card
     console.log('Next card requested');
   };
+
+  // Preload the image to make sure it exists before rendering
+  useEffect(() => {
+    if (currentCard?.imageUrl && currentCard.imageUrl !== FALLBACK_IMAGE) {
+      const img = new Image();
+      img.onerror = () => {
+        console.error('FullscreenViewer: Image failed to preload:', currentCard.imageUrl);
+        setCurrentCard(prev => prev ? { ...prev, imageUrl: FALLBACK_IMAGE } : null);
+      };
+      img.src = currentCard.imageUrl;
+    }
+  }, [currentCard?.imageUrl]);
 
   if (isLoading) {
     return (
@@ -92,6 +109,9 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
       </div>
     );
   }
+  
+  // Get final image URL with fallback
+  const imageUrl = currentCard.imageUrl || FALLBACK_IMAGE;
 
   return (
     <div className="fixed inset-0 bg-black/90 flex flex-col items-center justify-center z-50">
@@ -109,19 +129,20 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
         </div>
         
         <div className="w-full h-full flex items-center justify-center p-4">
-          {currentCard.imageUrl && (
-            <div className="relative w-full h-full max-h-[70vh] flex items-center justify-center">
-              <img
-                src={currentCard.imageUrl}
-                alt={currentCard.title || "Card"}
-                className="max-w-full max-h-full object-contain"
-                onError={(e) => {
-                  console.error('Failed to load image:', currentCard.imageUrl);
-                  e.currentTarget.src = fallbackImage;
-                }}
-              />
-            </div>
-          )}
+          <div className="relative w-full h-full max-h-[70vh] flex items-center justify-center">
+            <img
+              src={imageUrl}
+              alt={currentCard.title || "Card"}
+              className="max-w-full max-h-full object-contain"
+              onError={(e) => {
+                console.error('FullscreenViewer: Failed to load image:', imageUrl);
+                if (imageUrl !== FALLBACK_IMAGE) {
+                  e.currentTarget.src = FALLBACK_IMAGE;
+                }
+              }}
+              onLoad={() => console.log('FullscreenViewer: Image loaded successfully:', imageUrl)}
+            />
+          </div>
         </div>
         
         <div className="absolute right-4">
