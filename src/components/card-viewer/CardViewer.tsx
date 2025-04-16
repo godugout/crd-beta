@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Lightbulb } from 'lucide-react';
@@ -12,7 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 
 interface CardViewerProps {
   card: Card;
-  onUpdateCard?: (card: Card) => void;
+  onUpdateCard?: (updatedCard: Partial<Card>) => void;
   onDeleteCard?: (cardId: string) => void;
   fullscreen?: boolean;
   onFullscreenToggle?: () => void;
@@ -37,7 +36,7 @@ const CardViewer: React.FC<CardViewerProps> = ({
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [showLightbulb, setShowLightbulb] = useState(false);
-  const [activeEffects, setActiveEffects] = useState<string[]>([]);
+  const [activeEffects, setActiveEffects] = useState<string[]>(card.effects || []);
   const { toast } = useToast();
 
   const handleFlip = () => {
@@ -57,20 +56,16 @@ const CardViewer: React.FC<CardViewerProps> = ({
   };
 
   const handleApplyEffect = (effect: string) => {
-    setActiveEffects(prev => {
-      if (prev.includes(effect)) {
-        return prev.filter(e => e !== effect);
-      }
-      return [...prev, effect];
-    });
+    const updatedEffects = activeEffects.includes(effect) 
+      ? activeEffects.filter(e => e !== effect)
+      : [...activeEffects, effect];
     
-    // If we have an onUpdateCard handler, update the card with the new effects
+    setActiveEffects(updatedEffects);
+    
     if (onUpdateCard) {
-      onUpdateCard({
-        ...card,
-        effects: activeEffects.includes(effect) 
-          ? activeEffects.filter(e => e !== effect)
-          : [...activeEffects, effect]
+      onUpdateCard({ 
+        id: card.id, 
+        effects: updatedEffects 
       });
     }
   };
