@@ -1,4 +1,3 @@
-
 // Sample cards for demo purposes
 export const sampleCards = [
   {
@@ -11,6 +10,7 @@ export const sampleCards = [
     createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
     updatedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
     userId: 'demo-user',
+    effects: ['Holographic'],
     designMetadata: {
       cardStyle: {
         template: 'classic',
@@ -49,6 +49,7 @@ export const sampleCards = [
     createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
     updatedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
     userId: 'demo-user',
+    effects: ['Refractor', 'Chrome'],
     designMetadata: {
       cardStyle: {
         template: 'nifty',
@@ -87,6 +88,7 @@ export const sampleCards = [
     createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
     updatedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
     userId: 'demo-user',
+    effects: ['Vintage'],
     designMetadata: {
       cardStyle: {
         template: 'nostalgic',
@@ -125,6 +127,7 @@ export const sampleCards = [
     createdAt: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000).toISOString(),
     updatedAt: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000).toISOString(),
     userId: 'demo-user',
+    effects: ['Chrome'],
     designMetadata: {
       cardStyle: {
         template: 'nostalgic',
@@ -163,13 +166,14 @@ export const sampleCards = [
     createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
     updatedAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
     userId: 'demo-user',
+    effects: ['Vintage', 'Holographic'],
     designMetadata: {
       cardStyle: {
         template: 'classic',
         effect: 'classic',
         borderRadius: '4px',
         borderColor: '#f43f5e',
-        frameColor: '#f43f5e', 
+        frameColor: '#f43f5e',
         frameWidth: 2,
         shadowColor: 'rgba(244, 63, 94, 0.4)',
       },
@@ -201,6 +205,7 @@ export const sampleCards = [
     createdAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
     updatedAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
     userId: 'demo-user',
+    effects: ['Refractor'],
     designMetadata: {
       cardStyle: {
         template: 'nifty',

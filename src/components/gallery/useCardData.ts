@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { Card } from '@/lib/types';
 import { supabase } from '@/integrations/supabase/client';
@@ -53,9 +52,10 @@ export const useCardData = () => {
         imageUrl: card.image_url || '',
         thumbnailUrl: card.thumbnail_url || card.image_url || '',
         tags: card.tags || [],
-        createdAt: card.created_at, // Now using string directly
-        updatedAt: card.updated_at, // Now using string directly
-        collectionId: card.collection_id
+        createdAt: card.created_at,
+        updatedAt: card.updated_at,
+        collectionId: card.collection_id,
+        effects: [] // Add default empty effects array
       }));
 
       setCards(formattedCards);
@@ -64,9 +64,6 @@ export const useCardData = () => {
       console.error('Unexpected error fetching cards:', err);
       setError(err?.message || 'An unexpected error occurred');
       toast.error('Failed to load cards');
-      
-      // Increment retry count for auto-retry mechanism
-      setRetryCount(prevCount => prevCount + 1);
     } finally {
       setIsLoading(false);
     }

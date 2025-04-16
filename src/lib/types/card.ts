@@ -1,5 +1,4 @@
 
-
 import { BaseEntity } from './index';
 import { Reaction } from './interaction';
 import { Comment } from './interaction';
@@ -15,14 +14,14 @@ export interface FabricSwatch {
 
 export interface Card extends BaseEntity {
   title: string;
-  description: string;
+  description?: string; // Make description optional to match other Card interfaces
   imageUrl?: string;
   thumbnailUrl?: string;
   tags?: string[];
   userId?: string;
   collectionId?: string;
   metadata?: Record<string, any>;
-  effects: string[];
+  effects: string[]; // Required for card viewer
   reactions?: Reaction[];
   comments?: Comment[];
   viewCount?: number;

@@ -4,7 +4,7 @@
 export interface Card {
   id: string;
   title: string;
-  description: string;
+  description?: string; // Make this optional to be consistent
   imageUrl: string;
   thumbnailUrl?: string;
   collectionId?: string;
@@ -17,7 +17,7 @@ export interface Card {
   designMetadata?: any;
   reactions?: Reaction[];
   fabricSwatches?: FabricSwatch[];
-  effects: string[];
+  effects: string[]; // Required for card viewer
 }
 
 export interface OaklandMemoryData {

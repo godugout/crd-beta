@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
@@ -18,6 +17,7 @@ const enhancedSampleCards: EnhancedCard[] = sampleCards.map(card => ({
   releaseDate: new Date().toISOString(),
   qrCodeData: `https://example.com/card/${card.id}`,
   hotspots: [],
+  effects: card.effects || [],
   marketData: {
     price: Math.floor(Math.random() * 100) + 10,
     currency: 'USD',
@@ -130,6 +130,7 @@ export const CardEnhancedProvider: React.FC<{ children: React.ReactNode }> = ({ 
       userId: cardData.userId || 'anonymous',
       rarity: cardData.rarity || 'common',
       cardNumber: cardData.cardNumber || `1/${cardData.editionSize || 1}`,
+      effects: cardData.effects || [],
     };
     
     setCards(prev => [newCard, ...prev]);

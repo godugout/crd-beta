@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from 'sonner';
@@ -27,6 +28,12 @@ type CardContextType = {
 
 const CardContext = createContext<CardContextType | undefined>(undefined);
 
+// Add effects property to all sample cards
+const enhancedSampleCards: Card[] = sampleCards.map(card => ({
+  ...card,
+  effects: card.effects || []
+}));
+
 const sampleCollections: Collection[] = [
   {
     id: 'collection-001',
@@ -55,7 +62,7 @@ const sampleCollections: Collection[] = [
 ];
 
 export const CardProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [cards, setCards] = useState<Card[]>(sampleCards);
+  const [cards, setCards] = useState<Card[]>(enhancedSampleCards);
   const [collections, setCollections] = useState<Collection[]>(sampleCollections);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
@@ -81,7 +88,8 @@ export const CardProvider: React.FC<{ children: React.ReactNode }> = ({ children
         fabricSwatches: cardData.fabricSwatches || [],
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        collectionId: cardData.collectionId
+        collectionId: cardData.collectionId,
+        effects: cardData.effects || [] // Add default empty effects array
       };
 
       setCards(prevCards => [newCard, ...prevCards]);
@@ -247,7 +255,12 @@ export const CardProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsLoading(true);
       setError(null);
       await new Promise(resolve => setTimeout(resolve, 500));
-      setCards(sampleCards);
+      // Ensure sample cards have effects property
+      const cardsWithEffects = sampleCards.map(card => ({
+        ...card, 
+        effects: card.effects || []
+      }));
+      setCards(cardsWithEffects);
       setCollections(sampleCollections);
     } catch (error) {
       console.error("Error refreshing cards:", error);
