@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 // Define theme types
@@ -12,10 +11,10 @@ export interface BrandTheme {
   headerBackgroundColor: string;
   buttonPrimaryColor: string;
   buttonTextColor: string;
-  backgroundColor: string;           // Added
-  textColor: string;                 // Added
-  cardBackgroundColor: string;       // Added
-  buttonSecondaryColor: string;      // Added
+  backgroundColor: string;
+  textColor: string;
+  cardBackgroundColor: string;
+  buttonSecondaryColor: string;
   logo?: string;
 }
 
@@ -24,41 +23,41 @@ interface BrandThemeContextType {
   themeId: string;
   setTheme: (id: string) => void;
   currentTheme: BrandTheme;
-  addCustomTheme: (theme: BrandTheme) => void;     // Added
-  removeCustomTheme: (id: string) => void;         // Added
-  updateCustomTheme: (id: string, theme: BrandTheme) => void;  // Added
+  addCustomTheme: (theme: BrandTheme) => void;
+  removeCustomTheme: (id: string) => void;
+  updateCustomTheme: (id: string, theme: BrandTheme) => void;
 }
 
 // Export default themes for reference in other components
 export const defaultThemes: Record<string, BrandTheme> = {
   'default': {
     id: 'default',
-    name: 'CardShow Default',
-    primaryColor: '#48BB78', // litmus green
-    secondaryColor: '#38A169', // litmus green secondary
-    accentColor: '#F97316', // orange
+    name: 'CardShow Dark',
+    primaryColor: '#8B5CF6',
+    secondaryColor: '#6D28D9',
+    accentColor: '#F97316',
     navTextColor: '#FFFFFF',
-    headerBackgroundColor: '#2D3748', // dark background
-    buttonPrimaryColor: '#48BB78',
+    headerBackgroundColor: '#1A1A1A',
+    buttonPrimaryColor: '#8B5CF6',
     buttonTextColor: '#FFFFFF',
-    backgroundColor: '#F8F8F8',
-    textColor: '#1A1A1A',
-    cardBackgroundColor: '#FFFFFF',
-    buttonSecondaryColor: '#38A169',
+    backgroundColor: '#121212',
+    textColor: '#E2E8F0',
+    cardBackgroundColor: '#1E1E1E',
+    buttonSecondaryColor: '#6D28D9',
   },
   'athletics': {
     id: 'athletics',
     name: 'Oakland Athletics',
-    primaryColor: '#006341', // Kelly Green
-    secondaryColor: '#EFB21E', // Gold
-    accentColor: '#003831', // Dark Green
+    primaryColor: '#006341',
+    secondaryColor: '#EFB21E',
+    accentColor: '#003831',
     navTextColor: '#FFFFFF',
-    headerBackgroundColor: '#006341',
+    headerBackgroundColor: '#111111',
     buttonPrimaryColor: '#EFB21E',
     buttonTextColor: '#000000',
-    backgroundColor: '#F8F8F8',
-    textColor: '#1A1A1A',
-    cardBackgroundColor: '#FFFFFF',
+    backgroundColor: '#0F0F0F',
+    textColor: '#E2E8F0',
+    cardBackgroundColor: '#1A1A1A',
     buttonSecondaryColor: '#006341',
     logo: '/lovable-uploads/83c68cf9-abc8-4102-954e-6061d2bc86c5.png'
   },
@@ -66,17 +65,47 @@ export const defaultThemes: Record<string, BrandTheme> = {
     id: 'crd',
     name: 'CRD',
     primaryColor: '#48BB78',
-    secondaryColor: '#0000FF',
+    secondaryColor: '#4C51BF',
     accentColor: '#FFC300',
     navTextColor: '#FFFFFF',
-    headerBackgroundColor: '#1A1A1A',
-    buttonPrimaryColor: '#0000FF',
+    headerBackgroundColor: '#111111',
+    buttonPrimaryColor: '#4C51BF',
     buttonTextColor: '#FFFFFF',
-    backgroundColor: '#F8F8F8',
-    textColor: '#1A1A1A',
-    cardBackgroundColor: '#FFFFFF',
+    backgroundColor: '#0A0A0A',
+    textColor: '#E2E8F0',
+    cardBackgroundColor: '#1A1A1A',
     buttonSecondaryColor: '#48BB78',
     logo: '/lovable-uploads/83c68cf9-abc8-4102-954e-6061d2bc86c5.png'
+  },
+  'neon': {
+    id: 'neon',
+    name: 'Neon Night',
+    primaryColor: '#00FFFF',
+    secondaryColor: '#FF00FF',
+    accentColor: '#FFFF00',
+    navTextColor: '#FFFFFF',
+    headerBackgroundColor: '#121212',
+    buttonPrimaryColor: '#00FFFF',
+    buttonTextColor: '#000000',
+    backgroundColor: '#0A0A0A',
+    textColor: '#FFFFFF',
+    cardBackgroundColor: '#1A1A1A',
+    buttonSecondaryColor: '#FF00FF',
+  },
+  'midnight': {
+    id: 'midnight',
+    name: 'Midnight Blue',
+    primaryColor: '#60A5FA',
+    secondaryColor: '#3B82F6',
+    accentColor: '#F472B6',
+    navTextColor: '#FFFFFF',
+    headerBackgroundColor: '#0F172A',
+    buttonPrimaryColor: '#60A5FA',
+    buttonTextColor: '#0F172A',
+    backgroundColor: '#0F172A',
+    textColor: '#E2E8F0',
+    cardBackgroundColor: '#1E293B',
+    buttonSecondaryColor: '#3B82F6',
   },
 };
 
@@ -94,7 +123,6 @@ export const BrandThemeProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [themes, setThemes] = useState(defaultThemes);
   const [themeId, setThemeId] = useState('default');
 
-  // Initialize from local storage
   useEffect(() => {
     try {
       const savedThemeId = localStorage.getItem('brand-theme-id');
@@ -102,7 +130,6 @@ export const BrandThemeProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         setThemeId(savedThemeId);
       }
       
-      // Load custom themes from local storage
       const customThemesStr = localStorage.getItem('brand-custom-themes');
       if (customThemesStr) {
         const customThemes = JSON.parse(customThemesStr);
@@ -113,7 +140,6 @@ export const BrandThemeProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }
   }, []);
 
-  // Save theme selection to local storage
   const setTheme = (id: string) => {
     if (themes[id]) {
       setThemeId(id);
@@ -121,11 +147,9 @@ export const BrandThemeProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }
   };
   
-  // Add new custom theme
   const addCustomTheme = (theme: BrandTheme) => {
     setThemes(prevThemes => {
       const newThemes = {...prevThemes, [theme.id]: theme};
-      // Save to local storage
       try {
         const customThemes = Object.entries(newThemes)
           .filter(([id]) => !Object.keys(defaultThemes).includes(id))
@@ -138,16 +162,13 @@ export const BrandThemeProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     });
   };
   
-  // Remove custom theme
   const removeCustomTheme = (id: string) => {
-    // Don't allow removing default themes
     if (Object.keys(defaultThemes).includes(id)) {
       return;
     }
     
     setThemes(prevThemes => {
       const {[id]: removed, ...newThemes} = prevThemes;
-      // Save to local storage
       try {
         const customThemes = Object.entries(newThemes)
           .filter(([id]) => !Object.keys(defaultThemes).includes(id))
@@ -157,7 +178,6 @@ export const BrandThemeProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         console.error('Error saving custom themes to localStorage:', error);
       }
       
-      // If the removed theme was the current one, switch to default
       if (id === themeId) {
         setThemeId('default');
         localStorage.setItem('brand-theme-id', 'default');
@@ -167,16 +187,13 @@ export const BrandThemeProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     });
   };
   
-  // Update existing custom theme
   const updateCustomTheme = (id: string, theme: BrandTheme) => {
-    // Don't update default themes this way
     if (Object.keys(defaultThemes).includes(id)) {
       return;
     }
     
     setThemes(prevThemes => {
       const newThemes = {...prevThemes, [id]: theme};
-      // Save to local storage
       try {
         const customThemes = Object.entries(newThemes)
           .filter(([id]) => !Object.keys(defaultThemes).includes(id))
@@ -216,4 +233,4 @@ export const useBrandTheme = () => {
   return context;
 };
 
-export { defaultThemes as brandThemes };  // Export defaultThemes as brandThemes for backward compatibility
+export { defaultThemes as brandThemes };

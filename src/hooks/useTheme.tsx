@@ -1,58 +1,34 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 
-type Theme = "dark" | "light" | "system";
-
-interface ThemeProviderProps {
-  children: React.ReactNode;
-  defaultTheme?: Theme;
-}
-
 interface ThemeContextValue {
-  theme: Theme;
-  setTheme: React.Dispatch<React.SetStateAction<Theme>>;
+  theme: "dark";
+  setTheme: React.Dispatch<React.SetStateAction<"dark">>;
 }
 
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
 // Default mock theme context for when the hook is used outside the provider
 const mockThemeContext: ThemeContextValue = {
-  theme: "system",
+  theme: "dark",
   setTheme: () => console.warn("Using mock theme context. ThemeProvider not found."),
 };
 
 export function ThemeProvider({
   children,
-  defaultTheme = "system",
-}: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>(
-    () => (localStorage.getItem("ui-theme") as Theme) || defaultTheme
-  );
+}: {
+  children: React.ReactNode;
+}) {
+  const [theme] = useState<"dark">("dark");
 
   useEffect(() => {
     const root = window.document.documentElement;
-    
-    root.classList.remove("light", "dark");
-    
-    if (theme === "system") {
-      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
-        .matches
-        ? "dark"
-        : "light";
-      
-      root.classList.add(systemTheme);
-      return;
-    }
-    
-    root.classList.add(theme);
-  }, [theme]);
-  
-  useEffect(() => {
-    localStorage.setItem("ui-theme", theme);
-  }, [theme]);
+    root.classList.remove("light");
+    root.classList.add("dark");
+  }, []);
 
   return (
-    <ThemeContext.Provider value={{ theme, setTheme }}>
+    <ThemeContext.Provider value={{ theme, setTheme: () => {} }}>
       {children}
     </ThemeContext.Provider>
   );

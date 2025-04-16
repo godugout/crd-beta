@@ -119,7 +119,7 @@ const CardDisplay: React.FC<CardDisplayProps> = ({
           position: 'relative',
           width: '350px',
           height: '490px',
-          transition: isDragging || isGesturing ? 'none' : 'transform 0.3s ease',
+          transition: isDragging || isGesturing ? 'none' : 'transform 0.5s cubic-bezier(0.19, 1, 0.22, 1)',
           transform: `
             scale(${combinedZoom})
             translate3d(${gesturePosition.x}px, ${gesturePosition.y}px, 0px)
@@ -133,12 +133,12 @@ const CardDisplay: React.FC<CardDisplayProps> = ({
       >
         {/* Card Front */}
         <div 
-          className={`card-face card-front absolute w-full h-full rounded-xl overflow-hidden ${activeEffects.join(' ')}`}
+          className={`card-face card-front absolute w-full h-full rounded-xl overflow-hidden card-spotlight ${activeEffects.join(' ')}`}
           style={{
             backfaceVisibility: 'hidden',
             backgroundColor: currentTheme.cardBackgroundColor,
-            boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
-            border: `1px solid ${currentTheme.accentColor}20`,
+            boxShadow: `0 10px 40px rgba(0,0,0,0.5), 0 0 15px ${currentTheme.accentColor}40`,
+            border: `1px solid ${currentTheme.accentColor}30`,
           }}
         >
           {/* Card Front Content */}
@@ -180,25 +180,28 @@ const CardDisplay: React.FC<CardDisplayProps> = ({
               style={{ opacity: effectIntensities['Refractor'] || 1 }}
             ></div>
           )}
+          
+          {/* Add subtle gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/30 pointer-events-none"></div>
         </div>
 
         {/* Card Back */}
         <div 
-          className={`card-face card-back absolute w-full h-full rounded-xl overflow-hidden ${activeEffects.join(' ')}`}
+          className={`card-face card-back absolute w-full h-full rounded-xl overflow-hidden card-spotlight ${activeEffects.join(' ')}`}
           style={{
             backfaceVisibility: 'hidden',
             backgroundColor: currentTheme.backgroundColor,
             transform: 'rotateY(180deg)',
-            boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
-            border: `1px solid ${currentTheme.accentColor}20`,
+            boxShadow: `0 10px 40px rgba(0,0,0,0.5), 0 0 15px ${currentTheme.accentColor}40`,
+            border: `1px solid ${currentTheme.accentColor}30`,
           }}
         >
           {/* Card Back Content */}
-          <div className="p-6 flex flex-col h-full">
-            <h2 className="text-xl font-bold mb-2" style={{ color: currentTheme.primaryColor }}>{card.title || 'Card Title'}</h2>
+          <div className="p-6 flex flex-col h-full dark-glass">
+            <h2 className="text-xl font-bold mb-2 glow-text" style={{ color: currentTheme.primaryColor }}>{card.title || 'Card Title'}</h2>
             
             {card.description && (
-              <p className="text-sm mb-4 line-clamp-3" style={{ color: currentTheme.navTextColor }}>{card.description}</p>
+              <p className="text-sm mb-4 line-clamp-3" style={{ color: currentTheme.textColor }}>{card.description}</p>
             )}
             
             <div className="mt-auto">
@@ -209,7 +212,7 @@ const CardDisplay: React.FC<CardDisplayProps> = ({
                       key={i} 
                       className="px-2 py-1 rounded-md text-xs"
                       style={{ 
-                        backgroundColor: `${currentTheme.secondaryColor}20`, 
+                        backgroundColor: `${currentTheme.secondaryColor}40`, 
                         color: currentTheme.secondaryColor 
                       }}
                     >
@@ -219,7 +222,7 @@ const CardDisplay: React.FC<CardDisplayProps> = ({
                 </div>
               )}
               
-              <div className="border-t mt-4 pt-4 text-sm flex justify-between" style={{ borderColor: `${currentTheme.navTextColor}20`, color: `${currentTheme.navTextColor}80` }}>
+              <div className="border-t mt-4 pt-4 text-sm flex justify-between" style={{ borderColor: `${currentTheme.textColor}20`, color: `${currentTheme.textColor}80` }}>
                 <span>{card.year}</span>
                 <span>{card.id}</span>
               </div>
@@ -241,6 +244,9 @@ const CardDisplay: React.FC<CardDisplayProps> = ({
               } as React.CSSProperties}
             ></div>
           )}
+          
+          {/* Add subtle gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/30 pointer-events-none"></div>
         </div>
         
         {/* Exploded view layers */}
@@ -253,20 +259,20 @@ const CardDisplay: React.FC<CardDisplayProps> = ({
               className="absolute w-full h-full rounded-xl bg-black/90"
               style={{
                 transform: 'translateZ(-10px)',
-                boxShadow: '0 0 30px rgba(0,0,0,0.5)',
-                opacity: 0.3
+                boxShadow: '0 0 30px rgba(0,0,0,0.7)',
+                opacity: 0.4
               }}
             ></div>
             
             {/* Highlight layer */}
             <div 
-              className="absolute w-[90%] h-[90%] rounded-xl bg-white/20"
+              className="absolute w-[90%] h-[90%] rounded-xl bg-white/10"
               style={{
                 left: '5%',
                 top: '5%',
                 transform: 'translateZ(20px)',
-                boxShadow: '0 0 20px rgba(255,255,255,0.3)',
-                opacity: 0.6,
+                boxShadow: '0 0 20px rgba(255,255,255,0.1)',
+                opacity: 0.4,
                 pointerEvents: 'none'
               }}
             ></div>
@@ -274,7 +280,7 @@ const CardDisplay: React.FC<CardDisplayProps> = ({
             {/* Special effect layers */}
             {activeEffects.includes('Holographic') && (
               <div 
-                className="absolute w-[95%] h-[95%] rounded-xl bg-gradient-to-tr from-blue-400/30 to-purple-500/30"
+                className="absolute w-[95%] h-[95%] rounded-xl bg-gradient-to-tr from-blue-400/20 to-purple-500/20"
                 style={{
                   left: '2.5%',
                   top: '2.5%',
@@ -287,7 +293,7 @@ const CardDisplay: React.FC<CardDisplayProps> = ({
             
             {activeEffects.includes('Refractor') && (
               <div 
-                className="absolute w-[98%] h-[98%] rounded-xl bg-gradient-to-br from-yellow-400/20 to-orange-500/20"
+                className="absolute w-[98%] h-[98%] rounded-xl bg-gradient-to-br from-yellow-400/10 to-orange-500/10"
                 style={{
                   left: '1%',
                   top: '1%',
