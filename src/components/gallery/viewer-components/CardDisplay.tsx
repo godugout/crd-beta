@@ -198,7 +198,7 @@ const CardDisplay: React.FC<CardDisplayProps> = ({
             <h2 className="text-xl font-bold mb-2" style={{ color: currentTheme.primaryColor }}>{card.title || 'Card Title'}</h2>
             
             {card.description && (
-              <p className="text-sm mb-4 line-clamp-3" style={{ color: currentTheme.textColor }}>{card.description}</p>
+              <p className="text-sm mb-4 line-clamp-3" style={{ color: currentTheme.navTextColor }}>{card.description}</p>
             )}
             
             <div className="mt-auto">
@@ -219,7 +219,7 @@ const CardDisplay: React.FC<CardDisplayProps> = ({
                 </div>
               )}
               
-              <div className="border-t mt-4 pt-4 text-sm flex justify-between" style={{ borderColor: `${currentTheme.textColor}20`, color: `${currentTheme.textColor}80` }}>
+              <div className="border-t mt-4 pt-4 text-sm flex justify-between" style={{ borderColor: `${currentTheme.navTextColor}20`, color: `${currentTheme.navTextColor}80` }}>
                 <span>{card.year}</span>
                 <span>{card.id}</span>
               </div>

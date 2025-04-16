@@ -1,5 +1,6 @@
+
 import React, { useState } from 'react';
-import { useBrandTheme, BrandTheme, brandThemes } from '@/context/BrandThemeContext';
+import { useBrandTheme, BrandTheme, defaultThemes } from '@/context/BrandThemeContext';
 import { v4 as uuidv4 } from 'uuid';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -66,7 +67,7 @@ const ThemePreview: React.FC<ThemePreviewProps> = ({
           >
             <Copy className="h-4 w-4" />
           </Button>
-          {!Object.keys(brandThemes || {}).includes(theme.id) && (
+          {!Object.keys(defaultThemes || {}).includes(theme.id) && (
             <Button 
               onClick={onDelete} 
               size="sm" 
