@@ -9,7 +9,9 @@ import CardDetailed from '@/components/cards/CardDetailed';
 import RelatedCards from '@/components/cards/RelatedCards';
 import { useCardOperations } from '@/hooks/useCardOperations';
 import FullscreenViewer from '@/components/gallery/FullscreenViewer';
+import { Card } from '@/lib/types';
 import { sampleCards } from '@/lib/data/sampleCards';
+import { toast } from '@/hooks/use-toast';
 
 // Fallback image to use when card image is not available
 const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1518770660439-4636190af475';
@@ -20,6 +22,7 @@ const CardDetail = () => {
   const { cards, getCard } = useCards();
   const cardOperations = useCardOperations();
   const [showViewer, setShowViewer] = useState(false);
+  const [resolvedCard, setResolvedCard] = useState<Card | null>(null);
   
   // Wait for context to load before trying to show the viewer
   const [isLoaded, setIsLoaded] = useState(false);
@@ -32,49 +35,64 @@ const CardDetail = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  console.log('CardDetail: Rendering for ID:', id);
-  
-  // Find the card with the matching ID - first try from context, then fallback to sampleCards
-  let card = getCard ? getCard(id || '') : cards.find(c => c.id === id);
-  
-  // If card is not found in the context, try to find it in sampleCards
-  if (!card && id) {
-    console.log('CardDetail: Card not found in context, checking sampleCards for ID:', id);
-    card = sampleCards.find(c => c.id === id);
-  }
-  
-  // Ensure card has valid image URLs
-  if (card) {
-    console.log('CardDetail: Found card:', card.title, 'with imageUrl:', card.imageUrl);
-    if (!card.imageUrl || card.imageUrl === 'undefined' || typeof card.imageUrl !== 'string') {
-      console.warn('CardDetail: Card has invalid imageUrl, applying fallback', card);
-      card = {
-        ...card,
-        imageUrl: FALLBACK_IMAGE,
-        thumbnailUrl: FALLBACK_IMAGE
-      };
-    }
-  } else {
-    console.error('CardDetail: Card not found at all for ID:', id);
-  }
-  
-  // Pre-load the image to ensure it exists
   useEffect(() => {
-    if (card && card.imageUrl && card.imageUrl !== FALLBACK_IMAGE) {
-      const img = new Image();
-      img.onerror = () => {
-        console.error('CardDetail: Image failed to preload:', card?.imageUrl);
-        if (card) {
-          card.imageUrl = FALLBACK_IMAGE;
-          card.thumbnailUrl = FALLBACK_IMAGE;
-        }
-      };
-      img.src = card.imageUrl;
+    if (!id) {
+      console.error('CardDetail: No ID provided in URL params');
+      return;
     }
-  }, [card]);
+    
+    console.log('CardDetail: Rendering for ID:', id);
+    
+    // First try to find card from context
+    let foundCard = getCard ? getCard(id) : cards.find(c => c.id === id);
+    
+    // If card is not found in the context, try to find it in sampleCards
+    if (!foundCard) {
+      console.log('CardDetail: Card not found in context, checking sampleCards for ID:', id);
+      foundCard = sampleCards.find(c => c.id === id);
+    }
+    
+    // If we found a card, ensure it has valid image URLs
+    if (foundCard) {
+      console.log('CardDetail: Found card:', foundCard.title, 'with imageUrl:', foundCard.imageUrl);
+      
+      // Create a new object to avoid mutating the original
+      const processedCard = { ...foundCard };
+      
+      // Validate image URLs
+      if (!processedCard.imageUrl || processedCard.imageUrl === 'undefined' || typeof processedCard.imageUrl !== 'string') {
+        console.warn('CardDetail: Card has invalid imageUrl, applying fallback');
+        processedCard.imageUrl = FALLBACK_IMAGE;
+        processedCard.thumbnailUrl = FALLBACK_IMAGE;
+      }
+      
+      setResolvedCard(processedCard);
+      
+      // Pre-load the image to ensure it exists
+      if (processedCard.imageUrl && processedCard.imageUrl !== FALLBACK_IMAGE) {
+        const img = new Image();
+        img.onerror = () => {
+          console.error('CardDetail: Image failed to preload:', processedCard.imageUrl);
+          setResolvedCard(prev => prev ? { 
+            ...prev, 
+            imageUrl: FALLBACK_IMAGE,
+            thumbnailUrl: FALLBACK_IMAGE 
+          } : null);
+        };
+        img.src = processedCard.imageUrl;
+      }
+    } else {
+      console.error('CardDetail: Card not found at all for ID:', id);
+      toast({
+        title: "Card not found",
+        description: "The requested card could not be found",
+        variant: "destructive"
+      });
+    }
+  }, [id, cards, getCard]);
   
   // Handle card not found
-  if (!card) {
+  if (!resolvedCard) {
     return (
       <PageLayout
         title="Card Not Found"
@@ -119,8 +137,8 @@ const CardDetail = () => {
   
   return (
     <PageLayout
-      title={card.title || "Card Detail"}
-      description={card.description || "View card details"}
+      title={resolvedCard.title || "Card Detail"}
+      description={resolvedCard.description || "View card details"}
     >
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center mb-6">
@@ -131,16 +149,16 @@ const CardDetail = () => {
         </div>
         
         <CardDetailed 
-          card={card}
+          card={resolvedCard}
           onView={() => setShowViewer(true)}
           onEdit={cardOperations.editCard}
-          onShare={() => cardOperations.shareCard(card)}
+          onShare={() => cardOperations.shareCard(resolvedCard)}
           onDelete={(id) => cardOperations.removeCard(id, handleDeleteSuccess)}
         />
         
         <RelatedCards 
           cards={cards}
-          currentCardId={card.id}
+          currentCardId={resolvedCard.id}
           onCardClick={cardOperations.showCardDetails}
           className="mt-16"
         />

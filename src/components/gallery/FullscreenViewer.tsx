@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { useCards } from '@/context/CardContext';
 import { Card } from '@/lib/types';
 import { sampleCards } from '@/lib/data/sampleCards';
+import { toast } from '@/hooks/use-toast';
 
 interface FullscreenViewerProps {
   cardId: string;
@@ -62,6 +63,11 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
           img.onerror = () => {
             console.warn('FullscreenViewer: Image validation failed, using fallback');
             setValidImageUrl(FALLBACK_IMAGE);
+            toast({
+              title: "Image Error",
+              description: "Could not load the card image. Using a fallback image instead.",
+              variant: "destructive"
+            });
           };
           img.src = validCard.imageUrl;
         } else {
@@ -82,15 +88,21 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
     }
   }, [cardId, cards, getCard]);
   
-  // Handle previous/next card navigation (simplified version)
+  // Find all card indices to enable navigation between cards
+  const allCardIds = [...cards, ...sampleCards].map(card => card.id);
+  const currentIndex = allCardIds.indexOf(cardId);
+  
+  // Handle previous/next card navigation
   const handlePrevCard = () => {
-    // Implementation for previous card
-    console.log('Previous card requested');
+    if (currentIndex > 0) {
+      window.location.href = `/cards/${allCardIds[currentIndex - 1]}`;
+    }
   };
   
   const handleNextCard = () => {
-    // Implementation for next card
-    console.log('Next card requested');
+    if (currentIndex < allCardIds.length - 1) {
+      window.location.href = `/cards/${allCardIds[currentIndex + 1]}`;
+    }
   };
 
   if (isLoading) {
@@ -122,7 +134,13 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
       
       <div className="relative w-full h-full max-w-2xl max-h-[80vh] flex items-center justify-center">
         <div className="absolute left-4">
-          <Button variant="ghost" size="icon" onClick={handlePrevCard} className="text-white hover:bg-gray-800">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={handlePrevCard} 
+            className="text-white hover:bg-gray-800"
+            disabled={currentIndex <= 0}
+          >
             <ChevronLeft className="h-6 w-6" />
           </Button>
         </div>
@@ -145,7 +163,13 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
         </div>
         
         <div className="absolute right-4">
-          <Button variant="ghost" size="icon" onClick={handleNextCard} className="text-white hover:bg-gray-800">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={handleNextCard} 
+            className="text-white hover:bg-gray-800"
+            disabled={currentIndex >= allCardIds.length - 1}
+          >
             <ChevronRight className="h-6 w-6" />
           </Button>
         </div>
