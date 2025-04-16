@@ -1,7 +1,6 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, User, Plus, ChevronDown } from 'lucide-react';
+import { Search, User, Plus, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
@@ -12,7 +11,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import ThemeSwitcher from '@/components/brand/ThemeSwitcher';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { useBrandTheme } from '@/context/BrandThemeContext';
 import { useAuth } from '@/hooks/useAuth';
@@ -42,7 +40,7 @@ const GlobalNavbar: React.FC<GlobalNavbarProps> = ({
   const isMobile = useMediaQuery('(max-width: 768px)');
   const isTablet = useMediaQuery('(min-width: 769px) and (max-width: 1024px)');
   const isMinimized = useMediaQuery('(min-width: 769px) and (max-width: 900px)');
-  const { currentTheme } = useBrandTheme();
+  const { themes, themeId, setTheme, currentTheme } = useBrandTheme();
   const { signOut } = useAuth();
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
@@ -56,9 +54,7 @@ const GlobalNavbar: React.FC<GlobalNavbarProps> = ({
   };
 
   const getLogo = () => {
-    // CRD logo for desktop, Cardshow script logo for mobile
     if (isMobile) {
-      // Mobile: Cardshow script logo (white or green version)
       return (
         <img 
           src="/lovable-uploads/c23d9e1a-4645-4f50-a9e4-2a325e3b4a4d.png"
@@ -67,7 +63,6 @@ const GlobalNavbar: React.FC<GlobalNavbarProps> = ({
         />
       );
     } else {
-      // Desktop: CRD logo
       return (
         <img 
           src="/lovable-uploads/83c68cf9-abc8-4102-954e-6061d2bc86c5.png"
@@ -87,7 +82,6 @@ const GlobalNavbar: React.FC<GlobalNavbarProps> = ({
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 items-center">
-        {/* Logo */}
         <div className="flex items-center mr-4">
           <Link to="/" className="flex items-center">
             {getLogo()}
@@ -99,7 +93,6 @@ const GlobalNavbar: React.FC<GlobalNavbarProps> = ({
           </Link>
         </div>
 
-        {/* Create Card Button */}
         <Button 
           asChild
           variant="gradient" 
@@ -112,7 +105,6 @@ const GlobalNavbar: React.FC<GlobalNavbarProps> = ({
           </Link>
         </Button>
 
-        {/* Navigation Links - Centered */}
         <nav className="hidden md:flex flex-1 items-center justify-center">
           <ul className="flex space-x-4">
             {links.map((link, index) => (
@@ -128,7 +120,6 @@ const GlobalNavbar: React.FC<GlobalNavbarProps> = ({
           </ul>
         </nav>
 
-        {/* Mobile Menu Toggle */}
         <button
           className="inline-flex md:hidden items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
           onClick={toggleMenu}
@@ -166,9 +157,7 @@ const GlobalNavbar: React.FC<GlobalNavbarProps> = ({
           </svg>
         </button>
 
-        {/* Right Side Icons */}
         <div className="hidden md:flex items-center ml-auto space-x-3">
-          {/* Search Button */}
           <Button variant="ghost" size="icon" asChild>
             <Link to="/search">
               <Search className="h-5 w-5" />
@@ -176,10 +165,41 @@ const GlobalNavbar: React.FC<GlobalNavbarProps> = ({
             </Link>
           </Button>
 
-          {/* Theme Switcher */}
-          <ThemeSwitcher size="icon" showLabel={false} />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <Star 
+                  className="h-5 w-5" 
+                  fill={currentTheme.primaryColor} 
+                  stroke={currentTheme.primaryColor} 
+                />
+                <span className="sr-only">Change Theme</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel>Choose Theme</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {Object.values(themes).map((theme) => {
+                const isSelected = theme.id === themeId;
+                
+                return (
+                  <DropdownMenuItem
+                    key={theme.id}
+                    onClick={() => setTheme(theme.id)}
+                    className="flex items-center gap-2 py-2 px-3 cursor-pointer"
+                  >
+                    <div
+                      className="w-4 h-4 rounded-full"
+                      style={{ backgroundColor: theme.primaryColor }}
+                    />
+                    <span className="flex-1">{theme.name}</span>
+                    {isSelected && <Star className="h-4 w-4" fill="currentColor" />}
+                  </DropdownMenuItem>
+                );
+              })}
+            </DropdownMenuContent>
+          </DropdownMenu>
 
-          {/* User Profile */}
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -228,7 +248,6 @@ const GlobalNavbar: React.FC<GlobalNavbarProps> = ({
           )}
         </div>
 
-        {/* Mobile Menu Dropdown */}
         {isMenuOpen && (
           <div className="md:hidden absolute top-14 inset-x-0 z-50 bg-background border-b border-gray-200 shadow-lg">
             <div className="px-2 pt-2 pb-3 space-y-1">
@@ -244,7 +263,6 @@ const GlobalNavbar: React.FC<GlobalNavbarProps> = ({
               ))}
             </div>
             
-            {/* Mobile menu footer with actions */}
             <div className="border-t border-gray-200 pt-4 pb-3">
               {user ? (
                 <div className="px-4 flex items-center">
