@@ -1,20 +1,22 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useEnhancedCards } from '@/context/CardEnhancedContext';
-import { UserProfile } from '@/lib/types/UserTypes';
+import { User } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import {
-  Users, Grid, BarChart3, ShieldCheck, Settings, Plus
+  Users, Grid, BarChart3, ShieldCheck, Settings, Plus, Database, Image
 } from 'lucide-react';
+import MediaManagerPanel from '@/components/dashboard/MediaManagerPanel';
 
 interface AdminDashboardProps {
-  user: UserProfile;
+  user: User;
 }
 
 const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
   const { cards, series, decks } = useEnhancedCards();
+  const [activeTab, setActiveTab] = useState('media');
 
   // Sample user data (in a real app, this would be fetched from an API)
   const users = [
@@ -99,13 +101,18 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
         </Card>
       </div>
       
-      <Tabs defaultValue="users">
-        <TabsList className="grid grid-cols-3 w-full md:w-[400px]">
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="grid grid-cols-4 w-full md:w-[500px]">
+          <TabsTrigger value="media"><Image className="mr-2 h-4 w-4" />Media</TabsTrigger>
           <TabsTrigger value="users"><Users className="mr-2 h-4 w-4" />Users</TabsTrigger>
           <TabsTrigger value="content"><Grid className="mr-2 h-4 w-4" />Content</TabsTrigger>
           <TabsTrigger value="analytics"><BarChart3 className="mr-2 h-4 w-4" />Analytics</TabsTrigger>
         </TabsList>
         
+        <TabsContent value="media" className="mt-6">
+          <MediaManagerPanel />
+        </TabsContent>
+
         <TabsContent value="users" className="mt-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">

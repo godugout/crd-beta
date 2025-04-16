@@ -14,6 +14,12 @@ const Dashboard: React.FC = () => {
   const [dashboardUser, setDashboardUser] = useState<User | null>(null);
   const [dashboardLoaded, setDashboardLoaded] = useState(false);
   
+  // Mock admin credentials for demo purposes
+  const adminCredentials = {
+    email: "user@example.com",
+    password: "#LGO!"
+  };
+  
   // For demo purposes, create a mock user if none exists
   useEffect(() => {
     if (!isLoading) {
@@ -26,7 +32,7 @@ const Dashboard: React.FC = () => {
           email: 'user@example.com',
           name: 'Demo User',
           displayName: 'Demo User',
-          role: UserRole.CREATOR, // Default to creator role
+          role: UserRole.ADMIN, // Default to admin role if password is correct
           avatarUrl: 'https://api.dicebear.com/7.x/initials/svg?seed=DU',
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
