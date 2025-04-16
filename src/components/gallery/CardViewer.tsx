@@ -20,6 +20,10 @@ const CardViewer: React.FC<CardViewerProps> = ({
   const [rotation, setRotation] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [startPosition, setStartPosition] = useState({ x: 0, y: 0 });
+  const [imageError, setImageError] = useState(false);
+
+  // Fallback image when card image fails to load
+  const fallbackImage = 'https://images.unsplash.com/photo-1518770660439-4636190af475';
 
   useKeyboardControls({
     onRotateLeft: () => setRotation(prev => ({ ...prev, x: prev.x - 5 })),
@@ -46,10 +50,28 @@ const CardViewer: React.FC<CardViewerProps> = ({
     setIsDragging(false);
   };
 
+  const handleImageError = () => {
+    console.log('Image failed to load:', card.imageUrl);
+    setImageError(true);
+  };
+
+  // Get the appropriate image URL
+  const getImageUrl = () => {
+    if (imageError || !card.imageUrl) {
+      return fallbackImage;
+    }
+    return card.imageUrl;
+  };
+
   useEffect(() => {
     document.addEventListener('mouseup', handleMouseUp);
     return () => document.removeEventListener('mouseup', handleMouseUp);
   }, []);
+
+  useEffect(() => {
+    // Reset image error state when card changes
+    setImageError(false);
+  }, [card.id]);
 
   return (
     <div 
@@ -79,9 +101,10 @@ const CardViewer: React.FC<CardViewerProps> = ({
               activeEffects.map(effect => `effect-${effect.toLowerCase()}`).join(' ')
             }`}>
               <img
-                src={card.imageUrl}
-                alt={card.title}
+                src={getImageUrl()}
+                alt={card.title || 'Card'}
                 className="w-full h-full object-cover"
+                onError={handleImageError}
               />
               {/* Effect overlays */}
               {activeEffects.map(effect => (
