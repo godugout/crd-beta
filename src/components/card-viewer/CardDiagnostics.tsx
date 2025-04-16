@@ -15,7 +15,7 @@ interface RenderingStats {
 
 interface CardDiagnosticsProps {
   stats: RenderingStats;
-  position: number[];
+  position: [number, number, number]; // Changed to tuple for Vector3 compatibility
 }
 
 const CardDiagnostics: React.FC<CardDiagnosticsProps> = ({ 

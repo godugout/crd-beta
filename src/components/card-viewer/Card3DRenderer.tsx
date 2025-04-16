@@ -62,29 +62,21 @@ const Card3DRenderer: React.FC<Card3DRendererProps> = ({
   }, [card]);
 
   // Only load textures after we have valid URLs
-  const [frontTexture, backTexture] = useTexture(
+  const textures = useTexture(
     [textureUrls.front, textureUrls.back], 
-    (textures) => {
-      console.log('Card textures loaded:', textures);
+    (loadedTextures) => {
+      console.log('Card textures loaded:', loadedTextures);
       setRenderingStats(prev => ({
         ...prev,
         imageLoaded: true,
         warnings: prev.warnings.filter(w => !w.includes('texture loading'))
       }));
-    },
-    (error) => {
-      console.error('Error loading textures:', error);
-      setRenderingStats(prev => ({
-        ...prev,
-        errors: [...prev.errors, `Failed to load textures: ${error.message}`]
-      }));
-      
-      // Display error message
-      toast.error("Problem loading card textures", {
-        description: "Using fallback images instead"
-      });
     }
   );
+  
+  // Handle textures as an array
+  const frontTexture = textures[0];
+  const backTexture = textures[1];
 
   const { rotationSpeed, setRotationSpeed, handleWheel } = useCardRotation();
   const { shaderMaterial, glowMaterial, edgeMaterial } = useCardMaterials(frontTexture, backTexture, isFlipped);

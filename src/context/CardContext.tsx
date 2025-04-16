@@ -1,8 +1,9 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Card, Collection } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { sampleCardData } from '@/lib/data/sampleCardData';
+
+export type { Card, Collection };
 
 interface CardContextType {
   cards: Card[];
@@ -25,7 +26,6 @@ export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [error, setError] = useState<Error | null>(null);
   const { toast } = useToast();
 
-  // Function to get a card by ID
   const getCardById = (id: string): Card | undefined => {
     return cards.find(card => card.id === id);
   };
@@ -35,15 +35,13 @@ export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setLoading(true);
       setError(null);
       
-      // Use reliable sample card data
       console.log("Loading sample card data:", sampleCardData.length, "cards");
       setCards(sampleCardData);
 
-      // Create sample collections
       const sampleCollections: Collection[] = [
         {
           id: 'collection-001',
-          title: 'Sports Legends',
+          name: 'Sports Legends',
           description: 'A collection of legendary sports figures',
           coverImageUrl: sampleCardData[0].imageUrl,
           userId: 'user-1',
@@ -59,7 +57,7 @@ export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         },
         {
           id: 'collection-002',
-          title: 'Vintage Collection',
+          name: 'Vintage Collection',
           description: 'Classic cards from the past',
           coverImageUrl: sampleCardData[2].imageUrl,
           userId: 'user-1',
@@ -75,7 +73,7 @@ export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         },
         {
           id: 'collection-003',
-          title: 'Special Editions',
+          name: 'Special Editions',
           description: 'Limited and special edition cards',
           coverImageUrl: sampleCardData[4].imageUrl,
           userId: 'user-1',
@@ -118,7 +116,7 @@ export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         id: `card-${Date.now()}`,
         title: cardData.title || 'Untitled Card',
         description: cardData.description || '',
-        imageUrl: cardData.imageUrl || sampleCardData[0].imageUrl, // Use reliable image
+        imageUrl: cardData.imageUrl || sampleCardData[0].imageUrl,
         thumbnailUrl: cardData.thumbnailUrl || cardData.imageUrl || sampleCardData[0].imageUrl,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -220,10 +218,12 @@ export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   return <CardContext.Provider value={value}>{children}</CardContext.Provider>;
 };
 
-export const useCardContext = () => {
+export const useCards = () => {
   const context = useContext(CardContext);
   if (context === undefined) {
-    throw new Error('useCardContext must be used within a CardProvider');
+    throw new Error('useCards must be used within a CardProvider');
   }
   return context;
 };
+
+export const useCardContext = useCards;

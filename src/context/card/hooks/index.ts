@@ -3,8 +3,8 @@ export * from './useCardOperations';
 export * from './useCollectionOperations';
 
 // Import the useCards hook directly from the CardContext
-import { useCards } from '@/context/CardContext';
-export { useCards };
+import { useCards, Card, Collection } from '@/context/CardContext';
+export { useCards, Card, Collection };
 
 // This is a wrapper function that uses the CardContext to provide collection functionality
 export const useCollection = () => {
