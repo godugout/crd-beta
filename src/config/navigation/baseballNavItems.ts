@@ -1,22 +1,22 @@
 
-import { Archive, Database, PieChart } from 'lucide-react';
+import { Archive, Users, Building } from 'lucide-react';
 import { NavigationItem } from '@/components/navigation/mobile/types';
 
 export const baseballNavItems: NavigationItem[] = [
   {
-    title: 'Baseball Archive',
-    path: '/baseball-archive',
+    title: 'Teams & Towns',
+    path: '/teams',
     icon: Archive,
     highlight: true
   },
   {
-    title: 'Team Colors',
-    path: '/baseball-archive',
-    icon: Database
+    title: 'Fans Directory',
+    path: '/teams/fans',
+    icon: Users
   },
   {
-    title: 'Statistics',
-    path: '/baseball-archive/stats',
-    icon: PieChart
+    title: 'Town Directory',
+    path: '/teams/towns',
+    icon: Building
   }
 ];
