@@ -10,7 +10,7 @@ import MiniActionBar from '@/components/ui/MiniActionBar';
 import { useCardInteraction } from '@/hooks/useCardInteraction';
 import CardEffectsPanel from './viewer-components/CardEffectsPanel';
 import { useFeatureEnabled } from '@/hooks/useFeatureFlag';
-import { Card } from '@/lib/types/card';
+import { Card } from '@/lib/types/cardTypes';
 
 interface FullscreenViewerProps {
   cardId: string;

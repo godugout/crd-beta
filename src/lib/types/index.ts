@@ -1,4 +1,3 @@
-
 // Base types that might be used across modules
 export type JsonValue = 
   | string 
@@ -14,16 +13,13 @@ export interface BaseEntity {
   updatedAt?: string;
 }
 
-// Export from our type files directly
-export * from './card';
-export * from './collection';
-export * from './user';
+// Export updated type definitions
+export * from './cardTypes';
 export * from './interaction';
+export * from './user';
+export * from './collection';
 
-// Re-export all types from the old location
+// For backward compatibility, keep the old imports as well
+// But we should gradually migrate to using the centralized types
 import * as OldTypes from '@/types/card';
-
-// Export everything except FabricSwatch to avoid duplication
-// This avoids the "has already exported a member named 'FabricSwatch'" error
-type OldTypesWithoutFabricSwatch = Omit<typeof OldTypes, 'FabricSwatch'>;
-export const oldTypes: OldTypesWithoutFabricSwatch = {} as OldTypesWithoutFabricSwatch;
+export const oldTypes = OldTypes;

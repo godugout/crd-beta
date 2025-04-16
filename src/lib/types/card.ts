@@ -1,15 +1,14 @@
 
+/**
+ * @deprecated This file is maintained for backward compatibility.
+ * Please use the centralized type definitions from src/lib/types/cardTypes.ts instead.
+ */
+
 import { BaseEntity } from './index';
 import { Reaction, Comment } from './interaction';
+import { Card as CardType, FabricSwatch as FabricSwatchType } from './cardTypes';
 
-export interface FabricSwatch {
-  type: string;
-  team: string;
-  year: string;
-  manufacturer: string;
-  position: string;
-  size: string;
-}
+export interface FabricSwatch extends FabricSwatchType {}
 
 // Base Card interface that contains all common properties
 export interface BaseCard {
@@ -42,8 +41,11 @@ export interface BaseCard {
   name?: string;
   cardStyle?: string;
   backTemplate?: string;
-  createdAt?: string; // Make this optional to match other Card definitions
-  updatedAt?: string; // Make this optional too for consistency
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface Card extends BaseCard {}
+
+// Re-export the new types for gradual migration
+export { CardType as CardNew, FabricSwatchType as FabricSwatchNew };

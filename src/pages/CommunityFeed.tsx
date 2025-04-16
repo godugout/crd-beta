@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
 import PageLayout from '@/components/navigation/PageLayout';
-import { Card } from '@/lib/types';
+import { Card, Reaction } from '@/lib/types/cardTypes';
 import { useToast } from '@/hooks/use-toast';
 
 const CommunityFeed = () => {
@@ -23,13 +22,11 @@ const CommunityFeed = () => {
             imageUrl: '/community-card-1.jpg',
             thumbnailUrl: '/community-card-1-thumb.jpg',
             userId: 'user1',
-            teamId: 'team1',
             collectionId: 'collection1',
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
             isPublic: true,
             tags: ['community', 'created'],
-            designMetadata: {},
             reactions: [
               {
                 id: 'reaction1',
@@ -49,13 +46,11 @@ const CommunityFeed = () => {
             imageUrl: '/community-card-2.jpg',
             thumbnailUrl: '/community-card-2-thumb.jpg',
             userId: 'user3',
-            teamId: 'team2',
             collectionId: 'collection2',
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
             isPublic: true,
             tags: ['community', 'trending'],
-            designMetadata: {},
             reactions: [],
             effects: ['Chrome', 'Refractor'],
           },

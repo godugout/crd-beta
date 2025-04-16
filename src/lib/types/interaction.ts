@@ -1,21 +1,31 @@
 
-export interface Reaction {
-  id: string;
+import { BaseEntity } from './index';
+import { User } from './user';
+
+/**
+ * Reaction definition for user interactions with cards and comments
+ */
+export interface Reaction extends BaseEntity {
   userId: string;
   cardId?: string;
   collectionId?: string;
   commentId?: string;
   type: 'like' | 'love' | 'wow' | 'haha' | 'sad' | 'angry';
-  createdAt: string;
-  targetType: 'card' | 'comment' | string;
+  targetType: 'card' | 'comment' | 'collection' | string;
   targetId: string;
+  user?: User;
 }
 
-export interface Comment {
-  id: string;
+/**
+ * Comment definition for user comments on cards
+ */
+export interface Comment extends BaseEntity {
   content: string;
   userId: string;
   cardId?: string;
+  collectionId?: string;
+  teamId?: string;
   parentId?: string;
-  createdAt: string;
+  user?: User;
+  reactions?: Reaction[];
 }
