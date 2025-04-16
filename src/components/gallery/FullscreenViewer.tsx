@@ -7,7 +7,7 @@ import { X } from 'lucide-react';
 import CardDisplay from './viewer-components/CardDisplay';
 import ViewerControls from './viewer-components/ViewerControls';
 import InfoPanel from './viewer-components/InfoPanel';
-import KeyboardShortcuts from './viewer-components/KeyboardShortcuts';
+import MiniActionBar from '@/components/ui/MiniActionBar';
 import { useCardInteraction } from '@/hooks/useCardInteraction';
 import CardEffectsPanel from './viewer-components/CardEffectsPanel';
 
@@ -150,7 +150,7 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
 
       <InfoPanel card={card} showInfo={showInfo} />
       
-      <KeyboardShortcuts />
+      <MiniActionBar />
     </div>
   );
 };

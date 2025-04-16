@@ -99,7 +99,7 @@ const CardEffectsPanel: React.FC<CardEffectsPanelProps> = ({
   };
 
   return (
-    <div className="absolute bottom-4 left-4 right-4 z-20 bg-black/60 backdrop-blur-md rounded-lg p-3 text-white">
+    <div className="absolute bottom-4 left-4 right-4 z-20 bg-black/60 backdrop-blur-md rounded-lg p-3 text-white max-h-[calc(100vh-32rem)] overflow-y-auto">
       <h3 className="text-sm font-medium mb-2">Visual Effects</h3>
       <div className="flex flex-wrap gap-2">
         {availableEffects.map(effect => (
