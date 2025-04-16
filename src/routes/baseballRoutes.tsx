@@ -14,3 +14,4 @@ export const baseballRoutes: RouteObject[] = [
     element: <BaseballCardViewer />,
   },
 ];
+

@@ -21,7 +21,7 @@ export interface Card extends BaseEntity {
   userId?: string;
   collectionId?: string;
   metadata?: Record<string, any>;
-  effects?: string[]; // Add this line to resolve the TypeScript error
+  effects?: string[];
   reactions?: Reaction[];
   comments?: Comment[];
   viewCount?: number;
@@ -38,5 +38,6 @@ export interface Card extends BaseEntity {
   textColor?: string;
   specialEffect?: string;
   fabricSwatches?: FabricSwatch[];
-  name?: string; // For backward compatibility
+  name?: string;
 }
+
