@@ -1,7 +1,6 @@
-
 import React, { createContext, useContext, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Team } from '@/lib/types/TeamTypes';
+import { Team } from '@/lib/types/teamTypes';
 import { BreadcrumbItem, BreadcrumbHandlerProps } from './types';
 import { 
   createHomeBreadcrumb, 

@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -10,7 +9,7 @@ import {
   MousePointer, Maximize2, X, Plus
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { CardRarity, HotspotData } from '@/lib/types/CardTypes';
+import { CardRarity, HotspotData } from '@/lib/types/cardTypes';
 import { Slider } from '@/components/ui/slider';
 import { 
   Select, 

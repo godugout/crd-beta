@@ -1,9 +1,23 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card } from '@/lib/types';
+import { useParams } from 'react-router-dom';
+import { useCardContext } from '@/context/CardContext';
 
-// In the JSX where stats are displayed:
-const ImmersiveCardViewer = ({ card }: { card: Card }) => {
+const ImmersiveCardViewer = ({ card: initialCard }: { card: Card }) => {
+  const { id } = useParams();
+  const { getCardById } = useCardContext();
+  const [card, setCard] = useState<Card>(initialCard);
+  
+  useEffect(() => {
+    if (id) {
+      const foundCard = getCardById(id);
+      if (foundCard) {
+        setCard(foundCard);
+      }
+    }
+  }, [id, getCardById]);
+
   return (
     <div>
       {/* Display card stats */}

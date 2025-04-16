@@ -1,7 +1,6 @@
-
 import React, { useState } from 'react';
 import { useEnhancedCards } from '@/context/CardEnhancedContext';
-import { Deck } from '@/lib/types/CardTypes';
+import { Deck } from '@/lib/types/cardTypes';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

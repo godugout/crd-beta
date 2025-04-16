@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { ArrowLeft, Upload, SortDesc } from 'lucide-react';
-import { Series } from '@/lib/types/CardTypes';
+import { Series } from '@/lib/types/cardTypes';
 import { useEnhancedCards } from '@/context/CardEnhancedContext';
 import { toast } from 'sonner';
 
@@ -48,7 +48,6 @@ const SeriesManager: React.FC<SeriesManagerProps> = ({ initialSeries }) => {
   };
   
   const handleUploadCover = () => {
-    // This would be replaced with actual image upload logic
     setIsUploading(true);
     setTimeout(() => {
       setSeriesData(prev => ({ ...prev, coverImageUrl: 'https://placehold.co/600x400/png' }));
@@ -60,14 +59,11 @@ const SeriesManager: React.FC<SeriesManagerProps> = ({ initialSeries }) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Generate ID if it's a new series
     const seriesWithId = initialSeries?.id 
       ? { ...seriesData, updatedAt: new Date().toISOString() }
       : { ...seriesData, id: uuidv4(), updatedAt: new Date().toISOString() };
       
-    // Save series
     if (initialSeries?.id) {
-      // Fix: Pass series ID as the first argument and the updates as the second argument
       updateSeries(initialSeries.id, seriesWithId as Series);
       toast.success('Series updated successfully');
     } else {
@@ -75,7 +71,6 @@ const SeriesManager: React.FC<SeriesManagerProps> = ({ initialSeries }) => {
       toast.success('Series created successfully');
     }
     
-    // Navigate back to series list
     navigate('/series');
   };
   

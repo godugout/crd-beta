@@ -1,44 +1,38 @@
 
 import { BaseEntity } from './index';
-import { Card } from './cardTypes';
 
-/**
- * Instagram post data structure
- */
-export interface InstagramPost {
-  id: string;
+export interface InstagramPost extends BaseEntity {
+  postId: string;
+  username: string;
   caption?: string;
+  imageUrl: string;
+  permalink: string;
+  timestamp: string;
+  mediaType: 'IMAGE' | 'VIDEO' | 'CAROUSEL_ALBUM';
   mediaUrl: string;
   thumbnailUrl?: string;
-  mediaType: 'IMAGE' | 'VIDEO' | 'CAROUSEL_ALBUM';
-  timestamp: string;
-  permalink?: string;
-  username?: string;
-  likes?: number;
-  comments?: number;
+  children?: InstagramPostChild[];
 }
 
-/**
- * Instagram source for collections
- */
-export interface InstagramSource {
+export interface InstagramPostChild {
+  id: string;
+  mediaType: 'IMAGE' | 'VIDEO';
+  mediaUrl: string;
+  thumbnailUrl?: string;
+}
+
+export interface InstagramAccount {
+  id: string;
   username: string;
-  lastFetched: string;
-  autoUpdate: boolean;
-  postIds?: string[];
+  profilePictureUrl?: string;
+  followersCount?: number;
+  mediaCount?: number;
 }
 
-/**
- * Instagram collection extension
- */
-export interface InstagramCollectionData {
-  instagramSource?: InstagramSource;
+export interface InstagramCollection {
+  id: string;
+  name: string;
+  description?: string;
+  posts: InstagramPost[];
+  instagramSource?: string;
 }
-
-// Extended Card type with Instagram properties
-export interface InstagramCard extends Card {
-  instagramPostId?: string;
-  instagramUsername?: string;
-  instagramPost?: InstagramPost;
-}
-

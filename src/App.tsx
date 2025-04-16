@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster'; // Updated to use shadcn's Toaster
@@ -129,7 +128,13 @@ function App() {
             <Route path="/about" element={<AboutPage />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/cards" element={<CardCollectionPage />} />
-            <Route path="/view/:id" element={<ImmersiveCardViewer />} />
+            {/* Fix the ImmersiveCardViewer route by providing a dummy card prop that will be replaced by the component's logic */}
+            <Route path="/view/:id" element={<ImmersiveCardViewer card={{
+              id: "",
+              title: "",
+              imageUrl: "",
+              effects: []
+            }} />} />
             <Route path="/baseball-card-viewer" element={<BaseballCardViewer />} />
             <Route path="/baseball-action-figure" element={<BaseballActionFigure />} />
             

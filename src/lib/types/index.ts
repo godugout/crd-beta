@@ -24,6 +24,7 @@ export * from './collection';
 export * from './instagram';
 export * from './teamTypes';
 export type { CardEffect, CardEffectSettings } from './cardEffects';
+export * from './enhancedCardTypes';
 
 // For backward compatibility, keep the old imports as well
 // But we should gradually migrate to using the centralized types
