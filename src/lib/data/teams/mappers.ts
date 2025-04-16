@@ -11,8 +11,7 @@ export const mapTeamFromDb = (team: any): Team => ({
   logoUrl: team.logo_url,
   logo_url: team.logo_url,
   banner_url: team.banner_url,
-  ownerId: team.owner_id, // Changed from owner_id to ownerId
-  owner_id: team.owner_id,
+  ownerId: team.owner_id, // Keep only ownerId
   status: team.status,
   website: team.website,
   email: team.email,
