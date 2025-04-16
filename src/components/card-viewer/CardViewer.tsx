@@ -8,6 +8,7 @@ import { CardBack } from '@/components/card/CardBack';
 import { ShareDialog } from '@/components/ShareDialog';
 import { DeleteDialog } from '@/components/DeleteDialog';
 import { useToast } from "@/hooks/use-toast";
+import { CardTransitionEffects } from '@/components/card-effects/CardTransitionEffects';
 
 interface CardViewerProps {
   card: Card;
@@ -38,6 +39,7 @@ const CardViewer: React.FC<CardViewerProps> = ({
   const [showLightbulb, setShowLightbulb] = useState(false);
   const [activeEffects, setActiveEffects] = useState<string[]>(card.effects || []);
   const { toast } = useToast();
+  const [showTransition, setShowTransition] = useState(false);
 
   const handleFlip = () => {
     setIsFlipped(!isFlipped);
@@ -82,6 +84,18 @@ const CardViewer: React.FC<CardViewerProps> = ({
     }
   };
 
+  const handleStyleChange = () => {
+    setShowTransition(true);
+    if (!isFlipped) {
+      setIsFlipped(true);
+    }
+  };
+
+  const handleTransitionComplete = () => {
+    setShowTransition(false);
+    // Here you can trigger any post-transition updates
+  };
+
   return (
     <div className="relative">
       <div className="absolute top-2 left-2 flex space-x-2 z-10">
@@ -110,7 +124,9 @@ const CardViewer: React.FC<CardViewerProps> = ({
         onApplyEffect={handleApplyEffect}
       />
 
-      <div className="relative w-64 h-96 transform-style preserve-3d transition-transform duration-500">
+      <div 
+        className={`relative w-64 h-96 transform-style preserve-3d transition-transform duration-500`}
+      >
         <div className={`absolute inset-0 ${isFlipped ? 'rotate-y-180' : ''} transform-style preserve-3d transition-transform duration-500`}>
           <CardFront
             card={card}
@@ -121,6 +137,11 @@ const CardViewer: React.FC<CardViewerProps> = ({
           />
           <CardBack card={card} />
         </div>
+        
+        <CardTransitionEffects 
+          isActive={showTransition}
+          onComplete={handleTransitionComplete}
+        />
       </div>
 
       <ShareDialog

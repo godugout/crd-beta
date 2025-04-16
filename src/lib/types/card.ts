@@ -1,4 +1,3 @@
-
 import { BaseEntity } from './index';
 import { Reaction } from './interaction';
 import { Comment } from './interaction';
@@ -39,5 +38,6 @@ export interface Card extends BaseEntity {
   specialEffect?: string;
   fabricSwatches?: FabricSwatch[];
   name?: string;
+  cardStyle?: string;
+  backTemplate?: string;
 }
-
