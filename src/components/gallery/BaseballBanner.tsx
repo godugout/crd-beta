@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Tv2 } from 'lucide-react';
+import { DollarSign } from 'lucide-react';
 
 interface BaseballBannerProps {
   isVisible: boolean;
@@ -15,18 +15,18 @@ export const BaseballBanner: React.FC<BaseballBannerProps> = ({ isVisible }) => 
       <div className="p-6 flex flex-col md:flex-row items-center justify-between">
         <div className="mb-4 md:mb-0">
           <h2 className="text-white text-xl font-bold mb-2 flex items-center">
-            <Tv2 className="mr-2 h-5 w-5" />
-            ESPN-Style Baseball Card Viewer
+            <DollarSign className="mr-2 h-5 w-5" />
+            Live Card Breaking & Auctions
           </h2>
           <p className="text-blue-100">
-            Experience your vintage baseball cards in 3D with our immersive viewer featuring statistics and professional graphics
+            Join live breaking sessions and bid on physical & digital collectibles in real-time
           </p>
         </div>
         <Button 
           className="bg-white text-blue-700 hover:bg-blue-50"
-          onClick={() => window.location.href = '/baseball-card-viewer'}
+          onClick={() => window.location.href = '/cards/auction'}
         >
-          Launch Immersive Viewer
+          Join Live Auction
         </Button>
       </div>
     </div>

@@ -2,6 +2,7 @@
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { CardData } from '../types/BaseballCard';
+import { Timer, DollarSign, Users } from 'lucide-react';
 
 interface CardHeaderProps {
   cardData: CardData;
@@ -14,15 +15,28 @@ const CardHeader: React.FC<CardHeaderProps> = ({ cardData }) => {
         <div className="flex justify-between items-center">
           <div className="flex items-center space-x-2">
             <Badge variant="outline" className="bg-red-600 border-none text-white uppercase font-bold px-3 py-1">
-              Live
+              Live Auction
             </Badge>
-            <span className="text-xs text-gray-300">Card Showcase</span>
+            <Badge variant="outline" className="bg-emerald-600 border-none text-white">
+              <Timer className="w-4 h-4 mr-1" />
+              12:45 remaining
+            </Badge>
           </div>
-          <div className="text-xs text-gray-300">
-            {cardData.manufacturer} • {cardData.year}
+          <div className="flex items-center space-x-4 text-sm">
+            <span className="flex items-center">
+              <Users className="w-4 h-4 mr-1" />
+              24 bidders
+            </span>
+            <span className="flex items-center font-bold text-emerald-400">
+              <DollarSign className="w-4 h-4" />
+              Current Bid: {cardData.value}
+            </span>
           </div>
         </div>
         <h1 className="text-2xl md:text-3xl font-bold mt-2">{cardData.title}</h1>
+        <p className="text-gray-300 mt-1">
+          {cardData.condition} • Lot #T206-{cardData.id}
+        </p>
       </div>
     </div>
   );
