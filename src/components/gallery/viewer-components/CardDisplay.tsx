@@ -93,17 +93,17 @@ const CardDisplay: React.FC<CardDisplayProps> = ({
 
         {/* Back face */}
         <CubeFace position="back" size={CUBE_SIZE}>
-          <CubeFaceContent type="solid" title="Back" bgClass="bg-gray-700" />
+          <CubeFaceContent type="solid" card={card} title="Back" bgClass="bg-gray-700" />
         </CubeFace>
 
         {/* Bottom face */}
         <CubeFace position="bottom" size={CUBE_SIZE}>
-          <CubeFaceContent type="solid" title="Bottom" bgClass="bg-gray-800" />
+          <CubeFaceContent type="solid" card={card} title="Bottom" bgClass="bg-gray-800" />
         </CubeFace>
 
         {/* Left face */}
         <CubeFace position="left" size={CUBE_SIZE}>
-          <CubeFaceContent type="solid" title="Left" bgClass="bg-gray-900" />
+          <CubeFaceContent type="solid" card={card} title="Left" bgClass="bg-gray-900" />
         </CubeFace>
       </div>
 
