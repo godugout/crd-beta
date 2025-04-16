@@ -99,142 +99,8 @@ const CardDisplay: React.FC<CardDisplayProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleKeyDown]);
 
-  // Card dimensions and stack settings
-  const CARD_THICKNESS = 8; // 8px thickness for each card
-  const STACK_GAP = 8; // 8px gap between cards in the stack
-  const edgeColor = 'var(--edge-color, #e4e4e4)';
-  const edgeShadow = 'var(--edge-shadow, rgba(0,0,0,0.2))';
-
-  const renderCard = (zOffset: number, opacity: number = 1) => (
-    <div 
-      className={`absolute inset-0 transition-all duration-700 transform-gpu card-effect preserve-3d ${effectClasses}`}
-      style={{
-        transform: `translateZ(${zOffset}px)`,
-        opacity
-      }}
-    >
-      {/* Front face */}
-      <div 
-        className={`absolute inset-0 backface-hidden ${!isFlipped ? 'z-10' : 'z-0'}`}
-        aria-hidden={isFlipped}
-        style={{ 
-          transform: `translateZ(${CARD_THICKNESS / 2}px) rotateY(0deg)`,
-          boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
-        }}
-      >
-        <div className="relative w-full h-full overflow-hidden">
-          <img 
-            src={card.imageUrl} 
-            alt={card.title || 'Card'} 
-            className="w-full h-full object-cover"
-          />
-          
-          {/* Card info overlay */}
-          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none"></div>
-          <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
-            <h2 className="font-bold text-xl mb-1">{card.title}</h2>
-            {card.player && <p className="text-sm opacity-90">{card.player}</p>}
-            {card.team && <p className="text-xs opacity-80">{card.team}</p>}
-          </div>
-        </div>
-      </div>
-
-      {/* Back face */}
-      <div 
-        className={`absolute inset-0 backface-hidden ${isFlipped ? 'z-10' : 'z-0'}`}
-        aria-hidden={!isFlipped}
-        style={{ 
-          transform: `translateZ(${CARD_THICKNESS / 2}px) rotateY(180deg)`,
-          boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
-        }}
-      >
-        <div className="absolute inset-0 p-6 text-white bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
-          <h3 className="text-xl font-bold mb-4 bg-gradient-to-r from-blue-300 to-purple-300 bg-clip-text text-transparent">
-            {card.title}
-          </h3>
-          
-          {card.description && (
-            <p className="text-sm mb-4 opacity-90">{card.description}</p>
-          )}
-          
-          {/* Card stats */}
-          <div className="grid grid-cols-2 gap-3 my-4">
-            {card.year && (
-              <div className="bg-white/10 backdrop-blur-sm rounded p-2 text-center">
-                <span className="text-xs text-blue-300 block">Year</span>
-                <span className="text-md font-semibold">{card.year}</span>
-              </div>
-            )}
-            
-            {card.designMetadata?.cardMetadata?.cardNumber && (
-              <div className="bg-white/10 backdrop-blur-sm rounded p-2 text-center">
-                <span className="text-xs text-blue-300 block">Card #</span>
-                <span className="text-md font-semibold">
-                  {String(card.designMetadata.cardMetadata.cardNumber)}
-                </span>
-              </div>
-            )}
-          </div>
-          
-          {/* Card tags */}
-          {card.tags && card.tags.length > 0 && (
-            <div className="my-4">
-              <p className="text-xs text-blue-300 mb-1">Tags</p>
-              <div className="flex flex-wrap gap-2">
-                {card.tags.map((tag, index) => (
-                  <span key={index} className="bg-white/10 text-xs px-2 py-1 rounded-full">
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Card edges */}
-      <div
-        className="absolute w-full"
-        aria-hidden="true"
-        style={{
-          height: `${CARD_THICKNESS}px`,
-          transform: `rotateX(90deg) translateZ(${175 - CARD_THICKNESS / 2}px)`,
-          backgroundColor: edgeColor,
-          boxShadow: `inset 0 1px 2px ${edgeShadow}`
-        }}
-      />
-      <div
-        className="absolute w-full"
-        aria-hidden="true"
-        style={{
-          height: `${CARD_THICKNESS}px`,
-          transform: `rotateX(-90deg) translateZ(${175 - CARD_THICKNESS / 2}px)`,
-          backgroundColor: edgeColor,
-          boxShadow: `inset 0 -1px 2px ${edgeShadow}`
-        }}
-      />
-      <div
-        className="absolute h-full"
-        aria-hidden="true"
-        style={{
-          width: `${CARD_THICKNESS}px`,
-          transform: `rotateY(-90deg) translateZ(${125 - CARD_THICKNESS / 2}px)`,
-          backgroundColor: edgeColor,
-          boxShadow: `inset 1px 0 2px ${edgeShadow}`
-        }}
-      />
-      <div
-        className="absolute h-full"
-        aria-hidden="true"
-        style={{
-          width: `${CARD_THICKNESS}px`,
-          transform: `rotateY(90deg) translateZ(${125 - CARD_THICKNESS / 2}px)`,
-          backgroundColor: edgeColor,
-          boxShadow: `inset -1px 0 2px ${edgeShadow}`
-        }}
-      />
-    </div>
-  );
+  // Cube dimensions
+  const CUBE_SIZE = 250; // Base size of cube in px
 
   return (
     <div 
@@ -245,8 +111,7 @@ const CardDisplay: React.FC<CardDisplayProps> = ({
         ref={cardRef}
         role="button"
         tabIndex={0}
-        aria-label={`${card.title} trading card. Press F to flip, arrow keys to rotate, plus and minus to zoom.`}
-        aria-pressed={isFlipped}
+        aria-label={`${card.title} trading card cube. Press F to flip, arrow keys to rotate, plus and minus to zoom.`}
         className="relative transition-all duration-700 transform-gpu"
         style={{
           transformStyle: 'preserve-3d',
@@ -256,23 +121,138 @@ const CardDisplay: React.FC<CardDisplayProps> = ({
             rotateY(${rotation.y}deg) 
             scale(${zoom})
           `,
-          width: '250px', 
-          height: '350px',
+          width: `${CUBE_SIZE}px`, 
+          height: `${CUBE_SIZE}px`,
           ...generateEffectStyles()
         }}
       >
-        {/* Bottom card (slightly darker) */}
-        {renderCard(-STACK_GAP, 0.95)}
-        
-        {/* Top card */}
-        {renderCard(0)}
+        {/* Front face */}
+        <div 
+          className={`absolute backface-hidden ${effectClasses}`}
+          style={{ 
+            width: `${CUBE_SIZE}px`, 
+            height: `${CUBE_SIZE}px`,
+            transform: `translateZ(${CUBE_SIZE / 2}px)`,
+            boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+          }}
+        >
+          <div className="relative w-full h-full overflow-hidden">
+            <img 
+              src={card.imageUrl} 
+              alt={card.title || 'Card front'} 
+              className="w-full h-full object-cover"
+            />
+            
+            {/* Card info overlay */}
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4 text-white">
+              <h2 className="font-bold text-xl mb-1">{card.title}</h2>
+              {card.player && <p className="text-sm opacity-90">{card.player}</p>}
+            </div>
+          </div>
+        </div>
+
+        {/* Right face */}
+        <div 
+          className={`absolute backface-hidden ${effectClasses}`}
+          style={{ 
+            width: `${CUBE_SIZE}px`, 
+            height: `${CUBE_SIZE}px`,
+            transform: `rotateY(90deg) translateZ(${CUBE_SIZE / 2}px)`,
+            boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+          }}
+        >
+          <div className="relative w-full h-full overflow-hidden bg-gray-800">
+            <img 
+              src={card.thumbnailUrl || card.imageUrl} 
+              alt={card.title || 'Card side'} 
+              className="w-full h-full object-cover opacity-70"
+              style={{ filter: 'grayscale(50%)' }}
+            />
+            
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="bg-black/50 backdrop-blur-sm p-4 rounded-lg">
+                <h3 className="text-white text-xl font-bold">{card.team || 'Side View'}</h3>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Top face */}
+        <div 
+          className={`absolute backface-hidden ${effectClasses}`}
+          style={{ 
+            width: `${CUBE_SIZE}px`, 
+            height: `${CUBE_SIZE}px`,
+            transform: `rotateX(90deg) translateZ(${CUBE_SIZE / 2}px)`,
+            boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+          }}
+        >
+          <div className="relative w-full h-full overflow-hidden bg-gray-900">
+            <img 
+              src={card.imageUrl} 
+              alt={card.title || 'Card top'} 
+              className="w-full h-full object-cover opacity-60"
+              style={{ filter: 'hue-rotate(45deg) contrast(1.2)' }}
+            />
+            
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="bg-black/60 backdrop-blur-sm p-4 rounded-lg">
+                <h3 className="text-white text-xl font-bold">{card.year || 'Top View'}</h3>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Back face (solid color) */}
+        <div 
+          className="absolute backface-hidden bg-gray-700"
+          style={{ 
+            width: `${CUBE_SIZE}px`, 
+            height: `${CUBE_SIZE}px`,
+            transform: `rotateY(180deg) translateZ(${CUBE_SIZE / 2}px)`,
+            boxShadow: 'inset 0 0 20px rgba(0,0,0,0.5)'
+          }}
+        >
+          <div className="w-full h-full flex items-center justify-center">
+            <div className="text-white text-xl">Back</div>
+          </div>
+        </div>
+
+        {/* Bottom face (solid color) */}
+        <div 
+          className="absolute backface-hidden bg-gray-800"
+          style={{ 
+            width: `${CUBE_SIZE}px`, 
+            height: `${CUBE_SIZE}px`,
+            transform: `rotateX(-90deg) translateZ(${CUBE_SIZE / 2}px)`,
+            boxShadow: 'inset 0 0 20px rgba(0,0,0,0.5)'
+          }}
+        >
+          <div className="w-full h-full flex items-center justify-center">
+            <div className="text-white text-xl">Bottom</div>
+          </div>
+        </div>
+
+        {/* Left face (solid color) */}
+        <div 
+          className="absolute backface-hidden bg-gray-900"
+          style={{ 
+            width: `${CUBE_SIZE}px`, 
+            height: `${CUBE_SIZE}px`,
+            transform: `rotateY(-90deg) translateZ(${CUBE_SIZE / 2}px)`,
+            boxShadow: 'inset 0 0 20px rgba(0,0,0,0.5)'
+          }}
+        >
+          <div className="w-full h-full flex items-center justify-center">
+            <div className="text-white text-xl">Left</div>
+          </div>
+        </div>
       </div>
 
       {/* Accessibility description */}
       <div className="sr-only">
-        <p>Use keyboard controls to interact with the card:</p>
+        <p>Use keyboard controls to interact with the cube:</p>
         <ul>
-          <li>Press F to flip the card</li>
           <li>Use arrow keys to rotate</li>
           <li>Press + to zoom in</li>
           <li>Press - to zoom out</li>
