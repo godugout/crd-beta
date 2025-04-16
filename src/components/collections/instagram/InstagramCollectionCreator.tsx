@@ -1,159 +1,235 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { useCollection } from '@/context/card/hooks';
-import { Collection } from '@/lib/types';
+import { Collection, InstagramPost } from '@/lib/types';
+import { supabase } from '@/lib/supabase/client';
+import { Loader, Instagram, AlertCircle } from 'lucide-react';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { useNavigate } from 'react-router-dom';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 
 const InstagramCollectionCreator: React.FC = () => {
   const [isConnecting, setIsConnecting] = useState(false);
   const [username, setUsername] = useState('');
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [instagramPosts, setInstagramPosts] = useState<InstagramPost[]>([]);
+  const [isLoadingPosts, setIsLoadingPosts] = useState(false);
+  
   const { addCollection } = useCollection();
+  const navigate = useNavigate();
+  
+  const fetchInstagramPosts = async () => {
+    if (!username.trim()) {
+      toast.error('Please enter an Instagram username');
+      return;
+    }
+    
+    setIsLoadingPosts(true);
+    setErrorMessage(null);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('instagram-scraper', {
+        body: { username: username.replace('@', '') }
+      });
+      
+      if (error) {
+        console.error('Instagram API error:', error);
+        setErrorMessage(`Error connecting to Instagram: ${error.message}`);
+        toast.error('Failed to fetch Instagram posts');
+        return;
+      }
+      
+      if (!data?.posts || data.posts.length === 0) {
+        setErrorMessage('No posts found for this Instagram account');
+        toast.error('No Instagram posts found');
+        return;
+      }
+      
+      // Transform Instagram posts to our format
+      const posts: InstagramPost[] = data.posts.map((post: any) => ({
+        id: post.id,
+        postId: post.id,
+        username: username,
+        caption: post.caption || '',
+        imageUrl: post.media_url,
+        permalink: post.permalink,
+        timestamp: post.timestamp,
+        mediaType: post.media_type,
+        mediaUrl: post.media_url,
+        thumbnailUrl: post.thumbnail_url || post.media_url,
+      }));
+      
+      setInstagramPosts(posts);
+      toast.success(`Found ${posts.length} Instagram posts`);
+    } catch (error: any) {
+      console.error('Error fetching Instagram posts:', error);
+      setErrorMessage(`Error: ${error.message}`);
+      toast.error('Failed to connect to Instagram');
+    } finally {
+      setIsLoadingPosts(false);
+    }
+  };
   
   const handleConnectInstagram = async () => {
     setIsConnecting(true);
     try {
-      // Simulate Instagram API connection
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Create a new collection with Instagram content
-      const newCollection: Collection = {
-        id: `instagram-${Date.now()}`,
-        name: `${username}'s Instagram`,
-        description: `Photos imported from Instagram account @${username}`,
-        cards: [],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        coverImageUrl: 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7',
-        tags: ['instagram', 'social', 'imported'],
-        userId: 'user-1',
-        isPublic: true
-      };
-      
-      // Add the collection
-      const result = await addCollection(newCollection);
-      
-      toast.success(`Successfully imported Instagram photos from @${username}`);
-      setUsername('');
-      
-      // Navigate to the collection page - for now, just log
-      console.log(`Created collection: ${result.id}`);
-      
-    } catch (error) {
-      console.error('Error connecting to Instagram:', error);
-      toast.error('Failed to connect to Instagram');
+      await fetchInstagramPosts();
     } finally {
       setIsConnecting(false);
     }
   };
   
-  const handleAuthorize = async () => {
+  const createCollectionFromPosts = async () => {
+    if (instagramPosts.length === 0) {
+      toast.error('No Instagram posts to create collection from');
+      return;
+    }
+    
     try {
-      // Simulate authorization
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      setIsConnecting(true);
       
+      // Create a new collection with Instagram content
       const newCollection: Collection = {
-        id: `instagram-auth-${Date.now()}`,
-        name: `${username}'s Instagram (Authorized)`,
-        description: `Authorized connection to @${username}`,
-        cards: [],
+        id: `instagram-${Date.now()}`,
+        name: `${username}'s Instagram Collection`,
+        description: `Photos imported from Instagram account @${username}`,
+        cards: instagramPosts.map((post, index) => ({
+          id: `instagram-card-${post.postId || index}`,
+          title: post.caption?.substring(0, 50) || `Instagram post ${index + 1}`,
+          description: post.caption || '',
+          imageUrl: post.mediaUrl,
+          thumbnailUrl: post.thumbnailUrl || post.mediaUrl,
+          createdAt: post.timestamp || new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          userId: 'user-1',
+          tags: ['instagram', 'imported'],
+          effects: []
+        })),
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        coverImageUrl: 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7',
-        tags: ['instagram', 'social', 'imported', 'authorized'],
+        coverImageUrl: instagramPosts[0]?.mediaUrl || '',
+        tags: ['instagram', 'social', 'imported'],
         userId: 'user-1',
-        isPublic: true
+        isPublic: true,
+        instagramSource: {
+          username: username,
+          lastFetched: new Date().toISOString(),
+          autoUpdate: false
+        }
       };
       
       // Add the collection
       const result = await addCollection(newCollection);
       
-      toast.success(`Authorized connection to @${username}`);
+      toast.success(`Successfully created collection from Instagram posts`);
       
-      // Navigate to the new collection
-      console.log(`Authorized collection: ${result.id}`);
-      
-    } catch (error) {
-      console.error('Authorization error:', error);
-      toast.error('Failed to authorize Instagram connection');
-    }
-  };
-  
-  const handleDisconnect = async () => {
-    try {
-      // Simulate disconnection
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
-      const disconnectionRecord: Collection = {
-        id: `instagram-disconnect-${Date.now()}`,
-        name: 'Instagram Disconnection Record',
-        description: `Disconnected from @${username}`,
-        cards: [],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        coverImageUrl: 'https://images.unsplash.com/photo-1611605698335-8b1569810432',
-        tags: ['instagram', 'disconnect'],
-        userId: 'user-1',
-        isPublic: true
-      };
-      
-      // Record the disconnection
-      const result = await addCollection(disconnectionRecord);
-      
-      toast.info(`Disconnected from Instagram account @${username}`);
-      
-      // Log disconnection record
-      console.log(`Disconnection recorded: ${result.id}`);
-      
-    } catch (error) {
-      console.error('Error disconnecting:', error);
-      toast.error('Failed to disconnect from Instagram');
+      // Navigate to the collection page
+      navigate(`/collections/${result.id}`);
+    } catch (error: any) {
+      console.error('Error creating Instagram collection:', error);
+      toast.error('Failed to create Instagram collection');
+    } finally {
+      setIsConnecting(false);
     }
   };
   
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold mb-4">Import from Instagram</h2>
-      <p className="text-gray-600 mb-6">
-        Connect your Instagram account to import your photos as collectible cards.
-      </p>
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Import from Instagram</CardTitle>
+          <CardDescription>
+            Connect your Instagram account to import your photos as collectible cards
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="flex items-end gap-4">
+              <div className="flex-1">
+                <label className="text-sm font-medium mb-1 block">Instagram Username</label>
+                <Input 
+                  value={username}
+                  onChange={e => setUsername(e.target.value)}
+                  placeholder="@username"
+                  className="w-full"
+                />
+              </div>
+              <Button 
+                onClick={handleConnectInstagram}
+                disabled={!username.trim() || isConnecting || isLoadingPosts}
+                className="bg-gradient-to-r from-purple-500 to-pink-500"
+              >
+                {isLoadingPosts ? (
+                  <>
+                    <Loader className="mr-2 h-4 w-4 animate-spin" />
+                    Loading...
+                  </>
+                ) : (
+                  <>
+                    <Instagram className="mr-2 h-4 w-4" />
+                    Find Posts
+                  </>
+                )}
+              </Button>
+            </div>
+            
+            {errorMessage && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Error</AlertTitle>
+                <AlertDescription>{errorMessage}</AlertDescription>
+              </Alert>
+            )}
+          </div>
+        </CardContent>
+      </Card>
       
-      <div className="mb-4">
-        <label className="block text-gray-700 mb-2">Instagram Username</label>
-        <input 
-          type="text" 
-          value={username}
-          onChange={e => setUsername(e.target.value)}
-          placeholder="@username"
-          className="w-full px-4 py-2 border rounded-md"
-        />
-      </div>
-      
-      <div className="flex space-x-3">
-        <Button 
-          onClick={handleConnectInstagram}
-          disabled={!username.trim() || isConnecting}
-          className="bg-gradient-to-r from-purple-500 to-pink-500"
-        >
-          {isConnecting ? 'Connecting...' : 'Connect Instagram'}
-        </Button>
-        
-        <Button 
-          variant="outline"
-          onClick={handleAuthorize}
-          disabled={!username.trim()}
-        >
-          Authorize
-        </Button>
-        
-        <Button 
-          variant="destructive"
-          onClick={handleDisconnect}
-          disabled={!username.trim()}
-        >
-          Disconnect
-        </Button>
-      </div>
+      {instagramPosts.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Instagram Posts</CardTitle>
+            <CardDescription>
+              {instagramPosts.length} posts found from @{username}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-6">
+              {instagramPosts.slice(0, 8).map((post) => (
+                <div key={post.id} className="aspect-square rounded-md overflow-hidden">
+                  <img 
+                    src={post.mediaUrl} 
+                    alt={post.caption || 'Instagram post'} 
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ))}
+              {instagramPosts.length > 8 && (
+                <div className="aspect-square rounded-md overflow-hidden bg-gray-100 flex items-center justify-center text-gray-500">
+                  +{instagramPosts.length - 8} more
+                </div>
+              )}
+            </div>
+            
+            <Button 
+              onClick={createCollectionFromPosts}
+              disabled={isConnecting}
+              className="w-full"
+            >
+              {isConnecting ? (
+                <>
+                  <Loader className="mr-2 h-4 w-4 animate-spin" />
+                  Creating Collection...
+                </>
+              ) : (
+                'Create Collection from Posts'
+              )}
+            </Button>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };
