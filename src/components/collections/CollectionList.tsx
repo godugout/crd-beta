@@ -48,7 +48,7 @@ const CollectionList: React.FC<CollectionListProps> = ({ collections, isLoading 
             {collection.coverImageUrl ? (
               <img
                 src={collection.coverImageUrl}
-                alt={collection.title || collection.name || 'Collection'}
+                alt={collection.name || 'Collection'}
                 className="w-full h-full object-cover"
               />
             ) : (
@@ -59,7 +59,7 @@ const CollectionList: React.FC<CollectionListProps> = ({ collections, isLoading 
           
           <div className="flex-1 min-w-0">
             <div className="flex items-center">
-              <h3 className="font-medium text-base truncate">{collection.title || collection.name}</h3>
+              <h3 className="font-medium text-base truncate">{collection.name}</h3>
               <div className="ml-2 flex-shrink-0">
                 {collection.visibility === 'private' ? (
                   <Lock className="h-3.5 w-3.5 text-gray-400" />
