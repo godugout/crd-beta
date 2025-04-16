@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, User, Plus, Star } from 'lucide-react';
@@ -165,6 +166,7 @@ const GlobalNavbar: React.FC<GlobalNavbarProps> = ({
             </Link>
           </Button>
 
+          {/* Theme Switcher - Using Star Icon */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon">
