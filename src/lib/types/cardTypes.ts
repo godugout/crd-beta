@@ -214,17 +214,17 @@ export type CardRarity = 'common' | 'uncommon' | 'rare' | 'ultra-rare' | 'legend
  */
 export interface BaseCard extends BaseEntity {
   title: string;
-  description?: string;
+  description: string;
   imageUrl: string;
   image?: string; // Legacy support for older components
-  thumbnailUrl?: string;
-  tags?: string[];
+  thumbnailUrl: string;
+  tags: string[];
   collectionId?: string;
-  userId?: string;
+  userId: string;
   teamId?: string;
   isPublic?: boolean;
   metadata?: Record<string, any>;
-  effects: string[]; // Required for card viewer
+  effects: string[];
   reactions?: Reaction[];
   comments?: Comment[];
   viewCount?: number;
@@ -249,7 +249,7 @@ export interface BaseCard extends BaseEntity {
   name?: string; // Legacy support
   cardStyle?: string;
   backTemplate?: string;
-  designMetadata?: DesignMetadata;
+  designMetadata: DesignMetadata;
   
   // Market data
   price?: number;

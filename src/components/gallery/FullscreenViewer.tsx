@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -36,31 +35,31 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
       console.log('FullscreenViewer: Loading card with ID:', cardId);
       
       // First try to find card directly from sampleCards
-      let card = sampleCards.find(c => c.id === cardId);
+      let foundCard = sampleCards.find(c => c.id === cardId);
       
       // If not found in sampleCards, try the cards context
-      if (!card) {
+      if (!foundCard) {
         console.log('FullscreenViewer: Card not found in sampleCards, checking context');
-        card = getCard ? getCard(cardId) : cards.find(c => c.id === cardId);
+        foundCard = getCard ? getCard(cardId) : cards.find(c => c.id === cardId);
       }
       
-      if (card) {
-        // Create a processed card with required fields and ensure all properties exist
+      if (foundCard) {
+        // Create a processed card with all required fields
         const processedCard: Card = {
-          ...card,
-          // Ensure required properties exist
-          description: card.description || '',
-          effects: card.effects || [],
-          title: card.title || 'Untitled Card',
-          tags: card.tags || [],
-          createdAt: card.createdAt || new Date().toISOString(),
-          updatedAt: card.updatedAt || new Date().toISOString(),
-          userId: card.userId || '',
-          // Make sure imageUrl is present
-          imageUrl: card.imageUrl || FALLBACK_IMAGE,
-          thumbnailUrl: card.thumbnailUrl || card.imageUrl || FALLBACK_IMAGE,
+          ...foundCard,
+          // Ensure required properties exist with default values
+          description: foundCard.description || '',
+          effects: foundCard.effects || [],
+          title: foundCard.title || 'Untitled Card',
+          tags: foundCard.tags || [],
+          createdAt: foundCard.createdAt || new Date().toISOString(),
+          updatedAt: foundCard.updatedAt || new Date().toISOString(),
+          userId: foundCard.userId || '',
+          // Make sure image URLs are present
+          imageUrl: foundCard.imageUrl || FALLBACK_IMAGE,
+          thumbnailUrl: foundCard.thumbnailUrl || foundCard.imageUrl || FALLBACK_IMAGE,
           // Add any other required fields with default values
-          designMetadata: card.designMetadata || {
+          designMetadata: foundCard.designMetadata || {
             cardStyle: {},
             textStyle: {},
             marketMetadata: {},

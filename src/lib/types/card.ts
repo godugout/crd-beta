@@ -17,11 +17,11 @@ export interface FabricSwatch extends FabricSwatchType {}
 export interface BaseCard {
   id: string;
   title: string;
-  description?: string;
-  imageUrl?: string;
-  thumbnailUrl?: string;
-  tags?: string[];
-  userId?: string;
+  description: string; // Changed from optional to required
+  imageUrl: string; // Changed from optional to required
+  thumbnailUrl: string; // Changed from optional to required
+  tags: string[]; // Changed from optional to required
+  userId: string; // Changed from optional to required
   collectionId?: string;
   metadata?: Record<string, any>;
   effects: string[]; // Required for card viewer
@@ -44,12 +44,12 @@ export interface BaseCard {
   name?: string;
   cardStyle?: string;
   backTemplate?: string;
-  createdAt?: string;
-  updatedAt?: string;
+  createdAt: string; // Changed from optional to required
+  updatedAt: string; // Changed from optional to required
+  designMetadata: any; // Changed from optional to required
 }
 
 export interface Card extends BaseCard {}
 
 // Re-export the new types for gradual migration
 export type { CardType as CardNew, FabricSwatchType as FabricSwatchNew };
-
