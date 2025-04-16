@@ -1,5 +1,6 @@
+
 import { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
 import HomePage from './pages/HomePage';
 import AboutPage from './pages/AboutPage';
@@ -30,7 +31,7 @@ function App() {
 
     try {
       const requiredDeps = [
-        { name: 'React Router', check: () => !!Router },
+        { name: 'React Router', check: () => !!Routes },
         { name: 'Routes Component', check: () => !!Routes },
         { name: 'CardProvider', check: () => !!CardProvider },
       ];
@@ -80,52 +81,50 @@ function App() {
 
   return (
     <SettingsProvider>
-      <Router>
-        <BreadcrumbProvider>
-          <div className="debug-info fixed bottom-4 left-4 bg-black/80 text-white p-2 text-xs z-50 rounded-md">
-            App Loaded | {new Date().toLocaleTimeString()} | {isAuthenticated ? 'Authenticated' : 'Not Authenticated'}
-          </div>
-          
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/emergency" element={<EmergencyPage />} />
+      <BreadcrumbProvider>
+        <div className="debug-info fixed bottom-4 left-4 bg-black/80 text-white p-2 text-xs z-50 rounded-md">
+          App Loaded | {new Date().toLocaleTimeString()} | {isAuthenticated ? 'Authenticated' : 'Not Authenticated'}
+        </div>
+        
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/emergency" element={<EmergencyPage />} />
 
-            {routes.map((route, index) => {
-              if (route.children) {
-                return (
-                  <Route key={`parent-${index}`} path={route.path} element={route.element}>
-                    {route.children.map((childRoute, childIndex) => (
-                      <Route 
-                        key={`child-${childIndex}`}
-                        path={childRoute.path}
-                        element={childRoute.element}
-                      />
-                    ))}
-                  </Route>
-                );
-              }
-              
+          {routes.map((route, index) => {
+            if (route.children) {
               return (
-                <Route 
-                  key={`route-${index}`} 
-                  path={route.path} 
-                  element={route.element} 
-                />
+                <Route key={`parent-${index}`} path={route.path} element={route.element}>
+                  {route.children.map((childRoute, childIndex) => (
+                    <Route 
+                      key={`child-${childIndex}`}
+                      path={childRoute.path}
+                      element={childRoute.element}
+                    />
+                  ))}
+                </Route>
               );
-            })}
-
-            <Route path="/home" element={<HomePage />} />
-            <Route path="/about" element={<AboutPage />} />
-            <Route path="/contact" element={<ContactPage />} />
-            <Route path="/cards" element={<CardCollectionPage />} />
-            <Route path="/baseball-card-viewer" element={<BaseballCardViewer />} />
-            <Route path="/baseball-action-figure" element={<BaseballActionFigure />} />
+            }
             
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-          <Toaster />
-        </BreadcrumbProvider>
-      </Router>
+            return (
+              <Route 
+                key={`route-${index}`} 
+                path={route.path} 
+                element={route.element} 
+              />
+            );
+          })}
+
+          <Route path="/home" element={<HomePage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/contact" element={<ContactPage />} />
+          <Route path="/cards" element={<CardCollectionPage />} />
+          <Route path="/baseball-card-viewer" element={<BaseballCardViewer />} />
+          <Route path="/baseball-action-figure" element={<BaseballActionFigure />} />
+          
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+        <Toaster />
+      </BreadcrumbProvider>
     </SettingsProvider>
   );
 }
