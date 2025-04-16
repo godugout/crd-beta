@@ -6,6 +6,7 @@ import CardParticleSystem from '@/components/particles/CardParticleSystem';
 import { useParticleEffects } from '@/hooks/useParticleEffects';
 import GestureTutorial from '@/components/tutorials/GestureTutorial';
 import { toast } from 'sonner';
+import { useBrandTheme } from '@/context/BrandThemeContext';
 
 interface CardDisplayProps {
   card: Card;
@@ -43,6 +44,7 @@ const CardDisplay: React.FC<CardDisplayProps> = ({
   lightingSettings
 }) => {
   const [showTutorial, setShowTutorial] = useState(false);
+  const { currentTheme } = useBrandTheme();
 
   // Setup particle effects for the card
   const {
@@ -134,9 +136,9 @@ const CardDisplay: React.FC<CardDisplayProps> = ({
           className={`card-face card-front absolute w-full h-full rounded-xl overflow-hidden ${activeEffects.join(' ')}`}
           style={{
             backfaceVisibility: 'hidden',
-            backgroundColor: '#f8f8f8',
+            backgroundColor: currentTheme.cardBackgroundColor,
             boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
-            border: '1px solid rgba(255,255,255,0.2)',
+            border: `1px solid ${currentTheme.accentColor}20`,
           }}
         >
           {/* Card Front Content */}
@@ -185,32 +187,39 @@ const CardDisplay: React.FC<CardDisplayProps> = ({
           className={`card-face card-back absolute w-full h-full rounded-xl overflow-hidden ${activeEffects.join(' ')}`}
           style={{
             backfaceVisibility: 'hidden',
-            backgroundColor: '#252525',
+            backgroundColor: currentTheme.backgroundColor,
             transform: 'rotateY(180deg)',
             boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
-            border: '1px solid rgba(255,255,255,0.1)',
+            border: `1px solid ${currentTheme.accentColor}20`,
           }}
         >
           {/* Card Back Content */}
           <div className="p-6 flex flex-col h-full">
-            <h2 className="text-xl font-bold text-white mb-2">{card.title || 'Card Title'}</h2>
+            <h2 className="text-xl font-bold mb-2" style={{ color: currentTheme.primaryColor }}>{card.title || 'Card Title'}</h2>
             
             {card.description && (
-              <p className="text-gray-300 text-sm mb-4 line-clamp-3">{card.description}</p>
+              <p className="text-sm mb-4 line-clamp-3" style={{ color: currentTheme.textColor }}>{card.description}</p>
             )}
             
             <div className="mt-auto">
               {card.tags && card.tags.length > 0 && (
                 <div className="flex flex-wrap gap-1 mt-2">
                   {card.tags.map((tag, i) => (
-                    <span key={i} className="px-2 py-1 bg-gray-800 text-gray-400 rounded-md text-xs">
+                    <span 
+                      key={i} 
+                      className="px-2 py-1 rounded-md text-xs"
+                      style={{ 
+                        backgroundColor: `${currentTheme.secondaryColor}20`, 
+                        color: currentTheme.secondaryColor 
+                      }}
+                    >
                       {tag}
                     </span>
                   ))}
                 </div>
               )}
               
-              <div className="border-t border-gray-700 mt-4 pt-4 text-gray-400 text-sm flex justify-between">
+              <div className="border-t mt-4 pt-4 text-sm flex justify-between" style={{ borderColor: `${currentTheme.textColor}20`, color: `${currentTheme.textColor}80` }}>
                 <span>{card.year}</span>
                 <span>{card.id}</span>
               </div>

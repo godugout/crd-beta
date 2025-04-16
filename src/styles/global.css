@@ -1,12 +1,28 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* Theme CSS Variables */
+:root {
+  --primary: #0000FF;
+  --secondary: #FFD700;
+  --accent: #FF6B00;
+  --background: #F8F8F8;
+  --foreground: #1A1A1A;
+  --card-background: #FFFFFF;
+  --header-background: #0000FF;
+  --nav-text: #FFFFFF;
+  --button-primary: #0000FF;
+  --button-secondary: #FFD700;
+  --button-text: #FFFFFF;
+}
+
 /* General styles */
 body {
   font-family: 'Arial', sans-serif;
-  background-color: #1a202c;
-  color: #fff;
+  background-color: var(--background);
+  color: var(--foreground);
   line-height: 1.6;
 }
 
@@ -22,12 +38,17 @@ body {
 }
 
 .btn-primary {
-  @apply bg-blue-500 hover:bg-blue-700 text-white;
+  background-color: var(--button-primary);
+  color: var(--button-text);
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
 }
 
 /* Card specific styles */
 .card-base {
-  background-color: #2d3748;
+  background-color: var(--card-background);
   border-radius: 0.5rem;
   padding: 1rem;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -37,20 +58,28 @@ body {
   font-size: 1.25rem;
   font-weight: bold;
   margin-bottom: 0.5rem;
+  color: var(--primary);
 }
 
 .card-description {
-  color: #a0aec0;
+  color: var(--foreground);
 }
 
 /* Navigation styles */
 .nav-link {
-  @apply text-blue-300 hover:text-blue-100 px-3 py-2 rounded-md text-sm font-medium;
+  @apply px-3 py-2 rounded-md text-sm font-medium;
+  color: var(--nav-text);
+}
+
+.nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 /* Form styles */
 .form-input {
-  @apply shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline;
+  @apply shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline;
+  background-color: var(--background);
+  color: var(--foreground);
 }
 
 /* Effect styles */
@@ -156,7 +185,7 @@ body {
   transform: translate(-50%, -50%);
   width: 200px;
   height: 300px;
-  background-color: #374151;
+  background-color: var(--card-background);
   border-radius: 0.5rem;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
@@ -219,4 +248,21 @@ body {
 .backface-hidden {
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
+}
+
+/* Brand Theme Component Styles */
+.theme-preview-card {
+  border: 2px solid transparent;
+  transition: all 0.2s ease-in-out;
+}
+
+.theme-preview-card:hover {
+  border-color: var(--primary);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.theme-active {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px var(--primary);
 }
