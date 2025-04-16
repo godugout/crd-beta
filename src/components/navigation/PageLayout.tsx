@@ -77,8 +77,8 @@ const PageLayout: React.FC<PageLayoutProps> = ({
       
       {!hideNavigation && (
         <SecondaryNavbar
-          title={stringTitle}  // Use stringTitle instead of title
-          description={stringDescription}  // Use stringDescription
+          title={stringTitle}
+          description={stringDescription}
           hideBreadcrumbs={hideBreadcrumbs}
           actions={actions}
           hideDescription={hideDescription}

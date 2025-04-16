@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
+import { User } from '@/lib/types';
 
 type AuthMode = 'signin' | 'signup';
 
@@ -31,7 +32,8 @@ const Auth: React.FC = () => {
         await signIn(email, password);
         toast.success('Signed in successfully');
       } else {
-        await signUp(email, password, name);
+        // Pass name as userData object for signup
+        await signUp(email, password, { name } as Partial<User>);
         toast.success('Account created successfully');
       }
       navigate(from, { replace: true });
