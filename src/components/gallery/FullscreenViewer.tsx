@@ -45,20 +45,25 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
       }
       
       if (card) {
-        // Validate and ensure card has valid image URLs
-        const validCard = { ...card };
+        // Create a processed card with required fields
+        const processedCard: Card = {
+          ...card,
+          // Ensure required properties exist
+          description: card.description || '',
+          effects: card.effects || []
+        };
         
         // Always initialize with fallback first, then update if the real image loads
         setValidImageUrl(FALLBACK_IMAGE);
         
-        if (validCard.imageUrl && 
-            validCard.imageUrl !== 'undefined' && 
-            typeof validCard.imageUrl === 'string') {
+        if (processedCard.imageUrl && 
+            processedCard.imageUrl !== 'undefined' && 
+            typeof processedCard.imageUrl === 'string') {
           // Validate the image URL by preloading it
           const img = new Image();
           img.onload = () => {
-            console.log('FullscreenViewer: Image validated successfully:', validCard.imageUrl);
-            setValidImageUrl(validCard.imageUrl || FALLBACK_IMAGE);
+            console.log('FullscreenViewer: Image validated successfully:', processedCard.imageUrl);
+            setValidImageUrl(processedCard.imageUrl || FALLBACK_IMAGE);
           };
           img.onerror = () => {
             console.warn('FullscreenViewer: Image validation failed, using fallback');
@@ -69,13 +74,13 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
               variant: "destructive"
             });
           };
-          img.src = validCard.imageUrl;
+          img.src = processedCard.imageUrl;
         } else {
           console.warn('FullscreenViewer: Card has invalid imageUrl, using fallback');
         }
         
         console.log('FullscreenViewer: Card loaded successfully');
-        setCurrentCard(validCard);
+        setCurrentCard(processedCard);
       } else {
         console.error('FullscreenViewer: Card not found with ID:', cardId);
         setError(`Card with ID ${cardId} not found`);

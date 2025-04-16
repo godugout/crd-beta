@@ -57,7 +57,12 @@ const CardDetail = () => {
       console.log('CardDetail: Found card:', foundCard.title, 'with imageUrl:', foundCard.imageUrl);
       
       // Create a new object to avoid mutating the original
-      const processedCard = { ...foundCard };
+      const processedCard: Card = { 
+        ...foundCard,
+        // Ensure required properties exist
+        description: foundCard.description || '',
+        effects: foundCard.effects || []
+      };
       
       // Validate image URLs
       if (!processedCard.imageUrl || processedCard.imageUrl === 'undefined' || typeof processedCard.imageUrl !== 'string') {
