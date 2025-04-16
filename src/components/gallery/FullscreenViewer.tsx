@@ -1,8 +1,9 @@
+
 import React, { useRef, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCards } from '@/context/CardContext';
 import { toast } from 'sonner';
-import { X, ChevronDown, ChevronUp } from 'lucide-react';
+import { X, ChevronDown, ChevronUp, Lightbulb } from 'lucide-react';
 import CardDisplay from './viewer-components/CardDisplay';
 import ViewerControls from './viewer-components/ViewerControls';
 import InfoPanel from './viewer-components/InfoPanel';
@@ -11,6 +12,9 @@ import { useCardInteraction } from '@/hooks/useCardInteraction';
 import CardEffectsPanel from './viewer-components/CardEffectsPanel';
 import { useFeatureEnabled } from '@/hooks/useFeatureFlag';
 import { Card } from '@/lib/types/cardTypes';
+import LightingControls from './viewer-components/LightingControls';
+import { useCardLighting } from '@/hooks/useCardLighting';
+import '@/styles/card-lighting.css';
 
 interface FullscreenViewerProps {
   cardId: string;
@@ -42,6 +46,16 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
     setupWheelListener
   } = useCardInteraction({ containerRef, cardRef });
 
+  // Add lighting system
+  const {
+    lightingSettings,
+    updateLightPosition,
+    toggleFollowPointer,
+    toggleAutoRotate,
+    updateLightSetting,
+    applyPreset
+  } = useCardLighting('display_case');
+
   const [isFlipped, setIsFlipped] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
   const [activeEffects, setActiveEffects] = useState<string[]>([]);
@@ -59,6 +73,20 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
 
   const [featuresBarMinimized, setFeaturesBarMinimized] = useState(false);
   const [showExplodedView, setShowExplodedView] = useState(false);
+  const [showLighting, setShowLighting] = useState(false);
+
+  // Handle mouse move for both card interaction and lighting
+  const handleCombinedMouseMove = (e: React.MouseEvent) => {
+    handleMouseMove(e);
+    
+    // Update lighting if container ref exists
+    if (containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width;
+      const y = (e.clientY - rect.top) / rect.height;
+      updateLightPosition(x, y);
+    }
+  };
 
   useEffect(() => {
     setPosition({ x: 10, y: 15 });
@@ -107,6 +135,13 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
     setTimeout(() => {
       setShowExplodedView(true);
     }, 100);
+  };
+
+  const handleToggleLighting = () => {
+    setShowLighting(prev => !prev);
+    if (!showLighting) {
+      toast.info('Lighting controls activated');
+    }
   };
 
   if (!card) {
@@ -177,6 +212,14 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
               </button>
               
               <button 
+                onClick={handleToggleLighting}
+                className={`text-white hover:text-blue-300 transition-colors ${showLighting ? 'text-blue-400' : ''}`}
+                title="Lighting"
+              >
+                <Lightbulb size={16} className="inline mr-1" /> Lighting
+              </button>
+              
+              <button 
                 onClick={() => setShowInfo(!showInfo)}
                 className={`text-white hover:text-blue-300 transition-colors ${showInfo ? 'text-blue-400' : ''}`}
                 title="Info"
@@ -191,7 +234,7 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
       <div 
         ref={containerRef}
         className="relative flex-1 flex items-center justify-center overflow-hidden z-10"
-        onMouseMove={handleMouseMove}
+        onMouseMove={handleCombinedMouseMove}
       >
         <CardDisplay
           card={card}
@@ -208,9 +251,20 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
           mousePosition={mousePosition}
           touchImprintAreas={touchImprintAreas}
           showExplodedView={showExplodedView}
+          lightingSettings={lightingSettings}
         />
         
-        <div className="absolute left-4 top-20 bottom-4 w-80 pointer-events-auto">
+        <div className="absolute left-4 top-20 bottom-4 w-80 pointer-events-auto flex flex-col gap-4 overflow-y-auto">
+          {showLighting && (
+            <LightingControls
+              lightingSettings={lightingSettings}
+              onToggleFollowPointer={toggleFollowPointer}
+              onToggleAutoRotate={toggleAutoRotate}
+              onUpdateLightSetting={updateLightSetting}
+              onApplyPreset={applyPreset}
+            />
+          )}
+          
           <CardEffectsPanel 
             activeEffects={activeEffects}
             onToggleEffect={handleEffectToggle}

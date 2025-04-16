@@ -1,14 +1,16 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card } from '@/lib/types';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useKeyboardControls } from '@/hooks/useKeyboardControls';
+import { useCardLighting } from '@/hooks/useCardLighting';
 
 interface CardViewerProps {
   card: Card;
   isFlipped: boolean;
   activeEffects: string[];
   effectIntensities: Record<string, number>;
+  showLightingControls?: boolean;
 }
 
 const CardViewer: React.FC<CardViewerProps> = ({
@@ -16,12 +18,19 @@ const CardViewer: React.FC<CardViewerProps> = ({
   isFlipped,
   activeEffects,
   effectIntensities,
+  showLightingControls = false
 }) => {
   const [rotation, setRotation] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [startPosition, setStartPosition] = useState({ x: 0, y: 0 });
   const [imageError, setImageError] = useState(false);
   const [imageLoadAttempted, setImageLoadAttempted] = useState(false);
+  
+  // Add lighting system
+  const { 
+    lightingSettings, 
+    updateLightPosition
+  } = useCardLighting('display_case');
 
   // Default fallback image when card image fails to load
   const fallbackImage = 'https://images.unsplash.com/photo-1518770660439-4636190af475';
@@ -39,6 +48,14 @@ const CardViewer: React.FC<CardViewerProps> = ({
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
+    // Update light position based on mouse position
+    const el = e.currentTarget;
+    const rect = el.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width;
+    const y = (e.clientY - rect.top) / rect.height;
+    updateLightPosition(x, y);
+
+    // Handle dragging
     if (isDragging) {
       setRotation({
         x: (e.clientX - startPosition.x) * 0.5,
@@ -81,12 +98,16 @@ const CardViewer: React.FC<CardViewerProps> = ({
     console.log('Card changed, resetting image error state for card:', card.id);
   }, [card.id]);
 
-  // Add extra logging to help debug the issue
+  // Add lighting CSS variables to the root
   useEffect(() => {
-    console.log('CardViewer mounted/updated for card:', card.id);
-    console.log('Card image URL:', card.imageUrl);
-    console.log('Card active effects:', activeEffects);
-  }, [card, activeEffects]);
+    document.documentElement.style.setProperty('--light-x', `${lightingSettings.primaryLight.x}px`);
+    document.documentElement.style.setProperty('--light-y', `${lightingSettings.primaryLight.y}px`);
+    document.documentElement.style.setProperty('--light-z', `${lightingSettings.primaryLight.z}px`);
+    document.documentElement.style.setProperty('--light-intensity', lightingSettings.primaryLight.intensity.toString());
+    document.documentElement.style.setProperty('--light-color', lightingSettings.primaryLight.color);
+    document.documentElement.style.setProperty('--ambient-intensity', lightingSettings.ambientLight.intensity.toString());
+    document.documentElement.style.setProperty('--ambient-color', lightingSettings.ambientLight.color);
+  }, [lightingSettings]);
 
   return (
     <div 
@@ -112,7 +133,7 @@ const CardViewer: React.FC<CardViewerProps> = ({
             transition={{ duration: 0.6 }}
             style={{ backfaceVisibility: 'hidden' }}
           >
-            <div className={`w-full h-full rounded-xl overflow-hidden shadow-xl ${
+            <div className={`w-full h-full rounded-xl overflow-hidden shadow-xl card-with-lighting ${
               activeEffects.map(effect => `effect-${effect.toLowerCase()}`).join(' ')
             }`}>
               {/* Placeholder or loading state */}
@@ -153,6 +174,9 @@ const CardViewer: React.FC<CardViewerProps> = ({
                   }}
                 />
               ))}
+
+              {/* Dynamic lighting overlay */}
+              <div className="absolute inset-0 lighting-overlay"></div>
             </div>
           </motion.div>
         </AnimatePresence>
