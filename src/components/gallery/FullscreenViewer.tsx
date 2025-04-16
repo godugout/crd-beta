@@ -106,7 +106,8 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
   };
 
   useEffect(() => {
-    setPosition({ x: 10, y: 15 });
+    // Update position to include z coordinate to match the type requirements
+    setPosition({ x: 10, y: 15, z: 0 });
   }, [setPosition]);
 
   useEffect(() => {
@@ -270,7 +271,7 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
       >
         <CardDisplay
           card={card}
-          rotation={position}
+          rotation={{ x: position.x, y: position.y, z: position.z || 0 }}
           isFlipped={isFlipped}
           zoom={zoom}
           isDragging={isDragging}
@@ -290,7 +291,7 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
         <CardParticleSystem
           containerRef={containerRef}
           particleState={particleState}
-          cardRotation={position}
+          cardRotation={{ x: position.x, y: position.y, z: position.z || 0 }}
           isFlipped={isFlipped}
           isMoving={isDragging || isAutoRotating}
         />

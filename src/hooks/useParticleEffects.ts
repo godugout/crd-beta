@@ -76,7 +76,7 @@ export const useParticleEffects = (options: ParticleEffectsOptions = {}) => {
     onPerformanceChange
   } = options;
 
-  const { isMobile, optimizeForMobile } = useMobileOptimization();
+  const { isMobile, reduceEffects } = useMobileOptimization();
 
   // Initialize state with default settings
   const [state, setState] = useState<ParticleSystemState>({
