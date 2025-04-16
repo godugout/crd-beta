@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Card } from '@/lib/types';
-import { CardEffectsPanel } from '@/components/immersive-viewer/CardEffectsPanel';
+import CardEffectsPanel from '@/components/immersive-viewer/CardEffectsPanel';
 
 interface CardDetailPanelProps {
   card: Card;
@@ -56,10 +56,11 @@ const CardDetailPanel: React.FC<CardDetailPanelProps> = ({
               <dd>{card.year}</dd>
             </>
           )}
-          {card.series && (
+          {/* Change 'series' to another property that exists in the Card type */}
+          {card.set && (
             <>
               <dt className="text-gray-400">Series</dt>
-              <dd>{card.series}</dd>
+              <dd>{card.set}</dd>
             </>
           )}
           {card.rarity && (

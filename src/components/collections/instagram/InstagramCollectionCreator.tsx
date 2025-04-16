@@ -19,13 +19,15 @@ const InstagramCollectionCreator: React.FC = () => {
       // Create a new collection with Instagram content
       const newCollection: Collection = {
         id: `instagram-${Date.now()}`,
-        title: `${username}'s Instagram`,
+        name: `${username}'s Instagram`,
         description: `Photos imported from Instagram account @${username}`,
         cards: [],
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         coverImageUrl: 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7',
-        tags: ['instagram', 'social', 'imported']
+        tags: ['instagram', 'social', 'imported'],
+        userId: 'user-1',
+        isPublic: true
       };
       
       // Add the collection
@@ -52,13 +54,15 @@ const InstagramCollectionCreator: React.FC = () => {
       
       const newCollection: Collection = {
         id: `instagram-auth-${Date.now()}`,
-        title: `${username}'s Instagram (Authorized)`,
+        name: `${username}'s Instagram (Authorized)`,
         description: `Authorized connection to @${username}`,
         cards: [],
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         coverImageUrl: 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7',
-        tags: ['instagram', 'social', 'imported', 'authorized']
+        tags: ['instagram', 'social', 'imported', 'authorized'],
+        userId: 'user-1',
+        isPublic: true
       };
       
       // Add the collection
@@ -82,13 +86,15 @@ const InstagramCollectionCreator: React.FC = () => {
       
       const disconnectionRecord: Collection = {
         id: `instagram-disconnect-${Date.now()}`,
-        title: 'Instagram Disconnection Record',
+        name: 'Instagram Disconnection Record',
         description: `Disconnected from @${username}`,
         cards: [],
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         coverImageUrl: 'https://images.unsplash.com/photo-1611605698335-8b1569810432',
-        tags: ['instagram', 'disconnect']
+        tags: ['instagram', 'disconnect'],
+        userId: 'user-1',
+        isPublic: true
       };
       
       // Record the disconnection
