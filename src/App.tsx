@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { Toaster } from '@/components/ui/toaster'; // Updated to use shadcn's Toaster
+import { Toaster } from '@/components/ui/toaster';
 import HomePage from './pages/HomePage';
 import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
@@ -13,7 +13,6 @@ import { CardProvider } from './context/CardContext';
 import { SettingsProvider } from './context/SettingsContext';
 import EmergencyPage from './pages/EmergencyPage';
 
-// Import all routes
 import { routes } from './routes/index';
 
 function App() {
@@ -21,16 +20,13 @@ function App() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Simulate loading time
     const timer = setTimeout(() => {
       setLoading(false);
     }, 600);
     
-    // Log that the app is starting
     console.log('App is initializing', { routes });
 
     try {
-      // Check if any critical dependencies are missing
       const requiredDeps = [
         { name: 'React Router', check: () => !!Router },
         { name: 'Routes Component', check: () => !!Routes },
@@ -49,7 +45,6 @@ function App() {
     return () => clearTimeout(timer);
   }, []);
 
-  // Add error boundary for the entire app
   if (error) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-red-100">
@@ -90,15 +85,10 @@ function App() {
           </div>
           
           <Routes>
-            {/* Root fallback to HomePage */}
             <Route path="/" element={<HomePage />} />
-            
-            {/* Emergency route */}
             <Route path="/emergency" element={<EmergencyPage />} />
 
-            {/* Import all routes from the routes configuration */}
             {routes.map((route, index) => {
-              // Handle nested routes
               if (route.children) {
                 return (
                   <Route key={`parent-${index}`} path={route.path} element={route.element}>
@@ -113,7 +103,6 @@ function App() {
                 );
               }
               
-              // Handle standard routes
               return (
                 <Route 
                   key={`route-${index}`} 
@@ -123,22 +112,35 @@ function App() {
               );
             })}
 
-            {/* Legacy routes for backward compatibility */}
             <Route path="/home" element={<HomePage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/cards" element={<CardCollectionPage />} />
-            {/* Fix the ImmersiveCardViewer route by providing a dummy card prop that will be replaced by the component's logic */}
-            <Route path="/view/:id" element={<ImmersiveCardViewer card={{
-              id: "",
-              title: "",
-              imageUrl: "",
-              effects: []
-            }} />} />
+            <Route path="/view/:id" element={
+              <ImmersiveCardViewer card={{
+                id: "",
+                title: "",
+                imageUrl: "",
+                effects: [],
+                userId: "",
+                createdAt: "",
+                updatedAt: "",
+                description: "",
+                stats: {
+                  battingAverage: "",
+                  homeRuns: "",
+                  rbis: "",
+                  era: "",
+                  wins: "",
+                  strikeouts: "",
+                  careerYears: "",
+                  ranking: ""
+                }
+              }} />
+            } />
             <Route path="/baseball-card-viewer" element={<BaseballCardViewer />} />
             <Route path="/baseball-action-figure" element={<BaseballActionFigure />} />
             
-            {/* 404 Route */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Router>

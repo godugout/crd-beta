@@ -24,11 +24,9 @@ export const CardProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { user } = useAuth();
   
   useEffect(() => {
-    // Simulate loading cards from an API
     const loadCards = async () => {
       setIsLoading(true);
       try {
-        // Simulate API call
         setTimeout(() => {
           setCards(sampleCards);
           setIsLoading(false);
@@ -42,21 +40,19 @@ export const CardProvider: React.FC<{ children: React.ReactNode }> = ({ children
     loadCards();
   }, []);
   
-  // Update the addCard function to use imageUrl instead of image
   const addCard = async (cardData: Partial<Card>): Promise<Card> => {
-    // Create a new card with default values and user provided data
     const newCard: Card = {
       ...cardData as Card,
       id: cardData.id || uuidv4(),
       title: cardData.title || 'Untitled Card',
       description: cardData.description || '',
-      imageUrl: cardData.imageUrl || '', // Use imageUrl instead of image
-      thumbnailUrl: cardData.thumbnailUrl || cardData.imageUrl || '', // Use imageUrl as fallback
+      imageUrl: cardData.imageUrl || '',
+      thumbnailUrl: cardData.thumbnailUrl || cardData.imageUrl || '',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       userId: user?.id || 'anonymous',
       effects: cardData.effects || [],
-      creatorId: user?.id // Add creatorId for proper typing
+      creatorId: user?.id
     };
     
     setCards(prevCards => [newCard, ...prevCards]);
@@ -97,6 +93,14 @@ export const CardProvider: React.FC<{ children: React.ReactNode }> = ({ children
       {children}
     </CardContext.Provider>
   );
+};
+
+export const useCardContext = () => {
+  const context = useContext(CardContext);
+  if (context === undefined) {
+    throw new Error('useCardContext must be used within a CardProvider');
+  }
+  return context;
 };
 
 export const useCards = () => {
