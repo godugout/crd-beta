@@ -84,7 +84,7 @@ const BaseballCardSidebar = () => {
                     <Card 
                       key={card.id} 
                       className={`overflow-hidden cursor-pointer transition-all duration-200 hover:bg-gray-700 ${id === card.id ? 'bg-gray-700 ring-2 ring-blue-500' : 'bg-gray-800'}`}
-                      onClick={() => navigate(`/baseball-card-viewer/${card.id}`)}
+                      onClick={() => navigate(`/cards/auctions/${card.id}`)}
                     >
                       <CardContent className="p-3 flex space-x-3">
                         <div className="h-16 w-12 rounded overflow-hidden bg-gray-900 flex-shrink-0">

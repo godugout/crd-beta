@@ -10,8 +10,7 @@ export const baseballRoutes: RouteObject[] = [
     element: <BaseballArchive />,
   },
   {
-    path: "/cards/auction/:id?",
+    path: "/cards/auctions/:id?",
     element: <BaseballCardViewer />,
   },
 ];
-

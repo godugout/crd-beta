@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useBaseballCard } from './hooks/useBaseballCard';
 import CardContainer from './components/CardContainer';
@@ -40,7 +39,7 @@ const BaseballCardRenderer: React.FC = () => {
           <p className="text-gray-300 mb-6">{error || "The requested baseball card couldn't be loaded."}</p>
           {allCards.length > 0 && (
             <Button 
-              onClick={() => navigate('/baseball-card-viewer/' + allCards[0].id)}
+              onClick={() => navigate('/cards/auctions/' + allCards[0].id)}
               className="flex items-center gap-2"
             >
               <RefreshCcw className="h-4 w-4" />

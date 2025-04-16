@@ -37,7 +37,7 @@ const MainNavigation: React.FC = () => {
         <NavItem to="/series" icon={Album} label="Series" isActive={isActive('/series')} />
         <NavItem to="/decks" icon={Library} label="Decks" isActive={isActive('/decks')} />
         <NavItem to="/cards/create" icon={PlusCircle} label="Create Card" isActive={isActive('/cards/create')} />
-        <NavItem to="/teams/oakland" icon={Users} label="Oakland A's" isActive={isActive('/teams')} />
+        <NavItem to="/cards/auctions" icon={Users} label="Auctions" isActive={isActive('/cards/auctions')} />
       </div>
       
       <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700 space-y-1">
