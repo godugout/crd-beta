@@ -26,7 +26,8 @@ const CommunityFeed: React.FC = () => {
             imageUrl: 'https://placekitten.com/200/300',
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
-            userId: 'user123'
+            userId: 'user123',
+            effects: [] // Add required effects property
           },
           {
             id: '2',
@@ -35,7 +36,8 @@ const CommunityFeed: React.FC = () => {
             imageUrl: 'https://placekitten.com/200/301',
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
-            userId: 'user456'
+            userId: 'user456',
+            effects: [] // Add required effects property
           }
         ];
         

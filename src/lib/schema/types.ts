@@ -1,5 +1,5 @@
-
 // Define base types used throughout the application
+import { FabricSwatch } from '@/lib/types/card';
 
 export interface Card {
   id: string;
@@ -59,15 +59,6 @@ export interface User {
   username?: string;
 }
 
-export interface FabricSwatch {
-  type: string;
-  team: string;
-  year: string;
-  manufacturer: string;
-  position: string;
-  size: string;
-}
-
 export interface Team {
   id: string;
   name: string;
@@ -109,6 +100,8 @@ export interface Reaction {
   commentId?: string;
   type: 'like' | 'love' | 'wow' | 'haha' | 'sad' | 'angry';
   createdAt: string;
+  targetType?: 'card' | 'comment' | string; // Added to match Reaction in interaction.ts
+  targetId?: string; // Added to match Reaction in interaction.ts
   user?: User;
 }
 

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { Card } from '@/lib/types';
@@ -16,6 +15,7 @@ interface CardRecord {
   updated_at: string;
   user_id?: string;
   is_public?: boolean;
+  effects: [];
 }
 
 export function useArCardViewer(id?: string) {
@@ -60,7 +60,8 @@ export function useArCardViewer(id?: string) {
               thumbnailUrl: "/lovable-uploads/a38aa501-ea2d-4416-9699-1e69b1826233.png",
               tags: ["baseball", "sample", "demo"],
               createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(), // Add missing updatedAt field
+              updatedAt: new Date().toISOString(),
+              effects: []
             },
             {
               id: "sample-2",
@@ -70,7 +71,8 @@ export function useArCardViewer(id?: string) {
               thumbnailUrl: "/lovable-uploads/667e6ad2-af96-40ac-bd16-a69778e14b21.png",
               tags: ["trading", "sample", "demo"],
               createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(), // Add missing updatedAt field
+              updatedAt: new Date().toISOString(),
+              effects: []
             }
           ];
           
@@ -91,8 +93,9 @@ export function useArCardViewer(id?: string) {
             thumbnailUrl: card.thumbnail_url || card.image_url || '',
             tags: card.tags || [],
             createdAt: card.created_at,
-            updatedAt: card.updated_at, // Add missing updatedAt field
-            collectionId: card.collection_id
+            updatedAt: card.updated_at,
+            collectionId: card.collection_id,
+            effects: []
           }));
           
           console.log("Formatted cards:", formattedCards);

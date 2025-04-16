@@ -12,9 +12,11 @@ export interface FabricSwatch {
   size: string;
 }
 
-export interface Card extends BaseEntity {
+// Base Card interface that contains all common properties
+export interface BaseCard {
+  id: string;
   title: string;
-  description?: string; // Make description optional to match other Card interfaces
+  description?: string;
   imageUrl?: string;
   thumbnailUrl?: string;
   tags?: string[];
@@ -41,4 +43,8 @@ export interface Card extends BaseEntity {
   name?: string;
   cardStyle?: string;
   backTemplate?: string;
+  createdAt: string;
+  updatedAt: string;
 }
+
+export interface Card extends BaseCard {}
