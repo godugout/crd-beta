@@ -91,7 +91,7 @@ const CardViewerPage = () => {
       >
         <div className="container mx-auto px-4 py-6">
           <div className="flex flex-col md:flex-row md:items-start gap-8">
-            <div className="w-full md:w-2/3 mx-auto md:mx-0 max-w-xl">
+            <div className="w-full md:w-2/3 mx-auto md:mx-0 max-w-xl relative">
               <CardViewer 
                 card={card}
                 onFullscreenToggle={() => setFullscreen(true)}

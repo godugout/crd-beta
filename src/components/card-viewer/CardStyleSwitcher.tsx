@@ -30,10 +30,10 @@ const CardStyleSwitcher: React.FC<CardStyleSwitcherProps> = ({
   };
   
   return (
-    <div className={`fixed bottom-4 ${expanded ? 'left-4 right-4' : 'left-1/2 transform -translate-x-1/2'} transition-all duration-300`}>
-      <div className="bg-black/50 backdrop-blur-sm rounded-lg p-2 flex items-center justify-center">
+    <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50">
+      <div className="bg-black/80 backdrop-blur-sm rounded-lg p-3 shadow-lg">
         {expanded ? (
-          <div className="flex flex-wrap gap-2 w-full justify-center">
+          <div className="flex flex-wrap gap-2 justify-center">
             {cardStyles.map((style) => (
               <Button
                 key={style.id}
@@ -43,14 +43,14 @@ const CardStyleSwitcher: React.FC<CardStyleSwitcherProps> = ({
                 className={`flex items-center space-x-1 ${activeStyle === style.id ? 'bg-blue-600' : 'bg-gray-700'}`}
               >
                 {style.icon}
-                <span>{style.name}</span>
+                <span className="ml-1">{style.name}</span>
               </Button>
             ))}
             <Button 
               size="sm" 
               variant="outline"
               onClick={() => setExpanded(false)}
-              className="ml-2"
+              className="ml-2 bg-gray-800 text-white"
             >
               Hide
             </Button>
@@ -60,7 +60,7 @@ const CardStyleSwitcher: React.FC<CardStyleSwitcherProps> = ({
             size="sm"
             variant="ghost"
             onClick={() => setExpanded(true)}
-            className="text-white flex items-center"
+            className="text-white flex items-center bg-black/50 hover:bg-black/70"
           >
             <Sparkles size={16} className="mr-2" />
             <span>Visual Styles</span>

@@ -1,20 +1,43 @@
 
-@import './base.css';
 @import './holographic.css';
 @import './refractor.css';
-@import './metallic.css';
-@import './special.css';
 @import './vintage.css';
+@import './gold-foil.css';
+@import './prismatic.css';
 
-/* Media query for larger screens */
+/* Base card effect styles */
+.card-effect {
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/* Light reflection layer */
+.light-reflection-layer {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    rgba(255, 255, 255, 0.7) 0%,
+    rgba(255, 255, 255, 0) 50%
+  );
+  opacity: 0.4;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* Ensure effects are visible on different screen sizes */
 @media (min-width: 768px) {
   .effect-holographic::before,
   .effect-holographic::after,
   .effect-refractor::before,
   .effect-refractor::after,
-  .effect-chrome::before,
-  .effect-chrome::after,
-  .effect-vintage::before {
-    opacity: calc(1.2 * var(--holographic-intensity, 0.8));
+  .effect-vintage::before,
+  .effect-goldFoil::before,
+  .effect-goldFoil::after,
+  .effect-prismatic::before,
+  .effect-prismatic::after {
+    opacity: 1.2;
   }
 }

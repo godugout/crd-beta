@@ -1,0 +1,40 @@
+
+/* Prismatic effect */
+.effect-prismatic {
+  position: relative;
+}
+
+.effect-prismatic::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: conic-gradient(
+    from calc(var(--mouse-x, 0.5) * 360deg),
+    #ff0000, #ff8000, #ffff00, #00ff00, #00ffff, #0000ff, #8000ff, #ff0080, #ff0000
+  );
+  background-size: 400% 400%;
+  background-position: var(--mouse-x, 50%) var(--mouse-y, 50%);
+  mix-blend-mode: color-dodge;
+  opacity: var(--prismatic-intensity, 0.6);
+  z-index: 2;
+  pointer-events: none;
+  border-radius: 0.5rem;
+}
+
+.effect-prismatic::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(255, 255, 255, 0.1) 1px,
+    rgba(255, 255, 255, 0.1) 2px,
+    transparent 3px
+  );
+  opacity: calc(var(--prismatic-intensity, 0.6) * 0.5);
+  mix-blend-mode: overlay;
+  z-index: 1;
+  pointer-events: none;
+  border-radius: 0.5rem;
+}

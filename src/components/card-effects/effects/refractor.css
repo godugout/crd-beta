@@ -1,45 +1,42 @@
 
-/* Refractor effect with variable intensity */
+/* Refractor effect */
 .effect-refractor {
   position: relative;
 }
 
 .effect-refractor::before {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
   background: linear-gradient(
-    135deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.4) 25%,
-    rgba(255, 255, 255, 0.6) 50%,
-    rgba(255, 255, 255, 0.4) 75%,
-    transparent 100%
+    to right,
+    rgba(255, 0, 140, 0.4) 0%,
+    rgba(0, 140, 255, 0.4) 33.3%,
+    rgba(0, 255, 140, 0.4) 66.6%,
+    rgba(255, 140, 0, 0.4) 100%
   );
-  mix-blend-mode: screen;
-  pointer-events: none;
-  animation: refractor 3s ease infinite;
+  background-size: 300% 100%;
+  background-position: calc(var(--mouse-x, 0.5) * 200%) var(--mouse-y, 50%);
+  mix-blend-mode: color-dodge;
+  opacity: var(--refractor-intensity, 0.8);
   z-index: 2;
-  opacity: calc(0.8 * var(--refractor-intensity, 1.0));
+  pointer-events: none;
+  border-radius: 0.5rem;
 }
 
 .effect-refractor::after {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
-  background: radial-gradient(
-    circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
-    rgba(0, 150, 255, 0.6) 0%,
-    transparent 70%
-  );
+  background: 
+    radial-gradient(
+      circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+      rgba(255,255,255,0.8) 0%,
+      rgba(255,255,255,0) 60%
+    );
+  opacity: calc(var(--refractor-intensity, 0.8) * 0.7);
   mix-blend-mode: overlay;
+  z-index: 1;
   pointer-events: none;
-  z-index: 3;
-  opacity: calc(0.7 * var(--refractor-intensity, 1.0));
-}
-
-@keyframes refractor {
-  0% { opacity: 0.4; }
-  50% { opacity: 0.8; }
-  100% { opacity: 0.4; }
+  border-radius: 0.5rem;
 }

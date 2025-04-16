@@ -1,58 +1,49 @@
 
-/* Holographic effect - improved visibility with variable intensity */
+/* Holographic effect */
 .effect-holographic {
   position: relative;
-  overflow: hidden;
 }
 
 .effect-holographic::before {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
   background: linear-gradient(
-    125deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.4) 30%,
-    rgba(255, 255, 255, 0.6) 50%,
-    rgba(255, 255, 255, 0.4) 70%,
-    transparent 100%
+    125deg, 
+    rgba(255,0,0,0) 0%,
+    rgba(255,0,255,0.4) 25%, 
+    rgba(0,255,255,0.4) 50%,
+    rgba(0,255,0,0.4) 75%,
+    rgba(255,255,0,0) 100%
   );
-  background-size: 200% 200%;
-  animation: holographic 3s linear infinite;
-  pointer-events: none;
-  mix-blend-mode: overlay;
+  background-size: 400% 400%;
+  background-position: var(--mouse-x, 50%) var(--mouse-y, 50%);
+  mix-blend-mode: color-dodge;
+  opacity: var(--holographic-intensity, 0.7);
   z-index: 2;
-  opacity: calc(0.8 * var(--holographic-intensity, 0.8));
+  pointer-events: none;
+  border-radius: 0.5rem;
 }
 
 .effect-holographic::after {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    to right,
-    rgba(255, 0, 0, 0.3),
-    rgba(255, 255, 0, 0.3),
-    rgba(0, 255, 0, 0.3),
-    rgba(0, 255, 255, 0.3),
-    rgba(0, 0, 255, 0.3),
-    rgba(255, 0, 255, 0.3),
-    rgba(255, 0, 0, 0.3)
+  background: repeating-linear-gradient(
+    -45deg,
+    rgba(255,255,255,0.1) 0px,
+    rgba(255,255,255,0.2) 2px,
+    rgba(255,255,255,0.1) 4px
   );
-  background-size: 200% 100%;
-  animation: rainbow-shift 6s linear infinite;
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    black 30%,
+    black 70%,
+    transparent 100%
+  );
+  opacity: calc(var(--holographic-intensity, 0.7) * 0.5);
+  z-index: 1;
   pointer-events: none;
-  mix-blend-mode: color-dodge;
-  z-index: 3;
-  opacity: calc(0.6 * var(--holographic-intensity, 0.8));
-}
-
-@keyframes rainbow-shift {
-  0% { background-position: 0% 50%; }
-  100% { background-position: 200% 50%; }
-}
-
-@keyframes holographic {
-  0% { background-position: 0% 0%; }
-  100% { background-position: 200% 200%; }
+  border-radius: 0.5rem;
 }

@@ -1,0 +1,42 @@
+
+/* Gold Foil effect */
+.effect-goldFoil {
+  position: relative;
+}
+
+.effect-goldFoil::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 215, 0, 0.6) 0%,
+    rgba(255, 223, 0, 0.8) 25%, 
+    rgba(255, 215, 0, 0.6) 50%,
+    rgba(255, 230, 0, 0.8) 75%,
+    rgba(255, 215, 0, 0.6) 100%
+  );
+  background-size: 200% 200%;
+  background-position: var(--mouse-x, 50%) var(--mouse-y, 50%);
+  mix-blend-mode: color-dodge;
+  opacity: var(--gold-intensity, 0.7);
+  z-index: 2;
+  pointer-events: none;
+  border-radius: 0.5rem;
+}
+
+.effect-goldFoil::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    rgba(255, 255, 255, 0.8) 0%,
+    rgba(255, 255, 255, 0) 70%
+  );
+  opacity: var(--gold-intensity, 0.7);
+  mix-blend-mode: overlay;
+  z-index: 1;
+  pointer-events: none;
+  border-radius: 0.5rem;
+}

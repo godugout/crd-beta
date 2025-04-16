@@ -125,8 +125,8 @@ const CardViewer: React.FC<CardViewerProps> = ({
   // Card container style including 3D transforms
   const cardStyle = {
     transform: `
-      perspective(1000px)
-      rotateX(${rotation.x}deg)
+      perspective(1000px) 
+      rotateX(${rotation.x}deg) 
       rotateY(${rotation.y}deg)
       scale(${zoom})
     `,
@@ -139,7 +139,7 @@ const CardViewer: React.FC<CardViewerProps> = ({
   return (
     <div className="card-viewer relative flex flex-col h-full overflow-hidden bg-gray-900">
       {/* Top toolbar */}
-      <div className="sticky top-0 z-10">
+      <div className="sticky top-0 z-20">
         <CardToolbar 
           activePanel={activePanel}
           onAction={handleToolbarAction}
@@ -209,7 +209,7 @@ const CardViewer: React.FC<CardViewerProps> = ({
         
         {/* Effects panel */}
         <div 
-          className={`absolute top-0 bottom-0 right-0 w-72 bg-black/70 backdrop-blur-sm transform transition-transform duration-300 ${
+          className={`absolute top-0 bottom-0 right-0 w-72 bg-black/80 backdrop-blur-sm transform transition-transform duration-300 z-30 ${
             activePanel === 'effects' ? 'translate-x-0' : 'translate-x-full'
           }`}
         >
@@ -228,7 +228,7 @@ const CardViewer: React.FC<CardViewerProps> = ({
       />
       
       {/* Keyboard controls help */}
-      <div className="absolute bottom-16 right-4 bg-black/70 text-white text-xs rounded-lg p-2 z-10">
+      <div className="absolute bottom-16 right-4 bg-black/80 text-white text-xs rounded-lg p-3 z-30">
         <div className="flex flex-col gap-y-1">
           <div><kbd className="bg-gray-700 px-1 rounded">F</kbd> <span className="ml-1">Flip card</span></div>
           <div><kbd className="bg-gray-700 px-1 rounded">R</kbd> <span className="ml-1">Reset view</span></div>
