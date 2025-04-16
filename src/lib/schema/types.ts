@@ -1,4 +1,3 @@
-
 // Define base types used throughout the application
 
 export interface Card {
@@ -17,6 +16,7 @@ export interface Card {
   designMetadata?: any;
   reactions?: Reaction[];
   fabricSwatches?: FabricSwatch[];
+  effects: string[];
 }
 
 export interface OaklandMemoryData {

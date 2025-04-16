@@ -28,4 +28,5 @@ export interface CardData {
   tags?: string[];
   thumbnailUrl?: string;
   reactions?: any[];
+  effects?: string[];
 }
