@@ -8,10 +8,12 @@ import PageLayout from '@/components/navigation/PageLayout';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useToast } from '@/hooks/use-toast';
 
 const ImmersiveCardViewerPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const { data: card, isLoading, error } = useQuery({
     queryKey: ['card', id],
@@ -19,9 +21,31 @@ const ImmersiveCardViewerPage = () => {
     enabled: !!id
   });
 
+  // Log card data to help with debugging
+  useEffect(() => {
+    if (card) {
+      console.log("Card loaded successfully:", card);
+      console.log("Image URL:", card.imageUrl);
+    } else if (error) {
+      console.error("Error loading card:", error);
+    }
+  }, [card, error]);
+
   const handleBack = () => {
     navigate(-1);
   };
+
+  // Add fallback images if card data is available but image URL is missing
+  useEffect(() => {
+    if (card && !card.imageUrl) {
+      console.log("Adding fallback image to card");
+      card.imageUrl = "https://images.unsplash.com/photo-1518770660439-4636190af475";
+      toast({
+        title: "Using fallback image",
+        description: "The original card image couldn't be loaded",
+      });
+    }
+  }, [card, toast]);
 
   if (isLoading) {
     return (

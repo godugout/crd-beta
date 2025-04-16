@@ -54,9 +54,15 @@ export const CardThumbnail: React.FC<CardThumbnailProps> = ({
     
     return style;
   }, [card.designMetadata]);
+  
+  // Determine image URL with better fallback strategy
+  const imageUrl = card.imageUrl || card.thumbnailUrl || '/placeholder-card.png';
+  
+  // Add fallback image for when card images fail to load
+  const fallbackImage = 'https://images.unsplash.com/photo-1518770660439-4636190af475';
 
   // Log image loading attempt for debugging
-  console.log(`CardThumbnail: Attempting to load image for card ${card.id}: ${card.imageUrl}`);
+  console.log(`CardThumbnail: Attempting to load image for card ${card.id}: ${imageUrl}`);
 
   return (
     <CardBase
@@ -114,10 +120,10 @@ export const CardThumbnail: React.FC<CardThumbnailProps> = ({
         </div>
       )}
       
-      {/* Card image with improved visibility */}
-      {card.imageUrl && (
+      {/* Card image with improved visibility and fallback handling */}
+      {imageUrl && (
         <img 
-          src={card.imageUrl} 
+          src={imageUrl} 
           alt={card.title || "Card"} 
           className={cn(
             "absolute inset-0 w-full h-full object-cover z-10", 
@@ -127,16 +133,22 @@ export const CardThumbnail: React.FC<CardThumbnailProps> = ({
             console.log(`CardThumbnail: Image loaded successfully for card ${card.id}`);
             setIsImageLoaded(true);
           }}
-          onError={() => {
-            console.error(`CardThumbnail: Failed to load image for card ${card.id}: ${card.imageUrl}`);
-            setIsImageError(true);
+          onError={(e) => {
+            console.error(`CardThumbnail: Failed to load image for card ${card.id}: ${imageUrl}`);
+            // Try fallback image if the original fails
+            if (imageUrl !== fallbackImage) {
+              console.log(`CardThumbnail: Trying fallback image for card ${card.id}`);
+              (e.target as HTMLImageElement).src = fallbackImage;
+            } else {
+              setIsImageError(true);
+            }
           }}
           loading="lazy"
         />
       )}
       
       {/* Fallback for no image */}
-      {!card.imageUrl && !isImageError && (
+      {!imageUrl && !isImageError && (
         <div className="absolute inset-0 bg-gray-200 flex items-center justify-center text-gray-400 z-10">
           No Image
         </div>

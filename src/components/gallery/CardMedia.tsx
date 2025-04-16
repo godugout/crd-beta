@@ -18,9 +18,12 @@ const CardMedia: React.FC<CardMediaProps> = ({ card, onView, className = '' }) =
     if (onView) onView(card.id);
   };
 
-  // Determine image URL with fallback
-  const imageUrl = card.imageUrl || card.thumbnailUrl;
+  // Determine image URL with better fallback strategy
+  const imageUrl = card.imageUrl || card.thumbnailUrl || '/placeholder-card.png';
 
+  // Add actual fallback image if one doesn't exist in public folder
+  const fallbackImage = 'https://images.unsplash.com/photo-1518770660439-4636190af475';
+  
   // Log image loading attempt for debugging
   console.log(`Attempting to load image for card ${card.id}: ${imageUrl}`);
 
@@ -88,9 +91,15 @@ const CardMedia: React.FC<CardMediaProps> = ({ card, onView, className = '' }) =
             console.log(`Image loaded successfully for card ${card.id}`);
             setIsLoaded(true);
           }}
-          onError={() => {
+          onError={(e) => {
             console.error(`Failed to load image for card ${card.id}: ${imageUrl}`);
-            setIsError(true);
+            // Try fallback image if the original fails
+            if (imageUrl !== fallbackImage) {
+              console.log(`Trying fallback image for card ${card.id}`);
+              (e.target as HTMLImageElement).src = fallbackImage;
+            } else {
+              setIsError(true);
+            }
           }}
           loading="lazy"
         />
