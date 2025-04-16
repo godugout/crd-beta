@@ -16,7 +16,7 @@ export const BASEBALL_CARDS: CardData[] = [
     value: "$6,600,000+",
     rarityScore: 9.8,
     condition: "PSA 3 VG",
-    imageUrl: "/lovable-uploads/a38aa501-ea2d-4416-9699-1e69b1826233.png",
+    imageUrl: "/lovable-uploads/dc219616-1df7-461d-8f6d-7af3ef1b68ae.png", // Eddie Collins Allstar image
     stats: {
       battingAverage: ".327",
       homeRuns: "101",
@@ -35,8 +35,8 @@ export const BASEBALL_CARDS: CardData[] = [
     value: "$5,200,000+",
     rarityScore: 9.2,
     condition: "PSA 9 MINT",
-    imageUrl: "/lovable-uploads/667e6ad2-af96-40ac-bd16-a69778e14b21.png",
-    backImageUrl: "/lovable-uploads/c381b388-5693-44a6-852b-93af5f0d5217.png",
+    imageUrl: "/lovable-uploads/480dff88-07d3-461d-ad88-d5b0447dc9a4.png", // Mickey Mantle Yankees card
+    backImageUrl: "/lovable-uploads/f3854785-d55b-4f84-b273-272c5966c283.png", // Roger Staubach card as a placeholder
     stats: {
       battingAverage: ".298",
       homeRuns: "536",
@@ -55,7 +55,7 @@ export const BASEBALL_CARDS: CardData[] = [
     value: "$500,000+",
     rarityScore: 8.7,
     condition: "PSA 8 NM-MT",
-    imageUrl: "/lovable-uploads/79a099b9-c77a-491e-9755-ba25419791f5.png",
+    imageUrl: "/lovable-uploads/88d804c5-6d0c-402e-b2d6-f0d10b5f6699.png", // Babe Ruth Big League card
     stats: {
       battingAverage: ".342",
       homeRuns: "714",
