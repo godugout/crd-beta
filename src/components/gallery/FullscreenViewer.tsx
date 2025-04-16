@@ -1,24 +1,10 @@
-import React, { useRef, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+
+import React, { useEffect, useState } from 'react';
+import { ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { useCards } from '@/context/CardContext';
-import { toast } from 'sonner';
-import { X, ChevronDown, ChevronUp, Lightbulb, Sparkles, Layers } from 'lucide-react';
-import CardDisplay from './viewer-components/CardDisplay';
-import ViewerControls from './viewer-components/ViewerControls';
-import InfoPanel from './viewer-components/InfoPanel';
-import MiniActionBar from '@/components/ui/MiniActionBar';
-import { useCardInteraction } from '@/hooks/useCardInteraction';
-import CardEffectsPanel from './viewer-components/CardEffectsPanel';
-import { useFeatureEnabled } from '@/hooks/useFeatureFlag';
-import { Card } from '@/lib/types/cardTypes';
-import LightingControls from './viewer-components/LightingControls';
-import { useCardLighting } from '@/hooks/useCardLighting';
-import { useParticleEffects } from '@/hooks/useParticleEffects';
-import CardParticleSystem from '@/components/particles/CardParticleSystem';
-import ParticleEffectsControls from './viewer-components/ParticleEffectsControls';
-import { useExplodedView } from '@/hooks/useExplodedView';
-import ExplodedViewControls from './viewer-components/ExplodedViewControls';
-import ExplodedCardView from './viewer-components/ExplodedCardView';
+import { Card } from '@/lib/types';
+import { sampleCards } from '@/lib/data/sampleCards'; // Import sampleCards
 
 interface FullscreenViewerProps {
   cardId: string;
@@ -26,379 +12,131 @@ interface FullscreenViewerProps {
 }
 
 const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) => {
-  const { cards, getCardById } = useCards();
-  const card = getCardById ? getCardById(cardId) : cards.find(c => c.id === cardId);
-  const navigate = useNavigate();
-
-  const containerRef = useRef<HTMLDivElement>(null);
-  const cardRef = useRef<HTMLDivElement>(null);
+  const { cards, getCard } = useCards();
+  const [currentCard, setCurrentCard] = useState<Card | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   
-  const {
-    position,
-    zoom,
-    isAutoRotating,
-    isDragging,
-    mousePosition,
-    setIsDragging,
-    handleMouseMove,
-    handleCardReset,
-    handleKeyboardControls,
-    handleZoomIn,
-    handleZoomOut,
-    toggleAutoRotation,
-    setPosition,
-    setupWheelListener
-  } = useCardInteraction({ containerRef, cardRef });
+  // Fallback image to use when card image is not available
+  const fallbackImage = 'https://images.unsplash.com/photo-1518770660439-4636190af475';
 
-  const {
-    lightingSettings,
-    updateLightPosition,
-    toggleFollowPointer,
-    toggleAutoRotate,
-    updateLightSetting,
-    applyPreset
-  } = useCardLighting('display_case');
+  useEffect(() => {
+    if (!cardId) {
+      setError("No card ID provided");
+      setIsLoading(false);
+      return;
+    }
 
-  const {
-    particleState,
-    toggleEffect,
-    updateEffectSettings,
-    applyPreset: applyParticlePreset,
-    toggleSystem,
-    toggleAutoAdjust,
-    setPerformanceLevel
-  } = useParticleEffects({
-    card,
-    shouldAutoDetectCardType: true
-  });
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      // First try to get card from context
+      let card = getCard ? getCard(cardId) : cards.find(c => c.id === cardId);
+      
+      // If not found in context, try in sampleCards
+      if (!card) {
+        console.log('Card not found in context, checking sampleCards for ID:', cardId);
+        card = sampleCards.find(c => c.id === cardId);
+      }
+      
+      if (card) {
+        // Ensure image URLs are valid
+        if (!card.imageUrl || card.imageUrl === 'undefined') {
+          console.warn('Card has invalid imageUrl, applying fallback');
+          card = {
+            ...card,
+            imageUrl: fallbackImage,
+            thumbnailUrl: fallbackImage
+          };
+        }
+        
+        setCurrentCard(card);
+      } else {
+        setError(`Card with ID ${cardId} not found`);
+      }
+    } catch (err) {
+      console.error('Error loading card:', err);
+      setError('Failed to load card');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [cardId, cards, getCard]);
   
-  const {
-    settings: explodedViewSettings,
-    layers,
-    layerGroups,
-    layerPositions,
-    toggleExplodedView,
-    setExplosionDistance,
-    setExplosionType,
-    toggleLayerVisibility,
-    selectLayer,
-    setSpecialView
-  } = useExplodedView({ card });
-
-  const [isFlipped, setIsFlipped] = useState(false);
-  const [showInfo, setShowInfo] = useState(false);
-  const [activeEffects, setActiveEffects] = useState<string[]>([]);
-  const [effectIntensities, setEffectIntensities] = useState<Record<string, number>>({
-    Holographic: 0.7,
-    Refractor: 0.8,
-    Chrome: 0.6,
-    Vintage: 0.5,
-  });
-  const [touchImprintAreas, setTouchImprintAreas] = useState([
-    { id: 'flip-corner', active: false },
-    { id: 'zoom-center', active: false },
-    { id: 'rotate-edges', active: false }
-  ]);
-
-  const [featuresBarMinimized, setFeaturesBarMinimized] = useState(false);
-  const [showExplodedView, setShowExplodedView] = useState(false);
-  const [showLighting, setShowLighting] = useState(false);
-  const [showParticles, setShowParticles] = useState(false);
-
-  const handleCombinedMouseMove = (e: React.MouseEvent) => {
-    handleMouseMove(e);
-    
-    if (containerRef.current) {
-      const rect = containerRef.current.getBoundingClientRect();
-      const x = (e.clientX - rect.left) / rect.width;
-      const y = (e.clientY - rect.top) / rect.height;
-      updateLightPosition(x, y);
-    }
+  // Handle previous/next card navigation (simplified version)
+  const handlePrevCard = () => {
+    // Implementation for previous card
+    console.log('Previous card requested');
+  };
+  
+  const handleNextCard = () => {
+    // Implementation for next card
+    console.log('Next card requested');
   };
 
-  useEffect(() => {
-    setPosition({ x: 10, y: 15, z: 0 });
-  }, [setPosition]);
-
-  useEffect(() => {
-    window.addEventListener('keydown', handleKeyboardControls);
-    return () => {
-      window.removeEventListener('keydown', handleKeyboardControls);
-    };
-  }, [handleKeyboardControls]);
-
-  useEffect(() => {
-    const cleanup = setupWheelListener();
-    return () => {
-      if (cleanup) cleanup();
-    };
-  }, [setupWheelListener]);
-
-  useEffect(() => {
-    setShowExplodedView(explodedViewSettings.active);
-  }, [explodedViewSettings.active]);
-
-  const handleToggleFullscreen = () => {
-    toast.info('Fullscreen toggle - feature coming soon');
-  };
-
-  const handleShare = () => {
-    toast.info('Share feature coming soon');
-  };
-
-  const handleToggleExplodedView = () => {
-    toggleExplodedView();
-    
-    if (!explodedViewSettings.active) {
-      toast.info('Exploded view activated', {
-        description: 'Explore the card layers in 3D'
-      });
-    } else {
-      toast.info('Exploded view deactivated');
-    }
-  };
-
-  const handleEffectToggle = (effect: string) => {
-    setActiveEffects(prev => 
-      prev.includes(effect) ? prev.filter(e => e !== effect) : [...prev, effect]
-    );
-  };
-
-  const handleToggleLighting = () => {
-    setShowLighting(prev => !prev);
-    if (!showLighting) {
-      toast.info('Lighting controls activated');
-    }
-  };
-
-  const handleToggleParticles = () => {
-    setShowParticles(prev => !prev);
-    if (!showParticles) {
-      toast.info('Particle effects activated');
-    }
-  };
-
-  if (!card) {
+  if (isLoading) {
     return (
-      <div className="fixed inset-0 bg-black flex items-center justify-center z-50">
-        <div className="text-white text-lg">Card not found</div>
-        <button 
-          className="absolute top-4 right-4 text-white p-2 rounded-full bg-black/50"
-          onClick={onClose}
-        >
-          <X size={24} />
-        </button>
+      <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50">
+        <div className="w-16 h-16 border-4 border-t-transparent border-primary rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  if (error || !currentCard) {
+    return (
+      <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 text-white">
+        <div className="bg-gray-800 p-6 rounded-lg max-w-md text-center">
+          <p className="mb-4">{error || "Could not load card"}</p>
+          <Button onClick={onClose}>Close</Button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50">
-      <div className="absolute top-0 left-0 right-0 z-30 flex justify-center">
-        <div className={`${featuresBarMinimized ? 'w-20' : 'w-auto px-6'} transition-all duration-300 bg-gray-900/80 backdrop-blur-md rounded-b-lg`}>
-          {featuresBarMinimized ? (
-            <button 
-              onClick={() => setFeaturesBarMinimized(false)}
-              className="w-full py-2 text-white font-bold flex items-center justify-center hover:bg-gray-800/50 transition-colors"
-            >
-              CRD <ChevronDown size={16} className="ml-1" />
-            </button>
-          ) : (
-            <div className="py-3 flex items-center space-x-4 relative">
-              <button 
-                onClick={() => setFeaturesBarMinimized(true)}
-                className="absolute right-1 top-1 text-gray-400 hover:text-white p-1"
-                aria-label="Minimize"
-              >
-                <ChevronUp size={18} />
-              </button>
-              
-              <button 
-                onClick={handleCardReset} 
-                className="text-white hover:text-blue-300 transition-colors"
-                title="Reset View"
-              >
-                Reset View
-              </button>
-              
-              <button 
-                onClick={() => setIsFlipped(!isFlipped)} 
-                className={`text-white hover:text-blue-300 transition-colors ${isFlipped ? 'text-blue-400' : ''}`}
-                title="Flip Card"
-              >
-                Flip Card
-              </button>
-              
-              <button 
-                onClick={toggleAutoRotation}
-                className={`text-white hover:text-blue-300 transition-colors ${isAutoRotating ? 'text-blue-400' : ''}`}
-                title="Auto Rotate"
-              >
-                Auto Rotate
-              </button>
-              
-              <button 
-                onClick={handleToggleExplodedView}
-                className={`text-white hover:text-blue-300 transition-colors ${showExplodedView ? 'text-blue-400' : ''}`}
-                title="Exploded View"
-              >
-                <Layers size={16} className="inline mr-1" /> Exploded View
-              </button>
-              
-              <button 
-                onClick={handleToggleLighting}
-                className={`text-white hover:text-blue-300 transition-colors ${showLighting ? 'text-blue-400' : ''}`}
-                title="Lighting"
-              >
-                <Lightbulb size={16} className="inline mr-1" /> Lighting
-              </button>
-              
-              <button 
-                onClick={handleToggleParticles}
-                className={`text-white hover:text-blue-300 transition-colors ${showParticles ? 'text-blue-400' : ''}`}
-                title="Particles"
-              >
-                <Sparkles size={16} className="inline mr-1" /> Particles
-              </button>
-              
-              <button 
-                onClick={() => setShowInfo(!showInfo)}
-                className={`text-white hover:text-blue-300 transition-colors ${showInfo ? 'text-blue-400' : ''}`}
-                title="Info"
-              >
-                Info
-              </button>
+    <div className="fixed inset-0 bg-black/90 flex flex-col items-center justify-center z-50">
+      <div className="absolute top-4 right-4">
+        <Button variant="ghost" size="icon" onClick={onClose} className="text-white hover:bg-gray-800">
+          <X className="h-6 w-6" />
+        </Button>
+      </div>
+      
+      <div className="relative w-full h-full max-w-2xl max-h-[80vh] flex items-center justify-center">
+        <div className="absolute left-4">
+          <Button variant="ghost" size="icon" onClick={handlePrevCard} className="text-white hover:bg-gray-800">
+            <ChevronLeft className="h-6 w-6" />
+          </Button>
+        </div>
+        
+        <div className="w-full h-full flex items-center justify-center p-4">
+          {currentCard.imageUrl && (
+            <div className="relative w-full h-full max-h-[70vh] flex items-center justify-center">
+              <img
+                src={currentCard.imageUrl}
+                alt={currentCard.title || "Card"}
+                className="max-w-full max-h-full object-contain"
+                onError={(e) => {
+                  console.error('Failed to load image:', currentCard.imageUrl);
+                  e.currentTarget.src = fallbackImage;
+                }}
+              />
             </div>
           )}
         </div>
-      </div>
-
-      <div 
-        ref={containerRef}
-        className="relative flex-1 flex items-center justify-center overflow-hidden z-10"
-        onMouseMove={handleCombinedMouseMove}
-      >
-        {!showExplodedView && (
-          <CardDisplay
-            card={card}
-            rotation={{ x: position.x, y: position.y, z: position.z }}
-            isFlipped={isFlipped}
-            zoom={zoom}
-            isDragging={isDragging}
-            setIsDragging={setIsDragging}
-            cardRef={cardRef}
-            containerRef={containerRef}
-            isAutoRotating={isAutoRotating}
-            activeEffects={activeEffects}
-            effectIntensities={effectIntensities}
-            mousePosition={mousePosition}
-            touchImprintAreas={touchImprintAreas}
-            showExplodedView={showExplodedView}
-            lightingSettings={lightingSettings}
-          />
-        )}
         
-        {showExplodedView && (
-          <div 
-            className="relative w-80 h-120"
-            style={{
-              transformStyle: 'preserve-3d',
-              transform: `rotateY(${position.x}deg) rotateX(${position.y}deg) scale(${zoom})`,
-            }}
-          >
-            <ExplodedCardView
-              card={card}
-              isActive={showExplodedView}
-              layers={layers}
-              layerPositions={layerPositions}
-              visibleLayerIds={explodedViewSettings.visibleLayerIds}
-              selectedLayerId={explodedViewSettings.selectedLayerId}
-              specialView={explodedViewSettings.specialView}
-              showAnnotations={true}
-            />
-          </div>
-        )}
-        
-        {!showExplodedView && (
-          <CardParticleSystem
-            containerRef={containerRef}
-            particleState={particleState}
-            cardRotation={{ x: position.x, y: position.y, z: position.z }}
-            isFlipped={isFlipped}
-            isMoving={isDragging || isAutoRotating}
-          />
-        )}
-        
-        <div className="absolute left-4 top-20 bottom-4 w-80 pointer-events-auto flex flex-col gap-4 overflow-y-auto">
-          {showLighting && (
-            <LightingControls
-              lightingSettings={lightingSettings}
-              onToggleFollowPointer={toggleFollowPointer}
-              onToggleAutoRotate={toggleAutoRotate}
-              onUpdateLightSetting={updateLightSetting}
-              onApplyPreset={applyPreset}
-            />
-          )}
-          
-          {showParticles && (
-            <ParticleEffectsControls
-              particleState={particleState}
-              onToggleEffect={toggleEffect}
-              onUpdateEffectSettings={updateEffectSettings}
-              onApplyPreset={applyParticlePreset}
-              onToggleSystem={toggleSystem}
-              onToggleAutoAdjust={toggleAutoAdjust}
-              onSetPerformanceLevel={setPerformanceLevel}
-            />
-          )}
-          
-          {showExplodedView && (
-            <ExplodedViewControls
-              isActive={showExplodedView}
-              layers={layers}
-              layerGroups={layerGroups}
-              explosionDistance={explodedViewSettings.explosionDistance}
-              explosionType={explodedViewSettings.explosionType}
-              selectedLayerId={explodedViewSettings.selectedLayerId}
-              visibleLayerIds={explodedViewSettings.visibleLayerIds}
-              specialView={explodedViewSettings.specialView}
-              onExplosionDistanceChange={setExplosionDistance}
-              onExplosionTypeChange={setExplosionType}
-              onLayerVisibilityToggle={toggleLayerVisibility}
-              onLayerSelect={selectLayer}
-              onSpecialViewChange={setSpecialView}
-              onClose={handleToggleExplodedView}
-            />
-          )}
-          
-          {!showExplodedView && (
-            <CardEffectsPanel 
-              activeEffects={activeEffects}
-              onToggleEffect={handleEffectToggle}
-              onEffectIntensityChange={(effect, intensity) => {
-                setEffectIntensities(prev => ({ ...prev, [effect]: intensity }));
-              }}
-              effectIntensities={effectIntensities}
-            />
-          )}
+        <div className="absolute right-4">
+          <Button variant="ghost" size="icon" onClick={handleNextCard} className="text-white hover:bg-gray-800">
+            <ChevronRight className="h-6 w-6" />
+          </Button>
         </div>
       </div>
-
-      <ViewerControls
-        isFlipped={isFlipped}
-        isAutoRotating={isAutoRotating}
-        showInfo={showInfo}
-        onFlipCard={() => setIsFlipped(!isFlipped)}
-        onToggleAutoRotation={toggleAutoRotation}
-        onToggleInfo={() => setShowInfo(!showInfo)}
-        onToggleFullscreen={handleToggleFullscreen}
-        onShare={handleShare}
-        onClose={onClose}
-      />
-
-      <InfoPanel card={card} showInfo={showInfo} />
       
-      <MiniActionBar />
+      <div className="mt-4 p-4 text-white">
+        <h2 className="text-xl font-bold">{currentCard.title}</h2>
+        {currentCard.description && (
+          <p className="mt-2 text-sm text-gray-300">{currentCard.description}</p>
+        )}
+      </div>
     </div>
   );
 };

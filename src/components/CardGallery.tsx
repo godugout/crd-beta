@@ -38,6 +38,9 @@ const CardGallery: React.FC<CardGalleryProps> = ({
   const cards = propCards || [];
   const isLoading = propIsLoading;
   const { isMobile } = useMobileOptimization();
+  
+  // Fallback image to use when card image is not available
+  const fallbackImage = 'https://images.unsplash.com/photo-1518770660439-4636190af475';
 
   // Filter cards based on search query
   const filteredCards = useMemo(() => {
@@ -84,17 +87,16 @@ const CardGallery: React.FC<CardGalleryProps> = ({
                     onClick={() => handleCardItemClick(card.id)}
                   >
                     <div className="aspect-[2.5/3.5] rounded-lg overflow-hidden mb-2 bg-gray-100">
-                      {card.imageUrl && (
-                        <img 
-                          src={card.imageUrl}
-                          alt={card.title || 'Card image'}
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            console.error(`Failed to load image: ${card.imageUrl}`);
-                            e.currentTarget.src = 'https://images.unsplash.com/photo-1518770660439-4636190af475';
-                          }}
-                        />
-                      )}
+                      {/* Add explicit check for imageUrl and fallback */}
+                      <img 
+                        src={card.imageUrl || fallbackImage}
+                        alt={card.title || 'Card image'}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          console.error(`Failed to load image: ${card.imageUrl}. Using fallback.`);
+                          e.currentTarget.src = fallbackImage;
+                        }}
+                      />
                     </div>
                     <h3 className="font-medium text-sm truncate">{card.title || 'Untitled Card'}</h3>
                     {card.tags && card.tags.length > 0 && (
@@ -108,17 +110,16 @@ const CardGallery: React.FC<CardGalleryProps> = ({
                 ) : (
                   <div className="flex items-center p-3 gap-4 cursor-pointer" onClick={() => handleCardItemClick(card.id)}>
                     <div className="w-16 h-24 bg-gray-100">
-                      {card.imageUrl && (
-                        <img 
-                          src={card.imageUrl}
-                          alt={card.title || 'Card thumbnail'}
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            console.error(`Failed to load image: ${card.imageUrl}`);
-                            e.currentTarget.src = 'https://images.unsplash.com/photo-1518770660439-4636190af475';
-                          }}
-                        />
-                      )}
+                      {/* Add explicit check for imageUrl and fallback for list view too */}
+                      <img 
+                        src={card.imageUrl || fallbackImage}
+                        alt={card.title || 'Card thumbnail'}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          console.error(`Failed to load image: ${card.imageUrl}. Using fallback.`);
+                          e.currentTarget.src = fallbackImage;
+                        }}
+                      />
                     </div>
                     <div className="flex-1">
                       <h3 className="font-medium">{card.title || 'Untitled Card'}</h3>

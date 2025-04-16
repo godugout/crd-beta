@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Card, Collection } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
-import { sampleCards } from '@/data/sampleCards';
+import { sampleCards } from '@/lib/data/sampleCards';
 
 export function useCards() {
   const [cards, setCards] = useState<Card[]>([]);
@@ -15,8 +15,26 @@ export function useCards() {
     try {
       setLoading(true);
       
-      // Use the sample cards data that has proper image URLs
-      setCards(sampleCards);
+      // Process sampleCards to ensure they have valid image URLs
+      const processedCards = sampleCards.map(card => {
+        // Ensure imageUrl exists or use fallback
+        const fallbackImageUrl = 'https://images.unsplash.com/photo-1518770660439-4636190af475';
+        const imageUrl = card.imageUrl 
+          ? (card.imageUrl.includes('undefined') ? fallbackImageUrl : card.imageUrl)
+          : fallbackImageUrl;
+        
+        const thumbnailUrl = card.thumbnailUrl 
+          ? (card.thumbnailUrl.includes('undefined') ? fallbackImageUrl : card.thumbnailUrl)
+          : imageUrl;
+        
+        return {
+          ...card,
+          imageUrl,
+          thumbnailUrl
+        };
+      });
+      
+      setCards(processedCards);
 
       // Demo collections
       const demoCollections = [
@@ -24,7 +42,7 @@ export function useCards() {
           id: 'collection-1',
           name: 'Demo Collection 1',
           description: 'A sample collection',
-          coverImageUrl: '/lovable-uploads/667e6ad2-af96-40ac-bd16-a69778e14b21.png',
+          coverImageUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475',
           userId: 'user-1',
           teamId: 'team-1',
           visibility: 'public' as const,
@@ -40,7 +58,7 @@ export function useCards() {
           id: 'collection-2',
           name: 'Demo Collection 2',
           description: 'Another sample collection',
-          coverImageUrl: '/lovable-uploads/371b81a2-cafa-4637-9358-218d4120c658.png',
+          coverImageUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475',
           userId: 'user-1',
           teamId: 'team-1',
           visibility: 'public' as const,
@@ -58,7 +76,7 @@ export function useCards() {
       
       toast({
         title: "Cards loaded",
-        description: `Loaded ${sampleCards.length} cards`,
+        description: `Loaded ${processedCards.length} cards`,
         variant: "default",
       });
     } catch (err) {
@@ -187,6 +205,20 @@ export function useCards() {
     }
   }, [toast]);
 
+  const getCard = useCallback((id: string): Card | undefined => {
+    const foundCard = cards.find(card => card.id === id);
+    if (!foundCard) {
+      console.log(`Card with ID ${id} not found in cards array of length ${cards.length}`);
+      // Try to find in sampleCards as fallback
+      const sampleCard = sampleCards.find(card => card.id === id);
+      if (sampleCard) {
+        console.log(`Found card with ID ${id} in sampleCards`);
+        return sampleCard;
+      }
+    }
+    return foundCard;
+  }, [cards]);
+
   return {
     cards,
     collections,
@@ -197,5 +229,6 @@ export function useCards() {
     updateCard,
     deleteCard,
     createCollection,
+    getCard,
   };
 }

@@ -9,6 +9,7 @@ import CardDetailed from '@/components/cards/CardDetailed';
 import RelatedCards from '@/components/cards/RelatedCards';
 import { useCardOperations } from '@/hooks/useCardOperations';
 import FullscreenViewer from '@/components/gallery/FullscreenViewer';
+import { sampleCards } from '@/lib/data/sampleCards'; // Import sampleCards
 
 const CardDetail = () => {
   const { id } = useParams();
@@ -17,8 +18,24 @@ const CardDetail = () => {
   const cardOperations = useCardOperations();
   const [showViewer, setShowViewer] = useState(true);
   
-  // Find the card with the matching ID
-  const card = getCard ? getCard(id || '') : cards.find(c => c.id === id);
+  // Find the card with the matching ID - first try from context, then fallback to sampleCards
+  let card = getCard ? getCard(id || '') : cards.find(c => c.id === id);
+  
+  // If card is not found in the context, try to find it in sampleCards
+  if (!card && id) {
+    console.log('Card not found in context, checking sampleCards for ID:', id);
+    card = sampleCards.find(c => c.id === id);
+  }
+  
+  // Ensure card has valid image URLs
+  if (card && (!card.imageUrl || card.imageUrl === 'undefined')) {
+    console.warn('Card has invalid imageUrl, applying fallback', card);
+    card = {
+      ...card,
+      imageUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475',
+      thumbnailUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475'
+    };
+  }
   
   // Handle card not found
   if (!card) {
