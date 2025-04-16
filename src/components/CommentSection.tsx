@@ -10,6 +10,7 @@ import { commentRepository } from '@/lib/data';
 import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
 import { MessageCircle, SendHorizontal, Reply, Trash, Edit } from 'lucide-react';
+import { adaptSchemaCommentToInteractionComment, adaptInteractionCommentToSchemaComment } from '@/lib/adapters/commentAdapter';
 
 interface CommentSectionProps {
   cardId?: string;
@@ -48,10 +49,10 @@ const CommentSection: React.FC<CommentSectionProps> = ({ cardId, collectionId, t
       }
       
       if (data) {
-        // Ensure we're using a consistent type
-        const typedComments = data as Comment[];
-        setComments(typedComments);
-        typedComments.forEach(comment => {
+        // Convert schema comments to interaction comments
+        const adaptedComments = data.map(comment => adaptSchemaCommentToInteractionComment(comment));
+        setComments(adaptedComments);
+        adaptedComments.forEach(comment => {
           if (comment.id) {
             fetchReplies(comment.id);
           }
@@ -76,11 +77,10 @@ const CommentSection: React.FC<CommentSectionProps> = ({ cardId, collectionId, t
       }
       
       if (data && data.length > 0) {
-        // Handle type consistency
-        const typedReplies = data as Comment[];
+        const adaptedReplies = data.map(comment => adaptSchemaCommentToInteractionComment(comment));
         setRepliesByParentId(prev => ({
           ...prev,
-          [parentId]: typedReplies
+          [parentId]: adaptedReplies
         }));
       }
     } catch (err) {
@@ -92,7 +92,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ cardId, collectionId, t
     if (!user || !newComment.trim()) return;
     
     try {
-      const commentData: Partial<Comment> = {
+      const commentData = {
         content: newComment.trim(),
         userId: user.id,
         cardId,
@@ -101,7 +101,10 @@ const CommentSection: React.FC<CommentSectionProps> = ({ cardId, collectionId, t
         parentId: replyTo
       };
       
-      const { data, error } = await commentRepository.createComment(commentData);
+      // Convert interaction comment to schema comment before sending to repository
+      const schemaCommentData = adaptInteractionCommentToSchemaComment(commentData);
+      
+      const { data, error } = await commentRepository.createComment(schemaCommentData);
       
       if (error) {
         console.error('Error creating comment:', error);
@@ -113,17 +116,17 @@ const CommentSection: React.FC<CommentSectionProps> = ({ cardId, collectionId, t
         toast.success('Comment posted successfully');
         setNewComment('');
         
-        // Ensure type consistency by casting
-        const typedComment = data as Comment;
+        // Convert schema comment back to interaction comment
+        const adaptedComment = adaptSchemaCommentToInteractionComment(data);
         
         if (replyTo) {
           setRepliesByParentId(prev => ({
             ...prev,
-            [replyTo]: [...(prev[replyTo] || []), typedComment]
+            [replyTo]: [...(prev[replyTo] || []), adaptedComment]
           }));
           setReplyTo(null);
         } else {
-          setComments(prev => [...prev, typedComment]);
+          setComments(prev => [...prev, adaptedComment]);
         }
       }
     } catch (err) {
@@ -147,19 +150,19 @@ const CommentSection: React.FC<CommentSectionProps> = ({ cardId, collectionId, t
       if (data) {
         toast.success('Comment updated successfully');
         
-        // Ensure type consistency by casting
-        const typedComment = data as Comment;
+        // Convert schema comment to interaction comment
+        const adaptedComment = adaptSchemaCommentToInteractionComment(data);
         
-        if (typedComment.parentId) {
+        if (adaptedComment.parentId) {
           setRepliesByParentId(prev => ({
             ...prev,
-            [typedComment.parentId!]: prev[typedComment.parentId!].map(c => 
-              c.id === id ? typedComment : c
+            [adaptedComment.parentId!]: prev[adaptedComment.parentId!].map(c => 
+              c.id === id ? adaptedComment : c
             )
           }));
         } else {
           setComments(prev => prev.map(c => 
-            c.id === id ? typedComment : c
+            c.id === id ? adaptedComment : c
           ));
         }
         

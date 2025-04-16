@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { ThemeProvider } from '@/context/ThemeContext';
+import { TeamThemeProvider } from '@/context/ThemeContext'; // Changed from ThemeProvider to TeamThemeProvider
 import { CardProvider } from '@/context/CardContext';
 import { Toaster } from '@/components/ui/toaster';
 import { mainRoutes } from '@/routes/mainRoutes';
@@ -10,7 +10,7 @@ import { collectionRoutes } from '@/routes/collectionRoutes';
 
 function App() {
   return (
-    <ThemeProvider>
+    <TeamThemeProvider>
       <CardProvider>
         <BrowserRouter>
           <Routes>
@@ -44,7 +44,7 @@ function App() {
         </BrowserRouter>
         <Toaster />
       </CardProvider>
-    </ThemeProvider>
+    </TeamThemeProvider>
   );
 }
 

@@ -42,6 +42,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, UserPermission[]> = {
  * User interface for authentication and profiles
  */
 export interface User extends BaseEntity {
+  id: string; // Explicitly add id to ensure it's recognized
   email: string;
   name?: string;
   displayName?: string;

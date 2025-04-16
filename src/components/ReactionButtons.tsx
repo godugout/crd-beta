@@ -92,7 +92,7 @@ const ReactionButtons: React.FC<ReactionButtonsProps> = ({
     reactions.forEach(reaction => {
       if (reaction.type in counts) {
         counts[reaction.type as ReactionType].count++;
-        if (user && reaction.userId === user.id) {
+        if (user?.id && reaction.userId === user.id) {
           counts[reaction.type as ReactionType].userReacted = true;
         }
       }
@@ -108,7 +108,7 @@ const ReactionButtons: React.FC<ReactionButtonsProps> = ({
   };
   
   const handleReaction = async (type: ReactionType) => {
-    if (!user) {
+    if (!user?.id) {
       toast.error('You must be logged in to react');
       return;
     }
@@ -189,7 +189,7 @@ const ReactionButtons: React.FC<ReactionButtonsProps> = ({
   
   const reactionCounts = getReactionCounts();
   const totalReactions = reactions.length;
-  const userReactionType = user 
+  const userReactionType = user?.id 
     ? reactions.find(r => r.userId === user.id)?.type 
     : undefined;
   

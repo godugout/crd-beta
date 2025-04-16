@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card } from '@/lib/types';
 import CardEffectsPanel from '@/components/immersive-viewer/CardEffectsPanel';
@@ -44,10 +43,10 @@ const CardDetailPanel: React.FC<CardDetailPanelProps> = ({
       <div className="mb-6">
         <h3 className="text-xl font-semibold mb-3">Card Details</h3>
         <dl className="grid grid-cols-2 gap-2">
-          {card.artist && (
+          {card.artist || (card.designMetadata?.cardMetadata?.artist) && (
             <>
               <dt className="text-gray-400">Artist</dt>
-              <dd>{card.artist}</dd>
+              <dd>{card.artist || card.designMetadata?.cardMetadata?.artist}</dd>
             </>
           )}
           {card.year && (
@@ -56,7 +55,6 @@ const CardDetailPanel: React.FC<CardDetailPanelProps> = ({
               <dd>{card.year}</dd>
             </>
           )}
-          {/* Change 'series' to another property that exists in the Card type */}
           {card.set && (
             <>
               <dt className="text-gray-400">Series</dt>
@@ -84,7 +82,6 @@ const CardDetailPanel: React.FC<CardDetailPanelProps> = ({
         </dl>
       </div>
       
-      {/* Effects Section */}
       <div className="mb-4">
         <h3 className="text-xl font-semibold mb-3">Visual Effects</h3>
         <button

@@ -15,6 +15,21 @@ export interface Card {
   effects: any[];
   designMetadata: Record<string, any>;
   rarity: string;
+  
+  // Add missing properties that other components are using
+  reactions?: any[];
+  player?: string;
+  team?: string;
+  year?: string;
+  artist?: string;
+  stats?: {
+    battingAverage?: string;
+    homeRuns?: string;
+    rbis?: string;
+    era?: string;
+    wins?: string;
+    strikeouts?: string;
+  };
 }
 
 export interface Collection {
@@ -49,3 +64,19 @@ export interface OaklandMemoryData {
   historicalContext?: string;
   personalSignificance?: string;
 }
+
+// Add BaseEntity for common fields
+export interface BaseEntity {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Define JsonValue for use in other files
+export type JsonValue = 
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: JsonValue }
+  | JsonValue[];

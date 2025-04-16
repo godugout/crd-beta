@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import {
   Popover,
@@ -35,11 +34,8 @@ const Notifications: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('all');
 
-  // This is just a mock implementation as we don't have a notifications table yet
   useEffect(() => {
-    if (user) {
-      // In a real implementation, we would fetch from the database
-      // For now, let's simulate some notifications
+    if (user?.id) {
       const mockNotifications: Notification[] = [
         {
           id: '1',
