@@ -12,19 +12,21 @@ import BaseballActionFigure from './pages/BaseballActionFigure';
 import { CardProvider } from './context/CardContext';
 import { SettingsProvider } from './context/SettingsContext';
 import EmergencyPage from './pages/EmergencyPage';
+import { useAuth } from './hooks/useAuth';
 
 import { routes } from './routes/index';
 
 function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { isAuthenticated } = useAuth();
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setLoading(false);
     }, 600);
     
-    console.log('App is initializing', { routes });
+    console.log('App is initializing', { routes, authStatus: isAuthenticated ? 'authenticated' : 'not authenticated' });
 
     try {
       const requiredDeps = [
@@ -43,7 +45,7 @@ function App() {
     }
 
     return () => clearTimeout(timer);
-  }, []);
+  }, [isAuthenticated]);
 
   if (error) {
     return (
@@ -78,74 +80,72 @@ function App() {
 
   return (
     <SettingsProvider>
-      <CardProvider>
-        <Router>
-          <div className="debug-info fixed top-0 left-0 bg-black/80 text-white p-2 text-xs z-50">
-            App Loaded | {new Date().toLocaleTimeString()}
-          </div>
-          
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/emergency" element={<EmergencyPage />} />
+      <Router>
+        <div className="debug-info fixed top-0 left-0 bg-black/80 text-white p-2 text-xs z-50">
+          App Loaded | {new Date().toLocaleTimeString()} | {isAuthenticated ? 'Authenticated' : 'Not Authenticated'}
+        </div>
+        
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/emergency" element={<EmergencyPage />} />
 
-            {routes.map((route, index) => {
-              if (route.children) {
-                return (
-                  <Route key={`parent-${index}`} path={route.path} element={route.element}>
-                    {route.children.map((childRoute, childIndex) => (
-                      <Route 
-                        key={`child-${childIndex}`}
-                        path={childRoute.path}
-                        element={childRoute.element}
-                      />
-                    ))}
-                  </Route>
-                );
-              }
-              
+          {routes.map((route, index) => {
+            if (route.children) {
               return (
-                <Route 
-                  key={`route-${index}`} 
-                  path={route.path} 
-                  element={route.element} 
-                />
+                <Route key={`parent-${index}`} path={route.path} element={route.element}>
+                  {route.children.map((childRoute, childIndex) => (
+                    <Route 
+                      key={`child-${childIndex}`}
+                      path={childRoute.path}
+                      element={childRoute.element}
+                    />
+                  ))}
+                </Route>
               );
-            })}
-
-            <Route path="/home" element={<HomePage />} />
-            <Route path="/about" element={<AboutPage />} />
-            <Route path="/contact" element={<ContactPage />} />
-            <Route path="/cards" element={<CardCollectionPage />} />
-            <Route path="/view/:id" element={
-              <ImmersiveCardViewer card={{
-                id: "",
-                title: "",
-                imageUrl: "",
-                effects: [],
-                userId: "",
-                createdAt: "",
-                updatedAt: "",
-                description: "",
-                stats: {
-                  battingAverage: "",
-                  homeRuns: "",
-                  rbis: "",
-                  era: "",
-                  wins: "",
-                  strikeouts: "",
-                  careerYears: "",
-                  ranking: ""
-                }
-              }} />
-            } />
-            <Route path="/baseball-card-viewer" element={<BaseballCardViewer />} />
-            <Route path="/baseball-action-figure" element={<BaseballActionFigure />} />
+            }
             
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </Router>
+            return (
+              <Route 
+                key={`route-${index}`} 
+                path={route.path} 
+                element={route.element} 
+              />
+            );
+          })}
+
+          <Route path="/home" element={<HomePage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/contact" element={<ContactPage />} />
+          <Route path="/cards" element={<CardCollectionPage />} />
+          <Route path="/view/:id" element={
+            <ImmersiveCardViewer card={{
+              id: "",
+              title: "",
+              imageUrl: "",
+              effects: [],
+              userId: "",
+              createdAt: "",
+              updatedAt: "",
+              description: "",
+              stats: {
+                battingAverage: "",
+                homeRuns: "",
+                rbis: "",
+                era: "",
+                wins: "",
+                strikeouts: "",
+                careerYears: "",
+                ranking: ""
+              }
+            }} />
+          } />
+          <Route path="/baseball-card-viewer" element={<BaseballCardViewer />} />
+          <Route path="/baseball-action-figure" element={<BaseballActionFigure />} />
+          
+          <Route path="*" element={<NotFound />} />
+        </Routes>
         <Toaster />
-      </CardProvider>
+      </Router>
     </SettingsProvider>
   );
 }

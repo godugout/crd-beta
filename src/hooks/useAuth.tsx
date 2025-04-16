@@ -75,11 +75,10 @@ export const useAuth = (): UnifiedAuthContextType => {
         return compatContext;
       }
     } catch (innerError) {
-      // If both fail, return our mock implementation
-      console.log('Using mock auth context as fallback');
+      console.warn('Both auth providers failed, using mock auth context');
     }
     
-    // Return mock auth context if all else fails
+    console.info('Using mock auth context as fallback');
     return mockAuthContext;
   }
 };

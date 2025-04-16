@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { Card } from '@/lib/types';
@@ -21,7 +22,17 @@ export const CardProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [cards, setCards] = useState<Card[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { user } = useAuth();
+  
+  // Try to get auth info, but provide default if auth provider is not available
+  let auth;
+  try {
+    auth = useAuth();
+  } catch (e) {
+    console.warn("Auth provider not available, using default user");
+    auth = { user: { id: 'anonymous' } };
+  }
+  
+  const { user } = auth;
   
   useEffect(() => {
     const loadCards = async () => {

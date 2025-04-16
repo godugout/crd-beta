@@ -25,13 +25,13 @@ createRoot(rootElement).render(
       <QueryClientProvider client={queryClient}>
         <HelmetProvider>
           <ThemeProvider defaultTheme="system">
-            <CardProvider>
-              <CardEffectsProvider>
-                <AuthProvider autoLogin={true}>
+            <AuthProvider autoLogin={true}>
+              <CardProvider>
+                <CardEffectsProvider>
                   <App />
-                </AuthProvider>
-              </CardEffectsProvider>
-            </CardProvider>
+                </CardEffectsProvider>
+              </CardProvider>
+            </AuthProvider>
           </ThemeProvider>
         </HelmetProvider>
       </QueryClientProvider>
