@@ -1,11 +1,11 @@
 
 import { useEffect, useState } from 'react';
-import { Canvas as FabricCanvas } from 'fabric';
+import { fabric } from 'fabric';
 
 export const useInitFabricCanvas = (
   fabricRef: React.RefObject<HTMLCanvasElement>,
 ) => {
-  const [canvas, setCanvas] = useState<FabricCanvas | null>(null);
+  const [canvas, setCanvas] = useState<fabric.Canvas | null>(null);
   
   // Initialize the Fabric canvas
   useEffect(() => {
@@ -14,7 +14,7 @@ export const useInitFabricCanvas = (
     const canvasWidth = 600;
     const canvasHeight = 600;
     
-    const fabricCanvas = new FabricCanvas(fabricRef.current, {
+    const fabricCanvas = new fabric.Canvas(fabricRef.current, {
       width: canvasWidth,
       height: canvasHeight,
       selection: false,

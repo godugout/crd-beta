@@ -1,39 +1,39 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
-import { Canvas as FabricCanvas, Image as FabricImage, Text, IImageOptions } from 'fabric';
+import { fabric } from 'fabric';
 import Canvas from './FabricCanvas';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
 interface CardEditorProps {
   initialImage?: string;
-  onSave?: (canvas: FabricCanvas) => void;
+  onSave?: (canvas: fabric.Canvas) => void;
 }
 
 const CardEditor: React.FC<CardEditorProps> = ({
   initialImage,
   onSave,
 }) => {
-  const [canvas, setCanvas] = useState<FabricCanvas | null>(null);
+  const [canvas, setCanvas] = useState<fabric.Canvas | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
 
   // Initialize canvas with image if provided
-  const handleCanvasReady = useCallback((fabricCanvas: FabricCanvas) => {
+  const handleCanvasReady = useCallback((fabricCanvas: fabric.Canvas) => {
     console.log("Canvas is ready");
     setCanvas(fabricCanvas);
     
     if (initialImage) {
       setLoading(true);
       
-      FabricImage.fromURL(initialImage)
+      fabric.Image.fromURL(initialImage)
         .then((img) => {
           // Scale image to fit canvas
           const canvasWidth = fabricCanvas.getWidth();
           const canvasHeight = fabricCanvas.getHeight();
           
           const scale = Math.min(
-            (canvasWidth - 40) / img.width,
-            (canvasHeight - 40) / img.height
+            (canvasWidth - 40) / img.width!,
+            (canvasHeight - 40) / img.height!
           );
           
           img.scale(scale);
@@ -62,7 +62,7 @@ const CardEditor: React.FC<CardEditorProps> = ({
   const addText = useCallback(() => {
     if (!canvas) return;
     
-    const text = new Text('Double click to edit', {
+    const text = new fabric.Text('Double click to edit', {
       left: canvas.getWidth() / 2,
       top: canvas.getHeight() / 2,
       fontFamily: 'Arial',
@@ -94,15 +94,15 @@ const CardEditor: React.FC<CardEditorProps> = ({
       // Clear existing objects
       canvas.clear();
       
-      FabricImage.fromURL(event.target.result.toString())
+      fabric.Image.fromURL(event.target.result.toString())
         .then((img) => {
           // Scale image to fit canvas
           const canvasWidth = canvas.getWidth();
           const canvasHeight = canvas.getHeight();
           
           const scale = Math.min(
-            (canvasWidth - 40) / img.width,
-            (canvasHeight - 40) / img.height
+            (canvasWidth - 40) / img.width!,
+            (canvasHeight - 40) / img.height!
           );
           
           img.scale(scale);

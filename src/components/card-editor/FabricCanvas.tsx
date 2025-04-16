@@ -1,11 +1,11 @@
 
 import React, { useEffect, useRef } from 'react';
-import { Canvas as FabricCanvas } from 'fabric';
+import { fabric } from 'fabric';
 
 interface FabricCanvasProps {
   width?: number;
   height?: number;
-  onReady?: (canvas: FabricCanvas) => void;
+  onReady?: (canvas: fabric.Canvas) => void;
   className?: string;
 }
 
@@ -16,7 +16,7 @@ const Canvas: React.FC<FabricCanvasProps> = ({
   className = '',
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const fabricRef = useRef<FabricCanvas | null>(null);
+  const fabricRef = useRef<fabric.Canvas | null>(null);
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -24,7 +24,7 @@ const Canvas: React.FC<FabricCanvasProps> = ({
     console.log("Initializing Fabric.js canvas");
 
     // Initialize Fabric canvas
-    const canvas = new FabricCanvas(canvasRef.current, {
+    const canvas = new fabric.Canvas(canvasRef.current, {
       width,
       height,
       backgroundColor: '#ffffff',

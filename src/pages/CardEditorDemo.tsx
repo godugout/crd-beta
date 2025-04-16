@@ -1,13 +1,13 @@
 
 import React, { useState } from 'react';
-import { Canvas } from 'fabric';
+import { fabric } from 'fabric';
 import CardEditor from '@/components/card-editor/CardEditor';
 import PageLayout from '@/components/navigation/PageLayout';
 
 const CardEditorDemo: React.FC = () => {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   
-  const handleSave = (canvas: Canvas) => {
+  const handleSave = (canvas: fabric.Canvas) => {
     // Save canvas as image
     const dataUrl = canvas.toDataURL({
       format: 'png',
