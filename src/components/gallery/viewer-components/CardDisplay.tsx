@@ -1,9 +1,10 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Card } from '@/lib/types';
-import { useCardKeyboardNavigation } from '@/hooks/card-interactions/useCardKeyboardNavigation';
+import { CubeFace } from './card-elements/CubeFace';
+import { CubeFaceContent } from './card-elements/CubeFaceContent';
+import { AccessibilityInfo } from './card-elements/AccessibilityInfo';
 import '../../../styles/card-interactions.css';
-import '../../../styles/card-effects.css';
 
 interface CardDisplayProps {
   card: Card;
@@ -26,87 +27,24 @@ const CardDisplay: React.FC<CardDisplayProps> = ({
   rotation,
   isFlipped,
   zoom,
-  isDragging,
-  setIsDragging,
   cardRef,
-  containerRef,
-  isAutoRotating,
   activeEffects,
   effectIntensities = {},
   mousePosition,
-  touchImprintAreas = []
 }) => {
-  const [flipProgress, setFlipProgress] = useState(0);
-  
-  // Update flip progress when isFlipped changes for smooth animation
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setFlipProgress(isFlipped ? 100 : 0);
-    }, 50);
-    return () => clearTimeout(timer);
-  }, [isFlipped]);
+  const CUBE_SIZE = 250;
 
-  // Generate effect classes based on active effects
-  const effectClasses = activeEffects
-    .map(effect => `effect-${effect.toLowerCase()}`)
-    .join(' ');
-  
-  // Generate CSS variables for effect intensities
-  const generateEffectStyles = () => {
-    const style: React.CSSProperties = {
-      '--mouse-x': `${mousePosition.x * 100}%`,
-      '--mouse-y': `${mousePosition.y * 100}%`,
-    } as React.CSSProperties;
-    
-    Object.entries(effectIntensities).forEach(([effect, intensity]) => {
-      if (activeEffects.includes(effect)) {
-        style[`--${effect.toLowerCase()}-intensity`] = intensity.toString();
-      } else {
-        style[`--${effect.toLowerCase()}-intensity`] = "0";
-      }
-    });
-    
-    return style;
-  };
-
-  const { handleKeyDown } = useCardKeyboardNavigation({
-    onFlip: () => setFlipProgress(isFlipped ? 0 : 100),
-    onReset: () => {
-      // Reset card position
-    },
-    onZoomIn: () => {
-      // Zoom in logic
-    },
-    onZoomOut: () => {
-      // Zoom out logic
-    },
-    onRotateLeft: () => {
-      // Rotate left logic
-    },
-    onRotateRight: () => {
-      // Rotate right logic
-    },
-    onRotateUp: () => {
-      // Rotate up logic
-    },
-    onRotateDown: () => {
-      // Rotate down logic
-    },
-  });
-
-  useEffect(() => {
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleKeyDown]);
-
-  // Cube dimensions
-  const CUBE_SIZE = 250; // Base size of cube in px
+  const generateEffectStyles = () => ({
+    '--mouse-x': `${mousePosition.x * 100}%`,
+    '--mouse-y': `${mousePosition.y * 100}%`,
+    ...Object.entries(effectIntensities).reduce((acc, [effect, intensity]) => ({
+      ...acc,
+      [`--${effect.toLowerCase()}-intensity`]: activeEffects.includes(effect) ? intensity : "0"
+    }), {})
+  } as React.CSSProperties);
 
   return (
-    <div 
-      className="flex items-center justify-center gap-8 px-8"
-      style={{ perspective: '2000px' }}
-    >
+    <div className="flex items-center justify-center gap-8 px-8" style={{ perspective: '2000px' }}>
       <div 
         ref={cardRef}
         role="button"
@@ -121,144 +59,55 @@ const CardDisplay: React.FC<CardDisplayProps> = ({
             rotateY(${rotation.y}deg) 
             scale(${zoom})
           `,
-          width: `${CUBE_SIZE}px`, 
+          width: `${CUBE_SIZE}px`,
           height: `${CUBE_SIZE}px`,
           ...generateEffectStyles()
         }}
       >
         {/* Front face */}
-        <div 
-          className={`absolute backface-hidden ${effectClasses}`}
-          style={{ 
-            width: `${CUBE_SIZE}px`, 
-            height: `${CUBE_SIZE}px`,
-            transform: `translateZ(${CUBE_SIZE / 2}px)`,
-            boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
-          }}
-        >
-          <div className="relative w-full h-full overflow-hidden">
-            <img 
-              src={card.imageUrl} 
-              alt={card.title || 'Card front'} 
-              className="w-full h-full object-cover"
-            />
-            
-            {/* Card info overlay */}
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4 text-white">
-              <h2 className="font-bold text-xl mb-1">{card.title}</h2>
-              {card.player && <p className="text-sm opacity-90">{card.player}</p>}
-            </div>
-          </div>
-        </div>
+        <CubeFace position="front" size={CUBE_SIZE}>
+          <CubeFaceContent type="image" card={card} />
+        </CubeFace>
 
         {/* Right face */}
-        <div 
-          className={`absolute backface-hidden ${effectClasses}`}
-          style={{ 
-            width: `${CUBE_SIZE}px`, 
-            height: `${CUBE_SIZE}px`,
-            transform: `rotateY(90deg) translateZ(${CUBE_SIZE / 2}px)`,
-            boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
-          }}
-        >
-          <div className="relative w-full h-full overflow-hidden bg-gray-800">
-            <img 
-              src={card.thumbnailUrl || card.imageUrl} 
-              alt={card.title || 'Card side'} 
-              className="w-full h-full object-cover opacity-70"
-              style={{ filter: 'grayscale(50%)' }}
-            />
-            
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="bg-black/50 backdrop-blur-sm p-4 rounded-lg">
-                <h3 className="text-white text-xl font-bold">{card.team || 'Side View'}</h3>
-              </div>
-            </div>
-          </div>
-        </div>
+        <CubeFace position="right" size={CUBE_SIZE}>
+          <CubeFaceContent 
+            type="image" 
+            card={card}
+            title={card.team || 'Side View'}
+            filter="grayscale(50%)"
+            opacity={0.7}
+          />
+        </CubeFace>
 
         {/* Top face */}
-        <div 
-          className={`absolute backface-hidden ${effectClasses}`}
-          style={{ 
-            width: `${CUBE_SIZE}px`, 
-            height: `${CUBE_SIZE}px`,
-            transform: `rotateX(90deg) translateZ(${CUBE_SIZE / 2}px)`,
-            boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
-          }}
-        >
-          <div className="relative w-full h-full overflow-hidden bg-gray-900">
-            <img 
-              src={card.imageUrl} 
-              alt={card.title || 'Card top'} 
-              className="w-full h-full object-cover opacity-60"
-              style={{ filter: 'hue-rotate(45deg) contrast(1.2)' }}
-            />
-            
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="bg-black/60 backdrop-blur-sm p-4 rounded-lg">
-                <h3 className="text-white text-xl font-bold">{card.year || 'Top View'}</h3>
-              </div>
-            </div>
-          </div>
-        </div>
+        <CubeFace position="top" size={CUBE_SIZE}>
+          <CubeFaceContent 
+            type="image" 
+            card={card}
+            title={card.year || 'Top View'}
+            filter="hue-rotate(45deg) contrast(1.2)"
+            opacity={0.6}
+          />
+        </CubeFace>
 
-        {/* Back face (solid color) */}
-        <div 
-          className="absolute backface-hidden bg-gray-700"
-          style={{ 
-            width: `${CUBE_SIZE}px`, 
-            height: `${CUBE_SIZE}px`,
-            transform: `rotateY(180deg) translateZ(${CUBE_SIZE / 2}px)`,
-            boxShadow: 'inset 0 0 20px rgba(0,0,0,0.5)'
-          }}
-        >
-          <div className="w-full h-full flex items-center justify-center">
-            <div className="text-white text-xl">Back</div>
-          </div>
-        </div>
+        {/* Back face */}
+        <CubeFace position="back" size={CUBE_SIZE}>
+          <CubeFaceContent type="solid" title="Back" bgClass="bg-gray-700" />
+        </CubeFace>
 
-        {/* Bottom face (solid color) */}
-        <div 
-          className="absolute backface-hidden bg-gray-800"
-          style={{ 
-            width: `${CUBE_SIZE}px`, 
-            height: `${CUBE_SIZE}px`,
-            transform: `rotateX(-90deg) translateZ(${CUBE_SIZE / 2}px)`,
-            boxShadow: 'inset 0 0 20px rgba(0,0,0,0.5)'
-          }}
-        >
-          <div className="w-full h-full flex items-center justify-center">
-            <div className="text-white text-xl">Bottom</div>
-          </div>
-        </div>
+        {/* Bottom face */}
+        <CubeFace position="bottom" size={CUBE_SIZE}>
+          <CubeFaceContent type="solid" title="Bottom" bgClass="bg-gray-800" />
+        </CubeFace>
 
-        {/* Left face (solid color) */}
-        <div 
-          className="absolute backface-hidden bg-gray-900"
-          style={{ 
-            width: `${CUBE_SIZE}px`, 
-            height: `${CUBE_SIZE}px`,
-            transform: `rotateY(-90deg) translateZ(${CUBE_SIZE / 2}px)`,
-            boxShadow: 'inset 0 0 20px rgba(0,0,0,0.5)'
-          }}
-        >
-          <div className="w-full h-full flex items-center justify-center">
-            <div className="text-white text-xl">Left</div>
-          </div>
-        </div>
+        {/* Left face */}
+        <CubeFace position="left" size={CUBE_SIZE}>
+          <CubeFaceContent type="solid" title="Left" bgClass="bg-gray-900" />
+        </CubeFace>
       </div>
 
-      {/* Accessibility description */}
-      <div className="sr-only">
-        <p>Use keyboard controls to interact with the cube:</p>
-        <ul>
-          <li>Use arrow keys to rotate</li>
-          <li>Press + to zoom in</li>
-          <li>Press - to zoom out</li>
-          <li>Press R to reset position</li>
-        </ul>
-      </div>
+      <AccessibilityInfo />
     </div>
   );
 };
