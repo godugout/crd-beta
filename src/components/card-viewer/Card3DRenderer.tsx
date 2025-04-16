@@ -63,7 +63,7 @@ const Card3DRenderer: React.FC<Card3DRendererProps> = ({
 
   // Only load textures after we have valid URLs
   const textures = useTexture(
-    [textureUrls.front, textureUrls.back], 
+    [textureUrls.front, textureUrls.back],  // Using an array instead of separate params
     (loadedTextures) => {
       console.log('Card textures loaded:', loadedTextures);
       setRenderingStats(prev => ({
@@ -174,11 +174,11 @@ const Card3DRenderer: React.FC<Card3DRendererProps> = ({
         <primitive object={edgeMaterial} attach="material" />
       </mesh>
       
-      {/* Diagnostics overlay */}
+      {/* Diagnostics overlay - position moved to bottom left */}
       {showDiagnostics && (
         <CardDiagnostics 
           stats={renderingStats}
-          position={[0, 2.5, 0.5]}
+          position={[0, -2.5, 0.5]}
         />
       )}
     </group>

@@ -15,7 +15,7 @@ interface RenderingStats {
 
 interface CardDiagnosticsProps {
   stats: RenderingStats;
-  position: [number, number, number]; // Changed to tuple for Vector3 compatibility
+  position: [number, number, number]; // Properly typed as a tuple for Vector3
 }
 
 const CardDiagnostics: React.FC<CardDiagnosticsProps> = ({ 
@@ -33,7 +33,11 @@ const CardDiagnostics: React.FC<CardDiagnosticsProps> = ({
         width: '300px',
         maxHeight: '400px',
         overflowY: 'auto',
-        fontFamily: 'monospace'
+        fontFamily: 'monospace',
+        // Position at bottom left
+        position: 'absolute',
+        bottom: '20px',
+        left: '20px'
       }}>
         <h3 style={{ margin: '0 0 10px 0', borderBottom: '1px solid #555' }}>Card Diagnostics</h3>
         
