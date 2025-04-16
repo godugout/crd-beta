@@ -5,7 +5,7 @@ import { DEFAULT_DESIGN_METADATA } from '@/lib/utils/cardDefaults';
 
 interface InfoPanelProps {
   card: Card;
-  showInfo?: boolean; // Add the showInfo property
+  showInfo?: boolean;
 }
 
 const InfoPanel: React.FC<InfoPanelProps> = ({ card, showInfo = true }) => {
