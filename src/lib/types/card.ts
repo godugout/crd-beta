@@ -21,7 +21,7 @@ export interface Card extends BaseEntity {
   userId?: string;
   collectionId?: string;
   metadata?: Record<string, any>;
-  effects?: string[];
+  effects?: string[]; // Add this line to resolve the TypeScript error
   reactions?: Reaction[];
   comments?: Comment[];
   viewCount?: number;
