@@ -100,8 +100,8 @@ export interface Reaction {
   commentId?: string;
   type: 'like' | 'love' | 'wow' | 'haha' | 'sad' | 'angry';
   createdAt: string;
-  targetType?: 'card' | 'comment' | string; // Added to match Reaction in interaction.ts
-  targetId?: string; // Added to match Reaction in interaction.ts
+  targetType: 'card' | 'comment' | string; // Added to match Reaction in interaction.ts
+  targetId: string; // Added to match Reaction in interaction.ts
   user?: User;
 }
 

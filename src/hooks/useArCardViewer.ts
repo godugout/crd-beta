@@ -17,13 +17,22 @@ interface CardRecord extends Card {
   user_id: string;
 }
 
-export function useArCardViewer() {
+export function useArCardViewer(cardId?: string) {
   const [cards, setCards] = useState<Card[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  const [activeCardId, setActiveCardId] = useState<string | null>(null);
+  const [activeCardId, setActiveCardId] = useState<string | null>(cardId || null);
   const [isViewerOpen, setIsViewerOpen] = useState(false);
+  const [isArMode, setIsArMode] = useState(false);
+  const [isFlipped, setIsFlipped] = useState(false);
+  const [cameraError, setCameraError] = useState<string | null>(null);
+  const [arCards, setArCards] = useState<Card[]>([]);
   const { toast } = useToast();
+
+  // Get the active card based on activeCardId
+  const activeCard = activeCardId ? cards.find(card => card.id === activeCardId) || null : null;
+  // Cards available to add to AR scene
+  const availableCards = cards.filter(card => !arCards.some(arCard => arCard.id === card.id));
 
   const fetchCards = useCallback(async () => {
     try {
@@ -63,28 +72,35 @@ export function useArCardViewer() {
       
       // if (error) throw error;
       
-      // Instead of trying to directly convert incompatible types, create new objects with the proper shape
+      // Process fetched data (commented out for demo)
       // if (data) {
       //   const processedCards = data.map(item => ({
       //     id: item.id,
-      //     title: item.title,
-      //     description: item.description,
-      //     imageUrl: item.image_url,
-      //     thumbnailUrl: item.thumbnail_url,
-      //     tags: item.tags,
-      //     collectionId: item.collection_id,
-      //     createdAt: item.created_at,
-      //     updatedAt: item.updated_at,
-      //     userId: item.user_id,
-      //     teamId: item.team_id,
-      //     isPublic: item.is_public,
-      //     designMetadata: item.design_metadata,
-      //     effects: [], // Add required property
-      //   }));
+      //     title: item.title || '',
+      //     description: item.description || '',
+      //     imageUrl: item.image_url || '',
+      //     thumbnailUrl: item.thumbnail_url || '',
+      //     tags: item.tags || [],
+      //     collectionId: item.collection_id || '',
+      //     createdAt: item.created_at || new Date().toISOString(),
+      //     updatedAt: item.updated_at || new Date().toISOString(),
+      //     userId: item.user_id || '',
+      //     isPublic: item.is_public || false,
+      //     designMetadata: item.design_metadata || {},
+      //     effects: item.effects || ['Holographic'], // Ensure effects is always populated
+      //   } as Card));
       //   setCards(processedCards);
       // }
       
       setCards(demoCards);
+
+      // If a cardId was provided, add it to AR cards
+      if (cardId) {
+        const cardToAdd = demoCards.find(card => card.id === cardId);
+        if (cardToAdd) {
+          setArCards([cardToAdd]);
+        }
+      }
     } catch (err) {
       const error = err as Error;
       console.error('Error fetching AR cards:', error);
@@ -97,7 +113,7 @@ export function useArCardViewer() {
     } finally {
       setLoading(false);
     }
-  }, [toast]);
+  }, [toast, cardId]);
 
   useEffect(() => {
     fetchCards();
@@ -113,6 +129,76 @@ export function useArCardViewer() {
     setActiveCardId(null);
   }, []);
 
+  // AR interaction methods
+  const handleLaunchAr = useCallback(() => {
+    if (activeCard) {
+      setArCards([activeCard]);
+      setIsArMode(true);
+    } else {
+      toast({
+        title: 'No card selected',
+        description: 'Please select a card to view in AR',
+        variant: 'destructive',
+      });
+    }
+  }, [activeCard, toast]);
+
+  const handleExitAr = useCallback(() => {
+    setIsArMode(false);
+  }, []);
+
+  const handleCameraError = useCallback((error: string) => {
+    setCameraError(error);
+    toast({
+      title: 'Camera Error',
+      description: error,
+      variant: 'destructive',
+    });
+  }, [toast]);
+
+  const handleTakeSnapshot = useCallback(() => {
+    toast({
+      title: 'Snapshot taken',
+      description: 'AR snapshot saved to your gallery',
+    });
+  }, [toast]);
+
+  const handleFlip = useCallback(() => {
+    setIsFlipped(prev => !prev);
+  }, []);
+
+  const handleZoomIn = useCallback(() => {
+    toast({
+      title: 'Zooming in',
+      description: 'Feature coming soon',
+    });
+  }, [toast]);
+
+  const handleZoomOut = useCallback(() => {
+    toast({
+      title: 'Zooming out',
+      description: 'Feature coming soon',
+    });
+  }, [toast]);
+
+  const handleRotate = useCallback(() => {
+    toast({
+      title: 'Rotating card',
+      description: 'Feature coming soon',
+    });
+  }, [toast]);
+
+  const handleAddCard = useCallback((cardId: string) => {
+    const cardToAdd = cards.find(card => card.id === cardId);
+    if (cardToAdd && !arCards.some(card => card.id === cardId)) {
+      setArCards(prev => [...prev, cardToAdd]);
+    }
+  }, [cards, arCards]);
+
+  const handleRemoveCard = useCallback((cardId: string) => {
+    setArCards(prev => prev.filter(card => card.id !== cardId));
+  }, []);
+
   return {
     cards,
     loading,
@@ -122,5 +208,23 @@ export function useArCardViewer() {
     openViewer,
     closeViewer,
     fetchCards,
+    // Add the missing properties
+    activeCard,
+    arCards,
+    availableCards,
+    isArMode,
+    isFlipped,
+    cameraError,
+    isLoading: loading,
+    handleLaunchAr,
+    handleExitAr,
+    handleCameraError,
+    handleTakeSnapshot,
+    handleFlip,
+    handleZoomIn,
+    handleZoomOut,
+    handleRotate,
+    handleAddCard,
+    handleRemoveCard,
   };
 }

@@ -1,3 +1,4 @@
+
 import { Card } from '@/lib/types';
 import { FabricSwatch } from '@/lib/types/card';
 
@@ -100,3 +101,20 @@ export const sampleCards: Card[] = [
     effects: ['Refractor'], // Add required effects property
   }
 ];
+
+// Add the missing function to add sample cards
+export const addSampleCards = async (addCardFunction: (card: Omit<Card, 'id' | 'createdAt' | 'updatedAt'>) => any) => {
+  try {
+    const addedCards = [];
+    for (const card of sampleCards) {
+      // Create a copy of the card without the properties that will be set by the addCard function
+      const { id, createdAt, updatedAt, ...cardData } = card;
+      const addedCard = await addCardFunction(cardData);
+      addedCards.push(addedCard);
+    }
+    return addedCards;
+  } catch (error) {
+    console.error("Error adding sample cards:", error);
+    return [];
+  }
+};

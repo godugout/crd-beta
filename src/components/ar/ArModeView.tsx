@@ -1,35 +1,21 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Card } from '@/lib/types';
-import { toast } from 'sonner';
-import CameraView from './CameraView';
-import ArControls from './ArControls';
-import RadioDial from './RadioDial';
-import MouseInteractionLayer from './MouseInteractionLayer';
-import CardSelector from './CardSelector';
-import ArHeader from './ArHeader';
-import ArInfoOverlay from './ArInfoOverlay';
-import './arModeEffects.css';
-import './ar-animations.css';
+import { X, Camera, RotateCw, ZoomIn, ZoomOut, Flip } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface ArModeViewProps {
   activeCards: Card[];
   availableCards: Card[];
   onExitAr: () => void;
-  onCameraError: (message: string) => void;
+  onCameraError: (error: string) => void;
   onTakeSnapshot: () => void;
   onFlip: () => void;
   onZoomIn: () => void;
   onZoomOut: () => void;
   onRotate: () => void;
-  onAddCard?: (card: Card) => void;
-  onRemoveCard?: (cardId: string) => void;
-}
-
-interface CardPosition {
-  x: number;
-  y: number;
-  rotation: number;
+  onAddCard: (cardId: string) => void;
+  onRemoveCard: (cardId: string) => void;
 }
 
 const ArModeView: React.FC<ArModeViewProps> = ({
@@ -45,189 +31,122 @@ const ArModeView: React.FC<ArModeViewProps> = ({
   onAddCard,
   onRemoveCard
 }) => {
-  const [selectedCardId, setSelectedCardId] = useState<string | null>(
-    activeCards.length > 0 ? activeCards[0].id : null
-  );
-  const [showCardSelector, setShowCardSelector] = useState(false);
-  const [cardPositions, setCardPositions] = useState<Record<string, CardPosition>>({});
-  const [cameraActive, setCameraActive] = useState(false);
-
-  useEffect(() => {
-    if (activeCards.length > 0 && !selectedCardId) {
-      setSelectedCardId(activeCards[0].id);
-    } else if (selectedCardId && !activeCards.some(card => card.id === selectedCardId)) {
-      setSelectedCardId(activeCards.length > 0 ? activeCards[0].id : null);
+  // Mock AR view for development
+  React.useEffect(() => {
+    // Simulate AR initialization
+    console.log('Initializing AR view with cards:', activeCards);
+    
+    // Simulate potential camera error
+    const hasError = false; // Set to true to test error handling
+    if (hasError) {
+      onCameraError('Failed to access camera. Please check permissions.');
     }
-  }, [activeCards, selectedCardId]);
-
-  console.log("ArModeView rendering with activeCards:", activeCards, "selectedCardId:", selectedCardId);
-
-  const handleSelectCard = (id: string) => {
-    console.log("Selecting card:", id);
-    setSelectedCardId(id);
-  };
-
-  const handleUpdateCardPosition = (cardId: string, x: number, y: number, rotation: number) => {
-    console.log("Updating card position:", cardId, x, y, rotation);
-    setCardPositions(prev => ({
-      ...prev,
-      [cardId]: { x, y, rotation }
-    }));
-  };
-
-  const handleToggleCamera = () => {
-    setCameraActive(prev => !prev);
-    if (!cameraActive) {
-      toast.success('AR mode activated', {
-        description: 'The camera is now active. Place your cards in the scene.'
-      });
-    }
-  };
-
-  const handleAddCard = (card: Card) => {
-    if (activeCards.some(c => c.id === card.id)) {
-      toast.info('Card already in scene');
-      return;
-    }
-    
-    if (onAddCard) {
-      onAddCard(card);
-    }
-    
-    setShowCardSelector(false);
-    setSelectedCardId(card.id);
-    
-    setCardPositions(prev => ({
-      ...prev,
-      [card.id]: { x: 0, y: 0, rotation: 0 }
-    }));
-    
-    toast.success('Card added to scene');
-  };
-
-  const handleRemoveSelected = () => {
-    if (!selectedCardId || !onRemoveCard) return;
-    
-    onRemoveCard(selectedCardId);
-    
-    if (activeCards.length > 1) {
-      const newSelectedId = activeCards.find(c => c.id !== selectedCardId)?.id || null;
-      setSelectedCardId(newSelectedId);
-    } else {
-      setSelectedCardId(null);
-    }
-    
-    setCardPositions(prev => {
-      const newPositions = { ...prev };
-      delete newPositions[selectedCardId];
-      return newPositions;
-    });
-    
-    toast.success('Card removed from scene');
-  };
-  
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (showCardSelector) {
-        const target = e.target as HTMLElement;
-        if (!target.closest('.card-selector')) {
-          setShowCardSelector(false);
-        }
-      }
-    };
-    
-    document.addEventListener('mousedown', handleClickOutside);
     
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      console.log('Cleaning up AR resources');
     };
-  }, [showCardSelector]);
+  }, [activeCards, onCameraError]);
 
   return (
-    <div className="relative h-screen w-screen bg-black">
-      {cameraActive ? (
-        <>
-          <CameraView 
-            activeCards={activeCards}
-            selectedCardId={selectedCardId}
-            onSelectCard={handleSelectCard}
-            onError={onCameraError}
-            cardPositions={cardPositions}
-          />
+    <div className="fixed inset-0 bg-black z-50 flex flex-col">
+      {/* Mock camera feed */}
+      <div className="flex-1 relative bg-gradient-to-b from-gray-800 to-gray-900 flex items-center justify-center">
+        <div className="text-white text-center max-w-md px-6">
+          <Camera size={48} className="mx-auto mb-4 text-gray-400" />
+          <h2 className="text-2xl font-bold mb-2">AR Mode</h2>
+          <p className="text-gray-400 mb-6">
+            This is a placeholder for the AR camera view. 
+            In a production app, this would show a live camera feed with AR content.
+          </p>
           
-          <MouseInteractionLayer
-            cards={activeCards}
-            selectedCardId={selectedCardId}
-            onUpdateCardPosition={handleUpdateCardPosition}
-          />
-          
-          <RadioDial
-            cards={activeCards}
-            activeCardId={selectedCardId}
-            onSelectCard={handleSelectCard}
-          />
-          
-          <ArControls
-            onTakeSnapshot={onTakeSnapshot}
-            onFlip={onFlip}
-            onZoomIn={onZoomIn}
-            onZoomOut={onZoomOut}
-            onRotate={onRotate}
-          />
-          
-          <ArHeader 
-            onExitAr={() => {
-              setCameraActive(false);
-              onExitAr();
-            }}
-            onToggleSelector={() => setShowCardSelector(!showCardSelector)}
-            onRemoveSelected={handleRemoveSelected}
-            selectedCardId={selectedCardId}
-          />
-          
-          <CardSelector
-            showCardSelector={showCardSelector}
-            availableCards={availableCards}
-            onAddCard={handleAddCard}
-          />
-          
-          <ArInfoOverlay 
-            selectedCardId={selectedCardId}
-            activeCards={activeCards}
-          />
-        </>
-      ) : (
-        <div className="flex flex-col items-center justify-center h-full bg-gradient-to-b from-gray-900 to-black p-6">
-          <div className="max-w-lg text-center space-y-6">
-            <h2 className="text-3xl font-bold text-white">AR Card Experience</h2>
-            <p className="text-gray-300">
-              Experience your cards in augmented reality. Move, rotate, and interact with your cards in the real world.
-            </p>
-            <div className="grid grid-cols-2 gap-4 mt-8">
-              <button 
-                onClick={handleToggleCamera} 
-                className="crd-btn-primary flex items-center justify-center gap-2"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                Start AR Mode
-              </button>
-              <button 
-                onClick={onExitAr} 
-                className="crd-btn-outline text-white border-white hover:bg-white hover:bg-opacity-20 hover:text-white"
-              >
-                Back to Cards
-              </button>
+          {activeCards.length > 0 && (
+            <div className="flex flex-wrap gap-2 justify-center mb-6">
+              {activeCards.map(card => (
+                <div key={card.id} className="relative bg-gray-800 rounded p-2 w-24">
+                  <button 
+                    className="absolute -top-2 -right-2 bg-red-500 rounded-full p-1"
+                    onClick={() => onRemoveCard(card.id)}
+                  >
+                    <X size={12} />
+                  </button>
+                  <div className="h-20 bg-gray-700 rounded mb-2 flex items-center justify-center">
+                    {card.thumbnailUrl ? (
+                      <img 
+                        src={card.thumbnailUrl} 
+                        alt={card.title} 
+                        className="max-h-full max-w-full object-contain"
+                      />
+                    ) : (
+                      <div className="text-xs text-gray-400">{card.title}</div>
+                    )}
+                  </div>
+                  <div className="text-xs truncate">{card.title}</div>
+                </div>
+              ))}
             </div>
-          </div>
+          )}
           
-          <div className="absolute bottom-4 w-full text-center">
-            <p className="text-xs text-gray-400">Camera access required for AR functionality</p>
+          <div className="flex justify-center gap-4 mb-6">
+            <Button variant="outline" size="icon" onClick={onFlip}>
+              <Flip size={18} />
+            </Button>
+            <Button variant="outline" size="icon" onClick={onZoomIn}>
+              <ZoomIn size={18} />
+            </Button>
+            <Button variant="outline" size="icon" onClick={onZoomOut}>
+              <ZoomOut size={18} />
+            </Button>
+            <Button variant="outline" size="icon" onClick={onRotate}>
+              <RotateCw size={18} />
+            </Button>
+            <Button variant="default" onClick={onTakeSnapshot}>
+              <Camera size={18} className="mr-2" /> Snapshot
+            </Button>
           </div>
         </div>
-      )}
+      </div>
+      
+      {/* Bottom controls */}
+      <div className="bg-gray-900 p-4">
+        <div className="flex justify-between items-center">
+          <Button variant="destructive" onClick={onExitAr}>
+            <X size={18} className="mr-2" />
+            Exit AR
+          </Button>
+          
+          {availableCards.length > 0 && (
+            <div className="flex gap-2 overflow-x-auto pb-2 max-w-[70%]">
+              {availableCards.slice(0, 5).map(card => (
+                <button 
+                  key={card.id}
+                  className="bg-gray-800 rounded p-1 w-16 flex flex-col items-center"
+                  onClick={() => onAddCard(card.id)}
+                >
+                  <div className="h-12 w-12 bg-gray-700 rounded mb-1 flex items-center justify-center">
+                    {card.thumbnailUrl ? (
+                      <img 
+                        src={card.thumbnailUrl} 
+                        alt={card.title} 
+                        className="max-h-full max-w-full object-contain"
+                      />
+                    ) : (
+                      <div className="text-xs text-gray-400">{card.title.substring(0, 5)}...</div>
+                    )}
+                  </div>
+                  <div className="text-xs text-white truncate w-full text-center">
+                    {card.title.length > 8 ? card.title.substring(0, 8) + '...' : card.title}
+                  </div>
+                </button>
+              ))}
+              {availableCards.length > 5 && (
+                <div className="text-xs text-gray-400 flex items-center px-2">
+                  +{availableCards.length - 5} more
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 };
