@@ -40,19 +40,20 @@ export const getAllTeams = async (): Promise<Team[]> => {
 /**
  * Create a new team
  */
-export const createTeam = async (team: Omit<Team, 'id' | 'created_at' | 'updated_at'>): Promise<Team | null> => {
+export const createTeam = async (team: Omit<Team, 'id' | 'createdAt' | 'updatedAt'>): Promise<Team | null> => {
   const { data, error } = await supabase
     .from('teams')
     .insert({
       name: team.name,
       description: team.description,
-      logo_url: team.logo_url,
+      logo_url: team.logoUrl || team.logo_url,
       banner_url: team.banner_url,
-      owner_id: team.owner_id,
+      owner_id: team.ownerId,
       status: team.status,
       website: team.website,
       email: team.email,
-      specialties: team.specialties
+      specialties: team.specialties,
+      visibility: team.visibility
     })
     .select('*')
     .single();
@@ -74,12 +75,15 @@ export const updateTeam = async (teamId: string, updates: Partial<Team>): Promis
     .update({
       name: updates.name,
       description: updates.description,
-      logo_url: updates.logo_url,
+      logo_url: updates.logoUrl || updates.logo_url,
       banner_url: updates.banner_url,
       status: updates.status,
       website: updates.website,
       email: updates.email,
-      specialties: updates.specialties
+      specialties: updates.specialties,
+      visibility: updates.visibility,
+      primary_color: updates.primary_color,
+      secondary_color: updates.secondary_color
     })
     .eq('id', teamId)
     .select('*')

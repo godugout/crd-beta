@@ -26,6 +26,7 @@ export const createTeam = async (name: string, ownerId: string): Promise<Team | 
       // Additional fields needed by the Team interface
       description: data.description,
       logoUrl: data.logo_url,
+      logo_url: data.logo_url,
       primary_color: data.primary_color,
       secondary_color: data.secondary_color,
       tertiary_color: data.tertiary_color
