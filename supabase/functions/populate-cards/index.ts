@@ -267,6 +267,27 @@ serve(async (req) => {
     
     console.log("Starting to populate database with Commons Cards collection...");
 
+    // Get the user ID from the authorization header, but use a fixed admin ID if something goes wrong
+    let userId = '00000000-0000-0000-0000-000000000000'; // Default anonymous ID
+    
+    // Try to extract the user ID but don't break if it fails
+    try {
+      const authHeader = req.headers.get('authorization');
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        // Just use the token directly - don't try to parse it
+        const token = authHeader.split(' ')[1];
+        // Get the user from Supabase auth using the token
+        const { data: userData, error: userError } = await supabase.auth.getUser(token);
+        
+        if (!userError && userData && userData.user) {
+          userId = userData.user.id;
+        }
+      }
+    } catch (error) {
+      console.log("Error extracting user ID, using default:", error);
+      // Continue with default user ID
+    }
+    
     // Check if the Commons Cards collection already exists
     const { data: existingCollections, error: checkError } = await supabase
       .from('collections')
@@ -312,7 +333,7 @@ serve(async (req) => {
         .from('collections')
         .insert({
           ...commonsCollection,
-          owner_id: req.headers.get('authorization')?.split(' ')[1] || '00000000-0000-0000-0000-000000000000'
+          owner_id: userId
         })
         .select()
         .single();
@@ -349,8 +370,8 @@ serve(async (req) => {
       const cardData = {
         ...card,
         collection_id: collectionId,
-        creator_id: req.headers.get('authorization')?.split(' ')[1] || '00000000-0000-0000-0000-000000000000',
-        user_id: req.headers.get('authorization')?.split(' ')[1] || '00000000-0000-0000-0000-000000000000'
+        creator_id: userId,
+        user_id: userId
       };
       
       return supabase
