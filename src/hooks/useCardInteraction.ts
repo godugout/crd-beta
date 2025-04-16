@@ -1,10 +1,15 @@
-
 import { useState, useCallback, useRef } from 'react';
+
+interface CardInteractionPosition {
+  x: number;
+  y: number;
+  z: number;
+}
 
 interface CardInteractionOptions {
   containerRef: React.RefObject<HTMLDivElement>;
   cardRef: React.RefObject<HTMLDivElement>;
-  initialPosition?: { x: number; y: number; z: number };
+  initialPosition?: CardInteractionPosition;
   initialZoom?: number;
   sensitivity?: {
     rotate: number;
@@ -25,7 +30,7 @@ export const useCardInteraction = (options: CardInteractionOptions) => {
   } = options;
 
   // State for card rotation and position
-  const [position, setPosition] = useState(initialPosition);
+  const [position, setPosition] = useState<CardInteractionPosition>(initialPosition);
   const [zoom, setZoom] = useState(initialZoom);
   const [isAutoRotating, setIsAutoRotating] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
