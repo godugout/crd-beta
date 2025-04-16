@@ -1,6 +1,7 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Collection } from '@/context/CardContext';
+import { Collection } from '@/lib/types';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Lock, Globe, Users, Image } from 'lucide-react';
@@ -45,7 +46,7 @@ const CollectionGrid: React.FC<CollectionGridProps> = ({ collections, isLoading,
               {collection.coverImageUrl ? (
                 <img
                   src={collection.coverImageUrl}
-                  alt={collection.name}
+                  alt={collection.title || collection.name || 'Collection'}
                   className="w-full h-full object-cover"
                   onError={(e) => {
                     e.currentTarget.style.display = 'none';
@@ -58,8 +59,8 @@ const CollectionGrid: React.FC<CollectionGridProps> = ({ collections, isLoading,
               </div>
             </div>
             <CardContent className="p-4">
-              <h3 className="font-medium text-lg mb-1">{collection.name}</h3>
-              {collection.description && (
+              <h3 className="font-medium text-lg mb-1">{collection.title || collection.name}</h3>
+              {(collection.description) && (
                 <p className="text-sm text-gray-600 line-clamp-2">{collection.description}</p>
               )}
             </CardContent>

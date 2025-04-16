@@ -4,8 +4,10 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
-import { Loader2, AlertCircle, RefreshCw } from 'lucide-react';
+import { Loader2, AlertCircle, RefreshCw, Eye } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 export const PopulateDatabase = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -15,6 +17,7 @@ export const PopulateDatabase = () => {
     collectionId?: string;
     error?: string;
   } | null>(null);
+  const navigate = useNavigate();
 
   const handlePopulateDatabase = async () => {
     setIsLoading(true);
@@ -60,6 +63,13 @@ export const PopulateDatabase = () => {
     setResult(null);
     // Try again
     handlePopulateDatabase();
+  };
+
+  // Function to navigate to the created collection
+  const handleViewCollection = () => {
+    if (result?.collectionId) {
+      navigate(`/collections/${result.collectionId}`);
+    }
   };
   
   return (
@@ -118,7 +128,17 @@ export const PopulateDatabase = () => {
         <div className="mt-4 p-4 rounded bg-purple-900/30 border border-purple-700/50">
           <p className="font-medium text-purple-300">{result.message}</p>
           {result.collectionId && (
-            <p className="text-sm text-purple-400 mt-2">Collection ID: {result.collectionId}</p>
+            <div className="mt-2">
+              <p className="text-sm text-purple-400 mb-3">Collection ID: {result.collectionId}</p>
+              <Button 
+                onClick={handleViewCollection}
+                variant="outline" 
+                className="w-full border-purple-500 text-purple-200 hover:bg-purple-800"
+              >
+                <Eye className="mr-2 h-4 w-4" />
+                View Commons Cards Collection
+              </Button>
+            </div>
           )}
         </div>
       )}

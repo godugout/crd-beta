@@ -1,4 +1,3 @@
-
 import { Card, Collection } from '../types';
 import { supabase } from './client';
 
@@ -16,6 +15,7 @@ export const collectionOperations = {
         ...collection,
         createdAt: new Date(collection.created_at),
         updatedAt: new Date(collection.updated_at),
+        name: collection.title, // Add name property based on title for compatibility
         cards: (collection.cards || []).map((card: any) => ({
           ...card,
           createdAt: new Date(card.created_at),
@@ -25,6 +25,33 @@ export const collectionOperations = {
       })) as unknown as Collection[];
       
       return { data: processedCollections, error };
+    }
+    
+    return { data: null, error };
+  },
+  
+  getCollectionById: async (id: string): Promise<{ data: Collection | null; error: any }> => {
+    const { data, error } = await supabase
+      .from('collections')
+      .select('*, cards(*)')
+      .eq('id', id)
+      .single();
+      
+    if (data) {
+      const processedCollection = {
+        ...data,
+        createdAt: new Date(data.created_at),
+        updatedAt: new Date(data.updated_at),
+        name: data.title, // Add name property based on title for compatibility
+        cards: (data.cards || []).map((card: any) => ({
+          ...card,
+          createdAt: new Date(card.created_at),
+          updatedAt: new Date(card.updated_at),
+          tags: card.tags || []
+        }))
+      } as unknown as Collection;
+      
+      return { data: processedCollection, error };
     }
     
     return { data: null, error };
