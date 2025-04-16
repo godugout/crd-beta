@@ -1,84 +1,102 @@
-
 import { Card } from '@/lib/types';
-import { v4 as uuidv4 } from 'uuid';
+import { FabricSwatch } from '@/lib/types/card';
 
-const createSampleCard = (data: Partial<Card>): Card => ({
-  id: uuidv4(),
-  title: data.title || 'Untitled Card',
-  name: data.name || data.title || 'Untitled Card', // Ensure name field is present
-  description: data.description || '',
-  imageUrl: data.imageUrl || '',
-  image: data.image || data.imageUrl || '', // Ensure image field is present
-  thumbnailUrl: data.thumbnailUrl || data.imageUrl || '',
-  userId: data.userId || 'sample-creator',
-  creatorId: data.userId || 'sample-creator', // Use userId as creatorId for consistency
-  tags: data.tags || [],
-  createdAt: new Date().toISOString(),
-  updatedAt: new Date().toISOString(),
-  fabricSwatches: data.fabricSwatches || []
-});
-
+// Sample cards for development and testing
 export const sampleCards: Card[] = [
-  createSampleCard({
-    title: 'Vintage Baseball Card',
-    description: 'A classic baseball trading card from the 1970s',
-    imageUrl: 'https://source.unsplash.com/random/300x400?baseball',
-    thumbnailUrl: 'https://source.unsplash.com/random/300x400?baseball',
-    tags: ['Baseball', 'Vintage', 'Trading Card']
-  }),
-  createSampleCard({
-    title: 'Basketball Legend',
-    description: 'An iconic player from basketball history',
-    imageUrl: 'https://source.unsplash.com/random/300x400?basketball',
-    thumbnailUrl: 'https://source.unsplash.com/random/300x400?basketball',
-    tags: ['Basketball', 'Legend', 'Sports Icon']
-  }),
-  createSampleCard({
-    title: 'Football Superstar',
-    description: 'One of the greatest football players of all time',
-    imageUrl: 'https://source.unsplash.com/random/300x400?football',
-    thumbnailUrl: 'https://source.unsplash.com/random/300x400?football',
-    tags: ['Football', 'Superstar', 'NFL']
-  }),
-  createSampleCard({
-    title: 'Soccer World Cup',
-    description: 'Memorable moment from a World Cup final',
-    imageUrl: 'https://source.unsplash.com/random/300x400?soccer',
-    thumbnailUrl: 'https://source.unsplash.com/random/300x400?soccer',
-    tags: ['Soccer', 'World Cup', 'FIFA']
-  }),
-  createSampleCard({
-    title: 'Tennis Champion',
-    description: 'Grand Slam winning tennis player',
-    imageUrl: 'https://source.unsplash.com/random/300x400?tennis',
-    thumbnailUrl: 'https://source.unsplash.com/random/300x400?tennis',
-    tags: ['Tennis', 'Grand Slam', 'Champion']
-  }),
-  createSampleCard({
-    title: 'Hockey Star',
-    description: 'Legendary hockey player on ice',
-    imageUrl: 'https://source.unsplash.com/random/300x400?hockey',
-    thumbnailUrl: 'https://source.unsplash.com/random/300x400?hockey',
-    tags: ['Hockey', 'NHL', 'Ice Sports']
-  })
-];
-
-export const addSampleCards = async (addCardFn: (card: Partial<Card>) => Promise<Card>): Promise<Card[]> => {
-  const addedCards: Card[] = [];
-  
-  try {
-    for (const sampleCard of sampleCards) {
-      const cardToAdd = {
-        ...sampleCard,
-        id: undefined // Let the addCard function generate a new ID
-      };
-      
-      const newCard = await addCardFn(cardToAdd);
-      addedCards.push(newCard);
-    }
-  } catch (error) {
-    console.error('Error adding sample cards:', error);
+  {
+    id: 'sample-1',
+    title: 'Gundam RX-78-2',
+    name: 'Gundam RX-78-2',
+    description: 'Classic Gundam mecha featured in the original Mobile Suit Gundam anime series.',
+    imageUrl: '/sample-images/gundam.jpg',
+    image: '/sample-images/gundam.jpg',
+    thumbnailUrl: '/sample-images/gundam-thumb.jpg',
+    userId: 'demo-user',
+    creatorId: 'demo-user',
+    tags: ['anime', 'mecha', 'gundam', 'collectible'],
+    createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+    updatedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+    fabricSwatches: [],
+    effects: ['Holographic'], // Add required effects property
+  },
+  {
+    id: 'sample-2',
+    title: 'Lakers Kobe Bryant',
+    name: 'Lakers Kobe Bryant',
+    description: 'Limited edition Kobe Bryant collectible card featuring the Lakers legend.',
+    imageUrl: '/sample-images/kobe.jpg',
+    image: '/sample-images/kobe.jpg',
+    thumbnailUrl: '/sample-images/kobe-thumb.jpg',
+    userId: 'demo-user',
+    creatorId: 'demo-user',
+    tags: ['basketball', 'lakers', 'kobe', 'nba'],
+    createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+    updatedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+    fabricSwatches: [],
+    effects: ['Refractor', 'Chrome'], // Add required effects property
+  },
+  {
+    id: 'sample-3',
+    title: 'Football Running Back',
+    name: 'Football Running Back',
+    description: 'Dynamic action shot of an NFL running back breaking through defenses.',
+    imageUrl: '/sample-images/football.jpg',
+    image: '/sample-images/football.jpg',
+    thumbnailUrl: '/sample-images/football-thumb.jpg',
+    userId: 'demo-user',
+    creatorId: 'demo-user',
+    tags: ['football', 'nfl', 'sports', 'running-back'],
+    createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+    updatedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+    fabricSwatches: [],
+    effects: ['Vintage'], // Add required effects property
+  },
+  {
+    id: 'sample-4',
+    title: 'Golden Gate Quarterback',
+    name: 'Golden Gate Quarterback',
+    description: 'Iconic San Francisco quarterback with the Golden Gate bridge backdrop.',
+    imageUrl: '/sample-images/quarterback.jpg',
+    image: '/sample-images/quarterback.jpg',
+    thumbnailUrl: '/sample-images/quarterback-thumb.jpg',
+    userId: 'demo-user',
+    creatorId: 'demo-user',
+    tags: ['football', '49ers', 'san-francisco', 'vintage'],
+    createdAt: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000).toISOString(),
+    updatedAt: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000).toISOString(),
+    fabricSwatches: [],
+    effects: ['Chrome'], // Add required effects property
+  },
+  {
+    id: 'sample-5',
+    title: 'Garbage Pail Kids - Bob Ooze',
+    name: 'Garbage Pail Kids - Bob Ooze',
+    description: 'Vintage 80s Garbage Pail Kids collectible card featuring classic gross-out humor.',
+    imageUrl: '/sample-images/garbage-pail-kids.jpg',
+    image: '/sample-images/garbage-pail-kids.jpg',
+    thumbnailUrl: '/sample-images/garbage-pail-kids-thumb.jpg',
+    userId: 'demo-user',
+    creatorId: 'demo-user',
+    tags: ['vintage', '80s', 'garbage-pail-kids', 'collectible'],
+    createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+    updatedAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+    fabricSwatches: [],
+    effects: ['Vintage', 'Holographic'], // Add required effects property
+  },
+  {
+    id: 'sample-6',
+    title: 'LeBron James - Lakers Legend',
+    name: 'LeBron James - Lakers Legend',
+    description: 'Special edition Lakers LeBron James card with artistic surreal background.',
+    imageUrl: '/sample-images/lebron.jpg',
+    image: '/sample-images/lebron.jpg',
+    thumbnailUrl: '/sample-images/lebron-thumb.jpg',
+    userId: 'demo-user',
+    creatorId: 'demo-user',
+    tags: ['basketball', 'lakers', 'lebron', 'nba'],
+    createdAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
+    updatedAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
+    fabricSwatches: [],
+    effects: ['Refractor'], // Add required effects property
   }
-  
-  return addedCards;
-};
+];

@@ -1,3 +1,4 @@
+
 import React, { useRef, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCards } from '@/context/CardContext';
@@ -10,6 +11,7 @@ import MiniActionBar from '@/components/ui/MiniActionBar';
 import { useCardInteraction } from '@/hooks/useCardInteraction';
 import CardEffectsPanel from './viewer-components/CardEffectsPanel';
 import { useFeatureEnabled } from '@/hooks/useFeatureFlag';
+import { Card } from '@/lib/types/card';
 
 interface FullscreenViewerProps {
   cardId: string;
@@ -209,7 +211,8 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
           showExplodedView={showExplodedView}
         />
         
-        <div className="absolute right-4 top-20 bottom-4 w-80">
+        {/* Move the effects panel to the left side so it doesn't cover the card */}
+        <div className="absolute left-4 top-20 bottom-4 w-80 pointer-events-auto">
           <CardEffectsPanel 
             activeEffects={activeEffects}
             onToggleEffect={handleEffectToggle}

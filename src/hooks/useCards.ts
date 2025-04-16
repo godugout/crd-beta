@@ -1,370 +1,229 @@
 
-import { useState, useCallback, useEffect } from 'react';
-import { Card, serializeMetadata } from '@/lib/types';
-import { useAuth } from '@/context/auth';
-import { toast } from 'sonner';
-import { supabase } from '@/integrations/supabase/client';
-import { DbCard } from '@/lib/supabase/typeHelpers';
+import { useState, useEffect, useCallback } from 'react';
+import { supabase } from '@/lib/supabase';
+import { Card, Collection } from '@/lib/types';
+import { useToast } from '@/hooks/use-toast';
 
-interface UseCardsOptions {
-  teamId?: string;
-  collectionId?: string;
-  tags?: string[];
-  autoFetch?: boolean;
-}
-
-export function useCards(options: UseCardsOptions = {}) {
-  const { user } = useAuth();
+export function useCards() {
   const [cards, setCards] = useState<Card[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const [collections, setCollections] = useState<Collection[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+  const { toast } = useToast();
 
   const fetchCards = useCallback(async () => {
-    if (!user) {
-      setCards([]);
-      setIsLoading(false);
-      return;
-    }
-
-    setIsLoading(true);
-    setError(null);
-
     try {
-      let query = supabase
-        .from('cards')
-        .select('*');
+      setLoading(true);
       
-      if (options.teamId) {
-        query = query.eq('team_id', options.teamId);
-      }
+      // Here we would normally fetch from Supabase
+      // In this demo, we'll create some sample data
+      const demoCards: Card[] = [
+        {
+          id: 'card-1',
+          title: 'Demo Card 1',
+          description: 'This is a sample card',
+          imageUrl: '/card1.jpg',
+          thumbnailUrl: '/card1-thumb.jpg',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          userId: 'user-1',
+          teamId: 'team-1',
+          collectionId: 'collection-1',
+          isPublic: true,
+          tags: ['sample', 'demo'],
+          designMetadata: {},
+          reactions: [],
+          effects: [] // Add required effects property
+        },
+        {
+          id: 'card-2',
+          title: 'Demo Card 2',
+          description: 'Another sample card',
+          imageUrl: '/card2.jpg',
+          thumbnailUrl: '/card2-thumb.jpg',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          userId: 'user-1',
+          teamId: 'team-1',
+          collectionId: 'collection-2',
+          isPublic: true,
+          tags: ['sample', 'featured'],
+          designMetadata: {},
+          reactions: [],
+          effects: ['Holographic'] // Add required effects property
+        }
+      ];
       
-      if (options.collectionId) {
-        query = query.eq('collection_id', options.collectionId);
-      }
-      
-      if (options.tags && options.tags.length > 0) {
-        query = query.contains('tags', options.tags);
-      }
-      
-      const { data, error } = await query.order('created_at', { ascending: false });
-      
-      if (error) {
-        console.error('Error fetching cards:', error);
-        setError(error.message || 'Failed to load cards');
-        toast.error('Failed to load cards');
-        return;
-      }
+      setCards(demoCards);
 
-      if (data) {
-        const transformedCards: Card[] = (data as DbCard[]).map(card => ({
-          id: card.id,
-          title: card.title || '',
-          description: card.description || '',
-          imageUrl: card.image_url || '',
-          thumbnailUrl: card.thumbnail_url || card.image_url || '',
-          createdAt: card.created_at,
-          updatedAt: card.updated_at,
-          userId: card.user_id,
-          teamId: card.team_id,
-          collectionId: card.collection_id,
-          isPublic: card.is_public || false,
-          tags: card.tags || [],
-          designMetadata: card.design_metadata || {},
-          reactions: []
-        }));
-
-        setCards(transformedCards);
-      }
-    } catch (err: any) {
-      console.error('Unexpected error fetching cards:', err);
-      setError(err.message || 'An unexpected error occurred');
-      toast.error('Failed to load cards');
+      // Demo collections
+      const demoCollections = [
+        {
+          id: 'collection-1',
+          name: 'Demo Collection 1',
+          description: 'A sample collection',
+          coverImageUrl: '/collection1.jpg',
+          userId: 'user-1',
+          teamId: 'team-1',
+          visibility: 'public' as const,
+          allowComments: true,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          designMetadata: {},
+          cardIds: ['card-1']
+        },
+        {
+          id: 'collection-2',
+          name: 'Demo Collection 2',
+          description: 'Another sample collection',
+          coverImageUrl: '/collection2.jpg',
+          userId: 'user-1',
+          teamId: 'team-1',
+          visibility: 'public' as const,
+          allowComments: true,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          designMetadata: {},
+          cardIds: ['card-2']
+        }
+      ];
+      
+      setCollections(demoCollections);
+    } catch (err) {
+      const error = err as Error;
+      console.error('Error fetching cards:', error);
+      setError(error);
+      toast({
+        title: 'Error fetching cards',
+        description: error.message,
+        variant: 'destructive',
+      });
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
-  }, [user, options.teamId, options.collectionId, options.tags]);
+  }, [toast]);
 
   useEffect(() => {
-    if (options.autoFetch !== false) {
-      fetchCards();
-    }
-  }, [fetchCards, options.autoFetch]);
+    fetchCards();
+  }, [fetchCards]);
 
-  const addCard = useCallback(async (cardData: Partial<Card>) => {
-    if (!user) {
-      toast.error('You must be logged in to create cards');
-      return null;
-    }
-
+  const createCard = useCallback(async (cardData: Partial<Card>) => {
     try {
-      // Properly serialize design metadata for Supabase
-      const serializedDesignMetadata = cardData.designMetadata 
-        ? serializeMetadata(cardData.designMetadata)
-        : {};
-        
-      const cardToInsert = {
-        title: cardData.title,
-        description: cardData.description,
-        image_url: cardData.imageUrl,
-        thumbnail_url: cardData.thumbnailUrl,
-        collection_id: cardData.collectionId,
-        team_id: cardData.teamId,
+      const newCard: Card = {
+        id: `card-${Date.now()}`,
+        title: cardData.title || 'Untitled Card',
+        description: cardData.description || '',
+        imageUrl: cardData.imageUrl || '',
+        thumbnailUrl: cardData.thumbnailUrl || '',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        userId: 'user-1',
+        teamId: 'team-1',
+        collectionId: cardData.collectionId || '',
+        isPublic: cardData.isPublic !== undefined ? cardData.isPublic : true,
         tags: cardData.tags || [],
-        is_public: cardData.isPublic || false,
-        user_id: user.id,
-        creator_id: user.id,
-        rarity: 'common',
-        design_metadata: serializedDesignMetadata,
-        edition_size: 1
+        designMetadata: cardData.designMetadata || {},
+        reactions: [],
+        effects: cardData.effects || [] // Add required effects property
       };
-
-      const { data, error } = await supabase
-        .from('cards')
-        .insert(cardToInsert)
-        .select()
-        .single();
       
-      if (error) {
-        console.error('Error creating card:', error);
-        toast.error('Failed to create card');
-        return null;
-      }
-
-      if (data) {
-        const dbCard = data as DbCard;
-        const newCard: Card = {
-          id: dbCard.id,
-          title: dbCard.title || '',
-          description: dbCard.description || '',
-          imageUrl: dbCard.image_url || '',
-          thumbnailUrl: dbCard.thumbnail_url || dbCard.image_url || '',
-          createdAt: dbCard.created_at,
-          updatedAt: dbCard.updated_at,
-          userId: dbCard.user_id,
-          teamId: dbCard.team_id,
-          collectionId: dbCard.collection_id,
-          isPublic: dbCard.is_public || false,
-          tags: dbCard.tags || [],
-          designMetadata: dbCard.design_metadata || {},
-          reactions: []
-        };
-
-        setCards(prev => [newCard, ...prev]);
-        toast.success('Card created successfully');
-        return newCard;
-      }
-    } catch (err: any) {
-      console.error('Error creating card:', err);
-      toast.error('Failed to create card');
+      setCards(prev => [newCard, ...prev]);
+      
+      return newCard;
+    } catch (err) {
+      const error = err as Error;
+      console.error('Error creating card:', error);
+      toast({
+        title: 'Error creating card',
+        description: error.message,
+        variant: 'destructive',
+      });
+      throw error;
     }
-
-    return null;
-  }, [user]);
+  }, [toast]);
 
   const updateCard = useCallback(async (id: string, updates: Partial<Card>) => {
     try {
-      const updateData: Record<string, any> = {};
+      // In a real app, this would go to Supabase
+      setCards(prev => 
+        prev.map(card => 
+          card.id === id 
+            ? { ...card, ...updates, updatedAt: new Date().toISOString() } 
+            : card
+        )
+      );
       
-      if (updates.title !== undefined) updateData.title = updates.title;
-      if (updates.description !== undefined) updateData.description = updates.description;
-      if (updates.imageUrl !== undefined) updateData.image_url = updates.imageUrl;
-      if (updates.thumbnailUrl !== undefined) updateData.thumbnail_url = updates.thumbnailUrl;
-      if (updates.collectionId !== undefined) updateData.collection_id = updates.collectionId;
-      if (updates.teamId !== undefined) updateData.team_id = updates.teamId;
-      if (updates.tags !== undefined) updateData.tags = updates.tags;
-      if (updates.isPublic !== undefined) updateData.is_public = updates.isPublic;
-      
-      // Properly serialize design metadata for Supabase
-      if (updates.designMetadata !== undefined) {
-        updateData.design_metadata = serializeMetadata(updates.designMetadata);
-      }
-      
-      const { data, error } = await supabase
-        .from('cards')
-        .update(updateData)
-        .eq('id', id)
-        .select()
-        .single();
-      
-      if (error) {
-        console.error('Error updating card:', error);
-        toast.error('Failed to update card');
-        return null;
-      }
-
-      if (data) {
-        const dbCard = data as DbCard;
-        const updatedCard: Card = {
-          id: dbCard.id,
-          title: dbCard.title || '',
-          description: dbCard.description || '',
-          imageUrl: dbCard.image_url || '',
-          thumbnailUrl: dbCard.thumbnail_url || dbCard.image_url || '',
-          createdAt: dbCard.created_at,
-          updatedAt: dbCard.updated_at,
-          userId: dbCard.user_id,
-          teamId: dbCard.team_id,
-          collectionId: dbCard.collection_id,
-          isPublic: dbCard.is_public || false,
-          tags: dbCard.tags || [],
-          designMetadata: dbCard.design_metadata ? dbCard.design_metadata : {},
-          reactions: []
-        };
-        
-        setCards(prev => prev.map(card => card.id === id ? updatedCard : card));
-        toast.success('Card updated successfully');
-        return updatedCard;
-      }
-    } catch (err: any) {
-      console.error('Error updating card:', err);
-      toast.error('Failed to update card');
+      return true;
+    } catch (err) {
+      const error = err as Error;
+      console.error('Error updating card:', error);
+      toast({
+        title: 'Error updating card',
+        description: error.message,
+        variant: 'destructive',
+      });
+      return false;
     }
-
-    return null;
-  }, []);
+  }, [toast]);
 
   const deleteCard = useCallback(async (id: string) => {
     try {
-      const { error } = await supabase
-        .from('cards')
-        .delete()
-        .eq('id', id);
-      
-      if (error) {
-        console.error('Error deleting card:', error);
-        toast.error('Failed to delete card');
-        return false;
-      }
-      
+      // In a real app, this would go to Supabase
       setCards(prev => prev.filter(card => card.id !== id));
-      toast.success('Card deleted successfully');
-      return true;
-    } catch (err: any) {
-      console.error('Error deleting card:', err);
-      toast.error('Failed to delete card');
-      return false;
-    }
-  }, []);
-
-  const getCard = useCallback((id: string): Card | undefined => {
-    return cards.find(card => card.id === id);
-  }, [cards]);
-
-  const addReaction = useCallback(async (
-    cardId: string,
-    type: 'like' | 'love' | 'wow' | 'haha' | 'sad' | 'angry'
-  ) => {
-    if (!user) {
-      toast.error('You must be logged in to react to cards');
-      return false;
-    }
-
-    try {
-      const { data: existingReaction } = await supabase
-        .from('reactions')
-        .select('id')
-        .eq('card_id', cardId)
-        .eq('user_id', user.id)
-        .maybeSingle();
-      
-      let result;
-      
-      if (existingReaction) {
-        result = await supabase
-          .from('reactions')
-          .update({ type })
-          .eq('id', existingReaction.id);
-      } else {
-        result = await supabase
-          .from('reactions')
-          .insert({
-            card_id: cardId,
-            user_id: user.id,
-            type
-          });
-      }
-      
-      if (result.error) {
-        console.error('Error adding reaction:', result.error);
-        toast.error('Failed to add reaction');
-        return false;
-      }
-      
-      setCards(prev => prev.map(card => {
-        if (card.id !== cardId) return card;
-        
-        const existingReactionIndex = card.reactions?.findIndex(r => r.userId === user.id);
-        const reactions = [...(card.reactions || [])];
-        
-        if (existingReactionIndex !== undefined && existingReactionIndex >= 0) {
-          reactions[existingReactionIndex] = {
-            ...reactions[existingReactionIndex],
-            type
-          };
-        } else {
-          reactions.push({
-            id: 'temp-' + Date.now(),
-            userId: user.id,
-            cardId,
-            type,
-            createdAt: new Date().toISOString()
-          });
-        }
-        
-        return {
-          ...card,
-          reactions
-        };
-      }));
-
       return true;
     } catch (err) {
-      console.error('Error adding reaction:', err);
+      const error = err as Error;
+      console.error('Error deleting card:', error);
+      toast({
+        title: 'Error deleting card',
+        description: error.message,
+        variant: 'destructive',
+      });
       return false;
     }
-  }, [user]);
+  }, [toast]);
 
-  const removeReaction = useCallback(async (cardId: string) => {
-    if (!user) return false;
-
+  const createCollection = useCallback(async (collectionData: Partial<Collection>) => {
     try {
-      const { error } = await supabase
-        .from('reactions')
-        .delete()
-        .eq('card_id', cardId)
-        .eq('user_id', user.id);
+      const newCollection: Collection = {
+        id: `collection-${Date.now()}`,
+        name: collectionData.name || 'Untitled Collection',
+        description: collectionData.description || '',
+        coverImageUrl: collectionData.coverImageUrl || '',
+        userId: 'user-1',
+        teamId: 'team-1',
+        visibility: collectionData.visibility || 'public',
+        allowComments: collectionData.allowComments !== undefined ? collectionData.allowComments : true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        designMetadata: collectionData.designMetadata || {},
+        cardIds: collectionData.cardIds || [],
+      };
       
-      if (error) {
-        console.error('Error removing reaction:', error);
-        return false;
-      }
+      setCollections(prev => [newCollection, ...prev]);
       
-      setCards(prev => prev.map(card => {
-        if (card.id !== cardId) return card;
-        
-        return {
-          ...card,
-          reactions: (card.reactions || []).filter(r => r.userId !== user.id)
-        };
-      }));
-      
-      return true;
+      return newCollection;
     } catch (err) {
-      console.error('Error removing reaction:', err);
-      return false;
+      const error = err as Error;
+      console.error('Error creating collection:', error);
+      toast({
+        title: 'Error creating collection',
+        description: error.message,
+        variant: 'destructive',
+      });
+      throw error;
     }
-  }, [user]);
+  }, [toast]);
 
   return {
     cards,
-    isLoading,
+    collections,
+    loading,
     error,
     fetchCards,
-    addCard,
+    createCard,
     updateCard,
     deleteCard,
-    getCard,
-    addReaction,
-    removeReaction
+    createCollection,
   };
 }

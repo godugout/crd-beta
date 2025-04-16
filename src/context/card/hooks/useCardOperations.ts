@@ -13,6 +13,7 @@ const initialCards: Card[] = [
     userId: 'user1',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
+    effects: [], // Add required effects property
   },
 ];
 
@@ -52,6 +53,7 @@ export const useCardOperations = () => {
       id: uuidv4(),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
+      effects: card.effects || [], // Ensure effects property exists
     };
 
     setCards(prevCards => [...prevCards, newCard]);
