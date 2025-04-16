@@ -1,52 +1,238 @@
-/* Card Effects Main Stylesheet */
 
-/* Import all card effect styles */
-@import '../components/card-effects/effects/base.css';
-@import '../components/card-effects/effects/holographic.css';
-@import '../components/card-effects/effects/refractor.css';
-@import '../components/card-effects/effects/metallic.css';
-@import '../components/card-effects/effects/special.css';
-@import '../components/card-effects/effects/vintage.css';
-
-/* This file acts as a centralized import for all card effect styles */
-
-/* Default card effect settings */
+/* Card Effects CSS */
 :root {
-  --holographic-intensity: 0.8;
+  --mouse-x: 50%;
+  --mouse-y: 50%;
+  --rotate-x: 0deg;
+  --rotate-y: 0deg;
+  --card-shine-opacity: 0.3;
+  
+  /* Effect variables */
+  --holographic-intensity: 0.7;
   --refractor-intensity: 0.8;
   --chrome-intensity: 0.6;
   --vintage-intensity: 0.5;
-  --mouse-x: 50%;
-  --mouse-y: 50%;
+  --goldFoil-intensity: 0.7;
+  --prismatic-intensity: 0.9;
+  --mojo-intensity: 0.8;
+  --pulsar-intensity: 0.6;
   
-  /* Edge effect variables */
-  --edge-color: #e4e4e4;
-  --edge-shadow: rgba(0,0,0,0.2);
-  --edge-highlight: rgba(255,255,255,0.8);
-  --edge-gradient-start: #f0f0f0;
-  --edge-gradient-end: #ffffff;
+  /* Effect hues */
+  --holographic-hue: 0;
+  --prismatic-hue: 180;
 }
 
-/* Basic card effect class */
+/* Base card effect */
 .card-effect {
   position: relative;
   transform-style: preserve-3d;
-  transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+  transition-property: transform;
+  transition-duration: 0.6s;
+  transition-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
 }
 
-/* Custom card effects specific to this project */
-.effect-premium::before {
+/* Card faces */
+.card-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
+  overflow: hidden;
+}
+
+/* Flipped card */
+.card-effect.flipped {
+  transform: rotateY(180deg);
+}
+
+/* Holographic effect */
+.effect-holographic::before {
   content: '';
   position: absolute;
   inset: 0;
   background: linear-gradient(
     135deg,
-    rgba(255, 215, 0, 0.2) 0%,
-    rgba(255, 255, 255, 0.4) 50%,
-    rgba(255, 215, 0, 0.2) 100%
+    rgba(255, 0, 0, 0.5) 0%,
+    rgba(255, 255, 0, 0.5) 16.67%,
+    rgba(0, 255, 0, 0.5) 33.33%,
+    rgba(0, 255, 255, 0.5) 50%,
+    rgba(0, 0, 255, 0.5) 66.67%,
+    rgba(255, 0, 255, 0.5) 83.33%,
+    rgba(255, 0, 0, 0.5) 100%
   );
+  background-size: 300% 300%;
+  background-position: calc(var(--mouse-x, 50%)*2) calc(var(--mouse-y, 50%)*2);
+  border-radius: inherit;
+  z-index: 1;
+  mix-blend-mode: color-dodge;
+  opacity: calc(0.5 * var(--holographic-intensity, 0.7));
+  pointer-events: none;
+  filter: hue-rotate(calc(var(--holographic-hue, 0) * 1deg));
+}
+
+/* Refractor effect */
+.effect-refractor::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    45deg, 
+    rgba(255, 255, 255, 0.3) 0%, 
+    rgba(255, 255, 255, 0) 30%,
+    rgba(255, 255, 255, 0) 70%,
+    rgba(255, 255, 255, 0.4) 100%
+  );
+  background-size: 200% 200%;
+  background-position: var(--mouse-x, 0%) var(--mouse-y, 0%);
   border-radius: inherit;
   z-index: 2;
-  opacity: calc(0.7 * var(--premium-intensity, 0.8));
+  mix-blend-mode: overlay;
+  opacity: calc(0.7 * var(--refractor-intensity, 0.8));
   pointer-events: none;
+}
+
+/* Gold Foil effect */
+.effect-goldFoil::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: 
+    linear-gradient(
+      40deg,
+      rgba(255, 215, 0, 0.2) 0%,
+      rgba(255, 215, 0, 0.3) 15%,
+      rgba(255, 255, 255, 0.4) 30%,
+      rgba(255, 215, 0, 0.3) 45%,
+      rgba(255, 215, 0, 0.2) 60%,
+      rgba(255, 255, 255, 0.4) 75%,
+      rgba(255, 215, 0, 0.3) 100%
+    );
+  background-size: 200% 100%;
+  background-position: calc(var(--mouse-x) * 100%) 0;
+  border-radius: inherit;
+  z-index: 3;
+  mix-blend-mode: overlay;
+  opacity: calc(0.7 * var(--goldFoil-intensity, 0.7));
+  pointer-events: none;
+}
+
+/* Chrome effect */
+.effect-chrome::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.4) 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(0, 0, 0, 0.1) 51%,
+    rgba(0, 0, 0, 0.05) 100%
+  );
+  background-size: 300% 300%;
+  background-position: calc(var(--mouse-x) * 100%) calc(var(--mouse-y) * 100%);
+  border-radius: inherit;
+  z-index: 3;
+  opacity: calc(0.6 * var(--chrome-intensity, 0.6));
+  pointer-events: none;
+}
+
+/* Vintage effect */
+.effect-vintage {
+  filter: sepia(calc(0.5 * var(--vintage-intensity, 0.5))) 
+          brightness(calc(0.9 + (0.1 * var(--vintage-intensity, 0.5))));
+}
+
+/* Prismatic effect */
+.effect-prismatic::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: 
+    radial-gradient(
+      circle at calc(var(--mouse-x) * 100%) calc(var(--mouse-y) * 100%), 
+      rgba(255, 255, 255, 0.8) 0%, 
+      rgba(255, 255, 255, 0) 50%
+    ),
+    linear-gradient(
+      45deg,
+      hsla(calc(var(--prismatic-hue, 180) + 0), 100%, 60%, 0.5) 0%,
+      hsla(calc(var(--prismatic-hue, 180) + 60), 100%, 60%, 0.5) 20%,
+      hsla(calc(var(--prismatic-hue, 180) + 120), 100%, 60%, 0.5) 40%,
+      hsla(calc(var(--prismatic-hue, 180) + 180), 100%, 60%, 0.5) 60%,
+      hsla(calc(var(--prismatic-hue, 180) + 240), 100%, 60%, 0.5) 80%,
+      hsla(calc(var(--prismatic-hue, 180) + 300), 100%, 60%, 0.5) 100%
+    );
+  background-size: 100% 100%, 600% 100%;
+  background-position: 0 0, calc(100% - var(--mouse-x) * 500%) 0;
+  border-radius: inherit;
+  z-index: 2;
+  mix-blend-mode: color-dodge;
+  opacity: calc(0.6 * var(--prismatic-intensity, 0.9));
+  pointer-events: none;
+  animation: prismaticMove 5s linear infinite;
+}
+
+@keyframes prismaticMove {
+  0% {
+    background-position: 0 0, 0% 0;
+  }
+  100% {
+    background-position: 0 0, 100% 0;
+  }
+}
+
+/* Mojo effect - diagonal line pattern */
+.effect-mojo::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: 
+    repeating-linear-gradient(
+      45deg,
+      rgba(255, 255, 255, 0.05) 0px,
+      rgba(255, 255, 255, 0.05) 1px,
+      transparent 1px,
+      transparent 3px
+    ),
+    radial-gradient(
+      circle at calc(var(--mouse-x) * 100%) calc(var(--mouse-y) * 100%),
+      rgba(255, 255, 255, 0.5) 0%,
+      rgba(255, 255, 255, 0) 60%
+    );
+  border-radius: inherit;
+  z-index: 3;
+  opacity: calc(0.7 * var(--mojo-intensity, 0.8));
+  pointer-events: none;
+}
+
+/* Pulsar effect - animated glowing effect */
+.effect-pulsar {
+  animation: pulse 2s infinite;
+  box-shadow: 0 0 15px rgba(255, 255, 255, calc(0.3 * var(--pulsar-intensity, 0.6)));
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 15px rgba(255, 255, 255, calc(0.3 * var(--pulsar-intensity, 0.6)));
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(255, 255, 255, calc(0.6 * var(--pulsar-intensity, 0.6)));
+  }
+  100% {
+    box-shadow: 0 0 15px rgba(255, 255, 255, calc(0.3 * var(--pulsar-intensity, 0.6)));
+  }
+}
+
+/* Hue slider styling */
+.hue-slider [data-orientation="horizontal"] .slider-track {
+  background-image: linear-gradient(
+    to right,
+    hsl(0, 100%, 50%),
+    hsl(60, 100%, 50%),
+    hsl(120, 100%, 50%),
+    hsl(180, 100%, 50%),
+    hsl(240, 100%, 50%),
+    hsl(300, 100%, 50%),
+    hsl(360, 100%, 50%)
+  );
 }
