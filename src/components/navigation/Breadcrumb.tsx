@@ -7,7 +7,7 @@ import {
   BreadcrumbSeparator
 } from '@/components/ui/breadcrumb';
 import { ChevronRight } from 'lucide-react';
-import { Team } from '@/lib/types/TeamTypes';
+import { Team } from '@/lib/types/teamTypes';
 import { useBreadcrumbs } from '@/hooks/breadcrumbs/BreadcrumbContext';
 import { BreadcrumbItemComponent } from './components/BreadcrumbItem';
 

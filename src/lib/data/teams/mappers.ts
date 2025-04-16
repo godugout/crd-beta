@@ -1,5 +1,6 @@
+
 import { TeamMember, User, UserRole } from '@/lib/types';
-import { Team } from '@/lib/types/TeamTypes';
+import { Team } from '@/lib/types/teamTypes';
 
 /**
  * Maps a team record from the database to the Team interface
