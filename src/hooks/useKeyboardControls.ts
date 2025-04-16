@@ -1,56 +1,72 @@
 
-import { useState, useEffect, useCallback } from 'react';
-import { useKeyboardShortcut } from './useKeyboardShortcut';
+import { useEffect } from 'react';
 
-interface KeyboardControlsOptions {
+interface KeyboardControlsProps {
   onRotateLeft?: () => void;
   onRotateRight?: () => void;
   onRotateUp?: () => void;
   onRotateDown?: () => void;
   onFlip?: () => void;
-  onToggleAutoRotate?: () => void;
   onReset?: () => void;
-  onEscape?: () => void;
 }
 
-/**
- * Hook for handling keyboard controls for card viewer
- * 
- * @param options Object containing callback functions for different keyboard controls
- */
-export function useKeyboardControls(options: KeyboardControlsOptions = {}) {
-  // Use the existing keyboard shortcut hook for each control
-  useKeyboardShortcut('ArrowLeft', () => {
-    if (options.onRotateLeft) options.onRotateLeft();
-  }, { preventDefault: true });
+export const useKeyboardControls = ({
+  onRotateLeft,
+  onRotateRight,
+  onRotateUp,
+  onRotateDown,
+  onFlip,
+  onReset,
+}: KeyboardControlsProps) => {
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      switch (e.key) {
+        case 'ArrowLeft':
+          if (onRotateLeft) {
+            e.preventDefault();
+            onRotateLeft();
+          }
+          break;
+        case 'ArrowRight':
+          if (onRotateRight) {
+            e.preventDefault();
+            onRotateRight();
+          }
+          break;
+        case 'ArrowUp':
+          if (onRotateUp) {
+            e.preventDefault();
+            onRotateUp();
+          }
+          break;
+        case 'ArrowDown':
+          if (onRotateDown) {
+            e.preventDefault();
+            onRotateDown();
+          }
+          break;
+        case 'f':
+        case 'F':
+          if (onFlip) {
+            e.preventDefault();
+            onFlip();
+          }
+          break;
+        case 'r':
+        case 'R':
+          if (onReset) {
+            e.preventDefault();
+            onReset();
+          }
+          break;
+        default:
+          break;
+      }
+    };
 
-  useKeyboardShortcut('ArrowRight', () => {
-    if (options.onRotateRight) options.onRotateRight();
-  }, { preventDefault: true });
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onRotateLeft, onRotateRight, onRotateUp, onRotateDown, onFlip, onReset]);
+};
 
-  useKeyboardShortcut('ArrowUp', () => {
-    if (options.onRotateUp) options.onRotateUp();
-  }, { preventDefault: true });
-
-  useKeyboardShortcut('ArrowDown', () => {
-    if (options.onRotateDown) options.onRotateDown();
-  }, { preventDefault: true });
-
-  useKeyboardShortcut('f', () => {
-    if (options.onFlip) options.onFlip();
-  });
-
-  useKeyboardShortcut('r', () => {
-    if (options.onToggleAutoRotate) options.onToggleAutoRotate();
-  });
-
-  useKeyboardShortcut('0', () => {
-    if (options.onReset) options.onReset();
-  });
-
-  useKeyboardShortcut('Escape', () => {
-    if (options.onEscape) options.onEscape();
-  });
-
-  return { ...options };
-}
+export default useKeyboardControls;

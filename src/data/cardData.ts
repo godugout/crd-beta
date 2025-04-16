@@ -17,7 +17,7 @@ export const cardData: CardData[] = [
     description: "Special tribute artwork celebrating the Minneapolis legend in Wolves colors. Fan-created artwork reimagining Prince as a basketball player for his hometown team.",
     specialEffect: "Purple Rain Holographic",
     imageUrl: "/lovable-uploads/667e6ad2-af96-40ac-bd16-a69778e14b21.png",
-    effects: ["Holographic"] // Added required effects property
+    effects: ["Holographic"]
   },
   {
     id: 2,
@@ -34,7 +34,7 @@ export const cardData: CardData[] = [
     description: "Classic illustration of the GOAT in his legendary Bulls uniform. This fan art captures the iconic silhouette and spirit of Jordan's tremendous impact on the game.",
     specialEffect: "Ruby Shimmer",
     imageUrl: "/lovable-uploads/371b81a2-cafa-4637-9358-218d4120c658.png",
-    effects: ["Refractor"] // Added required effects property
+    effects: ["Refractor"]
   },
   {
     id: 3,
@@ -51,7 +51,7 @@ export const cardData: CardData[] = [
     description: "Memphis legend reimagined as a Grizzlies player. This creative interpretation connects Elvis to his hometown through the lens of basketball culture.",
     specialEffect: "Blue Suede Shimmer",
     imageUrl: "/lovable-uploads/236e3ad9-f7c2-4e5b-b29a-ca52a49ff3ed.png",
-    effects: ["Chrome"] // Added required effects property
+    effects: ["Chrome"]
   },
   {
     id: 4,
@@ -68,7 +68,7 @@ export const cardData: CardData[] = [
     description: "Reggae icon in Lakers gold. This fan creation reimagines what Bob Marley might look like as an LA Laker, combining music and basketball culture.",
     specialEffect: "Rasta Gold Effect",
     imageUrl: "/lovable-uploads/a38aa501-ea2d-4416-9699-1e69b1826233.png",
-    effects: ["Holographic", "Refractor"] // Added required effects property
+    effects: ["Holographic", "Refractor"]
   },
   {
     id: 5,
@@ -85,7 +85,7 @@ export const cardData: CardData[] = [
     description: "Hip-hop legend reimagined as a Blue Devil. This creative fan art brings Tupac's intensity to the basketball court as a Duke University player.",
     specialEffect: "Bandana Pattern",
     imageUrl: "/lovable-uploads/79a099b9-c77a-491e-9755-ba25419791f5.png",
-    effects: ["Vintage"] // Added required effects property
+    effects: ["Vintage"]
   },
   {
     id: 6,
@@ -102,6 +102,6 @@ export const cardData: CardData[] = [
     description: "Brooklyn's finest in his hometown jersey. This fan creation honors Biggie by visualizing him as a player for his hometown Brooklyn Nets.",
     specialEffect: "Brooklyn Metal",
     imageUrl: "/lovable-uploads/c381b388-5693-44a6-852b-93af5f0d5217.png",
-    effects: ["Chrome", "Holographic"] // Added required effects property
+    effects: ["Chrome", "Holographic"]
   }
 ];

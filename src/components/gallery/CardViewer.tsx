@@ -21,8 +21,9 @@ const CardViewer: React.FC<CardViewerProps> = ({
   const [isDragging, setIsDragging] = useState(false);
   const [startPosition, setStartPosition] = useState({ x: 0, y: 0 });
   const [imageError, setImageError] = useState(false);
+  const [imageLoadAttempted, setImageLoadAttempted] = useState(false);
 
-  // Fallback image when card image fails to load
+  // Default fallback image when card image fails to load
   const fallbackImage = 'https://images.unsplash.com/photo-1518770660439-4636190af475';
 
   useKeyboardControls({
@@ -55,12 +56,17 @@ const CardViewer: React.FC<CardViewerProps> = ({
     setImageError(true);
   };
 
-  // Get the appropriate image URL
+  // Get the appropriate image URL with fallback mechanisms
   const getImageUrl = () => {
-    if (imageError || !card.imageUrl) {
+    const imageUrl = card?.imageUrl;
+    
+    // If we've already tried loading the image and got an error, use the fallback
+    if (imageError || !imageUrl) {
+      console.log('Using fallback image for card', card.id);
       return fallbackImage;
     }
-    return card.imageUrl;
+    
+    return imageUrl;
   };
 
   useEffect(() => {
@@ -71,7 +77,16 @@ const CardViewer: React.FC<CardViewerProps> = ({
   useEffect(() => {
     // Reset image error state when card changes
     setImageError(false);
+    setImageLoadAttempted(false);
+    console.log('Card changed, resetting image error state for card:', card.id);
   }, [card.id]);
+
+  // Add extra logging to help debug the issue
+  useEffect(() => {
+    console.log('CardViewer mounted/updated for card:', card.id);
+    console.log('Card image URL:', card.imageUrl);
+    console.log('Card active effects:', activeEffects);
+  }, [card, activeEffects]);
 
   return (
     <div 
@@ -100,12 +115,34 @@ const CardViewer: React.FC<CardViewerProps> = ({
             <div className={`w-full h-full rounded-xl overflow-hidden shadow-xl ${
               activeEffects.map(effect => `effect-${effect.toLowerCase()}`).join(' ')
             }`}>
+              {/* Placeholder or loading state */}
+              {!imageLoadAttempted && (
+                <div className="absolute inset-0 flex items-center justify-center bg-gray-800">
+                  <div className="w-16 h-16 border-4 border-t-transparent border-primary rounded-full animate-spin"></div>
+                </div>
+              )}
+              
+              {/* The actual image with error handling */}
               <img
                 src={getImageUrl()}
                 alt={card.title || 'Card'}
                 className="w-full h-full object-cover"
-                onError={handleImageError}
+                onLoad={() => {
+                  console.log('Image loaded successfully for card:', card.id);
+                  setImageLoadAttempted(true);
+                }}
+                onError={(e) => {
+                  console.error('Image failed to load, trying fallback:', card.id);
+                  setImageLoadAttempted(true);
+                  // If the current source isn't already the fallback, try the fallback
+                  if ((e.target as HTMLImageElement).src !== fallbackImage) {
+                    (e.target as HTMLImageElement).src = fallbackImage;
+                  } else {
+                    handleImageError();
+                  }
+                }}
               />
+              
               {/* Effect overlays */}
               {activeEffects.map(effect => (
                 <div
