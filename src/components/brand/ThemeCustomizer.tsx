@@ -1,6 +1,5 @@
-
 import React, { useState } from 'react';
-import { useBrandTheme, BrandTheme } from '@/context/BrandThemeContext';
+import { useBrandTheme, BrandTheme, brandThemes } from '@/context/BrandThemeContext';
 import { v4 as uuidv4 } from 'uuid';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -80,12 +79,10 @@ const ThemePreview: React.FC<ThemePreviewProps> = ({
         </div>
       </div>
       
-      {/* Theme preview */}
       <div 
         className="rounded-md p-4 border"
         style={{ background: theme.backgroundColor, color: theme.textColor }}
       >
-        {/* Header preview */}
         <div 
           className="h-8 mb-3 rounded-md flex items-center px-3"
           style={{ background: theme.headerBackgroundColor, color: theme.navTextColor }}
@@ -93,7 +90,6 @@ const ThemePreview: React.FC<ThemePreviewProps> = ({
           <div className="text-sm font-medium">Header</div>
         </div>
         
-        {/* Color swatches */}
         <div className="grid grid-cols-3 gap-2 mb-3">
           <div 
             className="h-8 rounded-md flex items-center justify-center text-center text-xs text-white"
@@ -115,7 +111,6 @@ const ThemePreview: React.FC<ThemePreviewProps> = ({
           </div>
         </div>
         
-        {/* Buttons preview */}
         <div className="flex gap-2">
           <button 
             className="px-3 py-1 rounded-md text-xs"
@@ -238,10 +233,8 @@ const ThemeCustomizer: React.FC = () => {
     if (!editingTheme) return;
     
     if (editingTheme.id) {
-      // Update existing theme
       updateCustomTheme(editingTheme.id, editingTheme);
     } else {
-      // Create new theme with generated ID
       addCustomTheme({
         ...editingTheme,
         id: `custom-${uuidv4()}`
@@ -268,7 +261,6 @@ const ThemeCustomizer: React.FC = () => {
   const handleRandomizeColors = () => {
     if (!editingTheme) return;
     
-    // Generate random vibrant colors
     const hue1 = Math.floor(Math.random() * 360);
     const hue2 = (hue1 + Math.floor(Math.random() * 120) + 120) % 360;
     const hue3 = (hue2 + Math.floor(Math.random() * 120) + 120) % 360;
@@ -290,7 +282,6 @@ const ThemeCustomizer: React.FC = () => {
     toast.success('Colors randomized!');
   };
   
-  // Render the theme editor form
   const renderThemeEditor = () => {
     if (!editingTheme) return null;
     
@@ -442,7 +433,6 @@ const ThemeCustomizer: React.FC = () => {
           </div>
         </div>
         
-        {/* Theme Preview */}
         <div className="p-4 border rounded-md">
           <h3 className="font-medium mb-3">Theme Preview</h3>
           <div 
@@ -453,7 +443,6 @@ const ThemeCustomizer: React.FC = () => {
               borderColor: editingTheme.primaryColor
             }}
           >
-            {/* Header preview */}
             <div 
               className="h-10 mb-4 rounded-md flex items-center px-4"
               style={{ background: editingTheme.headerBackgroundColor, color: editingTheme.navTextColor }}
@@ -467,7 +456,6 @@ const ThemeCustomizer: React.FC = () => {
               </div>
             </div>
             
-            {/* Content preview */}
             <div className="flex gap-4 mb-4">
               <div 
                 className="flex-1 p-4 rounded-md border"
