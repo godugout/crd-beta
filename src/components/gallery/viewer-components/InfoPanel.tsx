@@ -23,10 +23,10 @@ const InfoPanel: React.FC<InfoPanelProps> = ({ card, showInfo = true }) => {
       <div className="grid grid-cols-2 gap-4">
         <div>
           <h3 className="text-lg font-semibold mb-2">Card Details</h3>
-          <p>Card Number: {cardMetadata.cardNumber || 'N/A'}</p>
-          <p>Card Type: {cardMetadata.cardType || 'Standard'}</p>
-          <p>Series: {cardMetadata.series || 'Base'}</p>
-          <p>Artist: {cardMetadata.artist || 'Unknown'}</p>
+          <p>Card Number: {String(cardMetadata.cardNumber || 'N/A')}</p>
+          <p>Card Type: {String(cardMetadata.cardType || 'Standard')}</p>
+          <p>Series: {String(cardMetadata.series || 'Base')}</p>
+          <p>Artist: {String(cardMetadata.artist || 'Unknown')}</p>
         </div>
         <div>
           <h3 className="text-lg font-semibold mb-2">Market Info</h3>
