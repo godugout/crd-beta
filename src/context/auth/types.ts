@@ -2,21 +2,14 @@
 import { User } from '@/lib/types';
 
 export interface AuthState {
+  isAuthenticated: boolean;
   user: User | null;
-  isLoading: boolean;
+  loading: boolean;
   error: string | null;
 }
 
-export interface AuthContextType {
-  user: User | null;
-  isLoading: boolean;
-  error: string | null;
+export interface AuthContextType extends AuthState {
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, name?: string) => Promise<void>;
+  signUp: (email: string, password: string, name: string) => Promise<void>;
   signOut: () => Promise<void>;
-  // Adding optional properties to make it compatible with the new context
-  isAuthenticated?: boolean;
-  signInWithProvider?: (provider: 'google' | 'github' | 'facebook') => Promise<void>;
-  updateUserProfile?: (data: Partial<User>) => Promise<void>;
 }
-

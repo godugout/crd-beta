@@ -6,6 +6,7 @@ import { BrowserRouter } from 'react-router-dom'
 import { ThemeProvider } from './hooks/useTheme.tsx'
 import { TeamThemeProvider } from './context/ThemeContext.tsx'
 import { BrandThemeProvider } from './context/BrandThemeContext.tsx'
+import { AuthProvider } from './providers/AuthProvider'
 import './index.css'
 import './main.css'
 
@@ -15,7 +16,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <ThemeProvider>
         <TeamThemeProvider>
           <BrandThemeProvider>
-            <App />
+            <AuthProvider autoLogin={true}>
+              <App />
+            </AuthProvider>
           </BrandThemeProvider>
         </TeamThemeProvider>
       </ThemeProvider>
