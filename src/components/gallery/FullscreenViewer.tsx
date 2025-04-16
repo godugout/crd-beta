@@ -3,7 +3,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCards } from '@/context/CardContext';
 import { toast } from 'sonner';
-import { X, ChevronDown, ChevronUp, Lightbulb } from 'lucide-react';
+import { X, ChevronDown, ChevronUp, Lightbulb, Sparkles } from 'lucide-react';
 import CardDisplay from './viewer-components/CardDisplay';
 import ViewerControls from './viewer-components/ViewerControls';
 import InfoPanel from './viewer-components/InfoPanel';
@@ -14,7 +14,9 @@ import { useFeatureEnabled } from '@/hooks/useFeatureFlag';
 import { Card } from '@/lib/types/cardTypes';
 import LightingControls from './viewer-components/LightingControls';
 import { useCardLighting } from '@/hooks/useCardLighting';
-import '@/styles/card-lighting.css';
+import { useParticleEffects } from '@/hooks/useParticleEffects';
+import CardParticleSystem from '@/components/particles/CardParticleSystem';
+import ParticleEffectsControls from './viewer-components/ParticleEffectsControls';
 
 interface FullscreenViewerProps {
   cardId: string;
@@ -56,6 +58,20 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
     applyPreset
   } = useCardLighting('display_case');
 
+  // Add particle effects system
+  const {
+    particleState,
+    toggleEffect,
+    updateEffectSettings,
+    applyPreset: applyParticlePreset,
+    toggleSystem,
+    toggleAutoAdjust,
+    setPerformanceLevel
+  } = useParticleEffects({
+    card,
+    shouldAutoDetectCardType: true
+  });
+
   const [isFlipped, setIsFlipped] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
   const [activeEffects, setActiveEffects] = useState<string[]>([]);
@@ -74,6 +90,7 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
   const [featuresBarMinimized, setFeaturesBarMinimized] = useState(false);
   const [showExplodedView, setShowExplodedView] = useState(false);
   const [showLighting, setShowLighting] = useState(false);
+  const [showParticles, setShowParticles] = useState(false);
 
   // Handle mouse move for both card interaction and lighting
   const handleCombinedMouseMove = (e: React.MouseEvent) => {
@@ -141,6 +158,13 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
     setShowLighting(prev => !prev);
     if (!showLighting) {
       toast.info('Lighting controls activated');
+    }
+  };
+
+  const handleToggleParticles = () => {
+    setShowParticles(prev => !prev);
+    if (!showParticles) {
+      toast.info('Particle effects activated');
     }
   };
 
@@ -220,6 +244,14 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
               </button>
               
               <button 
+                onClick={handleToggleParticles}
+                className={`text-white hover:text-blue-300 transition-colors ${showParticles ? 'text-blue-400' : ''}`}
+                title="Particles"
+              >
+                <Sparkles size={16} className="inline mr-1" /> Particles
+              </button>
+              
+              <button 
                 onClick={() => setShowInfo(!showInfo)}
                 className={`text-white hover:text-blue-300 transition-colors ${showInfo ? 'text-blue-400' : ''}`}
                 title="Info"
@@ -254,6 +286,15 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
           lightingSettings={lightingSettings}
         />
         
+        {/* Particle Effects System */}
+        <CardParticleSystem
+          containerRef={containerRef}
+          particleState={particleState}
+          cardRotation={position}
+          isFlipped={isFlipped}
+          isMoving={isDragging || isAutoRotating}
+        />
+        
         <div className="absolute left-4 top-20 bottom-4 w-80 pointer-events-auto flex flex-col gap-4 overflow-y-auto">
           {showLighting && (
             <LightingControls
@@ -262,6 +303,18 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
               onToggleAutoRotate={toggleAutoRotate}
               onUpdateLightSetting={updateLightSetting}
               onApplyPreset={applyPreset}
+            />
+          )}
+          
+          {showParticles && (
+            <ParticleEffectsControls
+              particleState={particleState}
+              onToggleEffect={toggleEffect}
+              onUpdateEffectSettings={updateEffectSettings}
+              onApplyPreset={applyParticlePreset}
+              onToggleSystem={toggleSystem}
+              onToggleAutoAdjust={toggleAutoAdjust}
+              onSetPerformanceLevel={setPerformanceLevel}
             />
           )}
           

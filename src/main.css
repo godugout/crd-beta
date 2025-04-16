@@ -7,8 +7,11 @@
 /* Import existing styles */
 @import './styles/card-interactions.css';
 
-/* Import our new lighting styles */
+/* Import our lighting styles */
 @import './styles/card-lighting.css';
+
+/* Import our particle effect styles */
+@import './styles/card-particles.css';
 
 /* Other global styles */
 .root {
