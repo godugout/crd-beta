@@ -2,6 +2,7 @@
 import React from 'react';
 import PageLayout from '@/components/navigation/PageLayout';
 import ActionFigure from '@/components/baseball/ActionFigure';
+import KeyboardShortcuts from '@/components/gallery/viewer-components/KeyboardShortcuts';
 
 const BaseballActionFigure = () => {
   return (
@@ -11,14 +12,12 @@ const BaseballActionFigure = () => {
       fullWidth={true}
     >
       <div className="container mx-auto px-4 py-8">
-        <div className="bg-gray-900/70 backdrop-blur-md rounded-xl overflow-hidden shadow-xl">
-          <div className="p-6">
-            <h1 className="text-3xl font-bold text-white mb-2">Baseball Action Figure</h1>
-            <p className="text-gray-300 mb-6">Customize your player with interchangeable parts. Drag to rotate.</p>
-            
-            <div className="h-[600px]">
+        <div className="bg-gray-900/70 backdrop-blur-md rounded-xl overflow-hidden shadow-xl h-[calc(100vh-12rem)]">
+          <div className="grid grid-cols-1 h-full relative">
+            <div className="h-full">
               <ActionFigure />
             </div>
+            <KeyboardShortcuts />
           </div>
         </div>
       </div>

@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Baseball, ShirtRounded, Shield } from 'lucide-react';
+import { CircleUser, Shirt, Shield, Rotate3d } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface ActionFigurePart {
@@ -28,7 +28,7 @@ const ActionFigure: React.FC<ActionFigureProps> = ({
     { 
       id: 'classic-cap', 
       name: 'Classic Baseball Cap', 
-      icon: <Baseball className="w-5 h-5" />,
+      icon: <CircleUser className="w-5 h-5" />,
       category: 'head' 
     },
     { 
@@ -40,13 +40,13 @@ const ActionFigure: React.FC<ActionFigureProps> = ({
     { 
       id: 'home-uniform', 
       name: 'Home Uniform', 
-      icon: <ShirtRounded className="w-5 h-5" />,
+      icon: <Shirt className="w-5 h-5" />,
       category: 'body' 
     },
     { 
       id: 'away-uniform', 
       name: 'Away Uniform', 
-      icon: <ShirtRounded className="w-5 h-5 rotate-45" />,
+      icon: <Shirt className="w-5 h-5 rotate-45" />,
       category: 'body' 
     }
   ];
@@ -113,8 +113,10 @@ const ActionFigure: React.FC<ActionFigureProps> = ({
               cursor: dragging ? 'grabbing' : 'grab'
             }}
           >
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-3xl font-bold text-gray-500">3D Model Area</div>
+            <div className="absolute inset-0 flex flex-col items-center justify-center">
+              <Rotate3d className="w-16 h-16 text-gray-400 mb-4" />
+              <div className="text-xl font-medium text-gray-300">Dusty Diamond</div>
+              <div className="text-sm text-gray-400 mt-2">Drag to rotate</div>
             </div>
           </motion.div>
         </div>
@@ -133,7 +135,7 @@ const ActionFigure: React.FC<ActionFigureProps> = ({
           {['head', 'body'].map((category) => (
             <div key={category} className="space-y-2">
               <h4 className="text-gray-300 font-medium capitalize">{category}</h4>
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
                 {availableParts
                   .filter(part => part.category === category)
                   .map(part => (
