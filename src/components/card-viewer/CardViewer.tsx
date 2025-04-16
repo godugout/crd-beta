@@ -1,51 +1,79 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Card } from '@/lib/types';
 import { useCardEffects } from '@/hooks/useCardEffects';
 import CardToolbar from './CardToolbar';
-import { cn } from '@/lib/utils';
-import { toast } from 'sonner';
-import { Share2, Camera, Expand, Maximize2 } from 'lucide-react';
 import EffectsPanel from './panels/EffectsPanel';
+import CardStyleSwitcher from './CardStyleSwitcher';
+import { useKeyboardShortcut } from '@/hooks/useKeyboardShortcut';
+import { toast } from 'sonner';
 
 interface CardViewerProps {
   card: Card;
-  className?: string;
+  onClose?: () => void;
   fullscreen?: boolean;
   onFullscreenToggle?: () => void;
-  onCapture?: () => void;
   onShare?: () => void;
+  onCapture?: () => void;
   onBack?: () => void;
 }
 
 const CardViewer: React.FC<CardViewerProps> = ({
   card,
-  className,
   fullscreen = false,
+  onClose,
   onFullscreenToggle,
-  onCapture,
   onShare,
+  onCapture,
   onBack
 }) => {
-  const [activePanelId, setActivePanelId] = useState<string | null>(null);
+  const [activePanel, setActivePanel] = useState<string | null>(null);
+  const [activeStyle, setActiveStyle] = useState<string | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  
+  const cardEffects = useCardEffects({
+    enableLighting: true,
+    enableReflections: true
+  });
   
   const {
     cardRef,
-    containerRef,
     rotation,
-    zoom,
     isFlipped,
+    zoom,
+    isMoving,
+    mousePosition,
+    effects,
     flipCard,
     resetCard,
     generateEffectStyles,
     generateEffectClasses,
-    activeEffects,
-    effects,
     toggleEffect,
-    updateEffectIntensity
-  } = useCardEffects();
+    updateEffectIntensity,
+    activeEffects
+  } = cardEffects;
 
-  const handleToolAction = (action: string) => {
+  // Bind keyboard shortcuts
+  useKeyboardShortcut('f', () => {
+    flipCard();
+    toast.info(`Card flipped to ${isFlipped ? 'back' : 'front'}`);
+  });
+  
+  useKeyboardShortcut('r', () => {
+    resetCard();
+    toast.info('Card view reset');
+  });
+  
+  useKeyboardShortcut('Escape', () => {
+    if (fullscreen && onFullscreenToggle) {
+      onFullscreenToggle();
+    } else if (activePanel) {
+      setActivePanel(null);
+    }
+  });
+
+  // Handle toolbar actions
+  const handleToolbarAction = (action: string) => {
     switch (action) {
       case 'flip':
         flipCard();
@@ -54,171 +82,159 @@ const CardViewer: React.FC<CardViewerProps> = ({
         resetCard();
         break;
       case 'effects':
-        setActivePanelId(prev => prev === 'effects' ? null : 'effects');
-        break;
-      case 'share':
-        if (onShare) {
-          onShare();
-        } else {
-          // Default share behavior
-          navigator.clipboard.writeText(window.location.href)
-            .then(() => toast.success('Link copied to clipboard'))
-            .catch(() => toast.error('Failed to copy link'));
-        }
-        break;
-      case 'capture':
-        if (onCapture) {
-          onCapture();
-        } else {
-          toast.info('Card snapshot feature coming soon');
-        }
+        setActivePanel(activePanel === 'effects' ? null : 'effects');
         break;
       case 'fullscreen':
-        if (onFullscreenToggle) {
-          onFullscreenToggle();
-        }
+        if (onFullscreenToggle) onFullscreenToggle();
+        break;
+      case 'camera':
+        if (onCapture) onCapture();
+        break;
+      case 'share':
+        if (onShare) onShare();
         break;
       case 'back':
-        if (onBack) {
-          onBack();
-        }
+        if (onClose) onClose();
+        else if (onBack) onBack();
         break;
       default:
         break;
     }
   };
 
+  // Apply style from the style switcher
+  const handleSelectStyle = (styleId: string) => {
+    // Clear all active effects first
+    effects.forEach(effect => {
+      if (effect.active) toggleEffect(effect.id);
+    });
+    
+    // Apply the selected style
+    if (styleId === activeStyle) {
+      setActiveStyle(null);
+      return;
+    }
+    
+    setActiveStyle(styleId);
+    toggleEffect(styleId);
+    
+    // Close any open panels
+    setActivePanel(null);
+  };
+
+  // Card container style including 3D transforms
+  const cardStyle = {
+    transform: `
+      perspective(1000px)
+      rotateX(${rotation.x}deg)
+      rotateY(${rotation.y}deg)
+      scale(${zoom})
+    `,
+    transition: isMoving ? 'none' : 'transform 0.5s ease',
+    ...generateEffectStyles()
+  };
+
+  const effectClasses = generateEffectClasses();
+
   return (
-    <div 
-      className={cn(
-        "card-viewer relative w-full h-full flex flex-col",
-        fullscreen ? "fixed inset-0 z-50 bg-black/90" : "",
-        className
-      )}
-    >
-      {/* Toolbar at top */}
-      <CardToolbar 
-        activePanel={activePanelId}
-        onAction={handleToolAction}
-        fullscreen={fullscreen}
-      />
+    <div className="card-viewer relative flex flex-col h-full overflow-hidden bg-gray-900">
+      {/* Top toolbar */}
+      <div className="sticky top-0 z-10">
+        <CardToolbar 
+          activePanel={activePanel}
+          onAction={handleToolbarAction}
+          fullscreen={fullscreen}
+        />
+      </div>
       
-      {/* Card display area */}
-      <div 
-        className="flex-1 flex items-center justify-center overflow-hidden"
-        ref={containerRef}
-      >
+      {/* Main content */}
+      <div className="flex-1 overflow-hidden relative flex items-center justify-center">
+        {/* Card container */}
         <div
-          ref={cardRef}
-          className={cn(
-            "card aspect-[2.5/3.5] w-full max-w-[320px] rounded-lg shadow-xl transition-all duration-300",
-            generateEffectClasses(),
-            isFlipped ? "flipped" : ""
-          )}
-          style={{
-            ...generateEffectStyles() as React.CSSProperties,
-            transform: `
-              perspective(1000px)
-              rotateY(${isFlipped ? 180 : 0}deg)
-              rotateX(${rotation.x}deg)
-              rotateY(${rotation.y}deg)
-              scale(${zoom})
-            `,
-            transformStyle: 'preserve-3d',
-          }}
+          ref={containerRef}
+          className="relative w-full h-full flex items-center justify-center overflow-hidden"
         >
-          {/* Card front */}
-          <div 
-            className="card-face card-front absolute inset-0 backface-hidden rounded-lg overflow-hidden"
-            style={{
-              backgroundImage: card.imageUrl ? `url(${card.imageUrl})` : undefined,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              backgroundColor: !card.imageUrl ? '#f3f4f6' : undefined
-            }}
+          {/* Card with 3D effects */}
+          <div
+            ref={cardRef}
+            className={`relative w-64 h-96 rounded-lg ${effectClasses}`}
+            style={cardStyle}
           >
-            {!card.imageUrl && (
-              <div className="absolute inset-0 flex items-center justify-center text-gray-400">
-                No Image
+            {/* Card front */}
+            <div 
+              className={`absolute inset-0 rounded-lg overflow-hidden transition-opacity duration-500 ${isFlipped ? 'opacity-0' : 'opacity-100'}`}
+              style={{ backfaceVisibility: 'hidden' }}
+            >
+              <img 
+                src={card.imageUrl || '/images/card-placeholder.png'}
+                alt={card.title}
+                className="w-full h-full object-cover"
+              />
+              
+              {/* Front overlay for effects */}
+              <div className="absolute inset-0 bg-gradient-to-b from-black/10 to-black/30 mix-blend-overlay" />
+              
+              {/* Card info */}
+              <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
+                <h3 className="text-white font-bold truncate">{card.title}</h3>
+                {card.player && <p className="text-white/70 text-sm truncate">{card.player}</p>}
+                {card.team && <p className="text-white/70 text-sm truncate">{card.team}</p>}
               </div>
-            )}
-            
-            <div className="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black/70 to-transparent">
-              <h3 className="text-white font-bold">{card.title}</h3>
-              {card.player && <p className="text-white/90 text-sm">{card.player}</p>}
-              {card.team && <p className="text-white/80 text-xs">{card.team} • {card.year || ''}</p>}
             </div>
             
-            {/* Interactive highlight overlay */}
-            <div className="card-highlight absolute inset-0 pointer-events-none"></div>
-          </div>
-          
-          {/* Card back */}
-          <div 
-            className="card-face card-back absolute inset-0 backface-hidden rounded-lg overflow-hidden bg-gray-800"
-            style={{ transform: 'rotateY(180deg)' }}
-          >
-            <div className="p-4 text-white h-full flex flex-col">
-              <h3 className="text-xl font-bold mb-2">{card.title}</h3>
-              {card.description && <p className="text-sm mb-4">{card.description}</p>}
-              
-              <div className="mt-auto text-sm">
-                {card.tags && card.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mb-2">
-                    {card.tags.map((tag, i) => (
-                      <span key={i} className="px-2 py-1 bg-gray-700 rounded-full text-xs">
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
+            {/* Card back */}
+            <div 
+              className={`absolute inset-0 rounded-lg overflow-hidden transition-opacity duration-500 ${isFlipped ? 'opacity-100' : 'opacity-0'}`}
+              style={{ 
+                backfaceVisibility: 'hidden',
+                transform: 'rotateY(180deg)'
+              }}
+            >
+              <div className="w-full h-full bg-gray-800 flex flex-col items-center justify-center p-6">
+                <h4 className="text-white font-bold mb-2">{card.title}</h4>
+                {card.description && (
+                  <p className="text-white/70 text-sm text-center">{card.description}</p>
                 )}
-                
-                {card.year && (
-                  <div className="text-gray-400 text-xs mt-2">
-                    {card.year}
-                  </div>
-                )}
+                <div className="mt-auto">
+                  {card.year && (
+                    <p className="text-white/50 text-xs text-center">
+                      {card.year}
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-      
-      {/* Side panels */}
-      <div className={`absolute top-16 bottom-0 right-0 w-80 bg-black/70 backdrop-blur-sm transition-transform duration-300 
-        ${activePanelId === 'effects' ? 'translate-x-0' : 'translate-x-full'}`}>
-        {activePanelId === 'effects' && (
+        
+        {/* Effects panel */}
+        <div 
+          className={`absolute top-0 bottom-0 right-0 w-72 bg-black/70 backdrop-blur-sm transform transition-transform duration-300 ${
+            activePanel === 'effects' ? 'translate-x-0' : 'translate-x-full'
+          }`}
+        >
           <EffectsPanel 
             effects={effects}
             onToggleEffect={toggleEffect}
             onUpdateIntensity={updateEffectIntensity}
           />
-        )}
+        </div>
       </div>
       
-      {/* Fullscreen controls */}
-      {fullscreen && (
-        <div className="absolute right-4 bottom-4 flex gap-2">
-          <button 
-            className="p-2 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors"
-            onClick={() => handleToolAction('capture')}
-          >
-            <Camera size={20} />
-          </button>
-          <button 
-            className="p-2 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors"
-            onClick={() => handleToolAction('share')}
-          >
-            <Share2 size={20} />
-          </button>
-          <button 
-            className="p-2 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors"
-            onClick={() => handleToolAction('fullscreen')}
-          >
-            {fullscreen ? <Maximize2 size={20} /> : <Expand size={20} />}
-          </button>
+      {/* Bottom style switcher */}
+      <CardStyleSwitcher 
+        onSelectStyle={handleSelectStyle}
+        activeStyle={activeStyle}
+      />
+      
+      {/* Keyboard controls help */}
+      <div className="absolute bottom-16 right-4 bg-black/70 text-white text-xs rounded-lg p-2 z-10">
+        <div className="flex flex-col gap-y-1">
+          <div><kbd className="bg-gray-700 px-1 rounded">F</kbd> <span className="ml-1">Flip card</span></div>
+          <div><kbd className="bg-gray-700 px-1 rounded">R</kbd> <span className="ml-1">Reset view</span></div>
+          <div><kbd className="bg-gray-700 px-1 rounded">ESC</kbd> <span className="ml-1">Close panel/fullscreen</span></div>
         </div>
-      )}
+      </div>
     </div>
   );
 };

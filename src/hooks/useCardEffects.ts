@@ -81,7 +81,7 @@ export function useCardEffects(options: CardEffectsOptions = {}) {
     );
   }, []);
 
-  // Set active effects array - adds this missing method
+  // Set active effects array - needed for ImmersiveCardViewer
   const setActiveEffects = useCallback((effectIds: string[]) => {
     setEffects(prev => 
       prev.map(effect => ({
@@ -91,7 +91,7 @@ export function useCardEffects(options: CardEffectsOptions = {}) {
     );
   }, []);
 
-  // Set card effects - adds this missing method
+  // Set card effects - needed for ImmersiveCardViewer
   const setCardEffects = useCallback((cardId: string, effectIds: string[]) => {
     setCardEffectsState(prev => ({
       ...prev,

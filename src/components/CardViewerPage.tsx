@@ -172,14 +172,16 @@ const CardViewerPage = () => {
       </PageLayout>
       
       {fullscreen && (
-        <CardViewer
-          card={card}
-          fullscreen={true}
-          onFullscreenToggle={() => setFullscreen(false)}
-          onShare={handleShare}
-          onCapture={handleCapture}
-          onBack={() => setFullscreen(false)}
-        />
+        <div className="fixed inset-0 z-50 bg-black">
+          <CardViewer
+            card={card}
+            fullscreen={true}
+            onFullscreenToggle={() => setFullscreen(false)}
+            onShare={handleShare}
+            onCapture={handleCapture}
+            onClose={() => setFullscreen(false)}
+          />
+        </div>
       )}
     </>
   );
