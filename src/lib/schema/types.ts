@@ -1,3 +1,4 @@
+
 // Define base types used throughout the application
 
 export interface Card {

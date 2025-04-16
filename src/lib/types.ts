@@ -1,3 +1,4 @@
+
 /**
  * Core Types for CRD (Collector's Republic Digital) App
  * Single source of truth for all type definitions
@@ -269,6 +270,9 @@ export interface Card {
   instagramUsername?: string;
   instagramPostId?: string;
   instagramPost?: InstagramPost;
+  
+  // Visual effects (required for card viewer)
+  effects: string[];
 }
 
 /**
@@ -483,3 +487,4 @@ export interface EffectSettings {
   animationEnabled?: boolean;
   [key: string]: any;
 }
+

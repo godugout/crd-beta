@@ -1,4 +1,5 @@
 
+
 export interface FabricSwatch {
   type: string;
   team: string;
@@ -28,5 +29,5 @@ export interface CardData {
   tags?: string[];
   thumbnailUrl?: string;
   reactions?: any[];
-  effects?: string[];
+  effects: string[]; // Changed from optional to required
 }
