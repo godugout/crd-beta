@@ -1,101 +1,16 @@
 
+@import './styles/theme.css';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@import './components/card-effects/effects/index.css';
-
-:root {
-  --holographic-intensity: 0.7;
-  --refractor-intensity: 0.8;
-  --vintage-intensity: 0.5;
-  --gold-intensity: 0.7;
-  --prismatic-intensity: 0.6;
-  --mouse-x: 50%;
-  --mouse-y: 50%;
-}
-
-@layer base {
-  :root {
-    --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 270 95% 75%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 14.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 0 0% 14.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 270 95% 75%;
-    --radius: 0.5rem;
-  }
-}
-
 @layer base {
   * {
-    @apply border-border;
+    @apply border-[var(--border-primary)];
   }
+
   body {
-    @apply bg-background text-foreground;
-  }
-}
-
-/* Card effect styles to ensure they're properly applied */
-.card-effect {
-  z-index: 10;
-}
-
-/* Dark mode glassmorphism */
-.glass-panel {
-  @apply backdrop-blur-md bg-black/40 border border-white/5;
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-}
-
-/* Glow effects */
-.glow-effect {
-  box-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
-}
-
-/* Animated gradient backgrounds */
-.animated-gradient {
-  background: linear-gradient(-45deg, #8B5CF6, #6D28D9, #4F46E5, #7C3AED);
-  background-size: 400% 400%;
-  animation: gradient 15s ease infinite;
-}
-
-@keyframes gradient {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-}
-
-/* Text gradient effect */
-.text-gradient {
-  background: linear-gradient(to right, #8B5CF6, #EC4899);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  animation: shine 8s linear infinite;
-  background-size: 200% auto;
-}
-
-@keyframes shine {
-  to {
-    background-position: 200% center;
+    @apply antialiased bg-[var(--bg-primary)] text-[var(--text-primary)];
+    font-feature-settings: "ss01", "ss02", "cv01", "cv02", "cv03";
   }
 }

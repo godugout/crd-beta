@@ -1,0 +1,113 @@
+
+@layer base {
+  :root {
+    /* Background colors */
+    --bg-primary: #131720;
+    --bg-secondary: #1C212E;
+    --bg-tertiary: #18202C;
+
+    /* Border colors */
+    --border-primary: rgba(51, 59, 71, 0.5);
+    --border-highlight: rgba(255, 255, 255, 0.12);
+
+    /* Text colors */
+    --text-primary: #FFFFFF;
+    --text-secondary: #D1D5DB;
+    --text-tertiary: #9CA3AF;
+    --text-quaternary: #6B7280;
+
+    /* Brand colors */
+    --brand-primary: #4F46E5;
+    --brand-secondary: #818CF8;
+    --brand-verified: #F59E0B;
+    --brand-notification: #EC4899;
+
+    /* Design tokens */
+    --space-xs: 4px;
+    --space-sm: 8px;
+    --space-md: 16px;
+    --space-lg: 24px;
+    --space-xl: 32px;
+
+    /* Shadows */
+    --shadow-sm: 0px 4px 8px rgba(0, 0, 0, 0.4);
+    --shadow-md: 0px 4px 16px rgba(0, 0, 0, 0.24);
+    --shadow-lg: 0px 16px 48px rgba(0, 0, 0, 0.4);
+
+    /* Border radius */
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 24px;
+    --radius-full: 100px;
+  }
+}
+
+/* Dark theme base styles */
+@layer base {
+  body {
+    @apply bg-[var(--bg-primary)] text-[var(--text-primary)];
+    font-family: 'Inter', sans-serif;
+  }
+}
+
+/* Component styles */
+@layer components {
+  /* Navigation */
+  .crd-navigation {
+    @apply bg-[var(--bg-primary)] border-b border-[var(--border-highlight)] backdrop-blur-xl h-[72px];
+  }
+
+  .crd-nav-link {
+    @apply font-bold text-[var(--text-tertiary)] hover:text-[var(--text-primary)] relative;
+  }
+
+  .crd-nav-link.active {
+    @apply text-[var(--text-primary)] after:content-[''] after:absolute after:h-[2px] after:left-0 after:right-0 after:bottom-[-12px] after:bg-[var(--text-primary)] after:rounded;
+  }
+
+  /* Button variants */
+  .crd-btn-primary {
+    @apply bg-[var(--brand-primary)] rounded-2xl px-4 py-2.5 font-medium text-sm text-[var(--text-primary)] 
+    flex items-center justify-center gap-1.5 hover:opacity-90 transition-opacity;
+  }
+
+  .crd-btn-secondary {
+    @apply bg-opacity-40 bg-gray-700 rounded-xl px-3 py-1.5 font-medium text-sm text-[var(--text-primary)] 
+    flex items-center justify-center gap-1 hover:bg-opacity-50 transition-colors;
+  }
+
+  .crd-btn-tertiary {
+    @apply bg-white bg-opacity-5 rounded-2xl px-3 py-2.5 font-medium text-sm text-[var(--text-primary)] 
+    flex items-center justify-center gap-1.5 hover:bg-opacity-10 transition-colors;
+  }
+
+  /* Cards */
+  .crd-card {
+    @apply bg-[var(--bg-secondary)] border border-[var(--border-primary)] rounded-xl p-4;
+  }
+
+  .crd-profile-card {
+    @apply bg-[var(--bg-secondary)] border border-[var(--border-primary)] rounded-xl overflow-hidden;
+  }
+
+  /* Modal styling */
+  .crd-modal-backdrop {
+    @apply fixed inset-0 bg-[var(--overlay-primary)] backdrop-blur-sm;
+  }
+
+  .crd-modal {
+    @apply bg-[var(--bg-primary)] border border-[var(--border-primary)] rounded-2xl max-w-[476px] mx-auto;
+  }
+}
+
+/* Utility classes */
+@layer utilities {
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-[var(--brand-primary)] to-[var(--brand-secondary)];
+  }
+  
+  .bg-glass {
+    @apply backdrop-blur-xl bg-black/40 border border-white/10;
+  }
+}

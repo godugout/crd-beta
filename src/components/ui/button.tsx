@@ -1,4 +1,3 @@
-
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
@@ -6,17 +5,16 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-litmus-green focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-primary)] focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none",
   {
     variants: {
       variant: {
-        default: "bg-litmus-green text-white shadow-sm hover:bg-litmus-green-secondary",
-        destructive: "bg-litmus-red text-white hover:bg-litmus-red/90",
-        outline: "border border-input bg-background hover:bg-muted hover:text-litmus-green",
-        secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        ghost: "hover:bg-muted hover:text-litmus-green",
-        link: "text-litmus-green underline-offset-4 hover:underline",
-        gradient: "relative overflow-hidden text-white shadow-md bg-gradient-to-r from-litmus-green to-litmus-green-secondary hover:shadow-glow",
+        default: "bg-[var(--brand-primary)] text-[var(--text-primary)] shadow-sm hover:opacity-90",
+        destructive: "bg-red-600 text-white hover:bg-red-600/90",
+        outline: "border border-input bg-background hover:bg-muted hover:text-[var(--brand-primary)]",
+        secondary: "bg-[rgba(55,65,81,0.4)] text-[var(--text-primary)] hover:bg-[rgba(55,65,81,0.5)]",
+        ghost: "hover:bg-muted hover:text-[var(--brand-primary)]",
+        link: "text-[var(--brand-primary)] underline-offset-4 hover:underline",
       },
       size: {
         default: "h-10 px-4 py-2",
