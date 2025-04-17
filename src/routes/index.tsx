@@ -5,6 +5,8 @@ import CardDetail from '@/pages/CardDetail';
 import CardGallery from '@/pages/CardGallery';
 import Profile from '@/pages/Profile';
 import Dashboard from '@/pages/Dashboard';
+import Unauthorized from '@/pages/Unauthorized';
+import Auth from '@/pages/Auth';
 
 // Import the town-related routes
 import TeamDetail from '@/pages/TeamDetail';
@@ -45,6 +47,14 @@ export const routes: RouteObject[] = [
   {
     path: "/profile",
     element: <Profile />,
+  },
+  {
+    path: "/auth",
+    element: <Auth />,
+  },
+  {
+    path: "/unauthorized",
+    element: <Unauthorized />,
   },
   {
     path: "/admin",

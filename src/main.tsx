@@ -6,7 +6,7 @@ import { BrowserRouter } from 'react-router-dom'
 import { ThemeProvider } from './hooks/useTheme.tsx'
 import { TeamThemeProvider } from './context/ThemeContext.tsx'
 import { BrandThemeProvider } from './context/BrandThemeContext.tsx'
-import { AuthProvider as RootAuthProvider } from './context/auth/AuthProvider'
+import { AuthProvider } from './providers/AuthProvider'
 import { HelmetProvider } from 'react-helmet-async'
 import { CardProvider } from './context/CardContext'
 import './index.css'
@@ -19,11 +19,11 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         <ThemeProvider>
           <TeamThemeProvider>
             <BrandThemeProvider>
-              <RootAuthProvider>
+              <AuthProvider>
                 <CardProvider>
                   <App />
                 </CardProvider>
-              </RootAuthProvider>
+              </AuthProvider>
             </BrandThemeProvider>
           </TeamThemeProvider>
         </ThemeProvider>

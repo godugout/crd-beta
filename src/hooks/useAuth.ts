@@ -9,26 +9,37 @@ import { AuthContextType } from '@/context/auth/types';
  * It tries to get auth from the provider or context
  */
 export const useAuth = (): AuthContextType => {
-  // First try to use the auth context from /context/auth
+  // Try to use the main provider first (the one configured in main.tsx)
   try {
-    const contextAuth = useContextAuth();
-    // Add isLoading as an alias to loading for compatibility
+    const providerAuth = useProviderAuth();
+    // Ensure loading property exists for compatibility with AuthContextType
     return {
-      ...contextAuth,
-      isLoading: contextAuth.loading
+      ...providerAuth,
+      loading: providerAuth.isLoading || false,
     };
-  } catch (contextError) {
-    // If that fails, try the provider from /providers
+  } catch (providerError) {
+    // If that fails, try the context from /context/auth
     try {
-      const providerAuth = useProviderAuth();
-      // Ensure loading property exists for compatibility with AuthContextType
+      const contextAuth = useContextAuth();
+      // Add isLoading as an alias to loading for compatibility
       return {
-        ...providerAuth,
-        loading: providerAuth.isLoading || false,
+        ...contextAuth,
+        isLoading: contextAuth.loading
       };
-    } catch (providerError) {
+    } catch (contextError) {
       console.warn('Auth provider not found or not initialized properly');
-      throw new Error('useAuth must be used within an AuthProvider');
+      // Instead of throwing an error, return a safe default version
+      // This prevents crashes when auth is not fully set up
+      return {
+        user: null,
+        isAuthenticated: false, 
+        loading: true,
+        error: null,
+        signIn: async () => { console.warn('Auth not initialized'); },
+        signUp: async () => { console.warn('Auth not initialized'); },
+        signOut: async () => { console.warn('Auth not initialized'); },
+        isLoading: true
+      };
     }
   }
 };

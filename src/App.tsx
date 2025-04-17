@@ -6,6 +6,7 @@ import HomePage from './pages/HomePage';
 import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
 import NotFound from './pages/NotFound';
+import Auth from './pages/Auth';
 import CardCollectionPage from './pages/CardCollectionPage';
 import BaseballCardViewer from './pages/BaseballCardViewer';
 import BaseballActionFigure from './pages/BaseballActionFigure';
@@ -21,7 +22,8 @@ import { routes } from './routes/index';
 function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { isAuthenticated } = useAuth();
+  const auth = useAuth();
+  const isAuthenticated = auth.isAuthenticated ?? false;
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -91,6 +93,7 @@ function App() {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/emergency" element={<EmergencyPage />} />
+            <Route path="/auth" element={<Auth />} />
 
             {routes.map((route, index) => {
               if (route.children) {
