@@ -6,21 +6,19 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { useCardOperations } from '@/hooks/useCardOperations';
 import FullscreenViewer from '@/components/gallery/FullscreenViewer';
-import { sampleCards } from '@/lib/data/sampleCards';
 import { useCardDetail, CardDetailedViewCard } from '@/hooks/useCardDetail';
-import { toStandardCard } from '@/lib/utils/cardConverters';
-import { ensureCardRarity } from '@/lib/utils/CardRarityUtils';
 import { RelatedCards } from '@/components/cards';
 import CardDetailedView from '@/components/cards/CardDetailedView';
-
-const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1518770660439-4636190af475';
+import { toStandardCard } from '@/lib/utils/cardConverters';
+import { ensureCardRarity } from '@/lib/utils/CardRarityUtils';
+import { sampleCards } from '@/lib/data/sampleCards';
 
 const CardDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const cardOperations = useCardOperations();
   const [showViewer, setShowViewer] = useState(false);
-  const { resolvedCard } = useCardDetail(id);
+  const { resolvedCard, FALLBACK_IMAGE } = useCardDetail(id);
   
   if (!resolvedCard) {
     return (
