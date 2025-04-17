@@ -1,10 +1,10 @@
-
 import React, { useState, useEffect, ReactNode } from 'react';
 import { Card, CardRarity, Collection } from '@/lib/types';
 import { sampleCards } from '@/lib/data/sampleCards';
 import { cardIdToCard } from '@/lib/utils/cardHelpers';
 import { CardContext, CardContextProps } from './CardContext';
 import { adaptToCard } from '@/lib/adapters/typeAdapters';
+import { toStandardCard } from '@/lib/utils/cardConverters';
 
 /**
  * Provider component for CardContext
@@ -13,7 +13,7 @@ import { adaptToCard } from '@/lib/adapters/typeAdapters';
 export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   // Process sample cards to ensure they all have the required properties
   // and use the correct CardRarity enum
-  const processedSampleCards = sampleCards.map(card => adaptToCard({
+  const processedSampleCards = sampleCards.map(card => toStandardCard({
     ...card,
     isFavorite: card.isFavorite ?? false,
     description: card.description || '',

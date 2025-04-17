@@ -185,20 +185,22 @@ export const EnhancedCardProvider: React.FC<{ children: ReactNode }> = ({ childr
           };
         }
 
-        const updatedEnhancedCard = {
-          ...cards[cardIndex],
+        const standardCard = enhancedCardToCard(cards[cardIndex]);
+        
+        const updatedStandardCard = {
+          ...standardCard,
           ...updates,
           updatedAt: new Date().toISOString()
         };
+        
+        const updatedEnhancedCard = cardToEnhancedCard(updatedStandardCard);
 
         const newCards = [...cards];
         newCards[cardIndex] = updatedEnhancedCard;
 
         setCards(newCards);
         
-        const cardToReturn = enhancedCardToCard(updatedEnhancedCard);
-        
-        resolve(cardToReturn);
+        resolve(updatedStandardCard);
       }, 500);
     });
   };

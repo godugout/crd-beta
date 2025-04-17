@@ -137,50 +137,54 @@ const CardDetail = () => {
     console.log('CardDetail: Rendering for ID:', id);
     
     import('@/lib/adapters/typeAdapters').then(({ adaptToCard }) => {
-      let foundCard = sampleCards.find(c => c.id === id);
-      
-      if (!foundCard) {
-        console.log('CardDetail: Card not found in sampleCards, checking context for ID:', id);
-        foundCard = getCard ? getCard(id) : cards.find(c => c.id === id);
-      }
-      
-      if (foundCard) {
-        console.log('CardDetail: Found card:', foundCard.title, 'with imageUrl:', foundCard.imageUrl);
+      import('@/lib/types').then(({ CardRarity }) => {
+        let foundCard = sampleCards.find(c => c.id === id);
         
-        const processedCard = toStandardCard({
-          ...foundCard,
-          imageUrl: foundCard.imageUrl || FALLBACK_IMAGE,
-          thumbnailUrl: foundCard.thumbnailUrl || foundCard.imageUrl || FALLBACK_IMAGE,
-          description: foundCard.description || '',
-          isFavorite: foundCard.isFavorite ?? false,
-          createdAt: foundCard.createdAt || new Date().toISOString(), 
-          updatedAt: foundCard.updatedAt || new Date().toISOString(),
-          rarity: foundCard.rarity || CardRarity.COMMON
-        });
-        
-        setResolvedCard(processedCard);
-        
-        if (processedCard.imageUrl && processedCard.imageUrl !== FALLBACK_IMAGE) {
-          const img = new Image();
-          img.onerror = () => {
-            console.error('CardDetail: Image failed to preload:', processedCard.imageUrl);
-            setResolvedCard(prev => prev ? toStandardCard({ 
-              ...prev, 
-              imageUrl: FALLBACK_IMAGE,
-              thumbnailUrl: FALLBACK_IMAGE,
-              description: prev.description || ''
-            }) : null);
-          };
-          img.src = processedCard.imageUrl;
+        if (!foundCard) {
+          console.log('CardDetail: Card not found in sampleCards, checking context for ID:', id);
+          foundCard = getCard ? getCard(id) : cards.find(c => c.id === id);
         }
-      } else {
-        console.error('CardDetail: Card not found at all for ID:', id);
-        toast({
-          title: "Card not found",
-          description: "The requested card could not be found",
-          variant: "destructive"
-        });
-      }
+        
+        if (foundCard) {
+          console.log('CardDetail: Found card:', foundCard.title, 'with imageUrl:', foundCard.imageUrl);
+          
+          import('@/lib/utils/cardConverters').then(({ toStandardCard }) => {
+            const processedCard = toStandardCard({
+              ...foundCard,
+              imageUrl: foundCard.imageUrl || FALLBACK_IMAGE,
+              thumbnailUrl: foundCard.thumbnailUrl || foundCard.imageUrl || FALLBACK_IMAGE,
+              description: foundCard.description || '',
+              isFavorite: foundCard.isFavorite ?? false,
+              createdAt: foundCard.createdAt || new Date().toISOString(), 
+              updatedAt: foundCard.updatedAt || new Date().toISOString(),
+              rarity: foundCard.rarity || CardRarity.COMMON
+            });
+            
+            setResolvedCard(processedCard);
+            
+            if (processedCard.imageUrl && processedCard.imageUrl !== FALLBACK_IMAGE) {
+              const img = new Image();
+              img.onerror = () => {
+                console.error('CardDetail: Image failed to preload:', processedCard.imageUrl);
+                setResolvedCard(prev => prev ? toStandardCard({ 
+                  ...prev, 
+                  imageUrl: FALLBACK_IMAGE,
+                  thumbnailUrl: FALLBACK_IMAGE,
+                  description: prev.description || ''
+                }) : null);
+              };
+              img.src = processedCard.imageUrl;
+            }
+          });
+        } else {
+          console.error('CardDetail: Card not found at all for ID:', id);
+          toast({
+            title: "Card not found",
+            description: "The requested card could not be found",
+            variant: "destructive"
+          });
+        }
+      });
     });
   }, [id, cards, getCard]);
   

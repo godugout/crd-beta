@@ -11,7 +11,7 @@ import { adaptToEnhancedCard } from '@/lib/adapters/EnhancedCardAdapter';
 export const enhancedCardToCard = (enhancedCard: EnhancedCard): Card => {
   // Convert edition from number to {number, total} object
   const edition = typeof enhancedCard.edition === 'number' 
-    ? { number: enhancedCard.edition, total: 1 } 
+    ? { number: enhancedCard.edition, total: enhancedCard.editionSize || 1 } 
     : undefined;
   
   // Use the standard adapter but override the edition format
@@ -26,7 +26,13 @@ export const enhancedCardToCard = (enhancedCard: EnhancedCard): Card => {
  * For backwards compatibility with existing code
  */
 export const cardToEnhancedCard = (card: Card): EnhancedCard => {
-  return adaptToEnhancedCard(card);
+  // Convert edition from {number, total} object to number
+  const editionNumber = card.edition?.number || 1;
+  
+  return {
+    ...adaptToEnhancedCard(card),
+    edition: editionNumber
+  };
 };
 
 /**
@@ -56,4 +62,3 @@ export const toStandardCard = (cardData: any): Card => {
     rarity
   });
 };
-

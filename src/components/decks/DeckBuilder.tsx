@@ -37,7 +37,7 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck }) => {
   useEffect(() => {
     if (initialDeck?.cardIds && initialDeck.cardIds.length > 0) {
       const deckCards = cards.filter(card => initialDeck.cardIds.includes(card.id));
-      setSelectedCards(deckCards.map(card => ensureEnhancedCard(card)));
+      setSelectedCards(deckCards.map(card => enhancedCardToCard(card)));
     }
   }, [initialDeck, cards]);
   
@@ -57,7 +57,7 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck }) => {
   );
   
   const handleAddCard = (card: any) => {
-    setSelectedCards(prev => [...prev, ensureEnhancedCard(card)]);
+    setSelectedCards(prev => [...prev, enhancedCardToCard(card)]);
     toast.success(`Added "${card.title}" to deck`);
   };
   
@@ -114,7 +114,7 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck }) => {
   const handleCardSelect = (cardId: string) => {
     const card = cards.find(c => c.id === cardId);
     if (card) {
-      handleAddCard(ensureEnhancedCard(card));
+      handleAddCard(card);
     } else {
       const tempCard = adaptToCard({
         id: cardId,
@@ -126,7 +126,7 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck }) => {
         rarity: CardRarity.COMMON,
         tags: []
       });
-      handleAddCard(ensureEnhancedCard(tempCard));
+      handleAddCard(tempCard);
     }
   };
   
