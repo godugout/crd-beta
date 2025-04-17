@@ -147,8 +147,8 @@ const CardDetail = () => {
     if (foundCard) {
       console.log('CardDetail: Found card:', foundCard.title, 'with imageUrl:', foundCard.imageUrl);
       
-      // Use toStandardCard and explicitly cast to CardDetailedViewCard to ensure type compatibility
-      const standardCard = toStandardCard({
+      // Create a complete card object with all required properties before calling toStandardCard
+      const completeCard = {
         ...foundCard,
         imageUrl: foundCard.imageUrl || FALLBACK_IMAGE,
         thumbnailUrl: foundCard.thumbnailUrl || foundCard.imageUrl || FALLBACK_IMAGE,
@@ -157,8 +157,13 @@ const CardDetail = () => {
         rarity: ensureCardRarity(foundCard.rarity),
         userId: foundCard.userId || 'anonymous',
         createdAt: foundCard.createdAt || new Date().toISOString(), 
-        updatedAt: foundCard.updatedAt || new Date().toISOString()
-      }) as CardDetailedViewCard;
+        updatedAt: foundCard.updatedAt || new Date().toISOString(),
+        tags: foundCard.tags || [],
+        effects: foundCard.effects || []
+      };
+      
+      // Now convert to standard card and cast to CardDetailedViewCard
+      const standardCard = toStandardCard(completeCard) as CardDetailedViewCard;
       
       setResolvedCard(standardCard);
       
@@ -246,10 +251,22 @@ const CardDetail = () => {
         
         <RelatedCards 
           cards={sampleCards.filter(card => card.id !== resolvedCard?.id).map(card => {
-            return toStandardCard({
+            // Create a complete card with all required properties
+            const completeCard = {
               ...card,
-              rarity: ensureCardRarity(card.rarity)
-            }) as CardDetailedViewCard;
+              imageUrl: card.imageUrl || FALLBACK_IMAGE,
+              thumbnailUrl: card.thumbnailUrl || card.imageUrl || FALLBACK_IMAGE,
+              description: card.description || '',
+              isFavorite: card.isFavorite ?? false,
+              rarity: ensureCardRarity(card.rarity),
+              userId: card.userId || 'anonymous',
+              createdAt: card.createdAt || new Date().toISOString(),
+              updatedAt: card.updatedAt || new Date().toISOString(),
+              tags: card.tags || [],
+              effects: card.effects || []
+            };
+            
+            return toStandardCard(completeCard) as CardDetailedViewCard;
           })}
           currentCardId={resolvedCard?.id || ''}
           onCardClick={(id) => navigate(`/cards/${id}`)}
