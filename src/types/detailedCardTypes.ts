@@ -43,7 +43,7 @@ export function ensureDetailedViewCard(card: Card): DetailedViewCard {
     updatedAt: card.updatedAt || new Date().toISOString(),
     userId: card.userId || 'unknown-user',
     effects: card.effects || [],
-    isFavorite: card.isFavorite || false, // Use logical OR to handle undefined
+    isFavorite: false, // Since Card type doesn't have isFavorite, we set a default value
     rarity: card.rarity || 'common', // This will be compatible with CardRarity
     designMetadata: card.designMetadata || {
       cardStyle: {
