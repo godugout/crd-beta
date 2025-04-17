@@ -146,17 +146,13 @@ const CardDetail = () => {
     if (foundCard) {
       console.log('CardDetail: Found card:', foundCard.title, 'with imageUrl:', foundCard.imageUrl);
       
-      // Ensure card rarity is a proper enum value
-      const rarityValue = ensureCardRarity(foundCard.rarity);
-      
-      // Use toStandardCard to ensure all required properties are present with correct types
       const standardCard = toStandardCard({
         ...foundCard,
         imageUrl: foundCard.imageUrl || FALLBACK_IMAGE,
         thumbnailUrl: foundCard.thumbnailUrl || foundCard.imageUrl || FALLBACK_IMAGE,
         description: foundCard.description || '',
         isFavorite: foundCard.isFavorite ?? false,
-        rarity: rarityValue,
+        rarity: ensureCardRarity(foundCard.rarity),
         userId: foundCard.userId || 'anonymous',
         createdAt: foundCard.createdAt || new Date().toISOString(), 
         updatedAt: foundCard.updatedAt || new Date().toISOString()
@@ -248,10 +244,7 @@ const CardDetail = () => {
         
         <RelatedCards 
           cards={sampleCards.filter(card => card.id !== resolvedCard?.id).map(card => {
-            // Ensure rarity is a proper enum value
             const rarityValue = ensureCardRarity(card.rarity);
-            
-            // Use toStandardCard to ensure all required properties are present
             return toStandardCard({
               ...card,
               rarity: rarityValue
