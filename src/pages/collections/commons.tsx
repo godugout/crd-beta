@@ -1,9 +1,10 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PageLayout from '@/components/navigation/PageLayout';
 import { Container } from '@/components/ui/container';
 import { Button } from '@/components/ui/button';
-import { Eye, RefreshCw, AlertTriangle, Loader } from 'lucide-react';
+import { Eye, RefreshCw, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -20,15 +21,22 @@ const CommonsCardsPage = () => {
   } | null>(null);
   const navigate = useNavigate();
 
+  // Collection ID for Commons Cards
+  const COMMONS_COLLECTION_ID = '5d034aa4-86e0-4ca7-92c5-1fbd8e71943c';
+
   useEffect(() => {
     const checkCollection = async () => {
-      const collectionId = '5d034aa4-86e0-4ca7-92c5-1fbd8e71943c';
-      const exists = await checkCollectionExists(collectionId);
-      console.log(`Collection ${collectionId} exists:`, exists);
+      const exists = await checkCollectionExists(COMMONS_COLLECTION_ID);
+      console.log(`Collection ${COMMONS_COLLECTION_ID} exists:`, exists);
+      
+      // If we have a stored result but the collection doesn't exist, something went wrong
+      if (result?.success && !exists) {
+        toast.error('The collection was reported as created but cannot be found in the database');
+      }
     };
 
     checkCollection();
-  }, []);
+  }, [result]);
 
   useEffect(() => {
     if (result?.collectionId) {
@@ -103,6 +111,9 @@ const CommonsCardsPage = () => {
   const handleViewCollection = () => {
     if (result?.collectionId) {
       navigate(`/collections/${result.collectionId}?refresh=true`);
+    } else {
+      // If we don't have a result yet but know the default ID, use that
+      navigate(`/collections/${COMMONS_COLLECTION_ID}?refresh=true`);
     }
   };
 
