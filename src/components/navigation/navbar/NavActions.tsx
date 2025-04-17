@@ -13,16 +13,16 @@ interface NavActionsProps {
 
 const NavActions: React.FC<NavActionsProps> = ({ user, onSignOut }) => {
   return (
-    <div className="hidden md:flex items-center ml-auto space-x-3">
+    <div className="hidden md:flex items-center ml-auto space-x-4">
       {/* Labs/Features Button */}
       <Button 
-        variant="ghost" 
+        variant="soft" 
         size="sm"
         asChild
-        className="text-muted-foreground hover:text-primary"
+        className="hover:text-[var(--brand-accent)]"
       >
         <Link to="/labs">
-          <Sparkles className="h-4 w-4 mr-1" />
+          <Sparkles className="h-4 w-4 mr-2" />
           <span className="text-sm">Labs</span>
         </Link>
       </Button>
@@ -31,13 +31,13 @@ const NavActions: React.FC<NavActionsProps> = ({ user, onSignOut }) => {
       {user ? (
         <UserDropdownMenu user={user} onSignOut={onSignOut} />
       ) : (
-        <Button variant="outline" asChild>
+        <Button variant="glass" asChild>
           <Link to="/login">Sign In</Link>
         </Button>
       )}
 
       {/* Create Card Button */}
-      <Button variant="gradient" asChild>
+      <Button variant="rainbow" asChild className="px-5 py-2">
         <Link to="/cards/create" className="flex items-center">
           <span className="mr-1">+</span>
           Card

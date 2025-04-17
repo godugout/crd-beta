@@ -30,39 +30,47 @@
 }
 
 @layer components {
+  /* Updated bento grid with improved spacing */
   .bento-grid {
-    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6;
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-7;
   }
   
+  /* Redesigned card with subtle hover effects */
   .bento-card {
-    @apply bg-[var(--bg-secondary)] rounded-[var(--radius-lg)] p-5 border border-[var(--border-primary)] 
-           shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] transition-all duration-300;
+    @apply bg-[var(--bg-secondary)] rounded-[var(--radius-xl)] p-6 border border-[var(--border-primary)] 
+           shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] transition-all duration-300 
+           hover:translate-y-[-2px];
   }
   
+  /* Better section container spacing */
   .section-container {
-    @apply container mx-auto px-4 py-10 md:py-16;
+    @apply container mx-auto px-5 py-12 md:py-18;
   }
   
+  /* Enhanced highlight effect with animated gradient */
   .crd-highlight {
     @apply relative;
   }
   
   .crd-highlight::after {
     content: '';
-    @apply absolute bottom-0 left-0 h-1 w-full bg-gradient-to-r from-[var(--brand-accent)] to-[var(--brand-primary)] rounded-full;
+    @apply absolute bottom-0 left-0 h-1.5 w-full bg-gradient-to-r from-[var(--brand-accent)] via-[var(--brand-primary)] to-[var(--brand-notification)] rounded-full opacity-90;
   }
   
+  /* Improved glass card effect */
   .glass-card {
-    @apply backdrop-blur-md bg-black/30 border border-white/10 rounded-lg p-4;
+    @apply backdrop-blur-xl bg-black/30 border border-white/10 rounded-xl p-5 hover:bg-black/35 transition-all;
   }
   
+  /* Enhanced spectrum text with animation */
   .spectrum-text {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-[var(--brand-notification)] via-[var(--brand-accent)] to-[var(--brand-primary)];
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-[var(--brand-notification)] via-[var(--brand-accent)] to-[var(--brand-primary)] animate-gradient-x;
   }
   
+  /* Better animated gradient background */
   .animated-gradient-bg {
-    background-size: 200% 200%;
-    animation: gradientMove 8s ease infinite;
+    background-size: 300% 300%;
+    animation: gradientMove 10s ease infinite;
   }
   
   @keyframes gradientMove {
@@ -71,7 +79,41 @@
     100% { background-position: 0% 50%; }
   }
   
+  @keyframes gradient-x {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 100% 50%; }
+  }
+  
+  .animate-gradient-x {
+    animation: gradient-x 4s linear infinite alternate;
+    background-size: 200% 200%;
+  }
+  
   .text-balance {
     text-wrap: balance;
+  }
+  
+  /* New card hover effect */
+  .card-hover {
+    @apply transition-all duration-300 hover:translate-y-[-3px] hover:shadow-lg;
+  }
+  
+  /* New button styles */
+  .btn-spectrum {
+    @apply relative overflow-hidden backdrop-blur-md bg-black/30 border border-white/10 
+           text-white shadow-md hover:shadow-lg transition-all transform hover:scale-[1.02] 
+           after:absolute after:inset-0 after:bg-[var(--gradient-rainbow)] after:opacity-20 
+           after:z-[-1] rounded-xl px-5 py-2.5;
+  }
+  
+  .btn-soft {
+    @apply rounded-xl bg-white/5 border border-white/10 px-5 py-2.5 text-white 
+           hover:bg-white/10 transition-all shadow-sm hover:shadow-md;
+  }
+  
+  /* Tag pills with improved design */
+  .tag-pill {
+    @apply inline-flex items-center rounded-full bg-white/10 px-2.5 py-0.5 text-xs 
+           font-medium text-white hover:bg-white/20 transition-colors;
   }
 }
