@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/auth';
 import { Button } from '@/components/ui/button';
@@ -13,8 +12,7 @@ import { MessageCircle, SendHorizontal, Reply, Trash, Edit } from 'lucide-react'
 import { 
   DbComment, 
   adaptSchemaCommentToInteractionComment, 
-  adaptInteractionCommentToSchemaComment,
-  adaptCommentToDbComment
+  adaptInteractionCommentToSchemaComment
 } from '@/lib/adapters/commentAdapter';
 
 interface CommentSectionProps {
@@ -56,7 +54,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ cardId, collectionId, t
       if (data) {
         // Convert schema comments to interaction comments
         const adaptedComments = data.map(comment => 
-          adaptSchemaCommentToInteractionComment(comment as DbComment)
+          adaptSchemaCommentToInteractionComment(comment as unknown as DbComment)
         );
         setComments(adaptedComments);
         adaptedComments.forEach(comment => {
@@ -85,7 +83,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ cardId, collectionId, t
       
       if (data && data.length > 0) {
         const adaptedReplies = data.map(comment => 
-          adaptSchemaCommentToInteractionComment(comment as DbComment)
+          adaptSchemaCommentToInteractionComment(comment as unknown as DbComment)
         );
         setRepliesByParentId(prev => ({
           ...prev,
@@ -126,7 +124,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ cardId, collectionId, t
         setNewComment('');
         
         // Convert schema comment back to interaction comment
-        const adaptedComment = adaptSchemaCommentToInteractionComment(data as DbComment);
+        const adaptedComment = adaptSchemaCommentToInteractionComment(data as unknown as DbComment);
         
         if (replyTo) {
           setRepliesByParentId(prev => ({
@@ -160,7 +158,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ cardId, collectionId, t
         toast.success('Comment updated successfully');
         
         // Convert schema comment to interaction comment
-        const adaptedComment = adaptSchemaCommentToInteractionComment(data as DbComment);
+        const adaptedComment = adaptSchemaCommentToInteractionComment(data as unknown as DbComment);
         
         if (adaptedComment.parentId) {
           setRepliesByParentId(prev => ({
@@ -235,7 +233,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ cardId, collectionId, t
     // Helper function to get display name
     const getDisplayName = (user?: User) => {
       if (!user) return 'Anonymous';
-      return user.displayName || user.username || user.email || 'Anonymous';
+      return user.displayName || user.username || user.name || user.email || 'Anonymous';
     };
     
     // Helper function to get avatar initial
@@ -243,6 +241,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ cardId, collectionId, t
       if (!user) return '?';
       if (user.displayName) return user.displayName.charAt(0);
       if (user.username) return user.username.charAt(0);
+      if (user.name) return user.name.charAt(0);
       return user.email?.charAt(0) || '?';
     };
     

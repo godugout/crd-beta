@@ -14,7 +14,6 @@ export interface CardViewerProps {
   onCapture?: () => void;
   onBack?: () => void;
   onClose?: () => void;
-  fullscreen?: boolean;
 }
 
 const CardViewer: React.FC<CardViewerProps> = ({ 
@@ -24,7 +23,6 @@ const CardViewer: React.FC<CardViewerProps> = ({
   effectIntensities = {},
   showLightingControls = false,
   isFullscreen = false,
-  fullscreen = false, // Alias for isFullscreen for backwards compatibility
   onFullscreenToggle,
   onShare,
   onCapture,
@@ -33,9 +31,6 @@ const CardViewer: React.FC<CardViewerProps> = ({
 }) => {
   const [rotationX, setRotationX] = useState(0);
   const [rotationY, setRotationY] = useState(0);
-  
-  // Use either isFullscreen or fullscreen
-  const showFullscreen = isFullscreen || fullscreen;
   
   // Common card effect classes
   const getEffectClasses = () => {
@@ -113,7 +108,7 @@ const CardViewer: React.FC<CardViewerProps> = ({
               onClick={onFullscreenToggle}
               className="bg-black/50 text-white px-3 py-1 rounded-full text-sm backdrop-blur-sm"
             >
-              {showFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
+              {isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
             </button>
           )}
           

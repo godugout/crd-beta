@@ -16,7 +16,8 @@ export enum UserRole {
   ADMIN = 'admin',
   ARTIST = 'artist',
   FAN = 'fan',
-  GUEST = 'guest'
+  GUEST = 'guest',
+  MODERATOR = 'moderator'
 }
 
 // Role-based permissions mapping
@@ -38,7 +39,11 @@ export const ROLE_PERMISSIONS = {
   [UserRole.FAN]: [
     UserPermission.VIEW_DASHBOARD
   ],
-  [UserRole.GUEST]: []
+  [UserRole.GUEST]: [],
+  [UserRole.MODERATOR]: [
+    UserPermission.VIEW_DASHBOARD,
+    UserPermission.MANAGE_USERS
+  ]
 };
 
 // User interface
@@ -49,6 +54,7 @@ export interface User {
   role: UserRole;
   avatarUrl?: string;
   username?: string;
+  displayName?: string;
   permissions?: UserPermission[];
   createdAt: string;
   updatedAt: string;

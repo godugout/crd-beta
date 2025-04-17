@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useContext, ReactNode } from 'react';
 import { Card, Collection } from '@/lib/types';
 
@@ -9,6 +8,18 @@ interface Deck {
   cards: Card[];
   createdAt: string;
   updatedAt: string;
+  coverImageUrl?: string;
+  cardIds?: string[];
+  isPublic?: boolean;
+}
+
+interface Series {
+  id: string;
+  name: string;
+  description?: string;
+  cards?: Card[];
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface EnhancedCardContextProps {
@@ -17,6 +28,7 @@ export interface EnhancedCardContextProps {
   enhancedCards: Card[];
   decks: Deck[];
   favorites: Card[];
+  series: Series[];
   loading: boolean;
   error: Error | null;
   fetchCards: () => Promise<void>;
@@ -33,6 +45,8 @@ export interface EnhancedCardContextProps {
   deleteDeck: (id: string) => Promise<boolean>;
   addCardToDeck: (deckId: string, cardId: string) => Promise<boolean>;
   removeCardFromDeck: (deckId: string, cardId: string) => Promise<boolean>;
+  addSeries: (series: Partial<Series>) => Promise<Series>;
+  updateSeries: (id: string, updates: Partial<Series>) => Promise<Series>;
 }
 
 export const EnhancedCardContext = createContext<EnhancedCardContextProps | undefined>(undefined);
@@ -42,6 +56,7 @@ export const EnhancedCardProvider: React.FC<{ children: ReactNode }> = ({ childr
   const [collections, setCollections] = useState<Collection[]>([]);
   const [decks, setDecks] = useState<Deck[]>([]);
   const [favorites, setFavorites] = useState<Card[]>([]);
+  const [series, setSeries] = useState<Series[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
@@ -107,7 +122,8 @@ export const EnhancedCardProvider: React.FC<{ children: ReactNode }> = ({ childr
   const addCollection = async (collectionData: Partial<Collection>): Promise<Collection> => {
     const newCollection: Collection = {
       id: `collection-${Date.now()}`,
-      name: collectionData.name || 'New Collection',
+      title: collectionData.title || 'New Collection',
+      name: collectionData.name || collectionData.title || 'New Collection',
       description: collectionData.description || '',
       coverImageUrl: collectionData.coverImageUrl || '',
       userId: collectionData.userId || 'user-1',
@@ -115,7 +131,6 @@ export const EnhancedCardProvider: React.FC<{ children: ReactNode }> = ({ childr
       allowComments: collectionData.allowComments !== undefined ? collectionData.allowComments : true,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      ...collectionData
     };
     setCollections(prev => [...prev, newCollection]);
     return newCollection;
@@ -212,12 +227,37 @@ export const EnhancedCardProvider: React.FC<{ children: ReactNode }> = ({ childr
     return true;
   };
 
+  const addSeries = async (seriesData: Partial<Series>): Promise<Series> => {
+    const newSeries: Series = {
+      id: `series-${Date.now()}`,
+      name: seriesData.name || 'New Series',
+      description: seriesData.description || '',
+      cards: seriesData.cards || [],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    setSeries(prev => [...prev, newSeries]);
+    return newSeries;
+  };
+
+  const updateSeries = async (id: string, updates: Partial<Series>): Promise<Series> => {
+    const updatedSeries = series.find(s => s.id === id);
+    if (!updatedSeries) {
+      throw new Error(`Series with ID ${id} not found`);
+    }
+    
+    const updated = { ...updatedSeries, ...updates, updatedAt: new Date().toISOString() };
+    setSeries(prev => prev.map(s => s.id === id ? updated : s));
+    return updated;
+  };
+
   const value: EnhancedCardContextProps = {
     cards,
     collections,
     enhancedCards: cards,
     decks,
     favorites,
+    series,
     loading,
     error,
     fetchCards,
@@ -233,7 +273,9 @@ export const EnhancedCardProvider: React.FC<{ children: ReactNode }> = ({ childr
     updateDeck,
     deleteDeck,
     addCardToDeck,
-    removeCardFromDeck
+    removeCardFromDeck,
+    addSeries,
+    updateSeries
   };
 
   return (
@@ -245,7 +287,7 @@ export const EnhancedCardProvider: React.FC<{ children: ReactNode }> = ({ childr
 
 export const useEnhancedCards = () => {
   const context = useContext(EnhancedCardContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useEnhancedCards must be used within an EnhancedCardProvider');
   }
   return context;

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -56,7 +55,6 @@ const ReactionButtons: React.FC<ReactionButtonsProps> = ({
       let result;
       
       if (cardId) {
-        // Use getReactions with cardId parameter instead of getReactionsByCardId
         result = await reactionRepository.getReactions({ 
           cardId, 
           collectionId: undefined, 
@@ -125,7 +123,7 @@ const ReactionButtons: React.FC<ReactionButtonsProps> = ({
       const isSameType = userReaction?.type === type;
       
       if (userReaction && isSameType) {
-        const success = await reactionRepository.deleteReaction(userReaction.id);
+        const { success } = await reactionRepository.deleteReaction(userReaction.id);
         
         if (!success) {
           toast.error('Failed to update reaction');
@@ -134,7 +132,6 @@ const ReactionButtons: React.FC<ReactionButtonsProps> = ({
         
         setReactions(prev => prev.filter(r => r.userId !== user.id));
       } else {
-        // Use createReaction instead of addReaction
         const reactionData = {
           userId: user.id,
           cardId,
@@ -145,7 +142,7 @@ const ReactionButtons: React.FC<ReactionButtonsProps> = ({
           targetId: cardId || collectionId || commentId || '',
         };
         
-        const data = await reactionRepository.createReaction(reactionData);
+        const { data } = await reactionRepository.createReaction(reactionData);
         
         if (!data) {
           toast.error('Failed to update reaction');

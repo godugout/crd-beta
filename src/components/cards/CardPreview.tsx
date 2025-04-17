@@ -1,68 +1,65 @@
 
 import React from 'react';
-import { Card } from '@/lib/types/card';
+import { Card } from '@/lib/types';
 import { cn } from '@/lib/utils';
 
 interface CardPreviewProps {
   card: Card;
   onClick?: () => void;
   className?: string;
-  showTitle?: boolean;
-  showDescription?: boolean;
-  aspectRatio?: 'portrait' | 'square';
+  showDetails?: boolean;
 }
 
 const CardPreview: React.FC<CardPreviewProps> = ({
   card,
   onClick,
   className,
-  showTitle = true,
-  showDescription = false,
-  aspectRatio = 'portrait'
+  showDetails = true
 }) => {
-  const imageUrl = card.thumbnailUrl || card.imageUrl;
-  
   return (
     <div 
-      className={cn(
-        'group relative bg-background border rounded-lg overflow-hidden transition-all duration-300 hover:shadow-lg',
-        onClick && 'cursor-pointer hover:scale-[1.02]',
-        aspectRatio === 'portrait' ? 'aspect-[2.5/3.5]' : 'aspect-square',
-        className
-      )}
+      className={cn("relative group cursor-pointer overflow-hidden rounded-lg", className)}
       onClick={onClick}
     >
-      <div className="w-full h-full relative">
-        <img 
-          src={imageUrl} 
-          alt={card.title}
-          className="absolute inset-0 w-full h-full object-cover"
-        />
-        
-        {/* Overlay gradient for text visibility */}
-        {showTitle && (
-          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent pt-8 pb-3 px-3">
-            <h3 className="font-medium text-white line-clamp-1">
-              {card.title}
-            </h3>
-            
-            {showDescription && card.description && (
-              <p className="text-xs text-gray-200 line-clamp-2 mt-1">
-                {card.description}
-              </p>
-            )}
+      <div className="aspect-[2.5/3.5] overflow-hidden relative">
+        {card.imageUrl ? (
+          <img 
+            src={card.imageUrl} 
+            alt={card.title}
+            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+          />
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center">
+            <span className="text-white opacity-60">{card.title}</span>
           </div>
         )}
         
-        {/* Effects badge */}
-        {card.effects && card.effects.length > 0 && (
-          <div className="absolute top-2 right-2">
-            <span className="bg-primary/80 backdrop-blur text-white text-xs rounded-full px-2 py-0.5">
-              {card.effects.length} {card.effects.length === 1 ? 'Effect' : 'Effects'}
-            </span>
-          </div>
-        )}
+        {/* Gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       </div>
+      
+      {showDetails && (
+        <div className="absolute bottom-0 left-0 right-0 p-3 text-white transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+          <h3 className="font-semibold text-sm truncate">{card.title}</h3>
+          {card.team && (
+            <p className="text-xs text-gray-300">{card.team}</p>
+          )}
+          {card.tags && card.tags.length > 0 && (
+            <div className="flex flex-wrap gap-1 mt-1">
+              {card.tags.slice(0, 2).map((tag, i) => (
+                <span key={i} className="text-xs bg-white/20 px-1.5 py-0.5 rounded-sm">
+                  {tag}
+                </span>
+              ))}
+              {card.tags.length > 2 && (
+                <span className="text-xs bg-white/20 px-1.5 py-0.5 rounded-sm">
+                  +{card.tags.length - 2}
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };

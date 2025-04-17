@@ -1,3 +1,4 @@
+
 import { CardRarity, DesignMetadata } from './cardTypes';
 import { BaseEntity } from '.';
 import { Reaction } from './interaction';
@@ -32,6 +33,10 @@ export interface Card extends BaseEntity {
   name?: string;
   isFavorite?: boolean;
   stats?: CardStats;
+  artistId?: string;
+  marketData?: any;
+  editionSize?: number;
+  cardNumber?: string;
 }
 
 // EnhancedCard includes additional fields for the application

@@ -264,10 +264,10 @@ export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 };
 
 // Hook to use the card context
-export const useCardContext = () => {
+export const useCards = () => {
   const context = useContext(CardContext);
   if (!context) {
-    throw new Error('useCardContext must be used within a CardProvider');
+    throw new Error('useCards must be used within a CardProvider');
   }
   return context;
 };

@@ -23,9 +23,9 @@ const CardViewerPage = () => {
   };
   
   // Safely extract properties for display
-  const cardPlayer = card ? getStringProp(card.player) : '';
-  const cardTeam = card ? getStringProp(card.team) : '';
-  const cardYear = card ? getStringProp(card.year) : '';
+  const cardPlayer = card ? getStringProp(card.player || '') : '';
+  const cardTeam = card ? getStringProp(card.team || '') : '';
+  const cardYear = card ? getStringProp(card.year || '') : '';
   
   // Handle keyboard navigation
   useEffect(() => {
@@ -109,7 +109,8 @@ const CardViewerPage = () => {
                 onShare={handleShare}
                 onCapture={handleCapture}
                 onBack={() => navigate('/')}
-                onFullscreenToggle={() => setFullscreen(true)}
+                isFullscreen={false}
+                onClose={() => {}}
               />
             </div>
             
