@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, ReactNode } from 'react';
 import { Card, CardRarity, Collection } from '@/lib/types';
 import { sampleCards } from '@/lib/data/sampleCards';
@@ -7,6 +6,7 @@ import { CardContext, CardContextProps } from './CardContext';
 import { adaptToCard } from '@/lib/adapters/typeAdapters';
 import { toStandardCard } from '@/lib/utils/cardConverters';
 import { stringToCardRarity } from '@/lib/utils/CardRarityUtils';
+import { ensureCardRarity } from '@/lib/utils/CardRarityUtils';
 
 /**
  * Provider component for CardContext
@@ -16,10 +16,8 @@ export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // Process sample cards to ensure they all have the required properties
   // and use the correct CardRarity enum
   const processedSampleCards = sampleCards.map(card => {
-    // Convert string rarity to CardRarity enum
-    const rarityValue = typeof card.rarity === 'string' 
-      ? stringToCardRarity(card.rarity as string)
-      : card.rarity || CardRarity.COMMON;
+    // Ensure rarity is a proper CardRarity enum value
+    const rarityValue = ensureCardRarity(card.rarity);
       
     return toStandardCard({
       ...card,
@@ -65,7 +63,8 @@ export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const addCard = async (cardData: Partial<Card>): Promise<Card> => {
     setLoading(true);
     try {
-      const newCard: Card = adaptToCard({
+      // Use our enhanced toStandardCard for type safety
+      const newCard = toStandardCard({
         id: `card-${Date.now()}`,
         title: cardData.title || 'Untitled Card',
         description: cardData.description || '',
@@ -75,7 +74,7 @@ export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         userId: 'user-1',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        rarity: cardData.rarity || CardRarity.COMMON,
+        rarity: ensureCardRarity(cardData.rarity),
         effects: [],
         isFavorite: cardData.isFavorite ?? false,
         ...cardData

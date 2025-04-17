@@ -50,3 +50,51 @@ export const ensureCardRarity = (value: unknown): CardRarity => {
   
   return CardRarity.COMMON;
 };
+
+/**
+ * Interface for card edition information with type discriminator
+ */
+export interface CardEdition {
+  number: number;
+  total: number;
+}
+
+/**
+ * Type guard to check if an object is a CardEdition
+ */
+export const isCardEdition = (edition: any): edition is CardEdition => {
+  return edition && 
+    typeof edition === 'object' && 
+    typeof edition.number === 'number' && 
+    typeof edition.total === 'number';
+};
+
+/**
+ * Convert any edition format to the CardEdition object format
+ */
+export const toCardEdition = (edition: number | CardEdition | undefined): CardEdition => {
+  if (!edition) {
+    return { number: 1, total: 1 };
+  }
+  
+  if (typeof edition === 'number') {
+    return { number: edition, total: 1 };
+  }
+  
+  return edition;
+};
+
+/**
+ * Convert CardEdition object to a simple number (for EnhancedCard)
+ */
+export const toEditionNumber = (edition: CardEdition | number | undefined): number => {
+  if (!edition) {
+    return 1;
+  }
+  
+  if (typeof edition === 'number') {
+    return edition;
+  }
+  
+  return edition.number;
+};

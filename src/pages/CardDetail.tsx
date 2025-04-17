@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import PageLayout from '@/components/navigation/PageLayout';
@@ -10,10 +9,9 @@ import FullscreenViewer from '@/components/gallery/FullscreenViewer';
 import { Card, CardRarity } from '@/lib/types';
 import { sampleCards } from '@/lib/data/sampleCards';
 import { toast } from '@/hooks/use-toast';
-import { adaptToCard } from '@/lib/adapters/typeAdapters';
 import { DEFAULT_DESIGN_METADATA } from '@/lib/utils/cardDefaults';
 import { toStandardCard } from '@/lib/utils/cardConverters';
-import { stringToCardRarity } from '@/lib/utils/CardRarityUtils';
+import { stringToCardRarity, ensureCardRarity } from '@/lib/utils/CardRarityUtils';
 
 interface CardDetailedProps {
   card: Card;
@@ -138,61 +136,51 @@ const CardDetail = () => {
     
     console.log('CardDetail: Rendering for ID:', id);
     
-    import('@/lib/adapters/typeAdapters').then(({ adaptToCard }) => {
-      import('@/lib/types').then(({ CardRarity }) => {
-        let foundCard = sampleCards.find(c => c.id === id);
-        
-        if (!foundCard) {
-          console.log('CardDetail: Card not found in sampleCards, checking context for ID:', id);
-          foundCard = getCard ? getCard(id) : cards.find(c => c.id === id);
-        }
-        
-        if (foundCard) {
-          console.log('CardDetail: Found card:', foundCard.title, 'with imageUrl:', foundCard.imageUrl);
-          
-          import('@/lib/utils/cardConverters').then(({ toStandardCard }) => {
-            // Ensure the rarity is properly converted to a CardRarity enum
-            const rarityValue = foundCard && typeof foundCard.rarity === 'string' 
-              ? stringToCardRarity(foundCard.rarity)
-              : foundCard?.rarity || CardRarity.COMMON;
-              
-            const processedCard = toStandardCard({
-              ...foundCard,
-              imageUrl: foundCard.imageUrl || FALLBACK_IMAGE,
-              thumbnailUrl: foundCard.thumbnailUrl || foundCard.imageUrl || FALLBACK_IMAGE,
-              description: foundCard.description || '',
-              isFavorite: foundCard.isFavorite ?? false,
-              createdAt: foundCard.createdAt || new Date().toISOString(), 
-              updatedAt: foundCard.updatedAt || new Date().toISOString(),
-              rarity: rarityValue,
-            });
-            
-            setResolvedCard(processedCard);
-            
-            if (processedCard.imageUrl && processedCard.imageUrl !== FALLBACK_IMAGE) {
-              const img = new Image();
-              img.onerror = () => {
-                console.error('CardDetail: Image failed to preload:', processedCard.imageUrl);
-                setResolvedCard(prev => prev ? toStandardCard({ 
-                  ...prev, 
-                  imageUrl: FALLBACK_IMAGE,
-                  thumbnailUrl: FALLBACK_IMAGE,
-                  description: prev.description || ''
-                }) : null);
-              };
-              img.src = processedCard.imageUrl;
-            }
-          });
-        } else {
-          console.error('CardDetail: Card not found at all for ID:', id);
-          toast({
-            title: "Card not found",
-            description: "The requested card could not be found",
-            variant: "destructive"
-          });
-        }
+    let foundCard = sampleCards.find(c => c.id === id);
+    
+    if (!foundCard) {
+      console.log('CardDetail: Card not found in sampleCards, checking context for ID:', id);
+      foundCard = getCard ? getCard(id) : cards.find(c => c.id === id);
+    }
+    
+    if (foundCard) {
+      console.log('CardDetail: Found card:', foundCard.title, 'with imageUrl:', foundCard.imageUrl);
+      
+      const rarityValue = ensureCardRarity(foundCard.rarity);
+      
+      const processedCard = toStandardCard({
+        ...foundCard,
+        imageUrl: foundCard.imageUrl || FALLBACK_IMAGE,
+        thumbnailUrl: foundCard.thumbnailUrl || foundCard.imageUrl || FALLBACK_IMAGE,
+        description: foundCard.description || '',
+        isFavorite: foundCard.isFavorite ?? false,
+        createdAt: foundCard.createdAt || new Date().toISOString(), 
+        updatedAt: foundCard.updatedAt || new Date().toISOString(),
+        rarity: rarityValue,
       });
-    });
+      
+      setResolvedCard(processedCard);
+      
+      if (processedCard.imageUrl && processedCard.imageUrl !== FALLBACK_IMAGE) {
+        const img = new Image();
+        img.onerror = () => {
+          console.error('CardDetail: Image failed to preload:', processedCard.imageUrl);
+          setResolvedCard(prev => prev ? toStandardCard({ 
+            ...prev, 
+            imageUrl: FALLBACK_IMAGE,
+            thumbnailUrl: FALLBACK_IMAGE,
+          }) : null);
+        };
+        img.src = processedCard.imageUrl;
+      }
+    } else {
+      console.error('CardDetail: Card not found at all for ID:', id);
+      toast({
+        title: "Card not found",
+        description: "The requested card could not be found",
+        variant: "destructive"
+      });
+    }
   }, [id, cards, getCard]);
   
   if (!resolvedCard) {
@@ -257,12 +245,9 @@ const CardDetail = () => {
         
         <RelatedCards 
           cards={sampleCards.filter(card => card.id !== resolvedCard?.id).map(card => {
-            // Convert string rarity to CardRarity enum for related cards
-            const rarityValue = typeof card.rarity === 'string'
-              ? stringToCardRarity(card.rarity)
-              : card.rarity || CardRarity.COMMON;
+            const rarityValue = ensureCardRarity(card.rarity);
             
-            return adaptToCard({
+            return toStandardCard({
               ...card,
               rarity: rarityValue
             });
