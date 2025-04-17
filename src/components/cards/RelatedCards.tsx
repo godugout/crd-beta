@@ -3,7 +3,7 @@ import React from 'react';
 import { Card as CardType } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import CardThumbnail from './CardThumbnail';
-import { DetailedViewCard, ensureDetailedViewCard } from '@/types/detailedCardTypes';
+import { DetailedViewCard } from '@/types/detailedCardTypes';
 
 interface RelatedCardsProps {
   /**

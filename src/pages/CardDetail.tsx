@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import PageLayout from '@/components/navigation/PageLayout';
@@ -23,7 +24,7 @@ const CardDetail = () => {
   const { cards, getCard } = useCards();
   const cardOperations = useCardOperations();
   const [showViewer, setShowViewer] = useState(false);
-  const [resolvedCard, setResolvedCard] = useState<Card | null>(null);
+  const [resolvedCard, setResolvedCard] = useState<DetailedViewCard | null>(null);
   
   const [isLoaded, setIsLoaded] = useState(false);
   
@@ -52,6 +53,7 @@ const CardDetail = () => {
     if (foundCard) {
       console.log('CardDetail: Found card:', foundCard.title, 'with imageUrl:', foundCard.imageUrl);
       
+      // Use our helper to ensure all required fields are present
       const processedCard = ensureDetailedViewCard(adaptToCard({
         ...foundCard,
         imageUrl: foundCard.imageUrl || FALLBACK_IMAGE,
@@ -69,11 +71,12 @@ const CardDetail = () => {
         const img = new Image();
         img.onerror = () => {
           console.error('CardDetail: Image failed to preload:', processedCard.imageUrl);
-          setResolvedCard(prev => prev ? ensureDetailedViewCard(adaptToCard({ 
-            ...prev, 
+          const updatedCard = ensureDetailedViewCard(adaptToCard({ 
+            ...processedCard, 
             imageUrl: FALLBACK_IMAGE,
             thumbnailUrl: FALLBACK_IMAGE 
-          })) : null);
+          }));
+          setResolvedCard(updatedCard);
         };
         img.src = processedCard.imageUrl;
       }

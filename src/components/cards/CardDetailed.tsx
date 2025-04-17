@@ -6,12 +6,13 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Eye, Edit, Share2, Trash2 } from 'lucide-react';
 import CardThumbnail from './CardThumbnail';
+import { DetailedViewCard } from '@/types/detailedCardTypes';
 
 export interface CardDetailedProps {
   /**
    * Card data to display
    */
-  card: Card;
+  card: Card | DetailedViewCard;
   
   /**
    * Optional className for styling

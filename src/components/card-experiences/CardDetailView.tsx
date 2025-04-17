@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useCards } from '@/context/CardContext';
 import { Button } from "@/components/ui/button";
@@ -28,7 +27,7 @@ const CardDetailView: React.FC<CardDetailViewProps> = ({ cardId, onBack }) => {
   const { getCard, deleteCard } = useCards();
   const [liked, setLiked] = useState(false);
   
-  const rawCardData = getCard(cardId);
+  const rawCardData = getCard ? getCard(cardId) : null;
   // Ensure we have a properly formatted card with all required fields
   const cardData = rawCardData ? ensureDetailedViewCard(rawCardData) : null;
   
@@ -61,9 +60,11 @@ const CardDetailView: React.FC<CardDetailViewProps> = ({ cardId, onBack }) => {
   
   const handleDelete = () => {
     // In a real app, add confirmation dialog
-    deleteCard(cardId);
-    toast.success('Card deleted');
-    onBack();
+    if (deleteCard) {
+      deleteCard(cardId);
+      toast.success('Card deleted');
+      onBack();
+    }
   };
   
   const formatDate = (dateString: string) => {
@@ -208,15 +209,15 @@ const CardDetailView: React.FC<CardDetailViewProps> = ({ cardId, onBack }) => {
                 <div className="grid grid-cols-3 gap-2">
                   <div className="text-center p-2 bg-gray-800 rounded">
                     <p className="text-xs text-gray-400">Printable</p>
-                    <p className="font-medium">{cardData.designMetadata?.marketMetadata?.isPrintable || false}</p>
+                    <p className="font-medium">{cardData.designMetadata?.marketMetadata?.isPrintable ? 'Yes' : 'No'}</p>
                   </div>
                   <div className="text-center p-2 bg-gray-800 rounded">
                     <p className="text-xs text-gray-400">For Sale</p>
-                    <p className="font-medium">{cardData.designMetadata?.marketMetadata?.isForSale || false}</p>
+                    <p className="font-medium">{cardData.designMetadata?.marketMetadata?.isForSale ? 'Yes' : 'No'}</p>
                   </div>
                   <div className="text-center p-2 bg-gray-800 rounded">
                     <p className="text-xs text-gray-400">In Catalog</p>
-                    <p className="font-medium">{cardData.designMetadata?.marketMetadata?.includeInCatalog || false}</p>
+                    <p className="font-medium">{cardData.designMetadata?.marketMetadata?.includeInCatalog ? 'Yes' : 'No'}</p>
                   </div>
                 </div>
               </div>

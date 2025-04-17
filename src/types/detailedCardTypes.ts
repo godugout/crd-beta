@@ -1,5 +1,5 @@
 
-import { Card, DesignMetadata } from '@/lib/types/cardTypes';
+import { Card, DesignMetadata, CardRarity } from '@/lib/types/cardTypes';
 
 /**
  * Card type with required fields for detail views
@@ -18,7 +18,7 @@ export interface DetailedViewCard {
   userId: string;
   effects: string[];
   isFavorite: boolean;
-  rarity: string;
+  rarity: CardRarity; // Use CardRarity type instead of string
   designMetadata: DesignMetadata;
 }
 
@@ -38,8 +38,8 @@ export function ensureDetailedViewCard(card: Card): DetailedViewCard {
     updatedAt: card.updatedAt || new Date().toISOString(),
     userId: card.userId || 'unknown-user',
     effects: card.effects || [],
-    isFavorite: card.isFavorite || false,
-    rarity: card.rarity || 'common',
+    isFavorite: Boolean(card.isFavorite),
+    rarity: card.rarity || 'common', // This will be compatible with CardRarity
     designMetadata: card.designMetadata || {
       cardStyle: {
         template: 'classic',
