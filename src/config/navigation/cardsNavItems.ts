@@ -1,6 +1,6 @@
 
 import { NavigationItem } from './types';
-import { Card, Collection, Heart, Plus, Search, Settings, Star } from 'lucide-react';
+import { Card, Collection, Heart, Plus, Search, Settings } from 'lucide-react';
 
 export const cardsNavItems: NavigationItem[] = [
   {
@@ -19,7 +19,7 @@ export const cardsNavItems: NavigationItem[] = [
     title: 'Favorites',
     path: '/cards/favorites',
     icon: Heart,
-    description: 'Cards you've favorited',
+    description: 'Cards you\'ve favorited',
   },
   {
     title: 'Card Designer',

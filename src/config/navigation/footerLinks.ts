@@ -1,7 +1,7 @@
 
-interface FooterSection {
-  title: string;
-  links: { label: string; href: string; }[];
+interface FooterLink {
+  label: string;
+  path: string;
 }
 
 export const footerLinks = {

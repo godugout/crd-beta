@@ -1,67 +1,56 @@
 
-import { BaseCard } from './cardTypes';
-import { User } from './user';
+import { CardRarity } from "@/lib/types";
 
-export type CardRarity = 'common' | 'uncommon' | 'rare' | 'ultra-rare' | 'legendary' | 'one-of-one';
+export { CardRarity };
 
-export interface HotspotData {
+export type EnhancedCard = {
   id: string;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  content: string;
-  type: 'text' | 'link' | 'image' | 'video';
-  visible: boolean;
-}
-
-export interface EnhancedCard extends BaseCard {
-  rarity?: CardRarity; // Make rarity optional to match cardTypes.ts
+  title: string;
+  description?: string;
+  imageUrl?: string;
+  thumbnailUrl?: string;
+  tags?: string[];
+  userId?: string;
+  isPublic?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+  rarity?: CardRarity;
   cardNumber?: string;
   seriesId?: string;
   artistId?: string;
-  artistProfile?: User;
   artistName?: string;
   edition?: number;
   editionSize?: number;
   releaseDate?: string;
   qrCodeData?: string;
-  hotspots?: HotspotData[];
-  marketData?: {
-    price?: number;
-    currency?: string;
-    availableForSale?: boolean;
-    lastSoldPrice?: number;
-    lastSoldDate?: string;
-  };
-}
+  effects?: string[];
+  designMetadata?: any;
+  marketData?: any;
+};
 
-export interface Series {
+export type Series = {
   id: string;
   title: string;
   description: string;
-  coverImageUrl: string;
-  artistId: string;
-  artist?: User;
+  coverImageUrl?: string;
+  artistId?: string;
   createdAt: string;
   updatedAt: string;
-  releaseDate: string;
+  releaseDate?: string;
   totalCards: number;
   isPublished: boolean;
   cardIds: string[];
-  cards?: EnhancedCard[];
-  releaseType: 'standard' | 'limited' | 'exclusive';
-}
+  releaseType?: 'standard' | 'limited' | 'promotional';
+};
 
-export interface Deck {
+export type Deck = {
   id: string;
   name: string;
-  description: string;
-  coverImageUrl: string;
+  description?: string;
+  coverImageUrl?: string;
   ownerId: string;
   createdAt: string;
   updatedAt: string;
   cardIds: string[];
-  cards?: EnhancedCard[];
   isPublic: boolean;
-}
+};
