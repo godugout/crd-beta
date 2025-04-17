@@ -1,8 +1,7 @@
 
 import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import { TeamThemeProvider } from '@/context/ThemeContext';
-import { CardProvider } from '@/context/CardContext';
 import { Toaster } from '@/components/ui/toaster';
 // Import as default since it's now exported as both default and named export
 import mainRoutes, { mainRoutes as namedMainRoutes } from '@/routes/mainRoutes';
@@ -12,39 +11,36 @@ import { collectionRoutes } from '@/routes/collectionRoutes';
 function App() {
   return (
     <TeamThemeProvider>
-      <CardProvider>
-        <BrowserRouter>
-          <Routes>
-            {/* Main routes */}
-            {mainRoutes.map((route, index) => (
-              <Route 
-                key={index}
-                path={route.path}
-                element={route.element}
-              />
-            ))}
-            
-            {/* Card routes */}
-            {cardRoutes.map((route, index) => (
-              <Route 
-                key={`card-${index}`}
-                path={route.path}
-                element={route.element}
-              />
-            ))}
-            
-            {/* Collection routes */}
-            {collectionRoutes.map((route, index) => (
-              <Route 
-                key={`collection-${index}`}
-                path={route.path}
-                element={route.element}
-              />
-            ))}
-          </Routes>
-        </BrowserRouter>
-        <Toaster />
-      </CardProvider>
+      {/* Removed the duplicate CardProvider since it's already in main.tsx */}
+      <Routes>
+        {/* Main routes */}
+        {mainRoutes.map((route, index) => (
+          <Route 
+            key={index}
+            path={route.path}
+            element={route.element}
+          />
+        ))}
+        
+        {/* Card routes */}
+        {cardRoutes.map((route, index) => (
+          <Route 
+            key={`card-${index}`}
+            path={route.path}
+            element={route.element}
+          />
+        ))}
+        
+        {/* Collection routes */}
+        {collectionRoutes.map((route, index) => (
+          <Route 
+            key={`collection-${index}`}
+            path={route.path}
+            element={route.element}
+          />
+        ))}
+      </Routes>
+      <Toaster />
     </TeamThemeProvider>
   );
 }
