@@ -1,9 +1,9 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Card, CardRarity, Collection } from '@/lib/types';
 import { sampleCards } from '@/lib/data/sampleCards';
 import { cardIdToCard } from '@/lib/utils/cardHelpers';
 import { adaptToCard } from '@/lib/adapters/typeAdapters';
+import { toStandardCard } from '@/lib/utils/cardConverters';
 
 /**
  * Props interface for the Card Context
@@ -46,7 +46,7 @@ export const CardContext = createContext<CardContextProps | undefined>(undefined
 export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   // Process sample cards to ensure they all have the required properties
   // and use the correct CardRarity enum
-  const processedSampleCards = sampleCards.map(card => adaptToCard({
+  const processedSampleCards = sampleCards.map(card => toStandardCard({
     ...card,
     isFavorite: card.isFavorite ?? false,
     description: card.description || '',
@@ -90,7 +90,8 @@ export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const addCard = async (cardData: Partial<Card>): Promise<Card> => {
     setLoading(true);
     try {
-      const newCard: Card = {
+      // Use toStandardCard to ensure proper CardRarity enum type
+      const newCard: Card = toStandardCard({
         id: `card-${Date.now()}`,
         title: cardData.title || 'Untitled Card',
         description: cardData.description || '',
@@ -100,11 +101,11 @@ export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         userId: 'user-1',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        rarity: CardRarity.COMMON,
+        rarity: cardData.rarity || CardRarity.COMMON,
         effects: [],
-        isFavorite: cardData.isFavorite ?? false, // Ensure isFavorite is set
+        isFavorite: cardData.isFavorite ?? false,
         ...cardData
-      };
+      });
       
       setCards(prevCards => [...prevCards, newCard]);
       return newCard;

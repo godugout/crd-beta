@@ -25,16 +25,28 @@ export const adaptToEnhancedCard = (data: Partial<Card | EnhancedCard>): Enhance
     tags: data.tags || []
   };
 
+  // Convert edition format for EnhancedCard
+  let editionValue: number | undefined = undefined;
+  if (data.edition !== undefined) {
+    if (typeof data.edition === 'object' && data.edition.number !== undefined) {
+      // Convert Card edition format {number, total} to just number for EnhancedCard
+      editionValue = data.edition.number;
+    } else if (typeof data.edition === 'number') {
+      // Already in the right format for EnhancedCard
+      editionValue = data.edition;
+    } else {
+      // Default
+      editionValue = 1;
+    }
+  }
+
   // Then add EnhancedCard-specific properties
   return {
     ...baseProps,
     views: (data as EnhancedCard).views || 0,
     likes: (data as EnhancedCard).likes || 0,
     shares: (data as EnhancedCard).shares || 0,
-    // If data has edition as an object, convert to number
-    edition: typeof data.edition === 'object' ? 
-      data.edition?.number || 1 : 
-      (data as EnhancedCard).edition || 1,
+    edition: editionValue,
     tags: data.tags || [] // Ensure tags are included
   };
 };
@@ -75,3 +87,4 @@ export const createBasicEnhancedCard = (id: string): EnhancedCard => {
 export const cardToEnhancedCard = (card: Card | Partial<Card>): EnhancedCard => {
   return adaptToEnhancedCard(card);
 };
+

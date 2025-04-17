@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useEnhancedCards } from '@/context/CardEnhancedContext';
@@ -15,6 +14,7 @@ import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { Plus, X, Save, ChevronLeft, ChevronRight, Heart } from 'lucide-react';
 import { ensureEnhancedCard } from '@/lib/utils/cardHelpers';
 import { adaptToCard } from '@/lib/adapters/typeAdapters';
+import { enhancedCardToCard } from '@/lib/utils/cardConverters';
 
 interface DeckBuilderProps {
   initialDeck?: Deck;
@@ -57,7 +57,7 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck }) => {
   );
   
   const handleAddCard = (card: any) => {
-    setSelectedCards(prev => [...prev, card]);
+    setSelectedCards(prev => [...prev, ensureEnhancedCard(card)]);
     toast.success(`Added "${card.title}" to deck`);
   };
   
@@ -123,7 +123,8 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck }) => {
         description: '', 
         effects: [],
         isFavorite: false,
-        rarity: CardRarity.COMMON
+        rarity: CardRarity.COMMON,
+        tags: []
       });
       handleAddCard(ensureEnhancedCard(tempCard));
     }

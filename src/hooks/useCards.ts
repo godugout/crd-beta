@@ -4,6 +4,7 @@ import { CardContext } from '@/context/CardContext';
 import { Card, CardRarity } from '@/lib/types';
 import { sampleCards } from '@/lib/data/sampleCards';
 import { adaptToCard } from '@/lib/adapters/typeAdapters';
+import { toStandardCard } from '@/lib/utils/cardConverters';
 
 /**
  * Hook to access the card context for managing cards
@@ -16,8 +17,8 @@ export function useCards() {
     console.warn('useCards: CardContext not found, using fallback data');
     
     // Ensure sample cards have the required properties
-    // and the correct CardRarity type
-    const processedSampleCards = sampleCards.map(card => adaptToCard({
+    // and the correct CardRarity type using our converter utility
+    const processedSampleCards = sampleCards.map(card => toStandardCard({
       ...card,
       isFavorite: card.isFavorite ?? false,
       description: card.description || '',

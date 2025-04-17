@@ -11,6 +11,7 @@ import { sampleCards } from '@/lib/data/sampleCards';
 import { toast } from '@/hooks/use-toast';
 import { adaptToCard } from '@/lib/adapters/typeAdapters';
 import { DEFAULT_DESIGN_METADATA } from '@/lib/utils/cardDefaults';
+import { toStandardCard } from '@/lib/utils/cardConverters';
 
 interface CardDetailedProps {
   card: Card;
@@ -146,12 +147,14 @@ const CardDetail = () => {
       if (foundCard) {
         console.log('CardDetail: Found card:', foundCard.title, 'with imageUrl:', foundCard.imageUrl);
         
-        const processedCard = adaptToCard({
+        const processedCard = toStandardCard({
           ...foundCard,
           imageUrl: foundCard.imageUrl || FALLBACK_IMAGE,
           thumbnailUrl: foundCard.thumbnailUrl || foundCard.imageUrl || FALLBACK_IMAGE,
           description: foundCard.description || '',
           isFavorite: foundCard.isFavorite ?? false,
+          createdAt: foundCard.createdAt || new Date().toISOString(), 
+          updatedAt: foundCard.updatedAt || new Date().toISOString(),
           rarity: foundCard.rarity || CardRarity.COMMON
         });
         
@@ -161,7 +164,7 @@ const CardDetail = () => {
           const img = new Image();
           img.onerror = () => {
             console.error('CardDetail: Image failed to preload:', processedCard.imageUrl);
-            setResolvedCard(prev => prev ? adaptToCard({ 
+            setResolvedCard(prev => prev ? toStandardCard({ 
               ...prev, 
               imageUrl: FALLBACK_IMAGE,
               thumbnailUrl: FALLBACK_IMAGE,

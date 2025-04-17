@@ -1,9 +1,9 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Card, CardRarity } from '@/lib/types';
-import { EnhancedCard, Deck, Series } from '@/lib/types/enhancedCardTypes';
+import { EnhancedCard, Deck, Series, ReleaseType } from '@/lib/types/enhancedCardTypes';
 import { adaptToCard } from '@/lib/adapters/typeAdapters';
 import { adaptToEnhancedCard, cardToEnhancedCard } from '@/lib/adapters/EnhancedCardAdapter';
+import { toStandardCard, enhancedCardToCard } from '@/lib/utils/cardConverters';
 
 /**
  * Enhanced Card Context Props
@@ -70,7 +70,7 @@ export const EnhancedCardProvider: React.FC<{ children: ReactNode }> = ({ childr
           views: 10,
           likes: 2,
           shares: 1,
-          tags: [] // Added required tags property
+          tags: []
         },
         {
           id: '2',
@@ -87,9 +87,10 @@ export const EnhancedCardProvider: React.FC<{ children: ReactNode }> = ({ childr
           views: 15,
           likes: 5,
           shares: 2,
-          tags: [] // Added required tags property
+          tags: []
         }
       ]);
+      
       setDecks([
         {
           id: 'deck-1',
@@ -102,6 +103,7 @@ export const EnhancedCardProvider: React.FC<{ children: ReactNode }> = ({ childr
           isPublic: true
         }
       ]);
+      
       setSeries([
         {
           id: 'series-1',
@@ -118,6 +120,7 @@ export const EnhancedCardProvider: React.FC<{ children: ReactNode }> = ({ childr
           releaseType: 'standard'
         }
       ]);
+      
       setLoading(false);
     }, 1000);
   }, []);
@@ -137,7 +140,7 @@ export const EnhancedCardProvider: React.FC<{ children: ReactNode }> = ({ childr
   const addCard = async (cardData: Partial<Card>): Promise<Card> => {
     setLoading(true);
     try {
-      const baseCard = adaptToCard({
+      const baseCard = toStandardCard({
         id: `card-${Date.now()}`,
         title: cardData.title || 'Untitled Card',
         description: cardData.description || '',
@@ -153,7 +156,6 @@ export const EnhancedCardProvider: React.FC<{ children: ReactNode }> = ({ childr
         ...cardData
       });
       
-      // Convert to enhanced card for storage
       const enhancedCard = cardToEnhancedCard(baseCard);
       
       setCards(prevCards => [...prevCards, enhancedCard]);
@@ -176,6 +178,13 @@ export const EnhancedCardProvider: React.FC<{ children: ReactNode }> = ({ childr
           return;
         }
 
+        if (updates.rarity && typeof updates.rarity === 'string') {
+          updates = {
+            ...updates,
+            rarity: toStandardCard({ rarity: updates.rarity }).rarity
+          };
+        }
+
         const updatedEnhancedCard = {
           ...cards[cardIndex],
           ...updates,
@@ -187,13 +196,7 @@ export const EnhancedCardProvider: React.FC<{ children: ReactNode }> = ({ childr
 
         setCards(newCards);
         
-        // Convert EnhancedCard to Card for return value
-        const cardToReturn = adaptToCard({
-          ...updatedEnhancedCard,
-          edition: typeof updatedEnhancedCard.edition === 'number' ? 
-            { number: updatedEnhancedCard.edition, total: 1 } : 
-            updatedEnhancedCard.edition
-        });
+        const cardToReturn = enhancedCardToCard(updatedEnhancedCard);
         
         resolve(cardToReturn);
       }, 500);
@@ -273,60 +276,50 @@ export const EnhancedCardProvider: React.FC<{ children: ReactNode }> = ({ childr
   };
 
   const addCardToDeck = async (deckId: string, cardId: string): Promise<boolean> => {
-    return new Promise((resolve) => {
-      setDecks(prevDecks => {
-        const deckIndex = prevDecks.findIndex(deck => deck.id === deckId);
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        const deckIndex = decks.findIndex(deck => deck.id === deckId);
         if (deckIndex === -1) {
-          console.warn(`Deck with ID ${deckId} not found`);
-          return prevDecks;
+          reject(new Error(`Deck not found: ${deckId}`));
+          return;
         }
-
-        const deck = prevDecks[deckIndex];
-        if (deck.cardIds.includes(cardId)) {
-          console.warn(`Card ${cardId} already in deck ${deckId}`);
-          return prevDecks;
-        }
-
-        const updatedDeck: Deck = {
-          ...deck,
-          cardIds: [...deck.cardIds, cardId],
+        
+        const updatedDeck = {
+          ...decks[deckIndex],
+          cardIds: [...decks[deckIndex].cardIds, cardId],
           updatedAt: new Date().toISOString()
         };
-
-        const newDecks = [...prevDecks];
+        
+        const newDecks = [...decks];
         newDecks[deckIndex] = updatedDeck;
+        
+        setDecks(newDecks);
         resolve(true);
-        return newDecks;
-      });
+      }, 500);
     });
   };
 
   const removeCardFromDeck = async (deckId: string, cardId: string): Promise<boolean> => {
-    return new Promise((resolve) => {
-      setDecks(prevDecks => {
-        const deckIndex = prevDecks.findIndex(deck => deck.id === deckId);
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        const deckIndex = decks.findIndex(deck => deck.id === deckId);
         if (deckIndex === -1) {
-          console.warn(`Deck with ID ${deckId} not found`);
-          return prevDecks;
+          reject(new Error(`Deck not found: ${deckId}`));
+          return;
         }
-
-        const deck = prevDecks[deckIndex];
-        if (!deck.cardIds.includes(cardId)) {
-          console.warn(`Card ${cardId} not in deck ${deckId}`);
-          return prevDecks;
-        }
-
-        const updatedDeck: Deck = {
-          ...deck,
-          cardIds: deck.cardIds.filter(id => id !== cardId),
+        
+        const updatedDeck = {
+          ...decks[deckIndex],
+          cardIds: decks[deckIndex].cardIds.filter(id => id !== cardId),
           updatedAt: new Date().toISOString()
         };
-
-        const newDecks = [...prevDecks];
+        
+        const newDecks = [...decks];
         newDecks[deckIndex] = updatedDeck;
+        
+        setDecks(newDecks);
         resolve(true);
-        return newDecks;
-      });
+      }, 500);
     });
   };
 
@@ -338,14 +331,14 @@ export const EnhancedCardProvider: React.FC<{ children: ReactNode }> = ({ childr
           name: seriesData.name || 'Untitled Series',
           description: seriesData.description || '',
           coverImageUrl: seriesData.coverImageUrl || '',
-          artistId: 'artist-1',
+          artistId: seriesData.artistId || 'artist-1',
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
-          releaseDate: new Date().toISOString(),
+          releaseDate: seriesData.releaseDate || new Date().toISOString(),
           totalCards: seriesData.totalCards || 0,
           isPublished: seriesData.isPublished ?? false,
           cardIds: seriesData.cardIds || [],
-          releaseType: seriesData.releaseType || 'standard'
+          releaseType: seriesData.releaseType || 'standard' as ReleaseType
         };
         setSeries(prevSeries => [...prevSeries, newSeries]);
         resolve(newSeries);
@@ -368,10 +361,10 @@ export const EnhancedCardProvider: React.FC<{ children: ReactNode }> = ({ childr
           updatedAt: new Date().toISOString()
         };
 
-        const newSeries = [...seriesItems];
-        newSeries[seriesIndex] = updatedSeries;
+        const newSeriesItems = [...seriesItems];
+        newSeriesItems[seriesIndex] = updatedSeries;
 
-        setSeries(newSeries);
+        setSeries(newSeriesItems);
         resolve(updatedSeries);
       }, 500);
     });
@@ -387,62 +380,50 @@ export const EnhancedCardProvider: React.FC<{ children: ReactNode }> = ({ childr
   };
 
   const addCardToSeries = async (seriesId: string, cardId: string): Promise<boolean> => {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       setTimeout(() => {
         const seriesIndex = seriesItems.findIndex(s => s.id === seriesId);
         if (seriesIndex === -1) {
-          console.warn(`Series with ID ${seriesId} not found`);
-          resolve(false);
+          reject(new Error(`Series not found: ${seriesId}`));
           return;
         }
-
-        const currentSeries = seriesItems[seriesIndex];
-        if (currentSeries.cardIds.includes(cardId)) {
-          console.warn(`Card ${cardId} already in series ${seriesId}`);
-          resolve(false);
-          return;
-        }
-
-        const updatedSeries: Series = {
-          ...currentSeries,
-          cardIds: [...currentSeries.cardIds, cardId],
+        
+        const updatedSeries = {
+          ...seriesItems[seriesIndex],
+          cardIds: [...seriesItems[seriesIndex].cardIds, cardId],
+          totalCards: seriesItems[seriesIndex].totalCards + 1,
           updatedAt: new Date().toISOString()
         };
-
-        const newSeries = [...seriesItems];
-        newSeries[seriesIndex] = updatedSeries;
-        setSeries(newSeries);
+        
+        const newSeriesItems = [...seriesItems];
+        newSeriesItems[seriesIndex] = updatedSeries;
+        
+        setSeries(newSeriesItems);
         resolve(true);
       }, 500);
     });
   };
 
   const removeCardFromSeries = async (seriesId: string, cardId: string): Promise<boolean> => {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       setTimeout(() => {
         const seriesIndex = seriesItems.findIndex(s => s.id === seriesId);
         if (seriesIndex === -1) {
-          console.warn(`Series with ID ${seriesId} not found`);
-          resolve(false);
+          reject(new Error(`Series not found: ${seriesId}`));
           return;
         }
-
-        const currentSeries = seriesItems[seriesIndex];
-        if (!currentSeries.cardIds.includes(cardId)) {
-          console.warn(`Card ${cardId} not in series ${seriesId}`);
-          resolve(false);
-          return;
-        }
-
-        const updatedSeries: Series = {
-          ...currentSeries,
-          cardIds: currentSeries.cardIds.filter(id => id !== cardId),
+        
+        const updatedSeries = {
+          ...seriesItems[seriesIndex],
+          cardIds: seriesItems[seriesIndex].cardIds.filter(id => id !== cardId),
+          totalCards: Math.max(0, seriesItems[seriesIndex].totalCards - 1),
           updatedAt: new Date().toISOString()
         };
-
-        const newSeries = [...seriesItems];
-        newSeries[seriesIndex] = updatedSeries;
-        setSeries(newSeries);
+        
+        const newSeriesItems = [...seriesItems];
+        newSeriesItems[seriesIndex] = updatedSeries;
+        
+        setSeries(newSeriesItems);
         resolve(true);
       }, 500);
     });

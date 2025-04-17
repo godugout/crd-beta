@@ -33,3 +33,4 @@ export const stringToCardRarity = (rarity: string): CardRarity => {
       return CardRarity.COMMON;
   }
 };
+
