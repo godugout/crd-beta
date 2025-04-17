@@ -16,63 +16,155 @@ export function useCards() {
     try {
       setLoading(true);
       
-      // Process sampleCards and ensure they have valid image URLs and all required properties
-      const processedCards = sampleCards.map(card => {
-        // Use our adapter to ensure all required properties exist
-        return adaptToCard(card);
-      });
+      // First try to get data from Supabase
+      console.log('Fetching cards and collections from Supabase...');
       
-      setCards(processedCards);
-
-      // Demo collections
-      const demoCollections = [
-        {
-          id: 'collection-1',
-          name: 'Demo Collection 1',
-          description: 'A sample collection',
-          coverImageUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475',
-          userId: 'user-1',
-          teamId: 'team-1',
-          visibility: 'public' as const,
-          allowComments: true,
-          isPublic: true,
+      // Fetch collections
+      const { data: collectionsData, error: collectionsError } = await supabase
+        .from('collections')
+        .select('*');
+        
+      if (collectionsError) {
+        console.error('Error fetching collections from Supabase:', collectionsError);
+      } else if (collectionsData && collectionsData.length > 0) {
+        console.log(`Fetched ${collectionsData.length} collections from Supabase`);
+        
+        // Process collections
+        const processedCollections = collectionsData.map(collection => ({
+          id: collection.id,
+          name: collection.title,
+          description: collection.description || '',
+          coverImageUrl: collection.cover_image_url || '',
+          userId: collection.owner_id,
+          teamId: collection.team_id,
+          visibility: collection.visibility || 'public',
+          allowComments: collection.allow_comments,
+          isPublic: collection.visibility === 'public',
           cards: [],
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          designMetadata: {},
-          cardIds: ['card-001']
-        },
-        {
-          id: 'collection-2',
-          name: 'Demo Collection 2',
-          description: 'Another sample collection',
-          coverImageUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475',
-          userId: 'user-1',
-          teamId: 'team-1',
-          visibility: 'public' as const,
-          allowComments: true,
-          isPublic: true,
-          cards: [],
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          designMetadata: {},
-          cardIds: ['card-002']
+          createdAt: new Date(collection.created_at).toISOString(),
+          updatedAt: new Date(collection.updated_at).toISOString(),
+          designMetadata: collection.design_metadata || {},
+          cardIds: [],
+        })) as Collection[];
+        
+        setCollections(processedCollections);
+      }
+      
+      // Fetch cards
+      const { data: cardsData, error: cardsError } = await supabase
+        .from('cards')
+        .select('*');
+        
+      if (cardsError) {
+        console.error('Error fetching cards from Supabase:', cardsError);
+      } else if (cardsData && cardsData.length > 0) {
+        console.log(`Fetched ${cardsData.length} cards from Supabase`);
+        
+        // Process cards
+        const processedCards = cardsData.map(card => {
+          const processedCard = {
+            id: card.id,
+            title: card.title,
+            description: card.description || '',
+            imageUrl: card.image_url || '',
+            thumbnailUrl: card.thumbnail_url || card.image_url || '',
+            collectionId: card.collection_id,
+            userId: card.creator_id,
+            teamId: card.team_id,
+            isPublic: card.is_public,
+            tags: card.tags || [],
+            effects: [],
+            rarity: card.rarity || 'common',
+            createdAt: new Date(card.created_at).toISOString(),
+            updatedAt: new Date(card.updated_at).toISOString(),
+            designMetadata: card.design_metadata || {},
+          };
+          return processedCard as Card;
+        });
+        
+        setCards(processedCards);
+        
+        // Update collection cardIds
+        if (processedCards.length > 0 && collections.length > 0) {
+          setCollections(prevCollections => {
+            return prevCollections.map(collection => {
+              const collectionCards = processedCards.filter(card => 
+                card.collectionId === collection.id
+              );
+              return {
+                ...collection,
+                cardIds: collectionCards.map(card => card.id),
+              };
+            });
+          });
         }
-      ];
+        
+        toast({
+          title: "Content loaded",
+          description: `Loaded ${processedCards.length} cards and ${collectionsData?.length || 0} collections`,
+          variant: "default",
+        });
+        
+        return;
+      }
       
-      setCollections(demoCollections);
+      // If Supabase data is empty/unavailable, use sample data as fallback
+      if ((collections.length === 0 && cards.length === 0) || true) {
+        console.log('Using sample data as fallback');
+        
+        // Process sampleCards and ensure they have valid image URLs and all required properties
+        const processedCards = sampleCards.map(card => {
+          // Use our adapter to ensure all required properties exist
+          return adaptToCard(card);
+        });
+        
+        setCards(processedCards);
+
+        // Demo collections
+        const demoCollections = [
+          {
+            id: 'collection-1',
+            name: 'Demo Collection 1',
+            description: 'A sample collection',
+            coverImageUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475',
+            userId: 'user-1',
+            teamId: 'team-1',
+            visibility: 'public' as const,
+            allowComments: true,
+            isPublic: true,
+            cards: [],
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            designMetadata: {},
+            cardIds: ['card-001']
+          },
+          {
+            id: 'collection-2',
+            name: 'Demo Collection 2',
+            description: 'Another sample collection',
+            coverImageUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475',
+            userId: 'user-1',
+            teamId: 'team-1',
+            visibility: 'public' as const,
+            allowComments: true,
+            isPublic: true,
+            cards: [],
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            designMetadata: {},
+            cardIds: ['card-002']
+          }
+        ];
+        
+        setCollections(demoCollections);
+      }
       
-      toast({
-        title: "Cards loaded",
-        description: `Loaded ${processedCards.length} cards`,
-        variant: "default",
-      });
     } catch (err) {
       const error = err as Error;
       console.error('Error fetching cards:', error);
       setError(error);
       toast({
-        title: 'Error fetching cards',
+        title: 'Error fetching content',
         description: error.message,
         variant: 'destructive',
       });
@@ -217,5 +309,6 @@ export function useCards() {
     deleteCard,
     createCollection,
     getCard,
+    isLoading: loading,
   };
 }

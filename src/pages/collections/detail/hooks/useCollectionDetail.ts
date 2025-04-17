@@ -1,11 +1,12 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useCards } from '@/context/CardContext';
 import { toast } from 'sonner';
 import { Card } from '@/lib/types';
+import { supabase } from '@/integrations/supabase/client';
 
 export const useCollectionDetail = (collectionId?: string) => {
-  const { collections, cards, isLoading, updateCard, updateCollection, deleteCollection } = useCards();
+  const { collections, cards, isLoading, updateCard, updateCollection, deleteCollection, fetchCards } = useCards();
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [isAssetGalleryOpen, setIsAssetGalleryOpen] = useState(false);
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
@@ -16,13 +17,62 @@ export const useCollectionDetail = (collectionId?: string) => {
     name: '',
     description: ''
   });
+  const [localLoading, setLocalLoading] = useState(false);
+  
+  // Refresh collection data from Supabase
+  const refreshCollection = useCallback(async () => {
+    if (!collectionId) return;
+    
+    setLocalLoading(true);
+    try {
+      console.log(`Refreshing collection data for ID: ${collectionId}`);
+      
+      // Fetch directly from Supabase to bypass any caching
+      const { data: collectionData, error: collectionError } = await supabase
+        .from('collections')
+        .select('*')
+        .eq('id', collectionId)
+        .single();
+        
+      if (collectionError) {
+        console.error('Error fetching collection:', collectionError);
+        toast.error('Failed to refresh collection data');
+        return;
+      }
+      
+      if (collectionData) {
+        console.log('Fetched collection data:', collectionData);
+        
+        // Fetch cards for this collection
+        const { data: cardsData, error: cardsError } = await supabase
+          .from('cards')
+          .select('*')
+          .eq('collection_id', collectionId);
+          
+        if (cardsError) {
+          console.error('Error fetching collection cards:', cardsError);
+        } else {
+          console.log(`Fetched ${cardsData?.length || 0} cards for collection`);
+        }
+        
+        // Refresh all cards and collections in the app context
+        await fetchCards();
+      } else {
+        console.error('No collection data returned');
+      }
+    } catch (err) {
+      console.error('Error in refreshCollection:', err);
+    } finally {
+      setLocalLoading(false);
+    }
+  }, [collectionId, fetchCards]);
   
   // Find the collection by ID
   const collection = collections.find(c => c.id === collectionId);
   
   // Get cards that belong to this collection
   const collectionCards = collection 
-    ? cards.filter(card => collection.cardIds?.includes(card.id)) 
+    ? cards.filter(card => card.collectionId === collectionId) 
     : [];
 
   // Filter cards based on search term
@@ -102,7 +152,7 @@ export const useCollectionDetail = (collectionId?: string) => {
     collection,
     collectionCards,
     filteredCards,
-    isLoading,
+    isLoading: isLoading || localLoading,
     viewMode,
     setViewMode,
     isAssetGalleryOpen,
@@ -121,6 +171,7 @@ export const useCollectionDetail = (collectionId?: string) => {
     handleUpdateCollection,
     handleDeleteCollection,
     handleShareCollection,
-    handleCardClick
+    handleCardClick,
+    refreshCollection
   };
 };

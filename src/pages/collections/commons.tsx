@@ -20,6 +20,33 @@ const CommonsCardsPage = () => {
   } | null>(null);
   const navigate = useNavigate();
 
+  // Check if the collection exists when component mounts or when result changes
+  useEffect(() => {
+    if (result?.collectionId) {
+      // Verify the collection exists in the database
+      const checkCollection = async () => {
+        try {
+          const { data, error } = await supabase
+            .from('collections')
+            .select('id, title')
+            .eq('id', result.collectionId)
+            .single();
+            
+          if (error || !data) {
+            console.error('Collection verification failed:', error || 'No data returned');
+            toast.error('Created collection could not be verified');
+          } else {
+            console.log('Collection verified:', data);
+          }
+        } catch (err) {
+          console.error('Error checking collection:', err);
+        }
+      };
+      
+      checkCollection();
+    }
+  }, [result]);
+
   const handleGenerateCommonsCards = async () => {
     setIsLoading(true);
     setResult(null);
@@ -68,7 +95,8 @@ const CommonsCardsPage = () => {
 
   const handleViewCollection = () => {
     if (result?.collectionId) {
-      navigate(`/collections/${result.collectionId}`);
+      // Force a refresh of the collections data in the destination page
+      navigate(`/collections/${result.collectionId}?refresh=true`);
     }
   };
 

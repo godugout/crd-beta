@@ -1,6 +1,6 @@
 
-import React from 'react';
-import { useParams, Link } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { useParams, Link, useSearchParams } from 'react-router-dom';
 import PageLayout from '@/components/navigation/PageLayout';
 import { Button } from '@/components/ui/button';
 import { useCollectionDetail } from './hooks/useCollectionDetail';
@@ -8,9 +8,14 @@ import { useCollectionHeader } from './CollectionHeader';
 import CollectionContent from './CollectionContent';
 import { EditDialog, DeleteDialog, AssetGalleryDialog } from './CollectionDialogs';
 import { LoadingState } from '@/components/ui/loading-state';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 const CollectionDetail = () => {
   const { id } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
+  const shouldRefresh = searchParams.get('refresh') === 'true';
+  
   const {
     collection,
     collectionCards,
@@ -34,11 +39,47 @@ const CollectionDetail = () => {
     handleUpdateCollection,
     handleDeleteCollection,
     handleShareCollection,
-    handleCardClick
+    handleCardClick,
+    refreshCollection
   } = useCollectionDetail(id);
 
+  // Refresh collection data when the refresh param is present
+  useEffect(() => {
+    if (shouldRefresh && id && !isLoading) {
+      console.log('Refreshing collection data due to refresh parameter');
+      refreshCollection();
+    }
+  }, [shouldRefresh, id, refreshCollection, isLoading]);
+  
   // Debug log
-  console.log('CollectionDetail rendering with collection:', collection?.name);
+  useEffect(() => {
+    if (id && !collection && !isLoading) {
+      console.log('Collection not found, checking Supabase directly');
+      // Check if collection exists in Supabase directly
+      const checkCollection = async () => {
+        try {
+          const { data, error } = await supabase
+            .from('collections')
+            .select('*')
+            .eq('id', id)
+            .single();
+            
+          if (error) {
+            console.error('Direct Supabase check failed:', error);
+          } else if (data) {
+            console.log('Collection exists in Supabase but not in state:', data);
+            toast.info('Collection found in database, but couldn\'t be loaded. Try refreshing the page.');
+          } else {
+            console.log('Collection not found in Supabase');
+          }
+        } catch (err) {
+          console.error('Error in direct check:', err);
+        }
+      };
+      
+      checkCollection();
+    }
+  }, [id, collection, isLoading]);
   
   if (isLoading) {
     return (
