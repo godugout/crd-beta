@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { useParams, Link, useSearchParams } from 'react-router-dom';
 import PageLayout from '@/components/navigation/PageLayout';
 import { Button } from '@/components/ui/button';
@@ -10,11 +10,13 @@ import { EditDialog, DeleteDialog, AssetGalleryDialog } from './CollectionDialog
 import { LoadingState } from '@/components/ui/loading-state';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useCards } from '@/context/CardContext';
 
 const CollectionDetail = () => {
   const { id } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
   const shouldRefresh = searchParams.get('refresh') === 'true';
+  const { refreshCards } = useCards(); // Get refreshCards from context
   
   const {
     collection,
@@ -43,13 +45,36 @@ const CollectionDetail = () => {
     refreshCollection
   } = useCollectionDetail(id);
 
+  // Custom event listener for collection refresh
+  useEffect(() => {
+    const handleCollectionRefreshed = (event: Event) => {
+      const customEvent = event as CustomEvent;
+      if (customEvent.detail?.collectionId === id) {
+        console.log('Collection refresh event detected, refreshing data');
+        if (refreshCards) {
+          refreshCards();
+        }
+      }
+    };
+
+    window.addEventListener('collection-refreshed', handleCollectionRefreshed);
+    return () => {
+      window.removeEventListener('collection-refreshed', handleCollectionRefreshed);
+    };
+  }, [id, refreshCards]);
+
   // Refresh collection data when the refresh param is present
   useEffect(() => {
     if (shouldRefresh && id && !isLoading) {
       console.log('Refreshing collection data due to refresh parameter');
       refreshCollection();
+      
+      // Also trigger a global cards refresh if available
+      if (refreshCards) {
+        refreshCards();
+      }
     }
-  }, [shouldRefresh, id, refreshCollection, isLoading]);
+  }, [shouldRefresh, id, refreshCollection, isLoading, refreshCards]);
   
   // Debug log
   useEffect(() => {
@@ -81,6 +106,7 @@ const CollectionDetail = () => {
     }
   }, [id, collection, isLoading]);
   
+  // Rest of component stays the same
   if (isLoading) {
     return (
       <PageLayout title="Loading Collection..." description="Please wait">

@@ -10,16 +10,16 @@ export interface CardContextType {
   collections: Collection[];
   isLoading: boolean;
   getCard: (id: string) => Card | undefined;
-  getCardById: (id: string) => Card | undefined; // Added this method
-  addCard: (card: Partial<Card>) => Promise<Card>; // Changed to accept Partial<Card>
+  getCardById: (id: string) => Card | undefined; 
+  addCard: (card: Partial<Card>) => Promise<Card>; 
   updateCard: (id: string, cardData: Partial<Card>) => Promise<Card>;
   deleteCard: (id: string) => Promise<boolean>;
-  addCollection: (collection: Partial<Collection>) => Promise<Collection>; // Changed to accept Partial<Collection>
+  addCollection: (collection: Partial<Collection>) => Promise<Collection>; 
   updateCollection: (id: string, collectionData: Partial<Collection>) => Promise<Collection>;
   deleteCollection: (id: string) => Promise<boolean>;
   addCardToCollection: (cardId: string, collectionId: string) => Promise<Collection>;
   removeCardFromCollection: (cardId: string, collectionId: string) => Promise<Collection>;
-  refreshCards: () => Promise<void>;
+  refreshCards: () => Promise<void>; // This should be included in the interface
 }
 
 const CardContext = createContext<CardContextType>({

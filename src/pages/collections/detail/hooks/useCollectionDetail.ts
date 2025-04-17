@@ -6,7 +6,7 @@ import { Card } from '@/lib/types';
 import { supabase } from '@/integrations/supabase/client';
 
 export const useCollectionDetail = (collectionId?: string) => {
-  const { collections, cards, isLoading, updateCard, updateCollection, deleteCollection, fetchCards } = useCards();
+  const { collections, cards, isLoading, updateCard, updateCollection, deleteCollection } = useCards();
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [isAssetGalleryOpen, setIsAssetGalleryOpen] = useState(false);
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
@@ -55,8 +55,16 @@ export const useCollectionDetail = (collectionId?: string) => {
           console.log(`Fetched ${cardsData?.length || 0} cards for collection`);
         }
         
-        // Refresh all cards and collections in the app context
-        await fetchCards();
+        // Since we don't have access to fetchCards directly, we'll use a workaround
+        // We'll refresh the page which will cause the cards to be fetched again
+        if (typeof window !== 'undefined') {
+          // Instead of triggering a full page refresh, we'll dispatch a custom event
+          // that can be listened for in the parent component
+          const refreshEvent = new CustomEvent('collection-refreshed', {
+            detail: { collectionId, timestamp: new Date().getTime() }
+          });
+          window.dispatchEvent(refreshEvent);
+        }
       } else {
         console.error('No collection data returned');
       }
@@ -65,7 +73,7 @@ export const useCollectionDetail = (collectionId?: string) => {
     } finally {
       setLocalLoading(false);
     }
-  }, [collectionId, fetchCards]);
+  }, [collectionId]);
   
   // Find the collection by ID
   const collection = collections.find(c => c.id === collectionId);
