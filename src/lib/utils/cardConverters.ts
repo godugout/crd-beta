@@ -54,10 +54,12 @@ export const toStandardCard = (cardData: any): Card => {
   
   // Ensure edition is in correct format
   const edition = cardData.edition ? toCardEdition(cardData.edition) : undefined;
-  
-  // Ensure required fields are present
+
+  // Ensure required fields are present with proper default values
   return adaptToCard({
     ...cardData,
+    id: cardData.id || `card-${Date.now()}`,
+    title: cardData.title || 'Untitled Card',
     rarity,
     edition,
     createdAt: cardData.createdAt || new Date().toISOString(),
@@ -66,6 +68,8 @@ export const toStandardCard = (cardData: any): Card => {
     effects: cardData.effects || [],
     tags: cardData.tags || [],
     isFavorite: cardData.isFavorite ?? false,
-    userId: cardData.userId || 'anonymous'
+    userId: cardData.userId || 'anonymous',
+    imageUrl: cardData.imageUrl || '',
+    thumbnailUrl: cardData.thumbnailUrl || cardData.imageUrl || ''
   });
 };

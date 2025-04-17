@@ -1,76 +1,15 @@
 
-import { Card, CardRarity } from '@/lib/types';
+import { Card } from '@/lib/types';
 import { EnhancedCard } from '@/lib/types/enhancedCardTypes';
 
 /**
- * Adapter to convert any object to an EnhancedCard
- * 
- * @param data Source data to adapt
- * @returns EnhancedCard with all required properties
+ * Adapts a standard Card to an EnhancedCard format
+ * @param card Standard Card to convert
+ * @returns An EnhancedCard with all necessary properties
  */
-export const adaptToEnhancedCard = (data: Partial<Card | EnhancedCard>): EnhancedCard => {
-  // First ensure it has all the base Card properties
-  const baseProps = {
-    id: data.id || `enhanced-${Date.now()}`,
-    title: data.title || 'Untitled Card',
-    description: data.description || '',
-    imageUrl: data.imageUrl || '',
-    thumbnailUrl: data.thumbnailUrl || data.imageUrl || '',
-    userId: data.userId || 'anonymous',
-    createdAt: data.createdAt || new Date().toISOString(),
-    updatedAt: data.updatedAt || new Date().toISOString(),
-    effects: data.effects || [],
-    isFavorite: data.isFavorite !== undefined ? data.isFavorite : false,
-    rarity: data.rarity || CardRarity.COMMON,
-    tags: data.tags || []
-  };
-
-  // Convert edition format for EnhancedCard
-  let editionValue: number | undefined = undefined;
-  if (data.edition !== undefined) {
-    if (typeof data.edition === 'object' && data.edition.number !== undefined) {
-      // Convert Card edition format {number, total} to just number for EnhancedCard
-      editionValue = data.edition.number;
-    } else if (typeof data.edition === 'number') {
-      // Already in the right format for EnhancedCard
-      editionValue = data.edition;
-    } else {
-      // Default
-      editionValue = 1;
-    }
-  }
-
-  // Then add EnhancedCard-specific properties
+export const adaptToEnhancedCard = (card: Card): EnhancedCard => {
   return {
-    ...baseProps,
-    views: (data as EnhancedCard).views || 0,
-    likes: (data as EnhancedCard).likes || 0,
-    shares: (data as EnhancedCard).shares || 0,
-    edition: editionValue,
-    tags: data.tags || [] // Ensure tags are included
-  };
-};
-
-/**
- * Create a basic enhanced card with minimum required properties
- * 
- * @param id Card ID
- * @returns EnhancedCard with default values
- */
-export const createBasicEnhancedCard = (id: string): EnhancedCard => {
-  return {
-    id,
-    title: `Card ${id.slice(-4)}`,
-    description: '', // Required property
-    imageUrl: '',
-    thumbnailUrl: '', // Required property
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    userId: 'anonymous',
-    effects: [],
-    isFavorite: false,
-    tags: [], // Added required tags property
-    rarity: CardRarity.COMMON,
+    ...card,
     views: 0,
     likes: 0,
     shares: 0
@@ -78,13 +17,12 @@ export const createBasicEnhancedCard = (id: string): EnhancedCard => {
 };
 
 /**
- * Convert a Card to an EnhancedCard
- * For backwards compatibility
- * 
- * @param card Card to convert
- * @returns Enhanced version of the card
+ * Type guard to check if an object is a valid EnhancedCard
  */
-export const cardToEnhancedCard = (card: Card | Partial<Card>): EnhancedCard => {
-  return adaptToEnhancedCard(card);
+export const isEnhancedCard = (obj: any): obj is EnhancedCard => {
+  return obj && 
+    typeof obj === 'object' && 
+    typeof obj.id === 'string' && 
+    typeof obj.title === 'string' && 
+    Array.isArray(obj.effects);
 };
-

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import PageLayout from '@/components/navigation/PageLayout';
@@ -146,32 +147,37 @@ const CardDetail = () => {
     if (foundCard) {
       console.log('CardDetail: Found card:', foundCard.title, 'with imageUrl:', foundCard.imageUrl);
       
+      // Ensure card rarity is a proper enum value
       const rarityValue = ensureCardRarity(foundCard.rarity);
       
-      const processedCard = toStandardCard({
+      // Use toStandardCard to ensure all required properties are present
+      const standardCard = toStandardCard({
         ...foundCard,
         imageUrl: foundCard.imageUrl || FALLBACK_IMAGE,
         thumbnailUrl: foundCard.thumbnailUrl || foundCard.imageUrl || FALLBACK_IMAGE,
         description: foundCard.description || '',
         isFavorite: foundCard.isFavorite ?? false,
+        // Ensure createdAt and updatedAt are present and correctly formatted
         createdAt: foundCard.createdAt || new Date().toISOString(), 
         updatedAt: foundCard.updatedAt || new Date().toISOString(),
         rarity: rarityValue,
+        // Ensure userId is present
+        userId: foundCard.userId || 'anonymous'
       });
       
-      setResolvedCard(processedCard);
+      setResolvedCard(standardCard);
       
-      if (processedCard.imageUrl && processedCard.imageUrl !== FALLBACK_IMAGE) {
+      if (standardCard.imageUrl && standardCard.imageUrl !== FALLBACK_IMAGE) {
         const img = new Image();
         img.onerror = () => {
-          console.error('CardDetail: Image failed to preload:', processedCard.imageUrl);
-          setResolvedCard(prev => prev ? toStandardCard({ 
-            ...prev, 
+          console.error('CardDetail: Image failed to preload:', standardCard.imageUrl);
+          setResolvedCard(prev => prev ? {
+            ...prev,
             imageUrl: FALLBACK_IMAGE,
             thumbnailUrl: FALLBACK_IMAGE,
-          }) : null);
+          } : null);
         };
-        img.src = processedCard.imageUrl;
+        img.src = standardCard.imageUrl;
       }
     } else {
       console.error('CardDetail: Card not found at all for ID:', id);
@@ -245,8 +251,10 @@ const CardDetail = () => {
         
         <RelatedCards 
           cards={sampleCards.filter(card => card.id !== resolvedCard?.id).map(card => {
+            // Ensure rarity is a proper enum value
             const rarityValue = ensureCardRarity(card.rarity);
             
+            // Use toStandardCard to ensure all required properties are present
             return toStandardCard({
               ...card,
               rarity: rarityValue
