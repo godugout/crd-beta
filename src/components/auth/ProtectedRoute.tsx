@@ -1,79 +1,59 @@
 
 import React from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { UserPermission } from '@/lib/types';
-import { usePermissions } from '@/hooks/usePermissions';
-import { Loader } from 'lucide-react';
-import { logger } from '@/lib/monitoring/logger';
+import LoadingSpinner from '@/components/ui/loading-spinner';
 
 interface ProtectedRouteProps {
-  children: React.ReactNode;
-  requiredPermission?: UserPermission;
-  adminOnly?: boolean;
-  redirectTo?: string;
+  requiredRole?: string;
+  redirectPath?: string;
+  children?: React.ReactNode;
 }
 
-export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
-  children,
-  requiredPermission,
-  adminOnly = false,
-  redirectTo = '/auth'
+/**
+ * A wrapper component for routes that need authentication
+ * or specific user roles to access
+ */
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
+  requiredRole,
+  redirectPath = '/login',
+  children
 }) => {
-  const auth = useAuth();
-  // Safely access isAuthenticated property with fallback
-  const isAuthenticated = auth.isAuthenticated ?? !!auth.user;
-  const isLoading = 'loading' in auth ? auth.loading : auth.isLoading; // Handle both property names
-  const { user } = auth;
-  const { hasPermission, isAdmin } = usePermissions();
   const location = useLocation();
-
-  // Track access attempts for monitoring
-  React.useEffect(() => {
-    if (user) {
-      logger.info('Protected route access', { 
-        context: { 
-          path: location.pathname,
-          userId: user.id,
-          requiredPermission,
-          adminOnly
-        }
-      });
-    }
-  }, [location.pathname, user, requiredPermission, adminOnly]);
-
+  const { user, isLoading, isAuthenticated } = useAuth();
+  
+  // Show loading state while auth status is being determined
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <Loader className="animate-spin h-8 w-8 text-primary" />
+      <div className="flex items-center justify-center h-screen">
+        <LoadingSpinner size="lg" />
+        <span className="ml-2 text-lg font-medium">Authenticating...</span>
       </div>
     );
   }
-
+  
+  // Redirect if user is not authenticated
   if (!isAuthenticated) {
-    logger.info('Unauthorized access attempt', { context: { path: location.pathname } });
-    return <Navigate to={redirectTo} replace state={{ from: location }} />;
+    return <Navigate to={redirectPath} state={{ from: location }} replace />;
   }
-
-  if (adminOnly && !isAdmin()) {
-    logger.warn('Non-admin attempted to access admin route', { 
-      context: { path: location.pathname, userId: user?.id }
-    });
-    return <Navigate to="/unauthorized" replace />;
+  
+  // Check if a specific role is required
+  if (requiredRole && user) {
+    const hasRequiredRole = user.role === requiredRole;
+    
+    // Role check failed, redirect to unauthorized or home
+    if (!hasRequiredRole) {
+      return <Navigate to="/unauthorized" replace />;
+    }
   }
-
-  if (requiredPermission && !hasPermission(requiredPermission)) {
-    logger.warn('User lacks required permission', { 
-      context: { 
-        path: location.pathname, 
-        userId: user?.id,
-        requiredPermission
-      }
-    });
-    return <Navigate to="/unauthorized" replace />;
+  
+  // Fixed the Boolean issue by using a boolean primitive
+  if (Boolean(process.env.MAINTENANCE_MODE) === true) {
+    return <Navigate to="/maintenance" replace />;
   }
-
-  return <>{children}</>;
+  
+  // Authentication successful, render the protected content
+  return children ? <>{children}</> : <Outlet />;
 };
 
 export default ProtectedRoute;

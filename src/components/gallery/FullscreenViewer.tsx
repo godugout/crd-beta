@@ -3,7 +3,7 @@ import React from 'react';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCards } from '@/hooks/useCards';
-import CardViewer from '@/components/cards/CardViewer';
+import CardViewer from '@/components/card-viewer/CardViewer';
 import { Card } from '@/lib/types';
 
 interface FullscreenViewerProps {
@@ -34,7 +34,7 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({
         {card ? (
           <CardViewer 
             card={card}
-            isFullscreen={true}
+            isFlipped={false}
             activeEffects={card.effects || []}
             onShare={onShare}
             onClose={onClose}

@@ -1,5 +1,5 @@
 
-import { Card as BaseCard } from '../types';
+import { Card } from './card';
 
 export enum CardRarity {
   COMMON = 'common',
@@ -10,13 +10,20 @@ export enum CardRarity {
   MYTHIC = 'mythic'
 }
 
-export interface EnhancedCard extends BaseCard {
+/**
+ * EnhancedCard with additional properties, maintaining compatibility
+ * with the main Card type but allowing for specialized usage
+ */
+export interface EnhancedCard extends Card {
   cardNumber?: string;
   seriesId?: string;
   artistId?: string;
   artistName?: string;
-  edition?: number;
   editionSize?: number;
+  edition?: {
+    number: number;
+    total: number;
+  };
   releaseDate?: string;
   qrCodeData?: string;
   marketData?: {

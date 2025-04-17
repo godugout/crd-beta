@@ -1,18 +1,19 @@
 
 import React, { createContext, useState, useContext, ReactNode } from 'react';
 import { Card, Collection } from '@/lib/types';
+import { adaptToCard } from '@/lib/adapters/typeAdapters';
 
 interface Deck {
   id: string;
   name: string;
   description?: string;
-  cards: Card[];
+  cards: Card[];         // Cards in the deck
   createdAt: string;
   updatedAt: string;
   coverImageUrl?: string;
-  cardIds?: string[];
-  isPublic?: boolean;
-  ownerId: string;
+  cardIds?: string[];    // Added for compatibility
+  isPublic?: boolean;    // Added for compatibility
+  ownerId: string;       // Required in EnhancedCardContext
 }
 
 interface Series {
@@ -28,6 +29,8 @@ interface Series {
   totalCards?: number;
   isPublished?: boolean;
   artistId?: string;
+  releaseDate?: string;
+  releaseType?: 'standard' | 'limited' | 'promotional' | 'exclusive';
 }
 
 export interface EnhancedCardContextProps {
@@ -97,7 +100,7 @@ export const EnhancedCardProvider: React.FC<{ children: ReactNode }> = ({ childr
   };
 
   const addCard = async (cardData: Partial<Card>): Promise<Card> => {
-    const newCard: Card = {
+    const newCard: Card = adaptToCard({
       id: `card-${Date.now()}`,
       title: cardData.title || 'Untitled Card',
       description: cardData.description || '',
@@ -108,7 +111,7 @@ export const EnhancedCardProvider: React.FC<{ children: ReactNode }> = ({ childr
       updatedAt: new Date().toISOString(),
       effects: [],
       ...cardData
-    };
+    });
     setCards(prev => [...prev, newCard]);
     return newCard;
   };
@@ -184,6 +187,10 @@ export const EnhancedCardProvider: React.FC<{ children: ReactNode }> = ({ childr
       cards: deckData.cards || [],
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
+      ownerId: deckData.ownerId || 'user-1', // Add required ownerId
+      coverImageUrl: deckData.coverImageUrl,
+      cardIds: deckData.cardIds,
+      isPublic: deckData.isPublic
     };
     setDecks(prev => [...prev, newDeck]);
     return newDeck;
@@ -253,6 +260,8 @@ export const EnhancedCardProvider: React.FC<{ children: ReactNode }> = ({ childr
       artistId: seriesData.artistId || '',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
+      releaseDate: seriesData.releaseDate,
+      releaseType: seriesData.releaseType
     };
     setSeries(prev => [...prev, newSeries]);
     return newSeries;

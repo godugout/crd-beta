@@ -3,6 +3,7 @@ import { useContext } from 'react';
 import { CardContext } from '@/context/CardContext';
 import { Card, CardRarity } from '@/lib/types';
 import { sampleCards } from '@/lib/data/sampleCards';
+import { adaptToCard } from '@/lib/adapters/typeAdapters';
 
 /**
  * Hook to access the card context for managing cards
@@ -23,34 +24,40 @@ export function useCards() {
       collections: [],
       fetchCards: async () => {},
       fetchCollections: async () => {},
-      addCard: async (data: Partial<Card>): Promise<Card> => ({ 
-        id: `fallback-${Date.now()}`, 
-        title: 'Fallback Card',
-        description: '', 
-        imageUrl: '',
-        thumbnailUrl: '',
-        tags: [],
-        userId: '',
-        createdAt: new Date().toISOString(), 
-        updatedAt: new Date().toISOString(), 
-        rarity: CardRarity.COMMON,
-        effects: [],
-        designMetadata: {}
-      }),
-      updateCard: async () => ({ 
-        id: `fallback-${Date.now()}`, 
-        title: 'Fallback Card', 
-        description: '', 
-        imageUrl: '',
-        thumbnailUrl: '',
-        tags: [],
-        userId: '',
-        createdAt: new Date().toISOString(), 
-        updatedAt: new Date().toISOString(), 
-        rarity: CardRarity.COMMON,
-        effects: [],
-        designMetadata: {}
-      }),
+      addCard: async (data: Partial<Card>): Promise<Card> => {
+        const card = adaptToCard({
+          id: `fallback-${Date.now()}`, 
+          title: 'Fallback Card',
+          description: '', 
+          imageUrl: '',
+          thumbnailUrl: '',
+          tags: [],
+          userId: '',
+          createdAt: new Date().toISOString(), 
+          updatedAt: new Date().toISOString(), 
+          rarity: CardRarity.COMMON,
+          effects: [],
+          designMetadata: {}
+        });
+        return { ...card, ...data };
+      },
+      updateCard: async (id: string, data: Partial<Card>): Promise<Card> => {
+        const card = sampleCards.find(card => card.id === id) || adaptToCard({
+          id,
+          title: 'Fallback Card', 
+          description: '', 
+          imageUrl: '',
+          thumbnailUrl: '',
+          tags: [],
+          userId: '',
+          createdAt: new Date().toISOString(), 
+          updatedAt: new Date().toISOString(), 
+          rarity: CardRarity.COMMON,
+          effects: [],
+          designMetadata: {}
+        });
+        return { ...card, ...data };
+      },
       deleteCard: async () => true,
       toggleFavorite: () => {},
       getCardById: (id: string) => sampleCards.find(card => card.id === id),

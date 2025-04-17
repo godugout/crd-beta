@@ -27,9 +27,8 @@ export { ROLE_PERMISSIONS, UserRole, CardRarity };
 // Re-export types with explicit type keyword for TypeScript modules
 export type { Card, Comment, Reaction, User, UserPermission, DesignMetadata, Collection };
 
-// Make sure OaklandMemoryData is properly defined without conflicting with JsonValue
+// Define OaklandMemoryData without conflicting with JsonValue
 export interface OaklandMemoryData {
-  [key: string]: JsonValue;
   title: string;
   description: string;
   date?: string;
@@ -43,4 +42,6 @@ export interface OaklandMemoryData {
   imageUrl?: string;
   historicalContext?: string;
   personalSignificance?: string;
+  // Allow additional properties of string type
+  [key: string]: string | string[] | undefined;
 }

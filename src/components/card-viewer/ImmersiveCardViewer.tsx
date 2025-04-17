@@ -5,7 +5,7 @@ import { Canvas } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
 import Card3DRenderer from './Card3DRenderer';
 import { useToast } from '@/hooks/use-toast';
-import { adaptCard } from '@/lib/adapters/typeAdapters';
+import { adaptToCard } from '@/lib/adapters/typeAdapters';
 
 // Define fallback constants
 const FALLBACK_IMAGE_URL = 'https://images.unsplash.com/photo-1518770660439-4636190af475';
@@ -52,7 +52,7 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
-  const [processedCard, setProcessedCard] = useState<any>(null);
+  const [processedCard, setProcessedCard] = useState<Card | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   
   // Convert card to compatible format for Card3DRenderer
@@ -61,7 +61,7 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
     
     try {
       // Make sure the card has the required properties
-      const cardWithDefaults = adaptCard(card);
+      const cardWithDefaults = adaptToCard(card);
 
       // Ensure we have valid image URL
       if (!cardWithDefaults.imageUrl || cardWithDefaults.imageUrl === 'undefined') {
@@ -95,7 +95,7 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
     } catch (error) {
       console.error("Error during card processing:", error);
       // Create a minimal valid card with fallback image
-      const fallbackCard = adaptCard({
+      const fallbackCard = adaptToCard({
         ...card,
         imageUrl: FALLBACK_IMAGE_URL,
         thumbnailUrl: FALLBACK_IMAGE_URL,

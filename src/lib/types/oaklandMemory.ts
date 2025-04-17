@@ -1,13 +1,8 @@
 
-import { JsonValue } from './index';
-
 /**
  * OaklandMemoryData interface for storing Oakland related memory data
- * Now properly compatible with JsonValue index signature
  */
 export interface OaklandMemoryData {
-  [key: string]: JsonValue | string | string[] | undefined;
-  
   title: string;
   description: string;
   date?: string;
@@ -21,4 +16,6 @@ export interface OaklandMemoryData {
   imageUrl?: string;
   historicalContext?: string;
   personalSignificance?: string;
+  // Allow additional properties
+  [key: string]: string | string[] | undefined;
 }

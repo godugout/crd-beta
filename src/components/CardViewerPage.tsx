@@ -2,11 +2,12 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useCards } from '@/hooks/useCards';
-import CardViewer from '@/components/cards/CardViewer';
+import CardViewer from '@/components/card-viewer/CardViewer';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import PageLayout from '@/components/navigation/PageLayout';
 import { toast } from 'sonner';
+import { adaptToCard } from '@/lib/adapters/typeAdapters';
 
 const CardViewerPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -17,15 +18,18 @@ const CardViewerPage = () => {
   const card = id ? getCardById(id) : undefined;
   const cardIndex = card ? cards.findIndex(c => c.id === card.id) : -1;
   
-  // Helper to safely get string properties
-  const getStringProp = (value: any): string => {
-    return typeof value === 'string' ? value : '';
+  // Helper to safely extract properties from designMetadata
+  const getCardProperty = (property: string, fallback: string = ''): string => {
+    if (!card) return fallback;
+    if (card[property as keyof typeof card]) return card[property as keyof typeof card] as string;
+    if (card.designMetadata?.[property]) return card.designMetadata[property] as string;
+    return fallback;
   };
   
   // Safely extract properties for display
-  const cardPlayer = card ? getStringProp(card.player || '') : '';
-  const cardTeam = card ? getStringProp(card.team || '') : '';
-  const cardYear = card ? getStringProp(card.year || '') : '';
+  const cardPlayer = getCardProperty('player', '');
+  const cardTeam = getCardProperty('team', '');
+  const cardYear = getCardProperty('year', '');
   
   // Handle keyboard navigation
   useEffect(() => {
@@ -92,6 +96,8 @@ const CardViewerPage = () => {
     toast.info('Card snapshot feature coming soon');
   };
   
+  const processedCard = adaptToCard(card);
+  
   return (
     <>
       <PageLayout
@@ -103,9 +109,9 @@ const CardViewerPage = () => {
           <div className="flex flex-col md:flex-row md:items-start gap-8">
             <div className="w-full md:w-2/3 mx-auto md:mx-0 max-w-xl relative">
               <CardViewer 
-                card={card}
+                card={processedCard}
                 isFlipped={false}
-                activeEffects={card.effects || []}
+                activeEffects={processedCard.effects || []}
                 onShare={handleShare}
                 onCapture={handleCapture}
                 onBack={() => navigate('/')}
@@ -184,12 +190,12 @@ const CardViewerPage = () => {
         </div>
       </PageLayout>
       
-      {fullscreen && (
+      {fullscreen && processedCard && (
         <div className="fixed inset-0 z-50 bg-black">
           <CardViewer
-            card={card}
+            card={processedCard}
             isFlipped={false}
-            activeEffects={card.effects || []}
+            activeEffects={processedCard.effects || []}
             isFullscreen={true}
             onShare={handleShare}
             onCapture={handleCapture}

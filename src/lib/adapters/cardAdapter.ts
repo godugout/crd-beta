@@ -1,59 +1,61 @@
 
-import { Card, CardRarity } from '@/lib/types';
-import { DEFAULT_DESIGN_METADATA } from '@/lib/utils/cardDefaults';
+import { Card } from '@/lib/types';
+import { CardRarity } from '@/lib/types/cardTypes';
+import { adaptToCard } from './typeAdapters';
 
 /**
- * Adapts any card-like object to the standard Card type
+ * Safely adapts any card-like object to a valid Card type
+ * For backward compatibility with other adapter patterns
  */
-export const adaptToCard = (card: any): Card => {
-  // Default values for required properties
-  const defaultCardData: Partial<Card> = {
-    title: 'Untitled Card',
+export { adaptToCard } from './typeAdapters';
+
+/**
+ * Default design metadata for cards that don't have it
+ */
+export const DEFAULT_DESIGN_METADATA = {
+  cardStyle: {
+    template: 'standard',
+    effect: 'standard',
+    borderRadius: '8px',
+    borderColor: '#000000',
+    shadowColor: '#000000',
+    frameWidth: 5,
+    frameColor: '#000000'
+  },
+  textStyle: {
+    titleColor: '#000000',
+    titleAlignment: 'center',
+    titleWeight: 'bold',
+    descriptionColor: '#333333'
+  },
+  cardMetadata: {
+    category: 'standard',
+    series: 'default',
+    cardType: 'standard'
+  },
+  marketMetadata: {
+    isPrintable: true,
+    isForSale: false,
+    includeInCatalog: false
+  }
+};
+
+/**
+ * Create a new card with default values
+ */
+export function createDefaultCard(partial: Partial<Card> = {}): Card {
+  return {
+    id: `card-${Date.now()}`,
+    title: 'New Card',
     description: '',
     imageUrl: '',
     thumbnailUrl: '',
-    tags: [],
-    userId: 'anonymous',
-    isPublic: true,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
+    userId: 'anonymous',
     effects: [],
     rarity: CardRarity.COMMON,
-    designMetadata: DEFAULT_DESIGN_METADATA
+    designMetadata: DEFAULT_DESIGN_METADATA,
+    ...partial
   };
-  
-  // Merge provided card with defaults, ensuring all required fields exist
-  const adaptedCard = {
-    ...defaultCardData,
-    ...card,
-    // Ensure thumbnailUrl has a value if not provided
-    thumbnailUrl: card.thumbnailUrl || card.imageUrl || defaultCardData.thumbnailUrl,
-    // Ensure tags is an array
-    tags: Array.isArray(card.tags) ? card.tags : [],
-    // Ensure effects is an array
-    effects: Array.isArray(card.effects) ? card.effects : [],
-    // Ensure rarity has a value
-    rarity: card.rarity || CardRarity.COMMON,
-    // Ensure designMetadata is properly structured with required fields
-    designMetadata: {
-      ...DEFAULT_DESIGN_METADATA,
-      ...card.designMetadata
-    }
-  };
-  
-  return adaptedCard as Card;
-};
-
-/**
- * Type guard to check if an object is a valid Card
- */
-export const isCard = (obj: any): obj is Card => {
-  return (
-    obj &&
-    typeof obj === 'object' &&
-    typeof obj.id === 'string' &&
-    typeof obj.title === 'string' &&
-    typeof obj.imageUrl === 'string' &&
-    Array.isArray(obj.tags)
-  );
-};
+}

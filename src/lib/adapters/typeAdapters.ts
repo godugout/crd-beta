@@ -89,3 +89,6 @@ export function adaptToOaklandMemory(memoryData: any): OaklandMemoryData {
     ...memoryData
   };
 }
+
+// Alias function for backward compatibility
+export const adaptCard = adaptToCard;
