@@ -22,6 +22,9 @@ const buttonVariants = cva(
         soft: "bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-colors",
         pill: "rounded-full px-4 py-1.5 text-xs font-semibold bg-[var(--bg-elevated)] text-[var(--text-primary)] hover:bg-[var(--bg-elevated)]/90",
         tag: "rounded-full px-2.5 py-0.5 text-xs font-medium bg-white/10 text-white hover:bg-white/15",
+        navItem: "px-4 py-2 rounded-lg transition-colors text-white/80 hover:bg-white/5 hover:text-white",
+        navItemActive: "bg-white/10 text-white font-medium",
+        featured: "relative overflow-hidden backdrop-blur-md bg-black/40 border border-amber-500/30 text-white shadow-md hover:shadow-lg transition-all transform hover:scale-[1.02] after:absolute after:inset-0 after:bg-gradient-to-r after:from-amber-500/20 after:to-purple-500/20 after:z-[-1]",
       },
       size: {
         default: "h-10 px-5 py-2.5",

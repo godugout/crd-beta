@@ -1,25 +1,25 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Plus } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { PlusCircle } from 'lucide-react';
+import { CrdButton } from '@/components/ui/crd-button';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 
 const CreateButton: React.FC = () => {
   const isMobile = useMediaQuery('(max-width: 768px)');
 
   return (
-    <Button 
+    <CrdButton 
       asChild
-      variant="gradient" 
-      size={isMobile ? "icon" : "default"}
-      className="mr-4"
+      variant="spectrum" 
+      size={isMobile ? "sm" : "sm"}
+      className={`${isMobile ? 'px-3' : 'px-4'}`}
     >
-      <Link to="/cards/create">
-        <Plus className="h-4 w-4" />
-        {!isMobile && <span>Create</span>}
+      <Link to="/cards/create" className="flex items-center">
+        <PlusCircle className="h-4 w-4 mr-1" />
+        {!isMobile && <span>Card</span>}
       </Link>
-    </Button>
+    </CrdButton>
   );
 };
 

@@ -116,4 +116,27 @@
     @apply inline-flex items-center rounded-full bg-white/10 px-2.5 py-0.5 text-xs 
            font-medium text-white hover:bg-white/20 transition-colors;
   }
+  
+  /* New navigation styles */
+  .nav-item {
+    @apply px-4 py-2 rounded-lg transition-colors text-white/80 hover:bg-white/5 hover:text-white;
+  }
+  
+  .nav-item-active {
+    @apply bg-white/10 text-white font-medium;
+  }
+  
+  .nav-glass {
+    @apply backdrop-blur-xl bg-black/70 border-b border-white/10;
+  }
+  
+  .nav-button {
+    @apply flex items-center rounded-xl px-3.5 py-2 text-sm font-medium bg-white/10
+           hover:bg-white/15 transition-all text-white;
+  }
+  
+  .nav-action {
+    @apply p-2 rounded-full bg-white/10 hover:bg-white/15 text-white;
+  }
 }
+
