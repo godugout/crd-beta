@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -18,7 +17,6 @@ const Auth = () => {
   const navigate = useNavigate();
   const location = useLocation();
   
-  // Get the intended destination from location state or default to home
   const from = location.state?.from?.pathname || '/';
   
   const handleSignIn = async (e: React.FormEvent) => {
@@ -26,13 +24,7 @@ const Auth = () => {
     setIsLoading(true);
     
     try {
-      // Use the appropriate sign in method based on what's available
-      if ('signIn' in auth) {
-        await auth.signIn(email, password);
-      } else if ('login' in auth) {
-        await auth.login(email, password);
-      }
-      
+      await auth.signIn(email, password);
       toast.success('Signed in successfully');
       navigate(from, { replace: true });
     } catch (error: any) {
@@ -50,13 +42,7 @@ const Auth = () => {
     setIsLoading(true);
     
     try {
-      // Use the appropriate sign up method based on what's available
-      if ('signUp' in auth) {
-        await auth.signUp(email, password, { name });
-      } else if ('register' in auth) {
-        await auth.register(email, password, { name });
-      }
-      
+      await auth.signUp(email, password, { name });
       toast.success('Account created successfully');
       navigate(from, { replace: true });
     } catch (error: any) {

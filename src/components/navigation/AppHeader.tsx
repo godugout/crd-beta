@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Search, PlusCircle, User, Menu, X, Palette, Sparkles } from 'lucide-react';
@@ -82,26 +81,6 @@ const AppHeader: React.FC = () => {
 
           {/* Action Buttons */}
           <div className="flex items-center space-x-2">
-            {/* Search Button */}
-            <Button asChild variant="ghost" size="icon" className="text-white/80 hover:text-white hover:bg-white/10">
-              <Link to="/search">
-                <Search className="h-5 w-5" />
-              </Link>
-            </Button>
-            
-            {/* Labs Button */}
-            <Button 
-              variant="ghost" 
-              size="icon"
-              asChild
-              className="relative text-white/80 hover:text-white hover:bg-white/10"
-            >
-              <Link to="/labs">
-                <Sparkles className="h-5 w-5 text-amber-400" />
-                <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-amber-400"></span>
-              </Link>
-            </Button>
-
             {/* User Profile */}
             {user ? (
               <Button 
