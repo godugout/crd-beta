@@ -1,4 +1,6 @@
+
 import { Card } from '@/lib/types';
+import { CardRarity } from '@/lib/types/cardTypes';
 
 /**
  * Utility function to convert a string ID to a Card object
@@ -9,9 +11,15 @@ export const cardIdToCard = (cardId: string): Card => {
     id: cardId,
     title: `Card ${cardId.slice(-4)}`,
     imageUrl: '',
+    thumbnailUrl: '', // Add required thumbnailUrl
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
-    effects: []
+    effects: [],
+    description: '', // Add required description
+    isFavorite: false, // Add required isFavorite
+    rarity: CardRarity.COMMON, // Explicitly use enum value
+    tags: [],
+    userId: 'user-default'
   };
 };
 
@@ -36,13 +44,15 @@ export const createEmptyCard = (): Card => {
   return {
     id: `card-${Date.now()}`,
     title: 'New Card',
-    description: '',  // Ensure description is present
+    description: '',
     imageUrl: '',
+    thumbnailUrl: '', // Add thumbnailUrl
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     effects: [],
-    isFavorite: false,  // Add isFavorite
+    isFavorite: false,
     tags: [],
-    userId: 'anonymous'
+    userId: 'anonymous',
+    rarity: CardRarity.COMMON // Use enum value
   };
 };

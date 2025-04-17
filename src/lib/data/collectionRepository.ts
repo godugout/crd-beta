@@ -5,11 +5,16 @@ export const fetchCollectionById = (id: string): Collection | undefined => {
   const mockCollection: Collection = {
     id: '1',
     name: 'My Collection',
+    title: 'My Collection', // Add required title field
     description: 'A great collection of cards',
     coverImageUrl: '/collection-cover.jpg',
     userId: 'user-1',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
+    cardIds: ['card-1'], // Add required cardIds
+    visibility: 'public', // Add required visibility
+    allowComments: true, // Add required allowComments
+    tags: [], // Add required tags
     cards: [
       {
         id: 'card-1',
@@ -37,11 +42,16 @@ export const fetchCollections = (): Collection[] => {
     {
       id: '1',
       name: 'My Collection',
+      title: 'My Collection', // Add required title field
       description: 'A great collection of cards',
       coverImageUrl: '/collection-cover.jpg',
       userId: 'user-1',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
+      cardIds: ['card-1'], // Add required cardIds
+      visibility: 'public', // Add required visibility
+      allowComments: true, // Add required allowComments
+      tags: [], // Add required tags
       cards: [
         {
           id: 'card-1',

@@ -17,7 +17,8 @@ export function useCardContext() {
     console.warn('useCardContext: CardContext not found, using fallback data');
     
     // Ensure sample cards have the required isFavorite property
-    const processedSampleCards = sampleCards.map(card => ({
+    // and the correct CardRarity type
+    const processedSampleCards = sampleCards.map(card => adaptToCard({
       ...card,
       isFavorite: card.isFavorite ?? false,
       description: card.description || ''
@@ -33,7 +34,7 @@ export function useCardContext() {
       fetchCards: async () => {},
       fetchCollections: async () => {},
       addCard: async (data: Partial<Card>): Promise<Card> => {
-        const card = adaptToCard({
+        return adaptToCard({
           id: `fallback-${Date.now()}`, 
           title: 'Fallback Card',
           description: '', 
@@ -46,27 +47,30 @@ export function useCardContext() {
           rarity: CardRarity.COMMON,
           effects: [],
           designMetadata: {},
-          isFavorite: false // Ensure isFavorite is included
+          isFavorite: false,
+          ...data
         });
-        return { ...card, ...data };
       },
       updateCard: async (id: string, data: Partial<Card>): Promise<Card> => {
-        const card = processedSampleCards.find(card => card.id === id) || adaptToCard({
-          id,
-          title: 'Fallback Card', 
-          description: '', 
-          imageUrl: '',
-          thumbnailUrl: '',
-          tags: [],
-          userId: '',
-          createdAt: new Date().toISOString(), 
-          updatedAt: new Date().toISOString(), 
-          rarity: CardRarity.COMMON,
-          effects: [],
-          designMetadata: {},
-          isFavorite: false // Ensure isFavorite is included
+        const card = processedSampleCards.find(card => card.id === id);
+        return adaptToCard({
+          ...(card || {
+            id,
+            title: 'Fallback Card', 
+            description: '', 
+            imageUrl: '',
+            thumbnailUrl: '',
+            tags: [],
+            userId: '',
+            createdAt: new Date().toISOString(), 
+            updatedAt: new Date().toISOString(), 
+            rarity: CardRarity.COMMON,
+            effects: [],
+            designMetadata: {},
+            isFavorite: false
+          }),
+          ...data
         });
-        return { ...card, ...data };
       },
       deleteCard: async () => true,
       toggleFavorite: () => {},

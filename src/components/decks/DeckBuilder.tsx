@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { Plus, X, Save, ChevronLeft, ChevronRight, Heart } from 'lucide-react';
 import { ensureEnhancedCard, cardIdToCard } from '@/lib/utils/cardHelpers';
+import { adaptToCard } from '@/lib/adapters/typeAdapters';
 
 interface DeckBuilderProps {
   initialDeck?: Deck;
@@ -109,8 +110,15 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck }) => {
   };
   
   const handleCardSelect = (cardId: string) => {
-    const card = cardIdToCard(cardId);
-    handleAddCard(ensureEnhancedCard(card));
+    const card = cards.find(c => c.id === cardId);
+    if (card) {
+      handleAddCard(ensureEnhancedCard(card));
+    } else {
+      import('@/lib/adapters/typeAdapters').then(({ adaptToCard }) => {
+        const tempCard = cardIdToCard(cardId);
+        handleAddCard(ensureEnhancedCard(adaptToCard(tempCard)));
+      });
+    }
   };
   
   return (

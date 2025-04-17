@@ -1,57 +1,89 @@
 
-import { Card } from '@/lib/types/card';
-import { OaklandMemoryData } from '@/lib/types/oaklandMemory';
+import { Card, CardRarity } from '@/lib/types';
 
 /**
- * Convert an object to a valid Card type
+ * Safely adapts any card-like object to a valid Card type
+ * Ensures all required properties are present
  */
-export function adaptToCard(obj: any): Card {
-  // Ensure all required Card properties exist
-  return {
-    id: obj.id || `card-${Date.now()}`,
-    title: obj.title || 'Untitled Card',
-    description: obj.description || '',
-    imageUrl: obj.imageUrl || '',
-    thumbnailUrl: obj.thumbnailUrl || obj.imageUrl || '',
-    effects: obj.effects || [],
-    // Include other fields with fallbacks
-    createdAt: obj.createdAt || new Date().toISOString(),
-    updatedAt: obj.updatedAt || new Date().toISOString(),
-    userId: obj.userId || 'anonymous',
-    collectionId: obj.collectionId,
-    teamId: obj.teamId,
-    isPublic: obj.isPublic ?? true,
-    tags: obj.tags || [],
-    designMetadata: obj.designMetadata || {},
-    // Add additional player data fields that might be used
-    player: obj.player || '',
-    team: obj.team || '',
-    year: obj.year || '',
-    name: obj.name || obj.title || '',
-    // Ensure isFavorite is always included with a default value
-    isFavorite: obj.isFavorite ?? false,
-    // Include edition field in the correct format
-    edition: obj.edition || { number: 1, total: 1 }
+export const adaptToCard = (cardData: Partial<Card>): Card => {
+  // Ensure the rarity is a valid CardRarity enum value
+  let rarity = cardData.rarity || CardRarity.COMMON;
+  
+  // If rarity is a string, convert it to the enum
+  if (typeof rarity === 'string') {
+    switch (rarity.toLowerCase()) {
+      case 'common':
+        rarity = CardRarity.COMMON;
+        break;
+      case 'uncommon':
+        rarity = CardRarity.UNCOMMON;
+        break;
+      case 'rare':
+        rarity = CardRarity.RARE;
+        break;
+      case 'ultra-rare':
+        rarity = CardRarity.ULTRA_RARE;
+        break;
+      case 'legendary':
+        rarity = CardRarity.LEGENDARY;
+        break;
+      case 'mythic':
+        rarity = CardRarity.MYTHIC;
+        break;
+      case 'one-of-one':
+        rarity = CardRarity.ONE_OF_ONE;
+        break;
+      default:
+        rarity = CardRarity.COMMON;
+    }
+  }
+  
+  // Create a card with all required properties
+  const card: Card = {
+    id: cardData.id || `card-${Date.now()}`,
+    title: cardData.title || 'Untitled Card',
+    description: cardData.description || '',
+    imageUrl: cardData.imageUrl || '',
+    thumbnailUrl: cardData.thumbnailUrl || cardData.imageUrl || '',
+    createdAt: cardData.createdAt || new Date().toISOString(),
+    updatedAt: cardData.updatedAt || new Date().toISOString(),
+    userId: cardData.userId || 'anonymous',
+    effects: cardData.effects || [],
+    isFavorite: cardData.isFavorite !== undefined ? cardData.isFavorite : false,
+    tags: cardData.tags || [],
+    rarity: rarity,
+    designMetadata: cardData.designMetadata || {}
   };
-}
+  
+  return card;
+};
 
 /**
- * Convert an object to a valid OaklandMemoryData type
+ * Function to ensure a CardRarity enum is used rather than a string
  */
-export function adaptToOaklandMemory(obj: any): OaklandMemoryData {
-  return {
-    title: obj.title || 'Untitled Memory',
-    description: obj.description || '',
-    date: obj.date || '',
-    opponent: obj.opponent || '',
-    score: obj.score || '',
-    location: obj.location || '',
-    section: obj.section || '',
-    memoryType: obj.memoryType || 'general',
-    attendees: obj.attendees || [],
-    tags: obj.tags || [],
-    imageUrl: obj.imageUrl || '',
-    historicalContext: obj.historicalContext || '',
-    personalSignificance: obj.personalSignificance || '',
-  };
-}
+export const ensureCardRarity = (rarity: string | CardRarity | undefined): CardRarity => {
+  if (rarity === undefined) return CardRarity.COMMON;
+  
+  if (typeof rarity === 'string') {
+    switch (rarity.toLowerCase()) {
+      case 'common':
+        return CardRarity.COMMON;
+      case 'uncommon':
+        return CardRarity.UNCOMMON;
+      case 'rare':
+        return CardRarity.RARE;
+      case 'ultra-rare':
+        return CardRarity.ULTRA_RARE;
+      case 'legendary':
+        return CardRarity.LEGENDARY;
+      case 'mythic':
+        return CardRarity.MYTHIC;
+      case 'one-of-one':
+        return CardRarity.ONE_OF_ONE;
+      default:
+        return CardRarity.COMMON;
+    }
+  }
+  
+  return rarity;
+};

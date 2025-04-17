@@ -44,7 +44,7 @@ export const DEFAULT_DESIGN_METADATA = {
  * Create a new card with default values
  */
 export function createDefaultCard(partial: Partial<Card> = {}): Card {
-  return {
+  return adaptToCard({
     id: `card-${Date.now()}`,
     title: 'New Card',
     description: '',
@@ -56,6 +56,7 @@ export function createDefaultCard(partial: Partial<Card> = {}): Card {
     effects: [],
     rarity: CardRarity.COMMON,
     designMetadata: DEFAULT_DESIGN_METADATA,
+    isFavorite: false,
     ...partial
-  };
+  });
 }
