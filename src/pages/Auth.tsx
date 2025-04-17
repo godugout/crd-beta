@@ -2,142 +2,174 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import PageLayout from '@/components/navigation/PageLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import { User } from '@/lib/types';
 
-type AuthMode = 'signin' | 'signup';
-
-const Auth: React.FC = () => {
+const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
-  const [mode, setMode] = useState<AuthMode>('signin');
   const [isLoading, setIsLoading] = useState(false);
-  
-  const { signIn, signUp } = useAuth();
+  const auth = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  
+  // Get the intended destination from location state or default to home
   const from = location.state?.from?.pathname || '/';
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  
+  const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-
+    
     try {
-      if (mode === 'signin') {
-        await signIn(email, password);
-        toast.success('Signed in successfully');
-      } else {
-        // Pass name as userData object for signup
-        await signUp(email, password, { name } as Partial<User>);
-        toast.success('Account created successfully');
+      // Use the appropriate sign in method based on what's available
+      if ('signIn' in auth) {
+        await auth.signIn(email, password);
+      } else if ('login' in auth) {
+        await auth.login(email, password);
       }
+      
+      toast.success('Signed in successfully');
       navigate(from, { replace: true });
     } catch (error: any) {
-      toast.error(error.message || 'Authentication failed');
+      console.error('Sign in error:', error);
+      toast.error('Sign in failed', { 
+        description: error.message || 'Please check your credentials and try again'
+      });
     } finally {
       setIsLoading(false);
     }
   };
-
-  const toggleMode = () => {
-    setMode(mode === 'signin' ? 'signup' : 'signin');
+  
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    
+    try {
+      // Use the appropriate sign up method based on what's available
+      if ('signUp' in auth) {
+        await auth.signUp(email, password, { name });
+      } else if ('register' in auth) {
+        await auth.register(email, password, { name });
+      }
+      
+      toast.success('Account created successfully');
+      navigate(from, { replace: true });
+    } catch (error: any) {
+      console.error('Sign up error:', error);
+      toast.error('Sign up failed', { 
+        description: error.message || 'Please try again with different credentials'
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
-
+  
   return (
-    <PageLayout
-      title={mode === 'signin' ? 'Sign In' : 'Create Account'}
-      description="Access your CardShow account"
-      hideNavigation
-    >
-      <div className="flex justify-center items-center min-h-[80vh] px-4">
-        <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardTitle>{mode === 'signin' ? 'Sign In' : 'Create Account'}</CardTitle>
-            <CardDescription>
-              {mode === 'signin' 
-                ? 'Enter your credentials to access your account' 
-                : 'Fill out the form to create a new account'}
-            </CardDescription>
-          </CardHeader>
-          <form onSubmit={handleSubmit}>
-            <CardContent className="space-y-4">
-              {mode === 'signup' && (
+    <div className="flex justify-center items-center min-h-screen bg-background py-12 px-4 sm:px-6 lg:px-8">
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <CardTitle className="text-2xl text-center">Welcome to CardShow</CardTitle>
+          <CardDescription className="text-center">
+            Sign in to your account or create a new one
+          </CardDescription>
+        </CardHeader>
+        <Tabs defaultValue="signin" className="w-full">
+          <TabsList className="grid grid-cols-2 mb-4">
+            <TabsTrigger value="signin">Sign In</TabsTrigger>
+            <TabsTrigger value="signup">Sign Up</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="signin">
+            <form onSubmit={handleSignIn}>
+              <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <label htmlFor="name" className="text-sm font-medium">
-                    Name
-                  </label>
-                  <Input
-                    id="name"
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    required={mode === 'signup'}
-                    placeholder="Your name"
+                  <Label htmlFor="signin-email">Email</Label>
+                  <Input 
+                    id="signin-email" 
+                    type="email" 
+                    placeholder="your@email.com" 
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
                   />
                 </div>
-              )}
-              
-              <div className="space-y-2">
-                <label htmlFor="email" className="text-sm font-medium">
-                  Email
-                </label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  placeholder="your.email@example.com"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <label htmlFor="password" className="text-sm font-medium">
-                  Password
-                </label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  placeholder="••••••••"
-                />
-              </div>
-            </CardContent>
-            
-            <CardFooter className="flex flex-col space-y-4">
-              <Button 
-                type="submit" 
-                className="w-full" 
-                disabled={isLoading}
-              >
-                {isLoading 
-                  ? 'Processing...' 
-                  : mode === 'signin' ? 'Sign In' : 'Create Account'}
-              </Button>
-              
-              <div className="text-center text-sm">
-                {mode === 'signin' ? "Don't have an account? " : "Already have an account? "}
+                <div className="space-y-2">
+                  <Label htmlFor="signin-password">Password</Label>
+                  <Input 
+                    id="signin-password" 
+                    type="password" 
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                </div>
+              </CardContent>
+              <CardFooter>
                 <Button 
-                  variant="link" 
-                  className="p-0" 
-                  type="button" 
-                  onClick={toggleMode}
+                  type="submit" 
+                  className="w-full" 
+                  disabled={isLoading}
                 >
-                  {mode === 'signin' ? 'Sign Up' : 'Sign In'}
+                  {isLoading ? "Signing in..." : "Sign In"}
                 </Button>
-              </div>
-            </CardFooter>
-          </form>
-        </Card>
-      </div>
-    </PageLayout>
+              </CardFooter>
+            </form>
+          </TabsContent>
+          
+          <TabsContent value="signup">
+            <form onSubmit={handleSignUp}>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="signup-name">Name</Label>
+                  <Input 
+                    id="signup-name" 
+                    placeholder="Your Name" 
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="signup-email">Email</Label>
+                  <Input 
+                    id="signup-email" 
+                    type="email" 
+                    placeholder="your@email.com" 
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="signup-password">Password</Label>
+                  <Input 
+                    id="signup-password" 
+                    type="password" 
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                </div>
+              </CardContent>
+              <CardFooter>
+                <Button 
+                  type="submit" 
+                  className="w-full" 
+                  disabled={isLoading}
+                >
+                  {isLoading ? "Creating Account..." : "Sign Up"}
+                </Button>
+              </CardFooter>
+            </form>
+          </TabsContent>
+        </Tabs>
+      </Card>
+    </div>
   );
 };
 

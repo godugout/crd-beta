@@ -1,11 +1,12 @@
 
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '@/context/auth/useAuth';
+import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 
 export function useNavbar() {
-  const { user, signOut } = useAuth();
+  const auth = useAuth();
+  const { user, signOut } = auth;
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
@@ -20,9 +21,11 @@ export function useNavbar() {
 
   const handleSignOut = async () => {
     try {
-      await signOut();
-      toast.success("Signed out successfully");
-      navigate('/');
+      if (signOut) {
+        await signOut();
+        toast.success("Signed out successfully");
+        navigate('/');
+      }
     } catch (error: any) {
       toast.error("Error signing out", {
         description: error.message || "An unexpected error occurred"

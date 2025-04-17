@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { User, UserRole } from '@/lib/types';
 import { CardEnhancedProvider } from '@/context/CardEnhancedContext';
@@ -10,7 +10,11 @@ import ArtistDashboard from '@/components/dashboard/ArtistDashboard';
 import FanDashboard from '@/components/dashboard/FanDashboard';
 
 const Dashboard: React.FC = () => {
-  const { user, isLoading } = useAuth();
+  const auth = useAuth();
+  const user = auth.user;
+  // Check for loading in either auth context format
+  const isLoading = 'loading' in auth ? auth.loading : ('isLoading' in auth ? auth.isLoading : false);
+  
   const [dashboardUser, setDashboardUser] = useState<User | null>(null);
   const [dashboardLoaded, setDashboardLoaded] = useState(false);
   
