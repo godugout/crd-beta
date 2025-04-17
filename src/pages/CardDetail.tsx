@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import PageLayout from '@/components/navigation/PageLayout';
@@ -13,7 +12,6 @@ import { toast } from '@/hooks/use-toast';
 import { adaptToCard } from '@/lib/adapters/typeAdapters';
 import { DEFAULT_DESIGN_METADATA } from '@/lib/utils/cardDefaults';
 
-// Adding CardDetailed component to fix type errors
 interface CardDetailedProps {
   card: Card;
   onEdit: () => void;
@@ -62,7 +60,6 @@ const CardDetailed: React.FC<CardDetailedProps> = ({ card, onEdit, onShare, onDe
   );
 };
 
-// Adding RelatedCards component
 interface RelatedCardsProps {
   cards: Card[];
   currentCardId: string;
@@ -141,7 +138,7 @@ const CardDetail = () => {
         ...foundCard,
         imageUrl: foundCard.imageUrl || FALLBACK_IMAGE,
         thumbnailUrl: foundCard.thumbnailUrl || foundCard.imageUrl || FALLBACK_IMAGE,
-        description: foundCard.description || '',
+        description: foundCard.description || '', // Ensure description is always a string
       });
       
       setResolvedCard(processedCard);

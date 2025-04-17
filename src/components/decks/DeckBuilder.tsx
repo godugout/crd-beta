@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { Plus, X, Save, ChevronLeft, ChevronRight, Heart } from 'lucide-react';
-import { ensureEnhancedCard, cardIdToCardObject } from '@/lib/utils/cardHelpers';
+import { ensureEnhancedCard, cardIdToCard } from '@/lib/utils/cardHelpers';
 
 interface DeckBuilderProps {
   initialDeck?: Deck;
@@ -106,6 +106,11 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck }) => {
       console.error('Error saving deck:', error);
       toast.error("Failed to save deck");
     }
+  };
+  
+  const handleCardSelect = (cardId: string) => {
+    const card = cardIdToCard(cardId);
+    handleAddCard(ensureEnhancedCard(card));
   };
   
   return (
@@ -271,7 +276,7 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck }) => {
                     <div
                       key={card.id}
                       className="border rounded-md overflow-hidden flex flex-col hover:border-primary cursor-pointer transition-colors"
-                      onClick={() => handleAddCard(ensureEnhancedCard(card))}
+                      onClick={() => handleCardSelect(card.id)}
                     >
                       <div className="aspect-[2/3] relative">
                         <img 
@@ -285,7 +290,7 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck }) => {
                           className="absolute bottom-2 right-2 rounded-full h-7 w-7"
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleAddCard(ensureEnhancedCard(card));
+                            handleCardSelect(card.id);
                           }}
                         >
                           <Plus className="h-4 w-4" />

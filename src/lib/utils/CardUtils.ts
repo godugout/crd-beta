@@ -5,7 +5,7 @@ import { Card } from '@/lib/types';
  * Utility function to convert a string ID to a Card object
  * Used primarily for type conversion when passing string IDs to functions expecting Card objects
  */
-export const cardIdToCardObject = (cardId: string): Card => {
+export const cardIdToCard = (cardId: string): Card => {
   return {
     id: cardId,
     title: `Card ${cardId.slice(-4)}`,
@@ -15,6 +15,12 @@ export const cardIdToCardObject = (cardId: string): Card => {
     effects: []
   };
 };
+
+/**
+ * Alias for cardIdToCard for backwards compatibility
+ * @deprecated Use cardIdToCard instead
+ */
+export const cardIdToCardObject = cardIdToCard;
 
 /**
  * Helper function to safely get the card description

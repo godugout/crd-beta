@@ -1,15 +1,15 @@
-
 // Import enum if needed
 import { JsonValue } from './index';
 
-// Define card rarity as an enum
+// Define card rarity as an enum - add ONE_OF_ONE
 export enum CardRarity {
   COMMON = 'common',
   UNCOMMON = 'uncommon',
   RARE = 'rare',
   ULTRA_RARE = 'ultra-rare',
   LEGENDARY = 'legendary',
-  MYTHIC = 'mythic'
+  MYTHIC = 'mythic',
+  ONE_OF_ONE = 'one-of-one'
 }
 
 // Define CardStyle type

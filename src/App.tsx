@@ -4,7 +4,8 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { TeamThemeProvider } from '@/context/ThemeContext';
 import { CardProvider } from '@/context/CardContext';
 import { Toaster } from '@/components/ui/toaster';
-import { mainRoutes } from '@/routes/mainRoutes';
+// Import as default since it's now exported as both default and named export
+import mainRoutes, { mainRoutes as namedMainRoutes } from '@/routes/mainRoutes';
 import { cardRoutes } from '@/routes/cardRoutes';
 import { collectionRoutes } from '@/routes/collectionRoutes';
 
