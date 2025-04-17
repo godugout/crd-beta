@@ -16,7 +16,7 @@ interface BatchOperationsProps {
 
 const BatchOperations: React.FC<BatchOperationsProps> = ({ collectionId, onComplete }) => {
   const { cards, isLoading, error } = useCardData({
-    filter: (card) => collectionId ? card.collectionId === collectionId : true,
+    filters: collectionId ? { collectionId } : undefined,
   });
   
   const [selectedCards, setSelectedCards] = useState<CardType[]>([]);

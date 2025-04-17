@@ -20,11 +20,11 @@ export interface Collection extends BaseEntity {
   instagramSource?: InstagramSource;
   
   // Additional properties needed by other components
-  visibility?: 'public' | 'private' | 'team' | 'unlisted';
-  allowComments?: boolean;
+  visibility: 'public' | 'private' | 'team' | 'unlisted';
+  allowComments: boolean;
   teamId?: string;
-  cardIds?: string[];
-  designMetadata?: any;
+  cardIds: string[];
+  designMetadata: any;
   owner_id?: string; // For backward compatibility
 }
 

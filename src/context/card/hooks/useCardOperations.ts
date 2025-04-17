@@ -1,127 +1,81 @@
 
-import { useCallback } from 'react';
-import { useCards } from '@/context/CardContext';
-import { toast } from 'sonner';
+import { useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 import { Card } from '@/lib/types';
+import { toast } from 'sonner';
 
-export const useCardOperations = () => {
-  const { addCard, updateCard, deleteCard, cards } = useCards();
-  
-  const createCard = useCallback(async (cardData: Omit<Card, 'id' | 'createdAt' | 'updatedAt'>) => {
+export default function useCardOperations() {
+  const [cards, setCards] = useState<Card[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+
+  const addCard = async (cardData: Omit<Card, "id" | "createdAt" | "updatedAt">): Promise<Card> => {
+    setIsLoading(true);
     try {
-      const newCard = await addCard(cardData);
-      toast.success('Card created successfully');
-      return newCard;
-    } catch (error) {
-      console.error('Error creating card:', error);
-      toast.error('Failed to create card');
-      throw error;
-    }
-  }, [addCard]);
-  
-  const editCard = useCallback(async (id: string, cardData: Partial<Card>) => {
-    try {
-      const success = await updateCard(id, cardData);
-      
-      if (success) {
-        toast.success('Card updated successfully');
-      } else {
-        toast.error('Failed to update card');
-      }
-      
-      return success;
-    } catch (error) {
-      console.error('Error updating card:', error);
-      toast.error('Failed to update card');
-      throw error;
-    }
-  }, [updateCard]);
-  
-  const removeCard = useCallback(async (id: string, onSuccess?: () => void) => {
-    try {
-      const success = await deleteCard(id);
-      
-      if (success) {
-        toast.success('Card deleted successfully');
-        if (onSuccess) onSuccess();
-      } else {
-        toast.error('Failed to delete card');
-      }
-      
-      return success;
-    } catch (error) {
-      console.error('Error deleting card:', error);
-      toast.error('Failed to delete card');
-      throw error;
-    }
-  }, [deleteCard]);
-  
-  const duplicateCard = useCallback(async (id: string) => {
-    try {
-      const originalCard = cards.find(card => card.id === id);
-      
-      if (!originalCard) {
-        toast.error('Card not found');
-        return null;
-      }
-      
-      const { id: _, createdAt, updatedAt, ...cardData } = originalCard;
-      
-      const duplicatedCard = {
+      const newCard: Card = {
         ...cardData,
-        title: `Copy of ${cardData.title}`
+        id: uuidv4(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       };
       
-      const newCard = await addCard(duplicatedCard as Omit<Card, 'id' | 'createdAt' | 'updatedAt'>);
-      toast.success('Card duplicated successfully');
-      
+      setCards(prevCards => [...prevCards, newCard]);
+      toast.success("Card created successfully");
       return newCard;
-    } catch (error) {
-      console.error('Error duplicating card:', error);
-      toast.error('Failed to duplicate card');
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Failed to create card');
+      setError(error);
+      toast.error(`Error creating card: ${error.message}`);
       throw error;
+    } finally {
+      setIsLoading(false);
     }
-  }, [addCard, cards]);
-  
-  const shareCard = useCallback((card: Card) => {
-    const shareUrl = `${window.location.origin}/cards/${card.id}`;
-    
-    if (navigator.share) {
-      navigator.share({
-        title: card.title,
-        text: card.description || 'Check out this card!',
-        url: shareUrl
-      })
-        .then(() => {
-          console.log('Successfully shared');
-        })
-        .catch((error) => {
-          console.error('Error sharing:', error);
-          copyToClipboard(shareUrl);
-        });
-    } else {
-      copyToClipboard(shareUrl);
-    }
-  }, []);
-  
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text)
-      .then(() => {
-        toast.success('Link copied to clipboard');
-      })
-      .catch((err) => {
-        console.error('Failed to copy:', err);
-        toast.error('Failed to copy link');
-      });
   };
-  
-  return {
-    createCard,
-    editCard,
-    removeCard,
-    duplicateCard,
-    shareCard
-  };
-};
 
-export default useCardOperations;
+  const updateCard = async (id: string, updates: Partial<Card>): Promise<boolean> => {
+    setIsLoading(true);
+    try {
+      setCards(prevCards =>
+        prevCards.map(card =>
+          card.id === id
+            ? { ...card, ...updates, updatedAt: new Date().toISOString() }
+            : card
+        )
+      );
+      toast.success("Card updated successfully");
+      return true;
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Failed to update card');
+      setError(error);
+      toast.error(`Error updating card: ${error.message}`);
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const deleteCard = async (id: string): Promise<boolean> => {
+    setIsLoading(true);
+    try {
+      setCards(prevCards => prevCards.filter(card => card.id !== id));
+      toast.success("Card deleted successfully");
+      return true;
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Failed to delete card');
+      setError(error);
+      toast.error(`Error deleting card: ${error.message}`);
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return {
+    cards,
+    isLoading,
+    error,
+    addCard,
+    updateCard,
+    deleteCard
+  };
+}

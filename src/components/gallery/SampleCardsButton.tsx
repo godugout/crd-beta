@@ -46,9 +46,7 @@ const SampleCardsButton: React.FC<SampleCardsButtonProps> = ({ className }) => {
       ];
 
       for (const cardData of sampleCards) {
-        // Type cast to fix Promise vs non-Promise return type issue
-        const addCardPromise = addCard as unknown as (card: Omit<Card, "id" | "createdAt" | "updatedAt">) => Promise<Card>;
-        await addCardPromise(cardData);
+        await addCard(cardData);
       }
 
       toast.success('Sample cards added!');

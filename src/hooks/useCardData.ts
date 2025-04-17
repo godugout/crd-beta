@@ -11,11 +11,13 @@ interface CardDataOptions {
     teamId?: string;
     isPublic?: boolean;
     query?: string;
+    collectionId?: string;
   };
 }
 
 export function useCardData(options: CardDataOptions = {}) {
-  const { cards: contextCards, isLoading: contextLoading } = useCards();
+  const cardsContext = useCards();
+  const { cards: contextCards, isLoading: contextLoading } = cardsContext;
   const [filteredCards, setFilteredCards] = useState<Card[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -44,6 +46,11 @@ export function useCardData(options: CardDataOptions = {}) {
     // Apply public filter
     if (filters?.isPublic !== undefined) {
       result = result.filter(card => card.isPublic === filters.isPublic);
+    }
+    
+    // Apply collection filter
+    if (filters?.collectionId) {
+      result = result.filter(card => card.collectionId === filters.collectionId);
     }
     
     // Apply search query filter
@@ -79,15 +86,15 @@ export function useCardData(options: CardDataOptions = {}) {
   const refresh = useCallback(async () => {
     setIsLoading(true);
     try {
-      if (typeof (useCards() as any).refreshCards === 'function') {
-        await (useCards() as any).refreshCards();
+      if (cardsContext.refreshCards) {
+        await cardsContext.refreshCards();
       }
       setIsLoading(false);
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Failed to refresh cards'));
       setIsLoading(false);
     }
-  }, []);
+  }, [cardsContext]);
 
   return {
     cards: filteredCards,

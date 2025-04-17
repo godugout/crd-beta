@@ -23,7 +23,7 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ onClose }) => {
       const foundCard = getCardById(id);
       if (foundCard) {
         // Use the type adapter to ensure compatibility
-        setCurrentCard(adaptCard(foundCard));
+        setCurrentCard(foundCard);
         
         // Find the index of the card in the cards array
         const index = cards.findIndex(card => card.id === id);
@@ -51,7 +51,7 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ onClose }) => {
       setCurrentIndex(currentIndex - 1);
       
       // Use the type adapter to ensure compatibility
-      setCurrentCard(adaptCard(prevCard));
+      setCurrentCard(prevCard);
       
       // Update URL without triggering a new page load
       window.history.replaceState(null, '', `/cards/${prevCard.id}`);
@@ -64,7 +64,7 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ onClose }) => {
       setCurrentIndex(currentIndex + 1);
       
       // Use the type adapter to ensure compatibility
-      setCurrentCard(adaptCard(nextCard));
+      setCurrentCard(nextCard);
       
       // Update URL without triggering a new page load
       window.history.replaceState(null, '', `/cards/${nextCard.id}`);

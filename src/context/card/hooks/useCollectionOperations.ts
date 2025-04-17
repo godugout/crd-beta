@@ -1,172 +1,169 @@
 
-import { useCallback } from 'react';
-import { useCards } from '@/context/CardContext';
-import { toast } from 'sonner';
+import { useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 import { Collection } from '@/lib/types';
+import { toast } from 'sonner';
 
-export const useCollectionOperations = () => {
-  const { 
-    createCollection, 
-    updateCollection, 
-    deleteCollection, 
-    addCardToCollection, 
-    removeCardFromCollection, 
-    collections 
-  } = useCards();
-  
-  const createNewCollection = useCallback(async (collectionData: Partial<Collection>) => {
+export default function useCollectionOperations() {
+  const [collections, setCollections] = useState<Collection[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+
+  const createCollection = async (collectionData: Partial<Collection>): Promise<Collection> => {
+    setIsLoading(true);
     try {
-      const newCollection = await createCollection(collectionData);
-      toast.success('Collection created successfully');
-      return newCollection;
-    } catch (error) {
-      console.error('Error creating collection:', error);
-      toast.error('Failed to create collection');
-      throw error;
-    }
-  }, [createCollection]);
-  
-  const editCollection = useCallback(async (id: string, collectionData: Partial<Collection>) => {
-    try {
-      const updatedCollection = await updateCollection(id, collectionData);
-      
-      if (updatedCollection) {
-        toast.success('Collection updated successfully');
-      } else {
-        toast.error('Failed to update collection');
-      }
-      
-      return updatedCollection;
-    } catch (error) {
-      console.error('Error updating collection:', error);
-      toast.error('Failed to update collection');
-      throw error;
-    }
-  }, [updateCollection]);
-  
-  const removeCollection = useCallback(async (id: string, onSuccess?: () => void) => {
-    try {
-      const success = await deleteCollection(id);
-      
-      if (success) {
-        toast.success('Collection deleted successfully');
-        if (onSuccess) onSuccess();
-      } else {
-        toast.error('Failed to delete collection');
-      }
-      
-      return success;
-    } catch (error) {
-      console.error('Error deleting collection:', error);
-      toast.error('Failed to delete collection');
-      throw error;
-    }
-  }, [deleteCollection]);
-  
-  const duplicateCollection = useCallback(async (id: string) => {
-    try {
-      const originalCollection = collections.find(collection => collection.id === id);
-      
-      if (!originalCollection) {
-        toast.error('Collection not found');
-        return null;
-      }
-      
-      const { id: _, createdAt, updatedAt, cards, ...collectionData } = originalCollection;
-      
-      const duplicatedCollection = {
+      const newCollection: Collection = {
         ...collectionData,
-        name: `Copy of ${collectionData.name}`
-      };
+        id: uuidv4(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        cards: [],
+        cardIds: [],
+        userId: collectionData.userId || 'anonymous',
+        isPublic: collectionData.isPublic ?? true,
+        name: collectionData.name || 'Untitled Collection',
+        description: collectionData.description || '',
+        coverImageUrl: collectionData.coverImageUrl || '',
+        visibility: collectionData.visibility || 'public',
+        allowComments: collectionData.allowComments ?? true,
+        designMetadata: collectionData.designMetadata || {},
+      } as Collection;
       
-      const newCollection = await createCollection(duplicatedCollection);
-      toast.success('Collection duplicated successfully');
-      
+      setCollections(prevCollections => [...prevCollections, newCollection]);
+      toast.success("Collection created successfully");
       return newCollection;
-    } catch (error) {
-      console.error('Error duplicating collection:', error);
-      toast.error('Failed to duplicate collection');
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Failed to create collection');
+      setError(error);
+      toast.error(`Error creating collection: ${error.message}`);
       throw error;
+    } finally {
+      setIsLoading(false);
     }
-  }, [createCollection, collections]);
-  
-  const addCardToExistingCollection = useCallback(async (cardId: string, collectionId: string) => {
-    try {
-      const success = await addCardToCollection(cardId, collectionId);
-      
-      if (success) {
-        toast.success('Card added to collection');
-      } else {
-        toast.error('Failed to add card to collection');
-      }
-      
-      return success;
-    } catch (error) {
-      console.error('Error adding card to collection:', error);
-      toast.error('Failed to add card to collection');
-      throw error;
-    }
-  }, [addCardToCollection]);
-  
-  const removeCardFromExistingCollection = useCallback(async (cardId: string, collectionId: string) => {
-    try {
-      const success = await removeCardFromCollection(cardId, collectionId);
-      
-      if (success) {
-        toast.success('Card removed from collection');
-      } else {
-        toast.error('Failed to remove card from collection');
-      }
-      
-      return success;
-    } catch (error) {
-      console.error('Error removing card from collection:', error);
-      toast.error('Failed to remove card from collection');
-      throw error;
-    }
-  }, [removeCardFromCollection]);
-  
-  const shareCollection = useCallback((collection: Collection) => {
-    const shareUrl = `${window.location.origin}/collections/${collection.id}`;
-    
-    if (navigator.share) {
-      navigator.share({
-        title: collection.name,
-        text: collection.description || 'Check out this collection!',
-        url: shareUrl
-      })
-        .then(() => {
-          console.log('Successfully shared');
-        })
-        .catch((error) => {
-          console.error('Error sharing:', error);
-          copyToClipboard(shareUrl);
-        });
-    } else {
-      copyToClipboard(shareUrl);
-    }
-  }, []);
-  
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text)
-      .then(() => {
-        toast.success('Link copied to clipboard');
-      })
-      .catch((err) => {
-        console.error('Failed to copy:', err);
-        toast.error('Failed to copy link');
-      });
   };
-  
-  return {
-    createCollection: createNewCollection,
-    editCollection,
-    removeCollection,
-    duplicateCollection,
-    addCardToCollection: addCardToExistingCollection,
-    removeCardFromCollection: removeCardFromExistingCollection,
-    shareCollection
-  };
-};
 
-export default useCollectionOperations;
+  const updateCollection = async (id: string, updates: Partial<Collection>): Promise<Collection> => {
+    setIsLoading(true);
+    try {
+      let updatedCollection: Collection | null = null;
+      
+      setCollections(prevCollections => {
+        const updated = prevCollections.map(collection => {
+          if (collection.id === id) {
+            const updated = {
+              ...collection,
+              ...updates,
+              updatedAt: new Date().toISOString()
+            };
+            updatedCollection = updated;
+            return updated;
+          }
+          return collection;
+        });
+        return updated;
+      });
+      
+      if (!updatedCollection) {
+        throw new Error(`Collection with id ${id} not found`);
+      }
+      
+      toast.success("Collection updated successfully");
+      return updatedCollection;
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Failed to update collection');
+      setError(error);
+      toast.error(`Error updating collection: ${error.message}`);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const deleteCollection = async (id: string): Promise<boolean> => {
+    setIsLoading(true);
+    try {
+      setCollections(prevCollections => prevCollections.filter(collection => collection.id !== id));
+      toast.success("Collection deleted successfully");
+      return true;
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Failed to delete collection');
+      setError(error);
+      toast.error(`Error deleting collection: ${error.message}`);
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const addCardToCollection = async (cardId: string, collectionId: string): Promise<boolean> => {
+    setIsLoading(true);
+    try {
+      setCollections(prevCollections => {
+        return prevCollections.map(collection => {
+          if (collection.id === collectionId) {
+            // Don't add if card is already in the collection
+            if (collection.cardIds.includes(cardId)) {
+              return collection;
+            }
+            
+            return {
+              ...collection,
+              cardIds: [...collection.cardIds, cardId],
+              updatedAt: new Date().toISOString()
+            };
+          }
+          return collection;
+        });
+      });
+      
+      toast.success("Card added to collection");
+      return true;
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Failed to add card to collection');
+      setError(error);
+      toast.error(`Error adding card to collection: ${error.message}`);
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const removeCardFromCollection = async (cardId: string, collectionId: string): Promise<boolean> => {
+    setIsLoading(true);
+    try {
+      setCollections(prevCollections => {
+        return prevCollections.map(collection => {
+          if (collection.id === collectionId) {
+            return {
+              ...collection,
+              cardIds: collection.cardIds.filter(id => id !== cardId),
+              updatedAt: new Date().toISOString()
+            };
+          }
+          return collection;
+        });
+      });
+      
+      toast.success("Card removed from collection");
+      return true;
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Failed to remove card from collection');
+      setError(error);
+      toast.error(`Error removing card from collection: ${error.message}`);
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return {
+    collections,
+    isLoading,
+    error,
+    createCollection,
+    updateCollection,
+    deleteCollection,
+    addCardToCollection,
+    removeCardFromCollection
+  };
+}

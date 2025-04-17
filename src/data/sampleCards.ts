@@ -1,5 +1,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
+import { Card } from '@/lib/types';
+import { DEFAULT_DESIGN_METADATA } from '@/lib/utils/cardDefaults';
 
 const sampleCards = [
   {
@@ -15,33 +17,7 @@ const sampleCards = [
     updatedAt: new Date().toISOString(),
     effects: [],
     rarity: 'common',
-    designMetadata: {
-      cardStyle: {
-        template: 'standard',
-        effect: 'standard',
-        borderRadius: '8px',
-        borderColor: '#000000',
-        shadowColor: '#000000',
-        frameWidth: 5,
-        frameColor: '#000000'
-      },
-      textStyle: {
-        titleColor: '#000000',
-        titleAlignment: 'center',
-        titleWeight: 'bold',
-        descriptionColor: '#333333'
-      },
-      cardMetadata: {
-        category: 'sports',
-        series: 'baseball',
-        cardType: 'standard'
-      },
-      marketMetadata: {
-        isPrintable: true,
-        isForSale: false,
-        includeInCatalog: false
-      }
-    }
+    designMetadata: DEFAULT_DESIGN_METADATA
   },
   {
     id: uuidv4(),
@@ -56,33 +32,7 @@ const sampleCards = [
     updatedAt: new Date().toISOString(),
     effects: ['Holographic'],
     rarity: 'rare',
-    designMetadata: {
-      cardStyle: {
-        template: 'premium',
-        effect: 'holographic',
-        borderRadius: '8px',
-        borderColor: '#000000',
-        shadowColor: '#000000',
-        frameWidth: 5,
-        frameColor: '#000000'
-      },
-      textStyle: {
-        titleColor: '#000000',
-        titleAlignment: 'center',
-        titleWeight: 'bold',
-        descriptionColor: '#333333'
-      },
-      cardMetadata: {
-        category: 'sports',
-        series: 'basketball',
-        cardType: 'premium'
-      },
-      marketMetadata: {
-        isPrintable: true,
-        isForSale: false,
-        includeInCatalog: false
-      }
-    }
+    designMetadata: DEFAULT_DESIGN_METADATA
   }
 ];
 

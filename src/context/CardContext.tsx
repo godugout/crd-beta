@@ -3,6 +3,7 @@ import { Card, Collection } from '@/lib/types';
 import { toast } from 'sonner';
 import { adaptToCard } from '@/lib/adapters/cardAdapter';
 import { v4 as uuidv4 } from 'uuid';
+import sampleCards from '@/data/sampleCards';
 
 export type { Card, Collection };
 
@@ -166,22 +167,21 @@ export const CardProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const handleCreateCollection = async (collectionData: Partial<Collection>): Promise<Collection> => {
     try {
       const newCollection: Collection = {
+        ...collectionData,
         id: uuidv4(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        cards: [],
+        cardIds: [],
+        userId: collectionData.userId || 'anonymous',
+        isPublic: collectionData.isPublic ?? true,
         name: collectionData.name || 'Untitled Collection',
         description: collectionData.description || '',
         coverImageUrl: collectionData.coverImageUrl || '',
-        userId: collectionData.userId || 'anonymous',
-        cards: [],
-        cardIds: collectionData.cardIds || [],
         visibility: collectionData.visibility || 'public',
-        allowComments: collectionData.allowComments !== undefined ? collectionData.allowComments : true,
-        isPublic: collectionData.isPublic !== undefined ? collectionData.isPublic : true,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        designMetadata: collectionData.designMetadata || {},
-        tags: collectionData.tags || [],
-        instagramSource: collectionData.instagramSource
-      };
+        allowComments: collectionData.allowComments ?? true,
+        designMetadata: collectionData.designMetadata || {}
+      } as Collection;
       
       setCollections(prevCollections => [...prevCollections, newCollection]);
       return Promise.resolve(newCollection);
@@ -193,26 +193,22 @@ export const CardProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const handleUpdateCollection = async (id: string, updates: Partial<Collection>): Promise<Collection> => {
     try {
-      let updatedCollection: Collection | null = null;
-      
-      const updatedCollections = collections.map(collection => {
-        if (collection.id === id) {
-          updatedCollection = {
-            ...collection,
-            ...updates,
-            updatedAt: new Date().toISOString()
-          };
-          return updatedCollection;
-        }
-        return collection;
-      });
-      
-      if (updatedCollection) {
-        setCollections(updatedCollections);
-        return Promise.resolve(updatedCollection);
+      const existingCollection = collections.find(collection => collection.id === id);
+      if (!existingCollection) {
+        throw new Error(`Collection with ID ${id} not found`);
       }
       
-      return Promise.reject(new Error('Collection not found'));
+      const updatedCollection = {
+        ...existingCollection,
+        ...updates,
+        updatedAt: new Date().toISOString()
+      };
+      
+      setCollections(prevCollections => 
+        prevCollections.map(collection => collection.id === id ? updatedCollection : collection)
+      );
+      
+      return Promise.resolve(updatedCollection);
     } catch (error: any) {
       setError(error.message || 'Failed to update collection');
       return Promise.reject(error);
@@ -222,13 +218,8 @@ export const CardProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const handleDeleteCollection = async (id: string): Promise<boolean> => {
     try {
       const filteredCollections = collections.filter(collection => collection.id !== id);
-      
-      if (filteredCollections.length < collections.length) {
-        setCollections(filteredCollections);
-        return Promise.resolve(true);
-      }
-      
-      return Promise.resolve(false);
+      setCollections(filteredCollections);
+      return Promise.resolve(true);
     } catch (error: any) {
       setError(error.message || 'Failed to delete collection');
       return Promise.resolve(false);
@@ -318,9 +309,9 @@ export const CardProvider: React.FC<{ children: React.ReactNode }> = ({ children
   return <CardContext.Provider value={value}>{children}</CardContext.Provider>;
 };
 
-export const useCards = (): CardContextProps => {
+export const useCards = () => {
   const context = useContext(CardContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useCards must be used within a CardProvider');
   }
   return context;

@@ -1,22 +1,8 @@
-
 import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/lib/supabase';
-import { Card } from '@/lib/types/card';
+import { Card } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { adaptToCard } from '@/lib/adapters/cardAdapter';
-
-interface CardRecord extends Card {
-  // This interface ensures CardRecord has all the properties of Card
-  collection_id?: string;
-  created_at: string;
-  creator_id: string;
-  design_metadata: any;
-  edition_size: number;
-  image_url: string;
-  is_public: boolean;
-  price?: number;
-  user_id: string;
-}
+import { DEFAULT_DESIGN_METADATA } from '@/lib/utils/cardDefaults';
 
 export function useArCardViewer(cardId?: string) {
   const [cards, setCards] = useState<Card[]>([]);
@@ -52,6 +38,8 @@ export function useArCardViewer(cardId?: string) {
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
           effects: ['Holographic'],
+          rarity: 'common',
+          designMetadata: DEFAULT_DESIGN_METADATA
         }),
         adaptToCard({
           id: '2',
@@ -64,6 +52,8 @@ export function useArCardViewer(cardId?: string) {
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
           effects: ['Refractor'],
+          rarity: 'rare',
+          designMetadata: DEFAULT_DESIGN_METADATA
         }),
       ];
       
@@ -74,26 +64,6 @@ export function useArCardViewer(cardId?: string) {
       //   .eq('ar_enabled', true);
       
       // if (error) throw error;
-      
-      // Process fetched data (commented out for demo)
-      // if (data) {
-      //   const processedCards = data.map(item => adaptToCard({
-      //     id: item.id,
-      //     title: item.title || '',
-      //     description: item.description || '',
-      //     imageUrl: item.image_url || '',
-      //     thumbnailUrl: item.thumbnail_url || '',
-      //     tags: item.tags || [],
-      //     collectionId: item.collection_id || '',
-      //     createdAt: item.created_at || new Date().toISOString(),
-      //     updatedAt: item.updated_at || new Date().toISOString(),
-      //     userId: item.user_id || '',
-      //     isPublic: item.is_public || false,
-      //     designMetadata: item.design_metadata || {},
-      //     effects: item.effects || ['Holographic'], // Ensure effects is always populated
-      //   }));
-      //   setCards(processedCards);
-      // }
       
       setCards(demoCards);
 
@@ -211,7 +181,6 @@ export function useArCardViewer(cardId?: string) {
     openViewer,
     closeViewer,
     fetchCards,
-    // Add the missing properties
     activeCard,
     arCards,
     availableCards,
