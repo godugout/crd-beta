@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { User } from '@/lib/types';
+import { useAuth } from '@/hooks/useAuth';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
@@ -12,32 +12,31 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { User as UserIcon, Settings, LogOut } from 'lucide-react';
+import { User as UserIcon, Settings, LogOut, CreditCard, GaugeCircle } from 'lucide-react';
 
 export interface UserDropdownProps {
-  user: User;
-  onSignOut: () => Promise<void>;
-  isOpen?: boolean;
-  onClose?: () => void;
+  className?: string;
+  onOpenChange?: (open: boolean) => void;
 }
 
-const UserDropdown: React.FC<UserDropdownProps> = ({ 
-  user, 
-  onSignOut,
-  isOpen = false,
-  onClose = () => {}
+const UserDropdown: React.FC<UserDropdownProps> = ({
+  className,
+  onOpenChange
 }) => {
-  const [open, setOpen] = useState(isOpen);
+  const { user, signOut } = useAuth();
+  const [open, setOpen] = useState(false);
+  
+  if (!user) return null;
   
   const handleOpenChange = (newOpen: boolean) => {
     setOpen(newOpen);
-    if (!newOpen && onClose) {
-      onClose();
+    if (onOpenChange) {
+      onOpenChange(newOpen);
     }
   };
   
   const handleSignOut = async () => {
-    await onSignOut();
+    await signOut();
     setOpen(false);
   };
   
@@ -55,7 +54,7 @@ const UserDropdown: React.FC<UserDropdownProps> = ({
   
   return (
     <DropdownMenu open={open} onOpenChange={handleOpenChange}>
-      <DropdownMenuTrigger className="outline-none">
+      <DropdownMenuTrigger className={`outline-none ${className}`}>
         <Avatar className="h-8 w-8">
           <AvatarImage src={user.avatarUrl} alt={getDisplayName()} />
           <AvatarFallback className="bg-primary/10">
@@ -74,6 +73,18 @@ const UserDropdown: React.FC<UserDropdownProps> = ({
             <Link to="/profile">
               <UserIcon className="mr-2 h-4 w-4" />
               <span>Profile</span>
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link to="/dashboard">
+              <GaugeCircle className="mr-2 h-4 w-4" />
+              <span>Dashboard</span>
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link to="/cards">
+              <CreditCard className="mr-2 h-4 w-4" />
+              <span>My Cards</span>
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>

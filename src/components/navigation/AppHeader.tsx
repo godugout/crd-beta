@@ -1,6 +1,7 @@
+
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Search, PlusCircle, User, Menu, X, Palette, Sparkles } from 'lucide-react';
+import { Search, PlusCircle, Menu, X, Palette, Sparkles, LogIn } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { CrdButton } from '@/components/ui/crd-button';
@@ -9,11 +10,12 @@ import { mainNavItems } from '@/config/navigation';
 import { useBrandTheme } from '@/context/BrandThemeContext';
 import ThemeSwitcher from '@/components/brand/ThemeSwitcher';
 import { useNavbar } from '@/hooks/use-navbar';
+import UserDropdown from '@/components/navbar/UserDropdown';
 
 const AppHeader: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
-  const { user, signOut } = useAuth();
+  const { user, signOut, isAuthenticated } = useAuth();
   const { currentTheme } = useBrandTheme();
   const { isActive } = useNavbar();
 
@@ -23,15 +25,6 @@ const AppHeader: React.FC = () => {
 
   const closeMenu = () => {
     setIsMenuOpen(false);
-  };
-
-  const handleSignInOut = async () => {
-    if (user) {
-      await signOut();
-    } else {
-      // This would be handled by the sign-in page
-      closeMenu();
-    }
   };
 
   // Use the theme variables for styling
@@ -82,24 +75,14 @@ const AppHeader: React.FC = () => {
           {/* Action Buttons */}
           <div className="flex items-center space-x-2">
             {/* User Profile */}
-            {user ? (
-              <Button 
-                asChild 
-                variant="ghost" 
-                size="icon"
-                className="rounded-full bg-white/10 hover:bg-white/15"
-              >
-                <Link to="/profile">
-                  {user.avatarUrl ? (
-                    <img src={user.avatarUrl} alt={user.name} className="h-8 w-8 rounded-full" />
-                  ) : (
-                    <User className="h-5 w-5 text-white" />
-                  )}
-                </Link>
-              </Button>
+            {isAuthenticated ? (
+              <UserDropdown />
             ) : (
               <Button asChild variant="glass" size="sm" className="rounded-xl">
-                <Link to="/login">Sign In</Link>
+                <Link to="/auth">
+                  <LogIn className="h-4 w-4 mr-2" />
+                  Sign In
+                </Link>
               </Button>
             )}
             
@@ -159,13 +142,16 @@ const AppHeader: React.FC = () => {
             </Link>
             
             <div className="pt-4">
-              <Button
-                onClick={handleSignInOut}
-                className="w-full mb-2 rounded-xl"
-                variant="glass"
-              >
-                {user ? 'Sign Out' : 'Sign In'}
-              </Button>
+              {!isAuthenticated && (
+                <Button
+                  asChild
+                  variant="glass"
+                  className="w-full mb-2 rounded-xl"
+                  onClick={closeMenu}
+                >
+                  <Link to="/auth">Sign In</Link>
+                </Button>
+              )}
               
               <CrdButton asChild variant="spectrum" className="w-full">
                 <Link to="/cards/create" onClick={closeMenu} className="flex items-center justify-center">

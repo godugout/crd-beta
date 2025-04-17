@@ -6,7 +6,7 @@ import HomePage from './pages/HomePage';
 import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
 import NotFound from './pages/NotFound';
-import Auth from './pages/Auth';
+import AuthPage from './pages/AuthPage';
 import CardCollectionPage from './pages/CardCollectionPage';
 import BaseballCardViewer from './pages/BaseballCardViewer';
 import BaseballActionFigure from './pages/BaseballActionFigure';
@@ -23,14 +23,18 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const auth = useAuth();
-  const isAuthenticated = auth.isAuthenticated ?? false;
+  const isAuthenticated = auth.isAuthenticated;
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setLoading(false);
     }, 600);
     
-    console.log('App is initializing', { routes, authStatus: isAuthenticated ? 'authenticated' : 'not authenticated' });
+    console.log('App is initializing', { 
+      routes, 
+      authStatus: isAuthenticated ? 'authenticated' : 'not authenticated',
+      user: auth.user ? `${auth.user.name} (${auth.user.email})` : 'no user'
+    });
 
     try {
       const requiredDeps = [
@@ -49,7 +53,7 @@ function App() {
     }
 
     return () => clearTimeout(timer);
-  }, [isAuthenticated]);
+  }, [isAuthenticated, auth.user]);
 
   if (error) {
     return (
@@ -88,12 +92,13 @@ function App() {
         <CardEnhancedProvider>
           <div className="debug-info fixed bottom-4 left-4 bg-black/80 text-white p-2 text-xs z-50 rounded-md">
             App Loaded | {new Date().toLocaleTimeString()} | {isAuthenticated ? 'Authenticated' : 'Not Authenticated'}
+            {auth.user && ` | ${auth.user.name}`}
           </div>
           
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/emergency" element={<EmergencyPage />} />
-            <Route path="/auth" element={<Auth />} />
+            <Route path="/auth" element={<AuthPage />} />
 
             {routes.map((route, index) => {
               if (route.children) {

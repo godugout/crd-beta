@@ -1,198 +1,382 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { User } from '@/lib/types';
-import { UserRole } from '@/lib/types/UserTypes';
+import { AuthContextType, AuthSession, AuthState, AuthUser } from '@/lib/types/auth';
+import { UserRole } from '@/lib/types/user';
+import { toast } from 'sonner';
+import { logger } from '@/lib/monitoring/logger';
 
-// Define auth context type
-interface AuthContextType {
-  user: User | null;
-  isLoading: boolean;
-  isAuthenticated: boolean;
-  error: string | null;
-  signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, userData: Partial<User>) => Promise<void>;
-  signOut: () => Promise<void>;
-  signInWithProvider: (provider: 'google' | 'github' | 'facebook') => Promise<void>;
-  updateUserProfile: (data: Partial<User>) => Promise<void>;
-}
+// Default auth context
+const initialState: AuthState = {
+  user: null,
+  session: null,
+  isAuthenticated: false,
+  isLoading: true,
+  error: null,
+};
 
+// Create the auth context
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Mock admin user for development
-const MOCK_ADMIN_USER: User = {
-  id: 'admin-user-id',
-  email: 'admin@example.com',
-  name: 'Admin User',
-  displayName: 'System Admin',
+// Mock user data for development
+const MOCK_USER: AuthUser = {
+  id: 'mock-user-id',
+  email: 'dusty@godugout.com',
+  name: 'Dusty Baker',
+  displayName: 'Dusty',
   role: UserRole.ADMIN,
-  avatarUrl: 'https://api.dicebear.com/7.x/initials/svg?seed=Admin',
-  bio: 'System administrator with full access to all features.',
+  permissions: ['all'],
+  avatarUrl: 'https://api.dicebear.com/7.x/initials/svg?seed=DB',
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
 };
 
-// Default user for development
-const DEFAULT_USER: User = {
-  id: 'mock-user-id',
-  email: 'user@example.com',
-  name: 'Demo User',
-  role: UserRole.ADMIN,
-  permissions: ['all'],
-  preferences: {
-    theme: 'light',
-    notifications: true
-  }
+// Mock session data
+const MOCK_SESSION: AuthSession = {
+  accessToken: 'mock-access-token',
+  refreshToken: 'mock-refresh-token',
+  expiresAt: Date.now() + 3600000, // Expires in 1 hour
 };
 
-export const AuthProvider: React.FC<{ children: React.ReactNode; autoLogin?: boolean }> = ({ 
-  children,
-  autoLogin = true // Default to auto login
-}) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  // Auto login for development
+/**
+ * The main Auth Provider for the application
+ */
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [state, setState] = useState<AuthState>(initialState);
+  
+  // Initialize auth state
   useEffect(() => {
     const initAuth = async () => {
-      setIsLoading(true);
-      
       try {
-        // For development: auto login as admin
-        if (autoLogin) {
-          console.log('🔑 Auto-logging in as admin for development');
-          setUser(MOCK_ADMIN_USER);
-          localStorage.setItem('auth-user', JSON.stringify(MOCK_ADMIN_USER));
-        } else {
-          // Check if there's a stored user
-          const storedUser = localStorage.getItem('auth-user');
-          if (storedUser) {
-            setUser(JSON.parse(storedUser));
+        // First check if we have a session in localStorage
+        const savedSession = localStorage.getItem('auth_session');
+        const savedUser = localStorage.getItem('auth_user');
+        
+        if (savedSession && savedUser) {
+          try {
+            const sessionData = JSON.parse(savedSession);
+            const userData = JSON.parse(savedUser);
+            
+            // Check if session is expired
+            if (sessionData.expiresAt && sessionData.expiresAt > Date.now()) {
+              setState({
+                user: userData,
+                session: sessionData,
+                isAuthenticated: true,
+                isLoading: false,
+                error: null,
+              });
+              logger.info('Auth: Restored session from localStorage');
+              return;
+            }
+          } catch (parseError) {
+            logger.error('Auth: Failed to parse stored session', parseError);
+            // Continue with initialization if parsing fails
           }
         }
+        
+        // For development: auto login with mock user
+        if (import.meta.env.DEV) {
+          setState({
+            user: MOCK_USER,
+            session: MOCK_SESSION,
+            isAuthenticated: true,
+            isLoading: false,
+            error: null,
+          });
+          localStorage.setItem('auth_user', JSON.stringify(MOCK_USER));
+          localStorage.setItem('auth_session', JSON.stringify(MOCK_SESSION));
+          logger.info('Auth: Using mock user for development');
+          return;
+        }
+        
+        // No valid session found
+        setState({
+          ...initialState,
+          isLoading: false,
+        });
       } catch (err) {
-        console.error('Auth initialization error:', err);
-        setError('Failed to initialize authentication');
-      } finally {
-        setIsLoading(false);
+        logger.error('Auth: Initialization error', err);
+        setState({
+          ...initialState,
+          isLoading: false,
+          error: 'Authentication system initialization failed',
+        });
       }
     };
 
     initAuth();
-  }, [autoLogin]);
+  }, []);
 
-  // Authentication methods
+  // Sign in implementation
   const signIn = async (email: string, password: string) => {
-    setIsLoading(true);
-    setError(null);
+    setState(prev => ({ ...prev, isLoading: true, error: null }));
     
     try {
-      // In a real app, you'd call your auth service here
-      // For now, simulate login with mock admin
-      setUser(MOCK_ADMIN_USER);
-      localStorage.setItem('auth-user', JSON.stringify(MOCK_ADMIN_USER));
-    } catch (err: any) {
-      setError(err.message || 'Failed to sign in');
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const signUp = async (email: string, password: string, userData: Partial<User>) => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      // In a real app, you'd call your auth service here
-      // For now, just log the action
-      console.log('Sign up called with', { email, userData });
-      setUser(MOCK_ADMIN_USER);
-      localStorage.setItem('auth-user', JSON.stringify(MOCK_ADMIN_USER));
-    } catch (err: any) {
-      setError(err.message || 'Failed to sign up');
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const signOut = async () => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      // In a real app, you'd call your auth service here
-      setUser(null);
-      localStorage.removeItem('auth-user');
-    } catch (err: any) {
-      setError(err.message || 'Failed to sign out');
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const signInWithProvider = async (provider: 'google' | 'github' | 'facebook') => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      // In a real app, you'd call your auth service here
-      console.log(`Sign in with ${provider} called`);
-      setUser(MOCK_ADMIN_USER);
-      localStorage.setItem('auth-user', JSON.stringify(MOCK_ADMIN_USER));
-    } catch (err: any) {
-      setError(err.message || `Failed to sign in with ${provider}`);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const updateUserProfile = async (data: Partial<User>) => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      // In a real app, you'd call your auth service here
-      if (user) {
-        const updatedUser = { ...user, ...data };
-        setUser(updatedUser);
-        localStorage.setItem('auth-user', JSON.stringify(updatedUser));
+      // In a real app, we'd call an auth service here
+      // For now, just simulate a login with mock data
+      
+      // Implement credential validation
+      if (email !== MOCK_USER.email || password !== 'CRD') {
+        setState(prev => ({ 
+          ...prev, 
+          isLoading: false, 
+          error: 'Invalid email or password' 
+        }));
+        logger.warn('Auth: Failed login attempt', { email });
+        return { success: false, error: 'Invalid email or password' };
       }
-    } catch (err: any) {
-      setError(err.message || 'Failed to update profile');
-      throw err;
-    } finally {
-      setIsLoading(false);
+      
+      // Successful login
+      const session: AuthSession = {
+        accessToken: 'mock-access-token-' + Date.now(),
+        refreshToken: 'mock-refresh-token-' + Date.now(),
+        expiresAt: Date.now() + 3600000, // 1 hour
+      };
+      
+      setState({
+        user: MOCK_USER,
+        session,
+        isAuthenticated: true,
+        isLoading: false,
+        error: null,
+      });
+      
+      localStorage.setItem('auth_user', JSON.stringify(MOCK_USER));
+      localStorage.setItem('auth_session', JSON.stringify(session));
+      
+      logger.info('Auth: User signed in', { userId: MOCK_USER.id });
+      return { success: true };
+    } catch (error: any) {
+      const errorMessage = error.message || 'Failed to sign in';
+      logger.error('Auth: Sign in error', error);
+      setState(prev => ({ 
+        ...prev, 
+        isLoading: false, 
+        error: errorMessage 
+      }));
+      return { success: false, error: errorMessage };
     }
   };
 
-  const value = {
-    user,
-    isLoading,
-    isAuthenticated: !!user,
-    error,
+  // Sign up implementation
+  const signUp = async (email: string, password: string, userData?: Partial<AuthUser>) => {
+    setState(prev => ({ ...prev, isLoading: true, error: null }));
+    
+    try {
+      // In a real app, we'd call an auth service here
+      // For now, just simulate a signup with mock data
+      
+      // Check if email is already used (mock check)
+      if (email === MOCK_USER.email) {
+        setState(prev => ({ 
+          ...prev, 
+          isLoading: false, 
+          error: 'Email already in use' 
+        }));
+        return { success: false, error: 'Email already in use' };
+      }
+      
+      // Create a new user
+      const newUser: AuthUser = {
+        id: 'user-' + Date.now(),
+        email,
+        name: userData?.name || email.split('@')[0],
+        displayName: userData?.displayName,
+        role: UserRole.USER,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      
+      const session: AuthSession = {
+        accessToken: 'access-token-' + Date.now(),
+        refreshToken: 'refresh-token-' + Date.now(),
+        expiresAt: Date.now() + 3600000, // 1 hour
+      };
+      
+      setState({
+        user: newUser,
+        session,
+        isAuthenticated: true,
+        isLoading: false,
+        error: null,
+      });
+      
+      localStorage.setItem('auth_user', JSON.stringify(newUser));
+      localStorage.setItem('auth_session', JSON.stringify(session));
+      
+      logger.info('Auth: User signed up', { userId: newUser.id });
+      return { success: true };
+    } catch (error: any) {
+      const errorMessage = error.message || 'Failed to sign up';
+      logger.error('Auth: Sign up error', error);
+      setState(prev => ({ 
+        ...prev, 
+        isLoading: false, 
+        error: errorMessage 
+      }));
+      return { success: false, error: errorMessage };
+    }
+  };
+
+  // Sign out implementation
+  const signOut = async () => {
+    setState(prev => ({ ...prev, isLoading: true }));
+    
+    try {
+      // In a real app, we'd call an auth service here
+      
+      // Clear local storage
+      localStorage.removeItem('auth_user');
+      localStorage.removeItem('auth_session');
+      
+      setState({
+        user: null,
+        session: null,
+        isAuthenticated: false,
+        isLoading: false,
+        error: null,
+      });
+      
+      logger.info('Auth: User signed out');
+    } catch (error) {
+      logger.error('Auth: Sign out error', error);
+      // Still sign out the user locally even if the server request fails
+      setState({
+        user: null,
+        session: null,
+        isAuthenticated: false,
+        isLoading: false,
+        error: null,
+      });
+    }
+  };
+
+  // Reset password implementation
+  const resetPassword = async (email: string) => {
+    setState(prev => ({ ...prev, isLoading: true }));
+    
+    try {
+      // In a real app, we'd call an auth service here
+      // For now, just simulate success
+      
+      setState(prev => ({ ...prev, isLoading: false }));
+      
+      logger.info('Auth: Password reset requested', { email });
+      return { success: true };
+    } catch (error: any) {
+      const errorMessage = error.message || 'Failed to reset password';
+      logger.error('Auth: Password reset error', error);
+      setState(prev => ({ 
+        ...prev, 
+        isLoading: false, 
+        error: errorMessage 
+      }));
+      return { success: false, error: errorMessage };
+    }
+  };
+
+  // Update profile implementation
+  const updateProfile = async (data: Partial<AuthUser>) => {
+    setState(prev => ({ ...prev, isLoading: true }));
+    
+    try {
+      // Make sure we have a user to update
+      if (!state.user) {
+        throw new Error('No authenticated user');
+      }
+      
+      // In a real app, we'd call an API service here
+      // For now, just update the local user data
+      const updatedUser = { ...state.user, ...data, updatedAt: new Date().toISOString() };
+      
+      setState(prev => ({
+        ...prev,
+        user: updatedUser,
+        isLoading: false,
+      }));
+      
+      localStorage.setItem('auth_user', JSON.stringify(updatedUser));
+      
+      logger.info('Auth: Profile updated', { userId: updatedUser.id });
+      return { success: true };
+    } catch (error: any) {
+      const errorMessage = error.message || 'Failed to update profile';
+      logger.error('Auth: Profile update error', error);
+      setState(prev => ({ 
+        ...prev, 
+        isLoading: false, 
+        error: errorMessage 
+      }));
+      return { success: false, error: errorMessage };
+    }
+  };
+
+  // Session refresh implementation
+  const refreshSession = async () => {
+    if (!state.session?.refreshToken) return false;
+    
+    setState(prev => ({ ...prev, isLoading: true }));
+    
+    try {
+      // In a real app, we'd call an auth service here
+      // For now, just simulate a session refresh
+      
+      const newSession: AuthSession = {
+        accessToken: 'refreshed-access-token-' + Date.now(),
+        refreshToken: state.session.refreshToken,
+        expiresAt: Date.now() + 3600000, // 1 hour
+      };
+      
+      setState(prev => ({
+        ...prev,
+        session: newSession,
+        isLoading: false,
+      }));
+      
+      localStorage.setItem('auth_session', JSON.stringify(newSession));
+      
+      logger.info('Auth: Session refreshed');
+      return true;
+    } catch (error) {
+      logger.error('Auth: Session refresh error', error);
+      setState(prev => ({ 
+        ...prev, 
+        isLoading: false,
+        error: 'Failed to refresh session'
+      }));
+      return false;
+    }
+  };
+
+  // Create the context value with all methods and state
+  const contextValue: AuthContextType = {
+    ...state,
     signIn,
     signUp,
     signOut,
-    signInWithProvider,
-    updateUserProfile
+    resetPassword,
+    updateProfile,
+    refreshSession,
+    // Add loading as an alias to isLoading for backward compatibility
+    loading: state.isLoading
   };
 
   return (
-    <AuthContext.Provider value={value}>
+    <AuthContext.Provider value={contextValue}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-// Custom hook to use the auth context
-export const useAuth = () => {
+/**
+ * Custom hook to use the auth context
+ */
+export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
+  
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
+  
   return context;
 };
