@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -52,20 +53,31 @@ const ReactionButtons: React.FC<ReactionButtonsProps> = ({
     
     setIsLoading(true);
     try {
-      let data: Reaction[] | null = null;
-      let error: any = null;
+      let result;
       
       if (cardId) {
-        const result = await reactionRepository.getReactionsByCardId(cardId);
-        data = result;
-        if (error) {
-          console.error('Error fetching reactions:', error);
-          return;
-        }
+        // Use getReactions with cardId parameter instead of getReactionsByCardId
+        result = await reactionRepository.getReactions({ 
+          cardId, 
+          collectionId: undefined, 
+          commentId: undefined 
+        });
+      } else if (collectionId) {
+        result = await reactionRepository.getReactions({ 
+          cardId: undefined, 
+          collectionId, 
+          commentId: undefined 
+        });
+      } else if (commentId) {
+        result = await reactionRepository.getReactions({ 
+          cardId: undefined, 
+          collectionId: undefined, 
+          commentId 
+        });
       }
       
-      if (data) {
-        setReactions(data);
+      if (result && result.data) {
+        setReactions(result.data);
       }
     } catch (err) {
       console.error('Unexpected error fetching reactions:', err);
@@ -122,7 +134,8 @@ const ReactionButtons: React.FC<ReactionButtonsProps> = ({
         
         setReactions(prev => prev.filter(r => r.userId !== user.id));
       } else {
-        const data = await reactionRepository.addReaction({
+        // Use createReaction instead of addReaction
+        const reactionData = {
           userId: user.id,
           cardId,
           collectionId,
@@ -130,7 +143,9 @@ const ReactionButtons: React.FC<ReactionButtonsProps> = ({
           type,
           targetType: cardId ? 'card' : collectionId ? 'collection' : 'comment',
           targetId: cardId || collectionId || commentId || '',
-        });
+        };
+        
+        const data = await reactionRepository.createReaction(reactionData);
         
         if (!data) {
           toast.error('Failed to update reaction');

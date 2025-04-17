@@ -1,65 +1,54 @@
 
-/**
- * @deprecated This file is maintained for backward compatibility.
- * Please use the centralized type definitions from src/lib/types/cardTypes.ts instead.
- */
+import { CardRarity, DesignMetadata } from './cardTypes';
+import { BaseEntity } from '.';
+import { Reaction } from './interaction';
 
-import { BaseEntity } from './index';
-import { Reaction, Comment } from './interaction';
-import { CardRarity as CardRarityEnum } from './cardTypes';
-import { DesignMetadata } from './cardTypes';
-
-// Fabric swatch interface
-export interface FabricSwatch {
-  id?: string;
-  type: string;
-  team: string;
-  year: string;
-  manufacturer: string;
-  position: string;
-  size: string;
+export interface CardStats {
+  rarity: string;
+  totalViews: number;
+  totalLikes: number;
+  totalShares: number;
+  averageRating: number;
+  totalRatings: number;
+  [key: string]: number | string;
 }
 
-// Base Card interface that contains all common properties
-export interface BaseCard {
-  id: string;
+export interface Card extends BaseEntity {
   title: string;
-  description: string;
+  description?: string;
   imageUrl: string;
-  thumbnailUrl: string;
-  tags: string[];
-  userId: string;
+  thumbnailUrl?: string;
   collectionId?: string;
+  userId?: string;
   teamId?: string;
-  metadata?: Record<string, any>;
-  effects: string[];
-  reactions?: Reaction[];
-  comments?: Comment[];
-  viewCount?: number;
   isPublic?: boolean;
-  rarity?: CardRarityEnum;
+  tags?: string[];
+  designMetadata?: DesignMetadata;
+  reactions?: Reaction[];
+  effects: string[];
+  rarity?: CardRarity;
   player?: string;
   team?: string;
   year?: string;
-  jersey?: string;
-  set?: string;
-  cardNumber?: string;
-  cardType?: string;
-  artist?: string;
-  backgroundColor?: string;
-  textColor?: string;
-  specialEffect?: string;
-  fabricSwatches?: FabricSwatch[];
   name?: string;
-  cardStyle?: string;
-  backTemplate?: string;
-  createdAt: string;
-  updatedAt: string;
-  designMetadata: DesignMetadata;
   isFavorite?: boolean;
+  stats?: CardStats;
 }
 
-export interface Card extends BaseCard {}
-
-// Export the CardRarity enum
-export { CardRarityEnum as CardRarity };
+// EnhancedCard includes additional fields for the application
+export interface EnhancedCard extends Card {
+  views?: number;
+  likes?: number;
+  shares?: number;
+  isAnimated?: boolean;
+  hasAudio?: boolean;
+  hasInteractiveElements?: boolean;
+  isInUserCollection?: boolean;
+  price?: number;
+  edition?: {
+    number: number;
+    total: number;
+  };
+  creatorName?: string;
+  creatorAvatar?: string;
+}

@@ -55,6 +55,8 @@ export const mapTeamFromDb = (dbTeam: DbTeam): Team => {
  * Maps a database user to the application User type
  */
 export const mapUserFromDb = (dbUser: DbUser): User => {
+  const currentTime = new Date().toISOString();
+  
   return {
     id: dbUser.id,
     email: dbUser.email,
@@ -63,7 +65,9 @@ export const mapUserFromDb = (dbUser: DbUser): User => {
     username: dbUser.username,
     isVerified: true,
     isActive: true,
-    permissions: []
+    permissions: [],
+    createdAt: currentTime,
+    updatedAt: currentTime
   };
 };
 
@@ -71,12 +75,16 @@ export const mapUserFromDb = (dbUser: DbUser): User => {
  * Maps a database team member to the application TeamMember type
  */
 export const mapTeamMemberFromDb = (dbMember: DbTeamMember): TeamMember => {
+  const currentTime = new Date().toISOString();
+  
   return {
     id: dbMember.id,
     teamId: dbMember.team_id,
     userId: dbMember.user_id,
     role: dbMember.role as "owner" | "admin" | "member" | "viewer", // Cast to correct type
     joinedAt: dbMember.joined_at,
+    createdAt: currentTime,
+    updatedAt: currentTime,
     user: dbMember.user ? mapUserFromDb(dbMember.user) : undefined
   };
 };

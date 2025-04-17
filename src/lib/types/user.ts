@@ -2,37 +2,56 @@
 import { BaseEntity } from './index';
 
 export enum UserRole {
-  USER = 'user',
   ADMIN = 'admin',
   MODERATOR = 'moderator',
-  TEAM_ADMIN = 'team_admin',
-  ARTIST = 'artist'
+  USER = 'user',
+  GUEST = 'guest'
 }
 
-export interface UserPermission {
-  id: string;
-  name: string;
-  description: string;
-}
+export type UserPermission = 
+  | 'read:own'
+  | 'write:own'
+  | 'delete:own'
+  | 'read:all'
+  | 'write:all'
+  | 'delete:all'
+  | 'manage:users'
+  | 'manage:settings';
 
 export interface User extends BaseEntity {
   email: string;
-  name: string; // Make name required
-  avatarUrl?: string;
+  name?: string;
+  displayName?: string;
   username?: string;
-  role?: UserRole;
+  avatarUrl?: string;
+  role: UserRole;
   isVerified: boolean;
   isActive: boolean;
-  permissions: string[];
-  displayName?: string;
-  bio?: string; // Add the missing bio property
+  permissions: UserPermission[] | string[];
+  bio?: string;
 }
 
-// Define role permissions
-export const ROLE_PERMISSIONS: Record<UserRole, string[]> = {
-  [UserRole.USER]: ['read:own', 'write:own', 'delete:own'],
-  [UserRole.ADMIN]: ['read:all', 'write:all', 'delete:all', 'manage:users'],
-  [UserRole.MODERATOR]: ['read:all', 'moderate:content', 'delete:flagged'],
-  [UserRole.TEAM_ADMIN]: ['read:team', 'write:team', 'delete:team', 'manage:team'],
-  [UserRole.ARTIST]: ['read:own', 'write:own', 'delete:own', 'create:series']
-};
+export interface UserProfile extends BaseEntity {
+  email: string;
+  name?: string;
+  displayName?: string;
+  username?: string;
+  avatarUrl?: string;
+  role: UserRole;
+  isVerified: boolean;
+  isActive: boolean;
+  permissions: UserPermission[] | string[];
+  bio?: string;
+}
+
+export interface UserStats {
+  cardsCreated: number;
+  collectionsCreated: number;
+  favorites: number;
+  followers: number;
+  following: number;
+}
+
+export interface UserWithStats extends User {
+  stats: UserStats;
+}

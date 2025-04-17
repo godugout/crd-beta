@@ -9,7 +9,12 @@ import { commentRepository } from '@/lib/data';
 import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
 import { MessageCircle, SendHorizontal, Reply, Trash, Edit } from 'lucide-react';
-import { adaptSchemaCommentToInteractionComment, adaptInteractionCommentToSchemaComment } from '@/lib/adapters/commentAdapter';
+import { 
+  DbComment, 
+  adaptSchemaCommentToInteractionComment, 
+  adaptInteractionCommentToSchemaComment,
+  adaptCommentToDbComment
+} from '@/lib/adapters/commentAdapter';
 
 interface CommentSectionProps {
   cardId?: string;
@@ -49,7 +54,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ cardId, collectionId, t
       
       if (data) {
         // Convert schema comments to interaction comments
-        const adaptedComments = data.map(comment => adaptSchemaCommentToInteractionComment(comment));
+        const adaptedComments = data.map(comment => adaptSchemaCommentToInteractionComment(comment as DbComment));
         setComments(adaptedComments);
         adaptedComments.forEach(comment => {
           if (comment.id) {
@@ -76,7 +81,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ cardId, collectionId, t
       }
       
       if (data && data.length > 0) {
-        const adaptedReplies = data.map(comment => adaptSchemaCommentToInteractionComment(comment));
+        const adaptedReplies = data.map(comment => adaptSchemaCommentToInteractionComment(comment as DbComment));
         setRepliesByParentId(prev => ({
           ...prev,
           [parentId]: adaptedReplies
@@ -116,7 +121,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ cardId, collectionId, t
         setNewComment('');
         
         // Convert schema comment back to interaction comment
-        const adaptedComment = adaptSchemaCommentToInteractionComment(data);
+        const adaptedComment = adaptSchemaCommentToInteractionComment(data as DbComment);
         
         if (replyTo) {
           setRepliesByParentId(prev => ({
@@ -150,7 +155,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ cardId, collectionId, t
         toast.success('Comment updated successfully');
         
         // Convert schema comment to interaction comment
-        const adaptedComment = adaptSchemaCommentToInteractionComment(data);
+        const adaptedComment = adaptSchemaCommentToInteractionComment(data as DbComment);
         
         if (adaptedComment.parentId) {
           setRepliesByParentId(prev => ({
@@ -217,7 +222,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ cardId, collectionId, t
     setEditText('');
   };
   
-  const renderCommentItem = (comment: Comment, isReply = false) => {
+  function renderCommentItem(comment: Comment, isReply = false) {
     const isEditing = editingId === comment.id;
     const isOwnComment = user && comment.userId === user.id;
     const replies = repliesByParentId[comment.id] || [];

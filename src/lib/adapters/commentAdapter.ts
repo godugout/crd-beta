@@ -54,22 +54,33 @@ export const dbUserToUser = (dbUser: DbUser): User => {
   };
 };
 
-// Add the missing adapter functions
-export const adaptSchemaCommentToInteractionComment = (schemaComment: DbComment): Comment => {
+// Convert Comment from application format to DbComment format
+export const adaptCommentToDbComment = (comment: Comment): DbComment => {
   return {
-    id: schemaComment.id,
-    content: schemaComment.content,
-    userId: schemaComment.user_id,
-    cardId: schemaComment.card_id,
-    collectionId: schemaComment.collection_id,
-    teamId: schemaComment.team_id,
-    parentId: schemaComment.parent_id,
-    createdAt: schemaComment.created_at,
-    updatedAt: schemaComment.updated_at,
-    user: schemaComment.user ? dbUserToUser(schemaComment.user) : undefined
+    id: comment.id,
+    content: comment.content,
+    user_id: comment.userId,
+    card_id: comment.cardId,
+    collection_id: comment.collectionId,
+    team_id: comment.teamId,
+    parent_id: comment.parentId,
+    created_at: comment.createdAt || new Date().toISOString(),
+    updated_at: comment.updatedAt || new Date().toISOString(),
+    user: comment.user ? {
+      id: comment.user.id,
+      email: comment.user.email,
+      display_name: comment.user.displayName,
+      name: comment.user.name,
+      username: comment.user.username,
+      avatar_url: comment.user.avatarUrl,
+      role: comment.user.role,
+      created_at: comment.user.createdAt || new Date().toISOString(),
+      updated_at: comment.user.updatedAt || new Date().toISOString()
+    } : undefined
   };
 };
 
+// Convert Comment Input to DbComment
 export const adaptInteractionCommentToSchemaComment = (comment: CommentInput): DbComment => {
   const timestamp = new Date().toISOString();
   
@@ -86,6 +97,22 @@ export const adaptInteractionCommentToSchemaComment = (comment: CommentInput): D
   };
 };
 
+// Convert DbComment to application Comment
+export const adaptSchemaCommentToInteractionComment = (schemaComment: DbComment): Comment => {
+  return {
+    id: schemaComment.id,
+    content: schemaComment.content,
+    userId: schemaComment.user_id,
+    cardId: schemaComment.card_id,
+    collectionId: schemaComment.collection_id,
+    teamId: schemaComment.team_id,
+    parentId: schemaComment.parent_id,
+    createdAt: schemaComment.created_at,
+    updatedAt: schemaComment.updated_at,
+    user: schemaComment.user ? dbUserToUser(schemaComment.user) : undefined
+  };
+};
+
 // Keep original functions for backwards compatibility
 export const dbCommentToComment = adaptSchemaCommentToInteractionComment;
-export const commentToDbComment = adaptInteractionCommentToSchemaComment;
+export const commentToDbComment = adaptCommentToDbComment;

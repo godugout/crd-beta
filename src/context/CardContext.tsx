@@ -1,190 +1,117 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Card, CardRarity, Collection } from '@/lib/types';
+import { Card, CardRarity } from '@/lib/types';
+import { sampleCards } from '@/lib/data/sampleCards';
 
-// Enhanced card with additional client-state properties
-export interface EnhancedCard extends Card {
-  isFavorite?: boolean;
-  viewCount?: number;
-  lastViewed?: string; // Changed from Date to string for JSON compatibility
-  player?: string;     // Added missing property
-  team?: string;       // Added missing property
-  year?: string;       // Added missing property
-}
-
-export interface EnhancedCardContextProps {
-  cards: EnhancedCard[];
-  favorites: EnhancedCard[];
+interface CardContextProps {
+  cards: Card[];
+  favorites: Card[];
   loading: boolean;
-  isLoading?: boolean; // Added for compatibility
   error: Error | null;
   fetchCards: () => Promise<void>;
   addCard: (card: Partial<Card>) => Promise<Card>;
-  updateCard: (id: string, updates: Partial<Card>) => Promise<Card>;
+  updateCard: (id: string, card: Partial<Card>) => Promise<Card>;
   deleteCard: (id: string) => Promise<boolean>;
   toggleFavorite: (id: string) => void;
-  getCardById: (id: string) => EnhancedCard | undefined;
-  getCard?: (id: string) => EnhancedCard | undefined; // Added alias for compatibility
-  createCollection?: (data: any) => Promise<any>; // Added missing method
-  refreshCards?: () => Promise<void>; // Added for compatibility
+  getCardById: (id: string) => Card | undefined;
+  getCard: (id: string) => Card | undefined;
+  refreshCards: () => Promise<void>;
 }
 
-export const CardContext = createContext<EnhancedCardContextProps | undefined>(undefined);
-
-export const useCards = (): EnhancedCardContextProps => {
-  const context = useContext(CardContext);
-  if (!context) {
-    throw new Error('useCards must be used within a CardProvider');
-  }
-  return context;
-};
+export const CardContext = createContext<CardContextProps | undefined>(undefined);
 
 export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [cards, setCards] = useState<EnhancedCard[]>([]);
-  const [favorites, setFavorites] = useState<EnhancedCard[]>([]);
-  const [loading, setIsLoading] = useState<boolean>(true);
+  const [cards, setCards] = useState<Card[]>(sampleCards || []);
+  const [favorites, setFavorites] = useState<Card[]>([]);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  // Mock implementation - replace with actual API calls
-  const fetchCards = async (): Promise<void> => {
+  useEffect(() => {
+    fetchCards();
+  }, []);
+
+  const fetchCards = async () => {
+    setLoading(true);
     try {
-      setIsLoading(true);
-      // Simulate API call
-      const mockCards: EnhancedCard[] = [
-        {
-          id: '1',
-          title: 'Sample Card 1',
-          description: 'This is a sample card',
-          imageUrl: '/assets/sample-card-1.jpg',
-          thumbnailUrl: '/assets/sample-card-1-thumb.jpg',
-          tags: ['sample', 'mock'],
-          userId: 'user1',
-          isPublic: true,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          effects: [],
-          rarity: CardRarity.COMMON,
-          designMetadata: {
-            cardStyle: { template: 'default', effect: 'none', borderRadius: '12px', borderColor: '#000', shadowColor: '#000', frameWidth: 2, frameColor: '#000' },
-            textStyle: { titleColor: '#000', titleAlignment: 'center', titleWeight: 'bold', descriptionColor: '#333' },
-            cardMetadata: { category: 'sample', series: 'mock', cardType: 'standard' },
-            marketMetadata: { isPrintable: true, isForSale: false, includeInCatalog: true },
-            player: 'John Doe',
-            team: 'Example Team',
-            year: '2023'
-          },
-          viewCount: 0,
-          lastViewed: new Date().toISOString(),
-          player: 'John Doe',
-          team: 'Example Team',
-          year: '2023'
-        }
-      ];
-      
-      setCards(mockCards);
-      setFavorites(mockCards.filter(card => card.isFavorite));
+      // In a real app, fetch cards from API
+      // For now, we'll use sample cards
+      setCards(sampleCards);
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Failed to fetch cards'));
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
-  // Add the getCardById method
-  const getCardById = (id: string): EnhancedCard | undefined => {
-    return cards.find(card => card.id === id);
-  };
-
-  // Mock implementation of createCollection
-  const createCollection = async (data: any): Promise<any> => {
-    // Simple mock for a collection creation function
-    console.log("Creating collection with data:", data);
-    return {
-      id: `collection-${Date.now()}`,
-      ...data,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
-  };
-
-  const addCard = async (card: Partial<Card>): Promise<Card> => {
+  const addCard = async (cardData: Partial<Card>): Promise<Card> => {
+    setLoading(true);
     try {
-      // Simulate API call
-      const newCard: EnhancedCard = {
-        ...card,
+      const newCard: Card = {
         id: `card-${Date.now()}`,
+        title: cardData.title || 'Untitled Card',
+        description: cardData.description || '',
+        imageUrl: cardData.imageUrl || '',
+        thumbnailUrl: cardData.thumbnailUrl || '',
+        tags: cardData.tags || [],
+        userId: 'user-1',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        isPublic: card.isPublic ?? false,
-        tags: card.tags ?? [],
-        effects: card.effects ?? [],
-        rarity: card.rarity || CardRarity.COMMON,
-        designMetadata: card.designMetadata ?? {
-          cardStyle: { template: 'default', effect: 'none', borderRadius: '12px', borderColor: '#000', shadowColor: '#000', frameWidth: 2, frameColor: '#000' },
-          textStyle: { titleColor: '#000', titleAlignment: 'center', titleWeight: 'bold', descriptionColor: '#333' },
-          cardMetadata: { category: 'custom', series: 'user', cardType: 'standard' },
-          marketMetadata: { isPrintable: true, isForSale: false, includeInCatalog: true }
-        },
-        viewCount: 0
-      } as EnhancedCard;
+        rarity: CardRarity.COMMON,
+        effects: [],
+        ...cardData
+      };
       
       setCards(prevCards => [...prevCards, newCard]);
       return newCard;
     } catch (err) {
-      setError(err instanceof Error ? err : new Error('Failed to add card'));
-      throw err;
+      const error = err instanceof Error ? err : new Error('Failed to add card');
+      setError(error);
+      throw error;
+    } finally {
+      setLoading(false);
     }
   };
 
   const updateCard = async (id: string, updates: Partial<Card>): Promise<Card> => {
+    setLoading(true);
     try {
-      // Simulate API call
-      const updatedCard = cards.map(card => 
-        card.id === id ? { 
-          ...card, 
-          ...updates, 
-          updatedAt: new Date().toISOString(),
-          // Handle isFavorite separately since it's not in the Card type
-          ...(updates as any).isFavorite !== undefined ? { isFavorite: (updates as any).isFavorite } : {}
-        } : card
-      );
-      
-      setCards(updatedCard);
-      
-      const updated = updatedCard.find(card => card.id === id);
-      if (!updated) {
-        throw new Error('Card not found');
+      const cardIndex = cards.findIndex(card => card.id === id);
+      if (cardIndex === -1) {
+        throw new Error(`Card with ID ${id} not found`);
       }
       
-      // Update favorites if needed
-      if ((updates as any).isFavorite !== undefined) {
-        if ((updates as any).isFavorite) {
-          setFavorites(prev => 
-            prev.some(f => f.id === id) 
-              ? prev.map(f => f.id === id ? updated : f)
-              : [...prev, updated]
-          );
-        } else {
-          setFavorites(prev => prev.filter(f => f.id !== id));
-        }
-      }
+      const updatedCard = {
+        ...cards[cardIndex],
+        ...updates,
+        updatedAt: new Date().toISOString()
+      };
       
-      return updated;
+      const newCards = [...cards];
+      newCards[cardIndex] = updatedCard;
+      
+      setCards(newCards);
+      return updatedCard;
     } catch (err) {
-      setError(err instanceof Error ? err : new Error('Failed to update card'));
-      throw err;
+      const error = err instanceof Error ? err : new Error('Failed to update card');
+      setError(error);
+      throw error;
+    } finally {
+      setLoading(false);
     }
   };
 
   const deleteCard = async (id: string): Promise<boolean> => {
+    setLoading(true);
     try {
-      // Simulate API call
       setCards(prevCards => prevCards.filter(card => card.id !== id));
       setFavorites(prevFavorites => prevFavorites.filter(card => card.id !== id));
       return true;
     } catch (err) {
-      setError(err instanceof Error ? err : new Error('Failed to delete card'));
-      throw err;
+      const error = err instanceof Error ? err : new Error('Failed to delete card');
+      setError(error);
+      throw error;
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -192,50 +119,49 @@ export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const card = cards.find(c => c.id === id);
     if (!card) return;
     
-    const isFavorite = !card.isFavorite;
-    
-    // Use spread to create a new object
-    updateCard(id, { 
-      ...card,
-      isFavorite
-    });
+    const isFavorite = favorites.some(f => f.id === id);
+    if (isFavorite) {
+      setFavorites(prevFavorites => prevFavorites.filter(f => f.id !== id));
+    } else {
+      setFavorites(prevFavorites => [...prevFavorites, card]);
+    }
   };
 
-  // Add refreshCards for compatibility
-  const refreshCards = async (): Promise<void> => {
-    await fetchCards();
+  const getCardById = (id: string) => {
+    return cards.find(card => card.id === id);
   };
 
-  // Load cards on mount
-  useEffect(() => {
-    fetchCards();
-  }, []);
+  const refreshCards = async () => {
+    return fetchCards();
+  };
+
+  const value: CardContextProps = {
+    cards,
+    favorites,
+    loading,
+    error,
+    fetchCards,
+    addCard,
+    updateCard,
+    deleteCard,
+    toggleFavorite,
+    getCardById,
+    getCard: getCardById, // Alias for consistency
+    refreshCards
+  };
 
   return (
-    <CardContext.Provider
-      value={{
-        cards,
-        favorites,
-        loading,
-        isLoading: loading,
-        error,
-        fetchCards,
-        addCard,
-        updateCard,
-        deleteCard,
-        toggleFavorite,
-        getCardById,
-        getCard: getCardById,
-        createCollection,
-        refreshCards
-      }}
-    >
+    <CardContext.Provider value={value}>
       {children}
     </CardContext.Provider>
   );
 };
 
-// Export the Card type to fix the module export error
-export type { Card };
-// Export Collection type to fix the missing export error
-export type { Collection };
+// Hook to use the card context
+export const useCardContext = () => {
+  const context = useContext(CardContext);
+  if (!context) {
+    throw new Error('useCardContext must be used within a CardProvider');
+  }
+  return context;
+};
