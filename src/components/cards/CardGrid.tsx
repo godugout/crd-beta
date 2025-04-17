@@ -1,91 +1,75 @@
-
-import React, { useMemo } from 'react';
+import React from 'react';
 import { Card } from '@/lib/types';
+import CardGridItem from './CardGridItem';
 import { cn } from '@/lib/utils';
-import CardThumbnail from './CardThumbnail';
 
 interface CardGridProps {
   cards: Card[];
-  searchQuery?: string;
-  selectedTags?: string[];
-  sortBy?: string;
-  onCardClick: (cardId: string) => void;
+  onCardClick?: (id: string) => void;
   className?: string;
+  columnCount?: number;
+  gap?: 'sm' | 'md' | 'lg';
+  emptyMessage?: string;
+  isLoading?: boolean;
+  loadingItemCount?: number;
 }
 
 const CardGrid: React.FC<CardGridProps> = ({
   cards,
-  searchQuery = '',
-  selectedTags = [],
-  sortBy = 'newest',
   onCardClick,
-  className = ''
+  className,
+  columnCount = 3,
+  gap = 'md',
+  emptyMessage = "No cards found",
+  isLoading = false,
+  loadingItemCount = 6
 }) => {
-  // Filter and sort the cards based on the provided criteria
-  const filteredCards = useMemo(() => {
-    // Step 1: Filter cards by search query
-    let filtered = cards;
+  // Map gap size to tailwind classes
+  const gapClasses = {
+    sm: 'gap-2',
+    md: 'gap-4',
+    lg: 'gap-6',
+  };
+  
+  // Calculate grid columns based on columnCount
+  const getGridColsClass = () => {
+    // Ensure columnCount is a valid number
+    const cols = typeof columnCount === 'number' && columnCount > 0 ? columnCount : 3;
     
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(card => 
-        card.title.toLowerCase().includes(query) || 
-        card.description.toLowerCase().includes(query)
-      );
+    switch (cols) {
+      case 1: return 'grid-cols-1';
+      case 2: return 'grid-cols-1 sm:grid-cols-2';
+      case 3: return 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3';
+      case 4: return 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4';
+      case 5: return 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5';
+      case 6: return 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6';
+      default: return 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3';
     }
-    
-    // Step 2: Filter cards by selected tags
-    if (selectedTags.length > 0) {
-      filtered = filtered.filter(card => 
-        selectedTags.every(tag => card.tags.includes(tag))
-      );
-    }
-    
-    // Step 3: Sort cards
-    return [...filtered].sort((a, b) => {
-      switch (sortBy) {
-        case 'newest':
-          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-        case 'oldest':
-          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-        case 'alphabetical':
-          return a.title.localeCompare(b.title);
-        case 'popularity':
-          // Safely handle viewCount which might be undefined
-          const viewCountA = a.viewCount || 0;
-          const viewCountB = b.viewCount || 0;
-          return viewCountB - viewCountA;
-        default:
-          return 0;
-      }
-    });
-  }, [cards, searchQuery, selectedTags, sortBy]);
-
-  // Check if there are no cards to display
-  if (filteredCards.length === 0) {
-    return (
-      <div className={cn(`p-8 text-center`, className)}>
-        <h3 className="text-lg font-medium mb-2">No cards found</h3>
-        <p className="text-muted-foreground">
-          {searchQuery || selectedTags.length > 0 
-            ? "Try adjusting your filters or search terms."
-            : "There are no cards in this collection yet."}
-        </p>
-      </div>
-    );
-  }
+  };
 
   return (
-    <div className={cn(`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6`, className)}>
-      {filteredCards.map(card => (
-        <CardThumbnail
-          key={card.id}
-          src={card.thumbnailUrl || card.imageUrl}
-          alt={card.title}
-          onClick={() => onCardClick(card.id)}
-          className="transition-all duration-300 hover:shadow-lg hover:scale-[1.02] aspect-[2.5/3.5]"
-        />
-      ))}
+    <div className={cn("space-y-4", className)}>
+      {isLoading ? (
+        <div className={cn("grid", getGridColsClass(), gapClasses[gap])}>
+          {Array.from({ length: loadingItemCount }).map((_, i) => (
+            <div key={i} className="aspect-[2.5/3.5] bg-gray-200 animate-pulse rounded-lg" />
+          ))}
+        </div>
+      ) : cards.length > 0 ? (
+        <div className={cn("grid", getGridColsClass(), gapClasses[gap])}>
+          {cards.map((card) => (
+            <CardGridItem
+              key={card.id}
+              card={card}
+              onClick={() => onCardClick?.(card.id)}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-12 text-gray-500">
+          {emptyMessage}
+        </div>
+      )}
     </div>
   );
 };

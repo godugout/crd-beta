@@ -1,5 +1,6 @@
 
-import { JsonValue } from './index';
+import { BaseEntity, JsonValue } from './index';
+import { User } from './user';
 
 export interface OaklandMemoryData {
   title: string;
@@ -15,6 +16,13 @@ export interface OaklandMemoryData {
   imageUrl?: string;
   historicalContext?: string;
   personalSignificance?: string;
-  template?: string;
   [key: string]: JsonValue | undefined;
+}
+
+export interface OaklandMemory extends BaseEntity {
+  userId: string;
+  data: OaklandMemoryData;
+  isPublic: boolean;
+  imageUrl?: string;
+  user?: User;
 }

@@ -3,33 +3,35 @@
  * Re-exports all types from the centralized type system
  */
 
-// Re-export all types from our centralized type system
-// Use explicit exports to avoid naming conflicts
+// Import but don't re-export to avoid naming conflicts
 import { BaseEntity, JsonValue } from './types/index';
-import { TeamMember } from './types/team';
-import { Card, DesignMetadata, CardRarity, CardStyle, TextStyle, CardMetadata, MarketMetadata } from './types/cardTypes';
-import { User } from './types/user';
+import { Card as IndexCard, DesignMetadata, CardRarity, CardStyle, TextStyle, CardMetadata, MarketMetadata } from './types/cardTypes';
+import { User, UserPermission } from './types/user';
 import { Reaction, Comment } from './types/interaction';
-import { Collection } from './types/collection';
-import { OaklandMemoryData } from './types/oaklandMemory';
+import { Collection as IndexCollection } from './types/collection';
+import { OaklandMemoryData as IndexOaklandMemoryData } from './types/oaklandMemory';
+import { TeamMember as IndexTeamMember } from './types/team';
 
+// Re-export with explicit naming
 export {
   BaseEntity,
   JsonValue,
-  Card,
-  DesignMetadata,
   CardRarity,
   CardStyle,
   TextStyle,
   CardMetadata,
   MarketMetadata,
   User,
+  UserPermission,
   Reaction,
-  Comment,
-  Collection,
-  TeamMember,
-  OaklandMemoryData
+  Comment
 };
+
+// Explicitly export and rename to avoid conflicts
+export type Card = IndexCard;
+export type Collection = IndexCollection;
+export type OaklandMemoryData = IndexOaklandMemoryData;
+export type TeamMember = IndexTeamMember;
 
 // Keep the utility function for backward compatibility
 /**

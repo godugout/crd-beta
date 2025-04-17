@@ -17,6 +17,16 @@ const CardViewerPage = () => {
   const card = id ? getCardById(id) : undefined;
   const cardIndex = card ? cards.findIndex(c => c.id === card.id) : -1;
   
+  // Helper to safely get string properties
+  const getStringProp = (value: any): string => {
+    return typeof value === 'string' ? value : '';
+  };
+  
+  // Safely extract properties for display
+  const cardPlayer = card ? getStringProp(card.player) : '';
+  const cardTeam = card ? getStringProp(card.team) : '';
+  const cardYear = card ? getStringProp(card.year) : '';
+  
   // Handle keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -108,24 +118,24 @@ const CardViewerPage = () => {
                 {card.description && <p className="text-gray-300 mb-4">{card.description}</p>}
                 
                 <div className="grid grid-cols-2 gap-4 mb-6">
-                  {card.player && (
+                  {cardPlayer && (
                     <div>
                       <p className="text-sm text-gray-500">Player</p>
-                      <p className="font-medium">{card.player}</p>
+                      <p className="font-medium">{cardPlayer}</p>
                     </div>
                   )}
                   
-                  {card.team && (
+                  {cardTeam && (
                     <div>
                       <p className="text-sm text-gray-500">Team</p>
-                      <p className="font-medium">{card.team}</p>
+                      <p className="font-medium">{cardTeam}</p>
                     </div>
                   )}
                   
-                  {card.year && (
+                  {cardYear && (
                     <div>
                       <p className="text-sm text-gray-500">Year</p>
-                      <p className="font-medium">{card.year}</p>
+                      <p className="font-medium">{cardYear}</p>
                     </div>
                   )}
                 </div>

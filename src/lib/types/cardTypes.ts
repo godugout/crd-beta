@@ -42,6 +42,19 @@ export interface MarketMetadata {
   [key: string]: JsonValue;
 }
 
+export interface HotspotData {
+  id: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  content: string;
+  title?: string;
+  type?: string;
+  mediaUrl?: string;
+  [key: string]: JsonValue | undefined;
+}
+
 export interface DesignMetadata {
   cardStyle: CardStyle;
   textStyle: TextStyle;
@@ -53,6 +66,7 @@ export interface DesignMetadata {
   year?: string;
   oaklandMemory?: Record<string, any>;
   layers?: any[];
+  hotspots?: HotspotData[];
   [key: string]: JsonValue | undefined;
 }
 
@@ -73,5 +87,9 @@ export interface Card {
   // Optional fields
   teamId?: string;
   collectionId?: string;
+  reactions?: any[];
+  player?: string;
+  team?: string;
+  year?: string;
   [key: string]: JsonValue | undefined;
 }

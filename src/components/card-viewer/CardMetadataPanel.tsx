@@ -11,6 +11,16 @@ interface CardMetadataPanelProps {
 const CardMetadataPanel: React.FC<CardMetadataPanelProps> = ({ card, isVisible }) => {
   if (!isVisible) return null;
   
+  // Helper function to safely extract string properties
+  const getStringProp = (value: any): string => {
+    return typeof value === 'string' ? value : '';
+  };
+  
+  // Safely extract card properties
+  const cardPlayer = getStringProp(card.player);
+  const cardTeam = getStringProp(card.team);
+  const cardYear = getStringProp(card.year);
+  
   return (
     <group position={[2, 0, 0]}>
       <mesh position={[0, 0, 0]}>
@@ -19,9 +29,9 @@ const CardMetadataPanel: React.FC<CardMetadataPanelProps> = ({ card, isVisible }
         <Html position={[0, 0, 0.1]} transform>
           <div className="bg-black/80 p-4 rounded text-white" style={{ width: '240px' }}>
             <h3 className="font-bold text-lg mb-2">{card.title}</h3>
-            {card.player && <p className="text-sm">Player: {card.player}</p>}
-            {card.team && <p className="text-sm">Team: {card.team}</p>}
-            {card.year && <p className="text-sm">Year: {card.year}</p>}
+            {cardPlayer && <p className="text-sm">Player: {cardPlayer}</p>}
+            {cardTeam && <p className="text-sm">Team: {cardTeam}</p>}
+            {cardYear && <p className="text-sm">Year: {cardYear}</p>}
             <p className="text-xs mt-2 opacity-70">Press D to hide this panel</p>
           </div>
         </Html>

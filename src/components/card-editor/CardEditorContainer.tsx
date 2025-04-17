@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCards } from '@/context/CardContext';
@@ -11,6 +10,7 @@ import CardEditorNavigation from './components/CardEditorNavigation';
 import CardEditorPreview from './components/CardEditorPreview';
 import CardEditorActions from './components/CardEditorActions';
 import { DEFAULT_DESIGN_METADATA } from '@/lib/utils/cardDefaults';
+import { CardRarity } from '@/lib/types';
 
 interface CardEditorContainerProps {
   card?: any;
@@ -63,7 +63,7 @@ const CardEditorContainer: React.FC<CardEditorContainerProps> = ({
       isPublic: true, // Add required fields
       userId: 'anonymous', // Add required fields
       effects: cardState.selectedEffects || [], // Add required fields
-      rarity: 'common', // Add required fields
+      rarity: CardRarity.COMMON, // Use enum instead of string
       designMetadata: {
         cardStyle: cardState.cardStyle || DEFAULT_DESIGN_METADATA.cardStyle,
         textStyle: DEFAULT_DESIGN_METADATA.textStyle,

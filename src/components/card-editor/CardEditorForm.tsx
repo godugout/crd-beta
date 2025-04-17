@@ -1,153 +1,221 @@
-
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
+import React, { useState, useEffect } from 'react';
+import { CardRarity } from '@/lib/types';
+import { DesignMetadata } from '@/lib/types/cardTypes';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
 import { Card } from '@/lib/types';
-import { useCards } from '@/context/CardContext';
-import { toast } from 'sonner';
-import TagInput from './TagInput';
-import ImageSelector from './ImageSelector';
-import { DEFAULT_DESIGN_METADATA } from '@/lib/utils/cardDefaults';
 
 interface CardEditorFormProps {
-  card?: Card;
-  onSave?: (card: Card) => void;
-  className?: string;
+  initialCard?: Partial<Card>;
+  onSubmit: (cardData: Partial<Card>) => void;
 }
 
-const CardEditorForm: React.FC<CardEditorFormProps> = ({ 
-  card,
-  onSave,
-  className = '' 
-}) => {
-  const navigate = useNavigate();
-  const { addCard, updateCard } = useCards();
-  const [isLoading, setIsLoading] = useState(false);
+const CardEditorForm = ({ initialCard, onSubmit }: CardEditorFormProps) => {
+  const [formData, setFormData] = useState({
+    title: initialCard?.title || '',
+    description: initialCard?.description || '',
+    imageUrl: initialCard?.imageUrl || '',
+    tags: initialCard?.tags || [],
+    template: initialCard?.designMetadata?.cardStyle?.template || 'classic',
+    effect: initialCard?.designMetadata?.cardStyle?.effect || 'none',
+    borderRadius: initialCard?.designMetadata?.cardStyle?.borderRadius || '10px',
+    borderColor: initialCard?.designMetadata?.cardStyle?.borderColor || '#000000',
+    shadowColor: initialCard?.designMetadata?.cardStyle?.shadowColor || 'rgba(0,0,0,0.5)',
+    frameWidth: initialCard?.designMetadata?.cardStyle?.frameWidth || 0,
+    frameColor: initialCard?.designMetadata?.cardStyle?.frameColor || '#000000',
+    titleColor: initialCard?.designMetadata?.textStyle?.titleColor || '#ffffff',
+    titleAlignment: initialCard?.designMetadata?.textStyle?.titleAlignment || 'center',
+    titleWeight: initialCard?.designMetadata?.textStyle?.titleWeight || 'bold',
+    descriptionColor: initialCard?.designMetadata?.textStyle?.descriptionColor || '#ffffff',
+    category: initialCard?.designMetadata?.cardMetadata?.category || 'sports',
+    series: initialCard?.designMetadata?.cardMetadata?.series || 'standard',
+    cardType: initialCard?.designMetadata?.cardMetadata?.cardType || 'player',
+    isPrintable: initialCard?.designMetadata?.marketMetadata?.isPrintable || false,
+    isForSale: initialCard?.designMetadata?.marketMetadata?.isForSale || false,
+    includeInCatalog: initialCard?.designMetadata?.marketMetadata?.includeInCatalog || true,
+    player: initialCard?.player || '',
+    team: initialCard?.team || '',
+    year: initialCard?.year || '',
+    effects: initialCard?.effects || []
+  });
   
-  const [title, setTitle] = useState(card?.title || '');
-  const [description, setDescription] = useState(card?.description || '');
-  const [imageUrl, setImageUrl] = useState(card?.imageUrl || '');
-  const [tags, setTags] = useState<string[]>(card?.tags || []);
-  
-  const isEditing = !!card;
-  
-  const handleAddTag = (tag: string) => {
-    setTags([...tags, tag]);
+  useEffect(() => {
+    if (initialCard) {
+      setFormData({
+        title: initialCard.title || '',
+        description: initialCard.description || '',
+        imageUrl: initialCard.imageUrl || '',
+        tags: initialCard.tags || [],
+        template: initialCard.designMetadata?.cardStyle?.template || 'classic',
+        effect: initialCard.designMetadata?.cardStyle?.effect || 'none',
+        borderRadius: initialCard.designMetadata?.cardStyle?.borderRadius || '10px',
+        borderColor: initialCard.designMetadata?.cardStyle?.borderColor || '#000000',
+        shadowColor: initialCard.designMetadata?.cardStyle?.shadowColor || 'rgba(0,0,0,0.5)',
+        frameWidth: initialCard.designMetadata?.cardStyle?.frameWidth || 0,
+        frameColor: initialCard.designMetadata?.cardStyle?.frameColor || '#000000',
+        titleColor: initialCard.designMetadata?.textStyle?.titleColor || '#ffffff',
+        titleAlignment: initialCard.designMetadata?.textStyle?.titleAlignment || 'center',
+        titleWeight: initialCard.designMetadata?.textStyle?.titleWeight || 'bold',
+        descriptionColor: initialCard.designMetadata?.textStyle?.descriptionColor || '#ffffff',
+        category: initialCard.designMetadata?.cardMetadata?.category || 'sports',
+        series: initialCard.designMetadata?.cardMetadata?.series || 'standard',
+        cardType: initialCard.designMetadata?.cardMetadata?.cardType || 'player',
+        isPrintable: initialCard.designMetadata?.marketMetadata?.isPrintable || false,
+        isForSale: initialCard.designMetadata?.marketMetadata?.isForSale || false,
+        includeInCatalog: initialCard.designMetadata?.marketMetadata?.includeInCatalog || true,
+        player: initialCard.player || '',
+        team: initialCard.team || '',
+        year: initialCard.year || '',
+        effects: initialCard.effects || []
+      });
+    }
+  }, [initialCard]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prevState => ({
+      ...prevState,
+      [name]: value
+    }));
   };
   
-  const handleRemoveTag = (tagToRemove: string) => {
-    setTags(tags.filter(tag => tag !== tagToRemove));
-  };
-  
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleFormSubmit = (e) => {
     e.preventDefault();
     
-    if (!title.trim()) {
-      toast.error('Please enter a title for the card');
-      return;
-    }
+    // Create card data with proper types
+    const cardData = {
+      title: formData.title,
+      description: formData.description,
+      imageUrl: formData.imageUrl,
+      thumbnailUrl: formData.imageUrl, // Use same URL for thumbnail
+      tags: formData.tags,
+      isPublic: true,
+      userId: 'user-1', // This would be dynamic in a real app
+      effects: formData.effects || [],
+      rarity: CardRarity.COMMON, // Use enum value instead of string
+      designMetadata: {
+        cardStyle: {
+          template: formData.template || 'classic',
+          effect: formData.effect || 'none',
+          borderRadius: formData.borderRadius || '10px',
+          borderColor: formData.borderColor || '#000000',
+          shadowColor: formData.shadowColor || 'rgba(0,0,0,0.5)',
+          frameWidth: formData.frameWidth || 0,
+          frameColor: formData.frameColor || '#000000'
+        },
+        textStyle: {
+          titleColor: formData.titleColor || '#ffffff',
+          titleAlignment: formData.titleAlignment || 'center',
+          titleWeight: formData.titleWeight || 'bold',
+          descriptionColor: formData.descriptionColor || '#ffffff'
+        },
+        cardMetadata: {
+          category: formData.category || 'sports',
+          series: formData.series || 'standard',
+          cardType: formData.cardType || 'player'
+        },
+        marketMetadata: {
+          isPrintable: formData.isPrintable || false,
+          isForSale: formData.isForSale || false,
+          includeInCatalog: formData.includeInCatalog || true
+        },
+        player: formData.player || '',
+        team: formData.team || '',
+        year: formData.year || ''
+      }
+    };
     
-    try {
-      setIsLoading(true);
-      
-      // Ensure all required fields are present for the Card type
-      const cardData = {
-        title, // Non-optional now
-        description,
-        imageUrl,
-        thumbnailUrl: imageUrl,
-        tags,
-        isPublic: true,
-        userId: 'anonymous',
-        effects: [],
-        rarity: 'common',
-        designMetadata: card?.designMetadata || DEFAULT_DESIGN_METADATA
-      };
-      
-      let savedCard;
-      if (isEditing && card?.id) {
-        const updated = await updateCard(card.id, cardData);
-        savedCard = updated ? card : null;
-        toast.success('Card updated successfully');
-      } else {
-        savedCard = await addCard(cardData);
-        toast.success('Card created successfully');
-      }
-      
-      if (onSave && savedCard) {
-        onSave(savedCard);
-      } else {
-        // Navigate to card detail
-        navigate('/cards');
-      }
-    } catch (error) {
-      console.error('Error saving card:', error);
-      toast.error('Failed to save card');
-    } finally {
-      setIsLoading(false);
-    }
+    onSubmit(cardData);
   };
-
+  
   return (
-    <form onSubmit={handleSubmit} className={`space-y-6 ${className}`}>
-      <div className="grid md:grid-cols-2 gap-6">
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="title">Card Title</Label>
-            <Input 
-              id="title" 
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Enter card title"
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
-            <Textarea 
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Enter card description"
-              rows={5}
-            />
-          </div>
-          
-          <TagInput 
-            tags={tags}
-            onAddTag={handleAddTag}
-            onRemoveTag={handleRemoveTag}
-          />
-        </div>
-        
-        <ImageSelector 
-          imageUrl={imageUrl}
-          onImageSelected={setImageUrl}
-          onImageRemove={() => setImageUrl('')}
+    <form onSubmit={handleFormSubmit} className="space-y-4">
+      <div>
+        <Label htmlFor="title">Title</Label>
+        <Input
+          type="text"
+          id="title"
+          name="title"
+          value={formData.title}
+          onChange={handleChange}
+          placeholder="Card Title"
         />
       </div>
       
-      <div className="flex justify-end space-x-4">
-        <Button 
-          type="button" 
-          variant="outline" 
-          onClick={() => navigate(-1)}
-        >
-          Cancel
-        </Button>
-        <Button type="submit" disabled={isLoading}>
-          {isLoading ? (
-            'Saving...'
-          ) : isEditing ? (
-            'Update Card'
-          ) : (
-            'Create Card'
-          )}
-        </Button>
+      <div>
+        <Label htmlFor="description">Description</Label>
+        <Textarea
+          id="description"
+          name="description"
+          value={formData.description}
+          onChange={handleChange}
+          placeholder="Card Description"
+        />
       </div>
+      
+      <div>
+        <Label htmlFor="imageUrl">Image URL</Label>
+        <Input
+          type="text"
+          id="imageUrl"
+          name="imageUrl"
+          value={formData.imageUrl}
+          onChange={handleChange}
+          placeholder="Image URL"
+        />
+      </div>
+      
+      <div>
+        <Label htmlFor="tags">Tags (comma separated)</Label>
+        <Input
+          type="text"
+          id="tags"
+          name="tags"
+          value={formData.tags}
+          onChange={handleChange}
+          placeholder="Tags"
+        />
+      </div>
+      
+      <div>
+        <Label htmlFor="player">Player</Label>
+        <Input
+          type="text"
+          id="player"
+          name="player"
+          value={formData.player}
+          onChange={handleChange}
+          placeholder="Player Name"
+        />
+      </div>
+      
+      <div>
+        <Label htmlFor="team">Team</Label>
+        <Input
+          type="text"
+          id="team"
+          name="team"
+          value={formData.team}
+          onChange={handleChange}
+          placeholder="Team Name"
+        />
+      </div>
+      
+      <div>
+        <Label htmlFor="year">Year</Label>
+        <Input
+          type="text"
+          id="year"
+          name="year"
+          value={formData.year}
+          onChange={handleChange}
+          placeholder="Year"
+        />
+      </div>
+      
+      <Button type="submit">Submit</Button>
     </form>
   );
 };

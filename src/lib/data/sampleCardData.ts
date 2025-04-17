@@ -1,110 +1,236 @@
+import { Card, CardRarity } from '@/lib/types';
 
-import { Card, DesignMetadata } from '@/lib/types';
-import { DEFAULT_DESIGN_METADATA } from '@/lib/utils/cardDefaults';
-
-export const sampleCards: Card[] = [
+export const sampleCardData: Card[] = [
   {
-    id: '1',
-    title: 'Vintage Baseball Card',
-    description: 'A classic baseball card from the golden era',
-    imageUrl: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3',
-    thumbnailUrl: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=200',
-    tags: ['baseball', 'vintage', 'collectible'],
-    createdAt: '2023-01-15T08:30:00Z',
-    updatedAt: '2023-01-15T08:30:00Z',
-    userId: 'user123',
-    teamId: 'team1',
-    collectionId: 'collection1',
+    id: 'card-1',
+    title: 'Rickey Henderson',
+    description: 'Hall of Fame Outfielder',
+    imageUrl: '/imgs/rickey.jpg',
+    thumbnailUrl: '/imgs/rickey-thumb.jpg',
+    tags: ['Hall of Fame', 'Outfield', 'Athletics'],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    userId: 'user-1',
+    teamId: 'team-1',
+    collectionId: 'collection-1',
     isPublic: true,
-    designMetadata: DEFAULT_DESIGN_METADATA,
-    effects: ['standard'],
-    rarity: 'common'
-  },
-  {
-    id: '2',
-    title: 'Basketball Legend',
-    description: 'Limited edition basketball trading card',
-    imageUrl: 'https://images.unsplash.com/photo-1612872087720-bb876e2e67d1',
-    thumbnailUrl: 'https://images.unsplash.com/photo-1612872087720-bb876e2e67d1?w=200',
-    tags: ['basketball', 'limited', 'sports'],
-    createdAt: '2023-02-10T14:22:00Z',
-    updatedAt: '2023-02-10T14:22:00Z',
-    userId: 'user456',
-    teamId: 'team1',
-    collectionId: 'collection2',
-    isPublic: true,
-    designMetadata: DEFAULT_DESIGN_METADATA,
     effects: ['holographic'],
-    rarity: 'rare'
+    rarity: CardRarity.LEGENDARY, // Added required rarity property
+    designMetadata: {
+      cardStyle: {
+        template: 'classic',
+        effect: 'holographic',
+        borderRadius: '10px',
+        borderColor: '#f0c14b',
+        shadowColor: '#f0c14b',
+        frameWidth: 2,
+        frameColor: '#f0c14b'
+      },
+      textStyle: {
+        titleColor: '#ffffff',
+        titleAlignment: 'center',
+        titleWeight: 'bold',
+        descriptionColor: '#ffffff'
+      },
+      cardMetadata: {
+        category: 'baseball',
+        series: 'legends',
+        cardType: 'player'
+      },
+      marketMetadata: {
+        isPrintable: true,
+        isForSale: true,
+        includeInCatalog: true
+      },
+      player: 'Rickey Henderson',
+      team: 'Oakland Athletics',
+      year: '1989'
+    }
   },
   {
-    id: '3',
-    title: 'Football Rookie Card',
-    description: 'Rookie card of a rising football star',
-    imageUrl: 'https://images.unsplash.com/photo-1566577739112-5180d4bf9390',
-    thumbnailUrl: 'https://images.unsplash.com/photo-1566577739112-5180d4bf9390?w=200',
-    tags: ['football', 'rookie', 'collectible'],
-    createdAt: '2023-03-05T09:45:00Z',
-    updatedAt: '2023-03-05T09:45:00Z',
-    userId: 'user123',
-    teamId: 'team2',
-    collectionId: 'collection1',
+    id: 'card-2',
+    title: 'Dave Stewart',
+    description: 'Ace Pitcher',
+    imageUrl: '/imgs/stew.jpg',
+    thumbnailUrl: '/imgs/stew-thumb.jpg',
+    tags: ['Pitcher', 'Athletics', '1989'],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    userId: 'user-1',
+    teamId: 'team-1',
+    collectionId: 'collection-1',
     isPublic: true,
-    designMetadata: DEFAULT_DESIGN_METADATA,
-    effects: ['standard'],
-    rarity: 'uncommon'
-  },
-  {
-    id: '4',
-    title: 'Hockey Star',
-    description: 'Premium hockey trading card of a legendary player',
-    imageUrl: 'https://images.unsplash.com/photo-1580891034313-7ecbf7c0de1c',
-    thumbnailUrl: 'https://images.unsplash.com/photo-1580891034313-7ecbf7c0de1c?w=200',
-    tags: ['hockey', 'legend', 'premium'],
-    createdAt: '2023-04-20T16:15:00Z',
-    updatedAt: '2023-04-20T16:15:00Z',
-    userId: 'user456',
-    teamId: 'team2',
-    collectionId: 'collection2',
-    isPublic: true,
-    designMetadata: DEFAULT_DESIGN_METADATA,
     effects: ['refractor'],
-    rarity: 'ultra-rare'
+    rarity: CardRarity.RARE, // Added required rarity property
+    designMetadata: {
+      cardStyle: {
+        template: 'modern',
+        effect: 'refractor',
+        borderRadius: '10px',
+        borderColor: '#a9a9a9',
+        shadowColor: '#a9a9a9',
+        frameWidth: 2,
+        frameColor: '#a9a9a9'
+      },
+      textStyle: {
+        titleColor: '#000000',
+        titleAlignment: 'left',
+        titleWeight: 'bold',
+        descriptionColor: '#666666'
+      },
+      cardMetadata: {
+        category: 'baseball',
+        series: 'world series 89',
+        cardType: 'player'
+      },
+      marketMetadata: {
+        isPrintable: true,
+        isForSale: false,
+        includeInCatalog: true
+      },
+      player: 'Dave Stewart',
+      team: 'Oakland Athletics',
+      year: '1989'
+    }
   },
   {
-    id: '5',
-    title: 'Vintage Soccer Card',
-    description: 'Classic soccer card from an iconic team',
-    imageUrl: 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55',
-    thumbnailUrl: 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=200',
-    tags: ['soccer', 'vintage', 'international'],
-    createdAt: '2023-05-12T11:30:00Z',
-    updatedAt: '2023-05-12T11:30:00Z',
-    userId: 'user789',
-    teamId: 'team3',
-    collectionId: 'collection3',
+    id: 'card-3',
+    title: 'Mark McGwire',
+    description: 'Power Hitter',
+    imageUrl: '/imgs/mcgwire.jpg',
+    thumbnailUrl: '/imgs/mcgwire-thumb.jpg',
+    tags: ['First Base', 'Athletics', 'Power Hitter'],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    userId: 'user-1',
+    teamId: 'team-1',
+    collectionId: 'collection-1',
     isPublic: true,
-    designMetadata: DEFAULT_DESIGN_METADATA,
+    effects: ['shimmer'],
+    rarity: CardRarity.UNCOMMON, // Added required rarity property
+    designMetadata: {
+      cardStyle: {
+        template: 'holo',
+        effect: 'shimmer',
+        borderRadius: '10px',
+        borderColor: '#ffffff',
+        shadowColor: '#000000',
+        frameWidth: 2,
+        frameColor: '#ffffff'
+      },
+      textStyle: {
+        titleColor: '#ffffff',
+        titleAlignment: 'center',
+        titleWeight: 'bold',
+        descriptionColor: '#ffffff'
+      },
+      cardMetadata: {
+        category: 'baseball',
+        series: 'home run heroes',
+        cardType: 'player'
+      },
+      marketMetadata: {
+        isPrintable: true,
+        isForSale: false,
+        includeInCatalog: true
+      },
+      player: 'Mark McGwire',
+      team: 'Oakland Athletics',
+      year: '1998'
+    }
+  },
+  {
+    id: 'card-4',
+    title: 'Dennis Eckersley',
+    description: 'Hall of Fame Closer',
+    imageUrl: '/imgs/eck.jpg',
+    thumbnailUrl: '/imgs/eck-thumb.jpg',
+    tags: ['Closer', 'Hall of Fame', 'Athletics'],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    userId: 'user-1',
+    teamId: 'team-1',
+    collectionId: 'collection-1',
+    isPublic: true,
     effects: ['vintage'],
-    rarity: 'legendary'
+    rarity: CardRarity.COMMON, // Added required rarity property
+    designMetadata: {
+      cardStyle: {
+        template: 'vintage',
+        effect: 'sepia',
+        borderRadius: '5px',
+        borderColor: '#000000',
+        shadowColor: '#000000',
+        frameWidth: 2,
+        frameColor: '#000000'
+      },
+      textStyle: {
+        titleColor: '#000000',
+        titleAlignment: 'center',
+        titleWeight: 'normal',
+        descriptionColor: '#333333'
+      },
+      cardMetadata: {
+        category: 'baseball',
+        series: 'vintage collection',
+        cardType: 'player'
+      },
+      marketMetadata: {
+        isPrintable: true,
+        isForSale: false,
+        includeInCatalog: true
+      },
+      player: 'Dennis Eckersley',
+      team: 'Oakland Athletics',
+      year: '1992'
+    }
   },
   {
-    id: '6',
-    title: 'Tennis Champion',
-    description: 'Commemorative card of a grand slam winner',
-    imageUrl: 'https://images.unsplash.com/photo-1595435934249-5df7ed86e1c1',
-    thumbnailUrl: 'https://images.unsplash.com/photo-1595435934249-5df7ed86e1c1?w=200',
-    tags: ['tennis', 'champion', 'grand slam'],
-    createdAt: '2023-06-30T10:20:00Z',
-    updatedAt: '2023-06-30T10:20:00Z',
-    userId: 'user789',
-    teamId: 'team3',
-    collectionId: 'collection3',
+    id: 'card-5',
+    title: 'Jose Canseco',
+    description: 'Power Hitter',
+    imageUrl: '/imgs/canseco.jpg',
+    thumbnailUrl: '/imgs/canseco-thumb.jpg',
+    tags: ['Outfield', 'Athletics', 'Power Hitter'],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    userId: 'user-1',
+    teamId: 'team-1',
+    collectionId: 'collection-1',
     isPublic: true,
-    designMetadata: DEFAULT_DESIGN_METADATA,
-    effects: ['gold'],
-    rarity: 'one-of-one'
+    effects: ['holographic'],
+    rarity: CardRarity.ULTRA_RARE, // Added required rarity property
+    designMetadata: {
+      cardStyle: {
+        template: 'classic',
+        effect: 'holographic',
+        borderRadius: '10px',
+        borderColor: '#f0c14b',
+        shadowColor: '#f0c14b',
+        frameWidth: 2,
+        frameColor: '#f0c14b'
+      },
+      textStyle: {
+        titleColor: '#ffffff',
+        titleAlignment: 'center',
+        titleWeight: 'bold',
+        descriptionColor: '#ffffff'
+      },
+      cardMetadata: {
+        category: 'baseball',
+        series: 'Bash Brothers',
+        cardType: 'player'
+      },
+      marketMetadata: {
+        isPrintable: true,
+        isForSale: true,
+        includeInCatalog: true
+      },
+      player: 'Jose Canseco',
+      team: 'Oakland Athletics',
+      year: '1989'
+    }
   }
 ];
 
-export default sampleCards;
+export default sampleCardData;

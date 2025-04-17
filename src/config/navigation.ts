@@ -1,4 +1,3 @@
-
 import { 
   ListCollection, 
   GalleryHorizontal, 
@@ -115,5 +114,35 @@ export const profileNavItems = [
     title: 'Settings',
     path: '/profile/settings',
     description: 'Update your account settings'
+  }
+];
+
+export const footerLinks = [
+  {
+    title: 'Company',
+    links: [
+      { label: 'About Us', href: '/about' },
+      { label: 'Careers', href: '/careers' },
+      { label: 'Press', href: '/press' },
+      { label: 'Contact', href: '/contact' }
+    ]
+  },
+  {
+    title: 'Resources',
+    links: [
+      { label: 'Blog', href: '/blog' },
+      { label: 'Help Center', href: '/help' },
+      { label: 'Terms of Use', href: '/terms' },
+      { label: 'Privacy Policy', href: '/privacy' }
+    ]
+  },
+  {
+    title: 'Community',
+    links: [
+      { label: 'Discord', href: 'https://discord.gg/cardshow' },
+      { label: 'Twitter', href: 'https://twitter.com/cardshow' },
+      { label: 'Instagram', href: 'https://instagram.com/cardshow' },
+      { label: 'YouTube', href: 'https://youtube.com/cardshow' }
+    ]
   }
 ];

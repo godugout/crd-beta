@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Card } from '@/lib/types';
+import { Card, Reaction } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useCards } from '@/context/CardContext';
@@ -61,6 +61,9 @@ const CardItem: React.FC<CardItemProps> = ({
     deleteCard(card.id);
   };
   
+  // Safely handle the reactions array
+  const cardReactions: Reaction[] = Array.isArray(card.reactions) ? card.reactions : [];
+  
   return (
     <div className="space-y-4">
       <div 
@@ -90,7 +93,7 @@ const CardItem: React.FC<CardItemProps> = ({
         <div className="px-2">
           <ReactionButtons 
             cardId={card.id} 
-            initialReactions={card.reactions}
+            initialReactions={cardReactions}
             showComments={displayComments}
             onShowComments={() => setDisplayComments(!displayComments)}
           />
