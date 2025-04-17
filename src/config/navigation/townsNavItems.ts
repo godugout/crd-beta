@@ -1,37 +1,39 @@
 
-import { NavigationItem } from './types';
-import { Map, Home, Building2, Landmark, Mountain, Trees } from 'lucide-react';
+import { Icon } from "lucide-react";
+import { Home, Map, Calendar, Building } from "lucide-react";
 
-export const townsNavItems: NavigationItem[] = [
+export interface NavItem {
+  title: string;
+  path: string;
+  icon: Icon;
+  description?: string;
+  highlight?: boolean;
+}
+
+export const townsNavItems: NavItem[] = [
   {
-    title: 'Oakland',
-    path: '/towns/oakland',
-    icon: Landmark,
-    description: 'Oakland town page',
-    highlight: true,
-  },
-  {
-    title: 'San Francisco',
-    path: '/towns/san-francisco',
-    icon: Building2,
-    description: 'San Francisco town page',
-  },
-  {
-    title: 'Sacramento',
-    path: '/towns/sacramento',
+    title: "Town Overview",
+    path: "/town",
     icon: Home,
-    description: 'Sacramento town page',
+    description: "Town information"
   },
   {
-    title: 'Berkeley',
-    path: '/towns/berkeley',
-    icon: Trees,
-    description: 'Berkeley town page',
-  },
-  {
-    title: 'All Towns',
-    path: '/towns/all',
+    title: "Map",
+    path: "/town/map",
     icon: Map,
-    description: 'View all towns',
+    description: "Town map and locations",
+    highlight: true
   },
+  {
+    title: "Events",
+    path: "/town/events",
+    icon: Calendar,
+    description: "Town events calendar"
+  },
+  {
+    title: "Landmarks",
+    path: "/town/landmarks",
+    icon: Building,
+    description: "Notable town landmarks"
+  }
 ];

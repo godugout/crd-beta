@@ -1,43 +1,51 @@
 
-import { NavigationItem } from './types';
-import { Card, Collection, Heart, Plus, Search, Settings } from 'lucide-react';
+import { Icon } from "lucide-react";
+import { Grid, Heart, BookOpen, Plus, Star } from "lucide-react";
 
-export const cardsNavItems: NavigationItem[] = [
+export interface NavItem {
+  title: string;
+  path: string;
+  icon: Icon;
+  description?: string;
+  highlight?: boolean;
+  label?: string;  // Added this for compatibility
+}
+
+export const cardsNavItems: NavItem[] = [
   {
-    title: 'Browse Cards',
-    path: '/cards/browse',
-    icon: Card,
-    description: 'Explore the card collection',
+    title: "All Cards",
+    path: "/cards",
+    icon: Grid,
+    description: "Browse all cards",
+    label: "All Cards"
   },
   {
-    title: 'My Cards',
-    path: '/cards/my-cards',
-    icon: Collection,
-    description: 'View your personal collection',
-  },
-  {
-    title: 'Favorites',
-    path: '/cards/favorites',
+    title: "Favorites",
+    path: "/cards/favorites",
     icon: Heart,
-    description: 'Cards you\'ve favorited',
+    description: "View your favorite cards",
+    label: "Favorites"
   },
   {
-    title: 'Card Designer',
-    path: '/cards/designer',
+    title: "Collections",
+    path: "/collections",
+    icon: BookOpen,
+    description: "Explore card collections",
+    label: "Collections"
+  },
+  {
+    title: "Create Card",
+    path: "/cards/create",
     icon: Plus,
-    description: 'Create your own cards',
+    description: "Design a new card",
     highlight: true,
+    label: "Create"
   },
   {
-    title: 'Search',
-    path: '/cards/search',
-    icon: Search,
-    description: 'Find specific cards',
-  },
-  {
-    title: 'Settings',
-    path: '/cards/settings',
-    icon: Settings,
-    description: 'Configure card preferences',
-  },
+    title: "Featured",
+    path: "/cards/featured",
+    icon: Star,
+    description: "Highlighted special cards",
+    label: "Featured"
+  }
 ];

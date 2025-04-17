@@ -1,176 +1,145 @@
+
 import React, { useState } from 'react';
-import { useCards } from '@/context/CardContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Plus } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import { Card, CardRarity } from '@/lib/types';
+import { useCards } from '@/hooks/useCards';
 import { toast } from 'sonner';
-import { DEFAULT_DESIGN_METADATA } from '@/lib/utils/cardDefaults';
 
 interface CardCreatorProps {
-  onComplete?: (card: any) => void;
+  onCardCreated?: (card: Card) => void;
 }
 
-const CardCreator: React.FC<CardCreatorProps> = ({ onComplete }) => {
-  const { addCard } = useCards();
+const CardCreator: React.FC<CardCreatorProps> = ({ onCardCreated }) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [image, setImage] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      setImage(file);
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        if (e.target?.result) {
-          setImagePreview(e.target.result as string);
-        }
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
+  const [imageUrl, setImageUrl] = useState('');
+  const [tags, setTags] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { addCard } = useCards();
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
     if (!title.trim()) {
-      toast.error('Please enter a title');
+      toast.error('Please enter a title for your card');
       return;
     }
     
-    if (!imagePreview) {
-      toast.error('Please upload an image');
-      return;
-    }
+    setIsSubmitting(true);
     
     try {
-      setIsLoading(true);
+      // Split tags by comma and trim whitespace
+      const tagArray = tags
+        .split(',')
+        .map(tag => tag.trim())
+        .filter(tag => tag.length > 0);
       
-      // In a real app, we would upload the image to a storage service
-      // For now, we'll just use the data URL
+      // Create a new card
       const newCard = await addCard({
         title,
         description,
-        imageUrl: imagePreview,
-        thumbnailUrl: imagePreview,
-        tags: [],
-        isPublic: true, // Add required field
-        userId: 'anonymous', // Add required field
-        effects: [], // Add required field
-        rarity: 'common', // Add required field
+        imageUrl,
+        thumbnailUrl: imageUrl,
+        tags: tagArray,
+        isPublic: true,
+        effects: [],
+        rarity: CardRarity.COMMON, // Use enum value instead of string
         designMetadata: {
-          ...DEFAULT_DESIGN_METADATA,
           cardStyle: {
-            ...DEFAULT_DESIGN_METADATA.cardStyle,
-            effect: 'classic',
-            borderRadius: '8px'
+            template: 'standard',
+            effect: 'none',
+            borderRadius: '12px',
+            borderColor: '#000',
+            shadowColor: '#000',
+            frameWidth: 2,
+            frameColor: '#000'
           },
           textStyle: {
-            ...DEFAULT_DESIGN_METADATA.textStyle
+            titleColor: '#000',
+            titleAlignment: 'center',
+            titleWeight: 'bold',
+            descriptionColor: '#333'
+          },
+          cardMetadata: {
+            category: 'custom',
+            series: 'user-created',
+            cardType: 'standard'
           }
         }
       });
       
       toast.success('Card created successfully!');
-      if (onComplete) {
-        onComplete(newCard);
+      
+      // Reset form
+      setTitle('');
+      setDescription('');
+      setImageUrl('');
+      setTags('');
+      
+      // Notify parent component
+      if (onCardCreated) {
+        onCardCreated(newCard);
       }
     } catch (error) {
+      toast.error('Failed to create card');
       console.error('Error creating card:', error);
-      toast.error('Failed to create card. Please try again.');
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
-
+  
   return (
-    <div className="space-y-6">
-      <div className="text-center">
-        <h2 className="text-2xl font-bold">Create New Card</h2>
-        <p className="text-gray-500">Upload an image and add details to create your card</p>
-      </div>
+    <div className="bg-white rounded-lg shadow-md p-6">
+      <h2 className="text-xl font-bold mb-4">Create New Card</h2>
       
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="image">Card Image</Label>
-          <div className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-6 bg-gray-50">
-            {imagePreview ? (
-              <div className="relative w-full max-w-xs mx-auto">
-                <img 
-                  src={imagePreview} 
-                  alt="Preview" 
-                  className="w-full h-auto rounded-lg shadow-md" 
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="absolute top-2 right-2 bg-white"
-                  onClick={() => {
-                    setImage(null);
-                    setImagePreview(null);
-                  }}
-                >
-                  Change
-                </Button>
-              </div>
-            ) : (
-              <div className="text-center">
-                <div className="flex flex-col items-center justify-center">
-                  <Plus className="h-12 w-12 text-gray-400" />
-                  <div className="mt-2">
-                    <Label 
-                      htmlFor="file-upload" 
-                      className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer"
-                    >
-                      Upload Image
-                    </Label>
-                    <input
-                      id="file-upload"
-                      name="file-upload"
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageChange}
-                      className="sr-only"
-                    />
-                  </div>
-                  <p className="text-xs text-gray-500 mt-2">PNG, JPG, GIF up to 10MB</p>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-        
-        <div className="space-y-2">
+        <div>
           <Label htmlFor="title">Title</Label>
-          <Input 
+          <Input
             id="title"
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Card title"
+            onChange={e => setTitle(e.target.value)}
+            placeholder="Enter card title"
+            required
           />
         </div>
         
-        <div className="space-y-2">
+        <div>
           <Label htmlFor="description">Description</Label>
-          <Textarea 
+          <Textarea
             id="description"
             value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="Add a description for your card"
+            onChange={e => setDescription(e.target.value)}
+            placeholder="Enter card description"
             rows={3}
           />
         </div>
         
-        <Button 
-          type="submit" 
-          className="w-full"
-          disabled={isLoading}
-        >
-          {isLoading ? 'Creating...' : 'Create Card'}
+        <div>
+          <Label htmlFor="imageUrl">Image URL</Label>
+          <Input
+            id="imageUrl"
+            value={imageUrl}
+            onChange={e => setImageUrl(e.target.value)}
+            placeholder="Enter image URL"
+          />
+        </div>
+        
+        <div>
+          <Label htmlFor="tags">Tags (comma separated)</Label>
+          <Input
+            id="tags"
+            value={tags}
+            onChange={e => setTags(e.target.value)}
+            placeholder="e.g. rare, baseball, vintage"
+          />
+        </div>
+        
+        <Button type="submit" disabled={isSubmitting} className="w-full">
+          {isSubmitting ? 'Creating...' : 'Create Card'}
         </Button>
       </form>
     </div>

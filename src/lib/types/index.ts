@@ -1,20 +1,25 @@
 
-// Base types for the application
-export type JsonValue = string | number | boolean | null | JsonObject | JsonArray;
-export interface JsonObject {
-  [key: string]: JsonValue;
-}
-export interface JsonArray extends Array<JsonValue> {}
-
+// Base entity for database objects
 export interface BaseEntity {
   id: string;
   createdAt: string;
   updatedAt: string;
 }
 
-// Re-export all types
-export * from './user';
+// JSON value type for database fields
+export type JsonValue = 
+  | string
+  | number
+  | boolean
+  | null
+  | JsonValue[]
+  | { [key: string]: JsonValue };
+
+// Export other common types that might be used across the application
 export * from './cardTypes';
+export * from './user';
+export * from './instagram';
+export * from './card';
 export * from './collection';
 export * from './interaction';
 export * from './team';

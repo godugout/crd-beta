@@ -36,6 +36,8 @@ export interface CardMetadata {
   category: string;
   series: string;
   cardType: string;
+  artist?: string;    // Added missing property
+  cardNumber?: string; // Added missing property
 }
 
 // Define MarketMetadata type
@@ -55,6 +57,7 @@ export interface HotspotData {
   targetId?: string;
   targetType?: string;
   description?: string;
+  title?: string;    // Added missing property
 }
 
 // Define DesignMetadata type
@@ -65,6 +68,9 @@ export interface DesignMetadata {
   marketMetadata?: MarketMetadata;
   oaklandMemory?: any;
   layers?: any[];
+  player?: string;    // Added missing property
+  team?: string;      // Added missing property
+  year?: string;      // Added missing property
   [key: string]: any;
 }
 
@@ -84,6 +90,11 @@ export interface Card {
   effects: string[];
   designMetadata?: DesignMetadata;
   reactions?: any[];
+  collectionId?: string;  // Added missing property
+  player?: string;        // Added missing property
+  team?: string;          // Added missing property
+  year?: string;          // Added missing property
+  name?: string;          // Added missing property (used in some components)
 }
 
 // Export all types

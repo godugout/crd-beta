@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Card, CardRarity } from '@/lib/types';
 
@@ -7,6 +6,9 @@ export interface EnhancedCard extends Card {
   isFavorite?: boolean;
   viewCount?: number;
   lastViewed?: string; // Changed from Date to string for JSON compatibility
+  player?: string;     // Added missing property
+  team?: string;       // Added missing property
+  year?: string;       // Added missing property
 }
 
 export interface EnhancedCardContextProps {
@@ -19,7 +21,8 @@ export interface EnhancedCardContextProps {
   updateCard: (id: string, updates: Partial<Card>) => Promise<Card>;
   deleteCard: (id: string) => Promise<boolean>;
   toggleFavorite: (id: string) => void;
-  getCardById: (id: string) => EnhancedCard | undefined; // Added missing method
+  getCardById: (id: string) => EnhancedCard | undefined;
+  createCollection?: (data: any) => Promise<any>; // Added missing method
 }
 
 const CardContext = createContext<EnhancedCardContextProps | undefined>(undefined);
@@ -61,11 +64,17 @@ export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             cardStyle: { template: 'default', effect: 'none', borderRadius: '12px', borderColor: '#000', shadowColor: '#000', frameWidth: 2, frameColor: '#000' },
             textStyle: { titleColor: '#000', titleAlignment: 'center', titleWeight: 'bold', descriptionColor: '#333' },
             cardMetadata: { category: 'sample', series: 'mock', cardType: 'standard' },
-            marketMetadata: { isPrintable: true, isForSale: false, includeInCatalog: true }
+            marketMetadata: { isPrintable: true, isForSale: false, includeInCatalog: true },
+            player: 'John Doe',
+            team: 'Example Team',
+            year: '2023'
           },
           isFavorite: false,
           viewCount: 0,
-          lastViewed: new Date().toISOString() // String format
+          lastViewed: new Date().toISOString(),
+          player: 'John Doe',
+          team: 'Example Team',
+          year: '2023'
         }
       ];
       
@@ -81,6 +90,18 @@ export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // Add the getCardById method
   const getCardById = (id: string): EnhancedCard | undefined => {
     return cards.find(card => card.id === id);
+  };
+
+  // Mock implementation of createCollection
+  const createCollection = async (data: any): Promise<any> => {
+    // Simple mock for a collection creation function
+    console.log("Creating collection with data:", data);
+    return {
+      id: `collection-${Date.now()}`,
+      ...data,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
   };
 
   const addCard = async (card: Partial<Card>): Promise<Card> => {
@@ -182,10 +203,24 @@ export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         updateCard,
         deleteCard,
         toggleFavorite,
-        getCardById // Include the new method
+        getCardById,
+        createCollection
       }}
     >
       {children}
     </CardContext.Provider>
   );
 };
+
+// Export the Card type to fix the module export error
+export type { Card };
+// Export Collection type to fix the missing export error
+export interface Collection {
+  id: string;
+  name: string;
+  description?: string;
+  coverImageUrl?: string;
+  cards?: Card[];
+  createdAt: string;
+  updatedAt: string;
+}

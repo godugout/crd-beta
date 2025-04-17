@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card } from '@/lib/types';
 import { Badge } from '@/components/ui/badge';
@@ -65,10 +66,10 @@ const CardDetailed: React.FC<CardDetailedProps> = ({
       <div className="relative">
         <CardImage
           card={card}
-          aspectRatio="aspect-[2.5/3.5] md:aspect-[2.5/2.2]"
           className="w-full"
           priority={true}
           fill={false}
+          // Remove aspectRatio prop as it's not defined in the CardImageProps interface
         />
         
         {/* Back button */}

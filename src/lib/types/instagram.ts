@@ -10,6 +10,7 @@ export interface InstagramPost {
   comments: number;
   username: string;
   userProfileUrl: string;
-  mediaType: string; // Added missing property
-  tags?: string[]; // Added missing property
+  mediaType: string;
+  tags?: string[];
+  mediaUrl?: string; // Added missing property
 }

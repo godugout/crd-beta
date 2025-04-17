@@ -1,84 +1,140 @@
 
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useCards } from '@/context/CardContext';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Card } from '@/lib/types';
-import CardDetailed from '@/components/cards/CardDetailed';
-import RelatedCards from '@/components/cards/RelatedCards';
+import { useCards } from '@/context/CardContext';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Edit, Share2, Trash } from 'lucide-react';
+import { toast } from 'sonner';
+import CardDetailedView from '@/components/cards/CardDetailed';
+import DeleteConfirmationDialog from '@/components/dialogs/DeleteConfirmationDialog';
+import ShareDialog from '@/components/dialogs/ShareDialog';
 
-/**
- * Component for displaying detailed card view
- */
 const CardDetailView: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { cards, getCardById } = useCards();
+  const { getCardById, deleteCard } = useCards();
   const [card, setCard] = useState<Card | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showShareDialog, setShowShareDialog] = useState(false);
   
   useEffect(() => {
     if (id) {
-      const foundCard = getCardById(id);
-      if (foundCard) {
-        setCard(foundCard);
-      } else {
-        console.error(`Card with ID ${id} not found`);
+      try {
+        const foundCard = getCardById(id);
+        if (foundCard) {
+          setCard(foundCard);
+        } else {
+          toast.error('Card not found');
+          navigate('/cards');
+        }
+      } catch (error) {
+        console.error('Error fetching card:', error);
+        toast.error('Failed to load card');
+      } finally {
+        setIsLoading(false);
       }
     }
-  }, [id, getCardById]);
+  }, [id, getCardById, navigate]);
   
-  const handleGoBack = () => {
-    navigate(-1);
-  };
-  
-  const handleViewFullScreen = (cardId: string) => {
-    navigate(`/cards/immersive/${cardId}`);
-  };
-  
-  const handleEditCard = (cardId: string) => {
-    navigate(`/cards/${cardId}/edit`);
-  };
-  
-  const handleCardClick = (cardId: string) => {
-    navigate(`/cards/${cardId}`);
-  };
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-[60vh]">
+        <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
+      </div>
+    );
+  }
   
   if (!card) {
     return (
-      <div className="p-8 text-center">
-        <p>Card not found</p>
-        <Button variant="outline" onClick={handleGoBack} className="mt-4">
-          Back to Gallery
+      <div className="text-center py-12">
+        <h2 className="text-2xl font-bold">Card Not Found</h2>
+        <p className="mt-2 text-muted-foreground">The card you're looking for doesn't exist or has been removed.</p>
+        <Button onClick={() => navigate('/cards')} className="mt-4">
+          Back to Cards
         </Button>
       </div>
     );
   }
   
+  const handleDelete = async () => {
+    try {
+      await deleteCard(card.id);
+      toast.success('Card deleted successfully');
+      navigate('/cards');
+    } catch (error) {
+      console.error('Error deleting card:', error);
+      toast.error('Failed to delete card');
+    }
+    setShowDeleteDialog(false);
+  };
+  
+  const handleShare = () => {
+    setShowShareDialog(true);
+  };
+  
+  // Create an empty function to satisfy the TypeScript requirement
+  const handleEdit = () => {
+    navigate(`/cards/${card.id}/edit`);
+  };
+  
   return (
     <div className="container mx-auto py-8 px-4">
-      <Button 
-        variant="ghost" 
-        onClick={handleGoBack}
-        className="mb-6 flex items-center"
-      >
+      <Button variant="ghost" onClick={() => navigate(-1)} className="mb-6">
         <ArrowLeft className="mr-2 h-4 w-4" />
         Back
       </Button>
       
-      <CardDetailed 
-        card={card}
-        onView={handleViewFullScreen}
-        onEdit={handleEditCard}
-        className="mb-12"
-      />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2">
+          <CardDetailedView 
+            card={card}
+            showActions={false}
+          />
+        </div>
+        
+        <div className="space-y-6">
+          <div className="bg-white rounded-lg shadow p-6">
+            <h2 className="text-xl font-semibold mb-4">Actions</h2>
+            <div className="flex flex-col gap-3">
+              <Button onClick={handleEdit} className="w-full flex items-center justify-center gap-2">
+                <Edit className="h-4 w-4" />
+                Edit Card
+              </Button>
+              
+              <Button onClick={handleShare} variant="outline" className="w-full flex items-center justify-center gap-2">
+                <Share2 className="h-4 w-4" />
+                Share Card
+              </Button>
+              
+              <Button onClick={() => setShowDeleteDialog(true)} variant="destructive" className="w-full flex items-center justify-center gap-2">
+                <Trash className="h-4 w-4" />
+                Delete Card
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
       
-      <RelatedCards
-        cards={cards.filter(c => c.id !== card.id)}
-        currentCardId={card.id}
-        onCardClick={handleCardClick}
-        className="mt-12"
-      />
+      {showDeleteDialog && (
+        <DeleteConfirmationDialog
+          isOpen={showDeleteDialog}
+          onClose={() => setShowDeleteDialog(false)}
+          onDelete={handleDelete}
+          itemName={card.title}
+        />
+      )}
+      
+      {showShareDialog && (
+        <ShareDialog
+          isOpen={showShareDialog}
+          onClose={() => setShowShareDialog(false)}
+          title={card.title}
+          description={card.description || ''}
+          url={window.location.href}
+        />
+      )}
     </div>
   );
 };

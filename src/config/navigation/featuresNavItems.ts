@@ -1,75 +1,39 @@
 
-import { 
-  Beaker, 
-  BookOpen, 
-  CaseSensitive, 
-  Code, 
-  Compass, 
-  Orbit, 
-  Pencil, 
-  PencilRuler, 
-  RotateCw, 
-  Sparkles,
-  Wand2 
-} from 'lucide-react';
-import { NavigationItem } from './types';
+import { Icon } from "lucide-react";
+import { Sparkles, Wand, Palette, BoxSelect } from "lucide-react";
 
-// Features section navigation
-export const featuresNavItems: NavigationItem[] = [
+export interface NavItem {
+  title: string;
+  path: string;
+  icon: Icon;
+  description?: string;
+  highlight?: boolean;
+}
+
+export const featuresNavItems: NavItem[] = [
   {
-    title: 'Card Showcase',
-    path: '/features/card-showcase',
+    title: "All Features",
+    path: "/features",
     icon: Sparkles,
-    description: 'Visual showcase of card design features'
+    description: "Browse all features"
   },
   {
-    title: 'Interactive Experiences',
-    path: '/features/experiences',
-    icon: Compass,
-    description: 'Interactive card-based experiences'
+    title: "AI Tools",
+    path: "/features/ai",
+    icon: Wand,
+    description: "AI-powered tools",
+    highlight: true
   },
   {
-    title: 'Card Creator Wizard',
-    path: '/card-creator',
-    icon: Wand2,
-    description: 'Create custom digital trading cards'
+    title: "Design Tools",
+    path: "/features/design",
+    icon: Palette,
+    description: "Card design features"
   },
   {
-    title: 'Dugout Labs',
-    path: '/features/labs',
-    icon: Beaker,
-    description: 'Experimental card features in development'
-  },
-  {
-    title: 'PBR Rendering',
-    path: '/features/pbr',
-    icon: Orbit,
-    description: 'Physically-based rendering for cards'
-  },
-  {
-    title: 'Card Animations',
-    path: '/features/animation',
-    icon: RotateCw,
-    description: 'Card animation and interaction effects'
-  },
-  {
-    title: 'Signature Technology',
-    path: '/features/signature',
-    icon: Pencil,
-    description: 'Digital signature authentication'
-  },
-  {
-    title: 'Developer Docs',
-    path: '/features/developer',
-    icon: Code,
-    description: 'API documentation and developer resources'
-  },
-  {
-    title: 'Caching Example',
-    path: '/features/cache-example',
-    icon: BookOpen,
-    description: 'Memory cache system demonstration'
+    title: "Collections",
+    path: "/features/collections",
+    icon: BoxSelect,
+    description: "Card collections"
   }
 ];
-
-export default featuresNavItems;

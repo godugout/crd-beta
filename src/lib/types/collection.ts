@@ -1,22 +1,18 @@
 
 import { Card } from './cardTypes';
-import { JsonValue } from './index';
+import { BaseEntity } from './index';
 
-export interface Collection {
-  id: string;
+export interface Collection extends BaseEntity {
   name: string;
-  title?: string; // Some APIs use title instead of name
+  title?: string;
   description?: string;
   coverImageUrl?: string;
   cards?: Card[];
   cardIds?: string[];
-  createdAt: string;
-  updatedAt: string;
   userId?: string;
   ownerId?: string;
-  visibility?: 'private' | 'public' | 'unlisted';
+  visibility?: 'public' | 'private' | 'team';
   allowComments?: boolean;
   designMetadata?: Record<string, any>;
   tags?: string[];
-  [key: string]: JsonValue | undefined;
 }

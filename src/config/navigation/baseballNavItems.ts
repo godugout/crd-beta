@@ -1,22 +1,39 @@
 
-import { Archive, Users, Building } from 'lucide-react';
-import { NavigationItem } from '@/components/navigation/mobile/types';
+import { Icon } from "lucide-react";
+import { Trophy, Users, Calendar, BarChart } from "lucide-react";
 
-export const baseballNavItems: NavigationItem[] = [
+export interface NavItem {
+  title: string;
+  path: string;
+  icon: Icon;
+  description?: string;
+  highlight?: boolean;
+}
+
+export const baseballNavItems: NavItem[] = [
   {
-    title: 'Teams & Towns',
-    path: '/teams',
-    icon: Archive,
+    title: "Games",
+    path: "/baseball/games",
+    icon: Trophy,
+    description: "View upcoming and past games"
+  },
+  {
+    title: "Teams",
+    path: "/baseball/teams",
+    icon: Users,
+    description: "Browse baseball teams",
     highlight: true
   },
   {
-    title: 'Fans Directory',
-    path: '/teams/fans',
-    icon: Users
+    title: "Schedule",
+    path: "/baseball/schedule",
+    icon: Calendar,
+    description: "Season schedule"
   },
   {
-    title: 'Town Directory',
-    path: '/teams/towns',
-    icon: Building
+    title: "Stats",
+    path: "/baseball/stats",
+    icon: BarChart,
+    description: "Player and team statistics"
   }
 ];
