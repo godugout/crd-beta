@@ -1,6 +1,26 @@
-
 import { v4 as uuidv4 } from 'uuid';
 import { Card, CardRarity } from '@/lib/types';
+import { DesignMetadata } from '@/lib/types/cardTypes';
+
+export const createNewCard = (title: string, imageUrl: string): Card => {
+  return {
+    id: `card-${Date.now()}`,
+    title,
+    description: '',  // Add description
+    imageUrl,
+    thumbnailUrl: imageUrl,
+    tags: [],
+    userId: 'user1',
+    team: 'team1',
+    isPublic: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    rarity: CardRarity.COMMON,
+    effects: [],
+    isFavorite: false,  // Add isFavorite
+    designMetadata: {} as DesignMetadata
+  };
+};
 
 export const createCard = (cardData: Partial<Card>): Card => {
   const timestamp = new Date().toISOString();
@@ -20,7 +40,8 @@ export const createCard = (cardData: Partial<Card>): Card => {
     updatedAt: timestamp,
     rarity: cardData.rarity || CardRarity.COMMON,
     effects: cardData.effects || [],
-    designMetadata: cardData.designMetadata || {}
+    designMetadata: cardData.designMetadata || {},
+    isFavorite: false
   };
   
   return newCard;

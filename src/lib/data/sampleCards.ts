@@ -1,4 +1,3 @@
-
 // Sample cards for demo purposes
 export const sampleCards = [
   {
@@ -12,6 +11,8 @@ export const sampleCards = [
     updatedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
     userId: 'demo-user',
     effects: ['Holographic'],
+    isFavorite: false,
+    rarity: 'COMMON',
     designMetadata: {
       cardStyle: {
         template: 'classic',
@@ -51,6 +52,8 @@ export const sampleCards = [
     updatedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
     userId: 'demo-user',
     effects: ['Refractor', 'Chrome'],
+    isFavorite: false,
+    rarity: 'RARE',
     designMetadata: {
       cardStyle: {
         template: 'nifty',
@@ -90,6 +93,8 @@ export const sampleCards = [
     updatedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
     userId: 'demo-user',
     effects: ['Vintage'],
+    isFavorite: false,
+    rarity: 'COMMON',
     designMetadata: {
       cardStyle: {
         template: 'nostalgic',
@@ -129,6 +134,8 @@ export const sampleCards = [
     updatedAt: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000).toISOString(),
     userId: 'demo-user',
     effects: ['Chrome', 'Holographic'],
+    isFavorite: false,
+    rarity: 'COMMON',
     designMetadata: {
       cardStyle: {
         template: 'nostalgic',
@@ -168,6 +175,8 @@ export const sampleCards = [
     updatedAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
     userId: 'demo-user',
     effects: ['Vintage', 'Holographic'],
+    isFavorite: false,
+    rarity: 'COMMON',
     designMetadata: {
       cardStyle: {
         template: 'classic',
@@ -207,6 +216,8 @@ export const sampleCards = [
     updatedAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
     userId: 'demo-user',
     effects: ['Chrome', 'Holographic'],
+    isFavorite: false,
+    rarity: 'COMMON',
     designMetadata: {
       cardStyle: {
         template: 'nifty',

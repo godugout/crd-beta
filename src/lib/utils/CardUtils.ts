@@ -1,4 +1,3 @@
-
 import { Card } from '@/lib/types';
 
 /**
@@ -28,4 +27,22 @@ export const cardIdToCardObject = cardIdToCard;
  */
 export const getCardDescription = (card: Card | undefined): string => {
   return card?.description || '';
+};
+
+/**
+ * Helper function to create an empty card object
+ */
+export const createEmptyCard = (): Card => {
+  return {
+    id: `card-${Date.now()}`,
+    title: 'New Card',
+    description: '',  // Ensure description is present
+    imageUrl: '',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    effects: [],
+    isFavorite: false,  // Add isFavorite
+    tags: [],
+    userId: 'anonymous'
+  };
 };

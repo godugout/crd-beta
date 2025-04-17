@@ -68,7 +68,15 @@ interface RelatedCardsProps {
 }
 
 const RelatedCards: React.FC<RelatedCardsProps> = ({ cards, currentCardId, onCardClick, className }) => {
-  const filteredCards = cards.filter(card => card.id !== currentCardId).slice(0, 4);
+  const processedCards = cards.map(card => ({
+    ...card,
+    isFavorite: card.isFavorite ?? false,
+    description: card.description || ''
+  }));
+  
+  const filteredCards = processedCards
+    .filter(card => card.id !== currentCardId)
+    .slice(0, 4);
   
   if (filteredCards.length === 0) return null;
   
@@ -83,12 +91,15 @@ const RelatedCards: React.FC<RelatedCardsProps> = ({ cards, currentCardId, onCar
             onClick={() => onCardClick(card.id)}
           >
             <img 
-              src={card.imageUrl} 
+              src={card.thumbnailUrl || card.imageUrl} 
               alt={card.title} 
               className="w-full aspect-[2.5/3.5] object-cover"
+              onError={(e) => {
+                e.currentTarget.src = '/card-placeholder.jpg';
+              }}
             />
             <div className="p-2">
-              <h4 className="font-medium truncate">{card.title}</h4>
+              <p className="font-medium truncate">{card.title}</p>
             </div>
           </div>
         ))}
@@ -134,13 +145,12 @@ const CardDetail = () => {
     if (foundCard) {
       console.log('CardDetail: Found card:', foundCard.title, 'with imageUrl:', foundCard.imageUrl);
       
-      // Make sure we have all required properties in the processed card
       const processedCard = adaptToCard({
         ...foundCard,
         imageUrl: foundCard.imageUrl || FALLBACK_IMAGE,
         thumbnailUrl: foundCard.thumbnailUrl || foundCard.imageUrl || FALLBACK_IMAGE,
-        description: foundCard.description || '', // Ensure description is always a string
-        isFavorite: foundCard.isFavorite || false // Ensure isFavorite is always boolean
+        description: foundCard.description || '',
+        isFavorite: foundCard.isFavorite || false
       });
       
       setResolvedCard(processedCard);
@@ -153,7 +163,7 @@ const CardDetail = () => {
             ...prev, 
             imageUrl: FALLBACK_IMAGE,
             thumbnailUrl: FALLBACK_IMAGE,
-            description: prev.description || '' // Ensure description is always set
+            description: prev.description || ''
           }) : null);
         };
         img.src = processedCard.imageUrl;

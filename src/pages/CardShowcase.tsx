@@ -21,7 +21,8 @@ const sampleCards: Card[] = [
     effects: [],
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
-    designMetadata: DEFAULT_DESIGN_METADATA
+    designMetadata: DEFAULT_DESIGN_METADATA,
+    isFavorite: false
   },
   {
     id: '2',
@@ -34,7 +35,8 @@ const sampleCards: Card[] = [
     effects: [],
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
-    designMetadata: DEFAULT_DESIGN_METADATA
+    designMetadata: DEFAULT_DESIGN_METADATA,
+    isFavorite: false
   }
 ];
 

@@ -15,7 +15,8 @@ export const sampleCardData: Card[] = [
     collectionId: 'collection-1',
     isPublic: true,
     effects: ['holographic'],
-    rarity: CardRarity.LEGENDARY, // Added required rarity property
+    isFavorite: false,
+    rarity: CardRarity.LEGENDARY,
     designMetadata: {
       cardStyle: {
         template: 'classic',
@@ -61,7 +62,8 @@ export const sampleCardData: Card[] = [
     collectionId: 'collection-1',
     isPublic: true,
     effects: ['refractor'],
-    rarity: CardRarity.RARE, // Added required rarity property
+    isFavorite: false,
+    rarity: CardRarity.RARE,
     designMetadata: {
       cardStyle: {
         template: 'modern',
@@ -107,7 +109,8 @@ export const sampleCardData: Card[] = [
     collectionId: 'collection-1',
     isPublic: true,
     effects: ['shimmer'],
-    rarity: CardRarity.UNCOMMON, // Added required rarity property
+    isFavorite: false,
+    rarity: CardRarity.UNCOMMON,
     designMetadata: {
       cardStyle: {
         template: 'holo',
@@ -153,7 +156,8 @@ export const sampleCardData: Card[] = [
     collectionId: 'collection-1',
     isPublic: true,
     effects: ['vintage'],
-    rarity: CardRarity.COMMON, // Added required rarity property
+    isFavorite: false,
+    rarity: CardRarity.COMMON,
     designMetadata: {
       cardStyle: {
         template: 'vintage',
@@ -199,7 +203,8 @@ export const sampleCardData: Card[] = [
     collectionId: 'collection-1',
     isPublic: true,
     effects: ['holographic'],
-    rarity: CardRarity.ULTRA_RARE, // Added required rarity property
+    isFavorite: false,
+    rarity: CardRarity.ULTRA_RARE,
     designMetadata: {
       cardStyle: {
         template: 'classic',
