@@ -1,34 +1,31 @@
 
-import { Map, Home, PlusCircle, Search } from "lucide-react";
+import { Building, MapPin, Search, Eye } from "lucide-react";
 import type { NavItem } from './types';
 
 export const townsNavItems: NavItem[] = [
   {
     title: "All Towns",
     path: "/towns",
-    icon: Map,
-    description: "Browse all towns",
-    highlight: false
+    icon: Building,
+    description: "Browse all towns"
   },
   {
-    title: "My Town",
-    path: "/towns/my",
-    icon: Home,
-    description: "View your town",
+    title: "Featured Towns",
+    path: "/towns/featured",
+    icon: MapPin,
+    description: "View featured towns",
     highlight: true
-  },
-  {
-    title: "Create Town",
-    path: "/towns/create",
-    icon: PlusCircle,
-    description: "Create a new town",
-    highlight: false
   },
   {
     title: "Search Towns",
     path: "/towns/search",
     icon: Search,
-    description: "Find specific towns",
-    highlight: false
+    description: "Find specific towns"
+  },
+  {
+    title: "Explore",
+    path: "/towns/explore",
+    icon: Eye,
+    description: "Explore towns"
   }
 ];

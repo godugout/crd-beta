@@ -1,41 +1,31 @@
 
-import { Home, Layers, Bell, Settings } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
-
-export interface NavItem {
-  title: string;
-  path: string;
-  icon: LucideIcon;
-  description?: string;
-  highlight?: boolean;
-  label?: string;
-}
+import { Home, GalleryHorizontal, FolderOpen, PenLine, UserCircle } from "lucide-react";
+import type { NavItem } from './types';
 
 export const mainNavItems: NavItem[] = [
   {
-    title: "Home",
-    path: "/",
-    icon: Home,
-    description: "Dashboard and recent activity"
+    title: 'Home',
+    path: '/',
+    icon: Home
   },
   {
-    title: "Explore",
-    path: "/explore",
-    icon: Layers,
-    description: "Discover new content",
-    highlight: true,
-    label: "Explore"
+    title: 'Gallery',
+    path: '/gallery',
+    icon: GalleryHorizontal
   },
   {
-    title: "Notifications",
-    path: "/notifications",
-    icon: Bell,
-    description: "Your notifications"
+    title: 'Collections',
+    path: '/collections',
+    icon: FolderOpen
   },
   {
-    title: "Settings",
-    path: "/settings",
-    icon: Settings,
-    description: "App settings"
+    title: 'Create',
+    path: '/create',
+    icon: PenLine
+  },
+  {
+    title: 'Profile',
+    path: '/profile',
+    icon: UserCircle
   }
 ];

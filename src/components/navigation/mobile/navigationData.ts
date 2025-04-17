@@ -8,7 +8,7 @@ import {
   townsNavItems, 
   featuresNavItems,
   baseballNavItems
-} from '@/config/navigation';
+} from '@/config/navigation/index';
 
 // Helper to ensure all required properties exist
 const processNavItem = (item: any) => ({

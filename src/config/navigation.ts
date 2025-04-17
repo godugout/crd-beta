@@ -12,6 +12,16 @@ import {
   PenLine
 } from 'lucide-react';
 
+// Re-export all navigation items from their respective files
+export * from './navigation/types';
+export * from './navigation/mainNavItems';
+export * from './navigation/cardsNavItems';
+export * from './navigation/collectionsNavItems';
+export * from './navigation/featuresNavItems';
+export * from './navigation/baseballNavItems';
+export * from './navigation/townsNavItems';
+export * from './navigation/teamsNavItems';
+
 export const mainNavItems = [
   {
     title: 'Home',

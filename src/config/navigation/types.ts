@@ -8,7 +8,7 @@ export interface NavItem {
   icon: LucideIcon;
   description?: string;
   highlight?: boolean;
-  label?: string;  // Adding the missing label property
+  label?: string;  // Including the label property
 }
 
 export interface NavGroup {

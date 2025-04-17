@@ -1,31 +1,37 @@
 
-import { LibraryBig, Heart, PlusCircle, Search } from "lucide-react";
-import { NavItem } from './types';
+import { Grid, Star, Clock, Search, PlusCircle } from "lucide-react";
+import type { NavItem } from './types';
 
 export const cardsNavItems: NavItem[] = [
   {
     title: "All Cards",
     path: "/cards",
-    icon: LibraryBig,
+    icon: Grid,
     description: "Browse all cards"
   },
   {
-    title: "My Cards",
-    path: "/cards/my",
-    icon: Heart,
-    description: "View your cards",
-    highlight: true
+    title: "Featured Cards",
+    path: "/cards/featured",
+    icon: Star,
+    description: "View featured cards"
+  },
+  {
+    title: "Recent Cards",
+    path: "/cards/recent",
+    icon: Clock,
+    description: "Recently added cards"
   },
   {
     title: "Create Card",
     path: "/cards/create",
     icon: PlusCircle,
-    description: "Create a new card"
+    description: "Create a new card",
+    highlight: true
   },
   {
     title: "Search Cards",
     path: "/cards/search",
     icon: Search,
-    description: "Find specific cards"
+    description: "Search for cards"
   }
 ];
