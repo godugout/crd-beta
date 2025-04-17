@@ -7,6 +7,7 @@ import { ensureCardRarity } from '@/lib/utils/CardRarityUtils';
 import { sampleCards } from '@/lib/data/sampleCards';
 import { toast } from '@/hooks/use-toast';
 
+// Define the CardDetailedViewCard type with all required properties from Card
 export type CardDetailedViewCard = Required<Pick<Card, 'id' | 'title' | 'description' | 'imageUrl' | 'thumbnailUrl' | 
   'tags' | 'createdAt' | 'updatedAt' | 'userId' | 'effects' | 'isFavorite' | 'rarity'>> & 
   Omit<Card, 'id' | 'title' | 'description' | 'imageUrl' | 'thumbnailUrl' | 'tags' | 'createdAt' | 
