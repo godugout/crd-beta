@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, ReactNode } from 'react';
 import { Card, CardRarity, Collection } from '@/lib/types';
 import { sampleCards } from '@/lib/data/sampleCards';
@@ -5,6 +6,7 @@ import { cardIdToCard } from '@/lib/utils/cardHelpers';
 import { CardContext, CardContextProps } from './CardContext';
 import { adaptToCard } from '@/lib/adapters/typeAdapters';
 import { toStandardCard } from '@/lib/utils/cardConverters';
+import { stringToCardRarity } from '@/lib/utils/CardRarityUtils';
 
 /**
  * Provider component for CardContext
@@ -13,12 +15,19 @@ import { toStandardCard } from '@/lib/utils/cardConverters';
 export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   // Process sample cards to ensure they all have the required properties
   // and use the correct CardRarity enum
-  const processedSampleCards = sampleCards.map(card => toStandardCard({
-    ...card,
-    isFavorite: card.isFavorite ?? false,
-    description: card.description || '',
-    rarity: card.rarity || CardRarity.COMMON
-  }));
+  const processedSampleCards = sampleCards.map(card => {
+    // Convert string rarity to CardRarity enum
+    const rarityValue = typeof card.rarity === 'string' 
+      ? stringToCardRarity(card.rarity as string)
+      : card.rarity || CardRarity.COMMON;
+      
+    return toStandardCard({
+      ...card,
+      isFavorite: card.isFavorite ?? false,
+      description: card.description || '',
+      rarity: rarityValue
+    });
+  });
   
   const [cards, setCards] = useState<Card[]>(processedSampleCards);
   const [favorites, setFavorites] = useState<Card[]>([]);

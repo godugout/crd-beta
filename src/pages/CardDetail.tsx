@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import PageLayout from '@/components/navigation/PageLayout';
@@ -12,6 +13,7 @@ import { toast } from '@/hooks/use-toast';
 import { adaptToCard } from '@/lib/adapters/typeAdapters';
 import { DEFAULT_DESIGN_METADATA } from '@/lib/utils/cardDefaults';
 import { toStandardCard } from '@/lib/utils/cardConverters';
+import { stringToCardRarity } from '@/lib/utils/CardRarityUtils';
 
 interface CardDetailedProps {
   card: Card;
@@ -149,6 +151,11 @@ const CardDetail = () => {
           console.log('CardDetail: Found card:', foundCard.title, 'with imageUrl:', foundCard.imageUrl);
           
           import('@/lib/utils/cardConverters').then(({ toStandardCard }) => {
+            // Ensure the rarity is properly converted to a CardRarity enum
+            const rarityValue = foundCard && typeof foundCard.rarity === 'string' 
+              ? stringToCardRarity(foundCard.rarity)
+              : foundCard?.rarity || CardRarity.COMMON;
+              
             const processedCard = toStandardCard({
               ...foundCard,
               imageUrl: foundCard.imageUrl || FALLBACK_IMAGE,
@@ -157,7 +164,7 @@ const CardDetail = () => {
               isFavorite: foundCard.isFavorite ?? false,
               createdAt: foundCard.createdAt || new Date().toISOString(), 
               updatedAt: foundCard.updatedAt || new Date().toISOString(),
-              rarity: foundCard.rarity || CardRarity.COMMON
+              rarity: rarityValue,
             });
             
             setResolvedCard(processedCard);

@@ -1,5 +1,5 @@
 
-import { CardRarity } from '@/lib/types/cardTypes';
+import { CardRarity } from '@/lib/types';
 
 /**
  * Utility function to check if a card rarity matches a string value
@@ -22,14 +22,31 @@ export const stringToCardRarity = (rarity: string): CardRarity => {
     case 'rare':
       return CardRarity.RARE;
     case 'ultra-rare':
+    case 'ultra_rare':
       return CardRarity.ULTRA_RARE;
     case 'legendary':
       return CardRarity.LEGENDARY;
     case 'mythic':
       return CardRarity.MYTHIC;
     case 'one-of-one':
+    case 'one_of_one':
       return CardRarity.ONE_OF_ONE;
     default:
       return CardRarity.COMMON;
   }
+};
+
+/**
+ * Safely get a CardRarity enum value from various input types
+ */
+export const ensureCardRarity = (value: unknown): CardRarity => {
+  if (typeof value === 'string') {
+    return stringToCardRarity(value);
+  }
+  
+  if (value && Object.values(CardRarity).includes(value as CardRarity)) {
+    return value as CardRarity;
+  }
+  
+  return CardRarity.COMMON;
 };
