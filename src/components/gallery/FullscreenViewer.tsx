@@ -33,6 +33,7 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({
           <CardViewer 
             card={card}
             isFullscreen={true}
+            activeEffects={card.effects || []}
           />
         ) : (
           <div className="text-white text-center">

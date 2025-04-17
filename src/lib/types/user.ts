@@ -1,6 +1,4 @@
 
-// Add this to the existing file
-
 // User permissions constants
 export enum UserPermission {
   CREATE_CARD = 'create_card',
@@ -17,7 +15,8 @@ export enum UserRole {
   ARTIST = 'artist',
   FAN = 'fan',
   GUEST = 'guest',
-  MODERATOR = 'moderator'
+  MODERATOR = 'moderator',
+  USER = 'user'
 }
 
 // Role-based permissions mapping
@@ -43,6 +42,9 @@ export const ROLE_PERMISSIONS = {
   [UserRole.MODERATOR]: [
     UserPermission.VIEW_DASHBOARD,
     UserPermission.MANAGE_USERS
+  ],
+  [UserRole.USER]: [
+    UserPermission.VIEW_DASHBOARD
   ]
 };
 
@@ -55,6 +57,7 @@ export interface User {
   avatarUrl?: string;
   username?: string;
   displayName?: string;
+  bio?: string;
   permissions?: UserPermission[];
   createdAt: string;
   updatedAt: string;

@@ -1,3 +1,4 @@
+
 import React, { createContext, useState, useContext, ReactNode } from 'react';
 import { Card, Collection } from '@/lib/types';
 
@@ -11,6 +12,7 @@ interface Deck {
   coverImageUrl?: string;
   cardIds?: string[];
   isPublic?: boolean;
+  ownerId: string;
 }
 
 interface Series {
@@ -20,6 +22,12 @@ interface Series {
   cards?: Card[];
   createdAt: string;
   updatedAt: string;
+  title?: string;
+  coverImageUrl?: string;
+  cardIds?: string[];
+  totalCards?: number;
+  isPublished?: boolean;
+  artistId?: string;
 }
 
 export interface EnhancedCardContextProps {
@@ -30,6 +38,7 @@ export interface EnhancedCardContextProps {
   favorites: Card[];
   series: Series[];
   loading: boolean;
+  isLoading: boolean;
   error: Error | null;
   fetchCards: () => Promise<void>;
   fetchCollections: () => Promise<void>;
@@ -58,6 +67,7 @@ export const EnhancedCardProvider: React.FC<{ children: ReactNode }> = ({ childr
   const [favorites, setFavorites] = useState<Card[]>([]);
   const [series, setSeries] = useState<Series[]>([]);
   const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
   const fetchCards = async (): Promise<void> => {
@@ -129,8 +139,10 @@ export const EnhancedCardProvider: React.FC<{ children: ReactNode }> = ({ childr
       userId: collectionData.userId || 'user-1',
       visibility: collectionData.visibility || 'private',
       allowComments: collectionData.allowComments !== undefined ? collectionData.allowComments : true,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      createdAt: collectionData.createdAt || new Date().toISOString(),
+      updatedAt: collectionData.updatedAt || new Date().toISOString(),
+      cardIds: collectionData.cardIds || [],
+      tags: collectionData.tags || []
     };
     setCollections(prev => [...prev, newCollection]);
     return newCollection;
@@ -231,8 +243,14 @@ export const EnhancedCardProvider: React.FC<{ children: ReactNode }> = ({ childr
     const newSeries: Series = {
       id: `series-${Date.now()}`,
       name: seriesData.name || 'New Series',
+      title: seriesData.title || seriesData.name || 'New Series',
       description: seriesData.description || '',
       cards: seriesData.cards || [],
+      coverImageUrl: seriesData.coverImageUrl || '',
+      cardIds: seriesData.cardIds || [],
+      totalCards: seriesData.totalCards || 0,
+      isPublished: seriesData.isPublished || false,
+      artistId: seriesData.artistId || '',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -259,6 +277,7 @@ export const EnhancedCardProvider: React.FC<{ children: ReactNode }> = ({ childr
     favorites,
     series,
     loading,
+    isLoading,
     error,
     fetchCards,
     fetchCollections,
@@ -292,3 +311,5 @@ export const useEnhancedCards = () => {
   }
   return context;
 };
+
+export type { Deck, Series };

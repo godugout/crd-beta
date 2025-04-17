@@ -21,6 +21,12 @@ export interface Collection extends BaseEntity {
   allowComments: boolean;
   createdAt: string;
   updatedAt: string;
+  cardIds?: string[];
+  tags?: string[];
+}
+
+export interface JsonValue {
+  [key: string]: string | number | boolean | null | JsonValue | JsonValue[];
 }
 
 export interface OaklandMemoryData {
@@ -31,17 +37,8 @@ export interface OaklandMemoryData {
   tags: string[];
 }
 
-export {
-  Card,
-  Comment,
-  Reaction,
-  User,
-  UserRole,
-  UserPermission,
-  ROLE_PERMISSIONS,
-  CardRarity,
-  DesignMetadata
-};
+// Export all types
+export { Card, Comment, Reaction, User, UserRole, UserPermission, ROLE_PERMISSIONS, CardRarity, DesignMetadata };
 
 // Re-export types properly for TypeScript
 export type { Collection };

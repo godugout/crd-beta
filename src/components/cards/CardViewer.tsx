@@ -2,142 +2,60 @@
 import React, { useState } from 'react';
 import { Card } from '@/lib/types';
 
-export interface CardViewerProps {
+interface CardViewerProps {
   card: Card;
+  isFullscreen?: boolean;
   isFlipped?: boolean;
   activeEffects?: string[];
   effectIntensities?: Record<string, number>;
   showLightingControls?: boolean;
-  isFullscreen?: boolean;
-  onFullscreenToggle?: () => void;
-  onShare?: () => void;
-  onCapture?: () => void;
-  onBack?: () => void;
-  onClose?: () => void;
 }
 
-const CardViewer: React.FC<CardViewerProps> = ({ 
-  card, 
-  isFlipped = false, 
+const CardViewer: React.FC<CardViewerProps> = ({
+  card,
+  isFullscreen = false,
+  isFlipped = false,
   activeEffects = [],
   effectIntensities = {},
-  showLightingControls = false,
-  isFullscreen = false,
-  onFullscreenToggle,
-  onShare,
-  onCapture,
-  onBack,
-  onClose
+  showLightingControls = false
 }) => {
-  const [rotationX, setRotationX] = useState(0);
-  const [rotationY, setRotationY] = useState(0);
-  
-  // Common card effect classes
-  const getEffectClasses = () => {
-    return activeEffects
-      .map(effect => {
-        switch(effect) {
-          case 'Holographic': return 'card-effect-holographic';
-          case 'Chrome': return 'card-effect-chrome';
-          case 'Refractor': return 'card-effect-refractor';
-          case 'Vintage': return 'card-effect-vintage';
-          default: return '';
-        }
-      })
-      .filter(Boolean)
-      .join(' ');
-  };
-  
+  // Ensure we have a valid URL
+  const imageUrl = card?.imageUrl || card?.thumbnailUrl || '/placeholder.svg';
+
   return (
-    <div className="card-viewer-container w-full h-full relative">
+    <div className={`relative ${isFullscreen ? 'w-full h-full' : 'w-full max-w-md'}`}>
       <div 
-        className={`card-display relative w-full aspect-[2.5/3.5] ${getEffectClasses()} ${isFlipped ? 'flipped' : ''}`}
-        style={{
-          transform: `perspective(1000px) rotateX(${rotationX}deg) rotateY(${rotationY}deg)`,
-        }}
+        className={`aspect-[2.5/3.5] overflow-hidden rounded-lg ${isFullscreen ? 'shadow-2xl' : 'shadow-md'}`}
       >
-        {/* Card Front */}
-        <div className="card-side card-front absolute inset-0">
+        <div className="w-full h-full relative">
+          {/* Card image */}
           <img 
-            src={card.imageUrl} 
-            alt={card.title}
-            className="w-full h-full object-cover rounded-lg"
+            src={imageUrl}
+            alt={card?.title || 'Card'}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              console.error('Image failed to load:', imageUrl);
+              e.currentTarget.src = '/placeholder.svg';
+            }}
           />
           
-          <div className="card-title absolute bottom-4 left-4 right-4 text-white text-xl font-bold drop-shadow-lg">
-            {card.title}
-          </div>
-        </div>
-        
-        {/* Card Back */}
-        <div className="card-side card-back absolute inset-0 [transform:rotateY(180deg)] bg-gray-800 rounded-lg">
-          <div className="p-4 text-white">
-            <h3 className="text-lg font-bold mb-2">{card.title}</h3>
-            <p className="text-sm">{card.description}</p>
-            
-            {card.tags && card.tags.length > 0 && (
-              <div className="mt-4">
-                <h4 className="text-xs uppercase mb-1">Tags</h4>
-                <div className="flex flex-wrap gap-1">
-                  {card.tags.map((tag, i) => (
-                    <span key={i} className="text-xs bg-gray-700 px-2 py-1 rounded">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
+          {/* Apply effects */}
+          {activeEffects?.map((effect, index) => (
+            <div 
+              key={index}
+              className={`absolute inset-0 pointer-events-none effect-${effect.toLowerCase()}`}
+              style={{ opacity: effectIntensities?.[effect] || 0.5 }}
+            />
+          ))}
         </div>
       </div>
       
-      {/* Controls */}
-      {(onBack || onFullscreenToggle || onShare || onCapture || onClose) && (
-        <div className="card-controls absolute bottom-4 left-0 right-0 flex justify-center gap-2">
-          {onBack && (
-            <button 
-              onClick={onBack}
-              className="bg-black/50 text-white px-3 py-1 rounded-full text-sm backdrop-blur-sm"
-            >
-              Back
-            </button>
-          )}
-          
-          {onFullscreenToggle && (
-            <button 
-              onClick={onFullscreenToggle}
-              className="bg-black/50 text-white px-3 py-1 rounded-full text-sm backdrop-blur-sm"
-            >
-              {isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
-            </button>
-          )}
-          
-          {onShare && (
-            <button 
-              onClick={onShare}
-              className="bg-black/50 text-white px-3 py-1 rounded-full text-sm backdrop-blur-sm"
-            >
-              Share
-            </button>
-          )}
-          
-          {onCapture && (
-            <button 
-              onClick={onCapture}
-              className="bg-black/50 text-white px-3 py-1 rounded-full text-sm backdrop-blur-sm"
-            >
-              Capture
-            </button>
-          )}
-          
-          {onClose && (
-            <button 
-              onClick={onClose}
-              className="bg-black/50 text-white px-3 py-1 rounded-full text-sm backdrop-blur-sm"
-            >
-              Close
-            </button>
-          )}
+      {/* Card details (when not fullscreen) */}
+      {!isFullscreen && card.title && (
+        <div className="mt-2 px-1">
+          <h3 className="text-sm font-medium truncate">{card.title}</h3>
+          {card.player && <p className="text-xs text-gray-600">{card.player}</p>}
+          {card.team && <p className="text-xs text-gray-600">{card.team}</p>}
         </div>
       )}
     </div>

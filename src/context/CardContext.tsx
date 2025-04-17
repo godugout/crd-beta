@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Card, CardRarity, Collection } from '@/lib/types';
 import { sampleCards } from '@/lib/data/sampleCards';
@@ -24,6 +23,7 @@ interface CardContextProps {
   addSeries: (series: any) => Promise<any>;
   updateSeries: (id: string, series: any) => Promise<any>;
   refreshCards: () => Promise<void>;
+  createCollection: (collection: Partial<Collection>) => Promise<Collection>;
 }
 
 export const CardContext = createContext<CardContextProps | undefined>(undefined);
@@ -220,7 +220,6 @@ export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  // Series functions (stubs for now)
   const addSeries = async (series: any) => {
     return {};
   };
@@ -232,6 +231,8 @@ export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const refreshCards = async () => {
     return fetchCards();
   };
+
+  const createCollection = addCollection;
 
   const value: CardContextProps = {
     cards,
@@ -253,7 +254,8 @@ export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     deleteCollection,
     addSeries,
     updateSeries,
-    refreshCards
+    refreshCards,
+    createCollection
   };
 
   return (
@@ -263,7 +265,6 @@ export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   );
 };
 
-// Hook to use the card context
 export const useCards = () => {
   const context = useContext(CardContext);
   if (!context) {
@@ -272,5 +273,4 @@ export const useCards = () => {
   return context;
 };
 
-// Export types
-export type { Card, Collection };
+export type { Card, Collection, CardContextProps };

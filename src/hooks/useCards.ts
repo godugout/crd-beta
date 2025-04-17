@@ -60,7 +60,8 @@ export function useCards() {
       deleteCollection: async () => true,
       addSeries: async () => ({}),
       updateSeries: async () => ({}),
-      refreshCards: async () => {}
+      refreshCards: async () => {},
+      createCollection: async () => ({})
     };
   }
   
