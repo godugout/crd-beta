@@ -150,7 +150,8 @@ const CardDetail = () => {
           setResolvedCard(prev => prev ? adaptToCard({ 
             ...prev, 
             imageUrl: FALLBACK_IMAGE,
-            thumbnailUrl: FALLBACK_IMAGE 
+            thumbnailUrl: FALLBACK_IMAGE,
+            description: prev.description || '' // Ensure description is always set
           }) : null);
         };
         img.src = processedCard.imageUrl;

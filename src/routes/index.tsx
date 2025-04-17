@@ -25,6 +25,13 @@ const SeriesManagerPage = React.lazy(() => import('@/pages/SeriesManagerPage'));
 const DeckViewPage = React.lazy(() => import('@/pages/DeckViewPage'));
 const SeriesViewPage = React.lazy(() => import('@/pages/SeriesViewPage'));
 
+// Replace missing components with appropriate placeholders 
+// or import them if they exist elsewhere
+import NotFound from '@/pages/NotFound';
+// Define placeholder components for missing pages
+const TeamDetail = NotFound;
+const TownDetail = NotFound;
+
 export const routes: RouteObject[] = [
   ...mainRoutes,
   ...teamRoutes,

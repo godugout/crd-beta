@@ -60,7 +60,7 @@ export interface Card extends BaseEntity {
   year?: string;
   name?: string;
   
-  // Collection and favorites
+  // Collection and favorites - now ensuring isFavorite is included
   isFavorite?: boolean;
   stats?: CardStats;
   

@@ -1,64 +1,33 @@
 
 import { Card } from '@/lib/types';
-import { adaptToCard } from '@/lib/adapters/typeAdapters';
-import { EnhancedCard } from '@/lib/types/enhancedCardTypes';
-import { cardToEnhancedCard } from '@/lib/adapters/EnhancedCardAdapter';
 
 /**
- * Convert a string card id to a minimal Card object
- * Useful for cases where a function expects a Card but only an ID is available
+ * Utility function to convert a string ID to a Card object
+ * Used primarily for type conversion when passing string IDs to functions expecting Card objects
  */
-export function cardIdToCard(cardId: string): Card {
-  return adaptToCard({
+export const cardIdToCard = (cardId: string): Card => {
+  return {
     id: cardId,
-    title: 'Card',
+    title: `Card ${cardId.slice(-4)}`,
     imageUrl: '',
-    effects: []
-  });
-}
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    effects: [],
+    isFavorite: false // Include the isFavorite property
+  };
+};
 
 /**
- * Convert a string card id to a minimal EnhancedCard object
- * Useful for cases where a function expects an EnhancedCard but only an ID is available
+ * Helper function to ensure a card is an EnhancedCard type
  */
-export function cardIdToEnhancedCard(cardId: string): EnhancedCard {
-  const baseCard = cardIdToCard(cardId);
-  return cardToEnhancedCard(baseCard);
-}
+export const ensureEnhancedCard = (card: Card): any => {
+  return {
+    ...card,
+    views: 0,
+    likes: 0,
+    shares: 0
+  };
+};
 
-/**
- * Ensures that a value is a Card object
- * If it's a string (card ID), converts it to a minimal Card object
- */
-export function ensureCard(cardOrId: Card | string): Card {
-  if (typeof cardOrId === 'string') {
-    return cardIdToCard(cardOrId);
-  }
-  return cardOrId;
-}
-
-/**
- * Ensures that a value is an EnhancedCard object
- * If it's a string (card ID), converts it to a minimal EnhancedCard object
- */
-export function ensureEnhancedCard(cardOrIdOrEnhanced: EnhancedCard | Card | string): EnhancedCard {
-  if (typeof cardOrIdOrEnhanced === 'string') {
-    return cardIdToEnhancedCard(cardOrIdOrEnhanced);
-  }
-  
-  if ('views' in cardOrIdOrEnhanced && 'likes' in cardOrIdOrEnhanced) {
-    return cardOrIdOrEnhanced as EnhancedCard;
-  }
-  
-  return cardToEnhancedCard(cardOrIdOrEnhanced);
-}
-
-/**
- * Safely get card property value, handling undefined and null values
- */
-export function getCardProperty<T>(card: Card | undefined | null, property: keyof Card, defaultValue: T): T {
-  if (!card) return defaultValue;
-  
-  const value = card[property];
-  return (value === undefined || value === null) ? defaultValue : (value as unknown as T);
-}
+// Export an alias for backward compatibility
+export const cardIdToCardObject = cardIdToCard;

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/lib/types';
 import { useAuth } from '@/hooks/useAuth';
@@ -27,18 +28,20 @@ const FanDashboard: React.FC = () => {
     if (user) {
       // Fetch or filter favorite cards based on user data
       // For now, let's just filter from available cards
-      const favorites = cards.filter(card => card.isFavorite);
+      const favorites = cards.filter(card => card.isFavorite === true);
       setFavoriteCards(favorites);
     }
   }, [user, cards]);
 
   const handleCardSelect = (cardId: string) => {
+    // Convert string ID to Card object
     const card = cardIdToCard(cardId);
     // Now use card instead of cardId
     console.log(`Card selected: ${card.title}`);
   };
 
   const handleCardClick = (cardId: string) => {
+    // Convert string ID to Card object
     const card = cardIdToCard(cardId);
     // Now use card instead of cardId
     console.log(`Card clicked: ${card.title}`);
