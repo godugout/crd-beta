@@ -87,3 +87,26 @@ export const ensureCardRarity = (rarity: string | CardRarity | undefined): CardR
   
   return rarity;
 };
+
+/**
+ * Adapter function for OaklandMemory data type
+ */
+export const adaptToOaklandMemory = (data: any): any => {
+  // Basic implementation for TypeScript compatibility
+  return {
+    title: data.title || '',
+    description: data.description || '',
+    date: data.date,
+    opponent: data.opponent,
+    score: data.score,
+    location: data.location,
+    section: data.section,
+    memoryType: data.memoryType,
+    attendees: data.attendees || [],
+    tags: data.tags || [],
+    imageUrl: data.imageUrl,
+    historicalContext: data.historicalContext,
+    personalSignificance: data.personalSignificance,
+    ...data
+  };
+};

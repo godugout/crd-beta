@@ -1,5 +1,4 @@
-
-import { Card } from '@/lib/types';
+import { Card, CardRarity } from '@/lib/types';
 import { adaptToCard } from '@/lib/adapters/cardAdapter';
 
 // Mock API service for card data
@@ -18,7 +17,7 @@ export const fetchCards = async (): Promise<Card[]> => {
       tags: ['baseball', 'vintage', 'collectible'],
       userId: 'demo-user',
       effects: ['standard'],
-      rarity: 'common',
+      rarity: CardRarity.COMMON,
     }),
     adaptToCard({
       id: '2',
@@ -29,7 +28,7 @@ export const fetchCards = async (): Promise<Card[]> => {
       tags: ['basketball', 'limited', 'sports'],
       userId: 'demo-user',
       effects: ['holographic'],
-      rarity: 'rare',
+      rarity: CardRarity.RARE,
     }),
   ];
   
@@ -52,7 +51,7 @@ export const fetchCardById = async (id: string): Promise<Card | null> => {
       tags: ['baseball', 'vintage', 'collectible'],
       userId: 'demo-user',
       effects: ['standard'],
-      rarity: 'common',
+      rarity: CardRarity.COMMON,
     });
   }
   

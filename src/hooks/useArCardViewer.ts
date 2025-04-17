@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Card } from '@/lib/types';
+import { Card, CardRarity } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { adaptToCard } from '@/lib/adapters/cardAdapter';
 
@@ -15,16 +15,13 @@ export function useArCardViewer(cardId?: string) {
   const [arCards, setArCards] = useState<Card[]>([]);
   const { toast } = useToast();
 
-  // Get the active card based on activeCardId
   const activeCard = activeCardId ? cards.find(card => card.id === activeCardId) || null : null;
-  // Cards available to add to AR scene
   const availableCards = cards.filter(card => !arCards.some(arCard => arCard.id === card.id));
 
   const fetchCards = useCallback(async () => {
     try {
       setLoading(true);
       
-      // For demonstration, create some sample cards
       const demoCards: Card[] = [
         adaptToCard({
           id: '1',
@@ -37,7 +34,7 @@ export function useArCardViewer(cardId?: string) {
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
           effects: ['Holographic'],
-          rarity: 'common',
+          rarity: CardRarity.COMMON,
         }),
         adaptToCard({
           id: '2',
@@ -50,13 +47,12 @@ export function useArCardViewer(cardId?: string) {
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
           effects: ['Refractor'],
-          rarity: 'rare',
+          rarity: CardRarity.RARE,
         }),
       ];
       
       setCards(demoCards);
 
-      // If a cardId was provided, add it to AR cards
       if (cardId) {
         const cardToAdd = demoCards.find(card => card.id === cardId);
         if (cardToAdd) {
@@ -91,7 +87,6 @@ export function useArCardViewer(cardId?: string) {
     setActiveCardId(null);
   }, []);
 
-  // AR interaction methods
   const handleLaunchAr = useCallback(() => {
     if (activeCard) {
       setArCards([activeCard]);

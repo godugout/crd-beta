@@ -1,6 +1,7 @@
+
 import React, { useState, useEffect } from 'react';
 import PageLayout from '@/components/navigation/PageLayout';
-import { Card } from '@/lib/types';
+import { Card, CardRarity } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { adaptToCard } from '@/lib/adapters/cardAdapter';
 
@@ -40,7 +41,7 @@ const CommunityFeed = () => {
               }
             ],
             effects: ['Holographic'],
-            rarity: 'common',
+            rarity: CardRarity.COMMON,
           }),
           adaptToCard({
             id: 'community-2',
@@ -56,7 +57,7 @@ const CommunityFeed = () => {
             tags: ['community', 'trending'],
             reactions: [],
             effects: ['Chrome', 'Refractor'],
-            rarity: 'rare',
+            rarity: CardRarity.RARE,
           }),
         ];
         

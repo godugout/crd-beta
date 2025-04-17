@@ -1,6 +1,6 @@
 
 import { supabase } from '@/lib/supabase';
-import { Card, Collection } from '@/lib/types';
+import { Card, Collection, CardRarity } from '@/lib/types';
 import { v4 as uuidv4 } from 'uuid';
 import { DEFAULT_DESIGN_METADATA } from '@/lib/utils/cardDefaults';
 import { adaptToCard } from '@/lib/adapters/cardAdapter';
@@ -125,7 +125,7 @@ export const fetchCards = async (options?: {
         isPublic: true,
         designMetadata: DEFAULT_DESIGN_METADATA,
         effects: [],
-        rarity: 'common',
+        rarity: CardRarity.COMMON,
       }),
       adaptToCard({
         id: '2',
@@ -142,7 +142,7 @@ export const fetchCards = async (options?: {
         isPublic: true,
         designMetadata: DEFAULT_DESIGN_METADATA,
         effects: ['Holographic'],
-        rarity: 'rare',
+        rarity: CardRarity.RARE,
       }),
     ];
   } catch (error) {

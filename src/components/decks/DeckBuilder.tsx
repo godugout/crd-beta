@@ -114,10 +114,8 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck }) => {
     if (card) {
       handleAddCard(ensureEnhancedCard(card));
     } else {
-      import('@/lib/adapters/typeAdapters').then(({ adaptToCard }) => {
-        const tempCard = cardIdToCard(cardId);
-        handleAddCard(ensureEnhancedCard(adaptToCard(tempCard)));
-      });
+      const tempCard = cardIdToCard(cardId);
+      handleAddCard(ensureEnhancedCard(adaptToCard(tempCard)));
     }
   };
   

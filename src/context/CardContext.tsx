@@ -1,8 +1,7 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Card, CardRarity, Collection } from '@/lib/types';
 import { sampleCards } from '@/lib/data/sampleCards';
-import { cardIdToCard } from '@/lib/utils/cardHelpers';
+import { cardIdToCard, adaptToCard } from '@/lib/utils/cardHelpers';
 
 /**
  * Props interface for the Card Context
@@ -43,8 +42,9 @@ export const CardContext = createContext<CardContextProps | undefined>(undefined
  * Manages state and provides card-related functionality to child components
  */
 export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  // Use the adaptToCard function to ensure all cards have the isFavorite property
-  const processedSampleCards = sampleCards.map(card => ({
+  // Process sample cards to ensure they all have the required isFavorite property
+  // and use the correct CardRarity enum
+  const processedSampleCards = sampleCards.map(card => adaptToCard({
     ...card,
     isFavorite: card.isFavorite ?? false,
     description: card.description || ''

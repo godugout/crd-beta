@@ -1,10 +1,10 @@
-
 import { v4 as uuidv4 } from 'uuid';
 import { Card, CardRarity } from '@/lib/types';
 import { DesignMetadata } from '@/lib/types/cardTypes';
+import { adaptToCard } from '@/lib/adapters/typeAdapters';
 
 export const createNewCard = (title: string, imageUrl: string): Card => {
-  return {
+  return adaptToCard({
     id: `card-${Date.now()}`,
     title,
     description: '',
@@ -14,20 +14,14 @@ export const createNewCard = (title: string, imageUrl: string): Card => {
     userId: 'user1',
     team: 'team1',
     isPublic: true,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    rarity: CardRarity.COMMON,
     effects: [],
-    isFavorite: false,
+    rarity: CardRarity.COMMON,
     designMetadata: {} as DesignMetadata
-  };
+  });
 };
 
 export const createCard = (cardData: Partial<Card>): Card => {
-  const timestamp = new Date().toISOString();
-  
-  // Generate default values if not provided
-  const newCard: Card = {
+  return adaptToCard({
     id: cardData.id || uuidv4(),
     title: cardData.title || 'Untitled Card',
     description: cardData.description || '',
@@ -37,15 +31,13 @@ export const createCard = (cardData: Partial<Card>): Card => {
     userId: cardData.userId || 'anonymous',
     team: cardData.team || '',
     isPublic: cardData.isPublic !== undefined ? cardData.isPublic : true,
-    createdAt: timestamp,
-    updatedAt: timestamp,
+    createdAt: cardData.createdAt || new Date().toISOString(),
+    updatedAt: cardData.updatedAt || new Date().toISOString(),
     rarity: cardData.rarity || CardRarity.COMMON,
     effects: cardData.effects || [],
     designMetadata: cardData.designMetadata || {},
     isFavorite: cardData.isFavorite !== undefined ? cardData.isFavorite : false
-  };
-  
-  return newCard;
+  });
 };
 
 /**

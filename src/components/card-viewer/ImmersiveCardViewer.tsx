@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect, useState } from 'react';
 import { Card } from '@/lib/types';
 import { Canvas } from '@react-three/fiber';
@@ -7,7 +6,6 @@ import Card3DRenderer from './Card3DRenderer';
 import { useToast } from '@/hooks/use-toast';
 import { adaptToCard } from '@/lib/adapters/typeAdapters';
 
-// Define fallback constants
 const FALLBACK_IMAGE_URL = 'https://images.unsplash.com/photo-1518770660439-4636190af475';
 const DEFAULT_DESIGN_METADATA = {
   cardStyle: {
@@ -55,15 +53,12 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
   const [processedCard, setProcessedCard] = useState<Card | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   
-  // Convert card to compatible format for Card3DRenderer
   useEffect(() => {
     setIsLoading(true);
     
     try {
-      // Make sure the card has the required properties
       const cardWithDefaults = adaptToCard(card);
 
-      // Ensure we have valid image URL
       if (!cardWithDefaults.imageUrl || cardWithDefaults.imageUrl === 'undefined') {
         console.warn(`Card ${cardWithDefaults.id} is missing an image URL, using fallback`);
         cardWithDefaults.imageUrl = FALLBACK_IMAGE_URL;
@@ -76,7 +71,6 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
         });
       }
       
-      // Set up imagePreload to validate that images actually load
       const image = new Image();
       image.onload = () => {
         console.log(`Image loaded successfully: ${cardWithDefaults.imageUrl}`);
@@ -94,14 +88,13 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
       
     } catch (error) {
       console.error("Error during card processing:", error);
-      // Create a minimal valid card with fallback image
       const fallbackCard = adaptToCard({
         ...card,
         imageUrl: FALLBACK_IMAGE_URL,
         thumbnailUrl: FALLBACK_IMAGE_URL,
         isPublic: true,
         effects: [],
-        rarity: 'common'
+        rarity: CardRarity.COMMON
       });
       setProcessedCard(fallbackCard);
       setIsLoading(false);
