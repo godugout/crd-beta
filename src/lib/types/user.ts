@@ -1,86 +1,61 @@
 
-import { BaseEntity } from './index';
+import { JsonValue } from './index';
 
-/**
- * User roles for permission management
- */
 export enum UserRole {
   ADMIN = 'admin',
+  ARTIST = 'artist',
   USER = 'user',
-  PREMIUM = 'premium',
-  CREATOR = 'creator',
-  MODERATOR = 'moderator'
+  GUEST = 'guest'
 }
 
-/**
- * User permission types
- */
-export type UserPermission = 
-  | 'read:own' 
-  | 'write:own' 
-  | 'delete:own' 
-  | 'read:all' 
-  | 'write:all' 
-  | 'delete:all' 
-  | 'premium:features'
-  | 'create:premium'
-  | 'moderate:content'
-  | 'all';
+export enum UserPermission {
+  CREATE_CARD = 'create:card',
+  DELETE_CARD = 'delete:card',
+  EDIT_CARD = 'edit:card',
+  CREATE_COLLECTION = 'create:collection',
+  DELETE_COLLECTION = 'delete:collection',
+  EDIT_COLLECTION = 'edit:collection',
+  VIEW_ANALYTICS = 'view:analytics',
+  MANAGE_USERS = 'manage:users',
+  APPROVE_SUBMISSIONS = 'approve:submissions'
+}
 
-/**
- * Role to permission mapping
- */
 export const ROLE_PERMISSIONS: Record<UserRole, UserPermission[]> = {
-  [UserRole.ADMIN]: ['all'],
-  [UserRole.USER]: ['read:own', 'write:own', 'delete:own'],
-  [UserRole.PREMIUM]: ['read:own', 'write:own', 'delete:own', 'premium:features'],
-  [UserRole.CREATOR]: ['read:own', 'write:own', 'delete:own', 'create:premium'],
-  [UserRole.MODERATOR]: ['read:own', 'write:own', 'delete:own', 'moderate:content']
+  [UserRole.ADMIN]: [
+    UserPermission.CREATE_CARD,
+    UserPermission.DELETE_CARD,
+    UserPermission.EDIT_CARD,
+    UserPermission.CREATE_COLLECTION,
+    UserPermission.DELETE_COLLECTION,
+    UserPermission.EDIT_COLLECTION,
+    UserPermission.VIEW_ANALYTICS,
+    UserPermission.MANAGE_USERS,
+    UserPermission.APPROVE_SUBMISSIONS
+  ],
+  [UserRole.ARTIST]: [
+    UserPermission.CREATE_CARD,
+    UserPermission.EDIT_CARD,
+    UserPermission.CREATE_COLLECTION,
+    UserPermission.EDIT_COLLECTION
+  ],
+  [UserRole.USER]: [
+    UserPermission.CREATE_COLLECTION,
+    UserPermission.EDIT_COLLECTION
+  ],
+  [UserRole.GUEST]: []
 };
 
-/**
- * User interface for authentication and profiles
- */
-export interface User extends BaseEntity {
-  id: string; // Explicitly add id to ensure it's recognized
-  email: string;
-  name?: string;
-  displayName?: string;
-  username?: string;
-  avatarUrl?: string;
-  bio?: string;
-  role: UserRole;
-  permissions?: UserPermission[];
-  preferences?: Record<string, any>;
-}
-
-/**
- * Extended user profile with additional information
- */
-export interface UserProfile extends User {
-  followers?: number;
-  following?: number;
-  cardCount?: number;
-  collectionCount?: number;
-  joinDate?: string;
-  socialLinks?: {
-    twitter?: string;
-    instagram?: string;
-    website?: string;
-  };
-}
-
-/**
- * Database representation of User for Supabase mapping
- */
-export interface DbUser {
+export interface User {
   id: string;
   email: string;
-  display_name?: string;
-  full_name?: string;
+  displayName: string;
+  name?: string;
   username?: string;
-  avatar_url?: string;
-  created_at: string;
-  updated_at: string;
-  role?: string;
+  avatarUrl?: string;
+  role: UserRole;
+  createdAt: string;
+  updatedAt: string;
+  permissions?: UserPermission[];
+  metadata?: Record<string, JsonValue>;
+  [key: string]: JsonValue | undefined;
 }

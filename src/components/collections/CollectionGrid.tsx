@@ -1,63 +1,97 @@
+
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Card, Collection } from '@/lib/types';
-import { CardThumbnail } from '@/components/cards';
-import { Button } from '@/components/ui/button';
-import { EyeIcon, LayoutGridIcon } from 'lucide-react';
+import { Collection } from '@/lib/types';
+import { Card, CardContent } from '@/components/ui/card';
+import { Link } from 'react-router-dom';
+import { Badge } from '@/components/ui/badge';
+import { GalleryHorizontal, Lock, Globe, Tag } from 'lucide-react';
+import { LoadingState } from '@/components/ui/loading-state';
 
 interface CollectionGridProps {
   collections: Collection[];
-  className?: string;
+  isLoading?: boolean;
 }
 
-const CollectionGrid: React.FC<CollectionGridProps> = ({ collections, className }) => {
-  const navigate = useNavigate();
+const CollectionGrid: React.FC<CollectionGridProps> = ({ 
+  collections,
+  isLoading = false
+}) => {
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center py-12">
+        <LoadingState text="Loading collections..." />
+      </div>
+    );
+  }
   
-  const handleCollectionClick = (collectionId: string) => {
-    navigate(`/collections/${collectionId}`);
-  };
+  if (collections.length === 0) {
+    return null;
+  }
 
   return (
-    <div className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 ${className}`}>
-      {collections.map(collection => (
-        <div 
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {collections.map((collection) => (
+        <Link 
+          to={`/collections/${collection.id}`} 
           key={collection.id}
-          className="relative bg-white rounded-md shadow-sm hover:shadow-md transition-shadow duration-200 cursor-pointer"
-          onClick={() => handleCollectionClick(collection.id)}
+          className="transition-transform hover:scale-[1.02]"
         >
-          {collection.coverImageUrl && (
-            <div className="aspect-w-4 aspect-h-3">
-              <CardThumbnail 
-                src={collection.coverImageUrl} 
-                alt={collection.name} 
-                className="object-cover rounded-t-md"
-              />
-            </div>
-          )}
-          
-          <div className="p-4">
-            <h3 className="font-semibold text-md line-clamp-1">{collection.name}</h3>
-            <p className="text-sm text-gray-500 line-clamp-2 mt-1">{collection.description}</p>
-          </div>
-          
-          {collection.visibility && collection.visibility !== 'private' && (
-            <div className="w-full py-2 flex justify-between items-center text-xs border-t border-gray-200 text-gray-500">
-              <div className="flex items-center">
-                <EyeIcon className="h-3.5 w-3.5 mr-1" />
-                {collection.visibility === 'public' && <span>Public</span>}
-                {collection.visibility === 'unlisted' && <span>Unlisted</span>}
-                {collection.visibility === 'team' && <span>Team Only</span>}
-              </div>
-              
-              {collection.cardIds && collection.cardIds.length > 0 && (
-                <div className="flex items-center">
-                  <LayoutGridIcon className="h-3.5 w-3.5 mr-1" />
-                  <span>{collection.cardIds.length} card{collection.cardIds.length !== 1 ? 's' : ''}</span>
+          <Card className="h-full overflow-hidden">
+            <div className="aspect-[16/9] overflow-hidden bg-muted">
+              {collection.coverImageUrl ? (
+                <img 
+                  src={collection.coverImageUrl} 
+                  alt={collection.name || collection.title || 'Collection'} 
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-muted to-muted/50">
+                  <GalleryHorizontal className="h-12 w-12 text-muted-foreground opacity-40" />
                 </div>
               )}
             </div>
-          )}
-        </div>
+            
+            <CardContent className="p-4">
+              <div className="flex justify-between items-start mb-2">
+                <h3 className="font-semibold text-lg line-clamp-2">
+                  {collection.name || collection.title || 'Untitled Collection'}
+                </h3>
+                
+                {collection.visibility && (
+                  <Badge variant={collection.visibility === 'public' ? 'outline' : 'secondary'} className="ml-2 flex-shrink-0">
+                    {collection.visibility === 'public' ? (
+                      <Globe className="h-3 w-3 mr-1" />
+                    ) : (
+                      <Lock className="h-3 w-3 mr-1" />
+                    )}
+                    {collection.visibility}
+                  </Badge>
+                )}
+              </div>
+              
+              {collection.description && (
+                <p className="text-muted-foreground text-sm line-clamp-2 mb-3">
+                  {collection.description}
+                </p>
+              )}
+              
+              <div className="flex items-center justify-between mt-2">
+                <div className="flex items-center text-xs text-muted-foreground">
+                  <GalleryHorizontal className="h-3 w-3 mr-1" />
+                  {collection.cards?.length || 0} cards
+                </div>
+                
+                {collection.tags && collection.tags.length > 0 && (
+                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                    <Tag className="h-3 w-3 mr-1" />
+                    {collection.tags.slice(0, 2).join(', ')}
+                    {collection.tags.length > 2 && '...'}
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
       ))}
     </div>
   );

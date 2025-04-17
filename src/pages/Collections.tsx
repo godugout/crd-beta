@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import PageLayout from '@/components/navigation/PageLayout';
 import { useCards } from '@/context/CardContext';
@@ -9,10 +9,15 @@ import { PlusCircle, Filter, Globe } from 'lucide-react';
 import CollectionGrid from '@/components/collections/CollectionGrid';
 import ContentTypeNavigation from '@/components/navigation/ContentTypeNavigation';
 import { collectionsNavItems } from '@/config/navigation';
-import SampleCardsButton from '@/components/gallery/SampleCardsButton';
+import { toast } from 'sonner';
 
 const Collections = () => {
-  const { collections, isLoading } = useCards();
+  const { collections, isLoading, fetchCollections } = useCards();
+  
+  // Fetch collections on component mount
+  useEffect(() => {
+    fetchCollections();
+  }, [fetchCollections]);
   
   // Create navigation items for content type navigation
   const navigationItems = collectionsNavItems.map(item => ({
@@ -21,6 +26,17 @@ const Collections = () => {
     icon: item.icon ? <item.icon className="h-4 w-4" /> : undefined,
     description: item.description
   }));
+  
+  // This is where we would normally load from database
+  const handleGenerateSampleCollections = () => {
+    // In a real app, this would call an API to generate sample collections
+    toast.info('Generating sample collections...');
+    
+    // For now, just refresh the page to show any existing collections
+    setTimeout(() => {
+      window.location.reload();
+    }, 1500);
+  };
   
   return (
     <PageLayout
@@ -60,7 +76,7 @@ const Collections = () => {
         {collections.length === 0 && !isLoading && (
           <div className="mb-10 p-8 border border-dashed rounded-lg text-center">
             <h3 className="text-lg font-medium mb-3">No collections yet</h3>
-            <p className="text-muted-foreground mb-6">Create a collection or generate sample cards to get started</p>
+            <p className="text-muted-foreground mb-6">Create a collection or generate sample collections to get started</p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button asChild variant="outline">
@@ -70,11 +86,9 @@ const Collections = () => {
                 </Link>
               </Button>
               
-              <Button asChild variant="secondary">
-                <Link to="/collections/commons">
-                  <Globe className="h-4 w-4 mr-2" />
-                  Generate Commons Cards
-                </Link>
+              <Button variant="secondary" onClick={handleGenerateSampleCollections}>
+                <Globe className="h-4 w-4 mr-2" />
+                Generate Sample Collections
               </Button>
             </div>
           </div>

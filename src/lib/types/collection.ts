@@ -1,58 +1,22 @@
 
-import { BaseEntity } from './index';
 import { Card } from './cardTypes';
+import { JsonValue } from './index';
 
-export interface InstagramSource {
-  username: string;
-  lastFetched: string;
-  autoUpdate: boolean;
-}
-
-export interface Collection extends BaseEntity {
-  name: string;
-  description?: string;
-  userId: string;
-  cards: Card[];
-  coverImageUrl?: string;
-  isPublic: boolean;
-  tags?: string[];
-  popularity?: number;
-  instagramSource?: InstagramSource;
-  
-  // Additional properties needed by other components
-  visibility: 'public' | 'private' | 'team' | 'unlisted';
-  allowComments: boolean;
-  teamId?: string;
-  cardIds: string[];
-  designMetadata: any;
-  owner_id?: string; // For backward compatibility
-}
-
-export interface CollectionWithCards extends Collection {
-  cards: Card[];
-}
-
-// For backwards compatibility with DB models
-export interface DbCollection {
+export interface Collection {
   id: string;
-  title: string;
+  name: string;
+  title?: string; // Some APIs use title instead of name
   description?: string;
-  cover_image_url?: string;
-  owner_id?: string; 
-  team_id?: string;
-  visibility?: 'public' | 'private' | 'team' | 'unlisted';
-  allow_comments?: boolean;
-  created_at: string;
-  updated_at: string;
-  design_metadata?: any;
+  coverImageUrl?: string;
+  cards?: Card[];
+  cardIds?: string[];
+  createdAt: string;
+  updatedAt: string;
+  userId?: string;
+  ownerId?: string;
+  visibility?: 'private' | 'public' | 'unlisted';
+  allowComments?: boolean;
+  designMetadata?: Record<string, any>;
+  tags?: string[];
+  [key: string]: JsonValue | undefined;
 }
-
-// Function to serialize metadata for storage
-export const serializeMetadata = (metadata: any) => {
-  if (!metadata) return {};
-  try {
-    return JSON.parse(JSON.stringify(metadata));
-  } catch (e) {
-    return metadata;
-  }
-};

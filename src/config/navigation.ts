@@ -1,0 +1,119 @@
+
+import { 
+  ListCollection, 
+  GalleryHorizontal, 
+  History, 
+  Star, 
+  Calendar, 
+  UserCircle, 
+  Home,
+  Layout,
+  Gem,
+  PenLine
+} from 'lucide-react';
+
+export const mainNavItems = [
+  {
+    title: 'Home',
+    path: '/',
+    icon: Home
+  },
+  {
+    title: 'Gallery',
+    path: '/gallery',
+    icon: GalleryHorizontal
+  },
+  {
+    title: 'Collections',
+    path: '/collections',
+    icon: ListCollection
+  },
+  {
+    title: 'Create',
+    path: '/create',
+    icon: PenLine
+  },
+  {
+    title: 'Profile',
+    path: '/profile',
+    icon: UserCircle
+  }
+];
+
+export const collectionsNavItems = [
+  {
+    title: 'All',
+    path: '/collections',
+    icon: ListCollection,
+    description: 'All collections'
+  },
+  {
+    title: 'My Collections',
+    path: '/collections/my',
+    icon: UserCircle,
+    description: 'Collections created by you'
+  },
+  {
+    title: 'Featured',
+    path: '/collections/featured',
+    icon: Star,
+    description: 'Featured collections'
+  },
+  {
+    title: 'Recent',
+    path: '/collections/recent',
+    icon: History,
+    description: 'Recently created collections'
+  }
+];
+
+export const galleryNavItems = [
+  {
+    title: 'All Cards',
+    path: '/gallery',
+    icon: Layout
+  },
+  {
+    title: 'Recent',
+    path: '/gallery/recent',
+    icon: History
+  },
+  {
+    title: 'Popular',
+    path: '/gallery/popular',
+    icon: Star
+  },
+  {
+    title: 'Premium',
+    path: '/gallery/premium',
+    icon: Gem
+  },
+  {
+    title: 'Events',
+    path: '/gallery/events',
+    icon: Calendar
+  }
+];
+
+export const profileNavItems = [
+  {
+    title: 'Profile',
+    path: '/profile',
+    description: 'Manage your profile information'
+  },
+  {
+    title: 'My Cards',
+    path: '/profile/cards',
+    description: 'View your created and collected cards'
+  },
+  {
+    title: 'My Collections',
+    path: '/profile/collections',
+    description: 'Manage your collections'
+  },
+  {
+    title: 'Settings',
+    path: '/profile/settings',
+    description: 'Update your account settings'
+  }
+];
