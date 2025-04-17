@@ -111,8 +111,8 @@ const AppHeader: React.FC = () => {
                 className="rounded-full bg-white/10 hover:bg-white/15"
               >
                 <Link to="/profile">
-                  {user.avatar ? (
-                    <img src={user.avatar} alt={user.name} className="h-8 w-8 rounded-full" />
+                  {user.avatarUrl ? (
+                    <img src={user.avatarUrl} alt={user.name} className="h-8 w-8 rounded-full" />
                   ) : (
                     <User className="h-5 w-5 text-white" />
                   )}
