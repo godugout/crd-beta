@@ -2,13 +2,15 @@
 import React, { useState } from 'react';
 import { Card } from '@/lib/types';
 
-interface CardViewerProps {
+export interface CardViewerProps {
   card: Card;
   isFullscreen?: boolean;
   isFlipped?: boolean;
   activeEffects?: string[];
   effectIntensities?: Record<string, number>;
   showLightingControls?: boolean;
+  onShare?: () => void;
+  onClose?: () => void;
 }
 
 const CardViewer: React.FC<CardViewerProps> = ({
@@ -17,7 +19,9 @@ const CardViewer: React.FC<CardViewerProps> = ({
   isFlipped = false,
   activeEffects = [],
   effectIntensities = {},
-  showLightingControls = false
+  showLightingControls = false,
+  onShare,
+  onClose
 }) => {
   // Ensure we have a valid URL
   const imageUrl = card?.imageUrl || card?.thumbnailUrl || '/placeholder.svg';

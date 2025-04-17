@@ -43,8 +43,6 @@ export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const fetchCards = async () => {
     setLoading(true);
     try {
-      // In a real app, fetch cards from API
-      // For now, we'll use sample cards
       setCards(sampleCards);
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Failed to fetch cards'));
@@ -56,7 +54,6 @@ export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const fetchCollections = async () => {
     setLoading(true);
     try {
-      // In a real app, fetch collections from API
       setCollections([]);
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Failed to fetch collections'));
@@ -248,7 +245,7 @@ export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     deleteCard,
     toggleFavorite,
     getCardById,
-    getCard: getCardById, // Alias for consistency
+    getCard: getCardById,
     addCollection,
     updateCollection,
     deleteCollection,

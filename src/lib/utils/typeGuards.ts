@@ -1,5 +1,6 @@
 
-import { Card, Collection, User, Comment, Reaction, OaklandMemoryData } from '@/lib/types';
+import { Card, Collection, User, OaklandMemoryData } from '@/lib/types';
+import { adaptToOaklandMemory } from '@/lib/adapters/typeAdapters';
 
 /**
  * Type guard to check if an object is a valid Card
@@ -10,7 +11,7 @@ export function isCard(obj: any): obj is Card {
     typeof obj === 'object' &&
     typeof obj.id === 'string' &&
     (typeof obj.title === 'string' || typeof obj.name === 'string') &&
-    typeof obj.description === 'string' &&
+    (typeof obj.description === 'string' || obj.description === undefined) &&
     (typeof obj.imageUrl === 'string' || typeof obj.image === 'string')
   );
 }
@@ -24,7 +25,7 @@ export function isCollection(obj: any): obj is Collection {
     typeof obj === 'object' &&
     typeof obj.id === 'string' &&
     (typeof obj.name === 'string' || typeof obj.title === 'string') &&
-    typeof obj.description === 'string'
+    (typeof obj.description === 'string' || obj.description === undefined)
   );
 }
 
@@ -58,19 +59,5 @@ export function isOaklandMemoryData(obj: any): obj is OaklandMemoryData {
  * Will fill in required fields if they're missing with safe defaults
  */
 export function ensureValidOaklandMemoryData(obj: Partial<OaklandMemoryData>): OaklandMemoryData {
-  return {
-    title: obj.title || '',
-    description: obj.description || '',
-    tags: obj.tags || [],
-    date: obj.date,
-    location: obj.location,
-    opponent: obj.opponent,
-    score: obj.score,
-    section: obj.section,
-    imageUrl: obj.imageUrl,
-    memoryType: obj.memoryType,
-    attendees: obj.attendees || [],
-    historicalContext: obj.historicalContext,
-    personalSignificance: obj.personalSignificance
-  };
+  return adaptToOaklandMemory(obj);
 }

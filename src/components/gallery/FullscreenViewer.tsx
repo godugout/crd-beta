@@ -9,11 +9,13 @@ import { Card } from '@/lib/types';
 interface FullscreenViewerProps {
   card: Card;
   onClose: () => void;
+  onShare?: () => void;
 }
 
 const FullscreenViewer: React.FC<FullscreenViewerProps> = ({
   card,
-  onClose
+  onClose,
+  onShare
 }) => {
   return (
     <div className="fixed inset-0 z-50 bg-black flex flex-col">
@@ -34,6 +36,8 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({
             card={card}
             isFullscreen={true}
             activeEffects={card.effects || []}
+            onShare={onShare}
+            onClose={onClose}
           />
         ) : (
           <div className="text-white text-center">

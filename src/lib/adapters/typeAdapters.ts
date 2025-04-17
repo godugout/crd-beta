@@ -1,159 +1,91 @@
-import { Card, CardRarity, Collection, DesignMetadata } from '@/lib/types';
-import { v4 as uuidv4 } from 'uuid';
 
-// Utility function to map string rarities to enum values
-export function mapRarityToEnum(rarity: string): CardRarity {
-  switch (rarity.toLowerCase()) {
-    case 'common':
-      return CardRarity.COMMON;
-    case 'uncommon':
-      return CardRarity.UNCOMMON;
-    case 'rare':
-      return CardRarity.RARE;
-    case 'ultra-rare':
-      return CardRarity.ULTRA_RARE;
-    case 'legendary':
-      return CardRarity.LEGENDARY;
-    default:
-      return CardRarity.COMMON;
-  }
-}
+/**
+ * Type adapter utilities to safely convert between different type variations
+ * and ensure backward compatibility
+ */
+import { Card, Collection, User, OaklandMemoryData } from '../types';
+import { CardRarity, DesignMetadata } from '../types/cardTypes';
 
-// Default design metadata as a fallback
-export const DEFAULT_DESIGN_METADATA: DesignMetadata = {
-  cardStyle: {
-    template: 'standard',
-    effect: 'standard',
-    borderRadius: '8px',
-    borderColor: '#000000',
-    shadowColor: '#000000',
-    frameWidth: 5,
-    frameColor: '#000000'
-  },
-  textStyle: {
-    titleColor: '#000000',
-    titleAlignment: 'center',
-    titleWeight: 'bold',
-    descriptionColor: '#333333'
-  },
-  cardMetadata: {
-    category: 'standard',
-    series: 'default',
-    cardType: 'standard'
-  },
-  marketMetadata: {
-    isPrintable: true,
-    isForSale: false,
-    includeInCatalog: false
-  }
-};
-
-// Transform any card-like object to conform to our Card type
-export function adaptCard(input: any): Card {
-  const now = new Date().toISOString();
-  
-  let designMetadata: DesignMetadata = DEFAULT_DESIGN_METADATA;
-  
-  if (input.designMetadata) {
-    // Ensure design metadata has all required properties
-    designMetadata = {
-      cardStyle: { 
-        ...(DEFAULT_DESIGN_METADATA.cardStyle),
-        ...(input.designMetadata.cardStyle || {}) 
-      },
-      textStyle: { 
-        ...(DEFAULT_DESIGN_METADATA.textStyle),
-        ...(input.designMetadata.textStyle || {}) 
-      },
-      cardMetadata: { 
-        ...(DEFAULT_DESIGN_METADATA.cardMetadata),
-        ...(input.designMetadata.cardMetadata || {}) 
-      },
-      marketMetadata: { 
-        ...(DEFAULT_DESIGN_METADATA.marketMetadata),
-        ...(input.designMetadata.marketMetadata || {}) 
-      }
-    };
-    
-    // Copy over any additional properties
-    if (input.designMetadata.player) designMetadata.player = input.designMetadata.player;
-    if (input.designMetadata.team) designMetadata.team = input.designMetadata.team;
-    if (input.designMetadata.year) designMetadata.year = input.designMetadata.year;
-    if (input.designMetadata.oaklandMemory) designMetadata.oaklandMemory = input.designMetadata.oaklandMemory;
-    if (input.designMetadata.layers) designMetadata.layers = input.designMetadata.layers;
-  }
-  
+/**
+ * Safely converts any Card-like object to a valid Card type
+ * Ensures all required properties are present
+ */
+export function adaptToCard(cardData: any): Card {
   return {
-    id: input.id || uuidv4(),
-    title: input.title || input.name || 'Untitled Card',
-    description: input.description || '',
-    imageUrl: input.imageUrl || '',
-    thumbnailUrl: input.thumbnailUrl || input.imageUrl || '',
-    tags: input.tags || [],
-    userId: input.userId || 'anonymous',
-    isPublic: input.isPublic ?? true,
-    createdAt: input.createdAt || now,
-    updatedAt: input.updatedAt || now,
-    effects: input.effects || [],
-    rarity: typeof input.rarity === 'string' ? mapRarityToEnum(input.rarity) : (input.rarity || CardRarity.COMMON),
-    designMetadata: designMetadata,
-    team: input.team,
-    player: input.player,
-    year: input.year,
-    teamId: input.teamId
+    id: cardData.id || `card-${Date.now()}`,
+    title: cardData.title || cardData.name || 'Untitled Card',
+    description: cardData.description || '',
+    imageUrl: cardData.imageUrl || cardData.image_url || '',
+    thumbnailUrl: cardData.thumbnailUrl || cardData.imageUrl || '',
+    userId: cardData.userId || cardData.user_id || 'anonymous',
+    createdAt: cardData.createdAt || new Date().toISOString(),
+    updatedAt: cardData.updatedAt || new Date().toISOString(),
+    tags: cardData.tags || [],
+    effects: cardData.effects || [],
+    rarity: cardData.rarity || CardRarity.COMMON,
+    designMetadata: cardData.designMetadata || {},
+    player: cardData.player || '',
+    team: cardData.team || '',
+    year: cardData.year || '',
+    ...cardData
   };
 }
 
-// Transform any collection-like object to conform to our Collection type
-export function adaptCollection(input: any): Collection {
-  const now = new Date().toISOString();
-  
+/**
+ * Safely converts any Collection-like object to a valid Collection type
+ */
+export function adaptToCollection(collectionData: any): Collection {
   return {
-    id: input.id || uuidv4(),
-    name: input.name || input.title || 'Untitled Collection',
-    title: input.title || input.name || 'Untitled Collection',
-    description: input.description || '',
-    coverImageUrl: input.coverImageUrl || input.imageUrl || '',
-    cards: input.cards ? input.cards.map(adaptCard) : [],
-    cardIds: input.cardIds || [],
-    createdAt: input.createdAt || now,
-    updatedAt: input.updatedAt || now,
-    userId: input.userId || input.ownerId || 'anonymous',
-    visibility: input.visibility || 'private',
-    allowComments: input.allowComments ?? true,
-    designMetadata: input.designMetadata || {},
-    tags: input.tags || [],
-    teamId: input.teamId,
-    isPublic: input.isPublic
+    id: collectionData.id || `collection-${Date.now()}`,
+    title: collectionData.title || collectionData.name || 'Untitled Collection',
+    name: collectionData.name || collectionData.title || 'Untitled Collection',
+    description: collectionData.description || '',
+    coverImageUrl: collectionData.coverImageUrl || '',
+    userId: collectionData.userId || collectionData.user_id || collectionData.ownerId || 'anonymous',
+    visibility: collectionData.visibility || 'private',
+    allowComments: collectionData.allowComments !== undefined ? collectionData.allowComments : true,
+    createdAt: collectionData.createdAt || new Date().toISOString(),
+    updatedAt: collectionData.updatedAt || new Date().toISOString(),
+    cardIds: collectionData.cardIds || [],
+    tags: collectionData.tags || [],
+    ...collectionData
   };
 }
 
-// Ensure a card has all necessary fields for display
-export function ensureValidCard(card: any): Card {
-  if (!card) {
-    return createDefaultCard();
-  }
-  
-  return adaptCard(card);
+/**
+ * Safely converts any User-like object to a valid User type
+ */
+export function adaptToUser(userData: any): User {
+  return {
+    id: userData.id || `user-${Date.now()}`,
+    email: userData.email || '',
+    name: userData.name || userData.displayName || '',
+    displayName: userData.displayName || userData.name || userData.username || '',
+    role: userData.role || 'user',
+    createdAt: userData.createdAt || new Date().toISOString(),
+    updatedAt: userData.updatedAt || new Date().toISOString(),
+    ...userData
+  };
 }
 
-// Create a default card when none is provided
-export function createDefaultCard(): Card {
-  const now = new Date().toISOString();
-  
+/**
+ * Safely converts any data to a valid OaklandMemoryData type
+ */
+export function adaptToOaklandMemory(memoryData: any): OaklandMemoryData {
   return {
-    id: uuidv4(),
-    title: 'Sample Card',
-    description: 'This is a placeholder card',
-    imageUrl: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3',
-    thumbnailUrl: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=200',
-    tags: ['sample', 'placeholder'],
-    userId: 'anonymous',
-    isPublic: true,
-    createdAt: now,
-    updatedAt: now,
-    effects: [],
-    rarity: CardRarity.COMMON,
-    designMetadata: DEFAULT_DESIGN_METADATA
+    title: memoryData.title || '',
+    description: memoryData.description || '',
+    date: memoryData.date || '',
+    location: memoryData.location || '',
+    tags: memoryData.tags || [],
+    opponent: memoryData.opponent || '',
+    score: memoryData.score || '',
+    section: memoryData.section || '',
+    memoryType: memoryData.memoryType || '',
+    attendees: memoryData.attendees || [],
+    imageUrl: memoryData.imageUrl || '',
+    historicalContext: memoryData.historicalContext || '',
+    personalSignificance: memoryData.personalSignificance || '',
+    ...memoryData
   };
 }

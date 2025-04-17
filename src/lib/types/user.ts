@@ -1,4 +1,8 @@
 
+/**
+ * User permissions and roles for the CRD application
+ */
+
 // User permissions constants
 export enum UserPermission {
   CREATE_CARD = 'create_card',
@@ -48,7 +52,10 @@ export const ROLE_PERMISSIONS = {
   ]
 };
 
-// User interface
+/**
+ * User interface representing a user in the CRD application
+ * Includes all properties used across the codebase
+ */
 export interface User {
   id: string;
   email: string;
@@ -56,11 +63,25 @@ export interface User {
   role: UserRole;
   avatarUrl?: string;
   username?: string;
-  displayName?: string;
+  displayName?: string; // Added because it's used in NavAvatar, UserDropdown, etc.
   bio?: string;
   permissions?: UserPermission[];
   createdAt: string;
   updatedAt: string;
   isVerified?: boolean;
   isActive?: boolean;
+  website?: string;
+  socialLinks?: {
+    twitter?: string;
+    instagram?: string;
+    tiktok?: string;
+  };
+  signature?: string;
+  logoUrl?: string;
+  cardsCreated?: number;
+  seriesCreated?: number;
+  totalSales?: number;
+  cardsCollected?: number;
+  decksCreated?: number;
+  purchaseCount?: number;
 }

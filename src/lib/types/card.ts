@@ -3,6 +3,9 @@ import { CardRarity, DesignMetadata } from './cardTypes';
 import { BaseEntity } from '.';
 import { Reaction } from './interaction';
 
+/**
+ * Card statistics including rarity, views, likes, and other metrics
+ */
 export interface CardStats {
   rarity: string;
   totalViews: number;
@@ -13,6 +16,29 @@ export interface CardStats {
   [key: string]: number | string;
 }
 
+/**
+ * Fabric swatch for baseball cards and memorabilia
+ */
+export interface FabricSwatch {
+  id: string;
+  name: string;
+  color: string;
+  fabricType: string;
+  imageUrl?: string;
+  thumbnail?: string;
+  isAvailable: boolean;
+  type?: string;
+  team?: string;
+  year?: string;
+  manufacturer?: string;
+  position?: string;
+  size?: string;
+}
+
+/**
+ * Core Card interface used throughout the application
+ * Consolidated from multiple definitions to ensure consistency
+ */
 export interface Card extends BaseEntity {
   title: string;
   description?: string;
@@ -27,42 +53,46 @@ export interface Card extends BaseEntity {
   reactions?: Reaction[];
   effects: string[];
   rarity?: CardRarity;
+  
+  // Player info commonly used throughout the app
   player?: string;
   team?: string;
   year?: string;
   name?: string;
+  
+  // Collection and favorites
   isFavorite?: boolean;
   stats?: CardStats;
+  
+  // Artist and market data
   artistId?: string;
   marketData?: any;
   editionSize?: number;
   cardNumber?: string;
-}
-
-// EnhancedCard includes additional fields for the application
-export interface EnhancedCard extends Card {
-  views?: number;
-  likes?: number;
-  shares?: number;
-  isAnimated?: boolean;
-  hasAudio?: boolean;
-  hasInteractiveElements?: boolean;
-  isInUserCollection?: boolean;
   price?: number;
   edition?: {
     number: number;
     total: number;
   };
+  
+  // Creator info
   creatorName?: string;
   creatorAvatar?: string;
+  
+  // Display properties
+  fabricSwatches?: FabricSwatch[];
+  isAnimated?: boolean;
+  hasAudio?: boolean;
+  hasInteractiveElements?: boolean;
+  isInUserCollection?: boolean;
 }
 
-export interface FabricSwatch {
-  id: string;
-  name: string;
-  color: string;
-  fabricType: string;
-  imageUrl?: string;
-  thumbnail?: string;
-  isAvailable: boolean;
+/**
+ * EnhancedCard includes additional fields for the application
+ * Retained for backward compatibility
+ */
+export interface EnhancedCard extends Card {
+  views?: number;
+  likes?: number;
+  shares?: number;
 }
