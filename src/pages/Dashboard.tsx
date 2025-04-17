@@ -13,7 +13,7 @@ const Dashboard: React.FC = () => {
   const auth = useAuth();
   const user = auth.user;
   // Check for loading in either auth context format
-  const isLoading = 'loading' in auth ? auth.loading : ('isLoading' in auth ? auth.isLoading : false);
+  const isLoading = auth.loading || auth.isLoading || false;
   
   const [dashboardUser, setDashboardUser] = useState<User | null>(null);
   const [dashboardLoaded, setDashboardLoaded] = useState(false);

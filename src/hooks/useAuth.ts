@@ -11,11 +11,21 @@ import { AuthContextType } from '@/context/auth/types';
 export const useAuth = (): AuthContextType => {
   // First try to use the auth context from /context/auth
   try {
-    return useContextAuth();
+    const contextAuth = useContextAuth();
+    // Add isLoading as an alias to loading for compatibility
+    return {
+      ...contextAuth,
+      isLoading: contextAuth.loading
+    };
   } catch (contextError) {
     // If that fails, try the provider from /providers
     try {
-      return useProviderAuth();
+      const providerAuth = useProviderAuth();
+      // Ensure loading property exists for compatibility with AuthContextType
+      return {
+        ...providerAuth,
+        loading: providerAuth.isLoading || false,
+      };
     } catch (providerError) {
       console.warn('Auth provider not found or not initialized properly');
       throw new Error('useAuth must be used within an AuthProvider');
