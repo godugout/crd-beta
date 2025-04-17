@@ -1,12 +1,12 @@
 
 import { Shirt, PlusCircle, Search, ListFilter } from "lucide-react";
-import { NavItem } from './types';
+import type { NavItem } from './types';
 
 export const baseballNavItems: NavItem[] = [
   {
     title: "All Cards",
     path: "/baseball",
-    icon: Shirt, // Using Shirt instead of Baseball since Baseball doesn't exist in lucide-react
+    icon: Shirt, // Using Shirt since Baseball doesn't exist in lucide-react
     description: "Browse all baseball cards"
   },
   {

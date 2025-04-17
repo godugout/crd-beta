@@ -25,6 +25,7 @@ export interface User extends BaseEntity {
   isActive: boolean;
   permissions: string[];
   displayName?: string;
+  bio?: string; // Add the missing bio property
 }
 
 // Define role permissions

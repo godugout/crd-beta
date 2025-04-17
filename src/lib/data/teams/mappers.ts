@@ -1,16 +1,19 @@
 
-import { User, TeamMember, Team } from '@/lib/types';
-import { UserRole } from '@/lib/types/user';
-import { v4 as uuidv4 } from 'uuid';
+import { Team, TeamMember, User } from '@/lib/types';
 
 export interface DbTeam {
   id: string;
   name: string;
-  description: string;
-  logo_url: string;
+  description?: string;
+  logo_url?: string;
   owner_id: string;
   created_at: string;
   updated_at: string;
+  // Additional fields
+  is_verified?: boolean;
+  type?: string;
+  website_url?: string;
+  social_links?: Record<string, string>;
 }
 
 export interface DbTeamMember {
@@ -19,21 +22,28 @@ export interface DbTeamMember {
   user_id: string;
   role: string;
   joined_at: string;
+  invited_by?: string;
+  status?: string;
+  permissions?: string[];
+  user?: DbUser;
 }
 
 export interface DbUser {
   id: string;
   email: string;
-  display_name?: string;
   name?: string;
   avatar_url?: string;
+  username?: string;
 }
 
-export const dbTeamToTeam = (dbTeam: DbTeam): Team => {
+/**
+ * Maps a database team to the application Team type
+ */
+export const mapTeamFromDb = (dbTeam: DbTeam): Team => {
   return {
     id: dbTeam.id,
     name: dbTeam.name,
-    description: dbTeam.description,
+    description: dbTeam.description || '',
     logoUrl: dbTeam.logo_url,
     ownerId: dbTeam.owner_id,
     createdAt: dbTeam.created_at,
@@ -41,31 +51,32 @@ export const dbTeamToTeam = (dbTeam: DbTeam): Team => {
   };
 };
 
-export const dbUserToUser = (dbUser: DbUser): User => {
+/**
+ * Maps a database user to the application User type
+ */
+export const mapUserFromDb = (dbUser: DbUser): User => {
   return {
     id: dbUser.id,
     email: dbUser.email,
-    displayName: dbUser.display_name,
-    name: dbUser.name || dbUser.display_name || dbUser.email.split('@')[0],
+    name: dbUser.name || dbUser.email.split('@')[0],
     avatarUrl: dbUser.avatar_url,
-    role: UserRole.USER,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+    username: dbUser.username,
     isVerified: true,
     isActive: true,
-    permissions: ['read:own', 'write:own', 'delete:own']
+    permissions: []
   };
 };
 
-export const dbTeamMemberToTeamMember = (dbTeamMember: DbTeamMember, user?: User): TeamMember => {
+/**
+ * Maps a database team member to the application TeamMember type
+ */
+export const mapTeamMemberFromDb = (dbMember: DbTeamMember): TeamMember => {
   return {
-    id: dbTeamMember.id,
-    teamId: dbTeamMember.team_id,
-    userId: dbTeamMember.user_id,
-    role: dbTeamMember.role,
-    joinedAt: dbTeamMember.joined_at,
-    user,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    id: dbMember.id,
+    teamId: dbMember.team_id,
+    userId: dbMember.user_id,
+    role: dbMember.role as "owner" | "admin" | "member" | "viewer", // Cast to correct type
+    joinedAt: dbMember.joined_at,
+    user: dbMember.user ? mapUserFromDb(dbMember.user) : undefined
   };
 };

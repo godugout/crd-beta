@@ -1,4 +1,3 @@
-
 import { Comment, User, UserRole } from '@/lib/types';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -36,6 +35,7 @@ export interface DbUser {
   updated_at: string;
 }
 
+// Convert DB user to app user format
 export const dbUserToUser = (dbUser: DbUser): User => {
   return {
     id: dbUser.id,
@@ -44,31 +44,33 @@ export const dbUserToUser = (dbUser: DbUser): User => {
     displayName: dbUser.display_name,
     username: dbUser.username,
     avatarUrl: dbUser.avatar_url,
-    role: UserRole.USER,
+    role: dbUser.role as UserRole || UserRole.USER,
     createdAt: dbUser.created_at,
     updatedAt: dbUser.updated_at,
     isVerified: true,
     isActive: true,
-    permissions: ['read:own', 'write:own', 'delete:own']
+    permissions: ['read:own', 'write:own', 'delete:own'],
+    bio: ''
   };
 };
 
-export const dbCommentToComment = (dbComment: DbComment): Comment => {
+// Add the missing adapter functions
+export const adaptSchemaCommentToInteractionComment = (schemaComment: DbComment): Comment => {
   return {
-    id: dbComment.id,
-    content: dbComment.content,
-    userId: dbComment.user_id,
-    cardId: dbComment.card_id,
-    collectionId: dbComment.collection_id,
-    teamId: dbComment.team_id,
-    parentId: dbComment.parent_id,
-    createdAt: dbComment.created_at,
-    updatedAt: dbComment.updated_at,
-    user: dbComment.user ? dbUserToUser(dbComment.user) : undefined
+    id: schemaComment.id,
+    content: schemaComment.content,
+    userId: schemaComment.user_id,
+    cardId: schemaComment.card_id,
+    collectionId: schemaComment.collection_id,
+    teamId: schemaComment.team_id,
+    parentId: schemaComment.parent_id,
+    createdAt: schemaComment.created_at,
+    updatedAt: schemaComment.updated_at,
+    user: schemaComment.user ? dbUserToUser(schemaComment.user) : undefined
   };
 };
 
-export const commentToDbComment = (comment: CommentInput): DbComment => {
+export const adaptInteractionCommentToSchemaComment = (comment: CommentInput): DbComment => {
   const timestamp = new Date().toISOString();
   
   return {
@@ -83,3 +85,7 @@ export const commentToDbComment = (comment: CommentInput): DbComment => {
     updated_at: timestamp
   };
 };
+
+// Keep original functions for backwards compatibility
+export const dbCommentToComment = adaptSchemaCommentToInteractionComment;
+export const commentToDbComment = adaptInteractionCommentToSchemaComment;

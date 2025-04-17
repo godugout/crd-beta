@@ -15,7 +15,7 @@ interface FanDashboardProps {
 }
 
 const FanDashboard: React.FC<FanDashboardProps> = ({ user }) => {
-  const { cards, decks, favorites } = useEnhancedCards();
+  const { cards, decks, favorites, toggleFavorite } = useEnhancedCards();
   const navigate = useNavigate();
   
   // Cards the user has collected (for demo purposes, we'll use all cards)

@@ -10,76 +10,43 @@ import {
   baseballNavItems
 } from '@/config/navigation';
 
+// Helper to ensure all required properties exist
+const processNavItem = (item: any) => ({
+  title: item.title,
+  path: item.path,
+  icon: item.icon,
+  highlight: item.highlight || false,
+  description: item.description || ''
+});
+
 // Define navigation groups for better organization with consistent paths
 export const navigationGroups: NavigationGroup[] = [
   {
     title: "MAIN",
-    items: mainNavItems.map(item => ({
-      title: item.title,
-      path: item.path,
-      icon: item.icon,
-      highlight: item.highlight || false,
-      description: item.description || ''
-    }))
+    items: mainNavItems.map(processNavItem)
   },
   {
     title: "CARDS",
-    items: cardsNavItems.map(item => ({
-      title: item.title,
-      path: item.path,
-      icon: item.icon,
-      highlight: item.highlight || false,
-      description: item.description || ''
-    }))
+    items: cardsNavItems.map(processNavItem)
   },
   {
     title: "COLLECTIONS",
-    items: collectionsNavItems.map(item => ({
-      title: item.title,
-      path: item.path,
-      icon: item.icon,
-      highlight: item.highlight || false,
-      description: item.description || ''
-    }))
+    items: collectionsNavItems.map(processNavItem)
   },
   {
     title: "TOWNS",
-    items: townsNavItems.map(item => ({
-      title: item.title,
-      path: item.path,
-      icon: item.icon,
-      highlight: item.highlight || false,
-      description: item.description || ''
-    }))
+    items: townsNavItems.map(processNavItem)
   },
   {
     title: "TEAMS",
-    items: teamsNavItems.map(item => ({
-      title: item.title,
-      path: item.path,
-      icon: item.icon,
-      highlight: item.highlight || false,
-      description: item.description || ''
-    }))
+    items: teamsNavItems.map(processNavItem)
   },
   {
     title: "FEATURES",
-    items: featuresNavItems.map(item => ({
-      title: item.title,
-      path: item.path,
-      icon: item.icon,
-      highlight: item.highlight || false,
-      description: item.description || ''
-    }))
+    items: featuresNavItems.map(processNavItem)
   },
   {
     title: "BASEBALL",
-    items: baseballNavItems.map(item => ({
-      title: item.title,
-      path: item.path,
-      icon: item.icon,
-      highlight: item.highlight || false,
-      description: item.description || ''
-    }))
+    items: baseballNavItems.map(processNavItem)
   }
 ];

@@ -1,8 +1,19 @@
 
-// Export repositories from a central location
-export * from './cardRepository';
-export * from './collectionRepository';
-export * from './commentRepository';
-export * from './teamRepository'; // Keep for backwards compatibility
-export * from './townRepository';
-export { reactionRepository } from './reactionRepository';
+import { cardRepository } from './cardRepository';
+import { commentRepository } from './commentRepository';
+import { collectionRepository } from './collectionRepository';
+import { userRepository } from './userRepository';
+import { teamService, teamMembersService } from './teams';
+import { reactionRepository } from './reactionRepository';
+import { memoriesRepository } from './memoriesRepository';
+
+export {
+  cardRepository,
+  commentRepository,
+  collectionRepository,
+  userRepository,
+  teamService,
+  teamMembersService,
+  reactionRepository,
+  memoriesRepository
+};

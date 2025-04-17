@@ -1,32 +1,25 @@
 
 import { JsonValue } from './index';
 
-export interface InstagramPost {
-  id: string;
-  username: string;
-  caption: string;
-  mediaUrl: string;
-  permalink: string;
-  timestamp: string;
-  mediaType: 'IMAGE' | 'VIDEO' | 'CAROUSEL_ALBUM';
-  thumbnailUrl?: string;
-  likes?: number;
-  comments?: number;
-  children?: InstagramMediaChild[];
-  metadata?: Record<string, JsonValue>;
-  [key: string]: JsonValue | undefined;
-}
-
 export interface InstagramMediaChild {
   id: string;
-  mediaType: 'IMAGE' | 'VIDEO';
-  mediaUrl: string;
-  thumbnailUrl?: string;
+  media_type: string;
+  media_url: string;
 }
 
-export interface InstagramSource {
+// Extending JsonValue to include our InstagramMediaChild[] type
+export interface ExtendedJsonValue extends JsonValue {
+  children?: InstagramMediaChild[];
+}
+
+export interface InstagramPost {
+  id: string;
+  caption: string;
+  media_type: 'IMAGE' | 'VIDEO' | 'CAROUSEL_ALBUM';
+  media_url: string;
+  permalink: string;
+  timestamp: string;
   username: string;
-  lastFetched: string;
-  autoUpdate: boolean;
-  filters?: Record<string, any>;
+  children?: InstagramMediaChild[]; // This is now compatible with our ExtendedJsonValue
+  metadata?: ExtendedJsonValue; // Use our extended type that supports children
 }

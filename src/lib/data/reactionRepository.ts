@@ -1,109 +1,105 @@
 
-import { v4 as uuidv4 } from 'uuid';
 import { Reaction } from '@/lib/types';
-import { UserRole } from '@/lib/types/user';
+import { v4 as uuidv4 } from 'uuid';
 
-export const sampleReactions: Reaction[] = [
-  {
-    id: '1',
-    userId: 'user1',
-    cardId: 'card1',
-    type: 'like',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    targetType: 'card',
-    targetId: 'card1',
-    user: {
-      id: 'user1',
-      email: 'user1@example.com',
-      displayName: 'User One',
-      name: 'User One',
-      username: 'user1',
-      avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=user1',
-      role: UserRole.USER,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      isVerified: true,
-      isActive: true,
-      permissions: ['read:own', 'write:own', 'delete:own']
+// In-memory storage for reactions
+let reactions: Reaction[] = [];
+
+export const reactionRepository = {
+  getReactions: async ({ 
+    cardId,
+    collectionId,
+    commentId,
+    userId
+  }: {
+    cardId?: string;
+    collectionId?: string;
+    commentId?: string;
+    userId?: string;
+  }) => {
+    try {
+      let filtered = [...reactions];
+      
+      if (cardId) {
+        filtered = filtered.filter(r => r.cardId === cardId);
+      }
+      
+      if (collectionId) {
+        filtered = filtered.filter(r => r.collectionId === collectionId);
+      }
+      
+      if (commentId) {
+        filtered = filtered.filter(r => r.commentId === commentId);
+      }
+      
+      if (userId) {
+        filtered = filtered.filter(r => r.userId === userId);
+      }
+      
+      return { data: filtered, error: null };
+    } catch (error) {
+      console.error('Error getting reactions:', error);
+      return { data: null, error: 'Failed to get reactions' };
     }
   },
-  {
-    id: '2',
-    userId: 'user2',
-    cardId: 'card1',
-    type: 'love',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    targetType: 'card',
-    targetId: 'card1',
-    user: {
-      id: 'user2',
-      email: 'user2@example.com',
-      displayName: 'User Two',
-      name: 'User Two',
-      username: 'user2',
-      avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=user2',
-      role: UserRole.USER,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      isVerified: true,
-      isActive: true,
-      permissions: ['read:own', 'write:own', 'delete:own']
+  
+  createReaction: async (reaction: Partial<Reaction>) => {
+    try {
+      const timestamp = new Date().toISOString();
+      const newReaction: Reaction = {
+        id: uuidv4(),
+        userId: reaction.userId!,
+        type: reaction.type!,
+        targetType: reaction.targetType!,
+        targetId: reaction.targetId!,
+        cardId: reaction.cardId,
+        collectionId: reaction.collectionId,
+        commentId: reaction.commentId,
+        createdAt: timestamp,
+        updatedAt: timestamp
+      };
+      
+      reactions.push(newReaction);
+      
+      return { data: newReaction, error: null };
+    } catch (error) {
+      console.error('Error creating reaction:', error);
+      return { data: null, error: 'Failed to create reaction' };
+    }
+  },
+  
+  deleteReaction: async (id: string) => {
+    try {
+      const initialLength = reactions.length;
+      reactions = reactions.filter(r => r.id !== id);
+      
+      const success = reactions.length < initialLength;
+      
+      return { success, error: null };
+    } catch (error) {
+      console.error('Error deleting reaction:', error);
+      return { success: false, error: 'Failed to delete reaction' };
+    }
+  },
+  
+  getUserReaction: async ({
+    userId,
+    targetType,
+    targetId
+  }: {
+    userId: string;
+    targetType: string;
+    targetId: string;
+  }) => {
+    try {
+      const userReaction = reactions.find(
+        r => r.userId === userId && r.targetType === targetType && r.targetId === targetId
+      );
+      
+      return { data: userReaction || null, error: null };
+    } catch (error) {
+      console.error('Error getting user reaction:', error);
+      return { data: null, error: 'Failed to get user reaction' };
     }
   }
-];
-
-// Create a reaction
-export const createReaction = async (data: Partial<Reaction>): Promise<Reaction> => {
-  const timestamp = new Date().toISOString();
-  
-  const reaction: Reaction = {
-    id: uuidv4(),
-    userId: data.userId || 'anonymous',
-    cardId: data.cardId,
-    type: data.type || 'like',
-    createdAt: timestamp,
-    updatedAt: timestamp,
-    targetType: data.targetType || 'card',
-    targetId: data.targetId || data.cardId || '',
-    user: data.user || {
-      id: 'anonymous',
-      email: 'anonymous@example.com',
-      name: 'Anonymous',
-      displayName: 'Anonymous',
-      username: 'anonymous',
-      avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=anonymous',
-      role: UserRole.USER,
-      createdAt: timestamp,
-      updatedAt: timestamp,
-      isVerified: true,
-      isActive: true,
-      permissions: ['read:own']
-    }
-  };
-  
-  sampleReactions.push(reaction);
-  return reaction;
-};
-
-// Get reactions for an entity
-export const getReactions = async (targetType: string, targetId: string): Promise<Reaction[]> => {
-  return sampleReactions.filter(r => r.targetType === targetType && r.targetId === targetId);
-};
-
-// Delete a reaction
-export const deleteReaction = async (id: string): Promise<boolean> => {
-  const index = sampleReactions.findIndex(r => r.id === id);
-  if (index === -1) {
-    return false;
-  }
-  
-  sampleReactions.splice(index, 1);
-  return true;
-};
-
-// Check if a user has reacted
-export const hasUserReacted = async (userId: string, targetType: string, targetId: string): Promise<boolean> => {
-  return sampleReactions.some(r => r.userId === userId && r.targetType === targetType && r.targetId === targetId);
 };

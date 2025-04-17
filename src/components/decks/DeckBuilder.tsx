@@ -19,7 +19,7 @@ interface DeckBuilderProps {
 
 const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck }) => {
   const navigate = useNavigate();
-  const { enhancedCards: cards, favorites, addDeck, updateDeck, addCardToDeck } = useEnhancedCards();
+  const { cards, favorites, addDeck, updateDeck, addCardToDeck } = useEnhancedCards();
   
   const [deck, setDeck] = useState<Partial<Deck>>(initialDeck || {
     name: '',

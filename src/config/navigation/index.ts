@@ -2,11 +2,21 @@
 // Export the interfaces from a single source
 export { type NavItem, type NavGroup } from './types';
 
-// Export all navigation items centrally
-export { cardsNavItems } from './cardsNavItems';
-export { teamsNavItems } from './teamsNavItems';
-export { townsNavItems } from './townsNavItems';
-export { featuresNavItems } from './featuresNavItems';
-export { baseballNavItems } from './baseballNavItems';
-export { collectionsNavItems } from './collectionsNavItems';
-export { mainNavItems } from './mainNavItems';
+// Import and re-export all navigation items centrally
+import { mainNavItems } from './mainNavItems';
+import { cardsNavItems } from './cardsNavItems';
+import { collectionsNavItems } from './collectionsNavItems';
+import { featuresNavItems } from './featuresNavItems';
+import { baseballNavItems } from './baseballNavItems';
+import { townsNavItems } from './townsNavItems';
+import { teamsNavItems } from './teamsNavItems';
+
+export {
+  mainNavItems,
+  cardsNavItems,
+  collectionsNavItems,
+  featuresNavItems,
+  baseballNavItems,
+  townsNavItems,
+  teamsNavItems
+};

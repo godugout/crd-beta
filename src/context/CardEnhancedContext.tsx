@@ -1,21 +1,22 @@
-
 import React, { createContext, useState, useContext } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { Card, CardRarity } from '@/lib/types';
-import { EnhancedCard, Series } from '@/lib/types/enhancedCardTypes';
-import { sampleCards } from '@/data/sampleCards';
+import { Card, CardRarity as BaseCardRarity } from '@/lib/types';
+import { EnhancedCard, Series, Deck, ReleaseType } from '@/lib/types/enhancedCardTypes';
+import { sampleCards } from '@/lib/data/sampleCards';
 import { toast } from 'sonner';
 
-// Define the context interface
+export { CardRarity } from '@/lib/types/enhancedCardTypes';
+
 export interface EnhancedCardContextProps {
   cards: EnhancedCard[];
   series: Series[];
+  decks: Deck[];
+  favorites: string[];
   selectedCardId: string | null;
   selectedSeriesId: string | null;
   isLoading: boolean;
   error: string | null;
   
-  // Card operations
   fetchCards: () => Promise<void>;
   getCardById: (id: string) => EnhancedCard | undefined;
   addCard: (card: Partial<EnhancedCard>) => Promise<EnhancedCard>;
@@ -23,7 +24,6 @@ export interface EnhancedCardContextProps {
   deleteCard: (id: string) => Promise<boolean>;
   setSelectedCardId: (id: string | null) => void;
   
-  // Series operations
   fetchSeries: () => Promise<void>;
   getSeriesById: (id: string) => Series | undefined;
   addSeries: (series: Series) => Promise<Series>;
@@ -33,12 +33,24 @@ export interface EnhancedCardContextProps {
   addCardToSeries: (cardId: string, seriesId: string) => Promise<boolean>;
   removeCardFromSeries: (cardId: string, seriesId: string) => Promise<boolean>;
   getCardsInSeries: (seriesId: string) => EnhancedCard[];
+  
+  toggleFavorite: (cardId: string) => void;
+  
+  addDeck: (deck: Partial<Deck>) => Promise<Deck>;
+  updateDeck: (id: string, updates: Partial<Deck>) => Promise<Deck>;
+  deleteDeck: (id: string) => Promise<boolean>;
+  addCardToDeck: (cardId: string, deckId: string) => Promise<boolean>;
+  removeCardFromDeck: (cardId: string, deckId: string) => Promise<boolean>;
+  
+  collections: any[];
+  fetchCollections: () => Promise<void>;
+  addCollection: (collection: any) => Promise<any>;
+  updateCollection: (id: string, updates: any) => Promise<any>;
+  deleteCollection: (id: string) => Promise<boolean>;
 }
 
-// Create the context with a default value
 const EnhancedCardContext = createContext<EnhancedCardContextProps | null>(null);
 
-// Sample series data for initial state
 const sampleSeries: Series[] = [
   {
     id: '1',
@@ -70,7 +82,6 @@ const sampleSeries: Series[] = [
   }
 ];
 
-// Convert a regular Card to an EnhancedCard
 const enhanceCard = (card: Card): EnhancedCard => {
   return {
     ...card,
@@ -90,25 +101,23 @@ const enhanceCard = (card: Card): EnhancedCard => {
   };
 };
 
-// Provider component
 export const EnhancedCardProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // State for cards and series
   const [cards, setCards] = useState<EnhancedCard[]>(() => sampleCards.map(enhanceCard));
   const [series, setSeries] = useState<Series[]>(sampleSeries);
+  const [decks, setDecks] = useState<Deck[]>([]);
+  const [favorites, setFavorites] = useState<string[]>([]);
+  const [collections, setCollections] = useState<any[]>([]);
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   const [selectedSeriesId, setSelectedSeriesId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
-  // Card operations
+
   const fetchCards = async () => {
     setIsLoading(true);
     setError(null);
     
     try {
-      // In a real app, fetch from API
       await new Promise(resolve => setTimeout(resolve, 500));
-      // No need to update state in this mock implementation
     } catch (err) {
       setError('Failed to fetch cards');
       console.error(err);
@@ -116,11 +125,11 @@ export const EnhancedCardProvider: React.FC<{ children: React.ReactNode }> = ({ 
       setIsLoading(false);
     }
   };
-  
+
   const getCardById = (id: string) => {
     return cards.find(card => card.id === id);
   };
-  
+
   const addCard = async (cardData: Partial<EnhancedCard>): Promise<EnhancedCard> => {
     const timestamp = new Date().toISOString();
     
@@ -134,11 +143,10 @@ export const EnhancedCardProvider: React.FC<{ children: React.ReactNode }> = ({ 
       userId: cardData.userId || 'anonymous',
       createdAt: timestamp,
       updatedAt: timestamp,
-      rarity: cardData.rarity || CardRarity.COMMON,
+      rarity: cardData.rarity || BaseCardRarity.COMMON,
       effects: cardData.effects || [],
       designMetadata: cardData.designMetadata || {},
       
-      // Enhanced fields
       cardNumber: cardData.cardNumber || `${Math.floor(Math.random() * 1000)}`,
       seriesId: cardData.seriesId,
       artistId: cardData.artistId || cardData.userId || 'anonymous',
@@ -158,7 +166,7 @@ export const EnhancedCardProvider: React.FC<{ children: React.ReactNode }> = ({ 
     toast.success('Card added successfully!');
     return newCard;
   };
-  
+
   const updateCard = async (id: string, updates: Partial<EnhancedCard>): Promise<EnhancedCard> => {
     const cardIndex = cards.findIndex(card => card.id === id);
     
@@ -179,7 +187,7 @@ export const EnhancedCardProvider: React.FC<{ children: React.ReactNode }> = ({ 
     toast.success('Card updated successfully!');
     return updatedCard;
   };
-  
+
   const deleteCard = async (id: string): Promise<boolean> => {
     const cardIndex = cards.findIndex(card => card.id === id);
     
@@ -189,7 +197,6 @@ export const EnhancedCardProvider: React.FC<{ children: React.ReactNode }> = ({ 
     
     setCards(prev => prev.filter(card => card.id !== id));
     
-    // Also remove from any series
     setSeries(prev => 
       prev.map(s => ({
         ...s,
@@ -201,16 +208,13 @@ export const EnhancedCardProvider: React.FC<{ children: React.ReactNode }> = ({ 
     toast.success('Card deleted successfully!');
     return true;
   };
-  
-  // Series operations
+
   const fetchSeries = async () => {
     setIsLoading(true);
     setError(null);
     
     try {
-      // In a real app, fetch from API
       await new Promise(resolve => setTimeout(resolve, 500));
-      // No need to update state in this mock implementation
     } catch (err) {
       setError('Failed to fetch series');
       console.error(err);
@@ -218,11 +222,11 @@ export const EnhancedCardProvider: React.FC<{ children: React.ReactNode }> = ({ 
       setIsLoading(false);
     }
   };
-  
+
   const getSeriesById = (id: string) => {
     return series.find(s => s.id === id);
   };
-  
+
   const addSeries = async (seriesData: Series): Promise<Series> => {
     const newSeries: Series = {
       ...seriesData,
@@ -236,7 +240,7 @@ export const EnhancedCardProvider: React.FC<{ children: React.ReactNode }> = ({ 
     toast.success('Series added successfully!');
     return newSeries;
   };
-  
+
   const updateSeries = async (id: string, updates: Partial<Series>): Promise<Series> => {
     const seriesIndex = series.findIndex(s => s.id === id);
     
@@ -258,7 +262,7 @@ export const EnhancedCardProvider: React.FC<{ children: React.ReactNode }> = ({ 
     toast.success('Series updated successfully!');
     return updatedSeries;
   };
-  
+
   const deleteSeries = async (id: string): Promise<boolean> => {
     const seriesIndex = series.findIndex(s => s.id === id);
     
@@ -270,7 +274,7 @@ export const EnhancedCardProvider: React.FC<{ children: React.ReactNode }> = ({ 
     toast.success('Series deleted successfully!');
     return true;
   };
-  
+
   const addCardToSeries = async (cardId: string, seriesId: string): Promise<boolean> => {
     const seriesIndex = series.findIndex(s => s.id === seriesId);
     
@@ -295,7 +299,6 @@ export const EnhancedCardProvider: React.FC<{ children: React.ReactNode }> = ({ 
     updatedSeriesList[seriesIndex] = updatedSeries;
     setSeries(updatedSeriesList);
     
-    // Also update the card
     const cardIndex = cards.findIndex(card => card.id === cardId);
     if (cardIndex !== -1) {
       const updatedCard = {
@@ -312,7 +315,7 @@ export const EnhancedCardProvider: React.FC<{ children: React.ReactNode }> = ({ 
     toast.success('Card added to series successfully!');
     return true;
   };
-  
+
   const removeCardFromSeries = async (cardId: string, seriesId: string): Promise<boolean> => {
     const seriesIndex = series.findIndex(s => s.id === seriesId);
     
@@ -337,7 +340,6 @@ export const EnhancedCardProvider: React.FC<{ children: React.ReactNode }> = ({ 
     updatedSeriesList[seriesIndex] = updatedSeries;
     setSeries(updatedSeriesList);
     
-    // Also update the card
     const cardIndex = cards.findIndex(card => card.id === cardId);
     if (cardIndex !== -1) {
       const updatedCard = {
@@ -354,7 +356,7 @@ export const EnhancedCardProvider: React.FC<{ children: React.ReactNode }> = ({ 
     toast.success('Card removed from series successfully!');
     return true;
   };
-  
+
   const getCardsInSeries = (seriesId: string): EnhancedCard[] => {
     const targetSeries = series.find(s => s.id === seriesId);
     if (!targetSeries) {
@@ -363,10 +365,165 @@ export const EnhancedCardProvider: React.FC<{ children: React.ReactNode }> = ({ 
     
     return cards.filter(card => targetSeries.cardIds.includes(card.id));
   };
-  
+
+  const toggleFavorite = (cardId: string) => {
+    setFavorites(prev => {
+      if (prev.includes(cardId)) {
+        return prev.filter(id => id !== cardId);
+      } else {
+        return [...prev, cardId];
+      }
+    });
+    toast.success("Favorites updated");
+  };
+
+  const addDeck = async (deckData: Partial<Deck>): Promise<Deck> => {
+    const timestamp = new Date().toISOString();
+    
+    const newDeck: Deck = {
+      id: uuidv4(),
+      name: deckData.name || 'Untitled Deck',
+      description: deckData.description || '',
+      coverImageUrl: deckData.coverImageUrl || '',
+      ownerId: deckData.ownerId || 'anonymous',
+      createdAt: timestamp,
+      updatedAt: timestamp,
+      cardIds: deckData.cardIds || [],
+      isPublic: deckData.isPublic || false
+    };
+    
+    setDecks(prev => [...prev, newDeck]);
+    toast.success('Deck created successfully!');
+    return newDeck;
+  };
+
+  const updateDeck = async (id: string, updates: Partial<Deck>): Promise<Deck> => {
+    const deckIndex = decks.findIndex(deck => deck.id === id);
+    
+    if (deckIndex === -1) {
+      throw new Error('Deck not found');
+    }
+    
+    const updatedDeck = {
+      ...decks[deckIndex],
+      ...updates,
+      updatedAt: new Date().toISOString()
+    };
+    
+    const updatedDecks = [...decks];
+    updatedDecks[deckIndex] = updatedDeck;
+    setDecks(updatedDecks);
+    
+    toast.success('Deck updated successfully!');
+    return updatedDeck;
+  };
+
+  const deleteDeck = async (id: string): Promise<boolean> => {
+    const deckIndex = decks.findIndex(deck => deck.id === id);
+    
+    if (deckIndex === -1) {
+      return false;
+    }
+    
+    setDecks(prev => prev.filter(deck => deck.id !== id));
+    toast.success('Deck deleted successfully!');
+    return true;
+  };
+
+  const addCardToDeck = async (cardId: string, deckId: string): Promise<boolean> => {
+    const deckIndex = decks.findIndex(deck => deck.id === deckId);
+    
+    if (deckIndex === -1) {
+      return false;
+    }
+    
+    const targetDeck = decks[deckIndex];
+    
+    if (targetDeck.cardIds.includes(cardId)) {
+      return true; // Card already in deck
+    }
+    
+    const updatedDeck = {
+      ...targetDeck,
+      cardIds: [...targetDeck.cardIds, cardId],
+      updatedAt: new Date().toISOString()
+    };
+    
+    const updatedDecks = [...decks];
+    updatedDecks[deckIndex] = updatedDeck;
+    setDecks(updatedDecks);
+    
+    toast.success('Card added to deck successfully!');
+    return true;
+  };
+
+  const removeCardFromDeck = async (cardId: string, deckId: string): Promise<boolean> => {
+    const deckIndex = decks.findIndex(deck => deck.id === deckId);
+    
+    if (deckIndex === -1) {
+      return false;
+    }
+    
+    const targetDeck = decks[deckIndex];
+    
+    if (!targetDeck.cardIds.includes(cardId)) {
+      return true; // Card not in deck
+    }
+    
+    const updatedDeck = {
+      ...targetDeck,
+      cardIds: targetDeck.cardIds.filter(id => id !== cardId),
+      updatedAt: new Date().toISOString()
+    };
+    
+    const updatedDecks = [...decks];
+    updatedDecks[deckIndex] = updatedDeck;
+    setDecks(updatedDecks);
+    
+    toast.success('Card removed from deck successfully!');
+    return true;
+  };
+
+  const fetchCollections = async () => {
+    setIsLoading(true);
+    try {
+      await new Promise(resolve => setTimeout(resolve, 500));
+    } catch (error) {
+      setError('Failed to fetch collections');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const addCollection = async (collection: any) => {
+    setCollections(prev => [...prev, {
+      ...collection,
+      id: uuidv4(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    }]);
+    return collection;
+  };
+
+  const updateCollection = async (id: string, updates: any) => {
+    const updatedCollections = collections.map(col => 
+      col.id === id ? { ...col, ...updates, updatedAt: new Date().toISOString() } : col
+    );
+    setCollections(updatedCollections);
+    return updatedCollections.find(col => col.id === id);
+  };
+
+  const deleteCollection = async (id: string) => {
+    setCollections(prev => prev.filter(col => col.id !== id));
+    return true;
+  };
+
   const contextValue: EnhancedCardContextProps = {
     cards,
     series,
+    decks,
+    favorites,
+    collections,
     selectedCardId,
     selectedSeriesId,
     isLoading,
@@ -387,7 +544,20 @@ export const EnhancedCardProvider: React.FC<{ children: React.ReactNode }> = ({ 
     setSelectedSeriesId,
     addCardToSeries,
     removeCardFromSeries,
-    getCardsInSeries
+    getCardsInSeries,
+    
+    toggleFavorite,
+    
+    addDeck,
+    updateDeck,
+    deleteDeck,
+    addCardToDeck,
+    removeCardFromDeck,
+    
+    fetchCollections,
+    addCollection,
+    updateCollection,
+    deleteCollection
   };
 
   return (
@@ -397,7 +567,6 @@ export const EnhancedCardProvider: React.FC<{ children: React.ReactNode }> = ({ 
   );
 };
 
-// Hook for using the context
 export const useEnhancedCards = () => {
   const context = useContext(EnhancedCardContext);
   
