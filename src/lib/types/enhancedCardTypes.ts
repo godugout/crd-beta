@@ -1,6 +1,10 @@
 
 import { Card } from './card';
 
+/**
+ * CardRarity enumeration defines possible rarity levels for cards
+ * Used for display and filtering purposes
+ */
 export enum CardRarity {
   COMMON = 'common',
   UNCOMMON = 'uncommon',
@@ -37,6 +41,9 @@ export interface EnhancedCard extends Omit<Card, 'edition'> {
   shares: number;
 }
 
+/**
+ * Deck represents a collection of cards that can be used together
+ */
 export interface Deck {
   id: string;
   name: string;
@@ -47,12 +54,20 @@ export interface Deck {
   updatedAt: string;
   cardIds: string[];
   isPublic: boolean;
+  cards?: Card[];
 }
 
+/**
+ * Defines the types of card releases
+ */
 export type ReleaseType = 'standard' | 'limited' | 'promotional' | 'exclusive';
 
+/**
+ * Series represents a collection of related cards that form a set
+ */
 export interface Series {
   id: string;
+  name: string;
   title: string;
   description: string;
   coverImageUrl: string;
@@ -64,4 +79,5 @@ export interface Series {
   isPublished: boolean;
   cardIds: string[];
   releaseType: ReleaseType;
+  cards?: Card[];
 }

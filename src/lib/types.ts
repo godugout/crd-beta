@@ -1,20 +1,17 @@
-
 /**
  * Core Types for CRD (Collector's Republic Digital) App
  * Re-exports all types from the centralized type system
  */
 
 // Import but don't re-export to avoid naming conflicts
-import { JsonValue } from './types/index';
+import { JsonValue, BaseEntity } from './types/index';
 import { DesignMetadata, CardRarity as CardRarityEnum, CardStyle, TextStyle, CardMetadata, MarketMetadata, HotspotData } from './types/cardTypes';
-import { User, UserPermission, UserRole, ROLE_PERMISSIONS } from './types/user';
+import { User, UserRole, UserPermission, ROLE_PERMISSIONS, Team, TeamMember } from './types/user';
 import { Reaction, Comment } from './types/interaction';
 import { OaklandMemoryData as IndexOaklandMemoryData } from './types/oaklandMemory';
-import { TeamMember as IndexTeamMember, Team as IndexTeam } from './types/team';
 import { InstagramPost } from './types/instagram';
-import { Card as IndexCard } from './types/card';
+import { Card as IndexCard, EnhancedCard as IndexEnhancedCard } from './types/card';
 import { Collection as IndexCollection } from './types/collection';
-import { BaseEntity } from './types/index';
 
 // Re-export using explicit types
 export type { 
@@ -30,7 +27,9 @@ export type {
   Comment,
   HotspotData,
   InstagramPost,
-  DesignMetadata
+  DesignMetadata,
+  Team,
+  TeamMember
 };
 
 // Export enums and constants
@@ -38,10 +37,9 @@ export { CardRarityEnum as CardRarity, ROLE_PERMISSIONS, UserRole };
 
 // Explicitly export and rename to avoid conflicts
 export type Card = IndexCard;
+export type EnhancedCard = IndexEnhancedCard;
 export type Collection = IndexCollection;
 export type OaklandMemoryData = IndexOaklandMemoryData;
-export type TeamMember = IndexTeamMember;
-export type Team = IndexTeam;
 
 // Keep the utility function for backward compatibility
 /**
@@ -77,3 +75,6 @@ export function serializeMetadata(metadata: DesignMetadata | undefined): Record<
   
   return serialized;
 }
+
+// Export adaptToCard for convenience
+export { adaptToCard } from './adapters/typeAdapters';

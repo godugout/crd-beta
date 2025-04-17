@@ -5,22 +5,23 @@ import { adaptToCard } from './typeAdapters';
 
 /**
  * Convert a Card to an EnhancedCard
+ * This adapter ensures all required fields are properly mapped
  */
 export function cardToEnhancedCard(card: Card): EnhancedCard {
   // First ensure we have a valid card
   const validCard = adaptToCard(card);
   
   // Handle the edition format difference
-  let edition;
+  let editionNumber: number;
   if (typeof validCard.edition === 'object' && validCard.edition !== null) {
-    edition = validCard.edition.number;
+    editionNumber = validCard.edition.number;
   } else {
-    edition = 1;
+    editionNumber = 1;
   }
   
   return {
     ...validCard,
-    edition,
+    edition: editionNumber,
     // Add any additional required EnhancedCard properties here
     likes: 0,
     shares: 0,
@@ -43,10 +44,27 @@ export function cardsToEnhancedCards(cards: Card[]): EnhancedCard[] {
 
 /**
  * Ensure a value is an EnhancedCard
+ * If it's already an EnhancedCard, it will be returned as is
+ * If it's a Card, it will be converted to an EnhancedCard
  */
 export function ensureEnhancedCard(cardOrEnhancedCard: Card | EnhancedCard): EnhancedCard {
   if ('views' in cardOrEnhancedCard && 'likes' in cardOrEnhancedCard && 'shares' in cardOrEnhancedCard) {
     return cardOrEnhancedCard as EnhancedCard;
   }
   return cardToEnhancedCard(cardOrEnhancedCard);
+}
+
+/**
+ * Utility function to convert a card ID to a Card object
+ * Used when API endpoints provide just card IDs that need to be converted to full objects
+ */
+export function cardIdToCard(cardId: string): Card {
+  return {
+    id: cardId,
+    title: 'Card ' + cardId.slice(-4),
+    imageUrl: '',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    effects: []
+  };
 }

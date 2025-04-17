@@ -79,6 +79,9 @@ export interface Card extends BaseEntity {
   creatorName?: string;
   creatorAvatar?: string;
   
+  // Release information
+  releaseDate?: string;
+  
   // Display properties
   fabricSwatches?: FabricSwatch[];
   isAnimated?: boolean;

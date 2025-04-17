@@ -4,7 +4,9 @@
  * This definition is the canonical source for OaklandMemoryData type
  */
 
-// Define the interface properly without using index signatures that cause type errors
+/**
+ * Represents data specific to Oakland memory cards and collections
+ */
 export interface OaklandMemoryData {
   title: string;
   description: string;
@@ -24,4 +26,5 @@ export interface OaklandMemoryData {
   eventType?: string;
   linkedMoments?: string[];
   sentiment?: 'positive' | 'neutral' | 'negative';
+  [key: string]: string | string[] | undefined;
 }

@@ -7,6 +7,7 @@ import { sampleCards } from '@/lib/data/sampleCards';
 
 /**
  * Hook for accessing CardContext functionality across the app
+ * Provides a fallback implementation if used outside of a CardProvider
  */
 export function useCardContext() {
   const context = useContext(CardContext);

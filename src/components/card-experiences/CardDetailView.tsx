@@ -1,8 +1,7 @@
 
-// Create a missing CardDetailView component to fix error in Experiences.tsx
 import React from 'react';
 import { Card } from '@/lib/types';
-import { useCards } from '@/hooks/useCards';
+import { useCards } from '@/context/CardContext';
 import { Button } from '@/components/ui/button';
 import { Share2, Download } from 'lucide-react';
 import CardViewer from '@/components/card-viewer/CardViewer';
@@ -12,6 +11,9 @@ interface CardDetailViewProps {
   onBack?: () => void;
 }
 
+/**
+ * Component to display detailed view of a card including metadata and controls
+ */
 const CardDetailView: React.FC<CardDetailViewProps> = ({ cardId, onBack }) => {
   const { getCard } = useCards();
   const card = getCard ? getCard(cardId) : null;
@@ -26,6 +28,19 @@ const CardDetailView: React.FC<CardDetailViewProps> = ({ cardId, onBack }) => {
       </div>
     );
   }
+  
+  // Helper to safely extract properties from designMetadata
+  const getCardProperty = (property: string, fallback: string = ''): string => {
+    if (!card) return fallback;
+    if (card[property as keyof typeof card]) return card[property as keyof typeof card] as string;
+    if (card.designMetadata?.[property]) return card.designMetadata[property] as string;
+    return fallback;
+  };
+  
+  // Safely extract properties for display
+  const cardPlayer = getCardProperty('player', '');
+  const cardTeam = getCardProperty('team', '');
+  const cardYear = getCardProperty('year', '');
   
   const handleShare = () => {
     if (navigator.share) {
@@ -72,9 +87,9 @@ const CardDetailView: React.FC<CardDetailViewProps> = ({ cardId, onBack }) => {
           <div>
             <h2 className="text-xl font-semibold mb-2">Details</h2>
             <div className="space-y-1 text-gray-300">
-              {card.player && <p>Player: {card.player}</p>}
-              {card.team && <p>Team: {card.team}</p>}
-              {card.year && <p>Year: {card.year}</p>}
+              {cardPlayer && <p>Player: {cardPlayer}</p>}
+              {cardTeam && <p>Team: {cardTeam}</p>}
+              {cardYear && <p>Year: {cardYear}</p>}
               <p>Rarity: {card.rarity || 'Common'}</p>
             </div>
           </div>

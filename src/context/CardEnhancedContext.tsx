@@ -1,56 +1,19 @@
+
 import React, { createContext, useState, useContext, ReactNode } from 'react';
 import { Card, Collection } from '@/lib/types';
 import { adaptToCard } from '@/lib/adapters/typeAdapters';
+import { cardToEnhancedCard } from '@/lib/adapters/EnhancedCardAdapter';
+import { Deck, Series, EnhancedCard } from '@/lib/types/enhancedCardTypes';
+import { CardContext, CardContextProps } from './CardContext';
 
-interface Deck {
-  id: string;
-  name: string;
-  description: string;
-  cards: Card[];
-  createdAt: string;
-  updatedAt: string;
-  coverImageUrl?: string;
-  cardIds?: string[];
-  isPublic?: boolean;
-  ownerId: string;
-}
-
-interface Series {
-  id: string;
-  name: string;
-  description?: string;
-  cards?: Card[];
-  createdAt: string;
-  updatedAt: string;
-  title?: string;
-  coverImageUrl?: string;
-  cardIds?: string[];
-  totalCards?: number;
-  isPublished?: boolean;
-  artistId?: string;
-  releaseDate?: string;
-  releaseType?: 'standard' | 'limited' | 'promotional' | 'exclusive';
-}
-
-export interface EnhancedCardContextProps {
-  cards: Card[];
-  collections: Collection[];
-  enhancedCards: Card[];
+/**
+ * Enhanced card context extends the basic card context with additional functionality
+ * for decks, series, and enhanced card types
+ */
+export interface EnhancedCardContextProps extends CardContextProps {
+  enhancedCards: EnhancedCard[];
   decks: Deck[];
-  favorites: Card[];
   series: Series[];
-  loading: boolean;
-  isLoading: boolean;
-  error: Error | null;
-  fetchCards: () => Promise<void>;
-  fetchCollections: () => Promise<void>;
-  addCard: (card: Partial<Card>) => Promise<Card>;
-  updateCard: (id: string, updates: Partial<Card>) => Promise<Card>;
-  deleteCard: (id: string) => Promise<boolean>;
-  addCollection: (collection: Partial<Collection>) => Promise<Collection>;
-  updateCollection: (id: string, updates: Partial<Collection>) => Promise<Collection>;
-  deleteCollection: (id: string) => Promise<boolean>;
-  toggleFavorite: (cardId: string) => void;
   addDeck: (deck: Partial<Deck>) => Promise<Deck>;
   updateDeck: (id: string, updates: Partial<Deck>) => Promise<Deck>;
   deleteDeck: (id: string) => Promise<boolean>;
@@ -60,124 +23,31 @@ export interface EnhancedCardContextProps {
   updateSeries: (id: string, updates: Partial<Series>) => Promise<Series>;
 }
 
+/**
+ * Context for enhanced card operations
+ */
 export const EnhancedCardContext = createContext<EnhancedCardContextProps | undefined>(undefined);
 
+/**
+ * Provider component for EnhancedCardContext
+ * Extends the base CardContext with enhanced functionality
+ */
 export const EnhancedCardProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [cards, setCards] = useState<Card[]>([]);
-  const [collections, setCollections] = useState<Collection[]>([]);
+  // Get base card context
+  const cardContext = useContext(CardContext);
+  if (!cardContext) {
+    throw new Error('EnhancedCardProvider must be used within a CardProvider');
+  }
+
   const [decks, setDecks] = useState<Deck[]>([]);
-  const [favorites, setFavorites] = useState<Card[]>([]);
   const [series, setSeries] = useState<Series[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
 
-  const fetchCards = async (): Promise<void> => {
-    setLoading(true);
-    try {
-      // Mock fetching cards
-      const mockCards: Card[] = [];
-      setCards(mockCards);
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error('Failed to fetch cards'));
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Convert standard cards to enhanced cards
+  const enhancedCards = cardContext.cards.map(cardToEnhancedCard);
 
-  const fetchCollections = async (): Promise<void> => {
-    setLoading(true);
-    try {
-      // Mock fetching collections
-      const mockCollections: Collection[] = [];
-      setCollections(mockCollections);
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error('Failed to fetch collections'));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const addCard = async (cardData: Partial<Card>): Promise<Card> => {
-    const newCard: Card = adaptToCard({
-      id: `card-${Date.now()}`,
-      title: cardData.title || 'Untitled Card',
-      description: cardData.description || '',
-      imageUrl: cardData.imageUrl || '',
-      thumbnailUrl: cardData.thumbnailUrl || '',
-      userId: cardData.userId || 'user-1',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      effects: [],
-      ...cardData
-    });
-    setCards(prev => [...prev, newCard]);
-    return newCard;
-  };
-
-  const updateCard = async (id: string, updates: Partial<Card>): Promise<Card> => {
-    const updatedCard = cards.find(card => card.id === id);
-    if (!updatedCard) {
-      throw new Error(`Card with ID ${id} not found`);
-    }
-    
-    const updated = { ...updatedCard, ...updates, updatedAt: new Date().toISOString() };
-    setCards(prev => prev.map(card => card.id === id ? updated : card));
-    return updated;
-  };
-
-  const deleteCard = async (id: string): Promise<boolean> => {
-    setCards(prev => prev.filter(card => card.id !== id));
-    return true;
-  };
-
-  const addCollection = async (collectionData: Partial<Collection>): Promise<Collection> => {
-    const newCollection: Collection = {
-      id: `collection-${Date.now()}`,
-      title: collectionData.title || 'New Collection',
-      name: collectionData.name || collectionData.title || 'New Collection',
-      description: collectionData.description || '',
-      coverImageUrl: collectionData.coverImageUrl || '',
-      userId: collectionData.userId || 'user-1',
-      visibility: collectionData.visibility || 'private',
-      allowComments: collectionData.allowComments !== undefined ? collectionData.allowComments : true,
-      createdAt: collectionData.createdAt || new Date().toISOString(),
-      updatedAt: collectionData.updatedAt || new Date().toISOString(),
-      cardIds: collectionData.cardIds || [],
-      tags: collectionData.tags || []
-    };
-    setCollections(prev => [...prev, newCollection]);
-    return newCollection;
-  };
-
-  const updateCollection = async (id: string, updates: Partial<Collection>): Promise<Collection> => {
-    const updatedCollection = collections.find(collection => collection.id === id);
-    if (!updatedCollection) {
-      throw new Error(`Collection with ID ${id} not found`);
-    }
-    
-    const updated = { ...updatedCollection, ...updates, updatedAt: new Date().toISOString() };
-    setCollections(prev => prev.map(collection => collection.id === id ? updated : collection));
-    return updated;
-  };
-
-  const deleteCollection = async (id: string): Promise<boolean> => {
-    setCollections(prev => prev.filter(collection => collection.id !== id));
-    return true;
-  };
-
-  const toggleFavorite = (cardId: string) => {
-    const card = cards.find(c => c.id === cardId);
-    if (!card) return;
-    
-    const isFavorite = favorites.some(f => f.id === cardId);
-    if (isFavorite) {
-      setFavorites(prev => prev.filter(f => f.id !== cardId));
-    } else {
-      setFavorites(prev => [...prev, card]);
-    }
-  };
-
+  /**
+   * Create a new deck
+   */
   const addDeck = async (deckData: Partial<Deck>): Promise<Deck> => {
     const newDeck: Deck = {
       id: `deck-${Date.now()}`,
@@ -188,13 +58,16 @@ export const EnhancedCardProvider: React.FC<{ children: ReactNode }> = ({ childr
       updatedAt: new Date().toISOString(),
       ownerId: deckData.ownerId || 'user-1',
       coverImageUrl: deckData.coverImageUrl,
-      cardIds: deckData.cardIds,
+      cardIds: deckData.cardIds || [],
       isPublic: deckData.isPublic || false
     };
     setDecks(prev => [...prev, newDeck]);
     return newDeck;
   };
 
+  /**
+   * Update an existing deck
+   */
   const updateDeck = async (id: string, updates: Partial<Deck>): Promise<Deck> => {
     const updatedDeck = decks.find(deck => deck.id === id);
     if (!updatedDeck) {
@@ -206,66 +79,108 @@ export const EnhancedCardProvider: React.FC<{ children: ReactNode }> = ({ childr
     return updated;
   };
 
+  /**
+   * Delete a deck
+   */
   const deleteDeck = async (id: string): Promise<boolean> => {
     setDecks(prev => prev.filter(deck => deck.id !== id));
     return true;
   };
 
+  /**
+   * Add a card to a deck
+   */
   const addCardToDeck = async (deckId: string, cardId: string): Promise<boolean> => {
     const deckIndex = decks.findIndex(d => d.id === deckId);
     if (deckIndex === -1) return false;
     
-    const cardToAdd = cards.find(c => c.id === cardId);
-    if (!cardToAdd) return false;
+    const cardToAdd = cardContext.cards.find(c => c.id === cardId) || adaptToCard({
+      id: cardId,
+      title: 'Card',
+      imageUrl: '',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      effects: []
+    });
     
-    const deckCards = decks[deckIndex].cards;
-    if (deckCards.some(c => c.id === cardId)) return true;
+    setDecks(prev => {
+      const updatedDecks = [...prev];
+      const currentDeck = { ...updatedDecks[deckIndex] };
+      
+      // Add to cardIds if not already present
+      if (!currentDeck.cardIds?.includes(cardId)) {
+        currentDeck.cardIds = [...(currentDeck.cardIds || []), cardId];
+      }
+      
+      // Add to cards array if it exists and card is not already present
+      if (currentDeck.cards) {
+        if (!currentDeck.cards.some(c => c.id === cardId)) {
+          currentDeck.cards = [...currentDeck.cards, cardToAdd];
+        }
+      }
+      
+      currentDeck.updatedAt = new Date().toISOString();
+      updatedDecks[deckIndex] = currentDeck;
+      return updatedDecks;
+    });
     
-    const updatedDeck = {
-      ...decks[deckIndex],
-      cards: [...deckCards, cardToAdd],
-      updatedAt: new Date().toISOString()
-    };
-    
-    setDecks(prev => prev.map(d => d.id === deckId ? updatedDeck : d));
     return true;
   };
 
+  /**
+   * Remove a card from a deck
+   */
   const removeCardFromDeck = async (deckId: string, cardId: string): Promise<boolean> => {
     const deckIndex = decks.findIndex(d => d.id === deckId);
     if (deckIndex === -1) return false;
     
-    const updatedDeck = {
-      ...decks[deckIndex],
-      cards: decks[deckIndex].cards.filter(c => c.id !== cardId),
-      updatedAt: new Date().toISOString()
-    };
+    setDecks(prev => {
+      const updatedDecks = [...prev];
+      const currentDeck = { ...updatedDecks[deckIndex] };
+      
+      // Remove from cardIds
+      currentDeck.cardIds = currentDeck.cardIds?.filter(id => id !== cardId) || [];
+      
+      // Remove from cards array if it exists
+      if (currentDeck.cards) {
+        currentDeck.cards = currentDeck.cards.filter(c => c.id !== cardId);
+      }
+      
+      currentDeck.updatedAt = new Date().toISOString();
+      updatedDecks[deckIndex] = currentDeck;
+      return updatedDecks;
+    });
     
-    setDecks(prev => prev.map(d => d.id === deckId ? updatedDeck : d));
     return true;
   };
 
+  /**
+   * Create a new series
+   */
   const addSeries = async (seriesData: Partial<Series>): Promise<Series> => {
     const newSeries: Series = {
       id: `series-${Date.now()}`,
       name: seriesData.name || 'New Series',
       title: seriesData.title || seriesData.name || 'New Series',
       description: seriesData.description || '',
-      cards: seriesData.cards || [],
       coverImageUrl: seriesData.coverImageUrl || '',
-      cardIds: seriesData.cardIds || [],
-      totalCards: seriesData.totalCards || 0,
-      isPublished: seriesData.isPublished || false,
       artistId: seriesData.artistId || '',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      releaseDate: seriesData.releaseDate,
-      releaseType: seriesData.releaseType
+      releaseDate: seriesData.releaseDate || new Date().toISOString(),
+      totalCards: seriesData.totalCards || 0,
+      isPublished: seriesData.isPublished || false,
+      cardIds: seriesData.cardIds || [],
+      releaseType: seriesData.releaseType || 'standard',
+      cards: seriesData.cards || []
     };
     setSeries(prev => [...prev, newSeries]);
     return newSeries;
   };
 
+  /**
+   * Update an existing series
+   */
   const updateSeries = async (id: string, updates: Partial<Series>): Promise<Series> => {
     const updatedSeries = series.find(s => s.id === id);
     if (!updatedSeries) {
@@ -278,24 +193,12 @@ export const EnhancedCardProvider: React.FC<{ children: ReactNode }> = ({ childr
   };
 
   const value: EnhancedCardContextProps = {
-    cards,
-    collections,
-    enhancedCards: cards,
+    // Include all base card context values
+    ...cardContext,
+    // Add enhanced functionality
+    enhancedCards,
     decks,
-    favorites,
     series,
-    loading,
-    isLoading,
-    error,
-    fetchCards,
-    fetchCollections,
-    addCard,
-    updateCard,
-    deleteCard,
-    addCollection,
-    updateCollection,
-    deleteCollection,
-    toggleFavorite,
     addDeck,
     updateDeck,
     deleteDeck,
@@ -312,6 +215,10 @@ export const EnhancedCardProvider: React.FC<{ children: ReactNode }> = ({ childr
   );
 };
 
+/**
+ * Hook to access the enhanced card context
+ * Throws an error if used outside of an EnhancedCardProvider
+ */
 export const useEnhancedCards = () => {
   const context = useContext(EnhancedCardContext);
   if (!context) {
@@ -320,4 +227,4 @@ export const useEnhancedCards = () => {
   return context;
 };
 
-export type { Deck, Series };
+export type { Deck, Series, EnhancedCard };

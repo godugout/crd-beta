@@ -1,8 +1,14 @@
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Card, CardRarity, Collection } from '@/lib/types';
 import { sampleCards } from '@/lib/data/sampleCards';
+import { cardIdToCard } from '@/lib/adapters/EnhancedCardAdapter';
 
-interface CardContextProps {
+/**
+ * Props interface for the Card Context
+ * Defines all methods and properties available throughout the application
+ */
+export interface CardContextProps {
   cards: Card[];
   favorites: Card[];
   collections: Collection[];
@@ -26,8 +32,16 @@ interface CardContextProps {
   createCollection: (collection: Partial<Collection>) => Promise<Collection>;
 }
 
+/**
+ * React Context for card-related operations
+ * Provides access to cards, collections, and related functionality
+ */
 export const CardContext = createContext<CardContextProps | undefined>(undefined);
 
+/**
+ * Provider component for CardContext
+ * Manages state and provides card-related functionality to child components
+ */
 export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [cards, setCards] = useState<Card[]>(sampleCards || []);
   const [favorites, setFavorites] = useState<Card[]>([]);
@@ -147,7 +161,7 @@ export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const getCardById = (id: string) => {
-    return cards.find(card => card.id === id);
+    return cards.find(card => card.id === id) || cardIdToCard(id);
   };
 
   const addCollection = async (collectionData: Partial<Collection>): Promise<Collection> => {
@@ -262,6 +276,10 @@ export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   );
 };
 
+/**
+ * Hook to access the card context
+ * Throws an error if used outside of a CardProvider
+ */
 export const useCards = () => {
   const context = useContext(CardContext);
   if (!context) {
@@ -270,4 +288,4 @@ export const useCards = () => {
   return context;
 };
 
-export type { Card, Collection, CardContextProps };
+export type { Card, Collection };

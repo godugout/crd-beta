@@ -1,92 +1,82 @@
 
+import { BaseEntity } from './index';
+
 /**
- * User permissions and roles for the CRD application
+ * Enumeration of possible user roles in the system
  */
-
-// User permissions constants
-export enum UserPermission {
-  CREATE_CARD = 'create_card',
-  EDIT_CARD = 'edit_card',
-  DELETE_CARD = 'delete_card',
-  VIEW_DASHBOARD = 'view_dashboard',
-  MANAGE_USERS = 'manage_users',
-  ADMIN_ACCESS = 'admin_access',
-  // Add permissions referenced in other parts of the codebase
-  READ_ALL = 'read:all',
-  WRITE_ALL = 'write:all'
-}
-
-// User roles
 export enum UserRole {
   ADMIN = 'admin',
-  ARTIST = 'artist',
-  FAN = 'fan',
-  GUEST = 'guest',
   MODERATOR = 'moderator',
-  USER = 'user'
+  USER = 'user',
+  GUEST = 'guest'
 }
 
-// Role-based permissions mapping
-export const ROLE_PERMISSIONS = {
-  [UserRole.ADMIN]: [
-    UserPermission.CREATE_CARD,
-    UserPermission.EDIT_CARD,
-    UserPermission.DELETE_CARD,
-    UserPermission.VIEW_DASHBOARD,
-    UserPermission.MANAGE_USERS,
-    UserPermission.ADMIN_ACCESS,
-    UserPermission.READ_ALL,
-    UserPermission.WRITE_ALL
-  ],
-  [UserRole.ARTIST]: [
-    UserPermission.CREATE_CARD,
-    UserPermission.EDIT_CARD,
-    UserPermission.DELETE_CARD,
-    UserPermission.VIEW_DASHBOARD
-  ],
-  [UserRole.FAN]: [
-    UserPermission.VIEW_DASHBOARD
-  ],
-  [UserRole.GUEST]: [],
-  [UserRole.MODERATOR]: [
-    UserPermission.VIEW_DASHBOARD,
-    UserPermission.MANAGE_USERS
-  ],
-  [UserRole.USER]: [
-    UserPermission.VIEW_DASHBOARD
-  ]
+/**
+ * Type definition for user permissions
+ * These control specific actions users can perform within the application
+ */
+export type UserPermission = 
+  | 'read:cards' 
+  | 'write:cards' 
+  | 'delete:cards'
+  | 'read:collections'
+  | 'write:collections'
+  | 'delete:collections'
+  | 'read:users'
+  | 'write:users'
+  | 'admin:access'
+  | 'create:series'
+  | 'read:all'
+  | 'write:all';
+
+/**
+ * Mapping of roles to permissions
+ * Defines which permissions are granted to each role by default
+ */
+export const ROLE_PERMISSIONS: Record<UserRole, UserPermission[]> = {
+  [UserRole.ADMIN]: ['read:cards', 'write:cards', 'delete:cards', 'read:collections', 'write:collections', 'delete:collections', 'read:users', 'write:users', 'admin:access', 'create:series', 'read:all', 'write:all'],
+  [UserRole.MODERATOR]: ['read:cards', 'write:cards', 'read:collections', 'write:collections', 'read:users'],
+  [UserRole.USER]: ['read:cards', 'write:cards', 'read:collections'],
+  [UserRole.GUEST]: ['read:cards', 'read:collections']
 };
 
 /**
- * User interface representing a user in the CRD application
- * Includes all properties used across the codebase
+ * User interface representing a user in the system
  */
-export interface User {
-  id: string;
+export interface User extends BaseEntity {
   email: string;
   name?: string;
-  role: UserRole;
-  avatarUrl?: string;
   username?: string;
-  displayName?: string; // Added because it's used in NavAvatar, UserDropdown, etc.
-  bio?: string;
+  avatarUrl?: string;
+  role: UserRole;
   permissions?: UserPermission[];
   createdAt: string;
   updatedAt: string;
   isVerified?: boolean;
   isActive?: boolean;
-  website?: string;
-  socialLinks?: {
-    twitter?: string;
-    instagram?: string;
-    tiktok?: string;
-  };
-  signature?: string;
+  teamIds?: string[];
+}
+
+/**
+ * Team interface representing a team in the system
+ */
+export interface Team extends BaseEntity {
+  name: string;
+  description?: string;
   logoUrl?: string;
-  cardsCreated?: number;
-  seriesCreated?: number;
-  totalSales?: number;
-  cardsCollected?: number;
-  decksCreated?: number;
-  purchaseCount?: number;
+  ownerId: string;
+  createdAt: string;
+  updatedAt: string;
+  memberIds?: string[];
+}
+
+/**
+ * TeamMember interface representing a member of a team
+ */
+export interface TeamMember extends BaseEntity {
+  teamId: string;
+  userId: string;
+  role: 'owner' | 'admin' | 'member' | 'viewer';
+  joinedAt: string;
+  user?: User;
 }
