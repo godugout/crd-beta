@@ -1,4 +1,3 @@
-
 import { CardRarity, DesignMetadata } from './cardTypes';
 import { BaseEntity } from '.';
 import { Reaction } from './interaction';
@@ -51,4 +50,14 @@ export interface EnhancedCard extends Card {
   };
   creatorName?: string;
   creatorAvatar?: string;
+}
+
+export interface FabricSwatch {
+  id: string;
+  name: string;
+  color: string;
+  fabricType: string;
+  imageUrl?: string;
+  thumbnail?: string;
+  isAvailable: boolean;
 }

@@ -1,8 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useCards } from '@/context/CardContext';
-import CardViewer from '@/components/card-viewer/CardViewer';
+import { useCards } from '@/hooks/useCards';
+import CardViewer from '@/components/cards/CardViewer';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import PageLayout from '@/components/navigation/PageLayout';
@@ -104,10 +104,12 @@ const CardViewerPage = () => {
             <div className="w-full md:w-2/3 mx-auto md:mx-0 max-w-xl relative">
               <CardViewer 
                 card={card}
-                onFullscreenToggle={() => setFullscreen(true)}
+                isFlipped={false}
+                activeEffects={card.effects || []}
                 onShare={handleShare}
                 onCapture={handleCapture}
                 onBack={() => navigate('/')}
+                onFullscreenToggle={() => setFullscreen(true)}
               />
             </div>
             
@@ -185,8 +187,9 @@ const CardViewerPage = () => {
         <div className="fixed inset-0 z-50 bg-black">
           <CardViewer
             card={card}
-            fullscreen={true}
-            onFullscreenToggle={() => setFullscreen(false)}
+            isFlipped={false}
+            activeEffects={card.effects || []}
+            isFullscreen={true}
             onShare={handleShare}
             onCapture={handleCapture}
             onClose={() => setFullscreen(false)}

@@ -20,7 +20,9 @@ export function useCards() {
       loading: false,
       isLoading: false,
       error: null,
+      collections: [],
       fetchCards: async () => {},
+      fetchCollections: async () => {},
       addCard: async (data: Partial<Card>): Promise<Card> => ({ 
         id: `fallback-${Date.now()}`, 
         title: 'Fallback Card',
@@ -53,6 +55,11 @@ export function useCards() {
       toggleFavorite: () => {},
       getCardById: (id: string) => sampleCards.find(card => card.id === id),
       getCard: (id: string) => sampleCards.find(card => card.id === id),
+      addCollection: async () => ({}),
+      updateCollection: async () => ({}),
+      deleteCollection: async () => true,
+      addSeries: async () => ({}),
+      updateSeries: async () => ({}),
       refreshCards: async () => {}
     };
   }

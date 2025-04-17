@@ -4,7 +4,7 @@ import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCards } from '@/hooks/useCards';
 import { Card } from '@/lib/types/card';
-import { CardViewer } from '@/components/card-viewer/CardViewer';
+import CardViewer from '@/components/cards/CardViewer';
 
 export interface FullscreenViewerProps {
   card: Card;
@@ -36,6 +36,7 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ card, onClose }) =>
             activeEffects={activeEffects}
             effectIntensities={effectIntensities}
             showLightingControls={true}
+            isFullscreen={true}
           />
         ) : (
           <div className="text-white text-center">

@@ -1,14 +1,5 @@
-import { Comment, User, UserRole } from '@/lib/types';
-import { v4 as uuidv4 } from 'uuid';
 
-export interface CommentInput {
-  content: string;
-  userId: string;
-  cardId?: string;
-  collectionId?: string;
-  teamId?: string;
-  parentId?: string;
-}
+import { Comment } from '@/lib/types';
 
 export interface DbComment {
   id: string;
@@ -20,41 +11,16 @@ export interface DbComment {
   parent_id?: string;
   created_at: string;
   updated_at: string;
-  user?: DbUser;
-}
-
-export interface DbUser {
-  id: string;
-  email: string;
-  display_name?: string;
-  name?: string;
-  username?: string;
-  avatar_url?: string;
-  role?: string;
-  created_at: string;
-  updated_at: string;
-}
-
-// Convert DB user to app user format
-export const dbUserToUser = (dbUser: DbUser): User => {
-  return {
-    id: dbUser.id,
-    email: dbUser.email,
-    name: dbUser.name || dbUser.display_name || dbUser.email.split('@')[0],
-    displayName: dbUser.display_name,
-    username: dbUser.username,
-    avatarUrl: dbUser.avatar_url,
-    role: dbUser.role as UserRole || UserRole.USER,
-    createdAt: dbUser.created_at,
-    updatedAt: dbUser.updated_at,
-    isVerified: true,
-    isActive: true,
-    permissions: ['read:own', 'write:own', 'delete:own'],
-    bio: ''
+  user?: {
+    id: string;
+    name?: string;
+    email: string;
+    avatar_url?: string;
+    username?: string;
   };
-};
+}
 
-// Convert Comment from application format to DbComment format
+// Convert from app Comment to DbComment
 export const adaptCommentToDbComment = (comment: Comment): DbComment => {
   return {
     id: comment.id,
@@ -64,55 +30,64 @@ export const adaptCommentToDbComment = (comment: Comment): DbComment => {
     collection_id: comment.collectionId,
     team_id: comment.teamId,
     parent_id: comment.parentId,
-    created_at: comment.createdAt || new Date().toISOString(),
-    updated_at: comment.updatedAt || new Date().toISOString(),
+    created_at: comment.createdAt,
+    updated_at: comment.updatedAt,
     user: comment.user ? {
       id: comment.user.id,
-      email: comment.user.email,
-      display_name: comment.user.displayName,
       name: comment.user.name,
-      username: comment.user.username,
+      email: comment.user.email,
       avatar_url: comment.user.avatarUrl,
-      role: comment.user.role,
-      created_at: comment.user.createdAt || new Date().toISOString(),
-      updated_at: comment.user.updatedAt || new Date().toISOString()
+      username: comment.user.username,
     } : undefined
   };
 };
 
-// Convert Comment Input to DbComment
-export const adaptInteractionCommentToSchemaComment = (comment: CommentInput): DbComment => {
-  const timestamp = new Date().toISOString();
+// Convert from schema Comment to interaction Comment
+export const adaptSchemaCommentToInteractionComment = (dbComment: DbComment): Comment => {
+  return {
+    id: dbComment.id,
+    content: dbComment.content,
+    userId: dbComment.user_id,
+    cardId: dbComment.card_id,
+    collectionId: dbComment.collection_id,
+    teamId: dbComment.team_id,
+    parentId: dbComment.parent_id,
+    createdAt: dbComment.created_at,
+    updatedAt: dbComment.updated_at,
+    user: dbComment.user ? {
+      id: dbComment.user.id,
+      name: dbComment.user.name,
+      email: dbComment.user.email,
+      avatarUrl: dbComment.user.avatar_url,
+      username: dbComment.user.username,
+    } : undefined
+  };
+};
+
+// Convert from interaction Comment to schema Comment
+export const adaptInteractionCommentToSchemaComment = (comment: Partial<Comment>): Partial<DbComment> => {
+  const result: Partial<DbComment> = {};
   
-  return {
-    id: uuidv4(),
-    content: comment.content,
-    user_id: comment.userId,
-    card_id: comment.cardId,
-    collection_id: comment.collectionId,
-    team_id: comment.teamId,
-    parent_id: comment.parentId,
-    created_at: timestamp,
-    updated_at: timestamp
-  };
+  if (comment.id) result.id = comment.id;
+  if (comment.content) result.content = comment.content;
+  if (comment.userId) result.user_id = comment.userId;
+  if (comment.cardId) result.card_id = comment.cardId;
+  if (comment.collectionId) result.collection_id = comment.collectionId;
+  if (comment.teamId) result.team_id = comment.teamId;
+  if (comment.parentId) result.parent_id = comment.parentId;
+  if (comment.createdAt) result.created_at = comment.createdAt;
+  if (comment.updatedAt) result.updated_at = comment.updatedAt;
+  
+  // Handle user object conversion
+  if (comment.user) {
+    result.user = {
+      id: comment.user.id,
+      name: comment.user.name,
+      email: comment.user.email,
+      avatar_url: comment.user.avatarUrl,
+      username: comment.user.username
+    };
+  }
+  
+  return result;
 };
-
-// Convert DbComment to application Comment
-export const adaptSchemaCommentToInteractionComment = (schemaComment: DbComment): Comment => {
-  return {
-    id: schemaComment.id,
-    content: schemaComment.content,
-    userId: schemaComment.user_id,
-    cardId: schemaComment.card_id,
-    collectionId: schemaComment.collection_id,
-    teamId: schemaComment.team_id,
-    parentId: schemaComment.parent_id,
-    createdAt: schemaComment.created_at,
-    updatedAt: schemaComment.updated_at,
-    user: schemaComment.user ? dbUserToUser(schemaComment.user) : undefined
-  };
-};
-
-// Keep original functions for backwards compatibility
-export const dbCommentToComment = adaptSchemaCommentToInteractionComment;
-export const commentToDbComment = adaptCommentToDbComment;

@@ -1,4 +1,3 @@
-
 import { Team, TeamMember, User } from '@/lib/types';
 
 export interface DbTeam {
@@ -86,5 +85,34 @@ export const mapTeamMemberFromDb = (dbMember: DbTeamMember): TeamMember => {
     createdAt: currentTime,
     updatedAt: currentTime,
     user: dbMember.user ? mapUserFromDb(dbMember.user) : undefined
+  };
+};
+
+export const mapToUser = (data: any) => {
+  return {
+    id: data.id || '',
+    email: data.email || '',
+    name: data.name || '',
+    avatarUrl: data.avatar_url || '',
+    username: data.username || '',
+    isVerified: true,
+    isActive: true,
+    permissions: [],
+    role: data.role || 'fan', // Add required role property
+    createdAt: data.created_at || new Date().toISOString(),
+    updatedAt: data.updated_at || new Date().toISOString(),
+  };
+};
+
+export const mapToTeamMember = (data: any, user: any = null) => {
+  return {
+    id: data.id || '',
+    teamId: data.team_id || '',
+    userId: data.user_id || '',
+    role: data.role || 'member',
+    joinedAt: data.joined_at || new Date().toISOString(),
+    createdAt: data.created_at || new Date().toISOString(), // Add required property
+    updatedAt: data.updated_at || new Date().toISOString(), // Add required property
+    user: user
   };
 };

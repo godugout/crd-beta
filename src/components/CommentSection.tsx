@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/auth';
 import { Button } from '@/components/ui/button';
@@ -54,7 +55,9 @@ const CommentSection: React.FC<CommentSectionProps> = ({ cardId, collectionId, t
       
       if (data) {
         // Convert schema comments to interaction comments
-        const adaptedComments = data.map(comment => adaptSchemaCommentToInteractionComment(comment as DbComment));
+        const adaptedComments = data.map(comment => 
+          adaptSchemaCommentToInteractionComment(comment as DbComment)
+        );
         setComments(adaptedComments);
         adaptedComments.forEach(comment => {
           if (comment.id) {
@@ -81,7 +84,9 @@ const CommentSection: React.FC<CommentSectionProps> = ({ cardId, collectionId, t
       }
       
       if (data && data.length > 0) {
-        const adaptedReplies = data.map(comment => adaptSchemaCommentToInteractionComment(comment as DbComment));
+        const adaptedReplies = data.map(comment => 
+          adaptSchemaCommentToInteractionComment(comment as DbComment)
+        );
         setRepliesByParentId(prev => ({
           ...prev,
           [parentId]: adaptedReplies

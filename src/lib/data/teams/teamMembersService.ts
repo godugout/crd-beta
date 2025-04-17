@@ -1,7 +1,11 @@
-
 import { TeamMember } from '@/lib/types';
 import { mapTeamMemberFromDb } from './mappers';
-import { supabase } from '@/lib/supabaseClient';
+import { createClient } from '@supabase/supabase-js';
+
+// Create a Supabase client
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://example.com';
+const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'your-anon-key';
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 // In-memory store for team members
 const teamMembersStore: TeamMember[] = [];
