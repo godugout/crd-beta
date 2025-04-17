@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import PageLayout from '@/components/navigation/PageLayout';
 import { Button } from '@/components/ui/button';
-import { useCards } from '@/context/CardContext';
+import { useCards } from '@/hooks/useCards';
 import { ArrowLeft } from 'lucide-react';
 import CardDetailed from '@/components/cards/CardDetailed';
 import RelatedCards from '@/components/cards/RelatedCards';
@@ -131,10 +131,10 @@ const CardDetail = () => {
   };
 
   // If showing the viewer, render it as an overlay, but only after context is loaded
-  if (showViewer && isLoaded) {
+  if (showViewer && isLoaded && resolvedCard) {
     return (
       <FullscreenViewer 
-        cardId={id || ''} 
+        card={resolvedCard}
         onClose={() => setShowViewer(false)} 
       />
     );

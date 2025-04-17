@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Card, CardRarity } from '@/lib/types';
 import { sampleCards } from '@/lib/data/sampleCards';
@@ -165,3 +164,6 @@ export const useCardContext = () => {
   }
   return context;
 };
+
+// Export the useCards hook
+export { Card };

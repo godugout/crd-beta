@@ -2,7 +2,7 @@
 import { useContext } from 'react';
 import { CardContext } from '@/context/CardContext';
 import { Card, CardRarity } from '@/lib/types';
-import { sampleCards } from '@/data/sampleCards';
+import { sampleCards } from '@/lib/data/sampleCards';
 
 /**
  * Hook to access the card context for managing cards
@@ -51,8 +51,8 @@ export function useCards() {
       }),
       deleteCard: async () => true,
       toggleFavorite: () => {},
-      getCardById: () => undefined,
-      getCard: () => undefined,
+      getCardById: (id: string) => sampleCards.find(card => card.id === id),
+      getCard: (id: string) => sampleCards.find(card => card.id === id),
       refreshCards: async () => {}
     };
   }

@@ -1,18 +1,19 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCards } from '@/hooks/useCards';
-import CardViewer from '@/components/cards/CardViewer';
+import { Card } from '@/lib/types/card';
+import { CardViewer } from '@/components/card-viewer/CardViewer';
 
 export interface FullscreenViewerProps {
-  cardId: string;
+  card: Card;
   onClose: () => void;
 }
 
-const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) => {
-  const { getCardById } = useCards();
-  const card = getCardById?.(cardId);
+const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ card, onClose }) => {
+  const [activeEffects, setActiveEffects] = useState<string[]>(card.effects || []);
+  const [effectIntensities, setEffectIntensities] = useState<Record<string, number>>({});
   
   return (
     <div className="fixed inset-0 z-50 bg-black flex flex-col">
@@ -29,7 +30,13 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
       
       <div className="flex-1 flex items-center justify-center p-4">
         {card ? (
-          <CardViewer card={card} isFullscreen />
+          <CardViewer 
+            card={card} 
+            isFlipped={false}
+            activeEffects={activeEffects}
+            effectIntensities={effectIntensities}
+            showLightingControls={true}
+          />
         ) : (
           <div className="text-white text-center">
             <h2 className="text-xl font-semibold mb-2">Card not found</h2>
