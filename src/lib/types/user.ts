@@ -1,42 +1,37 @@
 
 import { BaseEntity } from './index';
 
-export enum UserPermission {
-  READ = 'read',
-  WRITE = 'write',
-  ADMIN = 'admin',
-  SUPER_ADMIN = 'super_admin'
-}
-
 export enum UserRole {
   USER = 'user',
   ADMIN = 'admin',
-  SUPER_ADMIN = 'super_admin',
-  TEAM_MEMBER = 'team_member',
+  MODERATOR = 'moderator',
   TEAM_ADMIN = 'team_admin',
-  MODERATOR = 'moderator' // Added missing moderator role
+  ARTIST = 'artist'
 }
 
-// Define User interface
+export interface UserPermission {
+  id: string;
+  name: string;
+  description: string;
+}
+
 export interface User extends BaseEntity {
-  username?: string;
   email: string;
-  displayName?: string;
-  name?: string; // Add name property for backward compatibility
+  name: string; // Make name required
   avatarUrl?: string;
-  bio?: string;
+  username?: string;
+  role?: UserRole;
   isVerified: boolean;
   isActive: boolean;
-  permissions: UserPermission[];
-  role: UserRole;
+  permissions: string[];
+  displayName?: string;
 }
 
-// Define role-based permissions mapping
+// Define role permissions
 export const ROLE_PERMISSIONS = {
-  [UserRole.USER]: [UserPermission.READ],
-  [UserRole.ADMIN]: [UserPermission.READ, UserPermission.WRITE],
-  [UserRole.SUPER_ADMIN]: [UserPermission.READ, UserPermission.WRITE, UserPermission.ADMIN, UserPermission.SUPER_ADMIN],
-  [UserRole.TEAM_MEMBER]: [UserPermission.READ],
-  [UserRole.TEAM_ADMIN]: [UserPermission.READ, UserPermission.WRITE],
-  [UserRole.MODERATOR]: [UserPermission.READ, UserPermission.WRITE]
+  [UserRole.USER]: ['read:own', 'write:own', 'delete:own'],
+  [UserRole.ADMIN]: ['read:all', 'write:all', 'delete:all', 'manage:users'],
+  [UserRole.MODERATOR]: ['read:all', 'moderate:content', 'delete:flagged'],
+  [UserRole.TEAM_ADMIN]: ['read:team', 'write:team', 'delete:team', 'manage:team'],
+  [UserRole.ARTIST]: ['read:own', 'write:own', 'delete:own', 'create:series']
 };

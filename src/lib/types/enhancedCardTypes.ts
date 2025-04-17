@@ -1,7 +1,6 @@
 
+// Import from lib/types to ensure we're using the correct CardRarity enum
 import { CardRarity } from "@/lib/types";
-
-export { CardRarity };
 
 export type EnhancedCard = {
   id: string;
@@ -14,7 +13,7 @@ export type EnhancedCard = {
   isPublic?: boolean;
   createdAt?: string;
   updatedAt?: string;
-  rarity?: CardRarity;
+  rarity: CardRarity;
   cardNumber?: string;
   seriesId?: string;
   artistId?: string;
@@ -26,6 +25,7 @@ export type EnhancedCard = {
   effects?: string[];
   designMetadata?: any;
   marketData?: any;
+  isFavorite?: boolean;
 };
 
 export type Series = {

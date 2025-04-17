@@ -60,10 +60,10 @@ const CardEditorContainer: React.FC<CardEditorContainerProps> = ({
       imageUrl: cardState.imageUrl || '',
       thumbnailUrl: cardState.imageUrl || '',
       tags: cardState.tags || [],
-      isPublic: true, // Add required fields
-      userId: 'anonymous', // Add required fields
-      effects: cardState.selectedEffects || [], // Add required fields
-      rarity: CardRarity.COMMON, // Use enum instead of string
+      isPublic: true,
+      userId: 'anonymous',
+      effects: cardState.selectedEffects || [],
+      rarity: CardRarity.COMMON,
       designMetadata: {
         cardStyle: cardState.cardStyle || DEFAULT_DESIGN_METADATA.cardStyle,
         textStyle: DEFAULT_DESIGN_METADATA.textStyle,
@@ -77,23 +77,19 @@ const CardEditorContainer: React.FC<CardEditorContainerProps> = ({
     };
     
     try {
-      // If onSave prop is provided, use it
       if (onSave) {
         onSave(cardData);
         return;
       }
       
       if (card) {
-        // Update existing card
         await updateCard(card.id, cardData);
         toast.success('CRD updated successfully');
       } else {
-        // Add new card
         await addCard(cardData);
         toast.success('CRD created successfully');
       }
       
-      // Navigate to gallery with a refresh parameter to ensure updated data is fetched
       navigate('/gallery?refresh=true');
     } catch (error) {
       console.error('Error saving card:', error);
@@ -102,13 +98,11 @@ const CardEditorContainer: React.FC<CardEditorContainerProps> = ({
   };
 
   const handleCancel = () => {
-    // If onCancel prop is provided, use it
     if (onCancel) {
       onCancel();
       return;
     }
     
-    // Default cancel behavior - navigate back
     navigate(-1);
   };
 

@@ -61,7 +61,7 @@ const InstagramCollectionCreator: React.FC<InstagramCollectionCreatorProps> = ({
           tags: post.tags || ['instagram'],
           isPublic: true,
           effects: [],
-          rarity: CardRarity.COMMON, // Use enum value instead of string
+          rarity: CardRarity.COMMON,
           designMetadata: {
             cardStyle: {
               template: 'instagram',

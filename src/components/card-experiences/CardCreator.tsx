@@ -46,7 +46,7 @@ const CardCreator: React.FC<CardCreatorProps> = ({ onCardCreated }) => {
         tags: tagArray,
         isPublic: true,
         effects: [],
-        rarity: CardRarity.COMMON, // Use enum value instead of string
+        rarity: CardRarity.COMMON,
         designMetadata: {
           cardStyle: {
             template: 'standard',

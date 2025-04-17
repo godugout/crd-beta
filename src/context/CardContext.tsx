@@ -63,7 +63,7 @@ export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
           effects: [],
-          rarity: CardRarity.COMMON, // Using enum instead of string
+          rarity: CardRarity.COMMON,
           designMetadata: {
             cardStyle: { template: 'default', effect: 'none', borderRadius: '12px', borderColor: '#000', shadowColor: '#000', frameWidth: 2, frameColor: '#000' },
             textStyle: { titleColor: '#000', titleAlignment: 'center', titleWeight: 'bold', descriptionColor: '#333' },
@@ -118,7 +118,7 @@ export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         isPublic: card.isPublic ?? false,
         tags: card.tags ?? [],
         effects: card.effects ?? [],
-        rarity: card.rarity ?? CardRarity.COMMON,
+        rarity: card.rarity || CardRarity.COMMON,
         designMetadata: card.designMetadata ?? {
           cardStyle: { template: 'default', effect: 'none', borderRadius: '12px', borderColor: '#000', shadowColor: '#000', frameWidth: 2, frameColor: '#000' },
           textStyle: { titleColor: '#000', titleAlignment: 'center', titleWeight: 'bold', descriptionColor: '#333' },
@@ -140,7 +140,13 @@ export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       // Simulate API call
       const updatedCard = cards.map(card => 
-        card.id === id ? { ...card, ...updates, updatedAt: new Date().toISOString() } : card
+        card.id === id ? { 
+          ...card, 
+          ...updates, 
+          updatedAt: new Date().toISOString(),
+          // Handle isFavorite separately since it's not in the Card type
+          ...(updates as any).isFavorite !== undefined ? { isFavorite: (updates as any).isFavorite } : {}
+        } : card
       );
       
       setCards(updatedCard);
@@ -151,8 +157,8 @@ export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
       
       // Update favorites if needed
-      if ('isFavorite' in updates) {
-        if (updates.isFavorite) {
+      if ((updates as any).isFavorite !== undefined) {
+        if ((updates as any).isFavorite) {
           setFavorites(prev => 
             prev.some(f => f.id === id) 
               ? prev.map(f => f.id === id ? updated : f)

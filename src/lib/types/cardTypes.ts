@@ -59,7 +59,7 @@ export interface HotspotData {
   description?: string;
   title?: string;
   content?: any;
-  type?: string;  // Added missing property
+  type: string;  // Made required
 }
 
 // Define DesignMetadata type
@@ -73,7 +73,7 @@ export interface DesignMetadata {
   player?: string;
   team?: string;
   year?: string;
-  hotspots?: HotspotData[]; // Added hotspots array
+  hotspots?: HotspotData[]; 
   [key: string]: any;
 }
 
@@ -98,7 +98,8 @@ export interface Card {
   team?: string;
   year?: string;
   name?: string;
-  isFavorite?: boolean; // Added missing property
+  isFavorite?: boolean;
+  teamId?: string;
 }
 
 // Export all types

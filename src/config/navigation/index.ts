@@ -1,6 +1,6 @@
 
 // Export the interfaces from a single source
-export { type NavItem } from './types';
+export { type NavItem, type NavGroup } from './types';
 
 // Export all navigation items centrally
 export { cardsNavItems } from './cardsNavItems';

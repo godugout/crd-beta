@@ -1,37 +1,29 @@
 
-import { Grid, LibraryBig, PlusCircle, Search } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
-
-export interface NavItem {
-  title: string;
-  path: string;
-  icon: LucideIcon;
-  description?: string;
-  highlight?: boolean;
-}
+import { LibraryBig, Heart, PlusCircle, Search } from "lucide-react";
+import { NavItem } from './types';
 
 export const cardsNavItems: NavItem[] = [
   {
     title: "All Cards",
     path: "/cards",
-    icon: Grid,
+    icon: LibraryBig,
     description: "Browse all cards"
   },
   {
-    title: "My Collection",
-    path: "/cards/collection",
-    icon: LibraryBig,
-    description: "View your personal collection",
+    title: "My Cards",
+    path: "/cards/my",
+    icon: Heart,
+    description: "View your cards",
     highlight: true
   },
   {
     title: "Create Card",
     path: "/cards/create",
     icon: PlusCircle,
-    description: "Design a new card"
+    description: "Create a new card"
   },
   {
-    title: "Search",
+    title: "Search Cards",
     path: "/cards/search",
     icon: Search,
     description: "Find specific cards"

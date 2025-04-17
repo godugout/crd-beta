@@ -1,10 +1,11 @@
 
 import { ReactElement } from 'react';
+import { LucideIcon } from 'lucide-react';
 
 export interface NavigationItem {
   title: string;
   path: string;
-  icon: React.ElementType;
+  icon: LucideIcon;
   highlight?: boolean;
   description?: string;
 }

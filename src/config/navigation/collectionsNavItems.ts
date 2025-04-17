@@ -1,39 +1,31 @@
 
-import { LibraryBig, FolderPlus, Star, Tag } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
-
-export interface NavItem {
-  title: string;
-  path: string;
-  icon: LucideIcon;
-  description?: string;
-  highlight?: boolean;
-}
+import { Library, FolderPlus, CircleUser, Search } from "lucide-react";
+import { NavItem } from './types';
 
 export const collectionsNavItems: NavItem[] = [
   {
     title: "All Collections",
     path: "/collections",
-    icon: LibraryBig,
+    icon: Library,
     description: "Browse all collections"
-  },
-  {
-    title: "My Collections",
-    path: "/collections/my",
-    icon: Star,
-    description: "View your personal collections",
-    highlight: true
   },
   {
     title: "Create Collection",
     path: "/collections/create",
     icon: FolderPlus,
-    description: "Create a new collection"
+    description: "Create a new collection",
+    highlight: true
   },
   {
-    title: "Categories",
-    path: "/collections/categories",
-    icon: Tag,
-    description: "Browse by category"
+    title: "My Collections",
+    path: "/collections/my",
+    icon: CircleUser,
+    description: "View your collections"
+  },
+  {
+    title: "Search Collections",
+    path: "/collections/search",
+    icon: Search,
+    description: "Find specific collections"
   }
 ];

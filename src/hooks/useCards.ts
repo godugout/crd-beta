@@ -2,6 +2,7 @@
 import { useContext } from 'react';
 import { CardContext, EnhancedCardContextProps } from '@/context/CardContext';
 import sampleCards from '@/data/sampleCards';
+import { Card, CardRarity } from '@/lib/types';
 
 /**
  * Hook to access the card context for managing cards
@@ -25,7 +26,7 @@ export function useCards(): EnhancedCardContextProps {
         title: 'Fallback Card', 
         createdAt: new Date().toISOString(), 
         updatedAt: new Date().toISOString(), 
-        rarity: 'common' as any, 
+        rarity: CardRarity.COMMON,
         effects: [] 
       }),
       updateCard: async () => ({ 
@@ -33,7 +34,7 @@ export function useCards(): EnhancedCardContextProps {
         title: 'Fallback Card', 
         createdAt: new Date().toISOString(), 
         updatedAt: new Date().toISOString(), 
-        rarity: 'common' as any, 
+        rarity: CardRarity.COMMON,
         effects: [] 
       }),
       deleteCard: async () => true,

@@ -1,4 +1,3 @@
-
 /**
  * Core Types for CRD (Collector's Republic Digital) App
  * Re-exports all types from the centralized type system
@@ -6,7 +5,7 @@
 
 // Import but don't re-export to avoid naming conflicts
 import { JsonValue } from './types/index';
-import { DesignMetadata, CardRarity, CardStyle, TextStyle, CardMetadata, MarketMetadata, HotspotData } from './types/cardTypes';
+import { DesignMetadata, CardRarity as CardRarityEnum, CardStyle, TextStyle, CardMetadata, MarketMetadata, HotspotData } from './types/cardTypes';
 import { User, UserPermission, UserRole, ROLE_PERMISSIONS } from './types/user';
 import { Reaction, Comment } from './types/interaction';
 import { OaklandMemoryData as IndexOaklandMemoryData } from './types/oaklandMemory';
@@ -20,7 +19,6 @@ import { BaseEntity } from './types/index';
 export type { 
   BaseEntity,
   JsonValue,
-  CardRarity, 
   CardStyle,
   TextStyle,
   CardMetadata,
@@ -35,8 +33,8 @@ export type {
   DesignMetadata
 };
 
-// Export role permissions
-export { ROLE_PERMISSIONS };
+// Export enums directly so they can be used as values
+export { CardRarityEnum as CardRarity, ROLE_PERMISSIONS };
 
 // Explicitly export and rename to avoid conflicts
 export type Card = IndexCard;

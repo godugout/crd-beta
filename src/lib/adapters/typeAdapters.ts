@@ -1,4 +1,3 @@
-
 import { Card, CardRarity, Collection, DesignMetadata } from '@/lib/types';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -98,8 +97,10 @@ export function adaptCard(input: any): Card {
     effects: input.effects || [],
     rarity: typeof input.rarity === 'string' ? mapRarityToEnum(input.rarity) : (input.rarity || CardRarity.COMMON),
     designMetadata: designMetadata,
-    teamId: input.teamId,
-    collectionId: input.collectionId
+    team: input.team,
+    player: input.player,
+    year: input.year,
+    teamId: input.teamId
   };
 }
 
@@ -110,7 +111,7 @@ export function adaptCollection(input: any): Collection {
   return {
     id: input.id || uuidv4(),
     name: input.name || input.title || 'Untitled Collection',
-    title: input.title || input.name,
+    title: input.title || input.name || 'Untitled Collection',
     description: input.description || '',
     coverImageUrl: input.coverImageUrl || input.imageUrl || '',
     cards: input.cards ? input.cards.map(adaptCard) : [],
@@ -118,11 +119,12 @@ export function adaptCollection(input: any): Collection {
     createdAt: input.createdAt || now,
     updatedAt: input.updatedAt || now,
     userId: input.userId || input.ownerId || 'anonymous',
-    ownerId: input.ownerId || input.userId || 'anonymous',
     visibility: input.visibility || 'private',
     allowComments: input.allowComments ?? true,
     designMetadata: input.designMetadata || {},
-    tags: input.tags || []
+    tags: input.tags || [],
+    teamId: input.teamId,
+    isPublic: input.isPublic
   };
 }
 

@@ -1,37 +1,31 @@
 
-import { Baseline, Trophy, Calendar, User, Star } from "lucide-react";
-import type { NavItem } from './types';
+import { Baseball, PlusCircle, Search, ListFilter } from "lucide-react";
+import { NavItem } from './types';
 
 export const baseballNavItems: NavItem[] = [
   {
-    title: "Teams",
-    path: "/baseball/teams",
-    icon: Baseline,
-    description: "Browse baseball teams"
+    title: "All Cards",
+    path: "/baseball",
+    icon: Baseball,
+    description: "Browse all baseball cards"
   },
   {
-    title: "Players",
-    path: "/baseball/players",
-    icon: User,
-    description: "Browse baseball players"
-  },
-  {
-    title: "Games",
-    path: "/baseball/games",
-    icon: Calendar,
-    description: "Game schedule"
-  },
-  {
-    title: "Championships",
-    path: "/baseball/championships",
-    icon: Trophy,
-    description: "Championship history"
-  },
-  {
-    title: "Hall of Fame",
-    path: "/baseball/hall-of-fame",
-    icon: Star,
-    description: "Hall of Fame members",
+    title: "Create Card",
+    path: "/baseball/create",
+    icon: PlusCircle,
+    description: "Create a new baseball card",
     highlight: true
+  },
+  {
+    title: "Search",
+    path: "/baseball/search",
+    icon: Search,
+    description: "Search baseball cards"
+  },
+  {
+    title: "Collections",
+    path: "/baseball/collections",
+    icon: ListFilter,
+    description: "View baseball card collections"
   }
 ];

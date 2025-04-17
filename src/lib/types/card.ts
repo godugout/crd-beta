@@ -9,7 +9,8 @@ import { Reaction, Comment } from './interaction';
 import { 
   Card as CardType, 
   FabricSwatch as FabricSwatchType,
-  DesignMetadata 
+  DesignMetadata,
+  CardRarity as CardRarityEnum
 } from './cardTypes';
 
 export interface FabricSwatch extends FabricSwatchType {}
@@ -24,12 +25,14 @@ export interface BaseCard {
   tags: string[];
   userId: string;
   collectionId?: string;
+  teamId?: string;
   metadata?: Record<string, any>;
   effects: string[];
   reactions?: Reaction[];
   comments?: Comment[];
   viewCount?: number;
   isPublic?: boolean;
+  rarity?: CardRarityEnum;
   player?: string;
   team?: string;
   year?: string;
@@ -48,9 +51,11 @@ export interface BaseCard {
   createdAt: string;
   updatedAt: string;
   designMetadata: DesignMetadata;
+  isFavorite?: boolean;
 }
 
 export interface Card extends BaseCard {}
 
 // Re-export the new types for gradual migration
 export type { CardType as CardNew, FabricSwatchType as FabricSwatchNew };
+export { CardRarityEnum as CardRarity };

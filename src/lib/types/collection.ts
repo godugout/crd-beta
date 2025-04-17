@@ -3,7 +3,7 @@ import { Card, BaseEntity } from './index';
 
 export interface Collection extends BaseEntity {
   name: string;
-  title?: string; // Add title property for backward compatibility
+  title: string; // Make title required
   description: string;
   coverImageUrl: string;
   userId: string;

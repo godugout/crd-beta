@@ -78,7 +78,7 @@ const SampleCardsButton: React.FC<SampleCardsButtonProps> = ({ onCardsAdded }) =
           ...cardData,
           isPublic: true,
           userId: 'demo-user',
-          rarity: CardRarity.COMMON, // Use the enum instead of string
+          rarity: CardRarity.COMMON,
           designMetadata
         });
       });
