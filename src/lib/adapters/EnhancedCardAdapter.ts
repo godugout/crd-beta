@@ -36,3 +36,6 @@ export const createBasicEnhancedCard = (id: string): Card => {
     rarity: CardRarity.COMMON
   };
 };
+
+// For backwards compatibility
+export const cardToEnhancedCard = adaptToEnhancedCard;

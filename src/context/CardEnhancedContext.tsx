@@ -1,211 +1,363 @@
-
-import React, { createContext, useState, useContext, ReactNode } from 'react';
-import { Card, Collection } from '@/lib/types';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { Card, CardRarity } from '@/lib/types';
+import { Deck, EnhancedCard, Series } from '@/lib/types/enhancedCardTypes';
+import { adaptToEnhancedCard } from '@/lib/adapters/EnhancedCardAdapter';
 import { adaptToCard } from '@/lib/adapters/typeAdapters';
-import { cardToEnhancedCard } from '@/lib/adapters/EnhancedCardAdapter';
-import { Deck, Series, EnhancedCard } from '@/lib/types/enhancedCardTypes';
-import { CardContext, CardContextProps } from './CardContext';
 
 /**
- * Enhanced card context extends the basic card context with additional functionality
- * for decks, series, and enhanced card types
+ * Enhanced Card Context Props
  */
-export interface EnhancedCardContextProps extends CardContextProps {
-  enhancedCards: EnhancedCard[];
+export interface EnhancedCardContextProps {
+  cards: EnhancedCard[];
+  favorites: string[];
   decks: Deck[];
   series: Series[];
+  loading: boolean;
+  error: Error | null;
+  addCard: (card: Partial<Card>) => Promise<Card>;
+  updateCard: (id: string, card: Partial<Card>) => Promise<Card>;
+  deleteCard: (id: string) => Promise<boolean>;
+  toggleFavorite: (id: string) => void;
   addDeck: (deck: Partial<Deck>) => Promise<Deck>;
-  updateDeck: (id: string, updates: Partial<Deck>) => Promise<Deck>;
+  updateDeck: (id: string, deck: Partial<Deck>) => Promise<Deck>;
   deleteDeck: (id: string) => Promise<boolean>;
-  addCardToDeck: (deckId: string, cardId: string) => Promise<boolean>;
-  removeCardFromDeck: (deckId: string, cardId: string) => Promise<boolean>;
+  addCardToDeck: (deckId: string, cardId: string) => Promise<void>;
+  removeCardFromDeck: (deckId: string, cardId: string) => Promise<void>;
   addSeries: (series: Partial<Series>) => Promise<Series>;
-  updateSeries: (id: string, updates: Partial<Series>) => Promise<Series>;
+  updateSeries: (id: string, series: Partial<Series>) => Promise<Series>;
+  deleteSeries: (id: string) => Promise<boolean>;
 }
 
 /**
- * Context for enhanced card operations
+ * Enhanced Card Context
  */
 export const EnhancedCardContext = createContext<EnhancedCardContextProps | undefined>(undefined);
 
-/**
- * Provider component for EnhancedCardContext
- * Extends the base CardContext with enhanced functionality
- */
 export const EnhancedCardProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  // Get base card context
-  const cardContext = useContext(CardContext);
-  if (!cardContext) {
-    throw new Error('EnhancedCardProvider must be used within a CardProvider');
-  }
-
+  const [enhancedCards, setEnhancedCards] = useState<EnhancedCard[]>([]);
+  const [favorites, setFavorites] = useState<string[]>([]);
   const [decks, setDecks] = useState<Deck[]>([]);
   const [series, setSeries] = useState<Series[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
 
-  // Convert standard cards to enhanced cards
-  const enhancedCards = cardContext.cards.map(cardToEnhancedCard);
-
-  /**
-   * Create a new deck
-   */
-  const addDeck = async (deckData: Partial<Deck>): Promise<Deck> => {
-    const newDeck: Deck = {
-      id: `deck-${Date.now()}`,
-      name: deckData.name || 'New Deck',
-      description: deckData.description || '',
-      cards: deckData.cards || [],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      ownerId: deckData.ownerId || 'user-1',
-      coverImageUrl: deckData.coverImageUrl,
-      cardIds: deckData.cardIds || [],
-      isPublic: deckData.isPublic || false
-    };
-    setDecks(prev => [...prev, newDeck]);
-    return newDeck;
-  };
-
-  /**
-   * Update an existing deck
-   */
-  const updateDeck = async (id: string, updates: Partial<Deck>): Promise<Deck> => {
-    const updatedDeck = decks.find(deck => deck.id === id);
-    if (!updatedDeck) {
-      throw new Error(`Deck with ID ${id} not found`);
-    }
-    
-    const updated = { ...updatedDeck, ...updates, updatedAt: new Date().toISOString() };
-    setDecks(prev => prev.map(deck => deck.id === id ? updated : deck));
-    return updated;
-  };
-
-  /**
-   * Delete a deck
-   */
-  const deleteDeck = async (id: string): Promise<boolean> => {
-    setDecks(prev => prev.filter(deck => deck.id !== id));
-    return true;
-  };
-
-  /**
-   * Add a card to a deck
-   */
-  const addCardToDeck = async (deckId: string, cardId: string): Promise<boolean> => {
-    const deckIndex = decks.findIndex(d => d.id === deckId);
-    if (deckIndex === -1) return false;
-    
-    const cardToAdd = cardContext.cards.find(c => c.id === cardId) || adaptToCard({
-      id: cardId,
-      title: 'Card',
-      imageUrl: '',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      effects: []
-    });
-    
-    setDecks(prev => {
-      const updatedDecks = [...prev];
-      const currentDeck = { ...updatedDecks[deckIndex] };
-      
-      // Add to cardIds if not already present
-      if (!currentDeck.cardIds?.includes(cardId)) {
-        currentDeck.cardIds = [...(currentDeck.cardIds || []), cardId];
-      }
-      
-      // Add to cards array if it exists and card is not already present
-      if (currentDeck.cards) {
-        if (!currentDeck.cards.some(c => c.id === cardId)) {
-          currentDeck.cards = [...currentDeck.cards, cardToAdd];
+  useEffect(() => {
+    // Mock data loading
+    setLoading(true);
+    setTimeout(() => {
+      setEnhancedCards([
+        {
+          id: '1',
+          title: 'Enhanced Card 1',
+          description: 'Description for enhanced card 1',
+          imageUrl: 'https://via.placeholder.com/150',
+          thumbnailUrl: 'https://via.placeholder.com/150',
+          userId: 'user-1',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          effects: [],
+          isFavorite: false,
+          rarity: CardRarity.COMMON,
+          views: 10,
+          likes: 2,
+          shares: 1
+        },
+        {
+          id: '2',
+          title: 'Enhanced Card 2',
+          description: 'Description for enhanced card 2',
+          imageUrl: 'https://via.placeholder.com/150',
+          thumbnailUrl: 'https://via.placeholder.com/150',
+          userId: 'user-1',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          effects: [],
+          isFavorite: true,
+          rarity: CardRarity.RARE,
+          views: 15,
+          likes: 5,
+          shares: 2
         }
-      }
-      
-      currentDeck.updatedAt = new Date().toISOString();
-      updatedDecks[deckIndex] = currentDeck;
-      return updatedDecks;
+      ]);
+      setDecks([
+        {
+          id: 'deck-1',
+          name: 'My First Deck',
+          description: 'A sample deck',
+          ownerId: 'user-1',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          cardIds: ['1', '2'],
+          isPublic: true
+        }
+      ]);
+      setSeries([
+        {
+          id: 'series-1',
+          name: 'Sample Series',
+          description: 'A sample series',
+          coverImageUrl: 'https://via.placeholder.com/150',
+          artistId: 'artist-1',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          releaseDate: new Date().toISOString(),
+          totalCards: 2,
+          isPublished: true,
+          cardIds: ['1', '2'],
+          releaseType: 'standard'
+        }
+      ]);
+      setLoading(false);
+    }, 1000);
+  }, []);
+
+  const addCard = async (cardData: Partial<Card>): Promise<Card> => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const newCard: Card = {
+          id: `card-${Date.now()}`,
+          title: cardData.title || 'Untitled Card',
+          description: cardData.description || '',
+          imageUrl: cardData.imageUrl || '',
+          thumbnailUrl: cardData.thumbnailUrl || '',
+          tags: cardData.tags || [],
+          userId: 'user-1',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          rarity: CardRarity.COMMON,
+          effects: [],
+          isFavorite: cardData.isFavorite ?? false,
+          ...cardData
+        };
+        setEnhancedCards(prevCards => [...prevCards, adaptToEnhancedCard(newCard)]);
+        resolve(newCard);
+      }, 500);
     });
-    
-    return true;
   };
 
-  /**
-   * Remove a card from a deck
-   */
-  const removeCardFromDeck = async (deckId: string, cardId: string): Promise<boolean> => {
-    const deckIndex = decks.findIndex(d => d.id === deckId);
-    if (deckIndex === -1) return false;
-    
-    setDecks(prev => {
-      const updatedDecks = [...prev];
-      const currentDeck = { ...updatedDecks[deckIndex] };
-      
-      // Remove from cardIds
-      currentDeck.cardIds = currentDeck.cardIds?.filter(id => id !== cardId) || [];
-      
-      // Remove from cards array if it exists
-      if (currentDeck.cards) {
-        currentDeck.cards = currentDeck.cards.filter(c => c.id !== cardId);
-      }
-      
-      currentDeck.updatedAt = new Date().toISOString();
-      updatedDecks[deckIndex] = currentDeck;
-      return updatedDecks;
+  const updateCard = async (id: string, updates: Partial<Card>): Promise<Card> => {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        const cardIndex = enhancedCards.findIndex(card => card.id === id);
+        if (cardIndex === -1) {
+          reject(new Error(`Card with ID ${id} not found`));
+          return;
+        }
+
+        const updatedCard = {
+          ...enhancedCards[cardIndex],
+          ...updates,
+          updatedAt: new Date().toISOString()
+        };
+
+        const newCards = [...enhancedCards];
+        newCards[cardIndex] = updatedCard;
+
+        setEnhancedCards(newCards);
+        resolve(updatedCard);
+      }, 500);
     });
-    
-    return true;
   };
 
-  /**
-   * Create a new series
-   */
+  const deleteCard = async (id: string): Promise<boolean> => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        setEnhancedCards(prevCards => prevCards.filter(card => card.id !== id));
+        setFavorites(prevFavorites => prevFavorites.filter(favId => favId !== id));
+        resolve(true);
+      }, 500);
+    });
+  };
+
+  const toggleFavorite = (id: string) => {
+    setFavorites(prevFavorites => {
+      if (prevFavorites.includes(id)) {
+        return prevFavorites.filter(favId => favId !== id);
+      } else {
+        return [...prevFavorites, id];
+      }
+    });
+  };
+
+  const addDeck = async (deckData: Partial<Deck>): Promise<Deck> => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const newDeck: Deck = {
+          id: `deck-${Date.now()}`,
+          name: deckData.name || 'Untitled Deck',
+          description: deckData.description || '',
+          ownerId: 'user-1',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          cardIds: deckData.cardIds || [],
+          isPublic: deckData.isPublic ?? false
+        };
+        setDecks(prevDecks => [...prevDecks, newDeck]);
+        resolve(newDeck);
+      }, 500);
+    });
+  };
+
+  const updateDeck = async (id: string, deckUpdates: Partial<Deck>): Promise<Deck> => {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        const deckIndex = decks.findIndex(deck => deck.id === id);
+        if (deckIndex === -1) {
+          reject(new Error(`Deck with ID ${id} not found`));
+          return;
+        }
+
+        const updatedDeck: Deck = {
+          ...decks[deckIndex],
+          ...deckUpdates,
+          updatedAt: new Date().toISOString()
+        };
+
+        const newDecks = [...decks];
+        newDecks[deckIndex] = updatedDeck;
+
+        setDecks(newDecks);
+        resolve(updatedDeck);
+      }, 500);
+    });
+  };
+
+  const deleteDeck = async (id: string): Promise<boolean> => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        setDecks(prevDecks => prevDecks.filter(deck => deck.id !== id));
+        resolve(true);
+      }, 500);
+    });
+  };
+
+  const addCardToDeck = async (deckId: string, cardId: string): Promise<void> => {
+    setDecks(prevDecks => {
+      const deckIndex = prevDecks.findIndex(deck => deck.id === deckId);
+      if (deckIndex === -1) {
+        console.warn(`Deck with ID ${deckId} not found`);
+        return prevDecks;
+      }
+
+      const deck = prevDecks[deckIndex];
+      if (deck.cardIds.includes(cardId)) {
+        console.warn(`Card ${cardId} already in deck ${deckId}`);
+        return prevDecks;
+      }
+
+      const updatedDeck: Deck = {
+        ...deck,
+        cardIds: [...deck.cardIds, cardId],
+        updatedAt: new Date().toISOString()
+      };
+
+      const newDecks = [...prevDecks];
+      newDecks[deckIndex] = updatedDeck;
+      return newDecks;
+    });
+  };
+
+  const removeCardFromDeck = async (deckId: string, cardId: string): Promise<void> => {
+    setDecks(prevDecks => {
+      const deckIndex = prevDecks.findIndex(deck => deck.id === deckId);
+      if (deckIndex === -1) {
+        console.warn(`Deck with ID ${deckId} not found`);
+        return prevDecks;
+      }
+
+      const deck = prevDecks[deckIndex];
+      if (!deck.cardIds.includes(cardId)) {
+        console.warn(`Card ${cardId} not in deck ${deckId}`);
+        return prevDecks;
+      }
+
+      const updatedDeck: Deck = {
+        ...deck,
+        cardIds: deck.cardIds.filter(id => id !== cardId),
+        updatedAt: new Date().toISOString()
+      };
+
+      const newDecks = [...prevDecks];
+      newDecks[deckIndex] = updatedDeck;
+      return newDecks;
+    });
+  };
+
   const addSeries = async (seriesData: Partial<Series>): Promise<Series> => {
-    const newSeries: Series = {
-      id: `series-${Date.now()}`,
-      name: seriesData.name || 'New Series',
-      title: seriesData.title || seriesData.name || 'New Series',
-      description: seriesData.description || '',
-      coverImageUrl: seriesData.coverImageUrl || '',
-      artistId: seriesData.artistId || '',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      releaseDate: seriesData.releaseDate || new Date().toISOString(),
-      totalCards: seriesData.totalCards || 0,
-      isPublished: seriesData.isPublished || false,
-      cardIds: seriesData.cardIds || [],
-      releaseType: seriesData.releaseType || 'standard',
-      cards: seriesData.cards || []
-    };
-    setSeries(prev => [...prev, newSeries]);
-    return newSeries;
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const newSeries: Series = {
+          id: `series-${Date.now()}`,
+          name: seriesData.name || 'Untitled Series',
+          description: seriesData.description || '',
+          coverImageUrl: seriesData.coverImageUrl || '',
+          artistId: 'artist-1',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          releaseDate: new Date().toISOString(),
+          totalCards: seriesData.totalCards || 0,
+          isPublished: seriesData.isPublished ?? false,
+          cardIds: seriesData.cardIds || [],
+          releaseType: seriesData.releaseType || 'standard'
+        };
+        setSeries(prevSeries => [...prevSeries, newSeries]);
+        resolve(newSeries);
+      }, 500);
+    });
   };
 
-  /**
-   * Update an existing series
-   */
-  const updateSeries = async (id: string, updates: Partial<Series>): Promise<Series> => {
-    const updatedSeries = series.find(s => s.id === id);
-    if (!updatedSeries) {
-      throw new Error(`Series with ID ${id} not found`);
-    }
-    
-    const updated = { ...updatedSeries, ...updates, updatedAt: new Date().toISOString() };
-    setSeries(prev => prev.map(s => s.id === id ? updated : s));
-    return updated;
+  const updateSeries = async (id: string, seriesUpdates: Partial<Series>): Promise<Series> => {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        const seriesIndex = series.findIndex(series => series.id === id);
+        if (seriesIndex === -1) {
+          reject(new Error(`Series with ID ${id} not found`));
+          return;
+        }
+
+        const updatedSeries: Series = {
+          ...series[seriesIndex],
+          ...seriesUpdates,
+          updatedAt: new Date().toISOString()
+        };
+
+        const newSeries = [...series];
+        newSeries[seriesIndex] = updatedSeries;
+
+        setSeries(newSeries);
+        resolve(updatedSeries);
+      }, 500);
+    });
+  };
+
+  const deleteSeries = async (id: string): Promise<boolean> => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        setSeries(prevSeries => prevSeries.filter(series => series.id !== id));
+        resolve(true);
+      }, 500);
+    });
   };
 
   const value: EnhancedCardContextProps = {
-    // Include all base card context values
-    ...cardContext,
-    // Add enhanced functionality
-    enhancedCards,
+    cards: enhancedCards,
+    favorites,
     decks,
     series,
+    loading,
+    error,
+    addCard,
+    updateCard,
+    deleteCard,
+    toggleFavorite,
     addDeck,
     updateDeck,
     deleteDeck,
     addCardToDeck,
     removeCardFromDeck,
     addSeries,
-    updateSeries
+    updateSeries,
+    deleteSeries
   };
 
   return (
@@ -216,15 +368,12 @@ export const EnhancedCardProvider: React.FC<{ children: ReactNode }> = ({ childr
 };
 
 /**
- * Hook to access the enhanced card context
- * Throws an error if used outside of an EnhancedCardProvider
+ * Hook to use the enhanced card context
  */
 export const useEnhancedCards = () => {
   const context = useContext(EnhancedCardContext);
   if (!context) {
-    throw new Error('useEnhancedCards must be used within an EnhancedCardProvider');
+    throw new Error('useEnhancedCards must be used within a EnhancedCardProvider');
   }
   return context;
 };
-
-export type { Deck, Series, EnhancedCard };

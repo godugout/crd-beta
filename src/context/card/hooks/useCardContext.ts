@@ -38,3 +38,5 @@ export function useCardContext() {
     }
   };
 }
+
+export default useCardContext;

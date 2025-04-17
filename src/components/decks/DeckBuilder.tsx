@@ -1,11 +1,13 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useEnhancedCards } from '@/context/CardEnhancedContext';
-import { Deck, EnhancedCard, Card, CardRarity } from '@/lib/types/enhancedCardTypes';
+import { Deck, EnhancedCard } from '@/lib/types/enhancedCardTypes';
+import { Card, CardRarity } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card as UICard, CardContent } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
