@@ -1,12 +1,12 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Card } from '@/lib/types';
+import { Card, CardRarity } from '@/lib/types';
 
 // Enhanced card with additional client-state properties
 export interface EnhancedCard extends Card {
   isFavorite?: boolean;
   viewCount?: number;
-  lastViewed?: Date;
+  lastViewed?: string; // Changed from Date to string for JSON compatibility
 }
 
 export interface EnhancedCardContextProps {
@@ -19,6 +19,7 @@ export interface EnhancedCardContextProps {
   updateCard: (id: string, updates: Partial<Card>) => Promise<Card>;
   deleteCard: (id: string) => Promise<boolean>;
   toggleFavorite: (id: string) => void;
+  getCardById: (id: string) => EnhancedCard | undefined; // Added missing method
 }
 
 const CardContext = createContext<EnhancedCardContextProps | undefined>(undefined);
@@ -55,7 +56,7 @@ export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
           effects: [],
-          rarity: 'common',
+          rarity: CardRarity.COMMON, // Using enum instead of string
           designMetadata: {
             cardStyle: { template: 'default', effect: 'none', borderRadius: '12px', borderColor: '#000', shadowColor: '#000', frameWidth: 2, frameColor: '#000' },
             textStyle: { titleColor: '#000', titleAlignment: 'center', titleWeight: 'bold', descriptionColor: '#333' },
@@ -63,7 +64,8 @@ export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             marketMetadata: { isPrintable: true, isForSale: false, includeInCatalog: true }
           },
           isFavorite: false,
-          viewCount: 0
+          viewCount: 0,
+          lastViewed: new Date().toISOString() // String format
         }
       ];
       
@@ -74,6 +76,11 @@ export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     } finally {
       setLoading(false);
     }
+  };
+
+  // Add the getCardById method
+  const getCardById = (id: string): EnhancedCard | undefined => {
+    return cards.find(card => card.id === id);
   };
 
   const addCard = async (card: Partial<Card>): Promise<Card> => {
@@ -174,7 +181,8 @@ export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         addCard,
         updateCard,
         deleteCard,
-        toggleFavorite
+        toggleFavorite,
+        getCardById // Include the new method
       }}
     >
       {children}

@@ -1,14 +1,18 @@
 
+// Import enum if needed
 import { JsonValue } from './index';
 
+// Define card rarity as an enum
 export enum CardRarity {
   COMMON = 'common',
   UNCOMMON = 'uncommon',
   RARE = 'rare',
   ULTRA_RARE = 'ultra-rare',
-  LEGENDARY = 'legendary'
+  LEGENDARY = 'legendary',
+  MYTHIC = 'mythic'
 }
 
+// Define CardStyle type
 export interface CardStyle {
   template: string;
   effect: string;
@@ -17,79 +21,70 @@ export interface CardStyle {
   shadowColor: string;
   frameWidth: number;
   frameColor: string;
-  [key: string]: JsonValue;
 }
 
+// Define TextStyle type
 export interface TextStyle {
   titleColor: string;
   titleAlignment: string;
   titleWeight: string;
   descriptionColor: string;
-  [key: string]: JsonValue;
 }
 
+// Define CardMetadata type
 export interface CardMetadata {
   category: string;
   series: string;
   cardType: string;
-  [key: string]: JsonValue;
 }
 
+// Define MarketMetadata type
 export interface MarketMetadata {
   isPrintable: boolean;
   isForSale: boolean;
   includeInCatalog: boolean;
-  [key: string]: JsonValue;
 }
 
+// Define HotspotData type
 export interface HotspotData {
   id: string;
   x: number;
   y: number;
   width: number;
   height: number;
-  content: string;
-  title?: string;
-  type?: string;
-  mediaUrl?: string;
-  [key: string]: JsonValue | undefined;
+  targetId?: string;
+  targetType?: string;
+  description?: string;
 }
 
+// Define DesignMetadata type
 export interface DesignMetadata {
-  cardStyle: CardStyle;
-  textStyle: TextStyle;
-  cardMetadata: CardMetadata;
-  marketMetadata: MarketMetadata;
-  // Optional fields that might be present in some cards
-  player?: string;
-  team?: string;
-  year?: string;
-  oaklandMemory?: Record<string, any>;
+  cardStyle?: CardStyle;
+  textStyle?: TextStyle;
+  cardMetadata?: CardMetadata;
+  marketMetadata?: MarketMetadata;
+  oaklandMemory?: any;
   layers?: any[];
-  hotspots?: HotspotData[];
-  [key: string]: JsonValue | undefined;
+  [key: string]: any;
 }
 
+// Define Card type
 export interface Card {
   id: string;
   title: string;
-  description: string;
-  imageUrl: string;
-  thumbnailUrl: string;
-  tags: string[];
-  userId: string;
-  isPublic: boolean;
+  description?: string;
+  imageUrl?: string;
+  thumbnailUrl?: string;
+  tags?: string[];
+  userId?: string;
+  isPublic?: boolean;
   createdAt: string;
   updatedAt: string;
-  effects: string[];
   rarity: CardRarity;
-  designMetadata: DesignMetadata;
-  // Optional fields
-  teamId?: string;
-  collectionId?: string;
+  effects: string[];
+  designMetadata?: DesignMetadata;
   reactions?: any[];
-  player?: string;
-  team?: string;
-  year?: string;
-  [key: string]: JsonValue | undefined;
 }
+
+// Export all types
+export * from './card';

@@ -1,20 +1,15 @@
 
-import { BaseEntity } from './index';
-
-export interface InstagramPost extends BaseEntity {
-  caption: string;
-  mediaUrl: string;
-  permalink: string;
-  timestamp: string;
-  username: string;
-  children?: InstagramMedia[];
-  type: 'IMAGE' | 'VIDEO' | 'CAROUSEL_ALBUM';
-  likeCount?: number;
-  commentCount?: number;
-}
-
-export interface InstagramMedia {
+export interface InstagramPost {
   id: string;
-  mediaUrl: string;
-  mediaType: 'IMAGE' | 'VIDEO';
+  caption: string;
+  imageUrl: string;
+  thumbnailUrl?: string;
+  postUrl: string;
+  timestamp: string;
+  likes: number;
+  comments: number;
+  username: string;
+  userProfileUrl: string;
+  mediaType: string; // Added missing property
+  tags?: string[]; // Added missing property
 }

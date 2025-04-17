@@ -21,4 +21,5 @@ export interface User {
   permissions?: UserPermission[];
   createdAt: string;
   updatedAt: string;
+  displayName?: string; // Add displayName property
 }
