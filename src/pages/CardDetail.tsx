@@ -134,11 +134,13 @@ const CardDetail = () => {
     if (foundCard) {
       console.log('CardDetail: Found card:', foundCard.title, 'with imageUrl:', foundCard.imageUrl);
       
+      // Make sure we have all required properties in the processed card
       const processedCard = adaptToCard({
         ...foundCard,
         imageUrl: foundCard.imageUrl || FALLBACK_IMAGE,
         thumbnailUrl: foundCard.thumbnailUrl || foundCard.imageUrl || FALLBACK_IMAGE,
         description: foundCard.description || '', // Ensure description is always a string
+        isFavorite: foundCard.isFavorite || false // Ensure isFavorite is always boolean
       });
       
       setResolvedCard(processedCard);

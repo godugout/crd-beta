@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import AdminDashboard from '@/components/dashboard/AdminDashboard';
@@ -19,8 +20,8 @@ const Dashboard: React.FC = () => {
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
-      {user.role === UserRole.ADMIN && <AdminDashboard />}
-      {user.role === UserRole.ARTIST && <ArtistDashboard />}
+      {user.role === UserRole.ADMIN && <AdminDashboard user={user} />}
+      {user.role === UserRole.ARTIST && <ArtistDashboard user={user} />}
       {user.role === UserRole.USER && <FanDashboard />}
     </div>
   );

@@ -41,7 +41,7 @@ export interface FabricSwatch {
  */
 export interface Card extends BaseEntity {
   title: string;
-  description?: string;
+  description: string; // Changed from optional to required
   imageUrl: string;
   thumbnailUrl?: string;
   collectionId?: string;
@@ -61,7 +61,7 @@ export interface Card extends BaseEntity {
   name?: string;
   
   // Collection and favorites - now ensuring isFavorite is included
-  isFavorite?: boolean;
+  isFavorite: boolean; // Changed from optional to required
   stats?: CardStats;
   
   // Artist and market data

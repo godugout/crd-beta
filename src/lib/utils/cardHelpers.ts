@@ -10,10 +10,11 @@ export const cardIdToCard = (cardId: string): Card => {
     id: cardId,
     title: `Card ${cardId.slice(-4)}`,
     imageUrl: '',
+    description: '', // Ensure description is always provided
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     effects: [],
-    isFavorite: false // Include the isFavorite property
+    isFavorite: false // Ensure isFavorite is always provided
   };
 };
 
