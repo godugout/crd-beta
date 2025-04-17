@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import PageLayout from '@/components/navigation/PageLayout';
@@ -13,8 +14,14 @@ import { DEFAULT_DESIGN_METADATA } from '@/lib/utils/cardDefaults';
 import { toStandardCard } from '@/lib/utils/cardConverters';
 import { stringToCardRarity, ensureCardRarity } from '@/lib/utils/CardRarityUtils';
 
+// Define a type that explicitly includes all required fields for CardDetailed
+type CardDetailedViewCard = Required<Pick<Card, 'id' | 'title' | 'description' | 'imageUrl' | 'thumbnailUrl' | 
+  'tags' | 'createdAt' | 'updatedAt' | 'userId' | 'effects' | 'isFavorite' | 'rarity'>> & 
+  Omit<Card, 'id' | 'title' | 'description' | 'imageUrl' | 'thumbnailUrl' | 'tags' | 'createdAt' | 
+  'updatedAt' | 'userId' | 'effects' | 'isFavorite' | 'rarity'>;
+
 interface CardDetailedProps {
-  card: Card;
+  card: CardDetailedViewCard;
   onEdit: () => void;
   onShare: () => void;
   onDelete: () => void;
@@ -62,20 +69,14 @@ const CardDetailed: React.FC<CardDetailedProps> = ({ card, onEdit, onShare, onDe
 };
 
 interface RelatedCardsProps {
-  cards: Card[];
+  cards: CardDetailedViewCard[];
   currentCardId: string;
   onCardClick: (id: string) => void;
   className?: string;
 }
 
 const RelatedCards: React.FC<RelatedCardsProps> = ({ cards, currentCardId, onCardClick, className }) => {
-  const processedCards = cards.map(card => ({
-    ...card,
-    isFavorite: card.isFavorite ?? false,
-    description: card.description || ''
-  }));
-  
-  const filteredCards = processedCards
+  const filteredCards = cards
     .filter(card => card.id !== currentCardId)
     .slice(0, 4);
   
@@ -117,7 +118,7 @@ const CardDetail = () => {
   const { cards, getCard } = useCards();
   const cardOperations = useCardOperations();
   const [showViewer, setShowViewer] = useState(false);
-  const [resolvedCard, setResolvedCard] = useState<Card | null>(null);
+  const [resolvedCard, setResolvedCard] = useState<CardDetailedViewCard | null>(null);
   
   const [isLoaded, setIsLoaded] = useState(false);
   
@@ -146,6 +147,7 @@ const CardDetail = () => {
     if (foundCard) {
       console.log('CardDetail: Found card:', foundCard.title, 'with imageUrl:', foundCard.imageUrl);
       
+      // Use toStandardCard and explicitly cast to CardDetailedViewCard to ensure type compatibility
       const standardCard = toStandardCard({
         ...foundCard,
         imageUrl: foundCard.imageUrl || FALLBACK_IMAGE,
@@ -156,7 +158,7 @@ const CardDetail = () => {
         userId: foundCard.userId || 'anonymous',
         createdAt: foundCard.createdAt || new Date().toISOString(), 
         updatedAt: foundCard.updatedAt || new Date().toISOString()
-      });
+      }) as CardDetailedViewCard;
       
       setResolvedCard(standardCard);
       
@@ -244,11 +246,10 @@ const CardDetail = () => {
         
         <RelatedCards 
           cards={sampleCards.filter(card => card.id !== resolvedCard?.id).map(card => {
-            const rarityValue = ensureCardRarity(card.rarity);
             return toStandardCard({
               ...card,
-              rarity: rarityValue
-            });
+              rarity: ensureCardRarity(card.rarity)
+            }) as CardDetailedViewCard;
           })}
           currentCardId={resolvedCard?.id || ''}
           onCardClick={(id) => navigate(`/cards/${id}`)}
