@@ -1,39 +1,31 @@
 
-import { Home, Map, Calendar, Building } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
-
-export interface NavItem {
-  title: string;
-  path: string;
-  icon: LucideIcon;
-  description?: string;
-  highlight?: boolean;
-}
+import { Map, Home, PlusCircle, Search } from "lucide-react";
+import type { NavItem } from './types';
 
 export const townsNavItems: NavItem[] = [
   {
-    title: "Town Overview",
-    path: "/town",
-    icon: Home,
-    description: "Town information"
+    title: "All Towns",
+    path: "/towns",
+    icon: Map,
+    description: "Browse all towns"
   },
   {
-    title: "Map",
-    path: "/town/map",
-    icon: Map,
-    description: "Town map and locations",
+    title: "My Town",
+    path: "/towns/my",
+    icon: Home,
+    description: "View your town",
     highlight: true
   },
   {
-    title: "Events",
-    path: "/town/events",
-    icon: Calendar,
-    description: "Town events calendar"
+    title: "Create Town",
+    path: "/towns/create",
+    icon: PlusCircle,
+    description: "Create a new town"
   },
   {
-    title: "Landmarks",
-    path: "/town/landmarks",
-    icon: Building,
-    description: "Notable town landmarks"
+    title: "Search Towns",
+    path: "/towns/search",
+    icon: Search,
+    description: "Find specific towns"
   }
 ];

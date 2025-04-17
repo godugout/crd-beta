@@ -3,6 +3,7 @@ import { Card, BaseEntity } from './index';
 
 export interface Collection extends BaseEntity {
   name: string;
+  title?: string; // Add title property for backward compatibility
   description: string;
   coverImageUrl: string;
   userId: string;
@@ -12,6 +13,6 @@ export interface Collection extends BaseEntity {
   allowComments: boolean;
   designMetadata?: any;
   tags: string[];
-  isPublic?: boolean; // Add isPublic flag for compatibility
-  teamId?: string; // Add teamId for compatibility
+  isPublic?: boolean; // Keep isPublic flag for compatibility
+  teamId?: string; // Keep teamId for compatibility
 }

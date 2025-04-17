@@ -50,7 +50,7 @@ const NavigationFooter: React.FC<NavigationFooterProps> = ({ onSignOut, onClose 
           )}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium truncate">{user.displayName || user.name || user.email}</p>
+          <p className="text-sm font-medium truncate">{user.displayName || user.username || user.email}</p>
           <p className="text-xs text-gray-500 truncate">{user.email}</p>
         </div>
       </div>

@@ -1,39 +1,31 @@
 
-import { Users, UserCircle, Settings, MessageCircle } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
-
-export interface NavItem {
-  title: string;
-  path: string;
-  icon: LucideIcon;
-  description?: string;
-  highlight?: boolean;
-}
+import { Group, Users, PlusCircle, Search } from "lucide-react";
+import type { NavItem } from './types';
 
 export const teamsNavItems: NavItem[] = [
   {
-    title: "Teams",
+    title: "All Teams",
     path: "/teams",
-    icon: Users,
+    icon: Group,
     description: "Browse all teams"
   },
   {
-    title: "My Team",
-    path: "/teams/my-team",
-    icon: UserCircle,
-    description: "View your team",
+    title: "My Teams",
+    path: "/teams/my",
+    icon: Users,
+    description: "View your teams",
     highlight: true
   },
   {
-    title: "Team Settings",
-    path: "/teams/settings",
-    icon: Settings,
-    description: "Manage team settings"
+    title: "Create Team",
+    path: "/teams/create",
+    icon: PlusCircle,
+    description: "Create a new team"
   },
   {
-    title: "Team Chat",
-    path: "/teams/chat",
-    icon: MessageCircle,
-    description: "Team communication"
+    title: "Search Teams",
+    path: "/teams/search",
+    icon: Search,
+    description: "Find specific teams"
   }
 ];

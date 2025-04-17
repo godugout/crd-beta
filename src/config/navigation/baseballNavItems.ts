@@ -1,39 +1,37 @@
 
-import { Trophy, Medal, History, Layers } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
-
-export interface NavItem {
-  title: string;
-  path: string;
-  icon: LucideIcon;
-  description?: string;
-  highlight?: boolean;
-}
+import { Baseline, Trophy, Calendar, User, Star } from "lucide-react";
+import type { NavItem } from './types';
 
 export const baseballNavItems: NavItem[] = [
   {
     title: "Teams",
     path: "/baseball/teams",
-    icon: Trophy,
-    description: "Baseball teams"
+    icon: Baseline,
+    description: "Browse baseball teams"
   },
   {
     title: "Players",
     path: "/baseball/players",
-    icon: Medal,
-    description: "Baseball players",
+    icon: User,
+    description: "Browse baseball players"
+  },
+  {
+    title: "Games",
+    path: "/baseball/games",
+    icon: Calendar,
+    description: "Game schedule"
+  },
+  {
+    title: "Championships",
+    path: "/baseball/championships",
+    icon: Trophy,
+    description: "Championship history"
+  },
+  {
+    title: "Hall of Fame",
+    path: "/baseball/hall-of-fame",
+    icon: Star,
+    description: "Hall of Fame members",
     highlight: true
-  },
-  {
-    title: "History",
-    path: "/baseball/history",
-    icon: History,
-    description: "Baseball history"
-  },
-  {
-    title: "Collections",
-    path: "/baseball/collections",
-    icon: Layers,
-    description: "Baseball card collections"
   }
 ];

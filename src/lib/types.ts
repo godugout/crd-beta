@@ -5,25 +5,28 @@
  */
 
 // Import but don't re-export to avoid naming conflicts
-import { BaseEntity, JsonValue } from './types/index';
-import { Card as IndexCard, DesignMetadata, CardRarity, CardStyle, TextStyle, CardMetadata, MarketMetadata, HotspotData } from './types/cardTypes';
-import { User, UserPermission } from './types/user';
+import { JsonValue } from './types/index';
+import { DesignMetadata, CardRarity, CardStyle, TextStyle, CardMetadata, MarketMetadata, HotspotData } from './types/cardTypes';
+import { User, UserPermission, UserRole, ROLE_PERMISSIONS } from './types/user';
 import { Reaction, Comment } from './types/interaction';
-import { Collection as IndexCollection } from './types/collection';
 import { OaklandMemoryData as IndexOaklandMemoryData } from './types/oaklandMemory';
 import { TeamMember as IndexTeamMember, Team as IndexTeam } from './types/team';
 import { InstagramPost } from './types/instagram';
+import { Card as IndexCard } from './types/card';
+import { Collection as IndexCollection } from './types/collection';
+import { BaseEntity } from './types/index';
 
-// Re-export with explicit naming
-export {
+// Re-export using explicit types
+export type { 
   BaseEntity,
   JsonValue,
-  CardRarity,
+  CardRarity, 
   CardStyle,
   TextStyle,
   CardMetadata,
   MarketMetadata,
   User,
+  UserRole,
   UserPermission,
   Reaction,
   Comment,
@@ -31,6 +34,9 @@ export {
   InstagramPost,
   DesignMetadata
 };
+
+// Export role permissions
+export { ROLE_PERMISSIONS };
 
 // Explicitly export and rename to avoid conflicts
 export type Card = IndexCard;

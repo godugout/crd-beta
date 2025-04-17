@@ -6,6 +6,7 @@ export interface NavigationItem {
   path: string;
   icon: React.ElementType;
   highlight?: boolean;
+  description?: string;
 }
 
 export interface NavigationGroup {

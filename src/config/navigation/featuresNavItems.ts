@@ -1,14 +1,6 @@
 
-import { Sparkles, Wand, Palette, BoxSelect } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
-
-export interface NavItem {
-  title: string;
-  path: string;
-  icon: LucideIcon;
-  description?: string;
-  highlight?: boolean;
-}
+import { Sparkles, Star, Lightbulb, Layers } from "lucide-react";
+import type { NavItem } from './types';
 
 export const featuresNavItems: NavItem[] = [
   {
@@ -18,22 +10,22 @@ export const featuresNavItems: NavItem[] = [
     description: "Browse all features"
   },
   {
-    title: "AI Tools",
-    path: "/features/ai",
-    icon: Wand,
-    description: "AI-powered tools",
+    title: "Popular",
+    path: "/features/popular",
+    icon: Star,
+    description: "Most popular features",
     highlight: true
   },
   {
-    title: "Design Tools",
-    path: "/features/design",
-    icon: Palette,
-    description: "Card design features"
+    title: "New",
+    path: "/features/new",
+    icon: Lightbulb,
+    description: "Latest features"
   },
   {
-    title: "Collections",
-    path: "/features/collections",
-    icon: BoxSelect,
-    description: "Card collections"
+    title: "Categories",
+    path: "/features/categories",
+    icon: Layers,
+    description: "Browse by category"
   }
 ];

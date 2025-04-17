@@ -1,5 +1,6 @@
+
 import { 
-  ListCollection, 
+  FolderOpen, 
   GalleryHorizontal, 
   History, 
   Star, 
@@ -25,7 +26,7 @@ export const mainNavItems = [
   {
     title: 'Collections',
     path: '/collections',
-    icon: ListCollection
+    icon: FolderOpen
   },
   {
     title: 'Create',
@@ -43,7 +44,7 @@ export const collectionsNavItems = [
   {
     title: 'All',
     path: '/collections',
-    icon: ListCollection,
+    icon: FolderOpen,
     description: 'All collections'
   },
   {

@@ -41,7 +41,7 @@ const CollectionGrid: React.FC<CollectionGridProps> = ({
               {collection.coverImageUrl ? (
                 <img 
                   src={collection.coverImageUrl} 
-                  alt={collection.name || collection.title || 'Collection'} 
+                  alt={collection.name || 'Collection'} 
                   className="w-full h-full object-cover"
                 />
               ) : (
@@ -54,7 +54,7 @@ const CollectionGrid: React.FC<CollectionGridProps> = ({
             <CardContent className="p-4">
               <div className="flex justify-between items-start mb-2">
                 <h3 className="font-semibold text-lg line-clamp-2">
-                  {collection.name || collection.title || 'Untitled Collection'}
+                  {collection.name || 'Untitled Collection'}
                 </h3>
                 
                 {collection.visibility && (
