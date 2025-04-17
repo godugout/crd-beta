@@ -1,5 +1,5 @@
 
-import { Card } from '@/lib/types';
+import { Card, CardRarity } from '@/lib/types';
 import { DEFAULT_DESIGN_METADATA } from '@/lib/utils/cardDefaults';
 
 /**
@@ -18,7 +18,7 @@ export const adaptToCard = (card: any): Card => {
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     effects: [],
-    rarity: 'common',
+    rarity: CardRarity.COMMON,
     designMetadata: DEFAULT_DESIGN_METADATA
   };
   
@@ -33,7 +33,7 @@ export const adaptToCard = (card: any): Card => {
     // Ensure effects is an array
     effects: Array.isArray(card.effects) ? card.effects : [],
     // Ensure rarity has a value
-    rarity: card.rarity || 'common',
+    rarity: card.rarity || CardRarity.COMMON,
     // Ensure designMetadata is properly structured with required fields
     designMetadata: {
       ...DEFAULT_DESIGN_METADATA,

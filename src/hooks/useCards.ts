@@ -1,29 +1,30 @@
 
-import { useState, useEffect } from 'react';
-import { Card } from '@/lib/types';
-import { sampleCards } from '@/data/sampleCards';
+import { useContext } from 'react';
+import { CardContext } from '@/context/CardContext';
+import sampleCards from '@/data/sampleCards';
 
-export const useCards = () => {
-  const [cards, setCards] = useState<Card[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-
-  useEffect(() => {
-    try {
-      // In a real application, you would fetch cards from an API here
-      // For now, we'll use sample cards
-      setCards(sampleCards);
-      setLoading(false);
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error('Failed to fetch cards');
-      setError(error);
-      setLoading(false);
-    }
-  }, []);
-
-  return { 
-    cards, 
-    loading, 
-    error 
-  };
-};
+/**
+ * Hook to access the card context for managing cards
+ */
+export function useCards() {
+  const context = useContext(CardContext);
+  
+  if (!context) {
+    // Provide a fallback if context is not available
+    console.warn('useCards: CardContext not found, using fallback data');
+    
+    return {
+      cards: sampleCards,
+      loading: false,
+      error: null,
+      fetchCards: async () => {},
+      addCard: async () => ({ id: '', title: '', description: '', createdAt: '', updatedAt: '', rarity: 'common', effects: [] }),
+      updateCard: async () => ({ id: '', title: '', description: '', createdAt: '', updatedAt: '', rarity: 'common', effects: [] }),
+      deleteCard: async () => true,
+      toggleFavorite: () => {},
+      getCardById: () => undefined
+    };
+  }
+  
+  return context;
+}

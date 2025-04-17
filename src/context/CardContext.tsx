@@ -1,5 +1,6 @@
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Card, CardRarity } from '@/lib/types';
+import { Card, CardRarity, Collection } from '@/lib/types';
 
 // Enhanced card with additional client-state properties
 export interface EnhancedCard extends Card {
@@ -15,6 +16,7 @@ export interface EnhancedCardContextProps {
   cards: EnhancedCard[];
   favorites: EnhancedCard[];
   loading: boolean;
+  isLoading?: boolean; // Added for compatibility
   error: Error | null;
   fetchCards: () => Promise<void>;
   addCard: (card: Partial<Card>) => Promise<Card>;
@@ -22,7 +24,9 @@ export interface EnhancedCardContextProps {
   deleteCard: (id: string) => Promise<boolean>;
   toggleFavorite: (id: string) => void;
   getCardById: (id: string) => EnhancedCard | undefined;
+  getCard?: (id: string) => EnhancedCard | undefined; // Added alias for compatibility
   createCollection?: (data: any) => Promise<any>; // Added missing method
+  refreshCards?: () => Promise<void>; // Added for compatibility
 }
 
 const CardContext = createContext<EnhancedCardContextProps | undefined>(undefined);
@@ -69,7 +73,6 @@ export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             team: 'Example Team',
             year: '2023'
           },
-          isFavorite: false,
           viewCount: 0,
           lastViewed: new Date().toISOString(),
           player: 'John Doe',
@@ -115,14 +118,13 @@ export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         isPublic: card.isPublic ?? false,
         tags: card.tags ?? [],
         effects: card.effects ?? [],
-        rarity: card.rarity ?? 'common',
+        rarity: (card.rarity as CardRarity) ?? CardRarity.COMMON,
         designMetadata: card.designMetadata ?? {
           cardStyle: { template: 'default', effect: 'none', borderRadius: '12px', borderColor: '#000', shadowColor: '#000', frameWidth: 2, frameColor: '#000' },
           textStyle: { titleColor: '#000', titleAlignment: 'center', titleWeight: 'bold', descriptionColor: '#333' },
           cardMetadata: { category: 'custom', series: 'user', cardType: 'standard' },
           marketMetadata: { isPrintable: true, isForSale: false, includeInCatalog: true }
         },
-        isFavorite: false,
         viewCount: 0
       } as EnhancedCard;
       
@@ -149,13 +151,13 @@ export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
       
       // Update favorites if needed
-      if (updated.isFavorite) {
+      if ('isFavorite' in updates && updated.isFavorite) {
         setFavorites(prev => 
           prev.some(f => f.id === id) 
             ? prev.map(f => f.id === id ? updated : f)
             : [...prev, updated]
         );
-      } else {
+      } else if ('isFavorite' in updates) {
         setFavorites(prev => prev.filter(f => f.id !== id));
       }
       
@@ -186,6 +188,11 @@ export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     updateCard(id, { ...card, isFavorite });
   };
 
+  // Add refreshCards for compatibility
+  const refreshCards = async (): Promise<void> => {
+    await fetchCards();
+  };
+
   // Load cards on mount
   useEffect(() => {
     fetchCards();
@@ -197,6 +204,7 @@ export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         cards,
         favorites,
         loading,
+        isLoading: loading,
         error,
         fetchCards,
         addCard,
@@ -204,7 +212,9 @@ export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         deleteCard,
         toggleFavorite,
         getCardById,
-        createCollection
+        getCard: getCardById,
+        createCollection,
+        refreshCards
       }}
     >
       {children}
@@ -215,12 +225,5 @@ export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 // Export the Card type to fix the module export error
 export type { Card };
 // Export Collection type to fix the missing export error
-export interface Collection {
-  id: string;
-  name: string;
-  description?: string;
-  coverImageUrl?: string;
-  cards?: Card[];
-  createdAt: string;
-  updatedAt: string;
-}
+export type { Collection };
+

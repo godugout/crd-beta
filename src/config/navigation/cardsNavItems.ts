@@ -1,51 +1,44 @@
 
-import { Icon } from "lucide-react";
-import { Grid, Heart, BookOpen, Plus, Star } from "lucide-react";
+import { Grid, Pencil, Star, Cards } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 export interface NavItem {
   title: string;
   path: string;
-  icon: Icon;
+  icon: LucideIcon;
   description?: string;
   highlight?: boolean;
-  label?: string;  // Added this for compatibility
+  label?: string; // For backwards compatibility
 }
 
 export const cardsNavItems: NavItem[] = [
   {
     title: "All Cards",
+    label: "All Cards", // For backwards compatibility
     path: "/cards",
     icon: Grid,
-    description: "Browse all cards",
-    label: "All Cards"
-  },
-  {
-    title: "Favorites",
-    path: "/cards/favorites",
-    icon: Heart,
-    description: "View your favorite cards",
-    label: "Favorites"
-  },
-  {
-    title: "Collections",
-    path: "/collections",
-    icon: BookOpen,
-    description: "Explore card collections",
-    label: "Collections"
+    description: "Browse all cards"
   },
   {
     title: "Create Card",
+    label: "Create Card", // For backwards compatibility
     path: "/cards/create",
-    icon: Plus,
-    description: "Design a new card",
-    highlight: true,
-    label: "Create"
+    icon: Pencil,
+    description: "Create a new card",
+    highlight: true
   },
   {
-    title: "Featured",
-    path: "/cards/featured",
+    title: "Collections",
+    label: "Collections", // For backwards compatibility
+    path: "/collections",
+    icon: Cards,
+    description: "View card collections"
+  },
+  {
+    title: "Favorites",
+    label: "Favorites", // For backwards compatibility
+    path: "/cards/favorites",
     icon: Star,
-    description: "Highlighted special cards",
-    label: "Featured"
+    description: "Your favorite cards"
   }
 ];

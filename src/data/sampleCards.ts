@@ -1,5 +1,5 @@
 
-import { Card } from '@/lib/types';
+import { Card, CardRarity } from '@/lib/types';
 import { DEFAULT_DESIGN_METADATA } from '@/lib/utils/cardDefaults';
 
 const sampleCards: Card[] = [
@@ -15,7 +15,7 @@ const sampleCards: Card[] = [
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     effects: [],
-    rarity: 'common',
+    rarity: CardRarity.COMMON,
     designMetadata: DEFAULT_DESIGN_METADATA
   },
   {
@@ -30,7 +30,7 @@ const sampleCards: Card[] = [
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     effects: ['Holographic'],
-    rarity: 'rare',
+    rarity: CardRarity.RARE,
     designMetadata: DEFAULT_DESIGN_METADATA
   }
 ];

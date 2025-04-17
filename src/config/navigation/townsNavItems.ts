@@ -1,11 +1,11 @@
 
-import { Icon } from "lucide-react";
 import { Home, Map, Calendar, Building } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 export interface NavItem {
   title: string;
   path: string;
-  icon: Icon;
+  icon: LucideIcon;
   description?: string;
   highlight?: boolean;
 }

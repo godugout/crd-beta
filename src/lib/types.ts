@@ -1,3 +1,4 @@
+
 /**
  * Core Types for CRD (Collector's Republic Digital) App
  * Re-exports all types from the centralized type system
@@ -27,7 +28,8 @@ export {
   Reaction,
   Comment,
   HotspotData,
-  InstagramPost
+  InstagramPost,
+  DesignMetadata
 };
 
 // Explicitly export and rename to avoid conflicts

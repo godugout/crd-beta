@@ -58,6 +58,7 @@ export interface HotspotData {
   targetType?: string;
   description?: string;
   title?: string;    // Added missing property
+  content?: any;     // Added missing property
 }
 
 // Define DesignMetadata type
