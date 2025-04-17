@@ -1,5 +1,5 @@
 
-import { CardRarity } from '@/lib/types/enhancedCardTypes';
+import { CardRarity } from '@/lib/types/cardTypes';
 
 /**
  * Utility function to check if a card rarity matches a string value

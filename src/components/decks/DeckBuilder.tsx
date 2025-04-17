@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useEnhancedCards } from '@/context/CardEnhancedContext';
@@ -132,7 +133,7 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck }) => {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row gap-4">
         <div className="md:w-1/2 space-y-4">
-          <Card>
+          <UICard>
             <CardContent className="p-6 space-y-4">
               <h2 className="text-xl font-bold">Deck Details</h2>
               
@@ -166,9 +167,9 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck }) => {
                 <Label htmlFor="public-deck">Make deck public</Label>
               </div>
             </CardContent>
-          </Card>
+          </UICard>
           
-          <Card>
+          <UICard>
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-bold">Selected Cards ({selectedCards.length})</h2>
@@ -257,11 +258,11 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck }) => {
                 </Button>
               </div>
             </CardContent>
-          </Card>
+          </UICard>
         </div>
         
         <div className="md:w-1/2">
-          <Card>
+          <UICard>
             <CardContent className="p-6">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-bold">Available Cards</h2>
@@ -344,7 +345,7 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck }) => {
                 )}
               </div>
             </CardContent>
-          </Card>
+          </UICard>
         </div>
       </div>
     </div>

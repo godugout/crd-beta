@@ -1,2 +1,4 @@
 
-export { useCardContext } from './useCardContext';
+import { useCardContext } from './useCardContext';
+
+export { useCardContext };

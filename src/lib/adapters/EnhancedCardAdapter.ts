@@ -34,7 +34,8 @@ export const adaptToEnhancedCard = (data: Partial<Card | EnhancedCard>): Enhance
     // If data has edition as an object, convert to number
     edition: typeof data.edition === 'object' ? 
       data.edition?.number || 1 : 
-      (data as EnhancedCard).edition || 1
+      (data as EnhancedCard).edition || 1,
+    tags: data.tags || [] // Ensure tags are included
   };
 };
 
@@ -56,7 +57,7 @@ export const createBasicEnhancedCard = (id: string): EnhancedCard => {
     userId: 'anonymous',
     effects: [],
     isFavorite: false,
-    tags: [],
+    tags: [], // Added required tags property
     rarity: CardRarity.COMMON,
     views: 0,
     likes: 0,

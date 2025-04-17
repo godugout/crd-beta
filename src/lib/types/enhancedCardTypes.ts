@@ -3,6 +3,11 @@ import { CardRarity } from './cardTypes';
 import { Card as BaseCard } from './card';
 
 /**
+ * Export CardRarity to make it available to other modules
+ */
+export { CardRarity };
+
+/**
  * EnhancedCard with additional properties, maintaining compatibility
  * with the main Card type but allowing for specialized usage
  * 
@@ -28,6 +33,7 @@ export interface EnhancedCard extends Omit<BaseCard, 'edition'> {
   views: number;
   likes: number;
   shares: number;
+  tags: string[]; // Ensure tags is required to match BaseCard
 }
 
 /**

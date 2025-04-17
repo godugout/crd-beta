@@ -5,7 +5,7 @@
  */
 
 import { Card, CardRarity } from '@/lib/types';
-import { isCard, isCollection, isUser, isOaklandMemoryData } from './typeGuards';
+import { isCard } from './typeGuards';
 import { adaptToCard } from '@/lib/adapters/typeAdapters';
 
 /**
