@@ -15,8 +15,15 @@ export function useCards() {
     // Provide a fallback if context is not available
     console.warn('useCards: CardContext not found, using fallback data');
     
+    // Ensure sample cards have the required isFavorite property
+    const processedSampleCards = sampleCards.map(card => ({
+      ...card,
+      isFavorite: card.isFavorite ?? false,
+      description: card.description || ''
+    }));
+    
     return {
-      cards: sampleCards || [],
+      cards: processedSampleCards || [],
       favorites: [],
       loading: false,
       isLoading: false,
@@ -37,12 +44,13 @@ export function useCards() {
           updatedAt: new Date().toISOString(), 
           rarity: CardRarity.COMMON,
           effects: [],
-          designMetadata: {}
+          designMetadata: {},
+          isFavorite: false // Ensure isFavorite is included
         });
         return { ...card, ...data };
       },
       updateCard: async (id: string, data: Partial<Card>): Promise<Card> => {
-        const card = sampleCards.find(card => card.id === id) || adaptToCard({
+        const card = processedSampleCards.find(card => card.id === id) || adaptToCard({
           id,
           title: 'Fallback Card', 
           description: '', 
@@ -54,14 +62,15 @@ export function useCards() {
           updatedAt: new Date().toISOString(), 
           rarity: CardRarity.COMMON,
           effects: [],
-          designMetadata: {}
+          designMetadata: {},
+          isFavorite: false // Ensure isFavorite is included
         });
         return { ...card, ...data };
       },
       deleteCard: async () => true,
       toggleFavorite: () => {},
-      getCardById: (id: string) => sampleCards.find(card => card.id === id),
-      getCard: (id: string) => sampleCards.find(card => card.id === id),
+      getCardById: (id: string) => processedSampleCards.find(card => card.id === id),
+      getCard: (id: string) => processedSampleCards.find(card => card.id === id),
       addCollection: async () => ({}),
       updateCollection: async () => ({}),
       deleteCollection: async () => true,

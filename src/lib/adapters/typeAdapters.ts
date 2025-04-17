@@ -28,6 +28,8 @@ export function adaptToCard(obj: any): Card {
     team: obj.team || '',
     year: obj.year || '',
     name: obj.name || obj.title || '',
+    // Ensure isFavorite is always included with a default value
+    isFavorite: obj.isFavorite ?? false,
     // Include edition field in the correct format
     edition: obj.edition || { number: 1, total: 1 }
   };

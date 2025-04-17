@@ -2,7 +2,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Card, CardRarity, Collection } from '@/lib/types';
 import { sampleCards } from '@/lib/data/sampleCards';
-import { cardIdToCard } from '@/lib/adapters/EnhancedCardAdapter';
+import { cardIdToCard } from '@/lib/utils/cardHelpers';
 
 /**
  * Props interface for the Card Context
@@ -43,7 +43,14 @@ export const CardContext = createContext<CardContextProps | undefined>(undefined
  * Manages state and provides card-related functionality to child components
  */
 export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [cards, setCards] = useState<Card[]>(sampleCards || []);
+  // Use the adaptToCard function to ensure all cards have the isFavorite property
+  const processedSampleCards = sampleCards.map(card => ({
+    ...card,
+    isFavorite: card.isFavorite ?? false,
+    description: card.description || ''
+  }));
+  
+  const [cards, setCards] = useState<Card[]>(processedSampleCards || []);
   const [favorites, setFavorites] = useState<Card[]>([]);
   const [collections, setCollections] = useState<Collection[]>([]);
   const [loading, setLoading] = useState(false);
@@ -57,7 +64,8 @@ export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const fetchCards = async () => {
     setLoading(true);
     try {
-      setCards(sampleCards);
+      // Ensure cards have the isFavorite property
+      setCards(processedSampleCards);
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Failed to fetch cards'));
     } finally {
@@ -91,6 +99,7 @@ export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         updatedAt: new Date().toISOString(),
         rarity: CardRarity.COMMON,
         effects: [],
+        isFavorite: cardData.isFavorite ?? false, // Ensure isFavorite is set
         ...cardData
       };
       

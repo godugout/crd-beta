@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/card"
 import { Heart } from 'lucide-react';
 import { useCards } from '@/hooks/useCards';
+import { adaptToCard } from '@/lib/adapters/typeAdapters';
 
 // Fix the error where a string is used where Card is expected
 // Use cardIdToCard to convert the string to a Card object
@@ -28,7 +29,14 @@ const FanDashboard: React.FC = () => {
     if (user) {
       // Fetch or filter favorite cards based on user data
       // For now, let's just filter from available cards
-      const favorites = cards.filter(card => card.isFavorite === true);
+      // Ensure all cards have the isFavorite property before filtering
+      const processedCards = cards.map(card => ({
+        ...card,
+        isFavorite: card.isFavorite ?? false,
+        description: card.description || ''
+      }));
+      
+      const favorites = processedCards.filter(card => card.isFavorite === true);
       setFavoriteCards(favorites);
     }
   }, [user, cards]);
