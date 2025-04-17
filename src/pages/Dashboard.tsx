@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { User, UserRole } from '@/lib/types';
+import { User, UserRole, UserPermission } from '@/lib/types';
 import { CardEnhancedProvider } from '@/context/CardEnhancedContext';
 
 // Import dashboard components based on user role
