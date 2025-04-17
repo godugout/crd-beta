@@ -1,50 +1,39 @@
 
-import { 
-  Layers, 
-  PlusCircle,
-  Package,
-  Sparkles,
-  Instagram,
-  Globe
-} from 'lucide-react';
-import { NavigationItem } from './types';
+import { LibraryBig, FolderPlus, Star, Tag } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
-// Collections section navigation
-export const collectionsNavItems: NavigationItem[] = [
+export interface NavItem {
+  title: string;
+  path: string;
+  icon: LucideIcon;
+  description?: string;
+  highlight?: boolean;
+}
+
+export const collectionsNavItems: NavItem[] = [
   {
-    title: 'My Collections',
-    path: '/collections',
-    icon: Layers,
-    description: 'View your organized collections'
+    title: "All Collections",
+    path: "/collections",
+    icon: LibraryBig,
+    description: "Browse all collections"
   },
   {
-    title: 'Create Collection',
-    path: '/collections/create',
-    icon: PlusCircle,
-    description: 'Create a new collection'
+    title: "My Collections",
+    path: "/collections/my",
+    icon: Star,
+    description: "View your personal collections",
+    highlight: true
   },
   {
-    title: 'Commons Cards',
-    path: '/collections/commons',
-    icon: Globe,
-    description: 'Public domain card collection'
+    title: "Create Collection",
+    path: "/collections/create",
+    icon: FolderPlus,
+    description: "Create a new collection"
   },
   {
-    title: 'Instagram Collection',
-    path: '/collections/instagram',
-    icon: Instagram,
-    description: 'Create collection from Instagram posts'
-  },
-  {
-    title: 'Memory Packs',
-    path: '/packs',
-    icon: Package,
-    description: 'Themed collections of memories'
-  },
-  {
-    title: 'Featured Collections',
-    path: '/collections/featured',
-    icon: Sparkles,
-    description: 'Discover curated collections'
+    title: "Categories",
+    path: "/collections/categories",
+    icon: Tag,
+    description: "Browse by category"
   }
 ];

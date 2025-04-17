@@ -1,12 +1,12 @@
 
 import { useContext } from 'react';
-import { CardContext } from '@/context/CardContext';
+import { CardContext, EnhancedCardContextProps } from '@/context/CardContext';
 import sampleCards from '@/data/sampleCards';
 
 /**
  * Hook to access the card context for managing cards
  */
-export function useCards() {
+export function useCards(): EnhancedCardContextProps {
   const context = useContext(CardContext);
   
   if (!context) {
@@ -14,16 +14,34 @@ export function useCards() {
     console.warn('useCards: CardContext not found, using fallback data');
     
     return {
-      cards: sampleCards,
+      cards: sampleCards || [],
+      favorites: [],
       loading: false,
+      isLoading: false,
       error: null,
       fetchCards: async () => {},
-      addCard: async () => ({ id: '', title: '', description: '', createdAt: '', updatedAt: '', rarity: 'common', effects: [] }),
-      updateCard: async () => ({ id: '', title: '', description: '', createdAt: '', updatedAt: '', rarity: 'common', effects: [] }),
+      addCard: async () => ({ 
+        id: `fallback-${Date.now()}`, 
+        title: 'Fallback Card', 
+        createdAt: new Date().toISOString(), 
+        updatedAt: new Date().toISOString(), 
+        rarity: 'common' as any, 
+        effects: [] 
+      }),
+      updateCard: async () => ({ 
+        id: `fallback-${Date.now()}`, 
+        title: 'Fallback Card', 
+        createdAt: new Date().toISOString(), 
+        updatedAt: new Date().toISOString(), 
+        rarity: 'common' as any, 
+        effects: [] 
+      }),
       deleteCard: async () => true,
       toggleFavorite: () => {},
-      getCardById: () => undefined
-    };
+      getCardById: () => undefined,
+      getCard: () => undefined,
+      refreshCards: async () => {}
+    } as EnhancedCardContextProps;
   }
   
   return context;

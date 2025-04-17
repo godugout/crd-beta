@@ -1,43 +1,41 @@
 
-import { 
-  Home, 
-  Image, 
-  Layers, 
-  Users, 
-  MessageCircle 
-} from 'lucide-react';
-import { NavigationItem } from './types';
+import { Home, Layers, Bell, Settings } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
-// Main navigation items that appear in both desktop and mobile navigation
-export const mainNavItems: NavigationItem[] = [
-  { 
-    title: 'Home', 
-    path: '/',
+export interface NavItem {
+  title: string;
+  path: string;
+  icon: LucideIcon;
+  description?: string;
+  highlight?: boolean;
+  label?: string;
+}
+
+export const mainNavItems: NavItem[] = [
+  {
+    title: "Home",
+    path: "/",
     icon: Home,
-    description: 'Dashboard and overview'
+    description: "Dashboard and recent activity"
   },
-  { 
-    title: 'Cards', 
-    path: '/cards',
-    icon: Image,
-    description: 'Your digital card collection'
-  },
-  { 
-    title: 'Collections', 
-    path: '/collections',
+  {
+    title: "Explore",
+    path: "/explore",
     icon: Layers,
-    description: 'Organized card collections'
+    description: "Discover new content",
+    highlight: true,
+    label: "Explore"
   },
-  { 
-    title: 'Teams', 
-    path: '/teams',
-    icon: Users,
-    description: 'Team-based collections'
+  {
+    title: "Notifications",
+    path: "/notifications",
+    icon: Bell,
+    description: "Your notifications"
   },
-  { 
-    title: 'Community', 
-    path: '/community',
-    icon: MessageCircle,
-    description: 'Connect with other collectors'
+  {
+    title: "Settings",
+    path: "/settings",
+    icon: Settings,
+    description: "App settings"
   }
 ];

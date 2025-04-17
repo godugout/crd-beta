@@ -1,5 +1,5 @@
 
-import { Grid, Pencil, Star, Cards } from "lucide-react";
+import { Grid, LibraryBig, PlusCircle, Search } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 export interface NavItem {
@@ -8,37 +8,32 @@ export interface NavItem {
   icon: LucideIcon;
   description?: string;
   highlight?: boolean;
-  label?: string; // For backwards compatibility
 }
 
 export const cardsNavItems: NavItem[] = [
   {
     title: "All Cards",
-    label: "All Cards", // For backwards compatibility
     path: "/cards",
     icon: Grid,
     description: "Browse all cards"
   },
   {
-    title: "Create Card",
-    label: "Create Card", // For backwards compatibility
-    path: "/cards/create",
-    icon: Pencil,
-    description: "Create a new card",
+    title: "My Collection",
+    path: "/cards/collection",
+    icon: LibraryBig,
+    description: "View your personal collection",
     highlight: true
   },
   {
-    title: "Collections",
-    label: "Collections", // For backwards compatibility
-    path: "/collections",
-    icon: Cards,
-    description: "View card collections"
+    title: "Create Card",
+    path: "/cards/create",
+    icon: PlusCircle,
+    description: "Design a new card"
   },
   {
-    title: "Favorites",
-    label: "Favorites", // For backwards compatibility
-    path: "/cards/favorites",
-    icon: Star,
-    description: "Your favorite cards"
+    title: "Search",
+    path: "/cards/search",
+    icon: Search,
+    description: "Find specific cards"
   }
 ];

@@ -29,7 +29,7 @@ export interface EnhancedCardContextProps {
   refreshCards?: () => Promise<void>; // Added for compatibility
 }
 
-const CardContext = createContext<EnhancedCardContextProps | undefined>(undefined);
+export const CardContext = createContext<EnhancedCardContextProps | undefined>(undefined);
 
 export const useCards = (): EnhancedCardContextProps => {
   const context = useContext(CardContext);
@@ -42,13 +42,13 @@ export const useCards = (): EnhancedCardContextProps => {
 export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [cards, setCards] = useState<EnhancedCard[]>([]);
   const [favorites, setFavorites] = useState<EnhancedCard[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
 
   // Mock implementation - replace with actual API calls
   const fetchCards = async (): Promise<void> => {
     try {
-      setLoading(true);
+      setIsLoading(true);
       // Simulate API call
       const mockCards: EnhancedCard[] = [
         {
@@ -86,7 +86,7 @@ export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Failed to fetch cards'));
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -118,7 +118,7 @@ export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         isPublic: card.isPublic ?? false,
         tags: card.tags ?? [],
         effects: card.effects ?? [],
-        rarity: (card.rarity as CardRarity) ?? CardRarity.COMMON,
+        rarity: card.rarity ?? CardRarity.COMMON,
         designMetadata: card.designMetadata ?? {
           cardStyle: { template: 'default', effect: 'none', borderRadius: '12px', borderColor: '#000', shadowColor: '#000', frameWidth: 2, frameColor: '#000' },
           textStyle: { titleColor: '#000', titleAlignment: 'center', titleWeight: 'bold', descriptionColor: '#333' },
@@ -151,14 +151,16 @@ export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
       
       // Update favorites if needed
-      if ('isFavorite' in updates && updated.isFavorite) {
-        setFavorites(prev => 
-          prev.some(f => f.id === id) 
-            ? prev.map(f => f.id === id ? updated : f)
-            : [...prev, updated]
-        );
-      } else if ('isFavorite' in updates) {
-        setFavorites(prev => prev.filter(f => f.id !== id));
+      if ('isFavorite' in updates) {
+        if (updates.isFavorite) {
+          setFavorites(prev => 
+            prev.some(f => f.id === id) 
+              ? prev.map(f => f.id === id ? updated : f)
+              : [...prev, updated]
+          );
+        } else {
+          setFavorites(prev => prev.filter(f => f.id !== id));
+        }
       }
       
       return updated;
@@ -185,7 +187,12 @@ export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     if (!card) return;
     
     const isFavorite = !card.isFavorite;
-    updateCard(id, { ...card, isFavorite });
+    
+    // Use spread to create a new object
+    updateCard(id, { 
+      ...card,
+      isFavorite
+    });
   };
 
   // Add refreshCards for compatibility
@@ -226,4 +233,3 @@ export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 export type { Card };
 // Export Collection type to fix the missing export error
 export type { Collection };
-

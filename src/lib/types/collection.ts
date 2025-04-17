@@ -1,18 +1,17 @@
 
-import { Card } from './cardTypes';
-import { BaseEntity } from './index';
+import { Card, BaseEntity } from './index';
 
 export interface Collection extends BaseEntity {
   name: string;
-  title?: string;
-  description?: string;
-  coverImageUrl?: string;
+  description: string;
+  coverImageUrl: string;
+  userId: string;
   cards?: Card[];
-  cardIds?: string[];
-  userId?: string;
-  ownerId?: string;
-  visibility?: 'public' | 'private' | 'team';
-  allowComments?: boolean;
-  designMetadata?: Record<string, any>;
-  tags?: string[];
+  cardIds: string[];
+  visibility: 'public' | 'private' | 'team';
+  allowComments: boolean;
+  designMetadata?: any;
+  tags: string[];
+  isPublic?: boolean; // Add isPublic flag for compatibility
+  teamId?: string; // Add teamId for compatibility
 }
