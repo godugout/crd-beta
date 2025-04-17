@@ -15,7 +15,7 @@ export type JsonValue =
   | JsonValue[]
   | { [key: string]: JsonValue };
 
-// Export other common types that might be used across the application
+// Export all other common types
 export * from './cardTypes';
 export * from './user';
 export * from './instagram';
