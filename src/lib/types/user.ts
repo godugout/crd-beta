@@ -10,7 +10,10 @@ export enum UserPermission {
   DELETE_CARD = 'delete_card',
   VIEW_DASHBOARD = 'view_dashboard',
   MANAGE_USERS = 'manage_users',
-  ADMIN_ACCESS = 'admin_access'
+  ADMIN_ACCESS = 'admin_access',
+  // Add permissions referenced in other parts of the codebase
+  READ_ALL = 'read:all',
+  WRITE_ALL = 'write:all'
 }
 
 // User roles
@@ -31,7 +34,9 @@ export const ROLE_PERMISSIONS = {
     UserPermission.DELETE_CARD,
     UserPermission.VIEW_DASHBOARD,
     UserPermission.MANAGE_USERS,
-    UserPermission.ADMIN_ACCESS
+    UserPermission.ADMIN_ACCESS,
+    UserPermission.READ_ALL,
+    UserPermission.WRITE_ALL
   ],
   [UserRole.ARTIST]: [
     UserPermission.CREATE_CARD,

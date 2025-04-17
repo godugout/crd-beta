@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useEnhancedCards } from '@/context/CardEnhancedContext';
 import { UserProfile } from '@/lib/types/UserTypes';
@@ -9,6 +10,7 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { EnhancedCard } from '@/lib/types/enhancedCardTypes';
+import { ensureEnhancedCard } from '@/lib/utils/cardHelpers';
 
 interface FanDashboardProps {
   user: UserProfile;
@@ -98,7 +100,7 @@ const FanDashboard: React.FC<FanDashboardProps> = ({ user }) => {
               {collectedCards.map(card => (
                 <CardItemDisplay 
                   key={card.id} 
-                  card={card} 
+                  card={ensureEnhancedCard(card)}
                   isFavorite={favorites.includes(card.id)} 
                 />
               ))}
@@ -170,7 +172,7 @@ const FanDashboard: React.FC<FanDashboardProps> = ({ user }) => {
               {favoriteCards.map(card => (
                 <CardItemDisplay 
                   key={card.id} 
-                  card={card} 
+                  card={ensureEnhancedCard(card)}
                   isFavorite={true} 
                 />
               ))}

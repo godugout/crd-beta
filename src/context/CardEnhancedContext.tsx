@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useContext, ReactNode } from 'react';
 import { Card, Collection } from '@/lib/types';
 import { adaptToCard } from '@/lib/adapters/typeAdapters';
@@ -6,14 +5,14 @@ import { adaptToCard } from '@/lib/adapters/typeAdapters';
 interface Deck {
   id: string;
   name: string;
-  description?: string;
-  cards: Card[];         // Cards in the deck
+  description: string;
+  cards: Card[];
   createdAt: string;
   updatedAt: string;
   coverImageUrl?: string;
-  cardIds?: string[];    // Added for compatibility
-  isPublic?: boolean;    // Added for compatibility
-  ownerId: string;       // Required in EnhancedCardContext
+  cardIds?: string[];
+  isPublic?: boolean;
+  ownerId: string;
 }
 
 interface Series {
@@ -187,10 +186,10 @@ export const EnhancedCardProvider: React.FC<{ children: ReactNode }> = ({ childr
       cards: deckData.cards || [],
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      ownerId: deckData.ownerId || 'user-1', // Add required ownerId
+      ownerId: deckData.ownerId || 'user-1',
       coverImageUrl: deckData.coverImageUrl,
       cardIds: deckData.cardIds,
-      isPublic: deckData.isPublic
+      isPublic: deckData.isPublic || false
     };
     setDecks(prev => [...prev, newDeck]);
     return newDeck;
@@ -220,7 +219,7 @@ export const EnhancedCardProvider: React.FC<{ children: ReactNode }> = ({ childr
     if (!cardToAdd) return false;
     
     const deckCards = decks[deckIndex].cards;
-    if (deckCards.some(c => c.id === cardId)) return true; // Card already in deck
+    if (deckCards.some(c => c.id === cardId)) return true;
     
     const updatedDeck = {
       ...decks[deckIndex],

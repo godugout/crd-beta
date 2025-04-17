@@ -1,7 +1,10 @@
 
 /**
  * OaklandMemoryData interface for storing Oakland related memory data
+ * This definition is the canonical source for OaklandMemoryData type
  */
+
+// Define the interface properly without using index signatures that cause type errors
 export interface OaklandMemoryData {
   title: string;
   description: string;
@@ -16,6 +19,9 @@ export interface OaklandMemoryData {
   imageUrl?: string;
   historicalContext?: string;
   personalSignificance?: string;
-  // Allow additional properties
-  [key: string]: string | string[] | undefined;
+  // Additional properties can be added here with specific types
+  capturedBy?: string;
+  eventType?: string;
+  linkedMoments?: string[];
+  sentiment?: 'positive' | 'neutral' | 'negative';
 }

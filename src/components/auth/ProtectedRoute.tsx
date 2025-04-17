@@ -47,8 +47,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     }
   }
   
-  // Fixed the Boolean issue by using a boolean primitive
-  if (Boolean(process.env.MAINTENANCE_MODE) === true) {
+  // Fixed the Boolean issue by using a proper JavaScript boolean comparison
+  if (process.env.MAINTENANCE_MODE === 'true') {
     return <Navigate to="/maintenance" replace />;
   }
   

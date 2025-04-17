@@ -14,6 +14,10 @@ interface ReactionButtonsProps {
   onReactionChange?: (reactions: Reaction[]) => void;
   size?: 'sm' | 'md' | 'lg';
   variant?: 'default' | 'minimal' | 'expanded';
+  // Legacy support for older components
+  cardId?: string;
+  showComments?: boolean;
+  onShowComments?: () => void;
 }
 
 const ReactionButtons: React.FC<ReactionButtonsProps> = ({
@@ -22,8 +26,15 @@ const ReactionButtons: React.FC<ReactionButtonsProps> = ({
   initialReactions = [],
   onReactionChange,
   size = 'md',
-  variant = 'default'
+  variant = 'default',
+  cardId, // For backward compatibility
+  showComments,
+  onShowComments
 }) => {
+  // Ensure we have a valid targetId (use cardId for backward compatibility)
+  const effectiveTargetId = targetId || cardId || '';
+  const effectiveTargetType = targetType || 'card';
+
   const { user, isAuthenticated } = useAuth();
   const [reactions, setReactions] = useState<Reaction[]>(initialReactions);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -89,8 +100,8 @@ const ReactionButtons: React.FC<ReactionButtonsProps> = ({
           id: `reaction-${Date.now()}`,
           userId,
           type,
-          targetType,
-          targetId,
+          targetType: effectiveTargetType,
+          targetId: effectiveTargetId,
           createdAt: new Date().toISOString()
         };
         
@@ -117,6 +128,23 @@ const ReactionButtons: React.FC<ReactionButtonsProps> = ({
                     'h-10 px-3 text-sm';
   
   const iconSize = size === 'sm' ? 14 : size === 'lg' ? 20 : 16;
+
+  // For backward compatibility with components that use showComments
+  const renderCommentsButton = () => {
+    if (showComments !== undefined && onShowComments) {
+      return (
+        <Button
+          variant="ghost"
+          className={buttonSize}
+          onClick={onShowComments}
+        >
+          <MessageCircle size={iconSize} className="mr-1" />
+          <span>Comments</span>
+        </Button>
+      );
+    }
+    return null;
+  };
   
   if (variant === 'minimal') {
     return (
@@ -134,6 +162,7 @@ const ReactionButtons: React.FC<ReactionButtonsProps> = ({
           />
         </Button>
         <span className="text-sm text-gray-500">{getLikeCount()}</span>
+        {renderCommentsButton()}
       </div>
     );
   }
@@ -198,6 +227,8 @@ const ReactionButtons: React.FC<ReactionButtonsProps> = ({
           </Tooltip>
         </TooltipProvider>
       )}
+      
+      {renderCommentsButton()}
     </div>
   );
 };

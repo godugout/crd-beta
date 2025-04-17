@@ -21,9 +21,16 @@ export function cardToEnhancedCard(card: Card): EnhancedCard {
   return {
     ...validCard,
     edition,
-    views: 0,
+    // Add any additional required EnhancedCard properties here
     likes: 0,
-    shares: 0
+    shares: 0,
+    views: 0,
+    cardNumber: validCard.cardNumber || `#${validCard.id.slice(-4)}`,
+    seriesId: validCard.collectionId || undefined,
+    // Make sure all required EnhancedCard fields are included
+    artistId: validCard.artistId || '',
+    artistName: validCard.creatorName || '',
+    editionSize: validCard.editionSize || 1
   };
 }
 

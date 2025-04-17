@@ -92,7 +92,8 @@ const CardItem: React.FC<CardItemProps> = ({
       {showReactions && (
         <div className="px-2">
           <ReactionButtons 
-            cardId={card.id} 
+            targetId={card.id}
+            targetType="card"
             initialReactions={cardReactions}
             showComments={displayComments}
             onShowComments={() => setDisplayComments(!displayComments)}

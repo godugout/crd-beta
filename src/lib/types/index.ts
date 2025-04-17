@@ -10,6 +10,7 @@ import { User, UserRole, UserPermission } from './user';
 import { ROLE_PERMISSIONS } from './user';
 import { CardRarity, DesignMetadata } from './cardTypes';
 import { Collection } from './collection';
+import { OaklandMemoryData as IndexOaklandMemoryData } from './oaklandMemory';
 
 export interface BaseEntity {
   id: string;
@@ -27,21 +28,6 @@ export { ROLE_PERMISSIONS, UserRole, CardRarity };
 // Re-export types with explicit type keyword for TypeScript modules
 export type { Card, Comment, Reaction, User, UserPermission, DesignMetadata, Collection };
 
-// Define OaklandMemoryData without conflicting with JsonValue
-export interface OaklandMemoryData {
-  title: string;
-  description: string;
-  date?: string;
-  location?: string;
-  tags?: string[];
-  opponent?: string;
-  score?: string;
-  section?: string;
-  memoryType?: string;
-  attendees?: string[];
-  imageUrl?: string;
-  historicalContext?: string;
-  personalSignificance?: string;
-  // Allow additional properties of string type
-  [key: string]: string | string[] | undefined;
-}
+// Re-export the OaklandMemoryData type from oaklandMemory.ts
+export type { OaklandMemoryData } from './oaklandMemory';
+

@@ -12,6 +12,7 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { Plus, X, Save, ChevronLeft, ChevronRight, Heart } from 'lucide-react';
+import { ensureEnhancedCard } from '@/lib/utils/cardHelpers';
 
 interface DeckBuilderProps {
   initialDeck?: Deck;
@@ -35,7 +36,7 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck }) => {
   useEffect(() => {
     if (initialDeck?.cardIds && initialDeck.cardIds.length > 0) {
       const deckCards = cards.filter(card => initialDeck.cardIds.includes(card.id));
-      setSelectedCards(deckCards);
+      setSelectedCards(deckCards.map(card => ensureEnhancedCard(card)));
     }
   }, [initialDeck, cards]);
   
@@ -282,7 +283,7 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck }) => {
                     <div
                       key={card.id}
                       className="border rounded-md overflow-hidden flex flex-col hover:border-primary cursor-pointer transition-colors"
-                      onClick={() => handleAddCard(card)}
+                      onClick={() => handleAddCard(ensureEnhancedCard(card))}
                     >
                       <div className="aspect-[2/3] relative">
                         <img 
@@ -296,7 +297,7 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck }) => {
                           className="absolute bottom-2 right-2 rounded-full h-7 w-7"
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleAddCard(card);
+                            handleAddCard(ensureEnhancedCard(card));
                           }}
                         >
                           <Plus className="h-4 w-4" />

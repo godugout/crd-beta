@@ -1,4 +1,4 @@
-import { Team, TeamMember, User } from '@/lib/types';
+import { Team, TeamMember, User, UserRole } from '@/lib/types/user';
 
 export interface DbTeam {
   id: string;
@@ -116,3 +116,20 @@ export const mapToTeamMember = (data: any, user: any = null) => {
     user: user
   };
 };
+
+export function mapApiUserToUser(apiUser: any): User {
+  return {
+    id: apiUser.id,
+    email: apiUser.email,
+    name: apiUser.name || apiUser.displayName || '',
+    avatarUrl: apiUser.avatarUrl || apiUser.avatar || '',
+    username: apiUser.username || '',
+    isVerified: apiUser.isVerified || false,
+    isActive: apiUser.isActive || true,
+    permissions: apiUser.permissions || [],
+    createdAt: apiUser.createdAt || new Date().toISOString(),
+    updatedAt: apiUser.updatedAt || new Date().toISOString(),
+    // Add required role property
+    role: apiUser.role || UserRole.USER
+  };
+}

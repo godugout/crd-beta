@@ -1,6 +1,8 @@
 
 import { Card } from '@/lib/types';
 import { adaptToCard } from '@/lib/adapters/typeAdapters';
+import { EnhancedCard } from '@/lib/types/enhancedCardTypes';
+import { cardToEnhancedCard } from '@/lib/adapters/EnhancedCardAdapter';
 
 /**
  * Convert a string card id to a minimal Card object
@@ -16,6 +18,15 @@ export function cardIdToCard(cardId: string): Card {
 }
 
 /**
+ * Convert a string card id to a minimal EnhancedCard object
+ * Useful for cases where a function expects an EnhancedCard but only an ID is available
+ */
+export function cardIdToEnhancedCard(cardId: string): EnhancedCard {
+  const baseCard = cardIdToCard(cardId);
+  return cardToEnhancedCard(baseCard);
+}
+
+/**
  * Ensures that a value is a Card object
  * If it's a string (card ID), converts it to a minimal Card object
  */
@@ -24,6 +35,22 @@ export function ensureCard(cardOrId: Card | string): Card {
     return cardIdToCard(cardOrId);
   }
   return cardOrId;
+}
+
+/**
+ * Ensures that a value is an EnhancedCard object
+ * If it's a string (card ID), converts it to a minimal EnhancedCard object
+ */
+export function ensureEnhancedCard(cardOrIdOrEnhanced: EnhancedCard | Card | string): EnhancedCard {
+  if (typeof cardOrIdOrEnhanced === 'string') {
+    return cardIdToEnhancedCard(cardOrIdOrEnhanced);
+  }
+  
+  if ('views' in cardOrIdOrEnhanced && 'likes' in cardOrIdOrEnhanced) {
+    return cardOrIdOrEnhanced as EnhancedCard;
+  }
+  
+  return cardToEnhancedCard(cardOrIdOrEnhanced);
 }
 
 /**
