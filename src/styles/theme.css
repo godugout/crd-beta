@@ -22,7 +22,17 @@
     --brand-verified: #F59E0B;
     --brand-notification: #EC4899;
 
-    /* Design tokens */
+    /* Gradients */
+    --gradient-card: linear-gradient(180deg, rgba(0, 0, 0, 0) 45.97%, rgba(0, 0, 0, 0.74) 100%);
+    --gradient-share-card: linear-gradient(180deg, #0F2548 0%, #E86F8B 100%);
+    --gradient-header: linear-gradient(180deg, rgba(0, 0, 0, 0.67) 0%, rgba(0, 0, 0, 0.52) 100%);
+
+    /* Overlays */
+    --overlay-primary: rgba(0, 0, 0, 0.6);
+    --overlay-secondary: rgba(0, 0, 0, 0.24);
+    --overlay-tertiary: rgba(255, 255, 255, 0.08);
+
+    /* Spacing */
     --space-xs: 4px;
     --space-sm: 8px;
     --space-md: 16px;
@@ -48,66 +58,5 @@
   body {
     @apply bg-[var(--bg-primary)] text-[var(--text-primary)];
     font-family: 'Inter', sans-serif;
-  }
-}
-
-/* Component styles */
-@layer components {
-  /* Navigation */
-  .crd-navigation {
-    @apply bg-[var(--bg-primary)] border-b border-[var(--border-highlight)] backdrop-blur-xl h-[72px];
-  }
-
-  .crd-nav-link {
-    @apply font-bold text-[var(--text-tertiary)] hover:text-[var(--text-primary)] relative;
-  }
-
-  .crd-nav-link.active {
-    @apply text-[var(--text-primary)] after:content-[''] after:absolute after:h-[2px] after:left-0 after:right-0 after:bottom-[-12px] after:bg-[var(--text-primary)] after:rounded;
-  }
-
-  /* Button variants */
-  .crd-btn-primary {
-    @apply bg-[var(--brand-primary)] rounded-2xl px-4 py-2.5 font-medium text-sm text-[var(--text-primary)] 
-    flex items-center justify-center gap-1.5 hover:opacity-90 transition-opacity;
-  }
-
-  .crd-btn-secondary {
-    @apply bg-opacity-40 bg-gray-700 rounded-xl px-3 py-1.5 font-medium text-sm text-[var(--text-primary)] 
-    flex items-center justify-center gap-1 hover:bg-opacity-50 transition-colors;
-  }
-
-  .crd-btn-tertiary {
-    @apply bg-white bg-opacity-5 rounded-2xl px-3 py-2.5 font-medium text-sm text-[var(--text-primary)] 
-    flex items-center justify-center gap-1.5 hover:bg-opacity-10 transition-colors;
-  }
-
-  /* Cards */
-  .crd-card {
-    @apply bg-[var(--bg-secondary)] border border-[var(--border-primary)] rounded-xl p-4;
-  }
-
-  .crd-profile-card {
-    @apply bg-[var(--bg-secondary)] border border-[var(--border-primary)] rounded-xl overflow-hidden;
-  }
-
-  /* Modal styling */
-  .crd-modal-backdrop {
-    @apply fixed inset-0 bg-[var(--overlay-primary)] backdrop-blur-sm;
-  }
-
-  .crd-modal {
-    @apply bg-[var(--bg-primary)] border border-[var(--border-primary)] rounded-2xl max-w-[476px] mx-auto;
-  }
-}
-
-/* Utility classes */
-@layer utilities {
-  .text-gradient {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-[var(--brand-primary)] to-[var(--brand-secondary)];
-  }
-  
-  .bg-glass {
-    @apply backdrop-blur-xl bg-black/40 border border-white/10;
   }
 }
