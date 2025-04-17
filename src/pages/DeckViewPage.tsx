@@ -1,23 +1,37 @@
-
-import React from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useEnhancedCards } from '@/context/CardEnhancedContext';
-import PageLayout from '@/components/navigation/PageLayout';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card } from '@/lib/types';
+import { Deck } from '@/lib/types/enhancedCardTypes';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Edit, Grid, Plus, Share2 } from 'lucide-react';
+import { Card as UICard } from '@/components/ui/card';
+import { useToast } from '@/hooks/use-toast';
+import { Edit, Share, Trash, Plus, ArrowLeft } from 'lucide-react';
+import PageLayout from '@/components/navigation/PageLayout';
 
-const DeckViewPage: React.FC = () => {
+const DeckViewPage = () => {
   const { deckId } = useParams();
   const navigate = useNavigate();
-  const { decks, cards, isLoading } = useEnhancedCards();
+  const { decks, cards, loading, deleteDeck } = useEnhancedCards();
+  const { toast } = useToast();
+  const [deck, setDeck] = useState<Deck | undefined>();
+  const [deckCards, setDeckCards] = useState<Card[]>([]);
   
-  const deck = deckId ? decks.find(d => d.id === deckId) : undefined;
-  
-  // Get deck cards
-  const deckCards = deck 
-    ? cards.filter(card => deck.cardIds.includes(card.id))
-    : [];
+  const isLoading = loading;
+
+  useEffect(() => {
+    if (decks.length > 0 && deckId) {
+      const foundDeck = decks.find(d => d.id === deckId);
+      if (foundDeck) {
+        setDeck(foundDeck);
+        const cardsInDeck = foundDeck.cardIds.map(cardId => {
+          return cards.find(card => card.id === cardId);
+        }).filter(Boolean) as Card[];
+        
+        setDeckCards(cardsInDeck);
+      }
+    }
+  }, [deckId, decks, cards]);
   
   if (isLoading) {
     return (
@@ -58,7 +72,6 @@ const DeckViewPage: React.FC = () => {
   }
   
   if (deck) {
-    // Single deck view
     return (
       <PageLayout title={deck.name} description={deck.description || 'Custom deck of cards'}>
         <div className="container mx-auto px-4 py-8">
@@ -112,7 +125,7 @@ const DeckViewPage: React.FC = () => {
                     Edit Deck
                   </Button>
                   <Button variant="outline">
-                    <Share2 className="mr-2 h-4 w-4" />
+                    <Share className="mr-2 h-4 w-4" />
                     Share
                   </Button>
                 </div>
@@ -163,7 +176,6 @@ const DeckViewPage: React.FC = () => {
     );
   }
   
-  // Decks overview
   return (
     <PageLayout title="My Decks" description="Browse and manage your card decks">
       <div className="container mx-auto px-4 py-8">

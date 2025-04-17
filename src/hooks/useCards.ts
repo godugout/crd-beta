@@ -15,7 +15,7 @@ export function useCards() {
     // Provide a fallback if context is not available
     console.warn('useCards: CardContext not found, using fallback data');
     
-    // Ensure sample cards have the required isFavorite property
+    // Ensure sample cards have the required properties
     // and the correct CardRarity type
     const processedSampleCards = sampleCards.map(card => adaptToCard({
       ...card,

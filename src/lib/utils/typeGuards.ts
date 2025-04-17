@@ -1,3 +1,12 @@
-// Remove or comment out the line trying to import adaptToOaklandMemory
-// import { adaptToCard, adaptToOaklandMemory } from '@/lib/adapters/typeAdapters';
-import { adaptToCard } from '@/lib/adapters/typeAdapters';
+
+// Import adaptToCard from typeAdapters
+import { adaptToCard, isCard, isCollection, isUser, isOaklandMemoryData } from '@/lib/adapters/typeAdapters';
+
+// Re-export type guards for use throughout the app
+export { 
+  isCard, 
+  isCollection, 
+  isUser, 
+  isOaklandMemoryData,
+  adaptToCard 
+};

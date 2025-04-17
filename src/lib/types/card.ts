@@ -7,13 +7,13 @@ import { Reaction } from './interaction';
  * Card statistics including rarity, views, likes, and other metrics
  */
 export interface CardStats {
-  rarity: string;
+  rarity: CardRarity;
   totalViews: number;
   totalLikes: number;
   totalShares: number;
   averageRating: number;
   totalRatings: number;
-  [key: string]: number | string;
+  [key: string]: number | string | CardRarity;
 }
 
 /**
@@ -41,18 +41,18 @@ export interface FabricSwatch {
  */
 export interface Card extends BaseEntity {
   title: string;
-  description: string; // Changed from optional to required
+  description: string; // Required field
   imageUrl: string;
-  thumbnailUrl?: string;
+  thumbnailUrl: string; // Made required to match most usage
   collectionId?: string;
-  userId?: string;
+  userId: string; // Made required to match most usage
   teamId?: string;
   isPublic?: boolean;
-  tags?: string[];
+  tags: string[]; // Made required with empty array default
   designMetadata?: DesignMetadata;
   reactions?: Reaction[];
-  effects: string[];
-  rarity?: CardRarity;
+  effects: string[]; // Required field
+  rarity: CardRarity; // Using enum type
   
   // Player info commonly used throughout the app
   player?: string;
@@ -61,7 +61,7 @@ export interface Card extends BaseEntity {
   name?: string;
   
   // Collection and favorites - now ensuring isFavorite is included
-  isFavorite: boolean; // Changed from optional to required
+  isFavorite: boolean; // Required field
   stats?: CardStats;
   
   // Artist and market data
@@ -93,9 +93,11 @@ export interface Card extends BaseEntity {
 /**
  * EnhancedCard includes additional fields for the application
  * Retained for backward compatibility
+ * NOTE: EnhancedCard uses a different edition type than Card
  */
-export interface EnhancedCard extends Card {
-  views?: number;
-  likes?: number;
-  shares?: number;
+export interface EnhancedCard extends Omit<Card, 'edition'> {
+  views: number;
+  likes: number;
+  shares: number;
+  edition?: number; // Different from Card's edition format
 }

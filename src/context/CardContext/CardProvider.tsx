@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, ReactNode } from 'react';
 import { Card, CardRarity, Collection } from '@/lib/types';
 import { sampleCards } from '@/lib/data/sampleCards';
@@ -10,7 +11,7 @@ import { adaptToCard } from '@/lib/adapters/typeAdapters';
  * Manages state and provides card-related functionality to child components
  */
 export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  // Process sample cards to ensure they all have the required isFavorite property
+  // Process sample cards to ensure they all have the required properties
   // and use the correct CardRarity enum
   const processedSampleCards = sampleCards.map(card => adaptToCard({
     ...card,
@@ -19,7 +20,7 @@ export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     rarity: card.rarity || CardRarity.COMMON
   }));
   
-  const [cards, setCards] = useState<Card[]>(processedSampleCards || []);
+  const [cards, setCards] = useState<Card[]>(processedSampleCards);
   const [favorites, setFavorites] = useState<Card[]>([]);
   const [collections, setCollections] = useState<Collection[]>([]);
   const [loading, setLoading] = useState(false);

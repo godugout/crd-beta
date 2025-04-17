@@ -58,7 +58,10 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
     setIsLoading(true);
     
     try {
-      const cardWithDefaults = adaptToCard(card);
+      const cardWithDefaults = adaptToCard({
+        ...card,
+        rarity: card.rarity || CardRarity.COMMON  // Use the CardRarity enum
+      });
 
       if (!cardWithDefaults.imageUrl || cardWithDefaults.imageUrl === 'undefined') {
         console.warn(`Card ${cardWithDefaults.id} is missing an image URL, using fallback`);

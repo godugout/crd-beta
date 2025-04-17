@@ -7,7 +7,10 @@ import DeckBuilder from '@/components/decks/DeckBuilder';
 
 const DeckBuilderPage: React.FC = () => {
   const { deckId } = useParams();
-  const { decks, isLoading } = useEnhancedCards();
+  const { decks, loading } = useEnhancedCards();
+  
+  // Add isLoading property if it doesn't exist in EnhancedCardContextProps
+  const isLoading = loading;
   
   const deck = deckId ? decks.find(d => d.id === deckId) : undefined;
   

@@ -1,32 +1,21 @@
 
-import { Card } from './card';
-
-/**
- * CardRarity enumeration defines possible rarity levels for cards
- * Used for display and filtering purposes
- */
-export enum CardRarity {
-  COMMON = 'common',
-  UNCOMMON = 'uncommon',
-  RARE = 'rare',
-  ULTRA_RARE = 'ultra-rare',
-  LEGENDARY = 'legendary',
-  MYTHIC = 'mythic',
-  ONE_OF_ONE = 'one-of-one'
-}
+import { CardRarity } from './cardTypes';
+import { Card as BaseCard } from './card';
 
 /**
  * EnhancedCard with additional properties, maintaining compatibility
  * with the main Card type but allowing for specialized usage
+ * 
+ * NOTE: This extends the main Card type but overrides 'edition'
+ * to use a different format (number instead of object)
  */
-export interface EnhancedCard extends Omit<Card, 'edition'> {
+export interface EnhancedCard extends Omit<BaseCard, 'edition'> {
   cardNumber?: string;
   seriesId?: string;
   artistId?: string;
   artistName?: string;
   editionSize?: number;
-  edition?: number;
-  // Overriding edition from Card to be numeric for EnhancedCard
+  edition?: number; // Numeric edition format differs from Card's object format
   releaseDate?: string;
   qrCodeData?: string;
   marketData?: {
@@ -47,14 +36,14 @@ export interface EnhancedCard extends Omit<Card, 'edition'> {
 export interface Deck {
   id: string;
   name: string;
-  description?: string; // Made optional to match context implementation
+  description?: string;
   coverImageUrl?: string;
   ownerId: string;
   createdAt: string;
   updatedAt: string;
   cardIds: string[];
   isPublic: boolean;
-  cards?: Card[];
+  cards?: BaseCard[];
 }
 
 /**
@@ -68,7 +57,7 @@ export type ReleaseType = 'standard' | 'limited' | 'promotional' | 'exclusive';
 export interface Series {
   id: string;
   name: string;
-  title?: string; // Made optional to match context implementation
+  title?: string;
   description: string;
   coverImageUrl: string;
   artistId: string;
@@ -79,5 +68,5 @@ export interface Series {
   isPublished: boolean;
   cardIds: string[];
   releaseType: ReleaseType;
-  cards?: Card[];
+  cards?: BaseCard[];
 }
