@@ -62,7 +62,11 @@ export function useCardDetail(cardId: string) {
               },
             },
             createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
+            updatedAt: new Date().toISOString(),
+            // Optional baseball card properties
+            player: "Sample Player",
+            team: "Sample Team",
+            year: "2025"
             // Other properties would come from API
           };
           

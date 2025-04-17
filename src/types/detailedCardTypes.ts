@@ -20,6 +20,11 @@ export interface DetailedViewCard {
   isFavorite: boolean;
   rarity: CardRarity; // Use CardRarity type instead of string
   designMetadata: DesignMetadata;
+  
+  // Add these baseball card properties
+  player?: string;
+  team?: string;
+  year?: string;
 }
 
 /**
@@ -38,7 +43,7 @@ export function ensureDetailedViewCard(card: Card): DetailedViewCard {
     updatedAt: card.updatedAt || new Date().toISOString(),
     userId: card.userId || 'unknown-user',
     effects: card.effects || [],
-    isFavorite: Boolean(card.isFavorite),
+    isFavorite: card.isFavorite || false, // Use logical OR to handle undefined
     rarity: card.rarity || 'common', // This will be compatible with CardRarity
     designMetadata: card.designMetadata || {
       cardStyle: {
@@ -67,5 +72,9 @@ export function ensureDetailedViewCard(card: Card): DetailedViewCard {
         series: 'base',
       },
     },
+    // Add optional baseball card properties
+    player: card.player,
+    team: card.team,
+    year: card.year,
   };
 }

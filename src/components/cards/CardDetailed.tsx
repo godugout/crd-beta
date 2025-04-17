@@ -168,21 +168,21 @@ export const CardDetailed: React.FC<CardDetailedProps> = ({
             </div>
           )}
           
-          {card.player && (
+          {'player' in card && card.player && (
             <div>
               <h3 className="text-sm font-medium text-gray-500">Player</h3>
               <p>{card.player}</p>
             </div>
           )}
           
-          {card.team && (
+          {'team' in card && card.team && (
             <div>
               <h3 className="text-sm font-medium text-gray-500">Team</h3>
               <p>{card.team}</p>
             </div>
           )}
           
-          {card.year && (
+          {'year' in card && card.year && (
             <div>
               <h3 className="text-sm font-medium text-gray-500">Year</h3>
               <p>{card.year}</p>
