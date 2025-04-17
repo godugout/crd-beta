@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PageLayout from '@/components/navigation/PageLayout';
@@ -9,6 +8,7 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import { checkCollectionExists } from '@/lib/supabase/collections';
 
 const CommonsCardsPage = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -20,10 +20,18 @@ const CommonsCardsPage = () => {
   } | null>(null);
   const navigate = useNavigate();
 
-  // Check if the collection exists when component mounts or when result changes
+  useEffect(() => {
+    const checkCollection = async () => {
+      const collectionId = '5d034aa4-86e0-4ca7-92c5-1fbd8e71943c';
+      const exists = await checkCollectionExists(collectionId);
+      console.log(`Collection ${collectionId} exists:`, exists);
+    };
+
+    checkCollection();
+  }, []);
+
   useEffect(() => {
     if (result?.collectionId) {
-      // Verify the collection exists in the database
       const checkCollection = async () => {
         try {
           const { data, error } = await supabase
@@ -54,7 +62,6 @@ const CommonsCardsPage = () => {
     try {
       console.log("Starting Commons Cards generation request...");
       
-      // Call the edge function with proper error handling
       const { data, error } = await supabase.functions.invoke('populate-cards', {
         body: { timestamp: new Date().toISOString() }
       });
@@ -95,7 +102,6 @@ const CommonsCardsPage = () => {
 
   const handleViewCollection = () => {
     if (result?.collectionId) {
-      // Force a refresh of the collections data in the destination page
       navigate(`/collections/${result.collectionId}?refresh=true`);
     }
   };
