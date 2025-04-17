@@ -1,9 +1,8 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Search } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import ThemeSwitcher from './ThemeSwitcher';
 import UserDropdownMenu from './UserDropdownMenu';
 import { UserInfo } from '../GlobalNavbar';
 
@@ -15,15 +14,20 @@ interface NavActionsProps {
 const NavActions: React.FC<NavActionsProps> = ({ user, onSignOut }) => {
   return (
     <div className="hidden md:flex items-center ml-auto space-x-3">
-      <Button variant="ghost" size="icon" asChild>
-        <Link to="/search">
-          <Search className="h-5 w-5" />
-          <span className="sr-only">Search</span>
+      {/* Labs/Features Button */}
+      <Button 
+        variant="ghost" 
+        size="sm"
+        asChild
+        className="text-muted-foreground hover:text-primary"
+      >
+        <Link to="/labs">
+          <Sparkles className="h-4 w-4 mr-1" />
+          <span className="text-sm">Labs</span>
         </Link>
       </Button>
 
-      <ThemeSwitcher />
-
+      {/* User Profile Menu */}
       {user ? (
         <UserDropdownMenu user={user} onSignOut={onSignOut} />
       ) : (
@@ -31,6 +35,14 @@ const NavActions: React.FC<NavActionsProps> = ({ user, onSignOut }) => {
           <Link to="/login">Sign In</Link>
         </Button>
       )}
+
+      {/* Create Card Button */}
+      <Button variant="gradient" asChild>
+        <Link to="/cards/create" className="flex items-center">
+          <span className="mr-1">+</span>
+          Card
+        </Link>
+      </Button>
     </div>
   );
 };
