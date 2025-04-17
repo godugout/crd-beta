@@ -60,7 +60,7 @@ export function useCardDetail(cardId: string | undefined) {
         effects: foundCard.effects || []
       };
       
-      // Now convert to standard card and cast to CardDetailedViewCard
+      // Now convert to standard card and explicitly cast to CardDetailedViewCard
       const standardCard = toStandardCard(completeCard) as CardDetailedViewCard;
       
       setResolvedCard(standardCard);
