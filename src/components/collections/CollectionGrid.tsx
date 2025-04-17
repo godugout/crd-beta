@@ -1,95 +1,84 @@
 
 import React from 'react';
-import { Collection } from '@/lib/types';
-import { Card, CardContent } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
-import { Badge } from '@/components/ui/badge';
-import { GalleryHorizontal, Lock, Globe, Tag } from 'lucide-react';
-import { LoadingState } from '@/components/ui/loading-state';
+import { Collection } from '@/lib/types';
+import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Lock, Globe, Users, Image } from 'lucide-react';
 
 interface CollectionGridProps {
   collections: Collection[];
-  isLoading?: boolean;
+  isLoading: boolean;
+  className?: string;
 }
 
-const CollectionGrid: React.FC<CollectionGridProps> = ({ 
-  collections,
-  isLoading = false
-}) => {
+const CollectionGrid: React.FC<CollectionGridProps> = ({ collections, isLoading, className = '' }) => {
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center py-12">
-        <LoadingState text="Loading collections..." />
+      <div className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 ${className}`}>
+        {Array(6).fill(0).map((_, index) => (
+          <Card key={index} className="overflow-hidden">
+            <Skeleton className="h-40 w-full" />
+            <CardContent className="p-4">
+              <Skeleton className="h-6 w-3/4 mb-2" />
+              <Skeleton className="h-4 w-full" />
+            </CardContent>
+          </Card>
+        ))}
       </div>
     );
   }
-  
+
   if (collections.length === 0) {
-    return null;
+    return (
+      <div className={`text-center py-12 ${className}`}>
+        <p className="text-muted-foreground">No collections found.</p>
+      </div>
+    );
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 ${className}`}>
       {collections.map((collection) => (
-        <Link 
-          to={`/collections/${collection.id}`} 
-          key={collection.id}
-          className="transition-transform hover:scale-[1.02]"
-        >
-          <Card className="h-full overflow-hidden">
-            <div className="aspect-[16/9] overflow-hidden bg-muted">
+        <Link key={collection.id} to={`/collections/${collection.id}`}>
+          <Card className="overflow-hidden hover:shadow-md transition-shadow h-full">
+            <div className="h-40 bg-gray-100 relative">
               {collection.coverImageUrl ? (
-                <img 
-                  src={collection.coverImageUrl} 
-                  alt={collection.name || 'Collection'} 
+                <img
+                  src={collection.coverImageUrl}
+                  alt={collection.name || 'Collection'}
                   className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                    e.currentTarget.parentElement?.classList.add('fallback-active');
+                  }}
                 />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-muted to-muted/50">
-                  <GalleryHorizontal className="h-12 w-12 text-muted-foreground opacity-40" />
-                </div>
-              )}
+              ) : null}
+              <div className={`w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-200 to-gray-100 ${collection.coverImageUrl ? 'absolute top-0 left-0 opacity-0 fallback' : ''}`}>
+                <Image className="h-12 w-12 text-gray-400" />
+              </div>
             </div>
-            
             <CardContent className="p-4">
-              <div className="flex justify-between items-start mb-2">
-                <h3 className="font-semibold text-lg line-clamp-2">
-                  {collection.name || 'Untitled Collection'}
-                </h3>
-                
-                {collection.visibility && (
-                  <Badge variant={collection.visibility === 'public' ? 'outline' : 'secondary'} className="ml-2 flex-shrink-0">
-                    {collection.visibility === 'public' ? (
-                      <Globe className="h-3 w-3 mr-1" />
-                    ) : (
-                      <Lock className="h-3 w-3 mr-1" />
-                    )}
-                    {collection.visibility}
-                  </Badge>
-                )}
-              </div>
-              
-              {collection.description && (
-                <p className="text-muted-foreground text-sm line-clamp-2 mb-3">
-                  {collection.description}
-                </p>
+              <h3 className="font-medium text-lg mb-1">{collection.name}</h3>
+              {(collection.description) && (
+                <p className="text-sm text-gray-600 line-clamp-2">{collection.description}</p>
               )}
-              
-              <div className="flex items-center justify-between mt-2">
-                <div className="flex items-center text-xs text-muted-foreground">
-                  <GalleryHorizontal className="h-3 w-3 mr-1" />
-                  {collection.cards?.length || 0} cards
-                </div>
-                
-                {collection.tags && collection.tags.length > 0 && (
-                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                    <Tag className="h-3 w-3 mr-1" />
-                    {collection.tags.slice(0, 2).join(', ')}
-                    {collection.tags.length > 2 && '...'}
-                  </div>
-                )}
-              </div>
             </CardContent>
+            <CardFooter className="px-4 pb-4 pt-0 flex justify-between">
+              <span className="text-xs text-gray-500">
+                {collection.cards ? collection.cards.length : 0} card{collection.cards?.length !== 1 ? 's' : ''}
+              </span>
+              <span className="text-xs flex items-center gap-1 px-2 py-1 rounded-full bg-gray-100 text-gray-700">
+                {collection.visibility === 'private' ? (
+                  <Lock className="h-3 w-3" />
+                ) : collection.visibility === 'team' ? (
+                  <Users className="h-3 w-3" />
+                ) : (
+                  <Globe className="h-3 w-3" />
+                )}
+                <span>{collection.visibility}</span>
+              </span>
+            </CardFooter>
           </Card>
         </Link>
       ))}

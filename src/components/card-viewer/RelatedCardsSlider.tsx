@@ -25,11 +25,6 @@ const RelatedCardsSlider: React.FC<RelatedCardsSliderProps> = ({ cards, onCardCl
 
   if (cards.length === 0) return null;
 
-  // Helper function to safely get string properties
-  const getStringProp = (value: any): string => {
-    return typeof value === 'string' ? value : '';
-  };
-
   return (
     <div className="relative">
       <div 
@@ -37,29 +32,25 @@ const RelatedCardsSlider: React.FC<RelatedCardsSliderProps> = ({ cards, onCardCl
         className="flex overflow-x-auto gap-4 scrollbar-hide snap-x snap-mandatory pb-4"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
-        {cards.map(card => {
-          const cardPlayer = getStringProp(card.player);
-          
-          return (
-            <div 
-              key={card.id}
-              className="flex-shrink-0 w-36 md:w-40 snap-start cursor-pointer hover:opacity-90 transition-opacity"
-              onClick={() => onCardClick(card.id)}
-            >
-              <div className="relative aspect-[2.5/3.5] overflow-hidden rounded-lg bg-gray-800 shadow-lg">
-                <img 
-                  src={card.thumbnailUrl || card.imageUrl} 
-                  alt={card.title} 
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-x-0 bottom-0 p-2 bg-gradient-to-t from-black/80 to-transparent">
-                  <p className="text-xs text-white font-medium truncate">{card.title}</p>
-                  {cardPlayer && <p className="text-xs text-white/70 truncate">{cardPlayer}</p>}
-                </div>
+        {cards.map(card => (
+          <div 
+            key={card.id}
+            className="flex-shrink-0 w-36 md:w-40 snap-start cursor-pointer hover:opacity-90 transition-opacity"
+            onClick={() => onCardClick(card.id)}
+          >
+            <div className="relative aspect-[2.5/3.5] overflow-hidden rounded-lg bg-gray-800 shadow-lg">
+              <img 
+                src={card.thumbnailUrl || card.imageUrl} 
+                alt={card.title} 
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-x-0 bottom-0 p-2 bg-gradient-to-t from-black/80 to-transparent">
+                <p className="text-xs text-white font-medium truncate">{card.title}</p>
+                {card.player && <p className="text-xs text-white/70 truncate">{card.player}</p>}
               </div>
             </div>
-          );
-        })}
+          </div>
+        ))}
       </div>
 
       {/* Navigation buttons */}

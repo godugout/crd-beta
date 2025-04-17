@@ -1,10 +1,11 @@
+
 import React from 'react';
 import { RouteObject } from 'react-router-dom';
 import Collections from '@/pages/Collections';
 import CollectionDetail from '@/pages/collections/detail';
 import Packs from '@/pages/Packs';
 import MemoryPackDetail from '@/pages/MemoryPackDetail';
-import ProtectedRoute from '@/components/auth/ProtectedRoute';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import InstagramCollectionPage from '@/pages/collections/instagram';
 import CommonsCardsPage from '@/pages/collections/commons';
 

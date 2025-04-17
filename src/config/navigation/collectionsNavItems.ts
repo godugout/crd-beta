@@ -1,30 +1,50 @@
 
-import { FolderOpen, UserCircle, Star, History } from "lucide-react";
-import type { NavItem } from './types';
+import { 
+  Layers, 
+  PlusCircle,
+  Package,
+  Sparkles,
+  Instagram,
+  Globe
+} from 'lucide-react';
+import { NavigationItem } from './types';
 
-export const collectionsNavItems: NavItem[] = [
-  {
-    title: 'All',
-    path: '/collections',
-    icon: FolderOpen,
-    description: 'All collections'
-  },
+// Collections section navigation
+export const collectionsNavItems: NavigationItem[] = [
   {
     title: 'My Collections',
-    path: '/collections/my',
-    icon: UserCircle,
-    description: 'Collections created by you'
+    path: '/collections',
+    icon: Layers,
+    description: 'View your organized collections'
   },
   {
-    title: 'Featured',
+    title: 'Create Collection',
+    path: '/collections/create',
+    icon: PlusCircle,
+    description: 'Create a new collection'
+  },
+  {
+    title: 'Commons Cards',
+    path: '/collections/commons',
+    icon: Globe,
+    description: 'Public domain card collection'
+  },
+  {
+    title: 'Instagram Collection',
+    path: '/collections/instagram',
+    icon: Instagram,
+    description: 'Create collection from Instagram posts'
+  },
+  {
+    title: 'Memory Packs',
+    path: '/packs',
+    icon: Package,
+    description: 'Themed collections of memories'
+  },
+  {
+    title: 'Featured Collections',
     path: '/collections/featured',
-    icon: Star,
-    description: 'Featured collections'
-  },
-  {
-    title: 'Recent',
-    path: '/collections/recent',
-    icon: History,
-    description: 'Recently created collections'
+    icon: Sparkles,
+    description: 'Discover curated collections'
   }
 ];

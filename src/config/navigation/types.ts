@@ -1,17 +1,11 @@
 
-import { ReactElement } from 'react';
 import { LucideIcon } from 'lucide-react';
 
-export interface NavItem {
+export type NavigationItem = {
   title: string;
   path: string;
-  icon: LucideIcon;
+  icon: React.ElementType;
   description?: string;
   highlight?: boolean;
-  label?: string;  // Including the label property
-}
-
-export interface NavGroup {
-  title: string;
-  items: NavItem[];
-}
+  label?: string; // Added for backward compatibility
+};

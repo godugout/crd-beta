@@ -1,38 +1,23 @@
 
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import React from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useEnhancedCards } from '@/context/CardEnhancedContext';
-import { Card } from '@/lib/types';
-import { Deck } from '@/lib/types/enhancedCardTypes';
-import { Button } from '@/components/ui/button';
-import { Card as UICard, CardContent } from '@/components/ui/card';
-import { useToast } from '@/hooks/use-toast';
-import { Edit, Share, Trash, Plus, ArrowLeft, Grid } from 'lucide-react';
 import PageLayout from '@/components/navigation/PageLayout';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft, Edit, Grid, Plus, Share2 } from 'lucide-react';
 
-const DeckViewPage = () => {
+const DeckViewPage: React.FC = () => {
   const { deckId } = useParams();
   const navigate = useNavigate();
-  const { decks, cards, loading, deleteDeck } = useEnhancedCards();
-  const { toast } = useToast();
-  const [deck, setDeck] = useState<Deck | undefined>();
-  const [deckCards, setDeckCards] = useState<any[]>([]);
+  const { decks, cards, isLoading } = useEnhancedCards();
   
-  const isLoading = loading;
-
-  useEffect(() => {
-    if (decks.length > 0 && deckId) {
-      const foundDeck = decks.find(d => d.id === deckId);
-      if (foundDeck) {
-        setDeck(foundDeck);
-        const cardsInDeck = foundDeck.cardIds.map(cardId => {
-          return cards.find(card => card.id === cardId);
-        }).filter(Boolean) as any[];
-        
-        setDeckCards(cardsInDeck);
-      }
-    }
-  }, [deckId, decks, cards]);
+  const deck = deckId ? decks.find(d => d.id === deckId) : undefined;
+  
+  // Get deck cards
+  const deckCards = deck 
+    ? cards.filter(card => deck.cardIds.includes(card.id))
+    : [];
   
   if (isLoading) {
     return (
@@ -73,6 +58,7 @@ const DeckViewPage = () => {
   }
   
   if (deck) {
+    // Single deck view
     return (
       <PageLayout title={deck.name} description={deck.description || 'Custom deck of cards'}>
         <div className="container mx-auto px-4 py-8">
@@ -126,7 +112,7 @@ const DeckViewPage = () => {
                     Edit Deck
                   </Button>
                   <Button variant="outline">
-                    <Share className="mr-2 h-4 w-4" />
+                    <Share2 className="mr-2 h-4 w-4" />
                     Share
                   </Button>
                 </div>
@@ -141,7 +127,7 @@ const DeckViewPage = () => {
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {deckCards.length > 0 ? (
                   deckCards.map(card => (
-                    <UICard key={card.id} className="overflow-hidden">
+                    <Card key={card.id} className="overflow-hidden">
                       <div className="aspect-[2.5/3.5] relative">
                         <img 
                           src={card.imageUrl} 
@@ -158,7 +144,7 @@ const DeckViewPage = () => {
                           </span>
                         </div>
                       </CardContent>
-                    </UICard>
+                    </Card>
                   ))
                 ) : (
                   <div className="col-span-full text-center py-8">
@@ -177,6 +163,7 @@ const DeckViewPage = () => {
     );
   }
   
+  // Decks overview
   return (
     <PageLayout title="My Decks" description="Browse and manage your card decks">
       <div className="container mx-auto px-4 py-8">
@@ -191,7 +178,7 @@ const DeckViewPage = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {decks.length > 0 ? (
             decks.map(deck => (
-              <UICard key={deck.id} className="cursor-pointer hover:shadow-md transition-shadow"
+              <Card key={deck.id} className="cursor-pointer hover:shadow-md transition-shadow"
                 onClick={() => navigate(`/decks/${deck.id}`)}
               >
                 <div className="aspect-video relative">
@@ -229,7 +216,7 @@ const DeckViewPage = () => {
                     </span>
                   </div>
                 </CardContent>
-              </UICard>
+              </Card>
             ))
           ) : (
             <div className="col-span-full text-center py-16">
@@ -244,7 +231,7 @@ const DeckViewPage = () => {
             </div>
           )}
           
-          <UICard 
+          <Card 
             className="border-dashed border-2 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-50 transition-colors"
             onClick={() => navigate('/decks/create')}
           >
@@ -252,7 +239,7 @@ const DeckViewPage = () => {
               <Plus className="h-12 w-12 text-muted-foreground mb-4" />
               <p className="font-medium">Create New Deck</p>
             </CardContent>
-          </UICard>
+          </Card>
         </div>
       </div>
     </PageLayout>

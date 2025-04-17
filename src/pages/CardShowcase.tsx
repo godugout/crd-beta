@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { DEFAULT_DESIGN_METADATA } from '@/lib/utils/cardDefaults';
-import { Card, CardRarity } from '@/lib/types';
+import { Card } from '@/lib/types';
 
 const sampleCards: Card[] = [
   {
@@ -21,9 +21,7 @@ const sampleCards: Card[] = [
     effects: [],
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
-    designMetadata: DEFAULT_DESIGN_METADATA,
-    isFavorite: false,
-    rarity: CardRarity.LEGENDARY
+    designMetadata: DEFAULT_DESIGN_METADATA
   },
   {
     id: '2',
@@ -36,9 +34,7 @@ const sampleCards: Card[] = [
     effects: [],
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
-    designMetadata: DEFAULT_DESIGN_METADATA,
-    isFavorite: false,
-    rarity: CardRarity.RARE
+    designMetadata: DEFAULT_DESIGN_METADATA
   }
 ];
 

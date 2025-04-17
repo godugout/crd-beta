@@ -1,7 +1,22 @@
+
 import { useState, useEffect, useCallback } from 'react';
-import { Card, CardRarity } from '@/lib/types';
+import { supabase } from '@/lib/supabase';
+import { Card } from '@/lib/types/card';
 import { useToast } from '@/hooks/use-toast';
-import { adaptToCard } from '@/lib/adapters/typeAdapters';
+import { adaptToCard } from '@/lib/adapters/cardAdapter';
+
+interface CardRecord extends Card {
+  // This interface ensures CardRecord has all the properties of Card
+  collection_id?: string;
+  created_at: string;
+  creator_id: string;
+  design_metadata: any;
+  edition_size: number;
+  image_url: string;
+  is_public: boolean;
+  price?: number;
+  user_id: string;
+}
 
 export function useArCardViewer(cardId?: string) {
   const [cards, setCards] = useState<Card[]>([]);
@@ -15,13 +30,16 @@ export function useArCardViewer(cardId?: string) {
   const [arCards, setArCards] = useState<Card[]>([]);
   const { toast } = useToast();
 
+  // Get the active card based on activeCardId
   const activeCard = activeCardId ? cards.find(card => card.id === activeCardId) || null : null;
+  // Cards available to add to AR scene
   const availableCards = cards.filter(card => !arCards.some(arCard => arCard.id === card.id));
 
   const fetchCards = useCallback(async () => {
     try {
       setLoading(true);
       
+      // For demonstration, create some sample cards
       const demoCards: Card[] = [
         adaptToCard({
           id: '1',
@@ -34,7 +52,6 @@ export function useArCardViewer(cardId?: string) {
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
           effects: ['Holographic'],
-          rarity: CardRarity.COMMON,
         }),
         adaptToCard({
           id: '2',
@@ -47,12 +64,40 @@ export function useArCardViewer(cardId?: string) {
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
           effects: ['Refractor'],
-          rarity: CardRarity.RARE,
         }),
       ];
       
+      // Here, in a real application, you'd fetch from Supabase
+      // const { data, error } = await supabase
+      //   .from('cards')
+      //   .select('*')
+      //   .eq('ar_enabled', true);
+      
+      // if (error) throw error;
+      
+      // Process fetched data (commented out for demo)
+      // if (data) {
+      //   const processedCards = data.map(item => adaptToCard({
+      //     id: item.id,
+      //     title: item.title || '',
+      //     description: item.description || '',
+      //     imageUrl: item.image_url || '',
+      //     thumbnailUrl: item.thumbnail_url || '',
+      //     tags: item.tags || [],
+      //     collectionId: item.collection_id || '',
+      //     createdAt: item.created_at || new Date().toISOString(),
+      //     updatedAt: item.updated_at || new Date().toISOString(),
+      //     userId: item.user_id || '',
+      //     isPublic: item.is_public || false,
+      //     designMetadata: item.design_metadata || {},
+      //     effects: item.effects || ['Holographic'], // Ensure effects is always populated
+      //   }));
+      //   setCards(processedCards);
+      // }
+      
       setCards(demoCards);
 
+      // If a cardId was provided, add it to AR cards
       if (cardId) {
         const cardToAdd = demoCards.find(card => card.id === cardId);
         if (cardToAdd) {
@@ -87,6 +132,7 @@ export function useArCardViewer(cardId?: string) {
     setActiveCardId(null);
   }, []);
 
+  // AR interaction methods
   const handleLaunchAr = useCallback(() => {
     if (activeCard) {
       setArCards([activeCard]);
@@ -165,6 +211,7 @@ export function useArCardViewer(cardId?: string) {
     openViewer,
     closeViewer,
     fetchCards,
+    // Add the missing properties
     activeCard,
     arCards,
     availableCards,

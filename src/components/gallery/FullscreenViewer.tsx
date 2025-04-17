@@ -1,109 +1,201 @@
 
-import React, { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useCards } from '@/hooks/useCards';
-import CardViewer from '@/components/card-viewer/CardViewer';
-import { Card } from '@/lib/types';
-import { adaptToCard } from '@/lib/adapters/typeAdapters';
+import { useCards } from '@/context/CardContext';
+import { Card } from '@/lib/types/cardTypes';
+import { sampleCards } from '@/lib/data/sampleCards';
+import { toast } from '@/hooks/use-toast';
+import { adaptToCard } from '@/lib/adapters/cardAdapter';
+import { DEFAULT_DESIGN_METADATA, FALLBACK_IMAGE_URL } from '@/lib/utils/cardDefaults';
 
 interface FullscreenViewerProps {
-  card?: Card;
-  cardId?: string;
+  cardId: string;
   onClose: () => void;
-  onShare?: () => void;
-  onCapture?: () => void;
 }
 
-/**
- * FullscreenViewer component that displays a card in fullscreen mode
- * Accepts either a card object or a cardId to fetch the card
- */
-const FullscreenViewer: React.FC<FullscreenViewerProps> = ({
-  card: providedCard,
-  cardId,
-  onClose,
-  onShare,
-  onCapture
-}) => {
-  const { getCardById } = useCards();
-  const [card, setCard] = useState<Card | null>(providedCard || null);
-  const [isLoading, setIsLoading] = useState(!providedCard && !!cardId);
+const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) => {
+  const { cards, getCard } = useCards();
+  const [currentCard, setCurrentCard] = useState<Card | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  // Fetch card if cardId is provided but no card object
+  const [validImageUrl, setValidImageUrl] = useState<string>(FALLBACK_IMAGE_URL);
+  
   useEffect(() => {
-    if (!providedCard && cardId) {
-      try {
-        setIsLoading(true);
-        const fetchedCard = getCardById(cardId);
+    if (!cardId) {
+      setError("No card ID provided");
+      setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      console.log('FullscreenViewer: Loading card with ID:', cardId);
+      
+      // First try to find card directly from sampleCards
+      let foundCard = sampleCards.find(c => c.id === cardId);
+      
+      // If not found in sampleCards, try the cards context
+      if (!foundCard) {
+        console.log('FullscreenViewer: Card not found in sampleCards, checking context');
+        foundCard = getCard ? getCard(cardId) : cards.find(c => c.id === cardId);
+      }
+      
+      if (foundCard) {
+        // Always use adaptToCard to ensure the card has all required properties
+        const processedCard = adaptToCard({
+          ...foundCard,
+          // Ensure imageUrl is present
+          imageUrl: foundCard.imageUrl || FALLBACK_IMAGE_URL,
+          thumbnailUrl: foundCard.thumbnailUrl || foundCard.imageUrl || FALLBACK_IMAGE_URL,
+          // Ensure all required fields are present
+          designMetadata: foundCard.designMetadata || DEFAULT_DESIGN_METADATA,
+          createdAt: foundCard.createdAt || new Date().toISOString(),
+          updatedAt: foundCard.updatedAt || new Date().toISOString(),
+          userId: foundCard.userId || 'anonymous',
+          effects: foundCard.effects || []
+        });
         
-        if (fetchedCard) {
-          // Ensure card has all required properties
-          setCard(adaptToCard(fetchedCard));
+        // Always initialize with fallback first, then update if the real image loads
+        setValidImageUrl(FALLBACK_IMAGE_URL);
+        
+        if (processedCard.imageUrl && 
+            processedCard.imageUrl !== 'undefined' && 
+            typeof processedCard.imageUrl === 'string') {
+          // Validate the image URL by preloading it
+          const img = new Image();
+          img.onload = () => {
+            console.log('FullscreenViewer: Image validated successfully:', processedCard.imageUrl);
+            setValidImageUrl(processedCard.imageUrl || FALLBACK_IMAGE_URL);
+            setCurrentCard(processedCard);
+            setIsLoading(false);
+          };
+          img.onerror = () => {
+            console.warn('FullscreenViewer: Image validation failed, using fallback');
+            setValidImageUrl(FALLBACK_IMAGE_URL);
+            processedCard.imageUrl = FALLBACK_IMAGE_URL;
+            processedCard.thumbnailUrl = FALLBACK_IMAGE_URL;
+            setCurrentCard(processedCard);
+            setIsLoading(false);
+            toast({
+              title: "Image Error",
+              description: "Could not load the card image. Using a fallback image instead.",
+              variant: "destructive"
+            });
+          };
+          img.src = processedCard.imageUrl;
         } else {
-          setError(`Card with ID ${cardId} not found`);
+          console.warn('FullscreenViewer: Card has invalid imageUrl, using fallback');
+          processedCard.imageUrl = FALLBACK_IMAGE_URL;
+          processedCard.thumbnailUrl = FALLBACK_IMAGE_URL;
+          setCurrentCard(processedCard);
+          setIsLoading(false);
         }
-      } catch (err) {
-        console.error('Error fetching card:', err);
-        setError('Failed to load card');
-      } finally {
+      } else {
+        console.error('FullscreenViewer: Card not found with ID:', cardId);
+        setError(`Card with ID ${cardId} not found`);
         setIsLoading(false);
       }
+    } catch (err) {
+      console.error('FullscreenViewer: Error loading card:', err);
+      setError('Failed to load card');
+      setIsLoading(false);
     }
-  }, [cardId, providedCard, getCardById]);
+  }, [cardId, cards, getCard]);
+  
+  // Find all card indices from sampleCards to enable navigation between cards
+  const allCardIds = sampleCards.map(card => card.id);
+  const currentIndex = allCardIds.indexOf(cardId);
+  
+  // Handle previous/next card navigation
+  const handlePrevCard = () => {
+    if (currentIndex > 0) {
+      window.location.href = `/cards/${allCardIds[currentIndex - 1]}`;
+    }
+  };
+  
+  const handleNextCard = () => {
+    if (currentIndex < allCardIds.length - 1) {
+      window.location.href = `/cards/${allCardIds[currentIndex + 1]}`;
+    }
+  };
 
-  // Handle keyboard events for closing the viewer
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        onClose();
-      }
-    };
+  if (isLoading) {
+    return (
+      <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50">
+        <div className="w-16 h-16 border-4 border-t-transparent border-primary rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [onClose]);
+  if (error || !currentCard) {
+    return (
+      <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 text-white">
+        <div className="bg-gray-800 p-6 rounded-lg max-w-md text-center">
+          <p className="mb-4">{error || "Could not load card"}</p>
+          <Button onClick={onClose}>Close</Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="fixed inset-0 z-50 bg-black flex flex-col">
-      <div className="absolute top-4 right-4 z-10">
-        <Button
-          onClick={onClose}
-          variant="ghost"
-          className="h-10 w-10 rounded-full p-0 bg-black/50 backdrop-blur-sm text-white hover:bg-black/70"
-        >
-          <X className="h-5 w-5" />
-          <span className="sr-only">Close</span>
+    <div className="fixed inset-0 bg-black/90 flex flex-col items-center justify-center z-50">
+      <div className="absolute top-4 right-4">
+        <Button variant="ghost" size="icon" onClick={onClose} className="text-white hover:bg-gray-800">
+          <X className="h-6 w-6" />
         </Button>
       </div>
       
-      <div className="flex-1 flex items-center justify-center p-4">
-        {isLoading ? (
-          <div className="text-white text-center">
-            <div className="w-12 h-12 rounded-full border-t-2 border-white animate-spin mx-auto mb-4"></div>
-            <p>Loading card...</p>
+      <div className="relative w-full h-full max-w-2xl max-h-[80vh] flex items-center justify-center">
+        <div className="absolute left-4">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={handlePrevCard} 
+            className="text-white hover:bg-gray-800"
+            disabled={currentIndex <= 0}
+          >
+            <ChevronLeft className="h-6 w-6" />
+          </Button>
+        </div>
+        
+        <div className="w-full h-full flex items-center justify-center p-4">
+          <div className="relative w-full h-full max-h-[70vh] flex items-center justify-center">
+            <img
+              src={validImageUrl}
+              alt={currentCard.title || "Card"}
+              className="max-w-full max-h-full object-contain"
+              onError={(e) => {
+                console.error('FullscreenViewer: Failed to load image:', validImageUrl);
+                if (validImageUrl !== FALLBACK_IMAGE_URL) {
+                  e.currentTarget.src = FALLBACK_IMAGE_URL;
+                }
+              }}
+              onLoad={() => console.log('FullscreenViewer: Image loaded successfully:', validImageUrl)}
+            />
           </div>
-        ) : error ? (
-          <div className="text-white text-center">
-            <h2 className="text-xl font-semibold mb-2">Error</h2>
-            <p>{error}</p>
-          </div>
-        ) : card ? (
-          <CardViewer 
-            card={card}
-            isFlipped={false}
-            activeEffects={card.effects || []}
-            isFullscreen={true}
-            onShare={onShare}
-            onCapture={onCapture}
-            onClose={onClose}
-          />
-        ) : (
-          <div className="text-white text-center">
-            <h2 className="text-xl font-semibold mb-2">Card not found</h2>
-            <p>The requested card could not be loaded.</p>
-          </div>
+        </div>
+        
+        <div className="absolute right-4">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={handleNextCard} 
+            className="text-white hover:bg-gray-800"
+            disabled={currentIndex >= allCardIds.length - 1}
+          >
+            <ChevronRight className="h-6 w-6" />
+          </Button>
+        </div>
+      </div>
+      
+      <div className="mt-4 p-4 text-white">
+        <h2 className="text-xl font-bold">{currentCard.title}</h2>
+        {currentCard.description && (
+          <p className="mt-2 text-sm text-gray-300">{currentCard.description}</p>
         )}
       </div>
     </div>

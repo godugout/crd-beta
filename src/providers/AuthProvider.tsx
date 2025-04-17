@@ -1,7 +1,7 @@
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User } from '@/lib/types';
-import { UserRole } from '@/lib/types/user';
-import { UserPermission, UserPermissionValues } from '@/lib/types/user';
+import { UserRole } from '@/lib/types/UserTypes';
 
 // Define auth context type
 interface AuthContextType {
@@ -27,9 +27,6 @@ const MOCK_ADMIN_USER: User = {
   role: UserRole.ADMIN,
   avatarUrl: 'https://api.dicebear.com/7.x/initials/svg?seed=Admin',
   bio: 'System administrator with full access to all features.',
-  isVerified: true,
-  isActive: true,
-  permissions: [UserPermissionValues.READ_ALL, UserPermissionValues.WRITE_ALL],
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
 };
@@ -40,11 +37,11 @@ const DEFAULT_USER: User = {
   email: 'user@example.com',
   name: 'Demo User',
   role: UserRole.ADMIN,
-  permissions: [UserPermissionValues.READ_ALL, UserPermissionValues.WRITE_ALL],
-  isVerified: true,
-  isActive: true,
-  createdAt: new Date().toISOString(),
-  updatedAt: new Date().toISOString(),
+  permissions: ['all'],
+  preferences: {
+    theme: 'light',
+    notifications: true
+  }
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode; autoLogin?: boolean }> = ({ 

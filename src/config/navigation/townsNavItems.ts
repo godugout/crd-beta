@@ -1,31 +1,37 @@
 
-import { Building, MapPin, Search, Eye } from "lucide-react";
-import type { NavItem } from './types';
+import { 
+  Users, 
+  Building,
+  MapPin,
+  PlayCircle
+} from 'lucide-react';
+import { NavigationItem } from './types';
 
-export const townsNavItems: NavItem[] = [
+// Towns navigation section
+export const townsNavItems: NavigationItem[] = [
   {
-    title: "All Towns",
-    path: "/towns",
+    title: 'Oakland',
+    path: '/towns/oakland',
     icon: Building,
-    description: "Browse all towns"
+    description: 'Oakland Town'
   },
   {
-    title: "Featured Towns",
-    path: "/towns/featured",
+    title: 'San Francisco',
+    path: '/towns/sf-giants',
+    icon: Building,
+    description: 'San Francisco Town'
+  },
+  {
+    title: 'Town Directory',
+    path: '/towns',
     icon: MapPin,
-    description: "View featured towns",
+    description: 'Browse all towns'
+  },
+  {
+    title: 'Game Day Mode',
+    path: '/game-day',
+    icon: PlayCircle,
+    description: 'Enhanced experience for game day',
     highlight: true
-  },
-  {
-    title: "Search Towns",
-    path: "/towns/search",
-    icon: Search,
-    description: "Find specific towns"
-  },
-  {
-    title: "Explore",
-    path: "/towns/explore",
-    icon: Eye,
-    description: "Explore towns"
   }
 ];

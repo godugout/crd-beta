@@ -1,71 +1,48 @@
 
 import React, { useRef, useEffect, useState } from 'react';
-import { Card, CardRarity } from '@/lib/types';
+import { Card } from '@/lib/types/cardTypes';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
 import Card3DRenderer from './Card3DRenderer';
 import { useToast } from '@/hooks/use-toast';
-import { adaptToCard } from '@/lib/adapters/typeAdapters';
-
-const FALLBACK_IMAGE_URL = 'https://images.unsplash.com/photo-1518770660439-4636190af475';
-const DEFAULT_DESIGN_METADATA = {
-  cardStyle: {
-    template: 'standard',
-    effect: 'standard',
-    borderRadius: '8px',
-    borderColor: '#000000',
-    shadowColor: '#000000',
-    frameWidth: 5,
-    frameColor: '#000000'
-  },
-  textStyle: {
-    titleColor: '#000000',
-    titleAlignment: 'center',
-    titleWeight: 'bold',
-    descriptionColor: '#333333'
-  },
-  cardMetadata: {
-    category: 'standard',
-    series: 'default',
-    cardType: 'standard'
-  },
-  marketMetadata: {
-    isPrintable: true,
-    isForSale: false,
-    includeInCatalog: false
-  }
-};
+import { DEFAULT_DESIGN_METADATA, FALLBACK_IMAGE_URL } from '@/lib/utils/cardDefaults';
 
 interface ImmersiveCardViewerProps {
   card: Card;
-  isFlipped?: boolean;
+  isFlipped: boolean;
   activeEffects: string[];
   effectIntensities?: Record<string, number>;
 }
 
 const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
   card,
-  isFlipped = false,
+  isFlipped,
   activeEffects,
   effectIntensities
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
-  const [processedCard, setProcessedCard] = useState<Card | null>(null);
+  const [processedCard, setProcessedCard] = useState<Card>(card);
   const [isLoading, setIsLoading] = useState(true);
   
+  // Ensure we have valid image URLs before rendering
   useEffect(() => {
-    setIsLoading(true);
-    
-    try {
-      const cardWithDefaults = adaptToCard({
-        ...card,
-        rarity: card.rarity || CardRarity.COMMON  // Use the CardRarity enum
-      });
-
-      if (!cardWithDefaults.imageUrl || cardWithDefaults.imageUrl === 'undefined') {
-        console.warn(`Card ${cardWithDefaults.id} is missing an image URL, using fallback`);
-        cardWithDefaults.imageUrl = FALLBACK_IMAGE_URL;
+    const validateCardImages = async () => {
+      setIsLoading(true);
+      
+      // Create a deep copy of the card to avoid mutating the original
+      const cardCopy: Card = JSON.parse(JSON.stringify(card));
+      
+      // Ensure designMetadata is always present with required fields
+      if (!cardCopy.designMetadata || !cardCopy.designMetadata.cardStyle) {
+        console.warn(`Card ${cardCopy.id} is missing designMetadata or cardStyle, using default values`);
+        cardCopy.designMetadata = DEFAULT_DESIGN_METADATA;
+      }
+      
+      // Check if card has valid image URL
+      if (!cardCopy.imageUrl || cardCopy.imageUrl === 'undefined') {
+        console.warn(`Card ${cardCopy.id} is missing an image URL, using fallback`);
+        cardCopy.imageUrl = FALLBACK_IMAGE_URL;
         
         toast({
           title: "Using fallback image",
@@ -75,37 +52,45 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
         });
       }
       
-      const image = new Image();
-      image.onload = () => {
-        console.log(`Image loaded successfully: ${cardWithDefaults.imageUrl}`);
-        setProcessedCard(cardWithDefaults);
-        setIsLoading(false);
-      };
-      image.onerror = () => {
-        console.error(`Failed to load image: ${cardWithDefaults.imageUrl}, using fallback`);
-        cardWithDefaults.imageUrl = FALLBACK_IMAGE_URL;
-        cardWithDefaults.thumbnailUrl = FALLBACK_IMAGE_URL;
-        setProcessedCard(cardWithDefaults);
-        setIsLoading(false);
-      };
-      image.src = cardWithDefaults.imageUrl;
+      // Also ensure we have a thumbnail URL
+      if (!cardCopy.thumbnailUrl || cardCopy.thumbnailUrl === 'undefined') {
+        cardCopy.thumbnailUrl = cardCopy.imageUrl || FALLBACK_IMAGE_URL;
+      }
       
-    } catch (error) {
-      console.error("Error during card processing:", error);
-      const fallbackCard = adaptToCard({
-        ...card,
-        imageUrl: FALLBACK_IMAGE_URL,
-        thumbnailUrl: FALLBACK_IMAGE_URL,
-        isPublic: true,
-        effects: [],
-        rarity: CardRarity.COMMON
-      });
-      setProcessedCard(fallbackCard);
-      setIsLoading(false);
-    }
+      // Ensure other required fields are present
+      if (!cardCopy.effects) {
+        cardCopy.effects = [];
+      }
+      
+      // Set up imagePreload to validate that images actually load
+      try {
+        const image = new Image();
+        image.onload = () => {
+          console.log(`Image loaded successfully: ${cardCopy.imageUrl}`);
+          setProcessedCard(cardCopy);
+          setIsLoading(false);
+        };
+        image.onerror = () => {
+          console.error(`Failed to load image: ${cardCopy.imageUrl}, using fallback`);
+          cardCopy.imageUrl = FALLBACK_IMAGE_URL;
+          cardCopy.thumbnailUrl = FALLBACK_IMAGE_URL;
+          setProcessedCard(cardCopy);
+          setIsLoading(false);
+        };
+        image.src = cardCopy.imageUrl;
+      } catch (error) {
+        console.error("Error during image validation:", error);
+        cardCopy.imageUrl = FALLBACK_IMAGE_URL;
+        cardCopy.thumbnailUrl = FALLBACK_IMAGE_URL;
+        setProcessedCard(cardCopy);
+        setIsLoading(false);
+      }
+    };
+    
+    validateCardImages();
   }, [card, toast]);
   
-  if (isLoading || !processedCard) {
+  if (isLoading) {
     return (
       <div 
         className="w-full h-full min-h-[600px] bg-gray-900 rounded-lg overflow-hidden flex items-center justify-center"

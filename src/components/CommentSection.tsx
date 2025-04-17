@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/auth';
 import { Button } from '@/components/ui/button';
@@ -9,11 +10,6 @@ import { commentRepository } from '@/lib/data';
 import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
 import { MessageCircle, SendHorizontal, Reply, Trash, Edit } from 'lucide-react';
-import { 
-  DbComment, 
-  adaptSchemaCommentToInteractionComment, 
-  adaptInteractionCommentToSchemaComment
-} from '@/lib/adapters/commentAdapter';
 
 interface CommentSectionProps {
   cardId?: string;
@@ -52,12 +48,10 @@ const CommentSection: React.FC<CommentSectionProps> = ({ cardId, collectionId, t
       }
       
       if (data) {
-        // Convert schema comments to interaction comments
-        const adaptedComments = data.map(comment => 
-          adaptSchemaCommentToInteractionComment(comment as unknown as DbComment)
-        );
-        setComments(adaptedComments);
-        adaptedComments.forEach(comment => {
+        // Ensure we're using a consistent type
+        const typedComments = data as Comment[];
+        setComments(typedComments);
+        typedComments.forEach(comment => {
           if (comment.id) {
             fetchReplies(comment.id);
           }
@@ -82,12 +76,11 @@ const CommentSection: React.FC<CommentSectionProps> = ({ cardId, collectionId, t
       }
       
       if (data && data.length > 0) {
-        const adaptedReplies = data.map(comment => 
-          adaptSchemaCommentToInteractionComment(comment as unknown as DbComment)
-        );
+        // Handle type consistency
+        const typedReplies = data as Comment[];
         setRepliesByParentId(prev => ({
           ...prev,
-          [parentId]: adaptedReplies
+          [parentId]: typedReplies
         }));
       }
     } catch (err) {
@@ -99,7 +92,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ cardId, collectionId, t
     if (!user || !newComment.trim()) return;
     
     try {
-      const commentData = {
+      const commentData: Partial<Comment> = {
         content: newComment.trim(),
         userId: user.id,
         cardId,
@@ -108,10 +101,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ cardId, collectionId, t
         parentId: replyTo
       };
       
-      // Convert interaction comment to schema comment before sending to repository
-      const schemaCommentData = adaptInteractionCommentToSchemaComment(commentData);
-      
-      const { data, error } = await commentRepository.createComment(schemaCommentData);
+      const { data, error } = await commentRepository.createComment(commentData);
       
       if (error) {
         console.error('Error creating comment:', error);
@@ -123,17 +113,17 @@ const CommentSection: React.FC<CommentSectionProps> = ({ cardId, collectionId, t
         toast.success('Comment posted successfully');
         setNewComment('');
         
-        // Convert schema comment back to interaction comment
-        const adaptedComment = adaptSchemaCommentToInteractionComment(data as unknown as DbComment);
+        // Ensure type consistency by casting
+        const typedComment = data as Comment;
         
         if (replyTo) {
           setRepliesByParentId(prev => ({
             ...prev,
-            [replyTo]: [...(prev[replyTo] || []), adaptedComment]
+            [replyTo]: [...(prev[replyTo] || []), typedComment]
           }));
           setReplyTo(null);
         } else {
-          setComments(prev => [...prev, adaptedComment]);
+          setComments(prev => [...prev, typedComment]);
         }
       }
     } catch (err) {
@@ -157,19 +147,19 @@ const CommentSection: React.FC<CommentSectionProps> = ({ cardId, collectionId, t
       if (data) {
         toast.success('Comment updated successfully');
         
-        // Convert schema comment to interaction comment
-        const adaptedComment = adaptSchemaCommentToInteractionComment(data as unknown as DbComment);
+        // Ensure type consistency by casting
+        const typedComment = data as Comment;
         
-        if (adaptedComment.parentId) {
+        if (typedComment.parentId) {
           setRepliesByParentId(prev => ({
             ...prev,
-            [adaptedComment.parentId!]: prev[adaptedComment.parentId!].map(c => 
-              c.id === id ? adaptedComment : c
+            [typedComment.parentId!]: prev[typedComment.parentId!].map(c => 
+              c.id === id ? typedComment : c
             )
           }));
         } else {
           setComments(prev => prev.map(c => 
-            c.id === id ? adaptedComment : c
+            c.id === id ? typedComment : c
           ));
         }
         
@@ -225,7 +215,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ cardId, collectionId, t
     setEditText('');
   };
   
-  function renderCommentItem(comment: Comment, isReply = false) {
+  const renderCommentItem = (comment: Comment, isReply = false) => {
     const isEditing = editingId === comment.id;
     const isOwnComment = user && comment.userId === user.id;
     const replies = repliesByParentId[comment.id] || [];
@@ -233,14 +223,13 @@ const CommentSection: React.FC<CommentSectionProps> = ({ cardId, collectionId, t
     // Helper function to get display name
     const getDisplayName = (user?: User) => {
       if (!user) return 'Anonymous';
-      return user.displayName || user.username || user.name || user.email || 'Anonymous';
+      return user.displayName || user.name || user.username || 'Anonymous';
     };
     
     // Helper function to get avatar initial
     const getAvatarInitial = (user?: User) => {
       if (!user) return '?';
       if (user.displayName) return user.displayName.charAt(0);
-      if (user.username) return user.username.charAt(0);
       if (user.name) return user.name.charAt(0);
       return user.email?.charAt(0) || '?';
     };
@@ -362,9 +351,9 @@ const CommentSection: React.FC<CommentSectionProps> = ({ cardId, collectionId, t
       {user ? (
         <div className="flex gap-3 items-start">
           <Avatar className="h-8 w-8">
-            <AvatarImage src={user.avatarUrl} alt={user.displayName || user.username} />
+            <AvatarImage src={user.avatarUrl} alt={user.displayName || user.name} />
             <AvatarFallback>
-              {user.displayName?.charAt(0) || user.username?.charAt(0) || user.email?.charAt(0) || 'U'}
+              {user.displayName?.charAt(0) || user.name?.charAt(0) || user.email?.charAt(0) || 'U'}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 flex gap-2">

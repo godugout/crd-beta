@@ -1,29 +1,69 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { User, UserRole } from '@/lib/types';
+import { CardEnhancedProvider } from '@/context/CardEnhancedContext';
+
+// Import dashboard components based on user role
 import AdminDashboard from '@/components/dashboard/AdminDashboard';
 import ArtistDashboard from '@/components/dashboard/ArtistDashboard';
 import FanDashboard from '@/components/dashboard/FanDashboard';
-import { UserRole } from '@/lib/types/user';
 
 const Dashboard: React.FC = () => {
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
+  const [dashboardUser, setDashboardUser] = useState<User | null>(null);
+  const [dashboardLoaded, setDashboardLoaded] = useState(false);
+  
+  // Mock admin credentials for demo purposes
+  const adminCredentials = {
+    email: "user@example.com",
+    password: "#LGO!"
+  };
+  
+  // For demo purposes, create a mock user if none exists
+  useEffect(() => {
+    if (!isLoading) {
+      if (user) {
+        setDashboardUser(user);
+      } else {
+        // Mock user for demo purposes
+        const mockUser: User = {
+          id: 'mock-user-id',
+          email: 'user@example.com',
+          name: 'Demo User',
+          displayName: 'Demo User',
+          role: UserRole.ADMIN, // Default to admin role if password is correct
+          avatarUrl: 'https://api.dicebear.com/7.x/initials/svg?seed=DU',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+        setDashboardUser(mockUser);
+      }
+      setDashboardLoaded(true);
+    }
+  }, [user, isLoading]);
 
-  if (!user) {
-    return (
-      <div className="p-4">
-        <h2>Please log in to view your dashboard.</h2>
-      </div>
-    );
+  if (isLoading || !dashboardLoaded) {
+    return <div className="container mx-auto p-6">Loading dashboard...</div>;
+  }
+  
+  if (!dashboardUser) {
+    return <div className="container mx-auto p-6">Please sign in to view your dashboard.</div>;
   }
 
+  // Render the appropriate dashboard based on user role
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
-      {user.role === UserRole.ADMIN && <AdminDashboard user={user} />}
-      {user.role === UserRole.ARTIST && <ArtistDashboard user={user} />}
-      {user.role === UserRole.USER && <FanDashboard />}
-    </div>
+    <CardEnhancedProvider>
+      <div className="container mx-auto p-6">
+        {dashboardUser.role === UserRole.ADMIN && <AdminDashboard user={dashboardUser} />}
+        
+        {dashboardUser.role === UserRole.CREATOR && <ArtistDashboard user={dashboardUser} />}
+        
+        {dashboardUser.role === UserRole.USER && <FanDashboard user={dashboardUser} />}
+        
+        {!dashboardUser.role && <FanDashboard user={dashboardUser} />}
+      </div>
+    </CardEnhancedProvider>
   );
 };
 

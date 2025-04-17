@@ -1,234 +1,291 @@
 
 import React, { useState, useEffect } from 'react';
-import { Heart, ThumbsUp, Star, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/context/auth';
 import { Reaction } from '@/lib/types';
+import { reactionRepository } from '@/lib/data';
 import { toast } from 'sonner';
+import { Heart, ThumbsUp, MessageCircle, Star, Award, Share } from 'lucide-react';
 
 interface ReactionButtonsProps {
-  targetId: string;
-  targetType: 'card' | 'comment' | 'collection';
-  initialReactions?: Reaction[];
-  onReactionChange?: (reactions: Reaction[]) => void;
-  size?: 'sm' | 'md' | 'lg';
-  variant?: 'default' | 'minimal' | 'expanded';
-  // Legacy support for older components
   cardId?: string;
+  collectionId?: string;
+  commentId?: string;
+  initialReactions?: Reaction[];
+  onShare?: () => void;
   showComments?: boolean;
   onShowComments?: () => void;
+  commentsCount?: number;
+}
+
+type ReactionType = 'like' | 'love' | 'wow' | 'haha' | 'sad' | 'angry';
+
+interface ReactionCount {
+  type: ReactionType;
+  count: number;
+  userReacted: boolean;
 }
 
 const ReactionButtons: React.FC<ReactionButtonsProps> = ({
-  targetId,
-  targetType,
+  cardId,
+  collectionId,
+  commentId,
   initialReactions = [],
-  onReactionChange,
-  size = 'md',
-  variant = 'default',
-  cardId, // For backward compatibility
+  onShare,
   showComments,
-  onShowComments
+  onShowComments,
+  commentsCount = 0
 }) => {
-  // Ensure we have a valid targetId (use cardId for backward compatibility)
-  const effectiveTargetId = targetId || cardId || '';
-  const effectiveTargetType = targetType || 'card';
-
-  const { user, isAuthenticated } = useAuth();
+  const { user } = useAuth();
   const [reactions, setReactions] = useState<Reaction[]>(initialReactions);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSharing, setIsSharing] = useState(false);
   
-  // Update local state when initialReactions changes
   useEffect(() => {
-    setReactions(initialReactions);
-  }, [initialReactions]);
-  
-  // Get counts for each reaction type
-  const getLikeCount = () => reactions.filter(r => r.type === 'like').length;
-  const getLoveCount = () => reactions.filter(r => r.type === 'love').length;
-  const getWowCount = () => reactions.filter(r => r.type === 'wow').length;
-  
-  // Check if current user has reacted
-  const hasUserLiked = () => {
-    if (!user) return false;
-    return reactions.some(r => r.type === 'like' && r.userId === user.id);
-  };
-  
-  const hasUserLoved = () => {
-    if (!user) return false;
-    return reactions.some(r => r.type === 'love' && r.userId === user.id);
-  };
-  
-  const hasUserWowed = () => {
-    if (!user) return false;
-    return reactions.some(r => r.type === 'wow' && r.userId === user.id);
-  };
-  
-  // Handle reaction clicks
-  const handleReaction = async (type: 'like' | 'love' | 'wow') => {
-    if (!isAuthenticated) {
-      toast.error('Please sign in to react');
-      return;
+    if (cardId || collectionId || commentId) {
+      fetchReactions();
     }
+  }, [cardId, collectionId, commentId]);
+  
+  const fetchReactions = async () => {
+    if (!cardId && !collectionId && !commentId) return;
     
+    setIsLoading(true);
+    try {
+      let data: Reaction[] | null = null;
+      let error: any = null;
+      
+      if (cardId) {
+        const result = await reactionRepository.getAllByCardId(cardId);
+        data = result;
+        // If the API returns an error property, handle it here
+      }
+      
+      // Additional endpoints for collection and comment reactions could be added here
+      
+      if (error) {
+        console.error('Error fetching reactions:', error);
+        return;
+      }
+      
+      if (data) {
+        setReactions(data);
+      }
+    } catch (err) {
+      console.error('Unexpected error fetching reactions:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  const getReactionCounts = (): ReactionCount[] => {
+    const counts: Record<ReactionType, { count: number; userReacted: boolean }> = {
+      like: { count: 0, userReacted: false },
+      love: { count: 0, userReacted: false },
+      wow: { count: 0, userReacted: false },
+      haha: { count: 0, userReacted: false },
+      sad: { count: 0, userReacted: false },
+      angry: { count: 0, userReacted: false }
+    };
+    
+    reactions.forEach(reaction => {
+      if (reaction.type in counts) {
+        counts[reaction.type as ReactionType].count++;
+        if (user && reaction.userId === user.id) {
+          counts[reaction.type as ReactionType].userReacted = true;
+        }
+      }
+    });
+    
+    return Object.entries(counts)
+      .map(([type, { count, userReacted }]) => ({ 
+        type: type as ReactionType, 
+        count, 
+        userReacted 
+      }))
+      .filter(item => item.count > 0 || item.type === 'like' || item.type === 'love');
+  };
+  
+  const handleReaction = async (type: ReactionType) => {
     if (!user) {
-      toast.error('User information not available');
+      toast.error('You must be logged in to react');
       return;
     }
-    
-    setIsSubmitting(true);
     
     try {
-      const userId = user.id;
-      const existingReaction = reactions.find(
-        r => r.userId === userId && r.type === type
-      );
+      const userReaction = reactions.find(r => r.userId === user.id);
+      const isSameType = userReaction?.type === type;
       
-      if (existingReaction) {
-        // Remove reaction
-        const updatedReactions = reactions.filter(r => !(r.userId === userId && r.type === type));
-        setReactions(updatedReactions);
-        onReactionChange?.(updatedReactions);
+      if (userReaction && isSameType) {
+        // Remove reaction if clicking the same type again
+        const success = await reactionRepository.remove(userReaction.id);
         
-        // In a real implementation, you'd call an API to delete the reaction
-        // await deleteReaction(existingReaction.id);
-        console.log('Reaction removed:', type);
+        if (!success) {
+          toast.error('Failed to update reaction');
+          return;
+        }
+        
+        setReactions(prev => prev.filter(r => r.userId !== user.id));
       } else {
-        // Add reaction
-        const newReaction: Reaction = {
-          id: `reaction-${Date.now()}`,
-          userId,
-          type,
-          targetType: effectiveTargetType,
-          targetId: effectiveTargetId,
-          createdAt: new Date().toISOString()
-        };
+        // Add or update reaction
+        const data = await reactionRepository.add(
+          user.id,
+          cardId,
+          collectionId,
+          commentId,
+          type
+        );
         
-        // In a real implementation, you'd call an API to create the reaction
-        // const response = await createReaction({ ...newReaction });
-        console.log('Reaction added:', type);
+        if (!data) {
+          toast.error('Failed to update reaction');
+          return;
+        }
         
-        // Successfully created, update local state
-        const newReactions = [...reactions, newReaction];
-        setReactions(newReactions);
-        onReactionChange?.(newReactions);
+        if (userReaction) {
+          // Update existing reaction
+          setReactions(prev => 
+            prev.map(r => r.userId === user.id ? data : r)
+          );
+        } else {
+          // Add new reaction
+          setReactions(prev => [...prev, data]);
+        }
       }
-    } catch (error) {
-      console.error('Error toggling reaction:', error);
-      toast.error('Failed to update reaction');
-    } finally {
-      setIsSubmitting(false);
+    } catch (err) {
+      console.error('Unexpected error handling reaction:', err);
+      toast.error('An unexpected error occurred');
     }
   };
   
-  // Size classes
-  const buttonSize = size === 'sm' ? 'h-8 px-2 text-xs' : 
-                    size === 'lg' ? 'h-12 px-5 text-lg' : 
-                    'h-10 px-3 text-sm';
-  
-  const iconSize = size === 'sm' ? 14 : size === 'lg' ? 20 : 16;
-
-  // For backward compatibility with components that use showComments
-  const renderCommentsButton = () => {
-    if (showComments !== undefined && onShowComments) {
-      return (
-        <Button
-          variant="ghost"
-          className={buttonSize}
-          onClick={onShowComments}
-        >
-          <MessageCircle size={iconSize} className="mr-1" />
-          <span>Comments</span>
-        </Button>
-      );
+  const handleShare = () => {
+    if (onShare) {
+      onShare();
+    } else {
+      setIsSharing(true);
+      
+      // Default share functionality
+      if (navigator.share) {
+        navigator.share({
+          title: 'Check out this card',
+          url: window.location.href,
+        })
+          .then(() => toast.success('Shared successfully'))
+          .catch((error) => {
+            if (error.name !== 'AbortError') {
+              console.error('Error sharing:', error);
+              toast.error('Failed to share');
+            }
+          })
+          .finally(() => setIsSharing(false));
+      } else {
+        navigator.clipboard.writeText(window.location.href)
+          .then(() => toast.success('Link copied to clipboard'))
+          .catch(() => toast.error('Failed to copy link'))
+          .finally(() => setIsSharing(false));
+      }
     }
-    return null;
   };
   
-  if (variant === 'minimal') {
-    return (
-      <div className="flex space-x-1">
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="h-8 w-8"
-          disabled={isSubmitting}
-          onClick={() => handleReaction('like')}
-        >
-          <ThumbsUp 
-            size={iconSize} 
-            className={hasUserLiked() ? 'text-blue-500 fill-blue-500' : ''} 
-          />
-        </Button>
-        <span className="text-sm text-gray-500">{getLikeCount()}</span>
-        {renderCommentsButton()}
-      </div>
-    );
-  }
+  const reactionCounts = getReactionCounts();
+  const totalReactions = reactions.length;
+  const userReactionType = user 
+    ? reactions.find(r => r.userId === user.id)?.type 
+    : undefined;
   
   return (
-    <div className="flex space-x-2">
+    <div className="flex flex-wrap items-center gap-2">
       <TooltipProvider>
+        {/* Like Button */}
         <Tooltip>
           <TooltipTrigger asChild>
             <Button 
-              variant={hasUserLiked() ? "default" : "ghost"} 
-              className={`${buttonSize} ${hasUserLiked() ? 'bg-blue-500 hover:bg-blue-600' : ''}`}
+              variant={userReactionType === 'like' ? 'default' : 'outline'} 
+              size="sm" 
+              className="gap-1.5"
               onClick={() => handleReaction('like')}
-              disabled={isSubmitting}
             >
-              <ThumbsUp size={iconSize} className="mr-1" />
-              <span>{getLikeCount()}</span>
+              <ThumbsUp className={`h-4 w-4 ${userReactionType === 'like' ? 'fill-current' : ''}`} />
+              {reactionCounts.find(r => r.type === 'like')?.count || ''}
             </Button>
           </TooltipTrigger>
-          <TooltipContent>
-            <p>{hasUserLiked() ? 'Unlike' : 'Like'}</p>
-          </TooltipContent>
+          <TooltipContent>Like</TooltipContent>
         </Tooltip>
-      </TooltipProvider>
-      
-      <TooltipProvider>
+        
+        {/* Love Button */}
         <Tooltip>
           <TooltipTrigger asChild>
             <Button 
-              variant={hasUserLoved() ? "default" : "ghost"} 
-              className={`${buttonSize} ${hasUserLoved() ? 'bg-red-500 hover:bg-red-600' : ''}`}
+              variant={userReactionType === 'love' ? 'default' : 'outline'} 
+              size="sm" 
+              className={`gap-1.5 ${userReactionType === 'love' ? 'bg-pink-500 hover:bg-pink-600 text-white' : ''}`}
               onClick={() => handleReaction('love')}
-              disabled={isSubmitting}
             >
-              <Heart size={iconSize} className="mr-1" />
-              <span>{getLoveCount()}</span>
+              <Heart className={`h-4 w-4 ${userReactionType === 'love' ? 'fill-current' : ''}`} />
+              {reactionCounts.find(r => r.type === 'love')?.count || ''}
             </Button>
           </TooltipTrigger>
-          <TooltipContent>
-            <p>{hasUserLoved() ? 'Remove Love' : 'Love'}</p>
-          </TooltipContent>
+          <TooltipContent>Love</TooltipContent>
         </Tooltip>
-      </TooltipProvider>
-      
-      {variant === 'expanded' && (
-        <TooltipProvider>
+        
+        {/* Wow Button */}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button 
+              variant={userReactionType === 'wow' ? 'default' : 'outline'} 
+              size="sm" 
+              className={`gap-1.5 ${userReactionType === 'wow' ? 'bg-yellow-500 hover:bg-yellow-600 text-white' : ''}`}
+              onClick={() => handleReaction('wow')}
+            >
+              <Star className={`h-4 w-4 ${userReactionType === 'wow' ? 'fill-current' : ''}`} />
+              {reactionCounts.find(r => r.type === 'wow')?.count || ''}
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Wow</TooltipContent>
+        </Tooltip>
+        
+        {/* Comments Button (if enabled) */}
+        {showComments !== undefined && onShowComments && (
           <Tooltip>
             <TooltipTrigger asChild>
               <Button 
-                variant={hasUserWowed() ? "default" : "ghost"} 
-                className={`${buttonSize} ${hasUserWowed() ? 'bg-yellow-500 hover:bg-yellow-600' : ''}`}
-                onClick={() => handleReaction('wow')}
-                disabled={isSubmitting}
+                variant={showComments ? 'default' : 'outline'} 
+                size="sm" 
+                className="gap-1.5"
+                onClick={onShowComments}
               >
-                <Star size={iconSize} className="mr-1" />
-                <span>{getWowCount()}</span>
+                <MessageCircle className="h-4 w-4" />
+                {commentsCount > 0 ? commentsCount : ''}
               </Button>
             </TooltipTrigger>
-            <TooltipContent>
-              <p>{hasUserWowed() ? 'Remove Wow' : 'Wow'}</p>
-            </TooltipContent>
+            <TooltipContent>Comments</TooltipContent>
           </Tooltip>
-        </TooltipProvider>
-      )}
+        )}
+        
+        {/* Share Button */}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleShare}
+              disabled={isSharing}
+              className="gap-1.5"
+            >
+              <Share className="h-4 w-4" />
+              Share
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Share</TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
       
-      {renderCommentsButton()}
+      {/* Reactions summary (can be expanded with user icons for who reacted) */}
+      {totalReactions > 0 && (
+        <div className="text-sm text-muted-foreground ml-1">
+          {totalReactions} reaction{totalReactions !== 1 ? 's' : ''}
+        </div>
+      )}
     </div>
   );
 };

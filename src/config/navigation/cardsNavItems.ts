@@ -1,37 +1,36 @@
 
-import { Grid, Star, Clock, Search, PlusCircle } from "lucide-react";
-import type { NavItem } from './types';
+import { 
+  Image, 
+  PlusCircle,
+  Zap,
+  Eye 
+} from 'lucide-react';
+import { NavigationItem } from './types';
 
-export const cardsNavItems: NavItem[] = [
+// Cards section navigation
+export const cardsNavItems: NavigationItem[] = [
   {
-    title: "All Cards",
-    path: "/cards",
-    icon: Grid,
-    description: "Browse all cards"
+    title: 'All Cards',
+    path: '/cards',
+    icon: Image,
+    description: 'Browse your complete collection'
   },
   {
-    title: "Featured Cards",
-    path: "/cards/featured",
-    icon: Star,
-    description: "View featured cards"
-  },
-  {
-    title: "Recent Cards",
-    path: "/cards/recent",
-    icon: Clock,
-    description: "Recently added cards"
-  },
-  {
-    title: "Create Card",
-    path: "/cards/create",
+    title: 'Create Card',
+    path: '/cards/create',
     icon: PlusCircle,
-    description: "Create a new card",
-    highlight: true
+    description: 'Create a new digital card'
   },
   {
-    title: "Search Cards",
-    path: "/cards/search",
-    icon: Search,
-    description: "Search for cards"
+    title: 'Card Effects',
+    path: '/cards/effects',
+    icon: Zap,
+    description: 'Explore visual effects for cards'
+  },
+  {
+    title: 'Card Detector',
+    path: '/detector',
+    icon: Eye,
+    description: 'Scan and digitize physical cards'
   }
 ];

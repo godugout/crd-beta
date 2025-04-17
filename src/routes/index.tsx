@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { RouteObject } from 'react-router-dom';
 import CardDetail from '@/pages/CardDetail';
@@ -5,10 +6,11 @@ import CardGallery from '@/pages/CardGallery';
 import Profile from '@/pages/Profile';
 import Dashboard from '@/pages/Dashboard';
 
-// Import correctly from mainRoutes (now exports both default and named)
-import mainRoutes, { mainRoutes as namedMainRoutes } from './mainRoutes';
-import { teamRoutes } from './teamRoutes';
-import { townRoutes } from './townRoutes';
+// Import the town-related routes
+import TeamDetail from '@/pages/TeamDetail';
+import TownDetail from '@/pages/TownDetail';
+import { teamRoutes } from './teamRoutes';  // Keep for backward compatibility
+import { townRoutes } from './townRoutes';  // Add new town routes
 
 // Import admin page
 import Admin from '@/pages/Admin';
@@ -16,6 +18,7 @@ import Admin from '@/pages/Admin';
 // Import other route collections
 import { cardRoutes } from './cardRoutes';
 import { collectionRoutes } from './collectionRoutes';
+import { mainRoutes } from './mainRoutes';
 import { baseballRoutes } from './baseballRoutes';
 import featureRoutes from './featureRoutes';
 
@@ -25,17 +28,10 @@ const SeriesManagerPage = React.lazy(() => import('@/pages/SeriesManagerPage'));
 const DeckViewPage = React.lazy(() => import('@/pages/DeckViewPage'));
 const SeriesViewPage = React.lazy(() => import('@/pages/SeriesViewPage'));
 
-// Replace missing components with appropriate placeholders 
-// or import them if they exist elsewhere
-import NotFound from '@/pages/NotFound';
-// Define placeholder components for missing pages
-const TeamDetail = NotFound;
-const TownDetail = NotFound;
-
 export const routes: RouteObject[] = [
   ...mainRoutes,
-  ...teamRoutes,
-  ...townRoutes,
+  ...teamRoutes, // Keep for backward compatibility
+  ...townRoutes, // Add new town routes
   ...baseballRoutes,
   ...featureRoutes,
   {

@@ -1,31 +1,75 @@
 
-import { Sparkles, Calendar, Users, Camera } from "lucide-react";
-import type { NavItem } from './types';
+import { 
+  Beaker, 
+  BookOpen, 
+  CaseSensitive, 
+  Code, 
+  Compass, 
+  Orbit, 
+  Pencil, 
+  PencilRuler, 
+  RotateCw, 
+  Sparkles,
+  Wand2 
+} from 'lucide-react';
+import { NavigationItem } from './types';
 
-export const featuresNavItems: NavItem[] = [
+// Features section navigation
+export const featuresNavItems: NavigationItem[] = [
   {
-    title: "Game Day Mode",
-    path: "/features/gameday",
-    icon: Calendar,
-    description: "Enhanced stadium experience",
-    highlight: true
-  },
-  {
-    title: "Group Memory",
-    path: "/group-memory-creator",
-    icon: Users,
-    description: "Create group memories"
-  },
-  {
-    title: "Card Detection",
-    path: "/detector",
-    icon: Camera,
-    description: "Scan physical cards"
-  },
-  {
-    title: "Labs",
-    path: "/features/labs",
+    title: 'Card Showcase',
+    path: '/features/card-showcase',
     icon: Sparkles,
-    description: "Experimental features"
+    description: 'Visual showcase of card design features'
+  },
+  {
+    title: 'Interactive Experiences',
+    path: '/features/experiences',
+    icon: Compass,
+    description: 'Interactive card-based experiences'
+  },
+  {
+    title: 'Card Creator Wizard',
+    path: '/card-creator',
+    icon: Wand2,
+    description: 'Create custom digital trading cards'
+  },
+  {
+    title: 'Dugout Labs',
+    path: '/features/labs',
+    icon: Beaker,
+    description: 'Experimental card features in development'
+  },
+  {
+    title: 'PBR Rendering',
+    path: '/features/pbr',
+    icon: Orbit,
+    description: 'Physically-based rendering for cards'
+  },
+  {
+    title: 'Card Animations',
+    path: '/features/animation',
+    icon: RotateCw,
+    description: 'Card animation and interaction effects'
+  },
+  {
+    title: 'Signature Technology',
+    path: '/features/signature',
+    icon: Pencil,
+    description: 'Digital signature authentication'
+  },
+  {
+    title: 'Developer Docs',
+    path: '/features/developer',
+    icon: Code,
+    description: 'API documentation and developer resources'
+  },
+  {
+    title: 'Caching Example',
+    path: '/features/cache-example',
+    icon: BookOpen,
+    description: 'Memory cache system demonstration'
   }
 ];
+
+export default featuresNavItems;

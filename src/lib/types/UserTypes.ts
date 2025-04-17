@@ -1,7 +1,6 @@
 
 import { UserRole as BaseUserRole } from '../types';
 
-// Export directly rather than as a type
 export { BaseUserRole as UserRole };
 
 export interface UserProfile {

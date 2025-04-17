@@ -43,13 +43,13 @@ const UserDropdown: React.FC<UserDropdownProps> = ({
   
   // Get the display name with appropriate fallbacks
   const getDisplayName = () => {
-    return user.displayName || user.username || 'User';
+    return user.displayName || user.name || 'User';
   };
 
-  // Get the first letter of the email or displayName for avatar fallback
+  // Get the first letter of the name or email for avatar fallback
   const getAvatarInitial = () => {
     if (user.displayName) return user.displayName.charAt(0).toUpperCase();
-    if (user.username) return user.username.charAt(0).toUpperCase();
+    if (user.name) return user.name.charAt(0).toUpperCase();
     return user.email ? user.email.charAt(0).toUpperCase() : 'U';
   };
   

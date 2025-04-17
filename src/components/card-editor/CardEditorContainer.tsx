@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCards } from '@/context/CardContext';
@@ -10,7 +11,6 @@ import CardEditorNavigation from './components/CardEditorNavigation';
 import CardEditorPreview from './components/CardEditorPreview';
 import CardEditorActions from './components/CardEditorActions';
 import { DEFAULT_DESIGN_METADATA } from '@/lib/utils/cardDefaults';
-import { CardRarity } from '@/lib/types';
 
 interface CardEditorContainerProps {
   card?: any;
@@ -55,15 +55,7 @@ const CardEditorContainer: React.FC<CardEditorContainerProps> = ({
   
   const handleSubmit = async () => {
     const cardData = {
-      title: cardState.title,
-      description: cardState.description,
-      imageUrl: cardState.imageUrl || '',
-      thumbnailUrl: cardState.imageUrl || '',
-      tags: cardState.tags || [],
-      isPublic: true,
-      userId: 'anonymous',
-      effects: cardState.selectedEffects || [],
-      rarity: CardRarity.COMMON,
+      ...cardState.getCardData(),
       designMetadata: {
         cardStyle: cardState.cardStyle || DEFAULT_DESIGN_METADATA.cardStyle,
         textStyle: DEFAULT_DESIGN_METADATA.textStyle,
@@ -77,19 +69,23 @@ const CardEditorContainer: React.FC<CardEditorContainerProps> = ({
     };
     
     try {
+      // If onSave prop is provided, use it
       if (onSave) {
         onSave(cardData);
         return;
       }
       
       if (card) {
+        // Update existing card
         await updateCard(card.id, cardData);
         toast.success('CRD updated successfully');
       } else {
+        // Add new card
         await addCard(cardData);
         toast.success('CRD created successfully');
       }
       
+      // Navigate to gallery with a refresh parameter to ensure updated data is fetched
       navigate('/gallery?refresh=true');
     } catch (error) {
       console.error('Error saving card:', error);
@@ -98,11 +94,13 @@ const CardEditorContainer: React.FC<CardEditorContainerProps> = ({
   };
 
   const handleCancel = () => {
+    // If onCancel prop is provided, use it
     if (onCancel) {
       onCancel();
       return;
     }
     
+    // Default cancel behavior - navigate back
     navigate(-1);
   };
 

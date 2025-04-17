@@ -8,45 +8,71 @@ import {
   townsNavItems, 
   featuresNavItems,
   baseballNavItems
-} from '@/config/navigation/index';
-
-// Helper to ensure all required properties exist
-const processNavItem = (item: any) => ({
-  title: item.title,
-  path: item.path,
-  icon: item.icon,
-  highlight: item.highlight || false,
-  description: item.description || ''
-});
+} from '@/config/navigation';
 
 // Define navigation groups for better organization with consistent paths
 export const navigationGroups: NavigationGroup[] = [
   {
     title: "MAIN",
-    items: mainNavItems.map(processNavItem)
+    items: mainNavItems.map(item => ({
+      title: item.title,
+      path: item.path,
+      icon: item.icon,
+      highlight: item.highlight
+    }))
   },
   {
     title: "CARDS",
-    items: cardsNavItems.map(processNavItem)
+    items: cardsNavItems.map(item => ({
+      title: item.title,
+      path: item.path,
+      icon: item.icon,
+      highlight: item.highlight
+    }))
   },
   {
     title: "COLLECTIONS",
-    items: collectionsNavItems.map(processNavItem)
+    items: collectionsNavItems.map(item => ({
+      title: item.title,
+      path: item.path,
+      icon: item.icon,
+      highlight: item.highlight
+    }))
   },
   {
     title: "TOWNS",
-    items: townsNavItems.map(processNavItem)
+    items: townsNavItems.map(item => ({
+      title: item.title,
+      path: item.path,
+      icon: item.icon,
+      highlight: item.highlight
+    }))
   },
   {
     title: "TEAMS",
-    items: teamsNavItems.map(processNavItem)
+    items: teamsNavItems.map(item => ({
+      title: item.title,
+      path: item.path,
+      icon: item.icon,
+      highlight: item.highlight
+    }))
   },
   {
     title: "FEATURES",
-    items: featuresNavItems.map(processNavItem)
+    items: featuresNavItems.map(item => ({
+      title: item.title,
+      path: item.path,
+      icon: item.icon,
+      highlight: item.highlight
+    }))
   },
   {
     title: "BASEBALL",
-    items: baseballNavItems.map(processNavItem)
+    items: baseballNavItems.map(item => ({
+      title: item.title,
+      path: item.path,
+      icon: item.icon,
+      highlight: item.highlight
+    }))
   }
 ];

@@ -2,104 +2,84 @@
 import { BaseEntity } from './index';
 
 /**
- * Enumeration of possible user roles in the system
+ * User roles for permission management
  */
 export enum UserRole {
   ADMIN = 'admin',
-  MODERATOR = 'moderator',
   USER = 'user',
-  GUEST = 'guest',
-  ARTIST = 'artist',  // Added ARTIST role
-  FAN = 'fan'         // Added FAN role
+  PREMIUM = 'premium',
+  CREATOR = 'creator',
+  MODERATOR = 'moderator'
 }
 
 /**
- * Type definition for user permissions
- * These control specific actions users can perform within the application
+ * User permission types
  */
 export type UserPermission = 
-  | 'read:cards' 
-  | 'write:cards' 
-  | 'delete:cards'
-  | 'read:collections'
-  | 'write:collections'
-  | 'delete:collections'
-  | 'read:users'
-  | 'write:users'
-  | 'admin:access'
-  | 'create:series'
-  | 'read:all'
-  | 'write:all'
-  | 'create:card'   // Added additional permissions
-  | 'edit:card'     // to match those used in the code
-  | 'delete:card'
-  | 'view:dashboard'
-  | 'manage:users';
-
-// Constants for permission values to use in code
-export const UserPermissionValues = {
-  CREATE_CARD: 'create:card' as UserPermission,
-  EDIT_CARD: 'edit:card' as UserPermission,
-  DELETE_CARD: 'delete:card' as UserPermission,
-  VIEW_DASHBOARD: 'view:dashboard' as UserPermission,
-  MANAGE_USERS: 'manage:users' as UserPermission,
-  ADMIN_ACCESS: 'admin:access' as UserPermission,
-  READ_ALL: 'read:all' as UserPermission,
-  WRITE_ALL: 'write:all' as UserPermission
-};
+  | 'read:own' 
+  | 'write:own' 
+  | 'delete:own' 
+  | 'read:all' 
+  | 'write:all' 
+  | 'delete:all' 
+  | 'premium:features'
+  | 'create:premium'
+  | 'moderate:content'
+  | 'all';
 
 /**
- * Mapping of roles to permissions
- * Defines which permissions are granted to each role by default
+ * Role to permission mapping
  */
 export const ROLE_PERMISSIONS: Record<UserRole, UserPermission[]> = {
-  [UserRole.ADMIN]: ['read:cards', 'write:cards', 'delete:cards', 'read:collections', 'write:collections', 'delete:collections', 'read:users', 'write:users', 'admin:access', 'create:series', 'read:all', 'write:all', 'create:card', 'edit:card', 'delete:card', 'view:dashboard', 'manage:users'],
-  [UserRole.MODERATOR]: ['read:cards', 'write:cards', 'read:collections', 'write:collections', 'read:users', 'create:card', 'edit:card'],
-  [UserRole.USER]: ['read:cards', 'write:cards', 'read:collections', 'create:card'],
-  [UserRole.GUEST]: ['read:cards', 'read:collections'],
-  [UserRole.ARTIST]: ['read:cards', 'write:cards', 'read:collections', 'write:collections', 'create:card', 'edit:card', 'create:series'],
-  [UserRole.FAN]: ['read:cards', 'read:collections']
+  [UserRole.ADMIN]: ['all'],
+  [UserRole.USER]: ['read:own', 'write:own', 'delete:own'],
+  [UserRole.PREMIUM]: ['read:own', 'write:own', 'delete:own', 'premium:features'],
+  [UserRole.CREATOR]: ['read:own', 'write:own', 'delete:own', 'create:premium'],
+  [UserRole.MODERATOR]: ['read:own', 'write:own', 'delete:own', 'moderate:content']
 };
 
 /**
- * User interface representing a user in the system
+ * User interface for authentication and profiles
  */
 export interface User extends BaseEntity {
   email: string;
   name?: string;
+  displayName?: string;
   username?: string;
-  displayName?: string; // Added displayName
   avatarUrl?: string;
+  bio?: string;
   role: UserRole;
   permissions?: UserPermission[];
-  createdAt: string;
-  updatedAt: string;
-  isVerified?: boolean;
-  isActive?: boolean;
-  teamIds?: string[];
-  bio?: string;       // Added bio
+  preferences?: Record<string, any>;
 }
 
 /**
- * Team interface representing a team in the system
+ * Extended user profile with additional information
  */
-export interface Team extends BaseEntity {
-  name: string;
-  description?: string;
-  logoUrl?: string;
-  ownerId: string;
-  createdAt: string;
-  updatedAt: string;
-  memberIds?: string[];
+export interface UserProfile extends User {
+  followers?: number;
+  following?: number;
+  cardCount?: number;
+  collectionCount?: number;
+  joinDate?: string;
+  socialLinks?: {
+    twitter?: string;
+    instagram?: string;
+    website?: string;
+  };
 }
 
 /**
- * TeamMember interface representing a member of a team
+ * Database representation of User for Supabase mapping
  */
-export interface TeamMember extends BaseEntity {
-  teamId: string;
-  userId: string;
-  role: 'owner' | 'admin' | 'member' | 'viewer';
-  joinedAt: string;
-  user?: User;
+export interface DbUser {
+  id: string;
+  email: string;
+  display_name?: string;
+  full_name?: string;
+  username?: string;
+  avatar_url?: string;
+  created_at: string;
+  updated_at: string;
+  role?: string;
 }

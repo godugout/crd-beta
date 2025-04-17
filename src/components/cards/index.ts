@@ -1,19 +1,12 @@
 
-// Re-export all card components for easy imports
-import CardThumbnail from './CardThumbnail';
-import CardGrid from './CardGrid';
-import Card from './Card';
-import CardActions from './CardActions';
-import CardList from './CardList';
-import CardDetailed from './CardDetailed';
-import RelatedCards from './RelatedCards';
+export { default as CardBase } from './CardBase';
+export { CardImage } from './CardImage';
+export { CardInfoOverlay } from './CardInfoOverlay';
+export { default as CardThumbnail } from './CardThumbnail';
+export { default as CardDetailed } from './CardDetailed';
+export { default as RelatedCards } from './RelatedCards';
 
-export {
-  CardThumbnail,
-  CardGrid,
-  Card,
-  CardActions,
-  CardList,
-  CardDetailed,
-  RelatedCards,
-};
+// Types
+export type { CardBaseProps } from './CardBase';
+export type { CardThumbnailProps } from './CardThumbnail';
+export type { CardDetailedProps } from './CardDetailed';

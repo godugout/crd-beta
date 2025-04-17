@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
@@ -7,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { ArrowLeft, Upload, SortDesc } from 'lucide-react';
-import { Series, ReleaseType } from '@/lib/types/enhancedCardTypes';
+import { Series } from '@/lib/types/enhancedCardTypes';
 import { useEnhancedCards } from '@/context/CardEnhancedContext';
 import { toast } from 'sonner';
 
@@ -43,8 +44,8 @@ const SeriesManager: React.FC<SeriesManagerProps> = ({ initialSeries }) => {
     setSeriesData(prev => ({ ...prev, isPublished: checked }));
   };
   
-  const handleReleaseTypeChange = (type: ReleaseType) => {
-    setSeriesData(prev => ({ ...prev, releaseType: type as ReleaseType }));
+  const handleReleaseTypeChange = (type: 'standard' | 'limited' | 'exclusive') => {
+    setSeriesData(prev => ({ ...prev, releaseType: type }));
   };
   
   const handleUploadCover = () => {
@@ -137,7 +138,7 @@ const SeriesManager: React.FC<SeriesManagerProps> = ({ initialSeries }) => {
           <div>
             <Label>Release Type</Label>
             <div className="grid grid-cols-3 gap-2 mt-2">
-              {(['standard', 'limited', 'promotional', 'exclusive'] as const).map(type => (
+              {(['standard', 'limited', 'exclusive'] as const).map(type => (
                 <Button
                   key={type}
                   type="button"

@@ -1,31 +1,43 @@
 
-import { Home, GalleryHorizontal, FolderOpen, PenLine, UserCircle } from "lucide-react";
-import type { NavItem } from './types';
+import { 
+  Home, 
+  Image, 
+  Layers, 
+  Users, 
+  MessageCircle 
+} from 'lucide-react';
+import { NavigationItem } from './types';
 
-export const mainNavItems: NavItem[] = [
-  {
-    title: 'Home',
+// Main navigation items that appear in both desktop and mobile navigation
+export const mainNavItems: NavigationItem[] = [
+  { 
+    title: 'Home', 
     path: '/',
-    icon: Home
+    icon: Home,
+    description: 'Dashboard and overview'
   },
-  {
-    title: 'Gallery',
-    path: '/gallery',
-    icon: GalleryHorizontal
+  { 
+    title: 'Cards', 
+    path: '/cards',
+    icon: Image,
+    description: 'Your digital card collection'
   },
-  {
-    title: 'Collections',
+  { 
+    title: 'Collections', 
     path: '/collections',
-    icon: FolderOpen
+    icon: Layers,
+    description: 'Organized card collections'
   },
-  {
-    title: 'Create',
-    path: '/create',
-    icon: PenLine
+  { 
+    title: 'Teams', 
+    path: '/teams',
+    icon: Users,
+    description: 'Team-based collections'
   },
-  {
-    title: 'Profile',
-    path: '/profile',
-    icon: UserCircle
+  { 
+    title: 'Community', 
+    path: '/community',
+    icon: MessageCircle,
+    description: 'Connect with other collectors'
   }
 ];

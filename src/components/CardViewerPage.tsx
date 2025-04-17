@@ -1,13 +1,12 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useCards } from '@/hooks/useCards';
+import { useCards } from '@/context/CardContext';
 import CardViewer from '@/components/card-viewer/CardViewer';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import PageLayout from '@/components/navigation/PageLayout';
 import { toast } from 'sonner';
-import { adaptToCard } from '@/lib/adapters/typeAdapters';
 
 const CardViewerPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -17,19 +16,6 @@ const CardViewerPage = () => {
   
   const card = id ? getCardById(id) : undefined;
   const cardIndex = card ? cards.findIndex(c => c.id === card.id) : -1;
-  
-  // Helper to safely extract properties from designMetadata
-  const getCardProperty = (property: string, fallback: string = ''): string => {
-    if (!card) return fallback;
-    if (card[property as keyof typeof card]) return card[property as keyof typeof card] as string;
-    if (card.designMetadata?.[property]) return card.designMetadata[property] as string;
-    return fallback;
-  };
-  
-  // Safely extract properties for display
-  const cardPlayer = getCardProperty('player', '');
-  const cardTeam = getCardProperty('team', '');
-  const cardYear = getCardProperty('year', '');
   
   // Handle keyboard navigation
   useEffect(() => {
@@ -96,8 +82,6 @@ const CardViewerPage = () => {
     toast.info('Card snapshot feature coming soon');
   };
   
-  const processedCard = adaptToCard(card);
-  
   return (
     <>
       <PageLayout
@@ -109,14 +93,11 @@ const CardViewerPage = () => {
           <div className="flex flex-col md:flex-row md:items-start gap-8">
             <div className="w-full md:w-2/3 mx-auto md:mx-0 max-w-xl relative">
               <CardViewer 
-                card={processedCard}
-                isFlipped={false}
-                activeEffects={processedCard.effects || []}
+                card={card}
+                onFullscreenToggle={() => setFullscreen(true)}
                 onShare={handleShare}
                 onCapture={handleCapture}
                 onBack={() => navigate('/')}
-                isFullscreen={false}
-                onClose={() => {}}
               />
             </div>
             
@@ -127,24 +108,24 @@ const CardViewerPage = () => {
                 {card.description && <p className="text-gray-300 mb-4">{card.description}</p>}
                 
                 <div className="grid grid-cols-2 gap-4 mb-6">
-                  {cardPlayer && (
+                  {card.player && (
                     <div>
                       <p className="text-sm text-gray-500">Player</p>
-                      <p className="font-medium">{cardPlayer}</p>
+                      <p className="font-medium">{card.player}</p>
                     </div>
                   )}
                   
-                  {cardTeam && (
+                  {card.team && (
                     <div>
                       <p className="text-sm text-gray-500">Team</p>
-                      <p className="font-medium">{cardTeam}</p>
+                      <p className="font-medium">{card.team}</p>
                     </div>
                   )}
                   
-                  {cardYear && (
+                  {card.year && (
                     <div>
                       <p className="text-sm text-gray-500">Year</p>
-                      <p className="font-medium">{cardYear}</p>
+                      <p className="font-medium">{card.year}</p>
                     </div>
                   )}
                 </div>
@@ -190,13 +171,12 @@ const CardViewerPage = () => {
         </div>
       </PageLayout>
       
-      {fullscreen && processedCard && (
+      {fullscreen && (
         <div className="fixed inset-0 z-50 bg-black">
           <CardViewer
-            card={processedCard}
-            isFlipped={false}
-            activeEffects={processedCard.effects || []}
-            isFullscreen={true}
+            card={card}
+            fullscreen={true}
+            onFullscreenToggle={() => setFullscreen(false)}
             onShare={handleShare}
             onCapture={handleCapture}
             onClose={() => setFullscreen(false)}

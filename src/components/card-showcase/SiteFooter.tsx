@@ -2,7 +2,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Github, Twitter, Instagram, Linkedin } from 'lucide-react';
-import { footerLinks } from '@/config/navigation/footerLinks';
+import { footerLinks } from '@/config/navigation';
 
 const SiteFooter = () => {
   return (

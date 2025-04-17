@@ -1,62 +1,54 @@
 
-import { Card } from '@/lib/types';
-import { CardRarity } from '@/lib/types/cardTypes';
-import { adaptToCard } from './typeAdapters';
+import { Card, DesignMetadata } from '@/lib/types';
+import { DEFAULT_DESIGN_METADATA } from '@/lib/utils/cardDefaults';
 
 /**
- * Safely adapts any card-like object to a valid Card type
- * For backward compatibility with other adapter patterns
+ * Adapts partial card data to a complete Card object
  */
-export { adaptToCard } from './typeAdapters';
+export const adaptToCard = (data: Partial<Card>): Card => {
+  const now = new Date().toISOString();
+  
+  // Ensure designMetadata has all required properties
+  const designMetadata: DesignMetadata = {
+    ...DEFAULT_DESIGN_METADATA,
+    ...data.designMetadata,
+    cardStyle: {
+      ...DEFAULT_DESIGN_METADATA.cardStyle,
+      ...data.designMetadata?.cardStyle
+    },
+    textStyle: {
+      ...DEFAULT_DESIGN_METADATA.textStyle,
+      ...data.designMetadata?.textStyle
+    },
+    cardMetadata: {
+      ...DEFAULT_DESIGN_METADATA.cardMetadata,
+      ...data.designMetadata?.cardMetadata
+    },
+    marketMetadata: {
+      ...DEFAULT_DESIGN_METADATA.marketMetadata,
+      ...data.designMetadata?.marketMetadata
+    }
+  };
 
-/**
- * Default design metadata for cards that don't have it
- */
-export const DEFAULT_DESIGN_METADATA = {
-  cardStyle: {
-    template: 'standard',
-    effect: 'standard',
-    borderRadius: '8px',
-    borderColor: '#000000',
-    shadowColor: '#000000',
-    frameWidth: 5,
-    frameColor: '#000000'
-  },
-  textStyle: {
-    titleColor: '#000000',
-    titleAlignment: 'center',
-    titleWeight: 'bold',
-    descriptionColor: '#333333'
-  },
-  cardMetadata: {
-    category: 'standard',
-    series: 'default',
-    cardType: 'standard'
-  },
-  marketMetadata: {
-    isPrintable: true,
-    isForSale: false,
-    includeInCatalog: false
-  }
+  return {
+    id: data.id || `card-${Date.now()}`,
+    title: data.title || 'Untitled Card',
+    description: data.description || '',
+    imageUrl: data.imageUrl || '/placeholder-card.png',
+    thumbnailUrl: data.thumbnailUrl || data.imageUrl || '/placeholder-card-thumb.png',
+    tags: data.tags || [],
+    userId: data.userId || 'anonymous',
+    effects: data.effects || [],
+    createdAt: data.createdAt || now,
+    updatedAt: data.updatedAt || now,
+    player: data.player,
+    team: data.team,
+    year: data.year,
+    collectionId: data.collectionId,
+    reactions: data.reactions || [],
+    comments: data.comments || [],
+    rarity: data.rarity,
+    fabricSwatches: data.fabricSwatches || [],
+    designMetadata
+  };
 };
-
-/**
- * Create a new card with default values
- */
-export function createDefaultCard(partial: Partial<Card> = {}): Card {
-  return adaptToCard({
-    id: `card-${Date.now()}`,
-    title: 'New Card',
-    description: '',
-    imageUrl: '',
-    thumbnailUrl: '',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    userId: 'anonymous',
-    effects: [],
-    rarity: CardRarity.COMMON,
-    designMetadata: DEFAULT_DESIGN_METADATA,
-    isFavorite: false,
-    ...partial
-  });
-}

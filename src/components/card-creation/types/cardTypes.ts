@@ -3,7 +3,6 @@
  * Core card creation types for the CRD application
  */
 
-// Import JsonValue from our central types
 import { JsonValue } from '@/lib/types';
 
 export interface CardDesignState {

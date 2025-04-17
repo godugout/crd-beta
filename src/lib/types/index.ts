@@ -1,16 +1,11 @@
-
-/**
- * Central type exports for the CRD application
- * This file consolidates all type definitions and provides proper exports
- */
-
-import { Card } from './card';
-import { Comment, Reaction } from './interaction';
-import { User, UserRole, UserPermission } from './user';
-import { ROLE_PERMISSIONS } from './user';
-import { CardRarity, DesignMetadata } from './cardTypes';
-import { Collection } from './collection';
-import { OaklandMemoryData as IndexOaklandMemoryData } from './oaklandMemory';
+// Base types that might be used across modules
+export type JsonValue = 
+  | string 
+  | number 
+  | boolean 
+  | null 
+  | JsonValue[] 
+  | { [key: string]: JsonValue };
 
 export interface BaseEntity {
   id: string;
@@ -18,16 +13,28 @@ export interface BaseEntity {
   updatedAt?: string;
 }
 
-export interface JsonValue {
-  [key: string]: string | number | boolean | null | JsonValue | JsonValue[];
-}
+// For backward compatibility with JsonObject
+export type JsonObject = Record<string, JsonValue>;
 
-// Re-export all types
-export { ROLE_PERMISSIONS, UserRole, CardRarity };
+// Export updated type definitions
+export * from './cardTypes';
+export * from './interaction';
+export * from './user';
+export * from './collection';
+export * from './instagram';
+export * from './teamTypes';
+export type { CardEffect, CardEffectSettings } from './cardEffects';
 
-// Re-export types with explicit type keyword for TypeScript modules
-export type { Card, Comment, Reaction, User, UserPermission, DesignMetadata, Collection };
+// Don't re-export enhancedCardTypes directly to avoid ambiguity
+import * as EnhancedCardTypes from './enhancedCardTypes';
+export type { 
+  CardRarity as EnhancedCardRarity,
+  HotspotData as EnhancedHotspotData,
+  EnhancedCard as ExtendedCard,
+  Series as EnhancedSeries,
+} from './enhancedCardTypes';
 
-// Re-export the OaklandMemoryData type from oaklandMemory.ts
-export type { OaklandMemoryData } from './oaklandMemory';
-
+// For backward compatibility, keep the old imports as well
+// But we should gradually migrate to using the centralized types
+import * as OldTypes from '@/types/card';
+export const oldTypes = OldTypes;

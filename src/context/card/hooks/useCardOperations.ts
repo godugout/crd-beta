@@ -1,81 +1,93 @@
 
-import { useState } from 'react';
+import { useState, useCallback, useEffect } from 'react';
+import { Card } from '@/lib/types/card';
 import { v4 as uuidv4 } from 'uuid';
-import { Card } from '@/lib/types';
-import { toast } from 'sonner';
+import { adaptToCard } from '@/lib/adapters/cardAdapter';
 
-export default function useCardOperations() {
-  const [cards, setCards] = useState<Card[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+// Mock data for development
+const initialCards: Card[] = [
+  adaptToCard({
+    id: '1',
+    title: 'Sample Card',
+    description: 'This is a sample card for development',
+    imageUrl: '/placeholder.svg',
+    thumbnailUrl: '/placeholder.svg',
+    tags: ['sample', 'development'],
+    userId: 'user1',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    effects: [], // Add required effects property
+  }),
+];
 
-  const addCard = async (cardData: Omit<Card, "id" | "createdAt" | "updatedAt">): Promise<Card> => {
-    setIsLoading(true);
-    try {
-      const newCard: Card = {
-        ...cardData,
-        id: uuidv4(),
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-      
-      setCards(prevCards => [...prevCards, newCard]);
-      toast.success("Card created successfully");
-      return newCard;
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error('Failed to create card');
-      setError(error);
-      toast.error(`Error creating card: ${error.message}`);
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
-  };
+export const useCardOperations = () => {
+  const [cards, setCards] = useState<Card[]>(initialCards);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const updateCard = async (id: string, updates: Partial<Card>): Promise<boolean> => {
-    setIsLoading(true);
-    try {
-      setCards(prevCards =>
-        prevCards.map(card =>
-          card.id === id
-            ? { ...card, ...updates, updatedAt: new Date().toISOString() }
-            : card
-        )
-      );
-      toast.success("Card updated successfully");
-      return true;
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error('Failed to update card');
-      setError(error);
-      toast.error(`Error updating card: ${error.message}`);
-      return false;
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // Load cards from localStorage on initial render
+  useEffect(() => {
+    const loadCards = () => {
+      try {
+        const savedCards = localStorage.getItem('cards');
+        if (savedCards) {
+          // Parse stored cards and ensure they match the current Card type requirements
+          const parsedCards = JSON.parse(savedCards);
+          setCards(parsedCards.map((card: Partial<Card>) => adaptToCard(card)));
+        }
+      } catch (err) {
+        console.error('Error loading cards from storage:', err);
+      }
+    };
 
-  const deleteCard = async (id: string): Promise<boolean> => {
-    setIsLoading(true);
-    try {
-      setCards(prevCards => prevCards.filter(card => card.id !== id));
-      toast.success("Card deleted successfully");
-      return true;
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error('Failed to delete card');
-      setError(error);
-      toast.error(`Error deleting card: ${error.message}`);
-      return false;
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    loadCards();
+  }, []);
+
+  // Update localStorage whenever cards change
+  useEffect(() => {
+    localStorage.setItem('cards', JSON.stringify(cards));
+  }, [cards]);
+
+  const getCardById = useCallback((id: string): Card | undefined => {
+    return cards.find(card => card.id === id);
+  }, [cards]);
+
+  const addCard = useCallback((card: Omit<Card, 'id' | 'createdAt' | 'updatedAt'>) => {
+    const newCard: Card = adaptToCard({
+      ...card,
+      id: uuidv4(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+
+    setCards(prevCards => [...prevCards, newCard]);
+    return newCard;
+  }, []);
+
+  const updateCard = useCallback((id: string, updates: Partial<Card>) => {
+    setCards(prevCards =>
+      prevCards.map(card =>
+        card.id === id
+          ? adaptToCard({ ...card, ...updates, updatedAt: new Date().toISOString() })
+          : card
+      )
+    );
+  }, []);
+
+  const deleteCard = useCallback((id: string) => {
+    setCards(prevCards => prevCards.filter(card => card.id !== id));
+  }, []);
 
   return {
     cards,
     isLoading,
     error,
+    getCardById,
     addCard,
     updateCard,
-    deleteCard
+    deleteCard,
   };
-}
+};
+
+// Export types for consumers
+export type CardOperations = ReturnType<typeof useCardOperations>;

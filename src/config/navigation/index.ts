@@ -1,22 +1,9 @@
 
-// Export the interfaces from a single source
-export { type NavItem, type NavGroup } from './types';
-
-// Import and re-export all navigation items centrally
-import { mainNavItems } from './mainNavItems';
-import { cardsNavItems } from './cardsNavItems';
-import { collectionsNavItems } from './collectionsNavItems';
-import { featuresNavItems } from './featuresNavItems';
-import { baseballNavItems } from './baseballNavItems';
-import { townsNavItems } from './townsNavItems';
-import { teamsNavItems } from './teamsNavItems';
-
-export {
-  mainNavItems,
-  cardsNavItems,
-  collectionsNavItems,
-  featuresNavItems,
-  baseballNavItems,
-  townsNavItems,
-  teamsNavItems
-};
+export { cardsNavItems } from './cardsNavItems';
+export { collectionsNavItems } from './collectionsNavItems';
+export { featuresNavItems } from './featuresNavItems';
+export { teamsNavItems } from './teamsNavItems'; // Keep for backward compatibility
+export { townsNavItems } from './townsNavItems'; // Add new towns navigation
+export { baseballNavItems } from './baseballNavItems';
+export { mainNavItems } from './mainNavItems';
+export { footerLinks } from './footerLinks';

@@ -1,78 +1,67 @@
 
-import { CardRarity } from './cardTypes';
-import { Card as BaseCard } from './card';
+import { BaseCard } from './cardTypes';
+import { User } from './user';
 
-/**
- * Export CardRarity to make it available to other modules
- */
-export { CardRarity };
+export type CardRarity = 'common' | 'uncommon' | 'rare' | 'ultra-rare' | 'legendary' | 'one-of-one';
 
-/**
- * EnhancedCard with additional properties, maintaining compatibility
- * with the main Card type but allowing for specialized usage
- * 
- * NOTE: This extends the main Card type but overrides 'edition'
- * to use a different format (number instead of object)
- */
-export interface EnhancedCard extends Omit<BaseCard, 'edition'> {
+export interface HotspotData {
+  id: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  content: string;
+  type: 'text' | 'link' | 'image' | 'video';
+  visible: boolean;
+}
+
+export interface EnhancedCard extends BaseCard {
+  rarity?: CardRarity; // Make rarity optional to match cardTypes.ts
   cardNumber?: string;
   seriesId?: string;
   artistId?: string;
+  artistProfile?: User;
   artistName?: string;
+  edition?: number;
   editionSize?: number;
-  edition?: number; // Numeric edition format differs from Card's object format
   releaseDate?: string;
   qrCodeData?: string;
+  hotspots?: HotspotData[];
   marketData?: {
-    price: number;
-    currency: string;
-    availableForSale: boolean;
+    price?: number;
+    currency?: string;
+    availableForSale?: boolean;
     lastSoldPrice?: number;
     lastSoldDate?: string;
   };
-  views: number;
-  likes: number;
-  shares: number;
-  tags: string[]; // Ensure tags is required to match BaseCard
 }
 
-/**
- * Deck represents a collection of cards that can be used together
- */
-export interface Deck {
-  id: string;
-  name: string;
-  description?: string;
-  coverImageUrl?: string;
-  ownerId: string;
-  createdAt: string;
-  updatedAt: string;
-  cardIds: string[];
-  isPublic: boolean;
-  cards?: BaseCard[];
-}
-
-/**
- * Defines the types of card releases
- */
-export type ReleaseType = 'standard' | 'limited' | 'promotional' | 'exclusive';
-
-/**
- * Series represents a collection of related cards that form a set
- */
 export interface Series {
   id: string;
-  name: string;
-  title?: string;
+  title: string;
   description: string;
   coverImageUrl: string;
   artistId: string;
+  artist?: User;
   createdAt: string;
   updatedAt: string;
   releaseDate: string;
   totalCards: number;
   isPublished: boolean;
   cardIds: string[];
-  releaseType: ReleaseType;
-  cards?: BaseCard[];
+  cards?: EnhancedCard[];
+  releaseType: 'standard' | 'limited' | 'exclusive';
+}
+
+export interface Deck {
+  id: string;
+  name: string;
+  description: string;
+  coverImageUrl: string;
+  ownerId: string;
+  createdAt: string;
+  updatedAt: string;
+  cardIds: string[];
+  cards?: EnhancedCard[];
+  isPublic: boolean;
 }

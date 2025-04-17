@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 import { useCardPhysics } from '@/hooks/useCardPhysics';
 import '../../styles/card-interactions.css';
 
-export interface CardImageProps {
+interface CardImageProps {
   /**
    * Card data to display
    */
@@ -38,24 +38,6 @@ export interface CardImageProps {
    * Callback when card is flipped
    */
   onFlip?: (isFlipped: boolean) => void;
-  
-  /**
-   * Whether to prioritize loading this image
-   * @default false
-   */
-  priority?: boolean;
-  
-  /**
-   * Whether to fill the container
-   * @default false
-   */
-  fill?: boolean;
-  
-  /**
-   * Aspect ratio for the card
-   * @default undefined
-   */
-  aspectRatio?: string;
 }
 
 export const CardImage: React.FC<CardImageProps> = ({
@@ -64,10 +46,7 @@ export const CardImage: React.FC<CardImageProps> = ({
   flippable = true,
   enable3D = true,
   autoRotate = false,
-  onFlip,
-  priority = false,
-  fill = false,
-  aspectRatio
+  onFlip
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isFlipped, setIsFlipped] = useState(false);
@@ -187,18 +166,14 @@ export const CardImage: React.FC<CardImageProps> = ({
     setImageLoaded(false);
   };
 
-  // Apply aspect ratio class if provided
-  const containerClass = cn(
-    "card-container relative overflow-visible",
-    aspectRatio || "aspect-[2.5/3.5]",
-    isOutOfBounds && "boundary-warning",
-    className
-  );
-
   return (
     <div
       ref={containerRef}
-      className={containerClass}
+      className={cn(
+        "card-container relative aspect-[2.5/3.5] overflow-visible",
+        isOutOfBounds && "boundary-warning",
+        className
+      )}
       onPointerDown={enable3D ? physics.handlePointerDown : undefined}
       onPointerMove={enable3D ? physics.handlePointerMove : undefined}
       onPointerUp={enable3D ? physics.handlePointerUp : undefined}

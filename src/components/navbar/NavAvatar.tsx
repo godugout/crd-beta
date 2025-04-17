@@ -9,7 +9,7 @@ interface NavAvatarProps {
 }
 
 const NavAvatar: React.FC<NavAvatarProps> = ({ user, onClick }) => {
-  // Generate initials from user displayName, username, or email
+  // Generate initials from user displayName, name, or email
   const getInitials = () => {
     if (user.displayName) {
       return user.displayName
@@ -18,8 +18,8 @@ const NavAvatar: React.FC<NavAvatarProps> = ({ user, onClick }) => {
         .join('')
         .toUpperCase()
         .slice(0, 2);
-    } else if (user.username) {
-      return user.username
+    } else if (user.name) {
+      return user.name
         .split(' ')
         .map(n => n[0])
         .join('')
@@ -35,7 +35,7 @@ const NavAvatar: React.FC<NavAvatarProps> = ({ user, onClick }) => {
       onClick={onClick}
     >
       {user.avatarUrl ? (
-        <AvatarImage src={user.avatarUrl} alt={user.displayName || user.username || user.email} />
+        <AvatarImage src={user.avatarUrl} alt={user.displayName || user.name || user.email} />
       ) : null}
       <AvatarFallback className="bg-cardshow-blue-light text-cardshow-blue text-xs font-medium">
         {getInitials()}

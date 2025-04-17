@@ -1,127 +1,193 @@
 
-// Create a missing CardDetailed component to fix error in CardDetail.tsx
 import React from 'react';
-import { Button } from '@/components/ui/button';
 import { Card } from '@/lib/types';
-import { Share2, Edit, Trash, Eye, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Eye, Edit, Share2, Trash2 } from 'lucide-react';
+import CardThumbnail from './CardThumbnail';
 
 export interface CardDetailedProps {
+  /**
+   * Card data to display
+   */
   card: Card;
-  onEdit?: () => void;
-  onShare?: () => void;
-  onDelete?: () => void;
-  onView?: () => void;
+  
+  /**
+   * Optional className for styling
+   */
   className?: string;
+  
+  /**
+   * Function to call when "View" button is clicked
+   */
+  onView?: (cardId: string) => void;
+  
+  /**
+   * Function to call when "Edit" button is clicked
+   */
+  onEdit?: (cardId: string) => void;
+  
+  /**
+   * Function to call when "Share" button is clicked
+   */
+  onShare?: (cardId: string) => void;
+  
+  /**
+   * Function to call when "Delete" button is clicked
+   */
+  onDelete?: (cardId: string) => void;
+  
+  /**
+   * Whether to enable special effects for the card
+   */
+  enableEffects?: boolean;
+  
+  /**
+   * List of active effects to apply to the card
+   */
+  activeEffects?: string[];
 }
 
-const CardDetailed: React.FC<CardDetailedProps> = ({
+/**
+ * Detailed card component that displays card with actions and detailed info
+ */
+export const CardDetailed: React.FC<CardDetailedProps> = ({
   card,
+  className,
+  onView,
   onEdit,
   onShare,
   onDelete,
-  onView,
-  className,
+  enableEffects = false,
+  activeEffects = [],
 }) => {
+  // Format date for display
+  const formatDate = (dateString: string) => {
+    try {
+      return new Date(dateString).toLocaleDateString();
+    } catch (err) {
+      return 'Unknown date';
+    }
+  };
+
   return (
-    <div className={cn("grid grid-cols-1 md:grid-cols-3 gap-8", className)}>
-      <div className="md:col-span-1">
-        <div className="aspect-[2.5/3.5] relative rounded-lg overflow-hidden bg-gray-100 shadow-md">
-          <img
-            src={card.imageUrl}
-            alt={card.title}
-            className="w-full h-full object-cover"
+    <div className={cn("grid grid-cols-1 md:grid-cols-2 gap-8", className)}>
+      {/* Card Preview */}
+      <div className="flex justify-center">
+        <div className="max-w-md w-full">
+          <CardThumbnail 
+            card={card} 
+            onClick={() => onView && onView(card.id)}
+            enableEffects={enableEffects}
+            activeEffects={activeEffects} 
+            className="shadow-lg"
           />
-          {card.effects && card.effects.length > 0 && (
-            <div className="absolute top-2 right-2 bg-white/80 backdrop-blur-sm rounded-full px-2 py-1 text-xs font-medium">
-              <Star className="inline-block w-3 h-3 mr-1" /> 
-              {card.effects[0]}
-            </div>
-          )}
-        </div>
-        
-        <div className="flex justify-center mt-4 gap-2">
-          {onView && (
-            <Button onClick={onView} variant="outline" className="flex-1">
-              <Eye className="mr-2 h-4 w-4" />
-              View Full
-            </Button>
-          )}
           
-          {onShare && (
-            <Button onClick={onShare} variant="outline" size="icon">
-              <Share2 className="h-4 w-4" />
-            </Button>
-          )}
+          {/* Action Buttons */}
+          <div className="flex flex-wrap gap-3 mt-6 justify-center">
+            {onView && (
+              <Button 
+                variant="outline" 
+                onClick={() => onView(card.id)}
+                className="flex items-center"
+              >
+                <Eye className="h-4 w-4 mr-2" />
+                View Full Screen
+              </Button>
+            )}
+            
+            {onEdit && (
+              <Button 
+                variant="outline" 
+                onClick={() => onEdit(card.id)}
+                className="flex items-center"
+              >
+                <Edit className="h-4 w-4 mr-2" />
+                Edit Card
+              </Button>
+            )}
+            
+            {onShare && (
+              <Button 
+                variant="outline" 
+                className="flex items-center"
+                onClick={() => onShare(card.id)}
+              >
+                <Share2 className="h-4 w-4 mr-2" />
+                Share
+              </Button>
+            )}
+            
+            {onDelete && (
+              <Button 
+                variant="outline" 
+                className="flex items-center text-red-600 hover:bg-red-50"
+                onClick={() => onDelete(card.id)}
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete
+              </Button>
+            )}
+          </div>
         </div>
       </div>
       
-      <div className="md:col-span-2 space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold">{card.title}</h1>
-          <div className="flex flex-wrap gap-2 mt-2">
-            {card.tags && card.tags.map((tag, i) => (
-              <span 
-                key={i} 
-                className="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs"
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
-        </div>
+      {/* Card Details */}
+      <div>
+        <h1 className="text-3xl font-bold mb-3">{card.title}</h1>
         
-        {card.description && (
-          <div className="prose max-w-none">
-            <p>{card.description}</p>
+        {/* Tags */}
+        {card.tags && card.tags.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-4">
+            {card.tags.map((tag, i) => (
+              <Badge key={i} className="bg-gray-100 text-gray-700 px-2 py-1 rounded">
+                {tag}
+              </Badge>
+            ))}
           </div>
         )}
         
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <h3 className="text-sm font-medium text-gray-500">Rarity</h3>
-            <p className="mt-1">{card.rarity || 'Common'}</p>
-          </div>
+        {/* Description */}
+        <p className="text-gray-600 mb-6">{card.description || "No description available"}</p>
+        
+        {/* Additional card info */}
+        <div className="space-y-4">
+          {card.createdAt && (
+            <div>
+              <h3 className="text-sm font-medium text-gray-500">Created</h3>
+              <p>{formatDate(card.createdAt)}</p>
+            </div>
+          )}
+          
+          {card.updatedAt && card.updatedAt !== card.createdAt && (
+            <div>
+              <h3 className="text-sm font-medium text-gray-500">Last Updated</h3>
+              <p>{formatDate(card.updatedAt)}</p>
+            </div>
+          )}
           
           {card.player && (
             <div>
               <h3 className="text-sm font-medium text-gray-500">Player</h3>
-              <p className="mt-1">{card.player}</p>
+              <p>{card.player}</p>
             </div>
           )}
           
           {card.team && (
             <div>
               <h3 className="text-sm font-medium text-gray-500">Team</h3>
-              <p className="mt-1">{card.team}</p>
+              <p>{card.team}</p>
             </div>
           )}
           
           {card.year && (
             <div>
               <h3 className="text-sm font-medium text-gray-500">Year</h3>
-              <p className="mt-1">{card.year}</p>
+              <p>{card.year}</p>
             </div>
           )}
         </div>
-        
-        {(onEdit || onDelete) && (
-          <div className="flex gap-3 pt-4 border-t">
-            {onEdit && (
-              <Button onClick={onEdit} variant="outline">
-                <Edit className="mr-2 h-4 w-4" />
-                Edit Card
-              </Button>
-            )}
-            
-            {onDelete && (
-              <Button onClick={onDelete} variant="destructive">
-                <Trash className="mr-2 h-4 w-4" />
-                Delete
-              </Button>
-            )}
-          </div>
-        )}
       </div>
     </div>
   );

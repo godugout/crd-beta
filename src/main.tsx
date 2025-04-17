@@ -9,7 +9,6 @@ import { BrandThemeProvider } from './context/BrandThemeContext.tsx'
 import { AuthProvider } from './providers/AuthProvider'
 import { HelmetProvider } from 'react-helmet-async'
 import { CardProvider } from './context/CardContext'
-import { SettingsProvider } from './context/SettingsContext'
 import './index.css'
 import './main.css'
 
@@ -20,13 +19,11 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         <ThemeProvider>
           <TeamThemeProvider>
             <BrandThemeProvider>
-              <SettingsProvider>
-                <AuthProvider autoLogin={true}>
-                  <CardProvider>
-                    <App />
-                  </CardProvider>
-                </AuthProvider>
-              </SettingsProvider>
+              <AuthProvider autoLogin={true}>
+                <CardProvider>
+                  <App />
+                </CardProvider>
+              </AuthProvider>
             </BrandThemeProvider>
           </TeamThemeProvider>
         </ThemeProvider>

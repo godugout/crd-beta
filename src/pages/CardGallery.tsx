@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import PageLayout from '@/components/navigation/PageLayout';
 import CardGalleryComponent from '@/components/CardGallery';
-import { cardsNavItems } from '@/config/navigation/cardsNavItems';
+import { cardsNavItems } from '@/config/navigation';
 import ContentTypeNavigation from '@/components/navigation/ContentTypeNavigation';
 import { useCards } from '@/hooks/useCards';
 import { sampleCards } from '@/data/sampleCards';
@@ -17,7 +17,7 @@ const CardGallery = () => {
 
   // Create navigation items for content type navigation
   const navigationItems = cardsNavItems.map(item => ({
-    label: item.title,
+    label: item.label,
     path: item.path,
     icon: item.icon ? <item.icon className="h-4 w-4" /> : undefined,
     description: item.description

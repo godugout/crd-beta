@@ -1,140 +1,163 @@
-
-import React from 'react';
+import React, { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Lightbulb } from 'lucide-react';
+import LightbulbPanel from '../card-effects/LightbulbPanel';
 import { Card } from '@/lib/types';
-import { Heart, Share2, Camera, X, ArrowLeft } from 'lucide-react';
+import { CardFront } from '@/components/card/CardFront';
+import { CardBack } from '@/components/card/CardBack';
+import { ShareDialog } from '@/components/ShareDialog';
+import { DeleteDialog } from '@/components/DeleteDialog';
+import { useToast } from "@/hooks/use-toast";
+import { CardTransitionEffects } from '@/components/card-effects/CardTransitionEffects';
 
-export interface CardViewerProps {
+interface CardViewerProps {
   card: Card;
-  isFlipped?: boolean;
-  activeEffects?: string[];
-  effectIntensities?: Record<string, number>;
-  showLightingControls?: boolean;
-  isFullscreen?: boolean;
+  onUpdateCard?: (updatedCard: Partial<Card>) => void;
+  onDeleteCard?: (cardId: string) => void;
+  fullscreen?: boolean;
+  onFullscreenToggle?: () => void;
   onShare?: () => void;
   onCapture?: () => void;
   onBack?: () => void;
   onClose?: () => void;
 }
 
-/**
- * Universal Card Viewer component that renders a card with various display options
- * and interactive controls based on the provided props.
- */
-const CardViewer: React.FC<CardViewerProps> = ({
-  card,
-  isFlipped = false,
-  activeEffects = [],
-  effectIntensities = {},
-  showLightingControls = false,
-  isFullscreen = false,
+const CardViewer: React.FC<CardViewerProps> = ({ 
+  card, 
+  onUpdateCard, 
+  onDeleteCard,
+  fullscreen = false,
+  onFullscreenToggle,
   onShare,
   onCapture,
   onBack,
   onClose
 }) => {
-  // Get player, team, and year either directly from card or from designMetadata
-  const player = card.player || (card.designMetadata?.player as string | undefined);
-  const team = card.team || (card.designMetadata?.team as string | undefined);
-  const year = card.year || (card.designMetadata?.year as string | undefined);
-  
+  const [isFlipped, setIsFlipped] = useState(false);
+  const [isShareOpen, setIsShareOpen] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [showLightbulb, setShowLightbulb] = useState(false);
+  const [activeEffects, setActiveEffects] = useState<string[]>(card.effects || []);
+  const { toast } = useToast();
+  const [showTransition, setShowTransition] = useState(false);
+
+  const handleFlip = () => {
+    setIsFlipped(!isFlipped);
+  };
+
+  const handleShare = () => {
+    if (onShare) {
+      onShare();
+    } else {
+      setIsShareOpen(true);
+    }
+  };
+
+  const handleDelete = () => {
+    setIsDeleteOpen(true);
+  };
+
+  const handleApplyEffect = (effect: string) => {
+    const updatedEffects = activeEffects.includes(effect) 
+      ? activeEffects.filter(e => e !== effect)
+      : [...activeEffects, effect];
+    
+    setActiveEffects(updatedEffects);
+    
+    if (onUpdateCard) {
+      onUpdateCard({ 
+        id: card.id, 
+        effects: updatedEffects 
+      });
+    }
+  };
+
+  const handleDeleteCard = (cardId: string) => {
+    if (onDeleteCard) {
+      onDeleteCard(cardId);
+    } else {
+      toast({
+        title: "Action not available",
+        description: "Delete functionality is not available in this view.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleStyleChange = () => {
+    setShowTransition(true);
+    if (!isFlipped) {
+      setIsFlipped(true);
+    }
+  };
+
+  const handleTransitionComplete = () => {
+    setShowTransition(false);
+    // Here you can trigger any post-transition updates
+  };
+
   return (
-    <div className={`card-viewer relative w-full h-full flex items-center justify-center ${isFullscreen ? 'bg-black/90' : ''}`}>
-      <div className={`card-container relative ${isFullscreen ? 'w-full max-w-lg' : 'w-full'} h-full overflow-hidden rounded-lg`}>
-        {/* Card image */}
-        <div className="relative w-full h-full">
-          <img
-            src={card.imageUrl}
-            alt={card.title}
-            className="w-full h-full object-contain"
-            onError={(e) => {
-              console.error('Image failed to load:', card.imageUrl);
-              e.currentTarget.src = '/images/card-placeholder.png';
-            }}
-          />
-          
-          {/* Apply effect overlays */}
-          {activeEffects.map((effect, index) => (
-            <div 
-              key={index}
-              className={`absolute inset-0 pointer-events-none effect-${effect.toLowerCase()}`}
-              style={{ 
-                opacity: effectIntensities[effect] || 0.5,
-                mixBlendMode: 'overlay' 
-              }}
-            />
-          ))}
-        </div>
-        
-        {/* Controls overlay */}
-        <div className="absolute top-0 left-0 w-full p-4 flex justify-between">
-          {onBack && (
-            <button
-              onClick={onBack}
-              className="bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              <span className="sr-only">Back</span>
-            </button>
-          )}
-          
-          {onClose && (
-            <button
-              onClick={onClose}
-              className="bg-black/50 text-white p-2 rounded-full hover:bg-black/70 ml-auto"
-            >
-              <X className="h-4 w-4" />
-              <span className="sr-only">Close</span>
-            </button>
-          )}
-        </div>
-        
-        {/* Actions overlay */}
-        {(onShare || onCapture) && (
-          <div className="absolute bottom-0 left-0 w-full p-4 flex justify-center space-x-4">
-            {onShare && (
-              <button
-                onClick={onShare}
-                className="bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition"
-              >
-                <Share2 className="h-4 w-4" />
-                <span className="sr-only">Share</span>
-              </button>
-            )}
-            
-            {onCapture && (
-              <button
-                onClick={onCapture}
-                className="bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition"
-              >
-                <Camera className="h-4 w-4" />
-                <span className="sr-only">Capture</span>
-              </button>
-            )}
-          </div>
-        )}
-        
-        {/* Card info overlay */}
-        <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/80 to-transparent p-4">
-          <h3 className="text-white font-bold text-lg">{card.title}</h3>
-          {card.description && (
-            <p className="text-white/80 text-sm line-clamp-2">{card.description}</p>
-          )}
-          {(player || team || year) && (
-            <div className="text-white/80 text-sm flex flex-wrap gap-2 mt-1">
-              {player && <span>{player}</span>}
-              {team && <span>{team}</span>}
-              {year && <span>{year}</span>}
-            </div>
-          )}
-          {card.isFavorite && (
-            <div className="absolute bottom-4 right-4">
-              <Heart className="h-5 w-5 text-red-500 fill-current" />
-            </div>
-          )}
-        </div>
+    <div className="relative">
+      <div className="absolute top-2 left-2 flex space-x-2 z-10">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={handleFlip}
+          title="Flip Card"
+        >
+          {isFlipped ? 'Front' : 'Back'}
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setShowLightbulb(!showLightbulb)}
+          className="relative"
+          title="Creative Tools"
+        >
+          <Lightbulb className={showLightbulb ? "text-primary" : ""} />
+        </Button>
       </div>
+
+      <LightbulbPanel
+        isOpen={showLightbulb}
+        onClose={() => setShowLightbulb(false)}
+        onApplyEffect={handleApplyEffect}
+      />
+
+      <div 
+        className={`relative w-64 h-96 transform-style preserve-3d transition-transform duration-500`}
+      >
+        <div className={`absolute inset-0 ${isFlipped ? 'rotate-y-180' : ''} transform-style preserve-3d transition-transform duration-500`}>
+          <CardFront
+            card={card}
+            activeEffects={activeEffects}
+            onFlip={handleFlip}
+            onShare={handleShare}
+            onDelete={handleDelete}
+          />
+          <CardBack card={card} />
+        </div>
+        
+        <CardTransitionEffects 
+          isActive={showTransition}
+          onComplete={handleTransitionComplete}
+        />
+      </div>
+
+      <ShareDialog
+        isOpen={isShareOpen}
+        onClose={() => setIsShareOpen(false)}
+        cardId={card.id}
+      />
+
+      <DeleteDialog
+        isOpen={isDeleteOpen}
+        onClose={() => setIsDeleteOpen(false)}
+        card={card}
+        onDelete={handleDeleteCard}
+      />
     </div>
   );
-}
+};
 
 export default CardViewer;

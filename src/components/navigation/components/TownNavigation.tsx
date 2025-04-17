@@ -8,7 +8,7 @@ import {
   NavigationMenuLink,
 } from "@/components/ui/navigation-menu";
 import { Building } from 'lucide-react';
-import { townsNavItems } from '@/config/navigation/index';
+import { townsNavItems } from '@/config/navigation';
 import { cn } from '@/lib/utils';
 
 interface TownNavigationProps {

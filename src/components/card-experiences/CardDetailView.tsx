@@ -1,121 +1,223 @@
-
-import React from 'react';
-import { Card } from '@/lib/types';
+import React, { useState } from 'react';
 import { useCards } from '@/context/CardContext';
-import { Button } from '@/components/ui/button';
-import { Share2, Download } from 'lucide-react';
-import CardViewer from '@/components/card-viewer/CardViewer';
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { 
+  ChevronLeft, 
+  Share2, 
+  Download, 
+  Heart, 
+  Edit2,
+  Trash2
+} from 'lucide-react';
+import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 
 interface CardDetailViewProps {
   cardId: string;
-  onBack?: () => void;
+  onBack: () => void;
 }
 
-/**
- * Component to display detailed view of a card including metadata and controls
- */
 const CardDetailView: React.FC<CardDetailViewProps> = ({ cardId, onBack }) => {
-  const { getCard } = useCards();
-  const card = getCard ? getCard(cardId) : null;
+  const { getCard, deleteCard } = useCards();
+  const [liked, setLiked] = useState(false);
   
-  if (!card) {
+  const cardData = getCard(cardId);
+  
+  if (!cardData) {
     return (
-      <div className="flex flex-col items-center justify-center h-64">
-        <p className="text-white mb-4">Card not found</p>
-        <Button onClick={onBack} variant="outline">
+      <div className="p-8 text-center">
+        <p>Card not found</p>
+        <Button onClick={onBack} className="mt-4">
           Back to Gallery
         </Button>
       </div>
     );
   }
   
-  // Helper to safely extract properties from designMetadata
-  const getCardProperty = (property: string, fallback: string = ''): string => {
-    if (!card) return fallback;
-    if (card[property as keyof typeof card]) return card[property as keyof typeof card] as string;
-    if (card.designMetadata?.[property]) return card.designMetadata[property] as string;
-    return fallback;
+  const handleLike = () => {
+    setLiked(!liked);
+    toast.success(liked ? 'Removed from favorites' : 'Added to favorites');
   };
   
-  // Safely extract properties for display
-  const cardPlayer = getCardProperty('player', '');
-  const cardTeam = getCardProperty('team', '');
-  const cardYear = getCardProperty('year', '');
-  
   const handleShare = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: card.title,
-        text: card.description,
-        url: window.location.href,
-      }).catch(err => console.error('Error sharing card:', err));
-    } else {
-      navigator.clipboard.writeText(window.location.href);
-      // In a real app, show a toast notification here
-      alert('Link copied to clipboard');
-    }
+    // In a real app, implement sharing functionality
+    navigator.clipboard.writeText(`Check out this card: ${cardData.title}`);
+    toast.success('Link copied to clipboard');
+  };
+  
+  const handleDownload = () => {
+    // In a real app, implement download functionality
+    toast.success('Downloading card...');
+  };
+  
+  const handleDelete = () => {
+    // In a real app, add confirmation dialog
+    deleteCard(cardId);
+    toast.success('Card deleted');
+    onBack();
+  };
+  
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
   };
   
   return (
-    <div className="container px-4 py-6">
-      <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between">
-        <h1 className="text-2xl font-bold text-white">{card.title}</h1>
-        
-        <div className="flex gap-2 mt-4 md:mt-0">
-          <Button variant="outline" size="sm" onClick={handleShare}>
-            <Share2 className="h-4 w-4 mr-1" />
-            Share
-          </Button>
-          <Button variant="outline" size="sm">
-            <Download className="h-4 w-4 mr-1" />
-            Save
-          </Button>
-        </div>
+    <div className="container mx-auto max-w-4xl px-4">
+      <div className="mb-6">
+        <Button
+          variant="ghost"
+          className="flex items-center text-gray-400 hover:text-white pl-0"
+          onClick={onBack}
+        >
+          <ChevronLeft className="h-5 w-5 mr-1" />
+          Back to Gallery
+        </Button>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="aspect-[2.5/3.5] bg-black/20 rounded-lg overflow-hidden">
-          <CardViewer 
-            card={card}
-            activeEffects={card.effects || []}
-            isFullscreen={false}
-            onBack={onBack}
-          />
-        </div>
-        
-        <div className="space-y-4 text-white">
-          <div>
-            <h2 className="text-xl font-semibold mb-2">Details</h2>
-            <div className="space-y-1 text-gray-300">
-              {cardPlayer && <p>Player: {cardPlayer}</p>}
-              {cardTeam && <p>Team: {cardTeam}</p>}
-              {cardYear && <p>Year: {cardYear}</p>}
-              <p>Rarity: {card.rarity || 'Common'}</p>
+      <div className="flex flex-col lg:flex-row gap-8">
+        {/* Card display */}
+        <div className="lg:w-2/3">
+          <div className="flex justify-center">
+            <div 
+              className="aspect-[2.5/3.5] w-full max-w-md rounded-lg overflow-hidden"
+              style={{
+                borderRadius: cardData.designMetadata?.cardStyle?.borderRadius || '8px',
+                boxShadow: `0 0 20px ${cardData.designMetadata?.cardStyle?.shadowColor || 'rgba(0,0,0,0.2)'}`,
+                border: `${cardData.designMetadata?.cardStyle?.frameWidth || 2}px solid ${cardData.designMetadata?.cardStyle?.frameColor || '#000'}`,
+              }}
+            >
+              <img 
+                src={cardData.imageUrl} 
+                alt={cardData.title} 
+                className="w-full h-full object-cover"
+              />
             </div>
           </div>
           
-          {card.description && (
-            <div>
-              <h2 className="text-xl font-semibold mb-2">Description</h2>
-              <p className="text-gray-300">{card.description}</p>
-            </div>
-          )}
-          
-          {card.tags && card.tags.length > 0 && (
-            <div>
-              <h2 className="text-xl font-semibold mb-2">Tags</h2>
-              <div className="flex flex-wrap gap-2">
-                {card.tags.map((tag, index) => (
-                  <span 
-                    key={index}
-                    className="bg-gray-800 text-gray-200 px-3 py-1 rounded-full text-sm"
+          <div className="flex justify-center gap-2 mt-6">
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-2 text-gray-300"
+              onClick={handleShare}
+            >
+              <Share2 className="h-4 w-4" />
+              Share
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-2 text-gray-300"
+              onClick={handleDownload}
+            >
+              <Download className="h-4 w-4" />
+              Download
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className={cn(
+                "flex items-center gap-2",
+                liked ? "text-red-500 border-red-500" : "text-gray-300"
+              )}
+              onClick={handleLike}
+            >
+              <Heart className="h-4 w-4" fill={liked ? "currentColor" : "none"} />
+              {liked ? 'Liked' : 'Like'}
+            </Button>
+          </div>
+        </div>
+        
+        {/* Card info */}
+        <div className="lg:w-1/3">
+          <Card className="bg-gray-900 border-gray-700 text-white">
+            <CardContent className="p-6">
+              <div className="flex justify-between items-start">
+                <h1 className="text-2xl font-bold">{cardData.title}</h1>
+                <div className="flex gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-gray-400 hover:text-white"
                   >
-                    {tag}
-                  </span>
-                ))}
+                    <Edit2 className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-gray-400 hover:text-white"
+                    onClick={handleDelete}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
-            </div>
-          )}
+              
+              <div className="mt-4">
+                <p className="text-gray-300">{cardData.description}</p>
+              </div>
+              
+              <div className="mt-6 space-y-4">
+                <div>
+                  <h3 className="text-sm text-gray-400 uppercase">Card Type</h3>
+                  <p className="text-white">{cardData.designMetadata?.cardMetadata?.cardType || 'Standard'}</p>
+                </div>
+                
+                <div>
+                  <h3 className="text-sm text-gray-400 uppercase">Category</h3>
+                  <p className="text-white">{cardData.designMetadata?.cardMetadata?.category || 'General'}</p>
+                </div>
+                
+                <div>
+                  <h3 className="text-sm text-gray-400 uppercase">Series</h3>
+                  <p className="text-white">{cardData.designMetadata?.cardMetadata?.series || 'Base'}</p>
+                </div>
+                
+                <div>
+                  <h3 className="text-sm text-gray-400 uppercase">Created</h3>
+                  <p className="text-white">{formatDate(cardData.createdAt)}</p>
+                </div>
+                
+                <div>
+                  <h3 className="text-sm text-gray-400 uppercase">Tags</h3>
+                  <div className="flex flex-wrap gap-2 mt-1">
+                    {cardData.tags.map((tag, index) => (
+                      <Badge key={index} variant="secondary" className="bg-gray-800 hover:bg-gray-700">
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              
+              <div className="mt-8 space-y-4">
+                <h3 className="text-sm text-gray-400 uppercase">Market Status</h3>
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="text-center p-2 bg-gray-800 rounded">
+                    <p className="text-xs text-gray-400">Printable</p>
+                    <p className="font-medium">{cardData.designMetadata?.marketMetadata?.isPrintable || false}</p>
+                  </div>
+                  <div className="text-center p-2 bg-gray-800 rounded">
+                    <p className="text-xs text-gray-400">For Sale</p>
+                    <p className="font-medium">{cardData.designMetadata?.marketMetadata?.isForSale || false}</p>
+                  </div>
+                  <div className="text-center p-2 bg-gray-800 rounded">
+                    <p className="text-xs text-gray-400">In Catalog</p>
+                    <p className="font-medium">{cardData.designMetadata?.marketMetadata?.includeInCatalog || false}</p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>

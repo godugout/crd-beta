@@ -1,56 +1,54 @@
 
 import React from 'react';
 import { RouteObject } from 'react-router-dom';
-// Import ProtectedRoute as default import
-import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import Home from '@/pages/Home';
 import Auth from '@/pages/Auth';
-import Account from '@/components/Account';
-import Dashboard from '@/pages/Dashboard';
-import Admin from '@/pages/Admin';
-import CardDetail from '@/pages/CardDetail';
-import SeriesViewPage from '@/pages/SeriesViewPage';
-import NotFound from '@/pages/NotFound'; // Use NotFound instead of MaintenancePage
+import Unauthorized from '@/pages/Unauthorized';
+import NotFound from '@/pages/NotFound';
+import Index from '@/pages/Index';
+import Search from '@/pages/Search';
+import Profile from '@/pages/Profile';
+import Community from '@/pages/Community';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import EmergencyPage from '@/pages/EmergencyPage';
 
+// Main application routes (home, auth, etc.)
 export const mainRoutes: RouteObject[] = [
   {
-    path: "/maintenance",
-    element: <NotFound />, // Replace MaintenancePage with NotFound
+    path: "/",
+    element: <Index />,
   },
   {
-    path: "/",
+    path: "/home",
     element: <Home />,
   },
   {
-    path: "/login",
+    path: "/emergency",
+    element: <EmergencyPage />,
+  },
+  {
+    path: "/auth",
     element: <Auth />,
   },
   {
-    path: "/register",
-    element: <Auth />,
+    path: "/unauthorized",
+    element: <Unauthorized />,
   },
   {
-    path: "/account",
-    element: <Account />,
+    path: "/search",
+    element: <Search />,
   },
   {
-    path: "/cards/:id",
-    element: <CardDetail />,
+    path: "/community",
+    element: <Community />,
   },
   {
-    path: "/series/:id",
-    element: <SeriesViewPage />,
+    path: "/profile",
+    element: <ProtectedRoute><Profile /></ProtectedRoute>,
   },
-  
+  // 404 catch-all route
   {
-    path: "/dashboard",
-    element: <ProtectedRoute><Dashboard /></ProtectedRoute>,
-  },
-  {
-    path: "/admin",
-    element: <ProtectedRoute requiredRole="admin"><Admin /></ProtectedRoute>,
-  },
+    path: "*",
+    element: <NotFound />,
+  }
 ];
-
-// Export as default for apps that need to import it that way
-export default mainRoutes;

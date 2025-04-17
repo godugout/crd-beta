@@ -41,7 +41,7 @@ interface RelatedCardsProps {
 /**
  * Component for displaying a grid of related cards
  */
-const RelatedCards: React.FC<RelatedCardsProps> = ({
+export const RelatedCards: React.FC<RelatedCardsProps> = ({
   cards,
   currentCardId,
   onCardClick,
@@ -65,8 +65,7 @@ const RelatedCards: React.FC<RelatedCardsProps> = ({
         {relatedCards.map((card) => (
           <CardThumbnail
             key={card.id}
-            src={card.thumbnailUrl || card.imageUrl}
-            alt={card.title}
+            card={card}
             onClick={() => onCardClick(card.id)}
             className="border hover:shadow-md transition-shadow"
           />

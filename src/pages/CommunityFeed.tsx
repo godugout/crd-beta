@@ -1,9 +1,11 @@
 
 import React, { useState, useEffect } from 'react';
 import PageLayout from '@/components/navigation/PageLayout';
-import { Card, CardRarity } from '@/lib/types';
+import { Card } from '@/lib/types/cardTypes';
+import { Reaction } from '@/lib/types/interaction';
 import { useToast } from '@/hooks/use-toast';
-import { adaptToCard } from '@/lib/adapters/typeAdapters';
+import { adaptToCard } from '@/lib/adapters/cardAdapter';
+import { DEFAULT_DESIGN_METADATA } from '@/lib/utils/cardDefaults';
 
 const CommunityFeed = () => {
   const [feedCards, setFeedCards] = useState<Card[]>([]);
@@ -36,12 +38,11 @@ const CommunityFeed = () => {
                 type: 'like',
                 createdAt: new Date().toISOString(),
                 targetType: 'card',
-                targetId: 'community-1',
-                updatedAt: new Date().toISOString()
+                targetId: 'community-1'
               }
             ],
             effects: ['Holographic'],
-            rarity: CardRarity.COMMON,
+            designMetadata: DEFAULT_DESIGN_METADATA
           }),
           adaptToCard({
             id: 'community-2',
@@ -57,7 +58,7 @@ const CommunityFeed = () => {
             tags: ['community', 'trending'],
             reactions: [],
             effects: ['Chrome', 'Refractor'],
-            rarity: CardRarity.RARE,
+            designMetadata: DEFAULT_DESIGN_METADATA
           }),
         ];
         

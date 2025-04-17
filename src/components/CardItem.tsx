@@ -1,12 +1,12 @@
 
 import React, { useState } from 'react';
-import { Card, Reaction } from '@/lib/types';
+import { Card } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useCards } from '@/context/CardContext';
 import '../components/home/card-effects/index.css';
 import { CardFront } from './card/CardFront';
-import CardBack from './card/CardBack';
+import { CardBack } from './card/CardBack';
 import ReactionButtons from './ReactionButtons';
 import CommentSection from './CommentSection';
 
@@ -61,9 +61,6 @@ const CardItem: React.FC<CardItemProps> = ({
     deleteCard(card.id);
   };
   
-  // Safely handle the reactions array
-  const cardReactions: Reaction[] = Array.isArray(card.reactions) ? card.reactions : [];
-  
   return (
     <div className="space-y-4">
       <div 
@@ -92,9 +89,8 @@ const CardItem: React.FC<CardItemProps> = ({
       {showReactions && (
         <div className="px-2">
           <ReactionButtons 
-            targetId={card.id}
-            targetType="card"
-            initialReactions={cardReactions}
+            cardId={card.id} 
+            initialReactions={card.reactions}
             showComments={displayComments}
             onShowComments={() => setDisplayComments(!displayComments)}
           />

@@ -1,31 +1,22 @@
 
-import { Shirt, PlusCircle, Search, ListFilter } from "lucide-react";
-import type { NavItem } from './types';
+import { Archive, Users, Building } from 'lucide-react';
+import { NavigationItem } from '@/components/navigation/mobile/types';
 
-export const baseballNavItems: NavItem[] = [
+export const baseballNavItems: NavigationItem[] = [
   {
-    title: "All Cards",
-    path: "/baseball",
-    icon: Shirt, // Using Shirt since Baseball doesn't exist in lucide-react
-    description: "Browse all baseball cards"
-  },
-  {
-    title: "Create Card",
-    path: "/baseball/create",
-    icon: PlusCircle,
-    description: "Create a new baseball card",
+    title: 'Teams & Towns',
+    path: '/teams',
+    icon: Archive,
     highlight: true
   },
   {
-    title: "Search",
-    path: "/baseball/search",
-    icon: Search,
-    description: "Search baseball cards"
+    title: 'Fans Directory',
+    path: '/teams/fans',
+    icon: Users
   },
   {
-    title: "Collections",
-    path: "/baseball/collections",
-    icon: ListFilter,
-    description: "View baseball card collections"
+    title: 'Town Directory',
+    path: '/teams/towns',
+    icon: Building
   }
 ];

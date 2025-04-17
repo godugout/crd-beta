@@ -1,43 +1,49 @@
 
-import { useContext } from 'react';
-import { AuthContext } from '@/context/auth/AuthContext';
-import { UserPermission, UserRole, ROLE_PERMISSIONS, UserPermissionValues } from '@/lib/types/user';
+import { useAuth } from '@/hooks/useAuth';
+import { UserPermission, ROLE_PERMISSIONS } from '@/lib/types';
+import { UserRole } from '@/lib/types/UserTypes';
 
+/**
+ * Hook to check user permissions based on their role or specific permissions
+ */
 export function usePermissions() {
-  const { user } = useContext(AuthContext);
+  const { user } = useAuth();
   
+  /**
+   * Check if user has a specific permission
+   */
   const hasPermission = (permission: UserPermission): boolean => {
-    if (!user) return false;
-    
-    // If the user has explicit permissions list, check there first
-    if (user.permissions && user.permissions.includes(permission)) {
-      return true;
+    // If user has explicit permissions array, check that first
+    if (user?.permissions && Array.isArray(user.permissions)) {
+      return user.permissions.includes(permission);
     }
     
-    // Otherwise, check the role-based permissions
-    const rolePermissions = ROLE_PERMISSIONS[user.role] || [];
-    return rolePermissions.includes(permission);
+    // Otherwise, fall back to role-based permissions
+    if (user?.role) {
+      const rolePermissions = ROLE_PERMISSIONS[user.role as UserRole] || [];
+      return rolePermissions.includes(permission);
+    }
+    
+    return false;
   };
   
-  const hasRole = (role: UserRole): boolean => {
-    if (!user) return false;
-    return user.role === role;
+  /**
+   * Check if user has admin role
+   */
+  const isAdmin = (): boolean => {
+    return user?.role === UserRole.ADMIN;
+  };
+  
+  /**
+   * Check if user has moderator role or higher
+   */
+  const isModerator = (): boolean => {
+    return user?.role === UserRole.ADMIN || user?.role === UserRole.MODERATOR;
   };
   
   return {
     hasPermission,
-    hasRole,
-    // Shorthand helpers for common permission checks
-    canCreateCard: hasPermission(UserPermissionValues.CREATE_CARD),
-    canEditCard: hasPermission(UserPermissionValues.EDIT_CARD),
-    canDeleteCard: hasPermission(UserPermissionValues.DELETE_CARD),
-    canViewDashboard: hasPermission(UserPermissionValues.VIEW_DASHBOARD),
-    canManageUsers: hasPermission(UserPermissionValues.MANAGE_USERS),
-    hasAdminAccess: hasPermission(UserPermissionValues.ADMIN_ACCESS),
-    // Role shortcuts
-    isAdmin: hasRole(UserRole.ADMIN),
-    isArtist: hasRole(UserRole.ARTIST),
-    isFan: hasRole(UserRole.FAN),
-    isModerator: hasRole(UserRole.MODERATOR)
+    isAdmin,
+    isModerator,
   };
 }

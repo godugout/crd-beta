@@ -1,482 +1,519 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Card, CardRarity } from '@/lib/types';
-import { EnhancedCard, Deck, Series, ReleaseType } from '@/lib/types/enhancedCardTypes';
-import { adaptToCard } from '@/lib/adapters/typeAdapters';
-import { adaptToEnhancedCard, cardToEnhancedCard } from '@/lib/adapters/EnhancedCardAdapter';
-import { toStandardCard, enhancedCardToCard } from '@/lib/utils/cardConverters';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useAuth } from '@/hooks/useAuth';
+import { toast } from 'sonner';
+import { v4 as uuidv4 } from 'uuid';
+import { Card } from '@/lib/types/cardTypes';
+import { EnhancedCard, Series, Deck } from '@/lib/types/enhancedCardTypes';
+import { sampleCards } from '@/data/sampleCards';
 
-/**
- * Enhanced Card Context Props
- */
-export interface EnhancedCardContextProps {
+// Convert sample cards to enhanced cards
+const enhancedSampleCards: EnhancedCard[] = sampleCards.map(card => ({
+  ...card,
+  rarity: Math.random() > 0.8 ? 'rare' : Math.random() > 0.5 ? 'uncommon' : 'common',
+  cardNumber: `${Math.floor(Math.random() * 100)}/100`,
+  seriesId: Math.random() > 0.5 ? 'series-001' : 'series-002',
+  artistId: 'artist-001',
+  edition: 1,
+  editionSize: 100,
+  releaseDate: new Date().toISOString(),
+  qrCodeData: `https://example.com/card/${card.id}`,
+  hotspots: [],
+  effects: card.effects || [],
+  marketData: {
+    price: Math.floor(Math.random() * 100) + 10,
+    currency: 'USD',
+    availableForSale: Math.random() > 0.5,
+  },
+}));
+
+// Sample series
+const sampleSeries: Series[] = [
+  {
+    id: 'series-001',
+    title: 'First Edition Collection',
+    description: 'The inaugural collection showcasing legendary athletes',
+    coverImageUrl: '/lovable-uploads/fa55173e-d864-41b2-865d-144d94507dc1.png',
+    artistId: 'artist-001',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    releaseDate: new Date().toISOString(),
+    totalCards: 5,
+    isPublished: true,
+    cardIds: enhancedSampleCards.filter((_, i) => i < 5).map(card => card.id),
+    releaseType: 'standard'
+  },
+  {
+    id: 'series-002',
+    title: 'Limited Edition Memorabilia',
+    description: 'Rare collectibles featuring game-worn memorabilia',
+    coverImageUrl: '/lovable-uploads/fa55173e-d864-41b2-865d-144d94507dc1.png',
+    artistId: 'artist-001',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    releaseDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+    totalCards: 3,
+    isPublished: true,
+    cardIds: enhancedSampleCards.filter((_, i) => i >= 5).map(card => card.id),
+    releaseType: 'limited'
+  }
+];
+
+// Sample decks
+const sampleDecks: Deck[] = [
+  {
+    id: 'deck-001',
+    name: 'My Favorite Players',
+    description: 'A collection of my all-time favorite players',
+    coverImageUrl: '/lovable-uploads/fa55173e-d864-41b2-865d-144d94507dc1.png',
+    ownerId: 'user-001',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    cardIds: enhancedSampleCards.filter((_, i) => i % 2 === 0).map(card => card.id),
+    isPublic: true
+  }
+];
+
+interface CardEnhancedContextType {
   cards: EnhancedCard[];
-  decks: Deck[];
   series: Series[];
+  decks: Deck[];
   favorites: string[];
-  loading: boolean;
-  error: Error | null;
   isLoading: boolean;
-  fetchCards: () => Promise<void>;
-  fetchDecks: () => Promise<void>;
-  fetchSeries: () => Promise<void>;
-  addCard: (card: Partial<Card>) => Promise<Card>;
-  updateCard: (id: string, card: Partial<Card>) => Promise<Card>;
-  deleteCard: (id: string) => Promise<boolean>;
-  toggleFavorite: (id: string) => void;
+  
+  // Card operations
+  addCard: (card: Partial<EnhancedCard>) => Promise<EnhancedCard>;
+  updateCard: (id: string, updates: Partial<EnhancedCard>) => EnhancedCard | null;
+  deleteCard: (id: string) => boolean;
   getCard: (id: string) => EnhancedCard | undefined;
-  addDeck: (deck: Partial<Deck>) => Promise<Deck>;
-  updateDeck: (id: string, deck: Partial<Deck>) => Promise<Deck>;
-  deleteDeck: (id: string) => Promise<boolean>;
-  addCardToDeck: (deckId: string, cardId: string) => Promise<boolean>;
-  removeCardFromDeck: (deckId: string, cardId: string) => Promise<boolean>;
-  addSeries: (series: Partial<Series>) => Promise<Series>;
-  updateSeries: (id: string, series: Partial<Series>) => Promise<Series>;
-  deleteSeries: (id: string) => Promise<boolean>;
-  addCardToSeries: (seriesId: string, cardId: string) => Promise<boolean>;
-  removeCardFromSeries: (seriesId: string, cardId: string) => Promise<boolean>;
+  
+  // Series operations
+  addSeries: (series: Partial<Series>) => Series;
+  updateSeries: (id: string, updates: Partial<Series>) => Series | null;
+  deleteSeries: (id: string) => boolean;
+  getSeries: (id: string) => Series | undefined;
+  addCardToSeries: (cardId: string, seriesId: string) => boolean;
+  removeCardFromSeries: (cardId: string, seriesId: string) => boolean;
+  
+  // Deck operations
+  addDeck: (deck: Partial<Deck>) => Deck;
+  updateDeck: (id: string, updates: Partial<Deck>) => Deck | null;
+  deleteDeck: (id: string) => boolean;
+  getDeck: (id: string) => Deck | undefined;
+  addCardToDeck: (cardId: string, deckId: string) => boolean;
+  removeCardFromDeck: (cardId: string, deckId: string) => boolean;
+  
+  // Favorites
+  toggleFavorite: (cardId: string) => void;
+  isFavorite: (cardId: string) => boolean;
 }
 
-/**
- * Enhanced Card Context
- */
-export const EnhancedCardContext = createContext<EnhancedCardContextProps | undefined>(undefined);
+const CardEnhancedContext = createContext<CardEnhancedContextType | undefined>(undefined);
 
-export const EnhancedCardProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [cards, setCards] = useState<EnhancedCard[]>([]);
-  const [decks, setDecks] = useState<Deck[]>([]);
-  const [seriesItems, setSeries] = useState<Series[]>([]);
+export const CardEnhancedProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { user } = useAuth();
+  const [cards, setCards] = useState<EnhancedCard[]>(enhancedSampleCards);
+  const [series, setSeries] = useState<Series[]>(sampleSeries);
+  const [decks, setDecks] = useState<Deck[]>(sampleDecks);
   const [favorites, setFavorites] = useState<string[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    // Mock data loading
-    setLoading(true);
-    setTimeout(() => {
-      setCards([
-        {
-          id: '1',
-          title: 'Enhanced Card 1',
-          description: 'Description for enhanced card 1',
-          imageUrl: 'https://via.placeholder.com/150',
-          thumbnailUrl: 'https://via.placeholder.com/150',
-          userId: 'user-1',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          effects: [],
-          isFavorite: false,
-          rarity: CardRarity.COMMON,
-          views: 10,
-          likes: 2,
-          shares: 1,
-          tags: []
-        },
-        {
-          id: '2',
-          title: 'Enhanced Card 2',
-          description: 'Description for enhanced card 2',
-          imageUrl: 'https://via.placeholder.com/150',
-          thumbnailUrl: 'https://via.placeholder.com/150',
-          userId: 'user-1',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          effects: [],
-          isFavorite: true,
-          rarity: CardRarity.RARE,
-          views: 15,
-          likes: 5,
-          shares: 2,
-          tags: []
-        }
-      ]);
-      
-      setDecks([
-        {
-          id: 'deck-1',
-          name: 'My First Deck',
-          description: 'A sample deck',
-          ownerId: 'user-1',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          cardIds: ['1', '2'],
-          isPublic: true
-        }
-      ]);
-      
-      setSeries([
-        {
-          id: 'series-1',
-          name: 'Sample Series',
-          description: 'A sample series',
-          coverImageUrl: 'https://via.placeholder.com/150',
-          artistId: 'artist-1',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          releaseDate: new Date().toISOString(),
-          totalCards: 2,
-          isPublished: true,
-          cardIds: ['1', '2'],
-          releaseType: 'standard'
-        }
-      ]);
-      
-      setLoading(false);
-    }, 1000);
-  }, []);
-
-  const fetchCards = async () => {
-    // Fetch cards logic
+  
+  // Card operations
+  const addCard = async (cardData: Partial<EnhancedCard>): Promise<EnhancedCard> => {
+    const newCard: EnhancedCard = {
+      ...cardData as EnhancedCard,
+      id: cardData.id || uuidv4(),
+      title: cardData.title || 'Untitled Card',
+      description: cardData.description || '',
+      imageUrl: cardData.imageUrl || '',
+      thumbnailUrl: cardData.thumbnailUrl || cardData.imageUrl || '',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      userId: cardData.userId || 'anonymous',
+      rarity: cardData.rarity || 'common',
+      cardNumber: cardData.cardNumber || `1/${cardData.editionSize || 1}`,
+      effects: cardData.effects || [],
+    };
+    
+    setCards(prev => [newCard, ...prev]);
+    toast.success('Card created successfully');
+    
+    // If series ID is provided, add to series
+    if (newCard.seriesId) {
+      addCardToSeries(newCard.id, newCard.seriesId);
+    }
+    
+    return newCard;
   };
-
-  const fetchDecks = async () => {
-    // Fetch decks logic
+  
+  const updateCard = (id: string, updates: Partial<EnhancedCard>): EnhancedCard | null => {
+    let updatedCard: EnhancedCard | null = null;
+    
+    setCards(prev => {
+      return prev.map(card => {
+        if (card.id === id) {
+          updatedCard = {
+            ...card,
+            ...updates,
+            updatedAt: new Date().toISOString()
+          };
+          return updatedCard;
+        }
+        return card;
+      });
+    });
+    
+    if (updatedCard) {
+      toast.success('Card updated successfully');
+    }
+    
+    return updatedCard;
   };
-
-  const fetchSeries = async () => {
-    // Fetch series logic
-  };
-
-  const addCard = async (cardData: Partial<Card>): Promise<Card> => {
-    setLoading(true);
-    try {
-      const baseCard = toStandardCard({
-        id: `card-${Date.now()}`,
-        title: cardData.title || 'Untitled Card',
-        description: cardData.description || '',
-        imageUrl: cardData.imageUrl || '',
-        thumbnailUrl: cardData.thumbnailUrl || '',
-        tags: cardData.tags || [],
-        userId: 'user-1',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        rarity: cardData.rarity || CardRarity.COMMON,
-        effects: [],
-        isFavorite: cardData.isFavorite ?? false,
-        ...cardData
+  
+  const deleteCard = (id: string): boolean => {
+    const exists = cards.some(card => card.id === id);
+    
+    if (exists) {
+      setCards(prev => prev.filter(card => card.id !== id));
+      
+      // Remove from series
+      setSeries(prev => {
+        return prev.map(s => ({
+          ...s,
+          cardIds: s.cardIds.filter(cId => cId !== id)
+        }));
       });
       
-      const enhancedCard = cardToEnhancedCard(baseCard);
+      // Remove from decks
+      setDecks(prev => {
+        return prev.map(d => ({
+          ...d,
+          cardIds: d.cardIds.filter(cId => cId !== id)
+        }));
+      });
       
-      setCards(prevCards => [...prevCards, enhancedCard]);
-      return baseCard;
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error('Failed to add card');
-      setError(error);
-      throw error;
-    } finally {
-      setLoading(false);
+      // Remove from favorites
+      setFavorites(prev => prev.filter(fId => fId !== id));
+      
+      toast.success('Card deleted successfully');
+      return true;
     }
+    
+    return false;
   };
-
-  const updateCard = async (id: string, updates: Partial<Card>): Promise<Card> => {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        const cardIndex = cards.findIndex(card => card.id === id);
-        if (cardIndex === -1) {
-          reject(new Error(`Card with ID ${id} not found`));
-          return;
-        }
-
-        if (updates.rarity && typeof updates.rarity === 'string') {
-          updates = {
-            ...updates,
-            rarity: toStandardCard({ rarity: updates.rarity }).rarity
-          };
-        }
-
-        const standardCard = enhancedCardToCard(cards[cardIndex]);
-        
-        const updatedStandardCard = {
-          ...standardCard,
-          ...updates,
-          updatedAt: new Date().toISOString()
-        };
-        
-        const updatedEnhancedCard = cardToEnhancedCard(updatedStandardCard);
-
-        const newCards = [...cards];
-        newCards[cardIndex] = updatedEnhancedCard;
-
-        setCards(newCards);
-        
-        resolve(updatedStandardCard);
-      }, 500);
-    });
-  };
-
-  const deleteCard = async (id: string): Promise<boolean> => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        setCards(prevCards => prevCards.filter(card => card.id !== id));
-        setFavorites(prevFavorites => prevFavorites.filter(favId => favId !== id));
-        resolve(true);
-      }, 500);
-    });
-  };
-
-  const toggleFavorite = (id: string) => {
-    setFavorites(prevFavorites => {
-      if (prevFavorites.includes(id)) {
-        return prevFavorites.filter(favId => favId !== id);
-      } else {
-        return [...prevFavorites, id];
-      }
-    });
-  };
-
-  const addDeck = async (deckData: Partial<Deck>): Promise<Deck> => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const newDeck: Deck = {
-          id: `deck-${Date.now()}`,
-          name: deckData.name || 'Untitled Deck',
-          description: deckData.description || '',
-          ownerId: 'user-1',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          cardIds: deckData.cardIds || [],
-          isPublic: deckData.isPublic ?? false
-        };
-        setDecks(prevDecks => [...prevDecks, newDeck]);
-        resolve(newDeck);
-      }, 500);
-    });
-  };
-
-  const updateDeck = async (id: string, deckUpdates: Partial<Deck>): Promise<Deck> => {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        const deckIndex = decks.findIndex(deck => deck.id === id);
-        if (deckIndex === -1) {
-          reject(new Error(`Deck with ID ${id} not found`));
-          return;
-        }
-
-        const updatedDeck: Deck = {
-          ...decks[deckIndex],
-          ...deckUpdates,
-          updatedAt: new Date().toISOString()
-        };
-
-        const newDecks = [...decks];
-        newDecks[deckIndex] = updatedDeck;
-
-        setDecks(newDecks);
-        resolve(updatedDeck);
-      }, 500);
-    });
-  };
-
-  const deleteDeck = async (id: string): Promise<boolean> => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        setDecks(prevDecks => prevDecks.filter(deck => deck.id !== id));
-        resolve(true);
-      }, 500);
-    });
-  };
-
-  const addCardToDeck = async (deckId: string, cardId: string): Promise<boolean> => {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        const deckIndex = decks.findIndex(deck => deck.id === deckId);
-        if (deckIndex === -1) {
-          reject(new Error(`Deck not found: ${deckId}`));
-          return;
-        }
-        
-        const updatedDeck = {
-          ...decks[deckIndex],
-          cardIds: [...decks[deckIndex].cardIds, cardId],
-          updatedAt: new Date().toISOString()
-        };
-        
-        const newDecks = [...decks];
-        newDecks[deckIndex] = updatedDeck;
-        
-        setDecks(newDecks);
-        resolve(true);
-      }, 500);
-    });
-  };
-
-  const removeCardFromDeck = async (deckId: string, cardId: string): Promise<boolean> => {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        const deckIndex = decks.findIndex(deck => deck.id === deckId);
-        if (deckIndex === -1) {
-          reject(new Error(`Deck not found: ${deckId}`));
-          return;
-        }
-        
-        const updatedDeck = {
-          ...decks[deckIndex],
-          cardIds: decks[deckIndex].cardIds.filter(id => id !== cardId),
-          updatedAt: new Date().toISOString()
-        };
-        
-        const newDecks = [...decks];
-        newDecks[deckIndex] = updatedDeck;
-        
-        setDecks(newDecks);
-        resolve(true);
-      }, 500);
-    });
-  };
-
-  const addSeries = async (seriesData: Partial<Series>): Promise<Series> => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const newSeries: Series = {
-          id: `series-${Date.now()}`,
-          name: seriesData.name || 'Untitled Series',
-          description: seriesData.description || '',
-          coverImageUrl: seriesData.coverImageUrl || '',
-          artistId: seriesData.artistId || 'artist-1',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          releaseDate: seriesData.releaseDate || new Date().toISOString(),
-          totalCards: seriesData.totalCards || 0,
-          isPublished: seriesData.isPublished ?? false,
-          cardIds: seriesData.cardIds || [],
-          releaseType: seriesData.releaseType || 'standard' as ReleaseType
-        };
-        setSeries(prevSeries => [...prevSeries, newSeries]);
-        resolve(newSeries);
-      }, 500);
-    });
-  };
-
-  const updateSeries = async (id: string, seriesUpdates: Partial<Series>): Promise<Series> => {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        const seriesIndex = seriesItems.findIndex(s => s.id === id);
-        if (seriesIndex === -1) {
-          reject(new Error(`Series with ID ${id} not found`));
-          return;
-        }
-
-        const updatedSeries: Series = {
-          ...seriesItems[seriesIndex],
-          ...seriesUpdates,
-          updatedAt: new Date().toISOString()
-        };
-
-        const newSeriesItems = [...seriesItems];
-        newSeriesItems[seriesIndex] = updatedSeries;
-
-        setSeries(newSeriesItems);
-        resolve(updatedSeries);
-      }, 500);
-    });
-  };
-
-  const deleteSeries = async (id: string): Promise<boolean> => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        setSeries(prevSeries => prevSeries.filter(s => s.id !== id));
-        resolve(true);
-      }, 500);
-    });
-  };
-
-  const addCardToSeries = async (seriesId: string, cardId: string): Promise<boolean> => {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        const seriesIndex = seriesItems.findIndex(s => s.id === seriesId);
-        if (seriesIndex === -1) {
-          reject(new Error(`Series not found: ${seriesId}`));
-          return;
-        }
-        
-        const updatedSeries = {
-          ...seriesItems[seriesIndex],
-          cardIds: [...seriesItems[seriesIndex].cardIds, cardId],
-          totalCards: seriesItems[seriesIndex].totalCards + 1,
-          updatedAt: new Date().toISOString()
-        };
-        
-        const newSeriesItems = [...seriesItems];
-        newSeriesItems[seriesIndex] = updatedSeries;
-        
-        setSeries(newSeriesItems);
-        resolve(true);
-      }, 500);
-    });
-  };
-
-  const removeCardFromSeries = async (seriesId: string, cardId: string): Promise<boolean> => {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        const seriesIndex = seriesItems.findIndex(s => s.id === seriesId);
-        if (seriesIndex === -1) {
-          reject(new Error(`Series not found: ${seriesId}`));
-          return;
-        }
-        
-        const updatedSeries = {
-          ...seriesItems[seriesIndex],
-          cardIds: seriesItems[seriesIndex].cardIds.filter(id => id !== cardId),
-          totalCards: Math.max(0, seriesItems[seriesIndex].totalCards - 1),
-          updatedAt: new Date().toISOString()
-        };
-        
-        const newSeriesItems = [...seriesItems];
-        newSeriesItems[seriesIndex] = updatedSeries;
-        
-        setSeries(newSeriesItems);
-        resolve(true);
-      }, 500);
-    });
-  };
-
+  
   const getCard = (id: string): EnhancedCard | undefined => {
     return cards.find(card => card.id === id);
   };
-
-  const value: EnhancedCardContextProps = {
-    cards,
-    decks,
-    series: seriesItems,
-    favorites,
-    loading,
-    isLoading,
-    error,
-    fetchCards,
-    fetchDecks,
-    fetchSeries,
-    addCard,
-    updateCard,
-    deleteCard,
-    toggleFavorite,
-    getCard,
-    addDeck,
-    updateDeck,
-    deleteDeck,
-    addCardToDeck,
-    removeCardFromDeck,
-    addSeries,
-    updateSeries,
-    deleteSeries,
-    addCardToSeries,
-    removeCardFromSeries
+  
+  // Series operations
+  const addSeries = (seriesData: Partial<Series>): Series => {
+    const newSeries: Series = {
+      ...seriesData as Series,
+      id: seriesData.id || uuidv4(),
+      title: seriesData.title || 'Untitled Series',
+      description: seriesData.description || '',
+      coverImageUrl: seriesData.coverImageUrl || '',
+      artistId: seriesData.artistId || 'anonymous',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      releaseDate: seriesData.releaseDate || new Date().toISOString(),
+      totalCards: seriesData.totalCards || 0,
+      isPublished: seriesData.isPublished || false,
+      cardIds: seriesData.cardIds || [],
+      releaseType: seriesData.releaseType || 'standard'
+    };
+    
+    setSeries(prev => [newSeries, ...prev]);
+    toast.success('Series created successfully');
+    return newSeries;
   };
-
+  
+  const updateSeries = (id: string, updates: Partial<Series>): Series | null => {
+    let updatedSeries: Series | null = null;
+    
+    setSeries(prev => {
+      return prev.map(series => {
+        if (series.id === id) {
+          updatedSeries = {
+            ...series,
+            ...updates,
+            updatedAt: new Date().toISOString()
+          };
+          return updatedSeries;
+        }
+        return series;
+      });
+    });
+    
+    if (updatedSeries) {
+      toast.success('Series updated successfully');
+    }
+    
+    return updatedSeries;
+  };
+  
+  const deleteSeries = (id: string): boolean => {
+    const exists = series.some(s => s.id === id);
+    
+    if (exists) {
+      setSeries(prev => prev.filter(s => s.id !== id));
+      
+      // Update cards to remove series reference
+      setCards(prev => {
+        return prev.map(card => {
+          if (card.seriesId === id) {
+            return { ...card, seriesId: undefined };
+          }
+          return card;
+        });
+      });
+      
+      toast.success('Series deleted successfully');
+      return true;
+    }
+    
+    return false;
+  };
+  
+  const getSeries = (id: string): Series | undefined => {
+    return series.find(s => s.id === id);
+  };
+  
+  const addCardToSeries = (cardId: string, seriesId: string): boolean => {
+    const seriesExists = series.some(s => s.id === seriesId);
+    const cardExists = cards.some(c => c.id === cardId);
+    
+    if (!seriesExists || !cardExists) return false;
+    
+    setSeries(prev => {
+      return prev.map(s => {
+        if (s.id === seriesId && !s.cardIds.includes(cardId)) {
+          return {
+            ...s,
+            cardIds: [...s.cardIds, cardId],
+            totalCards: s.totalCards + 1,
+            updatedAt: new Date().toISOString()
+          };
+        }
+        return s;
+      });
+    });
+    
+    // Update card with series ID
+    setCards(prev => {
+      return prev.map(card => {
+        if (card.id === cardId) {
+          return { ...card, seriesId };
+        }
+        return card;
+      });
+    });
+    
+    return true;
+  };
+  
+  const removeCardFromSeries = (cardId: string, seriesId: string): boolean => {
+    const seriesExists = series.some(s => s.id === seriesId);
+    
+    if (!seriesExists) return false;
+    
+    setSeries(prev => {
+      return prev.map(s => {
+        if (s.id === seriesId && s.cardIds.includes(cardId)) {
+          return {
+            ...s,
+            cardIds: s.cardIds.filter(id => id !== cardId),
+            totalCards: s.totalCards - 1,
+            updatedAt: new Date().toISOString()
+          };
+        }
+        return s;
+      });
+    });
+    
+    // Update card to remove series ID
+    setCards(prev => {
+      return prev.map(card => {
+        if (card.id === cardId && card.seriesId === seriesId) {
+          return { ...card, seriesId: undefined };
+        }
+        return card;
+      });
+    });
+    
+    return true;
+  };
+  
+  // Deck operations
+  const addDeck = (deckData: Partial<Deck>): Deck => {
+    const newDeck: Deck = {
+      ...deckData as Deck,
+      id: deckData.id || uuidv4(),
+      name: deckData.name || 'Untitled Deck',
+      description: deckData.description || '',
+      coverImageUrl: deckData.coverImageUrl || '',
+      ownerId: deckData.ownerId || (user?.id || 'anonymous'),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      cardIds: deckData.cardIds || [],
+      isPublic: deckData.isPublic || false
+    };
+    
+    setDecks(prev => [newDeck, ...prev]);
+    toast.success('Deck created successfully');
+    return newDeck;
+  };
+  
+  const updateDeck = (id: string, updates: Partial<Deck>): Deck | null => {
+    let updatedDeck: Deck | null = null;
+    
+    setDecks(prev => {
+      return prev.map(deck => {
+        if (deck.id === id) {
+          updatedDeck = {
+            ...deck,
+            ...updates,
+            updatedAt: new Date().toISOString()
+          };
+          return updatedDeck;
+        }
+        return deck;
+      });
+    });
+    
+    if (updatedDeck) {
+      toast.success('Deck updated successfully');
+    }
+    
+    return updatedDeck;
+  };
+  
+  const deleteDeck = (id: string): boolean => {
+    const exists = decks.some(d => d.id === id);
+    
+    if (exists) {
+      setDecks(prev => prev.filter(d => d.id !== id));
+      toast.success('Deck deleted successfully');
+      return true;
+    }
+    
+    return false;
+  };
+  
+  const getDeck = (id: string): Deck | undefined => {
+    return decks.find(d => d.id === id);
+  };
+  
+  const addCardToDeck = (cardId: string, deckId: string): boolean => {
+    const deckExists = decks.some(d => d.id === deckId);
+    const cardExists = cards.some(c => c.id === cardId);
+    
+    if (!deckExists || !cardExists) return false;
+    
+    setDecks(prev => {
+      return prev.map(d => {
+        if (d.id === deckId && !d.cardIds.includes(cardId)) {
+          return {
+            ...d,
+            cardIds: [...d.cardIds, cardId],
+            updatedAt: new Date().toISOString()
+          };
+        }
+        return d;
+      });
+    });
+    
+    toast.success('Card added to deck');
+    return true;
+  };
+  
+  const removeCardFromDeck = (cardId: string, deckId: string): boolean => {
+    const deckExists = decks.some(d => d.id === deckId);
+    
+    if (!deckExists) return false;
+    
+    setDecks(prev => {
+      return prev.map(d => {
+        if (d.id === deckId && d.cardIds.includes(cardId)) {
+          return {
+            ...d,
+            cardIds: d.cardIds.filter(id => id !== cardId),
+            updatedAt: new Date().toISOString()
+          };
+        }
+        return d;
+      });
+    });
+    
+    toast.success('Card removed from deck');
+    return true;
+  };
+  
+  // Favorites management
+  const toggleFavorite = (cardId: string) => {
+    setFavorites(prev => {
+      if (prev.includes(cardId)) {
+        toast.success('Removed from favorites');
+        return prev.filter(id => id !== cardId);
+      } else {
+        toast.success('Added to favorites');
+        return [...prev, cardId];
+      }
+    });
+  };
+  
+  const isFavorite = (cardId: string): boolean => {
+    return favorites.includes(cardId);
+  };
+  
+  // Load user data
+  useEffect(() => {
+    if (user) {
+      // In a real app, we would load user's cards, decks, and favorites from an API
+      setIsLoading(true);
+      // Simulate API call
+      setTimeout(() => {
+        // For demo purposes, just use sample data
+        setIsLoading(false);
+      }, 500);
+    }
+  }, [user]);
+  
   return (
-    <EnhancedCardContext.Provider value={value}>
+    <CardEnhancedContext.Provider value={{
+      cards,
+      series,
+      decks,
+      favorites,
+      isLoading,
+      addCard,
+      updateCard,
+      deleteCard,
+      getCard,
+      addSeries,
+      updateSeries,
+      deleteSeries,
+      getSeries,
+      addCardToSeries,
+      removeCardFromSeries,
+      addDeck,
+      updateDeck,
+      deleteDeck,
+      getDeck,
+      addCardToDeck,
+      removeCardFromDeck,
+      toggleFavorite,
+      isFavorite
+    }}>
       {children}
-    </EnhancedCardContext.Provider>
+    </CardEnhancedContext.Provider>
   );
 };
 
-/**
- * Hook to use the enhanced card context
- */
 export const useEnhancedCards = () => {
-  const context = useContext(EnhancedCardContext);
-  if (!context) {
-    throw new Error('useEnhancedCards must be used within an EnhancedCardProvider');
+  const context = useContext(CardEnhancedContext);
+  if (context === undefined) {
+    throw new Error('useEnhancedCards must be used within a CardEnhancedProvider');
   }
   return context;
 };

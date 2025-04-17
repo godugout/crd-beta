@@ -1,20 +1,24 @@
 
-import { teamService } from './teamService';
-import { teamMembersService } from './teamMembersService';
+import * as teamService from './teamService';
+import * as teamMembersService from './teamMembersService';
 import { mapTeamFromDb, mapTeamMemberFromDb } from './mappers';
 
-export {
-  teamService,
-  teamMembersService,
-  mapTeamFromDb,
-  mapTeamMemberFromDb
-};
-
-// Create a team repository wrapper
 export const teamRepository = {
-  getTeams: teamService.getTeams,
+  // Team operations
   getTeamById: teamService.getTeamById,
+  getAllTeams: teamService.getAllTeams,
   createTeam: teamService.createTeam,
   updateTeam: teamService.updateTeam,
-  deleteTeam: teamService.deleteTeam
+  deleteTeam: teamService.deleteTeam,
+  
+  // Team member operations
+  getTeamMembers: teamMembersService.getTeamMembers,
+  addTeamMember: teamMembersService.addTeamMember,
+  updateTeamMemberRole: teamMembersService.updateTeamMemberRole,
+  removeTeamMember: teamMembersService.removeTeamMember
+};
+
+export {
+  mapTeamFromDb,
+  mapTeamMemberFromDb
 };

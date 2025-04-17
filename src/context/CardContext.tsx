@@ -1,285 +1,293 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Card, CardRarity, Collection } from '@/lib/types';
-import { sampleCards } from '@/lib/data/sampleCards';
-import { cardIdToCard } from '@/lib/utils/cardHelpers';
-import { adaptToCard } from '@/lib/adapters/typeAdapters';
-import { toStandardCard } from '@/lib/utils/cardConverters';
 
-/**
- * Props interface for the Card Context
- * Defines all methods and properties available throughout the application
- */
-export interface CardContextProps {
+import React, { createContext, useContext, useState, ReactNode, useCallback, useEffect } from 'react';
+import { Card, Collection, DesignMetadata } from '@/lib/types';
+import { DEFAULT_DESIGN_METADATA } from '@/lib/utils/cardDefaults';
+import { v4 as uuidv4 } from 'uuid';
+import { adaptToCard } from '@/lib/adapters/cardAdapter';
+
+export interface CardContextType {
   cards: Card[];
-  favorites: Card[];
   collections: Collection[];
-  loading: boolean;
-  error: Error | null;
   isLoading: boolean;
-  fetchCards: () => Promise<void>;
-  fetchCollections: () => Promise<void>;
-  addCard: (card: Partial<Card>) => Promise<Card>;
-  updateCard: (id: string, card: Partial<Card>) => Promise<Card>;
-  deleteCard: (id: string) => Promise<boolean>;
-  toggleFavorite: (id: string) => void;
-  getCardById: (id: string) => Card | undefined;
   getCard: (id: string) => Card | undefined;
-  addCollection: (collection: Partial<Collection>) => Promise<Collection>;
-  updateCollection: (id: string, collection: Partial<Collection>) => Promise<Collection>;
+  getCardById: (id: string) => Card | undefined; // Added this method
+  addCard: (card: Partial<Card>) => Promise<Card>; // Changed to accept Partial<Card>
+  updateCard: (id: string, cardData: Partial<Card>) => Promise<Card>;
+  deleteCard: (id: string) => Promise<boolean>;
+  addCollection: (collection: Partial<Collection>) => Promise<Collection>; // Changed to accept Partial<Collection>
+  updateCollection: (id: string, collectionData: Partial<Collection>) => Promise<Collection>;
   deleteCollection: (id: string) => Promise<boolean>;
-  addSeries: (series: any) => Promise<any>;
-  updateSeries: (id: string, series: any) => Promise<any>;
+  addCardToCollection: (cardId: string, collectionId: string) => Promise<Collection>;
+  removeCardFromCollection: (cardId: string, collectionId: string) => Promise<Collection>;
   refreshCards: () => Promise<void>;
-  createCollection: (collection: Partial<Collection>) => Promise<Collection>;
 }
 
-/**
- * React Context for card-related operations
- * Provides access to cards, collections, and related functionality
- */
-export const CardContext = createContext<CardContextProps | undefined>(undefined);
+const CardContext = createContext<CardContextType>({
+  cards: [],
+  collections: [],
+  isLoading: false,
+  getCard: () => undefined,
+  getCardById: () => undefined, // Added this method
+  addCard: async () => ({} as Card),
+  updateCard: async () => ({} as Card),
+  deleteCard: async () => false,
+  addCollection: async () => ({} as Collection),
+  updateCollection: async () => ({} as Collection),
+  deleteCollection: async () => false,
+  addCardToCollection: async () => ({} as Collection),
+  removeCardFromCollection: async () => ({} as Collection),
+  refreshCards: async () => {},
+});
 
-/**
- * Provider component for CardContext
- * Manages state and provides card-related functionality to child components
- */
 export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  // Process sample cards to ensure they all have the required properties
-  // and use the correct CardRarity enum
-  const processedSampleCards = sampleCards.map(card => toStandardCard({
-    ...card,
-    isFavorite: card.isFavorite ?? false,
-    description: card.description || '',
-    rarity: card.rarity || CardRarity.COMMON
-  }));
-  
-  const [cards, setCards] = useState<Card[]>(processedSampleCards);
-  const [favorites, setFavorites] = useState<Card[]>([]);
+  const [cards, setCards] = useState<Card[]>([]);
   const [collections, setCollections] = useState<Collection[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
+  // Load cards and collections from local storage on mount
   useEffect(() => {
-    fetchCards();
+    const storedCards = localStorage.getItem('cards');
+    if (storedCards) {
+      setCards(JSON.parse(storedCards).map((card: Card) => adaptToCard(card)));
+    }
+
+    const storedCollections = localStorage.getItem('collections');
+    if (storedCollections) {
+      setCollections(JSON.parse(storedCollections));
+    }
   }, []);
 
-  const fetchCards = async () => {
-    setLoading(true);
-    try {
-      // Ensure cards have the isFavorite property
-      setCards(processedSampleCards);
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error('Failed to fetch cards'));
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Save cards and collections to local storage whenever they change
+  useEffect(() => {
+    localStorage.setItem('cards', JSON.stringify(cards));
+  }, [cards]);
 
-  const fetchCollections = async () => {
-    setLoading(true);
-    try {
-      setCollections([]);
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error('Failed to fetch collections'));
-    } finally {
-      setLoading(false);
-    }
-  };
+  useEffect(() => {
+    localStorage.setItem('collections', JSON.stringify(collections));
+  }, [collections]);
 
-  const addCard = async (cardData: Partial<Card>): Promise<Card> => {
-    setLoading(true);
-    try {
-      // Use toStandardCard to ensure proper CardRarity enum type
-      const newCard: Card = toStandardCard({
-        id: `card-${Date.now()}`,
-        title: cardData.title || 'Untitled Card',
-        description: cardData.description || '',
-        imageUrl: cardData.imageUrl || '',
-        thumbnailUrl: cardData.thumbnailUrl || '',
-        tags: cardData.tags || [],
-        userId: 'user-1',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        rarity: cardData.rarity || CardRarity.COMMON,
-        effects: [],
-        isFavorite: cardData.isFavorite ?? false,
-        ...cardData
-      });
-      
-      setCards(prevCards => [...prevCards, newCard]);
-      return newCard;
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error('Failed to add card');
-      setError(error);
-      throw error;
-    } finally {
-      setLoading(false);
-    }
-  };
+  const getCard = useCallback((id: string) => {
+    return cards.find(card => card.id === id);
+  }, [cards]);
+  
+  // Add alias for getCardById to match getCard
+  const getCardById = useCallback((id: string) => {
+    return cards.find(card => card.id === id);
+  }, [cards]);
 
-  const updateCard = async (id: string, updates: Partial<Card>): Promise<Card> => {
-    setLoading(true);
-    try {
-      const cardIndex = cards.findIndex(card => card.id === id);
-      if (cardIndex === -1) {
-        throw new Error(`Card with ID ${id} not found`);
-      }
-      
-      const updatedCard = {
-        ...cards[cardIndex],
-        ...updates,
-        updatedAt: new Date().toISOString()
-      };
-      
-      const newCards = [...cards];
-      newCards[cardIndex] = updatedCard;
-      
-      setCards(newCards);
-      return updatedCard;
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error('Failed to update card');
-      setError(error);
-      throw error;
-    } finally {
-      setLoading(false);
-    }
-  };
+  const addCard = useCallback(async (cardData: Partial<Card>) => {
+    setIsLoading(true);
+    return new Promise<Card>((resolve) => {
+      setTimeout(() => {
+        // Create a complete card from partial data
+        const now = new Date().toISOString();
+        const newCard: Card = {
+          id: uuidv4(),
+          title: cardData.title || 'Untitled Card',
+          description: cardData.description || '',
+          imageUrl: cardData.imageUrl || '',
+          thumbnailUrl: cardData.thumbnailUrl || cardData.imageUrl || '',
+          userId: cardData.userId || 'default-user',
+          tags: cardData.tags || [],
+          effects: cardData.effects || [],
+          createdAt: now,
+          updatedAt: now,
+          designMetadata: cardData.designMetadata || DEFAULT_DESIGN_METADATA,
+          ...cardData
+        };
+        
+        setCards(prevCards => [...prevCards, newCard]);
+        setIsLoading(false);
+        resolve(newCard);
+      }, 300);
+    });
+  }, []);
 
-  const deleteCard = async (id: string): Promise<boolean> => {
-    setLoading(true);
-    try {
-      setCards(prevCards => prevCards.filter(card => card.id !== id));
-      setFavorites(prevFavorites => prevFavorites.filter(card => card.id !== id));
-      return true;
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error('Failed to delete card');
-      setError(error);
-      throw error;
-    } finally {
-      setLoading(false);
-    }
-  };
+  const updateCard = useCallback(async (id: string, cardData: Partial<Card>) => {
+    setIsLoading(true);
+    return new Promise<Card>((resolve) => {
+      setTimeout(() => {
+        let updatedCard: Card = {} as Card;
+        
+        setCards(prevCards =>
+          prevCards.map(card => {
+            if (card.id === id) {
+              updatedCard = { 
+                ...card, 
+                ...cardData, 
+                updatedAt: new Date().toISOString() 
+              };
+              return updatedCard;
+            }
+            return card;
+          })
+        );
+        
+        setIsLoading(false);
+        resolve(updatedCard);
+      }, 300);
+    });
+  }, []);
 
-  const toggleFavorite = (id: string) => {
-    const card = cards.find(c => c.id === id);
-    if (!card) return;
-    
-    const isFavorite = favorites.some(f => f.id === id);
-    if (isFavorite) {
-      setFavorites(prevFavorites => prevFavorites.filter(f => f.id !== id));
-    } else {
-      setFavorites(prevFavorites => [...prevFavorites, card]);
-    }
-  };
+  const deleteCard = useCallback(async (id: string) => {
+    setIsLoading(true);
+    return new Promise<boolean>((resolve) => {
+      setTimeout(() => {
+        setCards(prevCards => prevCards.filter(card => card.id !== id));
+        setIsLoading(false);
+        resolve(true);
+      }, 300);
+    });
+  }, []);
 
-  const getCardById = (id: string) => {
-    return cards.find(card => card.id === id) || cardIdToCard(id);
-  };
+  const addCollection = useCallback(async (collection: Partial<Collection>) => {
+    setIsLoading(true);
+    return new Promise<Collection>((resolve) => {
+      setTimeout(() => {
+        const now = new Date().toISOString();
+        const newCollection: Collection = {
+          id: uuidv4(),
+          name: collection.name || 'Untitled Collection',
+          description: collection.description || '',
+          userId: collection.userId || 'default-user',
+          cards: collection.cards || [],
+          coverImageUrl: collection.coverImageUrl || '',
+          isPublic: collection.isPublic !== undefined ? collection.isPublic : true,
+          cardIds: collection.cardIds || [],
+          createdAt: now,
+          updatedAt: now,
+          visibility: collection.visibility || 'public',
+          allowComments: collection.allowComments !== undefined ? collection.allowComments : true,
+          designMetadata: collection.designMetadata || {},
+          ...collection
+        };
+        
+        setCollections(prevCollections => [...prevCollections, newCollection]);
+        setIsLoading(false);
+        resolve(newCollection);
+      }, 300);
+    });
+  }, []);
 
-  const addCollection = async (collectionData: Partial<Collection>): Promise<Collection> => {
-    setLoading(true);
-    try {
-      const newCollection = {
-        id: `collection-${Date.now()}`,
-        title: collectionData.title || 'Untitled Collection',
-        description: collectionData.description || '',
-        name: collectionData.name || collectionData.title || 'Untitled Collection',
-        userId: 'user-1',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        ...collectionData
-      } as Collection;
-      
-      setCollections(prev => [...prev, newCollection]);
-      return newCollection;
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error('Failed to add collection');
-      setError(error);
-      throw error;
-    } finally {
-      setLoading(false);
-    }
-  };
+  const updateCollection = useCallback(async (id: string, collectionData: Partial<Collection>) => {
+    setIsLoading(true);
+    return new Promise<Collection>((resolve) => {
+      setTimeout(() => {
+        let updatedCollection: Collection = {} as Collection;
+        
+        setCollections(prevCollections =>
+          prevCollections.map(collection => {
+            if (collection.id === id) {
+              updatedCollection = { 
+                ...collection, 
+                ...collectionData, 
+                updatedAt: new Date().toISOString() 
+              };
+              return updatedCollection;
+            }
+            return collection;
+          })
+        );
+        
+        setIsLoading(false);
+        resolve(updatedCollection);
+      }, 300);
+    });
+  }, []);
 
-  const updateCollection = async (id: string, updates: Partial<Collection>): Promise<Collection> => {
-    setLoading(true);
-    try {
-      const collectionIndex = collections.findIndex(c => c.id === id);
-      if (collectionIndex === -1) {
-        throw new Error(`Collection with ID ${id} not found`);
-      }
-      
-      const updatedCollection = {
-        ...collections[collectionIndex],
-        ...updates,
-        updatedAt: new Date().toISOString()
-      } as Collection;
-      
-      const newCollections = [...collections];
-      newCollections[collectionIndex] = updatedCollection;
-      
-      setCollections(newCollections);
-      return updatedCollection;
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error('Failed to update collection');
-      setError(error);
-      throw error;
-    } finally {
-      setLoading(false);
-    }
-  };
+  const deleteCollection = useCallback(async (id: string) => {
+    setIsLoading(true);
+    return new Promise<boolean>((resolve) => {
+      setTimeout(() => {
+        setCollections(prevCollections => prevCollections.filter(collection => collection.id !== id));
+        setIsLoading(false);
+        resolve(true);
+      }, 300);
+    });
+  }, []);
 
-  const deleteCollection = async (id: string): Promise<boolean> => {
-    setLoading(true);
-    try {
-      setCollections(prevCollections => prevCollections.filter(c => c.id !== id));
-      return true;
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error('Failed to delete collection');
-      setError(error);
-      throw error;
-    } finally {
-      setLoading(false);
-    }
-  };
+  const addCardToCollection = useCallback(async (cardId: string, collectionId: string) => {
+    setIsLoading(true);
+    return new Promise<Collection>((resolve) => {
+      setTimeout(() => {
+        let updatedCollection: Collection = {} as Collection;
+        
+        setCollections(prevCollections =>
+          prevCollections.map(collection => {
+            if (collection.id === collectionId) {
+              const cardExists = collection.cardIds ? collection.cardIds.includes(cardId) : false;
+              
+              if (!cardExists) {
+                updatedCollection = {
+                  ...collection,
+                  cardIds: collection.cardIds ? [...collection.cardIds, cardId] : [cardId],
+                  updatedAt: new Date().toISOString()
+                };
+                return updatedCollection;
+              }
+              updatedCollection = collection;
+            }
+            return collection;
+          })
+        );
+        
+        setIsLoading(false);
+        resolve(updatedCollection);
+      }, 300);
+    });
+  }, []);
 
-  const addSeries = async (series: any) => {
-    return {};
-  };
+  const removeCardFromCollection = useCallback(async (cardId: string, collectionId: string) => {
+    setIsLoading(true);
+    return new Promise<Collection>((resolve) => {
+      setTimeout(() => {
+        let updatedCollection: Collection = {} as Collection;
+        
+        setCollections(prevCollections =>
+          prevCollections.map(collection => {
+            if (collection.id === collectionId) {
+              updatedCollection = {
+                ...collection,
+                cardIds: collection.cardIds ? collection.cardIds.filter(id => id !== cardId) : [],
+                updatedAt: new Date().toISOString()
+              };
+              return updatedCollection;
+            }
+            return collection;
+          })
+        );
+        
+        setIsLoading(false);
+        resolve(updatedCollection);
+      }, 300);
+    });
+  }, []);
 
-  const updateSeries = async (id: string, series: any) => {
-    return {};
-  };
+  const refreshCards = useCallback(async () => {
+    setIsLoading(true);
+    return new Promise<void>((resolve) => {
+      setTimeout(() => {
+        setIsLoading(false);
+        resolve();
+      }, 300);
+    });
+  }, []);
 
-  const refreshCards = async () => {
-    return fetchCards();
-  };
-
-  const createCollection = addCollection;
-
-  const value: CardContextProps = {
+  const value: CardContextType = {
     cards,
-    favorites,
     collections,
-    loading,
     isLoading,
-    error,
-    fetchCards,
-    fetchCollections,
+    getCard,
+    getCardById, // Added this method
     addCard,
     updateCard,
     deleteCard,
-    toggleFavorite,
-    getCardById,
-    getCard: getCardById,
     addCollection,
     updateCollection,
     deleteCollection,
-    addSeries,
-    updateSeries,
+    addCardToCollection,
+    removeCardFromCollection,
     refreshCards,
-    createCollection
   };
 
   return (
@@ -289,16 +297,8 @@ export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   );
 };
 
-/**
- * Hook to access the card context
- * Throws an error if used outside of a CardProvider
- */
-export const useCards = () => {
-  const context = useContext(CardContext);
-  if (!context) {
-    throw new Error('useCards must be used within a CardProvider');
-  }
-  return context;
-};
+export const useCards = () => useContext(CardContext);
+export const useCardContext = () => useContext(CardContext);
 
+// Use 'export type' for types to fix the isolatedModules issue
 export type { Card, Collection };

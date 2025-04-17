@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PageLayout from '@/components/navigation/PageLayout';
@@ -12,19 +11,16 @@ import { Card } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { useCards } from '@/hooks/useCards';
 
 const Gallery = () => {
   const { isMobile } = useMobileOptimization();
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
-  const [selectedCard, setSelectedCard] = useState<Card | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [showTutorial, setShowTutorial] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { getCardById } = useCards();
   
   const {
     displayCards,
@@ -37,15 +33,6 @@ const Gallery = () => {
       setShowTutorial(true);
     }
   }, []);
-
-  useEffect(() => {
-    if (selectedCardId && getCardById) {
-      const card = getCardById(selectedCardId);
-      if (card) {
-        setSelectedCard(card);
-      }
-    }
-  }, [selectedCardId, getCardById]);
 
   const completeTutorial = () => {
     localStorage.setItem('hasSeenGalleryTutorial', 'true');
@@ -76,13 +63,12 @@ const Gallery = () => {
   const handleCloseFullscreen = () => {
     setIsFullscreen(false);
     setSelectedCardId(null);
-    setSelectedCard(null);
   };
   
-  if (isFullscreen && selectedCard) {
+  if (isFullscreen && selectedCardId) {
     return (
       <FullscreenViewer 
-        card={selectedCard} 
+        cardId={selectedCardId} 
         onClose={handleCloseFullscreen}
       />
     );
