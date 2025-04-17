@@ -28,7 +28,19 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     if (!isLoading) {
       if (user) {
-        setDashboardUser(user);
+        // Ensure we create a User type compatible object
+        const compatibleUser: User = {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          displayName: user.displayName,
+          role: user.role,
+          permissions: user.permissions as UserPermission[],
+          avatarUrl: user.avatarUrl,
+          createdAt: user.createdAt,
+          updatedAt: user.updatedAt,
+        };
+        setDashboardUser(compatibleUser);
       } else {
         // Mock user for demo purposes
         const mockUser: User = {

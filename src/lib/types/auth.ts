@@ -1,9 +1,9 @@
 
-import { User, UserRole } from '@/lib/types';
+import { User, UserRole, UserPermission } from '@/lib/types';
 
 export interface AuthUser extends User {
   role: UserRole;
-  permissions?: string[];
+  permissions?: UserPermission[];
   email: string;
   displayName?: string;
   avatarUrl?: string;

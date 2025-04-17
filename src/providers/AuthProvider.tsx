@@ -24,7 +24,7 @@ const MOCK_USER: AuthUser = {
   name: 'Dusty Baker',
   displayName: 'Dusty',
   role: UserRole.ADMIN,
-  permissions: ['all'],
+  permissions: ['all'] as any, // Cast to satisfy TypeScript
   avatarUrl: 'https://api.dicebear.com/7.x/initials/svg?seed=DB',
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
@@ -122,7 +122,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           isLoading: false, 
           error: 'Invalid email or password' 
         }));
-        logger.warn('Auth: Failed login attempt', { email });
+        logger.warn('Auth: Failed login attempt', { 
+          context: { email } 
+        });
         return { success: false, error: 'Invalid email or password' };
       }
       
@@ -144,7 +146,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.setItem('auth_user', JSON.stringify(MOCK_USER));
       localStorage.setItem('auth_session', JSON.stringify(session));
       
-      logger.info('Auth: User signed in', { userId: MOCK_USER.id });
+      logger.info('Auth: User signed in', { 
+        context: { userId: MOCK_USER.id } 
+      });
       return { success: true };
     } catch (error: any) {
       const errorMessage = error.message || 'Failed to sign in';
@@ -204,7 +208,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.setItem('auth_user', JSON.stringify(newUser));
       localStorage.setItem('auth_session', JSON.stringify(session));
       
-      logger.info('Auth: User signed up', { userId: newUser.id });
+      logger.info('Auth: User signed up', { 
+        context: { userId: newUser.id } 
+      });
       return { success: true };
     } catch (error: any) {
       const errorMessage = error.message || 'Failed to sign up';
@@ -261,7 +267,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       setState(prev => ({ ...prev, isLoading: false }));
       
-      logger.info('Auth: Password reset requested', { email });
+      logger.info('Auth: Password reset requested', { 
+        context: { email: email } 
+      });
       return { success: true };
     } catch (error: any) {
       const errorMessage = error.message || 'Failed to reset password';
@@ -297,7 +305,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       localStorage.setItem('auth_user', JSON.stringify(updatedUser));
       
-      logger.info('Auth: Profile updated', { userId: updatedUser.id });
+      logger.info('Auth: Profile updated', { 
+        context: { userId: updatedUser.id } 
+      });
       return { success: true };
     } catch (error: any) {
       const errorMessage = error.message || 'Failed to update profile';
