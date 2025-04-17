@@ -21,17 +21,19 @@ export function useCards() {
       isLoading: false,
       error: null,
       fetchCards: async () => {},
-      addCard: async () => ({ 
+      addCard: async (data: Partial<Card>): Promise<Card> => ({ 
         id: `fallback-${Date.now()}`, 
         title: 'Fallback Card',
         description: '', 
         imageUrl: '',
         thumbnailUrl: '',
         tags: [],
+        userId: '',
         createdAt: new Date().toISOString(), 
         updatedAt: new Date().toISOString(), 
         rarity: CardRarity.COMMON,
-        effects: [] 
+        effects: [],
+        designMetadata: {}
       }),
       updateCard: async () => ({ 
         id: `fallback-${Date.now()}`, 
@@ -40,10 +42,12 @@ export function useCards() {
         imageUrl: '',
         thumbnailUrl: '',
         tags: [],
+        userId: '',
         createdAt: new Date().toISOString(), 
         updatedAt: new Date().toISOString(), 
         rarity: CardRarity.COMMON,
-        effects: [] 
+        effects: [],
+        designMetadata: {}
       }),
       deleteCard: async () => true,
       toggleFavorite: () => {},

@@ -6,7 +6,7 @@ export const baseballNavItems: NavItem[] = [
   {
     title: "All Cards",
     path: "/baseball",
-    icon: Shirt, // Replace Baseball with Shirt since Baseball doesn't exist
+    icon: Shirt, // Using Shirt instead of Baseball since Baseball doesn't exist in lucide-react
     description: "Browse all baseball cards"
   },
   {

@@ -6,14 +6,19 @@
 
 import { BaseEntity } from './index';
 import { Reaction, Comment } from './interaction';
-import { 
-  Card as CardType, 
-  FabricSwatch as FabricSwatchType,
-  DesignMetadata,
-  CardRarity as CardRarityEnum
-} from './cardTypes';
+import { CardRarity as CardRarityEnum } from './cardTypes';
+import { DesignMetadata } from './cardTypes';
 
-export interface FabricSwatch extends FabricSwatchType {}
+// Fabric swatch interface
+export interface FabricSwatch {
+  id?: string;
+  type: string;
+  team: string;
+  year: string;
+  manufacturer: string;
+  position: string;
+  size: string;
+}
 
 // Base Card interface that contains all common properties
 export interface BaseCard {
@@ -56,6 +61,5 @@ export interface BaseCard {
 
 export interface Card extends BaseCard {}
 
-// Re-export the new types for gradual migration
-export type { CardType as CardNew, FabricSwatchType as FabricSwatchNew };
+// Export the CardRarity enum
 export { CardRarityEnum as CardRarity };

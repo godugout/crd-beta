@@ -1,5 +1,7 @@
+
 import { useAuth } from '@/hooks/useAuth';
-import { UserRole, ROLE_PERMISSIONS } from '@/lib/types/user';
+import { UserRole } from '@/lib/types/user';
+import { ROLE_PERMISSIONS } from '@/lib/types/user';
 
 /**
  * Hook to check user permissions based on their role or specific permissions
@@ -18,7 +20,7 @@ export function usePermissions() {
     
     // Otherwise, fall back to role-based permissions
     if (user?.role) {
-      const rolePermissions = ROLE_PERMISSIONS[user.role] || [];
+      const rolePermissions = ROLE_PERMISSIONS[user.role as UserRole] || [];
       return rolePermissions.includes(permission);
     }
     

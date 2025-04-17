@@ -53,7 +53,7 @@ const TeamNavigation: React.FC<TeamNavigationProps> = ({ isActive = false }) => 
                       to={item.path}
                     >
                       <div className="text-sm font-medium leading-none flex items-center gap-2">
-                        {item.icon && <item.icon className="h-4 w-4" />} {item.label}
+                        {item.icon && <item.icon className="h-4 w-4" />} {item.title}
                       </div>
                       {item.description && (
                         <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">

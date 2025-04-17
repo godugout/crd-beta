@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
@@ -45,7 +44,7 @@ const SeriesManager: React.FC<SeriesManagerProps> = ({ initialSeries }) => {
   };
   
   const handleReleaseTypeChange = (type: ReleaseType) => {
-    setSeriesData(prev => ({ ...prev, releaseType: type }));
+    setSeriesData(prev => ({ ...prev, releaseType: type as ReleaseType }));
   };
   
   const handleUploadCover = () => {
@@ -138,7 +137,7 @@ const SeriesManager: React.FC<SeriesManagerProps> = ({ initialSeries }) => {
           <div>
             <Label>Release Type</Label>
             <div className="grid grid-cols-3 gap-2 mt-2">
-              {(['standard', 'limited', 'exclusive'] as const).map(type => (
+              {(['standard', 'limited', 'promotional', 'exclusive'] as const).map(type => (
                 <Button
                   key={type}
                   type="button"

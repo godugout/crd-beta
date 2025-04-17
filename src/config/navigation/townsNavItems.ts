@@ -7,7 +7,8 @@ export const townsNavItems: NavItem[] = [
     title: "All Towns",
     path: "/towns",
     icon: Map,
-    description: "Browse all towns"
+    description: "Browse all towns",
+    highlight: false
   },
   {
     title: "My Town",
@@ -20,12 +21,14 @@ export const townsNavItems: NavItem[] = [
     title: "Create Town",
     path: "/towns/create",
     icon: PlusCircle,
-    description: "Create a new town"
+    description: "Create a new town",
+    highlight: false
   },
   {
     title: "Search Towns",
     path: "/towns/search",
     icon: Search,
-    description: "Find specific towns"
+    description: "Find specific towns",
+    highlight: false
   }
 ];

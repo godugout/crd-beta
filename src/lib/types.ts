@@ -1,3 +1,4 @@
+
 /**
  * Core Types for CRD (Collector's Republic Digital) App
  * Re-exports all types from the centralized type system
@@ -24,7 +25,6 @@ export type {
   CardMetadata,
   MarketMetadata,
   User,
-  UserRole,
   UserPermission,
   Reaction,
   Comment,
@@ -33,8 +33,8 @@ export type {
   DesignMetadata
 };
 
-// Export enums directly so they can be used as values
-export { CardRarityEnum as CardRarity, ROLE_PERMISSIONS };
+// Export enums and constants
+export { CardRarityEnum as CardRarity, ROLE_PERMISSIONS, UserRole };
 
 // Explicitly export and rename to avoid conflicts
 export type Card = IndexCard;

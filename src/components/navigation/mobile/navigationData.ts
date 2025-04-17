@@ -18,8 +18,8 @@ export const navigationGroups: NavigationGroup[] = [
       title: item.title,
       path: item.path,
       icon: item.icon,
-      highlight: item.highlight,
-      description: item.description
+      highlight: item.highlight || false,
+      description: item.description || ''
     }))
   },
   {
@@ -28,8 +28,8 @@ export const navigationGroups: NavigationGroup[] = [
       title: item.title,
       path: item.path,
       icon: item.icon,
-      highlight: item.highlight,
-      description: item.description
+      highlight: item.highlight || false,
+      description: item.description || ''
     }))
   },
   {
@@ -38,8 +38,8 @@ export const navigationGroups: NavigationGroup[] = [
       title: item.title,
       path: item.path,
       icon: item.icon,
-      highlight: item.highlight,
-      description: item.description
+      highlight: item.highlight || false,
+      description: item.description || ''
     }))
   },
   {
@@ -48,8 +48,8 @@ export const navigationGroups: NavigationGroup[] = [
       title: item.title,
       path: item.path,
       icon: item.icon,
-      highlight: item.highlight,
-      description: item.description
+      highlight: item.highlight || false,
+      description: item.description || ''
     }))
   },
   {
@@ -58,8 +58,8 @@ export const navigationGroups: NavigationGroup[] = [
       title: item.title,
       path: item.path,
       icon: item.icon,
-      highlight: item.highlight,
-      description: item.description
+      highlight: item.highlight || false,
+      description: item.description || ''
     }))
   },
   {
@@ -68,8 +68,8 @@ export const navigationGroups: NavigationGroup[] = [
       title: item.title,
       path: item.path,
       icon: item.icon,
-      highlight: item.highlight,
-      description: item.description
+      highlight: item.highlight || false,
+      description: item.description || ''
     }))
   },
   {
@@ -78,8 +78,8 @@ export const navigationGroups: NavigationGroup[] = [
       title: item.title,
       path: item.path,
       icon: item.icon,
-      highlight: item.highlight,
-      description: item.description
+      highlight: item.highlight || false,
+      description: item.description || ''
     }))
   }
 ];

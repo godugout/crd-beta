@@ -28,7 +28,7 @@ export interface User extends BaseEntity {
 }
 
 // Define role permissions
-export const ROLE_PERMISSIONS = {
+export const ROLE_PERMISSIONS: Record<UserRole, string[]> = {
   [UserRole.USER]: ['read:own', 'write:own', 'delete:own'],
   [UserRole.ADMIN]: ['read:all', 'write:all', 'delete:all', 'manage:users'],
   [UserRole.MODERATOR]: ['read:all', 'moderate:content', 'delete:flagged'],

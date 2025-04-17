@@ -1,32 +1,29 @@
-
 import { v4 as uuidv4 } from 'uuid';
-import { Collection } from '@/lib/types';
+import { Collection, Card } from '@/lib/types';
 
 /**
- * Create a new collection with default properties
- * @param collectionData Partial collection data
- * @returns The newly created collection
+ * Create a new collection with given data
+ * @param data Collection data
  */
-export const createCollection = (collectionData: Partial<Collection>): Collection => {
+export const createCollection = (data: Partial<Collection>): Collection => {
   const timestamp = new Date().toISOString();
   
   const newCollection: Collection = {
-    id: collectionData.id || uuidv4(),
-    name: collectionData.name || 'Untitled Collection',
-    title: collectionData.title || collectionData.name || 'Untitled Collection',
-    description: collectionData.description || '',
-    coverImageUrl: collectionData.coverImageUrl || '',
-    userId: collectionData.userId || 'anonymous',
-    teamId: collectionData.teamId,
-    cards: collectionData.cards || [],
-    cardIds: collectionData.cardIds || [],
-    visibility: collectionData.visibility || 'public',
-    allowComments: collectionData.allowComments !== undefined ? collectionData.allowComments : true,
-    isPublic: collectionData.isPublic !== undefined ? collectionData.isPublic : true,
-    createdAt: timestamp,
-    updatedAt: timestamp,
-    designMetadata: collectionData.designMetadata || {},
-    tags: collectionData.tags || []
+    id: data.id || uuidv4(),
+    name: data.name || 'Untitled Collection',
+    title: data.title || data.name || 'Untitled Collection',
+    description: data.description || '',
+    coverImageUrl: data.coverImageUrl || '',
+    userId: data.userId || 'anonymous',
+    teamId: data.teamId,
+    cards: data.cards || [],
+    cardIds: data.cardIds || [],
+    visibility: data.visibility || 'private',
+    allowComments: data.allowComments !== undefined ? data.allowComments : true,
+    createdAt: data.createdAt || timestamp,
+    updatedAt: data.updatedAt || timestamp,
+    designMetadata: data.designMetadata || {},
+    tags: data.tags || []
   };
   
   return newCollection;

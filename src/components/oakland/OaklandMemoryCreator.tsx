@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -55,10 +54,11 @@ const OaklandMemoryCreator: React.FC<OaklandMemoryCreatorProps> = ({ onMemoryCre
         description,
         imageUrl,
         thumbnailUrl: imageUrl,
+        userId: 'user1',
         tags,
         isPublic: true,
         effects: [],
-        rarity: CardRarity.COMMON, // Use enum value instead of string
+        rarity: CardRarity.COMMON,
         designMetadata: {
           cardStyle: {
             template: 'oakland',
@@ -96,8 +96,8 @@ const OaklandMemoryCreator: React.FC<OaklandMemoryCreatorProps> = ({ onMemoryCre
       setImageUrl('');
       
       // Notify parent component
-      if (onMemoryCreated) {
-        onMemoryCreated(newCard);
+      if (onMemoryCreated && newCard) {
+        onMemoryCreated(newCard as Card);
       }
     } catch (error) {
       toast.error('Failed to create memory');

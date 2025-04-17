@@ -1,62 +1,71 @@
-import { TeamMember, User, UserRole } from '@/lib/types';
-import { Team } from '@/lib/types/teamTypes';
 
-/**
- * Maps a team record from the database to the Team interface
- */
-export const mapTeamFromDb = (team: any): Team => ({
-  id: team.id,
-  name: team.name,
-  description: team.description,
-  logoUrl: team.logo_url,
-  logo_url: team.logo_url,
-  banner_url: team.banner_url,
-  ownerId: team.owner_id, // Keep only ownerId
-  status: team.status,
-  website: team.website,
-  email: team.email,
-  specialties: team.specialties,
-  createdAt: team.created_at,
-  updatedAt: team.updated_at,
-  visibility: team.visibility || 'public', // Default visibility
-  
-  // Team fields
-  team_code: team.team_code,
-  primary_color: team.primary_color,
-  secondary_color: team.secondary_color,
-  tertiary_color: team.tertiary_color,
-  founded_year: team.founded_year,
-  city: team.city,
-  state: team.state,
-  country: team.country,
-  stadium: team.stadium,
-  mascot: team.mascot,
-  league: team.league,
-  division: team.division,
-  is_active: team.is_active
-});
+import { User, TeamMember, Team } from '@/lib/types';
+import { UserRole } from '@/lib/types/user';
+import { v4 as uuidv4 } from 'uuid';
 
-/**
- * Maps a team member record from the database to the TeamMember interface
- */
-export const mapTeamMemberFromDb = (member: any): TeamMember => {
-  const user: User = {
-    id: member.user_id,
-    email: member.users?.email,
-    displayName: member.users?.display_name,
-    name: member.users?.full_name,
-    avatarUrl: member.users?.avatar_url,
+export interface DbTeam {
+  id: string;
+  name: string;
+  description: string;
+  logo_url: string;
+  owner_id: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DbTeamMember {
+  id: string;
+  team_id: string;
+  user_id: string;
+  role: string;
+  joined_at: string;
+}
+
+export interface DbUser {
+  id: string;
+  email: string;
+  display_name?: string;
+  name?: string;
+  avatar_url?: string;
+}
+
+export const dbTeamToTeam = (dbTeam: DbTeam): Team => {
+  return {
+    id: dbTeam.id,
+    name: dbTeam.name,
+    description: dbTeam.description,
+    logoUrl: dbTeam.logo_url,
+    ownerId: dbTeam.owner_id,
+    createdAt: dbTeam.created_at,
+    updatedAt: dbTeam.updated_at
+  };
+};
+
+export const dbUserToUser = (dbUser: DbUser): User => {
+  return {
+    id: dbUser.id,
+    email: dbUser.email,
+    displayName: dbUser.display_name,
+    name: dbUser.name || dbUser.display_name || dbUser.email.split('@')[0],
+    avatarUrl: dbUser.avatar_url,
     role: UserRole.USER,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
+    isVerified: true,
+    isActive: true,
+    permissions: ['read:own', 'write:own', 'delete:own']
   };
+};
 
+export const dbTeamMemberToTeamMember = (dbTeamMember: DbTeamMember, user?: User): TeamMember => {
   return {
-    id: member.id,
-    teamId: member.team_id,
-    userId: member.user_id,
-    role: member.role,
-    joinedAt: member.joined_at,
-    user
+    id: dbTeamMember.id,
+    teamId: dbTeamMember.team_id,
+    userId: dbTeamMember.user_id,
+    role: dbTeamMember.role,
+    joinedAt: dbTeamMember.joined_at,
+    user,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   };
 };

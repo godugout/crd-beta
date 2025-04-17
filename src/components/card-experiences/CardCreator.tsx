@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -46,6 +45,7 @@ const CardCreator: React.FC<CardCreatorProps> = ({ onCardCreated }) => {
         tags: tagArray,
         isPublic: true,
         effects: [],
+        userId: 'user1',
         rarity: CardRarity.COMMON,
         designMetadata: {
           cardStyle: {
@@ -80,8 +80,8 @@ const CardCreator: React.FC<CardCreatorProps> = ({ onCardCreated }) => {
       setTags('');
       
       // Notify parent component
-      if (onCardCreated) {
-        onCardCreated(newCard);
+      if (onCardCreated && newCard) {
+        onCardCreated(newCard as Card);
       }
     } catch (error) {
       toast.error('Failed to create card');
