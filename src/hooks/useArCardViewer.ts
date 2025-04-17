@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from 'react';
 import { Card } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { adaptToCard } from '@/lib/adapters/cardAdapter';
-import { DEFAULT_DESIGN_METADATA } from '@/lib/utils/cardDefaults';
 
 export function useArCardViewer(cardId?: string) {
   const [cards, setCards] = useState<Card[]>([]);
@@ -39,7 +38,6 @@ export function useArCardViewer(cardId?: string) {
           updatedAt: new Date().toISOString(),
           effects: ['Holographic'],
           rarity: 'common',
-          designMetadata: DEFAULT_DESIGN_METADATA
         }),
         adaptToCard({
           id: '2',
@@ -53,17 +51,8 @@ export function useArCardViewer(cardId?: string) {
           updatedAt: new Date().toISOString(),
           effects: ['Refractor'],
           rarity: 'rare',
-          designMetadata: DEFAULT_DESIGN_METADATA
         }),
       ];
-      
-      // Here, in a real application, you'd fetch from Supabase
-      // const { data, error } = await supabase
-      //   .from('cards')
-      //   .select('*')
-      //   .eq('ar_enabled', true);
-      
-      // if (error) throw error;
       
       setCards(demoCards);
 

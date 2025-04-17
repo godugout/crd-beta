@@ -1,14 +1,16 @@
+
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { EnhancedCard, Series, Deck, CardRarity } from '@/lib/types/enhancedCardTypes';
 import { toast } from 'sonner';
+import sampleCards from '@/data/sampleCards';
 
 // Sample data
 const sampleEnhancedCards: EnhancedCard[] = [
   {
     id: '1',
     title: 'Michael Jordan Rookie',
-    description: 'Rare rookie card from the greatest basketball player of all time',
+    description: 'Rare rookie card from the golden era',
     imageUrl: 'https://example.com/mj-rookie.jpg',
     thumbnailUrl: 'https://example.com/mj-rookie-thumb.jpg',
     tags: ['basketball', 'rookie', 'legend'],
@@ -67,8 +69,10 @@ const sampleEnhancedCards: EnhancedCard[] = [
 // Context types
 interface EnhancedCardContextProps {
   enhancedCards: EnhancedCard[];
+  cards: EnhancedCard[]; // Added for Dashboard compatibility
   series: Series[];
   decks: Deck[];
+  favorites: string[]; // Added for Dashboard compatibility
   isLoading: boolean;
   error: Error | null;
   getEnhancedCardById: (id: string) => EnhancedCard | undefined;
@@ -87,6 +91,7 @@ interface EnhancedCardContextProps {
   deleteDeck: (id: string) => Promise<boolean>;
   addCardToDeck: (cardId: string, deckId: string) => Promise<boolean>;
   removeCardFromDeck: (cardId: string, deckId: string) => Promise<boolean>;
+  toggleFavorite: (cardId: string) => void; // Added for Dashboard compatibility
 }
 
 // Create context with default values
@@ -97,6 +102,7 @@ export const EnhancedCardProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const [enhancedCards, setEnhancedCards] = useState<EnhancedCard[]>([]);
   const [series, setSeries] = useState<Series[]>([]);
   const [decks, setDecks] = useState<Deck[]>([]);
+  const [favorites, setFavorites] = useState<string[]>([]); // Added for Dashboard compatibility
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
@@ -143,6 +149,9 @@ export const EnhancedCardProvider: React.FC<{ children: React.ReactNode }> = ({ 
             isPublic: true
           }
         ]);
+
+        // Set some initial favorites
+        setFavorites(['1']);
         
       } catch (e) {
         const err = e instanceof Error ? e : new Error('Unknown error loading enhanced cards');
@@ -168,6 +177,18 @@ export const EnhancedCardProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const getDeckById = useCallback((id: string) => {
     return decks.find(d => d.id === id);
   }, [decks]);
+
+  // Toggle favorite status for a card
+  const toggleFavorite = useCallback((cardId: string) => {
+    setFavorites(prev => {
+      if (prev.includes(cardId)) {
+        return prev.filter(id => id !== cardId);
+      } else {
+        return [...prev, cardId];
+      }
+    });
+    toast.success("Favorites updated");
+  }, []);
 
   // Card CRUD operations
   const addEnhancedCard = useCallback(async (card: Partial<EnhancedCard>): Promise<EnhancedCard> => {
@@ -631,10 +652,12 @@ export const EnhancedCardProvider: React.FC<{ children: React.ReactNode }> = ({ 
   return (
     <EnhancedCardContext.Provider value={{
       enhancedCards,
+      cards: enhancedCards, // Alias for Dashboard compatibility
       series,
       decks,
       isLoading,
       error,
+      favorites,
       getEnhancedCardById,
       getSeriesById,
       getDeckById,
@@ -650,7 +673,8 @@ export const EnhancedCardProvider: React.FC<{ children: React.ReactNode }> = ({ 
       updateDeck,
       deleteDeck,
       addCardToDeck,
-      removeCardFromDeck
+      removeCardFromDeck,
+      toggleFavorite
     }}>
       {children}
     </EnhancedCardContext.Provider>

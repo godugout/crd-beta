@@ -4,16 +4,34 @@
  */
 
 // Re-export all types from our centralized type system
-export * from './types/index';
-export * from './types/cardTypes';
-export * from './types/user';
-export * from './types/interaction';
-export * from './types/collection';
-export * from './types/instagram'; // Add export for Instagram types
+// Use explicit exports to avoid naming conflicts
+import { BaseEntity, JsonValue } from './types/index';
+import { TeamMember } from './types/team';
+import { Card, DesignMetadata, CardRarity, CardStyle, TextStyle, CardMetadata, MarketMetadata } from './types/cardTypes';
+import { User } from './types/user';
+import { Reaction, Comment } from './types/interaction';
+import { Collection } from './types/collection';
+import { OaklandMemoryData } from './types/oaklandMemory';
+
+export {
+  BaseEntity,
+  JsonValue,
+  Card,
+  DesignMetadata,
+  CardRarity,
+  CardStyle,
+  TextStyle,
+  CardMetadata,
+  MarketMetadata,
+  User,
+  Reaction,
+  Comment,
+  Collection,
+  TeamMember,
+  OaklandMemoryData
+};
 
 // Keep the utility function for backward compatibility
-import { DesignMetadata } from './types/cardTypes';
-
 /**
  * Utility function to serialize design metadata to JSON-safe format
  * @param metadata The design metadata to serialize

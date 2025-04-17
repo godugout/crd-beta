@@ -1,10 +1,8 @@
-
 import React, { useState, useEffect } from 'react';
 import PageLayout from '@/components/navigation/PageLayout';
 import { Card } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { adaptToCard } from '@/lib/adapters/cardAdapter';
-import { DEFAULT_DESIGN_METADATA } from '@/lib/utils/cardDefaults';
 
 const CommunityFeed = () => {
   const [feedCards, setFeedCards] = useState<Card[]>([]);
@@ -43,7 +41,6 @@ const CommunityFeed = () => {
             ],
             effects: ['Holographic'],
             rarity: 'common',
-            designMetadata: DEFAULT_DESIGN_METADATA
           }),
           adaptToCard({
             id: 'community-2',
@@ -60,7 +57,6 @@ const CommunityFeed = () => {
             reactions: [],
             effects: ['Chrome', 'Refractor'],
             rarity: 'rare',
-            designMetadata: DEFAULT_DESIGN_METADATA
           }),
         ];
         

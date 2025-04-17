@@ -1,143 +1,110 @@
 
-import { Card } from '@/lib/types';
+import { Card, DesignMetadata } from '@/lib/types';
+import { DEFAULT_DESIGN_METADATA } from '@/lib/utils/cardDefaults';
 
-// Reliable images from Unsplash
-const RELIABLE_IMAGES = {
-  basketball: 'https://images.unsplash.com/photo-1518063319789-7217e6706b04?q=80&w=1000',
-  football: 'https://images.unsplash.com/photo-1566577739112-5180d4bf9390?q=80&w=1000',
-  baseball: 'https://images.unsplash.com/photo-1508344928928-7165b67de128?q=80&w=1000',
-  anime: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?q=80&w=1000',
-  vintage: 'https://images.unsplash.com/photo-1637666589313-f22b900e9c2d?q=80&w=1000',
-  pokemon: 'https://images.unsplash.com/photo-1613771404273-1bound29e8d20?q=80&w=1000',
-  default: 'https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=1000'
-};
-
-// Create a base design metadata with all required fields
-const createDesignMetadata = (borderColor: string, frameColor: string) => ({
-  cardStyle: {
-    template: 'classic',
-    effect: 'classic',
-    borderRadius: '8px',
-    borderColor,
-    frameColor,
-    frameWidth: 3,
-    shadowColor: `rgba(${parseInt(borderColor.slice(1, 3), 16)}, ${parseInt(borderColor.slice(3, 5), 16)}, ${parseInt(borderColor.slice(5, 7), 16)}, 0.5)`,
-  },
-  textStyle: {
-    titleColor: '#FFFFFF',
-    titleAlignment: 'left',
-    titleWeight: 'bold',
-    descriptionColor: '#FFFFFF',
-  },
-  cardMetadata: {
-    category: 'sports',
-    cardType: 'collectible',
-    series: 'standard'
-  },
-  marketMetadata: {
-    isPrintable: false,
-    isForSale: false,
-    includeInCatalog: true
-  }
-});
-
-export const sampleCardData: Card[] = [
+export const sampleCards: Card[] = [
   {
-    id: 'card-001',
+    id: '1',
+    title: 'Vintage Baseball Card',
+    description: 'A classic baseball card from the golden era',
+    imageUrl: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=200',
+    tags: ['baseball', 'vintage', 'collectible'],
+    createdAt: '2023-01-15T08:30:00Z',
+    updatedAt: '2023-01-15T08:30:00Z',
+    userId: 'user123',
+    teamId: 'team1',
+    collectionId: 'collection1',
+    isPublic: true,
+    designMetadata: DEFAULT_DESIGN_METADATA,
+    effects: ['standard'],
+    rarity: 'common'
+  },
+  {
+    id: '2',
     title: 'Basketball Legend',
-    description: 'Limited edition collectible card featuring the basketball legend in action.',
-    imageUrl: RELIABLE_IMAGES.basketball,
-    thumbnailUrl: RELIABLE_IMAGES.basketball,
-    tags: ['basketball', 'sports', 'collectible', 'legend'],
-    createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-    updatedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-    userId: 'demo-user',
-    teamId: 'team-001',
-    collectionId: 'collection-001',
+    description: 'Limited edition basketball trading card',
+    imageUrl: 'https://images.unsplash.com/photo-1612872087720-bb876e2e67d1',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1612872087720-bb876e2e67d1?w=200',
+    tags: ['basketball', 'limited', 'sports'],
+    createdAt: '2023-02-10T14:22:00Z',
+    updatedAt: '2023-02-10T14:22:00Z',
+    userId: 'user456',
+    teamId: 'team1',
+    collectionId: 'collection2',
     isPublic: true,
-    designMetadata: createDesignMetadata('#f43f5e', '#f43f5e'),
-    effects: ['Holographic', 'Refractor']
+    designMetadata: DEFAULT_DESIGN_METADATA,
+    effects: ['holographic'],
+    rarity: 'rare'
   },
   {
-    id: 'card-002',
-    title: 'Football Star Rookie',
-    description: 'Rookie card of the football sensation that took the league by storm.',
-    imageUrl: RELIABLE_IMAGES.football,
-    thumbnailUrl: RELIABLE_IMAGES.football,
-    tags: ['football', 'rookie', 'sports', 'star'],
-    createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-    updatedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-    userId: 'demo-user',
-    teamId: 'team-001',
-    collectionId: 'collection-001',
+    id: '3',
+    title: 'Football Rookie Card',
+    description: 'Rookie card of a rising football star',
+    imageUrl: 'https://images.unsplash.com/photo-1566577739112-5180d4bf9390',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1566577739112-5180d4bf9390?w=200',
+    tags: ['football', 'rookie', 'collectible'],
+    createdAt: '2023-03-05T09:45:00Z',
+    updatedAt: '2023-03-05T09:45:00Z',
+    userId: 'user123',
+    teamId: 'team2',
+    collectionId: 'collection1',
     isPublic: true,
-    designMetadata: createDesignMetadata('#a855f7', '#a855f7'),
-    effects: ['Chrome', 'Shimmer']
+    designMetadata: DEFAULT_DESIGN_METADATA,
+    effects: ['standard'],
+    rarity: 'uncommon'
   },
   {
-    id: 'card-003',
-    title: 'Baseball Classic',
-    description: 'Vintage baseball card featuring a legendary pitcher from the golden era.',
-    imageUrl: RELIABLE_IMAGES.baseball,
-    thumbnailUrl: RELIABLE_IMAGES.baseball,
-    tags: ['baseball', 'vintage', 'pitcher', 'classic'],
-    createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-    updatedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-    userId: 'demo-user',
-    teamId: 'team-002',
-    collectionId: 'collection-002',
+    id: '4',
+    title: 'Hockey Star',
+    description: 'Premium hockey trading card of a legendary player',
+    imageUrl: 'https://images.unsplash.com/photo-1580891034313-7ecbf7c0de1c',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1580891034313-7ecbf7c0de1c?w=200',
+    tags: ['hockey', 'legend', 'premium'],
+    createdAt: '2023-04-20T16:15:00Z',
+    updatedAt: '2023-04-20T16:15:00Z',
+    userId: 'user456',
+    teamId: 'team2',
+    collectionId: 'collection2',
     isPublic: true,
-    designMetadata: createDesignMetadata('#22c55e', '#22c55e'),
-    effects: ['Vintage']
+    designMetadata: DEFAULT_DESIGN_METADATA,
+    effects: ['refractor'],
+    rarity: 'ultra-rare'
   },
   {
-    id: 'card-004',
-    title: 'Anime Collector Series',
-    description: 'Special edition anime-inspired trading card with holographic finish.',
-    imageUrl: RELIABLE_IMAGES.anime,
-    thumbnailUrl: RELIABLE_IMAGES.anime,
-    tags: ['anime', 'collector', 'special', 'holographic'],
-    createdAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
-    updatedAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
-    userId: 'demo-user',
-    teamId: 'team-002',
-    collectionId: 'collection-002',
+    id: '5',
+    title: 'Vintage Soccer Card',
+    description: 'Classic soccer card from an iconic team',
+    imageUrl: 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=200',
+    tags: ['soccer', 'vintage', 'international'],
+    createdAt: '2023-05-12T11:30:00Z',
+    updatedAt: '2023-05-12T11:30:00Z',
+    userId: 'user789',
+    teamId: 'team3',
+    collectionId: 'collection3',
     isPublic: true,
-    designMetadata: createDesignMetadata('#0ea5e9', '#0ea5e9'),
-    effects: ['Holographic', 'Gold']
+    designMetadata: DEFAULT_DESIGN_METADATA,
+    effects: ['vintage'],
+    rarity: 'legendary'
   },
   {
-    id: 'card-005',
-    title: 'Pokémon Tribute',
-    description: 'Fan-made tribute to the classic Pokémon trading card game.',
-    imageUrl: RELIABLE_IMAGES.pokemon,
-    thumbnailUrl: RELIABLE_IMAGES.pokemon,
-    tags: ['pokemon', 'tribute', 'fan-art', 'tcg'],
-    createdAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
-    updatedAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
-    userId: 'demo-user',
-    teamId: 'team-003',
-    collectionId: 'collection-003',
+    id: '6',
+    title: 'Tennis Champion',
+    description: 'Commemorative card of a grand slam winner',
+    imageUrl: 'https://images.unsplash.com/photo-1595435934249-5df7ed86e1c1',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1595435934249-5df7ed86e1c1?w=200',
+    tags: ['tennis', 'champion', 'grand slam'],
+    createdAt: '2023-06-30T10:20:00Z',
+    updatedAt: '2023-06-30T10:20:00Z',
+    userId: 'user789',
+    teamId: 'team3',
+    collectionId: 'collection3',
     isPublic: true,
-    designMetadata: createDesignMetadata('#fbbf24', '#fbbf24'),
-    effects: ['Refractor', 'Shimmer']
-  },
-  {
-    id: 'card-006',
-    title: 'Vintage Collectible',
-    description: 'Rare vintage trading card from the early days of card collecting.',
-    imageUrl: RELIABLE_IMAGES.vintage,
-    thumbnailUrl: RELIABLE_IMAGES.vintage,
-    tags: ['vintage', 'rare', 'collectible', 'antique'],
-    createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-    updatedAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-    userId: 'demo-user',
-    teamId: 'team-003',
-    collectionId: 'collection-003',
-    isPublic: true,
-    designMetadata: createDesignMetadata('#92400e', '#92400e'),
-    effects: ['Vintage', 'Gold']
+    designMetadata: DEFAULT_DESIGN_METADATA,
+    effects: ['gold'],
+    rarity: 'one-of-one'
   }
 ];
 
-export default sampleCardData;
+export default sampleCards;

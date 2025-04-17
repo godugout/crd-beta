@@ -1,11 +1,10 @@
 
-import { v4 as uuidv4 } from 'uuid';
 import { Card } from '@/lib/types';
 import { DEFAULT_DESIGN_METADATA } from '@/lib/utils/cardDefaults';
 
-const sampleCards = [
+const sampleCards: Card[] = [
   {
-    id: uuidv4(),
+    id: '1',
     title: 'Vintage Baseball Card',
     description: 'A classic baseball card from the golden era',
     imageUrl: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3',
@@ -20,7 +19,7 @@ const sampleCards = [
     designMetadata: DEFAULT_DESIGN_METADATA
   },
   {
-    id: uuidv4(),
+    id: '2',
     title: 'Basketball Legend',
     description: 'Limited edition basketball trading card',
     imageUrl: 'https://images.unsplash.com/photo-1612872087720-bb876e2e67d1',
