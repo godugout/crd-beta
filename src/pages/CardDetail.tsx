@@ -6,7 +6,7 @@ import { useCards } from '@/hooks/useCards';
 import { ArrowLeft } from 'lucide-react';
 import { useCardOperations } from '@/hooks/useCardOperations';
 import FullscreenViewer from '@/components/gallery/FullscreenViewer';
-import { Card } from '@/lib/types';
+import { Card, CardRarity } from '@/lib/types';
 import { sampleCards } from '@/lib/data/sampleCards';
 import { toast } from '@/hooks/use-toast';
 import { adaptToCard } from '@/lib/adapters/typeAdapters';
@@ -151,7 +151,8 @@ const CardDetail = () => {
           imageUrl: foundCard.imageUrl || FALLBACK_IMAGE,
           thumbnailUrl: foundCard.thumbnailUrl || foundCard.imageUrl || FALLBACK_IMAGE,
           description: foundCard.description || '',
-          isFavorite: foundCard.isFavorite ?? false
+          isFavorite: foundCard.isFavorite ?? false,
+          rarity: foundCard.rarity || CardRarity.COMMON
         });
         
         setResolvedCard(processedCard);
@@ -241,7 +242,7 @@ const CardDetail = () => {
         )}
         
         <RelatedCards 
-          cards={sampleCards.filter(card => card.id !== resolvedCard?.id)}
+          cards={sampleCards.filter(card => card.id !== resolvedCard?.id).map(card => adaptToCard(card))}
           currentCardId={resolvedCard?.id || ''}
           onCardClick={(id) => navigate(`/cards/${id}`)}
           className="mt-16"

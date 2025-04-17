@@ -22,6 +22,7 @@ export const adaptToCard = (cardData: Partial<Card>): Card => {
         rarity = CardRarity.RARE;
         break;
       case 'ultra-rare':
+      case 'ultra_rare':
         rarity = CardRarity.ULTRA_RARE;
         break;
       case 'legendary':
@@ -31,6 +32,7 @@ export const adaptToCard = (cardData: Partial<Card>): Card => {
         rarity = CardRarity.MYTHIC;
         break;
       case 'one-of-one':
+      case 'one_of_one':
         rarity = CardRarity.ONE_OF_ONE;
         break;
       default:
@@ -73,12 +75,14 @@ export const ensureCardRarity = (rarity: string | CardRarity | undefined): CardR
       case 'rare':
         return CardRarity.RARE;
       case 'ultra-rare':
+      case 'ultra_rare':
         return CardRarity.ULTRA_RARE;
       case 'legendary':
         return CardRarity.LEGENDARY;
       case 'mythic':
         return CardRarity.MYTHIC;
       case 'one-of-one':
+      case 'one_of_one':
         return CardRarity.ONE_OF_ONE;
       default:
         return CardRarity.COMMON;
@@ -86,27 +90,4 @@ export const ensureCardRarity = (rarity: string | CardRarity | undefined): CardR
   }
   
   return rarity;
-};
-
-/**
- * Adapter function for OaklandMemory data type
- */
-export const adaptToOaklandMemory = (data: any): any => {
-  // Basic implementation for TypeScript compatibility
-  return {
-    title: data.title || '',
-    description: data.description || '',
-    date: data.date,
-    opponent: data.opponent,
-    score: data.score,
-    location: data.location,
-    section: data.section,
-    memoryType: data.memoryType,
-    attendees: data.attendees || [],
-    tags: data.tags || [],
-    imageUrl: data.imageUrl,
-    historicalContext: data.historicalContext,
-    personalSignificance: data.personalSignificance,
-    ...data
-  };
 };

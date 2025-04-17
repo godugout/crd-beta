@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Card, CardRarity, Collection } from '@/lib/types';
 import { sampleCards } from '@/lib/data/sampleCards';
-import { cardIdToCard, adaptToCard } from '@/lib/utils/cardHelpers';
+import { cardIdToCard } from '@/lib/utils/cardHelpers';
+import { adaptToCard } from '@/lib/adapters/typeAdapters';
 
 /**
  * Props interface for the Card Context

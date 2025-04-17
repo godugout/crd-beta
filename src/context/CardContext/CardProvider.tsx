@@ -15,7 +15,8 @@ export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const processedSampleCards = sampleCards.map(card => adaptToCard({
     ...card,
     isFavorite: card.isFavorite ?? false,
-    description: card.description || ''
+    description: card.description || '',
+    rarity: card.rarity || CardRarity.COMMON
   }));
   
   const [cards, setCards] = useState<Card[]>(processedSampleCards || []);

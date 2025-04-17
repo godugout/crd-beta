@@ -20,7 +20,8 @@ export function useCards() {
     const processedSampleCards = sampleCards.map(card => adaptToCard({
       ...card,
       isFavorite: card.isFavorite ?? false,
-      description: card.description || ''
+      description: card.description || '',
+      rarity: card.rarity || CardRarity.COMMON
     }));
     
     return {

@@ -1,5 +1,5 @@
 import { Card, CardRarity } from '@/lib/types';
-import { adaptToCard } from '@/lib/adapters/cardAdapter';
+import { adaptToCard } from '@/lib/adapters/typeAdapters';
 
 // Mock API service for card data
 export const fetchCards = async (): Promise<Card[]> => {

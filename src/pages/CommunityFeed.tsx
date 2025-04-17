@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import PageLayout from '@/components/navigation/PageLayout';
 import { Card, CardRarity } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
-import { adaptToCard } from '@/lib/adapters/cardAdapter';
+import { adaptToCard } from '@/lib/adapters/typeAdapters';
 
 const CommunityFeed = () => {
   const [feedCards, setFeedCards] = useState<Card[]>([]);

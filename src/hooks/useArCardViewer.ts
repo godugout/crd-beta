@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Card, CardRarity } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
-import { adaptToCard } from '@/lib/adapters/cardAdapter';
+import { adaptToCard } from '@/lib/adapters/typeAdapters';
 
 export function useArCardViewer(cardId?: string) {
   const [cards, setCards] = useState<Card[]>([]);

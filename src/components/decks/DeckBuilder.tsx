@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useEnhancedCards } from '@/context/CardEnhancedContext';
-import { Deck, EnhancedCard } from '@/lib/types/enhancedCardTypes';
+import { Deck, EnhancedCard, Card, CardRarity } from '@/lib/types/enhancedCardTypes';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { Plus, X, Save, ChevronLeft, ChevronRight, Heart } from 'lucide-react';
-import { ensureEnhancedCard, cardIdToCard } from '@/lib/utils/cardHelpers';
+import { ensureEnhancedCard } from '@/lib/utils/cardHelpers';
 import { adaptToCard } from '@/lib/adapters/typeAdapters';
 
 interface DeckBuilderProps {
@@ -114,7 +114,19 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck }) => {
     if (card) {
       handleAddCard(ensureEnhancedCard(card));
     } else {
-      const tempCard = cardIdToCard(cardId);
+      const tempCard: Card = {
+        id: cardId,
+        title: `Card ${cardId.slice(-4)}`,
+        imageUrl: '',
+        description: '', 
+        effects: [],
+        isFavorite: false,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        userId: 'anonymous',
+        tags: [],
+        rarity: CardRarity.COMMON
+      };
       handleAddCard(ensureEnhancedCard(adaptToCard(tempCard)));
     }
   };

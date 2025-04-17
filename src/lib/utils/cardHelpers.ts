@@ -1,19 +1,20 @@
 
-import { Card } from '@/lib/types';
-import { adaptToCard } from '@/lib/adapters/typeAdapters';
+import { Card, CardRarity } from '@/lib/types';
+import { adaptToCard as adaptCardFromTypeAdapter } from '@/lib/adapters/typeAdapters';
 
 /**
  * Utility function to convert a string ID to a Card object
  * Used primarily for type conversion when passing string IDs to functions expecting Card objects
  */
 export const cardIdToCard = (cardId: string): Card => {
-  return adaptToCard({
+  return adaptCardFromTypeAdapter({
     id: cardId,
     title: `Card ${cardId.slice(-4)}`,
     imageUrl: '',
     description: '', 
     effects: [],
-    isFavorite: false
+    isFavorite: false,
+    rarity: CardRarity.COMMON
   });
 };
 
@@ -28,6 +29,9 @@ export const ensureEnhancedCard = (card: Card): any => {
     shares: 0
   };
 };
+
+// Export adaptToCard for convenience
+export const adaptToCard = adaptCardFromTypeAdapter;
 
 // Export an alias for backward compatibility
 export const cardIdToCardObject = cardIdToCard;
