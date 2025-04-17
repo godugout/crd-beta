@@ -13,8 +13,8 @@ import { sampleCards } from '@/lib/data/sampleCards';
 import { toast } from '@/hooks/use-toast';
 import { adaptToCard } from '@/lib/adapters/cardAdapter';
 import { DEFAULT_DESIGN_METADATA } from '@/lib/utils/cardDefaults';
+import { DetailedViewCard, ensureDetailedViewCard } from '@/types/detailedCardTypes';
 
-// Fallback image to use when card image is not available
 const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1518770660439-4636190af475';
 
 const CardDetail = () => {
@@ -25,11 +25,9 @@ const CardDetail = () => {
   const [showViewer, setShowViewer] = useState(false);
   const [resolvedCard, setResolvedCard] = useState<Card | null>(null);
   
-  // Wait for context to load before trying to show the viewer
   const [isLoaded, setIsLoaded] = useState(false);
   
   useEffect(() => {
-    // Short delay to ensure context is loaded
     const timer = setTimeout(() => {
       setIsLoaded(true);
     }, 300);
@@ -44,45 +42,38 @@ const CardDetail = () => {
     
     console.log('CardDetail: Rendering for ID:', id);
     
-    // Find card directly from sampleCards first, which contains the original card data
     let foundCard = sampleCards.find(c => c.id === id);
     
-    // If not found in sampleCards, try the cards context
     if (!foundCard) {
       console.log('CardDetail: Card not found in sampleCards, checking context for ID:', id);
       foundCard = getCard ? getCard(id) : cards.find(c => c.id === id);
     }
     
-    // If we found a card, ensure it has valid image URLs and all required properties
     if (foundCard) {
       console.log('CardDetail: Found card:', foundCard.title, 'with imageUrl:', foundCard.imageUrl);
       
-      // Create a processed card using our adapter to ensure all required properties exist
-      const processedCard = adaptToCard({
+      const processedCard = ensureDetailedViewCard(adaptToCard({
         ...foundCard,
-        // Ensure imageUrl is present
         imageUrl: foundCard.imageUrl || FALLBACK_IMAGE,
         thumbnailUrl: foundCard.thumbnailUrl || foundCard.imageUrl || FALLBACK_IMAGE,
-        // Ensure other required fields are present
         designMetadata: foundCard.designMetadata || DEFAULT_DESIGN_METADATA,
         createdAt: foundCard.createdAt || new Date().toISOString(),
         updatedAt: foundCard.updatedAt || new Date().toISOString(),
         userId: foundCard.userId || 'anonymous',
         effects: foundCard.effects || []
-      });
+      }));
       
       setResolvedCard(processedCard);
       
-      // Pre-load the image to ensure it exists
       if (processedCard.imageUrl && processedCard.imageUrl !== FALLBACK_IMAGE) {
         const img = new Image();
         img.onerror = () => {
           console.error('CardDetail: Image failed to preload:', processedCard.imageUrl);
-          setResolvedCard(prev => prev ? adaptToCard({ 
+          setResolvedCard(prev => prev ? ensureDetailedViewCard(adaptToCard({ 
             ...prev, 
             imageUrl: FALLBACK_IMAGE,
             thumbnailUrl: FALLBACK_IMAGE 
-          }) : null);
+          })) : null);
         };
         img.src = processedCard.imageUrl;
       }
@@ -96,7 +87,6 @@ const CardDetail = () => {
     }
   }, [id, cards, getCard]);
   
-  // Handle card not found
   if (!resolvedCard) {
     return (
       <PageLayout
@@ -125,12 +115,10 @@ const CardDetail = () => {
     );
   }
   
-  // Handle navigation back after delete
   const handleDeleteSuccess = () => {
     navigate('/cards');
   };
 
-  // If showing the viewer, render it as an overlay, but only after context is loaded
   if (showViewer && isLoaded) {
     return (
       <FullscreenViewer 

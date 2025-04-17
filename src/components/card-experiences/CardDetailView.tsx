@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useCards } from '@/context/CardContext';
 import { Button } from "@/components/ui/button";
@@ -16,6 +17,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { DetailedViewCard, ensureDetailedViewCard } from '@/types/detailedCardTypes';
 
 interface CardDetailViewProps {
   cardId: string;
@@ -26,7 +28,9 @@ const CardDetailView: React.FC<CardDetailViewProps> = ({ cardId, onBack }) => {
   const { getCard, deleteCard } = useCards();
   const [liked, setLiked] = useState(false);
   
-  const cardData = getCard(cardId);
+  const rawCardData = getCard(cardId);
+  // Ensure we have a properly formatted card with all required fields
+  const cardData = rawCardData ? ensureDetailedViewCard(rawCardData) : null;
   
   if (!cardData) {
     return (
