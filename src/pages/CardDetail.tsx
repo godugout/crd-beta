@@ -256,7 +256,17 @@ const CardDetail = () => {
         )}
         
         <RelatedCards 
-          cards={sampleCards.filter(card => card.id !== resolvedCard?.id).map(card => adaptToCard(card))}
+          cards={sampleCards.filter(card => card.id !== resolvedCard?.id).map(card => {
+            // Convert string rarity to CardRarity enum for related cards
+            const rarityValue = typeof card.rarity === 'string'
+              ? stringToCardRarity(card.rarity)
+              : card.rarity || CardRarity.COMMON;
+            
+            return adaptToCard({
+              ...card,
+              rarity: rarityValue
+            });
+          })}
           currentCardId={resolvedCard?.id || ''}
           onCardClick={(id) => navigate(`/cards/${id}`)}
           className="mt-16"
