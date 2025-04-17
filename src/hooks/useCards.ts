@@ -1,13 +1,13 @@
 
 import { useContext } from 'react';
-import { CardContext, EnhancedCardContextProps } from '@/context/CardContext';
-import sampleCards from '@/data/sampleCards';
+import { CardContext } from '@/context/CardContext';
 import { Card, CardRarity } from '@/lib/types';
+import { sampleCards } from '@/data/sampleCards';
 
 /**
  * Hook to access the card context for managing cards
  */
-export function useCards(): EnhancedCardContextProps {
+export function useCards() {
   const context = useContext(CardContext);
   
   if (!context) {
@@ -23,7 +23,11 @@ export function useCards(): EnhancedCardContextProps {
       fetchCards: async () => {},
       addCard: async () => ({ 
         id: `fallback-${Date.now()}`, 
-        title: 'Fallback Card', 
+        title: 'Fallback Card',
+        description: '', 
+        imageUrl: '',
+        thumbnailUrl: '',
+        tags: [],
         createdAt: new Date().toISOString(), 
         updatedAt: new Date().toISOString(), 
         rarity: CardRarity.COMMON,
@@ -32,6 +36,10 @@ export function useCards(): EnhancedCardContextProps {
       updateCard: async () => ({ 
         id: `fallback-${Date.now()}`, 
         title: 'Fallback Card', 
+        description: '', 
+        imageUrl: '',
+        thumbnailUrl: '',
+        tags: [],
         createdAt: new Date().toISOString(), 
         updatedAt: new Date().toISOString(), 
         rarity: CardRarity.COMMON,
@@ -42,7 +50,7 @@ export function useCards(): EnhancedCardContextProps {
       getCardById: () => undefined,
       getCard: () => undefined,
       refreshCards: async () => {}
-    } as EnhancedCardContextProps;
+    };
   }
   
   return context;

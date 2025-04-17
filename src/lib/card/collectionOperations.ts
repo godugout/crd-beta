@@ -13,6 +13,7 @@ export const createCollection = (collectionData: Partial<Collection>): Collectio
   const newCollection: Collection = {
     id: collectionData.id || uuidv4(),
     name: collectionData.name || 'Untitled Collection',
+    title: collectionData.title || collectionData.name || 'Untitled Collection',
     description: collectionData.description || '',
     coverImageUrl: collectionData.coverImageUrl || '',
     userId: collectionData.userId || 'anonymous',

@@ -1,7 +1,5 @@
-
 import { useAuth } from '@/hooks/useAuth';
-import { UserPermission, ROLE_PERMISSIONS } from '@/lib/types';
-import { UserRole } from '@/lib/types/UserTypes';
+import { UserRole, ROLE_PERMISSIONS } from '@/lib/types/user';
 
 /**
  * Hook to check user permissions based on their role or specific permissions
@@ -12,7 +10,7 @@ export function usePermissions() {
   /**
    * Check if user has a specific permission
    */
-  const hasPermission = (permission: UserPermission): boolean => {
+  const hasPermission = (permission: string): boolean => {
     // If user has explicit permissions array, check that first
     if (user?.permissions && Array.isArray(user.permissions)) {
       return user.permissions.includes(permission);
@@ -20,7 +18,7 @@ export function usePermissions() {
     
     // Otherwise, fall back to role-based permissions
     if (user?.role) {
-      const rolePermissions = ROLE_PERMISSIONS[user.role as UserRole] || [];
+      const rolePermissions = ROLE_PERMISSIONS[user.role] || [];
       return rolePermissions.includes(permission);
     }
     

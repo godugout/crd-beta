@@ -1,9 +1,9 @@
-
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { EnhancedCard, Series, Deck, CardRarity } from '@/lib/types/enhancedCardTypes';
+import { EnhancedCard, Series, Deck } from '@/lib/types/enhancedCardTypes';
+import { CardRarity } from '@/lib/types/cardTypes';
 import { toast } from 'sonner';
-import sampleCards from '@/data/sampleCards';
+import { sampleCards } from '@/data/sampleCards';
 
 // Sample data
 const sampleEnhancedCards: EnhancedCard[] = [
@@ -204,7 +204,7 @@ export const EnhancedCardProvider: React.FC<{ children: React.ReactNode }> = ({ 
         isPublic: card.isPublic ?? true,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        rarity: card.rarity || 'common',
+        rarity: card.rarity || CardRarity.COMMON,
         cardNumber: card.cardNumber || '',
         seriesId: card.seriesId || '',
         artistId: card.artistId || '',

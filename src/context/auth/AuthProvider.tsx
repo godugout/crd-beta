@@ -1,6 +1,8 @@
+
 import React, { createContext, useState, useEffect, ReactNode } from 'react';
 import { toast } from 'sonner';
-import { User, UserRole } from '@/lib/types';
+import { User } from '@/lib/types';
+import { UserRole } from '@/lib/types/user';
 
 interface AuthContextProps {
   user: User | null;

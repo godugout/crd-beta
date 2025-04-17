@@ -1,19 +1,16 @@
 
-// Import from lib/types to ensure we're using the correct CardRarity enum
-import { CardRarity } from "@/lib/types";
+import { Card as BaseCard } from '../types';
 
-export type EnhancedCard = {
-  id: string;
-  title: string;
-  description?: string;
-  imageUrl?: string;
-  thumbnailUrl?: string;
-  tags?: string[];
-  userId?: string;
-  isPublic?: boolean;
-  createdAt?: string;
-  updatedAt?: string;
-  rarity: CardRarity;
+export enum CardRarity {
+  COMMON = 'common',
+  UNCOMMON = 'uncommon',
+  RARE = 'rare',
+  ULTRA_RARE = 'ultra-rare',
+  LEGENDARY = 'legendary',
+  MYTHIC = 'mythic'
+}
+
+export interface EnhancedCard extends BaseCard {
   cardNumber?: string;
   seriesId?: string;
   artistId?: string;
@@ -22,35 +19,40 @@ export type EnhancedCard = {
   editionSize?: number;
   releaseDate?: string;
   qrCodeData?: string;
-  effects?: string[];
-  designMetadata?: any;
-  marketData?: any;
-  isFavorite?: boolean;
-};
+  marketData?: {
+    price: number;
+    currency: string;
+    availableForSale: boolean;
+    lastSoldPrice?: number;
+    lastSoldDate?: string;
+  };
+}
 
-export type Series = {
+export type ReleaseType = 'standard' | 'limited' | 'promotional' | 'exclusive';
+
+export interface Series {
   id: string;
   title: string;
   description: string;
-  coverImageUrl?: string;
-  artistId?: string;
+  coverImageUrl: string;
+  artistId: string;
   createdAt: string;
   updatedAt: string;
-  releaseDate?: string;
+  releaseDate: string;
   totalCards: number;
   isPublished: boolean;
   cardIds: string[];
-  releaseType?: 'standard' | 'limited' | 'promotional';
-};
+  releaseType: ReleaseType;
+}
 
-export type Deck = {
+export interface Deck {
   id: string;
   name: string;
-  description?: string;
-  coverImageUrl?: string;
+  description: string;
+  coverImageUrl: string;
   ownerId: string;
   createdAt: string;
   updatedAt: string;
   cardIds: string[];
   isPublic: boolean;
-};
+}

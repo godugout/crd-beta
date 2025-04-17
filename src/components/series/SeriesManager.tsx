@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { ArrowLeft, Upload, SortDesc } from 'lucide-react';
-import { Series } from '@/lib/types/enhancedCardTypes';
+import { Series, ReleaseType } from '@/lib/types/enhancedCardTypes';
 import { useEnhancedCards } from '@/context/CardEnhancedContext';
 import { toast } from 'sonner';
 
@@ -44,7 +44,7 @@ const SeriesManager: React.FC<SeriesManagerProps> = ({ initialSeries }) => {
     setSeriesData(prev => ({ ...prev, isPublished: checked }));
   };
   
-  const handleReleaseTypeChange = (type: 'standard' | 'limited' | 'exclusive') => {
+  const handleReleaseTypeChange = (type: ReleaseType) => {
     setSeriesData(prev => ({ ...prev, releaseType: type }));
   };
   

@@ -18,7 +18,8 @@ export const navigationGroups: NavigationGroup[] = [
       title: item.title,
       path: item.path,
       icon: item.icon,
-      highlight: item.highlight
+      highlight: item.highlight,
+      description: item.description
     }))
   },
   {
@@ -27,7 +28,8 @@ export const navigationGroups: NavigationGroup[] = [
       title: item.title,
       path: item.path,
       icon: item.icon,
-      highlight: item.highlight
+      highlight: item.highlight,
+      description: item.description
     }))
   },
   {
@@ -36,7 +38,8 @@ export const navigationGroups: NavigationGroup[] = [
       title: item.title,
       path: item.path,
       icon: item.icon,
-      highlight: item.highlight
+      highlight: item.highlight,
+      description: item.description
     }))
   },
   {
@@ -45,7 +48,8 @@ export const navigationGroups: NavigationGroup[] = [
       title: item.title,
       path: item.path,
       icon: item.icon,
-      highlight: item.highlight
+      highlight: item.highlight,
+      description: item.description
     }))
   },
   {
@@ -54,7 +58,8 @@ export const navigationGroups: NavigationGroup[] = [
       title: item.title,
       path: item.path,
       icon: item.icon,
-      highlight: item.highlight
+      highlight: item.highlight,
+      description: item.description
     }))
   },
   {
@@ -63,7 +68,8 @@ export const navigationGroups: NavigationGroup[] = [
       title: item.title,
       path: item.path,
       icon: item.icon,
-      highlight: item.highlight
+      highlight: item.highlight,
+      description: item.description
     }))
   },
   {
@@ -72,7 +78,8 @@ export const navigationGroups: NavigationGroup[] = [
       title: item.title,
       path: item.path,
       icon: item.icon,
-      highlight: item.highlight
+      highlight: item.highlight,
+      description: item.description
     }))
   }
 ];
