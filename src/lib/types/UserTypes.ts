@@ -1,7 +1,8 @@
 
 import { UserRole as BaseUserRole } from '../types';
 
-export type { BaseUserRole as UserRole };
+// Export directly rather than as a type
+export { BaseUserRole as UserRole };
 
 export interface UserProfile {
   id: string;

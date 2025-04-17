@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { User, UserRole } from '@/lib/types';
-import { CardEnhancedProvider } from '@/context/CardEnhancedContext';
+import { EnhancedCardProvider } from '@/context/CardEnhancedContext';
 
 // Import dashboard components based on user role
 import AdminDashboard from '@/components/dashboard/AdminDashboard';
@@ -34,6 +34,9 @@ const Dashboard: React.FC = () => {
           displayName: 'Demo User',
           role: UserRole.ADMIN, // Default to admin role if password is correct
           avatarUrl: 'https://api.dicebear.com/7.x/initials/svg?seed=DU',
+          isVerified: true,
+          isActive: true,
+          permissions: ['read:all', 'write:all'],
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         };
@@ -53,17 +56,17 @@ const Dashboard: React.FC = () => {
 
   // Render the appropriate dashboard based on user role
   return (
-    <CardEnhancedProvider>
+    <EnhancedCardProvider>
       <div className="container mx-auto p-6">
         {dashboardUser.role === UserRole.ADMIN && <AdminDashboard user={dashboardUser} />}
         
-        {dashboardUser.role === UserRole.CREATOR && <ArtistDashboard user={dashboardUser} />}
+        {dashboardUser.role === UserRole.ARTIST && <ArtistDashboard user={dashboardUser} />}
         
         {dashboardUser.role === UserRole.USER && <FanDashboard user={dashboardUser} />}
         
         {!dashboardUser.role && <FanDashboard user={dashboardUser} />}
       </div>
-    </CardEnhancedProvider>
+    </EnhancedCardProvider>
   );
 };
 
