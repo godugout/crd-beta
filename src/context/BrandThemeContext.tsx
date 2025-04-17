@@ -107,6 +107,22 @@ export const defaultThemes: Record<string, BrandTheme> = {
     cardBackgroundColor: '#1E293B',
     buttonSecondaryColor: '#3B82F6',
   },
+  'dscvr-dark': {
+    id: 'dscvr-dark',
+    name: 'DSCVR Dark',
+    primaryColor: '#4F46E5',
+    secondaryColor: '#818CF8',
+    accentColor: '#EC4899',
+    navTextColor: '#FFFFFF',
+    headerBackgroundColor: '#131720',
+    buttonPrimaryColor: '#4F46E5',
+    buttonTextColor: '#FFFFFF',
+    backgroundColor: '#131720',
+    textColor: '#D1D5DB',
+    cardBackgroundColor: '#1C212E',
+    buttonSecondaryColor: '#818CF8',
+    logo: '/images/dscvr-logo.png'
+  },
 };
 
 const BrandThemeContext = createContext<BrandThemeContextType>({
