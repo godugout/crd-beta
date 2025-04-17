@@ -123,6 +123,22 @@ export const defaultThemes: Record<string, BrandTheme> = {
     buttonSecondaryColor: '#818CF8',
     logo: '/images/dscvr-logo.png'
   },
+  'crd-spectrum': {
+    id: 'crd-spectrum',
+    name: 'CRD Spectrum',
+    primaryColor: '#38B6FF',
+    secondaryColor: '#2AFC98',
+    accentColor: '#FFAB4C',
+    navTextColor: '#FFFFFF',
+    headerBackgroundColor: '#121212',
+    buttonPrimaryColor: '#38B6FF',
+    buttonTextColor: '#FFFFFF',
+    backgroundColor: '#121212',
+    textColor: '#E2E8F0',
+    cardBackgroundColor: '#1A1A1A',
+    buttonSecondaryColor: '#2AFC98',
+    logo: '/lovable-uploads/c0579b1b-e5dc-4267-9d1d-9457111230fe.png'
+  },
 };
 
 const BrandThemeContext = createContext<BrandThemeContextType>({

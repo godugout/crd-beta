@@ -12,5 +12,66 @@
   body {
     @apply antialiased bg-[var(--bg-primary)] text-[var(--text-primary)];
     font-feature-settings: "ss01", "ss02", "cv01", "cv02", "cv03";
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-medium tracking-tight;
+  }
+  
+  a {
+    @apply transition-colors duration-200;
+  }
+  
+  button {
+    @apply transition-all duration-200;
+  }
+}
+
+@layer components {
+  .bento-grid {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6;
+  }
+  
+  .bento-card {
+    @apply bg-[var(--bg-secondary)] rounded-[var(--radius-lg)] p-5 border border-[var(--border-primary)] 
+           shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] transition-all duration-300;
+  }
+  
+  .section-container {
+    @apply container mx-auto px-4 py-10 md:py-16;
+  }
+  
+  .crd-highlight {
+    @apply relative;
+  }
+  
+  .crd-highlight::after {
+    content: '';
+    @apply absolute bottom-0 left-0 h-1 w-full bg-gradient-to-r from-[var(--brand-accent)] to-[var(--brand-primary)] rounded-full;
+  }
+  
+  .glass-card {
+    @apply backdrop-blur-md bg-black/30 border border-white/10 rounded-lg p-4;
+  }
+  
+  .spectrum-text {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-[var(--brand-notification)] via-[var(--brand-accent)] to-[var(--brand-primary)];
+  }
+  
+  .animated-gradient-bg {
+    background-size: 200% 200%;
+    animation: gradientMove 8s ease infinite;
+  }
+  
+  @keyframes gradientMove {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  
+  .text-balance {
+    text-wrap: balance;
   }
 }
