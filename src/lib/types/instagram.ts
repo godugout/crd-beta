@@ -1,20 +1,20 @@
 
-export interface InstagramPost {
-  id: string;
+import { BaseEntity } from './index';
+
+export interface InstagramPost extends BaseEntity {
   caption: string;
   mediaUrl: string;
-  thumbnailUrl: string;
-  mediaType: 'IMAGE' | 'VIDEO' | 'CAROUSEL_ALBUM';
   permalink: string;
   timestamp: string;
   username: string;
-  postId: string;
-  tags?: string[];
+  children?: InstagramMedia[];
+  type: 'IMAGE' | 'VIDEO' | 'CAROUSEL_ALBUM';
+  likeCount?: number;
+  commentCount?: number;
 }
 
-export interface InstagramCollection {
-  username: string;
-  posts: InstagramPost[];
-  lastFetched: string;
-  autoUpdate: boolean;
+export interface InstagramMedia {
+  id: string;
+  mediaUrl: string;
+  mediaType: 'IMAGE' | 'VIDEO';
 }

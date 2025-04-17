@@ -12,7 +12,7 @@ import RelatedCards from '../cards/RelatedCards';
 
 // Import our local components
 import { CardFront } from './CardFront';
-import { CardBack } from './CardBack';
+import CardBack from './CardBack'; // Fixed import
 
 // Export components
 export { 

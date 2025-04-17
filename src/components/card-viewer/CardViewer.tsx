@@ -1,10 +1,11 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Lightbulb } from 'lucide-react';
 import LightbulbPanel from '../card-effects/LightbulbPanel';
 import { Card } from '@/lib/types';
 import { CardFront } from '@/components/card/CardFront';
-import { CardBack } from '@/components/card/CardBack';
+import CardBack from '@/components/card/CardBack'; // Fixed import
 import { ShareDialog } from '@/components/ShareDialog';
 import { DeleteDialog } from '@/components/DeleteDialog';
 import { useToast } from "@/hooks/use-toast";

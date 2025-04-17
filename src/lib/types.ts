@@ -5,12 +5,13 @@
 
 // Import but don't re-export to avoid naming conflicts
 import { BaseEntity, JsonValue } from './types/index';
-import { Card as IndexCard, DesignMetadata, CardRarity, CardStyle, TextStyle, CardMetadata, MarketMetadata } from './types/cardTypes';
+import { Card as IndexCard, DesignMetadata, CardRarity, CardStyle, TextStyle, CardMetadata, MarketMetadata, HotspotData } from './types/cardTypes';
 import { User, UserPermission } from './types/user';
 import { Reaction, Comment } from './types/interaction';
 import { Collection as IndexCollection } from './types/collection';
 import { OaklandMemoryData as IndexOaklandMemoryData } from './types/oaklandMemory';
-import { TeamMember as IndexTeamMember } from './types/team';
+import { TeamMember as IndexTeamMember, Team as IndexTeam } from './types/team';
+import { InstagramPost } from './types/instagram';
 
 // Re-export with explicit naming
 export {
@@ -24,7 +25,9 @@ export {
   User,
   UserPermission,
   Reaction,
-  Comment
+  Comment,
+  HotspotData,
+  InstagramPost
 };
 
 // Explicitly export and rename to avoid conflicts
@@ -32,6 +35,7 @@ export type Card = IndexCard;
 export type Collection = IndexCollection;
 export type OaklandMemoryData = IndexOaklandMemoryData;
 export type TeamMember = IndexTeamMember;
+export type Team = IndexTeam;
 
 // Keep the utility function for backward compatibility
 /**

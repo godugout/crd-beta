@@ -1,29 +1,36 @@
 
-import { 
-  Users, 
-  PlayCircle 
-} from 'lucide-react';
 import { NavigationItem } from './types';
+import { Clock, Layers, Users, UserPlus, Settings, Briefcase } from 'lucide-react';
 
-// Teams section navigation - simplified to only include Oakland and SF Giants
 export const teamsNavItems: NavigationItem[] = [
   {
-    title: 'Oakland A\'s',
-    path: '/teams/oakland',
+    title: 'My Teams',
+    path: '/teams',
     icon: Users,
-    description: 'Oakland Athletics'
+    description: 'Teams you belong to',
   },
   {
-    title: 'San Francisco Giants',
-    path: '/teams/sf-giants',
-    icon: Users,
-    description: 'San Francisco Giants'
+    title: 'Join Team',
+    path: '/teams/join',
+    icon: UserPlus,
+    description: 'Join an existing team',
   },
   {
-    title: 'Game Day Mode',
-    path: '/game-day',
-    icon: PlayCircle,
-    description: 'Enhanced experience for game day',
-    highlight: true
-  }
+    title: 'Team Activity',
+    path: '/teams/activity',
+    icon: Clock,
+    description: 'Recent team activity',
+  },
+  {
+    title: 'Projects',
+    path: '/teams/projects',
+    icon: Briefcase,
+    description: 'Team projects',
+  },
+  {
+    title: 'Team Settings',
+    path: '/teams/settings',
+    icon: Settings,
+    description: 'Manage team settings',
+  },
 ];

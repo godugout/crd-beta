@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -57,16 +56,12 @@ const ReactionButtons: React.FC<ReactionButtonsProps> = ({
       let error: any = null;
       
       if (cardId) {
-        const result = await reactionRepository.getAllByCardId(cardId);
+        const result = await reactionRepository.getReactionsByCardId(cardId);
         data = result;
-        // If the API returns an error property, handle it here
-      }
-      
-      // Additional endpoints for collection and comment reactions could be added here
-      
-      if (error) {
-        console.error('Error fetching reactions:', error);
-        return;
+        if (error) {
+          console.error('Error fetching reactions:', error);
+          return;
+        }
       }
       
       if (data) {
@@ -118,8 +113,7 @@ const ReactionButtons: React.FC<ReactionButtonsProps> = ({
       const isSameType = userReaction?.type === type;
       
       if (userReaction && isSameType) {
-        // Remove reaction if clicking the same type again
-        const success = await reactionRepository.remove(userReaction.id);
+        const success = await reactionRepository.deleteReaction(userReaction.id);
         
         if (!success) {
           toast.error('Failed to update reaction');
@@ -128,14 +122,15 @@ const ReactionButtons: React.FC<ReactionButtonsProps> = ({
         
         setReactions(prev => prev.filter(r => r.userId !== user.id));
       } else {
-        // Add or update reaction
-        const data = await reactionRepository.add(
-          user.id,
+        const data = await reactionRepository.addReaction({
+          userId: user.id,
           cardId,
           collectionId,
           commentId,
-          type
-        );
+          type,
+          targetType: cardId ? 'card' : collectionId ? 'collection' : 'comment',
+          targetId: cardId || collectionId || commentId || '',
+        });
         
         if (!data) {
           toast.error('Failed to update reaction');
@@ -143,12 +138,10 @@ const ReactionButtons: React.FC<ReactionButtonsProps> = ({
         }
         
         if (userReaction) {
-          // Update existing reaction
           setReactions(prev => 
             prev.map(r => r.userId === user.id ? data : r)
           );
         } else {
-          // Add new reaction
           setReactions(prev => [...prev, data]);
         }
       }
@@ -164,7 +157,6 @@ const ReactionButtons: React.FC<ReactionButtonsProps> = ({
     } else {
       setIsSharing(true);
       
-      // Default share functionality
       if (navigator.share) {
         navigator.share({
           title: 'Check out this card',
@@ -196,7 +188,6 @@ const ReactionButtons: React.FC<ReactionButtonsProps> = ({
   return (
     <div className="flex flex-wrap items-center gap-2">
       <TooltipProvider>
-        {/* Like Button */}
         <Tooltip>
           <TooltipTrigger asChild>
             <Button 
@@ -212,7 +203,6 @@ const ReactionButtons: React.FC<ReactionButtonsProps> = ({
           <TooltipContent>Like</TooltipContent>
         </Tooltip>
         
-        {/* Love Button */}
         <Tooltip>
           <TooltipTrigger asChild>
             <Button 
@@ -228,7 +218,6 @@ const ReactionButtons: React.FC<ReactionButtonsProps> = ({
           <TooltipContent>Love</TooltipContent>
         </Tooltip>
         
-        {/* Wow Button */}
         <Tooltip>
           <TooltipTrigger asChild>
             <Button 
@@ -244,7 +233,6 @@ const ReactionButtons: React.FC<ReactionButtonsProps> = ({
           <TooltipContent>Wow</TooltipContent>
         </Tooltip>
         
-        {/* Comments Button (if enabled) */}
         {showComments !== undefined && onShowComments && (
           <Tooltip>
             <TooltipTrigger asChild>
@@ -262,7 +250,6 @@ const ReactionButtons: React.FC<ReactionButtonsProps> = ({
           </Tooltip>
         )}
         
-        {/* Share Button */}
         <Tooltip>
           <TooltipTrigger asChild>
             <Button 
@@ -280,7 +267,6 @@ const ReactionButtons: React.FC<ReactionButtonsProps> = ({
         </Tooltip>
       </TooltipProvider>
       
-      {/* Reactions summary (can be expanded with user icons for who reacted) */}
       {totalReactions > 0 && (
         <div className="text-sm text-muted-foreground ml-1">
           {totalReactions} reaction{totalReactions !== 1 ? 's' : ''}

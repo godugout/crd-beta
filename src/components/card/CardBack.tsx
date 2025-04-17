@@ -8,7 +8,7 @@ interface CardBackProps {
   card: Card;
 }
 
-const CardBack: React.FC<CardBackProps> = ({ card }) => {
+const CardBack = ({ card }: CardBackProps) => {
   // Get card properties safely
   const { designMetadata } = card;
   const player = typeof card.player === 'string' ? card.player : '';
@@ -115,3 +115,4 @@ const CardBack: React.FC<CardBackProps> = ({ card }) => {
 };
 
 export default CardBack;
+

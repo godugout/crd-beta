@@ -1,36 +1,43 @@
 
-import { 
-  Image, 
-  PlusCircle,
-  Zap,
-  Eye 
-} from 'lucide-react';
 import { NavigationItem } from './types';
+import { Card, Collection, Heart, Plus, Search, Settings, Star } from 'lucide-react';
 
-// Cards section navigation
 export const cardsNavItems: NavigationItem[] = [
   {
-    title: 'All Cards',
-    path: '/cards',
-    icon: Image,
-    description: 'Browse your complete collection'
+    title: 'Browse Cards',
+    path: '/cards/browse',
+    icon: Card,
+    description: 'Explore the card collection',
   },
   {
-    title: 'Create Card',
-    path: '/cards/create',
-    icon: PlusCircle,
-    description: 'Create a new digital card'
+    title: 'My Cards',
+    path: '/cards/my-cards',
+    icon: Collection,
+    description: 'View your personal collection',
   },
   {
-    title: 'Card Effects',
-    path: '/cards/effects',
-    icon: Zap,
-    description: 'Explore visual effects for cards'
+    title: 'Favorites',
+    path: '/cards/favorites',
+    icon: Heart,
+    description: 'Cards you've favorited',
   },
   {
-    title: 'Card Detector',
-    path: '/detector',
-    icon: Eye,
-    description: 'Scan and digitize physical cards'
-  }
+    title: 'Card Designer',
+    path: '/cards/designer',
+    icon: Plus,
+    description: 'Create your own cards',
+    highlight: true,
+  },
+  {
+    title: 'Search',
+    path: '/cards/search',
+    icon: Search,
+    description: 'Find specific cards',
+  },
+  {
+    title: 'Settings',
+    path: '/cards/settings',
+    icon: Settings,
+    description: 'Configure card preferences',
+  },
 ];

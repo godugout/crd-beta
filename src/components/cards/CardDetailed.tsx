@@ -1,209 +1,206 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { Card } from '@/lib/types';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Eye, Edit, Share2, Trash2 } from 'lucide-react';
-import CardThumbnail from './CardThumbnail';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+import { CardImage } from './CardImage';
+import { Award, Calendar, FileText, Hash, Info, MapPin, Tag, User } from 'lucide-react';
 
 export interface CardDetailedProps {
-  /**
-   * Card data to display
-   */
   card: Card;
-  
-  /**
-   * Optional className for styling
-   */
   className?: string;
-  
-  /**
-   * Function to call when "View" button is clicked
-   */
-  onView?: (cardId: string) => void;
-  
-  /**
-   * Function to call when "Edit" button is clicked
-   */
-  onEdit?: (cardId: string) => void;
-  
-  /**
-   * Function to call when "Share" button is clicked
-   */
-  onShare?: (cardId: string) => void;
-  
-  /**
-   * Function to call when "Delete" button is clicked
-   */
-  onDelete?: (cardId: string) => void;
-  
-  /**
-   * Whether to enable special effects for the card
-   */
-  enableEffects?: boolean;
-  
-  /**
-   * List of active effects to apply to the card
-   */
-  activeEffects?: string[];
+  onBack?: () => void;
+  showActions?: boolean;
+  onEdit?: () => void;
+  onDelete?: () => void;
+  onShare?: () => void;
 }
 
-/**
- * Detailed card component that displays card with actions and detailed info
- */
+// Helper function to check if a value is a safe ReactNode
+const isSafeReactNode = (value: any): boolean => {
+  return (
+    value === null ||
+    value === undefined ||
+    typeof value === 'string' ||
+    typeof value === 'number' ||
+    typeof value === 'boolean' ||
+    React.isValidElement(value) ||
+    (Array.isArray(value) && value.every(isSafeReactNode))
+  );
+};
+
+// Helper function to safely convert values to ReactNode
+const safeToReactNode = (value: any): React.ReactNode => {
+  if (isSafeReactNode(value)) {
+    return value as React.ReactNode;
+  }
+  
+  if (typeof value === 'object') {
+    return JSON.stringify(value);
+  }
+  
+  return String(value);
+};
+
 const CardDetailed: React.FC<CardDetailedProps> = ({
   card,
   className,
-  onView,
+  onBack,
+  showActions = true,
   onEdit,
-  onShare,
   onDelete,
-  enableEffects = false,
-  activeEffects = [],
+  onShare
 }) => {
-  // Format date for display
-  const formatDate = (dateString: string) => {
-    try {
-      return new Date(dateString).toLocaleDateString();
-    } catch (err) {
-      return 'Unknown date';
-    }
+  const [showMore, setShowMore] = useState(false);
+  const { designMetadata } = card;
+
+  // Function to toggle the "show more" state
+  const toggleShowMore = () => {
+    setShowMore(!showMore);
   };
 
   return (
-    <div className={cn("grid grid-cols-1 md:grid-cols-2 gap-8", className)}>
-      {/* Card Preview */}
-      <div className="flex justify-center">
-        <div className="max-w-md w-full">
-          <CardThumbnail 
-            src={card.thumbnailUrl || card.imageUrl}
-            alt={card.title}
-            card={card}
-            enableEffects={enableEffects}
-            activeEffects={activeEffects} 
-            className="shadow-lg"
-            onClick={() => onView && onView(card.id)}
-          />
-          
-          {/* Action Buttons */}
-          <div className="flex flex-wrap gap-3 mt-6 justify-center">
-            {onView && (
-              <Button 
-                variant="outline" 
-                onClick={() => onView(card.id)}
-                className="flex items-center"
-              >
-                <Eye className="h-4 w-4 mr-2" />
-                View Full Screen
-              </Button>
-            )}
-            
-            {onEdit && (
-              <Button 
-                variant="outline" 
-                onClick={() => onEdit(card.id)}
-                className="flex items-center"
-              >
-                <Edit className="h-4 w-4 mr-2" />
-                Edit Card
-              </Button>
-            )}
-            
-            {onShare && (
-              <Button 
-                variant="outline" 
-                className="flex items-center"
-                onClick={() => onShare(card.id)}
-              >
-                <Share2 className="h-4 w-4 mr-2" />
-                Share
-              </Button>
-            )}
-            
-            {onDelete && (
-              <Button 
-                variant="outline" 
-                className="flex items-center text-red-600 hover:bg-red-50"
-                onClick={() => onDelete(card.id)}
-              >
-                <Trash2 className="h-4 w-4 mr-2" />
-                Delete
-              </Button>
-            )}
-          </div>
-        </div>
+    <div className={cn("rounded-lg overflow-hidden bg-white shadow-md", className)}>
+      {/* Card image */}
+      <div className="relative">
+        <CardImage
+          card={card}
+          aspectRatio="aspect-[2.5/3.5] md:aspect-[2.5/2.2]"
+          className="w-full"
+          priority={true}
+          fill={false}
+        />
+        
+        {/* Back button */}
+        {onBack && (
+          <Button
+            size="sm"
+            variant="ghost"
+            className="absolute top-2 left-2 bg-black/20 hover:bg-black/40 text-white"
+            onClick={onBack}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 mr-1"><path d="m15 18-6-6 6-6"/></svg>
+            Back
+          </Button>
+        )}
       </div>
       
-      {/* Card Details */}
-      <div>
-        <h1 className="text-3xl font-bold mb-3">{card.title}</h1>
+      {/* Card details */}
+      <div className="p-4 md:p-6">
+        <h1 className="text-2xl font-bold">{card.title}</h1>
+        
+        {/* Card description */}
+        {card.description && (
+          <p className="mt-2 text-gray-600">{card.description}</p>
+        )}
         
         {/* Tags */}
         {card.tags && card.tags.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-4">
-            {card.tags.map((tag, i) => (
-              <Badge key={i} className="bg-gray-100 text-gray-700 px-2 py-1 rounded">
+          <div className="mt-4 flex flex-wrap gap-1">
+            {card.tags.map((tag, index) => (
+              <Badge key={index} variant="secondary" className="font-normal">
                 {tag}
               </Badge>
             ))}
           </div>
         )}
         
-        {/* Description */}
-        <p className="text-gray-600 mb-6">{card.description || "No description available"}</p>
-        
-        {/* Additional card info */}
-        <div className="space-y-4">
-          {card.createdAt && (
-            <div>
-              <h3 className="text-sm font-medium text-gray-500">Created</h3>
-              <p>{formatDate(card.createdAt)}</p>
-            </div>
-          )}
+        {/* Card metadata details */}
+        <div className="mt-6 space-y-4">
+          <h2 className="text-lg font-semibold">Card Details</h2>
           
-          {card.updatedAt && card.updatedAt !== card.createdAt && (
-            <div>
-              <h3 className="text-sm font-medium text-gray-500">Last Updated</h3>
-              <p>{formatDate(card.updatedAt)}</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {/* Rarity */}
+            <div className="flex items-center gap-2">
+              <Award className="w-4 h-4 text-amber-500" />
+              <span className="text-sm text-gray-600">Rarity:</span>
+              <span className="text-sm font-medium">{card.rarity}</span>
             </div>
-          )}
-          
-          {card.player && (
-            <div>
-              <h3 className="text-sm font-medium text-gray-500">Player</h3>
-              <p>{card.player}</p>
+            
+            {/* Creator */}
+            {card.userId && (
+              <div className="flex items-center gap-2">
+                <User className="w-4 h-4 text-blue-500" />
+                <span className="text-sm text-gray-600">Creator ID:</span>
+                <span className="text-sm font-medium">{card.userId}</span>
+              </div>
+            )}
+            
+            {/* Created date */}
+            <div className="flex items-center gap-2">
+              <Calendar className="w-4 h-4 text-green-500" />
+              <span className="text-sm text-gray-600">Created:</span>
+              <span className="text-sm font-medium">
+                {new Date(card.createdAt).toLocaleDateString()}
+              </span>
             </div>
-          )}
-          
-          {card.team && (
-            <div>
-              <h3 className="text-sm font-medium text-gray-500">Team</h3>
-              <p>{card.team}</p>
-            </div>
-          )}
-          
-          {card.year && (
-            <div>
-              <h3 className="text-sm font-medium text-gray-500">Year</h3>
-              <p>{card.year}</p>
-            </div>
-          )}
-          
-          {card.artist && (
-            <div>
-              <h3 className="text-sm font-medium text-gray-500">Artist</h3>
-              <p>{card.artist}</p>
-            </div>
-          )}
-          
-          {card.set && (
-            <div>
-              <h3 className="text-sm font-medium text-gray-500">Set</h3>
-              <p>{card.set}</p>
-            </div>
-          )}
+            
+            {/* Player - safely render */}
+            {card.player && (
+              <div className="flex items-center gap-2">
+                <User className="w-4 h-4 text-purple-500" />
+                <span className="text-sm text-gray-600">Player:</span>
+                <span className="text-sm font-medium">
+                  {safeToReactNode(card.player)}
+                </span>
+              </div>
+            )}
+            
+            {/* Team - safely render */}
+            {card.team && (
+              <div className="flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-red-500" />
+                <span className="text-sm text-gray-600">Team:</span>
+                <span className="text-sm font-medium">
+                  {safeToReactNode(card.team)}
+                </span>
+              </div>
+            )}
+            
+            {/* Year - safely render */}
+            {card.year && (
+              <div className="flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-yellow-600" />
+                <span className="text-sm text-gray-600">Year:</span>
+                <span className="text-sm font-medium">
+                  {safeToReactNode(card.year)}
+                </span>
+              </div>
+            )}
+            
+            {/* Collection ID */}
+            {card.collectionId && (
+              <div className="flex items-center gap-2">
+                <Hash className="w-4 h-4 text-indigo-500" />
+                <span className="text-sm text-gray-600">Collection:</span>
+                <span className="text-sm font-medium">{card.collectionId}</span>
+              </div>
+            )}
+          </div>
         </div>
+        
+        {/* Actions */}
+        {showActions && (
+          <div className="mt-6 flex flex-wrap gap-2">
+            {onEdit && (
+              <Button onClick={onEdit} variant="outline" size="sm">
+                Edit Card
+              </Button>
+            )}
+            
+            {onShare && (
+              <Button onClick={onShare} variant="outline" size="sm">
+                Share Card
+              </Button>
+            )}
+            
+            {onDelete && (
+              <Button onClick={onDelete} variant="destructive" size="sm">
+                Delete Card
+              </Button>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

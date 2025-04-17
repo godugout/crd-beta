@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, Reaction } from '@/lib/types';
 import { cn } from '@/lib/utils';
@@ -6,7 +5,7 @@ import { toast } from 'sonner';
 import { useCards } from '@/context/CardContext';
 import '../components/home/card-effects/index.css';
 import { CardFront } from './card/CardFront';
-import { CardBack } from './card/CardBack';
+import CardBack from './card/CardBack';
 import ReactionButtons from './ReactionButtons';
 import CommentSection from './CommentSection';
 
