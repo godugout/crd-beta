@@ -31,7 +31,6 @@ const Dashboard: React.FC = () => {
           id: 'mock-user-id',
           email: 'user@example.com',
           name: 'Demo User',
-          displayName: 'Demo User',
           role: UserRole.ADMIN, // Default to admin role if password is correct
           avatarUrl: 'https://api.dicebear.com/7.x/initials/svg?seed=DU',
           isVerified: true,

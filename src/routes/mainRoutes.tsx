@@ -1,54 +1,46 @@
-
 import React from 'react';
-import { RouteObject } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
+// Import ProtectedRoute as default import
+import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import Home from '@/pages/Home';
 import Auth from '@/pages/Auth';
-import Unauthorized from '@/pages/Unauthorized';
-import NotFound from '@/pages/NotFound';
-import Index from '@/pages/Index';
-import Search from '@/pages/Search';
-import Profile from '@/pages/Profile';
-import Community from '@/pages/Community';
-import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
-import EmergencyPage from '@/pages/EmergencyPage';
+import Account from '@/components/Account';
+import Dashboard from '@/pages/Dashboard';
+import Admin from '@/pages/Admin';
+import CardDetail from '@/pages/CardDetail';
+import SeriesViewPage from '@/pages/SeriesViewPage';
+import MaintenancePage from '@/pages/MaintenancePage';
 
-// Main application routes (home, auth, etc.)
-export const mainRoutes: RouteObject[] = [
-  {
-    path: "/",
-    element: <Index />,
-  },
-  {
-    path: "/home",
-    element: <Home />,
-  },
-  {
-    path: "/emergency",
-    element: <EmergencyPage />,
-  },
-  {
-    path: "/auth",
-    element: <Auth />,
-  },
-  {
-    path: "/unauthorized",
-    element: <Unauthorized />,
-  },
-  {
-    path: "/search",
-    element: <Search />,
-  },
-  {
-    path: "/community",
-    element: <Community />,
-  },
-  {
-    path: "/profile",
-    element: <ProtectedRoute><Profile /></ProtectedRoute>,
-  },
-  // 404 catch-all route
-  {
-    path: "*",
-    element: <NotFound />,
-  }
-];
+const MainRoutes: React.FC = () => {
+  return (
+    <Routes>
+      <Route path="/maintenance" element={<MaintenancePage />} />
+      <Route path="/" element={<Home />} />
+      <Route path="/login" element={<Auth />} />
+      <Route path="/register" element={<Auth />} />
+      <Route path="/account" element={<Account />} />
+      <Route path="/cards/:id" element={<CardDetail />} />
+      <Route path="/series/:id" element={<SeriesViewPage />} />
+      
+      {/* Protected Routes */}
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin"
+        element={
+          <ProtectedRoute requiredRole="admin">
+            <Admin />
+          </ProtectedRoute>
+        }
+      />
+    </Routes>
+  );
+};
+
+export default MainRoutes;

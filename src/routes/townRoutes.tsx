@@ -1,10 +1,9 @@
-
 import React from 'react';
 import { RouteObject } from 'react-router-dom';
 import TownPage from '@/pages/TownPage';
 import OaklandMemories from '@/pages/oakland/OaklandMemories';
 import OaklandMemoryDetail from '@/pages/oakland/OaklandMemoryDetail';
-import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import TownGallery from '@/pages/TownGallery';
 
 // Town-related routes

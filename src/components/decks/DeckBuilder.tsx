@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useEnhancedCards } from '@/context/CardEnhancedContext';
@@ -12,7 +11,7 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { Plus, X, Save, ChevronLeft, ChevronRight, Heart } from 'lucide-react';
-import { ensureEnhancedCard } from '@/lib/utils/cardHelpers';
+import { ensureEnhancedCard, cardIdToCardObject } from '@/lib/utils/cardHelpers';
 
 interface DeckBuilderProps {
   initialDeck?: Deck;
@@ -32,7 +31,6 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck }) => {
   const [selectedCards, setSelectedCards] = useState<EnhancedCard[]>([]);
   const [activeTab, setActiveTab] = useState('all'); // 'all', 'favorites', 'selected'
   
-  // Set up initial selected cards if editing existing deck
   useEffect(() => {
     if (initialDeck?.cardIds && initialDeck.cardIds.length > 0) {
       const deckCards = cards.filter(card => initialDeck.cardIds.includes(card.id));
@@ -40,7 +38,6 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck }) => {
     }
   }, [initialDeck, cards]);
   
-  // Update deck cardIds when selected cards change
   useEffect(() => {
     setDeck(prev => ({
       ...prev,
@@ -48,29 +45,24 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck }) => {
     }));
   }, [selectedCards]);
   
-  // Filter cards based on active tab
   const filteredCards = activeTab === 'favorites' 
     ? cards.filter(card => favorites.includes(card.id))
     : cards;
   
-  // Cards available to add (not already in deck)
   const availableCards = filteredCards.filter(
     card => !selectedCards.some(selected => selected.id === card.id)
   );
   
-  // Handle card selection
   const handleAddCard = (card: EnhancedCard) => {
     setSelectedCards(prev => [...prev, card]);
     toast.success(`Added "${card.title}" to deck`);
   };
   
-  // Handle card removal
   const handleRemoveCard = (cardId: string) => {
     setSelectedCards(prev => prev.filter(card => card.id !== cardId));
     toast.success("Card removed from deck");
   };
   
-  // Handle drag and drop reordering
   const handleDragEnd = (result: any) => {
     if (!result.destination) return;
     
@@ -81,7 +73,6 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck }) => {
     setSelectedCards(items);
   };
   
-  // Handle saving deck
   const handleSaveDeck = async () => {
     try {
       if (!deck.name) {
@@ -94,7 +85,6 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck }) => {
         return;
       }
       
-      // Get the first card's image as cover if none provided
       if (!deck.coverImageUrl && selectedCards.length > 0) {
         setDeck(prev => ({
           ...prev,
@@ -104,11 +94,9 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck }) => {
       
       let savedDeck;
       if (initialDeck?.id) {
-        // Update existing deck
         await updateDeck(initialDeck.id, deck);
         savedDeck = { ...initialDeck, ...deck };
       } else {
-        // Create new deck
         savedDeck = await addDeck(deck);
       }
       

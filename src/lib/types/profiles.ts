@@ -1,5 +1,5 @@
 
-import { User, UserRole } from '@/lib/types';
+import { User, UserRole } from '@/lib/types/user';
 
 export interface UserProfile {
   id: string;
@@ -33,9 +33,9 @@ export const userToProfile = (user: User): UserProfile => {
     id: user.id,
     email: user.email,
     name: user.name,
-    displayName: user.displayName,
+    displayName: user.displayName || user.name || user.username || '',
     avatarUrl: user.avatarUrl,
     role: user.role || UserRole.USER, // Ensure role is always defined
-    bio: user.bio,
+    bio: user.bio || '',
   };
 };

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PageLayout from '@/components/navigation/PageLayout';
@@ -31,7 +30,7 @@ const CommonsCardsPage = () => {
       // For now, we'll simulate creating a collection with sample cards
       
       // Create the collection
-      const collection = createCollection({
+      const collection = await createCollection({
         name: "Commons Cards",
         description: "A collection of trading cards featuring public domain images",
         coverImageUrl: "/lovable-uploads/a38aa501-ea2d-4416-9699-1e69b1826233.png",

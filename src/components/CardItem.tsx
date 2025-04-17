@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 import { useCards } from '@/context/CardContext';
 import '../components/home/card-effects/index.css';
 import { CardFront } from './card/CardFront';
-import CardBack from './card/CardBack'; // Fixed import
+import CardBack from './card/CardBack';
 import ReactionButtons from './ReactionButtons';
 import CommentSection from './CommentSection';
 

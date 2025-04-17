@@ -8,7 +8,9 @@ export enum UserRole {
   ADMIN = 'admin',
   MODERATOR = 'moderator',
   USER = 'user',
-  GUEST = 'guest'
+  GUEST = 'guest',
+  ARTIST = 'artist',  // Added ARTIST role
+  FAN = 'fan'         // Added FAN role
 }
 
 /**
@@ -27,17 +29,36 @@ export type UserPermission =
   | 'admin:access'
   | 'create:series'
   | 'read:all'
-  | 'write:all';
+  | 'write:all'
+  | 'create:card'   // Added additional permissions
+  | 'edit:card'     // to match those used in the code
+  | 'delete:card'
+  | 'view:dashboard'
+  | 'manage:users';
+
+// Constants for permission values to use in code
+export const UserPermissionValues = {
+  CREATE_CARD: 'create:card' as UserPermission,
+  EDIT_CARD: 'edit:card' as UserPermission,
+  DELETE_CARD: 'delete:card' as UserPermission,
+  VIEW_DASHBOARD: 'view:dashboard' as UserPermission,
+  MANAGE_USERS: 'manage:users' as UserPermission,
+  ADMIN_ACCESS: 'admin:access' as UserPermission,
+  READ_ALL: 'read:all' as UserPermission,
+  WRITE_ALL: 'write:all' as UserPermission
+};
 
 /**
  * Mapping of roles to permissions
  * Defines which permissions are granted to each role by default
  */
 export const ROLE_PERMISSIONS: Record<UserRole, UserPermission[]> = {
-  [UserRole.ADMIN]: ['read:cards', 'write:cards', 'delete:cards', 'read:collections', 'write:collections', 'delete:collections', 'read:users', 'write:users', 'admin:access', 'create:series', 'read:all', 'write:all'],
-  [UserRole.MODERATOR]: ['read:cards', 'write:cards', 'read:collections', 'write:collections', 'read:users'],
-  [UserRole.USER]: ['read:cards', 'write:cards', 'read:collections'],
-  [UserRole.GUEST]: ['read:cards', 'read:collections']
+  [UserRole.ADMIN]: ['read:cards', 'write:cards', 'delete:cards', 'read:collections', 'write:collections', 'delete:collections', 'read:users', 'write:users', 'admin:access', 'create:series', 'read:all', 'write:all', 'create:card', 'edit:card', 'delete:card', 'view:dashboard', 'manage:users'],
+  [UserRole.MODERATOR]: ['read:cards', 'write:cards', 'read:collections', 'write:collections', 'read:users', 'create:card', 'edit:card'],
+  [UserRole.USER]: ['read:cards', 'write:cards', 'read:collections', 'create:card'],
+  [UserRole.GUEST]: ['read:cards', 'read:collections'],
+  [UserRole.ARTIST]: ['read:cards', 'write:cards', 'read:collections', 'write:collections', 'create:card', 'edit:card', 'create:series'],
+  [UserRole.FAN]: ['read:cards', 'read:collections']
 };
 
 /**
@@ -47,6 +68,7 @@ export interface User extends BaseEntity {
   email: string;
   name?: string;
   username?: string;
+  displayName?: string; // Added displayName
   avatarUrl?: string;
   role: UserRole;
   permissions?: UserPermission[];
@@ -55,6 +77,7 @@ export interface User extends BaseEntity {
   isVerified?: boolean;
   isActive?: boolean;
   teamIds?: string[];
+  bio?: string;       // Added bio
 }
 
 /**

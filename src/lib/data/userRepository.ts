@@ -12,7 +12,8 @@ export const userRepository = {
       id,
       email: 'user@example.com',
       name: 'Test User',
-      role: UserRole.FAN,
+      displayName: 'Test User',
+      role: UserRole.USER, // Updated to UserRole.USER
       avatarUrl: 'https://ui-avatars.com/api/?name=Test+User',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
@@ -25,7 +26,8 @@ export const userRepository = {
       id: 'user-123',
       email,
       name: 'Test User',
-      role: UserRole.FAN,
+      displayName: 'Test User',
+      role: UserRole.USER, // Updated to UserRole.USER
       avatarUrl: 'https://ui-avatars.com/api/?name=Test+User',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
@@ -38,7 +40,8 @@ export const userRepository = {
       id: `user-${Date.now()}`,
       email: userData.email || 'user@example.com',
       name: userData.name || 'New User',
-      role: userData.role || UserRole.FAN,
+      displayName: userData.displayName || userData.name || 'New User',
+      role: userData.role || UserRole.USER, // Updated to UserRole.USER
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       ...userData

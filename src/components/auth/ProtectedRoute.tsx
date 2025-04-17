@@ -56,4 +56,5 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   return children ? <>{children}</> : <Outlet />;
 };
 
+// Make sure the component is exported as default
 export default ProtectedRoute;

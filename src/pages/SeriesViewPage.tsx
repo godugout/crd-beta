@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useEnhancedCards } from '@/context/CardEnhancedContext';
@@ -10,6 +9,7 @@ import {
   Grid, LayoutGrid, List
 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { isRarity } from '@/lib/utils/CardRarityUtils';
 
 const SeriesViewPage: React.FC = () => {
   const { seriesId } = useParams();
@@ -19,7 +19,6 @@ const SeriesViewPage: React.FC = () => {
   
   const currentSeries = seriesId ? series.find(s => s.id === seriesId) : undefined;
   
-  // Get series cards
   const seriesCards = currentSeries 
     ? cards.filter(card => currentSeries.cardIds.includes(card.id))
     : [];
@@ -63,7 +62,6 @@ const SeriesViewPage: React.FC = () => {
   }
   
   if (currentSeries) {
-    // Single series view
     return (
       <PageLayout title={currentSeries.title} description={currentSeries.description || 'Card series details'}>
         <div className="container mx-auto px-4 py-8">
@@ -381,7 +379,6 @@ const SeriesViewPage: React.FC = () => {
     );
   }
   
-  // Series overview
   return (
     <PageLayout title="Card Series" description="Browse and manage card series">
       <div className="container mx-auto px-4 py-8">

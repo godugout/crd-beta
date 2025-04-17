@@ -88,17 +88,18 @@ export const mapTeamMemberFromDb = (dbMember: DbTeamMember): TeamMember => {
   };
 };
 
-export const mapToUser = (data: any) => {
+export const mapToUser = (data: any): User => {
   return {
     id: data.id || '',
     email: data.email || '',
     name: data.name || '',
     avatarUrl: data.avatar_url || '',
     username: data.username || '',
+    displayName: data.display_name || data.name || '',
     isVerified: true,
     isActive: true,
     permissions: [],
-    role: data.role || 'fan', // Add required role property
+    role: data.role || UserRole.USER,
     createdAt: data.created_at || new Date().toISOString(),
     updatedAt: data.updated_at || new Date().toISOString(),
   };
@@ -111,8 +112,8 @@ export const mapToTeamMember = (data: any, user: any = null) => {
     userId: data.user_id || '',
     role: data.role || 'member',
     joinedAt: data.joined_at || new Date().toISOString(),
-    createdAt: data.created_at || new Date().toISOString(), // Add required property
-    updatedAt: data.updated_at || new Date().toISOString(), // Add required property
+    createdAt: data.created_at || new Date().toISOString(),
+    updatedAt: data.updated_at || new Date().toISOString(),
     user: user
   };
 };
@@ -124,12 +125,12 @@ export function mapApiUserToUser(apiUser: any): User {
     name: apiUser.name || apiUser.displayName || '',
     avatarUrl: apiUser.avatarUrl || apiUser.avatar || '',
     username: apiUser.username || '',
+    displayName: apiUser.displayName || apiUser.name || '',
     isVerified: apiUser.isVerified || false,
     isActive: apiUser.isActive || true,
     permissions: apiUser.permissions || [],
     createdAt: apiUser.createdAt || new Date().toISOString(),
     updatedAt: apiUser.updatedAt || new Date().toISOString(),
-    // Add required role property
     role: apiUser.role || UserRole.USER
   };
 }

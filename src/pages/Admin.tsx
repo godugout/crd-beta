@@ -23,7 +23,7 @@ const Admin = () => {
   const isLoading = false;
   
   if (isLoading) {
-    return <LoadingState message="Loading Admin Panel..." />;
+    return <LoadingState text="Loading Admin Panel..." />;
   }
   
   if (!isAdmin) {

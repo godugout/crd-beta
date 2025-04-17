@@ -32,7 +32,7 @@ export function cardToEnhancedCard(card: Card): EnhancedCard {
     artistId: validCard.artistId || '',
     artistName: validCard.creatorName || '',
     editionSize: validCard.editionSize || 1
-  };
+  } as EnhancedCard;
 }
 
 /**
@@ -48,6 +48,7 @@ export function cardsToEnhancedCards(cards: Card[]): EnhancedCard[] {
  * If it's a Card, it will be converted to an EnhancedCard
  */
 export function ensureEnhancedCard(cardOrEnhancedCard: Card | EnhancedCard): EnhancedCard {
+  // Check if it already has EnhancedCard specific properties
   if ('views' in cardOrEnhancedCard && 'likes' in cardOrEnhancedCard && 'shares' in cardOrEnhancedCard) {
     return cardOrEnhancedCard as EnhancedCard;
   }

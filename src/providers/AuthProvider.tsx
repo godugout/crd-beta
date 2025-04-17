@@ -1,7 +1,7 @@
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User } from '@/lib/types';
 import { UserRole } from '@/lib/types/user';
+import { UserPermission, UserPermissionValues } from '@/lib/types/user';
 
 // Define auth context type
 interface AuthContextType {
@@ -29,7 +29,7 @@ const MOCK_ADMIN_USER: User = {
   bio: 'System administrator with full access to all features.',
   isVerified: true,
   isActive: true,
-  permissions: ['all'],
+  permissions: [UserPermissionValues.READ_ALL, UserPermissionValues.WRITE_ALL],
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
 };
@@ -40,7 +40,7 @@ const DEFAULT_USER: User = {
   email: 'user@example.com',
   name: 'Demo User',
   role: UserRole.ADMIN,
-  permissions: ['all'],
+  permissions: [UserPermissionValues.READ_ALL, UserPermissionValues.WRITE_ALL],
   isVerified: true,
   isActive: true,
   createdAt: new Date().toISOString(),

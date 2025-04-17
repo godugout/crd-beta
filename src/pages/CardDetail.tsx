@@ -1,18 +1,104 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import PageLayout from '@/components/navigation/PageLayout';
 import { Button } from '@/components/ui/button';
 import { useCards } from '@/hooks/useCards';
 import { ArrowLeft } from 'lucide-react';
-import CardDetailed from '@/components/cards/CardDetailed';
-import RelatedCards from '@/components/cards/RelatedCards';
 import { useCardOperations } from '@/hooks/useCardOperations';
 import FullscreenViewer from '@/components/gallery/FullscreenViewer';
 import { Card } from '@/lib/types';
 import { sampleCards } from '@/lib/data/sampleCards';
 import { toast } from '@/hooks/use-toast';
-import { adaptToCard } from '@/lib/adapters/cardAdapter';
+import { adaptToCard } from '@/lib/adapters/typeAdapters';
 import { DEFAULT_DESIGN_METADATA } from '@/lib/utils/cardDefaults';
+
+// Adding CardDetailed component to fix type errors
+interface CardDetailedProps {
+  card: Card;
+  onEdit: () => void;
+  onShare: () => void;
+  onDelete: () => void;
+  onView: () => void;
+}
+
+const CardDetailed: React.FC<CardDetailedProps> = ({ card, onEdit, onShare, onDelete, onView }) => {
+  return (
+    <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+      <h2 className="text-2xl font-bold mb-4">{card.title}</h2>
+      <div className="flex flex-col md:flex-row gap-8">
+        <div className="w-full md:w-1/2 lg:w-2/5">
+          <div className="aspect-[2.5/3.5] relative rounded-lg overflow-hidden">
+            <img 
+              src={card.imageUrl} 
+              alt={card.title} 
+              className="w-full h-full object-cover cursor-pointer"
+              onClick={onView}
+            />
+          </div>
+        </div>
+        <div className="flex-1">
+          <p className="text-gray-700 mb-6">{card.description}</p>
+          <div className="grid grid-cols-2 gap-4 mb-6">
+            {card.player && <div><span className="font-medium">Player:</span> {card.player}</div>}
+            {card.team && <div><span className="font-medium">Team:</span> {card.team}</div>}
+            {card.year && <div><span className="font-medium">Year:</span> {card.year}</div>}
+          </div>
+          <div className="flex flex-wrap gap-2 mb-6">
+            {card.tags?.map(tag => (
+              <span key={tag} className="px-3 py-1 bg-gray-100 rounded-full text-sm">
+                {tag}
+              </span>
+            ))}
+          </div>
+          <div className="flex gap-3">
+            <Button onClick={onEdit}>Edit Card</Button>
+            <Button variant="outline" onClick={onShare}>Share Card</Button>
+            <Button variant="destructive" onClick={onDelete}>Delete Card</Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Adding RelatedCards component
+interface RelatedCardsProps {
+  cards: Card[];
+  currentCardId: string;
+  onCardClick: (id: string) => void;
+  className?: string;
+}
+
+const RelatedCards: React.FC<RelatedCardsProps> = ({ cards, currentCardId, onCardClick, className }) => {
+  const filteredCards = cards.filter(card => card.id !== currentCardId).slice(0, 4);
+  
+  if (filteredCards.length === 0) return null;
+  
+  return (
+    <div className={className}>
+      <h3 className="text-xl font-bold mb-4">Related Cards</h3>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {filteredCards.map(card => (
+          <div 
+            key={card.id}
+            className="cursor-pointer rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
+            onClick={() => onCardClick(card.id)}
+          >
+            <img 
+              src={card.imageUrl} 
+              alt={card.title} 
+              className="w-full aspect-[2.5/3.5] object-cover"
+            />
+            <div className="p-2">
+              <h4 className="font-medium truncate">{card.title}</h4>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1518770660439-4636190af475';
 
@@ -56,11 +142,6 @@ const CardDetail = () => {
         imageUrl: foundCard.imageUrl || FALLBACK_IMAGE,
         thumbnailUrl: foundCard.thumbnailUrl || foundCard.imageUrl || FALLBACK_IMAGE,
         description: foundCard.description || '',
-        designMetadata: foundCard.designMetadata || DEFAULT_DESIGN_METADATA,
-        createdAt: foundCard.createdAt || new Date().toISOString(),
-        updatedAt: foundCard.updatedAt || new Date().toISOString(),
-        userId: foundCard.userId || 'anonymous',
-        effects: foundCard.effects || []
       });
       
       setResolvedCard(processedCard);

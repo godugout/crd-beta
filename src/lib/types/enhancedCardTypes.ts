@@ -47,7 +47,7 @@ export interface EnhancedCard extends Omit<Card, 'edition'> {
 export interface Deck {
   id: string;
   name: string;
-  description: string;
+  description?: string; // Made optional to match context implementation
   coverImageUrl?: string;
   ownerId: string;
   createdAt: string;
@@ -68,7 +68,7 @@ export type ReleaseType = 'standard' | 'limited' | 'promotional' | 'exclusive';
 export interface Series {
   id: string;
   name: string;
-  title: string;
+  title?: string; // Made optional to match context implementation
   description: string;
   coverImageUrl: string;
   artistId: string;

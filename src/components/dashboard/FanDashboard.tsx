@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useEnhancedCards } from '@/context/CardEnhancedContext';
 import { UserProfile } from '@/lib/types/UserTypes';
@@ -11,6 +10,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { EnhancedCard } from '@/lib/types/enhancedCardTypes';
 import { ensureEnhancedCard } from '@/lib/utils/cardHelpers';
+import { cardIdToCardObject } from '@/lib/utils/CardUtils';
 
 interface FanDashboardProps {
   user: UserProfile;

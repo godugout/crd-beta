@@ -1,6 +1,7 @@
+
 import { useContext } from 'react';
 import { AuthContext } from '@/context/auth/AuthContext';
-import { UserPermission, UserRole, ROLE_PERMISSIONS } from '@/lib/types/user';
+import { UserPermission, UserRole, ROLE_PERMISSIONS, UserPermissionValues } from '@/lib/types/user';
 
 export function usePermissions() {
   const { user } = useContext(AuthContext);
@@ -27,12 +28,12 @@ export function usePermissions() {
     hasPermission,
     hasRole,
     // Shorthand helpers for common permission checks
-    canCreateCard: hasPermission(UserPermission.CREATE_CARD),
-    canEditCard: hasPermission(UserPermission.EDIT_CARD),
-    canDeleteCard: hasPermission(UserPermission.DELETE_CARD),
-    canViewDashboard: hasPermission(UserPermission.VIEW_DASHBOARD),
-    canManageUsers: hasPermission(UserPermission.MANAGE_USERS),
-    hasAdminAccess: hasPermission(UserPermission.ADMIN_ACCESS),
+    canCreateCard: hasPermission(UserPermissionValues.CREATE_CARD),
+    canEditCard: hasPermission(UserPermissionValues.EDIT_CARD),
+    canDeleteCard: hasPermission(UserPermissionValues.DELETE_CARD),
+    canViewDashboard: hasPermission(UserPermissionValues.VIEW_DASHBOARD),
+    canManageUsers: hasPermission(UserPermissionValues.MANAGE_USERS),
+    hasAdminAccess: hasPermission(UserPermissionValues.ADMIN_ACCESS),
     // Role shortcuts
     isAdmin: hasRole(UserRole.ADMIN),
     isArtist: hasRole(UserRole.ARTIST),
