@@ -260,8 +260,18 @@ serve(async (req) => {
 
   try {
     // Create a Supabase client with the project details
-    const supabaseUrl = Deno.env.get("SUPABASE_URL") || "https://wxlwhqlbxyuyujhqeyur.supabase.co";
-    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+
+    if (!supabaseUrl || !supabaseKey) {
+      console.error("Missing environment variables: SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY");
+      return new Response(JSON.stringify({ 
+        error: "Server configuration error: Missing required environment variables" 
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 500,
+      });
+    }
 
     const supabase = createClient(supabaseUrl, supabaseKey);
     
@@ -281,6 +291,7 @@ serve(async (req) => {
         
         if (!userError && userData && userData.user) {
           userId = userData.user.id;
+          console.log("Authenticated user ID:", userId);
         }
       }
     } catch (error) {
@@ -333,7 +344,8 @@ serve(async (req) => {
         .from('collections')
         .insert({
           ...commonsCollection,
-          owner_id: userId
+          owner_id: userId,
+          title: commonsCollection.title
         })
         .select()
         .single();
@@ -367,6 +379,7 @@ serve(async (req) => {
 
     // Add the new cards to the collection
     const cardPromises = commonsCards.map(card => {
+      console.log(`Creating card: ${card.title}`);
       const cardData = {
         ...card,
         collection_id: collectionId,
@@ -386,9 +399,14 @@ serve(async (req) => {
     const errors = results.filter(result => result.error).map(result => result.error);
     if (errors.length > 0) {
       console.error("Errors inserting cards:", errors);
-      return new Response(JSON.stringify({ errors }), {
+      return new Response(JSON.stringify({ 
+        errors, 
+        partial: true,
+        message: `Some cards failed to insert (${errors.length}/${commonsCards.length}). Check logs for details.`,
+        collectionId
+      }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 400,
+        status: 207, // Partial success
       });
     }
 

@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import PageLayout from '@/components/navigation/PageLayout';
 import { Container } from '@/components/ui/container';
 import { Button } from '@/components/ui/button';
-import { Eye, RefreshCw, AlertTriangle } from 'lucide-react';
+import { Eye, RefreshCw, AlertTriangle, Loader } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -25,20 +25,29 @@ const CommonsCardsPage = () => {
     setResult(null);
     
     try {
-      // Call the edge function with a timeout
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Request timed out after 15 seconds')), 15000);
+      console.log("Starting Commons Cards generation request...");
+      
+      // Call the edge function with proper error handling
+      const { data, error } = await supabase.functions.invoke('populate-cards', {
+        body: { timestamp: new Date().toISOString() }
       });
       
-      const responsePromise = supabase.functions.invoke('populate-cards');
-      const result = await Promise.race([responsePromise, timeoutPromise]);
-      
-      const { data, error } = result as any;
+      console.log("Edge function response:", { data, error });
       
       if (error) {
         console.error('Error generating Commons Cards:', error);
-        toast.error('Failed to generate Commons Cards');
+        toast.error(`Failed to generate Commons Cards: ${error.message}`);
         setResult({ success: false, error: error.message });
+        return;
+      }
+      
+      if (!data || !data.collectionId) {
+        console.error('Invalid response from function:', data);
+        toast.error('Received invalid response from server');
+        setResult({ 
+          success: false, 
+          error: 'The server returned an invalid response. Cards may not have been created correctly.' 
+        });
         return;
       }
       

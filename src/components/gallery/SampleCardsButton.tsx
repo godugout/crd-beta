@@ -41,7 +41,7 @@ const SampleCardsButton: React.FC<SampleCardsButtonProps> = ({
       }
     } catch (error) {
       console.error('Error adding sample cards:', error);
-      toast.error('An error occurred while adding sample cards');
+      toast.error('An unexpected error occurred while adding sample cards');
     } finally {
       setIsLoading(false);
     }
