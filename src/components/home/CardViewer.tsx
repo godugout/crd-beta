@@ -1,6 +1,9 @@
 
 import React from 'react';
 import { CardData } from '@/types/card';
+import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
+import { Eye3d } from 'lucide-react';
 
 interface CardViewerProps {
   card: CardData;
@@ -78,6 +81,21 @@ const CardViewer: React.FC<CardViewerProps> = ({
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>
         </button>
+        
+        {/* 3D View button */}
+        <Link 
+          to={`/immersive/${card.id}`}
+          className="absolute bottom-20 right-4 bg-indigo-600 bg-opacity-90 text-white p-2 rounded-full hover:bg-opacity-100 transition shadow-md flex items-center justify-center"
+        >
+          <Button variant="ghost" size="icon" className="h-5 w-5 p-0 text-white">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 3l8 4.5v9L12 21l-8-4.5v-9L12 3z" />
+              <path d="M12 12l8-4.5" />
+              <path d="M12 12v9" />
+              <path d="M12 12L4 7.5" />
+            </svg>
+          </Button>
+        </Link>
       </div>
     </div>
   );

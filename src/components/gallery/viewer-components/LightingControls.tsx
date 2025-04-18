@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
@@ -17,7 +18,10 @@ interface LightingControlsProps {
 
 const LightingControls: React.FC<LightingControlsProps> = ({
   settings,
-  onUpdateSettings
+  onUpdateSettings,
+  onApplyPreset,
+  onToggleDynamicLighting,
+  isUserCustomized
 }) => {
   // Environment presets
   const environmentPresets = [
@@ -27,17 +31,23 @@ const LightingControls: React.FC<LightingControlsProps> = ({
     { value: 'display_case' as LightingPreset, label: 'Display Case' },
   ];
 
+  const handlePresetChange = (value: string) => {
+    const validValue = value as LightingPreset;
+    onUpdateSettings({ environmentType: validValue });
+    
+    // If onApplyPreset is provided, call it to fully apply the preset
+    if (onApplyPreset) {
+      onApplyPreset(validValue);
+    }
+  };
+
   return (
     <div className="space-y-8 pb-4">
       <div className="space-y-4">
         <h3 className="text-lg font-medium">Environment</h3>
         <Select 
           value={settings.environmentType} 
-          onValueChange={(value: string) => {
-            if (value === 'studio' || value === 'natural' || value === 'dramatic' || value === 'display_case') {
-              onUpdateSettings({ environmentType: value as LightingPreset });
-            }
-          }}
+          onValueChange={handlePresetChange}
         >
           <SelectTrigger>
             <SelectValue placeholder="Select environment" />
@@ -145,9 +155,9 @@ const LightingControls: React.FC<LightingControlsProps> = ({
           <Label htmlFor="autoRotate" className="cursor-pointer">Auto Rotate</Label>
           <Switch
             id="autoRotate"
-            checked={false}
+            checked={settings.autoRotate || false}
             onCheckedChange={(checked) => {
-              // Handle auto rotation here - will be implemented in a future update
+              onUpdateSettings({ autoRotate: checked });
             }}
           />
         </div>
@@ -158,9 +168,9 @@ const LightingControls: React.FC<LightingControlsProps> = ({
           <Label htmlFor="followPointer" className="cursor-pointer">Follow Pointer</Label>
           <Switch
             id="followPointer"
-            checked={false}
+            checked={settings.followPointer || false}
             onCheckedChange={(checked) => {
-              // Handle follow pointer here - will be implemented in a future update
+              onUpdateSettings({ followPointer: checked });
             }}
           />
         </div>

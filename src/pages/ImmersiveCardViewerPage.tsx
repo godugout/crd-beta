@@ -1,173 +1,175 @@
 
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Download, Share2, Heart } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { toast } from 'sonner';
-import PageLayout from '@/components/navigation/PageLayout';
-import ImmersiveCardViewer from '@/components/immersive-viewer/ImmersiveCardViewer';
-import CardDetailPanel from '@/components/card-detail/CardDetailPanel';
+import { useParams } from 'react-router-dom';
 import { Card } from '@/lib/types';
+import { useCardLighting } from '@/hooks/useCardLighting';
+import { useUserLightingPreferences } from '@/hooks/useUserLightingPreferences';
+import RealisticCardViewer from '@/components/immersive-viewer/RealisticCardViewer';
+import CustomizationPanel from '@/components/immersive-viewer/CustomizationPanel';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft, Share2 } from 'lucide-react';
+import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 import { useCards } from '@/context/CardContext';
-import { useMobileOptimization } from '@/hooks/useMobileOptimization';
-import useEffectsManager from '@/hooks/card-effects/useEffectsManager';
 
-const ImmersiveCardViewerPage = () => {
+const ImmersiveCardViewerPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { cards } = useCards();
-  const [card, setCard] = useState<Card | undefined>(undefined);
+  const { cards, getCardById } = useCards();
+  const [card, setCard] = useState<Card | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const { isMobile } = useMobileOptimization();
-  const { availableEffects, toggleEffect, activeEffects, effectIntensities, adjustEffectIntensity } = useEffectsManager();
-  const [liked, setLiked] = useState(false);
+  const [isCustomizationOpen, setIsCustomizationOpen] = useState(false);
+  const [materialSettings, setMaterialSettings] = useState({
+    roughness: 0.15,
+    metalness: 0.3,
+    reflectivity: 0.2,
+    clearcoat: 0.1,
+    envMapIntensity: 1.0
+  });
+  
+  const { preferences, savePreferences } = useUserLightingPreferences();
+  
+  const {
+    lightingSettings,
+    lightingPreset,
+    updateLightingSetting,
+    applyPreset,
+    isUserCustomized,
+    toggleDynamicLighting
+  } = useCardLighting(preferences?.environmentType || 'studio');
 
+  // Load card data
   useEffect(() => {
-    if (id && cards.length > 0) {
-      const foundCard = cards.find(c => c.id === id);
-      if (foundCard) {
-        setCard(foundCard);
-      } else {
-        // Card not found
-        toast.error('Card not found');
+    if (id) {
+      setIsLoading(true);
+      try {
+        const foundCard = getCardById(id);
+        if (foundCard) {
+          setCard(foundCard);
+        } else {
+          toast.error("Card not found");
+          navigate('/cards');
+        }
+      } catch (err) {
+        console.error("Error loading card:", err);
+        toast.error("Failed to load card data");
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     }
-  }, [id, cards]);
+  }, [id, getCardById, navigate]);
 
+  // Save user preferences when they change
+  useEffect(() => {
+    if (isUserCustomized && lightingSettings) {
+      savePreferences(lightingSettings);
+    }
+  }, [lightingSettings, isUserCustomized, savePreferences]);
+  
+  // Handle material settings updates
+  const handleUpdateMaterial = (settings: Partial<typeof materialSettings>) => {
+    setMaterialSettings(prev => ({
+      ...prev,
+      ...settings
+    }));
+  };
+  
+  // Handle sharing functionality
   const handleShare = () => {
     const shareUrl = window.location.href;
     
     if (navigator.share) {
       navigator.share({
-        title: card?.title || 'Check out this card!',
-        text: card?.description || 'I found this awesome digital trading card',
+        title: card?.title || 'Check out this amazing trading card!',
+        text: card?.description || 'I found this awesome trading card',
         url: shareUrl,
-      }).catch((error) => {
+      }).catch(error => {
         console.error('Error sharing:', error);
-        // Fallback to clipboard
-        copyToClipboard(shareUrl);
+        navigator.clipboard.writeText(shareUrl)
+          .then(() => toast.success('Link copied to clipboard'))
+          .catch(() => toast.error('Failed to copy link'));
       });
     } else {
-      // Fallback to clipboard
-      copyToClipboard(shareUrl);
+      navigator.clipboard.writeText(shareUrl)
+        .then(() => toast.success('Link copied to clipboard'))
+        .catch(() => toast.error('Failed to copy link'));
     }
-  };
-  
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text)
-      .then(() => {
-        toast.success('Link copied to clipboard');
-      })
-      .catch((err) => {
-        console.error('Failed to copy:', err);
-        toast.error('Failed to copy link');
-      });
-  };
-  
-  const handleLike = () => {
-    setLiked(!liked);
-    toast.success(liked ? 'Removed from favorites' : 'Added to favorites');
-  };
-  
-  const handleDownload = () => {
-    // In a real app, this would download an image of the card
-    toast.success('Downloading card...');
-    
-    // This would normally generate an image and trigger a download
-    setTimeout(() => {
-      toast.success('Card downloaded successfully');
-    }, 1500);
   };
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      <div className="flex items-center justify-center h-screen bg-gray-900">
+        <div className="flex flex-col items-center">
+          <div className="w-32 h-48 bg-gray-800 rounded-lg animate-pulse"></div>
+          <div className="mt-4 h-4 w-32 bg-gray-800 rounded animate-pulse"></div>
+        </div>
       </div>
     );
   }
 
   if (!card) {
     return (
-      <PageLayout
-        title="Card Not Found"
-        description="We couldn't find the card you're looking for."
-      >
-        <div className="container mx-auto px-4 py-8">
-          <Button variant="outline" onClick={() => navigate('/cards')}>
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Gallery
-          </Button>
-          
-          <div className="text-center py-16">
-            <h2 className="text-2xl font-bold mb-4">Card Not Found</h2>
-            <p className="text-gray-600 mb-8">
-              The card you're looking for doesn't exist or has been removed.
-            </p>
-            <Button onClick={() => navigate('/cards')}>
-              Browse Cards
-            </Button>
-          </div>
+      <div className="flex items-center justify-center h-screen bg-gray-900">
+        <div className="text-center text-white">
+          <h2 className="text-2xl font-bold mb-4">Card Not Found</h2>
+          <p className="mb-6">The card you're looking for doesn't exist or has been removed.</p>
+          <Button onClick={() => navigate('/cards')}>Back to Gallery</Button>
         </div>
-      </PageLayout>
+      </div>
     );
   }
 
   return (
-    <PageLayout
-      title={card.title}
-      description={card.description}
-    >
-      <div className="container mx-auto px-4 py-4">
-        <div className="flex justify-between items-center mb-6">
-          <Button variant="outline" onClick={() => navigate(-1)} className="gap-2">
-            <ArrowLeft className="h-4 w-4" />
-            Back
-          </Button>
-          
-          <div className="flex gap-2">
-            <Button 
-              variant="ghost" 
-              size="icon"
-              onClick={handleLike}
-              className={liked ? "text-red-500" : ""}
-            >
-              <Heart className={`h-5 w-5 ${liked ? "fill-current" : ""}`} />
-            </Button>
-            <Button variant="ghost" size="icon" onClick={handleShare}>
-              <Share2 className="h-5 w-5" />
-            </Button>
-            <Button variant="ghost" size="icon" onClick={handleDownload}>
-              <Download className="h-5 w-5" />
-            </Button>
-          </div>
-        </div>
-        
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-          <div className="lg:col-span-3 h-[70vh] md:h-[80vh]">
-            <div className="w-full h-full rounded-lg overflow-hidden bg-black">
-              <ImmersiveCardViewer 
-                card={card}
-                activeEffects={activeEffects}
-                effectIntensities={effectIntensities}
-              />
-            </div>
-          </div>
-          
-          <div className="lg:col-span-2">
-            <CardDetailPanel 
-              card={card}
-              availableEffects={availableEffects}
-              activeEffects={activeEffects}
-              onToggleEffect={toggleEffect}
-              effectIntensities={effectIntensities}
-              onAdjustIntensity={adjustEffectIntensity}
-            />
-          </div>
-        </div>
+    <div className="relative h-screen bg-gray-900 overflow-hidden">
+      {/* Top navigation */}
+      <div className="absolute top-0 left-0 z-20 p-4 flex items-center gap-4">
+        <Button 
+          variant="ghost" 
+          size="icon"
+          className="bg-black/30 text-white hover:bg-black/50 backdrop-blur-sm"
+          onClick={() => navigate(-1)}
+        >
+          <ArrowLeft />
+        </Button>
+        <h1 className="text-white text-xl font-bold hidden md:block">{card.title}</h1>
       </div>
-    </PageLayout>
+      
+      {/* Share button */}
+      <div className="absolute top-0 right-0 z-20 p-4">
+        <Button 
+          variant="ghost" 
+          size="icon"
+          className="bg-black/30 text-white hover:bg-black/50 backdrop-blur-sm"
+          onClick={handleShare}
+        >
+          <Share2 />
+        </Button>
+      </div>
+      
+      {/* Main 3D viewer */}
+      <div className="w-full h-full">
+        <RealisticCardViewer 
+          card={card}
+          isCustomizationOpen={isCustomizationOpen}
+          onToggleCustomization={() => setIsCustomizationOpen(!isCustomizationOpen)}
+        />
+      </div>
+      
+      {/* Customization panel */}
+      <CustomizationPanel 
+        card={card}
+        isOpen={isCustomizationOpen}
+        onClose={() => setIsCustomizationOpen(false)}
+        lightingSettings={lightingSettings}
+        onUpdateLighting={updateLightingSetting}
+        onApplyPreset={applyPreset}
+        onToggleDynamicLighting={toggleDynamicLighting}
+        materialSettings={materialSettings}
+        onUpdateMaterial={handleUpdateMaterial}
+        onShareCard={handleShare}
+        isUserCustomized={isUserCustomized}
+      />
+    </div>
   );
 };
 
