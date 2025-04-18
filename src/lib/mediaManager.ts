@@ -32,79 +32,83 @@ export interface MediaRecord {
   metadata: Record<string, any>
 }
 
-export const mediaManager = {
-  async uploadMedia({
-    file,
-    memoryId,
-    userId,
-    isPrivate = false,
-    metadata = {},
-    detectFaces = false,
-    progressCallback
-  }: MediaUploadOptions): Promise<MediaRecord> {
-    try {
-      const fileExt = file.name.split('.').pop()
-      const fileName = `${uuidv4()}.${fileExt}`
-      const filePath = `${isPrivate ? 'private' : 'public'}/${userId}/${memoryId}/${fileName}`
-      
-      let mediaType: MediaRecord['type'] = 'unknown'
-      if (file.type.startsWith('image/')) mediaType = 'image'
-      else if (file.type.startsWith('video/')) mediaType = 'video'
-      else if (file.type.startsWith('audio/')) mediaType = 'audio'
-      
-      // Upload to Supabase Storage
-      const { error: uploadError } = await supabase.storage
-        .from('media')
-        .upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: false
-        })
-      
-      if (uploadError) {
-        toast.error(`Upload failed: ${uploadError.message}`)
-        throw uploadError
-      }
-      
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('media')
-        .getPublicUrl(filePath)
-      
-      // Prepare media record
-      const mediaRecord: Omit<MediaRecord, 'id'> = {
-        memoryId,
-        type: mediaType,
-        url: publicUrl,
-        originalFilename: file.name,
-        size: file.size,
-        mimeType: file.type,
-        metadata: {
-          ...metadata,
-          detectFaces
-        }
-      }
-      
-      // Insert media record into database
-      const { data: savedMedia, error: dbError } = await supabase
-        .from('media')
-        .insert(mediaRecord)
-        .select()
-        .single()
-      
-      if (dbError) {
-        toast.error(`Database error: ${dbError.message}`)
-        throw dbError
-      }
-      
-      toast.success('Media uploaded successfully')
-      return savedMedia
-      
-    } catch (error) {
-      console.error('Media upload error:', error)
-      toast.error('Failed to upload media')
-      throw error
+export const uploadMedia = async ({
+  file,
+  memoryId,
+  userId,
+  isPrivate = false,
+  metadata = {},
+  detectFaces = false,
+  progressCallback
+}: MediaUploadOptions): Promise<MediaRecord> => {
+  try {
+    const fileExt = file.name.split('.').pop()
+    const fileName = `${uuidv4()}.${fileExt}`
+    const filePath = `${isPrivate ? 'private' : 'public'}/${userId}/${memoryId}/${fileName}`
+    
+    let mediaType: MediaRecord['type'] = 'unknown'
+    if (file.type.startsWith('image/')) mediaType = 'image'
+    else if (file.type.startsWith('video/')) mediaType = 'video'
+    else if (file.type.startsWith('audio/')) mediaType = 'audio'
+    
+    // Upload to Supabase Storage
+    const { error: uploadError } = await supabase.storage
+      .from('media')
+      .upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: false
+      })
+    
+    if (uploadError) {
+      toast.error(`Upload failed: ${uploadError.message}`)
+      throw uploadError
     }
-  },
+    
+    // Get public URL
+    const { data: { publicUrl } } = supabase.storage
+      .from('media')
+      .getPublicUrl(filePath)
+    
+    // Prepare media record
+    const mediaRecord: Omit<MediaRecord, 'id'> = {
+      memoryId,
+      type: mediaType,
+      url: publicUrl,
+      thumbnailUrl: publicUrl, // Simple implementation, can be enhanced later
+      originalFilename: file.name,
+      size: file.size,
+      mimeType: file.type,
+      metadata: {
+        ...metadata,
+        detectFaces
+      }
+    }
+    
+    // Insert media record into database
+    const { data: savedMedia, error: dbError } = await supabase
+      .from('media')
+      .insert(mediaRecord)
+      .select()
+      .single()
+    
+    if (dbError) {
+      toast.error(`Database error: ${dbError.message}`)
+      throw dbError
+    }
+    
+    toast.success('Media uploaded successfully')
+    return savedMedia
+    
+  } catch (error) {
+    console.error('Media upload error:', error)
+    toast.error('Failed to upload media')
+    throw error
+  }
+}
+
+// Maintain existing methods from the previous implementation
+export const mediaManager = {
+  uploadMedia,
   
   async getMediaByMemoryId(memoryId: string): Promise<MediaRecord[]> {
     try {
