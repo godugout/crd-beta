@@ -15,7 +15,6 @@ function App() {
         <Toaster 
           position="bottom-right"
           closeButton
-          dismissible 
         />
       </CardProvider>
     </SessionProvider>
