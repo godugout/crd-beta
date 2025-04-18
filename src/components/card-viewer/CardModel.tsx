@@ -60,23 +60,21 @@ export const CardModel: React.FC<CardModelProps> = ({
     });
     
     // Apply effects to materials based on activeEffects
-    if (activeEffects.includes('Holographic')) {
-      const intensity = effectIntensities['Holographic'] || 1;
+    if (activeEffects.includes('holographic')) {
+      const intensity = effectIntensities['holographic'] || 1;
       frontMaterial.metalness = 0.8 * intensity;
       frontMaterial.roughness = 0.2 * (1 - intensity * 0.5);
       frontMaterial.envMapIntensity = 1.5 * intensity;
-      // Remove iridescence properties as they're not available in MeshStandardMaterial
     }
     
-    if (activeEffects.includes('Refractor')) {
-      const intensity = effectIntensities['Refractor'] || 1;
+    if (activeEffects.includes('refractor')) {
+      const intensity = effectIntensities['refractor'] || 1;
       frontMaterial.metalness = 0.7 * intensity;
       frontMaterial.roughness = 0.3 * (1 - intensity * 0.5);
-      // Remove clearcoat properties as they're not available in MeshStandardMaterial
     }
     
-    if (activeEffects.includes('Chrome')) {
-      const intensity = effectIntensities['Chrome'] || 1;
+    if (activeEffects.includes('chrome')) {
+      const intensity = effectIntensities['chrome'] || 1;
       frontMaterial.metalness = 0.9 * intensity;
       frontMaterial.roughness = 0.1 * (1 - intensity * 0.7);
       frontMaterial.envMapIntensity = 2.0 * intensity;
@@ -168,12 +166,12 @@ export const CardModel: React.FC<CardModelProps> = ({
       </mesh>
       
       {/* Add special effect overlays based on active effects */}
-      {activeEffects.includes('Holographic') && (
+      {activeEffects.includes('holographic') && (
         <mesh position={[0, 0, cardThickness/2 + 0.001]}>
           <planeGeometry args={[cardWidth - 0.05, cardHeight - 0.05]} />
           <meshPhysicalMaterial 
             transparent
-            opacity={0.2 * (effectIntensities['Holographic'] || 1)}
+            opacity={0.2 * (effectIntensities['holographic'] || 1)}
             metalness={0.8}
             roughness={0.2}
           />

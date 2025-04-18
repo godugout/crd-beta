@@ -1,10 +1,10 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
 import { CardEffect } from '@/hooks/useCardEffects';
-import { Sparkles, Palette, Rainbow, Layers, Disc, Wand2, Clock } from 'lucide-react';
+import { Label } from '@/components/ui/label';
+import { Sparkles, Waves, Circle, Star } from 'lucide-react';
 
 interface EffectsPanelProps {
   effects: CardEffect[];
@@ -17,113 +17,69 @@ const EffectsPanel: React.FC<EffectsPanelProps> = ({
   onToggleEffect,
   onUpdateIntensity
 }) => {
-  const [expandedEffectId, setExpandedEffectId] = useState<string | null>(null);
-
-  // Get icon for effect
-  const getEffectIcon = (effectId: string) => {
-    switch (effectId) {
+  // Helper function to get appropriate icon for each effect
+  const getEffectIcon = (effectType: string) => {
+    switch (effectType.toLowerCase()) {
       case 'holographic':
-        return <Rainbow size={18} />;
+        return <Sparkles className="h-4 w-4" />;
       case 'refractor':
-        return <Palette size={18} />;
-      case 'prismatic':
-        return <Sparkles size={18} />;
+        return <Waves className="h-4 w-4" />;
       case 'chrome':
-        return <Layers size={18} />;
-      case 'goldFoil':
-        return <Wand2 size={18} />;
-      case 'mojo':
-        return <Disc size={18} />;
-      case 'vintage':
-        return <Clock size={18} />;
+        return <Circle className="h-4 w-4" />;
+      case 'goldfoil':
+        return <Star className="h-4 w-4" />;
       default:
-        return <Sparkles size={18} />;
+        return <Sparkles className="h-4 w-4" />;
     }
   };
-
-  // Toggle expanded state for effect
-  const toggleExpand = (effectId: string) => {
-    setExpandedEffectId(prev => prev === effectId ? null : effectId);
-  };
-
+  
   return (
-    <div className="p-4 text-white h-full overflow-y-auto">
-      <div className="mb-4">
-        <h3 className="text-lg font-semibold mb-1">Card Effects</h3>
-        <p className="text-sm text-gray-400">Apply visual effects to enhance your card</p>
-      </div>
-
-      <div className="space-y-3">
-        {effects.map(effect => (
-          <div 
-            key={effect.id} 
-            className="bg-black/30 rounded-lg p-3"
-          >
-            <div 
-              className="flex items-center justify-between cursor-pointer"
-              onClick={() => toggleExpand(effect.id)}
-            >
-              <div className="flex items-center gap-3">
-                <div className="text-blue-400">
-                  {getEffectIcon(effect.id)}
-                </div>
-                <div>
-                  <h4 className="font-medium">{effect.name}</h4>
-                </div>
+    <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+      <h3 className="text-lg font-medium mb-4">Card Effects</h3>
+      
+      <div className="space-y-6">
+        {effects.map((effect) => (
+          <div key={effect.id} className="space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                {getEffectIcon(effect.id)}
+                <Label htmlFor={`effect-${effect.id}`} className="font-medium">
+                  {effect.name}
+                </Label>
               </div>
-              <Switch 
-                checked={effect.enabled} 
+              <Switch
+                id={`effect-${effect.id}`}
+                checked={effect.enabled}
                 onCheckedChange={() => onToggleEffect(effect.id)}
-                onClick={e => e.stopPropagation()}
               />
             </div>
             
-            {(expandedEffectId === effect.id && effect.enabled) && (
-              <div className="mt-3 pt-3 border-t border-gray-700">
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor={`intensity-${effect.id}`} className="text-sm">
-                        Intensity
-                      </Label>
-                      <span className="text-xs">{Math.round(effect.settings.intensity * 100)}%</span>
-                    </div>
-                    <Slider 
-                      id={`intensity-${effect.id}`}
-                      min={0}
-                      max={1}
-                      step={0.05}
-                      value={[effect.settings.intensity]}
-                      onValueChange={([value]) => onUpdateIntensity(effect.id, value)}
-                    />
-                  </div>
-                  
-                  {effect.settings.color !== undefined && (
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <Label htmlFor={`color-${effect.id}`} className="text-sm">
-                          Color
-                        </Label>
-                        <span className="text-xs">{effect.settings.color}</span>
-                      </div>
-                      <input
-                        type="color"
-                        id={`color-${effect.id}`}
-                        value={effect.settings.color}
-                        onChange={(e) => {
-                          // Update color setting logic would go here
-                          console.log(`Changed color for ${effect.id} to ${e.target.value}`);
-                        }}
-                        className="w-full h-8 rounded cursor-pointer"
-                      />
-                    </div>
-                  )}
+            {effect.enabled && (
+              <div className="pt-1 pl-6">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-sm text-gray-500">Intensity</span>
+                  <span className="text-xs text-gray-500">
+                    {Math.round((effect.settings.intensity || 0) * 100)}%
+                  </span>
                 </div>
+                <Slider
+                  value={[effect.settings.intensity || 0]}
+                  min={0}
+                  max={1}
+                  step={0.01}
+                  onValueChange={([value]) => onUpdateIntensity(effect.id, value)}
+                />
               </div>
             )}
           </div>
         ))}
       </div>
+      
+      {effects.length === 0 && (
+        <div className="text-center py-6 text-gray-500">
+          No effects available for this card
+        </div>
+      )}
     </div>
   );
 };

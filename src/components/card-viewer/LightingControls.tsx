@@ -1,230 +1,238 @@
 
 import React from 'react';
-import { LightingSettings, LightingPreset, useCardLighting } from '@/hooks/useCardLighting';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Slider } from '@/components/ui/slider';
-import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import {
-  Sun,
-  Moon,
-  PaintBucket,
-  Palette,
-  Sliders,
-  Eye
-} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Sun, Moon, Palette } from 'lucide-react';
+import { LightingSettings } from '@/hooks/useCardLighting';
 
 interface LightingControlsProps {
   settings: LightingSettings;
   onUpdateSettings: (settings: Partial<LightingSettings>) => void;
-  onApplyPreset: (preset: LightingPreset) => void;
-  onToggleDynamicLighting: () => void;
-  isUserCustomized: boolean;
 }
 
-export const LightingControls = ({
+const LightingControls: React.FC<LightingControlsProps> = ({
   settings,
-  onUpdateSettings,
-  onApplyPreset,
-  onToggleDynamicLighting,
-  isUserCustomized
-}: LightingControlsProps) => {
-  const handlePrimaryLightIntensity = (value: number[]) => {
-    onUpdateSettings({
-      primaryLight: {
-        ...settings.primaryLight,
-        intensity: value[0]
-      }
-    });
-  };
-
-  const handleAmbientLightIntensity = (value: number[]) => {
-    onUpdateSettings({
-      ambientLight: {
-        ...settings.ambientLight,
-        intensity: value[0]
-      }
-    });
-  };
-
-  const handleEnvMapIntensity = (value: number[]) => {
-    onUpdateSettings({
-      envMapIntensity: value[0]
-    });
-  };
-
-  const presets: Array<{ id: LightingPreset; name: string; icon: React.ReactNode }> = [
-    {
-      id: 'studio',
-      name: 'Studio',
-      icon: <Sun className="w-4 h-4" />
-    },
-    {
-      id: 'natural',
-      name: 'Natural',
-      icon: <Sun className="w-4 h-4" /> // Changed from BrightnessHigh
-    },
-    {
-      id: 'dramatic',
-      name: 'Dramatic',
-      icon: <Moon className="w-4 h-4" />
-    },
-    {
-      id: 'display_case',
-      name: 'Display Case',
-      icon: <Eye className="w-4 h-4" />
-    }
+  onUpdateSettings
+}) => {
+  // Environment presets
+  const environmentPresets = [
+    { value: 'studio', label: 'Studio' },
+    { value: 'natural', label: 'Natural' },
+    { value: 'dramatic', label: 'Dramatic' },
+    { value: 'display_case', label: 'Display Case' }
   ];
 
   return (
-    <div className="space-y-4 p-4 bg-gray-100 dark:bg-gray-900 rounded-lg">
-      <h3 className="text-lg font-medium mb-2 flex items-center">
-        <Sliders className="w-5 h-5 mr-2" />
-        Lighting Controls
-      </h3>
-
-      <div className="mb-4">
-        <div className="flex justify-between items-center mb-2">
-          <span className="text-sm font-medium">Lighting Presets</span>
-          {isUserCustomized && (
-            <span className="text-xs bg-gray-200 dark:bg-gray-700 px-2 py-0.5 rounded-full">
-              Custom
-            </span>
-          )}
+    <div className="space-y-8">
+      <div className="space-y-4">
+        <h3 className="text-lg font-medium">Environment</h3>
+        <Select 
+          value={settings.environmentType} 
+          onValueChange={(value) => onUpdateSettings({ environmentType: value })}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select environment" />
+          </SelectTrigger>
+          <SelectContent>
+            {environmentPresets.map((preset) => (
+              <SelectItem key={preset.value} value={preset.value}>{preset.label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      
+      <div className="space-y-4">
+        <h3 className="text-lg font-medium">Primary Light</h3>
+        
+        <div className="space-y-2">
+          <div className="flex justify-between items-center">
+            <Label htmlFor="primaryIntensity">Intensity</Label>
+            <span className="text-sm text-gray-500">{settings.primaryLight.intensity.toFixed(1)}</span>
+          </div>
+          <Slider
+            id="primaryIntensity"
+            value={[settings.primaryLight.intensity]}
+            min={0}
+            max={2}
+            step={0.1}
+            onValueChange={([value]) => 
+              onUpdateSettings({
+                primaryLight: { ...settings.primaryLight, intensity: value }
+              })
+            }
+          />
         </div>
         
-        <div className="grid grid-cols-4 gap-2">
-          {presets.map(preset => (
-            <button
-              key={preset.id}
-              onClick={() => onApplyPreset(preset.id)}
-              className={`px-2 py-1.5 rounded flex flex-col items-center justify-center text-xs ${
-                settings.environmentType === preset.id
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700'
-              }`}
+        <div className="space-y-2">
+          <Label htmlFor="primaryColor">Color</Label>
+          <div className="flex gap-2">
+            <Button 
+              variant={settings.primaryLight.color === '#ffffff' ? "default" : "outline"}
+              size="sm"
+              onClick={() => 
+                onUpdateSettings({
+                  primaryLight: { ...settings.primaryLight, color: '#ffffff' }
+                })
+              }
             >
-              {preset.icon}
-              <span className="mt-1">{preset.name}</span>
-            </button>
-          ))}
+              <Sun className="h-4 w-4 mr-2" />
+              White
+            </Button>
+            <Button 
+              variant={settings.primaryLight.color === '#fff5e0' ? "default" : "outline"}
+              size="sm"
+              onClick={() => 
+                onUpdateSettings({
+                  primaryLight: { ...settings.primaryLight, color: '#fff5e0' }
+                })
+              }
+            >
+              <Sun className="h-4 w-4 mr-2" />
+              Warm
+            </Button>
+            <Button 
+              variant={settings.primaryLight.color === '#e0f0ff' ? "default" : "outline"}
+              size="sm"
+              onClick={() => 
+                onUpdateSettings({
+                  primaryLight: { ...settings.primaryLight, color: '#e0f0ff' }
+                })
+              }
+            >
+              <Moon className="h-4 w-4 mr-2" />
+              Cool
+            </Button>
+          </div>
         </div>
       </div>
-
-      <Tabs defaultValue="main">
-        <TabsList className="w-full">
-          <TabsTrigger value="main" className="flex-1">
-            <Sun className="w-4 h-4 mr-2" />
-            Main Light
-          </TabsTrigger>
-          <TabsTrigger value="ambient" className="flex-1">
-            <Sun className="w-4 h-4 mr-2" /> {/* Changed from BrightnessHigh */}
-            Ambient
-          </TabsTrigger>
-          <TabsTrigger value="environment" className="flex-1">
-            <PaintBucket className="w-4 h-4 mr-2" />
-            Environment
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="main" className="space-y-4 pt-2">
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="main-light-intensity">Intensity</Label>
-              <span className="text-sm tabular-nums">{settings.primaryLight.intensity.toFixed(1)}</span>
-            </div>
-            <Slider
-              id="main-light-intensity"
-              value={[settings.primaryLight.intensity]}
-              min={0}
-              max={2}
-              step={0.1}
-              onValueChange={handlePrimaryLightIntensity}
-            />
+      
+      <div className="space-y-4">
+        <h3 className="text-lg font-medium">Ambient Light</h3>
+        
+        <div className="space-y-2">
+          <div className="flex justify-between items-center">
+            <Label htmlFor="ambientIntensity">Intensity</Label>
+            <span className="text-sm text-gray-500">{settings.ambientLight.intensity.toFixed(1)}</span>
           </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="main-light-color">Color</Label>
-            <div className="flex items-center gap-2">
-              <input
-                id="main-light-color"
-                type="color"
-                value={settings.primaryLight.color}
-                onChange={(e) => onUpdateSettings({
-                  primaryLight: {
-                    ...settings.primaryLight,
-                    color: e.target.value
-                  }
-                })}
-                className="w-10 h-10 rounded cursor-pointer"
-              />
-              <span className="text-sm">{settings.primaryLight.color}</span>
-            </div>
+          <Slider
+            id="ambientIntensity"
+            value={[settings.ambientLight.intensity]}
+            min={0}
+            max={1}
+            step={0.05}
+            onValueChange={([value]) => 
+              onUpdateSettings({
+                ambientLight: { ...settings.ambientLight, intensity: value }
+              })
+            }
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="ambientColor">Color</Label>
+          <div className="flex gap-2">
+            <Button 
+              variant={settings.ambientLight.color === '#202020' ? "default" : "outline"}
+              size="sm"
+              onClick={() => 
+                onUpdateSettings({
+                  ambientLight: { ...settings.ambientLight, color: '#202020' }
+                })
+              }
+            >
+              <Palette className="h-4 w-4 mr-2" />
+              Dark
+            </Button>
+            <Button 
+              variant={settings.ambientLight.color === '#404040' ? "default" : "outline"}
+              size="sm"
+              onClick={() => 
+                onUpdateSettings({
+                  ambientLight: { ...settings.ambientLight, color: '#404040' }
+                })
+              }
+            >
+              <Palette className="h-4 w-4 mr-2" />
+              Medium
+            </Button>
+            <Button 
+              variant={settings.ambientLight.color === '#606060' ? "default" : "outline"}
+              size="sm"
+              onClick={() => 
+                onUpdateSettings({
+                  ambientLight: { ...settings.ambientLight, color: '#606060' }
+                })
+              }
+            >
+              <Palette className="h-4 w-4 mr-2" />
+              Light
+            </Button>
           </div>
-
-          <div className="flex items-center justify-between pt-2">
-            <Label htmlFor="use-dynamic-lighting">Dynamic Lighting</Label>
-            <Switch
-              id="use-dynamic-lighting"
-              checked={settings.useDynamicLighting}
-              onCheckedChange={onToggleDynamicLighting}
-            />
+        </div>
+      </div>
+      
+      <div className="space-y-4">
+        <h3 className="text-lg font-medium">Light Position</h3>
+        
+        <div className="space-y-2">
+          <div className="flex justify-between items-center">
+            <Label htmlFor="lightX">X Position</Label>
+            <span className="text-sm text-gray-500">{settings.primaryLight.x.toFixed(1)}</span>
           </div>
-        </TabsContent>
-
-        <TabsContent value="ambient" className="space-y-4 pt-2">
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="ambient-light-intensity">Intensity</Label>
-              <span className="text-sm tabular-nums">{settings.ambientLight.intensity.toFixed(1)}</span>
-            </div>
-            <Slider
-              id="ambient-light-intensity"
-              value={[settings.ambientLight.intensity]}
-              min={0}
-              max={1}
-              step={0.05}
-              onValueChange={handleAmbientLightIntensity}
-            />
+          <Slider
+            id="lightX"
+            value={[settings.primaryLight.x]}
+            min={-5}
+            max={5}
+            step={0.1}
+            onValueChange={([value]) => 
+              onUpdateSettings({
+                primaryLight: { ...settings.primaryLight, x: value }
+              })
+            }
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <div className="flex justify-between items-center">
+            <Label htmlFor="lightY">Y Position</Label>
+            <span className="text-sm text-gray-500">{settings.primaryLight.y.toFixed(1)}</span>
           </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="ambient-light-color">Color</Label>
-            <div className="flex items-center gap-2">
-              <input
-                id="ambient-light-color"
-                type="color"
-                value={settings.ambientLight.color}
-                onChange={(e) => onUpdateSettings({
-                  ambientLight: {
-                    ...settings.ambientLight,
-                    color: e.target.value
-                  }
-                })}
-                className="w-10 h-10 rounded cursor-pointer"
-              />
-              <span className="text-sm">{settings.ambientLight.color}</span>
-            </div>
+          <Slider
+            id="lightY"
+            value={[settings.primaryLight.y]}
+            min={-5}
+            max={5}
+            step={0.1}
+            onValueChange={([value]) => 
+              onUpdateSettings({
+                primaryLight: { ...settings.primaryLight, y: value }
+              })
+            }
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <div className="flex justify-between items-center">
+            <Label htmlFor="lightZ">Z Position</Label>
+            <span className="text-sm text-gray-500">{settings.primaryLight.z.toFixed(1)}</span>
           </div>
-        </TabsContent>
-
-        <TabsContent value="environment" className="space-y-4 pt-2">
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="environment-intensity">Environment Intensity</Label>
-              <span className="text-sm tabular-nums">{settings.envMapIntensity.toFixed(1)}</span>
-            </div>
-            <Slider
-              id="environment-intensity"
-              value={[settings.envMapIntensity]}
-              min={0}
-              max={2}
-              step={0.1}
-              onValueChange={handleEnvMapIntensity}
-            />
-          </div>
-        </TabsContent>
-      </Tabs>
+          <Slider
+            id="lightZ"
+            value={[settings.primaryLight.z]}
+            min={-5}
+            max={5}
+            step={0.1}
+            onValueChange={([value]) => 
+              onUpdateSettings({
+                primaryLight: { ...settings.primaryLight, z: value }
+              })
+            }
+          />
+        </div>
+      </div>
     </div>
   );
 };
