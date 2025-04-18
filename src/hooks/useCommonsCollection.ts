@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -24,15 +23,30 @@ export const useCommonsCollection = (collectionId: string) => {
       
       if (error) {
         console.log(`Error checking collection ${collectionId}:`, error);
-        const exists = await checkCollectionExists(collectionId);
-        console.log(`Collection ${collectionId} exists:`, exists);
-        setCollectionExists(exists);
         
-        if (exists) {
+        try {
+          const exists = await checkCollectionExists(collectionId);
+          console.log(`Collection ${collectionId} exists check result:`, exists);
+          setCollectionExists(exists);
+          
+          if (exists) {
+            setResult({
+              success: true,
+              collectionId: collectionId,
+              message: "Commons Cards collection is available but couldn't load details"
+            });
+          } else {
+            setResult({
+              success: false,
+              message: "Commons Cards collection does not exist"
+            });
+          }
+        } catch (fallbackErr) {
+          console.error("Error in fallback existence check:", fallbackErr);
+          setCollectionExists(false);
           setResult({
-            success: true,
-            collectionId: collectionId,
-            message: "Commons Cards collection is available but couldn't load details"
+            success: false,
+            error: "Unable to connect to database. Please check your connection."
           });
         }
       } else if (data) {
@@ -45,10 +59,18 @@ export const useCommonsCollection = (collectionId: string) => {
         });
       } else {
         setCollectionExists(false);
+        setResult({
+          success: false,
+          message: "Commons Cards collection does not exist"
+        });
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error checking collection existence:", err);
       setCollectionExists(false);
+      setResult({
+        success: false,
+        error: err.message || "Unable to connect to database"
+      });
     } finally {
       setIsCheckingExistence(false);
     }
@@ -61,14 +83,19 @@ export const useCommonsCollection = (collectionId: string) => {
     try {
       console.log("Starting Commons Cards generation request...");
       
-      const { data, error } = await supabase.functions.invoke('populate-cards', {
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Request timed out after 15 seconds')), 15000);
+      });
+      
+      const fetchPromise = supabase.functions.invoke('populate-cards', {
         body: { 
           timestamp: new Date().toISOString(),
           collectionId: collectionId
         }
       });
       
-      console.log("Edge function response:", { data, error });
+      const response = await Promise.race([fetchPromise, timeoutPromise]);
+      const { data, error } = response as any;
       
       if (error) {
         console.error('Error generating Commons Cards:', error);
@@ -96,17 +123,20 @@ export const useCommonsCollection = (collectionId: string) => {
         collectionId: data.collectionId || collectionId
       });
       
-      // Refresh collection status
       setTimeout(async () => {
-        const { data: collectionData } = await collectionOperations.getCollection(collectionId);
-        if (collectionData) {
-          setCollectionData(collectionData);
-          setCollectionExists(true);
+        try {
+          const { data: collectionData } = await collectionOperations.getCollection(collectionId);
+          if (collectionData) {
+            setCollectionData(collectionData);
+            setCollectionExists(true);
+          }
+        } catch (refreshErr) {
+          console.error('Error refreshing collection data:', refreshErr);
         }
       }, 1000);
     } catch (err: any) {
       console.error('Unexpected error:', err);
-      toast.error('An unexpected error occurred');
+      toast.error(err.message || 'An unexpected error occurred');
       setResult({ 
         success: false, 
         error: err.message || 'Connection error or timeout occurred' 
@@ -117,7 +147,9 @@ export const useCommonsCollection = (collectionId: string) => {
   };
 
   useEffect(() => {
-    checkCollection();
+    if (collectionId) {
+      checkCollection();
+    }
   }, [collectionId]);
 
   return {

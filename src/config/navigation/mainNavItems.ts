@@ -5,7 +5,7 @@ import {
   Layers, 
   Users, 
   Building,
-  Basketball
+  Trophy
 } from 'lucide-react';
 import { NavigationItem } from './types';
 
@@ -26,7 +26,7 @@ export const mainNavItems: NavigationItem[] = [
   {
     title: 'Basketball Cards',
     path: '/basketball-cards',
-    icon: Basketball,
+    icon: Trophy,
     description: 'Basketball player card collection'
   },
   { 
