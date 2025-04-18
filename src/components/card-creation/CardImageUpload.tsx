@@ -3,14 +3,18 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Upload, Image as ImageIcon, X } from 'lucide-react';
 import { toast } from 'sonner';
-import { supabase } from '@/lib/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
+import { v4 as uuidv4 } from 'uuid';
 
 interface CardImageUploadProps {
   onImageUploaded: (url: string) => void;
   className?: string;
 }
 
-const CardImageUpload: React.FC<CardImageUploadProps> = ({ onImageUploaded, className }) => {
+const CardImageUpload: React.FC<CardImageUploadProps> = ({ 
+  onImageUploaded, 
+  className 
+}) => {
   const [isUploading, setIsUploading] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -44,7 +48,7 @@ const CardImageUpload: React.FC<CardImageUploadProps> = ({ onImageUploaded, clas
 
       // Generate a unique filename
       const fileExt = file.name.split('.').pop();
-      const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const fileName = `${uuidv4()}.${fileExt}`;
       const filePath = `uploads/${fileName}`;
 
       // Upload to Supabase Storage
