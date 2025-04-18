@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PageLayout from '@/components/navigation/PageLayout';
@@ -11,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { useCards } from '@/hooks/useCards';
+import FullscreenViewer from '@/components/gallery/FullscreenViewer';
 
 const Gallery = () => {
   const { isMobile } = useMobileOptimization();
@@ -22,11 +22,9 @@ const Gallery = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   
-  // Use the useCards hook to fetch card data
   const { cards, isLoading, fetchCards } = useCards();
 
   useEffect(() => {
-    // Ensure we fetch cards when the component mounts
     fetchCards();
     
     const hasSeenTutorial = localStorage.getItem('hasSeenGalleryTutorial');
