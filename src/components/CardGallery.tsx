@@ -1,11 +1,11 @@
-
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import { useMobileOptimization } from '@/hooks/useMobileOptimization';
 import { Card } from '@/lib/types';
-import { useCardOperations } from '@/hooks/useCardOperations';
+import { RefreshCw } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface CardGalleryProps {
   className?: string;
@@ -32,24 +32,24 @@ const CardGallery: React.FC<CardGalleryProps> = ({
 }) => {
   const navigate = useNavigate();
   const [viewMode, setViewMode] = useState(initialViewMode);
-  const cardOperations = useCardOperations();
-  
-  // Use the provided cards directly without depending on CardContext
-  const cards = propCards || [];
-  const isLoading = propIsLoading;
   const { isMobile } = useMobileOptimization();
   
+  // Use the provided cards directly
+  const cards = propCards || [];
+  const isLoading = propIsLoading;
+  
   // Fallback image to use when card image is not available
-  const fallbackImage = 'https://images.unsplash.com/photo-1518770660439-4636190af475';
+  const fallbackImage = '/placeholder-card.png';
 
   // Filter cards based on search query
   const filteredCards = useMemo(() => {
-    if (!searchQuery) return cards;
+    if (!searchQuery || !cards) return cards;
+    
     const lowerQuery = searchQuery.toLowerCase();
     return cards.filter(card => 
-      card.title?.toLowerCase().includes(lowerQuery) || 
-      card.description?.toLowerCase().includes(lowerQuery) ||
-      card.tags?.some(tag => tag.toLowerCase().includes(lowerQuery))
+      (card.title && card.title.toLowerCase().includes(lowerQuery)) || 
+      (card.description && card.description.toLowerCase().includes(lowerQuery)) ||
+      (card.tags && card.tags.some(tag => tag.toLowerCase().includes(lowerQuery)))
     );
   }, [cards, searchQuery]);
 
@@ -62,7 +62,27 @@ const CardGallery: React.FC<CardGalleryProps> = ({
     }
   };
 
-  console.log('CardGallery received cards:', cards);
+  // Handle empty state
+  if (cards.length === 0 && !isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center p-8 text-center">
+        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+          <RefreshCw className="h-8 w-8 text-gray-400" />
+        </div>
+        <h3 className="text-lg font-medium mb-2">No cards found</h3>
+        <p className="text-muted-foreground mb-4">
+          {searchQuery 
+            ? "Try adjusting your search terms" 
+            : "Your collection is empty. Create your first card to get started."}
+        </p>
+        <div className="flex gap-2">
+          <Button onClick={() => navigate('/cards/create')} variant="default">
+            Create a Card
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={cn("", className)}>
@@ -79,7 +99,7 @@ const CardGallery: React.FC<CardGalleryProps> = ({
             "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4" : 
             "space-y-4"
           }>
-            {filteredCards.length > 0 ? filteredCards.map(card => (
+            {filteredCards.map(card => (
               <div key={card.id} className={viewMode === 'list' ? "bg-background rounded-lg shadow" : ""}>
                 {viewMode === 'grid' ? (
                   <div 
@@ -87,7 +107,6 @@ const CardGallery: React.FC<CardGalleryProps> = ({
                     onClick={() => handleCardItemClick(card.id)}
                   >
                     <div className="aspect-[2.5/3.5] rounded-lg overflow-hidden mb-2 bg-gray-100">
-                      {/* Add explicit check for imageUrl and fallback */}
                       <img 
                         src={card.imageUrl || fallbackImage}
                         alt={card.title || 'Card image'}
@@ -110,7 +129,6 @@ const CardGallery: React.FC<CardGalleryProps> = ({
                 ) : (
                   <div className="flex items-center p-3 gap-4 cursor-pointer" onClick={() => handleCardItemClick(card.id)}>
                     <div className="w-16 h-24 bg-gray-100">
-                      {/* Add explicit check for imageUrl and fallback for list view too */}
                       <img 
                         src={card.imageUrl || fallbackImage}
                         alt={card.title || 'Card thumbnail'}
@@ -135,17 +153,7 @@ const CardGallery: React.FC<CardGalleryProps> = ({
                   </div>
                 )}
               </div>
-            )) : (
-              <div className="col-span-full text-center py-8">
-                <p className="text-muted-foreground">No cards found matching your criteria</p>
-              </div>
-            )}
-          </div>
-        )}
-        
-        {filteredCards.length === 0 && !isLoading && (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">No cards found</p>
+            ))}
           </div>
         )}
       </ErrorBoundary>

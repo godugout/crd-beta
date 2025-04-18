@@ -1,16 +1,16 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PageLayout from '@/components/navigation/PageLayout';
 import CardGallery from '@/components/CardGallery';
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import { useMobileOptimization } from '@/hooks/useMobileOptimization';
-import useGalleryCards from '@/components/gallery/useGalleryCards';
-import FullscreenViewer from '@/components/gallery/FullscreenViewer';
 import { PlusCircle, Info } from 'lucide-react';
 import { Card } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { useCards } from '@/hooks/useCards';
 
 const Gallery = () => {
   const { isMobile } = useMobileOptimization();
@@ -22,17 +22,18 @@ const Gallery = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   
-  const {
-    displayCards,
-    isLoading
-  } = useGalleryCards();
+  // Use the useCards hook to fetch card data
+  const { cards, isLoading, fetchCards } = useCards();
 
   useEffect(() => {
+    // Ensure we fetch cards when the component mounts
+    fetchCards();
+    
     const hasSeenTutorial = localStorage.getItem('hasSeenGalleryTutorial');
     if (!hasSeenTutorial) {
       setShowTutorial(true);
     }
-  }, []);
+  }, [fetchCards]);
 
   const completeTutorial = () => {
     localStorage.setItem('hasSeenGalleryTutorial', 'true');
@@ -74,6 +75,14 @@ const Gallery = () => {
     );
   }
   
+  const handleRefresh = async () => {
+    await fetchCards();
+    toast({
+      title: "Gallery refreshed",
+      description: "Your card collection has been refreshed",
+    });
+  };
+  
   return (
     <PageLayout
       title="Card Gallery"
@@ -96,22 +105,27 @@ const Gallery = () => {
     >
       <div className="container mx-auto max-w-6xl px-4">        
         <ErrorBoundary>
-          {!isLoading && displayCards?.length === 0 && (
+          {!isLoading && (!cards || cards.length === 0) && (
             <div className="py-16 text-center">
               <h2 className="text-2xl font-bold mb-4">Your gallery is empty</h2>
               <p className="text-gray-400 mb-8">Create your first card to get started with your collection</p>
-              <Button onClick={() => navigate('/cards/create')}>
-                <PlusCircle className="mr-2 h-5 w-5" />
-                Create Your First Card
-              </Button>
+              <div className="flex flex-wrap gap-3 justify-center">
+                <Button onClick={() => navigate('/cards/create')}>
+                  <PlusCircle className="mr-2 h-5 w-5" />
+                  Create Your First Card
+                </Button>
+                <Button variant="outline" onClick={handleRefresh}>
+                  Refresh Gallery
+                </Button>
+              </div>
             </div>
           )}
           
-          {(displayCards?.length > 0 || isLoading) && (
+          {(cards?.length > 0 || isLoading) && (
             <CardGallery 
               viewMode={viewMode} 
               onCardClick={handleCardClick} 
-              cards={(displayCards || []) as Card[]}
+              cards={(cards || []) as Card[]}
               isLoading={isLoading}
               searchQuery={searchQuery}
             />
