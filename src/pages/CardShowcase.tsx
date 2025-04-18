@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import PageLayout from '@/components/navigation/PageLayout';
 import CardGrid from '@/components/cards/CardGrid';
@@ -16,7 +17,7 @@ const basketballCards: Card[] = sampleCards.map(card => ({
   title: card.title,
   description: card.description,
   imageUrl: card.imageUrl,
-  thumbnailUrl: card.thumbnailUrl,
+  thumbnailUrl: card.thumbnailUrl || card.imageUrl,
   tags: card.tags || [],
   userId: card.userId,
   effects: card.effects || [],

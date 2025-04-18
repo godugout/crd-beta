@@ -16,7 +16,7 @@ const BasketballArtCollection: React.FC = () => {
     title: card.title,
     description: card.description,
     imageUrl: card.imageUrl,
-    thumbnailUrl: card.thumbnailUrl,
+    thumbnailUrl: card.thumbnailUrl || card.imageUrl,
     tags: card.tags || [],
     userId: card.userId,
     effects: card.effects || [],
