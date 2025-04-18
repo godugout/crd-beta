@@ -30,15 +30,32 @@ const CardModel = ({
   materialProps = { roughness: 0.1, metalness: 0.2 }
 }) => {
   const { scene } = useThree();
-  const meshRef = useRef<THREE.Mesh>();
+  const meshRef = useRef<THREE.Mesh>(null);
   
-  // Use single texture objects instead of arrays
+  // Load textures using useTexture
   const frontTextureResult = useTexture(card.imageUrl || '/placeholder-card.jpg');
   const backTextureResult = useTexture('/card-back-texture.jpg');
   
-  // Ensure we have single texture objects
-  const frontTexture = Array.isArray(frontTextureResult) ? frontTextureResult[0] : frontTextureResult;
-  const backTexture = Array.isArray(backTextureResult) ? backTextureResult[0] : backTextureResult;
+  // Handle the textures, ensuring we get a single Texture object
+  // This handles the case where useTexture returns either a Texture or an object with texture properties
+  const getFinalTexture = (textureResult: THREE.Texture | Record<string, THREE.Texture>): THREE.Texture => {
+    if (textureResult instanceof THREE.Texture) {
+      return textureResult;
+    } else if (typeof textureResult === 'object' && textureResult !== null) {
+      // If it's an object with textures as values, return the first one
+      const firstTexture = Object.values(textureResult)[0];
+      if (firstTexture instanceof THREE.Texture) {
+        return firstTexture;
+      }
+    }
+    // Fallback to a new empty texture if we can't get one
+    console.error('Could not extract valid texture from useTexture result');
+    return new THREE.Texture();
+  };
+  
+  // Extract the actual textures
+  const frontTexture = getFinalTexture(frontTextureResult);
+  const backTexture = getFinalTexture(backTextureResult);
   
   // Configure PBR materials
   const frontMaterial = new THREE.MeshPhysicalMaterial({
