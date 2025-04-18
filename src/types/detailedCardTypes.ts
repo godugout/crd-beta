@@ -1,5 +1,5 @@
 
-import { Card, DesignMetadata, CardRarity } from '@/lib/types/cardTypes';
+import { Card, DesignMetadata, CardRarity, CardStats } from '@/lib/types/cardTypes';
 
 /**
  * Card type with required fields for detail views
@@ -18,13 +18,17 @@ export interface DetailedViewCard {
   userId: string;
   effects: string[];
   isFavorite: boolean;
-  rarity: CardRarity; // Use CardRarity type instead of string
+  rarity: CardRarity;
   designMetadata: DesignMetadata;
   
-  // Add these baseball card properties
+  // Add baseball card properties
   player?: string;
   team?: string;
   year?: string;
+  cardNumber?: string;
+  set?: string;
+  cardType?: string;
+  stats?: CardStats;
 }
 
 /**
@@ -72,9 +76,13 @@ export function ensureDetailedViewCard(card: Card): DetailedViewCard {
         series: 'base',
       },
     },
-    // Add optional baseball card properties
+    // Copy optional baseball card properties
     player: card.player,
     team: card.team,
     year: card.year,
+    cardNumber: card.cardNumber,
+    set: card.set,
+    cardType: card.cardType,
+    stats: card.stats,
   };
 }

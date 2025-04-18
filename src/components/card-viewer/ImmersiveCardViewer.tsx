@@ -4,7 +4,8 @@ import { Card } from '@/lib/types/cardTypes';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera, Environment, useTexture } from '@react-three/drei';
 import { DEFAULT_DESIGN_METADATA, FALLBACK_IMAGE_URL } from '@/lib/utils/cardDefaults';
-import { toast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/use-toast';
+import * as THREE from 'three';
 
 interface ImmersiveCardViewerProps {
   card: Card;
@@ -21,15 +22,15 @@ const Card3DModel = ({
   activeEffects,
   effectIntensities = {}
 }) => {
-  const meshRef = useRef();
+  const meshRef = useRef<THREE.Mesh>(null);
   const [hovered, setHovered] = useState(false);
   
   // Load textures
-  const frontTexture = useTexture(frontTextureUrl);
-  const backTexture = useTexture(backTextureUrl || '/card-back-texture.jpg');
+  const frontTexture = useTexture(frontTextureUrl) as THREE.Texture;
+  const backTexture = useTexture(backTextureUrl || '/card-back-texture.jpg') as THREE.Texture;
 
   // Set PBR material properties
-  const materialProps = {
+  const materialProps: THREE.MeshPhysicalMaterialParameters = {
     roughness: 0.2,
     metalness: 0.8,
     envMapIntensity: 1.2,
@@ -43,12 +44,13 @@ const Card3DModel = ({
     if (!meshRef.current) return;
     
     // Apply effect-specific properties
-    let modifiedProps = { ...materialProps };
+    let modifiedProps: THREE.MeshPhysicalMaterialParameters = { ...materialProps };
     
     if (activeEffects.includes('Holographic')) {
       modifiedProps.metalness = 0.9;
       modifiedProps.clearcoat = 1.5;
       modifiedProps.clearcoatRoughness = 0.1;
+      // These properties require THREE.MeshPhysicalMaterialParameters
       modifiedProps.iridescence = 0.8;
       modifiedProps.iridescenceIOR = 1.4;
     }
@@ -60,6 +62,7 @@ const Card3DModel = ({
     }
     
     if (activeEffects.includes('Refractor')) {
+      // These properties require THREE.MeshPhysicalMaterialParameters
       modifiedProps.transmission = 0.1;
       modifiedProps.thickness = 0.05;
       modifiedProps.clearcoat = 1;
@@ -68,8 +71,8 @@ const Card3DModel = ({
 
     // Apply modifications to mesh material
     Object.entries(modifiedProps).forEach(([key, value]) => {
-      if (meshRef.current.material) {
-        meshRef.current.material[key] = value;
+      if (meshRef.current && meshRef.current.material) {
+        (meshRef.current.material as any)[key] = value;
       }
     });
   }, [activeEffects, effectIntensities]);

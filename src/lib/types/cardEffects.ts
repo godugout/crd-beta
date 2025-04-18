@@ -43,7 +43,8 @@ export interface CardEffectsResult {
   toggleEffect: (cardId: string, effect: string) => void;
   clearEffects: (cardId: string) => void;
   setCardEffects: (cardId: string, effects: string[]) => void;
-  setActiveEffects?: (effects: string[]) => void;
+  activeEffects: string[];
+  setActiveEffects: (effects: string[]) => void;
 }
 
 /**

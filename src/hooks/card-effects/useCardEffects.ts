@@ -69,6 +69,7 @@ const useCardEffects = (): CardEffectsResult => {
     toggleEffect,
     clearEffects,
     setCardEffects,
+    activeEffects,
     setActiveEffects
   };
 };
