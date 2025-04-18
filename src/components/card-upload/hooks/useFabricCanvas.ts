@@ -1,7 +1,8 @@
 
 import { useEffect, useRef } from 'react';
 import { fabric } from 'fabric';
-import { EnhancedCropBoxProps, MemorabiliaType } from '../cardDetection';
+import { EnhancedCropBoxProps } from '../CropBox';
+import { MemorabiliaType } from '../cardDetection';
 import { ImageData } from './useCropState';
 import { useEventHandlers } from './fabric/useEventHandlers';
 import { useBackgroundImage } from './fabric/useBackgroundImage';

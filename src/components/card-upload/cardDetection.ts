@@ -1,9 +1,10 @@
+
 // Define all memorabilia types
 export type MemorabiliaType = 'card' | 'ticket' | 'program' | 'autograph' | 'face' | 'unknown' | 'group';
 
 // Enhanced version with required memorabiliaType field for cropped items
 export interface EnhancedCropBoxProps {
-  id: number;
+  id: string; // Changed from number to string to match CropBox.ts
   x: number;
   y: number;
   width: number;
@@ -78,7 +79,7 @@ export async function detectCardsInImage(
     
     // Create a centered crop box with the calculated dimensions
     detectedItems.push({
-      id: 1,
+      id: crypto.randomUUID(), // Changed from number to string
       x: (width - cardDimensions.width) / 2,
       y: (height - cardDimensions.height) / 2,
       width: cardDimensions.width,
@@ -90,13 +91,12 @@ export async function detectCardsInImage(
     });
   }
   
-  // Other detection types follow the existing pattern
   // If ticket detection is enabled
   if (detectionTypes.includes('ticket')) {
     // Look for rectangular shapes with ticket-like aspect ratio
     // For now, we'll simulate ticket detection with a fixed size and position
     detectedItems.push({
-      id: 2,
+      id: crypto.randomUUID(), // Changed from number to string
       x: width * 0.1,
       y: height * 0.1,
       width: width * 0.3,
@@ -113,7 +113,7 @@ export async function detectCardsInImage(
     // Look for rectangular shapes with program-like aspect ratio
     // For now, we'll simulate program detection with a fixed size and position
     detectedItems.push({
-      id: 3,
+      id: crypto.randomUUID(), // Changed from number to string
       x: width * 0.6,
       y: height * 0.6,
       width: width * 0.3,
@@ -130,7 +130,7 @@ export async function detectCardsInImage(
     // Look for small, irregular shapes that might be autographs
     // For now, we'll simulate autograph detection with a fixed size and position
     detectedItems.push({
-      id: 4,
+      id: crypto.randomUUID(), // Changed from number to string
       x: width * 0.2,
       y: height * 0.7,
       width: width * 0.2,
@@ -147,7 +147,7 @@ export async function detectCardsInImage(
     // Look for circular shapes that might be faces
     // For now, we'll simulate face detection with a fixed size and position
     detectedItems.push({
-      id: 5,
+      id: crypto.randomUUID(), // Changed from number to string
       x: width * 0.7,
       y: height * 0.1,
       width: width * 0.2,
@@ -164,7 +164,7 @@ export async function detectCardsInImage(
     const cardDimensions = calculateCardDimensions(width * 0.5, height * 0.5);
     
     detectedItems.push({
-      id: 1,
+      id: crypto.randomUUID(), // Changed from number to string
       x: (width - cardDimensions.width) / 2,
       y: (height - cardDimensions.height) / 2,
       width: cardDimensions.width,

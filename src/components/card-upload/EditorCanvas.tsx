@@ -1,6 +1,7 @@
 
 import React from 'react';
-import { EnhancedCropBoxProps, MemorabiliaType } from './cardDetection';
+import { EnhancedCropBoxProps } from './CropBox';
+import { MemorabiliaType } from './cardDetection';
 import { ImageData } from './hooks/useCropState';
 import { useFabricCanvas } from './hooks/useFabricCanvas';
 
