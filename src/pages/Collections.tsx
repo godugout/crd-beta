@@ -1,12 +1,12 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import PageLayout from '@/components/navigation/PageLayout';
 import { useCards } from '@/context/CardContext';
 import { Button } from '@/components/ui/button';
 import { Container } from '@/components/ui/container';
-import { PlusCircle, Filter, Layout, ListFilter } from 'lucide-react';
+import { PlusCircle, Filter, Layout, ListFilter, Globe } from 'lucide-react';
 import CollectionGrid from '@/components/collections/CollectionGrid';
-import ContentTypeNavigation from '@/components/navigation/ContentTypeNavigation';
 import { collectionsNavItems } from '@/config/navigation';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
@@ -33,52 +33,50 @@ const Collections = () => {
       }}
     >
       <Container className="py-6">
-        <div className="flex flex-col space-y-4">
-          <div className="flex justify-end items-center gap-3">
-            <div className="flex p-1 bg-[var(--bg-tertiary)] rounded-lg overflow-hidden">
-              <button
-                onClick={() => setViewMode('grid')}
-                className={`p-2 rounded-md transition-colors ${viewMode === 'grid' 
-                  ? 'bg-[var(--bg-elevated)] text-[var(--text-primary)]' 
-                  : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'}`}
-              >
-                <Layout size={16} />
-              </button>
-              <button
-                onClick={() => setViewMode('list')}
-                className={`p-2 rounded-md transition-colors ${viewMode === 'list' 
-                  ? 'bg-[var(--bg-elevated)] text-[var(--text-primary)]' 
-                  : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'}`}
-              >
-                <ListFilter size={16} />
-              </button>
-            </div>
-            
-            <Button variant="soft" size="sm">
-              <Filter className="h-4 w-4 mr-2" />
-              Filter
-            </Button>
+        <div className="flex items-center gap-3 mb-4">
+          <div className="flex p-1 bg-[var(--bg-tertiary)] rounded-lg overflow-hidden">
+            <button
+              onClick={() => setViewMode('grid')}
+              className={`p-2 rounded-md transition-colors ${viewMode === 'grid' 
+                ? 'bg-[var(--bg-elevated)] text-[var(--text-primary)]' 
+                : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'}`}
+            >
+              <Layout size={16} />
+            </button>
+            <button
+              onClick={() => setViewMode('list')}
+              className={`p-2 rounded-md transition-colors ${viewMode === 'list' 
+                ? 'bg-[var(--bg-elevated)] text-[var(--text-primary)]' 
+                : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'}`}
+            >
+              <ListFilter size={16} />
+            </button>
           </div>
           
-          <div className="backdrop-blur-md bg-[var(--bg-secondary)]/30 p-1 rounded-xl border border-[var(--border-primary)]">
-            <Tabs defaultValue="all" className="w-full">
-              <TabsList className="grid grid-cols-3 md:grid-cols-6 bg-transparent h-auto p-0 w-full">
-                {navigationItems.map((item, i) => (
-                  <TabsTrigger 
-                    key={i} 
-                    value={item.path} 
-                    asChild
-                    className="data-[state=active]:bg-[var(--brand-primary)]/10 data-[state=active]:text-[var(--brand-primary)] rounded-lg py-2.5 h-auto"
-                  >
-                    <Link to={item.path} className="flex items-center gap-2 w-full">
-                      {item.icon}
-                      <span className="hidden md:inline">{item.label}</span>
-                    </Link>
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-            </Tabs>
-          </div>
+          <Button variant="soft" size="sm">
+            <Filter className="h-4 w-4 mr-2" />
+            Filter
+          </Button>
+        </div>
+          
+        <div className="backdrop-blur-md bg-[var(--bg-secondary)]/30 p-1 rounded-xl border border-[var(--border-primary)]">
+          <Tabs defaultValue="all" className="w-full">
+            <TabsList className="grid grid-cols-3 md:grid-cols-6 bg-transparent h-auto p-0 w-full">
+              {navigationItems.map((item, i) => (
+                <TabsTrigger 
+                  key={i} 
+                  value={item.path} 
+                  asChild
+                  className="data-[state=active]:bg-[var(--brand-primary)]/10 data-[state=active]:text-[var(--brand-primary)] rounded-lg py-2.5 h-auto"
+                >
+                  <Link to={item.path} className="flex items-center gap-2 w-full">
+                    {item.icon}
+                    <span className="hidden md:inline">{item.label}</span>
+                  </Link>
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
         </div>
         
         {collections.length === 0 && !isLoading && (

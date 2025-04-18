@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
@@ -5,6 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Card } from '@/lib/types/cardTypes';
 import { EnhancedCard, Series, Deck } from '@/lib/types/enhancedCardTypes';
 import { sampleCards } from '@/data/sampleCards';
+import { DEFAULT_DESIGN_METADATA } from '@/lib/utils/cardDefaults';
 
 // Convert sample cards to enhanced cards
 const enhancedSampleCards: EnhancedCard[] = sampleCards.map(card => ({
@@ -19,6 +21,7 @@ const enhancedSampleCards: EnhancedCard[] = sampleCards.map(card => ({
   qrCodeData: `https://example.com/card/${card.id}`,
   hotspots: [],
   effects: card.effects || [],
+  designMetadata: card.designMetadata || DEFAULT_DESIGN_METADATA,
   marketData: {
     price: Math.floor(Math.random() * 100) + 10,
     currency: 'USD',
