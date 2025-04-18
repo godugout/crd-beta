@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import PageLayout from '@/components/navigation/PageLayout';
 import CardGrid from '@/components/cards/CardGrid';
@@ -23,7 +22,10 @@ const basketballCards: Card[] = sampleCards.map(card => ({
   effects: card.effects || [],
   createdAt: card.createdAt,
   updatedAt: card.updatedAt,
-  designMetadata: card.designMetadata || DEFAULT_DESIGN_METADATA
+  designMetadata: card.designMetadata || DEFAULT_DESIGN_METADATA,
+  player: card.player,
+  team: card.team,
+  year: card.year
 }));
 
 const CardShowcase: React.FC = () => {

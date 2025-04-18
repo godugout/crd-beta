@@ -22,7 +22,10 @@ const BasketballArtCollection: React.FC = () => {
     effects: card.effects || [],
     createdAt: card.createdAt,
     updatedAt: card.updatedAt,
-    designMetadata: card.designMetadata || DEFAULT_DESIGN_METADATA
+    designMetadata: card.designMetadata || DEFAULT_DESIGN_METADATA,
+    player: card.player,
+    team: card.team,
+    year: card.year
   }));
 
   return (
