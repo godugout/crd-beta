@@ -26,11 +26,11 @@ const Card3DModel = ({
   const [hovered, setHovered] = useState(false);
   
   // Load textures
-  const frontTexture = useTexture(frontTextureUrl) as THREE.Texture;
-  const backTexture = useTexture(backTextureUrl || '/card-back-texture.jpg') as THREE.Texture;
+  const frontTexture = useTexture(frontTextureUrl);
+  const backTexture = useTexture(backTextureUrl || '/card-back-texture.jpg');
 
   // Set PBR material properties
-  const materialProps: THREE.MeshPhysicalMaterialParameters = {
+  const materialProps = {
     roughness: 0.2,
     metalness: 0.8,
     envMapIntensity: 1.2,
@@ -44,15 +44,18 @@ const Card3DModel = ({
     if (!meshRef.current) return;
     
     // Apply effect-specific properties
-    let modifiedProps: THREE.MeshPhysicalMaterialParameters = { ...materialProps };
+    let modifiedProps: any = { ...materialProps };
     
     if (activeEffects.includes('Holographic')) {
       modifiedProps.metalness = 0.9;
       modifiedProps.clearcoat = 1.5;
       modifiedProps.clearcoatRoughness = 0.1;
-      // These properties require THREE.MeshPhysicalMaterialParameters
-      modifiedProps.iridescence = 0.8;
-      modifiedProps.iridescenceIOR = 1.4;
+      
+      // These properties require THREE.MeshPhysicalMaterial
+      if (meshRef.current.material instanceof THREE.MeshPhysicalMaterial) {
+        meshRef.current.material.iridescence = 0.8;
+        meshRef.current.material.iridescenceIOR = 1.4;
+      }
     }
     
     if (activeEffects.includes('Shimmer')) {
@@ -62,19 +65,23 @@ const Card3DModel = ({
     }
     
     if (activeEffects.includes('Refractor')) {
-      // These properties require THREE.MeshPhysicalMaterialParameters
-      modifiedProps.transmission = 0.1;
-      modifiedProps.thickness = 0.05;
+      // These properties require THREE.MeshPhysicalMaterial
+      if (meshRef.current.material instanceof THREE.MeshPhysicalMaterial) {
+        meshRef.current.material.transmission = 0.1;
+        meshRef.current.material.thickness = 0.05;
+      }
       modifiedProps.clearcoat = 1;
       modifiedProps.clearcoatRoughness = 0.1;
     }
 
     // Apply modifications to mesh material
-    Object.entries(modifiedProps).forEach(([key, value]) => {
-      if (meshRef.current && meshRef.current.material) {
-        (meshRef.current.material as any)[key] = value;
-      }
-    });
+    if (meshRef.current && meshRef.current.material) {
+      Object.entries(modifiedProps).forEach(([key, value]) => {
+        if (key in meshRef.current!.material) {
+          (meshRef.current!.material as any)[key] = value;
+        }
+      });
+    }
   }, [activeEffects, effectIntensities]);
 
   // Animation effect
@@ -118,20 +125,21 @@ const Card3DModel = ({
       <planeGeometry args={[2.5, 3.5, 20, 20]} />
       
       {/* Front material */}
-      <meshPhysicalMaterial
-        map={frontTexture}
-        attachArray="material"
-        side={0}
-        {...materialProps}
+      <meshPhysicalMaterial 
+        map={frontTexture} 
+        side={THREE.FrontSide} 
+        {...materialProps} 
       />
       
-      {/* Back material */}
-      <meshPhysicalMaterial
-        map={backTexture}
-        attachArray="material"
-        side={1}
-        {...materialProps}
-      />
+      {/* Back material (added as a separate mesh to avoid material issues) */}
+      <mesh position={[0, 0, -0.01]} rotation={[0, Math.PI, 0]}>
+        <planeGeometry args={[2.5, 3.5, 1, 1]} />
+        <meshPhysicalMaterial 
+          map={backTexture} 
+          side={THREE.FrontSide} 
+          {...materialProps} 
+        />
+      </mesh>
     </mesh>
   );
 };
