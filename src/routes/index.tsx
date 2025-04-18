@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { RouteObject } from 'react-router-dom';
 import HomePage from '@/pages/HomePage';
@@ -31,12 +30,55 @@ const DeckBuilderPage = React.lazy(() => import('@/pages/DeckBuilderPage'));
 const SeriesManagerPage = React.lazy(() => import('@/pages/SeriesManagerPage'));
 const DeckViewPage = React.lazy(() => import('@/pages/DeckViewPage'));
 const SeriesViewPage = React.lazy(() => import('@/pages/SeriesViewPage'));
+const CardCreator = React.lazy(() => import('@/pages/CardCreator'));
+const CardDetectorPage = React.lazy(() => import('@/pages/CardDetectorPage'));
+const TeamPage = React.lazy(() => import('@/pages/TeamPage'));
 
 // Main application routes
 const rootRoutes: RouteObject[] = [
   {
     path: "/",
     element: <HomePage />
+  },
+  {
+    path: "/gallery",
+    element: <CardGallery />
+  },
+  {
+    path: "/cards/create",
+    element: <CardCreator />
+  },
+  {
+    path: "/collections",
+    element: <Collections />
+  },
+  {
+    path: "/packs",
+    element: <CollectionGallery />
+  },
+  {
+    path: "/labs",
+    element: <DeckViewPage />
+  },
+  {
+    path: "/features/game-day",
+    element: <ImmersiveCardViewerPage />
+  },
+  {
+    path: "/teams",
+    element: <TownCommunityHub />
+  },
+  {
+    path: "/teams/:teamId",
+    element: <TeamPage />
+  },
+  {
+    path: "/community",
+    element: <TownCommunityHub />
+  },
+  {
+    path: "/detector",
+    element: <CardDetectorPage />
   },
   {
     path: "/cards",
@@ -59,18 +101,6 @@ const rootRoutes: RouteObject[] = [
     element: <ImmersiveCardViewerPage />
   },
   {
-    path: "/collections",
-    element: <Collections />
-  },
-  {
-    path: "/community",
-    element: <TownCommunityHub />
-  },
-  {
-    path: "/teams",
-    element: <TownCommunityHub />
-  },
-  {
     path: "*",
     element: <NotFound />
   }
@@ -78,13 +108,13 @@ const rootRoutes: RouteObject[] = [
 
 export const routes: RouteObject[] = [
   ...rootRoutes,
-  ...mainRoutes.filter(route => route.path !== "/" && route.path !== "*" && route.path !== "/community"), // Avoid duplicates
+  ...mainRoutes.filter(route => route.path !== "/" && route.path !== "*" && route.path !== "/community"),
   ...teamRoutes,
   ...townRoutes,
   ...baseballRoutes,
   ...featureRoutes,
-  ...cardRoutes.filter(route => route.path !== "/cards" && route.path !== "/cards/:id"), // Avoid duplicates
-  ...collectionRoutes.filter(route => route.path !== "/collections"), // Avoid duplicates
+  ...cardRoutes.filter(route => route.path !== "/cards" && route.path !== "/cards/:id"),
+  ...collectionRoutes.filter(route => route.path !== "/collections"),
   
   // Deck routes
   {

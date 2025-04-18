@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import PageLayout from '@/components/navigation/PageLayout';
@@ -22,7 +21,7 @@ const Home = () => {
               <Link to="/cards/create">Create New Card</Link>
             </Button>
             <Button asChild size="lg" variant="outline">
-              <Link to="/cards">Browse Gallery</Link>
+              <Link to="/gallery">Browse Gallery</Link>
             </Button>
           </div>
         </div>
@@ -35,7 +34,7 @@ const Home = () => {
             <h2 className="text-xl font-bold mb-3">Card Gallery</h2>
             <p className="mb-4 text-muted-foreground">Browse your collection of cards and memories</p>
             <Button asChild variant="outline" className="w-full">
-              <Link to="/cards">View Cards</Link>
+              <Link to="/gallery">View Cards</Link>
             </Button>
           </div>
           
@@ -62,7 +61,6 @@ const Home = () => {
           </div>
         </div>
 
-        {/* Featured sections */}
         <div className="mt-16">
           <h2 className="text-2xl font-bold mb-6 text-center">Featured Experiences</h2>
           
@@ -76,7 +74,7 @@ const Home = () => {
                 Enhance your experience during live games with real-time updates and card creation
               </p>
               <Button asChild>
-                <Link to="/game-day">Try Game Day Mode</Link>
+                <Link to="/features/game-day">Try Game Day Mode</Link>
               </Button>
             </div>
             
@@ -95,7 +93,6 @@ const Home = () => {
           </div>
         </div>
         
-        {/* Teams section */}
         <div className="mt-16">
           <div className="flex flex-col sm:flex-row justify-between items-center mb-6">
             <h2 className="text-2xl font-bold">Teams</h2>
