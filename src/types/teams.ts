@@ -14,6 +14,7 @@ export interface TeamDisplayData {
   stadium?: string;
   league?: string;
   division?: string;
+  logo_url?: string;
 }
 
 export interface TeamMember {

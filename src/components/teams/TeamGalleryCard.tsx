@@ -2,7 +2,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Users, Info, Calendar } from 'lucide-react';
+import { Users, Info, Calendar, Briefcase } from 'lucide-react';
 import { TeamDisplayData } from '@/types/teams';
 
 interface TeamGalleryCardProps {
@@ -12,7 +12,6 @@ interface TeamGalleryCardProps {
 const TeamGalleryCard: React.FC<TeamGalleryCardProps> = ({ team }) => {
   // Helper function to determine if a color is light or dark
   const isLightColor = (color: string): boolean => {
-    // Handle empty or invalid colors
     if (!color || color === '#') return true;
     
     // Convert hex to RGB
@@ -54,27 +53,20 @@ const TeamGalleryCard: React.FC<TeamGalleryCardProps> = ({ team }) => {
         <div className="space-y-3 mb-4">
           <div className="flex items-center text-sm text-gray-500">
             <Users className="w-4 h-4 mr-2" />
-            <span>{team.memberCount?.toLocaleString() || 0} fans</span>
+            <span>{team.memberCount?.toLocaleString() || 0} members</span>
           </div>
+          
+          {team.league && (
+            <div className="flex items-center text-sm text-gray-500">
+              <Briefcase className="w-4 h-4 mr-2" />
+              <span>{team.league}{team.division ? ` - ${team.division}` : ''}</span>
+            </div>
+          )}
           
           {team.founded_year && (
             <div className="flex items-center text-sm text-gray-500">
               <Calendar className="w-4 h-4 mr-2" />
               <span>Founded {team.founded_year}</span>
-            </div>
-          )}
-          
-          {team.city && (
-            <div className="flex items-center text-sm text-gray-500">
-              <Info className="w-4 h-4 mr-2" />
-              <span>{team.city}, {team.state}</span>
-            </div>
-          )}
-          
-          {team.stadium && (
-            <div className="flex items-center text-sm text-gray-500">
-              <Info className="w-4 h-4 mr-2" />
-              <span>{team.stadium}</span>
             </div>
           )}
         </div>
@@ -91,7 +83,7 @@ const TeamGalleryCard: React.FC<TeamGalleryCardProps> = ({ team }) => {
               border: 'none'
             }}
           >
-            <Link to={`/teams/${team.slug}/memories/new`}>Create Memory</Link>
+            <Link to={`/teams/${team.slug}`}>Visit Team</Link>
           </Button>
         </div>
       </div>

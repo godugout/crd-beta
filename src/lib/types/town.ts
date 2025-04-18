@@ -69,4 +69,5 @@ export interface TownDisplayData {
   founded_year?: number;
   city?: string;
   state?: string;
+  logo_url?: string;
 }
