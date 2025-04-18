@@ -1,6 +1,6 @@
 
 import { useEffect, useRef } from 'react';
-import { Canvas } from 'fabric';
+import { fabric } from 'fabric';
 import { EnhancedCropBoxProps, MemorabiliaType } from '../cardDetection';
 import { ImageData } from './useCropState';
 import { useEventHandlers } from './fabric/useEventHandlers';
@@ -37,14 +37,14 @@ export const useFabricCanvas = ({
   onToggleBatchSelection,
   onMemorabiliaTypeChange
 }: UseFabricCanvasProps) => {
-  const canvasInstance = useRef<Canvas | null>(null);
+  const canvasInstance = useRef<fabric.Canvas | null>(null);
   
   // Initialize the Fabric canvas
   useEffect(() => {
     if (!fabricRef.current) return;
     
     // Create canvas instance
-    const canvas = new Canvas(fabricRef.current, {
+    const canvas = new fabric.Canvas(fabricRef.current, {
       width: fabricRef.current.parentElement?.clientWidth || 800,
       height: fabricRef.current.parentElement?.clientHeight || 600,
       selection: false, // Disable group selection
