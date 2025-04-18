@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { RouteObject } from 'react-router-dom';
 import Collections from '@/pages/Collections';
@@ -8,6 +7,7 @@ import MemoryPackDetail from '@/pages/MemoryPackDetail';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import InstagramCollectionPage from '@/pages/collections/instagram';
 import CommonsCardsPage from '@/pages/collections/commons';
+import BasketballArtCollection from '@/pages/collections/BasketballArtCollection';
 
 // Collection-related routes
 export const collectionRoutes: RouteObject[] = [
@@ -46,5 +46,9 @@ export const collectionRoutes: RouteObject[] = [
   {
     path: "/packs/:id",
     element: <MemoryPackDetail />,
+  },
+  {
+    path: "/collections/basketball-art",
+    element: <BasketballArtCollection />,
   },
 ];

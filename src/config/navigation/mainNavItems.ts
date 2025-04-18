@@ -4,11 +4,10 @@ import {
   Image, 
   Layers, 
   Building,
-  Trophy
+  Cards
 } from 'lucide-react';
 import { NavigationItem } from './types';
 
-// Main navigation items that appear in both desktop and mobile navigation
 export const mainNavItems: NavigationItem[] = [
   { 
     title: 'Home', 
@@ -19,8 +18,8 @@ export const mainNavItems: NavigationItem[] = [
   { 
     title: 'Cards', 
     path: '/cards',
-    icon: Trophy,
-    description: 'Basketball player card collection'
+    icon: Cards,
+    description: 'Browse the card collection'
   },
   { 
     title: 'Collections', 
