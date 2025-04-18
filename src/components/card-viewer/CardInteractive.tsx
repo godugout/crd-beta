@@ -1,5 +1,17 @@
+
 import React, { useState, useRef, useEffect } from 'react';
-import { Card } from '@/lib/types';
+import { Card } from '@/lib/types/cardTypes';
+import { Canvas } from '@react-three/fiber';
+import { PerspectiveCamera, OrbitControls } from '@react-three/drei';
+import { useCardLighting, LightingPreset } from '@/hooks/useCardLighting';
+import CardLighting from './CardLighting';
+import LightingControls from './LightingControls';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { MoveHorizontal, Lightbulb, Settings } from 'lucide-react';
+import { useDeviceDetect } from '@/hooks/useDeviceDetect';
+import { useUserLightingPreferences } from '@/hooks/useUserLightingPreferences';
+import { CardModel } from './CardModel';
+import { Button } from '@/components/ui/button';
 
 interface CardInteractiveProps {
   card: Card;
@@ -9,9 +21,6 @@ interface CardInteractiveProps {
   onFlip: () => void;
 }
 
-/**
- * Interactive card component with 3D effects, lighting, and touch controls
- */
 const CardInteractive: React.FC<CardInteractiveProps> = ({
   card,
   activeEffects,
@@ -19,208 +28,198 @@ const CardInteractive: React.FC<CardInteractiveProps> = ({
   isFlipped,
   onFlip
 }) => {
-  const [rotation, setRotation] = useState({ x: 0, y: 0 });
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-  const [isDragging, setIsDragging] = useState(false);
-  const [startPos, setStartPos] = useState({ x: 0, y: 0 });
-  const cardRef = useRef<HTMLDivElement>(null);
+  const { isMobile, isTablet, isDesktop } = useDeviceDetect();
+  const [showControls, setShowControls] = useState(!isMobile);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [currentTab, setCurrentTab] = useState<'view' | 'lighting'>('view');
+
+  // Initialize lighting system
+  const {
+    lightingSettings,
+    lightingPreset,
+    applyPreset,
+    updateLightingSetting,
+    updateLightPosition,
+    toggleDynamicLighting,
+    isUserCustomized
+  } = useCardLighting('display_case');
   
-  // Handle mouse movement for 3D effect
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!cardRef.current) return;
-    
-    // Calculate card dimensions and center point
-    const rect = cardRef.current.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-    
-    // Calculate normalized position relative to center (-1 to 1)
-    const normalizedX = (e.clientX - centerX) / (rect.width / 2);
-    const normalizedY = (e.clientY - centerY) / (rect.height / 2);
-    
-    // Update CSS variables for effect positioning
-    if (cardRef.current) {
-      cardRef.current.style.setProperty('--mouse-x', `${(e.clientX - rect.left) / rect.width}`);
-      cardRef.current.style.setProperty('--mouse-y', `${(e.clientY - rect.top) / rect.height}`);
-    }
-    
-    // If dragging, update position
-    if (isDragging) {
-      setPosition({
-        x: e.clientX - startPos.x,
-        y: e.clientY - startPos.y
-      });
-    } else {
-      // Otherwise update rotation for tilt effect
-      setRotation({
-        x: normalizedY * -20, // Reversed for natural tilt
-        y: normalizedX * 20
-      });
-    }
-  };
+  // Initialize user preferences (if logged in)
+  const {
+    currentSettings: savedUserSettings,
+    isLoading: isLoadingPreferences,
+    savePreference
+  } = useUserLightingPreferences('display_case');
   
-  const handleMouseLeave = () => {
-    // Reset card rotation when mouse leaves
-    setRotation({ x: 0, y: 0 });
-  };
-  
-  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-    setIsDragging(true);
-    setStartPos({
-      x: e.clientX - position.x,
-      y: e.clientY - position.y
-    });
-  };
-  
-  const handleMouseUp = () => {
-    setIsDragging(false);
-  };
-  
-  // Add event listeners for mouse up outside the card
+  // Apply saved user settings if available
   useEffect(() => {
-    const handleGlobalMouseUp = () => {
-      setIsDragging(false);
-    };
+    if (savedUserSettings && !isLoadingPreferences) {
+      updateLightingSetting('primaryLight', savedUserSettings.primaryLight);
+      updateLightingSetting('ambientLight', savedUserSettings.ambientLight);
+      updateLightingSetting('environmentType', savedUserSettings.environmentType);
+      updateLightingSetting('envMapIntensity', savedUserSettings.envMapIntensity);
+      updateLightingSetting('useDynamicLighting', savedUserSettings.useDynamicLighting);
+    }
+  }, [savedUserSettings, isLoadingPreferences, updateLightingSetting]);
+
+  // Handle mouse movement for dynamic lighting
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!lightingSettings.useDynamicLighting) return;
     
-    document.addEventListener('mouseup', handleGlobalMouseUp);
-    return () => {
-      document.removeEventListener('mouseup', handleGlobalMouseUp);
-    };
-  }, []);
-  
-  // Set effect CSS variables
-  useEffect(() => {
-    if (!cardRef.current) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width;
+    const y = (e.clientY - rect.top) / rect.height;
     
-    Object.entries(effectIntensities).forEach(([effect, intensity]) => {
-      const cssVarName = `--${effect.toLowerCase().replace(' ', '-')}-intensity`;
-      cardRef.current?.style.setProperty(cssVarName, intensity.toString());
-    });
-  }, [effectIntensities]);
+    updateLightPosition(x, y);
+  };
   
+  // Handle preset change
+  const handlePresetChange = (preset: LightingPreset) => {
+    applyPreset(preset);
+  };
+  
+  // Save current lighting settings
+  const handleSaveSettings = () => {
+    savePreference(lightingSettings, 'My Custom Lighting', true);
+  };
+
+  // Progressive enhancement: simplified lighting for mobile
+  const getOptimizedLighting = () => {
+    if (isMobile) {
+      // Simpler lighting setup for mobile
+      return {
+        ...lightingSettings,
+        envMapIntensity: lightingSettings.envMapIntensity * 0.7, // Reduce for performance
+      };
+    }
+    return lightingSettings;
+  };
+  
+  const optimizedSettings = getOptimizedLighting();
+
   return (
-    <div 
-      className="card-container relative w-full h-full perspective-1000"
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-      onMouseDown={handleMouseDown}
-      onMouseUp={handleMouseUp}
-    >
-      <div
-        ref={cardRef}
-        className={`
-          card-interactive w-full h-full transform-gpu transition-transform duration-200
-          ${isFlipped ? 'rotate-y-180' : ''}
-          ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}
-          ${activeEffects.map(effect => `effect-${effect.toLowerCase().replace(' ', '')}`).join(' ')}
-        `}
-        style={{
-          transform: isDragging
-            ? `translate(${position.x}px, ${position.y}px)`
-            : `rotateX(${rotation.x}deg) rotateY(${rotation.y}deg)`
-        }}
+    <div className="w-full h-full flex flex-col">
+      <Tabs 
+        defaultValue="view" 
+        value={currentTab} 
+        onValueChange={(value) => setCurrentTab(value as 'view' | 'lighting')}
+        className="w-full"
       >
-        {/* Card Front */}
-        <div className="absolute inset-0 backface-hidden">
-          <div className="relative w-full h-full rounded-xl overflow-hidden">
-            {/* Card Image */}
-            <img 
-              src={card.imageUrl} 
-              alt={card.title || 'Card'} 
-              className="w-full h-full object-cover"
-              onError={(e) => {
-                console.error('Error loading image:', card.imageUrl);
-                e.currentTarget.src = 'https://via.placeholder.com/400x560?text=Card+Image';
-              }}
-            />
-            
-            {/* Card Title */}
-            <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
-              <h3 className="text-white text-xl font-bold">{card.title}</h3>
-              {card.team && <p className="text-white/80 text-sm">{card.team}</p>}
-            </div>
-            
-            {/* Effects Overlays */}
-            <div className="effects-layer absolute inset-0 pointer-events-none z-10"></div>
-            
-            {/* Interactive Controls */}
-            <div 
-              className="absolute top-2 right-2 p-2 bg-black/50 rounded-full cursor-pointer"
-              onClick={(e) => {
-                e.stopPropagation();
-                onFlip();
-              }}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M8 5a1 1 0 100 2h5.586l-1.293 1.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L13.586 5H8z" />
-                <path d="M12 15a1 1 0 100-2H6.414l1.293-1.293a1 1 0 10-1.414-1.414l-3 3a1 1 0 000 1.414l3 3a1 1 0 001.414-1.414L6.414 15H12z" />
-              </svg>
-            </div>
-          </div>
+        <div className="flex justify-between items-center mb-4">
+          <TabsList>
+            <TabsTrigger value="view">
+              <MoveHorizontal className="w-4 h-4 mr-2" />
+              View Card
+            </TabsTrigger>
+            <TabsTrigger value="lighting">
+              <Lightbulb className="w-4 h-4 mr-2" />
+              Lighting
+            </TabsTrigger>
+          </TabsList>
+          
+          {isUserCustomized && (
+            <Button size="sm" variant="outline" onClick={handleSaveSettings}>
+              <Settings className="w-4 h-4 mr-2" />
+              Save Settings
+            </Button>
+          )}
         </div>
         
-        {/* Card Back */}
-        <div className="absolute inset-0 backface-hidden rotate-y-180">
-          <div className="relative w-full h-full rounded-xl overflow-hidden bg-gray-800">
-            {/* Card Back Content */}
-            <div className="p-6 flex flex-col h-full">
-              <h3 className="text-white text-xl font-bold mb-4">{card.title}</h3>
-              
-              {card.description && (
-                <p className="text-white/80 text-sm mb-4">{card.description}</p>
-              )}
-              
-              {card.player && (
-                <div className="mb-4">
-                  <h4 className="text-white/60 text-xs uppercase mb-1">Player</h4>
-                  <p className="text-white text-md">{card.player}</p>
-                </div>
-              )}
-              
-              {card.team && (
-                <div className="mb-4">
-                  <h4 className="text-white/60 text-xs uppercase mb-1">Team</h4>
-                  <p className="text-white text-md">{card.team}</p>
-                </div>
-              )}
-              
-              {card.year && (
-                <div className="mb-4">
-                  <h4 className="text-white/60 text-xs uppercase mb-1">Year</h4>
-                  <p className="text-white text-md">{card.year}</p>
-                </div>
-              )}
-              
-              <div className="mt-auto">
-                {card.tags && card.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {card.tags.map((tag, i) => (
-                      <span key={i} className="bg-white/20 px-2 py-1 rounded-md text-xs text-white">{tag}</span>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-            
-            {/* Effects Overlays */}
-            <div className="effects-layer absolute inset-0 pointer-events-none z-10"></div>
-            
-            {/* Interactive Controls */}
-            <div 
-              className="absolute top-2 right-2 p-2 bg-black/50 rounded-full cursor-pointer"
-              onClick={(e) => {
-                e.stopPropagation();
-                onFlip();
-              }}
+        <TabsContent value="view" className="mt-0">
+          <div 
+            className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-gray-900"
+            onMouseMove={handleMouseMove}
+          >
+            <Canvas
+              ref={canvasRef}
+              shadows
+              dpr={[1, isMobile ? 1.5 : 2]} // Lower DPR for mobile
+              performance={{ min: 0.5 }} // Allow performance scaling
+              gl={{ preserveDrawingBuffer: true }} // For screenshots
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M8 5a1 1 0 100 2h5.586l-1.293 1.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L13.586 5H8z" />
-                <path d="M12 15a1 1 0 100-2H6.414l1.293-1.293a1 1 0 10-1.414-1.414l-3 3a1 1 0 000 1.414l3 3a1 1 0 001.414-1.414L6.414 15H12z" />
+              <PerspectiveCamera makeDefault position={[0, 0, 5]} fov={50} />
+              
+              <CardLighting 
+                settings={optimizedSettings}
+                debug={false}
+              />
+              
+              <CardModel
+                card={card}
+                isFlipped={isFlipped}
+                activeEffects={activeEffects}
+                effectIntensities={effectIntensities}
+              />
+              
+              {/* Limit interaction on mobile for better performance */}
+              <OrbitControls
+                enablePan={!isMobile}
+                enableZoom={true}
+                minDistance={3}
+                maxDistance={8}
+                maxPolarAngle={Math.PI * 0.65}
+                minPolarAngle={Math.PI * 0.25}
+              />
+            </Canvas>
+            
+            {/* Flip button overlay */}
+            <button
+              className="absolute bottom-4 right-4 bg-white/80 hover:bg-white text-gray-900 rounded-full p-2 shadow-lg transition-all"
+              onClick={onFlip}
+              aria-label={isFlipped ? "Show front of card" : "Show back of card"}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="m17 3-5 5-5-5" />
+                <path d="m17 21-5-5-5 5" />
+                <path d="M4 12h16" />
               </svg>
-            </div>
+            </button>
           </div>
-        </div>
-      </div>
+        </TabsContent>
+        
+        <TabsContent value="lighting" className="mt-0">
+          <LightingControls
+            settings={lightingSettings}
+            onUpdateSettings={updateLightingSetting}
+            onApplyPreset={handlePresetChange}
+            onToggleDynamicLighting={toggleDynamicLighting}
+            isUserCustomized={isUserCustomized}
+          />
+          
+          <div className="mt-4 rounded-lg overflow-hidden bg-gray-900 aspect-video">
+            <Canvas
+              shadows
+              dpr={[1, isMobile ? 1.5 : 2]} // Lower DPR for mobile
+              performance={{ min: 0.5 }} // Allow performance scaling
+            >
+              <PerspectiveCamera makeDefault position={[0, 0, 5]} fov={50} />
+              
+              {/* Preview lighting with a simple scene */}
+              <CardLighting 
+                settings={optimizedSettings}
+                debug={true}
+              />
+              
+              <mesh position={[0, 0, 0]} castShadow receiveShadow>
+                <boxGeometry args={[1, 1.4, 0.05]} />
+                <meshStandardMaterial color="#ffffff" metalness={0.5} roughness={0.2} />
+              </mesh>
+              
+              <mesh position={[0, -1, 0]} rotation={[-Math.PI * 0.5, 0, 0]} receiveShadow>
+                <planeGeometry args={[10, 10]} />
+                <meshStandardMaterial color="#303030" metalness={0.2} roughness={0.8} />
+              </mesh>
+              
+              <OrbitControls
+                enablePan={false}
+                enableZoom={true}
+                autoRotate
+                autoRotateSpeed={1}
+              />
+            </Canvas>
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

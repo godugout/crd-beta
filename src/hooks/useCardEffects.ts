@@ -1,266 +1,220 @@
 
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useRef, useCallback } from 'react';
+import { useCardLighting } from './useCardLighting';
 
-export interface CardEffect {
+export type CardEffect = {
   id: string;
   name: string;
-  active: boolean;
+  description: string;
   intensity: number;
-  hue?: number;
-  saturation?: number;
-}
+  category: 'basic' | 'premium' | 'special';
+  enabled: boolean;
+};
 
-export interface MousePosition {
+export type MousePosition = {
   x: number;
   y: number;
-}
+};
 
-export interface CardEffectsOptions {
-  enableLighting?: boolean;
-  enableReflections?: boolean;
-  enableParallax?: boolean;
-  performanceMode?: 'low' | 'medium' | 'high';
-  initialEffects?: CardEffect[];
-}
-
-export const DEFAULT_EFFECTS: CardEffect[] = [
-  { id: 'holographic', name: 'Holographic', active: false, intensity: 0.7, hue: 0 },
-  { id: 'refractor', name: 'Refractor', active: false, intensity: 0.8 },
-  { id: 'chrome', name: 'Chrome', active: false, intensity: 0.6 },
-  { id: 'goldFoil', name: 'Gold Foil', active: false, intensity: 0.7 },
-  { id: 'vintage', name: 'Vintage', active: false, intensity: 0.5 },
-  { id: 'prismatic', name: 'Prismatic', active: false, intensity: 0.9, hue: 180 },
-  { id: 'mojo', name: 'Mojo', active: false, intensity: 0.8 },
-  { id: 'pulsar', name: 'Pulsar', active: false, intensity: 0.6 }
+const DEFAULT_EFFECTS: CardEffect[] = [
+  {
+    id: 'holographic',
+    name: 'Holographic',
+    description: 'Rainbow-colored reflective foil effect',
+    intensity: 1.0,
+    category: 'premium',
+    enabled: false
+  },
+  {
+    id: 'refractor',
+    name: 'Refractor',
+    description: 'Light-bending prismatic effect',
+    intensity: 1.0,
+    category: 'premium',
+    enabled: false
+  },
+  {
+    id: 'chrome',
+    name: 'Chrome',
+    description: 'Metallic reflective effect',
+    intensity: 1.0,
+    category: 'premium',
+    enabled: false
+  },
+  {
+    id: 'gold_foil',
+    name: 'Gold Foil',
+    description: 'Metallic gold accents',
+    intensity: 1.0,
+    category: 'special',
+    enabled: false
+  },
+  {
+    id: 'vintage',
+    name: 'Vintage',
+    description: 'Aged, worn appearance',
+    intensity: 1.0,
+    category: 'basic',
+    enabled: false
+  },
+  {
+    id: 'embossed',
+    name: 'Embossed',
+    description: '3D raised texture effect',
+    intensity: 1.0,
+    category: 'basic',
+    enabled: false
+  },
+  {
+    id: 'scratch_resistant',
+    name: 'Scratch Resistant',
+    description: 'Protective coating appearance',
+    intensity: 1.0,
+    category: 'basic',
+    enabled: false
+  },
+  {
+    id: 'matte',
+    name: 'Matte',
+    description: 'Non-reflective finish',
+    intensity: 1.0,
+    category: 'basic',
+    enabled: false
+  }
 ];
 
-export function useCardEffects(options: CardEffectsOptions = {}) {
-  // Initialize with default or provided effects
-  const [effects, setEffects] = useState<CardEffect[]>(
-    options.initialEffects || DEFAULT_EFFECTS
-  );
-  
-  const [mousePosition, setMousePosition] = useState<MousePosition>({ x: 0.5, y: 0.5 });
+export const useCardEffects = () => {
+  const [effects, setEffects] = useState<CardEffect[]>(DEFAULT_EFFECTS);
+  const [mousePosition, setMousePosition] = useState<MousePosition>({ x: 0, y: 0 });
   const [rotation, setRotation] = useState({ x: 0, y: 0 });
   const [isMoving, setIsMoving] = useState(false);
   const [zoom, setZoom] = useState(1);
   const [isFlipped, setIsFlipped] = useState(false);
-  const [cardEffectsState, setCardEffectsState] = useState<Record<string, string[]>>({});
-  
   const cardRef = useRef<HTMLDivElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const activeEffects = effects.filter(effect => effect.enabled).map(effect => effect.id);
   
-  // Track drag state
-  const dragInfo = useRef({
-    isDragging: false,
-    startX: 0,
-    startY: 0,
-    startRotateX: 0,
-    startRotateY: 0,
-  });
-
-  // Toggle effect active state
+  // Initialize lighting system
+  const { lightingSettings, updateLightPosition } = useCardLighting('studio');
+  
+  // Toggle effect on/off
   const toggleEffect = useCallback((effectId: string) => {
-    setEffects(prev => 
-      prev.map(effect => 
-        effect.id === effectId 
-          ? { ...effect, active: !effect.active } 
-          : effect
+    setEffects(prevEffects => 
+      prevEffects.map(effect => 
+        effect.id === effectId ? { ...effect, enabled: !effect.enabled } : effect
       )
     );
   }, []);
-
+  
   // Update effect intensity
   const updateEffectIntensity = useCallback((effectId: string, intensity: number) => {
-    setEffects(prev => 
-      prev.map(effect => 
-        effect.id === effectId 
-          ? { ...effect, intensity } 
-          : effect
+    setEffects(prevEffects => 
+      prevEffects.map(effect => 
+        effect.id === effectId ? { ...effect, intensity } : effect
       )
     );
   }, []);
-
-  // Set active effects array - needed for ImmersiveCardViewer
+  
+  // Set specific effects as active
   const setActiveEffects = useCallback((effectIds: string[]) => {
-    setEffects(prev => 
-      prev.map(effect => ({
+    setEffects(prevEffects =>
+      prevEffects.map(effect => ({
         ...effect,
-        active: effectIds.includes(effect.id)
+        enabled: effectIds.includes(effect.id)
       }))
     );
   }, []);
-
-  // Set card effects - needed for ImmersiveCardViewer
-  const setCardEffects = useCallback((cardId: string, effectIds: string[]) => {
-    setCardEffectsState(prev => ({
-      ...prev,
-      [cardId]: effectIds
-    }));
-  }, []);
-
-  // Update effect property (generic function)
-  const updateEffectProperty = useCallback(<T extends keyof CardEffect>(
-    effectId: string, 
-    property: T, 
-    value: CardEffect[T]
-  ) => {
-    setEffects(prev => 
-      prev.map(effect => 
-        effect.id === effectId 
-          ? { ...effect, [property]: value } 
-          : effect
-      )
-    );
-  }, []);
-
-  // Handle mouse/touch movement for interactive card
-  const handleInteraction = useCallback((clientX: number, clientY: number) => {
-    if (!cardRef.current || !containerRef.current) return;
-
-    const rect = containerRef.current.getBoundingClientRect();
+  
+  // Generate CSS for effect styles
+  const generateEffectStyles = useCallback(() => {
+    const styles: Record<string, any> = {};
     
-    // Calculate relative mouse position (0-1)
-    const relativeX = (clientX - rect.left) / rect.width;
-    const relativeY = (clientY - rect.top) / rect.height;
-    
-    setMousePosition({ x: relativeX, y: relativeY });
-    
-    // If dragging, update rotation
-    if (dragInfo.current.isDragging) {
-      const deltaX = clientX - dragInfo.current.startX;
-      const deltaY = clientY - dragInfo.current.startY;
+    effects.forEach(effect => {
+      if (!effect.enabled) return;
       
-      const sensitivity = 0.5;
-      
-      setRotation({
-        x: dragInfo.current.startRotateX + (deltaY * sensitivity),
-        y: dragInfo.current.startRotateY - (deltaX * sensitivity)
-      });
-    }
-  }, []);
-
-  // Start drag
-  const handleDragStart = useCallback((clientX: number, clientY: number) => {
-    dragInfo.current.isDragging = true;
-    dragInfo.current.startX = clientX;
-    dragInfo.current.startY = clientY;
-    dragInfo.current.startRotateX = rotation.x;
-    dragInfo.current.startRotateY = rotation.y;
+      switch (effect.id) {
+        case 'holographic':
+          styles.filter = `${styles.filter || ''} saturate(${1 + effect.intensity * 0.5})`;
+          styles.background = `linear-gradient(35deg, 
+            rgba(255,0,0,${0.1 * effect.intensity}) 0%, 
+            rgba(255,255,0,${0.1 * effect.intensity}) 20%, 
+            rgba(0,255,0,${0.1 * effect.intensity}) 40%, 
+            rgba(0,255,255,${0.1 * effect.intensity}) 60%, 
+            rgba(255,0,255,${0.1 * effect.intensity}) 80%, 
+            rgba(255,0,0,${0.1 * effect.intensity}) 100%)`;
+          styles.mixBlendMode = 'color-dodge';
+          break;
+        case 'refractor':
+          styles.filter = `${styles.filter || ''} brightness(${1 + effect.intensity * 0.1})`;
+          styles.boxShadow = `${styles.boxShadow || ''}, 0 0 ${10 * effect.intensity}px rgba(255,255,255,0.5)`;
+          break;
+        case 'chrome':
+          styles.filter = `${styles.filter || ''} contrast(${1 + effect.intensity * 0.3})`;
+          break;
+        case 'gold_foil':
+          styles.boxShadow = `${styles.boxShadow || ''}, 0 0 ${5 * effect.intensity}px rgba(255,215,0,0.7)`;
+          break;
+        case 'vintage':
+          styles.filter = `${styles.filter || ''} sepia(${0.5 * effect.intensity})`;
+          break;
+        case 'embossed':
+          styles.boxShadow = `${styles.boxShadow || ''}, 0 ${1 * effect.intensity}px ${2 * effect.intensity}px rgba(0,0,0,0.3)`;
+          break;
+        case 'matte':
+          styles.filter = `${styles.filter || ''} brightness(${1 - 0.05 * effect.intensity})`;
+          break;
+      }
+    });
+    
+    return styles;
+  }, [effects]);
+  
+  // Handle mouse/touch movement
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (!cardRef.current) return;
+    
+    const rect = cardRef.current.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+    const y = ((e.clientY - rect.top) / rect.height) * 2 - 1;
+    
+    setMousePosition({ x, y });
+    
+    // Update rotation based on mouse position
+    setRotation({
+      x: y * 15, // Rotate around X-axis based on Y position
+      y: -x * 15 // Rotate around Y-axis based on X position
+    });
+    
+    // Update lighting position
+    const normalizedX = (e.clientX - rect.left) / rect.width;
+    const normalizedY = (e.clientY - rect.top) / rect.height;
+    updateLightPosition(normalizedX, normalizedY);
+    
     setIsMoving(true);
-  }, [rotation]);
-
-  // End drag
-  const handleDragEnd = useCallback(() => {
-    dragInfo.current.isDragging = false;
-    setIsMoving(false);
     
-    // Optional: add momentum effect here
-  }, []);
-
-  // Reset card position
-  const resetCard = useCallback(() => {
-    setRotation({ x: 0, y: 0 });
-    setZoom(1);
-    setIsFlipped(false);
-  }, []);
-
-  // Flip card
+    // Set a timeout to mark movement as stopped
+    setTimeout(() => {
+      setIsMoving(false);
+    }, 100);
+  }, [updateLightPosition]);
+  
+  // Functions for flipping and zooming
   const flipCard = useCallback(() => {
     setIsFlipped(prev => !prev);
   }, []);
-
-  // Handle zoom
-  const handleZoom = useCallback((delta: number) => {
-    setZoom(prev => {
-      // Limit zoom between 0.5 and 3
-      const newZoom = prev + delta * 0.1;
-      return Math.max(0.5, Math.min(3, newZoom));
-    });
+  
+  const zoomIn = useCallback(() => {
+    setZoom(prev => Math.min(prev + 0.1, 2));
+  }, []);
+  
+  const zoomOut = useCallback(() => {
+    setZoom(prev => Math.max(prev - 0.1, 0.5));
+  }, []);
+  
+  const resetView = useCallback(() => {
+    setRotation({ x: 0, y: 0 });
+    setZoom(1);
   }, []);
 
-  // Generate CSS variables for effects
-  const generateEffectStyles = useCallback(() => {
-    const styles: Record<string, string> = {
-      '--mouse-x': `${mousePosition.x * 100}%`,
-      '--mouse-y': `${mousePosition.y * 100}%`,
-    };
-
-    // Add variables for each active effect
-    effects.forEach(effect => {
-      if (effect.active) {
-        styles[`--${effect.id}-active`] = '1';
-        styles[`--${effect.id}-intensity`] = effect.intensity.toString();
-        
-        if (effect.hue !== undefined) {
-          styles[`--${effect.id}-hue`] = effect.hue.toString();
-        }
-        
-        if (effect.saturation !== undefined) {
-          styles[`--${effect.id}-saturation`] = effect.saturation.toString();
-        }
-      } else {
-        styles[`--${effect.id}-active`] = '0';
-      }
-    });
-
-    return styles;
-  }, [effects, mousePosition]);
-
-  // Generate classes for active effects
-  const generateEffectClasses = useCallback(() => {
-    const classes = ['card-effect'];
-    effects.forEach(effect => {
-      if (effect.active) {
-        classes.push(`effect-${effect.id}`);
-      }
-    });
-    return classes.join(' ');
-  }, [effects]);
-
-  // Handle mouse/touch events
-  useEffect(() => {
-    const card = cardRef.current;
-    const container = containerRef.current;
-    if (!card || !container) return;
-    
-    const handleMouseMove = (e: MouseEvent) => {
-      handleInteraction(e.clientX, e.clientY);
-    };
-    
-    const handleMouseDown = (e: MouseEvent) => {
-      handleDragStart(e.clientX, e.clientY);
-    };
-    
-    const handleMouseUp = () => {
-      handleDragEnd();
-    };
-    
-    const handleMouseLeave = () => {
-      handleDragEnd();
-    };
-    
-    const handleWheel = (e: WheelEvent) => {
-      e.preventDefault();
-      handleZoom(-Math.sign(e.deltaY));
-    };
-    
-    container.addEventListener('mousemove', handleMouseMove);
-    container.addEventListener('mousedown', handleMouseDown);
-    window.addEventListener('mouseup', handleMouseUp);
-    container.addEventListener('mouseleave', handleMouseLeave);
-    container.addEventListener('wheel', handleWheel, { passive: false });
-    
-    return () => {
-      container.removeEventListener('mousemove', handleMouseMove);
-      container.removeEventListener('mousedown', handleMouseDown);
-      window.removeEventListener('mouseup', handleMouseUp);
-      container.removeEventListener('mouseleave', handleMouseLeave);
-      container.removeEventListener('wheel', handleWheel);
-    };
-  }, [handleInteraction, handleDragStart, handleDragEnd, handleZoom]);
-  
-  // Return all necessary values and functions
   return {
     effects,
     mousePosition,
@@ -269,20 +223,22 @@ export function useCardEffects(options: CardEffectsOptions = {}) {
     zoom,
     isFlipped,
     cardRef,
-    containerRef,
+    activeEffects,
+    lightingSettings,
+    handleMouseMove,
     toggleEffect,
     updateEffectIntensity,
-    updateEffectProperty,
-    resetCard,
-    flipCard,
-    handleZoom,
-    setZoom,
-    setRotation,
     generateEffectStyles,
-    generateEffectClasses,
-    activeEffects: effects.filter(e => e.active).map(e => e.id),
-    cardEffects: cardEffectsState,
-    setCardEffects,
-    setActiveEffects
+    flipCard,
+    zoomIn,
+    zoomOut,
+    resetView,
+    setActiveEffects,
+    availableEffects: effects.map(effect => effect.name),
+    effectIntensities: effects.reduce((acc, effect) => {
+      acc[effect.id] = effect.intensity;
+      return acc;
+    }, {} as Record<string, number>),
+    adjustEffectIntensity: updateEffectIntensity
   };
-}
+};

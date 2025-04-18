@@ -1,85 +1,182 @@
 
 import React from 'react';
-import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Sparkles, Layers, Settings } from 'lucide-react';
+import LightingControls from '@/components/card-viewer/LightingControls';
+import { useCardLighting } from '@/hooks/useCardLighting';
 
 interface EffectsPanelProps {
   availableEffects: string[];
   activeEffects: string[];
-  onToggleEffect: (effectName: string) => void;
   effectIntensities: Record<string, number>;
-  onAdjustIntensity: (effectName: string, intensity: number) => void;
+  onToggleEffect: (effectId: string) => void;
+  onAdjustIntensity: (effectId: string, intensity: number) => void;
 }
 
 const EffectsPanel: React.FC<EffectsPanelProps> = ({
   availableEffects,
   activeEffects,
-  onToggleEffect,
   effectIntensities,
+  onToggleEffect,
   onAdjustIntensity
 }) => {
+  // Initialize lighting controls
+  const {
+    lightingSettings,
+    lightingPreset,
+    isUserCustomized,
+    applyPreset,
+    updateLightingSetting,
+    toggleDynamicLighting
+  } = useCardLighting('studio');
+
+  // Effect categories for organization
+  const categories = [
+    { 
+      id: 'premium', 
+      name: 'Premium Effects',
+      effects: ['Holographic', 'Refractor', 'Chrome']
+    },
+    { 
+      id: 'special', 
+      name: 'Special Effects',
+      effects: ['Gold Foil', 'Embossed']
+    },
+    { 
+      id: 'basic', 
+      name: 'Basic Effects',
+      effects: ['Vintage', 'Matte', 'Scratch Resistant']
+    }
+  ];
+
+  // Get normalized effect ID
+  const getEffectId = (name: string) => {
+    return name.toLowerCase().replace(/\s+/g, '_');
+  };
+
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle className="text-lg font-medium">Card Effects</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="grid grid-cols-2 gap-2">
-          {availableEffects.map((effect) => (
-            <Button
-              key={effect}
-              variant={activeEffects.includes(effect) ? "default" : "outline"}
-              onClick={() => onToggleEffect(effect)}
-              className="justify-start"
-            >
-              <span className={activeEffects.includes(effect) ? "text-primary-foreground" : ""}>
-                {effect}
-              </span>
-            </Button>
-          ))}
-        </div>
+    <div className="p-4 bg-white rounded-lg shadow-md">
+      <h3 className="text-lg font-bold mb-4">Card Effects</h3>
+      
+      <Tabs defaultValue="effects">
+        <TabsList className="mb-4">
+          <TabsTrigger value="effects" className="flex items-center">
+            <Sparkles className="w-4 h-4 mr-2" /> 
+            Effects
+          </TabsTrigger>
+          <TabsTrigger value="lighting" className="flex items-center">
+            <Layers className="w-4 h-4 mr-2" /> 
+            Lighting
+          </TabsTrigger>
+          <TabsTrigger value="advanced" className="flex items-center">
+            <Settings className="w-4 h-4 mr-2" /> 
+            Advanced
+          </TabsTrigger>
+        </TabsList>
         
-        <div className="pt-4 space-y-6">
-          <h3 className="text-sm font-medium mb-2">Effect Intensity</h3>
-          
-          {activeEffects.map((effect) => (
-            <div key={`${effect}-intensity`} className="space-y-2">
-              <div className="flex items-center justify-between">
-                <label htmlFor={`${effect}-intensity`} className="text-sm font-medium">
-                  {effect}
-                </label>
-                <span className="text-xs text-muted-foreground">
-                  {Math.round(effectIntensities[effect] * 100)}%
-                </span>
+        <TabsContent value="effects" className="space-y-6">
+          {categories.map(category => (
+            <div key={category.id} className="space-y-3">
+              <h4 className="font-medium text-sm uppercase tracking-wider text-gray-500">
+                {category.name}
+              </h4>
+              
+              <div className="space-y-4">
+                {category.effects.filter(effect => availableEffects.includes(effect))
+                  .map(effect => {
+                    const effectId = getEffectId(effect);
+                    const isActive = activeEffects.includes(effectId);
+                    const intensity = effectIntensities[effectId] || 1;
+                    
+                    return (
+                      <div key={effectId} className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Switch 
+                              id={`effect-${effectId}`}
+                              checked={isActive}
+                              onCheckedChange={() => onToggleEffect(effectId)}
+                            />
+                            <Label htmlFor={`effect-${effectId}`} className="cursor-pointer">
+                              {effect}
+                            </Label>
+                          </div>
+                          
+                          {category.id === 'premium' && (
+                            <Badge variant="secondary" className="text-xs">Premium</Badge>
+                          )}
+                        </div>
+                        
+                        {isActive && (
+                          <div className="pl-7">
+                            <div className="flex items-center justify-between text-sm mb-1">
+                              <span>Intensity</span>
+                              <span className="text-gray-500">{(intensity * 100).toFixed(0)}%</span>
+                            </div>
+                            <Slider
+                              defaultValue={[intensity]}
+                              max={1}
+                              step={0.01}
+                              onValueChange={([value]) => onAdjustIntensity(effectId, value)}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
               </div>
-              <Slider
-                id={`${effect}-intensity`}
-                min={0}
-                max={1}
-                step={0.01}
-                value={[effectIntensities[effect] || 0.5]}
-                onValueChange={(value) => onAdjustIntensity(effect, value[0])}
-              />
             </div>
           ))}
-          
-          {activeEffects.length === 0 && (
-            <p className="text-sm text-muted-foreground italic">
-              Select effects to adjust their intensity
-            </p>
-          )}
-        </div>
+        </TabsContent>
         
-        <div className="pt-4">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium">Auto-Rotate</span>
-            <Switch id="auto-rotate" />
+        <TabsContent value="lighting">
+          <LightingControls
+            settings={lightingSettings}
+            onUpdateSettings={updateLightingSetting}
+            onApplyPreset={applyPreset}
+            onToggleDynamicLighting={toggleDynamicLighting}
+            isUserCustomized={isUserCustomized}
+          />
+        </TabsContent>
+        
+        <TabsContent value="advanced">
+          <div className="space-y-4">
+            <h4 className="font-medium">Performance Settings</h4>
+            
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="high-quality">High Quality Lighting</Label>
+                <Switch 
+                  id="high-quality"
+                  checked={lightingSettings.envMapIntensity > 0.5}
+                  onCheckedChange={(checked) => updateLightingSetting(
+                    'envMapIntensity',
+                    checked ? 1.0 : 0.3
+                  )}
+                />
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <Label htmlFor="dynamic-shadows">Dynamic Shadows</Label>
+                <Switch 
+                  id="dynamic-shadows"
+                  checked={lightingSettings.useDynamicLighting}
+                  onCheckedChange={toggleDynamicLighting}
+                />
+              </div>
+            </div>
+            
+            <div className="mt-4 text-xs text-gray-500">
+              <p>Turning off advanced lighting features may improve performance on lower-end devices.</p>
+            </div>
           </div>
-        </div>
-      </CardContent>
-    </Card>
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 };
 

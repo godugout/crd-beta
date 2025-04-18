@@ -1,5 +1,20 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useCallback, useEffect } from 'react';
+
+export type LightingPreset = 'studio' | 'natural' | 'dramatic' | 'display_case';
+
+interface LightPosition {
+  x: number;
+  y: number;
+  z: number;
+}
+
+interface Light {
+  position: LightPosition;
+  intensity: number;
+  color: string;
+  type: 'directional' | 'point' | 'ambient' | 'spot';
+}
 
 export interface LightingSettings {
   primaryLight: {
@@ -8,129 +23,203 @@ export interface LightingSettings {
     z: number;
     intensity: number;
     color: string;
-    castShadow: boolean;
   };
   ambientLight: {
     intensity: number;
     color: string;
   };
-  environmentType: 'display_case' | 'natural' | 'dramatic' | 'studio';
-  followPointer: boolean;
-  autoRotate: boolean;
+  environmentType: LightingPreset;
+  envMapIntensity: number;
+  useDynamicLighting: boolean;
 }
 
-export const LIGHTING_PRESETS = {
-  display_case: {
-    primaryLight: { x: 0, y: 10, z: 10, intensity: 1.2, color: '#ffffff', castShadow: true },
-    ambientLight: { intensity: 0.5, color: '#f0f0ff' },
-    environmentType: 'display_case' as const,
-    followPointer: false,
-    autoRotate: false
+const DEFAULT_LIGHTING: Record<LightingPreset, LightingSettings> = {
+  studio: {
+    primaryLight: {
+      x: 10,
+      y: 10,
+      z: 10,
+      intensity: 1.2,
+      color: '#ffffff'
+    },
+    ambientLight: {
+      intensity: 0.6,
+      color: '#f0f0ff'
+    },
+    environmentType: 'studio',
+    envMapIntensity: 1.0,
+    useDynamicLighting: true
   },
   natural: {
-    primaryLight: { x: 5, y: 10, z: 5, intensity: 0.8, color: '#fff6e0', castShadow: true },
-    ambientLight: { intensity: 0.6, color: '#e0f0ff' },
-    environmentType: 'natural' as const,
-    followPointer: false,
-    autoRotate: false
+    primaryLight: {
+      x: 5,
+      y: 15,
+      z: 5,
+      intensity: 0.9,
+      color: '#fffaf0'
+    },
+    ambientLight: {
+      intensity: 0.7,
+      color: '#e0f0ff'
+    },
+    environmentType: 'natural',
+    envMapIntensity: 0.8,
+    useDynamicLighting: true
   },
   dramatic: {
-    primaryLight: { x: -10, y: 5, z: 10, intensity: 1.5, color: '#ff9900', castShadow: true },
-    ambientLight: { intensity: 0.2, color: '#000033' },
-    environmentType: 'dramatic' as const,
-    followPointer: false,
-    autoRotate: false
+    primaryLight: {
+      x: 15,
+      y: 5,
+      z: 10,
+      intensity: 1.5,
+      color: '#fff0e0'
+    },
+    ambientLight: {
+      intensity: 0.3,
+      color: '#202040'
+    },
+    environmentType: 'dramatic',
+    envMapIntensity: 1.2,
+    useDynamicLighting: true
   },
-  studio: {
-    primaryLight: { x: 0, y: 5, z: 10, intensity: 1.0, color: '#ffffff', castShadow: true },
-    ambientLight: { intensity: 0.7, color: '#f8f8f8' },
-    environmentType: 'studio' as const,
-    followPointer: false,
-    autoRotate: false
+  display_case: {
+    primaryLight: {
+      x: 0,
+      y: 10,
+      z: 10,
+      intensity: 1,
+      color: '#ffffff'
+    },
+    ambientLight: {
+      intensity: 0.5,
+      color: '#f0f0ff'
+    },
+    environmentType: 'display_case',
+    envMapIntensity: 0.9,
+    useDynamicLighting: true
   }
 };
 
-export function useCardLighting(initialPreset: keyof typeof LIGHTING_PRESETS = 'display_case') {
-  const [lightingSettings, setLightingSettings] = useState<LightingSettings>(
-    LIGHTING_PRESETS[initialPreset]
-  );
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+export const useCardLighting = (initialPreset: LightingPreset = 'studio') => {
+  const [lightingPreset, setLightingPreset] = useState<LightingPreset>(initialPreset);
+  const [lightingSettings, setLightingSettings] = useState<LightingSettings>(DEFAULT_LIGHTING[initialPreset]);
+  const [isUserCustomized, setIsUserCustomized] = useState(false);
   
-  const updateLightPosition = (x: number, y: number) => {
-    setMousePosition({ x, y });
-    
-    if (lightingSettings.followPointer) {
-      setLightingSettings(prev => ({
-        ...prev,
-        primaryLight: {
-          ...prev.primaryLight,
-          x: (x - 0.5) * 20,
-          y: (0.5 - y) * 20
-        }
-      }));
-    }
-  };
+  // Apply preset lighting
+  const applyPreset = useCallback((preset: LightingPreset) => {
+    setLightingPreset(preset);
+    setLightingSettings(DEFAULT_LIGHTING[preset]);
+    setIsUserCustomized(false);
+  }, []);
   
-  const toggleFollowPointer = () => {
-    setLightingSettings(prev => ({
-      ...prev,
-      followPointer: !prev.followPointer
-    }));
-  };
-  
-  const toggleAutoRotate = () => {
-    setLightingSettings(prev => ({
-      ...prev,
-      autoRotate: !prev.autoRotate
-    }));
-  };
-  
-  const updateLightSetting = (
-    property: keyof LightingSettings['primaryLight'] | keyof LightingSettings['ambientLight'], 
-    value: any,
-    lightType: 'primaryLight' | 'ambientLight'
+  // Update a specific lighting parameter
+  const updateLightingSetting = useCallback(<K extends keyof LightingSettings>(
+    property: K, 
+    value: LightingSettings[K]
   ) => {
     setLightingSettings(prev => ({
       ...prev,
-      [lightType]: {
-        ...prev[lightType],
-        [property]: value
+      [property]: value
+    }));
+    setIsUserCustomized(true);
+  }, []);
+  
+  // Update primary light position (typically from mouse movement)
+  const updateLightPosition = useCallback((x: number, y: number) => {
+    if (!lightingSettings.useDynamicLighting) return;
+    
+    // Convert from normalized coordinates (0-1) to actual position values
+    const posX = (x - 0.5) * 20;
+    const posY = (y - 0.5) * -20; // Invert Y axis for natural movement
+    
+    setLightingSettings(prev => ({
+      ...prev,
+      primaryLight: {
+        ...prev.primaryLight,
+        x: posX,
+        y: posY
       }
     }));
-  };
+  }, [lightingSettings.useDynamicLighting]);
   
-  const applyPreset = (presetName: keyof typeof LIGHTING_PRESETS) => {
-    setLightingSettings(LIGHTING_PRESETS[presetName]);
-  };
+  // Update primary light intensity
+  const updatePrimaryLightIntensity = useCallback((intensity: number) => {
+    setLightingSettings(prev => ({
+      ...prev,
+      primaryLight: {
+        ...prev.primaryLight,
+        intensity
+      }
+    }));
+    setIsUserCustomized(true);
+  }, []);
   
-  // Auto-rotation effect
-  useEffect(() => {
-    if (!lightingSettings.autoRotate) return;
-    
-    let angle = 0;
-    const interval = setInterval(() => {
-      angle += 0.02;
-      setLightingSettings(prev => ({
-        ...prev,
-        primaryLight: {
-          ...prev.primaryLight,
-          x: Math.sin(angle) * 10,
-          z: Math.cos(angle) * 10
-        }
-      }));
-    }, 50);
-    
-    return () => clearInterval(interval);
-  }, [lightingSettings.autoRotate]);
+  // Update primary light color
+  const updatePrimaryLightColor = useCallback((color: string) => {
+    setLightingSettings(prev => ({
+      ...prev,
+      primaryLight: {
+        ...prev.primaryLight,
+        color
+      }
+    }));
+    setIsUserCustomized(true);
+  }, []);
+  
+  // Update ambient light intensity
+  const updateAmbientLightIntensity = useCallback((intensity: number) => {
+    setLightingSettings(prev => ({
+      ...prev,
+      ambientLight: {
+        ...prev.ambientLight,
+        intensity
+      }
+    }));
+    setIsUserCustomized(true);
+  }, []);
+  
+  // Update ambient light color
+  const updateAmbientLightColor = useCallback((color: string) => {
+    setLightingSettings(prev => ({
+      ...prev,
+      ambientLight: {
+        ...prev.ambientLight,
+        color
+      }
+    }));
+    setIsUserCustomized(true);
+  }, []);
+  
+  // Toggle dynamic lighting
+  const toggleDynamicLighting = useCallback(() => {
+    setLightingSettings(prev => ({
+      ...prev,
+      useDynamicLighting: !prev.useDynamicLighting
+    }));
+    setIsUserCustomized(true);
+  }, []);
+  
+  // Update environment map intensity
+  const updateEnvMapIntensity = useCallback((intensity: number) => {
+    setLightingSettings(prev => ({
+      ...prev,
+      envMapIntensity: intensity
+    }));
+    setIsUserCustomized(true);
+  }, []);
   
   return {
     lightingSettings,
-    mousePosition,
-    updateLightPosition,
-    toggleFollowPointer,
-    toggleAutoRotate,
-    updateLightSetting,
+    lightingPreset,
+    isUserCustomized,
     applyPreset,
-    lightingPresets: LIGHTING_PRESETS
+    updateLightingSetting,
+    updateLightPosition,
+    updatePrimaryLightIntensity,
+    updatePrimaryLightColor,
+    updateAmbientLightIntensity,
+    updateAmbientLightColor,
+    toggleDynamicLighting,
+    updateEnvMapIntensity
   };
-}
+};
