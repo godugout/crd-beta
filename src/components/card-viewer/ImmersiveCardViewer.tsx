@@ -1,3 +1,4 @@
+
 import React, { useRef, useEffect, useState } from 'react';
 import { Card } from '@/lib/types/cardTypes';
 import { Canvas, useFrame } from '@react-three/fiber';
@@ -5,7 +6,6 @@ import { OrbitControls, PerspectiveCamera, Environment } from '@react-three/drei
 import { DEFAULT_DESIGN_METADATA, FALLBACK_IMAGE_URL } from '@/lib/utils/cardDefaults';
 import { useToast } from '@/hooks/use-toast';
 import * as THREE from 'three';
-import { EffectComposer, Bloom } from '@react-three/postprocessing';
 
 interface ImmersiveCardViewerProps {
   card: Card;
@@ -110,12 +110,25 @@ const Card3DModel = ({
     return null;
   }
 
+  // Create glow material for enhanced effect without @react-three/postprocessing
+  const createGlowMaterial = () => {
+    const glowMaterial = new THREE.MeshStandardMaterial({
+      color: new THREE.Color('#8050ff'),
+      emissive: new THREE.Color('#4020a0'),
+      emissiveIntensity: 0.4,
+      transparent: true,
+      opacity: 0.6
+    });
+    return glowMaterial;
+  };
+
   return (
     <group 
       ref={groupRef}
       position={[0, 0, 0]}
       rotation={[0.1, 0, 0]} // Slight initial tilt
     >
+      {/* Main card mesh */}
       <mesh
         ref={meshRef}
         castShadow
@@ -151,6 +164,14 @@ const Card3DModel = ({
           clearcoat={0.8}
         />
       </mesh>
+      
+      {/* Optional glow effect for holographic cards if active */}
+      {activeEffects.includes('Holographic') && (
+        <mesh position={[0, 0, -0.03]} scale={[2.55, 3.55, 1]}>
+          <planeGeometry args={[1, 1]} />
+          <primitive object={createGlowMaterial()} attach="material" />
+        </mesh>
+      )}
     </group>
   );
 };
@@ -272,9 +293,6 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
         
         {/* Environment and effects */}
         <Environment preset="city" />
-        <EffectComposer>
-          <Bloom intensity={0.5} radius={0.7} />
-        </EffectComposer>
         
         <Card3DModel 
           frontTextureUrl={frontTexture}
