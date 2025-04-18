@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button';
 import { Container } from '@/components/ui/container';
 import { PlusCircle, Filter, Layout, ListFilter, Globe } from 'lucide-react';
 import CollectionGrid from '@/components/collections/CollectionGrid';
-import { collectionsNavItems } from '@/config/navigation';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import CreateCollectionDialog from '@/components/collections/CreateCollectionDialog';
 
@@ -15,6 +14,13 @@ const Collections = () => {
   const { collections, isLoading } = useCards();
   const [viewMode, setViewMode] = React.useState<'grid' | 'list'>('grid');
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  
+  // Define collectionsNavItems here since it's referenced in the component
+  const collectionsNavItems = [
+    { path: "all", title: "All Collections", icon: () => <Layout size={16} /> },
+    { path: "featured", title: "Featured", icon: () => <Globe size={16} /> },
+    { path: "private", title: "Private", icon: () => <Layout size={16} /> },
+  ];
   
   return (
     <PageLayout
@@ -61,13 +67,12 @@ const Collections = () => {
                 <TabsTrigger 
                   key={i} 
                   value={item.path} 
-                  asChild
                   className="data-[state=active]:bg-[var(--brand-primary)]/10 data-[state=active]:text-[var(--brand-primary)] rounded-lg py-2.5 h-auto"
                 >
-                  <Link to={item.path} className="flex items-center gap-2 w-full">
-                    {typeof item.icon === 'function' ? React.createElement(item.icon) : item.icon}
-                    <span className="hidden md:inline">{item.label || item.title}</span>
-                  </Link>
+                  <div className="flex items-center gap-2 w-full">
+                    {typeof item.icon === 'function' ? item.icon() : item.icon}
+                    <span className="hidden md:inline">{item.title}</span>
+                  </div>
                 </TabsTrigger>
               ))}
             </TabsList>
@@ -89,8 +94,8 @@ const Collections = () => {
                 Create a Collection
               </Button>
               
-              <Button variant="glass" asChild>
-                <Link to="/collections/commons">
+              <Button variant="glass">
+                <Link to="/collections/commons" className="flex items-center">
                   <Globe className="h-4 w-4 mr-2" />
                   Generate Commons Cards
                 </Link>
