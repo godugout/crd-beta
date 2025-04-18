@@ -14,6 +14,7 @@ interface PageLayoutProps {
   fullWidth?: boolean;
   hideNavigation?: boolean;
   className?: string;
+  contentClassName?: string;  // Added contentClassName prop
   canonicalPath?: string;
   hideBreadcrumbs?: boolean;
   actions?: React.ReactNode;
@@ -36,6 +37,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({
   fullWidth = false,
   hideNavigation = false,
   className = '',
+  contentClassName = '',  // Added default value
   canonicalPath,
   hideBreadcrumbs = false,
   actions,
@@ -90,7 +92,9 @@ const PageLayout: React.FC<PageLayoutProps> = ({
       )}
       
       <main className={`flex-grow ${className}`}>
-        {children}
+        <div className={contentClassName}>
+          {children}
+        </div>
       </main>
       
       {!hideNavigation && (
