@@ -24,14 +24,64 @@ const Card3DModel = ({
 }) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const [hovered, setHovered] = useState(false);
+  const [frontTextureLoaded, setFrontTextureLoaded] = useState<THREE.Texture | null>(null);
+  const [backTextureLoaded, setBackTextureLoaded] = useState<THREE.Texture | null>(null);
+  const [texturesLoaded, setTexturesLoaded] = useState(false);
   
-  // Load textures with proper type handling
-  const frontTextureResult = useTexture(frontTextureUrl);
-  const backTextureResult = useTexture(backTextureUrl || '/card-back-texture.jpg');
+  // Default card back image - using a relative path that exists in the public folder
+  const defaultCardBackImage = '/images/card-back-placeholder.png';
   
-  // Extract the actual texture objects (useTexture can return an array or single texture)
-  const frontTexture = Array.isArray(frontTextureResult) ? frontTextureResult[0] : frontTextureResult;
-  const backTexture = Array.isArray(backTextureResult) ? backTextureResult[0] : backTextureResult;
+  // Load textures safely with error handling
+  useEffect(() => {
+    const textureLoader = new THREE.TextureLoader();
+    
+    // Load front texture
+    textureLoader.load(
+      frontTextureUrl,
+      (texture) => {
+        setFrontTextureLoaded(texture);
+        console.log("Front texture loaded successfully");
+      },
+      undefined,
+      (error) => {
+        console.error("Error loading front texture:", error);
+        // Load fallback texture for front
+        textureLoader.load(
+          FALLBACK_IMAGE_URL,
+          (fallbackTexture) => setFrontTextureLoaded(fallbackTexture),
+          undefined,
+          () => console.error("Even fallback image failed to load")
+        );
+      }
+    );
+    
+    // Load back texture
+    textureLoader.load(
+      backTextureUrl || defaultCardBackImage,
+      (texture) => {
+        setBackTextureLoaded(texture);
+        console.log("Back texture loaded successfully");
+      },
+      undefined,
+      (error) => {
+        console.error("Error loading back texture:", error);
+        // Load default card back
+        textureLoader.load(
+          defaultCardBackImage,
+          (fallbackTexture) => setBackTextureLoaded(fallbackTexture),
+          undefined,
+          () => console.error("Failed to load default card back")
+        );
+      }
+    );
+  }, [frontTextureUrl, backTextureUrl, defaultCardBackImage]);
+  
+  // Set textures loaded when both are available
+  useEffect(() => {
+    if (frontTextureLoaded && backTextureLoaded) {
+      setTexturesLoaded(true);
+    }
+  }, [frontTextureLoaded, backTextureLoaded]);
 
   // Set PBR material properties
   const materialProps = {
@@ -55,7 +105,7 @@ const Card3DModel = ({
       modifiedProps.clearcoat = 1.5;
       modifiedProps.clearcoatRoughness = 0.1;
       
-      // These properties require THREE.MeshPhysicalMaterial
+      // Apply iridescence only if we have a MeshPhysicalMaterial
       if (meshRef.current.material instanceof THREE.MeshPhysicalMaterial) {
         meshRef.current.material.iridescence = 0.8;
         meshRef.current.material.iridescenceIOR = 1.4;
@@ -69,7 +119,7 @@ const Card3DModel = ({
     }
     
     if (activeEffects.includes('Refractor')) {
-      // These properties require THREE.MeshPhysicalMaterial
+      // Apply transmission only if we have a MeshPhysicalMaterial
       if (meshRef.current.material instanceof THREE.MeshPhysicalMaterial) {
         meshRef.current.material.transmission = 0.1;
         meshRef.current.material.thickness = 0.05;
@@ -117,6 +167,10 @@ const Card3DModel = ({
     return () => cancelAnimationFrame(animationFrame);
   }, [isFlipped]);
 
+  if (!texturesLoaded) {
+    return null; // Don't render until textures are loaded
+  }
+
   return (
     <mesh
       ref={meshRef}
@@ -130,7 +184,7 @@ const Card3DModel = ({
       
       {/* Front material */}
       <meshPhysicalMaterial 
-        map={frontTexture} 
+        map={frontTextureLoaded}
         side={THREE.FrontSide} 
         {...materialProps} 
       />
@@ -139,7 +193,7 @@ const Card3DModel = ({
       <mesh position={[0, 0, -0.01]} rotation={[0, Math.PI, 0]}>
         <planeGeometry args={[2.5, 3.5, 1, 1]} />
         <meshPhysicalMaterial 
-          map={backTexture} 
+          map={backTextureLoaded} 
           side={THREE.FrontSide} 
           {...materialProps} 
         />
@@ -159,7 +213,7 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
   const [processedCard, setProcessedCard] = useState<Card>(card);
   const [isLoading, setIsLoading] = useState(true);
   const [frontTexture, setFrontTexture] = useState<string>(card?.imageUrl || FALLBACK_IMAGE_URL);
-  const [backTexture, setBackTexture] = useState<string>('/card-back-texture.jpg');
+  const [backTexture, setBackTexture] = useState<string>('/images/card-back-placeholder.png');
   
   // Ensure we have valid image URLs before rendering
   useEffect(() => {
