@@ -35,7 +35,7 @@ export const useCreateCropBox = ({
     
     // Add to state
     const newCropBox: EnhancedCropBoxProps = {
-      id: uuidv4(), // Add a unique ID using uuid
+      id: crypto.randomUUID(), // Generate a unique ID as a number
       x,
       y,
       width: defaultWidth,

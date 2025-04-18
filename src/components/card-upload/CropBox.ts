@@ -2,7 +2,7 @@
 import { MemorabiliaType } from './cardDetection';
 
 export interface CropBoxProps {
-  id: number;
+  id: string; // Update to string to match the UUID format
   x: number;
   y: number;
   width: number;
@@ -14,7 +14,7 @@ export interface CropBoxProps {
 }
 
 export interface EnhancedCropBoxProps {
-  id: number;
+  id: string; // Update to string to match the UUID format
   x: number;
   y: number;
   width: number;
