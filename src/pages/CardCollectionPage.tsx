@@ -4,52 +4,83 @@ import PageLayout from '@/components/navigation/PageLayout';
 import CardGrid from '@/components/cards/CardGrid';
 import FilterPanel from '@/components/filters/FilterPanel';
 import { Button } from '@/components/ui/button';
-import { PlusCircle } from 'lucide-react';
+import { Filter, Grid3X3, LayoutList, PlusCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { Card } from '@/lib/types';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const CardCollectionPage: React.FC = () => {
-  const [filters, setFilters] = useState({
-    searchQuery: '',
-    tags: [],
-    sortBy: 'newest'
-  });
+  const [activeTab, setActiveTab] = useState('all');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const navigate = useNavigate();
-
-  const handleFilterChange = (newFilters: any) => {
-    setFilters({ ...filters, ...newFilters });
-  };
 
   return (
     <PageLayout
-      title="Card Collection"
+      title="Cards"
       description="Browse and discover unique digital cards"
-    >
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">Card Collection</h1>
+      actions={
+        <div className="flex items-center gap-2">
+          <div className="flex p-1 bg-[var(--bg-tertiary)] rounded-lg overflow-hidden">
+            <button
+              onClick={() => setViewMode('grid')}
+              className={`p-2 rounded-md transition-colors ${viewMode === 'grid' 
+                ? 'bg-[var(--bg-elevated)] text-[var(--text-primary)]' 
+                : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'}`}
+            >
+              <Grid3X3 size={16} />
+            </button>
+            <button
+              onClick={() => setViewMode('list')}
+              className={`p-2 rounded-md transition-colors ${viewMode === 'list' 
+                ? 'bg-[var(--bg-elevated)] text-[var(--text-primary)]' 
+                : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'}`}
+            >
+              <LayoutList size={16} />
+            </button>
+          </div>
           
-          <Button onClick={() => navigate('/cards/create')} className="flex items-center gap-2">
-            <PlusCircle size={18} />
-            Create New
+          <Button variant="soft" size="sm">
+            <Filter className="h-4 w-4 mr-2" />
+            Filter
+          </Button>
+
+          <Button 
+            onClick={() => navigate('/cards/create')}
+            className="bg-[var(--brand-primary)] text-white"
+          >
+            <PlusCircle className="h-4 w-4 mr-2" />
+            New Card
           </Button>
         </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div className="md:col-span-1">
-            <FilterPanel 
-              filters={filters} 
-              onFilterChange={handleFilterChange}
-            />
+      }
+    >
+      <div className="container mx-auto px-4">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <div className="bg-[var(--bg-secondary)]/30 backdrop-blur-md border border-[var(--border-primary)] rounded-xl overflow-hidden">
+            <TabsList className="w-full grid grid-cols-3 bg-transparent p-1 h-auto">
+              <TabsTrigger value="all" className="data-[state=active]:bg-[var(--brand-primary)]/10 data-[state=active]:text-[var(--brand-primary)] rounded-lg py-2.5 h-auto">
+                All Cards
+              </TabsTrigger>
+              <TabsTrigger value="recent" className="data-[state=active]:bg-[var(--brand-primary)]/10 data-[state=active]:text-[var(--brand-primary)] rounded-lg py-2.5 h-auto">
+                Recent
+              </TabsTrigger>
+              <TabsTrigger value="favorites" className="data-[state=active]:bg-[var(--brand-primary)]/10 data-[state=active]:text-[var(--brand-primary)] rounded-lg py-2.5 h-auto">
+                Favorites
+              </TabsTrigger>
+            </TabsList>
           </div>
+
+          <TabsContent value="all">
+            <CardGrid cards={[]} />
+          </TabsContent>
           
-          <div className="md:col-span-3">
-            <CardGrid 
-              cards={[]} 
-              onCardClick={(id) => navigate(`/cards/${id}`)}
-            />
-          </div>
-        </div>
+          <TabsContent value="recent">
+            <CardGrid cards={[]} />
+          </TabsContent>
+          
+          <TabsContent value="favorites">
+            <CardGrid cards={[]} />
+          </TabsContent>
+        </Tabs>
       </div>
     </PageLayout>
   );
