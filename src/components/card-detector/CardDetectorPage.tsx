@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
 import ImageEditor from '../card-upload/ImageEditor';
@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { MemorabiliaType } from '../card-upload/cardDetection';
 import { useNavigate } from 'react-router-dom';
 import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
 const CardDetectorPage = () => {
   const [showEditor, setShowEditor] = useState(false);
@@ -15,6 +16,7 @@ const CardDetectorPage = () => {
   const [currentFile, setCurrentFile] = useState<File | null>(null);
   const [detectionResults, setDetectionResults] = useState<any>(null);
   const [activeTab, setActiveTab] = useState('upload');
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   
   // Enable all memorabilia types
@@ -25,6 +27,8 @@ const CardDetectorPage = () => {
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
+      setIsLoading(true);
+      
       const reader = new FileReader();
       
       reader.onload = (e) => {
@@ -32,7 +36,13 @@ const CardDetectorPage = () => {
           setEditorImage(e.target.result as string);
           setCurrentFile(file);
           setShowEditor(true);
+          setIsLoading(false);
         }
+      };
+      
+      reader.onerror = () => {
+        toast.error("Failed to load image");
+        setIsLoading(false);
       };
       
       reader.readAsDataURL(file);
@@ -83,8 +93,9 @@ const CardDetectorPage = () => {
                     <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-12 text-center">
                       <p className="text-gray-500 mb-4">Upload a card or memorabilia item to analyze</p>
                       <div>
-                        <Button variant="default">
-                          <label htmlFor="file-upload" className="cursor-pointer">
+                        <Button variant="default" disabled={isLoading}>
+                          <label htmlFor="file-upload" className="cursor-pointer flex items-center">
+                            {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                             Select Image
                             <input
                               id="file-upload"
@@ -92,6 +103,7 @@ const CardDetectorPage = () => {
                               className="sr-only"
                               accept="image/*"
                               onChange={handleFileSelect}
+                              disabled={isLoading}
                             />
                           </label>
                         </Button>
@@ -178,15 +190,23 @@ const CardDetectorPage = () => {
         </div>
       </div>
       
-      <ImageEditor
-        showEditor={showEditor}
-        setShowEditor={setShowEditor}
-        editorImage={editorImage}
-        currentFile={currentFile}
-        onCropComplete={handleCropComplete}
-        enabledMemorabiliaTypes={enabledMemorabiliaTypes}
-        autoEnhance={true}
-      />
+      {/* Wrap ImageEditor in Suspense to handle async loading */}
+      <Suspense fallback={<div className="fixed inset-0 bg-black/40 flex items-center justify-center">
+        <div className="bg-white p-6 rounded-lg shadow-lg">
+          <Loader2 className="animate-spin h-8 w-8 mx-auto mb-4" />
+          <p className="text-center">Loading editor...</p>
+        </div>
+      </div>}>
+        <ImageEditor
+          showEditor={showEditor}
+          setShowEditor={setShowEditor}
+          editorImage={editorImage}
+          currentFile={currentFile}
+          onCropComplete={handleCropComplete}
+          enabledMemorabiliaTypes={enabledMemorabiliaTypes}
+          autoEnhance={true}
+        />
+      </Suspense>
     </PageLayout>
   );
 };
