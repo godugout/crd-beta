@@ -10,7 +10,7 @@ interface FileUploadAreaProps {
   handleDrop: (e: React.DragEvent) => void;
   selectedFilesCount: number;
   maxFiles: number;
-  disabled: boolean;
+  disabled?: boolean;
 }
 
 const FileUploadArea: React.FC<FileUploadAreaProps> = ({
@@ -24,22 +24,39 @@ const FileUploadArea: React.FC<FileUploadAreaProps> = ({
 }) => {
   return (
     <div
-      className="border-2 border-dashed rounded p-6 text-center"
+      className="border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center gap-4 bg-gray-50 hover:bg-gray-100 transition-colors"
       onDragOver={handleDragOver}
       onDrop={handleDrop}
     >
-      <p className="mb-2">
-        {selectedFilesCount > 0 
-          ? `Add more files (${selectedFilesCount}/${maxFiles})`
-          : 'Drag & drop or click to select multiple files'}
-      </p>
-      <div className="flex justify-center gap-2">
-        <Button variant="outline" onClick={onBrowseClick} disabled={disabled}>
-          <Upload size={16} className="mr-2"/> Browse
-        </Button>
-        <Button variant="outline" onClick={onCameraClick} disabled={disabled}>
-          <Camera size={16} className="mr-2"/> Camera
-        </Button>
+      <div className="text-center">
+        <p className="text-gray-700 mb-2">
+          {selectedFilesCount > 0 
+            ? `Add more files (${selectedFilesCount}/${maxFiles})`
+            : 'Drag and drop files here, or'}
+        </p>
+        <div className="flex gap-2 justify-center">
+          <Button 
+            variant="outline" 
+            onClick={onBrowseClick}
+            size="sm"
+            className="flex items-center gap-1"
+            disabled={disabled}
+          >
+            <Upload size={16} />
+            Browse
+          </Button>
+          
+          <Button 
+            variant="outline" 
+            onClick={onCameraClick}
+            size="sm"
+            className="flex items-center gap-1"
+            disabled={disabled}
+          >
+            <Camera size={16} />
+            Camera
+          </Button>
+        </div>
       </div>
     </div>
   );

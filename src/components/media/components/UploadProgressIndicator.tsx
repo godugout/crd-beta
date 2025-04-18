@@ -8,9 +8,9 @@ interface UploadProgressIndicatorProps {
 
 const UploadProgressIndicator: React.FC<UploadProgressIndicatorProps> = ({ progress }) => {
   return (
-    <div className="flex flex-col gap-2">
+    <div className="space-y-2">
       <Progress value={progress} />
-      <div className="text-right text-xs">
+      <div className="text-xs text-gray-500 text-right">
         {Math.round(progress)}%
       </div>
     </div>

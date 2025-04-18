@@ -7,40 +7,52 @@ interface FilePreviewGridProps {
   files: File[];
   previews: string[];
   onRemoveFile: (index: number) => void;
-  disabled: boolean;
+  disabled?: boolean;
 }
 
-const FilePreviewGrid: React.FC<FilePreviewGridProps> = ({
+export const FilePreviewGrid: React.FC<FilePreviewGridProps> = ({
   files,
   previews,
   onRemoveFile,
   disabled
 }) => {
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-      {files.map((file, idx) => (
-        <div key={idx} className="border relative rounded overflow-hidden">
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      {files.map((file, index) => (
+        <div 
+          key={`${file.name}-${index}`}
+          className="relative border border-gray-200 rounded-lg overflow-hidden"
+        >
           <Button
             variant="destructive"
             size="icon"
             className="absolute top-2 right-2 w-6 h-6 rounded-full z-10"
-            onClick={() => onRemoveFile(idx)}
+            onClick={() => onRemoveFile(index)}
             disabled={disabled}
           >
-            <X size={14}/>
+            <X size={12} />
           </Button>
-          {idx < previews.length && (
-            <div className="aspect-square bg-black flex items-center justify-center">
-              {file.type.startsWith('image/') ? (
-                <img src={previews[idx]} className="w-full h-full object-cover" alt={`Preview ${idx + 1}`}/>
+          
+          <div className="aspect-square bg-black flex items-center justify-center">
+            {index < previews.length && (
+              file.type.startsWith('image/') ? (
+                <img 
+                  src={previews[index]} 
+                  alt={`Preview ${index + 1}`} 
+                  className="max-h-full max-w-full object-cover w-full h-full"
+                />
               ) : file.type.startsWith('video/') ? (
-                <video src={previews[idx]} className="w-full h-full object-cover"/>
+                <video 
+                  src={previews[index]} 
+                  className="max-h-full max-w-full"
+                />
               ) : (
-                <div className="text-white">Unsupported</div>
-              )}
-            </div>
-          )}
-          <div className="p-2 text-xs truncate">
+                <div className="text-white">Unsupported file</div>
+              )
+            )}
+          </div>
+          
+          <div className="p-2 text-xs truncate bg-white">
             {file.name}
           </div>
         </div>
