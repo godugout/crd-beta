@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import PageLayout from '@/components/navigation/PageLayout';
@@ -13,27 +14,16 @@ const Collections = () => {
   const { collections, isLoading } = useCards();
   const [viewMode, setViewMode] = React.useState<'grid' | 'list'>('grid');
   const [showCreateDialog, setShowCreateDialog] = useState(false);
-  
-  // Define collections navigation items with proper icon functions
-  const collectionsNavItems = [
-    { path: "all", title: "All Collections", icon: () => <Layout size={16} /> },
-    { path: "featured", title: "Featured", icon: () => <Globe size={16} /> },
-    { path: "private", title: "Private", icon: () => <Layout size={16} /> },
-  ];
-  
+
   return (
     <PageLayout
       title="Collections"
       description="Manage your card collections"
       hideBreadcrumbs={false}
-      primaryAction={{
-        label: "New Collection",
-        icon: <PlusCircle className="h-4 w-4" />,
-        onClick: () => setShowCreateDialog(true)
-      }}
       className="pb-8"
+      contentClassName="space-y-4"
       actions={
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <div className="flex p-1 bg-[var(--bg-tertiary)] rounded-lg overflow-hidden">
             <button
               onClick={() => setViewMode('grid')}
@@ -57,13 +47,23 @@ const Collections = () => {
             <Filter className="h-4 w-4 mr-2" />
             Filter
           </Button>
+
+          <Button 
+            variant="default" 
+            size="sm"
+            onClick={() => setShowCreateDialog(true)}
+            className="bg-[var(--brand-primary)] text-white"
+          >
+            <PlusCircle className="h-4 w-4 mr-2" />
+            New Collection
+          </Button>
         </div>
       }
     >
       <Container>
-        <div className="mt-2 backdrop-blur-md bg-[var(--bg-secondary)]/30 p-1 rounded-xl border border-[var(--border-primary)]">
-          <Tabs defaultValue="all" className="w-full">
-            <TabsList className="grid grid-cols-3 md:grid-cols-3 bg-transparent h-auto p-0 w-full">
+        <Tabs defaultValue="all" className="w-full">
+          <div className="bg-[var(--bg-secondary)]/30 backdrop-blur-md border border-[var(--border-primary)] rounded-xl overflow-hidden">
+            <TabsList className="w-full grid grid-cols-3 bg-transparent p-1 h-auto">
               <TabsTrigger 
                 value="all" 
                 className="data-[state=active]:bg-[var(--brand-primary)]/10 data-[state=active]:text-[var(--brand-primary)] rounded-lg py-2.5 h-auto"
@@ -92,40 +92,26 @@ const Collections = () => {
                 </div>
               </TabsTrigger>
             </TabsList>
-          </Tabs>
-        </div>
-        
-        {collections.length === 0 && !isLoading && (
-          <div className="mt-10 p-8 backdrop-blur-md bg-[var(--bg-secondary)]/30 border border-dashed border-[var(--border-primary)] rounded-xl text-center">
-            <h3 className="text-lg font-medium mb-3">No collections yet</h3>
-            <p className="text-[var(--text-tertiary)] mb-6">Create a collection or generate sample cards to get started</p>
-            
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button 
-                variant="rainbow" 
-                onClick={() => setShowCreateDialog(true)}
-                className="flex items-center gap-2"
-              >
-                <PlusCircle className="h-4 w-4" /> 
-                Create a Collection
-              </Button>
-              
-              <Button variant="glass">
-                <Link to="/collections/commons" className="flex items-center">
-                  <Globe className="h-4 w-4 mr-2" />
-                  Generate Commons Cards
-                </Link>
-              </Button>
-            </div>
           </div>
-        )}
-        
-        <div className="mt-8">
-          <CollectionGrid 
-            collections={collections}
-            isLoading={isLoading}
-          />
-        </div>
+
+          <TabsContent value="all" className="mt-6">
+            <CollectionGrid collections={collections} isLoading={isLoading} />
+          </TabsContent>
+          
+          <TabsContent value="featured" className="mt-6">
+            <CollectionGrid 
+              collections={collections.filter(c => c.featured)} 
+              isLoading={isLoading} 
+            />
+          </TabsContent>
+          
+          <TabsContent value="private" className="mt-6">
+            <CollectionGrid 
+              collections={collections.filter(c => c.visibility === 'private')} 
+              isLoading={isLoading} 
+            />
+          </TabsContent>
+        </Tabs>
       </Container>
 
       <CreateCollectionDialog
