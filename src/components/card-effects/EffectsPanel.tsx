@@ -136,7 +136,7 @@ const EffectsPanel: React.FC<EffectsPanelProps> = ({
         <TabsContent value="lighting">
           <LightingControls
             settings={lightingSettings}
-            onUpdateSettings={updateLightingSetting}
+            onUpdateSettings={(settings) => updateLightingSetting(settings)}
             onApplyPreset={applyPreset}
             onToggleDynamicLighting={toggleDynamicLighting}
             isUserCustomized={isUserCustomized}
@@ -153,10 +153,9 @@ const EffectsPanel: React.FC<EffectsPanelProps> = ({
                 <Switch 
                   id="high-quality"
                   checked={lightingSettings.envMapIntensity > 0.5}
-                  onCheckedChange={(checked) => updateLightingSetting(
-                    'envMapIntensity',
-                    checked ? 1.0 : 0.3
-                  )}
+                  onCheckedChange={(checked) => updateLightingSetting({
+                    envMapIntensity: checked ? 1.0 : 0.3
+                  })}
                 />
               </div>
               

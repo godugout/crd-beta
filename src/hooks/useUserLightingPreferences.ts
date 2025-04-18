@@ -1,223 +1,154 @@
 
-import { useState, useEffect, useCallback } from 'react';
-import { useSession } from '@/providers/session-provider';
-import { lightingOperations, UserLightingPreference } from '@/lib/supabase/lighting-operations/lighting-operations';
-import { LightingSettings, LightingPreset } from './useCardLighting';
-import { toast } from 'sonner';
+import { useState, useEffect } from 'react';
+import { lightingOperations } from '@/lib/supabase/lighting-operations/lighting-operations';
+import { LightingSettings, LightingPreset, DEFAULT_LIGHTING } from '@/hooks/useCardLighting';
+import { useToast } from '@/hooks/use-toast';
 
-export const useUserLightingPreferences = (initialPreset: LightingPreset = 'studio') => {
-  const { session } = useSession();
-  const userId = session?.user?.id;
-  
-  const [preferences, setPreferences] = useState<UserLightingPreference[]>([]);
-  const [currentPreference, setCurrentPreference] = useState<UserLightingPreference | null>(null);
+interface UseUserLightingPreferencesOptions {
+  autoLoad?: boolean;
+}
+
+export const useUserLightingPreferences = (defaultPreset: LightingPreset = 'studio', options: UseUserLightingPreferencesOptions = {}) => {
+  const [currentSettings, setCurrentSettings] = useState<LightingSettings | null>(null);
+  const [savedPreferences, setSavedPreferences] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  // Load user preferences
-  useEffect(() => {
-    const loadPreferences = async () => {
-      if (!userId) {
-        setIsLoading(false);
-        return;
-      }
-      
-      setIsLoading(true);
-      setError(null);
-      
-      try {
-        // Get default preference first
-        const { data: defaultPreference, error: defaultError } = await lightingOperations.getUserDefaultLightingPreference(userId);
-        
-        if (defaultError) {
-          console.error('Error loading default preference:', defaultError);
-          setError('Failed to load lighting preferences');
-        }
-        
-        // Get all preferences
-        const { data: allPreferences, error: preferencesError } = await lightingOperations.getUserLightingPreferences(userId);
-        
-        if (preferencesError) {
-          console.error('Error loading preferences:', preferencesError);
-          setError('Failed to load lighting preferences');
-        } else {
-          setPreferences(allPreferences || []);
-          
-          // Set current preference to default or first in list
-          if (defaultPreference) {
-            setCurrentPreference(defaultPreference);
-          } else if (allPreferences && allPreferences.length > 0) {
-            setCurrentPreference(allPreferences[0]);
-          }
-        }
-      } catch (err: any) {
-        console.error('Error in loadPreferences:', err);
-        setError(err.message || 'An unknown error occurred');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    loadPreferences();
-  }, [userId]);
-
-  // Save a new preference
-  const savePreference = useCallback(async (
-    settings: LightingSettings, 
-    name: string = 'My Lighting', 
-    makeDefault: boolean = false
-  ) => {
-    if (!userId) {
-      toast.error('You must be logged in to save preferences');
-      return null;
-    }
-    
+  const { toast } = useToast();
+  
+  // Function to save the current lighting preference to the database
+  const savePreference = async (settings: LightingSettings, name: string = 'Default Lighting', isDefault: boolean = false) => {
     try {
-      // If making this the default, unset other defaults
-      if (makeDefault && preferences.some(p => p.is_default)) {
-        // Find current default
-        const currentDefault = preferences.find(p => p.is_default);
-        if (currentDefault) {
-          await lightingOperations.updateUserLightingPreference(
-            currentDefault.id!,
-            { is_default: false }
-          );
-        }
-      }
+      // Get the current user ID
+      // In a real app, you'd get this from your auth context
+      const userId = "current-user-id"; // Replace with actual user ID
       
-      const newPreference: Omit<UserLightingPreference, 'id' | 'created_at' | 'updated_at'> = {
+      const { data, error } = await lightingOperations.saveUserLightingPreference({
         user_id: userId,
         settings,
         name,
-        is_default: makeDefault,
-      };
-      
-      const { data, error } = await lightingOperations.saveUserLightingPreference(newPreference);
+        is_default: isDefault
+      });
       
       if (error) {
-        toast.error('Failed to save lighting preference');
-        return null;
+        console.error("Error saving lighting preference:", error);
+        toast({
+          title: "Failed to save lighting settings",
+          description: error.message,
+          variant: "destructive"
+        });
+        return false;
       }
       
-      toast.success('Lighting preference saved');
+      toast({
+        title: "Lighting settings saved",
+        description: `Your "${name}" lighting settings have been saved.`,
+        variant: "default"
+      });
       
-      // Update local state
-      setPreferences(prev => [data!, ...prev]);
+      // Refresh the saved preferences
+      loadUserPreferences();
+      return true;
       
-      // If this is the new default or we don't have a current preference, set it
-      if (makeDefault || !currentPreference) {
-        setCurrentPreference(data!);
-      }
-      
-      return data;
     } catch (err: any) {
-      toast.error('An error occurred while saving preference');
-      console.error('Error saving preference:', err);
-      return null;
-    }
-  }, [userId, preferences, currentPreference]);
-
-  // Update an existing preference
-  const updatePreference = useCallback(async (
-    id: string,
-    updates: Partial<UserLightingPreference>
-  ) => {
-    if (!userId) {
-      toast.error('You must be logged in to update preferences');
+      console.error("Error in savePreference:", err);
+      toast({
+        title: "Failed to save lighting settings",
+        description: err.message || "An unexpected error occurred",
+        variant: "destructive"
+      });
       return false;
     }
-    
+  };
+  
+  // Function to update an existing preference
+  const updatePreference = async (id: string, settings: LightingSettings, name?: string) => {
     try {
-      // If making this the default, unset other defaults
-      if (updates.is_default && preferences.some(p => p.is_default && p.id !== id)) {
-        // Find current default
-        const currentDefault = preferences.find(p => p.is_default && p.id !== id);
-        if (currentDefault) {
-          await lightingOperations.updateUserLightingPreference(
-            currentDefault.id!,
-            { is_default: false }
-          );
-        }
-      }
+      const updates: any = { settings };
+      if (name) updates.name = name;
       
       const { data, error } = await lightingOperations.updateUserLightingPreference(id, updates);
       
       if (error) {
-        toast.error('Failed to update lighting preference');
+        console.error("Error updating lighting preference:", error);
+        toast({
+          title: "Failed to update lighting settings",
+          description: error.message,
+          variant: "destructive"
+        });
         return false;
       }
       
-      toast.success('Lighting preference updated');
+      toast({
+        title: "Lighting settings updated",
+        description: `Your lighting settings have been updated.`,
+        variant: "default"
+      });
       
-      // Update local state
-      setPreferences(prev => prev.map(p => p.id === id ? data! : p));
-      
-      // If this is the current preference or new default, update current
-      if ((currentPreference && currentPreference.id === id) || updates.is_default) {
-        setCurrentPreference(data!);
-      }
-      
+      // Refresh the saved preferences
+      loadUserPreferences();
       return true;
+      
     } catch (err: any) {
-      toast.error('An error occurred while updating preference');
-      console.error('Error updating preference:', err);
+      console.error("Error in updatePreference:", err);
+      toast({
+        title: "Failed to update lighting settings",
+        description: err.message || "An unexpected error occurred",
+        variant: "destructive"
+      });
       return false;
     }
-  }, [userId, preferences, currentPreference]);
-
-  // Delete a preference
-  const deletePreference = useCallback(async (id: string) => {
+  };
+  
+  // Function to load user preferences
+  const loadUserPreferences = async () => {
     try {
-      const { success, error } = await lightingOperations.deleteLightingPreference(id);
+      setIsLoading(true);
+      setError(null);
       
-      if (error || !success) {
-        toast.error('Failed to delete lighting preference');
-        return false;
+      // In a real app, you'd get this from your auth context
+      const userId = "current-user-id"; // Replace with actual user ID
+      
+      const { data, error } = await lightingOperations.getUserLightingPreferences(userId);
+      
+      if (error) {
+        console.error("Error loading lighting preferences:", error);
+        setError(error.message);
+        return;
       }
       
-      toast.success('Lighting preference deleted');
+      setSavedPreferences(data || []);
       
-      // Update local state
-      setPreferences(prev => prev.filter(p => p.id !== id));
-      
-      // If this was the current preference, set to default or first in list
-      if (currentPreference && currentPreference.id === id) {
-        const newDefault = preferences.find(p => p.is_default && p.id !== id);
-        if (newDefault) {
-          setCurrentPreference(newDefault);
-        } else if (preferences.length > 1) {
-          const newCurrent = preferences.find(p => p.id !== id);
-          setCurrentPreference(newCurrent || null);
-        } else {
-          setCurrentPreference(null);
-        }
+      // Find the default preference
+      const defaultPref = data?.find(pref => pref.is_default);
+      if (defaultPref) {
+        setCurrentSettings(defaultPref.settings);
       }
       
-      return true;
     } catch (err: any) {
-      toast.error('An error occurred while deleting preference');
-      console.error('Error deleting preference:', err);
-      return false;
+      console.error("Error in loadUserPreferences:", err);
+      setError(err.message || "Failed to load preferences");
+    } finally {
+      setIsLoading(false);
     }
-  }, [preferences, currentPreference]);
-
-  // Apply a preference
-  const applyPreference = useCallback((preference: UserLightingPreference) => {
-    setCurrentPreference(preference);
-  }, []);
-
-  // Current settings to use with lighting system
-  const currentSettings = currentPreference?.settings || null;
-
+  };
+  
+  // Load user preferences on initial render if autoLoad is true
+  useEffect(() => {
+    if (options.autoLoad !== false) {
+      loadUserPreferences();
+    } else {
+      setIsLoading(false);
+      setCurrentSettings(DEFAULT_LIGHTING[defaultPreset]);
+    }
+  }, [defaultPreset, options.autoLoad]);
+  
   return {
-    preferences,
-    currentPreference,
     currentSettings,
+    savedPreferences,
     isLoading,
     error,
     savePreference,
     updatePreference,
-    deletePreference,
-    applyPreference
+    loadUserPreferences
   };
 };

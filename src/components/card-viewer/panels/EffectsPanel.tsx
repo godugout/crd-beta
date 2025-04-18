@@ -72,13 +72,13 @@ const EffectsPanel: React.FC<EffectsPanelProps> = ({
                 </div>
               </div>
               <Switch 
-                checked={effect.active} 
+                checked={effect.enabled} 
                 onCheckedChange={() => onToggleEffect(effect.id)}
                 onClick={e => e.stopPropagation()}
               />
             </div>
             
-            {(expandedEffectId === effect.id && effect.active) && (
+            {(expandedEffectId === effect.id && effect.enabled) && (
               <div className="mt-3 pt-3 border-t border-gray-700">
                 <div className="space-y-4">
                   <div className="space-y-2">
@@ -86,34 +86,35 @@ const EffectsPanel: React.FC<EffectsPanelProps> = ({
                       <Label htmlFor={`intensity-${effect.id}`} className="text-sm">
                         Intensity
                       </Label>
-                      <span className="text-xs">{Math.round(effect.intensity * 100)}%</span>
+                      <span className="text-xs">{Math.round(effect.settings.intensity * 100)}%</span>
                     </div>
                     <Slider 
                       id={`intensity-${effect.id}`}
                       min={0}
                       max={1}
                       step={0.05}
-                      value={[effect.intensity]}
+                      value={[effect.settings.intensity]}
                       onValueChange={([value]) => onUpdateIntensity(effect.id, value)}
                     />
                   </div>
                   
-                  {effect.hue !== undefined && (
+                  {effect.settings.color !== undefined && (
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
-                        <Label htmlFor={`hue-${effect.id}`} className="text-sm">
-                          Color Hue
+                        <Label htmlFor={`color-${effect.id}`} className="text-sm">
+                          Color
                         </Label>
-                        <span className="text-xs">{effect.hue}°</span>
+                        <span className="text-xs">{effect.settings.color}</span>
                       </div>
-                      <Slider 
-                        id={`hue-${effect.id}`}
-                        min={0}
-                        max={360}
-                        step={5}
-                        value={[effect.hue]}
-                        onValueChange={([value]) => onUpdateIntensity(effect.id, value)}
-                        className="hue-slider"
+                      <input
+                        type="color"
+                        id={`color-${effect.id}`}
+                        value={effect.settings.color}
+                        onChange={(e) => {
+                          // Update color setting logic would go here
+                          console.log(`Changed color for ${effect.id} to ${e.target.value}`);
+                        }}
+                        className="w-full h-8 rounded cursor-pointer"
                       />
                     </div>
                   )}

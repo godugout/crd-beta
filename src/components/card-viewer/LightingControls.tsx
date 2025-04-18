@@ -8,7 +8,6 @@ import { Label } from '@/components/ui/label';
 import {
   Sun,
   Moon,
-  BrightnessHigh,
   PaintBucket,
   Palette,
   Sliders,
@@ -63,7 +62,7 @@ export const LightingControls = ({
     {
       id: 'natural',
       name: 'Natural',
-      icon: <BrightnessHigh className="w-4 h-4" />
+      icon: <Sun className="w-4 h-4" /> // Changed from BrightnessHigh
     },
     {
       id: 'dramatic',
@@ -119,7 +118,7 @@ export const LightingControls = ({
             Main Light
           </TabsTrigger>
           <TabsTrigger value="ambient" className="flex-1">
-            <BrightnessHigh className="w-4 h-4 mr-2" />
+            <Sun className="w-4 h-4 mr-2" /> {/* Changed from BrightnessHigh */}
             Ambient
           </TabsTrigger>
           <TabsTrigger value="environment" className="flex-1">

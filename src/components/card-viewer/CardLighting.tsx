@@ -84,7 +84,6 @@ export const CardLighting = ({ settings, debug = false }: CardLightingProps) => 
         path=""
         preset={null}
         background={false}
-        intensity={settings.envMapIntensity}
       />
       
       {renderHelpers()}

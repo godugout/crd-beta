@@ -31,9 +31,11 @@ export interface LightingSettings {
   environmentType: LightingPreset;
   envMapIntensity: number;
   useDynamicLighting: boolean;
+  followPointer?: boolean;
+  autoRotate?: boolean;
 }
 
-const DEFAULT_LIGHTING: Record<LightingPreset, LightingSettings> = {
+export const DEFAULT_LIGHTING: Record<LightingPreset, LightingSettings> = {
   studio: {
     primaryLight: {
       x: 10,
@@ -48,7 +50,9 @@ const DEFAULT_LIGHTING: Record<LightingPreset, LightingSettings> = {
     },
     environmentType: 'studio',
     envMapIntensity: 1.0,
-    useDynamicLighting: true
+    useDynamicLighting: true,
+    followPointer: true,
+    autoRotate: false
   },
   natural: {
     primaryLight: {
@@ -64,7 +68,9 @@ const DEFAULT_LIGHTING: Record<LightingPreset, LightingSettings> = {
     },
     environmentType: 'natural',
     envMapIntensity: 0.8,
-    useDynamicLighting: true
+    useDynamicLighting: true,
+    followPointer: true,
+    autoRotate: false
   },
   dramatic: {
     primaryLight: {
@@ -80,7 +86,9 @@ const DEFAULT_LIGHTING: Record<LightingPreset, LightingSettings> = {
     },
     environmentType: 'dramatic',
     envMapIntensity: 1.2,
-    useDynamicLighting: true
+    useDynamicLighting: true,
+    followPointer: false,
+    autoRotate: true
   },
   display_case: {
     primaryLight: {
@@ -96,9 +104,14 @@ const DEFAULT_LIGHTING: Record<LightingPreset, LightingSettings> = {
     },
     environmentType: 'display_case',
     envMapIntensity: 0.9,
-    useDynamicLighting: true
+    useDynamicLighting: true,
+    followPointer: false,
+    autoRotate: false
   }
 };
+
+// Export LIGHTING_PRESETS to fix the error in LightingControls.tsx
+export const LIGHTING_PRESETS = DEFAULT_LIGHTING;
 
 export const useCardLighting = (initialPreset: LightingPreset = 'studio') => {
   const [lightingPreset, setLightingPreset] = useState<LightingPreset>(initialPreset);
@@ -112,14 +125,12 @@ export const useCardLighting = (initialPreset: LightingPreset = 'studio') => {
     setIsUserCustomized(false);
   }, []);
   
-  // Update a specific lighting parameter
-  const updateLightingSetting = useCallback(<K extends keyof LightingSettings>(
-    property: K, 
-    value: LightingSettings[K]
-  ) => {
+  // Update lighting settings with partial settings object
+  // Fix the function signature to match what's expected in the components
+  const updateLightingSetting = useCallback((settings: Partial<LightingSettings>) => {
     setLightingSettings(prev => ({
       ...prev,
-      [property]: value
+      ...settings
     }));
     setIsUserCustomized(true);
   }, []);

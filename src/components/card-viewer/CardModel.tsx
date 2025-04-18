@@ -29,7 +29,8 @@ export const CardModel: React.FC<CardModelProps> = ({
   // Load textures
   // Use placeholders if the card doesn't have images
   const frontImageUrl = card.imageUrl || '/placeholders/card-front.jpg';
-  const backImageUrl = card.backImageUrl || '/placeholders/card-back.jpg';
+  // Use same image for back if backImageUrl doesn't exist
+  const backImageUrl = card.imageUrl || '/placeholders/card-back.jpg';
   
   // Load textures with error handling
   const frontTexture = useTexture(frontImageUrl);
@@ -64,16 +65,14 @@ export const CardModel: React.FC<CardModelProps> = ({
       frontMaterial.metalness = 0.8 * intensity;
       frontMaterial.roughness = 0.2 * (1 - intensity * 0.5);
       frontMaterial.envMapIntensity = 1.5 * intensity;
-      frontMaterial.iridescence = 1.0 * intensity;
-      frontMaterial.iridescenceIOR = 1.3;
+      // Remove iridescence properties as they're not available in MeshStandardMaterial
     }
     
     if (activeEffects.includes('Refractor')) {
       const intensity = effectIntensities['Refractor'] || 1;
       frontMaterial.metalness = 0.7 * intensity;
       frontMaterial.roughness = 0.3 * (1 - intensity * 0.5);
-      frontMaterial.clearcoat = 1.0 * intensity;
-      frontMaterial.clearcoatRoughness = 0.1;
+      // Remove clearcoat properties as they're not available in MeshStandardMaterial
     }
     
     if (activeEffects.includes('Chrome')) {
@@ -106,64 +105,65 @@ export const CardModel: React.FC<CardModelProps> = ({
   // Progressive enhancement: enable higher quality rendering on desktop
   useEffect(() => {
     // Check if we're on a powerful device
-    const isHighPerformance = gl.capabilities.maxAnisotropy > 8;
+    const isHighPerformance = gl.capabilities.getMaxAnisotropy() > 8;
     
     if (isHighPerformance) {
       // Enable higher quality settings
       gl.setPixelRatio(window.devicePixelRatio);
       gl.shadowMap.type = THREE.PCFSoftShadowMap;
       
-      // Apply higher quality to materials
-      materials.frontMaterial.anisotropy = 16;
-      materials.backMaterial.anisotropy = 16;
+      // We can't set anisotropy directly on materials as it's not a property of MeshStandardMaterial
+      if (frontTexture) frontTexture.anisotropy = gl.capabilities.getMaxAnisotropy();
+      if (backTexture) backTexture.anisotropy = gl.capabilities.getMaxAnisotropy();
     } else {
       // Lower quality for mobile/low-end devices
       gl.setPixelRatio(Math.min(1.5, window.devicePixelRatio));
       gl.shadowMap.type = THREE.BasicShadowMap;
     }
-  }, [gl, materials]);
+  }, [gl, frontTexture, backTexture]);
 
   return (
     <group ref={cardRef}>
-      {/* Card body */}
+      {/* Card body - use separate meshes instead of attachArray */}
       <mesh castShadow receiveShadow>
         <boxGeometry args={[cardWidth, cardHeight, cardThickness]} />
-        <meshStandardMaterial
+        {/* Use an array of materials correctly in React Three Fiber */}
+        <meshStandardMaterial 
           map={frontTexture}
-          attachArray="material"
           metalness={0.2}
           roughness={0.4}
+          attach="material-0"
         />
-        <meshStandardMaterial
+        <meshStandardMaterial 
           map={backTexture}
-          attachArray="material"
           metalness={0.2}
           roughness={0.4}
+          attach="material-1"
         />
         {/* Edge materials for remaining 4 sides */}
         <meshStandardMaterial
           color={0xf0f0f0}
-          attachArray="material"
           metalness={0.3}
           roughness={0.6}
+          attach="material-2"
         />
         <meshStandardMaterial
           color={0xf0f0f0}
-          attachArray="material"
           metalness={0.3}
           roughness={0.6}
+          attach="material-3"
         />
         <meshStandardMaterial
           color={0xf0f0f0}
-          attachArray="material"
           metalness={0.3}
           roughness={0.6}
+          attach="material-4"
         />
         <meshStandardMaterial
           color={0xf0f0f0}
-          attachArray="material"
           metalness={0.3}
           roughness={0.6}
+          attach="material-5"
         />
       </mesh>
       
@@ -174,12 +174,8 @@ export const CardModel: React.FC<CardModelProps> = ({
           <meshPhysicalMaterial 
             transparent
             opacity={0.2 * (effectIntensities['Holographic'] || 1)}
-            iridescence={0.9}
-            iridescenceIOR={1.5}
             metalness={0.8}
             roughness={0.2}
-            clearcoat={1}
-            clearcoatRoughness={0.2}
           />
         </mesh>
       )}

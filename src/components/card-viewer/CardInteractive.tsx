@@ -54,11 +54,13 @@ const CardInteractive: React.FC<CardInteractiveProps> = ({
   // Apply saved user settings if available
   useEffect(() => {
     if (savedUserSettings && !isLoadingPreferences) {
-      updateLightingSetting('primaryLight', savedUserSettings.primaryLight);
-      updateLightingSetting('ambientLight', savedUserSettings.ambientLight);
-      updateLightingSetting('environmentType', savedUserSettings.environmentType);
-      updateLightingSetting('envMapIntensity', savedUserSettings.envMapIntensity);
-      updateLightingSetting('useDynamicLighting', savedUserSettings.useDynamicLighting);
+      updateLightingSetting({
+        primaryLight: savedUserSettings.primaryLight,
+        ambientLight: savedUserSettings.ambientLight,
+        environmentType: savedUserSettings.environmentType,
+        envMapIntensity: savedUserSettings.envMapIntensity,
+        useDynamicLighting: savedUserSettings.useDynamicLighting
+      });
     }
   }, [savedUserSettings, isLoadingPreferences, updateLightingSetting]);
 
@@ -180,7 +182,7 @@ const CardInteractive: React.FC<CardInteractiveProps> = ({
         <TabsContent value="lighting" className="mt-0">
           <LightingControls
             settings={lightingSettings}
-            onUpdateSettings={updateLightingSetting}
+            onUpdateSettings={(settings) => updateLightingSetting(settings)}
             onApplyPreset={handlePresetChange}
             onToggleDynamicLighting={toggleDynamicLighting}
             isUserCustomized={isUserCustomized}

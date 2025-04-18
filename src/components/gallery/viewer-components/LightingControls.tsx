@@ -4,14 +4,14 @@ import { Lightbulb, RotateCw, MousePointerClick } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
 import { Toggle } from '@/components/ui/toggle';
-import { LightingSettings, LIGHTING_PRESETS } from '@/hooks/useCardLighting';
+import { LightingSettings, DEFAULT_LIGHTING } from '@/hooks/useCardLighting';
 
 interface LightingControlsProps {
   lightingSettings: LightingSettings;
   onToggleFollowPointer: () => void;
   onToggleAutoRotate: () => void;
   onUpdateLightSetting: (property: string, value: any, lightType: 'primaryLight' | 'ambientLight') => void;
-  onApplyPreset: (preset: keyof typeof LIGHTING_PRESETS) => void;
+  onApplyPreset: (preset: keyof typeof DEFAULT_LIGHTING) => void;
 }
 
 const LightingControls: React.FC<LightingControlsProps> = ({
@@ -33,7 +33,7 @@ const LightingControls: React.FC<LightingControlsProps> = ({
         <div>
           <h4 className="text-xs font-medium mb-2">Preset Environments</h4>
           <div className="grid grid-cols-2 gap-2">
-            {Object.keys(LIGHTING_PRESETS).map((preset) => (
+            {Object.keys(DEFAULT_LIGHTING).map((preset) => (
               <Button 
                 key={preset} 
                 variant="outline" 
@@ -41,7 +41,7 @@ const LightingControls: React.FC<LightingControlsProps> = ({
                 className={`text-xs ${
                   lightingSettings.environmentType === preset ? 'bg-primary text-primary-foreground' : ''
                 }`}
-                onClick={() => onApplyPreset(preset as keyof typeof LIGHTING_PRESETS)}
+                onClick={() => onApplyPreset(preset as keyof typeof DEFAULT_LIGHTING)}
               >
                 {preset.replace('_', ' ').charAt(0).toUpperCase() + preset.replace('_', ' ').slice(1)}
               </Button>
@@ -70,7 +70,7 @@ const LightingControls: React.FC<LightingControlsProps> = ({
             
             <div className="grid grid-cols-2 gap-2 my-2">
               <Toggle
-                pressed={lightingSettings.followPointer}
+                pressed={lightingSettings.followPointer || false}
                 onPressedChange={onToggleFollowPointer}
                 size="sm"
                 className="flex items-center gap-2"
@@ -80,7 +80,7 @@ const LightingControls: React.FC<LightingControlsProps> = ({
               </Toggle>
               
               <Toggle
-                pressed={lightingSettings.autoRotate}
+                pressed={lightingSettings.autoRotate || false}
                 onPressedChange={onToggleAutoRotate}
                 size="sm"
                 className="flex items-center gap-2"
