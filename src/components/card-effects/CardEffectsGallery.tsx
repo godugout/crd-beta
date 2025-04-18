@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Card } from '@/lib/types/cardTypes';
 import CardInteractive from '@/components/card-viewer/CardInteractive';
-import EffectsPanel from '@/components/card-effects/EffectsPanel';
+import EffectsPanel from '@/components/card-viewer/panels/EffectsPanel';
 import { useCardEffects } from '@/hooks/useCardEffects';
 
 interface CardEffectsGalleryProps {
@@ -14,9 +14,8 @@ const CardEffectsGallery: React.FC<CardEffectsGalleryProps> = ({ card }) => {
   const { 
     effects,
     activeEffects,
-    updateEffectIntensity,
-    toggleEffect,
-    generateEffectStyles
+    updateIntensity,
+    toggleEffect
   } = useCardEffects();
   
   const handleFlip = () => {
@@ -25,7 +24,7 @@ const CardEffectsGallery: React.FC<CardEffectsGalleryProps> = ({ card }) => {
   
   // Generate an object with effect intensities from the effects array
   const effectIntensities = effects.reduce((acc, effect) => {
-    acc[effect.id] = effect.intensity;
+    acc[effect.id] = effect.settings.intensity || 0.7;
     return acc;
   }, {} as Record<string, number>);
   
@@ -43,11 +42,9 @@ const CardEffectsGallery: React.FC<CardEffectsGalleryProps> = ({ card }) => {
       
       <div className="w-full md:w-1/3">
         <EffectsPanel
-          availableEffects={effects.map(e => e.name)}
-          activeEffects={activeEffects}
+          effects={effects}
           onToggleEffect={toggleEffect}
-          effectIntensities={effectIntensities}
-          onAdjustIntensity={updateEffectIntensity}
+          onUpdateIntensity={updateIntensity}
         />
         
         <div className="mt-4">
