@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import PageLayout from '@/components/navigation/PageLayout';
 import TownGalleryCard from '@/components/towns/TownGalleryCard';
@@ -12,7 +13,10 @@ import useTownGalleryData from '@/hooks/useTownGalleryData';
 const TownGallery = () => {
   const [activeTab, setActiveTab] = useState('all');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const { towns, loading, error } = useTownGalleryData();
+  
+  // Pass required arguments to useTownGalleryData hook
+  // Adding empty filter and sorting options as default parameters
+  const { towns, loading, error } = useTownGalleryData({}, {});
   
   return (
     <PageLayout 

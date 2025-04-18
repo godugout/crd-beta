@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import PageLayout from '@/components/navigation/PageLayout';
 import TeamGalleryCard from '@/components/teams/TeamGalleryCard';
@@ -12,7 +13,10 @@ import useTeamGalleryData from '@/hooks/useTeamGalleryData';
 const TeamGallery = () => {
   const [activeTab, setActiveTab] = useState('all');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const { teams, loading, error } = useTeamGalleryData();
+  
+  // Pass required arguments to useTeamGalleryData hook
+  // Adding empty filter and sorting options as default parameters
+  const { teams, loading, error } = useTeamGalleryData({}, {});
   
   return (
     <PageLayout 

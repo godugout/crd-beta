@@ -1,131 +1,116 @@
 
-import { useEffect, useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { TeamDisplayData } from '@/types/teams';
+import { useState, useEffect } from 'react';
 
-export const useTeamGalleryData = (
-  activeLeague: string,
-  activeDivision: string
-) => {
-  const [teams, setTeams] = useState<TeamDisplayData[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+interface Team {
+  id: string;
+  name: string;
+  description?: string;
+  imageUrl?: string;
+  league?: string;
+  division?: string;
+  members?: number;
+  // Add any other team properties you need
+}
+
+interface FilterOptions {
+  league?: string;
+  division?: string;
+  searchQuery?: string;
+  // Add other filter options as needed
+}
+
+interface SortOptions {
+  field?: string;
+  direction?: 'asc' | 'desc';
+}
+
+const useTeamGalleryData = (filterOptions: FilterOptions = {}, sortOptions: SortOptions = {}) => {
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchTeams = async () => {
       setLoading(true);
-      setError(null);
-      
       try {
-        // Build query based on filters
-        let query = supabase
-          .from('teams')
-          .select(`
-            id, name, description, owner_id, created_at, updated_at, 
-            logo_url, primary_color, secondary_color, founded_year, 
-            city, state, stadium, league, division,
-            team_members!team_id (count)
-          `);
+        // Simulate API call with mock data for now
+        // In a real app, you'd make an actual API call here
         
-        // Apply filters if provided
-        if (activeLeague && activeLeague !== 'all') {
-          query = query.eq('league', activeLeague);
+        // Simulate network delay
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Mock data
+        const mockTeams: Team[] = [
+          {
+            id: '1',
+            name: 'Oakland Athletics',
+            description: 'MLB team based in Oakland, California',
+            imageUrl: '/lovable-uploads/88d804c5-6d0c-402e-b2d6-f0d10b5f6699.png',
+            league: 'MLB',
+            division: 'AL West',
+            members: 43
+          },
+          {
+            id: '2',
+            name: 'San Francisco Giants',
+            description: 'MLB team based in San Francisco, California',
+            imageUrl: '/lovable-uploads/c23d9e1a-4645-4f50-a9e4-2a325e3b4a4d.png',
+            league: 'MLB',
+            division: 'NL West',
+            members: 51
+          }
+        ];
+        
+        // Apply filters if any
+        let filteredTeams = [...mockTeams];
+        
+        if (filterOptions.league) {
+          filteredTeams = filteredTeams.filter(team => 
+            team.league?.toLowerCase() === filterOptions.league?.toLowerCase()
+          );
         }
         
-        if (activeDivision && activeDivision !== 'all') {
-          query = query.eq('division', activeDivision);
+        if (filterOptions.division) {
+          filteredTeams = filteredTeams.filter(team => 
+            team.division?.toLowerCase() === filterOptions.division?.toLowerCase()
+          );
         }
         
-        const { data, error } = await query.order('name');
-        
-        if (error) {
-          console.error('Error fetching teams:', error);
-          setError('Failed to load teams. Please try again later.');
-          setTeams([]);
-          return;
+        if (filterOptions.searchQuery) {
+          const query = filterOptions.searchQuery.toLowerCase();
+          filteredTeams = filteredTeams.filter(team => 
+            team.name.toLowerCase().includes(query) || 
+            team.description?.toLowerCase().includes(query)
+          );
         }
         
-        if (data && Array.isArray(data)) {
-          // Transform the data to match our interface
-          const transformedTeams: TeamDisplayData[] = data.map(teamData => {
-            const memberCount = teamData.team_members?.[0]?.count || 0;
+        // Apply sorting if specified
+        if (sortOptions.field) {
+          filteredTeams.sort((a: any, b: any) => {
+            const fieldA = a[sortOptions.field as keyof Team];
+            const fieldB = b[sortOptions.field as keyof Team];
             
-            return {
-              id: teamData.id,
-              name: teamData.name,
-              slug: teamData.name?.toLowerCase().replace(/\s+/g, '-') || '',
-              description: teamData.description || '',
-              owner_id: teamData.owner_id,
-              memberCount: memberCount,
-              primary_color: teamData.primary_color || '#cccccc',
-              secondary_color: teamData.secondary_color,
-              founded_year: teamData.founded_year,
-              city: teamData.city,
-              state: teamData.state,
-              stadium: teamData.stadium,
-              league: teamData.league,
-              division: teamData.division
-            };
+            if (!fieldA || !fieldB) return 0;
+            
+            const comparison = fieldA > fieldB ? 1 : -1;
+            return sortOptions.direction === 'desc' ? -comparison : comparison;
           });
-          setTeams(transformedTeams);
         }
+        
+        setTeams(filteredTeams);
+        setError(null);
       } catch (err) {
         console.error('Error fetching teams:', err);
-        setError('An unexpected error occurred. Please try again later.');
-        setTeams([]);
+        setError('Failed to load teams. Please try again later.');
       } finally {
         setLoading(false);
       }
     };
 
     fetchTeams();
-  }, [activeLeague, activeDivision]);
+  }, [filterOptions, sortOptions]);
 
-  // If we don't have team data yet, use the hardcoded data as a fallback
-  const fallbackTeams: TeamDisplayData[] = [
-    { 
-      id: '1', 
-      name: 'Oakland A\'s', 
-      slug: 'oakland', 
-      description: 'Memories and cards for Oakland Athletics fans',
-      primary_color: '#006341',
-      memberCount: 1243,
-      owner_id: 'system',
-      league: 'American League',
-      division: 'West'
-    },
-    { 
-      id: '2', 
-      name: 'San Francisco Giants', 
-      slug: 'sf-giants', 
-      description: 'A community for SF Giants fans to share their memories',
-      primary_color: '#FD5A1E',
-      memberCount: 984,
-      owner_id: 'system',
-      league: 'National League',
-      division: 'West'
-    },
-    { 
-      id: '3', 
-      name: 'Los Angeles Dodgers', 
-      slug: 'la-dodgers', 
-      description: 'Dodgers memories and moments from fans',
-      primary_color: '#005A9C',
-      memberCount: 756,
-      owner_id: 'system',
-      league: 'National League',
-      division: 'West'
-    }
-  ];
-
-  // Only use fallback if we have no teams and no error
-  const displayTeams = teams.length > 0 || error ? teams : fallbackTeams;
-
-  return {
-    teams: displayTeams,
-    loading,
-    error
-  };
+  return { teams, loading, error };
 };
 
 export default useTeamGalleryData;

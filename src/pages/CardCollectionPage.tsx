@@ -13,6 +13,11 @@ const CardCollectionPage: React.FC = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const navigate = useNavigate();
 
+  // Handler for card clicks
+  const handleCardClick = (cardId: string) => {
+    navigate(`/cards/${cardId}`);
+  };
+
   return (
     <PageLayout
       title="Cards"
@@ -70,15 +75,15 @@ const CardCollectionPage: React.FC = () => {
           </div>
 
           <TabsContent value="all">
-            <CardGrid cards={[]} />
+            <CardGrid cards={[]} onCardClick={handleCardClick} />
           </TabsContent>
           
           <TabsContent value="recent">
-            <CardGrid cards={[]} />
+            <CardGrid cards={[]} onCardClick={handleCardClick} />
           </TabsContent>
           
           <TabsContent value="favorites">
-            <CardGrid cards={[]} />
+            <CardGrid cards={[]} onCardClick={handleCardClick} />
           </TabsContent>
         </Tabs>
       </div>
