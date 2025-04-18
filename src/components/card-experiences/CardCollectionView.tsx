@@ -5,6 +5,8 @@ import { Card as CardType } from '@/lib/types';
 import CardGrid from '@/components/gallery/CardGrid';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 interface CardCollectionViewProps {
   cards?: CardType[];
@@ -12,6 +14,7 @@ interface CardCollectionViewProps {
   onCardClick?: (cardId: string) => void;
   isLoading?: boolean;
   emptyMessage?: string;
+  error?: Error | null;
 }
 
 const CardCollectionView: React.FC<CardCollectionViewProps> = ({
@@ -19,7 +22,8 @@ const CardCollectionView: React.FC<CardCollectionViewProps> = ({
   title = 'Cards',
   onCardClick,
   isLoading = false,
-  emptyMessage = 'No cards found'
+  emptyMessage = 'No cards found',
+  error = null
 }) => {
   const { cards: contextCards } = useCards();
   const [sortOrder, setSortOrder] = useState<string>('newest');
@@ -53,6 +57,19 @@ const CardCollectionView: React.FC<CardCollectionViewProps> = ({
     }
   };
   
+  // Error state
+  if (error) {
+    return (
+      <Alert variant="destructive" className="mb-4">
+        <AlertCircle className="h-4 w-4" />
+        <AlertTitle>Error</AlertTitle>
+        <AlertDescription>
+          {error.message || 'Failed to load cards'}
+        </AlertDescription>
+      </Alert>
+    );
+  }
+  
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -77,9 +94,15 @@ const CardCollectionView: React.FC<CardCollectionViewProps> = ({
         cards={sortedCards}
         onCardClick={handleCardClick}
         isLoading={isLoading}
-        error={null}
-        getCardEffects={() => []}
+        error={error}
+        getCardEffects={() => []} // Provide a default implementation
       />
+      
+      {!isLoading && sortedCards.length === 0 && (
+        <div className="text-center py-8 border border-dashed rounded-lg">
+          <p className="text-muted-foreground">{emptyMessage}</p>
+        </div>
+      )}
     </div>
   );
 };

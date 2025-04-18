@@ -15,7 +15,7 @@ const Collections = () => {
   const [viewMode, setViewMode] = React.useState<'grid' | 'list'>('grid');
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   
-  // Define collectionsNavItems here since it's referenced in the component
+  // Define collections navigation items with proper icon functions
   const collectionsNavItems = [
     { path: "all", title: "All Collections", icon: () => <Layout size={16} /> },
     { path: "featured", title: "Featured", icon: () => <Globe size={16} /> },
@@ -70,7 +70,7 @@ const Collections = () => {
                   className="data-[state=active]:bg-[var(--brand-primary)]/10 data-[state=active]:text-[var(--brand-primary)] rounded-lg py-2.5 h-auto"
                 >
                   <div className="flex items-center gap-2 w-full">
-                    {typeof item.icon === 'function' ? item.icon() : item.icon}
+                    {item.icon()}
                     <span className="hidden md:inline">{item.title}</span>
                   </div>
                 </TabsTrigger>

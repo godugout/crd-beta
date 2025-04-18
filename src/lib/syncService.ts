@@ -68,7 +68,8 @@ export const syncOfflineData = async (
         await createMemory(memToCreate)
         await removePendingMemory(mem.id)
         syncProgress.success++
-      } catch {
+      } catch (error) {
+        console.error('Error syncing memory:', error)
         syncProgress.failed++
       } finally {
         syncProgress.completed++
@@ -90,7 +91,8 @@ export const syncOfflineData = async (
         })
         await removePendingUpload(up.id)
         syncProgress.success++
-      } catch {
+      } catch (error) {
+        console.error('Error uploading media:', error)
         syncProgress.failed++
       } finally {
         syncProgress.completed++

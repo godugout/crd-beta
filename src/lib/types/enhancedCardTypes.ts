@@ -1,9 +1,25 @@
 
+// New file to split up the large cardTypes.ts file
 import { BaseCard } from './cardTypes';
-import { User } from './user';
 
-export type CardRarity = 'common' | 'uncommon' | 'rare' | 'ultra-rare' | 'legendary' | 'one-of-one';
+/**
+ * Enhanced Card with additional functionality
+ */
+export interface EnhancedCard extends BaseCard {
+  seriesId?: string; 
+  deckId?: string;
+  specialFeatures?: string[];
+  interactiveElements?: string[];
+  graded?: boolean;
+  gradingService?: string;
+  gradingScore?: string;
+  hotspots?: HotspotData[];
+  backSideImage?: string;
+}
 
+/**
+ * Hotspot data for interactive cards
+ */
 export interface HotspotData {
   id: string;
   x: number;
@@ -15,53 +31,46 @@ export interface HotspotData {
   visible: boolean;
 }
 
-export interface EnhancedCard extends BaseCard {
-  rarity?: CardRarity; // Make rarity optional to match cardTypes.ts
-  cardNumber?: string;
-  seriesId?: string;
-  artistId?: string;
-  artistProfile?: User;
-  artistName?: string;
-  edition?: number;
-  editionSize?: number;
-  releaseDate?: string;
-  qrCodeData?: string;
-  hotspots?: HotspotData[];
-  marketData?: {
-    price?: number;
-    currency?: string;
-    availableForSale?: boolean;
-    lastSoldPrice?: number;
-    lastSoldDate?: string;
-  };
-}
-
+/**
+ * Series of cards
+ */
 export interface Series {
   id: string;
-  title: string;
+  name: string;
   description: string;
-  coverImageUrl: string;
-  artistId: string;
-  artist?: User;
+  releaseDate: string;
+  cards: EnhancedCard[];
+  totalCards: number;
+  rarity: string;
+  creator: string;
   createdAt: string;
   updatedAt: string;
-  releaseDate: string;
-  totalCards: number;
-  isPublished: boolean;
-  cardIds: string[];
-  cards?: EnhancedCard[];
-  releaseType: 'standard' | 'limited' | 'exclusive';
 }
 
+/**
+ * Deck of cards
+ */
 export interface Deck {
   id: string;
   name: string;
   description: string;
-  coverImageUrl: string;
-  ownerId: string;
+  cards: EnhancedCard[];
+  creator: string;
   createdAt: string;
   updatedAt: string;
-  cardIds: string[];
-  cards?: EnhancedCard[];
   isPublic: boolean;
+}
+
+/**
+ * Card set for play
+ */
+export interface CardSet {
+  id: string;
+  name: string;
+  description: string;
+  cards: EnhancedCard[];
+  category: string;
+  rules?: string;
+  createdAt: string;
+  updatedAt: string;
 }
