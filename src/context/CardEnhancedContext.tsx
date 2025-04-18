@@ -20,7 +20,33 @@ const enhancedSampleCards: EnhancedCard[] = sampleCards.map(card => ({
   qrCodeData: `https://example.com/card/${card.id}`,
   hotspots: [],
   effects: card.effects || [],
-  designMetadata: card.designMetadata || DEFAULT_DESIGN_METADATA,
+  designMetadata: {
+    cardStyle: {
+      template: 'classic',
+      effect: 'none',
+      borderRadius: '12px',
+      borderColor: '#000000',
+      shadowColor: 'rgba(0,0,0,0.2)',
+      frameWidth: 2,
+      frameColor: '#000000'
+    },
+    textStyle: {
+      titleColor: '#000000',
+      titleAlignment: 'center',
+      titleWeight: 'bold',
+      descriptionColor: '#666666'
+    },
+    cardMetadata: {
+      category: 'sports',
+      series: 'basketball',
+      cardType: 'player',
+    },
+    marketMetadata: {
+      isPrintable: false,
+      isForSale: false,
+      includeInCatalog: true
+    }
+  },
   marketData: {
     price: Math.floor(Math.random() * 100) + 10,
     currency: 'USD',
