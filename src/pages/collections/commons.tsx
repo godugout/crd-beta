@@ -4,17 +4,19 @@ import { useNavigate } from 'react-router-dom';
 import PageLayout from '@/components/navigation/PageLayout';
 import { Container } from '@/components/ui/container';
 import { Button } from '@/components/ui/button';
-import { Eye, RefreshCw, AlertTriangle } from 'lucide-react';
+import { Eye, RefreshCw, AlertTriangle, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import { LoadingState } from '@/components/ui/loading-state';
 import { checkCollectionExists } from '@/lib/supabase/collections';
+import { collectionOperations } from '@/lib/supabase/collections';
 
 const CommonsCardsPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isCheckingExistence, setIsCheckingExistence] = useState(false);
   const [collectionExists, setCollectionExists] = useState<boolean | null>(null);
+  const [collectionData, setCollectionData] = useState<any>(null);
   const [result, setResult] = useState<{
     success?: boolean;
     message?: string;
@@ -30,39 +32,58 @@ const CommonsCardsPage = () => {
   useEffect(() => {
     const checkCollection = async () => {
       setIsCheckingExistence(true);
-      const exists = await checkCollectionExists(COMMONS_COLLECTION_ID);
-      console.log(`Collection ${COMMONS_COLLECTION_ID} exists:`, exists);
-      setCollectionExists(exists);
-      setIsCheckingExistence(false);
-      
-      if (exists) {
-        setResult({
-          success: true,
-          collectionId: COMMONS_COLLECTION_ID,
-          message: "Commons Cards collection is already available"
-        });
+      try {
+        // First try to get detailed collection data
+        const { data, error } = await collectionOperations.getCollection(COMMONS_COLLECTION_ID);
+        
+        if (error) {
+          console.log(`Error checking collection ${COMMONS_COLLECTION_ID}:`, error);
+          const exists = await checkCollectionExists(COMMONS_COLLECTION_ID);
+          console.log(`Collection ${COMMONS_COLLECTION_ID} exists:`, exists);
+          setCollectionExists(exists);
+          
+          if (exists) {
+            setResult({
+              success: true,
+              collectionId: COMMONS_COLLECTION_ID,
+              message: "Commons Cards collection is available but couldn't load details"
+            });
+          }
+        } else if (data) {
+          setCollectionData(data);
+          setCollectionExists(true);
+          setResult({
+            success: true,
+            collectionId: COMMONS_COLLECTION_ID,
+            message: "Commons Cards collection is already available"
+          });
+        } else {
+          setCollectionExists(false);
+        }
+      } catch (err) {
+        console.error("Error checking collection existence:", err);
+        setCollectionExists(false);
+      } finally {
+        setIsCheckingExistence(false);
       }
     };
 
     checkCollection();
-  }, []);
+  }, [COMMONS_COLLECTION_ID]);
 
   // Check collection existence after generation
   useEffect(() => {
-    if (result?.success && result?.collectionId) {
+    if (result?.success && result?.collectionId && !collectionData) {
       const verifyCollection = async () => {
         try {
-          const { data, error } = await supabase
-            .from('collections')
-            .select('id, title')
-            .eq('id', result.collectionId)
-            .maybeSingle();
+          const { data, error } = await collectionOperations.getCollection(result.collectionId);
             
           if (error || !data) {
             console.error('Collection verification failed:', error || 'No data returned');
             toast.error('Created collection could not be verified');
           } else {
             console.log('Collection verified:', data);
+            setCollectionData(data);
             setCollectionExists(true);
           }
         } catch (err) {
@@ -72,7 +93,7 @@ const CommonsCardsPage = () => {
       
       verifyCollection();
     }
-  }, [result]);
+  }, [result, collectionData]);
 
   const handleGenerateCommonsCards = async () => {
     setIsLoading(true);
@@ -117,8 +138,14 @@ const CommonsCardsPage = () => {
         collectionId: data.collectionId || COMMONS_COLLECTION_ID
       });
       
-      // Update collection exists state
-      setCollectionExists(true);
+      // Refresh collection status
+      setTimeout(async () => {
+        const { data: collectionData } = await collectionOperations.getCollection(COMMONS_COLLECTION_ID);
+        if (collectionData) {
+          setCollectionData(collectionData);
+          setCollectionExists(true);
+        }
+      }, 1000);
     } catch (err: any) {
       console.error('Unexpected error:', err);
       toast.error('An unexpected error occurred');
@@ -154,7 +181,7 @@ const CommonsCardsPage = () => {
           <div className="bg-card border rounded-lg p-8 shadow-sm">
             {isCheckingExistence ? (
               <div className="text-center p-6">
-                <LoadingSpinner size={24} className="mx-auto mb-4" />
+                <LoadingState size={24} className="mx-auto mb-4" />
                 <p>Checking collection status...</p>
               </div>
             ) : collectionExists && !result?.error ? (
@@ -163,9 +190,14 @@ const CommonsCardsPage = () => {
                   <h2 className="text-2xl font-semibold text-primary mb-2">
                     Commons Cards Collection Available
                   </h2>
-                  <p className="text-muted-foreground mb-4">
-                    The Commons Cards collection already exists and can be viewed.
-                  </p>
+                  {collectionData && (
+                    <div className="mb-4">
+                      <p className="font-medium">{collectionData.name}</p>
+                      {collectionData.description && (
+                        <p className="text-sm text-muted-foreground">{collectionData.description}</p>
+                      )}
+                    </div>
+                  )}
                   <Button 
                     onClick={handleViewCollection}
                     size="lg"
@@ -176,13 +208,28 @@ const CommonsCardsPage = () => {
                   </Button>
                 </div>
                 
-                <Button 
-                  onClick={handleGenerateCommonsCards} 
-                  variant="outline"
-                >
-                  <RefreshCw className="h-4 w-4 mr-2" />
-                  Regenerate Commons Cards
-                </Button>
+                <div className="border-t pt-4 mt-4">
+                  <p className="text-sm text-muted-foreground mb-4">
+                    You can regenerate the Commons Cards collection if you want to refresh the content.
+                  </p>
+                  <Button 
+                    onClick={handleGenerateCommonsCards}
+                    variant="outline"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <>
+                        <LoadingState size={16} className="mr-2" /> 
+                        Regenerating...
+                      </>
+                    ) : (
+                      <>
+                        <RefreshCw className="h-4 w-4 mr-2" />
+                        Regenerate Commons Cards
+                      </>
+                    )}
+                  </Button>
+                </div>
               </div>
             ) : !result?.success && !result?.error ? (
               <div className="text-center">
@@ -199,7 +246,7 @@ const CommonsCardsPage = () => {
                 >
                   {isLoading ? (
                     <>
-                      <LoadingSpinner size={16} className="mr-2" />
+                      <LoadingState size={16} className="mr-2" />
                       Generating Commons Cards...
                     </>
                   ) : (
@@ -216,8 +263,12 @@ const CommonsCardsPage = () => {
                 <AlertDescription>
                   {result.error}
                   <div className="mt-4">
-                    <Button onClick={handleGenerateCommonsCards} variant="outline" className="mr-2">
-                      <RefreshCw className="h-4 w-4 mr-2" />
+                    <Button onClick={handleGenerateCommonsCards} variant="outline" className="mr-2" disabled={isLoading}>
+                      {isLoading ? (
+                        <LoadingState size={16} className="mr-2" />
+                      ) : (
+                        <RefreshCw className="h-4 w-4 mr-2" />
+                      )}
                       Try Again
                     </Button>
                   </div>
@@ -245,8 +296,13 @@ const CommonsCardsPage = () => {
                 <Button 
                   onClick={handleGenerateCommonsCards} 
                   variant="outline"
+                  disabled={isLoading}
                 >
-                  <RefreshCw className="h-4 w-4 mr-2" />
+                  {isLoading ? (
+                    <LoadingState size={16} className="mr-2" />
+                  ) : (
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                  )}
                   Regenerate Commons Cards
                 </Button>
               </div>

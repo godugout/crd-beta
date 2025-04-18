@@ -15,7 +15,7 @@ export const collectionOperations = {
         .order('created_at', { ascending: false });
         
       return { data, error };
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error getting collections:', err);
       return { data: null, error: { message: 'Failed to get collections' } };
     }
@@ -32,10 +32,19 @@ export const collectionOperations = {
         .eq('id', id)
         .maybeSingle();
         
-      return { data, error };
-    } catch (err) {
+      if (error) {
+        return { data: null, error };
+      }
+      
+      if (!data) {
+        return { data: null, error: { message: 'Collection not found' } };
+      }
+      
+      const collection = convertDbCollectionToApp(data);
+      return { data: collection, error: null };
+    } catch (err: any) {
       console.error('Error getting collection:', err);
-      return { data: null, error: { message: 'Failed to get collection' } };
+      return { data: null, error: { message: 'Failed to get collection: ' + (err.message || 'Unknown error') } };
     }
   },
   
@@ -45,36 +54,43 @@ export const collectionOperations = {
   async getCollectionWithCards(id: string) {
     try {
       // First get the collection
-      const { data: collection, error: collectionError } = await supabase
+      const { data: collectionData, error: collectionError } = await supabase
         .from('collections')
         .select('*')
         .eq('id', id)
         .maybeSingle();
       
-      if (collectionError || !collection) {
-        return { data: null, error: collectionError || { message: 'Collection not found' } };
+      if (collectionError) {
+        console.error('Error fetching collection:', collectionError);
+        return { data: null, error: collectionError };
+      }
+      
+      if (!collectionData) {
+        console.log('Collection not found in Supabase');
+        return { data: null, error: { message: 'Collection not found' } };
       }
       
       // Then get the cards for this collection
-      const { data: cards, error: cardsError } = await supabase
+      const { data: cardsData, error: cardsError } = await supabase
         .from('cards')
         .select('*')
         .eq('collection_id', id);
         
       if (cardsError) {
+        console.error('Error fetching collection cards:', cardsError);
         return { 
-          data: { collection, cards: [] }, 
+          data: { collection: collectionData, cards: [] }, 
           error: { message: 'Failed to fetch collection cards' } 
         };
       }
       
       return { 
-        data: { collection, cards: cards || [] },
+        data: { collection: collectionData, cards: cardsData || [] },
         error: null
       };
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error getting collection with cards:', err);
-      return { data: null, error: { message: 'Failed to get collection with cards' } };
+      return { data: null, error: { message: 'Failed to get collection with cards: ' + (err.message || 'Unknown error') } };
     }
   },
   
@@ -98,10 +114,15 @@ export const collectionOperations = {
         .select()
         .single();
         
-      return { data, error };
-    } catch (err) {
+      if (error) {
+        return { data: null, error };
+      }
+      
+      const convertedCollection = convertDbCollectionToApp(data);
+      return { data: convertedCollection, error: null };
+    } catch (err: any) {
       console.error('Error creating collection:', err);
-      return { data: null, error: { message: 'Failed to create collection' } };
+      return { data: null, error: { message: 'Failed to create collection: ' + (err.message || 'Unknown error') } };
     }
   },
   
@@ -126,10 +147,15 @@ export const collectionOperations = {
         .select()
         .single();
         
-      return { data, error };
-    } catch (err) {
+      if (error) {
+        return { data: null, error };
+      }
+      
+      const convertedCollection = convertDbCollectionToApp(data);
+      return { data: convertedCollection, error: null };
+    } catch (err: any) {
       console.error('Error updating collection:', err);
-      return { data: null, error: { message: 'Failed to update collection' } };
+      return { data: null, error: { message: 'Failed to update collection: ' + (err.message || 'Unknown error') } };
     }
   },
   
@@ -144,9 +170,9 @@ export const collectionOperations = {
         .eq('id', id);
         
       return { error };
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error deleting collection:', err);
-      return { error: { message: 'Failed to delete collection' } };
+      return { error: { message: 'Failed to delete collection: ' + (err.message || 'Unknown error') } };
     }
   },
   
@@ -174,9 +200,9 @@ export const collectionOperations = {
         });
         
       return { error: joinError };
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error adding card to collection:', err);
-      return { error: { message: 'Failed to add card to collection' } };
+      return { error: { message: 'Failed to add card to collection: ' + (err.message || 'Unknown error') } };
     }
   },
   
@@ -202,9 +228,9 @@ export const collectionOperations = {
         .eq('card_id', cardId);
         
       return { error: joinError };
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error removing card from collection:', err);
-      return { error: { message: 'Failed to remove card from collection' } };
+      return { error: { message: 'Failed to remove card from collection: ' + (err.message || 'Unknown error') } };
     }
   }
 };

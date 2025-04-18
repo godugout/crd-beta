@@ -21,20 +21,26 @@ export const useCollectionDetail = (collectionId?: string) => {
   const [localLoading, setLocalLoading] = useState(false);
   const [localCollection, setLocalCollection] = useState<Collection | null>(null);
   const [localCards, setLocalCards] = useState<Card[]>([]);
+  const [fetchError, setFetchError] = useState<string | null>(null);
+  const [fetchAttempts, setFetchAttempts] = useState(0);
+  const maxFetchAttempts = 3;
   
-  // Refresh collection data from Supabase
+  // Refresh collection data from Supabase with improved error handling
   const refreshCollection = useCallback(async () => {
     if (!collectionId) return;
     
     setLocalLoading(true);
+    setFetchError(null);
+    
     try {
-      console.log(`Refreshing collection data for ID: ${collectionId}`);
+      console.log(`Refreshing collection data for ID: ${collectionId} (attempt ${fetchAttempts + 1})`);
       
       const { data, error } = await collectionOperations.getCollectionWithCards(collectionId);
         
       if (error) {
         console.error('Error fetching collection data:', error);
-        toast.error('Failed to refresh collection data');
+        setFetchError(error.message || 'Failed to load collection data');
+        toast.error(`Failed to refresh collection data: ${error.message}`);
         return;
       }
       
@@ -73,8 +79,10 @@ export const useCollectionDetail = (collectionId?: string) => {
         
         console.log(`Fetched collection with ${data.cards?.length || 0} cards`);
         
-        // Since we don't have access to fetchCards directly, we'll dispatch a custom event
-        // that can be listened for in the parent component
+        // Reset fetch attempts on success
+        setFetchAttempts(0);
+        
+        // Dispatch refresh event
         if (typeof window !== 'undefined') {
           const refreshEvent = new CustomEvent('collection-refreshed', {
             detail: { 
@@ -91,14 +99,19 @@ export const useCollectionDetail = (collectionId?: string) => {
           refreshCards();
         }
       } else {
+        setFetchError('Collection not found');
         console.error('No collection data returned');
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error in refreshCollection:', err);
+      setFetchError(err.message || 'Unexpected error loading collection');
+      
+      // Increment fetch attempts
+      setFetchAttempts(prevAttempts => prevAttempts + 1);
     } finally {
       setLocalLoading(false);
     }
-  }, [collectionId, refreshCards]);
+  }, [collectionId, refreshCards, fetchAttempts]);
   
   // Find the collection in global state or use local state
   const collection = localCollection || collections.find(c => c.id === collectionId);
@@ -131,12 +144,12 @@ export const useCollectionDetail = (collectionId?: string) => {
     }
   }, [collection]);
 
-  // Initial data load
+  // Initial data load with limited retries
   useEffect(() => {
-    if (collectionId && !collection && !localLoading && !isLoading) {
+    if (collectionId && !collection && !localLoading && fetchAttempts < maxFetchAttempts) {
       refreshCollection();
     }
-  }, [collectionId, collection, localLoading, isLoading, refreshCollection]);
+  }, [collectionId, collection, localLoading, refreshCollection, fetchAttempts, maxFetchAttempts]);
 
   // Handle asset selection from gallery
   const handleAssetSelect = (asset: any) => {
@@ -214,6 +227,7 @@ export const useCollectionDetail = (collectionId?: string) => {
     handleDeleteCollection,
     handleShareCollection,
     handleCardClick,
-    refreshCollection
+    refreshCollection,
+    fetchError
   };
 };

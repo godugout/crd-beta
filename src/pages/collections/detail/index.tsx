@@ -12,12 +12,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useCards } from '@/context/CardContext';
 import { collectionOperations } from '@/lib/supabase/collections';
+import { AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const CollectionDetail = () => {
   const { id } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
   const shouldRefresh = searchParams.get('refresh') === 'true';
-  const { refreshCards } = useCards(); 
+  const { refreshCards } = useCards();
   
   const {
     collection,
@@ -43,7 +45,8 @@ const CollectionDetail = () => {
     handleDeleteCollection,
     handleShareCollection,
     handleCardClick,
-    refreshCollection
+    refreshCollection,
+    fetchError
   } = useCollectionDetail(id);
 
   // Custom event listener for collection refresh
@@ -77,14 +80,23 @@ const CollectionDetail = () => {
     }
   }, [shouldRefresh, id, refreshCollection, refreshCards]);
   
-  // Check collection existence in Supabase
+  // Initial collection existence check (only once)
   useEffect(() => {
+    let isMounted = true;
+    
     if (id && !collection && !isLoading) {
       console.log('Collection not found in state, checking Supabase directly');
       
       const checkCollection = async () => {
         try {
-          const { data } = await collectionOperations.getCollection(id);
+          const { data, error } = await collectionOperations.getCollection(id);
+          
+          if (!isMounted) return;
+          
+          if (error) {
+            console.error('Error checking collection:', error);
+            return;
+          }
           
           if (data) {
             console.log('Collection exists in Supabase but not in state:', data);
@@ -95,12 +107,15 @@ const CollectionDetail = () => {
             toast.error('Collection not found');
           }
         } catch (err) {
+          if (!isMounted) return;
           console.error('Error in direct collection check:', err);
         }
       };
       
       checkCollection();
     }
+    
+    return () => { isMounted = false; };
   }, [id, collection, isLoading, refreshCollection]);
   
   // Handle loading state
@@ -114,6 +129,29 @@ const CollectionDetail = () => {
     );
   }
   
+  // Handle error state
+  if (fetchError && !collection) {
+    return (
+      <PageLayout title="Collection Error" description="There was a problem loading this collection">
+        <div className="max-w-7xl mx-auto p-4">
+          <Alert variant="destructive" className="mb-6">
+            <AlertCircle className="h-4 w-4 mr-2" />
+            <AlertTitle>Error Loading Collection</AlertTitle>
+            <AlertDescription className="space-y-4">
+              <p>{fetchError}</p>
+              <div className="flex space-x-4 mt-4">
+                <Button onClick={() => refreshCollection()}>Try Again</Button>
+                <Button variant="outline" asChild>
+                  <Link to="/collections">Back to Collections</Link>
+                </Button>
+              </div>
+            </AlertDescription>
+          </Alert>
+        </div>
+      </PageLayout>
+    );
+  }
+  
   // Handle not found state
   if (!collection) {
     return (
@@ -121,9 +159,14 @@ const CollectionDetail = () => {
         <div className="max-w-7xl mx-auto p-4 text-center py-16">
           <h1 className="text-3xl font-bold mb-4">Collection Not Found</h1>
           <p className="mb-8">The collection you're looking for doesn't exist or has been removed.</p>
-          <Button asChild>
-            <Link to="/collections">Browse Collections</Link>
-          </Button>
+          <div className="flex justify-center space-x-4">
+            <Button asChild>
+              <Link to="/collections">Browse Collections</Link>
+            </Button>
+            <Button variant="outline" onClick={() => window.location.reload()}>
+              Retry
+            </Button>
+          </div>
         </div>
       </PageLayout>
     );
