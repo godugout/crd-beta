@@ -1,13 +1,10 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import PageLayout from '@/components/navigation/PageLayout';
 import { Button } from '@/components/ui/button';
 import { useCards } from '@/context/CardContext';
-import { ArrowLeft } from 'lucide-react';
-import CardDetailed from '@/components/cards/CardDetailed';
-import RelatedCards from '@/components/cards/RelatedCards';
-import { useCardOperations } from '@/hooks/useCardOperations';
-import FullscreenViewer from '@/components/gallery/FullscreenViewer';
+import { ArrowLeft, Eye, Smartphone, Share2, Download } from 'lucide-react';
 import { Card } from '@/lib/types';
 import { sampleCards } from '@/lib/data/sampleCards';
 import { toast } from '@/hooks/use-toast';
@@ -21,10 +18,9 @@ const CardDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { cards, getCard } = useCards();
-  const cardOperations = useCardOperations();
   const [showViewer, setShowViewer] = useState(false);
+  const [viewMode, setViewMode] = useState<'standard' | 'immersive' | 'ar'>('standard');
   const [resolvedCard, setResolvedCard] = useState<DetailedViewCard | null>(null);
-  
   const [isLoaded, setIsLoaded] = useState(false);
   
   useEffect(() => {
@@ -117,46 +113,245 @@ const CardDetail = () => {
     );
   }
   
-  const handleDeleteSuccess = () => {
-    navigate('/cards');
+  const handleViewImmersive = () => {
+    navigate(`/immersive/${id}`);
+  };
+  
+  const handleViewAR = () => {
+    // For now, navigate to immersive with a specific mode param
+    // In the future, this could launch a proper AR experience
+    navigate(`/ar-card-viewer/${id}`);
+  };
+  
+  const handleShare = () => {
+    const shareUrl = window.location.href;
+    
+    if (navigator.share) {
+      navigator.share({
+        title: resolvedCard.title,
+        text: resolvedCard.description || `Check out this ${resolvedCard.title} card!`,
+        url: shareUrl,
+      })
+      .then(() => toast({
+        title: "Shared successfully",
+        description: "Card has been shared"
+      }))
+      .catch(error => {
+        console.error('Error sharing card:', error);
+        navigator.clipboard.writeText(shareUrl).then(() => {
+          toast({
+            title: "Link copied",
+            description: "Card URL copied to clipboard"
+          });
+        });
+      });
+    } else {
+      navigator.clipboard.writeText(shareUrl).then(() => {
+        toast({
+          title: "Link copied",
+          description: "Card URL copied to clipboard"
+        });
+      });
+    }
   };
 
-  if (showViewer && isLoaded) {
-    return (
-      <FullscreenViewer 
-        cardId={id || ''} 
-        onClose={() => setShowViewer(false)} 
-      />
-    );
-  }
-  
   return (
     <PageLayout
       title={resolvedCard?.title || "Card Detail"}
       description={resolvedCard?.description || "View card details"}
     >
       <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center mb-6">
+        <div className="flex items-center justify-between mb-6">
           <Button variant="ghost" onClick={() => navigate(-1)} className="mr-2">
             <ArrowLeft className="h-5 w-5 mr-2" />
             Back
           </Button>
+          
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="outline"
+              size="sm"
+              onClick={handleShare}
+            >
+              <Share2 className="h-4 w-4 mr-2" />
+              Share
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Download
+            </Button>
+          </div>
         </div>
         
-        <CardDetailed 
-          card={resolvedCard}
-          onView={() => setShowViewer(true)}
-          onEdit={cardOperations.editCard}
-          onShare={() => cardOperations.shareCard(resolvedCard)}
-          onDelete={(id) => cardOperations.removeCard(id, handleDeleteSuccess)}
-        />
-        
-        <RelatedCards 
-          cards={sampleCards.filter(card => card.id !== resolvedCard.id)}
-          currentCardId={resolvedCard.id}
-          onCardClick={(id) => navigate(`/cards/${id}`)}
-          className="mt-16"
-        />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {/* Card Image */}
+          <div className="md:col-span-2">
+            <div className="bg-gradient-to-br from-gray-800/50 to-gray-900/70 p-6 rounded-lg backdrop-blur-sm">
+              <div className="relative mx-auto max-w-md">
+                <div className="aspect-[2.5/3.5] w-full rounded-lg overflow-hidden border-2 border-gray-600/30 shadow-lg transition-all duration-300 hover:shadow-xl hover:shadow-purple-500/10">
+                  <img 
+                    src={resolvedCard.imageUrl} 
+                    alt={resolvedCard.title} 
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = FALLBACK_IMAGE;
+                    }}
+                  />
+                </div>
+              </div>
+              
+              <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
+                <Button
+                  onClick={handleViewImmersive}
+                  className="bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-700 hover:to-blue-600"
+                >
+                  <Eye className="h-5 w-5 mr-2" />
+                  View Immersive 3D
+                </Button>
+                
+                <Button
+                  onClick={handleViewAR}
+                  variant="outline"
+                  className="border-purple-500/50 text-purple-300 hover:bg-purple-900/20"
+                >
+                  <Smartphone className="h-5 w-5 mr-2" />
+                  View in AR
+                </Button>
+              </div>
+            </div>
+          </div>
+          
+          {/* Card Info */}
+          <div className="md:col-span-1">
+            <div className="bg-gradient-to-br from-gray-800/50 to-gray-900/70 p-6 rounded-lg backdrop-blur-sm">
+              <h1 className="text-2xl font-bold mb-2">{resolvedCard.title}</h1>
+              
+              {resolvedCard.description && (
+                <p className="text-gray-300 mb-6">{resolvedCard.description}</p>
+              )}
+              
+              <div className="space-y-6">
+                {/* Card Attributes */}
+                <div className="grid grid-cols-2 gap-4">
+                  {resolvedCard.player && (
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-400">Player</h3>
+                      <p className="text-white">{resolvedCard.player}</p>
+                    </div>
+                  )}
+                  
+                  {resolvedCard.team && (
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-400">Team</h3>
+                      <p className="text-white">{resolvedCard.team}</p>
+                    </div>
+                  )}
+                  
+                  {resolvedCard.year && (
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-400">Year</h3>
+                      <p className="text-white">{resolvedCard.year}</p>
+                    </div>
+                  )}
+
+                  {resolvedCard.cardNumber && (
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-400">Card #</h3>
+                      <p className="text-white">{resolvedCard.cardNumber}</p>
+                    </div>
+                  )}
+                  
+                  {resolvedCard.set && (
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-400">Set</h3>
+                      <p className="text-white">{resolvedCard.set}</p>
+                    </div>
+                  )}
+                  
+                  {resolvedCard.cardType && (
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-400">Type</h3>
+                      <p className="text-white">{resolvedCard.cardType}</p>
+                    </div>
+                  )}
+                </div>
+                
+                {/* Card Stats */}
+                {resolvedCard.stats && Object.keys(resolvedCard.stats).length > 0 && (
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-400 mb-2">Stats</h3>
+                    <div className="grid grid-cols-2 gap-2">
+                      {resolvedCard.stats.battingAverage && (
+                        <div className="bg-gray-800/50 p-2 rounded">
+                          <div className="text-xs text-gray-400">Batting Average</div>
+                          <div className="text-lg font-semibold">{resolvedCard.stats.battingAverage}</div>
+                        </div>
+                      )}
+                      
+                      {resolvedCard.stats.homeRuns && (
+                        <div className="bg-gray-800/50 p-2 rounded">
+                          <div className="text-xs text-gray-400">Home Runs</div>
+                          <div className="text-lg font-semibold">{resolvedCard.stats.homeRuns}</div>
+                        </div>
+                      )}
+                      
+                      {resolvedCard.stats.rbis && (
+                        <div className="bg-gray-800/50 p-2 rounded">
+                          <div className="text-xs text-gray-400">RBIs</div>
+                          <div className="text-lg font-semibold">{resolvedCard.stats.rbis}</div>
+                        </div>
+                      )}
+                      
+                      {resolvedCard.stats.era && (
+                        <div className="bg-gray-800/50 p-2 rounded">
+                          <div className="text-xs text-gray-400">ERA</div>
+                          <div className="text-lg font-semibold">{resolvedCard.stats.era}</div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+                
+                {/* Tags */}
+                {resolvedCard.tags && resolvedCard.tags.length > 0 && (
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-400 mb-2">Tags</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {resolvedCard.tags.map((tag, index) => (
+                        <span 
+                          key={index}
+                          className="px-2 py-1 bg-gray-800/80 text-gray-300 text-xs rounded-full"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                {/* Card Effects */}
+                {resolvedCard.effects && resolvedCard.effects.length > 0 && (
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-400 mb-2">Special Effects</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {resolvedCard.effects.map((effect, index) => (
+                        <span 
+                          key={index}
+                          className="px-2 py-1 bg-purple-800/30 border border-purple-500/30 text-purple-300 text-xs rounded-full"
+                        >
+                          {effect}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </PageLayout>
   );

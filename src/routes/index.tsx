@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { RouteObject } from 'react-router-dom';
 import HomePage from '@/pages/HomePage';
@@ -33,6 +34,7 @@ const SeriesViewPage = React.lazy(() => import('@/pages/SeriesViewPage'));
 const CardCreator = React.lazy(() => import('@/pages/CardCreator'));
 const CardDetector = React.lazy(() => import('@/pages/CardDetector')); 
 const TeamPage = React.lazy(() => import('@/pages/TeamPage')); 
+const ArCardViewerPage = React.lazy(() => import('@/pages/ArCardViewerPage'));
 
 // Main application routes
 const rootRoutes: RouteObject[] = [
@@ -46,7 +48,7 @@ const rootRoutes: RouteObject[] = [
   },
   {
     path: "/cards/create",
-    element: <CardCreator />
+    element: <React.Suspense fallback={<div>Loading...</div>}><CardCreator /></React.Suspense>
   },
   {
     path: "/collections",
@@ -70,7 +72,7 @@ const rootRoutes: RouteObject[] = [
   },
   {
     path: "/teams/:teamId",
-    element: <TeamPage />
+    element: <React.Suspense fallback={<div>Loading...</div>}><TeamPage /></React.Suspense>
   },
   {
     path: "/community",
@@ -97,7 +99,7 @@ const rootRoutes: RouteObject[] = [
   },
   {
     path: "/cards/:id",
-    element: <CardViewerPage />
+    element: <CardDetail />
   },
   {
     path: "/basketball-cards",
@@ -110,6 +112,32 @@ const rootRoutes: RouteObject[] = [
   {
     path: "/immersive",
     element: <ImmersiveCardViewerPage />
+  },
+  {
+    path: "/ar-card-viewer/:id",
+    element: <React.Suspense fallback={
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-center">
+          <div className="h-10 w-10 border-4 border-t-blue-600 border-blue-200 rounded-full animate-spin mx-auto mb-4"></div>
+          <p>Loading AR Experience...</p>
+        </div>
+      </div>
+    }>
+      <ArCardViewerPage />
+    </React.Suspense>
+  },
+  {
+    path: "/ar-card-viewer",
+    element: <React.Suspense fallback={
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-center">
+          <div className="h-10 w-10 border-4 border-t-blue-600 border-blue-200 rounded-full animate-spin mx-auto mb-4"></div>
+          <p>Loading AR Experience...</p>
+        </div>
+      </div>
+    }>
+      <ArCardViewerPage />
+    </React.Suspense>
   },
   {
     path: "*",
