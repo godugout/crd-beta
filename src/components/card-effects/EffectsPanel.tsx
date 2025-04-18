@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Sparkles, Layers, Settings } from 'lucide-react';
 import LightingControls from '@/components/card-viewer/LightingControls';
-import { useCardLighting } from '@/hooks/useCardLighting';
+import { useCardLighting, LightingPreset } from '@/hooks/useCardLighting';
 
 interface EffectsPanelProps {
   availableEffects: string[];

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
@@ -11,6 +10,9 @@ import { LightingSettings, LightingPreset } from '@/hooks/useCardLighting';
 interface LightingControlsProps {
   settings: LightingSettings;
   onUpdateSettings: (settings: Partial<LightingSettings>) => void;
+  onApplyPreset?: (preset: LightingPreset) => void;
+  onToggleDynamicLighting?: () => void;
+  isUserCustomized?: boolean;
 }
 
 const LightingControls: React.FC<LightingControlsProps> = ({
@@ -19,10 +21,10 @@ const LightingControls: React.FC<LightingControlsProps> = ({
 }) => {
   // Environment presets
   const environmentPresets = [
-    { value: 'studio', label: 'Studio' },
-    { value: 'natural', label: 'Natural' },
-    { value: 'dramatic', label: 'Dramatic' },
-    { value: 'display_case', label: 'Display Case' },
+    { value: 'studio' as LightingPreset, label: 'Studio' },
+    { value: 'natural' as LightingPreset, label: 'Natural' },
+    { value: 'dramatic' as LightingPreset, label: 'Dramatic' },
+    { value: 'display_case' as LightingPreset, label: 'Display Case' },
   ];
 
   return (
@@ -31,7 +33,11 @@ const LightingControls: React.FC<LightingControlsProps> = ({
         <h3 className="text-lg font-medium">Environment</h3>
         <Select 
           value={settings.environmentType} 
-          onValueChange={(value) => onUpdateSettings({ environmentType: value })}
+          onValueChange={(value: string) => {
+            if (value === 'studio' || value === 'natural' || value === 'dramatic' || value === 'display_case') {
+              onUpdateSettings({ environmentType: value as LightingPreset });
+            }
+          }}
         >
           <SelectTrigger>
             <SelectValue placeholder="Select environment" />

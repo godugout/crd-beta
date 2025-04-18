@@ -46,10 +46,10 @@ const CardInteractive: React.FC<CardInteractiveProps> = ({
   
   // Initialize user preferences (if logged in)
   const {
-    currentSettings: savedUserSettings,
+    preferences: savedUserSettings,
     isLoading: isLoadingPreferences,
-    savePreference
-  } = useUserLightingPreferences('display_case');
+    savePreferences
+  } = useUserLightingPreferences();
   
   // Apply saved user settings if available
   useEffect(() => {
@@ -82,7 +82,7 @@ const CardInteractive: React.FC<CardInteractiveProps> = ({
   
   // Save current lighting settings
   const handleSaveSettings = () => {
-    savePreference(lightingSettings, 'My Custom Lighting', true);
+    savePreferences(lightingSettings);
   };
 
   // Progressive enhancement: simplified lighting for mobile
