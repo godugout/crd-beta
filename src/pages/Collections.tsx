@@ -57,7 +57,7 @@ const Collections = () => {
         <div className="backdrop-blur-md bg-[var(--bg-secondary)]/30 p-1 rounded-xl border border-[var(--border-primary)]">
           <Tabs defaultValue="all" className="w-full">
             <TabsList className="grid grid-cols-3 md:grid-cols-6 bg-transparent h-auto p-0 w-full">
-              {navigationItems.map((item, i) => (
+              {collectionsNavItems.map((item, i) => (
                 <TabsTrigger 
                   key={i} 
                   value={item.path} 
@@ -66,7 +66,7 @@ const Collections = () => {
                 >
                   <Link to={item.path} className="flex items-center gap-2 w-full">
                     {item.icon}
-                    <span className="hidden md:inline">{item.label}</span>
+                    <span className="hidden md:inline">{item.label || item.title}</span>
                   </Link>
                 </TabsTrigger>
               ))}

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useCards } from '@/context/CardContext';
@@ -8,7 +9,7 @@ import CollectionGrid from '@/components/collections/CollectionGrid';
 import { Button } from '@/components/ui/button';
 import { Container } from '@/components/ui/container';
 import CreateCollectionDialog from '@/components/collections/CreateCollectionDialog';
-import { PlusCircle } from '@/components/ui/icons';
+import { PlusCircle } from 'lucide-react';
 
 const Index = () => {
   const { collections } = useCards();
