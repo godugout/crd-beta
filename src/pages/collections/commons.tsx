@@ -181,7 +181,7 @@ const CommonsCardsPage = () => {
           <div className="bg-card border rounded-lg p-8 shadow-sm">
             {isCheckingExistence ? (
               <div className="text-center p-6">
-                <LoadingState size={24} className="mx-auto mb-4" />
+                <LoadingState size="lg" className="mx-auto mb-4" />
                 <p>Checking collection status...</p>
               </div>
             ) : collectionExists && !result?.error ? (
@@ -219,7 +219,7 @@ const CommonsCardsPage = () => {
                   >
                     {isLoading ? (
                       <>
-                        <LoadingState size={16} className="mr-2" /> 
+                        <LoadingState size="sm" className="mr-2" /> 
                         Regenerating...
                       </>
                     ) : (
@@ -246,7 +246,7 @@ const CommonsCardsPage = () => {
                 >
                   {isLoading ? (
                     <>
-                      <LoadingState size={16} className="mr-2" />
+                      <LoadingState size="sm" className="mr-2" />
                       Generating Commons Cards...
                     </>
                   ) : (
@@ -265,7 +265,7 @@ const CommonsCardsPage = () => {
                   <div className="mt-4">
                     <Button onClick={handleGenerateCommonsCards} variant="outline" className="mr-2" disabled={isLoading}>
                       {isLoading ? (
-                        <LoadingState size={16} className="mr-2" />
+                        <LoadingState size="sm" className="mr-2" />
                       ) : (
                         <RefreshCw className="h-4 w-4 mr-2" />
                       )}
@@ -299,7 +299,7 @@ const CommonsCardsPage = () => {
                   disabled={isLoading}
                 >
                   {isLoading ? (
-                    <LoadingState size={16} className="mr-2" />
+                    <LoadingState size="sm" className="mr-2" />
                   ) : (
                     <RefreshCw className="h-4 w-4 mr-2" />
                   )}
