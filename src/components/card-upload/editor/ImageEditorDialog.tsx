@@ -12,6 +12,7 @@ import CardTypeSelector from '../components/CardTypeSelector';
 import { toast } from "sonner";
 import { storageOperations } from '@/lib/supabase/storage';
 import { Badge } from '@/components/ui/badge';
+import { EnhancedCropBoxProps } from '../CropBox';
 
 interface ImageEditorDialogProps {
   showEditor: boolean;

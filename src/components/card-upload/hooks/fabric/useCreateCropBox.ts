@@ -1,8 +1,7 @@
 
 import { useCallback } from 'react';
 import { Canvas, fabric } from 'fabric';
-import { EnhancedCropBoxProps } from '../../cardDetection';
-import { v4 as uuidv4 } from 'uuid';
+import { EnhancedCropBoxProps } from '../../CropBox';
 
 interface UseCreateCropBoxProps {
   canvas: Canvas | null;
@@ -35,7 +34,7 @@ export const useCreateCropBox = ({
     
     // Add to state
     const newCropBox: EnhancedCropBoxProps = {
-      id: crypto.randomUUID(), // Generate a unique ID as a number
+      id: crypto.randomUUID(), // Generate a unique ID as a string
       x,
       y,
       width: defaultWidth,

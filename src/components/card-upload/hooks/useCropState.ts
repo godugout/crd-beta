@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { CropBoxProps } from '../CropBox';
+import { EnhancedCropBoxProps } from '../CropBox';
 
 export interface ImageData {
   width: number;
@@ -11,7 +11,7 @@ export interface ImageData {
 }
 
 export const useCropState = () => {
-  const [cropBoxes, setCropBoxes] = useState<CropBoxProps[]>([]);
+  const [cropBoxes, setCropBoxes] = useState<EnhancedCropBoxProps[]>([]);
   const [selectedCropIndex, setSelectedCropIndex] = useState<number>(0);
   const [imageData, setImageData] = useState<ImageData>({ 
     width: 0, 
@@ -19,7 +19,7 @@ export const useCropState = () => {
     scale: 1,
     rotation: 0 
   });
-  const [detectedCards, setDetectedCards] = useState<CropBoxProps[]>([]);
+  const [detectedCards, setDetectedCards] = useState<EnhancedCropBoxProps[]>([]);
   
   // Lock the main image by default
   const [imageIsLocked, setImageIsLocked] = useState(true);

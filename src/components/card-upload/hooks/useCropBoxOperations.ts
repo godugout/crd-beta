@@ -57,7 +57,7 @@ export const useCropBoxOperations = ({
     const newHeight = newWidth / cardRatio;
     
     const newBox: EnhancedCropBoxProps = {
-      id: cropBoxes.length + 1,
+      id: crypto.randomUUID(), // Use string ID
       x: (rect.width - newWidth) / 2,
       y: (rect.height - newHeight) / 2,
       width: newWidth,

@@ -5,6 +5,7 @@ import { useEditor } from '../../hooks/useEditor';
 import { useCropBoxOperations } from '../../hooks/useCropBoxOperations';
 import { useImageHandling } from '../../hooks/useImageHandling';
 import { MemorabiliaType } from '../../cardDetection';
+import { EnhancedCropBoxProps } from '../../CropBox';
 
 interface UseImageEditorStateProps {
   onCropComplete: (file: File, url: string, memorabiliaType?: MemorabiliaType) => void;

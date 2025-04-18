@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { CropBoxProps } from '../../CropBox';
 
@@ -6,7 +7,7 @@ export const useCropBox = () => {
 
   const addCropBox = (x: number, y: number, width: number, height: number) => {
     const newBox: CropBoxProps = {
-      id: Date.now(),
+      id: crypto.randomUUID(), // Change to string ID using UUID
       x,
       y,
       width,
