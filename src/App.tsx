@@ -1,24 +1,17 @@
 
-import { Routes, Route } from 'react-router-dom';
-import HomePage from './pages/HomePage';
-import CardViewerPage from './pages/CardViewerPage';
-import ImmersiveCardViewerPage from './pages/ImmersiveCardViewerPage';
-import CardCollectionPage from './pages/CardCollectionPage';
+import { Routes, Route, useRoutes } from 'react-router-dom';
 import { CardProvider } from './context/CardContext';
 import { SessionProvider } from './context/SessionContext';
 import { Toaster } from 'sonner';
+import { routes } from './routes';
 
 function App() {
+  const routeElements = useRoutes(routes);
+
   return (
     <SessionProvider>
       <CardProvider>
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/cards" element={<CardCollectionPage />} />
-          <Route path="/cards/:id" element={<CardViewerPage />} />
-          <Route path="/immersive/:id" element={<ImmersiveCardViewerPage />} />
-          <Route path="/immersive" element={<ImmersiveCardViewerPage />} />
-        </Routes>
+        {routeElements}
         <Toaster position="top-center" />
       </CardProvider>
     </SessionProvider>

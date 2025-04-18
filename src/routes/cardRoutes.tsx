@@ -6,11 +6,12 @@ import CardGallery from '@/pages/CardGallery';
 import CardDetector from '@/pages/CardDetector';
 import CardCreator from '@/pages/CardCreator';
 import ImmersiveCardViewerPage from '@/pages/ImmersiveCardViewerPage';
+import CardCollectionPage from '@/pages/CardCollectionPage';
 
 export const cardRoutes: RouteObject[] = [
   {
     path: "/cards",
-    element: <CardGallery />,
+    element: <CardCollectionPage />,
   },
   {
     path: "/cards/:id",
@@ -25,7 +26,11 @@ export const cardRoutes: RouteObject[] = [
     element: <CardDetector />,
   },
   {
-    path: "/cards/immersive/:id",
+    path: "/immersive/:id",
+    element: <ImmersiveCardViewerPage />,
+  },
+  {
+    path: "/immersive",
     element: <ImmersiveCardViewerPage />,
   },
 ];

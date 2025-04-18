@@ -1,21 +1,19 @@
 
 import React from 'react';
 import { RouteObject } from 'react-router-dom';
+import HomePage from '@/pages/HomePage';
+import CardViewerPage from '@/pages/CardViewerPage';
+import ImmersiveCardViewerPage from '@/pages/ImmersiveCardViewerPage';
+import CardCollectionPage from '@/pages/CardCollectionPage';
+import CollectionGallery from '@/pages/CollectionGallery';
 import CardDetail from '@/pages/CardDetail';
 import CardGallery from '@/pages/CardGallery';
 import Profile from '@/pages/Profile';
 import Dashboard from '@/pages/Dashboard';
 import Unauthorized from '@/pages/Unauthorized';
 import AuthPage from '@/pages/AuthPage';
-
-// Import the town-related routes
-import TeamDetail from '@/pages/TeamDetail';
-import TownDetail from '@/pages/TownDetail';
-import { teamRoutes } from './teamRoutes';  // Keep for backward compatibility
-import { townRoutes } from './townRoutes';  // Add new town routes
-
-// Import admin page
-import Admin from '@/pages/Admin';
+import NotFound from '@/pages/NotFound';
+import Collections from '@/pages/Collections';
 
 // Import other route collections
 import { cardRoutes } from './cardRoutes';
@@ -23,6 +21,8 @@ import { collectionRoutes } from './collectionRoutes';
 import { mainRoutes } from './mainRoutes';
 import { baseballRoutes } from './baseballRoutes';
 import featureRoutes from './featureRoutes';
+import { teamRoutes } from './teamRoutes';
+import { townRoutes } from './townRoutes';
 
 // Create new pages for deck and series management
 const DeckBuilderPage = React.lazy(() => import('@/pages/DeckBuilderPage'));
@@ -30,44 +30,47 @@ const SeriesManagerPage = React.lazy(() => import('@/pages/SeriesManagerPage'));
 const DeckViewPage = React.lazy(() => import('@/pages/DeckViewPage'));
 const SeriesViewPage = React.lazy(() => import('@/pages/SeriesViewPage'));
 
-export const routes: RouteObject[] = [
-  ...mainRoutes,
-  ...teamRoutes, // Keep for backward compatibility
-  ...townRoutes, // Add new town routes
-  ...baseballRoutes,
-  ...featureRoutes,
+// Main application routes
+const rootRoutes: RouteObject[] = [
   {
     path: "/",
-    element: <Dashboard />,
+    element: <HomePage />
   },
   {
-    path: "/dashboard",
-    element: <Dashboard />,
+    path: "/cards",
+    element: <CardCollectionPage />
   },
   {
-    path: "/profile",
-    element: <Profile />,
+    path: "/cards/:id",
+    element: <CardViewerPage />
   },
   {
-    path: "/auth",
-    element: <AuthPage />,
+    path: "/immersive/:id",
+    element: <ImmersiveCardViewerPage />
   },
   {
-    path: "/unauthorized",
-    element: <Unauthorized />,
+    path: "/immersive",
+    element: <ImmersiveCardViewerPage />
   },
   {
-    path: "/admin",
-    element: <Admin />,
+    path: "/collections",
+    element: <Collections />
   },
   {
-    path: "/teams/:teamId",
-    element: <TeamDetail />,
-  },
-  {
-    path: "/towns/:townId",
-    element: <TownDetail />,
-  },
+    path: "*",
+    element: <NotFound />
+  }
+];
+
+export const routes: RouteObject[] = [
+  ...rootRoutes,
+  ...mainRoutes.filter(route => route.path !== "/" && route.path !== "*"), // Avoid duplicates
+  ...teamRoutes,
+  ...townRoutes,
+  ...baseballRoutes,
+  ...featureRoutes,
+  ...cardRoutes.filter(route => route.path !== "/cards" && route.path !== "/cards/:id"), // Avoid duplicates
+  ...collectionRoutes.filter(route => route.path !== "/collections"), // Avoid duplicates
   
   // Deck routes
   {
@@ -104,8 +107,4 @@ export const routes: RouteObject[] = [
     path: "/series/:seriesId/edit",
     element: <React.Suspense fallback={<div>Loading...</div>}><SeriesManagerPage /></React.Suspense>,
   },
-  
-  // Include card routes and collection routes
-  ...cardRoutes,
-  ...collectionRoutes,
 ];
