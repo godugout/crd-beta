@@ -3,8 +3,7 @@ import {
   Home, 
   Image, 
   Layers, 
-  Building,
-  Cards
+  Building
 } from 'lucide-react';
 import { NavigationItem } from './types';
 
@@ -18,7 +17,7 @@ export const mainNavItems: NavigationItem[] = [
   { 
     title: 'Cards', 
     path: '/cards',
-    icon: Cards,
+    icon: Image,
     description: 'Browse the card collection'
   },
   { 
