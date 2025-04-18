@@ -8,8 +8,7 @@ import { PlusCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { DEFAULT_DESIGN_METADATA } from '@/lib/utils/cardDefaults';
 import { Card } from '@/lib/types';
-import { sampleCards } from '@/data/sampleCards'; // Import the basketball player cards
-import { adaptToCard } from '@/lib/adapters/cardAdapter';
+import { sampleCards } from '@/data/sampleCards';
 
 // Map the basketball player sample cards to the Card type
 const basketballCards: Card[] = sampleCards.map(card => ({
@@ -23,7 +22,33 @@ const basketballCards: Card[] = sampleCards.map(card => ({
   effects: card.effects || [],
   createdAt: card.createdAt,
   updatedAt: card.updatedAt,
-  designMetadata: card.designMetadata || DEFAULT_DESIGN_METADATA,
+  designMetadata: {
+    cardStyle: {
+      template: 'classic',
+      effect: 'none',
+      borderRadius: '12px',
+      borderColor: '#000000',
+      shadowColor: 'rgba(0,0,0,0.2)',
+      frameWidth: 2,
+      frameColor: '#000000'
+    },
+    textStyle: {
+      titleColor: '#000000',
+      titleAlignment: 'center',
+      titleWeight: 'bold',
+      descriptionColor: '#666666'
+    },
+    cardMetadata: {
+      category: 'sports',
+      series: 'basketball',
+      cardType: 'player',
+    },
+    marketMetadata: {
+      isPrintable: false,
+      isForSale: false,
+      includeInCatalog: true
+    }
+  },
   player: card.player,
   team: card.team,
   year: card.year
