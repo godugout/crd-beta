@@ -1,3 +1,4 @@
+
 // Base types that might be used across modules
 export type JsonValue = 
   | string 
@@ -28,10 +29,10 @@ export type { CardEffect, CardEffectSettings } from './cardEffects';
 // Don't re-export enhancedCardTypes directly to avoid ambiguity
 import * as EnhancedCardTypes from './enhancedCardTypes';
 export type { 
-  CardRarity as EnhancedCardRarity,
   HotspotData as EnhancedHotspotData,
   EnhancedCard as ExtendedCard,
   Series as EnhancedSeries,
+  CardRarity,
 } from './enhancedCardTypes';
 
 // For backward compatibility, keep the old imports as well

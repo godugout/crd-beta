@@ -32,6 +32,7 @@ const SeriesManager: React.FC<SeriesManagerProps> = ({ initialSeries }) => {
     totalCards: 0,
     isPublished: false,
     cardIds: [],
+    cards: [],
     releaseType: 'standard',
   });
   
@@ -61,14 +62,14 @@ const SeriesManager: React.FC<SeriesManagerProps> = ({ initialSeries }) => {
     e.preventDefault();
     
     const seriesWithId = initialSeries?.id 
-      ? { ...seriesData, updatedAt: new Date().toISOString() }
-      : { ...seriesData, id: uuidv4(), updatedAt: new Date().toISOString() };
+      ? { ...seriesData, updatedAt: new Date().toISOString() } as Series
+      : { ...seriesData, id: uuidv4(), updatedAt: new Date().toISOString() } as Series;
       
     if (initialSeries?.id) {
-      updateSeries(initialSeries.id, seriesWithId as Series);
+      updateSeries(initialSeries.id, seriesWithId);
       toast.success('Series updated successfully');
     } else {
-      addSeries(seriesWithId as Series);
+      addSeries(seriesWithId);
       toast.success('Series created successfully');
     }
     

@@ -5,7 +5,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { Card } from '@/lib/types/cardTypes';
 import { EnhancedCard, Series, Deck } from '@/lib/types/enhancedCardTypes';
 import { sampleCards } from '@/data/sampleCards';
-import { DEFAULT_DESIGN_METADATA } from '@/lib/utils/cardDefaults';
 
 // Convert sample cards to enhanced cards
 const enhancedSampleCards: EnhancedCard[] = sampleCards.map(card => ({
@@ -67,6 +66,7 @@ const sampleSeries: Series[] = [
     releaseDate: new Date().toISOString(),
     totalCards: 5,
     isPublished: true,
+    cards: [] as EnhancedCard[],
     cardIds: enhancedSampleCards.filter((_, i) => i < 5).map(card => card.id),
     releaseType: 'standard'
   },
@@ -81,6 +81,7 @@ const sampleSeries: Series[] = [
     releaseDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
     totalCards: 3,
     isPublished: true,
+    cards: [] as EnhancedCard[],
     cardIds: enhancedSampleCards.filter((_, i) => i >= 5).map(card => card.id),
     releaseType: 'limited'
   }
@@ -96,6 +97,7 @@ const sampleDecks: Deck[] = [
     ownerId: 'user-001',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
+    cards: [] as EnhancedCard[],
     cardIds: enhancedSampleCards.filter((_, i) => i % 2 === 0).map(card => card.id),
     isPublic: true
   }
@@ -207,6 +209,7 @@ export const CardEnhancedProvider: React.FC<{ children: React.ReactNode }> = ({ 
       setSeries(prev => {
         return prev.map(s => ({
           ...s,
+          cards: (s.cards || []).filter(c => c.id !== id),
           cardIds: s.cardIds.filter(cId => cId !== id)
         }));
       });
@@ -215,6 +218,7 @@ export const CardEnhancedProvider: React.FC<{ children: React.ReactNode }> = ({ 
       setDecks(prev => {
         return prev.map(d => ({
           ...d,
+          cards: (d.cards || []).filter(c => c.id !== id),
           cardIds: d.cardIds.filter(cId => cId !== id)
         }));
       });
@@ -236,7 +240,6 @@ export const CardEnhancedProvider: React.FC<{ children: React.ReactNode }> = ({ 
   // Series operations
   const addSeries = (seriesData: Partial<Series>): Series => {
     const newSeries: Series = {
-      ...seriesData as Series,
       id: seriesData.id || uuidv4(),
       title: seriesData.title || 'Untitled Series',
       description: seriesData.description || '',
@@ -247,6 +250,7 @@ export const CardEnhancedProvider: React.FC<{ children: React.ReactNode }> = ({ 
       releaseDate: seriesData.releaseDate || new Date().toISOString(),
       totalCards: seriesData.totalCards || 0,
       isPublished: seriesData.isPublished || false,
+      cards: [],
       cardIds: seriesData.cardIds || [],
       releaseType: seriesData.releaseType || 'standard'
     };
@@ -375,7 +379,6 @@ export const CardEnhancedProvider: React.FC<{ children: React.ReactNode }> = ({ 
   // Deck operations
   const addDeck = (deckData: Partial<Deck>): Deck => {
     const newDeck: Deck = {
-      ...deckData as Deck,
       id: deckData.id || uuidv4(),
       name: deckData.name || 'Untitled Deck',
       description: deckData.description || '',
@@ -383,6 +386,7 @@ export const CardEnhancedProvider: React.FC<{ children: React.ReactNode }> = ({ 
       ownerId: deckData.ownerId || (user?.id || 'anonymous'),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
+      cards: [],
       cardIds: deckData.cardIds || [],
       isPublic: deckData.isPublic || false
     };

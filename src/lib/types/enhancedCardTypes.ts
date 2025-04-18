@@ -1,5 +1,5 @@
 
-// New file to split up the large cardTypes.ts file
+// Enhanced card types for the card system
 import { BaseCard } from './cardTypes';
 
 /**
@@ -15,7 +15,26 @@ export interface EnhancedCard extends BaseCard {
   gradingScore?: string;
   hotspots?: HotspotData[];
   backSideImage?: string;
+  cardNumber?: string;
+  artist?: string;
+  artistId?: string;
+  edition?: number;
+  editionSize?: number;
+  releaseDate?: string;
+  qrCodeData?: string;
+  marketData?: {
+    price?: number;
+    currency?: string;
+    lastSoldPrice?: number;
+    availableForSale?: boolean;
+  };
+  rarity?: CardRarity;
 }
+
+/**
+ * Card rarity types
+ */
+export type CardRarity = 'common' | 'uncommon' | 'rare' | 'ultra-rare' | 'legendary' | 'one-of-one';
 
 /**
  * Hotspot data for interactive cards
@@ -36,15 +55,21 @@ export interface HotspotData {
  */
 export interface Series {
   id: string;
-  name: string;
+  name?: string;
+  title: string;
   description: string;
   releaseDate: string;
   cards: EnhancedCard[];
   totalCards: number;
-  rarity: string;
-  creator: string;
+  rarity?: string;
+  creator?: string;
+  artistId?: string;
   createdAt: string;
   updatedAt: string;
+  coverImageUrl?: string;
+  isPublished?: boolean;
+  cardIds: string[];
+  releaseType?: 'standard' | 'limited' | 'exclusive';
 }
 
 /**
@@ -55,10 +80,13 @@ export interface Deck {
   name: string;
   description: string;
   cards: EnhancedCard[];
-  creator: string;
+  creator?: string;
+  ownerId?: string;
   createdAt: string;
   updatedAt: string;
   isPublic: boolean;
+  coverImageUrl?: string;
+  cardIds: string[];
 }
 
 /**
