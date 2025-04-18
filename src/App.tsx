@@ -15,7 +15,7 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/cards/:id" element={<CardViewerPage />} />
           <Route path="/immersive/:id" element={<ImmersiveCardViewerPage />} />
-          <Route path="/view/:id" element={<CardViewerPage />} />
+          <Route path="/immersive" element={<ImmersiveCardViewerPage />} />
         </Routes>
         <Toaster position="top-center" />
       </CardProvider>
