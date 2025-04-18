@@ -2,11 +2,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useCards } from '@/context/CardContext';
 import { toast } from 'sonner';
-import { Card } from '@/lib/types';
+import { Card, Collection } from '@/lib/types';
 import { supabase } from '@/integrations/supabase/client';
+import { collectionOperations, convertDbCollectionToApp } from '@/lib/supabase/collections';
 
 export const useCollectionDetail = (collectionId?: string) => {
-  const { collections, cards, isLoading, updateCard, updateCollection, deleteCollection } = useCards();
+  const { collections, cards, isLoading, updateCard, updateCollection, deleteCollection, refreshCards } = useCards();
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [isAssetGalleryOpen, setIsAssetGalleryOpen] = useState(false);
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
@@ -18,6 +19,8 @@ export const useCollectionDetail = (collectionId?: string) => {
     description: ''
   });
   const [localLoading, setLocalLoading] = useState(false);
+  const [localCollection, setLocalCollection] = useState<Collection | null>(null);
+  const [localCards, setLocalCards] = useState<Card[]>([]);
   
   // Refresh collection data from Supabase
   const refreshCollection = useCallback(async () => {
@@ -27,43 +30,65 @@ export const useCollectionDetail = (collectionId?: string) => {
     try {
       console.log(`Refreshing collection data for ID: ${collectionId}`);
       
-      // Fetch directly from Supabase to bypass any caching
-      const { data: collectionData, error: collectionError } = await supabase
-        .from('collections')
-        .select('*')
-        .eq('id', collectionId)
-        .single();
+      const { data, error } = await collectionOperations.getCollectionWithCards(collectionId);
         
-      if (collectionError) {
-        console.error('Error fetching collection:', collectionError);
+      if (error) {
+        console.error('Error fetching collection data:', error);
         toast.error('Failed to refresh collection data');
         return;
       }
       
-      if (collectionData) {
-        console.log('Fetched collection data:', collectionData);
+      if (data?.collection) {
+        // Convert DB collection to app format
+        const appCollection = convertDbCollectionToApp(data.collection);
+        setLocalCollection(appCollection);
         
-        // Fetch cards for this collection
-        const { data: cardsData, error: cardsError } = await supabase
-          .from('cards')
-          .select('*')
-          .eq('collection_id', collectionId);
+        if (data.cards?.length > 0) {
+          // Process cards
+          const processedCards = data.cards.map(card => ({
+            id: card.id,
+            title: card.title || '',
+            description: card.description || '',
+            imageUrl: card.image_url || '',
+            thumbnailUrl: card.thumbnail_url || card.image_url || '',
+            collectionId: card.collection_id,
+            userId: card.creator_id || card.user_id,
+            teamId: card.team_id,
+            isPublic: card.is_public,
+            tags: card.tags || [],
+            effects: [],
+            createdAt: card.created_at,
+            updatedAt: card.updated_at,
+            designMetadata: card.design_metadata || {},
+          })) as Card[];
           
-        if (cardsError) {
-          console.error('Error fetching collection cards:', cardsError);
-        } else {
-          console.log(`Fetched ${cardsData?.length || 0} cards for collection`);
+          setLocalCards(processedCards);
+          
+          // Update local collection with card IDs
+          setLocalCollection(prev => prev ? {
+            ...prev,
+            cardIds: processedCards.map(card => card.id)
+          } : null);
         }
         
-        // Since we don't have access to fetchCards directly, we'll use a workaround
-        // We'll refresh the page which will cause the cards to be fetched again
+        console.log(`Fetched collection with ${data.cards?.length || 0} cards`);
+        
+        // Since we don't have access to fetchCards directly, we'll dispatch a custom event
+        // that can be listened for in the parent component
         if (typeof window !== 'undefined') {
-          // Instead of triggering a full page refresh, we'll dispatch a custom event
-          // that can be listened for in the parent component
           const refreshEvent = new CustomEvent('collection-refreshed', {
-            detail: { collectionId, timestamp: new Date().getTime() }
+            detail: { 
+              collectionId, 
+              timestamp: new Date().getTime(),
+              hasLocalData: true 
+            }
           });
           window.dispatchEvent(refreshEvent);
+        }
+        
+        // Also try to trigger global cards refresh if available
+        if (refreshCards) {
+          refreshCards();
         }
       } else {
         console.error('No collection data returned');
@@ -73,15 +98,17 @@ export const useCollectionDetail = (collectionId?: string) => {
     } finally {
       setLocalLoading(false);
     }
-  }, [collectionId]);
+  }, [collectionId, refreshCards]);
   
-  // Find the collection by ID
-  const collection = collections.find(c => c.id === collectionId);
+  // Find the collection in global state or use local state
+  const collection = localCollection || collections.find(c => c.id === collectionId);
   
-  // Get cards that belong to this collection
-  const collectionCards = collection 
-    ? cards.filter(card => card.collectionId === collectionId) 
-    : [];
+  // Get cards that belong to this collection, prioritize local cards
+  const collectionCards = localCards.length > 0 
+    ? localCards 
+    : (collection 
+      ? cards.filter(card => card.collectionId === collectionId) 
+      : []);
 
   // Filter cards based on search term
   const filteredCards = !searchTerm.trim() 
@@ -103,6 +130,13 @@ export const useCollectionDetail = (collectionId?: string) => {
       });
     }
   }, [collection]);
+
+  // Initial data load
+  useEffect(() => {
+    if (collectionId && !collection && !localLoading && !isLoading) {
+      refreshCollection();
+    }
+  }, [collectionId, collection, localLoading, isLoading, refreshCollection]);
 
   // Handle asset selection from gallery
   const handleAssetSelect = (asset: any) => {

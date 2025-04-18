@@ -11,12 +11,13 @@ import { LoadingState } from '@/components/ui/loading-state';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useCards } from '@/context/CardContext';
+import { collectionOperations } from '@/lib/supabase/collections';
 
 const CollectionDetail = () => {
   const { id } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
   const shouldRefresh = searchParams.get('refresh') === 'true';
-  const { refreshCards } = useCards(); // Get refreshCards from context
+  const { refreshCards } = useCards(); 
   
   const {
     collection,
@@ -65,7 +66,7 @@ const CollectionDetail = () => {
 
   // Refresh collection data when the refresh param is present
   useEffect(() => {
-    if (shouldRefresh && id && !isLoading) {
+    if (shouldRefresh && id) {
       console.log('Refreshing collection data due to refresh parameter');
       refreshCollection();
       
@@ -74,39 +75,35 @@ const CollectionDetail = () => {
         refreshCards();
       }
     }
-  }, [shouldRefresh, id, refreshCollection, isLoading, refreshCards]);
+  }, [shouldRefresh, id, refreshCollection, refreshCards]);
   
-  // Debug log
+  // Check collection existence in Supabase
   useEffect(() => {
     if (id && !collection && !isLoading) {
-      console.log('Collection not found, checking Supabase directly');
-      // Check if collection exists in Supabase directly
+      console.log('Collection not found in state, checking Supabase directly');
+      
       const checkCollection = async () => {
         try {
-          const { data, error } = await supabase
-            .from('collections')
-            .select('*')
-            .eq('id', id)
-            .single();
-            
-          if (error) {
-            console.error('Direct Supabase check failed:', error);
-          } else if (data) {
+          const { data } = await collectionOperations.getCollection(id);
+          
+          if (data) {
             console.log('Collection exists in Supabase but not in state:', data);
-            toast.info('Collection found in database, but couldn\'t be loaded. Try refreshing the page.');
+            toast.info('Collection found. Loading data...');
+            refreshCollection();
           } else {
             console.log('Collection not found in Supabase');
+            toast.error('Collection not found');
           }
         } catch (err) {
-          console.error('Error in direct check:', err);
+          console.error('Error in direct collection check:', err);
         }
       };
       
       checkCollection();
     }
-  }, [id, collection, isLoading]);
+  }, [id, collection, isLoading, refreshCollection]);
   
-  // Rest of component stays the same
+  // Handle loading state
   if (isLoading) {
     return (
       <PageLayout title="Loading Collection..." description="Please wait">
@@ -117,6 +114,7 @@ const CollectionDetail = () => {
     );
   }
   
+  // Handle not found state
   if (!collection) {
     return (
       <PageLayout title="Collection Not Found" description="The requested collection could not be found">

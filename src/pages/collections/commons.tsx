@@ -13,6 +13,8 @@ import { checkCollectionExists } from '@/lib/supabase/collections';
 
 const CommonsCardsPage = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [isCheckingExistence, setIsCheckingExistence] = useState(false);
+  const [collectionExists, setCollectionExists] = useState<boolean | null>(null);
   const [result, setResult] = useState<{
     success?: boolean;
     message?: string;
@@ -24,42 +26,51 @@ const CommonsCardsPage = () => {
   // Collection ID for Commons Cards
   const COMMONS_COLLECTION_ID = '5d034aa4-86e0-4ca7-92c5-1fbd8e71943c';
 
+  // Check if the collection exists when the component mounts
   useEffect(() => {
     const checkCollection = async () => {
+      setIsCheckingExistence(true);
       const exists = await checkCollectionExists(COMMONS_COLLECTION_ID);
       console.log(`Collection ${COMMONS_COLLECTION_ID} exists:`, exists);
+      setCollectionExists(exists);
+      setIsCheckingExistence(false);
       
-      // If we have a stored result but the collection doesn't exist, something went wrong
-      if (result?.success && !exists) {
-        toast.error('The collection was reported as created but cannot be found in the database');
+      if (exists) {
+        setResult({
+          success: true,
+          collectionId: COMMONS_COLLECTION_ID,
+          message: "Commons Cards collection is already available"
+        });
       }
     };
 
     checkCollection();
-  }, [result]);
+  }, []);
 
+  // Check collection existence after generation
   useEffect(() => {
-    if (result?.collectionId) {
-      const checkCollection = async () => {
+    if (result?.success && result?.collectionId) {
+      const verifyCollection = async () => {
         try {
           const { data, error } = await supabase
             .from('collections')
             .select('id, title')
             .eq('id', result.collectionId)
-            .single();
+            .maybeSingle();
             
           if (error || !data) {
             console.error('Collection verification failed:', error || 'No data returned');
             toast.error('Created collection could not be verified');
           } else {
             console.log('Collection verified:', data);
+            setCollectionExists(true);
           }
         } catch (err) {
           console.error('Error checking collection:', err);
         }
       };
       
-      checkCollection();
+      verifyCollection();
     }
   }, [result]);
 
@@ -71,7 +82,10 @@ const CommonsCardsPage = () => {
       console.log("Starting Commons Cards generation request...");
       
       const { data, error } = await supabase.functions.invoke('populate-cards', {
-        body: { timestamp: new Date().toISOString() }
+        body: { 
+          timestamp: new Date().toISOString(),
+          collectionId: COMMONS_COLLECTION_ID
+        }
       });
       
       console.log("Edge function response:", { data, error });
@@ -95,7 +109,16 @@ const CommonsCardsPage = () => {
       
       console.log('Commons Cards generated successfully:', data);
       toast.success(data.message || 'Commons Cards collection created/updated successfully');
-      setResult({ ...data, success: true });
+      
+      // Set the result with the collection ID
+      setResult({ 
+        success: true, 
+        message: data.message || 'Commons Cards created successfully!',
+        collectionId: data.collectionId || COMMONS_COLLECTION_ID
+      });
+      
+      // Update collection exists state
+      setCollectionExists(true);
     } catch (err: any) {
       console.error('Unexpected error:', err);
       toast.error('An unexpected error occurred');
@@ -109,12 +132,8 @@ const CommonsCardsPage = () => {
   };
 
   const handleViewCollection = () => {
-    if (result?.collectionId) {
-      navigate(`/collections/${result.collectionId}?refresh=true`);
-    } else {
-      // If we don't have a result yet but know the default ID, use that
-      navigate(`/collections/${COMMONS_COLLECTION_ID}?refresh=true`);
-    }
+    const collectionIdToUse = result?.collectionId || COMMONS_COLLECTION_ID;
+    navigate(`/collections/${collectionIdToUse}?refresh=true`);
   };
 
   return (
@@ -133,7 +152,39 @@ const CommonsCardsPage = () => {
           </div>
 
           <div className="bg-card border rounded-lg p-8 shadow-sm">
-            {!result?.success && !result?.error && (
+            {isCheckingExistence ? (
+              <div className="text-center p-6">
+                <LoadingSpinner size={24} className="mx-auto mb-4" />
+                <p>Checking collection status...</p>
+              </div>
+            ) : collectionExists && !result?.error ? (
+              <div className="text-center space-y-4">
+                <div className="bg-primary/10 p-6 rounded-lg border border-primary/20">
+                  <h2 className="text-2xl font-semibold text-primary mb-2">
+                    Commons Cards Collection Available
+                  </h2>
+                  <p className="text-muted-foreground mb-4">
+                    The Commons Cards collection already exists and can be viewed.
+                  </p>
+                  <Button 
+                    onClick={handleViewCollection}
+                    size="lg"
+                    className="w-full"
+                  >
+                    <Eye className="h-4 w-4 mr-2" />
+                    View Commons Cards Collection
+                  </Button>
+                </div>
+                
+                <Button 
+                  onClick={handleGenerateCommonsCards} 
+                  variant="outline"
+                >
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Regenerate Commons Cards
+                </Button>
+              </div>
+            ) : !result?.success && !result?.error ? (
               <div className="text-center">
                 <p className="mb-6">
                   This will create or update the "Commons Cards" collection with sample trading cards
@@ -156,7 +207,7 @@ const CommonsCardsPage = () => {
                   )}
                 </Button>
               </div>
-            )}
+            ) : null}
 
             {result?.error && (
               <Alert variant="destructive" className="mb-6">
@@ -174,7 +225,7 @@ const CommonsCardsPage = () => {
               </Alert>
             )}
 
-            {result?.success && (
+            {result?.success && !collectionExists && (
               <div className="text-center space-y-4">
                 <div className="bg-primary/10 p-6 rounded-lg border border-primary/20">
                   <h2 className="text-2xl font-semibold text-primary mb-2">{result.message}</h2>

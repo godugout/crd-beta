@@ -30,12 +30,51 @@ export const collectionOperations = {
         .from('collections')
         .select('*')
         .eq('id', id)
-        .single();
+        .maybeSingle();
         
       return { data, error };
     } catch (err) {
       console.error('Error getting collection:', err);
       return { data: null, error: { message: 'Failed to get collection' } };
+    }
+  },
+  
+  /**
+   * Get collection with cards
+   */
+  async getCollectionWithCards(id: string) {
+    try {
+      // First get the collection
+      const { data: collection, error: collectionError } = await supabase
+        .from('collections')
+        .select('*')
+        .eq('id', id)
+        .maybeSingle();
+      
+      if (collectionError || !collection) {
+        return { data: null, error: collectionError || { message: 'Collection not found' } };
+      }
+      
+      // Then get the cards for this collection
+      const { data: cards, error: cardsError } = await supabase
+        .from('cards')
+        .select('*')
+        .eq('collection_id', id);
+        
+      if (cardsError) {
+        return { 
+          data: { collection, cards: [] }, 
+          error: { message: 'Failed to fetch collection cards' } 
+        };
+      }
+      
+      return { 
+        data: { collection, cards: cards || [] },
+        error: null
+      };
+    } catch (err) {
+      console.error('Error getting collection with cards:', err);
+      return { data: null, error: { message: 'Failed to get collection with cards' } };
     }
   },
   
@@ -175,9 +214,9 @@ export const checkCollectionExists = async (collectionId: string) => {
   try {
     const { data, error } = await supabase
       .from('collections')
-      .select('*')
+      .select('id')
       .eq('id', collectionId)
-      .single();
+      .maybeSingle();
     
     if (error) {
       console.error('Error checking collection:', error);
@@ -189,4 +228,26 @@ export const checkCollectionExists = async (collectionId: string) => {
     console.error('Unexpected error checking collection:', err);
     return false;
   }
+};
+
+// Convert from database schema to app schema
+export const convertDbCollectionToApp = (dbCollection: any): Collection => {
+  if (!dbCollection) return null as unknown as Collection;
+  
+  return {
+    id: dbCollection.id,
+    name: dbCollection.title,
+    description: dbCollection.description || '',
+    coverImageUrl: dbCollection.cover_image_url || '',
+    userId: dbCollection.owner_id,
+    teamId: dbCollection.team_id,
+    visibility: dbCollection.visibility || 'public',
+    allowComments: dbCollection.allow_comments,
+    isPublic: dbCollection.visibility === 'public',
+    designMetadata: dbCollection.design_metadata || {},
+    cards: [],
+    cardIds: [],
+    createdAt: dbCollection.created_at,
+    updatedAt: dbCollection.updated_at,
+  };
 };
