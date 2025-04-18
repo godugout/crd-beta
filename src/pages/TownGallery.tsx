@@ -23,8 +23,8 @@ const TownGallery = () => {
   // Pass required arguments to useTownGalleryData hook
   const { towns, loading, error } = useTownGalleryData(filterOptions, {});
   
-  // Prevent multiple loading skeletons from appearing
-  const renderContent = (towns: any[]) => {
+  // Render content based on loading state
+  const renderContent = () => {
     if (loading) {
       return <TownGalleryLoading />;
     }
@@ -106,14 +106,14 @@ const TownGallery = () => {
           </div>
 
           {error && (
-            <Alert variant="destructive" className="mb-6">
+            <Alert variant="destructive" className="mb-6 mt-6">
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
 
-          {/* Use a single content renderer for all tabs to avoid duplication */}
+          {/* Single content renderer for all tabs to avoid duplicated skeleton loading */}
           <div className="mt-6">
-            {renderContent(towns)}
+            {renderContent()}
           </div>
         </Tabs>
       </div>
