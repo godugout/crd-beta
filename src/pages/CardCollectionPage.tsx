@@ -1,35 +1,75 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import PageLayout from '@/components/navigation/PageLayout';
-import { useCards } from '@/context/CardContext';
+import CardGrid from '@/components/cards/CardGrid';
+import FilterPanel from '@/components/filters/FilterPanel';
+import { Button } from '@/components/ui/button';
+import { PlusCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import CardGridWrapper from '@/components/gallery/CardGridWrapper';
+import { DEFAULT_DESIGN_METADATA } from '@/lib/utils/cardDefaults';
+import { Card } from '@/lib/types';
+import { sampleCards } from '@/data/sampleCards';
+import { adaptToCard } from '@/lib/adapters/cardAdapter';
 
-const CardCollectionPage = () => {
-  const { cards, isLoading } = useCards();
+// Map the basketball player sample cards to the Card type
+const basketballCards: Card[] = sampleCards.map(card => ({
+  id: card.id,
+  title: card.title,
+  description: card.description,
+  imageUrl: card.imageUrl,
+  thumbnailUrl: card.thumbnailUrl,
+  tags: card.tags || [],
+  userId: card.userId,
+  effects: card.effects || [],
+  createdAt: card.createdAt,
+  updatedAt: card.updatedAt,
+  designMetadata: card.designMetadata || DEFAULT_DESIGN_METADATA
+}));
+
+const CardCollectionPage: React.FC = () => {
+  const [filters, setFilters] = useState({
+    searchQuery: '',
+    tags: [],
+    sortBy: 'newest'
+  });
   const navigate = useNavigate();
-  
-  const handleCardClick = (cardId: string) => {
-    navigate(`/cards/${cardId}`);
-  };
-  
-  const getCardEffects = (cardId: string) => {
-    const card = cards.find(c => c.id === cardId);
-    return card?.effects || [];
+
+  const handleFilterChange = (newFilters: any) => {
+    setFilters({ ...filters, ...newFilters });
   };
 
   return (
-    <PageLayout title="Card Collection" description="Browse our card collection">
+    <PageLayout
+      title="Basketball Card Collection"
+      description="Browse and discover unique basketball player trading cards"
+    >
       <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-6">Card Collection</h1>
-        <div className="mb-8">
-          <CardGridWrapper
-            cards={cards}
-            isLoading={isLoading}
-            error={null}
-            onCardClick={handleCardClick}
-            getCardEffects={getCardEffects}
-          />
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold">Basketball Card Collection</h1>
+          
+          <Button onClick={() => navigate('/cards/create')} className="flex items-center gap-2">
+            <PlusCircle size={18} />
+            Create New
+          </Button>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div className="md:col-span-1">
+            <FilterPanel 
+              filters={filters} 
+              onFilterChange={handleFilterChange}
+            />
+          </div>
+          
+          <div className="md:col-span-3">
+            <CardGrid 
+              cards={basketballCards} 
+              searchQuery={filters.searchQuery}
+              selectedTags={filters.tags}
+              sortBy={filters.sortBy}
+              onCardClick={(id) => navigate(`/cards/${id}`)}
+            />
+          </div>
         </div>
       </div>
     </PageLayout>

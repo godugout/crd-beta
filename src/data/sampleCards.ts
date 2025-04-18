@@ -1,239 +1,83 @@
-import { adaptToCard } from '@/lib/adapters/cardAdapter';
 
-// Sample cards for demo purposes
 export const sampleCards = [
-  adaptToCard({
-    id: 'card-001',
-    title: 'Prince',
-    description: 'Special tribute artwork celebrating the Minneapolis legend in Wolves colors. Fan-created artwork reimagining Prince as a basketball player for his hometown team.',
-    imageUrl: '/lovable-uploads/667e6ad2-af96-40ac-bd16-a69778e14b21.png', 
-    thumbnailUrl: '/lovable-uploads/667e6ad2-af96-40ac-bd16-a69778e14b21.png',
-    tags: ['music', 'prince', 'wolves', 'minneapolis'],
-    userId: 'demo-user',
-    createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-    updatedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-    effects: ['Holographic'],
-    designMetadata: {
-      cardStyle: {
-        template: 'classic',
-        effect: 'classic',
-        borderRadius: '4px',
-        borderColor: '#5B23A9',
-        frameColor: '#5B23A9',
-        frameWidth: 2,
-        shadowColor: 'rgba(91, 35, 169, 0.4)',
-      },
-      textStyle: {
-        titleColor: '#FFFFFF',
-        titleAlignment: 'left',
-        titleWeight: 'bold',
-        descriptionColor: '#FFFFFF',
-      },
-      marketMetadata: {
-        isPrintable: true,
-        isForSale: false,
-        includeInCatalog: true
-      },
-      cardMetadata: {
-        category: 'artist-series',
-        cardType: 'music-legends',
-        series: 'artist-reimagined'
-      }
-    }
-  }),
-  adaptToCard({
-    id: 'card-002',
-    title: 'Michael Jordan',
-    description: 'Classic illustration of the GOAT in his legendary Bulls uniform. This fan art captures the iconic silhouette and spirit of Jordan\'s tremendous impact on the game.',
-    imageUrl: '/lovable-uploads/371b81a2-cafa-4637-9358-218d4120c658.png',
-    thumbnailUrl: '/lovable-uploads/371b81a2-cafa-4637-9358-218d4120c658.png',
-    tags: ['basketball', 'bulls', 'jordan', 'nba'],
-    createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-    updatedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-    userId: 'demo-user',
-    effects: ['Refractor', 'Chrome'],
-    designMetadata: {
-      cardStyle: {
-        template: 'nifty',
-        effect: 'nifty',
-        borderRadius: '12px',
-        borderColor: '#CE1141',
-        frameColor: '#CE1141',
-        frameWidth: 4,
-        shadowColor: 'rgba(206, 17, 65, 0.6)',
-      },
-      textStyle: {
-        titleColor: '#FFFFFF',
-        titleAlignment: 'left',
-        titleWeight: 'bold',
-        descriptionColor: '#FFFFFF',
-      },
-      marketMetadata: {
-        isPrintable: true,
-        isForSale: true,
-        includeInCatalog: true
-      },
-      cardMetadata: {
-        category: 'sports',
-        cardType: 'artist-series',
-        series: 'basketball-legends'
-      }
-    }
-  }),
-  adaptToCard({
-    id: 'card-003',
-    title: 'Elvis Presley',
-    description: 'Memphis legend reimagined as a Grizzlies player. This creative interpretation connects Elvis to his hometown through the lens of basketball culture.',
-    imageUrl: '/lovable-uploads/236e3ad9-f7c2-4e5b-b29a-ca52a49ff3ed.png',
-    thumbnailUrl: '/lovable-uploads/236e3ad9-f7c2-4e5b-b29a-ca52a49ff3ed.png',
-    tags: ['music', 'elvis', 'grizzlies', 'memphis'],
-    createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-    updatedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-    userId: 'demo-user',
-    effects: ['Vintage'],
-    designMetadata: {
-      cardStyle: {
-        template: 'nostalgic',
-        effect: 'nostalgic',
-        borderRadius: '8px',
-        borderColor: '#5D9AD3',
-        frameColor: '#5D9AD3',
-        frameWidth: 3,
-        shadowColor: 'rgba(93, 154, 211, 0.5)',
-      },
-      textStyle: {
-        titleColor: '#FFFFFF',
-        titleAlignment: 'left',
-        titleWeight: 'bold',
-        descriptionColor: '#FFFFFF',
-      },
-      marketMetadata: {
-        isPrintable: true,
-        isForSale: false,
-        includeInCatalog: false
-      },
-      cardMetadata: {
-        category: 'music-legends',
-        cardType: 'artist-series',
-        series: 'memphis-icons'
-      }
-    }
-  }),
-  adaptToCard({
-    id: 'card-004',
-    title: 'Bob Marley',
-    description: 'Reggae icon in Lakers gold. This fan creation reimagines what Bob Marley might look like as an LA Laker, combining music and basketball culture.',
-    imageUrl: '/lovable-uploads/a38aa501-ea2d-4416-9699-1e69b1826233.png',
-    thumbnailUrl: '/lovable-uploads/a38aa501-ea2d-4416-9699-1e69b1826233.png',
-    tags: ['music', 'marley', 'lakers', 'reggae'],
-    createdAt: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000).toISOString(),
-    updatedAt: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000).toISOString(),
-    userId: 'demo-user',
-    effects: ['Chrome', 'Holographic'],
-    designMetadata: {
-      cardStyle: {
-        template: 'nostalgic',
-        effect: 'nostalgic',
-        borderRadius: '8px',
-        borderColor: '#FDB927',
-        frameColor: '#FDB927',
-        frameWidth: 3,
-        shadowColor: 'rgba(253, 185, 39, 0.5)',
-      },
-      textStyle: {
-        titleColor: '#552583',
-        titleAlignment: 'left',
-        titleWeight: 'bold',
-        descriptionColor: '#FFFFFF',
-      },
-      marketMetadata: {
-        isPrintable: true,
-        isForSale: true,
-        includeInCatalog: true
-      },
-      cardMetadata: {
-        category: 'music-legends',
-        cardType: 'artist-series',
-        series: 'gold-edition'
-      }
-    }
-  }),
-  adaptToCard({
-    id: 'card-005',
-    title: 'Tupac Shakur',
-    description: 'Hip-hop legend reimagined as a Blue Devil. This creative fan art brings Tupac\'s intensity to the basketball court as a Duke University player.',
-    imageUrl: '/lovable-uploads/79a099b9-c77a-491e-9755-ba25419791f5.png',
-    thumbnailUrl: '/lovable-uploads/79a099b9-c77a-491e-9755-ba25419791f5.png',
-    tags: ['music', 'tupac', 'duke', 'hip-hop'],
-    createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-    updatedAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-    userId: 'demo-user',
-    effects: ['Vintage', 'Holographic'],
-    designMetadata: {
-      cardStyle: {
-        template: 'classic',
-        effect: 'classic',
-        borderRadius: '4px',
-        borderColor: '#001A57',
-        frameColor: '#001A57',
-        frameWidth: 2,
-        shadowColor: 'rgba(0, 26, 87, 0.4)',
-      },
-      textStyle: {
-        titleColor: '#FFFFFF',
-        titleAlignment: 'left',
-        titleWeight: 'bold',
-        descriptionColor: '#FFFFFF',
-      },
-      marketMetadata: {
-        isPrintable: true,
-        isForSale: true,
-        includeInCatalog: true
-      },
-      cardMetadata: {
-        category: 'music-legends',
-        cardType: 'artist-series',
-        series: 'hip-hop-icons'
-      }
-    }
-  }),
-  adaptToCard({
-    id: 'card-006',
-    title: 'Notorious B.I.G.',
-    description: 'Brooklyn\'s finest in his hometown jersey. This fan creation honors Biggie by visualizing him as a player for his hometown Brooklyn Nets.',
-    imageUrl: '/lovable-uploads/c381b388-5693-44a6-852b-93af5f0d5217.png',
-    thumbnailUrl: '/lovable-uploads/c381b388-5693-44a6-852b-93af5f0d5217.png',
-    tags: ['music', 'biggie', 'nets', 'brooklyn', 'hip-hop'],
-    createdAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
-    updatedAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
-    userId: 'demo-user',
-    effects: ['Chrome', 'Holographic'],
-    designMetadata: {
-      cardStyle: {
-        template: 'nifty',
-        effect: 'nifty',
-        borderRadius: '12px',
-        borderColor: '#FF0063',
-        frameColor: '#FF0063',
-        frameWidth: 4,
-        shadowColor: 'rgba(255, 0, 99, 0.6)',
-      },
-      textStyle: {
-        titleColor: '#FFFFFF',
-        titleAlignment: 'left',
-        titleWeight: 'bold',
-        descriptionColor: '#FFFFFF',
-      },
-      marketMetadata: {
-        isPrintable: true,
-        isForSale: true,
-        includeInCatalog: true
-      },
-      cardMetadata: {
-        category: 'music-legends',
-        cardType: 'artist-series',
-        series: 'brooklyn-icons'
-      }
-    }
-  })
+  {
+    id: "t206-wagner",
+    title: "Honus Wagner Trading Card",
+    description: "Rare Pittsburgh Pirates shortstop card from the early 1900s, considered one of the most valuable baseball cards in existence.",
+    imageUrl: "/lovable-uploads/dc219616-1df7-461d-8f6d-7af3ef1b68ae.png",
+    thumbnailUrl: "/lovable-uploads/dc219616-1df7-461d-8f6d-7af3ef1b68ae.png",
+    tags: ["Baseball", "Vintage", "Rare", "Pirates"],
+    userId: "system",
+    effects: [],
+    createdAt: "1909-01-01T00:00:00.000Z",
+    updatedAt: "2023-01-01T00:00:00.000Z",
+    player: "Honus Wagner",
+    team: "Pittsburgh Pirates",
+    position: "Shortstop",
+    year: "1909-11"
+  },
+  {
+    id: "1952-topps-mantle",
+    title: "Mickey Mantle Rookie Card",
+    description: "Famous 1952 Topps #311 Mickey Mantle rookie card, one of the most iconic baseball cards of all time.",
+    imageUrl: "/lovable-uploads/480dff88-07d3-461d-ad88-d5b0447dc9a4.png",
+    thumbnailUrl: "/lovable-uploads/480dff88-07d3-461d-ad88-d5b0447dc9a4.png",
+    tags: ["Baseball", "Rookie", "Yankees", "Vintage"],
+    userId: "system",
+    effects: ["Holographic"],
+    createdAt: "1952-01-01T00:00:00.000Z",
+    updatedAt: "2023-01-01T00:00:00.000Z",
+    player: "Mickey Mantle",
+    team: "New York Yankees",
+    position: "Center Field",
+    year: "1952"
+  },
+  {
+    id: "1933-goudey-ruth",
+    title: "Babe Ruth Goudey Card",
+    description: "Classic 1933 Goudey #53 Babe Ruth card featuring the legendary Yankees slugger.",
+    imageUrl: "/lovable-uploads/88d804c5-6d0c-402e-b2d6-f0d10b5f6699.png",
+    thumbnailUrl: "/lovable-uploads/88d804c5-6d0c-402e-b2d6-f0d10b5f6699.png",
+    tags: ["Baseball", "Yankees", "Legend", "Vintage"],
+    userId: "system",
+    effects: ["Vintage"],
+    createdAt: "1933-01-01T00:00:00.000Z",
+    updatedAt: "2023-01-01T00:00:00.000Z",
+    player: "Babe Ruth",
+    team: "New York Yankees",
+    position: "Outfield",
+    year: "1933"
+  },
+  {
+    id: "lebron-james-rookie",
+    title: "LeBron James Rookie Card",
+    description: "Valuable LeBron James rookie card from his first NBA season with the Cleveland Cavaliers.",
+    imageUrl: "/lovable-uploads/371b81a2-cafa-4637-9358-218d4120c658.png",
+    thumbnailUrl: "/lovable-uploads/371b81a2-cafa-4637-9358-218d4120c658.png",
+    tags: ["Basketball", "Rookie", "Cavaliers", "Modern"],
+    userId: "system",
+    effects: ["Refractor"],
+    createdAt: "2003-01-01T00:00:00.000Z",
+    updatedAt: "2023-01-01T00:00:00.000Z",
+    player: "LeBron James",
+    team: "Cleveland Cavaliers",
+    position: "Small Forward",
+    year: "2003"
+  },
+  {
+    id: "michael-jordan-fleer",
+    title: "Michael Jordan Fleer Card",
+    description: "Classic Michael Jordan trading card from his dominant years with the Chicago Bulls.",
+    imageUrl: "/lovable-uploads/38b125d7-2257-4d56-98fa-c1ff2a7be7ea.png",
+    thumbnailUrl: "/lovable-uploads/38b125d7-2257-4d56-98fa-c1ff2a7be7ea.png",
+    tags: ["Basketball", "Bulls", "Legend", "90s"],
+    userId: "system",
+    effects: ["Holographic", "Shimmer"],
+    createdAt: "1993-01-01T00:00:00.000Z",
+    updatedAt: "2023-01-01T00:00:00.000Z",
+    player: "Michael Jordan",
+    team: "Chicago Bulls",
+    position: "Shooting Guard",
+    year: "1993"
+  }
 ];

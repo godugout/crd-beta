@@ -15,7 +15,7 @@ import AuthPage from '@/pages/AuthPage';
 import NotFound from '@/pages/NotFound';
 import Collections from '@/pages/Collections';
 import TownCommunityHub from '@/pages/TownCommunityHub';
-import CardShowcase from '@/pages/CardShowcase'; // Import the CardShowcase page for basketball players
+import { Navigate } from 'react-router-dom';
 
 // Import other route collections
 import { cardRoutes } from './cardRoutes';
@@ -47,8 +47,8 @@ const rootRoutes: RouteObject[] = [
     element: <CardViewerPage />
   },
   {
-    path: "/basketball-cards", // New route specifically for basketball player cards
-    element: <CardShowcase />
+    path: "/basketball-cards",
+    element: <Navigate to="/cards" replace />
   },
   {
     path: "/immersive/:id",

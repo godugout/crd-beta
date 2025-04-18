@@ -3,7 +3,6 @@ import {
   Home, 
   Image, 
   Layers, 
-  Users, 
   Building,
   Trophy
 } from 'lucide-react';
@@ -20,12 +19,6 @@ export const mainNavItems: NavigationItem[] = [
   { 
     title: 'Cards', 
     path: '/cards',
-    icon: Image,
-    description: 'Your digital card collection'
-  },
-  {
-    title: 'Basketball Cards',
-    path: '/basketball-cards',
     icon: Trophy,
     description: 'Basketball player card collection'
   },

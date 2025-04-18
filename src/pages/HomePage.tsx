@@ -20,23 +20,12 @@ const HomePage = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <div className="bg-white p-6 rounded-lg shadow-md">
             <h2 className="text-xl font-semibold mb-3">View Cards</h2>
-            <p className="mb-4">Browse through our collection of digital trading cards.</p>
+            <p className="mb-4">Browse through our collection of basketball trading cards.</p>
             <Link 
               to="/cards" 
               className="inline-block px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
             >
               Browse Collection
-            </Link>
-          </div>
-          
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <h2 className="text-xl font-semibold mb-3">Basketball Cards</h2>
-            <p className="mb-4">Check out our special collection of basketball player cards.</p>
-            <Link 
-              to="/basketball-cards" 
-              className="inline-block px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700"
-            >
-              View Basketball Cards
             </Link>
           </div>
           
@@ -50,6 +39,17 @@ const HomePage = () => {
               Create Card
             </Link>
           </div>
+          
+          <div className="bg-white p-6 rounded-lg shadow-md">
+            <h2 className="text-xl font-semibold mb-3">Collections</h2>
+            <p className="mb-4">Organize your cards into themed collections.</p>
+            <Link 
+              to="/collections" 
+              className="inline-block px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700"
+            >
+              View Collections
+            </Link>
+          </div>
         </div>
         
         <div className="mt-12 p-4 bg-gray-100 rounded-lg">
@@ -57,9 +57,6 @@ const HomePage = () => {
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
             <Link to="/emergency" className="px-3 py-1 bg-red-600 text-white text-sm rounded">
               Emergency Page
-            </Link>
-            <Link to="/basketball-cards" className="px-3 py-1 bg-purple-600 text-white text-sm rounded">
-              Basketball Cards
             </Link>
             <Link to="/index" className="px-3 py-1 bg-gray-600 text-white text-sm rounded">
               Index Page
