@@ -12,16 +12,22 @@ interface CardEffectsGalleryProps {
 const CardEffectsGallery: React.FC<CardEffectsGalleryProps> = ({ card }) => {
   const [isFlipped, setIsFlipped] = useState(false);
   const { 
-    availableEffects,
+    effects,
     activeEffects,
-    effectIntensities,
+    updateEffectIntensity,
     toggleEffect,
-    adjustEffectIntensity
+    generateEffectStyles
   } = useCardEffects();
   
   const handleFlip = () => {
     setIsFlipped(prev => !prev);
   };
+  
+  // Generate an object with effect intensities from the effects array
+  const effectIntensities = effects.reduce((acc, effect) => {
+    acc[effect.id] = effect.intensity;
+    return acc;
+  }, {} as Record<string, number>);
   
   return (
     <div className="flex flex-col md:flex-row gap-6">
@@ -37,11 +43,11 @@ const CardEffectsGallery: React.FC<CardEffectsGalleryProps> = ({ card }) => {
       
       <div className="w-full md:w-1/3">
         <EffectsPanel
-          availableEffects={availableEffects}
+          availableEffects={effects.map(e => e.name)}
           activeEffects={activeEffects}
           onToggleEffect={toggleEffect}
           effectIntensities={effectIntensities}
-          onAdjustIntensity={adjustEffectIntensity}
+          onAdjustIntensity={updateEffectIntensity}
         />
         
         <div className="mt-4">
