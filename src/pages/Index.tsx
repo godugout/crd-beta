@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useCards } from '@/context/CardContext';
 import PageLayout from '@/components/navigation/PageLayout';
@@ -8,10 +7,13 @@ import SiteFooter from '@/components/card-showcase/SiteFooter';
 import CollectionGrid from '@/components/collections/CollectionGrid';
 import { Button } from '@/components/ui/button';
 import { Container } from '@/components/ui/container';
+import CreateCollectionDialog from '@/components/collections/CreateCollectionDialog';
+import { PlusCircle } from '@/components/ui/icons';
 
 const Index = () => {
   const { collections } = useCards();
   const isLoading = false;
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
   
   return (
     <PageLayout
@@ -29,9 +31,10 @@ const Index = () => {
             <p className="text-gray-600 mt-1">Browse and manage your card collections</p>
           </div>
           
-          <Link to="/collections/new">
-            <Button>Create Collection</Button>
-          </Link>
+          <Button onClick={() => setShowCreateDialog(true)}>
+            <PlusCircle className="h-4 w-4 mr-2" />
+            Create Collection
+          </Button>
         </div>
         
         <CollectionGrid collections={collections} isLoading={isLoading} />
@@ -60,6 +63,11 @@ const Index = () => {
           </div>
         </div>
       </Container>
+      
+      <CreateCollectionDialog
+        open={showCreateDialog}
+        onOpenChange={setShowCreateDialog}
+      />
       
       <SiteFooter />
     </PageLayout>

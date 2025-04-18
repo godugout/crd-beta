@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import PageLayout from '@/components/navigation/PageLayout';
 import { useCards } from '@/context/CardContext';
@@ -9,17 +9,12 @@ import { PlusCircle, Filter, Layout, ListFilter, Globe } from 'lucide-react';
 import CollectionGrid from '@/components/collections/CollectionGrid';
 import { collectionsNavItems } from '@/config/navigation';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import CreateCollectionDialog from '@/components/collections/CreateCollectionDialog';
 
 const Collections = () => {
   const { collections, isLoading } = useCards();
   const [viewMode, setViewMode] = React.useState<'grid' | 'list'>('grid');
-  
-  const navigationItems = collectionsNavItems.map(item => ({
-    label: item.title,
-    path: item.path,
-    icon: item.icon ? <item.icon className="h-4 w-4" /> : undefined,
-    description: item.description
-  }));
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
   
   return (
     <PageLayout
@@ -29,7 +24,7 @@ const Collections = () => {
       primaryAction={{
         label: "New Collection",
         icon: <PlusCircle className="h-4 w-4" />,
-        href: "/collections/new"
+        onClick: () => setShowCreateDialog(true)
       }}
     >
       <Container className="py-6">
@@ -85,11 +80,13 @@ const Collections = () => {
             <p className="text-[var(--text-tertiary)] mb-6">Create a collection or generate sample cards to get started</p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button variant="rainbow" asChild>
-                <Link to="/collections/new">
-                  <PlusCircle className="h-4 w-4 mr-2" /> 
-                  Create a Collection
-                </Link>
+              <Button 
+                variant="rainbow" 
+                onClick={() => setShowCreateDialog(true)}
+                className="flex items-center gap-2"
+              >
+                <PlusCircle className="h-4 w-4" /> 
+                Create a Collection
               </Button>
               
               <Button variant="glass" asChild>
@@ -109,6 +106,11 @@ const Collections = () => {
           />
         </div>
       </Container>
+
+      <CreateCollectionDialog
+        open={showCreateDialog}
+        onOpenChange={setShowCreateDialog}
+      />
     </PageLayout>
   );
 };
