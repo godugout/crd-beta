@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card } from '@/lib/types';
 import { cn } from '@/lib/utils';
@@ -30,6 +29,13 @@ const CardItem: React.FC<CardItemProps> = ({
   const [isFlipped, setIsFlipped] = useState(false);
   const [displayComments, setDisplayComments] = useState(showComments);
   const { deleteCard } = useCards();
+  
+  const handleClick = (e: React.MouseEvent) => {
+    toast.dismiss(); // Dismiss any active toasts
+    if (onClick) {
+      onClick();
+    }
+  };
   
   const handleFlip = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -68,7 +74,7 @@ const CardItem: React.FC<CardItemProps> = ({
           "card-container relative w-full aspect-[2.5/3.5] cursor-pointer group",
           className
         )}
-        onClick={onClick}
+        onClick={handleClick}
       >
         <div className={cn("card-inner w-full h-full", isFlipped ? "flipped" : "")}>
           {/* Card Front */}

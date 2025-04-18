@@ -12,7 +12,11 @@ function App() {
     <SessionProvider>
       <CardProvider>
         {routeElements}
-        <Toaster position="top-center" />
+        <Toaster 
+          position="bottom-right"
+          closeButton
+          dismissible 
+        />
       </CardProvider>
     </SessionProvider>
   );

@@ -1,8 +1,8 @@
-
 import React, { memo } from 'react';
 import { Card } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { CardMedia } from './CardMedia';
+import { toast } from 'sonner';
 
 interface CardItemProps {
   /**
@@ -38,6 +38,13 @@ export const CardItem = memo(({
   className = "",
   highlight = false
 }: CardItemProps) => {
+  const handleClick = () => {
+    toast.dismiss(); // Dismiss any active toasts
+    if (onClick) {
+      onClick();
+    }
+  };
+
   // Combine all active effect classes
   const effectClasses = activeEffects.map(effect => {
     switch (effect) {
@@ -62,7 +69,7 @@ export const CardItem = memo(({
         effectClasses,
         className
       )}
-      onClick={onClick}
+      onClick={handleClick}
     >
       <CardMedia
         src={card.imageUrl}
