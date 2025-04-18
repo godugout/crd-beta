@@ -1,4 +1,5 @@
-import React from 'react';
+
+import React, { Suspense } from 'react';
 import { RouteObject } from 'react-router-dom';
 import HomePage from '@/pages/HomePage';
 import CardViewerPage from '@/pages/CardViewerPage';
@@ -35,6 +36,16 @@ const CardDetector = React.lazy(() => import('@/pages/CardDetector'));
 const TeamPage = React.lazy(() => import('@/pages/TeamPage')); 
 const ArCardViewerPage = React.lazy(() => import('@/pages/ArCardViewerPage'));
 
+// Loading fallback component
+const LoadingFallback = () => (
+  <div className="flex items-center justify-center h-screen">
+    <div className="text-center">
+      <div className="h-10 w-10 border-4 border-t-blue-600 border-blue-200 rounded-full animate-spin mx-auto mb-4"></div>
+      <p>Loading...</p>
+    </div>
+  </div>
+);
+
 // Main application routes
 const rootRoutes: RouteObject[] = [
   {
@@ -47,7 +58,11 @@ const rootRoutes: RouteObject[] = [
   },
   {
     path: "/cards/create",
-    element: <React.Suspense fallback={<div>Loading...</div>}><CardCreator /></React.Suspense>
+    element: (
+      <Suspense fallback={<LoadingFallback />}>
+        <CardCreator />
+      </Suspense>
+    )
   },
   {
     path: "/collections",
@@ -59,7 +74,11 @@ const rootRoutes: RouteObject[] = [
   },
   {
     path: "/labs",
-    element: <DeckViewPage />
+    element: (
+      <Suspense fallback={<LoadingFallback />}>
+        <DeckViewPage />
+      </Suspense>
+    )
   },
   {
     path: "/features/game-day",
@@ -71,7 +90,11 @@ const rootRoutes: RouteObject[] = [
   },
   {
     path: "/teams/:teamId",
-    element: <React.Suspense fallback={<div>Loading...</div>}><TeamPage /></React.Suspense>
+    element: (
+      <Suspense fallback={<LoadingFallback />}>
+        <TeamPage />
+      </Suspense>
+    )
   },
   {
     path: "/community",
@@ -80,7 +103,7 @@ const rootRoutes: RouteObject[] = [
   {
     path: "/detector",
     element: (
-      <React.Suspense fallback={
+      <Suspense fallback={
         <div className="flex items-center justify-center h-screen">
           <div className="text-center">
             <div className="h-10 w-10 border-4 border-t-blue-600 border-blue-200 rounded-full animate-spin mx-auto mb-4"></div>
@@ -89,7 +112,7 @@ const rootRoutes: RouteObject[] = [
         </div>
       }>
         <CardDetector />
-      </React.Suspense>
+      </Suspense>
     )
   },
   {
@@ -110,29 +133,33 @@ const rootRoutes: RouteObject[] = [
   },
   {
     path: "/ar-card-viewer/:id",
-    element: <React.Suspense fallback={
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-center">
-          <div className="h-10 w-10 border-4 border-t-blue-600 border-blue-200 rounded-full animate-spin mx-auto mb-4"></div>
-          <p>Loading AR Experience...</p>
+    element: (
+      <Suspense fallback={
+        <div className="flex items-center justify-center h-screen">
+          <div className="text-center">
+            <div className="h-10 w-10 border-4 border-t-blue-600 border-blue-200 rounded-full animate-spin mx-auto mb-4"></div>
+            <p>Loading AR Experience...</p>
+          </div>
         </div>
-      </div>
-    }>
-      <ArCardViewerPage />
-    </React.Suspense>
+      }>
+        <ArCardViewerPage />
+      </Suspense>
+    )
   },
   {
     path: "/ar-card-viewer",
-    element: <React.Suspense fallback={
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-center">
-          <div className="h-10 w-10 border-4 border-t-blue-600 border-blue-200 rounded-full animate-spin mx-auto mb-4"></div>
-          <p>Loading AR Experience...</p>
+    element: (
+      <Suspense fallback={
+        <div className="flex items-center justify-center h-screen">
+          <div className="text-center">
+            <div className="h-10 w-10 border-4 border-t-blue-600 border-blue-200 rounded-full animate-spin mx-auto mb-4"></div>
+            <p>Loading AR Experience...</p>
+          </div>
         </div>
-      </div>
-    }>
-      <ArCardViewerPage />
-    </React.Suspense>
+      }>
+        <ArCardViewerPage />
+      </Suspense>
+    )
   },
   {
     path: "*",
@@ -153,36 +180,68 @@ export const routes: RouteObject[] = [
   // Deck routes
   {
     path: "/decks",
-    element: <React.Suspense fallback={<div>Loading...</div>}><DeckViewPage /></React.Suspense>,
+    element: (
+      <Suspense fallback={<LoadingFallback />}>
+        <DeckViewPage />
+      </Suspense>
+    )
   },
   {
     path: "/decks/create",
-    element: <React.Suspense fallback={<div>Loading...</div>}><DeckBuilderPage /></React.Suspense>,
+    element: (
+      <Suspense fallback={<LoadingFallback />}>
+        <DeckBuilderPage />
+      </Suspense>
+    )
   },
   {
     path: "/decks/:deckId",
-    element: <React.Suspense fallback={<div>Loading...</div>}><DeckViewPage /></React.Suspense>,
+    element: (
+      <Suspense fallback={<LoadingFallback />}>
+        <DeckViewPage />
+      </Suspense>
+    )
   },
   {
     path: "/decks/:deckId/edit",
-    element: <React.Suspense fallback={<div>Loading...</div>}><DeckBuilderPage /></React.Suspense>,
+    element: (
+      <Suspense fallback={<LoadingFallback />}>
+        <DeckBuilderPage />
+      </Suspense>
+    )
   },
   
   // Series routes
   {
     path: "/series",
-    element: <React.Suspense fallback={<div>Loading...</div>}><SeriesViewPage /></React.Suspense>,
+    element: (
+      <Suspense fallback={<LoadingFallback />}>
+        <SeriesViewPage />
+      </Suspense>
+    )
   },
   {
     path: "/series/create",
-    element: <React.Suspense fallback={<div>Loading...</div>}><SeriesManagerPage /></React.Suspense>,
+    element: (
+      <Suspense fallback={<LoadingFallback />}>
+        <SeriesManagerPage />
+      </Suspense>
+    )
   },
   {
     path: "/series/:seriesId",
-    element: <React.Suspense fallback={<div>Loading...</div>}><SeriesViewPage /></React.Suspense>,
+    element: (
+      <Suspense fallback={<LoadingFallback />}>
+        <SeriesViewPage />
+      </Suspense>
+    )
   },
   {
     path: "/series/:seriesId/edit",
-    element: <React.Suspense fallback={<div>Loading...</div>}><SeriesManagerPage /></React.Suspense>,
+    element: (
+      <Suspense fallback={<LoadingFallback />}>
+        <SeriesManagerPage />
+      </Suspense>
+    )
   },
 ];

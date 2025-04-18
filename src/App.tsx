@@ -1,6 +1,6 @@
 
 import React, { Suspense } from 'react';
-import { Routes, Route, useRoutes } from 'react-router-dom';
+import { useRoutes } from 'react-router-dom';
 import { CardProvider } from './context/CardContext';
 import { SessionProvider } from './context/SessionContext';
 import { Toaster } from 'sonner';

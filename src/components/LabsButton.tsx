@@ -26,7 +26,7 @@ const LabsButton: React.FC<LabsButtonProps> = ({
   const handleNavigate = () => {
     // Use startTransition for navigation to prevent Suspense errors
     startTransition(() => {
-      navigate('/labs');
+      navigate('/features/labs');
     });
   };
 
