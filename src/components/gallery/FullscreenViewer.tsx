@@ -2,10 +2,10 @@
 import React, { useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useCards } from '@/context/CardContext';
-import { Card } from '@/lib/types/cardTypes';
+import { useCards } from '@/hooks/useCards';
+import { Card } from '@/lib/types';
 import { sampleCards } from '@/lib/data/sampleCards';
-import { toast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { adaptToCard } from '@/lib/adapters/cardAdapter';
 import { DEFAULT_DESIGN_METADATA, FALLBACK_IMAGE_URL } from '@/lib/utils/cardDefaults';
 
@@ -19,7 +19,8 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
   const [currentCard, setCurrentCard] = useState<Card | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [validImageUrl, setValidImageUrl] = useState<string>(FALLBACK_IMAGE_URL);
+  const [validImageUrl, setValidImageUrl] = useState<string>('/images/card-placeholder.png');
+  const { toast } = useToast();
   
   useEffect(() => {
     if (!cardId) {
@@ -35,7 +36,7 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
       console.log('FullscreenViewer: Loading card with ID:', cardId);
       
       // First try to find card directly from sampleCards
-      let foundCard = sampleCards.find(c => c.id === cardId);
+      let foundCard = sampleCards?.find(c => c.id === cardId);
       
       // If not found in sampleCards, try the cards context
       if (!foundCard) {
@@ -48,8 +49,8 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
         const processedCard = adaptToCard({
           ...foundCard,
           // Ensure imageUrl is present
-          imageUrl: foundCard.imageUrl || FALLBACK_IMAGE_URL,
-          thumbnailUrl: foundCard.thumbnailUrl || foundCard.imageUrl || FALLBACK_IMAGE_URL,
+          imageUrl: foundCard.imageUrl || '/images/card-placeholder.png',
+          thumbnailUrl: foundCard.thumbnailUrl || foundCard.imageUrl || '/images/card-placeholder.png',
           // Ensure all required fields are present
           designMetadata: foundCard.designMetadata || DEFAULT_DESIGN_METADATA,
           createdAt: foundCard.createdAt || new Date().toISOString(),
@@ -59,7 +60,7 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
         });
         
         // Always initialize with fallback first, then update if the real image loads
-        setValidImageUrl(FALLBACK_IMAGE_URL);
+        setValidImageUrl('/images/card-placeholder.png');
         
         if (processedCard.imageUrl && 
             processedCard.imageUrl !== 'undefined' && 
@@ -68,15 +69,15 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
           const img = new Image();
           img.onload = () => {
             console.log('FullscreenViewer: Image validated successfully:', processedCard.imageUrl);
-            setValidImageUrl(processedCard.imageUrl || FALLBACK_IMAGE_URL);
+            setValidImageUrl(processedCard.imageUrl || '/images/card-placeholder.png');
             setCurrentCard(processedCard);
             setIsLoading(false);
           };
           img.onerror = () => {
             console.warn('FullscreenViewer: Image validation failed, using fallback');
-            setValidImageUrl(FALLBACK_IMAGE_URL);
-            processedCard.imageUrl = FALLBACK_IMAGE_URL;
-            processedCard.thumbnailUrl = FALLBACK_IMAGE_URL;
+            setValidImageUrl('/images/card-placeholder.png');
+            processedCard.imageUrl = '/images/card-placeholder.png';
+            processedCard.thumbnailUrl = '/images/card-placeholder.png';
             setCurrentCard(processedCard);
             setIsLoading(false);
             toast({
@@ -88,8 +89,8 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
           img.src = processedCard.imageUrl;
         } else {
           console.warn('FullscreenViewer: Card has invalid imageUrl, using fallback');
-          processedCard.imageUrl = FALLBACK_IMAGE_URL;
-          processedCard.thumbnailUrl = FALLBACK_IMAGE_URL;
+          processedCard.imageUrl = '/images/card-placeholder.png';
+          processedCard.thumbnailUrl = '/images/card-placeholder.png';
           setCurrentCard(processedCard);
           setIsLoading(false);
         }
@@ -103,22 +104,34 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
       setError('Failed to load card');
       setIsLoading(false);
     }
-  }, [cardId, cards, getCard]);
+  }, [cardId, cards, getCard, toast]);
   
-  // Find all card indices from sampleCards to enable navigation between cards
-  const allCardIds = sampleCards.map(card => card.id);
+  // Find all card indices from cards array to enable navigation between cards
+  const allCardIds = cards?.map(card => card.id) || [];
   const currentIndex = allCardIds.indexOf(cardId);
   
   // Handle previous/next card navigation
   const handlePrevCard = () => {
     if (currentIndex > 0) {
-      window.location.href = `/cards/${allCardIds[currentIndex - 1]}`;
+      const prevCardId = allCardIds[currentIndex - 1];
+      setCurrentCard(null);
+      setIsLoading(true);
+      // Use the same component but update the cardId prop
+      setTimeout(() => {
+        window.location.hash = `/cards/${prevCardId}`;
+      }, 50);
     }
   };
   
   const handleNextCard = () => {
     if (currentIndex < allCardIds.length - 1) {
-      window.location.href = `/cards/${allCardIds[currentIndex + 1]}`;
+      const nextCardId = allCardIds[currentIndex + 1];
+      setCurrentCard(null);
+      setIsLoading(true);
+      // Use the same component but update the cardId prop
+      setTimeout(() => {
+        window.location.hash = `/cards/${nextCardId}`;
+      }, 50);
     }
   };
 
@@ -170,11 +183,10 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
               className="max-w-full max-h-full object-contain"
               onError={(e) => {
                 console.error('FullscreenViewer: Failed to load image:', validImageUrl);
-                if (validImageUrl !== FALLBACK_IMAGE_URL) {
-                  e.currentTarget.src = FALLBACK_IMAGE_URL;
+                if (validImageUrl !== '/images/card-placeholder.png') {
+                  e.currentTarget.src = '/images/card-placeholder.png';
                 }
               }}
-              onLoad={() => console.log('FullscreenViewer: Image loaded successfully:', validImageUrl)}
             />
           </div>
         </div>

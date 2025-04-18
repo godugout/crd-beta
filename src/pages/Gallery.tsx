@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState, useEffect, useTransition } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PageLayout from '@/components/navigation/PageLayout';
 import CardGallery from '@/components/CardGallery';
@@ -21,6 +22,7 @@ const Gallery = () => {
   const [showTutorial, setShowTutorial] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [isPending, startTransition] = useTransition();
   
   const { cards, isLoading, fetchCards } = useCards();
 
@@ -46,8 +48,11 @@ const Gallery = () => {
 
   const handleCardClick = (cardId: string) => {
     console.log('Card clicked:', cardId);
-    setSelectedCardId(cardId);
-    setIsFullscreen(true);
+    // Use startTransition to avoid the Suspense error
+    startTransition(() => {
+      setSelectedCardId(cardId);
+      setIsFullscreen(true);
+    });
     
     const hasSeenViewer = localStorage.getItem('hasSeenViewerTutorial');
     if (!hasSeenViewer) {
@@ -60,21 +65,32 @@ const Gallery = () => {
   };
   
   const handleCloseFullscreen = () => {
-    setIsFullscreen(false);
-    setSelectedCardId(null);
+    startTransition(() => {
+      setIsFullscreen(false);
+      setSelectedCardId(null);
+    });
   };
   
   if (isFullscreen && selectedCardId) {
     return (
-      <FullscreenViewer 
-        cardId={selectedCardId} 
-        onClose={handleCloseFullscreen}
-      />
+      <React.Suspense fallback={
+        <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50">
+          <div className="w-16 h-16 border-4 border-t-transparent border-primary rounded-full animate-spin"></div>
+        </div>
+      }>
+        <FullscreenViewer 
+          cardId={selectedCardId} 
+          onClose={handleCloseFullscreen}
+        />
+      </React.Suspense>
     );
   }
   
   const handleRefresh = async () => {
-    await fetchCards();
+    startTransition(() => {
+      fetchCards();
+    });
+    
     toast({
       title: "Gallery refreshed",
       description: "Your card collection has been refreshed",
@@ -103,6 +119,12 @@ const Gallery = () => {
     >
       <div className="container mx-auto max-w-6xl px-4">        
         <ErrorBoundary>
+          {isPending && (
+            <div className="w-full py-8 flex justify-center">
+              <div className="w-10 h-10 border-4 border-t-transparent border-primary rounded-full animate-spin"></div>
+            </div>
+          )}
+          
           {!isLoading && (!cards || cards.length === 0) && (
             <div className="py-16 text-center">
               <h2 className="text-2xl font-bold mb-4">Your gallery is empty</h2>
