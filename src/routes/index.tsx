@@ -14,6 +14,7 @@ import Unauthorized from '@/pages/Unauthorized';
 import AuthPage from '@/pages/AuthPage';
 import NotFound from '@/pages/NotFound';
 import Collections from '@/pages/Collections';
+import TownCommunityHub from '@/pages/TownCommunityHub';
 
 // Import other route collections
 import { cardRoutes } from './cardRoutes';
@@ -57,6 +58,14 @@ const rootRoutes: RouteObject[] = [
     element: <Collections />
   },
   {
+    path: "/community",
+    element: <TownCommunityHub />
+  },
+  {
+    path: "/teams",
+    element: <TownCommunityHub />
+  },
+  {
     path: "*",
     element: <NotFound />
   }
@@ -64,7 +73,7 @@ const rootRoutes: RouteObject[] = [
 
 export const routes: RouteObject[] = [
   ...rootRoutes,
-  ...mainRoutes.filter(route => route.path !== "/" && route.path !== "*"), // Avoid duplicates
+  ...mainRoutes.filter(route => route.path !== "/" && route.path !== "*" && route.path !== "/community"), // Avoid duplicates
   ...teamRoutes,
   ...townRoutes,
   ...baseballRoutes,

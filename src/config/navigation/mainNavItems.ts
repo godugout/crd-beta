@@ -4,7 +4,7 @@ import {
   Image, 
   Layers, 
   Users, 
-  MessageCircle 
+  Building
 } from 'lucide-react';
 import { NavigationItem } from './types';
 
@@ -29,15 +29,9 @@ export const mainNavItems: NavigationItem[] = [
     description: 'Organized card collections'
   },
   { 
-    title: 'Teams', 
-    path: '/teams',
-    icon: Users,
-    description: 'Team-based collections'
-  },
-  { 
-    title: 'Community', 
-    path: '/community',
-    icon: MessageCircle,
-    description: 'Connect with other collectors'
+    title: 'Towns & Communities', 
+    path: '/towns',
+    icon: Building,
+    description: 'Connect with communities and towns'
   }
 ];

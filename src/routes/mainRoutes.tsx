@@ -8,7 +8,7 @@ import NotFound from '@/pages/NotFound';
 import Index from '@/pages/Index';
 import Search from '@/pages/Search';
 import Profile from '@/pages/Profile';
-import Community from '@/pages/Community';
+import TownCommunityHub from '@/pages/TownCommunityHub';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import EmergencyPage from '@/pages/EmergencyPage';
 
@@ -39,8 +39,8 @@ export const mainRoutes: RouteObject[] = [
     element: <Search />,
   },
   {
-    path: "/community",
-    element: <Community />,
+    path: "/towns",
+    element: <TownCommunityHub />,
   },
   {
     path: "/profile",
