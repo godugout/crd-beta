@@ -19,16 +19,20 @@ const useTownGalleryData = (filterOptions: FilterOptions = {}, sortOptions: Sort
   const [towns, setTowns] = useState<TownDisplayData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
     const fetchTowns = async () => {
+      if (!isMounted) return;
       setLoading(true);
+      
       try {
         // Simulate API call with mock data for now
         // In a real app, you'd make an actual API call here
         
-        // Simulate network delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // Add a consistent delay to prevent flash of loading state
+        await new Promise(resolve => setTimeout(resolve, 800));
         
         // Mock data
         const mockTowns: TownDisplayData[] = [
@@ -102,20 +106,33 @@ const useTownGalleryData = (filterOptions: FilterOptions = {}, sortOptions: Sort
           });
         }
         
-        setTowns(filteredTowns);
-        setError(null);
+        if (isMounted) {
+          setTowns(filteredTowns);
+          setError(null);
+          setIsInitialLoad(false);
+        }
       } catch (err) {
         console.error('Error fetching towns:', err);
-        setError('Failed to load towns. Please try again later.');
+        if (isMounted) {
+          setError('Failed to load towns. Please try again later.');
+          setIsInitialLoad(false);
+        }
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
     fetchTowns();
+    
+    // Cleanup function
+    return () => {
+      isMounted = false;
+    };
   }, [filterOptions, sortOptions]);
 
-  return { towns, loading, error };
+  return { towns, loading, error, isInitialLoad };
 };
 
 export default useTownGalleryData;

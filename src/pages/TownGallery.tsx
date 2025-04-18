@@ -14,9 +14,39 @@ const TownGallery = () => {
   const [activeTab, setActiveTab] = useState('all');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   
+  // Define filter options based on active tab
+  const filterOptions = {
+    featured: activeTab === 'featured' ? true : undefined,
+    nearby: activeTab === 'nearby' ? true : undefined
+  };
+  
   // Pass required arguments to useTownGalleryData hook
-  // Adding empty filter and sorting options as default parameters
-  const { towns, loading, error } = useTownGalleryData({}, {});
+  const { towns, loading, error } = useTownGalleryData(filterOptions, {});
+  
+  // Prevent multiple loading skeletons from appearing
+  const renderContent = (towns: any[]) => {
+    if (loading) {
+      return <TownGalleryLoading />;
+    }
+    
+    if (towns.length > 0) {
+      return (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {towns.map(town => (
+            <TownGalleryCard key={town.id} town={town} />
+          ))}
+        </div>
+      );
+    }
+    
+    return (
+      <div className="text-center py-12 border border-dashed border-gray-300 rounded-lg">
+        <Building className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+        <p className="text-gray-500 text-lg mb-2">No towns found</p>
+        <p className="text-gray-400">Try adjusting your filters or check back later</p>
+      </div>
+    );
+  };
   
   return (
     <PageLayout 
@@ -81,59 +111,10 @@ const TownGallery = () => {
             </Alert>
           )}
 
-          <TabsContent value="all">
-            {loading ? (
-              <TownGalleryLoading />
-            ) : towns.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {towns.map(town => (
-                  <TownGalleryCard key={town.id} town={town} />
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-12 border border-dashed border-gray-300 rounded-lg">
-                <Building className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-                <p className="text-gray-500 text-lg mb-2">No towns found</p>
-                <p className="text-gray-400">Try adjusting your filters or check back later</p>
-              </div>
-            )}
-          </TabsContent>
-          
-          <TabsContent value="featured">
-            {loading ? (
-              <TownGalleryLoading />
-            ) : towns.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {towns.map(town => (
-                  <TownGalleryCard key={town.id} town={town} />
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-12 border border-dashed border-gray-300 rounded-lg">
-                <Building className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-                <p className="text-gray-500 text-lg mb-2">No towns found</p>
-                <p className="text-gray-400">Try adjusting your filters or check back later</p>
-              </div>
-            )}
-          </TabsContent>
-          
-          <TabsContent value="nearby">
-            {loading ? (
-              <TownGalleryLoading />
-            ) : towns.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {towns.map(town => (
-                  <TownGalleryCard key={town.id} town={town} />
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-12 border border-dashed border-gray-300 rounded-lg">
-                <Building className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-                <p className="text-gray-500 text-lg mb-2">No towns found</p>
-                <p className="text-gray-400">Try adjusting your filters or check back later</p>
-              </div>
-            )}
-          </TabsContent>
+          {/* Use a single content renderer for all tabs to avoid duplication */}
+          <div className="mt-6">
+            {renderContent(towns)}
+          </div>
         </Tabs>
       </div>
     </PageLayout>
