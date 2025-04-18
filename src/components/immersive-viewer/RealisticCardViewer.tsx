@@ -30,9 +30,15 @@ const CardModel = ({
   materialProps = { roughness: 0.1, metalness: 0.2 }
 }) => {
   const { scene } = useThree();
-  const meshRef = useRef();
-  const frontTexture = useTexture(card.imageUrl || '/placeholder-card.jpg');
-  const backTexture = useTexture('/card-back-texture.jpg');
+  const meshRef = useRef<THREE.Mesh>();
+  
+  // Use single texture objects instead of arrays
+  const frontTextureResult = useTexture(card.imageUrl || '/placeholder-card.jpg');
+  const backTextureResult = useTexture('/card-back-texture.jpg');
+  
+  // Ensure we have single texture objects
+  const frontTexture = Array.isArray(frontTextureResult) ? frontTextureResult[0] : frontTextureResult;
+  const backTexture = Array.isArray(backTextureResult) ? backTextureResult[0] : backTextureResult;
   
   // Configure PBR materials
   const frontMaterial = new THREE.MeshPhysicalMaterial({
@@ -119,6 +125,7 @@ const Environment3D = ({ preset }) => {
           maxDepthThreshold={1.4}
           color="#101010"
           metalness={0.6}
+          mirror={0.75}
         />
       </mesh>
     </>

@@ -3,7 +3,7 @@ import React from 'react';
 import { CardData } from '@/types/card';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { Eye3d } from 'lucide-react';
+import { Box } from 'lucide-react';
 
 interface CardViewerProps {
   card: CardData;
