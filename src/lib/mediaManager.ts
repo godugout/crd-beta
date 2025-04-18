@@ -1,12 +1,10 @@
 
-// lib/mediaManager.ts
 import { createClient } from '@supabase/supabase-js'
 import { v4 as uuidv4 } from 'uuid'
-import { extractImageMetadata, extractVideoMetadata } from '@/lib/metadataExtractor'
+import { toast } from 'sonner'
 
-// Replace process.env with import.meta.env for Vite projects
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || ''
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || ''
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
+const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 const supabase = createClient(supabaseUrl, supabaseKey)
 
 export interface MediaUploadOptions {
@@ -15,6 +13,7 @@ export interface MediaUploadOptions {
   userId: string
   isPrivate?: boolean
   metadata?: Record<string, any>
+  detectFaces?: boolean
   progressCallback?: (progress: number) => void
 }
 
@@ -23,7 +22,7 @@ export interface MediaRecord {
   memoryId: string
   type: 'image' | 'video' | 'audio' | 'unknown'
   url: string
-  thumbnailUrl: string
+  thumbnailUrl?: string
   originalFilename: string
   size: number
   mimeType: string
@@ -33,115 +32,145 @@ export interface MediaRecord {
   metadata: Record<string, any>
 }
 
-export const uploadMedia = async ({
-  file,
-  memoryId,
-  userId,
-  isPrivate = false,
-  metadata = {},
-  progressCallback
-}: MediaUploadOptions): Promise<MediaRecord> => {
-  try {
-    const fileExt = file.name.split('.').pop()
-    const fileName = `${uuidv4()}.${fileExt}`
-    const filePath = `${isPrivate ? 'private' : 'public'}/${userId}/${memoryId}/${fileName}`
-    let mediaType: MediaRecord['type'] = 'unknown'
-    if (file.type.startsWith('image/')) mediaType = 'image'
-    else if (file.type.startsWith('video/')) mediaType = 'video'
-    else if (file.type.startsWith('audio/')) mediaType = 'audio'
-
-    // Fix the onUploadProgress property by using the correct options interface
-    const options: any = {
-      cacheControl: '3600',
-      upsert: false
+export const mediaManager = {
+  async uploadMedia({
+    file,
+    memoryId,
+    userId,
+    isPrivate = false,
+    metadata = {},
+    detectFaces = false,
+    progressCallback
+  }: MediaUploadOptions): Promise<MediaRecord> {
+    try {
+      const fileExt = file.name.split('.').pop()
+      const fileName = `${uuidv4()}.${fileExt}`
+      const filePath = `${isPrivate ? 'private' : 'public'}/${userId}/${memoryId}/${fileName}`
+      
+      let mediaType: MediaRecord['type'] = 'unknown'
+      if (file.type.startsWith('image/')) mediaType = 'image'
+      else if (file.type.startsWith('video/')) mediaType = 'video'
+      else if (file.type.startsWith('audio/')) mediaType = 'audio'
+      
+      // Upload to Supabase Storage
+      const { error: uploadError } = await supabase.storage
+        .from('media')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        })
+      
+      if (uploadError) {
+        toast.error(`Upload failed: ${uploadError.message}`)
+        throw uploadError
+      }
+      
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('media')
+        .getPublicUrl(filePath)
+      
+      // Prepare media record
+      const mediaRecord: Omit<MediaRecord, 'id'> = {
+        memoryId,
+        type: mediaType,
+        url: publicUrl,
+        originalFilename: file.name,
+        size: file.size,
+        mimeType: file.type,
+        metadata: {
+          ...metadata,
+          detectFaces
+        }
+      }
+      
+      // Insert media record into database
+      const { data: savedMedia, error: dbError } = await supabase
+        .from('media')
+        .insert(mediaRecord)
+        .select()
+        .single()
+      
+      if (dbError) {
+        toast.error(`Database error: ${dbError.message}`)
+        throw dbError
+      }
+      
+      toast.success('Media uploaded successfully')
+      return savedMedia
+      
+    } catch (error) {
+      console.error('Media upload error:', error)
+      toast.error('Failed to upload media')
+      throw error
     }
-    
-    if (progressCallback) {
-      options.onUploadProgress = (progress: { percent: number }) => {
-        progressCallback(progress.percent || 0);
-      };
+  },
+  
+  async getMediaByMemoryId(memoryId: string): Promise<MediaRecord[]> {
+    try {
+      const { data, error } = await supabase
+        .from('media')
+        .select('*')
+        .eq('memory_id', memoryId)
+        .order('created_at', { ascending: true })
+      
+      if (error) {
+        toast.error(`Failed to fetch media: ${error.message}`)
+        throw error
+      }
+      
+      return data || []
+    } catch (error) {
+      console.error('Get media error:', error)
+      toast.error('Failed to retrieve media')
+      throw error
     }
-
-    const { error: uploadErr } = await supabase.storage
-      .from('media')
-      .upload(filePath, file, options)
-
-    if (uploadErr) throw uploadErr
-
-    // Public URL (or signed URL if isPrivate)
-    // For demonstration, we'll get a public link for all:
-    const { data: { publicUrl } } = supabase.storage
-      .from('media')
-      .getPublicUrl(filePath)
-
-    // Extract metadata
-    let extracted: any = {}
-    let thumbnailUrl = publicUrl
-
-    if (mediaType === 'image') {
-      extracted = await extractImageMetadata(file)
-      // thumbnailUrl = some function to create & upload a thumbnail
-      // omitted here for brevity; use the full-size URL
-    } else if (mediaType === 'video') {
-      extracted = await extractVideoMetadata(file)
-      // thumbnailUrl = some function to create & upload a video poster
+  },
+  
+  async deleteMedia(mediaId: string, userId: string): Promise<void> {
+    try {
+      // First, fetch the media details to get the file path
+      const { data: media, error: fetchError } = await supabase
+        .from('media')
+        .select('*')
+        .eq('id', mediaId)
+        .single()
+      
+      if (fetchError) {
+        toast.error(`Media not found: ${fetchError.message}`)
+        throw fetchError
+      }
+      
+      // Extract file path from URL
+      const urlParts = media.url.split('/media/')
+      const filePath = urlParts[1]
+      
+      // Delete from storage
+      const { error: storageError } = await supabase.storage
+        .from('media')
+        .remove([filePath])
+      
+      if (storageError) {
+        toast.error(`Storage deletion failed: ${storageError.message}`)
+        throw storageError
+      }
+      
+      // Delete from database
+      const { error: dbError } = await supabase
+        .from('media')
+        .delete()
+        .eq('id', mediaId)
+      
+      if (dbError) {
+        toast.error(`Database deletion failed: ${dbError.message}`)
+        throw dbError
+      }
+      
+      toast.success('Media deleted successfully')
+    } catch (error) {
+      console.error('Media deletion error:', error)
+      toast.error('Failed to delete media')
+      throw error
     }
-
-    const mediaRecord: MediaRecord = {
-      memoryId,
-      type: mediaType,
-      url: publicUrl,
-      thumbnailUrl,
-      originalFilename: file.name,
-      size: file.size,
-      mimeType: file.type,
-      width: extracted.dimensions?.width,
-      height: extracted.dimensions?.height,
-      duration: extracted.duration,
-      metadata: { ...metadata, ...extracted }
-    }
-
-    // Save to DB
-    const { data, error } = await supabase
-      .from('media')
-      .insert(mediaRecord)
-      .select()
-      .single()
-
-    if (error) throw error
-    return data
-  } catch (error) {
-    console.error('Error uploading media:', error)
-    throw error
   }
-}
-
-export const deleteMedia = async (mediaId: string, userId: string) => {
-  const { data: media, error: fetchError } = await supabase
-    .from('media')
-    .select('*')
-    .eq('id', mediaId)
-    .single()
-  if (fetchError) throw fetchError
-
-  // TODO: Confirm ownership if needed
-  const filePath = media.url.split('/media/')[1]
-
-  const { error: storageError } = await supabase.storage
-    .from('media')
-    .remove([filePath])
-  if (storageError) throw storageError
-
-  if (media.thumbnailUrl && media.thumbnailUrl !== media.url) {
-    const thumbPath = media.thumbnailUrl.split('/media/')[1]
-    await supabase.storage.from('media').remove([thumbPath])
-  }
-
-  const { error: dbError } = await supabase
-    .from('media')
-    .delete()
-    .eq('id', mediaId)
-  if (dbError) throw dbError
-
-  return { success: true }
 }

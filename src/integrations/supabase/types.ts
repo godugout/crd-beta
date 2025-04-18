@@ -646,6 +646,59 @@ export type Database = {
           },
         ]
       }
+      memories: {
+        Row: {
+          created_at: string
+          description: string | null
+          game_id: string | null
+          id: string
+          location: Json | null
+          metadata: Json | null
+          tags: string[] | null
+          team_id: string | null
+          title: string
+          updated_at: string
+          user_id: string
+          visibility: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          game_id?: string | null
+          id?: string
+          location?: Json | null
+          metadata?: Json | null
+          tags?: string[] | null
+          team_id?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+          visibility?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          game_id?: string | null
+          id?: string
+          location?: Json | null
+          metadata?: Json | null
+          tags?: string[] | null
+          team_id?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+          visibility?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "memories_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mini_games: {
         Row: {
           config: Json | null
