@@ -48,7 +48,7 @@ export const simulateItemDetection = (
       const faceHeight = faceWidth * 1.3; // approx face proportions
       
       detectedItems.push({
-        id: detectedItems.length + 1,
+        id: `face-${i + 1}`, // Change from number to string
         x: col * cellWidth + offsetX + cellWidth * 0.15,
         y: row * cellHeight + offsetY + cellHeight * 0.1,
         width: faceWidth,
@@ -65,7 +65,7 @@ export const simulateItemDetection = (
   if (detectionTypes.some(type => ['card', 'ticket', 'program', 'autograph'].includes(type))) {
     // Place a card in the center lower part
     detectedItems.push({
-      id: detectedItems.length + 1,
+      id: `card-1`, // Change from number to string
       x: imgWidth * 0.3,
       y: imgHeight * 0.6,
       width: imgWidth * 0.4,
@@ -79,7 +79,7 @@ export const simulateItemDetection = (
     // Add a ticket
     if (detectionTypes.includes('ticket')) {
       detectedItems.push({
-        id: detectedItems.length + 1,
+        id: `ticket-1`, // Change from number to string
         x: imgWidth * 0.1,
         y: imgHeight * 0.3,
         width: imgWidth * 0.3,

@@ -31,8 +31,8 @@ const SeriesManagerPage = React.lazy(() => import('@/pages/SeriesManagerPage'));
 const DeckViewPage = React.lazy(() => import('@/pages/DeckViewPage'));
 const SeriesViewPage = React.lazy(() => import('@/pages/SeriesViewPage'));
 const CardCreator = React.lazy(() => import('@/pages/CardCreator'));
-const CardDetectorPage = React.lazy(() => import('@/pages/CardDetectorPage'));
-const TeamPage = React.lazy(() => import('@/pages/TeamPage'));
+const CardDetector = React.lazy(() => import('@/pages/CardDetector')); // Fix import path
+const TeamPage = React.lazy(() => import('@/pages/TeamPage')); // Added missing import
 
 // Main application routes
 const rootRoutes: RouteObject[] = [
@@ -78,7 +78,7 @@ const rootRoutes: RouteObject[] = [
   },
   {
     path: "/detector",
-    element: <CardDetectorPage />
+    element: <CardDetector />
   },
   {
     path: "/cards",

@@ -1,3 +1,4 @@
+
 import { useState, useCallback } from 'react';
 import { EnhancedCropBoxProps, MemorabiliaType } from '@/components/card-upload/cardDetection';
 import { useMobileOptimization } from '@/hooks/useMobileOptimization';
@@ -41,7 +42,7 @@ export const useEditorState = ({
       
       // Create a new area in the center
       const newArea: EnhancedCropBoxProps = {
-        id: selectedAreas.length + 1,
+        id: `selection-${selectedAreas.length + 1}`, // Change from number to string
         x: img.naturalWidth / 2 - 100,
         y: img.naturalHeight / 2 - 100,
         width: 200,
