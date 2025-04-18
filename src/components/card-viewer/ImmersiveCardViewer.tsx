@@ -25,9 +25,13 @@ const Card3DModel = ({
   const meshRef = useRef<THREE.Mesh>(null);
   const [hovered, setHovered] = useState(false);
   
-  // Load textures
-  const frontTexture = useTexture(frontTextureUrl);
-  const backTexture = useTexture(backTextureUrl || '/card-back-texture.jpg');
+  // Load textures with proper type handling
+  const frontTextureResult = useTexture(frontTextureUrl);
+  const backTextureResult = useTexture(backTextureUrl || '/card-back-texture.jpg');
+  
+  // Extract the actual texture objects (useTexture can return an array or single texture)
+  const frontTexture = Array.isArray(frontTextureResult) ? frontTextureResult[0] : frontTextureResult;
+  const backTexture = Array.isArray(backTextureResult) ? backTextureResult[0] : backTextureResult;
 
   // Set PBR material properties
   const materialProps = {
