@@ -1,10 +1,16 @@
 
 import React from 'react';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
+import { Search, X } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { X } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 interface FilterPanelProps {
   filters: {
@@ -12,59 +18,62 @@ interface FilterPanelProps {
     tags: string[];
     sortBy: string;
   };
-  onFilterChange: (filters: Partial<FilterPanelProps['filters']>) => void;
+  onFilterChange: (filters: Partial<{ searchQuery: string; tags: string[]; sortBy: string }>) => void;
 }
 
-const FilterPanel: React.FC<FilterPanelProps> = ({
-  filters,
-  onFilterChange
-}) => {
-  // Common tags for the filter suggestions
-  const commonTags = [
-    'basketball', 'football', 'baseball', 'soccer', 
-    'legends', 'current', 'vintage', 'holographic'
-  ];
+// Sample tags for filtering
+const availableTags = [
+  'basketball', 'prince', 'bulls', 'lakers', 'music', 'legends', 'current', 'art'
+];
 
-  // Filter suggestions based on what's not already selected
-  const tagSuggestions = commonTags.filter(tag => !filters.tags.includes(tag));
-
-  // Handle adding a tag
-  const handleAddTag = (tag: string) => {
-    if (!filters.tags.includes(tag)) {
-      onFilterChange({ tags: [...filters.tags, tag] });
-    }
+const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFilterChange }) => {
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onFilterChange({ searchQuery: e.target.value });
   };
 
-  // Handle removing a tag
-  const handleRemoveTag = (tag: string) => {
-    onFilterChange({ tags: filters.tags.filter(t => t !== tag) });
+  const handleSortChange = (value: string) => {
+    onFilterChange({ sortBy: value });
+  };
+
+  const handleTagClick = (tag: string) => {
+    const updatedTags = filters.tags.includes(tag)
+      ? filters.tags.filter(t => t !== tag)
+      : [...filters.tags, tag];
+    
+    onFilterChange({ tags: updatedTags });
+  };
+
+  const clearFilters = () => {
+    onFilterChange({
+      searchQuery: '',
+      tags: [],
+      sortBy: 'newest'
+    });
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-      <h2 className="text-lg font-semibold mb-4">Filters</h2>
+    <div className="space-y-6 bg-card p-4 rounded-lg border">
+      <h3 className="font-semibold text-lg mb-2">Filters</h3>
       
-      {/* Search input */}
-      <div className="mb-4">
-        <Label htmlFor="search" className="block mb-2 text-sm">Search</Label>
-        <Input
-          id="search"
-          type="text"
-          placeholder="Search cards..."
-          value={filters.searchQuery}
-          onChange={(e) => onFilterChange({ searchQuery: e.target.value })}
-          className="w-full"
-        />
+      {/* Search */}
+      <div>
+        <label className="text-sm font-medium mb-1 block">Search</label>
+        <div className="relative">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search cards..."
+            value={filters.searchQuery}
+            onChange={handleSearchChange}
+            className="pl-8"
+          />
+        </div>
       </div>
       
-      {/* Sort options */}
-      <div className="mb-4">
-        <Label htmlFor="sort" className="block mb-2 text-sm">Sort By</Label>
-        <Select
-          value={filters.sortBy}
-          onValueChange={(value) => onFilterChange({ sortBy: value })}
-        >
-          <SelectTrigger id="sort" className="w-full">
+      {/* Sort */}
+      <div>
+        <label className="text-sm font-medium mb-1 block">Sort By</label>
+        <Select value={filters.sortBy} onValueChange={handleSortChange}>
+          <SelectTrigger>
             <SelectValue placeholder="Sort by" />
           </SelectTrigger>
           <SelectContent>
@@ -76,45 +85,35 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
         </Select>
       </div>
       
-      {/* Tags section */}
-      <div className="mb-4">
-        <Label className="block mb-2 text-sm">Tags</Label>
-        
-        {/* Selected tags */}
-        <div className="flex flex-wrap gap-2 mb-3">
-          {filters.tags.length > 0 ? (
-            filters.tags.map((tag) => (
-              <Badge key={tag} variant="secondary" className="flex items-center gap-1">
-                {tag}
-                <X 
-                  size={14} 
-                  className="cursor-pointer hover:text-destructive" 
-                  onClick={() => handleRemoveTag(tag)}
-                />
-              </Badge>
-            ))
-          ) : (
-            <p className="text-sm text-gray-500 dark:text-gray-400">No tags selected</p>
-          )}
-        </div>
-        
-        {/* Tag suggestions */}
-        <div>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Suggested tags:</p>
-          <div className="flex flex-wrap gap-2">
-            {tagSuggestions.slice(0, 8).map((tag) => (
-              <Badge 
-                key={tag} 
-                variant="outline" 
-                className="cursor-pointer hover:bg-primary hover:text-primary-foreground"
-                onClick={() => handleAddTag(tag)}
-              >
-                {tag}
-              </Badge>
-            ))}
-          </div>
+      {/* Tags */}
+      <div>
+        <label className="text-sm font-medium mb-1 block">Popular Tags</label>
+        <div className="flex flex-wrap gap-2 mt-2">
+          {availableTags.map(tag => (
+            <Badge
+              key={tag}
+              variant={filters.tags.includes(tag) ? "default" : "outline"}
+              className={`cursor-pointer ${filters.tags.includes(tag) ? '' : 'bg-transparent hover:bg-secondary'}`}
+              onClick={() => handleTagClick(tag)}
+            >
+              {tag}
+            </Badge>
+          ))}
         </div>
       </div>
+      
+      {/* Clear Filters button */}
+      {(filters.searchQuery || filters.tags.length > 0 || filters.sortBy !== 'newest') && (
+        <Button 
+          variant="outline" 
+          size="sm"
+          onClick={clearFilters}
+          className="w-full"
+        >
+          <X className="h-4 w-4 mr-2" />
+          Clear Filters
+        </Button>
+      )}
     </div>
   );
 };

@@ -30,6 +30,17 @@ const HomePage = () => {
           </div>
           
           <div className="bg-white p-6 rounded-lg shadow-md">
+            <h2 className="text-xl font-semibold mb-3">Basketball Cards</h2>
+            <p className="mb-4">Check out our special collection of basketball player cards.</p>
+            <Link 
+              to="/basketball-cards" 
+              className="inline-block px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700"
+            >
+              View Basketball Cards
+            </Link>
+          </div>
+          
+          <div className="bg-white p-6 rounded-lg shadow-md">
             <h2 className="text-xl font-semibold mb-3">Create Cards</h2>
             <p className="mb-4">Design and create your own custom digital trading cards.</p>
             <Link 
@@ -47,11 +58,11 @@ const HomePage = () => {
             <Link to="/emergency" className="px-3 py-1 bg-red-600 text-white text-sm rounded">
               Emergency Page
             </Link>
+            <Link to="/basketball-cards" className="px-3 py-1 bg-purple-600 text-white text-sm rounded">
+              Basketball Cards
+            </Link>
             <Link to="/index" className="px-3 py-1 bg-gray-600 text-white text-sm rounded">
               Index Page
-            </Link>
-            <Link to="/about" className="px-3 py-1 bg-gray-600 text-white text-sm rounded">
-              About Page
             </Link>
             <Link to="/profile" className="px-3 py-1 bg-gray-600 text-white text-sm rounded">
               Profile Page
