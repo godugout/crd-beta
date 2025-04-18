@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import PageLayout from '@/components/navigation/PageLayout';
@@ -32,9 +31,9 @@ const Collections = () => {
         icon: <PlusCircle className="h-4 w-4" />,
         onClick: () => setShowCreateDialog(true)
       }}
-    >
-      <Container className="py-6">
-        <div className="flex items-center gap-3 mb-4">
+      className="pb-8"
+      actions={
+        <div className="flex items-center gap-3">
           <div className="flex p-1 bg-[var(--bg-tertiary)] rounded-lg overflow-hidden">
             <button
               onClick={() => setViewMode('grid')}
@@ -59,22 +58,39 @@ const Collections = () => {
             Filter
           </Button>
         </div>
-          
-        <div className="backdrop-blur-md bg-[var(--bg-secondary)]/30 p-1 rounded-xl border border-[var(--border-primary)]">
+      }
+    >
+      <Container>
+        <div className="mt-2 backdrop-blur-md bg-[var(--bg-secondary)]/30 p-1 rounded-xl border border-[var(--border-primary)]">
           <Tabs defaultValue="all" className="w-full">
-            <TabsList className="grid grid-cols-3 md:grid-cols-6 bg-transparent h-auto p-0 w-full">
-              {collectionsNavItems.map((item, i) => (
-                <TabsTrigger 
-                  key={i} 
-                  value={item.path} 
-                  className="data-[state=active]:bg-[var(--brand-primary)]/10 data-[state=active]:text-[var(--brand-primary)] rounded-lg py-2.5 h-auto"
-                >
-                  <div className="flex items-center gap-2 w-full">
-                    {item.icon()}
-                    <span className="hidden md:inline">{item.title}</span>
-                  </div>
-                </TabsTrigger>
-              ))}
+            <TabsList className="grid grid-cols-3 md:grid-cols-3 bg-transparent h-auto p-0 w-full">
+              <TabsTrigger 
+                value="all" 
+                className="data-[state=active]:bg-[var(--brand-primary)]/10 data-[state=active]:text-[var(--brand-primary)] rounded-lg py-2.5 h-auto"
+              >
+                <div className="flex items-center gap-2">
+                  <Layout size={16} />
+                  <span>All Collections</span>
+                </div>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="featured" 
+                className="data-[state=active]:bg-[var(--brand-primary)]/10 data-[state=active]:text-[var(--brand-primary)] rounded-lg py-2.5 h-auto"
+              >
+                <div className="flex items-center gap-2">
+                  <Globe size={16} />
+                  <span>Featured</span>
+                </div>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="private" 
+                className="data-[state=active]:bg-[var(--brand-primary)]/10 data-[state=active]:text-[var(--brand-primary)] rounded-lg py-2.5 h-auto"
+              >
+                <div className="flex items-center gap-2">
+                  <Layout size={16} />
+                  <span>Private</span>
+                </div>
+              </TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
