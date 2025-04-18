@@ -1,11 +1,11 @@
-
 import React, { useRef, useEffect, useState } from 'react';
 import { Card } from '@/lib/types/cardTypes';
-import { Canvas } from '@react-three/fiber';
-import { OrbitControls, PerspectiveCamera, Environment, useTexture } from '@react-three/drei';
+import { Canvas, useFrame } from '@react-three/fiber';
+import { OrbitControls, PerspectiveCamera, Environment } from '@react-three/drei';
 import { DEFAULT_DESIGN_METADATA, FALLBACK_IMAGE_URL } from '@/lib/utils/cardDefaults';
 import { useToast } from '@/hooks/use-toast';
 import * as THREE from 'three';
+import { EffectComposer, Bloom } from '@react-three/postprocessing';
 
 interface ImmersiveCardViewerProps {
   card: Card;
@@ -14,7 +14,6 @@ interface ImmersiveCardViewerProps {
   effectIntensities?: Record<string, number>;
 }
 
-// Card 3D Model Component
 const Card3DModel = ({ 
   frontTextureUrl, 
   backTextureUrl, 
@@ -23,6 +22,7 @@ const Card3DModel = ({
   effectIntensities = {}
 }) => {
   const meshRef = useRef<THREE.Mesh>(null);
+  const groupRef = useRef<THREE.Group>(null);
   const [hovered, setHovered] = useState(false);
   const [frontTextureLoaded, setFrontTextureLoaded] = useState<THREE.Texture | null>(null);
   const [backTextureLoaded, setBackTextureLoaded] = useState<THREE.Texture | null>(null);
@@ -83,124 +83,75 @@ const Card3DModel = ({
     }
   }, [frontTextureLoaded, backTextureLoaded]);
 
-  // Set PBR material properties
-  const materialProps = {
-    roughness: 0.2,
-    metalness: 0.8,
-    envMapIntensity: 1.2,
-    clearcoat: 1,
-    clearcoatRoughness: 0.2,
-    reflectivity: 0.5,
-  };
-
-  // Apply effect modifiers
-  useEffect(() => {
-    if (!meshRef.current) return;
-    
-    // Apply effect-specific properties
-    let modifiedProps: any = { ...materialProps };
-    
-    if (activeEffects.includes('Holographic')) {
-      modifiedProps.metalness = 0.9;
-      modifiedProps.clearcoat = 1.5;
-      modifiedProps.clearcoatRoughness = 0.1;
-      
-      // Apply iridescence only if we have a MeshPhysicalMaterial
-      if (meshRef.current.material instanceof THREE.MeshPhysicalMaterial) {
-        meshRef.current.material.iridescence = 0.8;
-        meshRef.current.material.iridescenceIOR = 1.4;
-      }
-    }
-    
-    if (activeEffects.includes('Shimmer')) {
-      modifiedProps.metalness = 0.7;
-      modifiedProps.roughness = 0.15;
-      modifiedProps.envMapIntensity = 1.5;
-    }
-    
-    if (activeEffects.includes('Refractor')) {
-      // Apply transmission only if we have a MeshPhysicalMaterial
-      if (meshRef.current.material instanceof THREE.MeshPhysicalMaterial) {
-        meshRef.current.material.transmission = 0.1;
-        meshRef.current.material.thickness = 0.05;
-      }
-      modifiedProps.clearcoat = 1;
-      modifiedProps.clearcoatRoughness = 0.1;
-    }
-
-    // Apply modifications to mesh material
-    if (meshRef.current && meshRef.current.material) {
-      Object.entries(modifiedProps).forEach(([key, value]) => {
-        if (key in meshRef.current!.material) {
-          (meshRef.current!.material as any)[key] = value;
-        }
-      });
-    }
-  }, [activeEffects, effectIntensities]);
-
   // Animation effect
-  useEffect(() => {
-    if (!meshRef.current) return;
+  useFrame((state, delta) => {
+    if (!groupRef.current) return;
     
     // Card dimension ratios (2.5 x 3.5 inches standard card)
     const targetRotationY = isFlipped ? Math.PI : 0;
-    const rotationSpeed = 0.1;
     
-    // Animation for smooth flipping
-    const animate = () => {
-      if (!meshRef.current) return;
-      
-      // Smooth interpolation towards target rotation
-      meshRef.current.rotation.y += (targetRotationY - meshRef.current.rotation.y) * rotationSpeed;
-      
-      // Add subtle floating animation
-      if (!isFlipped) {
-        const time = Date.now() * 0.001;
-        meshRef.current.position.y = Math.sin(time * 0.5) * 0.05;
-        meshRef.current.rotation.z = Math.sin(time * 0.3) * 0.02;
-      }
-      
-      requestAnimationFrame(animate);
-    };
+    // Smooth rotation for flipping
+    if (groupRef.current.rotation.y !== targetRotationY) {
+      groupRef.current.rotation.y += (targetRotationY - groupRef.current.rotation.y) * 0.1;
+    }
     
-    const animationFrame = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(animationFrame);
-  }, [isFlipped]);
+    // Add floating animation
+    const time = state.clock.getElapsedTime();
+    groupRef.current.position.y = Math.sin(time * 0.5) * 0.1; // Gentle floating
+    groupRef.current.rotation.z = Math.sin(time * 0.3) * 0.02; // Subtle tilting
+    
+    // Add hover effect
+    if (hovered) {
+      groupRef.current.position.y += 0.1;
+    }
+  });
 
   if (!texturesLoaded) {
-    return null; // Don't render until textures are loaded
+    return null;
   }
 
   return (
-    <mesh
-      ref={meshRef}
-      castShadow
-      receiveShadow
-      onPointerOver={() => setHovered(true)}
-      onPointerOut={() => setHovered(false)}
-      position={[0, 0, 0]} // Ensure the card is positioned at center
-      scale={[1, 1, 1]} // Explicit scale to ensure visibility
+    <group 
+      ref={groupRef}
+      position={[0, 0, 0]}
+      rotation={[0.1, 0, 0]} // Slight initial tilt
     >
-      {/* Card geometry with proper card proportions (2.5 x 3.5 inch standard) */}
-      <planeGeometry args={[2.5, 3.5, 20, 20]} />
+      <mesh
+        ref={meshRef}
+        castShadow
+        receiveShadow
+        onPointerOver={() => setHovered(true)}
+        onPointerOut={() => setHovered(false)}
+      >
+        {/* Card geometry */}
+        <planeGeometry args={[2.5, 3.5, 20, 20]} />
+        
+        {/* Front material */}
+        <meshPhysicalMaterial 
+          map={frontTextureLoaded}
+          side={THREE.FrontSide}
+          roughness={0.2}
+          metalness={0.8}
+          envMapIntensity={1.2}
+          clearcoat={1}
+          clearcoatRoughness={0.2}
+          reflectivity={0.5}
+        />
+      </mesh>
       
-      {/* Front material */}
-      <meshPhysicalMaterial 
-        map={frontTextureLoaded}
-        side={THREE.FrontSide} 
-        {...materialProps} 
-      />
-      
-      {/* Back material (added as a separate mesh to avoid material issues) */}
+      {/* Back face */}
       <mesh position={[0, 0, -0.01]} rotation={[0, Math.PI, 0]}>
         <planeGeometry args={[2.5, 3.5, 1, 1]} />
         <meshPhysicalMaterial 
-          map={backTextureLoaded} 
-          side={THREE.FrontSide} 
-          {...materialProps} 
+          map={backTextureLoaded}
+          side={THREE.FrontSide}
+          roughness={0.3}
+          metalness={0.7}
+          envMapIntensity={1}
+          clearcoat={0.8}
         />
       </mesh>
-    </mesh>
+    </group>
   );
 };
 
@@ -304,33 +255,27 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
       className="w-full h-full min-h-[600px] bg-gray-900 rounded-lg overflow-hidden"
     >
       <Canvas shadows dpr={[1, 2]}>
-        {/* Move camera back a bit to ensure the card is visible */}
-        <PerspectiveCamera makeDefault position={[0, 0, 8]} fov={40} />
+        {/* Camera positioned for better view */}
+        <PerspectiveCamera makeDefault position={[0, 0, 6]} fov={45} />
         
-        {/* Enhanced lighting for better visibility */}
-        <ambientLight intensity={0.4} />
+        {/* Enhanced lighting setup */}
+        <ambientLight intensity={0.5} />
         <spotLight 
-          position={[5, 10, 10]} 
-          angle={0.3} 
+          position={[5, 5, 5]} 
+          angle={0.4} 
           penumbra={1} 
-          intensity={1.5} 
+          intensity={1.2} 
           castShadow 
         />
-        <pointLight position={[-10, -10, -10]} color="#2020ff" intensity={0.5} />
-        <pointLight position={[10, -5, -10]} color="#ff2020" intensity={0.3} />
+        <pointLight position={[-5, -5, -5]} color="#3050ff" intensity={0.5} />
+        <pointLight position={[5, -3, -5]} color="#ff3050" intensity={0.3} />
         
-        {/* Environment for reflections */}
+        {/* Environment and effects */}
         <Environment preset="city" />
+        <EffectComposer>
+          <Bloom intensity={0.5} radius={0.7} />
+        </EffectComposer>
         
-        {/* Debug helpers */}
-        <gridHelper 
-          args={[10, 10]} 
-          position={[0, -4, 0]} 
-          rotation={[Math.PI / 2, 0, 0]} 
-          visible={false} // Set to true to debug positioning
-        />
-        
-        {/* Card model */}
         <Card3DModel 
           frontTextureUrl={frontTexture}
           backTextureUrl={backTexture}
@@ -339,21 +284,17 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
           effectIntensities={effectIntensities}
         />
         
-        {/* Controls */}
         <OrbitControls 
           enableZoom={true}
           enablePan={false}
           enableRotate={true}
-          minDistance={5}
-          maxDistance={15}
-          target={[0, 0, 0]} // Explicitly set target to center
+          minDistance={4}
+          maxDistance={10}
+          target={[0, 0, 0]}
+          minPolarAngle={Math.PI / 4}
+          maxPolarAngle={Math.PI * 3/4}
         />
       </Canvas>
-      
-      {/* Optional debug overlay */}
-      <div className="absolute top-2 left-2 text-white text-xs bg-black/40 px-2 py-1 rounded opacity-50 pointer-events-none hidden">
-        Debug: Card is {isFlipped ? 'flipped' : 'front'}, Effects: {activeEffects.join(', ')}
-      </div>
     </div>
   );
 };
