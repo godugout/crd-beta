@@ -22,6 +22,9 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { getEnvironmentMapById } from '@/lib/environment-maps';
 
+// Define possible return types from useTexture
+type TextureResult = THREE.Texture | Record<string, THREE.Texture> | THREE.Texture[];
+
 // Physically-based card model with materials
 const CardModel = ({ 
   card, 
@@ -37,10 +40,13 @@ const CardModel = ({
   const backTextureResult = useTexture('/card-back-texture.jpg');
   
   // Handle the textures, ensuring we get a single Texture object
-  // This handles the case where useTexture returns either a Texture or an object with texture properties
-  const getFinalTexture = (textureResult: THREE.Texture | Record<string, THREE.Texture>): THREE.Texture => {
+  // This handles different return types from useTexture
+  const getFinalTexture = (textureResult: TextureResult): THREE.Texture => {
     if (textureResult instanceof THREE.Texture) {
       return textureResult;
+    } else if (Array.isArray(textureResult)) {
+      // Handle array return type
+      return textureResult[0] || new THREE.Texture();
     } else if (typeof textureResult === 'object' && textureResult !== null) {
       // If it's an object with textures as values, return the first one
       const firstTexture = Object.values(textureResult)[0];
