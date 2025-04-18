@@ -178,6 +178,8 @@ const Card3DModel = ({
       receiveShadow
       onPointerOver={() => setHovered(true)}
       onPointerOut={() => setHovered(false)}
+      position={[0, 0, 0]} // Ensure the card is positioned at center
+      scale={[1, 1, 1]} // Explicit scale to ensure visibility
     >
       {/* Card geometry with proper card proportions (2.5 x 3.5 inch standard) */}
       <planeGeometry args={[2.5, 3.5, 20, 20]} />
@@ -302,21 +304,31 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
       className="w-full h-full min-h-[600px] bg-gray-900 rounded-lg overflow-hidden"
     >
       <Canvas shadows dpr={[1, 2]}>
-        <PerspectiveCamera makeDefault position={[0, 0, 5]} fov={50} />
+        {/* Move camera back a bit to ensure the card is visible */}
+        <PerspectiveCamera makeDefault position={[0, 0, 8]} fov={40} />
         
-        {/* Lighting */}
-        <ambientLight intensity={0.3} />
+        {/* Enhanced lighting for better visibility */}
+        <ambientLight intensity={0.4} />
         <spotLight 
-          position={[10, 10, 10]} 
+          position={[5, 10, 10]} 
           angle={0.3} 
           penumbra={1} 
           intensity={1.5} 
           castShadow 
         />
         <pointLight position={[-10, -10, -10]} color="#2020ff" intensity={0.5} />
+        <pointLight position={[10, -5, -10]} color="#ff2020" intensity={0.3} />
         
         {/* Environment for reflections */}
         <Environment preset="city" />
+        
+        {/* Debug helpers */}
+        <gridHelper 
+          args={[10, 10]} 
+          position={[0, -4, 0]} 
+          rotation={[Math.PI / 2, 0, 0]} 
+          visible={false} // Set to true to debug positioning
+        />
         
         {/* Card model */}
         <Card3DModel 
@@ -332,10 +344,16 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
           enableZoom={true}
           enablePan={false}
           enableRotate={true}
-          minDistance={3}
-          maxDistance={10}
+          minDistance={5}
+          maxDistance={15}
+          target={[0, 0, 0]} // Explicitly set target to center
         />
       </Canvas>
+      
+      {/* Optional debug overlay */}
+      <div className="absolute top-2 left-2 text-white text-xs bg-black/40 px-2 py-1 rounded opacity-50 pointer-events-none hidden">
+        Debug: Card is {isFlipped ? 'flipped' : 'front'}, Effects: {activeEffects.join(', ')}
+      </div>
     </div>
   );
 };
