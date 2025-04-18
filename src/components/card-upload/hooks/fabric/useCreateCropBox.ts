@@ -1,7 +1,7 @@
 
 import { useCallback } from 'react';
-import { Canvas } from 'fabric';
-import { EnhancedCropBoxProps } from '../../CropBox';
+import { Canvas, fabric } from 'fabric';
+import { EnhancedCropBoxProps } from '../../cardDetection';
 
 interface UseCreateCropBoxProps {
   canvas: Canvas | null;
@@ -16,35 +16,38 @@ export const useCreateCropBox = ({
   setSelectedCropIndex,
   cropBoxes
 }: UseCreateCropBoxProps) => {
-  
+  // Handle creating new crop boxes
   const addNewCropBox = useCallback(() => {
     if (!canvas) return;
     
-    // Standard trading card ratio (2.5:3.5)
-    const cardRatio = 2.5 / 3.5;
-    
+    // Get canvas dimensions
     const canvasWidth = canvas.getWidth();
     const canvasHeight = canvas.getHeight();
     
-    // Create a new crop box with proper card ratio
-    const newWidth = canvasWidth * 0.3;
-    const newHeight = newWidth / cardRatio;
+    // Default crop box size (ensures it's not too small or too large)
+    const defaultWidth = Math.min(canvasWidth / 3, 150);
+    const defaultHeight = defaultWidth * (3.5 / 2.5); // Card ratio
     
-    const newBox: EnhancedCropBoxProps = {
-      id: cropBoxes.length + 1,
-      x: (canvasWidth - newWidth) / 2,
-      y: (canvasHeight - newHeight) / 2,
-      width: newWidth,
-      height: newHeight,
+    // Position in center of canvas
+    const x = canvasWidth / 2 - defaultWidth / 2;
+    const y = canvasHeight / 2 - defaultHeight / 2;
+    
+    // Add to state
+    const newCropBox: EnhancedCropBoxProps = {
+      x,
+      y,
+      width: defaultWidth,
+      height: defaultHeight,
       rotation: 0,
-      color: '#00FF00',
-      memorabiliaType: 'card',
-      confidence: 0.5
+      color: '#FF0000',
+      memorabiliaType: 'card'
     };
     
-    setCropBoxes(prev => [...prev, newBox]);
+    setCropBoxes(prev => [...prev, newCropBox]);
+    
+    // Select the new crop box
     setSelectedCropIndex(cropBoxes.length);
-  }, [canvas, cropBoxes, setCropBoxes, setSelectedCropIndex]);
+  }, [canvas, setCropBoxes, setSelectedCropIndex, cropBoxes.length]);
   
   return { addNewCropBox };
 };

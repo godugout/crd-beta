@@ -1,6 +1,6 @@
 
 import { useCallback, useEffect, useRef } from 'react';
-import { Canvas, Rect } from 'fabric';
+import { Canvas, fabric } from 'fabric';
 import { EnhancedCropBoxProps, MemorabiliaType } from '../../cardDetection';
 
 interface UseCropRectanglesProps {
@@ -26,7 +26,7 @@ export const useCropRectangles = ({
   onToggleBatchSelection,
   onMemorabiliaTypeChange
 }: UseCropRectanglesProps) => {
-  const cropRectsRef = useRef<Rect[]>([]);
+  const cropRectsRef = useRef<fabric.Rect[]>([]);
   
   // Function to render crop boxes on canvas
   const renderCropBoxes = useCallback(() => {
@@ -41,7 +41,8 @@ export const useCropRectangles = ({
       const isSelected = index === selectedCropIndex;
       const isInBatch = batchSelections?.includes(index);
       
-      const rect = new Rect({
+      // In Fabric.js v6, we use fabric.Rect (not just Rect)
+      const rect = new fabric.Rect({
         left: box.x,
         top: box.y,
         width: box.width,

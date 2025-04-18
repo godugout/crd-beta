@@ -9,75 +9,70 @@ interface UseEventHandlersProps {
   setSelectedCropIndex: React.Dispatch<React.SetStateAction<number>>;
 }
 
-export const useEventHandlers = ({
-  canvas,
+export const useEventHandlers = ({ 
+  canvas, 
   setCropBoxes,
-  setSelectedCropIndex
+  setSelectedCropIndex 
 }: UseEventHandlersProps) => {
-  
-  // Handle selection of crop rectangles
-  const handleSelectionCreated = useCallback((e: any) => {
-    const selectedObject = e.selected?.[0];
-    if (selectedObject && selectedObject.data?.cropBoxIndex !== undefined) {
-      setSelectedCropIndex(selectedObject.data.cropBoxIndex);
-    }
-  }, [setSelectedCropIndex]);
-  
-  // Handle modification of crop rectangles
-  const handleObjectModified = useCallback((e: any) => {
-    if (!e.target || e.target.data?.cropBoxIndex === undefined) return;
-    
-    const index = e.target.data.cropBoxIndex;
-    const rect = e.target;
-    
-    setCropBoxes(prev => {
-      const updated = [...prev];
-      if (updated[index]) {
-        updated[index] = {
-          ...updated[index],
-          x: rect.left || 0,
-          y: rect.top || 0,
-          width: rect.width * (rect.scaleX || 1),
-          height: rect.height * (rect.scaleY || 1),
-          rotation: rect.angle || 0
-        };
-      }
-      return updated;
-    });
-    
-    // Reset scale after applying the new dimensions
-    if (rect.scaleX !== 1 || rect.scaleY !== 1) {
-      rect.set({
-        width: rect.width * (rect.scaleX || 1),
-        height: rect.height * (rect.scaleY || 1),
-        scaleX: 1,
-        scaleY: 1
-      });
-    }
-  }, [setCropBoxes]);
-
-  // Initialize event handlers
+  // Initialize Fabric.js event handlers
   const initializeEvents = useCallback(() => {
-    if (!canvas) return;
+    if (!canvas) return () => {};
     
-    // Set up canvas event handlers
-    canvas.on('object:modified', handleObjectModified);
-    canvas.on('selection:created', handleSelectionCreated);
-    canvas.on('selection:updated', handleSelectionCreated);
-    canvas.on('selection:cleared', () => setSelectedCropIndex(-1));
-    
-    // Return cleanup function
-    return () => {
-      canvas.off('object:modified');
-      canvas.off('selection:created');
-      canvas.off('selection:updated');
-      canvas.off('selection:cleared');
+    // Object Modified handler - update crop boxes state when objects are moved/resized
+    const handleObjectModified = (e: any) => {
+      const target = e.target;
+      if (!target) return;
+      
+      // Get the crop box index from the object's data
+      const cropBoxIndex = (target as any).data?.cropBoxIndex;
+      if (cropBoxIndex === undefined) return;
+      
+      // Update the crop box with new position, size, and angle
+      setCropBoxes(prev => {
+        const updated = [...prev];
+        updated[cropBoxIndex] = {
+          ...updated[cropBoxIndex],
+          x: target.left || 0,
+          y: target.top || 0,
+          width: target.width! * target.scaleX!,
+          height: target.height! * target.scaleY!,
+          rotation: target.angle || 0
+        };
+        return updated;
+      });
     };
-  }, [canvas, handleObjectModified, handleSelectionCreated, setSelectedCropIndex]);
+    
+    // Object Selected handler - update selected crop box index
+    const handleObjectSelected = (e: any) => {
+      const target = e.selected?.[0] || e.target;
+      if (!target) return;
+      
+      // Get the crop box index from the object's data
+      const cropBoxIndex = (target as any).data?.cropBoxIndex;
+      if (cropBoxIndex === undefined) return;
+      
+      setSelectedCropIndex(cropBoxIndex);
+    };
+    
+    // Canvas cleared handler - deselect any crop box
+    const handleSelectionCleared = () => {
+      setSelectedCropIndex(-1);
+    };
+    
+    // Add event listeners
+    canvas.on('object:modified', handleObjectModified);
+    canvas.on('selection:created', handleObjectSelected);
+    canvas.on('selection:updated', handleObjectSelected);
+    canvas.on('selection:cleared', handleSelectionCleared);
+    
+    // Return cleanup function to remove event listeners
+    return () => {
+      canvas.off('object:modified', handleObjectModified);
+      canvas.off('selection:created', handleObjectSelected);
+      canvas.off('selection:updated', handleObjectSelected);
+      canvas.off('selection:cleared', handleSelectionCleared);
+    };
+  }, [canvas, setCropBoxes, setSelectedCropIndex]);
   
-  return {
-    initializeEvents,
-    handleObjectModified,
-    handleSelectionCreated
-  };
+  return { initializeEvents };
 };
