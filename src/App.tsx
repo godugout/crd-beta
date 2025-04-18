@@ -1,5 +1,5 @@
 
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import CardViewerPage from './pages/CardViewerPage';
 import ImmersiveCardViewerPage from './pages/ImmersiveCardViewerPage';
@@ -11,14 +11,12 @@ function App() {
   return (
     <SessionProvider>
       <CardProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/cards/:id" element={<CardViewerPage />} />
-            <Route path="/immersive/:id" element={<ImmersiveCardViewerPage />} />
-            <Route path="/view/:id" element={<CardViewerPage />} />
-          </Routes>
-        </BrowserRouter>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/cards/:id" element={<CardViewerPage />} />
+          <Route path="/immersive/:id" element={<ImmersiveCardViewerPage />} />
+          <Route path="/view/:id" element={<CardViewerPage />} />
+        </Routes>
         <Toaster position="top-center" />
       </CardProvider>
     </SessionProvider>
