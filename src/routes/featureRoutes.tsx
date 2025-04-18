@@ -1,15 +1,27 @@
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import { RouteObject } from 'react-router-dom';
-import DeveloperDocs from '@/pages/DeveloperDocs';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import CacheExample from '@/components/examples/CacheExample';
 import CardShowcase from '@/pages/CardShowcase';
-import Experiences from '@/pages/Experiences';
-import Labs from '@/pages/Labs';
-import PbrDemo from '@/pages/PbrDemo';
-import SignatureDemo from '@/pages/SignatureDemo';
-import CardAnimation from '@/pages/CardAnimation';
+
+// Lazy load components that might suspend
+const DeveloperDocs = React.lazy(() => import('@/pages/DeveloperDocs'));
+const Experiences = React.lazy(() => import('@/pages/Experiences'));
+const Labs = React.lazy(() => import('@/pages/Labs'));
+const PbrDemo = React.lazy(() => import('@/pages/PbrDemo'));
+const SignatureDemo = React.lazy(() => import('@/pages/SignatureDemo'));
+const CardAnimation = React.lazy(() => import('@/pages/CardAnimation'));
+
+// Loading fallback component
+const LoadingFallback = () => (
+  <div className="flex items-center justify-center h-screen">
+    <div className="text-center">
+      <div className="h-10 w-10 border-4 border-t-blue-600 border-blue-200 rounded-full animate-spin mx-auto mb-4"></div>
+      <p>Loading...</p>
+    </div>
+  </div>
+);
 
 const featureRoutes: RouteObject[] = [
   {
@@ -23,7 +35,9 @@ const featureRoutes: RouteObject[] = [
         path: 'experiences',
         element: (
           <ProtectedRoute>
-            <Experiences />
+            <Suspense fallback={<LoadingFallback />}>
+              <Experiences />
+            </Suspense>
           </ProtectedRoute>
         )
       },
@@ -31,7 +45,9 @@ const featureRoutes: RouteObject[] = [
         path: 'labs',
         element: (
           <ProtectedRoute>
-            <Labs />
+            <Suspense fallback={<LoadingFallback />}>
+              <Labs />
+            </Suspense>
           </ProtectedRoute>
         )
       },
@@ -39,7 +55,9 @@ const featureRoutes: RouteObject[] = [
         path: 'pbr',
         element: (
           <ProtectedRoute>
-            <PbrDemo />
+            <Suspense fallback={<LoadingFallback />}>
+              <PbrDemo />
+            </Suspense>
           </ProtectedRoute>
         )
       },
@@ -47,7 +65,9 @@ const featureRoutes: RouteObject[] = [
         path: 'signature',
         element: (
           <ProtectedRoute>
-            <SignatureDemo />
+            <Suspense fallback={<LoadingFallback />}>
+              <SignatureDemo />
+            </Suspense>
           </ProtectedRoute>
         )
       },
@@ -57,11 +77,19 @@ const featureRoutes: RouteObject[] = [
       },
       {
         path: 'animation',
-        element: <CardAnimation />
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <CardAnimation />
+          </Suspense>
+        )
       },
       {
         path: 'developer',
-        element: <DeveloperDocs />
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <DeveloperDocs />
+          </Suspense>
+        )
       }
     ]
   }
