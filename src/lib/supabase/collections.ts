@@ -12,3 +12,6 @@ export const collectionOperations = {
 
 // Re-export utility for checking collection existence
 export { checkCollectionExists } from './utils/collection-existence';
+
+// Re-export the collection converter utility
+export { convertDbCollectionToApp } from './utils/collection-converter';

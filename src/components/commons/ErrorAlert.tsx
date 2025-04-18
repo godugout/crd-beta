@@ -4,6 +4,7 @@ import { AlertTriangle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from '@/components/ui/button';
 import { RefreshCw } from 'lucide-react';
+import { LoadingState } from '@/components/ui/loading-state';
 
 interface ErrorAlertProps {
   error: string;
