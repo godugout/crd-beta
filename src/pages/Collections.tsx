@@ -65,7 +65,7 @@ const Collections = () => {
                   className="data-[state=active]:bg-[var(--brand-primary)]/10 data-[state=active]:text-[var(--brand-primary)] rounded-lg py-2.5 h-auto"
                 >
                   <Link to={item.path} className="flex items-center gap-2 w-full">
-                    {item.icon}
+                    {typeof item.icon === 'function' ? React.createElement(item.icon) : item.icon}
                     <span className="hidden md:inline">{item.label || item.title}</span>
                   </Link>
                 </TabsTrigger>
