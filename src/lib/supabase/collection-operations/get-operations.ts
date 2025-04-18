@@ -1,85 +1,78 @@
 
 import { supabase } from '../client';
-import { Collection } from '@/lib/types';
 import { convertDbCollectionToApp } from '../utils/collection-converter';
 
 export const getCollectionOperations = {
-  async getCollections() {
-    try {
-      const { data, error } = await supabase
-        .from('collections')
-        .select('*')
-        .order('created_at', { ascending: false });
-        
-      return { data, error };
-    } catch (err: any) {
-      console.error('Error getting collections:', err);
-      return { data: null, error: { message: 'Failed to get collections' } };
-    }
-  },
-
-  async getCollection(id: string) {
+  async getCollectionById(id: string) {
     try {
       const { data, error } = await supabase
         .from('collections')
         .select('*')
         .eq('id', id)
-        .maybeSingle();
-        
+        .single();
+      
       if (error) {
         return { data: null, error };
       }
       
-      if (!data) {
-        return { data: null, error: { message: 'Collection not found' } };
-      }
-      
-      const collection = convertDbCollectionToApp(data);
-      return { data: collection, error: null };
+      return { 
+        data: convertDbCollectionToApp(data), 
+        error: null 
+      };
     } catch (err: any) {
-      console.error('Error getting collection:', err);
-      return { data: null, error: { message: 'Failed to get collection: ' + (err.message || 'Unknown error') } };
+      console.error('Error fetching collection:', err);
+      return { 
+        data: null, 
+        error: { message: 'Failed to fetch collection: ' + (err.message || 'Unknown error') } 
+      };
     }
   },
-
-  async getCollectionWithCards(id: string) {
+  
+  async getUserCollections(userId: string) {
     try {
-      const { data: collectionData, error: collectionError } = await supabase
+      const { data, error } = await supabase
         .from('collections')
         .select('*')
-        .eq('id', id)
-        .maybeSingle();
+        .eq('owner_id', userId);
       
-      if (collectionError) {
-        console.error('Error fetching collection:', collectionError);
-        return { data: null, error: collectionError };
-      }
-      
-      if (!collectionData) {
-        console.log('Collection not found in Supabase');
-        return { data: null, error: { message: 'Collection not found' } };
-      }
-      
-      const { data: cardsData, error: cardsError } = await supabase
-        .from('cards')
-        .select('*')
-        .eq('collection_id', id);
-        
-      if (cardsError) {
-        console.error('Error fetching collection cards:', cardsError);
-        return { 
-          data: { collection: collectionData, cards: [] }, 
-          error: { message: 'Failed to fetch collection cards' } 
-        };
+      if (error) {
+        return { data: [], error };
       }
       
       return { 
-        data: { collection: collectionData, cards: cardsData || [] },
-        error: null
+        data: data.map(col => convertDbCollectionToApp(col)).filter(Boolean),
+        error: null 
       };
     } catch (err: any) {
-      console.error('Error getting collection with cards:', err);
-      return { data: null, error: { message: 'Failed to get collection with cards: ' + (err.message || 'Unknown error') } };
+      console.error('Error fetching user collections:', err);
+      return { 
+        data: [], 
+        error: { message: 'Failed to fetch collections: ' + (err.message || 'Unknown error') } 
+      };
+    }
+  },
+  
+  async getPublicCollections() {
+    try {
+      const { data, error } = await supabase
+        .from('collections')
+        .select('*')
+        .eq('visibility', 'public');
+      
+      if (error) {
+        return { data: [], error };
+      }
+      
+      return { 
+        data: data.map(col => convertDbCollectionToApp(col)).filter(Boolean),
+        error: null 
+      };
+    } catch (err: any) {
+      console.error('Error fetching public collections:', err);
+      return { 
+        data: [], 
+        error: { message: 'Failed to fetch public collections: ' + (err.message || 'Unknown error') } 
+      };
     }
   }
 };

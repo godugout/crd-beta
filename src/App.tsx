@@ -1,6 +1,7 @@
-
 import { useState, useEffect } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
+import './App.css';
+import './styles/effects.css'; // Import effects CSS
 import { Toaster } from '@/components/ui/toaster';
 import HomePage from './pages/HomePage';
 import AboutPage from './pages/AboutPage';
