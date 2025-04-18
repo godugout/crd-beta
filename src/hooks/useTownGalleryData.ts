@@ -1,17 +1,6 @@
 
 import { useState, useEffect } from 'react';
-
-interface Town {
-  id: string;
-  name: string;
-  description?: string;
-  imageUrl?: string;
-  population?: number;
-  region?: string;
-  isFeatured?: boolean;
-  distance?: number; // For nearby towns
-  // Add any other town properties you need
-}
+import { TownDisplayData } from '@/lib/types/town';
 
 interface FilterOptions {
   region?: string;
@@ -27,7 +16,7 @@ interface SortOptions {
 }
 
 const useTownGalleryData = (filterOptions: FilterOptions = {}, sortOptions: SortOptions = {}) => {
-  const [towns, setTowns] = useState<Town[]>([]);
+  const [towns, setTowns] = useState<TownDisplayData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -42,26 +31,34 @@ const useTownGalleryData = (filterOptions: FilterOptions = {}, sortOptions: Sort
         await new Promise(resolve => setTimeout(resolve, 1000));
         
         // Mock data
-        const mockTowns: Town[] = [
+        const mockTowns: TownDisplayData[] = [
           {
             id: '1',
             name: 'Oakland',
+            slug: 'oakland',
             description: 'City in California with rich baseball history',
             imageUrl: '/lovable-uploads/371b81a2-cafa-4637-9358-218d4120c658.png',
-            population: 433031,
-            region: 'West Coast',
-            isFeatured: true,
-            distance: 0
+            memberCount: 433,
+            owner_id: 'user-123',
+            primary_color: '#00A550',
+            secondary_color: '#FFCD00',
+            founded_year: 1852,
+            city: 'Oakland',
+            state: 'California'
           },
           {
             id: '2',
             name: 'San Francisco',
+            slug: 'san-francisco',
             description: 'City by the bay with iconic landmarks',
             imageUrl: '/lovable-uploads/667e6ad2-af96-40ac-bd16-a69778e14b21.png',
-            population: 873965,
-            region: 'West Coast',
-            isFeatured: true,
-            distance: 12
+            memberCount: 873,
+            owner_id: 'user-456',
+            primary_color: '#FF4C00',
+            secondary_color: '#000000',
+            founded_year: 1776,
+            city: 'San Francisco',
+            state: 'California'
           }
         ];
         
@@ -70,19 +67,18 @@ const useTownGalleryData = (filterOptions: FilterOptions = {}, sortOptions: Sort
         
         if (filterOptions.region) {
           filteredTowns = filteredTowns.filter(town => 
-            town.region?.toLowerCase() === filterOptions.region?.toLowerCase()
+            town.state?.toLowerCase() === filterOptions.region?.toLowerCase()
           );
         }
         
         if (filterOptions.featured === true) {
-          filteredTowns = filteredTowns.filter(town => town.isFeatured === true);
+          // Filter logic for featured towns would go here
+          // For now, just return all towns since we don't have a featured flag
         }
         
         if (filterOptions.nearby === true) {
           // Filter towns within a certain distance, e.g., 50 miles
-          filteredTowns = filteredTowns.filter(town => 
-            typeof town.distance === 'number' && town.distance <= 50
-          );
+          // For mock data, just return all towns
         }
         
         if (filterOptions.searchQuery) {
@@ -96,8 +92,8 @@ const useTownGalleryData = (filterOptions: FilterOptions = {}, sortOptions: Sort
         // Apply sorting if specified
         if (sortOptions.field) {
           filteredTowns.sort((a: any, b: any) => {
-            const fieldA = a[sortOptions.field as keyof Town];
-            const fieldB = b[sortOptions.field as keyof Town];
+            const fieldA = a[sortOptions.field as keyof TownDisplayData];
+            const fieldB = b[sortOptions.field as keyof TownDisplayData];
             
             if (!fieldA || !fieldB) return 0;
             

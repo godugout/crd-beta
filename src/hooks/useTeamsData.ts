@@ -2,20 +2,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-
-interface Team {
-  id: string;
-  name: string;
-  description?: string;
-  logoUrl?: string;
-  memberCount?: number;
-  ownerId: string;
-  createdAt: string;
-  tags?: string[];
-}
+import { TeamDisplayData } from '@/types/teams';
 
 export const useTeamsData = () => {
-  const [teams, setTeams] = useState<Team[]>([]);
+  const [teams, setTeams] = useState<TeamDisplayData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
@@ -33,15 +23,22 @@ export const useTeamsData = () => {
         throw new Error(error.message);
       }
       
-      const formattedTeams: Team[] = data.map((team: any) => ({
+      const formattedTeams: TeamDisplayData[] = data.map((team: any) => ({
         id: team.id,
         name: team.name,
+        slug: team.team_code?.toLowerCase() || team.id,
         description: team.description || '',
-        logoUrl: team.logo_url || '',
+        imageUrl: team.logo_url || '',
         memberCount: team.team_members?.[0]?.count || 0,
-        ownerId: team.owner_id,
-        createdAt: team.created_at,
-        tags: team.tags || [],
+        owner_id: team.owner_id,
+        primary_color: team.primary_color,
+        secondary_color: team.secondary_color,
+        founded_year: team.founded_year,
+        city: team.city,
+        state: team.state,
+        league: team.league,
+        division: team.division,
+        stadium: team.stadium
       }));
       
       setTeams(formattedTeams);

@@ -1,16 +1,6 @@
 
 import { useState, useEffect } from 'react';
-
-interface Team {
-  id: string;
-  name: string;
-  description?: string;
-  imageUrl?: string;
-  league?: string;
-  division?: string;
-  members?: number;
-  // Add any other team properties you need
-}
+import { TeamDisplayData } from '@/types/teams';
 
 interface FilterOptions {
   league?: string;
@@ -25,7 +15,7 @@ interface SortOptions {
 }
 
 const useTeamGalleryData = (filterOptions: FilterOptions = {}, sortOptions: SortOptions = {}) => {
-  const [teams, setTeams] = useState<Team[]>([]);
+  const [teams, setTeams] = useState<TeamDisplayData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -40,24 +30,28 @@ const useTeamGalleryData = (filterOptions: FilterOptions = {}, sortOptions: Sort
         await new Promise(resolve => setTimeout(resolve, 1000));
         
         // Mock data
-        const mockTeams: Team[] = [
+        const mockTeams: TeamDisplayData[] = [
           {
             id: '1',
             name: 'Oakland Athletics',
+            slug: 'oakland-athletics',
             description: 'MLB team based in Oakland, California',
             imageUrl: '/lovable-uploads/88d804c5-6d0c-402e-b2d6-f0d10b5f6699.png',
             league: 'MLB',
             division: 'AL West',
-            members: 43
+            memberCount: 43,
+            owner_id: 'user-123'
           },
           {
             id: '2',
             name: 'San Francisco Giants',
+            slug: 'sf-giants',
             description: 'MLB team based in San Francisco, California',
             imageUrl: '/lovable-uploads/c23d9e1a-4645-4f50-a9e4-2a325e3b4a4d.png',
             league: 'MLB',
             division: 'NL West',
-            members: 51
+            memberCount: 51,
+            owner_id: 'user-456'
           }
         ];
         
@@ -87,8 +81,8 @@ const useTeamGalleryData = (filterOptions: FilterOptions = {}, sortOptions: Sort
         // Apply sorting if specified
         if (sortOptions.field) {
           filteredTeams.sort((a: any, b: any) => {
-            const fieldA = a[sortOptions.field as keyof Team];
-            const fieldB = b[sortOptions.field as keyof Team];
+            const fieldA = a[sortOptions.field as keyof TeamDisplayData];
+            const fieldB = b[sortOptions.field as keyof TeamDisplayData];
             
             if (!fieldA || !fieldB) return 0;
             
