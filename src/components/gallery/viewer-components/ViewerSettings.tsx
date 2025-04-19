@@ -30,96 +30,91 @@ const ViewerSettings: React.FC<ViewerSettingsProps> = ({
   ] as const;
 
   return (
-    <div className={cn(
-      "fixed right-0 top-[64px] bottom-0 w-[320px] bg-gray-900/95 backdrop-blur border-l border-gray-800 transform transition-transform duration-300 ease-in-out overflow-y-auto",
-      isOpen ? "translate-x-0" : "translate-x-full"
-    )}>
-      <div className="p-6 space-y-6">
-        <div className="space-y-4">
-          <h3 className="text-lg font-medium flex items-center gap-2">
-            <Eye className="h-5 w-5" />
-            Environment
-          </h3>
-          <Select 
-            value={settings.environmentType} 
-            onValueChange={(value: LightingPreset) => onApplyPreset(value)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select environment" />
-            </SelectTrigger>
-            <SelectContent>
-              {environments.map((env) => (
-                <SelectItem key={env.value} value={env.value}>
-                  {env.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+    <div className="space-y-4">
+      <div className="space-y-4">
+        <h3 className="text-lg font-medium flex items-center gap-2">
+          <Eye className="h-5 w-5" />
+          Environment
+        </h3>
+        <Select 
+          value={settings.environmentType} 
+          onValueChange={(value: LightingPreset) => onApplyPreset(value)}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select environment" />
+          </SelectTrigger>
+          <SelectContent>
+            {environments.map((env) => (
+              <SelectItem key={env.value} value={env.value}>
+                {env.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
 
-        <div className="space-y-4">
-          <h3 className="text-lg font-medium flex items-center gap-2">
-            <Sun className="h-5 w-5" />
-            Primary Light
-          </h3>
-          <div className="space-y-2">
-            <div className="flex justify-between">
-              <Label>Intensity</Label>
-              <span className="text-sm text-gray-400">
-                {settings.primaryLight.intensity.toFixed(1)}
-              </span>
-            </div>
-            <Slider
-              value={[settings.primaryLight.intensity]}
-              min={0}
-              max={2}
-              step={0.1}
-              onValueChange={([value]) => 
-                onUpdateSettings({
-                  primaryLight: { ...settings.primaryLight, intensity: value }
-                })
-              }
-            />
+      <div className="space-y-4">
+        <h3 className="text-lg font-medium flex items-center gap-2">
+          <Sun className="h-5 w-5" />
+          Primary Light
+        </h3>
+        <div className="space-y-2">
+          <div className="flex justify-between">
+            <Label>Intensity</Label>
+            <span className="text-sm text-gray-400">
+              {settings.primaryLight.intensity.toFixed(1)}
+            </span>
           </div>
+          <Slider
+            value={[settings.primaryLight.intensity]}
+            min={0}
+            max={2}
+            step={0.1}
+            onValueChange={([value]) => 
+              onUpdateSettings({
+                primaryLight: { ...settings.primaryLight, intensity: value }
+              })
+            }
+          />
         </div>
+      </div>
 
-        <div className="space-y-4">
-          <h3 className="text-lg font-medium flex items-center gap-2">
-            <Moon className="h-5 w-5" />
-            Ambient Light
-          </h3>
-          <div className="space-y-2">
-            <div className="flex justify-between">
-              <Label>Intensity</Label>
-              <span className="text-sm text-gray-400">
-                {settings.ambientLight.intensity.toFixed(1)}
-              </span>
-            </div>
-            <Slider
-              value={[settings.ambientLight.intensity]}
-              min={0}
-              max={1}
-              step={0.05}
-              onValueChange={([value]) => 
-                onUpdateSettings({
-                  ambientLight: { ...settings.ambientLight, intensity: value }
-                })
-              }
-            />
+      <div className="space-y-4">
+        <h3 className="text-lg font-medium flex items-center gap-2">
+          <Moon className="h-5 w-5" />
+          Ambient Light
+        </h3>
+        <div className="space-y-2">
+          <div className="flex justify-between">
+            <Label>Intensity</Label>
+            <span className="text-sm text-gray-400">
+              {settings.ambientLight.intensity.toFixed(1)}
+            </span>
           </div>
+          <Slider
+            value={[settings.ambientLight.intensity]}
+            min={0}
+            max={1}
+            step={0.05}
+            onValueChange={([value]) => 
+              onUpdateSettings({
+                ambientLight: { ...settings.ambientLight, intensity: value }
+              })
+            }
+          />
         </div>
+      </div>
 
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <Label htmlFor="autoRotate">Auto Rotate</Label>
-            <Switch
-              id="autoRotate"
-              checked={settings.autoRotate}
-              onCheckedChange={(checked) => 
-                onUpdateSettings({ autoRotate: checked })
-              }
-            />
-          </div>
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <Label htmlFor="autoRotate">Auto Rotate</Label>
+          <Switch
+            id="autoRotate"
+            checked={settings.autoRotate}
+            onCheckedChange={(checked) => 
+              onUpdateSettings({ autoRotate: checked })
+            }
+          />
         </div>
       </div>
     </div>
