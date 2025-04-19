@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef, Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
@@ -68,10 +69,11 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
     setMousePosition({ x, y });
   };
   
+  // Ensure card has proper fallback images
   const cardWithFallback = {
     ...card,
     imageUrl: card.imageUrl || FALLBACK_IMAGE_URL,
-    backImageUrl: card.backImageUrl || '/card-back-texture.jpg'
+    backImageUrl: card.backImageUrl || '/card-back-texture.jpg' // Use consistent fallback
   };
   
   const toggleRenderMode = () => {
@@ -80,6 +82,7 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
     toast.info(`Switched to ${!cssOnly ? 'performance' : '3D'} mode`);
   };
   
+  // Clean up WebGL context to prevent memory leaks
   useEffect(() => {
     return () => {
       if (canvasRef.current) {
@@ -165,7 +168,7 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
               
               <div className="absolute inset-0 backface-hidden rotate-y-180 rounded-lg overflow-hidden shadow-xl bg-gray-800">
                 <img 
-                  src={cardWithFallback.backImageUrl || '/card-back-texture.jpg'} 
+                  src={cardWithFallback.backImageUrl} 
                   alt="Card Back" 
                   className="w-full h-full object-cover"
                 />

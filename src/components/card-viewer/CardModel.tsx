@@ -21,20 +21,48 @@ const CardModel: React.FC<CardModelProps> = ({
 }) => {
   const cardRef = useRef<THREE.Group>(null);
   const [textureError, setTextureError] = useState(false);
+  const [frontTextureLoaded, setFrontTextureLoaded] = useState(false);
+  const [backTextureLoaded, setBackTextureLoaded] = useState(false);
   
-  // Load textures with error handling - using proper argument count
-  const frontTexture = useTexture(imageUrl, (texture) => {
-    console.log('Front texture loaded successfully');
-  });
+  // Default fallback textures
+  const fallbackFrontTexture = new THREE.Color('#2a5298');
+  const fallbackBackTexture = new THREE.Color('#1a3060');
   
-  const backTexture = useTexture(backImageUrl, (texture) => {
-    console.log('Back texture loaded successfully');
-  });
+  // Load textures with error handling
+  const frontTexture = useTexture(
+    imageUrl, 
+    (texture) => {
+      console.log('Front texture loaded successfully');
+      setFrontTextureLoaded(true);
+    },
+    () => {
+      console.error('Failed to load front texture:', imageUrl);
+      setTextureError(true);
+    }
+  );
+  
+  // Use try-catch for back texture since it's optional and might fail
+  let backTexture;
+  try {
+    backTexture = useTexture(
+      backImageUrl, 
+      (texture) => {
+        console.log('Back texture loaded successfully');
+        setBackTextureLoaded(true);
+      },
+      () => {
+        console.error('Failed to load back texture:', backImageUrl);
+        // Don't set textureError here, just use fallback
+      }
+    );
+  } catch (error) {
+    console.warn('Back texture could not be loaded, using fallback');
+  }
 
   // Create materials with proper matte finish
   const frontMaterial = new THREE.MeshPhysicalMaterial({
-    map: frontTexture,
-    color: frontTexture ? undefined : new THREE.Color('#2a5298'),
+    map: frontTextureLoaded ? frontTexture : null,
+    color: frontTextureLoaded ? undefined : fallbackFrontTexture,
     metalness: 0.1,      // Lower metalness for matte look
     roughness: 0.7,      // Higher roughness for matte finish
     clearcoat: 0.3,      // Subtle clearcoat for print finish
@@ -43,8 +71,8 @@ const CardModel: React.FC<CardModelProps> = ({
   });
   
   const backMaterial = new THREE.MeshPhysicalMaterial({
-    map: backTexture,
-    color: backTexture ? undefined : new THREE.Color('#1a3060'),
+    map: backTextureLoaded ? backTexture : null,
+    color: backTextureLoaded ? undefined : fallbackBackTexture,
     metalness: 0.1,
     roughness: 0.7,
     clearcoat: 0.3,

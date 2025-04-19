@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, Suspense, useRef } from 'react';
 import { Canvas, useThree } from '@react-three/fiber';
 import { 
@@ -17,10 +18,11 @@ import { useUserLightingPreferences } from '@/hooks/useUserLightingPreferences';
 import { ChevronRight, ChevronLeft, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { mapLightingPresetToEnvironment } from '@/utils/environmentPresets';
+import { mapLightingPresetToEnvironment, ValidEnvironmentPreset } from '@/utils/environmentPresets';
 import { logRenderingInfo } from '@/utils/debugRenderer';
 import ViewerSettings from '@/components/gallery/viewer-components/ViewerSettings';
 import CardModel from '@/components/card-viewer/CardModel';
+import { FALLBACK_BACK_IMAGE_URL, FALLBACK_IMAGE_URL } from '@/lib/utils/cardDefaults';
 
 // Debug component to visualize camera and light positions - MUST BE USED INSIDE CANVAS
 const DebugInfo = ({ show = false }) => {
@@ -32,12 +34,12 @@ const DebugInfo = ({ show = false }) => {
 // Photorealistic environment setup
 const Environment3D = ({ preset = 'studio' }) => {
   // Map the custom preset to a valid @react-three/drei environment preset
-  const environmentPreset = mapLightingPresetToEnvironment(preset);
+  const environmentPreset = mapLightingPresetToEnvironment(preset) as ValidEnvironmentPreset;
   
   return (
     <>
       <Environment 
-        preset={environmentPreset as "studio" | "park" | "night" | "lobby" | "city" | "apartment" | "dawn" | "warehouse" | "sunset" | "forest"}
+        preset={environmentPreset}
         background={false} 
         blur={0.6} 
       />
@@ -99,6 +101,13 @@ const RealisticCardViewer: React.FC<RealisticCardViewerProps> = ({
     isUserCustomized,
     toggleDynamicLighting
   } = useCardLighting(preferences?.environmentType || 'studio');
+  
+  // Card with fallback images
+  const cardWithFallback = {
+    ...card,
+    imageUrl: card.imageUrl || FALLBACK_IMAGE_URL,
+    backImageUrl: card.backImageUrl || FALLBACK_BACK_IMAGE_URL
+  };
 
   // Save user preferences when they change
   useEffect(() => {
@@ -134,18 +143,39 @@ const RealisticCardViewer: React.FC<RealisticCardViewerProps> = ({
     Refractor: 0.6,
     Vintage: 0.7
   };
+  
+  // Clean up WebGL resources on unmount
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  
+  useEffect(() => {
+    return () => {
+      if (canvasRef.current) {
+        const gl = canvasRef.current.getContext('webgl2') || canvasRef.current.getContext('webgl');
+        if (gl) {
+          const loseContext = gl.getExtension('WEBGL_lose_context');
+          if (loseContext) loseContext.loseContext();
+        }
+      }
+    };
+  }, []);
+
+  // Get the environment preset as a valid type
+  const envPreset = mapLightingPresetToEnvironment(lightingSettings.environmentType) as ValidEnvironmentPreset;
 
   return (
     <div className="w-full h-full relative">
       {/* Canvas with WebGL renderer */}
       <Canvas 
+        ref={canvasRef}
         shadows 
         gl={{ 
           antialias: true, 
           alpha: false,
-          preserveDrawingBuffer: true
+          preserveDrawingBuffer: true,
+          powerPreference: 'high-performance',
         }}
         className="bg-gray-800 z-0"
+        dpr={[1, 1.5]} // Reduce resolution for better performance
       >
         <color attach="background" args={["#0f172a"]} />
         <PerspectiveCamera makeDefault position={[0, 0, 5]} fov={50} />
@@ -170,15 +200,15 @@ const RealisticCardViewer: React.FC<RealisticCardViewerProps> = ({
           </mesh>
         }>
           <CardModel 
-            imageUrl={card.imageUrl || '/placeholder-card.jpg'}
-            backImageUrl="/card-back-texture.jpg"
+            imageUrl={cardWithFallback.imageUrl}
+            backImageUrl={cardWithFallback.backImageUrl}
             isFlipped={isFlipped}
             activeEffects={activeEffects}
             effectIntensities={effectIntensities}
           />
           
           <Environment 
-            preset={mapLightingPresetToEnvironment(lightingSettings.environmentType) as "studio" | "park" | "night" | "lobby" | "city" | "apartment" | "dawn" | "warehouse" | "sunset" | "forest"} 
+            preset={envPreset} 
             background={false}
             blur={0.6}
           />
