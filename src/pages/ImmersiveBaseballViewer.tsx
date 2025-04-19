@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useBaseballCard } from '@/components/baseball/hooks/useBaseballCard';
@@ -27,10 +26,8 @@ const ImmersiveBaseballViewer: React.FC = () => {
   });
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   
-  // Initialize lighting settings with default values
   const { lightingSettings, updateLightingSetting } = useCardLighting('studio');
 
-  // Initialize material settings with proper structure
   const [materialSettings, setMaterialSettings] = useState({
     roughness: 0.15,
     metalness: 0.3,
@@ -44,7 +41,6 @@ const ImmersiveBaseballViewer: React.FC = () => {
     
     console.log("ImmersiveBaseballViewer: Converting baseball card to standard card format", cardData);
     
-    // Convert baseball card to standard Card format
     const formattedCard = adaptToCard({
       id: cardData.id,
       title: cardData.title,
@@ -62,23 +58,18 @@ const ImmersiveBaseballViewer: React.FC = () => {
     
     setCard(formattedCard);
     
-    // Set active effects from the card or defaults
     setActiveEffects(cardData.effects || ['Holographic']);
     
-    // Show a toast notification that the card is loaded
     toast.success("Card loaded successfully");
   }, [cardData, isLoading]);
 
-  // Handle navigation to another card
   const handleCardSelect = (cardId: string) => {
     navigate(`/baseball-card-viewer/${cardId}`);
   };
   
-  // Handle updates to material settings
   const handleUpdateMaterial = (settings: Partial<typeof materialSettings>) => {
     setMaterialSettings(prev => ({ ...prev, ...settings }));
     
-    // Also update effect intensities for card rendering
     const updatedEffectIntensities = { ...effectIntensities };
     if (settings.roughness !== undefined) {
       updatedEffectIntensities.Shimmer = 1 - settings.roughness;
@@ -120,7 +111,6 @@ const ImmersiveBaseballViewer: React.FC = () => {
   return (
     <div className="fixed inset-0 bg-black">
       <div className="relative h-full w-full">
-        {/* Settings button */}
         <Button
           variant="ghost"
           size="icon"
@@ -136,7 +126,6 @@ const ImmersiveBaseballViewer: React.FC = () => {
           effectIntensities={effectIntensities}
         />
         
-        {/* Customization Panel */}
         <CustomizationPanel
           card={card}
           isOpen={isPanelOpen}
@@ -147,7 +136,6 @@ const ImmersiveBaseballViewer: React.FC = () => {
           onUpdateMaterial={handleUpdateMaterial}
         />
         
-        {/* Scrollable gallery of all baseball cards at the bottom */}
         <ScrollableGallery 
           cards={allCards.map(baseballCard => adaptToCard({
             id: baseballCard.id,
