@@ -31,14 +31,9 @@ const CardModel: React.FC<CardModelProps> = ({
   const [frontTextureLoaded, setFrontTextureLoaded] = useState(false);
   const [backTextureLoaded, setBackTextureLoaded] = useState(false);
   
-  // Use onError for texture loading failures
-  const frontTexture = useTexture(imageUrl, undefined, (error) => {
-    console.error("Failed to load front texture:", error);
-  });
-  
-  const backTexture = useTexture(backImageUrl, undefined, (error) => {
-    console.error("Failed to load back texture:", error);
-  });
+  // Use proper error handlers for texture loading
+  const frontTexture = useTexture(imageUrl, undefined);
+  const backTexture = useTexture(backImageUrl, undefined);
 
   // Calculate card dimensions (standard trading card ratio)
   const width = 2.5;

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import PageLayout from '@/components/navigation/PageLayout';
 import { Button } from '@/components/ui/button';
@@ -7,7 +6,7 @@ import { Link } from 'react-router-dom';
 import GroupImageUploader from '@/components/group-memory/GroupImageUploader';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import CommentSection from '@/components/CommentSection';
-import { useImageProcessing } from '@/hooks/useImageProcessing';
+import useImageProcessing from '@/hooks/useImageProcessing';
 import { toast } from 'sonner';
 
 const GroupMemoryCreator = () => {
