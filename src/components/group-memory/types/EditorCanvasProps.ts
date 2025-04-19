@@ -13,5 +13,5 @@ export interface EditorCanvasProps {
   handlePointerDown: (e: React.PointerEvent) => void;
   handlePointerMove: (e: React.PointerEvent) => void;
   handlePointerUp: () => void;
-  isProcessing: boolean; // Add missing property
+  isProcessing: boolean; // Added required property
 }

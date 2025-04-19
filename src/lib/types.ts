@@ -1,4 +1,3 @@
-
 // Base types that might be used across modules
 export type JsonValue = 
   | string 
@@ -7,6 +6,14 @@ export type JsonValue =
   | null 
   | JsonValue[] 
   | { [key: string]: JsonValue };
+
+// Add JsonObject type that was missing
+export type JsonObject = { [key: string]: JsonValue };
+
+// Add serializeMetadata utility function
+export const serializeMetadata = (metadata: any): string => {
+  return JSON.stringify(metadata || {});
+};
 
 export interface BaseEntity {
   id: string;
@@ -69,10 +76,11 @@ export interface DesignMetadata {
     category: string;
     cardType: string;
     series: string;
-    cardNumber?: string; // Added cardNumber
-    artist?: string; // Added artist
+    cardNumber?: string;
+    artist?: string;
   };
-  oaklandMemory?: OaklandMemoryData; // Added oaklandMemory
+  oaklandMemory?: OaklandMemoryData;
+  teamId?: string; // Added for compatibility
 }
 
 // Define the GroupUploadType enum
@@ -97,6 +105,7 @@ export interface OaklandMemoryData {
   imageUrl?: string;
   historicalContext?: string;
   personalSignificance?: string;
+  template: string; // Required property for template
 }
 
 // Re-export from main types.ts file for compatibility
@@ -109,7 +118,7 @@ export * from './types/user';
 export * from './types/collection';
 export * from './types/instagram';
 export * from './types/teamTypes';
-export type { CardEffect, CardEffectSettings } from './types/cardEffects';
+export type { CardEffect, EffectSettings as CardEffectSettings } from './types/cardEffects';
 
 // Don't re-export enhancedCardTypes directly to avoid ambiguity
 import * as EnhancedCardTypes from './types/enhancedCardTypes';
@@ -118,8 +127,9 @@ export type {
   EnhancedCard as ExtendedCard,
   Series as EnhancedSeries,
   Deck,
-  CardRarity,
 } from './types/enhancedCardTypes';
+// Re-export CardRarity from cardTypes, not enhancedCardTypes
+export type { CardRarity } from './types/cardTypes';
 
 // For backward compatibility, keep the old imports as well
 import * as OldTypes from '@/types/card';
@@ -129,19 +139,20 @@ export const oldTypes = OldTypes;
 export interface Card {
   id: string;
   title: string;
-  description: string; // Make required for compatibility
+  description: string;
   imageUrl: string;
   backImageUrl?: string;
-  thumbnailUrl: string; // Make required for compatibility
-  tags: string[]; // Make required for compatibility
+  thumbnailUrl: string;
+  tags: string[];
   createdAt: string;
   updatedAt: string;
   userId: string;
-  designMetadata?: DesignMetadata;
-  effects: string[]; // Make required for compatibility
+  designMetadata: DesignMetadata; // Required
+  effects: string[];
   isPublic?: boolean;
   player?: string;
   team?: string;
+  teamId?: string; // Added for compatibility
   year?: string;
   sport?: string;
   cardType?: string;
@@ -174,7 +185,7 @@ export interface User {
   updatedAt?: string;
   displayName?: string;
   username?: string;
-  role?: UserRole;
+  role: UserRole; // Make required for consistency
 }
 
 // Collection Interface
@@ -193,10 +204,12 @@ export interface Collection {
   visibility?: 'public' | 'private' | 'team' | 'unlisted';
   featured?: boolean;
   cards?: Card[];
+  cardIds?: string[]; // Added for compatibility with collectionOperations
+  teamId?: string; // Added for compatibility
   allowComments?: boolean;
   designMetadata?: any;
-  tags?: string[]; // Add tags support
-  instagramSource?: string; // Added for Instagram collections
+  tags?: string[];
+  instagramSource?: string;
 }
 
 // Comment Interface
@@ -223,5 +236,7 @@ export interface Reaction {
   cardId?: string;
   collectionId?: string;
   commentId?: string;
+  createdAt: string; // Added required
+  updatedAt?: string;
   user?: User;
 }

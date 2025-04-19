@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Collection, Card } from '@/lib/types';
 import { v4 as uuidv4 } from 'uuid';
@@ -14,9 +15,9 @@ export const useCollectionOperations = () => {
       coverImageUrl: collectionData.coverImageUrl || '',
       userId: collectionData.userId || 'anonymous',
       cards: collectionData.cards || [],
-      cardIds: collectionData.cardIds || [], 
+      cardIds: collectionData.cardIds || [], // For compatibility
       visibility: collectionData.visibility || 'public',
-      teamId: collectionData.teamId,
+      teamId: collectionData.teamId, // For compatibility
       allowComments: collectionData.allowComments !== undefined ? collectionData.allowComments : true,
       designMetadata: collectionData.designMetadata || {},
       isPublic: collectionData.isPublic !== undefined ? collectionData.isPublic : true,
@@ -70,7 +71,9 @@ export const useCollectionOperations = () => {
           if (!cards.some(c => c.id === card.id)) {
             return {
               ...collection,
-              cards: [...cards, card]
+              cards: [...cards, card],
+              // Also update cardIds for compatibility
+              cardIds: [...(collection.cardIds || []), card.id]
             };
           }
         }
@@ -93,7 +96,9 @@ export const useCollectionOperations = () => {
         if (collection.id === collectionId && collection.cards) {
           return {
             ...collection,
-            cards: collection.cards.filter(card => card.id !== cardId)
+            cards: collection.cards.filter(card => card.id !== cardId),
+            // Also update cardIds for compatibility
+            cardIds: (collection.cardIds || []).filter(id => id !== cardId)
           };
         }
         return collection;

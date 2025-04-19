@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, Suspense, useRef } from 'react';
 import { Canvas, useThree } from '@react-three/fiber';
 import { 
@@ -20,6 +21,7 @@ import { cn } from '@/lib/utils';
 import { mapLightingPresetToEnvironment, ValidEnvironmentPreset } from '@/utils/environmentPresets';
 import CardModel from '@/components/card-viewer/CardModel';
 import { FALLBACK_IMAGE_URL, FALLBACK_BACK_IMAGE_URL } from '@/lib/utils/cardDefaults';
+import ViewerSettings from '@/components/card-viewer/ViewerSettings';
 
 const DebugInfo = ({ show = false }) => {
   if (!show) return null;

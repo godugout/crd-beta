@@ -4,7 +4,7 @@ import { FabricSwatch } from '@/lib/types/card';
 export interface Card {
   id: string;
   title: string;
-  description?: string; // Make this optional to be consistent
+  description?: string; 
   imageUrl: string;
   thumbnailUrl?: string;
   collectionId?: string;
@@ -34,7 +34,7 @@ export interface OaklandMemoryData {
   imageUrl?: string;
   historicalContext?: string;
   personalSignificance?: string;
-  template?: string; // Add template field
+  template: string; // Added template field as required
 }
 
 export interface Collection {
