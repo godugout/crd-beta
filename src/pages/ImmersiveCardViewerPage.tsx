@@ -42,12 +42,14 @@ const ImmersiveCardViewerPage: React.FC = () => {
           const baseballCard = BASEBALL_CARDS.find(card => card.id === id);
           if (baseballCard) {
             console.log("Found card in BASEBALL_CARDS:", baseballCard);
+            // Add default effects array if not present
+            const cardEffects = baseballCard.effects || [];
             foundCard = adaptToCard({
               ...baseballCard,
               userId: 'system', 
               createdAt: new Date().toISOString(),
               updatedAt: new Date().toISOString(),
-              effects: baseballCard.effects || []
+              effects: cardEffects
             });
           }
         }
