@@ -1,4 +1,5 @@
-import React, { useState, useEffect, Suspense } from 'react';
+
+import React, { useState, useEffect, Suspense, useRef } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { 
   PerspectiveCamera, 
@@ -186,11 +187,14 @@ const CardModel = ({
 };
 
 // Photorealistic environment setup
-const Environment3D = ({ preset = 'studio' }) => {
+const Environment3D = ({ preset = 'studio' as const }) => {
+  // Use an explicit type assertion to ensure preset is one of the valid values
+  const validPreset = (preset as "apartment" | "city" | "dawn" | "forest" | "lobby" | "night" | "park" | "studio" | "sunset" | "warehouse");
+  
   return (
     <>
       <Environment 
-        preset={preset} 
+        preset={validPreset} 
         background={false} 
         blur={0.6} 
       />

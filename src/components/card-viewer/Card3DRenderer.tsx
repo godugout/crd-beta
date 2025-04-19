@@ -1,7 +1,9 @@
+
 import React, { useRef, useEffect, useState } from 'react';
 import { Card } from '@/lib/types';
 import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
+import { Environment } from '@react-three/drei';
 
 interface Card3DRendererProps {
   card: Card;
@@ -221,11 +223,13 @@ const Card3DRenderer: React.FC<Card3DRendererProps> = ({
   };
 
   // If no environment type is specified, fallback to 'studio'
-  const getEnvironmentPreset = () => {
-    const validPresets = ['apartment', 'city', 'dawn', 'forest', 'lobby', 'night', 'park', 'studio', 'sunset', 'warehouse'];
-    const defaultPreset = 'studio';
+  const getEnvironmentPreset = (): "apartment" | "city" | "dawn" | "forest" | "lobby" | "night" | "park" | "studio" | "sunset" | "warehouse" => {
+    const validPresets = ['apartment', 'city', 'dawn', 'forest', 'lobby', 'night', 'park', 'studio', 'sunset', 'warehouse'] as const;
+    const defaultPreset = 'studio' as const;
     
-    const preset = validPresets.find(p => p === card.environmentType) || defaultPreset;
+    // Since environmentType is not in the Card type, we'll use a safe fallback
+    const environmentType = (card as any).environmentType;
+    const preset = validPresets.find(p => p === environmentType) || defaultPreset;
     return preset;
   };
 
