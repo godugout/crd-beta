@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Card, Collection } from '@/lib/types';
 import { supabase } from '@/lib/supabase';
@@ -43,8 +44,11 @@ export const CardContext = createContext<CardContextProps>({
 // Export Card and Collection types for use in other files
 export type { Card, Collection };
 
-// Export useCardContext hook
+// Export the useCardContext hook
 export const useCardContext = () => useContext(CardContext);
+
+// Create and export the useCards hook as an alias to useCardContext for backward compatibility
+export const useCards = useCardContext;
 
 interface CardProviderProps {
   children: ReactNode;

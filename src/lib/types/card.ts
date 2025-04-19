@@ -1,6 +1,15 @@
 
-// Properly import FabricSwatch from cardTypes
-import { FabricSwatch } from '@/lib/types';
+// Import from cardTypes
+import { FabricSwatch as FabricSwatchType } from './cardTypes';
+
+export interface FabricSwatch {
+  type: string;
+  team: string;
+  year: string;
+  manufacturer: string;
+  position: string;
+  size: string;
+}
 
 export interface CardData {
   id: number;
@@ -25,5 +34,7 @@ export interface CardData {
   effects: string[]; // Required property
 }
 
+// Re-export Card interface from cardTypes
+export { Card } from './cardTypes';
 // Export FabricSwatch for others to use
-export type { FabricSwatch };
+export type { FabricSwatchType };

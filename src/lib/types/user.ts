@@ -16,3 +16,6 @@ export interface User extends BaseEntity {
 
 // Fixed re-export syntax
 export type { UserPermission } from '../types';
+
+// Re-export UserRole
+export { UserRole };

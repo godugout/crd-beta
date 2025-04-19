@@ -1,5 +1,24 @@
 
-import { Collection, DbCollection } from '@/lib/types';
+import { Collection } from '@/lib/types';
+
+// Define DbCollection type for database records
+export interface DbCollection {
+  id: string;
+  title?: string;
+  name?: string;
+  description?: string;
+  cover_image_url?: string;
+  owner_id?: string;
+  user_id?: string;
+  team_id?: string;
+  visibility?: string;
+  allow_comments?: boolean;
+  design_metadata?: any;
+  created_at?: string;
+  updated_at?: string;
+  is_public?: boolean;
+  card_ids?: string[];
+}
 
 export function dbToCollection(dbCollection: any): Collection {
   return {
