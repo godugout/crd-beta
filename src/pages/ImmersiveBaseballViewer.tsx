@@ -1,0 +1,109 @@
+
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useBaseballCard } from '@/components/baseball/hooks/useBaseballCard';
+import ImmersiveCardViewer from '@/components/card-viewer/ImmersiveCardViewer';
+import { adaptToCard } from '@/lib/adapters/cardAdapter';
+import { Card } from '@/lib/types';
+import { LoadingState } from '@/components/ui/loading-state';
+import { toast } from 'sonner';
+import ScrollableGallery from '@/components/immersive-viewer/ScrollableGallery';
+
+const ImmersiveBaseballViewer: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const { cardData, allCards, isLoading, error } = useBaseballCard();
+  const [card, setCard] = useState<Card | null>(null);
+  const [activeEffects, setActiveEffects] = useState<string[]>([]);
+  const [effectIntensities, setEffectIntensities] = useState<Record<string, number>>({
+    Holographic: 0.7,
+    Shimmer: 0.5,
+    Refractor: 0.6,
+    Vintage: 0.4
+  });
+
+  useEffect(() => {
+    if (isLoading || !cardData) return;
+    
+    console.log("ImmersiveBaseballViewer: Converting baseball card to standard card format", cardData);
+    
+    // Convert baseball card to standard Card format
+    const formattedCard = adaptToCard({
+      id: cardData.id,
+      title: cardData.title,
+      description: `${cardData.year} ${cardData.player} - ${cardData.team}`,
+      imageUrl: cardData.imageUrl,
+      backImageUrl: cardData.backImageUrl,
+      player: cardData.player,
+      team: cardData.team,
+      year: cardData.year,
+      effects: cardData.effects || [],
+      userId: 'system',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    });
+    
+    setCard(formattedCard);
+    
+    // Set active effects from the card or defaults
+    setActiveEffects(cardData.effects || ['Holographic']);
+    
+    // Show a toast notification that the card is loaded
+    toast.success("Card loaded successfully");
+  }, [cardData, isLoading]);
+
+  // Handle navigation to another card
+  const handleCardSelect = (cardId: string) => {
+    navigate(`/baseball-card-viewer/${cardId}`);
+  };
+
+  if (isLoading) {
+    return <LoadingState size="lg" text="Loading card..." />;
+  }
+
+  if (error || !card) {
+    return (
+      <div className="fixed inset-0 bg-black flex items-center justify-center text-white">
+        <div className="text-center max-w-md p-6 bg-gray-800/50 rounded-lg">
+          <h2 className="text-2xl font-bold mb-4">Card Not Found</h2>
+          <p className="mb-6">{error || "Unable to load the baseball card"}</p>
+          <button
+            className="px-4 py-2 bg-blue-600 rounded hover:bg-blue-700"
+            onClick={() => navigate('/cards')}
+          >
+            Go to Card Gallery
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black">
+      <div className="relative h-full w-full">
+        <ImmersiveCardViewer 
+          card={card}
+          activeEffects={activeEffects}
+          effectIntensities={effectIntensities}
+        />
+        
+        {/* Scrollable gallery of all baseball cards at the bottom */}
+        <ScrollableGallery 
+          cards={allCards.map(baseballCard => adaptToCard({
+            id: baseballCard.id,
+            title: baseballCard.title,
+            imageUrl: baseballCard.imageUrl,
+            userId: 'system',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            effects: baseballCard.effects || []
+          }))}
+          currentCardId={card.id}
+          onCardClick={handleCardSelect}
+        />
+      </div>
+    </div>
+  );
+};
+
+export default ImmersiveBaseballViewer;
