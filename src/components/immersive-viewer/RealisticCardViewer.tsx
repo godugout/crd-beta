@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, Suspense, useRef } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { 
@@ -186,15 +185,30 @@ const CardModel = ({
   );
 };
 
+// Function to map our custom lighting presets to valid @react-three/drei environment presets
+const mapLightingPresetToEnvironment = (
+  preset: string
+): "apartment" | "city" | "dawn" | "forest" | "lobby" | "night" | "park" | "studio" | "sunset" | "warehouse" => {
+  const validPresets = {
+    studio: "studio",
+    natural: "park",
+    dramatic: "night", 
+    display_case: "lobby"
+  } as const;
+  
+  return (validPresets[preset as keyof typeof validPresets] || "studio") as 
+    "apartment" | "city" | "dawn" | "forest" | "lobby" | "night" | "park" | "studio" | "sunset" | "warehouse";
+};
+
 // Photorealistic environment setup
-const Environment3D = ({ preset = 'studio' as const }) => {
-  // Use an explicit type assertion to ensure preset is one of the valid values
-  const validPreset = (preset as "apartment" | "city" | "dawn" | "forest" | "lobby" | "night" | "park" | "studio" | "sunset" | "warehouse");
+const Environment3D = ({ preset = 'studio' }) => {
+  // Map the custom preset to a valid @react-three/drei environment preset
+  const environmentPreset = mapLightingPresetToEnvironment(preset);
   
   return (
     <>
       <Environment 
-        preset={validPreset} 
+        preset={environmentPreset} 
         background={false} 
         blur={0.6} 
       />

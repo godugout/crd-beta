@@ -13,6 +13,21 @@ interface Card3DRendererProps {
   effectIntensities?: Record<string, number>;
 }
 
+// Helper function to map our custom lighting presets to valid @react-three/drei environment presets
+const mapToValidEnvironmentPreset = (
+  preset: string
+): "apartment" | "city" | "dawn" | "forest" | "lobby" | "night" | "park" | "studio" | "sunset" | "warehouse" => {
+  const validPresetMap = {
+    studio: "studio",
+    natural: "park",
+    dramatic: "night", 
+    display_case: "lobby"
+  } as const;
+  
+  return (validPresetMap[preset as keyof typeof validPresetMap] || "studio") as 
+    "apartment" | "city" | "dawn" | "forest" | "lobby" | "night" | "park" | "studio" | "sunset" | "warehouse";
+};
+
 const Card3DRenderer: React.FC<Card3DRendererProps> = ({ 
   card, 
   isFlipped = false,
@@ -224,13 +239,11 @@ const Card3DRenderer: React.FC<Card3DRendererProps> = ({
 
   // If no environment type is specified, fallback to 'studio'
   const getEnvironmentPreset = (): "apartment" | "city" | "dawn" | "forest" | "lobby" | "night" | "park" | "studio" | "sunset" | "warehouse" => {
-    const validPresets = ['apartment', 'city', 'dawn', 'forest', 'lobby', 'night', 'park', 'studio', 'sunset', 'warehouse'] as const;
-    const defaultPreset = 'studio' as const;
+    // Extract environmentType from card if it exists, otherwise use 'studio'
+    const environmentType = (card as any).environmentType || 'studio';
     
-    // Since environmentType is not in the Card type, we'll use a safe fallback
-    const environmentType = (card as any).environmentType;
-    const preset = validPresets.find(p => p === environmentType) || defaultPreset;
-    return preset;
+    // Map to a valid preset that @react-three/drei supports
+    return mapToValidEnvironmentPreset(environmentType);
   };
 
   return (
@@ -239,6 +252,7 @@ const Card3DRenderer: React.FC<Card3DRendererProps> = ({
         preset={getEnvironmentPreset()} 
         background={false} 
       />
+      
       {/* Card front */}
       <mesh castShadow receiveShadow position={[0, 0, 0]}>
         <planeGeometry args={[2.5, 3.5, 20, 20]} />
