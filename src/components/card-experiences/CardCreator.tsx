@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useCards } from '@/context/CardContext';
 import { Button } from '@/components/ui/button';
@@ -64,9 +63,6 @@ const CardCreator: React.FC<CardCreatorProps> = ({ onComplete }) => {
             ...DEFAULT_DESIGN_METADATA.cardStyle,
             effect: 'classic',
             borderRadius: '8px'
-          },
-          textStyle: {
-            ...DEFAULT_DESIGN_METADATA.textStyle
           }
         }
       });

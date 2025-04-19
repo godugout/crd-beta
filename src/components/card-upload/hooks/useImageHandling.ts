@@ -1,10 +1,18 @@
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { processImage, compressImage } from '@/lib/image-utils';
 import { FALLBACK_UNSPLASH_IMAGE_URL } from '@/lib/utils/cardDefaults';
+import { EnhancedCropBoxProps, MemorabiliaType } from '../cardDetection';
 
-export const useImageHandling = () => {
+interface UseImageHandlingOptions {
+  enabledMemorabiliaTypes?: MemorabiliaType[];
+  batchProcessingMode?: boolean;
+}
+
+export const useImageHandling = (options?: UseImageHandlingOptions) => {
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [detectionRunning, setDetectionRunning] = useState(false);
   const [processingError, setProcessingError] = useState<string | null>(null);
   const [processedImage, setProcessedImage] = useState<{
     url: string;
@@ -14,7 +22,7 @@ export const useImageHandling = () => {
   } | null>(null);
 
   const handleImageUpload = async (file: File) => {
-    if (!file) return;
+    if (!file) return null;
     
     setIsProcessing(true);
     setProcessingError(null);
@@ -41,16 +49,36 @@ export const useImageHandling = () => {
     }
   };
 
-  // Fix the parameter count
   const clearProcessedImage = () => {
     setProcessedImage(null);
   };
+  
+  const rotateImage = useCallback(() => {
+    console.log("Rotating image");
+    // Implementation would go here
+  }, []);
+  
+  const detectItems = useCallback(() => {
+    console.log("Detecting items in image");
+    setDetectionRunning(true);
+    
+    // Mock implementation
+    setTimeout(() => {
+      setDetectionRunning(false);
+    }, 1500);
+    
+    // Implementation would go here
+  }, []);
 
   return {
     isProcessing,
+    isLoading,
+    detectionRunning,
     processingError,
     processedImage,
     handleImageUpload,
-    clearProcessedImage
+    clearProcessedImage,
+    rotateImage,
+    detectItems
   };
 };

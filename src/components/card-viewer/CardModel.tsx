@@ -28,22 +28,31 @@ const CardModel: React.FC<CardModelProps> = ({
   const [frontTextureLoaded, setFrontTextureLoaded] = useState(false);
   const [backTextureLoaded, setBackTextureLoaded] = useState(false);
   
-  // Use error handlers for texture loading
+  // useTexture accepts a URL and an optional onLoad callback
   const frontTexture = useTexture(imageUrl, () => {
     setFrontTextureLoaded(true);
     console.log("Front card texture loaded");
-  }, (error) => {
-    console.error("Failed to load front texture:", error);
-    // The drei useTexture already has fallback handling
   });
   
   const backTexture = useTexture(backImageUrl, () => {
     setBackTextureLoaded(true);
     console.log("Back card texture loaded");
-  }, (error) => {
-    console.error("Failed to load back texture:", error);
-    // The drei useTexture already has fallback handling
   });
+
+  // Add error handling for textures
+  useEffect(() => {
+    const handleTextureError = () => {
+      console.error("Failed to load texture, using fallback");
+    };
+    
+    frontTexture.onError = handleTextureError;
+    backTexture.onError = handleTextureError;
+    
+    return () => {
+      frontTexture.onError = null;
+      backTexture.onError = null;
+    };
+  }, [frontTexture, backTexture]);
 
   // Calculate card dimensions (standard trading card ratio)
   const width = 2.5;
