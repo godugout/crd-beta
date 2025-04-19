@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef } from 'react';
 import { fabric } from 'fabric';
 import { EnhancedCropBoxProps } from '../../cardDetection';
 import { ImageData } from '../useCropState';
+import { createFabricImageFromUrl, logFabricInfo } from './fabricAdapter';
 
 interface UseBackgroundImageProps {
   canvas: fabric.Canvas | null;
@@ -24,18 +25,25 @@ export const useBackgroundImage = ({
   const backgroundImageRef = useRef<fabric.Image | null>(null);
   
   // Load background image from the imageData or from the image reference
-  const loadBackgroundImage = useCallback(() => {
-    if (!canvas || !editorImgRef.current) return;
+  const loadBackgroundImage = useCallback(async () => {
+    if (!canvas || !editorImgRef.current) {
+      console.log('Canvas or image reference not available yet');
+      return;
+    }
     
     const imgElement = editorImgRef.current;
     const imgUrl = imgElement.src;
     
-    // Use fromURL instead of fromElement to avoid callback issues
-    fabric.Image.fromURL(imgUrl, (img) => {
+    console.log('Loading background image from:', imgUrl);
+    
+    try {
       // Remove existing background image if any
       if (backgroundImageRef.current) {
         canvas.remove(backgroundImageRef.current);
       }
+      
+      // Create a fabric Image from the URL
+      const img = await createFabricImageFromUrl(imgUrl, { crossOrigin: 'anonymous' });
       
       // Compute scale to fit the image inside the canvas while maintaining aspect ratio
       const canvasWidth = canvas.getWidth();
@@ -70,14 +78,18 @@ export const useBackgroundImage = ({
       // Render the canvas
       canvas.renderAll();
       
-      // If there are no crop boxes yet and automatic detection is on,
-      // we could add auto-detection logic here
-    }, { crossOrigin: 'anonymous' });
+      console.log('Background image loaded successfully');
+      logFabricInfo(canvas);
+      
+    } catch (error) {
+      console.error('Error loading background image:', error);
+    }
   }, [canvas, editorImgRef, imageData]);
   
   // Load or update background image when image data or ref changes
   useEffect(() => {
     if (canvas && editorImgRef.current) {
+      console.log('Loading background image due to dependencies change');
       loadBackgroundImage();
     }
   }, [canvas, editorImgRef.current, imageData, loadBackgroundImage]);

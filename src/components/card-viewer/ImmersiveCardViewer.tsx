@@ -6,6 +6,7 @@ import { OrbitControls, PerspectiveCamera, Environment } from '@react-three/drei
 import { DEFAULT_DESIGN_METADATA, FALLBACK_IMAGE_URL } from '@/lib/utils/cardDefaults';
 import { useToast } from '@/hooks/use-toast';
 import * as THREE from 'three';
+import { logRenderingInfo } from '@/utils/debugRenderer';
 
 interface ImmersiveCardViewerProps {
   card: Card;
@@ -34,21 +35,29 @@ const Card3DModel = ({
   // Load textures safely with error handling
   useEffect(() => {
     const textureLoader = new THREE.TextureLoader();
+    textureLoader.crossOrigin = 'anonymous';
+    
+    console.log("Loading front texture from:", frontTextureUrl);
     
     // Load front texture
     textureLoader.load(
       frontTextureUrl,
       (texture) => {
-        setFrontTextureLoaded(texture);
         console.log("Front texture loaded successfully");
+        setFrontTextureLoaded(texture);
       },
-      undefined,
+      (xhr) => {
+        console.log("Front texture loading progress:", (xhr.loaded / xhr.total) * 100 + "%");
+      },
       (error) => {
         console.error("Error loading front texture:", error);
         // Load fallback texture for front
         textureLoader.load(
           FALLBACK_IMAGE_URL,
-          (fallbackTexture) => setFrontTextureLoaded(fallbackTexture),
+          (fallbackTexture) => {
+            console.log("Fallback front texture loaded");
+            setFrontTextureLoaded(fallbackTexture);
+          },
           undefined,
           () => console.error("Even fallback image failed to load")
         );
@@ -56,21 +65,44 @@ const Card3DModel = ({
     );
     
     // Load back texture
+    console.log("Loading back texture from:", backTextureUrl || defaultCardBackImage);
     textureLoader.load(
       backTextureUrl || defaultCardBackImage,
       (texture) => {
-        setBackTextureLoaded(texture);
         console.log("Back texture loaded successfully");
+        setBackTextureLoaded(texture);
       },
-      undefined,
+      (xhr) => {
+        console.log("Back texture loading progress:", (xhr.loaded / xhr.total) * 100 + "%");
+      },
       (error) => {
         console.error("Error loading back texture:", error);
-        // Load default card back
+        // Try an absolute URL for the default card back
+        const absoluteBackUrl = new URL(defaultCardBackImage, window.location.origin).href;
+        console.log("Trying absolute URL for back texture:", absoluteBackUrl);
+        
         textureLoader.load(
-          defaultCardBackImage,
-          (fallbackTexture) => setBackTextureLoaded(fallbackTexture),
+          absoluteBackUrl,
+          (fallbackTexture) => {
+            console.log("Default back texture loaded from absolute URL");
+            setBackTextureLoaded(fallbackTexture);
+          },
           undefined,
-          () => console.error("Failed to load default card back")
+          () => {
+            console.error("Failed to load default card back");
+            // Create a plain color texture as last resort
+            const canvas = document.createElement('canvas');
+            canvas.width = 512;
+            canvas.height = 512;
+            const ctx = canvas.getContext('2d');
+            if (ctx) {
+              ctx.fillStyle = '#2a3042';
+              ctx.fillRect(0, 0, 512, 512);
+              const plainTexture = new THREE.CanvasTexture(canvas);
+              setBackTextureLoaded(plainTexture);
+              console.log("Created plain color texture as fallback");
+            }
+          }
         );
       }
     );
@@ -79,6 +111,7 @@ const Card3DModel = ({
   // Set textures loaded when both are available
   useEffect(() => {
     if (frontTextureLoaded && backTextureLoaded) {
+      console.log("Both textures loaded successfully");
       setTexturesLoaded(true);
     }
   }, [frontTextureLoaded, backTextureLoaded]);
@@ -104,10 +137,24 @@ const Card3DModel = ({
     if (hovered) {
       groupRef.current.position.y += 0.1;
     }
+    
+    // Log visibility for debugging
+    logRenderingInfo("Card3DModel", {
+      visible: texturesLoaded,
+      position: {
+        y: groupRef.current.position.y,
+        z: groupRef.current.position.z
+      }
+    });
   });
 
   if (!texturesLoaded) {
-    return null;
+    return (
+      <mesh position={[0, 0, 0]}>
+        <boxGeometry args={[2.5, 3.5, 0.1]} />
+        <meshStandardMaterial color="#333333" />
+      </mesh>
+    );
   }
 
   // Create glow material for enhanced effect without @react-three/postprocessing
@@ -145,10 +192,10 @@ const Card3DModel = ({
           side={THREE.FrontSide}
           roughness={0.2}
           metalness={0.8}
-          envMapIntensity={1.2}
+          envMapIntensity={1.5}
           clearcoat={1}
           clearcoatRoughness={0.2}
-          reflectivity={0.5}
+          reflectivity={0.8}
         />
       </mesh>
       
@@ -160,7 +207,7 @@ const Card3DModel = ({
           side={THREE.FrontSide}
           roughness={0.3}
           metalness={0.7}
-          envMapIntensity={1}
+          envMapIntensity={1.2}
           clearcoat={0.8}
         />
       </mesh>
@@ -229,6 +276,7 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
       // Set up imagePreload to validate that images actually load
       try {
         const image = new Image();
+        image.crossOrigin = "anonymous";
         image.onload = () => {
           console.log(`Image loaded successfully: ${cardCopy.imageUrl}`);
           setFrontTexture(cardCopy.imageUrl);
@@ -275,24 +323,24 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
       ref={containerRef} 
       className="w-full h-full min-h-[600px] bg-gray-900 rounded-lg overflow-hidden"
     >
-      <Canvas shadows dpr={[1, 2]}>
+      <Canvas shadows dpr={[1, 2]} gl={{ antialias: true, alpha: false }}>
         {/* Camera positioned for better view */}
         <PerspectiveCamera makeDefault position={[0, 0, 6]} fov={45} />
         
         {/* Enhanced lighting setup */}
-        <ambientLight intensity={0.5} />
+        <ambientLight intensity={1.0} />
         <spotLight 
           position={[5, 5, 5]} 
           angle={0.4} 
           penumbra={1} 
-          intensity={1.2} 
+          intensity={2.0} 
           castShadow 
         />
-        <pointLight position={[-5, -5, -5]} color="#3050ff" intensity={0.5} />
-        <pointLight position={[5, -3, -5]} color="#ff3050" intensity={0.3} />
+        <pointLight position={[-5, -5, -5]} color="#3050ff" intensity={1.0} />
+        <pointLight position={[5, -3, -5]} color="#ff3050" intensity={0.8} />
         
-        {/* Environment and effects */}
-        <Environment preset="city" />
+        {/* Stronger environment light */}
+        <Environment preset="city" background intensity={1.5} />
         
         <Card3DModel 
           frontTextureUrl={frontTexture}
@@ -309,10 +357,15 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
           minDistance={4}
           maxDistance={10}
           target={[0, 0, 0]}
-          minPolarAngle={Math.PI / 4}
-          maxPolarAngle={Math.PI * 3/4}
+          minPolarAngle={Math.PI / 6}
+          maxPolarAngle={Math.PI * 5/6}
         />
       </Canvas>
+      
+      {/* Debug overlay to show canvas boundaries */}
+      <div className="absolute top-0 left-0 right-0 p-2 text-white text-xs bg-black/30 pointer-events-none">
+        3D Viewer: {processedCard.id} - {processedCard.title || 'Untitled Card'}
+      </div>
     </div>
   );
 };

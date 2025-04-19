@@ -10,7 +10,8 @@ import {
   useTexture,
   MeshReflectorMaterial,
   AccumulativeShadows,
-  RandomizedLight
+  RandomizedLight,
+  Stats
 } from '@react-three/drei';
 import * as THREE from 'three';
 import { Card } from '@/lib/types';
@@ -21,9 +22,17 @@ import { ChevronRight, ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { getEnvironmentMapById } from '@/lib/environment-maps';
+import { logRenderingInfo } from '@/utils/debugRenderer';
 
 // Define possible return types from useTexture
 type TextureResult = THREE.Texture | Record<string, THREE.Texture> | THREE.Texture[];
+
+// Debug component to visualize camera and light positions
+const DebugInfo = ({ show = false }) => {
+  if (!show) return null;
+  
+  return <Stats className="top-0 left-0" />;
+};
 
 // Physically-based card model with materials
 const CardModel = ({ 
@@ -34,57 +43,51 @@ const CardModel = ({
 }) => {
   const { scene } = useThree();
   const meshRef = useRef<THREE.Mesh>(null);
-  
-  // Load textures using useTexture
-  const frontTextureResult = useTexture(card.imageUrl || '/placeholder-card.jpg');
-  const backTextureResult = useTexture('/card-back-texture.jpg');
-  
-  // Handle the textures, ensuring we get a single Texture object
-  // This handles different return types from useTexture
-  const getFinalTexture = (textureResult: TextureResult): THREE.Texture => {
-    if (textureResult instanceof THREE.Texture) {
-      return textureResult;
-    } else if (Array.isArray(textureResult)) {
-      // Handle array return type
-      return textureResult[0] || new THREE.Texture();
-    } else if (typeof textureResult === 'object' && textureResult !== null) {
-      // If it's an object with textures as values, return the first one
-      const firstTexture = Object.values(textureResult)[0];
-      if (firstTexture instanceof THREE.Texture) {
-        return firstTexture;
-      }
-    }
-    // Fallback to a new empty texture if we can't get one
-    console.error('Could not extract valid texture from useTexture result');
-    return new THREE.Texture();
+  const [loadingError, setLoadingError] = useState<string | null>(null);
+
+  // Try to load the textures with better error handling
+  const LoadTexture = ({ url, onLoad, onError }) => {
+    useEffect(() => {
+      const loader = new THREE.TextureLoader();
+      loader.crossOrigin = 'anonymous';
+      
+      console.log(`Loading texture from: ${url}`);
+      
+      loader.load(
+        url,
+        (texture) => {
+          console.log(`Successfully loaded texture from: ${url}`);
+          onLoad(texture);
+        },
+        (progress) => {
+          console.log(`Loading progress: ${Math.round((progress.loaded / progress.total) * 100)}%`);
+        },
+        (error) => {
+          console.error(`Failed to load texture from: ${url}`, error);
+          onError(error.message);
+        }
+      );
+    }, [url, onLoad, onError]);
+    
+    return null;
   };
   
-  // Extract the actual textures
-  const frontTexture = getFinalTexture(frontTextureResult);
-  const backTexture = getFinalTexture(backTextureResult);
+  // Load front texture
+  const [frontTexture, setFrontTexture] = useState<THREE.Texture | null>(null);
+  const frontTextureUrl = card.imageUrl || '/placeholder-card.jpg';
   
-  // Configure PBR materials
-  const frontMaterial = new THREE.MeshPhysicalMaterial({
-    map: frontTexture,
-    roughness: materialProps.roughness,
-    metalness: materialProps.metalness,
-    envMapIntensity: lightingSettings.envMapIntensity || 1,
-    clearcoat: 0.1,
-    clearcoatRoughness: 0.1,
-    reflectivity: 0.2,
-    side: THREE.FrontSide
-  });
-
-  const backMaterial = new THREE.MeshPhysicalMaterial({
-    map: backTexture,
-    roughness: materialProps.roughness * 1.2,
-    metalness: materialProps.metalness * 0.8,
-    envMapIntensity: lightingSettings.envMapIntensity || 1,
-    clearcoat: 0.05,
-    clearcoatRoughness: 0.3,
-    reflectivity: 0.1,
-    side: THREE.BackSide
-  });
+  // Load back texture
+  const [backTexture, setBackTexture] = useState<THREE.Texture | null>(null);
+  const backTextureUrl = '/card-back-texture.jpg';
+  
+  // Create a simple colored material as fallback
+  const createFallbackMaterial = (color: string) => {
+    return new THREE.MeshStandardMaterial({
+      color: new THREE.Color(color),
+      roughness: 0.5,
+      metalness: 0.2
+    });
+  };
 
   // Animation effect for flipping
   useFrame((state) => {
@@ -101,15 +104,82 @@ const CardModel = ({
     const t = state.clock.getElapsedTime();
     meshRef.current.position.y = Math.sin(t * 0.5) * 0.05;
     meshRef.current.rotation.z = Math.sin(t * 0.3) * 0.02;
+    
+    // Log the mesh position and rotation for debugging
+    logRenderingInfo("CardModel", {
+      visible: true,
+      position: {
+        y: meshRef.current.position.y,
+        z: meshRef.current.position.z
+      }
+    });
   });
   
   return (
     <group>
+      {/* Load textures */}
+      <LoadTexture 
+        url={frontTextureUrl} 
+        onLoad={setFrontTexture} 
+        onError={(msg) => setLoadingError(`Front texture: ${msg}`)} 
+      />
+      <LoadTexture 
+        url={backTextureUrl} 
+        onLoad={setBackTexture} 
+        onError={(msg) => setLoadingError(`Back texture: ${msg}`)} 
+      />
+      
+      {/* Visual feedback for loading errors */}
+      {loadingError && (
+        <mesh position={[0, 1, 0]}>
+          <boxGeometry args={[4, 0.5, 0.1]} />
+          <meshStandardMaterial color="red" transparent opacity={0.7} />
+        </mesh>
+      )}
+      
+      {/* Card mesh */}
       <mesh ref={meshRef} castShadow receiveShadow>
         {/* Card geometry with proper card proportions (2.5 x 3.5 inch standard) */}
         <planeGeometry args={[2.5, 3.5, 20, 20]} />
-        <primitive object={frontMaterial} attach="material-0" />
-        <primitive object={backMaterial} attach="material-1" />
+        
+        {/* Front material */}
+        {frontTexture ? (
+          <meshPhysicalMaterial 
+            attachArray="material"
+            map={frontTexture}
+            side={THREE.FrontSide}
+            roughness={materialProps.roughness || 0.2}
+            metalness={materialProps.metalness || 0.8}
+            envMapIntensity={lightingSettings.envMapIntensity || 1.5}
+            clearcoat={1}
+            clearcoatRoughness={0.2}
+            reflectivity={0.8}
+          />
+        ) : (
+          <primitive 
+            object={createFallbackMaterial('#2a5298')} 
+            attach="material-0" 
+          />
+        )}
+        
+        {/* Back material */}
+        {backTexture ? (
+          <meshPhysicalMaterial 
+            attachArray="material"
+            map={backTexture}
+            side={THREE.BackSide}
+            roughness={(materialProps.roughness || 0.2) * 1.2}
+            metalness={(materialProps.metalness || 0.8) * 0.8}
+            envMapIntensity={(lightingSettings.envMapIntensity || 1) * 0.8}
+            clearcoat={0.5}
+            clearcoatRoughness={0.3}
+          />
+        ) : (
+          <primitive 
+            object={createFallbackMaterial('#1a3060')} 
+            attach="material-1" 
+          />
+        )}
       </mesh>
     </group>
   );
@@ -117,14 +187,14 @@ const CardModel = ({
 
 // Photorealistic environment setup
 const Environment3D = ({ preset }) => {
-  const environmentMap = getEnvironmentMapById(preset);
-  
   return (
     <>
-      <Environment preset={preset} background blur={0.6} />
+      <Environment preset={preset} background={false} blur={0.6} />
+      
       <AccumulativeShadows temporal frames={30} alphaTest={0.85} opacity={0.75}>
         <RandomizedLight amount={8} radius={10} intensity={0.8} position={[5, 5, -10]} />
       </AccumulativeShadows>
+      
       <ContactShadows 
         opacity={0.5}
         scale={10}
@@ -167,6 +237,7 @@ const RealisticCardViewer: React.FC<RealisticCardViewerProps> = ({
   onToggleCustomization
 }) => {
   const [isFlipped, setIsFlipped] = useState(false);
+  const [isDebugMode, setIsDebugMode] = useState(false);
   const { preferences, savePreferences } = useUserLightingPreferences();
   const {
     lightingSettings,
@@ -183,25 +254,54 @@ const RealisticCardViewer: React.FC<RealisticCardViewerProps> = ({
       savePreferences(lightingSettings);
     }
   }, [lightingSettings, isUserCustomized, savePreferences]);
+  
+  // Toggle debug mode with Shift+D keyboard shortcut
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.shiftKey && e.key === 'D') {
+        setIsDebugMode(prev => !prev);
+        console.log("Debug mode:", !isDebugMode);
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isDebugMode]);
 
   return (
     <div className="w-full h-full relative">
       {/* Canvas with WebGL renderer */}
-      <Canvas shadows gl={{ antialias: true, alpha: true }}>
+      <Canvas 
+        shadows 
+        gl={{ 
+          antialias: true, 
+          alpha: false,
+          preserveDrawingBuffer: true
+        }}
+        className="bg-gray-800 z-0"
+      >
+        <color attach="background" args={["#0f172a"]} />
         <PerspectiveCamera makeDefault position={[0, 0, 5]} fov={50} />
-        <ambientLight intensity={0.3} />
+        
+        <ambientLight intensity={0.7} />
         <spotLight
           position={[
             lightingSettings.primaryLight.x,
             lightingSettings.primaryLight.y,
             lightingSettings.primaryLight.z
           ]}
-          intensity={lightingSettings.primaryLight.intensity}
+          intensity={lightingSettings.primaryLight.intensity * 1.5}
           color={lightingSettings.primaryLight.color}
           castShadow
           shadow-mapSize={[2048, 2048]}
         />
-        <Suspense fallback={null}>
+        
+        <Suspense fallback={
+          <mesh position={[0, 0, 0]}>
+            <boxGeometry args={[1, 1, 1]} />
+            <meshStandardMaterial color="purple" />
+          </mesh>
+        }>
           <CardModel 
             card={card}
             isFlipped={isFlipped}
@@ -213,6 +313,7 @@ const RealisticCardViewer: React.FC<RealisticCardViewerProps> = ({
           />
           <Environment3D preset={lightingSettings.environmentType} />
         </Suspense>
+        
         <OrbitControls 
           enablePan={false}
           enableZoom={true}
@@ -223,14 +324,16 @@ const RealisticCardViewer: React.FC<RealisticCardViewerProps> = ({
           autoRotate={!isCustomizationOpen && lightingSettings.autoRotate}
           autoRotateSpeed={0.5}
         />
+        
+        <DebugInfo show={isDebugMode} />
       </Canvas>
 
       {/* Controls overlay */}
-      <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex gap-3">
+      <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex gap-3 z-10">
         <Button
           variant="secondary"
           size="lg"
-          className="rounded-full shadow-lg bg-black/30 backdrop-blur-md hover:bg-black/50 text-white"
+          className="rounded-full shadow-lg bg-black/50 backdrop-blur-md hover:bg-black/70 text-white"
           onClick={() => setIsFlipped(!isFlipped)}
         >
           {isFlipped ? 'View Front' : 'View Back'}
@@ -247,11 +350,23 @@ const RealisticCardViewer: React.FC<RealisticCardViewerProps> = ({
         <Button
           variant="secondary"
           size="icon"
-          className="rounded-full shadow-lg bg-black/30 backdrop-blur-md hover:bg-black/50 text-white h-10 w-10"
+          className="rounded-full shadow-lg bg-black/50 backdrop-blur-md hover:bg-black/70 text-white h-10 w-10"
           onClick={onToggleCustomization}
         >
           {isCustomizationOpen ? <ChevronRight /> : <ChevronLeft />}
         </Button>
+      </div>
+      
+      {/* Debug indicator */}
+      {isDebugMode && (
+        <div className="absolute top-2 left-2 bg-red-500/80 text-white text-xs px-2 py-1 rounded z-50">
+          Debug Mode
+        </div>
+      )}
+      
+      {/* Card title overlay */}
+      <div className="absolute top-2 left-1/2 transform -translate-x-1/2 bg-black/50 backdrop-blur-sm text-white px-3 py-1 rounded-full text-sm z-10">
+        {card.title || 'Untitled Card'}
       </div>
     </div>
   );
