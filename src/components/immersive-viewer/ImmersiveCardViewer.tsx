@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef, Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
@@ -9,6 +8,8 @@ import CssEffectsLayer from '../card-effects/CssEffectsLayer';
 import { Button } from '@/components/ui/button';
 import { useCardLighting } from '@/hooks/useCardLighting';
 import { FALLBACK_IMAGE_URL } from '@/lib/utils/cardDefaults';
+import { LightingProvider } from '@/context/LightingContext';
+import DynamicLighting from '../card-viewer/DynamicLighting';
 
 interface ImmersiveCardViewerProps {
   card: Card;
@@ -96,12 +97,8 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
   }, []);
 
   return (
-    <div 
-      className="w-full h-full relative" 
-      ref={containerRef}
-      onMouseMove={handleMouseMove}
-    >
-      {(!cssOnly && use3D) ? (
+    <div className="w-full h-full relative">
+      <LightingProvider>
         <Canvas
           ref={canvasRef}
           camera={{ position: [0, 0, 5], fov: 50 }}
@@ -117,13 +114,7 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
             depth: true
           }}
         >
-          <ambientLight intensity={0.7} />
-          <spotLight 
-            position={[10, 10, 10]} 
-            angle={0.15} 
-            penumbra={1} 
-            intensity={1} 
-          />
+          <DynamicLighting />
           
           <Suspense fallback={null}>
             <Card3DRenderer 
@@ -144,39 +135,7 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
             autoRotate={false}
           />
         </Canvas>
-      ) : (
-        <div className="w-full h-full flex items-center justify-center bg-gray-900">
-          <div className="relative w-64 h-96 perspective-800">
-            <div 
-              className={`absolute w-full h-full transition-transform duration-500 transform-style-3d ${
-                isFlipped ? 'rotate-y-180' : ''
-              }`}
-            >
-              <div className="absolute inset-0 backface-hidden rounded-lg overflow-hidden shadow-xl">
-                <img 
-                  src={cardWithFallback.imageUrl} 
-                  alt={cardWithFallback.title || 'Card'} 
-                  className="w-full h-full object-cover"
-                />
-                <CssEffectsLayer 
-                  activeEffects={activeEffects}
-                  effectIntensities={effectIntensities}
-                  isFlipped={false}
-                  mousePosition={mousePosition}
-                />
-              </div>
-              
-              <div className="absolute inset-0 backface-hidden rotate-y-180 rounded-lg overflow-hidden shadow-xl bg-gray-800">
-                <img 
-                  src={cardWithFallback.backImageUrl} 
-                  alt="Card Back" 
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      </LightingProvider>
       
       <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2 z-10">
         <Button 

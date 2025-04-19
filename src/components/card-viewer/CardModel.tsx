@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
@@ -28,31 +27,37 @@ const CardModel: React.FC<CardModelProps> = ({
   const [frontTextureLoaded, setFrontTextureLoaded] = useState(false);
   const [backTextureLoaded, setBackTextureLoaded] = useState(false);
   
-  // useTexture accepts a URL and an optional onLoad callback
-  const frontTexture = useTexture(imageUrl, () => {
+  const frontTexture = useTexture(imageUrl, (texture) => {
     setFrontTextureLoaded(true);
     console.log("Front card texture loaded");
   });
   
-  const backTexture = useTexture(backImageUrl, () => {
+  const backTexture = useTexture(backImageUrl, (texture) => {
     setBackTextureLoaded(true);
     console.log("Back card texture loaded");
   });
 
-  // Add error handling for textures
   useEffect(() => {
-    const handleTextureError = () => {
-      console.error("Failed to load texture, using fallback");
+    const handleError = () => {
+      console.error("Texture failed to load");
+      setFrontTextureLoaded(false);
+      setBackTextureLoaded(false);
     };
-    
-    frontTexture.onError = handleTextureError;
-    backTexture.onError = handleTextureError;
-    
+
+    // Handle texture loading errors by monitoring the image source
+    const frontImg = new Image();
+    frontImg.onerror = handleError;
+    frontImg.src = imageUrl;
+
+    const backImg = new Image();
+    backImg.onerror = handleError;
+    backImg.src = backImageUrl;
+
     return () => {
-      frontTexture.onError = null;
-      backTexture.onError = null;
+      frontImg.onerror = null;
+      backImg.onerror = null;
     };
-  }, [frontTexture, backTexture]);
+  }, [imageUrl, backImageUrl]);
 
   // Calculate card dimensions (standard trading card ratio)
   const width = 2.5;
@@ -76,19 +81,25 @@ const CardModel: React.FC<CardModelProps> = ({
     console.log("Card textures:", { front: imageUrl, back: backImageUrl });
   }, [activeEffects, imageUrl, backImageUrl]);
 
-  // Create materials for each side of the card
+  // Update material creation to include better defaults
   const frontMaterial = new THREE.MeshStandardMaterial({ 
-    color: 'white', 
-    map: frontTexture 
+    map: frontTexture,
+    color: 'white',
+    roughness: 0.3,
+    metalness: 0.2,
   });
   
   const backMaterial = new THREE.MeshStandardMaterial({ 
+    map: backTexture,
     color: 'white',
-    map: backTexture 
+    roughness: 0.3,
+    metalness: 0.2,
   });
   
   const edgeMaterial = new THREE.MeshStandardMaterial({ 
-    color: 'white'
+    color: 'white',
+    roughness: 0.5,
+    metalness: 0.1,
   });
 
   return (
