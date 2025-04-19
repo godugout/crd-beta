@@ -1,5 +1,12 @@
 
 /**
+ * Valid environment presets for @react-three/drei's Environment component
+ */
+export type ValidEnvironmentPreset = 
+  'apartment' | 'city' | 'dawn' | 'forest' | 'lobby' | 
+  'night' | 'park' | 'studio' | 'sunset' | 'warehouse';
+
+/**
  * Maps custom lighting presets to valid react-three/drei environment presets
  */
 export function mapLightingPresetToEnvironment(preset: string): string {
