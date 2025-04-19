@@ -48,7 +48,6 @@ const InstagramCollectionCreator: React.FC = () => {
         return;
       }
       
-      // Transform Instagram posts to our format
       const posts: InstagramPost[] = data.posts.map((post: any) => ({
         id: post.id,
         postId: post.id,
@@ -91,10 +90,11 @@ const InstagramCollectionCreator: React.FC = () => {
     try {
       setIsConnecting(true);
       
-      // Create a new collection with Instagram content
+      const collectionTitle = `${username}'s Instagram Collection`;
       const newCollection: Collection = {
         id: `instagram-${Date.now()}`,
-        name: `${username}'s Instagram Collection`,
+        name: collectionTitle,
+        title: collectionTitle,
         description: `Photos imported from Instagram account @${username}`,
         cards: instagramPosts.map((post, index) => adaptToCard({
           id: `instagram-card-${post.postId || index}`,
@@ -106,7 +106,8 @@ const InstagramCollectionCreator: React.FC = () => {
           updatedAt: new Date().toISOString(),
           userId: 'user-1',
           tags: ['instagram', 'imported'],
-          effects: []
+          effects: [],
+          designMetadata: {}
         })),
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -116,12 +117,10 @@ const InstagramCollectionCreator: React.FC = () => {
         isPublic: true,
       };
       
-      // Add the collection
       const result = await addCollection(newCollection);
       
       toast.success(`Successfully created collection from Instagram posts`);
       
-      // Navigate to the collection page
       navigate(`/collections/${result.id}`);
     } catch (error: any) {
       console.error('Error creating Instagram collection:', error);

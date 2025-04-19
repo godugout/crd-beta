@@ -11,6 +11,14 @@ export type JsonValue =
   | JsonValue[]
   | { [key: string]: JsonValue };
 
+// Add JsonObject type that was missing
+export type JsonObject = { [key: string]: JsonValue };
+
+// Add serializeMetadata utility function
+export const serializeMetadata = (metadata: any): string => {
+  return JSON.stringify(metadata || {});
+};
+
 // Update OaklandMemoryData type to include template property
 export interface OaklandMemoryData {
   title: string;
@@ -26,7 +34,7 @@ export interface OaklandMemoryData {
   imageUrl?: string;
   historicalContext?: string;
   personalSignificance?: string;
-  template?: string; // Add the template property
+  template: string; // Make this required
 }
 
 // Base entity interface that many types extend

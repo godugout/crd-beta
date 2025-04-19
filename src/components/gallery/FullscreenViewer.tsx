@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -50,13 +51,14 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
           // Ensure imageUrl is present
           imageUrl: foundCard.imageUrl || '/images/card-placeholder.png',
           thumbnailUrl: foundCard.thumbnailUrl || foundCard.imageUrl || '/images/card-placeholder.png',
-          // Ensure all required fields are present
+          // Ensure designMetadata is always present and required
           designMetadata: foundCard.designMetadata || DEFAULT_DESIGN_METADATA,
           description: foundCard.description || '', // Ensure description is not undefined
           createdAt: foundCard.createdAt || new Date().toISOString(),
           updatedAt: foundCard.updatedAt || new Date().toISOString(),
           userId: foundCard.userId || 'anonymous',
-          effects: foundCard.effects || []
+          effects: foundCard.effects || [],
+          tags: foundCard.tags || []
         });
         
         // Always initialize with fallback first, then update if the real image loads

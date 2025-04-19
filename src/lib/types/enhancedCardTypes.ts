@@ -6,18 +6,19 @@ import { CardRarity } from './cardTypes';
  * Enhanced card types with additional features
  */
 export interface EnhancedCard extends BaseEntity {
-  id: string; // Add required id property
+  id: string;
   title: string;
-  description: string; // Changed from optional to required for compatibility
+  description: string;
   imageUrl: string;
-  thumbnailUrl: string; // Changed from optional to required for compatibility
-  tags?: string[];
-  userId: string; // Made required for compatibility
+  thumbnailUrl: string;
+  tags: string[]; // Changed from optional to required
+  userId: string;
   effects: string[];
   
   // Enhanced fields
   series?: string;
-  edition?: string; // Changed to string for compatibility
+  edition?: string;
+  seriesId?: string; // Add seriesId field
   serialNumber?: string;
   rarity: CardRarity;
   artist?: string;
@@ -42,9 +43,7 @@ export interface EnhancedCard extends BaseEntity {
   // Required fields for compatibility with base Card
   createdAt: string;
   updatedAt: string;
-  
-  // Additional fields to fix type mismatches
-  seriesId?: string; // Added for compatibility with CardEnhancedContext
+  designMetadata: any; // Make this required
 }
 
 /**
@@ -76,8 +75,8 @@ export interface HotspotData {
  */
 export interface Series {
   id: string;
-  name: string; // Required field
-  title?: string; // Optional field to maintain compatibility
+  name: string;
+  title?: string; // Optional as some code uses name, some uses title
   description?: string;
   cards: EnhancedCard[];
   totalCards: number;
@@ -100,8 +99,8 @@ export interface Series {
  */
 export interface Deck {
   id: string;
-  title: string; // Required field
-  name?: string; // Optional field to maintain compatibility
+  name?: string;
+  title: string;
   description?: string;
   coverImageUrl?: string;
   cards: EnhancedCard[];

@@ -9,12 +9,13 @@ export const useCollectionOperations = () => {
   const addCollection = (collectionData: Partial<Collection>): Collection => {
     const newCollection: Collection = {
       id: collectionData.id || uuidv4(),
-      name: collectionData.name || 'Untitled Collection',
+      title: collectionData.title || collectionData.name || 'Untitled Collection',
+      name: collectionData.name || collectionData.title || 'Untitled Collection',
       description: collectionData.description || '',
       coverImageUrl: collectionData.coverImageUrl || '',
       userId: collectionData.userId || 'anonymous',
       cards: collectionData.cards || [],
-      cardIds: collectionData.cardIds || [],
+      cardIds: collectionData.cardIds || [], // This is now allowed by the updated interface
       visibility: collectionData.visibility || 'public',
       allowComments: collectionData.allowComments !== undefined ? collectionData.allowComments : true,
       designMetadata: collectionData.designMetadata || {},

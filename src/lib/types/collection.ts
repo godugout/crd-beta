@@ -13,13 +13,15 @@ export interface Collection extends BaseEntity {
   coverImageUrl?: string;
   cardCount?: number;
   userId: string;
+  teamId?: string; // Add teamId field
   isPublic?: boolean;
   visibility?: 'public' | 'private' | 'team' | 'unlisted';
   featured?: boolean;
   cards?: Card[];
+  cardIds?: string[]; // Add cardIds for backward compatibility
   allowComments?: boolean;
   designMetadata?: any;
-  tags?: string[]; // Add tags support for Collections
+  tags?: string[];
 }
 
 /**

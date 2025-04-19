@@ -7,7 +7,7 @@ import { JsonValue } from '../types';
  */
 export interface Card extends BaseEntity {
   title: string;
-  description: string; // Make this required for compatibility with other code
+  description: string;
   imageUrl: string;
   thumbnailUrl: string;
   tags: string[];
@@ -16,6 +16,7 @@ export interface Card extends BaseEntity {
   backImageUrl?: string;
   player?: string;
   team?: string;
+  teamId?: string; // Add teamId field to support existing code
   year?: string;
   sport?: string;
   cardType?: string;
@@ -26,9 +27,9 @@ export interface Card extends BaseEntity {
   grade?: string;
   gradingCompany?: string;
   artist?: string;
-  rarity?: string;
+  rarity?: string; // Add rarity field
   isPublic?: boolean;
-  designMetadata?: any;
+  designMetadata: any; // Changed from optional to required
   reactions?: any[];
   fabricSwatches?: any[];
   viewCount?: number;
@@ -86,9 +87,6 @@ export interface CardLayer {
   [key: string]: any;
 }
 
-// Export HotspotData from enhancedCardTypes for backward compatibility
-export { HotspotData } from './enhancedCardTypes';
-
 // Card rarity levels
 export type CardRarity = 'common' | 'uncommon' | 'rare' | 'ultra-rare' | 'legendary' | 'exclusive';
 
@@ -109,3 +107,6 @@ export interface CardStats {
 
 // Card condition ratings
 export type CardCondition = 'mint' | 'near-mint' | 'excellent' | 'very-good' | 'good' | 'fair' | 'poor';
+
+// Export HotspotData from enhancedCardTypes for backward compatibility
+export { HotspotData } from './enhancedCardTypes';

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
@@ -12,6 +11,7 @@ import { useEnhancedCards } from '@/context/CardEnhancedContext';
 import CardCollectionView from '@/components/card-experiences/CardCollectionView';
 import { Deck, EnhancedCard } from '@/lib/types/enhancedCardTypes';
 import { toast } from 'sonner';
+import { adaptEnhancedCardsToCards } from '@/lib/adapters/cardTypeAdapter';
 
 interface DeckBuilderProps {
   initialDeck?: Deck;
@@ -34,19 +34,15 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck }) => {
     isPublic: false,
   });
   
-  // Selected cards for the deck
   const [selectedCards, setSelectedCards] = useState<EnhancedCard[]>(
     initialDeck?.cards || []
   );
   
-  // Available cards (not in the deck)
   const [availableCards, setAvailableCards] = useState<EnhancedCard[]>([]);
   
-  // Search term for filtering available cards
   const [searchTerm, setSearchTerm] = useState('');
   
   useEffect(() => {
-    // Filter out cards that are already in the deck
     const selectedCardIds = selectedCards.map(card => card.id);
     setAvailableCards(cards.filter(card => !selectedCardIds.includes(card.id)));
   }, [cards, selectedCards]);
@@ -108,7 +104,6 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck }) => {
     navigate('/decks');
   };
   
-  // Filter available cards based on search term
   const filteredAvailableCards = searchTerm
     ? availableCards.filter(card => 
         card.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -239,7 +234,7 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck }) => {
               <h3 className="text-xl font-semibold mb-4">Selected Cards</h3>
               {selectedCards.length > 0 ? (
                 <CardCollectionView
-                  cards={selectedCards}
+                  cards={adaptEnhancedCardsToCards(selectedCards)}
                   title=""
                   onCardClick={handleRemoveCard}
                   emptyMessage="Click on cards below to add them to your deck"
@@ -271,7 +266,7 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ initialDeck }) => {
               </div>
               
               <CardCollectionView
-                cards={filteredAvailableCards}
+                cards={adaptEnhancedCardsToCards(filteredAvailableCards)}
                 title=""
                 onCardClick={handleAddCard}
                 emptyMessage={searchTerm ? "No cards match your search" : "No cards available"}
