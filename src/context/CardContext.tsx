@@ -12,6 +12,7 @@ interface CardContextProps {
   loading: boolean;
   error: Error | null;
   getCardById: (id: string) => Card | undefined;
+  getCard: (id: string) => Card | undefined; // Added getCard method
   addCard: (card: Partial<Card>) => Promise<Card>;
   updateCard: (id: string, updates: Partial<Card>) => Promise<boolean>;
   deleteCard: (id: string) => Promise<boolean>;
@@ -57,6 +58,11 @@ export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const getCardById = (id: string): Card | undefined => {
     return cards.find(card => card.id === id);
+  };
+  
+  // Add getCard method as an alias to getCardById for compatibility
+  const getCard = (id: string): Card | undefined => {
+    return getCardById(id);
   };
 
   const addCard = async (cardData: Partial<Card>): Promise<Card> => {
@@ -260,6 +266,7 @@ export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         loading,
         error,
         getCardById,
+        getCard, // Add getCard to the context value
         addCard,
         updateCard,
         deleteCard,

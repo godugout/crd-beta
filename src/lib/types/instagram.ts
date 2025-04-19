@@ -1,21 +1,14 @@
 
-/**
- * Instagram related types
- */
-
 export interface InstagramPost {
   id: string;
-  caption: string;
-  imageUrl: string;
-  postUrl: string;
-  timestamp: string;
-  likes: number;
-  comments: number;
-  
-  // Additional properties needed by components
-  mediaType?: string;
+  caption?: string;
+  permalink?: string;
+  mediaType: string;
+  mediaUrl: string;
   thumbnailUrl?: string;
-  mediaUrl?: string;
+  timestamp?: string;
+  username?: string;
+  children?: InstagramPost[];
   postId?: string;
 }
 
@@ -24,13 +17,17 @@ export interface InstagramAccount {
   username: string;
   profilePicture?: string;
   followerCount?: number;
-  verified?: boolean;
+  accessToken?: string;
+  tokenExpiry?: string;
+  lastSync?: string;
 }
 
 export interface InstagramCollection {
   id: string;
   name: string;
+  description?: string;
   posts: InstagramPost[];
   createdAt: string;
   updatedAt: string;
+  userId: string;
 }

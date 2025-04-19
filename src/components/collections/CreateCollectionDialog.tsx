@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -6,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
 import { useCollections } from '@/hooks/useCollections';
-import { Collection } from '@/lib/types';
+import { Collection, Card } from '@/lib/types';
 
 interface CreateCollectionDialogProps {
   isOpen: boolean;
@@ -36,7 +37,18 @@ const CreateCollectionDialog: React.FC<CreateCollectionDialogProps> = ({ isOpen,
         title: collectionName,
         description: collectionDescription,
         visibility: isPublic ? 'public' : 'private',
-        cards: selectedCardIds.map(id => ({ id })),
+        cards: selectedCardIds.map(id => ({ 
+          id,
+          title: '',
+          description: '',
+          imageUrl: '',
+          thumbnailUrl: '',
+          tags: [],
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          userId: '',
+          effects: []
+        } as Card)),
       };
 
       await createCollection(newCollection);

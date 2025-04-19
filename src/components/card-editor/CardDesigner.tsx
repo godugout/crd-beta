@@ -19,6 +19,7 @@ import {
   SelectValue 
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { v4 as uuidv4 } from 'uuid';
 
 interface CardDesignerProps {
   initialCard?: any;
@@ -110,13 +111,14 @@ const CardDesigner: React.FC<CardDesignerProps> = ({ initialCard, onSave }) => {
     const y = ((e.clientY - rect.top) / rect.height) * 100;
     
     const newHotspot: HotspotData = {
-      id: `hotspot-${Date.now()}`,
-      x,
-      y,
-      width: 20,
-      height: 20,
-      content: 'New hotspot',
-      type: 'text',
+      id: uuidv4(),
+      x: 50,
+      y: 50,
+      radius: 15,
+      width: 100,
+      height: 30,
+      content: "Click to edit text",
+      type: "text",
       visible: true
     };
     
@@ -726,8 +728,12 @@ const CardDesigner: React.FC<CardDesignerProps> = ({ initialCard, onSave }) => {
                     </div>
                   )}
                   
-                  {/* Render hotspots */}
-                  {showHotspots && hotspots.map(hotspot => (
+                  {showHotspots && hotspots.map(hotspot => ({
+                    ...hotspot,
+                    content: typeof hotspot.content === 'string' 
+                      ? hotspot.content 
+                      : hotspot.content
+                  }).map(hotspot => (
                     <div
                       key={hotspot.id}
                       className={`absolute border-2 ${

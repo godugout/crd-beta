@@ -1,3 +1,4 @@
+
 // Base types that might be used across modules
 export type JsonValue = 
   | string 
@@ -68,7 +69,10 @@ export interface DesignMetadata {
     category: string;
     cardType: string;
     series: string;
+    cardNumber?: string; // Added cardNumber
+    artist?: string; // Added artist
   };
+  oaklandMemory?: OaklandMemoryData; // Added oaklandMemory
 }
 
 // Define the GroupUploadType enum
@@ -128,13 +132,13 @@ export interface Card {
   description: string; // Make required for compatibility
   imageUrl: string;
   backImageUrl?: string;
-  thumbnailUrl?: string;
-  tags?: string[];
+  thumbnailUrl: string; // Make required for compatibility
+  tags: string[]; // Make required for compatibility
   createdAt: string;
   updatedAt: string;
   userId: string;
   designMetadata?: DesignMetadata;
-  effects?: string[];
+  effects: string[]; // Make required for compatibility
   isPublic?: boolean;
   player?: string;
   team?: string;
@@ -156,6 +160,8 @@ export interface Card {
   viewCount?: number;
   name?: string;
   collectionId?: string;
+  // Extra fields needed for compatibility
+  instagramSource?: string;
 }
 
 // User Interface
@@ -190,6 +196,7 @@ export interface Collection {
   allowComments?: boolean;
   designMetadata?: any;
   tags?: string[]; // Add tags support
+  instagramSource?: string; // Added for Instagram collections
 }
 
 // Comment Interface

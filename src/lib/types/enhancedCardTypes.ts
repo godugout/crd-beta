@@ -20,6 +20,7 @@ export interface EnhancedCard extends BaseEntity {
   serialNumber?: string;
   rarity: CardRarity;
   artist?: string;
+  artistId?: string; // Added artistId property
   releaseDate?: string;
   license?: string;
   
@@ -96,6 +97,7 @@ export interface Series {
 export interface Deck {
   id: string;
   title: string;
+  name?: string; // Added name property
   description?: string;
   coverImageUrl?: string;
   cards: EnhancedCard[];
@@ -104,6 +106,8 @@ export interface Deck {
   ownerId: string;
   visibility?: 'public' | 'private' | 'team';
   totalCards?: number;
+  isPublic?: boolean; // Added isPublic property
+  cardIds?: string[]; // Added cardIds property
 }
 
 export { CardRarity };
