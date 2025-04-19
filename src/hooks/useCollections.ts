@@ -1,178 +1,173 @@
-
-import { useState, useCallback } from 'react';
-import { Collection, Card } from '@/lib/types';
-import { useToast } from '@/components/ui/use-toast';
+import { useState, useEffect } from 'react';
+import { Collection } from '@/lib/types';
+import { supabase } from '@/integrations/supabase/client';
 import { v4 as uuidv4 } from 'uuid';
 
 export function useCollections() {
   const [collections, setCollections] = useState<Collection[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-  const { toast } = useToast();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
 
-  const fetchCollections = useCallback(async () => {
-    setLoading(true);
-    try {
-      // Here you would typically fetch from an API
-      // For now we'll just simulate with a timeout
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // This would be replaced with actual fetched data
-      setCollections([]);
-      
-      setLoading(false);
-      return collections;
-    } catch (error) {
-      console.error('Error fetching collections:', error);
-      setLoading(false);
-      toast({
-        title: 'Error',
-        description: 'Failed to load collections',
-        variant: 'destructive',
-      });
-      return [];
-    }
-  }, [collections, toast]);
-
-  const createCollection = useCallback(async (collectionData: Partial<Collection>) => {
-    try {
-      const newCollection: Collection = {
-        id: uuidv4(),
-        title: collectionData.title || 'Untitled Collection',
-        description: collectionData.description || '',
-        userId: 'current-user-id', // This would come from auth context
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        cards: collectionData.cards || [],
-        visibility: collectionData.visibility || 'private',
-        thumbnailUrl: collectionData.thumbnailUrl || '',
-        coverImageUrl: collectionData.coverImageUrl || '',
-        tags: collectionData.tags || [],
-        isPublic: collectionData.isPublic || false,
-        allowComments: collectionData.allowComments || true,
-        designMetadata: collectionData.designMetadata || {},
-      };
-      
-      setCollections(prev => [...prev, newCollection]);
-      
-      toast({
-        title: 'Success',
-        description: 'Collection created successfully',
-      });
-      
-      return newCollection;
-    } catch (error) {
-      console.error('Error creating collection:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to create collection',
-        variant: 'destructive',
-      });
-      throw error;
-    }
-  }, [toast]);
-
-  const updateCollection = useCallback(async (id: string, updates: Partial<Collection>) => {
-    try {
-      setCollections(prev => 
-        prev.map(collection => 
-          collection.id === id ? { ...collection, ...updates, updatedAt: new Date().toISOString() } : collection
-        )
-      );
-      
-      toast({
-        title: 'Success',
-        description: 'Collection updated successfully',
-      });
-      
-      return true;
-    } catch (error) {
-      console.error('Error updating collection:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to update collection',
-        variant: 'destructive',
-      });
-      return false;
-    }
-  }, [toast]);
-
-  const deleteCollection = useCallback(async (id: string) => {
-    try {
-      setCollections(prev => prev.filter(collection => collection.id !== id));
-      
-      toast({
-        title: 'Success',
-        description: 'Collection deleted successfully',
-      });
-      
-      return true;
-    } catch (error) {
-      console.error('Error deleting collection:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to delete collection',
-        variant: 'destructive',
-      });
-      return false;
-    }
-  }, [toast]);
-
-  const addCardToCollection = useCallback(async (collectionId: string, cardId: string) => {
-    try {
-      setCollections(prev => 
-        prev.map(collection => {
-          if (collection.id === collectionId) {
-            // Check if cards array exists, if not create it
-            const cards = collection.cards || [];
-            
-            // Check if card already exists in collection
-            if (!cards.some(card => card.id === cardId)) {
-              return {
-                ...collection,
-                cards: [...cards, { id: cardId } as Card]
-              };
-            }
-          }
-          return collection;
-        })
-      );
-      
-      return true;
-    } catch (error) {
-      console.error('Error adding card to collection:', error);
-      return false;
-    }
+  useEffect(() => {
+    fetchCollections();
   }, []);
 
-  const removeCardFromCollection = useCallback(async (collectionId: string, cardId: string) => {
+  const fetchCollections = async () => {
     try {
-      setCollections(prev => 
-        prev.map(collection => {
-          if (collection.id === collectionId && collection.cards) {
+      setLoading(true);
+      
+      // In a real app, this would fetch from Supabase
+      // const { data, error } = await supabase.from('collections').select('*');
+      
+      // For now, use mock data
+      const mockCollections: Collection[] = [
+        {
+          id: '1',
+          title: 'Featured Collection',
+          name: 'Featured Collection',
+          description: 'A collection of featured cards',
+          coverImageUrl: '/images/collection-cover.jpg',
+          userId: 'user-1',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          visibility: 'public',
+          isPublic: true,
+          tags: ['featured'],
+          featured: true,
+        },
+        {
+          id: '2',
+          title: 'Rare Cards',
+          name: 'Rare Cards',
+          description: 'A collection of rare cards',
+          coverImageUrl: '/images/rare-collection-cover.jpg',
+          userId: 'user-1',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          visibility: 'private',
+          isPublic: false,
+          tags: ['rare', 'exclusive'],
+        }
+      ];
+      
+      setCollections(mockCollections);
+      setError(null);
+    } catch (err) {
+      console.error('Error fetching collections:', err);
+      setError(err as Error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const createCollection = (collectionData: Partial<Collection>): Collection => {
+    const newCollection: Collection = {
+      id: uuidv4(),
+      title: collectionData.title || 'New Collection',
+      name: collectionData.name || collectionData.title || 'New Collection',
+      description: collectionData.description || '',
+      coverImageUrl: collectionData.coverImageUrl || '',
+      thumbnailUrl: collectionData.thumbnailUrl || '',
+      userId: collectionData.userId || 'user-1',
+      visibility: collectionData.visibility || 'private',
+      tags: collectionData.tags || [],
+      isPublic: collectionData.isPublic || false,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    
+    setCollections(prev => [...prev, newCollection]);
+    return newCollection;
+  };
+
+  const updateCollection = (id: string, updates: Partial<Collection>): Collection | null => {
+    let updatedCollection: Collection | null = null;
+    
+    setCollections(prevCollections => {
+      return prevCollections.map(collection => {
+        if (collection.id === id) {
+          updatedCollection = {
+            ...collection,
+            ...updates,
+            updatedAt: new Date().toISOString()
+          };
+          return updatedCollection;
+        }
+        return collection;
+      });
+    });
+    
+    return updatedCollection;
+  };
+  
+  const deleteCollection = (id: string): boolean => {
+    const collectionExists = collections.some(collection => collection.id === id);
+    
+    if (collectionExists) {
+      setCollections(prevCollections => 
+        prevCollections.filter(collection => collection.id !== id)
+      );
+      return true;
+    }
+    
+    return false;
+  };
+  
+  const getCollectionById = (id: string): Collection | undefined => {
+    return collections.find(collection => collection.id === id);
+  };
+  
+  const addCardToCollection = (collectionId: string, cardId: string): boolean => {
+    const collection = collections.find(c => c.id === collectionId);
+    if (!collection) return false;
+    
+    setCollections(prevCollections => {
+      return prevCollections.map(c => {
+        if (c.id === collectionId) {
+          const cardIds = c.cardIds || [];
+          if (!cardIds.includes(cardId)) {
             return {
-              ...collection,
-              cards: collection.cards.filter(card => card.id !== cardId)
+              ...c,
+              cardIds: [...cardIds, cardId]
             };
           }
-          return collection;
-        })
-      );
-      
-      return true;
-    } catch (error) {
-      console.error('Error removing card from collection:', error);
-      return false;
-    }
-  }, []);
+        }
+        return c;
+      });
+    });
+    
+    return true;
+  };
+  
+  const removeCardFromCollection = (collectionId: string, cardId: string): boolean => {
+    const collection = collections.find(c => c.id === collectionId);
+    if (!collection) return false;
+    
+    setCollections(prevCollections => {
+      return prevCollections.map(c => {
+        if (c.id === collectionId) {
+          return {
+            ...c,
+            cardIds: (c.cardIds || []).filter(id => id !== cardId)
+          };
+        }
+        return c;
+      });
+    });
+    
+    return true;
+  };
 
   return {
     collections,
     loading,
+    error,
     fetchCollections,
     createCollection,
     updateCollection,
     deleteCollection,
+    getCollectionById,
     addCardToCollection,
-    removeCardFromCollection,
+    removeCardFromCollection
   };
 }

@@ -14,14 +14,16 @@ export interface Collection extends BaseEntity {
   cardCount?: number;
   userId: string;
   teamId?: string;
-  isPublic?: boolean; // Add isPublic property
+  isPublic?: boolean; 
   visibility?: 'public' | 'private' | 'team' | 'unlisted'; // Add unlisted to visibility
-  featured?: boolean; // Add featured property
+  featured?: boolean; 
   cards?: Card[];
   cardIds?: string[];
   allowComments?: boolean;
   designMetadata?: any;
-  tags?: string[]; // Add tags property
+  tags?: string[]; 
+  createdAt: string;
+  updatedAt?: string;
 }
 
 /**

@@ -1,3 +1,4 @@
+
 import { BaseEntity } from './index';
 import { JsonValue } from '../types';
 
@@ -37,6 +38,9 @@ export interface Card extends BaseEntity {
   width?: number;
   collectionId?: string;
   cards?: Card[];
+  createdAt: string;
+  updatedAt: string;
+  position?: string;
 }
 
 export interface CardDesignState {

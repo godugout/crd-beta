@@ -36,5 +36,7 @@ export interface CardData {
 
 // Re-export Card interface from cardTypes
 export { Card } from './cardTypes';
+
 // Export FabricSwatch for others to use
+// Use export type for re-exporting types when isolatedModules is enabled
 export type { FabricSwatchType };

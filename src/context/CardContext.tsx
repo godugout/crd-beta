@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Card, Collection } from '@/lib/types';
 import { fetchCards } from '@/lib/api/cards';
@@ -17,8 +18,8 @@ interface CardContextProps {
   deleteCollection: (id: string) => Promise<void>;
   getCollectionById: (id: string) => Collection | undefined;
   refreshCards: () => Promise<void>;
-  addCardToCollection?: (collectionId: string, cardId: string) => Promise<boolean>;
-  removeCardFromCollection?: (collectionId: string, cardId: string) => Promise<boolean>;
+  addCardToCollection: (collectionId: string, cardId: string) => Promise<boolean>;
+  removeCardFromCollection: (collectionId: string, cardId: string) => Promise<boolean>;
 }
 
 const CardContext = createContext<CardContextProps | undefined>(undefined);
@@ -224,6 +225,7 @@ export const useCards = () => {
   return context;
 };
 
+// Export types correctly
 export type { Card, Collection };
 
 export { CardContext };

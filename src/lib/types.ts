@@ -1,8 +1,8 @@
 
 // Import and re-export all types from the type modules
 import { Card, FabricSwatch, CardData } from './types/card';
-import { User, UserRole, UserPermission } from './types/user';
-import { Collection } from './schema/types';
+import { User, UserRole as UserRoleEnum, UserPermission as UserPermissionEnum } from './types/user';
+import { Collection } from './types/collection';
 import { Comment, Reaction, Team, TeamMember } from './schema/types';
 import { OaklandMemoryData } from './schema/types';
 import { GroupUploadType } from './types/uploadTypes';
@@ -25,7 +25,7 @@ export type {
 };
 
 // Enum exports
-export { UserRole, UserPermission };
+export { UserRoleEnum as UserRole, UserPermissionEnum as UserPermission };
 
 // Base entity interface
 export interface BaseEntity {
@@ -48,34 +48,34 @@ export const serializeMetadata = (metadata: any): string => {
 export type CardRarity = 'common' | 'uncommon' | 'rare' | 'ultra-rare' | 'legendary' | 'exclusive' | 'one-of-one';
 
 // Add Role Permissions mapping
-export const ROLE_PERMISSIONS: Record<UserRole, UserPermission[]> = {
-  [UserRole.ADMIN]: [
-    'manage_users',
-    'manage_content',
-    'view_analytics',
-    'manage_system',
-    'access_api',
-    'moderate_comments',
+export const ROLE_PERMISSIONS: Record<UserRoleEnum, UserPermissionEnum[]> = {
+  [UserRoleEnum.ADMIN]: [
+    UserPermissionEnum.MANAGE_USERS,
+    UserPermissionEnum.MANAGE_CONTENT,
+    UserPermissionEnum.VIEW_ANALYTICS,
+    UserPermissionEnum.MANAGE_SYSTEM,
+    UserPermissionEnum.ACCESS_API,
+    UserPermissionEnum.MODERATE_COMMENTS,
   ],
-  [UserRole.MODERATOR]: [
-    'manage_content',
-    'moderate_comments',
-    'view_analytics',
-    'access_api'
+  [UserRoleEnum.MODERATOR]: [
+    UserPermissionEnum.MANAGE_CONTENT,
+    UserPermissionEnum.MODERATE_COMMENTS,
+    UserPermissionEnum.VIEW_ANALYTICS,
+    UserPermissionEnum.ACCESS_API
   ],
-  [UserRole.CREATOR]: [
-    'create_content',
-    'edit_own_content',
-    'delete_own_content',
-    'access_api'
+  [UserRoleEnum.CREATOR]: [
+    UserPermissionEnum.CREATE_CONTENT,
+    UserPermissionEnum.EDIT_OWN_CONTENT,
+    UserPermissionEnum.DELETE_OWN_CONTENT,
+    UserPermissionEnum.ACCESS_API
   ],
-  [UserRole.USER]: [
-    'create_collections',
-    'edit_own_collections',
-    'view_content'
+  [UserRoleEnum.USER]: [
+    UserPermissionEnum.CREATE_COLLECTIONS,
+    UserPermissionEnum.EDIT_OWN_COLLECTIONS,
+    UserPermissionEnum.VIEW_CONTENT
   ],
-  [UserRole.GUEST]: [
-    'view_content'
+  [UserRoleEnum.GUEST]: [
+    UserPermissionEnum.VIEW_CONTENT
   ]
 };
 
@@ -122,7 +122,7 @@ export interface AuthUser {
   avatarUrl?: string;
   displayName?: string;
   username?: string;
-  role?: UserRole;
+  role?: UserRoleEnum;
   bio?: string;
   permissions?: string[];
   createdAt: string;
@@ -146,4 +146,6 @@ export interface DbCollection {
   updated_at?: string;
   is_public?: boolean;
   card_ids?: string[];
+  tags?: string[];
+  featured?: boolean;
 }

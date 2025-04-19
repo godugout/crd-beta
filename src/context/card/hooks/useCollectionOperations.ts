@@ -13,14 +13,17 @@ export const useCollectionOperations = () => {
       name: collectionData.name || collectionData.title || 'Untitled Collection',
       description: collectionData.description || '',
       coverImageUrl: collectionData.coverImageUrl || '',
+      thumbnailUrl: collectionData.thumbnailUrl || '',
       userId: collectionData.userId || 'anonymous',
       cards: collectionData.cards || [],
-      cardIds: collectionData.cardIds || [], // For compatibility
+      cardIds: collectionData.cardIds || [], 
       visibility: collectionData.visibility || 'public',
-      teamId: collectionData.teamId, // For compatibility
+      teamId: collectionData.teamId,
       allowComments: collectionData.allowComments !== undefined ? collectionData.allowComments : true,
       designMetadata: collectionData.designMetadata || {},
       isPublic: collectionData.isPublic !== undefined ? collectionData.isPublic : true,
+      tags: collectionData.tags || [],
+      featured: collectionData.featured || false,
       createdAt: new Date().toISOString(), 
       updatedAt: new Date().toISOString(),
     };

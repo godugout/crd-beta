@@ -1,2 +1,5 @@
 
-export type GroupUploadType = 'single' | 'multi' | 'batch' | 'series';
+/**
+ * Upload types for group memory functionality
+ */
+export type GroupUploadType = 'single' | 'multiple' | 'gallery' | 'batch';

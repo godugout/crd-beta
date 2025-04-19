@@ -1,4 +1,3 @@
-
 import { Comment } from '../../schema/types';
 
 /**
@@ -32,3 +31,16 @@ export function transformCommentFromDb(record: any): Comment {
   
   return comment;
 }
+
+export const transformCommentUserData = (userData: any) => {
+  return {
+    id: userData.id,
+    email: userData.email,
+    name: userData.name,
+    avatarUrl: userData.avatarUrl,
+    username: userData.username,
+    createdAt: userData.created_at || userData.createdAt || new Date().toISOString(), // Ensure createdAt is present
+    updatedAt: userData.updated_at || userData.updatedAt,
+    role: userData.role || 'user'
+  };
+};

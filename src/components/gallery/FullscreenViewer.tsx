@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useCards } from '@/hooks/useCards';
+import { useCards } from '@/context/CardContext';
 import { Card } from '@/lib/types/cardTypes';
 import { sampleCards } from '@/lib/data/sampleCards';
 import { useToast } from '@/hooks/use-toast';
@@ -15,7 +15,7 @@ interface FullscreenViewerProps {
 }
 
 const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) => {
-  const { cards, getCard } = useCards();
+  const { cards, getCardById } = useCards();
   const [currentCard, setCurrentCard] = useState<Card | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -41,7 +41,7 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
       // If not found in sampleCards, try the cards context
       if (!foundCard) {
         console.log('FullscreenViewer: Card not found in sampleCards, checking context');
-        foundCard = getCard ? getCard(cardId) : cards.find(c => c.id === cardId);
+        foundCard = getCardById ? getCardById(cardId) : cards.find(c => c.id === cardId);
       }
       
       if (foundCard) {
@@ -106,7 +106,7 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
       setError('Failed to load card');
       setIsLoading(false);
     }
-  }, [cardId, cards, getCard, toast]);
+  }, [cardId, cards, getCardById, toast]);
   
   // Find all card indices from cards array to enable navigation between cards
   const allCardIds = cards?.map(card => card.id) || [];

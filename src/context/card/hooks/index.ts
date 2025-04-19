@@ -2,9 +2,11 @@
 export * from './useCardOperations';
 export * from './useCollectionOperations';
 
-// Import the useCards hook directly from the CardContext
-import { useCards, Card, Collection } from '@/context/CardContext';
-// Use proper type export syntax
+// Import from CardContext and re-export
+import { useCards } from '@/context/CardContext';
+import type { Card, Collection } from '@/lib/types';
+
+// Export everything
 export { useCards };
 export type { Card, Collection };
 

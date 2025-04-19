@@ -46,7 +46,7 @@ export function useCardOperations() {
   };
 
   const removeCard = async (id: string) => {
-    setLoading(true);
+    setIsLoading(true);
     setError(null);
     
     try {
@@ -59,12 +59,8 @@ export function useCardOperations() {
       toast.error('Failed to delete card');
       return false;
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
-  };
-
-  const setLoading = (status: boolean) => {
-    setIsLoading(status);
   };
 
   return {
