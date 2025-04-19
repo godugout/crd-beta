@@ -1,9 +1,9 @@
 
-// Explicitly define fallback image paths with web-safe absolute paths
-export const FALLBACK_FRONT_IMAGE_URL = '/images/card-placeholder.png';
-export const FALLBACK_BACK_IMAGE_URL = '/images/card-back-placeholder.png';
+// Explicitly define fallback image paths with web-safe absolute URLs that are guaranteed to exist
+export const FALLBACK_FRONT_IMAGE_URL = 'https://images.unsplash.com/photo-1518770660439-4636190af475';
+export const FALLBACK_BACK_IMAGE_URL = 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6';
 export const FALLBACK_IMAGE_URL = FALLBACK_FRONT_IMAGE_URL; // Alias for broader use
-export const FALLBACK_UNSPLASH_BACKUP = 'https://images.unsplash.com/photo-1518770660439-4636190af475';
+export const FALLBACK_UNSPLASH_BACKUP = 'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b';
 export const FALLBACK_UNSPLASH_IMAGE_URL = FALLBACK_UNSPLASH_BACKUP; // Backward compatibility
 
 // Enhanced error handling for image loading
@@ -11,6 +11,7 @@ export const handleImageLoadError = (
   event: React.SyntheticEvent<HTMLImageElement, Event>, 
   fallbackUrl: string = FALLBACK_UNSPLASH_BACKUP
 ) => {
+  console.error('Image load error, applying fallback:', event.currentTarget.src);
   const imgElement = event.currentTarget;
   imgElement.onerror = null; // Prevent infinite error loop
   
@@ -53,10 +54,11 @@ export const DEFAULT_DESIGN_METADATA = {
     overlayOpacity: 0.3,
     overlayColor: 'rgba(0,0,0,0.3)',
     showOverlay: true,
-    // Adding required properties
     category: 'sports',
     series: 'default',
-    cardType: 'standard'
+    cardType: 'standard',
+    cardNumber: '001', // Added for InfoPanel
+    artist: 'Unknown' // Added for InfoPanel
   },
   marketMetadata: {
     price: 0,

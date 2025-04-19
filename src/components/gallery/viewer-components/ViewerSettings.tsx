@@ -1,87 +1,99 @@
 
 import React from 'react';
 import { Slider } from '@/components/ui/slider';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
 import { lightingPresets } from '@/utils/environmentPresets';
+import { X } from 'lucide-react';
 
 interface ViewerSettingsProps {
   settings: any;
   onUpdateSettings: (path: string, value: any) => void;
   onApplyPreset: (preset: string) => void;
   isOpen: boolean;
+  onClose?: () => void;
 }
 
 const ViewerSettings: React.FC<ViewerSettingsProps> = ({
   settings,
   onUpdateSettings,
   onApplyPreset,
-  isOpen
+  isOpen,
+  onClose
 }) => {
   if (!isOpen) return null;
-  
+
   return (
-    <div className="space-y-6">
-      <h3 className="font-medium text-white">Scene Settings</h3>
-      
+    <div className="p-4 bg-black/60 backdrop-blur-sm rounded-lg text-white text-sm">
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="font-medium">Viewer Settings</h3>
+        {onClose && (
+          <Button variant="ghost" size="sm" onClick={onClose} className="h-6 w-6 p-0 text-white">
+            <X size={16} />
+          </Button>
+        )}
+      </div>
+
       <div className="space-y-4">
         <div>
-          <Label className="text-white mb-1 block">Scene Preset</Label>
+          <Label htmlFor="preset">Lighting Preset</Label>
           <Select 
-            onValueChange={onApplyPreset} 
-            defaultValue={settings.environmentType || "studio"}
+            value={settings.environmentType || 'studio'} 
+            onValueChange={value => onApplyPreset(value)}
           >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select scene" />
+            <SelectTrigger className="bg-black/40 border-gray-700 text-white">
+              <SelectValue placeholder="Select preset" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="studio">Studio</SelectItem>
-              <SelectItem value="natural">Natural</SelectItem>
-              <SelectItem value="dramatic">Dramatic</SelectItem>
-              <SelectItem value="display_case">Display Case</SelectItem>
+              {lightingPresets.map(preset => (
+                <SelectItem key={preset.value} value={preset.value}>
+                  {preset.label}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
-        
-        <div className="space-y-2">
-          <Label className="text-white mb-1 block">Primary Light Intensity</Label>
-          <Slider 
-            value={[settings.primaryLight.intensity * 100]} 
-            onValueChange={(value) => onUpdateSettings('primaryLight.intensity', value[0] / 100)}
-            min={0} 
-            max={200} 
-            step={1}
-          />
-          <div className="flex justify-between text-xs text-gray-400">
-            <span>0%</span>
-            <span>{Math.round(settings.primaryLight.intensity * 100)}%</span>
-            <span>200%</span>
+
+        <div>
+          <div className="flex justify-between">
+            <Label htmlFor="ambient-light">Ambient Light</Label>
+            <span className="text-xs opacity-70">{settings.ambientLight?.intensity.toFixed(1)}</span>
           </div>
-        </div>
-        
-        <div className="space-y-2">
-          <Label className="text-white mb-1 block">Ambient Light Intensity</Label>
-          <Slider 
-            value={[settings.ambientLight.intensity * 100]} 
-            onValueChange={(value) => onUpdateSettings('ambientLight.intensity', value[0] / 100)}
-            min={0} 
-            max={100} 
-            step={1}
+          <Slider
+            id="ambient-light"
+            min={0}
+            max={1}
+            step={0.1}
+            value={[settings.ambientLight?.intensity || 0.5]}
+            onValueChange={value => onUpdateSettings('ambientLight.intensity', value[0])}
+            className="mt-2"
           />
-          <div className="flex justify-between text-xs text-gray-400">
-            <span>0%</span>
-            <span>{Math.round(settings.ambientLight.intensity * 100)}%</span>
-            <span>100%</span>
-          </div>
         </div>
-        
+
+        <div>
+          <div className="flex justify-between">
+            <Label htmlFor="primary-light">Primary Light</Label>
+            <span className="text-xs opacity-70">{settings.primaryLight?.intensity.toFixed(1)}</span>
+          </div>
+          <Slider
+            id="primary-light"
+            min={0}
+            max={2}
+            step={0.1}
+            value={[settings.primaryLight?.intensity || 1]}
+            onValueChange={value => onUpdateSettings('primaryLight.intensity', value[0])}
+            className="mt-2"
+          />
+        </div>
+
         <div className="flex items-center justify-between">
-          <Label className="text-white">Auto-rotate</Label>
-          <Switch 
+          <Label htmlFor="auto-rotate" className="cursor-pointer">Auto Rotate</Label>
+          <Switch
+            id="auto-rotate"
             checked={settings.autoRotate}
-            onCheckedChange={(checked) => onUpdateSettings('autoRotate', checked)}
+            onCheckedChange={value => onUpdateSettings('autoRotate', value)}
           />
         </div>
       </div>

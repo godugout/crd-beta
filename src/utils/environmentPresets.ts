@@ -12,6 +12,14 @@ export type ValidEnvironmentPreset =
   | 'park'
   | 'lobby';
 
+// Define lighting preset options for UI
+export const lightingPresets = [
+  { value: 'studio', label: 'Studio' },
+  { value: 'natural', label: 'Natural Light' },
+  { value: 'dramatic', label: 'Dramatic' },
+  { value: 'display_case', label: 'Display Case' }
+];
+
 // Map our custom lighting presets to valid drei environment presets
 export const mapLightingPresetToEnvironment = (preset: string): ValidEnvironmentPreset => {
   switch (preset) {

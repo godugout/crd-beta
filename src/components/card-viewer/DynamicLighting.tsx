@@ -3,14 +3,14 @@ import React from 'react';
 import { useThree } from '@react-three/fiber';
 import { Environment } from '@react-three/drei';
 import { useLighting } from '@/context/LightingContext';
-import { mapLightingPresetToEnvironment, ValidEnvironmentPreset } from '@/utils/environmentPresets';
+import { getEnvironmentPreset, ValidEnvironmentPreset } from '@/utils/environmentPresets';
 
 const DynamicLighting: React.FC = () => {
   const { lightSettings } = useLighting();
   const { scene } = useThree();
   
   // Map our custom environment type to one supported by drei
-  const environmentPreset = mapLightingPresetToEnvironment(lightSettings.environmentType);
+  const environmentPreset = getEnvironmentPreset(lightSettings.environmentType);
 
   return (
     <>

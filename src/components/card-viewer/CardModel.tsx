@@ -27,42 +27,48 @@ const CardModel: React.FC<CardModelProps> = ({
   const meshRef = useRef<THREE.Mesh>(null);
   const [frontTextureLoaded, setFrontTextureLoaded] = useState(false);
   const [backTextureLoaded, setBackTextureLoaded] = useState(false);
+  const [loadError, setLoadError] = useState(false);
   
-  // Use a reliable unsplash image as ultimate fallback
-  const reliableFallback = 'https://images.unsplash.com/photo-1518770660439-4636190af475';
+  // Ensure we always have valid texture URLs
+  const safeImageUrl = imageUrl || FALLBACK_FRONT_IMAGE_URL;
+  const safeBackImageUrl = backImageUrl || FALLBACK_BACK_IMAGE_URL;
   
   // Try to load textures with error handling
-  const frontTexture = useTexture(imageUrl || reliableFallback, () => {
+  const frontTexture = useTexture(safeImageUrl, () => {
     setFrontTextureLoaded(true);
-    console.log("Front card texture loaded");
+    console.log("Front card texture loaded:", safeImageUrl);
   });
   
-  const backTexture = useTexture(backImageUrl || reliableFallback, () => {
+  const backTexture = useTexture(safeBackImageUrl, () => {
     setBackTextureLoaded(true);
-    console.log("Back card texture loaded");
+    console.log("Back card texture loaded:", safeBackImageUrl);
   });
 
   useEffect(() => {
-    const handleError = () => {
-      console.error("Texture failed to load");
-      setFrontTextureLoaded(false);
-      setBackTextureLoaded(false);
+    // Extra safety check for textures
+    const checkTextureValidity = () => {
+      if (!frontTextureLoaded || !backTextureLoaded) {
+        console.warn("Textures not fully loaded, applying additional fallbacks");
+        
+        // Reset any problematic textures with new instances using guaranteed URLs
+        if (!frontTextureLoaded && frontTexture) {
+          console.log("Attempting to reload front texture with fallback");
+          const newTexture = new THREE.TextureLoader().load(FALLBACK_FRONT_IMAGE_URL);
+          Object.assign(frontTexture, newTexture);
+        }
+        
+        if (!backTextureLoaded && backTexture) {
+          console.log("Attempting to reload back texture with fallback");
+          const newTexture = new THREE.TextureLoader().load(FALLBACK_BACK_IMAGE_URL);
+          Object.assign(backTexture, newTexture);
+        }
+      }
     };
-
-    // Handle texture loading errors by monitoring the image source
-    const frontImg = new Image();
-    frontImg.onerror = handleError;
-    frontImg.src = imageUrl;
-
-    const backImg = new Image();
-    backImg.onerror = handleError;
-    backImg.src = backImageUrl;
-
-    return () => {
-      frontImg.onerror = null;
-      backImg.onerror = null;
-    };
-  }, [imageUrl, backImageUrl]);
+    
+    // Allow a short delay for normal loading before applying fallbacks
+    const timer = setTimeout(checkTextureValidity, 3000);
+    return () => clearTimeout(timer);
+  }, [frontTextureLoaded, backTextureLoaded, frontTexture, backTexture]);
 
   // Calculate card dimensions (standard trading card ratio)
   const width = 2.5;
@@ -80,11 +86,6 @@ const CardModel: React.FC<CardModelProps> = ({
       0.1
     );
   });
-  
-  useEffect(() => {
-    console.log("Card model received effects:", activeEffects);
-    console.log("Card textures:", { front: imageUrl, back: backImageUrl });
-  }, [activeEffects, imageUrl, backImageUrl]);
 
   // Update material creation to include better defaults
   const frontMaterial = new THREE.MeshStandardMaterial({ 

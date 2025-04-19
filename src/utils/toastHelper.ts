@@ -1,5 +1,6 @@
 
-import { toast } from 'sonner';
+import { toast, ToastOptions } from 'sonner';
+import React from 'react';
 
 // Helper function to safely call toast methods
 export const showToast = {
@@ -19,8 +20,12 @@ export const showToast = {
     return toast.warning(message, options);
   },
   
-  // For custom toast displays
+  // For custom toast displays - fixed to properly handle React nodes
   custom: (content: React.ReactNode, options = {}) => {
-    return toast.custom(content, options);
+    // Cast to any to work around type limitation
+    return toast(content as any, options);
   }
 };
+
+// Default export for backwards compatibility
+export default showToast;
