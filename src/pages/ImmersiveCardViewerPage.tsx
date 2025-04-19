@@ -33,7 +33,7 @@ const ImmersiveCardViewerPage: React.FC = () => {
   const [isFlipped, setIsFlipped] = useState(false);
   const [showControls, setShowControls] = useState(true);
   const [viewTab, setViewTab] = useState('effects');
-  const [isPanelOpen, setIsPanelOpen] = useState(false);
+  const [isPanelOpen, setIsPanelOpen] = useState(true);
   const viewMode = searchParams.get('mode') || 'standard';
   
   const { preferences, savePreferences } = useUserLightingPreferences();
@@ -187,9 +187,8 @@ const ImmersiveCardViewerPage: React.FC = () => {
           
           <div className="flex gap-2">
             <Tabs value={viewTab} onValueChange={setViewTab} className="w-[400px]">
-              <TabsList className="grid grid-cols-2 bg-gray-800/50 backdrop-blur">
+              <TabsList className="grid grid-cols-1 bg-gray-800/50 backdrop-blur">
                 <TabsTrigger value="effects">Effects & View</TabsTrigger>
-                <TabsTrigger value="controls">Controls</TabsTrigger>
               </TabsList>
             </Tabs>
           </div>
@@ -234,6 +233,7 @@ const ImmersiveCardViewerPage: React.FC = () => {
                       isFlipped={isFlipped}
                       activeEffects={activeEffects}
                       lightingSettings={lightingSettings}
+                      lightingPreset={lightingPreset}
                     />
                   </div>
                 </Suspense>
@@ -321,48 +321,6 @@ const ImmersiveCardViewerPage: React.FC = () => {
                       >
                         {isFlipped ? "Show Front" : "Show Back"}
                       </Button>
-                    </div>
-                  </div>
-                </TabsContent>
-                
-                <TabsContent value="controls" className="mt-0">
-                  <h3 className="text-xl font-semibold mb-4">Viewer Controls</h3>
-                  
-                  <div className="space-y-4">
-                    <div className="p-4 bg-gray-800/50 rounded-lg">
-                      <h4 className="font-medium text-white mb-2">Mouse Controls</h4>
-                      <ul className="text-sm text-gray-300 space-y-2">
-                        <li className="flex items-center">
-                          <span className="px-2 py-1 bg-gray-700 rounded mr-2 text-xs">Click + Drag</span>
-                          <span>Rotate card</span>
-                        </li>
-                        <li className="flex items-center">
-                          <span className="px-2 py-1 bg-gray-700 rounded mr-2 text-xs">Scroll</span>
-                          <span>Zoom in/out</span>
-                        </li>
-                        <li className="flex items-center">
-                          <span className="px-2 py-1 bg-gray-700 rounded mr-2 text-xs">Double Click</span>
-                          <span>Reset position</span>
-                        </li>
-                      </ul>
-                    </div>
-                    
-                    <div className="p-4 bg-gray-800/50 rounded-lg">
-                      <h4 className="font-medium text-white mb-2">Touch Controls</h4>
-                      <ul className="text-sm text-gray-300 space-y-2">
-                        <li className="flex items-center">
-                          <span className="px-2 py-1 bg-gray-700 rounded mr-2 text-xs">1 Finger</span>
-                          <span>Rotate card</span>
-                        </li>
-                        <li className="flex items-center">
-                          <span className="px-2 py-1 bg-gray-700 rounded mr-2 text-xs">2 Fingers</span>
-                          <span>Pinch to zoom</span>
-                        </li>
-                        <li className="flex items-center">
-                          <span className="px-2 py-1 bg-gray-700 rounded mr-2 text-xs">Double Tap</span>
-                          <span>Reset position</span>
-                        </li>
-                      </ul>
                     </div>
                   </div>
                 </TabsContent>
