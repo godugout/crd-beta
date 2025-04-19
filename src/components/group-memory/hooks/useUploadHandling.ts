@@ -1,102 +1,103 @@
 
 import { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { imageProcessing } from '@/lib/image-utils';
-import { MemorabiliaType } from '@/components/card-upload/cardDetection';
-import { toast } from '@/hooks/use-toast';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { useMobileOptimization } from '@/hooks/useMobileOptimization';
+import { processImage, compressImage } from '@/lib/image-utils';
 
-export type GroupUploadType = 'single' | 'multi' | 'detection';
+export type GroupUploadType = 'individual' | 'team' | 'group';
 
 export interface UseUploadHandlingProps {
-  onFilesSelected: (files: File[]) => void;
+  multiple?: boolean;
   maxFiles?: number;
-  allowedTypes?: string[];
-  maxSizeMB?: number;
+  maxSize?: number;
   uploadType?: GroupUploadType;
+  onComplete?: (files: File[], urls: string[]) => void;
 }
 
 export const useUploadHandling = ({
-  onFilesSelected,
+  multiple = false,
   maxFiles = 10,
-  allowedTypes = ['image/jpeg', 'image/png', 'image/webp'],
-  maxSizeMB = 10,
-  uploadType = 'single'
+  maxSize = 10 * 1024 * 1024, // 10MB
+  uploadType = 'group',
+  onComplete
 }: UseUploadHandlingProps) => {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const isMobile = useIsMobile();
-  const { shouldOptimizeAnimations, getImageQuality } = useMobileOptimization();
-
-  // Handle file drop/selection
-  const onDrop = useCallback(async (acceptedFiles: File[]) => {
+  
+  const handleFileSelected = async (files: File[]) => {
     try {
+      if (!files.length) return;
+      
       setIsUploading(true);
       setUploadProgress(10);
       
-      // Filter files by type and size
-      const validFiles = acceptedFiles.filter(file => {
-        // Check file type
-        const isValidType = allowedTypes.includes(file.type);
-        if (!isValidType) {
-          toast.error(`File type not supported: ${file.type}`);
-          return false;
-        }
-        
-        // Check file size
-        const isValidSize = file.size <= maxSizeMB * 1024 * 1024;
-        if (!isValidSize) {
-          toast.error(`File too large: ${(file.size / (1024 * 1024)).toFixed(1)}MB (max ${maxSizeMB}MB)`);
-          return false;
-        }
-        
-        return true;
-      });
+      // Process all files
+      const processedFiles = [];
+      const processedUrls = [];
       
-      if (validFiles.length === 0) {
-        setIsUploading(false);
-        return;
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        
+        // Simulate progress update for each file
+        setUploadProgress(10 + Math.round((i / files.length) * 80));
+        
+        // Process and compress image
+        const compressed = await compressImage(file);
+        const { url } = await processImage(compressed);
+        
+        processedFiles.push(compressed);
+        processedUrls.push(url);
       }
       
-      // Enforce max files limit
-      const filesToProcess = uploadType === 'single' 
-        ? validFiles.slice(0, 1) 
-        : validFiles.slice(0, maxFiles);
+      setUploadProgress(90);
       
-      if (validFiles.length > maxFiles) {
-        toast.warning(`Only the first ${maxFiles} files will be processed.`);
+      // Complete the upload
+      if (onComplete) {
+        onComplete(processedFiles, processedUrls);
       }
-      
-      // Process files if needed (resize, optimize, etc.)
-      setUploadProgress(30);
-      
-      // Pass files to the callback function
-      onFilesSelected(filesToProcess);
       
       setUploadProgress(100);
-      setIsUploading(false);
+      
+      // Reset progress after a delay
+      setTimeout(() => {
+        setIsUploading(false);
+        setUploadProgress(0);
+      }, 500);
     } catch (error) {
-      console.error('Error handling files:', error);
-      toast.error('Failed to process uploaded files');
+      console.error('Error processing uploads:', error);
       setIsUploading(false);
+      setUploadProgress(0);
     }
-  }, [allowedTypes, maxFiles, maxSizeMB, onFilesSelected, uploadType]);
-
-  // Configure dropzone
+  };
+  
+  const processUploads = async (acceptedFiles: File[]) => {
+    // If multiple is disabled, only take the first file
+    const filesToProcess = multiple 
+      ? acceptedFiles.slice(0, maxFiles) 
+      : [acceptedFiles[0]];
+    
+    await handleFileSelected(filesToProcess);
+  };
+  
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    accept: Object.fromEntries(allowedTypes.map(type => [type, []])),
-    maxFiles: uploadType === 'single' ? 1 : maxFiles,
-    disabled: isUploading
+    accept: {
+      'image/*': ['.jpeg', '.jpg', '.png', '.gif', '.webp']
+    },
+    maxSize,
+    multiple,
+    maxFiles,
+    onDrop: processUploads
   });
-
+  
   return {
     getRootProps,
     getInputProps,
     isDragActive,
     isUploading,
     uploadProgress,
-    uploadType
+    uploadType,
+    handleFileSelected, // Add these missing methods
+    processUploads
   };
 };
+
+export default useUploadHandling;

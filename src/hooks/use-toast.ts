@@ -1,5 +1,6 @@
 
-import { toast as sonnerToast } from 'sonner';
+import { toast as sonnerToast, type ToastT } from 'sonner';
+import { type ReactNode } from 'react';
 
 export type ToastVariant = 'default' | 'success' | 'info' | 'warning' | 'error' | 'destructive';
 
@@ -35,12 +36,11 @@ export type Toast = {
   onOpenChange?: (open: boolean) => void;
 };
 
-const toasts: Toast[] = [];
-
+// Create a fixed toastFunction that conforms to our expectations
 const showToast = ({ title, description, variant = 'default', duration = 5000, action }: ToastProps) => {
   switch (variant) {
     case 'success':
-      sonnerToast.success(title, {
+      return sonnerToast.success(title, {
         description,
         duration,
         action: action ? {
@@ -48,10 +48,9 @@ const showToast = ({ title, description, variant = 'default', duration = 5000, a
           onClick: action.onClick
         } : undefined
       });
-      break;
     case 'info':
     case 'default':
-      sonnerToast(title, {
+      return sonnerToast(title, {
         description,
         duration,
         action: action ? {
@@ -59,9 +58,8 @@ const showToast = ({ title, description, variant = 'default', duration = 5000, a
           onClick: action.onClick
         } : undefined
       });
-      break;
     case 'warning':
-      sonnerToast.warning(title, {
+      return sonnerToast.warning(title, {
         description,
         duration,
         action: action ? {
@@ -69,10 +67,9 @@ const showToast = ({ title, description, variant = 'default', duration = 5000, a
           onClick: action.onClick
         } : undefined
       });
-      break;
     case 'error':
     case 'destructive':
-      sonnerToast.error(title, {
+      return sonnerToast.error(title, {
         description,
         duration,
         action: action ? {
@@ -80,28 +77,42 @@ const showToast = ({ title, description, variant = 'default', duration = 5000, a
           onClick: action.onClick
         } : undefined
       });
-      break;
+    default:
+      return sonnerToast(title, {
+        description,
+        duration,
+        action: action ? {
+          label: action.label,
+          onClick: action.onClick
+        } : undefined
+      });
   }
 };
 
-// Export the toast function directly rather than as a property
+// Define our toast object with proper function signatures
 export const toast = {
-  // Direct access methods for specific variants
-  default: (title: string, options?: ToastOptions) => showToast({ title, ...options, variant: 'default' }),
-  success: (title: string, options?: ToastOptions) => showToast({ title, ...options, variant: 'success' }),
-  info: (title: string, options?: ToastOptions) => showToast({ title, ...options, variant: 'info' }),
-  warning: (title: string, options?: ToastOptions) => showToast({ title, ...options, variant: 'warning' }),
-  error: (title: string, options?: ToastOptions) => showToast({ title, ...options, variant: 'error' }),
-  destructive: (title: string, options?: ToastOptions) => showToast({ title, ...options, variant: 'destructive' }),
-  // Original toast method for backward compatibility
-  toast: showToast,
-  // Direct access to sonnerToast methods
-  ...sonnerToast
+  // Direct toast method that takes a ToastProps object
+  toast: (props: ToastProps) => showToast(props),
+  
+  // Variant-specific methods
+  default: (title: string, options?: ToastOptions) => 
+    showToast({ title, ...options, variant: 'default' }),
+  success: (title: string, options?: ToastOptions) => 
+    showToast({ title, ...options, variant: 'success' }),
+  info: (title: string, options?: ToastOptions) => 
+    showToast({ title, ...options, variant: 'info' }),
+  warning: (title: string, options?: ToastOptions) => 
+    showToast({ title, ...options, variant: 'warning' }),
+  error: (title: string, options?: ToastOptions) => 
+    showToast({ title, ...options, variant: 'error' }),
+  destructive: (title: string, options?: ToastOptions) => 
+    showToast({ title, ...options, variant: 'destructive' }),
 };
 
+// Our hook to use toast
 export const useToast = () => {
   return {
     toast: showToast,
-    toasts
+    toasts: [] // Empty toasts array to match expected interface
   };
 };

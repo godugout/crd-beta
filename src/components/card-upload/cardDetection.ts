@@ -1,109 +1,110 @@
 
-// Define the type for memorabilia
-export type MemorabiliaType = 'card' | 'ticket' | 'program' | 'autograph' | 'face' | 'group' | 'unknown';
+export type MemorabiliaType = 'card' | 'ticket' | 'program' | 'autograph' | 'face' | 'unknown' | 'group';
+export type ExtendedMemorabiliaType = MemorabiliaType | 'group'; // For backward compatibility
 
-// Define the enhanced crop box properties
 export interface EnhancedCropBoxProps {
   id: string;
   x: number;
   y: number;
   width: number;
   height: number;
-  type?: MemorabiliaType;
+  memorabiliaType?: MemorabiliaType;
   confidence?: number;
-  label?: string;
-  metadata?: Record<string, any>;
-  selected?: boolean;
   rotation?: number;
   color?: string;
-  memorabiliaType?: MemorabiliaType;
 }
 
-// Detection function stub
-export const detectCardsInImage = async (
-  imageSource: string | HTMLImageElement, 
-  autoEnhance: boolean = false,
-  canvasRef?: HTMLCanvasElement | null,
-  enabledTypes: MemorabiliaType[] = ['card', 'ticket', 'program', 'autograph', 'face', 'unknown', 'group']
-): Promise<EnhancedCropBoxProps[]> => {
-  console.log('Detecting cards in image:', typeof imageSource === 'string' ? imageSource : 'HTMLImageElement');
-  
-  // Mock detection - in a real app, this would use ML/AI services
-  return [
-    {
-      id: `detection-${Date.now()}-1`,
-      x: 20,
-      y: 20,
-      width: 300,
-      height: 420,
-      type: 'card',
-      memorabiliaType: 'card',
-      confidence: 0.92,
-      label: 'Trading Card',
-      color: '#FF0000',
-      rotation: 0
-    }
-  ];
-};
-
-// Text detection function stub
-export const detectText = async (
-  imageSource: string | HTMLCanvasElement,
-  region?: { x: number, y: number, width: number, height: number }
-): Promise<string> => {
-  console.log('Detecting text in image region:', region);
-  return 'Sample Text';
-};
-
-// Apply crop function stub
 export const applyCrop = async (
   cropBox: EnhancedCropBoxProps,
   canvas: HTMLCanvasElement | null,
-  originalFile: File,
-  imageElement: HTMLImageElement,
+  originalFile: File | null,
+  originalImage: HTMLImageElement | null,
   enhancementType?: MemorabiliaType
-): Promise<{ file: File; url: string }> => {
-  console.log('Applying crop to image:', originalFile.name, cropBox);
-  
-  if (!canvas || !imageElement) {
-    throw new Error('Canvas or image element is missing');
+): Promise<{ file: File; url: string } | null> => {
+  if (!canvas || !originalFile || !originalImage) {
+    console.error("Missing required parameters for applyCrop");
+    return null;
   }
-  
-  // Create a new canvas for the cropped area
-  const croppedCanvas = document.createElement('canvas');
-  const ctx = croppedCanvas.getContext('2d');
-  
-  if (!ctx) {
-    throw new Error('Could not get canvas context');
+
+  try {
+    // Create a new canvas for the cropped area
+    const cropCanvas = document.createElement('canvas');
+    const ctx = cropCanvas.getContext('2d');
+    if (!ctx) {
+      console.error("Failed to get 2D context for crop canvas");
+      return null;
+    }
+
+    cropCanvas.width = cropBox.width;
+    cropCanvas.height = cropBox.height;
+
+    // Draw the cropped portion to the new canvas
+    ctx.drawImage(
+      originalImage,
+      cropBox.x, cropBox.y, cropBox.width, cropBox.height,
+      0, 0, cropBox.width, cropBox.height
+    );
+
+    // Convert canvas to blob
+    const blob = await new Promise<Blob>((resolve) => {
+      cropCanvas.toBlob((blob) => {
+        if (blob) resolve(blob);
+        else resolve(new Blob([]));
+      }, 'image/jpeg', 0.9);
+    });
+
+    // Create a new file
+    const fileName = originalFile.name.replace(/\.[^/.]+$/, "") + "_crop_" + Date.now() + ".jpg";
+    const croppedFile = new File([blob], fileName, { type: 'image/jpeg' });
+
+    // Create a data URL for preview
+    const dataUrl = cropCanvas.toDataURL('image/jpeg', 0.9);
+
+    return { file: croppedFile, url: dataUrl };
+  } catch (error) {
+    console.error("Error in applyCrop:", error);
+    return null;
   }
+};
+
+// Simple text detection function
+export const detectText = async (input: HTMLCanvasElement | string): Promise<{
+  title?: string;
+  text?: string;
+  tags?: string[];
+  confidence?: number;
+}> => {
+  // In a real implementation, this would use OCR
+  // Here we just return a placeholder
+  return {
+    title: "Detected Text",
+    text: "Sample detected text from image",
+    tags: ["detected", "text"],
+    confidence: 0.8
+  };
+};
+
+// Card detection function
+export const detectCardsInImage = async (
+  imageElement: HTMLImageElement | null
+): Promise<EnhancedCropBoxProps[]> => {
+  // In a real implementation, this would use some ML model
+  // Here we just return a simple detection
+  if (!imageElement) return [];
   
-  // Set dimensions
-  croppedCanvas.width = cropBox.width;
-  croppedCanvas.height = cropBox.height;
+  const width = imageElement.naturalWidth;
+  const height = imageElement.naturalHeight;
   
-  // Draw the cropped image
-  ctx.drawImage(
-    imageElement,
-    cropBox.x, 
-    cropBox.y, 
-    cropBox.width, 
-    cropBox.height,
-    0, 
-    0, 
-    cropBox.width, 
-    cropBox.height
-  );
-  
-  // Convert to blob
-  return new Promise((resolve, reject) => {
-    croppedCanvas.toBlob((blob) => {
-      if (blob) {
-        const url = URL.createObjectURL(blob);
-        const file = new File([blob], `crop-${Date.now()}.jpg`, { type: 'image/jpeg' });
-        resolve({ file, url });
-      } else {
-        reject(new Error('Failed to create blob from canvas'));
-      }
-    }, 'image/jpeg', 0.92);
-  });
+  // Create a simple detection in the center of the image
+  return [{
+    id: `auto-${Date.now()}`,
+    x: width * 0.2,
+    y: height * 0.2,
+    width: width * 0.6,
+    height: height * 0.6,
+    memorabiliaType: 'card',
+    confidence: 0.9,
+    rotation: 0,
+    color: '#00aaff'
+  }];
 };

@@ -4,15 +4,16 @@ import { EnhancedCropBoxProps, MemorabiliaType } from '@/components/card-upload/
 
 interface EditorCanvasProps {
   canvasRef: React.RefObject<HTMLCanvasElement>;
-  image: string | null;
+  image?: string | null;
   selectedAreas: EnhancedCropBoxProps[];
   setSelectedAreas: React.Dispatch<React.SetStateAction<EnhancedCropBoxProps[]>>;
   selectedIndex: number;
   setSelectedIndex: (index: number) => void;
-  editorImgRef?: React.RefObject<HTMLImageElement>; // Added this missing prop
-  handlePointerDown?: (e: React.PointerEvent) => void; // Added these missing handlers
+  editorImgRef?: React.RefObject<HTMLImageElement>;
+  handlePointerDown?: (e: React.PointerEvent) => void;
   handlePointerMove?: (e: React.PointerEvent) => void;
   handlePointerUp?: () => void;
+  imageUrl?: string | null; // Added this missing prop
 }
 
 const EditorCanvas: React.FC<EditorCanvasProps> = ({
@@ -25,7 +26,8 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({
   editorImgRef,
   handlePointerDown,
   handlePointerMove,
-  handlePointerUp
+  handlePointerUp,
+  imageUrl
 }) => {
   return (
     <div className="relative w-full h-full">
@@ -39,7 +41,7 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({
       {editorImgRef && (
         <img
           ref={editorImgRef}
-          src={image || ''}
+          src={imageUrl || image || ''}
           className="hidden" // Hidden reference image
           alt="Editor reference"
         />
