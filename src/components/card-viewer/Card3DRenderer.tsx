@@ -86,23 +86,22 @@ const Card3DRenderer: React.FC<Card3DRendererProps> = ({
     return new THREE.MeshPhysicalMaterial({
       map: texture,
       color: texture ? undefined : (isBack ? "#1a3060" : "#2a5298"),
-      metalness: 0.1, // Lower metalness for matte look
-      roughness: 0.7, // Higher roughness for matte finish
-      clearcoat: 0.3, // Subtle clearcoat for print finish
-      clearcoatRoughness: 0.8, // High roughness in clearcoat
-      envMapIntensity: 0.5, // Subtle environment reflections
+      metalness: 0.1,      // Lower metalness for matte look
+      roughness: 0.7,      // Higher roughness for matte finish
+      clearcoat: 0.3,      // Subtle clearcoat for print finish
+      clearcoatRoughness: 0.8,  // High roughness in clearcoat
+      envMapIntensity: 0.5,     // Subtle environment reflections
       flatShading: false,
-      // Add subtle normal mapping for paper texture
-      normalScale: new THREE.Vector2(0.05, 0.05)
+      normalScale: new THREE.Vector2(0.05, 0.05)  // Subtle normal mapping for paper texture
     });
   };
 
-  // Update holographic effect to be more subtle and realistic
+  // Enhanced holographic effect with geometric patterns and rainbow gradients
   const createHolographicMaterial = (intensity: number = 1.0) => {
-    return new THREE.MeshPhysicalMaterial({
+    const material = new THREE.MeshPhysicalMaterial({
       color: new THREE.Color(0xffffff),
-      metalness: 0.9,
-      roughness: 0.2,
+      metalness: 0.95,
+      roughness: 0.15,
       transmission: 0.1,
       thickness: 0.1,
       clearcoat: 1.0,
@@ -110,8 +109,121 @@ const Card3DRenderer: React.FC<Card3DRendererProps> = ({
       transparent: true,
       opacity: 0.15 * intensity,
       side: THREE.FrontSide,
-      envMapIntensity: 2
+      envMapIntensity: 2.5
     });
+
+    // Add rainbow gradient through custom shader chunks
+    material.onBeforeCompile = (shader) => {
+      shader.fragmentShader = shader.fragmentShader.replace(
+        '#include <color_fragment>',
+        `
+        #include <color_fragment>
+        float rainbow = sin(vUv.x * 10.0 + time * 0.5) * 0.5 + 0.5;
+        vec3 rainbowColor = vec3(
+          sin(rainbow + 0.0) * 0.5 + 0.5,
+          sin(rainbow + 2.094) * 0.5 + 0.5,
+          sin(rainbow + 4.188) * 0.5 + 0.5
+        );
+        diffuseColor.rgb = mix(diffuseColor.rgb, rainbowColor, 0.3);
+        
+        // Add subtle geometric pattern
+        float pattern = step(0.5, fract(vUv.x * 20.0)) * step(0.5, fract(vUv.y * 20.0));
+        diffuseColor.rgb += pattern * 0.1;
+        `
+      );
+    };
+
+    return material;
+  };
+
+  // Enhanced shimmer effect with glossy finish
+  const createShimmerMaterial = (intensity: number = 1.0) => {
+    return new THREE.MeshPhysicalMaterial({
+      color: new THREE.Color(0xffffff),
+      metalness: 0.9,
+      roughness: 0.1,
+      clearcoat: 1.0,
+      clearcoatRoughness: 0.1,
+      transparent: true,
+      opacity: 0.2 * intensity,
+      envMapIntensity: 3.0
+    });
+  };
+
+  // Improved refractor effect with full card coverage
+  const createRefractorMaterial = (intensity: number = 1.0) => {
+    const material = new THREE.MeshPhysicalMaterial({
+      color: new THREE.Color(0xffffff),
+      metalness: 0.95,
+      roughness: 0.05,
+      transmission: 0.5,
+      thickness: 0.5,
+      clearcoat: 1.0,
+      clearcoatRoughness: 0.1,
+      transparent: true,
+      opacity: 0.3 * intensity,
+      envMapIntensity: 2.5,
+      side: THREE.DoubleSide
+    });
+
+    // Add prismatic refraction through custom shader
+    material.onBeforeCompile = (shader) => {
+      shader.fragmentShader = shader.fragmentShader.replace(
+        '#include <color_fragment>',
+        `
+        #include <color_fragment>
+        float refraction = sin(vUv.x * 15.0 + vUv.y * 15.0 + time) * 0.5 + 0.5;
+        vec3 prismColor = vec3(
+          sin(refraction * 6.28318) * 0.5 + 0.5,
+          sin(refraction * 6.28318 + 2.094) * 0.5 + 0.5,
+          sin(refraction * 6.28318 + 4.188) * 0.5 + 0.5
+        );
+        diffuseColor.rgb = mix(diffuseColor.rgb, prismColor, 0.4);
+        `
+      );
+    };
+
+    return material;
+  };
+
+  // Enhanced vintage effect with sepia tone and print artifacts
+  const createVintageMaterial = (texture: THREE.Texture | null) => {
+    const material = new THREE.MeshPhysicalMaterial({
+      map: texture,
+      color: new THREE.Color(0xd4b886),  // Sepia base tone
+      metalness: 0.1,
+      roughness: 0.8,
+      clearcoat: 0.2,
+      clearcoatRoughness: 0.9
+    });
+
+    // Add vintage processing effects through custom shader
+    material.onBeforeCompile = (shader) => {
+      shader.fragmentShader = shader.fragmentShader.replace(
+        '#include <color_fragment>',
+        `
+        #include <color_fragment>
+        // Sepia tone
+        vec3 sepiaColor = vec3(
+          diffuseColor.r * 0.393 + diffuseColor.g * 0.769 + diffuseColor.b * 0.189,
+          diffuseColor.r * 0.349 + diffuseColor.g * 0.686 + diffuseColor.b * 0.168,
+          diffuseColor.r * 0.272 + diffuseColor.g * 0.534 + diffuseColor.b * 0.131
+        );
+        
+        // Add subtle print dots pattern
+        float dotPattern = step(0.5, fract(vUv.x * 100.0)) * step(0.5, fract(vUv.y * 100.0));
+        
+        // Add slight vignette
+        vec2 center = vUv - 0.5;
+        float vignette = 1.0 - dot(center, center) * 0.5;
+        
+        // Combine effects
+        diffuseColor.rgb = mix(diffuseColor.rgb, sepiaColor, 0.8) * (0.8 + dotPattern * 0.2) * vignette;
+        `
+      );
+    };
+
+    return material;
   };
 
   useFrame((state) => {
@@ -207,85 +319,43 @@ const Card3DRenderer: React.FC<Card3DRendererProps> = ({
         background={false} 
       />
       
-      {/* Card front */}
+      {/* Card mesh with improved materials */}
       <mesh castShadow receiveShadow position={[0, 0, 0]}>
         <planeGeometry args={[2.5, 3.5, 32, 32]} />
-        <primitive object={createDefaultMaterial(frontTexture)} attach="material" />
+        <primitive object={activeEffects.includes('Vintage') ? 
+          createVintageMaterial(frontTexture) : 
+          createDefaultMaterial(frontTexture)} 
+          attach="material" 
+        />
       </mesh>
+
+      {/* Apply special effects layers */}
+      {activeEffects.includes('Holographic') && (
+        <mesh position={[0, 0, 0.01]} userData={{ effectType: 'holographic' }}>
+          <planeGeometry args={[2.48, 3.48, 32, 32]} />
+          <primitive object={createHolographicMaterial(effectIntensities['Holographic'])} attach="material" />
+        </mesh>
+      )}
       
-      {/* Card back */}
+      {activeEffects.includes('Shimmer') && (
+        <mesh position={[0, 0, 0.015]} userData={{ effectType: 'shimmer' }}>
+          <planeGeometry args={[2.46, 3.46, 32, 32]} />
+          <primitive object={createShimmerMaterial(effectIntensities['Shimmer'])} attach="material" />
+        </mesh>
+      )}
+
+      {activeEffects.includes('Refractor') && (
+        <mesh position={[0, 0, 0.02]} userData={{ effectType: 'refractor' }}>
+          <planeGeometry args={[2.5, 3.5, 32, 32]} />
+          <primitive object={createRefractorMaterial(effectIntensities['Refractor'])} attach="material" />
+        </mesh>
+      )}
+      
+      {/* Card back with appropriate material */}
       <mesh position={[0, 0, -0.01]} rotation={[0, Math.PI, 0]} castShadow receiveShadow>
         <planeGeometry args={[2.5, 3.5, 32, 32]} />
         <primitive object={createDefaultMaterial(backTexture, true)} attach="material" />
       </mesh>
-
-      {/* Apply special effects based on activeEffects */}
-      {activeEffects.includes('Holographic') && (
-        <mesh position={[0, 0, 0.01]} userData={{ effectType: 'holographic' }}>
-          <planeGeometry args={[2.4, 3.4, 30, 30]} />
-          <meshPhysicalMaterial 
-            transparent
-            opacity={0.2 * getEffectIntensity('Holographic')}
-            metalness={0.9}
-            roughness={0.1}
-            color="#ffffff"
-            side={THREE.FrontSide}
-            clearcoat={1}
-            clearcoatRoughness={0.1}
-            envMapIntensity={2}
-            emissive={new THREE.Color(0x88ccff)}
-            emissiveIntensity={0.5}
-          />
-        </mesh>
-      )}
-      
-      {activeEffects.includes('Refractor') && (
-        <mesh position={[0, 0, 0.015]} userData={{ effectType: 'refractor' }}>
-          <planeGeometry args={[2.3, 3.3, 20, 20]} />
-          <meshPhysicalMaterial 
-            transparent
-            opacity={0.15 * getEffectIntensity('Refractor')}
-            color="#88ccff"
-            metalness={0.8}
-            roughness={0.2}
-            side={THREE.FrontSide}
-            envMapIntensity={1.8}
-            transmission={0.5}
-          />
-        </mesh>
-      )}
-
-      {activeEffects.includes('Chrome') && (
-        <mesh position={[0, 0, 0.02]} userData={{ effectType: 'chrome' }}>
-          <planeGeometry args={[2.45, 3.45, 20, 20]} />
-          <meshPhysicalMaterial 
-            transparent
-            opacity={0.3 * getEffectIntensity('Chrome')}
-            color="#ffffff"
-            metalness={1}
-            roughness={0.05}
-            clearcoat={1}
-            side={THREE.FrontSide}
-            envMapIntensity={3}
-          />
-        </mesh>
-      )}
-      
-      {activeEffects.includes('Gold Foil') && (
-        <mesh position={[0, 0, 0.025]} userData={{ effectType: 'goldfoil' }}>
-          <planeGeometry args={[2.35, 3.35, 20, 20]} />
-          <meshPhysicalMaterial 
-            transparent
-            opacity={0.4 * getEffectIntensity('Gold Foil')}
-            color="#ffd700"
-            metalness={1}
-            roughness={0.2}
-            reflectivity={1}
-            side={THREE.FrontSide}
-            envMapIntensity={2}
-          />
-        </mesh>
-      )}
     </group>
   );
 };
