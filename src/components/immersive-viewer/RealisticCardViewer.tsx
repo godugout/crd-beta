@@ -22,6 +22,8 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { getEnvironmentMapById } from '@/lib/environment-maps';
 import { logRenderingInfo } from '@/utils/debugRenderer';
+import { Eye } from 'lucide-react';
+import ViewerSettings from '@/components/gallery/viewer-components/ViewerSettings';
 
 // Define possible return types from useTexture
 type TextureResult = THREE.Texture | Record<string, THREE.Texture> | THREE.Texture[];
@@ -257,6 +259,7 @@ const RealisticCardViewer: React.FC<RealisticCardViewerProps> = ({
     isUserCustomized,
     toggleDynamicLighting
   } = useCardLighting(preferences?.environmentType || 'studio');
+  const [showViewerSettings, setShowViewerSettings] = useState(false);
 
   // Save user preferences when they change
   useEffect(() => {
@@ -378,6 +381,22 @@ const RealisticCardViewer: React.FC<RealisticCardViewerProps> = ({
       <div className="absolute top-2 left-1/2 transform -translate-x-1/2 bg-black/50 backdrop-blur-sm text-white px-3 py-1 rounded-full text-sm z-10">
         {card.title || 'Untitled Card'}
       </div>
+
+      <Button
+        variant="ghost"
+        size="icon"
+        className="absolute top-4 right-4 text-white bg-black/50 backdrop-blur-sm hover:bg-black/70 z-20"
+        onClick={() => setShowViewerSettings(!showViewerSettings)}
+      >
+        <Eye className="h-5 w-5" />
+      </Button>
+
+      <ViewerSettings
+        settings={lightingSettings}
+        onUpdateSettings={updateLightingSetting}
+        onApplyPreset={applyPreset}
+        isOpen={showViewerSettings}
+      />
     </div>
   );
 };
