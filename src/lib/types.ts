@@ -26,6 +26,11 @@ export interface Card {
   gradingCompany?: string;
   height?: number;
   width?: number;
+  artist?: string; // Added for CardDetailPanel
+  rarity?: string; // Added for CardDetailPanel
+  reactions?: any[]; // Added for CardItem
+  fabricSwatches?: any[]; // Added for CardBack
+  viewCount?: number; // Added for CardGrid
 }
 
 export interface User {
@@ -35,18 +40,25 @@ export interface User {
   avatarUrl?: string;
   createdAt: string;
   updatedAt: string;
+  displayName?: string; // Added for CommentSection
+  username?: string; // Added for CommentSection
 }
 
 export interface Collection {
   id: string;
   title: string;
+  name?: string; // Added for compatibility with components that use name
   description?: string;
   thumbnailUrl?: string;
-  cardCount: number;
+  cardCount?: number;
   createdAt: string;
   updatedAt: string;
   userId: string;
   isPublic?: boolean;
+  coverImageUrl?: string; // Added for CollectionsSection
+  visibility?: 'public' | 'private' | 'team' | 'unlisted'; // Added for CollectionGrid
+  featured?: boolean; // Added for CollectionGrid
+  cards?: Card[]; // Added for CollectionGrid
 }
 
 export interface GroupMeta {
@@ -77,7 +89,7 @@ export interface AuthSession {
   refreshToken?: string;
 }
 
-// Add UserRole enum to be exported directly from this file
+// User Role, Permission and Mapping
 export enum UserRole {
   ADMIN = 'admin',
   USER = 'user',
@@ -86,9 +98,6 @@ export enum UserRole {
   MODERATOR = 'moderator'
 }
 
-/**
- * User permission types
- */
 export type UserPermission = 
   | 'read:own' 
   | 'write:own' 
@@ -101,9 +110,6 @@ export type UserPermission =
   | 'moderate:content'
   | 'all';
 
-/**
- * Role to permission mapping
- */
 export const ROLE_PERMISSIONS: Record<UserRole, UserPermission[]> = {
   [UserRole.ADMIN]: ['all'],
   [UserRole.USER]: ['read:own', 'write:own', 'delete:own'],
@@ -111,3 +117,29 @@ export const ROLE_PERMISSIONS: Record<UserRole, UserPermission[]> = {
   [UserRole.CREATOR]: ['read:own', 'write:own', 'delete:own', 'create:premium'],
   [UserRole.MODERATOR]: ['read:own', 'write:own', 'delete:own', 'moderate:content']
 };
+
+// Adding Comment and Reaction for components that need them
+export interface Comment {
+  id: string;
+  content: string;
+  userId: string;
+  cardId?: string;
+  collectionId?: string;
+  teamId?: string;
+  parentId?: string;
+  createdAt: string;
+  updatedAt: string;
+  user?: User;
+}
+
+export interface Reaction {
+  id: string;
+  userId: string;
+  targetType: 'card' | 'collection' | 'comment' | string;
+  targetId: string;
+  type: 'like' | 'love' | 'wow' | 'haha' | 'sad' | 'angry';
+  cardId?: string;
+  collectionId?: string;
+  commentId?: string;
+  user?: User;
+}

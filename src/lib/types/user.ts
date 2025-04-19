@@ -11,8 +11,8 @@ export { UserRole, UserPermission, ROLE_PERMISSIONS };
 export interface User extends BaseEntity {
   email: string;
   name?: string;
-  displayName?: string; // Add this property
-  username?: string; // Add this property
+  displayName?: string; // Already defined
+  username?: string; // Already defined
   avatarUrl?: string;
   bio?: string;
   role: UserRole;

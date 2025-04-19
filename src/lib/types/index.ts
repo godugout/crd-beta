@@ -13,9 +13,6 @@ export interface BaseEntity {
   updatedAt?: string;
 }
 
-// For backward compatibility with JsonObject
-export type JsonObject = Record<string, JsonValue>;
-
 // Re-export from main types.ts file for compatibility
 export { UserRole, UserPermission, ROLE_PERMISSIONS } from '../types';
 
@@ -38,6 +35,5 @@ export type {
 } from './enhancedCardTypes';
 
 // For backward compatibility, keep the old imports as well
-// But we should gradually migrate to using the centralized types
 import * as OldTypes from '@/types/card';
 export const oldTypes = OldTypes;

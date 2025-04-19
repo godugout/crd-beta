@@ -1,3 +1,4 @@
+
 /**
  * Consolidated Card Types for Cardshow (CRD)
  * This file serves as the central source of truth for all card-related types
@@ -215,12 +216,12 @@ export type CardRarity = 'common' | 'uncommon' | 'rare' | 'ultra-rare' | 'legend
  */
 export interface BaseCard extends BaseEntity {
   title: string;
-  description: string; // Make it required to satisfy most component requirements
+  description: string; // Required in this model
   imageUrl: string;
   backImageUrl?: string;
   thumbnailUrl: string;
   tags: string[];
-  collectionId?: string; // Add this property
+  collectionId?: string;
   userId: string;
   teamId?: string;
   isPublic?: boolean;
@@ -238,7 +239,7 @@ export interface BaseCard extends BaseEntity {
   set?: string;
   cardNumber?: string;
   cardType?: string;
-  artist?: string; // For backward compatibility
+  artist?: string;
   backgroundColor?: string;
   textColor?: string;
   specialEffect?: string;
@@ -261,7 +262,10 @@ export interface BaseCard extends BaseEntity {
 /**
  * Main Card interface that can be extended for specific use cases
  */
-export interface Card extends BaseCard {}
+export interface Card extends BaseCard {
+  // Make description optional for backward compatibility
+  description: string | undefined;
+}
 
 // Export types from enhancedCardTypes using export type for isolatedModules compatibility
 export type { EnhancedCard, Series, Deck } from './enhancedCardTypes';
