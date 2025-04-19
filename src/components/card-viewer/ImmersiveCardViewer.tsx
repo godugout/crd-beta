@@ -1,237 +1,239 @@
-import React, { useState, useEffect, Suspense, useRef } from 'react';
-import { Canvas } from '@react-three/fiber';
-import { OrbitControls } from '@react-three/drei';
-import { toast } from 'sonner';
+
+import React, { useRef, useEffect, useState, Suspense } from 'react';
+import { useParams, useSearchParams } from 'react-router-dom';
+import { useCards } from '@/context/CardContext';
+import { useToast } from '@/hooks/use-toast';
 import { Card } from '@/lib/types';
-import Card3DRenderer from './Card3DRenderer';
-import CssEffectsLayer from '../card-effects/CssEffectsLayer';
+import { Canvas } from '@react-three/fiber';
+import { OrbitControls, PerspectiveCamera, Environment } from '@react-three/drei';
+import { DEFAULT_DESIGN_METADATA, FALLBACK_IMAGE_URL } from '@/lib/utils/cardDefaults';
+import { LightingSettings } from '@/hooks/useCardLighting';
+import Card3DRenderer from '../card-viewer/Card3DRenderer';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
-import { useCardLighting } from '@/hooks/useCardLighting';
-import { FALLBACK_IMAGE_URL } from '@/lib/utils/cardDefaults';
+import { Slider } from '@/components/ui/slider';
+import { Label } from '@/components/ui/label';
+import { ChevronLeft, ChevronRight, ArrowUp, ArrowDown, SunMedium } from 'lucide-react';
 
 interface ImmersiveCardViewerProps {
   card: Card;
+  isFlipped: boolean;
   activeEffects: string[];
   effectIntensities?: Record<string, number>;
-  initialFlipped?: boolean;
+  lightingSettings?: LightingSettings;
+  onEffectIntensityChange?: (effect: string, value: number) => void;
 }
 
 const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
   card,
+  isFlipped,
   activeEffects = [],
   effectIntensities = {},
-  initialFlipped = false
+  lightingSettings,
+  onEffectIntensityChange
 }) => {
-  const [isFlipped, setIsFlipped] = useState(initialFlipped);
-  const [mousePosition, setMousePosition] = useState({ x: 0.5, y: 0.5 });
-  const [use3D, setUse3D] = useState(true);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const { lightingSettings } = useCardLighting('studio');
-  const frameCounterRef = useRef(0);
-  const lastFrameTimeRef = useRef(Date.now());
-  const [fps, setFps] = useState(60);
-  const [showControls, setShowControls] = useState(true);
-  const [qualityLevel, setQualityLevel] = useState<'high'|'medium'|'low'>('medium');
+  const { toast } = useToast();
+  const [imageError, setImageError] = useState(false);
+  const [localIsFlipped, setLocalIsFlipped] = useState(isFlipped);
+  const [showEffectsPanel, setShowEffectsPanel] = useState(false);
+  const [localEffectIntensities, setLocalEffectIntensities] = useState<Record<string, number>>(effectIntensities);
+  const [effectsOrder, setEffectsOrder] = useState<string[]>(activeEffects);
   
-  const updatePerformanceStats = () => {
-    const now = Date.now();
-    const elapsed = now - lastFrameTimeRef.current;
-    
-    frameCounterRef.current++;
-    if (frameCounterRef.current % 10 === 0) {
-      if (elapsed > 0) {
-        const currentFps = Math.round(1000 / (elapsed / 10));
-        setFps(currentFps);
-        
-        if (currentFps < 30 && qualityLevel !== 'low') {
-          setQualityLevel('low');
-          console.log('Auto-switching to low quality mode for better performance');
-        } else if (currentFps > 45 && currentFps < 55 && qualityLevel === 'high') {
-          setQualityLevel('medium');
-        } else if (currentFps > 58 && qualityLevel === 'low') {
-          setQualityLevel('medium');
-        }
-      }
-      lastFrameTimeRef.current = now;
-    }
-  };
-  
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!containerRef.current) return;
-    
-    if (frameCounterRef.current % 3 !== 0) return;
-    
-    const rect = containerRef.current.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width;
-    const y = (e.clientY - rect.top) / rect.height;
-    
-    setMousePosition({ x, y });
-  };
-  
-  const cardWithFallback = {
-    ...card,
-    imageUrl: card.imageUrl || FALLBACK_IMAGE_URL,
-    backImageUrl: card.backImageUrl || '/card-back-texture.jpg' 
-  };
-  
-  const toggleQuality = () => {
-    const levels: Array<'high'|'medium'|'low'> = ['high', 'medium', 'low'];
-    const currentIndex = levels.indexOf(qualityLevel);
-    const nextIndex = (currentIndex + 1) % levels.length;
-    setQualityLevel(levels[nextIndex]);
-    toast.info(`Quality set to ${levels[nextIndex]}`);
-  };
+  // Update local state when props change
+  useEffect(() => {
+    setLocalIsFlipped(isFlipped);
+  }, [isFlipped]);
   
   useEffect(() => {
-    return () => {
-      if (canvasRef.current) {
-        const gl = canvasRef.current.getContext('webgl2') || canvasRef.current.getContext('webgl');
-        if (gl) {
-          const loseContext = gl.getExtension('WEBGL_lose_context');
-          if (loseContext) loseContext.loseContext();
-        }
-      }
+    setLocalEffectIntensities(effectIntensities);
+  }, [effectIntensities]);
+  
+  useEffect(() => {
+    setEffectsOrder(activeEffects);
+  }, [activeEffects]);
+  
+  // Ensure card has proper image URLs before rendering
+  if (!card.imageUrl) {
+    // Use a fallback image if none is provided
+    card = {
+      ...card,
+      imageUrl: FALLBACK_IMAGE_URL
     };
-  }, []);
+    console.log("Using fallback image for card:", card.id);
+  }
+
+  // Handle effect intensity changes
+  const handleEffectIntensityChange = (effect: string, value: number) => {
+    setLocalEffectIntensities(prev => ({
+      ...prev,
+      [effect]: value
+    }));
+    
+    if (onEffectIntensityChange) {
+      onEffectIntensityChange(effect, value);
+    }
+  };
+
+  // Handle effect layer order changes
+  const moveEffectLayer = (effect: string, direction: 'up' | 'down') => {
+    const currentIndex = effectsOrder.indexOf(effect);
+    if (
+      (direction === 'up' && currentIndex > 0) || 
+      (direction === 'down' && currentIndex < effectsOrder.length - 1)
+    ) {
+      const newEffectsOrder = [...effectsOrder];
+      const swapIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+      
+      // Swap positions
+      [newEffectsOrder[currentIndex], newEffectsOrder[swapIndex]] = 
+      [newEffectsOrder[swapIndex], newEffectsOrder[currentIndex]];
+      
+      setEffectsOrder(newEffectsOrder);
+      
+      toast({
+        title: "Effect Layer Updated",
+        description: `${effect} moved ${direction}`,
+      });
+    }
+  };
 
   return (
-    <div 
-      ref={containerRef} 
-      className="fixed inset-0 w-full h-full bg-black overflow-hidden" 
-      onMouseMove={handleMouseMove}
-    >
-      {use3D ? (
-        <Canvas
-          ref={canvasRef}
-          className="w-full h-full"
-          camera={{ position: [0, 0, 5], fov: 50 }}
-          dpr={[1, qualityLevel === 'high' ? 2 : qualityLevel === 'medium' ? 1.5 : 1]}
-          frameloop={qualityLevel === 'low' ? 'demand' : 'always'}
-          gl={{ 
-            powerPreference: 'high-performance',
-            antialias: qualityLevel !== 'low',
-            alpha: false,
-            stencil: false,
-            depth: true,
-            precision: qualityLevel === 'high' ? 'highp' : 'mediump'
-          }}
-          performance={{
-            min: qualityLevel === 'low' ? 0.5 : qualityLevel === 'medium' ? 0.75 : 1
-          }}
-        >
-          <ambientLight intensity={0.7} />
-          <spotLight 
-            position={[10, 10, 10]} 
-            angle={0.15} 
-            penumbra={1} 
-            intensity={1} 
-            castShadow={qualityLevel === 'high'} 
+    <div className="w-full h-full relative">
+      <Canvas
+        camera={{ position: [0, 0, 5], fov: 50 }}
+        style={{ background: '#111' }}
+        shadows
+      >
+        <ambientLight intensity={lightingSettings?.ambientLight.intensity || 0.7} 
+                     color={lightingSettings?.ambientLight.color || '#ffffff'} />
+        <spotLight 
+          position={[
+            lightingSettings?.primaryLight.x || 10,
+            lightingSettings?.primaryLight.y || 10,
+            lightingSettings?.primaryLight.z || 10
+          ]} 
+          angle={0.15} 
+          penumbra={1} 
+          intensity={lightingSettings?.primaryLight.intensity || 1} 
+          color={lightingSettings?.primaryLight.color || '#ffffff'}
+          castShadow
+        />
+        
+        <Environment preset={(lightingSettings?.environmentType || 'studio') as any} background={false} />
+        
+        <Suspense fallback={
+          <mesh position={[0, 0, 0]}>
+            <boxGeometry args={[2, 2, 0.1]} />
+            <meshStandardMaterial color="blue" wireframe />
+          </mesh>
+        }>
+          <Card3DRenderer 
+            card={card}
+            isFlipped={localIsFlipped} 
+            activeEffects={effectsOrder}
+            effectIntensities={localEffectIntensities}
           />
-          
-          <Suspense fallback={null}>
-            <Card3DRenderer 
-              card={cardWithFallback}
-              isFlipped={isFlipped} 
-              activeEffects={activeEffects}
-              effectIntensities={effectIntensities}
-              onRenderFrame={updatePerformanceStats}
-              qualityLevel={qualityLevel}
-            />
-          </Suspense>
-          
-          <OrbitControls 
-            enablePan={false}
-            enableZoom={true}
-            minDistance={3}
-            maxDistance={8}
-            autoRotate={false}
-            enableDamping={qualityLevel !== 'low'}
-            dampingFactor={0.05}
-            rotateSpeed={0.5}
-            maxPolarAngle={Math.PI / 1.75}
-            minPolarAngle={Math.PI / 3}
-          />
-        </Canvas>
-      ) : (
-        <div className="w-full h-full flex items-center justify-center bg-gray-900">
-          <div className="relative w-64 h-96 perspective-800">
-            <div 
-              className={`absolute w-full h-full transition-transform duration-500 transform-style-3d ${
-                isFlipped ? 'rotate-y-180' : ''
-              }`}
-            >
-              <div className="absolute inset-0 backface-hidden rounded-lg overflow-hidden shadow-xl">
-                <img 
-                  src={cardWithFallback.imageUrl} 
-                  alt={cardWithFallback.title || 'Card'} 
-                  className="w-full h-full object-cover"
-                />
-                <CssEffectsLayer 
-                  activeEffects={activeEffects}
-                  effectIntensities={effectIntensities}
-                  isFlipped={false}
-                  mousePosition={mousePosition}
-                />
-              </div>
-              
-              <div className="absolute inset-0 backface-hidden rotate-y-180 rounded-lg overflow-hidden shadow-xl bg-gray-800">
-                <img 
-                  src={cardWithFallback.backImageUrl} 
-                  alt="Card Back" 
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+        </Suspense>
+        
+        <OrbitControls 
+          enablePan={false}
+          enableZoom={true}
+          minDistance={3}
+          maxDistance={8}
+          autoRotate={lightingSettings?.autoRotate || false}
+          autoRotateSpeed={0.5}
+        />
+      </Canvas>
       
-      <div className={cn(
-        "fixed top-0 left-0 right-0 p-4 transition-transform duration-300 z-10 bg-gradient-to-b from-black/50 to-transparent",
-        showControls ? "translate-y-0" : "-translate-y-full"
-      )}>
-        <div className="flex justify-between items-center">
-          <h1 className="text-white text-xl font-semibold">{card.title || 'Untitled Card'}</h1>
-          <div className="flex gap-2">
-            <Button 
-              variant="ghost" 
-              className="text-white hover:bg-white/20"
-              onClick={() => setIsFlipped(!isFlipped)}
-            >
-              {isFlipped ? 'Show Front' : 'Show Back'}
-            </Button>
-            <Button 
-              variant="ghost" 
-              className="text-white hover:bg-white/20"
-              onClick={toggleQuality}
-            >
-              {qualityLevel.charAt(0).toUpperCase() + qualityLevel.slice(1)} Quality
-            </Button>
-            <Button
-              variant="ghost"
-              className="text-white hover:bg-white/20"
-              onClick={() => setShowControls(false)}
-            >
-              Hide Controls
-            </Button>
-          </div>
-        </div>
+      {/* Controls overlay - OUTSIDE of Canvas */}
+      <div className="absolute bottom-4 left-0 right-0 flex justify-center z-10">
+        <Button 
+          className="px-4 py-2 bg-gray-800/70 text-white rounded-full hover:bg-gray-700/90 transition"
+          onClick={() => setLocalIsFlipped(!localIsFlipped)}
+        >
+          {localIsFlipped ? 'Show Front' : 'Show Back'}
+        </Button>
       </div>
 
-      {!showControls && (
+      {/* Effects Panel Toggle Button - OUTSIDE of Canvas */}
+      <div className="absolute top-1/2 right-4 transform -translate-y-1/2 z-20">
         <Button
-          className="fixed top-4 right-4 z-10 bg-black/50 hover:bg-black/70"
-          onClick={() => setShowControls(true)}
+          variant="secondary"
+          size="icon"
+          className="rounded-full shadow-lg bg-black/50 hover:bg-black/70 text-white"
+          onClick={() => setShowEffectsPanel(!showEffectsPanel)}
         >
-          Show Controls
+          {showEffectsPanel ? <ChevronRight /> : <ChevronLeft />}
         </Button>
-      )}
-      
-      <div className="fixed top-2 right-2 text-xs bg-black/50 text-white px-2 py-1 rounded z-20">
-        {fps} FPS ({qualityLevel})
       </div>
+
+      {/* Effects Controls Panel - OUTSIDE of Canvas */}
+      {showEffectsPanel && (
+        <div className="absolute top-0 right-0 h-full w-72 bg-gray-900/90 backdrop-blur-sm text-white p-4 overflow-y-auto z-10">
+          <h3 className="text-lg font-semibold mb-4">Effect Controls</h3>
+          
+          {activeEffects.length === 0 ? (
+            <p className="text-gray-400">No active effects</p>
+          ) : (
+            <div className="space-y-6">
+              {effectsOrder.map((effect) => (
+                <div key={effect} className="space-y-2 bg-gray-800/60 p-3 rounded-lg border border-gray-700">
+                  <div className="flex justify-between items-center">
+                    <Label className="text-sm font-medium">{effect}</Label>
+                    <div className="flex space-x-1">
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="h-6 w-6 p-0 hover:bg-gray-700"
+                        onClick={() => moveEffectLayer(effect, 'up')}
+                        disabled={effectsOrder.indexOf(effect) === 0}
+                      >
+                        <ArrowUp className="h-4 w-4" />
+                        <span className="sr-only">Move layer up</span>
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="h-6 w-6 p-0 hover:bg-gray-700"
+                        onClick={() => moveEffectLayer(effect, 'down')}
+                        disabled={effectsOrder.indexOf(effect) === effectsOrder.length - 1}
+                      >
+                        <ArrowDown className="h-4 w-4" />
+                        <span className="sr-only">Move layer down</span>
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <SunMedium className="h-3 w-3 text-gray-400" />
+                    <Slider
+                      value={[localEffectIntensities[effect] || 1.0]}
+                      min={0}
+                      max={1}
+                      step={0.05}
+                      onValueChange={(values) => handleEffectIntensityChange(effect, values[0])}
+                      className="flex-1"
+                    />
+                    <span className="text-xs w-8 text-right">
+                      {Math.round((localEffectIntensities[effect] || 1) * 100)}%
+                    </span>
+                  </div>
+                  
+                  <div className="text-xs text-gray-400 mt-1">
+                    {effect === 'Holographic' && 'Rainbow reflection effect with dynamic color shift.'}
+                    {effect === 'Refractor' && 'Light refraction with prismatic effect.'}
+                    {effect === 'Chrome' && 'Metallic chrome finish with high reflectivity.'}
+                    {effect === 'Gold Foil' && 'Golden foil accent with light reflection.'}
+                  </div>
+                  
+                  <div className="text-xs text-gray-500 mt-1">
+                    Layer order: {effectsOrder.indexOf(effect) + 1} of {effectsOrder.length}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };

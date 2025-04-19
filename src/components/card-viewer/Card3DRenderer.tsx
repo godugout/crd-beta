@@ -14,7 +14,6 @@ interface Card3DRendererProps {
   effectIntensities?: Record<string, number>;
   lightingPreset?: string;
   onRenderFrame?: () => void;
-  qualityLevel?: 'high' | 'medium' | 'low';
 }
 
 /**
@@ -26,13 +25,11 @@ const Card3DRenderer: React.FC<Card3DRendererProps> = ({
   activeEffects = [],
   effectIntensities = {},
   lightingPreset = 'studio',
-  onRenderFrame,
-  qualityLevel = 'medium'
+  onRenderFrame
 }) => {
   const groupRef = useRef<THREE.Group>(null);
   const frameCount = useRef(0);
   const [environmentPreset, setEnvironmentPreset] = useState('studio');
-  const skipFrameCount = useRef(0);
   
   // Map custom lighting preset to valid environment preset
   useEffect(() => {
@@ -40,69 +37,41 @@ const Card3DRenderer: React.FC<Card3DRendererProps> = ({
     setEnvironmentPreset(mappedPreset);
   }, [lightingPreset]);
   
-  // Optimized frame updates with dynamic frame skipping based on quality level
-  useFrame((state) => {
-    // Update render stats callback
-    if (onRenderFrame) {
+  // Optimized frame updates - only run certain operations every N frames
+  useFrame(() => {
+    frameCount.current = (frameCount.current + 1) % 5;
+    
+    // Only update every 5th frame to reduce CPU load
+    if (frameCount.current === 0 && onRenderFrame) {
       onRenderFrame();
-    }
-    
-    // Throttle animations based on quality level
-    const skipFrames = qualityLevel === 'high' ? 0 : qualityLevel === 'medium' ? 1 : 3;
-    skipFrameCount.current = (skipFrameCount.current + 1) % (skipFrames + 1);
-    if (skipFrameCount.current !== 0) return;
-    
-    // Add subtle floating animation to the card
-    if (groupRef.current && !isFlipped) {
-      const time = state.clock.getElapsedTime() * 0.3;
-      groupRef.current.position.y = Math.sin(time) * 0.05;
-      groupRef.current.rotation.z = Math.sin(time * 0.7) * 0.02;
-    }
-
-    // Smooth card flip animation
-    if (groupRef.current) {
-      const targetRotation = isFlipped ? Math.PI : 0;
-      const currentRotation = groupRef.current.rotation.y;
-      
-      // Use faster lerp for low quality mode
-      const lerpFactor = qualityLevel === 'low' ? 0.2 : 0.1;
-      
-      groupRef.current.rotation.y = THREE.MathUtils.lerp(
-        currentRotation,
-        targetRotation,
-        lerpFactor
-      );
     }
   });
   
-  // Skip rendering specific effects based on quality level
-  const filteredEffects = activeEffects.filter(effect => {
-    // In low quality mode, remove performance-heavy effects
-    if (qualityLevel === 'low') {
-      if (['Spectral', 'Pulsar', 'Mojo'].includes(effect)) {
-        return false;
-      }
-    }
-    return true;
-  });
+  // Determine if we need 3D effects or if CSS effects are sufficient
+  const needs3DEffects = activeEffects.some(effect => 
+    ['Holographic', 'Shimmer', 'Refractor'].includes(effect)
+  );
+  
+  // Use a simpler shadow setup when possible
+  const shadowProps = needs3DEffects 
+    ? { castShadow: true, receiveShadow: true } 
+    : {};
 
+  // Check for card back image or use default
+  const backImageUrl = card.backImageUrl || '/card-back-texture.jpg';
+  
   return (
-    <group ref={groupRef}>
+    <group ref={groupRef} {...shadowProps}>
       <CardModel
         imageUrl={card.imageUrl || '/placeholder-card.jpg'}
-        backImageUrl={card.backImageUrl || '/card-back-texture.jpg'}
+        backImageUrl={backImageUrl}
         isFlipped={isFlipped}
-        activeEffects={filteredEffects} 
+        activeEffects={activeEffects} 
         effectIntensities={effectIntensities}
-        qualityLevel={qualityLevel}
       />
       
       {/* Environment provides lighting - using mapped preset */}
-      <Environment 
-        preset={environmentPreset as any} 
-        background={false}
-        resolution={qualityLevel === 'high' ? 256 : qualityLevel === 'medium' ? 128 : 64}
-      />
+      <Environment preset={environmentPreset as any} background={false} />
     </group>
   );
 };
