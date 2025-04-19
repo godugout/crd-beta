@@ -33,6 +33,13 @@ export interface EnhancedCard extends BaseEntity {
   previousOwners?: string[];
   price?: number;
   forSale?: boolean;
+  marketData?: Record<string, any>;
+  editionSize?: number;
+  cardNumber?: string;
+  
+  // Required fields for compatibility with base Card
+  createdAt: string;
+  updatedAt: string;
 }
 
 /**
@@ -68,6 +75,32 @@ export interface Series {
   releaseDate?: string;
   creator?: string;
   rarity?: CardRarity;
+  
+  // Additional properties used in components
+  title?: string;
+  coverImageUrl?: string;
+  artistId?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  isPublished?: boolean;
+  releaseType?: string;
+  cardIds?: string[];
+}
+
+/**
+ * Deck interface for card grouping
+ */
+export interface Deck {
+  id: string;
+  title: string;
+  description?: string;
+  coverImageUrl?: string;
+  cards: EnhancedCard[];
+  createdAt: string;
+  updatedAt: string;
+  ownerId: string;
+  visibility?: 'public' | 'private' | 'team';
+  totalCards?: number;
 }
 
 export { CardRarity };

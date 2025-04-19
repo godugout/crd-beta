@@ -11,6 +11,12 @@ export interface InstagramPost {
   timestamp: string;
   likes: number;
   comments: number;
+  
+  // Additional properties needed by components
+  mediaType?: string;
+  thumbnailUrl?: string;
+  mediaUrl?: string;
+  postId?: string;
 }
 
 export interface InstagramAccount {

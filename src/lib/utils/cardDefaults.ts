@@ -33,3 +33,12 @@ export const DEFAULT_DESIGN_METADATA: DesignMetadata = {
 // Fallback image URLs
 export const FALLBACK_FRONT_IMAGE_URL = '/images/card-placeholder.png';
 export const FALLBACK_BACK_IMAGE_URL = '/images/card-back-placeholder.png';
+export const FALLBACK_IMAGE_URL = FALLBACK_FRONT_IMAGE_URL; // Alias for backward compatibility
+
+// Image error handling helper
+export const handleImageLoadError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+  const img = e.target as HTMLImageElement;
+  console.warn(`Image failed to load: ${img.src}`);
+  img.src = FALLBACK_FRONT_IMAGE_URL;
+  img.onerror = null; // Prevent infinite error loop
+};

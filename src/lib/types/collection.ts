@@ -19,6 +19,7 @@ export interface Collection extends BaseEntity {
   cards?: Card[];
   allowComments?: boolean;
   designMetadata?: any;
+  tags?: string[]; // Add tags support for Collections
 }
 
 /**

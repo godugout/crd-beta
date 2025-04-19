@@ -7,7 +7,7 @@ import { JsonValue } from '../types';
  */
 export interface Card extends BaseEntity {
   title: string;
-  description: string;
+  description: string; // Make this required for compatibility with other code
   imageUrl: string;
   thumbnailUrl?: string;
   tags: string[];
@@ -36,6 +36,7 @@ export interface Card extends BaseEntity {
   height?: number;
   width?: number;
   collectionId?: string;
+  cards?: Card[]; // For compatibility with collection references
 }
 
 export interface CardDesignState {
@@ -84,6 +85,9 @@ export interface CardLayer {
   color?: string;
   [key: string]: any;
 }
+
+// Export HotspotData from enhancedCardTypes for backward compatibility
+export { HotspotData } from './enhancedCardTypes';
 
 // Card rarity levels
 export type CardRarity = 'common' | 'uncommon' | 'rare' | 'ultra-rare' | 'legendary' | 'exclusive';

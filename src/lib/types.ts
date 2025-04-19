@@ -1,4 +1,3 @@
-
 // Base types that might be used across modules
 export type JsonValue = 
   | string 
@@ -14,11 +13,119 @@ export interface BaseEntity {
   updatedAt?: string;
 }
 
+// User Role, Permission and Mapping
+export enum UserRole {
+  ADMIN = 'admin',
+  USER = 'user',
+  PREMIUM = 'premium',
+  CREATOR = 'creator',
+  MODERATOR = 'moderator'
+}
+
+export type UserPermission = 
+  | 'read:own' 
+  | 'write:own' 
+  | 'delete:own' 
+  | 'read:all' 
+  | 'write:all' 
+  | 'delete:all' 
+  | 'premium:features'
+  | 'create:premium'
+  | 'moderate:content'
+  | 'all';
+
+export const ROLE_PERMISSIONS: Record<UserRole, UserPermission[]> = {
+  [UserRole.ADMIN]: ['all'],
+  [UserRole.USER]: ['read:own', 'write:own', 'delete:own'],
+  [UserRole.PREMIUM]: ['read:own', 'write:own', 'delete:own', 'premium:features'],
+  [UserRole.CREATOR]: ['read:own', 'write:own', 'delete:own', 'create:premium'],
+  [UserRole.MODERATOR]: ['read:own', 'write:own', 'delete:own', 'moderate:content']
+};
+
+// Design Metadata Interface
+export interface DesignMetadata {
+  cardStyle: {
+    template: string;
+    effect: string;
+    borderRadius: string;
+    borderColor: string;
+    frameColor: string;
+    frameWidth: number;
+    shadowColor: string;
+  };
+  textStyle: {
+    titleColor: string;
+    titleAlignment: string;
+    titleWeight: string;
+    descriptionColor: string;
+  };
+  marketMetadata: {
+    isPrintable: boolean;
+    isForSale: boolean;
+    includeInCatalog: boolean;
+  };
+  cardMetadata: {
+    category: string;
+    cardType: string;
+    series: string;
+  };
+}
+
+// Define the GroupUploadType enum
+export enum GroupUploadType {
+  PHOTOS = 'photos',
+  CARDS = 'cards',
+  MIXED = 'mixed'
+}
+
+// For Oakland Memories
+export interface OaklandMemoryData {
+  title: string;
+  description: string;
+  date?: string;
+  opponent?: string;
+  score?: string;
+  location?: string;
+  section?: string;
+  memoryType?: string;
+  attendees?: string[];
+  tags?: string[];
+  imageUrl?: string;
+  historicalContext?: string;
+  personalSignificance?: string;
+}
+
+// Re-export from main types.ts file for compatibility
+export { DEFAULT_DESIGN_METADATA } from './utils/cardDefaults';
+
+// Export updated type definitions
+export * from './types/cardTypes';
+export * from './types/interaction';
+export * from './types/user';
+export * from './types/collection';
+export * from './types/instagram';
+export * from './types/teamTypes';
+export type { CardEffect, CardEffectSettings } from './types/cardEffects';
+
+// Don't re-export enhancedCardTypes directly to avoid ambiguity
+import * as EnhancedCardTypes from './types/enhancedCardTypes';
+export type { 
+  HotspotData as EnhancedHotspotData,
+  EnhancedCard as ExtendedCard,
+  Series as EnhancedSeries,
+  Deck,
+  CardRarity,
+} from './types/enhancedCardTypes';
+
+// For backward compatibility, keep the old imports as well
+import * as OldTypes from '@/types/card';
+export const oldTypes = OldTypes;
+
 // Card Interface
 export interface Card {
   id: string;
   title: string;
-  description?: string;
+  description: string; // Make required for compatibility
   imageUrl: string;
   backImageUrl?: string;
   thumbnailUrl?: string;
@@ -26,7 +133,7 @@ export interface Card {
   createdAt: string;
   updatedAt: string;
   userId: string;
-  designMetadata?: any;
+  designMetadata?: DesignMetadata;
   effects?: string[];
   isPublic?: boolean;
   player?: string;
@@ -44,7 +151,7 @@ export interface Card {
   width?: number;
   artist?: string;
   rarity?: string;
-  reactions?: any[];
+  reactions?: Reaction[];
   fabricSwatches?: any[];
   viewCount?: number;
   name?: string;
@@ -82,64 +189,8 @@ export interface Collection {
   cards?: Card[];
   allowComments?: boolean;
   designMetadata?: any;
+  tags?: string[]; // Add tags support
 }
-
-export interface GroupMeta {
-  id: string;
-  name: string;
-  description?: string;
-  coverUrl?: string;
-  createdAt: string;
-  updatedAt: string;
-  userId: string;
-  isPublic?: boolean;
-}
-
-export enum GroupUploadType {
-  PHOTOS = 'photos',
-  CARDS = 'cards',
-  MIXED = 'mixed'
-}
-
-export interface AuthSession {
-  user: {
-    id: string;
-    email: string;
-    name?: string;
-    avatarUrl?: string;
-  };
-  accessToken: string;
-  refreshToken?: string;
-}
-
-// User Role, Permission and Mapping
-export enum UserRole {
-  ADMIN = 'admin',
-  USER = 'user',
-  PREMIUM = 'premium',
-  CREATOR = 'creator',
-  MODERATOR = 'moderator'
-}
-
-export type UserPermission = 
-  | 'read:own' 
-  | 'write:own' 
-  | 'delete:own' 
-  | 'read:all' 
-  | 'write:all' 
-  | 'delete:all' 
-  | 'premium:features'
-  | 'create:premium'
-  | 'moderate:content'
-  | 'all';
-
-export const ROLE_PERMISSIONS: Record<UserRole, UserPermission[]> = {
-  [UserRole.ADMIN]: ['all'],
-  [UserRole.USER]: ['read:own', 'write:own', 'delete:own'],
-  [UserRole.PREMIUM]: ['read:own', 'write:own', 'delete:own', 'premium:features'],
-  [UserRole.CREATOR]: ['read:own', 'write:own', 'delete:own', 'create:premium'],
-  [UserRole.MODERATOR]: ['read:own', 'write:own', 'delete:own', 'moderate:content']
-};
 
 // Comment Interface
 export interface Comment {
@@ -167,93 +218,3 @@ export interface Reaction {
   commentId?: string;
   user?: User;
 }
-
-// OaklandMemoryData Interface
-export interface OaklandMemoryData {
-  title: string;
-  description: string;
-  date?: string;
-  opponent?: string;
-  score?: string;
-  location?: string;
-  section?: string;
-  memoryType?: string;
-  attendees?: string[];
-  tags?: string[];
-  imageUrl?: string;
-  historicalContext?: string;
-  personalSignificance?: string;
-}
-
-// Instagram Post Interface
-export interface InstagramPost {
-  id: string;
-  caption: string;
-  imageUrl: string;
-  postUrl: string;
-  timestamp: string;
-  likes: number;
-  comments: number;
-}
-
-// Design Metadata Interface
-export interface DesignMetadata {
-  cardStyle: {
-    template: string;
-    effect: string;
-    borderRadius: string;
-    borderColor: string;
-    frameColor: string;
-    frameWidth: number;
-    shadowColor: string;
-  };
-  textStyle: {
-    titleColor: string;
-    titleAlignment: string;
-    titleWeight: string;
-    descriptionColor: string;
-  };
-  marketMetadata: {
-    isPrintable: boolean;
-    isForSale: boolean;
-    includeInCatalog: boolean;
-  };
-  cardMetadata: {
-    category: string;
-    cardType: string;
-    series: string;
-  };
-}
-
-// Default design metadata
-export const DEFAULT_DESIGN_METADATA: DesignMetadata = {
-  cardStyle: {
-    template: 'classic',
-    effect: 'none',
-    borderRadius: '8px',
-    borderColor: '#000000',
-    frameColor: '#000000',
-    frameWidth: 2,
-    shadowColor: 'rgba(0,0,0,0.2)',
-  },
-  textStyle: {
-    titleColor: '#000000',
-    titleAlignment: 'center',
-    titleWeight: 'bold',
-    descriptionColor: '#333333',
-  },
-  marketMetadata: {
-    isPrintable: false,
-    isForSale: false,
-    includeInCatalog: false,
-  },
-  cardMetadata: {
-    category: 'general',
-    cardType: 'standard',
-    series: 'base',
-  },
-};
-
-// Fallback image URLs
-export const FALLBACK_FRONT_IMAGE_URL = '/images/card-placeholder.png';
-export const FALLBACK_BACK_IMAGE_URL = '/images/card-back-placeholder.png';
