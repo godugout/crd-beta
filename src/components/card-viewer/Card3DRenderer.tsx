@@ -16,9 +16,6 @@ interface Card3DRendererProps {
   onRenderFrame?: () => void;
 }
 
-/**
- * Optimized 3D Card Renderer with performance improvements
- */
 const Card3DRenderer: React.FC<Card3DRendererProps> = ({
   card,
   isFlipped,
@@ -57,21 +54,21 @@ const Card3DRenderer: React.FC<Card3DRendererProps> = ({
     ? { castShadow: true, receiveShadow: true } 
     : {};
 
-  // Check for card back image or use default
-  const backImageUrl = card.backImageUrl || '/card-back-texture.jpg';
-  
   return (
     <group ref={groupRef} {...shadowProps}>
       <CardModel
         imageUrl={card.imageUrl || '/placeholder-card.jpg'}
-        backImageUrl={backImageUrl}
+        backImageUrl={card.backImageUrl || '/card-back-texture.jpg'}
         isFlipped={isFlipped}
         activeEffects={activeEffects} 
         effectIntensities={effectIntensities}
       />
       
       {/* Environment provides lighting - using mapped preset */}
-      <Environment preset={environmentPreset as any} background={false} />
+      <Environment 
+        preset={environmentPreset as any} 
+        background={false}
+      />
     </group>
   );
 };

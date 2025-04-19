@@ -3,7 +3,6 @@ import React from 'react';
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { LightingSettings, LightingPreset } from '@/hooks/useCardLighting';
 import { cn } from '@/lib/utils';
@@ -22,7 +21,7 @@ const ViewerSettings: React.FC<ViewerSettingsProps> = ({
   onApplyPreset,
   isOpen
 }) => {
-  const environments = [
+  const scenes = [
     { value: 'studio', label: 'Studio' },
     { value: 'natural', label: 'Natural' },
     { value: 'dramatic', label: 'Dramatic' },
@@ -34,19 +33,19 @@ const ViewerSettings: React.FC<ViewerSettingsProps> = ({
       <div className="space-y-4">
         <h3 className="text-lg font-medium flex items-center gap-2">
           <Eye className="h-5 w-5" />
-          Environment
+          Scene
         </h3>
         <Select 
           value={settings.environmentType} 
           onValueChange={(value: LightingPreset) => onApplyPreset(value)}
         >
           <SelectTrigger>
-            <SelectValue placeholder="Select environment" />
+            <SelectValue placeholder="Select scene" />
           </SelectTrigger>
           <SelectContent>
-            {environments.map((env) => (
-              <SelectItem key={env.value} value={env.value}>
-                {env.label}
+            {scenes.map((scene) => (
+              <SelectItem key={scene.value} value={scene.value}>
+                {scene.label}
               </SelectItem>
             ))}
           </SelectContent>
