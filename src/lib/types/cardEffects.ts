@@ -1,8 +1,20 @@
 
-/**
- * Card visual effects
- */
+import { CardEffectSettings } from '@/components/card-creation/types/cardTypes';
 
+// Card effect result interface
+export interface CardEffectsResult {
+  cardEffects: Record<string, string[]>;
+  isLoading: boolean;
+  addEffect: (cardId: string, effect: string) => void;
+  removeEffect: (cardId: string, effect: string) => void;
+  toggleEffect: (cardId: string, effect: string) => void;
+  clearEffects: (cardId: string) => void;
+  setCardEffects: (cardId: string, effects: string[]) => void;
+  setActiveEffects?: (effects: string[]) => void;  // Add optional method for ImmersiveCardViewer
+  activeEffects?: string[];  // Add active effects array
+}
+
+// Define CardEffect here
 export interface CardEffect {
   id: string;
   name: string;
@@ -11,18 +23,5 @@ export interface CardEffect {
   className?: string;
 }
 
-export interface CardEffectSettings {
-  intensity?: number;
-  speed?: number;
-  pattern?: string;
-  color?: string;
-  animationEnabled?: boolean;
-  [key: string]: any;
-}
-
-export type EffectPreset = {
-  name: string;
-  effects: CardEffect[];
-  description?: string;
-  thumbnail?: string;
-};
+// Effect settings type alias for backward compatibility
+export type EffectSettings = CardEffectSettings;

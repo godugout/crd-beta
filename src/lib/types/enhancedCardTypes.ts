@@ -1,3 +1,4 @@
+
 import { BaseEntity } from './index';
 import { CardRarity } from './cardTypes';
 
@@ -9,7 +10,7 @@ export interface EnhancedCard extends BaseEntity {
   title: string;
   description: string; // Changed from optional to required for compatibility
   imageUrl: string;
-  thumbnailUrl?: string;
+  thumbnailUrl: string; // Changed from optional to required for compatibility
   tags?: string[];
   userId: string; // Made required for compatibility
   effects: string[];
@@ -112,5 +113,3 @@ export interface Deck {
   isPublic?: boolean;
   cardIds?: string[];
 }
-
-export { CardRarity };

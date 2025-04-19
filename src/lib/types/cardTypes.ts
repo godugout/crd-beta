@@ -9,7 +9,7 @@ export interface Card extends BaseEntity {
   title: string;
   description: string; // Make this required for compatibility with other code
   imageUrl: string;
-  thumbnailUrl?: string;
+  thumbnailUrl: string;
   tags: string[];
   userId: string;
   effects: string[];

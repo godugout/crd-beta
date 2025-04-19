@@ -11,7 +11,7 @@ export type JsonValue =
   | JsonValue[]
   | { [key: string]: JsonValue };
 
-// Update OaklandMemoryData type if it's defined here
+// Update OaklandMemoryData type to include template property
 export interface OaklandMemoryData {
   title: string;
   description: string;
@@ -26,5 +26,23 @@ export interface OaklandMemoryData {
   imageUrl?: string;
   historicalContext?: string;
   personalSignificance?: string;
-  template?: string; // Add the missing template property
+  template?: string; // Add the template property
+}
+
+// Base entity interface that many types extend
+export interface BaseEntity {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+  [key: string]: any;
+}
+
+// Team interface
+export interface Team extends BaseEntity {
+  id: string; // Explicitly include id
+  name: string;
+  primary_color: string; // Add required properties
+  description?: string;
+  logoUrl?: string;
+  members?: string[];
 }
