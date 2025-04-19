@@ -5,8 +5,22 @@ import * as THREE from 'three';
 import { Card } from '@/lib/types';
 import CardModel from './CardModel';
 import { Environment } from '@react-three/drei';
-import { mapLightingPresetToEnvironment } from '@/utils/environmentPresets';
 import { FALLBACK_FRONT_IMAGE_URL, FALLBACK_BACK_IMAGE_URL, handleImageLoadError } from '@/lib/utils/cardDefaults';
+
+// Define function to map lighting presets
+const mapLightingPresetToEnvironment = (preset: string): string => {
+  switch (preset) {
+    case 'natural':
+      return 'forest';
+    case 'dramatic': 
+      return 'night';
+    case 'display_case':
+      return 'lobby';
+    case 'studio':
+    default:
+      return 'studio';
+  }
+};
 
 // Define the component props type
 interface Card3DRendererProps {

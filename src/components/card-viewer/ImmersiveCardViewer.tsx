@@ -5,16 +5,13 @@ import { useToast } from '@/hooks/use-toast';
 import { Card } from '@/lib/types';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera, Environment } from '@react-three/drei';
-import { DEFAULT_DESIGN_METADATA } from '@/lib/utils/cardDefaults';
+import { DEFAULT_DESIGN_METADATA, FALLBACK_FRONT_IMAGE_URL, FALLBACK_BACK_IMAGE_URL } from '@/lib/utils/cardDefaults';
 import { LightingSettings } from '@/hooks/useCardLighting';
 import Card3DRenderer from '../card-viewer/Card3DRenderer';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
 import { ChevronLeft, ChevronRight, ArrowUp, ArrowDown, SunMedium } from 'lucide-react';
-
-const FALLBACK_IMAGE_URL = '/images/card-placeholder.png';
-const FALLBACK_BACK_IMAGE_URL = '/images/card-back-placeholder.png';
 
 interface ImmersiveCardViewerProps {
   card: Card;
@@ -42,7 +39,7 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
   
   const cardWithFallbacks = {
     ...card,
-    imageUrl: card.imageUrl || FALLBACK_IMAGE_URL,
+    imageUrl: card.imageUrl || FALLBACK_FRONT_IMAGE_URL,
     backImageUrl: card.backImageUrl || FALLBACK_BACK_IMAGE_URL
   };
 

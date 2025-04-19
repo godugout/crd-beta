@@ -1,3 +1,4 @@
+
 import React, { useRef, useEffect, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
@@ -32,7 +33,7 @@ const CardModel: React.FC<CardModelProps> = ({
     console.log("Front card texture loaded");
   });
   
-  const backTexture = useTexture(backImageUrl || FALLBACK_FRONT_IMAGE_URL, () => {
+  const backTexture = useTexture(backImageUrl || FALLBACK_BACK_IMAGE_URL, () => {
     setBackTextureLoaded(true);
     console.log("Back card texture loaded");
   });
