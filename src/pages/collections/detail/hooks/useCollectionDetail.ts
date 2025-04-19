@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -32,9 +31,8 @@ export const useCollectionDetail = (collectionId?: string) => {
   
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { cards, collections, getCardById, getCollectionById } = useCards();
+  const { cards, collections, getCardById, getCollectionById, refreshCards } = useCards();
 
-  // Fetch and process collection data
   const fetchCollectionData = useCallback(async () => {
     if (!collectionId) {
       setIsLoading(false);
@@ -46,7 +44,6 @@ export const useCollectionDetail = (collectionId?: string) => {
     setFetchError(null);
     
     try {
-      // Try to get from the context first for faster rendering
       const contextCollection = getCollectionById(collectionId);
       
       if (contextCollection) {
@@ -62,7 +59,6 @@ export const useCollectionDetail = (collectionId?: string) => {
           tags: contextCollection.tags || []
         });
         
-        // Get cards for this collection
         const collectionCardIds = contextCollection.cardIds || [];
         const collectionCardsData = collectionCardIds
           .map(id => getCardById(id))
@@ -71,7 +67,6 @@ export const useCollectionDetail = (collectionId?: string) => {
         setCollectionCards(collectionCardsData);
         setFilteredCards(collectionCardsData);
       } else {
-        // If not in context, fetch from the database
         console.log('Collection not in context, fetching from API');
         const { data, error } = await collectionOperations.getCollection(collectionId);
         
@@ -93,15 +88,14 @@ export const useCollectionDetail = (collectionId?: string) => {
             tags: data.tags || []
           });
           
-          // Fetch cards for this collection
           if (data.cardIds && data.cardIds.length > 0) {
-            const { data: cardsData, error: cardsError } = await cardOperations.getCardsByIds(data.cardIds);
+            const response = await cardOperations.getCardsByIds(data.cardIds);
             
-            if (cardsError) {
-              console.error('Error fetching collection cards:', cardsError);
-            } else if (cardsData) {
-              setCollectionCards(cardsData);
-              setFilteredCards(cardsData);
+            if (response.error) {
+              console.error('Error fetching collection cards:', response.error);
+            } else if (response.data) {
+              setCollectionCards(response.data);
+              setFilteredCards(response.data);
             }
           }
         } else {
@@ -116,12 +110,10 @@ export const useCollectionDetail = (collectionId?: string) => {
     }
   }, [collectionId, getCardById, getCollectionById]);
   
-  // Load initial data
   useEffect(() => {
     fetchCollectionData();
   }, [fetchCollectionData]);
   
-  // Filter cards when search term changes
   useEffect(() => {
     if (searchTerm.trim() === '') {
       setFilteredCards(collectionCards);
@@ -140,7 +132,6 @@ export const useCollectionDetail = (collectionId?: string) => {
     setFilteredCards(filtered);
   }, [searchTerm, collectionCards]);
 
-  // Update collection mutation
   const updateCollectionMutation = useMutation({
     mutationFn: (updatedCollection: Partial<Collection>) => {
       if (!collectionId || !collection) {
@@ -177,7 +168,6 @@ export const useCollectionDetail = (collectionId?: string) => {
     }
   });
 
-  // Delete collection mutation
   const deleteCollectionMutation = useMutation({
     mutationFn: () => {
       if (!collectionId) {
@@ -211,12 +201,10 @@ export const useCollectionDetail = (collectionId?: string) => {
     }
   });
   
-  // Handler for adding card to collection
   const handleAddCardToCollection = useCallback(async (cardId: string) => {
     if (!collectionId || !collection) return;
     
     try {
-      // Use the context function if available
       if (typeof cardOperations.addCardToCollection === 'function') {
         const { error } = await cardOperations.addCardToCollection(cardId, collectionId);
         
@@ -224,7 +212,6 @@ export const useCollectionDetail = (collectionId?: string) => {
           throw new Error(error.message);
         }
         
-        // Refresh collection data
         fetchCollectionData();
         
         toast({
@@ -242,12 +229,10 @@ export const useCollectionDetail = (collectionId?: string) => {
     }
   }, [collectionId, collection, fetchCollectionData, toast]);
 
-  // Handler for removing card from collection
   const handleRemoveCardFromCollection = useCallback(async (cardId: string) => {
     if (!collectionId || !collection) return;
     
     try {
-      // Use the context function if available
       if (typeof cardOperations.removeCardFromCollection === 'function') {
         const { error } = await cardOperations.removeCardFromCollection(cardId, collectionId);
         
@@ -255,7 +240,6 @@ export const useCollectionDetail = (collectionId?: string) => {
           throw new Error(error.message);
         }
         
-        // Update local state
         setCollectionCards(prev => prev.filter(card => card.id !== cardId));
         setFilteredCards(prev => prev.filter(card => card.id !== cardId));
         
@@ -274,13 +258,10 @@ export const useCollectionDetail = (collectionId?: string) => {
     }
   }, [collectionId, collection, toast]);
 
-  // Handler for asset selection
   const handleAssetSelect = useCallback((assetUrl: string) => {
     if (selectedCardId) {
-      // Update card image
       console.log('Update card image:', selectedCardId, assetUrl);
     } else {
-      // Update collection cover
       setEditFormData(prev => ({
         ...prev,
         coverImageUrl: assetUrl
@@ -290,23 +271,19 @@ export const useCollectionDetail = (collectionId?: string) => {
     setSelectedCardId(null);
   }, [selectedCardId]);
 
-  // Handler for opening asset gallery for specific card
   const openAssetGalleryForCard = useCallback((cardId: string) => {
     setSelectedCardId(cardId);
     setIsAssetGalleryOpen(true);
   }, []);
 
-  // Handler for updating collection
   const handleUpdateCollection = useCallback((formData: Partial<Collection>) => {
     updateCollectionMutation.mutate(formData);
   }, [updateCollectionMutation]);
 
-  // Handler for deleting collection
   const handleDeleteCollection = useCallback(() => {
     deleteCollectionMutation.mutate();
   }, [deleteCollectionMutation]);
 
-  // Handler for sharing collection
   const handleShareCollection = useCallback(() => {
     if (!collection) return;
     
@@ -326,16 +303,13 @@ export const useCollectionDetail = (collectionId?: string) => {
       })
       .catch((err) => {
         console.error('Error sharing:', err);
-        // Fallback to clipboard
         handleCopyLink();
       });
     } else {
-      // Fallback for browsers that don't support sharing
       handleCopyLink();
     }
   }, [collection, toast]);
 
-  // Helper for copying collection link
   const handleCopyLink = useCallback(() => {
     if (!collection) return;
     
@@ -356,13 +330,11 @@ export const useCollectionDetail = (collectionId?: string) => {
         });
       });
   }, [collection, toast]);
-  
-  // Handler for card click
+
   const handleCardClick = useCallback((cardId: string) => {
     navigate(`/cards/${cardId}`);
   }, [navigate]);
-  
-  // Refresh collection data
+
   const refreshCollection = useCallback(() => {
     fetchCollectionData();
   }, [fetchCollectionData]);

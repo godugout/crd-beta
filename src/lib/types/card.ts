@@ -35,7 +35,7 @@ export interface CardData {
 }
 
 // Re-export Card interface from cardTypes with proper syntax for isolatedModules
-export { Card } from './cardTypes';
+export type { Card } from './cardTypes';
 
 // Export FabricSwatch for others to use with proper syntax for isolatedModules
 export type { FabricSwatchType };

@@ -8,8 +8,8 @@ import { TeamThemeProvider } from './context/ThemeContext.tsx'
 import { BrandThemeProvider } from './context/BrandThemeContext.tsx'
 import { AuthProvider } from './providers/AuthProvider'
 import { HelmetProvider } from 'react-helmet-async'
-import { CardProvider } from './context/CardContext'
-import { Toaster } from '@/components/ui/toaster' // Adding Toaster for notifications
+import { CardProvider } from './context/CardContext.tsx' // Fix the import path with explicit extension
+import { Toaster } from '@/components/ui/toaster'
 import './index.css'
 import './main.css'
 
@@ -23,7 +23,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
               <AuthProvider>
                 <CardProvider>
                   <App />
-                  <Toaster /> {/* Add toast notifications */}
+                  <Toaster />
                 </CardProvider>
               </AuthProvider>
             </BrandThemeProvider>

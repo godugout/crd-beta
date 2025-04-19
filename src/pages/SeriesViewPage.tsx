@@ -1,168 +1,84 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { Card } from '@/lib/types';
 import PageLayout from '@/components/navigation/PageLayout';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, Share2, Star } from 'lucide-react';
-import { useCards } from '@/hooks/useCards';
-// Fix import to use default import
-import CardGallery from '@/components/CardGallery';
+import CardGrid from '@/components/gallery/CardGrid';
+import { useCards } from '@/context/CardContext';
+import { toast } from 'sonner'; // Import toast from sonner (or your preferred library)
+import { Skeleton } from '@/components/ui/skeleton';
 
-// Define Series type
-export interface Series {
-  id: string;
-  name: string;
-  description: string;
-  imageUrl: string;
-  coverImageUrl?: string;
-  year: string;
-  cardCount: number;
-  createdAt: string;
-  updatedAt: string;
-}
-
-// Define loading enum
-enum LoadingState {
-  IDLE,
-  LOADING,
-  LOADED,
-  ERROR
-}
+interface SeriesViewPageProps {}
 
 const SeriesViewPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
-  const [series, setSeries] = useState<Series | null>(null);
-  const [cards, setCards] = useState<Card[]>([]);
-  const [loadingState, setLoadingState] = useState<LoadingState>(LoadingState.IDLE);
-  const [activeTab, setActiveTab] = useState('cards');
-  const [isFavorite, setIsFavorite] = useState(false);
-  const [shareUrl, setShareUrl] = useState('');
+  const { cards, getCardById } = useCards(); // Update to use getCardById instead of getCard
+  const [currentSeries, setCurrentSeries] = useState<Card | null>(null);
+  const [relatedCards, setRelatedCards] = useState<Card[]>([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { getCard } = useCards();
 
   useEffect(() => {
-    const fetchSeriesAndCards = async () => {
-      setLoadingState(LoadingState.LOADING);
+    if (id) {
       try {
-        // Mock data for series
-        const mockSeries: Series = {
-          id: id || '1',
-          name: '2023 Topps Baseball',
-          description: 'The flagship Topps Baseball series for the 2023 season.',
-          imageUrl: '/images/series-placeholder.png',
-          coverImageUrl: '/images/series-cover.png',
-          year: '2023',
-          cardCount: 350,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        };
-        setSeries(mockSeries);
-
-        // Mock data for cards in the series
-        const mockCardIds = ['1', '2', '3', '4'];
-        const mockCards: Card[] = mockCardIds.map(cardId => {
-          const card = getCard(cardId);
-          return card;
-        }).filter(card => card !== undefined) as Card[];
-        setCards(mockCards);
-
-        setLoadingState(LoadingState.LOADED);
+        // Use getCardById instead of getCard
+        const seriesCard = getCardById(id);
+        if (seriesCard) {
+          setCurrentSeries(seriesCard);
+          // Filter related cards by series
+          setRelatedCards(cards.filter(card => 
+            card.id !== id && 
+            card.designMetadata?.cardMetadata?.series === seriesCard.designMetadata?.cardMetadata?.series
+          ));
+        } else {
+          toast.error("Series not found");
+          setError("Series not found");
+        }
       } catch (err) {
-        setError('Failed to load series and cards.');
-        setLoadingState(LoadingState.ERROR);
+        console.error("Error loading series:", err);
+        toast.error("Error loading series");
+        setError("Error loading series");
       }
-    };
-
-    fetchSeriesAndCards();
-
-    // Generate share URL
-    setShareUrl(window.location.href);
-  }, [id, getCard]);
-
-  const handleShare = async () => {
-    try {
-      await navigator.clipboard.writeText(shareUrl);
-      toast.success('Share URL copied to clipboard!');
-    } catch (err) {
-      toast.error('Failed to copy share URL.');
+    } else {
+      toast.error("No series ID provided");
+      setError("No series ID provided");
     }
-  };
+  }, [id, cards, getCardById]);
 
-  const handleToggleFavorite = () => {
-    setIsFavorite(!isFavorite);
-    toast.success(`Series ${isFavorite ? 'removed from' : 'added to'} favorites!`);
-  };
+  if (loading) {
+    return (
+      <PageLayout title="Loading Series..." description="Please wait">
+        <div className="container mx-auto p-4">
+          <Skeleton className="w-full h-64" />
+        </div>
+      </PageLayout>
+    );
+  }
 
-  const renderContent = () => {
-    switch (loadingState) {
-      case LoadingState.LOADING:
-        return <div className="text-center py-12">Loading...</div>;
-      case LoadingState.ERROR:
-        return <div className="text-center py-12 text-red-500">{error}</div>;
-      case LoadingState.LOADED:
-        return (
-          <>
-            <Tabs defaultValue="cards" className="w-full">
-              <TabsList>
-                <TabsTrigger value="cards" onClick={() => setActiveTab('cards')}>Cards</TabsTrigger>
-                <TabsTrigger value="details" onClick={() => setActiveTab('details')}>Details</TabsTrigger>
-              </TabsList>
-              <TabsContent value="cards" className="mt-4">
-                {cards.length > 0 ? (
-                  <CardGallery cards={cards} onCardClick={(cardId) => navigate(`/cards/${cardId}`)} />
-                ) : (
-                  <div className="text-center py-8">No cards found in this series.</div>
-                )}
-              </TabsContent>
-              <TabsContent value="details" className="mt-4">
-                {series && (
-                  <div className="space-y-4">
-                    <div>
-                      <h4 className="text-lg font-semibold">Description</h4>
-                      <p>{series.description}</p>
-                    </div>
-                    <div>
-                      <h4 className="text-lg font-semibold">Year</h4>
-                      <p>{series.year}</p>
-                    </div>
-                    <div>
-                      <h4 className="text-lg font-semibold">Card Count</h4>
-                      <p>{series.cardCount}</p>
-                    </div>
-                  </div>
-                )}
-              </TabsContent>
-            </Tabs>
-          </>
-        );
-      default:
-        return null;
-    }
-  };
+  if (error || !currentSeries) {
+    return (
+      <PageLayout title="Series Not Found" description="The requested series could not be found">
+        <div className="container mx-auto p-4">
+          <p className="text-red-500">{error || "Series not found"}</p>
+        </div>
+      </PageLayout>
+    );
+  }
 
   return (
     <PageLayout
-      title={series ? series.name : 'Series Details'}
-      description={series ? series.description : 'View details about this card series.'}
+      title={currentSeries.title || "Series"}
+      description={`Explore cards from the ${currentSeries.title} series`}
     >
-      <div className="container mx-auto max-w-6xl p-4">
-        <div className="mb-6 flex items-center justify-between">
-          <Button variant="ghost" onClick={() => navigate(-1)}>
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back
-          </Button>
-          <div className="flex items-center space-x-2">
-            <Button variant="outline" size="icon" onClick={handleShare}>
-              <Share2 className="h-4 w-4" />
-            </Button>
-            <Button variant="outline" size="icon" onClick={handleToggleFavorite}>
-              <Star className="h-4 w-4" fill={isFavorite ? 'currentColor' : 'none'} />
-            </Button>
-          </div>
-        </div>
-        {renderContent()}
+      <div className="container mx-auto p-4">
+        <h1 className="text-3xl font-bold mb-4">{currentSeries.title}</h1>
+        <p className="text-gray-600 mb-8">{currentSeries.description}</p>
+
+        <h2 className="text-2xl font-semibold mb-4">Related Cards</h2>
+        {relatedCards.length > 0 ? (
+          <CardGrid cards={relatedCards} />
+        ) : (
+          <p>No related cards found for this series.</p>
+        )}
       </div>
     </PageLayout>
   );

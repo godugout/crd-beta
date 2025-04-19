@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Card, Collection } from '@/lib/types';
 import { fetchCards } from '@/lib/api/cards';
@@ -227,9 +226,6 @@ export const useCards = () => {
   return context;
 };
 
-// Export types correctly
-export type { Card, Collection };
+export type { Card, Collection, CardContextProps };
 
 export { CardContext };
-
-// Make sure CardProvider is exported properly

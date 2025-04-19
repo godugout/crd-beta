@@ -38,7 +38,7 @@ export function transformCommentFromDb(record: any): Comment {
 export const transformCommentUserData = (userData: any) => {
   return {
     id: userData.id,
-    email: userData.email,
+    email: userData.email || '',
     name: userData.name,
     avatarUrl: userData.avatarUrl,
     username: userData.username,

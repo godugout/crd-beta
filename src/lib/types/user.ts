@@ -34,9 +34,9 @@ export interface User extends BaseEntity {
   username?: string;
   role?: UserRole;
   createdAt: string;
-  updatedAt: string; // Changed from optional to required to match BaseEntity
+  updatedAt: string; // Required to match BaseEntity
   bio?: string;
   permissions?: UserPermission[]; 
 }
 
-// Export the types correctly - avoiding duplicate exports
+// Export the types directly without re-exporting to avoid conflicts

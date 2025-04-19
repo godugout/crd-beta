@@ -1,7 +1,7 @@
 
 import React, { Suspense } from 'react';
 import { useRoutes } from 'react-router-dom';
-import { CardProvider } from './context/CardContext';
+import { CardProvider } from './context/CardContext.tsx'; // Fix the import path with explicit extension
 import { SessionProvider } from './context/SessionContext';
 import { Toaster } from 'sonner';
 import { routes } from './routes';
