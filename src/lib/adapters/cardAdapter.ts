@@ -1,12 +1,13 @@
 
-import { Card as BaseCard } from '@/lib/types/card';
+import { Card } from '@/lib/types/cardTypes';
 import { Card as SchemaCard } from '@/lib/schema/types';
 import { EnhancedCard } from '@/lib/types/enhancedCardTypes';
+import { DEFAULT_DESIGN_METADATA } from '@/lib/utils/cardDefaults';
 
 /**
  * Adapts different card types to ensure compatibility
  */
-export function adaptToCard(partialCard: Partial<BaseCard>): BaseCard {
+export function adaptToCard(partialCard: Partial<Card>): Card {
   // Ensure all required fields have default values
   return {
     id: partialCard.id || '',
@@ -19,15 +20,16 @@ export function adaptToCard(partialCard: Partial<BaseCard>): BaseCard {
     effects: partialCard.effects || [],
     createdAt: partialCard.createdAt || new Date().toISOString(),
     updatedAt: partialCard.updatedAt || new Date().toISOString(),
+    designMetadata: partialCard.designMetadata || DEFAULT_DESIGN_METADATA,
     // Include other properties if present
     ...partialCard
   };
 }
 
 /**
- * Convert EnhancedCard to BaseCard
+ * Convert EnhancedCard to Card
  */
-export function enhancedCardToBaseCard(enhancedCard: EnhancedCard): BaseCard {
+export function enhancedCardToBaseCard(enhancedCard: EnhancedCard): Card {
   return {
     id: enhancedCard.id,
     title: enhancedCard.title,
@@ -39,6 +41,8 @@ export function enhancedCardToBaseCard(enhancedCard: EnhancedCard): BaseCard {
     effects: enhancedCard.effects,
     createdAt: enhancedCard.createdAt,
     updatedAt: enhancedCard.updatedAt,
+    teamId: enhancedCard.teamId,
+    designMetadata: enhancedCard.designMetadata,
     // Add other fields that BaseCard might need
     artist: enhancedCard.artist,
     rarity: enhancedCard.rarity,
@@ -51,7 +55,7 @@ export function enhancedCardToBaseCard(enhancedCard: EnhancedCard): BaseCard {
 /**
  * Convert schema card to base card
  */
-export function schemaCardToBaseCard(schemaCard: SchemaCard): BaseCard {
+export function schemaCardToBaseCard(schemaCard: SchemaCard): Card {
   return {
     id: schemaCard.id,
     title: schemaCard.title,
@@ -64,7 +68,7 @@ export function schemaCardToBaseCard(schemaCard: SchemaCard): BaseCard {
     createdAt: schemaCard.createdAt,
     updatedAt: schemaCard.updatedAt,
     isPublic: schemaCard.isPublic || false,
-    designMetadata: schemaCard.designMetadata,
+    designMetadata: schemaCard.designMetadata || DEFAULT_DESIGN_METADATA,
     reactions: schemaCard.reactions || []
   };
 }

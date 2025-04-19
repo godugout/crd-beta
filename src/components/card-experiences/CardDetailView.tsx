@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { Card as CardType } from '@/lib/types/cardTypes';
 import { DetailedViewCard, ensureDetailedViewCard } from '@/types/detailedCardTypes';
 
 interface CardDetailViewProps {
@@ -29,7 +30,7 @@ const CardDetailView: React.FC<CardDetailViewProps> = ({ cardId, onBack }) => {
   
   const rawCardData = getCard ? getCard(cardId) : null;
   // Ensure we have a properly formatted card with all required fields
-  const cardData = rawCardData ? ensureDetailedViewCard(rawCardData) : null;
+  const cardData = rawCardData ? ensureDetailedViewCard(rawCardData as CardType) : null;
   
   if (!cardData) {
     return (

@@ -13,10 +13,10 @@ export interface Card extends BaseEntity {
   tags: string[];
   userId: string;
   effects: string[];
+  teamId?: string; // Add teamId field to support existing code
   backImageUrl?: string;
   player?: string;
   team?: string;
-  teamId?: string; // Add teamId field to support existing code
   year?: string;
   sport?: string;
   cardType?: string;
@@ -27,7 +27,7 @@ export interface Card extends BaseEntity {
   grade?: string;
   gradingCompany?: string;
   artist?: string;
-  rarity?: string; // Add rarity field
+  rarity?: CardRarity; // Changed to optional CardRarity type
   isPublic?: boolean;
   designMetadata: any; // Changed from optional to required
   reactions?: any[];
@@ -107,6 +107,40 @@ export interface CardStats {
 
 // Card condition ratings
 export type CardCondition = 'mint' | 'near-mint' | 'excellent' | 'very-good' | 'good' | 'fair' | 'poor';
+
+// Design metadata structure to enforce consistent type
+export interface DesignMetadata {
+  cardStyle: {
+    template?: string;
+    effect?: string;
+    borderRadius?: string;
+    borderColor?: string;
+    frameColor?: string;
+    frameWidth?: number;
+    shadowColor?: string;
+    [key: string]: any;
+  };
+  textStyle: {
+    titleColor?: string;
+    titleAlignment?: string;
+    titleWeight?: string;
+    descriptionColor?: string;
+    [key: string]: any;
+  };
+  marketMetadata?: {
+    isPrintable?: boolean;
+    isForSale?: boolean;
+    includeInCatalog?: boolean;
+    [key: string]: any;
+  };
+  cardMetadata?: {
+    category?: string;
+    cardType?: string;
+    series?: string;
+    [key: string]: any;
+  };
+  [key: string]: any;
+}
 
 // Export HotspotData from enhancedCardTypes for backward compatibility
 export { HotspotData } from './enhancedCardTypes';

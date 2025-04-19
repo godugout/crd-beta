@@ -1,120 +1,100 @@
 
-import { useState, useEffect, MutableRefObject } from 'react';
-import { MemorabiliaType } from '@/components/card-upload/cardDetection';
+import { useState } from 'react';
 
-interface BatchImageProcessingProps {
-  canvasRef: MutableRefObject<HTMLCanvasElement | null>;
-  editorImgRef: MutableRefObject<HTMLImageElement | null>;
-  selectedAreas: any[];
-  detectionType: 'group' | 'memorabilia' | 'mixed';
-  setSelectedAreas: (areas: any[]) => void;
-  setIsDetecting: (detecting: boolean) => void;
-  setIsProcessing: (processing: boolean) => void;
+interface ProcessingResult {
+  success: boolean;
+  data?: any;
+  error?: string;
 }
 
-export const useBatchImageProcessing = ({
-  canvasRef,
-  editorImgRef,
-  selectedAreas,
-  detectionType,
-  setSelectedAreas,
-  setIsDetecting,
-  setIsProcessing
-}: BatchImageProcessingProps) => {
-  // Detect objects in the image
-  const detectObjects = async () => {
-    if (!canvasRef.current || !editorImgRef.current) return;
+export const useBatchImageProcessing = () => {
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [processedImages, setProcessedImages] = useState<any[]>([]);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  const processImage = async (imageFile: File): Promise<ProcessingResult> => {
+    setIsProcessing(true);
     
     try {
-      setIsDetecting(true);
-      
-      // Simulate API call for object detection
+      // Simulate image processing
       await new Promise(resolve => setTimeout(resolve, 1500));
       
-      // Generate some mock detected areas
-      const mockAreas = [
-        { id: '1', x: 100, y: 100, width: 200, height: 200, confidence: 0.95, memorabiliaType: 'card' as MemorabiliaType },
-        { id: '2', x: 350, y: 150, width: 180, height: 180, confidence: 0.88, memorabiliaType: 'ticket' as MemorabiliaType }
-      ];
+      // Mock successful processing
+      const result = {
+        originalFile: imageFile,
+        processedUrl: URL.createObjectURL(imageFile),
+        detections: [],
+        metadata: {
+          dimensions: { width: 800, height: 600 },
+          format: imageFile.type,
+          size: imageFile.size
+        }
+      };
       
-      setSelectedAreas(mockAreas);
-    } catch (error) {
-      console.error('Error detecting objects:', error);
-    } finally {
-      setIsDetecting(false);
-    }
-  };
-  
-  // Process detections into areas
-  const processDetections = (detections: any[]) => {
-    return detections.map((detection, index) => ({
-      id: `area-${index}`,
-      x: detection.x || Math.random() * 300,
-      y: detection.y || Math.random() * 200,
-      width: detection.width || 150,
-      height: detection.height || 150,
-      confidence: detection.confidence || 0.9,
-      memorabiliaType: detection.memorabiliaType || 'unknown'
-    }));
-  };
-  
-  // Extract selected areas as files
-  const extractSelectedAreas = async (indices?: number[]) => {
-    if (!canvasRef.current || !editorImgRef.current) return [] as File[];
-    
-    try {
-      setIsProcessing(true);
+      setProcessedImages(prev => [...prev, result]);
       
-      // Determine which areas to process
-      const areasToProcess = indices 
-        ? indices.map(i => selectedAreas[i]).filter(Boolean)
-        : selectedAreas;
+      return {
+        success: true,
+        data: result
+      };
+    } catch (error: any) {
+      console.error("Error processing image:", error);
       
-      if (areasToProcess.length === 0) return [] as File[];
-      
-      // Simulate processing time
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // In a real implementation, we would extract the image data and create File objects
-      // For now, we'll just create empty files as placeholders
-      const files = areasToProcess.map((area, index) => {
-        // Create a dummy file object
-        const blob = new Blob(['mock image data'], { type: 'image/jpeg' });
-        return new File([blob], `extracted-${area.id || index}.jpg`, { type: 'image/jpeg' });
-      });
-      
-      return files;
-    } catch (error) {
-      console.error('Error extracting selected areas:', error);
-      return [] as File[];
+      return {
+        success: false,
+        error: error.message || "Failed to process image"
+      };
     } finally {
       setIsProcessing(false);
     }
   };
-  
-  // Get preview URLs for selected areas
-  const getPreviewUrls = (indices?: number[]) => {
-    if (!canvasRef.current || !editorImgRef.current) return [] as string[];
-    
-    // Determine which areas to process
-    const areasToProcess = indices 
-      ? indices.map(i => selectedAreas[i]).filter(Boolean)
-      : selectedAreas;
-    
-    if (areasToProcess.length === 0) return [] as string[];
-    
-    // Create mock preview URLs
-    return areasToProcess.map((area, index) => {
-      // In a real implementation, we would create data URLs from canvas
-      // For now, return placeholder URLs
-      return `/placeholder-${area.memorabiliaType || 'item'}-${index}.jpg`;
-    });
+
+  const detectObjects = async (imageUrl: string): Promise<any[]> => {
+    // Simulate object detection
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    return [
+      { label: 'person', confidence: 0.95, bbox: { x: 100, y: 50, width: 200, height: 400 } },
+      { label: 'ball', confidence: 0.87, bbox: { x: 320, y: 240, width: 80, height: 80 } }
+    ];
   };
-  
+
+  const processDetections = async (detections: any[], imageUrl: string): Promise<any[]> => {
+    // Simulate processing detections
+    await new Promise(resolve => setTimeout(resolve, 500));
+    return detections.map(detection => ({
+      ...detection,
+      processed: true,
+      cropUrl: imageUrl // In real app, would generate a cropped image
+    }));
+  };
+
+  const extractSelectedAreas = async (
+    image: HTMLImageElement,
+    selections: Array<{ x: number, y: number, width: number, height: number }>
+  ): Promise<string[]> => {
+    // Simulate extracting image areas
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
+    // In a real implementation, you would use canvas to crop these areas
+    return selections.map(() => URL.createObjectURL(new Blob()));
+  };
+
+  const getPreviewUrls = (index: number): string[] => {
+    const image = processedImages[index];
+    if (!image) return [];
+    
+    // Return the URL for the image
+    return [image.processedUrl];
+  };
+
   return {
+    isProcessing,
+    processedImages,
+    currentImageIndex,
+    processImage,
     detectObjects,
     processDetections,
     extractSelectedAreas,
-    getPreviewUrls
+    getPreviewUrls,
   };
 };

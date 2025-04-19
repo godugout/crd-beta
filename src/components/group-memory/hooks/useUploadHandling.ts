@@ -1,103 +1,101 @@
 
-import { useState, useCallback } from 'react';
-import { useDropzone } from 'react-dropzone';
-import { processImage, compressImage } from '@/lib/image-utils';
+import { useState } from 'react';
+import { GroupUploadType } from '@/lib/types';
 
-export type GroupUploadType = 'individual' | 'team' | 'group';
-
-export interface UseUploadHandlingProps {
-  multiple?: boolean;
+interface UploadHandlingOptions {
+  uploadType: GroupUploadType;
   maxFiles?: number;
-  maxSize?: number;
-  uploadType?: GroupUploadType;
-  onComplete?: (files: File[], urls: string[]) => void;
+  allowedExtensions?: string[];
+  maxSizeInMB?: number;
 }
 
-export const useUploadHandling = ({
-  multiple = false,
-  maxFiles = 10,
-  maxSize = 10 * 1024 * 1024, // 10MB
-  uploadType = 'group',
-  onComplete
-}: UseUploadHandlingProps) => {
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  
-  const handleFileSelected = async (files: File[]) => {
+export const useUploadHandling = (options: UploadHandlingOptions) => {
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [isUploading, setIsUploading] = useState<boolean>(false);
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+
+  const handleFileUpload = async (files: FileList | File[], onComplete?: (urls: string[]) => void) => {
+    setIsUploading(true);
+    setUploadError(null);
+    
     try {
-      if (!files.length) return;
+      // Convert FileList to array if needed
+      const fileArray = Array.from(files);
       
-      setIsUploading(true);
-      setUploadProgress(10);
-      
-      // Process all files
-      const processedFiles = [];
-      const processedUrls = [];
-      
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        
-        // Simulate progress update for each file
-        setUploadProgress(10 + Math.round((i / files.length) * 80));
-        
-        // Process and compress image
-        const compressed = await compressImage(file);
-        const { url } = await processImage(compressed);
-        
-        processedFiles.push(compressed);
-        processedUrls.push(url);
+      if (options.maxFiles && fileArray.length > options.maxFiles) {
+        throw new Error(`Maximum ${options.maxFiles} files allowed`);
       }
       
-      setUploadProgress(90);
+      // Check file extensions if specified
+      if (options.allowedExtensions && options.allowedExtensions.length > 0) {
+        const invalidFiles = fileArray.filter(file => {
+          const extension = file.name.split('.').pop()?.toLowerCase();
+          return !extension || !options.allowedExtensions?.includes(`.${extension}`);
+        });
+        
+        if (invalidFiles.length > 0) {
+          throw new Error(`Invalid file type(s). Allowed: ${options.allowedExtensions.join(', ')}`);
+        }
+      }
       
-      // Complete the upload
+      // Check file sizes if specified
+      if (options.maxSizeInMB) {
+        const maxSizeBytes = options.maxSizeInMB * 1024 * 1024;
+        const oversizedFiles = fileArray.filter(file => file.size > maxSizeBytes);
+        
+        if (oversizedFiles.length > 0) {
+          throw new Error(`Some files exceed the maximum size of ${options.maxSizeInMB}MB`);
+        }
+      }
+      
+      // Mock upload process
+      setUploadedFiles(prev => [...prev, ...fileArray]);
+      
+      // Create URL objects for local preview
+      const urls = fileArray.map(file => URL.createObjectURL(file));
+      
+      // Call onComplete callback with URLs if provided
       if (onComplete) {
-        onComplete(processedFiles, processedUrls);
+        onComplete(urls);
       }
       
-      setUploadProgress(100);
+      return {
+        success: true,
+        files: fileArray,
+        urls
+      };
       
-      // Reset progress after a delay
-      setTimeout(() => {
-        setIsUploading(false);
-        setUploadProgress(0);
-      }, 500);
-    } catch (error) {
-      console.error('Error processing uploads:', error);
+    } catch (error: any) {
+      setUploadError(error.message || 'Failed to upload files');
+      return {
+        success: false,
+        error: error.message,
+      };
+    } finally {
       setIsUploading(false);
       setUploadProgress(0);
     }
   };
-  
-  const processUploads = async (acceptedFiles: File[]) => {
-    // If multiple is disabled, only take the first file
-    const filesToProcess = multiple 
-      ? acceptedFiles.slice(0, maxFiles) 
-      : [acceptedFiles[0]];
+
+  const clearUploads = () => {
+    // Clean up URLs to prevent memory leaks
+    uploadedFiles.forEach(file => {
+      const url = URL.createObjectURL(file);
+      URL.revokeObjectURL(url);
+    });
     
-    await handleFileSelected(filesToProcess);
+    setUploadedFiles([]);
+    setUploadError(null);
   };
-  
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    accept: {
-      'image/*': ['.jpeg', '.jpg', '.png', '.gif', '.webp']
-    },
-    maxSize,
-    multiple,
-    maxFiles,
-    onDrop: processUploads
-  });
   
   return {
-    getRootProps,
-    getInputProps,
-    isDragActive,
+    uploadedFiles,
     isUploading,
     uploadProgress,
-    uploadType,
-    handleFileSelected, // Add these missing methods
-    processUploads
+    uploadError,
+    handleFileUpload,
+    clearUploads,
+    uploadType: options.uploadType // Return the upload type for reference
   };
 };
-
-export default useUploadHandling;

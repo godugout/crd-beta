@@ -1,49 +1,33 @@
 
-import { DesignMetadata } from '@/lib/types';
+import { DesignMetadata } from '@/lib/types/cardTypes';
 
-// Fallback image URLs
-export const FALLBACK_FRONT_IMAGE_URL = '/images/placeholder-card.png';
-export const FALLBACK_BACK_IMAGE_URL = '/images/placeholder-card-back.png';
-export const FALLBACK_IMAGE_URL = '/images/placeholder-card.png';
+export const FALLBACK_IMAGE_URL = '/images/card-placeholder.png';
+export const FALLBACK_BACK_IMAGE_URL = '/images/card-back-placeholder.png';
 
-// Default design metadata
 export const DEFAULT_DESIGN_METADATA: DesignMetadata = {
   cardStyle: {
-    template: 'standard',
+    template: 'classic',
     effect: 'none',
-    borderRadius: '16px',
+    borderRadius: '8px',
     borderColor: '#000000',
-    frameColor: '#ffffff',
-    frameWidth: 8,
+    frameColor: '#000000',
+    frameWidth: 2,
     shadowColor: 'rgba(0,0,0,0.2)',
   },
   textStyle: {
     titleColor: '#000000',
     titleAlignment: 'center',
     titleWeight: 'bold',
-    descriptionColor: '#444444',
+    descriptionColor: '#333333',
   },
   marketMetadata: {
-    isPrintable: true,
+    isPrintable: false,
     isForSale: false,
-    includeInCatalog: true,
+    includeInCatalog: false,
   },
   cardMetadata: {
-    category: 'standard',
-    cardType: 'collectible',
-    series: 'default',
-    cardNumber: '001',
-    artist: 'Unknown Artist',
-  },
-};
-
-// Helper function to handle image loading errors
-export const handleImageLoadError = (event: React.SyntheticEvent<HTMLImageElement, Event>, fallbackSrc: string = FALLBACK_FRONT_IMAGE_URL) => {
-  const target = event.target as HTMLImageElement;
-  
-  // Prevent infinite loop by checking if we're already using the fallback
-  if (target.src !== fallbackSrc) {
-    console.warn('Image failed to load, using fallback:', target.src, '→', fallbackSrc);
-    target.src = fallbackSrc;
+    category: 'general',
+    cardType: 'standard',
+    series: 'base',
   }
 };

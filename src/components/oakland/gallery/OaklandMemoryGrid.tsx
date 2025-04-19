@@ -34,7 +34,7 @@ const OaklandMemoryGrid: React.FC<OaklandMemoryGridProps> = ({ cards }) => {
           imageUrl: oaklandMemory.imageUrl || card.imageUrl || '',
           historicalContext: oaklandMemory.historicalContext,
           personalSignificance: oaklandMemory.personalSignificance,
-          template: oaklandMemory.template, // Add the template property
+          template: oaklandMemory.template || 'classic', // Set default if missing
         };
         
         return (

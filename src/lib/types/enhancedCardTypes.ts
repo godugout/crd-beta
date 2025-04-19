@@ -1,6 +1,6 @@
 
 import { BaseEntity } from './index';
-import { CardRarity } from './cardTypes';
+import { CardRarity, DesignMetadata } from './cardTypes';
 
 /**
  * Enhanced card types with additional features
@@ -11,20 +11,21 @@ export interface EnhancedCard extends BaseEntity {
   description: string;
   imageUrl: string;
   thumbnailUrl: string;
-  tags: string[]; // Changed from optional to required
+  tags: string[]; // Required
   userId: string;
   effects: string[];
   
   // Enhanced fields
   series?: string;
   edition?: string;
-  seriesId?: string; // Add seriesId field
+  seriesId?: string; 
   serialNumber?: string;
   rarity: CardRarity;
   artist?: string;
   artistId?: string;
   releaseDate?: string;
   license?: string;
+  teamId?: string; // Add teamId field
   
   // Interactive elements
   hotspots?: HotspotData[];
@@ -43,7 +44,7 @@ export interface EnhancedCard extends BaseEntity {
   // Required fields for compatibility with base Card
   createdAt: string;
   updatedAt: string;
-  designMetadata: any; // Make this required
+  designMetadata: DesignMetadata; // Required
 }
 
 /**

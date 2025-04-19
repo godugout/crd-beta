@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Collection, Card } from '@/lib/types';
 import { v4 as uuidv4 } from 'uuid';
@@ -15,8 +14,9 @@ export const useCollectionOperations = () => {
       coverImageUrl: collectionData.coverImageUrl || '',
       userId: collectionData.userId || 'anonymous',
       cards: collectionData.cards || [],
-      cardIds: collectionData.cardIds || [], // This is now allowed by the updated interface
+      cardIds: collectionData.cardIds || [], 
       visibility: collectionData.visibility || 'public',
+      teamId: collectionData.teamId,
       allowComments: collectionData.allowComments !== undefined ? collectionData.allowComments : true,
       designMetadata: collectionData.designMetadata || {},
       isPublic: collectionData.isPublic !== undefined ? collectionData.isPublic : true,

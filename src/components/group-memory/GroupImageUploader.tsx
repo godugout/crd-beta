@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useUploadHandling } from './hooks/useUploadHandling';
@@ -14,16 +15,14 @@ const GroupImageUploader: React.FC<GroupImageUploaderProps> = ({
   onComplete,
   title = 'Upload Images',
   description = 'Drag and drop images here or click to browse',
-  uploadType = 'group' as GroupUploadType // Fixed by casting to GroupUploadType
+  uploadType = 'group'
 }) => {
   const [files, setFiles] = useState<File[]>([]);
   
-  // Fix the useUploadHandling hook usage
   const uploadHandler = useUploadHandling({
-    uploadType: uploadType as GroupUploadType,
+    uploadType: uploadType,
   });
 
-  // Fix the handleFileSelected function type and implementation
   const handleFileSelected = async (acceptedFiles: File[]) => {
     if (!acceptedFiles || acceptedFiles.length === 0) return;
     
@@ -43,14 +42,12 @@ const GroupImageUploader: React.FC<GroupImageUploaderProps> = ({
     }
   };
 
-  // Fix the handleSingleFileSelect function type and implementation
   const handleSingleFileSelect = async (file: File) => {
     if (!file) return;
     // Wrap single file in an array when calling handleFileSelected
     await handleFileSelected([file]);
   };
 
-  // Fix the button click handler to properly handle files
   const handleButtonClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     // Create a file input and trigger it
     const input = document.createElement('input');
