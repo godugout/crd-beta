@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -734,12 +735,7 @@ const CardDesigner: React.FC<CardDesignerProps> = ({ initialCard, onSave }) => {
                     </div>
                   )}
                   
-                  {showHotspots && hotspots.map(hotspot => ({
-                    ...hotspot,
-                    content: typeof hotspot.content === 'string' 
-                      ? hotspot.content 
-                      : hotspot.content
-                  }).map(hotspot => (
+                  {showHotspots && hotspots.map(hotspot => (
                     <div
                       key={hotspot.id}
                       className={`absolute border-2 ${
@@ -811,7 +807,10 @@ const CardDesigner: React.FC<CardDesignerProps> = ({ initialCard, onSave }) => {
                               <Label htmlFor="hotspotContent">Content</Label>
                               <Input
                                 id="hotspotContent"
-                                value={hotspot.content}
+                                value={typeof hotspot.content === 'string' 
+                                  ? hotspot.content 
+                                  : hotspot.content?.title || ''
+                                }
                                 onChange={(e) => updateHotspotContent(hotspot.id, e.target.value)}
                                 className="mt-1"
                               />
@@ -899,4 +898,84 @@ const CardDesigner: React.FC<CardDesignerProps> = ({ initialCard, onSave }) => {
                 QR codes can enhance your cards by providing:
               </p>
               <ul className="text-xs list-disc list-inside space-y-1 mt-2">
-                <li>
+                <li>Links to additional content or experiences</li>
+                <li>Authentication and verification features</li>
+                <li>Contact information or social profiles</li>
+                <li>AR/VR experiences when scanned</li>
+              </ul>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
+      
+      <div className="lg:col-span-1">
+        <div className="bg-gray-50 rounded-lg p-6 sticky top-24">
+          <h3 className="font-medium mb-4">Card Preview</h3>
+          <div className="aspect-[2.5/3.5] bg-white rounded-lg overflow-hidden shadow-lg mx-auto mb-4" style={{
+            borderRadius: `${cardStyle.borderRadius}px`,
+            borderWidth: `${cardStyle.borderWidth}px`,
+            borderColor: cardStyle.borderColor,
+            borderStyle: 'solid'
+          }}>
+            {imageUrl ? (
+              <div className="relative h-full">
+                <img
+                  src={imageUrl}
+                  alt={title}
+                  className="w-full h-full object-cover"
+                />
+                
+                {cardStyle.showOverlay && (
+                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black to-transparent py-4 px-3">
+                    <h3 className={`text-white font-bold ${cardStyle.textShadow ? 'text-shadow' : ''}`}>
+                      {title || 'Card Title'}
+                    </h3>
+                    {description && (
+                      <p className={`text-white/80 text-xs mt-1 ${cardStyle.textShadow ? 'text-shadow' : ''}`}>
+                        {description.length > 100 ? `${description.substring(0, 100)}...` : description}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="h-full flex items-center justify-center bg-gray-100">
+                <p className="text-gray-400 text-center px-4">
+                  Upload an image to preview your card
+                </p>
+              </div>
+            )}
+          </div>
+          
+          <Button 
+            onClick={handleSave}
+            disabled={!title.trim() || !imageUrl}
+            className="w-full"
+          >
+            <Save className="h-4 w-4 mr-2" />
+            Save Card
+          </Button>
+          
+          <div className="mt-4 text-xs text-gray-500">
+            <p>
+              {title ? title : 'No title'} • {rarity.charAt(0).toUpperCase() + rarity.slice(1)}
+            </p>
+            {cardNumber && (
+              <p className="mt-1">Card #{cardNumber}</p>
+            )}
+            {seriesId && (
+              <p className="mt-1">
+                Series: {sampleSeries.find(s => s.id === seriesId)?.name || seriesId}
+              </p>
+            )}
+            {artistInfo.name && (
+              <p className="mt-1">Artist: {artistInfo.name}</p>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default CardDesigner;
