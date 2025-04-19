@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
@@ -9,8 +8,8 @@ import RefractorEffect from '../card-effects/effects/RefractorEffect';
 import VintageEffect from '../card-effects/effects/VintageEffect';
 
 // Fallback textures if the main ones fail to load
-const FALLBACK_FRONT_TEXTURE = '/images/card-placeholder.png';
-const FALLBACK_BACK_TEXTURE = '/images/card-back-placeholder.png';
+const FALLBACK_FRONT_IMAGE_URL = '/images/card-placeholder.png';
+const FALLBACK_BACK_IMAGE_URL = '/images/card-back-placeholder.png';
 
 interface CardModelProps {
   imageUrl: string;
@@ -21,8 +20,8 @@ interface CardModelProps {
 }
 
 const CardModel: React.FC<CardModelProps> = ({
-  imageUrl,
-  backImageUrl,
+  imageUrl = FALLBACK_FRONT_IMAGE_URL,
+  backImageUrl = FALLBACK_BACK_IMAGE_URL,
   isFlipped,
   activeEffects = [],
   effectIntensities = {}

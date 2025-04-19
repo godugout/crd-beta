@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
@@ -6,19 +5,7 @@ import { Card } from '@/lib/types';
 import CardModel from './CardModel';
 import { Environment } from '@react-three/drei';
 import { mapLightingPresetToEnvironment } from '@/utils/environmentPresets';
-
-// Fallback image paths
-const FALLBACK_FRONT_TEXTURE = '/images/card-placeholder.png';
-const FALLBACK_BACK_TEXTURE = '/images/card-back-placeholder.png';
-
-interface Card3DRendererProps {
-  card: Card;
-  isFlipped: boolean;
-  activeEffects: string[];
-  effectIntensities?: Record<string, number>;
-  lightingPreset?: string;
-  onRenderFrame?: () => void;
-}
+import { FALLBACK_FRONT_IMAGE_URL, FALLBACK_BACK_IMAGE_URL, handleImageLoadError } from '@/lib/utils/cardDefaults';
 
 const Card3DRenderer: React.FC<Card3DRendererProps> = ({
   card,
@@ -32,53 +19,46 @@ const Card3DRenderer: React.FC<Card3DRendererProps> = ({
   const frameCount = useRef(0);
   const [environmentPreset, setEnvironmentPreset] = useState('studio');
   
-  // Map custom lighting preset to valid environment preset
   useEffect(() => {
     const mappedPreset = mapLightingPresetToEnvironment(lightingPreset);
     setEnvironmentPreset(mappedPreset);
     console.log("Applied lighting preset:", lightingPreset, "mapped to:", mappedPreset);
   }, [lightingPreset]);
   
-  // Optimized frame updates - only run certain operations every N frames
   useFrame(() => {
     frameCount.current = (frameCount.current + 1) % 5;
     
-    // Only update every 5th frame to reduce CPU load
     if (frameCount.current === 0 && onRenderFrame) {
       onRenderFrame();
     }
     
-    // Log active effects for debugging
     if (frameCount.current === 0 && activeEffects.length > 0) {
       console.log("Active effects:", activeEffects, "with intensities:", effectIntensities);
     }
   });
   
-  // Determine if we need 3D effects or if CSS effects are sufficient
   const needs3DEffects = activeEffects.some(effect => 
     ['Holographic', 'Shimmer', 'Refractor'].includes(effect)
   );
   
-  // Use a simpler shadow setup when possible
   const shadowProps = needs3DEffects 
     ? { castShadow: true, receiveShadow: true } 
     : {};
     
-  // Ensure we have valid image URLs with fallbacks
-  const cardImageUrl = card.imageUrl || FALLBACK_FRONT_TEXTURE;
-  const cardBackImageUrl = card.backImageUrl || FALLBACK_BACK_TEXTURE;
+  const cardImageUrl = card.imageUrl || FALLBACK_FRONT_IMAGE_URL;
+  const cardBackImageUrl = card.backImageUrl || FALLBACK_BACK_IMAGE_URL;
 
   return (
     <group ref={groupRef} {...shadowProps}>
       <CardModel
         imageUrl={cardImageUrl}
         backImageUrl={cardBackImageUrl}
+        onImageError={handleImageLoadError}
         isFlipped={isFlipped}
         activeEffects={activeEffects} 
         effectIntensities={effectIntensities}
       />
       
-      {/* Environment provides lighting - using mapped preset */}
       <Environment 
         preset={environmentPreset as any} 
         background={false}
