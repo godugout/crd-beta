@@ -35,6 +35,7 @@ const CardCreator = React.lazy(() => import('@/pages/CardCreator'));
 const CardDetector = React.lazy(() => import('@/pages/CardDetector')); 
 const TeamPage = React.lazy(() => import('@/pages/TeamPage')); 
 const ArCardViewerPage = React.lazy(() => import('@/pages/ArCardViewerPage'));
+const Labs = React.lazy(() => import('@/pages/Labs'));
 
 // Loading fallback component
 const LoadingFallback = () => (
@@ -76,7 +77,7 @@ const rootRoutes: RouteObject[] = [
     path: "/labs",
     element: (
       <Suspense fallback={<LoadingFallback />}>
-        <DeckViewPage />
+        <Labs />
       </Suspense>
     )
   },

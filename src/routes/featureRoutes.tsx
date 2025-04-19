@@ -4,6 +4,7 @@ import { RouteObject } from 'react-router-dom';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import CacheExample from '@/components/examples/CacheExample';
 import CardShowcase from '@/pages/CardShowcase';
+import { CardEnhancedProvider } from '@/context/CardEnhancedContext';
 
 // Lazy load components that might suspend
 const DeveloperDocs = React.lazy(() => import('@/pages/DeveloperDocs'));
