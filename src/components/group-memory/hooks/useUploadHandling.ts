@@ -1,7 +1,11 @@
+
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
 import useImageProcessing from '@/hooks/useImageProcessing';
+import { useConnectivity } from '@/hooks/useConnectivity';
+import { useMobileOptimization } from '@/hooks/useMobileOptimization';
+import { MemorabiliaType } from '@/components/card-upload/cardDetection';
 
 export type GroupUploadType = 'group' | 'memorabilia' | 'mixed';
 
@@ -15,7 +19,7 @@ export interface UseUploadHandlingProps {
   onComplete?: (cardIds: string[]) => void;
 }
 
-export const useUploadHandling = ({ onComplete }: UseUploadHandlingProps) => {
+export const useUploadHandling = ({ onComplete }: UseUploadHandlingProps = {}) => {
   const [uploadType, setUploadType] = useState<GroupUploadType>('group');
   const [uploadedFiles, setUploadedFiles] = useState<UploadFileItem[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);

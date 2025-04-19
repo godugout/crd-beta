@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import PageLayout from '@/components/navigation/PageLayout';
 import { Button } from '@/components/ui/button';
@@ -19,7 +20,7 @@ const GroupMemoryCreator = () => {
       // Convert card IDs to a format we can use for display
       const newImages = cardIds.map(id => ({
         id,
-        url: `/cards/${id}/preview` // This would be replaced with actual image URLs in production
+        url: `/images/card-placeholder.png` // Fallback to placeholder image
       }));
       
       setProcessedImages([...processedImages, ...newImages]);

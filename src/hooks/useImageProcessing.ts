@@ -95,10 +95,18 @@ export const useImageProcessing = () => {
       img.src = dataUrl;
     });
   }, []);
+  
+  // Add the missing createThumbnail function
+  const createThumbnail = useCallback(async (file: File, maxSize = 300): Promise<string> => {
+    const dataUrl = await fileToDataUrl(file);
+    const { dataUrl: thumbnailUrl } = await resizeImage(dataUrl, maxSize, maxSize, 0.7);
+    return thumbnailUrl;
+  }, [fileToDataUrl, resizeImage]);
 
   return {
     fileToDataUrl,
     resizeImage,
+    createThumbnail,
     processImage,
     enhanceStadiumPhoto,
     isProcessing
