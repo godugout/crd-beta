@@ -3,28 +3,14 @@ import React from 'react';
 import { useThree } from '@react-three/fiber';
 import { Environment } from '@react-three/drei';
 import { useLighting } from '@/context/LightingContext';
-
-// Map our custom environment types to the ones supported by drei
-const mapEnvironmentType = (type: string): "studio" | "apartment" | "city" | "dawn" | "forest" | "lobby" | "night" | "park" | "sunset" | "warehouse" => {
-  switch (type) {
-    case 'natural':
-      return 'forest';
-    case 'dramatic':
-      return 'night';
-    case 'display_case':
-      return 'lobby';
-    case 'studio':
-    default:
-      return 'studio';
-  }
-};
+import { mapLightingPresetToEnvironment, ValidEnvironmentPreset } from '@/utils/environmentPresets';
 
 const DynamicLighting: React.FC = () => {
   const { lightSettings } = useLighting();
   const { scene } = useThree();
   
   // Map our custom environment type to one supported by drei
-  const environmentPreset = mapEnvironmentType(lightSettings.environmentType);
+  const environmentPreset = mapLightingPresetToEnvironment(lightSettings.environmentType);
 
   return (
     <>

@@ -28,12 +28,16 @@ const CardModel: React.FC<CardModelProps> = ({
   const [frontTextureLoaded, setFrontTextureLoaded] = useState(false);
   const [backTextureLoaded, setBackTextureLoaded] = useState(false);
   
-  const frontTexture = useTexture(imageUrl || FALLBACK_FRONT_IMAGE_URL, () => {
+  // Use a reliable unsplash image as ultimate fallback
+  const reliableFallback = 'https://images.unsplash.com/photo-1518770660439-4636190af475';
+  
+  // Try to load textures with error handling
+  const frontTexture = useTexture(imageUrl || reliableFallback, () => {
     setFrontTextureLoaded(true);
     console.log("Front card texture loaded");
   });
   
-  const backTexture = useTexture(backImageUrl || FALLBACK_BACK_IMAGE_URL, () => {
+  const backTexture = useTexture(backImageUrl || reliableFallback, () => {
     setBackTextureLoaded(true);
     console.log("Back card texture loaded");
   });
