@@ -1,3 +1,4 @@
+
 import React, { useRef, useState, useEffect, Suspense } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { 
@@ -17,18 +18,17 @@ import { Card } from '@/lib/types';
 import { useCardLighting, LightingSettings } from '@/hooks/useCardLighting';
 import { useUserLightingPreferences } from '@/hooks/useUserLightingPreferences';
 import { motion } from 'framer-motion';
-import { ChevronRight, ChevronLeft } from 'lucide-react';
+import { ChevronRight, ChevronLeft, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { getEnvironmentMapById } from '@/lib/environment-maps';
 import { logRenderingInfo } from '@/utils/debugRenderer';
-import { Eye } from 'lucide-react';
 import ViewerSettings from '@/components/gallery/viewer-components/ViewerSettings';
 
 // Define possible return types from useTexture
 type TextureResult = THREE.Texture | Record<string, THREE.Texture> | THREE.Texture[];
 
-// Debug component to visualize camera and light positions
+// Debug component to visualize camera and light positions - MUST BE USED INSIDE CANVAS
 const DebugInfo = ({ show = false }) => {
   if (!show) return null;
   
@@ -47,7 +47,7 @@ const CardModel = ({
   const [loadingError, setLoadingError] = useState<string | null>(null);
 
   // Try to load the textures with better error handling
-  const LoadTexture = ({ url, onLoad, onError }) => {
+  const TextureLoader = ({ url, onLoad, onError }) => {
     useEffect(() => {
       const loader = new THREE.TextureLoader();
       loader.crossOrigin = 'anonymous';
@@ -119,19 +119,19 @@ const CardModel = ({
   
   return (
     <group>
-      {/* Load textures */}
-      <LoadTexture 
+      {/* Load textures - using components directly in the scene */}
+      <TextureLoader 
         url={frontTextureUrl} 
         onLoad={setFrontTexture} 
         onError={(msg: string) => setLoadingError(`Front texture: ${msg}`)} 
       />
-      <LoadTexture 
+      <TextureLoader 
         url={backTextureUrl} 
         onLoad={setBackTexture} 
         onError={(msg: string) => setLoadingError(`Back texture: ${msg}`)} 
       />
       
-      {/* Visual feedback for loading errors */}
+      {/* Visual feedback for loading errors - USING THREE.JS OBJECTS, NOT HTML */}
       {loadingError && (
         <mesh position={[0, 1, 0]}>
           <boxGeometry args={[4, 0.5, 0.1]} />
@@ -250,6 +250,7 @@ const RealisticCardViewer: React.FC<RealisticCardViewerProps> = ({
 }) => {
   const [isFlipped, setIsFlipped] = useState(false);
   const [isDebugMode, setIsDebugMode] = useState(false);
+  const [showViewerSettings, setShowViewerSettings] = useState(false);
   const { preferences, savePreferences } = useUserLightingPreferences();
   const {
     lightingSettings,
@@ -259,7 +260,6 @@ const RealisticCardViewer: React.FC<RealisticCardViewerProps> = ({
     isUserCustomized,
     toggleDynamicLighting
   } = useCardLighting(preferences?.environmentType || 'studio');
-  const [showViewerSettings, setShowViewerSettings] = useState(false);
 
   // Save user preferences when they change
   useEffect(() => {
@@ -341,7 +341,7 @@ const RealisticCardViewer: React.FC<RealisticCardViewerProps> = ({
         <DebugInfo show={isDebugMode} />
       </Canvas>
 
-      {/* Controls overlay */}
+      {/* Controls overlay - MOVED OUTSIDE of Canvas */}
       <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex gap-3 z-10">
         <Button
           variant="secondary"
@@ -353,7 +353,7 @@ const RealisticCardViewer: React.FC<RealisticCardViewerProps> = ({
         </Button>
       </div>
       
-      {/* Customization panel toggle */}
+      {/* Customization panel toggle - OUTSIDE of Canvas */}
       <div 
         className={cn(
           "absolute top-1/2 -translate-y-1/2 z-10 transition-all duration-300",
@@ -370,18 +370,19 @@ const RealisticCardViewer: React.FC<RealisticCardViewerProps> = ({
         </Button>
       </div>
       
-      {/* Debug indicator */}
+      {/* Debug indicator - OUTSIDE of Canvas */}
       {isDebugMode && (
         <div className="absolute top-2 left-2 bg-red-500/80 text-white text-xs px-2 py-1 rounded z-50">
           Debug Mode
         </div>
       )}
       
-      {/* Card title overlay */}
+      {/* Card title overlay - OUTSIDE of Canvas */}
       <div className="absolute top-2 left-1/2 transform -translate-x-1/2 bg-black/50 backdrop-blur-sm text-white px-3 py-1 rounded-full text-sm z-10">
         {card.title || 'Untitled Card'}
       </div>
 
+      {/* Settings button - OUTSIDE of Canvas */}
       <Button
         variant="ghost"
         size="icon"
@@ -391,12 +392,17 @@ const RealisticCardViewer: React.FC<RealisticCardViewerProps> = ({
         <Eye className="h-5 w-5" />
       </Button>
 
-      <ViewerSettings
-        settings={lightingSettings}
-        onUpdateSettings={updateLightingSetting}
-        onApplyPreset={applyPreset}
-        isOpen={showViewerSettings}
-      />
+      {/* Viewer settings - OUTSIDE of Canvas */}
+      {showViewerSettings && (
+        <div className="absolute top-16 right-4 w-72 bg-black/60 backdrop-blur-md p-4 rounded-lg z-20">
+          <ViewerSettings
+            settings={lightingSettings}
+            onUpdateSettings={updateLightingSetting}
+            onApplyPreset={applyPreset}
+            isOpen={showViewerSettings}
+          />
+        </div>
+      )}
     </div>
   );
 };
