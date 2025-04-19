@@ -9,10 +9,12 @@ export interface EditorCanvasProps {
   isDrawing: boolean;
   startX: number;
   startY: number;
-  isProcessing: boolean; // Add this prop
+  isProcessing: boolean; // Added this prop
   handlePointerDown: (e: React.PointerEvent) => void;
   handlePointerMove: (e: React.PointerEvent) => void;
   handlePointerUp: () => void;
+  imageUrl?: string; // Add optional imageUrl prop
+  selectedAreas?: any[]; // Add optional selectedAreas prop
 }
 
 const EditorCanvas: React.FC<EditorCanvasProps> = ({
@@ -26,7 +28,9 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({
   isProcessing,
   handlePointerDown,
   handlePointerMove,
-  handlePointerUp
+  handlePointerUp,
+  imageUrl,
+  selectedAreas
 }) => {
   return (
     <div className="relative">
@@ -44,8 +48,14 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({
         ref={editorImgRef}
         className="max-w-full h-auto"
         alt="Editor canvas"
+        src={imageUrl}
         style={{ opacity: isProcessing ? 0.5 : 1 }}
       />
+      {selectedAreas?.length > 0 && (
+        <div className="absolute top-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded">
+          {selectedAreas.length} areas selected
+        </div>
+      )}
     </div>
   );
 };

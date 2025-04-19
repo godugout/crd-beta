@@ -22,7 +22,7 @@ const OaklandMemoryGrid: React.FC<OaklandMemoryGridProps> = ({ cards }) => {
         
         const memoryData: OaklandMemoryData = {
           title: card.title || card.name || '',
-          description: card.description,
+          description: card.description || '',
           date: oaklandMemory.date,
           opponent: oaklandMemory.opponent,
           score: oaklandMemory.score,
@@ -34,6 +34,7 @@ const OaklandMemoryGrid: React.FC<OaklandMemoryGridProps> = ({ cards }) => {
           imageUrl: oaklandMemory.imageUrl || card.imageUrl || '',
           historicalContext: oaklandMemory.historicalContext,
           personalSignificance: oaklandMemory.personalSignificance,
+          template: oaklandMemory.template, // Add the template property
         };
         
         return (

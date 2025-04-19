@@ -21,9 +21,12 @@ export const useImageProcessing = () => {
     }
   };
 
-  // Additional methods needed by BatchImageEditor
+  // Required methods needed by BatchImageEditor
   const detectObjects = async (imageData: any) => {
+    setIsProcessing(true);
     // Mock implementation
+    await new Promise(resolve => setTimeout(resolve, 800));
+    setIsProcessing(false);
     return { success: true, data: [] };
   };
 
@@ -32,14 +35,17 @@ export const useImageProcessing = () => {
     return [];
   };
 
-  const extractSelectedAreas = async (imageFile: File, areas: any[]) => {
+  const extractSelectedAreas = async (indices?: number[]) => {
+    setIsProcessing(true);
     // Mock implementation
-    return [];
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    setIsProcessing(false);
+    return [] as File[];
   };
 
-  const getPreviewUrls = (areas: any[]) => {
+  const getPreviewUrls = (indices?: number[]) => {
     // Mock implementation
-    return [];
+    return [] as string[];
   };
 
   return {

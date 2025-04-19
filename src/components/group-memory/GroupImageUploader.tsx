@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useUploadHandling } from './hooks/useUploadHandling';
@@ -21,7 +20,7 @@ const GroupImageUploader: React.FC<GroupImageUploaderProps> = ({
   
   // Fix the useUploadHandling hook usage
   const uploadHandler = useUploadHandling({
-    uploadType,
+    uploadType: uploadType as GroupUploadType,
   });
 
   // Fix the handleFileSelected function type and implementation

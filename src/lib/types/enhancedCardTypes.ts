@@ -1,4 +1,3 @@
-
 import { BaseEntity } from './index';
 import { CardRarity } from './cardTypes';
 
@@ -6,6 +5,7 @@ import { CardRarity } from './cardTypes';
  * Enhanced card types with additional features
  */
 export interface EnhancedCard extends BaseEntity {
+  id: string; // Add required id property
   title: string;
   description: string; // Changed from optional to required for compatibility
   imageUrl: string;
