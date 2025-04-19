@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect, useState } from 'react';
 import { Card } from '@/lib/types/cardTypes';
 import { Canvas, useFrame } from '@react-three/fiber';
@@ -29,17 +28,14 @@ const Card3DModel = ({
   const [backTextureLoaded, setBackTextureLoaded] = useState<THREE.Texture | null>(null);
   const [texturesLoaded, setTexturesLoaded] = useState(false);
   
-  // Default card back image - using a relative path that exists in the public folder
   const defaultCardBackImage = '/images/card-back-placeholder.png';
   
-  // Load textures safely with error handling
   useEffect(() => {
     const textureLoader = new THREE.TextureLoader();
     textureLoader.crossOrigin = 'anonymous';
     
     console.log("Loading front texture from:", frontTextureUrl);
     
-    // Load front texture
     textureLoader.load(
       frontTextureUrl,
       (texture) => {
@@ -51,7 +47,6 @@ const Card3DModel = ({
       },
       (error) => {
         console.error("Error loading front texture:", error);
-        // Load fallback texture for front
         textureLoader.load(
           FALLBACK_IMAGE_URL,
           (fallbackTexture) => {
@@ -64,7 +59,6 @@ const Card3DModel = ({
       }
     );
     
-    // Load back texture
     console.log("Loading back texture from:", backTextureUrl || defaultCardBackImage);
     textureLoader.load(
       backTextureUrl || defaultCardBackImage,
@@ -77,7 +71,6 @@ const Card3DModel = ({
       },
       (error) => {
         console.error("Error loading back texture:", error);
-        // Try an absolute URL for the default card back
         const absoluteBackUrl = new URL(defaultCardBackImage, window.location.origin).href;
         console.log("Trying absolute URL for back texture:", absoluteBackUrl);
         
@@ -90,7 +83,6 @@ const Card3DModel = ({
           undefined,
           () => {
             console.error("Failed to load default card back");
-            // Create a plain color texture as last resort
             const canvas = document.createElement('canvas');
             canvas.width = 512;
             canvas.height = 512;
@@ -108,7 +100,6 @@ const Card3DModel = ({
     );
   }, [frontTextureUrl, backTextureUrl, defaultCardBackImage]);
   
-  // Set textures loaded when both are available
   useEffect(() => {
     if (frontTextureLoaded && backTextureLoaded) {
       console.log("Both textures loaded successfully");
@@ -116,29 +107,23 @@ const Card3DModel = ({
     }
   }, [frontTextureLoaded, backTextureLoaded]);
 
-  // Animation effect
   useFrame((state, delta) => {
     if (!groupRef.current) return;
     
-    // Card dimension ratios (2.5 x 3.5 inches standard card)
     const targetRotationY = isFlipped ? Math.PI : 0;
     
-    // Smooth rotation for flipping
     if (groupRef.current.rotation.y !== targetRotationY) {
       groupRef.current.rotation.y += (targetRotationY - groupRef.current.rotation.y) * 0.1;
     }
     
-    // Add floating animation
     const time = state.clock.getElapsedTime();
-    groupRef.current.position.y = Math.sin(time * 0.5) * 0.1; // Gentle floating
-    groupRef.current.rotation.z = Math.sin(time * 0.3) * 0.02; // Subtle tilting
+    groupRef.current.position.y = Math.sin(time * 0.5) * 0.1;
+    groupRef.current.rotation.z = Math.sin(time * 0.3) * 0.02;
     
-    // Add hover effect
     if (hovered) {
       groupRef.current.position.y += 0.1;
     }
     
-    // Log visibility for debugging
     logRenderingInfo("Card3DModel", {
       visible: texturesLoaded,
       position: {
@@ -157,7 +142,6 @@ const Card3DModel = ({
     );
   }
 
-  // Create glow material for enhanced effect without @react-three/postprocessing
   const createGlowMaterial = () => {
     const glowMaterial = new THREE.MeshStandardMaterial({
       color: new THREE.Color('#8050ff'),
@@ -173,9 +157,8 @@ const Card3DModel = ({
     <group 
       ref={groupRef}
       position={[0, 0, 0]}
-      rotation={[0.1, 0, 0]} // Slight initial tilt
+      rotation={[0.1, 0, 0]}
     >
-      {/* Main card mesh */}
       <mesh
         ref={meshRef}
         castShadow
@@ -183,10 +166,7 @@ const Card3DModel = ({
         onPointerOver={() => setHovered(true)}
         onPointerOut={() => setHovered(false)}
       >
-        {/* Card geometry */}
         <planeGeometry args={[2.5, 3.5, 20, 20]} />
-        
-        {/* Front material */}
         <meshPhysicalMaterial 
           map={frontTextureLoaded}
           side={THREE.FrontSide}
@@ -199,7 +179,6 @@ const Card3DModel = ({
         />
       </mesh>
       
-      {/* Back face */}
       <mesh position={[0, 0, -0.01]} rotation={[0, Math.PI, 0]}>
         <planeGeometry args={[2.5, 3.5, 1, 1]} />
         <meshPhysicalMaterial 
@@ -212,7 +191,6 @@ const Card3DModel = ({
         />
       </mesh>
       
-      {/* Optional glow effect for holographic cards if active */}
       {activeEffects.includes('Holographic') && (
         <mesh position={[0, 0, -0.03]} scale={[2.55, 3.55, 1]}>
           <planeGeometry args={[1, 1]} />
@@ -236,21 +214,17 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
   const [frontTexture, setFrontTexture] = useState<string>(card?.imageUrl || FALLBACK_IMAGE_URL);
   const [backTexture, setBackTexture] = useState<string>('/images/card-back-placeholder.png');
   
-  // Ensure we have valid image URLs before rendering
   useEffect(() => {
     const validateCardImages = async () => {
       setIsLoading(true);
       
-      // Create a deep copy of the card to avoid mutating the original
       const cardCopy: Card = JSON.parse(JSON.stringify(card));
       
-      // Ensure designMetadata is always present with required fields
       if (!cardCopy.designMetadata || !cardCopy.designMetadata.cardStyle) {
         console.warn(`Card ${cardCopy.id} is missing designMetadata or cardStyle, using default values`);
         cardCopy.designMetadata = DEFAULT_DESIGN_METADATA;
       }
       
-      // Check if card has valid image URL
       if (!cardCopy.imageUrl || cardCopy.imageUrl === 'undefined') {
         console.warn(`Card ${cardCopy.id} is missing an image URL, using fallback`);
         cardCopy.imageUrl = FALLBACK_IMAGE_URL;
@@ -263,17 +237,14 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
         });
       }
       
-      // Also ensure we have a thumbnail URL
       if (!cardCopy.thumbnailUrl || cardCopy.thumbnailUrl === 'undefined') {
         cardCopy.thumbnailUrl = cardCopy.imageUrl || FALLBACK_IMAGE_URL;
       }
       
-      // Ensure other required fields are present
       if (!cardCopy.effects) {
         cardCopy.effects = [];
       }
       
-      // Set up imagePreload to validate that images actually load
       try {
         const image = new Image();
         image.crossOrigin = "anonymous";
@@ -324,10 +295,8 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
       className="w-full h-full min-h-[600px] bg-gray-900 rounded-lg overflow-hidden"
     >
       <Canvas shadows dpr={[1, 2]} gl={{ antialias: true, alpha: false }}>
-        {/* Camera positioned for better view */}
         <PerspectiveCamera makeDefault position={[0, 0, 6]} fov={45} />
         
-        {/* Enhanced lighting setup */}
         <ambientLight intensity={1.0} />
         <spotLight 
           position={[5, 5, 5]} 
@@ -339,8 +308,7 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
         <pointLight position={[-5, -5, -5]} color="#3050ff" intensity={1.0} />
         <pointLight position={[5, -3, -5]} color="#ff3050" intensity={0.8} />
         
-        {/* Stronger environment light */}
-        <Environment preset="city" background intensity={1.5} />
+        <Environment preset="city" background={true} />
         
         <Card3DModel 
           frontTextureUrl={frontTexture}
@@ -362,7 +330,6 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
         />
       </Canvas>
       
-      {/* Debug overlay to show canvas boundaries */}
       <div className="absolute top-0 left-0 right-0 p-2 text-white text-xs bg-black/30 pointer-events-none">
         3D Viewer: {processedCard.id} - {processedCard.title || 'Untitled Card'}
       </div>
