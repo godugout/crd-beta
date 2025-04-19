@@ -1,4 +1,3 @@
-
 import { RefObject } from 'react';
 
 export type MemorabiliaType = 'card' | 'ticket' | 'program' | 'autograph' | 'face' | 'group' | 'unknown';
@@ -17,6 +16,7 @@ export interface EnhancedCropBoxProps extends CropBox {
   rotation?: number;
   aspectRatio?: number;
   selected?: boolean;
+  color?: string;
 }
 
 interface DetectionOptions {
@@ -91,4 +91,28 @@ export const detectText = async (canvas: HTMLCanvasElement): Promise<any> => {
     text: "Sample player statistics and information",
     confidence: 0.85
   };
+};
+
+export const applyCrop = (originalImage: HTMLImageElement, cropBox: CropBox): Promise<HTMLCanvasElement> => {
+  return new Promise((resolve) => {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    
+    if (!ctx) {
+      throw new Error('Failed to get canvas context');
+    }
+    
+    // Set canvas dimensions to crop box size
+    canvas.width = cropBox.width;
+    canvas.height = cropBox.height;
+    
+    // Draw cropped region to canvas
+    ctx.drawImage(
+      originalImage,
+      cropBox.x, cropBox.y, cropBox.width, cropBox.height,
+      0, 0, cropBox.width, cropBox.height
+    );
+    
+    resolve(canvas);
+  });
 };

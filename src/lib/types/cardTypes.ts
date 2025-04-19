@@ -1,4 +1,3 @@
-
 /**
  * Consolidated Card Types for Cardshow (CRD)
  * This file serves as the central source of truth for all card-related types
@@ -216,13 +215,12 @@ export type CardRarity = 'common' | 'uncommon' | 'rare' | 'ultra-rare' | 'legend
  */
 export interface BaseCard extends BaseEntity {
   title: string;
-  description: string;
+  description: string; // Make it required to satisfy most component requirements
   imageUrl: string;
-  backImageUrl?: string; // Added backImageUrl property
-  image?: string; // Legacy support for older components
+  backImageUrl?: string;
   thumbnailUrl: string;
   tags: string[];
-  collectionId?: string;
+  collectionId?: string; // Add this property
   userId: string;
   teamId?: string;
   isPublic?: boolean;
@@ -258,11 +256,6 @@ export interface BaseCard extends BaseEntity {
   estimatedValue?: string;
   condition?: string;
   rarity?: CardRarity;
-  
-  // Additional fields needed by some components
-  creatorId?: string;
-  createdAt: string;
-  updatedAt: string;
 }
 
 /**

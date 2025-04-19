@@ -9,7 +9,8 @@ export interface InstagramSource {
 }
 
 export interface Collection extends BaseEntity {
-  name: string;
+  name: string; // Changed from title for compatibility
+  title?: string; // Keep title as optional for backward compatibility
   description?: string;
   userId: string;
   cards: Card[];
@@ -18,7 +19,7 @@ export interface Collection extends BaseEntity {
   tags?: string[];
   popularity?: number;
   instagramSource?: InstagramSource;
-  featured?: boolean; // Added this property to fix the type error
+  featured?: boolean;
   
   // Additional properties needed by other components
   visibility?: 'public' | 'private' | 'team' | 'unlisted';
