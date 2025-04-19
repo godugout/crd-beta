@@ -1,5 +1,3 @@
-// Fix for the specific error in this file
-// We'll update the property name from cardIds to cards
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -38,7 +36,7 @@ const CreateCollectionDialog: React.FC<CreateCollectionDialogProps> = ({ isOpen,
         title: collectionName,
         description: collectionDescription,
         visibility: isPublic ? 'public' : 'private',
-        cards: selectedCardIds.map(id => ({ id })), // Changed from cardIds to cards
+        cards: selectedCardIds.map(id => ({ id })),
       };
 
       await createCollection(newCollection);

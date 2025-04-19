@@ -50,17 +50,20 @@ export interface HotspotData {
   x: number;
   y: number;
   radius: number;
-  type: 'info' | 'link' | 'audio' | 'video' | 'ar';
+  type: 'info' | 'link' | 'audio' | 'video' | 'ar' | 'text' | 'image';
   content: {
     title?: string;
     description?: string;
     url?: string;
     mediaUrl?: string;
-  };
+  } | string;  // Support both object and string content
   style?: {
     color?: string;
     icon?: string;
   };
+  visible?: boolean;
+  width?: number;
+  height?: number;
 }
 
 /**
