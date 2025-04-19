@@ -1,9 +1,9 @@
 
 import { toast as sonnerToast } from 'sonner';
 
-type ToastVariant = 'default' | 'success' | 'info' | 'warning' | 'error' | 'destructive';
+export type ToastVariant = 'default' | 'success' | 'info' | 'warning' | 'error' | 'destructive';
 
-interface ToastProps {
+export interface ToastProps {
   title: string;
   description?: string;
   variant?: ToastVariant;
@@ -14,7 +14,7 @@ interface ToastProps {
   };
 }
 
-interface ToastOptions {
+export interface ToastOptions {
   description?: string;
   duration?: number;
   action?: {
@@ -23,7 +23,7 @@ interface ToastOptions {
   };
 }
 
-type Toast = {
+export type Toast = {
   id: string;
   title: React.ReactNode;
   description?: React.ReactNode;
@@ -84,20 +84,19 @@ const showToast = ({ title, description, variant = 'default', duration = 5000, a
   }
 };
 
+// Export the toast function directly rather than as a property
 export const toast = {
-  // Legacy method for compatibility
-  toast: showToast,
-  
-  // Direct access with automatic variant
-  ...sonnerToast,
-  
-  // Custom variants
+  // Direct access methods for specific variants
   default: (title: string, options?: ToastOptions) => showToast({ title, ...options, variant: 'default' }),
   success: (title: string, options?: ToastOptions) => showToast({ title, ...options, variant: 'success' }),
   info: (title: string, options?: ToastOptions) => showToast({ title, ...options, variant: 'info' }),
   warning: (title: string, options?: ToastOptions) => showToast({ title, ...options, variant: 'warning' }),
   error: (title: string, options?: ToastOptions) => showToast({ title, ...options, variant: 'error' }),
-  destructive: (title: string, options?: ToastOptions) => showToast({ title, ...options, variant: 'destructive' })
+  destructive: (title: string, options?: ToastOptions) => showToast({ title, ...options, variant: 'destructive' }),
+  // Original toast method for backward compatibility
+  toast: showToast,
+  // Direct access to sonnerToast methods
+  ...sonnerToast
 };
 
 export const useToast = () => {

@@ -9,8 +9,8 @@ interface EditorCanvasProps {
   setSelectedAreas: React.Dispatch<React.SetStateAction<EnhancedCropBoxProps[]>>;
   selectedIndex: number;
   setSelectedIndex: (index: number) => void;
-  editorImgRef?: React.RefObject<HTMLImageElement>; // Add this missing prop
-  handlePointerDown?: (e: React.PointerEvent) => void; // Add optional interaction handlers
+  editorImgRef?: React.RefObject<HTMLImageElement>; // Added this missing prop
+  handlePointerDown?: (e: React.PointerEvent) => void; // Added these missing handlers
   handlePointerMove?: (e: React.PointerEvent) => void;
   handlePointerUp?: () => void;
 }

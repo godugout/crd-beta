@@ -1,110 +1,74 @@
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { useIsMobile } from './use-mobile';
 
-export interface MobileOptimizationOptions {
-  highQualityThreshold?: number; // Device memory in GB to consider high quality
-  mediumQualityThreshold?: number; // Device memory in GB to consider medium quality
-  defaultImageQuality?: number; // Default image quality (0-100)
-  defaultLazyLoading?: boolean; // Whether to lazy load images by default
+interface MobileOptimizationOptions {
+  reduceEffects?: boolean;
+  lazyLoadImages?: boolean;
+  optimizeInteractions?: boolean;
+  shouldOptimizeAnimations?: boolean;
 }
 
 export const useMobileOptimization = (options?: MobileOptimizationOptions) => {
-  const [isMobile, setIsMobile] = useState<boolean>(false);
-  const [isLowBandwidth, setIsLowBandwidth] = useState<boolean>(false);
-  const [shouldOptimizeAnimations, setShouldOptimizeAnimations] = useState<boolean>(false);
-  const [lazyLoadImages, setLazyLoadImages] = useState<boolean>(
-    options?.defaultLazyLoading ?? true
-  );
-  
+  const isMobile = useIsMobile();
+  const [bandwidthLevel, setBandwidthLevel] = useState<'high' | 'medium' | 'low'>('high');
+
+  // Detect connection quality (if available in browser)
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
+    const connection = (navigator as any).connection;
     
-    const checkConnectionSpeed = () => {
-      // Check if navigator.connection is available (Chrome, Edge, Opera)
-      if ('connection' in navigator) {
-        const connection = (navigator as any).connection;
-        if (connection) {
-          // Check for slow connections
-          const isSlowConnection = 
-            connection.saveData || 
-            connection.effectiveType === 'slow-2g' ||
-            connection.effectiveType === '2g' ||
-            connection.effectiveType === '3g';
-          
-          setIsLowBandwidth(isSlowConnection);
-          setShouldOptimizeAnimations(isSlowConnection || isMobile);
-        }
-      } else {
-        // Fallback for browsers without connection API
-        setIsLowBandwidth(false);
-        setShouldOptimizeAnimations(isMobile);
-      }
-    };
-    
-    checkMobile();
-    checkConnectionSpeed();
-    
-    window.addEventListener('resize', checkMobile);
-    
-    return () => {
-      window.removeEventListener('resize', checkMobile);
-    };
-  }, [isMobile]);
-  
-  // Check if device is low-end
-  const isLowEndDevice = (): boolean => {
-    // Check for device memory (Chrome only)
-    if ('deviceMemory' in navigator) {
-      return (navigator as any).deviceMemory < 4;
-    }
-    
-    // Check for hardware concurrency (CPU cores)
-    if ('hardwareConcurrency' in navigator) {
-      return navigator.hardwareConcurrency <= 4;
-    }
-    
-    // If can't detect, assume mobile devices are lower-end
-    return isMobile;
-  };
-
-  // Get appropriate image quality based on device and connection
-  const getImageQuality = (): number => {
-    if (isLowBandwidth) return 60; // Lower quality for slow connections
-    
-    if ('deviceMemory' in navigator) {
-      const memory = (navigator as any).deviceMemory;
+    if (connection) {
+      const updateConnectionStatus = () => {
+        const effectiveType = connection.effectiveType;
+        if (effectiveType === '4g') setBandwidthLevel('high');
+        else if (effectiveType === '3g') setBandwidthLevel('medium');
+        else setBandwidthLevel('low');
+      };
       
-      if (memory >= (options?.highQualityThreshold || 6)) {
-        return 90; // High quality for high-end devices
-      } else if (memory >= (options?.mediumQualityThreshold || 4)) {
-        return 75; // Medium quality
-      }
+      updateConnectionStatus();
+      connection.addEventListener('change', updateConnectionStatus);
+      
+      return () => {
+        connection.removeEventListener('change', updateConnectionStatus);
+      };
     }
     
-    return isMobile ? 70 : options?.defaultImageQuality || 85; // Default quality
+    return undefined;
+  }, []);
+
+  // Determine if we should reduce animations/effects based on device and options
+  const shouldOptimizeAnimations = () => {
+    if (options?.reduceEffects !== undefined) return options.reduceEffects;
+    return isMobile || bandwidthLevel !== 'high';
   };
 
-  // For animations and interactions optimization
-  const optimizeInteractions = (): boolean => {
-    return isMobile || isLowEndDevice() || isLowBandwidth;
+  // Determine if we should lazy load images
+  const lazyLoadImages = options?.lazyLoadImages !== false;
+
+  // Get image quality based on bandwidth and device
+  const getImageQuality = () => {
+    if (!isMobile && bandwidthLevel === 'high') return 0.92; // Desktop, high bandwidth
+    if (bandwidthLevel === 'medium') return 0.80; // Medium bandwidth
+    return 0.70; // Low bandwidth or mobile
   };
 
-  // For reducing effects on low-end devices
-  const reduceEffects = (): boolean => {
-    return isLowEndDevice() || isLowBandwidth;
-  };
+  // Check if we're on a low bandwidth connection
+  const isLowBandwidth = bandwidthLevel === 'low';
+
+  // Should we optimize touch interactions?
+  const optimizeInteractions = options?.optimizeInteractions !== false && isMobile;
+
+  // Implementation of reduceEffects property
+  const reduceEffects = options?.reduceEffects || isMobile;
 
   return {
     isMobile,
-    isLowBandwidth,
+    bandwidthLevel,
     shouldOptimizeAnimations,
     lazyLoadImages,
     getImageQuality,
+    isLowBandwidth,
     optimizeInteractions,
     reduceEffects
   };
 };
-
-export default useMobileOptimization;

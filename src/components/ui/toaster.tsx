@@ -1,8 +1,8 @@
 
 import * as React from "react"
-import { useToast } from "@/hooks/use-toast"
+import { useToast, Toast } from "@/hooks/use-toast"
 import {
-  Toast,
+  Toast as ToastComponent,
   ToastClose,
   ToastDescription,
   ToastProvider,
@@ -23,7 +23,7 @@ export function Toaster() {
         const Icon = IconName ? ToastIcons[IconName] : null
 
         return (
-          <Toast key={id} variant={variant as ToastVariant} {...props}>
+          <ToastComponent key={id} variant={variant as ToastVariant} {...props}>
             <div className="flex gap-3">
               {Icon && (
                 <div className="flex-shrink-0 self-start pt-1">
@@ -39,7 +39,7 @@ export function Toaster() {
             </div>
             {action}
             <ToastClose />
-          </Toast>
+          </ToastComponent>
         )
       })}
       <ToastViewport />

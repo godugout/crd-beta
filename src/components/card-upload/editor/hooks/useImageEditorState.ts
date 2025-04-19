@@ -22,7 +22,7 @@ export const useImageEditorState = ({
   setShowEditor,
   onBatchProcessComplete,
   autoEnhance = true,
-  enabledMemorabiliaTypes = ['card', 'ticket', 'program', 'autograph', 'face', 'unknown']
+  enabledMemorabiliaTypes = ['card', 'ticket', 'program', 'autograph', 'face', 'group', 'unknown']
 }: UseImageEditorStateProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const editorImgRef = useRef<HTMLImageElement>(null);
