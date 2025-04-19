@@ -11,6 +11,7 @@ export interface User extends BaseEntity {
   createdAt: string;
   updatedAt?: string;
   bio?: string; // Add bio field for profiles.ts compatibility
+  permissions?: any[]; // Add permissions for Dashboard compatibility
 }
 
 // Fixed re-export syntax

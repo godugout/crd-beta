@@ -1,3 +1,4 @@
+
 // Base types that might be used across modules
 export type JsonValue = 
   | string 
@@ -60,6 +61,7 @@ export interface DesignMetadata {
     frameColor: string;
     frameWidth: number;
     shadowColor: string;
+    teamSpecific?: boolean; // Added to fix OaklandMemoryCreator error
   };
   textStyle: {
     titleColor: string;
@@ -85,9 +87,11 @@ export interface DesignMetadata {
 
 // Define the GroupUploadType enum
 export enum GroupUploadType {
+  GROUP = 'group',
+  MEMORABILIA = 'memorabilia',
+  MIXED = 'mixed',
   PHOTOS = 'photos',
-  CARDS = 'cards',
-  MIXED = 'mixed'
+  CARDS = 'cards'
 }
 
 // For Oakland Memories
@@ -135,7 +139,7 @@ export type { CardRarity } from './types/cardTypes';
 import * as OldTypes from '@/types/card';
 export const oldTypes = OldTypes;
 
-// Card Interface
+// Card Interface - explicitly export for use in other modules
 export interface Card {
   id: string;
   title: string;
@@ -165,7 +169,7 @@ export interface Card {
   height?: number;
   width?: number;
   artist?: string;
-  rarity?: string;
+  rarity?: CardRarity;
   reactions?: Reaction[];
   fabricSwatches?: any[];
   viewCount?: number;
@@ -173,6 +177,20 @@ export interface Card {
   collectionId?: string;
   // Extra fields needed for compatibility
   instagramSource?: string;
+  stats?: CardStats; // Add stats field for ImmersiveCardViewer
+}
+
+// Card stats for use in ImmersiveCardViewer
+export interface CardStats {
+  battingAverage?: string;
+  homeRuns?: number;
+  rbis?: number;
+  era?: string;
+  wins?: number;
+  strikeouts?: number;
+  careerYears?: string;
+  ranking?: string;
+  [key: string]: any;
 }
 
 // User Interface
@@ -186,6 +204,8 @@ export interface User {
   displayName?: string;
   username?: string;
   role: UserRole; // Make required for consistency
+  bio?: string; // Add bio for Profile pages
+  permissions?: UserPermission[]; // Add permissions for Dashboard
 }
 
 // Collection Interface
@@ -239,4 +259,20 @@ export interface Reaction {
   createdAt: string; // Added required
   updatedAt?: string;
   user?: User;
+}
+
+// Add DbCollection interface
+export interface DbCollection {
+  id: string;
+  title?: string;
+  name?: string;
+  description?: string;
+  cover_image_url?: string;
+  owner_id?: string;
+  team_id?: string;
+  visibility?: string;
+  allow_comments?: boolean;
+  created_at: string;
+  updated_at: string;
+  design_metadata?: any;
 }

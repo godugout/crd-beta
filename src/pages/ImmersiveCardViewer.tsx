@@ -2,12 +2,12 @@
 import React, { useEffect, useState } from 'react';
 import { Card } from '@/lib/types';
 import { useParams } from 'react-router-dom';
-import { useCardContext } from '@/context/CardContext';
+import { useCards } from '@/context/CardContext';
 import { useToast } from '@/hooks/use-toast';
 
 const ImmersiveCardViewer = ({ card: initialCard }: { card: Card }) => {
   const { id } = useParams();
-  const { getCardById } = useCardContext();
+  const { getCardById } = useCards();
   const [card, setCard] = useState<Card>(initialCard);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
@@ -130,30 +130,6 @@ const ImmersiveCardViewer = ({ card: initialCard }: { card: Card }) => {
               <div className="stat-item">
                 <span className="text-sm text-gray-400">ERA</span>
                 <span className="block text-lg font-medium text-white">{card.stats.era}</span>
-              </div>
-            )}
-            {card.stats.wins && (
-              <div className="stat-item">
-                <span className="text-sm text-gray-400">Wins</span>
-                <span className="block text-lg font-medium text-white">{card.stats.wins}</span>
-              </div>
-            )}
-            {card.stats.strikeouts && (
-              <div className="stat-item">
-                <span className="text-sm text-gray-400">Strikeouts</span>
-                <span className="block text-lg font-medium text-white">{card.stats.strikeouts}</span>
-              </div>
-            )}
-            {card.stats.careerYears && (
-              <div className="stat-item">
-                <span className="text-sm text-gray-400">Career Years</span>
-                <span className="block text-lg font-medium text-white">{card.stats.careerYears}</span>
-              </div>
-            )}
-            {card.stats.ranking && (
-              <div className="stat-item">
-                <span className="text-sm text-gray-400">Ranking</span>
-                <span className="block text-lg font-medium text-white">{card.stats.ranking}</span>
               </div>
             )}
           </div>

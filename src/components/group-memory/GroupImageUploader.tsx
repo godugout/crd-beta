@@ -1,125 +1,72 @@
 
 import React, { useState } from 'react';
-import { Card } from '@/lib/types';
-import { UploadCloud } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import DropzoneUploader from '@/components/dam/DropzoneUploader';
-import CardSelector from '@/components/card-selector/CardSelector';
-import { useCards } from '@/hooks/useCards';
+import { GroupUploadType } from '@/lib/types';
 import UploadTypeSelector from './components/UploadTypeSelector';
-import { GroupUploadType, useUploadHandling } from './hooks/useUploadHandling';
+import DropzoneUploader from '@/components/ui/DropzoneUploader';
+import CardSelector from '@/components/ui/CardSelector';
 
-interface GroupImageUploaderProps {
-  onImageSelect: (urls: string[], sourceCards?: Card[]) => void;
+export interface GroupImageUploaderProps {
+  onComplete?: (cardIds: string[]) => void; 
+  onImageSelect?: (images: File[]) => void;
   className?: string;
-  onComplete?: (cardIds: string[]) => void; // Added for compatibility
 }
 
 const GroupImageUploader: React.FC<GroupImageUploaderProps> = ({ 
-  onImageSelect, 
-  className,
-  onComplete 
+  onComplete = () => {}, 
+  onImageSelect = () => {},
+  className 
 }) => {
-  const { cards } = useCards();
-  const [selectedCards, setSelectedCards] = useState<Card[]>([]);
-  const { 
-    uploadType, 
-    selectedFiles, 
-    uploadProgress, 
-    isUploading, 
-    hasSelectedFiles,
-    handleFileSelect, 
-    handleUploadTypeChange, 
-    clearSelectedFiles, 
-    simulateUpload 
-  } = useUploadHandling();
+  const [uploadType, setUploadType] = useState<GroupUploadType>(GroupUploadType.GROUP);
+  const [selectedImages, setSelectedImages] = useState<File[]>([]);
+  const [uploadedCardIds, setUploadedCardIds] = useState<string[]>([]);
 
-  const handleUploadClick = async () => {
-    if (uploadType === 'selection' && selectedCards.length > 0) {
-      // For card selection, use the card images
-      const cardUrls = selectedCards.map(card => card.imageUrl);
-      onImageSelect(cardUrls, selectedCards);
-      
-      // If onComplete is provided, also call it with card IDs
-      if (onComplete) {
-        onComplete(selectedCards.map(card => card.id));
-      }
-    } else if (hasSelectedFiles) {
-      // For direct uploads, use the file uploader
-      const urls = await simulateUpload();
-      onImageSelect(urls);
-      
-      // If onComplete is provided, also call it with empty array since these are new files
-      if (onComplete) {
-        onComplete([]);
-      }
+  const handleTypeChange = (type: GroupUploadType) => {
+    setUploadType(type);
+  };
+
+  const handleImagesSelected = (files: File[]) => {
+    setSelectedImages(files);
+    onImageSelect(files);
+  };
+
+  const handleCardIdsUpdated = (cardIds: string[]) => {
+    setUploadedCardIds(cardIds);
+    if (cardIds.length > 0) {
+      onComplete(cardIds);
     }
   };
 
   return (
     <div className={className}>
       <UploadTypeSelector 
-        uploadType={uploadType}
-        onUploadTypeChange={handleUploadTypeChange}
+        uploadType={uploadType} 
+        onUploadTypeChange={handleTypeChange} 
       />
       
-      {uploadType === 'selection' ? (
-        <div className="mt-6">
+      {/* Image upload area */}
+      <div className="mt-6">
+        <DropzoneUploader 
+          onFilesSelected={handleImagesSelected}
+          accept={{
+            'image/*': ['.jpeg', '.jpg', '.png', '.gif', '.webp']
+          }}
+          maxFiles={10}
+          showPreview={true}
+          onUploaded={handleCardIdsUpdated}
+        />
+      </div>
+      
+      {/* Display selected cards */}
+      {uploadedCardIds.length > 0 && (
+        <div className="mt-8">
+          <h3 className="text-lg font-medium mb-4">Selected cards</h3>
           <CardSelector 
-            cards={cards}
-            selectedCards={selectedCards}
-            onSelect={(card) => {
-              if (selectedCards.some(c => c.id === card.id)) {
-                setSelectedCards(selectedCards.filter(c => c.id !== card.id));
-              } else {
-                setSelectedCards([...selectedCards, card]);
-              }
-            }}
-            onSelectAll={() => setSelectedCards(cards)}
-            onClearSelection={() => setSelectedCards([])}
-            allowMultipleSelection={true}
+            selectedCardIds={uploadedCardIds} 
+            onSelectionChange={() => {}}
+            readOnly={true}
           />
         </div>
-      ) : (
-        <Tabs defaultValue="upload" className="mt-6">
-          <TabsList className="grid grid-cols-2">
-            <TabsTrigger value="upload">Upload</TabsTrigger>
-            <TabsTrigger value="gallery">My Gallery</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="upload" className="p-0 mt-4">
-            <DropzoneUploader
-              onFilesSelected={handleFileSelect}
-              maxFiles={uploadType === 'batch' ? 10 : 1}
-              selectedFiles={selectedFiles}
-              uploadProgress={uploadProgress}
-              isUploading={isUploading}
-              onCancel={clearSelectedFiles}
-            />
-          </TabsContent>
-          
-          <TabsContent value="gallery" className="mt-4">
-            <div className="bg-gray-100 border border-dashed border-gray-300 rounded-lg p-8 text-center">
-              <UploadCloud className="mx-auto text-gray-400 mb-4 h-12 w-12" />
-              <h3 className="font-medium text-gray-700 mb-1">Your Gallery</h3>
-              <p className="text-gray-500 text-sm mb-4">
-                Select images from your existing gallery
-              </p>
-            </div>
-          </TabsContent>
-        </Tabs>
       )}
-      
-      <div className="mt-6 flex justify-end">
-        <Button 
-          onClick={handleUploadClick}
-          disabled={(uploadType === 'selection' && selectedCards.length === 0) || 
-                   (uploadType !== 'selection' && !hasSelectedFiles)}
-        >
-          {uploadType === 'selection' ? 'Use Selected Cards' : 'Upload and Process'}
-        </Button>
-      </div>
     </div>
   );
 };

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef, Suspense } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import PageLayout from '@/components/navigation/PageLayout';
@@ -15,7 +14,7 @@ import {
   XCircle
 } from 'lucide-react';
 import { Card } from '@/lib/types';
-import { toast } from '@/hooks/use-toast';
+import { toast } from '@/components/ui/use-toast';
 import { AlertDialog, AlertDialogContent } from '@/components/ui/alert-dialog';
 import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import {
@@ -53,7 +52,6 @@ const ArCardViewerPage: React.FC = () => {
     handleRemoveCard,
   } = useArCardViewer(id);
 
-  // Start camera when entering AR mode
   useEffect(() => {
     if (isArMode) {
       startCamera();
@@ -62,7 +60,6 @@ const ArCardViewerPage: React.FC = () => {
     }
   }, [isArMode]);
 
-  // Start the camera feed
   const startCamera = async () => {
     try {
       if (!videoRef.current) return;
@@ -82,7 +79,6 @@ const ArCardViewerPage: React.FC = () => {
     }
   };
 
-  // Stop the camera feed
   const stopCamera = () => {
     if (videoRef.current && videoRef.current.srcObject) {
       const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
@@ -128,7 +124,6 @@ const ArCardViewerPage: React.FC = () => {
     );
   }
   
-  // Main AR Experience
   return (
     <PageLayout 
       title="AR Card Viewer" 
@@ -136,7 +131,6 @@ const ArCardViewerPage: React.FC = () => {
       className="bg-black"
     >
       <div className="relative min-h-[calc(100vh-64px)]">
-        {/* Top Navigation */}
         <div className="absolute top-0 left-0 right-0 z-20 p-4 flex justify-between items-center bg-gradient-to-b from-black/80 to-transparent">
           <Button 
             variant="ghost" 
@@ -162,7 +156,6 @@ const ArCardViewerPage: React.FC = () => {
           )}
         </div>
         
-        {/* Camera Background */}
         {isArMode && (
           <div className="absolute inset-0 z-0">
             <video 
@@ -175,7 +168,6 @@ const ArCardViewerPage: React.FC = () => {
           </div>
         )}
         
-        {/* Non-AR Background */}
         {!isArMode && (
           <div className="absolute inset-0 z-0">
             <div className="w-full h-full bg-gradient-to-b from-gray-900 to-black flex items-center justify-center">
@@ -194,7 +186,6 @@ const ArCardViewerPage: React.FC = () => {
           </div>
         )}
         
-        {/* Main Content Area */}
         <div className="relative z-10 flex flex-col items-center justify-center min-h-[calc(100vh-64px)]">
           {!isArMode && activeCard && (
             <div className="bg-gray-900/70 backdrop-blur-sm p-6 rounded-lg text-center max-w-sm">
@@ -214,10 +205,8 @@ const ArCardViewerPage: React.FC = () => {
           )}
         </div>
         
-        {/* Bottom Controls */}
         {isArMode && (
           <div className="absolute bottom-0 left-0 right-0 z-20 p-4 bg-gradient-to-t from-black/80 to-transparent">
-            {/* Card Selection Carousel */}
             <div className="mb-4 overflow-x-auto flex gap-2 pb-2">
               {arCards.map((card) => (
                 <div key={card.id} className="relative flex-shrink-0 w-20 h-28 rounded-md overflow-hidden">
@@ -237,7 +226,6 @@ const ArCardViewerPage: React.FC = () => {
                 </div>
               ))}
               
-              {/* Add Card Button */}
               <Button 
                 variant="outline" 
                 className="flex-shrink-0 w-20 h-28 flex flex-col items-center justify-center bg-gray-800/50 border-dashed border-gray-600"
@@ -248,7 +236,6 @@ const ArCardViewerPage: React.FC = () => {
               </Button>
             </div>
             
-            {/* Interaction Controls */}
             <div className="flex items-center justify-center gap-4">
               <Button
                 size="icon"
@@ -298,7 +285,6 @@ const ArCardViewerPage: React.FC = () => {
           </div>
         )}
         
-        {/* Permission Denied Dialog */}
         <AlertDialog open={isPermissionDenied}>
           <AlertDialogContent>
             <div className="p-6">
@@ -318,7 +304,6 @@ const ArCardViewerPage: React.FC = () => {
           </AlertDialogContent>
         </AlertDialog>
         
-        {/* Add Card Sheet */}
         <Sheet open={showAddCardSheet} onOpenChange={setShowAddCardSheet}>
           <SheetContent side="bottom" className="h-[400px]">
             <SheetHeader>

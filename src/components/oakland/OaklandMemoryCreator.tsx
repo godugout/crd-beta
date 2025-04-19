@@ -55,6 +55,8 @@ const OaklandMemoryCreator: React.FC<OaklandMemoryCreatorProps> = ({ className }
     try {
       // Prepare the metadata for storage
       const oaklandMetadata = {
+        title: memoryData.title, // Include title here
+        description: memoryData.description, // Include description here
         date: memoryData.date,
         opponent: memoryData.opponent,
         score: memoryData.score,
@@ -80,7 +82,6 @@ const OaklandMemoryCreator: React.FC<OaklandMemoryCreatorProps> = ({ className }
         designMetadata: {
           cardStyle: {
             effect: selectedTemplate,
-            teamSpecific: true,
             template: selectedTemplate,
             borderRadius: '8px',
             borderColor: '#006341',

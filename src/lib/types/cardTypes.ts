@@ -118,6 +118,7 @@ export interface DesignMetadata {
     frameColor: string; // Required
     frameWidth: number; // Required
     shadowColor: string; // Required
+    teamSpecific?: boolean; // Add this for compatibility
     [key: string]: any;
   };
   textStyle: {
@@ -142,5 +143,15 @@ export interface DesignMetadata {
   [key: string]: any;
 }
 
-// Fixed re-export syntax
+// Fix export syntax for TypeScript module
 export type { HotspotData } from './enhancedCardTypes';
+
+// Export FabricSwatch for types/card.ts
+export interface FabricSwatch {
+  type: string;
+  team: string;
+  year: string;
+  manufacturer: string;
+  position: string;
+  size: string;
+}

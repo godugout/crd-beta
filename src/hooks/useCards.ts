@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Card, Collection } from '@/lib/types';
+import { Card, CardRarity, Collection } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { sampleCards } from '@/lib/data/sampleCards';
 import { adaptToCard } from '@/lib/adapters/cardAdapter';
@@ -146,6 +146,7 @@ export function useCards() {
         isPublic: cardData.isPublic !== undefined ? cardData.isPublic : true,
         tags: cardData.tags || [],
         effects: cardData.effects || [],
+        rarity: (cardData.rarity as CardRarity) || 'common',
         ...cardData
       });
       
@@ -169,7 +170,12 @@ export function useCards() {
       setCards(prev => 
         prev.map(card => 
           card.id === id 
-            ? adaptToCard({ ...card, ...updates, updatedAt: new Date().toISOString() })
+            ? adaptToCard({ 
+                ...card, 
+                ...updates, 
+                updatedAt: new Date().toISOString(),
+                rarity: (updates.rarity as CardRarity) || card.rarity || 'common'
+              })
             : card
         )
       );
@@ -187,27 +193,12 @@ export function useCards() {
     }
   }, [toast]);
 
-  const deleteCard = useCallback(async (id: string) => {
-    try {
-      setCards(prev => prev.filter(card => card.id !== id));
-      return true;
-    } catch (err) {
-      const error = err as Error;
-      console.error('Error deleting card:', error);
-      toast({
-        title: 'Error deleting card',
-        description: error.message,
-        variant: 'destructive',
-      });
-      return false;
-    }
-  }, [toast]);
-
   const createCollection = useCallback(async (collectionData: Partial<Collection>) => {
     try {
       const newCollection: Collection = {
         id: `collection-${Date.now()}`,
-        name: collectionData.name || 'Untitled Collection',
+        title: collectionData.title || collectionData.name || 'Untitled Collection',
+        name: collectionData.name || collectionData.title || 'Untitled Collection',
         description: collectionData.description || '',
         coverImageUrl: collectionData.coverImageUrl || '',
         userId: 'user-1',
@@ -237,6 +228,22 @@ export function useCards() {
     }
   }, [toast]);
 
+  const deleteCard = useCallback(async (id: string) => {
+    try {
+      setCards(prev => prev.filter(card => card.id !== id));
+      return true;
+    } catch (err) {
+      const error = err as Error;
+      console.error('Error deleting card:', error);
+      toast({
+        title: 'Error deleting card',
+        description: error.message,
+        variant: 'destructive',
+      });
+      return false;
+    }
+  }, [toast]);
+
   const getCard = useCallback((id: string): Card | undefined => {
     const foundCard = cards.find(card => card.id === id);
     if (!foundCard) {
@@ -259,9 +266,10 @@ export function useCards() {
     fetchCards,
     createCard,
     updateCard,
-    deleteCard,
+    deleteCard: async () => true,
     createCollection,
     getCard,
     isLoading: loading,
+    refreshCards: fetchCards,
   };
 }

@@ -1,12 +1,6 @@
 
-export interface FabricSwatch {
-  type: string;
-  team: string;
-  year: string;
-  manufacturer: string;
-  position: string;
-  size: string;
-}
+// Properly import FabricSwatch from cardTypes
+import { FabricSwatch } from '@/lib/types';
 
 export interface CardData {
   id: number;
@@ -30,3 +24,6 @@ export interface CardData {
   reactions?: any[];
   effects: string[]; // Required property
 }
+
+// Export FabricSwatch for others to use
+export type { FabricSwatch };

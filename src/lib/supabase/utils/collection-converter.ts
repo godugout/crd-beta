@@ -1,21 +1,5 @@
 
-import { Collection } from '@/lib/types';
-
-// Define DbCollection interface locally if it's not exported from types
-interface DbCollection {
-  id: string;
-  title?: string;
-  name?: string;
-  description?: string;
-  cover_image_url?: string;
-  owner_id?: string;
-  team_id?: string;
-  visibility?: string;
-  allow_comments?: boolean;
-  created_at: string;
-  updated_at: string;
-  design_metadata?: any;
-}
+import { Collection, DbCollection } from '@/lib/types';
 
 export function dbToCollection(dbCollection: any): Collection {
   return {
@@ -51,3 +35,6 @@ export function collectionToDb(collection: Partial<Collection>): Partial<DbColle
     design_metadata: collection.designMetadata
   };
 }
+
+// Add convertDbCollectionToApp alias for compatibility
+export const convertDbCollectionToApp = dbToCollection;
