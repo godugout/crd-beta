@@ -3,10 +3,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
 import { useTexture } from '@react-three/drei';
-import HolographicEffect from '../card-effects/effects/HolographicEffect';
-import ShimmerEffect from '../card-effects/effects/ShimmerEffect';
-import RefractorEffect from '../card-effects/effects/RefractorEffect';
-import VintageEffect from '../card-effects/effects/VintageEffect';
 
 interface CardModelProps {
   imageUrl: string;
@@ -26,25 +22,23 @@ const CardModel: React.FC<CardModelProps> = ({
   const cardRef = useRef<THREE.Group>(null);
   const [textureError, setTextureError] = useState(false);
   
-  // Load textures using drei's useTexture
-  const frontTexture = useTexture(
-    imageUrl, 
-    (texture) => {
+  // Load textures with error handling
+  const frontTexture = useTexture(imageUrl, 
+    () => {
       console.log('Front texture loaded successfully');
     },
-    (error) => {
-      console.error('Front texture failed to load:', error);
+    () => {
+      console.error('Front texture failed to load');
       setTextureError(true);
     }
   );
   
-  const backTexture = useTexture(
-    backImageUrl,
-    (texture) => {
+  const backTexture = useTexture(backImageUrl, 
+    () => {
       console.log('Back texture loaded successfully');
     },
-    (error) => {
-      console.error('Back texture failed to load:', error);
+    () => {
+      console.error('Back texture failed to load');
     }
   );
 
@@ -74,7 +68,7 @@ const CardModel: React.FC<CardModelProps> = ({
     return effectIntensities[effectName] || 1.0;
   };
 
-  // Animate card flipping and subtle floating
+  // More efficient animation with reduced updates
   useFrame((state) => {
     if (!cardRef.current) return;
     
@@ -85,10 +79,12 @@ const CardModel: React.FC<CardModelProps> = ({
       0.1
     );
 
-    // Subtle floating animation
-    const t = state.clock.getElapsedTime();
-    cardRef.current.position.y = Math.sin(t * 0.5) * 0.05;
-    cardRef.current.rotation.z = Math.sin(t * 0.3) * 0.02;
+    // Reduced animation frequency
+    if (state.clock.getElapsedTime() % 0.5 < 0.1) {
+      const t = state.clock.getElapsedTime();
+      cardRef.current.position.y = Math.sin(t * 0.3) * 0.05;
+      cardRef.current.rotation.z = Math.sin(t * 0.2) * 0.01;
+    }
   });
 
   // If there's a texture error, show an error cube
@@ -105,45 +101,15 @@ const CardModel: React.FC<CardModelProps> = ({
     <group ref={cardRef} position={[0, 0, 0]}>
       {/* Front face */}
       <mesh castShadow receiveShadow>
-        <planeGeometry args={[2.5, 3.5, 32, 32]} />
+        <planeGeometry args={[2.5, 3.5]} />
         <primitive object={frontMaterial} attach="material" />
       </mesh>
       
       {/* Back face */}
       <mesh position={[0, 0, -0.01]} rotation={[0, Math.PI, 0]} castShadow receiveShadow>
-        <planeGeometry args={[2.5, 3.5, 32, 32]} />
+        <planeGeometry args={[2.5, 3.5]} />
         <primitive object={backMaterial} attach="material" />
       </mesh>
-      
-      {/* Apply special effects layers */}
-      {activeEffects.includes('Holographic') && (
-        <HolographicEffect 
-          isActive={true} 
-          intensity={getEffectIntensity('Holographic')} 
-        />
-      )}
-      
-      {activeEffects.includes('Shimmer') && (
-        <ShimmerEffect 
-          isActive={true} 
-          intensity={getEffectIntensity('Shimmer')} 
-        />
-      )}
-      
-      {activeEffects.includes('Refractor') && (
-        <RefractorEffect 
-          isActive={true} 
-          intensity={getEffectIntensity('Refractor')} 
-        />
-      )}
-      
-      {activeEffects.includes('Vintage') && (
-        <VintageEffect 
-          isActive={true} 
-          intensity={getEffectIntensity('Vintage')}
-          cardTexture={frontTexture}
-        />
-      )}
     </group>
   );
 };

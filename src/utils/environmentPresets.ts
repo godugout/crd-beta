@@ -1,12 +1,10 @@
 
-import { PresetsType } from '@react-three/drei/core/Environment';
-
 /**
  * Maps our custom lighting presets to valid @react-three/drei environment presets
  */
 export const mapLightingPresetToEnvironment = (
   preset: string
-): PresetsType => {
+): string => {
   const validPresets = {
     studio: "studio",
     natural: "park",
@@ -21,7 +19,7 @@ export const mapLightingPresetToEnvironment = (
   } as const;
   
   // Ensure we always return a valid preset
-  return (validPresets[preset as keyof typeof validPresets] || "studio") as PresetsType;
+  return (validPresets[preset as keyof typeof validPresets] || "studio");
 };
 
 /**

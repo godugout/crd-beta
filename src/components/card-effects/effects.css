@@ -1,50 +1,146 @@
-.glitch-overlay {
-  background: linear-gradient(45deg, transparent 65%, rgba(255, 255, 255, 0.2) 70%, transparent 75%);
-  background-size: 200% 200%;
-  animation: glitch 0.5s ease infinite;
+
+/* Base card effects */
+.effects-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: 12px;
+  overflow: hidden;
 }
 
-.effect-preview {
-  animation: trophy-presentation 2s ease-in-out;
-  transform-style: preserve-3d;
-}
-
-@keyframes trophy-presentation {
-  0% {
-    transform: scale(0.8) rotateY(0deg);
-    filter: brightness(0.5);
-  }
-  50% {
-    transform: scale(1.1) rotateY(180deg);
-    filter: brightness(1.2);
-  }
-  100% {
-    transform: scale(1) rotateY(360deg);
-    filter: brightness(1);
-  }
-}
-
-@keyframes glitch {
-  0% { background-position: 0% 0%; }
-  20% { background-position: -20% -20%; }
-  40% { background-position: 20% 20%; }
-  60% { background-position: -20% 20%; }
-  80% { background-position: 20% -20%; }
-  100% { background-position: 0% 0%; }
-}
-
-@keyframes rotate {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-.light-rays {
-  background: radial-gradient(circle at 50% 50%, 
-    rgba(255, 255, 255, 0.8) 0%,
-    transparent 20%,
-    rgba(255, 255, 255, 0.4) 30%,
-    transparent 40%
+/* Holographic effect */
+.effect-holographic .holographic-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    125deg, 
+    rgba(255,0,0,0) 0%,
+    rgba(255,0,255,0.4) 25%, 
+    rgba(0,255,255,0.4) 50%,
+    rgba(0,255,0,0.4) 75%,
+    rgba(255,255,0,0) 100%
   );
-  transform-origin: center;
-  animation: rotate 2s linear infinite;
+  background-size: 400% 400%;
+  background-position: var(--mouse-x, 50%) var(--mouse-y, 50%);
+  mix-blend-mode: color-dodge;
+  opacity: var(--holographic-intensity, 0.7);
+  z-index: 2;
+  pointer-events: none;
+}
+
+.effect-holographic .holographic-overlay::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    -45deg,
+    rgba(255,255,255,0.1) 0px,
+    rgba(255,255,255,0.2) 2px,
+    rgba(255,255,255,0.1) 4px
+  );
+  opacity: calc(var(--holographic-intensity, 0.7) * 0.5);
+}
+
+/* Shimmer effect */
+.effect-shimmer .shimmer-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    45deg, 
+    transparent 0%,
+    rgba(255, 255, 255, 0.4) 35%, 
+    rgba(255, 255, 255, 0.8) 50%,
+    rgba(255, 255, 255, 0.4) 65%,
+    transparent 100%
+  );
+  background-size: 200% 200%;
+  background-position: -100% -100%;
+  animation: shimmer-move 3s linear infinite;
+  mix-blend-mode: overlay;
+  opacity: var(--shimmer-intensity, 0.6);
+}
+
+@keyframes shimmer-move {
+  0% { background-position: -100% -100%; }
+  100% { background-position: 100% 100%; }
+}
+
+/* Refractor effect */
+.effect-refractor .refractor-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    var(--refractor-angle, 135deg),
+    rgba(255, 0, 128, 0.2) 0%,
+    rgba(0, 255, 255, 0.2) 33%,
+    rgba(255, 255, 0, 0.2) 66%
+  );
+  mix-blend-mode: color-dodge;
+  opacity: var(--refractor-intensity, 0.6);
+  transform: scale(1.05);
+  pointer-events: none;
+}
+
+.effect-refractor .refractor-overlay::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    rgba(255,255,255,0.8) 0%,
+    rgba(255,255,255,0) 70%
+  );
+  opacity: calc(var(--refractor-intensity, 0.6) * 0.7);
+  mix-blend-mode: overlay;
+}
+
+/* Vintage effect */
+.effect-vintage .vintage-overlay {
+  position: absolute;
+  inset: 0;
+  background-image: url('/textures/vintage-paper.jpg');
+  background-size: cover;
+  mix-blend-mode: multiply;
+  opacity: var(--vintage-intensity, 0.7);
+  filter: sepia(0.8) contrast(1.1);
+}
+
+.effect-vintage .vintage-overlay::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 2px,
+    rgba(0,0,0,0.03) 3px
+  );
+  pointer-events: none;
+}
+
+/* Lighting effect */
+.lighting-overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    rgba(255,255,255,0.15) 0%,
+    transparent 70%
+  );
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+
+/* Flipped state */
+.effects-layer.flipped {
+  transform: scaleX(-1);
+}
+
+/* Additional optimized effects for different states */
+.is-moving .effects-layer {
+  transition: none;
+}
+
+.is-static .effects-layer {
+  transition: all 0.3s ease-out;
 }
