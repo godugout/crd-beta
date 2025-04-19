@@ -1,40 +1,46 @@
 
-import { OfflineItem, getOfflineItems, removeOfflineItem } from './offlineStorage';
+import { getOfflineItems, removeOfflineItem } from '@/lib/offlineStorage';
 
-export interface SyncOptions {
-  notify?: boolean;
-  continueOnError?: boolean;
-  batchSize?: number;
-}
-
-let isSyncCancelled = false;
-
-export const syncAllData = async (options: SyncOptions = {}): Promise<number> => {
-  const { continueOnError = true, batchSize = 10 } = options;
-  
-  isSyncCancelled = false;
-  const offlineItems = await getOfflineItems();
-  let syncedCount = 0;
-  
-  for (const item of offlineItems) {
-    if (isSyncCancelled) break;
+// A simple sync service that handles offline data synchronization
+export async function syncAllData() {
+  try {
+    // Get all pending items
+    const pendingItems = await getOfflineItems();
+    const itemsToSync = pendingItems.filter(item => item.syncStatus === 'pending');
     
-    try {
-      // Mock sync process
-      await new Promise(resolve => setTimeout(resolve, 500));
-      await removeOfflineItem(item.id);
-      syncedCount++;
-    } catch (error) {
-      console.error(`Failed to sync item ${item.id}:`, error);
-      if (!continueOnError) {
-        break;
-      }
+    if (itemsToSync.length === 0) {
+      return 0;
     }
+    
+    console.log(`Syncing ${itemsToSync.length} pending items...`);
+    
+    let syncedCount = 0;
+    
+    // Process items in batches
+    const batchSize = 5;
+    for (let i = 0; i < itemsToSync.length; i += batchSize) {
+      const batch = itemsToSync.slice(i, i + batchSize);
+      
+      // Process each item in the batch
+      await Promise.all(batch.map(async (item) => {
+        try {
+          // In a real implementation, this would send the data to a server
+          // For now, just simulate a network request
+          await new Promise(resolve => setTimeout(resolve, 500));
+          
+          // Remove the item from offline storage after successful sync
+          await removeOfflineItem(item.id);
+          syncedCount++;
+        } catch (error) {
+          console.error(`Error syncing item ${item.id}:`, error);
+        }
+      }));
+    }
+    
+    console.log(`Successfully synced ${syncedCount} items`);
+    return syncedCount;
+  } catch (error) {
+    console.error('Error syncing data:', error);
+    return 0;
   }
-  
-  return syncedCount;
-};
-
-export const cancelSync = (): void => {
-  isSyncCancelled = true;
-};
+}

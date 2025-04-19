@@ -9,6 +9,10 @@ interface EditorCanvasProps {
   setSelectedAreas: React.Dispatch<React.SetStateAction<EnhancedCropBoxProps[]>>;
   selectedIndex: number;
   setSelectedIndex: (index: number) => void;
+  editorImgRef?: React.RefObject<HTMLImageElement>; // Add this missing prop
+  handlePointerDown?: (e: React.PointerEvent) => void; // Add optional interaction handlers
+  handlePointerMove?: (e: React.PointerEvent) => void;
+  handlePointerUp?: () => void;
 }
 
 const EditorCanvas: React.FC<EditorCanvasProps> = ({
@@ -17,14 +21,29 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({
   selectedAreas,
   setSelectedAreas,
   selectedIndex,
-  setSelectedIndex
+  setSelectedIndex,
+  editorImgRef,
+  handlePointerDown,
+  handlePointerMove,
+  handlePointerUp
 }) => {
   return (
     <div className="relative w-full h-full">
       <canvas 
         ref={canvasRef} 
         className="w-full h-full object-contain"
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
       />
+      {editorImgRef && (
+        <img
+          ref={editorImgRef}
+          src={image || ''}
+          className="hidden" // Hidden reference image
+          alt="Editor reference"
+        />
+      )}
     </div>
   );
 };

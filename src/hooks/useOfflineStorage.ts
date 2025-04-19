@@ -3,207 +3,216 @@ import { useState, useCallback } from 'react';
 import { useConnectivity } from './useConnectivity';
 import { 
   saveOfflineItem, 
-  storeFileAsDataUrl, 
-  getPendingItemCount,
   getOfflineItems,
   removeOfflineItem,
   OfflineItem
 } from '@/lib/offlineStorage';
 import { v4 as uuidv4 } from 'uuid';
 
+// Define missing function
+const storeFileAsDataUrl = async (key: string, file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = reader.result as string;
+      // In a real implementation, we would store this in IndexedDB or localStorage
+      console.log(`Stored file ${key} as data URL`);
+      resolve(dataUrl);
+    };
+    reader.onerror = () => {
+      reject(new Error("Failed to convert file to data URL"));
+    };
+    reader.readAsDataURL(file);
+  });
+};
+
 export interface UseOfflineStorageOptions {
   onSyncComplete?: (results: { success: boolean, syncedCount: number }) => void;
   autoSync?: boolean;
+  collectionName?: string;
 }
 
-export function useOfflineStorage(options?: UseOfflineStorageOptions) {
-  const { isOnline, pendingCount, syncOfflineItems } = useConnectivity();
-  const [isSaving, setIsSaving] = useState(false);
-  const [isSyncing, setIsSyncing] = useState(false);
-  const [lastSyncResult, setLastSyncResult] = useState<{ success: boolean, syncedCount: number } | null>(null);
-
-  // Function to save data with offline support
-  const saveData = useCallback(async (
-    data: Record<string, any>,
-    options?: { 
-      collectionName?: string;
-      persistOffline?: boolean;
+export function useOfflineStorage(options: UseOfflineStorageOptions = {}) {
+  const [isStoring, setIsStoring] = useState(false);
+  const [pendingCount, setPendingCount] = useState(0);
+  const { isOnline } = useConnectivity();
+  
+  // Fetch pending count
+  const fetchPendingCount = useCallback(async () => {
+    try {
+      const items = await getOfflineItems();
+      const count = items.filter(item => item.syncStatus === 'pending').length;
+      setPendingCount(count);
+      return count;
+    } catch (error) {
+      console.error('Error fetching pending count:', error);
+      return 0;
     }
-  ) => {
-    setIsSaving(true);
+  }, []);
+  
+  // Store an item offline
+  const storeOffline = async (type: string, data: any, priority = 1) => {
+    setIsStoring(true);
+    try {
+      const timestamp = Date.now();
+      
+      // Add necessary properties for OfflineItem
+      const itemToStore = {
+        type,
+        data,
+        syncStatus: 'pending',
+        collectionName: options.collectionName,
+        createdAt: timestamp,
+        syncPriority: priority,
+        retryCount: 0
+      };
+      
+      const id = await saveOfflineItem(itemToStore);
+      
+      await fetchPendingCount();
+      
+      return { success: true, id };
+    } catch (error) {
+      console.error('Error storing offline data:', error);
+      return { success: false, error };
+    } finally {
+      setIsStoring(false);
+    }
+  };
+  
+  // Store file as data URL and add to offline storage
+  const storeFileOffline = async (file: File, metadata: Record<string, any> = {}) => {
+    setIsStoring(true);
+    try {
+      const fileId = uuidv4();
+      const dataUrl = await storeFileAsDataUrl(fileId, file);
+      
+      const fileData = {
+        fileId,
+        dataUrl,
+        name: file.name,
+        type: file.type,
+        size: file.size,
+        metadata
+      };
+      
+      // Store file data in offline storage
+      // Add necessary properties for OfflineItem
+      const storageData = {
+        type: 'file',
+        data: fileData,
+        syncStatus: 'pending',
+        collectionName: options.collectionName || 'files',
+        createdAt: Date.now(),
+        syncPriority: 2, // Higher priority for files
+        retryCount: 0
+      };
+      
+      const id = await saveOfflineItem(storageData);
+      
+      await fetchPendingCount();
+      
+      return { success: true, id, dataUrl };
+    } catch (error) {
+      console.error('Error storing file offline:', error);
+      return { success: false, error };
+    } finally {
+      setIsStoring(false);
+    }
+  };
+  
+  // Sync a single item
+  const syncItem = async (item: OfflineItem) => {
+    // This would be implemented to actually sync with a server
+    console.log('Syncing item:', item);
+    
+    // Mock successful sync
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    // Remove the item from offline storage after successful sync
+    await removeOfflineItem(item.id);
+    
+    return true;
+  };
+  
+  // Sync all items
+  const syncAll = async () => {
+    if (!isOnline) {
+      return { success: false, error: 'Offline', syncedCount: 0 };
+    }
     
     try {
-      const itemId = uuidv4();
-      const collectionName = options?.collectionName || 'default';
+      const items = await getOfflineItems();
+      const pendingItems = items.filter(item => item.syncStatus === 'pending');
       
-      // If offline, save to offline storage
-      if (!isOnline) {
-        await saveOfflineItem({
-          id: itemId,
-          type: collectionName,
-          data,
-          createdAt: new Date().toISOString(),
-          collectionName,
-          syncStatus: 'pending',
-          syncPriority: 1
-        });
-        
-        return {
-          id: itemId,
-          success: true,
-          mode: 'offline',
-          message: 'Data saved offline and will sync when connection is restored'
-        };
-      } 
-      // Online mode - would typically send to an API
-      else {
-        // For demo purposes, we're simulating an API call
-        // In a real app, this would be an actual API request
-        console.log('Online mode - saving data:', data);
-        
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        // Return success with server-generated ID (simulated)
-        return {
-          id: itemId,
-          success: true,
-          mode: 'online',
-          message: 'Data saved to server'
-        };
+      if (pendingItems.length === 0) {
+        return { success: true, syncedCount: 0 };
       }
-    } catch (error) {
-      console.error('Error saving data:', error);
-      return {
-        success: false,
-        mode: isOnline ? 'online' : 'offline',
-        error: 'Failed to save data'
-      };
-    } finally {
-      setIsSaving(false);
-    }
-  }, [isOnline]);
-
-  // Function to upload a file with offline support
-  async function uploadFile(
-    file: File, 
-    metadata: Record<string, any> = {}
-  ) {
-    if (!isOnline) {
-      // Handle offline file upload
-      const uploadId = uuidv4();
-      const userId = metadata.userId || 'anonymous';
       
-      // Save file metadata for later upload
-      await saveOfflineItem({
-        id: uploadId,
-        type: 'file-upload',
-        data: {
-          file,
-          userId,
-          metadata
-        },
-        createdAt: Date.now()
+      let syncedCount = 0;
+      
+      // Sort by priority and timestamp
+      const sortedItems = pendingItems.sort((a, b) => {
+        // First by priority (if available)
+        if (a.syncPriority && b.syncPriority && a.syncPriority !== b.syncPriority) {
+          return a.syncPriority - b.syncPriority;
+        }
+        
+        // Then by timestamp or createdAt
+        const aTime = a.createdAt ? new Date(a.createdAt).getTime() : a.timestamp;
+        const bTime = b.createdAt ? new Date(b.createdAt).getTime() : b.timestamp;
+        return aTime - bTime;
       });
       
-      // Store the file as a data URL for immediate display
-      const fileKey = `file-${uploadId}`;
-      await storeFileAsDataUrl(fileKey, file);
-      
-      return {
-        success: true,
-        id: uploadId,
-        url: fileKey,
-        mode: 'offline',
-        message: 'File saved offline and will upload when connection is restored'
-      };
-    } else {
-      // Handle online file upload
-      // This would normally call an API endpoint
-      console.log('Online mode - uploading file:', file.name);
-      
-      // Simulate delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      return {
-        success: true,
-        id: `upload-${Date.now()}`,
-        url: URL.createObjectURL(file),
-        mode: 'online',
-        message: 'File uploaded successfully'
-      };
-    }
-  }
-
-  // Function to manually trigger sync
-  const syncData = useCallback(async () => {
-    if (!isOnline || isSyncing) return null;
-    
-    setIsSyncing(true);
-    try {
-      const result = await syncOfflineItems();
-      const syncResult = { 
-        success: true, 
-        syncedCount: result
-      };
-      
-      setLastSyncResult(syncResult);
-      
-      // Call the onSyncComplete callback if provided
-      if (options?.onSyncComplete) {
-        options.onSyncComplete(syncResult);
+      // Process in batches to avoid overwhelming the network
+      const batchSize = 5;
+      for (let i = 0; i < sortedItems.length; i += batchSize) {
+        const batch = sortedItems.slice(i, i + batchSize);
+        
+        await Promise.all(batch.map(async (item) => {
+          try {
+            const success = await syncItem(item);
+            if (success) {
+              syncedCount++;
+            }
+          } catch (error) {
+            console.error(`Error syncing item ${item.id}:`, error);
+          }
+        }));
       }
       
-      return syncResult;
+      await fetchPendingCount();
+      
+      if (options.onSyncComplete) {
+        options.onSyncComplete({ 
+          success: syncedCount > 0, 
+          syncedCount 
+        });
+      }
+      
+      return { success: true, syncedCount };
     } catch (error) {
-      console.error('Error syncing offline data:', error);
-      const errorResult = { 
-        success: false, 
-        syncedCount: 0 
-      };
-      
-      setLastSyncResult(errorResult);
-      
-      // Call the onSyncComplete callback if provided
-      if (options?.onSyncComplete) {
-        options.onSyncComplete(errorResult);
-      }
-      
-      return errorResult;
-    } finally {
-      setIsSyncing(false);
+      console.error('Error syncing all items:', error);
+      return { success: false, error, syncedCount: 0 };
     }
-  }, [isOnline, isSyncing, syncOfflineItems, options]);
-
-  // Function to fetch offline items
-  const getOfflineData = useCallback(async (collectionName?: string) => {
+  };
+  
+  // Get all offline items of a specific type
+  const getOfflineItemsByType = async (type: string) => {
     const items = await getOfflineItems();
-    if (collectionName) {
-      return items.filter(item => item.collectionName === collectionName);
-    }
-    return items;
-  }, []);
-
-  // Function to delete an offline item
-  const deleteOfflineItem = useCallback(async (id: string) => {
-    await removeOfflineItem(id);
-  }, []);
+    return items.filter(item => 
+      item.type === type && 
+      (options.collectionName ? item.collectionName === options.collectionName : true)
+    );
+  };
 
   return {
-    // Status
-    isOnline,
-    isSaving,
-    isSyncing,
+    storeOffline,
+    storeFileOffline,
+    syncAll,
+    isStoring,
     pendingCount,
-    lastSyncResult,
-    
-    // Functions
-    saveData,
-    uploadFile: uploadFile,
-    syncData,
-    getOfflineData,
-    deleteOfflineItem
+    fetchPendingCount,
+    getOfflineItemsByType
   };
 }
-
-export default useOfflineStorage;

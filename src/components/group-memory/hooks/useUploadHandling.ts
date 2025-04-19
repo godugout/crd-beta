@@ -6,6 +6,9 @@ import useImageProcessing from '@/hooks/useImageProcessing';
 import { useConnectivity } from '@/hooks/useConnectivity';
 import { useMobileOptimization } from '@/hooks/useMobileOptimization';
 
+// Define and export the GroupUploadType
+export type GroupUploadType = 'group' | 'memorabilia' | 'mixed';
+
 interface UseUploadHandlingProps {
   onComplete?: (cardIds: string[]) => void;
 }

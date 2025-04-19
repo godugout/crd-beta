@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { syncAllData } from '@/lib/syncService';
+import { getOfflineItems } from '@/lib/offlineStorage';
 
 export const useConnectivity = () => {
   const [isOnline, setIsOnline] = useState<boolean>(
@@ -51,9 +52,10 @@ export const useConnectivity = () => {
   useEffect(() => {
     const updatePendingCount = async () => {
       try {
-        // This would typically call a function to get the count from storage
-        // For now, just set a random number for demonstration
-        setPendingCount(Math.floor(Math.random() * 5));
+        // Get actual pending count from storage
+        const items = await getOfflineItems();
+        const count = items.filter(item => item.syncStatus === 'pending').length;
+        setPendingCount(count);
       } catch (error) {
         console.error("Error updating pending count:", error);
       }
@@ -68,7 +70,7 @@ export const useConnectivity = () => {
     return () => clearInterval(interval);
   }, []);
 
-  return { isOnline, pendingCount, syncOfflineItems };
+  return { isOnline, pendingCount, syncOfflineItems, isSyncing };
 };
 
 export default useConnectivity;
