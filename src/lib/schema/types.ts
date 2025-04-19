@@ -34,21 +34,24 @@ export interface OaklandMemoryData {
   imageUrl?: string;
   historicalContext?: string;
   personalSignificance?: string;
+  template?: string; // Add template field
 }
 
 export interface Collection {
   id: string;
   name: string;
+  title?: string; // For compatibility with components that use title
   description?: string;
   coverImageUrl?: string;
   userId?: string;
-  teamId?: string;
+  teamId?: string; // Add teamId field
   visibility?: 'public' | 'private' | 'team';
   allowComments?: boolean;
   createdAt: string;
   updatedAt: string;
   designMetadata?: any;
   cards?: Card[];
+  cardIds?: string[]; // Add cardIds field
 }
 
 export interface User {
@@ -100,8 +103,9 @@ export interface Reaction {
   commentId?: string;
   type: 'like' | 'love' | 'wow' | 'haha' | 'sad' | 'angry';
   createdAt: string;
-  targetType: 'card' | 'comment' | string; // Added to match Reaction in interaction.ts
-  targetId: string; // Added to match Reaction in interaction.ts
+  targetType: 'card' | 'comment' | string;
+  targetId: string;
+  updatedAt?: string; // Add updatedAt field
   user?: User;
 }
 

@@ -13,7 +13,7 @@ export interface Card extends BaseEntity {
   tags: string[];
   userId: string;
   effects: string[];
-  teamId?: string; // Add teamId field to support existing code
+  teamId?: string;
   backImageUrl?: string;
   player?: string;
   team?: string;
@@ -27,9 +27,9 @@ export interface Card extends BaseEntity {
   grade?: string;
   gradingCompany?: string;
   artist?: string;
-  rarity?: CardRarity; // Changed to optional CardRarity type
+  rarity?: CardRarity;
   isPublic?: boolean;
-  designMetadata: any; // Changed from optional to required
+  designMetadata: DesignMetadata; // Required field
   reactions?: any[];
   fabricSwatches?: any[];
   viewCount?: number;
@@ -37,7 +37,7 @@ export interface Card extends BaseEntity {
   height?: number;
   width?: number;
   collectionId?: string;
-  cards?: Card[]; // For compatibility with collection references
+  cards?: Card[];
 }
 
 export interface CardDesignState {
@@ -108,35 +108,35 @@ export interface CardStats {
 // Card condition ratings
 export type CardCondition = 'mint' | 'near-mint' | 'excellent' | 'very-good' | 'good' | 'fair' | 'poor';
 
-// Design metadata structure to enforce consistent type
+// Design metadata structure with required fields
 export interface DesignMetadata {
   cardStyle: {
-    template?: string;
-    effect?: string;
-    borderRadius?: string;
-    borderColor?: string;
-    frameColor?: string;
-    frameWidth?: number;
-    shadowColor?: string;
+    template: string; // Required
+    effect: string; // Required
+    borderRadius: string; // Required
+    borderColor: string; // Required
+    frameColor: string; // Required
+    frameWidth: number; // Required
+    shadowColor: string; // Required
     [key: string]: any;
   };
   textStyle: {
-    titleColor?: string;
-    titleAlignment?: string;
-    titleWeight?: string;
-    descriptionColor?: string;
+    titleColor: string; // Required
+    titleAlignment: string; // Required
+    titleWeight: string; // Required
+    descriptionColor: string; // Required
     [key: string]: any;
   };
-  marketMetadata?: {
-    isPrintable?: boolean;
-    isForSale?: boolean;
-    includeInCatalog?: boolean;
+  marketMetadata: {
+    isPrintable: boolean; // Required
+    isForSale: boolean; // Required
+    includeInCatalog: boolean; // Required
     [key: string]: any;
   };
-  cardMetadata?: {
-    category?: string;
-    cardType?: string;
-    series?: string;
+  cardMetadata: {
+    category: string; // Required
+    cardType: string; // Required
+    series: string; // Required
     [key: string]: any;
   };
   [key: string]: any;

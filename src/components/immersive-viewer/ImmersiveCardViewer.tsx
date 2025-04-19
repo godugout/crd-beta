@@ -19,8 +19,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { mapLightingPresetToEnvironment, ValidEnvironmentPreset } from '@/utils/environmentPresets';
 import CardModel from '@/components/card-viewer/CardModel';
-import { FALLBACK_FRONT_IMAGE_URL, FALLBACK_BACK_IMAGE_URL } from '@/lib/utils/cardDefaults';
-import ViewerSettings from '@/components/gallery/viewer-components/ViewerSettings';
+import { FALLBACK_IMAGE_URL, FALLBACK_BACK_IMAGE_URL } from '@/lib/utils/cardDefaults';
 
 const DebugInfo = ({ show = false }) => {
   if (!show) return null;
@@ -98,7 +97,7 @@ const RealisticCardViewer: React.FC<RealisticCardViewerProps> = ({
   
   const cardWithFallback = {
     ...card,
-    imageUrl: card.imageUrl || FALLBACK_FRONT_IMAGE_URL,
+    imageUrl: card.imageUrl || FALLBACK_IMAGE_URL,
     backImageUrl: card.backImageUrl || FALLBACK_BACK_IMAGE_URL
   };
 

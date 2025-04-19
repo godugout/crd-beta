@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
@@ -7,7 +6,7 @@ import ShimmerEffect from '../card-effects/effects/ShimmerEffect';
 import HolographicEffect from '../card-effects/effects/HolographicEffect';
 import RefractorEffect from '../card-effects/effects/RefractorEffect';
 import VintageEffect from '../card-effects/effects/VintageEffect';
-import { FALLBACK_FRONT_IMAGE_URL, FALLBACK_BACK_IMAGE_URL, handleImageLoadError } from '@/lib/utils/cardDefaults';
+import { FALLBACK_IMAGE_URL, FALLBACK_BACK_IMAGE_URL } from '@/lib/utils/cardDefaults';
 
 interface CardModelProps {
   imageUrl: string;
@@ -18,7 +17,7 @@ interface CardModelProps {
 }
 
 const CardModel: React.FC<CardModelProps> = ({
-  imageUrl = FALLBACK_FRONT_IMAGE_URL,
+  imageUrl = FALLBACK_IMAGE_URL,
   backImageUrl = FALLBACK_BACK_IMAGE_URL,
   isFlipped,
   activeEffects = [],
@@ -30,7 +29,7 @@ const CardModel: React.FC<CardModelProps> = ({
   const [loadError, setLoadError] = useState(false);
   
   // Ensure we always have valid texture URLs
-  const safeImageUrl = imageUrl || FALLBACK_FRONT_IMAGE_URL;
+  const safeImageUrl = imageUrl || FALLBACK_IMAGE_URL;
   const safeBackImageUrl = backImageUrl || FALLBACK_BACK_IMAGE_URL;
   
   // Try to load textures with error handling
@@ -53,7 +52,7 @@ const CardModel: React.FC<CardModelProps> = ({
         // Reset any problematic textures with new instances using guaranteed URLs
         if (!frontTextureLoaded && frontTexture) {
           console.log("Attempting to reload front texture with fallback");
-          const newTexture = new THREE.TextureLoader().load(FALLBACK_FRONT_IMAGE_URL);
+          const newTexture = new THREE.TextureLoader().load(FALLBACK_IMAGE_URL);
           Object.assign(frontTexture, newTexture);
         }
         
