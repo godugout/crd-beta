@@ -17,7 +17,10 @@ export function dbToCollection(dbCollection: any): Collection {
     cardIds: dbCollection.card_ids || [],
     createdAt: dbCollection.created_at,
     updatedAt: dbCollection.updated_at,
-    isPublic: dbCollection.visibility === 'public' || dbCollection.is_public === true
+    isPublic: dbCollection.visibility === 'public' || dbCollection.is_public === true,
+    tags: dbCollection.tags || [], // Add tags field
+    thumbnailUrl: dbCollection.thumbnail_url || dbCollection.cover_image_url || '',
+    featured: dbCollection.featured || false
   };
 }
 
@@ -32,7 +35,10 @@ export function collectionToDb(collection: Partial<Collection>): Partial<DbColle
     team_id: collection.teamId,
     visibility: collection.visibility,
     allow_comments: collection.allowComments,
-    design_metadata: collection.designMetadata
+    design_metadata: collection.designMetadata,
+    tags: collection.tags,
+    is_public: collection.isPublic,
+    featured: collection.featured
   };
 }
 

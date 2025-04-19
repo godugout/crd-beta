@@ -36,8 +36,48 @@ export interface BaseEntity {
 // Export JsonValue type
 export type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };
 
+// Add JsonObject type
+export type JsonObject = { [key: string]: JsonValue };
+
+// Add serializeMetadata utility function
+export const serializeMetadata = (metadata: any): string => {
+  return JSON.stringify(metadata || {});
+};
+
 // Add the CardRarity type that was missing
 export type CardRarity = 'common' | 'uncommon' | 'rare' | 'ultra-rare' | 'legendary' | 'exclusive' | 'one-of-one';
+
+// Add Role Permissions mapping
+export const ROLE_PERMISSIONS: Record<UserRole, UserPermission[]> = {
+  [UserRole.ADMIN]: [
+    'manage_users',
+    'manage_content',
+    'view_analytics',
+    'manage_system',
+    'access_api',
+    'moderate_comments',
+  ],
+  [UserRole.MODERATOR]: [
+    'manage_content',
+    'moderate_comments',
+    'view_analytics',
+    'access_api'
+  ],
+  [UserRole.CREATOR]: [
+    'create_content',
+    'edit_own_content',
+    'delete_own_content',
+    'access_api'
+  ],
+  [UserRole.USER]: [
+    'create_collections',
+    'edit_own_collections',
+    'view_content'
+  ],
+  [UserRole.GUEST]: [
+    'view_content'
+  ]
+};
 
 // Re-export design metadata types
 export interface DesignMetadata {

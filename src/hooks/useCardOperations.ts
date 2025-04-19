@@ -1,92 +1,77 @@
 
-import { useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useCards } from '@/context/CardContext';
+import { useState } from 'react';
 import { toast } from 'sonner';
 import { Card } from '@/lib/types';
+import { useCards } from '@/context/CardContext';
 
-/**
- * Hook that provides standard card operations and navigation
- */
 export function useCardOperations() {
-  const navigate = useNavigate();
-  
-  // Get functions from CardContext
-  const { deleteCard, updateCard } = useCards();
-  
-  /**
-   * View a card in the full screen viewer
-   */
-  const viewCard = useCallback((cardId: string) => {
-    navigate(`/view/${cardId}`);
-  }, [navigate]);
-  
-  /**
-   * Navigate to card detail page
-   */
-  const showCardDetails = useCallback((cardId: string) => {
-    navigate(`/card/${cardId}`);
-  }, [navigate]);
-  
-  /**
-   * Navigate to card edit page
-   */
-  const editCard = useCallback((cardId: string) => {
-    navigate(`/edit/${cardId}`);
-  }, [navigate]);
-  
-  /**
-   * Share a card
-   */
-  const shareCard = useCallback((card: Card) => {
-    if (navigator.share) {
-      navigator.share({
-        title: card.title || 'Check out this card',
-        text: card.description || '',
-        url: window.location.origin + `/card/${card.id}`,
-      })
-        .then(() => toast.success('Card shared successfully'))
-        .catch((error) => {
-          console.error('Error sharing card:', error);
-          copyCardLink(card.id);
-        });
-    } else {
-      copyCardLink(card.id);
+  const { addCard, updateCard, deleteCard } = useCards();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+
+  const createCard = async (cardData: Partial<Card>) => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const newCard = await addCard(cardData);
+      toast.success('Card created successfully');
+      return newCard;
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Failed to create card');
+      setError(error);
+      toast.error('Failed to create card');
+      return null;
+    } finally {
+      setIsLoading(false);
     }
-  }, []);
-  
-  /**
-   * Copy card link to clipboard
-   */
-  const copyCardLink = useCallback((cardId: string) => {
-    const url = `${window.location.origin}/card/${cardId}`;
-    navigator.clipboard.writeText(url)
-      .then(() => toast.success('Link copied to clipboard'))
-      .catch(() => toast.error('Failed to copy link'));
-  }, []);
-  
-  /**
-   * Delete a card with confirmation
-   */
-  const removeCard = useCallback((cardId: string, onSuccess?: () => void) => {
-    if (window.confirm('Are you sure you want to delete this card?')) {
-      deleteCard(cardId).then(success => {
-        if (success) {
-          toast.success('Card deleted successfully');
-          if (onSuccess) onSuccess();
-        } else {
-          toast.error('Failed to delete card');
-        }
-      });
+  };
+
+  const modifyCard = async (cardData: Partial<Card>) => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const updatedCard = await updateCard(cardData);
+      toast.success('Card updated successfully');
+      return updatedCard;
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Failed to update card');
+      setError(error);
+      toast.error('Failed to update card');
+      return null;
+    } finally {
+      setIsLoading(false);
     }
-  }, [deleteCard]);
-  
+  };
+
+  const removeCard = async (id: string) => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      await deleteCard(id);
+      toast.success('Card deleted successfully');
+      return true;
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Failed to delete card');
+      setError(error);
+      toast.error('Failed to delete card');
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const setLoading = (status: boolean) => {
+    setIsLoading(status);
+  };
+
   return {
-    viewCard,
-    showCardDetails,
-    editCard,
-    shareCard,
-    copyCardLink,
-    removeCard
+    createCard,
+    modifyCard,
+    removeCard,
+    isLoading,
+    error,
   };
 }

@@ -9,4 +9,5 @@ export interface InstagramPost {
   timestamp: string;
   username: string;
   children?: InstagramPost[];
+  postId?: string; // Add postId field
 }

@@ -1,4 +1,3 @@
-
 import { BaseEntity } from './index';
 import { JsonValue } from '../types';
 
@@ -88,7 +87,7 @@ export interface CardLayer {
 }
 
 // Card rarity levels
-export type CardRarity = 'common' | 'uncommon' | 'rare' | 'ultra-rare' | 'legendary' | 'exclusive';
+export type CardRarity = 'common' | 'uncommon' | 'rare' | 'ultra-rare' | 'legendary' | 'exclusive' | 'one-of-one';
 
 // Card statistics for sports cards
 export interface CardStats {

@@ -1,275 +1,168 @@
-import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/lib/supabase';
-import { Card, CardRarity, Collection } from '@/lib/types';
-import { useToast } from '@/hooks/use-toast';
-import { sampleCards } from '@/lib/data/sampleCards';
-import { adaptToCard } from '@/lib/adapters/cardAdapter';
+// THIS FILE IS DEPRECATED - USE /context/CardContext.tsx INSTEAD
 
-export function useCards() {
-  const [cards, setCards] = useState<Card[]>([]);
-  const [collections, setCollections] = useState<Collection[]>([]);
-  const [loading, setLoading] = useState(true);
+import { useState, useEffect } from 'react';
+import { v4 as uuidv4 } from 'uuid';
+import { Card, Collection, UserRole, DesignMetadata } from '@/lib/types';
+import { CardRarity } from '@/lib/types/cardTypes'; // Import CardRarity
+import { sampleCards } from '@/data/sampleCards';
+import { useAuth } from './useAuth';
+
+// Define a default design metadata
+const defaultDesignMetadata: DesignMetadata = {
+  cardStyle: {
+    template: 'classic',
+    effect: 'none',
+    borderRadius: '8px',
+    borderColor: '#000000',
+    frameColor: '#FFFFFF',
+    frameWidth: 10,
+    shadowColor: '#000000'
+  },
+  textStyle: {
+    titleColor: '#000000',
+    titleAlignment: 'center',
+    titleWeight: 'bold',
+    descriptionColor: '#333333'
+  },
+  marketMetadata: {
+    isPrintable: false,
+    isForSale: false,
+    includeInCatalog: false
+  },
+  cardMetadata: {
+    category: 'standard',
+    cardType: 'custom',
+    series: 'none'
+  }
+};
+
+// Define sample collections
+const sampleCollections: Collection[] = [
+  {
+    id: 'collection-001',
+    name: 'My First Collection',
+    title: 'My First Collection',
+    description: 'A collection of my favorite cards',
+    coverImageUrl: '/lovable-uploads/fa55173e-d864-41b2-865d-144d94507dc1.png',
+    userId: 'user-001',
+    teamId: 'team-001',
+    cards: sampleCards,
+    visibility: 'public',
+    allowComments: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    designMetadata: {},
+    cardIds: sampleCards.map(card => card.id),
+    isPublic: true,
+    tags: ['favorites', 'collection']
+  }
+];
+
+export const useCards = () => {
+  const { user } = useAuth();
+  const [cards, setCards] = useState<Card[]>(sampleCards);
+  const [collections, setCollections] = useState<Collection[]>(sampleCollections);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
-  const { toast } = useToast();
 
-  const fetchCards = useCallback(async () => {
-    try {
-      setLoading(true);
-      console.log('Fetching cards...');
-      
-      // First try to get data from Supabase
-      let cardsFromSupabase = false;
-      
-      // Fetch cards from Supabase
-      try {
-        const { data: cardsData, error: cardsError } = await supabase
-          .from('cards')
-          .select('*');
-          
-        if (!cardsError && cardsData && cardsData.length > 0) {
-          console.log(`Fetched ${cardsData.length} cards from Supabase`);
-          
-          // Process cards
-          const processedCards = cardsData.map(card => {
-            const processedCard = {
-              id: card.id,
-              title: card.title,
-              description: card.description || '',
-              imageUrl: card.image_url || '',
-              thumbnailUrl: card.thumbnail_url || card.image_url || '',
-              collectionId: card.collection_id,
-              userId: card.creator_id || card.user_id,
-              teamId: card.team_id,
-              isPublic: card.is_public,
-              tags: card.tags || [],
-              effects: [],
-              rarity: card.rarity || 'common',
-              createdAt: new Date(card.created_at).toISOString(),
-              updatedAt: new Date(card.updated_at).toISOString(),
-              designMetadata: card.design_metadata || {},
-            };
-            return processedCard as Card;
-          });
-          
-          setCards(processedCards);
-          cardsFromSupabase = true;
-          
-          console.log('Cards loaded from Supabase:', processedCards);
-        }
-      } catch (supabaseError) {
-        console.error('Supabase error:', supabaseError);
-      }
-      
-      // If no data from Supabase, use sample data
-      if (!cardsFromSupabase) {
-        console.log('Using sample data as fallback');
-        // Load sample cards
-        if (sampleCards && sampleCards.length > 0) {
-          const processedSampleCards = sampleCards.map(card => adaptToCard(card));
-          console.log('Loading sample cards:', processedSampleCards);
-          setCards(processedSampleCards);
-        } else {
-          // Create a fallback card if even sample cards are not available
-          console.log('No sample cards found, creating fallback card');
-          const fallbackCard: Card = adaptToCard({
-            id: 'fallback-card-1',
-            title: 'Sample Card',
-            description: 'This is a sample card to get you started.',
-            imageUrl: '/placeholder-card.png',
-            thumbnailUrl: '/placeholder-card.png',
-            userId: 'sample-user',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            tags: ['sample', 'demo'],
-            effects: []
-          });
-          setCards([fallbackCard]);
-        }
-      }
-      
-      // Successfully loaded cards one way or another
-      toast({
-        title: "Cards loaded",
-        description: `Your card collection is ready to view`,
-        variant: "default",
-      });
-      
-    } catch (err) {
-      const error = err as Error;
-      console.error('Error fetching cards:', error);
-      setError(error);
-      
-      toast({
-        title: 'Error loading cards',
-        description: error.message || 'Failed to load your card collection',
-        variant: 'destructive',
-      });
-      
-      // Even if there's an error, provide some fallback content
-      const fallbackCard: Card = adaptToCard({
-        id: 'error-fallback-card',
-        title: 'Sample Card',
-        description: 'This is a sample card.',
-        imageUrl: '/placeholder-card.png',
-        thumbnailUrl: '/placeholder-card.png',
-        userId: 'sample-user',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        tags: ['sample'],
-        effects: []
-      });
-      setCards([fallbackCard]);
-      
-    } finally {
-      setLoading(false);
-    }
-  }, [toast]);
-
-  // Automatically fetch cards on initial render
+  // Load user data
   useEffect(() => {
-    fetchCards();
-  }, [fetchCards]);
-
-  const createCard = useCallback(async (cardData: Partial<Card>) => {
-    try {
-      const newCard = adaptToCard({
-        id: `card-${Date.now()}`,
-        title: cardData.title || 'Untitled Card',
-        description: cardData.description || '',
-        imageUrl: cardData.imageUrl || '/lovable-uploads/667e6ad2-af96-40ac-bd16-a69778e14b21.png',
-        thumbnailUrl: cardData.thumbnailUrl || cardData.imageUrl || '/lovable-uploads/667e6ad2-af96-40ac-bd16-a69778e14b21.png',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        userId: 'user-1',
-        teamId: 'team-1',
-        collectionId: cardData.collectionId || '',
-        isPublic: cardData.isPublic !== undefined ? cardData.isPublic : true,
-        tags: cardData.tags || [],
-        effects: cardData.effects || [],
-        rarity: (cardData.rarity as CardRarity) || 'common',
-        ...cardData
-      });
-      
-      setCards(prev => [newCard, ...prev]);
-      
-      return newCard;
-    } catch (err) {
-      const error = err as Error;
-      console.error('Error creating card:', error);
-      toast({
-        title: 'Error creating card',
-        description: error.message,
-        variant: 'destructive',
-      });
-      throw error;
+    if (user) {
+      // In a real app, we would load user's cards and collections from an API
+      setIsLoading(true);
+      // Simulate API call
+      setTimeout(() => {
+        // For demo purposes, just use sample data
+        setIsLoading(false);
+      }, 500);
     }
-  }, [toast]);
+  }, [user]);
 
-  const updateCard = useCallback(async (id: string, updates: Partial<Card>) => {
-    try {
-      setCards(prev => 
-        prev.map(card => 
-          card.id === id 
-            ? adaptToCard({ 
-                ...card, 
-                ...updates, 
-                updatedAt: new Date().toISOString(),
-                rarity: (updates.rarity as CardRarity) || card.rarity || 'common'
-              })
-            : card
-        )
-      );
-      
-      return true;
-    } catch (err) {
-      const error = err as Error;
-      console.error('Error updating card:', error);
-      toast({
-        title: 'Error updating card',
-        description: error.message,
-        variant: 'destructive',
-      });
-      return false;
-    }
-  }, [toast]);
+  // Card operations
+  const addCard = async (card: Partial<Card>): Promise<Card> => {
+    const newCard: Card = {
+      id: uuidv4(),
+      title: card.title || 'New Card',
+      description: card.description || '',
+      imageUrl: card.imageUrl || '',
+      thumbnailUrl: card.thumbnailUrl || '',
+      tags: card.tags || [],
+      userId: user?.id || 'user-1',
+      teamId: card.teamId || 'team-1',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      effects: card.effects || [],
+      designMetadata: card.designMetadata || defaultDesignMetadata,
+      rarity: 'common'
+    };
+    setCards([...cards, newCard]);
+    return newCard;
+  };
 
-  const createCollection = useCallback(async (collectionData: Partial<Collection>) => {
-    try {
-      const newCollection: Collection = {
-        id: `collection-${Date.now()}`,
-        title: collectionData.title || collectionData.name || 'Untitled Collection',
-        name: collectionData.name || collectionData.title || 'Untitled Collection',
-        description: collectionData.description || '',
-        coverImageUrl: collectionData.coverImageUrl || '',
-        userId: 'user-1',
-        teamId: collectionData.teamId || 'team-1',
-        cards: [],
-        isPublic: collectionData.isPublic !== undefined ? collectionData.isPublic : true,
-        visibility: collectionData.visibility || 'public',
-        allowComments: collectionData.allowComments !== undefined ? collectionData.allowComments : true,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        designMetadata: collectionData.designMetadata || {},
-        cardIds: collectionData.cardIds || [],
-      };
-      
-      setCollections(prev => [newCollection, ...prev]);
-      
-      return newCollection;
-    } catch (err) {
-      const error = err as Error;
-      console.error('Error creating collection:', error);
-      toast({
-        title: 'Error creating collection',
-        description: error.message,
-        variant: 'destructive',
-      });
-      throw error;
-    }
-  }, [toast]);
+  const updateCard = async (card: Partial<Card>): Promise<Card> => {
+    const updatedCard = { ...card, updatedAt: new Date().toISOString() } as Card;
+    setCards(cards.map(c => c.id === card.id ? updatedCard : c));
+    return updatedCard;
+  };
 
-  const deleteCard = useCallback(async (id: string) => {
-    try {
-      setCards(prev => prev.filter(card => card.id !== id));
-      return true;
-    } catch (err) {
-      const error = err as Error;
-      console.error('Error deleting card:', error);
-      toast({
-        title: 'Error deleting card',
-        description: error.message,
-        variant: 'destructive',
-      });
-      return false;
-    }
-  }, [toast]);
+  const deleteCard = async (id: string): Promise<void> => {
+    setCards(cards.filter(c => c.id !== id));
+  };
 
-  const getCard = useCallback((id: string): Card | undefined => {
-    const foundCard = cards.find(card => card.id === id);
-    if (!foundCard) {
-      console.log(`Card with ID ${id} not found in cards array of length ${cards.length}`);
-      // Try to find in sampleCards as fallback
-      const sampleCard = sampleCards.find(card => card.id === id);
-      if (sampleCard) {
-        console.log(`Found card with ID ${id} in sampleCards`);
-        return adaptToCard(sampleCard);
-      }
-    }
-    return foundCard;
-  }, [cards]);
+  const getCardById = (id: string): Card | undefined => {
+    return cards.find(card => card.id === id);
+  };
+
+  // Collection operations
+  const addCollection = async (collection: Partial<Collection>): Promise<Collection> => {
+    const newCollection: Collection = {
+      id: uuidv4(),
+      name: collection.name || 'New Collection',
+      title: collection.title || collection.name || 'New Collection',
+      description: collection.description || '',
+      coverImageUrl: collection.coverImageUrl || '',
+      userId: user?.id || 'user-1',
+      teamId: collection.teamId || 'team-1',
+      cards: [],
+      visibility: collection.visibility || 'private',
+      allowComments: collection.allowComments || true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      designMetadata: collection.designMetadata || {},
+      cardIds: collection.cardIds || [],
+      isPublic: collection.isPublic || false,
+      tags: collection.tags || []
+    };
+    setCollections([...collections, newCollection]);
+    return newCollection;
+  };
+
+  const updateCollection = async (collection: Partial<Collection>): Promise<Collection> => {
+    const updatedCollection = { ...collection, updatedAt: new Date().toISOString() } as Collection;
+    setCollections(collections.map(c => c.id === collection.id ? updatedCollection : c));
+    return updatedCollection;
+  };
+
+  const deleteCollection = async (id: string): Promise<void> => {
+    setCollections(collections.filter(c => c.id !== id));
+  };
+
+  const getCollectionById = (id: string): Collection | undefined => {
+    return collections.find(collection => collection.id === id);
+  };
 
   return {
     cards,
     collections,
-    loading,
+    isLoading,
     error,
-    fetchCards,
-    createCard,
+    addCard,
     updateCard,
-    deleteCard: async () => true,
-    createCollection,
-    getCard,
-    isLoading: loading,
-    refreshCards: fetchCards,
+    deleteCard,
+    getCardById,
+    addCollection,
+    updateCollection,
+    deleteCollection,
+    getCollectionById
   };
-}
+};

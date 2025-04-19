@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCards } from '@/context/CardContext';
@@ -76,8 +75,8 @@ const CardEditorContainer: React.FC<CardEditorContainerProps> = ({
       }
       
       if (card) {
-        // Update existing card
-        await updateCard(card.id, cardData);
+        // Update existing card - fixed to use single argument
+        await updateCard(cardData);
         toast.success('CRD updated successfully');
       } else {
         // Add new card

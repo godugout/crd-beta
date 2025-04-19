@@ -60,6 +60,11 @@ export interface User {
   name?: string;
   avatarUrl?: string;
   username?: string;
+  createdAt: string; // Add this required field for compatibility
+  updatedAt?: string; // Add this for compatibility
+  displayName?: string; // Add this for compatibility
+  bio?: string; // Add this for compatibility
+  role?: string; // Add this for compatibility
 }
 
 export interface Team {

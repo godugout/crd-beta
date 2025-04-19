@@ -39,7 +39,7 @@ const CreateCollectionDialog: React.FC<CreateCollectionDialogProps> = ({
         title: name,
         description,
         cardIds: [],
-        visibility: 'private',
+        visibility: 'private' as 'public' | 'private' | 'team', // Specify type explicitly
         isPublic: false,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
