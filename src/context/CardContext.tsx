@@ -22,6 +22,8 @@ interface CardContextProps {
   addCardToCollection: (collectionId: string, card: Card) => boolean;
   removeCardFromCollection: (collectionId: string, cardId: string) => boolean;
   fetchCards: () => Promise<void>;
+  isLoading?: boolean; // Added for compatibility
+  refreshCards?: () => Promise<void>; // Added for compatibility
 }
 
 const CardContext = createContext<CardContextProps | undefined>(undefined);
@@ -55,6 +57,9 @@ export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setLoading(false);
     }
   };
+  
+  // Add refreshCards alias for fetchCards
+  const refreshCards = fetchCards;
 
   const getCardById = (id: string): Card | undefined => {
     return cards.find(card => card.id === id);
@@ -66,17 +71,48 @@ export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const addCard = async (cardData: Partial<Card>): Promise<Card> => {
+    // Ensure designMetadata is set with defaults if not provided
+    const designMetadata: DesignMetadata = cardData.designMetadata || {
+      cardStyle: {
+        template: 'standard',
+        effect: 'none',
+        borderRadius: '8px',
+        borderColor: '#000000',
+        frameColor: '#FFFFFF',
+        frameWidth: 2,
+        shadowColor: '#000000'
+      },
+      textStyle: {
+        titleColor: '#000000',
+        titleAlignment: 'center',
+        titleWeight: 'bold',
+        descriptionColor: '#333333'
+      },
+      marketMetadata: {
+        isPrintable: true,
+        isForSale: false,
+        includeInCatalog: true
+      },
+      cardMetadata: {
+        category: 'standard',
+        cardType: 'basic',
+        series: 'default'
+      }
+    };
+
+    // Create the new card with required fields and defaults
     const newCard: Card = {
-      id: uuidv4(),
+      id: cardData.id || uuidv4(),
       title: cardData.title || 'Untitled Card',
       description: cardData.description || '',
       imageUrl: cardData.imageUrl || '',
       thumbnailUrl: cardData.thumbnailUrl || cardData.imageUrl || '',
-      userId: 'current-user-id', // Would come from auth context
+      userId: cardData.userId || 'current-user-id',
       tags: cardData.tags || [],
       effects: cardData.effects || [],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      createdAt: cardData.createdAt || new Date().toISOString(),
+      updatedAt: cardData.updatedAt || new Date().toISOString(),
+      designMetadata: designMetadata,
       ...cardData
     };
 
@@ -266,7 +302,7 @@ export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         loading,
         error,
         getCardById,
-        getCard, // Add getCard to the context value
+        getCard,
         addCard,
         updateCard,
         deleteCard,
@@ -276,6 +312,8 @@ export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         addCardToCollection,
         removeCardFromCollection,
         fetchCards,
+        isLoading: loading,
+        refreshCards
       }}
     >
       {children}
@@ -291,5 +329,4 @@ export const useCards = () => {
   return context;
 };
 
-// Export Card and Collection types to maintain compatibility
-export type { Card, Collection };
+export { CardContext };

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -107,7 +108,33 @@ const InstagramCollectionCreator: React.FC = () => {
           userId: 'user-1',
           tags: ['instagram', 'imported'],
           effects: [],
-          designMetadata: {}
+          designMetadata: {
+            cardStyle: {
+              template: 'instagram',
+              effect: 'social',
+              borderRadius: '8px',
+              borderColor: '#E1306C',
+              frameColor: '#F77737',
+              frameWidth: 2,
+              shadowColor: '#833AB4'
+            },
+            textStyle: {
+              titleColor: '#262626',
+              titleAlignment: 'left',
+              titleWeight: 'medium',
+              descriptionColor: '#262626'
+            },
+            marketMetadata: {
+              isPrintable: true,
+              isForSale: false,
+              includeInCatalog: true
+            },
+            cardMetadata: {
+              category: 'social',
+              cardType: 'instagram',
+              series: 'imported'
+            }
+          }
         })),
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),

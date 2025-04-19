@@ -8,19 +8,31 @@ import { GroupUploadType } from '../hooks/useUploadHandling';
 interface UploadTypeSelectorProps {
   uploadType: GroupUploadType;
   onUploadTypeChange: (value: GroupUploadType) => void;
+  onChange?: (value: GroupUploadType) => void; // Add onChange for compatibility
 }
 
 const UploadTypeSelector: React.FC<UploadTypeSelectorProps> = ({ 
   uploadType, 
-  onUploadTypeChange 
+  onUploadTypeChange,
+  onChange 
 }) => {
+  // Use onChange if provided, otherwise use onUploadTypeChange
+  const handleChange = (value: string) => {
+    const typedValue = value as GroupUploadType;
+    if (onChange) {
+      onChange(typedValue);
+    } else {
+      onUploadTypeChange(typedValue);
+    }
+  };
+
   return (
     <div className="mb-6">
       <h3 className="text-lg font-medium mb-2">What type of photos are you uploading?</h3>
       <RadioGroup 
         defaultValue="group" 
         value={uploadType}
-        onValueChange={(value) => onUploadTypeChange(value as GroupUploadType)}
+        onValueChange={handleChange}
         className="flex flex-col space-y-3"
       >
         <div className="flex items-center space-x-3 p-3 rounded-md border hover:bg-gray-50">

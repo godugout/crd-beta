@@ -33,6 +33,7 @@ const OaklandEditorIntegration: React.FC<OaklandEditorIntegrationProps> = ({
     section: memoryData.section || 'Section 112',
     attendees: memoryData.attendees || ['Friend', 'Family'],
     tags: memoryData.tags || ['oakland', 'athletics', 'memory'],
+    template: selectedTemplate, // Add template property
   };
 
   return (

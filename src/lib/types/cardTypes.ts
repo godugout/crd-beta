@@ -142,5 +142,5 @@ export interface DesignMetadata {
   [key: string]: any;
 }
 
-// Export HotspotData from enhancedCardTypes for backward compatibility
-export { HotspotData } from './enhancedCardTypes';
+// Fixed re-export syntax
+export type { HotspotData } from './enhancedCardTypes';

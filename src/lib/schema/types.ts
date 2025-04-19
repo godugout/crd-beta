@@ -34,7 +34,7 @@ export interface OaklandMemoryData {
   imageUrl?: string;
   historicalContext?: string;
   personalSignificance?: string;
-  template: string; // Added template field as required
+  template: string; // Required template field
 }
 
 export interface Collection {

@@ -1,44 +1,42 @@
 
-import { DesignMetadata } from '@/lib/types/cardTypes';
-
-export const FALLBACK_IMAGE_URL = '/images/card-placeholder.png';
-export const FALLBACK_BACK_IMAGE_URL = '/images/card-back-placeholder.png';
-// Aliases for backward compatibility
-export const FALLBACK_FRONT_IMAGE_URL = FALLBACK_IMAGE_URL;
-
-// Helper function to handle image load errors
-export const handleImageLoadError = (event: React.SyntheticEvent<HTMLImageElement>, fallbackUrl: string = FALLBACK_IMAGE_URL) => {
-  const img = event.target as HTMLImageElement;
-  if (img.src !== fallbackUrl) {
-    console.warn('Image failed to load, using fallback:', img.src);
-    img.src = fallbackUrl;
-  }
-};
+// Default design metadata for cards
+import { DesignMetadata } from '@/lib/types';
 
 export const DEFAULT_DESIGN_METADATA: DesignMetadata = {
   cardStyle: {
-    template: 'classic',
+    template: 'standard',
     effect: 'none',
     borderRadius: '8px',
     borderColor: '#000000',
-    frameColor: '#000000',
+    frameColor: '#FFFFFF',
     frameWidth: 2,
-    shadowColor: 'rgba(0,0,0,0.2)',
+    shadowColor: '#000000'
   },
   textStyle: {
     titleColor: '#000000',
     titleAlignment: 'center',
     titleWeight: 'bold',
-    descriptionColor: '#333333',
+    descriptionColor: '#333333'
   },
   marketMetadata: {
-    isPrintable: false,
+    isPrintable: true,
     isForSale: false,
-    includeInCatalog: false,
+    includeInCatalog: true
   },
   cardMetadata: {
-    category: 'general',
-    cardType: 'standard',
-    series: 'base',
+    category: 'standard',
+    cardType: 'basic',
+    series: 'default'
   }
+};
+
+// Fallback image URLs
+export const FALLBACK_IMAGE_URL = '/assets/images/fallback-card.png';
+export const FALLBACK_FRONT_IMAGE_URL = '/assets/images/fallback-front.png';
+export const FALLBACK_BACK_IMAGE_URL = '/assets/images/fallback-back.png';
+
+// Image error handling
+export const handleImageLoadError = (event: React.SyntheticEvent<HTMLImageElement, Event>) => {
+  event.currentTarget.src = FALLBACK_IMAGE_URL;
+  event.currentTarget.onerror = null; // Prevent infinite error loop
 };

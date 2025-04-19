@@ -13,9 +13,14 @@ import { GroupUploadType, useUploadHandling } from './hooks/useUploadHandling';
 interface GroupImageUploaderProps {
   onImageSelect: (urls: string[], sourceCards?: Card[]) => void;
   className?: string;
+  onComplete?: (cardIds: string[]) => void; // Added for compatibility
 }
 
-const GroupImageUploader: React.FC<GroupImageUploaderProps> = ({ onImageSelect, className }) => {
+const GroupImageUploader: React.FC<GroupImageUploaderProps> = ({ 
+  onImageSelect, 
+  className,
+  onComplete 
+}) => {
   const { cards } = useCards();
   const [selectedCards, setSelectedCards] = useState<Card[]>([]);
   const { 
@@ -35,10 +40,20 @@ const GroupImageUploader: React.FC<GroupImageUploaderProps> = ({ onImageSelect, 
       // For card selection, use the card images
       const cardUrls = selectedCards.map(card => card.imageUrl);
       onImageSelect(cardUrls, selectedCards);
+      
+      // If onComplete is provided, also call it with card IDs
+      if (onComplete) {
+        onComplete(selectedCards.map(card => card.id));
+      }
     } else if (hasSelectedFiles) {
       // For direct uploads, use the file uploader
       const urls = await simulateUpload();
       onImageSelect(urls);
+      
+      // If onComplete is provided, also call it with empty array since these are new files
+      if (onComplete) {
+        onComplete([]);
+      }
     }
   };
 
@@ -46,7 +61,7 @@ const GroupImageUploader: React.FC<GroupImageUploaderProps> = ({ onImageSelect, 
     <div className={className}>
       <UploadTypeSelector 
         uploadType={uploadType}
-        onChange={handleUploadTypeChange}
+        onUploadTypeChange={handleUploadTypeChange}
       />
       
       {uploadType === 'selection' ? (

@@ -31,7 +31,8 @@ const OaklandMemoryCreator: React.FC<OaklandMemoryCreatorProps> = ({ className }
     // Update with the imageUrl
     const updatedData = {
       ...data,
-      imageUrl: imageUrl
+      imageUrl: imageUrl,
+      template: selectedTemplate // Add template property
     };
     setMemoryData(updatedData);
     setActiveTab('preview');
@@ -61,7 +62,7 @@ const OaklandMemoryCreator: React.FC<OaklandMemoryCreatorProps> = ({ className }
         section: memoryData.section,
         memoryType: memoryData.memoryType,
         attendees: memoryData.attendees,
-        template: selectedTemplate,
+        template: selectedTemplate, // Ensure template is included
         teamId: 'oakland-athletics',
         imageUrl: imageUrl,
         historicalContext: memoryData.historicalContext,
@@ -75,17 +76,36 @@ const OaklandMemoryCreator: React.FC<OaklandMemoryCreatorProps> = ({ className }
         imageUrl: imageUrl,
         thumbnailUrl: imageUrl,
         tags: memoryData.tags || [],
+        effects: [], // Add required effects property
         designMetadata: {
           cardStyle: {
             effect: selectedTemplate,
             teamSpecific: true,
+            template: selectedTemplate,
+            borderRadius: '8px',
+            borderColor: '#006341',
+            frameColor: '#EFB21E',
+            frameWidth: 4,
+            shadowColor: '#003831'
           },
           textStyle: {
             titleColor: '#EFB21E',
             descriptionColor: '#FFFFFF',
+            titleAlignment: 'center',
+            titleWeight: 'bold'
+          },
+          marketMetadata: {
+            isPrintable: true,
+            isForSale: false,
+            includeInCatalog: true
+          },
+          cardMetadata: {
+            category: 'memory',
+            cardType: 'oakland',
+            series: 'athletics'
           },
           oaklandMemory: oaklandMetadata
-        } as any
+        }
       });
 
       toast.success('Memory card created!');
@@ -123,7 +143,7 @@ const OaklandMemoryCreator: React.FC<OaklandMemoryCreatorProps> = ({ className }
           <h2 className="text-xl font-bold text-center mb-6 text-[#003831]">Add Memory Details</h2>
           <OaklandMemoryForm 
             onSubmit={handleMemoryDataSubmit}
-            initialData={memoryData || undefined}
+            initialData={memoryData || {template: selectedTemplate}}
           />
         </TabsContent>
         
@@ -176,7 +196,8 @@ const OaklandMemoryCreator: React.FC<OaklandMemoryCreatorProps> = ({ className }
                       tags: memoryData.tags || [],
                       imageUrl: imageUrl,
                       historicalContext: memoryData.historicalContext,
-                      personalSignificance: memoryData.personalSignificance
+                      personalSignificance: memoryData.personalSignificance,
+                      template: selectedTemplate
                     }}
                     templateType={selectedTemplate}
                   />
