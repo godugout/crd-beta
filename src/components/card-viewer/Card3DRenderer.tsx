@@ -84,22 +84,115 @@ const Card3DRenderer: React.FC<Card3DRendererProps> = ({
     
     // Apply holographic dynamic effects if active
     if (activeEffects.includes('Holographic')) {
-      const holographicLayer = cardRef.current.children.find(
-        child => child.userData.effectType === 'holographic'
-      ) as THREE.Mesh | undefined;
-      
-      if (holographicLayer) {
-        // Modify holographic effect based on time and card position
-        const material = holographicLayer.material as THREE.MeshPhysicalMaterial;
-        material.opacity = 0.2 + Math.sin(t * 2) * 0.1;
-        material.emissiveIntensity = 0.5 + Math.sin(t * 1.5) * 0.2;
-        
-        // Shift hue based on viewing angle
-        const hueShift = (Math.sin(t * 0.5) * 0.1 + 0.5) * 360;
-        const color = new THREE.Color();
-        color.setHSL(hueShift / 360, 0.8, 0.6);
-        material.color = color;
-      }
+      cardRef.current.children.forEach(child => {
+        if (child.userData.effectType === 'holographic' && child instanceof THREE.Mesh) {
+          if (child.material instanceof THREE.MeshPhysicalMaterial) {
+            // Get intensity from props or default
+            const intensity = effectIntensities['Holographic'] || 1.0;
+            
+            // Modify holographic effect based on time and card position
+            // Make color shift depending on viewing angle (rotation of card)
+            const viewAngle = Math.abs(cardRef.current!.rotation.y % (Math.PI * 2)) / (Math.PI * 2);
+            const hueShift = (viewAngle + Math.sin(t * 1.5) * 0.2) % 1.0;
+            
+            const color = new THREE.Color();
+            color.setHSL(hueShift, 0.8, 0.6);
+            
+            // Apply dynamic effects
+            child.material.color = color;
+            child.material.emissive = color.clone().multiplyScalar(0.4);
+            child.material.emissiveIntensity = 0.3 + Math.sin(t * 2) * 0.1;
+            child.material.opacity = 0.2 * intensity + Math.sin(t * 2) * 0.05;
+            
+            // Create wave effect on the geometry
+            if (child.geometry instanceof THREE.PlaneGeometry) {
+              const positions = child.geometry.attributes.position;
+              
+              for (let i = 0; i < positions.count; i++) {
+                const x = positions.getX(i);
+                const y = positions.getY(i);
+                
+                // Create wave pattern based on time
+                const waveX = Math.sin(x * 5 + t * 2) * 0.01 * intensity;
+                const waveY = Math.cos(y * 5 + t * 2) * 0.01 * intensity;
+                
+                // Only modify Z to create depth perception
+                positions.setZ(i, waveX + waveY);
+              }
+              
+              positions.needsUpdate = true;
+            }
+          }
+        }
+      });
+    }
+    
+    // Apply refractor dynamic effects
+    if (activeEffects.includes('Refractor')) {
+      cardRef.current.children.forEach(child => {
+        if (child.userData.effectType === 'refractor' && child instanceof THREE.Mesh) {
+          if (child.material instanceof THREE.MeshPhysicalMaterial) {
+            // Get intensity from props
+            const intensity = effectIntensities['Refractor'] || 1.0;
+            
+            // Create subtle color shifts
+            const hueBase = 0.6; // Blue-ish base
+            const hueShift = ((Math.sin(t * 0.3) * 0.1) + hueBase) % 1.0;
+            const color = new THREE.Color();
+            color.setHSL(hueShift, 0.7, 0.6);
+            
+            child.material.color = color;
+            child.material.opacity = 0.15 * intensity + Math.sin(t * 1.3) * 0.05;
+            
+            // Adjust transmission and roughness based on view angle
+            const viewAngle = Math.abs(cardRef.current!.rotation.y % (Math.PI * 2)) / (Math.PI * 2);
+            child.material.transmission = 0.4 + viewAngle * 0.3;
+            child.material.roughness = 0.2 + viewAngle * 0.2;
+          }
+        }
+      });
+    }
+    
+    // Apply chrome dynamic effects
+    if (activeEffects.includes('Chrome')) {
+      cardRef.current.children.forEach(child => {
+        if (child.userData.effectType === 'chrome' && child instanceof THREE.Mesh) {
+          if (child.material instanceof THREE.MeshPhysicalMaterial) {
+            const intensity = effectIntensities['Chrome'] || 1.0;
+            
+            // Make chrome appear more or less reflective based on viewing angle
+            const viewAngle = Math.abs(cardRef.current!.rotation.y % (Math.PI * 2)) / (Math.PI * 2);
+            child.material.roughness = 0.05 + viewAngle * 0.15;
+            child.material.metalness = 0.9 + viewAngle * 0.1;
+            child.material.clearcoatRoughness = 0.02 + viewAngle * 0.08;
+          }
+        }
+      });
+    }
+    
+    // Apply gold foil dynamic effects
+    if (activeEffects.includes('Gold Foil')) {
+      cardRef.current.children.forEach(child => {
+        if (child.userData.effectType === 'goldfoil' && child instanceof THREE.Mesh) {
+          if (child.material instanceof THREE.MeshPhysicalMaterial) {
+            const intensity = effectIntensities['Gold Foil'] || 1.0;
+            
+            // Create subtle color variation to simulate real gold
+            const baseHue = 0.12; // Gold base hue
+            const hueVariation = Math.sin(t * 0.5) * 0.02;
+            const color = new THREE.Color();
+            color.setHSL(baseHue + hueVariation, 0.8, 0.6);
+            
+            child.material.color = color;
+            
+            // Adjust sheen based on viewing angle
+            const viewAngle = Math.abs(cardRef.current!.rotation.y % (Math.PI * 2)) / (Math.PI * 2);
+            if (child.material.reflectivity !== undefined) {
+              child.material.reflectivity = 0.8 + viewAngle * 0.2;
+            }
+          }
+        }
+      });
     }
   });
 

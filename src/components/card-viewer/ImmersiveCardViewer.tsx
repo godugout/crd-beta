@@ -12,7 +12,7 @@ import Card3DRenderer from '../card-viewer/Card3DRenderer';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ArrowUp, ArrowDown, SunMedium } from 'lucide-react';
 
 interface ImmersiveCardViewerProps {
   card: Card;
@@ -36,6 +36,7 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
   const [localIsFlipped, setLocalIsFlipped] = useState(isFlipped);
   const [showEffectsPanel, setShowEffectsPanel] = useState(false);
   const [localEffectIntensities, setLocalEffectIntensities] = useState<Record<string, number>>(effectIntensities);
+  const [effectsOrder, setEffectsOrder] = useState<string[]>(activeEffects);
   
   // Update local state when props change
   useEffect(() => {
@@ -45,6 +46,10 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
   useEffect(() => {
     setLocalEffectIntensities(effectIntensities);
   }, [effectIntensities]);
+  
+  useEffect(() => {
+    setEffectsOrder(activeEffects);
+  }, [activeEffects]);
   
   // Ensure card has proper image URLs before rendering
   if (!card.imageUrl) {
@@ -56,16 +61,6 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
     console.log("Using fallback image for card:", card.id);
   }
 
-  // Error display as THREE object for within Canvas
-  const ErrorDisplay = () => {
-    return (
-      <mesh position={[0, 0, 0]}>
-        <boxGeometry args={[2, 2, 0.1]} />
-        <meshStandardMaterial color="red" />
-      </mesh>
-    );
-  };
-
   // Handle effect intensity changes
   const handleEffectIntensityChange = (effect: string, value: number) => {
     setLocalEffectIntensities(prev => ({
@@ -75,6 +70,29 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
     
     if (onEffectIntensityChange) {
       onEffectIntensityChange(effect, value);
+    }
+  };
+
+  // Handle effect layer order changes
+  const moveEffectLayer = (effect: string, direction: 'up' | 'down') => {
+    const currentIndex = effectsOrder.indexOf(effect);
+    if (
+      (direction === 'up' && currentIndex > 0) || 
+      (direction === 'down' && currentIndex < effectsOrder.length - 1)
+    ) {
+      const newEffectsOrder = [...effectsOrder];
+      const swapIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+      
+      // Swap positions
+      [newEffectsOrder[currentIndex], newEffectsOrder[swapIndex]] = 
+      [newEffectsOrder[swapIndex], newEffectsOrder[currentIndex]];
+      
+      setEffectsOrder(newEffectsOrder);
+      
+      toast({
+        title: "Effect Layer Updated",
+        description: `${effect} moved ${direction}`,
+      });
     }
   };
 
@@ -102,11 +120,16 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
         
         <Environment preset={(lightingSettings?.environmentType || 'studio') as any} background={false} />
         
-        <Suspense fallback={<ErrorDisplay />}>
+        <Suspense fallback={
+          <mesh position={[0, 0, 0]}>
+            <boxGeometry args={[2, 2, 0.1]} />
+            <meshStandardMaterial color="blue" wireframe />
+          </mesh>
+        }>
           <Card3DRenderer 
             card={card}
             isFlipped={localIsFlipped} 
-            activeEffects={activeEffects}
+            activeEffects={effectsOrder}
             effectIntensities={localEffectIntensities}
           />
         </Suspense>
@@ -152,10 +175,36 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
             <p className="text-gray-400">No active effects</p>
           ) : (
             <div className="space-y-6">
-              {activeEffects.map((effect) => (
-                <div key={effect} className="space-y-2">
-                  <Label className="text-sm font-medium">{effect} Intensity</Label>
+              {effectsOrder.map((effect) => (
+                <div key={effect} className="space-y-2 bg-gray-800/60 p-3 rounded-lg border border-gray-700">
+                  <div className="flex justify-between items-center">
+                    <Label className="text-sm font-medium">{effect}</Label>
+                    <div className="flex space-x-1">
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="h-6 w-6 p-0 hover:bg-gray-700"
+                        onClick={() => moveEffectLayer(effect, 'up')}
+                        disabled={effectsOrder.indexOf(effect) === 0}
+                      >
+                        <ArrowUp className="h-4 w-4" />
+                        <span className="sr-only">Move layer up</span>
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="h-6 w-6 p-0 hover:bg-gray-700"
+                        onClick={() => moveEffectLayer(effect, 'down')}
+                        disabled={effectsOrder.indexOf(effect) === effectsOrder.length - 1}
+                      >
+                        <ArrowDown className="h-4 w-4" />
+                        <span className="sr-only">Move layer down</span>
+                      </Button>
+                    </div>
+                  </div>
+                  
                   <div className="flex items-center space-x-2">
+                    <SunMedium className="h-3 w-3 text-gray-400" />
                     <Slider
                       value={[localEffectIntensities[effect] || 1.0]}
                       min={0}
@@ -176,27 +225,8 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
                     {effect === 'Gold Foil' && 'Golden foil accent with light reflection.'}
                   </div>
                   
-                  {/* Layer Order Controls */}
-                  <div className="flex justify-between items-center mt-2">
-                    <span className="text-xs text-gray-400">Layer Order:</span>
-                    <div className="flex space-x-1">
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        className="h-6 w-6 p-0"
-                        disabled={activeEffects.indexOf(effect) === 0}
-                      >
-                        ↑
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        className="h-6 w-6 p-0"
-                        disabled={activeEffects.indexOf(effect) === activeEffects.length - 1}
-                      >
-                        ↓
-                      </Button>
-                    </div>
+                  <div className="text-xs text-gray-500 mt-1">
+                    Layer order: {effectsOrder.indexOf(effect) + 1} of {effectsOrder.length}
                   </div>
                 </div>
               ))}

@@ -92,29 +92,32 @@ export const CardModel: React.FC<CardModelProps> = ({
       // Find holographic overlay mesh
       cardRef.current.children.forEach((child) => {
         if (child.userData.type === 'holographic') {
-          const material = child.material as THREE.MeshPhysicalMaterial;
-          
-          // Dynamic color shifts based on viewing angle and time
-          const intensity = effectIntensities['holographic'] || effectIntensities['Holographic'] || 1.0;
-          const time = state.clock.elapsedTime;
-          
-          // Create rainbow effect with hue rotation
-          const hue = (time * 0.1) % 1.0;
-          const color = new THREE.Color();
-          color.setHSL(hue, 0.8, 0.5);
-          
-          material.color = color;
-          material.emissive = color;
-          material.emissiveIntensity = 0.2 * intensity;
-          material.opacity = 0.2 * intensity + Math.sin(time * 2) * 0.05;
-          
-          // Simulate viewing angle effect
-          const viewAngle = Math.sin(time * 0.5) * 0.5 + 0.5;
-          material.clearcoatRoughness = 0.1 + viewAngle * 0.2;
-          material.roughness = 0.1 + viewAngle * 0.3;
-          
-          // Make rainbow pattern shift with time
-          (child as THREE.Mesh).rotation.z = Math.sin(time * 0.2) * 0.02;
+          // Add type checking to ensure it's a Mesh with material
+          if (child instanceof THREE.Mesh && child.material instanceof THREE.MeshPhysicalMaterial) {
+            const material = child.material;
+            
+            // Dynamic color shifts based on viewing angle and time
+            const intensity = effectIntensities['holographic'] || effectIntensities['Holographic'] || 1.0;
+            const time = state.clock.elapsedTime;
+            
+            // Create rainbow effect with hue rotation
+            const hue = (time * 0.1) % 1.0;
+            const color = new THREE.Color();
+            color.setHSL(hue, 0.8, 0.5);
+            
+            material.color = color;
+            material.emissive = color;
+            material.emissiveIntensity = 0.2 * intensity;
+            material.opacity = 0.2 * intensity + Math.sin(time * 2) * 0.05;
+            
+            // Simulate viewing angle effect
+            const viewAngle = Math.sin(time * 0.5) * 0.5 + 0.5;
+            material.clearcoatRoughness = 0.1 + viewAngle * 0.2;
+            material.roughness = 0.1 + viewAngle * 0.3;
+            
+            // Make rainbow pattern shift with time
+            child.rotation.z = Math.sin(time * 0.2) * 0.02;
+          }
         }
       });
     }
@@ -124,17 +127,20 @@ export const CardModel: React.FC<CardModelProps> = ({
       // Find refractor overlay mesh
       cardRef.current.children.forEach((child) => {
         if (child.userData.type === 'refractor') {
-          const material = child.material as THREE.MeshPhysicalMaterial;
-          const intensity = effectIntensities['refractor'] || effectIntensities['Refractor'] || 1.0;
-          const time = state.clock.elapsedTime;
-          
-          // Subtle color shifts
-          const hue = ((Math.sin(time * 0.3) * 0.1) + 0.6) % 1.0; // Blue-ish range
-          const color = new THREE.Color();
-          color.setHSL(hue, 0.7, 0.6);
-          
-          material.color = color;
-          material.opacity = 0.15 * intensity + Math.sin(time * 1.5) * 0.05;
+          // Add type checking to ensure it's a Mesh with material
+          if (child instanceof THREE.Mesh && child.material instanceof THREE.MeshPhysicalMaterial) {
+            const material = child.material;
+            const intensity = effectIntensities['refractor'] || effectIntensities['Refractor'] || 1.0;
+            const time = state.clock.elapsedTime;
+            
+            // Subtle color shifts
+            const hue = ((Math.sin(time * 0.3) * 0.1) + 0.6) % 1.0; // Blue-ish range
+            const color = new THREE.Color();
+            color.setHSL(hue, 0.7, 0.6);
+            
+            material.color = color;
+            material.opacity = 0.15 * intensity + Math.sin(time * 1.5) * 0.05;
+          }
         }
       });
     }
