@@ -20,17 +20,15 @@ import { cn } from '@/lib/utils';
 import { mapLightingPresetToEnvironment, ValidEnvironmentPreset } from '@/utils/environmentPresets';
 import CardModel from '@/components/card-viewer/CardModel';
 import { FALLBACK_FRONT_IMAGE_URL, FALLBACK_BACK_IMAGE_URL } from '@/lib/utils/cardDefaults';
+import ViewerSettings from '@/components/gallery/viewer-components/ViewerSettings';
 
-// Debug component to visualize camera and light positions - MUST BE USED INSIDE CANVAS
 const DebugInfo = ({ show = false }) => {
   if (!show) return null;
   
   return <Stats className="top-0 left-0" />;
 };
 
-// Photorealistic environment setup
 const Environment3D = ({ preset = 'studio' }) => {
-  // Map the custom preset to a valid @react-three/drei environment preset
   const environmentPreset = mapLightingPresetToEnvironment(preset) as ValidEnvironmentPreset;
   
   return (
@@ -54,7 +52,6 @@ const Environment3D = ({ preset = 'studio' }) => {
         color="#000000"
       />
       
-      {/* Reflective surface/table */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.5, 0]}>
         <planeGeometry args={[50, 50]} />
         <MeshReflectorMaterial
@@ -99,21 +96,18 @@ const RealisticCardViewer: React.FC<RealisticCardViewerProps> = ({
     toggleDynamicLighting
   } = useCardLighting(preferences?.environmentType || 'studio');
   
-  // Card with fallback images - use updated fallback paths
   const cardWithFallback = {
     ...card,
     imageUrl: card.imageUrl || FALLBACK_FRONT_IMAGE_URL,
     backImageUrl: card.backImageUrl || FALLBACK_BACK_IMAGE_URL
   };
 
-  // Save user preferences when they change
   useEffect(() => {
     if (isUserCustomized && lightingSettings) {
       savePreferences(lightingSettings);
     }
   }, [lightingSettings, isUserCustomized, savePreferences]);
   
-  // Toggle debug mode with Shift+D keyboard shortcut
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.shiftKey && e.key === 'D') {
@@ -126,14 +120,12 @@ const RealisticCardViewer: React.FC<RealisticCardViewerProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isDebugMode]);
 
-  // Setup effects from card data
   useEffect(() => {
     if (card && card.effects) {
       setActiveEffects(card.effects);
     }
   }, [card]);
 
-  // Get effect intensities (can be expanded to use card data if available)
   const effectIntensities = {
     Holographic: 0.7,
     Shimmer: 0.8,
@@ -141,7 +133,6 @@ const RealisticCardViewer: React.FC<RealisticCardViewerProps> = ({
     Vintage: 0.7
   };
   
-  // Clean up WebGL resources on unmount
   const canvasRef = useRef<HTMLCanvasElement>(null);
   
   useEffect(() => {
@@ -156,10 +147,8 @@ const RealisticCardViewer: React.FC<RealisticCardViewerProps> = ({
     };
   }, []);
 
-  // Get the environment preset as a valid type
   const envPreset = mapLightingPresetToEnvironment(lightingSettings.environmentType) as ValidEnvironmentPreset;
 
-  // Adapter function to make updateLightingSetting compatible with ViewerSettings
   const handleUpdateSetting = (path: string, value: any) => {
     const pathParts = path.split('.');
     if (pathParts.length === 2) {
@@ -179,7 +168,6 @@ const RealisticCardViewer: React.FC<RealisticCardViewerProps> = ({
 
   return (
     <div className="w-full h-full relative">
-      {/* Canvas with WebGL renderer */}
       <Canvas 
         ref={canvasRef}
         shadows 
@@ -190,7 +178,7 @@ const RealisticCardViewer: React.FC<RealisticCardViewerProps> = ({
           powerPreference: 'high-performance',
         }}
         className="bg-gray-800 z-0"
-        dpr={[1, 1.5]} // Reduce resolution for better performance
+        dpr={[1, 1.5]}
       >
         <color attach="background" args={["#0f172a"]} />
         <PerspectiveCamera makeDefault position={[0, 0, 5]} fov={50} />
@@ -243,7 +231,6 @@ const RealisticCardViewer: React.FC<RealisticCardViewerProps> = ({
         <DebugInfo show={isDebugMode} />
       </Canvas>
 
-      {/* Controls overlay - OUTSIDE of Canvas */}
       <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex gap-3 z-10">
         <Button
           variant="secondary"
@@ -255,7 +242,6 @@ const RealisticCardViewer: React.FC<RealisticCardViewerProps> = ({
         </Button>
       </div>
       
-      {/* Customization panel toggle - OUTSIDE of Canvas */}
       <div 
         className={cn(
           "absolute top-1/2 -translate-y-1/2 z-10 transition-all duration-300",
@@ -272,19 +258,16 @@ const RealisticCardViewer: React.FC<RealisticCardViewerProps> = ({
         </Button>
       </div>
       
-      {/* Debug indicator - OUTSIDE of Canvas */}
       {isDebugMode && (
         <div className="absolute top-2 left-2 bg-red-500/80 text-white text-xs px-2 py-1 rounded z-50">
           Debug Mode
         </div>
       )}
       
-      {/* Card title overlay - OUTSIDE of Canvas */}
       <div className="absolute top-2 left-1/2 transform -translate-x-1/2 bg-black/50 backdrop-blur-sm text-white px-3 py-1 rounded-full text-sm z-10">
         {card.title || 'Untitled Card'}
       </div>
 
-      {/* Settings button - OUTSIDE of Canvas */}
       <Button
         variant="ghost"
         size="icon"
@@ -294,7 +277,6 @@ const RealisticCardViewer: React.FC<RealisticCardViewerProps> = ({
         <Eye className="h-5 w-5" />
       </Button>
 
-      {/* Viewer settings - OUTSIDE of Canvas */}
       {showViewerSettings && (
         <div className="absolute top-16 right-4 w-72 bg-black/60 backdrop-blur-md p-4 rounded-lg z-20">
           <ViewerSettings
