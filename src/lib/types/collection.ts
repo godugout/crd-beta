@@ -15,7 +15,7 @@ export interface Collection extends BaseEntity {
   userId: string;
   teamId?: string;
   isPublic?: boolean; 
-  visibility?: 'public' | 'private' | 'team' | 'unlisted'; // Add unlisted to visibility
+  visibility?: 'public' | 'private' | 'team' | 'unlisted'; // Include unlisted in visibility
   featured?: boolean; 
   cards?: Card[];
   cardIds?: string[];
@@ -23,7 +23,7 @@ export interface Collection extends BaseEntity {
   designMetadata?: any;
   tags?: string[]; 
   createdAt: string;
-  updatedAt?: string;
+  updatedAt: string; // Changed from optional to required to match BaseEntity
 }
 
 /**

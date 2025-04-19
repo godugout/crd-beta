@@ -1,13 +1,30 @@
 
 export interface InstagramPost {
   id: string;
-  permalink: string;
-  caption?: string;
+  postId: string; // Add the missing postId property
+  caption: string;
   mediaUrl: string;
-  mediaType: 'IMAGE' | 'VIDEO' | 'CAROUSEL_ALBUM';
-  thumbnailUrl?: string;
+  permalink: string;
   timestamp: string;
   username: string;
-  children?: InstagramPost[];
-  postId?: string; // Add postId field
+  mediaType: string;
+}
+
+export interface TwitterPost {
+  id: string;
+  text: string;
+  mediaUrl?: string;
+  createdAt: string;
+  username: string;
+}
+
+export interface SocialShare {
+  platform: 'instagram' | 'twitter' | 'facebook';
+  link: string;
+  timestamp: string;
+  engagement: {
+    likes: number;
+    shares: number;
+    comments: number;
+  };
 }

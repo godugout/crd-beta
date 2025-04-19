@@ -1,12 +1,11 @@
-
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { useCards } from '@/context/CardContext';
 import { toast } from 'sonner';
 import { Card, Collection } from '@/lib/types';
 import { supabase } from '@/integrations/supabase/client';
 import { collectionOperations, convertDbCollectionToApp } from '@/lib/supabase/collections';
 
-export const useCollectionDetail = (collectionId?: string) => {
+export function useCollectionDetail(collectionId: string) {
   const { collections, cards, isLoading, updateCard, updateCollection, deleteCollection, refreshCards } = useCards();
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [isAssetGalleryOpen, setIsAssetGalleryOpen] = useState(false);
@@ -25,7 +24,6 @@ export const useCollectionDetail = (collectionId?: string) => {
   const [fetchAttempts, setFetchAttempts] = useState(0);
   const maxFetchAttempts = 3;
   
-  // Refresh collection data from Supabase with improved error handling
   const refreshCollection = useCallback(async () => {
     if (!collectionId) return;
     
@@ -45,12 +43,10 @@ export const useCollectionDetail = (collectionId?: string) => {
       }
       
       if (data?.collection) {
-        // Convert DB collection to app format
         const appCollection = convertDbCollectionToApp(data.collection);
         setLocalCollection(appCollection);
         
         if (data.cards?.length > 0) {
-          // Process cards
           const processedCards = data.cards.map(card => ({
             id: card.id,
             title: card.title || '',
@@ -70,7 +66,6 @@ export const useCollectionDetail = (collectionId?: string) => {
           
           setLocalCards(processedCards);
           
-          // Update local collection with card IDs
           setLocalCollection(prev => prev ? {
             ...prev,
             cardIds: processedCards.map(card => card.id)
@@ -79,10 +74,8 @@ export const useCollectionDetail = (collectionId?: string) => {
         
         console.log(`Fetched collection with ${data.cards?.length || 0} cards`);
         
-        // Reset fetch attempts on success
         setFetchAttempts(0);
         
-        // Dispatch refresh event
         if (typeof window !== 'undefined') {
           const refreshEvent = new CustomEvent('collection-refreshed', {
             detail: { 
@@ -94,7 +87,6 @@ export const useCollectionDetail = (collectionId?: string) => {
           window.dispatchEvent(refreshEvent);
         }
         
-        // Also try to trigger global cards refresh if available
         if (refreshCards) {
           refreshCards();
         }
@@ -106,24 +98,20 @@ export const useCollectionDetail = (collectionId?: string) => {
       console.error('Error in refreshCollection:', err);
       setFetchError(err.message || 'Unexpected error loading collection');
       
-      // Increment fetch attempts
       setFetchAttempts(prevAttempts => prevAttempts + 1);
     } finally {
       setLocalLoading(false);
     }
   }, [collectionId, refreshCards, fetchAttempts]);
   
-  // Find the collection in global state or use local state
   const collection = localCollection || collections.find(c => c.id === collectionId);
   
-  // Get cards that belong to this collection, prioritize local cards
   const collectionCards = localCards.length > 0 
     ? localCards 
     : (collection 
       ? cards.filter(card => card.collectionId === collectionId) 
       : []);
 
-  // Filter cards based on search term
   const filteredCards = !searchTerm.trim() 
     ? collectionCards 
     : collectionCards.filter(card => {
@@ -134,7 +122,6 @@ export const useCollectionDetail = (collectionId?: string) => {
         );
       });
 
-  // Initialize edit form data when collection changes
   useEffect(() => {
     if (collection) {
       setEditFormData({
@@ -144,14 +131,12 @@ export const useCollectionDetail = (collectionId?: string) => {
     }
   }, [collection]);
 
-  // Initial data load with limited retries
   useEffect(() => {
     if (collectionId && !collection && !localLoading && fetchAttempts < maxFetchAttempts) {
       refreshCollection();
     }
   }, [collectionId, collection, localLoading, refreshCollection, fetchAttempts, maxFetchAttempts]);
 
-  // Handle asset selection from gallery
   const handleAssetSelect = (asset: any) => {
     if (selectedCardId) {
       updateCard(selectedCardId, { 
@@ -164,13 +149,11 @@ export const useCollectionDetail = (collectionId?: string) => {
     }
   };
 
-  // Open asset gallery for a specific card
   const openAssetGalleryForCard = (cardId: string) => {
     setSelectedCardId(cardId);
     setIsAssetGalleryOpen(true);
   };
-  
-  // Update collection details
+
   const handleUpdateCollection = () => {
     if (collectionId && collection) {
       updateCollection(collectionId, {
@@ -182,12 +165,10 @@ export const useCollectionDetail = (collectionId?: string) => {
     }
   };
 
-  // Delete collection and navigate back
   const handleDeleteCollection = () => {
     if (collectionId) {
       deleteCollection(collectionId);
       toast.success('Collection deleted successfully');
-      // Navigate back to collections list
       window.location.href = '/collections';
     }
   };
@@ -199,8 +180,35 @@ export const useCollectionDetail = (collectionId?: string) => {
   };
 
   const handleCardClick = (cardId: string) => {
-    // Navigate to card detail view
     console.log('Card clicked:', cardId);
+  };
+
+  const handleAddCard = async (cardId: string) => {
+    try {
+      await addCardToCollection({
+        collectionId,
+        cardId
+      });
+      
+      toast.success('Card added to collection successfully');
+    } catch (error) {
+      console.error('Error adding card to collection:', error);
+      toast.error('Failed to add card to collection');
+    }
+  };
+
+  const handleDeleteCard = async (cardId: string) => {
+    try {
+      await removeCardFromCollection({
+        collectionId,
+        cardId
+      });
+      
+      toast.success('Card removed from collection successfully');
+    } catch (error) {
+      console.error('Error removing card from collection:', error);
+      toast.error('Failed to remove card from collection');
+    }
   };
 
   return {
@@ -230,4 +238,4 @@ export const useCollectionDetail = (collectionId?: string) => {
     refreshCollection,
     fetchError
   };
-};
+}

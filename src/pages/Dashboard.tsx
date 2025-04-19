@@ -1,85 +1,75 @@
-
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import PageLayout from '@/components/navigation/PageLayout';
+import { UserCard } from '@/components/cards/UserCard';
 import { useAuth } from '@/hooks/useAuth';
-import { User, UserRole, UserPermission } from '@/lib/types';
-import { CardEnhancedProvider } from '@/context/CardEnhancedContext';
+import { User, UserRole } from '@/lib/types';
 
-// Import dashboard components based on user role
-import AdminDashboard from '@/components/dashboard/AdminDashboard';
-import ArtistDashboard from '@/components/dashboard/ArtistDashboard';
-import FanDashboard from '@/components/dashboard/FanDashboard';
+// Add a UserProfile interface that extends User with required role
+interface UserProfile extends Omit<User, 'role'> {
+  role: UserRole;
+}
 
 const Dashboard: React.FC = () => {
-  const auth = useAuth();
-  const user = auth.user;
-  // Check for loading in either auth context format
-  const isLoading = auth.loading || auth.isLoading || false;
-  
-  const [dashboardUser, setDashboardUser] = useState<User | null>(null);
-  const [dashboardLoaded, setDashboardLoaded] = useState(false);
-  
-  // Mock admin credentials for demo purposes
-  const adminCredentials = {
-    email: "user@example.com",
-    password: "#LGO!"
-  };
-  
-  // For demo purposes, create a mock user if none exists
-  useEffect(() => {
-    if (!isLoading) {
-      if (user) {
-        // Ensure we create a User type compatible object
-        const compatibleUser: User = {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          displayName: user.displayName,
-          role: user.role,
-          permissions: user.permissions as UserPermission[],
-          avatarUrl: user.avatarUrl,
-          createdAt: user.createdAt,
-          updatedAt: user.updatedAt,
-        };
-        setDashboardUser(compatibleUser);
-      } else {
-        // Mock user for demo purposes
-        const mockUser: User = {
-          id: 'mock-user-id',
-          email: 'user@example.com',
-          name: 'Demo User',
-          displayName: 'Demo User',
-          role: UserRole.ADMIN, // Default to admin role if password is correct
-          avatarUrl: 'https://api.dicebear.com/7.x/initials/svg?seed=DU',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        };
-        setDashboardUser(mockUser);
+  const { users, isLoading, error } = useAuth();
+
+  // Group users by role
+  const usersByRole = React.useMemo(() => {
+    if (!users) return { admins: [], moderators: [], users: [] };
+
+    const admins: User[] = [];
+    const moderators: User[] = [];
+    const usersList: User[] = [];
+
+    users.forEach(user => {
+      switch (user.role) {
+        case UserRole.ADMIN:
+          admins.push(user);
+          break;
+        case UserRole.MODERATOR:
+          moderators.push(user);
+          break;
+        default:
+          usersList.push(user);
+          break;
       }
-      setDashboardLoaded(true);
-    }
-  }, [user, isLoading]);
+    });
 
-  if (isLoading || !dashboardLoaded) {
-    return <div className="container mx-auto p-6">Loading dashboard...</div>;
-  }
-  
-  if (!dashboardUser) {
-    return <div className="container mx-auto p-6">Please sign in to view your dashboard.</div>;
-  }
+    return { admins, moderators, users: usersList };
+  }, [users]);
 
-  // Render the appropriate dashboard based on user role
+  // Update the transformUser function to ensure the role is always set
+  const transformUserToProfile = (user: User): UserProfile => {
+    return {
+      ...user,
+      role: user.role || UserRole.USER // Default to USER if role is undefined
+    };
+  };
+
   return (
-    <CardEnhancedProvider>
-      <div className="container mx-auto p-6">
-        {dashboardUser.role === UserRole.ADMIN && <AdminDashboard user={dashboardUser} />}
-        
-        {dashboardUser.role === UserRole.CREATOR && <ArtistDashboard user={dashboardUser} />}
-        
-        {dashboardUser.role === UserRole.USER && <FanDashboard user={dashboardUser} />}
-        
-        {!dashboardUser.role && <FanDashboard user={dashboardUser} />}
+    <PageLayout title="Dashboard" description="Your personal dashboard">
+      <div className="container mx-auto py-10">
+        <h2 className="text-2xl font-semibold mb-4">Admin Users</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {usersByRole.admins.map(user => (
+            <UserCard key={user.id} user={transformUserToProfile(user)} />
+          ))}
+        </div>
+
+        <h2 className="text-2xl font-semibold mt-8 mb-4">Moderator Users</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {usersByRole.moderators.map(user => (
+            <UserCard key={user.id} user={transformUserToProfile(user)} />
+          ))}
+        </div>
+
+        <h2 className="text-2xl font-semibold mt-8 mb-4">Regular Users</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {usersByRole.users.map(user => (
+            <UserCard key={user.id} user={transformUserToProfile(user)} />
+          ))}
+        </div>
       </div>
-    </CardEnhancedProvider>
+    </PageLayout>
   );
 };
 

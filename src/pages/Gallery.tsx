@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useTransition } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PageLayout from '@/components/navigation/PageLayout';
@@ -24,7 +23,7 @@ const Gallery = () => {
   const navigate = useNavigate();
   const [isPending, startTransition] = useTransition();
   
-  const { cards, isLoading, fetchCards } = useCards();
+  const { cards, loading, error, fetchCards } = useCards();
 
   useEffect(() => {
     fetchCards();
@@ -48,7 +47,6 @@ const Gallery = () => {
 
   const handleCardClick = (cardId: string) => {
     console.log('Card clicked:', cardId);
-    // Use startTransition to avoid the Suspense error
     startTransition(() => {
       setSelectedCardId(cardId);
       setIsFullscreen(true);
@@ -125,7 +123,7 @@ const Gallery = () => {
             </div>
           )}
           
-          {!isLoading && (!cards || cards.length === 0) && (
+          {!loading && (!cards || cards.length === 0) && (
             <div className="py-16 text-center">
               <h2 className="text-2xl font-bold mb-4">Your gallery is empty</h2>
               <p className="text-gray-400 mb-8">Create your first card to get started with your collection</p>
@@ -141,12 +139,12 @@ const Gallery = () => {
             </div>
           )}
           
-          {(cards?.length > 0 || isLoading) && (
+          {(cards?.length > 0 || loading) && (
             <CardGallery 
               viewMode={viewMode} 
               onCardClick={handleCardClick} 
               cards={(cards || []) as Card[]}
-              isLoading={isLoading}
+              isLoading={loading}
               searchQuery={searchQuery}
             />
           )}

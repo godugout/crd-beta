@@ -1,3 +1,4 @@
+
 import { Comment } from '../../schema/types';
 
 /**
@@ -25,7 +26,8 @@ export function transformCommentFromDb(record: any): Comment {
       email: record.profiles.email || '', // Add default empty email
       name: record.profiles.full_name,
       avatarUrl: record.profiles.avatar_url,
-      username: record.profiles.username
+      username: record.profiles.username,
+      createdAt: record.profiles.created_at || new Date().toISOString(), // Ensure createdAt is present
     };
   }
   

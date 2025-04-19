@@ -1,24 +1,29 @@
-
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useCards } from '@/context/CardContext';
-import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 import PageLayout from '@/components/navigation/PageLayout';
+import { Card } from '@/lib/types';
+import { useCards } from '@/hooks/useCards';
 import CardGrid from '@/components/gallery/CardGrid';
-import CardFilter from '@/components/gallery/CardFilter';
+import { Button } from '@/components/ui/button';
+import CardFilter, { FilterOptions } from '@/components/gallery/CardFilter';
 
-const CardGallery = () => {
+const CardGallery: React.FC = () => {
   const { cards, isLoading, error } = useCards();
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
-  
+  const navigate = useNavigate();
+
   const filteredCards = selectedTag 
     ? cards.filter(card => card.tags?.includes(selectedTag)) 
     : cards;
     
   const allTags = Array.from(new Set(cards.flatMap(card => card.tags || [])));
   
+  const handleCardClick = (cardId: string) => {
+    navigate(`/cards/${cardId}`);
+  };
+
   return (
-    <PageLayout title="Card Gallery" description="Browse through your card collection">
+    <PageLayout title="Card Gallery" description="Browse your card collection">
       <div className="container mx-auto p-6">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
           <div>
@@ -84,7 +89,10 @@ const CardGallery = () => {
             </Button>
           </div>
         ) : (
-          <CardGrid cards={filteredCards} />
+          <CardGrid 
+            cards={filteredCards} 
+            onCardClick={handleCardClick}
+          />
         )}
       </div>
     </PageLayout>

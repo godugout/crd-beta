@@ -39,5 +39,4 @@ export interface User extends BaseEntity {
   permissions?: UserPermission[]; 
 }
 
-// Export the types
-export { UserRole, UserPermission };
+// Removed the duplicate exports at the end

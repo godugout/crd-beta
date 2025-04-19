@@ -1,7 +1,7 @@
 
 // Import and re-export all types from the type modules
 import { Card, FabricSwatch, CardData } from './types/card';
-import { User, UserRole as UserRoleEnum, UserPermission as UserPermissionEnum } from './types/user';
+import { User, UserRole, UserPermission } from './types/user';
 import { Collection } from './types/collection';
 import { Comment, Reaction, Team, TeamMember } from './schema/types';
 import { OaklandMemoryData } from './schema/types';
@@ -24,12 +24,14 @@ export type {
   InstagramPost
 };
 
-// Enum exports
-export { UserRoleEnum as UserRole, UserPermissionEnum as UserPermission };
+// Enum exports - remove aliases
+export { UserRole, UserPermission };
 
 // Base entity interface
 export interface BaseEntity {
   id: string;
+  createdAt: string;
+  updatedAt: string;
   [key: string]: any;
 }
 
@@ -48,34 +50,34 @@ export const serializeMetadata = (metadata: any): string => {
 export type CardRarity = 'common' | 'uncommon' | 'rare' | 'ultra-rare' | 'legendary' | 'exclusive' | 'one-of-one';
 
 // Add Role Permissions mapping
-export const ROLE_PERMISSIONS: Record<UserRoleEnum, UserPermissionEnum[]> = {
-  [UserRoleEnum.ADMIN]: [
-    UserPermissionEnum.MANAGE_USERS,
-    UserPermissionEnum.MANAGE_CONTENT,
-    UserPermissionEnum.VIEW_ANALYTICS,
-    UserPermissionEnum.MANAGE_SYSTEM,
-    UserPermissionEnum.ACCESS_API,
-    UserPermissionEnum.MODERATE_COMMENTS,
+export const ROLE_PERMISSIONS: Record<UserRole, UserPermission[]> = {
+  [UserRole.ADMIN]: [
+    UserPermission.MANAGE_USERS,
+    UserPermission.MANAGE_CONTENT,
+    UserPermission.VIEW_ANALYTICS,
+    UserPermission.MANAGE_SYSTEM,
+    UserPermission.ACCESS_API,
+    UserPermission.MODERATE_COMMENTS,
   ],
-  [UserRoleEnum.MODERATOR]: [
-    UserPermissionEnum.MANAGE_CONTENT,
-    UserPermissionEnum.MODERATE_COMMENTS,
-    UserPermissionEnum.VIEW_ANALYTICS,
-    UserPermissionEnum.ACCESS_API
+  [UserRole.MODERATOR]: [
+    UserPermission.MANAGE_CONTENT,
+    UserPermission.MODERATE_COMMENTS,
+    UserPermission.VIEW_ANALYTICS,
+    UserPermission.ACCESS_API
   ],
-  [UserRoleEnum.CREATOR]: [
-    UserPermissionEnum.CREATE_CONTENT,
-    UserPermissionEnum.EDIT_OWN_CONTENT,
-    UserPermissionEnum.DELETE_OWN_CONTENT,
-    UserPermissionEnum.ACCESS_API
+  [UserRole.CREATOR]: [
+    UserPermission.CREATE_CONTENT,
+    UserPermission.EDIT_OWN_CONTENT,
+    UserPermission.DELETE_OWN_CONTENT,
+    UserPermission.ACCESS_API
   ],
-  [UserRoleEnum.USER]: [
-    UserPermissionEnum.CREATE_COLLECTIONS,
-    UserPermissionEnum.EDIT_OWN_COLLECTIONS,
-    UserPermissionEnum.VIEW_CONTENT
+  [UserRole.USER]: [
+    UserPermission.CREATE_COLLECTIONS,
+    UserPermission.EDIT_OWN_COLLECTIONS,
+    UserPermission.VIEW_CONTENT
   ],
-  [UserRoleEnum.GUEST]: [
-    UserPermissionEnum.VIEW_CONTENT
+  [UserRole.GUEST]: [
+    UserPermission.VIEW_CONTENT
   ]
 };
 
