@@ -1,5 +1,5 @@
 
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useTexture } from '@react-three/drei';
@@ -7,6 +7,10 @@ import ShimmerEffect from '../card-effects/effects/ShimmerEffect';
 import HolographicEffect from '../card-effects/effects/HolographicEffect';
 import RefractorEffect from '../card-effects/effects/RefractorEffect';
 import VintageEffect from '../card-effects/effects/VintageEffect';
+
+// Fallback textures if the main ones fail to load
+const FALLBACK_FRONT_TEXTURE = '/images/card-placeholder.png';
+const FALLBACK_BACK_TEXTURE = '/images/card-back-placeholder.png';
 
 interface CardModelProps {
   imageUrl: string;
@@ -24,8 +28,17 @@ const CardModel: React.FC<CardModelProps> = ({
   effectIntensities = {}
 }) => {
   const meshRef = useRef<THREE.Mesh>(null);
-  const frontTexture = useTexture(imageUrl);
-  const backTexture = useTexture(backImageUrl);
+  const [frontTextureLoaded, setFrontTextureLoaded] = useState(false);
+  const [backTextureLoaded, setBackTextureLoaded] = useState(false);
+  
+  // Use onError for texture loading failures
+  const frontTexture = useTexture(imageUrl, undefined, (error) => {
+    console.error("Failed to load front texture:", error);
+  });
+  
+  const backTexture = useTexture(backImageUrl, undefined, (error) => {
+    console.error("Failed to load back texture:", error);
+  });
 
   // Calculate card dimensions (standard trading card ratio)
   const width = 2.5;
@@ -46,14 +59,8 @@ const CardModel: React.FC<CardModelProps> = ({
   
   useEffect(() => {
     console.log("Card model received effects:", activeEffects);
-  }, [activeEffects]);
-
-  // Log when textures are loaded
-  useEffect(() => {
-    if (frontTexture && backTexture) {
-      console.log("Textures loaded successfully");
-    }
-  }, [frontTexture, backTexture]);
+    console.log("Card textures:", { front: imageUrl, back: backImageUrl });
+  }, [activeEffects, imageUrl, backImageUrl]);
 
   // Create materials for each side of the card
   const frontMaterial = new THREE.MeshStandardMaterial({ 

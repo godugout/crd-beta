@@ -113,8 +113,7 @@ const AdaptiveImage: React.FC<AdaptiveImageProps> = ({
         className={cn(
           "w-full transition-opacity duration-300",
           isLoaded ? "opacity-100" : "opacity-0",
-          isBlurring && isLoaded ? "blur-sm" : "blur-0",
-          props.className
+          isBlurring && isLoaded ? "blur-sm" : "blur-0"
         )}
         {...props}
       />

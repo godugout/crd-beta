@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, Suspense } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { useCards } from '@/context/CardContext';
@@ -20,7 +19,8 @@ import ViewerSettings from '@/components/gallery/viewer-components/ViewerSetting
 import { useCardLighting } from '@/hooks/useCardLighting';
 import { useUserLightingPreferences } from '@/hooks/useUserLightingPreferences';
 
-const FALLBACK_IMAGE_URL = 'https://images.unsplash.com/photo-1518770660439-4636190af475';
+const FALLBACK_IMAGE_URL = '/images/card-placeholder.png';
+const FALLBACK_BACK_IMAGE_URL = '/images/card-back-placeholder.png';
 
 const ImmersiveCardViewerPage: React.FC = () => {
   const { id } = useParams();
@@ -89,6 +89,7 @@ const ImmersiveCardViewerPage: React.FC = () => {
           const cardWithDefaults = adaptToCard({
             ...foundCard,
             imageUrl: foundCard.imageUrl || FALLBACK_IMAGE_URL,
+            backImageUrl: foundCard.backImageUrl || FALLBACK_BACK_IMAGE_URL,
             thumbnailUrl: foundCard.thumbnailUrl || foundCard.imageUrl || FALLBACK_IMAGE_URL,
             designMetadata: foundCard.designMetadata || DEFAULT_DESIGN_METADATA,
             createdAt: foundCard.createdAt || new Date().toISOString(),
@@ -163,7 +164,6 @@ const ImmersiveCardViewerPage: React.FC = () => {
     }
   }, [viewTab, isPanelOpen]);
 
-  // Adapter function to make updateLightingSetting compatible with ViewerSettings
   const handleUpdateSetting = (path: string, value: any) => {
     const pathParts = path.split('.');
     if (pathParts.length === 2) {
@@ -319,7 +319,6 @@ const ImmersiveCardViewerPage: React.FC = () => {
                     ))}
                   </div>
                   
-                  {/* Scene settings integrated into the effects panel */}
                   <div className="mt-8 border-t border-gray-800 pt-6">
                     <ViewerSettings
                       settings={lightingSettings}
@@ -328,7 +327,6 @@ const ImmersiveCardViewerPage: React.FC = () => {
                       isOpen={true}
                     />
                     
-                    {/* Card position (flipping control) */}
                     <div className="mt-6 p-4 bg-gray-800/50 rounded-lg">
                       <h3 className="font-medium text-white mb-2">Card Position</h3>
                       <Button 

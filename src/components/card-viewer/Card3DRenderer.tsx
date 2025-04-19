@@ -7,6 +7,10 @@ import CardModel from './CardModel';
 import { Environment } from '@react-three/drei';
 import { mapLightingPresetToEnvironment } from '@/utils/environmentPresets';
 
+// Fallback image paths
+const FALLBACK_FRONT_TEXTURE = '/images/card-placeholder.png';
+const FALLBACK_BACK_TEXTURE = '/images/card-back-placeholder.png';
+
 interface Card3DRendererProps {
   card: Card;
   isFlipped: boolean;
@@ -59,12 +63,16 @@ const Card3DRenderer: React.FC<Card3DRendererProps> = ({
   const shadowProps = needs3DEffects 
     ? { castShadow: true, receiveShadow: true } 
     : {};
+    
+  // Ensure we have valid image URLs with fallbacks
+  const cardImageUrl = card.imageUrl || FALLBACK_FRONT_TEXTURE;
+  const cardBackImageUrl = card.backImageUrl || FALLBACK_BACK_TEXTURE;
 
   return (
     <group ref={groupRef} {...shadowProps}>
       <CardModel
-        imageUrl={card.imageUrl || '/placeholder-card.jpg'}
-        backImageUrl={card.backImageUrl || '/card-back-texture.jpg'}
+        imageUrl={cardImageUrl}
+        backImageUrl={cardBackImageUrl}
         isFlipped={isFlipped}
         activeEffects={activeEffects} 
         effectIntensities={effectIntensities}

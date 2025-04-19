@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect, useState, Suspense } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { useCards } from '@/context/CardContext';
@@ -6,13 +5,16 @@ import { useToast } from '@/hooks/use-toast';
 import { Card } from '@/lib/types';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera, Environment } from '@react-three/drei';
-import { DEFAULT_DESIGN_METADATA, FALLBACK_IMAGE_URL } from '@/lib/utils/cardDefaults';
+import { DEFAULT_DESIGN_METADATA } from '@/lib/utils/cardDefaults';
 import { LightingSettings } from '@/hooks/useCardLighting';
 import Card3DRenderer from '../card-viewer/Card3DRenderer';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
 import { ChevronLeft, ChevronRight, ArrowUp, ArrowDown, SunMedium } from 'lucide-react';
+
+const FALLBACK_IMAGE_URL = '/images/card-placeholder.png';
+const FALLBACK_BACK_IMAGE_URL = '/images/card-back-placeholder.png';
 
 interface ImmersiveCardViewerProps {
   card: Card;
@@ -38,7 +40,12 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
   const [localEffectIntensities, setLocalEffectIntensities] = useState<Record<string, number>>(effectIntensities);
   const [effectsOrder, setEffectsOrder] = useState<string[]>(activeEffects);
   
-  // Update local state when props change
+  const cardWithFallbacks = {
+    ...card,
+    imageUrl: card.imageUrl || FALLBACK_IMAGE_URL,
+    backImageUrl: card.backImageUrl || FALLBACK_BACK_IMAGE_URL
+  };
+
   useEffect(() => {
     setLocalIsFlipped(isFlipped);
   }, [isFlipped]);
@@ -51,17 +58,6 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
     setEffectsOrder(activeEffects);
   }, [activeEffects]);
   
-  // Ensure card has proper image URLs before rendering
-  if (!card.imageUrl) {
-    // Use a fallback image if none is provided
-    card = {
-      ...card,
-      imageUrl: FALLBACK_IMAGE_URL
-    };
-    console.log("Using fallback image for card:", card.id);
-  }
-
-  // Handle effect intensity changes
   const handleEffectIntensityChange = (effect: string, value: number) => {
     setLocalEffectIntensities(prev => ({
       ...prev,
@@ -73,7 +69,6 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
     }
   };
 
-  // Handle effect layer order changes
   const moveEffectLayer = (effect: string, direction: 'up' | 'down') => {
     const currentIndex = effectsOrder.indexOf(effect);
     if (
@@ -83,7 +78,6 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
       const newEffectsOrder = [...effectsOrder];
       const swapIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
       
-      // Swap positions
       [newEffectsOrder[currentIndex], newEffectsOrder[swapIndex]] = 
       [newEffectsOrder[swapIndex], newEffectsOrder[currentIndex]];
       
@@ -127,7 +121,7 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
           </mesh>
         }>
           <Card3DRenderer 
-            card={card}
+            card={cardWithFallbacks}
             isFlipped={localIsFlipped} 
             activeEffects={effectsOrder}
             effectIntensities={localEffectIntensities}
@@ -144,7 +138,6 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
         />
       </Canvas>
       
-      {/* Controls overlay - OUTSIDE of Canvas */}
       <div className="absolute bottom-4 left-0 right-0 flex justify-center z-10">
         <Button 
           className="px-4 py-2 bg-gray-800/70 text-white rounded-full hover:bg-gray-700/90 transition"
@@ -154,7 +147,6 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
         </Button>
       </div>
 
-      {/* Effects Panel Toggle Button - OUTSIDE of Canvas */}
       <div className="absolute top-1/2 right-4 transform -translate-y-1/2 z-20">
         <Button
           variant="secondary"
@@ -166,7 +158,6 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
         </Button>
       </div>
 
-      {/* Effects Controls Panel - OUTSIDE of Canvas */}
       {showEffectsPanel && (
         <div className="absolute top-0 right-0 h-full w-72 bg-gray-900/90 backdrop-blur-sm text-white p-4 overflow-y-auto z-10">
           <h3 className="text-lg font-semibold mb-4">Effect Controls</h3>

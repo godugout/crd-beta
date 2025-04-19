@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, Suspense, useRef } from 'react';
 import { Canvas, useThree } from '@react-three/fiber';
 import { 
@@ -22,7 +21,10 @@ import { mapLightingPresetToEnvironment, ValidEnvironmentPreset } from '@/utils/
 import { logRenderingInfo } from '@/utils/debugRenderer';
 import ViewerSettings from '@/components/gallery/viewer-components/ViewerSettings';
 import CardModel from '@/components/card-viewer/CardModel';
-import { FALLBACK_BACK_IMAGE_URL, FALLBACK_IMAGE_URL } from '@/lib/utils/cardDefaults';
+
+// Fallback image URLs - updated with correct paths
+const FALLBACK_IMAGE_URL = '/images/card-placeholder.png';
+const FALLBACK_BACK_IMAGE_URL = '/images/card-back-placeholder.png';
 
 // Debug component to visualize camera and light positions - MUST BE USED INSIDE CANVAS
 const DebugInfo = ({ show = false }) => {
@@ -102,7 +104,7 @@ const RealisticCardViewer: React.FC<RealisticCardViewerProps> = ({
     toggleDynamicLighting
   } = useCardLighting(preferences?.environmentType || 'studio');
   
-  // Card with fallback images
+  // Card with fallback images - use updated fallback paths
   const cardWithFallback = {
     ...card,
     imageUrl: card.imageUrl || FALLBACK_IMAGE_URL,
