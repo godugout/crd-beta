@@ -1,4 +1,3 @@
-
 import React, { useRef, useState, useEffect, Suspense } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { 
@@ -64,7 +63,8 @@ const CardModel = ({
         },
         (error) => {
           console.error(`Failed to load texture from: ${url}`, error);
-          onError(error.message);
+          const errorMsg = error instanceof Error ? error.message : "Unknown error loading texture";
+          onError(errorMsg);
         }
       );
     }, [url, onLoad, onError]);
@@ -121,12 +121,12 @@ const CardModel = ({
       <LoadTexture 
         url={frontTextureUrl} 
         onLoad={setFrontTexture} 
-        onError={(msg) => setLoadingError(`Front texture: ${msg}`)} 
+        onError={(msg: string) => setLoadingError(`Front texture: ${msg}`)} 
       />
       <LoadTexture 
         url={backTextureUrl} 
         onLoad={setBackTexture} 
-        onError={(msg) => setLoadingError(`Back texture: ${msg}`)} 
+        onError={(msg: string) => setLoadingError(`Back texture: ${msg}`)} 
       />
       
       {/* Visual feedback for loading errors */}
@@ -137,15 +137,18 @@ const CardModel = ({
         </mesh>
       )}
       
-      {/* Card mesh */}
-      <mesh ref={meshRef} castShadow receiveShadow>
+      {/* Card mesh - Front Side */}
+      <mesh 
+        ref={meshRef} 
+        castShadow 
+        receiveShadow
+      >
         {/* Card geometry with proper card proportions (2.5 x 3.5 inch standard) */}
         <planeGeometry args={[2.5, 3.5, 20, 20]} />
         
         {/* Front material */}
         {frontTexture ? (
           <meshPhysicalMaterial 
-            attachArray="material"
             map={frontTexture}
             side={THREE.FrontSide}
             roughness={materialProps.roughness || 0.2}
@@ -156,18 +159,26 @@ const CardModel = ({
             reflectivity={0.8}
           />
         ) : (
-          <primitive 
-            object={createFallbackMaterial('#2a5298')} 
-            attach="material-0" 
+          <meshStandardMaterial 
+            color="#2a5298" 
           />
         )}
+      </mesh>
+      
+      {/* Card back side - as a separate mesh */}
+      <mesh 
+        position={[0, 0, -0.01]}
+        rotation={[0, Math.PI, 0]}
+        castShadow 
+        receiveShadow
+      >
+        <planeGeometry args={[2.5, 3.5, 20, 20]} />
         
         {/* Back material */}
         {backTexture ? (
           <meshPhysicalMaterial 
-            attachArray="material"
             map={backTexture}
-            side={THREE.BackSide}
+            side={THREE.FrontSide}
             roughness={(materialProps.roughness || 0.2) * 1.2}
             metalness={(materialProps.metalness || 0.8) * 0.8}
             envMapIntensity={(lightingSettings.envMapIntensity || 1) * 0.8}
@@ -175,9 +186,8 @@ const CardModel = ({
             clearcoatRoughness={0.3}
           />
         ) : (
-          <primitive 
-            object={createFallbackMaterial('#1a3060')} 
-            attach="material-1" 
+          <meshStandardMaterial 
+            color="#1a3060" 
           />
         )}
       </mesh>
