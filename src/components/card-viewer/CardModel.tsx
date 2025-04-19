@@ -33,57 +33,45 @@ export const CardModel: React.FC<CardModelProps> = ({
   const backImageUrl = card.imageUrl || '/placeholders/card-back.jpg';
   
   // Load textures with error handling
-  const frontTexture = useTexture(frontImageUrl);
-  const backTexture = useTexture(backImageUrl);
+  let frontTexture;
+  let backTexture;
   
-  // Create materials
-  const materials = useMemo(() => {
-    // Front face material
-    const frontMaterial = new THREE.MeshStandardMaterial({
-      map: frontTexture,
-      metalness: 0.2,
-      roughness: 0.4,
-    });
-    
-    // Back face material
-    const backMaterial = new THREE.MeshStandardMaterial({
-      map: backTexture,
-      metalness: 0.2,
-      roughness: 0.4,
-    });
-    
-    // Edge material (for the thin sides of the card)
-    const edgeMaterial = new THREE.MeshStandardMaterial({
-      color: 0xf0f0f0,
-      metalness: 0.3,
-      roughness: 0.6,
-    });
-    
-    // Apply effects to materials based on activeEffects
-    if (activeEffects.includes('holographic')) {
-      const intensity = effectIntensities['holographic'] || 1;
-      frontMaterial.metalness = 0.8 * intensity;
-      frontMaterial.roughness = 0.2 * (1 - intensity * 0.5);
-      frontMaterial.envMapIntensity = 1.5 * intensity;
-    }
-    
-    if (activeEffects.includes('refractor')) {
-      const intensity = effectIntensities['refractor'] || 1;
-      frontMaterial.metalness = 0.7 * intensity;
-      frontMaterial.roughness = 0.3 * (1 - intensity * 0.5);
-    }
-    
-    if (activeEffects.includes('chrome')) {
-      const intensity = effectIntensities['chrome'] || 1;
-      frontMaterial.metalness = 0.9 * intensity;
-      frontMaterial.roughness = 0.1 * (1 - intensity * 0.7);
-      frontMaterial.envMapIntensity = 2.0 * intensity;
-    }
-    
-    return { frontMaterial, backMaterial, edgeMaterial };
-  }, [frontTexture, backTexture, activeEffects, effectIntensities]);
+  try {
+    frontTexture = useTexture(frontImageUrl);
+    backTexture = useTexture(backImageUrl);
+  } catch (error) {
+    console.error("Error loading textures:", error);
+    // We'll handle this in the render by checking if textures exist
+  }
   
-  // Handle animations
+  // Create holographic effect material for better visual appeal
+  const holographicMaterial = useMemo(() => {
+    return new THREE.MeshPhysicalMaterial({
+      color: 0xffffff,
+      metalness: 0.9,
+      roughness: 0.1,
+      clearcoat: 1.0,
+      clearcoatRoughness: 0.1,
+      transparent: true,
+      opacity: 0.3,
+      side: THREE.FrontSide
+    });
+  }, []);
+  
+  // Create refractor material
+  const refractorMaterial = useMemo(() => {
+    return new THREE.MeshPhysicalMaterial({
+      color: 0x88ccff,
+      metalness: 0.7,
+      roughness: 0.3,
+      transparent: true,
+      opacity: 0.2,
+      side: THREE.FrontSide,
+      transmission: 0.5
+    });
+  }, []);
+
+  // Handle animations and effects updates
   useFrame((state, delta) => {
     if (!cardRef.current) return;
     
@@ -98,6 +86,58 @@ export const CardModel: React.FC<CardModelProps> = ({
       cardRef.current.position.y = Math.sin(state.clock.elapsedTime * 0.4) * 0.05;
       cardRef.current.rotation.z = Math.sin(state.clock.elapsedTime * 0.3) * 0.02;
     }
+    
+    // Update holographic effect if active
+    if (activeEffects.includes('holographic') || activeEffects.includes('Holographic')) {
+      // Find holographic overlay mesh
+      cardRef.current.children.forEach((child) => {
+        if (child.userData.type === 'holographic') {
+          const material = child.material as THREE.MeshPhysicalMaterial;
+          
+          // Dynamic color shifts based on viewing angle and time
+          const intensity = effectIntensities['holographic'] || effectIntensities['Holographic'] || 1.0;
+          const time = state.clock.elapsedTime;
+          
+          // Create rainbow effect with hue rotation
+          const hue = (time * 0.1) % 1.0;
+          const color = new THREE.Color();
+          color.setHSL(hue, 0.8, 0.5);
+          
+          material.color = color;
+          material.emissive = color;
+          material.emissiveIntensity = 0.2 * intensity;
+          material.opacity = 0.2 * intensity + Math.sin(time * 2) * 0.05;
+          
+          // Simulate viewing angle effect
+          const viewAngle = Math.sin(time * 0.5) * 0.5 + 0.5;
+          material.clearcoatRoughness = 0.1 + viewAngle * 0.2;
+          material.roughness = 0.1 + viewAngle * 0.3;
+          
+          // Make rainbow pattern shift with time
+          (child as THREE.Mesh).rotation.z = Math.sin(time * 0.2) * 0.02;
+        }
+      });
+    }
+    
+    // Update refractor effect if active
+    if (activeEffects.includes('refractor') || activeEffects.includes('Refractor')) {
+      // Find refractor overlay mesh
+      cardRef.current.children.forEach((child) => {
+        if (child.userData.type === 'refractor') {
+          const material = child.material as THREE.MeshPhysicalMaterial;
+          const intensity = effectIntensities['refractor'] || effectIntensities['Refractor'] || 1.0;
+          const time = state.clock.elapsedTime;
+          
+          // Subtle color shifts
+          const hue = ((Math.sin(time * 0.3) * 0.1) + 0.6) % 1.0; // Blue-ish range
+          const color = new THREE.Color();
+          color.setHSL(hue, 0.7, 0.6);
+          
+          material.color = color;
+          material.opacity = 0.15 * intensity + Math.sin(time * 1.5) * 0.05;
+        }
+      });
+    }
   });
 
   // Progressive enhancement: enable higher quality rendering on desktop
@@ -110,7 +150,7 @@ export const CardModel: React.FC<CardModelProps> = ({
       gl.setPixelRatio(window.devicePixelRatio);
       gl.shadowMap.type = THREE.PCFSoftShadowMap;
       
-      // We can't set anisotropy directly on materials as it's not a property of MeshStandardMaterial
+      // Improve texture quality if textures exist
       if (frontTexture) frontTexture.anisotropy = gl.capabilities.getMaxAnisotropy();
       if (backTexture) backTexture.anisotropy = gl.capabilities.getMaxAnisotropy();
     } else {
@@ -122,61 +162,120 @@ export const CardModel: React.FC<CardModelProps> = ({
 
   return (
     <group ref={cardRef}>
-      {/* Card body - use separate meshes instead of attachArray */}
-      <mesh castShadow receiveShadow>
+      {/* Card body */}
+      <mesh castShadow receiveShadow position={[0, 0, 0]}>
         <boxGeometry args={[cardWidth, cardHeight, cardThickness]} />
-        {/* Use an array of materials correctly in React Three Fiber */}
-        <meshStandardMaterial 
+        
+        {/* Front face */}
+        <meshPhysicalMaterial 
           map={frontTexture}
+          color={frontTexture ? undefined : "#2a5298"}
           metalness={0.2}
           roughness={0.4}
+          clearcoat={0.8}
+          clearcoatRoughness={0.2}
           attach="material-0"
         />
-        <meshStandardMaterial 
+        
+        {/* Back face */}
+        <meshPhysicalMaterial 
           map={backTexture}
+          color={backTexture ? undefined : "#1a3060"}
           metalness={0.2}
           roughness={0.4}
           attach="material-1"
         />
-        {/* Edge materials for remaining 4 sides */}
-        <meshStandardMaterial
-          color={0xf0f0f0}
-          metalness={0.3}
-          roughness={0.6}
-          attach="material-2"
-        />
-        <meshStandardMaterial
-          color={0xf0f0f0}
-          metalness={0.3}
-          roughness={0.6}
-          attach="material-3"
-        />
-        <meshStandardMaterial
-          color={0xf0f0f0}
-          metalness={0.3}
-          roughness={0.6}
-          attach="material-4"
-        />
-        <meshStandardMaterial
-          color={0xf0f0f0}
-          metalness={0.3}
-          roughness={0.6}
-          attach="material-5"
-        />
+        
+        {/* Edge materials */}
+        <meshStandardMaterial color="#f0f0f0" metalness={0.3} roughness={0.6} attach="material-2" />
+        <meshStandardMaterial color="#f0f0f0" metalness={0.3} roughness={0.6} attach="material-3" />
+        <meshStandardMaterial color="#f0f0f0" metalness={0.3} roughness={0.6} attach="material-4" />
+        <meshStandardMaterial color="#f0f0f0" metalness={0.3} roughness={0.6} attach="material-5" />
       </mesh>
       
-      {/* Add special effect overlays based on active effects */}
-      {activeEffects.includes('holographic') && (
-        <mesh position={[0, 0, cardThickness/2 + 0.001]}>
-          <planeGeometry args={[cardWidth - 0.05, cardHeight - 0.05]} />
+      {/* Holographic effect overlay */}
+      {(activeEffects.includes('holographic') || activeEffects.includes('Holographic')) && (
+        <mesh 
+          position={[0, 0, cardThickness/2 + 0.005]} 
+          userData={{ type: 'holographic' }}
+        >
+          <planeGeometry args={[cardWidth - 0.05, cardHeight - 0.05, 30, 30]} />
           <meshPhysicalMaterial 
-            transparent
-            opacity={0.2 * (effectIntensities['holographic'] || 1)}
-            metalness={0.8}
+            color={new THREE.Color(0x88ccff)}
+            metalness={0.9}
+            roughness={0.1}
+            clearcoat={1.0}
+            clearcoatRoughness={0.1}
+            transparent={true}
+            opacity={0.3 * (effectIntensities['holographic'] || effectIntensities['Holographic'] || 1.0)}
+            side={THREE.FrontSide}
+            emissive={new THREE.Color(0x88ccff)}
+            emissiveIntensity={0.2}
+            envMapIntensity={2}
+          />
+        </mesh>
+      )}
+      
+      {/* Refractor effect overlay */}
+      {(activeEffects.includes('refractor') || activeEffects.includes('Refractor')) && (
+        <mesh 
+          position={[0, 0, cardThickness/2 + 0.01]} 
+          userData={{ type: 'refractor' }}
+        >
+          <planeGeometry args={[cardWidth - 0.1, cardHeight - 0.1, 20, 20]} />
+          <meshPhysicalMaterial 
+            color={new THREE.Color(0x88ccff)}
+            metalness={0.7}
+            roughness={0.3}
+            transparent={true}
+            opacity={0.15 * (effectIntensities['refractor'] || effectIntensities['Refractor'] || 1.0)}
+            side={THREE.FrontSide}
+            transmission={0.5}
+          />
+        </mesh>
+      )}
+      
+      {/* Gold Foil effect overlay */}
+      {(activeEffects.includes('Gold Foil') || activeEffects.includes('gold foil')) && (
+        <mesh 
+          position={[0, 0, cardThickness/2 + 0.015]} 
+          userData={{ type: 'goldfoil' }}
+        >
+          <planeGeometry args={[cardWidth - 0.15, cardHeight - 0.15, 15, 15]} />
+          <meshPhysicalMaterial 
+            color={new THREE.Color(0xffd700)}
+            metalness={1.0}
             roughness={0.2}
+            transparent={true}
+            opacity={0.4 * (effectIntensities['Gold Foil'] || effectIntensities['gold foil'] || 1.0)}
+            side={THREE.FrontSide}
+            clearcoat={0.8}
+          />
+        </mesh>
+      )}
+      
+      {/* Chrome effect overlay */}
+      {(activeEffects.includes('Chrome') || activeEffects.includes('chrome')) && (
+        <mesh 
+          position={[0, 0, cardThickness/2 + 0.02]} 
+          userData={{ type: 'chrome' }}
+        >
+          <planeGeometry args={[cardWidth - 0.08, cardHeight - 0.08, 20, 20]} />
+          <meshPhysicalMaterial 
+            color={new THREE.Color(0xffffff)}
+            metalness={1.0}
+            roughness={0.05}
+            transparent={true}
+            opacity={0.3 * (effectIntensities['Chrome'] || effectIntensities['chrome'] || 1.0)}
+            side={THREE.FrontSide}
+            clearcoat={1.0}
+            clearcoatRoughness={0.02}
+            envMapIntensity={3}
           />
         </mesh>
       )}
     </group>
   );
 };
+
+export default CardModel;
