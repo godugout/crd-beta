@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useUploadHandling } from './hooks/useUploadHandling';
@@ -14,7 +15,7 @@ const GroupImageUploader: React.FC<GroupImageUploaderProps> = ({
   onComplete,
   title = 'Upload Images',
   description = 'Drag and drop images here or click to browse',
-  uploadType = 'group'
+  uploadType = 'group' as GroupUploadType // Fixed by casting to GroupUploadType
 }) => {
   const [files, setFiles] = useState<File[]>([]);
   

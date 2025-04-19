@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -115,11 +114,6 @@ const InstagramCollectionCreator: React.FC = () => {
         tags: ['instagram', 'social', 'imported'],
         userId: 'user-1',
         isPublic: true,
-        instagramSource: {
-          username: username,
-          lastFetched: new Date().toISOString(),
-          autoUpdate: false
-        }
       };
       
       // Add the collection

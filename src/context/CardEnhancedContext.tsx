@@ -9,11 +9,14 @@ import { sampleCards } from '@/data/sampleCards';
 // Convert sample cards to enhanced cards
 const enhancedSampleCards: EnhancedCard[] = sampleCards.map(card => ({
   ...card,
+  description: card.description || '',
+  userId: card.userId || 'anonymous',
   rarity: Math.random() > 0.8 ? 'rare' : Math.random() > 0.5 ? 'uncommon' : 'common',
   cardNumber: `${Math.floor(Math.random() * 100)}/100`,
   seriesId: Math.random() > 0.5 ? 'series-001' : 'series-002',
+  series: Math.random() > 0.5 ? 'Series One' : 'Series Two',
   artistId: 'artist-001',
-  edition: 1,
+  edition: '1',
   editionSize: 100,
   releaseDate: new Date().toISOString(),
   qrCodeData: `https://example.com/card/${card.id}`,
@@ -57,6 +60,7 @@ const enhancedSampleCards: EnhancedCard[] = sampleCards.map(card => ({
 const sampleSeries: Series[] = [
   {
     id: 'series-001',
+    name: 'First Edition Collection',
     title: 'First Edition Collection',
     description: 'The inaugural collection showcasing legendary athletes',
     coverImageUrl: '/lovable-uploads/fa55173e-d864-41b2-865d-144d94507dc1.png',
@@ -72,6 +76,7 @@ const sampleSeries: Series[] = [
   },
   {
     id: 'series-002',
+    name: 'Limited Edition Memorabilia',
     title: 'Limited Edition Memorabilia',
     description: 'Rare collectibles featuring game-worn memorabilia',
     coverImageUrl: '/lovable-uploads/fa55173e-d864-41b2-865d-144d94507dc1.png',
@@ -92,6 +97,7 @@ const sampleDecks: Deck[] = [
   {
     id: 'deck-001',
     name: 'My Favorite Players',
+    title: 'My Favorite Players',
     description: 'A collection of my all-time favorite players',
     coverImageUrl: '/lovable-uploads/fa55173e-d864-41b2-865d-144d94507dc1.png',
     ownerId: 'user-001',
@@ -241,7 +247,8 @@ export const CardEnhancedProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const addSeries = (seriesData: Partial<Series>): Series => {
     const newSeries: Series = {
       id: seriesData.id || uuidv4(),
-      title: seriesData.title || 'Untitled Series',
+      name: seriesData.name || seriesData.title || 'Untitled Series',
+      title: seriesData.title || seriesData.name || 'Untitled Series',
       description: seriesData.description || '',
       coverImageUrl: seriesData.coverImageUrl || '',
       artistId: seriesData.artistId || 'anonymous',
@@ -380,7 +387,8 @@ export const CardEnhancedProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const addDeck = (deckData: Partial<Deck>): Deck => {
     const newDeck: Deck = {
       id: deckData.id || uuidv4(),
-      name: deckData.name || 'Untitled Deck',
+      name: deckData.name || deckData.title || 'Untitled Deck',
+      title: deckData.title || deckData.name || 'Untitled Deck',
       description: deckData.description || '',
       coverImageUrl: deckData.coverImageUrl || '',
       ownerId: deckData.ownerId || (user?.id || 'anonymous'),
