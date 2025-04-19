@@ -7,7 +7,10 @@ import { adaptToCard } from '@/lib/adapters/cardAdapter';
 import { Card } from '@/lib/types';
 import { LoadingState } from '@/components/ui/loading-state';
 import { toast } from 'sonner';
+import { Settings } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import ScrollableGallery from '@/components/immersive-viewer/ScrollableGallery';
+import CustomizationPanel from '@/components/immersive-viewer/CustomizationPanel';
 
 const ImmersiveBaseballViewer: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -21,6 +24,7 @@ const ImmersiveBaseballViewer: React.FC = () => {
     Refractor: 0.6,
     Vintage: 0.4
   });
+  const [isPanelOpen, setIsPanelOpen] = useState(false);
 
   useEffect(() => {
     if (isLoading || !cardData) return;
@@ -81,10 +85,31 @@ const ImmersiveBaseballViewer: React.FC = () => {
   return (
     <div className="fixed inset-0 bg-black">
       <div className="relative h-full w-full">
+        {/* Settings button */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="absolute top-4 right-4 z-50 bg-gray-900/50 hover:bg-gray-900/70"
+          onClick={() => setIsPanelOpen(true)}
+        >
+          <Settings className="h-5 w-5" />
+        </Button>
+
         <ImmersiveCardViewer 
           card={card}
           activeEffects={activeEffects}
           effectIntensities={effectIntensities}
+        />
+        
+        {/* Customization Panel */}
+        <CustomizationPanel
+          card={card}
+          isOpen={isPanelOpen}
+          onClose={() => setIsPanelOpen(false)}
+          lightingSettings={{}} // Add your lighting settings here
+          onUpdateLighting={() => {}} // Add your lighting update handler
+          materialSettings={effectIntensities}
+          onUpdateMaterial={(settings) => setEffectIntensities(prev => ({ ...prev, ...settings }))}
         />
         
         {/* Scrollable gallery of all baseball cards at the bottom */}
