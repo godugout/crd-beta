@@ -1,73 +1,35 @@
 
-// Explicitly define fallback image paths with web-safe absolute URLs that are guaranteed to exist
-export const FALLBACK_FRONT_IMAGE_URL = 'https://images.unsplash.com/photo-1518770660439-4636190af475';
-export const FALLBACK_BACK_IMAGE_URL = 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6';
-export const FALLBACK_IMAGE_URL = FALLBACK_FRONT_IMAGE_URL; // Alias for broader use
-export const FALLBACK_UNSPLASH_BACKUP = 'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b';
-export const FALLBACK_UNSPLASH_IMAGE_URL = FALLBACK_UNSPLASH_BACKUP; // Backward compatibility
+import { DesignMetadata } from '@/lib/types';
 
-// Enhanced error handling for image loading
-export const handleImageLoadError = (
-  event: React.SyntheticEvent<HTMLImageElement, Event>, 
-  fallbackUrl: string = FALLBACK_UNSPLASH_BACKUP
-) => {
-  console.error('Image load error, applying fallback:', event.currentTarget.src);
-  const imgElement = event.currentTarget;
-  imgElement.onerror = null; // Prevent infinite error loop
-  
-  // Try a reliable external URL if local file fails
-  imgElement.src = fallbackUrl;
-  
-  return fallbackUrl;
-};
-
-// Add default design metadata that many components are importing
-export const DEFAULT_DESIGN_METADATA = {
+// Default design metadata
+export const DEFAULT_DESIGN_METADATA: DesignMetadata = {
   cardStyle: {
-    template: 'standard',
-    effect: 'classic',
-    borderRadius: '12px',
-    borderWidth: 0,
+    template: 'classic',
+    effect: 'none',
+    borderRadius: '8px',
     borderColor: '#000000',
-    backgroundColor: '#FFFFFF',
-    shadowColor: '#000000',
-    frameWidth: 0,
-    frameColor: '#000000'
+    frameColor: '#000000',
+    frameWidth: 2,
+    shadowColor: 'rgba(0,0,0,0.2)',
   },
   textStyle: {
-    fontFamily: 'Inter, sans-serif',
-    titleSize: 18,
-    descriptionSize: 14,
-    textColor: '#FFFFFF',
-    textShadow: true,
-    titleColor: '#FFFFFF',
+    titleColor: '#000000',
     titleAlignment: 'center',
     titleWeight: 'bold',
-    descriptionColor: '#EEEEEE',
-    descriptionAlignment: 'center',
-  },
-  cardMetadata: {
-    borderRadius: 12,
-    borderWidth: 0,
-    borderColor: '#000000',
-    backgroundColor: '#FFFFFF',
-    overlayOpacity: 0.3,
-    overlayColor: 'rgba(0,0,0,0.3)',
-    showOverlay: true,
-    category: 'sports',
-    series: 'default',
-    cardType: 'standard',
-    cardNumber: '001', // Added for InfoPanel
-    artist: 'Unknown' // Added for InfoPanel
+    descriptionColor: '#333333',
   },
   marketMetadata: {
-    price: 0,
-    currency: 'USD',
-    available: true,
-    editionSize: 1,
-    editionNumber: 1,
-    isPrintable: true,
+    isPrintable: false,
     isForSale: false,
-    includeInCatalog: true
-  }
+    includeInCatalog: false,
+  },
+  cardMetadata: {
+    category: 'general',
+    cardType: 'standard',
+    series: 'base',
+  },
 };
+
+// Fallback image URLs
+export const FALLBACK_FRONT_IMAGE_URL = '/images/card-placeholder.png';
+export const FALLBACK_BACK_IMAGE_URL = '/images/card-back-placeholder.png';

@@ -1,29 +1,30 @@
 
-import { BaseEntity } from './index';
-
 /**
- * Instagram post interface for collections created from Instagram
+ * Instagram related types
  */
-export interface InstagramPost extends BaseEntity {
-  username: string;
-  caption: string;
-  mediaUrl: string;
-  permalink: string;
-  timestamp: string;
-  mediaType: 'IMAGE' | 'VIDEO' | 'CAROUSEL_ALBUM';
-  thumbnailUrl?: string;
-  children?: InstagramMedia[];
-}
 
-export interface InstagramMedia {
+export interface InstagramPost {
   id: string;
-  mediaType: 'IMAGE' | 'VIDEO';
-  mediaUrl: string;
-  thumbnailUrl?: string;
+  caption: string;
+  imageUrl: string;
+  postUrl: string;
+  timestamp: string;
+  likes: number;
+  comments: number;
 }
 
-export interface InstagramSource {
+export interface InstagramAccount {
+  id: string;
   username: string;
-  lastFetched: string;
-  autoUpdate: boolean;
+  profilePicture?: string;
+  followerCount?: number;
+  verified?: boolean;
+}
+
+export interface InstagramCollection {
+  id: string;
+  name: string;
+  posts: InstagramPost[];
+  createdAt: string;
+  updatedAt: string;
 }

@@ -1,60 +1,31 @@
 
 import { BaseEntity } from './index';
-import { Card } from './cardTypes';
+import { Card } from '../types';
 
-export interface InstagramSource {
-  username: string;
-  lastFetched: string;
-  autoUpdate: boolean;
-}
-
+/**
+ * Collection interface
+ */
 export interface Collection extends BaseEntity {
-  name: string; // Changed from title for compatibility
-  title?: string; // Keep title as optional for backward compatibility
-  description?: string;
-  userId: string;
-  cards: Card[];
-  coverImageUrl?: string;
-  isPublic: boolean;
-  tags?: string[];
-  popularity?: number;
-  instagramSource?: InstagramSource;
-  featured?: boolean;
-  
-  // Additional properties needed by other components
-  visibility?: 'public' | 'private' | 'team' | 'unlisted';
-  allowComments?: boolean;
-  teamId?: string;
-  cardIds?: string[];
-  designMetadata?: any;
-  owner_id?: string; // For backward compatibility
-}
-
-export interface CollectionWithCards extends Collection {
-  cards: Card[];
-}
-
-// For backwards compatibility with DB models
-export interface DbCollection {
-  id: string;
   title: string;
+  name?: string; // For backward compatibility
   description?: string;
-  cover_image_url?: string;
-  owner_id?: string; 
-  team_id?: string;
+  thumbnailUrl?: string;
+  coverImageUrl?: string;
+  cardCount?: number;
+  userId: string;
+  isPublic?: boolean;
   visibility?: 'public' | 'private' | 'team' | 'unlisted';
-  allow_comments?: boolean;
-  created_at: string;
-  updated_at: string;
-  design_metadata?: any;
+  featured?: boolean;
+  cards?: Card[];
+  allowComments?: boolean;
+  designMetadata?: any;
 }
 
-// Function to serialize metadata for storage
-export const serializeMetadata = (metadata: any) => {
-  if (!metadata) return {};
-  try {
-    return JSON.parse(JSON.stringify(metadata));
-  } catch (e) {
-    return metadata;
-  }
-};
+/**
+ * Featured Collection interface with additional properties
+ */
+export interface FeaturedCollection extends Collection {
+  spotlight?: boolean;
+  highlightText?: string;
+  displayOrder?: number;
+}

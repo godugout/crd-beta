@@ -1,4 +1,20 @@
 
+// Base types that might be used across modules
+export type JsonValue = 
+  | string 
+  | number 
+  | boolean 
+  | null 
+  | JsonValue[] 
+  | { [key: string]: JsonValue };
+
+export interface BaseEntity {
+  id: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+// Card Interface
 export interface Card {
   id: string;
   title: string;
@@ -26,28 +42,33 @@ export interface Card {
   gradingCompany?: string;
   height?: number;
   width?: number;
-  artist?: string; // Added for CardDetailPanel
-  rarity?: string; // Added for CardDetailPanel
-  reactions?: any[]; // Added for CardItem
-  fabricSwatches?: any[]; // Added for CardBack
-  viewCount?: number; // Added for CardGrid
+  artist?: string;
+  rarity?: string;
+  reactions?: any[];
+  fabricSwatches?: any[];
+  viewCount?: number;
+  name?: string;
+  collectionId?: string;
 }
 
+// User Interface
 export interface User {
   id: string;
   name?: string;
-  email?: string;
+  email: string;
   avatarUrl?: string;
-  createdAt: string;
-  updatedAt: string;
-  displayName?: string; // Added for CommentSection
-  username?: string; // Added for CommentSection
+  createdAt?: string;
+  updatedAt?: string;
+  displayName?: string;
+  username?: string;
+  role?: UserRole;
 }
 
+// Collection Interface
 export interface Collection {
   id: string;
   title: string;
-  name?: string; // Added for compatibility with components that use name
+  name?: string;
   description?: string;
   thumbnailUrl?: string;
   cardCount?: number;
@@ -55,10 +76,12 @@ export interface Collection {
   updatedAt: string;
   userId: string;
   isPublic?: boolean;
-  coverImageUrl?: string; // Added for CollectionsSection
-  visibility?: 'public' | 'private' | 'team' | 'unlisted'; // Added for CollectionGrid
-  featured?: boolean; // Added for CollectionGrid
-  cards?: Card[]; // Added for CollectionGrid
+  coverImageUrl?: string;
+  visibility?: 'public' | 'private' | 'team' | 'unlisted';
+  featured?: boolean;
+  cards?: Card[];
+  allowComments?: boolean;
+  designMetadata?: any;
 }
 
 export interface GroupMeta {
@@ -118,7 +141,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, UserPermission[]> = {
   [UserRole.MODERATOR]: ['read:own', 'write:own', 'delete:own', 'moderate:content']
 };
 
-// Adding Comment and Reaction for components that need them
+// Comment Interface
 export interface Comment {
   id: string;
   content: string;
@@ -132,6 +155,7 @@ export interface Comment {
   user?: User;
 }
 
+// Reaction Interface
 export interface Reaction {
   id: string;
   userId: string;
@@ -143,3 +167,93 @@ export interface Reaction {
   commentId?: string;
   user?: User;
 }
+
+// OaklandMemoryData Interface
+export interface OaklandMemoryData {
+  title: string;
+  description: string;
+  date?: string;
+  opponent?: string;
+  score?: string;
+  location?: string;
+  section?: string;
+  memoryType?: string;
+  attendees?: string[];
+  tags?: string[];
+  imageUrl?: string;
+  historicalContext?: string;
+  personalSignificance?: string;
+}
+
+// Instagram Post Interface
+export interface InstagramPost {
+  id: string;
+  caption: string;
+  imageUrl: string;
+  postUrl: string;
+  timestamp: string;
+  likes: number;
+  comments: number;
+}
+
+// Design Metadata Interface
+export interface DesignMetadata {
+  cardStyle: {
+    template: string;
+    effect: string;
+    borderRadius: string;
+    borderColor: string;
+    frameColor: string;
+    frameWidth: number;
+    shadowColor: string;
+  };
+  textStyle: {
+    titleColor: string;
+    titleAlignment: string;
+    titleWeight: string;
+    descriptionColor: string;
+  };
+  marketMetadata: {
+    isPrintable: boolean;
+    isForSale: boolean;
+    includeInCatalog: boolean;
+  };
+  cardMetadata: {
+    category: string;
+    cardType: string;
+    series: string;
+  };
+}
+
+// Default design metadata
+export const DEFAULT_DESIGN_METADATA: DesignMetadata = {
+  cardStyle: {
+    template: 'classic',
+    effect: 'none',
+    borderRadius: '8px',
+    borderColor: '#000000',
+    frameColor: '#000000',
+    frameWidth: 2,
+    shadowColor: 'rgba(0,0,0,0.2)',
+  },
+  textStyle: {
+    titleColor: '#000000',
+    titleAlignment: 'center',
+    titleWeight: 'bold',
+    descriptionColor: '#333333',
+  },
+  marketMetadata: {
+    isPrintable: false,
+    isForSale: false,
+    includeInCatalog: false,
+  },
+  cardMetadata: {
+    category: 'general',
+    cardType: 'standard',
+    series: 'base',
+  },
+};
+
+// Fallback image URLs
+export const FALLBACK_FRONT_IMAGE_URL = '/images/card-placeholder.png';
+export const FALLBACK_BACK_IMAGE_URL = '/images/card-back-placeholder.png';
