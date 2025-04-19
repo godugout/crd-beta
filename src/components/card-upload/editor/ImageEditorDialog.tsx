@@ -75,7 +75,6 @@ const ImageEditorDialog: React.FC<ImageEditorDialogProps> = ({
     isLoading, 
     detectionRunning 
   } = useImageHandling({
-    editorImage,
     showEditor,
     setImageData,
     setCropBoxes,
@@ -84,7 +83,8 @@ const ImageEditorDialog: React.FC<ImageEditorDialogProps> = ({
     canvasRef,
     editorImgRef,
     batchProcessingMode,
-    enabledMemorabiliaTypes: ['card']
+    enabledMemorabiliaTypes: ['card'],
+    editorImage
   });
   
   useEffect(() => {
@@ -341,85 +341,85 @@ const ImageEditorDialog: React.FC<ImageEditorDialogProps> = ({
             </div>
             
             {selectedCropIndex >= 0 && cropBoxes[selectedCropIndex] && (
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <h3 className="text-sm font-medium mb-2">Card Type</h3>
-                <CardTypeSelector
-                  selected={cropBoxes[selectedCropIndex].memorabiliaType || 'card'}
-                  onSelect={(type) => handleMemorabiliaTypeChange(selectedCropIndex, type as MemorabiliaType)}
-                  types={['card', 'autograph']}
-                />
-              </div>
-            )}
-            
-            {extractedMetadata && (
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <h3 className="text-sm font-medium mb-2 flex items-center justify-between">
-                  <span>Detected Info</span>
-                  <Badge variant="outline" className="text-xs">
-                    {Math.round((extractedMetadata?.confidence || 0) * 100)}% accuracy
-                  </Badge>
-                </h3>
-                
-                <div className="space-y-2 text-sm">
-                  {extractedMetadata.title && (
-                    <div className="flex items-start gap-2">
-                      <Tag className="h-4 w-4 text-gray-500 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <p className="font-medium">Title</p>
-                        <p className="text-gray-700">{extractedMetadata.title}</p>
-                      </div>
-                    </div>
-                  )}
-                  
-                  {extractedMetadata.player && (
-                    <div className="flex items-start gap-2">
-                      <User className="h-4 w-4 text-gray-500 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <p className="font-medium">Player</p>
-                        <p className="text-gray-700">
-                          {extractedMetadata.player}
-                          {extractedMetadata.position ? ` • ${extractedMetadata.position}` : ''}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                  
-                  {extractedMetadata.team && (
-                    <div className="flex items-start gap-2">
-                      <Shirt className="h-4 w-4 text-gray-500 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <p className="font-medium">Team</p>
-                        <p className="text-gray-700">{extractedMetadata.team}</p>
-                      </div>
-                    </div>
-                  )}
-                  
-                  {extractedMetadata.year && (
-                    <div className="flex items-start gap-2">
-                      <Calendar className="h-4 w-4 text-gray-500 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <p className="font-medium">Year</p>
-                        <p className="text-gray-700">
-                          {extractedMetadata.year}
-                          {extractedMetadata.manufacturer ? ` ${extractedMetadata.manufacturer}` : ''}
-                          {extractedMetadata.cardNumber ? ` #${extractedMetadata.cardNumber}` : ''}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                  
-                  {extractedMetadata.tags && extractedMetadata.tags.length > 0 && (
-                    <div className="mt-2 flex flex-wrap gap-1">
-                      {extractedMetadata.tags.map((tag: string, i: number) => (
-                        <Badge key={i} variant="secondary" className="text-xs">
-                          {tag}
-                        </Badge>
-                      ))}
-                    </div>
-                  )}
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h3 className="text-sm font-medium mb-2">Card Type</h3>
+                  <CardTypeSelector
+                    selected={cropBoxes[selectedCropIndex].memorabiliaType || 'card'}
+                    onSelect={(type) => handleMemorabiliaTypeChange(selectedCropIndex, type as MemorabiliaType)}
+                    types={['card', 'autograph']}
+                  />
                 </div>
-              </div>
-            )}
+              )}
+            
+              {extractedMetadata && (
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h3 className="text-sm font-medium mb-2 flex items-center justify-between">
+                    <span>Detected Info</span>
+                    <Badge variant="outline" className="text-xs">
+                      {Math.round((extractedMetadata?.confidence || 0) * 100)}% accuracy
+                    </Badge>
+                  </h3>
+                  
+                  <div className="space-y-2 text-sm">
+                    {extractedMetadata.title && (
+                      <div className="flex items-start gap-2">
+                        <Tag className="h-4 w-4 text-gray-500 mt-0.5 flex-shrink-0" />
+                        <div>
+                          <p className="font-medium">Title</p>
+                          <p className="text-gray-700">{extractedMetadata.title}</p>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {extractedMetadata.player && (
+                      <div className="flex items-start gap-2">
+                        <User className="h-4 w-4 text-gray-500 mt-0.5 flex-shrink-0" />
+                        <div>
+                          <p className="font-medium">Player</p>
+                          <p className="text-gray-700">
+                            {extractedMetadata.player}
+                            {extractedMetadata.position ? ` • ${extractedMetadata.position}` : ''}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {extractedMetadata.team && (
+                      <div className="flex items-start gap-2">
+                        <Shirt className="h-4 w-4 text-gray-500 mt-0.5 flex-shrink-0" />
+                        <div>
+                          <p className="font-medium">Team</p>
+                          <p className="text-gray-700">{extractedMetadata.team}</p>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {extractedMetadata.year && (
+                      <div className="flex items-start gap-2">
+                        <Calendar className="h-4 w-4 text-gray-500 mt-0.5 flex-shrink-0" />
+                        <div>
+                          <p className="font-medium">Year</p>
+                          <p className="text-gray-700">
+                            {extractedMetadata.year}
+                            {extractedMetadata.manufacturer ? ` ${extractedMetadata.manufacturer}` : ''}
+                            {extractedMetadata.cardNumber ? ` #${extractedMetadata.cardNumber}` : ''}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {extractedMetadata.tags && extractedMetadata.tags.length > 0 && (
+                      <div className="mt-2 flex flex-wrap gap-1">
+                        {extractedMetadata.tags.map((tag: string, i: number) => (
+                          <Badge key={i} variant="secondary" className="text-xs">
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             
             <div className="mt-auto">
               <Button 

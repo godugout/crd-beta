@@ -1,110 +1,94 @@
 
-export type MemorabiliaType = 'card' | 'ticket' | 'program' | 'autograph' | 'face' | 'unknown' | 'group';
-export type ExtendedMemorabiliaType = MemorabiliaType | 'group'; // For backward compatibility
+import { RefObject } from 'react';
 
-export interface EnhancedCropBoxProps {
-  id: string;
+export type MemorabiliaType = 'card' | 'ticket' | 'program' | 'autograph' | 'face' | 'group' | 'unknown';
+
+export interface CropBox {
   x: number;
   y: number;
   width: number;
   height: number;
+}
+
+export interface EnhancedCropBoxProps extends CropBox {
+  id: string;
   memorabiliaType?: MemorabiliaType;
   confidence?: number;
   rotation?: number;
-  color?: string;
+  aspectRatio?: number;
+  selected?: boolean;
 }
 
-export const applyCrop = async (
-  cropBox: EnhancedCropBoxProps,
-  canvas: HTMLCanvasElement | null,
-  originalFile: File | null,
-  originalImage: HTMLImageElement | null,
-  enhancementType?: MemorabiliaType
-): Promise<{ file: File; url: string } | null> => {
-  if (!canvas || !originalFile || !originalImage) {
-    console.error("Missing required parameters for applyCrop");
-    return null;
-  }
+interface DetectionOptions {
+  imageElement: HTMLImageElement;
+  debugMode?: boolean;
+  canvas?: HTMLCanvasElement | null;
+  enabledTypes?: MemorabiliaType[];
+  minimumConfidence?: number;
+}
 
-  try {
-    // Create a new canvas for the cropped area
-    const cropCanvas = document.createElement('canvas');
-    const ctx = cropCanvas.getContext('2d');
-    if (!ctx) {
-      console.error("Failed to get 2D context for crop canvas");
-      return null;
-    }
-
-    cropCanvas.width = cropBox.width;
-    cropCanvas.height = cropBox.height;
-
-    // Draw the cropped portion to the new canvas
-    ctx.drawImage(
-      originalImage,
-      cropBox.x, cropBox.y, cropBox.width, cropBox.height,
-      0, 0, cropBox.width, cropBox.height
-    );
-
-    // Convert canvas to blob
-    const blob = await new Promise<Blob>((resolve) => {
-      cropCanvas.toBlob((blob) => {
-        if (blob) resolve(blob);
-        else resolve(new Blob([]));
-      }, 'image/jpeg', 0.9);
-    });
-
-    // Create a new file
-    const fileName = originalFile.name.replace(/\.[^/.]+$/, "") + "_crop_" + Date.now() + ".jpg";
-    const croppedFile = new File([blob], fileName, { type: 'image/jpeg' });
-
-    // Create a data URL for preview
-    const dataUrl = cropCanvas.toDataURL('image/jpeg', 0.9);
-
-    return { file: croppedFile, url: dataUrl };
-  } catch (error) {
-    console.error("Error in applyCrop:", error);
-    return null;
-  }
-};
-
-// Simple text detection function
-export const detectText = async (input: HTMLCanvasElement | string): Promise<{
-  title?: string;
-  text?: string;
-  tags?: string[];
-  confidence?: number;
-}> => {
-  // In a real implementation, this would use OCR
-  // Here we just return a placeholder
-  return {
-    title: "Detected Text",
-    text: "Sample detected text from image",
-    tags: ["detected", "text"],
-    confidence: 0.8
-  };
-};
-
-// Card detection function
-export const detectCardsInImage = async (
-  imageElement: HTMLImageElement | null
-): Promise<EnhancedCropBoxProps[]> => {
-  // In a real implementation, this would use some ML model
-  // Here we just return a simple detection
-  if (!imageElement) return [];
+export const detectCardsInImage = async (options: DetectionOptions): Promise<EnhancedCropBoxProps[]> => {
+  const { imageElement, debugMode = false, canvas = null, enabledTypes = ['card'] } = options;
   
-  const width = imageElement.naturalWidth;
-  const height = imageElement.naturalHeight;
+  // Mock implementation
+  const detectedAreas: EnhancedCropBoxProps[] = [];
   
-  // Create a simple detection in the center of the image
-  return [{
-    id: `auto-${Date.now()}`,
-    x: width * 0.2,
-    y: height * 0.2,
-    width: width * 0.6,
-    height: height * 0.6,
+  // Create a single detection in the center covering most of the image
+  const centerDetection: EnhancedCropBoxProps = {
+    id: 'auto-0',
+    x: imageElement.naturalWidth * 0.1,
+    y: imageElement.naturalHeight * 0.1,
+    width: imageElement.naturalWidth * 0.8,
+    height: imageElement.naturalHeight * 0.8,
+    confidence: 0.92,
     memorabiliaType: 'card',
-    confidence: 0.9,
-    rotation: 0,
-    color: '#00aaff'
-  }];
+    aspectRatio: 2.5/3.5
+  };
+  
+  detectedAreas.push(centerDetection);
+  
+  // Debug visualization if requested
+  if (debugMode && canvas) {
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      // Set canvas dimensions to match image
+      canvas.width = imageElement.naturalWidth;
+      canvas.height = imageElement.naturalHeight;
+      
+      // Draw the image
+      ctx.drawImage(imageElement, 0, 0);
+      
+      // Draw rectangles around detected cards
+      detectedAreas.forEach(area => {
+        ctx.strokeStyle = 'rgba(0, 255, 0, 0.8)';
+        ctx.lineWidth = 3;
+        ctx.strokeRect(area.x, area.y, area.width, area.height);
+        
+        // Label the detection
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+        ctx.fillRect(area.x, area.y - 20, 120, 20);
+        ctx.fillStyle = 'white';
+        ctx.font = '12px Arial';
+        ctx.fillText(`${area.memorabiliaType} (${Math.round(area.confidence * 100)}%)`, area.x + 5, area.y - 5);
+      });
+    }
+  }
+  
+  return detectedAreas;
+};
+
+export const detectText = async (canvas: HTMLCanvasElement): Promise<any> => {
+  // Mock text extraction
+  return {
+    title: "Sample Card Title",
+    player: "John Smith",
+    team: "New York Stars",
+    year: "1995",
+    manufacturer: "Top Cards",
+    cardNumber: "123",
+    condition: "Near Mint",
+    tags: ["baseball", "vintage", "star player"],
+    text: "Sample player statistics and information",
+    confidence: 0.85
+  };
 };

@@ -14,8 +14,8 @@ interface ToastOptions {
   };
   cancel?: {
     label: string;
-    onClick?: () => void;
-  };
+    onClick: () => void;
+  } | React.ReactNode;
   onDismiss?: () => void;
   onAutoClose?: () => void;
   className?: string;
@@ -27,24 +27,24 @@ interface ToastOptions {
 // Helper function to safely call toast methods
 export const showToast = {
   success: (message: string, options: ToastOptions = {}) => {
-    return toast.success(message, options);
+    return toast.success(message, options as any);
   },
   
   error: (message: string, options: ToastOptions = {}) => {
-    return toast.error(message, options);
+    return toast.error(message, options as any);
   },
   
   info: (message: string, options: ToastOptions = {}) => {
-    return toast.info(message, options);
+    return toast.info(message, options as any);
   },
   
   warning: (message: string, options: ToastOptions = {}) => {
-    return toast.warning(message, options);
+    return toast.warning(message, options as any);
   },
   
   // For custom toast displays - fixed to properly handle React nodes
   custom: (content: React.ReactNode, options: ToastOptions = {}) => {
-    return toast(content as any, options);
+    return toast(content as any, options as any);
   }
 };
 

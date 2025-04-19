@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -39,13 +38,12 @@ const CardDetectionTrainer: React.FC<CardDetectionTrainerProps> = ({ onSaveModel
     if (!imageRef.current || !imageRef.current.complete) return;
     
     try {
-      // Use the mocked function
-      const detections = await detectCardsInImage(
-        imageRef.current,
-        true,
-        canvasRef.current,
-        ['card']
-      );
+      const detections = await detectCardsInImage({
+        imageElement: imageRef.current,
+        debugMode: true,
+        canvas: canvasRef.current,
+        enabledTypes: ['card']
+      });
       
       setDetectedAreas(detections);
     } catch (error) {

@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useEffect } from 'react';
 
 export type LightingPreset = 'studio' | 'natural' | 'dramatic' | 'display_case';
@@ -44,7 +45,7 @@ export interface LightingSettings {
   envMapIntensity: number;
   useDynamicLighting: boolean;
   followPointer?: boolean;
-  autoRotate?: boolean;
+  autoRotate: boolean; // Make autoRotate required
 }
 
 export const DEFAULT_LIGHTING: Record<LightingPreset, LightingSettings> = {
@@ -229,15 +230,10 @@ export const useCardLighting = (initialPreset: LightingPreset = 'studio') => {
     }));
     setIsUserCustomized(true);
   }, []);
-  
-  // Add utility function to get a valid @react-three/drei environment preset
-  const getValidEnvironmentPreset = useCallback((preset: LightingPreset): DreiEnvironmentPreset => {
-    return (LIGHTING_PRESET_MAPPING[preset] || 'studio') as DreiEnvironmentPreset;
-  }, []);
-  
+
   return {
-    lightingSettings,
     lightingPreset,
+    lightingSettings,
     isUserCustomized,
     applyPreset,
     updateLightingSetting,
@@ -247,7 +243,6 @@ export const useCardLighting = (initialPreset: LightingPreset = 'studio') => {
     updateAmbientLightIntensity,
     updateAmbientLightColor,
     toggleDynamicLighting,
-    updateEnvMapIntensity,
-    getValidEnvironmentPreset
+    updateEnvMapIntensity
   };
 };

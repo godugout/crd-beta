@@ -80,20 +80,6 @@ export const useImageEditorState = ({
     enabledMemorabiliaTypes
   });
 
-  // Handle memorabilia type changes
-  const handleMemorabiliaTypeChange = (index: number, type: MemorabiliaType) => {
-    setCropBoxes(prev => {
-      const updated = [...prev];
-      if (updated[index]) {
-        updated[index] = {
-          ...updated[index],
-          memorabiliaType: type
-        };
-      }
-      return updated;
-    });
-  };
-
   // Handler to extract the selected crop
   const handleStageSelectedCrop = async () => {
     if (selectedCropIndex >= 0 && selectedCropIndex < cropBoxes.length) {
@@ -139,6 +125,20 @@ export const useImageEditorState = ({
       onBatchProcessComplete(files, urls, types);
       setShowEditor(false);
     }
+  };
+
+  // Handle memorabilia type changes
+  const handleMemorabiliaTypeChange = (index: number, type: MemorabiliaType) => {
+    setCropBoxes(prev => {
+      const updated = [...prev];
+      if (updated[index]) {
+        updated[index] = {
+          ...updated[index],
+          memorabiliaType: type
+        };
+      }
+      return updated;
+    });
   };
 
   return {
