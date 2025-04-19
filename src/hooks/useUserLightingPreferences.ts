@@ -4,9 +4,11 @@ import { LightingSettings, DEFAULT_LIGHTING } from '@/hooks/useCardLighting';
 
 export const useUserLightingPreferences = () => {
   const [preferences, setPreferences] = useState<LightingSettings | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Load preferences on component mount
   useEffect(() => {
+    setIsLoading(true);
     const savedPreferences = localStorage.getItem('userLightingPreferences');
     if (savedPreferences) {
       try {
@@ -21,6 +23,7 @@ export const useUserLightingPreferences = () => {
       // Use default preferences if none are saved
       setPreferences(DEFAULT_LIGHTING.studio);
     }
+    setIsLoading(false);
   }, []);
 
   // Save preferences
@@ -41,6 +44,7 @@ export const useUserLightingPreferences = () => {
 
   return {
     preferences,
+    isLoading,
     savePreferences,
     resetPreferences
   };
