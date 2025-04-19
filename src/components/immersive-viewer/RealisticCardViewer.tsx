@@ -162,6 +162,24 @@ const RealisticCardViewer: React.FC<RealisticCardViewerProps> = ({
   // Get the environment preset as a valid type
   const envPreset = mapLightingPresetToEnvironment(lightingSettings.environmentType) as ValidEnvironmentPreset;
 
+  // Adapter function to make updateLightingSetting compatible with ViewerSettings
+  const handleUpdateSetting = (path: string, value: any) => {
+    const pathParts = path.split('.');
+    if (pathParts.length === 2) {
+      const [group, property] = pathParts;
+      updateLightingSetting({
+        [group]: {
+          ...lightingSettings[group],
+          [property]: value
+        }
+      });
+    } else {
+      updateLightingSetting({
+        [path]: value
+      });
+    }
+  };
+
   return (
     <div className="w-full h-full relative">
       {/* Canvas with WebGL renderer */}
@@ -284,7 +302,7 @@ const RealisticCardViewer: React.FC<RealisticCardViewerProps> = ({
         <div className="absolute top-16 right-4 w-72 bg-black/60 backdrop-blur-md p-4 rounded-lg z-20">
           <ViewerSettings
             settings={lightingSettings}
-            onUpdateSettings={updateLightingSetting}
+            onUpdateSettings={handleUpdateSetting}
             onApplyPreset={applyPreset}
             isOpen={showViewerSettings}
           />

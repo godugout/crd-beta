@@ -39,7 +39,6 @@ const ImmersiveCardViewerPage: React.FC = () => {
   const { preferences, savePreferences } = useUserLightingPreferences();
   const {
     lightingSettings,
-    lightingPreset,
     updateLightingSetting,
     applyPreset,
     isUserCustomized,
@@ -164,6 +163,24 @@ const ImmersiveCardViewerPage: React.FC = () => {
     }
   }, [viewTab, isPanelOpen]);
 
+  // Adapter function to make updateLightingSetting compatible with ViewerSettings
+  const handleUpdateSetting = (path: string, value: any) => {
+    const pathParts = path.split('.');
+    if (pathParts.length === 2) {
+      const [group, property] = pathParts;
+      updateLightingSetting({
+        [group]: {
+          ...lightingSettings[group],
+          [property]: value
+        }
+      });
+    } else {
+      updateLightingSetting({
+        [path]: value
+      });
+    }
+  };
+
   return (
     <PageLayout 
       title={card?.title ? `Viewing ${card.title}` : "Immersive Card Viewer"} 
@@ -233,7 +250,6 @@ const ImmersiveCardViewerPage: React.FC = () => {
                       isFlipped={isFlipped}
                       activeEffects={activeEffects}
                       lightingSettings={lightingSettings}
-                      lightingPreset={lightingPreset}
                     />
                   </div>
                 </Suspense>
@@ -307,7 +323,7 @@ const ImmersiveCardViewerPage: React.FC = () => {
                   <div className="mt-8 border-t border-gray-800 pt-6">
                     <ViewerSettings
                       settings={lightingSettings}
-                      onUpdateSettings={updateLightingSetting}
+                      onUpdateSettings={handleUpdateSetting}
                       onApplyPreset={applyPreset}
                       isOpen={true}
                     />

@@ -55,33 +55,32 @@ const CardModel: React.FC<CardModelProps> = ({
     }
   }, [frontTexture, backTexture]);
 
-  // Prepare materials for each side of the card
-  const materials = [
-    // Right side
-    new THREE.MeshStandardMaterial({ color: 'white', map: frontTexture }),
-    // Left side
-    new THREE.MeshStandardMaterial({ color: 'white', map: frontTexture }),
-    // Top side
-    new THREE.MeshStandardMaterial({ color: 'white' }),
-    // Bottom side
-    new THREE.MeshStandardMaterial({ color: 'white' }),
-    // Front side (showing back texture when flipped)
-    new THREE.MeshStandardMaterial({ color: 'white', map: backTexture }),
-    // Back side (showing front texture when not flipped)
-    new THREE.MeshStandardMaterial({ color: 'white', map: backTexture })
-  ];
+  // Create materials for each side of the card
+  const frontMaterial = new THREE.MeshStandardMaterial({ 
+    color: 'white', 
+    map: frontTexture 
+  });
+  
+  const backMaterial = new THREE.MeshStandardMaterial({ 
+    color: 'white',
+    map: backTexture 
+  });
+  
+  const edgeMaterial = new THREE.MeshStandardMaterial({ 
+    color: 'white'
+  });
 
   return (
     <group>
       {/* Main card mesh */}
       <mesh ref={meshRef} castShadow receiveShadow>
         <boxGeometry args={[width, height, thickness]} />
-        <primitive object={materials[0]} attach="material-0" />
-        <primitive object={materials[1]} attach="material-1" />
-        <primitive object={materials[2]} attach="material-2" />
-        <primitive object={materials[3]} attach="material-3" />
-        <primitive object={materials[4]} attach="material-4" />
-        <primitive object={materials[5]} attach="material-5" />
+        <primitive object={frontMaterial} attach="material-0" />
+        <primitive object={frontMaterial} attach="material-1" />
+        <primitive object={edgeMaterial} attach="material-2" />
+        <primitive object={edgeMaterial} attach="material-3" />
+        <primitive object={backMaterial} attach="material-4" />
+        <primitive object={backMaterial} attach="material-5" />
       </mesh>
       
       {/* Apply effects as separate layers */}
