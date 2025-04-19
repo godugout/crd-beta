@@ -1,8 +1,8 @@
-
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
 import { useTexture } from '@react-three/drei';
+import { Card } from '@/lib/types';
 
 interface CardModelProps {
   imageUrl: string;
@@ -34,10 +34,6 @@ const CardModel: React.FC<CardModelProps> = ({
     (texture) => {
       console.log('Front texture loaded successfully');
       setFrontTextureLoaded(true);
-    },
-    () => {
-      console.error('Failed to load front texture:', imageUrl);
-      setTextureError(true);
     }
   );
   
@@ -49,10 +45,6 @@ const CardModel: React.FC<CardModelProps> = ({
       (texture) => {
         console.log('Back texture loaded successfully');
         setBackTextureLoaded(true);
-      },
-      () => {
-        console.error('Failed to load back texture:', backImageUrl);
-        // Don't set textureError here, just use fallback
       }
     );
   } catch (error) {
