@@ -234,6 +234,7 @@ const ImmersiveCardViewerPage: React.FC = () => {
                       card={card}
                       isFlipped={isFlipped}
                       activeEffects={activeEffects}
+                      lightingSettings={lightingSettings}
                     />
                   </div>
                 </Suspense>

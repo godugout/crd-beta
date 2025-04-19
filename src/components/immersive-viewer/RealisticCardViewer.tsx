@@ -25,9 +25,6 @@ import { getEnvironmentMapById } from '@/lib/environment-maps';
 import { logRenderingInfo } from '@/utils/debugRenderer';
 import ViewerSettings from '@/components/gallery/viewer-components/ViewerSettings';
 
-// Define possible return types from useTexture
-type TextureResult = THREE.Texture | Record<string, THREE.Texture> | THREE.Texture[];
-
 // Debug component to visualize camera and light positions - MUST BE USED INSIDE CANVAS
 const DebugInfo = ({ show = false }) => {
   if (!show) return null;
@@ -45,42 +42,54 @@ const CardModel = ({
   const { scene } = useThree();
   const meshRef = useRef<THREE.Mesh>(null);
   const [loadingError, setLoadingError] = useState<string | null>(null);
-
-  // Try to load the textures with better error handling
-  const TextureLoader = ({ url, onLoad, onError }) => {
-    useEffect(() => {
-      const loader = new THREE.TextureLoader();
-      loader.crossOrigin = 'anonymous';
-      
-      console.log(`Loading texture from: ${url}`);
-      
-      loader.load(
-        url,
-        (texture) => {
-          console.log(`Successfully loaded texture from: ${url}`);
-          onLoad(texture);
-        },
-        (progress) => {
-          console.log(`Loading progress: ${Math.round((progress.loaded / progress.total) * 100)}%`);
-        },
-        (error) => {
-          console.error(`Failed to load texture from: ${url}`, error);
-          const errorMsg = error instanceof Error ? error.message : "Unknown error loading texture";
-          onError(errorMsg);
-        }
-      );
-    }, [url, onLoad, onError]);
-    
-    return null;
-  };
-  
-  // Load front texture
   const [frontTexture, setFrontTexture] = useState<THREE.Texture | null>(null);
-  const frontTextureUrl = card.imageUrl || '/placeholder-card.jpg';
-  
-  // Load back texture
   const [backTexture, setBackTexture] = useState<THREE.Texture | null>(null);
-  const backTextureUrl = '/card-back-texture.jpg';
+  
+  // Load textures using Three.js TextureLoader
+  useEffect(() => {
+    const textureLoader = new THREE.TextureLoader();
+    textureLoader.crossOrigin = 'anonymous';
+    
+    // Load front texture
+    const frontTextureUrl = card.imageUrl || '/placeholder-card.jpg';
+    console.log(`Loading front texture from: ${frontTextureUrl}`);
+    
+    textureLoader.load(
+      frontTextureUrl,
+      (texture) => {
+        console.log(`Successfully loaded front texture`);
+        setFrontTexture(texture);
+      },
+      (progress) => {
+        console.log(`Loading progress: ${Math.round((progress.loaded / progress.total) * 100)}%`);
+      },
+      (error) => {
+        console.error(`Failed to load texture from: ${frontTextureUrl}`, error);
+        setLoadingError(`Front texture loading failed`);
+      }
+    );
+    
+    // Load back texture
+    const backTextureUrl = '/card-back-texture.jpg';
+    
+    textureLoader.load(
+      backTextureUrl,
+      (texture) => {
+        setBackTexture(texture);
+      },
+      undefined,
+      (error) => {
+        console.error(`Failed to load back texture: ${backTextureUrl}`, error);
+        setLoadingError(`Back texture loading failed`);
+      }
+    );
+    
+    return () => {
+      // Dispose textures on cleanup
+      if (frontTexture) frontTexture.dispose();
+      if (backTexture) backTexture.dispose();
+    };
+  }, [card.imageUrl]);
   
   // Create a simple colored material as fallback
   const createFallbackMaterial = (color: string) => {
@@ -117,28 +126,18 @@ const CardModel = ({
     });
   });
   
+  // If there's a loading error, show an error cube
+  if (loadingError) {
+    return (
+      <mesh position={[0, 1, 0]}>
+        <boxGeometry args={[4, 0.5, 0.1]} />
+        <meshStandardMaterial color="red" transparent opacity={0.7} />
+      </mesh>
+    );
+  }
+  
   return (
     <group>
-      {/* Load textures - using components directly in the scene */}
-      <TextureLoader 
-        url={frontTextureUrl} 
-        onLoad={setFrontTexture} 
-        onError={(msg: string) => setLoadingError(`Front texture: ${msg}`)} 
-      />
-      <TextureLoader 
-        url={backTextureUrl} 
-        onLoad={setBackTexture} 
-        onError={(msg: string) => setLoadingError(`Back texture: ${msg}`)} 
-      />
-      
-      {/* Visual feedback for loading errors - USING THREE.JS OBJECTS, NOT HTML */}
-      {loadingError && (
-        <mesh position={[0, 1, 0]}>
-          <boxGeometry args={[4, 0.5, 0.1]} />
-          <meshStandardMaterial color="red" transparent opacity={0.7} />
-        </mesh>
-      )}
-      
       {/* Card mesh - Front Side */}
       <mesh 
         ref={meshRef} 
@@ -149,22 +148,17 @@ const CardModel = ({
         <planeGeometry args={[2.5, 3.5, 20, 20]} />
         
         {/* Front material */}
-        {frontTexture ? (
-          <meshPhysicalMaterial 
-            map={frontTexture}
-            side={THREE.FrontSide}
-            roughness={materialProps.roughness || 0.2}
-            metalness={materialProps.metalness || 0.8}
-            envMapIntensity={lightingSettings.envMapIntensity || 1.5}
-            clearcoat={1}
-            clearcoatRoughness={0.2}
-            reflectivity={0.8}
-          />
-        ) : (
-          <meshStandardMaterial 
-            color="#2a5298" 
-          />
-        )}
+        <meshPhysicalMaterial 
+          map={frontTexture}
+          color={frontTexture ? undefined : "#2a5298"}
+          side={THREE.FrontSide}
+          roughness={materialProps.roughness || 0.2}
+          metalness={materialProps.metalness || 0.8}
+          envMapIntensity={lightingSettings.envMapIntensity || 1.5}
+          clearcoat={1}
+          clearcoatRoughness={0.2}
+          reflectivity={0.8}
+        />
       </mesh>
       
       {/* Card back side - as a separate mesh */}
@@ -177,21 +171,16 @@ const CardModel = ({
         <planeGeometry args={[2.5, 3.5, 20, 20]} />
         
         {/* Back material */}
-        {backTexture ? (
-          <meshPhysicalMaterial 
-            map={backTexture}
-            side={THREE.FrontSide}
-            roughness={(materialProps.roughness || 0.2) * 1.2}
-            metalness={(materialProps.metalness || 0.8) * 0.8}
-            envMapIntensity={(lightingSettings.envMapIntensity || 1) * 0.8}
-            clearcoat={0.5}
-            clearcoatRoughness={0.3}
-          />
-        ) : (
-          <meshStandardMaterial 
-            color="#1a3060" 
-          />
-        )}
+        <meshPhysicalMaterial 
+          map={backTexture}
+          color={backTexture ? undefined : "#1a3060"}
+          side={THREE.FrontSide}
+          roughness={(materialProps.roughness || 0.2) * 1.2}
+          metalness={(materialProps.metalness || 0.8) * 0.8}
+          envMapIntensity={(lightingSettings.envMapIntensity || 1) * 0.8}
+          clearcoat={0.5}
+          clearcoatRoughness={0.3}
+        />
       </mesh>
     </group>
   );

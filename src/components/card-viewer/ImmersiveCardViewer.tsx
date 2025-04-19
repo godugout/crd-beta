@@ -9,6 +9,7 @@ import { OrbitControls, PerspectiveCamera, Environment } from '@react-three/drei
 import { DEFAULT_DESIGN_METADATA, FALLBACK_IMAGE_URL } from '@/lib/utils/cardDefaults';
 import { LightingSettings } from '@/hooks/useCardLighting';
 import Card3DRenderer from '../card-viewer/Card3DRenderer';
+import { Button } from '@/components/ui/button';
 
 interface ImmersiveCardViewerProps {
   card: Card;
@@ -27,6 +28,12 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
 }) => {
   const { toast } = useToast();
   const [imageError, setImageError] = useState(false);
+  const [localIsFlipped, setLocalIsFlipped] = useState(isFlipped);
+  
+  // Update local state when prop changes
+  useEffect(() => {
+    setLocalIsFlipped(isFlipped);
+  }, [isFlipped]);
   
   // Ensure card has proper image URLs before rendering
   if (!card.imageUrl) {
@@ -37,6 +44,16 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
     };
     console.log("Using fallback image for card:", card.id);
   }
+
+  // Error display as THREE object for within Canvas
+  const ErrorDisplay = () => {
+    return (
+      <mesh position={[0, 0, 0]}>
+        <boxGeometry args={[2, 2, 0.1]} />
+        <meshStandardMaterial color="red" />
+      </mesh>
+    );
+  };
 
   return (
     <div className="w-full h-full relative">
@@ -62,12 +79,14 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
         
         <Environment preset={(lightingSettings?.environmentType || 'studio') as any} background={false} />
         
-        <Card3DRenderer 
-          card={card}
-          isFlipped={isFlipped} 
-          activeEffects={activeEffects}
-          effectIntensities={effectIntensities}
-        />
+        <Suspense fallback={<ErrorDisplay />}>
+          <Card3DRenderer 
+            card={card}
+            isFlipped={localIsFlipped} 
+            activeEffects={activeEffects}
+            effectIntensities={effectIntensities}
+          />
+        </Suspense>
         
         <OrbitControls 
           enablePan={false}
@@ -81,12 +100,12 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
       
       {/* Controls overlay - MOVED OUTSIDE of Canvas */}
       <div className="absolute bottom-4 left-0 right-0 flex justify-center z-10">
-        <button 
+        <Button 
           className="px-4 py-2 bg-gray-800/70 text-white rounded-full hover:bg-gray-700/90 transition"
-          onClick={() => console.log("Flip card from viewer component")}
+          onClick={() => setLocalIsFlipped(!localIsFlipped)}
         >
-          {isFlipped ? 'Show Front' : 'Show Back'}
-        </button>
+          {localIsFlipped ? 'Show Front' : 'Show Back'}
+        </Button>
       </div>
     </div>
   );
