@@ -86,3 +86,28 @@ export enum UserRole {
   MODERATOR = 'moderator'
 }
 
+/**
+ * User permission types
+ */
+export type UserPermission = 
+  | 'read:own' 
+  | 'write:own' 
+  | 'delete:own' 
+  | 'read:all' 
+  | 'write:all' 
+  | 'delete:all' 
+  | 'premium:features'
+  | 'create:premium'
+  | 'moderate:content'
+  | 'all';
+
+/**
+ * Role to permission mapping
+ */
+export const ROLE_PERMISSIONS: Record<UserRole, UserPermission[]> = {
+  [UserRole.ADMIN]: ['all'],
+  [UserRole.USER]: ['read:own', 'write:own', 'delete:own'],
+  [UserRole.PREMIUM]: ['read:own', 'write:own', 'delete:own', 'premium:features'],
+  [UserRole.CREATOR]: ['read:own', 'write:own', 'delete:own', 'create:premium'],
+  [UserRole.MODERATOR]: ['read:own', 'write:own', 'delete:own', 'moderate:content']
+};

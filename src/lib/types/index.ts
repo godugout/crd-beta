@@ -1,4 +1,3 @@
-
 // Base types that might be used across modules
 export type JsonValue = 
   | string 
@@ -17,8 +16,8 @@ export interface BaseEntity {
 // For backward compatibility with JsonObject
 export type JsonObject = Record<string, JsonValue>;
 
-// Explicitly export UserRole from user.ts
-export { UserRole, UserPermission, ROLE_PERMISSIONS } from './user';
+// Re-export from main types.ts file for compatibility
+export { UserRole, UserPermission, ROLE_PERMISSIONS } from '../types';
 
 // Export updated type definitions
 export * from './cardTypes';
