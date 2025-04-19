@@ -11,6 +11,7 @@ import { Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ScrollableGallery from '@/components/immersive-viewer/ScrollableGallery';
 import CustomizationPanel from '@/components/immersive-viewer/CustomizationPanel';
+import { useCardLighting, DEFAULT_LIGHTING } from '@/hooks/useCardLighting';
 
 const ImmersiveBaseballViewer: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -25,6 +26,18 @@ const ImmersiveBaseballViewer: React.FC = () => {
     Vintage: 0.4
   });
   const [isPanelOpen, setIsPanelOpen] = useState(false);
+  
+  // Initialize lighting settings with default values
+  const { lightingSettings, updateLightingSetting } = useCardLighting('studio');
+
+  // Initialize material settings with proper structure
+  const [materialSettings, setMaterialSettings] = useState({
+    roughness: 0.15,
+    metalness: 0.3,
+    reflectivity: 0.2,
+    clearcoat: 0.1,
+    envMapIntensity: 1.0
+  });
 
   useEffect(() => {
     if (isLoading || !cardData) return;
@@ -59,6 +72,28 @@ const ImmersiveBaseballViewer: React.FC = () => {
   // Handle navigation to another card
   const handleCardSelect = (cardId: string) => {
     navigate(`/baseball-card-viewer/${cardId}`);
+  };
+  
+  // Handle updates to material settings
+  const handleUpdateMaterial = (settings: Partial<typeof materialSettings>) => {
+    setMaterialSettings(prev => ({ ...prev, ...settings }));
+    
+    // Also update effect intensities for card rendering
+    const updatedEffectIntensities = { ...effectIntensities };
+    if (settings.roughness !== undefined) {
+      updatedEffectIntensities.Shimmer = 1 - settings.roughness;
+    }
+    if (settings.metalness !== undefined) {
+      updatedEffectIntensities.Chrome = settings.metalness;
+    }
+    if (settings.reflectivity !== undefined) {
+      updatedEffectIntensities.Holographic = settings.reflectivity;
+    }
+    if (settings.clearcoat !== undefined) {
+      updatedEffectIntensities.Refractor = settings.clearcoat;
+    }
+    
+    setEffectIntensities(updatedEffectIntensities);
   };
 
   if (isLoading) {
@@ -106,10 +141,10 @@ const ImmersiveBaseballViewer: React.FC = () => {
           card={card}
           isOpen={isPanelOpen}
           onClose={() => setIsPanelOpen(false)}
-          lightingSettings={{}} // Add your lighting settings here
-          onUpdateLighting={() => {}} // Add your lighting update handler
-          materialSettings={effectIntensities}
-          onUpdateMaterial={(settings) => setEffectIntensities(prev => ({ ...prev, ...settings }))}
+          lightingSettings={lightingSettings}
+          onUpdateLighting={updateLightingSetting}
+          materialSettings={materialSettings}
+          onUpdateMaterial={handleUpdateMaterial}
         />
         
         {/* Scrollable gallery of all baseball cards at the bottom */}
