@@ -1,9 +1,10 @@
 
 export interface InstagramPost {
   id: string;
-  postId: string; // Add the missing postId property
+  postId: string;
   caption: string;
   mediaUrl: string;
+  thumbnailUrl: string; // Add missing thumbnailUrl property
   permalink: string;
   timestamp: string;
   username: string;

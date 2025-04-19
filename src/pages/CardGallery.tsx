@@ -1,98 +1,80 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import PageLayout from '@/components/navigation/PageLayout';
-import { Card } from '@/lib/types';
+
+import React, { useState, useEffect } from 'react';
 import { useCards } from '@/hooks/useCards';
-import CardGrid from '@/components/gallery/CardGrid';
+import { Card } from '@/lib/types';
+import PageLayout from '@/components/navigation/PageLayout';
 import { Button } from '@/components/ui/button';
-import CardFilter, { FilterOptions } from '@/components/gallery/CardFilter';
+import { Link } from 'react-router-dom';
+import CardFilter from '@/components/gallery/CardFilter';
+import CardGrid from '@/components/gallery/CardGrid';
 
 const CardGallery: React.FC = () => {
-  const { cards, isLoading, error } = useCards();
-  const [selectedTag, setSelectedTag] = useState<string | null>(null);
-  const navigate = useNavigate();
+  const { cards, loading } = useCards();
+  const [filteredCards, setFilteredCards] = useState<Card[]>([]);
+  const [selectedTag, setSelectedTag] = useState<string>('all');
+  const [isFiltering, setIsFiltering] = useState<boolean>(false);
 
-  const filteredCards = selectedTag 
-    ? cards.filter(card => card.tags?.includes(selectedTag)) 
-    : cards;
-    
-  const allTags = Array.from(new Set(cards.flatMap(card => card.tags || [])));
-  
+  // Extract unique tags from all cards
+  const allTags = React.useMemo(() => {
+    const tags = cards.flatMap(card => card.tags || []);
+    return [...new Set(tags)];
+  }, [cards]);
+
+  // Apply filtering when selectedTag or cards change
+  useEffect(() => {
+    setIsFiltering(true);
+    setTimeout(() => {
+      if (selectedTag === 'all') {
+        setFilteredCards(cards);
+      } else {
+        setFilteredCards(cards.filter(card => card.tags?.includes(selectedTag)));
+      }
+      setIsFiltering(false);
+    }, 300);
+  }, [selectedTag, cards]);
+
   const handleCardClick = (cardId: string) => {
-    navigate(`/cards/${cardId}`);
+    // Navigate to card detail or immersive view
+    console.log('Card clicked:', cardId);
   };
 
   return (
     <PageLayout title="Card Gallery" description="Browse your card collection">
-      <div className="container mx-auto p-6">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-          <div>
-            <h1 className="text-3xl font-bold mb-2">Card Gallery</h1>
-            <p className="text-gray-600">Browse through your collection of cards</p>
-          </div>
-          
-          <div className="mt-4 md:mt-0 space-x-2">
-            <Button variant="outline" asChild>
-              <Link to="/card-creator">Create New Card</Link>
+      <div className="container mx-auto py-8 px-4">
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-bold">Your Cards</h1>
+          <div className="flex gap-3">
+            <Button asChild>
+              <Link to="/cards/create">Create New Card</Link>
             </Button>
-            
             <Button variant="outline" asChild>
               <Link to="/collections">View Collections</Link>
             </Button>
           </div>
         </div>
-        
-        {allTags.length > 0 && (
-          <CardFilter 
-            tags={allTags}
-            selectedTag={selectedTag}
-            onSelectTag={setSelectedTag}
-          />
-        )}
 
-        {isLoading ? (
+        {/* Add filter component */}
+        <CardFilter 
+          tags={allTags}
+          selectedTag={selectedTag}
+          onSelectTag={setSelectedTag}
+        />
+
+        {/* Card grid */}
+        {loading ? (
           <div className="flex justify-center items-center h-64">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
           </div>
-        ) : error ? (
-          <div className="text-center p-12 bg-red-50 rounded-lg border border-red-200">
-            <h3 className="text-lg font-medium text-red-800">Error loading cards</h3>
-            <p className="mt-2 text-red-700">{error.message}</p>
-            <Button 
-              variant="destructive" 
-              className="mt-4"
-              onClick={() => window.location.reload()}
-            >
-              Try Again
-            </Button>
-          </div>
-        ) : filteredCards.length === 0 ? (
-          <div className="text-center p-12 bg-gray-50 rounded-lg border">
-            <h3 className="text-lg font-medium">No cards found</h3>
-            {selectedTag ? (
-              <p className="mt-2 text-gray-600">
-                No cards found with the tag "{selectedTag}".{' '}
-                <button 
-                  className="text-primary hover:underline" 
-                  onClick={() => setSelectedTag(null)}
-                >
-                  Clear filter
-                </button>
-              </p>
-            ) : (
-              <p className="mt-2 text-gray-600">
-                You don't have any cards in your collection yet.
-              </p>
-            )}
-            <Button className="mt-4" asChild>
-              <Link to="/card-creator">Create Your First Card</Link>
-            </Button>
-          </div>
+        ) : filteredCards.length > 0 ? (
+          <CardGrid cards={filteredCards} onCardClick={handleCardClick} />
         ) : (
-          <CardGrid 
-            cards={filteredCards} 
-            onCardClick={handleCardClick}
-          />
+          <div className="text-center py-16">
+            <h3 className="text-xl font-semibold mb-4">No Cards Found</h3>
+            <p className="text-gray-600 mb-8">You haven't created any cards yet, or none match your filter.</p>
+            <Button asChild>
+              <Link to="/cards/create">Create Your First Card</Link>
+            </Button>
+          </div>
         )}
       </div>
     </PageLayout>

@@ -34,9 +34,8 @@ export interface CardData {
   effects: string[]; // Required property
 }
 
-// Re-export Card interface from cardTypes
+// Re-export Card interface from cardTypes with proper syntax for isolatedModules
 export { Card } from './cardTypes';
 
-// Export FabricSwatch for others to use
-// Use export type for re-exporting types when isolatedModules is enabled
+// Export FabricSwatch for others to use with proper syntax for isolatedModules
 export type { FabricSwatchType };

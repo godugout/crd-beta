@@ -123,6 +123,7 @@ export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       title: collection.title || collection.name || 'New Collection',
       description: collection.description || '',
       coverImageUrl: collection.coverImageUrl || '',
+      thumbnailUrl: collection.thumbnailUrl || '',
       userId: collection.userId || 'user-1',
       teamId: collection.teamId || '',
       cards: [],
@@ -132,8 +133,9 @@ export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       updatedAt: new Date().toISOString(),
       designMetadata: collection.designMetadata || {},
       cardIds: collection.cardIds || [],
+      tags: collection.tags || [],
       isPublic: collection.isPublic || false,
-      tags: collection.tags || []
+      featured: collection.featured || false
     };
     
     setCollections([...collections, newCollection]);
@@ -229,3 +231,5 @@ export const useCards = () => {
 export type { Card, Collection };
 
 export { CardContext };
+
+// Make sure CardProvider is exported properly

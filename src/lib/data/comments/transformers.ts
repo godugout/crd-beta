@@ -28,6 +28,7 @@ export function transformCommentFromDb(record: any): Comment {
       avatarUrl: record.profiles.avatar_url,
       username: record.profiles.username,
       createdAt: record.profiles.created_at || new Date().toISOString(), // Ensure createdAt is present
+      updatedAt: record.profiles.updated_at || new Date().toISOString(), // Ensure updatedAt is present
     };
   }
   
@@ -42,7 +43,7 @@ export const transformCommentUserData = (userData: any) => {
     avatarUrl: userData.avatarUrl,
     username: userData.username,
     createdAt: userData.created_at || userData.createdAt || new Date().toISOString(), // Ensure createdAt is present
-    updatedAt: userData.updated_at || userData.updatedAt,
+    updatedAt: userData.updated_at || userData.updatedAt || new Date().toISOString(), // Ensure updatedAt is present
     role: userData.role || 'user'
   };
 };

@@ -124,7 +124,7 @@ export interface AuthUser {
   avatarUrl?: string;
   displayName?: string;
   username?: string;
-  role?: UserRoleEnum;
+  role?: UserRole; // Fix: Change UserRoleEnum to UserRole
   bio?: string;
   permissions?: string[];
   createdAt: string;
