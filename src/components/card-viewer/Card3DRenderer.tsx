@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect, useState } from 'react';
 import { Card } from '@/lib/types';
 import * as THREE from 'three';
@@ -221,8 +220,21 @@ const Card3DRenderer: React.FC<Card3DRendererProps> = ({
     return effectIntensities[effectName] || 1.0;
   };
 
+  // If no environment type is specified, fallback to 'studio'
+  const getEnvironmentPreset = () => {
+    const validPresets = ['apartment', 'city', 'dawn', 'forest', 'lobby', 'night', 'park', 'studio', 'sunset', 'warehouse'];
+    const defaultPreset = 'studio';
+    
+    const preset = validPresets.find(p => p === card.environmentType) || defaultPreset;
+    return preset;
+  };
+
   return (
     <group ref={cardRef}>
+      <Environment 
+        preset={getEnvironmentPreset()} 
+        background={false} 
+      />
       {/* Card front */}
       <mesh castShadow receiveShadow position={[0, 0, 0]}>
         <planeGeometry args={[2.5, 3.5, 20, 20]} />

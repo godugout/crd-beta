@@ -1,5 +1,4 @@
-
-import React, { useRef, useState, useEffect, Suspense } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { 
   PerspectiveCamera, 
@@ -187,10 +186,14 @@ const CardModel = ({
 };
 
 // Photorealistic environment setup
-const Environment3D = ({ preset }) => {
+const Environment3D = ({ preset = 'studio' }) => {
   return (
     <>
-      <Environment preset={preset} background={false} blur={0.6} />
+      <Environment 
+        preset={preset} 
+        background={false} 
+        blur={0.6} 
+      />
       
       <AccumulativeShadows temporal frames={30} alphaTest={0.85} opacity={0.75}>
         <RandomizedLight amount={8} radius={10} intensity={0.8} position={[5, 5, -10]} />
