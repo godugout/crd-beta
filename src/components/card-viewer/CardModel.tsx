@@ -22,25 +22,14 @@ const CardModel: React.FC<CardModelProps> = ({
   const cardRef = useRef<THREE.Group>(null);
   const [textureError, setTextureError] = useState(false);
   
-  // Load textures with error handling
-  const frontTexture = useTexture(imageUrl, 
-    () => {
-      console.log('Front texture loaded successfully');
-    },
-    () => {
-      console.error('Front texture failed to load');
-      setTextureError(true);
-    }
-  );
+  // Load textures with error handling - using proper argument count
+  const frontTexture = useTexture(imageUrl, (texture) => {
+    console.log('Front texture loaded successfully');
+  });
   
-  const backTexture = useTexture(backImageUrl, 
-    () => {
-      console.log('Back texture loaded successfully');
-    },
-    () => {
-      console.error('Back texture failed to load');
-    }
-  );
+  const backTexture = useTexture(backImageUrl, (texture) => {
+    console.log('Back texture loaded successfully');
+  });
 
   // Create materials with proper matte finish
   const frontMaterial = new THREE.MeshPhysicalMaterial({

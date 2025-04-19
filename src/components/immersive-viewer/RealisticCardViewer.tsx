@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, Suspense, useRef } from 'react';
 import { Canvas, useThree } from '@react-three/fiber';
 import { 
@@ -38,7 +37,7 @@ const Environment3D = ({ preset = 'studio' }) => {
   return (
     <>
       <Environment 
-        preset={environmentPreset}
+        preset={environmentPreset as "studio" | "park" | "night" | "lobby" | "city" | "apartment" | "dawn" | "warehouse" | "sunset" | "forest"}
         background={false} 
         blur={0.6} 
       />
@@ -179,7 +178,7 @@ const RealisticCardViewer: React.FC<RealisticCardViewerProps> = ({
           />
           
           <Environment 
-            preset={mapLightingPresetToEnvironment(lightingSettings.environmentType)} 
+            preset={mapLightingPresetToEnvironment(lightingSettings.environmentType) as "studio" | "park" | "night" | "lobby" | "city" | "apartment" | "dawn" | "warehouse" | "sunset" | "forest"} 
             background={false}
             blur={0.6}
           />

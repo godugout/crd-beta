@@ -70,7 +70,8 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
   
   const cardWithFallback = {
     ...card,
-    imageUrl: card.imageUrl || FALLBACK_IMAGE_URL
+    imageUrl: card.imageUrl || FALLBACK_IMAGE_URL,
+    backImageUrl: card.backImageUrl || '/card-back-texture.jpg'
   };
   
   const toggleRenderMode = () => {

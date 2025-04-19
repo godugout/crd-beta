@@ -18,6 +18,11 @@ export const mapLightingPresetToEnvironment = (
     default: "studio"
   } as const;
   
+  // First, check if the preset is already a valid @react-three/drei preset
+  if (getValidEnvironmentPresets().includes(preset)) {
+    return preset;
+  }
+  
   // Ensure we always return a valid preset
   return (validPresets[preset as keyof typeof validPresets] || "studio");
 };
@@ -39,3 +44,10 @@ export const getValidEnvironmentPresets = (): string[] => {
     "warehouse"
   ];
 };
+
+/**
+ * Type-safe environment presets for TypeScript
+ */
+export type ValidEnvironmentPreset = 
+  "apartment" | "city" | "dawn" | "forest" | "lobby" | 
+  "night" | "park" | "studio" | "sunset" | "warehouse";

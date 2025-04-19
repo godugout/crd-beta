@@ -1,3 +1,4 @@
+
 /**
  * Consolidated Card Types for Cardshow (CRD)
  * This file serves as the central source of truth for all card-related types
@@ -217,6 +218,7 @@ export interface BaseCard extends BaseEntity {
   title: string;
   description: string;
   imageUrl: string;
+  backImageUrl?: string; // Added backImageUrl property
   image?: string; // Legacy support for older components
   thumbnailUrl: string;
   tags: string[];

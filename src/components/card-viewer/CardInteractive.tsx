@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { MoveHorizontal, Lightbulb, Settings } from 'lucide-react';
 import { useDeviceDetect } from '@/hooks/useDeviceDetect';
 import { useUserLightingPreferences } from '@/hooks/useUserLightingPreferences';
-import { CardModel } from './CardModel';
+import CardModel from './CardModel';
 import { Button } from '@/components/ui/button';
 
 interface CardInteractiveProps {

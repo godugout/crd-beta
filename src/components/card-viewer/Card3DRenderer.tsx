@@ -56,12 +56,15 @@ const Card3DRenderer: React.FC<Card3DRendererProps> = ({
   const shadowProps = needs3DEffects 
     ? { castShadow: true, receiveShadow: true } 
     : {};
+
+  // Default back image if not provided
+  const defaultBackImage = '/card-back-texture.jpg';
   
   return (
     <group ref={groupRef} {...shadowProps}>
       <CardModel
         imageUrl={card.imageUrl || '/placeholder-card.jpg'}
-        backImageUrl={card.backImageUrl || '/card-back-texture.jpg'}
+        backImageUrl={card.backImageUrl || defaultBackImage}
         isFlipped={isFlipped}
         activeEffects={activeEffects} 
         effectIntensities={effectIntensities}
