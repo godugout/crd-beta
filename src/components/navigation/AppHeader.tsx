@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Search, PlusCircle, Menu, X, Palette, Sparkles, LogIn } from 'lucide-react';
@@ -34,6 +33,15 @@ const AppHeader: React.FC = () => {
     borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
   };
 
+  // Primary navigation links
+  const primaryNavLinks = [
+    { to: '/', label: 'Home' },
+    { to: '/gallery', label: 'Gallery' },
+    { to: '/collections', label: 'Collections' },
+    { to: '/cards/create', label: 'Create' },
+    { to: '/labs', label: 'Labs' }
+  ];
+
   return (
     <header className="sticky top-0 z-50 w-full" style={headerStyle}>
       <div className="container mx-auto px-4">
@@ -42,32 +50,26 @@ const AppHeader: React.FC = () => {
           <div className="flex items-center">
             <Link to="/" className="flex items-center" onClick={closeMenu}>
               {currentTheme.logo ? (
-                <img 
-                  src={currentTheme.logo} 
-                  alt="Logo" 
-                  className="h-8 w-auto mr-2" 
-                />
+                <img src={currentTheme.logo} alt="Logo" className="h-8 w-auto mr-2" />
               ) : (
-                <span className="text-2xl font-bold text-white">
-                  CardShow
-                </span>
+                <span className="text-2xl font-bold text-white">CardShow</span>
               )}
             </Link>
           </div>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-1">
-            {mainNavItems.map((item) => (
-              <Link 
-                key={item.path}
-                to={item.path} 
+            {primaryNavLinks.map((link) => (
+              <Link
+                key={link.to}
+                to={link.to}
                 className={`px-4 py-2 rounded-lg transition-colors ${
-                  isActive(item.path) 
-                    ? 'bg-white/10 text-white font-medium' 
+                  isActive(link.to)
+                    ? 'bg-white/10 text-white font-medium'
                     : 'text-white/80 hover:bg-white/5 hover:text-white'
                 }`}
               >
-                {item.title}
+                {link.label}
               </Link>
             ))}
           </nav>
@@ -112,21 +114,18 @@ const AppHeader: React.FC = () => {
       {isMenuOpen && (
         <div className="md:hidden border-t border-white/10 animate-in fade-in slide-in-from-top-5 duration-300" style={{ backgroundColor: 'rgba(0, 0, 0, 0.9)' }}>
           <div className="container px-4 py-3 space-y-1">
-            {mainNavItems.map((item) => (
-              <Link 
-                key={item.path}
-                to={item.path} 
+            {primaryNavLinks.map((link) => (
+              <Link
+                key={link.to}
+                to={link.to}
                 className={`block px-3 py-2 text-base font-medium rounded-lg ${
-                  isActive(item.path) 
-                    ? 'bg-white/10 text-white' 
+                  isActive(link.to)
+                    ? 'bg-white/10 text-white'
                     : 'text-white/80 hover:bg-white/5 hover:text-white'
                 }`}
                 onClick={closeMenu}
               >
-                <span className="flex items-center">
-                  {item.icon && <item.icon className="h-5 w-5 mr-2" />}
-                  {item.title}
-                </span>
+                {link.label}
               </Link>
             ))}
             
