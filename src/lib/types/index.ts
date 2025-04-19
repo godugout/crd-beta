@@ -17,6 +17,9 @@ export interface BaseEntity {
 // For backward compatibility with JsonObject
 export type JsonObject = Record<string, JsonValue>;
 
+// Explicitly export UserRole from user.ts
+export { UserRole, UserPermission, ROLE_PERMISSIONS } from './user';
+
 // Export updated type definitions
 export * from './cardTypes';
 export * from './interaction';

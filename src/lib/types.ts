@@ -76,3 +76,13 @@ export interface AuthSession {
   accessToken: string;
   refreshToken?: string;
 }
+
+// Add UserRole enum to be exported directly from this file
+export enum UserRole {
+  ADMIN = 'admin',
+  USER = 'user',
+  PREMIUM = 'premium',
+  CREATOR = 'creator',
+  MODERATOR = 'moderator'
+}
+
