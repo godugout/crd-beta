@@ -1,5 +1,13 @@
 
-import React from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { useCards } from '@/context/CardContext';
+import { toast } from 'sonner';
+import { v4 as uuidv4 } from 'uuid';
 
 export interface CreateCollectionDialogProps {
   open: boolean;
@@ -10,27 +18,108 @@ const CreateCollectionDialog: React.FC<CreateCollectionDialogProps> = ({
   open,
   onOpenChange
 }) => {
+  const navigate = useNavigate();
+  const { addCollection } = useCards();
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async () => {
+    if (!name.trim()) {
+      toast.error('Collection name is required');
+      return;
+    }
+    
+    setIsSubmitting(true);
+    
+    try {
+      const newCollection = {
+        id: uuidv4(),
+        name,
+        title: name,
+        description,
+        cardIds: [],
+        visibility: 'private',
+        isPublic: false,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      
+      const collection = await addCollection(newCollection);
+      
+      toast.success('Collection created successfully');
+      onOpenChange(false);
+      
+      // Reset form
+      setName('');
+      setDescription('');
+      
+      // Navigate to the new collection
+      navigate(`/collections/${collection.id}`);
+    } catch (error) {
+      console.error('Error creating collection:', error);
+      toast.error('Failed to create collection');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleClose = () => {
+    onOpenChange(false);
+    setName('');
+    setDescription('');
+  };
+
   return (
-    <div className={`fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 ${open ? 'block' : 'hidden'}`}>
-      <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full">
-        <h2 className="text-xl font-bold mb-4">Create New Collection</h2>
-        <p>This is a stub component for the CreateCollectionDialog.</p>
-        <div className="mt-6 flex justify-end">
-          <button 
-            className="px-4 py-2 bg-gray-200 rounded mr-2"
-            onClick={() => onOpenChange(false)}
-          >
-            Cancel
-          </button>
-          <button 
-            className="px-4 py-2 bg-blue-500 text-white rounded"
-            onClick={() => onOpenChange(false)}
-          >
-            Create
-          </button>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Create Collection</DialogTitle>
+          <DialogDescription>
+            Create a new collection to organize your cards
+          </DialogDescription>
+        </DialogHeader>
+        
+        <div className="space-y-4 py-4">
+          <div className="space-y-2">
+            <label htmlFor="name" className="text-sm font-medium">
+              Name
+            </label>
+            <Input
+              id="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="My Collection"
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <label htmlFor="description" className="text-sm font-medium">
+              Description
+            </label>
+            <Textarea
+              id="description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Describe your collection"
+              rows={3}
+            />
+          </div>
         </div>
-      </div>
-    </div>
+        
+        <DialogFooter>
+          <Button variant="outline" onClick={handleClose}>
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleSubmit} 
+            disabled={!name.trim() || isSubmitting}
+          >
+            {isSubmitting ? 'Creating...' : 'Create Collection'}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
 

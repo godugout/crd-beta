@@ -5,10 +5,10 @@ import { useParams } from 'react-router-dom';
 import { useCards } from '@/context/CardContext';
 import { useToast } from '@/hooks/use-toast';
 
-const ImmersiveCardViewer = ({ card: initialCard }: { card: Card }) => {
+const ImmersiveCardViewer = ({ card: initialCard }: { card?: Card }) => {
   const { id } = useParams();
   const { getCardById } = useCards();
-  const [card, setCard] = useState<Card>(initialCard);
+  const [card, setCard] = useState<Card | undefined>(initialCard);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
   const { toast } = useToast();
@@ -42,7 +42,7 @@ const ImmersiveCardViewer = ({ card: initialCard }: { card: Card }) => {
   }, [card, toast]);
   
   const handleImageError = () => {
-    console.error("Failed to load image:", card.imageUrl);
+    console.error("Failed to load image:", card?.imageUrl);
     setImageError(true);
     toast({
       title: "Image failed to load",
@@ -50,6 +50,13 @@ const ImmersiveCardViewer = ({ card: initialCard }: { card: Card }) => {
       variant: "destructive"
     });
   };
+
+  if (!card) {
+    return <div>Memory not found</div>;
+  }
+
+  // Extract stats from designMetadata if available
+  const cardStats = card.designMetadata?.stats || {};
 
   return (
     <div className="p-4 h-full flex flex-col items-center justify-center">
@@ -106,30 +113,30 @@ const ImmersiveCardViewer = ({ card: initialCard }: { card: Card }) => {
         )}
         
         {/* Display card stats if available */}
-        {card.stats && (
+        {Object.keys(cardStats).length > 0 && (
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-4">
-            {card.stats.battingAverage && (
+            {cardStats.battingAverage && (
               <div className="stat-item">
                 <span className="text-sm text-gray-400">Batting Average</span>
-                <span className="block text-lg font-medium text-white">{card.stats.battingAverage}</span>
+                <span className="block text-lg font-medium text-white">{cardStats.battingAverage}</span>
               </div>
             )}
-            {card.stats.homeRuns && (
+            {cardStats.homeRuns && (
               <div className="stat-item">
                 <span className="text-sm text-gray-400">Home Runs</span>
-                <span className="block text-lg font-medium text-white">{card.stats.homeRuns}</span>
+                <span className="block text-lg font-medium text-white">{cardStats.homeRuns}</span>
               </div>
             )}
-            {card.stats.rbis && (
+            {cardStats.rbis && (
               <div className="stat-item">
                 <span className="text-sm text-gray-400">RBIs</span>
-                <span className="block text-lg font-medium text-white">{card.stats.rbis}</span>
+                <span className="block text-lg font-medium text-white">{cardStats.rbis}</span>
               </div>
             )}
-            {card.stats.era && (
+            {cardStats.era && (
               <div className="stat-item">
                 <span className="text-sm text-gray-400">ERA</span>
-                <span className="block text-lg font-medium text-white">{card.stats.era}</span>
+                <span className="block text-lg font-medium text-white">{cardStats.era}</span>
               </div>
             )}
           </div>

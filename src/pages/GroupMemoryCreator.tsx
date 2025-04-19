@@ -1,103 +1,137 @@
 
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import PageLayout from '@/components/navigation/PageLayout';
+import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import GroupImageUploader from '@/components/group-memory/GroupImageUploader';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import CommentSection from '@/components/CommentSection';
-import useImageProcessing from '@/hooks/useImageProcessing';
 import { toast } from 'sonner';
+import { v4 as uuidv4 } from 'uuid';
+import GroupImageUploader from '@/components/group-memory/GroupImageUploader';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 
 const GroupMemoryCreator = () => {
-  const [activeTab, setActiveTab] = useState<string>("upload");
-  const [processedImages, setProcessedImages] = useState<Array<{url: string, id: string}>>([]);
-  const { isProcessing } = useImageProcessing();
+  const navigate = useNavigate();
+  const [selectedTab, setSelectedTab] = useState('upload');
+  const [uploadedCardIds, setUploadedCardIds] = useState<string[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
-  const handleProcessingComplete = (cardIds: string[]) => {
+  const handleCardUploadComplete = (cardIds: string[]) => {
+    setUploadedCardIds(cardIds);
     if (cardIds.length > 0) {
-      // Convert card IDs to a format we can use for display
-      const newImages = cardIds.map(id => ({
-        id,
-        url: `/images/card-placeholder.png` // Fallback to placeholder image
-      }));
+      toast.success(`${cardIds.length} ${cardIds.length === 1 ? 'card' : 'cards'} uploaded successfully`);
+      // Auto-advance to next step if cards were uploaded
+      setSelectedTab('title');
+    }
+  };
+  
+  const handleImageSelect = (files: File[]) => {
+    console.log('Selected files:', files);
+    // This handler is required by the component props but the actual implementation
+    // will be handled by the GroupImageUploader component internally
+  };
+  
+  const handleSubmitGroup = async () => {
+    if (uploadedCardIds.length === 0) {
+      toast.error('Upload at least one image first');
+      return;
+    }
+    
+    setIsSubmitting(true);
+    
+    try {
+      const groupId = uuidv4();
       
-      setProcessedImages([...processedImages, ...newImages]);
-      setActiveTab("results");
-      toast.success(`Successfully processed ${cardIds.length} images`);
+      // Here we would normally save the group memory to the database
+      // For now we'll just simulate a successful creation
+      
+      toast.success('Group memory created successfully!');
+      navigate(`/group-memories/${groupId}`);
+    } catch (error) {
+      console.error('Error creating group memory:', error);
+      toast.error('Failed to create group memory');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
     <PageLayout
-      title="Group Memory Creator"
-      description="Capture and preserve group experiences at the Coliseum"
+      title="Create Group Memory"
+      description="Upload multiple photos to create a group memory"
     >
-      <main className="pt-6 pb-12 px-4 sm:px-6 max-w-7xl mx-auto">
-        <div className="mb-10">
-          <Link to="/teams/oakland/memories">
-            <Button variant="ghost" className="mb-4 -ml-4">
-              <ChevronLeft className="mr-2 h-4 w-4" />
-              Back to Memories
-            </Button>
-          </Link>
-          
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-[#003831]">Group Memory Creator</h1>
-              <p className="text-gray-600 mt-2">
-                Capture and preserve group experiences at the Coliseum and beyond
-              </p>
-            </div>
-            
-            <div className="h-16 w-16">
-              <img 
-                src="/oakland/oak-fan-logo.png" 
-                alt="Oakland A's" 
-                className="h-full w-full object-contain"
-              />
-            </div>
-          </div>
-          
-          <div className="h-1 bg-gradient-to-r from-[#003831] via-[#006341] to-[#EFB21E] mt-4"></div>
-        </div>
-        
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid grid-cols-2 mb-6">
-            <TabsTrigger value="upload">Upload & Process</TabsTrigger>
-            <TabsTrigger value="results" disabled={processedImages.length === 0}>Results</TabsTrigger>
+      <div className="container mx-auto max-w-4xl px-4 py-8">
+        <Tabs value={selectedTab} onValueChange={setSelectedTab}>
+          <TabsList className="grid w-full grid-cols-3 mb-6">
+            <TabsTrigger value="upload">Upload Photos</TabsTrigger>
+            <TabsTrigger value="title">Add Details</TabsTrigger>
+            <TabsTrigger value="layout">Choose Layout</TabsTrigger>
           </TabsList>
           
-          <TabsContent value="upload" className="bg-white p-6 rounded-lg shadow-sm">
-            <GroupImageUploader 
-              onComplete={handleProcessingComplete} 
-              className="max-w-4xl mx-auto"
-            />
+          <TabsContent value="upload">
+            <Card className="p-6">
+              <h2 className="text-xl font-semibold mb-4">Upload Your Photos</h2>
+              <p className="text-gray-600 mb-6">
+                Upload multiple photos to create a group memory. You can arrange them later.
+              </p>
+              
+              <GroupImageUploader 
+                onImageSelect={handleImageSelect}
+                onComplete={handleCardUploadComplete} 
+                className="mb-6" 
+              />
+              
+              <div className="flex justify-end">
+                <Button 
+                  onClick={() => setSelectedTab('title')} 
+                  disabled={uploadedCardIds.length === 0}
+                >
+                  Next: Add Details
+                </Button>
+              </div>
+            </Card>
           </TabsContent>
           
-          <TabsContent value="results" className="space-y-6">
-            {processedImages.length > 0 && (
-              <div className="bg-white p-6 rounded-lg shadow-sm">
-                <h2 className="text-xl font-bold mb-4">Processed Images</h2>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                  {processedImages.map((image, index) => (
-                    <div key={image.id || index} className="aspect-square rounded-lg border overflow-hidden">
-                      <img 
-                        src={image.url} 
-                        alt={`Processed image ${index + 1}`} 
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  ))}
-                </div>
+          <TabsContent value="title">
+            <Card className="p-6">
+              <h2 className="text-xl font-semibold mb-4">Add Group Details</h2>
+              <p className="text-gray-600 mb-6">
+                Add a title and description to your group memory.
+              </p>
+              
+              {/* Form fields would go here */}
+              
+              <div className="flex justify-between mt-6">
+                <Button variant="outline" onClick={() => setSelectedTab('upload')}>
+                  Back
+                </Button>
+                <Button onClick={() => setSelectedTab('layout')}>
+                  Next: Choose Layout
+                </Button>
               </div>
-            )}
-            
-            <CommentSection />
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="layout">
+            <Card className="p-6">
+              <h2 className="text-xl font-semibold mb-4">Choose Layout</h2>
+              <p className="text-gray-600 mb-6">
+                Select a layout for your group memory.
+              </p>
+              
+              {/* Layout options would go here */}
+              
+              <div className="flex justify-between mt-6">
+                <Button variant="outline" onClick={() => setSelectedTab('title')}>
+                  Back
+                </Button>
+                <Button onClick={handleSubmitGroup}>
+                  Create Group Memory
+                </Button>
+              </div>
+            </Card>
           </TabsContent>
         </Tabs>
-      </main>
+      </div>
     </PageLayout>
   );
 };
