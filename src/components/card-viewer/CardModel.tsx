@@ -1,124 +1,124 @@
-import React, { useState, useRef } from 'react';
-import * as THREE from 'three';
+
+import React, { useRef, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
+import * as THREE from 'three';
 import { useTexture } from '@react-three/drei';
-import { Card } from '@/lib/types';
+import ShimmerEffect from '../card-effects/effects/ShimmerEffect';
+import HolographicEffect from '../card-effects/effects/HolographicEffect';
+import RefractorEffect from '../card-effects/effects/RefractorEffect';
+import VintageEffect from '../card-effects/effects/VintageEffect';
 
 interface CardModelProps {
   imageUrl: string;
-  backImageUrl?: string;
+  backImageUrl: string;
   isFlipped: boolean;
-  activeEffects: string[];
+  activeEffects?: string[];
   effectIntensities?: Record<string, number>;
 }
 
 const CardModel: React.FC<CardModelProps> = ({
   imageUrl,
-  backImageUrl = '/card-back-texture.jpg',
+  backImageUrl,
   isFlipped,
   activeEffects = [],
   effectIntensities = {}
 }) => {
-  const cardRef = useRef<THREE.Group>(null);
-  const [textureError, setTextureError] = useState(false);
-  const [frontTextureLoaded, setFrontTextureLoaded] = useState(false);
-  const [backTextureLoaded, setBackTextureLoaded] = useState(false);
-  
-  // Default fallback textures
-  const fallbackFrontTexture = new THREE.Color('#2a5298');
-  const fallbackBackTexture = new THREE.Color('#1a3060');
-  
-  // Load textures with error handling
-  const frontTexture = useTexture(
-    imageUrl, 
-    (texture) => {
-      console.log('Front texture loaded successfully');
-      setFrontTextureLoaded(true);
-    }
-  );
-  
-  // Use try-catch for back texture since it's optional and might fail
-  let backTexture;
-  try {
-    backTexture = useTexture(
-      backImageUrl, 
-      (texture) => {
-        console.log('Back texture loaded successfully');
-        setBackTextureLoaded(true);
-      }
-    );
-  } catch (error) {
-    console.warn('Back texture could not be loaded, using fallback');
-  }
+  const meshRef = useRef<THREE.Mesh>(null);
+  const frontTexture = useTexture(imageUrl);
+  const backTexture = useTexture(backImageUrl);
 
-  // Create materials with proper matte finish
-  const frontMaterial = new THREE.MeshPhysicalMaterial({
-    map: frontTextureLoaded ? frontTexture : null,
-    color: frontTextureLoaded ? undefined : fallbackFrontTexture,
-    metalness: 0.1,      // Lower metalness for matte look
-    roughness: 0.7,      // Higher roughness for matte finish
-    clearcoat: 0.3,      // Subtle clearcoat for print finish
-    clearcoatRoughness: 0.8,  // High roughness in clearcoat
-    envMapIntensity: 0.5     // Subtle environment reflections
-  });
+  // Calculate card dimensions (standard trading card ratio)
+  const width = 2.5;
+  const height = 3.5;
+  const thickness = 0.05;
   
-  const backMaterial = new THREE.MeshPhysicalMaterial({
-    map: backTextureLoaded ? backTexture : null,
-    color: backTextureLoaded ? undefined : fallbackBackTexture,
-    metalness: 0.1,
-    roughness: 0.7,
-    clearcoat: 0.3,
-    clearcoatRoughness: 0.8,
-    envMapIntensity: 0.5
-  });
-
-  // Get intensity value for a specific effect
-  const getEffectIntensity = (effectName: string): number => {
-    return effectIntensities[effectName] || 1.0;
-  };
-
-  // More efficient animation with reduced updates
-  useFrame((state) => {
-    if (!cardRef.current) return;
+  // Update rotation based on flipped state
+  useFrame(() => {
+    if (!meshRef.current) return;
     
-    const targetRotation = isFlipped ? Math.PI : 0;
-    cardRef.current.rotation.y = THREE.MathUtils.lerp(
-      cardRef.current.rotation.y,
-      targetRotation,
+    const targetRotationY = isFlipped ? Math.PI : 0;
+    meshRef.current.rotation.y = THREE.MathUtils.lerp(
+      meshRef.current.rotation.y,
+      targetRotationY,
       0.1
     );
-
-    // Reduced animation frequency
-    if (state.clock.getElapsedTime() % 0.5 < 0.1) {
-      const t = state.clock.getElapsedTime();
-      cardRef.current.position.y = Math.sin(t * 0.3) * 0.05;
-      cardRef.current.rotation.z = Math.sin(t * 0.2) * 0.01;
-    }
   });
+  
+  useEffect(() => {
+    console.log("Card model received effects:", activeEffects);
+  }, [activeEffects]);
 
-  // If there's a texture error, show an error cube
-  if (textureError) {
-    return (
-      <mesh position={[0, 0, 0]}>
-        <boxGeometry args={[2.5, 3.5, 0.1]} />
-        <meshStandardMaterial color="red" />
-      </mesh>
-    );
-  }
+  // Log when textures are loaded
+  useEffect(() => {
+    if (frontTexture && backTexture) {
+      console.log("Textures loaded successfully");
+    }
+  }, [frontTexture, backTexture]);
 
   return (
-    <group ref={cardRef} position={[0, 0, 0]}>
-      {/* Front face */}
-      <mesh castShadow receiveShadow>
-        <planeGeometry args={[2.5, 3.5]} />
-        <primitive object={frontMaterial} attach="material" />
+    <group>
+      {/* Main card mesh */}
+      <mesh ref={meshRef} castShadow receiveShadow>
+        <boxGeometry args={[width, height, thickness]} />
+        <meshStandardMaterial 
+          map={frontTexture} 
+          attachArray="material" 
+          color="white" 
+        />
+        <meshStandardMaterial 
+          map={frontTexture} 
+          attachArray="material" 
+          color="white"
+        />
+        <meshStandardMaterial 
+          color="white" 
+          attachArray="material"
+        />
+        <meshStandardMaterial 
+          color="white" 
+          attachArray="material"
+        />
+        <meshStandardMaterial 
+          map={backTexture} 
+          attachArray="material" 
+          color="white"
+        />
+        <meshStandardMaterial 
+          map={backTexture} 
+          attachArray="material" 
+          color="white"
+        />
       </mesh>
       
-      {/* Back face */}
-      <mesh position={[0, 0, -0.01]} rotation={[0, Math.PI, 0]} castShadow receiveShadow>
-        <planeGeometry args={[2.5, 3.5]} />
-        <primitive object={backMaterial} attach="material" />
-      </mesh>
+      {/* Apply effects as separate layers */}
+      {activeEffects.includes('Shimmer') && (
+        <ShimmerEffect 
+          isActive={true} 
+          intensity={effectIntensities['Shimmer'] || 0.7}
+        />
+      )}
+      
+      {activeEffects.includes('Holographic') && (
+        <HolographicEffect 
+          isActive={true} 
+          intensity={effectIntensities['Holographic'] || 0.7}
+        />
+      )}
+      
+      {activeEffects.includes('Refractor') && (
+        <RefractorEffect 
+          isActive={true} 
+          intensity={effectIntensities['Refractor'] || 0.7}
+        />
+      )}
+      
+      {activeEffects.includes('Vintage') && (
+        <VintageEffect 
+          isActive={true} 
+          intensity={effectIntensities['Vintage'] || 0.7}
+          cardTexture={frontTexture}
+        />
+      )}
     </group>
   );
 };

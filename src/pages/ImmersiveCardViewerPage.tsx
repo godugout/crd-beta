@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, Suspense } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { useCards } from '@/context/CardContext';
@@ -10,7 +11,6 @@ import { useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
-import CardEffectsPanel from '@/components/card-effects/CardEffectsPanel';
 import ImmersiveCardViewer from '@/components/card-viewer/ImmersiveCardViewer';
 import { sampleCards } from '@/lib/data/sampleCards';
 import { DEFAULT_DESIGN_METADATA } from '@/lib/utils/cardDefaults';
@@ -32,7 +32,7 @@ const ImmersiveCardViewerPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isFlipped, setIsFlipped] = useState(false);
   const [showControls, setShowControls] = useState(true);
-  const [viewTab, setViewTab] = useState('view');
+  const [viewTab, setViewTab] = useState('effects');
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const viewMode = searchParams.get('mode') || 'standard';
   
@@ -187,9 +187,8 @@ const ImmersiveCardViewerPage: React.FC = () => {
           
           <div className="flex gap-2">
             <Tabs value={viewTab} onValueChange={setViewTab} className="w-[400px]">
-              <TabsList className="grid grid-cols-3 bg-gray-800/50 backdrop-blur">
-                <TabsTrigger value="view">View</TabsTrigger>
-                <TabsTrigger value="effects">Effects</TabsTrigger>
+              <TabsList className="grid grid-cols-2 bg-gray-800/50 backdrop-blur">
+                <TabsTrigger value="effects">Effects & View</TabsTrigger>
                 <TabsTrigger value="controls">Controls</TabsTrigger>
               </TabsList>
             </Tabs>
@@ -247,32 +246,7 @@ const ImmersiveCardViewerPage: React.FC = () => {
             isPanelOpen ? "translate-x-0" : "translate-x-full"
           )}>
             <div className="p-6">
-              <Tabs value={viewTab} className="w-full" defaultValue="view">
-                <TabsContent value="view" className="mt-0">
-                  <h3 className="text-xl font-semibold mb-4">View Settings</h3>
-                  
-                  {card && (
-                    <div className="space-y-6">
-                      <div className="p-4 bg-gray-800/50 rounded-lg">
-                        <h4 className="font-medium text-white mb-2">Card Position</h4>
-                        <Button 
-                          className="w-full"
-                          onClick={() => setIsFlipped(!isFlipped)}
-                        >
-                          {isFlipped ? "Show Front" : "Show Back"}
-                        </Button>
-                      </div>
-                      
-                      <ViewerSettings
-                        settings={lightingSettings}
-                        onUpdateSettings={updateLightingSetting}
-                        onApplyPreset={applyPreset}
-                        isOpen={true}
-                      />
-                    </div>
-                  )}
-                </TabsContent>
-                
+              <Tabs value={viewTab} className="w-full">
                 <TabsContent value="effects" className="mt-0">
                   <div className="mb-4 flex justify-between items-center">
                     <h3 className="text-xl font-semibold">Card Effects</h3>
@@ -327,6 +301,27 @@ const ImmersiveCardViewerPage: React.FC = () => {
                         </div>
                       </div>
                     ))}
+                  </div>
+                  
+                  {/* Scene settings integrated into the effects panel */}
+                  <div className="mt-8 border-t border-gray-800 pt-6">
+                    <ViewerSettings
+                      settings={lightingSettings}
+                      onUpdateSettings={updateLightingSetting}
+                      onApplyPreset={applyPreset}
+                      isOpen={true}
+                    />
+                    
+                    {/* Card position (flipping control) */}
+                    <div className="mt-6 p-4 bg-gray-800/50 rounded-lg">
+                      <h3 className="font-medium text-white mb-2">Card Position</h3>
+                      <Button 
+                        className="w-full"
+                        onClick={() => setIsFlipped(!isFlipped)}
+                      >
+                        {isFlipped ? "Show Front" : "Show Back"}
+                      </Button>
+                    </div>
                   </div>
                 </TabsContent>
                 

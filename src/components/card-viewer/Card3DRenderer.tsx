@@ -32,6 +32,7 @@ const Card3DRenderer: React.FC<Card3DRendererProps> = ({
   useEffect(() => {
     const mappedPreset = mapLightingPresetToEnvironment(lightingPreset);
     setEnvironmentPreset(mappedPreset);
+    console.log("Applied lighting preset:", lightingPreset, "mapped to:", mappedPreset);
   }, [lightingPreset]);
   
   // Optimized frame updates - only run certain operations every N frames
@@ -41,6 +42,11 @@ const Card3DRenderer: React.FC<Card3DRendererProps> = ({
     // Only update every 5th frame to reduce CPU load
     if (frameCount.current === 0 && onRenderFrame) {
       onRenderFrame();
+    }
+    
+    // Log active effects for debugging
+    if (frameCount.current === 0 && activeEffects.length > 0) {
+      console.log("Active effects:", activeEffects, "with intensities:", effectIntensities);
     }
   });
   

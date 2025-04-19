@@ -1,53 +1,62 @@
 
-/**
- * Define valid environment presets for TypeScript
- */
+// Valid environment presets for the @react-three/drei Environment component
 export type ValidEnvironmentPreset = 
-  "apartment" | "city" | "dawn" | "forest" | "lobby" | 
-  "night" | "park" | "studio" | "sunset" | "warehouse";
+  | 'sunset' | 'dawn' | 'night' | 'warehouse' 
+  | 'forest' | 'apartment' | 'studio' | 'city' 
+  | 'park' | 'lobby';
 
-/**
- * Gets a list of all valid environment presets
- */
-export const getValidEnvironmentPresets = (): ValidEnvironmentPreset[] => {
-  return [
-    "apartment", 
-    "city", 
-    "dawn", 
-    "forest", 
-    "lobby", 
-    "night", 
-    "park", 
-    "studio", 
-    "sunset", 
-    "warehouse"
-  ];
+// Maps custom lighting presets to valid @react-three/drei environment presets
+export const mapLightingPresetToEnvironment = (preset: string): string => {
+  // Use console to debug which presets are being applied
+  console.log("Mapping lighting preset:", preset);
+  
+  switch (preset) {
+    case 'studio':
+      return 'studio';
+    case 'natural':
+      return 'park';
+    case 'dramatic':
+      return 'night';
+    case 'display_case':
+      return 'lobby';
+    default:
+      console.warn(`Unknown preset "${preset}" - falling back to "studio"`);
+      return 'studio';
+  }
 };
 
-/**
- * Maps our custom lighting presets to valid @react-three/drei environment presets
- */
-export const mapLightingPresetToEnvironment = (
-  preset: string
-): ValidEnvironmentPreset => {
-  const validPresets: Record<string, ValidEnvironmentPreset> = {
-    studio: "studio",
-    natural: "park",
-    dramatic: "night", 
-    display_case: "lobby",
-    bright: "city",
-    dim: "apartment",
-    outdoor: "dawn",
-    indoor: "warehouse",
-    sunset: "sunset",
-    default: "studio"
-  };
-  
-  // First, check if the preset is already a valid @react-three/drei preset
-  if (getValidEnvironmentPresets().includes(preset as ValidEnvironmentPreset)) {
-    return preset as ValidEnvironmentPreset;
+// Custom lighting preset configurations
+export const lightingPresets = {
+  studio: {
+    primaryLight: { intensity: 1.0, x: 10, y: 10, z: 10 },
+    ambientLight: { intensity: 0.7 },
+    envMapIntensity: 1.0,
+    environmentType: 'studio',
+    useDynamicLighting: true,
+    autoRotate: false
+  },
+  natural: {
+    primaryLight: { intensity: 1.2, x: 5, y: 15, z: 5 },
+    ambientLight: { intensity: 0.5 },
+    envMapIntensity: 0.8,
+    environmentType: 'natural',
+    useDynamicLighting: true,
+    autoRotate: false
+  },
+  dramatic: {
+    primaryLight: { intensity: 1.5, x: 3, y: 10, z: 10 },
+    ambientLight: { intensity: 0.3 },
+    envMapIntensity: 0.6,
+    environmentType: 'dramatic',
+    useDynamicLighting: true,
+    autoRotate: false
+  },
+  display_case: {
+    primaryLight: { intensity: 0.8, x: 0, y: 10, z: 0 },
+    ambientLight: { intensity: 0.6 },
+    envMapIntensity: 1.2,
+    environmentType: 'display_case',
+    useDynamicLighting: false,
+    autoRotate: true
   }
-  
-  // Return the mapped preset or default to studio
-  return validPresets[preset] || "studio";
 };
