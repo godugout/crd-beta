@@ -23,5 +23,5 @@ export type CardData = {
   imageUrl: string;
   backImageUrl?: string;
   stats?: CardStats;
+  effects?: string[]; // Added effects property
 };
-
