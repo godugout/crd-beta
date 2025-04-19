@@ -27,12 +27,12 @@ const CardModel: React.FC<CardModelProps> = ({
   const [frontTextureLoaded, setFrontTextureLoaded] = useState(false);
   const [backTextureLoaded, setBackTextureLoaded] = useState(false);
   
-  const frontTexture = useTexture(imageUrl, (texture) => {
+  const frontTexture = useTexture(imageUrl || FALLBACK_FRONT_IMAGE_URL, () => {
     setFrontTextureLoaded(true);
     console.log("Front card texture loaded");
   });
   
-  const backTexture = useTexture(backImageUrl, (texture) => {
+  const backTexture = useTexture(backImageUrl || FALLBACK_FRONT_IMAGE_URL, () => {
     setBackTextureLoaded(true);
     console.log("Back card texture loaded");
   });
