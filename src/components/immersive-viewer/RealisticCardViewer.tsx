@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, Suspense, useRef } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { 
@@ -196,6 +197,7 @@ const mapLightingPresetToEnvironment = (
     display_case: "lobby"
   } as const;
   
+  // Ensure we always return a valid preset, defaulting to "studio" if not found
   return (validPresets[preset as keyof typeof validPresets] || "studio") as 
     "apartment" | "city" | "dawn" | "forest" | "lobby" | "night" | "park" | "studio" | "sunset" | "warehouse";
 };
@@ -334,7 +336,11 @@ const RealisticCardViewer: React.FC<RealisticCardViewerProps> = ({
               metalness: 0.3
             }}
           />
-          <Environment3D preset={lightingSettings.environmentType} />
+          <Environment 
+            preset={mapLightingPresetToEnvironment(lightingSettings.environmentType)} 
+            background={false}
+            blur={0.6}
+          />
         </Suspense>
         
         <OrbitControls 
