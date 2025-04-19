@@ -1,6 +1,7 @@
 
 import { useState } from 'react';
 import { processImage, compressImage } from '@/lib/image-utils';
+import { FALLBACK_UNSPLASH_IMAGE_URL } from '@/lib/utils/cardDefaults';
 
 export const useImageHandling = () => {
   const [isProcessing, setIsProcessing] = useState(false);

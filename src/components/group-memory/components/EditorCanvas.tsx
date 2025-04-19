@@ -13,8 +13,8 @@ interface EditorCanvasProps {
   handlePointerDown?: (e: React.PointerEvent) => void;
   handlePointerMove?: (e: React.PointerEvent) => void;
   handlePointerUp?: () => void;
-  imageUrl?: string | null; // Added this missing prop
-  isDetecting?: boolean; // Added this missing prop
+  imageUrl?: string | null; // Required prop that was missing
+  isDetecting?: boolean; // Required prop that was missing
 }
 
 const EditorCanvas: React.FC<EditorCanvasProps> = ({

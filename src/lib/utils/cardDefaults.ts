@@ -1,7 +1,7 @@
 
 // Create a centralized constants file for default images
 export const FALLBACK_FRONT_IMAGE_URL = '/images/card-placeholder.png';
-export const FALLBACK_BACK_IMAGE_URL = '/images/card-back-placeholder.png';
+export const FALLBACK_BACK_IMAGE_URL = 'https://images.unsplash.com/photo-1518770660439-4636190af475';
 export const FALLBACK_UNSPLASH_IMAGE_URL = 'https://images.unsplash.com/photo-1518770660439-4636190af475';
 export const FALLBACK_IMAGE_URL = FALLBACK_FRONT_IMAGE_URL; // Add alias for broader use
 
@@ -24,6 +24,12 @@ export const DEFAULT_DESIGN_METADATA = {
     descriptionSize: 14,
     textColor: '#FFFFFF',
     textShadow: true,
+    // Adding missing properties to match TextStyle type
+    titleColor: '#FFFFFF',
+    titleAlignment: 'center',
+    titleWeight: 'bold',
+    descriptionColor: '#EEEEEE',
+    descriptionAlignment: 'center',
   },
   cardMetadata: {
     borderRadius: 12,

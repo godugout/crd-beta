@@ -7,7 +7,7 @@ import ShimmerEffect from '../card-effects/effects/ShimmerEffect';
 import HolographicEffect from '../card-effects/effects/HolographicEffect';
 import RefractorEffect from '../card-effects/effects/RefractorEffect';
 import VintageEffect from '../card-effects/effects/VintageEffect';
-import { FALLBACK_FRONT_IMAGE_URL, FALLBACK_BACK_IMAGE_URL } from '@/lib/utils/cardDefaults';
+import { FALLBACK_FRONT_IMAGE_URL, FALLBACK_BACK_IMAGE_URL, handleImageLoadError } from '@/lib/utils/cardDefaults';
 
 interface CardModelProps {
   imageUrl: string;
@@ -28,9 +28,22 @@ const CardModel: React.FC<CardModelProps> = ({
   const [frontTextureLoaded, setFrontTextureLoaded] = useState(false);
   const [backTextureLoaded, setBackTextureLoaded] = useState(false);
   
-  // Use proper error handlers for texture loading
-  const frontTexture = useTexture(imageUrl, undefined);
-  const backTexture = useTexture(backImageUrl, undefined);
+  // Use error handlers for texture loading
+  const frontTexture = useTexture(imageUrl, () => {
+    setFrontTextureLoaded(true);
+    console.log("Front card texture loaded");
+  }, (error) => {
+    console.error("Failed to load front texture:", error);
+    // The drei useTexture already has fallback handling
+  });
+  
+  const backTexture = useTexture(backImageUrl, () => {
+    setBackTextureLoaded(true);
+    console.log("Back card texture loaded");
+  }, (error) => {
+    console.error("Failed to load back texture:", error);
+    // The drei useTexture already has fallback handling
+  });
 
   // Calculate card dimensions (standard trading card ratio)
   const width = 2.5;
