@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
@@ -6,6 +7,16 @@ import CardModel from './CardModel';
 import { Environment } from '@react-three/drei';
 import { mapLightingPresetToEnvironment } from '@/utils/environmentPresets';
 import { FALLBACK_FRONT_IMAGE_URL, FALLBACK_BACK_IMAGE_URL, handleImageLoadError } from '@/lib/utils/cardDefaults';
+
+// Define the component props type
+interface Card3DRendererProps {
+  card: Card;
+  isFlipped: boolean;
+  activeEffects?: string[];
+  effectIntensities?: Record<string, number>;
+  lightingPreset?: string;
+  onRenderFrame?: () => void;
+}
 
 const Card3DRenderer: React.FC<Card3DRendererProps> = ({
   card,
@@ -53,7 +64,6 @@ const Card3DRenderer: React.FC<Card3DRendererProps> = ({
       <CardModel
         imageUrl={cardImageUrl}
         backImageUrl={cardBackImageUrl}
-        onImageError={handleImageLoadError}
         isFlipped={isFlipped}
         activeEffects={activeEffects} 
         effectIntensities={effectIntensities}

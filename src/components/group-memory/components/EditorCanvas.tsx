@@ -14,6 +14,7 @@ interface EditorCanvasProps {
   handlePointerMove?: (e: React.PointerEvent) => void;
   handlePointerUp?: () => void;
   imageUrl?: string | null; // Added this missing prop
+  isDetecting?: boolean; // Added this missing prop
 }
 
 const EditorCanvas: React.FC<EditorCanvasProps> = ({
@@ -27,7 +28,8 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({
   handlePointerDown,
   handlePointerMove,
   handlePointerUp,
-  imageUrl
+  imageUrl,
+  isDetecting = false
 }) => {
   return (
     <div className="relative w-full h-full">
@@ -45,6 +47,15 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({
           className="hidden" // Hidden reference image
           alt="Editor reference"
         />
+      )}
+      
+      {isDetecting && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+          <div className="text-white text-center">
+            <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-white mx-auto mb-2"></div>
+            <p>Detecting items...</p>
+          </div>
+        </div>
       )}
     </div>
   );

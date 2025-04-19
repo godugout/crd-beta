@@ -1,3 +1,4 @@
+
 import React, { useRef, useEffect, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
@@ -6,10 +7,7 @@ import ShimmerEffect from '../card-effects/effects/ShimmerEffect';
 import HolographicEffect from '../card-effects/effects/HolographicEffect';
 import RefractorEffect from '../card-effects/effects/RefractorEffect';
 import VintageEffect from '../card-effects/effects/VintageEffect';
-
-// Fallback textures if the main ones fail to load
-const FALLBACK_FRONT_IMAGE_URL = '/images/card-placeholder.png';
-const FALLBACK_BACK_IMAGE_URL = '/images/card-back-placeholder.png';
+import { FALLBACK_FRONT_IMAGE_URL, FALLBACK_BACK_IMAGE_URL } from '@/lib/utils/cardDefaults';
 
 interface CardModelProps {
   imageUrl: string;
