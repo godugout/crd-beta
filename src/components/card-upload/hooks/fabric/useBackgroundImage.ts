@@ -1,11 +1,11 @@
 
 import { useCallback, useEffect, useRef } from 'react';
-import { Canvas, fabric } from 'fabric';
+import { fabric } from 'fabric';
 import { EnhancedCropBoxProps } from '../../cardDetection';
 import { ImageData } from '../useCropState';
 
 interface UseBackgroundImageProps {
-  canvas: Canvas | null;
+  canvas: fabric.Canvas | null;
   editorImgRef: React.RefObject<HTMLImageElement>;
   imageData: ImageData;
   setCropBoxes: React.Dispatch<React.SetStateAction<EnhancedCropBoxProps[]>>;
@@ -28,11 +28,10 @@ export const useBackgroundImage = ({
     if (!canvas || !editorImgRef.current) return;
     
     const imgElement = editorImgRef.current;
+    const imgUrl = imgElement.src;
     
-    // Create a fabric Image object from the HTML img element
-    fabric.Image.fromElement(imgElement, {
-      crossOrigin: 'anonymous'
-    }).then(img => {
+    // Use fromURL instead of fromElement to avoid callback issues
+    fabric.Image.fromURL(imgUrl, (img) => {
       // Remove existing background image if any
       if (backgroundImageRef.current) {
         canvas.remove(backgroundImageRef.current);
@@ -73,7 +72,7 @@ export const useBackgroundImage = ({
       
       // If there are no crop boxes yet and automatic detection is on,
       // we could add auto-detection logic here
-    });
+    }, { crossOrigin: 'anonymous' });
   }, [canvas, editorImgRef, imageData]);
   
   // Load or update background image when image data or ref changes

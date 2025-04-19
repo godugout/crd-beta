@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { EnhancedCropBoxProps } from './CropBox';
 import { MemorabiliaType } from './cardDetection';
 import { ImageData } from './hooks/useCropState';
@@ -32,8 +32,6 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({
   onToggleBatchSelection,
   onMemorabiliaTypeChange
 }) => {
-  const fabricRef = canvasRef; // We'll use the same ref
-  
   // Use our enhanced Fabric.js canvas hook
   const { 
     addNewCropBox,
@@ -41,7 +39,7 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({
     updateCropBoxType,
     canvasInstance
   } = useFabricCanvas({
-    fabricRef,
+    fabricRef: canvasRef,
     canvasRef,
     cropBoxes, 
     setCropBoxes,
@@ -57,7 +55,7 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({
 
   return (
     <canvas 
-      ref={fabricRef}
+      ref={canvasRef}
       className="w-full h-full touch-none"
     />
   );

@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { Upload, X, Image as ImageIcon, Camera, Users, CopyCheck } from 'lucide-react';
@@ -62,7 +63,8 @@ const CardUpload: React.FC<CardUploadProps> = ({
     
     const localUrl = URL.createObjectURL(file);
     
-    const img = new window.Image();
+    // Preload the image to ensure it's loaded before we try to use it in Fabric.js
+    const img = new Image();
     img.onload = () => {
       setEditorImage(localUrl);
       setShowEditor(true);
@@ -70,6 +72,10 @@ const CardUpload: React.FC<CardUploadProps> = ({
         setBatchMode(true);
       }
     };
+    img.onerror = () => {
+      toast.error('Failed to load image');
+    };
+    img.crossOrigin = 'anonymous';
     img.src = localUrl;
   };
 
@@ -217,19 +223,17 @@ const CardUpload: React.FC<CardUploadProps> = ({
         </div>
       )}
 
-      {showEditor && (
-        <ImageEditor 
-          showEditor={showEditor}
-          setShowEditor={setShowEditor}
-          editorImage={editorImage}
-          currentFile={currentFile}
-          onCropComplete={handleImageUpload}
-          batchProcessingMode={batchMode}
-          onBatchProcessComplete={handleBatchUpload}
-          enabledMemorabiliaTypes={enabledMemorabiliaTypes}
-          autoEnhance={autoEnhance}
-        />
-      )}
+      <ImageEditor
+        showEditor={showEditor}
+        setShowEditor={setShowEditor}
+        editorImage={editorImage}
+        currentFile={currentFile}
+        onCropComplete={handleImageUpload}
+        onBatchProcessComplete={handleBatchUpload}
+        batchProcessingMode={batchMode}
+        enabledMemorabiliaTypes={enabledMemorabiliaTypes}
+        autoEnhance={autoEnhance}
+      />
     </div>
   );
 };
