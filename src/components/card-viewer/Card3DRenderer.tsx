@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect, useState } from 'react';
 import { Card } from '@/lib/types';
 import * as THREE from 'three';
@@ -82,7 +81,39 @@ const Card3DRenderer: React.FC<Card3DRendererProps> = ({
     };
   }, [card.imageUrl]);
 
-  // Animation effect for card
+  // Update the default card material to have a more realistic matte printing appearance
+  const createDefaultMaterial = (texture: THREE.Texture | null, isBack: boolean = false) => {
+    return new THREE.MeshPhysicalMaterial({
+      map: texture,
+      color: texture ? undefined : (isBack ? "#1a3060" : "#2a5298"),
+      metalness: 0.1, // Lower metalness for matte look
+      roughness: 0.7, // Higher roughness for matte finish
+      clearcoat: 0.3, // Subtle clearcoat for print finish
+      clearcoatRoughness: 0.8, // High roughness in clearcoat
+      envMapIntensity: 0.5, // Subtle environment reflections
+      flatShading: false,
+      // Add subtle normal mapping for paper texture
+      normalScale: new THREE.Vector2(0.05, 0.05)
+    });
+  };
+
+  // Update holographic effect to be more subtle and realistic
+  const createHolographicMaterial = (intensity: number = 1.0) => {
+    return new THREE.MeshPhysicalMaterial({
+      color: new THREE.Color(0xffffff),
+      metalness: 0.9,
+      roughness: 0.2,
+      transmission: 0.1,
+      thickness: 0.1,
+      clearcoat: 1.0,
+      clearcoatRoughness: 0.1,
+      transparent: true,
+      opacity: 0.15 * intensity,
+      side: THREE.FrontSide,
+      envMapIntensity: 2
+    });
+  };
+
   useFrame((state) => {
     if (!cardRef.current) return;
     
@@ -98,113 +129,36 @@ const Card3DRenderer: React.FC<Card3DRendererProps> = ({
     cardRef.current.position.y = Math.sin(t * 0.5) * 0.05;
     cardRef.current.rotation.z = Math.sin(t * 0.3) * 0.02;
     
-    // Apply holographic dynamic effects if active
+    // Update holographic effect if active
     if (activeEffects.includes('Holographic')) {
       cardRef.current.children.forEach(child => {
         if (child.userData.effectType === 'holographic' && child instanceof THREE.Mesh) {
           if (child.material instanceof THREE.MeshPhysicalMaterial) {
-            // Get intensity from props or default
             const intensity = effectIntensities['Holographic'] || 1.0;
+            const time = state.clock.getElapsedTime();
             
-            // Modify holographic effect based on time and card position
-            // Make color shift depending on viewing angle (rotation of card)
-            const viewAngle = Math.abs(cardRef.current!.rotation.y % (Math.PI * 2)) / (Math.PI * 2);
-            const hueShift = (viewAngle + Math.sin(t * 1.5) * 0.2) % 1.0;
-            
+            // Create more subtle color shifts
+            const hue = ((Math.sin(time * 0.2) * 0.1) + 0.5) % 1.0;
             const color = new THREE.Color();
-            color.setHSL(hueShift, 0.8, 0.6);
+            color.setHSL(hue, 0.5, 0.6);
             
-            // Apply dynamic effects
+            // Apply subtle modifications
             child.material.color = color;
-            child.material.emissive = color.clone().multiplyScalar(0.4);
-            child.material.emissiveIntensity = 0.3 + Math.sin(t * 2) * 0.1;
-            child.material.opacity = 0.2 * intensity + Math.sin(t * 2) * 0.05;
+            child.material.emissive = color.clone().multiplyScalar(0.2);
+            child.material.emissiveIntensity = 0.1 + Math.sin(time * 1.5) * 0.05;
+            child.material.opacity = 0.15 * intensity * (0.8 + Math.sin(time * 0.5) * 0.2);
             
-            // Create wave effect on the geometry
+            // Create subtle wave pattern
             if (child.geometry instanceof THREE.PlaneGeometry) {
               const positions = child.geometry.attributes.position;
-              
               for (let i = 0; i < positions.count; i++) {
                 const x = positions.getX(i);
                 const y = positions.getY(i);
-                
-                // Create wave pattern based on time
-                const waveX = Math.sin(x * 5 + t * 2) * 0.01 * intensity;
-                const waveY = Math.cos(y * 5 + t * 2) * 0.01 * intensity;
-                
-                // Only modify Z to create depth perception
+                const waveX = Math.sin(x * 3 + time * 0.5) * 0.002 * intensity;
+                const waveY = Math.cos(y * 3 + time * 0.5) * 0.002 * intensity;
                 positions.setZ(i, waveX + waveY);
               }
-              
               positions.needsUpdate = true;
-            }
-          }
-        }
-      });
-    }
-    
-    // Apply refractor dynamic effects
-    if (activeEffects.includes('Refractor')) {
-      cardRef.current.children.forEach(child => {
-        if (child.userData.effectType === 'refractor' && child instanceof THREE.Mesh) {
-          if (child.material instanceof THREE.MeshPhysicalMaterial) {
-            // Get intensity from props
-            const intensity = effectIntensities['Refractor'] || 1.0;
-            
-            // Create subtle color shifts
-            const hueBase = 0.6; // Blue-ish base
-            const hueShift = ((Math.sin(t * 0.3) * 0.1) + hueBase) % 1.0;
-            const color = new THREE.Color();
-            color.setHSL(hueShift, 0.7, 0.6);
-            
-            child.material.color = color;
-            child.material.opacity = 0.15 * intensity + Math.sin(t * 1.3) * 0.05;
-            
-            // Adjust transmission and roughness based on view angle
-            const viewAngle = Math.abs(cardRef.current!.rotation.y % (Math.PI * 2)) / (Math.PI * 2);
-            child.material.transmission = 0.4 + viewAngle * 0.3;
-            child.material.roughness = 0.2 + viewAngle * 0.2;
-          }
-        }
-      });
-    }
-    
-    // Apply chrome dynamic effects
-    if (activeEffects.includes('Chrome')) {
-      cardRef.current.children.forEach(child => {
-        if (child.userData.effectType === 'chrome' && child instanceof THREE.Mesh) {
-          if (child.material instanceof THREE.MeshPhysicalMaterial) {
-            const intensity = effectIntensities['Chrome'] || 1.0;
-            
-            // Make chrome appear more or less reflective based on viewing angle
-            const viewAngle = Math.abs(cardRef.current!.rotation.y % (Math.PI * 2)) / (Math.PI * 2);
-            child.material.roughness = 0.05 + viewAngle * 0.15;
-            child.material.metalness = 0.9 + viewAngle * 0.1;
-            child.material.clearcoatRoughness = 0.02 + viewAngle * 0.08;
-          }
-        }
-      });
-    }
-    
-    // Apply gold foil dynamic effects
-    if (activeEffects.includes('Gold Foil')) {
-      cardRef.current.children.forEach(child => {
-        if (child.userData.effectType === 'goldfoil' && child instanceof THREE.Mesh) {
-          if (child.material instanceof THREE.MeshPhysicalMaterial) {
-            const intensity = effectIntensities['Gold Foil'] || 1.0;
-            
-            // Create subtle color variation to simulate real gold
-            const baseHue = 0.12; // Gold base hue
-            const hueVariation = Math.sin(t * 0.5) * 0.02;
-            const color = new THREE.Color();
-            color.setHSL(baseHue + hueVariation, 0.8, 0.6);
-            
-            child.material.color = color;
-            
-            // Adjust sheen based on viewing angle
-            const viewAngle = Math.abs(cardRef.current!.rotation.y % (Math.PI * 2)) / (Math.PI * 2);
-            if (child.material.reflectivity !== undefined) {
-              child.material.reflectivity = 0.8 + viewAngle * 0.2;
             }
           }
         }
@@ -255,35 +209,16 @@ const Card3DRenderer: React.FC<Card3DRendererProps> = ({
       
       {/* Card front */}
       <mesh castShadow receiveShadow position={[0, 0, 0]}>
-        <planeGeometry args={[2.5, 3.5, 20, 20]} />
-        <meshPhysicalMaterial 
-          map={frontTexture} 
-          color={frontTexture ? undefined : "#2a5298"}
-          side={THREE.FrontSide}
-          roughness={0.2}
-          metalness={0.8}
-          envMapIntensity={1.5}
-          clearcoat={1}
-          clearcoatRoughness={0.2}
-          reflectivity={0.8}
-        />
+        <planeGeometry args={[2.5, 3.5, 32, 32]} />
+        <primitive object={createDefaultMaterial(frontTexture)} attach="material" />
       </mesh>
       
       {/* Card back */}
       <mesh position={[0, 0, -0.01]} rotation={[0, Math.PI, 0]} castShadow receiveShadow>
-        <planeGeometry args={[2.5, 3.5, 20, 20]} />
-        <meshPhysicalMaterial 
-          map={backTexture} 
-          color={backTexture ? undefined : "#1a3060"}
-          side={THREE.FrontSide}
-          roughness={0.24}
-          metalness={0.64}
-          envMapIntensity={1.2}
-          clearcoat={0.5}
-          clearcoatRoughness={0.3}
-        />
+        <planeGeometry args={[2.5, 3.5, 32, 32]} />
+        <primitive object={createDefaultMaterial(backTexture, true)} attach="material" />
       </mesh>
-      
+
       {/* Apply special effects based on activeEffects */}
       {activeEffects.includes('Holographic') && (
         <mesh position={[0, 0, 0.01]} userData={{ effectType: 'holographic' }}>
