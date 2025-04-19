@@ -1,7 +1,11 @@
-
 import { useState } from 'react';
-import { EnhancedCropBoxProps, MemorabiliaType, applyCrop } from '@/components/card-upload/cardDetection';
-import { detectCardsInImage } from '@/components/card-upload/cardDetection';
+import { 
+  EnhancedCropBoxProps, 
+  MemorabiliaType, 
+  applyCrop, 
+  detectCardsInImage,
+  ExtendedMemorabiliaType
+} from '@/components/card-upload/cardDetection';
 import { toast } from 'sonner';
 
 export interface BatchProcessingProps {
@@ -53,13 +57,13 @@ export const useBatchImageProcessing = ({
       
       switch (detectionType) {
         case 'group':
-          enabledTypes = ['face', 'group'];
+          enabledTypes = ['face'];
           break;
         case 'memorabilia':
           enabledTypes = ['card', 'ticket', 'program', 'autograph'];
           break;
         case 'mixed':
-          enabledTypes = ['face', 'group', 'card', 'ticket', 'program', 'autograph'];
+          enabledTypes = ['face', 'card', 'ticket', 'program', 'autograph'];
           break;
       }
       

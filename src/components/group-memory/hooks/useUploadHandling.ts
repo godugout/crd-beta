@@ -1,91 +1,38 @@
 
 import { useState } from 'react';
+import { MemorabiliaType } from '@/components/card-upload/cardDetection';
 import { toast } from 'sonner';
-import { v4 as uuidv4 } from 'uuid';
 import useImageProcessing from '@/hooks/useImageProcessing';
 import { useConnectivity } from '@/hooks/useConnectivity';
 import { useMobileOptimization } from '@/hooks/useMobileOptimization';
-import { MemorabiliaType } from '@/components/card-upload/cardDetection';
 
-export type GroupUploadType = 'group' | 'memorabilia' | 'mixed';
-
-export interface UploadFileItem {
-  file: File;
-  url: string;
-  type?: MemorabiliaType;
-}
-
-export interface UseUploadHandlingProps {
+interface UseUploadHandlingProps {
   onComplete?: (cardIds: string[]) => void;
 }
 
 export const useUploadHandling = ({ onComplete }: UseUploadHandlingProps = {}) => {
-  const [uploadType, setUploadType] = useState<GroupUploadType>('group');
-  const [uploadedFiles, setUploadedFiles] = useState<UploadFileItem[]>([]);
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [uploadedUrls, setUploadedUrls] = useState<string[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [showEditor, setShowEditor] = useState(false);
-  const [currentFile, setCurrentFile] = useState<File | null>(null);
-  const [currentImageUrl, setCurrentImageUrl] = useState<string | null>(null);
   
-  const { resizeImage, createThumbnail } = useImageProcessing();
+  const imageProcessing = useImageProcessing();
   const { isOnline } = useConnectivity();
-  const { shouldOptimizeAnimations, getImageQuality } = useMobileOptimization();
+  const { isMobile } = useMobileOptimization();
   
-  const handleFileSelected = async (file: File): Promise<void> => {
+  const handleFileSelected = async (file: File) => {
     try {
-      if (!file.type.includes('image/')) {
-        toast.error('Please select a valid image file');
-        return;
-      }
+      // Create a thumbnail for preview
+      const thumbnail = await imageProcessing.createThumbnail(file, 800, 800);
       
-      const quality = getImageQuality();
-      const dataUrl = await createThumbnail(file, 800);
+      // Add to uploaded files
+      setUploadedFiles(prev => [...prev, file]);
+      setUploadedUrls(prev => [...prev, thumbnail]);
       
-      setUploadedFiles(prev => [...prev, { file, url: dataUrl }]);
-      
-      setCurrentFile(file);
-      setCurrentImageUrl(dataUrl);
-      setShowEditor(true);
+      toast.success('Image added successfully');
     } catch (error) {
-      console.error('Error handling file:', error);
+      console.error('Error handling file upload:', error);
       toast.error('Failed to process image');
     }
-  };
-  
-  const handleBatchUpload = (
-    files: File[],
-    urls: string[],
-    types?: MemorabiliaType[]
-  ) => {
-    if (files.length === 0) {
-      toast.error('No files to process');
-      return;
-    }
-    
-    const newUploadItems: UploadFileItem[] = files.map((file, index) => ({
-      file,
-      url: urls[index] || '',
-      type: types?.[index]
-    }));
-    
-    setUploadedFiles(prev => [...prev, ...newUploadItems]);
-    
-    const cardIds = files.map((_, index) => `card-${Date.now()}-${index}`);
-    
-    setShowEditor(false);
-    
-    setCurrentFile(null);
-    setCurrentImageUrl(null);
-    
-    if (onComplete) {
-      onComplete(cardIds);
-    }
-    
-    toast.success(`Successfully processed ${files.length} items`);
-  };
-  
-  const handleRemoveFile = (index: number) => {
-    setUploadedFiles(prev => prev.filter((_, i) => i !== index));
   };
   
   const processUploads = async () => {
@@ -97,21 +44,21 @@ export const useUploadHandling = ({ onComplete }: UseUploadHandlingProps = {}) =
     setIsProcessing(true);
     
     try {
-      if (!isOnline) {
-        toast.warning('You are offline. Files will sync when connection is restored.');
-      }
+      // In a real app, this would handle actual upload and processing
+      await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate processing
       
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
+      // Generate mock card IDs
       const cardIds = uploadedFiles.map((_, index) => `card-${Date.now()}-${index}`);
       
       if (onComplete) {
         onComplete(cardIds);
       }
       
-      setUploadedFiles([]);
+      toast.success(`Processed ${uploadedFiles.length} images successfully`);
       
-      toast.success(`Successfully processed ${cardIds.length} images`);
+      // Clear files after processing
+      setUploadedFiles([]);
+      setUploadedUrls([]);
     } catch (error) {
       console.error('Error processing uploads:', error);
       toast.error('Failed to process uploads');
@@ -121,17 +68,10 @@ export const useUploadHandling = ({ onComplete }: UseUploadHandlingProps = {}) =
   };
   
   return {
-    uploadType,
-    setUploadType,
     uploadedFiles,
+    uploadedUrls,
     isProcessing,
-    showEditor,
-    setShowEditor,
-    currentFile,
-    currentImageUrl,
     handleFileSelected,
-    handleBatchUpload,
-    handleRemoveFile,
     processUploads
   };
 };

@@ -5,6 +5,11 @@ export interface OfflineItem {
   data: any;
   timestamp: number;
   syncStatus: 'pending' | 'syncing' | 'synced' | 'failed';
+  // Add missing properties that are being used in other files
+  collectionName?: string;
+  createdAt?: string | number;
+  syncPriority?: number;
+  retryCount?: number;
 }
 
 // Mock implementation of offline storage functions
@@ -37,3 +42,21 @@ export const removeOfflineItem = async (itemId: string): Promise<void> => {
 export const getPendingItemCount = async (): Promise<number> => {
   return offlineItems.filter(item => item.syncStatus === 'pending').length;
 };
+
+// Add the storeFileAsDataUrl function that's being imported
+export const storeFileAsDataUrl = async (key: string, file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = reader.result as string;
+      // In a real implementation, we would store this in IndexedDB or localStorage
+      console.log(`Stored file ${key} as data URL`);
+      resolve(dataUrl);
+    };
+    reader.onerror = () => {
+      reject(new Error("Failed to convert file to data URL"));
+    };
+    reader.readAsDataURL(file);
+  });
+};
+

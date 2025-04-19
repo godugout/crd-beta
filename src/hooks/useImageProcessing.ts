@@ -1,114 +1,169 @@
 
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 
-interface ProcessingOptions {
-  brightnessFix?: boolean;
-  contrastEnhance?: boolean;
-  dynamicRangeExpansion?: boolean;
-  enhanceLighting?: boolean;
-  noiseReduction?: boolean;
-  sharpen?: boolean;
+export interface ProcessingOptions {
+  width?: number;
+  height?: number;
+  quality?: number;
+  format?: 'jpeg' | 'png' | 'webp';
+  enhanceContrast?: boolean;
+  enhanceSharpness?: boolean;
+  autoWhiteBalance?: boolean;
 }
 
-// Basic image processing function that applies requested enhancements
-const processImage = async (imageData: ImageData | Blob, options: ProcessingOptions): Promise<ImageData | Blob> => {
-  // In a real implementation, this would apply the requested enhancements
-  console.log('Processing image with options:', options);
-  return imageData; // Return unmodified for now (placeholder implementation)
-};
+export interface ImageData {
+  width: number;
+  height: number;
+  url?: string;
+  scale?: number;
+  rotation?: number;
+}
 
-export const enhanceStadiumPhoto = async (imageData: ImageData | Blob): Promise<ImageData | Blob> => {
-    const options = {
-      brightnessFix: true, 
-      contrastEnhance: true,
-      dynamicRangeExpansion: true,
-      enhanceLighting: true
-    };
-    
-    return processImage(imageData, options);
-};
-
-export const useImageProcessing = () => {
+const useImageProcessing = () => {
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const fileToDataUrl = useCallback(async (file: File): Promise<string> => {
+  const fileToDataUrl = async (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
-      reader.onload = () => {
-        if (typeof reader.result === 'string') {
-          resolve(reader.result);
-        } else {
-          reject(new Error('Failed to convert file to data URL'));
-        }
-      };
-      reader.onerror = () => reject(new Error('Failed to read file'));
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
       reader.readAsDataURL(file);
     });
-  }, []);
+  };
 
-  const resizeImage = useCallback(async (
-    dataUrl: string, 
-    maxWidth = 1200, 
-    maxHeight = 1600, 
-    quality = 0.8
-  ): Promise<{ dataUrl: string, width: number, height: number }> => {
+  const resizeImage = async (
+    dataUrl: string,
+    maxWidth: number = 1200,
+    maxHeight: number = 1200,
+    quality: number = 0.8
+  ): Promise<{ dataUrl: string; width: number; height: number }> => {
     return new Promise((resolve, reject) => {
       const img = new Image();
       img.onload = () => {
         let width = img.width;
         let height = img.height;
-        
-        // Calculate new dimensions while maintaining aspect ratio
-        if (width > maxWidth) {
-          height = (height * maxWidth) / width;
-          width = maxWidth;
+
+        if (width > maxWidth || height > maxHeight) {
+          const ratio = Math.min(maxWidth / width, maxHeight / height);
+          width = Math.floor(width * ratio);
+          height = Math.floor(height * ratio);
         }
-        if (height > maxHeight) {
-          width = (width * maxHeight) / height;
-          height = maxHeight;
-        }
-        
-        // Create canvas for resizing
+
         const canvas = document.createElement('canvas');
         canvas.width = width;
         canvas.height = height;
+
         const ctx = canvas.getContext('2d');
-        
         if (!ctx) {
-          reject(new Error('Failed to get canvas context'));
+          reject(new Error('Could not get canvas context'));
           return;
         }
-        
-        // Draw resized image on canvas
+
         ctx.drawImage(img, 0, 0, width, height);
-        
-        // Convert canvas to data URL
         const resizedDataUrl = canvas.toDataURL('image/jpeg', quality);
-        resolve({
-          dataUrl: resizedDataUrl,
-          width,
-          height
-        });
+
+        resolve({ dataUrl: resizedDataUrl, width, height });
       };
-      
       img.onerror = () => reject(new Error('Failed to load image'));
       img.src = dataUrl;
     });
-  }, []);
-  
-  // Add the missing createThumbnail function
-  const createThumbnail = useCallback(async (file: File, maxSize = 300): Promise<string> => {
-    const dataUrl = await fileToDataUrl(file);
-    const { dataUrl: thumbnailUrl } = await resizeImage(dataUrl, maxSize, maxSize, 0.7);
-    return thumbnailUrl;
-  }, [fileToDataUrl, resizeImage]);
+  };
+
+  const processImage = async (
+    imageData: ImageData | Blob,
+    options: ProcessingOptions
+  ): Promise<{ dataUrl: string; width: number; height: number }> => {
+    setIsProcessing(true);
+    
+    try {
+      let dataUrl: string;
+      
+      if (imageData instanceof Blob) {
+        dataUrl = await fileToDataUrl(new File([imageData], 'image.jpg', { type: 'image/jpeg' }));
+      } else if (imageData.url) {
+        dataUrl = imageData.url;
+      } else {
+        throw new Error('Invalid image data');
+      }
+      
+      const result = await resizeImage(
+        dataUrl, 
+        options.width || 1200,
+        options.height || 1200,
+        options.quality || 0.8
+      );
+      
+      return result;
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  // Add the createThumbnail function
+  const createThumbnail = async (
+    file: File,
+    maxWidth: number = 300,
+    maxHeight: number = 300
+  ): Promise<string> => {
+    try {
+      const dataUrl = await fileToDataUrl(file);
+      const result = await resizeImage(dataUrl, maxWidth, maxHeight, 0.7);
+      return result.dataUrl;
+    } catch (error) {
+      console.error("Error creating thumbnail:", error);
+      return '';
+    }
+  };
+
+  const enhanceStadiumPhoto = async (imageDataUrl: string): Promise<string> => {
+    // Simplified implementation - in a real app would use more sophisticated image processing
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          resolve(imageDataUrl); // Return original if context not available
+          return;
+        }
+
+        // Draw image to canvas
+        ctx.drawImage(img, 0, 0);
+        
+        // Get image data for manipulation
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imageData.data;
+        
+        // Simple enhancement: increase contrast and brighten slightly
+        for (let i = 0; i < data.length; i += 4) {
+          // Increase contrast
+          data[i] = Math.min(255, Math.max(0, (data[i] - 128) * 1.2 + 128)); // Red
+          data[i + 1] = Math.min(255, Math.max(0, (data[i + 1] - 128) * 1.2 + 128)); // Green
+          data[i + 2] = Math.min(255, Math.max(0, (data[i + 2] - 128) * 1.2 + 128)); // Blue
+          
+          // Brighten slightly
+          data[i] = Math.min(255, data[i] * 1.1);
+          data[i + 1] = Math.min(255, data[i + 1] * 1.1);
+          data[i + 2] = Math.min(255, data[i + 2] * 1.1);
+        }
+        
+        ctx.putImageData(imageData, 0, 0);
+        resolve(canvas.toDataURL('image/jpeg', 0.85));
+      };
+      
+      img.src = imageDataUrl;
+    });
+  };
 
   return {
     fileToDataUrl,
     resizeImage,
-    createThumbnail,
     processImage,
     enhanceStadiumPhoto,
+    createThumbnail,
     isProcessing
   };
 };

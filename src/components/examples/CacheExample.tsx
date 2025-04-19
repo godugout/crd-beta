@@ -1,131 +1,81 @@
 
-import React, { useState, useEffect } from 'react';
-import { memoryCache } from '@/lib/memoryCache';
-import useMemoryCache from '@/hooks/useMemoryCache';
-import { useConnectivity } from '@/hooks/useConnectivity';
-import { useOfflineStorage } from '@/hooks/useOfflineStorage';
+import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Loader2, WifiOff, Wifi, Database, RefreshCw } from 'lucide-react';
-import OfflineIndicator from '@/components/game-day/OfflineIndicator';
+import { useConnectivity } from '@/hooks/useConnectivity';
 
-// Example data fetching function that simulates an API call
-const fetchUserData = async () => {
-  console.log('Fetching user data from API...');
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 1500));
-  return {
-    id: 1,
-    name: 'John Doe',
-    email: 'john@example.com',
-    lastUpdated: new Date().toISOString()
-  };
-};
+interface CacheExampleProps {
+  title?: string;
+}
 
-export const CacheExample: React.FC = () => {
-  const [refreshKey, setRefreshKey] = useState<string>('user-data');
-  const { isOnline, pendingCount } = useConnectivity();
+const CacheExample: React.FC<CacheExampleProps> = ({ title = 'Cache Example' }) => {
+  const { isOnline, pendingCount, syncOfflineItems } = useConnectivity();
+  const [data, setData] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   
-  // Use our cache hook with offline persistence enabled
-  const { data, isLoading, error, refreshCache } = useMemoryCache(
-    refreshKey,
-    fetchUserData,
-    { ttl: 30, persistOffline: true } // Cache for 30 seconds with offline persistence
-  );
-  
-  // Force a refresh 
-  const handleRefresh = () => {
-    refreshCache();
+  const fetchData = async () => {
+    setIsLoading(true);
+    try {
+      // Simulate API call with delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      const newData = [
+        { id: 1, name: 'Item 1' },
+        { id: 2, name: 'Item 2' },
+        { id: 3, name: 'Item 3' },
+      ];
+      
+      setData(newData);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
   
-  // Clear the cache
-  const handleClearCache = () => {
-    memoryCache.clear();
-    handleRefresh();
-  };
+  useEffect(() => {
+    fetchData();
+  }, []);
   
   return (
-    <div className="space-y-4">
-      {!isOnline && (
-        <OfflineIndicator itemCount={pendingCount} />
+    <div className="border rounded-lg p-4">
+      <h2 className="text-lg font-medium mb-4">{title}</h2>
+      
+      <div className="flex items-center gap-2 mb-4">
+        <div className={`h-3 w-3 rounded-full ${isOnline ? 'bg-green-500' : 'bg-red-500'}`} />
+        <span>{isOnline ? 'Online' : 'Offline'}</span>
+        
+        {pendingCount > 0 && (
+          <span className="ml-2 px-2 py-1 text-xs bg-amber-100 text-amber-800 rounded-full">
+            {pendingCount} pending
+          </span>
+        )}
+      </div>
+      
+      {isLoading ? (
+        <div className="flex justify-center py-4">
+          <div className="animate-spin h-6 w-6 border-2 border-blue-500 border-t-transparent rounded-full" />
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {data.map(item => (
+            <div key={item.id} className="p-2 border rounded">
+              {item.name}
+            </div>
+          ))}
+        </div>
       )}
       
-      <Card className="p-4 border rounded-lg shadow-sm">
-        <h2 className="text-xl font-bold mb-4">Memory Cache with Offline Support</h2>
+      <div className="mt-4 flex gap-2">
+        <Button onClick={fetchData} disabled={isLoading}>
+          Refresh Data
+        </Button>
         
-        <div className="space-y-4">
-          <div className="flex items-center space-x-2 mb-4">
-            <Badge variant={isOnline ? "default" : "destructive"} className="px-2 py-1">
-              {isOnline ? (
-                <><Wifi className="h-3 w-3 mr-1" /> Online</>
-              ) : (
-                <><WifiOff className="h-3 w-3 mr-1" /> Offline</>
-              )}
-            </Badge>
-            
-            <Badge variant="outline" className="px-2 py-1">
-              <Database className="h-3 w-3 mr-1" /> 
-              {memoryCache.size} items cached
-            </Badge>
-          </div>
-          
-          {isLoading ? (
-            <div className="flex items-center space-x-2">
-              <Loader2 className="h-4 w-4 animate-spin" />
-              <p>Loading data...</p>
-            </div>
-          ) : error ? (
-            <div className="text-red-500">
-              Error loading data: {error.message}
-            </div>
-          ) : data ? (
-            <div className="space-y-2">
-              <p><strong>User ID:</strong> {data.id}</p>
-              <p><strong>Name:</strong> {data.name}</p>
-              <p><strong>Email:</strong> {data.email}</p>
-              <p><strong>Last Updated:</strong> {new Date(data.lastUpdated).toLocaleString()}</p>
-              <p className="text-xs text-gray-500">
-                Note: After fetching, this data will be cached for 30 seconds
-                {!isOnline && " and persisted offline"}
-              </p>
-            </div>
-          ) : (
-            <p>No data available</p>
-          )}
-          
-          <div className="flex space-x-2">
-            <Button 
-              variant="outline" 
-              onClick={handleRefresh}
-              disabled={isLoading}
-              className="flex items-center"
-            >
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Refresh Data
-            </Button>
-            
-            <Button 
-              variant="destructive" 
-              onClick={handleClearCache}
-              disabled={isLoading}
-            >
-              Clear Cache
-            </Button>
-          </div>
-          
-          <div className="text-xs bg-gray-100 p-2 rounded">
-            <p>Cache status: {memoryCache.size} items in cache</p>
-            <p>Connection status: {isOnline ? 'Online' : 'Offline'}</p>
-            <p>Pending sync items: {pendingCount}</p>
-            
-            <div className="mt-2 text-gray-500">
-              <p>Try toggling your device's network connection to see how the cache handles offline mode.</p>
-              <p>Data will persist even when the page is refreshed while offline.</p>
-            </div>
-          </div>
-        </div>
-      </Card>
+        {pendingCount > 0 && (
+          <Button onClick={syncOfflineItems} variant="outline">
+            Sync Pending ({pendingCount})
+          </Button>
+        )}
+      </div>
     </div>
   );
 };
