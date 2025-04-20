@@ -15,21 +15,22 @@ export const DEFAULT_DESIGN_METADATA = {
     borderColor: '#ffffff',
     shadowColor: 'rgba(0,0,0,0.3)',
     backgroundColor: '#000000',
-    frameColor: '#ffffff', // Added required property
-    frameWidth: 2, // Added required property
-    teamSpecific: false // Added optional property
+    frameColor: '#ffffff',
+    frameWidth: 2,
+    teamSpecific: false
   },
   textStyle: {
     fontFamily: '"Inter", system-ui, sans-serif',
     titleColor: '#ffffff',
     descriptionColor: '#e0e0e0',
-    titleAlignment: 'center', // Added required property
-    titleWeight: 'bold' // Added required property
+    titleAlignment: 'center',
+    titleWeight: 'bold'
   },
   cardMetadata: {
     cardNumber: '',
     cardType: 'Standard',
     series: 'Base',
+    category: 'Standard', // Added required category field
     artist: '',
     rarity: 'Common'
   },

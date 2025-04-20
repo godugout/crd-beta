@@ -5,7 +5,8 @@ export interface CardEffect {
   intensity: number;
   type: 'holographic' | 'refractor' | 'shimmer' | 'foil' | 'vintage' | 'chrome' | 'standard';
   enabled: boolean;
-  settings?: Record<string, any>; // Add settings property for compatibility
+  settings?: Record<string, any>;
+  className?: string; // Added className property
 }
 
 export interface EffectSettings {
@@ -23,8 +24,8 @@ export interface CardEffectsResult {
   clearEffects: (cardId: string) => void;
   setCardEffects: (cardId: string, effects: string[]) => void;
   setActiveEffects: (effects: string[]) => void;
-  effects?: CardEffect[]; // Add effects array for compatibility
-  updateIntensity?: (effectId: string, intensity: number) => void; // Add updateIntensity for compatibility
+  effects?: CardEffect[]; 
+  updateIntensity?: (effectId: string, intensity: number) => void;
 }
 
 // Add this export to fix imports in other files

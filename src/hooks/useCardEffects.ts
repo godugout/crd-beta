@@ -114,5 +114,5 @@ export default function useCardEffects(): CardEffectsResult {
   };
 }
 
-// Re-export the card effect type to fix the imports
-export { CardEffect } from '@/lib/types/cardEffects';
+// Re-export the card effect type using export type to fix TypeScript isolatedModules error
+export type { CardEffect } from '@/lib/types/cardEffects';
