@@ -51,15 +51,16 @@ const Collections = () => {
             Filter
           </Button>
 
-          <Button 
-            variant="default" 
-            size="sm"
-            onClick={() => setShowCreateDialog(true)}
-            className="bg-[var(--brand-primary)] text-white"
-          >
-            <PlusCircle className="h-4 w-4 mr-2" />
-            New Collection
-          </Button>
+          <Link to="/collections/new">
+            <Button 
+              variant="default" 
+              size="sm"
+              className="bg-[var(--brand-primary)] text-white"
+            >
+              <PlusCircle className="h-4 w-4 mr-2" />
+              New Collection
+            </Button>
+          </Link>
         </div>
       }
     >

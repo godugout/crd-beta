@@ -2,13 +2,12 @@
 import React, { Suspense } from 'react';
 import { RouteObject } from 'react-router-dom';
 import HomePage from '@/pages/HomePage';
-import Collections from '@/pages/Collections';
 import NotFound from '@/pages/NotFound';
 import { mainRoutes } from './mainRoutes';
 import { cardRoutes } from './cardRoutes';
 import { collectionRoutes } from './collectionRoutes';
 import { communityRoutes } from './communityRoutes';
-import { featureRoutes } from './featureRoutes';
+import featureRoutes from './featureRoutes';  // Changed to default import
 
 // Loading fallback component
 const LoadingFallback = () => (

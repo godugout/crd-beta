@@ -30,7 +30,7 @@ const fetchUnclaimedAssets = async () => {
 };
 
 export const UnclaimedImagesGallery = () => {
-  // Explicitly type the query result to avoid deep type instantiation
+  // Fix: Explicitly type the query result to avoid deep type instantiation
   const { data: unclaimedAssets, isLoading } = useQuery({
     queryKey: ['unclaimedAssets'],
     queryFn: fetchUnclaimedAssets
@@ -85,4 +85,3 @@ export const UnclaimedImagesGallery = () => {
 };
 
 export default UnclaimedImagesGallery;
-

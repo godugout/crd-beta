@@ -7,6 +7,7 @@ import InstagramCollectionPage from '@/pages/collections/instagram';
 import CommonsCardsPage from '@/pages/collections/commons';
 import BasketballArtCollection from '@/pages/collections/BasketballArtCollection';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import CollectionForm from '@/pages/CollectionForm';
 
 export const collectionRoutes: RouteObject[] = [
   {
@@ -20,6 +21,10 @@ export const collectionRoutes: RouteObject[] = [
   {
     path: '/collections/create',
     element: <ProtectedRoute><Collections /></ProtectedRoute>
+  },
+  {
+    path: '/collections/new',
+    element: <ProtectedRoute><CollectionForm /></ProtectedRoute>
   },
   {
     path: '/collections/instagram',

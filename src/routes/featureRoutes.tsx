@@ -96,4 +96,5 @@ const featureRoutes: RouteObject[] = [
   }
 ];
 
+// Export as default
 export default featureRoutes;
