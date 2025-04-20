@@ -27,8 +27,7 @@ interface DigitalAsset {
 }
 
 export const UnclaimedImagesGallery = () => {
-  // Fix the type by avoiding generic type parameter in useQuery
-  // and simplifying the query function
+  // Fixed type instantiation issue by simplifying the query function
   const { data, isLoading } = useQuery({
     queryKey: ['unclaimedAssets'],
     queryFn: async () => {
@@ -39,11 +38,13 @@ export const UnclaimedImagesGallery = () => {
         .order('created_at', { ascending: false });
         
       if (error) throw error;
-      return (data || []) as DigitalAsset[];
+      // Use type assertion to simplify type checking
+      return data as DigitalAsset[];
     }
   });
 
-  const unclaimedAssets = data as DigitalAsset[] | undefined;
+  // Simplified type handling
+  const unclaimedAssets = data || [];
 
   if (isLoading) {
     return <div className="flex justify-center p-8">
@@ -51,7 +52,7 @@ export const UnclaimedImagesGallery = () => {
     </div>;
   }
 
-  if (!unclaimedAssets || unclaimedAssets.length === 0) {
+  if (unclaimedAssets.length === 0) {
     return <div className="text-center p-8">
       <Image className="mx-auto h-12 w-12 text-gray-400" />
       <h3 className="mt-2 text-sm font-medium">No unclaimed images</h3>
