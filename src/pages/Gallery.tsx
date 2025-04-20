@@ -35,10 +35,42 @@ const Gallery = () => {
         // In a real app, we would fetch from an API
         // For now, use the sample data
         setTimeout(() => {
-          // Use our sample cards data
-          setCards(sampleCards);
+          // Transform sample cards to ensure they have all required properties
+          const transformedCards = sampleCards.map(card => ({
+            ...card,
+            // Add default designMetadata if it doesn't exist
+            designMetadata: card.designMetadata || {
+              cardStyle: {
+                template: 'classic',
+                effect: 'classic',
+                borderRadius: '8px',
+                borderColor: '#000000',
+                frameColor: '#000000',
+                frameWidth: 2,
+                shadowColor: 'rgba(0,0,0,0.2)',
+              },
+              textStyle: {
+                titleColor: '#FFFFFF',
+                titleAlignment: 'left',
+                titleWeight: 'bold',
+                descriptionColor: '#FFFFFF',
+              },
+              marketMetadata: {
+                isPrintable: false,
+                isForSale: false,
+                includeInCatalog: true
+              },
+              cardMetadata: {
+                category: 'sports',
+                cardType: 'collectible',
+                series: 'standard'
+              }
+            }
+          })) as Card[];
+          
+          setCards(transformedCards);
           setIsLoading(false);
-          console.log("Loaded sample cards:", sampleCards.length);
+          console.log("Loaded sample cards:", transformedCards.length);
         }, 500); // Simulate loading delay
       } catch (error) {
         console.error("Error loading cards:", error);
