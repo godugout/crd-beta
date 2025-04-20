@@ -27,9 +27,9 @@ interface DigitalAsset {
 }
 
 export const UnclaimedImagesGallery = () => {
-  const { data: unclaimedAssets, isLoading } = useQuery({
+  const { data: unclaimedAssets, isLoading } = useQuery<DigitalAsset[]>({
     queryKey: ['unclaimedAssets'],
-    queryFn: async () => {
+    queryFn: async (): Promise<DigitalAsset[]> => {
       const { data, error } = await supabase
         .from('digital_assets')
         .select('*')
@@ -37,7 +37,7 @@ export const UnclaimedImagesGallery = () => {
         .order('created_at', { ascending: false });
         
       if (error) throw error;
-      return data || [];
+      return data as DigitalAsset[] || [];
     }
   });
 
