@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { Card, Collection } from '@/lib/types';
 import { sampleCards } from '@/data/sampleCards';
@@ -99,6 +98,7 @@ export function CardProvider({ children }: { children: ReactNode }) {
             // Ensure all required fields exist
             tags: card.tags || [],
             effects: card.effects || [],
+            // Ensure designMetadata is properly merged
             designMetadata: card.designMetadata ? {
               ...defaultCardValues.designMetadata,
               ...card.designMetadata
