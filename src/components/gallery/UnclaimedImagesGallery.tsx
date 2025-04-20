@@ -9,16 +9,15 @@ import { toast } from 'sonner';
 import { Spinner } from '@/components/ui/spinner';
 
 // Define a simplified type for our unclaimed images
-type UnclaimedAsset = {
+interface UnclaimedAsset {
   id: string;
   title: string | null;
   description: string | null;
   storage_path: string;
   original_filename: string;
-};
+}
 
-// Create a dedicated function for fetching unclaimed assets
-// Explicitly define the return type to avoid deep type instantiation
+// Create a dedicated function for fetching unclaimed assets with explicit return type
 const fetchUnclaimedAssets = async (): Promise<UnclaimedAsset[]> => {
   const { data, error } = await supabase
     .from('digital_assets')
@@ -27,11 +26,11 @@ const fetchUnclaimedAssets = async (): Promise<UnclaimedAsset[]> => {
     .order('created_at', { ascending: false });
     
   if (error) throw new Error(error.message);
-  return (data || []) as UnclaimedAsset[];
+  return data || [];
 };
 
 export const UnclaimedImagesGallery = () => {
-  // Fix: Explicitly type the query result to avoid deep type instantiation
+  // Explicitly type the query result to avoid deep type instantiation
   const { data: unclaimedAssets, isLoading } = useQuery({
     queryKey: ['unclaimedAssets'],
     queryFn: fetchUnclaimedAssets
