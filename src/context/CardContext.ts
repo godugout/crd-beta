@@ -37,7 +37,34 @@ const CardContext = createContext<CardContextProps>({
     userId: '',
     effects: [],
     createdAt: '', 
-    updatedAt: '' 
+    updatedAt: '',
+    designMetadata: {
+      cardStyle: {
+        template: 'basic',
+        effect: 'none',
+        borderRadius: '16px',
+        borderColor: '#000000',
+        frameColor: '#FFFFFF',
+        frameWidth: 10,
+        shadowColor: '#000000'
+      },
+      textStyle: {
+        titleColor: '#000000',
+        titleAlignment: 'center',
+        titleWeight: 'bold',
+        descriptionColor: '#333333'
+      },
+      marketMetadata: {
+        isPrintable: false,
+        isForSale: false,
+        includeInCatalog: false
+      },
+      cardMetadata: {
+        category: 'standard',
+        cardType: 'custom',
+        series: 'none'
+      }
+    }
   }),
   updateCard: async () => ({ 
     id: '', 
@@ -49,7 +76,34 @@ const CardContext = createContext<CardContextProps>({
     userId: '',
     effects: [],
     createdAt: '', 
-    updatedAt: '' 
+    updatedAt: '',
+    designMetadata: {
+      cardStyle: {
+        template: 'basic',
+        effect: 'none',
+        borderRadius: '16px',
+        borderColor: '#000000',
+        frameColor: '#FFFFFF',
+        frameWidth: 10,
+        shadowColor: '#000000'
+      },
+      textStyle: {
+        titleColor: '#000000',
+        titleAlignment: 'center',
+        titleWeight: 'bold',
+        descriptionColor: '#333333'
+      },
+      marketMetadata: {
+        isPrintable: false,
+        isForSale: false,
+        includeInCatalog: false
+      },
+      cardMetadata: {
+        category: 'standard',
+        cardType: 'custom',
+        series: 'none'
+      }
+    }
   }),
   deleteCard: async () => false,
   addCollection: async () => ({ id: '', title: '', createdAt: '', updatedAt: '', userId: '' }),
