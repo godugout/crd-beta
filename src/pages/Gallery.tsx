@@ -8,12 +8,14 @@ import CardGrid from '@/components/cards/CardGrid';
 import { Card } from '@/lib/types';
 import { sampleCards } from '@/data/sampleCards';
 import { toast } from 'sonner';
+import CardDetailView from '@/components/card-experiences/CardDetailView';
 
 const Gallery = () => {
   const [cards, setCards] = useState<Card[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   
   // Collect all unique tags
   const allTags = React.useMemo(() => {
@@ -103,11 +105,31 @@ const Gallery = () => {
   }, [cards, searchQuery, selectedTag]);
 
   const handleCardClick = (cardId: string) => {
-    // In a real app, navigate to card detail page
     console.log("Card clicked:", cardId);
-    // Navigate to a detail page
-    window.location.href = `/cards/${cardId}`;
+    setSelectedCardId(cardId);
   };
+
+  // Get card by ID (used for detail view)
+  const getCard = (cardId: string) => {
+    return cards.find(card => card.id === cardId);
+  };
+
+  // Delete card (just removes from state in this demo)
+  const deleteCard = (cardId: string) => {
+    setCards(prevCards => prevCards.filter(card => card.id !== cardId));
+    setSelectedCardId(null);
+    toast.success("Card deleted successfully");
+  };
+
+  // If a card is selected, show its detail view
+  if (selectedCardId) {
+    return (
+      <CardDetailView
+        cardId={selectedCardId}
+        onBack={() => setSelectedCardId(null)}
+      />
+    );
+  }
 
   return (
     <PageLayout 
@@ -172,7 +194,10 @@ const Gallery = () => {
             <span className="ml-2 text-lg">Loading cards...</span>
           </div>
         ) : filteredCards.length > 0 ? (
-          <CardGrid cards={filteredCards} onCardClick={handleCardClick} />
+          <CardGrid 
+            cards={filteredCards} 
+            onCardClick={handleCardClick} 
+          />
         ) : (
           <div className="text-center py-16">
             <h3 className="text-xl font-semibold mb-4">No cards found</h3>

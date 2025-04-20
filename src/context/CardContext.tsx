@@ -1,231 +1,154 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Card, Collection } from '@/lib/types';
-import { fetchCards } from '@/lib/api/cards';
 
-interface CardContextProps {
+import React, { createContext, useContext, useState, ReactNode } from 'react';
+import { Card } from '@/lib/types';
+import { sampleCards } from '@/data/sampleCards';
+import { toast } from 'sonner';
+
+interface CardContextType {
   cards: Card[];
-  collections: Collection[];
   isLoading: boolean;
   error: Error | null;
-  addCard: (card: Partial<Card>) => Promise<Card>;
-  updateCard: (card: Partial<Card>) => Promise<Card>;
-  deleteCard: (id: string) => Promise<void>;
-  getCardById: (id: string) => Card | undefined;
-  getCard: (id: string) => Card | undefined; 
-  addCollection: (collection: Partial<Collection>) => Promise<Collection>;
-  updateCollection: (collection: Partial<Collection>) => Promise<Collection>;
-  deleteCollection: (id: string) => Promise<void>;
-  getCollectionById: (id: string) => Collection | undefined;
+  addCard: (card: Card) => void;
+  updateCard: (card: Card) => void;
+  deleteCard: (cardId: string) => void;
+  getCard: (cardId: string) => Card | undefined;
+  getCardById: (cardId: string) => Card | undefined;
   refreshCards: () => Promise<void>;
-  addCardToCollection: (collectionId: string, cardId: string) => Promise<boolean>;
-  removeCardFromCollection: (collectionId: string, cardId: string) => Promise<boolean>;
 }
 
-const CardContext = createContext<CardContextProps | undefined>(undefined);
+const CardContext = createContext<CardContextType | undefined>(undefined);
 
 export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [cards, setCards] = useState<Card[]>([]);
-  const [collections, setCollections] = useState<Collection[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  useEffect(() => {
-    loadCards();
-  }, []);
-
-  const loadCards = async () => {
-    setIsLoading(true);
-    try {
-      const cardsData = await fetchCards();
-      setCards(cardsData);
-      setCollections([]);
-      setError(null);
-    } catch (err) {
-      setError(err as Error);
-      console.error('Error fetching cards:', err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const refreshCards = async () => {
-    await loadCards();
-  };
-
-  const addCard = async (card: Partial<Card>): Promise<Card> => {
-    const newCard: Card = {
-      id: Math.random().toString(36).substring(7),
-      title: card.title || 'New Card',
-      description: card.description || '',
-      imageUrl: card.imageUrl || '',
-      thumbnailUrl: card.thumbnailUrl || '',
-      tags: card.tags || [],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      userId: card.userId || 'user-1',
-      effects: card.effects || [],
-      designMetadata: card.designMetadata || {
-        cardStyle: {
-          template: 'basic',
-          effect: 'none',
-          borderRadius: '16px',
-          borderColor: '#000000',
-          frameColor: '#FFFFFF',
-          frameWidth: 10,
-          shadowColor: '#000000'
-        },
-        textStyle: {
-          titleColor: '#000000',
-          titleAlignment: 'center',
-          titleWeight: 'bold',
-          descriptionColor: '#333333'
-        },
-        marketMetadata: {
-          isPrintable: false,
-          isForSale: false,
-          includeInCatalog: false
-        },
-        cardMetadata: {
-          category: 'standard',
-          cardType: 'custom',
-          series: 'none'
-        }
+  // Initialize with sample cards
+  React.useEffect(() => {
+    const loadInitialCards = async () => {
+      try {
+        setIsLoading(true);
+        
+        // Transform sample cards to ensure they have all required properties
+        const transformedCards = sampleCards.map(card => {
+          // Create a new object with all properties from the card
+          const transformedCard = {
+            ...card,
+            // Add default designMetadata if it doesn't exist
+            designMetadata: {
+              cardStyle: {
+                template: 'classic',
+                effect: 'classic',
+                borderRadius: '8px',
+                borderColor: '#000000',
+                frameColor: '#000000',
+                frameWidth: 2,
+                shadowColor: 'rgba(0,0,0,0.2)',
+              },
+              textStyle: {
+                titleColor: '#FFFFFF',
+                titleAlignment: 'left',
+                titleWeight: 'bold',
+                descriptionColor: '#FFFFFF',
+              },
+              marketMetadata: {
+                isPrintable: false,
+                isForSale: false,
+                includeInCatalog: true
+              },
+              cardMetadata: {
+                category: 'sports',
+                cardType: 'collectible',
+                series: 'standard'
+              }
+            }
+          };
+          return transformedCard as Card;
+        });
+        
+        setCards(transformedCards);
+        setIsLoading(false);
+        setError(null);
+      } catch (err) {
+        setError(err as Error);
+        setIsLoading(false);
+        toast.error("Failed to load cards");
       }
     };
     
-    setCards([...cards, newCard]);
-    return newCard;
+    loadInitialCards();
+  }, []);
+
+  const addCard = (card: Card) => {
+    setCards(prevCards => [...prevCards, card]);
+    toast.success("Card added successfully");
   };
 
-  const updateCard = async (card: Partial<Card>): Promise<Card> => {
-    const updatedCard = { ...card, updatedAt: new Date().toISOString() } as Card;
-    setCards(cards.map(c => c.id === card.id ? updatedCard : c));
-    return updatedCard;
+  const updateCard = (updatedCard: Card) => {
+    setCards(prevCards => 
+      prevCards.map(card => 
+        card.id === updatedCard.id ? updatedCard : card
+      )
+    );
+    toast.success("Card updated successfully");
   };
 
-  const deleteCard = async (id: string): Promise<void> => {
-    setCards(cards.filter(c => c.id !== id));
+  const deleteCard = (cardId: string) => {
+    setCards(prevCards => prevCards.filter(card => card.id !== cardId));
+    toast.success("Card deleted successfully");
   };
 
-  const getCardById = (id: string): Card | undefined => {
-    return cards.find(card => card.id === id);
+  const getCard = (cardId: string) => {
+    return cards.find(card => card.id === cardId);
   };
 
-  const getCard = (id: string): Card | undefined => {
-    return getCardById(id);
+  const getCardById = (cardId: string) => {
+    return cards.find(card => card.id === cardId);
   };
 
-  const addCollection = async (collection: Partial<Collection>): Promise<Collection> => {
-    const newCollection: Collection = {
-      id: Math.random().toString(36).substring(7),
-      name: collection.name || 'New Collection',
-      title: collection.title || collection.name || 'New Collection',
-      description: collection.description || '',
-      coverImageUrl: collection.coverImageUrl || '',
-      thumbnailUrl: collection.thumbnailUrl || '',
-      userId: collection.userId || 'user-1',
-      teamId: collection.teamId || '',
-      cards: [],
-      visibility: collection.visibility || 'private',
-      allowComments: collection.allowComments || true,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      designMetadata: collection.designMetadata || {},
-      cardIds: collection.cardIds || [],
-      tags: collection.tags || [],
-      isPublic: collection.isPublic || false,
-      featured: collection.featured || false
-    };
-    
-    setCollections([...collections, newCollection]);
-    return newCollection;
-  };
-
-  const updateCollection = async (collection: Partial<Collection>): Promise<Collection> => {
-    const updatedCollection = { ...collection, updatedAt: new Date().toISOString() } as Collection;
-    setCollections(collections.map(c => c.id === collection.id ? updatedCollection : c));
-    return updatedCollection;
-  };
-
-  const deleteCollection = async (id: string): Promise<void> => {
-    setCollections(collections.filter(c => c.id !== id));
-  };
-
-  const getCollectionById = (id: string): Collection | undefined => {
-    return collections.find(collection => collection.id === id);
-  };
-
-  const addCardToCollection = async (collectionId: string, cardId: string): Promise<boolean> => {
+  const refreshCards = async () => {
     try {
-      const collection = collections.find(c => c.id === collectionId);
-      if (!collection) return false;
+      setIsLoading(true);
       
-      const cardExists = collection.cardIds?.includes(cardId);
-      if (cardExists) return true;
+      // In a real app, we would make an API call here
+      // For demo purposes, just wait a bit then use the same cards
+      await new Promise(resolve => setTimeout(resolve, 500));
       
-      const updatedCardIds = [...(collection.cardIds || []), cardId];
-      
-      setCollections(collections.map(c => 
-        c.id === collectionId ? {...c, cardIds: updatedCardIds} : c
-      ));
-      
-      return true;
-    } catch (error) {
-      console.error('Error adding card to collection:', error);
-      return false;
-    }
-  };
-
-  const removeCardFromCollection = async (collectionId: string, cardId: string): Promise<boolean> => {
-    try {
-      const collection = collections.find(c => c.id === collectionId);
-      if (!collection) return false;
-      
-      const updatedCardIds = (collection.cardIds || []).filter(id => id !== cardId);
-      
-      setCollections(collections.map(c => 
-        c.id === collectionId ? {...c, cardIds: updatedCardIds} : c
-      ));
-      
-      return true;
-    } catch (error) {
-      console.error('Error removing card from collection:', error);
-      return false;
+      setIsLoading(false);
+      toast.success("Cards refreshed");
+    } catch (err) {
+      setError(err as Error);
+      setIsLoading(false);
+      toast.error("Failed to refresh cards");
     }
   };
 
   return (
-    <CardContext.Provider value={{ 
-      cards, 
-      collections, 
-      isLoading, 
-      error,
-      addCard, 
-      updateCard, 
-      deleteCard, 
-      getCardById,
-      getCard, 
-      addCollection, 
-      updateCollection, 
-      deleteCollection, 
-      getCollectionById,
-      refreshCards,
-      addCardToCollection,
-      removeCardFromCollection
-    }}>
+    <CardContext.Provider
+      value={{
+        cards,
+        isLoading,
+        error,
+        addCard,
+        updateCard,
+        deleteCard,
+        getCard,
+        getCardById,
+        refreshCards
+      }}
+    >
       {children}
     </CardContext.Provider>
   );
 };
 
+// Hook to use the card context
 export const useCards = () => {
   const context = useContext(CardContext);
+  
   if (context === undefined) {
     throw new Error('useCards must be used within a CardProvider');
   }
+  
   return context;
 };
-
-export type { Card, Collection, CardContextProps };
-
-export { CardContext };
