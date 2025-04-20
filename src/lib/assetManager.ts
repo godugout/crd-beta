@@ -42,8 +42,11 @@ export const createAssetBundle = async (
         title: cardInfo.title,
         description: cardInfo.description || null,
         user_id: userId,
+        creator_id: userId, // Required field from the schema
         team_id: cardInfo.teamId || null,
         tags: cardInfo.tags || [],
+        rarity: 'common', // Required field from the schema
+        edition_size: 1, // Required field from the schema
         design_metadata: {
           player_id: cardInfo.playerId || null,
           game_id: cardInfo.gameId || null,
@@ -66,9 +69,15 @@ export const createAssetBundle = async (
       display_order: mediaIds.indexOf(mediaId),
     }));
     
+    // Since asset_links table doesn't exist yet, we'll use asset_usages instead
+    // This could be a temporary solution until a proper DB migration is done
     const { error: linkError } = await supabase
-      .from('asset_links')
-      .insert(assetLinks);
+      .from('asset_usages')
+      .insert(assetLinks.map(link => ({
+        asset_id: link.media_id,
+        reference_id: link.card_id,
+        usage_type: 'card_asset'
+      })));
     
     if (linkError) throw linkError;
     
@@ -95,47 +104,46 @@ export const getAssetBundle = async (
   media: any[];
 }> => {
   try {
-    // Get asset links for this bundle
-    const { data: links, error: linkError } = await supabase
-      .from('asset_links')
-      .select('*')
-      .eq('bundle_id', bundleId)
-      .order('display_order', { ascending: true });
-    
-    if (linkError) throw linkError;
-    if (!links || links.length === 0) {
-      throw new Error('Asset bundle not found');
-    }
-    
-    // Get the card information
+    // Since we're using asset_usages instead of asset_links,
+    // we need to adapt our query
     const { data: card, error: cardError } = await supabase
       .from('cards')
       .select('*')
-      .eq('id', links[0].card_id)
+      .eq('id', bundleId)
       .single();
     
     if (cardError) throw cardError;
     
-    // Get all media items
-    const mediaIds = links.map(link => link.media_id);
+    // Get all media items linked to this card
+    const { data: assetUsages, error: usageError } = await supabase
+      .from('asset_usages')
+      .select('*')
+      .eq('reference_id', card.id)
+      .eq('usage_type', 'card_asset');
+    
+    if (usageError) throw usageError;
+    
+    if (!assetUsages || assetUsages.length === 0) {
+      return {
+        bundle: { id: bundleId },
+        card,
+        media: []
+      };
+    }
+    
+    // Get media items
+    const assetIds = assetUsages.map(usage => usage.asset_id);
     const { data: media, error: mediaError } = await supabase
       .from('digital_assets')
       .select('*')
-      .in('id', mediaIds);
+      .in('id', assetIds);
     
     if (mediaError) throw mediaError;
-    
-    // Sort media based on the original display order
-    const sortedMedia = media?.sort((a, b) => {
-      const aLink = links.find(link => link.media_id === a.id);
-      const bLink = links.find(link => link.media_id === b.id);
-      return (aLink?.display_order || 0) - (bLink?.display_order || 0);
-    });
     
     return {
       bundle: { id: bundleId },
       card,
-      media: sortedMedia || []
+      media: media || []
     };
   } catch (error: any) {
     console.error('Error retrieving asset bundle:', error);
@@ -158,63 +166,42 @@ export const updateAssetBundle = async (
   
   try {
     if (mediaIds) {
-      // Get current links to determine card ID
-      const { data: currentLinks, error: linkError } = await supabase
-        .from('asset_links')
-        .select('card_id, user_id')
-        .eq('bundle_id', bundleId)
-        .limit(1);
+      // First, get the card ID
+      const { data: card, error: cardError } = await supabase
+        .from('cards')
+        .select('id')
+        .eq('id', bundleId)
+        .single();
       
-      if (linkError) throw linkError;
-      if (!currentLinks || currentLinks.length === 0) {
-        throw new Error('Asset bundle not found');
-      }
-      
-      const cardId = currentLinks[0].card_id;
-      const userId = currentLinks[0].user_id;
+      if (cardError) throw cardError;
       
       // Delete existing links
       await supabase
-        .from('asset_links')
+        .from('asset_usages')
         .delete()
-        .eq('bundle_id', bundleId);
+        .eq('reference_id', card.id)
+        .eq('usage_type', 'card_asset');
       
-      // Create new links with updated order
-      const newLinks = mediaIds.map((mediaId, index) => ({
-        bundle_id: bundleId,
-        media_id: mediaId,
-        card_id: cardId,
-        user_id: userId,
-        display_order: index
+      // Create new links
+      const newLinks = mediaIds.map((mediaId) => ({
+        asset_id: mediaId,
+        reference_id: card.id,
+        usage_type: 'card_asset'
       }));
       
       const { error: insertError } = await supabase
-        .from('asset_links')
+        .from('asset_usages')
         .insert(newLinks);
       
       if (insertError) throw insertError;
     }
     
     if (cardUpdates) {
-      // Get the card ID
-      const { data: links, error: linkError } = await supabase
-        .from('asset_links')
-        .select('card_id')
-        .eq('bundle_id', bundleId)
-        .limit(1);
-      
-      if (linkError) throw linkError;
-      if (!links || links.length === 0) {
-        throw new Error('Asset bundle not found');
-      }
-      
-      const cardId = links[0].card_id;
-      
-      // Update the card
+      // Update the card directly using its ID as bundleId
       const { error: updateError } = await supabase
         .from('cards')
         .update(cardUpdates)
-        .eq('id', cardId);
+        .eq('id', bundleId);
       
       if (updateError) throw updateError;
     }
@@ -232,12 +219,22 @@ export const deleteAssetBundle = async (
   bundleId: string
 ): Promise<void> => {
   try {
-    const { error } = await supabase
-      .from('asset_links')
+    // Delete all asset usages for this card
+    const { error: usageError } = await supabase
+      .from('asset_usages')
       .delete()
-      .eq('bundle_id', bundleId);
+      .eq('reference_id', bundleId)
+      .eq('usage_type', 'card_asset');
     
-    if (error) throw error;
+    if (usageError) throw usageError;
+    
+    // Delete the card itself
+    const { error: cardError } = await supabase
+      .from('cards')
+      .delete()
+      .eq('id', bundleId);
+    
+    if (cardError) throw cardError;
     
     toast.success('Asset bundle deleted successfully');
   } catch (error: any) {

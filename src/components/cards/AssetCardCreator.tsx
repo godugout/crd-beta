@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
-import { ImageUploader } from '@/components/dam/ImageUploader';
+import ImageUploader from '@/components/dam/ImageUploader';
 import { AssetSelector } from '@/components/media/AssetSelector';
 import { createAssetBundle } from '@/lib/assetManager';
 import { toast } from 'sonner';

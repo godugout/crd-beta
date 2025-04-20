@@ -106,6 +106,20 @@ export const AssetCardDisplay: React.FC<AssetCardDisplayProps> = ({
   
   const card = bundle.card;
   const media = bundle.media;
+  
+  if (!media || media.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <p>No images available for this card</p>
+        {onClose && (
+          <Button onClick={onClose} className="mt-4">
+            Close
+          </Button>
+        )}
+      </div>
+    );
+  }
+  
   const activeMedia = media[activeImageIndex];
   const imageUrl = `https://wxlwhqlbxyuyujhqeyur.supabase.co/storage/v1/object/public/card-images/${activeMedia.storage_path}`;
   
