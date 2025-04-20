@@ -53,7 +53,16 @@ export const uploadCardImage = async (
       .from('card-images')
       .getPublicUrl(filePath);
 
-    // Create asset record in digital_assets
+    // Get the authenticated user ID
+    const { data: { user } } = await supabase.auth.getUser();
+    const userId = user?.id;
+
+    if (!userId) {
+      toast.error('You must be logged in to upload images');
+      return null;
+    }
+
+    // Create asset record in digital_assets with all required fields
     const { data: assetData, error: assetError } = await supabase
       .from('digital_assets')
       .insert({
@@ -61,6 +70,9 @@ export const uploadCardImage = async (
         description: metadata.description,
         storage_path: filePath,
         original_filename: file.name,
+        mime_type: file.type,
+        file_size: file.size,
+        user_id: userId,
         tags: metadata.tags || [],
         metadata: {
           player: metadata.player,

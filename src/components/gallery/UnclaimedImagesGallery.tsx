@@ -26,7 +26,7 @@ const fetchUnclaimedAssets = async (): Promise<UnclaimedAsset[]> => {
     .order('created_at', { ascending: false });
     
   if (error) throw new Error(error.message);
-  return (data || []) as UnclaimedAsset[];
+  return data || [];
 };
 
 export const UnclaimedImagesGallery = () => {
@@ -56,7 +56,7 @@ export const UnclaimedImagesGallery = () => {
         <Card key={asset.id} className="overflow-hidden">
           <div className="aspect-square relative bg-gray-100">
             <img
-              src={`https://wxlwhqlbxyuyujhqeyur.supabase.co/storage/v1/object/public/${asset.storage_path}`}
+              src={`https://wxlwhqlbxyuyujhqeyur.supabase.co/storage/v1/object/public/card-images/${asset.storage_path}`}
               alt={asset.title || 'Unclaimed image'}
               className="w-full h-full object-cover"
             />
