@@ -18,6 +18,7 @@ interface CardContextType {
 
 const CardContext = createContext<CardContextType | undefined>(undefined);
 
+// Export CardProvider as a named export
 export const CardProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [cards, setCards] = useState<Card[]>([]);
   const [isLoading, setIsLoading] = useState(true);
