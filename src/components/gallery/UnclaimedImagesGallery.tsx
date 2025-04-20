@@ -9,16 +9,16 @@ import { toast } from 'sonner';
 import { Spinner } from '@/components/ui/spinner';
 
 // Define a simplified type for our unclaimed images
-interface UnclaimedAsset {
+type UnclaimedAsset = {
   id: string;
   title: string | null;
   description: string | null;
   storage_path: string;
   original_filename: string;
-}
+};
 
-// Create a dedicated function for fetching unclaimed assets with explicit typing
-const fetchUnclaimedAssets = async (): Promise<UnclaimedAsset[]> => {
+// Create a dedicated function for fetching unclaimed assets
+const fetchUnclaimedAssets = async () => {
   const { data, error } = await supabase
     .from('digital_assets')
     .select('id, title, description, storage_path, original_filename')
@@ -26,7 +26,7 @@ const fetchUnclaimedAssets = async (): Promise<UnclaimedAsset[]> => {
     .order('created_at', { ascending: false });
     
   if (error) throw new Error(error.message);
-  return data || [];
+  return (data || []) as UnclaimedAsset[];
 };
 
 export const UnclaimedImagesGallery = () => {
@@ -85,3 +85,4 @@ export const UnclaimedImagesGallery = () => {
 };
 
 export default UnclaimedImagesGallery;
+
