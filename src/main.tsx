@@ -8,7 +8,6 @@ import { TeamThemeProvider } from './context/ThemeContext.tsx'
 import { BrandThemeProvider } from './context/BrandThemeContext.tsx'
 import { AuthProvider } from './providers/AuthProvider'
 import { HelmetProvider } from 'react-helmet-async'
-import { CardProvider } from './context/CardContext.tsx' // Fix the import path with explicit extension
 import { Toaster } from '@/components/ui/toaster'
 import './index.css'
 import './main.css'
@@ -21,10 +20,8 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           <TeamThemeProvider>
             <BrandThemeProvider>
               <AuthProvider>
-                <CardProvider>
-                  <App />
-                  <Toaster />
-                </CardProvider>
+                <App />
+                <Toaster />
               </AuthProvider>
             </BrandThemeProvider>
           </TeamThemeProvider>

@@ -32,12 +32,19 @@ const CardContext = createContext<CardContextType | undefined>(undefined);
 
 // Define default values for required fields in Card objects
 const defaultCardValues = {
+  title: '',
+  description: '',
   thumbnailUrl: '',
+  imageUrl: '',
   userId: 'anonymous',
   effects: [] as string[],
   tags: [] as string[],
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
+  player: '',
+  team: '',
+  position: '',
+  year: '',
   designMetadata: {
     cardStyle: {
       template: 'classic',
@@ -88,13 +95,14 @@ export function CardProvider({ children }: { children: ReactNode }) {
             ...card,
             thumbnailUrl: card.thumbnailUrl || card.imageUrl || '',
             id: card.id || uuidv4(),
+            title: card.title || 'Untitled Card',
             // Ensure all required fields exist
             tags: card.tags || [],
             effects: card.effects || [],
-            designMetadata: {
+            designMetadata: card.designMetadata ? {
               ...defaultCardValues.designMetadata,
-              ...(card.designMetadata || {})
-            }
+              ...card.designMetadata
+            } : defaultCardValues.designMetadata
           } as Card;
         });
         
@@ -116,16 +124,17 @@ export function CardProvider({ children }: { children: ReactNode }) {
       ...defaultCardValues,
       ...card,
       id: card.id || uuidv4(),
+      title: card.title || 'Untitled Card',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       thumbnailUrl: card.thumbnailUrl || card.imageUrl || '',
       tags: card.tags || [],
       effects: card.effects || [],
       userId: card.userId || 'anonymous',
-      designMetadata: {
+      designMetadata: card.designMetadata ? {
         ...defaultCardValues.designMetadata,
-        ...(card.designMetadata || {})
-      }
+        ...card.designMetadata
+      } : defaultCardValues.designMetadata
     };
 
     setCards(prevCards => [...prevCards, newCard]);
@@ -162,7 +171,7 @@ export function CardProvider({ children }: { children: ReactNode }) {
     return cards.find(card => card.id === cardId);
   };
 
-  const refreshCards = async () => {
+  const refreshCards = async (): Promise<void> => {
     try {
       setIsLoading(true);
       
