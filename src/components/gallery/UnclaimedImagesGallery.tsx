@@ -6,52 +6,43 @@ import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { Image, Heart } from 'lucide-react';
 import { toast } from 'sonner';
+import { Spinner } from '@/components/ui/spinner';
 
-// Define the type to match the actual structure from Supabase
-interface DigitalAsset {
+// Define a simplified type for our unclaimed images
+interface UnclaimedAsset {
   id: string;
   title: string | null;
   description: string | null;
   storage_path: string;
-  mime_type: string;
-  file_size: number;
-  width: number | null;
-  height: number | null;
-  tags: string[] | null;
-  created_at: string;
-  updated_at: string;
-  user_id: string;
   original_filename: string;
-  metadata: Record<string, any> | null;
-  thumbnail_path: string | null;
 }
 
-export const UnclaimedImagesGallery = () => {
-  // Resolve deep type instantiation issue by explicitly typing the query result
-  const { data, isLoading } = useQuery<DigitalAsset[]>({
-    queryKey: ['unclaimedAssets'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('digital_assets')
-        .select('*')
-        .eq('claimed', false)
-        .order('created_at', { ascending: false });
-        
-      if (error) throw error;
-      return data as DigitalAsset[];
-    }
-  });
+// Create a dedicated function for fetching unclaimed assets
+const fetchUnclaimedAssets = async (): Promise<UnclaimedAsset[]> => {
+  const { data, error } = await supabase
+    .from('digital_assets')
+    .select('id, title, description, storage_path, original_filename')
+    .eq('claimed', false)
+    .order('created_at', { ascending: false });
+    
+  if (error) throw new Error(error.message);
+  return data || [];
+};
 
-  // Use a simple default empty array
-  const unclaimedAssets = data || [];
+export const UnclaimedImagesGallery = () => {
+  // Use explicitly typed query with a dedicated fetch function
+  const { data: unclaimedAssets, isLoading } = useQuery<UnclaimedAsset[]>({
+    queryKey: ['unclaimedAssets'],
+    queryFn: fetchUnclaimedAssets
+  });
 
   if (isLoading) {
     return <div className="flex justify-center p-8">
-      <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
+      <Spinner size="lg" />
     </div>;
   }
 
-  if (unclaimedAssets.length === 0) {
+  if (!unclaimedAssets || unclaimedAssets.length === 0) {
     return <div className="text-center p-8">
       <Image className="mx-auto h-12 w-12 text-gray-400" />
       <h3 className="mt-2 text-sm font-medium">No unclaimed images</h3>
