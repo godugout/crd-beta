@@ -6,13 +6,12 @@ import { PlusCircle, Filter, Search, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import CardGrid from '@/components/cards/CardGrid';
 import { Card } from '@/lib/types';
-import { sampleCards } from '@/data/sampleCards';
 import { toast } from 'sonner';
 import CardDetailView from '@/components/card-experiences/CardDetailView';
+import { useCards } from '@/context/CardContext';
 
 const Gallery = () => {
-  const [cards, setCards] = useState<Card[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { cards, isLoading } = useCards();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
@@ -27,66 +26,6 @@ const Gallery = () => {
     });
     return Array.from(tags);
   }, [cards]);
-
-  // Load cards on component mount
-  useEffect(() => {
-    const loadCards = async () => {
-      try {
-        setIsLoading(true);
-        
-        // In a real app, we would fetch from an API
-        // For now, use the sample data
-        setTimeout(() => {
-          // Transform sample cards to ensure they have all required properties
-          const transformedCards = sampleCards.map(card => {
-            // Create a new object with all properties from the card
-            const transformedCard = {
-              ...card,
-              // Add default designMetadata if it doesn't exist
-              designMetadata: {
-                cardStyle: {
-                  template: 'classic',
-                  effect: 'classic',
-                  borderRadius: '8px',
-                  borderColor: '#000000',
-                  frameColor: '#000000',
-                  frameWidth: 2,
-                  shadowColor: 'rgba(0,0,0,0.2)',
-                },
-                textStyle: {
-                  titleColor: '#FFFFFF',
-                  titleAlignment: 'left',
-                  titleWeight: 'bold',
-                  descriptionColor: '#FFFFFF',
-                },
-                marketMetadata: {
-                  isPrintable: false,
-                  isForSale: false,
-                  includeInCatalog: true
-                },
-                cardMetadata: {
-                  category: 'sports',
-                  cardType: 'collectible',
-                  series: 'standard'
-                }
-              }
-            };
-            return transformedCard as Card;
-          });
-          
-          setCards(transformedCards);
-          setIsLoading(false);
-          console.log("Loaded sample cards:", transformedCards.length);
-        }, 500); // Simulate loading delay
-      } catch (error) {
-        console.error("Error loading cards:", error);
-        toast.error("Failed to load cards");
-        setIsLoading(false);
-      }
-    };
-    
-    loadCards();
-  }, []);
   
   // Filter cards based on search and tags
   const filteredCards = React.useMemo(() => {
@@ -109,18 +48,6 @@ const Gallery = () => {
     setSelectedCardId(cardId);
   };
 
-  // Get card by ID (used for detail view)
-  const getCard = (cardId: string) => {
-    return cards.find(card => card.id === cardId);
-  };
-
-  // Delete card (just removes from state in this demo)
-  const deleteCard = (cardId: string) => {
-    setCards(prevCards => prevCards.filter(card => card.id !== cardId));
-    setSelectedCardId(null);
-    toast.success("Card deleted successfully");
-  };
-
   // If a card is selected, show its detail view
   if (selectedCardId) {
     return (
@@ -140,7 +67,7 @@ const Gallery = () => {
         <div className="flex flex-wrap justify-between items-center mb-6">
           <h1 className="text-3xl font-bold">Card Gallery</h1>
           <Button asChild className="ml-auto">
-            <Link to="/cards/create">
+            <Link to="/editor">
               <PlusCircle className="mr-2 h-4 w-4" />
               Create Card
             </Link>
@@ -207,7 +134,7 @@ const Gallery = () => {
                 : "There are no cards in the gallery yet"}
             </p>
             <Button asChild>
-              <Link to="/cards/create">Create Your First Card</Link>
+              <Link to="/editor">Create Your First Card</Link>
             </Button>
           </div>
         )}
