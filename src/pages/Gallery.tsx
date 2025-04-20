@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Button } from '@/components/ui/button';
 import { useCards } from '@/hooks/useCards';
 import FullscreenViewer from '@/components/gallery/FullscreenViewer';
+import UnclaimedImagesGallery from '@/components/gallery/UnclaimedImagesGallery';
 
 const Gallery = () => {
   const { isMobile } = useMobileOptimization();
@@ -117,6 +118,12 @@ const Gallery = () => {
     >
       <div className="container mx-auto max-w-6xl px-4">        
         <ErrorBoundary>
+          <div className="mb-8">
+            <h2 className="text-xl font-semibold mb-4">🏆 Image Challenge</h2>
+            <p className="text-gray-500 mb-4">Create a card using an unclaimed image and get 88 votes to win!</p>
+            <UnclaimedImagesGallery />
+          </div>
+          
           {isPending && (
             <div className="w-full py-8 flex justify-center">
               <div className="w-10 h-10 border-4 border-t-transparent border-primary rounded-full animate-spin"></div>
