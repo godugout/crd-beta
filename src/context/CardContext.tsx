@@ -151,7 +151,16 @@ export function CardProvider({ children }: { children: ReactNode }) {
     setCards(prevCards => 
       prevCards.map(card => 
         card.id === updatedCard.id
-          ? { ...card, ...updatedCard, updatedAt: new Date().toISOString() }
+          ? { 
+              ...card, 
+              ...updatedCard, 
+              updatedAt: new Date().toISOString(),
+              // Make sure designMetadata is properly merged
+              designMetadata: updatedCard.designMetadata ? {
+                ...card.designMetadata,
+                ...updatedCard.designMetadata
+              } : card.designMetadata
+            }
           : card
       )
     );
