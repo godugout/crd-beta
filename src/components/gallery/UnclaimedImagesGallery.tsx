@@ -7,17 +7,27 @@ import { supabase } from '@/integrations/supabase/client';
 import { Image, Heart } from 'lucide-react';
 import { toast } from 'sonner';
 
-// Define the type for the digital asset
+// Define the type to match the actual structure from Supabase
 interface DigitalAsset {
   id: string;
-  title: string;
+  title: string | null;
+  description: string | null;
   storage_path: string;
-  claimed: boolean;
+  mime_type: string;
+  file_size: number;
+  width: number | null;
+  height: number | null;
+  tags: string[] | null;
   created_at: string;
+  updated_at: string;
+  user_id: string;
+  original_filename: string;
+  metadata: Record<string, any> | null;
+  thumbnail_path: string | null;
 }
 
 export const UnclaimedImagesGallery = () => {
-  const { data: unclaimedAssets, isLoading } = useQuery<DigitalAsset[]>({
+  const { data: unclaimedAssets, isLoading } = useQuery({
     queryKey: ['unclaimedAssets'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -37,7 +47,7 @@ export const UnclaimedImagesGallery = () => {
     </div>;
   }
 
-  if (!unclaimedAssets?.length) {
+  if (!unclaimedAssets || unclaimedAssets.length === 0) {
     return <div className="text-center p-8">
       <Image className="mx-auto h-12 w-12 text-gray-400" />
       <h3 className="mt-2 text-sm font-medium">No unclaimed images</h3>
