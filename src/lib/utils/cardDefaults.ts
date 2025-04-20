@@ -6,16 +6,36 @@ export const FALLBACK_BACK_IMAGE_URL = 'https://images.unsplash.com/photo-148859
 export const FALLBACK_IMAGE_URL = FALLBACK_FRONT_IMAGE_URL; // Add this line to export FALLBACK_IMAGE_URL
 
 export const DEFAULT_DESIGN_METADATA = {
+  cardStyle: {
+    template: 'classic',
+    effect: 'none',
+    borderRadius: '8px',
+    borderColor: '#000000',
+    frameColor: '#000000',
+    frameWidth: 2,
+    shadowColor: 'rgba(0,0,0,0.2)'
+  },
   cardMetadata: {
     series: 'Base Set',
     year: '1999',
     rarity: 'Common',
     version: 'Unlimited',
-    category: 'Default', // Add missing category
-    cardType: 'Standard' // Add missing cardType
+    category: 'Default',
+    cardType: 'Standard',
+    cardNumber: 'N/A',
+    artist: 'Unknown'
   },
-  textStyle: {}, // Add missing textStyle
-  marketMetadata: {}, // Add missing marketMetadata
+  textStyle: {
+    titleColor: '#000000',
+    titleAlignment: 'center',
+    titleWeight: 'bold',
+    descriptionColor: '#333333'
+  },
+  marketMetadata: {
+    isPrintable: false,
+    isForSale: false,
+    includeInCatalog: false
+  },
   stats: {
     attack: 50,
     defense: 30,
