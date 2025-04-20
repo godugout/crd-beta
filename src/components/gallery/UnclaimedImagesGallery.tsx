@@ -18,7 +18,8 @@ type UnclaimedAsset = {
 };
 
 // Create a dedicated function for fetching unclaimed assets
-const fetchUnclaimedAssets = async () => {
+// Explicitly define the return type to avoid deep type instantiation
+const fetchUnclaimedAssets = async (): Promise<UnclaimedAsset[]> => {
   const { data, error } = await supabase
     .from('digital_assets')
     .select('id, title, description, storage_path, original_filename')
