@@ -7,8 +7,17 @@ import { supabase } from '@/integrations/supabase/client';
 import { Image, Heart } from 'lucide-react';
 import { toast } from 'sonner';
 
+// Define the type for the digital asset
+interface DigitalAsset {
+  id: string;
+  title: string;
+  storage_path: string;
+  claimed: boolean;
+  created_at: string;
+}
+
 export const UnclaimedImagesGallery = () => {
-  const { data: unclaimedAssets, isLoading } = useQuery({
+  const { data: unclaimedAssets, isLoading } = useQuery<DigitalAsset[]>({
     queryKey: ['unclaimedAssets'],
     queryFn: async () => {
       const { data, error } = await supabase
