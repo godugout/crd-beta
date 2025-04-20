@@ -17,7 +17,7 @@ interface UnclaimedAsset {
   original_filename: string;
 }
 
-// Create a dedicated function for fetching unclaimed assets
+// Create a dedicated function for fetching unclaimed assets with explicit typing
 const fetchUnclaimedAssets = async (): Promise<UnclaimedAsset[]> => {
   const { data, error } = await supabase
     .from('digital_assets')
@@ -26,12 +26,12 @@ const fetchUnclaimedAssets = async (): Promise<UnclaimedAsset[]> => {
     .order('created_at', { ascending: false });
     
   if (error) throw new Error(error.message);
-  return data || [];
+  return (data || []) as UnclaimedAsset[];
 };
 
 export const UnclaimedImagesGallery = () => {
   // Use explicitly typed query with a dedicated fetch function
-  const { data: unclaimedAssets, isLoading } = useQuery<UnclaimedAsset[]>({
+  const { data: unclaimedAssets, isLoading } = useQuery({
     queryKey: ['unclaimedAssets'],
     queryFn: fetchUnclaimedAssets
   });
