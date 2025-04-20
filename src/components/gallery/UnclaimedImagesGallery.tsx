@@ -1,87 +1,97 @@
 
-import React from 'react';
-import { useQuery } from '@tanstack/react-query';
+import React, { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { supabase } from '@/integrations/supabase/client';
-import { Image, Heart } from 'lucide-react';
-import { toast } from 'sonner';
-import { Spinner } from '@/components/ui/spinner';
+import { PlusCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
-// Define a simplified type for our unclaimed images
-interface UnclaimedAsset {
+type DigitalAsset = {
   id: string;
-  title: string | null;
-  description: string | null;
-  storage_path: string;
   original_filename: string;
+  storage_path: string;
+  mime_type: string;
+  created_at: string;
 }
 
-// Create a dedicated function for fetching unclaimed assets with explicit return type
-const fetchUnclaimedAssets = async (): Promise<UnclaimedAsset[]> => {
-  const { data, error } = await supabase
-    .from('digital_assets')
-    .select('id, title, description, storage_path, original_filename')
-    .eq('claimed', false)
-    .order('created_at', { ascending: false });
+export const UnclaimedImagesGallery: React.FC = () => {
+  const [assets, setAssets] = useState<DigitalAsset[]>([]);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchUnclaimedAssets = async () => {
+      try {
+        setLoading(true);
+        // Explicitly type the return value to avoid deep instantiation
+        const { data, error } = await supabase
+          .from('digital_assets')
+          .select('*')
+          .is('reference_id', null)
+          .order('created_at', { ascending: false })
+          .limit(20);
+          
+        if (error) throw error;
+        setAssets(data || []);
+      } catch (err) {
+        console.error('Error fetching unclaimed assets:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
     
-  if (error) throw new Error(error.message);
-  return data || [];
-};
-
-export const UnclaimedImagesGallery = () => {
-  // Explicitly type the query result to avoid deep type instantiation
-  const { data: unclaimedAssets, isLoading } = useQuery({
-    queryKey: ['unclaimedAssets'],
-    queryFn: fetchUnclaimedAssets
-  });
-
-  if (isLoading) {
-    return <div className="flex justify-center p-8">
-      <Spinner size="lg" />
-    </div>;
-  }
-
-  if (!unclaimedAssets || unclaimedAssets.length === 0) {
-    return <div className="text-center p-8">
-      <Image className="mx-auto h-12 w-12 text-gray-400" />
-      <h3 className="mt-2 text-sm font-medium">No unclaimed images</h3>
-      <p className="mt-1 text-sm text-gray-500">Upload some images to get started</p>
-    </div>;
-  }
-
+    fetchUnclaimedAssets();
+  }, []);
+  
+  const handleCreateCard = (assetId: string) => {
+    navigate(`/cards/create?assetId=${assetId}`);
+  };
+  
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-      {unclaimedAssets.map((asset) => (
-        <Card key={asset.id} className="overflow-hidden">
-          <div className="aspect-square relative bg-gray-100">
-            <img
-              src={`https://wxlwhqlbxyuyujhqeyur.supabase.co/storage/v1/object/public/card-images/${asset.storage_path}`}
-              alt={asset.title || 'Unclaimed image'}
-              className="w-full h-full object-cover"
-            />
-          </div>
-          <CardContent className="p-4">
-            <div className="flex justify-between items-center">
-              <Button 
-                onClick={() => {
-                  toast.info("Create a card with this image to participate in the challenge! First to get 88 votes wins!");
-                }}
-                variant="outline"
-                size="sm"
-              >
-                Claim & Create
-              </Button>
-              <div className="flex items-center text-gray-500 text-sm">
-                <Heart className="h-4 w-4 mr-1" />
-                <span>0/88</span>
+    <div className="space-y-4">
+      <h2 className="text-xl font-semibold">Recently Uploaded Images</h2>
+      {loading ? (
+        <div className="text-center py-12">
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+        </div>
+      ) : assets.length === 0 ? (
+        <div className="text-center py-12 text-muted-foreground">
+          No unclaimed images found
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {assets.map(asset => (
+            <Card key={asset.id} className="overflow-hidden">
+              <div className="aspect-square bg-muted relative">
+                {asset.mime_type.startsWith('image/') ? (
+                  <img
+                    src={`https://wxlwhqlbxyuyujhqeyur.supabase.co/storage/v1/object/public/card-images/${asset.storage_path}`}
+                    alt={asset.original_filename}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="flex items-center justify-center h-full bg-muted">
+                    <span>{asset.mime_type}</span>
+                  </div>
+                )}
               </div>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
+              <CardContent className="p-3">
+                <p className="text-sm truncate" title={asset.original_filename}>
+                  {asset.original_filename}
+                </p>
+                <Button 
+                  size="sm" 
+                  variant="ghost" 
+                  className="w-full mt-2 h-8"
+                  onClick={() => handleCreateCard(asset.id)}
+                >
+                  <PlusCircle className="h-4 w-4 mr-1" /> Create Card
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
-
-export default UnclaimedImagesGallery;

@@ -6,6 +6,7 @@ import Auth from '@/pages/Auth';
 import Search from '@/pages/Search';
 import Profile from '@/pages/Profile';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import Gallery from '@/pages/Gallery';
 
 export const mainRoutes: RouteObject[] = [
   {
@@ -17,6 +18,10 @@ export const mainRoutes: RouteObject[] = [
     element: <Auth />
   },
   {
+    path: '/gallery',
+    element: <Gallery />
+  },
+  {
     path: '/search',
     element: <Search />
   },
@@ -25,4 +30,3 @@ export const mainRoutes: RouteObject[] = [
     element: <ProtectedRoute><Profile /></ProtectedRoute>
   }
 ];
-

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Search, PlusCircle, Menu, X, Palette, Sparkles, LogIn } from 'lucide-react';
@@ -64,7 +65,7 @@ const AppHeader: React.FC = () => {
                 key={link.to}
                 to={link.to}
                 className={`px-4 py-2 rounded-lg transition-colors ${
-                  isActive(link.to)
+                  location.pathname === link.to
                     ? 'bg-white/10 text-white font-medium'
                     : 'text-white/80 hover:bg-white/5 hover:text-white'
                 }`}
@@ -119,7 +120,7 @@ const AppHeader: React.FC = () => {
                 key={link.to}
                 to={link.to}
                 className={`block px-3 py-2 text-base font-medium rounded-lg ${
-                  isActive(link.to)
+                  location.pathname === link.to
                     ? 'bg-white/10 text-white'
                     : 'text-white/80 hover:bg-white/5 hover:text-white'
                 }`}

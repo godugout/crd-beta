@@ -75,23 +75,23 @@ const HomePage = () => {
             </Link>
             
             <Link 
-              to="/communities" 
+              to="/teams" 
               className="bg-card p-4 rounded-lg shadow-sm flex flex-col items-center hover:shadow-md transition-shadow border text-center group"
             >
               <div className="h-16 w-16 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
                 <Users className="h-8 w-8 text-green-600 dark:text-green-400" />
               </div>
-              <span className="font-medium">Communities</span>
+              <span className="font-medium">Teams</span>
             </Link>
             
             <Link 
-              to="/connect" 
+              to="/gallery" 
               className="bg-card p-4 rounded-lg shadow-sm flex flex-col items-center hover:shadow-md transition-shadow border text-center group"
             >
               <div className="h-16 w-16 bg-blue-100 dark:bg-blue-900/20 rounded-full flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
                 <MessageCircle className="h-8 w-8 text-blue-600 dark:text-blue-400" />
               </div>
-              <span className="font-medium">Connect</span>
+              <span className="font-medium">Gallery</span>
             </Link>
           </div>
         </div>
