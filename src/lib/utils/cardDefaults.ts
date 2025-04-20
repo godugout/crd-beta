@@ -1,15 +1,21 @@
+
 import { getFallbackImageUrl } from './imageUtils';
 
 export const FALLBACK_FRONT_IMAGE_URL = 'https://images.unsplash.com/photo-1518770660439-4636190af475';
 export const FALLBACK_BACK_IMAGE_URL = 'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b';
+export const FALLBACK_IMAGE_URL = FALLBACK_FRONT_IMAGE_URL; // Add this line to export FALLBACK_IMAGE_URL
 
 export const DEFAULT_DESIGN_METADATA = {
   cardMetadata: {
     series: 'Base Set',
     year: '1999',
     rarity: 'Common',
-    version: 'Unlimited'
+    version: 'Unlimited',
+    category: 'Default', // Add missing category
+    cardType: 'Standard' // Add missing cardType
   },
+  textStyle: {}, // Add missing textStyle
+  marketMetadata: {}, // Add missing marketMetadata
   stats: {
     attack: 50,
     defense: 30,
