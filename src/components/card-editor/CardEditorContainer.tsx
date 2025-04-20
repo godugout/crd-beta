@@ -56,10 +56,8 @@ const CardEditorContainer: React.FC<CardEditorContainerProps> = ({
     const cardData = {
       ...cardState.getCardData(),
       designMetadata: {
+        ...DEFAULT_DESIGN_METADATA,
         cardStyle: cardState.cardStyle || DEFAULT_DESIGN_METADATA.cardStyle,
-        textStyle: DEFAULT_DESIGN_METADATA.textStyle,
-        cardMetadata: DEFAULT_DESIGN_METADATA.cardMetadata,
-        marketMetadata: DEFAULT_DESIGN_METADATA.marketMetadata,
         effects: cardState.selectedEffects || [],
         player: cardState.player,
         team: cardState.team,

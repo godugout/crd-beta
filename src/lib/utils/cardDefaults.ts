@@ -9,16 +9,22 @@ export const FALLBACK_BACK_IMAGE_URL = 'https://images.unsplash.com/photo-150911
 // Default design metadata for cards
 export const DEFAULT_DESIGN_METADATA = {
   cardStyle: {
+    template: 'standard',
     effect: 'standard',
     borderRadius: '8px',
     borderColor: '#ffffff',
     shadowColor: 'rgba(0,0,0,0.3)',
-    backgroundColor: '#000000'
+    backgroundColor: '#000000',
+    frameColor: '#ffffff', // Added required property
+    frameWidth: 2, // Added required property
+    teamSpecific: false // Added optional property
   },
   textStyle: {
     fontFamily: '"Inter", system-ui, sans-serif',
     titleColor: '#ffffff',
-    descriptionColor: '#e0e0e0'
+    descriptionColor: '#e0e0e0',
+    titleAlignment: 'center', // Added required property
+    titleWeight: 'bold' // Added required property
   },
   cardMetadata: {
     cardNumber: '',
