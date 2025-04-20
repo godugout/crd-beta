@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext } from 'react';
 import { Card, Collection } from '@/lib/types';
 
 interface CardContextProps {
@@ -17,7 +17,8 @@ interface CardContextProps {
   getCollectionById: (id: string) => Collection | undefined;
   addCardToCollection: (params: { collectionId: string, cardId: string }) => Promise<void>;
   removeCardFromCollection: (params: { collectionId: string, cardId: string }) => Promise<void>;
-  getCard: (id: string) => Card | undefined; // Added the missing getCard function
+  getCard: (id: string) => Card | undefined;
+  refreshCards: () => Promise<void>; // Add this line to fix the errors
 }
 
 // Create the context with default values

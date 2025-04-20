@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Card } from '@/lib/types';
@@ -44,6 +45,11 @@ const SeriesViewPage: React.FC = () => {
     }
   }, [id, cards, getCardById]);
 
+  const handleCardClick = (cardId: string) => {
+    // Handle card click, for example navigate to the card details page
+    window.location.href = `/cards/${cardId}`;
+  };
+
   if (loading) {
     return (
       <PageLayout title="Loading Series..." description="Please wait">
@@ -75,7 +81,10 @@ const SeriesViewPage: React.FC = () => {
 
         <h2 className="text-2xl font-semibold mb-4">Related Cards</h2>
         {relatedCards.length > 0 ? (
-          <CardGrid cards={relatedCards} />
+          <CardGrid 
+            cards={relatedCards} 
+            onCardClick={handleCardClick} // Add the required onCardClick prop
+          />
         ) : (
           <p>No related cards found for this series.</p>
         )}
