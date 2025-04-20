@@ -24,7 +24,8 @@ const ImmersiveCardViewer = ({ card: initialCard }: { card?: Card }) => {
     settings, 
     toggleEffect, 
     setEffectIntensity,
-    devicePerformance 
+    devicePerformance,
+    optimizeForPerformance 
   } = useOptimizedCardEffects(card?.effects || []);
   
   useEffect(() => {
@@ -178,8 +179,10 @@ const ImmersiveCardViewer = ({ card: initialCard }: { card?: Card }) => {
                     id="animations-toggle" 
                     checked={settings.animationEnabled} 
                     onCheckedChange={(checked) => {
-                      // Update animation setting
-                      setSettings(prev => ({...prev, animationEnabled: checked}));
+                      // Use optimizeForPerformance instead of setSettings
+                      if (!checked) {
+                        optimizeForPerformance();
+                      }
                     }}
                     disabled={devicePerformance === 'low'}
                   />
@@ -199,7 +202,7 @@ const ImmersiveCardViewer = ({ card: initialCard }: { card?: Card }) => {
                 {Object.entries(cardStats).map(([key, value]) => (
                   <div key={key} className="text-center">
                     <p className="text-xs text-gray-400">{key}</p>
-                    <p className="font-medium">{value}</p>
+                    <p className="font-medium">{String(value)}</p>
                   </div>
                 ))}
               </div>

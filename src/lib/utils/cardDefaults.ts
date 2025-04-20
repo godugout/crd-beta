@@ -6,6 +6,36 @@ export const FALLBACK_IMAGE_URL = 'https://images.unsplash.com/photo-15187706604
 export const FALLBACK_FRONT_IMAGE_URL = 'https://images.unsplash.com/photo-1518770660439-4636190af475';
 export const FALLBACK_BACK_IMAGE_URL = 'https://images.unsplash.com/photo-1509114397022-ed747cca3f65';
 
+// Default design metadata for cards
+export const DEFAULT_DESIGN_METADATA = {
+  cardStyle: {
+    effect: 'standard',
+    borderRadius: '8px',
+    borderColor: '#ffffff',
+    shadowColor: 'rgba(0,0,0,0.3)',
+    backgroundColor: '#000000'
+  },
+  textStyle: {
+    fontFamily: '"Inter", system-ui, sans-serif',
+    titleColor: '#ffffff',
+    descriptionColor: '#e0e0e0'
+  },
+  cardMetadata: {
+    cardNumber: '',
+    cardType: 'Standard',
+    series: 'Base',
+    artist: '',
+    rarity: 'Common'
+  },
+  marketMetadata: {
+    isPrintable: false,
+    isForSale: false,
+    includeInCatalog: true,
+    price: 0
+  },
+  stats: {}
+};
+
 // Default rendering quality presets
 export const RENDERING_QUALITY_PRESETS = {
   high: {
