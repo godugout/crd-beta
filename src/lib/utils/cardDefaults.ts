@@ -1,9 +1,9 @@
 
 import { getFallbackImageUrl } from './imageUtils';
 
-export const FALLBACK_FRONT_IMAGE_URL = 'https://images.unsplash.com/photo-1518770660439-4636190af475';
-export const FALLBACK_BACK_IMAGE_URL = 'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b';
-export const FALLBACK_IMAGE_URL = FALLBACK_FRONT_IMAGE_URL; // Add this line to export FALLBACK_IMAGE_URL
+export const FALLBACK_FRONT_IMAGE_URL = getFallbackImageUrl('front');
+export const FALLBACK_BACK_IMAGE_URL = getFallbackImageUrl('back');
+export const FALLBACK_IMAGE_URL = FALLBACK_FRONT_IMAGE_URL;
 
 export const DEFAULT_DESIGN_METADATA = {
   cardStyle: {
@@ -50,14 +50,3 @@ export const DEFAULT_DESIGN_METADATA = {
   }
 };
 
-// Optional: Add a function to get a fallback based on card type
-export const getCardBackPlaceholder = (cardType?: string) => {
-  switch (cardType) {
-    case 'baseball':
-      return 'https://images.unsplash.com/photo-1546519638-68e109498ffc';
-    case 'vintage':
-      return 'https://images.unsplash.com/photo-1594736292631-6df61984a1a8';
-    default:
-      return FALLBACK_BACK_IMAGE_URL;
-  }
-};

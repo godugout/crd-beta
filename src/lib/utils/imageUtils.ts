@@ -1,5 +1,5 @@
 
-export const getCardImageFallback = (tags?: string[], title?: string, type?: 'front' | 'back' = 'front'): string => {
+export const getCardImageFallback = (tags?: string[], title?: string, type: 'front' | 'back' = 'front'): string => {
   const defaultFrontImage = 'https://images.unsplash.com/photo-1518770660439-4636190af475';
   const defaultBackImage = 'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b';
 
@@ -32,3 +32,10 @@ export const getCardImageFallback = (tags?: string[], title?: string, type?: 'fr
 
   return type === 'back' ? defaultBackImage : defaultFrontImage;
 };
+
+export const getFallbackImageUrl = (type: 'front' | 'back' = 'front'): string => {
+  return type === 'back' 
+    ? 'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b'
+    : 'https://images.unsplash.com/photo-1518770660439-4636190af475';
+};
+
