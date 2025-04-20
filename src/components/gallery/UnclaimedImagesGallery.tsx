@@ -30,7 +30,7 @@ const fetchUnclaimedAssets = async (): Promise<UnclaimedAsset[]> => {
 };
 
 export const UnclaimedImagesGallery = () => {
-  // Use explicitly typed query with a dedicated fetch function
+  // Explicitly type the query result to avoid deep type instantiation
   const { data: unclaimedAssets, isLoading } = useQuery({
     queryKey: ['unclaimedAssets'],
     queryFn: fetchUnclaimedAssets
