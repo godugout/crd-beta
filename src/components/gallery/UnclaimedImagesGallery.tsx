@@ -27,9 +27,11 @@ interface DigitalAsset {
 }
 
 export const UnclaimedImagesGallery = () => {
-  const { data: unclaimedAssets, isLoading } = useQuery<DigitalAsset[]>({
+  // Fix the type by avoiding generic type parameter in useQuery
+  // and simplifying the query function
+  const { data, isLoading } = useQuery({
     queryKey: ['unclaimedAssets'],
-    queryFn: async (): Promise<DigitalAsset[]> => {
+    queryFn: async () => {
       const { data, error } = await supabase
         .from('digital_assets')
         .select('*')
@@ -37,9 +39,11 @@ export const UnclaimedImagesGallery = () => {
         .order('created_at', { ascending: false });
         
       if (error) throw error;
-      return data as DigitalAsset[] || [];
+      return (data || []) as DigitalAsset[];
     }
   });
+
+  const unclaimedAssets = data as DigitalAsset[] | undefined;
 
   if (isLoading) {
     return <div className="flex justify-center p-8">
