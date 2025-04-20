@@ -27,8 +27,8 @@ interface DigitalAsset {
 }
 
 export const UnclaimedImagesGallery = () => {
-  // Fixed type instantiation issue by simplifying the query function
-  const { data, isLoading } = useQuery({
+  // Resolve deep type instantiation issue by explicitly typing the query result
+  const { data, isLoading } = useQuery<DigitalAsset[]>({
     queryKey: ['unclaimedAssets'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -38,12 +38,11 @@ export const UnclaimedImagesGallery = () => {
         .order('created_at', { ascending: false });
         
       if (error) throw error;
-      // Use type assertion to simplify type checking
       return data as DigitalAsset[];
     }
   });
 
-  // Simplified type handling
+  // Use a simple default empty array
   const unclaimedAssets = data || [];
 
   if (isLoading) {
