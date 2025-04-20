@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCards } from '@/context/CardContext';
@@ -14,6 +15,8 @@ import ThreeColumnLayout from '../card-creation/layouts/ThreeColumnLayout';
 import TemplatesPanel from './panels/TemplatesPanel';
 import CardPreviewPanel from './panels/CardPreview';
 import LayersPanel from './panels/LayersPanel';
+import { v4 as uuidv4 } from 'uuid';
+import { Card } from '@/lib/types';
 
 interface CardEditorContainerProps {
   card?: any;
@@ -57,16 +60,28 @@ const CardEditorContainer: React.FC<CardEditorContainerProps> = ({
   );
   
   const handleSubmit = async () => {
-    const cardData = {
-      ...cardState.getCardData(),
+    const currentDate = new Date().toISOString();
+    
+    const cardData: Partial<Card> = {
+      id: card?.id || uuidv4(),
+      title: cardState.title,
+      description: cardState.description || '',
+      imageUrl: cardState.imageUrl || '',
+      thumbnailUrl: cardState.imageUrl || '',
+      tags: cardState.tags || [],
+      effects: cardState.selectedEffects || [],
+      player: cardState.player,
+      team: cardState.team,
+      year: cardState.year,
+      userId: 'current-user',
+      createdAt: card?.createdAt || currentDate,
+      updatedAt: currentDate,
       designMetadata: {
         ...DEFAULT_DESIGN_METADATA,
         cardStyle: cardState.cardStyle || DEFAULT_DESIGN_METADATA.cardStyle,
         effects: cardState.selectedEffects || [],
-        player: cardState.player,
-        team: cardState.team,
-        year: cardState.year,
-      }
+      },
+      layers: cardState.layers || [],
     };
     
     try {
@@ -77,7 +92,7 @@ const CardEditorContainer: React.FC<CardEditorContainerProps> = ({
       }
       
       if (card) {
-        // Update existing card - fixed to use single argument
+        // Update existing card
         await updateCard(cardData);
         toast.success('CRD updated successfully');
       } else {

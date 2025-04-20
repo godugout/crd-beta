@@ -59,6 +59,7 @@ const OaklandMemoryCreator: React.FC = () => {
         thumbnailUrl: formData.imageUrl || '',
         tags: formData.tags || ['oakland', 'athletics', 'memory'],
         effects: ['Vintage'],
+        userId: 'current-user', // Add the required userId field
         designMetadata: {
           cardStyle: {
             template: formData.template || 'classic',
@@ -98,9 +99,7 @@ const OaklandMemoryCreator: React.FC = () => {
             historicalContext: formData.historicalContext || '',
             personalSignificance: formData.personalSignificance || ''
           }
-        },
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        }
       };
       
       await addCard(newCard);

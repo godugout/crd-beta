@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCards } from '@/context/CardContext';
@@ -68,7 +69,7 @@ const CardCreator = () => {
     setIsSubmitting(true);
     
     try {
-      const newCard = await addCard({
+      const cardToCreate = {
         id: uuidv4(),
         title: cardData.title,
         description: cardData.description,
@@ -80,7 +81,9 @@ const CardCreator = () => {
         designMetadata: DEFAULT_DESIGN_METADATA,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
-      });
+      };
+
+      const newCard = await addCard(cardToCreate);
 
       toast({
         title: "Card created!",

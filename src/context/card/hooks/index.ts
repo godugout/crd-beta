@@ -13,14 +13,18 @@ export type { Card, Collection };
 // This is a wrapper function that uses the CardContext to provide collection functionality
 export const useCollection = () => {
   // Using useCards() context to provide collection functionality
+  const context = useCards();
+  
+  // Extract collection-related props from context
   const { 
     collections, 
     addCollection, 
     updateCollection, 
     deleteCollection, 
     addCardToCollection, 
-    removeCardFromCollection 
-  } = useCards();
+    removeCardFromCollection,
+    getCollectionById
+  } = context;
   
   return {
     collections,
@@ -28,6 +32,7 @@ export const useCollection = () => {
     updateCollection,
     deleteCollection,
     addCardToCollection,
-    removeCardFromCollection
+    removeCardFromCollection,
+    getCollectionById
   };
 };

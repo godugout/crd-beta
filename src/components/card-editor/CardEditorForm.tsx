@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -8,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Card } from '@/lib/types';
 import { useCards } from '@/context/CardContext';
 import { toast } from 'sonner';
+import { v4 as uuidv4 } from 'uuid';
 
 const cardFormSchema = z.object({
   title: z.string().min(2, {
@@ -50,17 +52,53 @@ const CardEditorForm: React.FC<CardEditorFormProps> = ({ card, onSubmit }) => {
         return;
       }
       
-      const cardData = {
+      const currentDate = new Date().toISOString();
+      const tags = data.tags ? data.tags.split(',').map(tag => tag.trim()) : [];
+      
+      const cardData: Partial<Card> = {
         title: data.title,
         description: data.description,
-        tags: data.tags.split(',').map(tag => tag.trim()),
-        imageUrl: data.imageUrl,
-        // Add other card properties as needed
+        tags: tags,
+        imageUrl: data.imageUrl || '',
+        thumbnailUrl: data.imageUrl || '',
+        userId: 'current-user',
+        effects: [],
+        createdAt: card?.createdAt || currentDate,
+        updatedAt: currentDate,
+        designMetadata: card?.designMetadata || {
+          cardStyle: {
+            template: 'classic',
+            effect: 'classic',
+            borderRadius: '8px',
+            borderColor: '#000000',
+            frameColor: '#000000',
+            frameWidth: 2,
+            shadowColor: 'rgba(0,0,0,0.2)',
+          },
+          textStyle: {
+            titleColor: '#FFFFFF',
+            titleAlignment: 'left',
+            titleWeight: 'bold',
+            descriptionColor: '#FFFFFF',
+          },
+          marketMetadata: {
+            isPrintable: false,
+            isForSale: false,
+            includeInCatalog: true
+          },
+          cardMetadata: {
+            category: 'sports',
+            cardType: 'collectible',
+            series: 'standard'
+          }
+        }
       };
       
       if (card) {
-        // Fix updateCard call to use one argument
-        await updateCard({ id: card.id, ...cardData });
+        await updateCard({
+          ...cardData,
+          id: card.id
+        });
         toast.success('Card updated successfully');
       } else {
         await addCard(cardData);
