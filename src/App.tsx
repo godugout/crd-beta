@@ -4,7 +4,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { Toaster } from 'sonner';
-import { CardProvider } from '@/context/CardContext';
+import { CardProvider } from './context/CardContext'; // Fix the import path to use correct file
 import Home from '@/pages/Home';
 import Editor from '@/pages/Editor';
 import Gallery from '@/pages/Gallery';

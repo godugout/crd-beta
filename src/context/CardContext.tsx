@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { Card } from '@/lib/types';
 import { sampleCards } from '@/data/sampleCards';
@@ -17,8 +18,8 @@ interface CardContextType {
 
 const CardContext = createContext<CardContextType | undefined>(undefined);
 
-// Explicitly export CardProvider
-export function CardProvider({ children }: { children: React.ReactNode }) {
+// Explicitly export CardProvider as a named export
+export function CardProvider({ children }: { children: ReactNode }) {
   const [cards, setCards] = useState<Card[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
