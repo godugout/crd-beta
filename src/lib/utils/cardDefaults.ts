@@ -1,4 +1,3 @@
-
 // Default values and fallbacks for card rendering
 
 // Default image URLs for when card images fail to load
@@ -106,7 +105,7 @@ export const getOptimizedEffectSettings = (
     return {
       ...settings,
       effectDetail: settings.effectDetail * 0.7,
-      animationEnabled: devicePerformance === 'high'
+      animationEnabled: false
     };
   }
   
