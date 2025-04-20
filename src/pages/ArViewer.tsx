@@ -2,7 +2,8 @@
 import React from 'react';
 import PageLayout from '@/components/navigation/PageLayout';
 import { Button } from '@/components/ui/button';
-import { Cube, ArrowLeft } from 'lucide-react';
+import { Layers } from 'lucide-react';  // Changed from 'Cube'
+import { ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const ArViewer = () => {
@@ -28,7 +29,7 @@ const ArViewer = () => {
         </div>
         
         <div className="flex flex-col items-center justify-center py-12 bg-muted rounded-lg text-center">
-          <Cube className="h-16 w-16 mb-4 text-muted-foreground" />
+          <Layers className="h-16 w-16 mb-4 text-muted-foreground" />  {/* Changed from 'Cube' */}
           <h2 className="text-xl font-medium mb-2">AR Viewer Coming Soon</h2>
           <p className="text-muted-foreground max-w-md mx-auto mb-6">
             Our augmented reality card viewer is currently under development. 

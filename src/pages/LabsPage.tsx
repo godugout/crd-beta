@@ -1,11 +1,9 @@
-
 import React from 'react';
 import PageLayout from '@/components/navigation/PageLayout';
 import { Button } from '@/components/ui/button';
-import { BeakerIcon, Sparkles, ArrowRight, Eye, Layers3D, RotateCw } from 'lucide-react';
+import { BeakerIcon, Sparkles, ArrowRight, Eye, Layers, RotateCw } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-// Importing BeakerIcon from Lucide
 const BeakerIconComponent = () => <BeakerIcon className="h-5 w-5" />;
 
 const LabsPage = () => {
@@ -53,7 +51,7 @@ const LabsPage = () => {
           
           <div className="border rounded-lg overflow-hidden bg-card hover:shadow-md transition-shadow">
             <div className="h-40 bg-gradient-to-br from-purple-50 to-pink-100 dark:from-purple-900/20 dark:to-pink-900/30 flex items-center justify-center">
-              <Layers3D className="h-12 w-12 text-purple-500/70" />
+              <Layers className="h-12 w-12 text-purple-500/70" />
             </div>
             <div className="p-5">
               <h3 className="font-bold text-lg mb-2">AR Card Viewer</h3>
