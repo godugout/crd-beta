@@ -18,11 +18,28 @@ interface CardContextProps {
   addCardToCollection: (params: { collectionId: string, cardId: string }) => Promise<void>;
   removeCardFromCollection: (params: { collectionId: string, cardId: string }) => Promise<void>;
   getCard: (id: string) => Card | undefined;
-  refreshCards: () => Promise<void>; // Add this line to fix the errors
+  refreshCards: () => Promise<void>;
 }
 
 // Create the context with default values
-const CardContext = createContext<CardContextProps>({} as CardContextProps);
+const CardContext = createContext<CardContextProps>({
+  cards: [],
+  collections: [], 
+  isLoading: false,
+  error: null,
+  addCard: async () => ({ id: '', title: '', imageUrl: '', createdAt: '', updatedAt: '' }),
+  updateCard: async () => ({ id: '', title: '', imageUrl: '', createdAt: '', updatedAt: '' }),
+  deleteCard: async () => false,
+  addCollection: async () => ({ id: '', title: '', createdAt: '', updatedAt: '', userId: '' }),
+  updateCollection: async () => ({ id: '', title: '', createdAt: '', updatedAt: '', userId: '' }),
+  deleteCollection: async () => false,
+  getCardById: () => undefined,
+  getCollectionById: () => undefined,
+  addCardToCollection: async () => {},
+  removeCardFromCollection: async () => {},
+  getCard: () => undefined,
+  refreshCards: async () => {},
+});
 
 export { CardContext };
 export type { CardContextProps };
