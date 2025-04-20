@@ -101,6 +101,7 @@ export const getOptimizedEffectSettings = (
     ['Holographic', 'Refractor', 'Superfractor'].includes(e)
   );
   
+  // Fix the comparison issue by ensuring consistent types
   if (premiumEffects.length > 1 && devicePerformance !== 'high') {
     return {
       ...settings,
