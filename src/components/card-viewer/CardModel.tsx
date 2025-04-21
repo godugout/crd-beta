@@ -1,3 +1,4 @@
+
 import React, { useRef, useEffect, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
@@ -6,7 +7,11 @@ import ShimmerEffect from '../card-effects/effects/ShimmerEffect';
 import HolographicEffect from '../card-effects/effects/HolographicEffect';
 import RefractorEffect from '../card-effects/effects/RefractorEffect';
 import VintageEffect from '../card-effects/effects/VintageEffect';
-import { FALLBACK_IMAGE_URL, FALLBACK_BACK_IMAGE_URL } from '@/lib/utils/cardDefaults';
+import { 
+  FALLBACK_IMAGE_URL, 
+  FALLBACK_BACK_IMAGE_URL,
+  safeNumber 
+} from '@/lib/utils/cardDefaults';
 
 interface CardModelProps {
   imageUrl: string;
@@ -32,16 +37,29 @@ const CardModel: React.FC<CardModelProps> = ({
   const safeImageUrl = imageUrl || FALLBACK_IMAGE_URL;
   const safeBackImageUrl = backImageUrl || FALLBACK_BACK_IMAGE_URL;
   
-  // Try to load textures with error handling
-  const frontTexture = useTexture(safeImageUrl, () => {
-    setFrontTextureLoaded(true);
-    console.log("Front card texture loaded:", safeImageUrl);
-  });
+  // Use a try-catch block around texture loading
+  let frontTexture, backTexture;
   
-  const backTexture = useTexture(safeBackImageUrl, () => {
-    setBackTextureLoaded(true);
-    console.log("Back card texture loaded:", safeBackImageUrl);
-  });
+  try {
+    // Try to load textures with error handling
+    frontTexture = useTexture(safeImageUrl, () => {
+      setFrontTextureLoaded(true);
+      console.log("Front card texture loaded:", safeImageUrl);
+    });
+    
+    backTexture = useTexture(safeBackImageUrl, () => {
+      setBackTextureLoaded(true);
+      console.log("Back card texture loaded:", safeBackImageUrl);
+    });
+  } catch (error) {
+    console.error("Error loading textures:", error);
+    setLoadError(true);
+    
+    // Create fallback textures if loading fails
+    const loader = new THREE.TextureLoader();
+    frontTexture = loader.load(FALLBACK_IMAGE_URL);
+    backTexture = loader.load(FALLBACK_BACK_IMAGE_URL);
+  }
 
   useEffect(() => {
     // Extra safety check for textures
@@ -124,28 +142,28 @@ const CardModel: React.FC<CardModelProps> = ({
       {activeEffects.includes('Shimmer') && (
         <ShimmerEffect 
           isActive={true} 
-          intensity={effectIntensities['Shimmer'] || 0.7}
+          intensity={safeNumber(effectIntensities['Shimmer'], 0.7)}
         />
       )}
       
       {activeEffects.includes('Holographic') && (
         <HolographicEffect 
           isActive={true} 
-          intensity={effectIntensities['Holographic'] || 0.7}
+          intensity={safeNumber(effectIntensities['Holographic'], 0.7)}
         />
       )}
       
       {activeEffects.includes('Refractor') && (
         <RefractorEffect 
           isActive={true} 
-          intensity={effectIntensities['Refractor'] || 0.7}
+          intensity={safeNumber(effectIntensities['Refractor'], 0.7)}
         />
       )}
       
       {activeEffects.includes('Vintage') && (
         <VintageEffect 
           isActive={true} 
-          intensity={effectIntensities['Vintage'] || 0.7}
+          intensity={safeNumber(effectIntensities['Vintage'], 0.7)}
           cardTexture={frontTexture}
         />
       )}

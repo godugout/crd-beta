@@ -1,43 +1,92 @@
 
-// Valid environment presets supported by @react-three/drei
-export type ValidEnvironmentPreset = 
-  | 'sunset'
-  | 'dawn'
-  | 'night'
-  | 'warehouse'
-  | 'forest'
-  | 'apartment'
-  | 'studio'
-  | 'city'
-  | 'park'
-  | 'lobby';
-
-// Define lighting preset options for UI
-export const lightingPresets = [
-  { value: 'studio', label: 'Studio' },
-  { value: 'natural', label: 'Natural Light' },
-  { value: 'dramatic', label: 'Dramatic' },
-  { value: 'display_case', label: 'Display Case' }
+// Define valid environment presets for three.js/react-three-fiber
+const VALID_ENVIRONMENT_PRESETS = [
+  'sunset', 
+  'dawn', 
+  'night', 
+  'warehouse', 
+  'forest', 
+  'apartment', 
+  'studio', 
+  'city', 
+  'park', 
+  'lobby'
 ];
 
-// Map our custom lighting presets to valid drei environment presets
-export const mapLightingPresetToEnvironment = (preset: string): ValidEnvironmentPreset => {
-  switch (preset) {
-    case 'natural':
-      return 'forest';
-    case 'dramatic':
-      return 'night';
-    case 'display_case':
-      return 'lobby';
-    case 'studio':
-    default:
-      return 'studio';
+/**
+ * Maps a string preset name to a valid environment preset
+ * @param preset Preset name to validate
+ * @returns Valid environment preset name
+ */
+export const getEnvironmentPreset = (preset: string): string => {
+  // Default to 'studio' for best lighting
+  const defaultPreset = 'studio';
+  
+  if (!preset || typeof preset !== 'string') {
+    return defaultPreset;
   }
+  
+  // Check if the preset is valid
+  const normalizedPreset = preset.toLowerCase().trim();
+  
+  if (VALID_ENVIRONMENT_PRESETS.includes(normalizedPreset)) {
+    return normalizedPreset;
+  }
+  
+  // Map similar names to valid presets
+  const presetMap: Record<string, string> = {
+    'day': 'dawn',
+    'evening': 'sunset',
+    'dark': 'night',
+    'indoor': 'apartment',
+    'outdoors': 'park',
+    'nature': 'forest',
+    'urban': 'city',
+    'professional': 'studio'
+  };
+  
+  return presetMap[normalizedPreset] || defaultPreset;
 };
 
-// Get the appropriate environment preset with type safety
-export const getEnvironmentPreset = (
-  preset: string = 'studio'
-): ValidEnvironmentPreset => {
-  return mapLightingPresetToEnvironment(preset);
+/**
+ * Gets a list of all available environment presets
+ */
+export const getAllEnvironmentPresets = (): string[] => {
+  return [...VALID_ENVIRONMENT_PRESETS];
+};
+
+/**
+ * Gets the appropriate intensity for an effect based on environment
+ */
+export const getEffectIntensityForEnvironment = (
+  effect: string,
+  environment: string,
+  baseIntensity = 0.7
+): number => {
+  // Adjust intensities based on environment lighting
+  const intensityFactors: Record<string, Record<string, number>> = {
+    'holographic': {
+      'night': 1.2,
+      'studio': 1.0,
+      'sunset': 0.9,
+      'dawn': 0.8,
+      'day': 0.7
+    },
+    'refractor': {
+      'night': 1.3,
+      'studio': 1.0,
+      'sunset': 0.85,
+      'dawn': 0.8,
+      'day': 0.7
+    }
+  };
+  
+  const normalizedEffect = effect.toLowerCase();
+  const normalizedEnvironment = environment.toLowerCase();
+  
+  // Get the effect-specific modifiers or default to 1.0
+  const effectFactors = intensityFactors[normalizedEffect] || {};
+  const intensityFactor = effectFactors[normalizedEnvironment] || 1.0;
+  
+  return baseIntensity * intensityFactor;
 };

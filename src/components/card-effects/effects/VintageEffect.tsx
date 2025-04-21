@@ -1,107 +1,58 @@
 
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import * as THREE from 'three';
-import { useTexture } from '@react-three/drei';
+import { safeNumber } from '@/lib/utils/cardDefaults';
 
 interface VintageEffectProps {
   intensity?: number;
   isActive: boolean;
-  cardTexture: THREE.Texture;
+  cardTexture?: THREE.Texture;
 }
 
-/**
- * Enhanced vintage effect with sepia tone and print artifacts
- */
 const VintageEffect: React.FC<VintageEffectProps> = ({
   intensity = 1.0,
   isActive,
   cardTexture
 }) => {
-  const materialRef = useRef<THREE.ShaderMaterial>(null);
+  const vintageRef = useRef<HTMLDivElement>(null);
   
-  // Load paper texture for vintage effect
-  const paperTexture = useTexture('/textures/vintage-paper.jpg');
-  
-  // Only render the effect when active
-  if (!isActive) return null;
-
-  // Make sure textures are properly set up
-  if (paperTexture) {
-    paperTexture.wrapS = paperTexture.wrapT = THREE.RepeatWrapping;
-    paperTexture.repeat.set(1, 1);
-  }
-
-  const vertexShader = `
-    varying vec2 vUv;
-    void main() {
-      vUv = uv;
-      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-    }
-  `;
-
-  const fragmentShader = `
-    uniform float intensity;
-    uniform sampler2D cardTexture;
-    uniform sampler2D paperTexture;
-    varying vec2 vUv;
+  // Apply vintage effect when active
+  useEffect(() => {
+    if (!vintageRef.current || !isActive) return;
     
-    void main() {
-      // Sample the original card texture
-      vec4 cardColor = texture2D(cardTexture, vUv);
-      
-      // Apply sepia tone effect
-      vec3 sepia = vec3(
-        cardColor.r * 0.393 + cardColor.g * 0.769 + cardColor.b * 0.189,
-        cardColor.r * 0.349 + cardColor.g * 0.686 + cardColor.b * 0.168,
-        cardColor.r * 0.272 + cardColor.g * 0.534 + cardColor.b * 0.131
-      );
-      
-      // Sample the vintage paper texture
-      vec4 paper = texture2D(paperTexture, vUv * 2.0);
-      
-      // Add print press artifacts
-      float noise = fract(sin(vUv.x * 500.0 + vUv.y * 500.0) * 1000.0);
-      float printDots = step(0.92, noise) * 0.1;
-      
-      // Add vignette effect
-      vec2 center = vUv - 0.5;
-      float vignette = 1.0 - dot(center, center) * 1.5;
-      vignette = clamp(vignette, 0.0, 1.0);
-      
-      // Add slight color bleeding like old prints
-      float bleed = noise * 0.03;
-      
-      // Mix sepia tone with paper texture and artifacts
-      vec3 finalColor = mix(sepia, paper.rgb * sepia, 0.2) + vec3(printDots);
-      finalColor *= vignette;
-      finalColor += vec3(bleed, 0.0, 0.0); // Slight red bleed
-      
-      // Adjust contrast and brightness
-      finalColor = (finalColor - 0.5) * 1.1 + 0.5; // Contrast
-      finalColor *= 0.9; // Brightness
-      
-      // Apply intensity
-      vec3 result = mix(cardColor.rgb, finalColor, intensity);
-      
-      gl_FragColor = vec4(result, cardColor.a);
+    const element = vintageRef.current;
+    const safeIntensity = safeNumber(intensity, 0.7);
+    
+    // Set CSS variables for effect strength
+    element.style.setProperty('--vintage-intensity', safeIntensity.toString());
+    element.style.setProperty('--vintage-sepia', (safeIntensity * 0.6).toFixed(2));
+    element.style.setProperty('--vintage-contrast', (1 + safeIntensity * 0.1).toFixed(2));
+    
+    // If we have a texture, we could use it for grain pattern (advanced)
+    if (cardTexture) {
+      console.log("Vintage effect has card texture for advanced rendering");
     }
-  `;
-
+    
+  }, [intensity, isActive, cardTexture]);
+  
+  // Don't render if not active
+  if (!isActive) return null;
+  
   return (
-    <mesh position={[0, 0, 0.001]} renderOrder={5}>
-      <planeGeometry args={[2.5, 3.5, 32, 32]} />
-      <shaderMaterial
-        ref={materialRef}
-        vertexShader={vertexShader}
-        fragmentShader={fragmentShader}
-        transparent={true}
-        uniforms={{
-          intensity: { value: intensity },
-          cardTexture: { value: cardTexture },
-          paperTexture: { value: paperTexture }
-        }}
-      />
-    </mesh>
+    <div 
+      ref={vintageRef}
+      className="vintage-effect"
+      style={{
+        position: 'absolute',
+        inset: 0,
+        zIndex: 3,
+        pointerEvents: 'none',
+        mixBlendMode: 'multiply',
+        filter: `sepia(var(--vintage-sepia, 0.5)) contrast(var(--vintage-contrast, 1.1))`,
+        background: 'url("https://www.transparenttextures.com/patterns/paper-fibers.png")',
+        opacity: safeNumber(intensity, 0.7) * 0.8
+      }}
+    />
   );
 };
 

@@ -1,133 +1,29 @@
-// Default values and fallbacks for card rendering
 
-// Default image URLs for when card images fail to load
-export const FALLBACK_IMAGE_URL = 'https://images.unsplash.com/photo-1518770660439-4636190af475';
+// Default values for cards and rendering
 export const FALLBACK_FRONT_IMAGE_URL = 'https://images.unsplash.com/photo-1518770660439-4636190af475';
-export const FALLBACK_BACK_IMAGE_URL = 'https://images.unsplash.com/photo-1509114397022-ed747cca3f65';
+export const FALLBACK_BACK_IMAGE_URL = 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6';
+export const FALLBACK_IMAGE_URL = FALLBACK_FRONT_IMAGE_URL;
 
-// Default design metadata for cards
-export const DEFAULT_DESIGN_METADATA = {
-  cardStyle: {
-    template: 'standard',
-    effect: 'standard',
-    borderRadius: '8px',
-    borderColor: '#ffffff',
-    shadowColor: 'rgba(0,0,0,0.3)',
-    backgroundColor: '#000000',
-    frameColor: '#ffffff',
-    frameWidth: 2,
-    teamSpecific: false
-  },
-  textStyle: {
-    fontFamily: '"Inter", system-ui, sans-serif',
-    titleColor: '#ffffff',
-    descriptionColor: '#e0e0e0',
-    titleAlignment: 'center',
-    titleWeight: 'bold'
-  },
-  cardMetadata: {
-    cardNumber: '',
-    cardType: 'Standard',
-    series: 'Base',
-    category: 'Standard', // Added required category field
-    artist: '',
-    rarity: 'Common'
-  },
-  marketMetadata: {
-    isPrintable: false,
-    isForSale: false,
-    includeInCatalog: true,
-    price: 0
-  },
-  stats: {}
+// Make card back texture URL configurable
+export const CARD_BACK_TEXTURE_URL = '/lovable-uploads/card-back-texture.jpg';
+
+// Default card dimensions (standard trading card ratio)
+export const CARD_DIMENSIONS = {
+  width: 2.5,
+  height: 3.5,
+  thickness: 0.05
 };
 
-// Default rendering quality presets
-export const RENDERING_QUALITY_PRESETS = {
-  high: {
-    effectDetail: 1.0,
-    lightingQuality: 'pbr',
-    reflectionIntensity: 0.8,
-    textureSize: 2048,
-    animationEnabled: true,
-    shadowEnabled: true
-  },
-  medium: {
-    effectDetail: 0.7,
-    lightingQuality: 'standard',
-    reflectionIntensity: 0.6,
-    textureSize: 1024,
-    animationEnabled: true,
-    shadowEnabled: true
-  },
-  low: {
-    effectDetail: 0.4,
-    lightingQuality: 'basic',
-    reflectionIntensity: 0.3,
-    textureSize: 512,
-    animationEnabled: false,
-    shadowEnabled: false
+// Safety wrapper for numeric operations (prevents toFixed errors)
+export const safeNumber = (value: any, fallback: number = 0): number => {
+  if (value === undefined || value === null || isNaN(Number(value))) {
+    return fallback;
   }
+  return Number(value);
 };
 
-// Detect device performance tiers
-export const detectDevicePerformance = (): 'high' | 'medium' | 'low' => {
-  // Check for hardware capabilities
-  const cores = navigator.hardwareConcurrency || 2;
-  const memory = (navigator as any).deviceMemory || 4;
-  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-  const isOldBrowser = !window.requestAnimationFrame || !window.performance;
-  
-  // Estimate device capability
-  if (cores >= 8 && memory >= 4 && !isMobile && !isOldBrowser) {
-    return 'high';
-  } else if (cores <= 2 || memory <= 2 || (isMobile && isOldBrowser)) {
-    return 'low';
-  } else {
-    return 'medium';
-  }
-};
-
-// Get optimized effect settings based on device performance
-export const getOptimizedEffectSettings = (
-  devicePerformance: 'high' | 'medium' | 'low', 
-  activeEffects: string[]
-) => {
-  const settings = {...RENDERING_QUALITY_PRESETS[devicePerformance]};
-  
-  // Further reduce quality for multiple premium effects
-  const premiumEffects = activeEffects.filter(e => 
-    ['Holographic', 'Refractor', 'Superfractor'].includes(e)
-  );
-  
-  // Fix the comparison issue by ensuring consistent types
-  if (premiumEffects.length > 1 && devicePerformance !== 'high') {
-    return {
-      ...settings,
-      effectDetail: settings.effectDetail * 0.7,
-      animationEnabled: false
-    };
-  }
-  
-  return settings;
-};
-
-// Format to use for rendering text on cards
-export const CARD_TEXT_FORMATS = {
-  title: {
-    fontFamily: '"Inter", system-ui, sans-serif',
-    fontSize: '20px',
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-    textAlign: 'center',
-    textShadow: '0 1px 2px rgba(0,0,0,0.5)'
-  },
-  description: {
-    fontFamily: '"Inter", system-ui, sans-serif',
-    fontSize: '14px',
-    fontWeight: 'normal',
-    color: '#E0E0E0',
-    textAlign: 'center',
-    textShadow: '0 1px 1px rgba(0,0,0,0.5)'
-  }
+// Format a number safely with decimal places
+export const safeFixed = (value: any, decimals: number = 2, fallback: number = 0): string => {
+  const num = safeNumber(value, fallback);
+  return num.toFixed(decimals);
 };

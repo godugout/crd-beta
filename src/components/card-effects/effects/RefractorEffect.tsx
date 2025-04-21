@@ -1,111 +1,112 @@
 
-import React, { useRef } from 'react';
-import * as THREE from 'three';
-import { useFrame } from '@react-three/fiber';
+import React, { useEffect, useRef } from 'react';
+import { safeNumber, safeFixed } from '@/lib/utils/cardDefaults';
+import '../effects.css';
 
 interface RefractorEffectProps {
   intensity?: number;
+  speed?: number;
+  colors?: string[];
   isActive: boolean;
+  mousePosition?: { x: number; y: number };
+  animationEnabled?: boolean;
+  angle?: number;
 }
 
-/**
- * Enhanced refractor effect with full card coverage
- */
 const RefractorEffect: React.FC<RefractorEffectProps> = ({
   intensity = 1.0,
-  isActive
+  speed = 1.0,
+  colors = ['rgba(255, 0, 128, 0.2)', 'rgba(0, 255, 255, 0.2)', 'rgba(255, 255, 0, 0.2)'],
+  isActive,
+  mousePosition = { x: 0.5, y: 0.5 },
+  animationEnabled = true,
+  angle
 }) => {
-  const materialRef = useRef<THREE.ShaderMaterial>(null);
+  const refractorRef = useRef<HTMLDivElement>(null);
   
-  // Only render the effect when active
-  if (!isActive) return null;
-
-  const vertexShader = `
-    varying vec2 vUv;
-    void main() {
-      vUv = uv;
-      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-    }
-  `;
-
-  const fragmentShader = `
-    uniform float time;
-    uniform float intensity;
-    varying vec2 vUv;
+  // Dynamic angle calculation based on mouse position or preset angle
+  const calculateRefractorAngle = () => {
+    if (angle !== undefined) return safeNumber(angle, 0);
     
-    // Function to create prismatic refraction pattern
-    vec3 prismColor(float angle) {
-      vec3 color;
-      angle = mod(angle, 6.28318);
-      color.r = abs(sin(angle));
-      color.g = abs(sin(angle + 2.0944));
-      color.b = abs(sin(angle + 4.18879));
-      return color;
-    }
+    // Safe mouse position values
+    const safeX = safeNumber(mousePosition?.x, 0.5);
+    const safeY = safeNumber(mousePosition?.y, 0.5);
     
-    void main() {
-      // Create dynamic refraction pattern
-      float angle = atan(vUv.y - 0.5, vUv.x - 0.5);
-      float dist = length(vUv - 0.5);
-      
-      // Create refraction lines that move across the card
-      float lines = sin(dist * 30.0 - time * 0.5) * 0.5 + 0.5;
-      lines = smoothstep(0.45, 0.55, lines);
-      
-      // Dynamic refraction angle based on time and position
-      float refractAngle = angle * 3.0 + dist * 5.0 + time * 0.2;
-      vec3 refractColor = prismColor(refractAngle);
-      
-      // Prismatic color separation
-      float separation = 0.03 * sin(time * 0.5);
-      vec3 refractR = prismColor(refractAngle + separation);
-      vec3 refractG = prismColor(refractAngle);
-      vec3 refractB = prismColor(refractAngle - separation);
-      
-      vec3 finalColor = vec3(
-        refractR.r,
-        refractG.g,
-        refractB.b
+    return Math.atan2(safeY - 0.5, safeX - 0.5) * (180 / Math.PI);
+  };
+  
+  // Apply refractor effect properties when active
+  useEffect(() => {
+    if (!refractorRef.current || !isActive) return;
+    
+    const refractorElement = refractorRef.current;
+    const safeIntensity = safeNumber(intensity, 1.0);
+    const safeSpeed = safeNumber(speed, 1.0);
+    
+    // Apply intensity through CSS variables
+    refractorElement.style.setProperty('--refractor-intensity', safeIntensity.toString());
+    refractorElement.style.setProperty('--refractor-speed', `${3 / safeSpeed}s`);
+    
+    // Set the refraction colors to simulate different light angles based on mouse position
+    const safeX = safeNumber(mousePosition?.x, 0.5);
+    const safeY = safeNumber(mousePosition?.y, 0.5);
+    
+    const hue1 = 120 + safeX * 60;
+    const hue2 = 180 + safeY * 60;
+    const hue3 = 240 + (safeX + safeY) * 30;
+    
+    // Apply custom colors if provided, otherwise generate dynamic colors
+    if (colors && colors.length >= 3) {
+      refractorElement.style.setProperty('--refractor-color-1', colors[0]);
+      refractorElement.style.setProperty('--refractor-color-2', colors[1]);
+      refractorElement.style.setProperty('--refractor-color-3', colors[2]);
+    } else {
+      refractorElement.style.setProperty(
+        '--refractor-color-1', 
+        `hsla(${safeFixed(hue1, 0)}, 100%, 50%, ${0.2 * safeIntensity})`
       );
-      
-      // Create thin refraction lines for a more authentic look
-      float pattern = abs(sin(vUv.x * 40.0 + vUv.y * 40.0 + time));
-      pattern = smoothstep(0.95, 1.0, pattern);
-      
-      // Make the effect visible only at certain angles
-      float visibility = pow(sin(dist * 3.14159 * 2.0 + time * 0.2) * 0.5 + 0.5, 0.5);
-      
-      // Apply intensity and full card coverage
-      float alpha = (lines * 0.3 + pattern * 0.2 + 0.05) * visibility * intensity;
-      
-      gl_FragColor = vec4(finalColor, alpha);
+      refractorElement.style.setProperty(
+        '--refractor-color-2', 
+        `hsla(${safeFixed(hue2, 0)}, 100%, 50%, ${0.2 * safeIntensity})`
+      );
+      refractorElement.style.setProperty(
+        '--refractor-color-3', 
+        `hsla(${safeFixed(hue3, 0)}, 100%, 50%, ${0.2 * safeIntensity})`
+      );
     }
-  `;
-
-  useFrame((state) => {
-    if (materialRef.current) {
-      materialRef.current.uniforms.time.value = state.clock.getElapsedTime();
-      materialRef.current.uniforms.intensity.value = intensity;
-    }
-  });
-
+    
+    // Calculate refractor angle based on mouse position or preset angle
+    const refractorAngle = calculateRefractorAngle();
+    refractorElement.style.setProperty('--refractor-angle', `${refractorAngle}deg`);
+    
+    // Set animation status
+    refractorElement.style.setProperty('--animation-enabled', animationEnabled ? '1' : '0');
+    
+    // RGB fringing effect (color separation)
+    refractorElement.style.setProperty('--mouse-x', safeX.toString());
+    refractorElement.style.setProperty('--mouse-y', safeY.toString());
+    
+  }, [intensity, isActive, mousePosition, speed, colors, animationEnabled, angle]);
+  
+  // Don't render anything if effect is not active
+  if (!isActive) return null;
+  
   return (
-    <mesh position={[0, 0, 0.015]} renderOrder={12}>
-      {/* Cover the full card with the effect */}
-      <planeGeometry args={[2.5, 3.5, 32, 32]} />
-      <shaderMaterial
-        ref={materialRef}
-        vertexShader={vertexShader}
-        fragmentShader={fragmentShader}
-        transparent={true}
-        uniforms={{
-          time: { value: 0 },
-          intensity: { value: intensity }
-        }}
-        blending={THREE.AdditiveBlending}
-        depthWrite={false}
-      />
-    </mesh>
+    <div 
+      ref={refractorRef}
+      className="refractor-effect"
+      style={{
+        position: 'absolute',
+        inset: 0,
+        zIndex: 10,
+        pointerEvents: 'none',
+        mixBlendMode: 'color-dodge'
+      }}
+    >
+      <div className="refractor-layer refractor-primary-layer"></div>
+      <div className="refractor-layer refractor-secondary-layer"></div>
+      <div className="refractor-layer refractor-rgb-fringe-layer"></div>
+    </div>
   );
 };
 
