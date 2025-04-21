@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { Card, Collection } from '@/lib/types';
+import { Card, Collection, DesignMetadata } from '@/lib/types';
 import { sampleCards } from '@/data/sampleCards';
 import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
@@ -96,10 +96,10 @@ export function CardProvider({ children }: { children: ReactNode }) {
             thumbnailUrl: card.thumbnailUrl || card.imageUrl || '',
             id: card.id || uuidv4(),
             title: card.title || 'Untitled Card',
-            // Ensure all required fields exist
+            description: card.description || '',
             tags: card.tags || [],
             effects: card.effects || [],
-            // Ensure designMetadata is properly merged
+            userId: card.userId || 'anonymous',
             designMetadata: {
               ...defaultCardValues.designMetadata,
               ...(card.designMetadata || {})
@@ -126,6 +126,7 @@ export function CardProvider({ children }: { children: ReactNode }) {
       ...card,
       id: card.id || uuidv4(),
       title: card.title || 'Untitled Card',
+      description: card.description || '',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       thumbnailUrl: card.thumbnailUrl || card.imageUrl || '',
@@ -156,7 +157,6 @@ export function CardProvider({ children }: { children: ReactNode }) {
               ...card, 
               ...updatedCard, 
               updatedAt: new Date().toISOString(),
-              // Make sure designMetadata is properly merged
               designMetadata: {
                 ...(card.designMetadata || defaultCardValues.designMetadata),
                 ...(updatedCard.designMetadata || {})
