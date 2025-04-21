@@ -19,6 +19,7 @@ export interface LightingPreferences {
   };
   envMapIntensity?: number;
   useDynamicLighting?: boolean;
+  followPointer?: boolean;
 }
 
 export const useUserLightingPreferences = () => {
@@ -50,7 +51,8 @@ export const useUserLightingPreferences = () => {
             color: '#f0f0ff'
           },
           envMapIntensity: 1.0,
-          useDynamicLighting: true
+          useDynamicLighting: true,
+          followPointer: false
         };
         setPreferences(defaultPrefs);
         localStorage.setItem('cardLightingPreferences', JSON.stringify(defaultPrefs));
@@ -74,7 +76,8 @@ export const useUserLightingPreferences = () => {
           color: '#f0f0ff'
         },
         envMapIntensity: 1.0,
-        useDynamicLighting: true
+        useDynamicLighting: true,
+        followPointer: false
       });
     } finally {
       setIsLoading(false);
@@ -91,7 +94,8 @@ export const useUserLightingPreferences = () => {
         primaryLight: settings.primaryLight,
         ambientLight: settings.ambientLight,
         envMapIntensity: settings.envMapIntensity,
-        useDynamicLighting: settings.useDynamicLighting
+        useDynamicLighting: settings.useDynamicLighting,
+        followPointer: settings.followPointer
       };
       
       setPreferences(prefsToSave);
