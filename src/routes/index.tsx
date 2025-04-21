@@ -3,11 +3,16 @@ import React, { Suspense } from 'react';
 import { RouteObject } from 'react-router-dom';
 import HomePage from '@/pages/HomePage';
 import NotFound from '@/pages/NotFound';
+
+// Import route segments
 import { mainRoutes } from './mainRoutes';
 import { cardRoutes } from './cardRoutes';
 import { collectionRoutes } from './collectionRoutes';
 import { communityRoutes } from './communityRoutes';
-import featureRoutes from './featureRoutes';  // Changed to default import
+import featureRoutes from './featureRoutes';
+import { townRoutes } from './townRoutes';
+import { teamRoutes } from './teamRoutes';
+import { baseballRoutes } from './baseballRoutes';
 
 // Loading fallback component
 const LoadingFallback = () => (
@@ -38,6 +43,8 @@ export const routes: RouteObject[] = [
   ...cardRoutes,
   ...collectionRoutes,
   ...communityRoutes,
-  ...featureRoutes
+  ...featureRoutes,
+  ...townRoutes,
+  ...teamRoutes,
+  ...baseballRoutes
 ];
-

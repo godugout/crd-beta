@@ -1,26 +1,22 @@
 
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useRoutes } from 'react-router-dom';
 import './App.css';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { Toaster } from 'sonner';
 import { CardProvider } from './context/CardContext';
-import Home from '@/pages/Home';
-import Editor from '@/pages/Editor';
-import Gallery from '@/pages/Gallery';
+import { routes } from './routes';
 import NotFound from '@/pages/NotFound';
 
 function App() {
+  // Use the centralized routes configuration
+  const routeElements = useRoutes(routes);
+  
   return (
     <HelmetProvider>
       <CardProvider>
         <Toaster position="top-right" />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/editor" element={<Editor />} />
-          <Route path="/gallery" element={<Gallery />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        {routeElements || <NotFound />}
       </CardProvider>
     </HelmetProvider>
   );
