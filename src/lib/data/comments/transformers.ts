@@ -26,24 +26,9 @@ export function transformCommentFromDb(record: any): Comment {
       email: record.profiles.email || '', // Add default empty email
       name: record.profiles.full_name,
       avatarUrl: record.profiles.avatar_url,
-      username: record.profiles.username,
-      createdAt: record.profiles.created_at || new Date().toISOString(), // Ensure createdAt is present
-      updatedAt: record.profiles.updated_at || new Date().toISOString(), // Ensure updatedAt is present
+      username: record.profiles.username
     };
   }
   
   return comment;
 }
-
-export const transformCommentUserData = (userData: any) => {
-  return {
-    id: userData.id,
-    email: userData.email || '',
-    name: userData.name,
-    avatarUrl: userData.avatarUrl,
-    username: userData.username,
-    createdAt: userData.created_at || userData.createdAt || new Date().toISOString(), // Ensure createdAt is present
-    updatedAt: userData.updated_at || userData.updatedAt || new Date().toISOString(), // Ensure updatedAt is present
-    role: userData.role || 'user'
-  };
-};

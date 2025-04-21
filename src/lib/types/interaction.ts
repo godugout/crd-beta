@@ -1,10 +1,23 @@
 
-// Types for user interactions with cards and collections
 import { BaseEntity } from './index';
 import { User } from './user';
 
 /**
- * Comment interface
+ * Reaction definition for user interactions with cards and comments
+ */
+export interface Reaction extends BaseEntity {
+  userId: string;
+  cardId?: string;
+  collectionId?: string;
+  commentId?: string;
+  type: 'like' | 'love' | 'wow' | 'haha' | 'sad' | 'angry';
+  targetType: 'card' | 'comment' | 'collection' | string;
+  targetId: string;
+  user?: User;
+}
+
+/**
+ * Comment definition for user comments on cards
  */
 export interface Comment extends BaseEntity {
   content: string;
@@ -14,18 +27,5 @@ export interface Comment extends BaseEntity {
   teamId?: string;
   parentId?: string;
   user?: User;
-}
-
-/**
- * Reaction interface
- */
-export interface Reaction extends BaseEntity {
-  userId: string;
-  targetType: 'card' | 'collection' | 'comment' | string;
-  targetId: string;
-  type: 'like' | 'love' | 'wow' | 'haha' | 'sad' | 'angry';
-  cardId?: string;
-  collectionId?: string;
-  commentId?: string;
-  user?: User;
+  reactions?: Reaction[];
 }

@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { EnhancedCropBoxProps, MemorabiliaType, applyCrop, detectText } from '../cardDetection';
@@ -70,29 +71,26 @@ export const useEditor = ({
       // We're passing the canvas reference directly instead of accessing it here
       // This gives more control to the applyCrop function to handle null cases
       const result = await applyCrop(
+        selectedBox, 
+        canvasRef.current, 
+        currentFile, 
         editorImgRef.current,
-        selectedBox
+        enhancementType
       );
       
       // Wait for metadata extraction to complete
       const metadata = await metadataPromise;
       
-      if (result) {
+      if (result && result.file && result.url) {
         const newStagedCard: StagedCardProps = {
           id: `card-${Date.now()}-${Math.random().toString(16).slice(2)}`,
           cropBox: {
             ...selectedBox,
             memorabiliaType: actualType
           },
-          previewUrl: result.toDataURL(),
-          file: new File(
-            [await new Promise<Blob>((resolve) => 
-              result.toBlob(blob => resolve(blob!), 'image/jpeg')
-            )],
-            `${actualType}-${Date.now()}.jpg`,
-            { type: 'image/jpeg' }
-          ),
-          url: result.toDataURL(),
+          previewUrl: result.url,
+          file: result.file,
+          url: result.url,
           metadata
         };
         
@@ -118,12 +116,7 @@ export const useEditor = ({
           }
         }
         
-        return {
-          canvas: result,
-          file: newStagedCard.file,
-          url: newStagedCard.url,
-          metadata
-        };
+        return {...result, metadata};
       } else {
         console.error("Failed to crop the image, result:", result);
         showToast && toast.error("Failed to extract the item");

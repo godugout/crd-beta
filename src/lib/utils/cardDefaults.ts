@@ -1,29 +1,48 @@
 
-// Default values for cards and rendering
-export const FALLBACK_FRONT_IMAGE_URL = 'https://images.unsplash.com/photo-1518770660439-4636190af475';
-export const FALLBACK_BACK_IMAGE_URL = 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6';
-export const FALLBACK_IMAGE_URL = FALLBACK_FRONT_IMAGE_URL;
+import { DesignMetadata, CardStyle, TextStyle } from '@/lib/types';
 
-// Make card back texture URL configurable
-export const CARD_BACK_TEXTURE_URL = '/lovable-uploads/card-back-texture.jpg';
+// Fallback image URL for when a card image doesn't load
+export const FALLBACK_IMAGE_URL = '/placeholder-card.png';
 
-// Default card dimensions (standard trading card ratio)
-export const CARD_DIMENSIONS = {
-  width: 2.5,
-  height: 3.5,
-  thickness: 0.05
+// Default CardStyle
+export const DEFAULT_CARD_STYLE: CardStyle = {
+  template: 'standard',
+  effect: 'none',
+  borderRadius: '8px',
+  borderColor: '#000000',
+  borderWidth: 1,
+  shadowColor: 'rgba(0,0,0,0.2)',
+  frameWidth: 2,
+  frameColor: '#000000',
+  backgroundColor: '#ffffff'
 };
 
-// Safety wrapper for numeric operations (prevents toFixed errors)
-export const safeNumber = (value: any, fallback: number = 0): number => {
-  if (value === undefined || value === null || isNaN(Number(value))) {
-    return fallback;
+// Default TextStyle
+export const DEFAULT_TEXT_STYLE: TextStyle = {
+  fontFamily: 'Inter',
+  fontSize: '14px',
+  fontWeight: '400',
+  color: '#000000',
+  titleColor: '#000000',
+  titleAlignment: 'center',
+  titleWeight: 'bold',
+  descriptionColor: '#333333'
+};
+
+// Complete default DesignMetadata
+export const DEFAULT_DESIGN_METADATA: DesignMetadata = {
+  cardStyle: DEFAULT_CARD_STYLE,
+  textStyle: DEFAULT_TEXT_STYLE,
+  cardMetadata: {
+    category: 'Standard',
+    series: 'Base',
+    cardType: 'Standard',
+    cardNumber: '1',
+    artist: 'Unknown'
+  },
+  marketMetadata: {
+    isPrintable: false,
+    isForSale: false,
+    includeInCatalog: false
   }
-  return Number(value);
-};
-
-// Format a number safely with decimal places
-export const safeFixed = (value: any, decimals: number = 2, fallback: number = 0): string => {
-  const num = safeNumber(value, fallback);
-  return num.toFixed(decimals);
 };

@@ -1,61 +1,62 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import BatchImageUploader from '@/components/dam/BatchImageUploader';
 import { useCards } from '@/context/CardContext';
-import { toast } from 'sonner';
-import { v4 as uuidv4 } from 'uuid';
 
-export interface CreateCollectionDialogProps {
+interface CreateCollectionDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
 const CreateCollectionDialog: React.FC<CreateCollectionDialogProps> = ({
   open,
-  onOpenChange
+  onOpenChange,
 }) => {
   const navigate = useNavigate();
   const { addCollection } = useCards();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadedImages, setUploadedImages] = useState<string[]>([]);
 
-  const handleSubmit = async () => {
+  const handleImagesUploaded = (urls: string[], assetIds: string[]) => {
+    setUploadedImages(urls);
+    if (urls.length > 0) {
+      toast.success(`Successfully uploaded ${urls.length} images`);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (!name.trim()) {
-      toast.error('Collection name is required');
+      toast.error('Please provide a collection name');
       return;
     }
-    
-    setIsSubmitting(true);
-    
+
     try {
-      const newCollection = {
-        id: uuidv4(),
+      setIsSubmitting(true);
+      
+      const newCollection = await addCollection({
         name,
-        title: name,
         description,
-        cardIds: [],
-        visibility: 'private' as 'public' | 'private' | 'team', // Specify type explicitly
-        isPublic: false,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
-      
-      const collection = await addCollection(newCollection);
-      
+        coverImageUrl: uploadedImages[0], // Use first image as cover
+        isPublic: true,
+        cardIds: [], // Will be populated when cards are created
+        designMetadata: {
+          uploadedImages // Store all uploaded images for later card creation
+        }
+      });
+
       toast.success('Collection created successfully');
       onOpenChange(false);
-      
-      // Reset form
-      setName('');
-      setDescription('');
-      
-      // Navigate to the new collection
-      navigate(`/collections/${collection.id}`);
+      navigate(`/collections/${newCollection.id}`);
     } catch (error) {
       console.error('Error creating collection:', error);
       toast.error('Failed to create collection');
@@ -64,60 +65,64 @@ const CreateCollectionDialog: React.FC<CreateCollectionDialogProps> = ({
     }
   };
 
-  const handleClose = () => {
-    onOpenChange(false);
-    setName('');
-    setDescription('');
-  };
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="max-w-3xl">
         <DialogHeader>
-          <DialogTitle>Create Collection</DialogTitle>
-          <DialogDescription>
-            Create a new collection to organize your cards
-          </DialogDescription>
+          <DialogTitle>Create New Collection</DialogTitle>
         </DialogHeader>
         
-        <div className="space-y-4 py-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid gap-4">
+            <div>
+              <Label htmlFor="name">Collection Name</Label>
+              <Input
+                id="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Enter collection name"
+                required
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Describe your collection"
+                rows={3}
+              />
+            </div>
+          </div>
+
           <div className="space-y-2">
-            <label htmlFor="name" className="text-sm font-medium">
-              Name
-            </label>
-            <Input
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="My Collection"
+            <Label>Upload Images</Label>
+            <BatchImageUploader
+              onComplete={handleImagesUploaded}
+              maxFiles={50}
+              maxSizeMB={5}
             />
           </div>
-          
-          <div className="space-y-2">
-            <label htmlFor="description" className="text-sm font-medium">
-              Description
-            </label>
-            <Textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Describe your collection"
-              rows={3}
-            />
+
+          <div className="flex justify-end gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              disabled={isSubmitting}
+            >
+              Cancel
+            </Button>
+            <Button 
+              type="submit" 
+              disabled={isSubmitting || !name.trim() || uploadedImages.length === 0}
+            >
+              {isSubmitting ? 'Creating...' : 'Create Collection'}
+            </Button>
           </div>
-        </div>
-        
-        <DialogFooter>
-          <Button variant="outline" onClick={handleClose}>
-            Cancel
-          </Button>
-          <Button 
-            onClick={handleSubmit} 
-            disabled={!name.trim() || isSubmitting}
-          >
-            {isSubmitting ? 'Creating...' : 'Create Collection'}
-          </Button>
-        </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );

@@ -1,73 +1,77 @@
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { CardEffectsResult } from '@/lib/types/cardEffects';
 
-export default function useCardEffects(): CardEffectsResult {
-  const [cardEffects, setCardEffects] = useState<Record<string, string[]>>({});
+const useCardEffects = (): CardEffectsResult => {
+  const [cardEffects, setCardEffectsState] = useState<Record<string, string[]>>({});
+  const [isLoading, setIsLoading] = useState(false);
   const [activeEffects, setActiveEffects] = useState<string[]>([]);
 
-  const addEffect = (cardId: string, effect: string) => {
-    setCardEffects(prev => {
-      const cardPrevEffects = prev[cardId] || [];
-      if (cardPrevEffects.includes(effect)) return prev;
-      
-      return {
-        ...prev,
-        [cardId]: [...cardPrevEffects, effect]
-      };
-    });
-  };
-
-  const removeEffect = (cardId: string, effect: string) => {
-    setCardEffects(prev => {
-      const cardPrevEffects = prev[cardId] || [];
-      return {
-        ...prev,
-        [cardId]: cardPrevEffects.filter(e => e !== effect)
-      };
-    });
-  };
-
-  const toggleEffect = (cardId: string, effect: string) => {
-    setCardEffects(prev => {
-      const cardPrevEffects = prev[cardId] || [];
-      
-      if (cardPrevEffects.includes(effect)) {
+  const addEffect = useCallback((cardId: string, effect: string) => {
+    setCardEffectsState(prev => {
+      const currentEffects = prev[cardId] || [];
+      if (!currentEffects.includes(effect)) {
         return {
           ...prev,
-          [cardId]: cardPrevEffects.filter(e => e !== effect)
+          [cardId]: [...currentEffects, effect]
+        };
+      }
+      return prev;
+    });
+  }, []);
+
+  const removeEffect = useCallback((cardId: string, effect: string) => {
+    setCardEffectsState(prev => {
+      const currentEffects = prev[cardId] || [];
+      return {
+        ...prev,
+        [cardId]: currentEffects.filter(e => e !== effect)
+      };
+    });
+  }, []);
+
+  const toggleEffect = useCallback((cardId: string, effect: string) => {
+    setCardEffectsState(prev => {
+      const currentEffects = prev[cardId] || [];
+      if (currentEffects.includes(effect)) {
+        return {
+          ...prev,
+          [cardId]: currentEffects.filter(e => e !== effect)
         };
       } else {
         return {
           ...prev,
-          [cardId]: [...cardPrevEffects, effect]
+          [cardId]: [...currentEffects, effect]
         };
       }
     });
-  };
+  }, []);
 
-  const clearEffects = (cardId: string) => {
-    setCardEffects(prev => ({
+  const clearEffects = useCallback((cardId: string) => {
+    setCardEffectsState(prev => ({
       ...prev,
       [cardId]: []
     }));
-  };
+  }, []);
 
-  const setAllCardEffects = (cardId: string, effects: string[]) => {
-    setCardEffects(prev => ({
+  const setCardEffects = useCallback((cardId: string, effects: string[]) => {
+    setCardEffectsState(prev => ({
       ...prev,
       [cardId]: effects
     }));
-  };
+  }, []);
 
   return {
     cardEffects,
-    activeEffects,
+    isLoading,
     addEffect,
     removeEffect,
     toggleEffect,
     clearEffects,
-    setCardEffects: setAllCardEffects,
+    setCardEffects,
+    activeEffects,
     setActiveEffects
   };
-}
+};
+
+export default useCardEffects;

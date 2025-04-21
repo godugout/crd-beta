@@ -3,8 +3,7 @@ import React, { useState } from 'react';
 import { Card } from '@/lib/types/cardTypes';
 import CardInteractive from '@/components/card-viewer/CardInteractive';
 import EffectsPanel from '@/components/card-viewer/panels/EffectsPanel';
-// Import from the new centralized location
-import { useCardEffects } from '@/hooks/card-effects';
+import { useCardEffects } from '@/hooks/useCardEffects';
 
 interface CardEffectsGalleryProps {
   card: Card;
@@ -25,7 +24,7 @@ const CardEffectsGallery: React.FC<CardEffectsGalleryProps> = ({ card }) => {
   
   // Generate an object with effect intensities from the effects array
   const effectIntensities = effects.reduce((acc, effect) => {
-    acc[effect.id] = effect.intensity || 0.7;
+    acc[effect.id] = effect.settings.intensity || 0.7;
     return acc;
   }, {} as Record<string, number>);
   
@@ -44,7 +43,7 @@ const CardEffectsGallery: React.FC<CardEffectsGalleryProps> = ({ card }) => {
       <div className="w-full md:w-1/3">
         <EffectsPanel
           effects={effects}
-          onToggleEffect={(id) => toggleEffect(card.id, id)}
+          onToggleEffect={toggleEffect}
           onUpdateIntensity={updateIntensity}
         />
         

@@ -1,6 +1,6 @@
 
 import { toast } from 'sonner';
-import { EnhancedCropBoxProps, MemorabiliaType } from '../cardDetection';
+import { EnhancedCropBoxProps } from '../CropBox';
 
 export interface UseCropBoxOperationsProps {
   cropBoxes: EnhancedCropBoxProps[];
@@ -57,14 +57,14 @@ export const useCropBoxOperations = ({
     const newHeight = newWidth / cardRatio;
     
     const newBox: EnhancedCropBoxProps = {
-      id: crypto.randomUUID(), 
+      id: crypto.randomUUID(), // Use string ID
       x: (rect.width - newWidth) / 2,
       y: (rect.height - newHeight) / 2,
       width: newWidth,
       height: newHeight,
       rotation: 0,
       color: '#00FF00',
-      memorabiliaType: 'card' as MemorabiliaType, // Changed from 'unknown' to 'card'
+      memorabiliaType: 'unknown',
       confidence: 0.5
     };
     

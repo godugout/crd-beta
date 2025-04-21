@@ -1,9 +1,8 @@
-
 import React, { useState, useEffect, Suspense } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { useCards } from '@/context/CardContext';
 import { useToast } from '@/hooks/use-toast';
-import { Card, CardRarity } from '@/lib/types'; // Added CardRarity import here
+import { Card } from '@/lib/types';
 import PageLayout from '@/components/navigation/PageLayout';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, ChevronRight } from 'lucide-react';
@@ -11,17 +10,14 @@ import { useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
+import CardEffectsPanel from '@/components/card-effects/CardEffectsPanel';
 import ImmersiveCardViewer from '@/components/card-viewer/ImmersiveCardViewer';
 import { sampleCards } from '@/lib/data/sampleCards';
 import { DEFAULT_DESIGN_METADATA } from '@/lib/utils/cardDefaults';
 import { adaptToCard } from '@/lib/adapters/cardAdapter';
 import useCardEffects from '@/hooks/card-effects';
-import ViewerSettings from '@/components/gallery/viewer-components/ViewerSettings';
-import { useCardLighting } from '@/hooks/useCardLighting';
-import { useUserLightingPreferences } from '@/hooks/useUserLightingPreferences';
 
-const FALLBACK_IMAGE_URL = '/images/card-placeholder.png';
-const FALLBACK_BACK_IMAGE_URL = '/images/card-back-placeholder.png';
+const FALLBACK_IMAGE_URL = 'https://images.unsplash.com/photo-1518770660439-4636190af475';
 
 const ImmersiveCardViewerPage: React.FC = () => {
   const { id } = useParams();
@@ -33,17 +29,9 @@ const ImmersiveCardViewerPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isFlipped, setIsFlipped] = useState(false);
   const [showControls, setShowControls] = useState(true);
-  const [viewTab, setViewTab] = useState('effects');
-  const [isPanelOpen, setIsPanelOpen] = useState(true);
+  const [viewTab, setViewTab] = useState('view');
+  const [isPanelOpen, setIsPanelOpen] = useState(false);
   const viewMode = searchParams.get('mode') || 'standard';
-  
-  const { preferences, savePreferences } = useUserLightingPreferences();
-  const {
-    lightingSettings,
-    updateLightingSetting,
-    applyPreset,
-    isUserCustomized,
-  } = useCardLighting(preferences?.environmentType || 'studio');
   
   const { 
     cardEffects, 
@@ -55,12 +43,6 @@ const ImmersiveCardViewerPage: React.FC = () => {
     activeEffects,
     setActiveEffects
   } = useCardEffects();
-
-  useEffect(() => {
-    if (isUserCustomized && lightingSettings) {
-      savePreferences(lightingSettings);
-    }
-  }, [lightingSettings, isUserCustomized, savePreferences]);
 
   useEffect(() => {
     const loadCard = async () => {
@@ -87,19 +69,15 @@ const ImmersiveCardViewerPage: React.FC = () => {
         if (foundCard) {
           console.log('Found card:', foundCard.title);
           
-          const cardRarity = foundCard.rarity as CardRarity | undefined;
-          
           const cardWithDefaults = adaptToCard({
             ...foundCard,
             imageUrl: foundCard.imageUrl || FALLBACK_IMAGE_URL,
-            backImageUrl: foundCard.backImageUrl || FALLBACK_BACK_IMAGE_URL,
             thumbnailUrl: foundCard.thumbnailUrl || foundCard.imageUrl || FALLBACK_IMAGE_URL,
             designMetadata: foundCard.designMetadata || DEFAULT_DESIGN_METADATA,
             createdAt: foundCard.createdAt || new Date().toISOString(),
             updatedAt: foundCard.updatedAt || new Date().toISOString(),
             userId: foundCard.userId || 'anonymous',
-            effects: foundCard.effects || [],
-            rarity: cardRarity
+            effects: foundCard.effects || []
           });
           
           setCard(cardWithDefaults);
@@ -162,29 +140,6 @@ const ImmersiveCardViewerPage: React.FC = () => {
     }
   };
 
-  useEffect(() => {
-    if (viewTab !== 'view' && !isPanelOpen) {
-      setIsPanelOpen(true);
-    }
-  }, [viewTab, isPanelOpen]);
-
-  const handleUpdateSetting = (path: string, value: any) => {
-    const pathParts = path.split('.');
-    if (pathParts.length === 2) {
-      const [group, property] = pathParts;
-      updateLightingSetting({
-        [group]: {
-          ...lightingSettings[group],
-          [property]: value
-        }
-      });
-    } else {
-      updateLightingSetting({
-        [path]: value
-      });
-    }
-  };
-
   return (
     <PageLayout 
       title={card?.title ? `Viewing ${card.title}` : "Immersive Card Viewer"} 
@@ -208,8 +163,10 @@ const ImmersiveCardViewerPage: React.FC = () => {
           
           <div className="flex gap-2">
             <Tabs value={viewTab} onValueChange={setViewTab} className="w-[400px]">
-              <TabsList className="grid grid-cols-1 bg-gray-800/50 backdrop-blur">
-                <TabsTrigger value="effects">Effects & View</TabsTrigger>
+              <TabsList className="grid grid-cols-3 bg-gray-800/50 backdrop-blur">
+                <TabsTrigger value="view">View</TabsTrigger>
+                <TabsTrigger value="effects">Effects</TabsTrigger>
+                <TabsTrigger value="controls">Controls</TabsTrigger>
               </TabsList>
             </Tabs>
           </div>
@@ -253,7 +210,6 @@ const ImmersiveCardViewerPage: React.FC = () => {
                       card={card}
                       isFlipped={isFlipped}
                       activeEffects={activeEffects}
-                      lightingSettings={lightingSettings}
                     />
                   </div>
                 </Suspense>
@@ -266,7 +222,73 @@ const ImmersiveCardViewerPage: React.FC = () => {
             isPanelOpen ? "translate-x-0" : "translate-x-full"
           )}>
             <div className="p-6">
-              <Tabs value={viewTab} className="w-full">
+              <Tabs value={viewTab} className="w-full" defaultValue="view">
+                <TabsContent value="view" className="mt-0">
+                  <h3 className="text-xl font-semibold mb-4">Card Details</h3>
+                  
+                  {card && (
+                    <div className="space-y-6">
+                      <div>
+                        <h4 className="text-sm text-gray-400 font-medium mb-1">Title</h4>
+                        <p className="text-white">{card.title}</p>
+                      </div>
+                      
+                      {card.description && (
+                        <div>
+                          <h4 className="text-sm text-gray-400 font-medium mb-1">Description</h4>
+                          <p className="text-white">{card.description}</p>
+                        </div>
+                      )}
+                      
+                      <div className="grid grid-cols-2 gap-4">
+                        {card.player && (
+                          <div>
+                            <h4 className="text-sm text-gray-400 font-medium mb-1">Player</h4>
+                            <p className="text-white">{card.player}</p>
+                          </div>
+                        )}
+                        
+                        {card.team && (
+                          <div>
+                            <h4 className="text-sm text-gray-400 font-medium mb-1">Team</h4>
+                            <p className="text-white">{card.team}</p>
+                          </div>
+                        )}
+                        
+                        {card.year && (
+                          <div>
+                            <h4 className="text-sm text-gray-400 font-medium mb-1">Year</h4>
+                            <p className="text-white">{card.year}</p>
+                          </div>
+                        )}
+                        
+                        {card.set && (
+                          <div>
+                            <h4 className="text-sm text-gray-400 font-medium mb-1">Set</h4>
+                            <p className="text-white">{card.set}</p>
+                          </div>
+                        )}
+                      </div>
+                      
+                      {card.tags && card.tags.length > 0 && (
+                        <div>
+                          <h4 className="text-sm text-gray-400 font-medium mb-2">Tags</h4>
+                          <div className="flex flex-wrap gap-2">
+                            {card.tags.map((tag, i) => (
+                              <span 
+                                key={i}
+                                className="px-2 py-1 bg-gray-800 rounded-md text-xs text-gray-300"
+                              >
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </TabsContent>
+                
                 <TabsContent value="effects" className="mt-0">
                   <div className="mb-4 flex justify-between items-center">
                     <h3 className="text-xl font-semibold">Card Effects</h3>
@@ -322,23 +344,56 @@ const ImmersiveCardViewerPage: React.FC = () => {
                       </div>
                     ))}
                   </div>
+                </TabsContent>
+                
+                <TabsContent value="controls" className="mt-0">
+                  <h3 className="text-xl font-semibold mb-4">Viewer Controls</h3>
                   
-                  <div className="mt-8 border-t border-gray-800 pt-6">
-                    <ViewerSettings
-                      settings={lightingSettings}
-                      onUpdateSettings={handleUpdateSetting}
-                      onApplyPreset={applyPreset}
-                      isOpen={true}
-                    />
-                    
-                    <div className="mt-6 p-4 bg-gray-800/50 rounded-lg">
-                      <h3 className="font-medium text-white mb-2">Card Position</h3>
+                  <div className="space-y-4">
+                    <div className="p-4 bg-gray-800/50 rounded-lg">
+                      <h4 className="font-medium text-white mb-2">Card Position</h4>
                       <Button 
                         className="w-full"
                         onClick={() => setIsFlipped(!isFlipped)}
                       >
                         {isFlipped ? "Show Front" : "Show Back"}
                       </Button>
+                    </div>
+                    
+                    <div className="p-4 bg-gray-800/50 rounded-lg">
+                      <h4 className="font-medium text-white mb-2">Mouse Controls</h4>
+                      <ul className="text-sm text-gray-300 space-y-2">
+                        <li className="flex items-center">
+                          <span className="px-2 py-1 bg-gray-700 rounded mr-2 text-xs">Click + Drag</span>
+                          <span>Rotate card</span>
+                        </li>
+                        <li className="flex items-center">
+                          <span className="px-2 py-1 bg-gray-700 rounded mr-2 text-xs">Scroll</span>
+                          <span>Zoom in/out</span>
+                        </li>
+                        <li className="flex items-center">
+                          <span className="px-2 py-1 bg-gray-700 rounded mr-2 text-xs">Double Click</span>
+                          <span>Reset position</span>
+                        </li>
+                      </ul>
+                    </div>
+                    
+                    <div className="p-4 bg-gray-800/50 rounded-lg">
+                      <h4 className="font-medium text-white mb-2">Touch Controls</h4>
+                      <ul className="text-sm text-gray-300 space-y-2">
+                        <li className="flex items-center">
+                          <span className="px-2 py-1 bg-gray-700 rounded mr-2 text-xs">1 Finger</span>
+                          <span>Rotate card</span>
+                        </li>
+                        <li className="flex items-center">
+                          <span className="px-2 py-1 bg-gray-700 rounded mr-2 text-xs">2 Fingers</span>
+                          <span>Pinch to zoom</span>
+                        </li>
+                        <li className="flex items-center">
+                          <span className="px-2 py-1 bg-gray-700 rounded mr-2 text-xs">Double Tap</span>
+                          <span>Reset position</span>
+                        </li>
+                      </ul>
                     </div>
                   </div>
                 </TabsContent>

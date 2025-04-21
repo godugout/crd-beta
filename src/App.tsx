@@ -1,24 +1,36 @@
 
-import React from 'react';
-import { Routes, Route, useRoutes } from 'react-router-dom';
-import './App.css';
-import { Helmet, HelmetProvider } from 'react-helmet-async';
-import { Toaster } from 'sonner';
+import React, { Suspense } from 'react';
+import { useRoutes } from 'react-router-dom';
 import { CardProvider } from './context/CardContext';
+import { SessionProvider } from './context/SessionContext';
+import { Toaster } from 'sonner';
 import { routes } from './routes';
-import NotFound from '@/pages/NotFound';
+
+// Loading fallback for the entire app
+const AppLoadingFallback = () => (
+  <div className="flex items-center justify-center h-screen bg-background">
+    <div className="text-center">
+      <div className="h-12 w-12 border-4 border-t-primary border-primary/30 rounded-full animate-spin mx-auto mb-4"></div>
+      <p className="text-foreground">Loading CardShow...</p>
+    </div>
+  </div>
+);
 
 function App() {
-  // Use the centralized routes configuration
   const routeElements = useRoutes(routes);
-  
+
   return (
-    <HelmetProvider>
+    <SessionProvider>
       <CardProvider>
-        <Toaster position="top-right" />
-        {routeElements || <NotFound />}
+        <Suspense fallback={<AppLoadingFallback />}>
+          {routeElements}
+        </Suspense>
+        <Toaster 
+          position="bottom-right"
+          closeButton
+        />
       </CardProvider>
-    </HelmetProvider>
+    </SessionProvider>
   );
 }
 

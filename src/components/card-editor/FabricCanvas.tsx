@@ -2,73 +2,54 @@
 import React, { useEffect, useRef } from 'react';
 import { fabric } from 'fabric';
 
-interface CanvasProps {
-  width: number;
-  height: number;
+interface FabricCanvasProps {
+  width?: number;
+  height?: number;
   onReady?: (canvas: fabric.Canvas) => void;
   className?: string;
 }
 
-const Canvas: React.FC<CanvasProps> = ({
+const Canvas: React.FC<FabricCanvasProps> = ({
   width = 500,
   height = 700,
   onReady,
-  className = ''
+  className = '',
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const canvasInstanceRef = useRef<fabric.Canvas | null>(null);
+  const fabricRef = useRef<fabric.Canvas | null>(null);
 
   useEffect(() => {
     if (!canvasRef.current) return;
 
-    // Clean up any existing canvas instance
-    if (canvasInstanceRef.current) {
-      canvasInstanceRef.current.dispose();
-    }
+    console.log("Initializing Fabric.js canvas");
+
+    // Initialize Fabric canvas
+    const canvas = new fabric.Canvas(canvasRef.current, {
+      width,
+      height,
+      backgroundColor: '#ffffff',
+      preserveObjectStacking: true,
+    });
+
+    fabricRef.current = canvas;
     
-    try {
-      // Create a new canvas instance with proper error handling
-      const canvas = new fabric.Canvas(canvasRef.current, {
-        width,
-        height,
-        backgroundColor: '#ffffff'
-      });
-      
-      canvasInstanceRef.current = canvas;
-      
-      // Call onReady callback if provided
-      if (onReady) {
-        onReady(canvas);
-      }
-      
-      // Log success for debugging
-      console.log("Fabric canvas initialized successfully:", {
-        width: canvas.getWidth(),
-        height: canvas.getHeight()
-      });
-    } catch (error) {
-      console.error("Failed to initialize Fabric canvas:", error);
+    // Execute onReady callback if provided
+    if (onReady) {
+      onReady(canvas);
     }
 
-    // Clean up on unmount
+    // Clean up function
     return () => {
-      if (canvasInstanceRef.current) {
-        try {
-          canvasInstanceRef.current.dispose();
-          canvasInstanceRef.current = null;
-        } catch (error) {
-          console.error("Error disposing canvas:", error);
-        }
-      }
+      console.log("Disposing Fabric.js canvas");
+      canvas.dispose();
+      fabricRef.current = null;
     };
   }, [width, height, onReady]);
 
   return (
-    <canvas 
-      ref={canvasRef} 
-      className={className}
-      data-testid="fabric-canvas"
-    />
+    <div className={`fabric-canvas-container ${className}`}>
+      <canvas ref={canvasRef} className="border rounded-md shadow-md" />
+    </div>
   );
 };
 

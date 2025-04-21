@@ -1,83 +1,98 @@
 
 import React from 'react';
 import { CardData } from '@/types/card';
+import { Badge } from '@/components/ui/badge';
+import { Award, Star, Trophy } from 'lucide-react';
 
 interface CardBackProps {
   card: CardData;
 }
 
 const CardBack: React.FC<CardBackProps> = ({ card }) => {
+  // Extract data safely with fallbacks
+  const cardRarity = card.cardType || 'Standard';
+  const cardSeries = card.set || 'Core Set';
+  const cardAttributes = {
+    year: card.year,
+    cardNumber: card.cardNumber
+  };
+  
   return (
-    <div className="card-back w-full h-full rounded-lg overflow-hidden bg-gradient-to-br from-gray-800 to-gray-900">
-      <div className="p-4 h-full flex flex-col">
-        <div className="text-center mb-4">
-          <h3 className="text-xl font-bold text-white">{card.title || card.name}</h3>
+    <div className="absolute inset-0 flex flex-col p-6 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900" style={{ zIndex: 5 }}>
+      {/* Card content - ensure it's highly visible */}
+      <div className="relative z-10 flex flex-col h-full text-white">
+        <div className="text-center mb-6">
+          <h2 className="text-2xl font-bold bg-gradient-to-r from-yellow-200 via-yellow-400 to-yellow-200 bg-clip-text text-transparent">
+            {card.name}
+          </h2>
           {card.team && (
-            <div className="text-sm text-white/70">
-              {card.team} • {card.year}
+            <div className="flex justify-center items-center gap-2 mt-2">
+              <Badge variant="outline" className="bg-white/10 backdrop-blur-sm">
+                {card.team}
+              </Badge>
             </div>
           )}
         </div>
         
-        <div className="flex-grow flex flex-col justify-between">
-          <div className="space-y-4">
-            {/* Card description */}
-            <div>
-              <h4 className="text-sm font-medium text-white/80 mb-1">Description</h4>
-              <p className="text-sm text-white/70">{card.description || "No description available."}</p>
-            </div>
-
-            {/* Card details */}
-            <div className="grid grid-cols-2 gap-2">
-              {card.cardType && (
-                <div>
-                  <h4 className="text-xs font-medium text-white/80">Card Type</h4>
-                  <p className="text-xs text-white/70">{card.cardType}</p>
-                </div>
-              )}
-              
-              {card.set && (
-                <div>
-                  <h4 className="text-xs font-medium text-white/80">Set</h4>
-                  <p className="text-xs text-white/70">{card.set}</p>
-                </div>
-              )}
-              
-              {card.cardNumber && (
-                <div>
-                  <h4 className="text-xs font-medium text-white/80">Card #</h4>
-                  <p className="text-xs text-white/70">{card.cardNumber}</p>
-                </div>
-              )}
-              
-              {card.artist && (
-                <div>
-                  <h4 className="text-xs font-medium text-white/80">Artist</h4>
-                  <p className="text-xs text-white/70">{card.artist}</p>
-                </div>
-              )}
-            </div>
-          </div>
+        {/* Card details */}
+        <div className="space-y-4 flex-grow">
+          {card.description && (
+            <p className="text-sm text-gray-300 text-center italic">
+              "{card.description}"
+            </p>
+          )}
           
-          {/* Card footer */}
-          <div className="mt-4 pt-2 border-t border-white/10">
-            {card.fabricSwatches && card.fabricSwatches.length > 0 ? (
+          <div className="grid grid-cols-3 gap-4 text-center">
+            {card.artist && (
               <div>
-                <h4 className="text-xs font-medium text-white/80 mb-1">Fabric Swatches</h4>
-                <div className="flex flex-wrap gap-1">
-                  {card.fabricSwatches.map((swatch, index) => (
-                    <div key={index} className="px-2 py-1 rounded-full bg-white/10 text-white/70 text-xs">
-                      {swatch.type}
-                    </div>
-                  ))}
-                </div>
+                <Award className="w-5 h-5 mx-auto mb-1 text-blue-400" />
+                <span className="text-xs text-gray-400 block">Artist</span>
+                <span className="text-sm">{card.artist}</span>
               </div>
-            ) : (
-              <div className="text-xs text-center text-white/50">
-                {card.specialEffect || "Standard Card"}
+            )}
+            
+            {cardRarity && (
+              <div>
+                <Star className="w-5 h-5 mx-auto mb-1 text-yellow-400" />
+                <span className="text-xs text-gray-400 block">Type</span>
+                <span className="text-sm">{cardRarity}</span>
+              </div>
+            )}
+            
+            {cardSeries && (
+              <div>
+                <Trophy className="w-5 h-5 mx-auto mb-1 text-purple-400" />
+                <span className="text-xs text-gray-400 block">Set</span>
+                <span className="text-sm">{cardSeries}</span>
               </div>
             )}
           </div>
+          
+          {Object.keys(cardAttributes).length > 0 && (
+            <div className="mt-4">
+              <h3 className="text-sm font-medium text-gray-400 mb-2">Attributes</h3>
+              <div className="flex flex-wrap gap-2">
+                {Object.entries(cardAttributes).map(([key, value]) => (
+                  value && (
+                    <Badge 
+                      key={key}
+                      variant="secondary" 
+                      className="bg-white/10 backdrop-blur-sm"
+                    >
+                      {key}: {String(value)}
+                    </Badge>
+                  )
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+        
+        {/* Footer */}
+        <div className="mt-4 pt-4 border-t border-white/20 text-center">
+          <p className="text-xs text-gray-400">
+            {card.cardNumber && `#${card.cardNumber}`} • {card.year}
+          </p>
         </div>
       </div>
     </div>

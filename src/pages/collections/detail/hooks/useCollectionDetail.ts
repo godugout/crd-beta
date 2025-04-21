@@ -1,355 +1,219 @@
-import { useState, useCallback, useEffect } from 'react';
-import { useToast } from '@/hooks/use-toast';
-import { useNavigate } from 'react-router-dom';
-import { Card, Collection } from '@/lib/types';
+
+import { useState, useEffect, useCallback } from 'react';
 import { useCards } from '@/context/CardContext';
-import { collectionOperations, cardOperations } from '@/lib/supabase';
-import { useMutation } from '@tanstack/react-query';
+import { toast } from 'sonner';
+import { Card, Collection } from '@/lib/types';
+import { supabase } from '@/integrations/supabase/client';
+import { collectionOperations, convertDbCollectionToApp } from '@/lib/supabase/collections';
 
 export const useCollectionDetail = (collectionId?: string) => {
-  const [collection, setCollection] = useState<Collection | null>(null);
-  const [collectionCards, setCollectionCards] = useState<Card[]>([]);
-  const [filteredCards, setFilteredCards] = useState<Card[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { collections, cards, isLoading, updateCard, updateCollection, deleteCollection, refreshCards } = useCards();
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [isAssetGalleryOpen, setIsAssetGalleryOpen] = useState(false);
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [fetchError, setFetchError] = useState<string | null>(null);
-  
-  const [editFormData, setEditFormData] = useState<Partial<Collection>>({
-    title: '',
-    description: '',
-    coverImageUrl: '',
-    visibility: 'public',
-    isPublic: true,
-    allowComments: true,
-    tags: []
+  const [editFormData, setEditFormData] = useState({
+    name: '',
+    description: ''
   });
+  const [localLoading, setLocalLoading] = useState(false);
+  const [localCollection, setLocalCollection] = useState<Collection | null>(null);
+  const [localCards, setLocalCards] = useState<Card[]>([]);
+  const [fetchError, setFetchError] = useState<string | null>(null);
+  const [fetchAttempts, setFetchAttempts] = useState(0);
+  const maxFetchAttempts = 3;
   
-  const { toast } = useToast();
-  const navigate = useNavigate();
-  const { cards, collections, getCardById, getCollectionById, refreshCards } = useCards();
-
-  const fetchCollectionData = useCallback(async () => {
-    if (!collectionId) {
-      setIsLoading(false);
-      setFetchError('No collection ID provided');
-      return;
-    }
-
-    setIsLoading(true);
+  // Refresh collection data from Supabase with improved error handling
+  const refreshCollection = useCallback(async () => {
+    if (!collectionId) return;
+    
+    setLocalLoading(true);
     setFetchError(null);
     
     try {
-      const contextCollection = getCollectionById(collectionId);
+      console.log(`Refreshing collection data for ID: ${collectionId} (attempt ${fetchAttempts + 1})`);
       
-      if (contextCollection) {
-        console.log('Collection found in context:', contextCollection);
-        setCollection(contextCollection);
-        setEditFormData({
-          title: contextCollection.title || contextCollection.name,
-          description: contextCollection.description,
-          coverImageUrl: contextCollection.coverImageUrl,
-          visibility: contextCollection.visibility || 'public',
-          isPublic: contextCollection.isPublic !== undefined ? contextCollection.isPublic : true,
-          allowComments: contextCollection.allowComments !== undefined ? contextCollection.allowComments : true,
-          tags: contextCollection.tags || []
-        });
+      const { data, error } = await collectionOperations.getCollectionWithCards(collectionId);
         
-        const collectionCardIds = contextCollection.cardIds || [];
-        const collectionCardsData = collectionCardIds
-          .map(id => getCardById(id))
-          .filter(Boolean) as Card[];
+      if (error) {
+        console.error('Error fetching collection data:', error);
+        setFetchError(error.message || 'Failed to load collection data');
+        toast.error(`Failed to refresh collection data: ${error.message}`);
+        return;
+      }
+      
+      if (data?.collection) {
+        // Convert DB collection to app format
+        const appCollection = convertDbCollectionToApp(data.collection);
+        setLocalCollection(appCollection);
+        
+        if (data.cards?.length > 0) {
+          // Process cards
+          const processedCards = data.cards.map(card => ({
+            id: card.id,
+            title: card.title || '',
+            description: card.description || '',
+            imageUrl: card.image_url || '',
+            thumbnailUrl: card.thumbnail_url || card.image_url || '',
+            collectionId: card.collection_id,
+            userId: card.creator_id || card.user_id,
+            teamId: card.team_id,
+            isPublic: card.is_public,
+            tags: card.tags || [],
+            effects: [],
+            createdAt: card.created_at,
+            updatedAt: card.updated_at,
+            designMetadata: card.design_metadata || {},
+          })) as Card[];
           
-        setCollectionCards(collectionCardsData);
-        setFilteredCards(collectionCardsData);
-      } else {
-        console.log('Collection not in context, fetching from API');
-        const { data, error } = await collectionOperations.getCollection(collectionId);
-        
-        if (error) {
-          console.error('Error fetching collection:', error);
-          setFetchError(`Failed to load collection: ${error.message}`);
-          return;
+          setLocalCards(processedCards);
+          
+          // Update local collection with card IDs
+          setLocalCollection(prev => prev ? {
+            ...prev,
+            cardIds: processedCards.map(card => card.id)
+          } : null);
         }
         
-        if (data) {
-          setCollection(data);
-          setEditFormData({
-            title: data.title || data.name,
-            description: data.description,
-            coverImageUrl: data.coverImageUrl,
-            visibility: data.visibility || 'public',
-            isPublic: data.isPublic !== undefined ? data.isPublic : true,
-            allowComments: data.allowComments !== undefined ? data.allowComments : true,
-            tags: data.tags || []
-          });
-          
-          if (data.cardIds && data.cardIds.length > 0) {
-            const response = await cardOperations.getCardsByIds(data.cardIds);
-            
-            if (response.error) {
-              console.error('Error fetching collection cards:', response.error);
-            } else if (response.data) {
-              setCollectionCards(response.data);
-              setFilteredCards(response.data);
+        console.log(`Fetched collection with ${data.cards?.length || 0} cards`);
+        
+        // Reset fetch attempts on success
+        setFetchAttempts(0);
+        
+        // Dispatch refresh event
+        if (typeof window !== 'undefined') {
+          const refreshEvent = new CustomEvent('collection-refreshed', {
+            detail: { 
+              collectionId, 
+              timestamp: new Date().getTime(),
+              hasLocalData: true 
             }
-          }
-        } else {
-          setFetchError('Collection not found');
+          });
+          window.dispatchEvent(refreshEvent);
         }
+        
+        // Also try to trigger global cards refresh if available
+        if (refreshCards) {
+          refreshCards();
+        }
+      } else {
+        setFetchError('Collection not found');
+        console.error('No collection data returned');
       }
     } catch (err: any) {
-      console.error('Error in collection detail fetching:', err);
-      setFetchError(err.message || 'An unexpected error occurred');
+      console.error('Error in refreshCollection:', err);
+      setFetchError(err.message || 'Unexpected error loading collection');
+      
+      // Increment fetch attempts
+      setFetchAttempts(prevAttempts => prevAttempts + 1);
     } finally {
-      setIsLoading(false);
+      setLocalLoading(false);
     }
-  }, [collectionId, getCardById, getCollectionById]);
+  }, [collectionId, refreshCards, fetchAttempts]);
   
+  // Find the collection in global state or use local state
+  const collection = localCollection || collections.find(c => c.id === collectionId);
+  
+  // Get cards that belong to this collection, prioritize local cards
+  const collectionCards = localCards.length > 0 
+    ? localCards 
+    : (collection 
+      ? cards.filter(card => card.collectionId === collectionId) 
+      : []);
+
+  // Filter cards based on search term
+  const filteredCards = !searchTerm.trim() 
+    ? collectionCards 
+    : collectionCards.filter(card => {
+        const lowerSearchTerm = searchTerm.toLowerCase();
+        return (
+          (card.title?.toLowerCase().includes(lowerSearchTerm) || false) || 
+          (card.description && card.description.toLowerCase().includes(lowerSearchTerm))
+        );
+      });
+
+  // Initialize edit form data when collection changes
   useEffect(() => {
-    fetchCollectionData();
-  }, [fetchCollectionData]);
-  
+    if (collection) {
+      setEditFormData({
+        name: collection.name,
+        description: collection.description || ''
+      });
+    }
+  }, [collection]);
+
+  // Initial data load with limited retries
   useEffect(() => {
-    if (searchTerm.trim() === '') {
-      setFilteredCards(collectionCards);
-      return;
+    if (collectionId && !collection && !localLoading && fetchAttempts < maxFetchAttempts) {
+      refreshCollection();
     }
-    
-    const lowerSearchTerm = searchTerm.toLowerCase();
-    const filtered = collectionCards.filter(card => {
-      return (
-        card.title?.toLowerCase().includes(lowerSearchTerm) ||
-        card.description?.toLowerCase().includes(lowerSearchTerm) ||
-        card.tags?.some(tag => tag.toLowerCase().includes(lowerSearchTerm))
-      );
-    });
-    
-    setFilteredCards(filtered);
-  }, [searchTerm, collectionCards]);
+  }, [collectionId, collection, localLoading, refreshCollection, fetchAttempts, maxFetchAttempts]);
 
-  const updateCollectionMutation = useMutation({
-    mutationFn: (updatedCollection: Partial<Collection>) => {
-      if (!collectionId || !collection) {
-        throw new Error('Collection not found');
-      }
-      
-      return collectionOperations.updateCollection(collectionId, updatedCollection);
-    },
-    onSuccess: (response) => {
-      if (response.error) {
-        toast({
-          title: "Update failed",
-          description: response.error.message,
-          variant: "destructive"
-        });
-        return;
-      }
-      
-      if (response.data) {
-        setCollection(response.data);
-        toast({
-          title: "Collection updated",
-          description: "Your collection has been updated successfully"
-        });
-        setIsEditDialogOpen(false);
-      }
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Update failed",
-        description: error.message || "An error occurred while updating the collection",
-        variant: "destructive"
-      });
-    }
-  });
-
-  const deleteCollectionMutation = useMutation({
-    mutationFn: () => {
-      if (!collectionId) {
-        throw new Error('Collection not found');
-      }
-      
-      return collectionOperations.deleteCollection(collectionId);
-    },
-    onSuccess: (response) => {
-      if (response.error) {
-        toast({
-          title: "Delete failed",
-          description: response.error.message,
-          variant: "destructive"
-        });
-        return;
-      }
-      
-      toast({
-        title: "Collection deleted",
-        description: "Your collection has been deleted successfully"
-      });
-      navigate('/collections');
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Delete failed",
-        description: error.message || "An error occurred while deleting the collection",
-        variant: "destructive"
-      });
-    }
-  });
-  
-  const handleAddCardToCollection = useCallback(async (cardId: string) => {
-    if (!collectionId || !collection) return;
-    
-    try {
-      if (typeof cardOperations.addCardToCollection === 'function') {
-        const { error } = await cardOperations.addCardToCollection(cardId, collectionId);
-        
-        if (error) {
-          throw new Error(error.message);
-        }
-        
-        fetchCollectionData();
-        
-        toast({
-          title: "Card added",
-          description: "Card added to collection successfully"
-        });
-      }
-    } catch (err: any) {
-      console.error('Error adding card to collection:', err);
-      toast({
-        title: "Failed to add card",
-        description: err.message || "An error occurred",
-        variant: "destructive"
-      });
-    }
-  }, [collectionId, collection, fetchCollectionData, toast]);
-
-  const handleRemoveCardFromCollection = useCallback(async (cardId: string) => {
-    if (!collectionId || !collection) return;
-    
-    try {
-      if (typeof cardOperations.removeCardFromCollection === 'function') {
-        const { error } = await cardOperations.removeCardFromCollection(cardId, collectionId);
-        
-        if (error) {
-          throw new Error(error.message);
-        }
-        
-        setCollectionCards(prev => prev.filter(card => card.id !== cardId));
-        setFilteredCards(prev => prev.filter(card => card.id !== cardId));
-        
-        toast({
-          title: "Card removed",
-          description: "Card removed from collection successfully"
-        });
-      }
-    } catch (err: any) {
-      console.error('Error removing card from collection:', err);
-      toast({
-        title: "Failed to remove card",
-        description: err.message || "An error occurred",
-        variant: "destructive"
-      });
-    }
-  }, [collectionId, collection, toast]);
-
-  const handleAssetSelect = useCallback((assetUrl: string) => {
+  // Handle asset selection from gallery
+  const handleAssetSelect = (asset: any) => {
     if (selectedCardId) {
-      console.log('Update card image:', selectedCardId, assetUrl);
-    } else {
-      setEditFormData(prev => ({
-        ...prev,
-        coverImageUrl: assetUrl
-      }));
+      updateCard(selectedCardId, { 
+        imageUrl: asset.publicUrl,
+        thumbnailUrl: asset.thumbnailUrl || asset.publicUrl 
+      });
+      toast.success('Card image updated successfully');
+      setIsAssetGalleryOpen(false);
+      setSelectedCardId(null);
     }
-    setIsAssetGalleryOpen(false);
-    setSelectedCardId(null);
-  }, [selectedCardId]);
+  };
 
-  const openAssetGalleryForCard = useCallback((cardId: string) => {
+  // Open asset gallery for a specific card
+  const openAssetGalleryForCard = (cardId: string) => {
     setSelectedCardId(cardId);
     setIsAssetGalleryOpen(true);
-  }, []);
-
-  const handleUpdateCollection = useCallback((formData: Partial<Collection>) => {
-    updateCollectionMutation.mutate(formData);
-  }, [updateCollectionMutation]);
-
-  const handleDeleteCollection = useCallback(() => {
-    deleteCollectionMutation.mutate();
-  }, [deleteCollectionMutation]);
-
-  const handleShareCollection = useCallback(() => {
-    if (!collection) return;
-    
-    const url = `${window.location.origin}/collections/${collection.id}`;
-    
-    if (navigator.share) {
-      navigator.share({
-        title: collection.title || collection.name || 'Shared Collection',
-        text: collection.description || 'Check out this card collection!',
-        url: url
-      })
-      .then(() => {
-        toast({
-          title: "Shared successfully",
-          description: "The collection has been shared"
-        });
-      })
-      .catch((err) => {
-        console.error('Error sharing:', err);
-        handleCopyLink();
+  };
+  
+  // Update collection details
+  const handleUpdateCollection = () => {
+    if (collectionId && collection) {
+      updateCollection(collectionId, {
+        name: editFormData.name,
+        description: editFormData.description
       });
-    } else {
-      handleCopyLink();
+      setIsEditDialogOpen(false);
+      toast.success('Collection updated successfully');
     }
-  }, [collection, toast]);
+  };
 
-  const handleCopyLink = useCallback(() => {
-    if (!collection) return;
-    
-    const url = `${window.location.origin}/collections/${collection.id}`;
-    navigator.clipboard.writeText(url)
-      .then(() => {
-        toast({
-          title: "Link copied",
-          description: "Collection link copied to clipboard"
-        });
-      })
-      .catch((err) => {
-        console.error('Error copying to clipboard:', err);
-        toast({
-          title: "Copy failed",
-          description: "Could not copy link to clipboard",
-          variant: "destructive"
-        });
-      });
-  }, [collection, toast]);
+  // Delete collection and navigate back
+  const handleDeleteCollection = () => {
+    if (collectionId) {
+      deleteCollection(collectionId);
+      toast.success('Collection deleted successfully');
+      // Navigate back to collections list
+      window.location.href = '/collections';
+    }
+  };
 
-  const handleCardClick = useCallback((cardId: string) => {
-    navigate(`/cards/${cardId}`);
-  }, [navigate]);
+  const handleShareCollection = () => {
+    navigator.clipboard.writeText(window.location.href)
+      .then(() => toast.success('Collection link copied to clipboard'))
+      .catch(() => toast.error('Failed to copy collection link'));
+  };
 
-  const refreshCollection = useCallback(() => {
-    fetchCollectionData();
-  }, [fetchCollectionData]);
+  const handleCardClick = (cardId: string) => {
+    // Navigate to card detail view
+    console.log('Card clicked:', cardId);
+  };
 
   return {
     collection,
     collectionCards,
     filteredCards,
-    isLoading,
+    isLoading: isLoading || localLoading,
     viewMode,
     setViewMode,
     isAssetGalleryOpen,
     setIsAssetGalleryOpen,
     selectedCardId,
-    isEditDialogOpen,
+    isEditDialogOpen, 
     setIsEditDialogOpen,
     isDeleteDialogOpen,
     setIsDeleteDialogOpen,
@@ -363,8 +227,6 @@ export const useCollectionDetail = (collectionId?: string) => {
     handleDeleteCollection,
     handleShareCollection,
     handleCardClick,
-    handleAddCardToCollection,
-    handleRemoveCardFromCollection,
     refreshCollection,
     fetchError
   };

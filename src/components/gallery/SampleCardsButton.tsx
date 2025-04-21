@@ -1,52 +1,61 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { useCards } from '@/context/CardContext';
-import { sampleCards } from '@/data/sampleCards';
 import { toast } from 'sonner';
-import { Card } from '@/lib/types';
+import { useCards } from '@/context/CardContext';
+import { addSampleCards } from '@/lib/sampleCards';
+import { Sparkles } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface SampleCardsButtonProps {
-  onClick?: () => void;
+  onComplete?: () => void;
+  variant?: "default" | "commonsLink";
 }
 
-const SampleCardsButton: React.FC<SampleCardsButtonProps> = ({ onClick }) => {
+const SampleCardsButton: React.FC<SampleCardsButtonProps> = ({ 
+  onComplete,
+  variant = "default" 
+}) => {
   const { addCard } = useCards();
-
-  const handleLoadSampleCards = async () => {
+  const [isLoading, setIsLoading] = React.useState(false);
+  const navigate = useNavigate();
+  
+  const handleAddSampleCards = async () => {
+    if (variant === "commonsLink") {
+      navigate('/collections/commons');
+      return;
+    }
+    
+    setIsLoading(true);
+    
     try {
-      // Track the number of cards added
-      let cardsAdded = 0;
-
-      // Process each sample card
-      for (const card of sampleCards) {
-        // Clone card to avoid mutating the source
-        const cardToAdd: Partial<Card> = {
-          ...card,
-          // Ensure we use a new ID to avoid duplicates
-          id: undefined
-        };
-
-        // Add the card using our context
-        await Promise.resolve(addCard(cardToAdd));
-        cardsAdded++;
+      const addedCards = await addSampleCards(addCard);
+      
+      if (addedCards.length > 0) {
+        toast.success(`Added ${addedCards.length} sample cards to your collection!`);
+        if (onComplete) {
+          onComplete();
+        }
+      } else {
+        toast.error('Failed to add sample cards');
       }
-
-      // Show success message
-      toast.success(`Added ${cardsAdded} sample cards successfully`);
-      
-      // Call the onClick callback if provided
-      if (onClick) onClick();
-      
     } catch (error) {
       console.error('Error adding sample cards:', error);
-      toast.error('Failed to add sample cards');
+      toast.error('An unexpected error occurred while adding sample cards');
+    } finally {
+      setIsLoading(false);
     }
   };
-
+  
   return (
-    <Button onClick={handleLoadSampleCards} variant="secondary">
-      Load Sample Cards
+    <Button
+      onClick={handleAddSampleCards}
+      disabled={isLoading}
+      className="flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+      size="lg"
+    >
+      <Sparkles className="h-4 w-4" />
+      {isLoading ? 'Adding Sample Cards...' : variant === "commonsLink" ? 'Generate Commons Cards' : 'Add Sample Cards'}
     </Button>
   );
 };

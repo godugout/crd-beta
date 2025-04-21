@@ -1,6 +1,5 @@
 
 import { useState, useCallback } from 'react';
-import { v4 as uuidv4 } from 'uuid';
 
 interface CardEditorStateProps {
   initialCard?: any;
@@ -30,30 +29,6 @@ export function useCardEditorState({ initialCard, initialMetadata }: CardEditorS
   // Effects
   const [selectedEffects, setSelectedEffects] = useState<string[]>(initialCard?.designMetadata?.effects || []);
   
-  // Layers management
-  const [layers, setLayers] = useState<any[]>(initialCard?.layers || []);
-  
-  const updateLayer = useCallback((layerId: string, updates: any) => {
-    setLayers(prev =>
-      prev.map(layer =>
-        layer.id === layerId ? { ...layer, ...updates } : layer
-      )
-    );
-  }, []);
-  
-  const deleteLayer = useCallback((layerId: string) => {
-    setLayers(prev => prev.filter(layer => layer.id !== layerId));
-  }, []);
-  
-  const reorderLayers = useCallback((fromIndex: number, toIndex: number) => {
-    setLayers(prev => {
-      const result = [...prev];
-      const [removed] = result.splice(fromIndex, 1);
-      result.splice(toIndex, 0, removed);
-      return result;
-    });
-  }, []);
-  
   const handleFileChange = useCallback((file: File) => {
     const url = URL.createObjectURL(file);
     setImageUrl(url);
@@ -65,7 +40,6 @@ export function useCardEditorState({ initialCard, initialMetadata }: CardEditorS
       description,
       imageUrl,
       tags,
-      layers,
       designMetadata: {
         cardStyle,
         effects: selectedEffects,
@@ -74,7 +48,7 @@ export function useCardEditorState({ initialCard, initialMetadata }: CardEditorS
         year,
       }
     };
-  }, [title, description, imageUrl, tags, cardStyle, selectedEffects, player, team, year, layers]);
+  }, [title, description, imageUrl, tags, cardStyle, selectedEffects, player, team, year]);
 
   return {
     // Basic info
@@ -103,13 +77,6 @@ export function useCardEditorState({ initialCard, initialMetadata }: CardEditorS
     // Effects
     selectedEffects,
     setSelectedEffects,
-    
-    // Layer management
-    layers,
-    setLayers,
-    updateLayer,
-    deleteLayer,
-    reorderLayers,
     
     // Utils
     getCardData

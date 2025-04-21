@@ -1,34 +1,53 @@
 
+/**
+ * Card effect settings interface
+ */
+export interface CardEffectSettings {
+  intensity?: number;
+  speed?: number;
+  pattern?: string;
+  color?: string;
+  animationEnabled?: boolean;
+  [key: string]: any;
+}
+
+/**
+ * Card effect interface
+ */
 export interface CardEffect {
   id: string;
   name: string;
-  intensity: number;
-  type: 'holographic' | 'refractor' | 'shimmer' | 'foil' | 'vintage' | 'chrome' | 'standard';
   enabled: boolean;
-  settings?: Record<string, any>;
-  className?: string; // Added className property
+  settings: CardEffectSettings;
+  className?: string;
 }
 
-export interface EffectSettings {
-  intensity: number;
-  animation: boolean;
-  quality: 'high' | 'medium' | 'low';
+/**
+ * Card effects options for the hook
+ */
+export interface CardEffectsOptions {
+  initialEffects?: Record<string, string[]>;
+  presets?: Record<string, string[]>;
+  defaultIntensity?: number;
+  performanceMode?: 'high' | 'medium' | 'low';
 }
 
+/**
+ * Card effects result from the hook
+ */
 export interface CardEffectsResult {
   cardEffects: Record<string, string[]>;
-  activeEffects: string[];
+  isLoading: boolean;
   addEffect: (cardId: string, effect: string) => void;
   removeEffect: (cardId: string, effect: string) => void;
   toggleEffect: (cardId: string, effect: string) => void;
   clearEffects: (cardId: string) => void;
   setCardEffects: (cardId: string, effects: string[]) => void;
+  activeEffects: string[];
   setActiveEffects: (effects: string[]) => void;
-  effects?: CardEffect[]; 
-  updateIntensity?: (effectId: string, intensity: number) => void;
 }
 
-// Add this export to fix imports in other files
-export interface CardEffectWithClassName extends CardEffect {
-  className?: string;
-}
+/**
+ * Additional effect settings for premium effects
+ */
+export type EffectSettings = CardEffectSettings;
