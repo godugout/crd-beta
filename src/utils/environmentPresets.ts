@@ -6,7 +6,13 @@ export type ValidEnvironmentPreset =
   | 'display_case' 
   | 'sunset' 
   | 'dawn' 
-  | 'night';
+  | 'night'
+  | 'warehouse'
+  | 'apartment'
+  | 'lobby'
+  | 'forest'
+  | 'park'
+  | 'city';
 
 interface EnvironmentPreset {
   name: string;
@@ -57,6 +63,43 @@ export const lightingPresets: Record<ValidEnvironmentPreset, EnvironmentPreset> 
     intensity: 0.4,
     path: '/environments/night.hdr',
     description: 'Dark night setting with limited ambient light'
+  },
+  // Adding missing environment presets
+  warehouse: {
+    name: 'Warehouse',
+    intensity: 0.8,
+    path: '/environments/display_case.hdr',
+    description: 'Industrial warehouse lighting'
+  },
+  apartment: {
+    name: 'Apartment',
+    intensity: 0.65,
+    path: '/environments/display_case.hdr',
+    description: 'Cozy home lighting'
+  },
+  lobby: {
+    name: 'Lobby',
+    intensity: 1.2,
+    path: '/environments/display_case.hdr',
+    description: 'Business lobby lighting'
+  },
+  forest: {
+    name: 'Forest',
+    intensity: 0.6,
+    path: '/environments/natural.hdr',
+    description: 'Dappled forest lighting'
+  },
+  park: {
+    name: 'Park',
+    intensity: 0.75,
+    path: '/environments/natural.hdr',
+    description: 'Open park lighting'
+  },
+  city: {
+    name: 'City',
+    intensity: 0.9,
+    path: '/environments/natural.hdr',
+    description: 'Urban city lighting'
   }
 };
 

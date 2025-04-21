@@ -79,7 +79,7 @@ const MouseInteractionLayer: React.FC<MouseInteractionLayerProps> = ({
     }
     
     // Release the physics engine
-    physics.handlePointerUp(e);
+    physics.handlePointerUp();  // Fix: Remove the argument as it's not expected
   };
 
   // Reset card position when it's off-screen or user wants to reset
