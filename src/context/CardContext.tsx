@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { Card, Collection } from '@/lib/types';
 import { sampleCards } from '@/data/sampleCards';
@@ -99,10 +100,10 @@ export function CardProvider({ children }: { children: ReactNode }) {
             tags: card.tags || [],
             effects: card.effects || [],
             // Ensure designMetadata is properly merged
-            designMetadata: card.designMetadata ? {
+            designMetadata: {
               ...defaultCardValues.designMetadata,
-              ...card.designMetadata
-            } : defaultCardValues.designMetadata
+              ...(card.designMetadata || {})
+            }
           } as Card;
         });
         
@@ -131,10 +132,10 @@ export function CardProvider({ children }: { children: ReactNode }) {
       tags: card.tags || [],
       effects: card.effects || [],
       userId: card.userId || 'anonymous',
-      designMetadata: card.designMetadata ? {
+      designMetadata: {
         ...defaultCardValues.designMetadata,
-        ...card.designMetadata
-      } : defaultCardValues.designMetadata
+        ...(card.designMetadata || {})
+      }
     };
 
     setCards(prevCards => [...prevCards, newCard]);
@@ -156,10 +157,10 @@ export function CardProvider({ children }: { children: ReactNode }) {
               ...updatedCard, 
               updatedAt: new Date().toISOString(),
               // Make sure designMetadata is properly merged
-              designMetadata: updatedCard.designMetadata ? {
-                ...card.designMetadata,
-                ...updatedCard.designMetadata
-              } : card.designMetadata
+              designMetadata: {
+                ...(card.designMetadata || defaultCardValues.designMetadata),
+                ...(updatedCard.designMetadata || {})
+              }
             }
           : card
       )
