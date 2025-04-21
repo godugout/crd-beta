@@ -104,7 +104,9 @@ export function CardProvider({ children }: { children: ReactNode }) {
             designMetadata: {
               ...defaultCardValues.designMetadata,
               ...(card.designMetadata || {})
-            }
+            },
+            // Convert rarity to CardRarity type if it's a string
+            rarity: card.rarity || undefined
           } as Card;
         });
         

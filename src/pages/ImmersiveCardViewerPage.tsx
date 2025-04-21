@@ -86,6 +86,8 @@ const ImmersiveCardViewerPage: React.FC = () => {
         if (foundCard) {
           console.log('Found card:', foundCard.title);
           
+          const cardRarity = foundCard.rarity as CardRarity | undefined;
+          
           const cardWithDefaults = adaptToCard({
             ...foundCard,
             imageUrl: foundCard.imageUrl || FALLBACK_IMAGE_URL,
@@ -95,7 +97,8 @@ const ImmersiveCardViewerPage: React.FC = () => {
             createdAt: foundCard.createdAt || new Date().toISOString(),
             updatedAt: foundCard.updatedAt || new Date().toISOString(),
             userId: foundCard.userId || 'anonymous',
-            effects: foundCard.effects || []
+            effects: foundCard.effects || [],
+            rarity: cardRarity
           });
           
           setCard(cardWithDefaults);

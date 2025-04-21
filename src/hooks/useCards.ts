@@ -158,8 +158,6 @@ export function useCards() {
     return newCard;
   };
 
-  // Other functions...
-
   return {
     cards,
     collections,
@@ -168,6 +166,5 @@ export function useCards() {
     fetchCards,
     addCard,
     addCollection
-    // Additional methods as needed
   };
 }
