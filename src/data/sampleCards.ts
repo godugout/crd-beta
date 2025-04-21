@@ -1,5 +1,37 @@
 
-export const sampleCards = [
+// Import Card and CardRarity types
+import { Card, CardRarity, DesignMetadata } from '@/lib/types';
+
+// Default design metadata for legacy cards
+const defaultDesignMetadata: DesignMetadata = {
+  cardStyle: {
+    template: 'classic',
+    effect: 'classic',
+    borderRadius: '8px',
+    borderColor: '#000000',
+    frameColor: '#000000',
+    frameWidth: 2,
+    shadowColor: 'rgba(0,0,0,0.2)',
+  },
+  textStyle: {
+    titleColor: '#FFFFFF',
+    titleAlignment: 'left',
+    titleWeight: 'bold',
+    descriptionColor: '#FFFFFF',
+  },
+  marketMetadata: {
+    isPrintable: false,
+    isForSale: false,
+    includeInCatalog: true
+  },
+  cardMetadata: {
+    category: 'sports',
+    cardType: 'collectible',
+    series: 'standard'
+  }
+};
+
+export const sampleCards: Card[] = [
   {
     id: "t206-wagner",
     title: "Honus Wagner Trading Card",
@@ -14,7 +46,9 @@ export const sampleCards = [
     player: "Honus Wagner",
     team: "Pittsburgh Pirates",
     position: "Shortstop",
-    year: "1909-11"
+    year: "1909-11",
+    designMetadata: { ...defaultDesignMetadata },
+    rarity: 'legendary' as CardRarity
   },
   {
     id: "1952-topps-mantle",
@@ -30,7 +64,9 @@ export const sampleCards = [
     player: "Mickey Mantle",
     team: "New York Yankees",
     position: "Center Field",
-    year: "1952"
+    year: "1952",
+    designMetadata: { ...defaultDesignMetadata },
+    rarity: 'legendary' as CardRarity
   },
   {
     id: "1933-goudey-ruth",
@@ -46,7 +82,9 @@ export const sampleCards = [
     player: "Babe Ruth",
     team: "New York Yankees",
     position: "Outfield",
-    year: "1933"
+    year: "1933",
+    designMetadata: { ...defaultDesignMetadata },
+    rarity: 'legendary' as CardRarity
   },
   {
     id: "lebron-james-rookie",
@@ -62,7 +100,9 @@ export const sampleCards = [
     player: "LeBron James",
     team: "Cleveland Cavaliers",
     position: "Small Forward",
-    year: "2003"
+    year: "2003",
+    designMetadata: { ...defaultDesignMetadata },
+    rarity: "ultra-rare" as CardRarity
   },
   {
     id: "michael-jordan-fleer",
@@ -78,6 +118,8 @@ export const sampleCards = [
     player: "Michael Jordan",
     team: "Chicago Bulls",
     position: "Shooting Guard",
-    year: "1993"
+    year: "1993",
+    designMetadata: { ...defaultDesignMetadata },
+    rarity: "ultra-rare" as CardRarity
   }
 ];

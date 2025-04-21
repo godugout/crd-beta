@@ -1,6 +1,5 @@
-
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { Card, Collection, DesignMetadata, CardRarity } from '@/lib/types'; // Added CardRarity import here
+import { Card, Collection, DesignMetadata, CardRarity } from '@/lib/types';
 import { sampleCards } from '@/data/sampleCards';
 import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
@@ -11,7 +10,6 @@ export interface CardContextType {
   error: Error | null;
   collections: Collection[];
   
-  // Card operations
   addCard: (card: Partial<Card>) => Card;
   updateCard: (card: Partial<Card>) => void;
   deleteCard: (cardId: string) => void;
@@ -19,7 +17,6 @@ export interface CardContextType {
   getCardById: (cardId: string) => Card | undefined;
   refreshCards: () => Promise<void>;
   
-  // Collection operations
   addCollection: (collection: Partial<Collection>) => Collection;
   updateCollection: (id: string, updates: Partial<Collection>) => Collection | null;
   deleteCollection: (id: string) => boolean;
@@ -28,10 +25,8 @@ export interface CardContextType {
   removeCardFromCollection: (collectionId: string, cardId: string) => boolean;
 }
 
-// Create the CardContext before it's used
 const CardContext = createContext<CardContextType | undefined>(undefined);
 
-// Define default values for required fields in Card objects
 const defaultCardValues: Omit<Card, 'id'> = {
   title: '',
   description: '',
@@ -75,44 +70,37 @@ const defaultCardValues: Omit<Card, 'id'> = {
   }
 };
 
-// Explicitly export CardProvider as a named export
 export function CardProvider({ children }: { children: ReactNode }) {
   const [cards, setCards] = useState<Card[]>([]);
   const [collections, setCollections] = useState<Collection[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  // Initialize with sample cards
   React.useEffect(() => {
     const loadInitialCards = async () => {
       try {
         setIsLoading(true);
-        
-        // Transform sample cards to ensure they have all required properties
+
         const transformedCards = sampleCards.map(card => {
-          // Make sure the card has all required properties or use defaults
-          const transformedCard: Card = {
+          return {
             ...defaultCardValues,
             ...card,
             thumbnailUrl: card.thumbnailUrl || card.imageUrl || '',
-            imageUrl: card.imageUrl || '', // Ensure imageUrl is not undefined
+            imageUrl: card.imageUrl || '',
             id: card.id || uuidv4(),
             title: card.title || 'Untitled Card',
             description: card.description || '',
             tags: card.tags || [],
             effects: card.effects || [],
             userId: card.userId || 'anonymous',
-            // Explicitly handle designMetadata since it's causing an error
             designMetadata: {
               ...defaultCardValues.designMetadata,
               ...(card.designMetadata || {})
             },
-            // Handle rarity explicitly - and cast it to CardRarity if present
             rarity: card.rarity as CardRarity | undefined
           };
-          return transformedCard;
         });
-        
+
         setCards(transformedCards);
         setIsLoading(false);
         setError(null);
@@ -122,7 +110,7 @@ export function CardProvider({ children }: { children: ReactNode }) {
         toast.error("Failed to load cards");
       }
     };
-    
+
     loadInitialCards();
   }, []);
 
@@ -133,7 +121,7 @@ export function CardProvider({ children }: { children: ReactNode }) {
       id: card.id || uuidv4(),
       title: card.title || 'Untitled Card',
       description: card.description || '',
-      imageUrl: card.imageUrl || '', // Ensure imageUrl is provided and not optional
+      imageUrl: card.imageUrl || '',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       thumbnailUrl: card.thumbnailUrl || card.imageUrl || '',
@@ -192,8 +180,6 @@ export function CardProvider({ children }: { children: ReactNode }) {
     try {
       setIsLoading(true);
       
-      // In a real app, we would make an API call here
-      // For demo purposes, just wait a bit then use the same cards
       await new Promise(resolve => setTimeout(resolve, 500));
       
       setIsLoading(false);
@@ -205,7 +191,6 @@ export function CardProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Collection operations
   const addCollection = (collectionData: Partial<Collection>): Collection => {
     const newCollection: Collection = {
       id: collectionData.id || uuidv4(),
@@ -283,12 +268,10 @@ export function CardProvider({ children }: { children: ReactNode }) {
       return prevCollections.map(collection => {
         if (collection.id === collectionId) {
           const cards = collection.cards || [];
-          // Check if card already exists to avoid duplicates
           if (!cards.some(c => c.id === card.id)) {
             return {
               ...collection,
               cards: [...cards, card],
-              // Also update cardIds for compatibility
               cardIds: [...(collection.cardIds || []), card.id]
             };
           }
@@ -313,7 +296,6 @@ export function CardProvider({ children }: { children: ReactNode }) {
           return {
             ...collection,
             cards: collection.cards.filter(card => card.id !== cardId),
-            // Also update cardIds for compatibility
             cardIds: (collection.cardIds || []).filter(id => id !== cardId)
           };
         }
@@ -350,7 +332,6 @@ export function CardProvider({ children }: { children: ReactNode }) {
   );
 }
 
-// Hook to use the card context
 export const useCards = () => {
   const context = useContext(CardContext);
   
@@ -361,5 +342,4 @@ export const useCards = () => {
   return context;
 };
 
-// Export the CardContext
 export { CardContext };
