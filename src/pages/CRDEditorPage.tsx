@@ -8,7 +8,6 @@ const CRDEditorPage: React.FC = () => {
     <PageLayout
       title="CRD Editor"
       description="Create stunning collectible digital cards with our advanced editor"
-      hideFooter={true}
     >
       <CRDEditor />
     </PageLayout>
