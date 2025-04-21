@@ -2,8 +2,8 @@
 import React, { useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useCards } from '@/context/CardContext';
-import { Card } from '@/lib/types/cardTypes';
+import { useCards } from '@/hooks/useCards';
+import { Card } from '@/lib/types';
 import { sampleCards } from '@/lib/data/sampleCards';
 import { useToast } from '@/hooks/use-toast';
 import { adaptToCard } from '@/lib/adapters/cardAdapter';
@@ -15,7 +15,7 @@ interface FullscreenViewerProps {
 }
 
 const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) => {
-  const { cards, getCardById } = useCards();
+  const { cards, getCard } = useCards();
   const [currentCard, setCurrentCard] = useState<Card | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -41,7 +41,7 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
       // If not found in sampleCards, try the cards context
       if (!foundCard) {
         console.log('FullscreenViewer: Card not found in sampleCards, checking context');
-        foundCard = getCardById ? getCardById(cardId) : cards.find(c => c.id === cardId);
+        foundCard = getCard ? getCard(cardId) : cards.find(c => c.id === cardId);
       }
       
       if (foundCard) {
@@ -51,14 +51,12 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
           // Ensure imageUrl is present
           imageUrl: foundCard.imageUrl || '/images/card-placeholder.png',
           thumbnailUrl: foundCard.thumbnailUrl || foundCard.imageUrl || '/images/card-placeholder.png',
-          // Ensure designMetadata is always present
+          // Ensure all required fields are present
           designMetadata: foundCard.designMetadata || DEFAULT_DESIGN_METADATA,
-          description: foundCard.description || '', // Ensure description is not undefined
           createdAt: foundCard.createdAt || new Date().toISOString(),
           updatedAt: foundCard.updatedAt || new Date().toISOString(),
           userId: foundCard.userId || 'anonymous',
-          effects: foundCard.effects || [],
-          tags: foundCard.tags || []
+          effects: foundCard.effects || []
         });
         
         // Always initialize with fallback first, then update if the real image loads
@@ -106,7 +104,7 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
       setError('Failed to load card');
       setIsLoading(false);
     }
-  }, [cardId, cards, getCardById, toast]);
+  }, [cardId, cards, getCard, toast]);
   
   // Find all card indices from cards array to enable navigation between cards
   const allCardIds = cards?.map(card => card.id) || [];

@@ -1,25 +1,32 @@
 
-export interface InstagramPost {
-  id: string;
+import { BaseEntity } from './index';
+
+export interface InstagramPost extends BaseEntity {
+  postId: string;
+  username: string;
   caption?: string;
-  permalink?: string;
-  mediaType: string;
+  imageUrl: string;
+  permalink: string;
+  timestamp: string;
+  mediaType: 'IMAGE' | 'VIDEO' | 'CAROUSEL_ALBUM';
   mediaUrl: string;
   thumbnailUrl?: string;
-  timestamp?: string;
-  username?: string;
-  children?: InstagramPost[];
-  postId?: string;
+  children?: InstagramPostChild[];
+}
+
+export interface InstagramPostChild {
+  id: string;
+  mediaType: 'IMAGE' | 'VIDEO';
+  mediaUrl: string;
+  thumbnailUrl?: string;
 }
 
 export interface InstagramAccount {
   id: string;
   username: string;
-  profilePicture?: string;
-  followerCount?: number;
-  accessToken?: string;
-  tokenExpiry?: string;
-  lastSync?: string;
+  profilePictureUrl?: string;
+  followersCount?: number;
+  mediaCount?: number;
 }
 
 export interface InstagramCollection {
@@ -27,7 +34,5 @@ export interface InstagramCollection {
   name: string;
   description?: string;
   posts: InstagramPost[];
-  createdAt: string;
-  updatedAt: string;
-  userId: string;
+  instagramSource?: string;
 }

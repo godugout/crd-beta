@@ -1,3 +1,4 @@
+
 import React, { useState, Suspense } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
@@ -20,7 +21,7 @@ const CardDetectorPage = () => {
   
   // Enable all memorabilia types
   const enabledMemorabiliaTypes: MemorabiliaType[] = [
-    'card', 'ticket', 'program', 'autograph', 'face', 'group', 'unknown'
+    'card', 'ticket', 'program', 'autograph', 'face', 'unknown'
   ];
   
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {

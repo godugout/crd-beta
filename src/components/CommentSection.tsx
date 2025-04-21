@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/auth';
 import { Button } from '@/components/ui/button';
@@ -47,6 +48,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ cardId, collectionId, t
       }
       
       if (data) {
+        // Ensure we're using a consistent type
         const typedComments = data as Comment[];
         setComments(typedComments);
         typedComments.forEach(comment => {
@@ -74,6 +76,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ cardId, collectionId, t
       }
       
       if (data && data.length > 0) {
+        // Handle type consistency
         const typedReplies = data as Comment[];
         setRepliesByParentId(prev => ({
           ...prev,
@@ -110,6 +113,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ cardId, collectionId, t
         toast.success('Comment posted successfully');
         setNewComment('');
         
+        // Ensure type consistency by casting
         const typedComment = data as Comment;
         
         if (replyTo) {
@@ -143,6 +147,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ cardId, collectionId, t
       if (data) {
         toast.success('Comment updated successfully');
         
+        // Ensure type consistency by casting
         const typedComment = data as Comment;
         
         if (typedComment.parentId) {
@@ -210,22 +215,24 @@ const CommentSection: React.FC<CommentSectionProps> = ({ cardId, collectionId, t
     setEditText('');
   };
   
-  const getDisplayName = (user?: any) => {
-    if (!user) return 'Anonymous';
-    return user.displayName || user.name || user.username || 'Anonymous';
-  };
-  
-  const getAvatarInitial = (user?: any) => {
-    if (!user) return '?';
-    if (user.displayName) return user.displayName.charAt(0);
-    if (user.name) return user.name.charAt(0);
-    return user.email?.charAt(0) || '?';
-  };
-
   const renderCommentItem = (comment: Comment, isReply = false) => {
     const isEditing = editingId === comment.id;
     const isOwnComment = user && comment.userId === user.id;
     const replies = repliesByParentId[comment.id] || [];
+    
+    // Helper function to get display name
+    const getDisplayName = (user?: User) => {
+      if (!user) return 'Anonymous';
+      return user.displayName || user.name || user.username || 'Anonymous';
+    };
+    
+    // Helper function to get avatar initial
+    const getAvatarInitial = (user?: User) => {
+      if (!user) return '?';
+      if (user.displayName) return user.displayName.charAt(0);
+      if (user.name) return user.name.charAt(0);
+      return user.email?.charAt(0) || '?';
+    };
     
     return (
       <div key={comment.id} className={`${isReply ? 'ml-8 mt-2' : 'mt-4'}`}>

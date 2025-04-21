@@ -1,7 +1,7 @@
 
 import { type ToastProps } from "@radix-ui/react-toast"
 
-export type ToastVariant = 'default' | 'destructive' | 'success' | 'warning' | 'info' | 'error';
+export type ToastVariant = 'default' | 'destructive' | 'success' | 'warning' | 'info'
 
 export interface ToasterToast {
   id: string

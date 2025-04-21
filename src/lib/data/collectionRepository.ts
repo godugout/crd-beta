@@ -1,208 +1,208 @@
+import { supabase } from '@/lib/supabase';
+import { Collection, serializeMetadata } from '@/lib/types';
 
-import { Collection, Card } from '@/lib/types';
-import { v4 as uuidv4 } from 'uuid';
-
-// Define serializeMetadata locally if not available
-const serializeMetadata = (metadata: any): string => {
-  return JSON.stringify(metadata || {});
-};
-
-export async function fetchCollectionById(id: string): Promise<Collection | null> {
-  try {
-    // Simulate API fetch with a timeout
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    // Mock data
-    const mockCollection = {
-      id: id,
-      title: `Collection ${id}`, // Ensure title is set
-      name: `Collection ${id}`,
-      description: 'A description of the collection',
-      coverImageUrl: '/images/collection-cover.jpg',
-      visibility: 'public' as 'public' | 'private' | 'team' | 'unlisted',
-      allowComments: true,
-      designMetadata: {},
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      userId: 'user-123',
-      teamId: 'team-456',
-      cards: [],
-      tags: ['collection', 'featured'],
-      isPublic: true
-    };
-
-    return mockCollection;
-  } catch (error) {
-    console.error('Error fetching collection:', error);
-    return null;
-  }
-}
-
-export async function createCollection(collectionData: Partial<Collection>): Promise<Collection | null> {
-  try {
-    // Simulate API call with a timeout
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    // Create a new collection with the provided data and defaults
-    const newCollection: Collection = {
-      id: uuidv4(),
-      title: collectionData.title || collectionData.name || 'Untitled Collection', // Ensure title is set
-      name: collectionData.name || collectionData.title || 'Untitled Collection',
-      description: collectionData.description || '',
-      coverImageUrl: collectionData.coverImageUrl || '',
-      userId: collectionData.userId || 'user-1',
-      teamId: collectionData.teamId,
-      visibility: collectionData.visibility || 'public',
-      allowComments: collectionData.allowComments !== undefined ? collectionData.allowComments : true,
-      designMetadata: collectionData.designMetadata || {},
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      cards: collectionData.cards || [],
-      tags: collectionData.tags || [],
-      isPublic: collectionData.isPublic !== undefined ? collectionData.isPublic : true
-    };
-
-    // Mock response
-    return newCollection;
-  } catch (error) {
-    console.error('Error creating collection:', error);
-    return null;
-  }
-}
-
-export async function updateCollection(id: string, updates: Partial<Collection>): Promise<Collection | null> {
-  try {
-    // Fetch the existing collection
-    const existingCollection = await fetchCollectionById(id);
-    if (!existingCollection) {
-      return null;
+export const collectionRepository = {
+  /**
+   * Get a collection by ID
+   */
+  async getCollectionById(id: string) {
+    try {
+      const { data, error } = await supabase
+        .from('collections')
+        .select('*')
+        .eq('id', id)
+        .single();
+      
+      if (error) {
+        return { data: null, error: error.message };
+      }
+      
+      if (!data) {
+        return { data: null, error: 'Collection not found' };
+      }
+      
+      const dbCollection = data;
+      const collection: Collection = {
+        id: dbCollection.id,
+        name: dbCollection.title,
+        description: dbCollection.description || '',
+        coverImageUrl: dbCollection.cover_image_url || undefined,
+        visibility: dbCollection.visibility as 'public' | 'private' | 'team' | 'unlisted',
+        allowComments: dbCollection.allow_comments || false,
+        designMetadata: dbCollection.design_metadata,
+        createdAt: dbCollection.created_at,
+        updatedAt: dbCollection.updated_at,
+        userId: dbCollection.owner_id,
+        teamId: dbCollection.team_id,
+        cardIds: [],
+        cards: [],
+        isPublic: dbCollection.visibility === 'public',
+      };
+      
+      return { data: collection, error: null };
+    } catch (err) {
+      console.error('Error getting collection by ID:', err);
+      return { data: null, error: 'Failed to get collection' };
     }
-
-    // Simulate API call with a timeout
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    // Update the collection with the provided updates
-    const updatedCollection: Collection = {
-      ...existingCollection,
-      title: updates.title || updates.name || existingCollection.title, // Ensure title is updated
-      name: updates.name || updates.title || existingCollection.name,
-      description: updates.description !== undefined ? updates.description : existingCollection.description,
-      coverImageUrl: updates.coverImageUrl !== undefined ? updates.coverImageUrl : existingCollection.coverImageUrl,
-      visibility: updates.visibility || existingCollection.visibility,
-      allowComments: updates.allowComments !== undefined ? updates.allowComments : existingCollection.allowComments,
-      designMetadata: updates.designMetadata || existingCollection.designMetadata,
-      cards: updates.cards || existingCollection.cards,
-      tags: updates.tags || existingCollection.tags,
-      updatedAt: new Date().toISOString(),
-      teamId: updates.teamId !== undefined ? updates.teamId : existingCollection.teamId,
-      isPublic: updates.isPublic !== undefined ? updates.isPublic : existingCollection.isPublic
-    };
-
-    // Mock response
-    return updatedCollection;
-  } catch (error) {
-    console.error('Error updating collection:', error);
-    return null;
+  },
+  
+  /**
+   * Update a collection
+   */
+  async updateCollection(id: string, collectionUpdates: Partial<Collection>) {
+    try {
+      const updateCollectionData: any = {};
+      if (collectionUpdates.name !== undefined) updateCollectionData.title = collectionUpdates.name;
+      if (collectionUpdates.description !== undefined) updateCollectionData.description = collectionUpdates.description;
+      if (collectionUpdates.coverImageUrl !== undefined) updateCollectionData.cover_image_url = collectionUpdates.coverImageUrl;
+      if (collectionUpdates.visibility !== undefined) {
+        updateCollectionData.visibility = collectionUpdates.visibility;
+      }
+      if (collectionUpdates.allowComments !== undefined) updateCollectionData.allow_comments = collectionUpdates.allowComments;
+      if (collectionUpdates.designMetadata !== undefined) {
+        updateCollectionData.design_metadata = serializeMetadata(collectionUpdates.designMetadata);
+      }
+      if (collectionUpdates.teamId !== undefined) updateCollectionData.team_id = collectionUpdates.teamId;
+      
+      const { data, error } = await supabase
+        .from('collections')
+        .update(updateCollectionData)
+        .eq('id', id)
+        .select()
+        .single();
+      
+      if (error) {
+        return { data: null, error: error.message };
+      }
+      
+      const dbCollection = data;
+      const collection: Collection = {
+        id: dbCollection.id,
+        name: dbCollection.title,
+        description: dbCollection.description || '',
+        coverImageUrl: dbCollection.cover_image_url || undefined,
+        visibility: dbCollection.visibility as 'public' | 'private' | 'team' | 'unlisted',
+        allowComments: dbCollection.allow_comments || false,
+        designMetadata: dbCollection.design_metadata,
+        createdAt: dbCollection.created_at,
+        updatedAt: dbCollection.updated_at,
+        userId: dbCollection.owner_id,
+        teamId: dbCollection.team_id,
+        cardIds: [],
+        cards: [],
+        isPublic: dbCollection.visibility === 'public',
+      };
+      
+      return { data: collection, error: null };
+    } catch (err) {
+      console.error('Error updating collection:', err);
+      return { data: null, error: 'Failed to update collection' };
+    }
+  },
+  
+  /**
+   * Filter collections based on options
+   */
+  async filterCollections(filterOptions: {
+    userId?: string;
+    teamId?: string;
+    visibility?: string;
+  }) {
+    try {
+      let queryBuilder = supabase
+        .from('collections')
+        .select('*');
+      
+      if (filterOptions.teamId) {
+        queryBuilder = queryBuilder.eq('team_id', filterOptions.teamId);
+      }
+      
+      if (filterOptions.userId) {
+        queryBuilder = queryBuilder.eq('owner_id', filterOptions.userId);
+      }
+      
+      if (filterOptions.visibility) {
+        queryBuilder = queryBuilder.eq('visibility', filterOptions.visibility);
+      }
+      
+      const { data, error } = await queryBuilder;
+      
+      if (error) {
+        return { data: null, error: error.message };
+      }
+      
+      const collections: Collection[] = data.map(dbCollection => ({
+        id: dbCollection.id,
+        name: dbCollection.title,
+        description: dbCollection.description || '',
+        coverImageUrl: dbCollection.cover_image_url || undefined,
+        visibility: dbCollection.visibility as 'public' | 'private' | 'team' | 'unlisted',
+        allowComments: dbCollection.allow_comments || false,
+        designMetadata: dbCollection.design_metadata,
+        createdAt: dbCollection.created_at,
+        updatedAt: dbCollection.updated_at,
+        userId: dbCollection.owner_id,
+        teamId: dbCollection.team_id,
+        cardIds: [],
+        cards: [],
+        isPublic: dbCollection.visibility === 'public',
+      }));
+      
+      return { data: collections, error: null };
+    } catch (err) {
+      console.error('Error filtering collections:', err);
+      return { data: null, error: 'Failed to filter collections' };
+    }
+  },
+  
+  /**
+   * Create a new collection
+   */
+  async createCollection(collection: Partial<Collection>) {
+    try {
+      const collectionData = {
+        title: collection.name,
+        description: collection.description || null,
+        cover_image_url: collection.coverImageUrl || null,
+        visibility: collection.visibility || 'private',
+        allow_comments: collection.allowComments !== undefined ? collection.allowComments : true,
+        owner_id: collection.userId,
+        team_id: collection.teamId || null,
+        design_metadata: collection.designMetadata ? serializeMetadata(collection.designMetadata) : {}
+      };
+      
+      const { data, error } = await supabase
+        .from('collections')
+        .insert(collectionData)
+        .select()
+        .single();
+      
+      if (error) {
+        return { data: null, error: error.message };
+      }
+      
+      const dbCollection = data;
+      const newCollection: Collection = {
+        id: dbCollection.id,
+        name: dbCollection.title,
+        description: dbCollection.description || '',
+        coverImageUrl: dbCollection.cover_image_url || undefined,
+        visibility: dbCollection.visibility as 'public' | 'private' | 'team' | 'unlisted',
+        allowComments: dbCollection.allow_comments || false,
+        designMetadata: dbCollection.design_metadata,
+        createdAt: dbCollection.created_at,
+        updatedAt: dbCollection.updated_at,
+        userId: dbCollection.owner_id,
+        teamId: dbCollection.team_id,
+        cardIds: [],
+        cards: [],
+        isPublic: dbCollection.visibility === 'public',
+      };
+      
+      return { data: newCollection, error: null };
+    } catch (err) {
+      console.error('Error creating collection:', err);
+      return { data: null, error: 'Failed to create collection' };
+    }
   }
-}
-
-export async function deleteCollection(id: string): Promise<boolean> {
-  try {
-    // Simulate API call with a timeout
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    // Mock successful deletion
-    return true;
-  } catch (error) {
-    console.error('Error deleting collection:', error);
-    return false;
-  }
-}
-
-export async function fetchCollections(): Promise<Collection[]> {
-  try {
-    // Simulate API fetch with a timeout
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    // Mock collection data
-    const mockCollections = Array.from({ length: 5 }, (_, i) => ({
-      id: `collection-${i + 1}`,
-      title: `Collection ${i + 1}`, // Ensure title is set
-      name: `Collection ${i + 1}`,
-      description: `A sample collection ${i + 1}`,
-      coverImageUrl: `/images/collection-${i + 1}.jpg`,
-      visibility: 'public' as 'public' | 'private' | 'team' | 'unlisted',
-      allowComments: true,
-      designMetadata: {},
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      userId: 'user-1',
-      teamId: i % 2 === 0 ? 'team-1' : undefined,
-      cards: [],
-      tags: ['sample', `tag-${i + 1}`],
-      isPublic: true
-    }));
-
-    return mockCollections;
-  } catch (error) {
-    console.error('Error fetching collections:', error);
-    return [];
-  }
-}
-
-export async function addCardToCollection(collectionId: string, cardId: string): Promise<boolean> {
-  try {
-    // Simulate API call with a timeout
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    // Mock successful operation
-    return true;
-  } catch (error) {
-    console.error('Error adding card to collection:', error);
-    return false;
-  }
-}
-
-export async function removeCardFromCollection(collectionId: string, cardId: string): Promise<boolean> {
-  try {
-    // Simulate API call with a timeout
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    // Mock successful operation
-    return true;
-  } catch (error) {
-    console.error('Error removing card from collection:', error);
-    return false;
-  }
-}
-
-export async function fetchCollectionsByUserId(userId: string): Promise<Collection[]> {
-  try {
-    // Simulate API fetch with a timeout
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    // Mock user collections
-    const mockUserCollections = Array.from({ length: 3 }, (_, i) => ({
-      id: `user-collection-${i + 1}`,
-      title: `User Collection ${i + 1}`, // Ensure title is set
-      name: `User Collection ${i + 1}`,
-      description: `A personal collection ${i + 1}`,
-      coverImageUrl: `/images/user-collection-${i + 1}.jpg`,
-      visibility: i === 0 ? 'public' : 'private' as 'public' | 'private' | 'team' | 'unlisted',
-      allowComments: true,
-      designMetadata: {},
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      userId: userId,
-      teamId: i === 2 ? 'team-1' : undefined,
-      cards: [],
-      tags: ['personal', `user-tag-${i + 1}`],
-      isPublic: i === 0
-    }));
-
-    return mockUserCollections;
-  } catch (error) {
-    console.error('Error fetching user collections:', error);
-    return [];
-  }
-}
+};

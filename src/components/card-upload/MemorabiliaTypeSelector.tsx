@@ -14,8 +14,7 @@ import {
   User,
   PenTool,
   CreditCard,
-  HelpCircle,
-  Users
+  HelpCircle
 } from 'lucide-react';
 import { MemorabiliaType } from './cardDetection';
 
@@ -30,7 +29,7 @@ const MemorabiliaTypeSelector: React.FC<MemorabiliaTypeSelectorProps> = ({
   value,
   onChange,
   className,
-  enabledTypes = ['card', 'ticket', 'program', 'autograph', 'face', 'group', 'unknown']
+  enabledTypes = ['card', 'ticket', 'program', 'autograph', 'face', 'unknown']
 }) => {
   
   // Array of all available memorabilia types
@@ -63,11 +62,6 @@ const MemorabiliaTypeSelector: React.FC<MemorabiliaTypeSelectorProps> = ({
       value: 'face',
       label: 'Person',
       icon: <User className="h-4 w-4 mr-2" />
-    },
-    {
-      value: 'group',
-      label: 'Group Photo',
-      icon: <Users className="h-4 w-4 mr-2" />
     },
     {
       value: 'unknown',

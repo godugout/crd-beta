@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -5,11 +6,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { toast } from 'sonner';
+import { toast } from '@/hooks/use-toast';
 import { Plus, Upload, X, Edit, Trash2, Tag, CheckCircle, Image as ImageIcon } from 'lucide-react';
 import BatchImageUploader from '@/components/dam/BatchImageUploader';
 import { DigitalAsset } from '@/lib/types/assetTypes';
 
+// Sample data for the DAM system
 const mockAssets: DigitalAsset[] = [
   {
     id: 'asset-1',
@@ -73,6 +75,7 @@ const mockAssets: DigitalAsset[] = [
   }
 ];
 
+// Placeholder image URLs for sample assets
 const placeholderImages = [
   'https://images.unsplash.com/photo-1508344928928-7165b5c2cb0b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
   'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
@@ -94,6 +97,7 @@ const MediaManagerPanel: React.FC = () => {
   const [displayMode, setDisplayMode] = useState<'grid' | 'list'>('grid');
   const [activeTab, setActiveTab] = useState('browse');
 
+  // Filter assets based on search query
   const filteredAssets = assets.filter(asset => {
     const query = searchQuery.toLowerCase();
     return (
@@ -104,6 +108,7 @@ const MediaManagerPanel: React.FC = () => {
     );
   });
 
+  // Handle selecting an asset for viewing or editing
   const handleSelectAsset = (asset: DigitalAsset) => {
     setSelectedAsset(asset);
     setEditFormData({
@@ -115,25 +120,31 @@ const MediaManagerPanel: React.FC = () => {
     setIsEditing(false);
   };
 
+  // Handle edit form changes
   const handleEditFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setEditFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  // Handle save edits
   const handleSaveEdits = () => {
     if (!selectedAsset) return;
     
     try {
+      // Parse metadata JSON
       let parsedMetadata;
       try {
         parsedMetadata = JSON.parse(editFormData.metadata);
       } catch (e) {
-        toast.error("Invalid metadata JSON", {
-          description: "Please enter valid JSON for metadata"
+        toast({
+          title: "Invalid metadata JSON",
+          description: "Please enter valid JSON for metadata",
+          variant: "destructive"
         });
         return;
       }
       
+      // Create updated asset
       const updatedAsset: DigitalAsset = {
         ...selectedAsset,
         title: editFormData.title,
@@ -143,6 +154,7 @@ const MediaManagerPanel: React.FC = () => {
         updated_at: new Date().toISOString()
       };
       
+      // Update assets array
       setAssets(prevAssets => 
         prevAssets.map(asset => 
           asset.id === updatedAsset.id ? updatedAsset : asset
@@ -152,17 +164,22 @@ const MediaManagerPanel: React.FC = () => {
       setSelectedAsset(updatedAsset);
       setIsEditing(false);
       
-      toast.success("Asset updated", {
-        description: "Asset metadata has been updated successfully"
+      toast({
+        title: "Asset updated",
+        description: "Asset metadata has been updated successfully",
+        variant: "default"
       });
     } catch (err) {
       console.error('Error updating asset:', err);
-      toast.error("Update failed", {
-        description: "Failed to update asset metadata"
+      toast({
+        title: "Update failed",
+        description: "Failed to update asset metadata",
+        variant: "destructive"
       });
     }
   };
 
+  // Handle delete asset
   const handleDeleteAsset = (assetId: string) => {
     if (window.confirm('Are you sure you want to delete this asset? This action cannot be undone.')) {
       setAssets(prevAssets => prevAssets.filter(asset => asset.id !== assetId));
@@ -171,12 +188,15 @@ const MediaManagerPanel: React.FC = () => {
         setSelectedAsset(null);
       }
       
-      toast.success("Asset deleted", {
-        description: "Asset has been deleted successfully"
+      toast({
+        title: "Asset deleted",
+        description: "Asset has been deleted successfully",
+        variant: "default"
       });
     }
   };
 
+  // Handle batch upload completion
   const handleUploadComplete = (urls: string[], assetIds: string[]) => {
     const newAssets: DigitalAsset[] = urls.map((url, index) => {
       const filename = url.split('/').pop() || `file-${index}.jpg`;
@@ -184,14 +204,14 @@ const MediaManagerPanel: React.FC = () => {
         id: assetIds[index] || `asset-${Date.now()}-${index}`,
         title: filename.split('.')[0],
         original_filename: filename,
-        mime_type: 'image/jpeg',
+        mime_type: 'image/jpeg', // Assuming JPEG for now
         storage_path: url,
         description: '',
         tags: [],
         user_id: 'user-1',
-        file_size: 1024000,
-        width: 800,
-        height: 600,
+        file_size: 1024000, // Placeholder
+        width: 800, // Placeholder
+        height: 600, // Placeholder
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
         thumbnail_path: url,
@@ -202,8 +222,10 @@ const MediaManagerPanel: React.FC = () => {
     setAssets(prev => [...newAssets, ...prev]);
     setActiveTab('browse');
     
-    toast.success("Upload complete", {
-      description: `Successfully uploaded ${urls.length} assets`
+    toast({
+      title: "Upload complete",
+      description: `Successfully uploaded ${urls.length} assets`,
+      variant: "default"
     });
   };
 

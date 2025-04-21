@@ -1,81 +1,51 @@
 
-import React, { useState, useEffect } from 'react';
-import { useCards } from '@/hooks/useCards';
-import { Card } from '@/lib/types';
+import React, { useState } from 'react';
 import PageLayout from '@/components/navigation/PageLayout';
-import { Button } from '@/components/ui/button';
-import { Link } from 'react-router-dom';
-import CardFilter from '@/components/gallery/CardFilter';
-import CardGrid from '@/components/gallery/CardGrid';
+import CardGalleryComponent from '@/components/CardGallery';
+import { cardsNavItems } from '@/config/navigation';
+import ContentTypeNavigation from '@/components/navigation/ContentTypeNavigation';
+import { useCards } from '@/hooks/useCards';
+import { sampleCards } from '@/data/sampleCards';
+import { Card } from '@/lib/types';
 
-const CardGallery: React.FC = () => {
+const CardGallery = () => {
+  const [searchQuery, setSearchQuery] = useState('');
   const { cards, loading } = useCards();
-  const [filteredCards, setFilteredCards] = useState<Card[]>([]);
-  const [selectedTag, setSelectedTag] = useState<string>('all');
-  const [isFiltering, setIsFiltering] = useState<boolean>(false);
+  
+  console.log('CardGallery page received cards:', cards);
+  console.log('Sample cards available:', sampleCards.length);
 
-  // Extract unique tags from all cards
-  const allTags = React.useMemo(() => {
-    const tags = cards.flatMap(card => card.tags || []);
-    return [...new Set(tags)];
-  }, [cards]);
+  // Create navigation items for content type navigation
+  const navigationItems = cardsNavItems.map(item => ({
+    label: item.label,
+    path: item.path,
+    icon: item.icon ? <item.icon className="h-4 w-4" /> : undefined,
+    description: item.description
+  }));
 
-  // Apply filtering when selectedTag or cards change
-  useEffect(() => {
-    setIsFiltering(true);
-    setTimeout(() => {
-      if (selectedTag === 'all') {
-        setFilteredCards(cards);
-      } else {
-        setFilteredCards(cards.filter(card => card.tags?.includes(selectedTag)));
-      }
-      setIsFiltering(false);
-    }, 300);
-  }, [selectedTag, cards]);
-
-  const handleCardClick = (cardId: string) => {
-    // Navigate to card detail or immersive view
-    console.log('Card clicked:', cardId);
-  };
+  // Determine which cards to use - if useCards() returns empty, use sampleCards directly
+  const cardsToDisplay = cards && cards.length > 0 ? cards : sampleCards;
 
   return (
-    <PageLayout title="Card Gallery" description="Browse your card collection">
-      <div className="container mx-auto py-8 px-4">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold">Your Cards</h1>
-          <div className="flex gap-3">
-            <Button asChild>
-              <Link to="/cards/create">Create New Card</Link>
-            </Button>
-            <Button variant="outline" asChild>
-              <Link to="/collections">View Collections</Link>
-            </Button>
-          </div>
+    <PageLayout
+      title="Card Gallery"
+      hideBreadcrumbs={false}
+      onSearch={setSearchQuery}
+      searchPlaceholder="Search cards..."
+    >
+      <div className="container mx-auto max-w-6xl px-4 py-4">
+        <div className="mb-8">
+          <ContentTypeNavigation 
+            items={navigationItems}
+            variant="pills"
+          />
         </div>
-
-        {/* Add filter component */}
-        <CardFilter 
-          tags={allTags}
-          selectedTag={selectedTag}
-          onSelectTag={setSelectedTag}
+        
+        <CardGalleryComponent 
+          searchQuery={searchQuery}
+          cards={cardsToDisplay as Card[]} 
+          isLoading={loading && cardsToDisplay.length === 0}
         />
-
-        {/* Card grid */}
-        {loading ? (
-          <div className="flex justify-center items-center h-64">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-          </div>
-        ) : filteredCards.length > 0 ? (
-          <CardGrid cards={filteredCards} onCardClick={handleCardClick} />
-        ) : (
-          <div className="text-center py-16">
-            <h3 className="text-xl font-semibold mb-4">No Cards Found</h3>
-            <p className="text-gray-600 mb-8">You haven't created any cards yet, or none match your filter.</p>
-            <Button asChild>
-              <Link to="/cards/create">Create Your First Card</Link>
-            </Button>
-          </div>
-        )}
       </div>
     </PageLayout>
   );

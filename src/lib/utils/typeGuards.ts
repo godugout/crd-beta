@@ -49,8 +49,7 @@ export function isOaklandMemoryData(obj: any): obj is OaklandMemoryData {
     typeof obj === 'object' &&
     typeof obj.title === 'string' &&
     typeof obj.description === 'string' &&
-    (obj.tags === undefined || Array.isArray(obj.tags)) &&
-    typeof obj.template === 'string' // Check for required template
+    (obj.tags === undefined || Array.isArray(obj.tags))
   );
 }
 
@@ -72,7 +71,6 @@ export function ensureValidOaklandMemoryData(obj: Partial<OaklandMemoryData>): O
     memoryType: obj.memoryType,
     attendees: obj.attendees || [],
     historicalContext: obj.historicalContext,
-    personalSignificance: obj.personalSignificance,
-    template: obj.template || 'classic' // Provide default template
+    personalSignificance: obj.personalSignificance
   };
 }

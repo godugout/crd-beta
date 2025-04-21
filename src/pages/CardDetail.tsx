@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -5,7 +6,7 @@ import { useCards } from '@/context/CardContext';
 import { ArrowLeft, Eye, Smartphone, Share2, Download } from 'lucide-react';
 import { Card } from '@/lib/types';
 import { sampleCards } from '@/lib/data/sampleCards';
-import { showToast } from '@/utils/toastHelper';
+import { toast } from '@/hooks/use-toast';
 import { adaptToCard } from '@/lib/adapters/cardAdapter';
 import { DEFAULT_DESIGN_METADATA } from '@/lib/utils/cardDefaults';
 import { DetailedViewCard, ensureDetailedViewCard } from '@/types/detailedCardTypes';
@@ -75,7 +76,11 @@ const CardDetail = () => {
       }
     } else {
       console.error('CardDetail: Card not found at all for ID:', id);
-      showToast.error("Card not found", { description: "The requested card could not be found" });
+      toast({
+        title: "Card not found",
+        description: "The requested card could not be found",
+        variant: "destructive"
+      });
     }
   }, [id, cards, getCard]);
   
@@ -126,16 +131,25 @@ const CardDetail = () => {
         text: resolvedCard.description || `Check out this ${resolvedCard.title} card!`,
         url: shareUrl,
       })
-      .then(() => showToast.success("Shared successfully", { description: "Card has been shared" }))
+      .then(() => toast({
+        title: "Shared successfully",
+        description: "Card has been shared"
+      }))
       .catch(error => {
         console.error('Error sharing card:', error);
         navigator.clipboard.writeText(shareUrl).then(() => {
-          showToast.success("Link copied", { description: "Card URL copied to clipboard" });
+          toast({
+            title: "Link copied",
+            description: "Card URL copied to clipboard"
+          });
         });
       });
     } else {
       navigator.clipboard.writeText(shareUrl).then(() => {
-        showToast.success("Link copied", { description: "Card URL copied to clipboard" });
+        toast({
+          title: "Link copied",
+          description: "Card URL copied to clipboard"
+        });
       });
     }
   };

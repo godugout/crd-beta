@@ -1,8 +1,8 @@
 
 import * as React from "react"
-import { useToast, Toast } from "@/hooks/use-toast"
+import { useToast } from "@/hooks/use-toast"
 import {
-  Toast as ToastComponent,
+  Toast,
   ToastClose,
   ToastDescription,
   ToastProvider,
@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/toast"
 import { toastIconConfig } from "@/config/toast"
 import { ToastIcons } from "./toast/icons"
-import type { ToastVariant } from "@/types/toast"
+import type { ToasterToastWithStatus } from "@/types/toast"
 
 export function Toaster() {
   const { toasts } = useToast()
@@ -19,11 +19,11 @@ export function Toaster() {
   return (
     <ToastProvider>
       {toasts.map(function ({ id, title, description, action, variant = "default", ...props }) {
-        const IconName = toastIconConfig[variant as ToastVariant]
+        const IconName = toastIconConfig[variant]
         const Icon = IconName ? ToastIcons[IconName] : null
 
         return (
-          <ToastComponent key={id} variant={variant as ToastVariant} {...props}>
+          <Toast key={id} variant={variant} {...props}>
             <div className="flex gap-3">
               {Icon && (
                 <div className="flex-shrink-0 self-start pt-1">
@@ -39,7 +39,7 @@ export function Toaster() {
             </div>
             {action}
             <ToastClose />
-          </ToastComponent>
+          </Toast>
         )
       })}
       <ToastViewport />

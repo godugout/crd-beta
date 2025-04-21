@@ -1,80 +1,135 @@
 
-import React, { useState, useRef, useEffect } from 'react';
-import { useFrame } from '@react-three/fiber';
-import * as THREE from 'three';
+import React, { useRef, useEffect } from 'react';
 import { Card } from '@/lib/types';
-import CardModel from './CardModel';
-import { Environment } from '@react-three/drei';
-import { FALLBACK_FRONT_IMAGE_URL, FALLBACK_BACK_IMAGE_URL } from '@/lib/utils/cardDefaults';
-import { getEnvironmentPreset } from '@/utils/environmentPresets';
+import * as THREE from 'three';
 
-// Define the component props type
 interface Card3DRendererProps {
   card: Card;
-  isFlipped: boolean;
+  className?: string;
+  isFlipped?: boolean;
   activeEffects?: string[];
   effectIntensities?: Record<string, number>;
-  lightingPreset?: string;
-  onRenderFrame?: () => void;
 }
 
-const Card3DRenderer: React.FC<Card3DRendererProps> = ({
-  card,
-  isFlipped,
+const Card3DRenderer: React.FC<Card3DRendererProps> = ({ 
+  card, 
+  className,
+  isFlipped = false,
   activeEffects = [],
-  effectIntensities = {},
-  lightingPreset = 'studio',
-  onRenderFrame
+  effectIntensities = {}
 }) => {
-  const groupRef = useRef<THREE.Group>(null);
-  const frameCount = useRef(0);
-  const [environmentPreset, setEnvironmentPreset] = useState('studio');
-  
+  const containerRef = useRef<HTMLDivElement>(null);
+  const renderer = useRef<THREE.WebGLRenderer | null>(null);
+  const scene = useRef<THREE.Scene | null>(null);
+  const camera = useRef<THREE.PerspectiveCamera | null>(null);
+  const cardMesh = useRef<THREE.Mesh | null>(null);
+
   useEffect(() => {
-    const mappedPreset = getEnvironmentPreset(lightingPreset);
-    setEnvironmentPreset(mappedPreset);
-    console.log("Applied lighting preset:", lightingPreset, "mapped to:", mappedPreset);
-  }, [lightingPreset]);
-  
-  useFrame(() => {
-    frameCount.current = (frameCount.current + 1) % 5;
+    if (!containerRef.current) return;
+
+    // Setup scene
+    scene.current = new THREE.Scene();
+    camera.current = new THREE.PerspectiveCamera(
+      75, 
+      containerRef.current.clientWidth / containerRef.current.clientHeight,
+      0.1,
+      1000
+    );
     
-    if (frameCount.current === 0 && onRenderFrame) {
-      onRenderFrame();
-    }
+    renderer.current = new THREE.WebGLRenderer({ 
+      antialias: true,
+      alpha: true 
+    });
     
-    if (frameCount.current === 0 && activeEffects.length > 0) {
-      console.log("Active effects:", activeEffects, "with intensities:", effectIntensities);
-    }
-  });
-  
-  const needs3DEffects = activeEffects.some(effect => 
-    ['Holographic', 'Shimmer', 'Refractor'].includes(effect)
-  );
-  
-  const shadowProps = needs3DEffects 
-    ? { castShadow: true, receiveShadow: true } 
-    : {};
+    renderer.current.setSize(
+      containerRef.current.clientWidth,
+      containerRef.current.clientHeight
+    );
     
-  // Ensure we always have valid image URLs, falling back to guaranteed external URLs if needed
-  const cardImageUrl = card.imageUrl || FALLBACK_FRONT_IMAGE_URL;
-  const cardBackImageUrl = card.backImageUrl || FALLBACK_BACK_IMAGE_URL;
+    containerRef.current.appendChild(renderer.current.domElement);
+    
+    // Position camera
+    camera.current.position.z = 1.5;
+    
+    // Create card mesh
+    const cardGeometry = new THREE.PlaneGeometry(1, 1.4); // Card aspect ratio
+    
+    // Load card texture
+    const textureLoader = new THREE.TextureLoader();
+    const cardTexture = textureLoader.load(
+      card.imageUrl || '/placeholder-card.png', 
+      () => {
+        if (renderer.current) renderer.current.render(scene.current!, camera.current!);
+      }
+    );
+    
+    const cardMaterial = new THREE.MeshBasicMaterial({ 
+      map: cardTexture,
+      side: THREE.DoubleSide
+    });
+    
+    cardMesh.current = new THREE.Mesh(cardGeometry, cardMaterial);
+    scene.current.add(cardMesh.current);
+    
+    // Animation loop
+    const animate = () => {
+      requestAnimationFrame(animate);
+      
+      if (cardMesh.current) {
+        // Apply flipping effect if needed
+        if (isFlipped) {
+          cardMesh.current.rotation.y = Math.PI;
+        } else {
+          cardMesh.current.rotation.y = Math.sin(Date.now() * 0.001) * 0.3;
+        }
+      }
+      
+      if (renderer.current && scene.current && camera.current) {
+        renderer.current.render(scene.current, camera.current);
+      }
+    };
+    
+    animate();
+    
+    // Handle resize
+    const handleResize = () => {
+      if (!containerRef.current || !camera.current || !renderer.current) return;
+      
+      camera.current.aspect = containerRef.current.clientWidth / containerRef.current.clientHeight;
+      camera.current.updateProjectionMatrix();
+      
+      renderer.current.setSize(
+        containerRef.current.clientWidth,
+        containerRef.current.clientHeight
+      );
+    };
+    
+    window.addEventListener('resize', handleResize);
+    
+    // Cleanup
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      
+      if (containerRef.current && renderer.current) {
+        containerRef.current.removeChild(renderer.current.domElement);
+      }
+      
+      if (cardMesh.current) {
+        cardMesh.current.geometry.dispose();
+        (cardMesh.current.material as THREE.MeshBasicMaterial).dispose();
+      }
+      
+      if (renderer.current) {
+        renderer.current.dispose();
+      }
+    };
+  }, [card.imageUrl, isFlipped]);
 
   return (
-    <group ref={groupRef} {...shadowProps}>
-      <CardModel
-        imageUrl={cardImageUrl}
-        backImageUrl={cardBackImageUrl}
-        isFlipped={isFlipped}
-        activeEffects={activeEffects} 
-        effectIntensities={effectIntensities}
-      />
-      
-      <Environment 
-        preset={environmentPreset as any} 
-        background={false}
-      />
-    </group>
+    <div 
+      ref={containerRef} 
+      className={className || "w-full h-full min-h-[300px]"}
+    />
   );
 };
 

@@ -1,42 +1,54 @@
-
 import React from 'react';
 import { RouteObject } from 'react-router-dom';
 import Collections from '@/pages/Collections';
 import CollectionDetail from '@/pages/collections/detail';
+import Packs from '@/pages/Packs';
+import MemoryPackDetail from '@/pages/MemoryPackDetail';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import InstagramCollectionPage from '@/pages/collections/instagram';
 import CommonsCardsPage from '@/pages/collections/commons';
 import BasketballArtCollection from '@/pages/collections/BasketballArtCollection';
-import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
-import CollectionForm from '@/pages/CollectionForm';
 
+// Collection-related routes
 export const collectionRoutes: RouteObject[] = [
   {
-    path: '/collections',
-    element: <Collections />
+    path: "/collections",
+    element: <Collections />,
   },
   {
-    path: '/collections/:id',
-    element: <CollectionDetail />
+    path: "/collections/featured",
+    element: <Collections />,
   },
   {
-    path: '/collections/create',
-    element: <ProtectedRoute><Collections /></ProtectedRoute>
+    path: "/collections/:id",
+    element: <CollectionDetail />,
   },
   {
-    path: '/collections/new',
-    element: <ProtectedRoute><CollectionForm /></ProtectedRoute>
+    path: "/collections/create",
+    element: <ProtectedRoute><Collections /></ProtectedRoute>,
   },
   {
-    path: '/collections/instagram',
-    element: <ProtectedRoute><InstagramCollectionPage /></ProtectedRoute>
+    path: "/collections/new",
+    element: <ProtectedRoute><Collections /></ProtectedRoute>,
   },
   {
-    path: '/collections/commons',
-    element: <CommonsCardsPage />
+    path: "/collections/instagram",
+    element: <ProtectedRoute><InstagramCollectionPage /></ProtectedRoute>,
   },
   {
-    path: '/collections/basketball-art',
-    element: <BasketballArtCollection />
-  }
+    path: "/collections/commons",
+    element: <CommonsCardsPage />,
+  },
+  {
+    path: "/packs",
+    element: <Packs />,
+  },
+  {
+    path: "/packs/:id",
+    element: <MemoryPackDetail />,
+  },
+  {
+    path: "/collections/basketball-art",
+    element: <BasketballArtCollection />,
+  },
 ];
-

@@ -3,30 +3,52 @@ import React from 'react';
 import { RouteObject } from 'react-router-dom';
 import Home from '@/pages/Home';
 import Auth from '@/pages/Auth';
+import Unauthorized from '@/pages/Unauthorized';
+import NotFound from '@/pages/NotFound';
+import Index from '@/pages/Index';
 import Search from '@/pages/Search';
 import Profile from '@/pages/Profile';
+import TownCommunityHub from '@/pages/TownCommunityHub';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
-import Gallery from '@/pages/Gallery';
+import EmergencyPage from '@/pages/EmergencyPage';
 
+// Main application routes (home, auth, etc.)
 export const mainRoutes: RouteObject[] = [
   {
-    path: '/home',
-    element: <Home />
+    path: "/",
+    element: <Index />,
   },
   {
-    path: '/auth',
-    element: <Auth />
+    path: "/home",
+    element: <Home />,
   },
   {
-    path: '/gallery',
-    element: <Gallery />
+    path: "/emergency",
+    element: <EmergencyPage />,
   },
   {
-    path: '/search',
-    element: <Search />
+    path: "/auth",
+    element: <Auth />,
   },
   {
-    path: '/profile',
-    element: <ProtectedRoute><Profile /></ProtectedRoute>
+    path: "/unauthorized",
+    element: <Unauthorized />,
+  },
+  {
+    path: "/search",
+    element: <Search />,
+  },
+  {
+    path: "/towns",
+    element: <TownCommunityHub />,
+  },
+  {
+    path: "/profile",
+    element: <ProtectedRoute><Profile /></ProtectedRoute>,
+  },
+  // 404 catch-all route
+  {
+    path: "*",
+    element: <NotFound />,
   }
 ];

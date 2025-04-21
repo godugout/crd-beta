@@ -2,31 +2,20 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useCards } from '@/context/CardContext';
-import OptimizedCardRenderer from '@/components/card-viewer/OptimizedCardRenderer';
+import CardViewer from '@/components/card-viewer/CardViewer';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight, Share2, Camera, Cpu } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import PageLayout from '@/components/navigation/PageLayout';
 import { toast } from 'sonner';
-import { useOptimizedCardEffects } from '@/hooks/useOptimizedCardEffects';
 
 const CardViewerPage = () => {
   const { id } = useParams<{ id: string }>();
   const { cards, getCardById } = useCards();
   const [fullscreen, setFullscreen] = useState(false);
-  const [isFlipped, setIsFlipped] = useState(false);
   const navigate = useNavigate();
   
   const card = id ? getCardById(id) : undefined;
   const cardIndex = card ? cards.findIndex(c => c.id === card.id) : -1;
-  
-  // Get optimized effects settings
-  const { 
-    activeEffects, 
-    settings, 
-    toggleEffect, 
-    setEffectIntensity,
-    devicePerformance 
-  } = useOptimizedCardEffects(card?.effects || []);
   
   // Handle keyboard navigation
   useEffect(() => {
@@ -37,8 +26,6 @@ const CardViewerPage = () => {
         navigate(`/view/${cards[cardIndex - 1].id}`);
       } else if (e.key === 'ArrowRight' && cardIndex < cards.length - 1) {
         navigate(`/view/${cards[cardIndex + 1].id}`);
-      } else if (e.key === ' ' || e.key === 'f') {
-        setIsFlipped(prev => !prev);
       }
     };
     
@@ -94,10 +81,6 @@ const CardViewerPage = () => {
     // Future implementation for saving card image
     toast.info('Card snapshot feature coming soon');
   };
-
-  const handleFlipCard = () => {
-    setIsFlipped(prev => !prev);
-  };
   
   return (
     <>
@@ -109,43 +92,13 @@ const CardViewerPage = () => {
         <div className="container mx-auto px-4 py-6">
           <div className="flex flex-col md:flex-row md:items-start gap-8">
             <div className="w-full md:w-2/3 mx-auto md:mx-0 max-w-xl relative">
-              <OptimizedCardRenderer 
+              <CardViewer 
                 card={card}
-                isFlipped={isFlipped}
-                activeEffects={activeEffects}
-                effectIntensities={settings.effectIntensities}
                 onFullscreenToggle={() => setFullscreen(true)}
+                onShare={handleShare}
+                onCapture={handleCapture}
+                onBack={() => navigate('/')}
               />
-              
-              {/* Effect controls */}
-              <div className="mt-6 bg-white/5 backdrop-blur-sm rounded-lg p-4">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-sm font-medium">Card Effects</h3>
-                  <div className="flex items-center gap-2">
-                    <Cpu className="h-4 w-4 text-gray-400" />
-                    <span className="text-xs text-gray-400">Quality: {settings.qualityLevel}</span>
-                  </div>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {['Holographic', 'Refractor', 'Shimmer', 'Gold Foil'].map(effect => (
-                    <Button
-                      key={effect}
-                      size="sm"
-                      variant={activeEffects.includes(effect) ? "default" : "outline"}
-                      onClick={() => toggleEffect(effect)}
-                      className={activeEffects.includes(effect) 
-                        ? "bg-primary/90 hover:bg-primary/80" 
-                        : ""
-                      }
-                    >
-                      {effect}
-                    </Button>
-                  ))}
-                  <Button size="sm" variant="ghost" onClick={handleFlipCard}>
-                    Flip Card
-                  </Button>
-                </div>
-              </div>
             </div>
             
             <div className="w-full md:w-1/3 space-y-6">
@@ -177,31 +130,8 @@ const CardViewerPage = () => {
                   )}
                 </div>
                 
-                {/* Card actions */}
-                <div className="flex gap-2 mt-4">
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={handleShare}
-                    className="flex-1"
-                  >
-                    <Share2 className="h-4 w-4 mr-2" />
-                    Share
-                  </Button>
-                  
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={handleCapture}
-                    className="flex-1"
-                  >
-                    <Camera className="h-4 w-4 mr-2" />
-                    Capture
-                  </Button>
-                </div>
-                
                 {card.tags && card.tags.length > 0 && (
-                  <div className="mt-6">
+                  <div>
                     <p className="text-sm text-gray-500 mb-2">Tags</p>
                     <div className="flex flex-wrap gap-2">
                       {card.tags.map((tag, i) => (
@@ -243,11 +173,8 @@ const CardViewerPage = () => {
       
       {fullscreen && (
         <div className="fixed inset-0 z-50 bg-black">
-          <OptimizedCardRenderer
+          <CardViewer
             card={card}
-            isFlipped={isFlipped}
-            activeEffects={activeEffects}
-            effectIntensities={settings.effectIntensities}
             fullscreen={true}
             onFullscreenToggle={() => setFullscreen(false)}
             onShare={handleShare}

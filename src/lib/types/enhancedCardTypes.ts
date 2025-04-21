@@ -1,115 +1,104 @@
 
-import { BaseEntity } from './index';
-import { CardRarity, DesignMetadata } from './cardTypes';
+// Enhanced card types for the card system
+import { BaseCard } from './cardTypes';
 
 /**
- * Enhanced card types with additional features
+ * Enhanced Card with additional functionality
  */
-export interface EnhancedCard extends BaseEntity {
-  id: string;
-  title: string;
-  description: string;
-  imageUrl: string;
-  thumbnailUrl: string;
-  tags: string[]; // Required
-  userId: string;
-  effects: string[];
-  
-  // Enhanced fields
-  series?: string;
-  edition?: string;
+export interface EnhancedCard extends BaseCard {
   seriesId?: string; 
-  serialNumber?: string;
-  rarity: CardRarity;
+  deckId?: string;
+  specialFeatures?: string[];
+  interactiveElements?: string[];
+  graded?: boolean;
+  gradingService?: string;
+  gradingScore?: string;
+  hotspots?: HotspotData[];
+  backSideImage?: string;
+  cardNumber?: string;
   artist?: string;
   artistId?: string;
-  releaseDate?: string;
-  license?: string;
-  teamId?: string; // Add teamId field
-  
-  // Interactive elements
-  hotspots?: HotspotData[];
-  
-  // Market data
-  mintDate?: string;
-  mintQuantity?: number;
-  currentOwner?: string;
-  previousOwners?: string[];
-  price?: number;
-  forSale?: boolean;
-  marketData?: Record<string, any>;
+  edition?: number;
   editionSize?: number;
-  cardNumber?: string;
-  
-  // Required fields for compatibility with base Card
-  createdAt: string;
-  updatedAt: string;
-  designMetadata: DesignMetadata; // Required
+  releaseDate?: string;
+  qrCodeData?: string;
+  marketData?: {
+    price?: number;
+    currency?: string;
+    lastSoldPrice?: number;
+    availableForSale?: boolean;
+  };
+  rarity?: CardRarity;
 }
 
 /**
- * Hotspot for interactive cards
+ * Card rarity types
+ */
+export type CardRarity = 'common' | 'uncommon' | 'rare' | 'ultra-rare' | 'legendary' | 'one-of-one';
+
+/**
+ * Hotspot data for interactive cards
  */
 export interface HotspotData {
   id: string;
   x: number;
   y: number;
-  radius: number;
-  type: 'info' | 'link' | 'audio' | 'video' | 'ar' | 'text' | 'image';
-  content: {
-    title?: string;
-    description?: string;
-    url?: string;
-    mediaUrl?: string;
-  } | string;  // Support both object and string content
-  style?: {
-    color?: string;
-    icon?: string;
-  };
-  visible?: boolean;
-  width?: number;
-  height?: number;
+  width: number;
+  height: number;
+  content: string;
+  type: 'text' | 'link' | 'image' | 'video';
+  visible: boolean;
 }
 
 /**
- * Series definition for card collections
+ * Series of cards
  */
 export interface Series {
   id: string;
-  name: string;
-  title?: string; // Optional as some code uses name, some uses title
-  description?: string;
+  name?: string;
+  title: string;
+  description: string;
+  releaseDate: string;
   cards: EnhancedCard[];
   totalCards: number;
-  releaseDate?: string;
+  rarity?: string;
   creator?: string;
-  rarity?: CardRarity;
-  
-  // Additional properties used in components
-  coverImageUrl?: string;
   artistId?: string;
-  createdAt?: string;
-  updatedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+  coverImageUrl?: string;
   isPublished?: boolean;
-  releaseType?: string;
-  cardIds?: string[];
+  cardIds: string[];
+  releaseType?: 'standard' | 'limited' | 'exclusive';
 }
 
 /**
- * Deck interface for card grouping
+ * Deck of cards
  */
 export interface Deck {
   id: string;
-  name?: string;
-  title: string;
-  description?: string;
-  coverImageUrl?: string;
+  name: string;
+  description: string;
   cards: EnhancedCard[];
+  creator?: string;
+  ownerId?: string;
   createdAt: string;
   updatedAt: string;
-  ownerId: string;
-  visibility?: 'public' | 'private' | 'team';
-  totalCards?: number;
-  isPublic?: boolean;
-  cardIds?: string[];
+  isPublic: boolean;
+  coverImageUrl?: string;
+  cardIds: string[];
+}
+
+/**
+ * Card set for play
+ */
+export interface CardSet {
+  id: string;
+  name: string;
+  description: string;
+  cards: EnhancedCard[];
+  category: string;
+  rules?: string;
+  createdAt: string;
+  updatedAt: string;
 }

@@ -2,9 +2,9 @@
 import React from 'react';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
+import { CardEffect } from '@/hooks/useCardEffects';
 import { Label } from '@/components/ui/label';
 import { Sparkles, Waves, Circle, Star } from 'lucide-react';
-import { CardEffect } from '@/lib/types/cardEffects';
 
 interface EffectsPanelProps {
   effects: CardEffect[];
@@ -59,11 +59,11 @@ const EffectsPanel: React.FC<EffectsPanelProps> = ({
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-sm text-gray-500">Intensity</span>
                   <span className="text-xs text-gray-500">
-                    {Math.round((effect.intensity || 0) * 100)}%
+                    {Math.round((effect.settings.intensity || 0) * 100)}%
                   </span>
                 </div>
                 <Slider
-                  value={[effect.intensity || 0]}
+                  value={[effect.settings.intensity || 0]}
                   min={0}
                   max={1}
                   step={0.01}

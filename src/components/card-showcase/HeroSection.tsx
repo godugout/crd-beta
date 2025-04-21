@@ -30,7 +30,7 @@ const HeroSection = () => {
           <div className="flex flex-wrap justify-center gap-4">
             <Button 
               size="lg" 
-              onClick={() => navigate('/cards/create')}
+              onClick={() => navigate('/editor')}
               variant="gradient"
               className="h-12 px-8"
             >

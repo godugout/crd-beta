@@ -1,3 +1,4 @@
+
 import React, { useEffect, useCallback } from 'react';
 import { useParams, Link, useSearchParams } from 'react-router-dom';
 import PageLayout from '@/components/navigation/PageLayout';
@@ -48,6 +49,7 @@ const CollectionDetail = () => {
     fetchError
   } = useCollectionDetail(id);
 
+  // Custom event listener for collection refresh
   useEffect(() => {
     const handleCollectionRefreshed = (event: Event) => {
       const customEvent = event as CustomEvent;
@@ -65,17 +67,20 @@ const CollectionDetail = () => {
     };
   }, [id, refreshCards]);
 
+  // Refresh collection data when the refresh param is present
   useEffect(() => {
     if (shouldRefresh && id) {
       console.log('Refreshing collection data due to refresh parameter');
       refreshCollection();
       
+      // Also trigger a global cards refresh if available
       if (refreshCards) {
         refreshCards();
       }
     }
   }, [shouldRefresh, id, refreshCollection, refreshCards]);
   
+  // Initial collection existence check (only once)
   useEffect(() => {
     let isMounted = true;
     
@@ -113,6 +118,7 @@ const CollectionDetail = () => {
     return () => { isMounted = false; };
   }, [id, collection, isLoading, refreshCollection]);
   
+  // Handle loading state
   if (isLoading) {
     return (
       <PageLayout title="Loading Collection..." description="Please wait">
@@ -123,6 +129,7 @@ const CollectionDetail = () => {
     );
   }
   
+  // Handle error state
   if (fetchError && !collection) {
     return (
       <PageLayout title="Collection Error" description="There was a problem loading this collection">
@@ -145,6 +152,7 @@ const CollectionDetail = () => {
     );
   }
   
+  // Handle not found state
   if (!collection) {
     return (
       <PageLayout title="Collection Not Found" description="The requested collection could not be found">
@@ -175,37 +183,31 @@ const CollectionDetail = () => {
 
   return (
     <PageLayout 
-      title={collection?.name || 'Collection'} 
-      description={collection?.description || 'View cards in this collection'}
+      title={collection.name} 
+      description={collection.description || 'View cards in this collection'}
       actions={actionButtons}
       stats={collectionStats}
       onSearch={setSearchTerm}
       searchPlaceholder="Search cards..."
     >
       <div className="container mx-auto px-4 py-4">
+        {/* Edit Collection Dialog */}
         <EditDialog 
           isOpen={isEditDialogOpen}
           onOpenChange={setIsEditDialogOpen}
-          formData={{
-            name: editFormData.title || '',
-            description: editFormData.description || ''
-          }}
-          setFormData={(data) => {
-            setEditFormData({
-              ...editFormData,
-              title: data.name,
-              description: data.description
-            });
-          }}
-          onSave={() => handleUpdateCollection(editFormData)}
+          formData={editFormData}
+          setFormData={setEditFormData}
+          onSave={handleUpdateCollection}
         />
 
+        {/* Delete Collection Dialog */}
         <DeleteDialog 
           isOpen={isDeleteDialogOpen}
           onOpenChange={setIsDeleteDialogOpen}
           onDelete={handleDeleteCollection}
         />
 
+        {/* Asset Gallery Dialog */}
         <AssetGalleryDialog 
           isOpen={isAssetGalleryOpen}
           onOpenChange={setIsAssetGalleryOpen}

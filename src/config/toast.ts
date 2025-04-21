@@ -1,4 +1,3 @@
-
 import type { ToastVariant } from "@/types/toast"
 import { cva } from "class-variance-authority"
 import type { ToastIconName } from "@/components/ui/toast/icons"
@@ -26,7 +25,6 @@ export const toastStyles = cva(
         success: "border-green-500/30 bg-green-900/50 text-white/80 backdrop-blur-md",
         warning: "border-yellow-500/30 bg-yellow-900/50 text-white/80 backdrop-blur-md",
         info: "border-blue-500/30 bg-blue-900/50 text-white/80 backdrop-blur-md",
-        error: "border-red-500/30 bg-red-900/50 text-white/80 backdrop-blur-md",
       },
     },
     defaultVariants: {
@@ -51,6 +49,5 @@ export const toastIconConfig: Record<ToastVariant, ToastIconName | null> = {
   success: "CheckCircle",
   warning: "AlertTriangle",
   destructive: "AlertCircle",
-  info: "Info",
-  error: "AlertCircle" // Added error variant
+  info: "Info"
 }

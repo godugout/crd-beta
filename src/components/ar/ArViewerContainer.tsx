@@ -21,10 +21,10 @@ interface ArViewerContainerProps {
 const ArViewerContainer: React.FC<ArViewerContainerProps> = ({
   activeCard,
   availableCards,
-  cameraError = null,
-  scale = 1,
+  cameraError,
+  scale,
   setScale,
-  rotation = 0,
+  rotation,
   setRotation,
   onLaunchAr
 }) => {

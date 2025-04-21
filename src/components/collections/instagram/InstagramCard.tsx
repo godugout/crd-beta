@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { InstagramPost } from '@/lib/types';
 import { format } from 'date-fns';
 import { Instagram, MessageCircle, Heart } from 'lucide-react';
-import { CardEffect } from '@/lib/types/cardEffects';
+import { CardEffect } from '@/hooks/card-effects';
 
 interface InstagramCardProps {
   post: InstagramPost;
