@@ -1,6 +1,6 @@
 
 // Re-export types from cardTypes.ts
-import { FabricSwatch as FabricSwatchType, Card as CardType, DesignMetadata } from './cardTypes';
+import { FabricSwatch as FabricSwatchType, Card as CardType, DesignMetadata, HotspotData } from './cardTypes';
 
 export interface FabricSwatch {
   type: string;
@@ -51,6 +51,31 @@ export type Card = {
   position?: string;
   year?: string;
   designMetadata: DesignMetadata;
+  
+  // Add missing fields that caused TypeScript errors
+  artist?: string;
+  set?: string;
+  rarity?: string;
+  backImageUrl?: string;
+  fabricSwatches?: FabricSwatch[];
+  viewCount?: number;
+  collectionId?: string;
+  name?: string;
+  teamId?: string;
+  isPublic?: boolean;
+  layers?: any[];
+  reactions?: any[];
+  cardNumber?: string;
+  hotspots?: HotspotData[];
+  height?: number;
+  width?: number;
+  cards?: Card[];
+  sport?: string;
+  cardType?: string;
+  condition?: string;
+  manufacturer?: string;
+  grade?: string;
+  gradingCompany?: string;
 };
 
 // Export FabricSwatch for others to use
@@ -58,3 +83,6 @@ export type { FabricSwatchType };
 
 // Export DesignMetadata
 export type { DesignMetadata };
+
+// Export HotspotData
+export type { HotspotData };
