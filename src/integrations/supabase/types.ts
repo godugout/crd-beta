@@ -47,6 +47,68 @@ export type Database = {
           },
         ]
       }
+      app_registry: {
+        Row: {
+          app_key: string
+          app_name: string
+          app_version: string
+          created_at: string
+          id: string
+          is_active: boolean
+          updated_at: string
+        }
+        Insert: {
+          app_key: string
+          app_name: string
+          app_version: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          updated_at?: string
+        }
+        Update: {
+          app_key?: string
+          app_name?: string
+          app_version?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      app_settings: {
+        Row: {
+          app_id: string
+          created_at: string
+          id: string
+          settings: Json
+          updated_at: string
+        }
+        Insert: {
+          app_id: string
+          created_at?: string
+          id?: string
+          settings?: Json
+          updated_at?: string
+        }
+        Update: {
+          app_id?: string
+          created_at?: string
+          id?: string
+          settings?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "app_settings_app_id_fkey"
+            columns: ["app_id"]
+            isOneToOne: false
+            referencedRelation: "app_registry"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       artists: {
         Row: {
           bio: string | null
@@ -297,6 +359,7 @@ export type Database = {
       collections: {
         Row: {
           allow_comments: boolean | null
+          app_id: string | null
           cover_image_url: string | null
           created_at: string
           description: string | null
@@ -310,6 +373,7 @@ export type Database = {
         }
         Insert: {
           allow_comments?: boolean | null
+          app_id?: string | null
           cover_image_url?: string | null
           created_at?: string
           description?: string | null
@@ -323,6 +387,7 @@ export type Database = {
         }
         Update: {
           allow_comments?: boolean | null
+          app_id?: string | null
           cover_image_url?: string | null
           created_at?: string
           description?: string | null
@@ -335,6 +400,13 @@ export type Database = {
           visibility?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "collections_app_id_fkey"
+            columns: ["app_id"]
+            isOneToOne: false
+            referencedRelation: "app_registry"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "collections_team_id_fkey"
             columns: ["team_id"]
@@ -646,8 +718,172 @@ export type Database = {
           },
         ]
       }
+      media_assets: {
+        Row: {
+          created_at: string
+          deleted_at: string | null
+          description: string | null
+          file_size: number
+          height: number | null
+          id: string
+          metadata: Json | null
+          mime_type: string
+          original_url: string
+          processed_url: string | null
+          status: string
+          thumbnail_url: string | null
+          title: string
+          updated_at: string
+          user_id: string
+          width: number | null
+        }
+        Insert: {
+          created_at?: string
+          deleted_at?: string | null
+          description?: string | null
+          file_size: number
+          height?: number | null
+          id?: string
+          metadata?: Json | null
+          mime_type: string
+          original_url: string
+          processed_url?: string | null
+          status?: string
+          thumbnail_url?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+          width?: number | null
+        }
+        Update: {
+          created_at?: string
+          deleted_at?: string | null
+          description?: string | null
+          file_size?: number
+          height?: number | null
+          id?: string
+          metadata?: Json | null
+          mime_type?: string
+          original_url?: string
+          processed_url?: string | null
+          status?: string
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+          width?: number | null
+        }
+        Relationships: []
+      }
+      media_processing: {
+        Row: {
+          asset_id: string
+          created_at: string
+          error: string | null
+          id: string
+          operation: string
+          params: Json | null
+          result: Json | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          asset_id: string
+          created_at?: string
+          error?: string | null
+          id?: string
+          operation: string
+          params?: Json | null
+          result?: Json | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          asset_id?: string
+          created_at?: string
+          error?: string | null
+          id?: string
+          operation?: string
+          params?: Json | null
+          result?: Json | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "media_processing_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "media_assets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      media_sync_queue: {
+        Row: {
+          asset_id: string | null
+          created_at: string
+          id: string
+          operation: string
+          params: Json
+          retry_count: number | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          asset_id?: string | null
+          created_at?: string
+          id?: string
+          operation: string
+          params: Json
+          retry_count?: number | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          asset_id?: string | null
+          created_at?: string
+          id?: string
+          operation?: string
+          params?: Json
+          retry_count?: number | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      media_tags: {
+        Row: {
+          asset_id: string
+          created_at: string
+          tag: string
+        }
+        Insert: {
+          asset_id: string
+          created_at?: string
+          tag: string
+        }
+        Update: {
+          asset_id?: string
+          created_at?: string
+          tag?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "media_tags_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "media_assets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       memories: {
         Row: {
+          app_id: string | null
           created_at: string
           description: string | null
           game_id: string | null
@@ -662,6 +898,7 @@ export type Database = {
           visibility: string
         }
         Insert: {
+          app_id?: string | null
           created_at?: string
           description?: string | null
           game_id?: string | null
@@ -676,6 +913,7 @@ export type Database = {
           visibility?: string
         }
         Update: {
+          app_id?: string | null
           created_at?: string
           description?: string | null
           game_id?: string | null
@@ -690,6 +928,13 @@ export type Database = {
           visibility?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "memories_app_id_fkey"
+            columns: ["app_id"]
+            isOneToOne: false
+            referencedRelation: "app_registry"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "memories_team_id_fkey"
             columns: ["team_id"]
@@ -1490,6 +1735,36 @@ export type Database = {
         }
         Relationships: []
       }
+      templates: {
+        Row: {
+          category: string
+          created_at: string
+          id: string
+          layout_json: Json
+          name: string
+          thumbnail_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          id?: string
+          layout_json?: Json
+          name: string
+          thumbnail_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          id?: string
+          layout_json?: Json
+          name?: string
+          thumbnail_url?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       time_capsules: {
         Row: {
           created_at: string
@@ -1774,11 +2049,45 @@ export type Database = {
           },
         ]
       }
+      venue_profiles: {
+        Row: {
+          created_at: string
+          id: string
+          lighting_profile: Json | null
+          location: Json | null
+          metadata: Json | null
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          lighting_profile?: Json | null
+          location?: Json | null
+          metadata?: Json | null
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          lighting_profile?: Json | null
+          location?: Json | null
+          metadata?: Json | null
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      get_app_id: {
+        Args: { p_app_key: string }
+        Returns: string
+      }
       get_user_team_role: {
         Args: { team_id: string; user_id: string }
         Returns: string

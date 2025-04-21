@@ -2,7 +2,8 @@
 import { DesignMetadata, CardStyle, TextStyle } from '@/lib/types';
 
 // Fallback image URL for when a card image doesn't load
-export const FALLBACK_IMAGE_URL = '/placeholder-card.png';
+export const FALLBACK_IMAGE_URL = '/images/card-placeholder.png';
+export const FALLBACK_CARD_BACK_URL = '/images/card-back-placeholder.png';
 
 // Default CardStyle
 export const DEFAULT_CARD_STYLE: CardStyle = {

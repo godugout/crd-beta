@@ -1,29 +1,19 @@
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
+import { ValidEnvironmentPreset, lightingPresets } from '@/utils/environmentPresets';
 
-export type LightingPreset = 'studio' | 'natural' | 'dramatic' | 'display_case';
+export type LightingPreset = ValidEnvironmentPreset;
 
-interface LightPosition {
+export interface LightPoint {
   x: number;
   y: number;
   z: number;
-}
-
-interface Light {
-  position: LightPosition;
   intensity: number;
   color: string;
-  type: 'directional' | 'point' | 'ambient' | 'spot';
 }
 
 export interface LightingSettings {
-  primaryLight: {
-    x: number;
-    y: number;
-    z: number;
-    intensity: number;
-    color: string;
-  };
+  primaryLight: LightPoint;
   ambientLight: {
     intensity: number;
     color: string;
@@ -31,177 +21,74 @@ export interface LightingSettings {
   environmentType: LightingPreset;
   envMapIntensity: number;
   useDynamicLighting: boolean;
-  followPointer?: boolean;
   autoRotate?: boolean;
 }
 
-export const DEFAULT_LIGHTING: Record<LightingPreset, LightingSettings> = {
-  studio: {
-    primaryLight: {
-      x: 10,
-      y: 10,
-      z: 10,
-      intensity: 1.2,
-      color: '#ffffff'
-    },
-    ambientLight: {
-      intensity: 0.6,
-      color: '#f0f0ff'
-    },
-    environmentType: 'studio',
-    envMapIntensity: 1.0,
-    useDynamicLighting: true,
-    followPointer: true,
-    autoRotate: false
-  },
-  natural: {
+interface UseCardLightingProps {
+  initialPreset?: LightingPreset;
+}
+
+export const useCardLighting = (initialPreset: LightingPreset = 'studio') => {
+  const [lightingSettings, setLightingSettings] = useState<LightingSettings>({
     primaryLight: {
       x: 5,
-      y: 15,
-      z: 5,
-      intensity: 0.9,
-      color: '#fffaf0'
-    },
-    ambientLight: {
-      intensity: 0.7,
-      color: '#e0f0ff'
-    },
-    environmentType: 'natural',
-    envMapIntensity: 0.8,
-    useDynamicLighting: true,
-    followPointer: true,
-    autoRotate: false
-  },
-  dramatic: {
-    primaryLight: {
-      x: 15,
       y: 5,
-      z: 10,
-      intensity: 1.5,
-      color: '#fff0e0'
-    },
-    ambientLight: {
-      intensity: 0.3,
-      color: '#202040'
-    },
-    environmentType: 'dramatic',
-    envMapIntensity: 1.2,
-    useDynamicLighting: true,
-    followPointer: false,
-    autoRotate: true
-  },
-  display_case: {
-    primaryLight: {
-      x: 0,
-      y: 10,
-      z: 10,
-      intensity: 1,
+      z: 5,
+      intensity: 1.0,
       color: '#ffffff'
     },
     ambientLight: {
       intensity: 0.5,
       color: '#f0f0ff'
     },
-    environmentType: 'display_case',
-    envMapIntensity: 0.9,
+    environmentType: initialPreset,
+    envMapIntensity: 1.0,
     useDynamicLighting: true,
-    followPointer: false,
     autoRotate: false
-  }
-};
-
-// Export LIGHTING_PRESETS to fix the error in LightingControls.tsx
-export const LIGHTING_PRESETS = DEFAULT_LIGHTING;
-
-export const useCardLighting = (initialPreset: LightingPreset = 'studio') => {
-  const [lightingPreset, setLightingPreset] = useState<LightingPreset>(initialPreset);
-  const [lightingSettings, setLightingSettings] = useState<LightingSettings>(DEFAULT_LIGHTING[initialPreset]);
-  const [isUserCustomized, setIsUserCustomized] = useState(false);
+  });
   
-  // Apply preset lighting
+  const [lightingPreset, setLightingPreset] = useState<LightingPreset>(initialPreset);
+  const [isUserCustomized, setIsUserCustomized] = useState(false);
+
+  // Update a single setting in the lighting configuration
+  const updateLightingSetting = useCallback((newSettings: Partial<LightingSettings>) => {
+    setLightingSettings(prev => ({
+      ...prev,
+      ...newSettings
+    }));
+    setIsUserCustomized(true);
+  }, []);
+
+  // Apply a preset lighting configuration
   const applyPreset = useCallback((preset: LightingPreset) => {
+    const presetConfig = lightingPresets[preset];
+    
+    if (!presetConfig) return;
+    
     setLightingPreset(preset);
-    setLightingSettings(DEFAULT_LIGHTING[preset]);
+    setLightingSettings(prev => ({
+      ...prev,
+      environmentType: preset,
+      envMapIntensity: presetConfig.intensity || 1.0,
+      primaryLight: {
+        ...prev.primaryLight,
+        intensity: preset === 'dramatic' ? 1.5 : 
+                  preset === 'night' ? 0.7 : 1.0,
+        color: preset === 'sunset' ? '#ff9966' : 
+               preset === 'dawn' ? '#ffb399' : '#ffffff'
+      },
+      ambientLight: {
+        ...prev.ambientLight,
+        intensity: preset === 'night' ? 0.3 : 
+                  preset === 'studio' ? 0.5 : 0.4,
+        color: preset === 'sunset' ? '#331100' : 
+               preset === 'dawn' ? '#113366' : '#f0f0ff'
+      }
+    }));
     setIsUserCustomized(false);
   }, []);
-  
-  // Update lighting settings with partial settings object
-  // Fix the function signature to match what's expected in the components
-  const updateLightingSetting = useCallback((settings: Partial<LightingSettings>) => {
-    setLightingSettings(prev => ({
-      ...prev,
-      ...settings
-    }));
-    setIsUserCustomized(true);
-  }, []);
-  
-  // Update primary light position (typically from mouse movement)
-  const updateLightPosition = useCallback((x: number, y: number) => {
-    if (!lightingSettings.useDynamicLighting) return;
-    
-    // Convert from normalized coordinates (0-1) to actual position values
-    const posX = (x - 0.5) * 20;
-    const posY = (y - 0.5) * -20; // Invert Y axis for natural movement
-    
-    setLightingSettings(prev => ({
-      ...prev,
-      primaryLight: {
-        ...prev.primaryLight,
-        x: posX,
-        y: posY
-      }
-    }));
-  }, [lightingSettings.useDynamicLighting]);
-  
-  // Update primary light intensity
-  const updatePrimaryLightIntensity = useCallback((intensity: number) => {
-    setLightingSettings(prev => ({
-      ...prev,
-      primaryLight: {
-        ...prev.primaryLight,
-        intensity
-      }
-    }));
-    setIsUserCustomized(true);
-  }, []);
-  
-  // Update primary light color
-  const updatePrimaryLightColor = useCallback((color: string) => {
-    setLightingSettings(prev => ({
-      ...prev,
-      primaryLight: {
-        ...prev.primaryLight,
-        color
-      }
-    }));
-    setIsUserCustomized(true);
-  }, []);
-  
-  // Update ambient light intensity
-  const updateAmbientLightIntensity = useCallback((intensity: number) => {
-    setLightingSettings(prev => ({
-      ...prev,
-      ambientLight: {
-        ...prev.ambientLight,
-        intensity
-      }
-    }));
-    setIsUserCustomized(true);
-  }, []);
-  
-  // Update ambient light color
-  const updateAmbientLightColor = useCallback((color: string) => {
-    setLightingSettings(prev => ({
-      ...prev,
-      ambientLight: {
-        ...prev.ambientLight,
-        color
-      }
-    }));
-    setIsUserCustomized(true);
-  }, []);
-  
-  // Toggle dynamic lighting
+
+  // Toggle dynamic lighting feature
   const toggleDynamicLighting = useCallback(() => {
     setLightingSettings(prev => ({
       ...prev,
@@ -209,28 +96,15 @@ export const useCardLighting = (initialPreset: LightingPreset = 'studio') => {
     }));
     setIsUserCustomized(true);
   }, []);
-  
-  // Update environment map intensity
-  const updateEnvMapIntensity = useCallback((intensity: number) => {
-    setLightingSettings(prev => ({
-      ...prev,
-      envMapIntensity: intensity
-    }));
-    setIsUserCustomized(true);
-  }, []);
-  
+
   return {
     lightingSettings,
     lightingPreset,
-    isUserCustomized,
-    applyPreset,
     updateLightingSetting,
-    updateLightPosition,
-    updatePrimaryLightIntensity,
-    updatePrimaryLightColor,
-    updateAmbientLightIntensity,
-    updateAmbientLightColor,
-    toggleDynamicLighting,
-    updateEnvMapIntensity
+    applyPreset,
+    isUserCustomized,
+    toggleDynamicLighting
   };
 };
+
+export default useCardLighting;
