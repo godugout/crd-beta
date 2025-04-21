@@ -1,8 +1,9 @@
+
 import React, { useState, useEffect, Suspense } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { useCards } from '@/context/CardContext';
 import { useToast } from '@/hooks/use-toast';
-import { Card } from '@/lib/types';
+import { Card, CardRarity } from '@/lib/types'; // Added CardRarity import here
 import PageLayout from '@/components/navigation/PageLayout';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, ChevronRight } from 'lucide-react';

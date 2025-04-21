@@ -1,5 +1,6 @@
+
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { Card, Collection, DesignMetadata } from '@/lib/types';
+import { Card, Collection, DesignMetadata, CardRarity } from '@/lib/types'; // Added CardRarity import here
 import { sampleCards } from '@/data/sampleCards';
 import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
@@ -89,8 +90,8 @@ export function CardProvider({ children }: { children: ReactNode }) {
         
         // Transform sample cards to ensure they have all required properties
         const transformedCards = sampleCards.map(card => {
-          // Create a new object with all properties from the card and default values
-          return {
+          // Make sure the card has all required properties or use defaults
+          const transformedCard: Card = {
             ...defaultCardValues,
             ...card,
             thumbnailUrl: card.thumbnailUrl || card.imageUrl || '',
@@ -106,8 +107,9 @@ export function CardProvider({ children }: { children: ReactNode }) {
               ...(card.designMetadata || {})
             },
             // Convert rarity to CardRarity type if it's a string
-            rarity: card.rarity || undefined
-          } as Card;
+            rarity: card.rarity as CardRarity | undefined
+          };
+          return transformedCard;
         });
         
         setCards(transformedCards);
