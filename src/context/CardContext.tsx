@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { Card, Collection, DesignMetadata, CardRarity } from '@/lib/types'; // Added CardRarity import here
 import { sampleCards } from '@/data/sampleCards';
@@ -106,8 +105,8 @@ export function CardProvider({ children }: { children: ReactNode }) {
               ...defaultCardValues.designMetadata,
               ...(card.designMetadata || {})
             },
-            // Convert rarity to CardRarity type if it's a string
-            rarity: card.rarity as CardRarity | undefined
+            // Handle rarity explicitly with type assertion if it exists
+            rarity: (card.rarity as CardRarity | undefined) || undefined
           };
           return transformedCard;
         });
