@@ -45,6 +45,48 @@ export interface BaseEntity {
   [key: string]: any;
 }
 
+// Ensure that Card includes designMetadata in its type definition
+export interface Card extends BaseEntity {
+  title: string;
+  description: string;
+  imageUrl: string;
+  thumbnailUrl?: string;
+  tags: string[];
+  userId: string;
+  effects: string[];
+  player?: string;
+  team?: string;
+  position?: string;
+  year?: string;
+  designMetadata: {
+    cardStyle: {
+      template: string;
+      effect: string;
+      borderRadius: string;
+      borderColor: string;
+      frameColor: string;
+      frameWidth: number;
+      shadowColor: string;
+    };
+    textStyle: {
+      titleColor: string;
+      titleAlignment: string;
+      titleWeight: string;
+      descriptionColor: string;
+    };
+    marketMetadata: {
+      isPrintable: boolean;
+      isForSale: boolean;
+      includeInCatalog: boolean;
+    };
+    cardMetadata: {
+      category: string;
+      cardType: string;
+      series: string;
+    };
+  };
+}
+
 // Team interface
 export interface Team extends BaseEntity {
   id: string; // Explicitly include id

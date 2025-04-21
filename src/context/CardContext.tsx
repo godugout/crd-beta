@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { Card, Collection } from '@/lib/types';
 import { sampleCards } from '@/data/sampleCards';
@@ -28,10 +27,8 @@ export interface CardContextType {
   removeCardFromCollection: (collectionId: string, cardId: string) => boolean;
 }
 
-const CardContext = createContext<CardContextType | undefined>(undefined);
-
 // Define default values for required fields in Card objects
-const defaultCardValues = {
+const defaultCardValues: Omit<Card, 'id'> = {
   title: '',
   description: '',
   thumbnailUrl: '',
