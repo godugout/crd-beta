@@ -11,9 +11,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import CreateCollectionDialog from '@/components/collections/CreateCollectionDialog';
 
 const Collections = () => {
-  const { collections, isLoading } = useCards();
+  const { collections = [], isLoading } = useCards();
   const [viewMode, setViewMode] = React.useState<'grid' | 'list'>('grid');
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+
+  // Ensure collections is always an array, even if undefined
+  const safeCollections = Array.isArray(collections) ? collections : [];
 
   return (
     <PageLayout
@@ -48,15 +51,16 @@ const Collections = () => {
             Filter
           </Button>
 
-          <Button 
-            variant="default" 
-            size="sm"
-            onClick={() => setShowCreateDialog(true)}
-            className="bg-[var(--brand-primary)] text-white"
-          >
-            <PlusCircle className="h-4 w-4 mr-2" />
-            New Collection
-          </Button>
+          <Link to="/collections/new">
+            <Button 
+              variant="default" 
+              size="sm"
+              className="bg-[var(--brand-primary)] text-white"
+            >
+              <PlusCircle className="h-4 w-4 mr-2" />
+              New Collection
+            </Button>
+          </Link>
         </div>
       }
     >
@@ -95,19 +99,19 @@ const Collections = () => {
           </div>
 
           <TabsContent value="all" className="mt-6">
-            <CollectionGrid collections={collections} isLoading={isLoading} />
+            <CollectionGrid collections={safeCollections} isLoading={isLoading} />
           </TabsContent>
           
           <TabsContent value="featured" className="mt-6">
             <CollectionGrid 
-              collections={collections.filter(c => c.featured)} 
+              collections={safeCollections.filter(c => c?.featured)} 
               isLoading={isLoading} 
             />
           </TabsContent>
           
           <TabsContent value="private" className="mt-6">
             <CollectionGrid 
-              collections={collections.filter(c => c.visibility === 'private')} 
+              collections={safeCollections.filter(c => c?.visibility === 'private')} 
               isLoading={isLoading} 
             />
           </TabsContent>

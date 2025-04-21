@@ -1,10 +1,11 @@
+
 // Define base types used throughout the application
 import { FabricSwatch } from '@/lib/types/card';
 
 export interface Card {
   id: string;
   title: string;
-  description?: string; // Make this optional to be consistent
+  description?: string; 
   imageUrl: string;
   thumbnailUrl?: string;
   collectionId?: string;
@@ -34,21 +35,28 @@ export interface OaklandMemoryData {
   imageUrl?: string;
   historicalContext?: string;
   personalSignificance?: string;
+  template: string; // Required template field
 }
 
 export interface Collection {
   id: string;
   name: string;
+  title?: string; // For compatibility with components that use title
   description?: string;
   coverImageUrl?: string;
+  thumbnailUrl?: string;
   userId?: string;
   teamId?: string;
-  visibility?: 'public' | 'private' | 'team';
+  visibility?: 'public' | 'private' | 'team' | 'unlisted';
   allowComments?: boolean;
   createdAt: string;
   updatedAt: string;
   designMetadata?: any;
   cards?: Card[];
+  cardIds?: string[];
+  tags?: string[];
+  isPublic?: boolean;
+  featured?: boolean;
 }
 
 export interface User {
@@ -57,6 +65,11 @@ export interface User {
   name?: string;
   avatarUrl?: string;
   username?: string;
+  createdAt: string; // Required field for compatibility
+  updatedAt?: string;
+  displayName?: string;
+  bio?: string;
+  role?: string;
 }
 
 export interface Team {
@@ -100,8 +113,9 @@ export interface Reaction {
   commentId?: string;
   type: 'like' | 'love' | 'wow' | 'haha' | 'sad' | 'angry';
   createdAt: string;
-  targetType: 'card' | 'comment' | string; // Added to match Reaction in interaction.ts
-  targetId: string; // Added to match Reaction in interaction.ts
+  targetType: 'card' | 'comment' | string;
+  targetId: string;
+  updatedAt?: string; // Add updatedAt field
   user?: User;
 }
 
@@ -133,11 +147,14 @@ export interface DbCollection {
   cover_image_url?: string;
   owner_id?: string;
   team_id?: string;
-  visibility?: 'public' | 'private' | 'team';
+  visibility?: 'public' | 'private' | 'team' | 'unlisted';
   allow_comments?: boolean;
   created_at: string;
   updated_at: string;
   design_metadata?: any;
+  tags?: string[];
+  is_public?: boolean;
+  featured?: boolean;
 }
 
 export interface DbReaction {

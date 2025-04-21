@@ -1,4 +1,5 @@
-import React, { useState, useRef } from 'react';
+
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,6 +20,7 @@ import {
   SelectValue 
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { v4 as uuidv4 } from 'uuid';
 
 interface CardDesignerProps {
   initialCard?: any;
@@ -110,17 +112,24 @@ const CardDesigner: React.FC<CardDesignerProps> = ({ initialCard, onSave }) => {
     const y = ((e.clientY - rect.top) / rect.height) * 100;
     
     const newHotspot: HotspotData = {
-      id: `hotspot-${Date.now()}`,
-      x,
-      y,
-      width: 20,
-      height: 20,
-      content: 'New hotspot',
+      id: uuidv4(),
+      x: x,  // Use the calculated x position
+      y: y,  // Use the calculated y position
+      radius: 15,
       type: 'text',
-      visible: true
+      content: {
+        title: 'Click to edit text'
+      },
+      style: {
+        color: '#000000',
+        icon: ''
+      },
+      visible: true,
+      width: 100,
+      height: 30
     };
     
-    setHotspots([...hotspots, newHotspot]);
+    setHotspots(prevHotspots => [...prevHotspots, newHotspot]);
     setActiveHotspot(newHotspot.id);
     setIsAddingHotspot(false);
     toast.success('Hotspot added');
@@ -726,7 +735,6 @@ const CardDesigner: React.FC<CardDesignerProps> = ({ initialCard, onSave }) => {
                     </div>
                   )}
                   
-                  {/* Render hotspots */}
                   {showHotspots && hotspots.map(hotspot => (
                     <div
                       key={hotspot.id}
@@ -799,7 +807,10 @@ const CardDesigner: React.FC<CardDesignerProps> = ({ initialCard, onSave }) => {
                               <Label htmlFor="hotspotContent">Content</Label>
                               <Input
                                 id="hotspotContent"
-                                value={hotspot.content}
+                                value={typeof hotspot.content === 'string' 
+                                  ? hotspot.content 
+                                  : hotspot.content?.title || ''
+                                }
                                 onChange={(e) => updateHotspotContent(hotspot.id, e.target.value)}
                                 className="mt-1"
                               />
@@ -887,129 +898,80 @@ const CardDesigner: React.FC<CardDesignerProps> = ({ initialCard, onSave }) => {
                 QR codes can enhance your cards by providing:
               </p>
               <ul className="text-xs list-disc list-inside space-y-1 mt-2">
-                <li>Links to exclusive digital content</li>
-                <li>Authentication verification</li>
-                <li>Artist profiles and portfolios</li>
-                <li>Video content related to the card</li>
-                <li>Interactive experiences</li>
+                <li>Links to additional content or experiences</li>
+                <li>Authentication and verification features</li>
+                <li>Contact information or social profiles</li>
+                <li>AR/VR experiences when scanned</li>
               </ul>
             </div>
           </TabsContent>
         </Tabs>
       </div>
       
-      <div>
-        <div className="bg-white rounded-lg border p-4 shadow-sm sticky top-4">
+      <div className="lg:col-span-1">
+        <div className="bg-gray-50 rounded-lg p-6 sticky top-24">
           <h3 className="font-medium mb-4">Card Preview</h3>
-          
-          <div 
-            className={`relative mx-auto aspect-[2.5/3.5] max-w-[300px] overflow-hidden`}
-            style={{
-              borderRadius: `${cardStyle.borderRadius}px`,
-              border: cardStyle.borderWidth ? `${cardStyle.borderWidth}px solid ${cardStyle.borderColor}` : 'none',
-              backgroundColor: cardStyle.backgroundColor
-            }}
-          >
-            {imageUrl && (
-              <img 
-                src={imageUrl}
-                alt="Card preview"
-                className="w-full h-full object-cover"
-              />
-            )}
-            
-            {cardStyle.showOverlay && (
-              <div 
-                className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-4"
-                style={{ color: cardStyle.textColor }}
-              >
-                <h3 
-                  className={`font-bold text-lg mb-1 ${cardStyle.textShadow ? 'text-shadow' : ''}`}
-                >
-                  {title || 'Card Title'}
-                </h3>
+          <div className="aspect-[2.5/3.5] bg-white rounded-lg overflow-hidden shadow-lg mx-auto mb-4" style={{
+            borderRadius: `${cardStyle.borderRadius}px`,
+            borderWidth: `${cardStyle.borderWidth}px`,
+            borderColor: cardStyle.borderColor,
+            borderStyle: 'solid'
+          }}>
+            {imageUrl ? (
+              <div className="relative h-full">
+                <img
+                  src={imageUrl}
+                  alt={title}
+                  className="w-full h-full object-cover"
+                />
                 
-                {cardNumber && (
-                  <p className={`text-xs ${cardStyle.textShadow ? 'text-shadow' : ''}`}>
-                    {cardNumber}
-                  </p>
+                {cardStyle.showOverlay && (
+                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black to-transparent py-4 px-3">
+                    <h3 className={`text-white font-bold ${cardStyle.textShadow ? 'text-shadow' : ''}`}>
+                      {title || 'Card Title'}
+                    </h3>
+                    {description && (
+                      <p className={`text-white/80 text-xs mt-1 ${cardStyle.textShadow ? 'text-shadow' : ''}`}>
+                        {description.length > 100 ? `${description.substring(0, 100)}...` : description}
+                      </p>
+                    )}
+                  </div>
                 )}
               </div>
-            )}
-            
-            {qrCodeData && (
-              <div className="absolute top-2 right-2 bg-white rounded-md p-1 shadow">
-                <QrCode className="h-5 w-5" />
-              </div>
-            )}
-            
-            {artistInfo.showLogo && artistInfo.logoUrl && (
-              <div className="absolute top-2 left-2">
-                <img 
-                  src={artistInfo.logoUrl} 
-                  alt="Artist Logo" 
-                  className="h-8 w-8 object-contain"
-                />
-              </div>
-            )}
-            
-            {artistInfo.showSignature && artistInfo.signatureUrl && (
-              <div className="absolute bottom-16 right-4">
-                <img 
-                  src={artistInfo.signatureUrl} 
-                  alt="Artist Signature" 
-                  className="h-8 object-contain"
-                />
+            ) : (
+              <div className="h-full flex items-center justify-center bg-gray-100">
+                <p className="text-gray-400 text-center px-4">
+                  Upload an image to preview your card
+                </p>
               </div>
             )}
           </div>
           
-          <div className="flex justify-center mt-4">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="mr-2"
-            >
-              <Maximize2 className="h-4 w-4 mr-1" />
-              Full Preview
-            </Button>
-          </div>
-          
-          <div className="mt-6 space-y-2">
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Title:</span>
-              <span className="font-medium truncate max-w-[150px]">{title || 'Not set'}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Rarity:</span>
-              <span className="font-medium">{rarity.charAt(0).toUpperCase() + rarity.slice(1)}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Card Number:</span>
-              <span className="font-medium">{cardNumber || 'Not set'}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Edition Size:</span>
-              <span className="font-medium">{editionSize}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Series:</span>
-              <span className="font-medium truncate max-w-[150px]">
-                {sampleSeries.find(s => s.id === seriesId)?.name || 'None'}
-              </span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Template:</span>
-              <span className="font-medium">
-                {cardTemplates.find(t => t.id === activeTemplate)?.name || 'Standard'}
-              </span>
-            </div>
-          </div>
-          
-          <Button className="w-full mt-6" onClick={handleSave}>
-            <Save className="mr-2 h-4 w-4" />
+          <Button 
+            onClick={handleSave}
+            disabled={!title.trim() || !imageUrl}
+            className="w-full"
+          >
+            <Save className="h-4 w-4 mr-2" />
             Save Card
           </Button>
+          
+          <div className="mt-4 text-xs text-gray-500">
+            <p>
+              {title ? title : 'No title'} • {rarity.charAt(0).toUpperCase() + rarity.slice(1)}
+            </p>
+            {cardNumber && (
+              <p className="mt-1">Card #{cardNumber}</p>
+            )}
+            {seriesId && (
+              <p className="mt-1">
+                Series: {sampleSeries.find(s => s.id === seriesId)?.name || seriesId}
+              </p>
+            )}
+            {artistInfo.name && (
+              <p className="mt-1">Artist: {artistInfo.name}</p>
+            )}
+          </div>
         </div>
       </div>
     </div>

@@ -1,104 +1,115 @@
 
-// Enhanced card types for the card system
-import { BaseCard } from './cardTypes';
+import { BaseEntity } from './index';
+import { CardRarity, DesignMetadata } from './cardTypes';
 
 /**
- * Enhanced Card with additional functionality
+ * Enhanced card types with additional features
  */
-export interface EnhancedCard extends BaseCard {
+export interface EnhancedCard extends BaseEntity {
+  id: string;
+  title: string;
+  description: string;
+  imageUrl: string;
+  thumbnailUrl: string;
+  tags: string[]; // Required
+  userId: string;
+  effects: string[];
+  
+  // Enhanced fields
+  series?: string;
+  edition?: string;
   seriesId?: string; 
-  deckId?: string;
-  specialFeatures?: string[];
-  interactiveElements?: string[];
-  graded?: boolean;
-  gradingService?: string;
-  gradingScore?: string;
-  hotspots?: HotspotData[];
-  backSideImage?: string;
-  cardNumber?: string;
+  serialNumber?: string;
+  rarity: CardRarity;
   artist?: string;
   artistId?: string;
-  edition?: number;
-  editionSize?: number;
   releaseDate?: string;
-  qrCodeData?: string;
-  marketData?: {
-    price?: number;
-    currency?: string;
-    lastSoldPrice?: number;
-    availableForSale?: boolean;
-  };
-  rarity?: CardRarity;
+  license?: string;
+  teamId?: string; // Add teamId field
+  
+  // Interactive elements
+  hotspots?: HotspotData[];
+  
+  // Market data
+  mintDate?: string;
+  mintQuantity?: number;
+  currentOwner?: string;
+  previousOwners?: string[];
+  price?: number;
+  forSale?: boolean;
+  marketData?: Record<string, any>;
+  editionSize?: number;
+  cardNumber?: string;
+  
+  // Required fields for compatibility with base Card
+  createdAt: string;
+  updatedAt: string;
+  designMetadata: DesignMetadata; // Required
 }
 
 /**
- * Card rarity types
- */
-export type CardRarity = 'common' | 'uncommon' | 'rare' | 'ultra-rare' | 'legendary' | 'one-of-one';
-
-/**
- * Hotspot data for interactive cards
+ * Hotspot for interactive cards
  */
 export interface HotspotData {
   id: string;
   x: number;
   y: number;
-  width: number;
-  height: number;
-  content: string;
-  type: 'text' | 'link' | 'image' | 'video';
-  visible: boolean;
+  radius: number;
+  type: 'info' | 'link' | 'audio' | 'video' | 'ar' | 'text' | 'image';
+  content: {
+    title?: string;
+    description?: string;
+    url?: string;
+    mediaUrl?: string;
+  } | string;  // Support both object and string content
+  style?: {
+    color?: string;
+    icon?: string;
+  };
+  visible?: boolean;
+  width?: number;
+  height?: number;
 }
 
 /**
- * Series of cards
+ * Series definition for card collections
  */
 export interface Series {
   id: string;
-  name?: string;
-  title: string;
-  description: string;
-  releaseDate: string;
+  name: string;
+  title?: string; // Optional as some code uses name, some uses title
+  description?: string;
   cards: EnhancedCard[];
   totalCards: number;
-  rarity?: string;
+  releaseDate?: string;
   creator?: string;
-  artistId?: string;
-  createdAt: string;
-  updatedAt: string;
+  rarity?: CardRarity;
+  
+  // Additional properties used in components
   coverImageUrl?: string;
+  artistId?: string;
+  createdAt?: string;
+  updatedAt?: string;
   isPublished?: boolean;
-  cardIds: string[];
-  releaseType?: 'standard' | 'limited' | 'exclusive';
+  releaseType?: string;
+  cardIds?: string[];
 }
 
 /**
- * Deck of cards
+ * Deck interface for card grouping
  */
 export interface Deck {
   id: string;
-  name: string;
-  description: string;
-  cards: EnhancedCard[];
-  creator?: string;
-  ownerId?: string;
-  createdAt: string;
-  updatedAt: string;
-  isPublic: boolean;
+  name?: string;
+  title: string;
+  description?: string;
   coverImageUrl?: string;
-  cardIds: string[];
-}
-
-/**
- * Card set for play
- */
-export interface CardSet {
-  id: string;
-  name: string;
-  description: string;
   cards: EnhancedCard[];
-  category: string;
-  rules?: string;
   createdAt: string;
   updatedAt: string;
+  ownerId: string;
+  visibility?: 'public' | 'private' | 'team';
+  totalCards?: number;
+  isPublic?: boolean;
+  cardIds?: string[];
 }

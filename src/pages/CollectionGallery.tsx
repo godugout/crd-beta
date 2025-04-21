@@ -4,12 +4,11 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Plus, Grid3X3, LayoutList } from 'lucide-react';
+import { Grid3X3, LayoutList, Plus } from 'lucide-react';
 import PageLayout from '@/components/navigation/PageLayout';
 import { useCards } from '@/context/CardContext';
 import CollectionGrid from '@/components/collections/CollectionGrid';
 import CollectionList from '@/components/collections/CollectionList';
-import { Collection } from '@/context/CardContext';
 
 const CollectionGallery = () => {
   const { collections, isLoading } = useCards();
@@ -17,10 +16,15 @@ const CollectionGallery = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [activeTab, setActiveTab] = useState('all');
 
+  // Ensure collections is always an array
+  const safeCollections = Array.isArray(collections) ? collections : [];
+
   // Filter collections based on search term and active tab
-  const filteredCollections = collections?.filter(collection => {
-    const matchesSearch = collection.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         collection.description?.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredCollections = safeCollections.filter(collection => {
+    if (!collection) return false;
+    
+    const matchesSearch = (collection.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         (collection.description || '').toLowerCase().includes(searchTerm.toLowerCase());
     
     if (activeTab === 'all') return matchesSearch;
     if (activeTab === 'private') return matchesSearch && collection.visibility === 'private';
@@ -34,7 +38,7 @@ const CollectionGallery = () => {
       title="Collections"
       description="Organize your cards into themed collections"
     >
-      <div className="container mx-auto max-w-6xl px-4 py-8">
+      <div className="container mx-auto px-4 py-8">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
           <div>
             <h1 className="text-3xl font-bold text-cardshow-dark mb-2">Collections</h1>
@@ -103,12 +107,12 @@ const CollectionGallery = () => {
             <TabsContent value="private" className="mt-4">
               {viewMode === 'grid' ? (
                 <CollectionGrid 
-                  collections={(filteredCollections || []).filter(c => c.visibility === 'private')} 
+                  collections={filteredCollections.filter(c => c && c.visibility === 'private')} 
                   isLoading={isLoading} 
                 />
               ) : (
                 <CollectionList 
-                  collections={(filteredCollections || []).filter(c => c.visibility === 'private')} 
+                  collections={filteredCollections.filter(c => c && c.visibility === 'private')} 
                   isLoading={isLoading} 
                 />
               )}
@@ -117,12 +121,12 @@ const CollectionGallery = () => {
             <TabsContent value="public" className="mt-4">
               {viewMode === 'grid' ? (
                 <CollectionGrid 
-                  collections={(filteredCollections || []).filter(c => c.visibility === 'public')} 
+                  collections={filteredCollections.filter(c => c && c.visibility === 'public')} 
                   isLoading={isLoading} 
                 />
               ) : (
                 <CollectionList 
-                  collections={(filteredCollections || []).filter(c => c.visibility === 'public')} 
+                  collections={filteredCollections.filter(c => c && c.visibility === 'public')} 
                   isLoading={isLoading} 
                 />
               )}

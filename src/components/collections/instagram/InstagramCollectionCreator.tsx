@@ -49,7 +49,6 @@ const InstagramCollectionCreator: React.FC = () => {
         return;
       }
       
-      // Transform Instagram posts to our format
       const posts: InstagramPost[] = data.posts.map((post: any) => ({
         id: post.id,
         postId: post.id,
@@ -92,10 +91,11 @@ const InstagramCollectionCreator: React.FC = () => {
     try {
       setIsConnecting(true);
       
-      // Create a new collection with Instagram content
+      const collectionTitle = `${username}'s Instagram Collection`;
       const newCollection: Collection = {
         id: `instagram-${Date.now()}`,
-        name: `${username}'s Instagram Collection`,
+        name: collectionTitle,
+        title: collectionTitle,
         description: `Photos imported from Instagram account @${username}`,
         cards: instagramPosts.map((post, index) => adaptToCard({
           id: `instagram-card-${post.postId || index}`,
@@ -107,7 +107,34 @@ const InstagramCollectionCreator: React.FC = () => {
           updatedAt: new Date().toISOString(),
           userId: 'user-1',
           tags: ['instagram', 'imported'],
-          effects: []
+          effects: [],
+          designMetadata: {
+            cardStyle: {
+              template: 'instagram',
+              effect: 'social',
+              borderRadius: '8px',
+              borderColor: '#E1306C',
+              frameColor: '#F77737',
+              frameWidth: 2,
+              shadowColor: '#833AB4'
+            },
+            textStyle: {
+              titleColor: '#262626',
+              titleAlignment: 'left',
+              titleWeight: 'medium',
+              descriptionColor: '#262626'
+            },
+            marketMetadata: {
+              isPrintable: true,
+              isForSale: false,
+              includeInCatalog: true
+            },
+            cardMetadata: {
+              category: 'social',
+              cardType: 'instagram',
+              series: 'imported'
+            }
+          }
         })),
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -115,19 +142,12 @@ const InstagramCollectionCreator: React.FC = () => {
         tags: ['instagram', 'social', 'imported'],
         userId: 'user-1',
         isPublic: true,
-        instagramSource: {
-          username: username,
-          lastFetched: new Date().toISOString(),
-          autoUpdate: false
-        }
       };
       
-      // Add the collection
       const result = await addCollection(newCollection);
       
       toast.success(`Successfully created collection from Instagram posts`);
       
-      // Navigate to the collection page
       navigate(`/collections/${result.id}`);
     } catch (error: any) {
       console.error('Error creating Instagram collection:', error);

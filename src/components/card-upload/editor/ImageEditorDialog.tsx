@@ -1,18 +1,11 @@
-import React, { useRef, useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Loader2, Info, Tag, User, Calendar, Shirt } from 'lucide-react';
-import { useCropState } from '../hooks/useCropState';
-import { useEditor } from '../hooks/useEditor';
-import { useCropBoxOperations } from '../hooks/useCropBoxOperations';
-import { useImageHandling } from '../hooks/useImageHandling';
-import { MemorabiliaType, detectText } from '../cardDetection';
-import EditorContent from './EditorContent';
-import CardTypeSelector from '../components/CardTypeSelector';
-import { toast } from "sonner";
-import { storageOperations } from '@/lib/supabase/storage';
-import { Badge } from '@/components/ui/badge';
-import { EnhancedCropBoxProps } from '../CropBox';
+import React, { useEffect, useState, useRef } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { toast } from 'sonner';
+import { detectCardsInImage, MemorabiliaType, EnhancedCropBoxProps } from '../cardDetection';
+import { StagedCardProps } from '../hooks/useEditor';
+import { ExtendedCanvas, asExtendedCanvas } from '@/types/extendedCanvas';
 
 interface ImageEditorDialogProps {
   showEditor: boolean;
@@ -34,411 +27,371 @@ const ImageEditorDialog: React.FC<ImageEditorDialogProps> = ({
   onCropComplete,
   batchProcessingMode = false,
   onBatchProcessComplete,
-  enabledMemorabiliaTypes = ['card', 'ticket', 'program', 'autograph', 'face'],
+  enabledMemorabiliaTypes = ['card', 'ticket', 'program', 'autograph'],
   autoEnhance = true
 }) => {
+  const [activeTab, setActiveTab] = useState('auto');
+  const [isLoading, setIsLoading] = useState(false);
+  const [detectedAreas, setDetectedAreas] = useState<EnhancedCropBoxProps[]>([]);
+  const [selectedBox, setSelectedBox] = useState<EnhancedCropBoxProps | null>(null);
+  const [stagedCards, setStagedCards] = useState<StagedCardProps[]>([]);
+  const [selectedType, setSelectedType] = useState<MemorabiliaType>('card');
+  
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const debugCanvasRef = useRef<HTMLCanvasElement>(null);
   const editorImgRef = useRef<HTMLImageElement>(null);
+  const cropCanvasRef = useRef<HTMLCanvasElement>(null);
   
-  const [isExtractingSaving, setIsExtractingSaving] = useState(false);
-  const [extractedMetadata, setExtractedMetadata] = useState<any>(null);
-  const [isExtractingMetadata, setIsExtractingMetadata] = useState(false);
-  
-  const { imageData, setImageData, cropBoxes, setCropBoxes, detectedCards, setDetectedCards } = useCropState();
-  
-  const { stagedCards, stageSelectedCrop, selectStagedCard } = useEditor({
-    onCropComplete,
-    currentFile,
-    setShowEditor,
-    autoEnhance,
-  });
-  
-  const [selectedCropIndex, setSelectedCropIndex] = useState(-1);
-  
-  const { 
-    rotateClockwise, 
-    rotateCounterClockwise, 
-    addNewCropBox, 
-    removeCropBox, 
-    maximizeCrop 
-  } = useCropBoxOperations({
-    cropBoxes, 
-    setCropBoxes, 
-    selectedCropIndex,
-    setSelectedCropIndex,
-    canvasRef
-  });
-  
-  const { 
-    rotateImage, 
-    detectItems, 
-    isLoading, 
-    detectionRunning 
-  } = useImageHandling({
-    editorImage,
-    showEditor,
-    setImageData,
-    setCropBoxes,
-    setDetectedCards,
-    setSelectedCropIndex,
-    canvasRef,
-    editorImgRef,
-    batchProcessingMode,
-    enabledMemorabiliaTypes: ['card']
-  });
-  
+  // Reset state when editor is opened
   useEffect(() => {
-    if (editorImage && showEditor) {
-      setImageData({ 
-        width: 0, 
-        height: 0, 
-        scale: 1,
-        rotation: 0,
-        url: editorImage 
-      });
+    if (showEditor) {
+      setActiveTab('auto');
+      setDetectedAreas([]);
+      setSelectedBox(null);
+      setStagedCards([]);
     }
-  }, [editorImage, showEditor, setImageData]);
+  }, [showEditor]);
   
+  // Run detection when image is loaded
   useEffect(() => {
-    if (showEditor && editorImage && !detectionRunning && cropBoxes.length === 0) {
+    if (showEditor && editorImage && editorImgRef.current) {
       const img = editorImgRef.current;
-      if (img && img.complete) {
-        detectItems();
+      
+      if (img.complete) {
+        runDetection();
+      } else {
+        img.onload = runDetection;
       }
     }
-  }, [showEditor, editorImage, editorImgRef.current?.complete, detectionRunning, cropBoxes.length, detectItems]);
+  }, [showEditor, editorImage]);
   
-  const handleMemorabiliaTypeChange = (index: number, type: MemorabiliaType) => {
-    if (index >= 0 && index < cropBoxes.length) {
-      const newBoxes = [...cropBoxes];
-      newBoxes[index] = {
-        ...newBoxes[index],
-        memorabiliaType: type
-      };
-      setCropBoxes(newBoxes);
+  const runDetection = async () => {
+    if (!editorImgRef.current) return;
+    
+    setIsLoading(true);
+    try {
+      const detections = await detectCardsInImage({
+        imageElement: editorImgRef.current,
+        debugMode: true,
+        canvas: debugCanvasRef.current,
+        enabledTypes: enabledMemorabiliaTypes,
+        minimumConfidence: 0.7
+      });
       
-      setExtractedMetadata(null);
-      extractCardMetadata();
+      setDetectedAreas(detections);
+      
+      // Auto-select the first detection with highest confidence
+      if (detections.length > 0) {
+        const bestDetection = [...detections].sort((a, b) => 
+          (b.confidence || 0) - (a.confidence || 0)
+        )[0];
+        setSelectedBox(bestDetection);
+      }
+    } catch (error) {
+      console.error('Detection error:', error);
+      toast.error('Failed to detect items in image');
+    } finally {
+      setIsLoading(false);
     }
   };
   
-  const extractCardMetadata = async () => {
-    if (selectedCropIndex < 0 || !editorImgRef.current) return null;
-    
-    setIsExtractingMetadata(true);
+  const handleBoxSelect = (box: EnhancedCropBoxProps) => {
+    setSelectedBox(box);
+  };
+  
+  const handleCropComplete = async () => {
+    if (!selectedBox || !currentFile || !editorImgRef.current || !cropCanvasRef.current) {
+      toast.error('Please select an area to crop');
+      return;
+    }
     
     try {
-      const selectedBox = cropBoxes[selectedCropIndex];
-      const img = editorImgRef.current;
+      setIsLoading(true);
       
+      // Create a temporary canvas for the crop
       const tempCanvas = document.createElement('canvas');
       const ctx = tempCanvas.getContext('2d');
-      if (!ctx) return null;
       
+      if (!ctx) {
+        throw new Error('Failed to get canvas context');
+      }
+      
+      // Set canvas dimensions to crop box size
       tempCanvas.width = selectedBox.width;
       tempCanvas.height = selectedBox.height;
       
+      // Draw cropped region to canvas
       ctx.drawImage(
-        img,
+        editorImgRef.current,
         selectedBox.x, selectedBox.y, selectedBox.width, selectedBox.height,
         0, 0, selectedBox.width, selectedBox.height
       );
       
-      const textData = await detectText(tempCanvas);
-      setExtractedMetadata(textData);
-      return textData;
-    } catch (error) {
-      console.error('Error extracting metadata:', error);
-      return null;
-    } finally {
-      setIsExtractingMetadata(false);
-    }
-  };
-  
-  useEffect(() => {
-    if (selectedCropIndex >= 0 && !extractedMetadata) {
-      extractCardMetadata();
-    }
-  }, [selectedCropIndex]);
-  
-  const handleExtractAndSaveCard = async () => {
-    if (!currentFile || selectedCropIndex < 0) {
-      toast.error("Please select an area to extract");
-      return;
-    }
-    
-    setIsExtractingSaving(true);
-    
-    try {
-      const selectedBox = cropBoxes[selectedCropIndex];
-      
-      const metadata = extractedMetadata || await extractCardMetadata();
-      
-      const result = await stageSelectedCrop(
-        selectedBox, 
-        canvasRef, 
-        editorImgRef, 
-        selectedBox.memorabiliaType, 
-        false
+      // Convert to blob and create a file
+      const blob = await new Promise<Blob>((resolve) => 
+        tempCanvas.toBlob(blob => resolve(blob!), 'image/jpeg', 0.95)
       );
       
-      if (!result) {
-        toast.error("Failed to extract card");
-        return;
-      }
+      const file = new File(
+        [blob], 
+        `cropped-${currentFile.name || 'image'}.jpg`, 
+        { type: 'image/jpeg' }
+      );
       
-      const cardData = {
-        title: metadata?.title || "Extracted Card",
-        tags: metadata?.tags || ["baseball", "card", "extracted"],
-        cardType: selectedBox.memorabiliaType || 'card',
-        text: metadata?.text,
-        year: metadata?.year,
-        player: metadata?.player,
-        team: metadata?.team,
-        position: metadata?.position,
-        sport: metadata?.sport,
-        manufacturer: metadata?.manufacturer,
-        cardNumber: metadata?.cardNumber,
-        setName: metadata?.setName,
-        condition: metadata?.condition
+      const url = URL.createObjectURL(blob);
+      
+      // Create extended canvas with file and url properties
+      const extendedCanvas = asExtendedCanvas(tempCanvas);
+      extendedCanvas.file = file;
+      extendedCanvas.url = url;
+      extendedCanvas.metadata = {
+        type: selectedType || selectedBox.memorabiliaType,
+        confidence: selectedBox.confidence,
+        dimensions: {
+          width: selectedBox.width,
+          height: selectedBox.height,
+          aspectRatio: selectedBox.width / selectedBox.height
+        }
       };
       
-      try {
-        const saveResult = await storageOperations.saveExtractedCard(result.file, cardData);
-        
-        if (saveResult.error) {
-          console.error("Error saving to catalog:", saveResult.error);
-          toast.warning("Card extracted but couldn't be saved to catalog. Using local version.");
-        } else {
-          toast.success("Card extracted and saved to your catalog");
-        }
-      } catch (saveError) {
-        console.error("Error saving to catalog:", saveError);
-        toast.warning("Card extracted but couldn't be saved to catalog. Using local version.");
-      }
-      
+      // Pass the cropped image back to the parent component
       onCropComplete(
-        result.file, 
-        result.url, 
-        selectedBox.memorabiliaType,
-        metadata
+        file, 
+        url, 
+        selectedType || selectedBox.memorabiliaType,
+        extendedCanvas.metadata
       );
       
       setShowEditor(false);
     } catch (error) {
-      console.error("Error extracting card:", error);
-      toast.error("Failed to extract card");
+      console.error('Crop error:', error);
+      toast.error('Failed to crop image');
     } finally {
-      setIsExtractingSaving(false);
+      setIsLoading(false);
     }
   };
-
+  
+  const handleBatchProcess = async () => {
+    if (!batchProcessingMode || !onBatchProcessComplete || detectedAreas.length === 0) {
+      return;
+    }
+    
+    try {
+      setIsLoading(true);
+      
+      const files: File[] = [];
+      const urls: string[] = [];
+      const types: MemorabiliaType[] = [];
+      
+      // Process each detected area
+      for (const box of detectedAreas) {
+        if (!currentFile || !editorImgRef.current) continue;
+        
+        // Create a temporary canvas for the crop
+        const tempCanvas = document.createElement('canvas');
+        const ctx = tempCanvas.getContext('2d');
+        
+        if (!ctx) continue;
+        
+        // Set canvas dimensions to crop box size
+        tempCanvas.width = box.width;
+        tempCanvas.height = box.height;
+        
+        // Draw cropped region to canvas
+        ctx.drawImage(
+          editorImgRef.current,
+          box.x, box.y, box.width, box.height,
+          0, 0, box.width, box.height
+        );
+        
+        // Convert to blob and create a file
+        const blob = await new Promise<Blob>((resolve) => 
+          tempCanvas.toBlob(blob => resolve(blob!), 'image/jpeg', 0.95)
+        );
+        
+        const file = new File(
+          [blob], 
+          `batch-${files.length}-${currentFile.name || 'image'}.jpg`, 
+          { type: 'image/jpeg' }
+        );
+        
+        const url = URL.createObjectURL(blob);
+        
+        files.push(file);
+        urls.push(url);
+        types.push(box.memorabiliaType || 'card');
+      }
+      
+      if (files.length > 0) {
+        onBatchProcessComplete(files, urls, types);
+        setShowEditor(false);
+      } else {
+        toast.error('No valid items to process');
+      }
+    } catch (error) {
+      console.error('Batch processing error:', error);
+      toast.error('Failed to process images in batch');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  const renderDetectionOverlay = () => {
+    if (detectedAreas.length === 0) {
+      return (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-white">
+          {isLoading ? 'Detecting items...' : 'No items detected'}
+        </div>
+      );
+    }
+    
+    return (
+      <div className="absolute inset-0">
+        {detectedAreas.map((box, index) => (
+          <div
+            key={index}
+            className={`absolute border-2 ${
+              selectedBox && selectedBox.id === box.id
+                ? 'border-blue-500'
+                : 'border-yellow-300'
+            } cursor-pointer`}
+            style={{
+              left: box.x,
+              top: box.y,
+              width: box.width,
+              height: box.height,
+              transform: box.rotation ? `rotate(${box.rotation}deg)` : undefined
+            }}
+            onClick={() => handleBoxSelect(box)}
+          >
+            <div className="absolute -top-6 left-0 bg-black/70 text-white text-xs px-2 py-1 rounded">
+              {box.memorabiliaType || 'Unknown'} ({Math.round((box.confidence || 0) * 100)}%)
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  };
+  
   return (
     <Dialog open={showEditor} onOpenChange={setShowEditor}>
-      <DialogContent className="max-w-5xl w-[95vw] max-h-[90vh] p-0 overflow-hidden">
-        <DialogHeader className="p-4 border-b">
-          <DialogTitle>Card Extractor</DialogTitle>
-          <DialogDescription className="text-sm text-muted-foreground">
-            Detect and extract trading cards from your images
-          </DialogDescription>
+      <DialogContent className="sm:max-w-4xl">
+        <DialogHeader>
+          <DialogTitle>Edit Image</DialogTitle>
         </DialogHeader>
         
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 h-[calc(90vh-8rem)] overflow-hidden">
-          <div className="md:col-span-3 h-[50vh] md:h-full overflow-hidden flex flex-col">
-            <EditorContent
-              canvasRef={canvasRef}
-              editorImgRef={editorImgRef}
-              cropBoxes={cropBoxes}
-              setCropBoxes={setCropBoxes}
-              selectedCropIndex={selectedCropIndex}
-              setSelectedCropIndex={setSelectedCropIndex}
-              imageData={imageData}
-              onRotateImage={rotateImage}
-              onMaximizeCrop={maximizeCrop}
-              onAddCropBox={addNewCropBox}
-              onRemoveCropBox={removeCropBox}
-              onRotateClockwise={rotateClockwise}
-              onRotateCounterClockwise={rotateCounterClockwise}
-              onMemorabiliaTypeChange={handleMemorabiliaTypeChange}
-              editorImage={editorImage}
-            />
-          </div>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid grid-cols-2">
+            <TabsTrigger value="auto">Auto-Detect</TabsTrigger>
+            <TabsTrigger value="manual">Manual Selection</TabsTrigger>
+          </TabsList>
           
-          <div className="flex flex-col space-y-4 overflow-auto">
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h3 className="text-sm font-medium mb-2">Card Detection</h3>
-              <div className="flex flex-col gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={detectItems}
-                  disabled={detectionRunning}
-                  className="w-full"
-                >
-                  {detectionRunning ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Detecting...
-                    </>
-                  ) : (
-                    "Auto Detect Card"
-                  )}
-                </Button>
-                
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={maximizeCrop}
-                  disabled={selectedCropIndex < 0}
-                  className="w-full"
-                >
-                  Fit to Card Dimensions
-                </Button>
-                
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={extractCardMetadata}
-                  disabled={selectedCropIndex < 0 || isExtractingMetadata}
-                  className="w-full"
-                >
-                  {isExtractingMetadata ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Extracting Text...
-                    </>
-                  ) : (
-                    "Extract Text"
-                  )}
-                </Button>
+          <TabsContent value="auto" className="space-y-4">
+            <div className="relative border rounded-lg overflow-hidden" style={{ height: '60vh' }}>
+              {/* Original image with detection overlay */}
+              <div className="relative w-full h-full overflow-auto">
+                {editorImage && (
+                  <img
+                    ref={editorImgRef}
+                    src={editorImage}
+                    alt="Editor"
+                    className="max-w-none"
+                  />
+                )}
+                {renderDetectionOverlay()}
               </div>
               
-              {selectedCropIndex >= 0 && cropBoxes[selectedCropIndex] && (
-                <div className="mt-4 p-2 border border-gray-200 rounded bg-white">
-                  <p className="text-xs font-medium">Detection Confidence</p>
-                  <div className="flex items-center mt-1">
-                    <div className="w-full bg-gray-200 rounded-full h-2.5">
-                      <div 
-                        className="bg-green-600 h-2.5 rounded-full" 
-                        style={{ 
-                          width: `${((cropBoxes[selectedCropIndex].confidence || 0) * 100)}%` 
-                        }}
-                      ></div>
-                    </div>
-                    <span className="ml-2 text-xs font-medium">
-                      {Math.round((cropBoxes[selectedCropIndex].confidence || 0) * 100)}%
-                    </span>
-                  </div>
-                </div>
-              )}
-              
-              <div className="mt-4">
-                <p className="text-xs text-gray-500 flex items-start">
-                  <Info className="h-3 w-3 mr-1 mt-0.5 flex-shrink-0" />
-                  Card dimensions will automatically use the standard 2.5:3.5 ratio
-                </p>
-              </div>
+              {/* Debug canvas (hidden) */}
+              <canvas
+                ref={debugCanvasRef}
+                className="hidden"
+              />
             </div>
             
-            {selectedCropIndex >= 0 && cropBoxes[selectedCropIndex] && (
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <h3 className="text-sm font-medium mb-2">Card Type</h3>
-                <CardTypeSelector
-                  selected={cropBoxes[selectedCropIndex].memorabiliaType || 'card'}
-                  onSelect={(type) => handleMemorabiliaTypeChange(selectedCropIndex, type as MemorabiliaType)}
-                  types={['card', 'autograph']}
-                />
+            <div className="flex flex-col space-y-4">
+              <div className="flex flex-wrap gap-2">
+                <span className="text-sm font-medium">Item Type:</span>
+                {enabledMemorabiliaTypes.map(type => (
+                  <Button
+                    key={type}
+                    variant={selectedType === type ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setSelectedType(type)}
+                  >
+                    {type.charAt(0).toUpperCase() + type.slice(1)}
+                  </Button>
+                ))}
               </div>
-            )}
-            
-            {extractedMetadata && (
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <h3 className="text-sm font-medium mb-2 flex items-center justify-between">
-                  <span>Detected Info</span>
-                  <Badge variant="outline" className="text-xs">
-                    {Math.round((extractedMetadata?.confidence || 0) * 100)}% accuracy
-                  </Badge>
-                </h3>
+              
+              <div className="flex justify-between">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowEditor(false)}
+                >
+                  Cancel
+                </Button>
                 
-                <div className="space-y-2 text-sm">
-                  {extractedMetadata.title && (
-                    <div className="flex items-start gap-2">
-                      <Tag className="h-4 w-4 text-gray-500 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <p className="font-medium">Title</p>
-                        <p className="text-gray-700">{extractedMetadata.title}</p>
-                      </div>
-                    </div>
+                <div className="space-x-2">
+                  {batchProcessingMode && (
+                    <Button
+                      onClick={handleBatchProcess}
+                      disabled={isLoading || detectedAreas.length === 0}
+                    >
+                      Process All ({detectedAreas.length})
+                    </Button>
                   )}
                   
-                  {extractedMetadata.player && (
-                    <div className="flex items-start gap-2">
-                      <User className="h-4 w-4 text-gray-500 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <p className="font-medium">Player</p>
-                        <p className="text-gray-700">
-                          {extractedMetadata.player}
-                          {extractedMetadata.position ? ` • ${extractedMetadata.position}` : ''}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                  
-                  {extractedMetadata.team && (
-                    <div className="flex items-start gap-2">
-                      <Shirt className="h-4 w-4 text-gray-500 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <p className="font-medium">Team</p>
-                        <p className="text-gray-700">{extractedMetadata.team}</p>
-                      </div>
-                    </div>
-                  )}
-                  
-                  {extractedMetadata.year && (
-                    <div className="flex items-start gap-2">
-                      <Calendar className="h-4 w-4 text-gray-500 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <p className="font-medium">Year</p>
-                        <p className="text-gray-700">
-                          {extractedMetadata.year}
-                          {extractedMetadata.manufacturer ? ` ${extractedMetadata.manufacturer}` : ''}
-                          {extractedMetadata.cardNumber ? ` #${extractedMetadata.cardNumber}` : ''}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                  
-                  {extractedMetadata.tags && extractedMetadata.tags.length > 0 && (
-                    <div className="mt-2 flex flex-wrap gap-1">
-                      {extractedMetadata.tags.map((tag: string, i: number) => (
-                        <Badge key={i} variant="secondary" className="text-xs">
-                          {tag}
-                        </Badge>
-                      ))}
-                    </div>
-                  )}
+                  <Button
+                    onClick={handleCropComplete}
+                    disabled={isLoading || !selectedBox}
+                  >
+                    {isLoading ? 'Processing...' : 'Crop Selected'}
+                  </Button>
                 </div>
               </div>
-            )}
-            
-            <div className="mt-auto">
-              <Button 
-                className="w-full" 
-                onClick={handleExtractAndSaveCard}
-                disabled={selectedCropIndex < 0 || isExtractingSaving}
-              >
-                {isExtractingSaving ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Extracting...
-                  </>
-                ) : (
-                  "Extract & Save Card"
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="manual" className="space-y-4">
+            <div className="relative border rounded-lg overflow-hidden" style={{ height: '60vh' }}>
+              {/* Manual crop interface */}
+              <div className="relative w-full h-full overflow-auto">
+                {editorImage && (
+                  <img
+                    src={editorImage}
+                    alt="Manual Crop"
+                    className="max-w-none"
+                  />
                 )}
+                {/* Manual crop overlay would go here */}
+                <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-white">
+                  Manual crop functionality not implemented
+                </div>
+              </div>
+              
+              <canvas
+                ref={cropCanvasRef}
+                className="hidden"
+              />
+            </div>
+            
+            <div className="flex justify-between">
+              <Button
+                variant="outline"
+                onClick={() => setShowEditor(false)}
+              >
+                Cancel
+              </Button>
+              
+              <Button
+                onClick={() => toast.info('Manual crop not implemented')}
+                disabled={true}
+              >
+                Apply Crop
               </Button>
             </div>
-          </div>
-        </div>
+          </TabsContent>
+        </Tabs>
       </DialogContent>
     </Dialog>
   );

@@ -1,6 +1,5 @@
-
 import { useState, useCallback, useEffect } from 'react';
-import { Card } from '@/lib/types/card';
+import { Card } from '@/lib/types/cardTypes';
 import { v4 as uuidv4 } from 'uuid';
 import { adaptToCard } from '@/lib/adapters/cardAdapter';
 

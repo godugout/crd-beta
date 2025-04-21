@@ -1,124 +1,170 @@
 
 import { useState } from 'react';
-import { toast } from 'sonner';
 
-/**
- * A custom hook for handling image processing operations
- */
-export const useImageProcessing = () => {
+export interface ProcessingOptions {
+  width?: number;
+  height?: number;
+  quality?: number;
+  format?: 'jpeg' | 'png' | 'webp';
+  enhanceContrast?: boolean;
+  enhanceSharpness?: boolean;
+  autoWhiteBalance?: boolean;
+}
+
+export interface ImageData {
+  width: number;
+  height: number;
+  url?: string;
+  scale?: number;
+  rotation?: number;
+}
+
+const useImageProcessing = () => {
   const [isProcessing, setIsProcessing] = useState(false);
-  
-  /**
-   * Loads an image from a URL
-   */
-  const loadImage = (url: string): Promise<HTMLImageElement> => {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      img.onload = () => resolve(img);
-      img.onerror = () => reject(new Error('Failed to load image'));
-      img.src = url;
-    });
-  };
-  
-  /**
-   * Converts a File to a data URL
-   */
-  const fileToDataUrl = (file: File): Promise<string> => {
+
+  const fileToDataUrl = async (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
-      reader.onload = () => {
-        if (typeof reader.result === 'string') {
-          resolve(reader.result);
-        } else {
-          reject(new Error('FileReader did not return a string'));
-        }
-      };
-      reader.onerror = () => reject(reader.error);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
       reader.readAsDataURL(file);
     });
   };
-  
-  /**
-   * Resizes an image to fit within maxWidth/maxHeight while maintaining aspect ratio
-   */
+
   const resizeImage = async (
-    imgOrUrl: string | HTMLImageElement,
-    maxWidth = 800,
-    maxHeight = 800,
-    quality = 0.85
+    dataUrl: string,
+    maxWidth: number = 1200,
+    maxHeight: number = 1200,
+    quality: number = 0.8
+  ): Promise<{ dataUrl: string; width: number; height: number }> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        let width = img.width;
+        let height = img.height;
+
+        if (width > maxWidth || height > maxHeight) {
+          const ratio = Math.min(maxWidth / width, maxHeight / height);
+          width = Math.floor(width * ratio);
+          height = Math.floor(height * ratio);
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          reject(new Error('Could not get canvas context'));
+          return;
+        }
+
+        ctx.drawImage(img, 0, 0, width, height);
+        const resizedDataUrl = canvas.toDataURL('image/jpeg', quality);
+
+        resolve({ dataUrl: resizedDataUrl, width, height });
+      };
+      img.onerror = () => reject(new Error('Failed to load image'));
+      img.src = dataUrl;
+    });
+  };
+
+  const processImage = async (
+    imageData: ImageData | Blob,
+    options: ProcessingOptions
   ): Promise<{ dataUrl: string; width: number; height: number }> => {
     setIsProcessing(true);
     
     try {
-      const img = typeof imgOrUrl === 'string' ? await loadImage(imgOrUrl) : imgOrUrl;
-
-      // Calculate dimensions while maintaining aspect ratio
-      let width = img.naturalWidth;
-      let height = img.naturalHeight;
+      let dataUrl: string;
       
-      if (width > maxWidth || height > maxHeight) {
-        const ratio = Math.min(maxWidth / width, maxHeight / height);
-        width = Math.floor(width * ratio);
-        height = Math.floor(height * ratio);
+      if (imageData instanceof Blob) {
+        dataUrl = await fileToDataUrl(new File([imageData], 'image.jpg', { type: 'image/jpeg' }));
+      } else if (imageData.url) {
+        dataUrl = imageData.url;
+      } else {
+        throw new Error('Invalid image data');
       }
       
-      // Create canvas and draw resized image
-      const canvas = document.createElement('canvas');
-      canvas.width = width;
-      canvas.height = height;
-      const ctx = canvas.getContext('2d');
+      const result = await resizeImage(
+        dataUrl, 
+        options.width || 1200,
+        options.height || 1200,
+        options.quality || 0.8
+      );
       
-      if (!ctx) {
-        throw new Error('Could not get canvas context');
-      }
-      
-      // Draw image with better quality
-      ctx.imageSmoothingEnabled = true;
-      ctx.imageSmoothingQuality = 'high';
-      ctx.drawImage(img, 0, 0, width, height);
-      
-      // Convert to data URL
-      const dataUrl = canvas.toDataURL('image/jpeg', quality);
-      
-      return { dataUrl, width, height };
-    } catch (error) {
-      console.error('Error resizing image:', error);
-      toast.error('Error processing image');
-      throw error;
+      return result;
     } finally {
       setIsProcessing(false);
     }
   };
-  
-  /**
-   * Creates a thumbnail from an image
-   * @param imgOrUrl - The image or URL to create a thumbnail from
-   * @param size - The maximum size of the thumbnail (default: 200)
-   * @returns A promise that resolves to the thumbnail data URL
-   */
+
+  // Add the createThumbnail function
   const createThumbnail = async (
-    imgOrUrl: string | HTMLImageElement | File,
-    size = 200
+    file: File,
+    maxWidth: number = 300,
+    maxHeight: number = 300
   ): Promise<string> => {
-    // Handle different input types
-    let imgSource: string | HTMLImageElement;
-    
-    if (imgOrUrl instanceof File) {
-      imgSource = await fileToDataUrl(imgOrUrl);
-    } else {
-      imgSource = imgOrUrl;
+    try {
+      const dataUrl = await fileToDataUrl(file);
+      const result = await resizeImage(dataUrl, maxWidth, maxHeight, 0.7);
+      return result.dataUrl;
+    } catch (error) {
+      console.error("Error creating thumbnail:", error);
+      return '';
     }
-    
-    const { dataUrl } = await resizeImage(imgSource, size, size, 0.7);
-    return dataUrl;
   };
-  
+
+  const enhanceStadiumPhoto = async (imageDataUrl: string): Promise<string> => {
+    // Simplified implementation - in a real app would use more sophisticated image processing
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          resolve(imageDataUrl); // Return original if context not available
+          return;
+        }
+
+        // Draw image to canvas
+        ctx.drawImage(img, 0, 0);
+        
+        // Get image data for manipulation
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imageData.data;
+        
+        // Simple enhancement: increase contrast and brighten slightly
+        for (let i = 0; i < data.length; i += 4) {
+          // Increase contrast
+          data[i] = Math.min(255, Math.max(0, (data[i] - 128) * 1.2 + 128)); // Red
+          data[i + 1] = Math.min(255, Math.max(0, (data[i + 1] - 128) * 1.2 + 128)); // Green
+          data[i + 2] = Math.min(255, Math.max(0, (data[i + 2] - 128) * 1.2 + 128)); // Blue
+          
+          // Brighten slightly
+          data[i] = Math.min(255, data[i] * 1.1);
+          data[i + 1] = Math.min(255, data[i + 1] * 1.1);
+          data[i + 2] = Math.min(255, data[i + 2] * 1.1);
+        }
+        
+        ctx.putImageData(imageData, 0, 0);
+        resolve(canvas.toDataURL('image/jpeg', 0.85));
+      };
+      
+      img.src = imageDataUrl;
+    });
+  };
+
   return {
-    isProcessing,
-    loadImage,
     fileToDataUrl,
     resizeImage,
-    createThumbnail
+    processImage,
+    enhanceStadiumPhoto,
+    createThumbnail,
+    isProcessing
   };
 };
 

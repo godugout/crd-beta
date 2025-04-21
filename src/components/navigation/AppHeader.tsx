@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Search, PlusCircle, Menu, X, Palette, Sparkles, LogIn } from 'lucide-react';
@@ -33,15 +34,6 @@ const AppHeader: React.FC = () => {
     borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
   };
 
-  // Primary navigation links
-  const primaryNavLinks = [
-    { to: '/', label: 'Home' },
-    { to: '/gallery', label: 'Gallery' },
-    { to: '/collections', label: 'Collections' },
-    { to: '/cards/create', label: 'Create' },
-    { to: '/labs', label: 'Labs' }
-  ];
-
   return (
     <header className="sticky top-0 z-50 w-full" style={headerStyle}>
       <div className="container mx-auto px-4">
@@ -59,17 +51,18 @@ const AppHeader: React.FC = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-1">
-            {primaryNavLinks.map((link) => (
+            {mainNavItems.map((item) => (
               <Link
-                key={link.to}
-                to={link.to}
+                key={item.path}
+                to={item.path}
                 className={`px-4 py-2 rounded-lg transition-colors ${
-                  isActive(link.to)
+                  location.pathname === item.path || (item.path !== '/' && location.pathname.startsWith(item.path + '/'))
                     ? 'bg-white/10 text-white font-medium'
                     : 'text-white/80 hover:bg-white/5 hover:text-white'
                 }`}
+                onClick={closeMenu}
               >
-                {link.label}
+                {item.title}
               </Link>
             ))}
           </nav>
@@ -114,18 +107,18 @@ const AppHeader: React.FC = () => {
       {isMenuOpen && (
         <div className="md:hidden border-t border-white/10 animate-in fade-in slide-in-from-top-5 duration-300" style={{ backgroundColor: 'rgba(0, 0, 0, 0.9)' }}>
           <div className="container px-4 py-3 space-y-1">
-            {primaryNavLinks.map((link) => (
+            {mainNavItems.map((item) => (
               <Link
-                key={link.to}
-                to={link.to}
+                key={item.path}
+                to={item.path}
                 className={`block px-3 py-2 text-base font-medium rounded-lg ${
-                  isActive(link.to)
+                  location.pathname === item.path || (item.path !== '/' && location.pathname.startsWith(item.path + '/'))
                     ? 'bg-white/10 text-white'
                     : 'text-white/80 hover:bg-white/5 hover:text-white'
                 }`}
                 onClick={closeMenu}
               >
-                {link.label}
+                {item.title}
               </Link>
             ))}
             
@@ -167,3 +160,4 @@ const AppHeader: React.FC = () => {
 };
 
 export default AppHeader;
+

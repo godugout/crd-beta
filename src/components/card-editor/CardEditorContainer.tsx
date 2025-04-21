@@ -11,6 +11,12 @@ import CardEditorNavigation from './components/CardEditorNavigation';
 import CardEditorPreview from './components/CardEditorPreview';
 import CardEditorActions from './components/CardEditorActions';
 import { DEFAULT_DESIGN_METADATA } from '@/lib/utils/cardDefaults';
+import ThreeColumnLayout from '../card-creation/layouts/ThreeColumnLayout';
+import TemplatesPanel from './panels/TemplatesPanel';
+import CardPreviewPanel from './panels/CardPreview';
+import LayersPanel from './panels/LayersPanel';
+import { v4 as uuidv4 } from 'uuid';
+import { Card } from '@/lib/types';
 
 interface CardEditorContainerProps {
   card?: any;
@@ -54,18 +60,28 @@ const CardEditorContainer: React.FC<CardEditorContainerProps> = ({
   );
   
   const handleSubmit = async () => {
-    const cardData = {
-      ...cardState.getCardData(),
+    const currentDate = new Date().toISOString();
+    
+    const cardData: Partial<Card> = {
+      id: card?.id || uuidv4(),
+      title: cardState.title,
+      description: cardState.description || '',
+      imageUrl: cardState.imageUrl || '',
+      thumbnailUrl: cardState.imageUrl || '',
+      tags: cardState.tags || [],
+      effects: cardState.selectedEffects || [],
+      player: cardState.player,
+      team: cardState.team,
+      year: cardState.year,
+      userId: 'current-user',
+      createdAt: card?.createdAt || currentDate,
+      updatedAt: currentDate,
       designMetadata: {
+        ...DEFAULT_DESIGN_METADATA,
         cardStyle: cardState.cardStyle || DEFAULT_DESIGN_METADATA.cardStyle,
-        textStyle: DEFAULT_DESIGN_METADATA.textStyle,
-        cardMetadata: DEFAULT_DESIGN_METADATA.cardMetadata,
-        marketMetadata: DEFAULT_DESIGN_METADATA.marketMetadata,
         effects: cardState.selectedEffects || [],
-        player: cardState.player,
-        team: cardState.team,
-        year: cardState.year,
-      }
+      },
+      layers: cardState.layers || [],
     };
     
     try {
@@ -77,7 +93,7 @@ const CardEditorContainer: React.FC<CardEditorContainerProps> = ({
       
       if (card) {
         // Update existing card
-        await updateCard(card.id, cardData);
+        await updateCard(cardData);
         toast.success('CRD updated successfully');
       } else {
         // Add new card
@@ -105,50 +121,30 @@ const CardEditorContainer: React.FC<CardEditorContainerProps> = ({
   };
 
   return (
-    <div className={`max-w-7xl mx-auto ${className}`}>
-      <CardEditorHeader title={card ? "Edit" : "Create a"} />
-      
-      <CardEditorNavigation 
-        steps={steps} 
-        currentStep={currentStep} 
-        onStepClick={goToStep}
-        validateCurrentStep={validateCurrentStep}
-      />
-      
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
-        <div className="lg:col-span-2">
-          <div className="bg-white rounded-lg shadow-sm border p-4 md:p-6">
-            <StepContent 
-              currentStep={currentStep}
-              cardState={cardState}
-            />
-          </div>
-          
-          <CardEditorActions 
-            onPrevious={goToPreviousStep}
-            onNext={goToNextStep}
-            onSubmit={handleSubmit}
-            onCancel={handleCancel}
-            isFirstStep={isFirstStep}
-            isLastStep={isLastStep}
+    <div className={`${className}`}>
+      <ThreeColumnLayout
+        leftPanel={
+          <TemplatesPanel 
+            selectedTemplate={cardState.cardStyle?.template}
+            onTemplateSelect={(template) => cardState.setCardStyle({ ...cardState.cardStyle, template })}
           />
-          
-          <div className="mt-4 flex justify-center md:justify-end">
-            <p className="text-xs text-gray-500">Auto saving</p>
-          </div>
-        </div>
-        
-        <CardEditorPreview 
-          imageUrl={cardState.imageUrl}
-          title={cardState.title}
-          description={cardState.description}
-          tags={cardState.tags}
-          player={cardState.player}
-          team={cardState.team}
-          year={cardState.year}
-          cardStyle={cardState.cardStyle}
-        />
-      </div>
+        }
+        mainContent={
+          <CardPreviewPanel
+            cardData={cardState.getCardData()}
+            onSave={handleSubmit}
+            onCancel={handleCancel}
+          />
+        }
+        rightPanel={
+          <LayersPanel
+            layers={cardState.layers}
+            onLayerUpdate={cardState.updateLayer}
+            onLayerDelete={cardState.deleteLayer}
+            onLayerReorder={cardState.reorderLayers}
+          />
+        }
+      />
     </div>
   );
 };

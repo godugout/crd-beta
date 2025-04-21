@@ -1,11 +1,10 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { Upload, X, Image as ImageIcon } from 'lucide-react';
 
 interface MediaUploaderProps {
@@ -34,11 +33,7 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
       
       // Validate file size
       if (selectedFile.size > maxSizeMB * 1024 * 1024) {
-        toast({
-          title: 'File too large',
-          description: `File size should not exceed ${maxSizeMB}MB`,
-          variant: 'destructive'
-        });
+        toast.error(`File size should not exceed ${maxSizeMB}MB`);
         return;
       }
       
@@ -67,11 +62,7 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
 
   const handleUpload = async () => {
     if (!file) {
-      toast({
-        title: 'No file selected',
-        description: 'Please select a file to upload',
-        variant: 'destructive'
-      });
+      toast.error('Please select a file to upload');
       return;
     }
 
@@ -104,17 +95,10 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
         tags: ''
       });
       
-      toast({
-        title: 'Upload successful',
-        description: 'Your file has been uploaded',
-      });
+      toast.success('Your file has been uploaded');
     } catch (error) {
       console.error('Upload error:', error);
-      toast({
-        title: 'Upload failed',
-        description: 'There was a problem uploading your file',
-        variant: 'destructive'
-      });
+      toast.error('There was a problem uploading your file');
     } finally {
       setIsUploading(false);
     }
@@ -134,21 +118,13 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
       
       // Check if it's an image
       if (!droppedFile.type.startsWith('image/')) {
-        toast({
-          title: 'Invalid file type',
-          description: 'Please upload an image file',
-          variant: 'destructive'
-        });
+        toast.error('Please upload an image file');
         return;
       }
       
       // Validate file size
       if (droppedFile.size > maxSizeMB * 1024 * 1024) {
-        toast({
-          title: 'File too large',
-          description: `File size should not exceed ${maxSizeMB}MB`,
-          variant: 'destructive'
-        });
+        toast.error(`File size should not exceed ${maxSizeMB}MB`);
         return;
       }
       

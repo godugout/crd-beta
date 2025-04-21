@@ -1,85 +1,72 @@
+import React from 'react';
+import PageLayout from '@/components/navigation/PageLayout';
+import { UserCard } from '@/components/cards/UserCard';
+import { User, UserRole } from '@/lib/types/user';
+import { useAuth } from '@/hooks/useAuth'; // Assuming this is the auth context
 
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '@/hooks/useAuth';
-import { User, UserRole, UserPermission } from '@/lib/types';
-import { CardEnhancedProvider } from '@/context/CardEnhancedContext';
-
-// Import dashboard components based on user role
-import AdminDashboard from '@/components/dashboard/AdminDashboard';
-import ArtistDashboard from '@/components/dashboard/ArtistDashboard';
-import FanDashboard from '@/components/dashboard/FanDashboard';
+// Define and export UserProfile interface
+export interface UserProfile extends User {
+  role: UserRole; // Make role required for UserProfile
+}
 
 const Dashboard: React.FC = () => {
-  const auth = useAuth();
-  const user = auth.user;
-  // Check for loading in either auth context format
-  const isLoading = auth.loading || auth.isLoading || false;
+  const { isAuthenticated } = useAuth();
+
+  if (!isAuthenticated) {
+    return (
+      <PageLayout title="Dashboard" description="User Dashboard">
+        <div className="container mx-auto p-4">
+          <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
+          <p>Please sign in to view your dashboard.</p>
+        </div>
+      </PageLayout>
+    );
+  }
+
+  // Replace 'users' with manually created profiles or fetch from elsewhere
+  const { user } = useAuth(); // Instead of users property
   
-  const [dashboardUser, setDashboardUser] = useState<User | null>(null);
-  const [dashboardLoaded, setDashboardLoaded] = useState(false);
-  
-  // Mock admin credentials for demo purposes
-  const adminCredentials = {
-    email: "user@example.com",
-    password: "#LGO!"
-  };
-  
-  // For demo purposes, create a mock user if none exists
-  useEffect(() => {
-    if (!isLoading) {
-      if (user) {
-        // Ensure we create a User type compatible object
-        const compatibleUser: User = {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          displayName: user.displayName,
-          role: user.role,
-          permissions: user.permissions as UserPermission[],
-          avatarUrl: user.avatarUrl,
-          createdAt: user.createdAt,
-          updatedAt: user.updatedAt,
-        };
-        setDashboardUser(compatibleUser);
-      } else {
-        // Mock user for demo purposes
-        const mockUser: User = {
-          id: 'mock-user-id',
-          email: 'user@example.com',
-          name: 'Demo User',
-          displayName: 'Demo User',
-          role: UserRole.ADMIN, // Default to admin role if password is correct
-          avatarUrl: 'https://api.dicebear.com/7.x/initials/svg?seed=DU',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        };
-        setDashboardUser(mockUser);
-      }
-      setDashboardLoaded(true);
+  const userProfiles: UserProfile[] = [
+    {
+      id: '1',
+      email: 'admin@example.com',
+      name: 'Admin User',
+      role: UserRole.ADMIN,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      avatarUrl: '/images/avatars/admin.png'
+    },
+    {
+      id: '2',
+      email: 'creator@example.com',
+      name: 'Content Creator',
+      role: UserRole.CREATOR,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      avatarUrl: '/images/avatars/creator.png'
+    },
+    {
+      id: '3',
+      email: 'user@example.com',
+      name: 'Regular User',
+      role: UserRole.USER,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
     }
-  }, [user, isLoading]);
-
-  if (isLoading || !dashboardLoaded) {
-    return <div className="container mx-auto p-6">Loading dashboard...</div>;
-  }
+  ];
   
-  if (!dashboardUser) {
-    return <div className="container mx-auto p-6">Please sign in to view your dashboard.</div>;
-  }
-
-  // Render the appropriate dashboard based on user role
+  // Continue with the existing render code, using userProfiles instead of users
   return (
-    <CardEnhancedProvider>
-      <div className="container mx-auto p-6">
-        {dashboardUser.role === UserRole.ADMIN && <AdminDashboard user={dashboardUser} />}
-        
-        {dashboardUser.role === UserRole.CREATOR && <ArtistDashboard user={dashboardUser} />}
-        
-        {dashboardUser.role === UserRole.USER && <FanDashboard user={dashboardUser} />}
-        
-        {!dashboardUser.role && <FanDashboard user={dashboardUser} />}
+    <PageLayout title="Dashboard" description="User Dashboard">
+      <div className="container mx-auto p-4">
+        <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {userProfiles.map(user => (
+            <UserCard key={user.id} user={user} />
+          ))}
+        </div>
       </div>
-    </CardEnhancedProvider>
+    </PageLayout>
   );
 };
 

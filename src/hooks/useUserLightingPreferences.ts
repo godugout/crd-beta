@@ -1,111 +1,51 @@
 
 import { useState, useEffect, useCallback } from 'react';
-import { LightingSettings, LightingPreset } from './useCardLighting';
-
-export interface LightingPreferences {
-  environmentType: LightingPreset;
-  intensity: number;
-  autoRotate: boolean;
-  primaryLight?: {
-    x: number;
-    y: number;
-    z: number;
-    intensity: number;
-    color: string;
-  };
-  ambientLight?: {
-    intensity: number;
-    color: string;
-  };
-  envMapIntensity?: number;
-  useDynamicLighting?: boolean;
-  followPointer?: boolean;
-}
+import { LightingSettings, DEFAULT_LIGHTING } from '@/hooks/useCardLighting';
 
 export const useUserLightingPreferences = () => {
-  const [preferences, setPreferences] = useState<LightingPreferences | null>(null);
+  const [preferences, setPreferences] = useState<LightingSettings | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load preferences from localStorage on component mount
+  // Load preferences on component mount
   useEffect(() => {
-    try {
-      setIsLoading(true);
-      const savedPrefs = localStorage.getItem('cardLightingPreferences');
-      if (savedPrefs) {
-        setPreferences(JSON.parse(savedPrefs));
-      } else {
-        // Default preferences
-        const defaultPrefs: LightingPreferences = {
-          environmentType: 'studio',
-          intensity: 1.0,
-          autoRotate: false,
-          primaryLight: {
-            x: 5,
-            y: 5,
-            z: 5,
-            intensity: 1.0,
-            color: '#ffffff'
-          },
-          ambientLight: {
-            intensity: 0.5,
-            color: '#f0f0ff'
-          },
-          envMapIntensity: 1.0,
-          useDynamicLighting: true,
-          followPointer: false
-        };
-        setPreferences(defaultPrefs);
-        localStorage.setItem('cardLightingPreferences', JSON.stringify(defaultPrefs));
+    setIsLoading(true);
+    const savedPreferences = localStorage.getItem('userLightingPreferences');
+    if (savedPreferences) {
+      try {
+        const parsedPreferences = JSON.parse(savedPreferences) as LightingSettings;
+        setPreferences(parsedPreferences);
+      } catch (error) {
+        console.error('Error parsing lighting preferences:', error);
+        // Use default preferences if parsing fails
+        setPreferences(DEFAULT_LIGHTING.studio);
       }
-    } catch (error) {
-      console.error('Error loading lighting preferences:', error);
-      // Set fallback preferences
-      setPreferences({
-        environmentType: 'studio',
-        intensity: 1.0,
-        autoRotate: false,
-        primaryLight: {
-          x: 5,
-          y: 5,
-          z: 5,
-          intensity: 1.0,
-          color: '#ffffff'
-        },
-        ambientLight: {
-          intensity: 0.5,
-          color: '#f0f0ff'
-        },
-        envMapIntensity: 1.0,
-        useDynamicLighting: true,
-        followPointer: false
-      });
-    } finally {
-      setIsLoading(false);
+    } else {
+      // Use default preferences if none are saved
+      setPreferences(DEFAULT_LIGHTING.studio);
     }
+    setIsLoading(false);
   }, []);
 
-  // Save preferences to localStorage
-  const savePreferences = useCallback((settings: Partial<LightingSettings>) => {
+  // Save preferences
+  const savePreferences = useCallback((settings: LightingSettings) => {
     try {
-      const prefsToSave: LightingPreferences = {
-        environmentType: settings.environmentType || 'studio',
-        intensity: settings.envMapIntensity || 1.0,
-        autoRotate: settings.autoRotate || false,
-        primaryLight: settings.primaryLight,
-        ambientLight: settings.ambientLight,
-        envMapIntensity: settings.envMapIntensity,
-        useDynamicLighting: settings.useDynamicLighting,
-        followPointer: settings.followPointer
-      };
-      
-      setPreferences(prefsToSave);
-      localStorage.setItem('cardLightingPreferences', JSON.stringify(prefsToSave));
+      localStorage.setItem('userLightingPreferences', JSON.stringify(settings));
+      setPreferences(settings);
     } catch (error) {
       console.error('Error saving lighting preferences:', error);
     }
   }, []);
 
-  return { preferences, isLoading, savePreferences };
-};
+  // Reset preferences to defaults
+  const resetPreferences = useCallback(() => {
+    localStorage.removeItem('userLightingPreferences');
+    setPreferences(DEFAULT_LIGHTING.studio);
+  }, []);
 
-export default useUserLightingPreferences;
+  return {
+    preferences,
+    isLoading,
+    savePreferences,
+    resetPreferences
+  };
+};

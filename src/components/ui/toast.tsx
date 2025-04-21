@@ -1,3 +1,4 @@
+
 import * as React from "react"
 import * as ToastPrimitives from "@radix-ui/react-toast"
 import { cva } from "class-variance-authority"
@@ -27,10 +28,16 @@ const Toast = React.forwardRef<
   React.ElementRef<typeof ToastPrimitives.Root>,
   React.ComponentPropsWithoutRef<typeof ToastPrimitives.Root> & Pick<ToasterToastWithStatus, "variant">
 >(({ className, variant, ...props }, ref) => {
+  // Convert "error" variant to "destructive" for radix-ui compatibility
+  let safeVariant = variant;
+  if (variant === "error") {
+    safeVariant = "destructive";
+  }
+  
   return (
     <ToastPrimitives.Root
       ref={ref}
-      className={cn(toastStyles({ variant }), className)}
+      className={cn(toastStyles({ variant: safeVariant }), className)}
       {...props}
     />
   )

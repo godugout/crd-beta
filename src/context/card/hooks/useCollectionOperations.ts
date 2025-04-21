@@ -9,16 +9,21 @@ export const useCollectionOperations = () => {
   const addCollection = (collectionData: Partial<Collection>): Collection => {
     const newCollection: Collection = {
       id: collectionData.id || uuidv4(),
-      name: collectionData.name || 'Untitled Collection',
+      title: collectionData.title || collectionData.name || 'Untitled Collection',
+      name: collectionData.name || collectionData.title || 'Untitled Collection',
       description: collectionData.description || '',
       coverImageUrl: collectionData.coverImageUrl || '',
+      thumbnailUrl: collectionData.thumbnailUrl || '',
       userId: collectionData.userId || 'anonymous',
       cards: collectionData.cards || [],
-      cardIds: collectionData.cardIds || [],
+      cardIds: collectionData.cardIds || [], 
       visibility: collectionData.visibility || 'public',
+      teamId: collectionData.teamId,
       allowComments: collectionData.allowComments !== undefined ? collectionData.allowComments : true,
       designMetadata: collectionData.designMetadata || {},
       isPublic: collectionData.isPublic !== undefined ? collectionData.isPublic : true,
+      tags: collectionData.tags || [],
+      featured: collectionData.featured || false,
       createdAt: new Date().toISOString(), 
       updatedAt: new Date().toISOString(),
     };
@@ -69,7 +74,9 @@ export const useCollectionOperations = () => {
           if (!cards.some(c => c.id === card.id)) {
             return {
               ...collection,
-              cards: [...cards, card]
+              cards: [...cards, card],
+              // Also update cardIds for compatibility
+              cardIds: [...(collection.cardIds || []), card.id]
             };
           }
         }
@@ -92,7 +99,9 @@ export const useCollectionOperations = () => {
         if (collection.id === collectionId && collection.cards) {
           return {
             ...collection,
-            cards: collection.cards.filter(card => card.id !== cardId)
+            cards: collection.cards.filter(card => card.id !== cardId),
+            // Also update cardIds for compatibility
+            cardIds: (collection.cardIds || []).filter(id => id !== cardId)
           };
         }
         return collection;

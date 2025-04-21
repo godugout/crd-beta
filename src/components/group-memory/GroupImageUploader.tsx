@@ -1,108 +1,117 @@
 
 import React, { useState } from 'react';
-import { UploadFileItem } from './hooks/useUploadHandling';
-import ProcessingQueue from './components/ProcessingQueue';
-import ImageUploadArea from './components/ImageUploadArea';
-import { toast } from 'sonner';
-import { useImageProcessing } from '@/hooks/useImageProcessing';
-import { storageOperations } from '@/lib/supabase';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { GroupUploadType } from '@/lib/types';
+import useUploadHandling, { UploadTypeSelectorProps } from './hooks/useUploadHandling';
+import { Upload, UploadCloud } from 'lucide-react';
 
-// Update props for ProcessingQueue
-interface GroupImageUploaderProps {
+// Upload Type Selector Component
+const UploadTypeSelector: React.FC<UploadTypeSelectorProps> = ({
+  uploadType,
+  onChange
+}) => {
+  return (
+    <div className="flex space-x-2 mb-4">
+      <Button
+        variant={uploadType === 'single' ? 'default' : 'outline'}
+        onClick={() => onChange('single')}
+        className="flex-1"
+      >
+        Single
+      </Button>
+      <Button
+        variant={uploadType === 'multi' ? 'default' : 'outline'}
+        onClick={() => onChange('multi')}
+        className="flex-1"
+      >
+        Multiple
+      </Button>
+      <Button
+        variant={uploadType === 'batch' ? 'default' : 'outline'}
+        onClick={() => onChange('batch')}
+        className="flex-1"
+      >
+        Batch
+      </Button>
+    </div>
+  );
+};
+
+export interface GroupImageUploaderProps {
+  onImageSelect: (files: File[]) => void;
   onComplete?: (cardIds: string[]) => void;
   className?: string;
 }
 
-const GroupImageUploader: React.FC<GroupImageUploaderProps> = ({ onComplete, className }) => {
-  const [uploadedFiles, setUploadedFiles] = useState<UploadFileItem[]>([]);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const { createThumbnail } = useImageProcessing();
-
-  const handleFileSelected = async (file: File) => {
-    try {
-      // Basic validation
-      if (!file.type.includes('image/')) {
-        toast.error('Please select a valid image file');
-        return;
+const GroupImageUploader: React.FC<GroupImageUploaderProps> = ({
+  onImageSelect,
+  onComplete,
+  className
+}) => {
+  const [uploadType, setUploadType] = useState<GroupUploadType>('multi');
+  const { handleFileUpload, isUploading } = useUploadHandling();
+  
+  const handleFilesChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files.length > 0) {
+      const filesArray = Array.from(event.target.files);
+      onImageSelect(filesArray);
+      
+      // Process the files
+      const cardIds = handleFileUpload(filesArray);
+      
+      // Call onComplete callback if provided
+      if (onComplete) {
+        onComplete(cardIds);
       }
-      
-      // Create thumbnail
-      const dataUrl = await createThumbnail(file, 800);
-      
-      // Add to uploaded files
-      setUploadedFiles(prev => [...prev, { file, url: dataUrl }]);
-      
-      toast.success('Image added to processing queue');
-    } catch (error) {
-      console.error('Error handling file:', error);
-      toast.error('Failed to process image');
     }
   };
-
-  const handleRemoveFile = (index: number) => {
-    setUploadedFiles(prev => prev.filter((_, i) => i !== index));
-  };
-
-  const handleProcessUploads = async () => {
-    if (uploadedFiles.length === 0) {
-      toast.warning('No files to process');
-      return;
-    }
-    
-    try {
-      setIsProcessing(true);
-      
-      // Upload files to storage and process them
-      const processedCardIds = await Promise.all(uploadedFiles.map(async (item, index) => {
-        try {
-          // Upload to Supabase Storage
-          const uploadResult = await storageOperations.uploadImage(
-            item.file, 
-            'group-memories'
-          );
-          
-          if (!uploadResult.data) {
-            throw new Error('Upload failed');
-          }
-          
-          // In a real app, you would create database entries here
-          // For now, return a generated ID
-          return `card-${Date.now()}-${index}`;
-        } catch (err) {
-          console.error('Error processing file:', err);
-          throw err;
-        }
-      }));
-      
-      // Simulate processing time
-      setTimeout(() => {
-        // If onComplete is provided, call it with the processed card IDs
-        if (onComplete) {
-          onComplete(processedCardIds);
-        }
-        
-        setUploadedFiles([]); // Clear after processing
-        setIsProcessing(false);
-        toast.success(`Successfully processed ${processedCardIds.length} images`);
-      }, 1000);
-      
-    } catch (error) {
-      console.error('Error processing uploads:', error);
-      toast.error('Failed to process uploads');
-      setIsProcessing(false);
-    }
+  
+  const handleTypeChange = (type: GroupUploadType) => {
+    setUploadType(type);
   };
 
   return (
-    <div className={`space-y-6 ${className || ''}`}>
-      <ImageUploadArea onFileSelected={handleFileSelected} />
-      
-      <ProcessingQueue 
-        queue={uploadedFiles}
-        onRemoveFromQueue={handleRemoveFile}
-        onClearQueue={() => setUploadedFiles([])}
-        onProcessAll={handleProcessUploads}
+    <div className={className}>
+      <UploadTypeSelector
+        uploadType={uploadType}
+        onChange={handleTypeChange}
       />
+      
+      <Card className="border-dashed border-2 p-8 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors">
+        <input
+          type="file"
+          id="fileInput"
+          multiple={uploadType !== 'single'}
+          accept="image/*"
+          className="hidden"
+          onChange={handleFilesChange}
+          disabled={isUploading}
+        />
+        
+        <label htmlFor="fileInput" className="w-full h-full cursor-pointer">
+          <div className="flex flex-col items-center justify-center text-center">
+            {isUploading ? (
+              <div className="animate-pulse">
+                <Upload className="h-12 w-12 text-gray-400 mb-4" />
+                <p className="text-lg font-medium text-gray-700">Uploading...</p>
+              </div>
+            ) : (
+              <>
+                <UploadCloud className="h-12 w-12 text-gray-400 mb-4" />
+                <p className="text-lg font-medium text-gray-700">
+                  {uploadType === 'single' ? 'Upload Image' : 'Upload Images'}
+                </p>
+                <p className="text-sm text-gray-500 mt-2">
+                  {uploadType === 'single' 
+                    ? 'Click to select or drag and drop' 
+                    : 'Click to select multiple images or drag and drop them'}
+                </p>
+              </>
+            )}
+          </div>
+        </label>
+      </Card>
     </div>
   );
 };

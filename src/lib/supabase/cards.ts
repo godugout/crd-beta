@@ -1,4 +1,3 @@
-
 import { Card } from '../types';
 import { supabase } from './client';
 
@@ -11,7 +10,6 @@ export const cardOperations = {
       .order('created_at', { ascending: false });
       
     if (data) {
-      // Convert dates from strings to Date objects
       const processedCards = data.map(card => ({
         ...card,
         createdAt: new Date(card.created_at),
@@ -41,6 +39,28 @@ export const cardOperations = {
       } as unknown as Card;
       
       return { data: processedCard, error };
+    }
+    
+    return { data: null, error };
+  },
+  
+  getCardsByIds: async (ids: string[]): Promise<{ data: Card[] | null; error: any }> => {
+    if (!ids.length) return { data: [], error: null };
+    
+    const { data, error } = await supabase
+      .from('cards')
+      .select('*')
+      .in('id', ids);
+      
+    if (data) {
+      const processedCards = data.map(card => ({
+        ...card,
+        createdAt: new Date(card.created_at),
+        updatedAt: new Date(card.updated_at),
+        tags: card.tags || []
+      })) as unknown as Card[];
+      
+      return { data: processedCards, error };
     }
     
     return { data: null, error };
@@ -112,5 +132,29 @@ export const cardOperations = {
       .eq('id', id);
       
     return { error };
+  },
+  
+  addCardToCollection: async (cardId: string, collectionId: string): Promise<{ data: any; error: any }> => {
+    const { data, error } = await supabase
+      .from('collection_cards')
+      .insert({
+        card_id: cardId,
+        collection_id: collectionId
+      })
+      .select();
+      
+    return { data, error };
+  },
+  
+  removeCardFromCollection: async (cardId: string, collectionId: string): Promise<{ data: any; error: any }> => {
+    const { data, error } = await supabase
+      .from('collection_cards')
+      .delete()
+      .match({
+        card_id: cardId,
+        collection_id: collectionId
+      });
+      
+    return { data, error };
   }
 };

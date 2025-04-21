@@ -1,49 +1,133 @@
+// Default values and fallbacks for card rendering
 
-import { DesignMetadata, CardStyle, TextStyle } from '@/lib/types';
+// Default image URLs for when card images fail to load
+export const FALLBACK_IMAGE_URL = 'https://images.unsplash.com/photo-1518770660439-4636190af475';
+export const FALLBACK_FRONT_IMAGE_URL = 'https://images.unsplash.com/photo-1518770660439-4636190af475';
+export const FALLBACK_BACK_IMAGE_URL = 'https://images.unsplash.com/photo-1509114397022-ed747cca3f65';
 
-// Fallback image URL for when a card image doesn't load
-export const FALLBACK_IMAGE_URL = '/images/card-placeholder.png';
-export const FALLBACK_CARD_BACK_URL = '/images/card-back-placeholder.png';
-
-// Default CardStyle
-export const DEFAULT_CARD_STYLE: CardStyle = {
-  template: 'standard',
-  effect: 'none',
-  borderRadius: '8px',
-  borderColor: '#000000',
-  borderWidth: 1,
-  shadowColor: 'rgba(0,0,0,0.2)',
-  frameWidth: 2,
-  frameColor: '#000000',
-  backgroundColor: '#ffffff'
-};
-
-// Default TextStyle
-export const DEFAULT_TEXT_STYLE: TextStyle = {
-  fontFamily: 'Inter',
-  fontSize: '14px',
-  fontWeight: '400',
-  color: '#000000',
-  titleColor: '#000000',
-  titleAlignment: 'center',
-  titleWeight: 'bold',
-  descriptionColor: '#333333'
-};
-
-// Complete default DesignMetadata
-export const DEFAULT_DESIGN_METADATA: DesignMetadata = {
-  cardStyle: DEFAULT_CARD_STYLE,
-  textStyle: DEFAULT_TEXT_STYLE,
+// Default design metadata for cards
+export const DEFAULT_DESIGN_METADATA = {
+  cardStyle: {
+    template: 'standard',
+    effect: 'standard',
+    borderRadius: '8px',
+    borderColor: '#ffffff',
+    shadowColor: 'rgba(0,0,0,0.3)',
+    backgroundColor: '#000000',
+    frameColor: '#ffffff',
+    frameWidth: 2,
+    teamSpecific: false
+  },
+  textStyle: {
+    fontFamily: '"Inter", system-ui, sans-serif',
+    titleColor: '#ffffff',
+    descriptionColor: '#e0e0e0',
+    titleAlignment: 'center',
+    titleWeight: 'bold'
+  },
   cardMetadata: {
-    category: 'Standard',
-    series: 'Base',
+    cardNumber: '',
     cardType: 'Standard',
-    cardNumber: '1',
-    artist: 'Unknown'
+    series: 'Base',
+    category: 'Standard', // Added required category field
+    artist: '',
+    rarity: 'Common'
   },
   marketMetadata: {
     isPrintable: false,
     isForSale: false,
-    includeInCatalog: false
+    includeInCatalog: true,
+    price: 0
+  },
+  stats: {}
+};
+
+// Default rendering quality presets
+export const RENDERING_QUALITY_PRESETS = {
+  high: {
+    effectDetail: 1.0,
+    lightingQuality: 'pbr',
+    reflectionIntensity: 0.8,
+    textureSize: 2048,
+    animationEnabled: true,
+    shadowEnabled: true
+  },
+  medium: {
+    effectDetail: 0.7,
+    lightingQuality: 'standard',
+    reflectionIntensity: 0.6,
+    textureSize: 1024,
+    animationEnabled: true,
+    shadowEnabled: true
+  },
+  low: {
+    effectDetail: 0.4,
+    lightingQuality: 'basic',
+    reflectionIntensity: 0.3,
+    textureSize: 512,
+    animationEnabled: false,
+    shadowEnabled: false
+  }
+};
+
+// Detect device performance tiers
+export const detectDevicePerformance = (): 'high' | 'medium' | 'low' => {
+  // Check for hardware capabilities
+  const cores = navigator.hardwareConcurrency || 2;
+  const memory = (navigator as any).deviceMemory || 4;
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  const isOldBrowser = !window.requestAnimationFrame || !window.performance;
+  
+  // Estimate device capability
+  if (cores >= 8 && memory >= 4 && !isMobile && !isOldBrowser) {
+    return 'high';
+  } else if (cores <= 2 || memory <= 2 || (isMobile && isOldBrowser)) {
+    return 'low';
+  } else {
+    return 'medium';
+  }
+};
+
+// Get optimized effect settings based on device performance
+export const getOptimizedEffectSettings = (
+  devicePerformance: 'high' | 'medium' | 'low', 
+  activeEffects: string[]
+) => {
+  const settings = {...RENDERING_QUALITY_PRESETS[devicePerformance]};
+  
+  // Further reduce quality for multiple premium effects
+  const premiumEffects = activeEffects.filter(e => 
+    ['Holographic', 'Refractor', 'Superfractor'].includes(e)
+  );
+  
+  // Fix the comparison issue by ensuring consistent types
+  if (premiumEffects.length > 1 && devicePerformance !== 'high') {
+    return {
+      ...settings,
+      effectDetail: settings.effectDetail * 0.7,
+      animationEnabled: false
+    };
+  }
+  
+  return settings;
+};
+
+// Format to use for rendering text on cards
+export const CARD_TEXT_FORMATS = {
+  title: {
+    fontFamily: '"Inter", system-ui, sans-serif',
+    fontSize: '20px',
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+    textAlign: 'center',
+    textShadow: '0 1px 2px rgba(0,0,0,0.5)'
+  },
+  description: {
+    fontFamily: '"Inter", system-ui, sans-serif',
+    fontSize: '14px',
+    fontWeight: 'normal',
+    color: '#E0E0E0',
+    textAlign: 'center',
+    textShadow: '0 1px 1px rgba(0,0,0,0.5)'
   }
 };

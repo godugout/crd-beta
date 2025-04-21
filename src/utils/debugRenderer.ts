@@ -1,61 +1,39 @@
 
-interface RenderingInfo {
-  visible?: boolean;
-  position?: { x?: number; y?: number; z?: number };
-  rotation?: { x?: number; y?: number; z?: number };
-  scale?: { x?: number; y?: number; z?: number };
-  [key: string]: any;
-}
+/**
+ * Utility functions to help debug rendering issues in 3D scenes
+ */
 
-export const isDebugMode = (): boolean => {
-  return window.location.search.includes('debug=true') || 
-         localStorage.getItem('debugMode') === 'true';
-};
+// Enable debug mode globally
+export const DEBUG_RENDERING = false;
 
-export const logRenderingInfo = (component: string, info: RenderingInfo): void => {
-  if (isDebugMode()) {
-    console.log(`[${component}]`, info);
+// Log visibility issues for debugging
+export const logRenderingInfo = (
+  componentName: string, 
+  visibilityInfo: {
+    elementId?: string;
+    visible: boolean;
+    zIndex?: number;
+    opacity?: number;
+    position?: { x?: number; y?: number; z?: number };
   }
+) => {
+  if (!DEBUG_RENDERING) return;
+  
+  console.log(
+    `%c[${componentName}] Rendering debug:`,
+    'background: #334155; color: #94a3b8; padding: 2px 4px; border-radius: 2px;',
+    visibilityInfo
+  );
 };
 
-export const setDebugMode = (enabled: boolean): void => {
-  localStorage.setItem('debugMode', enabled ? 'true' : 'false');
-};
-
-export const getDebugStats = () => {
+// Style object helper for z-index and visibility
+export const getDebugStyles = (zIndex: number, visible: boolean = true) => {
+  if (!DEBUG_RENDERING) return {};
+  
   return {
-    memory: (window as any).performance?.memory ? {
-      jsHeapSizeLimit: ((window as any).performance.memory.jsHeapSizeLimit / 1048576).toFixed(2) + ' MB',
-      totalJSHeapSize: ((window as any).performance.memory.totalJSHeapSize / 1048576).toFixed(2) + ' MB',
-      usedJSHeapSize: ((window as any).performance.memory.usedJSHeapSize / 1048576).toFixed(2) + ' MB',
-    } : 'Not available',
-    fps: calculateFPS()
+    outline: '1px dashed rgba(255,0,0,0.5)',
+    position: 'relative' as const,
+    zIndex: zIndex,
+    opacity: visible ? 1 : 0.3
   };
 };
-
-// Simple FPS calculator
-let lastFrameTime = performance.now();
-let frameCount = 0;
-let fps = 0;
-
-function calculateFPS(): number {
-  const now = performance.now();
-  frameCount++;
-  
-  if (now - lastFrameTime >= 1000) {
-    fps = Math.round((frameCount * 1000) / (now - lastFrameTime));
-    frameCount = 0;
-    lastFrameTime = now;
-  }
-  
-  return fps;
-}
-
-// Update FPS calculation on animation frame
-if (typeof window !== 'undefined') {
-  const updateFPS = () => {
-    calculateFPS();
-    requestAnimationFrame(updateFPS);
-  };
-  requestAnimationFrame(updateFPS);
-}

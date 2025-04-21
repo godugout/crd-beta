@@ -1,75 +1,295 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, Suspense, useRef } from 'react';
+import { Canvas, useThree } from '@react-three/fiber';
+import { 
+  PerspectiveCamera, 
+  Environment, 
+  OrbitControls,
+  ContactShadows,
+  MeshReflectorMaterial,
+  AccumulativeShadows,
+  RandomizedLight,
+  Stats
+} from '@react-three/drei';
+import * as THREE from 'three';
 import { Card } from '@/lib/types';
-import { Canvas } from '@react-three/fiber';
-import { OrbitControls } from '@react-three/drei';
-import { toast } from 'sonner';
-import Card3DRenderer from '../card-viewer/Card3DRenderer';
+import { useCardLighting } from '@/hooks/useCardLighting';
+import { useUserLightingPreferences } from '@/hooks/useUserLightingPreferences';
+import { ChevronRight, ChevronLeft, Eye } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+import { mapLightingPresetToEnvironment, ValidEnvironmentPreset } from '@/utils/environmentPresets';
+import CardModel from '@/components/card-viewer/CardModel';
+import { FALLBACK_IMAGE_URL, FALLBACK_BACK_IMAGE_URL } from '@/lib/utils/cardDefaults';
+import ViewerSettings from '@/components/card-viewer/ViewerSettings';
 
-interface ImmersiveCardViewerProps {
+const DebugInfo = ({ show = false }) => {
+  if (!show) return null;
+  
+  return <Stats className="top-0 left-0" />;
+};
+
+const Environment3D = ({ preset = 'studio' }) => {
+  const environmentPreset = mapLightingPresetToEnvironment(preset) as ValidEnvironmentPreset;
+  
+  return (
+    <>
+      <Environment 
+        preset={environmentPreset}
+        background={false} 
+        blur={0.6} 
+      />
+      
+      <AccumulativeShadows temporal frames={30} alphaTest={0.85} opacity={0.75}>
+        <RandomizedLight amount={8} radius={10} intensity={0.8} position={[5, 5, -10]} />
+      </AccumulativeShadows>
+      
+      <ContactShadows 
+        opacity={0.5}
+        scale={10}
+        blur={2}
+        far={10}
+        resolution={256}
+        color="#000000"
+      />
+      
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.5, 0]}>
+        <planeGeometry args={[50, 50]} />
+        <MeshReflectorMaterial
+          blur={[300, 100]}
+          resolution={1024}
+          mixBlur={1}
+          mixStrength={50}
+          roughness={0.8}
+          depthScale={1.2}
+          minDepthThreshold={0.4}
+          maxDepthThreshold={1.4}
+          color="#101010"
+          metalness={0.6}
+          mirror={0.75}
+        />
+      </mesh>
+    </>
+  );
+};
+
+interface RealisticCardViewerProps {
   card: Card;
-  activeEffects: string[];
-  effectIntensities?: Record<string, number>;
+  isCustomizationOpen?: boolean;
+  onToggleCustomization?: () => void;
 }
 
-const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
+const RealisticCardViewer: React.FC<RealisticCardViewerProps> = ({ 
   card,
-  activeEffects = [],
-  effectIntensities = {}
+  isCustomizationOpen = false,
+  onToggleCustomization
 }) => {
   const [isFlipped, setIsFlipped] = useState(false);
+  const [isDebugMode, setIsDebugMode] = useState(false);
+  const [showViewerSettings, setShowViewerSettings] = useState(false);
+  const [activeEffects, setActiveEffects] = useState<string[]>([]);
+  const { preferences, savePreferences } = useUserLightingPreferences();
+  const {
+    lightingSettings,
+    updateLightingSetting,
+    applyPreset,
+    isUserCustomized,
+    toggleDynamicLighting
+  } = useCardLighting(preferences?.environmentType || 'studio');
   
-  // Ensure card has proper image URLs before rendering
-  if (!card.imageUrl) {
-    // Use a fallback image if none is provided
-    card = {
-      ...card,
-      imageUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475'
+  const cardWithFallback = {
+    ...card,
+    imageUrl: card.imageUrl || FALLBACK_IMAGE_URL,
+    backImageUrl: card.backImageUrl || FALLBACK_BACK_IMAGE_URL
+  };
+
+  useEffect(() => {
+    if (isUserCustomized && lightingSettings) {
+      savePreferences(lightingSettings);
+    }
+  }, [lightingSettings, isUserCustomized, savePreferences]);
+  
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.shiftKey && e.key === 'D') {
+        setIsDebugMode(prev => !prev);
+        console.log("Debug mode:", !isDebugMode);
+      }
     };
-    console.log("Using fallback image for card:", card.id);
-  }
+    
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isDebugMode]);
+
+  useEffect(() => {
+    if (card && card.effects) {
+      setActiveEffects(card.effects);
+    }
+  }, [card]);
+
+  const effectIntensities = {
+    Holographic: 0.7,
+    Shimmer: 0.8,
+    Refractor: 0.6,
+    Vintage: 0.7
+  };
+  
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  
+  useEffect(() => {
+    return () => {
+      if (canvasRef.current) {
+        const gl = canvasRef.current.getContext('webgl2') || canvasRef.current.getContext('webgl');
+        if (gl) {
+          const loseContext = gl.getExtension('WEBGL_lose_context');
+          if (loseContext) loseContext.loseContext();
+        }
+      }
+    };
+  }, []);
+
+  const envPreset = mapLightingPresetToEnvironment(lightingSettings.environmentType) as ValidEnvironmentPreset;
+
+  const handleUpdateSetting = (path: string, value: any) => {
+    const pathParts = path.split('.');
+    if (pathParts.length === 2) {
+      const [group, property] = pathParts;
+      updateLightingSetting({
+        [group]: {
+          ...lightingSettings[group],
+          [property]: value
+        }
+      });
+    } else {
+      updateLightingSetting({
+        [path]: value
+      });
+    }
+  };
 
   return (
     <div className="w-full h-full relative">
-      <Canvas
-        camera={{ position: [0, 0, 5], fov: 50 }}
-        style={{ background: '#111' }}
+      <Canvas 
+        ref={canvasRef}
+        shadows 
+        gl={{ 
+          antialias: true, 
+          alpha: false,
+          preserveDrawingBuffer: true,
+          powerPreference: 'high-performance',
+        }}
+        className="bg-gray-800 z-0"
+        dpr={[1, 1.5]}
       >
-        <ambientLight intensity={0.7} />
-        <spotLight 
-          position={[10, 10, 10]} 
-          angle={0.15} 
-          penumbra={1} 
-          intensity={1} 
-        />
-        <pointLight position={[-10, -10, -10]} intensity={0.5} />
+        <color attach="background" args={["#0f172a"]} />
+        <PerspectiveCamera makeDefault position={[0, 0, 5]} fov={50} />
         
-        <Card3DRenderer 
-          card={card}
-          isFlipped={isFlipped} 
-          activeEffects={activeEffects}
-          effectIntensities={effectIntensities}
+        <ambientLight intensity={0.7} />
+        <spotLight
+          position={[
+            lightingSettings.primaryLight.x,
+            lightingSettings.primaryLight.y,
+            lightingSettings.primaryLight.z
+          ]}
+          intensity={lightingSettings.primaryLight.intensity * 1.5}
+          color={lightingSettings.primaryLight.color}
+          castShadow
+          shadow-mapSize={[2048, 2048]}
         />
+        
+        <Suspense fallback={
+          <mesh position={[0, 0, 0]}>
+            <boxGeometry args={[1, 1, 1]} />
+            <meshStandardMaterial color="purple" />
+          </mesh>
+        }>
+          <CardModel 
+            imageUrl={cardWithFallback.imageUrl}
+            backImageUrl={cardWithFallback.backImageUrl}
+            isFlipped={isFlipped}
+            activeEffects={activeEffects}
+            effectIntensities={effectIntensities}
+          />
+          
+          <Environment 
+            preset={envPreset} 
+            background={false}
+            blur={0.6}
+          />
+        </Suspense>
         
         <OrbitControls 
           enablePan={false}
           enableZoom={true}
-          minDistance={3}
-          maxDistance={8}
+          minPolarAngle={Math.PI / 6}
+          maxPolarAngle={Math.PI - Math.PI / 6}
+          minDistance={4}
+          maxDistance={10}
+          autoRotate={!isCustomizationOpen && lightingSettings.autoRotate}
+          autoRotateSpeed={0.5}
         />
+        
+        <DebugInfo show={isDebugMode} />
       </Canvas>
-      
-      {/* Controls overlay */}
-      <div className="absolute bottom-4 left-0 right-0 flex justify-center z-10">
-        <button 
-          className="px-4 py-2 bg-gray-800/70 text-white rounded-full hover:bg-gray-700/90 transition"
+
+      <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex gap-3 z-10">
+        <Button
+          variant="secondary"
+          size="lg"
+          className="rounded-full shadow-lg bg-black/50 backdrop-blur-md hover:bg-black/70 text-white"
           onClick={() => setIsFlipped(!isFlipped)}
         >
-          {isFlipped ? 'Show Front' : 'Show Back'}
-        </button>
+          {isFlipped ? 'View Front' : 'View Back'}
+        </Button>
       </div>
+      
+      <div 
+        className={cn(
+          "absolute top-1/2 -translate-y-1/2 z-10 transition-all duration-300",
+          isCustomizationOpen ? "right-[380px]" : "right-4"
+        )}
+      >
+        <Button
+          variant="secondary"
+          size="icon"
+          className="rounded-full shadow-lg bg-black/50 backdrop-blur-md hover:bg-black/70 text-white h-10 w-10"
+          onClick={onToggleCustomization}
+        >
+          {isCustomizationOpen ? <ChevronRight /> : <ChevronLeft />}
+        </Button>
+      </div>
+      
+      {isDebugMode && (
+        <div className="absolute top-2 left-2 bg-red-500/80 text-white text-xs px-2 py-1 rounded z-50">
+          Debug Mode
+        </div>
+      )}
+      
+      <div className="absolute top-2 left-1/2 transform -translate-x-1/2 bg-black/50 backdrop-blur-sm text-white px-3 py-1 rounded-full text-sm z-10">
+        {card.title || 'Untitled Card'}
+      </div>
+
+      <Button
+        variant="ghost"
+        size="icon"
+        className="absolute top-4 right-4 text-white bg-black/50 backdrop-blur-sm hover:bg-black/70 z-20"
+        onClick={() => setShowViewerSettings(!showViewerSettings)}
+      >
+        <Eye className="h-5 w-5" />
+      </Button>
+
+      {showViewerSettings && (
+        <div className="absolute top-16 right-4 w-72 bg-black/60 backdrop-blur-md p-4 rounded-lg z-20">
+          <ViewerSettings
+            settings={lightingSettings}
+            onUpdateSettings={handleUpdateSetting}
+            onApplyPreset={applyPreset}
+            isOpen={showViewerSettings}
+          />
+        </div>
+      )}
     </div>
   );
 };
 
-export default ImmersiveCardViewer;
+export default RealisticCardViewer;

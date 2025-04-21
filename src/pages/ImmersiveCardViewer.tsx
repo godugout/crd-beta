@@ -1,20 +1,32 @@
 
 import React, { useEffect, useState } from 'react';
 import { Card } from '@/lib/types';
-import { useParams } from 'react-router-dom';
-import { useCardContext } from '@/context/CardContext';
+import { useParams, Link } from 'react-router-dom';
+import { useCards } from '@/context/CardContext';
 import { useToast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
+import OptimizedCardRenderer from '@/components/card-viewer/OptimizedCardRenderer';
+import { useOptimizedCardEffects } from '@/hooks/useOptimizedCardEffects';
+import { ChevronLeft, Lightbulb, Zap, ChevronsUp, ChevronsDown } from 'lucide-react';
+import { Slider } from '@/components/ui/slider';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 
-const ImmersiveCardViewer = ({ card: initialCard }: { card: Card }) => {
+const ImmersiveCardViewer = ({ card: initialCard }: { card?: Card }) => {
   const { id } = useParams();
-  const { getCardById } = useCardContext();
-  const [card, setCard] = useState<Card>(initialCard);
-  const [imageLoaded, setImageLoaded] = useState(false);
-  const [imageError, setImageError] = useState(false);
+  const { getCardById } = useCards();
+  const [card, setCard] = useState<Card | undefined>(initialCard);
+  const [isFlipped, setIsFlipped] = useState(false);
+  const [showControls, setShowControls] = useState(true);
   const { toast } = useToast();
-  
-  // Fall back image for when the card image doesn't load
-  const fallbackImage = 'https://images.unsplash.com/photo-1518770660439-4636190af475';
+  const { 
+    activeEffects, 
+    settings, 
+    toggleEffect, 
+    setEffectIntensity,
+    devicePerformance,
+    optimizeForPerformance 
+  } = useOptimizedCardEffects(card?.effects || []);
   
   useEffect(() => {
     if (id) {
@@ -28,137 +40,184 @@ const ImmersiveCardViewer = ({ card: initialCard }: { card: Card }) => {
     }
   }, [id, getCardById]);
 
-  useEffect(() => {
-    if (card) {
-      console.log("Current card data:", card);
-      if (!card.imageUrl) {
-        console.warn("Card has no image URL:", card.id);
-        toast({
-          title: "Image not available",
-          description: "Using a fallback image for this card"
-        });
-      }
-    }
-  }, [card, toast]);
-  
-  const handleImageError = () => {
-    console.error("Failed to load image:", card.imageUrl);
-    setImageError(true);
-    toast({
-      title: "Image failed to load",
-      description: "Using a fallback image",
-      variant: "destructive"
-    });
+  if (!card) {
+    return (
+      <div className="p-8 flex flex-col items-center justify-center h-full">
+        <h2 className="text-2xl font-bold mb-4">Card Not Found</h2>
+        <p className="text-gray-400 mb-6">The card you're looking for may have been removed or doesn't exist.</p>
+        <Button variant="outline" asChild>
+          <Link to="/collections">
+            <ChevronLeft className="mr-2 h-4 w-4" />
+            Back to Collections
+          </Link>
+        </Button>
+      </div>
+    );
+  }
+
+  const handleFlipCard = () => {
+    setIsFlipped(prev => !prev);
   };
 
+  // Extract stats from designMetadata if available
+  const cardStats = card.designMetadata?.stats || {};
+
   return (
-    <div className="p-4 h-full flex flex-col items-center justify-center">
-      <h2 className="text-xl font-bold mb-4 text-white">{card.title}</h2>
-      <div className="bg-gray-800 rounded-lg p-6 w-full max-w-md mx-auto">
-        {/* Card image with fallback handling */}
-        <div className="relative aspect-[3/4] w-full mb-4 bg-gray-700 rounded overflow-hidden">
-          {!imageLoaded && !imageError && (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-12 h-12 border-4 border-t-transparent border-white rounded-full animate-spin"></div>
-            </div>
-          )}
+    <div className="relative h-full flex flex-col bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+      {/* Card display area */}
+      <div className="flex-1 relative overflow-hidden flex items-center justify-center">
+        <div className="absolute inset-0 pointer-events-none">
+          {/* Performance-optimized ambient lighting effects */}
+          <div className="absolute top-0 left-0 w-full h-full bg-gradient-radial from-transparent to-black/30 opacity-70"></div>
+          <div className="absolute top-[20%] right-[10%] w-[300px] h-[300px] rounded-full blur-[120px] bg-blue-500/10"></div>
+          <div className="absolute bottom-[10%] left-[20%] w-[250px] h-[250px] rounded-full blur-[100px] bg-purple-500/10"></div>
           
-          {imageError && (
-            <div className="absolute inset-0 flex items-center justify-center text-gray-300">
-              <div className="text-center">
-                <svg 
-                  xmlns="http://www.w3.org/2000/svg" 
-                  className="h-12 w-12 mx-auto mb-2" 
-                  fill="none" 
-                  viewBox="0 0 24 24" 
-                  stroke="currentColor"
-                >
-                  <path 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round" 
-                    strokeWidth={2} 
-                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" 
-                  />
-                </svg>
-                <p>Failed to load image</p>
-              </div>
-            </div>
+          {/* Simplified light beams (conditional based on performance) */}
+          {devicePerformance !== 'low' && (
+            <>
+              <div className="absolute top-[5%] left-[30%] w-[3px] h-[150px] bg-gradient-to-b from-white/5 to-transparent transform rotate-[20deg]"></div>
+              <div className="absolute top-[10%] left-[40%] w-[2px] h-[100px] bg-gradient-to-b from-white/3 to-transparent transform rotate-[15deg]"></div>
+              <div className="absolute top-[8%] left-[55%] w-[4px] h-[200px] bg-gradient-to-b from-white/4 to-transparent transform rotate-[25deg]"></div>
+            </>
           )}
-          
-          <img 
-            src={card.imageUrl || fallbackImage} 
-            alt={card.title} 
-            className={`w-full h-full object-cover transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
-            onLoad={() => setImageLoaded(true)}
-            onError={(e) => {
-              // Try the fallback image if the original fails
-              if (e.currentTarget.src !== fallbackImage) {
-                e.currentTarget.src = fallbackImage;
-              } else {
-                handleImageError();
-              }
-            }}
-          />
         </div>
         
-        {card.description && (
-          <p className="text-gray-300 mb-4">{card.description}</p>
-        )}
+        <div className="w-full max-w-lg h-full max-h-[70vh] flex items-center justify-center">
+          <OptimizedCardRenderer 
+            card={card}
+            isFlipped={isFlipped}
+            activeEffects={activeEffects}
+            effectIntensities={settings.effectIntensities}
+          />
+        </div>
+      </div>
+      
+      {/* Controls panel - collapsible */}
+      <div 
+        className={`bg-black/50 backdrop-blur-md border-t border-white/10 transition-all duration-300 ease-in-out ${
+          showControls ? 'max-h-[300px]' : 'max-h-14'
+        } overflow-hidden`}
+      >
+        <div 
+          className="p-4 flex justify-between items-center cursor-pointer"
+          onClick={() => setShowControls(prev => !prev)}
+        >
+          <h3 className="font-medium text-lg flex items-center">
+            <Zap className="mr-2 h-5 w-5 text-primary" />
+            Card Controls
+          </h3>
+          <Button variant="ghost" size="sm">
+            {showControls ? (
+              <ChevronsDown className="h-5 w-5" />
+            ) : (
+              <ChevronsUp className="h-5 w-5" />
+            )}
+          </Button>
+        </div>
         
-        {/* Display card stats if available */}
-        {card.stats && (
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-4">
-            {card.stats.battingAverage && (
-              <div className="stat-item">
-                <span className="text-sm text-gray-400">Batting Average</span>
-                <span className="block text-lg font-medium text-white">{card.stats.battingAverage}</span>
+        <div className="px-4 pb-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <h4 className="text-sm font-medium mb-3 flex items-center">
+                <Lightbulb className="mr-2 h-4 w-4 text-yellow-400" />
+                Visual Effects
+              </h4>
+              <div className="space-y-3">
+                <div className="flex justify-between">
+                  <Label htmlFor="flipswitch" className="text-sm">Flip Card</Label>
+                  <Switch 
+                    id="flipswitch" 
+                    checked={isFlipped} 
+                    onCheckedChange={handleFlipCard} 
+                  />
+                </div>
+                
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {['Holographic', 'Refractor', 'Shimmer', 'Gold Foil'].map(effect => (
+                    <Button
+                      key={effect}
+                      size="sm"
+                      variant={activeEffects.includes(effect) ? "default" : "outline"}
+                      onClick={() => toggleEffect(effect)}
+                    >
+                      {effect}
+                    </Button>
+                  ))}
+                </div>
               </div>
-            )}
-            {card.stats.homeRuns && (
-              <div className="stat-item">
-                <span className="text-sm text-gray-400">Home Runs</span>
-                <span className="block text-lg font-medium text-white">{card.stats.homeRuns}</span>
+            </div>
+            
+            <div>
+              <h4 className="text-sm font-medium mb-3">Effect Intensity</h4>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <Label htmlFor="effect-intensity" className="text-sm">Effect Strength</Label>
+                    <span className="text-xs text-gray-400">
+                      {Math.round(settings.effectIntensities.Holographic * 100)}%
+                    </span>
+                  </div>
+                  <Slider
+                    id="effect-intensity"
+                    min={0.1}
+                    max={1.0}
+                    step={0.1}
+                    value={[settings.effectIntensities.Holographic]}
+                    onValueChange={(value) => {
+                      setEffectIntensity('Holographic', value[0]);
+                      // Update all effect intensities proportionally
+                      Object.keys(settings.effectIntensities).forEach(key => {
+                        setEffectIntensity(key, value[0]);
+                      });
+                    }}
+                  />
+                </div>
+                
+                <div className="flex justify-between">
+                  <Label htmlFor="animations-toggle" className="text-sm">Enable Animations</Label>
+                  <Switch 
+                    id="animations-toggle" 
+                    checked={settings.animationEnabled} 
+                    onCheckedChange={(checked) => {
+                      // Use optimizeForPerformance instead of setSettings
+                      if (!checked) {
+                        optimizeForPerformance();
+                      }
+                    }}
+                    disabled={devicePerformance === 'low'}
+                  />
+                </div>
               </div>
-            )}
-            {card.stats.rbis && (
-              <div className="stat-item">
-                <span className="text-sm text-gray-400">RBIs</span>
-                <span className="block text-lg font-medium text-white">{card.stats.rbis}</span>
-              </div>
-            )}
-            {card.stats.era && (
-              <div className="stat-item">
-                <span className="text-sm text-gray-400">ERA</span>
-                <span className="block text-lg font-medium text-white">{card.stats.era}</span>
-              </div>
-            )}
-            {card.stats.wins && (
-              <div className="stat-item">
-                <span className="text-sm text-gray-400">Wins</span>
-                <span className="block text-lg font-medium text-white">{card.stats.wins}</span>
-              </div>
-            )}
-            {card.stats.strikeouts && (
-              <div className="stat-item">
-                <span className="text-sm text-gray-400">Strikeouts</span>
-                <span className="block text-lg font-medium text-white">{card.stats.strikeouts}</span>
-              </div>
-            )}
-            {card.stats.careerYears && (
-              <div className="stat-item">
-                <span className="text-sm text-gray-400">Career Years</span>
-                <span className="block text-lg font-medium text-white">{card.stats.careerYears}</span>
-              </div>
-            )}
-            {card.stats.ranking && (
-              <div className="stat-item">
-                <span className="text-sm text-gray-400">Ranking</span>
-                <span className="block text-lg font-medium text-white">{card.stats.ranking}</span>
+            </div>
+          </div>
+          
+          {/* Card Information */}
+          <div className="mt-6 pt-4 border-t border-white/10">
+            <h3 className="font-semibold">{card.title}</h3>
+            {card.description && <p className="text-sm mt-1 text-gray-300">{card.description}</p>}
+            
+            {/* Display card stats if available */}
+            {Object.keys(cardStats).length > 0 && (
+              <div className="grid grid-cols-4 gap-2 mt-3">
+                {Object.entries(cardStats).map(([key, value]) => (
+                  <div key={key} className="text-center">
+                    <p className="text-xs text-gray-400">{key}</p>
+                    <p className="font-medium">{String(value)}</p>
+                  </div>
+                ))}
               </div>
             )}
           </div>
-        )}
+        </div>
       </div>
+      
+      {/* Back button */}
+      <Link 
+        to="/collections"
+        className="absolute top-4 left-4 bg-black/40 backdrop-blur-sm p-2 rounded-full hover:bg-black/60 transition-colors"
+      >
+        <ChevronLeft className="h-6 w-6" />
+      </Link>
     </div>
   );
 };

@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Card } from '@/lib/types/cardTypes';
 import { Canvas } from '@react-three/fiber';
@@ -10,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { MoveHorizontal, Lightbulb, Settings } from 'lucide-react';
 import { useDeviceDetect } from '@/hooks/useDeviceDetect';
 import { useUserLightingPreferences } from '@/hooks/useUserLightingPreferences';
-import { CardModel } from './CardModel';
+import CardModel from './CardModel';
 import { Button } from '@/components/ui/button';
 
 interface CardInteractiveProps {
@@ -33,7 +32,6 @@ const CardInteractive: React.FC<CardInteractiveProps> = ({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [currentTab, setCurrentTab] = useState<'view' | 'lighting'>('view');
 
-  // Initialize lighting system
   const {
     lightingSettings,
     lightingPreset,
@@ -44,14 +42,12 @@ const CardInteractive: React.FC<CardInteractiveProps> = ({
     isUserCustomized
   } = useCardLighting('display_case');
   
-  // Initialize user preferences (if logged in)
   const {
     preferences: savedUserSettings,
     isLoading: isLoadingPreferences,
     savePreferences
   } = useUserLightingPreferences();
   
-  // Apply saved user settings if available
   useEffect(() => {
     if (savedUserSettings && !isLoadingPreferences) {
       updateLightingSetting({
@@ -64,7 +60,6 @@ const CardInteractive: React.FC<CardInteractiveProps> = ({
     }
   }, [savedUserSettings, isLoadingPreferences, updateLightingSetting]);
 
-  // Handle mouse movement for dynamic lighting
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!lightingSettings.useDynamicLighting) return;
     
@@ -75,23 +70,19 @@ const CardInteractive: React.FC<CardInteractiveProps> = ({
     updateLightPosition(x, y);
   };
   
-  // Handle preset change
   const handlePresetChange = (preset: LightingPreset) => {
     applyPreset(preset);
   };
   
-  // Save current lighting settings
   const handleSaveSettings = () => {
     savePreferences(lightingSettings);
   };
 
-  // Progressive enhancement: simplified lighting for mobile
   const getOptimizedLighting = () => {
     if (isMobile) {
-      // Simpler lighting setup for mobile
       return {
         ...lightingSettings,
-        envMapIntensity: lightingSettings.envMapIntensity * 0.7, // Reduce for performance
+        envMapIntensity: lightingSettings.envMapIntensity * 0.7,
       };
     }
     return lightingSettings;
@@ -135,9 +126,9 @@ const CardInteractive: React.FC<CardInteractiveProps> = ({
             <Canvas
               ref={canvasRef}
               shadows
-              dpr={[1, isMobile ? 1.5 : 2]} // Lower DPR for mobile
-              performance={{ min: 0.5 }} // Allow performance scaling
-              gl={{ preserveDrawingBuffer: true }} // For screenshots
+              dpr={[1, isMobile ? 1.5 : 2]}
+              performance={{ min: 0.5 }}
+              gl={{ preserveDrawingBuffer: true }}
             >
               <PerspectiveCamera makeDefault position={[0, 0, 5]} fov={50} />
               
@@ -146,14 +137,14 @@ const CardInteractive: React.FC<CardInteractiveProps> = ({
                 debug={false}
               />
               
-              <CardModel
-                card={card}
-                isFlipped={isFlipped}
+              <CardModel 
+                imageUrl={card.imageUrl || '/placeholder-card.jpg'}
+                backImageUrl={card.backImageUrl || '/card-back-texture.jpg'}
+                isFlipped={isFlipped} 
                 activeEffects={activeEffects}
-                effectIntensities={effectIntensities}
+                effectIntensities={{}}
               />
               
-              {/* Limit interaction on mobile for better performance */}
               <OrbitControls
                 enablePan={!isMobile}
                 enableZoom={true}
@@ -164,7 +155,6 @@ const CardInteractive: React.FC<CardInteractiveProps> = ({
               />
             </Canvas>
             
-            {/* Flip button overlay */}
             <button
               className="absolute bottom-4 right-4 bg-white/80 hover:bg-white text-gray-900 rounded-full p-2 shadow-lg transition-all"
               onClick={onFlip}
@@ -191,12 +181,11 @@ const CardInteractive: React.FC<CardInteractiveProps> = ({
           <div className="mt-4 rounded-lg overflow-hidden bg-gray-900 aspect-video">
             <Canvas
               shadows
-              dpr={[1, isMobile ? 1.5 : 2]} // Lower DPR for mobile
-              performance={{ min: 0.5 }} // Allow performance scaling
+              dpr={[1, isMobile ? 1.5 : 2]}
+              performance={{ min: 0.5 }}
             >
               <PerspectiveCamera makeDefault position={[0, 0, 5]} fov={50} />
               
-              {/* Preview lighting with a simple scene */}
               <CardLighting 
                 settings={optimizedSettings}
                 debug={true}

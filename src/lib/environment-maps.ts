@@ -1,86 +1,78 @@
 
-import { ValidEnvironmentPreset } from '@/utils/environmentPresets';
+import { LightingPreset } from '@/hooks/useCardLighting';
 
-interface EnvironmentMap {
-  id: string;
+export interface EnvironmentMap {
+  id: LightingPreset;
   name: string;
   path: string;
-  preview: string;
-  author?: string;
-  intensity?: number;
+  thumbnail: string;
+  description: string;
 }
 
-const environmentMaps: Record<string, EnvironmentMap> = {
-  studio: {
+// Define environment maps for different lighting presets
+export const ENVIRONMENT_MAPS: EnvironmentMap[] = [
+  {
     id: 'studio',
     name: 'Studio',
     path: '/environments/studio.hdr',
-    preview: '/environment-previews/studio.jpg',
-    author: 'CRD',
-    intensity: 1.0
+    thumbnail: '/environments/thumbnails/studio.jpg',
+    description: 'Professional studio lighting with clean, balanced illumination'
   },
-  natural: {
+  {
     id: 'natural',
     name: 'Natural',
     path: '/environments/natural.hdr',
-    preview: '/environment-previews/natural.jpg',
-    intensity: 0.8
+    thumbnail: '/environments/thumbnails/natural.jpg',
+    description: 'Soft, natural daylight with subtle ambient occlusion'
   },
-  dramatic: {
+  {
     id: 'dramatic',
     name: 'Dramatic',
     path: '/environments/dramatic.hdr',
-    preview: '/environment-previews/dramatic.jpg',
-    intensity: 1.2
+    thumbnail: '/environments/thumbnails/dramatic.jpg',
+    description: 'High contrast lighting with deep shadows and bright highlights'
   },
-  display_case: {
+  {
     id: 'display_case',
     name: 'Display Case',
     path: '/environments/display_case.hdr',
-    preview: '/environment-previews/display_case.jpg',
-    intensity: 0.9
-  },
-  sunset: {
-    id: 'sunset',
-    name: 'Sunset',
-    path: '/environments/sunset.hdr',
-    preview: '/environment-previews/sunset.jpg',
-    intensity: 1.1
+    thumbnail: '/environments/thumbnails/display_case.jpg',
+    description: 'Museum-quality display lighting optimized for collectibles'
   }
+];
+
+// Helper to get environment map by ID
+export const getEnvironmentMapById = (id: LightingPreset): EnvironmentMap => {
+  return ENVIRONMENT_MAPS.find(env => env.id === id) || ENVIRONMENT_MAPS[0];
 };
 
-export const getEnvironmentMapById = (id: string): EnvironmentMap => {
-  return environmentMaps[id] || environmentMaps.studio;
+// Function to preload environment maps for better performance
+export const preloadEnvironmentMaps = (): Promise<boolean> => {
+  return new Promise((resolve) => {
+    // Create an array to track loading progress
+    const loadingPromises: Promise<HTMLImageElement>[] = [];
+    
+    // Preload thumbnails
+    ENVIRONMENT_MAPS.forEach(env => {
+      const imagePromise = new Promise<HTMLImageElement>((resolveImage) => {
+        const img = new Image();
+        img.onload = () => resolveImage(img);
+        img.onerror = () => resolveImage(img); // Don't fail if an image fails to load
+        img.src = env.thumbnail;
+      });
+      
+      loadingPromises.push(imagePromise);
+    });
+    
+    // Resolve the main promise when all images are loaded
+    Promise.all(loadingPromises)
+      .then(() => {
+        console.log('Environment map thumbnails preloaded');
+        resolve(true);
+      })
+      .catch(() => {
+        console.warn('Some environment map thumbnails failed to preload');
+        resolve(false);
+      });
+  });
 };
-
-export const getEnvironmentMapFromPreset = (preset: ValidEnvironmentPreset): EnvironmentMap => {
-  switch (preset) {
-    case 'studio':
-      return environmentMaps.studio;
-    case 'natural':
-      return environmentMaps.natural;
-    case 'dramatic':
-      return environmentMaps.dramatic;
-    case 'display_case':
-      return environmentMaps.display_case;
-    case 'sunset':
-      return environmentMaps.sunset;
-    // Fallbacks for other presets
-    case 'dawn':
-      return environmentMaps.natural;
-    case 'night':
-      return environmentMaps.dramatic;
-    case 'warehouse':
-    case 'apartment':
-    case 'lobby':
-      return environmentMaps.display_case;
-    case 'forest':
-    case 'park':
-    case 'city':
-      return environmentMaps.natural;
-    default:
-      return environmentMaps.studio;
-  }
-};
-
-export default environmentMaps;

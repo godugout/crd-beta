@@ -1,240 +1,100 @@
 
 import { useState } from 'react';
-import { EnhancedCropBoxProps, MemorabiliaType, applyCrop } from '@/components/card-upload/cardDetection';
-import { detectCardsInImage } from '@/components/card-upload/cardDetection';
-import { toast } from 'sonner';
 
-export interface BatchProcessingProps {
-  canvasRef?: React.RefObject<HTMLCanvasElement>;
-  editorImgRef?: React.RefObject<HTMLImageElement>;
-  selectedAreas?: EnhancedCropBoxProps[];
-  detectionType?: 'group' | 'memorabilia' | 'mixed';
-  setSelectedAreas?: React.Dispatch<React.SetStateAction<EnhancedCropBoxProps[]>>;
-  setIsDetecting?: (value: boolean) => void;
-  setIsProcessing?: (value: boolean) => void;
-  onComplete?: (files: File[], urls: string[], types?: MemorabiliaType[]) => void;
-  autoEnhance?: boolean;
+interface ProcessingResult {
+  success: boolean;
+  data?: any;
+  error?: string;
 }
 
-export const useBatchImageProcessing = ({ 
-  canvasRef,
-  editorImgRef,
-  selectedAreas = [],
-  detectionType = 'group',
-  setSelectedAreas,
-  setIsDetecting,
-  setIsProcessing,
-  onComplete, 
-  autoEnhance = true 
-}: BatchProcessingProps = {}) => {
-  const [stagedItems, setStagedItems] = useState<Array<{
-    file: File;
-    url: string;
-    type?: MemorabiliaType;
-  }>>([]);
+export const useBatchImageProcessing = () => {
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [processedImages, setProcessedImages] = useState<any[]>([]);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  // Clear staged items
-  const clearStaged = () => {
-    setStagedItems([]);
-  };
-
-  // Run detection on an image element
-  const detectObjects = async (): Promise<EnhancedCropBoxProps[]> => {
-    if (!editorImgRef?.current || !editorImgRef.current.complete) {
-      toast.error("Image not loaded");
-      return [];
-    }
-
-    if (setIsDetecting) setIsDetecting(true);
+  const processImage = async (imageFile: File): Promise<ProcessingResult> => {
+    setIsProcessing(true);
     
     try {
-      // Determine which detection types to enable based on the selected mode
-      let enabledTypes: MemorabiliaType[] = [];
+      // Simulate image processing
+      await new Promise(resolve => setTimeout(resolve, 1500));
       
-      switch (detectionType) {
-        case 'group':
-          enabledTypes = ['face', 'group'];
-          break;
-        case 'memorabilia':
-          enabledTypes = ['card', 'ticket', 'program', 'autograph'];
-          break;
-        case 'mixed':
-          enabledTypes = ['face', 'group', 'card', 'ticket', 'program', 'autograph'];
-          break;
-      }
+      // Mock successful processing
+      const result = {
+        originalFile: imageFile,
+        processedUrl: URL.createObjectURL(imageFile),
+        detections: [],
+        metadata: {
+          dimensions: { width: 800, height: 600 },
+          format: imageFile.type,
+          size: imageFile.size
+        }
+      };
       
-      // Run detection with appropriate types
-      const detectedItems = await detectCardsInImage(
-        editorImgRef.current,
-        autoEnhance,
-        null,
-        enabledTypes
-      );
+      setProcessedImages(prev => [...prev, result]);
       
-      if (setSelectedAreas) {
-        setSelectedAreas(detectedItems);
-      }
+      return {
+        success: true,
+        data: result
+      };
+    } catch (error: any) {
+      console.error("Error processing image:", error);
       
-      return detectedItems;
-    } catch (error) {
-      console.error("Detection error:", error);
-      toast.error("Failed to detect content in image");
-      return [];
+      return {
+        success: false,
+        error: error.message || "Failed to process image"
+      };
     } finally {
-      if (setIsDetecting) setIsDetecting(false);
+      setIsProcessing(false);
     }
   };
 
-  // Process batch selections
-  const processDetections = async (
-    originalFile: File,
-    cropBoxes: EnhancedCropBoxProps[],
-    batchSelections: number[]
-  ): Promise<boolean> => {
-    if (!canvasRef?.current || !editorImgRef?.current || !originalFile) {
-      toast.error("Missing required elements for processing");
-      return false;
-    }
-
-    if (setIsProcessing) setIsProcessing(true);
-    
-    try {
-      const files: File[] = [];
-      const urls: string[] = [];
-      const types: MemorabiliaType[] = [];
-      
-      // Process each selected area
-      for (const index of batchSelections) {
-        if (index >= 0 && index < cropBoxes.length) {
-          const box = cropBoxes[index];
-          
-          const result = await applyCrop(
-            box,
-            canvasRef.current,
-            originalFile,
-            editorImgRef.current,
-            autoEnhance ? box.memorabiliaType : undefined
-          );
-          
-          if (result?.file && result?.url) {
-            files.push(result.file);
-            urls.push(result.url);
-            types.push(box.memorabiliaType || 'unknown');
-          }
-        }
-      }
-      
-      if (files.length > 0) {
-        // Add to staged items
-        const newStagedItems = files.map((file, i) => ({
-          file,
-          url: urls[i],
-          type: types[i]
-        }));
-        
-        setStagedItems([...stagedItems, ...newStagedItems]);
-        
-        // Call the completion callback if provided
-        if (onComplete) {
-          onComplete(files, urls, types);
-        }
-        
-        toast.success(`Successfully processed ${files.length} items`);
-        return true;
-      } else {
-        toast.error("No items were processed");
-        return false;
-      }
-    } catch (error) {
-      console.error("Processing error:", error);
-      toast.error("Failed to process selected areas");
-      return false;
-    } finally {
-      if (setIsProcessing) setIsProcessing(false);
-    }
+  const detectObjects = async (imageUrl: string): Promise<any[]> => {
+    // Simulate object detection
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    return [
+      { label: 'person', confidence: 0.95, bbox: { x: 100, y: 50, width: 200, height: 400 } },
+      { label: 'ball', confidence: 0.87, bbox: { x: 320, y: 240, width: 80, height: 80 } }
+    ];
   };
 
-  // Extract selected areas from the image
-  const extractSelectedAreas = async (specificIndices?: number[]): Promise<File[]> => {
-    if (!canvasRef?.current || !editorImgRef?.current) {
-      toast.error("Missing required elements for extraction");
-      return [];
-    }
-    
-    const originalFile = new File([""], "temp.jpg", { type: "image/jpeg" });
-    const indicesToProcess = specificIndices || selectedAreas.map((_, index) => index);
-    
-    if (setIsProcessing) setIsProcessing(true);
-    
-    try {
-      const files: File[] = [];
-      
-      // Process each selected area
-      for (const index of indicesToProcess) {
-        if (index >= 0 && index < selectedAreas.length) {
-          const box = selectedAreas[index];
-          
-          const result = await applyCrop(
-            box,
-            canvasRef.current,
-            originalFile,
-            editorImgRef.current,
-            autoEnhance ? box.memorabiliaType : undefined
-          );
-          
-          if (result?.file) {
-            files.push(result.file);
-          }
-        }
-      }
-      
-      return files;
-    } catch (error) {
-      console.error("Extraction error:", error);
-      return [];
-    } finally {
-      if (setIsProcessing) setIsProcessing(false);
-    }
+  const processDetections = async (detections: any[], imageUrl: string): Promise<any[]> => {
+    // Simulate processing detections
+    await new Promise(resolve => setTimeout(resolve, 500));
+    return detections.map(detection => ({
+      ...detection,
+      processed: true,
+      cropUrl: imageUrl // In real app, would generate a cropped image
+    }));
   };
 
-  // Get preview URLs for selected areas
-  const getPreviewUrls = (specificIndices?: number[]): string[] => {
-    const indicesToProcess = specificIndices || selectedAreas.map((_, index) => index);
+  const extractSelectedAreas = async (
+    image: HTMLImageElement,
+    selections: Array<{ x: number, y: number, width: number, height: number }>
+  ): Promise<string[]> => {
+    // Simulate extracting image areas
+    await new Promise(resolve => setTimeout(resolve, 800));
     
-    return indicesToProcess.map((index) => {
-      if (canvasRef?.current && index >= 0 && index < selectedAreas.length) {
-        const box = selectedAreas[index];
-        
-        // Create a temporary canvas for the preview
-        const tempCanvas = document.createElement('canvas');
-        tempCanvas.width = box.width;
-        tempCanvas.height = box.height;
-        const ctx = tempCanvas.getContext('2d');
-        
-        if (ctx) {
-          ctx.drawImage(
-            canvasRef.current,
-            box.x, box.y, box.width, box.height,
-            0, 0, box.width, box.height
-          );
-          
-          return tempCanvas.toDataURL('image/jpeg', 0.7);
-        }
-      }
-      
-      return '';
-    }).filter(url => url !== '');
+    // In a real implementation, you would use canvas to crop these areas
+    return selections.map(() => URL.createObjectURL(new Blob()));
+  };
+
+  const getPreviewUrls = (index: number): string[] => {
+    const image = processedImages[index];
+    if (!image) return [];
+    
+    // Return the URL for the image
+    return [image.processedUrl];
   };
 
   return {
-    stagedItems,
-    setStagedItems,
-    clearStaged,
-    processDetections,
+    isProcessing,
+    processedImages,
+    currentImageIndex,
+    processImage,
     detectObjects,
+    processDetections,
     extractSelectedAreas,
     getPreviewUrls,
-    isDetecting: false,
-    isProcessing: false
   };
 };

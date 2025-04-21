@@ -1,7 +1,5 @@
-
 import { useAuth } from '@/hooks/useAuth';
-import { UserPermission, ROLE_PERMISSIONS } from '@/lib/types';
-import { UserRole } from '@/lib/types/UserTypes';
+import { UserPermission, ROLE_PERMISSIONS, UserRole } from '@/lib/types';
 
 /**
  * Hook to check user permissions based on their role or specific permissions

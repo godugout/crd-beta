@@ -1,12 +1,10 @@
-import React, { useRef, useState, useEffect, Suspense } from 'react';
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import React, { useState, useEffect, Suspense, useRef } from 'react';
+import { Canvas, useThree } from '@react-three/fiber';
 import { 
   PerspectiveCamera, 
   Environment, 
-  useGLTF, 
   OrbitControls,
   ContactShadows,
-  useTexture,
   MeshReflectorMaterial,
   AccumulativeShadows,
   RandomizedLight,
@@ -14,194 +12,39 @@ import {
 } from '@react-three/drei';
 import * as THREE from 'three';
 import { Card } from '@/lib/types';
-import { useCardLighting, LightingSettings } from '@/hooks/useCardLighting';
+import { useCardLighting } from '@/hooks/useCardLighting';
 import { useUserLightingPreferences } from '@/hooks/useUserLightingPreferences';
-import { motion } from 'framer-motion';
-import { ChevronRight, ChevronLeft } from 'lucide-react';
+import { ChevronRight, ChevronLeft, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { getEnvironmentMapById } from '@/lib/environment-maps';
+import { mapLightingPresetToEnvironment, ValidEnvironmentPreset } from '@/utils/environmentPresets';
 import { logRenderingInfo } from '@/utils/debugRenderer';
-import { Eye } from 'lucide-react';
 import ViewerSettings from '@/components/gallery/viewer-components/ViewerSettings';
+import CardModel from '@/components/card-viewer/CardModel';
 
-// Define possible return types from useTexture
-type TextureResult = THREE.Texture | Record<string, THREE.Texture> | THREE.Texture[];
+// Fallback image URLs - updated with correct paths
+const FALLBACK_IMAGE_URL = '/images/card-placeholder.png';
+const FALLBACK_BACK_IMAGE_URL = '/images/card-back-placeholder.png';
 
-// Debug component to visualize camera and light positions
+// Debug component to visualize camera and light positions - MUST BE USED INSIDE CANVAS
 const DebugInfo = ({ show = false }) => {
   if (!show) return null;
   
   return <Stats className="top-0 left-0" />;
 };
 
-// Physically-based card model with materials
-const CardModel = ({ 
-  card, 
-  isFlipped, 
-  lightingSettings,
-  materialProps = { roughness: 0.1, metalness: 0.2 }
-}) => {
-  const { scene } = useThree();
-  const meshRef = useRef<THREE.Mesh>(null);
-  const [loadingError, setLoadingError] = useState<string | null>(null);
-
-  // Try to load the textures with better error handling
-  const LoadTexture = ({ url, onLoad, onError }) => {
-    useEffect(() => {
-      const loader = new THREE.TextureLoader();
-      loader.crossOrigin = 'anonymous';
-      
-      console.log(`Loading texture from: ${url}`);
-      
-      loader.load(
-        url,
-        (texture) => {
-          console.log(`Successfully loaded texture from: ${url}`);
-          onLoad(texture);
-        },
-        (progress) => {
-          console.log(`Loading progress: ${Math.round((progress.loaded / progress.total) * 100)}%`);
-        },
-        (error) => {
-          console.error(`Failed to load texture from: ${url}`, error);
-          const errorMsg = error instanceof Error ? error.message : "Unknown error loading texture";
-          onError(errorMsg);
-        }
-      );
-    }, [url, onLoad, onError]);
-    
-    return null;
-  };
-  
-  // Load front texture
-  const [frontTexture, setFrontTexture] = useState<THREE.Texture | null>(null);
-  const frontTextureUrl = card.imageUrl || '/placeholder-card.jpg';
-  
-  // Load back texture
-  const [backTexture, setBackTexture] = useState<THREE.Texture | null>(null);
-  const backTextureUrl = '/card-back-texture.jpg';
-  
-  // Create a simple colored material as fallback
-  const createFallbackMaterial = (color: string) => {
-    return new THREE.MeshStandardMaterial({
-      color: new THREE.Color(color),
-      roughness: 0.5,
-      metalness: 0.2
-    });
-  };
-
-  // Animation effect for flipping
-  useFrame((state) => {
-    if (!meshRef.current) return;
-    
-    const targetRotation = isFlipped ? Math.PI : 0;
-    meshRef.current.rotation.y = THREE.MathUtils.lerp(
-      meshRef.current.rotation.y,
-      targetRotation,
-      0.1
-    );
-
-    // Subtle floating animation
-    const t = state.clock.getElapsedTime();
-    meshRef.current.position.y = Math.sin(t * 0.5) * 0.05;
-    meshRef.current.rotation.z = Math.sin(t * 0.3) * 0.02;
-    
-    // Log the mesh position and rotation for debugging
-    logRenderingInfo("CardModel", {
-      visible: true,
-      position: {
-        y: meshRef.current.position.y,
-        z: meshRef.current.position.z
-      }
-    });
-  });
-  
-  return (
-    <group>
-      {/* Load textures */}
-      <LoadTexture 
-        url={frontTextureUrl} 
-        onLoad={setFrontTexture} 
-        onError={(msg: string) => setLoadingError(`Front texture: ${msg}`)} 
-      />
-      <LoadTexture 
-        url={backTextureUrl} 
-        onLoad={setBackTexture} 
-        onError={(msg: string) => setLoadingError(`Back texture: ${msg}`)} 
-      />
-      
-      {/* Visual feedback for loading errors */}
-      {loadingError && (
-        <mesh position={[0, 1, 0]}>
-          <boxGeometry args={[4, 0.5, 0.1]} />
-          <meshStandardMaterial color="red" transparent opacity={0.7} />
-        </mesh>
-      )}
-      
-      {/* Card mesh - Front Side */}
-      <mesh 
-        ref={meshRef} 
-        castShadow 
-        receiveShadow
-      >
-        {/* Card geometry with proper card proportions (2.5 x 3.5 inch standard) */}
-        <planeGeometry args={[2.5, 3.5, 20, 20]} />
-        
-        {/* Front material */}
-        {frontTexture ? (
-          <meshPhysicalMaterial 
-            map={frontTexture}
-            side={THREE.FrontSide}
-            roughness={materialProps.roughness || 0.2}
-            metalness={materialProps.metalness || 0.8}
-            envMapIntensity={lightingSettings.envMapIntensity || 1.5}
-            clearcoat={1}
-            clearcoatRoughness={0.2}
-            reflectivity={0.8}
-          />
-        ) : (
-          <meshStandardMaterial 
-            color="#2a5298" 
-          />
-        )}
-      </mesh>
-      
-      {/* Card back side - as a separate mesh */}
-      <mesh 
-        position={[0, 0, -0.01]}
-        rotation={[0, Math.PI, 0]}
-        castShadow 
-        receiveShadow
-      >
-        <planeGeometry args={[2.5, 3.5, 20, 20]} />
-        
-        {/* Back material */}
-        {backTexture ? (
-          <meshPhysicalMaterial 
-            map={backTexture}
-            side={THREE.FrontSide}
-            roughness={(materialProps.roughness || 0.2) * 1.2}
-            metalness={(materialProps.metalness || 0.8) * 0.8}
-            envMapIntensity={(lightingSettings.envMapIntensity || 1) * 0.8}
-            clearcoat={0.5}
-            clearcoatRoughness={0.3}
-          />
-        ) : (
-          <meshStandardMaterial 
-            color="#1a3060" 
-          />
-        )}
-      </mesh>
-    </group>
-  );
-};
-
 // Photorealistic environment setup
-const Environment3D = ({ preset }) => {
+const Environment3D = ({ preset = 'studio' }) => {
+  // Map the custom preset to a valid @react-three/drei environment preset
+  const environmentPreset = mapLightingPresetToEnvironment(preset) as ValidEnvironmentPreset;
+  
   return (
     <>
-      <Environment preset={preset} background={false} blur={0.6} />
+      <Environment 
+        preset={environmentPreset}
+        background={false} 
+        blur={0.6} 
+      />
       
       <AccumulativeShadows temporal frames={30} alphaTest={0.85} opacity={0.75}>
         <RandomizedLight amount={8} radius={10} intensity={0.8} position={[5, 5, -10]} />
@@ -250,16 +93,23 @@ const RealisticCardViewer: React.FC<RealisticCardViewerProps> = ({
 }) => {
   const [isFlipped, setIsFlipped] = useState(false);
   const [isDebugMode, setIsDebugMode] = useState(false);
+  const [showViewerSettings, setShowViewerSettings] = useState(false);
+  const [activeEffects, setActiveEffects] = useState<string[]>([]);
   const { preferences, savePreferences } = useUserLightingPreferences();
   const {
     lightingSettings,
-    lightingPreset,
     updateLightingSetting,
     applyPreset,
     isUserCustomized,
     toggleDynamicLighting
   } = useCardLighting(preferences?.environmentType || 'studio');
-  const [showViewerSettings, setShowViewerSettings] = useState(false);
+  
+  // Card with fallback images - use updated fallback paths
+  const cardWithFallback = {
+    ...card,
+    imageUrl: card.imageUrl || FALLBACK_IMAGE_URL,
+    backImageUrl: card.backImageUrl || FALLBACK_BACK_IMAGE_URL
+  };
 
   // Save user preferences when they change
   useEffect(() => {
@@ -281,17 +131,71 @@ const RealisticCardViewer: React.FC<RealisticCardViewerProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isDebugMode]);
 
+  // Setup effects from card data
+  useEffect(() => {
+    if (card && card.effects) {
+      setActiveEffects(card.effects);
+    }
+  }, [card]);
+
+  // Get effect intensities (can be expanded to use card data if available)
+  const effectIntensities = {
+    Holographic: 0.7,
+    Shimmer: 0.8,
+    Refractor: 0.6,
+    Vintage: 0.7
+  };
+  
+  // Clean up WebGL resources on unmount
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  
+  useEffect(() => {
+    return () => {
+      if (canvasRef.current) {
+        const gl = canvasRef.current.getContext('webgl2') || canvasRef.current.getContext('webgl');
+        if (gl) {
+          const loseContext = gl.getExtension('WEBGL_lose_context');
+          if (loseContext) loseContext.loseContext();
+        }
+      }
+    };
+  }, []);
+
+  // Get the environment preset as a valid type
+  const envPreset = mapLightingPresetToEnvironment(lightingSettings.environmentType) as ValidEnvironmentPreset;
+
+  // Adapter function to make updateLightingSetting compatible with ViewerSettings
+  const handleUpdateSetting = (path: string, value: any) => {
+    const pathParts = path.split('.');
+    if (pathParts.length === 2) {
+      const [group, property] = pathParts;
+      updateLightingSetting({
+        [group]: {
+          ...lightingSettings[group],
+          [property]: value
+        }
+      });
+    } else {
+      updateLightingSetting({
+        [path]: value
+      });
+    }
+  };
+
   return (
     <div className="w-full h-full relative">
       {/* Canvas with WebGL renderer */}
       <Canvas 
+        ref={canvasRef}
         shadows 
         gl={{ 
           antialias: true, 
           alpha: false,
-          preserveDrawingBuffer: true
+          preserveDrawingBuffer: true,
+          powerPreference: 'high-performance',
         }}
         className="bg-gray-800 z-0"
+        dpr={[1, 1.5]} // Reduce resolution for better performance
       >
         <color attach="background" args={["#0f172a"]} />
         <PerspectiveCamera makeDefault position={[0, 0, 5]} fov={50} />
@@ -316,15 +220,18 @@ const RealisticCardViewer: React.FC<RealisticCardViewerProps> = ({
           </mesh>
         }>
           <CardModel 
-            card={card}
+            imageUrl={cardWithFallback.imageUrl}
+            backImageUrl={cardWithFallback.backImageUrl}
             isFlipped={isFlipped}
-            lightingSettings={lightingSettings}
-            materialProps={{
-              roughness: 0.15,
-              metalness: 0.3
-            }}
+            activeEffects={activeEffects}
+            effectIntensities={effectIntensities}
           />
-          <Environment3D preset={lightingSettings.environmentType} />
+          
+          <Environment 
+            preset={envPreset} 
+            background={false}
+            blur={0.6}
+          />
         </Suspense>
         
         <OrbitControls 
@@ -341,7 +248,7 @@ const RealisticCardViewer: React.FC<RealisticCardViewerProps> = ({
         <DebugInfo show={isDebugMode} />
       </Canvas>
 
-      {/* Controls overlay */}
+      {/* Controls overlay - OUTSIDE of Canvas */}
       <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex gap-3 z-10">
         <Button
           variant="secondary"
@@ -353,7 +260,7 @@ const RealisticCardViewer: React.FC<RealisticCardViewerProps> = ({
         </Button>
       </div>
       
-      {/* Customization panel toggle */}
+      {/* Customization panel toggle - OUTSIDE of Canvas */}
       <div 
         className={cn(
           "absolute top-1/2 -translate-y-1/2 z-10 transition-all duration-300",
@@ -370,18 +277,19 @@ const RealisticCardViewer: React.FC<RealisticCardViewerProps> = ({
         </Button>
       </div>
       
-      {/* Debug indicator */}
+      {/* Debug indicator - OUTSIDE of Canvas */}
       {isDebugMode && (
         <div className="absolute top-2 left-2 bg-red-500/80 text-white text-xs px-2 py-1 rounded z-50">
           Debug Mode
         </div>
       )}
       
-      {/* Card title overlay */}
+      {/* Card title overlay - OUTSIDE of Canvas */}
       <div className="absolute top-2 left-1/2 transform -translate-x-1/2 bg-black/50 backdrop-blur-sm text-white px-3 py-1 rounded-full text-sm z-10">
         {card.title || 'Untitled Card'}
       </div>
 
+      {/* Settings button - OUTSIDE of Canvas */}
       <Button
         variant="ghost"
         size="icon"
@@ -391,12 +299,17 @@ const RealisticCardViewer: React.FC<RealisticCardViewerProps> = ({
         <Eye className="h-5 w-5" />
       </Button>
 
-      <ViewerSettings
-        settings={lightingSettings}
-        onUpdateSettings={updateLightingSetting}
-        onApplyPreset={applyPreset}
-        isOpen={showViewerSettings}
-      />
+      {/* Viewer settings - OUTSIDE of Canvas */}
+      {showViewerSettings && (
+        <div className="absolute top-16 right-4 w-72 bg-black/60 backdrop-blur-md p-4 rounded-lg z-20">
+          <ViewerSettings
+            settings={lightingSettings}
+            onUpdateSettings={handleUpdateSetting}
+            onApplyPreset={applyPreset}
+            isOpen={showViewerSettings}
+          />
+        </div>
+      )}
     </div>
   );
 };

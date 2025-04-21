@@ -1,251 +1,253 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { MemorabiliaType } from '@/components/card-upload/cardDetection';
-import EditorCanvas from './components/EditorCanvas';
-import { useEditorState } from './hooks/useEditorState';
-import { useCanvasManager } from './hooks/useCanvasManager';
 import { useBatchImageProcessing } from './hooks/useBatchImageProcessing';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { useOfflineStorage } from '@/hooks/useOfflineStorage';
-import { useConnectivity } from '@/hooks/useConnectivity';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import AdjustmentsPanel from './components/AdjustmentsPanel';
-import DetectionPanel from './components/DetectionPanel';
+import EditorCanvas from './EditorCanvas';
 
 interface BatchImageEditorProps {
-  open: boolean;
-  onClose: () => void;
-  imageUrl: string | null;
-  originalFile: File | null;
-  onProcessComplete: (files: File[], urls: string[], types?: MemorabiliaType[]) => void;
-  detectionType?: 'group' | 'memorabilia' | 'mixed';
+  files: File[];
+  onComplete?: (processedImages: any[]) => void;
 }
 
-const BatchImageEditor: React.FC<BatchImageEditorProps> = ({
-  open,
-  onClose,
-  imageUrl,
-  originalFile,
-  onProcessComplete,
-  detectionType = 'group'
-}) => {
-  const isMobile = useIsMobile();
-  const { isOnline } = useConnectivity();
-  
-  // Editor canvas refs
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const editorImgRef = useRef<HTMLImageElement>(null);
-  
-  // Editor state
+const BatchImageEditor: React.FC<BatchImageEditorProps> = ({ files, onComplete }) => {
   const {
-    selectedAreas,
-    setSelectedAreas,
-    activePanel,
-    setActivePanel,
-    isDetecting,
-    setIsDetecting,
     isProcessing,
-    setIsProcessing
-  } = useEditorState({ detectionType });
-  
-  // Canvas interaction handlers
-  const {
-    handlePointerDown,
-    handlePointerMove,
-    handlePointerUp,
-    zoom,
-    setZoom,
-    handleZoomIn,
-    handleZoomOut,
-    rotation,
-    setRotation,
-    rotateImage,
-    brightness,
-    setBrightness,
-    contrast,
-    setContrast,
-    enhanceImage,
-    resetAdjustments
-  } = useCanvasManager({
-    canvasRef,
-    editorImgRef,
-    selectedAreas
-  });
-  
-  // Batch processing
-  const {
+    processedImages,
+    currentImageIndex,
+    processImage,
     detectObjects,
     processDetections,
     extractSelectedAreas,
     getPreviewUrls
-  } = useBatchImageProcessing({
-    canvasRef,
-    editorImgRef,
-    selectedAreas,
-    detectionType,
-    setSelectedAreas,
-    setIsDetecting,
-    setIsProcessing
-  });
+  } = useBatchImageProcessing();
   
-  // Run detection when image loads
+  const [selectedAreas, setSelectedAreas] = useState<any[]>([]);
+  const [width, setWidth] = useState(800);
+  const [height, setHeight] = useState(600);
+  const [isDrawing, setIsDrawing] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [startY, setStartY] = useState(0);
+  const [currentFile, setCurrentFile] = useState<File | null>(null);
+  const [currentImageUrl, setCurrentImageUrl] = useState<string>('');
+  
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const editorImgRef = useRef<HTMLImageElement>(null);
+  
+  // Process the first image when component mounts
   useEffect(() => {
-    if (open && imageUrl && originalFile && canvasRef.current && editorImgRef.current) {
-      // Wait for image to load before detecting
-      const img = editorImgRef.current;
-      if (img.complete) {
-        detectObjects();
-      } else {
-        img.onload = () => detectObjects();
-      }
+    if (files.length > 0 && processedImages.length === 0) {
+      setCurrentFile(files[0]);
+      processCurrentFile(files[0]);
     }
-  }, [open, imageUrl, originalFile]);
+  }, [files]);
   
-  // Handle completion
-  const handleComplete = async () => {
-    if (!originalFile || !canvasRef.current) return;
-    
-    try {
-      setIsProcessing(true);
+  // Update the current image when the index changes
+  useEffect(() => {
+    if (processedImages[currentImageIndex]) {
+      setCurrentImageUrl(processedImages[currentImageIndex].processedUrl);
+    }
+  }, [processedImages, currentImageIndex]);
+  
+  const processCurrentFile = async (file: File) => {
+    const result = await processImage(file);
+    if (result.success && result.data) {
+      setCurrentImageUrl(result.data.processedUrl);
       
-      // Extract all selected areas
-      const extractedFiles = await extractSelectedAreas();
-      
-      // Get preview URLs for extracted areas
-      const extractedUrls = getPreviewUrls();
-      
-      // Get types for the extracted areas
-      const extractedTypes = selectedAreas.map(area => area.memorabiliaType);
-      
-      // If offline and using offline storage, let the user know
-      if (!isOnline) {
-        console.log('Processing in offline mode');
-      }
-      
-      onProcessComplete(extractedFiles, extractedUrls, extractedTypes);
-    } catch (error) {
-      console.error('Error completing batch processing:', error);
-    } finally {
-      setIsProcessing(false);
-      onClose();
+      // Set the image dimensions for canvas
+      const img = new Image();
+      img.onload = () => {
+        setWidth(img.width);
+        setHeight(img.height);
+      };
+      img.src = result.data.processedUrl;
     }
   };
   
-  // This function will process a single area for preview
-  const handleProcessSingleArea = async (index: number) => {
-    if (!originalFile || !canvasRef.current) return;
+  const handlePointerDown = (e: React.PointerEvent) => {
+    if (isProcessing || !canvasRef.current) return;
+    
+    const canvas = canvasRef.current;
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    setIsDrawing(true);
+    setStartX(x);
+    setStartY(y);
+  };
+  
+  const handlePointerMove = (e: React.PointerEvent) => {
+    if (!isDrawing || !canvasRef.current) return;
+    
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    // Clear the canvas and draw the new selection rectangle
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+    ctx.strokeStyle = 'rgba(0, 120, 255, 1)';
+    ctx.lineWidth = 2;
+    
+    const width = x - startX;
+    const height = y - startY;
+    
+    ctx.fillRect(startX, startY, width, height);
+    ctx.strokeRect(startX, startY, width, height);
+  };
+  
+  const handlePointerUp = () => {
+    if (!isDrawing || !canvasRef.current) return;
+    
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    
+    setIsDrawing(false);
+    
+    // Add the selected area to our state
+    const rect = canvas.getBoundingClientRect();
+    
+    // Only add the selection if it's big enough
+    const minSize = 10; // Minimum size in pixels
+    const width = Math.abs(rect.width);
+    const height = Math.abs(rect.height);
+    
+    if (width > minSize && height > minSize) {
+      setSelectedAreas([...selectedAreas, {
+        x: Math.min(startX, rect.width),
+        y: Math.min(startY, rect.height),
+        width,
+        height
+      }]);
+    }
+    
+    // Clear canvas after adding the selection
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  };
+  
+  const processNext = async () => {
+    // Process any selected areas here
+    // ...
+    
+    // Move to the next file
+    const nextIndex = currentImageIndex + 1;
+    if (nextIndex < files.length) {
+      setCurrentFile(files[nextIndex]);
+      processCurrentFile(files[nextIndex]);
+      setSelectedAreas([]);
+    } else {
+      // All files processed
+      if (onComplete) {
+        onComplete(processedImages);
+      }
+    }
+  };
+  
+  const detectAndProcess = async () => {
+    if (!currentImageUrl) return;
     
     try {
-      setIsProcessing(true);
+      const detections = await detectObjects(currentImageUrl);
+      const processed = await processDetections(detections, currentImageUrl);
       
-      // Extract all selected areas
-      const extractedFiles = await extractSelectedAreas([index]);
-      const extractedUrls = getPreviewUrls([index]);
-      const extractedTypes = [selectedAreas[index].memorabiliaType].filter(Boolean) as MemorabiliaType[];
+      // Update the processedImages with the detections
+      const updatedProcessedImages = [...processedImages];
+      updatedProcessedImages[currentImageIndex] = {
+        ...updatedProcessedImages[currentImageIndex],
+        detections: processed
+      };
       
-      onProcessComplete(extractedFiles, extractedUrls, extractedTypes);
+      // Here you would normally update your state with the processed detections
+      console.log("Processed detections:", processed);
+      
     } catch (error) {
-      console.error('Error processing single area:', error);
-    } finally {
-      setIsProcessing(false);
-      onClose();
+      console.error("Error in detection and processing:", error);
     }
   };
   
   return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-screen-lg w-[95vw] max-h-[90vh] p-0 overflow-hidden">
-        <div className="flex flex-col h-[80vh]">
-          <div className="p-4 border-b flex items-center justify-between">
-            <h2 className="text-lg font-semibold">
-              Batch Editor - {selectedAreas.length} areas detected
-            </h2>
-            <div className="flex gap-2">
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={detectObjects}
-                disabled={isDetecting}
+    <div className="p-4">
+      <h2 className="text-xl font-semibold mb-4">Batch Image Editor</h2>
+      
+      <div className="mb-4">
+        <p>
+          Processing image {currentImageIndex + 1} of {files.length}: 
+          <span className="font-medium ml-1">{currentFile?.name || ''}</span>
+        </p>
+      </div>
+      
+      <div className="border rounded-lg overflow-hidden bg-gray-50">
+        <EditorCanvas 
+          canvasRef={canvasRef}
+          editorImgRef={editorImgRef}
+          width={width}
+          height={height}
+          isDrawing={isDrawing}
+          startX={startX}
+          startY={startY}
+          isProcessing={isProcessing}
+          handlePointerDown={handlePointerDown}
+          handlePointerMove={handlePointerMove}
+          handlePointerUp={handlePointerUp}
+          imageUrl={currentImageUrl}
+          selectedAreas={selectedAreas}
+        />
+      </div>
+      
+      <div className="flex justify-between mt-4">
+        <Button 
+          variant="outline"
+          onClick={detectAndProcess}
+          disabled={isProcessing || !currentImageUrl}
+        >
+          Auto-Detect Objects
+        </Button>
+        
+        <div className="flex gap-2">
+          <Button
+            variant="secondary"
+            onClick={() => {
+              setSelectedAreas([]);
+              if (canvasRef.current) {
+                const ctx = canvasRef.current.getContext('2d');
+                if (ctx) ctx.clearRect(0, 0, width, height);
+              }
+            }}
+            disabled={isProcessing || selectedAreas.length === 0}
+          >
+            Clear Selections
+          </Button>
+          
+          <Button
+            onClick={processNext}
+            disabled={isProcessing}
+          >
+            {currentImageIndex < files.length - 1 ? 'Next Image' : 'Finish'}
+          </Button>
+        </div>
+      </div>
+      
+      {selectedAreas.length > 0 && (
+        <div className="mt-4">
+          <h3 className="text-sm font-medium mb-2">Selected Areas: {selectedAreas.length}</h3>
+          <div className="grid grid-cols-6 gap-2">
+            {selectedAreas.map((area, index) => (
+              <div 
+                key={index} 
+                className="aspect-square bg-gray-100 rounded-md flex items-center justify-center text-xs text-gray-500"
               >
-                {isDetecting ? "Detecting..." : "Re-detect"}
-              </Button>
-              <Tabs value={activePanel} onValueChange={setActivePanel}>
-                <TabsList>
-                  <TabsTrigger value="detect">Detection</TabsTrigger>
-                  <TabsTrigger value="adjust">Adjustments</TabsTrigger>
-                </TabsList>
-              </Tabs>
-            </div>
-          </div>
-          
-          <div className="flex flex-col md:flex-row h-full">
-            <div className="w-full md:w-3/4 h-1/2 md:h-full p-4 flex flex-col">
-              <EditorCanvas 
-                canvasRef={canvasRef}
-                editorImgRef={editorImgRef}
-                imageUrl={imageUrl}
-                selectedAreas={selectedAreas}
-                isDetecting={isDetecting}
-                isProcessing={isProcessing}
-                handlePointerDown={handlePointerDown}
-                handlePointerMove={handlePointerMove}
-                handlePointerUp={handlePointerUp}
-              />
-              
-              {/* Mobile toolbar for common operations */}
-              {isMobile && (
-                <div className="flex justify-between items-center mt-2 px-1 py-2 bg-gray-50 rounded-md">
-                  <Button variant="outline" size="sm" onClick={handleZoomOut}>-</Button>
-                  <span className="text-xs">{zoom}%</span>
-                  <Button variant="outline" size="sm" onClick={handleZoomIn}>+</Button>
-                  <Button variant="outline" size="sm" onClick={() => rotateImage('counterclockwise')}>↺</Button>
-                  <Button variant="outline" size="sm" onClick={() => rotateImage('clockwise')}>↻</Button>
-                  <Button variant="outline" size="sm" onClick={enhanceImage}>✨</Button>
-                  <Button variant="outline" size="sm" onClick={resetAdjustments}>Reset</Button>
-                </div>
-              )}
-            </div>
-            
-            <div className="w-full md:w-1/4 h-1/2 md:h-full border-t md:border-t-0 md:border-l p-4 overflow-auto">
-              <Tabs value={activePanel} className="w-full">
-                <TabsContent value="detect" className="mt-0">
-                  <DetectionPanel 
-                    selectedAreas={selectedAreas}
-                    onProcessArea={handleProcessSingleArea}
-                  />
-                </TabsContent>
-                <TabsContent value="adjust" className="mt-0">
-                  <AdjustmentsPanel 
-                    brightness={brightness}
-                    setBrightness={setBrightness}
-                    contrast={contrast}
-                    setContrast={setContrast}
-                    rotation={rotation}
-                    setRotation={setRotation}
-                    onEnhanceImage={enhanceImage}
-                    onResetAdjustments={resetAdjustments}
-                  />
-                </TabsContent>
-              </Tabs>
-            </div>
-          </div>
-          
-          <div className="p-4 border-t flex justify-end space-x-2">
-            <Button variant="outline" onClick={onClose}>Cancel</Button>
-            <Button 
-              onClick={handleComplete} 
-              disabled={selectedAreas.length === 0 || isProcessing}
-            >
-              {isProcessing 
-                ? 'Processing...' 
-                : `Process ${selectedAreas.length} Items`}
-            </Button>
+                Area {index + 1}
+              </div>
+            ))}
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+      )}
+    </div>
   );
 };
 

@@ -1,115 +1,74 @@
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useIsMobile } from './use-mobile';
 
-interface OptimizedRenderingConfig {
-  resolution: number;
-  maxFPS: number;
-  useLowQualityTextures: boolean;
-  disablePostProcessing: boolean;
-  disableShadows: boolean;
+interface MobileOptimizationOptions {
+  reduceEffects?: boolean;
+  lazyLoadImages?: boolean;
+  optimizeInteractions?: boolean;
+  shouldOptimizeAnimations?: boolean;
 }
 
-// Define the network connection interface
-interface NetworkInformation {
-  effectiveType: string;
-  addEventListener: (type: string, listener: EventListener) => void;
-  removeEventListener: (type: string, listener: EventListener) => void;
-}
+export const useMobileOptimization = (options?: MobileOptimizationOptions) => {
+  const isMobile = useIsMobile();
+  const [bandwidthLevel, setBandwidthLevel] = useState<'high' | 'medium' | 'low'>('high');
 
-export const useMobileOptimization = () => {
-  const [isMobile, setIsMobile] = useState(false);
-  const [viewportWidth, setViewportWidth] = useState(window.innerWidth);
-  const [isLowBandwidth, setIsLowBandwidth] = useState(false);
-  const [connectionType, setConnectionType] = useState<string | null>(null);
-  
+  // Detect connection quality (if available in browser)
   useEffect(() => {
-    const checkMobile = () => {
-      const width = window.innerWidth;
-      setViewportWidth(width);
-      setIsMobile(width < 768);
-    };
+    const connection = (navigator as any).connection;
     
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
+    if (connection) {
+      const updateConnectionStatus = () => {
+        const effectiveType = connection.effectiveType;
+        if (effectiveType === '4g') setBandwidthLevel('high');
+        else if (effectiveType === '3g') setBandwidthLevel('medium');
+        else setBandwidthLevel('low');
+      };
+      
+      updateConnectionStatus();
+      connection.addEventListener('change', updateConnectionStatus);
+      
+      return () => {
+        connection.removeEventListener('change', updateConnectionStatus);
+      };
+    }
     
-    // Check network conditions
-    const checkNetworkCondition = () => {
-      if ('connection' in navigator) {
-        // Cast to our defined interface to handle the properties correctly
-        const connection = (
-          navigator as any
-        ).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection as NetworkInformation | undefined;
-        
-        if (connection) {
-          const type = connection.effectiveType;
-          setConnectionType(type);
-          
-          // Consider 2G and slow 3G as low bandwidth
-          setIsLowBandwidth(['slow-2g', '2g', 'slow-3g'].includes(type));
-          
-          if (connection.addEventListener) {
-            connection.addEventListener('change', checkNetworkCondition);
-          }
-        }
-      }
-    };
-    
-    checkNetworkCondition();
-    
-    return () => {
-      window.removeEventListener('resize', checkMobile);
-      if ('connection' in navigator) {
-        const connection = (
-          navigator as any
-        ).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection as NetworkInformation | undefined;
-        
-        if (connection && connection.removeEventListener) {
-          connection.removeEventListener('change', checkNetworkCondition);
-        }
-      }
-    };
+    return undefined;
   }, []);
-  
-  // Calculate if animations should be optimized based on device and settings
-  const shouldOptimizeAnimations = isMobile || isLowBandwidth;
-  
-  // Define if interactions should be optimized (haptics, etc)
-  const optimizeInteractions = isMobile;
-  
-  // Determine if images should be lazy loaded
-  const lazyLoadImages = isMobile || isLowBandwidth;
-  
-  // Determine image quality based on device and network
+
+  // Determine if we should reduce animations/effects based on device and options
+  const shouldOptimizeAnimations = () => {
+    if (options?.reduceEffects !== undefined) return options.reduceEffects;
+    return isMobile || bandwidthLevel !== 'high';
+  };
+
+  // Determine if we should lazy load images
+  const lazyLoadImages = options?.lazyLoadImages !== false;
+
+  // Get image quality based on bandwidth and device
   const getImageQuality = () => {
-    if (isLowBandwidth) return 60; // Lower quality for poor connections
-    if (isMobile) return 80; // Good balance for mobile
-    return 90; // High quality for desktop
+    if (!isMobile && bandwidthLevel === 'high') return 0.92; // Desktop, high bandwidth
+    if (bandwidthLevel === 'medium') return 0.80; // Medium bandwidth
+    return 0.70; // Low bandwidth or mobile
   };
-  
-  const reduceEffects = isMobile;
-  const lowPowerMode = isMobile;
-  
-  const optimizedRendering: OptimizedRenderingConfig = {
-    resolution: isMobile ? 0.75 : 1,
-    maxFPS: isMobile ? 30 : 60,
-    useLowQualityTextures: isMobile,
-    disablePostProcessing: isMobile,
-    disableShadows: isMobile,
-  };
-  
+
+  // Check if we're on a low bandwidth connection
+  const isLowBandwidth = bandwidthLevel === 'low';
+
+  // Should we optimize touch interactions?
+  const optimizeInteractions = options?.optimizeInteractions !== false && isMobile;
+
+  // Implementation of reduceEffects property
+  const reduceEffects = options?.reduceEffects || isMobile;
+
   return {
     isMobile,
-    viewportWidth,
-    reduceEffects,
-    lowPowerMode,
-    optimizedRendering,
-    // Add the new properties
-    isLowBandwidth,
-    connectionType,
+    bandwidthLevel,
     shouldOptimizeAnimations,
-    optimizeInteractions,
     lazyLoadImages,
-    getImageQuality
+    getImageQuality,
+    isLowBandwidth,
+    optimizeInteractions,
+    reduceEffects
   };
 };
