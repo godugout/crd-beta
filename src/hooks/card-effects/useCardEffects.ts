@@ -30,6 +30,7 @@ export interface CardEffectsResult {
   setActiveEffects: (effects: string[]) => void;
   effectSettings: Record<CardEffect, EffectSettings>;
   updateEffectSetting: (effect: CardEffect, settings: Partial<EffectSettings>) => void;
+  isLoading: boolean;
 }
 
 const defaultEffectSettings: Record<CardEffect, EffectSettings> = {
@@ -51,10 +52,13 @@ const useCardEffects = (): CardEffectsResult => {
   const [activeEffects, setActiveEffects] = useState<string[]>([]);
   // Settings for each effect type
   const [effectSettings, setEffectSettings] = useState<Record<CardEffect, EffectSettings>>(defaultEffectSettings);
+  // Loading state
+  const [isLoading, setIsLoading] = useState(true);
 
   // Load saved effects from localStorage on mount
   useEffect(() => {
     try {
+      setIsLoading(true);
       const savedEffects = localStorage.getItem('cardEffects');
       if (savedEffects) {
         setCardEffects(JSON.parse(savedEffects));
@@ -66,6 +70,8 @@ const useCardEffects = (): CardEffectsResult => {
       }
     } catch (error) {
       console.error('Error loading card effects:', error);
+    } finally {
+      setIsLoading(false);
     }
   }, []);
 
@@ -156,7 +162,8 @@ const useCardEffects = (): CardEffectsResult => {
     clearEffects,
     setActiveEffects,
     effectSettings,
-    updateEffectSetting
+    updateEffectSetting,
+    isLoading
   };
 };
 

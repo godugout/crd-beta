@@ -22,6 +22,7 @@ export interface LightingSettings {
   envMapIntensity: number;
   useDynamicLighting: boolean;
   autoRotate?: boolean;
+  followPointer?: boolean;
 }
 
 interface UseCardLightingProps {
@@ -55,6 +56,19 @@ export const useCardLighting = (initialPreset: LightingPreset = 'studio') => {
     setLightingSettings(prev => ({
       ...prev,
       ...newSettings
+    }));
+    setIsUserCustomized(true);
+  }, []);
+
+  // Update light position based on mouse coordinates
+  const updateLightPosition = useCallback((x: number, y: number) => {
+    setLightingSettings(prev => ({
+      ...prev,
+      primaryLight: {
+        ...prev.primaryLight,
+        x: 5 + (x - 0.5) * 10,
+        y: 5 + (y - 0.5) * 10
+      }
     }));
     setIsUserCustomized(true);
   }, []);
@@ -101,6 +115,7 @@ export const useCardLighting = (initialPreset: LightingPreset = 'studio') => {
     lightingSettings,
     lightingPreset,
     updateLightingSetting,
+    updateLightPosition,
     applyPreset,
     isUserCustomized,
     toggleDynamicLighting
