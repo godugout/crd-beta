@@ -3,7 +3,8 @@ import {
   Home, 
   Image, 
   Layers, 
-  Building
+  Building, 
+  Users 
 } from 'lucide-react';
 import { NavigationItem } from './types';
 
@@ -27,9 +28,21 @@ export const mainNavItems: NavigationItem[] = [
     description: 'Organized card collections'
   },
   { 
-    title: 'Towns & Communities', 
+    title: 'Towns', 
     path: '/towns',
     icon: Building,
-    description: 'Connect with communities and towns'
+    description: 'Discover towns and locales'
+  },
+  { 
+    title: 'Teams', 
+    path: '/teams',
+    icon: Users,
+    description: 'Browse all teams'
+  },
+  { 
+    title: 'Community', 
+    path: '/community',
+    icon: Users,
+    description: 'Connect with collectors, creators & communities'
   }
 ];
