@@ -384,7 +384,7 @@ const CRDEditor: React.FC = () => {
             onClick={handleReset}
             className="flex items-center gap-2"
           >
-            <Reset size={16} />
+            <RotateCcw size={16} />
             Reset
           </Button>
           
