@@ -101,12 +101,13 @@ export function CardProvider({ children }: { children: ReactNode }) {
             tags: card.tags || [],
             effects: card.effects || [],
             userId: card.userId || 'anonymous',
-            designMetadata: {
+            // Explicitly handle designMetadata since it's causing an error
+            designMetadata: card.designMetadata ? {
               ...defaultCardValues.designMetadata,
-              ...(card.designMetadata || {})
-            },
-            // Handle rarity explicitly with type assertion if it exists
-            rarity: (card.rarity as CardRarity | undefined) || undefined
+              ...card.designMetadata
+            } : { ...defaultCardValues.designMetadata },
+            // Handle rarity explicitly - and cast it to CardRarity if present
+            rarity: card.rarity ? (card.rarity as CardRarity) : undefined
           };
           return transformedCard;
         });
