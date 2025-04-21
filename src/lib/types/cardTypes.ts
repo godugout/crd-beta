@@ -41,6 +41,7 @@ export interface Card extends BaseEntity {
   createdAt: string;
   updatedAt: string;
   position?: string;
+  hotspots?: HotspotData[]; // Added hotspots field
 }
 
 export interface CardDesignState {
@@ -154,4 +155,28 @@ export interface FabricSwatch {
   manufacturer: string;
   position: string;
   size: string;
+}
+
+/**
+ * Hotspot for interactive cards
+ */
+export interface HotspotData {
+  id: string;
+  x: number;
+  y: number;
+  radius: number;
+  type: 'info' | 'link' | 'audio' | 'video' | 'ar' | 'text' | 'image';
+  content: {
+    title?: string;
+    description?: string;
+    url?: string;
+    mediaUrl?: string;
+  } | string;  // Support both object and string content
+  style?: {
+    color?: string;
+    icon?: string;
+  };
+  visible?: boolean;
+  width?: number;
+  height?: number;
 }
