@@ -27,6 +27,9 @@ export interface CardContextType {
   removeCardFromCollection: (collectionId: string, cardId: string) => boolean;
 }
 
+// Create the CardContext before it's used
+const CardContext = createContext<CardContextType | undefined>(undefined);
+
 // Define default values for required fields in Card objects
 const defaultCardValues: Omit<Card, 'id'> = {
   title: '',
@@ -351,4 +354,5 @@ export const useCards = () => {
   return context;
 };
 
+// Export the CardContext
 export { CardContext };
