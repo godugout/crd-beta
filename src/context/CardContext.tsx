@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { Card, Collection, DesignMetadata, CardRarity } from '@/lib/types'; // Added CardRarity import here
 import { sampleCards } from '@/data/sampleCards';
@@ -102,12 +103,12 @@ export function CardProvider({ children }: { children: ReactNode }) {
             effects: card.effects || [],
             userId: card.userId || 'anonymous',
             // Explicitly handle designMetadata since it's causing an error
-            designMetadata: card.designMetadata ? {
+            designMetadata: {
               ...defaultCardValues.designMetadata,
-              ...card.designMetadata
-            } : { ...defaultCardValues.designMetadata },
+              ...(card.designMetadata || {})
+            },
             // Handle rarity explicitly - and cast it to CardRarity if present
-            rarity: card.rarity ? (card.rarity as CardRarity) : undefined
+            rarity: card.rarity as CardRarity | undefined
           };
           return transformedCard;
         });
