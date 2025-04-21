@@ -1,6 +1,6 @@
 
-// Import from cardTypes
-import { FabricSwatch as FabricSwatchType } from './cardTypes';
+// Re-export types from cardTypes.ts
+import { FabricSwatch as FabricSwatchType, Card as CardType } from './cardTypes';
 
 export interface FabricSwatch {
   type: string;
@@ -34,8 +34,8 @@ export interface CardData {
   effects: string[]; // Required property
 }
 
-// Re-export Card interface from cardTypes with proper syntax for isolatedModules
-export type { Card } from './cardTypes';
+// Export Card type from cardTypes
+export type { CardType as Card };
 
-// Export FabricSwatch for others to use with proper syntax for isolatedModules
+// Export FabricSwatch for others to use
 export type { FabricSwatchType };

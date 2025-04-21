@@ -94,6 +94,7 @@ export function CardProvider({ children }: { children: ReactNode }) {
             ...defaultCardValues,
             ...card,
             thumbnailUrl: card.thumbnailUrl || card.imageUrl || '',
+            imageUrl: card.imageUrl || '', // Ensure imageUrl is not undefined
             id: card.id || uuidv4(),
             title: card.title || 'Untitled Card',
             description: card.description || '',
@@ -127,6 +128,7 @@ export function CardProvider({ children }: { children: ReactNode }) {
       id: card.id || uuidv4(),
       title: card.title || 'Untitled Card',
       description: card.description || '',
+      imageUrl: card.imageUrl || '', // Ensure imageUrl is provided and not optional
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       thumbnailUrl: card.thumbnailUrl || card.imageUrl || '',

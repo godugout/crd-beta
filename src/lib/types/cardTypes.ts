@@ -1,5 +1,5 @@
 
-import { BaseEntity } from './index';
+import { BaseEntity } from '../types';
 import { JsonValue } from '../types';
 
 /**
@@ -145,9 +145,6 @@ export interface DesignMetadata {
   };
   [key: string]: any;
 }
-
-// Fix export syntax for TypeScript module
-export type { HotspotData } from './enhancedCardTypes';
 
 // Export FabricSwatch for types/card.ts
 export interface FabricSwatch {

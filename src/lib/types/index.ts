@@ -1,38 +1,30 @@
 
-// Import and re-export all types from the type modules
-import { Card, FabricSwatch, CardData } from './types/card';
-import { User, UserRole, UserPermission } from './types/user';
-import { Collection } from './types/collection';
-import { Comment, Reaction, Team, TeamMember } from './schema/types';
-import { OaklandMemoryData } from './schema/types';
-import { GroupUploadType } from './types/uploadTypes';
-import { InstagramPost } from './types/socialTypes';
+// Import from local file paths that actually exist
+import { Card as CardType, FabricSwatch, CardData } from '../types/card';
+import { CardRarity, DesignMetadata } from '../types/cardTypes';
 
-// Core data types
-export type {
-  Card,
-  CardData,
-  FabricSwatch,
-  User,
-  Collection,
-  Comment,
-  Reaction,
-  Team,
-  TeamMember,
-  OaklandMemoryData,
-  GroupUploadType,
-  InstagramPost
-};
-
-// Enum exports - remove aliases
-export { UserRole, UserPermission };
-
-// Base entity interface
+// Define base entity interface
 export interface BaseEntity {
   id: string;
   createdAt: string;
   updatedAt: string;
   [key: string]: any;
+}
+
+// Define the Card interface with all required properties
+export interface Card extends BaseEntity {
+  title: string;
+  description: string; // Required field
+  imageUrl: string;    // Required field
+  thumbnailUrl: string;
+  tags: string[];
+  userId: string;
+  effects: string[];
+  player?: string;
+  team?: string;
+  position?: string;
+  year?: string;
+  designMetadata: DesignMetadata;  // Required field with proper type
 }
 
 // Export JsonValue type
@@ -47,7 +39,104 @@ export const serializeMetadata = (metadata: any): string => {
 };
 
 // Add the CardRarity type that was missing
-export type CardRarity = 'common' | 'uncommon' | 'rare' | 'ultra-rare' | 'legendary' | 'exclusive' | 'one-of-one';
+export type { CardRarity };
+
+// Re-export design metadata types
+export interface Collection {
+  id: string;
+  name: string;
+  title?: string;
+  description?: string;
+  coverImageUrl?: string;
+  thumbnailUrl?: string;
+  userId?: string;
+  teamId?: string;
+  visibility?: string;
+  allowComments?: boolean;
+  createdAt: string;
+  updatedAt: string;
+  designMetadata?: any;
+  cards?: Card[];
+  cardIds?: string[];
+  tags?: string[];
+  isPublic?: boolean;
+  featured?: boolean;
+}
+
+// Re-export DesignMetadata
+export type { DesignMetadata };
+
+// Types for AuthUser
+export interface AuthUser {
+  id: string;
+  email: string;
+  name?: string;
+  avatarUrl?: string;
+  displayName?: string;
+  username?: string;
+  role?: string;
+  bio?: string;
+  permissions?: string[];
+  createdAt: string;
+  updatedAt?: string;
+}
+
+// DbCollection type
+export interface DbCollection {
+  id: string;
+  title?: string;
+  name?: string;
+  description?: string;
+  cover_image_url?: string;
+  owner_id?: string;
+  user_id?: string;
+  team_id?: string;
+  visibility?: string;
+  allow_comments?: boolean;
+  design_metadata?: any;
+  created_at?: string;
+  updated_at?: string;
+  is_public?: boolean;
+  card_ids?: string[];
+  tags?: string[];
+  featured?: boolean;
+}
+
+// Re-export types
+export type { CardType, FabricSwatch, CardData };
+
+// Define minimal User and UserRole types
+export interface User {
+  id: string;
+  email: string;
+  name?: string;
+  avatarUrl?: string;
+  role?: string;
+  createdAt: string;
+}
+
+export enum UserRole {
+  ADMIN = 'ADMIN',
+  MODERATOR = 'MODERATOR',
+  CREATOR = 'CREATOR',
+  USER = 'USER',
+  GUEST = 'GUEST'
+}
+
+export enum UserPermission {
+  MANAGE_USERS = 'MANAGE_USERS',
+  MANAGE_CONTENT = 'MANAGE_CONTENT',
+  VIEW_ANALYTICS = 'VIEW_ANALYTICS',
+  MANAGE_SYSTEM = 'MANAGE_SYSTEM',
+  ACCESS_API = 'ACCESS_API',
+  MODERATE_COMMENTS = 'MODERATE_COMMENTS',
+  CREATE_CONTENT = 'CREATE_CONTENT',
+  EDIT_OWN_CONTENT = 'EDIT_OWN_CONTENT',
+  DELETE_OWN_CONTENT = 'DELETE_OWN_CONTENT',
+  CREATE_COLLECTIONS = 'CREATE_COLLECTIONS',
+  EDIT_OWN_COLLECTIONS = 'EDIT_OWN_COLLECTIONS',
+  VIEW_CONTENT = 'VIEW_CONTENT'
+}
 
 // Add Role Permissions mapping
 export const ROLE_PERMISSIONS: Record<UserRole, UserPermission[]> = {
@@ -81,89 +170,48 @@ export const ROLE_PERMISSIONS: Record<UserRole, UserPermission[]> = {
   ]
 };
 
-// Re-export design metadata types
-export interface DesignMetadata {
-  cardStyle: {
-    template: string;
-    effect: string;
-    borderRadius: string;
-    borderColor: string;
-    frameColor: string;
-    frameWidth: number;
-    shadowColor: string;
-    teamSpecific?: boolean;
-    [key: string]: any;
-  };
-  textStyle: {
-    titleColor: string;
-    titleAlignment: string;
-    titleWeight: string;
-    descriptionColor: string;
-    [key: string]: any;
-  };
-  marketMetadata: {
-    isPrintable: boolean;
-    isForSale: boolean;
-    includeInCatalog: boolean;
-    [key: string]: any;
-  };
-  cardMetadata: {
-    category: string;
-    cardType: string;
-    series: string;
-    [key: string]: any;
-  };
-  [key: string]: any;
-}
-
-// Update our Card interface to ensure consistency
-export interface Card extends BaseEntity {
-  title: string;
-  description: string; // Required field
-  imageUrl: string;
-  thumbnailUrl: string;
-  tags: string[];
+// Define minimal versions of the missing types
+export interface Comment {
+  id: string;
+  content: string;
   userId: string;
-  effects: string[];
-  player?: string;
-  team?: string;
-  position?: string;
-  year?: string;
-  designMetadata: DesignMetadata;  // Required field with proper type
-}
-
-// Types for AuthUser
-export interface AuthUser {
-  id: string;
-  email: string;
-  name?: string;
-  avatarUrl?: string;
-  displayName?: string;
-  username?: string;
-  role?: UserRole;
-  bio?: string;
-  permissions?: string[];
   createdAt: string;
-  updatedAt?: string;
 }
 
-// DbCollection type
-export interface DbCollection {
+export interface Reaction {
   id: string;
-  title?: string;
-  name?: string;
-  description?: string;
-  cover_image_url?: string;
-  owner_id?: string;
-  user_id?: string;
-  team_id?: string;
-  visibility?: string;
-  allow_comments?: boolean;
-  design_metadata?: any;
-  created_at?: string;
-  updated_at?: string;
-  is_public?: boolean;
-  card_ids?: string[];
-  tags?: string[];
-  featured?: boolean;
+  userId: string;
+  type: string;
+  createdAt: string;
+}
+
+export interface Team {
+  id: string;
+  name: string;
+  createdAt: string;
+}
+
+export interface TeamMember {
+  id: string;
+  teamId: string;
+  userId: string;
+  role: string;
+  joinedAt: string;
+}
+
+export interface OaklandMemoryData {
+  title: string;
+  description: string;
+  template: string;
+}
+
+export interface GroupUploadType {
+  id: string;
+  name: string;
+}
+
+export interface InstagramPost {
+  id: string;
+  caption?: string;
+  imageUrl?: string;
 }
