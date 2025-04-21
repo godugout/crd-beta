@@ -1,6 +1,6 @@
 
 // Re-export types from cardTypes.ts
-import { FabricSwatch as FabricSwatchType, Card as CardType } from './cardTypes';
+import { FabricSwatch as FabricSwatchType, Card as CardType, DesignMetadata } from './cardTypes';
 
 export interface FabricSwatch {
   type: string;
@@ -34,8 +34,27 @@ export interface CardData {
   effects: string[]; // Required property
 }
 
-// Export Card type from cardTypes
-export type { CardType as Card };
+// Export Card type from cardTypes with design metadata
+export type Card = {
+  id: string;
+  title: string;
+  description: string;
+  imageUrl: string;
+  thumbnailUrl: string;
+  tags: string[];
+  userId: string;
+  effects: string[];
+  createdAt: string;
+  updatedAt: string;
+  player?: string;
+  team?: string;
+  position?: string;
+  year?: string;
+  designMetadata: DesignMetadata;
+};
 
 // Export FabricSwatch for others to use
 export type { FabricSwatchType };
+
+// Export DesignMetadata
+export type { DesignMetadata };

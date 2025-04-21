@@ -1,7 +1,7 @@
 
 // Import from local file paths that actually exist
-import { Card as CardType, FabricSwatch, CardData } from '../types/card';
-import { CardRarity, DesignMetadata } from '../types/cardTypes';
+import { Card, FabricSwatch, CardData, DesignMetadata as CardDesignMetadata } from '../types/card';
+import { CardRarity, DesignMetadata as CardTypesDesignMetadata } from '../types/cardTypes';
 
 // Define base entity interface
 export interface BaseEntity {
@@ -11,21 +11,8 @@ export interface BaseEntity {
   [key: string]: any;
 }
 
-// Define the Card interface with all required properties
-export interface Card extends BaseEntity {
-  title: string;
-  description: string; // Required field
-  imageUrl: string;    // Required field
-  thumbnailUrl: string;
-  tags: string[];
-  userId: string;
-  effects: string[];
-  player?: string;
-  team?: string;
-  position?: string;
-  year?: string;
-  designMetadata: DesignMetadata;  // Required field with proper type
-}
+// Re-export the Card interface for use throughout the application
+export type { Card };
 
 // Export JsonValue type
 export type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };
@@ -63,8 +50,40 @@ export interface Collection {
   featured?: boolean;
 }
 
-// Re-export DesignMetadata
-export type { DesignMetadata };
+// Re-export DesignMetadata, using the definition from cardTypes
+export interface DesignMetadata {
+  cardStyle: {
+    template: string;
+    effect: string;
+    borderRadius: string;
+    borderColor: string;
+    frameColor: string;
+    frameWidth: number;
+    shadowColor: string;
+    teamSpecific?: boolean;
+    [key: string]: any;
+  };
+  textStyle: {
+    titleColor: string;
+    titleAlignment: string;
+    titleWeight: string;
+    descriptionColor: string;
+    [key: string]: any;
+  };
+  marketMetadata: {
+    isPrintable: boolean;
+    isForSale: boolean;
+    includeInCatalog: boolean;
+    [key: string]: any;
+  };
+  cardMetadata: {
+    category: string;
+    cardType: string;
+    series: string;
+    [key: string]: any;
+  };
+  [key: string]: any;
+}
 
 // Types for AuthUser
 export interface AuthUser {
@@ -103,7 +122,7 @@ export interface DbCollection {
 }
 
 // Re-export types
-export type { CardType, FabricSwatch, CardData };
+export type { FabricSwatch, CardData };
 
 // Define minimal User and UserRole types
 export interface User {
