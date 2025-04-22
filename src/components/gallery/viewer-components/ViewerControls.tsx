@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { 
-  Flip, 
+  RotateCw, 
   RotateCcw, 
   Info, 
   Maximize2, 
@@ -50,7 +50,7 @@ const ViewerControls: React.FC<ViewerControlsProps> = ({
               onClick={onFlipCard}
               title="Flip Card"
             >
-              <Flip className="h-5 w-5" />
+              <RotateCw className="h-5 w-5" />
             </Button>
             
             <Button

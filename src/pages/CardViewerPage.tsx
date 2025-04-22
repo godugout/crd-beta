@@ -30,7 +30,7 @@ const CardViewerPage = () => {
     Chrome: 0.6,
     Vintage: 0.5
   });
-  const [showEffectsPanel, setShowEffectsPanel] = useState(true); // Set to true by default
+  const [showEffectsPanel, setShowEffectsPanel] = useState(true); // Always open by default
 
   const [card, setCard] = useState<Card | undefined>(undefined);
 

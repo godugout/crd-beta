@@ -160,10 +160,10 @@ const CardViewer: React.FC<CardViewerProps> = ({
                 activeEffects.map(effect => `effect-${effect.toLowerCase()}`).join(' ')
               }`}
               style={{
-                // Add custom CSS variables for effects
-                '--rotation-x': `${rotation.x}deg`,
-                '--rotation-y': `${rotation.y}deg`,
-              }}
+                // Fix: Use camelCase for custom properties in React
+                '--rotationX': `${rotation.x}deg`,
+                '--rotationY': `${rotation.y}deg`,
+              } as React.CSSProperties}
             >
               {/* Placeholder or loading state */}
               {!imageLoadAttempted && (
