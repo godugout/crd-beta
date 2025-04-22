@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card } from '@/lib/types';
@@ -23,18 +22,17 @@ const CardViewerPage = () => {
   const [isFlipped, setIsFlipped] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
   const [isAutoRotating, setIsAutoRotating] = useState(false);
-  const [activeEffects, setActiveEffects] = useState<string[]>(['Holographic', 'Refractor']); // Initialize with default effects
+  const [activeEffects, setActiveEffects] = useState<string[]>(['Holographic', 'Refractor']);
   const [effectIntensities, setEffectIntensities] = useState<Record<string, number>>({
     Holographic: 0.7,
     Refractor: 0.8,
     Chrome: 0.6,
     Vintage: 0.5
   });
-  const [showEffectsPanel, setShowEffectsPanel] = useState(true); // Always open by default
+  const [showEffectsPanel, setShowEffectsPanel] = useState(true);
 
   const [card, setCard] = useState<Card | undefined>(undefined);
 
-  // Load the card data
   useEffect(() => {
     setIsLoading(true);
     setLoadError(null);
@@ -47,7 +45,6 @@ const CardViewerPage = () => {
           console.log("Card found:", foundCard);
           setCard(foundCard);
           
-          // Initialize effects if the card has them
           if (foundCard.effects && foundCard.effects.length > 0) {
             setActiveEffects(foundCard.effects);
           }
@@ -77,10 +74,9 @@ const CardViewerPage = () => {
     setEffectIntensities(prev => ({ ...prev, [effect]: intensity }));
   };
 
-  // Handle error states
   if (loadError) {
     return (
-      <PageLayout title="Card Not Found" description="The card you're looking for doesn't exist.">
+      <PageLayout title="Card Not Found" description="The card you're looking for doesn't exist." hideNavigation>
         <Container className="py-8">
           <Button variant="outline" onClick={() => navigate(-1)}>
             <ArrowLeft className="mr-2 h-4 w-4" />
@@ -98,10 +94,9 @@ const CardViewerPage = () => {
     );
   }
 
-  // Handle loading state
   if (isLoading) {
     return (
-      <PageLayout title="Loading Card" description="Please wait while we load the card details.">
+      <PageLayout title="Loading Card" description="Please wait while we load the card details." hideNavigation>
         <Container className="py-8 flex justify-center items-center min-h-[60vh]">
           <div className="text-center">
             <div className="w-12 h-12 rounded-full border-4 border-primary border-t-transparent animate-spin mx-auto mb-4"></div>
@@ -112,10 +107,9 @@ const CardViewerPage = () => {
     );
   }
 
-  // Handle missing card
   if (!card) {
     return (
-      <PageLayout title="Card Not Found" description="The card you're looking for doesn't exist.">
+      <PageLayout title="Card Not Found" description="The card you're looking for doesn't exist." hideNavigation>
         <Container className="py-8">
           <Button variant="outline" onClick={() => navigate(-1)}>
             <ArrowLeft className="mr-2 h-4 w-4" />
@@ -131,48 +125,65 @@ const CardViewerPage = () => {
   }
 
   return (
-    <PageLayout title={card.title} description={card.description}>
-      <Container className="py-8">
-        <Button variant="outline" onClick={() => navigate(-1)} className="mb-8">
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back
-        </Button>
+    <PageLayout 
+      title={card.title} 
+      description={card.description}
+      hideNavigation 
+      contentClassName="p-0"
+    >
+      <div className="min-h-screen bg-gray-900">
+        <div className="sticky top-0 z-50 w-full border-b border-white/10 bg-black/50 backdrop-blur-md">
+          <div className="container flex h-14 items-center justify-between px-4">
+            <Button 
+              variant="ghost" 
+              onClick={() => navigate(-1)}
+              className="text-white hover:bg-white/10"
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back
+            </Button>
 
-        <div className="relative min-h-[80vh]">
-          <CardViewer
-            card={card}
-            isFlipped={isFlipped}
-            activeEffects={activeEffects}
-            effectIntensities={effectIntensities}
-          />
+            <ViewerControls
+              isFlipped={isFlipped}
+              isAutoRotating={isAutoRotating}
+              showInfo={showInfo}
+              showEffectsPanel={showEffectsPanel}
+              onFlipCard={() => setIsFlipped(!isFlipped)}
+              onToggleAutoRotation={() => setIsAutoRotating(!isAutoRotating)}
+              onToggleInfo={() => setShowInfo(!showInfo)}
+              onToggleEffects={() => setShowEffectsPanel(!showEffectsPanel)}
+              onToggleFullscreen={() => {}}
+              onShare={() => {}}
+              onClose={() => navigate(-1)}
+            />
+          </div>
+        </div>
 
-          <ViewerControls
-            isFlipped={isFlipped}
-            isAutoRotating={isAutoRotating}
-            showInfo={showInfo}
-            showEffectsPanel={showEffectsPanel}
-            onFlipCard={() => setIsFlipped(!isFlipped)}
-            onToggleAutoRotation={() => setIsAutoRotating(!isAutoRotating)}
-            onToggleInfo={() => setShowInfo(!showInfo)}
-            onToggleEffects={() => setShowEffectsPanel(!showEffectsPanel)}
-            onToggleFullscreen={() => {}}
-            onShare={() => {}}
-            onClose={() => navigate(-1)}
-          />
+        <div className="relative flex">
+          <div className={`flex-1 transition-all duration-300 ${showEffectsPanel ? 'mr-[320px]' : ''}`}>
+            <CardViewer
+              card={card}
+              isFlipped={isFlipped}
+              activeEffects={activeEffects}
+              effectIntensities={effectIntensities}
+            />
+          </div>
 
           {showEffectsPanel && (
-            <CardEffectsPanel
-              activeEffects={activeEffects}
-              onToggleEffect={handleEffectToggle}
-              effectIntensities={effectIntensities}
-              onEffectIntensityChange={handleEffectIntensityChange}
-            />
+            <div className="fixed right-0 top-14 bottom-0 w-[320px] bg-gray-900/95 backdrop-blur-lg border-l border-gray-800">
+              <CardEffectsPanel
+                activeEffects={activeEffects}
+                onToggleEffect={handleEffectToggle}
+                effectIntensities={effectIntensities}
+                onEffectIntensityChange={handleEffectIntensityChange}
+              />
+            </div>
           )}
 
           <InfoPanel card={card} showInfo={showInfo} />
           <KeyboardShortcuts />
         </div>
-      </Container>
+      </div>
     </PageLayout>
   );
 };
