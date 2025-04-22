@@ -133,7 +133,7 @@ const CardViewer: React.FC<CardViewerProps> = ({
 
   return (
     <div 
-      className="relative w-full h-full flex items-center justify-center"
+      className="relative w-full h-[calc(100vh-56px)] flex items-center justify-center"
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
@@ -160,7 +160,7 @@ const CardViewer: React.FC<CardViewerProps> = ({
                 activeEffects.map(effect => `effect-${effect.toLowerCase()}`).join(' ')
               }`}
               style={{
-                // Fix: Use camelCase for custom properties in React
+                // Use camelCase for custom properties in React
                 '--rotationX': `${rotation.x}deg`,
                 '--rotationY': `${rotation.y}deg`,
               } as React.CSSProperties}
