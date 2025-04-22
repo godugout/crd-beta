@@ -23,8 +23,14 @@ const CardViewerPage = () => {
   const [isFlipped, setIsFlipped] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
   const [isAutoRotating, setIsAutoRotating] = useState(false);
-  const [activeEffects, setActiveEffects] = useState<string[]>([]);
-  const [effectIntensities, setEffectIntensities] = useState<Record<string, number>>({});
+  const [activeEffects, setActiveEffects] = useState<string[]>(['Holographic', 'Refractor']); // Initialize with default effects
+  const [effectIntensities, setEffectIntensities] = useState<Record<string, number>>({
+    Holographic: 0.7,
+    Refractor: 0.8,
+    Chrome: 0.6,
+    Vintage: 0.5
+  });
+  const [showEffectsPanel, setShowEffectsPanel] = useState(true); // Set to true by default
 
   const [card, setCard] = useState<Card | undefined>(undefined);
 
@@ -144,20 +150,24 @@ const CardViewerPage = () => {
             isFlipped={isFlipped}
             isAutoRotating={isAutoRotating}
             showInfo={showInfo}
+            showEffectsPanel={showEffectsPanel}
             onFlipCard={() => setIsFlipped(!isFlipped)}
             onToggleAutoRotation={() => setIsAutoRotating(!isAutoRotating)}
             onToggleInfo={() => setShowInfo(!showInfo)}
+            onToggleEffects={() => setShowEffectsPanel(!showEffectsPanel)}
             onToggleFullscreen={() => {}}
             onShare={() => {}}
             onClose={() => navigate(-1)}
           />
 
-          <CardEffectsPanel
-            activeEffects={activeEffects}
-            onToggleEffect={handleEffectToggle}
-            effectIntensities={effectIntensities}
-            onEffectIntensityChange={handleEffectIntensityChange}
-          />
+          {showEffectsPanel && (
+            <CardEffectsPanel
+              activeEffects={activeEffects}
+              onToggleEffect={handleEffectToggle}
+              effectIntensities={effectIntensities}
+              onEffectIntensityChange={handleEffectIntensityChange}
+            />
+          )}
 
           <InfoPanel card={card} showInfo={showInfo} />
           <KeyboardShortcuts />

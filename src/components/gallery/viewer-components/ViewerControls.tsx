@@ -1,80 +1,130 @@
 
 import React from 'react';
-import { ChevronLeft, ChevronRight, Share2, Maximize, Rotate3D, Info, X } from 'lucide-react';
+import { 
+  Flip, 
+  RotateCcw, 
+  Info, 
+  Maximize2, 
+  Share2, 
+  X, 
+  Sparkles 
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface ViewerControlsProps {
   isFlipped: boolean;
   isAutoRotating: boolean;
   showInfo: boolean;
+  showEffectsPanel?: boolean;
   onFlipCard: () => void;
   onToggleAutoRotation: () => void;
   onToggleInfo: () => void;
+  onToggleEffects?: () => void;
   onToggleFullscreen: () => void;
   onShare: () => void;
-  onClose: () => void;
+  onClose?: () => void;
 }
 
-const ViewerControls = ({
+const ViewerControls: React.FC<ViewerControlsProps> = ({
   isFlipped,
   isAutoRotating,
   showInfo,
+  showEffectsPanel = true, // Default to true
   onFlipCard,
   onToggleAutoRotation,
   onToggleInfo,
+  onToggleEffects,
   onToggleFullscreen,
   onShare,
-  onClose,
-}: ViewerControlsProps) => {
+  onClose
+}) => {
   return (
-    <div className="absolute top-4 right-4 flex space-x-3">
-      <button 
-        className="text-white p-2 rounded-full bg-black/50 hover:bg-black/70 transition"
-        onClick={onFlipCard}
-        title="Flip card"
-      >
-        <ChevronLeft size={20} className={isFlipped ? "hidden" : ""} />
-        <ChevronRight size={20} className={isFlipped ? "" : "hidden"} />
-      </button>
+    <div className="absolute top-4 right-4 z-20">
+      <div className="flex flex-col space-y-2">
+        <div className="bg-black/50 backdrop-blur-md rounded-lg p-2">
+          <div className="flex flex-col gap-2">
+            <Button
+              size="icon"
+              variant="outline"
+              className="bg-transparent border-gray-600 hover:bg-gray-700 text-white hover:text-white"
+              onClick={onFlipCard}
+              title="Flip Card"
+            >
+              <Flip className="h-5 w-5" />
+            </Button>
+            
+            <Button
+              size="icon"
+              variant="outline"
+              className={`bg-transparent border-gray-600 hover:bg-gray-700 text-white hover:text-white ${
+                isAutoRotating ? "bg-purple-900/50 border-purple-500" : ""
+              }`}
+              onClick={onToggleAutoRotation}
+              title="Auto Rotate"
+            >
+              <RotateCcw className="h-5 w-5" />
+            </Button>
+            
+            <Button
+              size="icon"
+              variant="outline"
+              className={`bg-transparent border-gray-600 hover:bg-gray-700 text-white hover:text-white ${
+                showInfo ? "bg-blue-900/50 border-blue-500" : ""
+              }`}
+              onClick={onToggleInfo}
+              title="Card Information"
+            >
+              <Info className="h-5 w-5" />
+            </Button>
 
-      <button 
-        className="text-white p-2 rounded-full bg-black/50 hover:bg-black/70 transition"
-        onClick={onToggleAutoRotation}
-        title={isAutoRotating ? "Stop auto rotation" : "Start auto rotation"}
-      >
-        <Rotate3D size={20} className={isAutoRotating ? "text-primary" : "text-white"} />
-      </button>
-
-      <button 
-        className="text-white p-2 rounded-full bg-black/50 hover:bg-black/70 transition"
-        onClick={onToggleInfo}
-        title="Show card info"
-      >
-        <Info size={20} className={showInfo ? "text-primary" : "text-white"} />
-      </button>
-
-      <button 
-        className="text-white p-2 rounded-full bg-black/50 hover:bg-black/70 transition"
-        onClick={onToggleFullscreen}
-        title="Toggle fullscreen"
-      >
-        <Maximize size={20} />
-      </button>
-
-      <button 
-        className="text-white p-2 rounded-full bg-black/50 hover:bg-black/70 transition"
-        onClick={onShare}
-        title="Share card"
-      >
-        <Share2 size={20} />
-      </button>
-
-      <button 
-        className="text-white p-2 rounded-full bg-black/50 hover:bg-black/70 transition"
-        onClick={onClose}
-        title="Close viewer"
-      >
-        <X size={20} />
-      </button>
+            {onToggleEffects && (
+              <Button
+                size="icon"
+                variant="outline"
+                className={`bg-transparent border-gray-600 hover:bg-gray-700 text-white hover:text-white ${
+                  showEffectsPanel ? "bg-purple-900/50 border-purple-500" : ""
+                }`}
+                onClick={onToggleEffects}
+                title="Effects Panel"
+              >
+                <Sparkles className="h-5 w-5" />
+              </Button>
+            )}
+            
+            <Button
+              size="icon"
+              variant="outline"
+              className="bg-transparent border-gray-600 hover:bg-gray-700 text-white hover:text-white"
+              onClick={onToggleFullscreen}
+              title="Fullscreen"
+            >
+              <Maximize2 className="h-5 w-5" />
+            </Button>
+            
+            <Button
+              size="icon"
+              variant="outline"
+              className="bg-transparent border-gray-600 hover:bg-gray-700 text-white hover:text-white"
+              onClick={onShare}
+              title="Share"
+            >
+              <Share2 className="h-5 w-5" />
+            </Button>
+            
+            {onClose && (
+              <Button
+                size="icon"
+                variant="outline"
+                className="bg-transparent border-gray-600 hover:bg-gray-700 text-white hover:text-white"
+                onClick={onClose}
+                title="Close"
+              >
+                <X className="h-5 w-5" />
+              </Button>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

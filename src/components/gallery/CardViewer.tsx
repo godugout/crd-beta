@@ -35,6 +35,28 @@ const CardViewer: React.FC<CardViewerProps> = ({
   // Default fallback image when card image fails to load
   const fallbackImage = 'https://images.unsplash.com/photo-1518770660439-4636190af475';
 
+  // Apply effect CSS variables when effects change
+  useEffect(() => {
+    console.log("Active effects:", activeEffects);
+    console.log("Effect intensities:", effectIntensities);
+    
+    // Set default CSS variables for all possible effects
+    document.documentElement.style.setProperty('--holographic-active', '0');
+    document.documentElement.style.setProperty('--refractor-active', '0');
+    document.documentElement.style.setProperty('--chrome-active', '0');
+    document.documentElement.style.setProperty('--vintage-active', '0');
+    
+    // Enable active effects
+    activeEffects.forEach(effect => {
+      const normalizedName = effect.toLowerCase();
+      document.documentElement.style.setProperty(`--${normalizedName}-active`, '1');
+      document.documentElement.style.setProperty(
+        `--${normalizedName}-intensity`, 
+        (effectIntensities[effect] || 0.5).toString()
+      );
+    });
+  }, [activeEffects, effectIntensities]);
+
   useKeyboardControls({
     onRotateLeft: () => setRotation(prev => ({ ...prev, x: prev.x - 5 })),
     onRotateRight: () => setRotation(prev => ({ ...prev, x: prev.x + 5 })),
@@ -133,9 +155,16 @@ const CardViewer: React.FC<CardViewerProps> = ({
             transition={{ duration: 0.6 }}
             style={{ backfaceVisibility: 'hidden' }}
           >
-            <div className={`w-full h-full rounded-xl overflow-hidden shadow-xl card-with-lighting ${
-              activeEffects.map(effect => `effect-${effect.toLowerCase()}`).join(' ')
-            }`}>
+            <div 
+              className={`w-full h-full rounded-xl overflow-hidden shadow-xl card-with-lighting ${
+                activeEffects.map(effect => `effect-${effect.toLowerCase()}`).join(' ')
+              }`}
+              style={{
+                // Add custom CSS variables for effects
+                '--rotation-x': `${rotation.x}deg`,
+                '--rotation-y': `${rotation.y}deg`,
+              }}
+            >
               {/* Placeholder or loading state */}
               {!imageLoadAttempted && (
                 <div className="absolute inset-0 flex items-center justify-center bg-gray-800">
@@ -164,16 +193,22 @@ const CardViewer: React.FC<CardViewerProps> = ({
                 }}
               />
               
-              {/* Effect overlays */}
-              {activeEffects.map(effect => (
-                <div
-                  key={effect}
-                  className={`absolute inset-0 effect-overlay-${effect.toLowerCase()}`}
-                  style={{
-                    opacity: effectIntensities[effect] || 0.5,
-                  }}
-                />
-              ))}
+              {/* Effect overlays - Always render but control visibility with CSS */}
+              <div className="absolute inset-0 holographic-effect-overlay" 
+                style={{ opacity: activeEffects.includes('Holographic') ? (effectIntensities['Holographic'] || 0.5) : 0 }} 
+              />
+              
+              <div className="absolute inset-0 refractor-effect-overlay" 
+                style={{ opacity: activeEffects.includes('Refractor') ? (effectIntensities['Refractor'] || 0.5) : 0 }} 
+              />
+              
+              <div className="absolute inset-0 chrome-effect-overlay" 
+                style={{ opacity: activeEffects.includes('Chrome') ? (effectIntensities['Chrome'] || 0.5) : 0 }} 
+              />
+              
+              <div className="absolute inset-0 vintage-effect-overlay" 
+                style={{ opacity: activeEffects.includes('Vintage') ? (effectIntensities['Vintage'] || 0.5) : 0 }} 
+              />
 
               {/* Dynamic lighting overlay */}
               <div className="absolute inset-0 lighting-overlay"></div>
