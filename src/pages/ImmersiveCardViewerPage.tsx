@@ -224,180 +224,182 @@ const ImmersiveCardViewerPage: React.FC = () => {
             isPanelOpen ? "translate-x-0" : "translate-x-full"
           )}>
             <div className="p-6 h-full">
-              <TabsContent value="view" className="mt-0 h-full">
-                <h3 className="text-xl font-semibold mb-4">Card Details</h3>
-                
-                {card && (
-                  <div className="space-y-6">
-                    <div>
-                      <h4 className="text-sm text-gray-400 font-medium mb-1">Title</h4>
-                      <p className="text-white">{card.title}</p>
-                    </div>
-                    
-                    {card.description && (
+              <Tabs value={viewTab} className="h-full">
+                <TabsContent value="view" className="mt-0 h-full">
+                  <h3 className="text-xl font-semibold mb-4">Card Details</h3>
+                  
+                  {card && (
+                    <div className="space-y-6">
                       <div>
-                        <h4 className="text-sm text-gray-400 font-medium mb-1">Description</h4>
-                        <p className="text-white">{card.description}</p>
+                        <h4 className="text-sm text-gray-400 font-medium mb-1">Title</h4>
+                        <p className="text-white">{card.title}</p>
                       </div>
-                    )}
-                    
-                    <div className="grid grid-cols-2 gap-4">
-                      {card.player && (
+                      
+                      {card.description && (
                         <div>
-                          <h4 className="text-sm text-gray-400 font-medium mb-1">Player</h4>
-                          <p className="text-white">{card.player}</p>
+                          <h4 className="text-sm text-gray-400 font-medium mb-1">Description</h4>
+                          <p className="text-white">{card.description}</p>
                         </div>
                       )}
                       
-                      {card.team && (
-                        <div>
-                          <h4 className="text-sm text-gray-400 font-medium mb-1">Team</h4>
-                          <p className="text-white">{card.team}</p>
-                        </div>
-                      )}
+                      <div className="grid grid-cols-2 gap-4">
+                        {card.player && (
+                          <div>
+                            <h4 className="text-sm text-gray-400 font-medium mb-1">Player</h4>
+                            <p className="text-white">{card.player}</p>
+                          </div>
+                        )}
+                        
+                        {card.team && (
+                          <div>
+                            <h4 className="text-sm text-gray-400 font-medium mb-1">Team</h4>
+                            <p className="text-white">{card.team}</p>
+                          </div>
+                        )}
+                        
+                        {card.year && (
+                          <div>
+                            <h4 className="text-sm text-gray-400 font-medium mb-1">Year</h4>
+                            <p className="text-white">{card.year}</p>
+                          </div>
+                        )}
+                        
+                        {card.set && (
+                          <div>
+                            <h4 className="text-sm text-gray-400 font-medium mb-1">Set</h4>
+                            <p className="text-white">{card.set}</p>
+                          </div>
+                        )}
+                      </div>
                       
-                      {card.year && (
+                      {card.tags && card.tags.length > 0 && (
                         <div>
-                          <h4 className="text-sm text-gray-400 font-medium mb-1">Year</h4>
-                          <p className="text-white">{card.year}</p>
-                        </div>
-                      )}
-                      
-                      {card.set && (
-                        <div>
-                          <h4 className="text-sm text-gray-400 font-medium mb-1">Set</h4>
-                          <p className="text-white">{card.set}</p>
+                          <h4 className="text-sm text-gray-400 font-medium mb-2">Tags</h4>
+                          <div className="flex flex-wrap gap-2">
+                            {card.tags.map((tag, i) => (
+                              <span 
+                                key={i}
+                                className="px-2 py-1 bg-gray-800 rounded-md text-xs text-gray-300"
+                              >
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
                         </div>
                       )}
                     </div>
-                    
-                    {card.tags && card.tags.length > 0 && (
-                      <div>
-                        <h4 className="text-sm text-gray-400 font-medium mb-2">Tags</h4>
-                        <div className="flex flex-wrap gap-2">
-                          {card.tags.map((tag, i) => (
-                            <span 
-                              key={i}
-                              className="px-2 py-1 bg-gray-800 rounded-md text-xs text-gray-300"
-                            >
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </TabsContent>
-              
-              <TabsContent value="effects" className="mt-0 h-full">
-                <div className="mb-4 flex justify-between items-center">
-                  <h3 className="text-xl font-semibold">Card Effects</h3>
-                  <div className="flex gap-2">
-                    <Button 
-                      size="sm" 
-                      variant="secondary" 
-                      onClick={handleClearEffects}
-                    >
-                      Clear
-                    </Button>
-                    <Button 
-                      size="sm" 
-                      variant="default" 
-                      onClick={handleApplyAllEffects}
-                      className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
-                    >
-                      Apply All
-                    </Button>
-                  </div>
-                </div>
+                  )}
+                </TabsContent>
                 
-                <div className="space-y-4">
-                  {['Holographic', 'Shimmer', 'Refractor', 'Vintage'].map((effect) => (
-                    <div 
-                      key={effect} 
-                      className={cn(
-                        "p-4 border rounded-lg cursor-pointer transition-all",
-                        activeEffects.includes(effect) 
-                          ? "bg-purple-900/40 border-purple-500/50" 
-                          : "bg-gray-800/50 border-gray-700/50 hover:border-gray-600/50"
-                      )}
-                      onClick={() => handleEffectToggle(effect)}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h4 className="font-medium text-white">{effect}</h4>
-                          <p className="text-xs text-gray-400">{getEffectDescription(effect)}</p>
-                        </div>
-                        <div className={cn(
-                          "w-6 h-6 rounded-full border-2",
+                <TabsContent value="effects" className="mt-0 h-full">
+                  <div className="mb-4 flex justify-between items-center">
+                    <h3 className="text-xl font-semibold">Card Effects</h3>
+                    <div className="flex gap-2">
+                      <Button 
+                        size="sm" 
+                        variant="secondary" 
+                        onClick={handleClearEffects}
+                      >
+                        Clear
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        variant="default" 
+                        onClick={handleApplyAllEffects}
+                        className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                      >
+                        Apply All
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    {['Holographic', 'Shimmer', 'Refractor', 'Vintage'].map((effect) => (
+                      <div 
+                        key={effect} 
+                        className={cn(
+                          "p-4 border rounded-lg cursor-pointer transition-all",
                           activeEffects.includes(effect) 
-                            ? "border-purple-500 bg-purple-500/50" 
-                            : "border-gray-600"
-                        )}>
-                          {activeEffects.includes(effect) && (
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-white">
-                              <polyline points="20 6 9 17 4 12"></polyline>
-                            </svg>
-                          )}
+                            ? "bg-purple-900/40 border-purple-500/50" 
+                            : "bg-gray-800/50 border-gray-700/50 hover:border-gray-600/50"
+                        )}
+                        onClick={() => handleEffectToggle(effect)}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h4 className="font-medium text-white">{effect}</h4>
+                            <p className="text-xs text-gray-400">{getEffectDescription(effect)}</p>
+                          </div>
+                          <div className={cn(
+                            "w-6 h-6 rounded-full border-2",
+                            activeEffects.includes(effect) 
+                              ? "border-purple-500 bg-purple-500/50" 
+                              : "border-gray-600"
+                          )}>
+                            {activeEffects.includes(effect) && (
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-white">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                              </svg>
+                            )}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              </TabsContent>
-              
-              <TabsContent value="controls" className="mt-0 h-full">
-                <h3 className="text-xl font-semibold mb-4">Viewer Controls</h3>
+                    ))}
+                  </div>
+                </TabsContent>
                 
-                <div className="space-y-4">
-                  <div className="p-4 bg-gray-800/50 rounded-lg">
-                    <h4 className="font-medium text-white mb-2">Card Position</h4>
-                    <Button 
-                      className="w-full"
-                      onClick={() => setIsFlipped(!isFlipped)}
-                    >
-                      {isFlipped ? "Show Front" : "Show Back"}
-                    </Button>
-                  </div>
+                <TabsContent value="controls" className="mt-0 h-full">
+                  <h3 className="text-xl font-semibold mb-4">Viewer Controls</h3>
                   
-                  <div className="p-4 bg-gray-800/50 rounded-lg">
-                    <h4 className="font-medium text-white mb-2">Mouse Controls</h4>
-                    <ul className="text-sm text-gray-300 space-y-2">
-                      <li className="flex items-center">
-                        <span className="px-2 py-1 bg-gray-700 rounded mr-2 text-xs">Click + Drag</span>
-                        <span>Rotate card</span>
-                      </li>
-                      <li className="flex items-center">
-                        <span className="px-2 py-1 bg-gray-700 rounded mr-2 text-xs">Scroll</span>
-                        <span>Zoom in/out</span>
-                      </li>
-                      <li className="flex items-center">
-                        <span className="px-2 py-1 bg-gray-700 rounded mr-2 text-xs">Double Click</span>
-                        <span>Reset position</span>
-                      </li>
-                    </ul>
+                  <div className="space-y-4">
+                    <div className="p-4 bg-gray-800/50 rounded-lg">
+                      <h4 className="font-medium text-white mb-2">Card Position</h4>
+                      <Button 
+                        className="w-full"
+                        onClick={() => setIsFlipped(!isFlipped)}
+                      >
+                        {isFlipped ? "Show Front" : "Show Back"}
+                      </Button>
+                    </div>
+                    
+                    <div className="p-4 bg-gray-800/50 rounded-lg">
+                      <h4 className="font-medium text-white mb-2">Mouse Controls</h4>
+                      <ul className="text-sm text-gray-300 space-y-2">
+                        <li className="flex items-center">
+                          <span className="px-2 py-1 bg-gray-700 rounded mr-2 text-xs">Click + Drag</span>
+                          <span>Rotate card</span>
+                        </li>
+                        <li className="flex items-center">
+                          <span className="px-2 py-1 bg-gray-700 rounded mr-2 text-xs">Scroll</span>
+                          <span>Zoom in/out</span>
+                        </li>
+                        <li className="flex items-center">
+                          <span className="px-2 py-1 bg-gray-700 rounded mr-2 text-xs">Double Click</span>
+                          <span>Reset position</span>
+                        </li>
+                      </ul>
+                    </div>
+                    
+                    <div className="p-4 bg-gray-800/50 rounded-lg">
+                      <h4 className="font-medium text-white mb-2">Touch Controls</h4>
+                      <ul className="text-sm text-gray-300 space-y-2">
+                        <li className="flex items-center">
+                          <span className="px-2 py-1 bg-gray-700 rounded mr-2 text-xs">1 Finger</span>
+                          <span>Rotate card</span>
+                        </li>
+                        <li className="flex items-center">
+                          <span className="px-2 py-1 bg-gray-700 rounded mr-2 text-xs">2 Fingers</span>
+                          <span>Pinch to zoom</span>
+                        </li>
+                        <li className="flex items-center">
+                          <span className="px-2 py-1 bg-gray-700 rounded mr-2 text-xs">Double Tap</span>
+                          <span>Reset position</span>
+                        </li>
+                      </ul>
+                    </div>
                   </div>
-                  
-                  <div className="p-4 bg-gray-800/50 rounded-lg">
-                    <h4 className="font-medium text-white mb-2">Touch Controls</h4>
-                    <ul className="text-sm text-gray-300 space-y-2">
-                      <li className="flex items-center">
-                        <span className="px-2 py-1 bg-gray-700 rounded mr-2 text-xs">1 Finger</span>
-                        <span>Rotate card</span>
-                      </li>
-                      <li className="flex items-center">
-                        <span className="px-2 py-1 bg-gray-700 rounded mr-2 text-xs">2 Fingers</span>
-                        <span>Pinch to zoom</span>
-                      </li>
-                      <li className="flex items-center">
-                        <span className="px-2 py-1 bg-gray-700 rounded mr-2 text-xs">Double Tap</span>
-                        <span>Reset position</span>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </TabsContent>
+                </TabsContent>
+              </Tabs>
             </div>
           </div>
         </div>
