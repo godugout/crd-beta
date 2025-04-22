@@ -8,16 +8,58 @@
   content: '';
   position: absolute;
   inset: 0;
+  /* More subtle gradient for the shimmer effect */
   background: linear-gradient(
     90deg,
     transparent,
-    rgba(255, 255, 255, 0.5),
+    rgba(255, 255, 255, 0.3),
     transparent
   );
   transform: translateX(-100%);
-  animation: shimmer 2s infinite;
+  animation: shimmer 2.5s infinite;
   z-index: 2;
-  opacity: 0.8;
+  opacity: 0.6;
+  mix-blend-mode: soft-light;
+}
+
+/* Base card styles - more matte by default */
+.card-base {
+  position: relative;
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.05) 0%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  box-shadow: 
+    0 1px 2px rgba(0, 0, 0, 0.1),
+    0 4px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* Enhanced glossy effect when activated */
+.effect-glossy {
+  position: relative;
+  overflow: hidden;
+}
+
+.effect-glossy::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.1) 15%,
+    rgba(255, 255, 255, 0.15) 30%,
+    transparent 60%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  mix-blend-mode: soft-light;
+}
+
+.effect-glossy:hover::before {
+  opacity: 1;
 }
 
 /* Electric effect */
