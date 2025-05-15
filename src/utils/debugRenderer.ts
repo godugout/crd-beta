@@ -101,7 +101,7 @@ export function withRenderLogging<P extends object>(
     const timerName = startRenderTimer(displayName);
     logRenderInfo(displayName, props);
     
-    const result = <Component {...props} />;
+    const result = React.createElement(Component, props);
     
     endRenderTimer(timerName);
     return result;
