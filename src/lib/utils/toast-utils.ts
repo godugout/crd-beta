@@ -1,5 +1,6 @@
 
 import showToast, { ToastOptions } from '@/lib/adapters/toastAdapter';
+import { createToast } from '@/types/toast';
 
 /**
  * Utility functions for displaying toast notifications
@@ -10,44 +11,44 @@ export const toastUtils = {
    * Display a success toast
    */
   success: (title: string, description?: string) => {
-    return showToast({
+    return showToast(createToast({
       title,
       description,
       variant: 'success'
-    });
+    }));
   },
 
   /**
    * Display an error toast
    */
   error: (title: string, description?: string) => {
-    return showToast({
+    return showToast(createToast({
       title,
       description,
       variant: 'destructive'
-    });
+    }));
   },
 
   /**
    * Display an info toast
    */
   info: (title: string, description?: string) => {
-    return showToast({
+    return showToast(createToast({
       title,
       description,
       variant: 'info'
-    });
+    }));
   },
 
   /**
    * Display a warning toast
    */
   warning: (title: string, description?: string) => {
-    return showToast({
+    return showToast(createToast({
       title,
       description,
       variant: 'warning'
-    });
+    }));
   }
 };
 

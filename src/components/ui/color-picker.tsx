@@ -30,6 +30,9 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
     onChange(presetColor);
   };
 
+  // Ensure we have valid values
+  const safeValue = value || color || "#000000";
+
   return (
     <div className={cn("flex flex-col gap-1.5", className)}>
       {label && (
@@ -43,17 +46,17 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
       <div className="flex items-center gap-2">
         <div
           className="h-6 w-6 rounded-full border border-gray-200 dark:border-gray-800"
-          style={{ backgroundColor: value }}
+          style={{ backgroundColor: safeValue }}
         />
         <input
           id={id}
           type="color"
-          value={value}
+          value={safeValue}
           onChange={handleChange}
           className="h-9 w-9 appearance-none rounded-md bg-transparent"
         />
         <span className="text-sm text-gray-500 dark:text-gray-400">
-          {value}
+          {safeValue}
         </span>
       </div>
 

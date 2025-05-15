@@ -15,10 +15,17 @@ interface WizardProgressProps {
 }
 
 const WizardProgress: React.FC<WizardProgressProps> = ({
-  steps,
-  currentStep,
+  steps = [],
+  currentStep = 0,
   onStepClick
 }) => {
+  // Safety check to ensure valid currentStep
+  const validatedCurrentStep = Math.max(0, Math.min(currentStep, steps.length - 1));
+  
+  if (!steps || steps.length === 0) {
+    return null;
+  }
+  
   return (
     <div className="w-full">
       <ol className="flex items-center w-full text-sm font-medium text-center text-gray-500 dark:text-gray-400 sm:text-base">
@@ -27,19 +34,19 @@ const WizardProgress: React.FC<WizardProgressProps> = ({
             key={step.key}
             className={cn(
               "flex md:w-full items-center cursor-pointer",
-              index <= currentStep ? "text-blue-600 dark:text-blue-500" : "text-gray-500"
+              index <= validatedCurrentStep ? "text-blue-600 dark:text-blue-500" : "text-gray-500"
             )}
             onClick={() => onStepClick && onStepClick(index)}
           >
             <span className={cn(
               "flex items-center justify-center w-6 h-6 me-2 text-xs border rounded-full shrink-0",
-              index < currentStep 
+              index < validatedCurrentStep 
                 ? "border-blue-600 bg-blue-100 dark:border-blue-500 dark:bg-blue-900" 
-                : index === currentStep
+                : index === validatedCurrentStep
                   ? "border-blue-600 dark:border-blue-500"
                   : "border-gray-300 dark:border-gray-600"
             )}>
-              {index < currentStep ? (
+              {index < validatedCurrentStep ? (
                 <Check className="w-3 h-3" />
               ) : (
                 index + 1
@@ -47,7 +54,7 @@ const WizardProgress: React.FC<WizardProgressProps> = ({
             </span>
             <span className={cn(
               "hidden sm:inline-flex",
-              index === currentStep ? "font-bold" : ""
+              index === validatedCurrentStep ? "font-bold" : ""
             )}>
               {step.label}
             </span>
@@ -56,7 +63,7 @@ const WizardProgress: React.FC<WizardProgressProps> = ({
               <div className="flex-1 hidden sm:flex sm:ms-4 sm:me-6">
                 <div className={cn(
                   "h-0.5 w-full relative top-2",
-                  index < currentStep ? "bg-blue-600" : "bg-gray-200 dark:bg-gray-700"
+                  index < validatedCurrentStep ? "bg-blue-600" : "bg-gray-200 dark:bg-gray-700"
                 )}></div>
               </div>
             )}
