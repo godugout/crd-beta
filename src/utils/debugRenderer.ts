@@ -2,6 +2,7 @@
 /**
  * Utility for consistent debugging of render performance and component state
  */
+import React from 'react';
 
 // Enable/disable debug mode globally
 const DEBUG_MODE = process.env.NODE_ENV === 'development' || false;

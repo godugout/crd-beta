@@ -1,36 +1,40 @@
 
-import React, { Suspense } from 'react';
-import { useRoutes } from 'react-router-dom';
-import { CardProvider } from './context/CardContext';
-import { SessionProvider } from './context/SessionContext';
-import { Toaster } from 'sonner';
-import { routes } from './routes';
+import React from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import './App.css';
 
-// Loading fallback for the entire app
-const AppLoadingFallback = () => (
-  <div className="flex items-center justify-center h-screen bg-background">
-    <div className="text-center">
-      <div className="h-12 w-12 border-4 border-t-primary border-primary/30 rounded-full animate-spin mx-auto mb-4"></div>
-      <p className="text-foreground">Loading CardShow...</p>
-    </div>
-  </div>
-);
+// Pages
+import Home from './pages/Home';
+import CardCreator from './pages/CardCreator';
+import CardStudio from './pages/CardStudio'; // Add import for new CardStudio page
+import Editor from './pages/Editor';
+import Gallery from './pages/Gallery';
+import CardView from './pages/CardView';
+import Community from './pages/Community';
+
+// Providers
+import { CardProvider } from './context/CardContext';
+import { Toaster } from './components/ui/toaster';
 
 function App() {
-  const routeElements = useRoutes(routes);
-
   return (
-    <SessionProvider>
+    <Router>
       <CardProvider>
-        <Suspense fallback={<AppLoadingFallback />}>
-          {routeElements}
-        </Suspense>
-        <Toaster 
-          position="bottom-right"
-          closeButton
-        />
+        <div className="App">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/create" element={<CardCreator />} />
+            <Route path="/studio" element={<CardStudio />} /> {/* Add new Studio route */}
+            <Route path="/editor" element={<Editor />} />
+            <Route path="/editor/:id" element={<Editor />} />
+            <Route path="/gallery" element={<Gallery />} />
+            <Route path="/card/:id" element={<CardView />} />
+            <Route path="/community" element={<Community />} />
+          </Routes>
+        </div>
+        <Toaster />
       </CardProvider>
-    </SessionProvider>
+    </Router>
   );
 }
 
