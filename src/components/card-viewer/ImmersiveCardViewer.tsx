@@ -12,6 +12,7 @@ interface ImmersiveCardViewerProps {
   isFlipped: boolean;
   activeEffects: string[];
   effectIntensities?: Record<string, number>;
+  isAutoRotating?: boolean; // Added this prop
 }
 
 const Card3DModel = ({ 
@@ -19,7 +20,8 @@ const Card3DModel = ({
   backTextureUrl, 
   isFlipped,
   activeEffects,
-  effectIntensities = {}
+  effectIntensities = {},
+  isAutoRotating = false // Added default value
 }) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const groupRef = useRef<THREE.Group>(null);
@@ -117,6 +119,12 @@ const Card3DModel = ({
     }
     
     const time = state.clock.getElapsedTime();
+    
+    // Apply auto-rotation if enabled
+    if (isAutoRotating) {
+      groupRef.current.rotation.y += delta * 0.3;
+    }
+    
     groupRef.current.position.y = Math.sin(time * 0.5) * 0.1;
     groupRef.current.rotation.z = Math.sin(time * 0.3) * 0.02;
     
@@ -205,7 +213,8 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
   card,
   isFlipped,
   activeEffects,
-  effectIntensities = {}
+  effectIntensities = {},
+  isAutoRotating = false // Added with default value
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
@@ -316,6 +325,7 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
           isFlipped={isFlipped}
           activeEffects={activeEffects}
           effectIntensities={effectIntensities}
+          isAutoRotating={isAutoRotating} // Pass the prop through
         />
         
         <OrbitControls 
@@ -327,6 +337,8 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
           target={[0, 0, 0]}
           minPolarAngle={Math.PI / 6}
           maxPolarAngle={Math.PI * 5/6}
+          autoRotate={isAutoRotating} // Use the prop for OrbitControls
+          autoRotateSpeed={2.0}
         />
       </Canvas>
       
