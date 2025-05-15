@@ -1,93 +1,92 @@
 
 import React from 'react';
-import { CheckCircle2, CircleDot } from 'lucide-react';
+import { Check, ChevronRight } from 'lucide-react';
+import { cn } from '@/lib/utils';
+
+export interface StepInfo {
+  key: string;
+  label: string;
+}
 
 interface WizardStepperProps {
-  steps: { key: string; label: string }[];
+  steps: StepInfo[];
   currentStep: number;
-  onChange: (step: number) => void;
+  onChange: (stepIndex: number) => void;
+  className?: string;
 }
 
 const WizardStepper: React.FC<WizardStepperProps> = ({
   steps,
   currentStep,
-  onChange
+  onChange,
+  className
 }) => {
   return (
-    <div className="w-full">
-      <div className="hidden md:flex justify-between">
+    <div className={cn("w-full", className)}>
+      <ol className="flex items-center w-full">
         {steps.map((step, index) => (
-          <div
-            key={step.key}
-            className={`flex-1 ${index > 0 ? 'ml-4' : ''} relative`}
-          >
-            {/* Connector line */}
-            {index > 0 && (
-              <div 
-                className={`absolute h-0.5 top-4 -left-4 right-1/2 
-                  ${index <= currentStep ? 'bg-primary' : 'bg-gray-200'}`}
-              />
-            )}
-            
-            {/* Step button */}
-            <button
-              onClick={() => onChange(index)}
-              className={`flex flex-col items-center w-full ${
-                index === currentStep ? 'text-primary' : 
-                index < currentStep ? 'text-gray-600' : 'text-gray-400'
-              } focus:outline-none`}
+          <React.Fragment key={step.key}>
+            <li 
+              className={cn(
+                "flex items-center",
+                index < steps.length - 1 ? "flex-1" : "",
+              )}
             >
-              {/* Step indicator */}
-              <div className="relative">
-                {index < currentStep ? (
-                  <div className="rounded-full bg-primary text-white h-8 w-8 flex items-center justify-center">
-                    <CheckCircle2 className="h-6 w-6" />
-                  </div>
-                ) : index === currentStep ? (
-                  <div className="rounded-full border-2 border-primary bg-primary/10 h-8 w-8 flex items-center justify-center">
-                    <CircleDot className="h-5 w-5 text-primary" />
-                  </div>
-                ) : (
-                  <div className="rounded-full border-2 border-gray-300 h-8 w-8 flex items-center justify-center">
-                    <span className="text-sm font-medium">{index + 1}</span>
-                  </div>
+              <button
+                type="button"
+                className={cn(
+                  "flex items-center gap-2",
+                  index < currentStep 
+                    ? "text-blue-600 hover:text-blue-800" 
+                    : index === currentStep 
+                    ? "text-blue-600" 
+                    : "text-gray-500"
                 )}
-              </div>
-              
-              {/* Step label */}
-              <span className="mt-2 text-sm font-medium">{step.label}</span>
-            </button>
-          </div>
+                onClick={() => onChange(index)}
+              >
+                <span 
+                  className={cn(
+                    "flex items-center justify-center w-7 h-7 rounded-full shrink-0",
+                    index < currentStep
+                      ? "bg-blue-100 text-blue-600"
+                      : index === currentStep
+                      ? "border-2 border-blue-600 font-semibold"
+                      : "border border-gray-300 text-gray-500"
+                  )}
+                >
+                  {index < currentStep ? (
+                    <Check className="w-4 h-4" />
+                  ) : (
+                    <span className="text-xs">{index + 1}</span>
+                  )}
+                </span>
+                
+                <span className={cn(
+                  "hidden sm:block text-sm",
+                  index === currentStep ? "font-medium" : ""
+                )}>
+                  {step.label}
+                </span>
+              </button>
+            </li>
+            
+            {index < steps.length - 1 && (
+              <li className="flex items-center flex-1">
+                <div className="w-full bg-gray-200 h-0.5 mx-4">
+                  <div 
+                    className="bg-blue-600 h-0.5" 
+                    style={{ 
+                      width: index < currentStep ? '100%' : '0%',
+                      transition: 'width 0.3s ease-in-out' 
+                    }}
+                  ></div>
+                </div>
+                <ChevronRight className="hidden sm:block w-4 h-4 text-gray-400" />
+              </li>
+            )}
+          </React.Fragment>
         ))}
-      </div>
-      
-      {/* Mobile stepper (horizontal scrollable) */}
-      <div className="flex md:hidden overflow-x-auto py-2">
-        {steps.map((step, index) => (
-          <button
-            key={step.key}
-            onClick={() => onChange(index)}
-            className={`flex items-center mr-4 px-3 py-2 rounded-full ${
-              index === currentStep 
-                ? 'bg-primary/10 text-primary border border-primary/30'
-                : index < currentStep 
-                  ? 'bg-gray-100 text-gray-600' 
-                  : 'bg-gray-100 text-gray-400'
-            }`}
-          >
-            <div className={`rounded-full h-5 w-5 flex items-center justify-center mr-2 ${
-              index === currentStep 
-                ? 'bg-primary text-white' 
-                : index < currentStep
-                  ? 'bg-gray-500 text-white'
-                  : 'bg-gray-300 text-gray-500'
-            }`}>
-              <span className="text-xs">{index + 1}</span>
-            </div>
-            <span className="text-sm whitespace-nowrap">{step.label}</span>
-          </button>
-        ))}
-      </div>
+      </ol>
     </div>
   );
 };

@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Card } from '@/lib/types/cardTypes';
-import { ZoomIn, ZoomOut, RotateRight, RotateLeft, Maximize, Minimize } from 'lucide-react';
+import { ZoomIn, ZoomOut, RotateCw, RotateCcw, Maximize, Minimize } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 
@@ -240,7 +239,7 @@ const CardCanvas: React.FC<CardCanvasProps> = ({
           className="h-8 w-8 rounded-full"
           onClick={() => handleRotate('left')}
         >
-          <RotateLeft className="h-4 w-4" />
+          <RotateCcw className="h-4 w-4" />
         </Button>
         
         <Button 
@@ -249,7 +248,7 @@ const CardCanvas: React.FC<CardCanvasProps> = ({
           className="h-8 w-8 rounded-full"
           onClick={() => handleRotate('right')}
         >
-          <RotateRight className="h-4 w-4" />
+          <RotateCw className="h-4 w-4" />
         </Button>
         
         <div className="w-px h-6 bg-gray-300 mx-1"></div>

@@ -1,76 +1,76 @@
 
 import { useState, useCallback } from 'react';
 
-interface UseUndoRedoOptions {
-  maxHistorySize?: number;
+interface UndoRedoState<T> {
+  past: T[];
+  present: T;
+  future: T[];
 }
 
-/**
- * A hook that provides undo/redo functionality for any state
- */
-export function useUndoRedo<T>(
-  initialState: T,
-  { maxHistorySize = 50 }: UseUndoRedoOptions = {}
-) {
-  // Current state
-  const [state, setState] = useState<T>(initialState);
+export function useUndoRedo<T>(initialState: T) {
+  const [state, setState] = useState<UndoRedoState<T>>({
+    past: [],
+    present: initialState,
+    future: []
+  });
   
-  // History stacks
-  const [past, setPast] = useState<T[]>([]);
-  const [future, setFuture] = useState<T[]>([]);
+  const canUndo = state.past.length > 0;
+  const canRedo = state.future.length > 0;
   
-  // Add state to history
-  const addToHistory = useCallback((newState: T) => {
-    setPast(prevPast => {
-      // Limit history size
-      const nextPast = [...prevPast, state].slice(-maxHistorySize);
-      return nextPast;
-    });
-    setFuture([]); // Clear redo stack
-    setState(newState);
-  }, [state, maxHistorySize]);
-  
-  // Undo operation
   const undo = useCallback(() => {
-    if (past.length === 0) return;
+    if (!canUndo) return;
     
-    const previous = past[past.length - 1];
-    const newPast = past.slice(0, past.length - 1);
+    const newPresent = state.past[state.past.length - 1];
     
-    setPast(newPast);
-    setFuture([state, ...future]); 
-    setState(previous);
-  }, [past, state, future]);
+    setState({
+      past: state.past.slice(0, state.past.length - 1),
+      present: newPresent,
+      future: [state.present, ...state.future]
+    });
+  }, [state, canUndo]);
   
-  // Redo operation
   const redo = useCallback(() => {
-    if (future.length === 0) return;
+    if (!canRedo) return;
     
-    const next = future[0];
-    const newFuture = future.slice(1);
+    const newPresent = state.future[0];
     
-    setPast([...past, state]);
-    setFuture(newFuture);
-    setState(next);
-  }, [past, state, future]);
+    setState({
+      past: [...state.past, state.present],
+      present: newPresent,
+      future: state.future.slice(1)
+    });
+  }, [state, canRedo]);
   
-  // Check if undo/redo are available
-  const canUndo = past.length > 0;
-  const canRedo = future.length > 0;
-
+  const addToHistory = useCallback((newPresent: T) => {
+    setState({
+      past: [...state.past, state.present],
+      present: newPresent,
+      future: []
+    });
+  }, [state]);
+  
+  const resetHistory = useCallback((newPresent: T) => {
+    setState({
+      past: [],
+      present: newPresent,
+      future: []
+    });
+  }, []);
+  
   return {
-    state,
+    state: state.present,
     setState: addToHistory,
+    resetHistory,
     undo,
     redo,
     canUndo,
     canRedo,
     addToHistory,
     history: {
-      past,
-      present: state,
-      future,
-    },
+      past: state.past,
+      present: state.present,
+      future: state.future
+    }
   };
 }
 

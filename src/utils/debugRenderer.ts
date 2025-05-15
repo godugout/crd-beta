@@ -1,123 +1,72 @@
 
 /**
- * Utility for consistent debugging of render performance and component state
+ * Helper functions for debugging rendering issues
  */
-import React from 'react';
 
-// Enable/disable debug mode globally
-const DEBUG_MODE = process.env.NODE_ENV === 'development' || false;
+export const logRenderingInfo = (componentName: string, details?: Record<string, any>) => {
+  // Only log in development mode
+  if (process.env.NODE_ENV !== 'development') {
+    return;
+  }
 
-// Colored console output for different component types
-const COLORS = {
-  component: '#4CAF50', // Green
-  hook: '#2196F3',      // Blue
-  render: '#FF9800',    // Orange
-  error: '#F44336',     // Red
-  warning: '#FFC107',   // Yellow
-  effect: '#9C27B0'     // Purple
+  console.log(
+    `%c[${componentName}]%c rendered${details ? ':' : ''}`,
+    'color: #8B5CF6; font-weight: bold;',
+    'color: inherit;',
+  );
+
+  if (details && Object.keys(details).length > 0) {
+    console.log(
+      '%c Details:',
+      'color: #8B5CF6;',
+      details
+    );
+  }
 };
 
-/**
- * Log component render information
- */
-export const logRenderInfo = (componentName: string, props?: any, counter?: number) => {
-  if (!DEBUG_MODE) return;
+export const traceRenderCause = (componentName: string) => {
+  // Only trace in development mode
+  if (process.env.NODE_ENV !== 'development') {
+    return;
+  }
+
+  console.log(
+    `%c[${componentName}]%c render trace:`,
+    'color: #EC4899; font-weight: bold;',
+    'color: inherit;',
+  );
+  console.trace();
+};
+
+export const measureRenderTime = (
+  componentName: string, 
+  callback: () => void
+) => {
+  // Only measure in development mode
+  if (process.env.NODE_ENV !== 'development') {
+    callback();
+    return;
+  }
+
+  const startTime = performance.now();
+  callback();
+  const endTime = performance.now();
   
   console.log(
-    `%c[RENDER] ${componentName} ${counter ? `(${counter})` : ''}`, 
-    `color: ${COLORS.render}; font-weight: bold;`,
-    props ? { props } : ''
+    `%c[${componentName}]%c rendered in %c${(endTime - startTime).toFixed(2)}ms`,
+    'color: #8B5CF6; font-weight: bold;',
+    'color: inherit;',
+    'color: #10B981; font-weight: bold;'
   );
 };
 
-/**
- * Log hook execution
- */
-export const logHookExecution = (hookName: string, params?: any) => {
-  if (!DEBUG_MODE) return;
-  
-  console.log(
-    `%c[HOOK] ${hookName}`, 
-    `color: ${COLORS.hook}; font-weight: bold;`,
-    params ? { params } : ''
-  );
-};
+export const debugObject = (label: string, obj: any) => {
+  // Only debug in development mode
+  if (process.env.NODE_ENV !== 'development') {
+    return;
+  }
 
-/**
- * Log effect execution
- */
-export const logEffectExecution = (effectName: string, dependencies?: any[]) => {
-  if (!DEBUG_MODE) return;
-  
-  console.log(
-    `%c[EFFECT] ${effectName}`, 
-    `color: ${COLORS.effect}; font-weight: bold;`,
-    dependencies ? { dependencies } : ''
-  );
-};
-
-/**
- * Log rendering performance information
- */
-export const logRenderingInfo = (componentName: string, info: any) => {
-  if (!DEBUG_MODE) return;
-  
-  console.log(
-    `%c[PERF] ${componentName}`, 
-    `color: ${COLORS.component}; font-weight: bold;`,
-    info
-  );
-};
-
-/**
- * Start timing a component render
- */
-export const startRenderTimer = (componentName: string) => {
-  if (!DEBUG_MODE) return null;
-  
-  const timerName = `render_${componentName}`;
-  console.time(timerName);
-  return timerName;
-};
-
-/**
- * End timing a component render
- */
-export const endRenderTimer = (timerName: string | null) => {
-  if (!DEBUG_MODE || !timerName) return;
-  
-  console.timeEnd(timerName);
-};
-
-/**
- * Create a component wrapper that logs renders and timing
- */
-export function withRenderLogging<P extends object>(
-  Component: React.ComponentType<P>, 
-  componentName?: string
-) {
-  const displayName = componentName || Component.displayName || Component.name;
-  
-  const WrappedComponent = (props: P) => {
-    const timerName = startRenderTimer(displayName);
-    logRenderInfo(displayName, props);
-    
-    const result = React.createElement(Component, props);
-    
-    endRenderTimer(timerName);
-    return result;
-  };
-  
-  WrappedComponent.displayName = `WithRenderLogging(${displayName})`;
-  return WrappedComponent;
-}
-
-export default {
-  logRenderInfo,
-  logHookExecution,
-  logEffectExecution,
-  logRenderingInfo,
-  startRenderTimer,
-  endRenderTimer,
-  withRenderLogging
+  console.group(`%c${label}`, 'color: #8B5CF6; font-weight: bold;');
+  console.dir(obj);
+  console.groupEnd();
 };
