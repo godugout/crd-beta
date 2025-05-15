@@ -1,246 +1,264 @@
-import React, { useRef, useState, useEffect, useCallback } from 'react';
-import { CardData } from '@/types/card';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { RotateCw, Maximize2, Minimize2, Download, Share2 } from 'lucide-react';
-import { useWindowSize } from '@/hooks/useWindowSize';
+import React, { useState, useEffect, useRef } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { Card } from '@/lib/types';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useHotkeys } from 'react-hotkeys-hook';
-import { useScreenshot } from 'use-react-screenshot';
-import { showToast } from '@/lib/adapters/toastAdapter';
-import CardCanvas from './CardCanvas';
-import ShareDialog from '@/components/ShareDialog';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 
 interface ImmersiveCardViewerProps {
-  card: CardData;
-  className?: string;
-  debug?: boolean;
-  effectSettings?: {
-    refractorIntensity?: number;
-    refractorColors?: string[];
-    animationEnabled?: boolean;
-    refractorSpeed?: number;
-    refractorAngle?: number;
-    holographicIntensity?: number;
-    holographicPattern?: 'linear' | 'circular' | 'angular' | 'geometric';
-    holographicColorMode?: 'rainbow' | 'blue-purple' | 'gold-green' | 'custom';
-    holographicCustomColors?: string[];
-    holographicSparklesEnabled?: boolean;
-    holographicBorderWidth?: number;
-  };
+  cardId: string;
 }
 
-const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
-  card,
-  className = '',
-  debug = false,
-  effectSettings = {}
-}) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const cardRef = useRef<HTMLDivElement>(null);
-  const screenshotRef = useRef<HTMLDivElement>(null);
+const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({ cardId }) => {
+  const navigate = useNavigate();
+  const [card, setCard] = useState<Card | null>(null);
   const [isFlipped, setIsFlipped] = useState(false);
-  const [isFullScreen, setIsFullScreen] = useState(false);
+  const [rotation, setRotation] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [startPosition, setStartPosition] = useState({ x: 0, y: 0 });
+  const [imageError, setImageError] = useState(false);
+  const [imageLoadAttempted, setImageLoadAttempted] = useState(false);
   const [activeEffects, setActiveEffects] = useState<string[]>([]);
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
-  const windowSize = useWindowSize();
-  const [rotation, setRotation] = useState(0);
-  const [isDownloading, setIsDownloading] = useState(false);
-  const [isTouch, setIsTouch] = useState(false);
-
-  // Screenshot functionality
-  const [image, takeScreenshot] = useScreenshot({
-    type: "image/jpeg",
-    quality: 1.0
+  const [effectIntensities, setEffectIntensities] = useState<Record<string, number>>({
+    Holographic: 0.7,
+    Refractor: 0.8,
+    Chrome: 0.6,
+    Vintage: 0.5
   });
 
-  // Toggle effects
-  const toggleEffect = (effect: string) => {
-    setActiveEffects(prev =>
-      prev.includes(effect) ? prev.filter(e => e !== effect) : [...prev, effect]
-    );
-  };
+  // Default fallback image when card image fails to load
+  const fallbackImage = 'https://images.unsplash.com/photo-1518770660439-4636190af475';
 
-  // Mouse move handler
-  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    const rect = container.getBoundingClientRect();
-    setMousePosition({
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top
-    });
-  }, []);
-
-  // Mouse leave handler
-  const handleMouseLeave = () => {
-    setMousePosition({ x: 0, y: 0 });
-  };
-
-  // Fullscreen toggle
-  const toggleFullScreen = () => {
-    if (isFullScreen) {
-      document.exitFullscreen();
-    } else {
-      containerRef.current?.requestFullscreen().catch(err => {
-        console.error("Error attempting to enable full-screen mode:", err);
-      });
-    }
-    setIsFullScreen(!isFullScreen);
-  };
-
-  // Card flip
-  const handleFlip = () => {
-    setIsFlipped(!isFlipped);
-    showToast({
-      title: "Card rotated",
-      description: "The card has been rotated to the back side",
-      variant: "default",
-      duration: 2000
-    });
-  };
-
-  // Hotkeys
-  useHotkeys('f', handleFlip, { enableOnTags: 'INPUT,SELECT,TEXTAREA' });
-  useHotkeys('shift+f', toggleFullScreen, { enableOnTags: 'INPUT,SELECT,TEXTAREA' });
-
-  // Screenshot and download
-  const downloadScreenshot = async () => {
-    setIsDownloading(true);
-    try {
-      const screenShot = await takeScreenshot(screenshotRef.current);
-      if (screenShot) {
-        const downloadLink = document.createElement("a");
-        downloadLink.href = screenShot;
-        downloadLink.download = `${card.title}-card.jpeg`;
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
-        document.body.removeChild(downloadLink);
-        showToast({
-          title: "Screenshot Downloaded",
-          description: "The screenshot has been downloaded successfully.",
-          duration: 3000,
-        });
-      } else {
-        showToast({
-          title: "Screenshot Failed",
-          description: "Failed to take the screenshot.",
-          variant: "destructive",
-          duration: 3000,
-        });
-      }
-    } catch (error) {
-      console.error("Error downloading screenshot:", error);
-      showToast({
-        title: "Download Error",
-        description: "An error occurred while downloading the screenshot.",
-        variant: "destructive",
-        duration: 3000,
-      });
-    } finally {
-      setIsDownloading(false);
-    }
-  };
-
-  // Share dialog
-  const handleShare = () => {
-    setIsShareDialogOpen(true);
-  };
-
-  // Detect touch
+  // Load card data (mock implementation)
   useEffect(() => {
-    const handleTouch = () => {
-      setIsTouch(true);
-    };
+    // Mock card data loading
+    const mockCardData = {
+      id: cardId,
+      title: 'Sample Card',
+      description: 'This is a sample card for demonstration purposes.',
+      imageUrl: 'https://placehold.co/600x400/orange/white?text=Sample+Card',
+      tags: ['sample', 'card'],
+      userId: 'system',
+      effects: ['Holographic', 'Refractor'],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      designMetadata: {
+        cardStyle: {
+          template: 'classic',
+          effect: 'none',
+          borderRadius: '8px',
+          borderColor: '#000000',
+          shadowColor: 'rgba(0,0,0,0.2)',
+          frameWidth: 2,
+          frameColor: '#000000'
+        },
+        textStyle: {
+          titleColor: '#000000',
+          titleAlignment: 'center',
+          titleWeight: 'bold',
+          descriptionColor: '#333333'
+        },
+        cardMetadata: {},
+        marketMetadata: {}
+      }
+    } as Card;
 
-    window.addEventListener('touchstart', handleTouch, { once: true });
+    setCard(mockCardData);
+    setActiveEffects(mockCardData.effects || []);
+  }, [cardId]);
 
-    return () => {
-      window.removeEventListener('touchstart', handleTouch);
-    };
+  // Apply effect CSS variables when effects change
+  useEffect(() => {
+    console.log("Active effects:", activeEffects);
+    console.log("Effect intensities:", effectIntensities);
+
+    // Set default CSS variables for all possible effects
+    document.documentElement.style.setProperty('--holographic-active', '0');
+    document.documentElement.style.setProperty('--refractor-active', '0');
+    document.documentElement.style.setProperty('--chrome-active', '0');
+    document.documentElement.style.setProperty('--vintage-active', '0');
+
+    // Enable active effects
+    activeEffects.forEach(effect => {
+      const normalizedName = effect.toLowerCase();
+      document.documentElement.style.setProperty(`--${normalizedName}-active`, '1');
+      document.documentElement.style.setProperty(
+        `--${normalizedName}-intensity`,
+        (effectIntensities[effect] || 0.5).toString()
+      );
+    });
+  }, [activeEffects, effectIntensities]);
+
+  // Keyboard controls
+  const handlePrevCard = () => {
+    // Navigate to the previous card
+    console.log('Previous card');
+  };
+
+  const handleNextCard = () => {
+    // Navigate to the next card
+    console.log('Next card');
+  };
+
+  useHotkeys('arrowleft', handlePrevCard);
+  useHotkeys('arrowright', handleNextCard);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setIsDragging(true);
+    setStartPosition({ x: e.clientX - rotation.x, y: e.clientY - rotation.y });
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (isDragging) {
+      setRotation({
+        x: (e.clientX - startPosition.x) * 0.5,
+        y: (e.clientY - startPosition.y) * 0.5,
+      });
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleImageError = () => {
+    console.log('Image failed to load:', card?.imageUrl);
+    setImageError(true);
+  };
+
+  // Get the appropriate image URL with fallback mechanisms
+  const getImageUrl = () => {
+    const imageUrl = card?.imageUrl;
+
+    // If we've already tried loading the image and got an error, use the fallback
+    if (imageError || !imageUrl) {
+      console.log('Using fallback image for card', card?.id);
+      return fallbackImage;
+    }
+
+    return imageUrl;
+  };
+
+  useEffect(() => {
+    document.addEventListener('mouseup', handleMouseUp);
+    return () => document.removeEventListener('mouseup', handleMouseUp);
   }, []);
+
+  useEffect(() => {
+    // Reset image error state when card changes
+    setImageError(false);
+    setImageLoadAttempted(false);
+    console.log('Card changed, resetting image error state for card:', card?.id);
+  }, [card?.id]);
+
+  if (!card) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div
-      ref={containerRef}
-      className={cn("relative", className)}
+      className="relative w-full h-screen flex items-center justify-center"
+      onMouseDown={handleMouseDown}
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
     >
-      {/* Card Viewer */}
-      <div
-        ref={screenshotRef}
-        className="relative w-full h-full"
+      <motion.div
+        className={`card-container w-80 h-120 relative perspective-1000 cursor-grab ${isDragging ? 'cursor-grabbing' : ''}`}
         style={{
-          maxWidth: 'min(80vh, 600px)',
-          maxHeight: 'calc(min(80vh, 600px) * 1.4)',
-          margin: '0 auto',
-          perspective: '1000px',
+          transformStyle: 'preserve-3d',
+          transform: `rotateY(${rotation.x}deg) rotateX(${rotation.y}deg)`,
         }}
       >
-        <CardCanvas
-          card={card}
-          isFlipped={isFlipped}
-          activeEffects={activeEffects}
-          containerRef={containerRef}
-          cardRef={cardRef}
-          onMouseMove={handleMouseMove}
-          onMouseLeave={handleMouseLeave}
-          effectSettings={effectSettings}
-          debug={debug}
-        />
-      </div>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={isFlipped ? 'back' : 'front'}
+            className="absolute inset-0 w-full h-full backface-hidden"
+            initial={{ rotateY: isFlipped ? 180 : 0 }}
+            animate={{ rotateY: isFlipped ? 180 : 0 }}
+            exit={{ rotateY: isFlipped ? 180 : 0 }}
+            transition={{ duration: 0.6 }}
+            style={{ backfaceVisibility: 'hidden' }}
+          >
+            <div
+              className={`w-full h-full rounded-xl overflow-hidden shadow-xl card-with-lighting ${
+                activeEffects.map(effect => `effect-${effect.toLowerCase()}`).join(' ')
+              }`}
+              style={{
+                // Use camelCase for custom properties in React
+                '--rotationX': `${rotation.x}deg`,
+                '--rotationY': `${rotation.y}deg`,
+              } as React.CSSProperties}
+            >
+              {/* Placeholder or loading state */}
+              {!imageLoadAttempted && (
+                <div className="absolute inset-0 flex items-center justify-center bg-gray-800">
+                  <div className="w-16 h-16 border-4 border-t-transparent border-primary rounded-full animate-spin"></div>
+                </div>
+              )}
 
-      {/* Controls */}
-      <div className="absolute top-2 left-2 flex space-x-2 z-10">
-        <Button variant="outline" size="icon" onClick={handleFlip} aria-label="Flip Card">
-          <RotateCw className="h-4 w-4" />
-        </Button>
-        <Button variant="outline" size="icon" onClick={toggleFullScreen} aria-label="Toggle Fullscreen">
-          {isFullScreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+              {/* The actual image with error handling */}
+              <img
+                src={getImageUrl()}
+                alt={card.title || 'Card'}
+                className="w-full h-full object-cover"
+                onLoad={() => {
+                  console.log('Image loaded successfully for card:', card?.id);
+                  setImageLoadAttempted(true);
+                }}
+                onError={(e) => {
+                  console.error('Image failed to load, trying fallback:', card?.id);
+                  setImageLoadAttempted(true);
+                  // If the current source isn't already the fallback, try the fallback
+                  if ((e.target as HTMLImageElement).src !== fallbackImage) {
+                    (e.target as HTMLImageElement).src = fallbackImage;
+                  } else {
+                    handleImageError();
+                  }
+                }}
+              />
+
+              {/* Effect overlays - Always render but control visibility with CSS */}
+              <div className="absolute inset-0 holographic-effect-overlay"
+                style={{ opacity: activeEffects.includes('Holographic') ? (effectIntensities['Holographic'] || 0.5) : 0 }}
+              />
+
+              <div className="absolute inset-0 refractor-effect-overlay"
+                style={{ opacity: activeEffects.includes('Refractor') ? (effectIntensities['Refractor'] || 0.5) : 0 }}
+              />
+
+              <div className="absolute inset-0 chrome-effect-overlay"
+                style={{ opacity: activeEffects.includes('Chrome') ? (effectIntensities['Chrome'] || 0.5) : 0 }}
+              />
+
+              <div className="absolute inset-0 vintage-effect-overlay"
+                style={{ opacity: activeEffects.includes('Vintage') ? (effectIntensities['Vintage'] || 0.5) : 0 }}
+              />
+
+              {/* Dynamic lighting overlay */}
+              <div className="absolute inset-0 lighting-overlay"></div>
+            </div>
+          </motion.div>
+        </AnimatePresence>
+      </motion.div>
+
+      {/* Navigation Buttons */}
+      <div className="absolute top-4 left-4">
+        <Button variant="ghost" onClick={() => navigate(-1)}>
+          <ArrowLeft className="mr-2" />
+          Back
         </Button>
       </div>
-
-      <div className="absolute top-2 right-2 flex space-x-2 z-10">
-        <Button variant="outline" size="icon" onClick={downloadScreenshot} disabled={isDownloading} aria-label="Download Card">
-          <Download className="h-4 w-4" />
+      <div className="absolute top-4 right-4 flex space-x-2">
+        <Button variant="ghost" onClick={handlePrevCard}>
+          <ArrowRight className="mr-2" />
+          Prev
         </Button>
-        <Button variant="outline" size="icon" onClick={handleShare} aria-label="Share Card">
-          <Share2 className="h-4 w-4" />
-        </Button>
-      </div>
-
-      {/* Effect Toggles */}
-      <div className="absolute bottom-2 left-2 right-2 flex justify-center space-x-2 z-10">
-        <Button
-          variant={activeEffects.includes('Refractor') ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => toggleEffect('Refractor')}
-        >
-          Refractor
-        </Button>
-        <Button
-          variant={activeEffects.includes('Holographic') ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => toggleEffect('Holographic')}
-        >
-          Holographic
-        </Button>
-        <Button
-          variant={activeEffects.includes('Gold Foil') ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => toggleEffect('Gold Foil')}
-        >
-          Gold Foil
+        <Button variant="ghost" onClick={handleNextCard}>
+          <ArrowLeft className="mr-2" />
+          Next
         </Button>
       </div>
-
-      <ShareDialog
-        isOpen={isShareDialogOpen}
-        onClose={() => setIsShareDialogOpen(false)}
-        title={card.title}
-        url={window.location.href}
-        imageUrl={card.imageUrl}
-      />
     </div>
   );
 };

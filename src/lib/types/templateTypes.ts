@@ -5,8 +5,9 @@ export interface CardTemplate {
   id: string;
   name: string;
   description?: string;
-  thumbnailUrl?: string;
-  category?: string;
+  thumbnail: string;
+  thumbnailUrl?: string; // Added for backward compatibility
+  category: string;
   tags?: string[];
   popularity?: number;
   isOfficial?: boolean;
@@ -14,8 +15,13 @@ export interface CardTemplate {
   userId?: string;
   createdAt?: string;
   updatedAt?: string;
-  cardStyle: Partial<CardStyle>;
-  textStyle: Partial<TextStyle>;
+  designDefaults?: {
+    cardStyle: Partial<CardStyle>;
+    textStyle?: Partial<TextStyle>;
+    effects?: string[];
+  };
+  cardStyle?: Partial<CardStyle>;
+  textStyle?: Partial<TextStyle>;
   layers?: any[];
   effects?: string[];
   backgroundColor?: string;

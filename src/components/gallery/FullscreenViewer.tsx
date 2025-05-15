@@ -85,11 +85,13 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
           imageUrl: foundCard.imageUrl || '/images/card-placeholder.png',
           thumbnailUrl: foundCard.thumbnailUrl || foundCard.imageUrl || '/images/card-placeholder.png',
           // Ensure all required fields are present
+          description: foundCard.description || '',  // Set default empty string
           designMetadata: foundCard.designMetadata || DEFAULT_DESIGN_METADATA,
           createdAt: foundCard.createdAt || new Date().toISOString(),
           updatedAt: foundCard.updatedAt || new Date().toISOString(),
           userId: foundCard.userId || 'anonymous',
-          effects: foundCard.effects || []
+          effects: foundCard.effects || [],
+          tags: foundCard.tags || []  // Ensure tags are present
         };
         
         // Always initialize with fallback first, then update if the real image loads

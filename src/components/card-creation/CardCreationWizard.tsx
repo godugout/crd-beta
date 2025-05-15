@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { 
@@ -16,11 +15,11 @@ import { toastUtils } from '@/lib/utils/toast-utils';
 
 // Import wizard steps
 import TemplateSelectionStep from './wizard-steps/TemplateSelectionStep';
-import ImageUploadStep from './wizard-steps/ImageUploadStep';
-import DesignStep from './wizard-steps/DesignStep';
-import EffectsStep from './wizard-steps/EffectsStep';
-import TextDetailsStep from './wizard-steps/TextDetailsStep';
-import FinalizeStep from './wizard-steps/FinalizeStep';
+import ImageUploadStep from './steps/CardUploadStep';
+import DesignStep from './steps/CardDesignStep';
+import EffectsStep from './steps/CardEffectsStep';
+import TextDetailsStep from './steps/CardTextStep';
+import FinalizeStep from './steps/CardPreviewStep';
 
 // Import wizard components
 import WizardProgress from './components/WizardProgress';

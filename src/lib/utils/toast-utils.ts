@@ -1,6 +1,5 @@
 
 import { toast } from '@/hooks/use-toast';
-import { ToastOptions } from '@/lib/adapters/toastAdapter';
 import { createToast } from '@/types/toast';
 
 /**

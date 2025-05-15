@@ -1,19 +1,17 @@
-
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Layers, ArrowUp, ArrowDown, Trash, Lock, Unlock, Eye, EyeOff } from 'lucide-react';
-import { CardLayer } from '@/components/card-creation/types/cardTypes';
+import { CardLayer } from '@/lib/types/cardTypes';
 
-interface LayersPanelProps {
+export interface LayersPanelProps {
   layers: CardLayer[];
-  activeLayerId: string | null;
-  onSelectLayer: (layerId: string) => void;
-  onDeleteLayer: (layerId: string) => void;
-  onMoveLayerUp: (layerId: string) => void;
-  onMoveLayerDown: (layerId: string) => void;
-  onToggleLayerVisibility: (layerId: string) => void;
-  onToggleLayerLock: (layerId: string) => void;
+  activeLayerId: string;
+  onSelectLayer: (id: string) => void;
+  onDeleteLayer: (id: string) => void;
+  onMoveLayerUp: (id: string) => void;
+  onMoveLayerDown: (id: string) => void;
+  onUpdateLayer?: (id: string, updates: Partial<CardLayer>) => void;
 }
 
 const LayersPanel: React.FC<LayersPanelProps> = ({
@@ -23,8 +21,7 @@ const LayersPanel: React.FC<LayersPanelProps> = ({
   onDeleteLayer,
   onMoveLayerUp,
   onMoveLayerDown,
-  onToggleLayerVisibility,
-  onToggleLayerLock
+  onUpdateLayer
 }) => {
   return (
     <Card>

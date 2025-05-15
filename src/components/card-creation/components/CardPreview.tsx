@@ -1,4 +1,3 @@
-
 import React, { forwardRef } from 'react';
 import { Card } from '@/lib/types/cardTypes';
 import { cn } from '@/lib/utils';
@@ -17,8 +16,30 @@ const CardPreview = forwardRef<HTMLDivElement, CardPreviewProps>(({
     .map(effect => `effect-${effect}`)
     .join(' ');
   
-  const cardStyle = card.designMetadata?.cardStyle || {};
-  const textStyle = card.designMetadata?.textStyle || {};
+  // Ensure cardStyle has default values
+  const cardStyle = card.designMetadata?.cardStyle || {
+    template: 'classic',
+    effect: 'none',
+    borderRadius: '8px',
+    borderWidth: 2,
+    borderColor: '#000000',
+    backgroundColor: '#FFFFFF',
+    shadowColor: 'rgba(0,0,0,0.2)',
+    frameWidth: 2,
+    frameColor: '#000000'
+  };
+  
+  // Ensure textStyle has default values
+  const textStyle = card.designMetadata?.textStyle || {
+    fontFamily: 'Inter',
+    fontSize: '16px',
+    fontWeight: 'normal',
+    color: '#000000',
+    titleColor: '#000000',
+    titleAlignment: 'center',
+    titleWeight: 'bold',
+    descriptionColor: '#333333'
+  };
   
   return (
     <div 
