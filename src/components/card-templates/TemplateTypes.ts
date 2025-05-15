@@ -1,42 +1,25 @@
 
-// Types and default values for card templates
-
 export interface CardStyle {
   template: string;
   effect: string;
   borderRadius: string;
-  borderWidth?: number;
+  borderWidth: number;
   borderColor: string;
-  backgroundColor?: string;
+  backgroundColor: string;
   shadowColor: string;
   frameWidth: number;
   frameColor: string;
-  [key: string]: any;
 }
 
 export interface TextStyle {
-  fontFamily?: string;
-  fontSize?: string;
-  fontWeight?: string;
-  color?: string;
+  fontFamily: string;
+  fontSize: string;
+  fontWeight: string;
+  color: string;
   titleColor: string;
   titleAlignment: string;
   titleWeight: string;
   descriptionColor: string;
-  [key: string]: any;
-}
-
-export interface CardTemplate {
-  id: string;
-  name: string;
-  description: string;
-  imageUrl: string;
-  thumbnailUrl?: string;
-  cardStyle: CardStyle;
-  textStyle: TextStyle;
-  backgroundColor: string;
-  category: string;
-  tags: string[];
 }
 
 export const DEFAULT_CARD_STYLE: CardStyle = {
@@ -52,7 +35,7 @@ export const DEFAULT_CARD_STYLE: CardStyle = {
 };
 
 export const DEFAULT_TEXT_STYLE: TextStyle = {
-  fontFamily: 'sans-serif',
+  fontFamily: 'Inter',
   fontSize: '16px',
   fontWeight: 'normal',
   color: '#000000',
@@ -61,3 +44,16 @@ export const DEFAULT_TEXT_STYLE: TextStyle = {
   titleWeight: 'bold',
   descriptionColor: '#333333',
 };
+
+export interface CardTemplate {
+  id: string;
+  name: string;
+  description: string;
+  imageUrl: string;
+  thumbnailUrl?: string;
+  cardStyle: CardStyle;
+  textStyle: TextStyle;
+  backgroundColor: string;
+  category: string;
+  tags: string[];
+}

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
@@ -7,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/hooks/use-toast';
 import { Upload, X, Image as ImageIcon } from 'lucide-react';
+import { showToast } from '@/lib/adapters/toastAdapter';
 
 interface MediaUploaderProps {
   onUploadComplete?: (url: string, metadata?: Record<string, any>) => void;
@@ -34,7 +34,7 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
       
       // Validate file size
       if (selectedFile.size > maxSizeMB * 1024 * 1024) {
-        toast({
+        showToast({
           title: 'File too large',
           description: `File size should not exceed ${maxSizeMB}MB`,
           variant: 'destructive'
@@ -67,7 +67,7 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
 
   const handleUpload = async () => {
     if (!file) {
-      toast({
+      showToast({
         title: 'No file selected',
         description: 'Please select a file to upload',
         variant: 'destructive'
@@ -104,13 +104,13 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
         tags: ''
       });
       
-      toast({
+      showToast({
         title: 'Upload successful',
         description: 'Your file has been uploaded',
       });
     } catch (error) {
       console.error('Upload error:', error);
-      toast({
+      showToast({
         title: 'Upload failed',
         description: 'There was a problem uploading your file',
         variant: 'destructive'
@@ -134,7 +134,7 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
       
       // Check if it's an image
       if (!droppedFile.type.startsWith('image/')) {
-        toast({
+        showToast({
           title: 'Invalid file type',
           description: 'Please upload an image file',
           variant: 'destructive'
@@ -144,7 +144,7 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
       
       // Validate file size
       if (droppedFile.size > maxSizeMB * 1024 * 1024) {
-        toast({
+        showToast({
           title: 'File too large',
           description: `File size should not exceed ${maxSizeMB}MB`,
           variant: 'destructive'

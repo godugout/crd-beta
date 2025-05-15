@@ -1,9 +1,10 @@
 
-import React, { useState, useCallback } from 'react';
+import React, { useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
-import { Upload, Camera, LinkIcon, X } from 'lucide-react';
+import { Camera, Upload } from 'lucide-react';
 import { toastUtils } from '@/lib/utils/toast-utils';
 
 interface ImageUploadStepProps {
@@ -12,166 +13,139 @@ interface ImageUploadStepProps {
 }
 
 const ImageUploadStep: React.FC<ImageUploadStepProps> = ({ imageUrl, onImageSelect }) => {
-  const [uploading, setUploading] = useState(false);
-  const [urlInput, setUrlInput] = useState('');
-  
-  // Method to upload an image file
-  const handleFileUpload = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState(imageUrl);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (!file) return;
-    
-    // Check file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      toastUtils.error(
-        "File too large", 
-        "Please select an image under 5MB"
-      );
-      return;
-    }
-    
-    // Check file type
+
+    // Simple validation
     if (!file.type.startsWith('image/')) {
-      toastUtils.error(
-        "Invalid file type", 
-        "Please select a valid image file"
-      );
+      toastUtils.error("Invalid file", "Please select an image file");
       return;
     }
-    
-    setUploading(true);
-    
-    // Simulate file upload (would connect to a real service)
+
+    setIsUploading(true);
+
+    // Create a preview
     const reader = new FileReader();
-    reader.onload = (e) => {
-      if (e.target?.result) {
-        onImageSelect(e.target.result.toString());
-        toastUtils.success(
-          "Image uploaded",
-          "Your image has been uploaded successfully"
-        );
-      }
-      setUploading(false);
+    reader.onload = () => {
+      const result = reader.result as string;
+      setPreviewUrl(result);
+      onImageSelect(result);
+      setIsUploading(false);
     };
-    
+
     reader.onerror = () => {
-      toastUtils.error(
-        "Upload failed",
-        "There was a problem uploading your image"
-      );
-      setUploading(false);
+      toastUtils.error("Error", "Failed to read the file");
+      setIsUploading(false);
     };
-    
+
     reader.readAsDataURL(file);
-  }, [onImageSelect]);
-  
-  // Add image from URL
-  const handleUrlSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!urlInput.trim()) return;
-    
-    try {
-      new URL(urlInput); // Validate URL
-      onImageSelect(urlInput);
-    } catch (error) {
-      toastUtils.error(
-        "Invalid URL",
-        "Please enter a valid image URL"
-      );
+  };
+
+  const openFileDialog = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
     }
   };
-  
-  // Clear the selected image
-  const handleClearImage = () => {
-    onImageSelect('');
-  };
-  
+
   return (
     <div className="space-y-6">
-      <h2 className="text-xl font-semibold">Upload Card Image</h2>
-      
-      {imageUrl ? (
-        <div className="relative aspect-[2.5/3.5] max-w-xs mx-auto border rounded-md overflow-hidden">
-          <img
-            src={imageUrl}
-            alt="Selected card"
-            className="w-full h-full object-contain"
+      <div className="text-center">
+        <h2 className="text-2xl font-bold">Upload Your Card Image</h2>
+        <p className="text-gray-500 mt-2">
+          Choose a high-quality image to use as the base for your card
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            className="hidden"
+            onChange={handleFileChange}
+            accept="image/*"
+            disabled={isUploading}
           />
-          <Button
-            variant="outline"
-            size="icon"
-            className="absolute top-2 right-2 bg-white/80 hover:bg-white"
-            onClick={handleClearImage}
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* File upload option */}
-          <Card className="border-dashed cursor-pointer hover:border-primary transition-colors">
-            <CardContent className="p-6 flex flex-col items-center">
-              <Input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                id="file-upload"
-                onChange={handleFileUpload}
-                disabled={uploading}
-              />
-              <label htmlFor="file-upload" className="cursor-pointer flex flex-col items-center">
-                <div className="h-12 w-12 bg-primary/10 rounded-full flex items-center justify-center mb-4">
-                  <Upload className="h-6 w-6 text-primary" />
-                </div>
-                <h3 className="font-semibold">Upload Image</h3>
-                <p className="text-sm text-gray-500 text-center mt-2">
-                  Drag and drop or click to browse
-                </p>
-              </label>
-            </CardContent>
-          </Card>
-          
-          {/* URL input option */}
-          <Card className="border-dashed hover:border-primary transition-colors">
-            <CardContent className="p-6">
-              <div className="flex flex-col items-center">
-                <div className="h-12 w-12 bg-primary/10 rounded-full flex items-center justify-center mb-4">
-                  <LinkIcon className="h-6 w-6 text-primary" />
-                </div>
-                <h3 className="font-semibold">Image URL</h3>
-                <p className="text-sm text-gray-500 text-center mt-2">
-                  Paste a direct link to an image
-                </p>
-                <form onSubmit={handleUrlSubmit} className="w-full mt-4">
-                  <div className="flex gap-2">
-                    <Input
-                      type="url"
-                      placeholder="https://example.com/image.jpg"
-                      value={urlInput}
-                      onChange={(e) => setUrlInput(e.target.value)}
-                      className="flex-grow"
-                    />
-                    <Button type="submit" size="sm">
-                      Add
-                    </Button>
+
+          <Card className="border-2 border-dashed border-gray-300 hover:border-primary transition-colors">
+            <CardContent className="flex flex-col items-center justify-center p-6 text-center cursor-pointer" onClick={openFileDialog}>
+              {previewUrl ? (
+                <div className="w-full aspect-[2.5/3.5] relative">
+                  <img
+                    src={previewUrl}
+                    alt="Card preview"
+                    className="w-full h-full object-contain"
+                  />
+                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                    <p className="text-white">Change Image</p>
                   </div>
-                </form>
-              </div>
+                </div>
+              ) : (
+                <>
+                  <Upload className="h-10 w-10 text-gray-400 mb-4" />
+                  <h3 className="font-medium mb-1">Upload an image</h3>
+                  <p className="text-sm text-gray-500">
+                    Drag & drop or click to browse
+                  </p>
+                </>
+              )}
             </CardContent>
           </Card>
+
+          <div className="mt-4">
+            <p className="text-xs text-gray-500">
+              Recommended dimensions: 1050px × 1500px (2.5:3.5 ratio)
+              <br />
+              Max file size: 10MB
+              <br />
+              Supported formats: JPG, PNG, WebP
+            </p>
+          </div>
         </div>
-      )}
-      
-      {/* Image tips */}
-      <div className="bg-blue-50 text-blue-800 p-4 rounded-lg text-sm">
-        <h3 className="font-semibold mb-2">Tips for best results:</h3>
-        <ul className="list-disc pl-5 space-y-1">
-          <li>Use high resolution images (at least 1000px width)</li>
-          <li>Images with clear subject and minimal background work best</li>
-          <li>For sports cards, use player photos with good lighting</li>
-          <li>Keep the file size under 5MB</li>
-        </ul>
+
+        <div>
+          <h3 className="text-lg font-medium mb-4">Image Options</h3>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="image-url">Or enter an image URL</Label>
+              <Input
+                id="image-url"
+                type="text"
+                placeholder="https://example.com/image.jpg"
+                value={imageUrl}
+                onChange={(e) => onImageSelect(e.target.value)}
+                className="mt-1"
+              />
+            </div>
+
+            <Button 
+              variant="outline" 
+              className="w-full"
+              onClick={() => {
+                // This would activate the device camera in a real implementation
+                toastUtils.info("Camera feature", "Camera capture would open here");
+              }}
+            >
+              <Camera className="h-4 w-4 mr-2" />
+              Use Camera
+            </Button>
+
+            <Button 
+              variant="outline" 
+              className="w-full"
+              onClick={() => {
+                toastUtils.info("AI feature", "AI image generation would open here");
+              }}
+            >
+              Generate Image with AI
+            </Button>
+          </div>
+        </div>
       </div>
     </div>
   );

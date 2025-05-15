@@ -1,164 +1,235 @@
 
 import React, { useState } from 'react';
+import { Card } from '@/lib/types/cardTypes';
 import { Button } from '@/components/ui/button';
-import { Lightbulb } from 'lucide-react';
-import LightbulbPanel from '../card-effects/LightbulbPanel';
-import { Card } from '@/lib/types';
-import { CardFront } from '@/components/card/CardFront';
-import { CardBack } from '@/components/card/CardBack';
+import { ArrowLeft, Download, Share2, ThumbsUp } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ShareDialog from '@/components/ShareDialog';
-import { DeleteDialog } from '@/components/DeleteDialog';
-import { useToast } from "@/hooks/use-toast";
-import { CardTransitionEffects } from '@/components/card-effects/CardTransitionEffects';
-import { createToast } from '@/types/toast';
-import { toastUtils } from '@/lib/utils/toast-utils';
+import { showToast } from '@/lib/adapters/toastAdapter';
 
 interface CardViewerProps {
   card: Card;
-  onUpdateCard?: (updatedCard: Partial<Card>) => void;
-  onDeleteCard?: (cardId: string) => void;
-  fullscreen?: boolean;
-  onFullscreenToggle?: () => void;
-  onShare?: () => void;
-  onCapture?: () => void;
   onBack?: () => void;
-  onClose?: () => void;
+  showShareButton?: boolean;
+  showDownloadButton?: boolean;
+  showLikeButton?: boolean;
 }
 
-const CardViewer: React.FC<CardViewerProps> = ({ 
-  card, 
-  onUpdateCard, 
-  onDeleteCard,
-  fullscreen = false,
-  onFullscreenToggle,
-  onShare,
-  onCapture,
+const CardViewer: React.FC<CardViewerProps> = ({
+  card,
   onBack,
-  onClose
+  showShareButton = true,
+  showDownloadButton = true,
+  showLikeButton = true,
 }) => {
-  const [isFlipped, setIsFlipped] = useState(false);
-  const [isShareOpen, setIsShareOpen] = useState(false);
-  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-  const [showLightbulb, setShowLightbulb] = useState(false);
-  const [activeEffects, setActiveEffects] = useState<string[]>(card.effects || []);
-  const { toast } = useToast();
-  const [showTransition, setShowTransition] = useState(false);
-
-  const handleFlip = () => {
-    setIsFlipped(!isFlipped);
-  };
+  const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
+  const [isLiked, setIsLiked] = useState(false);
+  const [activeTab, setActiveTab] = useState('details');
 
   const handleShare = () => {
-    if (onShare) {
-      onShare();
-    } else {
-      setIsShareOpen(true);
-    }
+    setIsShareDialogOpen(true);
   };
 
-  const handleDelete = () => {
-    setIsDeleteOpen(true);
-  };
-
-  const handleApplyEffect = (effect: string) => {
-    const updatedEffects = activeEffects.includes(effect) 
-      ? activeEffects.filter(e => e !== effect)
-      : [...activeEffects, effect];
-    
-    setActiveEffects(updatedEffects);
-    
-    if (onUpdateCard) {
-      onUpdateCard({ 
-        id: card.id, 
-        effects: updatedEffects 
+  const handleLike = () => {
+    setIsLiked(!isLiked);
+    if (!isLiked) {
+      showToast({
+        title: "Card Liked!",
+        description: "This card has been added to your favorites"
       });
     }
   };
 
-  const handleDeleteCard = (cardId: string) => {
-    if (onDeleteCard) {
-      onDeleteCard(cardId);
-    } else {
-      toast(createToast({
-        title: "Action not available",
-        description: "Delete functionality is not available in this view.",
+  const handleDownload = async () => {
+    try {
+      const response = await fetch(card.imageUrl);
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${card.title.replace(/\s+/g, '-').toLowerCase()}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      showToast({
+        title: "Download Started",
+        description: "Your card image is being downloaded"
+      });
+    } catch (error) {
+      console.error('Download error:', error);
+      showToast({
+        title: "Download Failed",
+        description: "There was an error downloading the image",
         variant: "destructive"
-      }));
+      });
     }
-  };
-
-  const handleStyleChange = () => {
-    setShowTransition(true);
-    if (!isFlipped) {
-      setIsFlipped(true);
-    }
-  };
-
-  const handleTransitionComplete = () => {
-    setShowTransition(false);
-    // Here you can trigger any post-transition updates
   };
 
   return (
-    <div className="relative">
-      <div className="absolute top-2 left-2 flex space-x-2 z-10">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={handleFlip}
-          title="Flip Card"
-        >
-          {isFlipped ? 'Front' : 'Back'}
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setShowLightbulb(!showLightbulb)}
-          className="relative"
-          title="Creative Tools"
-        >
-          <Lightbulb className={showLightbulb ? "text-primary" : ""} />
-        </Button>
+    <div className="max-w-4xl mx-auto p-4">
+      <div className="mb-4 flex items-center">
+        {onBack && (
+          <Button variant="ghost" onClick={onBack} className="mr-2">
+            <ArrowLeft className="h-4 w-4 mr-1" />
+            Back
+          </Button>
+        )}
+        <h1 className="text-2xl font-bold flex-1">{card.title}</h1>
       </div>
-
-      <LightbulbPanel
-        isOpen={showLightbulb}
-        onClose={() => setShowLightbulb(false)}
-        onApplyEffect={handleApplyEffect}
-      />
-
-      <div 
-        className={`relative w-64 h-96 transform-style preserve-3d transition-transform duration-500`}
-      >
-        <div className={`absolute inset-0 ${isFlipped ? 'rotate-y-180' : ''} transform-style preserve-3d transition-transform duration-500`}>
-          <CardFront
-            card={card}
-            activeEffects={activeEffects}
-            onFlip={handleFlip}
-            onShare={handleShare}
-            onDelete={handleDelete}
-          />
-          <CardBack card={card} />
+      
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="md:col-span-1">
+          <div className={`aspect-[2.5/3.5] rounded-lg overflow-hidden shadow-lg ${card.effects?.join(' ') || ''}`}>
+            <img 
+              src={card.imageUrl} 
+              alt={card.title} 
+              className="w-full h-full object-cover"
+            />
+          </div>
+          
+          <div className="flex justify-center space-x-2 mt-4">
+            {showDownloadButton && (
+              <Button variant="outline" onClick={handleDownload}>
+                <Download className="h-4 w-4 mr-1" />
+                Download
+              </Button>
+            )}
+            
+            {showShareButton && (
+              <Button variant="outline" onClick={handleShare}>
+                <Share2 className="h-4 w-4 mr-1" />
+                Share
+              </Button>
+            )}
+            
+            {showLikeButton && (
+              <Button 
+                variant={isLiked ? "default" : "outline"}
+                onClick={handleLike}
+              >
+                <ThumbsUp className="h-4 w-4 mr-1" />
+                {isLiked ? 'Liked' : 'Like'}
+              </Button>
+            )}
+          </div>
         </div>
         
-        <CardTransitionEffects 
-          isActive={showTransition}
-          onComplete={handleTransitionComplete}
-        />
+        <div className="md:col-span-2">
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="mb-4">
+              <TabsTrigger value="details">Details</TabsTrigger>
+              <TabsTrigger value="attributes">Attributes</TabsTrigger>
+              <TabsTrigger value="history">History</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="details">
+              <div className="space-y-4">
+                <div>
+                  <h2 className="text-lg font-medium">Description</h2>
+                  <p className="text-gray-700">{card.description || 'No description provided.'}</p>
+                </div>
+                
+                {card.tags && card.tags.length > 0 && (
+                  <div>
+                    <h2 className="text-lg font-medium">Tags</h2>
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {card.tags.map((tag) => (
+                        <Badge key={tag} variant="secondary">{tag}</Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                <div className="grid grid-cols-2 gap-4">
+                  {card.player && (
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-500">Player</h3>
+                      <p>{card.player}</p>
+                    </div>
+                  )}
+                  
+                  {card.team && (
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-500">Team</h3>
+                      <p>{card.team}</p>
+                    </div>
+                  )}
+                  
+                  {card.year && (
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-500">Year</h3>
+                      <p>{card.year}</p>
+                    </div>
+                  )}
+                  
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-500">Created</h3>
+                    <p>{new Date(card.createdAt).toLocaleDateString()}</p>
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="attributes">
+              <div className="space-y-4">
+                <h2 className="text-lg font-medium">Card Attributes</h2>
+                
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500">Effects</h3>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {card.effects && card.effects.length > 0 ? (
+                      card.effects.map((effect) => (
+                        <Badge key={effect} variant="outline">{effect}</Badge>
+                      ))
+                    ) : (
+                      <span className="text-gray-500">No effects applied</span>
+                    )}
+                  </div>
+                </div>
+                
+                {card.designMetadata && (
+                  <div className="space-y-2">
+                    {card.designMetadata.cardStyle && (
+                      <div>
+                        <h3 className="text-sm font-medium text-gray-500">Card Style</h3>
+                        <div className="grid grid-cols-2 gap-2 mt-1">
+                          <div className="flex items-center">
+                            <span className="text-xs text-gray-500 w-24">Template:</span>
+                            <span>{card.designMetadata.cardStyle.template || 'Standard'}</span>
+                          </div>
+                          
+                          <div className="flex items-center">
+                            <span className="text-xs text-gray-500 w-24">Border Color:</span>
+                            <div className="w-4 h-4 rounded-full" style={{ backgroundColor: card.designMetadata.cardStyle.borderColor || '#000000' }}></div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="history">
+              <div className="space-y-4">
+                <h2 className="text-lg font-medium">History</h2>
+                <p className="text-gray-700">Card created on {new Date(card.createdAt).toLocaleString()}</p>
+                <p className="text-gray-700">Last updated on {new Date(card.updatedAt).toLocaleString()}</p>
+              </div>
+            </TabsContent>
+          </Tabs>
+        </div>
       </div>
-
-      <ShareDialog
-        isOpen={isShareOpen}
-        onOpenChange={(open) => setIsShareOpen(open)}
-        onClose={() => setIsShareOpen(false)}
-        cardId={card.id}
-      />
-
-      <DeleteDialog
-        isOpen={isDeleteOpen}
-        onClose={() => setIsDeleteOpen(false)}
-        card={card}
-        onDelete={handleDeleteCard}
+      
+      <ShareDialog 
+        isOpen={isShareDialogOpen}
+        onClose={() => setIsShareDialogOpen(false)}
+        title={card.title}
+        url={window.location.href}
+        imageUrl={card.imageUrl}
       />
     </div>
   );

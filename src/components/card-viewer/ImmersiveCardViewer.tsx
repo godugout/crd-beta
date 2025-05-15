@@ -1,350 +1,246 @@
-import React, { useRef, useEffect, useState } from 'react';
-import { Card } from '@/lib/types/cardTypes';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, PerspectiveCamera, Environment } from '@react-three/drei';
-import { DEFAULT_DESIGN_METADATA, FALLBACK_IMAGE_URL } from '@/lib/utils/cardDefaults';
-import { useToast } from '@/hooks/use-toast';
-import * as THREE from 'three';
-import { logRenderingInfo } from '@/utils/debugRenderer';
+import React, { useRef, useState, useEffect, useCallback } from 'react';
+import { CardData } from '@/types/card';
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { RotateCw, Maximize2, Minimize2, Download, Share2 } from 'lucide-react';
+import { useWindowSize } from '@/hooks/useWindowSize';
+import { useHotkeys } from 'react-hotkeys-hook';
+import { useScreenshot } from 'use-react-screenshot';
+import { showToast } from '@/lib/adapters/toastAdapter';
+import CardCanvas from './CardCanvas';
+import ShareDialog from '@/components/ShareDialog';
 
 interface ImmersiveCardViewerProps {
-  card: Card;
-  isFlipped: boolean;
-  activeEffects: string[];
-  effectIntensities?: Record<string, number>;
-  isAutoRotating?: boolean; // Added this prop
-}
-
-const Card3DModel = ({ 
-  frontTextureUrl, 
-  backTextureUrl, 
-  isFlipped,
-  activeEffects,
-  effectIntensities = {},
-  isAutoRotating = false // Added default value
-}) => {
-  const meshRef = useRef<THREE.Mesh>(null);
-  const groupRef = useRef<THREE.Group>(null);
-  const [hovered, setHovered] = useState(false);
-  const [frontTextureLoaded, setFrontTextureLoaded] = useState<THREE.Texture | null>(null);
-  const [backTextureLoaded, setBackTextureLoaded] = useState<THREE.Texture | null>(null);
-  const [texturesLoaded, setTexturesLoaded] = useState(false);
-  
-  const defaultCardBackImage = '/images/card-back-placeholder.png';
-  
-  useEffect(() => {
-    const textureLoader = new THREE.TextureLoader();
-    textureLoader.crossOrigin = 'anonymous';
-    
-    console.log("Loading front texture from:", frontTextureUrl);
-    
-    textureLoader.load(
-      frontTextureUrl,
-      (texture) => {
-        console.log("Front texture loaded successfully");
-        setFrontTextureLoaded(texture);
-      },
-      (xhr) => {
-        console.log("Front texture loading progress:", (xhr.loaded / xhr.total) * 100 + "%");
-      },
-      (error) => {
-        console.error("Error loading front texture:", error);
-        textureLoader.load(
-          FALLBACK_IMAGE_URL,
-          (fallbackTexture) => {
-            console.log("Fallback front texture loaded");
-            setFrontTextureLoaded(fallbackTexture);
-          },
-          undefined,
-          () => console.error("Even fallback image failed to load")
-        );
-      }
-    );
-    
-    console.log("Loading back texture from:", backTextureUrl || defaultCardBackImage);
-    textureLoader.load(
-      backTextureUrl || defaultCardBackImage,
-      (texture) => {
-        console.log("Back texture loaded successfully");
-        setBackTextureLoaded(texture);
-      },
-      (xhr) => {
-        console.log("Back texture loading progress:", (xhr.loaded / xhr.total) * 100 + "%");
-      },
-      (error) => {
-        console.error("Error loading back texture:", error);
-        const absoluteBackUrl = new URL(defaultCardBackImage, window.location.origin).href;
-        console.log("Trying absolute URL for back texture:", absoluteBackUrl);
-        
-        textureLoader.load(
-          absoluteBackUrl,
-          (fallbackTexture) => {
-            console.log("Default back texture loaded from absolute URL");
-            setBackTextureLoaded(fallbackTexture);
-          },
-          undefined,
-          () => {
-            console.error("Failed to load default card back");
-            const canvas = document.createElement('canvas');
-            canvas.width = 512;
-            canvas.height = 512;
-            const ctx = canvas.getContext('2d');
-            if (ctx) {
-              ctx.fillStyle = '#2a3042';
-              ctx.fillRect(0, 0, 512, 512);
-              const plainTexture = new THREE.CanvasTexture(canvas);
-              setBackTextureLoaded(plainTexture);
-              console.log("Created plain color texture as fallback");
-            }
-          }
-        );
-      }
-    );
-  }, [frontTextureUrl, backTextureUrl, defaultCardBackImage]);
-  
-  useEffect(() => {
-    if (frontTextureLoaded && backTextureLoaded) {
-      console.log("Both textures loaded successfully");
-      setTexturesLoaded(true);
-    }
-  }, [frontTextureLoaded, backTextureLoaded]);
-
-  useFrame((state, delta) => {
-    if (!groupRef.current) return;
-    
-    const targetRotationY = isFlipped ? Math.PI : 0;
-    
-    if (groupRef.current.rotation.y !== targetRotationY) {
-      groupRef.current.rotation.y += (targetRotationY - groupRef.current.rotation.y) * 0.1;
-    }
-    
-    const time = state.clock.getElapsedTime();
-    
-    // Apply auto-rotation if enabled
-    if (isAutoRotating) {
-      groupRef.current.rotation.y += delta * 0.3;
-    }
-    
-    groupRef.current.position.y = Math.sin(time * 0.5) * 0.1;
-    groupRef.current.rotation.z = Math.sin(time * 0.3) * 0.02;
-    
-    if (hovered) {
-      groupRef.current.position.y += 0.1;
-    }
-    
-    logRenderingInfo("Card3DModel", {
-      visible: texturesLoaded,
-      position: {
-        y: groupRef.current.position.y,
-        z: groupRef.current.position.z
-      }
-    });
-  });
-
-  if (!texturesLoaded) {
-    return (
-      <mesh position={[0, 0, 0]}>
-        <boxGeometry args={[2.5, 3.5, 0.1]} />
-        <meshStandardMaterial color="#333333" />
-      </mesh>
-    );
-  }
-
-  const createGlowMaterial = () => {
-    const glowMaterial = new THREE.MeshStandardMaterial({
-      color: new THREE.Color('#8050ff'),
-      emissive: new THREE.Color('#4020a0'),
-      emissiveIntensity: 0.4,
-      transparent: true,
-      opacity: 0.6
-    });
-    return glowMaterial;
+  card: CardData;
+  className?: string;
+  debug?: boolean;
+  effectSettings?: {
+    refractorIntensity?: number;
+    refractorColors?: string[];
+    animationEnabled?: boolean;
+    refractorSpeed?: number;
+    refractorAngle?: number;
+    holographicIntensity?: number;
+    holographicPattern?: 'linear' | 'circular' | 'angular' | 'geometric';
+    holographicColorMode?: 'rainbow' | 'blue-purple' | 'gold-green' | 'custom';
+    holographicCustomColors?: string[];
+    holographicSparklesEnabled?: boolean;
+    holographicBorderWidth?: number;
   };
-
-  return (
-    <group 
-      ref={groupRef}
-      position={[0, 0, 0]}
-      rotation={[0.1, 0, 0]}
-    >
-      <mesh
-        ref={meshRef}
-        castShadow
-        receiveShadow
-        onPointerOver={() => setHovered(true)}
-        onPointerOut={() => setHovered(false)}
-      >
-        <planeGeometry args={[2.5, 3.5, 20, 20]} />
-        <meshPhysicalMaterial 
-          map={frontTextureLoaded}
-          side={THREE.FrontSide}
-          roughness={0.2}
-          metalness={0.8}
-          envMapIntensity={1.5}
-          clearcoat={1}
-          clearcoatRoughness={0.2}
-          reflectivity={0.8}
-        />
-      </mesh>
-      
-      <mesh position={[0, 0, -0.01]} rotation={[0, Math.PI, 0]}>
-        <planeGeometry args={[2.5, 3.5, 1, 1]} />
-        <meshPhysicalMaterial 
-          map={backTextureLoaded}
-          side={THREE.FrontSide}
-          roughness={0.3}
-          metalness={0.7}
-          envMapIntensity={1.2}
-          clearcoat={0.8}
-        />
-      </mesh>
-      
-      {activeEffects.includes('Holographic') && (
-        <mesh position={[0, 0, -0.03]} scale={[2.55, 3.55, 1]}>
-          <planeGeometry args={[1, 1]} />
-          <primitive object={createGlowMaterial()} attach="material" />
-        </mesh>
-      )}
-    </group>
-  );
-};
+}
 
 const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
   card,
-  isFlipped,
-  activeEffects,
-  effectIntensities = {},
-  isAutoRotating = false // Added with default value
+  className = '',
+  debug = false,
+  effectSettings = {}
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const { toast } = useToast();
-  const [processedCard, setProcessedCard] = useState<Card>(card);
-  const [isLoading, setIsLoading] = useState(true);
-  const [frontTexture, setFrontTexture] = useState<string>(card?.imageUrl || FALLBACK_IMAGE_URL);
-  const [backTexture, setBackTexture] = useState<string>('/images/card-back-placeholder.png');
-  
-  useEffect(() => {
-    const validateCardImages = async () => {
-      setIsLoading(true);
-      
-      const cardCopy: Card = JSON.parse(JSON.stringify(card));
-      
-      if (!cardCopy.designMetadata || !cardCopy.designMetadata.cardStyle) {
-        console.warn(`Card ${cardCopy.id} is missing designMetadata or cardStyle, using default values`);
-        cardCopy.designMetadata = DEFAULT_DESIGN_METADATA;
-      }
-      
-      if (!cardCopy.imageUrl || cardCopy.imageUrl === 'undefined') {
-        console.warn(`Card ${cardCopy.id} is missing an image URL, using fallback`);
-        cardCopy.imageUrl = FALLBACK_IMAGE_URL;
-        
-        toast({
-          title: "Using fallback image",
-          description: "The original card image couldn't be loaded",
-          variant: "default",
-          duration: 3000
+  const cardRef = useRef<HTMLDivElement>(null);
+  const screenshotRef = useRef<HTMLDivElement>(null);
+  const [isFlipped, setIsFlipped] = useState(false);
+  const [isFullScreen, setIsFullScreen] = useState(false);
+  const [activeEffects, setActiveEffects] = useState<string[]>([]);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
+  const windowSize = useWindowSize();
+  const [rotation, setRotation] = useState(0);
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [isTouch, setIsTouch] = useState(false);
+
+  // Screenshot functionality
+  const [image, takeScreenshot] = useScreenshot({
+    type: "image/jpeg",
+    quality: 1.0
+  });
+
+  // Toggle effects
+  const toggleEffect = (effect: string) => {
+    setActiveEffects(prev =>
+      prev.includes(effect) ? prev.filter(e => e !== effect) : [...prev, effect]
+    );
+  };
+
+  // Mouse move handler
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const rect = container.getBoundingClientRect();
+    setMousePosition({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top
+    });
+  }, []);
+
+  // Mouse leave handler
+  const handleMouseLeave = () => {
+    setMousePosition({ x: 0, y: 0 });
+  };
+
+  // Fullscreen toggle
+  const toggleFullScreen = () => {
+    if (isFullScreen) {
+      document.exitFullscreen();
+    } else {
+      containerRef.current?.requestFullscreen().catch(err => {
+        console.error("Error attempting to enable full-screen mode:", err);
+      });
+    }
+    setIsFullScreen(!isFullScreen);
+  };
+
+  // Card flip
+  const handleFlip = () => {
+    setIsFlipped(!isFlipped);
+    showToast({
+      title: "Card rotated",
+      description: "The card has been rotated to the back side",
+      variant: "default",
+      duration: 2000
+    });
+  };
+
+  // Hotkeys
+  useHotkeys('f', handleFlip, { enableOnTags: 'INPUT,SELECT,TEXTAREA' });
+  useHotkeys('shift+f', toggleFullScreen, { enableOnTags: 'INPUT,SELECT,TEXTAREA' });
+
+  // Screenshot and download
+  const downloadScreenshot = async () => {
+    setIsDownloading(true);
+    try {
+      const screenShot = await takeScreenshot(screenshotRef.current);
+      if (screenShot) {
+        const downloadLink = document.createElement("a");
+        downloadLink.href = screenShot;
+        downloadLink.download = `${card.title}-card.jpeg`;
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+        showToast({
+          title: "Screenshot Downloaded",
+          description: "The screenshot has been downloaded successfully.",
+          duration: 3000,
+        });
+      } else {
+        showToast({
+          title: "Screenshot Failed",
+          description: "Failed to take the screenshot.",
+          variant: "destructive",
+          duration: 3000,
         });
       }
-      
-      if (!cardCopy.thumbnailUrl || cardCopy.thumbnailUrl === 'undefined') {
-        cardCopy.thumbnailUrl = cardCopy.imageUrl || FALLBACK_IMAGE_URL;
-      }
-      
-      if (!cardCopy.effects) {
-        cardCopy.effects = [];
-      }
-      
-      try {
-        const image = new Image();
-        image.crossOrigin = "anonymous";
-        image.onload = () => {
-          console.log(`Image loaded successfully: ${cardCopy.imageUrl}`);
-          setFrontTexture(cardCopy.imageUrl);
-          setProcessedCard(cardCopy);
-          setIsLoading(false);
-        };
-        image.onerror = () => {
-          console.error(`Failed to load image: ${cardCopy.imageUrl}, using fallback`);
-          cardCopy.imageUrl = FALLBACK_IMAGE_URL;
-          cardCopy.thumbnailUrl = FALLBACK_IMAGE_URL;
-          setFrontTexture(FALLBACK_IMAGE_URL);
-          setProcessedCard(cardCopy);
-          setIsLoading(false);
-        };
-        image.src = cardCopy.imageUrl;
-      } catch (error) {
-        console.error("Error during image validation:", error);
-        cardCopy.imageUrl = FALLBACK_IMAGE_URL;
-        cardCopy.thumbnailUrl = FALLBACK_IMAGE_URL;
-        setFrontTexture(FALLBACK_IMAGE_URL);
-        setProcessedCard(cardCopy);
-        setIsLoading(false);
-      }
+    } catch (error) {
+      console.error("Error downloading screenshot:", error);
+      showToast({
+        title: "Download Error",
+        description: "An error occurred while downloading the screenshot.",
+        variant: "destructive",
+        duration: 3000,
+      });
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
+  // Share dialog
+  const handleShare = () => {
+    setIsShareDialogOpen(true);
+  };
+
+  // Detect touch
+  useEffect(() => {
+    const handleTouch = () => {
+      setIsTouch(true);
     };
-    
-    validateCardImages();
-  }, [card, toast]);
-  
-  if (isLoading) {
-    return (
-      <div 
-        className="w-full h-full min-h-[600px] bg-gray-900 rounded-lg overflow-hidden flex items-center justify-center"
-      >
-        <div className="text-white text-center">
-          <div className="w-10 h-10 border-4 border-t-transparent border-white rounded-full animate-spin mx-auto mb-4"></div>
-          <p>Preparing immersive card viewer...</p>
-        </div>
-      </div>
-    );
-  }
-  
+
+    window.addEventListener('touchstart', handleTouch, { once: true });
+
+    return () => {
+      window.removeEventListener('touchstart', handleTouch);
+    };
+  }, []);
+
   return (
-    <div 
-      ref={containerRef} 
-      className="w-full h-full min-h-[600px] bg-gray-900 rounded-lg overflow-hidden"
+    <div
+      ref={containerRef}
+      className={cn("relative", className)}
     >
-      <Canvas shadows dpr={[1, 2]} gl={{ antialias: true, alpha: false }}>
-        <PerspectiveCamera makeDefault position={[0, 0, 6]} fov={45} />
-        
-        <ambientLight intensity={1.0} />
-        <spotLight 
-          position={[5, 5, 5]} 
-          angle={0.4} 
-          penumbra={1} 
-          intensity={2.0} 
-          castShadow 
-        />
-        <pointLight position={[-5, -5, -5]} color="#3050ff" intensity={1.0} />
-        <pointLight position={[5, -3, -5]} color="#ff3050" intensity={0.8} />
-        
-        <Environment preset="city" background={true} />
-        
-        <Card3DModel 
-          frontTextureUrl={frontTexture}
-          backTextureUrl={backTexture}
+      {/* Card Viewer */}
+      <div
+        ref={screenshotRef}
+        className="relative w-full h-full"
+        style={{
+          maxWidth: 'min(80vh, 600px)',
+          maxHeight: 'calc(min(80vh, 600px) * 1.4)',
+          margin: '0 auto',
+          perspective: '1000px',
+        }}
+      >
+        <CardCanvas
+          card={card}
           isFlipped={isFlipped}
           activeEffects={activeEffects}
-          effectIntensities={effectIntensities}
-          isAutoRotating={isAutoRotating} // Pass the prop through
+          containerRef={containerRef}
+          cardRef={cardRef}
+          onMouseMove={handleMouseMove}
+          onMouseLeave={handleMouseLeave}
+          effectSettings={effectSettings}
+          debug={debug}
         />
-        
-        <OrbitControls 
-          enableZoom={true}
-          enablePan={false}
-          enableRotate={true}
-          minDistance={4}
-          maxDistance={10}
-          target={[0, 0, 0]}
-          minPolarAngle={Math.PI / 6}
-          maxPolarAngle={Math.PI * 5/6}
-          autoRotate={isAutoRotating} // Use the prop for OrbitControls
-          autoRotateSpeed={2.0}
-        />
-      </Canvas>
-      
-      <div className="absolute top-0 left-0 right-0 p-2 text-white text-xs bg-black/30 pointer-events-none">
-        3D Viewer: {processedCard.id} - {processedCard.title || 'Untitled Card'}
       </div>
+
+      {/* Controls */}
+      <div className="absolute top-2 left-2 flex space-x-2 z-10">
+        <Button variant="outline" size="icon" onClick={handleFlip} aria-label="Flip Card">
+          <RotateCw className="h-4 w-4" />
+        </Button>
+        <Button variant="outline" size="icon" onClick={toggleFullScreen} aria-label="Toggle Fullscreen">
+          {isFullScreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+        </Button>
+      </div>
+
+      <div className="absolute top-2 right-2 flex space-x-2 z-10">
+        <Button variant="outline" size="icon" onClick={downloadScreenshot} disabled={isDownloading} aria-label="Download Card">
+          <Download className="h-4 w-4" />
+        </Button>
+        <Button variant="outline" size="icon" onClick={handleShare} aria-label="Share Card">
+          <Share2 className="h-4 w-4" />
+        </Button>
+      </div>
+
+      {/* Effect Toggles */}
+      <div className="absolute bottom-2 left-2 right-2 flex justify-center space-x-2 z-10">
+        <Button
+          variant={activeEffects.includes('Refractor') ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => toggleEffect('Refractor')}
+        >
+          Refractor
+        </Button>
+        <Button
+          variant={activeEffects.includes('Holographic') ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => toggleEffect('Holographic')}
+        >
+          Holographic
+        </Button>
+        <Button
+          variant={activeEffects.includes('Gold Foil') ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => toggleEffect('Gold Foil')}
+        >
+          Gold Foil
+        </Button>
+      </div>
+
+      <ShareDialog
+        isOpen={isShareDialogOpen}
+        onClose={() => setIsShareDialogOpen(false)}
+        title={card.title}
+        url={window.location.href}
+        imageUrl={card.imageUrl}
+      />
     </div>
   );
 };

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -33,7 +32,7 @@ const SampleCardsButton: React.FC<SampleCardsButtonProps> = ({
       const addedCards = await addSampleCards(addCard);
       
       if (addedCards.length > 0) {
-        toast({
+        showToast({
           title: "Success",
           description: `Added ${addedCards.length} sample cards to your collection!`,
           variant: "success"
@@ -43,7 +42,7 @@ const SampleCardsButton: React.FC<SampleCardsButtonProps> = ({
           onComplete();
         }
       } else {
-        toast({
+        showToast({
           title: "Error",
           description: "Failed to add sample cards",
           variant: "destructive"
@@ -51,7 +50,7 @@ const SampleCardsButton: React.FC<SampleCardsButtonProps> = ({
       }
     } catch (error) {
       console.error('Error adding sample cards:', error);
-      toast({
+      showToast({
         title: "Error",
         description: "An unexpected error occurred while adding sample cards",
         variant: "destructive"
