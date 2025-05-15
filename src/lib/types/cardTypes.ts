@@ -1,4 +1,3 @@
-
 /**
  * Consolidated Card Types for Cardshow (CRD)
  * This file serves as the central source of truth for all card-related types
@@ -273,6 +272,22 @@ export interface BaseCard extends BaseEntity {
  * Main Card interface that can be extended for specific use cases
  */
 export interface Card extends BaseCard {}
+
+/**
+ * Card template definition for template system
+ */
+export interface CardTemplate {
+  id: string;
+  name: string;
+  description?: string;
+  thumbnail: string;
+  category: string;
+  designDefaults: {
+    cardStyle: Partial<CardStyle>;
+    textStyle?: Partial<TextStyle>;
+    effects?: string[];
+  };
+}
 
 // Export types from enhancedCardTypes using export type for isolatedModules compatibility
 export type { EnhancedCard, Series, Deck } from './enhancedCardTypes';

@@ -6,7 +6,7 @@ import { Card } from '@/lib/types/cardTypes';
 import { sampleCards } from '@/lib/data/sampleCards';
 import { useToast } from '@/hooks/use-toast';
 import { adaptCardToSchema } from '@/lib/adapters/cardAdapter';
-import { showToast } from '@/lib/adapters/toastAdapter';
+import { createToast } from '@/types/toast';
 
 // Define a compatibile default design metadata constant
 const DEFAULT_DESIGN_METADATA = {
@@ -113,11 +113,11 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
             processedCard.thumbnailUrl = '/images/card-placeholder.png';
             setCurrentCard(processedCard as Card);
             setIsLoading(false);
-            toast({
+            toast(createToast({
               title: "Image Error",
               description: "Could not load the card image. Using a fallback image instead.",
               variant: "destructive"
-            });
+            }));
           };
           img.src = processedCard.imageUrl;
         } else {

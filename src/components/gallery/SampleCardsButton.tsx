@@ -45,8 +45,8 @@ const SampleCardsButton: React.FC<SampleCardsButtonProps> = ({ variant = 'defaul
             titleWeight: 'bold',
             descriptionColor: '#333333'
           },
-          marketMetadata: {},
-          cardMetadata: {}
+          cardMetadata: {},
+          marketMetadata: {}
         }
       },
       {
@@ -75,8 +75,8 @@ const SampleCardsButton: React.FC<SampleCardsButtonProps> = ({ variant = 'defaul
             titleWeight: 'bold',
             descriptionColor: '#333333'
           },
-          marketMetadata: {},
-          cardMetadata: {}
+          cardMetadata: {},
+          marketMetadata: {}
         }
       }
     ];
