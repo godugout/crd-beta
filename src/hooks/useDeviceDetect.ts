@@ -1,95 +1,151 @@
 
 import { useState, useEffect } from 'react';
 
-interface DeviceInfo {
+interface DeviceCapabilities {
   isMobile: boolean;
   isTablet: boolean;
   isDesktop: boolean;
-  isLowEndDevice: boolean;
-  canHandleComplexLighting: boolean;
+  isHighPerformance: boolean;
+  supportsWebGL2: boolean;
+  supportsWebGPU: boolean;
+  hasTouchScreen: boolean;
+  pixelRatio: number;
+  screenWidth: number;
+  screenHeight: number;
+  connection: {
+    effectiveType: string;
+    saveData: boolean;
+  };
 }
 
-export const useDeviceDetect = (): DeviceInfo => {
-  const [deviceInfo, setDeviceInfo] = useState<DeviceInfo>({
+export function useDeviceDetect(): DeviceCapabilities {
+  const [capabilities, setCapabilities] = useState<DeviceCapabilities>({
     isMobile: false,
     isTablet: false,
     isDesktop: true,
-    isLowEndDevice: false,
-    canHandleComplexLighting: true
+    isHighPerformance: true,
+    supportsWebGL2: true,
+    supportsWebGPU: false,
+    hasTouchScreen: false,
+    pixelRatio: 1,
+    screenWidth: 1920,
+    screenHeight: 1080,
+    connection: {
+      effectiveType: '4g',
+      saveData: false
+    }
   });
-  
+
   useEffect(() => {
-    const checkDeviceCapabilities = () => {
-      // Check screen size
-      const width = window.innerWidth;
-      const isMobile = width <= 768;
-      const isTablet = width > 768 && width <= 1024;
-      const isDesktop = width > 1024;
+    const detectCapabilities = () => {
+      // Check for mobile/tablet
+      const userAgent = navigator.userAgent;
+      const isMobileDevice = /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+      const isTabletDevice = /iPad|Tablet|PlayBook|Silk|Android(?!.*Mobile)/i.test(userAgent);
       
-      // Check for low-end devices
-      const isLowEndDevice = detectLowEndDevice();
+      // Screen dimensions
+      const screenWidth = window.innerWidth;
+      const screenHeight = window.innerHeight;
+      const devicePixelRatio = window.devicePixelRatio || 1;
       
-      // Determine if device can handle complex lighting
-      const canHandleComplexLighting = isDesktop || (isTablet && !isLowEndDevice);
+      // Check for touch screen
+      const hasTouchScreen = ('ontouchstart' in window) || 
+                            (navigator.maxTouchPoints > 0) || 
+                            ('msMaxTouchPoints' in navigator && (navigator as any).msMaxTouchPoints > 0);
       
-      setDeviceInfo({
-        isMobile,
-        isTablet,
-        isDesktop,
-        isLowEndDevice,
-        canHandleComplexLighting
+      // Network information
+      const connection = (navigator as any).connection || 
+                        (navigator as any).mozConnection || 
+                        (navigator as any).webkitConnection || {
+                          effectiveType: '4g',
+                          saveData: false
+                        };
+      
+      // Performance detection logic
+      const isLowPerformanceDevice = () => {
+        // Mobile or tablet with poor touch events generally means lower performance
+        if ((isMobileDevice || isTabletDevice) && hasTouchScreen) {
+          return true;
+        }
+        
+        // Low pixel ratio often indicates lower-end devices
+        if (devicePixelRatio < 2 && screenWidth < 1366) {
+          return true;
+        }
+        
+        // Check for WebGL capabilities
+        try {
+          const canvas = document.createElement('canvas');
+          // Fix: Cast to WebGLRenderingContext to access WebGL-specific properties
+          const gl = (canvas.getContext('webgl') || 
+                    canvas.getContext('experimental-webgl')) as WebGLRenderingContext | null;
+          
+          if (!gl) {
+            return true; // No WebGL support
+          }
+          
+          // Now we can safely access WebGL properties
+          const maxTextureSize = gl.getParameter(gl.MAX_TEXTURE_SIZE);
+          if (maxTextureSize < 4096) {
+            return true; // Limited texture support
+          }
+          
+        } catch (e) {
+          return true; // Error checking WebGL means we should assume low performance
+        }
+        
+        return false;
+      };
+      
+      // WebGL2 support
+      let webGL2Support = false;
+      try {
+        const canvas = document.createElement('canvas');
+        webGL2Support = !!canvas.getContext('webgl2');
+      } catch (e) {
+        webGL2Support = false;
+      }
+      
+      // WebGPU support (experimental)
+      const webGPUSupport = 'gpu' in navigator;
+      
+      setCapabilities({
+        isMobile: isMobileDevice && !isTabletDevice,
+        isTablet: isTabletDevice,
+        isDesktop: !isMobileDevice && !isTabletDevice,
+        isHighPerformance: !isLowPerformanceDevice(),
+        supportsWebGL2: webGL2Support,
+        supportsWebGPU: webGPUSupport,
+        hasTouchScreen,
+        pixelRatio: devicePixelRatio,
+        screenWidth,
+        screenHeight,
+        connection: {
+          effectiveType: connection.effectiveType || '4g',
+          saveData: connection.saveData || false
+        }
       });
     };
     
-    // Try to detect if the device is low-end
-    const detectLowEndDevice = (): boolean => {
-      // Check for navigator.deviceMemory (Chrome)
-      if ('deviceMemory' in navigator) {
-        const memory = (navigator as any).deviceMemory;
-        if (memory && memory < 4) {
-          return true;
-        }
-      }
-      
-      // Check for navigator.hardwareConcurrency (CPU cores)
-      if ('hardwareConcurrency' in navigator) {
-        const cores = navigator.hardwareConcurrency;
-        if (cores && cores <= 2) {
-          return true;
-        }
-      }
-      
-      // Mobile heuristic - most mobile browsers have poor WebGL performance
-      const userAgent = navigator.userAgent.toLowerCase();
-      const isMobileDevice = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
-      
-      // Check for WebGL capabilities
-      try {
-        const canvas = document.createElement('canvas');
-        // Fix: Cast to WebGLRenderingContext to access WebGL-specific properties
-        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl') as WebGLRenderingContext | null;
-        if (!gl) {
-          return true; // No WebGL support
-        }
-        
-        // Now we can safely access WebGL properties
-        const maxTextureSize = gl.getParameter(gl.MAX_TEXTURE_SIZE);
-        if (maxTextureSize < 4096) {
-          return true; // Limited texture support
-        }
-        
-        return isMobileDevice; // Default to treating mobile as low-end unless proven otherwise
-      } catch (e) {
-        return true; // Error occurred, assume it's a low-end device
+    detectCapabilities();
+    
+    // Update on resize for responsive capabilities
+    window.addEventListener('resize', detectCapabilities);
+    
+    // If connection API is available, listen for changes
+    if ((navigator as any).connection) {
+      (navigator as any).connection.addEventListener('change', detectCapabilities);
+    }
+    
+    return () => {
+      window.removeEventListener('resize', detectCapabilities);
+      if ((navigator as any).connection) {
+        (navigator as any).connection.removeEventListener('change', detectCapabilities);
       }
     };
-    
-    checkDeviceCapabilities();
-    
-    // Update on resize
-    window.addEventListener('resize', checkDeviceCapabilities);
-    return () => window.removeEventListener('resize', checkDeviceCapabilities);
   }, []);
   
-  return deviceInfo;
-};
+  return capabilities;
+}
+
+export default useDeviceDetect;
