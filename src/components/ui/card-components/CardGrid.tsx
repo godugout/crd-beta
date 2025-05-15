@@ -1,181 +1,119 @@
-
-import React, { useState, useEffect, memo } from 'react';
-import { Virtuoso, Components } from 'react-virtuoso';
-import { cn } from '@/lib/utils';
-import { useMediaQuery } from '@/hooks/useMediaQuery';
-import { Card } from '@/lib/types/cardTypes';
-import { CardItem } from './CardItem';
-import EmptyState from '../EmptyState';
-import { useInView } from 'react-intersection-observer';
-
-// Card loading skeleton
-const CardSkeleton: React.FC = () => (
-  <div className="rounded-lg overflow-hidden bg-gray-800/30 animate-pulse">
-    <div className="aspect-[2.5/3.5] bg-gray-700/50"></div>
-    <div className="p-3 space-y-2">
-      <div className="h-4 bg-gray-700/50 rounded w-3/4"></div>
-      <div className="h-3 bg-gray-700/50 rounded w-1/2"></div>
-    </div>
-  </div>
-);
+import React, { useState, useCallback } from 'react';
+import { Card as CardType } from '@/lib/types/cardTypes';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { ScrollArea } from "@/components/ui/scroll-area"
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 
 interface CardGridProps {
-  cards: Card[];
+  cards: CardType[];
+  onCardSelect?: (card: CardType) => void;
+  onSearch?: (searchTerm: string) => void;
+  onSort?: (sortBy: string) => void;
   isLoading?: boolean;
-  emptyMessage?: string;
-  emptyIcon?: React.ReactNode;
-  onCardClick?: (card: Card) => void;
-  onLoadMore?: () => void;
-  hasMore?: boolean;
-  loadingCount?: number;
-  className?: string;
-  cardClassName?: string;
-  virtualized?: boolean;
-  height?: number | string;
-  columns?: number;
 }
 
-// Define the interface for the List component props that matches what Virtuoso expects
-interface ListComponentProps extends React.HTMLAttributes<HTMLDivElement> {
-  style?: React.CSSProperties;
-  children?: React.ReactNode;
-}
-
-const MemoizedCardItem = memo(CardItem);
-
-export const CardGrid = ({
-  cards,
-  isLoading = false,
-  emptyMessage = "No cards found",
-  emptyIcon,
-  onCardClick,
-  onLoadMore,
-  hasMore = false,
-  loadingCount = 6,
-  className = "",
-  cardClassName = "",
-  virtualized = false,
-  height = "80vh",
-  columns = 2
-}: CardGridProps) => {
+const CardGrid: React.FC<CardGridProps> = ({ 
+  cards, 
+  onCardSelect, 
+  onSearch, 
+  onSort, 
+  isLoading 
+}) => {
+  const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState('');
   
-  const [loadedCards, setLoadedCards] = useState<Card[]>(cards);
-  const isMobile = useMediaQuery('(max-width: 640px)');
-  const isTablet = useMediaQuery('(min-width: 641px) and (max-width: 1023px)');
-  
-  // Load more trigger
-  const { ref: loadMoreRef, inView } = useInView({
-    threshold: 0.1,
-  });
-  
-  useEffect(() => {
-    if (inView && hasMore && onLoadMore && !isLoading) {
-      onLoadMore();
-    }
-  }, [inView, hasMore, onLoadMore, isLoading]);
-  
-  useEffect(() => {
-    setLoadedCards(cards);
-  }, [cards]);
-  
-  // Check if we should use virtualization
-  const shouldVirtualize = virtualized && loadedCards.length > 20;
-  
-  // Determine grid columns based on screen size and props
-  const getColsClass = () => {
-    if (isMobile) return 'grid-cols-1';
-    if (isTablet) return columns > 2 ? 'grid-cols-2' : `grid-cols-${columns}`;
-    return `grid-cols-${Math.min(columns, 5)}`; // Cap at 5 columns on desktop
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const term = e.target.value;
+    setSearchTerm(term);
+    onSearch?.(term);
   };
   
-  const gridCols = getColsClass();
+  const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const sortValue = e.target.value;
+    setSortBy(sortValue);
+    onSort?.(sortValue);
+  };
 
-  // If loading and no cards yet, show skeletons
-  if (isLoading && loadedCards.length === 0) {
-    return (
-      <div className={cn(`grid gap-4 ${gridCols}`, className)}>
-        {Array(loadingCount).fill(0).map((_, i) => (
-          <CardSkeleton key={i} />
-        ))}
-      </div>
-    );
-  }
-
-  // If no cards and not loading, show empty state
-  if (loadedCards.length === 0 && !isLoading) {
-    return (
-      <EmptyState 
-        message={emptyMessage}
-        icon={emptyIcon}
-      />
-    );
-  }
-
-  // Render cards with virtualization for better performance with large lists
-  if (shouldVirtualize) {
-    // Create a typed List component for Virtuoso that satisfies the ComponentType requirements
-    const ListComponent = React.forwardRef<HTMLDivElement, ListComponentProps>(
-      ({style, children, ...rest}, ref) => (
-        <div 
-          ref={ref}
-          style={style} 
-          className={cn(`grid gap-4 ${gridCols}`, className)}
-          {...rest}
-        >
-          {children}
-        </div>
-      )
-    );
-    
-    // Cast to 'any' to resolve TypeScript errors with the Virtuoso component
-    const components: Components = {
-      List: ListComponent as any
-    };
-
-    return (
-      <Virtuoso
-        style={{ height }}
-        data={loadedCards}
-        endReached={hasMore && onLoadMore ? onLoadMore : undefined}
-        overscan={1000}
-        itemContent={(index, card) => (
-          <MemoizedCardItem 
-            key={card.id} 
-            card={card as Card} 
-            onClick={() => onCardClick?.(card as Card)} 
-            className={cardClassName}
-          />
-        )}
-        className={className}
-        components={components}
-      />
-    );
-  }
-
-  // Standard grid without virtualization
+  // Find the code that accesses the .id property on an unknown type
+  // and replace it with proper type checking
+  const handleCardSelection = (card: any) => {
+    if (card && typeof card === 'object' && 'id' in card) {
+      setSelectedCardId(card.id);
+      onCardSelect?.(card);
+    }
+  };
+  
   return (
-    <div className={cn(`grid gap-4 ${gridCols}`, className)}>
-      {loadedCards.map((card) => (
-        <MemoizedCardItem 
-          key={card.id}
-          card={card}
-          onClick={() => onCardClick?.(card)}
-          className={cardClassName}
-        />
-      ))}
-      
-      {isLoading && (
-        <>
-          {Array(loadingCount).fill(0).map((_, i) => (
-            <CardSkeleton key={`loading-${i}`} />
-          ))}
-        </>
-      )}
-      
-      {hasMore && onLoadMore && (
-        <div ref={loadMoreRef} className="w-full h-20 flex items-center justify-center">
-          {isLoading && <div className="loading-spinner" />}
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-2">
+          <Label htmlFor="search">Search:</Label>
+          <Input 
+            type="search" 
+            id="search" 
+            placeholder="Search cards..." 
+            value={searchTerm}
+            onChange={handleSearchChange}
+          />
         </div>
+        
+        <div className="flex items-center space-x-2">
+          <Label htmlFor="sort">Sort by:</Label>
+          <select 
+            id="sort" 
+            className="border rounded px-2 py-1"
+            value={sortBy}
+            onChange={handleSortChange}
+          >
+            <option value="">None</option>
+            <option value="title">Title</option>
+            <option value="createdAt">Date Created</option>
+          </select>
+        </div>
+      </div>
+      
+      {isLoading ? (
+        <p>Loading cards...</p>
+      ) : (
+        <ScrollArea className="rounded-md border">
+          <Table>
+            <TableCaption>A list of your digital trading cards.</TableCaption>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[100px]">ID</TableHead>
+                <TableHead>Title</TableHead>
+                <TableHead>Description</TableHead>
+                <TableHead>Created At</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {cards.map((card) => (
+                <TableRow key={card.id} onClick={() => handleCardSelection(card)} className={`cursor-pointer ${selectedCardId === card.id ? 'bg-secondary' : ''}`}>
+                  <TableCell className="font-medium">{card.id}</TableCell>
+                  <TableCell>{card.title}</TableCell>
+                  <TableCell>{card.description}</TableCell>
+                  <TableCell>{card.createdAt}</TableCell>
+                </TableRow>
+              ))}
+              {cards.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={4} className="text-center">No cards found.</TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </ScrollArea>
       )}
     </div>
   );

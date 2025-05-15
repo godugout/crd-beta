@@ -1,10 +1,11 @@
+
 import * as React from "react"
 import * as ToastPrimitives from "@radix-ui/react-toast"
 import { cva } from "class-variance-authority"
 import { X } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { toastStyles } from "@/config/toast"
-import type { ToasterToastWithStatus } from "@/types/toast"
+import type { ToasterToast } from "@/types/toast"
 
 const ToastProvider = ToastPrimitives.Provider
 
@@ -25,7 +26,7 @@ ToastViewport.displayName = ToastPrimitives.Viewport.displayName
 
 const Toast = React.forwardRef<
   React.ElementRef<typeof ToastPrimitives.Root>,
-  React.ComponentPropsWithoutRef<typeof ToastPrimitives.Root> & Pick<ToasterToastWithStatus, "variant">
+  React.ComponentPropsWithoutRef<typeof ToastPrimitives.Root> & Pick<ToasterToast, "variant">
 >(({ className, variant, ...props }, ref) => {
   return (
     <ToastPrimitives.Root
@@ -95,12 +96,11 @@ const ToastDescription = React.forwardRef<
 ))
 ToastDescription.displayName = ToastPrimitives.Description.displayName
 
-type ToastProps = React.ComponentPropsWithoutRef<typeof Toast>
-
-type ToastActionElement = React.ReactElement<typeof ToastAction>
+export type { 
+  ToasterToast as ToastProps
+}
 
 export {
-  type ToasterToastWithStatus as ToastProps,
   ToastProvider,
   ToastViewport,
   Toast,

@@ -44,6 +44,12 @@ export interface MaterialSimulation {
   reflectivity: number;
   emissive: string;
   envMapIntensity: number;
+  
+  // Additional properties needed by MaterialSimulator component
+  textureUrl?: string;
+  baseColor?: string;
+  type?: string;
+  weathering?: number;
 }
 
 // Core effect engine interfaces

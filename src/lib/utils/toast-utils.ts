@@ -1,43 +1,33 @@
 
-import { toast } from "sonner";
-import { v4 as uuidv4 } from 'uuid';
+import { toast } from '@/hooks/use-toast';
+import { ToastVariant } from "@/types/toast";
 
-// Helper to create toast with proper ID
-export const createToast = (config: {
-  title: string;
-  description?: string;
-  variant?: "success" | "error" | "warning" | "info" | "destructive";
-  duration?: number;
-}) => {
-  const { title, description, variant, duration } = config;
-  
-  // Convert variant if needed (for compatibility)
-  let toastVariant = variant;
-  if (variant === "error") {
-    toastVariant = "destructive";
-  }
-  
-  return {
-    id: uuidv4(),
-    title,
-    description,
-    variant: toastVariant,
-    ...(duration ? { duration } : {})
-  };
-};
-
-// Toast utility with predefined methods
 export const toastUtils = {
-  success: (title: string, description?: string) => {
-    toast(createToast({ title, description, variant: "success" }));
+  show: (title: string, description: string, variant: ToastVariant = 'default', duration?: number) => {
+    return toast({
+      id: Math.random().toString(36).substring(2, 9),
+      title,
+      description,
+      variant,
+      duration
+    });
   },
-  error: (title: string, description?: string) => {
-    toast(createToast({ title, description, variant: "error" }));
+  
+  success: (title: string, description: string, duration?: number) => {
+    return toastUtils.show(title, description, 'success', duration);
   },
-  warning: (title: string, description?: string) => {
-    toast(createToast({ title, description, variant: "warning" }));
+  
+  error: (title: string, description: string, duration?: number) => {
+    return toastUtils.show(title, description, 'error', duration);
   },
-  info: (title: string, description?: string) => {
-    toast(createToast({ title, description, variant: "info" }));
+  
+  warning: (title: string, description: string, duration?: number) => {
+    return toastUtils.show(title, description, 'warning', duration);
+  },
+  
+  info: (title: string, description: string, duration?: number) => {
+    return toastUtils.show(title, description, 'info', duration);
   }
 };
+
+export default toastUtils;

@@ -1,108 +1,86 @@
 
-import React, { forwardRef } from 'react';
+import React from 'react';
+import { cn } from '@/lib/utils';
 import { Card } from '@/lib/types/cardTypes';
 
 interface CardPreviewProps {
-  card: Partial<Card>;
+  card?: Partial<Card>;
   className?: string;
+  effectClasses?: string;
 }
 
-const CardPreview = forwardRef<HTMLDivElement, CardPreviewProps>(({ card, className }, ref) => {
-  // Safely access nested properties with fallbacks
+const CardPreview: React.FC<CardPreviewProps> = ({
+  card,
+  className,
+  effectClasses = ''
+}) => {
+  if (!card || !card.imageUrl) {
+    return (
+      <div className={cn(
+        "aspect-[2.5/3.5] bg-gray-100 rounded-lg border flex flex-col items-center justify-center text-gray-400",
+        className
+      )}>
+        <p className="text-center px-4">
+          Upload an image to see your card preview
+        </p>
+      </div>
+    );
+  }
+  
+  // Use safe access for card style properties with defaults
   const cardStyle = card.designMetadata?.cardStyle || {};
   const textStyle = card.designMetadata?.textStyle || {};
   
-  // Card style properties with fallbacks
-  const borderRadius = cardStyle.borderRadius || '8px';
-  const borderWidth = cardStyle.borderWidth || 2;
-  const borderStyle = 'solid';
-  const borderColor = cardStyle.borderColor || '#000000';
-  const backgroundColor = cardStyle.backgroundColor || '#FFFFFF';
-  
-  // Text style properties with fallbacks
-  const titleColor = textStyle.titleColor || '#000000';
-  const titleAlignment = textStyle.titleAlignment || 'center';
-  const titleWeight = textStyle.titleWeight || 'bold';
-  const descriptionColor = textStyle.descriptionColor || '#333333';
-
   return (
-    <div 
-      ref={ref}
-      className={`relative overflow-hidden ${className}`}
-      style={{
-        borderRadius,
-        borderWidth,
-        borderStyle,
-        borderColor,
-        backgroundColor,
-        transition: 'all 0.3s ease',
-        aspectRatio: '5/7',
-      }}
-    >
-      {/* Card Image */}
-      {card.imageUrl && (
-        <div className="w-full h-3/5 overflow-hidden">
+    <div className="relative">
+      <div 
+        className={cn(
+          "aspect-[2.5/3.5] rounded-lg overflow-hidden shadow-xl transition-all duration-300",
+          effectClasses,
+          className
+        )}
+        style={{
+          backgroundColor: cardStyle.backgroundColor || '#FFFFFF',
+          borderRadius: cardStyle.borderRadius || '8px',
+          borderWidth: '2px',
+          borderStyle: 'solid',
+          borderColor: cardStyle.borderColor || '#000000',
+        }}
+      >
+        <div className="relative w-full h-full">
           <img 
             src={card.imageUrl} 
-            alt={card.title || 'Card'} 
+            alt={card.title || "Card preview"} 
             className="w-full h-full object-cover"
           />
-        </div>
-      )}
-      
-      {/* Card Title */}
-      <div className="p-4">
-        <h3 
-          className="text-xl font-semibold mb-2"
-          style={{ 
-            color: titleColor,
-            textAlign: titleAlignment as any,
-            fontWeight: titleWeight,
-          }}
-        >
-          {card.title || 'Untitled Card'}
-        </h3>
-        
-        {/* Card Description */}
-        {card.description && (
-          <p 
-            className="text-sm"
-            style={{ color: descriptionColor }}
-          >
-            {card.description}
-          </p>
-        )}
-        
-        {/* Card Details */}
-        <div className="mt-3 text-xs space-y-1">
-          {card.player && <div><span className="opacity-70">Player: </span>{card.player}</div>}
-          {card.team && <div><span className="opacity-70">Team: </span>{card.team}</div>}
-          {card.year && <div><span className="opacity-70">Year: </span>{card.year}</div>}
-        </div>
-        
-        {/* Card Tags */}
-        {card.tags && card.tags.length > 0 && (
-          <div className="mt-3 flex flex-wrap gap-1">
-            {card.tags.map((tag, index) => (
-              <span 
-                key={index}
-                className="px-2 py-0.5 bg-gray-100 rounded-full text-xs"
+          
+          {card.title && (
+            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-3">
+              <h3 className="text-white text-sm font-bold truncate"
+                style={{ 
+                  color: textStyle.titleColor || '#FFFFFF',
+                  fontWeight: textStyle.titleWeight || 'bold',
+                  textAlign: (textStyle.titleAlignment as any) || 'center'
+                }}
               >
-                {tag}
-              </span>
-            ))}
-          </div>
-        )}
+                {card.title}
+              </h3>
+              {card.player && (
+                <p className="text-white/80 text-xs truncate"
+                  style={{ 
+                    color: textStyle.descriptionColor || '#DDDDDD',
+                  }}
+                >
+                  {card.player}
+                  {card.team && ` • ${card.team}`}
+                </p>
+              )}
+            </div>
+          )}
+        </div>
       </div>
-      
-      {/* Effects Overlay */}
-      {card.effects && card.effects.length > 0 && (
-        <div className={`absolute inset-0 pointer-events-none ${card.effects.join(' ')}`} />
-      )}
     </div>
   );
-});
-
-CardPreview.displayName = 'CardPreview';
+};
 
 export default CardPreview;

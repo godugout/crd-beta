@@ -3,6 +3,5 @@ export { default } from './useCardEffects';
 export type { 
   CardEffect, 
   CardEffectSettings as EffectSettings,
-  CardEffect as CardEffectsResult
+  CardEffectsResult
 } from '@/lib/types/cardEffects';
-

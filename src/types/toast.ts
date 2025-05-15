@@ -13,6 +13,15 @@ export interface ToasterToast {
   variant?: ToastVariant
   duration?: number
   open?: boolean
+  onOpenChange?: (open: boolean) => void
+}
+
+export interface ToasterToastWithId extends ToasterToast {
+  id: string
+}
+
+export interface ToasterToastWithStatus extends ToasterToast {
+  status?: "loading" | "success" | "error"
 }
 
 export type Toast = {
@@ -25,3 +34,19 @@ export type Toast = {
   action?: () => void
   open?: boolean
 }
+
+// Helper function to create toast
+export const createToast = (
+  title: string,
+  description?: string,
+  variant: ToastVariant = "default",
+  duration?: number
+): ToasterToast => {
+  return {
+    id: Math.random().toString(36).substring(2, 9),
+    title,
+    description,
+    variant,
+    duration
+  };
+};

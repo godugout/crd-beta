@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/toast"
 import { toastIconConfig } from "@/config/toast"
 import { ToastIcons } from "./toast/icons"
-import type { ToasterToastWithStatus } from "@/types/toast"
+import type { ToasterToast } from "@/types/toast"
 
 export function Toaster() {
   const { toasts } = useToast()
