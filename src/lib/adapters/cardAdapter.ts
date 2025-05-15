@@ -1,95 +1,123 @@
 
-import { Card } from '@/types/card';
+import { Card as CardType } from '@/lib/types/cardTypes';
+import { Card as CardSchema } from '@/lib/schema/types';
+import { Card as CardData } from '@/types/card';
 
 // Default values for required fields
-const DEFAULT_CARD: Partial<Card> = {
-  tags: [],
-  effects: [],
-  designMetadata: {
-    cardStyle: {
-      borderRadius: '12px',
-      borderColor: '#000000',
-      borderWidth: '1px',
-      backgroundColor: '#ffffff',
-    },
-    textStyle: {
-      titleFont: 'Inter',
-      titleSize: '24px',
-      titleColor: '#000000',
-      descriptionFont: 'Inter',
-      descriptionSize: '16px',
-      descriptionColor: '#555555',
-    }
+const DEFAULT_CARD_STYLE = {
+  template: 'classic',
+  effect: 'none',
+  borderRadius: '8px',
+  borderColor: '#000000',
+  shadowColor: 'rgba(0,0,0,0.2)',
+  frameWidth: 2,
+  frameColor: '#000000',
+};
+
+const DEFAULT_TEXT_STYLE = {
+  titleColor: '#000000',
+  titleAlignment: 'center',
+  titleWeight: 'bold',
+  descriptionColor: '#333333',
+};
+
+const DEFAULT_DESIGN_METADATA = {
+  cardStyle: DEFAULT_CARD_STYLE,
+  textStyle: DEFAULT_TEXT_STYLE,
+  cardMetadata: {
+    edition: 'standard',
+    series: 'base',
+    cardType: 'standard',
+  },
+  marketMetadata: {
+    price: 0,
+    currency: 'USD',
+    availableForSale: false,
+    editionSize: 0,
+    editionNumber: 0
   }
 };
 
 /**
- * Adapts any card-like object to conform to the Card interface
- * Ensures all required fields have valid values
+ * Adapts any card-like object to standardized Card type
  */
-export const adaptToCard = (data: Partial<Card>): Card => {
-  if (!data.id) {
-    throw new Error('Card must have an ID');
+export function adaptToCard(source: any): CardType {
+  if (!source) {
+    throw new Error('Cannot adapt null or undefined to Card');
   }
   
-  if (!data.imageUrl && !data.thumbnailUrl) {
-    console.warn(`Card ${data.id} has no image URL, using fallback`);
-  }
+  // Default fallback image
+  const fallbackImageUrl = '/images/card-placeholder.png';
   
-  // Merge with defaults and ensure required fields
-  return {
-    id: data.id,
-    title: data.title || 'Untitled Card',
-    description: data.description || '',
-    imageUrl: data.imageUrl || data.thumbnailUrl || '/placeholder-card.png',
-    thumbnailUrl: data.thumbnailUrl || data.imageUrl || '/placeholder-card.png',
-    tags: data.tags || DEFAULT_CARD.tags!,
-    player: data.player,
-    team: data.team,
-    year: data.year,
-    set: data.set,
-    effects: data.effects || DEFAULT_CARD.effects!,
-    effectSettings: data.effectSettings || {},
-    designMetadata: {
-      ...DEFAULT_CARD.designMetadata!,
-      ...(data.designMetadata || {})
-    },
-    userId: data.userId || 'anonymous',
-    createdAt: data.createdAt || new Date().toISOString(),
-    updatedAt: data.updatedAt || new Date().toISOString(),
-    viewCount: data.viewCount || 0,
-    reactions: data.reactions
+  // Start with base properties that should exist on all card types
+  const adaptedCard: CardType = {
+    id: source.id || crypto.randomUUID?.() || String(Date.now()),
+    title: source.title || source.name || 'Unnamed Card',
+    description: source.description || '',
+    imageUrl: source.imageUrl || source.image || fallbackImageUrl,
+    thumbnailUrl: source.thumbnailUrl || source.imageUrl || source.image || fallbackImageUrl,
+    tags: Array.isArray(source.tags) ? source.tags : [],
+    createdAt: source.createdAt || new Date().toISOString(),
+    updatedAt: source.updatedAt || new Date().toISOString(),
+    userId: source.userId || source.creatorId || 'anonymous',
+    effects: Array.isArray(source.effects) ? source.effects : [],
+    designMetadata: source.designMetadata || DEFAULT_DESIGN_METADATA,
   };
-};
-
-/**
- * Converts Card object to a simplified DTO for API transmission
- */
-export const cardToDto = (card: Card) => {
-  // Remove any heavy or sensitive data
-  const { reactions, ...cardDto } = card;
-  return cardDto;
-};
-
-/**
- * Creates a blank card template with default values
- */
-export const createBlankCard = (userId: string, partialCard: Partial<Card> = {}): Card => {
-  const id = crypto.randomUUID();
   
-  return adaptToCard({
-    id,
-    userId,
-    title: 'New Card',
-    description: '',
-    imageUrl: '/placeholder-card.png',
-    thumbnailUrl: '/placeholder-card.png',
-    tags: [],
-    effects: [],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    ...partialCard
-  });
-};
+  // Ensure designMetadata has all required nested objects
+  if (!adaptedCard.designMetadata.cardStyle) {
+    adaptedCard.designMetadata.cardStyle = DEFAULT_CARD_STYLE;
+  }
+  
+  if (!adaptedCard.designMetadata.textStyle) {
+    adaptedCard.designMetadata.textStyle = DEFAULT_TEXT_STYLE;
+  }
+  
+  if (!adaptedCard.designMetadata.cardMetadata) {
+    adaptedCard.designMetadata.cardMetadata = {
+      edition: 'standard',
+      series: 'base',
+      cardType: 'standard',
+    };
+  }
+  
+  if (!adaptedCard.designMetadata.marketMetadata) {
+    adaptedCard.designMetadata.marketMetadata = {
+      price: 0,
+      currency: 'USD',
+      availableForSale: false,
+      editionSize: 0,
+      editionNumber: 0
+    };
+  }
+  
+  // Copy over other potentially useful properties without type errors
+  if (source.player) adaptedCard.player = source.player;
+  if (source.team) adaptedCard.team = source.team;
+  if (source.year) adaptedCard.year = source.year;
+  if (source.set) adaptedCard.set = source.set;
+  if (source.fabricSwatches) adaptedCard.fabricSwatches = source.fabricSwatches;
+  
+  return adaptedCard;
+}
 
-export default { adaptToCard, cardToDto, createBlankCard };
+/**
+ * Adapts an array of card-like objects to standardized Card type
+ */
+export function adaptCardsArray(sources: any[]): CardType[] {
+  if (!Array.isArray(sources)) {
+    return [];
+  }
+  
+  return sources
+    .filter(source => source != null)
+    .map(source => {
+      try {
+        return adaptToCard(source);
+      } catch (error) {
+        console.error('Failed to adapt card:', error, source);
+        return null;
+      }
+    })
+    .filter((card): card is CardType => card !== null);
+}

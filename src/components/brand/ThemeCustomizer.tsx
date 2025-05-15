@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useBrandTheme, BrandTheme, defaultThemes } from '@/context/BrandThemeContext';
 import { v4 as uuidv4 } from 'uuid';
@@ -16,7 +17,7 @@ import {
   Image,
   RefreshCw
 } from 'lucide-react';
-import { toast } from 'sonner';
+import { toast } from '@/lib/utils/toast-utils';
 import ColorPicker from '@/components/ui/color-picker';
 
 interface ThemePreviewProps {
@@ -325,7 +326,7 @@ const ThemeCustomizer: React.FC = () => {
               <Label htmlFor="primaryColor">Primary Color</Label>
               <ColorPicker
                 id="primaryColor"
-                value={editingTheme.primaryColor}
+                color={editingTheme.primaryColor}
                 onChange={(value) => handleChangeThemeProperty('primaryColor', value)}
                 label="Primary Color"
               />
@@ -335,7 +336,7 @@ const ThemeCustomizer: React.FC = () => {
               <Label htmlFor="secondaryColor">Secondary Color</Label>
               <ColorPicker
                 id="secondaryColor"
-                value={editingTheme.secondaryColor}
+                color={editingTheme.secondaryColor}
                 onChange={(value) => handleChangeThemeProperty('secondaryColor', value)}
                 label="Secondary Color"
               />
@@ -345,7 +346,7 @@ const ThemeCustomizer: React.FC = () => {
               <Label htmlFor="accentColor">Accent Color</Label>
               <ColorPicker
                 id="accentColor"
-                value={editingTheme.accentColor}
+                color={editingTheme.accentColor}
                 onChange={(value) => handleChangeThemeProperty('accentColor', value)}
                 label="Accent Color"
               />
@@ -355,7 +356,7 @@ const ThemeCustomizer: React.FC = () => {
               <Label htmlFor="backgroundColor">Background Color</Label>
               <ColorPicker
                 id="backgroundColor"
-                value={editingTheme.backgroundColor}
+                color={editingTheme.backgroundColor}
                 onChange={(value) => handleChangeThemeProperty('backgroundColor', value)}
                 label="Background Color"
               />
@@ -365,7 +366,7 @@ const ThemeCustomizer: React.FC = () => {
               <Label htmlFor="textColor">Text Color</Label>
               <ColorPicker
                 id="textColor"
-                value={editingTheme.textColor}
+                color={editingTheme.textColor}
                 onChange={(value) => handleChangeThemeProperty('textColor', value)}
                 label="Text Color"
               />
@@ -375,7 +376,7 @@ const ThemeCustomizer: React.FC = () => {
               <Label htmlFor="cardBackgroundColor">Card Background</Label>
               <ColorPicker
                 id="cardBackgroundColor"
-                value={editingTheme.cardBackgroundColor}
+                color={editingTheme.cardBackgroundColor}
                 onChange={(value) => handleChangeThemeProperty('cardBackgroundColor', value)}
                 label="Card Background"
               />
@@ -385,7 +386,7 @@ const ThemeCustomizer: React.FC = () => {
               <Label htmlFor="headerBackgroundColor">Header Background</Label>
               <ColorPicker
                 id="headerBackgroundColor"
-                value={editingTheme.headerBackgroundColor}
+                color={editingTheme.headerBackgroundColor}
                 onChange={(value) => handleChangeThemeProperty('headerBackgroundColor', value)}
                 label="Header Background"
               />
@@ -395,7 +396,7 @@ const ThemeCustomizer: React.FC = () => {
               <Label htmlFor="navTextColor">Navigation Text</Label>
               <ColorPicker
                 id="navTextColor"
-                value={editingTheme.navTextColor}
+                color={editingTheme.navTextColor}
                 onChange={(value) => handleChangeThemeProperty('navTextColor', value)}
                 label="Navigation Text"
               />
@@ -405,7 +406,7 @@ const ThemeCustomizer: React.FC = () => {
               <Label htmlFor="buttonPrimaryColor">Button Primary</Label>
               <ColorPicker
                 id="buttonPrimaryColor"
-                value={editingTheme.buttonPrimaryColor}
+                color={editingTheme.buttonPrimaryColor}
                 onChange={(value) => handleChangeThemeProperty('buttonPrimaryColor', value)}
                 label="Button Primary"
               />
@@ -415,7 +416,7 @@ const ThemeCustomizer: React.FC = () => {
               <Label htmlFor="buttonSecondaryColor">Button Secondary</Label>
               <ColorPicker
                 id="buttonSecondaryColor"
-                value={editingTheme.buttonSecondaryColor}
+                color={editingTheme.buttonSecondaryColor}
                 onChange={(value) => handleChangeThemeProperty('buttonSecondaryColor', value)}
                 label="Button Secondary"
               />
@@ -425,7 +426,7 @@ const ThemeCustomizer: React.FC = () => {
               <Label htmlFor="buttonTextColor">Button Text</Label>
               <ColorPicker
                 id="buttonTextColor"
-                value={editingTheme.buttonTextColor}
+                color={editingTheme.buttonTextColor}
                 onChange={(value) => handleChangeThemeProperty('buttonTextColor', value)}
                 label="Button Text"
               />

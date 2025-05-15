@@ -1,5 +1,30 @@
 
-import { CardStyle, TextStyle } from '@/components/card-editor/types';
+// Types and default values for card templates
+
+export interface CardStyle {
+  template: string;
+  effect: string;
+  borderRadius: string;
+  borderWidth?: number;
+  borderColor: string;
+  backgroundColor?: string;
+  shadowColor: string;
+  frameWidth: number;
+  frameColor: string;
+  [key: string]: any;
+}
+
+export interface TextStyle {
+  fontFamily?: string;
+  fontSize?: string;
+  fontWeight?: string;
+  color?: string;
+  titleColor: string;
+  titleAlignment: string;
+  titleWeight: string;
+  descriptionColor: string;
+  [key: string]: any;
+}
 
 export interface CardTemplate {
   id: string;
@@ -14,11 +39,11 @@ export interface CardTemplate {
   tags: string[];
 }
 
-// Default values for CardStyle to prevent type errors
 export const DEFAULT_CARD_STYLE: CardStyle = {
   template: 'classic',
   effect: 'none',
   borderRadius: '8px',
+  borderWidth: 2,
   borderColor: '#000000',
   backgroundColor: '#FFFFFF',
   shadowColor: 'rgba(0,0,0,0.2)',
@@ -26,9 +51,8 @@ export const DEFAULT_CARD_STYLE: CardStyle = {
   frameColor: '#000000',
 };
 
-// Default values for TextStyle to prevent type errors
 export const DEFAULT_TEXT_STYLE: TextStyle = {
-  fontFamily: 'Inter',
+  fontFamily: 'sans-serif',
   fontSize: '16px',
   fontWeight: 'normal',
   color: '#000000',

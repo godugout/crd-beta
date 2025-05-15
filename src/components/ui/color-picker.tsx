@@ -3,13 +3,13 @@ import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 
 interface ColorPickerProps {
-  color: string;
+  color?: string;
+  value?: string; // Allow value prop for compatibility
   onChange: (color: string) => void;
   className?: string;
   preset?: boolean;
   colors?: string[];
   id?: string;
-  value?: string; // For compatibility with ThemeCustomizer
   label?: string;
 }
 
@@ -37,7 +37,7 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
   label
 }) => {
   // If value is provided (for backward compatibility with ThemeCustomizer), use it instead of color
-  const actualColor = value || color;
+  const actualColor = value || color || '#000000';
   
   const [showColorPicker, setShowColorPicker] = useState(false);
   const colorPickerRef = useRef<HTMLDivElement>(null);
