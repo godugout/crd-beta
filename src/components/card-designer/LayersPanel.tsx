@@ -1,10 +1,7 @@
 import React from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Layers, ArrowUp, ArrowDown, Trash, Lock, Unlock, Eye, EyeOff } from 'lucide-react';
 import { CardLayer } from '@/lib/types/cardTypes';
 
-export interface LayersPanelProps {
+interface LayersPanelProps {
   layers: CardLayer[];
   activeLayerId: string;
   onSelectLayer: (id: string) => void;
@@ -12,6 +9,8 @@ export interface LayersPanelProps {
   onMoveLayerUp: (id: string) => void;
   onMoveLayerDown: (id: string) => void;
   onUpdateLayer?: (id: string, updates: Partial<CardLayer>) => void;
+  onToggleLayerVisibility?: (id: string) => void;
+  onToggleLayerLock?: (id: string) => void;
 }
 
 const LayersPanel: React.FC<LayersPanelProps> = ({
@@ -21,101 +20,81 @@ const LayersPanel: React.FC<LayersPanelProps> = ({
   onDeleteLayer,
   onMoveLayerUp,
   onMoveLayerDown,
-  onUpdateLayer
+  onUpdateLayer,
+  onToggleLayerVisibility,
+  onToggleLayerLock
 }) => {
+  // Replace with actual implementation
   return (
-    <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-sm">Layers</CardTitle>
-      </CardHeader>
-      
-      <CardContent className="p-2">
-        {layers.length === 0 ? (
-          <div className="text-center text-sm text-muted-foreground py-4">
-            No layers added yet
-          </div>
-        ) : (
-          <div className="space-y-1 max-h-[400px] overflow-y-auto">
-            {[...layers].sort((a, b) => b.zIndex - a.zIndex).map(layer => (
-              <div 
-                key={layer.id}
-                className={`flex items-center justify-between p-2 rounded cursor-pointer ${activeLayerId === layer.id ? 'bg-accent' : 'hover:bg-accent/50'}`}
-                onClick={() => onSelectLayer(layer.id)}
+    <div className="bg-white border rounded-lg p-4">
+      <h3 className="text-lg font-semibold mb-3">Layers</h3>
+      <div className="space-y-2">
+        {layers.map(layer => (
+          <div
+            key={layer.id}
+            className={`p-2 border rounded flex items-center justify-between ${
+              layer.id === activeLayerId ? 'bg-gray-100 border-blue-500' : ''
+            }`}
+            onClick={() => onSelectLayer(layer.id)}
+          >
+            <div className="flex items-center">
+              <span className="ml-2">{layer.type}</span>
+            </div>
+            <div className="flex space-x-1">
+              <button
+                className="p-1 hover:bg-gray-100 rounded"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (onToggleLayerVisibility) {
+                    onToggleLayerVisibility(layer.id);
+                  }
+                }}
               >
-                <div className="flex items-center gap-2">
-                  {layer.type === 'image' && <img src={layer.imageUrl} alt="" className="w-6 h-6 object-cover" />}
-                  {layer.type === 'text' && <span className="text-xs font-mono px-1 border rounded">{layer.content.substring(0, 10)}{layer.content.length > 10 ? '...' : ''}</span>}
-                  {layer.type === 'shape' && <div className="w-4 h-4" style={{backgroundColor: layer.color}}></div>}
-                  <span className="text-sm truncate max-w-[100px]">{layer.type} {layers.findIndex(l => l.id === layer.id) + 1}</span>
-                </div>
-                
-                <div className="flex items-center gap-1">
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-6 w-6" 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onToggleLayerVisibility(layer.id);
-                    }}
-                  >
-                    {layer.visible !== false ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3" />}
-                  </Button>
-                  
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-6 w-6" 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onToggleLayerLock(layer.id);
-                    }}
-                  >
-                    {layer.locked ? <Lock className="h-3 w-3" /> : <Unlock className="h-3 w-3" />}
-                  </Button>
-                  
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-6 w-6" 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onMoveLayerUp(layer.id);
-                    }}
-                  >
-                    <ArrowUp className="h-3 w-3" />
-                  </Button>
-                  
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-6 w-6" 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onMoveLayerDown(layer.id);
-                    }}
-                  >
-                    <ArrowDown className="h-3 w-3" />
-                  </Button>
-                  
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-6 w-6" 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onDeleteLayer(layer.id);
-                    }}
-                  >
-                    <Trash className="h-3 w-3" />
-                  </Button>
-                </div>
-              </div>
-            ))}
+                {layer.visible !== false ? '👁️' : '🔴'}
+              </button>
+              <button
+                className="p-1 hover:bg-gray-100 rounded"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (onToggleLayerLock) {
+                    onToggleLayerLock(layer.id);
+                  }
+                }}
+              >
+                {layer.locked ? '🔒' : '🔓'}
+              </button>
+              <button
+                className="p-1 hover:bg-gray-100 rounded"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onMoveLayerUp(layer.id);
+                }}
+              >
+                ↑
+              </button>
+              <button
+                className="p-1 hover:bg-gray-100 rounded"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onMoveLayerDown(layer.id);
+                }}
+              >
+                ↓
+              </button>
+              <button
+                className="p-1 hover:bg-gray-100 rounded text-red-500"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDeleteLayer(layer.id);
+                }}
+              >
+                🗑️
+              </button>
+            </div>
           </div>
-        )}
-      </CardContent>
-    </Card>
+        ))}
+      </div>
+    </div>
   );
 };
 

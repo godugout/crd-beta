@@ -9,37 +9,57 @@ import CardUpload from '@/components/card-upload/CardUpload';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface CardUploadStepProps {
-  cardData: any;
-  setCardData: (data: any) => void;
-  onContinue: () => void;
+  imageUrl?: string;
+  cardData?: any;
+  setCardData?: (data: any) => void;
+  onImageUpload?: (imageUrl: string) => void;
+  onImageCaptured?: (url: string) => void;
+  onContinue?: () => void;
 }
 
 const CardUploadStep: React.FC<CardUploadStepProps> = ({
   cardData,
   setCardData,
+  imageUrl,
+  onImageUpload,
+  onImageCaptured,
   onContinue
 }) => {
   const [activeTab, setActiveTab] = useState("front");
   
   const handleImageUpload = (file: File, previewUrl: string) => {
     if (activeTab === "front") {
-      setCardData({
-        ...cardData,
-        imageUrl: previewUrl
-      });
+      if (setCardData) {
+        setCardData({
+          ...cardData,
+          imageUrl: previewUrl
+        });
+      }
+      
+      if (onImageUpload) {
+        onImageUpload(previewUrl);
+      }
+      
+      if (onImageCaptured) {
+        onImageCaptured(previewUrl);
+      }
     } else {
-      setCardData({
-        ...cardData,
-        backImageUrl: previewUrl
-      });
+      if (setCardData) {
+        setCardData({
+          ...cardData,
+          backImageUrl: previewUrl
+        });
+      }
     }
   };
   
   const handleTextChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setCardData({
-      ...cardData,
-      [e.target.name]: e.target.value
-    });
+    if (setCardData && cardData) {
+      setCardData({
+        ...cardData,
+        [e.target.name]: e.target.value
+      });
+    }
   };
 
   return (

@@ -3,7 +3,7 @@ import { CardData } from '@/types/card';
 
 export const cardData: CardData[] = [
   {
-    id: 1,
+    id: "1",
     name: "Prince",
     team: "Minnesota Wolves",
     jersey: "72",
@@ -20,7 +20,7 @@ export const cardData: CardData[] = [
     effects: ["Holographic"]
   },
   {
-    id: 2,
+    id: "2",
     name: "Michael Jordan",
     team: "Chicago Bulls",
     jersey: "23",
@@ -37,7 +37,7 @@ export const cardData: CardData[] = [
     effects: ["Refractor"]
   },
   {
-    id: 3,
+    id: "3",
     name: "Elvis Presley",
     team: "Memphis Grizzlies",
     jersey: "15",
@@ -54,7 +54,7 @@ export const cardData: CardData[] = [
     effects: ["Chrome"]
   },
   {
-    id: 4,
+    id: "4",
     name: "Bob Marley",
     team: "Los Angeles Lakers",
     jersey: "23",
@@ -71,7 +71,7 @@ export const cardData: CardData[] = [
     effects: ["Holographic", "Refractor"]
   },
   {
-    id: 5,
+    id: "5",
     name: "Tupac Shakur",
     team: "Duke",
     jersey: "2",
@@ -88,7 +88,7 @@ export const cardData: CardData[] = [
     effects: ["Vintage"]
   },
   {
-    id: 6,
+    id: "6",
     name: "Notorious B.I.G.",
     team: "Brooklyn Nets",
     jersey: "72",
