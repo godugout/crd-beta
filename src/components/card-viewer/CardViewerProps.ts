@@ -1,8 +1,8 @@
 
-import { CardData } from "@/types/card";
+import { Card } from "@/lib/types/cardTypes";
 
 export interface CardViewerProps {
-  card: CardData;
+  card: Card;
   fullscreen?: boolean;
   onFullscreenToggle?: () => void;
   onShare?: () => void;

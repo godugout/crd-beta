@@ -1,204 +1,124 @@
 
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { CardData } from '@/types/card';
-
-interface CardFrontProps {
-  card: CardData;
-  effectClasses: string;
-}
-
-const CardFront: React.FC<CardFrontProps> = ({ card, effectClasses }) => {
-  return (
-    <div className={`card-front absolute inset-0 w-full h-full ${effectClasses}`} style={{
-      backfaceVisibility: 'hidden',
-      transformStyle: 'preserve-3d',
-    }}>
-      <img 
-        src={card.imageUrl} 
-        alt={card.title} 
-        className="w-full h-full object-cover rounded-lg"
-      />
-      <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/70 to-transparent text-white">
-        <h3 className="text-lg font-bold">{card.title}</h3>
-        {card.description && <p className="text-sm opacity-80">{card.description}</p>}
-      </div>
-    </div>
-  );
-};
-
-interface CardBackProps {
-  card: CardData;
-}
-
-const CardBack: React.FC<CardBackProps> = ({ card }) => {
-  return (
-    <div className="card-back absolute inset-0 w-full h-full bg-gray-100 rounded-lg p-6" style={{
-      backfaceVisibility: 'hidden',
-      transform: 'rotateY(180deg)',
-      transformStyle: 'preserve-3d',
-    }}>
-      <div className="flex flex-col h-full">
-        <h3 className="text-xl font-bold mb-3">{card.title}</h3>
-        <p className="mb-4 text-sm">{card.description || 'No description available'}</p>
-        
-        {card.player && (
-          <div className="mb-2">
-            <span className="font-medium">Player:</span> {card.player}
-          </div>
-        )}
-        
-        {card.team && (
-          <div className="mb-2">
-            <span className="font-medium">Team:</span> {card.team}
-          </div>
-        )}
-        
-        {card.year && (
-          <div className="mb-2">
-            <span className="font-medium">Year:</span> {card.year}
-          </div>
-        )}
-        
-        {card.tags && card.tags.length > 0 && (
-          <div className="mt-auto pt-4">
-            <div className="font-medium mb-2">Tags:</div>
-            <div className="flex flex-wrap gap-2">
-              {card.tags.map((tag, index) => (
-                <span key={index} className="px-2 py-1 bg-gray-200 text-gray-800 text-xs rounded-full">
-                  {tag}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
-interface CardEdgesProps {
-  color: string;
-  thickness: string;
-}
-
-const CardEdges: React.FC<CardEdgesProps> = ({ color, thickness }) => {
-  return (
-    <div className="card-edges absolute" style={{
-      left: `-${thickness}`,
-      right: `-${thickness}`,
-      top: `-${thickness}`,
-      bottom: `-${thickness}`,
-      background: color,
-      borderRadius: 'calc(0.5rem + 2px)',
-      zIndex: -1,
-    }} />
-  );
-};
+import { cn } from '@/lib/utils';
 
 interface CardCanvasProps {
   card: CardData;
-  isFlipped: boolean;
+  isFlipped?: boolean;
   activeEffects: string[];
-  containerRef: React.RefObject<HTMLDivElement>;
-  cardRef: React.RefObject<HTMLDivElement>;
-  onMouseMove: (e: React.MouseEvent<HTMLDivElement>) => void;
-  onMouseLeave: () => void;
-  effectSettings?: {
-    refractorIntensity?: number;
-    refractorColors?: string[];
-    animationEnabled?: boolean;
-    refractorSpeed?: number;
-    refractorAngle?: number;
-    holographicIntensity?: number;
-    holographicPattern?: 'linear' | 'circular' | 'angular' | 'geometric';
-    holographicColorMode?: 'rainbow' | 'blue-purple' | 'gold-green' | 'custom';
-    holographicCustomColors?: string[];
-    holographicSparklesEnabled?: boolean;
-    holographicBorderWidth?: number;
-  };
+  effectSettings?: Record<string, any>;
+  containerRef?: React.RefObject<HTMLDivElement>;
+  cardRef?: React.RefObject<HTMLDivElement>;
+  onMouseMove?: (e: React.MouseEvent<HTMLDivElement>) => void;
+  onMouseLeave?: () => void;
   debug?: boolean;
 }
 
 const CardCanvas: React.FC<CardCanvasProps> = ({
   card,
-  isFlipped,
-  activeEffects,
+  isFlipped = false,
+  activeEffects = [],
+  effectSettings = {},
   containerRef,
   cardRef,
   onMouseMove,
   onMouseLeave,
-  effectSettings = {},
   debug = false
 }) => {
-  // Calculate card thickness based on the active effects
-  const getCardThickness = () => {
-    const baseThickness = '12px'; // Start with a thicker card
-    
-    // Add more thickness for premium effects
-    if (activeEffects.includes('Refractor') || activeEffects.includes('Holographic')) {
-      return '16px'; 
-    }
-    
-    return baseThickness;
-  };
-  
-  // Function to determine edge color
-  const getEdgeColor = () => {
-    // Brighter colors for better visibility
-    let edgeColor = '#b09dff'; // Brighter purple
-    
-    if (activeEffects.includes('Refractor')) {
-      edgeColor = '#25c4ff'; // Brighter blue
-    } else if (activeEffects.includes('Holographic')) {
-      edgeColor = '#ff5af7'; // Brighter pink
-    } else if (activeEffects.includes('Gold Foil')) {
-      edgeColor = '#ffd700'; // Gold
-    }
-    
-    return edgeColor;
-  };
+  const [loaded, setLoaded] = useState(false);
+  const innerCardRef = useRef<HTMLDivElement>(null);
+  const localRef = cardRef || innerCardRef;
 
-  // Build effect classes
-  const getEffectClasses = () => {
-    let classes = [];
+  useEffect(() => {
+    // Apply card effects logic here
+    const element = localRef.current;
+    if (!element) return;
     
-    if (activeEffects.includes('Refractor')) {
-      classes.push('refractor-effect');
-      if (effectSettings.animationEnabled) classes.push('refractor-animated');
+    // Set up effect classes
+    const effectClasses = activeEffects.map(e => e.toLowerCase().replace(/\s+/g, '-')).join(' ');
+    element.className = cn(
+      element.className.split(' ').filter(c => !c.includes('effect-')).join(' '),
+      activeEffects.map(e => `effect-${e.toLowerCase().replace(/\s+/g, '-')}`).join(' ')
+    );
+    
+    // Add debug info
+    if (debug) {
+      console.log("CardCanvas: Active effects:", activeEffects);
+      console.log("CardCanvas: Effect settings:", effectSettings);
     }
-    
-    if (activeEffects.includes('Holographic')) {
-      classes.push('holographic-effect');
-    }
-    
-    if (activeEffects.includes('Gold Foil')) {
-      classes.push('gold-foil-effect');
-    }
-    
-    return classes.join(' ');
-  };
+  }, [activeEffects, effectSettings, localRef, debug]);
 
-  const thickness = getCardThickness();
-  const edgeColor = getEdgeColor();
-  const effectClasses = getEffectClasses();
+  // Handle image loading
+  const handleImageLoad = () => {
+    setLoaded(true);
+    if (debug) console.log("CardCanvas: Image loaded");
+  };
 
   return (
     <div 
-      ref={cardRef}
-      className="card-container relative mx-auto"
-      style={{
-        width: '100%',
-        height: '100%',
-        transformStyle: 'preserve-3d',
-        transition: 'transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-        transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
-      }}
+      className={cn(
+        "relative transition-transform duration-500 w-full h-full",
+        isFlipped ? "rotate-y-180" : "",
+        !loaded && "opacity-50"
+      )}
       onMouseMove={onMouseMove}
       onMouseLeave={onMouseLeave}
     >
-      <CardFront card={card} effectClasses={effectClasses} />
-      <CardBack card={card} />
-      <CardEdges color={edgeColor} thickness={thickness} />
+      {/* Front of card */}
+      <div 
+        ref={localRef}
+        className={cn(
+          "absolute inset-0 rounded-lg overflow-hidden preserve-3d backface-hidden shadow-lg",
+          activeEffects.map(e => `effect-${e.toLowerCase().replace(/\s+/g, '-')}`).join(' ')
+        )}
+        style={{
+          visibility: isFlipped ? 'hidden' : 'visible',
+        }}
+      >
+        <div className="relative w-full h-full">
+          <img 
+            src={card.imageUrl} 
+            alt={card.title} 
+            onLoad={handleImageLoad}
+            className="w-full h-full object-cover"
+          />
+          
+          {/* Card Frame */}
+          <div 
+            className="absolute inset-0 pointer-events-none" 
+            style={{
+              boxShadow: `inset 0 0 0 ${card.designMetadata?.cardStyle?.frameWidth || 4}px ${card.designMetadata?.cardStyle?.frameColor || '#000'}`,
+              borderRadius: card.designMetadata?.cardStyle?.borderRadius || '8px'
+            }}
+          />
+        </div>
+      </div>
+      
+      {/* Back of card */}
+      <div 
+        className={cn(
+          "absolute inset-0 rounded-lg overflow-hidden rotate-y-180 preserve-3d backface-hidden bg-gray-800",
+          activeEffects.map(e => `effect-${e.toLowerCase().replace(/\s+/g, '-')}-back`).join(' ')
+        )}
+        style={{
+          visibility: isFlipped ? 'visible' : 'hidden',
+        }}
+      >
+        <div className="flex flex-col items-center justify-center h-full p-4 text-center">
+          <h3 className="text-xl font-bold text-white">{card.title}</h3>
+          {card.description && (
+            <p className="mt-2 text-sm text-gray-300">{card.description}</p>
+          )}
+        </div>
+      </div>
+      
+      {/* Loading overlay */}
+      {!loaded && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      )}
     </div>
   );
 };

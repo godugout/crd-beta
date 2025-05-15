@@ -1,97 +1,91 @@
 
-/* Base effect styles */
-.effect-container {
+/* Base card effect styles */
+.effect-holographic {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0.1) 100%);
+}
+
+.effect-holographic::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, 
+    rgba(255, 0, 0, 0.3), 
+    rgba(255, 255, 0, 0.3), 
+    rgba(0, 255, 0, 0.3), 
+    rgba(0, 255, 255, 0.3), 
+    rgba(0, 0, 255, 0.3), 
+    rgba(255, 0, 255, 0.3), 
+    rgba(255, 0, 0, 0.3));
+  background-size: 400% 400%;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  animation: holographic-animation 10s ease infinite;
+}
+
+.effect-refractor {
+  position: relative;
+  overflow: hidden;
+}
+
+.effect-refractor::after {
+  content: "";
   position: absolute;
   inset: 0;
+  background: linear-gradient(130deg, 
+    rgba(255, 255, 255, 0) 0%, 
+    rgba(255, 255, 255, 0.4) 45%, 
+    rgba(255, 255, 255, 0.7) 50%, 
+    rgba(255, 255, 255, 0.4) 55%, 
+    rgba(255, 255, 255, 0) 100%);
+  background-size: 200% 200%;
+  mix-blend-mode: overlay;
   pointer-events: none;
-  z-index: 10;
+  animation: refractor-animation 5s infinite linear;
 }
 
-/* Holographic effect */
-.effect-holographic {
-  background: linear-gradient(
-    135deg,
-    rgba(255,0,0,0.2),
-    rgba(255,255,0,0.2),
-    rgba(0,255,0,0.2),
-    rgba(0,255,255,0.2),
-    rgba(0,0,255,0.2),
-    rgba(255,0,255,0.2)
-  );
-  background-size: 400% 400%;
-  animation: rainbow 3s ease infinite;
-  mix-blend-mode: color-dodge;
-  opacity: var(--holographic-intensity, 0.7);
+.effect-gold-foil {
+  position: relative;
+  overflow: hidden;
 }
 
-/* Refractor effect */
-.effect-refractor {
-  background: 
-    linear-gradient(
-      45deg,
-      transparent 40%,
-      rgba(255, 255, 255, 0.4) 45%,
-      rgba(255, 255, 255, 0.5) 50%,
-      rgba(255, 255, 255, 0.4) 55%,
-      transparent 60%
-    );
+.effect-gold-foil::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(45deg, 
+    rgba(255, 215, 0, 0.3) 0%,
+    rgba(255, 230, 150, 0.5) 50%,
+    rgba(255, 215, 0, 0.3) 100%);
   background-size: 200% 200%;
-  animation: shimmer 1.5s ease infinite;
-  opacity: var(--refractor-intensity, 0.8);
+  mix-blend-mode: overlay;
+  pointer-events: none;
 }
 
-/* Shimmer effect */
-.effect-shimmer {
-  background: radial-gradient(
-    circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
-    rgba(255, 255, 255, 0.3) 0%,
-    transparent 60%
-  );
-  opacity: var(--shimmer-intensity, 0.6);
-}
-
-/* Gold Foil effect */
-.effect-goldFoil {
-  background: 
-    linear-gradient(
-      45deg,
-      rgba(255, 215, 0, 0.3),
-      rgba(255, 255, 255, 0.4),
-      rgba(255, 215, 0, 0.3)
-    );
-  background-size: 200% 200%;
-  animation: shine 2s linear infinite;
-  opacity: var(--gold-intensity, 0.7);
-}
-
-/* Vintage effect */
-.effect-vintage {
-  background: rgba(160, 140, 110, 0.1);
-  filter: sepia(var(--vintage-intensity, 0.5));
-}
-
-/* Animations */
-@keyframes rainbow {
+@keyframes holographic-animation {
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
 }
 
-@keyframes shimmer {
-  0% { background-position: 200% 200%; }
-  100% { background-position: -200% -200%; }
+@keyframes refractor-animation {
+  0% { background-position: 200% 0%; }
+  100% { background-position: -200% 0%; }
 }
 
-@keyframes shine {
-  0% { background-position: -200% -200%; }
-  100% { background-position: 200% 200%; }
+/* 3D card flip support */
+.preserve-3d {
+  transform-style: preserve-3d;
 }
 
-/* Interactive states */
-.effect-container.interactive {
-  transition: all 0.3s ease;
+.backface-hidden {
+  backface-visibility: hidden;
 }
 
-.effect-container.interactive:hover {
-  opacity: calc(var(--effect-intensity, 1) * 1.2);
+.rotate-y-180 {
+  transform: rotateY(180deg);
 }

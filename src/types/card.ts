@@ -1,178 +1,94 @@
 
-/**
- * Core Card Interface
- * Defines the structure of a card in the Cardshow application
- */
-export interface Card {
-  id: string;
-  title: string;
-  description?: string;
-  imageUrl: string;
-  thumbnailUrl?: string;
-  tags: string[];
-  player?: string;
-  team?: string;
-  year?: string;
-  set?: string;
-  effects: string[];
-  effectSettings?: Record<string, EffectSetting>;
-  designMetadata: CardDesignMetadata;
-  userId: string;
-  createdAt: string;
-  updatedAt: string;
-  viewCount?: number;
-  reactions?: CardReactions;
-}
+import { Card } from '@/lib/types/cardTypes';
 
 /**
- * CardData type for use in components that need card data
+ * Legacy CardData type for backward compatibility
  */
 export interface CardData {
   id: string;
   title: string;
   description: string;
   imageUrl: string;
-  thumbnailUrl?: string;
+  thumbnailUrl: string;
   tags: string[];
-  player?: string;
-  team?: string;
-  year?: string;
+  userId: string;
   effects: string[];
-  designMetadata: CardDesignMetadata;
-  userId: string;
   createdAt: string;
   updatedAt: string;
-}
-
-/**
- * Effect Setting Interface
- * Configuration options for card effects
- */
-export interface EffectSetting {
-  intensity?: number;
-  speed?: number;
-  color?: string;
-  colorScheme?: string[];
-  pattern?: string;
-  animation?: boolean;
-  [key: string]: any;
-}
-
-/**
- * Card Design Metadata Interface
- * Configuration for the visual appearance of a card
- */
-export interface CardDesignMetadata {
-  cardStyle?: {
-    borderRadius?: string;
-    borderColor?: string;
-    borderWidth?: string;
-    backgroundColor?: string;
-    backgroundGradient?: string;
-    shadow?: string;
-  };
-  textStyle?: {
-    titleFont?: string;
-    titleSize?: string;
-    titleColor?: string;
-    descriptionFont?: string;
-    descriptionSize?: string;
-    descriptionColor?: string;
-  };
-  cardMetadata?: {
-    rarity?: string;
-    edition?: string;
-    number?: string;
-    series?: string;
-  };
-  marketMetadata?: {
-    price?: number;
-    currency?: string;
-    availableForSale?: boolean;
-    editionSize?: number;
-    editionNumber?: number;
+  designMetadata: {
+    cardStyle: {
+      template: string;
+      effect: string;
+      borderRadius: string;
+      borderColor: string;
+      frameColor: string;
+      frameWidth: number;
+      shadowColor: string;
+    };
+    textStyle: {
+      titleColor: string;
+      titleAlignment: string;
+      titleWeight: string;
+      descriptionColor: string;
+    };
+    cardMetadata: {
+      category?: string;
+      series?: string;
+      cardType?: string;
+    };
+    marketMetadata: {
+      price?: number;
+      currency?: string;
+      availableForSale?: boolean;
+      editionSize?: number;
+      editionNumber?: number;
+    };
   };
 }
 
 /**
- * Collection Interface
- * Group of cards with additional metadata
+ * Helper function to convert between Card and CardData types
  */
-export interface Collection {
-  id: string;
-  name: string;
-  description?: string;
-  coverImageUrl?: string;
-  userId: string;
-  cards?: Card[];
-  cardIds: string[];
-  visibility?: 'public' | 'private' | 'unlisted';
-  allowComments?: boolean;
-  designMetadata?: Record<string, any>;
-  isPublic: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
-
-/**
- * Card Layer Interface
- * For the card editor and creation tool
- */
-export interface CardLayer {
-  id: string;
-  type: 'image' | 'text' | 'shape' | 'effect';
-  content?: string;
-  position: {
-    x: number;
-    y: number;
-    z: number;
+export function adaptCardToCardData(card: Card): CardData {
+  return {
+    id: card.id,
+    title: card.title,
+    description: card.description || '',
+    imageUrl: card.imageUrl,
+    thumbnailUrl: card.thumbnailUrl || card.imageUrl,
+    tags: card.tags || [],
+    userId: card.userId,
+    effects: card.effects || [],
+    createdAt: card.createdAt,
+    updatedAt: card.updatedAt,
+    designMetadata: card.designMetadata || {
+      cardStyle: {
+        template: 'classic',
+        effect: 'none',
+        borderRadius: '8px',
+        borderColor: '#000000',
+        frameColor: '#000000',
+        frameWidth: 2,
+        shadowColor: 'rgba(0,0,0,0.2)',
+      },
+      textStyle: {
+        titleColor: '#000000',
+        titleAlignment: 'center',
+        titleWeight: 'bold',
+        descriptionColor: '#333333',
+      },
+      cardMetadata: {
+        category: 'general',
+        series: 'base',
+        cardType: 'standard',
+      },
+      marketMetadata: {
+        price: 0,
+        currency: 'USD',
+        availableForSale: false,
+        editionSize: 0,
+        editionNumber: 0
+      }
+    }
   };
-  size: {
-    width: number | string;
-    height: number | string;
-  };
-  rotation: number;
-  opacity: number;
-  zIndex: number;
-  visible: boolean;
-  locked: boolean;
-  effectIds: string[];
-  // Type-specific properties
-  textStyle?: {
-    fontFamily: string;
-    fontSize: number;
-    fontWeight: string;
-    color: string;
-    textAlign: string;
-  };
-  imageUrl?: string;
-  shapeType?: 'rect' | 'circle' | 'triangle' | 'polygon';
-  color?: string;
-}
-
-/**
- * Card Reactions Interface
- * User engagement with cards
- */
-export interface CardReactions {
-  likes: number;
-  shares: number;
-  comments?: CardComment[];
-  favorites: number;
-}
-
-/**
- * Card Comment Interface
- * User comments on cards
- */
-export interface CardComment {
-  id: string;
-  userId: string;
-  userName: string;
-  userAvatar?: string;
-  content: string;
-  createdAt: string;
-  updatedAt?: string;
-  replies?: CardComment[];
-  reactionCount?: number;
 }

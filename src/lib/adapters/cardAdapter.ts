@@ -1,42 +1,79 @@
 
-import { Card as CardType } from '@/lib/types/cardTypes';
+import { Card } from '@/lib/types/cardTypes';
 import { CardData } from '@/types/card';
 
 /**
- * Adapts a Card from the internal type to the schema expected by components
+ * Adapts a card object to a standardized schema
  */
-export const adaptCardToSchema = (card: CardType): CardData => {
+export const adaptCardToSchema = (card: Card | CardData): Card => {
   return {
     id: card.id,
     title: card.title,
-    description: card.description || '',  // Ensure description is not undefined
-    imageUrl: card.imageUrl || card.image || '', // Handle both imageUrl and legacy image property
-    thumbnailUrl: card.thumbnailUrl,
+    description: card.description || '',
+    imageUrl: card.imageUrl,
+    thumbnailUrl: card.thumbnailUrl || card.imageUrl,
     tags: card.tags || [],
-    player: card.player,
-    team: card.team,
-    year: card.year,
+    userId: card.userId,
     effects: card.effects || [],
-    designMetadata: card.designMetadata || {
-      cardStyle: {},
-      textStyle: {},
+    createdAt: card.createdAt,
+    updatedAt: card.updatedAt,
+    designMetadata: 'designMetadata' in card ? card.designMetadata : {
+      cardStyle: {
+        template: 'classic',
+        effect: 'none',
+        borderRadius: '8px',
+        borderColor: '#000000',
+        frameColor: '#000000',
+        frameWidth: 2,
+        shadowColor: 'rgba(0,0,0,0.2)',
+      },
+      textStyle: {
+        titleColor: '#000000',
+        titleAlignment: 'center',
+        titleWeight: 'bold',
+        descriptionColor: '#333333',
+      },
       cardMetadata: {},
       marketMetadata: {}
-    },
-    userId: card.userId || '',
-    createdAt: card.createdAt,
-    updatedAt: card.updatedAt
+    }
   };
 };
 
 /**
- * Adapts multiple cards from internal types to the schema expected by components
+ * Convert arbitrary data to a Card object
  */
-export const adaptCardsToSchema = (cards: CardType[]): CardData[] => {
-  return cards.map(adaptCardToSchema);
+export const adaptToCard = (data: any): Card => {
+  return {
+    id: data.id || crypto.randomUUID(),
+    title: data.title || 'Untitled Card',
+    description: data.description || '',
+    imageUrl: data.imageUrl || '/images/card-placeholder.png',
+    thumbnailUrl: data.thumbnailUrl || data.imageUrl || '/images/card-placeholder.png',
+    tags: Array.isArray(data.tags) ? data.tags : [],
+    userId: data.userId || 'anonymous',
+    effects: Array.isArray(data.effects) ? data.effects : [],
+    createdAt: data.createdAt || new Date().toISOString(),
+    updatedAt: data.updatedAt || new Date().toISOString(),
+    designMetadata: data.designMetadata || {
+      cardStyle: {
+        template: 'classic',
+        effect: 'none',
+        borderRadius: '8px',
+        borderColor: '#000000',
+        frameColor: '#000000',
+        frameWidth: 2,
+        shadowColor: 'rgba(0,0,0,0.2)',
+      },
+      textStyle: {
+        titleColor: '#000000',
+        titleAlignment: 'center',
+        titleWeight: 'bold',
+        descriptionColor: '#333333',
+      },
+      cardMetadata: {},
+      marketMetadata: {}
+    }
+  };
 };
 
-export default {
-  adaptCardToSchema,
-  adaptCardsToSchema
-};
+export default adaptToCard;

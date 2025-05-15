@@ -9,6 +9,8 @@ export interface ColorPickerProps {
   onChange: (value: string) => void;
   label?: string;
   className?: string;
+  // Add support for colors array for backward compatibility
+  colors?: string[];
 }
 
 export const ColorPicker: React.FC<ColorPickerProps> = ({
@@ -18,6 +20,7 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
   onChange,
   label,
   className,
+  colors, // Ignore colors prop as it's not used in the new implementation
 }) => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onChange(e.target.value);
