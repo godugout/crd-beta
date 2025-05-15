@@ -36,6 +36,22 @@ const DesignStep: React.FC<DesignStepProps> = ({ cardData, onUpdate }) => {
       frameColor: '#000000',
       frameWidth: 2,
       shadowColor: 'rgba(0,0,0,0.2)',
+    },
+    textStyle: {
+      titleColor: '#000000',
+      titleAlignment: 'center',
+      titleWeight: 'bold',
+      descriptionColor: '#333333',
+    },
+    cardMetadata: {
+      category: 'standard',
+      series: 'base',
+      cardType: 'player',
+    },
+    marketMetadata: {
+      isPrintable: false,
+      isForSale: false,
+      includeInCatalog: false,
     }
   };
 

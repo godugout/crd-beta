@@ -1,87 +1,57 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import PageLayout from '@/components/navigation/PageLayout';
 import { useCards } from '@/context/CardContext';
 import { Card } from '@/lib/types/cardTypes';
 import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, Heart, MessageSquare, Share2, Pencil } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { useToast } from '@/components/ui/use-toast';
+import { ArrowLeft, Share, Heart, MessageCircle, Download } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const CardView: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const { getCard } = useCards();
+  const { getCardById } = useCards();
   const [card, setCard] = useState<Card | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const { toast } = useToast();
+  const [loading, setLoading] = useState<boolean>(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const loadCard = async () => {
+    if (id) {
       try {
-        setLoading(true);
-        if (!id) {
-          throw new Error('No card ID provided');
-        }
-        const cardData = await getCard(id);
-        if (!cardData) {
-          throw new Error('Card not found');
-        }
-        setCard(cardData);
-        setError(null);
-      } catch (err) {
-        console.error('Error loading card:', err);
-        setError('Failed to load card');
-        toast({
-          title: "Error",
-          description: "Failed to load the card",
-          variant: "destructive"
-        });
+        const cardData = getCardById(id);
+        setCard(cardData || null);
+      } catch (error) {
+        console.error("Error loading card:", error);
       } finally {
         setLoading(false);
       }
-    };
-
-    loadCard();
-  }, [id, getCard, toast]);
+    }
+  }, [id, getCardById]);
 
   if (loading) {
     return (
-      <PageLayout title="Loading Card..." description="Please wait">
-        <div className="container max-w-5xl mx-auto px-4 py-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="aspect-[2.5/3.5] bg-gray-100 rounded-lg">
-              <Skeleton className="w-full h-full rounded-lg" />
-            </div>
-            <div className="space-y-4">
-              <Skeleton className="h-10 w-3/4" />
-              <Skeleton className="h-4 w-1/2" />
-              <Skeleton className="h-24 w-full" />
-              <div className="flex gap-2 mt-4">
-                <Skeleton className="h-10 w-10 rounded-full" />
-                <Skeleton className="h-10 w-10 rounded-full" />
-                <Skeleton className="h-10 w-10 rounded-full" />
-              </div>
-            </div>
+      <PageLayout title="Loading Card" description="Please wait...">
+        <div className="container mx-auto py-8 flex items-center justify-center min-h-[60vh]">
+          <div className="animate-pulse flex flex-col items-center gap-4">
+            <div className="w-64 h-96 bg-gray-200 rounded-lg"></div>
+            <div className="h-6 w-48 bg-gray-200 rounded"></div>
           </div>
         </div>
       </PageLayout>
     );
   }
 
-  if (error || !card) {
+  if (!card) {
     return (
       <PageLayout title="Card Not Found" description="The requested card could not be found">
-        <div className="container max-w-5xl mx-auto px-4 py-8">
-          <div className="text-center py-16">
+        <div className="container mx-auto py-8">
+          <div className="text-center">
             <h2 className="text-2xl font-bold mb-4">Card Not Found</h2>
             <p className="text-gray-500 mb-6">
-              The card you're looking for doesn't exist or couldn't be loaded.
+              The card you're looking for doesn't exist or has been removed.
             </p>
-            <Button asChild>
-              <Link to="/gallery">Back to Gallery</Link>
+            <Button onClick={() => navigate('/gallery')}>
+              Return to Gallery
             </Button>
           </div>
         </div>
@@ -89,91 +59,121 @@ const CardView: React.FC = () => {
     );
   }
 
+  // Effects classes based on card's applied effects
+  const getEffectClasses = () => {
+    if (!card.effects || card.effects.length === 0) return '';
+    return card.effects.map(effect => effect.toLowerCase().replace(' ', '-')).join(' ');
+  };
+
   return (
     <PageLayout
       title={card.title}
-      description={card.description || 'View card details'}
+      description={card.description || 'Card Details'}
     >
-      <div className="container max-w-5xl mx-auto px-4 py-8">
-        <Link to="/gallery" className="inline-flex items-center text-sm mb-6 hover:underline">
-          <ArrowLeft className="h-4 w-4 mr-1" /> Back to Gallery
-        </Link>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Card Preview */}
-          <div className="aspect-[2.5/3.5] rounded-lg overflow-hidden border bg-white shadow-lg">
-            <img
-              src={card.imageUrl}
-              alt={card.title}
-              className="w-full h-full object-cover object-center"
-              onError={(e) => {
-                (e.target as HTMLImageElement).src = '/placeholder-card.png';
+      <div className="container mx-auto py-8">
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className="mb-6"
+          onClick={() => navigate(-1)}
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" /> Back
+        </Button>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {/* Card Display */}
+          <div className="md:col-span-2 flex justify-center">
+            <div 
+              className={`relative max-w-md aspect-[2.5/3.5] rounded-lg overflow-hidden shadow-xl ${getEffectClasses()}`}
+              style={{
+                borderRadius: card.designMetadata?.cardStyle?.borderRadius || '8px',
+                borderColor: card.designMetadata?.cardStyle?.borderColor || '#000',
+                borderWidth: '2px',
+                borderStyle: 'solid',
               }}
-            />
-          </div>
-
-          {/* Card Details */}
-          <div className="space-y-6">
-            <div>
-              <h1 className="text-3xl font-bold">{card.title}</h1>
+            >
+              <img 
+                src={card.imageUrl} 
+                alt={card.title}
+                className="w-full h-full object-cover"
+              />
               
+              {/* Overlays and effects could be added here */}
+            </div>
+          </div>
+          
+          {/* Card Details */}
+          <div>
+            <h1 className="text-3xl font-bold mb-2">{card.title}</h1>
+            {card.description && (
+              <p className="text-gray-700 mb-4">{card.description}</p>
+            )}
+            
+            {/* Meta Information */}
+            <div className="space-y-4 mb-6">
               {card.player && (
-                <div className="flex items-center text-gray-600 mt-1">
-                  <span>{card.player}</span>
-                  {card.team && (
-                    <>
-                      <span className="mx-2">•</span>
-                      <span>{card.team}</span>
-                    </>
-                  )}
-                  {card.year && (
-                    <>
-                      <span className="mx-2">•</span>
-                      <span>{card.year}</span>
-                    </>
-                  )}
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500">Player</h3>
+                  <p className="text-lg">{card.player}</p>
+                </div>
+              )}
+              
+              {card.team && (
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500">Team</h3>
+                  <p className="text-lg">{card.team}</p>
+                </div>
+              )}
+              
+              {card.year && (
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500">Year</h3>
+                  <p className="text-lg">{card.year}</p>
                 </div>
               )}
             </div>
-
-            <div>
-              <p className="text-gray-700 whitespace-pre-line">{card.description}</p>
-            </div>
-
+            
             {/* Tags */}
             {card.tags && card.tags.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {card.tags.map((tag, index) => (
-                  <div
-                    key={`${tag}-${index}`}
-                    className="px-3 py-1 bg-gray-100 text-gray-800 text-xs rounded-full"
-                  >
-                    {tag}
-                  </div>
-                ))}
+              <div className="mb-6">
+                <h3 className="text-sm font-medium text-gray-500 mb-2">Tags</h3>
+                <div className="flex flex-wrap gap-2">
+                  {card.tags.map((tag, index) => (
+                    <span 
+                      key={index}
+                      className="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-full"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
               </div>
             )}
-
-            {/* Action Buttons */}
-            <div className="flex items-center gap-4 pt-4">
-              <Button variant="outline" size="icon">
-                <Heart className="h-5 w-5 text-gray-600" />
+            
+            {/* Action buttons */}
+            <div className="flex flex-wrap gap-2 mt-8">
+              <Button variant="outline" size="sm">
+                <Heart className="h-4 w-4 mr-2" />
+                Like
               </Button>
-              <Button variant="outline" size="icon">
-                <MessageSquare className="h-5 w-5 text-gray-600" />
+              <Button variant="outline" size="sm">
+                <MessageCircle className="h-4 w-4 mr-2" />
+                Comment
               </Button>
-              <Button variant="outline" size="icon">
-                <Share2 className="h-5 w-5 text-gray-600" />
+              <Button variant="outline" size="sm">
+                <Share className="h-4 w-4 mr-2" />
+                Share
               </Button>
-              <div className="ml-auto">
-                <Button variant="default" className="flex items-center gap-2" asChild>
-                  <Link to={`/editor/${card.id}`}>
-                    <Pencil className="h-4 w-4" />
-                    Edit Card
-                  </Link>
-                </Button>
-              </div>
+              <Button variant="outline" size="sm">
+                <Download className="h-4 w-4 mr-2" />
+                Download
+              </Button>
             </div>
+            
+            {/* Created date */}
+            <p className="text-xs text-gray-500 mt-6">
+              Created: {new Date(card.createdAt).toLocaleDateString()}
+            </p>
           </div>
         </div>
       </div>

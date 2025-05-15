@@ -1,26 +1,15 @@
 
 import React, { useState } from 'react';
 import { Card } from '@/lib/types/cardTypes';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
-import { Switch } from '@/components/ui/switch';
-import { 
-  Tabs, 
-  TabsContent, 
-  TabsList, 
-  TabsTrigger 
-} from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { 
-  Download, 
-  Share2, 
-  BookOpen, 
-  Tag, 
-  Plus, 
-  X 
-} from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { X, Plus, Download, Share, Copy, MessageSquare } from 'lucide-react';
+import { useToast } from '@/components/ui/use-toast';
+import { Textarea } from '@/components/ui/textarea';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface FinalizeStepProps {
   cardData: Partial<Card>;
@@ -28,39 +17,40 @@ interface FinalizeStepProps {
 }
 
 const FinalizeStep: React.FC<FinalizeStepProps> = ({ cardData, onUpdate }) => {
-  const [activeTab, setActiveTab] = useState<string>("details");
-  const [tagInput, setTagInput] = useState<string>('');
+  const { toast } = useToast();
+  const [tags, setTags] = useState<string[]>(cardData.tags || []);
+  const [newTag, setNewTag] = useState<string>('');
+  const [isPublic, setIsPublic] = useState<boolean>(!!cardData.isPublic);
   
+  // Handle adding a new tag
   const handleAddTag = () => {
-    if (!tagInput.trim()) return;
-    
-    const newTags = [...(cardData.tags || []), tagInput.trim()];
-    
-    onUpdate({
-      tags: newTags
-    });
-    
-    setTagInput('');
-  };
-  
-  const handleRemoveTag = (tagToRemove: string) => {
-    const newTags = (cardData.tags || []).filter(tag => tag !== tagToRemove);
-    
-    onUpdate({
-      tags: newTags
-    });
-  };
-  
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      handleAddTag();
+    if (newTag && !tags.includes(newTag)) {
+      const updatedTags = [...tags, newTag];
+      setTags(updatedTags);
+      onUpdate({ tags: updatedTags });
+      setNewTag('');
     }
   };
   
-  const handleVisibilityChange = (isPublic: boolean) => {
-    onUpdate({
-      isPublic
+  // Handle removing a tag
+  const handleRemoveTag = (tagToRemove: string) => {
+    const updatedTags = tags.filter(tag => tag !== tagToRemove);
+    setTags(updatedTags);
+    onUpdate({ tags: updatedTags });
+  };
+  
+  // Handle toggle for public/private
+  const handleTogglePublic = (checked: boolean) => {
+    setIsPublic(checked);
+    onUpdate({ isPublic: checked });
+  };
+  
+  // Handle copy link
+  const handleCopyLink = () => {
+    // In a real app, this would copy a link to the clipboard
+    toast({
+      title: "Link Copied",
+      description: "Card link copied to clipboard",
     });
   };
 
@@ -73,147 +63,149 @@ const FinalizeStep: React.FC<FinalizeStepProps> = ({ cardData, onUpdate }) => {
         </p>
       </div>
       
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
+      <Tabs defaultValue="metadata">
         <TabsList className="grid grid-cols-3 mb-6">
-          <TabsTrigger value="details">Details</TabsTrigger>
+          <TabsTrigger value="metadata">Metadata</TabsTrigger>
           <TabsTrigger value="sharing">Sharing</TabsTrigger>
           <TabsTrigger value="export">Export</TabsTrigger>
         </TabsList>
         
-        <TabsContent value="details" className="space-y-4">
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="card-title-final">Card Title</Label>
+        <TabsContent value="metadata" className="space-y-4">
+          {/* Tags input */}
+          <div>
+            <Label htmlFor="tags">Tags</Label>
+            <div className="flex items-center space-x-2 mt-1">
               <Input
-                id="card-title-final"
-                value={cardData.title || ''}
-                onChange={(e) => onUpdate({ title: e.target.value })}
-                placeholder="Enter a title for your card"
-                className="mt-1"
+                id="tags"
+                placeholder="Add tag (e.g., rookie, vintage)"
+                value={newTag}
+                onChange={(e) => setNewTag(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleAddTag();
+                  }
+                }}
+                className="flex-1"
               />
+              <Button variant="outline" onClick={handleAddTag} disabled={!newTag}>
+                <Plus className="h-4 w-4" />
+              </Button>
             </div>
             
+            {/* Tags display */}
+            <div className="flex flex-wrap gap-2 mt-2">
+              {tags.map((tag, index) => (
+                <Badge key={index} variant="secondary" className="flex items-center gap-1">
+                  {tag}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-4 w-4 p-0 hover:bg-transparent"
+                    onClick={() => handleRemoveTag(tag)}
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                </Badge>
+              ))}
+              {tags.length === 0 && (
+                <p className="text-sm text-gray-500">No tags added yet</p>
+              )}
+            </div>
+          </div>
+          
+          {/* Card visibility */}
+          <div className="flex items-center justify-between">
             <div>
-              <Label>Tags</Label>
-              <div className="flex mt-1 gap-2">
-                <Input
-                  value={tagInput}
-                  onChange={(e) => setTagInput(e.target.value)}
-                  placeholder="Add a tag"
-                  onKeyDown={handleKeyDown}
-                  className="flex-1"
-                />
-                <Button type="button" onClick={handleAddTag}>
-                  <Plus className="h-4 w-4 mr-1" />
-                  Add
-                </Button>
-              </div>
-              
-              <div className="flex flex-wrap gap-2 mt-3">
-                {(cardData.tags || []).map((tag, index) => (
-                  <Badge key={`${tag}-${index}`} variant="secondary" className="flex items-center gap-1">
-                    {tag}
-                    <button 
-                      onClick={() => handleRemoveTag(tag)}
-                      className="ml-1 hover:bg-gray-200 rounded-full p-0.5"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </Badge>
-                ))}
-                
-                {(cardData.tags || []).length === 0 && (
-                  <p className="text-sm text-gray-500">No tags added yet</p>
-                )}
-              </div>
+              <Label htmlFor="card-public">Make card public</Label>
+              <p className="text-sm text-gray-500">Allow others to see this card in public galleries</p>
             </div>
-            
-            <Separator />
-            
-            <div className="flex items-center justify-between">
-              <div>
-                <Label htmlFor="card-visibility" className="text-base">Visibility</Label>
-                <p className="text-sm text-gray-500">Make your card public in the community</p>
-              </div>
-              <Switch
-                id="card-visibility"
-                checked={cardData.isPublic || false}
-                onCheckedChange={handleVisibilityChange}
-              />
-            </div>
+            <Switch
+              id="card-public"
+              checked={isPublic}
+              onCheckedChange={handleTogglePublic}
+            />
+          </div>
+          
+          {/* Additional notes */}
+          <div>
+            <Label htmlFor="card-notes">Additional Notes</Label>
+            <Textarea
+              id="card-notes"
+              placeholder="Add any notes about this card (not visible to others)"
+              className="mt-1"
+            />
           </div>
         </TabsContent>
         
         <TabsContent value="sharing" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer">
-              <div className="flex items-start">
-                <div className="bg-blue-100 rounded-lg p-2">
-                  <Share2 className="h-5 w-5 text-blue-600" />
-                </div>
-                <div className="ml-3">
-                  <h3 className="font-medium">Share Direct Link</h3>
-                  <p className="text-sm text-gray-500 mt-1">Share your card with a direct link</p>
-                </div>
-              </div>
-            </div>
-            
-            <div className="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer">
-              <div className="flex items-start">
-                <div className="bg-purple-100 rounded-lg p-2">
-                  <BookOpen className="h-5 w-5 text-purple-600" />
-                </div>
-                <div className="ml-3">
-                  <h3 className="font-medium">Add to Collection</h3>
-                  <p className="text-sm text-gray-500 mt-1">Add this card to one of your collections</p>
-                </div>
-              </div>
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <h3 className="font-medium text-sm mb-2">Share Your Card</h3>
+            <div className="flex items-center space-x-2">
+              <Input 
+                value="https://cardshow.com/card/example-id"
+                readOnly
+                className="flex-1"
+              />
+              <Button variant="outline" onClick={handleCopyLink}>
+                <Copy className="h-4 w-4" />
+              </Button>
             </div>
           </div>
           
-          <div className="bg-gray-50 p-4 rounded-md mt-4">
-            <h3 className="text-sm font-medium mb-1">Community Features</h3>
-            <p className="text-xs text-gray-500">
-              Public cards can be viewed, liked and commented on by the community.
-              You'll get notifications when someone interacts with your cards.
+          <div className="grid grid-cols-2 gap-2">
+            <Button variant="outline" className="w-full">
+              <MessageSquare className="h-4 w-4 mr-2" />
+              Message
+            </Button>
+            <Button variant="outline" className="w-full">
+              <Share className="h-4 w-4 mr-2" />
+              Social
+            </Button>
+          </div>
+          
+          <div className="bg-blue-50 p-4 rounded-lg">
+            <h3 className="font-medium text-sm mb-1">Collection</h3>
+            <p className="text-xs text-blue-800 mb-2">
+              Add this card to a collection to organize your cards
             </p>
+            <Button variant="outline" size="sm" className="w-full">
+              <Plus className="h-4 w-4 mr-2" />
+              Add to Collection
+            </Button>
           </div>
         </TabsContent>
         
         <TabsContent value="export" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer">
-              <div className="flex items-start">
-                <div className="bg-green-100 rounded-lg p-2">
-                  <Download className="h-5 w-5 text-green-600" />
-                </div>
-                <div className="ml-3">
-                  <h3 className="font-medium">Download Image</h3>
-                  <p className="text-sm text-gray-500 mt-1">Download as high resolution image</p>
-                </div>
-              </div>
-            </div>
-            
-            <div className="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer opacity-70">
-              <div className="flex items-start">
-                <div className="bg-amber-100 rounded-lg p-2">
-                  <Tag className="h-5 w-5 text-amber-600" />
-                </div>
-                <div className="ml-3">
-                  <h3 className="font-medium">Order Physical Card</h3>
-                  <p className="text-sm text-gray-500 mt-1">Coming soon!</p>
-                </div>
-              </div>
+          <div>
+            <h3 className="font-medium mb-2">Export Options</h3>
+            <div className="space-y-2">
+              <Button variant="outline" className="w-full justify-start">
+                <Download className="h-4 w-4 mr-2" />
+                Download as JPG
+              </Button>
+              <Button variant="outline" className="w-full justify-start">
+                <Download className="h-4 w-4 mr-2" />
+                Download as PNG
+              </Button>
+              <Button variant="outline" className="w-full justify-start">
+                <Download className="h-4 w-4 mr-2" />
+                Download as PDF
+              </Button>
             </div>
           </div>
           
-          <div className="bg-gray-50 p-4 rounded-md mt-4">
-            <h3 className="text-sm font-medium mb-1">Available Formats</h3>
-            <div className="flex flex-wrap gap-2 mt-2">
-              <Badge>JPG</Badge>
-              <Badge>PNG</Badge>
-              <Badge>PDF</Badge>
-              <Badge variant="outline">SVG (Coming Soon)</Badge>
+          <div className="border-t pt-4">
+            <h3 className="font-medium mb-2">Print Options</h3>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="print-ready">Print-ready version</Label>
+                <Switch id="print-ready" />
+              </div>
+              
+              <Button variant="outline" className="w-full">
+                Prepare for Printing
+              </Button>
             </div>
           </div>
         </TabsContent>

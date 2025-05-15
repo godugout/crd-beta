@@ -31,13 +31,31 @@ const TextStep: React.FC<TextStepProps> = ({ cardData, onUpdate }) => {
   // Get design metadata from card data or use default values
   const designMetadata = cardData.designMetadata || {
     textStyle: {
-      titleFont: 'Inter',
-      titleSize: '24px',
       titleColor: '#000000',
       titleAlignment: 'center',
-      descriptionFont: 'Inter',
-      descriptionSize: '16px',
+      titleWeight: 'bold',
       descriptionColor: '#333333',
+      fontFamily: 'Inter',
+      fontSize: '16px',
+    },
+    cardStyle: {
+      template: 'classic',
+      effect: 'none',
+      borderRadius: '8px',
+      borderColor: '#000000',
+      frameColor: '#000000',
+      frameWidth: 2,
+      shadowColor: 'rgba(0,0,0,0.2)',
+    },
+    cardMetadata: {
+      category: 'standard',
+      series: 'base',
+      cardType: 'player',
+    },
+    marketMetadata: {
+      isPrintable: false,
+      isForSale: false,
+      includeInCatalog: false,
     }
   };
   
@@ -140,8 +158,8 @@ const TextStep: React.FC<TextStepProps> = ({ cardData, onUpdate }) => {
           <div>
             <Label htmlFor="title-font">Title Font</Label>
             <Select
-              value={textStyle.titleFont || 'Inter'}
-              onValueChange={(value) => handleTextStyleChange('titleFont', value)}
+              value={textStyle.fontFamily || 'Inter'}
+              onValueChange={(value) => handleTextStyleChange('fontFamily', value)}
             >
               <SelectTrigger id="title-font">
                 <SelectValue placeholder="Select font" />
@@ -179,8 +197,8 @@ const TextStep: React.FC<TextStepProps> = ({ cardData, onUpdate }) => {
             <div>
               <Label htmlFor="title-size">Title Size</Label>
               <Select
-                value={textStyle.titleSize || '24px'}
-                onValueChange={(value) => handleTextStyleChange('titleSize', value)}
+                value={textStyle.fontSize || '24px'}
+                onValueChange={(value) => handleTextStyleChange('fontSize', value)}
               >
                 <SelectTrigger id="title-size">
                   <SelectValue placeholder="Select size" />

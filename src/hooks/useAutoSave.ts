@@ -1,96 +1,104 @@
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 interface AutoSaveOptions<T> {
   data: T;
   key: string;
   saveInterval?: number; // in milliseconds
-  onSave?: (data: T) => Promise<void> | void;
 }
 
 type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 
-export function useAutoSave<T>({
-  data,
-  key,
-  saveInterval = 30000, // default: 30 seconds
-  onSave
-}: AutoSaveOptions<T>) {
+export function useAutoSave<T>({ data, key, saveInterval = 60000 }: AutoSaveOptions<T>) {
   const [lastSaved, setLastSaved] = useState<number>(Date.now());
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
   const [error, setError] = useState<Error | null>(null);
-  const [isSaving, setIsSaving] = useState<boolean>(false);
-
-  // Save data to localStorage and optionally call the onSave callback
-  const saveData = useCallback(async () => {
+  const timeoutRef = useRef<number | null>(null);
+  const isSaving = saveStatus === 'saving';
+  
+  // Save data to localStorage
+  const saveData = async () => {
+    if (isSaving) return;
+    
+    setSaveStatus('saving');
+    
     try {
-      setIsSaving(true);
-      setSaveStatus('saving');
+      // Simulate async operation
+      await new Promise(resolve => setTimeout(resolve, 300));
       
-      // First save to localStorage
-      localStorage.setItem(key, JSON.stringify({
-        data,
-        timestamp: Date.now()
-      }));
+      // Save to localStorage
+      localStorage.setItem(key, JSON.stringify(data));
       
-      // Then call onSave callback if provided
-      if (onSave) {
-        await onSave(data);
-      }
-      
+      // Update state
       setLastSaved(Date.now());
       setSaveStatus('saved');
       setError(null);
     } catch (err) {
-      console.error('Error auto-saving data:', err);
       setSaveStatus('error');
-      setError(err instanceof Error ? err : new Error('Unknown error during autosave'));
-    } finally {
-      setIsSaving(false);
+      setError(err as Error);
+      console.error('Failed to save data:', err);
     }
-  }, [data, key, onSave]);
+  };
   
-  // Load data from localStorage on initial mount
-  useEffect(() => {
-    try {
-      const savedItem = localStorage.getItem(key);
-      if (savedItem) {
-        const { timestamp } = JSON.parse(savedItem);
-        setLastSaved(timestamp);
-      }
-    } catch (err) {
-      console.error('Error loading saved data:', err);
+  // Schedule auto-save
+  const scheduleAutoSave = () => {
+    if (timeoutRef.current !== null) {
+      window.clearTimeout(timeoutRef.current);
     }
-  }, [key]);
-  
-  // Set up interval for auto-saving
-  useEffect(() => {
-    const interval = setInterval(() => {
+    
+    timeoutRef.current = window.setTimeout(() => {
       saveData();
     }, saveInterval);
-    
-    return () => clearInterval(interval);
-  }, [saveData, saveInterval]);
+  };
   
-  // Save on unmount
+  // Set up auto-save when data changes
   useEffect(() => {
+    scheduleAutoSave();
+    
     return () => {
-      saveData();
+      if (timeoutRef.current !== null) {
+        window.clearTimeout(timeoutRef.current);
+      }
     };
-  }, [saveData]);
+  }, [data, saveInterval]);
   
-  // Manual save function that can be called from components
-  const save = useCallback(async () => {
-    await saveData();
-  }, [saveData]);
-
+  // Load data on initial render
+  useEffect(() => {
+    const loadSavedData = () => {
+      try {
+        const savedData = localStorage.getItem(key);
+        if (savedData) {
+          const parsedData = JSON.parse(savedData);
+          return parsedData;
+        }
+      } catch (err) {
+        console.error('Failed to load saved data:', err);
+      }
+      return null;
+    };
+    
+    // Initial load (optional implementation)
+    // const initialData = loadSavedData();
+    // if (initialData) {
+    //   // Handle loading initial data 
+    // }
+  }, [key]);
+  
+  // Manual save function
+  const saveNow = () => {
+    if (timeoutRef.current !== null) {
+      window.clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+    
+    return saveData();
+  };
+  
   return {
+    saveNow,
     lastSaved,
-    save,
     isSaving,
     saveStatus,
     error
   };
 }
-
-export default useAutoSave;

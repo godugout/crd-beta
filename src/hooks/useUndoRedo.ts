@@ -1,77 +1,49 @@
 
 import { useState, useCallback } from 'react';
 
-interface UndoRedoState<T> {
-  past: T[];
-  present: T;
-  future: T[];
-}
-
 export function useUndoRedo<T>(initialState: T) {
-  const [state, setState] = useState<UndoRedoState<T>>({
-    past: [],
-    present: initialState,
-    future: []
-  });
+  const [state, setState] = useState<T>(initialState);
+  const [past, setPast] = useState<T[]>([]);
+  const [future, setFuture] = useState<T[]>([]);
   
-  const canUndo = state.past.length > 0;
-  const canRedo = state.future.length > 0;
-  
-  const undo = useCallback(() => {
-    if (!canUndo) return;
-    
-    const newPresent = state.past[state.past.length - 1];
-    
-    setState({
-      past: state.past.slice(0, state.past.length - 1),
-      present: newPresent,
-      future: [state.present, ...state.future]
-    });
-  }, [state, canUndo]);
-  
-  const redo = useCallback(() => {
-    if (!canRedo) return;
-    
-    const newPresent = state.future[0];
-    
-    setState({
-      past: [...state.past, state.present],
-      present: newPresent,
-      future: state.future.slice(1)
-    });
-  }, [state, canRedo]);
-  
-  const addToHistory = useCallback((newPresent: T) => {
-    setState({
-      past: [...state.past, state.present],
-      present: newPresent,
-      future: []
-    });
+  // Update state and move current state to past
+  const addToHistory = useCallback((newState: T) => {
+    setPast(prev => [...prev, state]);
+    setState(newState);
+    setFuture([]); // Clear redo history when a new action is performed
   }, [state]);
   
-  const resetHistory = useCallback((newPresent: T) => {
-    setState({
-      past: [],
-      present: newPresent,
-      future: []
-    });
-  }, []);
+  // Undo: go back to the previous state
+  const undo = useCallback(() => {
+    if (past.length === 0) return;
+    
+    const previous = past[past.length - 1];
+    const newPast = past.slice(0, past.length - 1);
+    
+    setFuture(prev => [state, ...prev]);
+    setState(previous);
+    setPast(newPast);
+  }, [past, state]);
+  
+  // Redo: go forward to the next state
+  const redo = useCallback(() => {
+    if (future.length === 0) return;
+    
+    const next = future[0];
+    const newFuture = future.slice(1);
+    
+    setPast(prev => [...prev, state]);
+    setState(next);
+    setFuture(newFuture);
+  }, [future, state]);
   
   return {
-    state: state.present,
+    state,
     setState: addToHistory,
-    resetHistory,
     undo,
     redo,
-    canUndo,
-    canRedo,
     addToHistory,
-    history: {
-      past: state.past,
-      present: state.present,
-      future: state.future
-    }
+    canUndo: past.length > 0,
+    canRedo: future.length > 0,
   };
 }
-
-export default useUndoRedo;
