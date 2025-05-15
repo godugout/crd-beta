@@ -1,9 +1,10 @@
 
 import { useEffect, useCallback } from 'react';
-import { toast } from '@/lib/utils/toast';
+import { toast } from 'sonner';
+import { Canvas, Object as FabricObject } from 'fabric';
 
 interface UseFabricKeyboardProps {
-  canvas: fabric.Canvas | null;
+  canvas: Canvas | null;
   onSave?: () => void;
   onDelete?: () => void;
   onDuplicate?: () => void;
@@ -29,10 +30,7 @@ export function useFabricKeyboard({
         onDelete();
       }
       
-      toast({
-        title: "Object deleted",
-        description: "Selected object was removed"
-      });
+      toast("Object deleted");
     }
   }, [canvas, onDelete]);
 
@@ -45,15 +43,15 @@ export function useFabricKeyboard({
     
     // Store selected object in clipboard
     // Note: This uses a simplified approach. In a real app, you'd serialize the object properly.
-    canvas._clipboard = activeObject;
+    (canvas as any)._clipboard = activeObject;
   }, [canvas]);
 
   // Paste copied objects
   const handlePaste = useCallback(() => {
-    if (!canvas || !canvas._clipboard) return;
+    if (!canvas || !(canvas as any)._clipboard) return;
     
     // Clone the clipboard object
-    canvas._clipboard.clone((cloned: fabric.Object) => {
+    (canvas as any)._clipboard.clone((cloned: FabricObject) => {
       // Position slightly offset from original
       cloned.set({
         left: (cloned.left || 0) + 10,
@@ -63,11 +61,11 @@ export function useFabricKeyboard({
       
       // If it's a group, remake it a proper group
       if (cloned.type === 'group') {
-        cloned.canvas = canvas;
-        cloned.forEachObject((obj: fabric.Object) => {
+        (cloned as any).canvas = canvas;
+        (cloned as any).forEachObject((obj: FabricObject) => {
           canvas.add(obj);
         });
-        canvas.setActiveGroup(cloned as any).renderAll();
+        (canvas as any).setActiveGroup(cloned as any).renderAll();
       } else {
         canvas.add(cloned);
       }
@@ -75,10 +73,7 @@ export function useFabricKeyboard({
       canvas.setActiveObject(cloned);
       canvas.renderAll();
       
-      toast({
-        title: "Object pasted",
-        description: "Copied object was pasted"
-      });
+      toast("Object pasted");
     });
   }, [canvas]);
 
@@ -90,7 +85,7 @@ export function useFabricKeyboard({
     if (!activeObject) return;
     
     // Clone the active object
-    activeObject.clone((cloned: fabric.Object) => {
+    activeObject.clone((cloned: FabricObject) => {
       // Position slightly offset from original
       cloned.set({
         left: (activeObject.left || 0) + 10,
@@ -107,10 +102,7 @@ export function useFabricKeyboard({
         onDuplicate();
       }
       
-      toast({
-        title: "Object duplicated",
-        description: "Selected object was duplicated"
-      });
+      toast("Object duplicated");
     });
   }, [canvas, onDuplicate]);
 
@@ -119,10 +111,7 @@ export function useFabricKeyboard({
     if (!onSave) return;
     
     onSave();
-    toast({
-      title: "Card saved",
-      description: "Your changes have been saved"
-    });
+    toast("Card saved");
   }, [onSave]);
 
   // Set up keyboard event listeners

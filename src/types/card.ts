@@ -25,6 +25,26 @@ export interface Card {
 }
 
 /**
+ * CardData type for use in components that need card data
+ */
+export interface CardData {
+  id: string;
+  title: string;
+  description: string;
+  imageUrl: string;
+  thumbnailUrl?: string;
+  tags: string[];
+  player?: string;
+  team?: string;
+  year?: string;
+  effects: string[];
+  designMetadata: CardDesignMetadata;
+  userId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
  * Effect Setting Interface
  * Configuration options for card effects
  */

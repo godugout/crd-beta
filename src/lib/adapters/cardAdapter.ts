@@ -1,92 +1,42 @@
 
-import { Card } from '@/lib/types/cardTypes';
-import { v4 as uuidv4 } from 'uuid';
+import { Card as CardType } from '@/lib/types/cardTypes';
+import { CardData } from '@/types/card';
 
-// Default card structure with required fields
-export const createEmptyCard = (): Card => {
+/**
+ * Adapts a Card from the internal type to the schema expected by components
+ */
+export const adaptCardToSchema = (card: CardType): CardData => {
   return {
-    id: uuidv4(),
-    title: '',
-    description: '',
-    imageUrl: '',
-    tags: [],
-    userId: '',
-    effects: [],
-    designMetadata: {
-      cardStyle: {
-        template: 'basic',
-        effect: 'none',
-        borderRadius: '12px',
-        borderColor: '#000000',
-        shadowColor: '#000000',
-        frameWidth: 0,
-        frameColor: '#000000'
-      },
-      textStyle: {
-        fontFamily: 'Inter',
-        fontSize: '16px',
-        fontWeight: '400',
-        titleColor: '#000000',
-        titleAlignment: 'center',
-        titleWeight: 'bold',
-        descriptionColor: '#333333'
-      },
+    id: card.id,
+    title: card.title,
+    description: card.description || '',  // Ensure description is not undefined
+    imageUrl: card.imageUrl || card.image || '', // Handle both imageUrl and legacy image property
+    thumbnailUrl: card.thumbnailUrl,
+    tags: card.tags || [],
+    player: card.player,
+    team: card.team,
+    year: card.year,
+    effects: card.effects || [],
+    designMetadata: card.designMetadata || {
+      cardStyle: {},
+      textStyle: {},
       cardMetadata: {},
       marketMetadata: {}
     },
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    userId: card.userId || '',
+    createdAt: card.createdAt,
+    updatedAt: card.updatedAt
   };
 };
 
-// Function to adapt any card-like object to a standard Card type
-export const adaptToCard = (source: any): Card => {
-  // Start with an empty card
-  const baseCard = createEmptyCard();
-  
-  // Merge the source data with our base card, with proper fallbacks
-  const adaptedCard: Card = {
-    ...baseCard,
-    ...source,
-    // Ensure designMetadata exists and has the right structure
-    designMetadata: {
-      ...baseCard.designMetadata,
-      ...(source.designMetadata || {}),
-      // Ensure cardStyle exists and has required fields
-      cardStyle: {
-        ...baseCard.designMetadata.cardStyle,
-        ...(source.designMetadata?.cardStyle || {})
-      },
-      // Ensure textStyle exists and has required fields
-      textStyle: {
-        ...baseCard.designMetadata.textStyle,
-        ...(source.designMetadata?.textStyle || {})
-      },
-      // Ensure other metadata structures exist
-      cardMetadata: {
-        ...baseCard.designMetadata.cardMetadata,
-        ...(source.designMetadata?.cardMetadata || {})
-      },
-      marketMetadata: {
-        ...baseCard.designMetadata.marketMetadata,
-        ...(source.designMetadata?.marketMetadata || {})
-      }
-    },
-    // Ensure tags is an array
-    tags: Array.isArray(source.tags) ? source.tags : baseCard.tags,
-    // Ensure effects is an array
-    effects: Array.isArray(source.effects) ? source.effects : baseCard.effects,
-  };
-  
-  // Ensure thumbnail exists or use main image
-  if (!adaptedCard.thumbnailUrl && adaptedCard.imageUrl) {
-    adaptedCard.thumbnailUrl = adaptedCard.imageUrl;
-  }
-  
-  return adaptedCard;
+/**
+ * Adapts multiple cards from internal types to the schema expected by components
+ */
+export const adaptCardsToSchema = (cards: CardType[]): CardData[] => {
+  return cards.map(adaptCardToSchema);
 };
 
-// Function to convert an array of card-like objects to Card[] type
-export const adaptCardsArray = (cards: any[]): Card[] => {
-  return cards.map(card => adaptToCard(card));
+export default {
+  adaptCardToSchema,
+  adaptCardsToSchema
 };

@@ -1,170 +1,122 @@
 
-import { useEffect, useRef, useCallback } from 'react';
-import { toast } from '@/lib/utils/toast';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
-interface AutoSaveOptions<T> {
+export interface AutoSaveOptions<T> {
   data: T;
-  onSave: (data: T) => Promise<void>;
-  interval?: number;
-  debounce?: number;
-  enabled?: boolean;
-  onSuccess?: () => void;
-  onError?: (error: any) => void;
-  showNotifications?: boolean;
+  key: string; // Storage key
+  saveInterval?: number; // Autosave interval in ms
+  storageType?: 'localStorage' | 'sessionStorage';
+  onSave?: (data: T) => Promise<void>; // Optional custom save handler
 }
 
+export interface AutoSaveResult {
+  save: () => Promise<void>;
+  triggerDebouncedSave: () => void;
+  hasChanges: boolean;
+  isSaving: boolean;
+  isAutoSaveEnabled: boolean;
+  lastSaved: number; // Timestamp of last save
+  saveStatus: 'idle' | 'saving' | 'saved' | 'error';
+}
+
+/**
+ * Hook for automatically saving data at regular intervals
+ */
 export function useAutoSave<T>({
   data,
-  onSave,
-  interval = 60000, // Default to 1 minute
-  debounce = 2000,  // Default to 2 seconds
-  enabled = true,
-  onSuccess,
-  onError,
-  showNotifications = true
-}: AutoSaveOptions<T>) {
-  // Reference to the current data to save
+  key,
+  saveInterval = 30000, // Default to 30 seconds
+  storageType = 'localStorage',
+  onSave
+}: AutoSaveOptions<T>): AutoSaveResult {
+  const [isSaving, setIsSaving] = useState(false);
+  const [lastSaved, setLastSaved] = useState(Date.now());
+  const [hasChanges, setHasChanges] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const [isAutoSaveEnabled] = useState(saveInterval > 0);
+  
   const dataRef = useRef<T>(data);
-  
-  // Flag to track pending changes
-  const hasChangesRef = useRef<boolean>(false);
-  
-  // Flag to track if save is in progress
-  const isSavingRef = useRef<boolean>(false);
-  
-  // Track last saved data for comparison
-  const lastSavedDataRef = useRef<string>(JSON.stringify(data));
-  
-  // Track the timeout IDs for interval and debounce
-  const intervalTimerRef = useRef<number | null>(null);
-  const debounceTimerRef = useRef<number | null>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Update ref when data changes
   useEffect(() => {
-    dataRef.current = data;
-    
-    // Check if data has changed since last save
-    const currentDataString = JSON.stringify(data);
-    if (lastSavedDataRef.current !== currentDataString) {
-      hasChangesRef.current = true;
+    const hasDataChanged = JSON.stringify(dataRef.current) !== JSON.stringify(data);
+    if (hasDataChanged) {
+      dataRef.current = data;
+      setHasChanges(true);
     }
   }, [data]);
 
-  // Function to execute the save
-  const saveData = useCallback(async () => {
-    // If already saving or no changes, skip
-    if (isSavingRef.current || !hasChangesRef.current || !enabled) {
-      return;
-    }
-
+  // Save function
+  const save = useCallback(async () => {
+    if (isSaving) return;
+    
+    setIsSaving(true);
+    setSaveStatus('saving');
+    
     try {
-      isSavingRef.current = true;
-      
-      // Show notification
-      let toastId: string | undefined;
-      if (showNotifications) {
-        toastId = toast({
-          title: "Saving changes...",
-          description: "Your changes are being saved automatically"
-        });
+      if (onSave) {
+        // Use custom save function if provided
+        await onSave(dataRef.current);
+      } else {
+        // Default storage implementation
+        const storage = storageType === 'localStorage' ? localStorage : sessionStorage;
+        storage.setItem(key, JSON.stringify(dataRef.current));
       }
       
-      // Execute the save function
-      await onSave(dataRef.current);
-      
-      // Update last saved data
-      lastSavedDataRef.current = JSON.stringify(dataRef.current);
-      hasChangesRef.current = false;
-      
-      // Show success notification
-      if (showNotifications) {
-        toast({
-          title: "Changes saved",
-          description: "Your changes have been saved automatically",
-          variant: "success"
-        });
-      }
-      
-      // Call success callback if provided
-      if (onSuccess) {
-        onSuccess();
-      }
+      setLastSaved(Date.now());
+      setHasChanges(false);
+      setSaveStatus('saved');
     } catch (error) {
-      // Show error notification
-      if (showNotifications) {
-        toast({
-          title: "Save failed",
-          description: "There was an error saving your changes",
-          variant: "destructive"
-        });
-      }
-      
-      // Call error callback if provided
-      if (onError) {
-        onError(error);
-      }
+      console.error('AutoSave error:', error);
+      setSaveStatus('error');
     } finally {
-      isSavingRef.current = false;
+      setIsSaving(false);
     }
-  }, [onSave, enabled, onSuccess, onError, showNotifications]);
+  }, [isSaving, key, onSave, storageType]);
 
-  // Function to trigger a debounced save
+  // Debounced save trigger
   const triggerDebouncedSave = useCallback(() => {
-    // Clear any existing debounce timer
-    if (debounceTimerRef.current) {
-      window.clearTimeout(debounceTimerRef.current);
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
     }
     
-    // Set new debounce timer
-    debounceTimerRef.current = window.setTimeout(() => {
-      saveData();
-    }, debounce);
-  }, [debounce, saveData]);
+    timeoutRef.current = setTimeout(() => {
+      if (hasChanges) {
+        save();
+      }
+    }, 1000); // 1 second debounce
+  }, [hasChanges, save]);
 
-  // Set up interval auto-save
+  // Set up autosave interval
   useEffect(() => {
-    if (!enabled) return;
+    if (!isAutoSaveEnabled) return;
     
-    // Set initial interval timer
-    intervalTimerRef.current = window.setInterval(() => {
-      if (hasChangesRef.current) {
-        saveData();
+    const interval = setInterval(() => {
+      if (hasChanges) {
+        save();
       }
-    }, interval);
+    }, saveInterval);
     
-    // Clean up timers on unmount
+    return () => clearInterval(interval);
+  }, [hasChanges, save, saveInterval, isAutoSaveEnabled]);
+
+  // Cleanup on unmount
+  useEffect(() => {
     return () => {
-      if (intervalTimerRef.current) {
-        window.clearInterval(intervalTimerRef.current);
-      }
-      if (debounceTimerRef.current) {
-        window.clearTimeout(debounceTimerRef.current);
-      }
-      
-      // Save any pending changes before unmounting
-      if (hasChangesRef.current) {
-        saveData();
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
       }
     };
-  }, [enabled, interval, saveData]);
+  }, []);
 
-  // Function to manually trigger a save
-  const save = useCallback(() => {
-    // Clear any pending debounce timer
-    if (debounceTimerRef.current) {
-      window.clearTimeout(debounceTimerRef.current);
-      debounceTimerRef.current = null;
-    }
-    
-    return saveData();
-  }, [saveData]);
-
-  // Return the manual save function and ability to check if auto-save is active
   return {
     save,
     triggerDebouncedSave,
-    hasChanges: hasChangesRef.current,
-    isSaving: isSavingRef.current,
-    isAutoSaveEnabled: enabled
+    hasChanges,
+    isSaving,
+    isAutoSaveEnabled,
+    lastSaved,
+    saveStatus
   };
 }

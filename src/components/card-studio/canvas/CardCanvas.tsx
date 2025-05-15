@@ -1,187 +1,173 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { Card } from '@/lib/types/cardTypes';
-import { fabric } from 'fabric';
-import { ChevronLeft, ChevronRight, Plus, Minus } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 
 interface CardCanvasProps {
-  template?: any;
-  onReady?: (canvas: HTMLCanvasElement) => void;
   cardData: Partial<Card>;
-  onUpdate: (updates: Partial<Card>) => void;
+  onUpdate?: (updates: Partial<Card>) => void;
+  readOnly?: boolean;
 }
 
-const CardCanvas: React.FC<CardCanvasProps> = ({ 
-  template = {}, 
-  onReady,
-  cardData,
-  onUpdate
-}) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const fabricRef = useRef<fabric.Canvas | null>(null);
-  const [zoom, setZoom] = useState(1);
-  
+const DEFAULT_CARD_STYLE = {
+  template: 'classic',
+  effect: 'none',
+  borderRadius: '8px',
+  borderWidth: 2,
+  borderColor: '#000000',
+  backgroundColor: '#FFFFFF',
+  shadowColor: 'rgba(0,0,0,0.2)',
+  frameWidth: 2,
+  frameColor: '#000000',
+};
+
+const DEFAULT_TEXT_STYLE = {
+  fontFamily: 'Inter',
+  fontSize: '16px',
+  fontWeight: 'normal',
+  color: '#000000',
+  titleColor: '#000000',
+  titleAlignment: 'center',
+  titleWeight: 'bold',
+  descriptionColor: '#333333',
+};
+
+const CardCanvas: React.FC<CardCanvasProps> = ({ cardData, onUpdate, readOnly = false }) => {
+  const canvasRef = useRef<HTMLDivElement>(null);
+  const [isInteracting, setIsInteracting] = useState(false);
+
+  // Extract card style from cardData or use defaults
+  const cardStyle = cardData.designMetadata?.cardStyle || DEFAULT_CARD_STYLE;
+  const textStyle = cardData.designMetadata?.textStyle || DEFAULT_TEXT_STYLE;
+
+  // Set up canvas interaction handlers
   useEffect(() => {
-    if (!canvasRef.current) return;
-    
-    // Initialize fabric canvas if it doesn't exist
-    if (!fabricRef.current) {
-      fabricRef.current = new fabric.Canvas(canvasRef.current, {
-        width: 300,
-        height: 420,
-        preserveObjectStacking: true,
-        selection: true,
-        backgroundColor: '#FFFFFF'
-      });
-      
-      // Call onReady callback if provided
-      if (onReady && canvasRef.current) {
-        onReady(canvasRef.current);
-      }
-    }
-    
-    const canvas = fabricRef.current;
-    const designMetadata = cardData.designMetadata || {};
-    const cardStyle = designMetadata.cardStyle || {};
-    const textStyle = designMetadata.textStyle || {};
-    
-    // Clear canvas
-    canvas.clear();
-    
-    // Set background color
-    canvas.backgroundColor = cardStyle.backgroundColor || '#FFFFFF';
-    
-    // Add background image if exists
-    if (cardData.imageUrl) {
-      fabric.Image.fromURL(cardData.imageUrl, (img) => {
-        // Scale image to fit canvas
-        const canvasWidth = canvas.width || 300;
-        const canvasHeight = canvas.height || 420;
-        
-        const scale = Math.min(
-          canvasWidth / (img.width || 1),
-          canvasHeight / (img.height || 1)
-        );
-        
-        img.scale(scale);
-        
-        // Center image
-        img.set({
-          left: canvasWidth / 2,
-          top: canvasHeight / 2,
-          originX: 'center',
-          originY: 'center',
-          selectable: true
-        });
-        
-        canvas.add(img);
-        canvas.renderAll();
-      });
-    }
-    
-    // Add title text if exists
-    if (cardData.title) {
-      const titleText = new fabric.Text(cardData.title, {
-        left: (canvas.width || 300) / 2,
-        top: 30,
-        fontSize: parseInt(textStyle.fontSize || '20'),
-        fontFamily: textStyle.fontFamily || 'Arial',
-        fontWeight: textStyle.titleWeight || 'bold',
-        fill: textStyle.titleColor || '#000000',
-        textAlign: (textStyle.titleAlignment as any) || 'center',
-        originX: 'center',
-        selectable: true
-      });
-      
-      canvas.add(titleText);
-    }
-    
-    // Add description if exists
-    if (cardData.description) {
-      const descriptionText = new fabric.Text(cardData.description, {
-        left: (canvas.width || 300) / 2,
-        top: (canvas.height || 420) - 50,
-        fontSize: parseInt(textStyle.fontSize || '14'),
-        fontFamily: textStyle.fontFamily || 'Arial',
-        fill: textStyle.descriptionColor || '#333333',
-        textAlign: 'center',
-        originX: 'center',
-        width: (canvas.width || 300) * 0.8,
-        selectable: true
-      });
-      
-      canvas.add(descriptionText);
-    }
-    
-    // Add border if needed
-    if (cardStyle.borderWidth && cardStyle.borderColor) {
-      const border = new fabric.Rect({
-        left: 0,
-        top: 0,
-        width: canvas.width || 300,
-        height: canvas.height || 420,
-        fill: 'transparent',
-        stroke: cardStyle.borderColor,
-        strokeWidth: cardStyle.borderWidth,
-        selectable: false
-      });
-      
-      canvas.add(border);
-    }
-    
-    canvas.renderAll();
-    
-    // Set up event listeners for object modifications
-    canvas.on('object:modified', (e) => {
-      // Handle object modification here
-      // For example, update text content if a text object was modified
-      if (e.target instanceof fabric.Text) {
-        const text = e.target.text;
-        if (e.target === titleText) {
-          onUpdate({ title: text });
-        } else if (e.target === descriptionText) {
-          onUpdate({ description: text });
-        }
-      }
-    });
-    
-    // Clean up function
-    return () => {
-      canvas.off('object:modified');
+    if (readOnly || !canvasRef.current) return;
+
+    const handleMouseDown = (e: MouseEvent) => {
+      if (!onUpdate) return;
+      setIsInteracting(true);
+      // Interaction logic could be added here
     };
-  }, [cardData, onReady, onUpdate]);
-  
-  // Zoom functions
-  const handleZoomIn = () => {
-    if (!fabricRef.current) return;
-    fabricRef.current.setZoom(zoom + 0.1);
-    setZoom(zoom + 0.1);
-  };
-  
-  const handleZoomOut = () => {
-    if (!fabricRef.current) return;
-    if (zoom > 0.2) {
-      fabricRef.current.setZoom(zoom - 0.1);
-      setZoom(zoom - 0.1);
+
+    const handleMouseUp = () => {
+      setIsInteracting(false);
+    };
+
+    const element = canvasRef.current;
+    element.addEventListener('mousedown', handleMouseDown);
+    window.addEventListener('mouseup', handleMouseUp);
+
+    return () => {
+      element.removeEventListener('mousedown', handleMouseDown);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [readOnly, onUpdate]);
+
+  // Build card class names based on active effects
+  const getCardClassNames = () => {
+    const classes = ['card-canvas'];
+    
+    if (cardData.effects) {
+      if (cardData.effects.includes('holographic')) classes.push('holographic-effect');
+      if (cardData.effects.includes('refractor')) classes.push('refractor-effect');
+      if (cardData.effects.includes('gold-foil')) classes.push('gold-foil-effect');
     }
+    
+    return classes.join(' ');
   };
-  
+
   return (
-    <div className="card-canvas-container relative">
-      <canvas 
-        ref={canvasRef} 
-        className="w-full h-full object-contain border rounded shadow-sm"
-      />
+    <div
+      ref={canvasRef}
+      className={getCardClassNames()}
+      style={{
+        width: '100%',
+        maxWidth: '400px',
+        height: '560px',
+        margin: '0 auto',
+        borderRadius: cardStyle.borderRadius,
+        backgroundColor: cardStyle.backgroundColor,
+        boxShadow: `0 4px 8px ${cardStyle.shadowColor}`,
+        border: `${cardStyle.borderWidth}px solid ${cardStyle.borderColor}`,
+        overflow: 'hidden',
+        position: 'relative',
+        userSelect: 'none',
+        cursor: readOnly ? 'default' : 'pointer',
+      }}
+    >
+      {/* Card image */}
+      {cardData.imageUrl && (
+        <div className="card-image-container" style={{
+          position: 'absolute',
+          top: '0',
+          left: '0',
+          width: '100%',
+          height: '100%',
+          zIndex: 1,
+        }}>
+          <img 
+            src={cardData.imageUrl}
+            alt={cardData.title || 'Card image'}
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              objectPosition: 'center',
+            }}
+          />
+        </div>
+      )}
       
-      <div className="absolute bottom-2 right-2 flex gap-1">
-        <Button variant="outline" size="icon" onClick={handleZoomOut}>
-          <Minus className="h-4 w-4" />
-        </Button>
-        <Button variant="outline" size="icon" onClick={handleZoomIn}>
-          <Plus className="h-4 w-4" />
-        </Button>
+      {/* Card title and description overlay */}
+      <div className="card-content" style={{
+        position: 'absolute',
+        bottom: '0',
+        left: '0',
+        right: '0',
+        padding: '20px',
+        background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%)',
+        color: '#fff',
+        zIndex: 2,
+      }}>
+        {cardData.title && (
+          <h3
+            style={{
+              fontSize: '1.5rem',
+              fontWeight: textStyle.titleWeight,
+              marginBottom: '0.5rem',
+              color: textStyle.titleColor,
+              textAlign: textStyle.titleAlignment as any,
+            }}
+          >
+            {cardData.title}
+          </h3>
+        )}
+        
+        {cardData.description && (
+          <p
+            style={{
+              fontSize: '0.9rem',
+              color: textStyle.descriptionColor,
+              margin: 0,
+            }}
+          >
+            {cardData.description}
+          </p>
+        )}
       </div>
+      
+      {/* Handle interactions overlay (only when not readOnly) */}
+      {!readOnly && (
+        <div className="card-interactions" style={{
+          position: 'absolute',
+          top: '0',
+          left: '0',
+          width: '100%',
+          height: '100%',
+          zIndex: isInteracting ? 100 : 3,
+          pointerEvents: 'none',
+        }} />
+      )}
     </div>
   );
 };

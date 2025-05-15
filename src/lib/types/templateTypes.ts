@@ -18,6 +18,8 @@ export interface CardTemplate {
   textStyle: Partial<TextStyle>;
   layers?: any[];
   effects?: string[];
+  backgroundColor?: string;
+  imageUrl?: string;
   [key: string]: any;
 }
 
