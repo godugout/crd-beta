@@ -4,12 +4,10 @@ import { Card } from '@/lib/types/cardTypes';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
-import { X, Plus, Download, Share, Copy, MessageSquare } from 'lucide-react';
-import { useToast } from '@/components/ui/use-toast';
-import { Textarea } from '@/components/ui/textarea';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
+import { Plus, X } from 'lucide-react';
+import { toastUtils } from '@/lib/utils/toast-utils';
 
 interface FinalizeStepProps {
   cardData: Partial<Card>;
@@ -17,199 +15,243 @@ interface FinalizeStepProps {
 }
 
 const FinalizeStep: React.FC<FinalizeStepProps> = ({ cardData, onUpdate }) => {
-  const { toast } = useToast();
-  const [tags, setTags] = useState<string[]>(cardData.tags || []);
-  const [newTag, setNewTag] = useState<string>('');
-  const [isPublic, setIsPublic] = useState<boolean>(!!cardData.isPublic);
+  const [tagInput, setTagInput] = useState<string>('');
   
+  // Metadata defaults with fallbacks
+  const marketMetadata = cardData.designMetadata?.marketMetadata || {
+    price: 0,
+    currency: 'USD',
+    availableForSale: false,
+    editionSize: 1,
+    editionNumber: 1,
+  };
+  
+  const cardMetadata = cardData.designMetadata?.cardMetadata || {
+    category: 'general',
+    series: 'base',
+    cardType: 'standard',
+  };
+
   // Handle adding a new tag
-  const handleAddTag = () => {
-    if (newTag && !tags.includes(newTag)) {
-      const updatedTags = [...tags, newTag];
-      setTags(updatedTags);
-      onUpdate({ tags: updatedTags });
-      setNewTag('');
+  const handleAddTag = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!tagInput.trim()) return;
+    
+    // Check if tag already exists
+    const currentTags = cardData.tags || [];
+    if (currentTags.includes(tagInput.trim().toLowerCase())) {
+      toastUtils.info(
+        "Tag already exists",
+        "This tag is already added to the card"
+      );
+      return;
     }
+    
+    // Add the new tag
+    onUpdate({ 
+      tags: [...currentTags, tagInput.trim().toLowerCase()]
+    });
+    
+    // Reset input
+    setTagInput('');
   };
   
   // Handle removing a tag
   const handleRemoveTag = (tagToRemove: string) => {
-    const updatedTags = tags.filter(tag => tag !== tagToRemove);
-    setTags(updatedTags);
+    const updatedTags = (cardData.tags || []).filter(tag => tag !== tagToRemove);
     onUpdate({ tags: updatedTags });
   };
   
-  // Handle toggle for public/private
-  const handleTogglePublic = (checked: boolean) => {
-    setIsPublic(checked);
-    onUpdate({ isPublic: checked });
+  // Update market metadata
+  const handleMarketMetadataChange = (key: keyof typeof marketMetadata, value: any) => {
+    onUpdate({
+      designMetadata: {
+        ...cardData.designMetadata,
+        marketMetadata: {
+          ...marketMetadata,
+          [key]: value
+        }
+      }
+    });
   };
   
-  // Handle copy link
-  const handleCopyLink = () => {
-    // In a real app, this would copy a link to the clipboard
-    toast({
-      title: "Link Copied",
-      description: "Card link copied to clipboard",
+  // Update card metadata
+  const handleCardMetadataChange = (key: keyof typeof cardMetadata, value: any) => {
+    onUpdate({
+      designMetadata: {
+        ...cardData.designMetadata,
+        cardMetadata: {
+          ...cardMetadata,
+          [key]: value
+        }
+      }
     });
   };
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-lg font-medium">Finalize Your Card</h2>
-        <p className="text-sm text-gray-500 mt-1">
-          Add final details and prepare your card for sharing
-        </p>
+      <h2 className="text-xl font-semibold">Finalize Card</h2>
+      
+      {/* Basic card details */}
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="title">Card Title</Label>
+          <Input
+            id="title"
+            value={cardData.title || ''}
+            onChange={(e) => onUpdate({ title: e.target.value })}
+            placeholder="Enter card title"
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="description">Description</Label>
+          <Input
+            id="description"
+            value={cardData.description || ''}
+            onChange={(e) => onUpdate({ description: e.target.value })}
+            placeholder="Brief description of the card"
+          />
+        </div>
       </div>
       
-      <Tabs defaultValue="metadata">
-        <TabsList className="grid grid-cols-3 mb-6">
-          <TabsTrigger value="metadata">Metadata</TabsTrigger>
-          <TabsTrigger value="sharing">Sharing</TabsTrigger>
-          <TabsTrigger value="export">Export</TabsTrigger>
-        </TabsList>
+      {/* Tags input */}
+      <div className="space-y-2">
+        <Label htmlFor="tags">Tags</Label>
+        <form onSubmit={handleAddTag} className="flex gap-2">
+          <Input
+            id="tags"
+            value={tagInput}
+            onChange={(e) => setTagInput(e.target.value)}
+            placeholder="Add tags to help find your card"
+          />
+          <Button type="submit" size="sm">
+            <Plus className="h-4 w-4 mr-1" /> Add
+          </Button>
+        </form>
         
-        <TabsContent value="metadata" className="space-y-4">
-          {/* Tags input */}
-          <div>
-            <Label htmlFor="tags">Tags</Label>
-            <div className="flex items-center space-x-2 mt-1">
+        {/* Display tags */}
+        <div className="flex flex-wrap gap-2 mt-2">
+          {(cardData.tags || []).map(tag => (
+            <Badge key={tag} variant="secondary" className="flex items-center gap-1">
+              {tag}
+              <button
+                type="button"
+                onClick={() => handleRemoveTag(tag)}
+                className="focus:outline-none"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </Badge>
+          ))}
+          
+          {(cardData.tags || []).length === 0 && (
+            <p className="text-sm text-gray-500">No tags added yet</p>
+          )}
+        </div>
+      </div>
+      
+      {/* Card metadata */}
+      <div className="space-y-4">
+        <h3 className="font-medium">Card Details</h3>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="category">Category</Label>
+            <Input
+              id="category"
+              value={cardMetadata.category || ''}
+              onChange={(e) => handleCardMetadataChange('category', e.target.value)}
+              placeholder="e.g., Sports, Collectible, Special"
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="series">Series</Label>
+            <Input
+              id="series"
+              value={cardMetadata.series || ''}
+              onChange={(e) => handleCardMetadataChange('series', e.target.value)}
+              placeholder="e.g., Base, Limited Edition"
+            />
+          </div>
+        </div>
+      </div>
+      
+      {/* Market metadata */}
+      <div className="space-y-4">
+        <h3 className="font-medium">Market Information</h3>
+        
+        <div className="flex items-center space-x-2">
+          <Switch
+            id="available-for-sale"
+            checked={!!marketMetadata.availableForSale}
+            onCheckedChange={(checked) => 
+              handleMarketMetadataChange('availableForSale', checked)
+            }
+          />
+          <Label htmlFor="available-for-sale">Available for sale</Label>
+        </div>
+        
+        {marketMetadata.availableForSale && (
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="price">Price</Label>
               <Input
-                id="tags"
-                placeholder="Add tag (e.g., rookie, vintage)"
-                value={newTag}
-                onChange={(e) => setNewTag(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    handleAddTag();
-                  }
-                }}
-                className="flex-1"
+                id="price"
+                type="number"
+                min="0"
+                step="0.01"
+                value={marketMetadata.price?.toString() || '0'}
+                onChange={(e) => handleMarketMetadataChange('price', parseFloat(e.target.value) || 0)}
+                className="w-full"
               />
-              <Button variant="outline" onClick={handleAddTag} disabled={!newTag}>
-                <Plus className="h-4 w-4" />
-              </Button>
             </div>
             
-            {/* Tags display */}
-            <div className="flex flex-wrap gap-2 mt-2">
-              {tags.map((tag, index) => (
-                <Badge key={index} variant="secondary" className="flex items-center gap-1">
-                  {tag}
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-4 w-4 p-0 hover:bg-transparent"
-                    onClick={() => handleRemoveTag(tag)}
-                  >
-                    <X className="h-3 w-3" />
-                  </Button>
-                </Badge>
-              ))}
-              {tags.length === 0 && (
-                <p className="text-sm text-gray-500">No tags added yet</p>
-              )}
-            </div>
-          </div>
-          
-          {/* Card visibility */}
-          <div className="flex items-center justify-between">
-            <div>
-              <Label htmlFor="card-public">Make card public</Label>
-              <p className="text-sm text-gray-500">Allow others to see this card in public galleries</p>
-            </div>
-            <Switch
-              id="card-public"
-              checked={isPublic}
-              onCheckedChange={handleTogglePublic}
-            />
-          </div>
-          
-          {/* Additional notes */}
-          <div>
-            <Label htmlFor="card-notes">Additional Notes</Label>
-            <Textarea
-              id="card-notes"
-              placeholder="Add any notes about this card (not visible to others)"
-              className="mt-1"
-            />
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="sharing" className="space-y-4">
-          <div className="bg-gray-50 p-4 rounded-lg">
-            <h3 className="font-medium text-sm mb-2">Share Your Card</h3>
-            <div className="flex items-center space-x-2">
-              <Input 
-                value="https://cardshow.com/card/example-id"
-                readOnly
-                className="flex-1"
-              />
-              <Button variant="outline" onClick={handleCopyLink}>
-                <Copy className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-2">
-            <Button variant="outline" className="w-full">
-              <MessageSquare className="h-4 w-4 mr-2" />
-              Message
-            </Button>
-            <Button variant="outline" className="w-full">
-              <Share className="h-4 w-4 mr-2" />
-              Social
-            </Button>
-          </div>
-          
-          <div className="bg-blue-50 p-4 rounded-lg">
-            <h3 className="font-medium text-sm mb-1">Collection</h3>
-            <p className="text-xs text-blue-800 mb-2">
-              Add this card to a collection to organize your cards
-            </p>
-            <Button variant="outline" size="sm" className="w-full">
-              <Plus className="h-4 w-4 mr-2" />
-              Add to Collection
-            </Button>
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="export" className="space-y-4">
-          <div>
-            <h3 className="font-medium mb-2">Export Options</h3>
             <div className="space-y-2">
-              <Button variant="outline" className="w-full justify-start">
-                <Download className="h-4 w-4 mr-2" />
-                Download as JPG
-              </Button>
-              <Button variant="outline" className="w-full justify-start">
-                <Download className="h-4 w-4 mr-2" />
-                Download as PNG
-              </Button>
-              <Button variant="outline" className="w-full justify-start">
-                <Download className="h-4 w-4 mr-2" />
-                Download as PDF
-              </Button>
+              <Label htmlFor="currency">Currency</Label>
+              <Input
+                id="currency"
+                value={marketMetadata.currency || 'USD'}
+                onChange={(e) => handleMarketMetadataChange('currency', e.target.value)}
+                placeholder="USD"
+              />
             </div>
+          </div>
+        )}
+        
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="edition-size">Edition Size</Label>
+            <Input
+              id="edition-size"
+              type="number"
+              min="1"
+              value={marketMetadata.editionSize?.toString() || '1'}
+              onChange={(e) => handleMarketMetadataChange('editionSize', parseInt(e.target.value) || 1)}
+              className="w-full"
+            />
           </div>
           
-          <div className="border-t pt-4">
-            <h3 className="font-medium mb-2">Print Options</h3>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="print-ready">Print-ready version</Label>
-                <Switch id="print-ready" />
-              </div>
-              
-              <Button variant="outline" className="w-full">
-                Prepare for Printing
-              </Button>
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="edition-number">Edition Number</Label>
+            <Input
+              id="edition-number"
+              type="number"
+              min="1"
+              max={marketMetadata.editionSize || 1}
+              value={marketMetadata.editionNumber?.toString() || '1'}
+              onChange={(e) => {
+                const value = parseInt(e.target.value) || 1;
+                const max = marketMetadata.editionSize || 1;
+                handleMarketMetadataChange('editionNumber', Math.min(value, max));
+              }}
+              className="w-full"
+            />
           </div>
-        </TabsContent>
-      </Tabs>
+        </div>
+      </div>
     </div>
   );
 };

@@ -10,6 +10,7 @@ import { toast } from '@/components/ui/use-toast';
 import { useUndoRedo } from '@/hooks/useUndoRedo';
 import { useAutoSave } from '@/hooks/useAutoSave';
 import { useCards } from '@/context/CardContext';
+import { toastUtils } from '@/lib/utils/toast-utils';
 import WizardStepper from './WizardStepper';
 import CardCanvas from './canvas/CardCanvas';
 import ImageUploadStep from './steps/ImageUploadStep';
@@ -18,6 +19,7 @@ import ElementsStep from './steps/ElementsStep';
 import EffectsStep from './steps/EffectsStep';
 import TextStep from './steps/TextStep';
 import FinalizeStep from './steps/FinalizeStep';
+import { v4 as uuidv4 } from 'uuid';
 
 interface CardCreationWizardProps {
   initialTemplate?: CardTemplate | null;
@@ -34,6 +36,43 @@ const STEPS = [
   { key: 'text', label: 'Text' },
   { key: 'finalize', label: 'Finalize' },
 ];
+
+// Default design metadata to ensure we have the properties we need
+const DEFAULT_DESIGN_METADATA = {
+  cardStyle: {
+    template: 'classic',
+    effect: 'none',
+    borderRadius: '8px',
+    borderWidth: 2,
+    borderColor: '#000000',
+    backgroundColor: '#FFFFFF',
+    shadowColor: 'rgba(0,0,0,0.2)',
+    frameWidth: 2,
+    frameColor: '#000000',
+  },
+  textStyle: {
+    fontFamily: 'Inter',
+    fontSize: '16px',
+    fontWeight: 'normal',
+    color: '#000000',
+    titleColor: '#000000',
+    titleAlignment: 'center',
+    titleWeight: 'bold',
+    descriptionColor: '#333333',
+  },
+  cardMetadata: {
+    category: 'general',
+    series: 'base',
+    cardType: 'standard',
+  },
+  marketMetadata: {
+    price: 0,
+    currency: 'USD',
+    availableForSale: false,
+    editionSize: 1,
+    editionNumber: 1,
+  }
+};
 
 const CardCreationWizard: React.FC<CardCreationWizardProps> = ({
   initialTemplate,
@@ -53,6 +92,7 @@ const CardCreationWizard: React.FC<CardCreationWizardProps> = ({
     team: '',
     year: '',
     effects: [],
+    designMetadata: DEFAULT_DESIGN_METADATA,
     ...initialData,
   });
 
@@ -108,11 +148,10 @@ const CardCreationWizard: React.FC<CardCreationWizardProps> = ({
     try {
       // Ensure we have required fields
       if (!cardData.title || !cardData.imageUrl) {
-        toast({
-          title: "Missing information",
-          description: "Please provide a title and image for your card",
-          variant: "destructive"
-        });
+        toastUtils.error(
+          "Missing information",
+          "Please provide a title and image for your card"
+        );
         return;
       }
 
@@ -123,18 +162,17 @@ const CardCreationWizard: React.FC<CardCreationWizardProps> = ({
         updatedAt: new Date().toISOString(),
       } as Card);
 
-      toast({
-        title: "Success!",
-        description: "Your card has been created successfully."
-      });
+      toastUtils.success(
+        "Success!",
+        "Your card has been created successfully."
+      );
 
       onComplete(newCard);
     } catch (error) {
-      toast({
-        title: "Error saving card",
-        description: "There was a problem saving your card. Please try again.",
-        variant: "destructive"
-      });
+      toastUtils.error(
+        "Error saving card",
+        "There was a problem saving your card. Please try again."
+      );
       console.error("Error saving card:", error);
     }
   };

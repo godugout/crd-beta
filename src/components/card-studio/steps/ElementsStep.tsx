@@ -2,13 +2,9 @@
 import React, { useState } from 'react';
 import { Card } from '@/lib/types/cardTypes';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, Image, Text, Shapes, Sticker, Move } from 'lucide-react';
-import { Slider } from '@/components/ui/slider';
-import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { PlusCircle, Image, Type, Square, Sticker } from 'lucide-react';
+import { toastUtils } from '@/lib/utils/toast-utils';
 
 interface ElementsStepProps {
   cardData: Partial<Card>;
@@ -16,175 +12,156 @@ interface ElementsStepProps {
 }
 
 const ElementsStep: React.FC<ElementsStepProps> = ({ cardData, onUpdate }) => {
-  const [activeTab, setActiveTab] = useState<string>("stickers");
-  const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState("images");
 
-  // Sample stickers for demonstration
-  const SAMPLE_STICKERS = [
-    { id: 'sticker1', name: 'Star', imageUrl: '/placeholder-card.png' },
-    { id: 'sticker2', name: 'Trophy', imageUrl: '/placeholder-card.png' },
-    { id: 'sticker3', name: 'Fire', imageUrl: '/placeholder-card.png' },
-    { id: 'sticker4', name: 'Sparkle', imageUrl: '/placeholder-card.png' },
-    { id: 'sticker5', name: 'Lightning', imageUrl: '/placeholder-card.png' },
-    { id: 'sticker6', name: 'Crown', imageUrl: '/placeholder-card.png' },
-  ];
-  
-  // Sample shapes
-  const SAMPLE_SHAPES = [
-    { id: 'shape1', name: 'Circle', type: 'circle' },
-    { id: 'shape2', name: 'Square', type: 'square' },
-    { id: 'shape3', name: 'Triangle', type: 'triangle' },
-    { id: 'shape4', name: 'Hexagon', type: 'hexagon' },
-    { id: 'shape5', name: 'Star', type: 'star' },
-  ];
-
-  const handleAddElement = (type: string, content: string) => {
-    // In a real implementation, this would add a new element to the card layers
-    console.log(`Adding ${type} element:`, content);
+  const handleAddElement = (type: string) => {
+    // This is a placeholder - we'll implement the actual element adding functionality in a future enhancement
+    toastUtils.info(
+      `Adding ${type}`,
+      "Element functionality will be implemented in a future update"
+    );
   };
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-lg font-medium">Card Elements</h2>
-        <p className="text-sm text-gray-500 mt-1">
-          Add stickers, text, and shapes to enhance your card
-        </p>
-      </div>
+      <h2 className="text-xl font-semibold">Add Elements</h2>
       
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid grid-cols-3 mb-4">
-          <TabsTrigger value="stickers">Stickers</TabsTrigger>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid grid-cols-4 mb-4">
+          <TabsTrigger value="images">Images</TabsTrigger>
           <TabsTrigger value="text">Text</TabsTrigger>
           <TabsTrigger value="shapes">Shapes</TabsTrigger>
+          <TabsTrigger value="stickers">Stickers</TabsTrigger>
         </TabsList>
         
-        {/* Stickers Tab */}
-        <TabsContent value="stickers" className="space-y-4">
-          <ScrollArea className="h-64 border rounded-md p-4">
-            <div className="grid grid-cols-3 gap-4">
-              {SAMPLE_STICKERS.map((sticker) => (
-                <div 
-                  key={sticker.id}
-                  className="aspect-square border rounded-md flex items-center justify-center cursor-pointer hover:bg-gray-50"
-                  onClick={() => handleAddElement('sticker', sticker.id)}
-                >
-                  <img 
-                    src={sticker.imageUrl} 
-                    alt={sticker.name}
-                    className="max-w-full max-h-full object-contain"
-                  />
-                </div>
-              ))}
-            </div>
-          </ScrollArea>
-          
-          <Button className="w-full" onClick={() => handleAddElement('sticker', 'custom')}>
-            <Plus className="h-4 w-4 mr-2" /> Add Custom Sticker
-          </Button>
-        </TabsContent>
-        
-        {/* Text Tab */}
-        <TabsContent value="text" className="space-y-4">
+        <TabsContent value="images">
           <div className="space-y-4">
-            <div>
-              <Label htmlFor="text-content">Text Content</Label>
-              <Input 
-                id="text-content"
-                placeholder="Enter text to add to card"
-              />
-            </div>
+            <p className="text-sm text-gray-600">Add images to your card design</p>
             
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="text-color">Text Color</Label>
-                <Input 
-                  type="color" 
-                  id="text-color" 
-                  value="#000000" 
-                  className="h-10"
-                />
-              </div>
+              <Button
+                variant="outline"
+                className="h-auto py-6 flex flex-col gap-2"
+                onClick={() => handleAddElement('image')}
+              >
+                <Image className="h-8 w-8 text-primary" />
+                <span>Upload Image</span>
+              </Button>
               
-              <div>
-                <Label htmlFor="text-size">Text Size</Label>
-                <Slider
-                  id="text-size"
-                  min={8}
-                  max={72}
-                  step={1}
-                  defaultValue={[24]}
-                />
-              </div>
+              <Button
+                variant="outline"
+                className="h-auto py-6 flex flex-col gap-2"
+                onClick={() => handleAddElement('logo')}
+              >
+                <Image className="h-8 w-8 text-primary" />
+                <span>Add Logo</span>
+              </Button>
             </div>
-            
-            <Button onClick={() => handleAddElement('text', 'Sample Text')}>
-              <Text className="h-4 w-4 mr-2" /> Add Text
-            </Button>
           </div>
         </TabsContent>
         
-        {/* Shapes Tab */}
-        <TabsContent value="shapes" className="space-y-4">
-          <div className="grid grid-cols-3 gap-4 mb-4">
-            {SAMPLE_SHAPES.map((shape) => (
-              <div 
-                key={shape.id}
-                className="aspect-square border rounded-md flex flex-col items-center justify-center p-2 cursor-pointer hover:bg-gray-50"
-                onClick={() => handleAddElement('shape', shape.type)}
-              >
-                <div className="w-12 h-12 bg-gray-200 rounded-md flex items-center justify-center">
-                  {/* Simple shape preview would go here */}
-                </div>
-                <span className="text-xs mt-2">{shape.name}</span>
-              </div>
-            ))}
-          </div>
-          
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="shape-color">Shape Color</Label>
-              <Input 
-                type="color" 
-                id="shape-color" 
-                value="#4C6EF5" 
-                className="h-10"
-              />
-            </div>
+        <TabsContent value="text">
+          <div className="space-y-4">
+            <p className="text-sm text-gray-600">Add text elements to your card</p>
             
-            <div>
-              <Label htmlFor="shape-opacity">Opacity</Label>
-              <Slider
-                id="shape-opacity"
-                min={0}
-                max={100}
-                step={1}
-                defaultValue={[100]}
-              />
+            <div className="grid grid-cols-2 gap-4">
+              <Button
+                variant="outline"
+                className="h-auto py-6 flex flex-col gap-2"
+                onClick={() => handleAddElement('heading')}
+              >
+                <Type className="h-8 w-8 text-primary" />
+                <span>Heading</span>
+              </Button>
+              
+              <Button
+                variant="outline"
+                className="h-auto py-6 flex flex-col gap-2"
+                onClick={() => handleAddElement('paragraph')}
+              >
+                <Type className="h-8 w-8 text-primary" />
+                <span>Paragraph</span>
+              </Button>
             </div>
           </div>
-          
-          <Button onClick={() => handleAddElement('shape', 'custom')}>
-            <Shapes className="h-4 w-4 mr-2" /> Add Shape
-          </Button>
+        </TabsContent>
+        
+        <TabsContent value="shapes">
+          <div className="space-y-4">
+            <p className="text-sm text-gray-600">Add shapes to your card design</p>
+            
+            <div className="grid grid-cols-3 gap-4">
+              <Button
+                variant="outline"
+                className="h-auto py-6 flex flex-col gap-2"
+                onClick={() => handleAddElement('rectangle')}
+              >
+                <Square className="h-6 w-6 text-primary" />
+                <span className="text-xs">Rectangle</span>
+              </Button>
+              
+              <Button
+                variant="outline"
+                className="h-auto py-6 flex flex-col gap-2"
+                onClick={() => handleAddElement('circle')}
+              >
+                <div className="h-6 w-6 rounded-full border-2 border-primary"></div>
+                <span className="text-xs">Circle</span>
+              </Button>
+              
+              <Button
+                variant="outline"
+                className="h-auto py-6 flex flex-col gap-2"
+                onClick={() => handleAddElement('line')}
+              >
+                <div className="h-0 w-6 border-t-2 border-primary"></div>
+                <span className="text-xs">Line</span>
+              </Button>
+            </div>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="stickers">
+          <div className="space-y-4">
+            <p className="text-sm text-gray-600">Add stickers and badges to your card</p>
+            
+            <div className="grid grid-cols-3 gap-4">
+              <Button
+                variant="outline"
+                className="h-auto py-6 flex flex-col gap-2"
+                onClick={() => handleAddElement('badge')}
+              >
+                <Sticker className="h-6 w-6 text-primary" />
+                <span className="text-xs">Badge</span>
+              </Button>
+              
+              <Button
+                variant="outline"
+                className="h-auto py-6 flex flex-col gap-2"
+                onClick={() => handleAddElement('star')}
+              >
+                <div className="h-6 w-6 text-primary">★</div>
+                <span className="text-xs">Star</span>
+              </Button>
+              
+              <Button
+                variant="outline"
+                className="h-auto py-6 flex flex-col gap-2"
+                onClick={() => handleAddElement('emoji')}
+              >
+                <div className="h-6 w-6 text-primary">🏆</div>
+                <span className="text-xs">Emoji</span>
+              </Button>
+            </div>
+          </div>
         </TabsContent>
       </Tabs>
       
-      {/* Element list - in a real app would show currently added elements */}
-      <div className="mt-6">
-        <h3 className="text-sm font-medium mb-2">Added Elements</h3>
-        <div className="border rounded-md p-2 min-h-[100px] bg-gray-50">
-          <p className="text-gray-400 text-sm text-center pt-8">
-            No elements added yet. Use the tabs above to add elements.
-          </p>
-        </div>
-      </div>
-      
-      <div className="bg-blue-50 rounded-md p-4 text-sm text-blue-600">
-        <h3 className="font-medium mb-1">Pro Tip</h3>
-        <p>
-          You can drag elements directly onto the card preview to position them precisely.
-          Use the handles to resize or rotate elements.
+      <div className="bg-amber-50 border border-amber-200 rounded-md p-4">
+        <h3 className="text-amber-800 text-sm font-medium mb-1">Coming Soon</h3>
+        <p className="text-amber-700 text-xs">
+          The full element editor with drag-and-drop support will be available in an upcoming update.
+          Check back soon for enhanced card creation features!
         </p>
       </div>
     </div>

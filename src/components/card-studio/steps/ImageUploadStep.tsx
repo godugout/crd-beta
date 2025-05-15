@@ -1,10 +1,10 @@
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Upload, ImagePlus, Camera } from 'lucide-react';
-import { useToast } from '@/components/ui/use-toast';
+import { Card, CardContent } from '@/components/ui/card';
+import { Upload, Camera, LinkIcon, X } from 'lucide-react';
+import { toastUtils } from '@/lib/utils/toast-utils';
 
 interface ImageUploadStepProps {
   imageUrl: string;
@@ -12,173 +12,165 @@ interface ImageUploadStepProps {
 }
 
 const ImageUploadStep: React.FC<ImageUploadStepProps> = ({ imageUrl, onImageSelect }) => {
-  const [dragActive, setDragActive] = useState(false);
-  const { toast } = useToast();
+  const [uploading, setUploading] = useState(false);
+  const [urlInput, setUrlInput] = useState('');
   
-  const handleDrag = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  // Method to upload an image file
+  const handleFileUpload = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
     
-    if (e.type === 'dragenter' || e.type === 'dragover') {
-      setDragActive(true);
-    } else if (e.type === 'dragleave') {
-      setDragActive(false);
-    }
-  };
-  
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
-    
-    const file = e.dataTransfer.files?.[0];
-    processFile(file);
-  };
-  
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    processFile(file);
-  };
-  
-  const processFile = (file?: File) => {
     if (!file) return;
     
-    if (!file.type.match('image.*')) {
-      toast({
-        title: "Invalid File Type",
-        description: "Please upload an image file (jpg, png, gif, etc)",
-        variant: "destructive"
-      });
+    // Check file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toastUtils.error(
+        "File too large", 
+        "Please select an image under 5MB"
+      );
       return;
     }
     
+    // Check file type
+    if (!file.type.startsWith('image/')) {
+      toastUtils.error(
+        "Invalid file type", 
+        "Please select a valid image file"
+      );
+      return;
+    }
+    
+    setUploading(true);
+    
+    // Simulate file upload (would connect to a real service)
     const reader = new FileReader();
     reader.onload = (e) => {
-      const result = e.target?.result as string;
-      onImageSelect(result);
-    };
-    reader.readAsDataURL(file);
-  };
-  
-  const handleTakePhoto = () => {
-    toast({
-      title: "Camera Feature",
-      description: "Camera functionality would be implemented here"
-    });
-  };
-  
-  const handleImageUrl = () => {
-    const url = prompt("Enter image URL");
-    if (url) {
-      // Simple validation
-      if (url.match(/\.(jpeg|jpg|gif|png|webp)$/i)) {
-        onImageSelect(url);
-      } else {
-        toast({
-          title: "Invalid URL",
-          description: "Please provide a valid image URL",
-          variant: "destructive"
-        });
+      if (e.target?.result) {
+        onImageSelect(e.target.result.toString());
+        toastUtils.success(
+          "Image uploaded",
+          "Your image has been uploaded successfully"
+        );
       }
+      setUploading(false);
+    };
+    
+    reader.onerror = () => {
+      toastUtils.error(
+        "Upload failed",
+        "There was a problem uploading your image"
+      );
+      setUploading(false);
+    };
+    
+    reader.readAsDataURL(file);
+  }, [onImageSelect]);
+  
+  // Add image from URL
+  const handleUrlSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!urlInput.trim()) return;
+    
+    try {
+      new URL(urlInput); // Validate URL
+      onImageSelect(urlInput);
+    } catch (error) {
+      toastUtils.error(
+        "Invalid URL",
+        "Please enter a valid image URL"
+      );
     }
   };
-
+  
+  // Clear the selected image
+  const handleClearImage = () => {
+    onImageSelect('');
+  };
+  
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-lg font-medium">Upload Your Card Image</h2>
-        <p className="text-sm text-gray-500 mt-1">
-          Upload a high-quality image for your card. Square images work best.
-        </p>
-      </div>
+      <h2 className="text-xl font-semibold">Upload Card Image</h2>
       
-      {/* Image Preview */}
-      {imageUrl && (
-        <div className="mt-4">
-          <div className="relative aspect-[2.5/3.5] max-w-xs mx-auto bg-gray-100 rounded-lg overflow-hidden">
-            <img 
-              src={imageUrl} 
-              alt="Card Preview" 
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/50 to-transparent p-4">
-              <Button 
-                variant="outline" 
-                className="bg-white/90 hover:bg-white w-full"
-                onClick={() => onImageSelect('')}
-              >
-                Change Image
-              </Button>
-            </div>
-          </div>
+      {imageUrl ? (
+        <div className="relative aspect-[2.5/3.5] max-w-xs mx-auto border rounded-md overflow-hidden">
+          <img
+            src={imageUrl}
+            alt="Selected card"
+            className="w-full h-full object-contain"
+          />
+          <Button
+            variant="outline"
+            size="icon"
+            className="absolute top-2 right-2 bg-white/80 hover:bg-white"
+            onClick={handleClearImage}
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* File upload option */}
+          <Card className="border-dashed cursor-pointer hover:border-primary transition-colors">
+            <CardContent className="p-6 flex flex-col items-center">
+              <Input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                id="file-upload"
+                onChange={handleFileUpload}
+                disabled={uploading}
+              />
+              <label htmlFor="file-upload" className="cursor-pointer flex flex-col items-center">
+                <div className="h-12 w-12 bg-primary/10 rounded-full flex items-center justify-center mb-4">
+                  <Upload className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="font-semibold">Upload Image</h3>
+                <p className="text-sm text-gray-500 text-center mt-2">
+                  Drag and drop or click to browse
+                </p>
+              </label>
+            </CardContent>
+          </Card>
+          
+          {/* URL input option */}
+          <Card className="border-dashed hover:border-primary transition-colors">
+            <CardContent className="p-6">
+              <div className="flex flex-col items-center">
+                <div className="h-12 w-12 bg-primary/10 rounded-full flex items-center justify-center mb-4">
+                  <LinkIcon className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="font-semibold">Image URL</h3>
+                <p className="text-sm text-gray-500 text-center mt-2">
+                  Paste a direct link to an image
+                </p>
+                <form onSubmit={handleUrlSubmit} className="w-full mt-4">
+                  <div className="flex gap-2">
+                    <Input
+                      type="url"
+                      placeholder="https://example.com/image.jpg"
+                      value={urlInput}
+                      onChange={(e) => setUrlInput(e.target.value)}
+                      className="flex-grow"
+                    />
+                    <Button type="submit" size="sm">
+                      Add
+                    </Button>
+                  </div>
+                </form>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       )}
       
-      {/* Upload Zone */}
-      {!imageUrl && (
-        <div 
-          className={`border-2 border-dashed rounded-lg p-8 text-center ${
-            dragActive ? 'border-primary bg-primary/5' : 'border-gray-300'
-          }`}
-          onDragEnter={handleDrag}
-          onDragLeave={handleDrag}
-          onDragOver={handleDrag}
-          onDrop={handleDrop}
-        >
-          <div className="flex flex-col items-center justify-center space-y-4">
-            <div className="rounded-full bg-primary/10 p-3">
-              <Upload className="h-8 w-8 text-primary" />
-            </div>
-            <div>
-              <p className="text-sm font-medium">Drag and drop your image here</p>
-              <p className="text-xs text-gray-500 mt-1">or select an option below</p>
-            </div>
-            
-            <div className="flex flex-wrap gap-2 justify-center">
-              <Label 
-                htmlFor="image-upload" 
-                className="bg-primary text-white rounded-md px-4 py-2 cursor-pointer hover:bg-primary/90 transition-colors"
-              >
-                Browse Files
-                <Input 
-                  id="image-upload"
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleInputChange}
-                />
-              </Label>
-              
-              <Button 
-                variant="outline" 
-                className="flex items-center gap-1"
-                onClick={handleImageUrl}
-              >
-                <ImagePlus className="h-4 w-4" />
-                URL
-              </Button>
-              
-              <Button 
-                variant="outline" 
-                className="flex items-center gap-1"
-                onClick={handleTakePhoto}
-              >
-                <Camera className="h-4 w-4" />
-                Take Photo
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
-      
-      <div className="flex flex-col gap-2">
-        <h3 className="text-sm font-medium">Tips for great card images:</h3>
-        <ul className="text-xs text-gray-500 list-disc pl-5 space-y-1">
-          <li>Use high-resolution images for best results</li>
-          <li>Center the subject in the frame</li>
-          <li>Good lighting enhances card appearance</li>
-          <li>Avoid busy backgrounds unless intentional</li>
-          <li>Recommended aspect ratio: 2.5:3.5 (trading card standard)</li>
+      {/* Image tips */}
+      <div className="bg-blue-50 text-blue-800 p-4 rounded-lg text-sm">
+        <h3 className="font-semibold mb-2">Tips for best results:</h3>
+        <ul className="list-disc pl-5 space-y-1">
+          <li>Use high resolution images (at least 1000px width)</li>
+          <li>Images with clear subject and minimal background work best</li>
+          <li>For sports cards, use player photos with good lighting</li>
+          <li>Keep the file size under 5MB</li>
         </ul>
       </div>
     </div>

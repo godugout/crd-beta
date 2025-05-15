@@ -31,16 +31,8 @@ const CardCanvas: React.FC<CardCanvasProps> = ({ cardData, onUpdate }) => {
       titleAlignment: 'center',
       titleWeight: 'bold',
       descriptionColor: '#333333',
-    },
-    cardMetadata: {
-      category: 'general',
-      series: 'base',
-      cardType: 'standard',
-    },
-    marketMetadata: {
-      isPrintable: false,
-      isForSale: false,
-      includeInCatalog: false,
+      fontFamily: 'Inter',
+      fontSize: '16px',
     }
   };
   
@@ -82,12 +74,12 @@ const CardCanvas: React.FC<CardCanvasProps> = ({ cardData, onUpdate }) => {
             style={{ 
               width: '280px',
               aspectRatio: '2.5/3.5',
-              borderRadius: cardStyle?.borderRadius || '8px',
-              borderWidth: cardStyle?.borderWidth || 2,
+              borderRadius: cardStyle.borderRadius || '8px',
+              borderWidth: cardStyle.borderWidth || 2,
               borderStyle: 'solid',
-              borderColor: cardStyle?.borderColor || '#000',
-              backgroundColor: cardStyle?.backgroundColor || '#fff',
-              boxShadow: cardStyle?.shadowColor ? `0 4px 12px ${cardStyle.shadowColor}` : 'none',
+              borderColor: cardStyle.borderColor || '#000',
+              backgroundColor: cardStyle.backgroundColor || '#fff',
+              boxShadow: cardStyle.shadowColor ? `0 4px 12px ${cardStyle.shadowColor}` : 'none',
             }}
           >
             {/* Card image */}
@@ -106,11 +98,11 @@ const CardCanvas: React.FC<CardCanvasProps> = ({ cardData, onUpdate }) => {
                   <h3 
                     className="text-white font-bold text-xl"
                     style={{
-                      color: textStyle?.titleColor || '#fff',
-                      textAlign: (textStyle?.titleAlignment as any) || 'center',
-                      fontWeight: textStyle?.titleWeight || 'bold',
-                      fontFamily: textStyle?.fontFamily || 'Inter',
-                      fontSize: textStyle?.fontSize || '24px',
+                      color: textStyle.titleColor || '#fff',
+                      textAlign: (textStyle.titleAlignment as any) || 'center',
+                      fontWeight: textStyle.titleWeight || 'bold',
+                      fontFamily: textStyle.fontFamily || 'Inter',
+                      fontSize: textStyle.fontSize || '24px',
                     }}
                   >
                     {cardData.title}
@@ -119,7 +111,7 @@ const CardCanvas: React.FC<CardCanvasProps> = ({ cardData, onUpdate }) => {
                     <p 
                       className="text-white/80 text-sm mt-1"
                       style={{
-                        color: textStyle?.descriptionColor || 'rgba(255,255,255,0.8)',
+                        color: textStyle.descriptionColor || 'rgba(255,255,255,0.8)',
                       }}
                     >
                       {cardData.description}
