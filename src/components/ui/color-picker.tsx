@@ -9,7 +9,7 @@ export interface ColorPickerProps {
   onChange: (value: string) => void;
   label?: string;
   className?: string;
-  // Add support for colors array for backward compatibility
+  // Add support for colors array
   colors?: string[];
 }
 
@@ -20,10 +20,14 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
   onChange,
   label,
   className,
-  colors, // Ignore colors prop as it's not used in the new implementation
+  colors = [],
 }) => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onChange(e.target.value);
+  };
+
+  const handlePresetClick = (presetColor: string) => {
+    onChange(presetColor);
   };
 
   return (
@@ -52,6 +56,21 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
           {value}
         </span>
       </div>
+
+      {colors && colors.length > 0 && (
+        <div className="flex flex-wrap gap-1 mt-1">
+          {colors.map((presetColor, index) => (
+            <button
+              key={index}
+              type="button"
+              className="h-5 w-5 rounded-full border border-gray-200 dark:border-gray-800"
+              style={{ backgroundColor: presetColor }}
+              onClick={() => handlePresetClick(presetColor)}
+              aria-label={`Select color ${presetColor}`}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 };

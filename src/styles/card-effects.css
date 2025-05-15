@@ -66,6 +66,61 @@
   pointer-events: none;
 }
 
+.effect-prismatic {
+  position: relative;
+  overflow: hidden;
+}
+
+.effect-prismatic::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg,
+    rgba(255, 0, 0, 0.2) 0%,
+    rgba(255, 165, 0, 0.2) 16%,
+    rgba(255, 255, 0, 0.2) 33%,
+    rgba(0, 128, 0, 0.2) 50%,
+    rgba(0, 0, 255, 0.2) 66%,
+    rgba(75, 0, 130, 0.2) 83%,
+    rgba(238, 130, 238, 0.2) 100%);
+  background-size: 1000% 100%;
+  mix-blend-mode: color-dodge;
+  pointer-events: none;
+  animation: prismatic-animation 8s linear infinite;
+}
+
+.effect-gloss {
+  position: relative;
+  overflow: hidden;
+}
+
+.effect-gloss::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.3) 48%,
+    rgba(255, 255, 255, 0.8) 50%,
+    rgba(255, 255, 255, 0.3) 52%,
+    rgba(255, 255, 255, 0) 100%);
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+
+.effect-matte {
+  position: relative;
+  overflow: hidden;
+}
+
+.effect-matte::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.05);
+  pointer-events: none;
+}
+
 @keyframes holographic-animation {
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
@@ -75,6 +130,11 @@
 @keyframes refractor-animation {
   0% { background-position: 200% 0%; }
   100% { background-position: -200% 0%; }
+}
+
+@keyframes prismatic-animation {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
 }
 
 /* 3D card flip support */
@@ -88,4 +148,23 @@
 
 .rotate-y-180 {
   transform: rotateY(180deg);
+}
+
+/* Interactive hover effects */
+.card-hover-lift {
+  transition: transform 0.3s ease;
+}
+
+.card-hover-lift:hover {
+  transform: translateY(-10px);
+}
+
+.card-hover-glow:hover::after {
+  content: "";
+  position: absolute;
+  inset: -10px;
+  background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 70%);
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.6;
 }

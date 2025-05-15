@@ -15,6 +15,17 @@ export interface CardData {
   effects: string[];
   createdAt: string;
   updatedAt: string;
+  // Additional properties used in home components
+  backgroundColor?: string;
+  name?: string;
+  team?: string;
+  jersey?: string;
+  set?: string;
+  year?: string;
+  specialEffect?: string;
+  cardType?: string;
+  artist?: string;
+  cardNumber?: string;
   designMetadata: {
     cardStyle: {
       template: string;
@@ -61,6 +72,17 @@ export function adaptCardToCardData(card: Card): CardData {
     effects: card.effects || [],
     createdAt: card.createdAt,
     updatedAt: card.updatedAt,
+    // Map legacy fields
+    name: card.player || card.name,
+    team: card.team,
+    jersey: card.jersey,
+    year: card.year,
+    set: card.set,
+    cardType: card.cardType,
+    artist: card.artist,
+    cardNumber: card.cardNumber,
+    backgroundColor: card.backgroundColor,
+    specialEffect: card.specialEffect,
     designMetadata: card.designMetadata || {
       cardStyle: {
         template: 'classic',
@@ -92,3 +114,6 @@ export function adaptCardToCardData(card: Card): CardData {
     }
   };
 }
+
+// Export from @/types/card to prevent errors in other imports
+export { Card };

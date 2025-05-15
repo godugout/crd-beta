@@ -1,67 +1,54 @@
 
-import { toast, type Toast } from '@/components/ui/use-toast';
+import showToast, { ToastOptions } from '@/lib/adapters/toastAdapter';
 
-// Generate a simple unique ID for toasts
-const generateToastId = (): string => {
-  return `toast-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-};
-
-// Toast utilities
+/**
+ * Utility functions for displaying toast notifications
+ * This provides a simpler API for common toast types
+ */
 export const toastUtils = {
+  /**
+   * Display a success toast
+   */
   success: (title: string, description?: string) => {
-    toast({
-      id: generateToastId(),
+    return showToast({
       title,
       description,
-      variant: 'default'
+      variant: 'success'
     });
   },
-  
+
+  /**
+   * Display an error toast
+   */
   error: (title: string, description?: string) => {
-    toast({
-      id: generateToastId(),
+    return showToast({
       title,
       description,
       variant: 'destructive'
     });
   },
-  
+
+  /**
+   * Display an info toast
+   */
   info: (title: string, description?: string) => {
-    toast({
-      id: generateToastId(),
+    return showToast({
       title,
       description,
       variant: 'info'
     });
   },
-  
+
+  /**
+   * Display a warning toast
+   */
   warning: (title: string, description?: string) => {
-    toast({
-      id: generateToastId(),
+    return showToast({
       title,
       description,
       variant: 'warning'
     });
-  },
-  
-  custom: (options: Omit<Toast, 'id'>) => {
-    toast({
-      id: generateToastId(),
-      ...options
-    });
   }
-};
-
-// Legacy function for backward compatibility
-export const showToast = (options: { title: string; description?: string; variant?: 'default' | 'destructive' | 'info' | 'warning'; duration?: number; }) => {
-  const { title, description, variant = 'default', duration } = options;
-  toast({
-    id: generateToastId(),
-    title,
-    description,
-    variant,
-    duration
-  });
 };
 
 export default toastUtils;
