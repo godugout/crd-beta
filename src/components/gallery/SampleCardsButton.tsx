@@ -1,74 +1,48 @@
-import React from 'react';
+
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
+import { Database } from 'lucide-react';
 import { useCards } from '@/context/CardContext';
-import { addSampleCards } from '@/lib/sampleCards';
-import { Sparkles } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useToast } from '@/hooks/use-toast';
 
 interface SampleCardsButtonProps {
-  onComplete?: () => void;
-  variant?: "default" | "commonsLink";
+  variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
 }
 
-const SampleCardsButton: React.FC<SampleCardsButtonProps> = ({ 
-  onComplete,
-  variant = "default" 
-}) => {
-  const { addCard } = useCards();
-  const [isLoading, setIsLoading] = React.useState(false);
-  const navigate = useNavigate();
+const SampleCardsButton: React.FC<SampleCardsButtonProps> = ({ variant = 'default' }) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const { addSampleCards } = useCards();
   const { toast } = useToast();
-  
-  const handleAddSampleCards = async () => {
-    if (variant === "commonsLink") {
-      navigate('/collections/commons');
-      return;
-    }
-    
-    setIsLoading(true);
-    
+
+  const handleClick = async () => {
     try {
-      const addedCards = await addSampleCards(addCard);
-      
-      if (addedCards.length > 0) {
-        showToast({
-          title: "Success",
-          description: `Added ${addedCards.length} sample cards to your collection!`,
-          variant: "success"
-        });
-        
-        if (onComplete) {
-          onComplete();
-        }
-      } else {
-        showToast({
-          title: "Error",
-          description: "Failed to add sample cards",
-          variant: "destructive"
-        });
-      }
+      setIsLoading(true);
+      await addSampleCards();
+      toast({
+        title: "Sample cards added",
+        description: "Sample cards have been added to your collection",
+        variant: "success"
+      });
     } catch (error) {
-      console.error('Error adding sample cards:', error);
-      showToast({
-        title: "Error",
-        description: "An unexpected error occurred while adding sample cards",
+      console.error("Failed to add sample cards:", error);
+      toast({
+        title: "Failed to add sample cards",
+        description: "An error occurred while adding sample cards",
         variant: "destructive"
       });
     } finally {
       setIsLoading(false);
     }
   };
-  
+
   return (
     <Button
-      onClick={handleAddSampleCards}
+      variant={variant}
+      onClick={handleClick}
       disabled={isLoading}
-      className="flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-      size="lg"
     >
-      <Sparkles className="h-4 w-4" />
-      {isLoading ? 'Adding Sample Cards...' : variant === "commonsLink" ? 'Generate Commons Cards' : 'Add Sample Cards'}
+      <Database className="mr-2 h-4 w-4" />
+      {isLoading ? "Adding..." : "Add Sample Cards"}
     </Button>
   );
 };

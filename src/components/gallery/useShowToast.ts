@@ -1,10 +1,19 @@
 
-import showToast from '@/lib/adapters/toastAdapter';
+import { useToast } from '@/hooks/use-toast';
+import { ToastOptions } from '@/lib/adapters/toastAdapter';
 
 /**
  * Hook to use the standardized toast function
  * This allows components that were using a different toast API to easily migrate
  */
 export default function useShowToast() {
-  return showToast;
+  const { toast } = useToast();
+  
+  return (options: ToastOptions) => {
+    toast({
+      title: options.title,
+      description: options.description,
+      variant: options.variant
+    });
+  };
 }
