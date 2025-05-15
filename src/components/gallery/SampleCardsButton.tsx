@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { toast } from 'sonner';
+import { useToast } from '@/hooks/use-toast';
 import { useCards } from '@/context/CardContext';
 import { addSampleCards } from '@/lib/sampleCards';
 import { Sparkles } from 'lucide-react';
@@ -19,6 +19,7 @@ const SampleCardsButton: React.FC<SampleCardsButtonProps> = ({
   const { addCard } = useCards();
   const [isLoading, setIsLoading] = React.useState(false);
   const navigate = useNavigate();
+  const { toast } = useToast();
   
   const handleAddSampleCards = async () => {
     if (variant === "commonsLink") {
@@ -32,16 +33,29 @@ const SampleCardsButton: React.FC<SampleCardsButtonProps> = ({
       const addedCards = await addSampleCards(addCard);
       
       if (addedCards.length > 0) {
-        toast.success(`Added ${addedCards.length} sample cards to your collection!`);
+        toast({
+          title: "Success",
+          description: `Added ${addedCards.length} sample cards to your collection!`,
+          variant: "success"
+        });
+        
         if (onComplete) {
           onComplete();
         }
       } else {
-        toast.error('Failed to add sample cards');
+        toast({
+          title: "Error",
+          description: "Failed to add sample cards",
+          variant: "destructive"
+        });
       }
     } catch (error) {
       console.error('Error adding sample cards:', error);
-      toast.error('An unexpected error occurred while adding sample cards');
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred while adding sample cards",
+        variant: "destructive"
+      });
     } finally {
       setIsLoading(false);
     }

@@ -2,7 +2,7 @@
 import { useState, useCallback } from 'react';
 import { EnhancedCropBoxProps, MemorabiliaType } from '@/components/card-upload/cardDetection';
 import { useMobileOptimization } from '@/hooks/useMobileOptimization';
-import { useToast } from '@/hooks/use-toast'; // Updated to use our enhanced toast
+import { useToast } from '@/hooks/use-toast';
 
 interface UseEditorStateProps {
   isDetecting?: boolean;
