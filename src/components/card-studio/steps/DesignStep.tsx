@@ -26,7 +26,7 @@ interface DesignStepProps {
 }
 
 const DesignStep: React.FC<DesignStepProps> = ({ cardData, onUpdate }) => {
-  // Get design metadata from card data or use default values
+  // Initialize designMetadata with all required properties
   const designMetadata = cardData.designMetadata || {
     cardStyle: {
       template: 'classic',
@@ -232,7 +232,7 @@ const DesignStep: React.FC<DesignStepProps> = ({ cardData, onUpdate }) => {
               <Input
                 type="color"
                 id="shadow-color"
-                value={cardStyle.shadowColor?.replace(/[^#\w]/g, '') || '#000000'}
+                value={(cardStyle.shadowColor || 'rgba(0,0,0,0.2)').replace(/[^#\w]/g, '') || '#000000'}
                 onChange={(e) => handleStyleChange('shadowColor', e.target.value)}
                 className="w-10 h-10 p-1"
               />

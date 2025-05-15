@@ -1,3 +1,4 @@
+
 /**
  * Consolidated Card Types for Cardshow (CRD)
  * This file serves as the central source of truth for all card-related types
@@ -124,6 +125,24 @@ export interface CardLayer {
 }
 
 /**
+ * Market metadata for card marketplace information
+ */
+export interface MarketMetadata {
+  lastSoldPrice?: number;
+  currentAskingPrice?: number;
+  estimatedMarketValue?: number;
+  isPrintable?: boolean;      // Made optional for compatibility
+  isForSale?: boolean;        // Made optional for compatibility
+  includeInCatalog?: boolean; // Made optional for compatibility
+  price?: number;
+  currency?: string;
+  availableForSale?: boolean;
+  editionSize?: number;
+  editionNumber?: number;
+  [key: string]: JsonValue | undefined;
+}
+
+/**
  * Card metadata for additional card information
  */
 export interface CardMetadata {
@@ -131,27 +150,14 @@ export interface CardMetadata {
   serialNumber?: string;
   certification?: string;
   gradeScore?: string;
-  category: string;      // Required
-  series: string;        // Required
-  cardType: string;      // Required
+  category?: string;      // Made optional for compatibility
+  series?: string;        // Made optional for compatibility
+  cardType?: string;      // Made optional for compatibility
   cardStyle?: CardStyle;
   textStyle?: TextStyle;
   effects?: string[];
   layers?: CardLayer[];
   effectClasses?: string;
-  [key: string]: JsonValue | undefined;
-}
-
-/**
- * Market metadata for card marketplace information
- */
-export interface MarketMetadata {
-  lastSoldPrice?: number;
-  currentAskingPrice?: number;
-  estimatedMarketValue?: number;
-  isPrintable: boolean;      // Required
-  isForSale: boolean;        // Required
-  includeInCatalog: boolean; // Required
   [key: string]: JsonValue | undefined;
 }
 
@@ -180,10 +186,10 @@ export interface OaklandMemoryData {
  * Design metadata for card design information
  */
 export interface DesignMetadata {
-  cardStyle: CardStyle;            // Required
-  textStyle: TextStyle;            // Required
-  cardMetadata: CardMetadata;      // Required
-  marketMetadata: MarketMetadata;  // Required
+  cardStyle: CardStyle;
+  textStyle: TextStyle;
+  cardMetadata: CardMetadata;
+  marketMetadata: MarketMetadata;
   oaklandMemory?: OaklandMemoryData;
   effects?: string[];
   layers?: CardLayer[];
@@ -215,10 +221,10 @@ export type CardRarity = 'common' | 'uncommon' | 'rare' | 'ultra-rare' | 'legend
  */
 export interface BaseCard extends BaseEntity {
   title: string;
-  description: string;
+  description?: string; // Made optional to fix compatibility issues
   imageUrl: string;
   image?: string; // Legacy support for older components
-  thumbnailUrl: string;
+  thumbnailUrl?: string; // Made optional for compatibility
   tags: string[];
   collectionId?: string;
   userId: string;

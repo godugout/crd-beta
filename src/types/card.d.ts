@@ -39,3 +39,6 @@ export interface CardData {
   };
   [key: string]: any;
 }
+
+// Re-export CardData for backwards compatibility
+export type { CardData as CardDataType };

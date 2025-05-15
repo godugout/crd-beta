@@ -28,7 +28,7 @@ interface TextStepProps {
 const TextStep: React.FC<TextStepProps> = ({ cardData, onUpdate }) => {
   const [activeTab, setActiveTab] = useState<string>("content");
   
-  // Get design metadata from card data or use default values
+  // Initialize designMetadata with all required properties
   const designMetadata = cardData.designMetadata || {
     textStyle: {
       titleColor: '#000000',

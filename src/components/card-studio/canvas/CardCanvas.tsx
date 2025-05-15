@@ -15,8 +15,35 @@ const CardCanvas: React.FC<CardCanvasProps> = ({ cardData, onUpdate }) => {
   
   const imageUrl = cardData.imageUrl || '/placeholder-card.png';
   
-  // Default styles if not provided
-  const designMetadata = cardData.designMetadata || {};
+  // Default styles with proper fallbacks
+  const designMetadata = cardData.designMetadata || {
+    cardStyle: {
+      template: 'classic',
+      effect: 'none',
+      borderRadius: '8px',
+      borderColor: '#000000',
+      frameColor: '#000000',
+      frameWidth: 2,
+      shadowColor: 'rgba(0,0,0,0.2)',
+    },
+    textStyle: {
+      titleColor: '#000000',
+      titleAlignment: 'center',
+      titleWeight: 'bold',
+      descriptionColor: '#333333',
+    },
+    cardMetadata: {
+      category: 'general',
+      series: 'base',
+      cardType: 'standard',
+    },
+    marketMetadata: {
+      isPrintable: false,
+      isForSale: false,
+      includeInCatalog: false,
+    }
+  };
+  
   const cardStyle = designMetadata.cardStyle || {};
   const textStyle = designMetadata.textStyle || {};
   
@@ -55,12 +82,12 @@ const CardCanvas: React.FC<CardCanvasProps> = ({ cardData, onUpdate }) => {
             style={{ 
               width: '280px',
               aspectRatio: '2.5/3.5',
-              borderRadius: cardStyle.borderRadius || '8px',
-              borderWidth: cardStyle.borderWidth || 2,
+              borderRadius: cardStyle?.borderRadius || '8px',
+              borderWidth: cardStyle?.borderWidth || 2,
               borderStyle: 'solid',
-              borderColor: cardStyle.borderColor || '#000',
-              backgroundColor: cardStyle.backgroundColor || '#fff',
-              boxShadow: cardStyle.shadowColor ? `0 4px 12px ${cardStyle.shadowColor}` : 'none',
+              borderColor: cardStyle?.borderColor || '#000',
+              backgroundColor: cardStyle?.backgroundColor || '#fff',
+              boxShadow: cardStyle?.shadowColor ? `0 4px 12px ${cardStyle.shadowColor}` : 'none',
             }}
           >
             {/* Card image */}
@@ -79,11 +106,11 @@ const CardCanvas: React.FC<CardCanvasProps> = ({ cardData, onUpdate }) => {
                   <h3 
                     className="text-white font-bold text-xl"
                     style={{
-                      color: textStyle.titleColor || '#fff',
-                      textAlign: textStyle.titleAlignment as any || 'center',
-                      fontWeight: textStyle.titleWeight || 'bold',
-                      fontFamily: textStyle.fontFamily || 'Inter',
-                      fontSize: textStyle.fontSize || '24px',
+                      color: textStyle?.titleColor || '#fff',
+                      textAlign: (textStyle?.titleAlignment as any) || 'center',
+                      fontWeight: textStyle?.titleWeight || 'bold',
+                      fontFamily: textStyle?.fontFamily || 'Inter',
+                      fontSize: textStyle?.fontSize || '24px',
                     }}
                   >
                     {cardData.title}
@@ -92,7 +119,7 @@ const CardCanvas: React.FC<CardCanvasProps> = ({ cardData, onUpdate }) => {
                     <p 
                       className="text-white/80 text-sm mt-1"
                       style={{
-                        color: textStyle.descriptionColor || 'rgba(255,255,255,0.8)',
+                        color: textStyle?.descriptionColor || 'rgba(255,255,255,0.8)',
                       }}
                     >
                       {cardData.description}
