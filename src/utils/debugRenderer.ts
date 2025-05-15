@@ -91,10 +91,10 @@ export const endRenderTimer = (timerName: string | null) => {
 /**
  * Create a component wrapper that logs renders and timing
  */
-export const withRenderLogging = <P extends object>(
+export function withRenderLogging<P extends object>(
   Component: React.ComponentType<P>, 
   componentName?: string
-) => {
+) {
   const displayName = componentName || Component.displayName || Component.name;
   
   const WrappedComponent = (props: P) => {
@@ -109,7 +109,7 @@ export const withRenderLogging = <P extends object>(
   
   WrappedComponent.displayName = `WithRenderLogging(${displayName})`;
   return WrappedComponent;
-};
+}
 
 export default {
   logRenderInfo,
