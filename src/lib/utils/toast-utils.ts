@@ -1,6 +1,6 @@
 
 import { toast } from '@/hooks/use-toast';
-import { ToastVariant } from "@/types/toast";
+import { ToastVariant, ToasterToast } from "@/types/toast";
 
 export const toastUtils = {
   show: (title: string, description: string, variant: ToastVariant = 'default', duration?: number) => {

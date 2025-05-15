@@ -1,4 +1,3 @@
-
 import { JsonValue } from './index';
 import { ReactNode } from 'react';
 
@@ -33,7 +32,7 @@ export interface CardEffectsResult {
 
 export type EffectSettings = CardEffectSettings;
 
-// Material simulation types
+// Material simulation types - fixed to include all needed properties
 export interface MaterialSimulation {
   roughness: number;
   metalness: number;

@@ -22,6 +22,9 @@ export interface InstagramPost {
   permalink: string;
   timestamp: string;
   username: string;
+  mediaType?: 'IMAGE' | 'VIDEO' | 'CAROUSEL_ALBUM';
+  thumbnailUrl?: string;
+  postId?: string;
   children?: InstagramMediaItem[];
 }
 
