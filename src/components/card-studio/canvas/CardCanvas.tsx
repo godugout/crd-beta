@@ -1,288 +1,300 @@
 
-import React, { useRef, useState, useEffect } from 'react';
-import { useDrag } from '@/hooks/useDrag';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card } from '@/lib/types/cardTypes';
-import { CardLayer } from '@/components/card-creation/types/cardTypes';
+import { ZoomIn, ZoomOut, RotateRight, RotateLeft, Maximize, Minimize } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { 
-  ZoomIn, 
-  ZoomOut, 
-  Move, 
-  Maximize2, 
-  Minimize2,
-  Save,
-  Download
-} from 'lucide-react';
+import { Slider } from '@/components/ui/slider';
 
 interface CardCanvasProps {
   cardData: Partial<Card>;
-  onUpdate: (updates: Partial<Card>) => void;
+  onUpdate?: (updates: Partial<Card>) => void;
+  editable?: boolean;
 }
 
 const CardCanvas: React.FC<CardCanvasProps> = ({
   cardData,
-  onUpdate
+  onUpdate = () => {},
+  editable = true
 }) => {
+  // Canvas transformation state
+  const [zoom, setZoom] = useState(1);
+  const [rotation, setRotation] = useState(0);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [fullscreen, setFullscreen] = useState(false);
+  
   const canvasRef = useRef<HTMLDivElement>(null);
-  const [zoom, setZoom] = useState<number>(100);
-  const [isDragging, setIsDragging] = useState<boolean>(false);
-  const [activeLayerId, setActiveLayerId] = useState<string | null>(null);
-  const [layers, setLayers] = useState<CardLayer[]>([]);
-  const [showGrid, setShowGrid] = useState<boolean>(false);
-  const [fullscreen, setFullscreen] = useState<boolean>(false);
+  const containerRef = useRef<HTMLDivElement>(null);
   
-  // Initialize the canvas with the card data
-  useEffect(() => {
-    if (cardData.imageUrl && layers.length === 0) {
-      // Create a base image layer if we have an image URL
-      const baseImageLayer: CardLayer = {
-        id: 'base-image',
-        type: 'image',
-        content: cardData.imageUrl,
-        position: { x: 50, y: 50, z: 0 },
-        size: { width: 400, height: 560 },
-        rotation: 0,
-        opacity: 1,
-        zIndex: 0,
-        visible: true,
-        locked: false,
-        effectIds: []
-      };
-      
-      setLayers([baseImageLayer]);
+  // Handle mouse wheel for zooming
+  const handleWheel = (e: React.WheelEvent) => {
+    if (e.ctrlKey || e.metaKey) {
+      e.preventDefault();
+      const delta = e.deltaY * -0.01;
+      const newZoom = Math.max(0.5, Math.min(zoom + delta, 3));
+      setZoom(newZoom);
     }
-  }, [cardData.imageUrl, layers.length]);
-
-  // Set up drag handling for layers
-  const { handleMouseDown } = useDrag({
-    onDragStart: (e, id) => {
-      if (id) {
-        setActiveLayerId(id);
-        setIsDragging(true);
-      }
-    },
-    onDrag: (e, id, deltaX, deltaY) => {
-      if (id && isDragging) {
-        setLayers(prevLayers => 
-          prevLayers.map(layer => {
-            if (layer.id === id && !layer.locked) {
-              // Calculate new position based on drag delta and zoom level
-              const scaleFactor = 100 / zoom;
-              const newX = layer.position.x + deltaX * scaleFactor;
-              const newY = layer.position.y + deltaY * scaleFactor;
-              
-              return {
-                ...layer,
-                position: {
-                  ...layer.position,
-                  x: newX,
-                  y: newY
-                }
-              };
-            }
-            return layer;
-          })
-        );
-      }
-    },
-    onDragEnd: () => {
-      setIsDragging(false);
-    }
-  });
+  };
   
-  // Handle zooming the canvas
-  const handleZoom = (direction: 'in' | 'out') => {
-    setZoom(prev => {
-      if (direction === 'in') {
-        return Math.min(prev + 10, 200);
-      } else {
-        return Math.max(prev - 10, 50);
-      }
+  // Handle drag to move the card
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!editable) return;
+    
+    setIsDragging(true);
+    setDragStart({
+      x: e.clientX - position.x,
+      y: e.clientY - position.y
     });
   };
   
-  // Toggle fullscreen mode
-  const toggleFullscreen = () => {
-    setFullscreen(prev => !prev);
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging) return;
+    
+    setPosition({
+      x: e.clientX - dragStart.x,
+      y: e.clientY - dragStart.y
+    });
   };
   
-  // Export the card as an image
-  const exportCard = () => {
-    // Implement canvas export functionality
-    // This would typically use html-to-image or a similar library
-    console.log("Export functionality to be implemented");
+  const handleMouseUp = () => {
+    setIsDragging(false);
   };
   
-  // Render a layer based on its type
-  const renderLayer = (layer: CardLayer) => {
-    if (!layer.visible) return null;
+  // Handle rotation
+  const handleRotate = (direction: 'left' | 'right') => {
+    const amount = direction === 'left' ? -90 : 90;
+    setRotation((prev) => prev + amount);
+  };
+  
+  // Reset transformations
+  const handleReset = () => {
+    setZoom(1);
+    setRotation(0);
+    setPosition({ x: 0, y: 0 });
+  };
+  
+  // Toggle fullscreen
+  const handleFullscreenToggle = () => {
+    setFullscreen(!fullscreen);
     
-    const layerStyle: React.CSSProperties = {
-      position: 'absolute',
-      left: `${layer.position.x}%`,
-      top: `${layer.position.y}%`,
-      zIndex: layer.position.z,
-      transform: `translate(-50%, -50%) rotate(${layer.rotation}deg)`,
-      opacity: layer.opacity,
-      width: typeof layer.size.width === 'number' ? `${layer.size.width}px` : layer.size.width,
-      height: typeof layer.size.height === 'number' ? `${layer.size.height}px` : layer.size.height,
-      cursor: layer.locked ? 'not-allowed' : 'move'
-    };
+    // Reset position when toggling fullscreen
+    setPosition({ x: 0, y: 0 });
     
-    // Element-specific props
-    const elementProps = {
-      'data-layer-id': layer.id,
-      onMouseDown: (e: React.MouseEvent) => handleMouseDown(e, layer.id),
-      className: `layer ${activeLayerId === layer.id ? 'active-layer ring-2 ring-blue-500' : ''} ${isDragging && activeLayerId === layer.id ? 'is-dragging' : ''}`
-    };
-    
-    switch (layer.type) {
-      case 'image':
-        return (
-          <div
-            key={layer.id}
-            style={layerStyle}
-            {...elementProps}
-          >
-            <img
-              src={layer.content as string}
-              alt="Layer"
-              style={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-                pointerEvents: 'none'
-              }}
-            />
-          </div>
-        );
-        
-      case 'text':
-        const textStyle: React.CSSProperties = {
-          fontFamily: layer.textStyle?.fontFamily || 'sans-serif',
-          fontSize: `${layer.textStyle?.fontSize || 16}px`,
-          fontWeight: layer.textStyle?.fontWeight || 'normal',
-          color: layer.textStyle?.color || '#000000',
-          textAlign: (layer.textStyle?.textAlign as any) || 'left',
-          wordBreak: 'break-word',
-          whiteSpace: 'pre-wrap'
-        };
-        
-        return (
-          <div
-            key={layer.id}
-            style={{...layerStyle, ...textStyle}}
-            {...elementProps}
-          >
-            {layer.content as string}
-          </div>
-        );
-        
-      case 'shape':
-        return (
-          <div
-            key={layer.id}
-            style={{
-              ...layerStyle,
-              backgroundColor: layer.color || '#e2e2e2',
-              border: '1px solid #d0d0d0'
-            }}
-            {...elementProps}
-          />
-        );
-        
-      default:
-        return null;
+    // If exiting fullscreen, reset zoom as well
+    if (fullscreen) {
+      setZoom(1);
     }
+  };
+  
+  // Determine CSS classes for the card based on any applied effects
+  const getCardClasses = () => {
+    const classes = ['card-preview', 'relative'];
+    
+    // Add effect classes if there are any
+    if (cardData.effects && cardData.effects.length > 0) {
+      cardData.effects.forEach(effect => {
+        classes.push(`effect-${effect.toLowerCase()}`);
+      });
+    }
+    
+    return classes.join(' ');
+  };
+  
+  // Get card style properties from design metadata
+  const getCardStyle = () => {
+    const designMetadata = cardData.designMetadata || {};
+    const cardStyle = designMetadata.cardStyle || {};
+    
+    return {
+      borderRadius: cardStyle.borderRadius || '8px',
+      borderColor: cardStyle.borderColor || '#000000',
+      borderWidth: cardStyle.borderWidth !== undefined ? `${cardStyle.borderWidth}px` : '2px',
+      backgroundColor: cardStyle.backgroundColor || 'white',
+      boxShadow: cardStyle.shadowColor 
+        ? `0 4px 6px ${cardStyle.shadowColor}` 
+        : '0 4px 6px rgba(0, 0, 0, 0.1)'
+    };
   };
 
   return (
-    <div className={`card-canvas-container ${fullscreen ? 'fixed inset-0 z-50 bg-black/90 p-8' : ''}`}>
-      {/* Canvas toolbar */}
-      <div className="flex justify-between items-center mb-4">
-        <div className="flex items-center space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handleZoom('out')}
-            title="Zoom out"
-          >
-            <ZoomOut className="h-4 w-4" />
-          </Button>
-          <div className="text-sm font-medium">{zoom}%</div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handleZoom('in')}
-            title="Zoom in"
-          >
-            <ZoomIn className="h-4 w-4" />
-          </Button>
-        </div>
-        
-        <div className="flex items-center space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowGrid(!showGrid)}
-            title="Toggle grid"
-            className={showGrid ? 'bg-gray-100' : ''}
-          >
-            <Move className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={toggleFullscreen}
-            title={fullscreen ? "Exit fullscreen" : "Enter fullscreen"}
-          >
-            {fullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={exportCard}
-            title="Export card"
-          >
-            <Download className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
-
-      {/* Card canvas */}
-      <div 
-        className="flex items-center justify-center bg-gray-100 rounded-lg border p-4"
-        style={{ height: fullscreen ? 'calc(100vh - 8rem)' : '600px' }}
+    <div
+      className={`relative overflow-hidden bg-gray-100 border ${
+        fullscreen 
+          ? 'fixed inset-0 z-50 flex items-center justify-center bg-black/90' 
+          : 'aspect-[2.5/3.5] rounded-lg'
+      }`}
+      ref={containerRef}
+      onWheel={handleWheel}
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
+      onMouseLeave={handleMouseUp}
+    >
+      {/* Card Canvas */}
+      <div
+        ref={canvasRef}
+        className="relative"
+        style={{
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
       >
-        <div 
-          ref={canvasRef}
-          className={`card-canvas relative bg-white shadow-lg rounded-lg overflow-hidden ${cardData.effects?.join(' ') || ''}`}
+        {/* The actual card */}
+        <div
+          className={getCardClasses()}
           style={{
-            width: '400px',
-            height: '560px',
-            transform: `scale(${zoom / 100})`,
-            transformOrigin: 'center',
-            transition: 'transform 0.2s ease'
+            width: fullscreen ? '70vh' : '100%',
+            aspectRatio: '2.5/3.5',
+            transform: `translate(${position.x}px, ${position.y}px) scale(${zoom}) rotate(${rotation}deg)`,
+            transition: isDragging ? 'none' : 'transform 0.2s ease-out',
+            cursor: editable ? 'move' : 'default',
+            ...getCardStyle(),
+            borderStyle: 'solid',
           }}
+          onMouseDown={handleMouseDown}
         >
-          {/* Grid overlay */}
-          {showGrid && (
-            <div className="absolute inset-0 grid grid-cols-6 grid-rows-8 pointer-events-none">
-              {Array.from({ length: 6 * 8 }).map((_, i) => (
-                <div key={i} className="border border-dashed border-blue-200/50" />
-              ))}
+          {/* Card Background/Image */}
+          {cardData.imageUrl && (
+            <div className="absolute inset-0 overflow-hidden" style={{ borderRadius: 'inherit' }}>
+              <img
+                src={cardData.imageUrl}
+                alt={cardData.title || "Card"}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  // Handle image loading errors
+                  (e.target as HTMLImageElement).src = '/placeholder-card.png';
+                }}
+              />
             </div>
           )}
-          
-          {/* Safe zone indicator */}
-          <div 
-            className="safe-zone pointer-events-none absolute inset-6 border border-dashed border-gray-300/50"
-          />
-          
-          {/* Render layers */}
-          {layers.map(renderLayer)}
+
+          {/* Card Content Overlay */}
+          <div className="absolute inset-0 flex flex-col justify-end" style={{ borderRadius: 'inherit' }}>
+            {/* Card info at bottom */}
+            <div className="bg-gradient-to-t from-black/80 to-transparent p-4 text-white">
+              <h3 className="text-lg font-bold line-clamp-2">
+                {cardData.title || 'Untitled Card'}
+              </h3>
+              
+              {cardData.player && (
+                <div className="mt-1 flex items-center">
+                  <span className="text-sm font-medium">{cardData.player}</span>
+                  {cardData.team && (
+                    <>
+                      <span className="mx-1">•</span>
+                      <span className="text-sm">{cardData.team}</span>
+                    </>
+                  )}
+                  {cardData.year && (
+                    <>
+                      <span className="mx-1">•</span>
+                      <span className="text-sm">{cardData.year}</span>
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
+      
+      {/* Canvas Controls */}
+      <div className={`absolute bottom-4 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-sm rounded-full shadow-lg p-2 flex items-center space-x-1 ${fullscreen ? 'bg-white/30' : ''}`}>
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="h-8 w-8 rounded-full"
+          onClick={() => setZoom((prev) => Math.max(0.5, prev - 0.1))}
+        >
+          <ZoomOut className="h-4 w-4" />
+        </Button>
+        
+        <div className="w-24">
+          <Slider 
+            value={[zoom * 100]} 
+            min={50} 
+            max={300} 
+            step={1} 
+            className="w-full"
+            onValueChange={(value) => setZoom(value[0] / 100)}
+          />
+        </div>
+        
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="h-8 w-8 rounded-full"
+          onClick={() => setZoom((prev) => Math.min(3, prev + 0.1))}
+        >
+          <ZoomIn className="h-4 w-4" />
+        </Button>
+        
+        <div className="w-px h-6 bg-gray-300 mx-1"></div>
+        
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="h-8 w-8 rounded-full"
+          onClick={() => handleRotate('left')}
+        >
+          <RotateLeft className="h-4 w-4" />
+        </Button>
+        
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="h-8 w-8 rounded-full"
+          onClick={() => handleRotate('right')}
+        >
+          <RotateRight className="h-4 w-4" />
+        </Button>
+        
+        <div className="w-px h-6 bg-gray-300 mx-1"></div>
+        
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="h-8 w-8 rounded-full"
+          onClick={handleReset}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M16 12h-7" />
+            <path d="M9 9l3 3-3 3" />
+          </svg>
+        </Button>
+        
+        <Button
+          variant="ghost" 
+          size="icon" 
+          className="h-8 w-8 rounded-full"
+          onClick={handleFullscreenToggle}
+        >
+          {fullscreen ? (
+            <Minimize className="h-4 w-4" />
+          ) : (
+            <Maximize className="h-4 w-4" />
+          )}
+        </Button>
+      </div>
+      
+      {/* Close button when in fullscreen */}
+      {fullscreen && (
+        <Button
+          variant="ghost"
+          size="icon"
+          className="absolute top-4 right-4 h-10 w-10 rounded-full bg-white/10 hover:bg-white/20 text-white"
+          onClick={handleFullscreenToggle}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </Button>
+      )}
     </div>
   );
 };

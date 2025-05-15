@@ -1,15 +1,9 @@
 
 import React from 'react';
-import { cn } from '@/lib/utils';
-import { Check } from 'lucide-react';
-
-interface Step {
-  key: string;
-  label: string;
-}
+import { CheckCircle2, CircleDot } from 'lucide-react';
 
 interface WizardStepperProps {
-  steps: Step[];
+  steps: { key: string; label: string }[];
   currentStep: number;
   onChange: (step: number) => void;
 }
@@ -17,60 +11,83 @@ interface WizardStepperProps {
 const WizardStepper: React.FC<WizardStepperProps> = ({
   steps,
   currentStep,
-  onChange,
+  onChange
 }) => {
   return (
-    <div className="flex flex-wrap justify-center md:justify-between items-center">
-      <ol className="flex flex-wrap items-center w-full text-sm font-medium text-center text-gray-500">
-        {steps.map((step, index) => {
-          const isActive = index === currentStep;
-          const isCompleted = index < currentStep;
-          
-          return (
-            <li 
-              key={step.key}
-              className={cn(
-                "flex items-center",
-                index < steps.length - 1 ? "md:w-auto flex-auto" : "flex-none"
-              )}
-              aria-current={isActive ? "step" : undefined}
+    <div className="w-full">
+      <div className="hidden md:flex justify-between">
+        {steps.map((step, index) => (
+          <div
+            key={step.key}
+            className={`flex-1 ${index > 0 ? 'ml-4' : ''} relative`}
+          >
+            {/* Connector line */}
+            {index > 0 && (
+              <div 
+                className={`absolute h-0.5 top-4 -left-4 right-1/2 
+                  ${index <= currentStep ? 'bg-primary' : 'bg-gray-200'}`}
+              />
+            )}
+            
+            {/* Step button */}
+            <button
+              onClick={() => onChange(index)}
+              className={`flex flex-col items-center w-full ${
+                index === currentStep ? 'text-primary' : 
+                index < currentStep ? 'text-gray-600' : 'text-gray-400'
+              } focus:outline-none`}
             >
-              <button
-                type="button"
-                className={cn(
-                  "flex flex-col md:flex-row items-center justify-center w-full",
-                  index < steps.length - 1 && "md:after:content-[''] md:after:w-full md:after:h-1 md:after:border-b md:after:border-gray-200 md:after:border-1 md:after:hidden md:after:mx-6 md:after:inline-block",
-                  (isCompleted) && "md:after:border-primary"
+              {/* Step indicator */}
+              <div className="relative">
+                {index < currentStep ? (
+                  <div className="rounded-full bg-primary text-white h-8 w-8 flex items-center justify-center">
+                    <CheckCircle2 className="h-6 w-6" />
+                  </div>
+                ) : index === currentStep ? (
+                  <div className="rounded-full border-2 border-primary bg-primary/10 h-8 w-8 flex items-center justify-center">
+                    <CircleDot className="h-5 w-5 text-primary" />
+                  </div>
+                ) : (
+                  <div className="rounded-full border-2 border-gray-300 h-8 w-8 flex items-center justify-center">
+                    <span className="text-sm font-medium">{index + 1}</span>
+                  </div>
                 )}
-                onClick={() => onChange(index)}
-              >
-                <span 
-                  className={cn(
-                    "flex items-center justify-center w-8 h-8 rounded-full shrink-0",
-                    isActive && "bg-primary text-white",
-                    isCompleted && "bg-primary-light text-primary",
-                    !isActive && !isCompleted && "bg-gray-100"
-                  )}
-                >
-                  {isCompleted ? (
-                    <Check className="w-4 h-4" />
-                  ) : (
-                    <span>{index + 1}</span>
-                  )}
-                </span>
-                <span 
-                  className={cn(
-                    "hidden md:inline-flex ml-2 text-sm",
-                    isActive ? "text-primary" : "text-gray-500"
-                  )}
-                >
-                  {step.label}
-                </span>
-              </button>
-            </li>
-          );
-        })}
-      </ol>
+              </div>
+              
+              {/* Step label */}
+              <span className="mt-2 text-sm font-medium">{step.label}</span>
+            </button>
+          </div>
+        ))}
+      </div>
+      
+      {/* Mobile stepper (horizontal scrollable) */}
+      <div className="flex md:hidden overflow-x-auto py-2">
+        {steps.map((step, index) => (
+          <button
+            key={step.key}
+            onClick={() => onChange(index)}
+            className={`flex items-center mr-4 px-3 py-2 rounded-full ${
+              index === currentStep 
+                ? 'bg-primary/10 text-primary border border-primary/30'
+                : index < currentStep 
+                  ? 'bg-gray-100 text-gray-600' 
+                  : 'bg-gray-100 text-gray-400'
+            }`}
+          >
+            <div className={`rounded-full h-5 w-5 flex items-center justify-center mr-2 ${
+              index === currentStep 
+                ? 'bg-primary text-white' 
+                : index < currentStep
+                  ? 'bg-gray-500 text-white'
+                  : 'bg-gray-300 text-gray-500'
+            }`}>
+              <span className="text-xs">{index + 1}</span>
+            </div>
+            <span className="text-sm whitespace-nowrap">{step.label}</span>
+          </button>
+        ))}
+      </div>
     </div>
   );
 };

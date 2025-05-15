@@ -1,307 +1,323 @@
 
 import React, { useState } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
-import { Badge } from '@/components/ui/badge';
-import { X } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { CardEffect } from '@/components/card-creation/types/cardTypes';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { ChevronRight, Plus, Trash2, Settings, Sparkles } from 'lucide-react';
 
 interface EffectsStepProps {
   effects: string[];
   onUpdate: (effects: string[]) => void;
 }
 
-// Available effect categories
-const EFFECT_CATEGORIES = ['Premium', 'Standard', 'Patterns', 'Custom'];
-
-// Sample effects data - in a real app this would come from an API
+// Mock list of available effects
 const AVAILABLE_EFFECTS = [
-  {
-    id: 'refractor',
-    name: 'Refractor',
-    category: 'Premium',
-    description: 'Rainbow prismatic effect that shifts with viewing angle',
-    thumbnail: '/placeholder-card.png',
-    options: {
-      intensity: { min: 0, max: 100, default: 80 },
-      speed: { min: 0, max: 100, default: 50 }
-    }
-  },
-  {
-    id: 'chrome',
-    name: 'Chrome',
-    category: 'Premium',
-    description: 'Metallic chrome finish with high reflectivity',
-    thumbnail: '/placeholder-card.png',
-    options: {
-      intensity: { min: 0, max: 100, default: 70 }
-    }
-  },
   {
     id: 'holographic',
     name: 'Holographic',
-    category: 'Premium',
-    description: '3D holographic pattern with depth effect',
-    thumbnail: '/placeholder-card.png',
-    options: {
-      pattern: ['dots', 'lines', 'waves'],
-      intensity: { min: 0, max: 100, default: 60 }
-    }
+    description: 'Creates a rainbow-colored prismatic effect that shifts with light',
+    thumbnail: '/effects/holographic-thumb.png',
+    premium: false,
+  },
+  {
+    id: 'refractor',
+    name: 'Refractor',
+    description: 'Refractive light pattern that bends across the surface',
+    thumbnail: '/effects/refractor-thumb.png',
+    premium: false,
   },
   {
     id: 'gold-foil',
     name: 'Gold Foil',
-    category: 'Premium',
-    description: 'Shimmering gold foil accent',
-    thumbnail: '/placeholder-card.png',
-    options: {
-      coverage: { min: 0, max: 100, default: 30 }
-    }
+    description: 'Metallic gold foil effect for premium cards',
+    thumbnail: '/effects/gold-thumb.png',
+    premium: true,
+  },
+  {
+    id: 'silver-foil',
+    name: 'Silver Foil',
+    description: 'Metallic silver foil effect with light reflection',
+    thumbnail: '/effects/silver-thumb.png',
+    premium: true,
+  },
+  {
+    id: 'cracked-ice',
+    name: 'Cracked Ice',
+    description: 'Fractured prismatic pattern resembling cracked ice',
+    thumbnail: '/effects/cracked-ice-thumb.png',
+    premium: true,
+  },
+  {
+    id: 'pulsar',
+    name: 'Pulsar',
+    description: 'Animated pulsing glow emanating from the card',
+    thumbnail: '/effects/pulsar-thumb.png',
+    premium: false,
   },
   {
     id: 'vintage',
     name: 'Vintage',
-    category: 'Standard',
-    description: 'Classic worn look with subtle aging',
-    thumbnail: '/placeholder-card.png',
-    options: {
-      aging: { min: 0, max: 100, default: 40 }
-    }
+    description: 'Aged appearance with slight texture and color shifts',
+    thumbnail: '/effects/vintage-thumb.png',
+    premium: false,
   },
-  {
-    id: 'glossy',
-    name: 'Glossy',
-    category: 'Standard',
-    description: 'High-gloss finish',
-    thumbnail: '/placeholder-card.png'
-  }
 ];
 
-const EffectsStep: React.FC<EffectsStepProps> = ({
-  effects,
-  onUpdate
-}) => {
-  const [activeCategory, setActiveCategory] = useState(EFFECT_CATEGORIES[0]);
+const EffectsStep: React.FC<EffectsStepProps> = ({ effects = [], onUpdate }) => {
   const [selectedEffect, setSelectedEffect] = useState<string | null>(null);
-  const [effectOptions, setEffectOptions] = useState<Record<string, any>>({});
-  
-  // Get effects for current category
-  const filteredEffects = AVAILABLE_EFFECTS.filter(
-    effect => effect.category === activeCategory
-  );
   
   const handleAddEffect = (effectId: string) => {
     if (!effects.includes(effectId)) {
       const newEffects = [...effects, effectId];
       onUpdate(newEffects);
-      setSelectedEffect(effectId);
-      
-      // Initialize default options
-      const effect = AVAILABLE_EFFECTS.find(e => e.id === effectId);
-      if (effect?.options) {
-        const defaultOptions: Record<string, any> = {};
-        
-        Object.entries(effect.options).forEach(([key, value]) => {
-          if (typeof value === 'object' && 'default' in value) {
-            defaultOptions[key] = value.default;
-          }
-        });
-        
-        setEffectOptions(prev => ({
-          ...prev,
-          [effectId]: defaultOptions
-        }));
-      }
     }
+    setSelectedEffect(effectId);
   };
   
   const handleRemoveEffect = (effectId: string) => {
     const newEffects = effects.filter(id => id !== effectId);
     onUpdate(newEffects);
-    
     if (selectedEffect === effectId) {
       setSelectedEffect(null);
     }
   };
   
-  const updateEffectOption = (effectId: string, option: string, value: any) => {
-    setEffectOptions(prev => ({
-      ...prev,
-      [effectId]: {
-        ...(prev[effectId] || {}),
-        [option]: value
-      }
-    }));
-    
-    // In a real app, this would update a more complex effect state
-    // For now we just toggle the effect on/off
-    console.log(`Updated ${effectId} ${option} to ${value}`);
-  };
-  
-  // Get the full effect object from its ID
-  const getEffectById = (id: string) => AVAILABLE_EFFECTS.find(e => e.id === id);
+  const selectedEffectData = AVAILABLE_EFFECTS.find(effect => effect.id === selectedEffect);
 
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-lg font-semibold mb-2">Add Special Effects</h2>
-        <p className="text-sm text-gray-500">
-          Enhance your card with special visual effects that make it stand out.
+        <h2 className="text-lg font-medium">Card Effects</h2>
+        <p className="text-sm text-gray-500 mt-1">
+          Add special effects to enhance the appearance of your card
         </p>
       </div>
       
-      <div className="flex flex-col md:flex-row gap-4">
-        <div className="md:w-1/2">
-          <h3 className="text-sm font-medium mb-3">Applied Effects</h3>
-          
-          {effects.length > 0 ? (
-            <div className="space-y-3">
-              {effects.map(effectId => {
-                const effect = getEffectById(effectId);
-                return effect ? (
-                  <div 
-                    key={effectId}
-                    className={`p-3 rounded-md border ${selectedEffect === effectId ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}`}
-                    onClick={() => setSelectedEffect(effectId)}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center">
-                        <Switch 
-                          id={`switch-${effectId}`} 
-                          checked={true}
-                          onCheckedChange={() => handleRemoveEffect(effectId)}
-                        />
-                        <Label 
-                          htmlFor={`switch-${effectId}`}
-                          className="font-medium ml-2 cursor-pointer"
-                        >
-                          {effect.name}
-                        </Label>
-                        <Badge variant="outline" className="ml-2 text-xs">
-                          {effect.category}
-                        </Badge>
-                      </div>
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleRemoveEffect(effectId);
-                        }}
-                        className="h-8 w-8 p-0"
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
+      <Tabs defaultValue="applied">
+        <TabsList className="grid grid-cols-2 mb-4">
+          <TabsTrigger value="applied">Applied Effects</TabsTrigger>
+          <TabsTrigger value="available">Available Effects</TabsTrigger>
+        </TabsList>
+        
+        {/* Applied Effects Tab */}
+        <TabsContent value="applied">
+          <div className="bg-gray-50 rounded-lg border p-4">
+            {effects.length > 0 ? (
+              <div className="space-y-3">
+                <ScrollArea className="h-[200px]">
+                  {effects.map((effectId) => {
+                    const effect = AVAILABLE_EFFECTS.find(e => e.id === effectId);
+                    if (!effect) return null;
                     
-                    {selectedEffect === effectId && effect.options && (
-                      <div className="mt-3 pt-3 border-t">
-                        {Object.entries(effect.options).map(([key, value]) => {
-                          if (typeof value === 'object' && 'min' in value && 'max' in value) {
-                            // Slider control for numeric options
-                            return (
-                              <div key={key} className="mb-3">
-                                <div className="flex justify-between items-center mb-1">
-                                  <Label htmlFor={`${effectId}-${key}`} className="text-xs capitalize">
-                                    {key}
-                                  </Label>
-                                  <span className="text-xs">
-                                    {effectOptions[effectId]?.[key] || value.default}%
-                                  </span>
-                                </div>
-                                <Slider
-                                  id={`${effectId}-${key}`}
-                                  min={value.min}
-                                  max={value.max}
-                                  step={1}
-                                  value={[effectOptions[effectId]?.[key] || value.default]}
-                                  onValueChange={([newValue]) => updateEffectOption(effectId, key, newValue)}
-                                />
+                    return (
+                      <div 
+                        key={effect.id} 
+                        className={`flex items-center justify-between p-3 rounded-md mb-2 hover:bg-gray-100 border ${
+                          selectedEffect === effect.id ? 'border-primary' : 'border-transparent'
+                        }`}
+                        onClick={() => setSelectedEffect(effect.id)}
+                      >
+                        <div className="flex items-center">
+                          <div className="h-12 w-12 rounded bg-gray-200 mr-3 overflow-hidden">
+                            {effect.thumbnail ? (
+                              <img 
+                                src={effect.thumbnail} 
+                                alt={effect.name}
+                                className="h-full w-full object-cover"
+                                onError={(e) => {
+                                  (e.target as HTMLImageElement).src = '/effects/default-effect.png';
+                                }}
+                              />
+                            ) : (
+                              <div className="flex items-center justify-center h-full bg-gray-200">
+                                <Sparkles className="h-6 w-6 text-gray-400" />
                               </div>
-                            );
-                          } else if (Array.isArray(value)) {
-                            // Options dropdown for array options
-                            return (
-                              <div key={key} className="mb-3">
-                                <Label htmlFor={`${effectId}-${key}`} className="text-xs capitalize mb-1 block">
-                                  {key}
-                                </Label>
-                                <div className="flex flex-wrap gap-2">
-                                  {value.map((option: string) => (
-                                    <Button
-                                      key={option}
-                                      variant={effectOptions[effectId]?.[key] === option ? "default" : "outline"}
-                                      size="sm"
-                                      onClick={() => updateEffectOption(effectId, key, option)}
-                                      className="text-xs py-1 h-7"
-                                    >
-                                      {option}
-                                    </Button>
-                                  ))}
-                                </div>
-                              </div>
-                            );
-                          }
-                          return null;
-                        })}
+                            )}
+                          </div>
+                          <div>
+                            <h4 className="text-sm font-medium">{effect.name}</h4>
+                            <p className="text-xs text-gray-500 line-clamp-1">{effect.description}</p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex space-x-1">
+                          <Button 
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0"
+                            title="Effect Settings"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedEffect(effect.id);
+                            }}
+                          >
+                            <Settings className="h-4 w-4" />
+                          </Button>
+                          
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0 text-red-500 hover:text-red-600"
+                            title="Remove Effect"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleRemoveEffect(effect.id);
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
+                    );
+                  })}
+                </ScrollArea>
+                
+                {selectedEffectData && (
+                  <div className="mt-4 pt-4 border-t">
+                    <h4 className="text-sm font-medium mb-2">{selectedEffectData.name} Settings</h4>
+                    
+                    <div className="space-y-3">
+                      <div>
+                        <Label htmlFor="effect-intensity" className="text-xs">Intensity</Label>
+                        <div className="flex items-center">
+                          <Slider
+                            id="effect-intensity"
+                            defaultValue={[50]}
+                            max={100}
+                            step={1}
+                            className="flex-1"
+                          />
+                          <span className="text-xs ml-2 w-6">50%</span>
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor="effect-animation" className="text-xs flex items-center justify-between">
+                          <span>Animation</span>
+                          <Switch id="effect-animation" />
+                        </Label>
+                      </div>
+                      
+                      {['holographic', 'refractor'].includes(selectedEffectData.id) && (
+                        <div>
+                          <Label htmlFor="effect-color" className="text-xs">Color Scheme</Label>
+                          <div className="grid grid-cols-4 gap-2 mt-1">
+                            <div className="h-6 w-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-md cursor-pointer" />
+                            <div className="h-6 w-full bg-gradient-to-r from-blue-500 to-cyan-500 rounded-md cursor-pointer" />
+                            <div className="h-6 w-full bg-gradient-to-r from-amber-500 to-orange-500 rounded-md cursor-pointer" />
+                            <div className="h-6 w-full bg-gradient-to-r from-emerald-500 to-lime-500 rounded-md cursor-pointer" />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+                
+                <Button 
+                  variant="outline" 
+                  className="w-full mt-2"
+                  onClick={() => setSelectedEffect(null)}
+                >
+                  <Plus className="h-4 w-4 mr-1" />
+                  Add Effect
+                </Button>
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <Sparkles className="h-12 w-12 text-gray-300 mx-auto" />
+                <h3 className="text-base font-medium mt-4">No Effects Applied</h3>
+                <p className="text-sm text-gray-500 mt-1">
+                  Add effects to make your card stand out
+                </p>
+                <Button 
+                  variant="outline" 
+                  className="mt-4"
+                >
+                  <Plus className="h-4 w-4 mr-1" />
+                  Add Effect
+                </Button>
+              </div>
+            )}
+          </div>
+        </TabsContent>
+        
+        {/* Available Effects Tab */}
+        <TabsContent value="available">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            {AVAILABLE_EFFECTS.map((effect) => (
+              <div 
+                key={effect.id}
+                className={`bg-white border rounded-lg overflow-hidden cursor-pointer transition-all ${
+                  effects.includes(effect.id) 
+                    ? 'ring-2 ring-primary ring-offset-2' 
+                    : 'hover:shadow-md'
+                }`}
+                onClick={() => handleAddEffect(effect.id)}
+              >
+                <div className="h-24 bg-gray-100">
+                  {effect.thumbnail ? (
+                    <img 
+                      src={effect.thumbnail} 
+                      alt={effect.name}
+                      className="h-full w-full object-cover"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = '/effects/default-effect.png';
+                      }}
+                    />
+                  ) : (
+                    <div className="flex items-center justify-center h-full bg-gray-100">
+                      <Sparkles className="h-8 w-8 text-gray-300" />
+                    </div>
+                  )}
+                </div>
+                
+                <div className="p-3">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-medium text-sm">{effect.name}</h4>
+                    {effect.premium && (
+                      <span className="bg-amber-100 text-amber-800 text-xs px-2 py-0.5 rounded-full">
+                        Premium
+                      </span>
                     )}
                   </div>
-                ) : null;
-              })}
-            </div>
-          ) : (
-            <div className="border border-dashed rounded-md p-6 text-center">
-              <p className="text-gray-500">No effects applied yet.</p>
-              <p className="text-sm text-gray-400 mt-1">
-                Select from the available effects on the right.
-              </p>
-            </div>
-          )}
-        </div>
-        
-        <div className="md:w-1/2">
-          <Tabs defaultValue={EFFECT_CATEGORIES[0]} onValueChange={setActiveCategory}>
-            <TabsList className="grid grid-cols-4 mb-4">
-              {EFFECT_CATEGORIES.map(category => (
-                <TabsTrigger 
-                  key={category} 
-                  value={category}
-                  className="text-xs"
-                >
-                  {category}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-            
-            <TabsContent value={activeCategory} className="mt-0">
-              <div className="grid grid-cols-2 gap-3">
-                {filteredEffects.map(effect => (
-                  <div
-                    key={effect.id}
-                    className="border rounded-md overflow-hidden cursor-pointer hover:border-blue-500 transition-colors"
-                    onClick={() => handleAddEffect(effect.id)}
-                  >
-                    <div className="h-24 bg-gray-100 flex items-center justify-center">
-                      <img
-                        src={effect.thumbnail}
-                        alt={effect.name}
-                        className="h-full w-full object-cover"
-                      />
-                    </div>
-                    <div className="p-2">
-                      <h4 className="font-medium text-sm">{effect.name}</h4>
-                      <p className="text-xs text-gray-500 truncate">{effect.description}</p>
-                    </div>
-                  </div>
-                ))}
+                  <p className="text-gray-500 text-xs mt-1 line-clamp-2">
+                    {effect.description}
+                  </p>
+                  
+                  {effects.includes(effect.id) ? (
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="mt-2 w-full text-red-500 hover:text-red-600 hover:bg-red-50"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleRemoveEffect(effect.id);
+                      }}
+                    >
+                      <Trash2 className="h-3 w-3 mr-1" />
+                      Remove
+                    </Button>
+                  ) : (
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="mt-2 w-full text-primary"
+                    >
+                      <Plus className="h-3 w-3 mr-1" />
+                      Apply
+                    </Button>
+                  )}
+                </div>
               </div>
-            </TabsContent>
-          </Tabs>
-        </div>
-      </div>
+            ))}
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

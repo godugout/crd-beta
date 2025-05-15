@@ -3,77 +3,54 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PageLayout from '@/components/navigation/PageLayout';
 import CardCreationWizard from '@/components/card-studio/CardCreationWizard';
-import TemplateSelector from '@/components/card-studio/TemplateSelector';
+import { useToast } from '@/components/ui/use-toast';
 import { Card } from '@/lib/types/cardTypes';
-import { CardTemplate } from '@/components/card-templates/TemplateLibrary';
-import { toast } from '@/components/ui/use-toast';
-import { Button } from '@/components/ui/button';
-import { PlusCircle } from 'lucide-react';
+import { useCards } from '@/context/CardContext';
 
 const CardStudio: React.FC = () => {
   const navigate = useNavigate();
-  const [selectedTemplate, setSelectedTemplate] = useState<CardTemplate | null>(null);
-  const [isCreating, setIsCreating] = useState<boolean>(false);
-
-  // When a template is selected, start the creation process
-  const handleTemplateSelect = (template: CardTemplate) => {
-    setSelectedTemplate(template);
-    setIsCreating(true);
-    toast({
-      title: "Template selected",
-      description: `${template.name} template loaded. You can now customize your card.`
-    });
+  const { addCard } = useCards();
+  const { toast } = useToast();
+  
+  // Handle completion of card creation
+  const handleComplete = async (card: Card) => {
+    try {
+      // Add the card to the collection
+      await addCard(card);
+      
+      // Show success message
+      toast({
+        title: "Card Created!",
+        description: "Your card has been successfully created and saved to your collection.",
+      });
+      
+      // Navigate to gallery with refresh parameter
+      navigate('/gallery?refresh=true');
+    } catch (error) {
+      console.error('Error creating card:', error);
+      toast({
+        title: "Creation Failed",
+        description: "There was a problem creating your card. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
-
-  // For quick creation without template selection
-  const handleQuickCreate = () => {
-    setIsCreating(true);
-  };
-
-  // Return to template selection
+  
+  // Handle cancellation
   const handleCancel = () => {
-    setIsCreating(false);
-    setSelectedTemplate(null);
-  };
-
-  // When the card is completed
-  const handleCardComplete = (card: Card) => {
-    toast({
-      title: "Card created successfully!",
-      description: "Your new card has been added to your collection."
-    });
-    navigate('/gallery');
+    navigate('/');
   };
 
   return (
     <PageLayout
       title="Card Studio"
-      description="Create custom trading cards with advanced design tools"
+      description="Create amazing trading cards with our advanced design tools"
     >
-      <div className="container mx-auto px-4 py-8">
-        {!isCreating ? (
-          <div className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold">Select a Template</h2>
-              <Button 
-                onClick={handleQuickCreate}
-                variant="outline"
-                className="flex items-center gap-2"
-              >
-                <PlusCircle size={16} />
-                Quick Create
-              </Button>
-            </div>
-            
-            <TemplateSelector onSelectTemplate={handleTemplateSelect} />
-          </div>
-        ) : (
-          <CardCreationWizard 
-            initialTemplate={selectedTemplate} 
-            onComplete={handleCardComplete}
-            onCancel={handleCancel}
-          />
-        )}
+      <div className="container mx-auto max-w-7xl px-4 py-8">
+        <CardCreationWizard
+          onComplete={handleComplete}
+          onCancel={handleCancel}
+        />
       </div>
     </PageLayout>
   );

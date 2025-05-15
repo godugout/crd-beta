@@ -1,19 +1,8 @@
 
 /**
- * Card effect settings interface
+ * Type definitions for card effects system
  */
-export interface CardEffectSettings {
-  intensity?: number;
-  speed?: number;
-  pattern?: string;
-  color?: string;
-  animationEnabled?: boolean;
-  [key: string]: any;
-}
 
-/**
- * Card effect interface
- */
 export interface CardEffect {
   id: string;
   name: string;
@@ -22,32 +11,46 @@ export interface CardEffect {
   className?: string;
 }
 
-/**
- * Card effects options for the hook
- */
-export interface CardEffectsOptions {
-  initialEffects?: Record<string, string[]>;
-  presets?: Record<string, string[]>;
-  defaultIntensity?: number;
-  performanceMode?: 'high' | 'medium' | 'low';
+export interface CardEffectSettings {
+  intensity?: number;
+  speed?: number;
+  pattern?: string;
+  color?: string;
+  colorScheme?: string[];
+  animationEnabled?: boolean;
+  [key: string]: any;
 }
 
-/**
- * Card effects result from the hook
- */
-export interface CardEffectsResult {
-  cardEffects: Record<string, string[]>;
-  isLoading: boolean;
-  addEffect: (cardId: string, effect: string) => void;
-  removeEffect: (cardId: string, effect: string) => void;
-  toggleEffect: (cardId: string, effect: string) => void;
-  clearEffects: (cardId: string) => void;
-  setCardEffects: (cardId: string, effects: string[]) => void;
-  activeEffects: string[];
-  setActiveEffects: (effects: string[]) => void;
+export interface CardEffectDefinition {
+  id: string;
+  name: string;
+  description: string;
+  thumbnail: string;
+  category: 'premium' | 'standard' | 'special';
+  defaultSettings: CardEffectSettings;
+  cssClass: string;
+  supportedCardTypes: string[];
 }
 
-/**
- * Additional effect settings for premium effects
- */
-export type EffectSettings = CardEffectSettings;
+export interface MaterialSimulation {
+  type: 'metal' | 'plastic' | 'paper' | 'glass' | 'custom';
+  roughness: number;
+  metalness: number;
+  reflectivity: number;
+  clearcoat?: number;
+  clearcoatRoughness?: number;
+  transmission?: number;
+  thickness?: number;
+  sheen?: number;
+  sheenRoughness?: number;
+  sheenColor?: string;
+  specularIntensity?: number;
+  specularColor?: string;
+  iridescence?: number;
+  iridescenceIOR?: number;
+  iridescenceThicknessRange?: [number, number];
+  anisotropy?: number;
+  anisotropyRotation?: number;
+  envMapIntensity?: number;
+  customProperties?: Record<string, any>;
+}

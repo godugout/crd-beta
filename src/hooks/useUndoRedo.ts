@@ -1,11 +1,36 @@
 
 import { useState, useCallback } from 'react';
 
-export const useUndoRedo = <T>(initialState: T) => {
+interface UseUndoRedoOptions {
+  maxHistorySize?: number;
+}
+
+/**
+ * A hook that provides undo/redo functionality for any state
+ */
+export function useUndoRedo<T>(
+  initialState: T,
+  { maxHistorySize = 50 }: UseUndoRedoOptions = {}
+) {
+  // Current state
   const [state, setState] = useState<T>(initialState);
+  
+  // History stacks
   const [past, setPast] = useState<T[]>([]);
   const [future, setFuture] = useState<T[]>([]);
-
+  
+  // Add state to history
+  const addToHistory = useCallback((newState: T) => {
+    setPast(prevPast => {
+      // Limit history size
+      const nextPast = [...prevPast, state].slice(-maxHistorySize);
+      return nextPast;
+    });
+    setFuture([]); // Clear redo stack
+    setState(newState);
+  }, [state, maxHistorySize]);
+  
+  // Undo operation
   const undo = useCallback(() => {
     if (past.length === 0) return;
     
@@ -13,10 +38,11 @@ export const useUndoRedo = <T>(initialState: T) => {
     const newPast = past.slice(0, past.length - 1);
     
     setPast(newPast);
-    setFuture([state, ...future]);
+    setFuture([state, ...future]); 
     setState(previous);
   }, [past, state, future]);
-
+  
+  // Redo operation
   const redo = useCallback(() => {
     if (future.length === 0) return;
     
@@ -27,20 +53,25 @@ export const useUndoRedo = <T>(initialState: T) => {
     setFuture(newFuture);
     setState(next);
   }, [past, state, future]);
-
-  const addToHistory = useCallback((newState: T) => {
-    setPast([...past, state]);
-    setFuture([]);
-    setState(newState);
-  }, [past, state]);
   
+  // Check if undo/redo are available
+  const canUndo = past.length > 0;
+  const canRedo = future.length > 0;
+
   return {
     state,
     setState: addToHistory,
     undo,
     redo,
-    canUndo: past.length > 0,
-    canRedo: future.length > 0,
-    addToHistory
+    canUndo,
+    canRedo,
+    addToHistory,
+    history: {
+      past,
+      present: state,
+      future,
+    },
   };
-};
+}
+
+export default useUndoRedo;

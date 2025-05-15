@@ -5,93 +5,127 @@ interface UseAutoSaveOptions<T> {
   data: T;
   key: string;
   saveInterval?: number;
-  onSave?: (data: T) => void;
+  storageType?: 'local' | 'session';
 }
 
-export const useAutoSave = <T>({
+/**
+ * A hook that provides auto-saving functionality for form data
+ */
+export function useAutoSave<T>({
   data,
   key,
-  saveInterval = 60000, // Default: save every 60 seconds
-  onSave
-}: UseAutoSaveOptions<T>) => {
+  saveInterval = 60000, // 1 minute by default
+  storageType = 'local'
+}: UseAutoSaveOptions<T>) {
   const [lastSaved, setLastSaved] = useState<number>(Date.now());
-  const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const storage = storageType === 'local' ? localStorage : sessionStorage;
   
-  // Load saved data on mount
+  const timerRef = useRef<number | null>(null);
+  const dataRef = useRef<T>(data);
+  
+  // Update the ref whenever data changes
   useEffect(() => {
-    const savedData = localStorage.getItem(key);
-    
-    if (savedData) {
-      try {
-        const parsedData = JSON.parse(savedData);
-        onSave?.(parsedData);
-      } catch (error) {
-        console.error('Error loading saved data:', error);
-      }
-    }
-  }, [key, onSave]);
+    dataRef.current = data;
+  }, [data]);
   
-  // Save data function
-  const saveData = async () => {
-    setIsSaving(true);
-    setSaveStatus('saving');
-    
+  // Load data from storage on mount
+  useEffect(() => {
     try {
-      localStorage.setItem(key, JSON.stringify(data));
+      const savedData = storage.getItem(key);
+      if (savedData) {
+        // We're not setting the data here, just checking if it exists
+        const { timestamp } = JSON.parse(savedData);
+        if (timestamp) {
+          setLastSaved(timestamp);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading auto-saved data:', error);
+    }
+  }, [key, storage]);
+  
+  // Set up the auto-save timer
+  useEffect(() => {
+    const saveData = async () => {
+      try {
+        setSaveStatus('saving');
+        setIsSaving(true);
+        
+        // Save the current data and timestamp
+        const saveObj = {
+          data: dataRef.current,
+          timestamp: Date.now()
+        };
+        
+        storage.setItem(key, JSON.stringify(saveObj));
+        
+        setLastSaved(saveObj.timestamp);
+        setSaveStatus('saved');
+      } catch (error) {
+        console.error('Error auto-saving data:', error);
+        setSaveStatus('error');
+      } finally {
+        setIsSaving(false);
+      }
+    };
+    
+    // Setup interval
+    timerRef.current = window.setInterval(saveData, saveInterval);
+    
+    // Cleanup
+    return () => {
+      if (timerRef.current !== null) {
+        clearInterval(timerRef.current);
+      }
+    };
+  }, [key, saveInterval, storage]);
+  
+  // Manual save function
+  const save = async () => {
+    try {
+      setSaveStatus('saving');
+      setIsSaving(true);
       
-      setLastSaved(Date.now());
+      const saveObj = {
+        data: dataRef.current,
+        timestamp: Date.now()
+      };
+      
+      storage.setItem(key, JSON.stringify(saveObj));
+      
+      setLastSaved(saveObj.timestamp);
       setSaveStatus('saved');
       
-      // Call custom save handler if provided
-      if (onSave) {
-        await onSave(data);
-      }
+      return true;
     } catch (error) {
       console.error('Error saving data:', error);
       setSaveStatus('error');
+      return false;
     } finally {
       setIsSaving(false);
     }
   };
   
-  // Set up the auto-save interval
-  useEffect(() => {
-    // Clear any existing timeout
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
+  // Clear saved data
+  const clearSaved = () => {
+    try {
+      storage.removeItem(key);
+      return true;
+    } catch (error) {
+      console.error('Error clearing saved data:', error);
+      return false;
     }
-    
-    // Set new timeout
-    timeoutRef.current = setTimeout(() => {
-      saveData();
-    }, saveInterval);
-    
-    // Cleanup on unmount
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
-  }, [data, saveInterval]);
-  
-  // Save when component unmounts
-  useEffect(() => {
-    return () => {
-      saveData();
-    };
-  }, []);
-  
-  // Manual save function
-  const manualSave = () => {
-    saveData();
   };
-  
+
   return {
     lastSaved,
     isSaving,
     saveStatus,
-    manualSave
+    save,
+    clearSaved
   };
-};
+}
+
+export default useAutoSave;
