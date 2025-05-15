@@ -281,7 +281,10 @@ export interface CardTemplate {
   name: string;
   description?: string;
   thumbnail: string;
+  thumbnailUrl?: string; // Added for backward compatibility
   category: string;
+  isOfficial?: boolean; // Added for filtering
+  popularity?: number; // Added for sorting
   designDefaults: {
     cardStyle: Partial<CardStyle>;
     textStyle?: Partial<TextStyle>;

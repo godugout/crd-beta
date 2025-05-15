@@ -200,6 +200,65 @@ const CardCreationWizard: React.FC<CardCreationWizardProps> = ({
     }
   };
   
+  // Complete creation function
+  const handleCompleteCreation = async () => {
+    try {
+      setIsSubmitting(true);
+      
+      // Create a new Card instance with the collected data
+      const newCard = {
+        id: `card-${Date.now()}`,
+        title: cardData.title || 'Untitled Card',
+        description: cardData.description || '',
+        imageUrl: cardData.imageUrl || '',
+        tags: cardData.tags || [],
+        effects: activeEffects,
+        player: cardData.player || '',
+        team: cardData.team || '',
+        year: cardData.year || '',
+        userId: 'current-user',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        designMetadata: {
+          cardStyle: cardStyle || {},
+          textStyle: textStyle || {},
+          marketMetadata: {},
+          cardMetadata: {
+            effects: activeEffects
+          }
+        }
+      };
+      
+      // Add the card to the context or make API call
+      if (typeof onAddCard === 'function') {
+        onAddCard(newCard);
+      }
+      
+      toast({
+        id: Math.random().toString(36).substr(2, 9),
+        title: "Card Created!",
+        description: "Your card has been successfully created.",
+        variant: "success"
+      });
+      
+      // Call onComplete if provided
+      if (typeof onComplete === 'function') {
+        onComplete(newCard);
+      }
+      
+    } catch (error) {
+      console.error('Error creating card:', error);
+      toast({
+        id: Math.random().toString(36).substr(2, 9),
+        title: "Error Creating Card",
+        description: "There was an error creating your card. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+  
   // Render the current step content
   const renderStepContent = () => {
     switch (currentStep) {
@@ -394,7 +453,7 @@ const CardCreationWizard: React.FC<CardCreationWizardProps> = ({
                 Next <ChevronRight className="h-4 w-4 ml-1" />
               </Button>
             ) : (
-              <Button variant="default" onClick={handleSave}>
+              <Button variant="default" onClick={handleCompleteCreation}>
                 <Save className="h-4 w-4 mr-1" />
                 Save Card
               </Button>

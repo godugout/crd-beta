@@ -1,382 +1,395 @@
-
 import React, { useState, useEffect } from 'react';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
-import { Search, Star, Plus, Download, Share } from 'lucide-react';
-import { toast } from '@/lib/utils/toast';
 import { CardTemplate } from '@/lib/types/cardTypes';
-
-// Define available categories
-const CATEGORIES = [
-  'All',
-  'Sports',
-  'Baseball',
-  'Basketball',
-  'Football',
-  'Hockey',
-  'Soccer',
-  'Memorabilia',
-  'Custom'
-];
+import { CardStyle, TextStyle } from '@/lib/types/cardTypes';
+import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { cn } from '@/lib/utils';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
 
 interface TemplateSystemProps {
   onSelectTemplate: (template: CardTemplate) => void;
-  onSaveTemplate?: (template: CardTemplate) => Promise<void>;
-  onShareTemplate?: (templateId: string) => void;
-  userTemplates?: CardTemplate[];
-  communityTemplates?: CardTemplate[];
+  selectedTemplate: CardTemplate | null;
+  cardStyle: Partial<CardStyle> | null;
+  textStyle: Partial<TextStyle> | null;
 }
 
-export function TemplateSystem({
+const TemplateSystem: React.FC<TemplateSystemProps> = ({
   onSelectTemplate,
-  onSaveTemplate,
-  onShareTemplate,
-  userTemplates = [],
-  communityTemplates = []
-}: TemplateSystemProps) {
-  const [activeTab, setActiveTab] = useState('official');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All');
-  const [filteredTemplates, setFilteredTemplates] = useState<CardTemplate[]>([]);
+  selectedTemplate,
+  cardStyle,
+  textStyle
+}) => {
+  const isMobile = useMediaQuery('(max-width: 768px)');
+  const [categoryFilter, setCategoryFilter] = useState<string>('All');
+  const [sortBy, setSortBy] = useState<string>('Popularity');
   
-  // Mock official templates
-  const officialTemplates: CardTemplate[] = [
+  useEffect(() => {
+    if (selectedTemplate) {
+      onSelectTemplate(selectedTemplate);
+    }
+  }, [selectedTemplate, onSelectTemplate]);
+  
+  const handleSelectTemplate = (template: CardTemplate) => {
+    onSelectTemplate(template);
+  };
+  
+  const handleCategoryFilter = (category: string) => {
+    setCategoryFilter(category);
+  };
+  
+  const handleSortBy = (sortBy: string) => {
+    setSortBy(sortBy);
+  };
+
+  const baseballTemplates: CardTemplate[] = [
     {
-      id: 'template-1',
-      name: 'Baseball Classic',
-      description: 'Classic baseball card design with stats',
-      thumbnailUrl: '/images/templates/baseball-classic.png',
+      id: 'baseball-classic',
+      name: 'Classic Baseball',
+      description: 'Traditional baseball card design with clean lines and bold text',
+      thumbnail: '/templates/baseball-classic.jpg',
       category: 'Baseball',
-      popularity: 125,
       isOfficial: true,
-      cardStyle: {
-        template: 'baseball-classic',
-        effect: 'none',
-        borderRadius: '8px',
-        borderColor: '#000000',
-        shadowColor: '#000000',
-        frameWidth: 4,
-        frameColor: '#D4AF37'
-      },
-      textStyle: {
-        titleColor: '#000000',
-        titleAlignment: 'center',
-        titleWeight: 'bold',
-        descriptionColor: '#333333'
+      popularity: 95,
+      designDefaults: {
+        cardStyle: {
+          template: 'baseball-classic',
+          effect: 'holographic',
+          borderRadius: '8px',
+          borderWidth: 4,
+          borderColor: '#d4af37',
+          backgroundColor: '#ffffff'
+        },
+        textStyle: {
+          fontFamily: 'Inter',
+          titleColor: '#1a202c',
+          titleAlignment: 'center'
+        },
+        effects: ['Holographic']
       }
     },
     {
-      id: 'template-2',
-      name: 'Basketball Pro',
-      description: 'Modern basketball card design',
-      thumbnailUrl: '/images/templates/basketball-pro.png',
-      category: 'Basketball',
-      popularity: 89,
-      isOfficial: true,
-      cardStyle: {
-        template: 'basketball-pro',
-        effect: 'gradient',
-        borderRadius: '12px',
-        borderColor: '#FF4500',
-        shadowColor: '#000000',
-        frameWidth: 2,
-        frameColor: '#FF4500'
-      },
-      textStyle: {
-        titleColor: '#FFFFFF',
-        titleAlignment: 'center',
-        titleWeight: 'bold',
-        descriptionColor: '#EEEEEE'
+      id: 'baseball-vintage',
+      name: 'Vintage Baseball',
+      description: 'Aged baseball card design with a classic, nostalgic feel',
+      thumbnail: '/templates/baseball-vintage.jpg',
+      category: 'Baseball',
+      isOfficial: false,
+      popularity: 80,
+      designDefaults: {
+        cardStyle: {
+          template: 'baseball-vintage',
+          effect: 'vintage',
+          borderRadius: '12px',
+          borderWidth: 2,
+          borderColor: '#a52a2a',
+          backgroundColor: '#f5f5dc'
+        },
+        textStyle: {
+          fontFamily: 'Times New Roman',
+          titleColor: '#8b4513',
+          titleAlignment: 'left'
+        },
+        effects: ['Vintage']
       }
     },
     {
-      id: 'template-3',
-      name: 'Soccer Star',
-      description: 'International soccer player template',
-      thumbnailUrl: '/images/templates/soccer-star.png',
-      category: 'Soccer',
-      popularity: 112,
+      id: 'baseball-modern',
+      name: 'Modern Baseball',
+      description: 'Sleek, contemporary baseball card design with dynamic graphics',
+      thumbnail: '/templates/baseball-modern.jpg',
+      category: 'Baseball',
       isOfficial: true,
-      cardStyle: {
-        template: 'soccer-star',
-        effect: 'shine',
-        borderRadius: '8px',
-        borderColor: '#006600',
-        shadowColor: '#000000',
-        frameWidth: 3,
-        frameColor: '#FFFFFF'
-      },
-      textStyle: {
-        titleColor: '#000000',
-        titleAlignment: 'center',
-        titleWeight: 'bold',
-        descriptionColor: '#333333'
+      popularity: 70,
+      designDefaults: {
+        cardStyle: {
+          template: 'baseball-modern',
+          effect: 'chrome',
+          borderRadius: '10px',
+          borderWidth: 0,
+          borderColor: '#000000',
+          backgroundColor: '#ffffff'
+        },
+        textStyle: {
+          fontFamily: 'Arial',
+          titleColor: '#000080',
+          titleAlignment: 'right'
+        },
+        effects: ['Chrome']
       }
     }
   ];
 
-  // Handler for template selection
-  const handleTemplateSelect = (template: CardTemplate) => {
-    onSelectTemplate(template);
-    toast({
-      title: "Template applied",
-      description: `Applied ${template.name} template to your card`
-    });
-  };
-
-  // Handler for template saving
-  const handleSaveTemplate = async (template: Partial<CardTemplate>) => {
-    if (!onSaveTemplate) return;
-
-    try {
-      await onSaveTemplate(template as CardTemplate);
-      toast({
-        title: "Template saved",
-        description: "Your custom template has been saved"
-      });
-    } catch (error) {
-      toast({
-        title: "Error saving template",
-        description: "There was an error saving your template",
-        variant: "destructive"
-      });
+  const basketballTemplates: CardTemplate[] = [
+    {
+      id: 'basketball-classic',
+      name: 'Classic Basketball',
+      description: 'Traditional basketball card design with clean lines and bold text',
+      thumbnail: '/templates/basketball-classic.jpg',
+      category: 'Basketball',
+      isOfficial: true,
+      popularity: 90,
+      designDefaults: {
+        cardStyle: {
+          template: 'basketball-classic',
+          effect: 'refractor',
+          borderRadius: '8px',
+          borderWidth: 4,
+          borderColor: '#ffa500',
+          backgroundColor: '#ffffff'
+        },
+        textStyle: {
+          fontFamily: 'Inter',
+          titleColor: '#1a202c',
+          titleAlignment: 'center'
+        },
+        effects: ['Refractor']
+      }
+    },
+    {
+      id: 'basketball-vintage',
+      name: 'Vintage Basketball',
+      description: 'Aged basketball card design with a classic, nostalgic feel',
+      thumbnail: '/templates/basketball-vintage.jpg',
+      category: 'Basketball',
+      isOfficial: false,
+      popularity: 75,
+      designDefaults: {
+        cardStyle: {
+          template: 'basketball-vintage',
+          effect: 'vintage',
+          borderRadius: '12px',
+          borderWidth: 2,
+          borderColor: '#800000',
+          backgroundColor: '#f5f5dc'
+        },
+        textStyle: {
+          fontFamily: 'Times New Roman',
+          titleColor: '#8b4513',
+          titleAlignment: 'left'
+        },
+        effects: ['Vintage']
+      }
+    },
+    {
+      id: 'basketball-modern',
+      name: 'Modern Basketball',
+      description: 'Sleek, contemporary basketball card design with dynamic graphics',
+      thumbnail: '/templates/basketball-modern.jpg',
+      category: 'Basketball',
+      isOfficial: true,
+      popularity: 65,
+      designDefaults: {
+        cardStyle: {
+          template: 'basketball-modern',
+          effect: 'chrome',
+          borderRadius: '10px',
+          borderWidth: 0,
+          borderColor: '#000000',
+          backgroundColor: '#ffffff'
+        },
+        textStyle: {
+          fontFamily: 'Arial',
+          titleColor: '#000080',
+          titleAlignment: 'right'
+        },
+        effects: ['Chrome']
+      }
     }
-  };
+  ];
 
-  // Handler for template sharing
-  const handleShareTemplate = (templateId: string) => {
-    if (!onShareTemplate) return;
-    
-    onShareTemplate(templateId);
-    toast({
-      title: "Template shared",
-      description: "Template link copied to clipboard"
-    });
-  };
+  const footballTemplates: CardTemplate[] = [
+    {
+      id: 'football-classic',
+      name: 'Classic Football',
+      description: 'Traditional football card design with clean lines and bold text',
+      thumbnail: '/templates/football-classic.jpg',
+      category: 'Football',
+      isOfficial: true,
+      popularity: 85,
+      designDefaults: {
+        cardStyle: {
+          template: 'football-classic',
+          effect: 'holographic',
+          borderRadius: '8px',
+          borderWidth: 4,
+          borderColor: '#008000',
+          backgroundColor: '#ffffff'
+        },
+        textStyle: {
+          fontFamily: 'Inter',
+          titleColor: '#1a202c',
+          titleAlignment: 'center'
+        },
+        effects: ['Holographic']
+      }
+    },
+    {
+      id: 'football-vintage',
+      name: 'Vintage Football',
+      description: 'Aged football card design with a classic, nostalgic feel',
+      thumbnail: '/templates/football-vintage.jpg',
+      category: 'Football',
+      isOfficial: false,
+      popularity: 70,
+      designDefaults: {
+        cardStyle: {
+          template: 'football-vintage',
+          effect: 'vintage',
+          borderRadius: '12px',
+          borderWidth: 2,
+          borderColor: '#8b4513',
+          backgroundColor: '#f5f5dc'
+        },
+        textStyle: {
+          fontFamily: 'Times New Roman',
+          titleColor: '#a0522d',
+          titleAlignment: 'left'
+        },
+        effects: ['Vintage']
+      }
+    },
+    {
+      id: 'football-modern',
+      name: 'Modern Football',
+      description: 'Sleek, contemporary football card design with dynamic graphics',
+      thumbnail: '/templates/football-modern.jpg',
+      category: 'Football',
+      isOfficial: true,
+      popularity: 60,
+      designDefaults: {
+        cardStyle: {
+          template: 'football-modern',
+          effect: 'chrome',
+          borderRadius: '10px',
+          borderWidth: 0,
+          borderColor: '#000000',
+          backgroundColor: '#ffffff'
+        },
+        textStyle: {
+          fontFamily: 'Arial',
+          titleColor: '#006400',
+          titleAlignment: 'right'
+        },
+        effects: ['Chrome']
+      }
+    }
+  ];
 
-  // Filter templates based on search query and selected category
-  useEffect(() => {
-    let templates: CardTemplate[] = [];
-    
-    // Select templates based on active tab
-    switch (activeTab) {
-      case 'official':
-        templates = officialTemplates;
-        break;
-      case 'my-templates':
-        templates = userTemplates;
-        break;
-      case 'community':
-        templates = communityTemplates;
-        break;
-      default:
-        templates = [...officialTemplates, ...userTemplates];
-    }
-    
-    // Apply category filter
-    if (selectedCategory !== 'All') {
-      templates = templates.filter(t => t.category === selectedCategory);
-    }
-    
-    // Apply search filter
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      templates = templates.filter(t => 
-        t.name.toLowerCase().includes(query) || 
-        t.description?.toLowerCase().includes(query)
-      );
-    }
-    
-    setFilteredTemplates(templates);
-  }, [activeTab, selectedCategory, searchQuery, userTemplates, communityTemplates]);
+  const allTemplates = [
+    ...baseballTemplates,
+    ...basketballTemplates,
+    ...footballTemplates
+  ];
 
-  return (
-    <div className="template-system w-full">
-      <div className="search-and-filter flex flex-col md:flex-row gap-4 mb-6">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-          <Input
-            placeholder="Search templates..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
-          />
-        </div>
+  const filteredTemplates = categoryFilter === 'All'
+    ? allTemplates
+    : allTemplates.filter(template => template.category === categoryFilter);
+
+  const sortedTemplates = filteredTemplates.sort((a, b) => {
+    if (sortBy === 'Popularity') {
+      return (b.popularity || 0) - (a.popularity || 0);
+    } else {
+      return a.name.localeCompare(b.name);
+    }
+  });
+
+  const renderTemplateItem = (template: CardTemplate) => (
+    <div 
+      key={template.id}
+      className={cn(
+        "group relative aspect-[2.5/3.5] overflow-hidden rounded-lg border cursor-pointer hover:border-primary transition-all",
+        selectedTemplate?.id === template.id ? "border-primary ring-2 ring-primary ring-offset-2" : "border-border"
+      )}
+      onClick={() => handleSelectTemplate(template)}
+    >
+      <img
+        src={template.thumbnail}
+        alt={template.name}
+        className="w-full h-full object-cover transition-transform group-hover:scale-105"
+        loading="lazy"
+      />
+      
+      <div className="absolute top-2 left-2 flex gap-1">
+        {template.isOfficial && (
+          <span className="bg-blue-600 text-white text-xs px-2 py-0.5 rounded-full">Official</span>
+        )}
         
-        <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0 hide-scrollbar">
-          {CATEGORIES.map(category => (
-            <Button
-              key={category}
-              variant={selectedCategory === category ? "default" : "outline"}
-              size="sm"
-              onClick={() => setSelectedCategory(category)}
-            >
-              {category}
-            </Button>
-          ))}
-        </div>
+        {(template.popularity && template.popularity > 90) && (
+          <span className="bg-amber-500 text-white text-xs px-2 py-0.5 rounded-full">Popular</span>
+        )}
       </div>
       
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid grid-cols-3 mb-4">
-          <TabsTrigger value="official">Official</TabsTrigger>
-          <TabsTrigger value="my-templates">My Templates</TabsTrigger>
-          <TabsTrigger value="community">Community</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="official" className="space-y-4">
-          {filteredTemplates.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-gray-500">No templates match your search</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {filteredTemplates.map(template => (
-                <TemplateCard
-                  key={template.id}
-                  template={template}
-                  onSelect={handleTemplateSelect}
-                  onShare={onShareTemplate ? () => handleShareTemplate(template.id) : undefined}
-                />
-              ))}
-            </div>
-          )}
-        </TabsContent>
-        
-        <TabsContent value="my-templates" className="space-y-4">
-          <div className="flex justify-end mb-4">
-            <Button onClick={() => toast({ title: "Feature coming soon", description: "Template creator will be available soon" })}>
-              <Plus className="h-4 w-4 mr-2" />
-              Create Template
-            </Button>
-          </div>
-          
-          {filteredTemplates.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-gray-500">You haven't created any templates yet</p>
-              <Button variant="outline" className="mt-4" onClick={() => toast({ title: "Feature coming soon", description: "Template creator will be available soon" })}>
-                Create Your First Template
-              </Button>
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {filteredTemplates.map(template => (
-                <TemplateCard
-                  key={template.id}
-                  template={template}
-                  onSelect={handleTemplateSelect}
-                  onSave={onSaveTemplate ? () => handleSaveTemplate(template) : undefined}
-                  onShare={onShareTemplate ? () => handleShareTemplate(template.id) : undefined}
-                  editable
-                />
-              ))}
-            </div>
-          )}
-        </TabsContent>
-        
-        <TabsContent value="community" className="space-y-4">
-          {filteredTemplates.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-gray-500">No community templates found</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {filteredTemplates.map(template => (
-                <TemplateCard
-                  key={template.id}
-                  template={template}
-                  onSelect={handleTemplateSelect}
-                  onSave={onSaveTemplate ? () => handleSaveTemplate(template) : undefined}
-                  onShare={onShareTemplate ? () => handleShareTemplate(template.id) : undefined}
-                />
-              ))}
-            </div>
-          )}
-        </TabsContent>
-      </Tabs>
+      <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 to-transparent p-3 text-white">
+        <p className="font-medium text-sm">{template.name}</p>
+        <p className="text-xs text-white/70 truncate">{template.category}</p>
+      </div>
     </div>
   );
-}
 
-// Template card component
-interface TemplateCardProps {
-  template: CardTemplate;
-  onSelect: (template: CardTemplate) => void;
-  onSave?: () => void;
-  onShare?: () => void;
-  editable?: boolean;
-}
-
-function TemplateCard({
-  template,
-  onSelect,
-  onSave,
-  onShare,
-  editable
-}: TemplateCardProps) {
   return (
-    <Card className="overflow-hidden hover:shadow-md transition-shadow duration-200">
-      <div className="relative aspect-[2.5/3.5] bg-gray-200 cursor-pointer" onClick={() => onSelect(template)}>
-        {template.thumbnailUrl ? (
-          <img
-            src={template.thumbnailUrl}
-            alt={template.name}
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center text-gray-500">
-            No Preview
-          </div>
-        )}
-        
-        {template.isOfficial && (
-          <Badge className="absolute top-2 right-2 bg-blue-500">
-            Official
-          </Badge>
-        )}
-        
-        {template.popularity && template.popularity > 100 && (
-          <Badge variant="outline" className="absolute bottom-2 left-2 bg-white/80">
-            <Star className="h-3 w-3 mr-1 text-yellow-500 fill-yellow-500" />
-            Popular
-          </Badge>
-        )}
+    <div className="space-y-6">
+      <div>
+        <h3 className="text-lg font-medium mb-2">Select a Template</h3>
+        <p className="text-sm text-gray-500">
+          Choose a pre-designed template to quickly get started with your card creation.
+        </p>
       </div>
       
-      <CardContent className="p-3">
-        <h3 className="font-semibold truncate">{template.name}</h3>
-        <p className="text-sm text-gray-500 truncate">{template.description}</p>
-        
-        <div className="flex mt-2 gap-2">
+      <div className="flex items-center justify-between">
+        <div className="flex gap-2">
           <Button 
-            variant="default" 
-            size="sm" 
-            className="flex-1"
-            onClick={() => onSelect(template)}
+            variant="outline" 
+            size="sm"
+            className={categoryFilter === 'All' ? 'bg-secondary text-secondary-foreground hover:bg-secondary/80' : ''}
+            onClick={() => handleCategoryFilter('All')}
           >
-            Use
+            All
           </Button>
-          
-          <div className="flex gap-1">
-            {onSave && (
-              <Button variant="outline" size="sm" onClick={onSave}>
-                <Download className="h-4 w-4" />
-                <span className="sr-only">Save</span>
-              </Button>
-            )}
-            
-            {onShare && (
-              <Button variant="outline" size="sm" onClick={onShare}>
-                <Share className="h-4 w-4" />
-                <span className="sr-only">Share</span>
-              </Button>
-            )}
-          </div>
+          <Button 
+            variant="outline" 
+            size="sm"
+            className={categoryFilter === 'Baseball' ? 'bg-secondary text-secondary-foreground hover:bg-secondary/80' : ''}
+            onClick={() => handleCategoryFilter('Baseball')}
+          >
+            Baseball
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm"
+            className={categoryFilter === 'Basketball' ? 'bg-secondary text-secondary-foreground hover:bg-secondary/80' : ''}
+            onClick={() => handleCategoryFilter('Basketball')}
+          >
+            Basketball
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm"
+            className={categoryFilter === 'Football' ? 'bg-secondary text-secondary-foreground hover:bg-secondary/80' : ''}
+            onClick={() => handleCategoryFilter('Football')}
+          >
+            Football
+          </Button>
         </div>
-      </CardContent>
-    </Card>
+        
+        <div className="flex items-center space-x-2">
+          <label htmlFor="sort" className="text-sm font-medium text-gray-700">Sort by:</label>
+          <select 
+            id="sort" 
+            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            value={sortBy}
+            onChange={(e) => handleSortBy(e.target.value)}
+          >
+            <option value="Popularity">Popularity</option>
+            <option value="Name">Name</option>
+          </select>
+        </div>
+      </div>
+      
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        {sortedTemplates.map(renderTemplateItem)}
+      </div>
+    </div>
   );
-}
+};
+
+export default TemplateSystem;

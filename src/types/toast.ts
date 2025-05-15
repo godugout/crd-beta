@@ -1,27 +1,27 @@
 
-import { type ToastProps } from "@radix-ui/react-toast"
+import { ReactNode } from "react"
 
-export type ToastVariant = 'default' | 'destructive' | 'success' | 'warning' | 'info'
+export type ToastVariant = "default" | "success" | "error" | "warning" | "info" | "destructive"
+
+export type ToastActionElement = React.ReactElement
 
 export interface ToasterToast {
-  id: string;
-  title?: React.ReactNode;
-  description?: React.ReactNode;
-  action?: React.ReactElement;
-  variant?: ToastVariant;
-  duration?: number;
+  id: string
+  title?: ReactNode
+  description?: ReactNode
+  action?: ReactNode
+  variant?: ToastVariant
+  duration?: number
+  open?: boolean
 }
 
-export interface ToasterToastWithStatus extends ToasterToast {
-  open?: boolean;
-  ariaLive?: 'assertive' | 'off' | 'polite';
-  onOpenChange?: (open: boolean) => void;
+export type Toast = {
+  id: string
+  title?: string
+  description?: string
+  variant?: ToastVariant
+  duration?: number
+  actionLabel?: string
+  action?: () => void
+  open?: boolean
 }
-
-// Add a utility function to create toast with ID
-export const createToast = (toast: Partial<ToasterToast>): ToasterToast => {
-  return {
-    id: crypto.randomUUID?.() || String(Date.now()),
-    ...toast
-  };
-};

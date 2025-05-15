@@ -1,74 +1,48 @@
 
-import { Card as CardTypes } from "@/lib/types/cardTypes";
-import { Card as LegacyCard } from "@/lib/types/card";
+import { Card } from '@/lib/types/cardTypes';
 
-// Default values for mandatory fields
-const DEFAULT_CARD_VALUES = {
-  description: '',
-  thumbnailUrl: '',
-  tags: [] as string[],
-  effects: [] as string[],
-  createdAt: new Date().toISOString(),
-  updatedAt: new Date().toISOString(),
-  designMetadata: {
+/**
+ * Adapts a Card object to ensure all required fields are present
+ */
+export const adaptCardToSchema = (card: Card): Card => {
+  // Ensure description exists
+  const description = card.description || '';
+  
+  // Ensure thumbnailUrl exists
+  const thumbnailUrl = card.thumbnailUrl || card.imageUrl;
+  
+  // Ensure designMetadata has all required nested properties
+  const designMetadata = {
     cardStyle: {
-      template: 'classic',
+      template: 'default',
       effect: 'none',
-      borderRadius: '8px',
+      borderRadius: '12px',
       borderColor: '#000000',
+      shadowColor: '#000000',
+      frameWidth: 0,
       frameColor: '#000000',
-      frameWidth: 2,
-      shadowColor: 'rgba(0,0,0,0.2)',
+      ...(card.designMetadata?.cardStyle || {})
     },
     textStyle: {
       titleColor: '#000000',
       titleAlignment: 'center',
       titleWeight: 'bold',
-      descriptionColor: '#333333',
+      descriptionColor: '#666666',
+      ...(card.designMetadata?.textStyle || {})
     },
     marketMetadata: {
-      isPrintable: false,
-      isForSale: false,
-      includeInCatalog: false,
+      ...(card.designMetadata?.marketMetadata || {})
     },
     cardMetadata: {
-      category: 'general',
-      cardType: 'standard',
-      series: 'base',
+      ...(card.designMetadata?.cardMetadata || {})
     },
-  }
-};
-
-// Adapt any card-like object to a fully valid Card type
-export function adaptToCard(partialCard: Partial<CardTypes>): CardTypes {
-  return {
-    ...DEFAULT_CARD_VALUES,
-    id: partialCard.id || '',
-    title: partialCard.title || '',
-    imageUrl: partialCard.imageUrl || '',
-    userId: partialCard.userId || '',
-    ...partialCard,
-    // Ensure we have required nested objects
-    designMetadata: {
-      ...DEFAULT_CARD_VALUES.designMetadata,
-      ...partialCard.designMetadata,
-      cardStyle: {
-        ...DEFAULT_CARD_VALUES.designMetadata.cardStyle,
-        ...partialCard.designMetadata?.cardStyle
-      },
-      textStyle: {
-        ...DEFAULT_CARD_VALUES.designMetadata.textStyle,
-        ...partialCard.designMetadata?.textStyle
-      }
-    },
-    description: partialCard.description || DEFAULT_CARD_VALUES.description,
-    thumbnailUrl: partialCard.thumbnailUrl || partialCard.imageUrl || DEFAULT_CARD_VALUES.thumbnailUrl,
-    tags: partialCard.tags || DEFAULT_CARD_VALUES.tags,
-    effects: partialCard.effects || DEFAULT_CARD_VALUES.effects,
+    ...(card.designMetadata || {})
   };
-}
-
-// Convert between Card versions
-export function convertCardTypes(card: CardTypes | LegacyCard): CardTypes {
-  return adaptToCard(card as Partial<CardTypes>);
-}
+  
+  return {
+    ...card,
+    description,
+    thumbnailUrl,
+    designMetadata
+  };
+};

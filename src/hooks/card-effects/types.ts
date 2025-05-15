@@ -41,3 +41,20 @@ export interface CardEffectDefinition {
   supportedCardTypes: string[];
   renderFunction?: (settings: CardEffectSettings) => React.ReactNode;
 }
+
+export interface PremiumCardEffect extends CardEffect {
+  premium: boolean;
+  requiresSubscription: boolean;
+}
+
+export interface MaterialSimulation {
+  roughness: number;
+  metalness: number;
+  clearcoat: number;
+  clearcoatRoughness: number;
+  ior: number;
+  transmission: number;
+  reflectivity: number;
+  emissive: string;
+  envMapIntensity: number;
+}
