@@ -30,8 +30,21 @@ const SampleCardsButton: React.FC<SampleCardsButtonProps> = ({ variant = 'defaul
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         designMetadata: {
-          cardStyle: {},
-          textStyle: {},
+          cardStyle: {
+            template: 'classic',
+            effect: 'none',
+            borderRadius: '8px',
+            borderColor: '#000000',
+            shadowColor: 'rgba(0,0,0,0.2)',
+            frameWidth: 2,
+            frameColor: '#000000'
+          },
+          textStyle: {
+            titleColor: '#000000',
+            titleAlignment: 'center',
+            titleWeight: 'bold',
+            descriptionColor: '#333333'
+          },
           marketMetadata: {},
           cardMetadata: {}
         }
@@ -47,8 +60,21 @@ const SampleCardsButton: React.FC<SampleCardsButtonProps> = ({ variant = 'defaul
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         designMetadata: {
-          cardStyle: {},
-          textStyle: {},
+          cardStyle: {
+            template: 'classic',
+            effect: 'none',
+            borderRadius: '8px',
+            borderColor: '#000000',
+            shadowColor: 'rgba(0,0,0,0.2)',
+            frameWidth: 2,
+            frameColor: '#000000'
+          },
+          textStyle: {
+            titleColor: '#000000',
+            titleAlignment: 'center',
+            titleWeight: 'bold',
+            descriptionColor: '#333333'
+          },
           marketMetadata: {},
           cardMetadata: {}
         }

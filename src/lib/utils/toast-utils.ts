@@ -1,5 +1,6 @@
 
-import showToast, { ToastOptions } from '@/lib/adapters/toastAdapter';
+import { toast } from '@/hooks/use-toast';
+import { ToastOptions } from '@/lib/adapters/toastAdapter';
 import { createToast } from '@/types/toast';
 
 /**
@@ -11,7 +12,7 @@ export const toastUtils = {
    * Display a success toast
    */
   success: (title: string, description?: string) => {
-    return showToast(createToast({
+    return toast(createToast({
       title,
       description,
       variant: 'success'
@@ -22,7 +23,7 @@ export const toastUtils = {
    * Display an error toast
    */
   error: (title: string, description?: string) => {
-    return showToast(createToast({
+    return toast(createToast({
       title,
       description,
       variant: 'destructive'
@@ -33,7 +34,7 @@ export const toastUtils = {
    * Display an info toast
    */
   info: (title: string, description?: string) => {
-    return showToast(createToast({
+    return toast(createToast({
       title,
       description,
       variant: 'info'
@@ -44,7 +45,7 @@ export const toastUtils = {
    * Display a warning toast
    */
   warning: (title: string, description?: string) => {
-    return showToast(createToast({
+    return toast(createToast({
       title,
       description,
       variant: 'warning'

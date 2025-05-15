@@ -57,6 +57,20 @@ export interface CardData {
   };
 }
 
+// Define CardTemplate type to fix template system issues
+export interface CardTemplate {
+  id: string;
+  name: string;
+  description?: string;
+  thumbnail: string;
+  category: string;
+  designDefaults: {
+    cardStyle: Partial<CardStyle>;
+    textStyle?: Partial<TextStyle>;
+    effects?: string[];
+  };
+}
+
 /**
  * Helper function to convert between Card and CardData types
  */
@@ -115,5 +129,8 @@ export function adaptCardToCardData(card: Card): CardData {
   };
 }
 
+// Import types from cardTypes.ts
+import { CardStyle, TextStyle } from '@/lib/types/cardTypes';
+
 // Export from @/types/card to prevent errors in other imports
-export { Card };
+export { Card, CardStyle, TextStyle, CardTemplate };
