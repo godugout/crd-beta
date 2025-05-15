@@ -1,55 +1,43 @@
 
-import { toast } from '@/hooks/use-toast';
-import { createToast } from '@/types/toast';
+import { toast } from "sonner";
+import { v4 as uuidv4 } from 'uuid';
 
-/**
- * Utility functions for displaying toast notifications
- * This provides a simpler API for common toast types
- */
-export const toastUtils = {
-  /**
-   * Display a success toast
-   */
-  success: (title: string, description?: string) => {
-    return toast(createToast({
-      title,
-      description,
-      variant: 'success'
-    }));
-  },
-
-  /**
-   * Display an error toast
-   */
-  error: (title: string, description?: string) => {
-    return toast(createToast({
-      title,
-      description,
-      variant: 'destructive'
-    }));
-  },
-
-  /**
-   * Display an info toast
-   */
-  info: (title: string, description?: string) => {
-    return toast(createToast({
-      title,
-      description,
-      variant: 'info'
-    }));
-  },
-
-  /**
-   * Display a warning toast
-   */
-  warning: (title: string, description?: string) => {
-    return toast(createToast({
-      title,
-      description,
-      variant: 'warning'
-    }));
+// Helper to create toast with proper ID
+export const createToast = (config: {
+  title: string;
+  description?: string;
+  variant?: "success" | "error" | "warning" | "info" | "destructive";
+  duration?: number;
+}) => {
+  const { title, description, variant, duration } = config;
+  
+  // Convert variant if needed (for compatibility)
+  let toastVariant = variant;
+  if (variant === "error") {
+    toastVariant = "destructive";
   }
+  
+  return {
+    id: uuidv4(),
+    title,
+    description,
+    variant: toastVariant,
+    ...(duration ? { duration } : {})
+  };
 };
 
-export default toastUtils;
+// Toast utility with predefined methods
+export const toastUtils = {
+  success: (title: string, description?: string) => {
+    toast(createToast({ title, description, variant: "success" }));
+  },
+  error: (title: string, description?: string) => {
+    toast(createToast({ title, description, variant: "error" }));
+  },
+  warning: (title: string, description?: string) => {
+    toast(createToast({ title, description, variant: "warning" }));
+  },
+  info: (title: string, description?: string) => {
+    toast(createToast({ title, description, variant: "info" }));
+  }
+};

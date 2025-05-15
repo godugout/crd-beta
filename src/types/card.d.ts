@@ -14,6 +14,7 @@ export interface CardData {
   updatedAt: string;
   userId: string;
   effects: string[];
+  textColor?: string;  // Added for backward compatibility
   designMetadata?: {
     cardStyle?: {
       template?: string;

@@ -1,68 +1,47 @@
 
 import React, { forwardRef } from 'react';
 import { Card } from '@/lib/types/cardTypes';
-import { cn } from '@/lib/utils';
 
 interface CardPreviewProps {
   card: Partial<Card>;
   className?: string;
 }
 
-const CardPreview = forwardRef<HTMLDivElement, CardPreviewProps>(({ 
-  card, 
-  className 
-}, ref) => {
-  // Determine which effects classes to apply
-  const effectClasses = (card.effects || [])
-    .map(effect => `effect-${effect}`)
-    .join(' ');
+const CardPreview = forwardRef<HTMLDivElement, CardPreviewProps>(({ card, className }, ref) => {
+  // Safely access nested properties with fallbacks
+  const cardStyle = card.designMetadata?.cardStyle || {};
+  const textStyle = card.designMetadata?.textStyle || {};
   
-  // Ensure cardStyle has default values
-  const cardStyle = card.designMetadata?.cardStyle || {
-    template: 'classic',
-    effect: 'none',
-    borderRadius: '8px',
-    borderWidth: 2,
-    borderColor: '#000000',
-    backgroundColor: '#FFFFFF',
-    shadowColor: 'rgba(0,0,0,0.2)',
-    frameWidth: 2,
-    frameColor: '#000000'
-  };
+  // Card style properties with fallbacks
+  const borderRadius = cardStyle.borderRadius || '8px';
+  const borderWidth = cardStyle.borderWidth || 2;
+  const borderStyle = 'solid';
+  const borderColor = cardStyle.borderColor || '#000000';
+  const backgroundColor = cardStyle.backgroundColor || '#FFFFFF';
   
-  // Ensure textStyle has default values
-  const textStyle = card.designMetadata?.textStyle || {
-    fontFamily: 'Inter',
-    fontSize: '16px',
-    fontWeight: 'normal',
-    color: '#000000',
-    titleColor: '#000000',
-    titleAlignment: 'center',
-    titleWeight: 'bold',
-    descriptionColor: '#333333'
-  };
-  
+  // Text style properties with fallbacks
+  const titleColor = textStyle.titleColor || '#000000';
+  const titleAlignment = textStyle.titleAlignment || 'center';
+  const titleWeight = textStyle.titleWeight || 'bold';
+  const descriptionColor = textStyle.descriptionColor || '#333333';
+
   return (
     <div 
       ref={ref}
-      className={cn(
-        "relative overflow-hidden rounded-lg shadow-lg mx-auto card-preview", 
-        effectClasses,
-        className
-      )}
+      className={`relative overflow-hidden ${className}`}
       style={{
-        width: '300px',
-        height: '420px',
-        borderRadius: cardStyle.borderRadius || '8px',
-        borderWidth: cardStyle.borderWidth || 2,
-        borderStyle: 'solid',
-        borderColor: cardStyle.borderColor || '#000',
-        backgroundColor: cardStyle.backgroundColor || '#fff',
+        borderRadius,
+        borderWidth,
+        borderStyle,
+        borderColor,
+        backgroundColor,
+        transition: 'all 0.3s ease',
+        aspectRatio: '5/7',
       }}
     >
       {/* Card Image */}
       {card.imageUrl && (
-        <div className="absolute inset-0 z-10">
+        <div className="w-full h-3/5 overflow-hidden">
           <img 
             src={card.imageUrl} 
             alt={card.title || 'Card'} 
@@ -71,39 +50,55 @@ const CardPreview = forwardRef<HTMLDivElement, CardPreviewProps>(({
         </div>
       )}
       
-      {/* Card Content Overlay */}
-      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 z-20">
-        {card.title && (
-          <h3 
-            className="text-lg font-bold text-white mb-1"
-            style={{
-              color: textStyle.titleColor || '#fff',
-              textAlign: (textStyle.titleAlignment as any) || 'center',
-              fontWeight: textStyle.titleWeight || 'bold'
-            }}
-          >
-            {card.title}
-          </h3>
-        )}
+      {/* Card Title */}
+      <div className="p-4">
+        <h3 
+          className="text-xl font-semibold mb-2"
+          style={{ 
+            color: titleColor,
+            textAlign: titleAlignment as any,
+            fontWeight: titleWeight,
+          }}
+        >
+          {card.title || 'Untitled Card'}
+        </h3>
         
+        {/* Card Description */}
         {card.description && (
           <p 
-            className="text-sm text-white/80"
-            style={{
-              color: textStyle.descriptionColor || 'rgba(255,255,255,0.8)'
-            }}
+            className="text-sm"
+            style={{ color: descriptionColor }}
           >
             {card.description}
           </p>
         )}
         
-        {(card.player || card.team) && (
-          <div className="flex justify-between mt-2 text-xs text-white/70">
-            <span>{card.player}</span>
-            <span>{card.team} {card.year}</span>
+        {/* Card Details */}
+        <div className="mt-3 text-xs space-y-1">
+          {card.player && <div><span className="opacity-70">Player: </span>{card.player}</div>}
+          {card.team && <div><span className="opacity-70">Team: </span>{card.team}</div>}
+          {card.year && <div><span className="opacity-70">Year: </span>{card.year}</div>}
+        </div>
+        
+        {/* Card Tags */}
+        {card.tags && card.tags.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-1">
+            {card.tags.map((tag, index) => (
+              <span 
+                key={index}
+                className="px-2 py-0.5 bg-gray-100 rounded-full text-xs"
+              >
+                {tag}
+              </span>
+            ))}
           </div>
         )}
       </div>
+      
+      {/* Effects Overlay */}
+      {card.effects && card.effects.length > 0 && (
+        <div className={`absolute inset-0 pointer-events-none ${card.effects.join(' ')}`} />
+      )}
     </div>
   );
 });

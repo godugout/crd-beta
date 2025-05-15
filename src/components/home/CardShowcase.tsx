@@ -19,7 +19,7 @@ interface Snapshot {
   id: number;
   timestamp: Date;
   effects: string[];
-  cardId: number;
+  cardId: string; // Change from number to string to match card.id type
 }
 
 const CardShowcase = ({ 
@@ -96,6 +96,7 @@ const CardShowcase = ({
     );
   }
 
+  // Use string comparison for cardId
   const filteredSnapshots = snapshots.filter(s => s.cardId === cardData[activeCard].id);
 
   return (

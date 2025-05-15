@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { 
@@ -14,6 +13,7 @@ import { Card as CardType } from '@/lib/types/cardTypes';
 import { useUndoRedoState } from '@/hooks/useUndoRedoState';
 import { toastUtils } from '@/lib/utils/toast-utils';
 import { Card as CardUI } from '@/components/ui/card';
+import { v4 as uuidv4 } from 'uuid';
 
 // Import wizard steps
 import TemplateSelectionStep from './steps/TemplateSelectionStep';
@@ -166,29 +166,38 @@ const CardCreationWizard: React.FC<CardCreationWizardProps> = ({
   };
   
   // Save function
-  const handleSave = () => {
-    if (!validateCurrentStep()) return;
-    
-    // Ensure we have required fields
-    if (!cardData.title) {
-      toastUtils.error('Please provide a title for your card');
-      return;
+  const handleSave = async () => {
+    try {
+      // Ensure we have required fields
+      if (!cardData.title || !cardData.imageUrl) {
+        toastUtils.error(
+          "Missing information",
+          "Please provide a title and image for your card"
+        );
+        return;
+      }
+
+      // Create a complete card
+      const newCard = await addCard({
+        ...cardData,
+        id: cardData.id || uuidv4(),
+        createdAt: cardData.createdAt || new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      } as Card);
+
+      toastUtils.success(
+        "Success!",
+        "Your card has been created successfully."
+      );
+
+      onComplete(newCard as Card);
+    } catch (error) {
+      toastUtils.error(
+        "Error saving card",
+        "There was a problem saving your card. Please try again."
+      );
+      console.error("Error saving card:", error);
     }
-    
-    if (!cardData.imageUrl) {
-      toastUtils.error('Please upload an image for your card');
-      return;
-    }
-    
-    // Add final metadata
-    const finalCard = {
-      ...cardData,
-      updatedAt: new Date().toISOString(),
-    } as CardType;
-    
-    // Call the save function
-    onSave(finalCard);
-    toastUtils.success('Card saved successfully');
   };
   
   // Render the current step content

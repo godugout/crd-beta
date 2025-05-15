@@ -1,5 +1,6 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { Card } from '@/lib/types/cardTypes';
 
 interface CardTextStepProps {
   cardData?: any;
