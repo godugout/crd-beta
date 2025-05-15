@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card } from '@/lib/types/cardTypes';
 import { Label } from '@/components/ui/label';
@@ -6,7 +5,7 @@ import { Slider } from '@/components/ui/slider';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
-import ColorPicker from '@/components/ui/color-picker';
+import { ColorPicker } from '@/components/ui/color-picker';
 
 interface DesignStepProps {
   cardData: Partial<Card>;

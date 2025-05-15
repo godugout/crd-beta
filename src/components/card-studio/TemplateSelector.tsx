@@ -1,148 +1,102 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { CardTemplate } from '@/components/card-templates/TemplateLibrary';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search } from 'lucide-react';
-import TemplateCard from '@/components/card-templates/TemplateCard';
 
 interface TemplateSelectorProps {
-  onSelectTemplate: (template: CardTemplate) => void;
+  onSelect: (template: CardTemplate) => void;
 }
 
-// Sample templates - in a real app these would come from an API
-const SAMPLE_TEMPLATES: CardTemplate[] = [
+// Update the templates to remove the 'effects' property if it's not part of the CardTemplate type
+const TEMPLATES: CardTemplate[] = [
   {
-    id: 'topps-chrome',
-    name: 'Topps Chrome',
-    previewUrl: '/placeholder-card.png',
-    sport: 'baseball',
-    style: 'premium',
-    effects: ['Chrome']
+    id: 'classic',
+    name: 'Classic Card',
+    description: 'Traditional trading card style with clean borders',
+    thumbnailUrl: '/images/card-placeholder.png',
+    designMetadata: {
+      cardStyle: {
+        template: 'classic',
+        borderRadius: '8px',
+        borderColor: '#000000',
+      }
+    },
   },
   {
-    id: 'panini-prizm',
-    name: 'Panini Prizm',
-    previewUrl: '/placeholder-card.png',
-    sport: 'basketball',
-    style: 'premium',
-    effects: ['Refractor']
+    id: 'modern',
+    name: 'Modern Sleek',
+    description: 'Contemporary design with minimal borders',
+    thumbnailUrl: '/images/card-placeholder.png',
+    designMetadata: {
+      cardStyle: {
+        template: 'modern',
+        borderRadius: '4px',
+        borderColor: '#333333',
+      }
+    },
   },
   {
-    id: 'upper-deck',
-    name: 'Upper Deck',
-    previewUrl: '/placeholder-card.png',
-    sport: 'hockey',
-    style: 'standard',
-    effects: []
+    id: 'vintage',
+    name: 'Vintage Style',
+    description: 'Aged look with retro styling',
+    thumbnailUrl: '/images/card-placeholder.png',
+    designMetadata: {
+      cardStyle: {
+        template: 'vintage',
+        borderRadius: '0px',
+        borderColor: '#8B5C29',
+      }
+    },
   },
   {
-    id: 'fleer-ultra',
-    name: 'Fleer Ultra',
-    previewUrl: '/placeholder-card.png',
-    sport: 'baseball',
-    style: 'premium',
-    effects: ['Holographic']
+    id: 'premium',
+    name: 'Premium Edition',
+    description: 'Luxury card with gold accents',
+    thumbnailUrl: '/images/card-placeholder.png',
+    designMetadata: {
+      cardStyle: {
+        template: 'premium',
+        borderRadius: '12px',
+        borderColor: '#D4AF37',
+      }
+    },
   },
   {
-    id: 'donruss',
-    name: 'Donruss',
-    previewUrl: '/placeholder-card.png',
-    sport: 'basketball',
-    style: 'standard',
-    effects: []
-  }
+    id: 'sport',
+    name: 'Sports Edition',
+    description: 'Dynamic design for sports cards',
+    thumbnailUrl: '/images/card-placeholder.png',
+    designMetadata: {
+      cardStyle: {
+        template: 'sport',
+        borderRadius: '8px',
+        borderColor: '#E53E3E',
+      }
+    },
+  },
 ];
 
-// Sport categories for filtering
-const SPORTS = ['All', 'Baseball', 'Basketball', 'Football', 'Hockey', 'Soccer'];
-
-const TemplateSelector: React.FC<TemplateSelectorProps> = ({ onSelectTemplate }) => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedSport, setSelectedSport] = useState('All');
-  const [templates, setTemplates] = useState<CardTemplate[]>(SAMPLE_TEMPLATES);
-  const [filteredTemplates, setFilteredTemplates] = useState<CardTemplate[]>(SAMPLE_TEMPLATES);
-  const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
-
-  // Handle filtering by search query and sport
-  useEffect(() => {
-    let filtered = templates;
-    
-    // Filter by sport
-    if (selectedSport !== 'All') {
-      filtered = filtered.filter(template => 
-        template.sport && template.sport.toLowerCase() === selectedSport.toLowerCase()
-      );
-    }
-    
-    // Filter by search query
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(template => 
-        template.name.toLowerCase().includes(query) ||
-        template.sport?.toLowerCase().includes(query) ||
-        template.style?.toLowerCase().includes(query)
-      );
-    }
-    
-    setFilteredTemplates(filtered);
-  }, [templates, searchQuery, selectedSport]);
-
-  const handleSelectTemplate = (template: CardTemplate) => {
-    setSelectedTemplate(template.id);
-    onSelectTemplate(template);
-  };
-
+const TemplateSelector: React.FC<TemplateSelectorProps> = ({ onSelect }) => {
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center gap-4">
-        <div className="relative flex-grow">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-          <Input
-            type="text"
-            placeholder="Search templates..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-        
-        <Tabs defaultValue="All" onValueChange={setSelectedSport} className="w-full md:w-auto">
-          <TabsList className="grid grid-cols-3 md:grid-cols-6">
-            {SPORTS.map(sport => (
-              <TabsTrigger key={sport} value={sport}>{sport}</TabsTrigger>
-            ))}
-          </TabsList>
-        </Tabs>
-      </div>
-      
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {filteredTemplates.length > 0 ? (
-          filteredTemplates.map(template => (
-            <TemplateCard
-              key={template.id}
-              template={template}
-              isSelected={template.id === selectedTemplate}
-              onSelect={() => handleSelectTemplate(template)}
+    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+      {TEMPLATES.map((template) => (
+        <div 
+          key={template.id}
+          className="border rounded-lg overflow-hidden cursor-pointer hover:border-primary transition-colors"
+          onClick={() => onSelect(template)}
+        >
+          <div className="aspect-[2.5/3.5] bg-gray-100">
+            <img 
+              src={template.thumbnailUrl} 
+              alt={template.name}
+              className="w-full h-full object-cover"
             />
-          ))
-        ) : (
-          <div className="col-span-full py-12 text-center text-gray-500">
-            <p>No templates found matching your search.</p>
-            <Button 
-              variant="link" 
-              onClick={() => {
-                setSearchQuery('');
-                setSelectedSport('All');
-              }}
-              className="mt-2"
-            >
-              Clear filters
-            </Button>
           </div>
-        )}
-      </div>
+          <div className="p-3">
+            <h3 className="font-medium">{template.name}</h3>
+            <p className="text-sm text-gray-500">{template.description}</p>
+          </div>
+        </div>
+      ))}
     </div>
   );
 };

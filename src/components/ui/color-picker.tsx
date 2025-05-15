@@ -22,7 +22,7 @@ const PRESET_COLORS = [
   '#718096', // Gray
 ];
 
-const ColorPicker: React.FC<ColorPickerProps> = ({ 
+export const ColorPicker: React.FC<ColorPickerProps> = ({ 
   color, 
   onChange, 
   className,
@@ -110,4 +110,5 @@ const ColorPicker: React.FC<ColorPickerProps> = ({
   );
 };
 
+// Export both as default and named export
 export default ColorPicker;

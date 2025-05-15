@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useBrandTheme, BrandTheme, defaultThemes } from '@/context/BrandThemeContext';
 import { v4 as uuidv4 } from 'uuid';
@@ -18,7 +17,7 @@ import {
   RefreshCw
 } from 'lucide-react';
 import { toast } from 'sonner';
-import ColorPicker from '@/components/brand/ColorPicker';
+import ColorPicker from '@/components/ui/color-picker';
 
 interface ThemePreviewProps {
   theme: BrandTheme;
