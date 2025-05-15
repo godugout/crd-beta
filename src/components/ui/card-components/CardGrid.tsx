@@ -57,12 +57,12 @@ interface CardGridProps {
   columns?: number;
 }
 
-const MemoizedCardItem = memo(CardItem);
-
 interface ListComponentProps {
   style?: React.CSSProperties;
   children?: React.ReactNode;
 }
+
+const MemoizedCardItem = memo(CardItem);
 
 export const CardGrid = ({
   cards,
@@ -120,6 +120,19 @@ export const CardGrid = ({
 
   // Render cards with virtualization for better performance with large lists
   if (shouldVirtualize) {
+    // Fix: Properly typed List component for Virtuoso
+    const ListComponent = React.forwardRef<HTMLDivElement, ListComponentProps>(
+      (props, ref) => (
+        <div 
+          ref={ref}
+          style={props.style} 
+          className={cn(`grid gap-4 ${gridCols}`, className)}
+        >
+          {props.children}
+        </div>
+      )
+    );
+
     return (
       <Virtuoso
         style={{ height }}
@@ -134,15 +147,7 @@ export const CardGrid = ({
         )}
         className={className}
         components={{
-          List: React.forwardRef((props: ListComponentProps, ref) => (
-            <div 
-              ref={ref as any} 
-              style={props.style} 
-              className={cn(`grid gap-4 ${gridCols}`, className)}
-            >
-              {props.children}
-            </div>
-          ))
+          List: ListComponent
         }}
       />
     );

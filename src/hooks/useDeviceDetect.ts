@@ -66,12 +66,13 @@ export const useDeviceDetect = (): DeviceInfo => {
       // Check for WebGL capabilities
       try {
         const canvas = document.createElement('canvas');
-        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+        // Fix: Cast to WebGLRenderingContext to access WebGL-specific properties
+        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl') as WebGLRenderingContext | null;
         if (!gl) {
           return true; // No WebGL support
         }
         
-        // Check max texture size as a rough performance indicator
+        // Now we can safely access WebGL properties
         const maxTextureSize = gl.getParameter(gl.MAX_TEXTURE_SIZE);
         if (maxTextureSize < 4096) {
           return true; // Limited texture support
