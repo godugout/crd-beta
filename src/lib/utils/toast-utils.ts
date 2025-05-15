@@ -1,51 +1,41 @@
 
-import { toast, type ToasterToast } from "@/components/ui/use-toast";
-import { v4 as uuidv4 } from "uuid";
+import { toast } from "@/components/ui/use-toast";
+import { createToast } from "@/types/toast";
 
-/**
- * Helper function to create a toast with auto-generated ID
- */
-export function createToast(
-  params: Omit<ToasterToast, "id">
-): void {
-  toast({
-    id: uuidv4(),
-    ...params
-  });
-}
-
-/**
- * Helper functions for common toast types
- */
 export const toastUtils = {
-  success: (title: string, description?: string) => {
-    createToast({ 
-      title, 
-      description, 
-      variant: "default" 
-    });
-  },
-  
-  error: (title: string, description?: string) => {
-    createToast({ 
-      title, 
-      description, 
-      variant: "destructive" 
-    });
-  },
-  
-  info: (title: string, description?: string) => {
-    createToast({ 
-      title, 
-      description, 
-    });
-  },
-  
-  loading: (title: string, description?: string) => {
-    createToast({ 
-      title, 
+  success: (title: string, description?: string, duration?: number) => {
+    toast(createToast({
+      title,
       description,
-      duration: Infinity,
-    });
+      variant: "success",
+      duration: duration || 3000
+    }));
+  },
+
+  error: (title: string, description?: string, duration?: number) => {
+    toast(createToast({
+      title,
+      description,
+      variant: "destructive",
+      duration: duration || 5000
+    }));
+  },
+
+  info: (title: string, description?: string, duration?: number) => {
+    toast(createToast({
+      title,
+      description,
+      variant: "info",
+      duration: duration || 3000
+    }));
+  },
+
+  warning: (title: string, description?: string, duration?: number) => {
+    toast(createToast({
+      title,
+      description,
+      variant: "warning",
+      duration: duration || 4000
+    }));
   }
 };

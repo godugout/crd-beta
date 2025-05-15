@@ -1,99 +1,121 @@
 
 import React from 'react';
-import { CardTemplate } from '@/components/card-templates/TemplateLibrary';
+import { CardTemplate, DEFAULT_CARD_STYLE, DEFAULT_TEXT_STYLE } from '@/components/card-templates/TemplateTypes';
 
 interface TemplateSelectorProps {
   onSelect: (template: CardTemplate) => void;
 }
 
-// Update the templates to remove the 'effects' property if it's not part of the CardTemplate type
-const TEMPLATES: CardTemplate[] = [
+const templates: CardTemplate[] = [
   {
     id: 'classic',
-    name: 'Classic Card',
-    description: 'Traditional trading card style with clean borders',
+    name: 'Classic',
+    description: 'Traditional card with a clean design',
+    imageUrl: '/images/card-placeholder.png',
     thumbnailUrl: '/images/card-placeholder.png',
-    designMetadata: {
-      cardStyle: {
-        template: 'classic',
-        borderRadius: '8px',
-        borderColor: '#000000',
-      }
+    cardStyle: {
+      ...DEFAULT_CARD_STYLE,
+      template: 'classic',
+      borderRadius: '8px',
+      borderColor: '#000000',
     },
+    textStyle: DEFAULT_TEXT_STYLE,
+    backgroundColor: '#FFFFFF',
+    category: 'general',
+    tags: ['classic', 'traditional'],
   },
   {
     id: 'modern',
-    name: 'Modern Sleek',
-    description: 'Contemporary design with minimal borders',
+    name: 'Modern',
+    description: 'Sleek contemporary style',
+    imageUrl: '/images/card-placeholder.png',
     thumbnailUrl: '/images/card-placeholder.png',
-    designMetadata: {
-      cardStyle: {
-        template: 'modern',
-        borderRadius: '4px',
-        borderColor: '#333333',
-      }
+    cardStyle: {
+      ...DEFAULT_CARD_STYLE,
+      template: 'modern',
+      borderRadius: '16px',
+      borderColor: '#3182CE',
     },
+    textStyle: DEFAULT_TEXT_STYLE,
+    backgroundColor: '#F7FAFC',
+    category: 'general',
+    tags: ['modern', 'sleek'],
   },
   {
     id: 'vintage',
-    name: 'Vintage Style',
-    description: 'Aged look with retro styling',
+    name: 'Vintage',
+    description: 'Aged look with retro feel',
+    imageUrl: '/images/card-placeholder.png',
     thumbnailUrl: '/images/card-placeholder.png',
-    designMetadata: {
-      cardStyle: {
-        template: 'vintage',
-        borderRadius: '0px',
-        borderColor: '#8B5C29',
-      }
+    cardStyle: {
+      ...DEFAULT_CARD_STYLE,
+      template: 'vintage',
+      borderRadius: '4px',
+      borderColor: '#A0845C',
     },
+    textStyle: DEFAULT_TEXT_STYLE,
+    backgroundColor: '#F8F0E3',
+    category: 'general',
+    tags: ['vintage', 'retro'],
+  },
+  {
+    id: 'sports',
+    name: 'Sports',
+    description: 'Athletic-focused card design',
+    imageUrl: '/images/card-placeholder.png',
+    thumbnailUrl: '/images/card-placeholder.png',
+    cardStyle: {
+      ...DEFAULT_CARD_STYLE,
+      template: 'sports',
+      borderRadius: '12px',
+      borderColor: '#E53E3E',
+    },
+    textStyle: DEFAULT_TEXT_STYLE,
+    backgroundColor: '#FFF5F5',
+    category: 'sports',
+    tags: ['sports', 'athletic'],
   },
   {
     id: 'premium',
-    name: 'Premium Edition',
-    description: 'Luxury card with gold accents',
+    name: 'Premium',
+    description: 'Luxury card with elegant design',
+    imageUrl: '/images/card-placeholder.png',
     thumbnailUrl: '/images/card-placeholder.png',
-    designMetadata: {
-      cardStyle: {
-        template: 'premium',
-        borderRadius: '12px',
-        borderColor: '#D4AF37',
-      }
+    cardStyle: {
+      ...DEFAULT_CARD_STYLE,
+      template: 'premium',
+      borderRadius: '8px',
+      borderColor: '#D69E2E',
     },
-  },
-  {
-    id: 'sport',
-    name: 'Sports Edition',
-    description: 'Dynamic design for sports cards',
-    thumbnailUrl: '/images/card-placeholder.png',
-    designMetadata: {
-      cardStyle: {
-        template: 'sport',
-        borderRadius: '8px',
-        borderColor: '#E53E3E',
-      }
-    },
+    textStyle: DEFAULT_TEXT_STYLE,
+    backgroundColor: '#FFFFF0',
+    category: 'premium',
+    tags: ['luxury', 'premium', 'elegant'],
   },
 ];
 
 const TemplateSelector: React.FC<TemplateSelectorProps> = ({ onSelect }) => {
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-      {TEMPLATES.map((template) => (
-        <div 
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {templates.map((template) => (
+        <div
           key={template.id}
-          className="border rounded-lg overflow-hidden cursor-pointer hover:border-primary transition-colors"
+          className="border rounded-lg overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
           onClick={() => onSelect(template)}
         >
-          <div className="aspect-[2.5/3.5] bg-gray-100">
-            <img 
-              src={template.thumbnailUrl} 
+          <div className="aspect-[2.5/3.5] relative">
+            <img
+              src={template.thumbnailUrl || template.imageUrl}
               alt={template.name}
               className="w-full h-full object-cover"
             />
+            <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+              <span className="text-white font-medium">Select Template</span>
+            </div>
           </div>
-          <div className="p-3">
-            <h3 className="font-medium">{template.name}</h3>
-            <p className="text-sm text-gray-500">{template.description}</p>
+          <div className="p-4">
+            <h3 className="font-semibold">{template.name}</h3>
+            <p className="text-sm text-gray-600">{template.description}</p>
           </div>
         </div>
       ))}

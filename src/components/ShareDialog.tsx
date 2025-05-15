@@ -13,6 +13,7 @@ interface ShareDialogProps {
   shareUrl?: string;
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
+  onClose?: () => void;
 }
 
 const ShareDialog: React.FC<ShareDialogProps> = ({
@@ -21,6 +22,7 @@ const ShareDialog: React.FC<ShareDialogProps> = ({
   shareUrl,
   isOpen,
   onOpenChange,
+  onClose,
 }) => {
   const [copied, setCopied] = useState(false);
   
@@ -66,6 +68,12 @@ const ShareDialog: React.FC<ShareDialogProps> = ({
     }
     
     window.open(shareLink, '_blank');
+  };
+
+  const handleDialogClose = () => {
+    if (onClose) {
+      onClose();
+    }
   };
 
   return (
@@ -138,6 +146,7 @@ const ShareDialog: React.FC<ShareDialogProps> = ({
             <button
               className="absolute top-3 right-3 p-1 rounded-full hover:bg-gray-100"
               aria-label="Close"
+              onClick={handleDialogClose}
             >
               <Cross1Icon className="h-4 w-4" />
             </button>
@@ -148,4 +157,6 @@ const ShareDialog: React.FC<ShareDialogProps> = ({
   );
 };
 
+// Export both as default AND named export to fix import issues
 export default ShareDialog;
+export { ShareDialog };

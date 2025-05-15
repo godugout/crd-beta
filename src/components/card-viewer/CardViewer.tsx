@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Lightbulb } from 'lucide-react';
@@ -5,10 +6,12 @@ import LightbulbPanel from '../card-effects/LightbulbPanel';
 import { Card } from '@/lib/types';
 import { CardFront } from '@/components/card/CardFront';
 import { CardBack } from '@/components/card/CardBack';
-import { ShareDialog } from '@/components/ShareDialog';
+import ShareDialog from '@/components/ShareDialog';
 import { DeleteDialog } from '@/components/DeleteDialog';
 import { useToast } from "@/hooks/use-toast";
 import { CardTransitionEffects } from '@/components/card-effects/CardTransitionEffects';
+import { createToast } from '@/types/toast';
+import { toastUtils } from '@/lib/utils/toast-utils';
 
 interface CardViewerProps {
   card: Card;
@@ -76,11 +79,11 @@ const CardViewer: React.FC<CardViewerProps> = ({
     if (onDeleteCard) {
       onDeleteCard(cardId);
     } else {
-      toast({
+      toast(createToast({
         title: "Action not available",
         description: "Delete functionality is not available in this view.",
         variant: "destructive"
-      });
+      }));
     }
   };
 
@@ -146,6 +149,7 @@ const CardViewer: React.FC<CardViewerProps> = ({
 
       <ShareDialog
         isOpen={isShareOpen}
+        onOpenChange={(open) => setIsShareOpen(open)}
         onClose={() => setIsShareOpen(false)}
         cardId={card.id}
       />

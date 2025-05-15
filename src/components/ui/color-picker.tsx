@@ -7,6 +7,10 @@ interface ColorPickerProps {
   onChange: (color: string) => void;
   className?: string;
   preset?: boolean;
+  colors?: string[];
+  id?: string;
+  value?: string; // For compatibility with ThemeCustomizer
+  label?: string;
 }
 
 const PRESET_COLORS = [
@@ -26,8 +30,15 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
   color, 
   onChange, 
   className,
-  preset = true
+  preset = true,
+  colors = PRESET_COLORS,
+  id,
+  value, // For ThemeCustomizer compatibility
+  label
 }) => {
+  // If value is provided (for backward compatibility with ThemeCustomizer), use it instead of color
+  const actualColor = value || color;
+  
   const [showColorPicker, setShowColorPicker] = useState(false);
   const colorPickerRef = useRef<HTMLDivElement>(null);
   
@@ -55,9 +66,16 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
   const toggleColorPicker = () => {
     setShowColorPicker(!showColorPicker);
   };
+
+  // Handle onChange calls whether coming as color or value
+  const handleChange = (newColor: string) => {
+    onChange(newColor);
+  };
   
   return (
     <div className={cn("relative", className)} ref={colorPickerRef}>
+      {label && <span className="text-sm block mb-1">{label}</span>}
+      
       {/* Color display */}
       <div 
         className="h-8 w-full rounded-md border cursor-pointer flex items-center"
@@ -65,9 +83,9 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
       >
         <div 
           className="h-full aspect-square rounded-l-md border-r"
-          style={{ backgroundColor: color }}
+          style={{ backgroundColor: actualColor }}
         />
-        <span className="px-3 text-sm">{color}</span>
+        <span className="px-3 text-sm">{actualColor}</span>
       </div>
       
       {/* Color picker popup */}
@@ -76,9 +94,10 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
           {/* Color input */}
           <div className="mb-3">
             <input
+              id={id}
               type="color"
-              value={color}
-              onChange={(e) => onChange(e.target.value)}
+              value={actualColor}
+              onChange={(e) => handleChange(e.target.value)}
               className="w-full h-8"
             />
           </div>
@@ -86,17 +105,17 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
           {/* Presets */}
           {preset && (
             <div className="grid grid-cols-5 gap-2">
-              {PRESET_COLORS.map((presetColor) => (
+              {colors.map((presetColor, index) => (
                 <button
-                  key={presetColor}
+                  key={`${presetColor}-${index}`}
                   type="button"
                   className={cn(
                     "w-6 h-6 rounded-full border", 
-                    color === presetColor && "ring-2 ring-primary"
+                    actualColor === presetColor && "ring-2 ring-primary"
                   )}
                   style={{ backgroundColor: presetColor }}
                   onClick={() => {
-                    onChange(presetColor);
+                    handleChange(presetColor);
                     setShowColorPicker(false);
                   }}
                   title={presetColor}
