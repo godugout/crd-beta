@@ -1,9 +1,10 @@
+
 import React, { useState, useEffect, memo } from 'react';
 import { Virtuoso, Components } from 'react-virtuoso';
 import { cn } from '@/lib/utils';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { Card } from '@/lib/types/cardTypes';
-import CardItem from './CardItem';
+import { CardItem } from './CardItem';
 import EmptyState from '../EmptyState';
 import { useInView } from 'react-intersection-observer';
 
@@ -126,7 +127,7 @@ export const CardGrid = ({
       )
     );
     
-    // Type assertion to convince TypeScript that our component matches Virtuoso's expectations
+    // Cast to 'any' to resolve TypeScript errors with the Virtuoso component
     const components: Components = {
       List: ListComponent as any
     };
@@ -140,8 +141,8 @@ export const CardGrid = ({
         itemContent={(index, card) => (
           <MemoizedCardItem 
             key={card.id} 
-            card={card} 
-            onClick={() => onCardClick?.(card)} 
+            card={card as Card} 
+            onClick={() => onCardClick?.(card as Card)} 
             className={cardClassName}
           />
         )}
