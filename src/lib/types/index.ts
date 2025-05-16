@@ -24,7 +24,7 @@ export * from './instagram';
 export * from './cardElements';
 export * from './teamTypes';
 export * from './enhancedCardTypes';
-export * from './oaklandTypes'; 
+export * from './oaklandTypes';
 
 // Additional types for backward compatibility
 export type BackgroundColor = string;

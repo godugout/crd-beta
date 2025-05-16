@@ -5,9 +5,9 @@ export type ToastVariant = "default" | "destructive" | "success" | "warning" | "
 
 export interface Toast {
   id?: string;
-  title?: React.ReactNode;
-  description?: React.ReactNode;
-  action?: ToastAction;
+  title?: ReactNode;
+  description?: ReactNode;
+  action?: ToastAction | ReactNode;
   variant?: ToastVariant;
   duration?: number;
   open: boolean;
@@ -16,14 +16,14 @@ export interface Toast {
 export interface ToastAction {
   altText: string;
   onClick: () => void;
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 export type ToasterToast = Toast & {
   id: string;
-  title?: React.ReactNode;
-  description?: React.ReactNode;
-  action?: ReactNode;
+  title?: ReactNode;
+  description?: ReactNode;
+  action?: ToastAction | ReactNode;
   open: boolean;
 }
 
@@ -36,6 +36,8 @@ export type ToastActionElement = React.ReactElement<{
   onClick: () => void;
   className?: string;
 }>;
+
+export type ToastProps = Omit<ToasterToast, "id">;
 
 // Update the createToast function to return a proper Toast type
 export const createToast = (config: {

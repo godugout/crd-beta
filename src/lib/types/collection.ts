@@ -17,8 +17,8 @@ export interface Collection {
   cardIds?: string[]; // Added for backward compatibility
   isPublic?: boolean; // Added for backward compatibility
   tags?: string[];
-  featured?: boolean; // Add featured property
-  instagramSource?: { // Add instagramSource property
+  featured?: boolean;
+  instagramSource?: {
     username: string;
     lastFetched: string;
     autoUpdate: boolean;

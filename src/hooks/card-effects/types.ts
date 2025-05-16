@@ -1,59 +1,58 @@
+import { Card, CardEffect } from '@/lib/types/cardTypes';
+import { CardEffectSettings } from '@/lib/types/cardTypes';
 
-import { CardEffect, CardEffectSettings } from '@/lib/types/cardTypes';
+export interface EffectCategory {
+  id: string;
+  name: string;
+  description?: string;
+  icon?: React.ReactNode;
+}
 
 export interface PremiumCardEffect extends CardEffect {
   premium: boolean;
-  enabled: boolean;
-  description?: string;
-  iconUrl?: string;
+  price?: number;
+  category?: string;
+  animationClass?: string;
+  renderer?: () => React.ReactNode;
 }
 
-export interface MaterialSimulation {
-  type: string;
-  intensity: number;
-  reflectivity: number;
-  roughness: number;
-  metalness: number;
-  pattern?: string;
-  color?: string;
-  texture?: string;
-  baseColor?: string;
-  weathering?: number;
-}
-
-export type CardEffectFunctionParams = {
-  element: HTMLElement;
-  settings: CardEffectSettings;
-  isEnabled: boolean;
-};
-
-export type CardEffectFunction = (params: CardEffectFunctionParams) => void | (() => void);
-
-export interface CardEffectRegistry {
-  [key: string]: CardEffectFunction;
-}
-
-export interface CardEffectDefinition {
-  id: string;
-  name: string;
-  description: string;
-  thumbnail: string;
-  category: string;
-  defaultSettings: CardEffectSettings;
-  cssClass?: string;
-  supportedCardTypes?: string[];
-  premium: boolean;
-  enabled: boolean;
-  renderer?: (element: HTMLElement, settings: any) => void;
-  iconUrl?: string;
-}
-
-export type EffectUpdateCallback = (effectIds: string[]) => void;
-
-// Re-export CardEffectSettings from cardTypes for components that import it from here
-export type { CardEffectSettings } from '@/lib/types/cardTypes';
-
-export type CardEffectsResult = {
+export interface CardEffectContextProps {
   activeEffects: string[];
-  effectSettings: Record<string, CardEffectSettings>;
-};
+  setActiveEffects: React.Dispatch<React.SetStateAction<string[]>>;
+  effectIntensities: { [key: string]: number };
+  setEffectIntensities: React.Dispatch<React.SetStateAction<{ [key: string]: number }>>;
+  isEffectEnabled: (effectId: string) => boolean;
+  toggleEffect: (effectId: string) => void;
+  setEffectIntensity: (effectId: string, intensity: number) => void;
+  getEffectIntensity: (effectId: string) => number;
+  resetEffects: () => void;
+  cardEffects: CardEffect[];
+  premiumEffects: PremiumCardEffect[];
+  getEffectSettings: (effectId: string) => CardEffectSettings | undefined;
+  getEffectCategory: (effectId: string) => EffectCategory | undefined;
+}
+
+export interface MediaServiceHook {
+  uploadFile: (file: File) => Promise<string>;
+  uploadImage: (file: File) => Promise<string>; // Add this missing method
+  getMedia: () => Promise<string[]>;
+  isUploading: boolean;
+  error: Error | null;
+}
+
+export interface EffectRendererProps {
+  card: Card;
+  intensity: number;
+  settings: Record<string, any>;
+}
+
+export interface EffectRegistry {
+  [key: string]: {
+    name: string;
+    description?: string;
+    category?: string;
+    icon?: React.ReactNode;
+    renderer: (props: EffectRendererProps) => React.ReactNode;
+    settings?: CardEffectSettings;
+  };
+}

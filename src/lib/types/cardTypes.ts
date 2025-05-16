@@ -1,4 +1,3 @@
-
 /**
  * Card market metadata interface
  */
@@ -213,8 +212,21 @@ export interface CardEffect {
   enabled: boolean;
   settings: Record<string, any>;
   className?: string;
-  iconUrl?: string; // Add iconUrl property
-  description?: string; // Add description property
+  iconUrl?: string;
+  description?: string;
+  category?: string; // Add category property
+}
+
+/**
+ * Card effect settings interface
+ */
+export interface CardEffectSettings {
+  intensity?: number;
+  speed?: number;
+  pattern?: string;
+  color?: string;
+  animationEnabled?: boolean;
+  [key: string]: any;
 }
 
 /**

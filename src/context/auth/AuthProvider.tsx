@@ -1,8 +1,10 @@
+
 import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { AuthContextType, AuthState, AuthUser, AuthSession } from './types';
 import { UserRole } from '@/lib/types';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase/client';
+import { User } from '@/lib/types/user';
 
 // Default auth context
 const initialState: AuthState = {
@@ -41,6 +43,10 @@ const MOCK_SESSION: AuthSession = {
  */
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, setState] = useState<AuthState>(initialState);
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
   
   const getUserProfile = async (userId: string): Promise<User | null> => {
     try {
@@ -86,7 +92,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (session && session.user) {
         const profile = await getUserProfile(session.user.id);
         if (profile) {
-          setUser(profile);
+          setUser(profile as AuthUser);
           setIsAuthenticated(true);
         }
       }
@@ -98,7 +104,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (event === 'SIGNED_IN' && session) {
           const profile = await getUserProfile(session.user.id);
           if (profile) {
-            setUser(profile);
+            setUser(profile as AuthUser);
             setIsAuthenticated(true);
           }
         } else if (event === 'SIGNED_OUT') {
@@ -115,7 +121,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setupAuth();
   }, []);
 
-  const login = async (email: string, password: string): Promise<User | null> => {
+  const signIn = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email: email,
@@ -124,29 +130,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       if (error) {
         console.error('Login failed:', error);
-        throw error;
+        return { success: false, error: error.message };
       }
       
       if (!data.user) {
-        return null;
+        return { success: false, error: "No user returned from sign in" };
       }
       
       const profile = await getUserProfile(data.user.id);
       
       if (profile) {
-        setUser(profile);
+        setUser(profile as AuthUser);
         setIsAuthenticated(true);
-        return profile;
+        return { success: true };
       }
       
-      return null;
-    } catch (error) {
+      return { success: false, error: "Failed to get user profile" };
+    } catch (error: any) {
       console.error('Login error:', error);
-      return null;
+      return { success: false, error: error.message || "Unknown error during sign in" };
     }
   };
 
-  const logout = async (): Promise<void> => {
+  const signOut = async (): Promise<void> => {
     try {
       const { error } = await supabase.auth.signOut();
       if (error) {
@@ -159,19 +165,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const register = async (email: string, password: string, metadata?: { [key: string]: any }): Promise<User | null> => {
+  const signUp = async (email: string, password: string, userData?: Partial<AuthUser>): Promise<{ success: boolean; error?: string }> => {
     try {
       const { data, error } = await supabase.auth.signUp({
         email: email,
         password: password,
         options: {
-          data: metadata,
+          data: userData,
         },
       });
       
       if (error) {
         console.error('Registration failed:', error);
-        throw error;
+        return { success: false, error: error.message };
       }
       
       if (data.user) {
@@ -182,28 +188,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const profile = await getUserProfile(data.user.id);
         
         if (profile) {
-          setUser(profile);
+          setUser(profile as AuthUser);
           setIsAuthenticated(true);
-          return profile;
+          return { success: true };
         }
       }
       
-      return null;
-    } catch (error) {
+      return { success: false, error: "User registration failed" };
+    } catch (error: any) {
       console.error('Registration error:', error);
-      return null;
+      return { success: false, error: error.message || "Unknown error during registration" };
     }
   };
 
-  const updateUser = async (updates: Partial<User>): Promise<User | null> => {
-    if (!user) return null;
+  const updateProfile = async (data: Partial<AuthUser>): Promise<{ success: boolean; error?: string }> => {
+    if (!user) return { success: false, error: "Not authenticated" };
     
     try {
       // Convert User updates to profile updates
       const profileUpdates: Record<string, any> = {};
       
-      if (updates.displayName) profileUpdates.full_name = updates.displayName;
-      if (updates.avatarUrl) profileUpdates.avatar_url = updates.avatarUrl;
+      if (data.displayName) profileUpdates.full_name = data.displayName;
+      if (data.avatarUrl) profileUpdates.avatar_url = data.avatarUrl;
       
       // Only update if we have changes
       if (Object.keys(profileUpdates).length > 0) {
@@ -214,36 +220,65 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         if (error) {
           console.error('Error updating user profile:', error);
-          return null;
+          return { success: false, error: error.message };
         }
       }
       
       // Update local user state
-      const updatedUser: User = {
+      const updatedUser: AuthUser = {
         ...user,
-        ...updates,
+        ...data,
       };
       
       setUser(updatedUser);
-      return updatedUser;
-    } catch (error) {
+      return { success: true };
+    } catch (error: any) {
       console.error('Error updating user:', error);
-      return null;
+      return { success: false, error: error.message || "Unknown error updating profile" };
     }
   };
 
-  const value = useMemo(() => ({
+  const resetPassword = async (email: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email);
+      if (error) {
+        return { success: false, error: error.message };
+      }
+      return { success: true };
+    } catch (error: any) {
+      return { success: false, error: error.message || "Unknown error resetting password" };
+    }
+  };
+
+  const refreshSession = async (): Promise<boolean> => {
+    try {
+      const { data, error } = await supabase.auth.refreshSession();
+      if (error || !data.session) {
+        return false;
+      }
+      return true;
+    } catch (error) {
+      return false;
+    }
+  };
+
+  const contextValue: AuthContextType = {
     user,
+    session: state.session,
     isAuthenticated,
     isLoading,
-    login,
-    register,
-    logout,
-    updateUser,
-  }), [user, isAuthenticated, isLoading]);
+    error: state.error,
+    signIn,
+    signUp,
+    signOut,
+    resetPassword,
+    updateProfile,
+    refreshSession,
+    loading: isLoading, // Backward compatibility
+  };
 
   return (
-    <AuthContext.Provider value={value}>
+    <AuthContext.Provider value={contextValue}>
       {children}
     </AuthContext.Provider>
   );

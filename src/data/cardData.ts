@@ -40,12 +40,12 @@ const sampleCards: CardData[] = [
       marketMetadata: {
         price: 299.99,
         currency: 'USD',
-        availableForSale: true,
-        editionSize: 1000,
-        editionNumber: 42,
         isPrintable: true,
         isForSale: true,
-        includeInCatalog: true
+        includeInCatalog: true,
+        availableForSale: true,
+        editionSize: 1000,
+        editionNumber: 42
       }
     }
   },
@@ -87,12 +87,12 @@ const sampleCards: CardData[] = [
       marketMetadata: {
         price: 149.99,
         currency: 'USD',
-        availableForSale: true,
-        editionSize: 500,
-        editionNumber: 62,
         isPrintable: true,
         isForSale: true,
-        includeInCatalog: true
+        includeInCatalog: true,
+        availableForSale: true,
+        editionSize: 500,
+        editionNumber: 62
       }
     }
   },
@@ -134,12 +134,12 @@ const sampleCards: CardData[] = [
       marketMetadata: {
         price: 199.99,
         currency: 'USD',
-        availableForSale: true,
-        editionSize: 750,
-        editionNumber: 24,
         isPrintable: true,
         isForSale: true,
-        includeInCatalog: true
+        includeInCatalog: true,
+        availableForSale: true,
+        editionSize: 750,
+        editionNumber: 24
       }
     }
   }

@@ -7,7 +7,7 @@ export interface EnhancedCard extends Card {
   editionSize?: number;
   cardNumber?: string;
   marketData?: any;
-  seriesId?: string; // Add seriesId property
+  seriesId?: string;
 }
 
 export interface Series {
@@ -36,7 +36,7 @@ export interface Deck {
   createdAt: string;
   updatedAt: string;
   userId: string;
-  isPublic?: boolean; // Add isPublic property
-  cardIds?: string[]; // Add cardIds property
-  ownerId?: string;  // Add ownerId property
+  isPublic?: boolean;
+  cardIds?: string[];
+  ownerId?: string;
 }
