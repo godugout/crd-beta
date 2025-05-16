@@ -35,7 +35,7 @@ export interface CardEffectContextProps {
 
 export interface MediaServiceHook {
   uploadFile: (file: File) => Promise<string>;
-  uploadImage: (file: File) => Promise<string>; // Make sure this is defined
+  uploadImage: (file: File) => Promise<string>; 
   getMedia: () => Promise<string[]>;
   isUploading: boolean;
   error: Error | null;
@@ -58,7 +58,7 @@ export interface EffectRegistry {
   };
 }
 
-// Define CardEffectDefinition interface
+// Define CardEffectDefinition interface and export it
 export interface CardEffectDefinition {
   id: string;
   name: string;
@@ -73,7 +73,7 @@ export interface CardEffectDefinition {
   iconUrl: string;
 }
 
-// Define MaterialSimulation interface
+// Define and export MaterialSimulation interface
 export interface MaterialSimulation {
   roughness: number;
   metalness: number;
@@ -86,6 +86,8 @@ export interface MaterialSimulation {
   envMapIntensity: number;
   textureUrl?: string;
   baseColor?: string;
+  color?: string;
+  texture?: string;
   type?: string;
   weathering?: number;
 }

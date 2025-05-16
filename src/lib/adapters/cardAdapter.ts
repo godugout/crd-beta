@@ -1,96 +1,42 @@
-
-import { Card } from '../types/cardTypes';
-import { Card as LegacyCard } from '../types/card';
-import { DEFAULT_CARD_METADATA, DEFAULT_MARKET_METADATA } from '../utils/cardDefaults';
+import { Card as CardTypeCard } from '@/lib/types/cardTypes';
+import { Card as CardCard } from '@/lib/types/card';
+import { DEFAULT_DESIGN_METADATA } from '@/lib/utils/cardDefaults';
 
 /**
- * Adapts a card from the legacy format to the new format
- * @param legacyCard The legacy format card
- * @returns A card in the new format
+ * Adapts a card from one format to another
  */
-export function adaptToCard(legacyCard: LegacyCard): Card {
+export const adaptToCard = (sourceCard: Partial<CardTypeCard>): CardCard => {
   return {
-    id: legacyCard.id,
-    title: legacyCard.title,
-    description: legacyCard.description || '',
-    imageUrl: legacyCard.imageUrl,
-    thumbnailUrl: legacyCard.thumbnailUrl,
-    tags: legacyCard.tags || [],
-    createdAt: legacyCard.createdAt,
-    updatedAt: legacyCard.updatedAt,
-    userId: legacyCard.userId || legacyCard.creatorId,
-    player: legacyCard.player,
-    team: legacyCard.team,
-    year: legacyCard.year,
-    isPublic: legacyCard.isPublic,
-    designMetadata: legacyCard.designMetadata,
-    effects: legacyCard.effects || [],
-    rarity: legacyCard.rarity,
-    fabricSwatches: legacyCard.fabricSwatches
+    id: sourceCard.id || crypto.randomUUID(),
+    title: sourceCard.title || '',
+    description: sourceCard.description || '',
+    imageUrl: sourceCard.imageUrl || '',
+    thumbnailUrl: sourceCard.thumbnailUrl || '',
+    tags: sourceCard.tags || [],
+    createdAt: sourceCard.createdAt || new Date().toISOString(),
+    updatedAt: sourceCard.updatedAt || new Date().toISOString(),
+    userId: sourceCard.userId || '',
+    effects: sourceCard.effects || [],
+    designMetadata: sourceCard.designMetadata || DEFAULT_DESIGN_METADATA,
+    // Include other properties as needed
   };
-}
+};
 
 /**
- * Adapts a card from the new format to the legacy format
- * @param card The new format card
- * @returns A card in the legacy format
+ * Adapts a card to legacy format
  */
-export function adaptFromCard(card: Card): LegacyCard {
+export const adaptToLegacyCard = (card: Partial<CardCard>): CardTypeCard => {
   return {
-    id: card.id,
-    title: card.title,
+    id: card.id || crypto.randomUUID(),
+    title: card.title || '',
     description: card.description || '',
-    imageUrl: card.imageUrl,
-    thumbnailUrl: card.thumbnailUrl || card.imageUrl,
+    imageUrl: card.imageUrl || '',
+    thumbnailUrl: card.thumbnailUrl || '',
     tags: card.tags || [],
+    createdAt: card.createdAt || new Date().toISOString(),
+    updatedAt: card.updatedAt || new Date().toISOString(),
     userId: card.userId || '',
     effects: card.effects || [],
-    createdAt: card.createdAt,
-    updatedAt: card.updatedAt,
-    player: card.player,
-    team: card.team,
-    year: card.year,
-    cardNumber: card.cardNumber,
-    set: card.set,
-    cardType: card.cardType,
-    artist: card.artist,
-    designMetadata: card.designMetadata || {
-      cardStyle: {
-        template: 'classic',
-        effect: 'none',
-        borderRadius: '8px',
-        borderColor: '#000000',
-        frameColor: '#000000',
-        frameWidth: 2,
-        shadowColor: 'rgba(0,0,0,0.2)',
-      },
-      textStyle: {
-        titleColor: '#000000',
-        titleAlignment: 'center',
-        titleWeight: 'bold',
-        descriptionColor: '#333333',
-      },
-      cardMetadata: {
-        category: 'general',
-        series: 'base',
-        cardType: 'standard',
-      },
-      marketMetadata: {
-        price: 0,
-        currency: 'USD',
-        availableForSale: false,
-        editionSize: 0,
-        editionNumber: 0,
-        isPrintable: false,
-        isForSale: false,
-        includeInCatalog: false
-      }
-    },
-    fabricSwatches: card.fabricSwatches
+    designMetadata: card.designMetadata || DEFAULT_DESIGN_METADATA,
   };
-}
-
-/**
- * Alias for adaptFromCard for backward compatibility
- */
-export const adaptToLegacyCard = adaptFromCard;
+};

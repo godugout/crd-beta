@@ -1,6 +1,6 @@
 
 import { useToast } from '@/hooks/use-toast';
-import { ToastVariant, createToast } from '@/types/toast';
+import { ToastVariant } from '@/types/toast';
 
 interface ToastOptions {
   title: string;
@@ -17,11 +17,11 @@ export default function useShowToast() {
   const { toast } = useToast();
   
   return (options: ToastOptions) => {
-    toast(createToast({
+    toast({
       title: options.title,
       description: options.description,
       variant: options.variant || "default",
       duration: options.duration
-    }));
+    });
   };
 }

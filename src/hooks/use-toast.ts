@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
-import { toast as sonnerToast } from 'sonner';
-import { Toast, ToastOptions } from '@/types/toast';
+import { toast as sonnerToast, ToastT } from 'sonner';
+import { Toast, ToastOptions, ToastVariant } from '@/types/toast';
 
 export function useToast() {
   const [toasts, setToasts] = useState<Toast[]>([]);
@@ -18,7 +18,7 @@ export function useToast() {
                 sonnerVariant === 'success' ? 'success' : 
                 sonnerVariant === 'warning' ? 'warning' : 
                 sonnerVariant === 'info' ? 'info' : 'default'](
-      toastOptions.title,
+      toastOptions.title || '',
       { description: toastOptions.description }
     );
 

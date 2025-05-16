@@ -20,11 +20,13 @@ export interface ToastAction {
 }
 
 export interface ToastOptions {
+  id?: string;
   title?: string;
   description?: string;
   action?: ToastAction;
   variant?: ToastVariant;
   duration?: number;
+  open?: boolean;
 }
 
 export type ToasterToast = Toast & {

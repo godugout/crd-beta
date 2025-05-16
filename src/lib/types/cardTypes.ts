@@ -95,7 +95,7 @@ export interface Card {
   team?: string;
   year?: string;
   isPublic?: boolean;
-  designMetadata: CardDesignMetadata; // Make designMetadata required
+  designMetadata: CardDesignMetadata; // Required property
   ownerId?: string; 
   collectionId?: string;
   userId?: string;
@@ -109,6 +109,7 @@ export interface Card {
   fabricSwatches?: any[];
   name?: string;
   jersey?: string;
+  seriesId?: string; // Add seriesId property
 }
 
 /**
@@ -214,7 +215,7 @@ export interface CardEffect {
   className?: string;
   iconUrl?: string;
   description?: string;
-  category?: string; // Add category property
+  category?: string;
 }
 
 /**
