@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { CardTemplate } from '@/components/card-templates/TemplateLibrary';
+import { CardTemplate } from '@/components/card-templates/TemplateTypes';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';

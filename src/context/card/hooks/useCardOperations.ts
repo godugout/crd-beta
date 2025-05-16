@@ -1,13 +1,25 @@
 
 import { useState, useCallback, useEffect } from 'react';
-import { Card } from '@/lib/types/card';
+import { Card } from '@/lib/types/cardTypes';
 import { v4 as uuidv4 } from 'uuid';
 import { adaptToLegacyCard } from '@/lib/adapters/cardAdapter';
 import { Card as CardType } from '@/lib/types/cardTypes';
 
-// Mock data for development
+// Create default market metadata to conform to the MarketMetadata interface
+const DEFAULT_MARKET_METADATA = {
+  isPrintable: false,
+  isForSale: false,
+  includeInCatalog: false,
+  price: 0,
+  currency: 'USD',
+  availableForSale: false,
+  editionSize: 1,
+  editionNumber: 1
+};
+
+// Mock data for development with correct types
 const initialCards: Card[] = [
-  adaptToLegacyCard({
+  {
     id: '1',
     title: 'Sample Card',
     description: 'This is a sample card for development',
@@ -18,7 +30,30 @@ const initialCards: Card[] = [
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     effects: [],
-  }),
+    designMetadata: {
+      cardStyle: {
+        template: 'classic',
+        effect: 'none',
+        borderRadius: '8px',
+        borderColor: '#000000',
+        shadowColor: 'rgba(0,0,0,0.2)',
+        frameWidth: 2,
+        frameColor: '#000000'
+      },
+      textStyle: {
+        titleColor: '#000000',
+        titleAlignment: 'center',
+        titleWeight: 'bold',
+        descriptionColor: '#333333'
+      },
+      cardMetadata: {
+        category: 'general',
+        series: 'base',
+        cardType: 'standard'
+      },
+      marketMetadata: DEFAULT_MARKET_METADATA
+    }
+  },
 ];
 
 export const useCardOperations = () => {
@@ -34,7 +69,19 @@ export const useCardOperations = () => {
         if (savedCards) {
           // Parse stored cards and ensure they match the current Card type requirements
           const parsedCards = JSON.parse(savedCards);
-          setCards(parsedCards.map((card: Partial<Card>) => adaptToLegacyCard(card)));
+          setCards(parsedCards.map((card: Partial<Card>) => {
+            // Ensure correct structure with defaults
+            return {
+              ...adaptToLegacyCard(card),
+              designMetadata: {
+                ...card.designMetadata,
+                marketMetadata: {
+                  ...DEFAULT_MARKET_METADATA,
+                  ...(card.designMetadata?.marketMetadata || {})
+                }
+              }
+            };
+          }));
         }
       } catch (err) {
         console.error('Error loading cards from storage:', err);
@@ -54,12 +101,41 @@ export const useCardOperations = () => {
   }, [cards]);
 
   const addCard = useCallback((card: Omit<CardType, 'id' | 'createdAt' | 'updatedAt'>) => {
-    const newCard = adaptToLegacyCard({
+    const now = new Date().toISOString();
+    // Ensure card has proper default values
+    const newCard: Card = {
       ...card,
       id: uuidv4(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    });
+      createdAt: now,
+      updatedAt: now,
+      designMetadata: {
+        ...(card.designMetadata || {}),
+        cardStyle: card.designMetadata?.cardStyle || {
+          template: 'classic',
+          effect: 'none',
+          borderRadius: '8px',
+          borderColor: '#000000',
+          shadowColor: 'rgba(0,0,0,0.2)',
+          frameWidth: 2,
+          frameColor: '#000000'
+        },
+        textStyle: card.designMetadata?.textStyle || {
+          titleColor: '#000000',
+          titleAlignment: 'center',
+          titleWeight: 'bold',
+          descriptionColor: '#333333'
+        },
+        cardMetadata: card.designMetadata?.cardMetadata || {
+          category: 'general',
+          series: 'base',
+          cardType: 'standard'
+        },
+        marketMetadata: {
+          ...DEFAULT_MARKET_METADATA,
+          ...(card.designMetadata?.marketMetadata || {})
+        }
+      }
+    } as Card;
 
     setCards(prevCards => [...prevCards, newCard]);
     return newCard;
@@ -69,7 +145,20 @@ export const useCardOperations = () => {
     setCards(prevCards =>
       prevCards.map(card =>
         card.id === id
-          ? adaptToLegacyCard({ ...card, ...updates, updatedAt: new Date().toISOString() })
+          ? {
+              ...card,
+              ...updates,
+              updatedAt: new Date().toISOString(),
+              designMetadata: {
+                ...(card.designMetadata || {}),
+                ...(updates.designMetadata || {}),
+                marketMetadata: {
+                  ...DEFAULT_MARKET_METADATA,
+                  ...(card.designMetadata?.marketMetadata || {}),
+                  ...(updates.designMetadata?.marketMetadata || {})
+                }
+              }
+            } as Card
           : card
       )
     );

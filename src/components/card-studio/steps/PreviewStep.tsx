@@ -19,8 +19,7 @@ const PreviewStep: React.FC<PreviewStepProps> = ({ cardData }) => {
   };
 
   // Create a safe copy to pass to CardPreview
-  const safeCardData: Partial<Card> = {
-    ...cardData,
+  const safeCardData = {
     title: cardData.title || 'Untitled Card',
     description: cardData.description || '',
     imageUrl: cardData.imageUrl || '',
@@ -29,7 +28,8 @@ const PreviewStep: React.FC<PreviewStepProps> = ({ cardData }) => {
     effects: cardData.effects || [],
     userId: cardData.userId || '',
     createdAt: cardData.createdAt || new Date().toISOString(),
-    updatedAt: cardData.updatedAt || new Date().toISOString()
+    updatedAt: cardData.updatedAt || new Date().toISOString(),
+    ...cardData
   };
   
   return (
@@ -46,7 +46,7 @@ const PreviewStep: React.FC<PreviewStepProps> = ({ cardData }) => {
         <TabsContent value="visual" className="space-y-4">
           <div className="flex justify-center">
             <CardPreview 
-              card={safeCardData}
+              card={safeCardData as any}
               effectClasses={generateEffectClasses()}
               className="max-w-[280px]"
             />

@@ -38,7 +38,8 @@ const FinalizeStep: React.FC<FinalizeStepProps> = ({ cardData, onUpdate }) => {
     cardMetadata: {
       category: 'general',
       series: 'base',
-      cardType: 'standard'
+      cardType: 'standard',
+      edition: '' // Add default empty value for edition
     },
     marketMetadata: {
       isPrintable: false,

@@ -76,6 +76,7 @@ export interface CardEffect {
   className?: string;
   category?: string;
   description?: string;
+  iconUrl?: string; // Added for RecommendationEngine
 }
 
 /**
@@ -285,7 +286,11 @@ export interface CardTemplate {
   description?: string;
   thumbnail: string;
   thumbnailUrl?: string; // Added for backward compatibility
+  imageUrl?: string; // Added for backward compatibility
   category: string;
+  tags?: string[]; // Added for TemplateSelector
+  sport?: string; // Added for SettingsPanel
+  style?: string; // Added for SettingsPanel
   isOfficial?: boolean; // Added for filtering
   popularity?: number; // Added for sorting
   designDefaults: {
