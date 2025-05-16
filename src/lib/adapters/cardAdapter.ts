@@ -1,92 +1,100 @@
 
-import { Card } from '@/lib/types/cardTypes';
-import { Card as SchemaCard } from '@/lib/schema/types';
-import { CardData } from '@/types/card';
+import { Card } from "@/lib/types/card";
+import { DEFAULT_DESIGN_METADATA } from "@/lib/utils/cardDefaults";
+import { generateId } from "@/lib/utils/idGenerator";
 
-// Create default values for required properties that might be missing
-const DEFAULT_DESIGN_METADATA = {
-  cardStyle: {
-    template: 'classic',
-    effect: 'none',
-    borderRadius: '8px',
-    borderColor: '#000000',
-    frameColor: '#000000',
-    frameWidth: 2,
-    shadowColor: 'rgba(0,0,0,0.2)',
-  },
-  textStyle: {
-    titleColor: '#000000',
-    titleAlignment: 'center',
-    titleWeight: 'bold',
-    descriptionColor: '#333333',
-  },
-  cardMetadata: {
-    category: 'general',
-    series: 'base',
-    cardType: 'standard',
-  },
-  marketMetadata: {
-    price: 0,
-    currency: 'USD',
-    availableForSale: false,
-    editionSize: 0,
-    editionNumber: 0,
-    isPrintable: false,
-    isForSale: false,
-    includeInCatalog: false
+// Helper to generate a default card with minimal required properties
+export function createEmptyCard(): Card {
+  const timestamp = new Date().toISOString();
+  
+  return {
+    id: generateId(),
+    title: "New Card",
+    description: "",
+    imageUrl: "/placeholder-card.png",
+    thumbnailUrl: "/placeholder-card.png",
+    tags: [],
+    userId: "anonymous", // This should be replaced with actual user ID when available
+    effects: [],
+    createdAt: timestamp,
+    updatedAt: timestamp,
+    designMetadata: DEFAULT_DESIGN_METADATA
+  };
+}
+
+// Adapts data from various sources to a valid Card object
+export function adaptToCard(data: Partial<Card>): Card {
+  const timestamp = new Date().toISOString();
+  const designMetadata = data.designMetadata || DEFAULT_DESIGN_METADATA;
+  
+  // Ensure essential nested objects exist
+  if (!designMetadata.cardMetadata) {
+    designMetadata.cardMetadata = DEFAULT_DESIGN_METADATA.cardMetadata;
   }
-};
+  
+  if (!designMetadata.marketMetadata) {
+    designMetadata.marketMetadata = DEFAULT_DESIGN_METADATA.marketMetadata;
+  }
+  
+  if (!designMetadata.cardStyle) {
+    designMetadata.cardStyle = DEFAULT_DESIGN_METADATA.cardStyle;
+  }
+  
+  if (!designMetadata.textStyle) {
+    designMetadata.textStyle = DEFAULT_DESIGN_METADATA.textStyle;
+  }
 
-// Adapter function to convert between card types
-export const adaptCardToSchema = (card: Partial<Card>): SchemaCard => {
   return {
-    id: card.id || '',
-    title: card.title || 'Untitled Card',
-    description: card.description || '',
-    imageUrl: card.imageUrl || '',
-    thumbnailUrl: card.thumbnailUrl || card.imageUrl || '',
-    tags: card.tags || [],
-    userId: card.userId || '',
-    createdAt: card.createdAt || new Date().toISOString(),
-    updatedAt: card.updatedAt || new Date().toISOString(),
-    effects: card.effects || [],
-    designMetadata: card.designMetadata || DEFAULT_DESIGN_METADATA
+    // Required fields with defaults
+    id: data.id || generateId(),
+    title: data.title || "Untitled Card",
+    description: data.description || "",
+    imageUrl: data.imageUrl || "/placeholder-card.png",
+    thumbnailUrl: data.thumbnailUrl || data.imageUrl || "/placeholder-card-thumb.png",
+    tags: data.tags || [],
+    userId: data.userId || "anonymous",
+    effects: data.effects || [],
+    createdAt: data.createdAt || timestamp,
+    updatedAt: data.updatedAt || timestamp,
+    designMetadata: designMetadata,
+    
+    // Optional fields that can be passed through
+    collectionId: data.collectionId,
+    metadata: data.metadata,
+    reactions: data.reactions,
+    comments: data.comments,
+    viewCount: data.viewCount,
+    isPublic: data.isPublic,
+    
+    // Player-related fields
+    player: data.player,
+    team: data.team,
+    year: data.year,
+    jersey: data.jersey,
+    set: data.set,
+    cardNumber: data.cardNumber,
+    cardType: data.cardType,
+    
+    // Visual properties
+    artist: data.artist,
+    backgroundColor: data.backgroundColor,
+    textColor: data.textColor, // Support this legacy field
+    specialEffect: data.specialEffect,
+    fabricSwatches: data.fabricSwatches,
+    
+    // Additional metadata
+    name: data.name,
+    cardStyle: data.cardStyle,
+    backTemplate: data.backTemplate,
+    
+    // Additional IDs
+    teamId: data.teamId,
+    creatorId: data.creatorId,
+    
+    // Market data
+    price: data.price,
+    estimatedValue: data.estimatedValue,
+    condition: data.condition,
+    rarity: data.rarity
   };
-};
-
-export const adaptToCard = (schema: Partial<SchemaCard>): Card => {
-  return {
-    id: schema.id || '',
-    title: schema.title || 'Untitled Card',
-    description: schema.description || '',
-    imageUrl: schema.imageUrl || '',
-    thumbnailUrl: schema.thumbnailUrl || schema.imageUrl || '',
-    tags: schema.tags || [],
-    userId: schema.userId || '',
-    createdAt: schema.createdAt || new Date().toISOString(),
-    updatedAt: schema.updatedAt || new Date().toISOString(),
-    effects: schema.effects || [],
-    designMetadata: schema.designMetadata || DEFAULT_DESIGN_METADATA
-  } as Card;
-};
-
-// Add missing adaptToLegacyCard function
-export const adaptToLegacyCard = (card: Card): CardData => {
-  return {
-    id: card.id,
-    title: card.title,
-    description: card.description || '',
-    imageUrl: card.imageUrl,
-    thumbnailUrl: card.thumbnailUrl || card.imageUrl,
-    tags: card.tags || [],
-    userId: card.userId || '',
-    effects: card.effects || [],
-    createdAt: card.createdAt,
-    updatedAt: card.updatedAt,
-    textColor: card.textColor,
-    player: card.player,
-    team: card.team,
-    year: card.year,
-    designMetadata: card.designMetadata || DEFAULT_DESIGN_METADATA
-  };
-};
+}

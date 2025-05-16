@@ -30,9 +30,12 @@ const SampleCardsButton: React.FC<SampleCardsButtonProps> = ({ className }) => {
               cardType: cardData.designMetadata?.cardMetadata?.cardType || DEFAULT_CARD_METADATA.cardType
             },
             marketMetadata: {
-              isPrintable: false,
-              isForSale: false,
-              includeInCatalog: false,
+              isPrintable: cardData.designMetadata?.marketMetadata?.isPrintable !== undefined ? 
+                cardData.designMetadata?.marketMetadata?.isPrintable : false,
+              isForSale: cardData.designMetadata?.marketMetadata?.isForSale !== undefined ?
+                cardData.designMetadata?.marketMetadata?.isForSale : false,
+              includeInCatalog: cardData.designMetadata?.marketMetadata?.includeInCatalog !== undefined ?
+                cardData.designMetadata?.marketMetadata?.includeInCatalog : false,
               price: cardData.designMetadata?.marketMetadata?.price || 0,
               currency: cardData.designMetadata?.marketMetadata?.currency || 'USD',
               availableForSale: cardData.designMetadata?.marketMetadata?.availableForSale || false,

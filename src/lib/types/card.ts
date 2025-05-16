@@ -30,6 +30,8 @@ export interface BaseCard {
   comments?: Comment[];
   viewCount?: number;
   isPublic?: boolean;
+  
+  // Player-related properties
   player?: string;
   team?: string;
   year?: string;
@@ -37,17 +39,33 @@ export interface BaseCard {
   set?: string;
   cardNumber?: string;
   cardType?: string;
+  
+  // Visual properties
   artist?: string;
   backgroundColor?: string;
   textColor?: string;
   specialEffect?: string;
   fabricSwatches?: FabricSwatch[];
+  
+  // Additional metadata
   name?: string;
   cardStyle?: string;
   backTemplate?: string;
+  
+  // Timestamps and IDs
   createdAt: string;
   updatedAt: string;
+  creatorId?: string;
+  teamId?: string;
+  
+  // Design metadata
   designMetadata: DesignMetadata;
+  
+  // Market data
+  price?: number;
+  estimatedValue?: string;
+  condition?: string;
+  rarity?: string;
 }
 
 export interface Card extends BaseCard {}

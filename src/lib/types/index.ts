@@ -20,17 +20,24 @@ export interface Reaction {
   type: string;
   createdAt: string;
   updatedAt: string;
+  cardId?: string;        // Added for backward compatibility
+  collectionId?: string;  // Added for backward compatibility
+  commentId?: string;     // Added for backward compatibility
+  user?: User;            // Added for backward compatibility
 }
 
 export interface Comment {
   id: string;
   content: string;
   userId: string;
-  authorId?: string; // Added for backward compatibility
+  authorId?: string;      // Added for backward compatibility
   parentId?: string;
+  cardId?: string;        // Added for backward compatibility
+  collectionId?: string;  // Added for backward compatibility
+  teamId?: string;        // Added for backward compatibility
   createdAt: string;
   updatedAt: string;
-  user?: User;   // Added for backward compatibility
+  user?: User;            // Added for backward compatibility
   reactions?: Reaction[];
 }
 
@@ -41,6 +48,7 @@ export interface TeamMember {
   role: 'owner' | 'admin' | 'member' | 'viewer';
   joinedAt: string;
   updatedAt?: string;
+  user?: User;            // Added for compatibility
 }
 
 export interface CreationHistoryItem {
@@ -55,7 +63,7 @@ export interface CreationHistoryItem {
 export interface UserStyleProfile {
   favoriteColors: string[];
   preferredEffects: string[];
-  favoriteTemplates: string[];
+  favoriteTemplates: string[];  // Added missing property
   lastUsedElements: string[];
 }
 

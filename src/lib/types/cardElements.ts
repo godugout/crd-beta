@@ -1,11 +1,9 @@
-
 /**
  * Definition for card elements like stickers, logos, etc.
  */
 export type ElementType = 'sticker' | 'logo' | 'frame' | 'badge' | 'overlay' | 'decoration';
-export type ElementCategoryName = string;
 
-// Change ElementCategory from type alias to string enum
+// Use a proper string enum for ElementCategory
 export enum ElementCategory {
   SPORTS = 'sports',
   ENTERTAINMENT = 'entertainment',
@@ -25,7 +23,7 @@ export interface CardElement {
   description?: string;
   type: ElementType;
   category: ElementCategory;
-  url: string;  // Make required
+  url: string;  // Required field
   thumbnailUrl?: string;
   assetUrl?: string;
   tags: string[];
@@ -54,6 +52,20 @@ export interface CardElement {
   style?: Record<string, any>;
   metadata?: Record<string, any>;
   creatorId?: string; // Added for ElementLibrary.ts compatibility
+}
+
+// Add missing ElementUploadMetadata interface
+export interface ElementUploadMetadata {
+  name: string;
+  description?: string;
+  tags: string[];
+  category: ElementCategory;
+  isOfficial?: boolean;
+  isPremium?: boolean;
+  dimensions?: {
+    width?: number;
+    height?: number;
+  };
 }
 
 export interface ElementCategoryInfo {
@@ -124,19 +136,6 @@ export interface ElementPlacementOptions {
   autoScale?: boolean;
 }
 
-export interface ElementUploadMetadata {
-  name: string;
-  description?: string;
-  tags: string[];
-  category: ElementCategory;
-  isOfficial?: boolean;
-  isPremium?: boolean;
-  dimensions?: {  // Added dimensions property
-    width?: number;
-    height?: number;
-  };
-}
-
 export interface ElementLibraryCollection {
   id: string;
   name: string;
@@ -146,7 +145,7 @@ export interface ElementLibraryCollection {
   updatedAt: string;
 }
 
-// Update ElementType to include 'decoration'
+// Update ElementTypeMap to include 'decoration'
 export type ElementTypeMap = Record<ElementType, string[]>;
 
 // Create a function to validate if a type is a valid ElementType

@@ -3,19 +3,12 @@
  * Instagram-related types
  */
 
-export interface InstagramPost {
-  id: string;
-  postId?: string;
-  username: string;
-  caption?: string;
-  imageUrl?: string;
-  permalink?: string;
-  timestamp: string;
-  mediaType: string;
-  mediaUrl: string;
-  thumbnailUrl?: string;
-}
+import { InstagramPost as BaseInstagramPost } from './index';
 
+// Re-export the type from the index file
+export type InstagramPost = BaseInstagramPost;
+
+// Additional Instagram-specific types
 export interface InstagramSource {
   username: string;
   lastFetched: string;

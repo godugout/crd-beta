@@ -1,55 +1,47 @@
-
 import { CardStyle, TextStyle, CardMetadata, MarketMetadata, DesignMetadata } from '@/lib/types/cardTypes';
 
+// Default values for card styles
 export const DEFAULT_CARD_STYLE: CardStyle = {
-  template: 'classic',
+  template: 'basic',
   effect: 'none',
-  borderRadius: '8px',
-  borderColor: '#000000',
-  frameColor: '#000000',
-  frameWidth: 2,
-  shadowColor: 'rgba(0,0,0,0.2)'
+  borderRadius: '12px',
+  borderColor: '#e2e8f0',
+  backgroundColor: '#ffffff',
+  shadowColor: '#000000',
+  frameWidth: 0,
+  frameColor: '#ffffff'
 };
 
+// Default values for text styles
 export const DEFAULT_TEXT_STYLE: TextStyle = {
-  titleColor: '#000000',
+  titleFont: 'Arial',
+  titleSize: '24px',
+  titleColor: '#ffffff',
   titleAlignment: 'center',
   titleWeight: 'bold',
-  descriptionColor: '#333333',
-  fontFamily: 'Inter',
-  fontSize: '16px',
-  fontWeight: 'normal',
-  color: '#333333'
+  descriptionFont: 'Arial',
+  descriptionSize: '16px',
+  descriptionColor: '#dddddd'
 };
 
+// Default values for card metadata
 export const DEFAULT_CARD_METADATA: CardMetadata = {
-  category: 'general',
-  series: 'base',
-  cardType: 'standard',
+  category: 'sports',
+  series: 'standard',
+  cardType: 'baseball'
 };
 
+// Default values for market metadata
 export const DEFAULT_MARKET_METADATA: MarketMetadata = {
   isPrintable: false,
   isForSale: false,
-  includeInCatalog: false,
-  price: 0,
-  currency: 'USD',
-  availableForSale: false,
-  editionSize: 1,
-  editionNumber: 1
+  includeInCatalog: false
 };
 
+// Consolidated default design metadata
 export const DEFAULT_DESIGN_METADATA: DesignMetadata = {
   cardStyle: DEFAULT_CARD_STYLE,
   textStyle: DEFAULT_TEXT_STYLE,
   cardMetadata: DEFAULT_CARD_METADATA,
   marketMetadata: DEFAULT_MARKET_METADATA
-};
-
-export default {
-  cardStyle: DEFAULT_CARD_STYLE,
-  textStyle: DEFAULT_TEXT_STYLE,
-  cardMetadata: DEFAULT_CARD_METADATA,
-  marketMetadata: DEFAULT_MARKET_METADATA,
-  designMetadata: DEFAULT_DESIGN_METADATA
 };

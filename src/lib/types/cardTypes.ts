@@ -1,4 +1,3 @@
-
 /**
  * Consolidated Card Types for Cardshow (CRD)
  * This file serves as the central source of truth for all card-related types
@@ -305,3 +304,5 @@ export type { EnhancedCard, Series, Deck } from './enhancedCardTypes';
 
 // Export renamed Reaction type to avoid conflicts
 export type { Reaction as CardReaction } from './interaction';
+
+</edits_to_apply>

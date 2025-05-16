@@ -1,307 +1,233 @@
-
-import React, { useState, useEffect } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Search } from 'lucide-react';
-import { CardElement, ElementType, ElementCategory } from '@/lib/types/cardElements';
-import { elementLibrary } from '@/lib/elements/ElementLibrary';
-import { cn } from '@/lib/utils';
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Button } from "@/components/ui/button"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
+import { Search, Plus, Upload, Loader2 } from "lucide-react"
+import { ElementCategory, CardElement, ElementUploadMetadata } from '@/lib/types/cardElements';
+import { useToast } from "@/hooks/use-toast"
+import AssetUploader from '@/components/ugc/AssetUploader';
+import { storageOperations } from '@/lib/supabase/storage';
+
+interface CategoryCardProps {
+  title: string;
+  description: string;
+  count: number;
+  onClick: () => void;
+}
+
+const CategoryCard: React.FC<CategoryCardProps> = ({ title, description, count, onClick }) => {
+  return (
+    <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={onClick}>
+      <CardHeader>
+        <CardTitle>{title}</CardTitle>
+        <CardDescription>{description}</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Label className="text-muted-foreground">{count} elements</Label>
+      </CardContent>
+    </Card>
+  );
+};
+
+interface ElementCardProps {
+  element: CardElement;
+  onSelect: (element: CardElement) => void;
+}
+
+const ElementCard: React.FC<ElementCardProps> = ({ element, onSelect }) => {
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => onSelect(element)}>
+            <CardHeader>
+              <CardTitle>{element.name}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Avatar>
+                <AvatarImage src={element.thumbnailUrl || element.url} alt={element.name} />
+                <AvatarFallback>{element.name.substring(0, 2)}</AvatarFallback>
+              </Avatar>
+            </CardContent>
+          </Card>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>{element.description || 'No description'}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+};
 
 interface ElementLibraryBrowserProps {
   onElementSelect: (element: CardElement) => void;
-  selectedElementId?: string;
-  filterTypes?: ElementType[];
 }
 
-// Define category type more specifically
-const ELEMENT_CATEGORIES = [
-  'all', 
-  'sports', 
-  'entertainment', 
-  'achievement', 
-  'decorative', 
-  'seasonal', 
-  'holiday', 
-  'teams', 
-  'brands', 
-  'custom', 
-  'other'
-] as const;
-
-type ElementCategoryType = typeof ELEMENT_CATEGORIES[number];
-
-const ElementLibraryBrowser: React.FC<ElementLibraryBrowserProps> = ({
-  onElementSelect,
-  selectedElementId,
-  filterTypes,
-}) => {
-  const [elements, setElements] = useState<CardElement[]>([]);
-  const [activeTab, setActiveTab] = useState<ElementType | 'all'>('all');
+const ElementLibraryBrowser: React.FC<ElementLibraryBrowserProps> = ({ onElementSelect }) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState<ElementCategoryType>('all');
-  const [officialFilter, setOfficialFilter] = useState<'all' | 'official' | 'community'>('all');
-  
-  // Load elements on component mount
-  useEffect(() => {
-    loadElements();
-  }, []);
-  
-  // Reload when tab changes
-  useEffect(() => {
-    loadElements();
-  }, [activeTab, searchQuery, categoryFilter, officialFilter]);
-  
-  // Load elements from the library
-  const loadElements = () => {
-    let filteredElements: CardElement[];
-    
-    // First, apply tab filter (element type)
-    if (activeTab === 'all') {
-      filteredElements = elementLibrary.getAllElements();
-    } else {
-      filteredElements = elementLibrary.getElementsByType(activeTab);
+  const [selectedCategory, setSelectedCategory] = useState<ElementCategory | null>(null);
+  const [showUploader, setShowUploader] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const { toast } = useToast();
+
+  // Mock data for categories and elements
+  const categories = Object.values(ElementCategory);
+  const decorativeElements: CardElement[] = [
+    {
+      id: 'decorative-1',
+      name: 'Sparkle',
+      description: 'A shiny sparkle effect',
+      type: 'decoration',
+      category: ElementCategory.DECORATIVE,
+      url: '/sparkle.png',
+      tags: ['sparkle', 'shiny'],
+      position: { x: 0, y: 0 },
+      size: { width: 50, height: 50 }
+    },
+    {
+      id: 'decorative-2',
+      name: 'Glitter',
+      description: 'A glitter overlay',
+      type: 'decoration',
+      category: ElementCategory.DECORATIVE,
+      url: '/glitter.png',
+      tags: ['glitter', 'shiny'],
+      position: { x: 0, y: 0 },
+      size: { width: 50, height: 50 }
     }
-    
-    // Apply category filter
-    if (categoryFilter !== 'all') {
-      filteredElements = filteredElements.filter(
-        element => element.category === categoryFilter
-      );
+  ];
+  const teamElements: CardElement[] = [
+    {
+      id: 'team-1',
+      name: 'Team A Logo',
+      description: 'The official logo of Team A',
+      type: 'logo',
+      category: ElementCategory.TEAMS,
+      url: '/team-a-logo.png',
+      tags: ['team a', 'logo'],
+      position: { x: 0, y: 0 },
+      size: { width: 50, height: 50 }
+    },
+    {
+      id: 'team-2',
+      name: 'Team B Logo',
+      description: 'The official logo of Team B',
+      type: 'logo',
+      category: ElementCategory.TEAMS,
+      url: '/team-b-logo.png',
+      tags: ['team b', 'logo'],
+      position: { x: 0, y: 0 },
+      size: { width: 50, height: 50 }
     }
-    
-    // Apply official/community filter
-    if (officialFilter !== 'all') {
-      filteredElements = filteredElements.filter(
-        element => element.isOfficial === (officialFilter === 'official')
-      );
+  ];
+
+  const handleUploadComplete = useCallback((asset: ElementUploadMetadata) => {
+    setIsUploading(false);
+    toast({
+      title: 'Upload Complete',
+      description: `${asset.name} has been uploaded`,
+    });
+  }, [toast]);
+
+  const filteredElements = () => {
+    let elements: CardElement[] = [];
+    if (selectedCategory === ElementCategory.DECORATIVE) {
+      elements = decorativeElements;
+    } else if (selectedCategory === ElementCategory.TEAMS) {
+      elements = teamElements;
     }
-    
-    // Apply search query
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      filteredElements = filteredElements.filter(
-        element => 
-          element.name.toLowerCase().includes(query) ||
-          element.tags.some(tag => tag.toLowerCase().includes(query)) ||
-          (element.description && element.description.toLowerCase().includes(query))
-      );
-    }
-    
-    // Apply external type filter if provided
-    if (filterTypes && filterTypes.length > 0) {
-      filteredElements = filteredElements.filter(
-        element => filterTypes.includes(element.type)
-      );
-    }
-    
-    setElements(filteredElements);
+
+    return elements.filter(element =>
+      element.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      element.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+    );
   };
-  
-  // Element type tabs
-  const tabs = [
-    { value: 'all', label: 'All' },
-    { value: 'sticker', label: 'Stickers' },
-    { value: 'logo', label: 'Logos' },
-    { value: 'frame', label: 'Frames' },
-    { value: 'badge', label: 'Badges' },
-    { value: 'overlay', label: 'Overlays' }
-  ];
-  
-  // Category options
-  const categoryOptions = [
-    { value: 'all', label: 'All Categories' },
-    { value: 'sports', label: 'Sports' },
-    { value: 'entertainment', label: 'Entertainment' },
-    { value: 'achievement', label: 'Achievement' },
-    { value: 'decorative', label: 'Decorative' },
-    { value: 'seasonal', label: 'Seasonal' },
-    { value: 'holiday', label: 'Holiday' },
-    { value: 'teams', label: 'Teams' },
-    { value: 'brands', label: 'Brands' },
-    { value: 'custom', label: 'Custom' },
-    { value: 'other', label: 'Other' }
-  ];
 
   return (
-    <div>
-      <Tabs 
-        defaultValue="all" 
-        value={activeTab}
-        onValueChange={(value) => setActiveTab(value as ElementType | 'all')}
-      >
-        <TabsList className="grid grid-cols-6 mb-4">
-          {tabs.map((tab) => (
-            <TabsTrigger key={tab.value} value={tab.value}>
-              {tab.label}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-      </Tabs>
-      
-      <div className="space-y-4">
-        {/* Filter bar */}
-        <div className="flex flex-col md:flex-row gap-2">
-          <div className="relative flex-1">
-            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search elements..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-8"
-            />
+    <Tabs defaultValue="browse" className="w-full space-y-4">
+      <TabsList>
+        <TabsTrigger value="browse">Browse</TabsTrigger>
+        <TabsTrigger value="upload">Upload</TabsTrigger>
+      </TabsList>
+      <TabsContent value="browse" className="space-y-4">
+        <div className="flex items-center space-x-2">
+          <Search className="h-4 w-4 text-gray-500" />
+          <Input
+            type="search"
+            placeholder="Search elements..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+          <CategoryCard
+            key="decorative"
+            title="Decorative"
+            description="Add decorative elements to your cards"
+            count={decorativeElements.length}
+            onClick={() => setSelectedCategory(ElementCategory.DECORATIVE)}
+          />
+          <CategoryCard
+            key="teams"
+            title="Teams"
+            description="Team logos and branding elements"
+            count={teamElements.length}
+            onClick={() => setSelectedCategory(ElementCategory.TEAMS)}
+          />
+        </div>
+        <ScrollArea className="rounded-md border p-4 h-[400px]">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {filteredElements().map(element => (
+              <ElementCard key={element.id} element={element} onSelect={onElementSelect} />
+            ))}
           </div>
-          
-          <Select
-            value={categoryFilter}
-            onValueChange={(value) => setCategoryFilter(value as ElementCategoryType)}
-          >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Category" />
-            </SelectTrigger>
-            <SelectContent>
-              {categoryOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          
-          <Select
-            value={officialFilter}
-            onValueChange={(value) => setOfficialFilter(value as 'all' | 'official' | 'community')}
-          >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Source" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Sources</SelectItem>
-              <SelectItem value="official">Official</SelectItem>
-              <SelectItem value="community">Community</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        
-        {/* Elements grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-          {elements.length > 0 ? (
-            elements.map((element) => (
-              <Card 
-                key={element.id}
-                className={cn(
-                  "cursor-pointer hover:border-primary transition-colors",
-                  element.id === selectedElementId && "border-primary"
-                )}
-                onClick={() => onElementSelect(element)}
-              >
-                <CardContent className="p-3">
-                  <div className="aspect-square bg-gray-100 rounded-md mb-2 flex items-center justify-center">
-                    {element.thumbnailUrl ? (
-                      <img 
-                        src={element.thumbnailUrl} 
-                        alt={element.name}
-                        className="max-w-full max-h-full object-contain"
-                      />
-                    ) : (
-                      <div className="text-muted-foreground text-xs text-center p-2">
-                        No preview
-                      </div>
-                    )}
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-sm truncate">{element.name}</h3>
-                    <div className="flex items-center gap-1 mt-1 flex-wrap">
-                      <Badge 
-                        variant={element.isOfficial ? "default" : "outline"}
-                        className="text-[10px] px-1 py-0 h-4"
-                      >
-                        {element.isOfficial ? 'Official' : 'Community'}
-                      </Badge>
-                      <Badge 
-                        variant="secondary"
-                        className="text-[10px] px-1 py-0 h-4"
-                      >
-                        {element.category}
-                      </Badge>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))
-          ) : (
-            <div className="col-span-full text-center py-8 text-muted-foreground">
-              No elements found matching your criteria
-            </div>
-          )}
-        </div>
-        
-        {/* Add some demo placeholder elements if none exist */}
-        {elements.length === 0 && (
-          <Button
-            variant="outline"
-            className="w-full"
-            onClick={() => {
-              // Add some demo elements
-              const demoSticker = elementLibrary.createElement('sticker', {
-                name: 'Star Sticker',
-                url: '/placeholder.svg',  // Add URL property to fix TypeScript error
-                assetUrl: '/placeholder.svg',
-                thumbnailUrl: '/placeholder.svg',
-                description: 'A sample star sticker',
-                tags: ['star', 'sample', 'decoration'],
-                category: 'decorative',
-                isOfficial: true,
-                position: { x: 0, y: 0 },
-                size: { width: 100, height: 100, scale: 1, aspectRatio: 1, preserveAspectRatio: true },
-                style: { opacity: 1 }
-              });
-              
-              const demoLogo = elementLibrary.createElement('logo', {
-                name: 'Sample Team Logo',
-                url: '/placeholder.svg',  // Add URL property to fix TypeScript error
-                assetUrl: '/placeholder.svg',
-                thumbnailUrl: '/placeholder.svg',
-                description: 'A sample team logo',
-                tags: ['team', 'logo', 'sports'],
-                category: 'teams',
-                isOfficial: true,
-                position: { x: 0, y: 0 },
-                size: { width: 120, height: 120, scale: 1, aspectRatio: 1, preserveAspectRatio: true },
-                style: { opacity: 1 }
-              });
-              
-              const demoFrame = elementLibrary.createElement('frame', {
-                name: 'Gold Frame',
-                url: '/placeholder.svg',  // Add URL property to fix TypeScript error
-                assetUrl: '/placeholder.svg',
-                thumbnailUrl: '/placeholder.svg',
-                description: 'A decorative gold frame',
-                tags: ['frame', 'gold', 'decoration'],
-                category: 'decorative',
-                isOfficial: true,
-                position: { x: 0, y: 0 },
-                size: { width: 300, height: 400, scale: 1, aspectRatio: 0.75, preserveAspectRatio: true },
-                style: { opacity: 1 }
-              });
-              
-              loadElements();
-            }}
-          >
-            Add Demo Elements
-          </Button>
+        </ScrollArea>
+      </TabsContent>
+      <TabsContent value="upload" className="space-y-4">
+        {showUploader ? (
+          <>
+            {isUploading && (
+              <div className="flex items-center justify-center space-x-2">
+                <Loader2 className="h-6 w-6 animate-spin" />
+                <p>Uploading...</p>
+              </div>
+            )}
+            <AssetUploader onUploadComplete={handleUploadComplete} />
+          </>
+        ) : (
+          <div className="flex flex-col items-center justify-center space-y-4">
+            <p className="text-sm text-gray-500">
+              Click the button below to upload your own elements
+            </p>
+            <Button onClick={() => setShowUploader(true)}>
+              <Upload className="h-4 w-4 mr-2" />
+              Upload Element
+            </Button>
+          </div>
         )}
-      </div>
-    </div>
+      </TabsContent>
+    </Tabs>
   );
 };
 
