@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { AuthContextType, AuthState, AuthUser, AuthSession } from './types';
 import { UserRole } from '@/lib/types';
@@ -48,6 +47,56 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   
+  // For development purposes, use a mock user if running locally
+  useEffect(() => {
+    const setupAuthState = async () => {
+      try {
+        // First attempt to get an actual session
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (session && session.user) {
+          const profile = await getUserProfile(session.user.id);
+          if (profile) {
+            setUser(profile as AuthUser);
+            setIsAuthenticated(true);
+          }
+        } else {
+          // If no session, use the mock user for development
+          const isDevelopment = import.meta.env.DEV;
+          if (isDevelopment) {
+            console.log('Development environment detected, using mock user');
+            setUser(MOCK_USER);
+            setIsAuthenticated(true);
+          }
+        }
+      } catch (error) {
+        console.error('Auth initialization error:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    setupAuthState();
+    
+    // Set up auth state change listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_IN' && session) {
+        const profile = await getUserProfile(session.user.id);
+        if (profile) {
+          setUser(profile as AuthUser);
+          setIsAuthenticated(true);
+        }
+      } else if (event === 'SIGNED_OUT') {
+        setUser(null);
+        setIsAuthenticated(false);
+      }
+    });
+    
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
   const getUserProfile = async (userId: string): Promise<User | null> => {
     try {
       // Instead of querying users table directly, query profiles table
@@ -84,42 +133,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return null;
     }
   };
-
-  useEffect(() => {
-    const setupAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (session && session.user) {
-        const profile = await getUserProfile(session.user.id);
-        if (profile) {
-          setUser(profile as AuthUser);
-          setIsAuthenticated(true);
-        }
-      }
-      
-      setIsLoading(false);
-      
-      // Set up auth state change listener
-      const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-        if (event === 'SIGNED_IN' && session) {
-          const profile = await getUserProfile(session.user.id);
-          if (profile) {
-            setUser(profile as AuthUser);
-            setIsAuthenticated(true);
-          }
-        } else if (event === 'SIGNED_OUT') {
-          setUser(null);
-          setIsAuthenticated(false);
-        }
-      });
-      
-      return () => {
-        subscription.unsubscribe();
-      };
-    };
-    
-    setupAuth();
-  }, []);
 
   const signIn = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
     try {

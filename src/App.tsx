@@ -2,6 +2,7 @@
 import React, { useEffect } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import './App.css';
+import AuthCheck from './components/auth/AuthCheck';
 
 // Pages
 import Home from './pages/Home';
@@ -72,19 +73,21 @@ function App() {
     )}>
       <UserPreferencesProvider>
         <CardProvider>
-          <Routes>
-            <Route path="/" element={renderWithLayout(<Home />)} />
-            <Route path="/create" element={renderWithLayout(<CardCreator />)} />
-            <Route path="/studio" element={renderWithLayout(<CardStudio />)} /> 
-            <Route path="/editor" element={renderWithLayout(<Editor />)} />
-            <Route path="/editor/:id" element={renderWithLayout(<Editor />)} />
-            <Route path="/gallery" element={renderWithLayout(<Gallery />)} />
-            <Route path="/card/:id" element={renderWithLayout(<CardView />)} />
-            <Route path="/community" element={renderWithLayout(<Community />)} />
-            <Route path="/personalize" element={renderWithLayout(<UserPersonalization />)} />
-            <Route path="/docs" element={renderWithLayout(<Documentation />)} />
-          </Routes>
-          <Toaster />
+          <AuthCheck fallback={<div>Loading app...</div>}>
+            <Routes>
+              <Route path="/" element={renderWithLayout(<Home />)} />
+              <Route path="/create" element={renderWithLayout(<CardCreator />)} />
+              <Route path="/studio" element={renderWithLayout(<CardStudio />)} /> 
+              <Route path="/editor" element={renderWithLayout(<Editor />)} />
+              <Route path="/editor/:id" element={renderWithLayout(<Editor />)} />
+              <Route path="/gallery" element={renderWithLayout(<Gallery />)} />
+              <Route path="/card/:id" element={renderWithLayout(<CardView />)} />
+              <Route path="/community" element={renderWithLayout(<Community />)} />
+              <Route path="/personalize" element={renderWithLayout(<UserPersonalization />)} />
+              <Route path="/docs" element={renderWithLayout(<Documentation />)} />
+            </Routes>
+            <Toaster />
+          </AuthCheck>
         </CardProvider>
       </UserPreferencesProvider>
     </div>
