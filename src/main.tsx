@@ -6,7 +6,7 @@ import { BrowserRouter } from 'react-router-dom'
 import { ThemeProvider } from './hooks/useTheme.tsx'
 import { TeamThemeProvider } from './context/ThemeContext.tsx'
 import { BrandThemeProvider } from './context/BrandThemeContext.tsx'
-import { AuthProvider } from './providers/AuthProvider'
+import { AuthProvider } from './context/auth'
 import { HelmetProvider } from 'react-helmet-async'
 import { CardProvider } from './context/CardContext'
 import { Toaster } from '@/components/ui/toaster' // Adding Toaster for notifications

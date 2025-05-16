@@ -1,32 +1,46 @@
-
 import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { User, UserRole } from '@/lib/types';
+import { AuthContextType, AuthState, AuthUser, AuthSession } from './types';
+import { UserRole } from '@/lib/types';
+import { toast } from 'sonner';
+import { supabase } from '@/lib/supabase/client';
 
-interface AuthContextType {
-  user: User | null;
-  isAuthenticated: boolean;
-  isLoading: boolean;
-  login: (email: string, password: string) => Promise<User | null>;
-  register: (email: string, password: string, metadata?: { [key: string]: any }) => Promise<User | null>;
-  logout: () => Promise<void>;
-  updateUser: (updates: Partial<User>) => Promise<User | null>;
-}
-
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
+// Default auth context
+const initialState: AuthState = {
+  user: null,
+  session: null,
+  isAuthenticated: false,
+  isLoading: true,
+  error: null,
 };
 
+// Create the auth context
+export const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+// Mock user data for development
+const MOCK_USER: AuthUser = {
+  id: 'mock-user-id',
+  email: 'dusty@godugout.com',
+  name: 'Dusty Baker',
+  displayName: 'Dusty',
+  role: UserRole.ADMIN,
+  permissions: ['all'] as any, // Cast to satisfy TypeScript
+  avatarUrl: 'https://api.dicebear.com/7.x/initials/svg?seed=DB',
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+};
+
+// Mock session data
+const MOCK_SESSION: AuthSession = {
+  accessToken: 'mock-access-token',
+  refreshToken: 'mock-refresh-token',
+  expiresAt: Date.now() + 3600000, // Expires in 1 hour
+};
+
+/**
+ * The main Auth Provider for the application
+ */
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [state, setState] = useState<AuthState>(initialState);
   
   const getUserProfile = async (userId: string): Promise<User | null> => {
     try {
@@ -230,7 +244,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   return (
     <AuthContext.Provider value={value}>
-      {!isLoading && children}
+      {children}
     </AuthContext.Provider>
   );
 };
+
+export default AuthProvider;
