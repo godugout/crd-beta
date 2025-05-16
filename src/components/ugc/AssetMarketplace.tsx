@@ -10,6 +10,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Search, Filter, Sliders, Tag, Star, Download, Clock, TrendingUp } from 'lucide-react';
 import { useUGCSystem } from '@/hooks/useUGCSystem';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { useMobileOptimization } from '@/hooks/useMobileOptimization';
+import { ResponsiveImage } from '@/components/ui/responsive-image';
+import { MobileBottomBar, MobileTouchButton } from '@/components/ui/mobile-controls';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import {
   Select,
   SelectContent,
@@ -31,6 +36,11 @@ const AssetMarketplace: React.FC<AssetMarketplaceProps> = ({ onAssetSelect }) =>
   const [sortBy, setSortBy] = useState<'latest' | 'popular' | 'rating'>('latest');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
+  const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
+  
+  // Mobile state
+  const isMobile = useIsMobile();
+  const { lazyLoadImages } = useMobileOptimization();
   
   // Fetch assets using the UGC hook
   const { usePublicAssets } = useUGCSystem();
@@ -67,6 +77,112 @@ const AssetMarketplace: React.FC<AssetMarketplaceProps> = ({ onAssetSelect }) =>
       asset.tags.some(tag => tag.toLowerCase().includes(query))
     );
   }) || [];
+
+  // Reset search when component unmounts
+  useEffect(() => {
+    return () => {
+      setSearchQuery('');
+      setAssetType(undefined);
+      setCategory(undefined);
+      setSelectedTags([]);
+    };
+  }, []);
+
+  // Clear filters function
+  const clearFilters = () => {
+    setSearchQuery('');
+    setAssetType(undefined);
+    setCategory(undefined);
+    setSelectedTags([]);
+  };
+  
+  // Mobile filter panel
+  const MobileFilterPanel = () => (
+    <MobileBottomBar className="bg-background/95 backdrop-blur-md border-t p-4 animate-in slide-in-from-bottom">
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h4 className="font-medium">Filters</h4>
+          <Button variant="ghost" size="sm" onClick={() => setMobileFilterOpen(false)}>
+            Close
+          </Button>
+        </div>
+        
+        <div className="space-y-4">
+          <div>
+            <h4 className="mb-2 text-sm font-medium">Asset Type</h4>
+            <Select 
+              value={assetType} 
+              onValueChange={(value) => setAssetType(value as ElementType || undefined)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="All types" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">All types</SelectItem>
+                <SelectItem value="sticker">Stickers</SelectItem>
+                <SelectItem value="logo">Logos</SelectItem>
+                <SelectItem value="frame">Frames</SelectItem>
+                <SelectItem value="badge">Badges</SelectItem>
+                <SelectItem value="overlay">Overlays</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div>
+            <h4 className="mb-2 text-sm font-medium">Category</h4>
+            <Select 
+              value={category} 
+              onValueChange={(value) => setCategory(value as ElementCategory || undefined)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="All categories" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">All categories</SelectItem>
+                <SelectItem value="sports">Sports</SelectItem>
+                <SelectItem value="entertainment">Entertainment</SelectItem>
+                <SelectItem value="decorative">Decorative</SelectItem>
+                <SelectItem value="seasonal">Seasonal</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div>
+            <h4 className="mb-2 text-sm font-medium">Tags</h4>
+            <ScrollArea className="h-32 p-2 border rounded-md">
+              <div className="flex flex-wrap gap-1">
+                {popularTags.map(tag => (
+                  <Badge 
+                    key={tag}
+                    variant={selectedTags.includes(tag) ? "default" : "outline"}
+                    className="cursor-pointer"
+                    onClick={() => toggleTag(tag)}
+                  >
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+            </ScrollArea>
+          </div>
+          
+          <div className="flex justify-between pt-2">
+            <Button 
+              variant="outline" 
+              onClick={clearFilters}
+            >
+              Clear all
+            </Button>
+            
+            <Button 
+              onClick={() => setMobileFilterOpen(false)}
+            >
+              Apply filters
+            </Button>
+          </div>
+        </div>
+      </div>
+    </MobileBottomBar>
+  );
   
   return (
     <div className="space-y-6">
@@ -83,17 +199,29 @@ const AssetMarketplace: React.FC<AssetMarketplaceProps> = ({ onAssetSelect }) =>
             />
           </div>
           
-          <Button 
-            variant="outline" 
-            size="icon" 
-            onClick={() => setShowFilters(!showFilters)}
-            className={showFilters ? 'bg-accent text-accent-foreground' : ''}
-          >
-            <Filter className="h-4 w-4" />
-          </Button>
+          {isMobile ? (
+            <MobileTouchButton 
+              hapticFeedback
+              variant="outline" 
+              size="icon" 
+              onClick={() => setMobileFilterOpen(true)}
+              className={selectedTags.length > 0 || assetType || category ? 'bg-accent text-accent-foreground' : ''}
+            >
+              <Filter className="h-4 w-4" />
+            </MobileTouchButton>
+          ) : (
+            <Button 
+              variant="outline" 
+              size="icon" 
+              onClick={() => setShowFilters(!showFilters)}
+              className={showFilters ? 'bg-accent text-accent-foreground' : ''}
+            >
+              <Filter className="h-4 w-4" />
+            </Button>
+          )}
           
           <Select value={sortBy} onValueChange={(value) => setSortBy(value as any)}>
-            <SelectTrigger className="w-[160px]">
+            <SelectTrigger className={isMobile ? "w-auto" : "w-[160px]"}>
               <SelectValue placeholder="Sort by" />
             </SelectTrigger>
             <SelectContent>
@@ -121,7 +249,7 @@ const AssetMarketplace: React.FC<AssetMarketplaceProps> = ({ onAssetSelect }) =>
           </Select>
         </div>
         
-        {showFilters && (
+        {!isMobile && showFilters && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 border rounded-md bg-muted/30">
             <div>
               <h4 className="mb-2 text-sm font-medium">Asset Type</h4>
@@ -179,6 +307,18 @@ const AssetMarketplace: React.FC<AssetMarketplaceProps> = ({ onAssetSelect }) =>
                 </div>
               </ScrollArea>
             </div>
+            
+            {(selectedTags.length > 0 || assetType || category) && (
+              <div className="col-span-1 md:col-span-3 flex justify-end">
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={clearFilters}
+                >
+                  Clear filters
+                </Button>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -195,7 +335,7 @@ const AssetMarketplace: React.FC<AssetMarketplaceProps> = ({ onAssetSelect }) =>
         <TabsContent value="all" className="space-y-4">
           {isLoading ? (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {[...Array(12)].map((_, i) => (
+              {[...Array(8)].map((_, i) => (
                 <div key={i} className="animate-pulse">
                   <div className="aspect-square bg-muted rounded-md mb-2" />
                   <div className="h-4 bg-muted rounded w-3/4 mb-1" />
@@ -216,12 +356,7 @@ const AssetMarketplace: React.FC<AssetMarketplaceProps> = ({ onAssetSelect }) =>
               {searchQuery || assetType || category || selectedTags.length > 0 ? (
                 <Button 
                   variant="outline" 
-                  onClick={() => {
-                    setSearchQuery('');
-                    setAssetType(undefined);
-                    setCategory(undefined);
-                    setSelectedTags([]);
-                  }}
+                  onClick={clearFilters}
                 >
                   Clear Filters
                 </Button>
@@ -237,7 +372,8 @@ const AssetMarketplace: React.FC<AssetMarketplaceProps> = ({ onAssetSelect }) =>
                 <AssetCard 
                   key={asset.id} 
                   asset={asset} 
-                  onClick={() => onAssetSelect?.(asset)} 
+                  onClick={() => onAssetSelect?.(asset)}
+                  lazyLoad={lazyLoadImages}
                 />
               ))}
             </div>
@@ -252,7 +388,8 @@ const AssetMarketplace: React.FC<AssetMarketplaceProps> = ({ onAssetSelect }) =>
                 <AssetCard 
                   key={asset.id} 
                   asset={asset} 
-                  onClick={() => onAssetSelect?.(asset)} 
+                  onClick={() => onAssetSelect?.(asset)}
+                  lazyLoad={lazyLoadImages}
                 />
               ))}
           </div>
@@ -266,7 +403,8 @@ const AssetMarketplace: React.FC<AssetMarketplaceProps> = ({ onAssetSelect }) =>
                 <AssetCard 
                   key={asset.id} 
                   asset={asset} 
-                  onClick={() => onAssetSelect?.(asset)} 
+                  onClick={() => onAssetSelect?.(asset)}
+                  lazyLoad={lazyLoadImages}
                 />
               ))}
           </div>
@@ -280,12 +418,46 @@ const AssetMarketplace: React.FC<AssetMarketplaceProps> = ({ onAssetSelect }) =>
                 <AssetCard 
                   key={asset.id} 
                   asset={asset} 
-                  onClick={() => onAssetSelect?.(asset)} 
+                  onClick={() => onAssetSelect?.(asset)}
+                  lazyLoad={lazyLoadImages}
                 />
               ))}
           </div>
         </TabsContent>
       </Tabs>
+      
+      {/* Mobile Filter Panel */}
+      {isMobile && mobileFilterOpen && <MobileFilterPanel />}
+      
+      {/* Active Filters Display for Mobile */}
+      {isMobile && (selectedTags.length > 0 || assetType || category) && (
+        <div className="pt-2 pb-4 flex flex-wrap gap-2 items-center">
+          <span className="text-xs text-muted-foreground">Active filters:</span>
+          {assetType && (
+            <Badge variant="secondary" className="flex gap-1 text-xs" onClick={() => setAssetType(undefined)}>
+              {assetType}
+              <span className="opacity-60">×</span>
+            </Badge>
+          )}
+          {category && (
+            <Badge variant="secondary" className="flex gap-1 text-xs" onClick={() => setCategory(undefined)}>
+              {category}
+              <span className="opacity-60">×</span>
+            </Badge>
+          )}
+          {selectedTags.map(tag => (
+            <Badge 
+              key={tag} 
+              variant="secondary" 
+              className="flex gap-1 text-xs"
+              onClick={() => toggleTag(tag)}
+            >
+              {tag}
+              <span className="opacity-60">×</span>
+            </Badge>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
@@ -294,9 +466,10 @@ const AssetMarketplace: React.FC<AssetMarketplaceProps> = ({ onAssetSelect }) =>
 interface AssetCardProps {
   asset: UGCAsset;
   onClick?: () => void;
+  lazyLoad?: boolean;
 }
 
-const AssetCard: React.FC<AssetCardProps> = ({ asset, onClick }) => {
+const AssetCard: React.FC<AssetCardProps> = ({ asset, onClick, lazyLoad = false }) => {
   return (
     <Card 
       className="overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
@@ -304,10 +477,12 @@ const AssetCard: React.FC<AssetCardProps> = ({ asset, onClick }) => {
     >
       <div className="aspect-square bg-muted relative">
         {asset.thumbnailUrl ? (
-          <img 
+          <ResponsiveImage 
             src={asset.thumbnailUrl} 
             alt={asset.title}
             className="w-full h-full object-cover"
+            loading={lazyLoad ? "lazy" : "eager"}
+            lowQualitySrc={asset.thumbnailUrl} // Use the same URL as a fallback
           />
         ) : (
           <div className="flex items-center justify-center h-full text-muted-foreground">

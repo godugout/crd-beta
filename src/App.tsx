@@ -1,40 +1,56 @@
 
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import './App.css';
 
 // Pages
 import Home from './pages/Home';
 import CardCreator from './pages/CardCreator';
-import CardStudio from './pages/CardStudio'; // Add import for new CardStudio page
+import CardStudio from './pages/CardStudio';
 import Editor from './pages/Editor';
 import Gallery from './pages/Gallery';
 import CardView from './pages/CardView';
 import Community from './pages/Community';
+import Documentation from './pages/Documentation';
 
 // Providers
 import { CardProvider } from './context/CardContext';
 import { Toaster } from './components/ui/toaster';
+import { useIsMobile } from './hooks/use-mobile';
+import MobileOptimizedLayout from './components/layout/MobileOptimizedLayout';
+import ResponsiveLayout from './components/layout/ResponsiveLayout';
 
 function App() {
+  const location = useLocation();
+  const isMobile = useIsMobile();
+  
+  // Check if current route needs mobile layout
+  const shouldUseMobileLayout = isMobile && !location.pathname.includes('/admin');
+  
+  // Wrap content in appropriate layout
+  const renderWithLayout = (component: React.ReactNode) => {
+    if (shouldUseMobileLayout) {
+      return <MobileOptimizedLayout>{component}</MobileOptimizedLayout>;
+    }
+    
+    return <ResponsiveLayout>{component}</ResponsiveLayout>;
+  };
+  
   return (
-    <Router>
-      <CardProvider>
-        <div className="App">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/create" element={<CardCreator />} />
-            <Route path="/studio" element={<CardStudio />} /> {/* Add new Studio route */}
-            <Route path="/editor" element={<Editor />} />
-            <Route path="/editor/:id" element={<Editor />} />
-            <Route path="/gallery" element={<Gallery />} />
-            <Route path="/card/:id" element={<CardView />} />
-            <Route path="/community" element={<Community />} />
-          </Routes>
-        </div>
-        <Toaster />
-      </CardProvider>
-    </Router>
+    <div className="App">
+      <Routes>
+        <Route path="/" element={renderWithLayout(<Home />)} />
+        <Route path="/create" element={renderWithLayout(<CardCreator />)} />
+        <Route path="/studio" element={<CardStudio />} /> 
+        <Route path="/editor" element={renderWithLayout(<Editor />)} />
+        <Route path="/editor/:id" element={renderWithLayout(<Editor />)} />
+        <Route path="/gallery" element={renderWithLayout(<Gallery />)} />
+        <Route path="/card/:id" element={renderWithLayout(<CardView />)} />
+        <Route path="/community" element={renderWithLayout(<Community />)} />
+        <Route path="/docs" element={<Documentation />} />
+      </Routes>
+      <Toaster />
+    </div>
   );
 }
 
