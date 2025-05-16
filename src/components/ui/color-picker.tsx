@@ -1,21 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-
-// Define DEFAULT_COLORS in the component file itself to avoid import errors
-const DEFAULT_COLORS = [
-  '#000000', // Black
-  '#FFFFFF', // White
-  '#F87171', // Red
-  '#FB923C', // Orange
-  '#FBBF24', // Amber
-  '#34D399', // Green
-  '#22D3EE', // Cyan
-  '#60A5FA', // Blue
-  '#818CF8', // Indigo
-  '#A78BFA', // Violet
-  '#E879F9', // Pink
-];
+import { DEFAULT_COLORS } from '@/config/toast';
 
 export interface ColorPickerProps {
   color: string;

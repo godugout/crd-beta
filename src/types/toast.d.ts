@@ -26,10 +26,3 @@ export type ToastIconNames = "Check" | "X" | "AlertTriangle" | "Info" | null;
 export interface ToastActionProps extends ComponentProps<"button"> {
   altText?: string
 }
-
-export function createToast(options: Omit<ToastOptions, "id">): ToastOptions {
-  return {
-    ...options,
-    variant: options.variant || "default"
-  }
-}

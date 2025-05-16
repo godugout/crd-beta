@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useUserPreferencesContext } from '@/context/UserPreferencesContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,7 +9,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import ColorPicker from '@/components/ui/color-picker';
+import { ColorPicker } from '@/components/ui/color-picker'; // Changed to named import
 import { PlusCircle, Trash2, Star, StarOff, Palette, Layers, Settings } from 'lucide-react';
 
 const UserPreferencesDashboard: React.FC = () => {
