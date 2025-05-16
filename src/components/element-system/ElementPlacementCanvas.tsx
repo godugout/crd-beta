@@ -1,360 +1,261 @@
 
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { CardElement } from '@/lib/types/cardElements';
-import { placementEngine } from '@/lib/elements/PlacementEngine';
+import { Button } from '@/components/ui/button';
+import { Trash2, RotateCw, ZoomIn, ZoomOut } from 'lucide-react';
+import { toast } from 'sonner';
+
+interface ElementPosition {
+  x: number;
+  y: number;
+  z?: number;
+  rotation?: number; // Added rotation property
+}
 
 interface ElementPlacementCanvasProps {
-  elements: CardElement[];
-  onElementSelect: (element: CardElement | null) => void;
-  onElementMove: (element: CardElement, newPosition: { x: number; y: number }) => void;
-  onElementResize: (element: CardElement, newSize: { width: number; height: number }) => void;
-  onElementRotate: (element: CardElement, newRotation: number) => void;
-  selectedElementId: string | null;
+  selectedElements: CardElement[];
+  initialPositions?: Record<string, ElementPosition>;
   canvasWidth?: number;
   canvasHeight?: number;
-  gridSize?: number;
-  showGrid?: boolean;
-  snapToGrid?: boolean;
+  onElementsChange?: (elements: CardElement[]) => void;
 }
 
 const ElementPlacementCanvas: React.FC<ElementPlacementCanvasProps> = ({
-  elements,
-  onElementSelect,
-  onElementMove,
-  onElementResize,
-  onElementRotate,
-  selectedElementId,
-  canvasWidth = 400,
-  canvasHeight = 560,
-  gridSize = 10,
-  showGrid = true,
-  snapToGrid = true,
+  selectedElements = [],
+  initialPositions = {},
+  canvasWidth = 800,
+  canvasHeight = 600,
+  onElementsChange
 }) => {
   const canvasRef = useRef<HTMLDivElement>(null);
+  const [elementPositions, setElementPositions] = useState<Record<string, ElementPosition>>(initialPositions);
+  const [activeElementId, setActiveElementId] = useState<string | null>(null);
+  const [zoom, setZoom] = useState(1);
   const [isDragging, setIsDragging] = useState(false);
-  const [isResizing, setIsResizing] = useState(false);
-  const [isRotating, setIsRotating] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
-  const [resizeStartPos, setResizeStartPos] = useState({ x: 0, y: 0 });
-  const [resizeStartSize, setResizeStartSize] = useState({ width: 0, height: 0 });
-  const [rotateStartAngle, setRotateStartAngle] = useState(0);
   
-  // Initialize the placement engine with the canvas element
+  // Ensure we have positions for all selected elements
   useEffect(() => {
-    if (canvasRef.current) {
-      placementEngine.setCanvas(canvasRef.current);
-      placementEngine.setGridSize(gridSize);
-    }
-  }, [gridSize]);
-  
-  // Get selected element
-  const selectedElement = elements.find(el => el.id === selectedElementId) || null;
-  
-  // Handle mouse down on element
-  const handleMouseDown = (
-    event: React.MouseEvent<HTMLDivElement>,
-    element: CardElement
-  ) => {
-    event.preventDefault();
-    event.stopPropagation();
+    const newPositions = { ...elementPositions };
+    let updated = false;
     
-    const rect = canvasRef.current!.getBoundingClientRect();
-    const mouseX = event.clientX - rect.left;
-    const mouseY = event.clientY - rect.top;
-    
-    // Select the element
-    onElementSelect(element);
-    
-    // Check if clicking on a resize handle
-    if ((event.target as HTMLElement).classList.contains('resize-handle')) {
-      setIsResizing(true);
-      setResizeStartPos({ x: mouseX, y: mouseY });
-      setResizeStartSize({ 
-        width: element.size ? element.size.width : 100, 
-        height: element.size ? element.size.height : 100 
-      });
-      return;
-    }
-    
-    // Check if clicking on a rotation handle
-    if ((event.target as HTMLElement).classList.contains('rotate-handle')) {
-      setIsRotating(true);
-      
-      // Calculate angle between element center and mouse position
-      const elementCenterX = element.position.x;
-      const elementCenterY = element.position.y;
-      const startAngle = Math.atan2(mouseY - elementCenterY, mouseX - elementCenterX);
-      
-      setRotateStartAngle(startAngle - ((element.position.rotation || 0) * Math.PI / 180));
-      return;
-    }
-    
-    // Normal dragging
-    setIsDragging(true);
-    setDragOffset({
-      x: mouseX - element.position.x,
-      y: mouseY - element.position.y,
+    selectedElements.forEach(element => {
+      if (!newPositions[element.id]) {
+        // Initialize position for new element
+        newPositions[element.id] = {
+          x: Math.random() * (canvasWidth / 2) + canvasWidth / 4,
+          y: Math.random() * (canvasHeight / 2) + canvasHeight / 4,
+          z: Object.keys(newPositions).length,
+          rotation: 0
+        };
+        updated = true;
+      }
     });
+    
+    if (updated) {
+      setElementPositions(newPositions);
+    }
+  }, [selectedElements]);
+  
+  // Handle element selection
+  const handleElementClick = (elementId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setActiveElementId(elementId);
   };
   
-  // Handle mouse move
-  const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
-    if (!isDragging && !isResizing && !isRotating) return;
-    if (!selectedElement) return;
+  // Handle canvas click (deselect element)
+  const handleCanvasClick = () => {
+    setActiveElementId(null);
+  };
+  
+  // Start dragging an element
+  const handleMouseDown = (elementId: string, e: React.MouseEvent) => {
+    if (e.button !== 0) return; // Only process left clicks
     
-    const rect = canvasRef.current!.getBoundingClientRect();
-    const mouseX = event.clientX - rect.left;
-    const mouseY = event.clientY - rect.top;
+    e.stopPropagation();
+    setActiveElementId(elementId);
+    setIsDragging(true);
     
-    // Handle dragging
-    if (isDragging) {
-      let newX = mouseX - dragOffset.x;
-      let newY = mouseY - dragOffset.y;
-      
-      // Apply snap to grid
-      if (snapToGrid) {
-        newX = Math.round(newX / gridSize) * gridSize;
-        newY = Math.round(newY / gridSize) * gridSize;
-      }
-      
-      onElementMove(selectedElement, { x: newX, y: newY });
-    }
-    
-    // Handle resizing
-    else if (isResizing && selectedElement.size) {
-      const deltaX = mouseX - resizeStartPos.x;
-      const deltaY = mouseY - resizeStartPos.y;
-      
-      // Calculate new size (maintain aspect ratio if shift key is pressed)
-      let newWidth = resizeStartSize.width + deltaX;
-      let newHeight = resizeStartSize.height + deltaY;
-      
-      if (event.shiftKey && selectedElement.size.aspectRatio && selectedElement.size.aspectRatio > 0) {
-        // Maintain aspect ratio
-        if (Math.abs(deltaX) > Math.abs(deltaY)) {
-          newHeight = newWidth / selectedElement.size.aspectRatio;
-        } else {
-          newWidth = newHeight * selectedElement.size.aspectRatio;
-        }
-      }
-      
-      // Apply minimum size
-      newWidth = Math.max(20, newWidth);
-      newHeight = Math.max(20, newHeight);
-      
-      // Apply snap to grid for size
-      if (snapToGrid) {
-        newWidth = Math.round(newWidth / gridSize) * gridSize;
-        newHeight = Math.round(newHeight / gridSize) * gridSize;
-      }
-      
-      onElementResize(selectedElement, { width: newWidth, height: newHeight });
-    }
-    
-    // Handle rotating
-    else if (isRotating) {
-      const elementCenterX = selectedElement.position.x;
-      const elementCenterY = selectedElement.position.y;
-      
-      // Calculate current angle
-      const angle = Math.atan2(mouseY - elementCenterY, mouseX - elementCenterX);
-      
-      // Convert radians to degrees and normalize to 0-360
-      let degrees = ((angle - rotateStartAngle) * 180 / Math.PI) % 360;
-      if (degrees < 0) degrees += 360;
-      
-      // Snap to 15 degree increments if shift is pressed
-      if (event.shiftKey) {
-        degrees = Math.round(degrees / 15) * 15;
-      }
-      
-      onElementRotate(selectedElement, degrees);
+    const element = document.getElementById(`element-${elementId}`);
+    if (element) {
+      const rect = element.getBoundingClientRect();
+      setDragOffset({
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
+      });
     }
   };
   
-  // Handle mouse up
+  // Handle mouse move for dragging
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging || !activeElementId || !canvasRef.current) return;
+    
+    const canvasRect = canvasRef.current.getBoundingClientRect();
+    const newX = (e.clientX - canvasRect.left - dragOffset.x) / zoom;
+    const newY = (e.clientY - canvasRect.top - dragOffset.y) / zoom;
+    
+    // Update position
+    setElementPositions(prev => ({
+      ...prev,
+      [activeElementId]: {
+        ...prev[activeElementId],
+        x: Math.max(0, Math.min(canvasWidth, newX)),
+        y: Math.max(0, Math.min(canvasHeight, newY))
+      }
+    }));
+  };
+  
+  // End dragging
   const handleMouseUp = () => {
     setIsDragging(false);
-    setIsResizing(false);
-    setIsRotating(false);
   };
   
-  // Handle canvas click (deselect)
-  const handleCanvasClick = (event: React.MouseEvent<HTMLDivElement>) => {
-    if ((event.target as HTMLElement).classList.contains('canvas-container')) {
-      onElementSelect(null);
-    }
-  };
-  
-  // Render the grid lines
-  const renderGrid = () => {
-    if (!showGrid) return null;
+  // Rotate active element
+  const rotateElement = () => {
+    if (!activeElementId) return;
     
-    const gridLines = [];
-    
-    // Vertical lines
-    for (let x = 0; x <= canvasWidth; x += gridSize) {
-      gridLines.push(
-        <line
-          key={`v-${x}`}
-          x1={x}
-          y1={0}
-          x2={x}
-          y2={canvasHeight}
-          stroke="rgba(0,0,0,0.1)"
-          strokeWidth="1"
-        />
-      );
-    }
-    
-    // Horizontal lines
-    for (let y = 0; y <= canvasHeight; y += gridSize) {
-      gridLines.push(
-        <line
-          key={`h-${y}`}
-          x1={0}
-          y1={y}
-          x2={canvasWidth}
-          y2={y}
-          stroke="rgba(0,0,0,0.1)"
-          strokeWidth="1"
-        />
-      );
-    }
-    
-    return (
-      <svg
-        className="absolute inset-0 pointer-events-none"
-        width={canvasWidth}
-        height={canvasHeight}
-      >
-        {gridLines}
-      </svg>
-    );
-  };
-  
-  // Render elements
-  const renderElements = () => {
-    return elements.map(element => {
-      const isSelected = element.id === selectedElementId;
-      
-      // Generate element style
-      const style: React.CSSProperties = {
-        position: 'absolute',
-        left: `${element.position.x}px`,
-        top: `${element.position.y}px`,
-        width: `${element.size ? element.size.width : 100}px`,
-        height: `${element.size ? element.size.height : 100}px`,
-        transform: `translate(-50%, -50%) rotate(${element.position.rotation || 0}deg)`,
-        opacity: element.style?.opacity ?? 1,
-        zIndex: element.position.z || 0,
-        cursor: isDragging ? 'grabbing' : 'grab',
-        border: isSelected ? '2px solid #3b82f6' : 'none',
-        boxShadow: isSelected ? '0 0 0 1px rgba(59, 130, 246, 0.5)' : 'none'
-      };
-      
-      // Generate content based on element type
-      let content;
-      switch (element.type) {
-        case 'sticker':
-        case 'logo':
-        case 'badge':
-          content = (
-            <img 
-              src={element.assetUrl || element.url} 
-              alt={element.name}
-              style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-              draggable={false}
-            />
-          );
-          break;
-          
-        case 'frame':
-          // For frames, we can have different styles based on frameType
-          content = (
-            <img 
-              src={element.assetUrl || element.url} 
-              alt={element.name}
-              style={{ 
-                width: '100%', 
-                height: '100%', 
-                objectFit: 'contain', 
-                pointerEvents: 'none' 
-              }}
-              draggable={false}
-            />
-          );
-          break;
-          
-        case 'overlay':
-          // For overlays, apply the blend mode
-          content = (
-            <img 
-              src={element.assetUrl || element.url} 
-              alt={element.name}
-              style={{ 
-                width: '100%', 
-                height: '100%', 
-                objectFit: 'cover', 
-                pointerEvents: 'none',
-                mixBlendMode: (element.style?.blendMode as any) || 'normal'
-              }}
-              draggable={false}
-            />
-          );
-          break;
-          
-        default:
-          content = (
-            <div className="w-full h-full flex items-center justify-center bg-gray-200">
-              {element.name}
-            </div>
-          );
+    setElementPositions(prev => ({
+      ...prev,
+      [activeElementId]: {
+        ...prev[activeElementId],
+        rotation: ((prev[activeElementId].rotation || 0) + 45) % 360
       }
-      
-      return (
-        <div
-          key={element.id}
-          className="element"
-          style={style}
-          onMouseDown={(e) => handleMouseDown(e, element)}
-        >
-          {content}
+    }));
+    
+    toast.info(`Rotated element by 45 degrees`);
+  };
+  
+  // Delete active element
+  const deleteElement = () => {
+    if (!activeElementId) return;
+    
+    // Find the element to get its name for the toast
+    const element = selectedElements.find(el => el.id === activeElementId);
+    
+    // Remove from positions
+    const newPositions = { ...elementPositions };
+    delete newPositions[activeElementId];
+    setElementPositions(newPositions);
+    
+    // Update selected elements if callback provided
+    if (onElementsChange) {
+      onElementsChange(selectedElements.filter(el => el.id !== activeElementId));
+    }
+    
+    setActiveElementId(null);
+    
+    toast.success(`${element?.name || 'Element'} removed from canvas`);
+  };
+  
+  // Zoom controls
+  const zoomIn = () => {
+    setZoom(prev => Math.min(prev + 0.1, 2));
+  };
+  
+  const zoomOut = () => {
+    setZoom(prev => Math.max(prev - 0.1, 0.5));
+  };
+  
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex justify-between items-center">
+        <div className="text-sm text-gray-500">
+          {selectedElements.length} element{selectedElements.length !== 1 ? 's' : ''} available
+        </div>
+        
+        <div className="flex gap-2">
+          <Button size="sm" variant="outline" onClick={zoomOut} disabled={zoom <= 0.5}>
+            <ZoomOut className="h-4 w-4 mr-1" />
+            Zoom Out
+          </Button>
           
-          {/* Render controls for selected element */}
-          {isSelected && (
+          <span className="flex items-center px-2">
+            {Math.round(zoom * 100)}%
+          </span>
+          
+          <Button size="sm" variant="outline" onClick={zoomIn} disabled={zoom >= 2}>
+            <ZoomIn className="h-4 w-4 mr-1" />
+            Zoom In
+          </Button>
+          
+          {activeElementId && (
             <>
-              {/* Resize handles */}
-              <div 
-                className="resize-handle absolute bottom-0 right-0 w-4 h-4 bg-white border border-blue-500 rounded-full cursor-se-resize -mr-2 -mb-2"
-                onMouseDown={(e) => handleMouseDown(e, element)}
-              />
+              <Button size="sm" variant="outline" onClick={rotateElement}>
+                <RotateCw className="h-4 w-4 mr-1" />
+                Rotate
+              </Button>
               
-              {/* Rotation handle */}
-              <div 
-                className="rotate-handle absolute top-0 left-1/2 w-4 h-4 bg-white border border-blue-500 rounded-full cursor-grab -translate-x-1/2 -mt-8"
-                style={{ transform: 'translateX(-50%)' }}
-                onMouseDown={(e) => handleMouseDown(e, element)}
-              />
+              <Button size="sm" variant="destructive" onClick={deleteElement}>
+                <Trash2 className="h-4 w-4 mr-1" />
+                Remove
+              </Button>
             </>
           )}
         </div>
-      );
-    });
-  };
-
-  return (
-    <div
-      ref={canvasRef}
-      className="canvas-container relative bg-white shadow-md overflow-hidden"
-      style={{ width: canvasWidth, height: canvasHeight }}
-      onClick={handleCanvasClick}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseUp}
-    >
-      {renderGrid()}
-      {renderElements()}
+      </div>
+      
+      <div 
+        ref={canvasRef}
+        className="relative bg-gray-100 border border-gray-300 rounded-lg overflow-hidden"
+        style={{ 
+          width: '100%', 
+          height: `${canvasHeight}px`,
+          cursor: isDragging ? 'grabbing' : 'default'
+        }}
+        onClick={handleCanvasClick}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+      >
+        <div 
+          className="absolute inset-0"
+          style={{ 
+            transform: `scale(${zoom})`,
+            transformOrigin: 'center center',
+            width: `${canvasWidth}px`,
+            height: `${canvasHeight}px`,
+            margin: '0 auto'
+          }}
+        >
+          {selectedElements.map(element => {
+            const position = elementPositions[element.id] || { x: 50, y: 50, z: 0, rotation: 0 };
+            
+            return (
+              <div
+                id={`element-${element.id}`}
+                key={element.id}
+                className={`absolute cursor-grab transition-shadow ${
+                  activeElementId === element.id 
+                    ? 'ring-2 ring-blue-500 shadow-lg z-10' 
+                    : ''
+                }`}
+                style={{ 
+                  left: `${position.x}px`,
+                  top: `${position.y}px`,
+                  zIndex: activeElementId === element.id ? 100 : (position.z || 0),
+                  transform: `rotate(${position.rotation || 0}deg)`,
+                  transformOrigin: 'center center'
+                }}
+                onClick={(e) => handleElementClick(element.id, e)}
+                onMouseDown={(e) => handleMouseDown(element.id, e)}
+              >
+                <img 
+                  src={element.imageUrl} 
+                  alt={element.name}
+                  className="max-w-[150px] max-h-[150px] pointer-events-none"
+                  draggable={false}
+                />
+              </div>
+            );
+          })}
+        </div>
+      </div>
+      
+      {selectedElements.length === 0 && (
+        <div className="text-center py-8 text-gray-500">
+          No elements selected. Add elements from the library to place them on the canvas.
+        </div>
+      )}
     </div>
   );
 };

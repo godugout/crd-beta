@@ -1,48 +1,50 @@
 
 import { BaseEntity } from './index';
 import { Card } from './cardTypes';
+import { User } from './user';
 
 /**
- * Enhanced card interface with additional features
+ * Enhanced card interface with additional fields
  */
 export interface EnhancedCard extends Card {
-  variants?: Card[];
-  seriesInfo?: SeriesInfo;
-  relatedCards?: Card[];
-  augmentedRealityModel?: string;
-  interactive?: boolean;
-  
-  // Fields for ArtistDashboard compatibility
-  artistId?: string;
-  artist?: string;
-  marketData?: any;
-  editionSize?: number;
-  metadata?: any;
+  seriesId?: string;
+  series?: Series;
+  rarity?: string;
+  attributes?: Record<string, any>;
+  effects?: string[];
 }
 
 /**
- * Series information for card series
+ * Series interface for card series
  */
-export interface SeriesInfo {
-  id: string;
+export interface Series extends BaseEntity {
   name: string;
   description?: string;
-  totalCards: number;
+  coverImageUrl?: string;
+  totalCards?: number;
   releaseDate?: string;
   publisher?: string;
+  isLimited?: boolean;
+  edition?: string;
+  ownerId: string;
+  owner?: User;
+  teamId?: string;
+  visibility?: 'public' | 'private' | 'team';
+  cards?: EnhancedCard[];
 }
 
 /**
- * Card deck interface for card collections
+ * Deck interface for card decks
  */
 export interface Deck extends BaseEntity {
   name: string;
   description?: string;
-  cards: Card[];
-  cardIds?: string[];         // For backward compatibility
-  owner: string;
-  ownerId?: string;           // For backward compatibility
-  isPublic: boolean;
-  category?: string;
-  coverImageUrl?: string;     // For DeckBuilder component
+  coverImageUrl?: string;
+  ownerId: string;
+  owner: User;
+  teamId?: string;
+  visibility?: 'public' | 'private' | 'team';
+  cards?: EnhancedCard[];
+  cardIds?: string[];
+  isPublic?: boolean;
 }

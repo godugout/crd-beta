@@ -2,25 +2,21 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import ImageUploader from '@/components/dam/ImageUploader';
-import TagInput from '@/components/ui/tag-input';
-import { toast } from 'sonner';
 import { ElementCategory, ElementUploadMetadata } from '@/lib/types/cardElements';
 import { mapToElementCategory } from '@/lib/utils/typeAdapters';
+import TagInput from '@/components/ui/tag-input';
 
 interface ElementUploadFormProps {
   onSubmit: (elementData: ElementUploadMetadata) => void;
   initialData?: Partial<ElementUploadMetadata>;
-  className?: string;
 }
 
 const ElementUploadForm: React.FC<ElementUploadFormProps> = ({
   onSubmit,
   initialData = {},
-  className = '',
 }) => {
   // Form state
   const [name, setName] = useState(initialData.name || '');
@@ -28,202 +24,162 @@ const ElementUploadForm: React.FC<ElementUploadFormProps> = ({
   const [category, setCategory] = useState<string>(initialData.category?.toString() || ElementCategory.STICKERS);
   const [type, setType] = useState(initialData.type || 'standard');
   const [tags, setTags] = useState<string[]>(initialData.tags || []);
-  const [imageUrl, setImageUrl] = useState<string | undefined>(initialData.imageUrl);
-  const [attribution, setAttribution] = useState<string>('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [attribution, setAttribution] = useState(initialData.attribution || '');
+  const [imageUrl, setImageUrl] = useState(initialData.imageUrl || '');
   
-  const handleImageUpload = (url: string) => {
-    setImageUrl(url);
-    toast.success('Image uploaded successfully');
-  };
+  // Validation state
+  const [errors, setErrors] = useState<Record<string, string>>({});
   
-  const handleAddTag = (tag: string) => {
-    if (tag && !tags.includes(tag)) {
-      setTags([...tags, tag]);
-      return true;
+  // Handle tag management
+  const handleAddTag = (tag: string): boolean => {
+    if (tags.includes(tag)) {
+      return false; // Tag already exists
     }
-    return false;
+    
+    setTags([...tags, tag]);
+    return true;
   };
   
   const handleRemoveTag = (tagToRemove: string) => {
     setTags(tags.filter(tag => tag !== tagToRemove));
   };
   
+  // Handle form submission
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Simple validation
+    const newErrors: Record<string, string> = {};
+    
     if (!name.trim()) {
-      toast.error('Please enter an element name');
+      newErrors.name = 'Element name is required';
+    }
+    
+    if (!imageUrl.trim()) {
+      newErrors.imageUrl = 'Image URL is required';
+    }
+    
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
       return;
     }
     
-    if (!imageUrl) {
-      toast.error('Please upload an image');
-      return;
-    }
+    // Clear any previous errors
+    setErrors({});
     
-    setIsSubmitting(true);
+    // Create element data
+    const elementData: ElementUploadMetadata = {
+      name: name.trim(),
+      description: description.trim() || undefined,
+      category: mapToElementCategory(category),
+      type,
+      tags,
+      attribution: attribution.trim() || undefined,
+      imageUrl,
+    };
     
-    // Convert string category to enum if possible
-    const categoryEnum = mapToElementCategory(category);
-    
-    try {
-      const elementData: ElementUploadMetadata = {
-        name: name.trim(),
-        description: description.trim() || undefined,
-        category: categoryEnum,
-        type,
-        tags,
-        imageUrl,
-        thumbnailUrl: imageUrl,
-        attribution: attribution.trim() || undefined,
-      };
-      
-      onSubmit(elementData);
-      toast.success('Element data submitted successfully');
-      
-      // Reset form after submission if needed
-      // resetForm();
-    } catch (error) {
-      console.error('Error submitting element:', error);
-      toast.error('Failed to submit element data');
-    } finally {
-      setIsSubmitting(false);
-    }
+    onSubmit(elementData);
   };
   
-  const categoryOptions = [
-    { value: ElementCategory.STICKERS, label: 'Stickers' },
-    { value: ElementCategory.TEAMS, label: 'Team Logos' },
-    { value: ElementCategory.BADGES, label: 'Badges' },
-    { value: ElementCategory.FRAMES, label: 'Frames' },
-    { value: ElementCategory.EFFECTS, label: 'Effects' },
-    { value: ElementCategory.BACKGROUNDS, label: 'Backgrounds' },
-    { value: ElementCategory.OVERLAY, label: 'Overlays' },
-    { value: ElementCategory.TEXTURE, label: 'Textures' },
-    { value: ElementCategory.DECORATIVE, label: 'Decorations' },
-    { value: ElementCategory.ICON, label: 'Icons' },
-    { value: ElementCategory.SHAPE, label: 'Shapes' }
-  ];
-
   return (
-    <form onSubmit={handleSubmit} className={`space-y-6 ${className}`}>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-4">
-          <div>
-            <Label htmlFor="name">Element Name</Label>
-            <Input
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Enter element name"
-            />
-          </div>
-          
-          <div>
-            <Label htmlFor="description">Description</Label>
-            <Textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Describe this element"
-              rows={3}
-            />
-          </div>
-          
-          <div>
-            <Label htmlFor="category">Category</Label>
-            <Select
-              value={category}
-              onValueChange={setCategory}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select category" />
-              </SelectTrigger>
-              <SelectContent>
-                {categoryOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div>
-            <Label htmlFor="type">Element Type</Label>
-            <Select
-              value={type}
-              onValueChange={setType}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="standard">Standard</SelectItem>
-                <SelectItem value="animated">Animated</SelectItem>
-                <SelectItem value="interactive">Interactive</SelectItem>
-                <SelectItem value="premium">Premium</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div>
-            <Label htmlFor="attribution">Attribution (Optional)</Label>
-            <Input
-              id="attribution"
-              value={attribution}
-              onChange={(e) => setAttribution(e.target.value)}
-              placeholder="Credit the creator if applicable"
-            />
-          </div>
-          
-          <div>
-            <Label>Tags</Label>
-            <TagInput 
-              tags={tags}
-              onAddTag={handleAddTag}
-              onRemoveTag={handleRemoveTag}
-              placeholder="Add tags and press Enter"
-            />
-          </div>
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="space-y-2">
+        <Label htmlFor="name">Element Name *</Label>
+        <Input
+          id="name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Enter element name"
+          className={errors.name ? 'border-red-500' : ''}
+        />
+        {errors.name && <p className="text-xs text-red-500">{errors.name}</p>}
+      </div>
+      
+      <div className="space-y-2">
+        <Label htmlFor="description">Description</Label>
+        <Textarea
+          id="description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          placeholder="Enter element description"
+          rows={3}
+        />
+      </div>
+      
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="category">Category *</Label>
+          <Select value={category} onValueChange={setCategory}>
+            <SelectTrigger id="category">
+              <SelectValue placeholder="Select category" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={ElementCategory.STICKERS}>Stickers</SelectItem>
+              <SelectItem value={ElementCategory.TEAMS}>Teams</SelectItem>
+              <SelectItem value={ElementCategory.BADGES}>Badges</SelectItem>
+              <SelectItem value={ElementCategory.FRAMES}>Frames</SelectItem>
+              <SelectItem value={ElementCategory.EFFECTS}>Effects</SelectItem>
+              <SelectItem value={ElementCategory.BACKGROUNDS}>Backgrounds</SelectItem>
+              <SelectItem value={ElementCategory.DECORATIVE}>Decorative</SelectItem>
+              <SelectItem value={ElementCategory.LOGO}>Logo</SelectItem>
+              <SelectItem value={ElementCategory.OVERLAY}>Overlay</SelectItem>
+              <SelectItem value={ElementCategory.TEXTURE}>Texture</SelectItem>
+              <SelectItem value={ElementCategory.ICON}>Icon</SelectItem>
+              <SelectItem value={ElementCategory.SHAPE}>Shape</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         
-        <div>
-          <Label>Element Image</Label>
-          <div className="mt-2 space-y-4">
-            {imageUrl ? (
-              <div className="relative aspect-square max-w-xs mx-auto border rounded-md overflow-hidden">
-                <img
-                  src={imageUrl}
-                  alt="Element preview"
-                  className="w-full h-full object-contain"
-                />
-                <Button
-                  type="button"
-                  variant="destructive"
-                  size="sm"
-                  className="absolute top-2 right-2"
-                  onClick={() => setImageUrl(undefined)}
-                >
-                  Remove
-                </Button>
-              </div>
-            ) : (
-              <ImageUploader
-                onUploadComplete={handleImageUpload}
-                title="Upload Element Image"
-                maxSizeMB={2}
-              />
-            )}
-          </div>
+        <div className="space-y-2">
+          <Label htmlFor="type">Type *</Label>
+          <Select value={type} onValueChange={setType}>
+            <SelectTrigger id="type">
+              <SelectValue placeholder="Select type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="standard">Standard</SelectItem>
+              <SelectItem value="premium">Premium</SelectItem>
+              <SelectItem value="special">Special</SelectItem>
+              <SelectItem value="limited">Limited</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
       
-      <div className="flex justify-end">
-        <Button type="submit" disabled={isSubmitting || !name || !imageUrl}>
-          {isSubmitting ? 'Submitting...' : 'Submit Element'}
-        </Button>
+      <div className="space-y-2">
+        <Label htmlFor="imageUrl">Image URL *</Label>
+        <Input
+          id="imageUrl"
+          value={imageUrl}
+          onChange={(e) => setImageUrl(e.target.value)}
+          placeholder="Enter image URL"
+          className={errors.imageUrl ? 'border-red-500' : ''}
+        />
+        {errors.imageUrl && <p className="text-xs text-red-500">{errors.imageUrl}</p>}
+      </div>
+      
+      <div className="space-y-2">
+        <Label htmlFor="tags">Tags</Label>
+        <TagInput
+          tags={tags}
+          onAddTag={handleAddTag}
+          onRemoveTag={handleRemoveTag}
+          placeholder="Add tags..."
+        />
+      </div>
+      
+      <div className="space-y-2">
+        <Label htmlFor="attribution">Attribution</Label>
+        <Input
+          id="attribution"
+          value={attribution}
+          onChange={(e) => setAttribution(e.target.value)}
+          placeholder="Credit the creator (optional)"
+        />
+      </div>
+      
+      <div className="flex justify-end pt-4">
+        <Button type="submit">Upload Element</Button>
       </div>
     </form>
   );

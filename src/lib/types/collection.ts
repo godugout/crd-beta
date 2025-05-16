@@ -12,6 +12,7 @@ export interface Collection extends BaseEntity {
   description?: string;
   coverImageUrl?: string;
   ownerId: string;
+  userId?: string;            // Added for compatibility with legacy code
   owner?: User;
   teamId?: string;
   visibility?: 'public' | 'private' | 'team';

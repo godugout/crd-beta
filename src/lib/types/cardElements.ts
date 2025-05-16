@@ -2,6 +2,16 @@
 import { BaseEntity } from './index';
 
 /**
+ * Element type enum
+ */
+export enum ElementType {
+  STANDARD = 'standard',
+  PREMIUM = 'premium',
+  SPECIAL = 'special',
+  LIMITED = 'limited',
+}
+
+/**
  * Element category enum
  */
 export enum ElementCategory {
@@ -36,6 +46,7 @@ export interface CardElement extends BaseEntity {
     x: number;
     y: number;
     z?: number;
+    rotation?: number; // Added rotation property
   };
   size?: {
     width: number;
@@ -66,6 +77,7 @@ export interface ElementUploadMetadata {
     x: number;
     y: number;
     z?: number;
+    rotation?: number; // Added rotation property
   };
   size?: {
     width: number;

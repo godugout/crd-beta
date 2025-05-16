@@ -1,29 +1,34 @@
 
-import { ReactNode } from 'react';
-
-export type ToastVariant = 'default' | 'destructive' | 'success' | 'warning' | 'info' | 'error';
-
-export interface ToastAction {
-  label: string;
-  onClick: () => void;
-  altText?: string;
-}
+import { ReactNode } from "react";
 
 export interface Toast {
-  id?: string;
-  title?: ReactNode;
-  description?: ReactNode;
+  id: string;
+  title?: React.ReactNode;
+  description?: React.ReactNode;
   action?: ToastAction;
-  variant?: ToastVariant;
-  duration?: number;
-  open: boolean;  // Required property to fix errors
+  variant?: "default" | "destructive" | "success" | "warning" | "info";
 }
 
-export function createToast(options: Omit<Toast, 'open'>): Toast {
-  return {
-    ...options,
-    open: true
-  };
+export interface ToastAction {
+  altText: string;
+  onClick: () => void;
+  children: React.ReactNode;
 }
 
-export type ToastOptions = Omit<Toast, 'open'>;
+export type ToasterToast = Toast & {
+  id: string;
+  title?: React.ReactNode;
+  description?: React.ReactNode;
+  action?: ReactNode;
+  open: boolean;
+}
+
+export type ToasterToastWithId = Toast & {
+  id: string;
+}
+
+export type ToastActionElement = React.ReactElement<{
+  altText: string;
+  onClick: () => void;
+  className?: string;
+}>;

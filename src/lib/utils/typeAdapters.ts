@@ -1,6 +1,7 @@
 
 import { ElementCategory, ElementUploadMetadata, CardElement } from '../types/cardElements';
 import { Collection, CollectionDisplayData } from '../types/collection';
+import { Comment, User } from '../types/index';
 
 /**
  * Convert ElementUploadMetadata to CardElement
@@ -74,4 +75,34 @@ export function mapToElementCategory(category: string): ElementCategory {
   };
   
   return categoryMap[category.toLowerCase()] || ElementCategory.DECORATIVE;
+}
+
+/**
+ * Adapt comment data from API format
+ */
+export function adaptComment(rawComment: any): Comment {
+  return {
+    id: rawComment.id,
+    text: rawComment.text,
+    userId: rawComment.userId,
+    itemId: rawComment.itemId,
+    itemType: rawComment.itemType,
+    createdAt: rawComment.createdAt,
+    updatedAt: rawComment.updatedAt,
+    user: rawComment.user ? adaptUser(rawComment.user) : undefined
+  };
+}
+
+/**
+ * Adapt user data from API format
+ */
+export function adaptUser(rawUser: any): User {
+  return {
+    id: rawUser.id,
+    name: rawUser.name || rawUser.username || 'Anonymous',
+    email: rawUser.email,
+    avatar: rawUser.avatar,
+    createdAt: rawUser.createdAt,
+    updatedAt: rawUser.updatedAt
+  };
 }
