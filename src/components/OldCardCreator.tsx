@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import CardUpload from './home/CardUpload';
 import CardCollection from './home/CardCollection';
 import CardShowcase from './home/CardShowcase';
-import cardData from '@/data/cardData';
+import { cardData } from '@/data/cardData';
 
 const OldCardCreator: React.FC = () => {
   const [view, setView] = useState<'showcase' | 'collection' | 'upload'>('collection');

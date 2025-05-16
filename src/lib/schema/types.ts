@@ -1,3 +1,4 @@
+
 // Define base types used throughout the application
 import { FabricSwatch } from '@/lib/types/card';
 
@@ -10,6 +11,7 @@ export interface Card {
   collectionId?: string;
   userId?: string;
   teamId?: string;
+  team?: string;  // Add team field
   createdAt: string;
   updatedAt: string;
   isPublic?: boolean;
@@ -18,6 +20,7 @@ export interface Card {
   reactions?: Reaction[];
   fabricSwatches?: FabricSwatch[];
   effects: string[]; // Required for card viewer
+  comments?: Comment[]; // Add comments array
 }
 
 export interface OaklandMemoryData {
@@ -43,7 +46,7 @@ export interface Collection {
   coverImageUrl?: string;
   userId?: string;
   teamId?: string;
-  visibility?: 'public' | 'private' | 'team';
+  visibility?: 'public' | 'private' | 'team' | 'unlisted';  // Add 'unlisted' as a valid option
   allowComments?: boolean;
   createdAt: string;
   updatedAt: string;
@@ -133,7 +136,7 @@ export interface DbCollection {
   cover_image_url?: string;
   owner_id?: string;
   team_id?: string;
-  visibility?: 'public' | 'private' | 'team';
+  visibility?: 'public' | 'private' | 'team' | 'unlisted';  // Add 'unlisted' option here too
   allow_comments?: boolean;
   created_at: string;
   updated_at: string;

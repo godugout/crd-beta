@@ -35,7 +35,7 @@ export interface CardEffectContextProps {
 
 export interface MediaServiceHook {
   uploadFile: (file: File) => Promise<string>;
-  uploadImage: (file: File) => Promise<string>; 
+  uploadImage: (file: File) => Promise<string>; // Added uploadImage method
   getMedia: () => Promise<string[]>;
   isUploading: boolean;
   error: Error | null;

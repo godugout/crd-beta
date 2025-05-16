@@ -10,7 +10,9 @@ export interface Deck {
   cardIds: string[];
   userId?: string;  // Make userId optional
   ownerId?: string;
+  teamId?: string;  // Add teamId as an optional field
   createdAt: string;
   updatedAt: string;
   isPublic?: boolean;
+  visibility?: 'public' | 'private' | 'team' | 'unlisted'; // Add visibility options including unlisted
 }
