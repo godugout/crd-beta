@@ -29,7 +29,7 @@ export * from './oaklandTypes';
 // Additional types for backward compatibility
 export type BackgroundColor = string;
 
-// Export aliases for legacy code
+// Export aliases for legacy code - these are now correctly imported from their respective files
 export { User } from './user';
 export { Comment, Reaction } from './interaction';
 export { Card, CardLayer, CardStyle, TextStyle, CardMetadata } from './cardTypes';

@@ -75,3 +75,6 @@ export interface TeamUser extends User {
   contributions?: number;
   isActive: boolean;
 }
+
+// Make sure we're exporting User directly
+export { User as User };

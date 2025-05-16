@@ -13,6 +13,21 @@ export interface CardElement {
   updatedAt: string;
   creatorId?: string;
   isOfficial?: boolean;
+  
+  // Additional properties needed by adapters and components
+  imageUrl?: string;
+  assetUrl?: string;
+  position?: {
+    x: number;
+    y: number;
+    z: number;
+  };
+  size?: {
+    width: number;
+    height: number;
+    scale?: number;
+  };
+  style?: Record<string, any>;
 }
 
 export interface StickerElement extends CardElement {
@@ -56,13 +71,27 @@ export enum ElementType {
   Overlay = 'overlay'
 }
 
-// Element category enum
+// Expanded ElementCategory enum with all needed categories
 export enum ElementCategory {
   Sports = 'sports',
   Entertainment = 'entertainment',
   Art = 'art',
   Seasonal = 'seasonal',
-  Special = 'special'
+  Special = 'special',
+  
+  // Additional categories needed by components
+  STICKERS = 'stickers',
+  TEAMS = 'teams',
+  BADGES = 'badges',
+  FRAMES = 'frames',
+  EFFECTS = 'effects',
+  BACKGROUNDS = 'backgrounds',
+  DECORATIVE = 'decorative',
+  LOGO = 'logo',
+  OVERLAY = 'overlay',
+  TEXTURE = 'texture',
+  ICON = 'icon',
+  SHAPE = 'shape'
 }
 
 // Type for element upload metadata
@@ -74,4 +103,10 @@ export interface ElementUploadMetadata {
   type: ElementType;
   isAnimated?: boolean;
   mimeType?: string;
+  
+  // Additional properties needed by components
+  name?: string;
+  attribution?: string;
+  imageUrl?: string;
+  metadata?: any;
 }
