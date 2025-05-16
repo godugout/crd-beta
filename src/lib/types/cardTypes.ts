@@ -13,6 +13,9 @@ export interface CardMarketMetadata {
   includeInCatalog?: boolean;
 }
 
+// Export alias as MarketMetadata for backward compatibility
+export type MarketMetadata = CardMarketMetadata;
+
 /**
  * Card metadata interface
  */
@@ -71,7 +74,11 @@ export interface CardDesignMetadata {
   player?: string;
   team?: string;
   year?: string;
+  oaklandMemory?: any; // Add oaklandMemory property
 }
+
+// Export alias as DesignMetadata for backward compatibility
+export type DesignMetadata = CardDesignMetadata;
 
 /**
  * Card interface for basic card data
@@ -88,6 +95,7 @@ export interface Card {
   player?: string;
   team?: string;
   year?: string;
+  isPublic?: boolean; // Add isPublic property
   designMetadata?: CardDesignMetadata;
   ownerId?: string; 
   collectionId?: string;
@@ -97,6 +105,10 @@ export interface Card {
   artist?: string; // Added for compatibility
   set?: string; // Added for compatibility
   rarity?: string; // Added for compatibility
+  viewCount?: number; // Add viewCount property
+  cardNumber?: string; // Add cardNumber property
+  fabricSwatches?: any[]; // Add fabricSwatches property
+  name?: string; // Add name property
 }
 
 /**
@@ -152,6 +164,7 @@ export interface HotspotData {
   height: number;
   content: string;
   type: string;
+  visible?: boolean; // Add visible property
 }
 
 /**
@@ -188,6 +201,17 @@ export interface CardLayer {
   shapeType?: string;
   color?: string;
   [key: string]: any;
+}
+
+/**
+ * Card effect interface
+ */
+export interface CardEffect {
+  id: string;
+  name: string;
+  enabled: boolean;
+  settings: Record<string, any>;
+  className?: string;
 }
 
 /**

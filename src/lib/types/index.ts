@@ -24,6 +24,7 @@ export * from './instagram';
 export * from './cardElements';
 export * from './teamTypes';
 export * from './enhancedCardTypes';
+export * from './oaklandTypes'; // Add export for Oakland types
 
 // Additional types for backward compatibility
 export type BackgroundColor = string;
@@ -34,3 +35,4 @@ export { Comment, Reaction } from './interaction';
 export { Card, CardLayer, CardStyle, TextStyle } from './cardTypes';
 export { InstagramPost } from './instagram';
 export { TeamMember, Team } from './teamTypes';
+export { OaklandMemoryData } from './oaklandTypes'; // Explicitly export OaklandMemoryData

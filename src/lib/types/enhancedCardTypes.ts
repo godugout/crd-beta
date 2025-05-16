@@ -1,50 +1,38 @@
 
-import { BaseEntity } from './index';
-import { Card } from './cardTypes';
-import { User } from './user';
+import { Card, CardRarity } from './cardTypes';
 
-/**
- * Enhanced card interface with additional fields
- */
 export interface EnhancedCard extends Card {
-  seriesId?: string;
-  series?: Series;
-  rarity?: string;
-  attributes?: Record<string, any>;
-  effects?: string[];
+  artist?: string;
+  artistId?: string; // Add artistId property
+  editionSize?: number; // Add editionSize property
+  cardNumber?: string; // Add cardNumber property
+  marketData?: any; // Add marketData property
 }
 
-/**
- * Series interface for card series
- */
-export interface Series extends BaseEntity {
-  name: string;
-  description?: string;
-  coverImageUrl?: string;
-  totalCards?: number;
-  releaseDate?: string;
+export interface Series {
+  id: string;
+  title: string; // Add title property
+  description: string;
+  coverImageUrl: string;
+  artistId: string; // Add artistId property
+  createdAt: string;
+  updatedAt: string;
+  releaseDate: string;
+  totalCards: number;
+  isPublished: boolean; // Add isPublished property
+  cardIds: string[]; // Add cardIds property
+  cards: Card[];
+  releaseType: string;
   publisher?: string;
-  isLimited?: boolean;
-  edition?: string;
-  ownerId: string;
-  owner?: User;
-  teamId?: string;
-  visibility?: 'public' | 'private' | 'team';
-  cards?: EnhancedCard[];
 }
 
-/**
- * Deck interface for card decks
- */
-export interface Deck extends BaseEntity {
+export interface Deck {
+  id: string;
   name: string;
   description?: string;
   coverImageUrl?: string;
-  ownerId: string;
-  owner: User;
-  teamId?: string;
-  visibility?: 'public' | 'private' | 'team';
-  cards?: EnhancedCard[];
-  cardIds?: string[];
-  isPublic?: boolean;
+  cards: Card[];
+  createdAt: string;
+  updatedAt: string;
+  userId: string;
 }

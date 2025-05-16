@@ -1,5 +1,6 @@
+
 import React, { useState } from 'react';
-import { Card, CardMetadata, MarketMetadata, DesignMetadata } from '@/lib/types/cardTypes';
+import { Card, CardMarketMetadata as MarketMetadata, CardDesignMetadata as DesignMetadata } from '@/lib/types/cardTypes';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';

@@ -1,12 +1,16 @@
 
 import { ReactNode } from "react";
 
+export type ToastVariant = "default" | "destructive" | "success" | "warning" | "info" | "error";
+
 export interface Toast {
-  id: string;
+  id?: string;
   title?: React.ReactNode;
   description?: React.ReactNode;
   action?: ToastAction;
-  variant?: "default" | "destructive" | "success" | "warning" | "info";
+  variant?: ToastVariant;
+  duration?: number;
+  open: boolean;
 }
 
 export interface ToastAction {
@@ -32,3 +36,21 @@ export type ToastActionElement = React.ReactElement<{
   onClick: () => void;
   className?: string;
 }>;
+
+export const createToast = (config: {
+  title: string;
+  description?: string;
+  action?: ToastActionElement;
+  variant?: ToastVariant;
+  duration?: number;
+}): Toast => {
+  return {
+    id: Math.random().toString(36).substring(2, 9),
+    title: config.title,
+    description: config.description,
+    action: config.action,
+    variant: config.variant || "default",
+    duration: config.duration || 3000,
+    open: true
+  };
+};

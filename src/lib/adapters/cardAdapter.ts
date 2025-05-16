@@ -2,46 +2,55 @@
 import { Card } from '../types/cardTypes';
 
 /**
- * Adapt a card to legacy format if needed
+ * Adapts any object to a Card type
+ * This is useful for handling data from external sources
  */
-export function adaptToLegacyCard(card: any): Card {
-  // Ensure the card has all required fields
+export function adaptToCard(data: any): Card {
   return {
-    id: card.id,
-    title: card.title || card.name || '',
-    description: card.description || '',
-    imageUrl: card.imageUrl || card.image || '',
-    thumbnailUrl: card.thumbnailUrl || card.imageUrl || '',
-    tags: card.tags || [],
-    createdAt: card.createdAt || new Date().toISOString(),
-    updatedAt: card.updatedAt || new Date().toISOString(),
-    player: card.player || '',
-    team: card.team || '',
-    year: card.year || '',
-    designMetadata: card.designMetadata || {},
-    ownerId: card.ownerId || card.userId || '',
-    collectionId: card.collectionId || ''
-  };
-}
-
-/**
- * Convert legacy card data to new format
- */
-export function adaptFromLegacyCard(legacyCard: any): Card {
-  return {
-    id: legacyCard.id,
-    title: legacyCard.title || legacyCard.name || '',
-    description: legacyCard.description || '',
-    imageUrl: legacyCard.imageUrl || legacyCard.image || '',
-    thumbnailUrl: legacyCard.thumbnailUrl || legacyCard.imageUrl || '',
-    tags: legacyCard.tags || [],
-    createdAt: legacyCard.createdAt || new Date().toISOString(),
-    updatedAt: legacyCard.updatedAt || new Date().toISOString(),
-    player: legacyCard.player || '',
-    team: legacyCard.team || '',
-    year: legacyCard.year || '',
-    designMetadata: legacyCard.designMetadata || {},
-    ownerId: legacyCard.ownerId || legacyCard.userId || '',
-    collectionId: legacyCard.collectionId || ''
+    id: data.id || `card-${Date.now()}`,
+    title: data.title || 'Untitled Card',
+    description: data.description || '',
+    imageUrl: data.imageUrl || '',
+    thumbnailUrl: data.thumbnailUrl || data.imageUrl || '',
+    tags: data.tags || [],
+    createdAt: data.createdAt || new Date().toISOString(),
+    updatedAt: data.updatedAt || new Date().toISOString(),
+    userId: data.userId || 'unknown',
+    effects: data.effects || [],
+    player: data.player || '',
+    team: data.team || '',
+    year: data.year || '',
+    designMetadata: data.designMetadata || {
+      cardStyle: {
+        template: 'standard',
+        effect: 'none',
+        borderRadius: '8px',
+        borderColor: '#000000',
+        shadowColor: 'rgba(0,0,0,0.1)',
+        frameWidth: 2,
+        frameColor: '#000000'
+      },
+      textStyle: {
+        titleColor: '#000000',
+        titleAlignment: 'center',
+        titleWeight: 'bold',
+        descriptionColor: '#333333'
+      },
+      cardMetadata: {
+        category: 'general',
+        series: 'base',
+        cardType: 'standard'
+      },
+      marketMetadata: {
+        price: 0,
+        currency: 'USD',
+        availableForSale: false,
+        editionSize: 0,
+        editionNumber: 0,
+        isPrintable: false,
+        isForSale: false,
+        includeInCatalog: false
+      }
+    }
   };
 }

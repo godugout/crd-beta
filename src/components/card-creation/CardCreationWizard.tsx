@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { 
@@ -334,7 +333,7 @@ const CardCreationWizard: React.FC<CardCreationWizardProps> = ({
           <CardUI className="p-4">
             <h2 className="text-lg font-bold mb-4">Preview</h2>
             <CardPreview
-              card={cardData as CardType}
+              card={cardData as Card}
               className="mx-auto max-w-full"
             />
             
