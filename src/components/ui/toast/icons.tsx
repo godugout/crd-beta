@@ -1,12 +1,15 @@
 
 import React from "react";
-import { AlertCircle, AlertTriangle, CheckCircle, Info } from "lucide-react";
+import { 
+  Check, 
+  X, 
+  AlertTriangle,
+  Info 
+} from "lucide-react";
 
-export type ToastIconName = "AlertCircle" | "AlertTriangle" | "CheckCircle" | "Info";
-
-export const ToastIcons: Record<ToastIconName, React.FC<{ className?: string }>> = {
-  AlertCircle: ({ className }) => <AlertCircle className={className} />,
+export const ToastIcons: Record<string, React.FC<{ className?: string }>> = {
+  Check: ({ className }) => <Check className={className} />,
+  X: ({ className }) => <X className={className} />,
   AlertTriangle: ({ className }) => <AlertTriangle className={className} />,
-  CheckCircle: ({ className }) => <CheckCircle className={className} />,
   Info: ({ className }) => <Info className={className} />
 };

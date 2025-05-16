@@ -17,6 +17,8 @@ export interface MaterialSimulation {
   pattern?: string;
   color?: string;
   texture?: string;
+  baseColor?: string;
+  weathering?: number;
 }
 
 export type CardEffectFunctionParams = {
@@ -31,4 +33,27 @@ export interface CardEffectRegistry {
   [key: string]: CardEffectFunction;
 }
 
+export interface CardEffectDefinition {
+  id: string;
+  name: string;
+  description: string;
+  thumbnail: string;
+  category: string;
+  defaultSettings: CardEffectSettings;
+  cssClass?: string;
+  supportedCardTypes?: string[];
+  premium: boolean;
+  enabled: boolean;
+  renderer?: (element: HTMLElement, settings: any) => void;
+  iconUrl?: string;
+}
+
 export type EffectUpdateCallback = (effectIds: string[]) => void;
+
+// Re-export CardEffectSettings from cardTypes for components that import it from here
+export { CardEffectSettings } from '@/lib/types/cardTypes';
+
+export type CardEffectsResult = {
+  activeEffects: string[];
+  effectSettings: Record<string, CardEffectSettings>;
+};

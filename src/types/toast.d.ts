@@ -1,22 +1,22 @@
 
-import { ReactNode } from "react";
+import { ComponentProps } from "react"
+import { ToastActionElement, ToastProps } from "@/components/ui/toast"
 
 export type ToastVariant = "default" | "destructive" | "success" | "warning" | "info";
 
-export interface ToasterToast {
-  id: string;
-  title?: React.ReactNode;
-  description?: React.ReactNode;
-  action?: ReactNode;
-  variant?: ToastVariant;
-  duration?: number;
+export type ToasterToast = ToastProps & {
+  id: string
+  title?: string
+  description?: string
+  action?: ToastActionElement
+  variant?: ToastVariant
+  duration?: number
 }
 
-export interface ToasterToastWithId extends ToasterToast {
-  id: string;
-}
+export type ToastOptions = Omit<ToasterToast, "id">
 
-export type ToastActionElement = React.ReactElement<{
-  altText: string;
-  onClick: () => void;
-}>;
+export type ToastIconNames = "Check" | "X" | "AlertTriangle" | "Info" | null;
+
+export interface ToastActionProps extends ComponentProps<"button"> {
+  altText?: string
+}

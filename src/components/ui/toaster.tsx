@@ -1,3 +1,4 @@
+
 import * as React from "react"
 import { useToast } from "@/hooks/use-toast"
 import {
@@ -10,6 +11,7 @@ import {
 } from "@/components/ui/toast"
 import { ToastIcons } from "./toast/icons"
 import type { ToasterToast } from "@/types/toast"
+import { toastIconConfig } from "@/config/toast"
 
 export function Toaster() {
   const { toasts } = useToast()

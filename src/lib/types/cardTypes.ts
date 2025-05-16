@@ -1,3 +1,4 @@
+
 /**
  * Consolidated Card Types for Cardshow (CRD)
  * This file serves as the central source of truth for all card-related types
@@ -42,7 +43,7 @@ export interface CardStyle {
   borderRadius: string;  // Required
   borderWidth?: number;
   borderColor: string;   // Required
-  backgroundColor?: string;
+  backgroundColor?: string; // Added for compatibility
   shadowColor: string;   // Required
   frameWidth: number;    // Required
   frameColor: string;    // Required
@@ -75,7 +76,7 @@ export interface CardEffect {
   className?: string;
   category?: string;
   description?: string;
-  iconUrl?: string; // Added for RecommendationEngine
+  iconUrl?: string; // Added for compatibility
 }
 
 /**
@@ -152,9 +153,9 @@ export interface CardMetadata {
   serialNumber?: string;
   certification?: string;
   gradeScore?: string;
-  category: string;      // Make required
-  series: string;        // Make required
-  cardType: string;      // Make required
+  category: string;      // Required
+  series: string;        // Required
+  cardType: string;      // Required
   cardStyle?: CardStyle;
   textStyle?: TextStyle;
   effects?: string[];

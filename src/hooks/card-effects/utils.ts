@@ -1,146 +1,127 @@
-// Import necessary types
+
 import { PremiumCardEffect } from './types';
-import { CardEffectSettings } from '@/lib/types/cardTypes';
 
-// Export card effect factories and utilities
-export const createCardEffect = (
-  id: string,
-  name: string,
-  category: string,
-  settings: CardEffectSettings,
-  description: string = '',
-  premium: boolean = false,
-  iconUrl: string = ''
-): PremiumCardEffect => {
-  return {
-    id,
-    name,
-    category,
-    settings,
-    description,
-    premium,
-    iconUrl,
-    enabled: false,  // Add this to fix the missing property error
-    className: `effect-${id.toLowerCase()}`
-  };
-};
+// Helper to create effect IDs in a consistent format
+export const createEffectId = (cardId: string, effectName: string) => `${cardId}:${effectName}`;
 
-// Update the PREMIUM_EFFECTS data to include the enabled property
-export const PREMIUM_EFFECTS: PremiumCardEffect[] = [
+// Base effects available to all users
+export const BASE_EFFECTS: PremiumCardEffect[] = [
   {
-    id: 'holographic',
-    name: 'Holographic',
-    category: 'premium',
-    enabled: false,
+    id: "shimmer",
+    name: "Shimmer",
+    category: "standard",
     settings: {
-      intensity: 0.7,
-      speed: 1.0,
+      intensity: 0.5,
+      speed: 0.8,
     },
-    description: 'Rainbow holographic effect that changes with movement',
+    description: "Subtle shimmer effect that adds a gentle glow",
     premium: false,
-    iconUrl: '/assets/effects/holographic-icon.svg'
+    iconUrl: "/effects/shimmer-icon.svg",
+    enabled: true
   },
   {
-    id: 'refractor',
-    name: 'Refractor',
-    category: 'premium',
-    enabled: false,
+    id: "vintage",
+    name: "Vintage",
+    category: "standard",
     settings: {
       intensity: 0.6,
-      speed: 0.8,
-      pattern: 'noise',
+      speed: 0.4,
+      pattern: "grain"
     },
-    description: 'Prismatic refractor effect that bends light',
+    description: "Classic aged look with subtle grain texture",
     premium: true,
-    iconUrl: '/assets/effects/refractor-icon.svg'
+    iconUrl: "/effects/vintage-icon.svg",
+    enabled: true
   },
   {
-    id: 'iridescent',
-    name: 'Iridescent',
-    category: 'premium',
-    enabled: false,
+    id: "refractor",
+    name: "Refractor",
+    category: "premium",
     settings: {
       intensity: 0.7,
       speed: 0.6,
-      pattern: 'ripples',
+      pattern: "lines"
     },
-    description: 'Shimmering iridescent effect with subtle color shifts',
+    description: "Light-bending prismatic effect with angular highlights",
     premium: true,
-    iconUrl: '/assets/effects/iridescent-icon.svg'
+    iconUrl: "/effects/refractor-icon.svg",
+    enabled: true
   },
   {
-    id: 'opalescent',
-    name: 'Opalescent',
-    category: 'premium',
-    enabled: false,
-    settings: {
-      intensity: 0.5,
-      speed: 0.7,
-      pattern: 'swirls',
-    },
-    description: 'Milky opalescent effect with a soft glow',
-    premium: true,
-    iconUrl: '/assets/effects/opalescent-icon.svg'
-  },
-  {
-    id: 'aurora',
-    name: 'Aurora',
-    category: 'premium',
-    enabled: false,
-    settings: {
-      intensity: 0.6,
-      speed: 0.9,
-      pattern: 'waves',
-      animationEnabled: true,
-    },
-    description: 'Dynamic aurora effect with flowing colors',
-    premium: true,
-    iconUrl: '/assets/effects/aurora-icon.svg'
-  },
-  {
-    id: 'nebula',
-    name: 'Nebula',
-    category: 'premium',
-    enabled: false,
-    settings: {
-      intensity: 0.7,
-      speed: 0.7,
-      pattern: 'clouds',
-    },
-    description: 'Cosmic nebula effect with swirling stardust',
-    premium: true,
-    iconUrl: '/assets/effects/nebula-icon.svg'
-  },
-  {
-    id: 'vintage',
-    name: 'Vintage',
-    category: 'premium',
-    enabled: false,
-    settings: {
-      intensity: 0.4,
-      speed: 0.4,
-      pattern: 'dots',
-    },
-    description: 'Aged vintage effect with subtle imperfections',
-    premium: true,
-    iconUrl: '/assets/effects/vintage-icon.svg'
-  },
-  {
-    id: 'chrome',
-    name: 'Chrome',
-    category: 'premium',
-    enabled: false,
+    id: "holographic",
+    name: "Holographic",
+    category: "premium",
     settings: {
       intensity: 0.8,
-      speed: 0.5,
-      pattern: 'linear',
+      speed: 1.0,
+      pattern: "rainbow"
     },
-    description: 'Reflective chrome finish with dynamic lighting',
+    description: "Rainbow reflective effect that shifts with viewing angle",
     premium: true,
-    iconUrl: '/assets/effects/chrome-icon.svg'
+    iconUrl: "/effects/holographic-icon.svg",
+    enabled: true
   },
+  {
+    id: "prismatic",
+    name: "Prismatic",
+    category: "premium",
+    settings: {
+      intensity: 0.75,
+      speed: 1.2,
+      pattern: "diamonds",
+      animationEnabled: true
+    },
+    description: "Colorful geometric pattern with depth and motion",
+    premium: true,
+    iconUrl: "/effects/prismatic-icon.svg",
+    enabled: true
+  },
+  {
+    id: "chrome",
+    name: "Chrome",
+    category: "premium",
+    settings: {
+      intensity: 0.6,
+      speed: 0.5,
+      pattern: "metallic"
+    },
+    description: "Metallic chrome finish with reflection and shine",
+    premium: true,
+    iconUrl: "/effects/chrome-icon.svg",
+    enabled: true
+  },
+  {
+    id: "foil",
+    name: "Foil",
+    category: "premium",
+    settings: {
+      intensity: 0.7,
+      speed: 0.4,
+      pattern: "foil"
+    },
+    description: "Textured foil effect with subtle highlights",
+    premium: true,
+    iconUrl: "/effects/foil-icon.svg",
+    enabled: true
+  }
 ];
 
-export const getEffectById = (effectId: string): PremiumCardEffect | undefined => {
-  return PREMIUM_EFFECTS.find(effect => effect.id === effectId);
+// Premium effects only available to premium users or special cards
+export const PREMIUM_EFFECTS = BASE_EFFECTS.filter(effect => effect.premium);
+
+// Standard effects available to all users
+export const STANDARD_EFFECTS = BASE_EFFECTS.filter(effect => !effect.premium);
+
+// Get effect by ID utility function
+export const getEffectById = (effects: PremiumCardEffect[], id: string): PremiumCardEffect | undefined => {
+  return effects.find(effect => effect.id === id);
+};
+
+// Determine if an effect is enabled for a given user
+export const isEffectEnabledForUser = (
+  effect: PremiumCardEffect,
+  isPremiumUser: boolean = false
+): boolean => {
+  if (!effect.premium) return true;
+  return isPremiumUser;
 };
