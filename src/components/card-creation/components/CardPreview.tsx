@@ -34,6 +34,15 @@ const CardPreview = React.forwardRef<HTMLDivElement, CardPreviewProps>(({
   const cardStyle = card.designMetadata?.cardStyle || {};
   const textStyle = card.designMetadata?.textStyle || {};
   
+  // Ensure we have default values for required properties
+  const backgroundColor = cardStyle.backgroundColor || '#FFFFFF';
+  const borderRadius = cardStyle.borderRadius || '8px';
+  const borderColor = cardStyle.borderColor || '#000000';
+  const titleColor = textStyle.titleColor || '#FFFFFF';
+  const titleWeight = textStyle.titleWeight || 'bold';
+  const titleAlignment = (textStyle.titleAlignment as any) || 'center';
+  const descriptionColor = textStyle.descriptionColor || '#DDDDDD';
+  
   return (
     <div className="relative" ref={ref}>
       <div 
@@ -43,11 +52,11 @@ const CardPreview = React.forwardRef<HTMLDivElement, CardPreviewProps>(({
           className
         )}
         style={{
-          backgroundColor: cardStyle.backgroundColor || '#FFFFFF',
-          borderRadius: cardStyle.borderRadius || '8px',
+          backgroundColor,
+          borderRadius,
           borderWidth: '2px',
           borderStyle: 'solid',
-          borderColor: cardStyle.borderColor || '#000000',
+          borderColor,
         }}
       >
         <div className="relative w-full h-full">
@@ -62,9 +71,9 @@ const CardPreview = React.forwardRef<HTMLDivElement, CardPreviewProps>(({
               <h3 
                 className="text-white text-sm font-bold truncate"
                 style={{ 
-                  color: textStyle.titleColor || '#FFFFFF',
-                  fontWeight: textStyle.titleWeight || 'bold',
-                  textAlign: (textStyle.titleAlignment as any) || 'center'
+                  color: titleColor,
+                  fontWeight: titleWeight,
+                  textAlign: titleAlignment
                 }}
               >
                 {card.title}
@@ -73,7 +82,7 @@ const CardPreview = React.forwardRef<HTMLDivElement, CardPreviewProps>(({
                 <p 
                   className="text-white/80 text-xs truncate"
                   style={{ 
-                    color: textStyle.descriptionColor || '#DDDDDD',
+                    color: descriptionColor,
                   }}
                 >
                   {card.player}

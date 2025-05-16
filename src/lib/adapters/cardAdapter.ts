@@ -66,3 +66,42 @@ export function adaptCardToSchema(card: CardType): any {
     designMetadata: card.designMetadata
   };
 }
+
+/**
+ * Adapts any card format to the current Card type
+ */
+export function adaptToCard(cardData: any): CardType {
+  // Ensure we have at least the basic required properties
+  return {
+    id: cardData.id || crypto.randomUUID(),
+    title: cardData.title || 'Untitled Card',
+    description: cardData.description || '',
+    imageUrl: cardData.imageUrl || cardData.image || '',
+    thumbnailUrl: cardData.thumbnailUrl || cardData.imageUrl || cardData.image || '',
+    tags: cardData.tags || [],
+    userId: cardData.userId || cardData.creatorId || '',
+    createdAt: cardData.createdAt || new Date().toISOString(),
+    updatedAt: cardData.updatedAt || new Date().toISOString(),
+    effects: cardData.effects || [],
+    designMetadata: cardData.designMetadata || {
+      cardStyle: {
+        template: cardData.template || 'classic',
+        effect: cardData.effect || 'none',
+        borderRadius: cardData.borderRadius || '8px',
+        borderColor: cardData.borderColor || '#000000',
+        frameWidth: cardData.frameWidth || 2,
+        frameColor: cardData.frameColor || '#000000',
+        shadowColor: cardData.shadowColor || 'rgba(0,0,0,0.2)',
+        backgroundColor: cardData.backgroundColor || '#FFFFFF'
+      },
+      textStyle: {
+        titleColor: cardData.titleColor || cardData.textColor || '#FFFFFF',
+        titleAlignment: cardData.titleAlignment || 'center',
+        titleWeight: cardData.titleWeight || 'bold',
+        descriptionColor: cardData.descriptionColor || '#DDDDDD'
+      },
+      cardMetadata: {},
+      marketMetadata: {}
+    }
+  };
+}
