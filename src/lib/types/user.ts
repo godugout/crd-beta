@@ -2,84 +2,62 @@
 import { BaseEntity } from './index';
 
 /**
- * User roles for permission management
+ * User role enum
  */
 export enum UserRole {
   ADMIN = 'admin',
   USER = 'user',
-  PREMIUM = 'premium',
   CREATOR = 'creator',
-  MODERATOR = 'moderator'
+  EDITOR = 'editor',
+  VIEWER = 'viewer'
 }
 
 /**
- * User permission types
+ * Extended user interface with detailed profile information
  */
-export type UserPermission = 
-  | 'read:own' 
-  | 'write:own' 
-  | 'delete:own' 
-  | 'read:all' 
-  | 'write:all' 
-  | 'delete:all' 
-  | 'premium:features'
-  | 'create:premium'
-  | 'moderate:content'
-  | 'all';
-
-/**
- * Role to permission mapping
- */
-export const ROLE_PERMISSIONS: Record<UserRole, UserPermission[]> = {
-  [UserRole.ADMIN]: ['all'],
-  [UserRole.USER]: ['read:own', 'write:own', 'delete:own'],
-  [UserRole.PREMIUM]: ['read:own', 'write:own', 'delete:own', 'premium:features'],
-  [UserRole.CREATOR]: ['read:own', 'write:own', 'delete:own', 'create:premium'],
-  [UserRole.MODERATOR]: ['read:own', 'write:own', 'delete:own', 'moderate:content']
-};
-
-/**
- * User interface for authentication and profiles
- */
-export interface User extends BaseEntity {
-  email: string;
-  name?: string;
-  displayName?: string;
-  username?: string;
-  avatarUrl?: string;
+export interface UserProfile {
   bio?: string;
-  role: UserRole;
-  permissions?: UserPermission[];
+  website?: string;
+  location?: string;
+  favoriteTeams?: string[];
+  favoriteCards?: string[];
+  interests?: string[];
+  joinDate?: string;
+  socialLinks?: Record<string, string>;
+  achievements?: string[];
   preferences?: Record<string, any>;
 }
 
 /**
- * Extended user profile with additional information
+ * User interface extending the base entity
  */
-export interface UserProfile extends User {
-  followers?: number;
-  following?: number;
-  cardCount?: number;
-  collectionCount?: number;
-  joinDate?: string;
-  socialLinks?: {
-    twitter?: string;
-    instagram?: string;
-    website?: string;
-  };
+export interface User extends BaseEntity {
+  email?: string;
+  name?: string;
+  displayName?: string;
+  username?: string;
+  avatarUrl?: string;
+  role?: string;
+  profile?: UserProfile;
 }
 
 /**
- * Database representation of User for Supabase mapping
+ * Auth user interface with authentication-specific properties
  */
-export interface DbUser {
-  id: string;
-  email: string;
-  display_name?: string;
-  full_name?: string;
-  username?: string;
-  avatar_url?: string;
-  created_at: string;
-  updated_at: string;
-  role?: string;
+export interface AuthUser extends User {
+  accessToken?: string;
+  refreshToken?: string;
+  isAuthenticated: boolean;
+  permissions?: string[];
+  lastLogin?: string;
+}
+
+/**
+ * Team member user interface for team context
+ */
+export interface TeamUser extends User {
+  teamRole: string;
+  joinedAt: string;
+  contributions?: number;
+  isActive: boolean;
 }

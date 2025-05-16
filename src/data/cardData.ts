@@ -1,8 +1,7 @@
-
 import { CardData } from '@/types/card';
 
 // Sample card data
-const sampleCardsData: CardData[] = [
+const sampleCards: CardData[] = [
   {
     id: '1',
     title: 'Rickey Henderson Rookie Card',
@@ -147,7 +146,7 @@ const sampleCardsData: CardData[] = [
 ];
 
 // Export as default as well as named export for compatibility
-export default sampleCardsData;
+export default sampleCards;
 
 // Legacy named export for backward compatibility
-export { sampleCardsData as cardData };
+export { sampleCards as cardData };

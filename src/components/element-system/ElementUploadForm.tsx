@@ -1,282 +1,293 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { ElementType, ElementCategory } from '@/lib/types/cardElements';
-import { ElementUploader } from '@/lib/elements/ElementUploader';
-import { AssetProcessor } from '@/lib/elements/AssetProcessor';
-import { elementLibrary } from '@/lib/elements/ElementLibrary';
-import { Switch } from "@/components/ui/switch"; // Corrected import
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { toastUtils } from '@/lib/utils/toast-utils';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { Cross2Icon, PlusIcon } from '@radix-ui/react-icons';
+import { ElementUploadMetadata, ElementCategory } from '@/lib/types/cardElements';
 
 interface ElementUploadFormProps {
-  onElementCreated?: (elementId: string) => void;
+  onSubmit: (data: FormData, metadata: ElementUploadMetadata) => Promise<void>;
+  onCancel: () => void;
+  initialCategory?: ElementCategory;
+  className?: string;
 }
 
-const ElementUploadForm: React.FC<ElementUploadFormProps> = ({ 
-  onElementCreated 
+const ElementUploadForm: React.FC<ElementUploadFormProps> = ({
+  onSubmit,
+  onCancel,
+  initialCategory = ElementCategory.STICKER,
+  className = '',
 }) => {
-  const [isUploading, setIsUploading] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [elementType, setElementType] = useState<ElementType>('sticker');
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [category, setCategory] = useState<ElementCategory>(ElementCategory.CUSTOM);
-  const [tags, setTags] = useState('');
+  const [name, setName] = useState<string>('');
+  const [description, setDescription] = useState<string>('');
+  const [category, setCategory] = useState<ElementCategory>(initialCategory);
+  const [tags, setTags] = useState<string[]>([]);
+  const [currentTag, setCurrentTag] = useState<string>('');
+  const [file, setFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
+  const [premium, setPremium] = useState<boolean>(false);
+  const [attribution, setAttribution] = useState<string>('');
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Handle file selection
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    
-    setSelectedFile(file);
-    setName(file.name.split('.')[0]); // Set default name based on filename
-    
-    // Create a preview
-    const preview = URL.createObjectURL(file);
-    setPreviewUrl(preview);
+    const selectedFile = e.target.files?.[0];
+    if (!selectedFile) return;
+
+    if (!selectedFile.type.startsWith('image/')) {
+      setError('Please upload an image file');
+      return;
+    }
+
+    setFile(selectedFile);
+    setPreview(URL.createObjectURL(selectedFile));
+    setError(null);
   };
 
-  // Handle form submission
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleAddTag = () => {
+    const trimmedTag = currentTag.trim();
+    if (trimmedTag && !tags.includes(trimmedTag)) {
+      setTags([...tags, trimmedTag]);
+      setCurrentTag('');
+    }
+  };
+
+  const handleRemoveTag = (tagToRemove: string) => {
+    setTags(tags.filter(tag => tag !== tagToRemove));
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleAddTag();
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
-    if (!selectedFile) {
-      toastUtils.error('No file selected', 'Please select a file to upload');
+    if (!name) {
+      setError('Please enter a name for the element');
       return;
     }
     
-    if (!name || !category) {
-      toastUtils.error('Missing information', 'Please provide a name and category for the asset.');
+    if (!file) {
+      setError('Please upload an image file');
       return;
     }
-    
-    setIsUploading(true);
-    
+
     try {
-      // Upload the file
-      const uploadResult = await ElementUploader.uploadElement(
-        selectedFile,
-        elementType,
-        {
-          name,
-          description,
-          tags: tags.split(',').map(tag => tag.trim()).filter(tag => tag),
-          category
-        }
-      );
+      setIsSubmitting(true);
       
-      if (!uploadResult.success || !uploadResult.url) {
-        toastUtils.error('Upload failed', uploadResult.error || 'Unknown error');
-        setIsUploading(false);
-        return;
-      }
+      // Create form data
+      const formData = new FormData();
+      formData.append('file', file);
       
-      // Process the asset
-      const processingResult = await AssetProcessor.processAsset(
-        uploadResult.url,
-        elementType,
-        uploadResult.metadata!,
-        { generateThumbnail: true, optimize: true }
-      );
-      
-      // Create the element in the library
-      const element = elementLibrary.createElement(elementType, {
-        name,
-        url: uploadResult.url, // Required field
-        assetUrl: processingResult.processedUrl || uploadResult.url,
-        thumbnailUrl: processingResult.thumbnailUrl,
-        description,
-        tags: tags.split(',').map(tag => tag.trim()).filter(tag => tag),
+      // Create metadata object
+      const metadata: ElementUploadMetadata = {
         category,
-        isOfficial: false,
-        position: { x: 0, y: 0, z: 0, rotation: 0 },
-        size: { 
-          width: uploadResult.metadata?.dimensions?.width || 100,
-          height: uploadResult.metadata?.dimensions?.height || 100,
-          scale: 1,
-          aspectRatio: 
-            uploadResult.metadata?.dimensions?.width && 
-            uploadResult.metadata?.dimensions?.height 
-              ? uploadResult.metadata.dimensions.width / uploadResult.metadata.dimensions.height 
-              : 1,
-          preserveAspectRatio: true
-        },
-        style: { opacity: 1 },
-        metadata: {
-          ...uploadResult.metadata,
-          ...processingResult.metadata
-        }
-      });
-      
-      toastUtils.success('Element created', `Successfully created ${elementType}: ${name}`);
-      
-      // Clear the form
-      setSelectedFile(null);
-      setPreviewUrl(null);
-      setName('');
-      setDescription('');
-      setTags('');
-      
-      // Notify parent component
-      if (onElementCreated) {
-        onElementCreated(element.id);
-      }
-    } catch (error) {
-      console.error('Error creating element:', error);
-      toastUtils.error('Error creating element', 'An unexpected error occurred');
+        tags,
+        description: description || '',
+        attribution: attribution || '',
+        premium,
+      };
+
+      await onSubmit(formData, metadata);
+    } catch (err: any) {
+      console.error('Error uploading element:', err);
+      setError(err.message || 'An error occurred while uploading');
     } finally {
-      setIsUploading(false);
+      setIsSubmitting(false);
     }
   };
 
-  // Element type options
-  const elementTypeOptions: { value: ElementType; label: string }[] = [
-    { value: 'sticker', label: 'Sticker' },
-    { value: 'logo', label: 'Logo' },
-    { value: 'frame', label: 'Frame' },
-    { value: 'badge', label: 'Badge' },
-    { value: 'overlay', label: 'Overlay' },
-    { value: 'decoration', label: 'Decoration' }
-  ];
-
-  // Element category options
-  const categoryOptions = Object.values(ElementCategory).map(category => ({
-    value: category,
-    label: category.charAt(0).toUpperCase() + category.slice(1).toLowerCase()
-  }));
-
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <div className="mb-4">
-            <Label htmlFor="element-type">Element Type</Label>
-            <Select 
-              value={elementType} 
-              onValueChange={(value) => setElementType(value as ElementType)}
+    <form onSubmit={handleSubmit} className={`space-y-6 ${className}`}>
+      <div className="flex flex-col md:flex-row gap-6">
+        {/* Left column - File upload */}
+        <div className="w-full md:w-1/3 space-y-6">
+          <div>
+            <Label htmlFor="element-category">Element Category</Label>
+            <select
+              id="element-category"
+              value={category}
+              onChange={(e) => setCategory(e.target.value as ElementCategory)}
+              className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
             >
-              <SelectTrigger id="element-type">
-                <SelectValue placeholder="Select element type" />
-              </SelectTrigger>
-              <SelectContent>
-                {elementTypeOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              <option value={ElementCategory.STICKER}>Sticker</option>
+              <option value={ElementCategory.LOGO}>Logo</option>
+              <option value={ElementCategory.FRAME}>Frame</option>
+              <option value={ElementCategory.BADGE}>Badge</option>
+              <option value={ElementCategory.OVERLAY}>Overlay</option>
+              <option value={ElementCategory.BACKGROUND}>Background</option>
+              <option value={ElementCategory.TEXTURE}>Texture</option>
+              <option value={ElementCategory.DECORATION}>Decoration</option>
+              <option value={ElementCategory.ICON}>Icon</option>
+              <option value={ElementCategory.SHAPE}>Shape</option>
+            </select>
           </div>
-
-          <div className="mb-4">
-            <Label htmlFor="file-upload">Upload File</Label>
-            <Input 
-              id="file-upload" 
-              type="file" 
-              accept="image/*" 
-              onChange={handleFileChange}
-              disabled={isUploading}
-              className="mt-1"
-            />
-            <p className="text-sm text-muted-foreground mt-1">
-              Supported formats: PNG, JPEG, SVG, WebP, GIF
-            </p>
-          </div>
-
-          <div className="mb-4">
-            <Label htmlFor="name">Name</Label>
-            <Input 
-              id="name" 
-              value={name} 
-              onChange={(e) => setName(e.target.value)}
-              disabled={isUploading}
-              className="mt-1"
-              required
-            />
-          </div>
-
-          <div className="mb-4">
-            <Label htmlFor="description">Description</Label>
-            <Textarea 
-              id="description" 
-              value={description} 
-              onChange={(e) => setDescription(e.target.value)}
-              disabled={isUploading}
-              className="mt-1 h-20"
-            />
+          
+          <div>
+            <Label htmlFor="element-file">Upload Element File</Label>
+            <div 
+              className="mt-1 border-2 border-dashed border-gray-300 rounded-md p-4 flex flex-col items-center justify-center cursor-pointer hover:border-primary transition-colors"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <input
+                id="element-file"
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileChange}
+                accept="image/*"
+                className="hidden"
+              />
+              
+              {preview ? (
+                <div className="w-full flex flex-col items-center">
+                  <img
+                    src={preview}
+                    alt="Element preview"
+                    className="mb-2 max-h-48 object-contain rounded"
+                  />
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setFile(null);
+                      setPreview(null);
+                    }}
+                  >
+                    Change Image
+                  </Button>
+                </div>
+              ) : (
+                <>
+                  <div className="mb-2 flex flex-col items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                    </svg>
+                    <p className="mt-1 text-sm text-gray-600">Click to upload or drag and drop</p>
+                  </div>
+                  <p className="text-xs text-gray-500">PNG, JPG, GIF up to 5MB</p>
+                </>
+              )}
+            </div>
           </div>
         </div>
-
-        <div>
-          <div className="mb-4">
-            <Label htmlFor="category">Category</Label>
-            <Select 
-              value={category} 
-              onValueChange={(value) => setCategory(value as ElementCategory)}
-            >
-              <SelectTrigger id="category">
-                <SelectValue placeholder="Select category" />
-              </SelectTrigger>
-              <SelectContent>
-                {categoryOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="mb-4">
-            <Label htmlFor="tags">Tags (comma separated)</Label>
-            <Input 
-              id="tags" 
-              value={tags} 
-              onChange={(e) => setTags(e.target.value)}
-              disabled={isUploading}
+        
+        {/* Right column - Metadata */}
+        <div className="w-full md:w-2/3 space-y-6">
+          <div>
+            <Label htmlFor="element-name">Element Name</Label>
+            <Input
+              id="element-name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Enter element name"
               className="mt-1"
-              placeholder="sports, team, logo"
             />
           </div>
-
-          {previewUrl && (
-            <div className="mb-4">
-              <Label>Preview</Label>
-              <div className="mt-1 border rounded-md overflow-hidden h-40 flex items-center justify-center bg-gray-50">
-                <img 
-                  src={previewUrl} 
-                  alt="Preview" 
-                  className="max-w-full max-h-full object-contain" 
-                />
-              </div>
+          
+          <div>
+            <Label htmlFor="element-description">Description</Label>
+            <Textarea
+              id="element-description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Enter a description of the element"
+              className="mt-1"
+              rows={3}
+            />
+          </div>
+          
+          <div>
+            <Label htmlFor="element-tags">Tags</Label>
+            <div className="mt-1 flex items-center">
+              <Input
+                id="element-tags"
+                value={currentTag}
+                onChange={(e) => setCurrentTag(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Enter tags and press Enter"
+                className="flex-grow"
+              />
+              <Button 
+                type="button" 
+                onClick={handleAddTag} 
+                variant="ghost" 
+                className="ml-2"
+              >
+                <PlusIcon />
+              </Button>
             </div>
-          )}
+            
+            {tags.length > 0 && (
+              <div className="mt-2 flex flex-wrap gap-2">
+                {tags.map((tag, index) => (
+                  <div 
+                    key={index} 
+                    className="flex items-center bg-primary/10 text-primary px-2 py-1 rounded-full text-xs"
+                  >
+                    {tag}
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveTag(tag)}
+                      className="ml-1 text-primary hover:text-primary/80"
+                    >
+                      <Cross2Icon className="h-3 w-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          
+          <div>
+            <Label htmlFor="element-attribution">Attribution (Optional)</Label>
+            <Input
+              id="element-attribution"
+              value={attribution}
+              onChange={(e) => setAttribution(e.target.value)}
+              placeholder="Credit the creator or source"
+              className="mt-1"
+            />
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="premium"
+              checked={premium}
+              onCheckedChange={setPremium}
+            />
+            <Label htmlFor="premium">Premium Element</Label>
+          </div>
         </div>
       </div>
-
-      <div className="flex justify-end space-x-2">
+      
+      {error && (
+        <div className="text-destructive text-sm">{error}</div>
+      )}
+      
+      <div className="flex justify-end space-x-4">
         <Button
           type="button"
           variant="outline"
-          disabled={isUploading}
-          onClick={() => {
-            setSelectedFile(null);
-            setPreviewUrl(null);
-            setName('');
-            setDescription('');
-            setTags('');
-          }}
+          onClick={onCancel}
+          disabled={isSubmitting}
         >
-          Clear
+          Cancel
         </Button>
-        <Button type="submit" disabled={isUploading || !selectedFile || !name}>
-          {isUploading ? 'Uploading...' : 'Upload Element'}
+        <Button
+          type="submit"
+          disabled={isSubmitting || !file || !name}
+        >
+          {isSubmitting ? 'Uploading...' : 'Upload Element'}
         </Button>
       </div>
     </form>

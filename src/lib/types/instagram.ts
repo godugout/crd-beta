@@ -3,12 +3,26 @@
  * Instagram-related types
  */
 
-import { InstagramPost as BaseInstagramPost } from './index';
+import { BaseEntity } from './index';
 
-// Re-export the type from the index file
-export type InstagramPost = BaseInstagramPost;
+/**
+ * Instagram Post definition
+ */
+export interface InstagramPost extends BaseEntity {
+  postId?: string;
+  username: string;
+  caption?: string;
+  imageUrl?: string;
+  permalink?: string;
+  timestamp: string;
+  mediaType: string;
+  mediaUrl: string;
+  thumbnailUrl?: string;
+}
 
-// Additional Instagram-specific types
+/**
+ * Instagram source information
+ */
 export interface InstagramSource {
   username: string;
   lastFetched: string;

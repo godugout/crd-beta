@@ -1,3 +1,4 @@
+
 import { CardStyle, TextStyle, CardMetadata, MarketMetadata, DesignMetadata } from '@/lib/types/cardTypes';
 
 // Default values for card styles

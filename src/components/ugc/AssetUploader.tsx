@@ -1,313 +1,213 @@
 
 import React, { useState, useCallback } from 'react';
-import { useDropzone, Accept } from 'react-dropzone';
+import { useDropzone } from 'react-dropzone';
+import { UploadCloud, FileText, Image, X, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
-import { Switch } from '@/components/ui/switch';
-import { useToast } from '@/hooks/use-toast';
-import { ElementType, ElementCategory, ElementUploadMetadata } from '@/lib/types/cardElements';
-import { storageOperations } from '@/lib/supabase/storage';
-import { X, Upload, FileUp, Info } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
+import { toast } from 'sonner';
+import { ElementUploadMetadata } from '@/lib/types/cardElements';
+import { useMediaService } from '@/hooks/useMediaService';
 
 interface AssetUploaderProps {
-  onUploadComplete?: (asset: ElementUploadMetadata) => void;
-  allowedTypes?: ElementType[];
+  onUploadComplete?: (url: string, id: string) => void;
+  acceptedTypes?: string[];
   maxSizeMB?: number;
+  metadata?: Partial<ElementUploadMetadata>;
+  className?: string;
   showPreview?: boolean;
 }
 
 const AssetUploader: React.FC<AssetUploaderProps> = ({
   onUploadComplete,
-  allowedTypes = ['sticker', 'logo', 'frame', 'badge', 'overlay', 'decoration'],
+  acceptedTypes = ['image/jpeg', 'image/png', 'image/webp'],
   maxSizeMB = 5,
-  showPreview = true,
+  metadata = {},
+  className = '',
+  showPreview = true
 }) => {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
-  const [metadata, setMetadata] = useState<Partial<ElementUploadMetadata>>({
-    name: '',
-    description: '',
-    tags: [],
-    category: ElementCategory.OTHER,
-    isOfficial: false
-  });
-  const [currentTag, setCurrentTag] = useState('');
   const [uploading, setUploading] = useState(false);
-  const { toast } = useToast();
-
-  // Define accepted file types based on allowedTypes
-  const acceptedTypes: Accept = {
-    'image/png': ['.png'],
-    'image/jpeg': ['.jpg', '.jpeg'],
-    'image/svg+xml': ['.svg'],
-  };
+  const [progress, setProgress] = useState(0);
+  const [error, setError] = useState<string | null>(null);
+  const mediaService = useMediaService();
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
-    if (acceptedFiles.length === 0) return;
+    const selected = acceptedFiles[0];
     
-    const selectedFile = acceptedFiles[0];
+    if (!selected) return;
     
     // Check file size
-    if (selectedFile.size > maxSizeMB * 1024 * 1024) {
-      toast({
-        title: 'File Too Large',
-        description: `Maximum file size is ${maxSizeMB}MB`,
-        variant: 'destructive',
-        open: true
-      });
+    if (selected.size > maxSizeMB * 1024 * 1024) {
+      setError(`File too large. Maximum size is ${maxSizeMB}MB`);
       return;
     }
     
-    setFile(selectedFile);
-    
-    // Generate preview
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      setPreview(e.target?.result as string);
-      // Auto-populate name from filename
-      const fileName = selectedFile.name.split('.').slice(0, -1).join('.');
-      setMetadata(prev => ({ ...prev, name: fileName }));
-    };
-    reader.readAsDataURL(selectedFile);
-  }, [maxSizeMB, toast]);
+    // Reset states
+    setError(null);
+    setFile(selected);
+    setPreview(URL.createObjectURL(selected));
+  }, [maxSizeMB]);
 
-  const { getRootProps, getInputProps } = useDropzone({ onDrop, accept: acceptedTypes });
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: acceptedTypes.reduce((acc: Record<string, string[]>, type) => {
+      acc[type] = [];
+      return acc;
+    }, {}),
+    maxSize: maxSizeMB * 1024 * 1024,
+    multiple: false
+  });
 
   const handleUpload = async () => {
     if (!file) return;
-
+    
     try {
       setUploading(true);
+      let progress = 0;
       
-      // Use storageOperations to upload the image
-      const result = await storageOperations.uploadImage(file, `user-assets/${file.name}`);
+      // Simulate upload progress
+      const interval = setInterval(() => {
+        progress += 5;
+        if (progress >= 95) {
+          clearInterval(interval);
+        }
+        setProgress(progress);
+      }, 100);
       
-      if (result.error) {
-        throw new Error(result.error.message);
+      // Upload the file
+      const { data, error } = await mediaService.uploadImage(file, `uploads/${Date.now()}-${file.name}`);
+      
+      clearInterval(interval);
+      setProgress(100);
+      
+      if (error) {
+        throw new Error(error.message);
       }
       
-      // Call onUploadComplete with the metadata and upload info
-      if (onUploadComplete && result.data) {
-        onUploadComplete({
-          name: metadata.name || 'Untitled Asset',
-          description: metadata.description || '',
-          tags: metadata.tags || [],
-          category: metadata.category || ElementCategory.OTHER,
-          isOfficial: false,
-          dimensions: {
-            width: 0, // These would be determined after image processing
-            height: 0
-          }
-        });
+      if (data) {
+        toast.success('File uploaded successfully');
+        
+        if (onUploadComplete) {
+          onUploadComplete(data.url, data.path);
+        }
       }
-      
-      toast({
-        title: 'Upload Successful',
-        description: 'Your asset has been uploaded',
-        variant: 'success',
-        open: true
-      });
-      
-      // Reset the form
-      setFile(null);
-      setPreview(null);
-      setMetadata({
-        name: '',
-        description: '',
-        tags: [],
-        category: ElementCategory.OTHER,
-        isOfficial: false
-      });
-    } catch (error) {
-      console.error('Upload failed:', error);
-      toast({
-        title: 'Upload Failed',
-        description: 'There was a problem uploading your asset',
-        variant: 'destructive',
-        open: true
-      });
+    } catch (err: any) {
+      console.error('Upload error:', err);
+      setError(err.message || 'Error uploading file');
+      toast.error('Upload failed');
     } finally {
       setUploading(false);
     }
   };
 
-  const addTag = () => {
-    if (!currentTag.trim()) return;
-    setMetadata(prev => ({
-      ...prev,
-      tags: [...(prev.tags || []), currentTag.trim()]
-    }));
-    setCurrentTag('');
+  const clearFile = () => {
+    if (preview) {
+      URL.revokeObjectURL(preview);
+    }
+    setFile(null);
+    setPreview(null);
   };
-
-  const removeTag = (tagToRemove: string) => {
-    setMetadata(prev => ({
-      ...prev,
-      tags: (prev.tags || []).filter(tag => tag !== tagToRemove)
-    }));
-  };
-
-  const categoryOptions = [
-    { value: ElementCategory.SPORTS, label: 'Sports' },
-    { value: ElementCategory.ENTERTAINMENT, label: 'Entertainment' },
-    { value: ElementCategory.ACHIEVEMENT, label: 'Achievement' },
-    { value: ElementCategory.DECORATIVE, label: 'Decorative' },
-    { value: ElementCategory.SEASONAL, label: 'Seasonal' },
-    { value: ElementCategory.HOLIDAY, label: 'Holiday' },
-    { value: ElementCategory.TEAMS, label: 'Teams' },
-    { value: ElementCategory.BRANDS, label: 'Brands' },
-    { value: ElementCategory.CUSTOM, label: 'Custom' },
-    { value: ElementCategory.OTHER, label: 'Other' }
-  ];
 
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle>Upload Asset</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {!file ? (
-          <div 
-            {...getRootProps()} 
-            className="border-2 border-dashed rounded-lg p-6 text-center hover:bg-gray-50 cursor-pointer"
-          >
-            <input {...getInputProps()} />
-            <div className="flex flex-col items-center justify-center space-y-2">
-              <Upload className="h-8 w-8 text-gray-400" />
-              <p className="text-sm text-gray-500">Drag & drop an image, or click to select</p>
-              <p className="text-xs text-gray-400">
-                Supported formats: PNG, JPG, SVG (Max {maxSizeMB}MB)
-              </p>
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {showPreview && preview && (
-              <div className="flex justify-center">
-                <div className="relative max-w-xs">
-                  <img 
-                    src={preview} 
-                    alt="Preview" 
-                    className="max-h-64 max-w-full object-contain"
-                  />
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    className="absolute -top-2 -right-2 rounded-full p-1 h-8 w-8"
-                    onClick={() => { setFile(null); setPreview(null); }}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            )}
-            
-            <div className="space-y-3">
-              <div>
-                <Label htmlFor="asset-name">Asset Name</Label>
-                <Input
-                  id="asset-name"
-                  value={metadata.name || ''}
-                  onChange={(e) => setMetadata(prev => ({ ...prev, name: e.target.value }))}
-                  placeholder="Enter asset name"
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="asset-description">Description</Label>
-                <Input
-                  id="asset-description"
-                  value={metadata.description || ''}
-                  onChange={(e) => setMetadata(prev => ({ ...prev, description: e.target.value }))}
-                  placeholder="Brief description of the asset"
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="asset-category">Category</Label>
-                <select
-                  id="asset-category"
-                  className="w-full rounded-md border border-gray-300 p-2"
-                  value={metadata.category}
-                  onChange={(e) => setMetadata(prev => ({ ...prev, category: e.target.value as ElementCategory }))}
-                >
-                  {categoryOptions.map(option => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              
-              <div>
-                <Label htmlFor="asset-tags">Tags</Label>
-                <div className="flex">
-                  <Input
-                    id="asset-tags"
-                    value={currentTag}
-                    onChange={(e) => setCurrentTag(e.target.value)}
-                    placeholder="Add tags"
-                    onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
-                  />
-                  <Button type="button" onClick={addTag} className="ml-2">
-                    Add
-                  </Button>
-                </div>
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {metadata.tags?.map((tag) => (
-                    <Badge key={tag} variant="secondary" className="flex items-center gap-1">
-                      {tag}
-                      <X 
-                        className="h-3 w-3 cursor-pointer" 
-                        onClick={() => removeTag(tag)} 
-                      />
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-      </CardContent>
-      
-      <CardFooter className="flex justify-between">
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id="premium-asset"
-                  checked={metadata.isPremium || false}
-                  onCheckedChange={(checked) => setMetadata(prev => ({ ...prev, isPremium: checked }))}
-                />
-                <Label htmlFor="premium-asset">Premium Asset</Label>
-                <Info className="h-4 w-4 text-gray-400" />
-              </div>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Premium assets may require user payment or subscription</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-        
-        <Button 
-          onClick={handleUpload}
-          disabled={!file || uploading || !metadata.name}
+    <div className={`w-full ${className}`}>
+      {!file ? (
+        <div
+          {...getRootProps()}
+          className={`border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center h-40 cursor-pointer transition-colors ${
+            isDragActive ? 'border-primary bg-primary/5' : 'border-gray-300 hover:border-primary/50'
+          }`}
         >
-          {uploading ? 'Uploading...' : 'Upload Asset'}
-          {!uploading && <FileUp className="ml-2 h-4 w-4" />}
-        </Button>
-      </CardFooter>
-    </Card>
+          <input {...getInputProps()} />
+          <UploadCloud className="h-10 w-10 text-gray-400 mb-2" />
+          {isDragActive ? (
+            <p className="text-sm text-center text-gray-500">Drop the file here</p>
+          ) : (
+            <>
+              <p className="text-sm text-center text-gray-500">
+                Drag & drop a file here, or click to select
+              </p>
+              <p className="text-xs text-center text-gray-400 mt-1">
+                {acceptedTypes.join(', ')} (max {maxSizeMB}MB)
+              </p>
+            </>
+          )}
+        </div>
+      ) : (
+        <div className="border rounded-lg p-4">
+          <div className="flex justify-between items-center mb-3">
+            <div className="flex items-center">
+              {preview && showPreview ? (
+                <div className="h-10 w-10 mr-3 rounded overflow-hidden bg-gray-100">
+                  <img
+                    src={preview}
+                    alt="Preview"
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+              ) : (
+                <div className="h-10 w-10 mr-3 rounded bg-gray-100 flex items-center justify-center">
+                  <FileText className="h-5 w-5 text-gray-400" />
+                </div>
+              )}
+              <div>
+                <p className="text-sm font-medium">{file.name}</p>
+                <p className="text-xs text-gray-500">
+                  {(file.size / (1024 * 1024)).toFixed(2)} MB
+                </p>
+              </div>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={clearFile}
+              disabled={uploading}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+
+          {uploading && (
+            <div className="mb-3">
+              <Progress value={progress} className="h-2 mb-1" />
+              <p className="text-xs text-gray-500 text-right">{progress}%</p>
+            </div>
+          )}
+
+          {error && (
+            <p className="text-sm text-destructive mb-3">{error}</p>
+          )}
+
+          <div className="flex justify-end">
+            <Button
+              variant="outline"
+              size="sm"
+              className="mr-2"
+              onClick={clearFile}
+              disabled={uploading}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="default"
+              size="sm"
+              onClick={handleUpload}
+              disabled={uploading || !!error}
+            >
+              {uploading ? (
+                <span className="flex items-center">
+                  Uploading...
+                </span>
+              ) : (
+                <span className="flex items-center">
+                  <Check className="mr-1 h-4 w-4" /> Upload
+                </span>
+              )}
+            </Button>
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 

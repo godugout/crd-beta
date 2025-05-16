@@ -1,88 +1,55 @@
 
-import * as React from "react";
-import { Toast, createToast } from "@/types/toast";
-
-export type ToasterToast = Toast & {
-  id: string;
-  title?: React.ReactNode;
-  description?: React.ReactNode;
-  action?: React.ReactNode;
-}
-
-const TOAST_LIMIT = 10;
-const TOAST_REMOVE_DELAY = 1000000;
-
-let count = 0;
-
-function genId() {
-  count = (count + 1) % Number.MAX_VALUE;
-  return count.toString();
-}
-
-const toasts = new Map<string, ToasterToast>();
-
-const listeners: Array<(toasts: ToasterToast[]) => void> = [];
-
-function emitChange() {
-  listeners.forEach((listener) => {
-    listener(Array.from(toasts.values()));
-  });
-}
-
-function addToast(toast: Toast) {
-  const id = toast.id ?? genId();
-  toasts.set(id, { ...toast, id });
-  emitChange();
-  return id;
-}
-
-function updateToast(id: string, toast: ToasterToast) {
-  if (!toasts.has(id)) return;
-  const newToast = { ...toasts.get(id), ...toast };
-  toasts.set(id, newToast);
-  emitChange();
-}
-
-function dismissToast(id: string) {
-  toasts.delete(id);
-  emitChange();
-}
+import { useState } from 'react';
+import { toast as sonnerToast } from 'sonner';
+import { Toast, ToastOptions } from '@/types/toast';
 
 export function useToast() {
-  const [toastState, setToastState] = React.useState<ToasterToast[]>(
-    Array.from(toasts.values())
-  );
+  const [toasts, setToasts] = useState<Toast[]>([]);
 
-  React.useEffect(() => {
-    listeners.push(setToastState);
-    return () => {
-      const index = listeners.indexOf(setToastState);
-      if (index > -1) {
-        listeners.splice(index, 1);
-      }
+  const toast = (options: ToastOptions | string) => {
+    const toastOptions = typeof options === 'string' ? { description: options } : options;
+    const { variant = 'default', ...rest } = toastOptions;
+
+    // Map our variant to sonner variant
+    const sonnerVariant = variant === 'error' ? 'destructive' : variant;
+
+    // Create toast with sonner
+    sonnerToast[sonnerVariant === 'destructive' ? 'error' : 
+                sonnerVariant === 'success' ? 'success' : 
+                sonnerVariant === 'warning' ? 'warning' : 
+                sonnerVariant === 'info' ? 'info' : 'default'](
+      toastOptions.title,
+      { description: toastOptions.description }
+    );
+
+    // Create toast for our internal state
+    const newToast: Toast = {
+      ...rest,
+      variant,
+      id: crypto.randomUUID?.() || String(Date.now()),
+      open: true,
     };
-  }, []);
+
+    setToasts((currentToasts) => [...currentToasts, newToast]);
+    return newToast;
+  };
+
+  const dismiss = (toastId?: string) => {
+    if (toastId) {
+      setToasts((current) =>
+        current.filter((toast) => toast.id !== toastId)
+      );
+    } else {
+      setToasts([]);
+    }
+  };
 
   return {
-    toast: (props: Toast) => {
-      return addToast({ ...props, open: true });
-    },
-    update: (id: string, props: Toast) => {
-      return updateToast(id, props as ToasterToast);
-    },
-    dismiss: (id: string) => {
-      return dismissToast(id);
-    },
-    toasts: toastState,
+    toast,
+    dismiss,
+    toasts,
   };
 }
 
-// Export our toast utility methods
-export { updateToast, dismissToast, createToast };
-
-// For compatibility with older import patterns
-export const toast = {
-  create: createToast,
-  dismiss: dismissToast,
-  update: updateToast
-};
+// Re-export toast from Sonner for convenience
+export { toast } from 'sonner';

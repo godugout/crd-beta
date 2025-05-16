@@ -51,6 +51,7 @@ export async function getCardReactions(cardId: string): Promise<Reaction[]> {
         cardId: reaction.cardId,
         type: reaction.type,
         createdAt: reaction.createdAt,
+        updatedAt: reaction.createdAt, // Ensure updatedAt is set
         targetType: 'card',
         targetId: reaction.cardId,
         user: {
