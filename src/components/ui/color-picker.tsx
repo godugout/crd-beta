@@ -90,3 +90,6 @@ const ColorPicker = ({ color, onChange, className, title = 'Select color', size 
 };
 
 export default ColorPicker;
+
+// Add named export to fix import errors
+export { ColorPicker };

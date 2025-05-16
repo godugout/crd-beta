@@ -12,6 +12,7 @@ import Gallery from './pages/Gallery';
 import CardView from './pages/CardView';
 import Community from './pages/Community';
 import Documentation from './pages/Documentation';
+import UserPersonalization from './pages/UserPersonalization';
 
 // Providers
 import { CardProvider } from './context/CardContext';
@@ -19,6 +20,7 @@ import { Toaster } from './components/ui/toaster';
 import { useIsMobile } from './hooks/use-mobile';
 import MobileOptimizedLayout from './components/layout/MobileOptimizedLayout';
 import ResponsiveLayout from './components/layout/ResponsiveLayout';
+import { UserPreferencesProvider } from './context/UserPreferencesContext';
 
 function App() {
   const location = useLocation();
@@ -38,18 +40,23 @@ function App() {
   
   return (
     <div className="App">
-      <Routes>
-        <Route path="/" element={renderWithLayout(<Home />)} />
-        <Route path="/create" element={renderWithLayout(<CardCreator />)} />
-        <Route path="/studio" element={<CardStudio />} /> 
-        <Route path="/editor" element={renderWithLayout(<Editor />)} />
-        <Route path="/editor/:id" element={renderWithLayout(<Editor />)} />
-        <Route path="/gallery" element={renderWithLayout(<Gallery />)} />
-        <Route path="/card/:id" element={renderWithLayout(<CardView />)} />
-        <Route path="/community" element={renderWithLayout(<Community />)} />
-        <Route path="/docs" element={<Documentation />} />
-      </Routes>
-      <Toaster />
+      <UserPreferencesProvider>
+        <CardProvider>
+          <Routes>
+            <Route path="/" element={renderWithLayout(<Home />)} />
+            <Route path="/create" element={renderWithLayout(<CardCreator />)} />
+            <Route path="/studio" element={<CardStudio />} /> 
+            <Route path="/editor" element={renderWithLayout(<Editor />)} />
+            <Route path="/editor/:id" element={renderWithLayout(<Editor />)} />
+            <Route path="/gallery" element={renderWithLayout(<Gallery />)} />
+            <Route path="/card/:id" element={renderWithLayout(<CardView />)} />
+            <Route path="/community" element={renderWithLayout(<Community />)} />
+            <Route path="/personalize" element={renderWithLayout(<UserPersonalization />)} />
+            <Route path="/docs" element={<Documentation />} />
+          </Routes>
+          <Toaster />
+        </CardProvider>
+      </UserPreferencesProvider>
     </div>
   );
 }
