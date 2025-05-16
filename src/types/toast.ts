@@ -21,9 +21,9 @@ export interface ToastAction {
 
 export interface ToastOptions {
   id?: string;
-  title?: string;
-  description?: string;
-  action?: ToastAction;
+  title?: string | ReactNode;
+  description?: string | ReactNode;
+  action?: ToastAction | ReactNode;
   variant?: ToastVariant;
   duration?: number;
   open?: boolean;
@@ -51,8 +51,8 @@ export type ToastProps = Omit<ToasterToast, "id">;
 
 // Update the createToast function to return a proper Toast type
 export const createToast = (config: {
-  title: string;
-  description?: string;
+  title: string | ReactNode;
+  description?: string | ReactNode;
   action?: ToastActionElement;
   variant?: ToastVariant;
   duration?: number;

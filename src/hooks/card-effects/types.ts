@@ -58,7 +58,7 @@ export interface EffectRegistry {
   };
 }
 
-// Define CardEffectDefinition interface and export it
+// Export CardEffectDefinition interface
 export interface CardEffectDefinition {
   id: string;
   name: string;
@@ -73,7 +73,7 @@ export interface CardEffectDefinition {
   iconUrl: string;
 }
 
-// Define and export MaterialSimulation interface
+// Export MaterialSimulation interface
 export interface MaterialSimulation {
   roughness: number;
   metalness: number;
@@ -84,10 +84,13 @@ export interface MaterialSimulation {
   reflectivity: number;
   emissive: string;
   envMapIntensity: number;
-  textureUrl?: string;
-  baseColor?: string;
-  color?: string;
-  texture?: string;
-  type?: string;
-  weathering?: number;
+  textureUrl: string;
+  baseColor: string;
+  color: string;
+  texture: string;
+  type: string;
+  weathering: number;
 }
+
+// Export CardEffectSettings for use by other modules
+export type { CardEffectSettings };

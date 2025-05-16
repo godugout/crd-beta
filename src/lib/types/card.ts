@@ -1,74 +1,142 @@
+import { Card } from '@/lib/types/cardTypes';
 
 /**
- * @deprecated This file is maintained for backward compatibility.
- * Please use the centralized type definitions from src/lib/types/cardTypes.ts instead.
+ * Legacy CardData type for backward compatibility
  */
-
-import { BaseEntity } from './index';
-import { Reaction, Comment } from './interaction';
-import { 
-  Card as CardType, 
-  FabricSwatch as FabricSwatchType,
-  DesignMetadata 
-} from './cardTypes';
-
-export interface FabricSwatch extends FabricSwatchType {}
-
-// Base Card interface that contains all common properties
-export interface BaseCard {
+export interface CardData {
   id: string;
   title: string;
   description: string;
   imageUrl: string;
   thumbnailUrl: string;
   tags: string[];
-  userId: string;
-  collectionId?: string;
-  metadata?: Record<string, any>;
+  userId?: string;  // Make userId optional
+  ownerId?: string;  // Add ownerId as an alternative
   effects: string[];
-  reactions?: Reaction[];
-  comments?: Comment[];
-  viewCount?: number;
-  isPublic?: boolean;
-  
-  // Player-related properties
-  player?: string;
-  team?: string;
-  year?: string;
-  jersey?: string;
-  set?: string;
-  cardNumber?: string;
-  cardType?: string;
-  
-  // Visual properties
-  artist?: string;
-  backgroundColor?: string;
-  textColor?: string;
-  specialEffect?: string;
-  fabricSwatches?: FabricSwatch[];
-  
-  // Additional metadata
-  name?: string;
-  cardStyle?: string;
-  backTemplate?: string;
-  
-  // Timestamps and IDs
   createdAt: string;
   updatedAt: string;
-  creatorId?: string;
-  teamId?: string;
-  
-  // Design metadata
-  designMetadata: DesignMetadata;
-  
-  // Market data
-  price?: number;
-  estimatedValue?: string;
-  condition?: string;
-  rarity?: string;
+  // Additional properties used in home components
+  backgroundColor?: string;
+  name?: string;
+  team?: string;
+  jersey?: string;
+  set?: string;
+  year?: string;
+  specialEffect?: string;
+  cardType?: string;
+  artist?: string;
+  cardNumber?: string;
+  designMetadata: {
+    cardStyle: {
+      template: string;
+      effect: string;
+      borderRadius: string;
+      borderColor: string;
+      frameColor: string;
+      frameWidth: number;
+      shadowColor: string;
+    };
+    textStyle: {
+      titleColor: string;
+      titleAlignment: string;
+      titleWeight: string;
+      descriptionColor: string;
+    };
+    cardMetadata: {
+      category?: string;
+      series?: string;
+      cardType?: string;
+    };
+    marketMetadata: {
+      price?: number;
+      currency?: string;
+      availableForSale?: boolean;
+      editionSize?: number;
+      editionNumber?: number;
+      isPrintable?: boolean;
+      isForSale?: boolean;
+      includeInCatalog?: boolean;
+    };
+  };
 }
 
-export interface Card extends BaseCard {}
+// Define CardTemplate type to fix template system issues
+export interface CardTemplate {
+  id: string;
+  name: string;
+  description?: string;
+  thumbnail: string;
+  category: string;
+  designDefaults: {
+    cardStyle: Partial<CardStyle>;
+    textStyle?: Partial<TextStyle>;
+    effects?: string[];
+  };
+}
 
-// Re-export the new types for gradual migration
-export type { CardType as CardNew, FabricSwatchType as FabricSwatchNew };
+/**
+ * Helper function to convert between Card and CardData types
+ */
+export function adaptCardToCardData(card: Card): CardData {
+  return {
+    id: card.id,
+    title: card.title,
+    description: card.description || '',
+    imageUrl: card.imageUrl,
+    thumbnailUrl: card.thumbnailUrl || card.imageUrl,
+    tags: card.tags || [],
+    userId: card.userId,
+    effects: card.effects || [],
+    createdAt: card.createdAt,
+    updatedAt: card.updatedAt,
+    // Map legacy fields
+    name: card.player || card.name,
+    team: card.team,
+    jersey: card.jersey,
+    year: card.year,
+    set: card.set,
+    cardType: card.cardType,
+    artist: card.artist,
+    cardNumber: card.cardNumber,
+    backgroundColor: card.backgroundColor,
+    specialEffect: card.specialEffect,
+    designMetadata: card.designMetadata || {
+      cardStyle: {
+        template: 'classic',
+        effect: 'none',
+        borderRadius: '8px',
+        borderColor: '#000000',
+        frameColor: '#000000',
+        frameWidth: 2,
+        shadowColor: 'rgba(0,0,0,0.2)',
+      },
+      textStyle: {
+        titleColor: '#000000',
+        titleAlignment: 'center',
+        titleWeight: 'bold',
+        descriptionColor: '#333333',
+      },
+      cardMetadata: {
+        category: 'general',
+        series: 'base',
+        cardType: 'standard',
+      },
+      marketMetadata: {
+        price: 0,
+        currency: 'USD',
+        availableForSale: false,
+        editionSize: 0,
+        editionNumber: 0,
+        isPrintable: false,
+        isForSale: false,
+        includeInCatalog: false
+      }
+    }
+  };
+}
+
+// Import types from cardTypes.ts
+import { CardStyle, TextStyle } from '@/lib/types/cardTypes';
+
+// Export from @/types/card to prevent errors in other imports
+export { Card, CardStyle, TextStyle, CardTemplate };

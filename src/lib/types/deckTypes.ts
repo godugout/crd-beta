@@ -8,7 +8,7 @@ export interface Deck {
   coverImageUrl: string;
   cards: Card[];
   cardIds: string[];
-  userId: string;
+  userId?: string;  // Make userId optional
   ownerId?: string;
   createdAt: string;
   updatedAt: string;
