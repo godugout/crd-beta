@@ -16,6 +16,7 @@ export interface AuthState {
   isLoading: boolean;
   isAdmin: boolean;
   userId: string | null;
+  signOut: () => Promise<void>;
 }
 
 export function useAuth(): AuthState {
@@ -74,12 +75,24 @@ export function useAuth(): AuthState {
       subscription.unsubscribe();
     };
   }, []);
+  
+  const signOut = async () => {
+    try {
+      await supabase.auth.signOut();
+      setUser(null);
+      setIsAuthenticated(false);
+      setUserId(null);
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
 
   return {
     user,
     isAuthenticated,
     isLoading,
     isAdmin,
-    userId
+    userId,
+    signOut
   };
 }

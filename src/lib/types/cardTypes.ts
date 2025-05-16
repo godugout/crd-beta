@@ -223,8 +223,8 @@ export interface BaseCard extends BaseEntity {
   title: string;
   description: string; // Making description required for consistency
   imageUrl: string;
+  thumbnailUrl: string; // Making thumbnailUrl required for consistency
   image?: string; // Legacy support for older components
-  thumbnailUrl?: string;
   tags: string[];
   collectionId?: string;
   userId: string;

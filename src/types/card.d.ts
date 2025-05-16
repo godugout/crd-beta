@@ -5,7 +5,7 @@ export interface CardData {
   title: string;
   description: string;
   imageUrl: string;
-  thumbnailUrl?: string;
+  thumbnailUrl: string; // Making this required for consistency
   player?: string;
   team?: string;
   year?: string;
