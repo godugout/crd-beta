@@ -1,3 +1,4 @@
+
 /**
  * Consolidated Card Types for Cardshow (CRD)
  * This file serves as the central source of truth for all card-related types
@@ -220,10 +221,10 @@ export type CardRarity = 'common' | 'uncommon' | 'rare' | 'ultra-rare' | 'legend
  */
 export interface BaseCard extends BaseEntity {
   title: string;
-  description?: string; // Made optional to fix compatibility issues
+  description: string; // Making description required for consistency
   imageUrl: string;
   image?: string; // Legacy support for older components
-  thumbnailUrl?: string; // Made optional for compatibility
+  thumbnailUrl?: string;
   tags: string[];
   collectionId?: string;
   userId: string;
