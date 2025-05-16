@@ -30,11 +30,10 @@ const CardPreview = React.forwardRef<HTMLDivElement, CardPreviewProps>(({
     );
   }
   
-  // Use safe access for card style properties with defaults
+  // Ensure we have default values for required properties
   const cardStyle = card.designMetadata?.cardStyle || {};
   const textStyle = card.designMetadata?.textStyle || {};
   
-  // Ensure we have default values for required properties
   const backgroundColor = cardStyle.backgroundColor || '#FFFFFF';
   const borderRadius = cardStyle.borderRadius || '8px';
   const borderColor = cardStyle.borderColor || '#000000';

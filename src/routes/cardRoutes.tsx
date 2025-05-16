@@ -7,6 +7,7 @@ import CardDetector from '@/pages/CardDetector';
 import CardCreator from '@/pages/CardCreator';
 import ImmersiveCardViewerPage from '@/pages/ImmersiveCardViewerPage';
 import CardCollectionPage from '@/pages/CardCollectionPage';
+import AssetLibraryPage from '@/pages/AssetLibraryPage';
 
 export const cardRoutes: RouteObject[] = [
   {
@@ -32,5 +33,9 @@ export const cardRoutes: RouteObject[] = [
   {
     path: "/immersive",
     element: <ImmersiveCardViewerPage />,
+  },
+  {
+    path: "/assets",
+    element: <AssetLibraryPage />,
   },
 ];
