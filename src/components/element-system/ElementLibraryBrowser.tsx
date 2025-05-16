@@ -38,7 +38,7 @@ const ElementLibraryBrowser: React.FC<ElementLibraryBrowserProps> = ({
       url: '/assets/elements/stickers/star.png',
       imageUrl: 'https://placehold.co/200x200/FFD700/FFF?text=★',
       tags: ['star', 'gold', 'achievement'],
-      position: { x: 50, y: 50 },
+      position: { x: 50, y: 50, z: 0 },
       size: { width: 100, height: 100 },
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
@@ -52,7 +52,7 @@ const ElementLibraryBrowser: React.FC<ElementLibraryBrowserProps> = ({
       url: '/assets/elements/stickers/trophy.png',
       imageUrl: 'https://placehold.co/200x200/C0C0C0/000?text=🏆',
       tags: ['trophy', 'winner', 'award'],
-      position: { x: 50, y: 50 },
+      position: { x: 50, y: 50, z: 0 },
       size: { width: 100, height: 100 },
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
@@ -68,7 +68,7 @@ const ElementLibraryBrowser: React.FC<ElementLibraryBrowserProps> = ({
       url: '/assets/elements/teams/red-team.png',
       imageUrl: 'https://placehold.co/200x200/FF0000/FFF?text=R',
       tags: ['red', 'team', 'logo'],
-      position: { x: 50, y: 50 },
+      position: { x: 50, y: 50, z: 0 },
       size: { width: 100, height: 100 },
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
@@ -82,7 +82,7 @@ const ElementLibraryBrowser: React.FC<ElementLibraryBrowserProps> = ({
       url: '/assets/elements/teams/blue-team.png',
       imageUrl: 'https://placehold.co/200x200/0000FF/FFF?text=B',
       tags: ['blue', 'team', 'logo'],
-      position: { x: 50, y: 50 },
+      position: { x: 50, y: 50, z: 0 },
       size: { width: 100, height: 100 },
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()

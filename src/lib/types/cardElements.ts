@@ -60,6 +60,10 @@ export interface ElementLibraryCollection {
   id: string;
   name: string;
   elements: CardElement[];
+  updatedAt?: string;
+  createdAt?: string;
+  isOfficial?: boolean;
+  category?: string;
 }
 
 // Element type enum for matching string literals
@@ -96,7 +100,7 @@ export enum ElementCategory {
 
 // Type for element upload metadata
 export interface ElementUploadMetadata {
-  title: string;
+  title?: string;
   description?: string;
   tags?: string[];
   category: ElementCategory;

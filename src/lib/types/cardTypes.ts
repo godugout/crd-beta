@@ -1,3 +1,4 @@
+
 /**
  * Card market metadata interface
  */
@@ -257,3 +258,35 @@ export const DEFAULT_CARD_METADATA: CardMetadata = {
   series: 'base',
   cardType: 'standard'
 };
+
+// Add a helper function to ensure valid cardMetadata
+export function ensureValidCardMetadata(metadata?: Partial<CardMetadata> | null): CardMetadata {
+  if (!metadata) return { ...DEFAULT_CARD_METADATA };
+  
+  return {
+    category: metadata.category || DEFAULT_CARD_METADATA.category,
+    series: metadata.series || DEFAULT_CARD_METADATA.series,
+    cardType: metadata.cardType || DEFAULT_CARD_METADATA.cardType,
+    ...metadata
+  };
+}
+
+// Add a helper function to ensure valid design metadata
+export function ensureValidDesignMetadata(designMetadata?: Partial<CardDesignMetadata> | null): CardDesignMetadata {
+  if (!designMetadata) {
+    return {
+      cardStyle: {},
+      textStyle: {},
+      cardMetadata: { ...DEFAULT_CARD_METADATA },
+      marketMetadata: {}
+    };
+  }
+  
+  return {
+    cardStyle: designMetadata.cardStyle || {},
+    textStyle: designMetadata.textStyle || {},
+    cardMetadata: ensureValidCardMetadata(designMetadata.cardMetadata),
+    marketMetadata: designMetadata.marketMetadata || {},
+    effects: designMetadata.effects || []
+  };
+}

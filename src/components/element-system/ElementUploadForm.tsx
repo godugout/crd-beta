@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ElementCategory, ElementUploadMetadata } from '@/lib/types/cardElements';
+import { ElementCategory, ElementType, ElementUploadMetadata } from '@/lib/types/cardElements';
 import { mapToElementCategory } from '@/lib/utils/typeAdapters';
 import TagInput from '@/components/ui/tag-input';
 
@@ -22,7 +22,7 @@ const ElementUploadForm: React.FC<ElementUploadFormProps> = ({
   const [name, setName] = useState(initialData.name || '');
   const [description, setDescription] = useState(initialData.description || '');
   const [category, setCategory] = useState<string>(initialData.category?.toString() || ElementCategory.STICKERS);
-  const [type, setType] = useState(initialData.type || 'standard');
+  const [type, setType] = useState<ElementType>(initialData.type || ElementType.Sticker);
   const [tags, setTags] = useState<string[]>(initialData.tags || []);
   const [attribution, setAttribution] = useState(initialData.attribution || '');
   const [imageUrl, setImageUrl] = useState(initialData.imageUrl || '');
@@ -76,6 +76,8 @@ const ElementUploadForm: React.FC<ElementUploadFormProps> = ({
       tags,
       attribution: attribution.trim() || undefined,
       imageUrl,
+      mimeType: 'image/png', // Default mime type
+      isAnimated: false     // Default is not animated
     };
     
     onSubmit(elementData);
@@ -132,15 +134,19 @@ const ElementUploadForm: React.FC<ElementUploadFormProps> = ({
         
         <div className="space-y-2">
           <Label htmlFor="type">Type *</Label>
-          <Select value={type} onValueChange={setType}>
+          <Select 
+            value={type} 
+            onValueChange={(value) => setType(value as ElementType)}
+          >
             <SelectTrigger id="type">
               <SelectValue placeholder="Select type" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="standard">Standard</SelectItem>
-              <SelectItem value="premium">Premium</SelectItem>
-              <SelectItem value="special">Special</SelectItem>
-              <SelectItem value="limited">Limited</SelectItem>
+              <SelectItem value={ElementType.Sticker}>Sticker</SelectItem>
+              <SelectItem value={ElementType.Logo}>Logo</SelectItem>
+              <SelectItem value={ElementType.Frame}>Frame</SelectItem>
+              <SelectItem value={ElementType.Badge}>Badge</SelectItem>
+              <SelectItem value={ElementType.Overlay}>Overlay</SelectItem>
             </SelectContent>
           </Select>
         </div>

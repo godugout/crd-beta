@@ -1,26 +1,39 @@
 
+import { BaseEntity } from './index';
 import { Card } from './cardTypes';
 
-export interface Collection {
-  id: string;
+/**
+ * Collection visibility options
+ */
+export type CollectionVisibility = 'public' | 'private' | 'team' | 'unlisted';
+
+/**
+ * Collection interface
+ */
+export interface Collection extends BaseEntity {
   name: string;
-  description?: string;
+  description: string;
   coverImageUrl?: string;
-  userId?: string;
-  teamId?: string;
-  visibility?: 'public' | 'private' | 'team';
-  allowComments?: boolean;
-  createdAt: string;
-  updatedAt: string;
-  designMetadata?: any;
+  userId: string;
+  teamId?: string;  
   cards?: Card[];
-  cardIds?: string[]; // Added for backward compatibility
-  isPublic?: boolean; // Added for backward compatibility
-  tags?: string[];
-  featured?: boolean;
-  instagramSource?: {
-    username: string;
-    lastFetched: string;
-    autoUpdate: boolean;
-  };
+  cardIds: string[];
+  designMetadata?: Record<string, any>;
+  visibility: CollectionVisibility;
+  isPublic: boolean;
+  allowComments?: boolean;
+}
+
+/**
+ * Deck interface for card decks
+ */
+export interface Deck extends BaseEntity {
+  name: string;
+  description: string;
+  coverImageUrl: string;
+  userId?: string;  // Making userId optional 
+  ownerId: string;  // Added as alternative to userId
+  cards: any[];
+  cardIds: string[];
+  isPublic: boolean;
 }
