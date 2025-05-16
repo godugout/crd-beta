@@ -24,7 +24,7 @@ export * from './instagram';
 export * from './cardElements';
 export * from './teamTypes';
 export * from './enhancedCardTypes';
-export * from './oaklandTypes'; // Add export for Oakland types
+export * from './oaklandTypes'; 
 
 // Additional types for backward compatibility
 export type BackgroundColor = string;
@@ -32,7 +32,7 @@ export type BackgroundColor = string;
 // Export aliases for legacy code
 export { User } from './user';
 export { Comment, Reaction } from './interaction';
-export { Card, CardLayer, CardStyle, TextStyle } from './cardTypes';
+export { Card, CardLayer, CardStyle, TextStyle, CardMetadata } from './cardTypes';
 export { InstagramPost } from './instagram';
 export { TeamMember, Team } from './teamTypes';
-export { OaklandMemoryData } from './oaklandTypes'; // Explicitly export OaklandMemoryData
+export { OaklandMemoryData } from './oaklandTypes';

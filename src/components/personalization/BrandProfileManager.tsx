@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { usePersonalizationContext } from '@/context/PersonalizationContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2, Plus, Check, Upload, Pencil } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import toastUtils from '@/lib/utils/toast-utils';
+import { toastUtils } from "@/lib/utils/toast-utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BrandProfile } from '@/lib/types/userPreferences';
 

@@ -2,8 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { useCards } from '@/context/CardContext';
-import { toast } from '@/components/ui/use-toast';
-import { createToast } from '@/utils/createToast';
+import { toast } from 'sonner';
 import { DEFAULT_CARD_METADATA, DEFAULT_MARKET_METADATA } from '@/lib/utils/cardDefaults';
 
 // Use default import for sampleCardsData
@@ -54,19 +53,15 @@ const SampleCardsButton: React.FC<SampleCardsButtonProps> = ({ className }) => {
   };
 
   const handleSuccess = () => {
-    toast(createToast({
-      title: 'Sample Cards Added',
+    toast.success('Sample Cards Added', {
       description: 'Sample cards have been added to your collection.',
-      variant: 'default'
-    }));
+    });
   };
 
   const handleError = () => {
-    toast(createToast({
-      title: 'Error Adding Cards',
+    toast.error('Error Adding Cards', {
       description: 'There was a problem adding the sample cards. Please try again.',
-      variant: 'destructive'
-    }));
+    });
   };
 
   return (

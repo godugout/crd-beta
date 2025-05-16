@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { usePersonalizationContext } from '@/context/PersonalizationContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Loader2, Save, Trash2 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Slider } from '@/components/ui/slider';
-import toastUtils from '@/lib/utils/toast-utils';
+import { toastUtils } from "@/lib/utils/toast-utils";
 import { WorkflowConfig } from '@/lib/types/userPreferences';
 
 const UserPreferencePanel: React.FC = () => {

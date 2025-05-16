@@ -1,11 +1,11 @@
-
 import * as React from "react"
 import type {
   ToastActionElement,
   ToasterToast,
   ToasterToastWithId,
+  Toast,
+  ToastVariant
 } from "@/types/toast"
-import { useToast as useToastShared } from "@/hooks/use-toast"
 
 const TOAST_LIMIT = 5
 const TOAST_REMOVE_DELAY = 1000000
@@ -85,8 +85,8 @@ export const reducer = (state: State, action: Action): State => {
     case "DISMISS_TOAST": {
       const { toastId } = action
 
-      // ! Side effects ! - This could be extracted into a dismissToast() action,
-      // but I'll keep it here for simplicity
+      // Side effects - This could be extracted into a dismissToast() action,
+      // but keeping it here for simplicity
       if (toastId) {
         addToRemoveQueue(toastId)
       } else {
@@ -165,22 +165,19 @@ export function toast(props: ToastProps) {
 
   const dismiss = () => dispatch({ type: "DISMISS_TOAST", toastId: id })
 
-  // Ensure the action is of the correct type
-  const propsWithSafeAction = {
+  // Ensure correct typing by casting
+  const toastWithId = {
     ...props,
-    action: props.action as ToastActionElement,
-  }
+    id,
+    open: true,
+    onOpenChange: (open: boolean) => {
+      if (!open) dismiss()
+    },
+  } as unknown as ToasterToastWithId
 
   dispatch({
     type: "ADD_TOAST",
-    toast: {
-      ...propsWithSafeAction,
-      id,
-      open: true,
-      onOpenChange: (open) => {
-        if (!open) dismiss()
-      },
-    } as ToasterToastWithId,
+    toast: toastWithId,
   })
 
   return {

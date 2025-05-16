@@ -109,6 +109,7 @@ export interface Card {
   cardNumber?: string; // Add cardNumber property
   fabricSwatches?: any[]; // Add fabricSwatches property
   name?: string; // Add name property
+  jersey?: string; // Add jersey property
 }
 
 /**
@@ -212,6 +213,20 @@ export interface CardEffect {
   enabled: boolean;
   settings: Record<string, any>;
   className?: string;
+  iconUrl?: string; // Add iconUrl property
+  description?: string; // Add description property
+}
+
+/**
+ * Stats interface for baseball cards
+ */
+export interface CardStats {
+  battingAverage?: string;
+  homeRuns?: string;
+  rbis?: string;
+  era?: string;
+  wins?: string;
+  strikeouts?: string;
 }
 
 /**

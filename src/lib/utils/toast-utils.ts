@@ -50,3 +50,6 @@ export const toastUtils = {
     });
   }
 };
+
+// Default export for backward compatibility
+export default toastUtils;

@@ -54,3 +54,10 @@ export function adaptToCard(data: any): Card {
     }
   };
 }
+
+/**
+ * Adapts a Card to a legacy format for compatibility
+ */
+export function adaptToLegacyCard(data: any): Card {
+  return adaptToCard(data);
+}

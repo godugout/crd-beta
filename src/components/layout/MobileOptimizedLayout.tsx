@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useMobileOptimization } from '@/hooks/useMobileOptimization';
 import { useConnectivity } from '@/hooks/useConnectivity';
-import { useToast } from '@/components/ui/use-toast';
+import { toast } from 'sonner';
 import MobileBottomNav from '@/components/navigation/MobileBottomNav';
 import AppHeader from '@/components/navigation/AppHeader';
 import MobileNavigation from '@/components/navigation/MobileNavigation';
@@ -29,7 +29,6 @@ const MobileOptimizedLayout: React.FC<MobileOptimizedLayoutProps> = ({
   const { isOnline, offlineSince } = useConnectivity();
   const [menuOpen, setMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const { toast } = useToast();
   
   // For performance monitoring
   useEffect(() => {
@@ -71,7 +70,7 @@ const MobileOptimizedLayout: React.FC<MobileOptimizedLayoutProps> = ({
         duration: 3000,
       });
     }
-  }, [isOnline, offlineSince, toast]);
+  }, [isOnline, offlineSince]);
   
   const toggleMenu = () => setMenuOpen(!menuOpen);
   

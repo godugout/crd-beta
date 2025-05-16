@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Plus, ThumbsUp, ThumbsDown, Star } from 'lucide-react';
@@ -9,7 +8,7 @@ import { CardEffect } from '@/lib/types/cardTypes';
 import { CardElement } from '@/lib/types/cardElements';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import toastUtils from '@/lib/utils/toast-utils';
+import { toastUtils } from "@/lib/utils/toast-utils";
 
 interface RecommendationProps<T> {
   title: string;

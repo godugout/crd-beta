@@ -37,6 +37,7 @@ export type ToastActionElement = React.ReactElement<{
   className?: string;
 }>;
 
+// Update the createToast function to return a proper Toast type
 export const createToast = (config: {
   title: string;
   description?: string;
