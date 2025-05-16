@@ -29,5 +29,5 @@ export interface Comment extends BaseEntity {
   teamId?: string;
   parentId?: string;
   user?: User;
-  reactions?: Reaction[];
+  reactions?: Reaction[];     // Added to support CommentSection component
 }

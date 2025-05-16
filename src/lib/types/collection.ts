@@ -8,6 +8,7 @@ import { User } from './user';
  */
 export interface Collection extends BaseEntity {
   title: string;
+  name?: string;              // Added for backward compatibility
   description?: string;
   coverImageUrl?: string;
   ownerId: string;
@@ -17,6 +18,7 @@ export interface Collection extends BaseEntity {
   allowComments?: boolean;
   designMetadata?: any;
   cards?: Card[];
+  featured?: boolean;         // Added for CollectionGrid component
 }
 
 /**

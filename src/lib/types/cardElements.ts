@@ -1,193 +1,82 @@
 
-/**
- * Element types and interfaces for the CRD card element system
- */
-
-import { BaseEntity, JsonValue } from './index';
-import { User } from './user';
+import { BaseEntity } from './index';
 
 /**
- * Element categories enum
+ * Element category enum
  */
 export enum ElementCategory {
-  STICKER = 'sticker',
-  LOGO = 'logo',
-  FRAME = 'frame',
-  BADGE = 'badge',
-  OVERLAY = 'overlay',
-  BACKGROUND = 'background',
-  TEXTURE = 'texture',
-  DECORATION = 'decoration',
-  ICON = 'icon',
-  SHAPE = 'shape',
-  TEAMS = 'teams',      // Added for backward compatibility
-  DECORATIVE = 'decorative' // Added for backward compatibility
+  DECORATIVE = 'decorative',
+  STICKERS = 'stickers',
+  TEAMS = 'teams',
+  BADGES = 'badges',
+  FRAMES = 'frames',
+  EFFECTS = 'effects',
+  BACKGROUNDS = 'backgrounds',
+  USER_GENERATED = 'user-generated'
 }
 
 /**
- * Element types enum
+ * Card element interface for stickers, logos, frames, etc.
  */
-export type ElementType = 
-  | 'sticker'
-  | 'logo'
-  | 'frame'
-  | 'badge'
-  | 'overlay'
-  | 'background'
-  | 'texture'
-  | 'decoration'
-  | 'icon'
-  | 'shape';
-
-/**
- * Element dimensions interface
- */
-export interface ElementDimensions {
-  width: number;
-  height: number;
-  aspectRatio?: number;
-}
-
-/**
- * Element position interface
- */
-export interface ElementPosition {
-  x: number;
-  y: number;
-  z?: number;
-}
-
-/**
- * Element size interface
- */
-export interface ElementSize {
-  width: number | 'auto';
-  height: number | 'auto';
-  scale?: number;
-}
-
-/**
- * Element transform interface
- */
-export interface ElementTransform {
-  rotation: number;
-  flipX?: boolean;
-  flipY?: boolean;
-  skewX?: number;
-  skewY?: number;
-}
-
-/**
- * Element placement options interface
- */
-export interface ElementPlacementOptions {
-  position?: ElementPosition;
-  size?: ElementSize;
-  transform?: ElementTransform;
-  opacity?: number;
-  blendMode?: string;
+export interface CardElement extends BaseEntity {
+  name: string;
+  description?: string;
+  type: string;
+  category: ElementCategory | string;
+  url?: string;
+  imageUrl: string;
+  thumbnailUrl?: string;
+  tags?: string[];
+  position?: {
+    x: number;
+    y: number;
+  };
+  size?: {
+    width: number;
+    height: number;
+  };
+  metadata?: any;
 }
 
 /**
  * Element upload metadata interface
  */
 export interface ElementUploadMetadata {
-  category: ElementCategory;
-  tags?: string[];
-  description?: string;
-  source?: string;
-  attribution?: string;
-  premium?: boolean;
-  dimensions?: ElementDimensions;
-  rasterizable?: boolean;
-  customizable?: boolean;
-  name?: string;  // Added for backward compatibility
-  url?: string;   // Added for backward compatibility
-}
-
-/**
- * Base card element interface
- */
-export interface CardElement extends BaseEntity {
+  id?: string;
   name: string;
-  type: ElementType;
-  category: ElementCategory;
-  imageUrl: string;
-  thumbnailUrl: string;
   description?: string;
-  tags: string[];
-  metadata?: Record<string, any>;
-  premium?: boolean;
-  creator?: User;
-  creatorId?: string;
-  usage?: number;
-  rating?: number;
-  dimensions?: ElementDimensions;
-  position?: ElementPosition;  // Added for backward compatibility
-  size?: ElementSize;         // Added for backward compatibility
-  url?: string;              // Added for backward compatibility
+  type: string;
+  category: ElementCategory | string;
+  url?: string;
+  imageUrl?: string;
+  thumbnailUrl?: string;
+  tags?: string[];
+  position?: {
+    x: number;
+    y: number;
+  };
+  size?: {
+    width: number;
+    height: number;
+  };
 }
 
 /**
- * Sticker element interface
+ * Element placement interface for positioned elements on cards
  */
-export interface StickerElement extends CardElement {
-  type: 'sticker';
-  category: ElementCategory.STICKER;
-  transparent: boolean;
-}
-
-/**
- * Logo element interface
- */
-export interface LogoElement extends CardElement {
-  type: 'logo';
-  category: ElementCategory.LOGO;
-  team?: string;
-  league?: string;
-  year?: string;
-}
-
-/**
- * Frame element interface
- */
-export interface FrameElement extends CardElement {
-  type: 'frame';
-  category: ElementCategory.FRAME;
-  innerWidth: number;
-  innerHeight: number;
-  borderWidth: number;
-}
-
-/**
- * Badge element interface
- */
-export interface BadgeElement extends CardElement {
-  type: 'badge';
-  category: ElementCategory.BADGE;
-  achievement?: string;
-  level?: string;
-}
-
-/**
- * Overlay element interface
- */
-export interface OverlayElement extends CardElement {
-  type: 'overlay';
-  category: ElementCategory.OVERLAY;
+export interface ElementPlacement {
+  elementId: string;
+  elementType: string;
+  position: {
+    x: number;
+    y: number;
+    z: number;
+  };
+  size: {
+    width: number;
+    height: number;
+  };
+  rotation: number;
   opacity: number;
-  blendMode: string;
-}
-
-/**
- * Element library collection interface
- */
-export interface ElementLibraryCollection {
-  id: string;
-  name: string;
-  description?: string;
-  elements: CardElement[];
-  category?: ElementCategory;
-  tags?: string[];
-  featured?: boolean;
+  element?: CardElement;
 }

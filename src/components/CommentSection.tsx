@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/auth';
 import { Button } from '@/components/ui/button';
@@ -10,6 +9,7 @@ import { commentRepository } from '@/lib/data';
 import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
 import { MessageCircle, SendHorizontal, Reply, Trash, Edit } from 'lucide-react';
+import { adaptComment, adaptUser } from '@/lib/utils/typeAdapters';
 
 interface CommentSectionProps {
   cardId?: string;
@@ -49,32 +49,10 @@ const CommentSection: React.FC<CommentSectionProps> = ({ cardId, collectionId, t
       
       if (data) {
         // Convert the comments to our expected type with proper typing
-        const typedComments: Comment[] = data.map(c => ({
-          id: c.id,
-          content: c.content,
-          userId: c.userId || c.authorId || '',
-          authorId: c.authorId, // Keep authorId for backward compatibility
-          cardId: c.cardId,
-          collectionId: c.collectionId,
-          teamId: c.teamId,
-          parentId: c.parentId,
-          createdAt: c.createdAt,
-          updatedAt: c.updatedAt,
-          user: c.user ? {
-            id: c.user.id,
-            email: c.user.email,
-            name: c.user.name,
-            displayName: c.user.displayName,
-            username: c.user.username,
-            avatarUrl: c.user.avatarUrl,
-            role: c.user.role,
-            createdAt: c.user.createdAt || new Date().toISOString(),
-            updatedAt: c.user.updatedAt || new Date().toISOString(),
-          } : undefined,
-          reactions: c.reactions
-        }));
-        
+        const typedComments: Comment[] = data.map(c => adaptComment(c));
         setComments(typedComments);
+        
+        // Fetch replies for each comment
         typedComments.forEach(comment => {
           if (comment.id) {
             fetchReplies(comment.id);
@@ -100,31 +78,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ cardId, collectionId, t
       }
       
       if (data && data.length > 0) {
-        // Convert to our expected type with proper typing
-        const typedReplies: Comment[] = data.map(c => ({
-          id: c.id,
-          content: c.content,
-          userId: c.userId || c.authorId || '',
-          authorId: c.authorId, // Keep authorId for backward compatibility
-          cardId: c.cardId,
-          collectionId: c.collectionId,
-          teamId: c.teamId,
-          parentId: c.parentId,
-          createdAt: c.createdAt,
-          updatedAt: c.updatedAt,
-          user: c.user ? {
-            id: c.user.id,
-            email: c.user.email,
-            name: c.user.name,
-            displayName: c.user.displayName,
-            username: c.user.username,
-            avatarUrl: c.user.avatarUrl,
-            role: c.user.role,
-            createdAt: c.user.createdAt || new Date().toISOString(),
-            updatedAt: c.user.updatedAt || new Date().toISOString(),
-          } : undefined,
-          reactions: c.reactions
-        }));
+        const typedReplies: Comment[] = data.map(c => adaptComment(c));
         
         setRepliesByParentId(prev => ({
           ...prev,
@@ -142,8 +96,8 @@ const CommentSection: React.FC<CommentSectionProps> = ({ cardId, collectionId, t
     try {
       const commentData = {
         content: newComment.trim(),
+        userId: user.id,
         authorId: user.id, // Using authorId for compatibility with different APIs
-        userId: user.id,   // Using userId for our interface
         cardId,
         collectionId,
         teamId,
@@ -163,14 +117,10 @@ const CommentSection: React.FC<CommentSectionProps> = ({ cardId, collectionId, t
         setNewComment('');
         
         // Convert to our expected type
-        const typedComment: Comment = {
+        const typedComment = adaptComment({
           ...data,
-          userId: data.userId || data.authorId || user.id,
-          user: {
-            ...user,
-            id: user.id
-          }
-        };
+          user: user
+        });
         
         if (replyTo) {
           setRepliesByParentId(prev => ({
@@ -204,11 +154,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ cardId, collectionId, t
         toast.success('Comment updated successfully');
         
         // Convert to our expected type
-        const typedComment: Comment = {
-          ...data,
-          userId: data.userId || data.authorId || '',
-          user: data.user
-        };
+        const typedComment = adaptComment(data);
         
         if (typedComment.parentId) {
           setRepliesByParentId(prev => ({

@@ -11,6 +11,13 @@ export interface EnhancedCard extends Card {
   relatedCards?: Card[];
   augmentedRealityModel?: string;
   interactive?: boolean;
+  
+  // Fields for ArtistDashboard compatibility
+  artistId?: string;
+  artist?: string;
+  marketData?: any;
+  editionSize?: number;
+  metadata?: any;
 }
 
 /**
@@ -32,7 +39,10 @@ export interface Deck extends BaseEntity {
   name: string;
   description?: string;
   cards: Card[];
+  cardIds?: string[];         // For backward compatibility
   owner: string;
+  ownerId?: string;           // For backward compatibility
   isPublic: boolean;
   category?: string;
+  coverImageUrl?: string;     // For DeckBuilder component
 }

@@ -48,10 +48,10 @@ export interface UserProfile {
 export interface User extends BaseEntity {
   email?: string;
   name?: string;
-  displayName?: string;
+  displayName?: string;        // Required by CommentSection
   username?: string;
   avatarUrl?: string;
-  role?: string;
+  role?: string;               // Required by CommentSection
   profile?: UserProfile;
 }
 
