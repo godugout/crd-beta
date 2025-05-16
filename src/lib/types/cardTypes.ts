@@ -224,9 +224,9 @@ export type CardRarity = 'common' | 'uncommon' | 'rare' | 'ultra-rare' | 'legend
  */
 export interface BaseCard extends BaseEntity {
   title: string;
-  description: string; // Making description required for consistency
+  description: string;
   imageUrl: string;
-  thumbnailUrl: string; // Making thumbnailUrl required for consistency
+  thumbnailUrl: string;
   image?: string; // Legacy support for older components
   tags: string[];
   collectionId?: string;
@@ -240,16 +240,16 @@ export interface BaseCard extends BaseEntity {
   viewCount?: number;
   
   // Baseball card properties
-  player?: string;
-  team?: string;
-  year?: string;
+  player?: string; // Required for baseball cards
+  team?: string;  // Required for baseball cards
+  year?: string;  // Required for baseball cards
   jersey?: string;
   set?: string;
   cardNumber?: string;
   cardType?: string;
-  artist?: string; // For backward compatibility
+  artist?: string;
   backgroundColor?: string;
-  textColor?: string; // Added for backward compatibility
+  textColor?: string;
   specialEffect?: string;
   fabricSwatches?: FabricSwatch[];
   stats?: CardStats;

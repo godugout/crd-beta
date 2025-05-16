@@ -25,10 +25,13 @@ export interface Reaction {
 export interface Comment {
   id: string;
   content: string;
-  authorId: string;
+  userId: string;
+  authorId?: string; // Added for backward compatibility
   parentId?: string;
   createdAt: string;
   updatedAt: string;
+  user?: User;   // Added for backward compatibility
+  reactions?: Reaction[];
 }
 
 export interface TeamMember {
@@ -58,3 +61,30 @@ export interface UserStyleProfile {
 
 // Additional types to resolve errors
 export type BackgroundColor = string;
+
+// Instagram-related types
+export interface InstagramPost {
+  id: string;
+  postId?: string;
+  username: string;
+  caption?: string;
+  imageUrl?: string;
+  permalink?: string;
+  timestamp: string;
+  mediaType: string;
+  mediaUrl: string;
+  thumbnailUrl?: string;
+}
+
+// User type definition to support user property in Comment
+export interface User {
+  id: string;
+  email?: string;
+  name?: string;
+  displayName?: string;
+  username?: string;
+  avatarUrl?: string;
+  role?: string;
+  createdAt: string;
+  updatedAt: string;
+}

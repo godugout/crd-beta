@@ -5,13 +5,27 @@
 export type ElementType = 'sticker' | 'logo' | 'frame' | 'badge' | 'overlay' | 'decoration';
 export type ElementCategoryName = string;
 
+// Change ElementCategory from type alias to string enum
+export enum ElementCategory {
+  SPORTS = 'sports',
+  ENTERTAINMENT = 'entertainment',
+  ACHIEVEMENT = 'achievement',
+  DECORATIVE = 'decorative',
+  SEASONAL = 'seasonal',
+  HOLIDAY = 'holiday',
+  TEAMS = 'teams',
+  BRANDS = 'brands',
+  CUSTOM = 'custom',
+  OTHER = 'other'
+}
+
 export interface CardElement {
   id: string;
   name: string;
   description?: string;
   type: ElementType;
-  category: ElementCategoryName;
-  url?: string;  // Make optional if assetUrl is provided
+  category: ElementCategory;
+  url: string;  // Make required
   thumbnailUrl?: string;
   assetUrl?: string;
   tags: string[];
@@ -39,11 +53,12 @@ export interface CardElement {
   };
   style?: Record<string, any>;
   metadata?: Record<string, any>;
+  creatorId?: string; // Added for ElementLibrary.ts compatibility
 }
 
-export interface ElementCategory {
+export interface ElementCategoryInfo {
   id: string;
-  name: string;
+  name: ElementCategory;
   description?: string;
   count?: number;
   tags?: string[];
@@ -51,7 +66,7 @@ export interface ElementCategory {
 }
 
 export interface ElementLibrary {
-  categories: ElementCategory[];
+  categories: ElementCategoryInfo[];
   elements: Record<string, CardElement[]>;
   featured: string[];
   recentlyUsed: string[];
@@ -113,9 +128,13 @@ export interface ElementUploadMetadata {
   name: string;
   description?: string;
   tags: string[];
-  category: string;
+  category: ElementCategory;
   isOfficial?: boolean;
   isPremium?: boolean;
+  dimensions?: {  // Added dimensions property
+    width?: number;
+    height?: number;
+  };
 }
 
 export interface ElementLibraryCollection {

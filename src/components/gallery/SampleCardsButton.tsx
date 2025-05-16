@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { useCards } from '@/context/CardContext';
 import { toast } from '@/components/ui/use-toast';
 import { createToast } from '@/utils/createToast';
+import { DEFAULT_CARD_METADATA, DEFAULT_MARKET_METADATA } from '@/lib/utils/cardDefaults';
 
 // Use default import for sampleCardsData
 import sampleCardsData from '@/data/cardData';
@@ -24,9 +25,9 @@ const SampleCardsButton: React.FC<SampleCardsButtonProps> = ({ className }) => {
           designMetadata: {
             ...cardData.designMetadata,
             cardMetadata: {
-              category: cardData.designMetadata?.cardMetadata?.category || 'general',
-              series: cardData.designMetadata?.cardMetadata?.series || 'base',
-              cardType: cardData.designMetadata?.cardMetadata?.cardType || 'standard'
+              category: cardData.designMetadata?.cardMetadata?.category || DEFAULT_CARD_METADATA.category,
+              series: cardData.designMetadata?.cardMetadata?.series || DEFAULT_CARD_METADATA.series,
+              cardType: cardData.designMetadata?.cardMetadata?.cardType || DEFAULT_CARD_METADATA.cardType
             },
             marketMetadata: {
               isPrintable: false,

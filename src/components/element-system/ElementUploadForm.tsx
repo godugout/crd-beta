@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,6 +9,8 @@ import { ElementType, ElementCategory } from '@/lib/types/cardElements';
 import { ElementUploader } from '@/lib/elements/ElementUploader';
 import { AssetProcessor } from '@/lib/elements/AssetProcessor';
 import { elementLibrary } from '@/lib/elements/ElementLibrary';
+import { Switch } from "@/components/ui/switch"; // Corrected import
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { toastUtils } from '@/lib/utils/toast-utils';
 
 interface ElementUploadFormProps {
@@ -23,7 +26,7 @@ const ElementUploadForm: React.FC<ElementUploadFormProps> = ({
   const [elementType, setElementType] = useState<ElementType>('sticker');
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [category, setCategory] = useState<ElementCategory>('custom');
+  const [category, setCategory] = useState<ElementCategory>(ElementCategory.CUSTOM);
   const [tags, setTags] = useState('');
 
   // Handle file selection
@@ -48,6 +51,11 @@ const ElementUploadForm: React.FC<ElementUploadFormProps> = ({
       return;
     }
     
+    if (!name || !category) {
+      toastUtils.error('Missing information', 'Please provide a name and category for the asset.');
+      return;
+    }
+    
     setIsUploading(true);
     
     try {
@@ -56,8 +64,10 @@ const ElementUploadForm: React.FC<ElementUploadFormProps> = ({
         selectedFile,
         elementType,
         {
-          title: name,
-          tags: tags.split(',').map(tag => tag.trim()).filter(tag => tag)
+          name,
+          description,
+          tags: tags.split(',').map(tag => tag.trim()).filter(tag => tag),
+          category
         }
       );
       
@@ -78,7 +88,7 @@ const ElementUploadForm: React.FC<ElementUploadFormProps> = ({
       // Create the element in the library
       const element = elementLibrary.createElement(elementType, {
         name,
-        url: uploadResult.url, // Add the required url property
+        url: uploadResult.url, // Required field
         assetUrl: processingResult.processedUrl || uploadResult.url,
         thumbnailUrl: processingResult.thumbnailUrl,
         description,
@@ -131,22 +141,15 @@ const ElementUploadForm: React.FC<ElementUploadFormProps> = ({
     { value: 'logo', label: 'Logo' },
     { value: 'frame', label: 'Frame' },
     { value: 'badge', label: 'Badge' },
-    { value: 'overlay', label: 'Overlay' }
+    { value: 'overlay', label: 'Overlay' },
+    { value: 'decoration', label: 'Decoration' }
   ];
 
   // Element category options
-  const categoryOptions: { value: ElementCategory; label: string }[] = [
-    { value: 'sports', label: 'Sports' },
-    { value: 'entertainment', label: 'Entertainment' },
-    { value: 'achievement', label: 'Achievement' },
-    { value: 'decorative', label: 'Decorative' },
-    { value: 'seasonal', label: 'Seasonal' },
-    { value: 'holiday', label: 'Holiday' },
-    { value: 'teams', label: 'Teams' },
-    { value: 'brands', label: 'Brands' },
-    { value: 'custom', label: 'Custom' },
-    { value: 'other', label: 'Other' }
-  ];
+  const categoryOptions = Object.values(ElementCategory).map(category => ({
+    value: category,
+    label: category.charAt(0).toUpperCase() + category.slice(1).toLowerCase()
+  }));
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">

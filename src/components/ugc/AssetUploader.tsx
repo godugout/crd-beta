@@ -5,8 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Switch } from "@/components/ui/switch"; // Fix incorrect import
-import { ElementType, ElementUploadMetadata } from '@/lib/types/cardElements';
+import { Switch } from "@/components/ui/switch"; // Fixed import
+import { ElementType, ElementCategory } from '@/lib/types/cardElements';
 import { storageOperations } from '@/lib/supabase/storage';
 import { toast } from 'sonner';
 
@@ -34,7 +34,7 @@ const AssetUploader: React.FC<AssetUploaderProps> = ({ onUploadComplete }) => {
     frame: ['png', 'svg'],
     badge: ['png', 'svg', 'webp'],
     overlay: ['png', 'svg'],
-    decoration: ['png', 'svg', 'webp'] // Add decoration type
+    decoration: ['png', 'svg', 'webp'] // Added decoration type
   };
   
   const onDrop = useCallback((acceptedFiles: File[]) => {
@@ -76,29 +76,34 @@ const AssetUploader: React.FC<AssetUploaderProps> = ({ onUploadComplete }) => {
     setUploading(true);
     
     try {
-      const { publicUrl, assetId } = await storageOperations.uploadAsset(
+      // Upload the file - use storageOperations.uploadImage instead of uploadAsset
+      const uploadResult = await storageOperations.uploadImage(
         selectedFile,
-        selectedElementType,
-        metadata
+        `assets/${selectedElementType}/${Date.now()}-${selectedFile.name}`
       );
       
-      if (publicUrl && assetId) {
-        toast.success('Asset uploaded successfully!');
-        onUploadComplete(publicUrl, assetId);
-        
-        // Reset state
-        setMetadata({
-          name: '',
-          description: '',
-          tags: [],
-          category: '',
-          isOfficial: false,
-          isPremium: false,
-        });
-        setSelectedFile(null);
-      } else {
-        toast.error('Failed to upload asset. Please try again.');
+      if (!uploadResult.data) {
+        toast.error('Upload failed: Could not upload file');
+        setIsUploading(false);
+        return;
       }
+      
+      // Create asset ID
+      const assetId = `asset-${Date.now()}`;
+      
+      // Return the public URL and asset ID
+      onUploadComplete(uploadResult.data.url, assetId);
+      
+      // Reset state
+      setMetadata({
+        name: '',
+        description: '',
+        tags: [],
+        category: '',
+        isOfficial: false,
+        isPremium: false,
+      });
+      setSelectedFile(null);
     } catch (error: any) {
       console.error('Upload error:', error);
       toast.error(`Upload failed: ${error.message}`);

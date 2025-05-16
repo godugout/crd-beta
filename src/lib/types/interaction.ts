@@ -21,11 +21,12 @@ export interface Reaction extends BaseEntity {
  */
 export interface Comment extends BaseEntity {
   content: string;
-  userId: string;
+  userId: string; // Required for our interface
+  authorId?: string; // Legacy support for old API
   cardId?: string;
   collectionId?: string;
   teamId?: string;
   parentId?: string;
-  user?: User;
+  user?: User; // Support for user object
   reactions?: Reaction[];
 }
