@@ -20,7 +20,15 @@ export const effectRegistry: Record<string, CardEffectDefinition> = {
       animationEnabled: true
     },
     cssClass: 'effect-holographic',
-    supportedCardTypes: ['standard', 'premium', 'collectible']
+    supportedCardTypes: ['standard', 'premium', 'collectible'],
+    premium: true,
+    enabled: true,
+    renderer: (element: HTMLElement, settings: any) => {
+      // Apply holographic effect to the element
+      element.classList.add('effect-holographic');
+      element.style.setProperty('--hologram-intensity', settings.intensity.toString());
+      element.style.setProperty('--motion-speed', settings.speed.toString());
+    }
   },
   
   Refractor: {
@@ -37,7 +45,15 @@ export const effectRegistry: Record<string, CardEffectDefinition> = {
       animationEnabled: true
     },
     cssClass: 'effect-refractor',
-    supportedCardTypes: ['premium', 'collectible']
+    supportedCardTypes: ['premium', 'collectible'],
+    premium: true,
+    enabled: true,
+    renderer: (element: HTMLElement, settings: any) => {
+      // Apply refractor effect to the element
+      element.classList.add('card-refractor');
+      element.style.setProperty('--refractor-intensity', settings.intensity.toString());
+      element.style.setProperty('--motion-speed', settings.speed.toString());
+    }
   },
   
   Chrome: {
@@ -53,7 +69,14 @@ export const effectRegistry: Record<string, CardEffectDefinition> = {
       animationEnabled: false
     },
     cssClass: 'effect-chrome',
-    supportedCardTypes: ['standard', 'premium', 'collectible']
+    supportedCardTypes: ['standard', 'premium', 'collectible'],
+    premium: false,
+    enabled: true,
+    renderer: (element: HTMLElement, settings: any) => {
+      // Apply chrome effect to the element
+      element.classList.add('card-chrome');
+      element.style.setProperty('--chrome-intensity', settings.intensity.toString());
+    }
   },
   
   Vintage: {
@@ -69,7 +92,14 @@ export const effectRegistry: Record<string, CardEffectDefinition> = {
       animationEnabled: false
     },
     cssClass: 'effect-vintage',
-    supportedCardTypes: ['standard', 'collectible']
+    supportedCardTypes: ['standard', 'collectible'],
+    premium: false,
+    enabled: true,
+    renderer: (element: HTMLElement, settings: any) => {
+      // Apply vintage effect to the element
+      element.classList.add('card-vintage');
+      element.style.setProperty('--vintage-intensity', settings.intensity.toString());
+    }
   },
   
   Shimmer: {
@@ -85,7 +115,15 @@ export const effectRegistry: Record<string, CardEffectDefinition> = {
       animationEnabled: true
     },
     cssClass: 'effect-shimmer',
-    supportedCardTypes: ['standard', 'premium', 'collectible']
+    supportedCardTypes: ['standard', 'premium', 'collectible'],
+    premium: false,
+    enabled: true,
+    renderer: (element: HTMLElement, settings: any) => {
+      // Apply shimmer effect to the element
+      element.classList.add('effect-shimmer');
+      element.style.setProperty('--shimmer-intensity', settings.intensity.toString());
+      element.style.setProperty('--motion-speed', settings.speed.toString());
+    }
   }
 };
 

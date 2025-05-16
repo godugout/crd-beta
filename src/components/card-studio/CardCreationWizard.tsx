@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card } from '@/lib/types/cardTypes';
 import { v4 as uuidv4 } from 'uuid';
@@ -77,6 +78,14 @@ const CardCreationWizard: React.FC<CardCreationWizardProps> = ({
     }));
   };
 
+  const handleEffectUpdate = (effects: string[]) => {
+    setCardData(prev => ({
+      ...prev,
+      effects,
+      updatedAt: new Date().toISOString()
+    }));
+  };
+
   const handleComplete = () => {
     // Ensure all required fields are set
     const completedCard = {
@@ -97,7 +106,7 @@ const CardCreationWizard: React.FC<CardCreationWizardProps> = ({
     { title: 'Image', component: <ImageStep cardData={cardData} onUpdate={handleUpdate} /> },
     { title: 'Text', component: <TextStep cardData={cardData} onUpdate={handleUpdate} /> },
     { title: 'Design', component: <DesignStep cardData={cardData} onUpdate={handleUpdate} /> },
-    { title: 'Effects', component: <EffectsStep cardData={cardData} onUpdate={handleUpdate} /> },
+    { title: 'Effects', component: <EffectsStep cardData={cardData} onUpdateEffects={handleEffectUpdate} /> },
     { title: 'Finalize', component: <FinalizeStep cardData={cardData} onUpdate={handleUpdate} /> },
     { title: 'Preview', component: <PreviewStep cardData={cardData} /> },
   ];

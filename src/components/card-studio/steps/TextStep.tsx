@@ -49,6 +49,17 @@ const DEFAULT_TEXT_STYLE = {
   descriptionColor: '#333333',
 };
 
+const DEFAULT_MARKET_METADATA = {
+  isPrintable: false,
+  isForSale: false,
+  includeInCatalog: false,
+  price: 0,
+  currency: 'USD',
+  availableForSale: false,
+  editionSize: 1,
+  editionNumber: 1,
+};
+
 const TextStep: React.FC<TextStepProps> = ({ cardData, onUpdate }) => {
   // Ensure we have design metadata with text style
   const designMetadata = cardData.designMetadata || {
@@ -63,8 +74,12 @@ const TextStep: React.FC<TextStepProps> = ({ cardData, onUpdate }) => {
       frameColor: '#000000',
     },
     textStyle: DEFAULT_TEXT_STYLE,
-    cardMetadata: {},
-    marketMetadata: {}
+    cardMetadata: {
+      category: 'general',
+      series: 'base',
+      cardType: 'standard',
+    },
+    marketMetadata: DEFAULT_MARKET_METADATA
   };
 
   // Get text style with fallback

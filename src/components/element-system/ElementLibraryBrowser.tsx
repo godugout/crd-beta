@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
@@ -253,6 +254,7 @@ const ElementLibraryBrowser: React.FC<ElementLibraryBrowserProps> = ({
               // Add some demo elements
               const demoSticker = elementLibrary.createElement('sticker', {
                 name: 'Star Sticker',
+                url: '/placeholder.svg',  // Add URL property to fix TypeScript error
                 assetUrl: '/placeholder.svg',
                 thumbnailUrl: '/placeholder.svg',
                 description: 'A sample star sticker',
@@ -266,6 +268,7 @@ const ElementLibraryBrowser: React.FC<ElementLibraryBrowserProps> = ({
               
               const demoLogo = elementLibrary.createElement('logo', {
                 name: 'Sample Team Logo',
+                url: '/placeholder.svg',  // Add URL property to fix TypeScript error
                 assetUrl: '/placeholder.svg',
                 thumbnailUrl: '/placeholder.svg',
                 description: 'A sample team logo',
@@ -279,6 +282,7 @@ const ElementLibraryBrowser: React.FC<ElementLibraryBrowserProps> = ({
               
               const demoFrame = elementLibrary.createElement('frame', {
                 name: 'Gold Frame',
+                url: '/placeholder.svg',  // Add URL property to fix TypeScript error
                 assetUrl: '/placeholder.svg',
                 thumbnailUrl: '/placeholder.svg',
                 description: 'A decorative gold frame',

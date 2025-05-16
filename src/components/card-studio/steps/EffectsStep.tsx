@@ -1,170 +1,231 @@
 
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
+import React, { useState, useEffect } from 'react';
+import { Card } from '@/lib/types/cardTypes';
+import { CardEffectDefinition } from '@/hooks/card-effects/types';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent } from '@/components/ui/card';
-import { Check, X } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { getEffectsByCategory, getEffectById } from '@/components/effects/effectRegistry';
 
 interface EffectsStepProps {
-  effects: string[];
-  onUpdate: (effects: string[]) => void;
+  cardData: Partial<Card>;
+  onUpdateEffects: (effects: string[]) => void;
 }
 
-// Available effects for cards
-const AVAILABLE_EFFECTS = [
-  {
-    id: 'holographic',
-    name: 'Holographic',
-    description: 'Rainbow holographic effect that changes with viewing angle',
-    preview: '🌈',
-    premium: false,
-  },
-  {
-    id: 'gold-foil',
-    name: 'Gold Foil',
-    description: 'Metallic gold foil accents',
-    preview: '✨',
-    premium: false,
-  },
-  {
-    id: 'silver-foil',
-    name: 'Silver Foil',
-    description: 'Metallic silver foil accents',
-    preview: '⚪',
-    premium: false,
-  },
-  {
-    id: 'gloss',
-    name: 'Gloss Finish',
-    description: 'Shiny high-gloss finish',
-    preview: '💎',
-    premium: false,
-  },
-  {
-    id: 'matte',
-    name: 'Matte Finish',
-    description: 'Smooth matte finish with reduced glare',
-    preview: '🔲',
-    premium: false,
-  },
-  {
-    id: 'prismatic',
-    name: 'Prismatic',
-    description: 'Advanced rainbow prismatic effect',
-    preview: '🌟',
-    premium: true,
-  },
-  {
-    id: 'refractor',
-    name: 'Refractor',
-    description: 'Refractor pattern with light diffusion',
-    preview: '📱',
-    premium: true,
-  },
-];
+const EffectsStep: React.FC<EffectsStepProps> = ({ cardData, onUpdateEffects }) => {
+  const [selectedEffects, setSelectedEffects] = useState<string[]>(cardData.effects || []);
+  const [selectedEffect, setSelectedEffect] = useState<CardEffectDefinition | null>(null);
+  const [standardEffects, setStandardEffects] = useState<CardEffectDefinition[]>([]);
+  const [premiumEffects, setPremiumEffects] = useState<CardEffectDefinition[]>([]);
 
-const EffectsStep: React.FC<EffectsStepProps> = ({ effects, onUpdate }) => {
-  const [intensity, setIntensity] = useState(50);
-  
-  // Toggle an effect on or off
-  const toggleEffect = (effectId: string) => {
-    if (effects.includes(effectId)) {
-      onUpdate(effects.filter(id => id !== effectId));
+  // Load effects on component mount
+  useEffect(() => {
+    setStandardEffects(getEffectsByCategory('standard'));
+    setPremiumEffects(getEffectsByCategory('premium'));
+  }, []);
+
+  // Update selected effect when changing selection
+  useEffect(() => {
+    if (selectedEffects.length > 0) {
+      const effect = getEffectById(selectedEffects[0]);
+      if (effect) {
+        setSelectedEffect(effect);
+      }
     } else {
-      onUpdate([...effects, effectId]);
+      setSelectedEffect(null);
+    }
+  }, [selectedEffects]);
+
+  // Update parent component when effects change
+  useEffect(() => {
+    onUpdateEffects(selectedEffects);
+  }, [selectedEffects, onUpdateEffects]);
+
+  // Toggle effect selection
+  const toggleEffect = (effectId: string) => {
+    if (selectedEffects.includes(effectId)) {
+      setSelectedEffects(selectedEffects.filter(id => id !== effectId));
+    } else {
+      // For simplicity, we'll only allow one effect at a time for now
+      setSelectedEffects([effectId]);
     }
   };
-  
-  // Check if an effect is active
-  const isEffectActive = (effectId: string) => {
-    return effects.includes(effectId);
+
+  // Render effect card
+  const renderEffectCard = (effect: CardEffectDefinition) => {
+    const isSelected = selectedEffects.includes(effect.id);
+    
+    return (
+      <div
+        key={effect.id}
+        className={`border rounded-lg p-3 cursor-pointer transition-all ${
+          isSelected ? 'border-primary bg-primary/5' : 'hover:border-gray-400'
+        }`}
+        onClick={() => toggleEffect(effect.id)}
+      >
+        <div className="aspect-[2.5/3.5] bg-gray-100 mb-2 rounded-md overflow-hidden">
+          {effect.thumbnail ? (
+            <img 
+              src={effect.thumbnail} 
+              alt={effect.name} 
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-gray-400">
+              No Preview
+            </div>
+          )}
+        </div>
+        <div className="flex justify-between items-center">
+          <div>
+            <h3 className="font-medium text-sm">{effect.name}</h3>
+            <p className="text-xs text-gray-500 truncate">{effect.description}</p>
+          </div>
+          {isSelected && (
+            <Badge variant="default" className="ml-2">Active</Badge>
+          )}
+        </div>
+      </div>
+    );
   };
 
   return (
     <div className="space-y-6">
-      <h2 className="text-xl font-semibold">Special Effects</h2>
+      <h2 className="text-xl font-semibold">Card Effects</h2>
       
-      <p className="text-sm text-gray-600">
-        Add special effects to make your card stand out. These effects will be visible when viewing your card.
-      </p>
-      
-      {/* Effects list */}
-      <div className="space-y-3">
-        {AVAILABLE_EFFECTS.map(effect => (
-          <Card 
-            key={effect.id}
-            className={`transition-all ${isEffectActive(effect.id) ? 'border-primary' : ''}`}
-          >
-            <CardContent className="p-4 flex justify-between items-center">
-              <div className="flex items-center space-x-4">
-                <div className="text-2xl">{effect.preview}</div>
-                <div>
-                  <h3 className="font-medium flex items-center">
-                    {effect.name}
-                    {effect.premium && (
-                      <span className="ml-2 px-1.5 py-0.5 text-xs bg-amber-100 text-amber-800 rounded">
-                        PREMIUM
-                      </span>
-                    )}
-                  </h3>
-                  <p className="text-xs text-gray-500">{effect.description}</p>
-                </div>
+      <Tabs defaultValue="standard" className="w-full">
+        <TabsList className="grid grid-cols-3 mb-4">
+          <TabsTrigger value="standard">Standard Effects</TabsTrigger>
+          <TabsTrigger value="premium">Premium Effects</TabsTrigger>
+          <TabsTrigger value="settings">Effect Settings</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="standard" className="space-y-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            {standardEffects.map(renderEffectCard)}
+          </div>
+          
+          {standardEffects.length === 0 && (
+            <div className="text-center py-8 text-gray-500">
+              Loading standard effects...
+            </div>
+          )}
+        </TabsContent>
+        
+        <TabsContent value="premium" className="space-y-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            {premiumEffects.map(renderEffectCard)}
+          </div>
+          
+          {premiumEffects.length === 0 && (
+            <div className="text-center py-8 text-gray-500">
+              Loading premium effects...
+            </div>
+          )}
+        </TabsContent>
+        
+        <TabsContent value="settings" className="space-y-4">
+          {selectedEffect ? (
+            <div className="border rounded-lg p-4 space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="font-medium">{selectedEffect.name} Settings</h3>
+                <Badge>{selectedEffect.category}</Badge>
               </div>
               
-              <Switch 
-                checked={isEffectActive(effect.id)} 
-                onCheckedChange={() => toggleEffect(effect.id)} 
-                disabled={effect.premium && effects.length >= 2}
-              />
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-      
-      {/* Intensity control */}
-      {effects.length > 0 && (
-        <div className="space-y-2 pt-4 border-t">
-          <div className="flex justify-between">
-            <Label>Effect Intensity</Label>
-            <span className="text-sm">{intensity}%</span>
-          </div>
-          <Slider
-            value={[intensity]}
-            min={0}
-            max={100}
-            step={1}
-            onValueChange={([value]) => setIntensity(value)}
-          />
-          <p className="text-xs text-gray-500">
-            Adjust the intensity of all selected effects.
-          </p>
-        </div>
-      )}
-      
-      {/* Selected effects summary */}
-      <div className="bg-gray-50 p-4 rounded-lg">
-        <h3 className="text-sm font-medium mb-2">Selected Effects</h3>
-        {effects.length > 0 ? (
-          <ul className="space-y-1">
-            {effects.map(effectId => {
-              const effect = AVAILABLE_EFFECTS.find(e => e.id === effectId);
-              return (
-                <li key={effectId} className="text-sm flex items-center">
-                  <Check className="h-4 w-4 text-green-500 mr-2" />
-                  {effect?.name}
-                </li>
-              );
-            })}
-          </ul>
-        ) : (
-          <p className="text-sm text-gray-500 flex items-center">
-            <X className="h-4 w-4 text-gray-400 mr-2" />
-            No effects selected
-          </p>
-        )}
-      </div>
+              <div className="space-y-6">
+                {selectedEffect.defaultSettings.intensity !== undefined && (
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <Label>Effect Intensity</Label>
+                      <span className="text-sm text-gray-500">
+                        {Math.round(selectedEffect.defaultSettings.intensity * 100)}%
+                      </span>
+                    </div>
+                    <Slider 
+                      defaultValue={[selectedEffect.defaultSettings.intensity * 100]}
+                      max={100}
+                      step={1}
+                      className="w-full"
+                    />
+                  </div>
+                )}
+                
+                {selectedEffect.defaultSettings.speed !== undefined && (
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <Label>Animation Speed</Label>
+                      <span className="text-sm text-gray-500">
+                        {Math.round(selectedEffect.defaultSettings.speed * 100)}%
+                      </span>
+                    </div>
+                    <Slider 
+                      defaultValue={[selectedEffect.defaultSettings.speed * 100]}
+                      max={100}
+                      step={1}
+                      className="w-full"
+                    />
+                  </div>
+                )}
+                
+                {selectedEffect.defaultSettings.animationEnabled !== undefined && (
+                  <div className="flex items-center justify-between">
+                    <Label>Enable Animation</Label>
+                    <Switch 
+                      checked={selectedEffect.defaultSettings.animationEnabled}
+                    />
+                  </div>
+                )}
+                
+                {selectedEffect.defaultSettings.pattern && (
+                  <div className="space-y-2">
+                    <Label>Pattern Style</Label>
+                    <div className="flex flex-wrap gap-2">
+                      {['linear', 'radial', 'angular'].map(pattern => (
+                        <Badge 
+                          key={pattern}
+                          variant={pattern === selectedEffect.defaultSettings.pattern ? "default" : "outline"}
+                          className="cursor-pointer"
+                        >
+                          {pattern}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                {/* Simple color scheme display */}
+                {selectedEffect.defaultSettings.colorScheme && (
+                  <div className="space-y-2">
+                    <Label>Color Scheme</Label>
+                    <div className="flex gap-1">
+                      {Array.isArray(selectedEffect.defaultSettings.colorScheme) ? (
+                        selectedEffect.defaultSettings.colorScheme.map((color, index) => (
+                          <div 
+                            key={index}
+                            className="w-8 h-8 rounded-full"
+                            style={{ backgroundColor: color }}
+                          />
+                        ))
+                      ) : (
+                        <div 
+                          className="w-8 h-8 rounded-full"
+                          style={{ backgroundColor: selectedEffect.defaultSettings.colorScheme }}
+                        />
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-8 text-gray-500">
+              Select an effect to see available settings
+            </div>
+          )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
