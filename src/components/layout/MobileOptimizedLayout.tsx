@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useMobileOptimization } from '@/hooks/useMobileOptimization';
@@ -10,6 +9,7 @@ import MobileNavigation from '@/components/navigation/MobileNavigation';
 import { Button } from '@/components/ui/button';
 import { Wifi, WifiOff } from 'lucide-react';
 import { logRenderingInfo } from '@/utils/debugRenderer';
+import { cn } from '@/lib/utils';
 
 interface MobileOptimizedLayoutProps {
   children: React.ReactNode;
@@ -25,7 +25,7 @@ const MobileOptimizedLayout: React.FC<MobileOptimizedLayoutProps> = ({
   showBottomNav = true
 }) => {
   const isMobile = useIsMobile();
-  const { isLowBandwidth, reduceEffects } = useMobileOptimization();
+  const { isLowBandwidth, reduceEffects, viewportWidth } = useMobileOptimization();
   const { isOnline, offlineSince } = useConnectivity();
   const [menuOpen, setMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -37,10 +37,11 @@ const MobileOptimizedLayout: React.FC<MobileOptimizedLayoutProps> = ({
       logRenderingInfo('MobileOptimizedLayout', { 
         isMobile, 
         reduceEffects,
-        isOnline 
+        isOnline,
+        viewportWidth 
       });
     }
-  }, [isMobile, reduceEffects, isOnline]);
+  }, [isMobile, reduceEffects, isOnline, viewportWidth]);
   
   // Track scroll position to hide/show the header on mobile
   useEffect(() => {
@@ -74,6 +75,9 @@ const MobileOptimizedLayout: React.FC<MobileOptimizedLayoutProps> = ({
   
   const toggleMenu = () => setMenuOpen(!menuOpen);
   
+  // Determine if we should use tablet optimizations (viewport between mobile and desktop)
+  const isTablet = viewportWidth >= 768 && viewportWidth < 1024;
+  
   return (
     <div className="flex flex-col min-h-screen">
       {/* Header - hides on scroll down on mobile */}
@@ -95,7 +99,13 @@ const MobileOptimizedLayout: React.FC<MobileOptimizedLayoutProps> = ({
           </div>
         )}
         
-        {children}
+        {/* Apply different padding based on device type */}
+        <div className={cn(
+          isMobile ? "px-3" : isTablet ? "px-6" : "px-8",
+          "transition-all duration-200"
+        )}>
+          {children}
+        </div>
         
         {/* Offline Banner */}
         {!isOnline && (

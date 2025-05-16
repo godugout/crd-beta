@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { Card } from '@/lib/types/cardTypes';
-import { ResponsiveImage } from '@/components/ui/responsive-image';
 import { useMobileOptimization } from '@/hooks/useMobileOptimization';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
@@ -45,22 +44,22 @@ const CardPreview: React.FC<CardPreviewProps> = ({
 
   // Card container styles from design metadata (with defaults)
   const containerStyle = {
-    backgroundColor: cardStyle.backgroundColor || '#ffffff',
-    borderRadius: cardStyle.borderRadius || '8px',
-    borderColor: cardStyle.borderColor || '#000000',
-    boxShadow: cardStyle.shadowColor ? `0 4px 12px ${cardStyle.shadowColor}` : undefined,
-    borderWidth: cardStyle.frameWidth ? `${cardStyle.frameWidth}px` : '2px'
+    backgroundColor: (cardStyle as any).backgroundColor || '#ffffff',
+    borderRadius: (cardStyle as any).borderRadius || '8px',
+    borderColor: (cardStyle as any).borderColor || '#000000',
+    boxShadow: (cardStyle as any).shadowColor ? `0 4px 12px ${(cardStyle as any).shadowColor}` : undefined,
+    borderWidth: (cardStyle as any).frameWidth ? `${(cardStyle as any).frameWidth}px` : '2px'
   };
   
   // Text styles from design metadata (with defaults)
   const titleStyle = {
-    color: textStyle.titleColor || '#000000',
-    fontWeight: textStyle.titleWeight || 'bold',
-    textAlign: textStyle.titleAlignment || 'center'
+    color: (textStyle as any).titleColor || '#000000',
+    fontWeight: (textStyle as any).titleWeight || 'bold',
+    textAlign: (textStyle as any).titleAlignment || 'center'
   };
   
   const descStyle = {
-    color: textStyle.descriptionColor || '#333333',
+    color: (textStyle as any).descriptionColor || '#333333',
   };
 
   return (
@@ -74,13 +73,13 @@ const CardPreview: React.FC<CardPreviewProps> = ({
     >
       {/* Card image */}
       <div className="w-full h-[65%] overflow-hidden">
-        <ResponsiveImage 
+        <img 
           src={card.imageUrl}
           alt={card.title}
           width={optimizedRendering.resolution * 400}
           height={optimizedRendering.resolution * 520}
           className="w-full h-full object-cover"
-          priority={true}
+          loading="lazy"
         />
       </div>
       

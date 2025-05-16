@@ -4,97 +4,115 @@ import { useState, useEffect } from 'react';
 interface ConnectivityState {
   isOnline: boolean;
   offlineSince: Date | null;
-  reconnected: boolean;
-  lastChecked: Date;
+  lastSync: Date | null;
+  connectionType: string | null;
+  reconnectAttempts: number;
 }
 
-export function useConnectivity() {
+export const useConnectivity = () => {
   const [state, setState] = useState<ConnectivityState>({
     isOnline: navigator.onLine,
-    offlineSince: null,
-    reconnected: false,
-    lastChecked: new Date()
+    offlineSince: navigator.onLine ? null : new Date(),
+    lastSync: null,
+    connectionType: null,
+    reconnectAttempts: 0
   });
-
-  // Check active connection status using fetch API
-  const checkConnection = async () => {
-    try {
-      // Random query param to prevent caching
-      const timestamp = new Date().getTime();
-      const response = await fetch(`/ping?_=${timestamp}`, {
-        method: 'HEAD',
-        cache: 'no-cache',
-        headers: {
-          'Cache-Control': 'no-cache',
-        },
-        // Short timeout to detect poor connections
-        signal: AbortSignal.timeout(3000)
-      });
-      
-      if (response.ok) {
-        setState(prev => ({
-          isOnline: true,
-          offlineSince: prev.isOnline ? null : prev.offlineSince,
-          reconnected: !prev.isOnline,
-          lastChecked: new Date()
-        }));
-      } else {
-        handleOfflineState();
-      }
-    } catch (error) {
-      handleOfflineState();
-    }
-  };
-
-  const handleOfflineState = () => {
-    setState(prev => ({
-      isOnline: false,
-      offlineSince: prev.offlineSince || new Date(),
-      reconnected: false,
-      lastChecked: new Date()
-    }));
-  };
-
+  
+  // Get connection type if available in browser
   useEffect(() => {
-    // Initial check
-    checkConnection();
-    
-    // Browser online/offline events
+    const connection = 
+      'connection' in navigator 
+        ? (navigator as any).connection || 
+          (navigator as any).mozConnection || 
+          (navigator as any).webkitConnection
+        : null;
+        
+    if (connection) {
+      setState(prev => ({
+        ...prev,
+        connectionType: connection.effectiveType || connection.type || null
+      }));
+      
+      const handleConnectionChange = () => {
+        setState(prev => ({
+          ...prev,
+          connectionType: connection.effectiveType || connection.type || null
+        }));
+      };
+      
+      connection.addEventListener('change', handleConnectionChange);
+      return () => connection.removeEventListener('change', handleConnectionChange);
+    }
+  }, []);
+  
+  // Monitor online/offline status
+  useEffect(() => {
     const handleOnline = () => {
-      checkConnection(); // Verify actual connection with fetch
+      setState(prev => ({
+        ...prev,
+        isOnline: true,
+        lastSync: new Date(),
+        reconnectAttempts: 0
+      }));
     };
     
     const handleOffline = () => {
-      handleOfflineState();
+      setState(prev => ({
+        ...prev,
+        isOnline: false,
+        offlineSince: new Date()
+      }));
     };
     
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
     
-    // Set up periodic checking (less frequent to save battery)
-    const intervalId = setInterval(checkConnection, 30000);
-    
-    // Check on tab visibility change (user returns to app)
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        checkConnection();
-      }
-    };
-    
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      clearInterval(intervalId);
     };
   }, []);
-
-  return {
-    isOnline: state.isOnline,
-    offlineSince: state.offlineSince,
-    reconnected: state.reconnected,
-    lastChecked: state.lastChecked
+  
+  // Method to attempt manual reconnection
+  const attemptReconnect = async (): Promise<boolean> => {
+    if (state.isOnline) return true;
+    
+    try {
+      // Try to fetch a small resource to check connectivity
+      const response = await fetch('/api/ping', { 
+        method: 'HEAD',
+        cache: 'no-store'
+      });
+      
+      const isConnected = response.ok;
+      
+      if (isConnected) {
+        setState(prev => ({
+          ...prev,
+          isOnline: true,
+          lastSync: new Date()
+        }));
+        return true;
+      }
+      
+      setState(prev => ({
+        ...prev, 
+        reconnectAttempts: prev.reconnectAttempts + 1
+      }));
+      
+      return false;
+    } catch (error) {
+      setState(prev => ({
+        ...prev, 
+        reconnectAttempts: prev.reconnectAttempts + 1
+      }));
+      
+      return false;
+    }
   };
-}
+  
+  return {
+    ...state,
+    attemptReconnect
+  };
+};
