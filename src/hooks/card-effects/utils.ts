@@ -1,4 +1,3 @@
-
 import { Card } from '@/lib/types';
 import { debounce } from 'lodash-es';
 import { PremiumCardEffect } from './types';
@@ -74,20 +73,34 @@ export async function processCardsBatch(
 /**
  * Predefined premium effects for cards
  */
-export const premiumEffects: Record<string, PremiumCardEffect> = {
-  'Holographic': {
-    id: 'holographic',
-    name: 'Holographic',
-    category: 'holographic',
+export const premiumEffects: PremiumCardEffect[] = [
+  {
+    id: 'holographic-rainbow',
+    name: 'Holographic Rainbow',
+    description: 'Full rainbow holographic effect',
+    enabled: false,
+    category: 'premium',
     settings: {
       intensity: 0.8,
-      speed: 1.0
+      speed: 1.2,
     },
-    description: 'Classic rainbow holographic effect that shifts colors as the card moves',
     premium: false,
-    iconUrl: '/icons/effects/holographic.svg'
+    iconUrl: '/effects/holographic-icon.png'
   },
-  'Refractor': {
+  {
+    id: 'holographic-linear',
+    name: 'Linear Holographic',
+    description: 'Linear gradient holographic effect',
+    enabled: false,
+    category: 'premium',
+    settings: {
+      intensity: 0.7,
+      speed: 1.0,
+    },
+    premium: false,
+    iconUrl: '/effects/linear-holo-icon.png'
+  },
+  {
     id: 'refractor',
     name: 'Refractor',
     category: 'refractor',
@@ -99,7 +112,7 @@ export const premiumEffects: Record<string, PremiumCardEffect> = {
     premium: false,
     iconUrl: '/icons/effects/refractor.svg'
   },
-  'Superfractor': {
+  {
     id: 'superfractor',
     name: 'Superfractor',
     category: 'refractor',
@@ -112,7 +125,7 @@ export const premiumEffects: Record<string, PremiumCardEffect> = {
     premium: true,
     iconUrl: '/icons/effects/superfractor.svg'
   },
-  'Cracked Ice': {
+  {
     id: 'cracked-ice',
     name: 'Cracked Ice',
     category: 'refractor',
@@ -125,7 +138,7 @@ export const premiumEffects: Record<string, PremiumCardEffect> = {
     premium: true,
     iconUrl: '/icons/effects/cracked-ice.svg'
   },
-  'Mojo': {
+  {
     id: 'mojo',
     name: 'Mojo',
     category: 'refractor',
@@ -138,7 +151,7 @@ export const premiumEffects: Record<string, PremiumCardEffect> = {
     premium: true,
     iconUrl: '/icons/effects/mojo.svg'
   },
-  'Pulsar': {
+  {
     id: 'pulsar',
     name: 'Pulsar',
     category: 'special',
@@ -152,7 +165,7 @@ export const premiumEffects: Record<string, PremiumCardEffect> = {
     premium: true,
     iconUrl: '/icons/effects/pulsar.svg'
   },
-  'Scope': {
+  {
     id: 'scope',
     name: 'Scope',
     category: 'special',
@@ -165,7 +178,7 @@ export const premiumEffects: Record<string, PremiumCardEffect> = {
     premium: true,
     iconUrl: '/icons/effects/scope.svg'
   },
-  'Gold Foil': {
+  {
     id: 'gold-foil',
     name: 'Gold Foil',
     category: 'foil',
@@ -178,7 +191,7 @@ export const premiumEffects: Record<string, PremiumCardEffect> = {
     premium: false,
     iconUrl: '/icons/effects/gold-foil.svg'
   },
-  'Silver Foil': {
+  {
     id: 'silver-foil',
     name: 'Silver Foil',
     category: 'foil',
@@ -191,7 +204,7 @@ export const premiumEffects: Record<string, PremiumCardEffect> = {
     premium: false,
     iconUrl: '/icons/effects/silver-foil.svg'
   },
-  'Chrome': {
+  {
     id: 'chrome',
     name: 'Chrome',
     category: 'texture',
@@ -203,7 +216,7 @@ export const premiumEffects: Record<string, PremiumCardEffect> = {
     premium: false,
     iconUrl: '/icons/effects/chrome.svg'
   },
-  'Prizm': {
+  {
     id: 'prizm',
     name: 'Prizm',
     category: 'refractor',
@@ -216,7 +229,7 @@ export const premiumEffects: Record<string, PremiumCardEffect> = {
     premium: false,
     iconUrl: '/icons/effects/prizm.svg'
   },
-  'Vintage': {
+  {
     id: 'vintage',
     name: 'Vintage',
     category: 'texture',
@@ -228,7 +241,7 @@ export const premiumEffects: Record<string, PremiumCardEffect> = {
     premium: false,
     iconUrl: '/icons/effects/vintage.svg'
   },
-  'Canvas': {
+  {
     id: 'canvas',
     name: 'Canvas',
     category: 'texture',
@@ -240,7 +253,7 @@ export const premiumEffects: Record<string, PremiumCardEffect> = {
     premium: false,
     iconUrl: '/icons/effects/canvas.svg'
   },
-  'Linen': {
+  {
     id: 'linen',
     name: 'Linen',
     category: 'texture',
@@ -252,7 +265,7 @@ export const premiumEffects: Record<string, PremiumCardEffect> = {
     premium: false,
     iconUrl: '/icons/effects/linen.svg'
   },
-  'Spectral': {
+  {
     id: 'spectral',
     name: 'Spectral',
     category: 'holographic',
@@ -265,7 +278,7 @@ export const premiumEffects: Record<string, PremiumCardEffect> = {
     premium: true,
     iconUrl: '/icons/effects/spectral.svg'
   }
-};
+];
 
 /**
  * Get the CSS class for a specific effect

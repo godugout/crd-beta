@@ -27,12 +27,15 @@ export function toast(props: ToastProps, options?: ToastOptions): string {
   };
 
   // Map our custom variants to sonner variants
-  // Only use default and destructive externally to match shadcn toast
   switch (variant) {
     case 'success':
-    case 'info':
+      sonnerToast.success(title, { ...toastOptions, description });
+      break;
     case 'warning':
-      sonnerToast(title, { ...toastOptions, description });
+      sonnerToast.warning(title, { ...toastOptions, description });
+      break;
+    case 'info':
+      sonnerToast.info(title, { ...toastOptions, description });
       break;
     case 'error':
     case 'destructive':

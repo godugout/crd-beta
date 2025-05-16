@@ -1,70 +1,86 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { usePersonalizationContext } from '@/context/PersonalizationContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { useToast } from '@/components/ui/use-toast';
+import { Loader2, Plus, Check, Upload, Pencil } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { CheckIcon, Trash2 } from 'lucide-react';
+import toastUtils from '@/lib/utils/toast-utils';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BrandProfile } from '@/lib/types/userPreferences';
 
 const BrandProfileManager: React.FC = () => {
-  const { preferences, createBrandProfile, setActiveBrand } = usePersonalizationContext();
-  const { toast } = useToast();
-  
-  const [formData, setFormData] = useState<{
-    name: string;
-    description: string;
-    logoUrl: string;
-    primaryColor: string;
-    secondaryColor: string;
-    accentColor: string;
-    textColor: string;
-    backgroundColor: string;
-    fontFamily: string;
-    headingFont: string;
-    bodyFont: string;
-  }>({
+  const { preferences, activeBrandProfile, loading, createBrandProfile, setActiveBrand } = usePersonalizationContext();
+  const [isCreating, setIsCreating] = useState(false);
+  const [newProfile, setNewProfile] = useState<Partial<BrandProfile>>({
     name: '',
     description: '',
-    logoUrl: '',
-    primaryColor: '#3b82f6',
-    secondaryColor: '#10b981',
-    accentColor: '#f59e0b',
-    textColor: '#111827',
-    backgroundColor: '#ffffff',
-    fontFamily: 'Inter, sans-serif',
-    headingFont: 'Inter, sans-serif',
-    bodyFont: 'Inter, sans-serif',
+    colors: {
+      primary: '#1a202c',
+      secondary: '#4a5568',
+      accent: '#3182ce',
+      text: '#2d3748',
+      background: '#ffffff'
+    },
+    typography: {
+      fontFamily: 'Inter',
+    },
+    assets: {
+      logos: [],
+      backgrounds: [],
+      elements: []
+    },
+    templates: []
   });
   
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-40">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
   
-  const handleCreateProfile = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
+  if (!preferences) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Brand Profiles</CardTitle>
+          <CardDescription>Manage your brand identities</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground">Brand profile data not available</p>
+        </CardContent>
+      </Card>
+    );
+  }
+  
+  const handleCreateProfile = async () => {
     try {
-      const newBrandProfile: Omit<BrandProfile, 'id' | 'createdAt' | 'updatedAt'> = {
-        name: formData.name,
-        description: formData.description,
-        logoUrl: formData.logoUrl || undefined,
+      if (!newProfile.name) {
+        toastUtils.warning('Missing information', 'Please provide a name for your brand profile');
+        return;
+      }
+      
+      setIsCreating(true);
+      const createdProfile = await createBrandProfile(newProfile as Omit<BrandProfile, 'id' | 'createdAt' | 'updatedAt'>);
+      
+      toastUtils.success('Brand profile created', `"${createdProfile.name}" has been created successfully`);
+      setIsCreating(false);
+      setNewProfile({
+        name: '',
+        description: '',
         colors: {
-          primary: formData.primaryColor,
-          secondary: formData.secondaryColor,
-          accent: formData.accentColor,
-          text: formData.textColor,
-          background: formData.backgroundColor,
+          primary: '#1a202c',
+          secondary: '#4a5568',
+          accent: '#3182ce',
+          text: '#2d3748',
+          background: '#ffffff'
         },
         typography: {
-          fontFamily: formData.fontFamily,
-          headingFont: formData.headingFont || undefined,
-          bodyFont: formData.bodyFont || undefined,
+          fontFamily: 'Inter',
         },
         assets: {
           logos: [],
@@ -72,357 +88,304 @@ const BrandProfileManager: React.FC = () => {
           elements: []
         },
         templates: []
-      };
-      
-      await createBrandProfile(newBrandProfile);
-      
-      toast({
-        title: "Brand profile created",
-        description: "Your new brand profile has been created successfully.",
-      });
-      
-      // Reset form
-      setFormData({
-        name: '',
-        description: '',
-        logoUrl: '',
-        primaryColor: '#3b82f6',
-        secondaryColor: '#10b981',
-        accentColor: '#f59e0b',
-        textColor: '#111827',
-        backgroundColor: '#ffffff',
-        fontFamily: 'Inter, sans-serif',
-        headingFont: 'Inter, sans-serif',
-        bodyFont: 'Inter, sans-serif',
       });
     } catch (error) {
       console.error('Failed to create brand profile:', error);
-      toast({
-        title: "Failed to create brand profile",
-        description: "An error occurred while creating your brand profile.",
-        variant: "destructive",
-      });
+      toastUtils.error('Failed to create profile', 'Please try again');
+      setIsCreating(false);
     }
   };
   
-  const handleSetActive = async (profileId: string) => {
+  const handleSetActiveBrand = async (profileId: string) => {
     try {
       await setActiveBrand(profileId);
-      toast({
-        title: "Active brand updated",
-        description: "Your active brand profile has been updated.",
-      });
+      toastUtils.success('Active profile updated', 'Your brand profile has been set as active');
     } catch (error) {
       console.error('Failed to set active brand:', error);
-      toast({
-        title: "Failed to update",
-        description: "An error occurred while updating your active brand profile.",
-        variant: "destructive",
-      });
+      toastUtils.error('Failed to update active profile', 'Please try again');
     }
   };
   
   return (
-    <Card className="w-full max-w-4xl mx-auto">
+    <Card>
       <CardHeader>
-        <CardTitle>Brand Profile Management</CardTitle>
-        <CardDescription>Create and manage your brand profiles</CardDescription>
+        <CardTitle>Brand Profiles</CardTitle>
+        <CardDescription>Create and manage brand identities for consistent designs</CardDescription>
       </CardHeader>
       <CardContent>
-        <Tabs defaultValue="manage" className="w-full">
-          <TabsList className="grid grid-cols-2 mb-6">
-            <TabsTrigger value="manage">Manage Brands</TabsTrigger>
-            <TabsTrigger value="create">Create New Brand</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="manage">
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Your Brand Profiles</h3>
-              
-              {!preferences || preferences.brandProfiles.length === 0 ? (
-                <div className="border rounded-lg p-6 text-center">
-                  <p className="text-muted-foreground">You haven't created any brand profiles yet.</p>
-                  <Button className="mt-4" variant="outline">Create Your First Brand</Button>
-                </div>
-              ) : (
-                <ScrollArea className="h-[400px] rounded-md border">
-                  <div className="p-4 space-y-4">
-                    {preferences.brandProfiles.map((profile) => (
-                      <div 
-                        key={profile.id} 
-                        className="border rounded-lg p-4 hover:border-primary transition-colors"
-                      >
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <h4 className="font-medium text-lg">{profile.name}</h4>
-                            {profile.description && (
-                              <p className="text-sm text-muted-foreground">{profile.description}</p>
-                            )}
-                          </div>
-                          
-                          {profile.id === preferences.activeBrandProfileId ? (
-                            <div className="bg-primary/10 text-primary text-xs px-2 py-1 rounded-full flex items-center">
-                              <CheckIcon className="w-3 h-3 mr-1" />
-                              <span>Active</span>
-                            </div>
-                          ) : (
-                            <Button 
-                              variant="ghost" 
-                              size="sm"
-                              onClick={() => handleSetActive(profile.id)}
-                            >
-                              Set Active
-                            </Button>
-                          )}
-                        </div>
-                        
-                        <div className="mt-4">
-                          <h5 className="text-sm font-medium mb-2">Brand Colors</h5>
-                          <div className="flex gap-3 flex-wrap">
-                            <ColorSwatch 
-                              color={profile.colors.primary} 
-                              name="Primary" 
-                            />
-                            <ColorSwatch 
-                              color={profile.colors.secondary} 
-                              name="Secondary" 
-                            />
-                            <ColorSwatch 
-                              color={profile.colors.accent} 
-                              name="Accent" 
-                            />
-                            <ColorSwatch 
-                              color={profile.colors.text} 
-                              name="Text" 
-                            />
-                            <ColorSwatch 
-                              color={profile.colors.background} 
-                              name="Background" 
-                            />
-                          </div>
-                        </div>
-                        
-                        <div className="mt-4">
-                          <h5 className="text-sm font-medium mb-1">Typography</h5>
-                          <p className="text-sm text-muted-foreground">
-                            {profile.typography.fontFamily}
-                            {profile.typography.headingFont ? ` / ${profile.typography.headingFont}` : ''}
-                          </p>
-                        </div>
-                        
-                        <div className="mt-4 flex gap-2 justify-end">
-                          <Button variant="outline" size="sm">
-                            Edit
-                          </Button>
-                          
-                          <Button variant="destructive" size="sm">
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
+        {preferences.brandProfiles.length > 0 ? (
+          <>
+            <h3 className="font-medium text-base mb-3">Your Brand Profiles</h3>
+            <ScrollArea className="h-60 w-full pr-4">
+              <div className="space-y-3">
+                {preferences.brandProfiles.map(profile => (
+                  <div 
+                    key={profile.id} 
+                    className={`border rounded-lg p-4 ${
+                      activeBrandProfile?.id === profile.id ? 'border-primary bg-primary/5' : ''
+                    }`}
+                  >
+                    <div className="flex items-start justify-between mb-2">
+                      <div>
+                        <h4 className="font-medium">{profile.name}</h4>
+                        {profile.description && (
+                          <p className="text-sm text-muted-foreground">{profile.description}</p>
+                        )}
                       </div>
-                    ))}
+                      
+                      {activeBrandProfile?.id === profile.id ? (
+                        <span className="bg-primary/10 text-primary text-xs rounded-full px-2 py-1 flex items-center">
+                          <Check className="h-3 w-3 mr-1" />
+                          Active
+                        </span>
+                      ) : (
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          onClick={() => handleSetActiveBrand(profile.id)}
+                        >
+                          Set Active
+                        </Button>
+                      )}
+                    </div>
+                    
+                    <div className="mt-3">
+                      <div className="flex space-x-1 mb-2">
+                        {Object.entries(profile.colors).map(([key, color]) => (
+                          <div
+                            key={key}
+                            className="h-6 w-6 rounded-full"
+                            style={{ backgroundColor: color }}
+                            title={key}
+                          />
+                        ))}
+                      </div>
+                      
+                      <div className="flex space-x-2 text-xs text-muted-foreground">
+                        <span>Font: {profile.typography.fontFamily}</span>
+                        <span>•</span>
+                        <span>{profile.assets.logos.length} logos</span>
+                        <span>•</span>
+                        <span>{profile.templates.length} templates</span>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-3 flex space-x-2">
+                      <Button size="sm" variant="outline" className="text-xs h-7 px-2">
+                        <Pencil className="h-3 w-3 mr-1" />
+                        Edit
+                      </Button>
+                      <Button size="sm" variant="outline" className="text-xs h-7 px-2">
+                        <Upload className="h-3 w-3 mr-1" />
+                        Export
+                      </Button>
+                    </div>
                   </div>
-                </ScrollArea>
-              )}
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="create">
-            <form onSubmit={handleCreateProfile} className="space-y-6">
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="name">Brand Name *</Label>
-                    <Input 
-                      id="name" 
-                      name="name"
-                      placeholder="My Brand" 
-                      value={formData.name}
-                      onChange={handleChange}
-                      required
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="logoUrl">Logo URL</Label>
-                    <Input 
-                      id="logoUrl" 
-                      name="logoUrl"
-                      placeholder="https://example.com/logo.png" 
-                      value={formData.logoUrl}
-                      onChange={handleChange}
-                    />
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="description">Brand Description</Label>
-                  <Input 
-                    id="description" 
-                    name="description"
-                    placeholder="A brief description of your brand" 
-                    value={formData.description}
-                    onChange={handleChange}
+                ))}
+              </div>
+            </ScrollArea>
+          </>
+        ) : (
+          <div className="text-center py-6 bg-muted/30 rounded-lg">
+            <p className="text-muted-foreground mb-2">No brand profiles yet</p>
+            <Button 
+              onClick={() => setIsCreating(true)}
+              size="sm"
+            >
+              <Plus className="h-4 w-4 mr-1" />
+              Create Your First Brand Profile
+            </Button>
+          </div>
+        )}
+        
+        {(isCreating || preferences.brandProfiles.length > 0) && !isCreating && (
+          <div className="mt-6 flex justify-end">
+            <Button 
+              onClick={() => setIsCreating(true)}
+              variant="outline"
+            >
+              <Plus className="h-4 w-4 mr-1" />
+              Create New Profile
+            </Button>
+          </div>
+        )}
+        
+        {isCreating && (
+          <div className="mt-6 border rounded-lg p-4">
+            <h3 className="font-medium text-base mb-4">Create New Brand Profile</h3>
+            
+            <Tabs defaultValue="basic">
+              <TabsList className="mb-4">
+                <TabsTrigger value="basic">Basic Info</TabsTrigger>
+                <TabsTrigger value="colors">Colors</TabsTrigger>
+                <TabsTrigger value="typography">Typography</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="basic" className="space-y-4">
+                <div>
+                  <Label htmlFor="profile-name">Brand Name</Label>
+                  <Input
+                    id="profile-name"
+                    value={newProfile.name}
+                    onChange={(e) => setNewProfile({...newProfile, name: e.target.value})}
+                    placeholder="e.g., My Sports Brand"
                   />
                 </div>
-              </div>
+                
+                <div>
+                  <Label htmlFor="profile-description">Description (Optional)</Label>
+                  <Input
+                    id="profile-description"
+                    value={newProfile.description || ''}
+                    onChange={(e) => setNewProfile({...newProfile, description: e.target.value})}
+                    placeholder="Brief description of this brand profile"
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="profile-logo" className="block mb-2">Logo (Optional)</Label>
+                  <div className="flex items-center space-x-2">
+                    <Button variant="outline" size="sm">
+                      <Upload className="h-4 w-4 mr-1" />
+                      Upload Logo
+                    </Button>
+                    <span className="text-sm text-muted-foreground">No logo uploaded</span>
+                  </div>
+                </div>
+              </TabsContent>
               
-              <div>
-                <h3 className="text-lg font-semibold mb-4">Brand Colors</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="primaryColor">Primary Color</Label>
-                    <div className="flex">
+              <TabsContent value="colors" className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="primary-color">Primary Color</Label>
+                    <div className="flex mt-1">
                       <div 
-                        className="w-10 h-10 border rounded-l-md"
-                        style={{ backgroundColor: formData.primaryColor }}
-                      ></div>
-                      <Input 
-                        id="primaryColor" 
-                        name="primaryColor"
-                        type="color"
-                        value={formData.primaryColor}
-                        onChange={handleChange}
-                        className="h-10 rounded-l-none"
+                        className="h-9 w-9 rounded-l-md border border-r-0"
+                        style={{ backgroundColor: newProfile.colors?.primary }}
+                      />
+                      <Input
+                        id="primary-color"
+                        value={newProfile.colors?.primary || ''}
+                        onChange={(e) => setNewProfile({
+                          ...newProfile, 
+                          colors: {...newProfile.colors!, primary: e.target.value}
+                        })}
+                        className="rounded-l-none"
                       />
                     </div>
                   </div>
                   
-                  <div className="space-y-2">
-                    <Label htmlFor="secondaryColor">Secondary Color</Label>
-                    <div className="flex">
+                  <div>
+                    <Label htmlFor="secondary-color">Secondary Color</Label>
+                    <div className="flex mt-1">
                       <div 
-                        className="w-10 h-10 border rounded-l-md"
-                        style={{ backgroundColor: formData.secondaryColor }}
-                      ></div>
-                      <Input 
-                        id="secondaryColor" 
-                        name="secondaryColor"
-                        type="color"
-                        value={formData.secondaryColor}
-                        onChange={handleChange}
-                        className="h-10 rounded-l-none"
+                        className="h-9 w-9 rounded-l-md border border-r-0"
+                        style={{ backgroundColor: newProfile.colors?.secondary }}
+                      />
+                      <Input
+                        id="secondary-color"
+                        value={newProfile.colors?.secondary || ''}
+                        onChange={(e) => setNewProfile({
+                          ...newProfile, 
+                          colors: {...newProfile.colors!, secondary: e.target.value}
+                        })}
+                        className="rounded-l-none"
                       />
                     </div>
                   </div>
                   
-                  <div className="space-y-2">
-                    <Label htmlFor="accentColor">Accent Color</Label>
-                    <div className="flex">
+                  <div>
+                    <Label htmlFor="accent-color">Accent Color</Label>
+                    <div className="flex mt-1">
                       <div 
-                        className="w-10 h-10 border rounded-l-md"
-                        style={{ backgroundColor: formData.accentColor }}
-                      ></div>
-                      <Input 
-                        id="accentColor" 
-                        name="accentColor"
-                        type="color"
-                        value={formData.accentColor}
-                        onChange={handleChange}
-                        className="h-10 rounded-l-none"
+                        className="h-9 w-9 rounded-l-md border border-r-0"
+                        style={{ backgroundColor: newProfile.colors?.accent }}
+                      />
+                      <Input
+                        id="accent-color"
+                        value={newProfile.colors?.accent || ''}
+                        onChange={(e) => setNewProfile({
+                          ...newProfile, 
+                          colors: {...newProfile.colors!, accent: e.target.value}
+                        })}
+                        className="rounded-l-none"
                       />
                     </div>
                   </div>
                   
-                  <div className="space-y-2">
-                    <Label htmlFor="textColor">Text Color</Label>
-                    <div className="flex">
+                  <div>
+                    <Label htmlFor="text-color">Text Color</Label>
+                    <div className="flex mt-1">
                       <div 
-                        className="w-10 h-10 border rounded-l-md"
-                        style={{ backgroundColor: formData.textColor }}
-                      ></div>
-                      <Input 
-                        id="textColor" 
-                        name="textColor"
-                        type="color"
-                        value={formData.textColor}
-                        onChange={handleChange}
-                        className="h-10 rounded-l-none"
+                        className="h-9 w-9 rounded-l-md border border-r-0"
+                        style={{ backgroundColor: newProfile.colors?.text }}
                       />
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="backgroundColor">Background Color</Label>
-                    <div className="flex">
-                      <div 
-                        className="w-10 h-10 border rounded-l-md"
-                        style={{ backgroundColor: formData.backgroundColor }}
-                      ></div>
-                      <Input 
-                        id="backgroundColor" 
-                        name="backgroundColor"
-                        type="color"
-                        value={formData.backgroundColor}
-                        onChange={handleChange}
-                        className="h-10 rounded-l-none"
+                      <Input
+                        id="text-color"
+                        value={newProfile.colors?.text || ''}
+                        onChange={(e) => setNewProfile({
+                          ...newProfile, 
+                          colors: {...newProfile.colors!, text: e.target.value}
+                        })}
+                        className="rounded-l-none"
                       />
                     </div>
                   </div>
                 </div>
-              </div>
+              </TabsContent>
               
-              <div>
-                <h3 className="text-lg font-semibold mb-4">Typography</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="fontFamily">Primary Font</Label>
-                    <Input 
-                      id="fontFamily" 
-                      name="fontFamily"
-                      placeholder="Inter, sans-serif"
-                      value={formData.fontFamily}
-                      onChange={handleChange}
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="headingFont">Heading Font (optional)</Label>
-                    <Input 
-                      id="headingFont" 
-                      name="headingFont"
-                      placeholder="Same as primary font"
-                      value={formData.headingFont}
-                      onChange={handleChange}
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="bodyFont">Body Font (optional)</Label>
-                    <Input 
-                      id="bodyFont" 
-                      name="bodyFont"
-                      placeholder="Same as primary font"
-                      value={formData.bodyFont}
-                      onChange={handleChange}
-                    />
-                  </div>
+              <TabsContent value="typography" className="space-y-4">
+                <div>
+                  <Label htmlFor="font-family">Primary Font</Label>
+                  <Input
+                    id="font-family"
+                    value={newProfile.typography?.fontFamily || ''}
+                    onChange={(e) => setNewProfile({
+                      ...newProfile, 
+                      typography: {...newProfile.typography!, fontFamily: e.target.value}
+                    })}
+                    placeholder="e.g., Inter, Arial, sans-serif"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Enter a web-safe font or font stack
+                  </p>
                 </div>
-              </div>
-              
-              <div className="pt-4 border-t flex justify-end">
-                <Button type="submit" disabled={!formData.name}>
-                  Create Brand Profile
-                </Button>
-              </div>
-            </form>
-          </TabsContent>
-        </Tabs>
+                
+                <div>
+                  <Label htmlFor="heading-font">Heading Font (Optional)</Label>
+                  <Input
+                    id="heading-font"
+                    value={newProfile.typography?.headingFont || ''}
+                    onChange={(e) => setNewProfile({
+                      ...newProfile, 
+                      typography: {...newProfile.typography!, headingFont: e.target.value}
+                    })}
+                    placeholder="e.g., Montserrat, sans-serif"
+                  />
+                </div>
+              </TabsContent>
+            </Tabs>
+            
+            <div className="mt-6 flex justify-end space-x-2">
+              <Button 
+                variant="outline" 
+                onClick={() => setIsCreating(false)}
+                disabled={isCreating}
+              >
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleCreateProfile}
+                disabled={!newProfile.name || isCreating}
+              >
+                {isCreating ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Plus className="h-4 w-4 mr-2" />}
+                Create Brand Profile
+              </Button>
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
-  );
-};
-
-// Helper component for color swatches
-const ColorSwatch: React.FC<{ color: string; name: string }> = ({ color, name }) => {
-  return (
-    <div className="flex flex-col items-center">
-      <div 
-        className="w-8 h-8 rounded-full border"
-        style={{ backgroundColor: color }}
-      />
-      <span className="text-xs mt-1 text-muted-foreground">{name}</span>
-    </div>
   );
 };
 

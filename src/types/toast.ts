@@ -13,9 +13,7 @@ export interface ToasterToast {
   duration?: number;
 }
 
-export interface ToasterToastWithId extends ToasterToast {
-  id: string;
-}
+export type ToasterToastWithId = ToasterToast;
 
 export type ToastActionElement = React.ReactElement<{
   altText: string;

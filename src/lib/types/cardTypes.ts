@@ -1,3 +1,4 @@
+
 /**
  * Consolidated Card Types for Cardshow (CRD)
  * This file serves as the central source of truth for all card-related types
@@ -74,6 +75,7 @@ export interface CardEffect {
   settings: CardEffectSettings;
   className?: string;
   category?: string;
+  description?: string;
 }
 
 /**
@@ -131,9 +133,9 @@ export interface MarketMetadata {
   lastSoldPrice?: number;
   currentAskingPrice?: number;
   estimatedMarketValue?: number;
-  isPrintable?: boolean;      // Made optional for compatibility
-  isForSale?: boolean;        // Made optional for compatibility
-  includeInCatalog?: boolean; // Made optional for compatibility
+  isPrintable: boolean;      
+  isForSale: boolean;       
+  includeInCatalog: boolean; 
   price?: number;
   currency?: string;
   availableForSale?: boolean;
@@ -150,9 +152,9 @@ export interface CardMetadata {
   serialNumber?: string;
   certification?: string;
   gradeScore?: string;
-  category?: string;      // Made optional for compatibility
-  series?: string;        // Made optional for compatibility
-  cardType?: string;      // Made optional for compatibility
+  category?: string;      
+  series?: string;        
+  cardType?: string;      
   cardStyle?: CardStyle;
   textStyle?: TextStyle;
   effects?: string[];
@@ -246,7 +248,7 @@ export interface BaseCard extends BaseEntity {
   cardType?: string;
   artist?: string; // For backward compatibility
   backgroundColor?: string;
-  textColor?: string;
+  textColor?: string; // Added for backward compatibility
   specialEffect?: string;
   fabricSwatches?: FabricSwatch[];
   stats?: CardStats;

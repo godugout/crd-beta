@@ -1,10 +1,11 @@
 
 import { useToast } from '@/hooks/use-toast';
+import { ToastVariant } from '@/types/toast';
 
 interface ToastOptions {
   title: string;
   description?: string;
-  variant?: "default" | "destructive";
+  variant?: ToastVariant;
   duration?: number;
 }
 

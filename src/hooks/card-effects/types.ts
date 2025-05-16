@@ -20,7 +20,7 @@ export interface BaseCardEffect {
 export interface PremiumCardEffect extends BaseCardEffect {
   premium: boolean;
   price?: number;
-  category: string;  // Added category property
+  category: string;
   requiresGPU?: boolean;
   compatibleWith?: string[];
 }
@@ -30,4 +30,26 @@ export interface EffectCategory {
   name: string;
   description: string;
   effects: PremiumCardEffect[];
+}
+
+export interface CardEffectDefinition {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  defaultSettings: CardEffectSettings;
+  premium: boolean;
+  enabled: boolean;
+  iconUrl?: string;
+  renderer: (element: HTMLElement, settings: CardEffectSettings) => void;
+}
+
+export interface UseCardEffectsResult {
+  effects: PremiumCardEffect[];
+  categories: EffectCategory[];
+  activeEffects: string[];
+  toggleEffect: (effectId: string) => void;
+  updateEffectSettings: (effectId: string, settings: Partial<CardEffectSettings>) => void;
+  applyEffectsToElement: (element: HTMLElement) => void;
+  effectsLoading: boolean;
 }
