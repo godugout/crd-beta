@@ -74,3 +74,17 @@ export const logRenderingSummary = () => {
   
   console.groupEnd();
 };
+
+/**
+ * Debug utility for logging objects with a label
+ * @param label Label to identify the debug output
+ * @param obj Object to log
+ */
+export const debugObject = (label: string, obj: any) => {
+  if (process.env.NODE_ENV !== 'development') return;
+  
+  console.group(`🔍 Debug: ${label}`);
+  console.log(obj);
+  console.groupEnd();
+};
+

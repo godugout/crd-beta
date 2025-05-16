@@ -5,7 +5,7 @@ import ComponentDocs from '@/components/documentation/ComponentDocs';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import MobileOptimizedLayout from '@/components/layout/MobileOptimizedLayout';
 import CardPreview from '@/components/card-creation/components/CardPreview';
-import ColorPicker from '@/components/ui/color-picker';
+import { ColorPicker } from '@/components/ui/color-picker';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import { Card } from '@/lib/types/cardTypes';
