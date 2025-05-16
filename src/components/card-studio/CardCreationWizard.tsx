@@ -9,6 +9,7 @@ import EffectsStep from './steps/EffectsStep';
 import FinalizeStep from './steps/FinalizeStep';
 import PreviewStep from './steps/PreviewStep';
 import StepperControl from './components/StepperControl';
+import { normalizeDesignMetadata } from '@/lib/utils/cardPropertyAdapter';
 
 interface CardCreationWizardProps {
   initialCard?: Partial<Card>;
@@ -41,7 +42,7 @@ const CardCreationWizard: React.FC<CardCreationWizardProps> = ({
     thumbnailUrl: initialCard?.thumbnailUrl || '',
     tags: initialCard?.tags || [],
     effects: initialCard?.effects || [],
-    userId: initialCard?.userId || '',
+    ownerId: initialCard?.ownerId || initialCard?.userId || '',
     createdAt: initialCard?.createdAt || new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     designMetadata: initialCard?.designMetadata || {
@@ -82,22 +83,37 @@ const CardCreationWizard: React.FC<CardCreationWizardProps> = ({
     setCardData(prev => ({
       ...prev,
       effects,
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
+      designMetadata: {
+        ...prev.designMetadata,
+        cardMetadata: {
+          ...prev.designMetadata?.cardMetadata,
+          effects
+        }
+      }
     }));
   };
 
   const handleComplete = () => {
+    // Normalize design metadata to ensure compatibility
+    const normalizedMetadata = normalizeDesignMetadata(cardData.designMetadata);
+    
     // Ensure all required fields are set
-    const completedCard = {
-      ...cardData,
-      designMetadata: {
-        ...cardData.designMetadata,
-        marketMetadata: {
-          ...DEFAULT_MARKET_METADATA,
-          ...(cardData.designMetadata?.marketMetadata || {})
-        }
-      }
-    } as Card;
+    const completedCard: Card = {
+      id: cardData.id || uuidv4(),
+      title: cardData.title || 'Untitled Card',
+      description: cardData.description || '',
+      imageUrl: cardData.imageUrl || '',
+      thumbnailUrl: cardData.thumbnailUrl || cardData.imageUrl || '',
+      tags: cardData.tags || [],
+      createdAt: cardData.createdAt || new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      player: cardData.player || '',
+      team: cardData.team || '',
+      year: cardData.year || '',
+      ownerId: cardData.ownerId || '',
+      designMetadata: normalizedMetadata
+    };
     
     onComplete(completedCard);
   };

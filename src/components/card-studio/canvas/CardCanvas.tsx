@@ -1,6 +1,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { Card } from '@/lib/types/cardTypes';
+import { normalizeCardStyle, normalizeTextStyle, getCardEffects } from '@/lib/utils/cardPropertyAdapter';
 
 interface CardCanvasProps {
   cardData: Partial<Card>;
@@ -35,9 +36,9 @@ const CardCanvas: React.FC<CardCanvasProps> = ({ cardData, onUpdate, readOnly = 
   const canvasRef = useRef<HTMLDivElement>(null);
   const [isInteracting, setIsInteracting] = useState(false);
 
-  // Extract card style from cardData or use defaults
-  const cardStyle = cardData.designMetadata?.cardStyle || DEFAULT_CARD_STYLE;
-  const textStyle = cardData.designMetadata?.textStyle || DEFAULT_TEXT_STYLE;
+  // Extract card style from cardData and normalize to ensure compatibility
+  const cardStyle = normalizeCardStyle(cardData.designMetadata?.cardStyle || DEFAULT_CARD_STYLE);
+  const textStyle = normalizeTextStyle(cardData.designMetadata?.textStyle || DEFAULT_TEXT_STYLE);
 
   // Set up canvas interaction handlers
   useEffect(() => {
@@ -67,10 +68,12 @@ const CardCanvas: React.FC<CardCanvasProps> = ({ cardData, onUpdate, readOnly = 
   const getCardClassNames = () => {
     const classes = ['card-canvas'];
     
-    if (cardData.effects) {
-      if (cardData.effects.includes('holographic')) classes.push('holographic-effect');
-      if (cardData.effects.includes('refractor')) classes.push('refractor-effect');
-      if (cardData.effects.includes('gold-foil')) classes.push('gold-foil-effect');
+    const cardEffects = getCardEffects(cardData);
+    
+    if (cardEffects.length > 0) {
+      if (cardEffects.includes('holographic')) classes.push('holographic-effect');
+      if (cardEffects.includes('refractor')) classes.push('refractor-effect');
+      if (cardEffects.includes('gold-foil')) classes.push('gold-foil-effect');
     }
     
     return classes.join(' ');
@@ -85,10 +88,10 @@ const CardCanvas: React.FC<CardCanvasProps> = ({ cardData, onUpdate, readOnly = 
         maxWidth: '400px',
         height: '560px',
         margin: '0 auto',
-        borderRadius: cardStyle.borderRadius,
+        borderRadius: cardStyle.borderRadius || cardStyle.cornerRadius || '8px',
         backgroundColor: cardStyle.backgroundColor,
-        boxShadow: `0 4px 8px ${cardStyle.shadowColor}`,
-        border: `${cardStyle.borderWidth}px solid ${cardStyle.borderColor}`,
+        boxShadow: `0 4px 8px ${cardStyle.shadowColor || 'rgba(0,0,0,0.2)'}`,
+        border: `${cardStyle.borderWidth || 2}px solid ${cardStyle.borderColor}`,
         overflow: 'hidden',
         position: 'relative',
         userSelect: 'none',
@@ -133,10 +136,10 @@ const CardCanvas: React.FC<CardCanvasProps> = ({ cardData, onUpdate, readOnly = 
           <h3
             style={{
               fontSize: '1.5rem',
-              fontWeight: textStyle.titleWeight,
+              fontWeight: textStyle.titleWeight || 'bold',
               marginBottom: '0.5rem',
-              color: textStyle.titleColor,
-              textAlign: textStyle.titleAlignment as any,
+              color: textStyle.titleColor || '#fff',
+              textAlign: (textStyle.titleAlignment || 'center') as any,
             }}
           >
             {cardData.title}
@@ -147,7 +150,7 @@ const CardCanvas: React.FC<CardCanvasProps> = ({ cardData, onUpdate, readOnly = 
           <p
             style={{
               fontSize: '0.9rem',
-              color: textStyle.descriptionColor,
+              color: textStyle.descriptionColor || '#ddd',
               margin: 0,
             }}
           >

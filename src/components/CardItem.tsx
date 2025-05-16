@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card } from '@/lib/types';
 import { cn } from '@/lib/utils';
@@ -96,7 +97,7 @@ const CardItem: React.FC<CardItemProps> = ({
         <div className="px-2">
           <ReactionButtons 
             cardId={card.id} 
-            initialReactions={card.reactions}
+            initialReactions={card.reactions || []}
             showComments={displayComments}
             onShowComments={() => setDisplayComments(!displayComments)}
           />

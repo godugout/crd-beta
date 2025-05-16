@@ -10,11 +10,12 @@ import {
   Redo, 
   HelpCircle 
 } from 'lucide-react';
-import { Card as CardType } from '@/lib/types/cardTypes';
+import { Card, CardTemplate } from '@/lib/types/cardTypes';
 import { useUndoRedoState } from '@/hooks/useUndoRedoState';
 import { toastUtils } from '@/lib/utils/toast-utils';
 import { Card as CardUI } from '@/components/ui/card';
 import { v4 as uuidv4 } from 'uuid';
+import { normalizeDesignMetadata } from '@/lib/utils/cardPropertyAdapter';
 
 // Import wizard steps
 import TemplateSelectionStep from './steps/TemplateSelectionStep';
@@ -31,15 +32,15 @@ import HelpPanel from './components/HelpPanel';
 
 // Define props for CardTextStep
 export interface CardTextStepProps {
-  cardData: Partial<CardType>;
-  setCardData?: (data: Partial<CardType>) => void;
-  onUpdate?: (updates: Partial<CardType>) => void;
+  cardData: Partial<Card>;
+  setCardData?: (data: Partial<Card>) => void;
+  onUpdate?: (updates: Partial<Card>) => void;
   onContinue?: () => void;
 }
 
 interface CardCreationWizardProps {
-  initialData?: Partial<CardType>;
-  onSave: (cardData: CardType) => void;
+  initialData?: Partial<Card>;
+  onSave: (cardData: Card) => void;
   onCancel: () => void;
 }
 
@@ -66,7 +67,7 @@ const CardCreationWizard: React.FC<CardCreationWizardProps> = ({
   const [isAutoSaving, setIsAutoSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [activeEffects, setActiveEffects] = useState<string[]>([]);
+  const [activeEffects, setActiveEffects] = useState<string[]>(initialData.effects || []);
   
   // Set up undo/redo functionality with initial data
   const { 
@@ -77,7 +78,7 @@ const CardCreationWizard: React.FC<CardCreationWizardProps> = ({
     canUndo, 
     canRedo,
     pushState: addToHistory
-  } = useUndoRedoState<Partial<CardType>>({
+  } = useUndoRedoState<Partial<Card>>({
     ...initialData,
     effects: initialData.effects || [],
     tags: initialData.tags || [],
@@ -89,7 +90,7 @@ const CardCreationWizard: React.FC<CardCreationWizardProps> = ({
   const previewRef = useRef<HTMLDivElement>(null);
   
   // Handle card data updates
-  const updateCardData = (updates: Partial<CardType>) => {
+  const updateCardData = (updates: Partial<Card>) => {
     const updatedData = { ...cardData, ...updates };
     setCardData(updatedData);
     addToHistory(updatedData);
@@ -194,7 +195,7 @@ const CardCreationWizard: React.FC<CardCreationWizardProps> = ({
         id: cardData.id || uuidv4(),
         createdAt: cardData.createdAt || new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-      } as CardType;
+      } as Card;
 
       toastUtils.success(
         "Success!",
@@ -216,32 +217,39 @@ const CardCreationWizard: React.FC<CardCreationWizardProps> = ({
     try {
       setIsSubmitting(true);
       
+      // Normalize design metadata to ensure compatibility
+      let designMetadata = normalizeDesignMetadata(cardData.designMetadata);
+      
+      // Ensure effects are stored in the right place
+      if (cardData.effects && cardData.effects.length > 0) {
+        designMetadata = {
+          ...designMetadata,
+          cardMetadata: {
+            ...designMetadata.cardMetadata,
+            effects: cardData.effects
+          }
+        };
+      }
+      
       // Create a new Card instance with the collected data
-      const newCard = {
-        id: `card-${Date.now()}`,
+      const newCard: Card = {
+        id: cardData.id || `card-${Date.now()}`,
         title: cardData.title || 'Untitled Card',
         description: cardData.description || '',
         imageUrl: cardData.imageUrl || '',
+        thumbnailUrl: cardData.thumbnailUrl || '',
         tags: cardData.tags || [],
-        effects: cardData.effects || [],
         player: cardData.player || '',
         team: cardData.team || '',
         year: cardData.year || '',
-        userId: 'current-user',
-        createdAt: new Date().toISOString(),
+        ownerId: cardData.ownerId || cardData.userId || 'current-user',
+        createdAt: cardData.createdAt || new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        designMetadata: {
-          cardStyle: cardData.designMetadata?.cardStyle || {},
-          textStyle: cardData.designMetadata?.textStyle || {},
-          marketMetadata: {},
-          cardMetadata: {
-            effects: cardData.effects || []
-          }
-        }
+        designMetadata
       };
       
       // Add the card to the context or make API call
-      onSave(newCard as CardType);
+      onSave(newCard);
       
       toastUtils.success("Card Created!", "Your card has been successfully created.");
       

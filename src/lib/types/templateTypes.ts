@@ -42,3 +42,6 @@ export interface TemplateSuggestion {
   matchScore: number;
   reason: string;
 }
+
+// Re-export the types from cardTypes to maintain backward compatibility
+export { CardStyle, TextStyle } from './cardTypes';
