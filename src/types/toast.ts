@@ -13,12 +13,6 @@ export interface Toast {
   open: boolean;
 }
 
-export interface ToastAction {
-  altText: string;
-  onClick: () => void;
-  children: ReactNode;
-}
-
 export interface ToastOptions {
   id?: string;
   title?: string | ReactNode;
@@ -27,6 +21,28 @@ export interface ToastOptions {
   variant?: ToastVariant;
   duration?: number;
   open?: boolean;
+}
+
+export interface ToastAction {
+  altText: string;
+  onClick: () => void;
+  children: ReactNode;
+}
+
+// Add a compatibility type that matches sonner.toast expectations
+export interface SonnerToastOptions {
+  id?: string;
+  title?: string | ReactNode;
+  description?: string | ReactNode;
+  action?: React.ReactNode;
+  position?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'top-center' | 'bottom-center';
+  duration?: number;
+  dismissible?: boolean;
+  icon?: React.ReactNode;
+  important?: boolean;
+  cancel?: React.ReactNode;
+  onDismiss?: () => void;
+  onAutoClose?: () => void;
 }
 
 export type ToasterToast = Toast & {

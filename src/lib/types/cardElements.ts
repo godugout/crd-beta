@@ -1,112 +1,77 @@
 
-import { BaseEntity } from './index';
+// Export element types needed by ElementLibrary.ts
+export interface CardElement {
+  id: string;
+  name: string;
+  type: string;
+  url: string;
+  thumbnailUrl?: string;
+  description?: string;
+  tags?: string[];
+  category?: string;
+  createdAt: string;
+  updatedAt: string;
+  creatorId?: string;
+  isOfficial?: boolean;
+}
 
-/**
- * Element type enum
- */
+export interface StickerElement extends CardElement {
+  type: 'sticker';
+  isAnimated?: boolean;
+}
+
+export interface LogoElement extends CardElement {
+  type: 'logo';
+  team?: string;
+  league?: string;
+}
+
+export interface FrameElement extends CardElement {
+  type: 'frame';
+  borderWidth?: number;
+}
+
+export interface BadgeElement extends CardElement {
+  type: 'badge';
+  rarity?: string;
+}
+
+export interface OverlayElement extends CardElement {
+  type: 'overlay';
+  opacity?: number;
+}
+
+export interface ElementLibraryCollection {
+  id: string;
+  name: string;
+  elements: CardElement[];
+}
+
+// Element type enum for matching string literals
 export enum ElementType {
-  STANDARD = 'standard',
-  PREMIUM = 'premium',
-  SPECIAL = 'special',
-  LIMITED = 'limited',
+  Sticker = 'sticker',
+  Logo = 'logo',
+  Frame = 'frame',
+  Badge = 'badge',
+  Overlay = 'overlay'
 }
 
-/**
- * Element category enum
- */
+// Element category enum
 export enum ElementCategory {
-  DECORATIVE = 'decorative',
-  STICKERS = 'stickers',
-  TEAMS = 'teams',
-  BADGES = 'badges',
-  FRAMES = 'frames',
-  EFFECTS = 'effects',
-  BACKGROUNDS = 'backgrounds',
-  USER_GENERATED = 'user-generated',
-  LOGO = 'logo',
-  OVERLAY = 'overlay',
-  TEXTURE = 'texture',
-  ICON = 'icon',
-  SHAPE = 'shape'
+  Sports = 'sports',
+  Entertainment = 'entertainment',
+  Art = 'art',
+  Seasonal = 'seasonal',
+  Special = 'special'
 }
 
-/**
- * Card element interface for stickers, logos, frames, etc.
- */
-export interface CardElement extends BaseEntity {
-  name: string;
-  description?: string;
-  type: string;
-  category: ElementCategory | string;
-  url?: string;
-  imageUrl: string;
-  thumbnailUrl?: string;
-  tags?: string[];
-  position?: {
-    x: number;
-    y: number;
-    z?: number;
-    rotation?: number; // Added rotation property
-  };
-  size?: {
-    width: number;
-    height: number;
-    aspectRatio?: number;
-  };
-  rotation?: number;
-  style?: Record<string, any>;
-  assetUrl?: string; // Used in ElementPlacementCanvas
-  metadata?: any;
-  attribution?: string; // For giving credit to element creators
-}
-
-/**
- * Element upload metadata interface
- */
+// Type for element upload metadata
 export interface ElementUploadMetadata {
-  id?: string;
-  name: string;
+  title: string;
   description?: string;
-  type: string;
-  category: ElementCategory | string;
-  url?: string;
-  imageUrl?: string;
-  thumbnailUrl?: string;
   tags?: string[];
-  position?: {
-    x: number;
-    y: number;
-    z?: number;
-    rotation?: number; // Added rotation property
-  };
-  size?: {
-    width: number;
-    height: number;
-    aspectRatio?: number;
-  };
-  rotation?: number;
-  attribution?: string; // Added for attribution requirements
-  metadata?: any;
-}
-
-/**
- * Element placement interface for positioned elements on cards
- */
-export interface ElementPlacement {
-  elementId: string;
-  elementType: string;
-  position: {
-    x: number;
-    y: number;
-    z: number;
-  };
-  size: {
-    width: number;
-    height: number;
-    aspectRatio?: number;
-  };
-  rotation: number;
-  opacity: number;
-  element?: CardElement;
-  style?: Record<string, any>;
+  category: ElementCategory;
+  type: ElementType;
+  isAnimated?: boolean;
+  mimeType?: string;
 }

@@ -99,8 +99,10 @@ export interface Card {
   ownerId?: string; 
   collectionId?: string;
   userId?: string;
+  teamId?: string; // Add teamId property
   effects?: string[];
   reactions?: any[];
+  comments?: any[]; // Add comments property
   artist?: string;
   set?: string;
   rarity?: string;
@@ -110,6 +112,8 @@ export interface Card {
   name?: string;
   jersey?: string;
   seriesId?: string; // Add seriesId property
+  backgroundColor?: string; // Add backgroundColor
+  specialEffect?: string; // Add specialEffect
 }
 
 /**
@@ -246,3 +250,10 @@ export interface CardStats {
  * Export other card types to ensure consistency
  */
 export * from './cardElements';
+
+// Add DEFAULT_CARD_METADATA to satisfy CardMetadata interface
+export const DEFAULT_CARD_METADATA: CardMetadata = {
+  category: 'general',
+  series: 'base',
+  cardType: 'standard'
+};

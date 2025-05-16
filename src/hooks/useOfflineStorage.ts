@@ -11,7 +11,11 @@ export const useOfflineStorage = () => {
     connectionType: 'wifi',
     reconnectAttempts: 0,
     pendingCount: 0,
-    syncOfflineItems: () => Promise.resolve({ synced: 0, failed: 0 })
+    syncOfflineItems: () => Promise.resolve({ synced: 0, failed: 0 }),
+    saveData: (data: any, options: { collectionName: string, persistOffline: boolean }) => {
+      console.log('Saving data to offline storage:', data, options);
+      return Promise.resolve({ id: 'offline-id', ...data });
+    }
   };
 };
 

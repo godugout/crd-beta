@@ -1,4 +1,3 @@
-
 // Define base types used throughout the application
 import { FabricSwatch } from '@/lib/types/card';
 
@@ -129,6 +128,9 @@ export interface DbCard {
   rarity: string;
 }
 
+// Update the Collection interface to include unlisted visibility
+export type CollectionVisibility = 'public' | 'private' | 'team' | 'unlisted';
+
 export interface DbCollection {
   id: string;
   title: string;
@@ -136,7 +138,7 @@ export interface DbCollection {
   cover_image_url?: string;
   owner_id?: string;
   team_id?: string;
-  visibility?: 'public' | 'private' | 'team' | 'unlisted';  // Add 'unlisted' option here too
+  visibility?: CollectionVisibility;  // Use our updated type here
   allow_comments?: boolean;
   created_at: string;
   updated_at: string;

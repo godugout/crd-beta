@@ -1,6 +1,15 @@
 
 import { Card, CardEffect } from '@/lib/types/cardTypes';
-import { CardEffectSettings } from '@/lib/types/cardTypes';
+
+// Export CardEffectSettings for use by other modules
+export interface CardEffectSettings {
+  intensity?: number;
+  speed?: number;
+  pattern?: string;
+  color?: string;
+  animationEnabled?: boolean;
+  [key: string]: any;
+}
 
 export interface EffectCategory {
   id: string;
@@ -75,15 +84,15 @@ export interface CardEffectDefinition {
 
 // Export MaterialSimulation interface
 export interface MaterialSimulation {
-  roughness: number;
-  metalness: number;
-  clearcoat: number;
-  clearcoatRoughness: number;
-  ior: number;
-  transmission: number;
-  reflectivity: number;
-  emissive: string;
-  envMapIntensity: number;
+  roughness?: number;
+  metalness?: number;
+  clearcoat?: number;
+  clearcoatRoughness?: number;
+  ior?: number;
+  transmission?: number;
+  reflectivity?: number;
+  emissive?: string;
+  envMapIntensity?: number;
   textureUrl: string;
   baseColor: string;
   color: string;
@@ -91,6 +100,3 @@ export interface MaterialSimulation {
   type: string;
   weathering: number;
 }
-
-// Export CardEffectSettings for use by other modules
-export type { CardEffectSettings };

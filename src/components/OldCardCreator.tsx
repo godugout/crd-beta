@@ -4,6 +4,7 @@ import CardUpload from './home/CardUpload';
 import CardCollection from './home/CardCollection';
 import CardShowcase from './home/CardShowcase';
 import { cardData } from '@/data/cardData';
+import { adaptCardToCardData } from '@/types/card';
 
 const OldCardCreator: React.FC = () => {
   const [view, setView] = useState<'showcase' | 'collection' | 'upload'>('collection');
@@ -18,6 +19,18 @@ const OldCardCreator: React.FC = () => {
     setIsFlipped(!isFlipped);
   };
   
+  // Ensure we're using CardData type for compatibility
+  const compatibleCardData = cardData.map(card => {
+    if ('description' in card && typeof card.description === 'string') {
+      return card;
+    }
+    // Make sure description is not undefined
+    return {
+      ...card,
+      description: card.description || ''
+    };
+  });
+  
   return (
     <div className="bg-white rounded-lg shadow-md p-4">
       {view === 'upload' && (
@@ -26,7 +39,7 @@ const OldCardCreator: React.FC = () => {
       
       {view === 'collection' && (
         <CardCollection 
-          cardData={cardData} 
+          cardData={compatibleCardData} 
           selectCard={selectCard} 
           setView={setView} 
         />
@@ -34,7 +47,7 @@ const OldCardCreator: React.FC = () => {
       
       {view === 'showcase' && (
         <CardShowcase 
-          cardData={cardData}
+          cardData={compatibleCardData}
           activeCard={activeCard}
           isFlipped={isFlipped}
           selectCard={selectCard}

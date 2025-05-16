@@ -15,4 +15,5 @@ export interface MaterialSimulation {
   reflectivity?: number;
   emissive?: string;
   envMapIntensity?: number;
+  scale?: number; // Add scale property for compatibility
 }
