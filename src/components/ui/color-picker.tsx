@@ -8,7 +8,6 @@ interface ColorPickerProps {
   className?: string;
 }
 
-// A simple color picker component
 const ColorPicker: React.FC<ColorPickerProps> = ({ color, onChange, className }) => {
   return (
     <div className={cn("flex flex-wrap gap-2", className)}>

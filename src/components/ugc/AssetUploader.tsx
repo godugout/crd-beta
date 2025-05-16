@@ -1,492 +1,460 @@
 
 import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
 import { ElementType, ElementCategory } from '@/lib/types/cardElements';
 import { useUGCSystem } from '@/hooks/useUGCSystem';
-import { Upload, X, Image as ImageIcon, AlertCircle } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
+import { X, Upload, Image, ChevronDown, ChevronUp, Tag, Info } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
+import {
+  Switch,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui';
 
 interface AssetUploaderProps {
   onUploadComplete?: (assetId: string) => void;
-  defaultType?: ElementType;
-  defaultCategory?: ElementCategory;
   className?: string;
 }
 
-const AssetUploader: React.FC<AssetUploaderProps> = ({
-  onUploadComplete,
-  defaultType = 'sticker',
-  defaultCategory = 'custom',
-  className
-}) => {
-  const { uploadAsset, uploadProgress } = useUGCSystem();
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  
-  const [file, setFile] = useState<File | null>(null);
-  const [preview, setPreview] = useState<string | null>(null);
-  const [assetType, setAssetType] = useState<ElementType>(defaultType);
-  const [category, setCategory] = useState<ElementCategory>(defaultCategory);
+const AssetUploader: React.FC<AssetUploaderProps> = ({ onUploadComplete, className }) => {
+  // State for form values
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [tags, setTags] = useState<string[]>([]);
+  const [assetType, setAssetType] = useState<ElementType>('sticker');
+  const [category, setCategory] = useState<ElementCategory>('sports');
   const [tagInput, setTagInput] = useState('');
+  const [tags, setTags] = useState<string[]>([]);
   const [isPublic, setIsPublic] = useState(true);
-  const [isForSale, setIsForSale] = useState(false);
-  const [price, setPrice] = useState(0);
-  const [currentTab, setCurrentTab] = useState('basic');
-  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+  const [forSale, setForSale] = useState(false);
+  const [price, setPrice] = useState(5);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   
-  // File selection handler
+  // File handling
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // Advanced options
+  const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
+  
+  // Use the UGC hook for upload functionality
+  const { uploadAsset, uploadProgress } = useUGCSystem();
+  
+  // Handle file selection
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      const selectedFile = e.target.files[0];
-      
-      // Basic validation
-      if (!selectedFile.type.startsWith('image/')) {
-        setValidationErrors({
-          ...validationErrors,
-          file: 'Please select a valid image file'
-        });
-        return;
-      }
-      
-      setFile(selectedFile);
-      setValidationErrors({
-        ...validationErrors,
-        file: undefined
-      });
-      
-      // Generate title from filename if empty
-      if (!title) {
-        setTitle(selectedFile.name.split('.')[0].replace(/[-_]/g, ' '));
-      }
+      const file = e.target.files[0];
+      setSelectedFile(file);
       
       // Create preview
       const reader = new FileReader();
-      reader.onloadend = () => {
+      reader.onload = () => {
         setPreview(reader.result as string);
       };
-      reader.readAsDataURL(selectedFile);
+      reader.readAsDataURL(file);
+      
+      // Clear any file-related errors
+      const newErrors = { ...errors };
+      delete newErrors.file;
+      setErrors(newErrors);
     }
   };
   
-  // Tag management
-  const addTag = () => {
+  // Handle tag addition
+  const handleAddTag = () => {
     if (tagInput.trim() && !tags.includes(tagInput.trim())) {
       setTags([...tags, tagInput.trim()]);
       setTagInput('');
     }
   };
   
-  const removeTag = (tagToRemove: string) => {
+  // Handle tag input keypress
+  const handleTagKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleAddTag();
+    }
+  };
+  
+  // Handle tag removal
+  const handleRemoveTag = (tagToRemove: string) => {
     setTags(tags.filter(tag => tag !== tagToRemove));
   };
   
-  // Handle dropping files
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+  // Handle form submission
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      const droppedFile = e.dataTransfer.files[0];
+    // Validate form
+    const newErrors: Record<string, string> = {};
+    
+    if (!title.trim()) newErrors.title = 'Title is required';
+    if (!selectedFile) newErrors.file = 'Please select a file to upload';
+    
+    // Asset type validation
+    if (selectedFile) {
+      const fileExt = selectedFile.name.split('.').pop()?.toLowerCase() || '';
       
-      if (!droppedFile.type.startsWith('image/')) {
-        setValidationErrors({
-          ...validationErrors,
-          file: 'Please select a valid image file'
-        });
-        return;
-      }
-      
-      setFile(droppedFile);
-      setValidationErrors({
-        ...validationErrors,
-        file: undefined
-      });
-      
-      // Generate title from filename if empty
-      if (!title) {
-        setTitle(droppedFile.name.split('.')[0].replace(/[-_]/g, ' '));
-      }
-      
-      // Create preview
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreview(reader.result as string);
+      // Check file formats based on asset type
+      const allowedFormats: Record<ElementType, string[]> = {
+        'sticker': ['png', 'gif', 'webp', 'svg'],
+        'logo': ['png', 'svg', 'webp'],
+        'frame': ['png', 'svg'],
+        'badge': ['png', 'svg'],
+        'overlay': ['png', 'webp', 'svg']
       };
-      reader.readAsDataURL(droppedFile);
-    }
-  };
-  
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-  };
-  
-  // Validation check
-  const validate = (): boolean => {
-    const errors: Record<string, string> = {};
-    
-    if (!file) {
-      errors.file = 'Please select a file to upload';
+      
+      if (!allowedFormats[assetType].includes(fileExt)) {
+        newErrors.file = `Invalid file format for ${assetType}. Allowed formats: ${allowedFormats[assetType].join(', ')}`;
+      }
+      
+      // Check file size (5MB limit for most, 10MB for frames and overlays)
+      const maxSize = (assetType === 'frame' || assetType === 'overlay') ? 10 * 1024 * 1024 : 5 * 1024 * 1024;
+      if (selectedFile.size > maxSize) {
+        newErrors.file = `File size exceeds the maximum allowed (${maxSize / (1024 * 1024)}MB)`;
+      }
     }
     
-    if (!title.trim()) {
-      errors.title = 'Title is required';
-    }
-    
-    if (isForSale && price <= 0) {
-      errors.price = 'Please enter a valid price';
-    }
-    
-    setValidationErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
-  
-  // Handle upload
-  const handleUpload = async () => {
-    if (!validate()) {
+    // Check if there are validation errors
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
       return;
     }
     
-    if (!file) return;
-    
-    try {
-      const result = await uploadAsset.mutateAsync({
-        file,
-        metadata: {
-          title,
-          description,
-          assetType,
-          category,
-          tags,
-          isPublic,
-          forSale: isForSale,
-          price: isForSale ? price : undefined
+    // Submit the form
+    if (selectedFile) {
+      try {
+        const result = await uploadAsset.mutateAsync({
+          file: selectedFile,
+          metadata: {
+            title,
+            description,
+            assetType,
+            category,
+            tags,
+            isPublic,
+            forSale,
+            price: forSale ? price : undefined
+          }
+        });
+        
+        if (result && onUploadComplete) {
+          onUploadComplete(result.id);
         }
-      });
-      
-      if (result && onUploadComplete) {
-        onUploadComplete(result.id);
+        
+        // Reset form
+        setTitle('');
+        setDescription('');
+        setAssetType('sticker');
+        setCategory('sports');
+        setTags([]);
+        setSelectedFile(null);
+        setPreview(null);
+        setIsPublic(true);
+        setForSale(false);
+        setPrice(5);
+        setErrors({});
+      } catch (error) {
+        console.error('Upload error:', error);
+        setErrors({ submit: 'Failed to upload asset. Please try again.' });
       }
-      
-      // Reset form
-      setFile(null);
-      setPreview(null);
-      setTitle('');
-      setDescription('');
-      setTags([]);
-      setTagInput('');
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
-      
-    } catch (error) {
-      console.error('Upload error:', error);
     }
   };
   
-  // Define asset type options
-  const assetTypeOptions: { value: ElementType; label: string; description: string }[] = [
-    { value: 'sticker', label: 'Sticker', description: 'Decorative elements that can be placed anywhere on a card' },
-    { value: 'logo', label: 'Logo', description: 'Brand or team logos, usually vector-based for quality' },
-    { value: 'frame', label: 'Frame', description: 'Decorative borders that go around the edge of cards' },
-    { value: 'badge', label: 'Badge', description: 'Achievement or status indicators for cards' },
-    { value: 'overlay', label: 'Overlay', description: 'Effects or filters that affect the entire card' }
-  ];
-  
-  // Define category options
-  const categoryOptions: { value: ElementCategory; label: string }[] = [
-    { value: 'sports', label: 'Sports' },
-    { value: 'entertainment', label: 'Entertainment' },
-    { value: 'achievement', label: 'Achievement' },
-    { value: 'decorative', label: 'Decorative' },
-    { value: 'seasonal', label: 'Seasonal' },
-    { value: 'holiday', label: 'Holiday' },
-    { value: 'teams', label: 'Teams' },
-    { value: 'brands', label: 'Brands' },
-    { value: 'custom', label: 'Custom' },
-    { value: 'other', label: 'Other' }
-  ];
-
   return (
-    <Card className={className}>
-      <CardHeader>
-        <CardTitle>Upload New Asset</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Tabs value={currentTab} onValueChange={setCurrentTab}>
-          <TabsList className="grid grid-cols-3 w-full">
-            <TabsTrigger value="basic">Basic Info</TabsTrigger>
-            <TabsTrigger value="details">Details</TabsTrigger>
-            <TabsTrigger value="marketplace" disabled={!file}>Marketplace</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="basic" className="space-y-4 mt-4">
-            <div>
-              <Label htmlFor="asset-type">Asset Type</Label>
-              <Select value={assetType} onValueChange={(value) => setAssetType(value as ElementType)}>
-                <SelectTrigger id="asset-type">
-                  <SelectValue placeholder="Select asset type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    {assetTypeOptions.map(option => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-              <p className="text-xs text-muted-foreground mt-1">
-                {assetTypeOptions.find(opt => opt.value === assetType)?.description}
-              </p>
-            </div>
-            
-            <div>
-              {!file ? (
-                <div
-                  className="border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center hover:bg-gray-50 transition-colors cursor-pointer"
-                  onClick={() => fileInputRef.current?.click()}
-                  onDrop={handleDrop}
-                  onDragOver={handleDragOver}
-                >
-                  <Upload className="h-10 w-10 text-gray-400 mb-2" />
-                  <p className="text-sm font-medium mb-1">Upload a file</p>
-                  <p className="text-xs text-muted-foreground mb-2">Drag and drop or click to browse</p>
-                  {assetType === 'sticker' && <p className="text-xs">PNG, SVG, GIF or WebP (max 5MB)</p>}
-                  {assetType === 'logo' && <p className="text-xs">PNG, SVG or WebP (max 5MB)</p>}
-                  {assetType === 'frame' && <p className="text-xs">PNG with transparency or SVG (max 10MB)</p>}
-                  {assetType === 'badge' && <p className="text-xs">PNG, SVG (max 5MB)</p>}
-                  {assetType === 'overlay' && <p className="text-xs">PNG, WebP, SVG with transparency (max 10MB)</p>}
-                  
-                  {validationErrors.file && (
-                    <div className="flex items-center gap-1 text-destructive text-xs mt-2">
-                      <AlertCircle size={12} />
-                      <span>{validationErrors.file}</span>
-                    </div>
-                  )}
+    <div className={cn("space-y-6", className)}>
+      {uploadProgress > 0 && uploadProgress < 100 ? (
+        <div className="space-y-2">
+          <Progress value={uploadProgress} className="w-full" />
+          <p className="text-center text-sm text-muted-foreground">
+            Uploading... {Math.round(uploadProgress)}%
+          </p>
+        </div>
+      ) : (
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* File Upload Section */}
+          <div className="space-y-2">
+            <Label htmlFor="asset-file">Asset File</Label>
+            <div 
+              className={cn(
+                "border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center cursor-pointer transition-colors",
+                preview ? "border-primary/20 bg-primary/5" : "border-gray-300 hover:border-primary/40 hover:bg-primary/5",
+                errors.file && "border-destructive/50 bg-destructive/5"
+              )}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              {preview ? (
+                <div className="relative w-full aspect-square flex items-center justify-center">
+                  <img 
+                    src={preview} 
+                    alt="Preview" 
+                    className="max-w-full max-h-full object-contain"
+                  />
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    className="absolute bottom-2 right-2 opacity-80 hover:opacity-100"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedFile(null);
+                      setPreview(null);
+                      if (fileInputRef.current) fileInputRef.current.value = '';
+                    }}
+                  >
+                    <X className="h-4 w-4 mr-1" /> Remove
+                  </Button>
                 </div>
               ) : (
-                <div className="border rounded-lg overflow-hidden">
-                  <div className="aspect-video bg-gray-100 flex items-center justify-center">
-                    <img 
-                      src={preview || ''} 
-                      alt="Preview" 
-                      className="max-w-full max-h-full object-contain"
-                    />
-                  </div>
-                  <div className="p-2 flex justify-between items-center">
-                    <span className="text-sm truncate">{file.name}</span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        setFile(null);
-                        setPreview(null);
-                        if (fileInputRef.current) {
-                          fileInputRef.current.value = '';
-                        }
-                      }}
-                    >
-                      <X size={16} />
-                    </Button>
-                  </div>
+                <div className="text-center">
+                  <Upload className="mx-auto h-10 w-10 text-muted-foreground mb-2" />
+                  <p className="text-sm font-medium mb-1">
+                    Drag and drop or click to upload
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    SVG, PNG, GIF up to {assetType === 'frame' || assetType === 'overlay' ? '10MB' : '5MB'}
+                  </p>
                 </div>
               )}
               <input
                 ref={fileInputRef}
+                id="asset-file"
                 type="file"
-                accept="image/*"
-                onChange={handleFileChange}
+                accept=".png,.svg,.gif,.webp"
                 className="hidden"
+                onChange={handleFileChange}
               />
             </div>
-            
-            <div>
-              <Label htmlFor="title" className={validationErrors.title ? 'text-destructive' : ''}>
-                Title {validationErrors.title && <span className="text-xs">({validationErrors.title})</span>}
-              </Label>
+            {errors.file && (
+              <p className="text-sm text-destructive">{errors.file}</p>
+            )}
+          </div>
+          
+          {/* Basic Information */}
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="title">Title</Label>
               <Input
                 id="title"
                 value={title}
-                onChange={(e) => {
-                  setTitle(e.target.value);
-                  if (e.target.value.trim()) {
-                    setValidationErrors({
-                      ...validationErrors,
-                      title: undefined
-                    });
-                  }
-                }}
-                className={validationErrors.title ? 'border-destructive' : ''}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Give your asset a name"
+                className={errors.title ? "border-destructive" : ""}
               />
+              {errors.title && (
+                <p className="text-sm text-destructive">{errors.title}</p>
+              )}
             </div>
             
-            <Button 
-              onClick={() => setCurrentTab('details')} 
-              disabled={!file || !title.trim()}
-              className="w-full"
-            >
-              Next
-            </Button>
-          </TabsContent>
-          
-          <TabsContent value="details" className="space-y-4 mt-4">
-            <div>
-              <Label htmlFor="description">Description</Label>
+            <div className="space-y-2">
+              <Label htmlFor="description">Description (optional)</Label>
               <Textarea
                 id="description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Describe your asset..."
-                className="resize-none"
                 rows={3}
               />
             </div>
             
-            <div>
-              <Label htmlFor="category">Category</Label>
-              <Select value={category} onValueChange={(value) => setCategory(value as ElementCategory)}>
-                <SelectTrigger id="category">
-                  <SelectValue placeholder="Select a category" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    {categoryOptions.map(option => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="asset-type">Asset Type</Label>
+                <Select 
+                  value={assetType} 
+                  onValueChange={(value) => setAssetType(value as ElementType)}
+                >
+                  <SelectTrigger id="asset-type">
+                    <SelectValue placeholder="Select asset type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="sticker">Sticker</SelectItem>
+                    <SelectItem value="logo">Logo</SelectItem>
+                    <SelectItem value="frame">Frame</SelectItem>
+                    <SelectItem value="badge">Badge</SelectItem>
+                    <SelectItem value="overlay">Overlay</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="category">Category</Label>
+                <Select 
+                  value={category} 
+                  onValueChange={(value) => setCategory(value as ElementCategory)}
+                >
+                  <SelectTrigger id="category">
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="sports">Sports</SelectItem>
+                    <SelectItem value="entertainment">Entertainment</SelectItem>
+                    <SelectItem value="decorative">Decorative</SelectItem>
+                    <SelectItem value="seasonal">Seasonal</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
             
-            <div>
+            <div className="space-y-2">
               <Label htmlFor="tags">Tags</Label>
-              <div className="flex gap-2 mb-2">
+              <div className="flex gap-2">
                 <Input
                   id="tags"
                   value={tagInput}
                   onChange={(e) => setTagInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      addTag();
-                    }
-                  }}
-                  placeholder="Add tags..."
+                  onKeyDown={handleTagKeyPress}
+                  placeholder="Add tags (press Enter)"
                 />
-                <Button type="button" onClick={addTag} disabled={!tagInput.trim()}>
+                <Button 
+                  type="button" 
+                  onClick={handleAddTag}
+                  variant="outline"
+                >
+                  <Tag className="h-4 w-4 mr-2" />
                   Add
                 </Button>
               </div>
-              <div className="flex flex-wrap gap-1 mt-2">
-                {tags.map(tag => (
-                  <Badge key={tag} variant="secondary" className="flex items-center gap-1">
-                    {tag}
-                    <X size={14} className="cursor-pointer" onClick={() => removeTag(tag)} />
-                  </Badge>
-                ))}
-              </div>
+              
+              {tags.length > 0 && (
+                <div className="flex flex-wrap gap-1 mt-2">
+                  {tags.map((tag) => (
+                    <Badge 
+                      key={tag} 
+                      variant="secondary"
+                      className="flex items-center gap-1"
+                    >
+                      {tag}
+                      <X 
+                        className="h-3 w-3 cursor-pointer hover:text-destructive" 
+                        onClick={() => handleRemoveTag(tag)}
+                      />
+                    </Badge>
+                  ))}
+                </div>
+              )}
             </div>
-            
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="is-public"
-                checked={isPublic}
-                onCheckedChange={setIsPublic}
-              />
-              <Label htmlFor="is-public">Make this asset public</Label>
-            </div>
-            
-            <div className="flex justify-between">
-              <Button variant="outline" onClick={() => setCurrentTab('basic')}>
-                Back
-              </Button>
-              <Button onClick={() => setCurrentTab('marketplace')}>
-                Next
-              </Button>
-            </div>
-          </TabsContent>
+          </div>
           
-          <TabsContent value="marketplace" className="space-y-4 mt-4">
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="for-sale"
-                checked={isForSale}
-                onCheckedChange={setIsForSale}
-              />
-              <Label htmlFor="for-sale">Sell this asset in marketplace</Label>
+          {/* Advanced Options */}
+          <Collapsible
+            open={isAdvancedOpen}
+            onOpenChange={setIsAdvancedOpen}
+            className="border rounded-md p-4"
+          >
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-medium">Advanced Options</h3>
+              <CollapsibleTrigger asChild>
+                <Button variant="ghost" size="sm">
+                  {isAdvancedOpen ? (
+                    <ChevronUp className="h-4 w-4" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4" />
+                  )}
+                </Button>
+              </CollapsibleTrigger>
             </div>
             
-            {isForSale && (
-              <div>
-                <Label htmlFor="price" className={validationErrors.price ? 'text-destructive' : ''}>
-                  Price (Credits) {validationErrors.price && <span className="text-xs">({validationErrors.price})</span>}
-                </Label>
-                <Input
-                  id="price"
-                  type="number"
-                  min="1"
-                  step="1"
-                  value={price}
-                  onChange={(e) => {
-                    setPrice(Number(e.target.value));
-                    if (Number(e.target.value) > 0) {
-                      setValidationErrors({
-                        ...validationErrors,
-                        price: undefined
-                      });
-                    }
-                  }}
-                  className={validationErrors.price ? 'border-destructive' : ''}
+            <CollapsibleContent className="pt-4 space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Label htmlFor="is-public">Make Public</Label>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Info className="h-3 w-3 text-muted-foreground" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Public assets are visible to everyone in the marketplace</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
+                <Switch 
+                  id="is-public" 
+                  checked={isPublic}
+                  onCheckedChange={setIsPublic}
                 />
               </div>
-            )}
-            
-            <div className="bg-muted rounded-lg p-4">
-              <h3 className="text-sm font-medium mb-2">Marketplace Terms</h3>
-              <p className="text-xs text-muted-foreground">
-                By uploading content to the marketplace, you confirm that:
-              </p>
-              <ul className="text-xs text-muted-foreground list-disc list-inside mt-1">
-                <li>You own or have rights to this asset</li>
-                <li>The asset does not infringe on others' rights</li>
-                <li>You agree to our content guidelines and terms of service</li>
-                <li>You grant us a license to distribute your asset</li>
-              </ul>
+              
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Label htmlFor="for-sale">Sell this asset</Label>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Info className="h-3 w-3 text-muted-foreground" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Set a price in credits for others to purchase your asset</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
+                <Switch 
+                  id="for-sale" 
+                  checked={forSale}
+                  onCheckedChange={setForSale}
+                />
+              </div>
+              
+              {forSale && (
+                <div className="space-y-2">
+                  <Label htmlFor="price">Price (credits)</Label>
+                  <Input
+                    id="price"
+                    type="number"
+                    min={1}
+                    value={price}
+                    onChange={(e) => setPrice(parseInt(e.target.value) || 1)}
+                  />
+                </div>
+              )}
+              
+              <div className="pt-2 text-xs text-muted-foreground">
+                <p>
+                  Your asset will be reviewed before appearing in the marketplace. 
+                  This helps ensure quality and appropriate content.
+                </p>
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
+          
+          {/* Error Message */}
+          {errors.submit && (
+            <div className="bg-destructive/10 p-3 rounded-md text-sm text-destructive">
+              {errors.submit}
             </div>
-            
-            <div className="flex justify-between">
-              <Button variant="outline" onClick={() => setCurrentTab('details')}>
-                Back
-              </Button>
-              <Button onClick={handleUpload} disabled={uploadAsset.isPending}>
-                {uploadAsset.isPending ? 'Uploading...' : 'Upload Asset'}
-              </Button>
-            </div>
-          </TabsContent>
-        </Tabs>
-        
-        {uploadAsset.isPending && uploadProgress > 0 && (
-          <div className="mt-4 space-y-2">
-            <Progress value={uploadProgress} className="h-2" />
-            <p className="text-xs text-center text-muted-foreground">
-              {uploadProgress < 100 ? `Uploading... ${uploadProgress}%` : 'Processing...'}
-            </p>
+          )}
+          
+          {/* Submit Button */}
+          <div className="flex justify-end">
+            <Button type="submit" disabled={uploadAsset.isPending}>
+              <Upload className="mr-2 h-4 w-4" />
+              Upload Asset
+            </Button>
           </div>
-        )}
-      </CardContent>
-    </Card>
+        </form>
+      )}
+    </div>
   );
 };
 

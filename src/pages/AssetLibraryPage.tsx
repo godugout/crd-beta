@@ -6,8 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AssetMarketplace from '@/components/ugc/AssetMarketplace';
 import AssetUploader from '@/components/ugc/AssetUploader';
+import ModerationDashboard from '@/components/ugc/ModerationDashboard';
 import { UGCAsset } from '@/lib/types/ugcTypes';
-import { AlertTriangle, Plus, AlertCircle } from 'lucide-react';
+import { AlertTriangle, Plus, AlertCircle, ShieldAlert } from 'lucide-react';
 import { useUGCSystem } from '@/hooks/useUGCSystem';
 import { useAuth } from '@/hooks/useAuth';
 import { 
@@ -23,8 +24,13 @@ const AssetLibraryPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('marketplace');
   const [showUploader, setShowUploader] = useState(false);
   const [selectedAsset, setSelectedAsset] = useState<UGCAsset | null>(null);
+  const [reportDialogOpen, setReportDialogOpen] = useState(false);
+  const [reportReason, setReportReason] = useState('');
+  const [reportDetails, setReportDetails] = useState('');
+  
   const navigate = useNavigate();
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, user, isAdmin } = useAuth();
+  const { reportAsset } = useUGCSystem();
   
   const handleAssetSelect = (asset: UGCAsset) => {
     setSelectedAsset(asset);
@@ -33,6 +39,20 @@ const AssetLibraryPage: React.FC = () => {
   const handleAddToCard = (asset: UGCAsset) => {
     // In a real implementation, this would add the asset to the current card being edited
     navigate(`/card-creator?add-asset=${asset.id}`);
+  };
+
+  const handleReportSubmit = async () => {
+    if (!selectedAsset) return;
+    
+    await reportAsset.mutateAsync({
+      assetId: selectedAsset.id,
+      reason: reportReason,
+      details: reportDetails
+    });
+    
+    setReportDialogOpen(false);
+    setReportReason('');
+    setReportDetails('');
   };
 
   return (
@@ -44,18 +64,33 @@ const AssetLibraryPage: React.FC = () => {
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold">Asset Library</h1>
           
-          {isLoggedIn && (
-            <Button onClick={() => setShowUploader(true)}>
-              <Plus className="mr-1 h-4 w-4" /> Upload New Asset
-            </Button>
-          )}
+          <div className="flex gap-2">
+            {isAdmin && (
+              <Button 
+                variant="outline" 
+                onClick={() => setActiveTab('moderation')}
+                className="flex items-center gap-1"
+              >
+                <ShieldAlert className="h-4 w-4" />
+                <span className="hidden md:inline">Moderation</span>
+              </Button>
+            )}
+            
+            {isLoggedIn && (
+              <Button onClick={() => setShowUploader(true)}>
+                <Plus className="mr-1 h-4 w-4" /> Upload Asset
+              </Button>
+            )}
+          </div>
         </div>
         
-        <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="w-full max-w-md mx-auto grid grid-cols-3">
             <TabsTrigger value="marketplace">Marketplace</TabsTrigger>
             <TabsTrigger value="my-assets">My Assets</TabsTrigger>
-            <TabsTrigger value="collections">Collections</TabsTrigger>
+            <TabsTrigger value="moderation" className={!isAdmin ? 'hidden' : ''}>
+              Moderation
+            </TabsTrigger>
           </TabsList>
           
           <TabsContent value="marketplace" className="space-y-6">
@@ -79,14 +114,8 @@ const AssetLibraryPage: React.FC = () => {
             )}
           </TabsContent>
           
-          <TabsContent value="collections" className="space-y-6">
-            <div className="text-center py-12 border rounded-lg">
-              <AlertTriangle className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-              <h2 className="text-xl font-semibold mb-2">Coming Soon</h2>
-              <p className="text-muted-foreground">
-                Asset collections are under development and will be available soon.
-              </p>
-            </div>
+          <TabsContent value="moderation" className="space-y-6">
+            <ModerationDashboard isAdmin={isAdmin} />
           </TabsContent>
         </Tabs>
       </div>
@@ -196,24 +225,100 @@ const AssetLibraryPage: React.FC = () => {
               </div>
             </div>
             
-            <DialogFooter>
-              {selectedAsset.marketplace?.isForSale ? (
-                <>
-                  <Button variant="outline">
-                    {selectedAsset.marketplace.price} Credits
-                  </Button>
+            <DialogFooter className="flex justify-between items-center flex-wrap gap-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => {
+                  setReportDialogOpen(true);
+                }}
+                className="flex items-center"
+              >
+                <AlertTriangle className="h-3 w-3 mr-1" />
+                Report
+              </Button>
+              
+              <div>
+                {selectedAsset.marketplace?.isForSale ? (
+                  <>
+                    <Button variant="outline" className="mr-2">
+                      {selectedAsset.marketplace.price} Credits
+                    </Button>
+                    <Button onClick={() => handleAddToCard(selectedAsset)}>
+                      Purchase & Add to Card
+                    </Button>
+                  </>
+                ) : (
                   <Button onClick={() => handleAddToCard(selectedAsset)}>
-                    Purchase & Add to Card
+                    Add to Card
                   </Button>
-                </>
-              ) : (
-                <Button onClick={() => handleAddToCard(selectedAsset)}>
-                  Add to Card
-                </Button>
-              )}
+                )}
+              </div>
             </DialogFooter>
           </DialogContent>
         )}
+      </Dialog>
+      
+      {/* Report Dialog */}
+      <Dialog open={reportDialogOpen} onOpenChange={setReportDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Report Content</DialogTitle>
+            <DialogDescription>
+              Please let us know why you're reporting this content.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <label htmlFor="report-reason" className="text-sm font-medium">
+                Reason
+              </label>
+              <select
+                id="report-reason"
+                value={reportReason}
+                onChange={(e) => setReportReason(e.target.value)}
+                className="w-full p-2 border rounded-md"
+                required
+              >
+                <option value="">Select a reason</option>
+                <option value="inappropriate">Inappropriate content</option>
+                <option value="copyright">Copyright violation</option>
+                <option value="quality">Poor quality</option>
+                <option value="duplicate">Duplicate</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            
+            <div className="space-y-2">
+              <label htmlFor="report-details" className="text-sm font-medium">
+                Details
+              </label>
+              <textarea
+                id="report-details"
+                value={reportDetails}
+                onChange={(e) => setReportDetails(e.target.value)}
+                className="w-full p-2 border rounded-md"
+                rows={4}
+                placeholder="Please provide additional details about the issue"
+                required
+              />
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setReportDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={handleReportSubmit}
+              disabled={!reportReason || !reportDetails || reportAsset.isPending}
+            >
+              Submit Report
+            </Button>
+          </DialogFooter>
+        </DialogContent>
       </Dialog>
     </PageLayout>
   );
@@ -226,10 +331,15 @@ interface MyAssetsProps {
 
 const MyAssets: React.FC<MyAssetsProps> = ({ onAssetSelect }) => {
   const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
+  const { usePublicAssets } = useUGCSystem();
   
-  // In a real implementation, we would fetch the user's assets from the API
-  // For now, we'll show a placeholder
+  // Fetch the current user's assets
+  const { data: userAssets, isLoading } = usePublicAssets({
+    // In a real implementation, this would filter by the current user's ID
+    // creatorId: user?.id
+  });
   
+  // For demo purposes, assume no user assets yet
   return (
     <div className="text-center py-12 border rounded-lg">
       <AlertTriangle className="mx-auto h-12 w-12 text-muted-foreground mb-4" />

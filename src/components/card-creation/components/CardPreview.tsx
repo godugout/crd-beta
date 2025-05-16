@@ -31,7 +31,12 @@ const CardPreview = React.forwardRef<HTMLDivElement, CardPreviewProps>(({
   }
   
   // Ensure we have default values for required properties with proper type safety
-  const designMetadata = card.designMetadata || {};
+  const designMetadata = card.designMetadata || {
+    cardStyle: {},
+    textStyle: {},
+    cardMetadata: {},
+    marketMetadata: {}
+  };
   const cardStyle = designMetadata.cardStyle || {}; 
   const textStyle = designMetadata.textStyle || {};
   
