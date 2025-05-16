@@ -1,5 +1,6 @@
+
 // Define base types used throughout the application
-import { FabricSwatch } from '@/lib/types/card';
+import { FabricSwatch } from '@/lib/types/cardTypes';
 
 export interface Card {
   id: string;
@@ -59,6 +60,7 @@ export interface User {
   name?: string;
   avatarUrl?: string;
   username?: string;
+  displayName?: string;
 }
 
 export interface Team {
@@ -69,6 +71,7 @@ export interface Team {
   ownerId: string;
   createdAt: string;
   updatedAt: string;
+  members?: User[];  // Add members field
 }
 
 // Update the TeamMember interface to include user property
@@ -79,6 +82,7 @@ export interface TeamMember {
   role: 'owner' | 'admin' | 'member' | 'viewer';
   joinedAt: string;
   user?: User;
+  email?: string; // Add email field for mappers.ts
 }
 
 export interface Comment {
@@ -92,6 +96,7 @@ export interface Comment {
   createdAt: string;
   updatedAt: string;
   user?: User;
+  text?: string; // Add text field for adaptComment
 }
 
 export interface Reaction {
@@ -130,27 +135,3 @@ export interface DbCard {
 
 // Update the Collection interface to include unlisted visibility
 export type CollectionVisibility = 'public' | 'private' | 'team' | 'unlisted';
-
-export interface DbCollection {
-  id: string;
-  title: string;
-  description?: string;
-  cover_image_url?: string;
-  owner_id?: string;
-  team_id?: string;
-  visibility?: CollectionVisibility;  // Use our updated type here
-  allow_comments?: boolean;
-  created_at: string;
-  updated_at: string;
-  design_metadata?: any;
-}
-
-export interface DbReaction {
-  id: string;
-  user_id: string;
-  card_id?: string;
-  collection_id?: string;
-  comment_id?: string;
-  type: 'like' | 'love' | 'wow' | 'haha' | 'sad' | 'angry';
-  created_at: string;
-}

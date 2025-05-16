@@ -9,8 +9,8 @@ export interface CardElement {
   description?: string;
   tags?: string[];
   category?: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt?: string;
+  updatedAt?: string;
   creatorId?: string;
   isOfficial?: boolean;
   metadata?: any; // Added for ElementLibrary
@@ -21,6 +21,8 @@ export interface CardElement {
   position?: ElementPosition;
   size?: ElementSize;
   style?: Record<string, any>;
+  zIndex?: number;
+  transform?: ElementTransform;
 }
 
 /**
@@ -47,10 +49,18 @@ export interface ElementSize {
  * Element transform interface for placement engine
  */
 export interface ElementTransform {
-  position: ElementPosition;
-  size: ElementSize;
+  rotation: number;
+  scale: number;
+  translateX: number;
+  translateY: number;
+  scaleX: number;
+  scaleY: number;
+  rotate: number;
+  position?: ElementPosition;
+  size?: ElementSize;
   opacity?: number;
   zIndex?: number;
+  style?: Record<string, any>;
 }
 
 /**
@@ -61,6 +71,9 @@ export interface ElementPlacementOptions {
   constrainToCanvas?: boolean;
   preventOverlap?: boolean;
   alignCenter?: boolean;
+  position?: ElementPosition;
+  size?: ElementSize;
+  style?: Record<string, any>;
 }
 
 export interface StickerElement extends CardElement {

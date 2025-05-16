@@ -1,33 +1,66 @@
 
-import { BaseEntity } from './index';
 import { User } from './user';
 
 /**
- * Reaction definition for user interactions with cards and comments
+ * Interface for user comments
  */
-export interface Reaction extends BaseEntity {
+export interface Comment {
+  id: string;
+  text: string;
+  content?: string; // Add content field for adaptComment
+  cardId?: string;
+  collectionId?: string;
+  teamId?: string;
+  userId: string;
+  parentId?: string;
+  createdAt: string;
+  updatedAt: string;
+  user?: User;
+}
+
+/**
+ * Interface for reactions to content
+ */
+export interface Reaction {
+  id: string;
   userId: string;
   cardId?: string;
   collectionId?: string;
   commentId?: string;
   type: 'like' | 'love' | 'wow' | 'haha' | 'sad' | 'angry';
-  targetType: 'card' | 'comment' | 'collection' | string;
-  targetId: string;
+  createdAt: string;
   user?: User;
-  authorId?: string; // Added for backward compatibility
+  targetType: 'card' | 'collection' | 'comment';
+  targetId: string;
 }
 
 /**
- * Comment definition for user comments on cards
+ * Interface for user views tracking
  */
-export interface Comment extends BaseEntity {
-  content: string;
-  userId: string;
-  authorId?: string;          // Support legacy field
+export interface View {
+  id: string;
+  userId?: string;
   cardId?: string;
   collectionId?: string;
-  teamId?: string;
-  parentId?: string;
-  user?: User;
-  reactions?: Reaction[];     // Added to support CommentSection component
+  createdAt: string;
+  duration?: number;
+  sessionId: string;
+  deviceInfo?: Record<string, any>;
+}
+
+/**
+ * Interface for notifications
+ */
+export interface Notification {
+  id: string;
+  userId: string;
+  type: 'comment' | 'reaction' | 'mention' | 'system';
+  message: string;
+  read: boolean;
+  createdAt: string;
+  data?: Record<string, any>;
+  actorId?: string;
+  actor?: User;
+  targetId?: string;
+  targetType?: string;
 }

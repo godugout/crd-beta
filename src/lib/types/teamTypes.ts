@@ -1,69 +1,72 @@
 
-import { BaseEntity } from './index';
 import { User } from './user';
 
 /**
- * Team interface for team-related data
+ * Interface for team data
  */
-export interface Team extends BaseEntity {
+export interface Team {
+  id: string;
   name: string;
   description?: string;
   logoUrl?: string;
-  logo_url?: string;  // For backward compatibility
-  banner_url?: string;  // For backward compatibility
   ownerId: string;
-  status?: string;
-  website?: string;
-  email?: string;
-  specialties?: string[];
-  visibility?: 'public' | 'private' | 'team';
-  
-  // Team specific fields
-  team_code?: string;
-  primary_color?: string;
-  secondary_color?: string;
-  tertiary_color?: string;
-  founded_year?: number;
-  city?: string;
-  state?: string;
-  country?: string;
-  stadium?: string;
-  mascot?: string;
-  league?: string;
-  division?: string;
-  is_active?: boolean;
+  createdAt: string;
+  updatedAt: string;
+  members?: TeamMember[];
+  primaryColor?: string;
+  secondaryColor?: string;
+  tags?: string[];
 }
 
 /**
- * Team member interface for team-user relationship
+ * Interface for team members
  */
-export interface TeamMember extends BaseEntity {
+export interface TeamMember {
+  id: string;
   teamId: string;
   userId: string;
-  role: 'owner' | 'admin' | 'member' | 'viewer' | string;
+  role: 'owner' | 'admin' | 'member' | 'viewer';
   joinedAt: string;
   user?: User;
-  isActive?: boolean;
+  email?: string;
 }
 
 /**
- * Team display data interface for UI components
+ * Interface for team invitation
  */
-export interface TeamDisplayData {
+export interface TeamInvitation {
   id: string;
-  name: string;
-  slug: string;
-  description?: string;
-  memberCount?: number;
-  owner_id: string;
-  primary_color?: string;
-  secondary_color?: string;
-  founded_year?: number;
-  city?: string;
-  state?: string;
-  stadium?: string;
-  league?: string;
-  division?: string;
-  logo_url?: string;
-  imageUrl?: string;
+  teamId: string;
+  team?: Team;
+  inviterId: string;
+  inviter?: User;
+  email: string;
+  role: 'admin' | 'member' | 'viewer';
+  status: 'pending' | 'accepted' | 'declined' | 'expired';
+  createdAt: string;
+  expiresAt: string;
+  acceptedAt?: string;
+}
+
+/**
+ * Interface for team settings
+ */
+export interface TeamSettings {
+  teamId: string;
+  allowMemberInvites: boolean;
+  allowMemberCardCreation: boolean;
+  requireContentApproval: boolean;
+  defaultCollectionVisibility: 'public' | 'team' | 'private';
+  brandingSettings: {
+    useCustomBranding: boolean;
+    primaryColor: string;
+    secondaryColor: string;
+    logoPosition: 'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right';
+    defaultTemplate?: string;
+  };
+  notificationSettings: {
+    newMember: boolean;
+    newContent: boolean;
+    contentUpdates: boolean;
+  };
 }

@@ -27,6 +27,7 @@ export interface CardData {
   cardType?: string;
   artist?: string;
   cardNumber?: string;
+  textColor?: string; // Add textColor for sampleCards
   designMetadata: {
     cardStyle: {
       template: string;
@@ -79,6 +80,61 @@ export interface CardTemplate {
  * Helper function to convert between Card and CardData types
  */
 export function adaptCardToCardData(card: Card): CardData {
+  const defaultDesignMetadata = {
+    cardStyle: {
+      template: 'classic',
+      effect: 'none',
+      borderRadius: '8px',
+      borderColor: '#000000',
+      frameColor: '#000000',
+      frameWidth: 2,
+      shadowColor: 'rgba(0,0,0,0.2)',
+    },
+    textStyle: {
+      titleColor: '#000000',
+      titleAlignment: 'center',
+      titleWeight: 'bold',
+      descriptionColor: '#333333',
+    },
+    cardMetadata: {
+      category: 'general',
+      series: 'base',
+      cardType: 'standard',
+    },
+    marketMetadata: {
+      price: 0,
+      currency: 'USD',
+      availableForSale: false,
+      editionSize: 0,
+      editionNumber: 0,
+      isPrintable: false,
+      isForSale: false,
+      includeInCatalog: false
+    }
+  };
+
+  // Make sure we have all required properties in designMetadata
+  let adaptedDesignMetadata = card.designMetadata || defaultDesignMetadata;
+  adaptedDesignMetadata = {
+    cardStyle: {
+      template: adaptedDesignMetadata.cardStyle?.template || defaultDesignMetadata.cardStyle.template,
+      effect: adaptedDesignMetadata.cardStyle?.effect || defaultDesignMetadata.cardStyle.effect,
+      borderRadius: adaptedDesignMetadata.cardStyle?.borderRadius || defaultDesignMetadata.cardStyle.borderRadius,
+      borderColor: adaptedDesignMetadata.cardStyle?.borderColor || defaultDesignMetadata.cardStyle.borderColor,
+      frameColor: adaptedDesignMetadata.cardStyle?.frameColor || defaultDesignMetadata.cardStyle.frameColor,
+      frameWidth: adaptedDesignMetadata.cardStyle?.frameWidth || defaultDesignMetadata.cardStyle.frameWidth,
+      shadowColor: adaptedDesignMetadata.cardStyle?.shadowColor || defaultDesignMetadata.cardStyle.shadowColor
+    },
+    textStyle: {
+      titleColor: adaptedDesignMetadata.textStyle?.titleColor || defaultDesignMetadata.textStyle.titleColor,
+      titleAlignment: adaptedDesignMetadata.textStyle?.titleAlignment || defaultDesignMetadata.textStyle.titleAlignment,
+      titleWeight: adaptedDesignMetadata.textStyle?.titleWeight || defaultDesignMetadata.textStyle.titleWeight,
+      descriptionColor: adaptedDesignMetadata.textStyle?.descriptionColor || defaultDesignMetadata.textStyle.descriptionColor
+    },
+    cardMetadata: adaptedDesignMetadata.cardMetadata || defaultDesignMetadata.cardMetadata,
+    marketMetadata: adaptedDesignMetadata.marketMetadata || defaultDesignMetadata.marketMetadata
+  };
+
   return {
     id: card.id,
     title: card.title,
@@ -101,38 +157,8 @@ export function adaptCardToCardData(card: Card): CardData {
     cardNumber: card.cardNumber,
     backgroundColor: card.backgroundColor,
     specialEffect: card.specialEffect,
-    designMetadata: card.designMetadata || {
-      cardStyle: {
-        template: 'classic',
-        effect: 'none',
-        borderRadius: '8px',
-        borderColor: '#000000',
-        frameColor: '#000000',
-        frameWidth: 2,
-        shadowColor: 'rgba(0,0,0,0.2)',
-      },
-      textStyle: {
-        titleColor: '#000000',
-        titleAlignment: 'center',
-        titleWeight: 'bold',
-        descriptionColor: '#333333',
-      },
-      cardMetadata: {
-        category: 'general',
-        series: 'base',
-        cardType: 'standard',
-      },
-      marketMetadata: {
-        price: 0,
-        currency: 'USD',
-        availableForSale: false,
-        editionSize: 0,
-        editionNumber: 0,
-        isPrintable: false,
-        isForSale: false,
-        includeInCatalog: false
-      }
-    }
+    textColor: card.textColor,
+    designMetadata: adaptedDesignMetadata
   };
 }
 
@@ -140,4 +166,4 @@ export function adaptCardToCardData(card: Card): CardData {
 import { CardStyle, TextStyle } from '@/lib/types/cardTypes';
 
 // Export from @/types/card to prevent errors in other imports
-export { Card, CardStyle, TextStyle, CardTemplate };
+export type { Card, CardStyle, TextStyle, CardTemplate };

@@ -1,41 +1,101 @@
 
-import { BaseEntity } from './index';
 import { Card } from './cardTypes';
+import { User } from './user';
 
 /**
- * Collection visibility options
+ * Interface for a collection of cards
  */
-export type CollectionVisibility = 'public' | 'private' | 'team' | 'unlisted';
-
-/**
- * Collection interface
- */
-export interface Collection extends BaseEntity {
+export interface Collection {
+  id: string;
   name: string;
-  description: string;
+  description?: string;
   coverImageUrl?: string;
-  userId: string;
-  teamId?: string;  
-  cards?: Card[];
-  cardIds: string[];
-  designMetadata?: Record<string, any>;
-  visibility: CollectionVisibility;
-  isPublic: boolean;
+  userId?: string;
+  teamId?: string;
+  visibility?: 'public' | 'private' | 'team' | 'unlisted';
   allowComments?: boolean;
-  featured?: boolean; // Added for CollectionGrid component
-  tags?: string[]; // Added for InstagramCollectionCreator
+  createdAt: string;
+  updatedAt: string;
+  designMetadata?: any;
+  cards?: Card[];
+  members?: User[];
+  instagramSource?: string; // Add instagramSource for InstagramCollectionCreator
+  owner?: User;
+  displayOrder?: number;
+  featured?: boolean;
+  isPublic?: boolean;
+  ownerId?: string;
 }
 
 /**
- * Deck interface for card decks
+ * Interface for a deck of cards (specialized collection)
  */
-export interface Deck extends BaseEntity {
+export interface Deck {
+  id: string;
   name: string;
   description: string;
   coverImageUrl: string;
-  userId?: string;  // Making userId optional 
-  ownerId: string;  // Added as alternative to userId
-  cards: any[];
+  userId?: string; // Make optional to fix error
+  ownerId?: string; // Add ownerId as alternative
+  createdAt: string;
+  updatedAt: string;
+  cards: Card[];
   cardIds: string[];
   isPublic: boolean;
+  featured?: boolean;
+  displayOrder?: number;
+  owner?: User;
+}
+
+/**
+ * Types of collections available
+ */
+export enum CollectionType {
+  Standard = 'standard',
+  Series = 'series',
+  Set = 'set',
+  Team = 'team',
+  Player = 'player',
+  Personal = 'personal',
+  Favorites = 'favorites',
+  Custom = 'custom'
+}
+
+/**
+ * Interface for collection metadata
+ */
+export interface CollectionMetadata {
+  type: CollectionType;
+  theme?: string;
+  icon?: string;
+  tags?: string[];
+  featuredCardIds?: string[];
+  customAttributes?: Record<string, any>;
+}
+
+/**
+ * Interface for collection statistics
+ */
+export interface CollectionStats {
+  totalCards: number;
+  viewCount: number;
+  shareCount: number;
+  favoriteCount: number;
+  averageRating?: number;
+  lastUpdated: string;
+}
+
+// Add a DbCollection type for the collection converter
+export interface DbCollection {
+  id: string;
+  title: string;
+  description?: string;
+  cover_image_url?: string;
+  owner_id?: string;
+  team_id?: string;
+  visibility?: 'public' | 'private' | 'team' | 'unlisted';
+  allow_comments?: boolean;
+  created_at: string;
+  updated_at: string;
+  design_metadata?: any;
 }

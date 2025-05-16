@@ -1,80 +1,100 @@
 
-import { BaseEntity } from './index';
+import { Card } from './cardTypes';
+import { Team, TeamMember } from './teamTypes';
 
 /**
- * User role enum
+ * Core user interface
+ */
+export interface User {
+  id: string;
+  email: string;
+  name?: string;
+  displayName?: string;
+  avatarUrl?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  role?: UserRole;
+  teams?: Team[];
+  cards?: Card[];
+  username?: string;
+  bio?: string;
+  website?: string;
+  socialLinks?: Record<string, string>;
+  preferences?: Record<string, any>;
+  isVerified?: boolean;
+}
+
+/**
+ * User roles for authorization
  */
 export enum UserRole {
   ADMIN = 'admin',
+  MANAGER = 'manager',
   USER = 'user',
-  CREATOR = 'creator',
-  EDITOR = 'editor',
-  VIEWER = 'viewer'
+  GUEST = 'guest'
 }
 
 /**
- * User permission enum
+ * User permissions for fine-grained access control
  */
-export enum UserPermission {
-  CREATE_CARD = 'create_card',
-  EDIT_CARD = 'edit_card',
-  DELETE_CARD = 'delete_card',
-  CREATE_COLLECTION = 'create_collection',
-  EDIT_COLLECTION = 'edit_collection',
-  DELETE_COLLECTION = 'delete_collection',
-  ADMIN_ACCESS = 'admin_access',
-  TEAM_MANAGEMENT = 'team_management'
+export interface Permission {
+  id: string;
+  name: string;
+  description: string;
+  resource: string;
+  action: 'create' | 'read' | 'update' | 'delete' | 'all';
 }
 
 /**
- * Extended user interface with detailed profile information
+ * User profile for public display
  */
 export interface UserProfile {
-  bio?: string;
-  website?: string;
-  location?: string;
-  favoriteTeams?: string[];
-  favoriteCards?: string[];
-  interests?: string[];
-  joinDate?: string;
-  socialLinks?: Record<string, string>;
-  achievements?: string[];
-  preferences?: Record<string, any>;
-}
-
-/**
- * User interface extending the base entity
- */
-export interface User extends BaseEntity {
-  email?: string;
-  name?: string;
-  displayName?: string;        // Required by CommentSection
+  id: string;
+  displayName: string;
   username?: string;
   avatarUrl?: string;
-  role?: string;               // Required by CommentSection
-  profile?: UserProfile;
+  bio?: string;
+  followersCount?: number;
+  followingCount?: number;
+  website?: string;
+  socialLinks?: Record<string, string>;
+  createdAt: string;
+  featuredCards?: Card[];
+  badges?: string[];
 }
 
 /**
- * Auth user interface with authentication-specific properties
+ * Extended user stats
  */
-export interface AuthUser extends User {
-  accessToken?: string;
-  refreshToken?: string;
-  isAuthenticated: boolean;
-  permissions?: UserPermission[];
-  lastLogin?: string;
+export interface UserStats {
+  totalCards: number;
+  totalCollections: number;
+  totalLikes: number;
+  totalViews: number;
+  completedChallenges: number;
+  streak: number;
+  memberSince: string;
+  lastActive: string;
 }
 
 /**
- * Team member user interface for team context
+ * User settings
  */
-export interface TeamUser extends User {
-  teamRole: string;
-  joinedAt: string;
-  contributions?: number;
-  isActive: boolean;
+export interface UserSettings {
+  notificationsEnabled: boolean;
+  emailNotificationsEnabled: boolean;
+  theme: 'light' | 'dark' | 'system';
+  language: string;
+  privacyOptions: {
+    profileVisibility: 'public' | 'private' | 'friends';
+    activityVisibility: 'public' | 'private' | 'friends';
+    discoverability: boolean;
+  };
 }
 
-// Make sure we're exporting User directly
-export { User as User };
+// Re-exports from other related types
+export { Team, TeamMember };
+
+// Export Comment and Collection type from their respective files
+export type { Comment } from './interaction';
+export type { Collection } from './collection';

@@ -11,6 +11,8 @@ export interface CardMarketMetadata {
   isPrintable?: boolean;
   isForSale?: boolean;
   includeInCatalog?: boolean;
+  featured?: boolean;
+  forSale?: boolean;
 }
 
 // Export alias as MarketMetadata for backward compatibility
@@ -82,6 +84,21 @@ export interface CardDesignMetadata {
 export type DesignMetadata = CardDesignMetadata;
 
 /**
+ * Fabric swatch type for material simulations
+ */
+export interface FabricSwatch {
+  id: string;
+  name: string;
+  color: string;
+  texture?: string;
+  normalMap?: string;
+  type: string;
+  materialType?: 'fabric' | 'leather' | 'plastic' | 'metal' | 'paper';
+  roughness?: number;
+  metalness?: number;
+}
+
+/**
  * Card interface for basic card data
  */
 export interface Card {
@@ -110,13 +127,14 @@ export interface Card {
   rarity?: string;
   viewCount?: number;
   cardNumber?: string;
-  fabricSwatches?: any[];
+  fabricSwatches?: FabricSwatch[];
   name?: string;
   jersey?: string;
   seriesId?: string; // Add seriesId property
   backgroundColor?: string; // Add backgroundColor
   specialEffect?: string; // Add specialEffect
   cardType?: string; // Add cardType for sampleCards.ts
+  textColor?: string; // Add textColor for sampleCards.ts
 }
 
 /**
@@ -247,21 +265,6 @@ export interface CardStats {
   era?: string;
   wins?: string;
   strikeouts?: string;
-}
-
-/**
- * Fabric swatch type for material simulations
- */
-export interface FabricSwatch {
-  id: string;
-  name: string;
-  color: string;
-  texture?: string;
-  normalMap?: string;
-  type: string;
-  materialType?: 'fabric' | 'leather' | 'plastic' | 'metal' | 'paper';
-  roughness?: number;
-  metalness?: number;
 }
 
 /**

@@ -20,23 +20,17 @@ export * from './cardTypes';
 export * from './user';
 export * from './interaction';
 export * from './collection';
-export * from './instagram';
 export * from './cardElements';
 export * from './teamTypes';
-export * from './enhancedCardTypes';
+export * from './historyTypes';
 export * from './oaklandTypes';
 export * from './ugcTypes';
-export * from './historyTypes';
+
+// Export type aliases for backward compatibility
+export type { Card, CardLayer, CardStyle, TextStyle, CardMetadata, FabricSwatch } from './cardTypes';
+export type { User } from './user';
+export type { Comment, Reaction } from './interaction';
+export type { Collection, Deck } from './collection';
 
 // Additional types for backward compatibility
 export type BackgroundColor = string;
-
-// Export aliases for legacy code - these are now correctly imported from their respective files
-export type { User } from './user';
-export type { Comment, Reaction } from './interaction';
-export type { Card, CardLayer, CardStyle, TextStyle, CardMetadata } from './cardTypes';
-export type { InstagramPost } from './instagram';
-export type { Team, TeamMember } from './teamTypes';
-export type { OaklandMemoryData } from './oaklandTypes';
-export type { UGCAsset, CreatorProfile, UGCReport } from './ugcTypes';
-export type { CreationHistoryItem, UserStyleProfile } from './historyTypes';
