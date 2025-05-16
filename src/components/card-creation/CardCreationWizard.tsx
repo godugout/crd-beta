@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { 
@@ -28,6 +29,14 @@ import WizardProgress from './components/WizardProgress';
 import CardPreview from './components/CardPreview';
 import HelpPanel from './components/HelpPanel';
 
+// Define props for CardTextStep
+export interface CardTextStepProps {
+  cardData: Partial<CardType>;
+  setCardData?: (data: Partial<CardType>) => void;
+  onUpdate?: (updates: Partial<CardType>) => void;
+  onContinue?: () => void;
+}
+
 interface CardCreationWizardProps {
   initialData?: Partial<CardType>;
   onSave: (cardData: CardType) => void;
@@ -56,6 +65,8 @@ const CardCreationWizard: React.FC<CardCreationWizardProps> = ({
   const [helpVisible, setHelpVisible] = useState(false);
   const [isAutoSaving, setIsAutoSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [activeEffects, setActiveEffects] = useState<string[]>([]);
   
   // Set up undo/redo functionality with initial data
   const { 
@@ -102,7 +113,7 @@ const CardCreationWizard: React.FC<CardCreationWizardProps> = ({
       const isValid = validateCurrentStep();
       if (isValid) {
         setCurrentStep(currentStep + 1);
-        toastUtils.info(`Step ${currentStep + 1} completed`);
+        toastUtils.info("Step completed", `${WIZARD_STEPS[currentStep].label} completed`);
       }
     }
   };
@@ -118,7 +129,7 @@ const CardCreationWizard: React.FC<CardCreationWizardProps> = ({
     if (index > currentStep) {
       for (let i = currentStep; i < index; i++) {
         if (!validateStep(i)) {
-          toastUtils.warning(`Please complete step ${i + 1} first`);
+          toastUtils.warning("Incomplete step", `Please complete step ${i + 1} first`);
           return;
         }
       }
@@ -147,7 +158,7 @@ const CardCreationWizard: React.FC<CardCreationWizardProps> = ({
   const validateCurrentStep = (): boolean => {
     const valid = validateStep(currentStep);
     if (!valid) {
-      toastUtils.warning('Please complete all required fields');
+      toastUtils.warning("Incomplete step", "Please complete all required fields");
     }
     return valid;
   };
@@ -156,12 +167,12 @@ const CardCreationWizard: React.FC<CardCreationWizardProps> = ({
   const exportCard = (format: string) => {
     if (!previewRef.current) return;
     
-    toastUtils.info(`Exporting card as ${format.toUpperCase()}`);
+    toastUtils.info("Exporting card", `Exporting card as ${format.toUpperCase()}`);
     
     // In a real implementation, this would use a library like html-to-image
     // to capture the preview and download it
     setTimeout(() => {
-      toastUtils.success('Card exported successfully');
+      toastUtils.success("Export completed", "Card exported successfully");
     }, 1000);
   };
   
@@ -203,11 +214,6 @@ const CardCreationWizard: React.FC<CardCreationWizardProps> = ({
   // Complete creation function
   const handleCompleteCreation = async () => {
     try {
-      const setIsSubmitting = (value: boolean) => {
-        // This is a placeholder for state management
-        console.log('Setting isSubmitting to', value);
-      };
-      
       setIsSubmitting(true);
       
       // Create a new Card instance with the collected data
@@ -235,27 +241,14 @@ const CardCreationWizard: React.FC<CardCreationWizardProps> = ({
       };
       
       // Add the card to the context or make API call
-      const onAddCard = onSave;
-      if (typeof onAddCard === 'function') {
-        onAddCard(newCard as CardType);
-      }
+      onSave(newCard as CardType);
       
       toastUtils.success("Card Created!", "Your card has been successfully created.");
-      
-      // Call onComplete if provided
-      const onComplete = onSave;
-      if (typeof onComplete === 'function') {
-        onComplete(newCard as CardType);
-      }
       
     } catch (error) {
       console.error('Error creating card:', error);
       toastUtils.error("Error Creating Card", "There was an error creating your card. Please try again.");
     } finally {
-      const setIsSubmitting = (value: boolean) => {
-        // This is a placeholder for state management
-        console.log('Setting isSubmitting to', value);
-      };
       setIsSubmitting(false);
     }
   };
@@ -333,7 +326,6 @@ const CardCreationWizard: React.FC<CardCreationWizardProps> = ({
           <CardUI className="p-4">
             <h2 className="text-lg font-bold mb-4">Preview</h2>
             <CardPreview
-              ref={previewRef}
               card={cardData as CardType}
               className="mx-auto max-w-full"
             />

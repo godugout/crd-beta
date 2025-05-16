@@ -1,19 +1,14 @@
+
 import * as React from "react"
 import type {
   ToastActionElement,
   ToasterToast,
+  ToasterToastWithId,
 } from "@/types/toast"
 import { useToast as useToastShared } from "@/hooks/use-toast"
 
 const TOAST_LIMIT = 5
 const TOAST_REMOVE_DELAY = 1000000
-
-type ToasterToastWithId = ToasterToast & {
-  id: string
-  title?: React.ReactNode
-  description?: React.ReactNode
-  action?: ToastActionElement
-}
 
 const actionTypes = {
   ADD_TOAST: "ADD_TOAST",
@@ -157,27 +152,35 @@ export function useToast() {
   }
 }
 
-export function toast(props: ToasterToast) {
+interface ToastProps extends Omit<ToasterToast, 'id'> {}
+
+export function toast(props: ToastProps) {
   const id = genId()
 
-  const update = (props: ToasterToast) =>
+  const update = (props: ToastProps) =>
     dispatch({
       type: "UPDATE_TOAST",
-      toast: { ...props, id },
+      toast: { ...props, id } as ToasterToastWithId,
     })
 
   const dismiss = () => dispatch({ type: "DISMISS_TOAST", toastId: id })
 
+  // Ensure the action is of the correct type
+  const propsWithSafeAction = {
+    ...props,
+    action: props.action as ToastActionElement,
+  }
+
   dispatch({
     type: "ADD_TOAST",
     toast: {
-      ...props,
+      ...propsWithSafeAction,
       id,
       open: true,
       onOpenChange: (open) => {
         if (!open) dismiss()
       },
-    },
+    } as ToasterToastWithId,
   })
 
   return {

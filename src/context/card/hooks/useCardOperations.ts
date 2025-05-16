@@ -2,11 +2,12 @@
 import { useState, useCallback, useEffect } from 'react';
 import { Card } from '@/lib/types/card';
 import { v4 as uuidv4 } from 'uuid';
-import { adaptToCard } from '@/lib/adapters/cardAdapter';
+import { adaptToLegacyCard } from '@/lib/adapters/cardAdapter';
+import { Card as CardType } from '@/lib/types/cardTypes';
 
 // Mock data for development
 const initialCards: Card[] = [
-  adaptToCard({
+  adaptToLegacyCard({
     id: '1',
     title: 'Sample Card',
     description: 'This is a sample card for development',
@@ -16,7 +17,7 @@ const initialCards: Card[] = [
     userId: 'user1',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
-    effects: [], // Add required effects property
+    effects: [],
   }),
 ];
 
@@ -33,7 +34,7 @@ export const useCardOperations = () => {
         if (savedCards) {
           // Parse stored cards and ensure they match the current Card type requirements
           const parsedCards = JSON.parse(savedCards);
-          setCards(parsedCards.map((card: Partial<Card>) => adaptToCard(card)));
+          setCards(parsedCards.map((card: Partial<Card>) => adaptToLegacyCard(card)));
         }
       } catch (err) {
         console.error('Error loading cards from storage:', err);
@@ -52,8 +53,8 @@ export const useCardOperations = () => {
     return cards.find(card => card.id === id);
   }, [cards]);
 
-  const addCard = useCallback((card: Omit<Card, 'id' | 'createdAt' | 'updatedAt'>) => {
-    const newCard: Card = adaptToCard({
+  const addCard = useCallback((card: Omit<CardType, 'id' | 'createdAt' | 'updatedAt'>) => {
+    const newCard = adaptToLegacyCard({
       ...card,
       id: uuidv4(),
       createdAt: new Date().toISOString(),
@@ -64,11 +65,11 @@ export const useCardOperations = () => {
     return newCard;
   }, []);
 
-  const updateCard = useCallback((id: string, updates: Partial<Card>) => {
+  const updateCard = useCallback((id: string, updates: Partial<CardType>) => {
     setCards(prevCards =>
       prevCards.map(card =>
         card.id === id
-          ? adaptToCard({ ...card, ...updates, updatedAt: new Date().toISOString() })
+          ? adaptToLegacyCard({ ...card, ...updates, updatedAt: new Date().toISOString() })
           : card
       )
     );

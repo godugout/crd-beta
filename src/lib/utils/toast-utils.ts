@@ -3,7 +3,7 @@ import { toast } from '@/hooks/use-toast';
 import { ToastVariant, ToasterToast } from "@/types/toast";
 
 export const toastUtils = {
-  show: (title: string, description: string, variant: ToastVariant = 'default', duration?: number) => {
+  show: (title: string, description?: string, variant: ToastVariant = 'default', duration?: number) => {
     return toast({
       id: Math.random().toString(36).substring(2, 9),
       title,
@@ -13,19 +13,19 @@ export const toastUtils = {
     });
   },
   
-  success: (title: string, description: string, duration?: number) => {
+  success: (title: string, description?: string, duration?: number) => {
     return toastUtils.show(title, description, 'success', duration);
   },
   
-  error: (title: string, description: string, duration?: number) => {
+  error: (title: string, description?: string, duration?: number) => {
     return toastUtils.show(title, description, 'error', duration);
   },
   
-  warning: (title: string, description: string, duration?: number) => {
+  warning: (title: string, description?: string, duration?: number) => {
     return toastUtils.show(title, description, 'warning', duration);
   },
   
-  info: (title: string, description: string, duration?: number) => {
+  info: (title: string, description?: string, duration?: number) => {
     return toastUtils.show(title, description, 'info', duration);
   }
 };

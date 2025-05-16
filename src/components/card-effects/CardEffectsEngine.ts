@@ -1,11 +1,11 @@
 
-import { CardEffect, CardEffectsResult, EffectEngine as BaseEffectEngine } from '@/lib/types/cardEffects';
+import { CardEffect, CardEffectsResult, EffectEngine } from '@/lib/types/cardEffects';
 import { useRef } from 'react';
 
 /**
  * Extended EffectEngine implementation for component usage
  */
-export interface ExtendedEffectEngine extends BaseEffectEngine {
+export interface ExtendedEffectEngine extends EffectEngine {
   // Additional properties used in CardEffectsDemo
   engine: any;
   activeEffects: string[];

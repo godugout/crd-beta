@@ -9,7 +9,7 @@ export interface ToasterToast {
   id: string
   title?: ReactNode
   description?: ReactNode
-  action?: ReactNode
+  action?: ToastActionElement
   variant?: ToastVariant
   duration?: number
   open?: boolean
