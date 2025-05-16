@@ -13,21 +13,54 @@ export interface CardElement {
   updatedAt: string;
   creatorId?: string;
   isOfficial?: boolean;
+  metadata?: any; // Added for ElementLibrary
   
   // Additional properties needed by adapters and components
   imageUrl?: string;
   assetUrl?: string;
-  position?: {
-    x: number;
-    y: number;
-    z: number;
-  };
-  size?: {
-    width: number;
-    height: number;
-    scale?: number;
-  };
+  position?: ElementPosition;
+  size?: ElementSize;
   style?: Record<string, any>;
+}
+
+/**
+ * Position interface with rotation for element placement
+ */
+export interface ElementPosition {
+  x: number;
+  y: number;
+  z: number;
+  rotation?: number;
+}
+
+/**
+ * Size interface with scale and aspect ratio
+ */
+export interface ElementSize {
+  width: number;
+  height: number;
+  scale?: number;
+  aspectRatio?: number;
+}
+
+/**
+ * Element transform interface for placement engine
+ */
+export interface ElementTransform {
+  position: ElementPosition;
+  size: ElementSize;
+  opacity?: number;
+  zIndex?: number;
+}
+
+/**
+ * Element placement options
+ */
+export interface ElementPlacementOptions {
+  snapToGrid?: boolean;
+  constrainToCanvas?: boolean;
+  preventOverlap?: boolean;
+  alignCenter?: boolean;
 }
 
 export interface StickerElement extends CardElement {
@@ -60,6 +93,7 @@ export interface ElementLibraryCollection {
   id: string;
   name: string;
   elements: CardElement[];
+  elementIds?: string[]; // For backward compatibility
   updatedAt?: string;
   createdAt?: string;
   isOfficial?: boolean;
@@ -107,6 +141,13 @@ export interface ElementUploadMetadata {
   type: ElementType;
   isAnimated?: boolean;
   mimeType?: string;
+  fileName?: string; // For ElementUploader
+  fileSize?: number; // For ElementUploader
+  dimensions?: { // For ElementUploader
+    width: number;
+    height: number;
+  };
+  hasTransparency?: boolean; // For ElementUploader
   
   // Additional properties needed by components
   name?: string;

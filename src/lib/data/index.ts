@@ -10,4 +10,5 @@ export * from './townRepository';
 export * from './reactionRepository';
 
 // Also export the reactionRepository as a named export
-export { reactionRepository } from './reactionRepository';
+import * as reactionRepoFunctions from './reactionRepository';
+export const reactionRepository = reactionRepoFunctions;

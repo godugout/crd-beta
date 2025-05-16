@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ElementCategory, ElementType, ElementUploadMetadata } from '@/lib/types/cardElements';
-import { mapToElementCategory } from '@/lib/utils/typeAdapters';
+import { mapToElementCategory, mapToElementType } from '@/lib/utils/typeAdapters';
 import TagInput from '@/components/ui/tag-input';
 
 interface ElementUploadFormProps {
@@ -72,7 +72,7 @@ const ElementUploadForm: React.FC<ElementUploadFormProps> = ({
       name: name.trim(),
       description: description.trim() || undefined,
       category: mapToElementCategory(category),
-      type,
+      type: mapToElementType(type.toString()),
       tags,
       attribution: attribution.trim() || undefined,
       imageUrl,

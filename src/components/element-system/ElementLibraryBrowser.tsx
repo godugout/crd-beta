@@ -7,7 +7,7 @@ import { Search, Plus } from 'lucide-react';
 import ElementCard from './ElementCard';
 import ElementUploadDialog from './ElementUploadDialog';
 import { ElementCategory, CardElement } from '@/lib/types/cardElements';
-import { elementUploadToCardElement } from '@/lib/utils/typeAdapters';
+import { elementUploadToCardElement } from '@/lib/adapters/cardElementsAdapter';
 
 interface ElementLibraryBrowserProps {
   onElementSelect?: (element: CardElement) => void;
@@ -91,7 +91,7 @@ const ElementLibraryBrowser: React.FC<ElementLibraryBrowserProps> = ({
   
   // Filter elements by category and search query
   const filteredElements = elements.filter(element => {
-    const matchesCategory = activeCategory === 'all' || element.category.toString().toLowerCase() === activeCategory.toLowerCase();
+    const matchesCategory = activeCategory === 'all' || element.category?.toString().toLowerCase() === activeCategory.toLowerCase();
     const matchesSearch = !searchQuery || 
       element.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (element.tags && element.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase())));

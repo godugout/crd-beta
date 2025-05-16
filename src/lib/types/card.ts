@@ -1,3 +1,4 @@
+
 import { Card } from '@/lib/types/cardTypes';
 
 /**
@@ -6,7 +7,7 @@ import { Card } from '@/lib/types/cardTypes';
 export interface CardData {
   id: string;
   title: string;
-  description: string;
+  description: string; // Required by OldCardCreator
   imageUrl: string;
   thumbnailUrl: string;
   tags: string[];
@@ -81,7 +82,7 @@ export function adaptCardToCardData(card: Card): CardData {
   return {
     id: card.id,
     title: card.title,
-    description: card.description || '',
+    description: card.description || '', // Ensure description exists for CardData
     imageUrl: card.imageUrl,
     thumbnailUrl: card.thumbnailUrl || card.imageUrl,
     tags: card.tags || [],

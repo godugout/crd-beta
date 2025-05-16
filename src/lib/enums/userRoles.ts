@@ -1,15 +1,14 @@
 
-// Creating a stub file to resolve missing import errors
-
 /**
- * User role definitions
+ * User role enum for Cardshow (CRD) application
  */
-export enum UserRole {
-  Admin = 'admin',
-  Editor = 'editor',
-  Member = 'member',
-  Guest = 'guest',
-  Owner = 'owner'
+enum UserRole {
+  ADMIN = 'admin',
+  EDITOR = 'editor',
+  CREATOR = 'creator', 
+  VIEWER = 'viewer',
+  USER = 'user',
+  MEMBER = 'member'
 }
 
 export default UserRole;

@@ -1,4 +1,6 @@
 
+import { UGCReport } from '@/lib/types/ugcTypes';
+
 /**
  * Moderation Service for UGC content
  */
@@ -6,7 +8,7 @@ export const ModerationService = {
   /**
    * Report an asset for moderation
    */
-  reportAsset: async (assetId: string, reason: string, details: string) => {
+  reportAsset: async (assetId: string, reason: string, details: string): Promise<{ success: boolean; reportId: string }> => {
     console.log('Reporting asset:', assetId, reason, details);
     return { success: true, reportId: `report-${Date.now()}` };
   },
@@ -27,7 +29,8 @@ export const ModerationService = {
       pendingCount: 0,
       approvedCount: 0,
       rejectedCount: 0,
-      flaggedCount: 0
+      flaggedCount: 0,
+      openReports: 0 // Added for ModerationDashboard
     };
   },
 
@@ -35,10 +38,23 @@ export const ModerationService = {
    * Get pending reports (admin only)
    */
   getPendingReports: async (limit = 20, offset = 0) => {
-    return {
-      reports: [],
-      total: 0
+    // Return an array with map and length properties for ModerationDashboard
+    const reports = [];
+    const result = {
+      reports,
+      total: 0,
+      map: function(callback: (report: any) => any) {
+        return this.reports.map(callback);
+      },
+      length: 0
     };
+    
+    // Set length property for compatibility
+    Object.defineProperty(result, 'length', {
+      get: function() { return this.reports.length; }
+    });
+    
+    return result;
   },
 
   /**

@@ -75,6 +75,7 @@ export interface CardDesignMetadata {
   team?: string;
   year?: string;
   oaklandMemory?: any; // Add oaklandMemory property
+  layers?: any[]; // Add layers for serialization support
 }
 
 // Export alias as DesignMetadata for backward compatibility
@@ -115,6 +116,7 @@ export interface Card {
   seriesId?: string; // Add seriesId property
   backgroundColor?: string; // Add backgroundColor
   specialEffect?: string; // Add specialEffect
+  cardType?: string; // Add cardType for sampleCards.ts
 }
 
 /**
@@ -245,6 +247,21 @@ export interface CardStats {
   era?: string;
   wins?: string;
   strikeouts?: string;
+}
+
+/**
+ * Fabric swatch type for material simulations
+ */
+export interface FabricSwatch {
+  id: string;
+  name: string;
+  color: string;
+  texture?: string;
+  normalMap?: string;
+  type: string;
+  materialType?: 'fabric' | 'leather' | 'plastic' | 'metal' | 'paper';
+  roughness?: number;
+  metalness?: number;
 }
 
 /**

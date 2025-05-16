@@ -22,6 +22,8 @@ export interface Collection extends BaseEntity {
   visibility: CollectionVisibility;
   isPublic: boolean;
   allowComments?: boolean;
+  featured?: boolean; // Added for CollectionGrid component
+  tags?: string[]; // Added for InstagramCollectionCreator
 }
 
 /**

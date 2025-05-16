@@ -16,7 +16,13 @@ export interface UGCAsset {
   tags: string[];
   isPublic: boolean;
   isApproved: boolean;
-  moderationStatus: 'pending' | 'approved' | 'rejected' | 'flagged';
+  isOfficial?: boolean; // Added for AssetMarketplace
+  moderationStatus: UGCModerationStatus;
+  marketplace?: { // Added for AssetMarketplace
+    price?: number;
+    forSale?: boolean;
+    salesCount?: number;
+  };
   stats: {
     views: number;
     downloads: number;
@@ -27,6 +33,11 @@ export interface UGCAsset {
   createdAt: string;
   updatedAt: string;
 }
+
+/**
+ * UGC Moderation Status type
+ */
+export type UGCModerationStatus = 'pending' | 'approved' | 'rejected' | 'flagged';
 
 /**
  * Creator Profile interface

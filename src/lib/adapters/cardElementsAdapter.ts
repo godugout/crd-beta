@@ -1,31 +1,11 @@
 
 // cardElementsAdapter.ts
-import { CardElement, ElementType, ElementCategory, ElementUploadMetadata } from '@/lib/types/cardElements';
-
-/**
- * Interface for position with rotation
- */
-interface PositionWithRotation {
-  x: number;
-  y: number;
-  z: number;
-  rotation?: number;
-}
-
-/**
- * Interface for size with aspect ratio
- */
-interface SizeWithAspectRatio {
-  width: number;
-  height: number;
-  scale?: number;
-  aspectRatio?: number;
-}
+import { CardElement, ElementType, ElementCategory, ElementUploadMetadata, ElementPosition, ElementSize } from '@/lib/types/cardElements';
 
 /**
  * Adapter to convert between different element formats
  */
-export function adaptElementPosition(position: any): { x: number; y: number; z: number } {
+export function adaptElementPosition(position: any): ElementPosition {
   if (!position) {
     return { x: 0, y: 0, z: 0 };
   }
@@ -34,7 +14,7 @@ export function adaptElementPosition(position: any): { x: number; y: number; z: 
     x: position.x || 0,
     y: position.y || 0,
     z: position.z || 0,
-    // Note: rotation is handled separately and not part of the position object
+    rotation: position.rotation || 0 // Add rotation if available
   };
 }
 
@@ -58,7 +38,11 @@ export function elementUploadToCardElement(metadata: ElementUploadMetadata): Car
     creatorId: metadata.attribution || 'system',
     isOfficial: false,
     imageUrl: metadata.imageUrl || '',
-    position: { x: 0, y: 0, z: 0 },
+    position: { 
+      x: 0, 
+      y: 0, 
+      z: 0 
+    },
     size: { 
       width: 200, 
       height: 200,
@@ -71,16 +55,20 @@ export function elementUploadToCardElement(metadata: ElementUploadMetadata): Car
 /**
  * Adapter to convert between different size formats
  */
-export function adaptElementSize(size: any): { width: number; height: number; scale?: number } {
+export function adaptElementSize(size: any): ElementSize {
   if (!size) {
     return { width: 200, height: 200, scale: 1 };
   }
   
+  // Calculate aspect ratio if needed
+  const width = size.width || 200;
+  const height = size.height || 200;
+  
   return {
-    width: size.width || 200,
-    height: size.height || 200,
+    width,
+    height,
     scale: size.scale || 1,
-    // Note: aspectRatio is calculated, not stored
+    aspectRatio: width / height // Calculate aspect ratio
   };
 }
 
