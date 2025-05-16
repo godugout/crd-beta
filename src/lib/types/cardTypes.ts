@@ -88,6 +88,7 @@ export interface CardEffectSettings {
   pattern?: string;
   color?: string;
   animationEnabled?: boolean;
+  colorScheme?: string | string[];
   [key: string]: JsonValue | undefined;
 }
 
@@ -134,9 +135,9 @@ export interface MarketMetadata {
   lastSoldPrice?: number;
   currentAskingPrice?: number;
   estimatedMarketValue?: number;
-  isPrintable: boolean;      
-  isForSale: boolean;       
-  includeInCatalog: boolean; 
+  isPrintable: boolean;      // Required
+  isForSale: boolean;       // Required
+  includeInCatalog: boolean; // Required
   price?: number;
   currency?: string;
   availableForSale?: boolean;

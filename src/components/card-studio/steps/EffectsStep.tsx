@@ -140,11 +140,11 @@ const EffectsStep: React.FC<EffectsStepProps> = ({ cardData, onUpdateEffects }) 
                     <div className="flex justify-between">
                       <Label>Effect Intensity</Label>
                       <span className="text-sm text-gray-500">
-                        {Math.round(selectedEffect.defaultSettings.intensity * 100)}%
+                        {Math.round(Number(selectedEffect.defaultSettings.intensity) * 100)}%
                       </span>
                     </div>
                     <Slider 
-                      defaultValue={[selectedEffect.defaultSettings.intensity * 100]}
+                      defaultValue={[Number(selectedEffect.defaultSettings.intensity) * 100]}
                       max={100}
                       step={1}
                       className="w-full"
@@ -157,11 +157,11 @@ const EffectsStep: React.FC<EffectsStepProps> = ({ cardData, onUpdateEffects }) 
                     <div className="flex justify-between">
                       <Label>Animation Speed</Label>
                       <span className="text-sm text-gray-500">
-                        {Math.round(selectedEffect.defaultSettings.speed * 100)}%
+                        {Math.round(Number(selectedEffect.defaultSettings.speed) * 100)}%
                       </span>
                     </div>
                     <Slider 
-                      defaultValue={[selectedEffect.defaultSettings.speed * 100]}
+                      defaultValue={[Number(selectedEffect.defaultSettings.speed) * 100]}
                       max={100}
                       step={1}
                       className="w-full"
@@ -173,7 +173,7 @@ const EffectsStep: React.FC<EffectsStepProps> = ({ cardData, onUpdateEffects }) 
                   <div className="flex items-center justify-between">
                     <Label>Enable Animation</Label>
                     <Switch 
-                      checked={selectedEffect.defaultSettings.animationEnabled}
+                      checked={Boolean(selectedEffect.defaultSettings.animationEnabled)}
                     />
                   </div>
                 )}
@@ -205,13 +205,13 @@ const EffectsStep: React.FC<EffectsStepProps> = ({ cardData, onUpdateEffects }) 
                           <div 
                             key={index}
                             className="w-8 h-8 rounded-full"
-                            style={{ backgroundColor: color }}
+                            style={{ backgroundColor: String(color) }}
                           />
                         ))
                       ) : (
                         <div 
                           className="w-8 h-8 rounded-full"
-                          style={{ backgroundColor: selectedEffect.defaultSettings.colorScheme }}
+                          style={{ backgroundColor: String(selectedEffect.defaultSettings.colorScheme) }}
                         />
                       )}
                     </div>

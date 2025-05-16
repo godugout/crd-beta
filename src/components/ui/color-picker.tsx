@@ -1,7 +1,21 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { DEFAULT_COLORS } from '@/config/toast';
+
+// Define DEFAULT_COLORS in the component file itself to avoid import errors
+const DEFAULT_COLORS = [
+  '#000000', // Black
+  '#FFFFFF', // White
+  '#F87171', // Red
+  '#FB923C', // Orange
+  '#FBBF24', // Amber
+  '#34D399', // Green
+  '#22D3EE', // Cyan
+  '#60A5FA', // Blue
+  '#818CF8', // Indigo
+  '#A78BFA', // Violet
+  '#E879F9', // Pink
+];
 
 export interface ColorPickerProps {
   color: string;
@@ -45,7 +59,6 @@ export function ColorPicker({
           style={{ backgroundColor: colorOption }}
           onClick={() => onChange(colorOption)}
           title={title}
-          hapticFeedback={true}
         />
       ))}
       <Button
@@ -54,7 +67,6 @@ export function ColorPicker({
         className={`p-1 rounded-full bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 ${sizeClasses[size]}`}
         onClick={handleOpenNativeColorPicker}
         title="Custom color"
-        hapticFeedback={true}
       />
     </div>
   );

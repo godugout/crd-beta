@@ -7,9 +7,9 @@ import { ColorPicker } from '@/components/ui/color-picker';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Card, CardContent } from '@/components/ui/card';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { useTheme } from 'next-themes';
-import { createToast } from '@/types/toast';
+import { createToast } from '@/utils/createToast';
 
 interface ThemeCustomizerProps {
   className?: string;
@@ -85,7 +85,7 @@ const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({ className }) => {
                 <ColorPicker
                   color={primaryColor}
                   onChange={setPrimaryColor}
-                  label="Primary Color"
+                  className="mt-2"
                 />
               </div>
               <div>
@@ -93,7 +93,7 @@ const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({ className }) => {
                 <ColorPicker
                   color={secondaryColor}
                   onChange={setSecondaryColor}
-                  label="Secondary Color"
+                  className="mt-2"
                 />
               </div>
               <div>
@@ -101,7 +101,7 @@ const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({ className }) => {
                 <ColorPicker
                   color={accentColor}
                   onChange={setAccentColor}
-                  label="Accent Color"
+                  className="mt-2"
                 />
               </div>
               <div>

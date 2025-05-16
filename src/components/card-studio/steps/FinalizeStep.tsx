@@ -1,12 +1,11 @@
 
 import React, { useState } from 'react';
-import { Card } from '@/lib/types/cardTypes';
+import { Card, CardMetadata, MarketMetadata } from '@/lib/types/cardTypes';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
-import { Textarea } from '@/components/ui/textarea';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface FinalizeStepProps {
@@ -14,78 +13,80 @@ interface FinalizeStepProps {
   onUpdate: (updates: Partial<Card>) => void;
 }
 
+// Default metadata with required fields to prevent type errors
+const defaultCardMetadata: CardMetadata = {
+  category: 'general',
+  series: 'base',
+  cardType: 'standard'
+};
+
+// Default market metadata with required fields
+const defaultMarketMetadata: MarketMetadata = {
+  isPrintable: false,
+  isForSale: false,
+  includeInCatalog: false
+};
+
 const FinalizeStep: React.FC<FinalizeStepProps> = ({ cardData, onUpdate }) => {
-  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [currentTab, setCurrentTab] = useState("details");
+  const [isForSale, setIsForSale] = useState(
+    cardData.designMetadata?.marketMetadata?.isForSale || false
+  );
+  const [isPrintable, setIsPrintable] = useState(
+    cardData.designMetadata?.marketMetadata?.isPrintable || false
+  );
   
-  // Ensure we have designMetadata with empty values as needed
-  const designMetadata = cardData.designMetadata || {
-    cardStyle: {
-      template: 'classic',
-      effect: 'none',
-      borderRadius: '8px',
-      borderColor: '#000000',
-      shadowColor: 'rgba(0,0,0,0.2)',
-      frameWidth: 2,
-      frameColor: '#000000'
-    },
-    textStyle: {
-      fontFamily: 'Inter',
-      titleColor: '#000000',
-      titleAlignment: 'center',
-      titleWeight: 'bold',
-      descriptionColor: '#333333'
-    },
-    cardMetadata: {
-      category: 'general',
-      series: 'base',
-      cardType: 'standard',
-      edition: '' // Add default empty value for edition
-    },
-    marketMetadata: {
-      isPrintable: false,
-      isForSale: false,
-      includeInCatalog: false,
-      price: 0,
-      currency: 'USD',
-      availableForSale: false,
-      editionSize: 1,
-      editionNumber: 1
-    }
-  };
-  
-  // Get market metadata with fallback
-  const marketMetadata = designMetadata.marketMetadata || {
-    isPrintable: false,
-    isForSale: false,
-    includeInCatalog: false,
-    price: 0,
-    currency: 'USD',
-    availableForSale: false,
-    editionSize: 1,
-    editionNumber: 1
+  const handleTagChange = (tagString: string) => {
+    const tags = tagString.split(',').map(tag => tag.trim()).filter(Boolean);
+    onUpdate({ tags });
   };
 
-  // Handle market metadata changes
-  const handleMarketChange = (property: keyof typeof marketMetadata, value: any) => {
+  const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const price = parseFloat(e.target.value);
+    updateMarketMetadata({
+      price: isNaN(price) ? 0 : price
+    });
+  };
+
+  const handleIsForSaleChange = (checked: boolean) => {
+    setIsForSale(checked);
+    updateMarketMetadata({
+      isForSale: checked
+    });
+  };
+
+  const handleIsPrintableChange = (checked: boolean) => {
+    setIsPrintable(checked);
+    updateMarketMetadata({
+      isPrintable: checked
+    });
+  };
+
+  const updateMarketMetadata = (updates: Partial<MarketMetadata>) => {
+    const currentMetadata = cardData.designMetadata || {};
+    const currentMarketMetadata = currentMetadata.marketMetadata || defaultMarketMetadata;
+    
     onUpdate({
       designMetadata: {
-        ...designMetadata,
+        ...currentMetadata,
         marketMetadata: {
-          ...marketMetadata,
-          [property]: value
+          ...currentMarketMetadata,
+          ...updates
         }
       }
     });
   };
   
-  // Handle card metadata changes
-  const handleMetadataChange = (property: string, value: any) => {
+  const updateCardMetadata = (updates: Partial<CardMetadata>) => {
+    const currentMetadata = cardData.designMetadata || {};
+    const currentCardMetadata = currentMetadata.cardMetadata || defaultCardMetadata;
+    
     onUpdate({
       designMetadata: {
-        ...designMetadata,
+        ...currentMetadata,
         cardMetadata: {
-          ...(designMetadata.cardMetadata || {}),
-          [property]: value
+          ...currentCardMetadata,
+          ...updates
         }
       }
     });
@@ -93,182 +94,134 @@ const FinalizeStep: React.FC<FinalizeStepProps> = ({ cardData, onUpdate }) => {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-xl font-semibold">Finalize Details</h2>
+      <h2 className="text-xl font-semibold">Finalize Your Card</h2>
       
-      <Tabs defaultValue="details">
-        <TabsList className="mb-4">
+      <Tabs value={currentTab} onValueChange={setCurrentTab} className="w-full">
+        <TabsList className="grid grid-cols-3 mb-4">
           <TabsTrigger value="details">Card Details</TabsTrigger>
-          <TabsTrigger value="market">Market Settings</TabsTrigger>
-          {showAdvanced && <TabsTrigger value="advanced">Advanced</TabsTrigger>}
+          <TabsTrigger value="market">Market Options</TabsTrigger>
+          <TabsTrigger value="publish">Publishing</TabsTrigger>
         </TabsList>
         
         <TabsContent value="details" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Category</Label>
-              <Select
-                value={(designMetadata.cardMetadata?.category as string) || 'general'}
-                onValueChange={(value) => handleMetadataChange('category', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select category" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="general">General</SelectItem>
-                  <SelectItem value="sports">Sports</SelectItem>
-                  <SelectItem value="entertainment">Entertainment</SelectItem>
-                  <SelectItem value="art">Art</SelectItem>
-                  <SelectItem value="collectibles">Collectibles</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="space-y-2">
-              <Label>Series</Label>
+          <div className="grid gap-4">
+            <div>
+              <Label htmlFor="card-title">Card Title</Label>
               <Input 
-                value={(designMetadata.cardMetadata?.series as string) || 'base'}
-                onChange={(e) => handleMetadataChange('series', e.target.value)}
-                placeholder="e.g. Base Set, Limited Edition"
+                id="card-title" 
+                value={cardData.title || ''} 
+                onChange={(e) => onUpdate({ title: e.target.value })} 
               />
             </div>
             
-            <div className="space-y-2">
-              <Label>Card Type</Label>
-              <Select
-                value={(designMetadata.cardMetadata?.cardType as string) || 'standard'}
-                onValueChange={(value) => handleMetadataChange('cardType', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="standard">Standard</SelectItem>
-                  <SelectItem value="premium">Premium</SelectItem>
-                  <SelectItem value="special">Special</SelectItem>
-                  <SelectItem value="limited">Limited Edition</SelectItem>
-                </SelectContent>
-              </Select>
+            <div>
+              <Label htmlFor="card-description">Description</Label>
+              <Input 
+                id="card-description" 
+                value={cardData.description || ''} 
+                onChange={(e) => onUpdate({ description: e.target.value })} 
+              />
             </div>
             
-            <div className="space-y-2">
-              <Label>Card Edition</Label>
+            <div>
+              <Label htmlFor="card-tags">Tags (comma separated)</Label>
               <Input 
-                value={(designMetadata.cardMetadata?.edition as string) || ''}
-                onChange={(e) => handleMetadataChange('edition', e.target.value)}
-                placeholder="e.g. First Edition, Rookie"
+                id="card-tags" 
+                value={cardData.tags?.join(', ') || ''} 
+                onChange={(e) => handleTagChange(e.target.value)} 
+                placeholder="sports, baseball, collectible" 
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="card-category">Category</Label>
+              <Input 
+                id="card-category" 
+                value={cardData.designMetadata?.cardMetadata?.category || defaultCardMetadata.category} 
+                onChange={(e) => updateCardMetadata({ category: e.target.value })} 
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="card-series">Series</Label>
+              <Input 
+                id="card-series" 
+                value={cardData.designMetadata?.cardMetadata?.series || defaultCardMetadata.series} 
+                onChange={(e) => updateCardMetadata({ series: e.target.value })} 
               />
             </div>
           </div>
         </TabsContent>
         
         <TabsContent value="market" className="space-y-4">
-          <div className="space-y-2">
+          <div>
             <div className="flex items-center justify-between">
-              <Label htmlFor="isPrintable">Enable Physical Printing</Label>
-              <Switch
-                id="isPrintable"
-                checked={marketMetadata.isPrintable}
-                onCheckedChange={(checked) => handleMarketChange('isPrintable', checked)}
+              <Label htmlFor="is-for-sale">Available for Sale</Label>
+              <Switch 
+                id="is-for-sale"
+                checked={isForSale}
+                onCheckedChange={handleIsForSaleChange}
               />
             </div>
-            <p className="text-xs text-gray-500">
-              Allow this card to be printed as a physical product
+            <p className="text-sm text-muted-foreground mt-1">
+              Make this card available for purchase in the marketplace
             </p>
           </div>
           
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="isForSale">Available For Sale</Label>
-              <Switch
-                id="isForSale"
-                checked={marketMetadata.isForSale}
-                onCheckedChange={(checked) => handleMarketChange('isForSale', checked)}
-              />
-            </div>
-            <p className="text-xs text-gray-500">
-              Make this card available for purchase by others
-            </p>
-          </div>
-          
-          {marketMetadata.isForSale && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Price</Label>
-                <div className="flex">
-                  <Input
-                    type="number"
-                    value={marketMetadata.price || 0}
-                    onChange={(e) => handleMarketChange('price', parseFloat(e.target.value))}
-                    min={0}
-                    step={0.01}
-                    className="rounded-r-none"
-                  />
-                  <Select
-                    value={marketMetadata.currency || 'USD'}
-                    onValueChange={(value) => handleMarketChange('currency', value)}
-                  >
-                    <SelectTrigger className="w-24 rounded-l-none border-l-0">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="USD">USD</SelectItem>
-                      <SelectItem value="EUR">EUR</SelectItem>
-                      <SelectItem value="GBP">GBP</SelectItem>
-                      <SelectItem value="CAD">CAD</SelectItem>
-                      <SelectItem value="AUD">AUD</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <Label>Edition Size</Label>
-                <Input
-                  type="number"
-                  value={marketMetadata.editionSize || 1}
-                  onChange={(e) => handleMarketChange('editionSize', parseInt(e.target.value))}
-                  min={1}
+          {isForSale && (
+            <div>
+              <Label htmlFor="card-price">Price</Label>
+              <div className="flex items-center">
+                <span className="mr-2">$</span>
+                <Input 
+                  id="card-price" 
+                  type="number" 
+                  min="0" 
+                  step="0.01" 
+                  value={cardData.designMetadata?.marketMetadata?.price || 0} 
+                  onChange={handlePriceChange} 
                 />
               </div>
             </div>
           )}
           
-          <div className="space-y-2">
+          <Separator className="my-4" />
+          
+          <div>
             <div className="flex items-center justify-between">
-              <Label htmlFor="includeInCatalog">Include in Public Catalog</Label>
-              <Switch
-                id="includeInCatalog"
-                checked={marketMetadata.includeInCatalog}
-                onCheckedChange={(checked) => handleMarketChange('includeInCatalog', checked)}
+              <Label htmlFor="is-printable">Printable</Label>
+              <Switch 
+                id="is-printable"
+                checked={isPrintable}
+                onCheckedChange={handleIsPrintableChange}
               />
             </div>
-            <p className="text-xs text-gray-500">
-              Display this card in public galleries and search results
+            <p className="text-sm text-muted-foreground mt-1">
+              Allow users to order physical prints of this card
             </p>
           </div>
         </TabsContent>
         
-        {showAdvanced && (
-          <TabsContent value="advanced" className="space-y-4">
-            <div className="space-y-2">
-              <Label>Additional Notes</Label>
-              <Textarea 
-                placeholder="Add any additional notes or details about this card..."
+        <TabsContent value="publish" className="space-y-4">
+          <div className="grid gap-4">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="is-public">Public Card</Label>
+              <Switch 
+                id="is-public"
+                checked={cardData.isPublic !== false}
+                onCheckedChange={(checked) => onUpdate({ isPublic: checked })}
               />
             </div>
-          </TabsContent>
-        )}
+            <p className="text-sm text-muted-foreground">
+              When published, your card will be visible to everyone
+            </p>
+            
+            <div className="mt-4">
+              <Button className="w-full">Publish Card</Button>
+            </div>
+          </div>
+        </TabsContent>
       </Tabs>
-      
-      <div className="pt-4">
-        <button
-          type="button"
-          className="text-sm text-blue-600 hover:text-blue-800"
-          onClick={() => setShowAdvanced(!showAdvanced)}
-        >
-          {showAdvanced ? 'Hide Advanced Options' : 'Show Advanced Options'}
-        </button>
-      </div>
     </div>
   );
 };

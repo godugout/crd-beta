@@ -11,6 +11,12 @@ export type ToasterToast = ToastProps & {
   action?: ToastActionElement
   variant?: ToastVariant
   duration?: number
+  open?: boolean
+}
+
+export type ToasterToastWithId = ToasterToast & {
+  id: string
+  open: boolean
 }
 
 export type ToastOptions = Omit<ToasterToast, "id">
@@ -19,4 +25,11 @@ export type ToastIconNames = "Check" | "X" | "AlertTriangle" | "Info" | null;
 
 export interface ToastActionProps extends ComponentProps<"button"> {
   altText?: string
+}
+
+export function createToast(options: Omit<ToastOptions, "id">): ToastOptions {
+  return {
+    ...options,
+    variant: options.variant || "default"
+  }
 }

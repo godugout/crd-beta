@@ -51,7 +51,7 @@ export interface CardEffectDefinition {
 export type EffectUpdateCallback = (effectIds: string[]) => void;
 
 // Re-export CardEffectSettings from cardTypes for components that import it from here
-export { CardEffectSettings } from '@/lib/types/cardTypes';
+export type { CardEffectSettings } from '@/lib/types/cardTypes';
 
 export type CardEffectsResult = {
   activeEffects: string[];

@@ -1,292 +1,153 @@
 
 import { CardData } from '@/types/card';
 
-export const cardData: CardData[] = [
+// Sample card data
+const sampleCardsData: CardData[] = [
   {
-    id: "card1",
-    title: "Rickey Henderson",
-    description: "The Man of Steal",
-    imageUrl: "/lovable-uploads/667e6ad2-af96-40ac-bd16-a69778e14b21.png",
-    thumbnailUrl: "/lovable-uploads/667e6ad2-af96-40ac-bd16-a69778e14b21.png",
-    player: "Rickey Henderson",
-    team: "Oakland Athletics",
-    year: "1989",
-    tags: ["baseball", "athletics", "hall-of-fame"],
-    createdAt: "2023-05-10T12:00:00Z",
-    updatedAt: "2023-05-10T12:00:00Z",
-    userId: "user1",
-    effects: ["holographic"],
+    id: '1',
+    title: 'Rickey Henderson Rookie Card',
+    description: 'A classic Rickey Henderson rookie card from 1979.',
+    imageUrl: '/assets/cards/rickey-henderson.jpg',
+    thumbnailUrl: '/assets/cards/thumbnails/rickey-henderson-thumb.jpg',
+    player: 'Rickey Henderson',
+    team: 'Oakland Athletics',
+    year: '1979',
+    tags: ['baseball', 'rookie', 'oakland', 'athletics'],
+    createdAt: '2023-02-15T10:30:00Z',
+    updatedAt: '2023-02-15T10:30:00Z',
+    userId: 'user-1',
+    effects: ['holographic'],
     designMetadata: {
       cardStyle: {
-        template: "classic",
-        effect: "holographic",
-        borderRadius: "8px",
-        borderColor: "#000000",
-        frameColor: "#00A04A",
+        template: 'classic',
+        effect: 'holographic',
+        borderRadius: '10px',
+        borderColor: '#00a33d',
         frameWidth: 3,
-        shadowColor: "rgba(0,0,0,0.3)",
+        shadowColor: 'rgba(0,0,0,0.3)',
+        frameColor: '#ffd700'
       },
       textStyle: {
-        titleColor: "#FFFFFF",
-        titleAlignment: "center",
-        titleWeight: "bold",
-        descriptionColor: "#DDDDDD"
+        titleColor: '#000000',
+        titleAlignment: 'center',
+        titleWeight: 'bold',
+        descriptionColor: '#333333'
       },
       cardMetadata: {
-        category: "baseball",
-        series: "legends",
-        cardType: "player"
+        category: 'baseball',
+        series: 'vintage',
+        cardType: 'rookie'
       },
       marketMetadata: {
+        price: 299.99,
+        currency: 'USD',
+        availableForSale: true,
+        editionSize: 1000,
+        editionNumber: 42,
         isPrintable: true,
         isForSale: true,
-        includeInCatalog: true,
-        price: 15,
-        currency: "USD",
-        availableForSale: true,
-        editionSize: 100,
-        editionNumber: 1
+        includeInCatalog: true
       }
     }
   },
   {
-    id: "card2",
-    title: "Dennis Eckersley",
-    description: "The Eck",
-    imageUrl: "/lovable-uploads/38b125d7-2257-4d56-98fa-c1ff2a7be7ea.png",
-    thumbnailUrl: "/lovable-uploads/38b125d7-2257-4d56-98fa-c1ff2a7be7ea.png",
-    player: "Dennis Eckersley",
-    team: "Oakland Athletics",
-    year: "1988",
-    tags: ["baseball", "athletics", "hall-of-fame", "pitcher"],
-    createdAt: "2023-05-11T12:00:00Z",
-    updatedAt: "2023-05-11T12:00:00Z",
-    userId: "user1",
-    effects: ["refractor"],
+    id: '2',
+    title: 'Mark McGwire Home Run Record',
+    description: 'Commemorative card for Mark McGwire\'s home run record.',
+    imageUrl: '/assets/cards/mark-mcgwire.jpg',
+    thumbnailUrl: '/assets/cards/thumbnails/mark-mcgwire-thumb.jpg',
+    player: 'Mark McGwire',
+    team: 'St. Louis Cardinals',
+    year: '1998',
+    tags: ['baseball', 'record', 'home run', 'cardinals'],
+    createdAt: '2023-02-16T14:45:00Z',
+    updatedAt: '2023-02-16T14:45:00Z',
+    userId: 'user-2',
+    effects: ['gold-foil'],
     designMetadata: {
       cardStyle: {
-        template: "classic",
-        effect: "refractor",
-        borderRadius: "8px",
-        borderColor: "#000000",
-        frameColor: "#00A04A",
-        frameWidth: 3,
-        shadowColor: "rgba(0,0,0,0.3)",
+        template: 'premium',
+        effect: 'gold-foil',
+        borderRadius: '8px',
+        borderColor: '#c41e3a',
+        frameWidth: 4,
+        shadowColor: 'rgba(0,0,0,0.4)',
+        frameColor: '#ffd700'
       },
       textStyle: {
-        titleColor: "#FFFFFF",
-        titleAlignment: "center",
-        titleWeight: "bold",
-        descriptionColor: "#DDDDDD"
+        titleColor: '#c41e3a',
+        titleAlignment: 'center',
+        titleWeight: 'bold',
+        descriptionColor: '#333333'
       },
       cardMetadata: {
-        category: "baseball",
-        series: "legends",
-        cardType: "player"
+        category: 'baseball',
+        series: 'commemorative',
+        cardType: 'special'
       },
       marketMetadata: {
+        price: 149.99,
+        currency: 'USD',
+        availableForSale: true,
+        editionSize: 500,
+        editionNumber: 62,
         isPrintable: true,
         isForSale: true,
-        includeInCatalog: true,
-        price: 15,
-        currency: "USD",
-        availableForSale: true,
-        editionSize: 100,
-        editionNumber: 2
+        includeInCatalog: true
       }
     }
   },
   {
-    id: "card3",
-    title: "Mark McGwire",
-    description: "Big Mac",
-    imageUrl: "/lovable-uploads/7bb9f93e-4a42-4b96-9429-8b2966efd3a6.png",
-    thumbnailUrl: "/lovable-uploads/7bb9f93e-4a42-4b96-9429-8b2966efd3a6.png",
-    player: "Mark McGwire",
-    team: "Oakland Athletics",
-    year: "1987",
-    tags: ["baseball", "athletics", "slugger"],
-    createdAt: "2023-05-12T12:00:00Z",
-    updatedAt: "2023-05-12T12:00:00Z",
-    userId: "user1",
-    effects: ["shimmer"],
+    id: '3',
+    title: 'Ken Griffey Jr. All-Star',
+    description: 'Ken Griffey Jr. All-Star card with special effects.',
+    imageUrl: '/assets/cards/griffey-jr.jpg',
+    thumbnailUrl: '/assets/cards/thumbnails/griffey-jr-thumb.jpg',
+    player: 'Ken Griffey Jr.',
+    team: 'Seattle Mariners',
+    year: '1994',
+    tags: ['baseball', 'all-star', 'mariners', '90s'],
+    createdAt: '2023-02-17T09:20:00Z',
+    updatedAt: '2023-02-17T09:20:00Z',
+    userId: 'user-1',
+    effects: ['refractor'],
     designMetadata: {
       cardStyle: {
-        template: "classic",
-        effect: "shimmer",
-        borderRadius: "8px",
-        borderColor: "#000000",
-        frameColor: "#00A04A",
+        template: 'modern',
+        effect: 'refractor',
+        borderRadius: '12px',
+        borderColor: '#0c2c56',
         frameWidth: 3,
-        shadowColor: "rgba(0,0,0,0.3)",
+        shadowColor: 'rgba(0,0,0,0.3)',
+        frameColor: '#00ccff'
       },
       textStyle: {
-        titleColor: "#FFFFFF",
-        titleAlignment: "center",
-        titleWeight: "bold",
-        descriptionColor: "#DDDDDD"
+        titleColor: '#0c2c56',
+        titleAlignment: 'center',
+        titleWeight: 'bold',
+        descriptionColor: '#333333'
       },
       cardMetadata: {
-        category: "baseball",
-        series: "legends",
-        cardType: "player"
+        category: 'baseball',
+        series: 'all-star',
+        cardType: 'premium'
       },
       marketMetadata: {
+        price: 199.99,
+        currency: 'USD',
+        availableForSale: true,
+        editionSize: 750,
+        editionNumber: 24,
         isPrintable: true,
         isForSale: true,
-        includeInCatalog: true,
-        price: 15,
-        currency: "USD",
-        availableForSale: true,
-        editionSize: 100,
-        editionNumber: 3
-      }
-    }
-  },
-  {
-    id: "card4",
-    title: "Jose Canseco",
-    description: "The Chemist",
-    imageUrl: "/lovable-uploads/dc219616-1df7-461d-8f6d-7af3ef1b68ae.png",
-    thumbnailUrl: "/lovable-uploads/dc219616-1df7-461d-8f6d-7af3ef1b68ae.png",
-    player: "Jose Canseco",
-    team: "Oakland Athletics",
-    year: "1988",
-    tags: ["baseball", "athletics", "slugger"],
-    createdAt: "2023-05-12T12:00:00Z",
-    updatedAt: "2023-05-12T12:00:00Z",
-    userId: "user1",
-    effects: ["chrome"],
-    designMetadata: {
-      cardStyle: {
-        template: "classic",
-        effect: "chrome",
-        borderRadius: "8px",
-        borderColor: "#000000",
-        frameColor: "#00A04A",
-        frameWidth: 3,
-        shadowColor: "rgba(0,0,0,0.3)",
-      },
-      textStyle: {
-        titleColor: "#FFFFFF",
-        titleAlignment: "center",
-        titleWeight: "bold",
-        descriptionColor: "#DDDDDD"
-      },
-      cardMetadata: {
-        category: "baseball",
-        series: "legends",
-        cardType: "player"
-      },
-      marketMetadata: {
-        isPrintable: true,
-        isForSale: true,
-        includeInCatalog: true,
-        price: 15,
-        currency: "USD",
-        availableForSale: true,
-        editionSize: 100,
-        editionNumber: 4
-      }
-    }
-  },
-  {
-    id: "card5",
-    title: "Carney Lansford",
-    description: "The Consistent One",
-    imageUrl: "/lovable-uploads/a38aa501-ea2d-4416-9699-1e69b1826233.png",
-    thumbnailUrl: "/lovable-uploads/a38aa501-ea2d-4416-9699-1e69b1826233.png",
-    player: "Carney Lansford",
-    team: "Oakland Athletics",
-    year: "1989",
-    tags: ["baseball", "athletics", "infielder"],
-    createdAt: "2023-05-12T12:00:00Z",
-    updatedAt: "2023-05-12T12:00:00Z",
-    userId: "user1",
-    effects: ["vintage"],
-    designMetadata: {
-      cardStyle: {
-        template: "classic",
-        effect: "vintage",
-        borderRadius: "8px",
-        borderColor: "#000000",
-        frameColor: "#00A04A",
-        frameWidth: 3,
-        shadowColor: "rgba(0,0,0,0.3)",
-      },
-      textStyle: {
-        titleColor: "#FFFFFF",
-        titleAlignment: "center",
-        titleWeight: "bold",
-        descriptionColor: "#DDDDDD"
-      },
-      cardMetadata: {
-        category: "baseball",
-        series: "legends",
-        cardType: "player"
-      },
-      marketMetadata: {
-        isPrintable: true,
-        isForSale: true,
-        includeInCatalog: true,
-        price: 12,
-        currency: "USD",
-        availableForSale: true,
-        editionSize: 100,
-        editionNumber: 5
-      }
-    }
-  },
-  {
-    id: "card6",
-    title: "Dave Stewart",
-    description: "Smoke",
-    imageUrl: "/lovable-uploads/88d804c5-6d0c-402e-b2d6-f0d10b5f6699.png",
-    thumbnailUrl: "/lovable-uploads/88d804c5-6d0c-402e-b2d6-f0d10b5f6699.png",
-    player: "Dave Stewart",
-    team: "Oakland Athletics",
-    year: "1989",
-    tags: ["baseball", "athletics", "pitcher"],
-    createdAt: "2023-05-12T12:00:00Z",
-    updatedAt: "2023-05-12T12:00:00Z",
-    userId: "user1",
-    effects: [],
-    designMetadata: {
-      cardStyle: {
-        template: "classic",
-        effect: "none",
-        borderRadius: "8px",
-        borderColor: "#000000",
-        frameColor: "#00A04A",
-        frameWidth: 3,
-        shadowColor: "rgba(0,0,0,0.3)",
-      },
-      textStyle: {
-        titleColor: "#FFFFFF",
-        titleAlignment: "center",
-        titleWeight: "bold",
-        descriptionColor: "#DDDDDD"
-      },
-      cardMetadata: {
-        category: "baseball",
-        series: "legends",
-        cardType: "player"
-      },
-      marketMetadata: {
-        isPrintable: true,
-        isForSale: true,
-        includeInCatalog: true,
-        price: 12,
-        currency: "USD",
-        availableForSale: true,
-        editionSize: 100,
-        editionNumber: 6
+        includeInCatalog: true
       }
     }
   }
 ];
 
-// Export for backwards compatibility
-export const sampleCardsData = cardData;
+// Export as default as well as named export for compatibility
+export default sampleCardsData;
 
-export default cardData;
+// Legacy named export for backward compatibility
+export { sampleCardsData as cardData };
