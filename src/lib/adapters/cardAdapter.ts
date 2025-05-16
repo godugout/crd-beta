@@ -1,6 +1,7 @@
 
 import { Card } from '../types/cardTypes';
 import { Card as LegacyCard } from '../types/card';
+import { DEFAULT_CARD_METADATA, DEFAULT_MARKET_METADATA } from '../utils/cardDefaults';
 
 /**
  * Adapts a card from the legacy format to the new format
@@ -24,7 +25,8 @@ export function adaptToCard(legacyCard: LegacyCard): Card {
     isPublic: legacyCard.isPublic,
     designMetadata: legacyCard.designMetadata,
     effects: legacyCard.effects || [],
-    rarity: legacyCard.rarity
+    rarity: legacyCard.rarity,
+    fabricSwatches: legacyCard.fabricSwatches
   };
 }
 
@@ -83,6 +85,12 @@ export function adaptFromCard(card: Card): LegacyCard {
         isForSale: false,
         includeInCatalog: false
       }
-    }
+    },
+    fabricSwatches: card.fabricSwatches
   };
 }
+
+/**
+ * Alias for adaptFromCard for backward compatibility
+ */
+export const adaptToLegacyCard = adaptFromCard;

@@ -1,3 +1,4 @@
+
 import { Card, CardEffect } from '@/lib/types/cardTypes';
 import { CardEffectSettings } from '@/lib/types/cardTypes';
 
@@ -34,7 +35,7 @@ export interface CardEffectContextProps {
 
 export interface MediaServiceHook {
   uploadFile: (file: File) => Promise<string>;
-  uploadImage: (file: File) => Promise<string>; // Add this missing method
+  uploadImage: (file: File) => Promise<string>; // Make sure this is defined
   getMedia: () => Promise<string[]>;
   isUploading: boolean;
   error: Error | null;
@@ -55,4 +56,36 @@ export interface EffectRegistry {
     renderer: (props: EffectRendererProps) => React.ReactNode;
     settings?: CardEffectSettings;
   };
+}
+
+// Define CardEffectDefinition interface
+export interface CardEffectDefinition {
+  id: string;
+  name: string;
+  description: string;
+  thumbnail: string;
+  category: string;
+  defaultSettings: CardEffectSettings;
+  cssClass: string;
+  supportedCardTypes: string[];
+  premium: boolean;
+  enabled: boolean;
+  iconUrl: string;
+}
+
+// Define MaterialSimulation interface
+export interface MaterialSimulation {
+  roughness: number;
+  metalness: number;
+  clearcoat: number;
+  clearcoatRoughness: number;
+  ior: number;
+  transmission: number;
+  reflectivity: number;
+  emissive: string;
+  envMapIntensity: number;
+  textureUrl?: string;
+  baseColor?: string;
+  type?: string;
+  weathering?: number;
 }

@@ -94,21 +94,21 @@ export interface Card {
   player?: string;
   team?: string;
   year?: string;
-  isPublic?: boolean; // Add isPublic property
-  designMetadata?: CardDesignMetadata;
+  isPublic?: boolean;
+  designMetadata: CardDesignMetadata; // Make designMetadata required
   ownerId?: string; 
   collectionId?: string;
-  userId?: string; // Added for compatibility
-  effects?: string[]; // Added for compatibility
-  reactions?: any[]; // Added for compatibility
-  artist?: string; // Added for compatibility
-  set?: string; // Added for compatibility
-  rarity?: string; // Added for compatibility
-  viewCount?: number; // Add viewCount property
-  cardNumber?: string; // Add cardNumber property
-  fabricSwatches?: any[]; // Add fabricSwatches property
-  name?: string; // Add name property
-  jersey?: string; // Add jersey property
+  userId?: string;
+  effects?: string[];
+  reactions?: any[];
+  artist?: string;
+  set?: string;
+  rarity?: string;
+  viewCount?: number;
+  cardNumber?: string;
+  fabricSwatches?: any[];
+  name?: string;
+  jersey?: string;
 }
 
 /**

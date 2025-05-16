@@ -19,6 +19,14 @@ export interface ToastAction {
   children: ReactNode;
 }
 
+export interface ToastOptions {
+  title?: string;
+  description?: string;
+  action?: ToastAction;
+  variant?: ToastVariant;
+  duration?: number;
+}
+
 export type ToasterToast = Toast & {
   id: string;
   title?: ReactNode;

@@ -1,8 +1,6 @@
 
-import React from 'react';
-
 /**
- * Oakland Memory Data interface
+ * Interface for Oakland Memory Data
  */
 export interface OaklandMemoryData {
   title: string;
@@ -18,13 +16,4 @@ export interface OaklandMemoryData {
   imageUrl?: string;
   historicalContext?: string;
   personalSignificance?: string;
-  template?: string;
-  teamId?: string;
-}
-
-export interface OaklandTemplateOptions {
-  name: string;
-  description: string;
-  years: string;
-  icon: React.ReactNode;
 }
