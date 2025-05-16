@@ -1,48 +1,60 @@
 
-// Generic types used across the application
-export type JsonValue = 
-  | string
-  | number
-  | boolean
-  | null
-  | JsonValue[]
-  | { [key: string]: JsonValue };
-
+/**
+ * Core types used throughout the application
+ */
 export interface BaseEntity {
   id: string;
   createdAt: string;
   updatedAt: string;
 }
 
-// Instagram related types
-export interface InstagramPost {
+export type JsonValue = string | number | boolean | null | JsonObject | JsonArray;
+export interface JsonObject { [key: string]: JsonValue; }
+export type JsonArray = Array<JsonValue>;
+
+export interface Reaction {
   id: string;
-  caption: string;
-  mediaUrl: string;
-  permalink: string;
-  timestamp: string;
-  username: string;
-  mediaType?: 'IMAGE' | 'VIDEO' | 'CAROUSEL_ALBUM';
-  thumbnailUrl?: string;
-  postId?: string;
-  children?: InstagramMediaItem[];
+  targetType: string;
+  targetId: string;
+  userId: string;
+  type: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
-export interface InstagramMediaItem {
+export interface Comment {
   id: string;
-  mediaType: 'IMAGE' | 'VIDEO' | 'CAROUSEL_ALBUM';
-  mediaUrl: string;
-  permalink: string;
-  thumbnail?: string;
+  content: string;
+  authorId: string;
+  parentId?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
-export interface InstagramApiResponse {
-  data: InstagramPost[];
-  paging?: {
-    cursors: {
-      before: string;
-      after: string;
-    };
-    next?: string;
-  };
+export interface TeamMember {
+  id: string;
+  userId: string;
+  teamId: string;
+  role: 'owner' | 'admin' | 'member' | 'viewer';
+  joinedAt: string;
+  updatedAt?: string;
 }
+
+export interface CreationHistoryItem {
+  id: string;
+  createdAt: string;
+  cardId: string;
+  effectsUsed: string[];
+  elementsUsed: string[];
+  timeSpent: number;
+}
+
+export interface UserStyleProfile {
+  favoriteColors: string[];
+  preferredEffects: string[];
+  favoriteTemplates: string[];
+  lastUsedElements: string[];
+}
+
+// Additional types to resolve errors
+export type BackgroundColor = string;

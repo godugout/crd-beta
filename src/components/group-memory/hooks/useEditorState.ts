@@ -3,6 +3,7 @@ import { useState, useCallback } from 'react';
 import { EnhancedCropBoxProps, MemorabiliaType } from '@/components/card-upload/cardDetection';
 import { useMobileOptimization } from '@/hooks/useMobileOptimization';
 import { useToast } from '@/hooks/use-toast';
+import { createToast } from '@/types/toast';
 
 interface UseEditorStateProps {
   isDetecting?: boolean;
@@ -30,12 +31,11 @@ export const useEditorState = ({
       editorImgRef: React.RefObject<HTMLImageElement>
     ) => {
       if (!canvasRef.current || !editorImgRef.current) {
-        toast({
+        toast(createToast({
           variant: "warning",
           title: "Cannot add selection",
-          description: "Canvas or image reference is not available",
-          open: true
-        });
+          description: "Canvas or image reference is not available"
+        }));
         return;
       }
       
@@ -56,12 +56,11 @@ export const useEditorState = ({
       
       setSelectedAreas(prev => [...prev, newArea]);
       
-      toast({
+      toast(createToast({
         variant: "success",
         title: "Selection area added",
-        description: `Added new selection area (#${selectedAreas.length + 1})`,
-        open: true
-      });
+        description: `Added new selection area (#${selectedAreas.length + 1})`
+      }));
     },
     [selectedAreas.length, toast]
   );
@@ -72,12 +71,11 @@ export const useEditorState = ({
       const updated = [...prev];
       const removed = updated.splice(index, 1)[0];
       
-      toast({
+      toast(createToast({
         variant: "info",
         title: "Selection area removed",
-        description: `Removed selection area (#${removed.id})`,
-        open: true
-      });
+        description: `Removed selection area (#${removed.id})`
+      }));
       
       return updated;
     });
@@ -87,12 +85,11 @@ export const useEditorState = ({
   const startDetection = useCallback(() => {
     setIsDetecting(true);
     
-    toast({
+    toast(createToast({
       variant: "info",
       title: "Detection started",
-      description: "Analyzing image for face detection...",
-      open: true
-    });
+      description: "Analyzing image for face detection..."
+    }));
     
     // In a real implementation, this would be connected to an actual detection API
   }, [toast]);
@@ -101,23 +98,21 @@ export const useEditorState = ({
   const startProcessing = useCallback(() => {
     setIsProcessing(true);
     
-    toast({
+    toast(createToast({
       variant: "info",
       title: "Processing started",
-      description: "Enhancing selected areas...",
-      open: true
-    });
+      description: "Enhancing selected areas..."
+    }));
     
     // Simulate processing completion after a delay
     setTimeout(() => {
       setIsProcessing(false);
       
-      toast({
+      toast(createToast({
         variant: "success",
         title: "Processing complete",
-        description: `Successfully enhanced ${selectedAreas.length} selection areas`,
-        open: true
-      });
+        description: `Successfully enhanced ${selectedAreas.length} selection areas`
+      }));
     }, 2000);
   }, [selectedAreas.length, toast]);
 

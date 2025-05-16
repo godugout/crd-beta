@@ -1,3 +1,4 @@
+
 /**
  * Consolidated Card Types for Cardshow (CRD)
  * This file serves as the central source of truth for all card-related types

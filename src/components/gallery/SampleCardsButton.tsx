@@ -2,7 +2,6 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { useCards } from '@/context/CardContext';
-import { adaptCardToCardData } from '@/types/card';
 import { toast } from '@/components/ui/use-toast';
 import { createToast } from '@/utils/createToast';
 
@@ -21,7 +20,7 @@ const SampleCardsButton: React.FC<SampleCardsButtonProps> = ({ className }) => {
       sampleCardsData.forEach(async (cardData) => {
         // Make sure we properly adapt the card data to match required CardMetadata format
         const adaptedCard = {
-          ...adaptCardToCardData(cardData),
+          ...cardData,
           designMetadata: {
             ...cardData.designMetadata,
             cardMetadata: {

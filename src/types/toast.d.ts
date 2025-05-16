@@ -4,7 +4,7 @@ import { ToastActionElement, ToastProps } from "@/components/ui/toast"
 
 export type ToastVariant = "default" | "destructive" | "success" | "warning" | "info" | "error";
 
-export type ToasterToast = ToastProps & {
+export interface ToasterToast {
   id: string
   title?: string
   description?: string
@@ -16,7 +16,7 @@ export type ToasterToast = ToastProps & {
 
 export type Toast = Omit<ToasterToast, "id"> & {
   id?: string
-  open?: boolean
+  open: boolean
 }
 
 export type ToastOptions = Toast

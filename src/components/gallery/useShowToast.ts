@@ -17,11 +17,11 @@ export default function useShowToast() {
   const { toast } = useToast();
   
   return (options: ToastOptions) => {
-    toast({
+    toast(createToast({
       title: options.title,
       description: options.description,
       variant: options.variant || "default",
-      open: true
-    });
+      duration: options.duration
+    }));
   };
 }

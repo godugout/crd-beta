@@ -1,59 +1,55 @@
 
-import { DesignMetadata } from '@/lib/types/cardTypes';
+import { CardStyle, TextStyle, CardMetadata, MarketMetadata, DesignMetadata } from '@/lib/types/cardTypes';
 
-// Default fallback image URL if card image can't be loaded
-export const FALLBACK_IMAGE_URL = '/placeholder-card.png';
+export const DEFAULT_CARD_STYLE: CardStyle = {
+  template: 'classic',
+  effect: 'none',
+  borderRadius: '8px',
+  borderColor: '#000000',
+  frameColor: '#000000',
+  frameWidth: 2,
+  shadowColor: 'rgba(0,0,0,0.2)'
+};
 
-// Default design metadata for new cards
+export const DEFAULT_TEXT_STYLE: TextStyle = {
+  titleColor: '#000000',
+  titleAlignment: 'center',
+  titleWeight: 'bold',
+  descriptionColor: '#333333',
+  fontFamily: 'Inter',
+  fontSize: '16px',
+  fontWeight: 'normal',
+  color: '#333333'
+};
+
+export const DEFAULT_CARD_METADATA: CardMetadata = {
+  category: 'general',
+  series: 'base',
+  cardType: 'standard',
+};
+
+export const DEFAULT_MARKET_METADATA: MarketMetadata = {
+  isPrintable: false,
+  isForSale: false,
+  includeInCatalog: false,
+  price: 0,
+  currency: 'USD',
+  availableForSale: false,
+  editionSize: 1,
+  editionNumber: 1
+};
+
 export const DEFAULT_DESIGN_METADATA: DesignMetadata = {
-  cardStyle: {
-    template: 'classic',
-    effect: 'none',
-    borderRadius: '8px',
-    borderColor: '#000000',
-    backgroundColor: '#FFFFFF',
-    shadowColor: 'rgba(0,0,0,0.2)',
-    frameWidth: 2,
-    frameColor: '#000000',
-  },
-  textStyle: {
-    titleFont: 'Inter',
-    titleSize: '24px',
-    titleColor: '#000000',
-    titleAlignment: 'center',
-    descriptionFont: 'Inter',
-    descriptionSize: '16px',
-    descriptionColor: '#333333',
-  },
-  cardMetadata: {
-    category: 'Sports',
-    series: 'Standard',
-    cardType: 'Player',
-  },
-  marketMetadata: {
-    isPrintable: true,
-    isForSale: false,
-    includeInCatalog: true,
-  }
+  cardStyle: DEFAULT_CARD_STYLE,
+  textStyle: DEFAULT_TEXT_STYLE,
+  cardMetadata: DEFAULT_CARD_METADATA,
+  marketMetadata: DEFAULT_MARKET_METADATA
 };
 
-// Utils for card creation
-export const createEmptyCard = () => {
-  return {
-    id: '',
-    title: '',
-    description: '',
-    imageUrl: '',
-    thumbnailUrl: '',
-    tags: [],
-    userId: '',
-    effects: [],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    designMetadata: DEFAULT_DESIGN_METADATA
-  };
-};
-
-export const generateCardId = () => {
-  return `card-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+export default {
+  cardStyle: DEFAULT_CARD_STYLE,
+  textStyle: DEFAULT_TEXT_STYLE,
+  cardMetadata: DEFAULT_CARD_METADATA,
+  marketMetadata: DEFAULT_MARKET_METADATA,
+  designMetadata: DEFAULT_DESIGN_METADATA
 };

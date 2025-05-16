@@ -113,6 +113,12 @@ export const useCardOperations = () => {
       createdAt: now,
       updatedAt: now,
       effects: cardData.effects || [],
+      // Include player property from cardData if available
+      ...(cardData.player && { player: cardData.player }),
+      // Include team property from cardData if available  
+      ...(cardData.team && { team: cardData.team }),
+      // Include year property from cardData if available
+      ...(cardData.year && { year: cardData.year }),
       designMetadata: {
         cardStyle: cardData.designMetadata?.cardStyle || {
           template: 'classic',
@@ -135,7 +141,14 @@ export const useCardOperations = () => {
           cardType: 'standard'
         },
         marketMetadata: {
-          ...DEFAULT_MARKET_METADATA,
+          isPrintable: false,
+          isForSale: false,
+          includeInCatalog: false,
+          price: 0,
+          currency: 'USD',
+          availableForSale: false,
+          editionSize: 1,
+          editionNumber: 1,
           ...(cardData.designMetadata?.marketMetadata || {})
         }
       }
