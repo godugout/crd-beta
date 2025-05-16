@@ -1,181 +1,68 @@
 
-import { Card as CardType } from '@/lib/types/cardTypes';
-import { Card as LegacyCard } from '@/lib/types/card';
-import { CardData } from '@/types/card';
+import { Card as CardType } from '../types/cardTypes';
 
 /**
- * Adapts a card object to ensure it has all the required fields for the Card type
+ * Adapts legacy card data to the current Card type
  */
-export const adaptToCard = (input: Partial<CardType>): CardType => {
+export function adaptToLegacyCard(card: Partial<CardType>): any {
   return {
-    id: input.id || `card-${Date.now()}`,
-    title: input.title || 'Untitled Card',
-    description: input.description || '',
-    imageUrl: input.imageUrl || '',
-    thumbnailUrl: input.thumbnailUrl || input.imageUrl || '',
-    tags: input.tags || [],
-    userId: input.userId || 'default-user',
-    effects: input.effects || [],
-    collectionId: input.collectionId,
-    teamId: input.teamId,
-    isPublic: input.isPublic ?? true,
-    player: input.player || '',
-    team: input.team || '',
-    year: input.year || '',
-    designMetadata: input.designMetadata || {
-      cardStyle: {
-        template: 'classic',
-        effect: 'none',
-        borderRadius: '8px',
-        borderColor: '#000000',
-        frameWidth: 2,
-        frameColor: '#000000',
-        shadowColor: 'rgba(0,0,0,0.2)',
-      },
-      textStyle: {
-        titleColor: '#FFFFFF',
-        titleAlignment: 'center',
-        titleWeight: 'bold',
-        descriptionColor: '#DDDDDD',
-      },
-      marketMetadata: {},
-      cardMetadata: {}
-    },
-    createdAt: input.createdAt || new Date().toISOString(),
-    updatedAt: input.updatedAt || new Date().toISOString(),
-  } as CardType;
-};
-
-/**
- * Adapts a card object to ensure it has all the required fields for the legacy Card type
- */
-export const adaptToLegacyCard = (input: Partial<CardType>): LegacyCard => {
-  return {
-    id: input.id || `card-${Date.now()}`,
-    title: input.title || 'Untitled Card',
-    description: input.description || '',
-    imageUrl: input.imageUrl || '',
-    thumbnailUrl: input.thumbnailUrl || input.imageUrl || '',
-    tags: input.tags || [],
-    userId: input.userId || 'default-user',
-    effects: input.effects || [],
-    collectionId: input.collectionId,
-    player: input.player || '',
-    team: input.team || '',
-    year: input.year || '',
-    createdAt: input.createdAt || new Date().toISOString(),
-    updatedAt: input.updatedAt || new Date().toISOString(),
-    designMetadata: input.designMetadata || {
-      cardStyle: {
-        template: 'classic',
-        effect: 'none',
-        borderRadius: '8px',
-        borderColor: '#000000',
-        frameWidth: 2,
-        frameColor: '#000000',
-        shadowColor: 'rgba(0,0,0,0.2)',
-      },
-      textStyle: {
-        titleColor: '#FFFFFF',
-        titleAlignment: 'center',
-        titleWeight: 'bold',
-        descriptionColor: '#DDDDDD',
-      },
-      marketMetadata: {},
-      cardMetadata: {}
-    }
-  } as LegacyCard;
-};
-
-/**
- * Converts a Card to a CardData format (for legacy systems)
- */
-export const adaptCardToCardData = (card: Partial<CardType>): CardData => {
-  return {
-    id: card.id || `card-${Date.now()}`,
-    title: card.title || 'Untitled Card',
+    id: card.id || '',
+    title: card.title || '',
     description: card.description || '',
     imageUrl: card.imageUrl || '',
     thumbnailUrl: card.thumbnailUrl || card.imageUrl || '',
     tags: card.tags || [],
-    userId: card.userId || 'default-user',
-    effects: card.effects || [],
+    userId: card.userId || '',
     createdAt: card.createdAt || new Date().toISOString(),
     updatedAt: card.updatedAt || new Date().toISOString(),
-    name: card.player || card.name || '',
-    team: card.team || '',
-    jersey: card.jersey || '',
-    year: card.year || '',
-    set: card.set || '',
-    cardType: card.cardType || '',
-    designMetadata: card.designMetadata || {
+    effects: card.effects || [],
+    // Ensure all required nested properties exist
+    designMetadata: {
       cardStyle: {
         template: 'classic',
         effect: 'none',
         borderRadius: '8px',
         borderColor: '#000000',
-        frameColor: '#000000',
         frameWidth: 2,
+        frameColor: '#000000',
         shadowColor: 'rgba(0,0,0,0.2)',
+        ...(card.designMetadata?.cardStyle || {})
       },
       textStyle: {
-        titleColor: '#000000',
+        titleColor: '#FFFFFF',
         titleAlignment: 'center',
         titleWeight: 'bold',
-        descriptionColor: '#333333',
+        descriptionColor: '#DDDDDD',
+        ...(card.designMetadata?.textStyle || {})
       },
       cardMetadata: {
-        category: 'general',
-        series: 'base',
-        cardType: 'standard',
+        ...(card.designMetadata?.cardMetadata || {})
       },
       marketMetadata: {
-        price: 0,
-        currency: 'USD',
-        availableForSale: false,
-        editionSize: 0,
-        editionNumber: 0
-      }
-    }
-  } as CardData;
-};
+        ...(card.designMetadata?.marketMetadata || {})
+      },
+      ...(card.designMetadata || {})
+    },
+    // Include any other properties from the original card
+    ...card
+  };
+}
 
 /**
- * Converts a legacy CardData to a Card format
+ * Adapts a card to match a specific schema format
  */
-export const adaptCardDataToCard = (cardData: CardData): CardType => {
-  return adaptToCard({
-    id: cardData.id,
-    title: cardData.title,
-    description: cardData.description,
-    imageUrl: cardData.imageUrl,
-    thumbnailUrl: cardData.thumbnailUrl,
-    tags: cardData.tags,
-    userId: cardData.userId,
-    effects: cardData.effects,
-    player: cardData.name,
-    team: cardData.team,
-    year: cardData.year,
-    jersey: cardData.jersey,
-    set: cardData.set,
-    cardType: cardData.cardType,
-    designMetadata: cardData.designMetadata,
-    createdAt: cardData.createdAt,
-    updatedAt: cardData.updatedAt
-  });
-};
-
-/**
- * For adapting cards to specific schemas/formats needed by components
- */
-export const adaptCardToSchema = (card: CardType, schemaName?: string): any => {
-  // Base adaptation
-  const adapted = { ...card };
-  
-  // Convert description from optional to required if necessary
-  if (!adapted.description) {
-    adapted.description = '';
-  }
-  
-  return adapted;
-};
+export function adaptCardToSchema(card: CardType): any {
+  return {
+    id: card.id,
+    title: card.title,
+    description: card.description || '',
+    imageUrl: card.imageUrl,
+    thumbnailUrl: card.thumbnailUrl || card.imageUrl,
+    tags: card.tags || [],
+    createdAt: card.createdAt,
+    updatedAt: card.updatedAt,
+    userId: card.userId,
+    effects: card.effects || [],
+    designMetadata: card.designMetadata
+  };
+}

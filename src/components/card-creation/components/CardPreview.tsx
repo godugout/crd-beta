@@ -43,11 +43,11 @@ const CardPreview = React.forwardRef<HTMLDivElement, CardPreviewProps>(({
           className
         )}
         style={{
-          backgroundColor: cardStyle?.backgroundColor || '#FFFFFF',
-          borderRadius: cardStyle?.borderRadius || '8px',
+          backgroundColor: cardStyle.backgroundColor || '#FFFFFF',
+          borderRadius: cardStyle.borderRadius || '8px',
           borderWidth: '2px',
           borderStyle: 'solid',
-          borderColor: cardStyle?.borderColor || '#000000',
+          borderColor: cardStyle.borderColor || '#000000',
         }}
       >
         <div className="relative w-full h-full">
@@ -62,9 +62,9 @@ const CardPreview = React.forwardRef<HTMLDivElement, CardPreviewProps>(({
               <h3 
                 className="text-white text-sm font-bold truncate"
                 style={{ 
-                  color: textStyle?.titleColor || '#FFFFFF',
-                  fontWeight: textStyle?.titleWeight || 'bold',
-                  textAlign: (textStyle?.titleAlignment as any) || 'center'
+                  color: textStyle.titleColor || '#FFFFFF',
+                  fontWeight: textStyle.titleWeight || 'bold',
+                  textAlign: (textStyle.titleAlignment as any) || 'center'
                 }}
               >
                 {card.title}
@@ -73,7 +73,7 @@ const CardPreview = React.forwardRef<HTMLDivElement, CardPreviewProps>(({
                 <p 
                   className="text-white/80 text-xs truncate"
                   style={{ 
-                    color: textStyle?.descriptionColor || '#DDDDDD',
+                    color: textStyle.descriptionColor || '#DDDDDD',
                   }}
                 >
                   {card.player}
