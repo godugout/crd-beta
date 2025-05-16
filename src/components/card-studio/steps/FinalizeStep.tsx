@@ -3,10 +3,11 @@ import React, { useState } from 'react';
 import { Card } from '@/lib/types/cardTypes';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
+import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
-import { X, Plus } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface FinalizeStepProps {
   cardData: Partial<Card>;
@@ -14,68 +15,45 @@ interface FinalizeStepProps {
 }
 
 const FinalizeStep: React.FC<FinalizeStepProps> = ({ cardData, onUpdate }) => {
-  const [tagInput, setTagInput] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
-
-  // Handle adding a tag
-  const handleAddTag = () => {
-    if (!tagInput.trim()) {
-      return;
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  
+  // Ensure we have designMetadata with empty values as needed
+  const designMetadata = cardData.designMetadata || {
+    cardStyle: {
+      template: 'classic',
+      effect: 'none',
+      borderRadius: '8px',
+      borderColor: '#000000',
+      shadowColor: 'rgba(0,0,0,0.2)',
+      frameWidth: 2,
+      frameColor: '#000000'
+    },
+    textStyle: {
+      fontFamily: 'Inter',
+      titleColor: '#000000',
+      titleAlignment: 'center',
+      titleWeight: 'bold',
+      descriptionColor: '#333333'
+    },
+    cardMetadata: {
+      category: 'general',
+      series: 'base',
+      cardType: 'standard'
+    },
+    marketMetadata: {
+      isPrintable: false,
+      isForSale: false,
+      includeInCatalog: false,
+      price: 0,
+      currency: 'USD',
+      availableForSale: false,
+      editionSize: 1,
+      editionNumber: 1
     }
-    
-    // Check if tag already exists
-    if (cardData.tags?.includes(tagInput.trim())) {
-      setErrorMessage('This tag already exists');
-      return;
-    }
-    
-    // Add the tag
-    const newTags = [...(cardData.tags || []), tagInput.trim()];
-    onUpdate({ tags: newTags });
-    setTagInput('');
-    setErrorMessage('');
   };
   
-  // Handle removing a tag
-  const handleRemoveTag = (tag: string) => {
-    const newTags = cardData.tags?.filter(t => t !== tag) || [];
-    onUpdate({ tags: newTags });
-  };
-  
-  // Handle Enter key in tag input
-  const handleTagInputKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      handleAddTag();
-    }
-  };
-  
-  // Handle player, team, year updates
-  const handleInputChange = (field: string, value: string) => {
-    onUpdate({ [field]: value });
-  };
-  
-  // Handle market metadata changes
-  const handleMarketMetadataChange = (field: string, value: any) => {
-    const marketMetadata = {
-      ...(cardData.designMetadata?.marketMetadata || {
-        isPrintable: false,
-        isForSale: false,
-        includeInCatalog: false
-      }),
-      [field]: value
-    };
-    
-    onUpdate({
-      designMetadata: {
-        ...(cardData.designMetadata || {}),
-        marketMetadata
-      }
-    });
-  };
-  
-  // Ensure we have market metadata with default values
-  const marketMetadata = cardData.designMetadata?.marketMetadata || {
+  // Get market metadata with fallback
+  const marketMetadata = designMetadata.marketMetadata || {
     isPrintable: false,
     isForSale: false,
     includeInCatalog: false,
@@ -86,172 +64,209 @@ const FinalizeStep: React.FC<FinalizeStepProps> = ({ cardData, onUpdate }) => {
     editionNumber: 1
   };
 
+  // Handle market metadata changes
+  const handleMarketChange = (property: keyof typeof marketMetadata, value: any) => {
+    onUpdate({
+      designMetadata: {
+        ...designMetadata,
+        marketMetadata: {
+          ...marketMetadata,
+          [property]: value
+        }
+      }
+    });
+  };
+  
+  // Handle card metadata changes
+  const handleMetadataChange = (property: string, value: any) => {
+    onUpdate({
+      designMetadata: {
+        ...designMetadata,
+        cardMetadata: {
+          ...(designMetadata.cardMetadata || {}),
+          [property]: value
+        }
+      }
+    });
+  };
+
   return (
     <div className="space-y-6">
-      <h2 className="text-xl font-semibold">Finalize Your Card</h2>
+      <h2 className="text-xl font-semibold">Finalize Details</h2>
       
-      <div className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="player">Player Name</Label>
-            <Input
-              id="player"
-              value={cardData.player || ''}
-              onChange={(e) => handleInputChange('player', e.target.value)}
-              placeholder="Player name"
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="team">Team Name</Label>
-            <Input
-              id="team"
-              value={cardData.team || ''}
-              onChange={(e) => handleInputChange('team', e.target.value)}
-              placeholder="Team name"
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="year">Year</Label>
-            <Input
-              id="year"
-              value={cardData.year || ''}
-              onChange={(e) => handleInputChange('year', e.target.value)}
-              placeholder="Year or season"
-            />
-          </div>
-        </div>
+      <Tabs defaultValue="details">
+        <TabsList className="mb-4">
+          <TabsTrigger value="details">Card Details</TabsTrigger>
+          <TabsTrigger value="market">Market Settings</TabsTrigger>
+          {showAdvanced && <TabsTrigger value="advanced">Advanced</TabsTrigger>}
+        </TabsList>
         
-        <div className="space-y-2">
-          <Label htmlFor="tags">Tags</Label>
-          <div className="flex gap-2">
-            <Input
-              id="tags"
-              value={tagInput}
-              onChange={(e) => {
-                setTagInput(e.target.value);
-                setErrorMessage('');
-              }}
-              onKeyDown={handleTagInputKeyDown}
-              placeholder="Add tags (e.g., rookie, special, limited)"
-              className="flex-1"
-            />
-            <Button type="button" onClick={handleAddTag}>
-              <Plus className="h-4 w-4" />
-            </Button>
+        <TabsContent value="details" className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Category</Label>
+              <Select
+                value={(designMetadata.cardMetadata?.category as string) || 'general'}
+                onValueChange={(value) => handleMetadataChange('category', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="general">General</SelectItem>
+                  <SelectItem value="sports">Sports</SelectItem>
+                  <SelectItem value="entertainment">Entertainment</SelectItem>
+                  <SelectItem value="art">Art</SelectItem>
+                  <SelectItem value="collectibles">Collectibles</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <Label>Series</Label>
+              <Input 
+                value={(designMetadata.cardMetadata?.series as string) || 'base'}
+                onChange={(e) => handleMetadataChange('series', e.target.value)}
+                placeholder="e.g. Base Set, Limited Edition"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label>Card Type</Label>
+              <Select
+                value={(designMetadata.cardMetadata?.cardType as string) || 'standard'}
+                onValueChange={(value) => handleMetadataChange('cardType', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="standard">Standard</SelectItem>
+                  <SelectItem value="premium">Premium</SelectItem>
+                  <SelectItem value="special">Special</SelectItem>
+                  <SelectItem value="limited">Limited Edition</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <Label>Card Edition</Label>
+              <Input 
+                value={(designMetadata.cardMetadata?.edition as string) || ''}
+                onChange={(e) => handleMetadataChange('edition', e.target.value)}
+                placeholder="e.g. First Edition, Rookie"
+              />
+            </div>
           </div>
-          {errorMessage && (
-            <p className="text-sm text-red-500 mt-1">{errorMessage}</p>
-          )}
-          
-          <div className="flex flex-wrap gap-2 mt-2">
-            {cardData.tags && cardData.tags.length > 0 ? (
-              cardData.tags.map((tag) => (
-                <Badge key={tag} variant="secondary" className="flex items-center gap-1">
-                  {tag}
-                  <X
-                    className="h-3 w-3 cursor-pointer opacity-70 hover:opacity-100"
-                    onClick={() => handleRemoveTag(tag)}
-                  />
-                </Badge>
-              ))
-            ) : (
-              <p className="text-sm text-gray-500">No tags added yet</p>
-            )}
-          </div>
-        </div>
+        </TabsContent>
         
-        <div className="border-t pt-4 mt-4">
-          <h3 className="font-medium mb-4">Marketplace Settings</h3>
-          
-          <div className="space-y-4">
-            <div className="flex items-center space-x-2">
-              <Checkbox 
-                id="printable" 
+        <TabsContent value="market" className="space-y-4">
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="isPrintable">Enable Physical Printing</Label>
+              <Switch
+                id="isPrintable"
                 checked={marketMetadata.isPrintable}
-                onCheckedChange={(checked) => 
-                  handleMarketMetadataChange('isPrintable', Boolean(checked))
-                }
+                onCheckedChange={(checked) => handleMarketChange('isPrintable', checked)}
               />
-              <Label htmlFor="printable">Make this card printable</Label>
             </div>
-            
-            <div className="flex items-center space-x-2">
-              <Checkbox 
-                id="forSale" 
+            <p className="text-xs text-gray-500">
+              Allow this card to be printed as a physical product
+            </p>
+          </div>
+          
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="isForSale">Available For Sale</Label>
+              <Switch
+                id="isForSale"
                 checked={marketMetadata.isForSale}
-                onCheckedChange={(checked) => 
-                  handleMarketMetadataChange('isForSale', Boolean(checked))
-                }
+                onCheckedChange={(checked) => handleMarketChange('isForSale', checked)}
               />
-              <Label htmlFor="forSale">Offer this card for sale</Label>
             </div>
-            
-            {marketMetadata.isForSale && (
-              <div className="pl-6 border-l-2 border-gray-100 space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="price">Price</Label>
-                    <Input
-                      id="price"
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      value={marketMetadata.price || 0}
-                      onChange={(e) => handleMarketMetadataChange('price', parseFloat(e.target.value))}
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="currency">Currency</Label>
-                    <Input
-                      id="currency"
-                      value={marketMetadata.currency || 'USD'}
-                      onChange={(e) => handleMarketMetadataChange('currency', e.target.value)}
-                    />
-                  </div>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="editionSize">Edition Size</Label>
-                    <Input
-                      id="editionSize"
-                      type="number"
-                      min="1"
-                      value={marketMetadata.editionSize || 1}
-                      onChange={(e) => handleMarketMetadataChange('editionSize', parseInt(e.target.value))}
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="editionNumber">Edition Number</Label>
-                    <Input
-                      id="editionNumber"
-                      type="number"
-                      min="1"
-                      max={marketMetadata.editionSize || 1}
-                      value={marketMetadata.editionNumber || 1}
-                      onChange={(e) => handleMarketMetadataChange('editionNumber', parseInt(e.target.value))}
-                    />
-                  </div>
+            <p className="text-xs text-gray-500">
+              Make this card available for purchase by others
+            </p>
+          </div>
+          
+          {marketMetadata.isForSale && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Price</Label>
+                <div className="flex">
+                  <Input
+                    type="number"
+                    value={marketMetadata.price || 0}
+                    onChange={(e) => handleMarketChange('price', parseFloat(e.target.value))}
+                    min={0}
+                    step={0.01}
+                    className="rounded-r-none"
+                  />
+                  <Select
+                    value={marketMetadata.currency || 'USD'}
+                    onValueChange={(value) => handleMarketChange('currency', value)}
+                  >
+                    <SelectTrigger className="w-24 rounded-l-none border-l-0">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="USD">USD</SelectItem>
+                      <SelectItem value="EUR">EUR</SelectItem>
+                      <SelectItem value="GBP">GBP</SelectItem>
+                      <SelectItem value="CAD">CAD</SelectItem>
+                      <SelectItem value="AUD">AUD</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
-            )}
-            
-            <div className="flex items-center space-x-2">
-              <Checkbox 
-                id="catalog" 
-                checked={marketMetadata.includeInCatalog}
-                onCheckedChange={(checked) => 
-                  handleMarketMetadataChange('includeInCatalog', Boolean(checked))
-                }
-              />
-              <Label htmlFor="catalog">Include in public catalog</Label>
+              
+              <div className="space-y-2">
+                <Label>Edition Size</Label>
+                <Input
+                  type="number"
+                  value={marketMetadata.editionSize || 1}
+                  onChange={(e) => handleMarketChange('editionSize', parseInt(e.target.value))}
+                  min={1}
+                />
+              </div>
             </div>
+          )}
+          
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="includeInCatalog">Include in Public Catalog</Label>
+              <Switch
+                id="includeInCatalog"
+                checked={marketMetadata.includeInCatalog}
+                onCheckedChange={(checked) => handleMarketChange('includeInCatalog', checked)}
+              />
+            </div>
+            <p className="text-xs text-gray-500">
+              Display this card in public galleries and search results
+            </p>
           </div>
-        </div>
+        </TabsContent>
+        
+        {showAdvanced && (
+          <TabsContent value="advanced" className="space-y-4">
+            <div className="space-y-2">
+              <Label>Additional Notes</Label>
+              <Textarea 
+                placeholder="Add any additional notes or details about this card..."
+              />
+            </div>
+          </TabsContent>
+        )}
+      </Tabs>
+      
+      <div className="pt-4">
+        <button
+          type="button"
+          className="text-sm text-blue-600 hover:text-blue-800"
+          onClick={() => setShowAdvanced(!showAdvanced)}
+        >
+          {showAdvanced ? 'Hide Advanced Options' : 'Show Advanced Options'}
+        </button>
       </div>
     </div>
   );

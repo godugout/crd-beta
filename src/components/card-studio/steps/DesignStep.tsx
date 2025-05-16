@@ -38,7 +38,7 @@ const EFFECT_OPTIONS = [
 ];
 
 const DesignStep: React.FC<DesignStepProps> = ({ cardData, onUpdate }) => {
-  // Ensure we have design metadata
+  // Ensure we have design metadata with default values
   const designMetadata = cardData.designMetadata || {
     cardStyle: {
       template: 'classic',
@@ -75,10 +75,19 @@ const DesignStep: React.FC<DesignStepProps> = ({ cardData, onUpdate }) => {
   };
 
   // Get card style with fallback
-  const cardStyle = designMetadata.cardStyle || {};
+  const cardStyle = designMetadata.cardStyle || {
+    template: 'classic',
+    effect: 'none',
+    borderRadius: '8px',
+    borderColor: '#000000',
+    backgroundColor: '#FFFFFF',
+    shadowColor: 'rgba(0,0,0,0.2)',
+    frameWidth: 2,
+    frameColor: '#000000'
+  };
 
   // Handle card style changes
-  const handleStyleChange = (property: keyof typeof cardStyle, value: any) => {
+  const handleStyleChange = (property: string, value: any) => {
     onUpdate({
       designMetadata: {
         ...designMetadata,

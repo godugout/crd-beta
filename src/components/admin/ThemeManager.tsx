@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useTeamTheme, TeamTheme } from '@/context/ThemeContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -181,7 +182,6 @@ const ThemeManager: React.FC = () => {
               <ColorPicker
                 color={editingTheme.primary}
                 onChange={(color) => handleThemePropertyChange('primary', color)}
-                colors={['#48BB78', '#4FD1C5', '#006341', '#FD5A1E', '#9b87f5', '#F97316', '#0EA5E9', '#D946EF']}
               />
             </div>
             
@@ -190,7 +190,6 @@ const ThemeManager: React.FC = () => {
               <ColorPicker
                 color={editingTheme.secondary}
                 onChange={(color) => handleThemePropertyChange('secondary', color)}
-                colors={['#38A169', '#285E61', '#EFB21E', '#27251F', '#7E69AB', '#B45309', '#0369A1', '#A21CAF']}
               />
             </div>
             
@@ -199,7 +198,6 @@ const ThemeManager: React.FC = () => {
               <ColorPicker
                 color={editingTheme.accent}
                 onChange={(color) => handleThemePropertyChange('accent', color)}
-                colors={['#4FD1C5', '#9AE6B4', '#003831', '#8B6F4E', '#D946EF', '#FBBF24', '#60A5FA', '#F43F5E']}
               />
             </div>
             
@@ -208,7 +206,6 @@ const ThemeManager: React.FC = () => {
               <ColorPicker
                 color={editingTheme.neutral}
                 onChange={(color) => handleThemePropertyChange('neutral', color)}
-                colors={['#8E9196', '#CBD5E0', '#CCCCCC', '#E2E8F0', '#A0AEC0', '#D1D5DB', '#9CA3AF', '#71717A']}
               />
             </div>
             
@@ -217,7 +214,6 @@ const ThemeManager: React.FC = () => {
               <ColorPicker
                 color={editingTheme.background}
                 onChange={(color) => handleThemePropertyChange('background', color)}
-                colors={['#FFFFFF', '#F8F8F8', '#F7FAFC', '#F9FAFB', '#1A1F2C', '#111827', '#0F172A', '#18181B']}
               />
             </div>
             
@@ -226,7 +222,6 @@ const ThemeManager: React.FC = () => {
               <ColorPicker
                 color={editingTheme.text}
                 onChange={(color) => handleThemePropertyChange('text', color)}
-                colors={['#1A202C', '#2D3748', '#4A5568', '#718096', '#FFFFFF', '#F7FAFC', '#E2E8F0', '#CBD5E0']}
               />
             </div>
           </div>

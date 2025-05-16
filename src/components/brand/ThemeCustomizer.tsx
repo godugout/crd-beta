@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -78,11 +79,10 @@ const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({ className }) => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <Card>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 pt-6">
               <div>
                 <Label htmlFor="primary-color">Primary Color</Label>
                 <ColorPicker
-                  id="primary-color"
                   color={primaryColor}
                   onChange={setPrimaryColor}
                   label="Primary Color"
@@ -91,7 +91,6 @@ const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({ className }) => {
               <div>
                 <Label htmlFor="secondary-color">Secondary Color</Label>
                 <ColorPicker
-                  id="secondary-color"
                   color={secondaryColor}
                   onChange={setSecondaryColor}
                   label="Secondary Color"
@@ -100,7 +99,6 @@ const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({ className }) => {
               <div>
                 <Label htmlFor="accent-color">Accent Color</Label>
                 <ColorPicker
-                  id="accent-color"
                   color={accentColor}
                   onChange={setAccentColor}
                   label="Accent Color"
@@ -137,7 +135,7 @@ const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({ className }) => {
         </div>
         <div>
           <Card>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 pt-6">
               <div>
                 <Label htmlFor="custom-css">Custom CSS</Label>
                 <Textarea
