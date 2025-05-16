@@ -14,6 +14,7 @@ export interface Reaction extends BaseEntity {
   targetType: 'card' | 'comment' | 'collection' | string;
   targetId: string;
   user?: User;
+  authorId?: string; // Added for backward compatibility
 }
 
 /**

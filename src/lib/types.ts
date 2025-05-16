@@ -5,11 +5,6 @@
 
 // Re-export all types from our centralized type system
 export * from './types/index';
-export * from './types/cardTypes';
-export * from './types/user';
-export * from './types/interaction';
-export * from './types/collection';
-export * from './types/instagram';  // Added Instagram types
 
 // Keep the utility function for backward compatibility
 import { DesignMetadata } from './types/cardTypes';

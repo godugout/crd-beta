@@ -3,47 +3,22 @@ import { BaseEntity } from './index';
 import { User } from './user';
 
 /**
- * Team member roles
- */
-export enum TeamMemberRole {
-  OWNER = 'owner',
-  ADMIN = 'admin',
-  MEMBER = 'member',
-  VIEWER = 'viewer',
-}
-
-/**
- * Team member interface
- */
-export interface TeamMember extends BaseEntity {
-  userId: string;
-  teamId: string;
-  role: TeamMemberRole;
-  invitedBy?: string;
-  joinedAt?: string;
-  user?: User;
-}
-
-/**
- * Team interface
+ * Team interface for team-related data
  */
 export interface Team extends BaseEntity {
   name: string;
   description?: string;
   logoUrl?: string;
-  members?: TeamMember[];
+  logo_url?: string;  // For backward compatibility
+  banner_url?: string;  // For backward compatibility
   ownerId: string;
-  visibility: 'public' | 'private' | 'unlisted';
-  
-  // Additional team properties from DbTeam
-  logo_url?: string;
-  banner_url?: string;
   status?: string;
   website?: string;
   email?: string;
   specialties?: string[];
+  visibility?: 'public' | 'private' | 'team';
   
-  // Team fields
+  // Team specific fields
   team_code?: string;
   primary_color?: string;
   secondary_color?: string;
@@ -57,7 +32,38 @@ export interface Team extends BaseEntity {
   league?: string;
   division?: string;
   is_active?: boolean;
-  
-  // For display purposes in TeamGallery
+}
+
+/**
+ * Team member interface for team-user relationship
+ */
+export interface TeamMember extends BaseEntity {
+  teamId: string;
+  userId: string;
+  role: 'owner' | 'admin' | 'member' | 'viewer' | string;
+  joinedAt: string;
+  user?: User;
+  isActive?: boolean;
+}
+
+/**
+ * Team display data interface for UI components
+ */
+export interface TeamDisplayData {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
   memberCount?: number;
+  owner_id: string;
+  primary_color?: string;
+  secondary_color?: string;
+  founded_year?: number;
+  city?: string;
+  state?: string;
+  stadium?: string;
+  league?: string;
+  division?: string;
+  logo_url?: string;
+  imageUrl?: string;
 }

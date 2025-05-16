@@ -1,6 +1,5 @@
 
-import { Team } from '@/lib/types';
-import { TeamMember } from '@/lib/types/teamTypes';
+import { Team, TeamMember } from '@/lib/types/teamTypes';
 import { User } from '@/lib/types/user';
 import { UserRole } from '@/lib/enums/userRoles';
 
@@ -14,14 +13,14 @@ export const mapTeamFromDb = (team: any): Team => ({
   logoUrl: team.logo_url,
   logo_url: team.logo_url,
   banner_url: team.banner_url,
-  ownerId: team.owner_id, // Keep only ownerId
+  ownerId: team.owner_id,
   status: team.status,
   website: team.website,
   email: team.email,
   specialties: team.specialties,
   createdAt: team.created_at,
   updatedAt: team.updated_at,
-  visibility: team.visibility || 'public', // Default visibility
+  visibility: team.visibility || 'public',
   
   // Team fields
   team_code: team.team_code,
@@ -50,8 +49,8 @@ export const mapTeamMemberFromDb = (member: any): TeamMember => {
     name: member.users?.full_name,
     avatarUrl: member.users?.avatar_url,
     role: UserRole.USER,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+    createdAt: member.users?.created_at || new Date().toISOString(),
+    updatedAt: member.users?.updated_at || new Date().toISOString(),
   };
 
   return {
@@ -60,6 +59,8 @@ export const mapTeamMemberFromDb = (member: any): TeamMember => {
     userId: member.user_id,
     role: member.role,
     joinedAt: member.joined_at,
+    createdAt: member.created_at || new Date().toISOString(),
+    updatedAt: member.updated_at || new Date().toISOString(),
     user
   };
 };

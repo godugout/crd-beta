@@ -19,7 +19,9 @@ export enum ElementCategory {
   TEXTURE = 'texture',
   DECORATION = 'decoration',
   ICON = 'icon',
-  SHAPE = 'shape'
+  SHAPE = 'shape',
+  TEAMS = 'teams',      // Added for backward compatibility
+  DECORATIVE = 'decorative' // Added for backward compatibility
 }
 
 /**
@@ -99,6 +101,8 @@ export interface ElementUploadMetadata {
   dimensions?: ElementDimensions;
   rasterizable?: boolean;
   customizable?: boolean;
+  name?: string;  // Added for backward compatibility
+  url?: string;   // Added for backward compatibility
 }
 
 /**
@@ -119,6 +123,9 @@ export interface CardElement extends BaseEntity {
   usage?: number;
   rating?: number;
   dimensions?: ElementDimensions;
+  position?: ElementPosition;  // Added for backward compatibility
+  size?: ElementSize;         // Added for backward compatibility
+  url?: string;              // Added for backward compatibility
 }
 
 /**

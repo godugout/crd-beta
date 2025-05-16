@@ -48,12 +48,32 @@ const CommentSection: React.FC<CommentSectionProps> = ({ cardId, collectionId, t
       }
       
       if (data) {
-        // Convert the comments to our expected type
+        // Convert the comments to our expected type with proper typing
         const typedComments: Comment[] = data.map(c => ({
-          ...c,
-          userId: c.userId || c.authorId || '', // Handle either userId or authorId
-          user: c.user  // Keep the user object if it exists
+          id: c.id,
+          content: c.content,
+          userId: c.userId || c.authorId || '',
+          authorId: c.authorId, // Keep authorId for backward compatibility
+          cardId: c.cardId,
+          collectionId: c.collectionId,
+          teamId: c.teamId,
+          parentId: c.parentId,
+          createdAt: c.createdAt,
+          updatedAt: c.updatedAt,
+          user: c.user ? {
+            id: c.user.id,
+            email: c.user.email,
+            name: c.user.name,
+            displayName: c.user.displayName,
+            username: c.user.username,
+            avatarUrl: c.user.avatarUrl,
+            role: c.user.role,
+            createdAt: c.user.createdAt || new Date().toISOString(),
+            updatedAt: c.user.updatedAt || new Date().toISOString(),
+          } : undefined,
+          reactions: c.reactions
         }));
+        
         setComments(typedComments);
         typedComments.forEach(comment => {
           if (comment.id) {
@@ -80,12 +100,32 @@ const CommentSection: React.FC<CommentSectionProps> = ({ cardId, collectionId, t
       }
       
       if (data && data.length > 0) {
-        // Convert to our expected type
+        // Convert to our expected type with proper typing
         const typedReplies: Comment[] = data.map(c => ({
-          ...c,
-          userId: c.userId || c.authorId || '', // Handle either userId or authorId
-          user: c.user // Keep the user object if it exists
+          id: c.id,
+          content: c.content,
+          userId: c.userId || c.authorId || '',
+          authorId: c.authorId, // Keep authorId for backward compatibility
+          cardId: c.cardId,
+          collectionId: c.collectionId,
+          teamId: c.teamId,
+          parentId: c.parentId,
+          createdAt: c.createdAt,
+          updatedAt: c.updatedAt,
+          user: c.user ? {
+            id: c.user.id,
+            email: c.user.email,
+            name: c.user.name,
+            displayName: c.user.displayName,
+            username: c.user.username,
+            avatarUrl: c.user.avatarUrl,
+            role: c.user.role,
+            createdAt: c.user.createdAt || new Date().toISOString(),
+            updatedAt: c.user.updatedAt || new Date().toISOString(),
+          } : undefined,
+          reactions: c.reactions
         }));
+        
         setRepliesByParentId(prev => ({
           ...prev,
           [parentId]: typedReplies

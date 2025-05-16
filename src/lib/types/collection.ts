@@ -1,59 +1,47 @@
 
 import { BaseEntity } from './index';
 import { Card } from './cardTypes';
+import { User } from './user';
 
-export interface InstagramSource {
-  username: string;
-  lastFetched: string;
-  autoUpdate: boolean;
-}
-
+/**
+ * Collection interface for card collections
+ */
 export interface Collection extends BaseEntity {
-  name: string;
+  title: string;
   description?: string;
-  userId: string;
-  cards: Card[];
   coverImageUrl?: string;
-  isPublic: boolean;
-  tags?: string[];
-  popularity?: number;
-  instagramSource?: InstagramSource;
-  featured?: boolean; // Added this property to fix the type error
-  
-  // Additional properties needed by other components
-  visibility?: 'public' | 'private' | 'team' | 'unlisted';
-  allowComments?: boolean;
+  ownerId: string;
+  owner?: User;
   teamId?: string;
-  cardIds?: string[];
+  visibility?: 'public' | 'private' | 'team';
+  allowComments?: boolean;
   designMetadata?: any;
-  owner_id?: string; // For backward compatibility
+  cards?: Card[];
 }
 
-export interface CollectionWithCards extends Collection {
-  cards: Card[];
+/**
+ * Collection card relationship interface
+ */
+export interface CollectionCard extends BaseEntity {
+  collectionId: string;
+  cardId: string;
+  order?: number;
+  featured?: boolean;
+  card?: Card;
+  collection?: Collection;
 }
 
-// For backwards compatibility with DB models
-export interface DbCollection {
+/**
+ * Collection display interface for UI components
+ */
+export interface CollectionDisplayData {
   id: string;
   title: string;
   description?: string;
-  cover_image_url?: string;
-  owner_id?: string; 
-  team_id?: string;
-  visibility?: 'public' | 'private' | 'team' | 'unlisted';
-  allow_comments?: boolean;
-  created_at: string;
-  updated_at: string;
-  design_metadata?: any;
+  coverImageUrl?: string;
+  cardCount?: number;
+  ownerName?: string;
+  visibility: 'public' | 'private' | 'team';
+  createdAt: string;
+  updatedAt: string;
 }
-
-// Function to serialize metadata for storage
-export const serializeMetadata = (metadata: any) => {
-  if (!metadata) return {};
-  try {
-    return JSON.parse(JSON.stringify(metadata));
-  } catch (e) {
-    return metadata;
-  }
-};

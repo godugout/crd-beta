@@ -1,7 +1,10 @@
 
 /**
  * Core types used throughout the application
+ * This file serves as the central export point for all type definitions
  */
+
+// Define basic types
 export interface BaseEntity {
   id: string;
   createdAt: string;
@@ -12,87 +15,22 @@ export type JsonValue = string | number | boolean | null | JsonObject | JsonArra
 export interface JsonObject { [key: string]: JsonValue; }
 export type JsonArray = Array<JsonValue>;
 
-export interface Reaction {
-  id: string;
-  targetType: string;
-  targetId: string;
-  userId: string;
-  type: string;
-  createdAt: string;
-  updatedAt: string;
-  cardId?: string;        // Added for backward compatibility
-  collectionId?: string;  // Added for backward compatibility
-  commentId?: string;     // Added for backward compatibility
-  user?: User;            // Added for backward compatibility
-}
+// Re-export all types from other files
+export * from './cardTypes';
+export * from './user';
+export * from './interaction';
+export * from './collection';
+export * from './instagram';
+export * from './cardElements';
+export * from './teamTypes';
+export * from './enhancedCardTypes';
 
-export interface Comment {
-  id: string;
-  content: string;
-  userId: string;
-  authorId?: string;      // Added for backward compatibility
-  parentId?: string;
-  cardId?: string;        // Added for backward compatibility
-  collectionId?: string;  // Added for backward compatibility
-  teamId?: string;        // Added for backward compatibility
-  createdAt: string;
-  updatedAt: string;
-  user?: User;            // Added for backward compatibility
-  reactions?: Reaction[];
-}
-
-export interface TeamMember {
-  id: string;
-  userId: string;
-  teamId: string;
-  role: 'owner' | 'admin' | 'member' | 'viewer';
-  joinedAt: string;
-  updatedAt?: string;
-  user?: User;            // Added for compatibility
-}
-
-export interface CreationHistoryItem {
-  id: string;
-  createdAt: string;
-  cardId: string;
-  effectsUsed: string[];
-  elementsUsed: string[];
-  timeSpent: number;
-}
-
-export interface UserStyleProfile {
-  favoriteColors: string[];
-  preferredEffects: string[];
-  favoriteTemplates: string[];  // Added missing property
-  lastUsedElements: string[];
-}
-
-// Additional types to resolve errors
+// Additional types for backward compatibility
 export type BackgroundColor = string;
 
-// Instagram-related types
-export interface InstagramPost {
-  id: string;
-  postId?: string;
-  username: string;
-  caption?: string;
-  imageUrl?: string;
-  permalink?: string;
-  timestamp: string;
-  mediaType: string;
-  mediaUrl: string;
-  thumbnailUrl?: string;
-}
-
-// User type definition to support user property in Comment
-export interface User {
-  id: string;
-  email?: string;
-  name?: string;
-  displayName?: string;
-  username?: string;
-  avatarUrl?: string;
-  role?: string;
-  createdAt: string;
-  updatedAt: string;
-}
+// Export aliases for legacy code
+export { User } from './user';
+export { Comment, Reaction } from './interaction';
+export { Card } from './cardTypes';
+export { InstagramPost } from './instagram';
+export { TeamMember, Team } from './teamTypes';

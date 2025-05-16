@@ -57,9 +57,13 @@ export interface TextStyle {
   fontSize?: string;
   fontWeight?: string;
   color?: string;
+  titleFont?: string;   // Added for backward compatibility
+  titleSize?: string;   // Added for backward compatibility
   titleColor: string;      // Required
   titleAlignment: string;  // Required
   titleWeight: string;     // Required
+  descriptionFont?: string; // Added for backward compatibility
+  descriptionSize?: string; // Added for backward compatibility
   descriptionColor: string; // Required
   [key: string]: JsonValue | undefined;
 }
@@ -217,7 +221,7 @@ export interface HotspotData {
 /**
  * Card rarity types
  */
-export type CardRarity = 'common' | 'uncommon' | 'rare' | 'ultra-rare' | 'legendary' | 'one-of-one';
+export type CardRarity = 'common' | 'uncommon' | 'rare' | 'ultra-rare' | 'legendary' | 'one-of-one' | string; // Added string for backward compatibility
 
 /**
  * Base Card interface containing common properties

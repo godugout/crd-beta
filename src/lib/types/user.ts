@@ -13,6 +13,20 @@ export enum UserRole {
 }
 
 /**
+ * User permission enum
+ */
+export enum UserPermission {
+  CREATE_CARD = 'create_card',
+  EDIT_CARD = 'edit_card',
+  DELETE_CARD = 'delete_card',
+  CREATE_COLLECTION = 'create_collection',
+  EDIT_COLLECTION = 'edit_collection',
+  DELETE_COLLECTION = 'delete_collection',
+  ADMIN_ACCESS = 'admin_access',
+  TEAM_MANAGEMENT = 'team_management'
+}
+
+/**
  * Extended user interface with detailed profile information
  */
 export interface UserProfile {
@@ -48,7 +62,7 @@ export interface AuthUser extends User {
   accessToken?: string;
   refreshToken?: string;
   isAuthenticated: boolean;
-  permissions?: string[];
+  permissions?: UserPermission[];
   lastLogin?: string;
 }
 
