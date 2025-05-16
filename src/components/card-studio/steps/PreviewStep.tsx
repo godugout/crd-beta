@@ -1,128 +1,101 @@
-
 import React from 'react';
 import { Card } from '@/lib/types/cardTypes';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
-import CardPreview from '@/components/card-creation/components/CardPreview';
 
 interface PreviewStepProps {
   cardData: Partial<Card>;
 }
 
 const PreviewStep: React.FC<PreviewStepProps> = ({ cardData }) => {
-  // Determine which effects are active
-  const activeEffects = cardData.effects || [];
-  
-  // Generate effect classes from active effects
-  const generateEffectClasses = () => {
-    return activeEffects.map(effectId => `effect-${effectId}`).join(' ');
-  };
-
-  // Create a safe copy to pass to CardPreview
-  const safeCardData = {
-    title: cardData.title || 'Untitled Card',
+  // Create a complete Card object from partial data to ensure all required fields are present
+  const completeCard: Card = {
+    id: cardData.id || 'preview',
+    title: cardData.title || 'Card Preview',
     description: cardData.description || '',
-    imageUrl: cardData.imageUrl || '',
-    thumbnailUrl: cardData.thumbnailUrl || '',
+    imageUrl: cardData.imageUrl || '/placeholder.svg',
+    thumbnailUrl: cardData.thumbnailUrl || cardData.imageUrl || '/placeholder.svg',
     tags: cardData.tags || [],
-    effects: cardData.effects || [],
-    userId: cardData.userId || '',
+    userId: cardData.userId || 'preview-user',
     createdAt: cardData.createdAt || new Date().toISOString(),
     updatedAt: cardData.updatedAt || new Date().toISOString(),
-    ...cardData
+    effects: cardData.effects || [],
+    designMetadata: cardData.designMetadata || {
+      cardStyle: {
+        template: 'classic',
+        effect: 'none',
+        borderRadius: '8px',
+        borderColor: '#000000',
+        shadowColor: 'rgba(0,0,0,0.2)',
+        frameWidth: 2,
+        frameColor: '#000000'
+      },
+      textStyle: {
+        titleColor: '#000000',
+        titleAlignment: 'center',
+        titleWeight: 'bold',
+        descriptionColor: '#333333'
+      },
+      cardMetadata: {
+        category: 'general',
+        series: 'base',
+        cardType: 'standard'
+      },
+      marketMetadata: {
+        isPrintable: false,
+        isForSale: false,
+        includeInCatalog: false,
+        price: 0,
+        currency: 'USD',
+        availableForSale: false,
+        editionSize: 1,
+        editionNumber: 1
+      }
+    }
   };
-  
+
   return (
-    <div className="space-y-6">
-      <h2 className="text-xl font-semibold">Preview Your Card</h2>
-      
-      <Tabs defaultValue="visual" className="w-full">
-        <TabsList className="grid grid-cols-3 mb-4">
-          <TabsTrigger value="visual">Visual Preview</TabsTrigger>
-          <TabsTrigger value="data">Card Data</TabsTrigger>
-          <TabsTrigger value="render">3D Preview</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="visual" className="space-y-4">
-          <div className="flex justify-center">
-            <CardPreview 
-              card={safeCardData as any}
-              effectClasses={generateEffectClasses()}
-              className="max-w-[280px]"
+    <div>
+      <h2 className="text-xl font-semibold mb-4">Preview Your Card</h2>
+      <div className="flex justify-center">
+        <div className="aspect-[2.5/3.5] w-full max-w-sm border rounded-lg overflow-hidden shadow-lg"
+          style={{
+            borderRadius: completeCard.designMetadata.cardStyle.borderRadius || '8px',
+            borderColor: completeCard.designMetadata.cardStyle.borderColor || '#000000',
+            borderWidth: '2px',
+            borderStyle: 'solid'
+          }}
+        >
+          {completeCard.imageUrl ? (
+            <img 
+              src={completeCard.imageUrl} 
+              alt={completeCard.title}
+              className="w-full h-full object-cover"
+              style={{
+                filter: completeCard.designMetadata.cardStyle.effect === 'vintage' ? 'sepia(0.7)' :
+                       completeCard.designMetadata.cardStyle.effect === 'chrome' ? 'contrast(1.2) brightness(1.1)' : 'none'
+              }}
             />
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="data" className="space-y-4">
-          <div className="border rounded-lg p-4 space-y-4">
-            <div>
-              <h3 className="font-semibold mb-1">Basic Information</h3>
-              <div className="grid grid-cols-2 gap-2">
-                <div className="text-sm">
-                  <span className="text-gray-500">Title:</span> {cardData.title || 'Not set'}
-                </div>
-                <div className="text-sm">
-                  <span className="text-gray-500">Created:</span> {cardData.createdAt ? new Date(cardData.createdAt).toLocaleDateString() : 'Not set'}
-                </div>
-                <div className="text-sm">
-                  <span className="text-gray-500">Last Updated:</span> {cardData.updatedAt ? new Date(cardData.updatedAt).toLocaleDateString() : 'Not set'}
-                </div>
-              </div>
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-gray-100">
+              <p className="text-gray-400">No image selected</p>
             </div>
-            
-            {cardData.player && (
-              <div>
-                <h3 className="font-semibold mb-1">Card Details</h3>
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="text-sm">
-                    <span className="text-gray-500">Player:</span> {cardData.player}
-                  </div>
-                  <div className="text-sm">
-                    <span className="text-gray-500">Team:</span> {cardData.team || 'Not set'}
-                  </div>
-                  <div className="text-sm">
-                    <span className="text-gray-500">Year:</span> {cardData.year || 'Not set'}
-                  </div>
-                </div>
-              </div>
-            )}
-            
-            {cardData.tags && cardData.tags.length > 0 && (
-              <div>
-                <h3 className="font-semibold mb-1">Tags</h3>
-                <div className="flex flex-wrap gap-1">
-                  {cardData.tags.map((tag, index) => (
-                    <Badge key={index} variant="secondary">
-                      {tag}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            )}
-            
-            {cardData.effects && cardData.effects.length > 0 && (
-              <div>
-                <h3 className="font-semibold mb-1">Applied Effects</h3>
-                <div className="flex flex-wrap gap-1">
-                  {cardData.effects.map((effect, index) => (
-                    <Badge key={index} variant="outline" className="capitalize">
-                      {effect}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        </TabsContent>
+          )}
+        </div>
+      </div>
+      
+      <div className="mt-8 space-y-4 max-w-md mx-auto">
+        <h3 className="text-lg font-medium">{completeCard.title}</h3>
+        {completeCard.description && <p className="text-gray-600">{completeCard.description}</p>}
         
-        <TabsContent value="render" className="space-y-4">
-          <div className="flex justify-center items-center min-h-[400px] border rounded-lg">
-            <p className="text-gray-500">
-              3D preview rendering will be available soon!
-            </p>
+        {completeCard.tags && completeCard.tags.length > 0 && (
+          <div className="flex flex-wrap gap-2 mt-2">
+            {completeCard.tags.map(tag => (
+              <span key={tag} className="bg-gray-100 px-2 py-1 rounded-full text-xs">
+                {tag}
+              </span>
+            ))}
           </div>
-        </TabsContent>
-      </Tabs>
+        )}
+      </div>
     </div>
   );
 };

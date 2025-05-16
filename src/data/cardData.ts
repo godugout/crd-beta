@@ -1,107 +1,276 @@
-
 import { CardData } from '@/types/card';
 
-export const cardData: CardData[] = [
+const sampleCards: CardData[] = [
   {
-    id: "1",
-    name: "Prince",
-    team: "Minnesota Wolves",
-    jersey: "72",
-    year: "2023",
-    backgroundColor: "#5B23A9", // Purple
-    textColor: "white",
-    cardType: "Artist Series",
-    artist: "Jason T.",
-    set: "Music Legends Series",
-    cardNumber: "ML-001",
-    description: "Special tribute artwork celebrating the Minneapolis legend in Wolves colors. Fan-created artwork reimagining Prince as a basketball player for his hometown team.",
-    specialEffect: "Purple Rain Holographic",
-    imageUrl: "/lovable-uploads/667e6ad2-af96-40ac-bd16-a69778e14b21.png",
-    effects: ["Holographic"]
+    id: '1',
+    title: 'Sample Card 1',
+    description: 'This is a sample card for development',
+    imageUrl: '/placeholder.svg',
+    thumbnailUrl: '/placeholder.svg',
+    tags: ['sample', 'development'],
+    userId: 'user1',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    effects: [],
+    designMetadata: {
+      cardStyle: {
+        template: 'classic',
+        effect: 'none',
+        borderRadius: '8px',
+        borderColor: '#000000',
+        backgroundColor: '#FFFFFF',
+        shadowColor: 'rgba(0,0,0,0.2)',
+        frameWidth: 2,
+        frameColor: '#000000'
+      },
+      textStyle: {
+        titleColor: '#000000',
+        titleAlignment: 'center',
+        titleWeight: 'bold',
+        descriptionColor: '#333333'
+      },
+      cardMetadata: {
+        category: 'general',
+        series: 'base',
+        cardType: 'standard'
+      },
+      marketMetadata: {
+        isPrintable: false,
+        isForSale: false,
+        includeInCatalog: false,
+        price: 0,
+        currency: 'USD',
+        availableForSale: false,
+        editionSize: 1,
+        editionNumber: 1
+      }
+    }
   },
   {
-    id: "2",
-    name: "Michael Jordan",
-    team: "Chicago Bulls",
-    jersey: "23",
-    year: "2023",
-    backgroundColor: "#CE1141", // Red
-    textColor: "white",
-    cardType: "Artist Series",
-    artist: "Jules A.",
-    set: "Basketball Legends",
-    cardNumber: "BL-023",
-    description: "Classic illustration of the GOAT in his legendary Bulls uniform. This fan art captures the iconic silhouette and spirit of Jordan's tremendous impact on the game.",
-    specialEffect: "Ruby Shimmer",
-    imageUrl: "/lovable-uploads/371b81a2-cafa-4637-9358-218d4120c658.png",
-    effects: ["Refractor"]
+    id: '2',
+    title: 'Sample Card 2',
+    description: 'Another sample card for testing',
+    imageUrl: '/placeholder.svg',
+    thumbnailUrl: '/placeholder.svg',
+    tags: ['sample', 'testing'],
+    userId: 'user2',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    effects: [],
+    designMetadata: {
+      cardStyle: {
+        template: 'classic',
+        effect: 'none',
+        borderRadius: '8px',
+        borderColor: '#000000',
+        backgroundColor: '#FFFFFF',
+        shadowColor: 'rgba(0,0,0,0.2)',
+        frameWidth: 2,
+        frameColor: '#000000'
+      },
+      textStyle: {
+        titleColor: '#000000',
+        titleAlignment: 'center',
+        titleWeight: 'bold',
+        descriptionColor: '#333333'
+      },
+      cardMetadata: {
+        category: 'general',
+        series: 'base',
+        cardType: 'standard'
+      },
+      marketMetadata: {
+        isPrintable: false,
+        isForSale: false,
+        includeInCatalog: false,
+        price: 0,
+        currency: 'USD',
+        availableForSale: false,
+        editionSize: 1,
+        editionNumber: 1
+      }
+    }
   },
   {
-    id: "3",
-    name: "Elvis Presley",
-    team: "Memphis Grizzlies",
-    jersey: "15",
-    year: "2023",
-    backgroundColor: "#5D9AD3", // Light Blue
-    textColor: "navy",
-    cardType: "Artist Series",
-    artist: "Marcel G.",
-    set: "Music Legends Series",
-    cardNumber: "ML-002",
-    description: "Memphis legend reimagined as a Grizzlies player. This creative interpretation connects Elvis to his hometown through the lens of basketball culture.",
-    specialEffect: "Blue Suede Shimmer",
-    imageUrl: "/lovable-uploads/236e3ad9-f7c2-4e5b-b29a-ca52a49ff3ed.png",
-    effects: ["Chrome"]
+    id: '3',
+    title: 'Sample Card 3',
+    description: 'A third sample card for demonstration',
+    imageUrl: '/placeholder.svg',
+    thumbnailUrl: '/placeholder.svg',
+    tags: ['sample', 'demonstration'],
+    userId: 'user3',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    effects: [],
+    designMetadata: {
+      cardStyle: {
+        template: 'classic',
+        effect: 'none',
+        borderRadius: '8px',
+        borderColor: '#000000',
+        backgroundColor: '#FFFFFF',
+        shadowColor: 'rgba(0,0,0,0.2)',
+        frameWidth: 2,
+        frameColor: '#000000'
+      },
+      textStyle: {
+        titleColor: '#000000',
+        titleAlignment: 'center',
+        titleWeight: 'bold',
+        descriptionColor: '#333333'
+      },
+      cardMetadata: {
+        category: 'general',
+        series: 'base',
+        cardType: 'standard'
+      },
+      marketMetadata: {
+        isPrintable: false,
+        isForSale: false,
+        includeInCatalog: false,
+        price: 0,
+        currency: 'USD',
+        availableForSale: false,
+        editionSize: 1,
+        editionNumber: 1
+      }
+    }
   },
   {
-    id: "4",
-    name: "Bob Marley",
-    team: "Los Angeles Lakers",
-    jersey: "23",
-    year: "2023",
-    backgroundColor: "#FDB927", // Gold
-    textColor: "purple",
-    cardType: "Artist Series",
-    artist: "Jessica P.",
-    set: "Music Legends Series",
-    cardNumber: "ML-003",
-    description: "Reggae icon in Lakers gold. This fan creation reimagines what Bob Marley might look like as an LA Laker, combining music and basketball culture.",
-    specialEffect: "Rasta Gold Effect",
-    imageUrl: "/lovable-uploads/a38aa501-ea2d-4416-9699-1e69b1826233.png",
-    effects: ["Holographic", "Refractor"]
+    id: '4',
+    title: 'Sample Card 4',
+    description: 'A fourth sample card for illustration',
+    imageUrl: '/placeholder.svg',
+    thumbnailUrl: '/placeholder.svg',
+    tags: ['sample', 'illustration'],
+    userId: 'user4',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    effects: [],
+    designMetadata: {
+      cardStyle: {
+        template: 'classic',
+        effect: 'none',
+        borderRadius: '8px',
+        borderColor: '#000000',
+        backgroundColor: '#FFFFFF',
+        shadowColor: 'rgba(0,0,0,0.2)',
+        frameWidth: 2,
+        frameColor: '#000000'
+      },
+      textStyle: {
+        titleColor: '#000000',
+        titleAlignment: 'center',
+        titleWeight: 'bold',
+        descriptionColor: '#333333'
+      },
+      cardMetadata: {
+        category: 'general',
+        series: 'base',
+        cardType: 'standard'
+      },
+      marketMetadata: {
+        isPrintable: false,
+        isForSale: false,
+        includeInCatalog: false,
+        price: 0,
+        currency: 'USD',
+        availableForSale: false,
+        editionSize: 1,
+        editionNumber: 1
+      }
+    }
   },
   {
-    id: "5",
-    name: "Tupac Shakur",
-    team: "Duke",
-    jersey: "2",
-    year: "2023",
-    backgroundColor: "#001A57", // Duke Blue
-    textColor: "white",
-    cardType: "Artist Series",
-    artist: "Tyrone J.",
-    set: "Music Legends Series",
-    cardNumber: "ML-004",
-    description: "Hip-hop legend reimagined as a Blue Devil. This creative fan art brings Tupac's intensity to the basketball court as a Duke University player.",
-    specialEffect: "Bandana Pattern",
-    imageUrl: "/lovable-uploads/79a099b9-c77a-491e-9755-ba25419791f5.png",
-    effects: ["Vintage"]
+    id: '5',
+    title: 'Sample Card 5',
+    description: 'A fifth sample card for presentation',
+    imageUrl: '/placeholder.svg',
+    thumbnailUrl: '/placeholder.svg',
+    tags: ['sample', 'presentation'],
+    userId: 'user5',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    effects: [],
+    designMetadata: {
+      cardStyle: {
+        template: 'classic',
+        effect: 'none',
+        borderRadius: '8px',
+        borderColor: '#000000',
+        backgroundColor: '#FFFFFF',
+        shadowColor: 'rgba(0,0,0,0.2)',
+        frameWidth: 2,
+        frameColor: '#000000'
+      },
+      textStyle: {
+        titleColor: '#000000',
+        titleAlignment: 'center',
+        titleWeight: 'bold',
+        descriptionColor: '#333333'
+      },
+      cardMetadata: {
+        category: 'general',
+        series: 'base',
+        cardType: 'standard'
+      },
+      marketMetadata: {
+        isPrintable: false,
+        isForSale: false,
+        includeInCatalog: false,
+        price: 0,
+        currency: 'USD',
+        availableForSale: false,
+        editionSize: 1,
+        editionNumber: 1
+      }
+    }
   },
   {
-    id: "6",
-    name: "Notorious B.I.G.",
-    team: "Brooklyn Nets",
-    jersey: "72",
-    year: "2023",
-    backgroundColor: "#FF0063", // Hot Pink
-    textColor: "white",
-    cardType: "Artist Series",
-    artist: "Marcus L.",
-    set: "Music Legends Series",
-    cardNumber: "ML-005",
-    description: "Brooklyn's finest in his hometown jersey. This fan creation honors Biggie by visualizing him as a player for his hometown Brooklyn Nets.",
-    specialEffect: "Brooklyn Metal",
-    imageUrl: "/lovable-uploads/c381b388-5693-44a6-852b-93af5f0d5217.png",
-    effects: ["Chrome", "Holographic"]
-  }
+    id: '6',
+    title: 'Sample Card 6',
+    description: 'A sixth sample card for showcasing',
+    imageUrl: '/placeholder.svg',
+    thumbnailUrl: '/placeholder.svg',
+    tags: ['sample', 'showcasing'],
+    userId: 'user6',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    effects: [],
+    designMetadata: {
+      cardStyle: {
+        template: 'classic',
+        effect: 'none',
+        borderRadius: '8px',
+        borderColor: '#000000',
+        backgroundColor: '#FFFFFF',
+        shadowColor: 'rgba(0,0,0,0.2)',
+        frameWidth: 2,
+        frameColor: '#000000'
+      },
+      textStyle: {
+        titleColor: '#000000',
+        titleAlignment: 'center',
+        titleWeight: 'bold',
+        descriptionColor: '#333333'
+      },
+      cardMetadata: {
+        category: 'general',
+        series: 'base',
+        cardType: 'standard'
+      },
+      marketMetadata: {
+        isPrintable: false,
+        isForSale: false,
+        includeInCatalog: false,
+        price: 0,
+        currency: 'USD',
+        availableForSale: false,
+        editionSize: 1,
+        editionNumber: 1
+      }
+    }
+  },
 ];
+
+export default sampleCards;

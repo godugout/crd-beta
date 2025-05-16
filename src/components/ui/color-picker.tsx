@@ -8,16 +8,10 @@ export interface ColorPickerProps {
   color: string;
   onChange: (color: string) => void;
   className?: string;
-  id?: string; // Added for ThemeCustomizer
-  label?: string; // Added for ThemeCustomizer
-  colors?: string[]; // Added for CardDesignCustomization
+  id?: string;
+  label?: string;
+  colors?: string[];
 }
-
-const DEFAULT_COLORS = [
-  '#000000', '#FFFFFF', '#FF0000', '#00FF00', '#0000FF',
-  '#FFFF00', '#FF00FF', '#00FFFF', '#FF9900', '#9900FF',
-  '#9999FF', '#99FF99', '#FF9999', '#B8860B', '#800000'
-];
 
 export interface MobileTouchButtonProps {
   children?: React.ReactNode;
@@ -48,6 +42,12 @@ export function ColorPicker({ color, onChange, className, id, label, colors = DE
     setSelectedColor(newColor);
     onChange(newColor);
   };
+
+  const DEFAULT_COLORS = [
+    '#000000', '#FFFFFF', '#FF0000', '#00FF00', '#0000FF',
+    '#FFFF00', '#FF00FF', '#00FFFF', '#FF9900', '#9900FF',
+    '#9999FF', '#99FF99', '#FF9999', '#B8860B', '#800000'
+  ];
 
   return (
     <Popover>
@@ -111,3 +111,6 @@ export function ColorPicker({ color, onChange, className, id, label, colors = DE
     </Popover>
   );
 }
+
+// Export both as default and named export for compatibility
+export default ColorPicker;

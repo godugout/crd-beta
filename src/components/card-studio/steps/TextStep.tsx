@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card } from '@/lib/types/cardTypes';
 import { Label } from '@/components/ui/label';
@@ -7,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { AlignLeft, AlignCenter, AlignRight } from 'lucide-react';
-import ColorPicker from '@/components/ui/color-picker';
+import { ColorPicker } from '@/components/ui/color-picker';
 
 interface TextStepProps {
   cardData: Partial<Card>;

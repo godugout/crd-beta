@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import { Card } from '@/lib/types/cardTypes';
 import { v4 as uuidv4 } from 'uuid';
@@ -17,7 +16,7 @@ const DEFAULT_MARKET_METADATA = {
   editionNumber: 1
 };
 
-// Mock data for development with correct types
+// Ensure the mock data conforms to the Card type
 const initialCards: Card[] = [
   {
     id: '1',
@@ -100,17 +99,22 @@ export const useCardOperations = () => {
     return cards.find(card => card.id === id);
   }, [cards]);
 
-  const addCard = useCallback((card: Omit<CardType, 'id' | 'createdAt' | 'updatedAt'>) => {
+  const addCard = useCallback((cardData: Partial<Card>) => {
     const now = new Date().toISOString();
-    // Ensure card has proper default values
+    // Create a complete card with all required fields
     const newCard: Card = {
-      ...card,
       id: uuidv4(),
+      title: cardData.title || 'Untitled Card', // Ensure required field
+      description: cardData.description || '', // Ensure required field
+      imageUrl: cardData.imageUrl || '/placeholder.svg', // Ensure required field
+      thumbnailUrl: cardData.thumbnailUrl || cardData.imageUrl || '/placeholder.svg', // Ensure required field
+      tags: cardData.tags || [],
+      userId: cardData.userId || 'default-user',
       createdAt: now,
       updatedAt: now,
+      effects: cardData.effects || [],
       designMetadata: {
-        ...(card.designMetadata || {}),
-        cardStyle: card.designMetadata?.cardStyle || {
+        cardStyle: cardData.designMetadata?.cardStyle || {
           template: 'classic',
           effect: 'none',
           borderRadius: '8px',
@@ -119,23 +123,23 @@ export const useCardOperations = () => {
           frameWidth: 2,
           frameColor: '#000000'
         },
-        textStyle: card.designMetadata?.textStyle || {
+        textStyle: cardData.designMetadata?.textStyle || {
           titleColor: '#000000',
           titleAlignment: 'center',
           titleWeight: 'bold',
           descriptionColor: '#333333'
         },
-        cardMetadata: card.designMetadata?.cardMetadata || {
+        cardMetadata: cardData.designMetadata?.cardMetadata || {
           category: 'general',
           series: 'base',
           cardType: 'standard'
         },
         marketMetadata: {
           ...DEFAULT_MARKET_METADATA,
-          ...(card.designMetadata?.marketMetadata || {})
+          ...(cardData.designMetadata?.marketMetadata || {})
         }
       }
-    } as Card;
+    };
 
     setCards(prevCards => [...prevCards, newCard]);
     return newCard;

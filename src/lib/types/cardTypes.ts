@@ -1,4 +1,3 @@
-
 /**
  * Consolidated Card Types for Cardshow (CRD)
  * This file serves as the central source of truth for all card-related types
@@ -153,9 +152,9 @@ export interface CardMetadata {
   serialNumber?: string;
   certification?: string;
   gradeScore?: string;
-  category?: string;      
-  series?: string;        
-  cardType?: string;      
+  category: string;      // Make required
+  series: string;        // Make required
+  cardType: string;      // Make required
   cardStyle?: CardStyle;
   textStyle?: TextStyle;
   effects?: string[];

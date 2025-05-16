@@ -1,123 +1,51 @@
-
-import React, { useState } from 'react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Database } from 'lucide-react';
 import { useCards } from '@/context/CardContext';
-import { useToast } from '@/hooks/use-toast';
-import { createToast } from '@/types/toast';
+import { adaptCardToCardData } from '@/types/card';
+import { sampleCardsData } from '@/data/cardData';
+import { toast } from '@/components/ui/use-toast';
 
 interface SampleCardsButtonProps {
-  variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
+  className?: string;
 }
 
-const SampleCardsButton: React.FC<SampleCardsButtonProps> = ({ variant = 'default' }) => {
-  const [isLoading, setIsLoading] = useState(false);
+const SampleCardsButton: React.FC<SampleCardsButtonProps> = ({ className }) => {
   const { addCard } = useCards();
-  const { toast } = useToast();
 
-  // Since addSampleCards doesn't exist in context, let's implement it here
   const addSampleCards = async () => {
-    // Mock implementation - in a real app this would fetch sample data
-    const sampleCards = [
-      {
-        id: `sample-${Date.now()}-1`,
-        title: 'Sample Basketball Card',
-        description: 'A sample basketball card',
-        imageUrl: 'https://placehold.co/600x400/orange/white?text=Basketball',
-        tags: ['sample', 'basketball'],
-        userId: 'system',
-        effects: [],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        designMetadata: {
-          cardStyle: {
-            template: 'classic',
-            effect: 'none',
-            borderRadius: '8px',
-            borderColor: '#000000',
-            shadowColor: 'rgba(0,0,0,0.2)',
-            frameWidth: 2,
-            frameColor: '#000000'
-          },
-          textStyle: {
-            titleColor: '#000000',
-            titleAlignment: 'center',
-            titleWeight: 'bold',
-            descriptionColor: '#333333'
-          },
-          cardMetadata: {},
-          marketMetadata: {}
-        }
-      },
-      {
-        id: `sample-${Date.now()}-2`,
-        title: 'Sample Baseball Card',
-        description: 'A sample baseball card',
-        imageUrl: 'https://placehold.co/600x400/blue/white?text=Baseball',
-        tags: ['sample', 'baseball'],
-        userId: 'system',
-        effects: [],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        designMetadata: {
-          cardStyle: {
-            template: 'classic',
-            effect: 'none',
-            borderRadius: '8px',
-            borderColor: '#000000',
-            shadowColor: 'rgba(0,0,0,0.2)',
-            frameWidth: 2,
-            frameColor: '#000000'
-          },
-          textStyle: {
-            titleColor: '#000000',
-            titleAlignment: 'center',
-            titleWeight: 'bold',
-            descriptionColor: '#333333'
-          },
-          cardMetadata: {},
-          marketMetadata: {}
-        }
-      }
-    ];
-    
-    // Add the sample cards to the collection
-    for (const card of sampleCards) {
-      await addCard(card);
+    try {
+      sampleCardsData.forEach(async (cardData) => {
+        const adaptedCard = adaptCardToCardData(cardData);
+        await addCard(adaptedCard);
+      });
+      handleSuccess();
+    } catch (error) {
+      console.error("Error adding sample cards:", error);
+      handleError();
     }
-    
-    return sampleCards;
   };
 
-  const handleClick = async () => {
-    try {
-      setIsLoading(true);
-      const cards = await addSampleCards();
-      toast({
-        title: "Sample cards added",
-        description: `${cards.length} sample cards have been added to your collection`,
-        variant: "default" // Changed from "success" to "default"
-      });
-    } catch (error) {
-      console.error("Failed to add sample cards:", error);
-      toast({
-        title: "Failed to add sample cards",
-        description: "An error occurred while adding sample cards",
-        variant: "destructive"
-      });
-    } finally {
-      setIsLoading(false);
-    }
+  const handleSuccess = () => {
+    toast({
+      id: `sample-cards-success-${Date.now()}`,
+      title: 'Sample Cards Added',
+      description: 'Sample cards have been added to your collection.',
+      variant: 'default'
+    });
+  };
+
+  const handleError = () => {
+    toast({
+      id: `sample-cards-error-${Date.now()}`,
+      title: 'Error Adding Cards',
+      description: 'There was a problem adding the sample cards. Please try again.',
+      variant: 'destructive'
+    });
   };
 
   return (
-    <Button
-      variant={variant}
-      onClick={handleClick}
-      disabled={isLoading}
-    >
-      <Database className="mr-2 h-4 w-4" />
-      {isLoading ? "Adding..." : "Add Sample Cards"}
+    <Button className={className} onClick={addSampleCards}>
+      Add Sample Cards
     </Button>
   );
 };

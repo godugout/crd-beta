@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useUserPreferencesContext } from '@/context/UserPreferencesContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -297,11 +296,10 @@ const UserPreferencesDashboard: React.FC = () => {
                         id="default-view"
                         className="border rounded p-2"
                         value={preferences.defaultView}
-                        onChange={(e) => updateLayoutPreference('defaultView', e.target.value)}
+                        onChange={(e) => updateLayoutPreference('panelSizes', e.target.value)}
                       >
-                        <option value="simple">Simple View</option>
-                        <option value="advanced">Advanced View</option>
-                        <option value="expert">Expert View</option>
+                        <option value="grid">Grid</option>
+                        <option value="list">List</option>
                       </select>
                     </div>
                     

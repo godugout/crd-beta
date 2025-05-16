@@ -1,5 +1,4 @@
-
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import { MaterialSimulation } from '@/hooks/card-effects/types';
 import './fabric-materials.css';
 
