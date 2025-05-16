@@ -19,6 +19,9 @@ export interface Collection extends BaseEntity {
   designMetadata?: any;
   cards?: Card[];
   featured?: boolean;         // Added for CollectionGrid component
+  isPublic?: boolean;         // Flag to determine if collection is public
+  tags?: string[];            // Collection tags for filtering and categorization
+  cardIds?: string[];         // For referencing cards without loading full card data
 }
 
 /**
@@ -46,4 +49,6 @@ export interface CollectionDisplayData {
   visibility: 'public' | 'private' | 'team';
   createdAt: string;
   updatedAt: string;
+  tags?: string[];            // Added for consistency
+  isPublic?: boolean;         // Added for consistency
 }

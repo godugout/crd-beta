@@ -12,7 +12,12 @@ export enum ElementCategory {
   FRAMES = 'frames',
   EFFECTS = 'effects',
   BACKGROUNDS = 'backgrounds',
-  USER_GENERATED = 'user-generated'
+  USER_GENERATED = 'user-generated',
+  LOGO = 'logo',
+  OVERLAY = 'overlay',
+  TEXTURE = 'texture',
+  ICON = 'icon',
+  SHAPE = 'shape'
 }
 
 /**
@@ -30,12 +35,18 @@ export interface CardElement extends BaseEntity {
   position?: {
     x: number;
     y: number;
+    z?: number;
   };
   size?: {
     width: number;
     height: number;
+    aspectRatio?: number;
   };
+  rotation?: number;
+  style?: Record<string, any>;
+  assetUrl?: string; // Used in ElementPlacementCanvas
   metadata?: any;
+  attribution?: string; // For giving credit to element creators
 }
 
 /**
@@ -54,11 +65,16 @@ export interface ElementUploadMetadata {
   position?: {
     x: number;
     y: number;
+    z?: number;
   };
   size?: {
     width: number;
     height: number;
+    aspectRatio?: number;
   };
+  rotation?: number;
+  attribution?: string; // Added for attribution requirements
+  metadata?: any;
 }
 
 /**
@@ -75,8 +91,10 @@ export interface ElementPlacement {
   size: {
     width: number;
     height: number;
+    aspectRatio?: number;
   };
   rotation: number;
   opacity: number;
   element?: CardElement;
+  style?: Record<string, any>;
 }
