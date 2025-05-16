@@ -1,6 +1,7 @@
 
 import { Card } from '@/lib/types/cardTypes';
 import { Card as SchemaCard } from '@/lib/schema/types';
+import { CardData } from '@/types/card';
 
 // Create default values for required properties that might be missing
 const DEFAULT_DESIGN_METADATA = {
@@ -29,7 +30,10 @@ const DEFAULT_DESIGN_METADATA = {
     currency: 'USD',
     availableForSale: false,
     editionSize: 0,
-    editionNumber: 0
+    editionNumber: 0,
+    isPrintable: false,
+    isForSale: false,
+    includeInCatalog: false
   }
 };
 
@@ -64,4 +68,25 @@ export const adaptToCard = (schema: Partial<SchemaCard>): Card => {
     effects: schema.effects || [],
     designMetadata: schema.designMetadata || DEFAULT_DESIGN_METADATA
   } as Card;
+};
+
+// Add missing adaptToLegacyCard function
+export const adaptToLegacyCard = (card: Card): CardData => {
+  return {
+    id: card.id,
+    title: card.title,
+    description: card.description || '',
+    imageUrl: card.imageUrl,
+    thumbnailUrl: card.thumbnailUrl || card.imageUrl,
+    tags: card.tags || [],
+    userId: card.userId || '',
+    effects: card.effects || [],
+    createdAt: card.createdAt,
+    updatedAt: card.updatedAt,
+    textColor: card.textColor,
+    player: card.player,
+    team: card.team,
+    year: card.year,
+    designMetadata: card.designMetadata || DEFAULT_DESIGN_METADATA
+  };
 };

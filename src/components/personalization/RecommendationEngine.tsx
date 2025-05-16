@@ -3,8 +3,6 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 
-// Update the button size to a valid value
-// Replace 'xs' with 'sm' which is a valid size
 const RecommendationEngine = () => {
   const selectRecommendation = (id: string) => {
     console.log(`Selected recommendation: ${id}`);

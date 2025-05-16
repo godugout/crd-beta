@@ -1,4 +1,3 @@
-
 /**
  * Consolidated Card Types for Cardshow (CRD)
  * This file serves as the central source of truth for all card-related types
@@ -74,6 +73,7 @@ export interface CardEffect {
   enabled: boolean;
   settings: CardEffectSettings;
   className?: string;
+  category?: string;
 }
 
 /**

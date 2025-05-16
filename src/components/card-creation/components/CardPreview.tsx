@@ -41,7 +41,7 @@ const CardPreview = React.forwardRef<HTMLDivElement, CardPreviewProps>(({
   const borderColor = cardStyle.borderColor || '#000000';
   const titleColor = textStyle.titleColor || '#FFFFFF';
   const titleWeight = textStyle.titleWeight || 'bold';
-  const titleAlignment = (textStyle.titleAlignment as any) || 'center';
+  const titleAlignment = (textStyle.titleAlignment || 'center') as any;
   const descriptionColor = textStyle.descriptionColor || '#DDDDDD';
   
   return (

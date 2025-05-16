@@ -2,132 +2,153 @@
 import { useState, useEffect } from 'react';
 
 interface DeviceCapabilities {
-  isMobile: boolean;
-  isTablet: boolean;
-  isDesktop: boolean;
   browserName: string;
-  operatingSystem: string;
-  hasWebGLSupport: boolean;
-  maxTextureSize: number;
-  devicePixelRatio: number;
+  browserVersion: string;
+  os: string;
+  mobile: boolean;
+  tablet: boolean;
+  desktop: boolean;
+  webGLSupport: boolean;
+  webGLVersion: number;
+  touchSupport: boolean;
   screenWidth: number;
   screenHeight: number;
-  touchSupport: boolean;
-  orientation: 'portrait' | 'landscape';
+  pixelRatio: number;
+  maxTextureSize: number | null;
+  gpuInfo: string | null;
 }
 
-export const useDeviceDetect = (): DeviceCapabilities => {
+export function useDeviceDetect(): DeviceCapabilities {
   const [capabilities, setCapabilities] = useState<DeviceCapabilities>({
-    isMobile: false,
-    isTablet: false,
-    isDesktop: true,
-    browserName: 'unknown',
-    operatingSystem: 'unknown',
-    hasWebGLSupport: false,
-    maxTextureSize: 0,
-    devicePixelRatio: 1,
-    screenWidth: 0,
-    screenHeight: 0,
+    browserName: '',
+    browserVersion: '',
+    os: '',
+    mobile: false,
+    tablet: false,
+    desktop: true,
+    webGLSupport: false,
+    webGLVersion: 0,
     touchSupport: false,
-    orientation: 'landscape'
+    screenWidth: typeof window !== 'undefined' ? window.innerWidth : 0,
+    screenHeight: typeof window !== 'undefined' ? window.innerHeight : 0,
+    pixelRatio: typeof window !== 'undefined' ? window.devicePixelRatio : 1,
+    maxTextureSize: null,
+    gpuInfo: null,
   });
 
   useEffect(() => {
-    // Only run on client
+    // Only run in browser environment
     if (typeof window === 'undefined') return;
+
+    // Detect browser and version
+    const ua = navigator.userAgent;
+    let browserName = 'Unknown';
+    let browserVersion = 'Unknown';
     
-    // Detect browser and OS
-    const userAgent = navigator.userAgent;
-    const browserInfo = detectBrowser(userAgent);
-    const osInfo = detectOS(userAgent);
+    if (ua.indexOf('Chrome') > -1) {
+      browserName = 'Chrome';
+      browserVersion = ua.match(/Chrome\/([0-9.]+)/)![1];
+    } else if (ua.indexOf('Firefox') > -1) {
+      browserName = 'Firefox';
+      browserVersion = ua.match(/Firefox\/([0-9.]+)/)![1];
+    } else if (ua.indexOf('Safari') > -1) {
+      browserName = 'Safari';
+      browserVersion = ua.match(/Version\/([0-9.]+)/)![1];
+    } else if (ua.indexOf('MSIE') > -1 || ua.indexOf('Trident/') > -1) {
+      browserName = 'Internet Explorer';
+      browserVersion = ua.match(/(?:MSIE |rv:)([0-9.]+)/)![1];
+    } else if (ua.indexOf('Edge') > -1) {
+      browserName = 'Edge';
+      browserVersion = ua.match(/Edge\/([0-9.]+)/)![1];
+    }
+    
+    // Detect OS
+    let os = 'Unknown';
+    if (ua.indexOf('Windows') > -1) os = 'Windows';
+    else if (ua.indexOf('Mac') > -1) os = 'macOS';
+    else if (ua.indexOf('Linux') > -1) os = 'Linux';
+    else if (ua.indexOf('Android') > -1) os = 'Android';
+    else if (ua.indexOf('iOS') > -1 || ua.indexOf('iPhone') > -1 || ua.indexOf('iPad') > -1) os = 'iOS';
     
     // Detect device type
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
-    const isTablet = /(iPad|tablet|Nexus 9|Nexus 7)/i.test(userAgent) || 
-                      (window.innerWidth >= 768 && window.innerWidth <= 1024);
-    const isDesktop = !isMobile || (!isTablet && window.innerWidth > 1024);
+    const mobile = /Android|webOS|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
+    const tablet = /iPad|Android(?!.*Mobile)/i.test(ua);
+    const desktop = !mobile && !tablet;
     
-    // Detect touch support
+    // Check for touch support
     const touchSupport = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     
-    // Screen info
-    const screenWidth = window.screen.width;
-    const screenHeight = window.screen.height;
-    const devicePixelRatio = window.devicePixelRatio || 1;
-    const orientation = screenWidth > screenHeight ? 'landscape' : 'portrait';
+    // Check WebGL support and get version
+    let webGLSupport = false;
+    let webGLVersion = 0;
+    let maxTextureSize = null;
+    let gpuInfo = null;
     
-    // WebGL support
-    const webGLInfo = checkWebGLSupport();
+    try {
+      const canvas = document.createElement('canvas');
+      
+      // Try WebGL2 first
+      const gl2 = canvas.getContext('webgl2') as WebGL2RenderingContext | null;
+      if (gl2) {
+        webGLSupport = true;
+        webGLVersion = 2;
+        maxTextureSize = gl2.getParameter(gl2.MAX_TEXTURE_SIZE);
+        const debugInfo = gl2.getExtension('WEBGL_debug_renderer_info');
+        if (debugInfo) {
+          gpuInfo = gl2.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+        }
+      } else {
+        // Fall back to WebGL1
+        const gl = (
+          canvas.getContext('webgl') || 
+          canvas.getContext('experimental-webgl')
+        ) as WebGLRenderingContext | null;
+        
+        if (gl) {
+          webGLSupport = true;
+          webGLVersion = 1;
+          maxTextureSize = gl.getParameter(gl.MAX_TEXTURE_SIZE);
+          const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+          if (debugInfo) {
+            gpuInfo = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+          }
+        }
+      }
+    } catch (e) {
+      console.error('Error detecting WebGL support:', e);
+    }
     
     setCapabilities({
-      isMobile,
-      isTablet,
-      isDesktop,
-      browserName: browserInfo,
-      operatingSystem: osInfo,
-      hasWebGLSupport: webGLInfo.supported,
-      maxTextureSize: webGLInfo.maxTextureSize,
-      devicePixelRatio,
-      screenWidth,
-      screenHeight,
+      browserName,
+      browserVersion,
+      os,
+      mobile,
+      tablet,
+      desktop,
+      webGLSupport,
+      webGLVersion,
       touchSupport,
-      orientation
+      screenWidth: window.innerWidth,
+      screenHeight: window.innerHeight,
+      pixelRatio: window.devicePixelRatio,
+      maxTextureSize,
+      gpuInfo,
     });
     
+    // Update screen size on resize
+    const handleResize = () => {
+      setCapabilities(prev => ({
+        ...prev,
+        screenWidth: window.innerWidth,
+        screenHeight: window.innerHeight,
+      }));
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
   
   return capabilities;
-};
-
-function detectBrowser(userAgent: string): string {
-  if (userAgent.includes('Chrome')) return 'Chrome';
-  if (userAgent.includes('Firefox')) return 'Firefox';
-  if (userAgent.includes('Safari') && !userAgent.includes('Chrome')) return 'Safari';
-  if (userAgent.includes('Edge')) return 'Edge';
-  if (userAgent.includes('MSIE') || userAgent.includes('Trident/')) return 'Internet Explorer';
-  return 'unknown';
-}
-
-function detectOS(userAgent: string): string {
-  if (userAgent.includes('Windows')) return 'Windows';
-  if (userAgent.includes('Mac OS')) return 'macOS';
-  if (userAgent.includes('Linux')) return 'Linux';
-  if (userAgent.includes('Android')) return 'Android';
-  if (userAgent.includes('iOS') || userAgent.includes('iPhone') || userAgent.includes('iPad')) return 'iOS';
-  return 'unknown';
-}
-
-function checkWebGLSupport(): { supported: boolean; maxTextureSize: number } {
-  if (typeof window === 'undefined') {
-    return { supported: false, maxTextureSize: 0 };
-  }
-  
-  try {
-    const canvas = document.createElement('canvas');
-    // Try to get WebGL2 first, then fall back to WebGL
-    let gl: WebGLRenderingContext | WebGL2RenderingContext | null = 
-      canvas.getContext('webgl2') || 
-      canvas.getContext('webgl') || 
-      canvas.getContext('experimental-webgl');
-    
-    if (!gl) {
-      return { supported: false, maxTextureSize: 0 };
-    }
-    
-    // Cast to WebGLRenderingContext to access WebGL methods
-    const webGLContext = gl as WebGLRenderingContext;
-    
-    // Get max texture size
-    const maxTextureSize = webGLContext.getParameter(webGLContext.MAX_TEXTURE_SIZE) || 0;
-    
-    return {
-      supported: true,
-      maxTextureSize
-    };
-  } catch (e) {
-    console.error('Error checking WebGL support:', e);
-    return { supported: false, maxTextureSize: 0 };
-  }
 }
 
 export default useDeviceDetect;

@@ -35,7 +35,10 @@ const DEFAULT_DESIGN_METADATA = {
     currency: 'USD',
     availableForSale: false,
     editionSize: 0,
-    editionNumber: 0
+    editionNumber: 0,
+    isPrintable: false,
+    isForSale: false,
+    includeInCatalog: false
   }
 };
 
@@ -86,7 +89,13 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
           thumbnailUrl: foundCard.thumbnailUrl || foundCard.imageUrl || '/images/card-placeholder.png',
           // Ensure all required fields are present
           description: foundCard.description || '',  // Set default empty string
-          designMetadata: foundCard.designMetadata || DEFAULT_DESIGN_METADATA,
+          designMetadata: foundCard.designMetadata ? {
+            ...foundCard.designMetadata,
+            marketMetadata: {
+              ...DEFAULT_DESIGN_METADATA.marketMetadata,
+              ...(foundCard.designMetadata.marketMetadata || {})
+            }
+          } : DEFAULT_DESIGN_METADATA,
           createdAt: foundCard.createdAt || new Date().toISOString(),
           updatedAt: foundCard.updatedAt || new Date().toISOString(),
           userId: foundCard.userId || 'anonymous',

@@ -2274,9 +2274,21 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      execute_sql: {
+        Args: { query_text: string; query_params?: Json }
+        Returns: Json
+      }
       get_app_id: {
         Args: { p_app_key: string }
         Returns: string
+      }
+      get_column_exists: {
+        Args: { p_table_name: string; p_column_name: string }
+        Returns: boolean
+      }
+      get_table_exists: {
+        Args: { table_name: string }
+        Returns: boolean
       }
       get_user_team_role: {
         Args: { team_id: string; user_id: string }

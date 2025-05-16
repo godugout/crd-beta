@@ -1,7 +1,12 @@
 
 import { useToast } from '@/hooks/use-toast';
-import { ToastOptions } from '@/lib/adapters/toastAdapter';
-import { createToast } from '@/types/toast';
+
+interface ToastOptions {
+  title: string;
+  description?: string;
+  variant?: "default" | "destructive";
+  duration?: number;
+}
 
 /**
  * Hook to use the standardized toast function
@@ -11,10 +16,11 @@ export default function useShowToast() {
   const { toast } = useToast();
   
   return (options: ToastOptions) => {
-    toast(createToast({
+    toast({
+      id: Math.random().toString(36).substring(2, 9),
       title: options.title,
       description: options.description,
-      variant: options.variant
-    }));
+      variant: options.variant || "default"
+    });
   };
 }

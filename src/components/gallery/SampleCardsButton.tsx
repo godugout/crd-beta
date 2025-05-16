@@ -93,18 +93,18 @@ const SampleCardsButton: React.FC<SampleCardsButtonProps> = ({ variant = 'defaul
     try {
       setIsLoading(true);
       const cards = await addSampleCards();
-      toast(createToast({
+      toast({
         title: "Sample cards added",
         description: `${cards.length} sample cards have been added to your collection`,
-        variant: "success"
-      }));
+        variant: "default" // Changed from "success" to "default"
+      });
     } catch (error) {
       console.error("Failed to add sample cards:", error);
-      toast(createToast({
+      toast({
         title: "Failed to add sample cards",
         description: "An error occurred while adding sample cards",
         variant: "destructive"
-      }));
+      });
     } finally {
       setIsLoading(false);
     }

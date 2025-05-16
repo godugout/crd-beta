@@ -37,6 +37,21 @@ export interface CardData {
       titleWeight?: string;
       descriptionColor?: string;
     };
+    cardMetadata?: {
+      category?: string;
+      series?: string;
+      cardType?: string;
+    };
+    marketMetadata?: {
+      price?: number;
+      currency?: string;
+      availableForSale?: boolean;
+      editionSize?: number;
+      editionNumber?: number;
+      isPrintable?: boolean;
+      isForSale?: boolean;
+      includeInCatalog?: boolean;
+    };
   };
   [key: string]: any;
 }
