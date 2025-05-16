@@ -11,7 +11,7 @@ export interface CardElement {
   description?: string;
   type: ElementType;
   category: ElementCategory;
-  url: string;
+  url?: string;  // Make optional if assetUrl is provided
   thumbnailUrl?: string;
   assetUrl?: string;
   tags: string[];
@@ -55,4 +55,12 @@ export interface ElementLibrary {
   elements: Record<string, CardElement[]>;
   featured: string[];
   recentlyUsed: string[];
+}
+
+// Update ElementType to include 'decoration'
+export type ElementTypeMap = Record<ElementType, string[]>;
+
+// Create a function to validate if a type is a valid ElementType
+export function isValidElementType(type: string): type is ElementType {
+  return ['sticker', 'logo', 'frame', 'badge', 'overlay', 'decoration'].includes(type);
 }

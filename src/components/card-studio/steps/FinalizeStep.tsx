@@ -1,6 +1,5 @@
-
 import React, { useState } from 'react';
-import { Card, CardMetadata, MarketMetadata } from '@/lib/types/cardTypes';
+import { Card, CardMetadata, MarketMetadata, DesignMetadata } from '@/lib/types/cardTypes';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -25,6 +24,33 @@ const defaultMarketMetadata: MarketMetadata = {
   isPrintable: false,
   isForSale: false,
   includeInCatalog: false
+};
+
+// Default text style with required fields
+const defaultTextStyle = {
+  titleColor: '#000000',
+  titleAlignment: 'center',
+  titleWeight: 'bold',
+  descriptionColor: '#333333'
+};
+
+// Default card style with required fields
+const defaultCardStyle = {
+  template: 'standard',
+  effect: 'none',
+  borderRadius: '8px',
+  borderColor: '#000000',
+  shadowColor: 'rgba(0,0,0,0.1)',
+  frameWidth: 2,
+  frameColor: '#000000'
+};
+
+// Create a default design metadata object
+const defaultDesignMetadata: DesignMetadata = {
+  cardStyle: defaultCardStyle,
+  textStyle: defaultTextStyle,
+  cardMetadata: defaultCardMetadata,
+  marketMetadata: defaultMarketMetadata
 };
 
 const FinalizeStep: React.FC<FinalizeStepProps> = ({ cardData, onUpdate }) => {
@@ -63,12 +89,12 @@ const FinalizeStep: React.FC<FinalizeStepProps> = ({ cardData, onUpdate }) => {
   };
 
   const updateMarketMetadata = (updates: Partial<MarketMetadata>) => {
-    const currentMetadata = cardData.designMetadata || {};
-    const currentMarketMetadata = currentMetadata.marketMetadata || defaultMarketMetadata;
+    const currentDesignMetadata = cardData.designMetadata || {...defaultDesignMetadata};
+    const currentMarketMetadata = currentDesignMetadata.marketMetadata || defaultMarketMetadata;
     
     onUpdate({
       designMetadata: {
-        ...currentMetadata,
+        ...currentDesignMetadata,
         marketMetadata: {
           ...currentMarketMetadata,
           ...updates
@@ -78,12 +104,12 @@ const FinalizeStep: React.FC<FinalizeStepProps> = ({ cardData, onUpdate }) => {
   };
   
   const updateCardMetadata = (updates: Partial<CardMetadata>) => {
-    const currentMetadata = cardData.designMetadata || {};
-    const currentCardMetadata = currentMetadata.cardMetadata || defaultCardMetadata;
+    const currentDesignMetadata = cardData.designMetadata || {...defaultDesignMetadata};
+    const currentCardMetadata = currentDesignMetadata.cardMetadata || defaultCardMetadata;
     
     onUpdate({
       designMetadata: {
-        ...currentMetadata,
+        ...currentDesignMetadata,
         cardMetadata: {
           ...currentCardMetadata,
           ...updates

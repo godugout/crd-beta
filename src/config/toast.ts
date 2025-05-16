@@ -48,6 +48,8 @@ export const toastStyles = cva(
           "warning group border-yellow-600 bg-yellow-500 text-slate-50",
         info:
           "info group border-blue-600 bg-blue-600 text-slate-50",
+        error:
+          "error group border-red-600 bg-red-600 text-slate-50",
       },
     },
     defaultVariants: {

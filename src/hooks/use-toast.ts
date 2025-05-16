@@ -3,7 +3,7 @@
 import * as React from "react"
 
 import { type ToastActionElement, type ToastProps } from "@/components/ui/toast"
-import { type ToastOptions } from "@/types/toast"
+import type { Toast } from "@/types/toast"
 
 const TOAST_LIMIT = 5
 const TOAST_REMOVE_DELAY = 1000
@@ -142,10 +142,9 @@ function dispatch(action: Action) {
   })
 }
 
-type Toast = Omit<ToasterToast, "id">
-
-function toast({ ...props }: Toast) {
-  const id = genId()
+function toast(props: Toast) {
+  const id = props.id || genId()
+  const open = props.open !== undefined ? props.open : true
 
   const update = (props: ToasterToast) =>
     dispatch({
@@ -159,7 +158,7 @@ function toast({ ...props }: Toast) {
     toast: {
       ...props,
       id,
-      open: true,
+      open,
       onOpenChange: (open: boolean) => {
         if (!open) dismiss()
       },

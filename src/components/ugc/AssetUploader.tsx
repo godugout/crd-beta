@@ -115,11 +115,12 @@ const AssetUploader: React.FC<AssetUploaderProps> = ({ onUploadComplete, classNa
       
       // Check file formats based on asset type
       const allowedFormats: Record<ElementType, string[]> = {
-        'sticker': ['png', 'gif', 'webp', 'svg'],
-        'logo': ['png', 'svg', 'webp'],
-        'frame': ['png', 'svg'],
-        'badge': ['png', 'svg'],
-        'overlay': ['png', 'webp', 'svg']
+        'sticker': ['image/png', 'image/jpeg', 'image/svg+xml', 'image/webp'],
+        'logo': ['image/png', 'image/svg+xml', 'image/webp'],
+        'frame': ['image/png', 'image/svg+xml', 'image/webp'],
+        'badge': ['image/png', 'image/svg+xml', 'image/webp'],
+        'overlay': ['image/png', 'image/svg+xml'],
+        'decoration': ['image/png', 'image/svg+xml', 'image/webp']
       };
       
       if (!allowedFormats[assetType].includes(fileExt)) {

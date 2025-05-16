@@ -1,4 +1,3 @@
-
 /**
  * Consolidated Card Types for Cardshow (CRD)
  * This file serves as the central source of truth for all card-related types
@@ -6,7 +5,6 @@
 
 import { BaseEntity, JsonValue } from './index';
 import { Reaction, Comment } from './interaction';
-import { User } from './user';
 
 /**
  * Fabric Swatch definition for card memorabilia
@@ -41,12 +39,12 @@ export interface CardStyle {
   template: string;      // Required
   effect: string;        // Required
   borderRadius: string;  // Required
-  borderWidth?: number;
   borderColor: string;   // Required
-  backgroundColor?: string; // Added for compatibility
+  backgroundColor?: string; // Added this property
   shadowColor: string;   // Required
   frameWidth: number;    // Required
   frameColor: string;    // Required
+  borderWidth?: number;
   [key: string]: JsonValue | undefined;
 }
 

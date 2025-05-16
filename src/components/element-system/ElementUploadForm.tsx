@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -79,6 +78,7 @@ const ElementUploadForm: React.FC<ElementUploadFormProps> = ({
       // Create the element in the library
       const element = elementLibrary.createElement(elementType, {
         name,
+        url: uploadResult.url, // Add the required url property
         assetUrl: processingResult.processedUrl || uploadResult.url,
         thumbnailUrl: processingResult.thumbnailUrl,
         description,
