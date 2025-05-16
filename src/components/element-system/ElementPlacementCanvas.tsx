@@ -69,7 +69,10 @@ const ElementPlacementCanvas: React.FC<ElementPlacementCanvasProps> = ({
     if ((event.target as HTMLElement).classList.contains('resize-handle')) {
       setIsResizing(true);
       setResizeStartPos({ x: mouseX, y: mouseY });
-      setResizeStartSize({ width: element.size.width, height: element.size.height });
+      setResizeStartSize({ 
+        width: element.size ? element.size.width : 100, 
+        height: element.size ? element.size.height : 100 
+      });
       return;
     }
     
@@ -82,7 +85,7 @@ const ElementPlacementCanvas: React.FC<ElementPlacementCanvasProps> = ({
       const elementCenterY = element.position.y;
       const startAngle = Math.atan2(mouseY - elementCenterY, mouseX - elementCenterX);
       
-      setRotateStartAngle(startAngle - (element.position.rotation * Math.PI / 180));
+      setRotateStartAngle(startAngle - ((element.position.rotation || 0) * Math.PI / 180));
       return;
     }
     
@@ -118,7 +121,7 @@ const ElementPlacementCanvas: React.FC<ElementPlacementCanvasProps> = ({
     }
     
     // Handle resizing
-    else if (isResizing) {
+    else if (isResizing && selectedElement.size) {
       const deltaX = mouseX - resizeStartPos.x;
       const deltaY = mouseY - resizeStartPos.y;
       
@@ -126,7 +129,7 @@ const ElementPlacementCanvas: React.FC<ElementPlacementCanvasProps> = ({
       let newWidth = resizeStartSize.width + deltaX;
       let newHeight = resizeStartSize.height + deltaY;
       
-      if (event.shiftKey && selectedElement.size.aspectRatio > 0) {
+      if (event.shiftKey && selectedElement.size.aspectRatio && selectedElement.size.aspectRatio > 0) {
         // Maintain aspect ratio
         if (Math.abs(deltaX) > Math.abs(deltaY)) {
           newHeight = newWidth / selectedElement.size.aspectRatio;
@@ -240,11 +243,11 @@ const ElementPlacementCanvas: React.FC<ElementPlacementCanvasProps> = ({
         position: 'absolute',
         left: `${element.position.x}px`,
         top: `${element.position.y}px`,
-        width: `${element.size.width}px`,
-        height: `${element.size.height}px`,
-        transform: `translate(-50%, -50%) rotate(${element.position.rotation}deg)`,
+        width: `${element.size ? element.size.width : 100}px`,
+        height: `${element.size ? element.size.height : 100}px`,
+        transform: `translate(-50%, -50%) rotate(${element.position.rotation || 0}deg)`,
         opacity: element.style?.opacity ?? 1,
-        zIndex: element.position.z,
+        zIndex: element.position.z || 0,
         cursor: isDragging ? 'grabbing' : 'grab',
         border: isSelected ? '2px solid #3b82f6' : 'none',
         boxShadow: isSelected ? '0 0 0 1px rgba(59, 130, 246, 0.5)' : 'none'
@@ -258,7 +261,7 @@ const ElementPlacementCanvas: React.FC<ElementPlacementCanvasProps> = ({
         case 'badge':
           content = (
             <img 
-              src={element.assetUrl} 
+              src={element.assetUrl || element.url} 
               alt={element.name}
               style={{ width: '100%', height: '100%', objectFit: 'contain' }}
               draggable={false}
@@ -270,7 +273,7 @@ const ElementPlacementCanvas: React.FC<ElementPlacementCanvasProps> = ({
           // For frames, we can have different styles based on frameType
           content = (
             <img 
-              src={element.assetUrl} 
+              src={element.assetUrl || element.url} 
               alt={element.name}
               style={{ 
                 width: '100%', 
@@ -287,7 +290,7 @@ const ElementPlacementCanvas: React.FC<ElementPlacementCanvasProps> = ({
           // For overlays, apply the blend mode
           content = (
             <img 
-              src={element.assetUrl} 
+              src={element.assetUrl || element.url} 
               alt={element.name}
               style={{ 
                 width: '100%', 
@@ -300,6 +303,13 @@ const ElementPlacementCanvas: React.FC<ElementPlacementCanvasProps> = ({
             />
           );
           break;
+          
+        default:
+          content = (
+            <div className="w-full h-full flex items-center justify-center bg-gray-200">
+              {element.name}
+            </div>
+          );
       }
       
       return (

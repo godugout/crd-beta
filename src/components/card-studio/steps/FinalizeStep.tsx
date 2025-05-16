@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card } from '@/lib/types/cardTypes';
 import { Button } from '@/components/ui/button';
@@ -14,16 +13,24 @@ interface FinalizeStepProps {
   onUpdate: (updates: Partial<Card>) => void;
 }
 
+const DEFAULT_MARKET_METADATA = {
+  isPrintable: false,
+  isForSale: false,
+  includeInCatalog: false,
+  price: 0,
+  currency: 'USD',
+  availableForSale: false,
+  editionSize: 1,
+  editionNumber: 1,
+};
+
 const FinalizeStep: React.FC<FinalizeStepProps> = ({ cardData, onUpdate }) => {
   const [tagInput, setTagInput] = useState<string>('');
   
   // Metadata defaults with fallbacks
-  const marketMetadata = cardData.designMetadata?.marketMetadata || {
-    price: 0,
-    currency: 'USD',
-    availableForSale: false,
-    editionSize: 1,
-    editionNumber: 1,
+  const marketMetadata = {
+    ...DEFAULT_MARKET_METADATA,
+    ...(cardData.designMetadata?.marketMetadata || {})
   };
   
   const cardMetadata = cardData.designMetadata?.cardMetadata || {
@@ -87,6 +94,17 @@ const FinalizeStep: React.FC<FinalizeStepProps> = ({ cardData, onUpdate }) => {
         }
       }
     });
+  };
+
+  // Ensure availability flags are properly set
+  const handleAvailabilityChange = (checked: boolean) => {
+    handleMarketMetadataChange('availableForSale', checked);
+    
+    // Also update the required fields for marketplace
+    if (checked) {
+      handleMarketMetadataChange('isForSale', true);
+      handleMarketMetadataChange('includeInCatalog', true);
+    }
   };
 
   return (
@@ -187,9 +205,7 @@ const FinalizeStep: React.FC<FinalizeStepProps> = ({ cardData, onUpdate }) => {
           <Switch
             id="available-for-sale"
             checked={!!marketMetadata.availableForSale}
-            onCheckedChange={(checked) => 
-              handleMarketMetadataChange('availableForSale', checked)
-            }
+            onCheckedChange={handleAvailabilityChange}
           />
           <Label htmlFor="available-for-sale">Available for sale</Label>
         </div>
@@ -249,6 +265,33 @@ const FinalizeStep: React.FC<FinalizeStepProps> = ({ cardData, onUpdate }) => {
               }}
               className="w-full"
             />
+          </div>
+        </div>
+        
+        {/* Add additional fields for required market metadata */}
+        <div className="col-span-2 space-y-2">
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="include-in-catalog"
+              checked={marketMetadata.includeInCatalog}
+              onCheckedChange={(checked) => 
+                handleMarketMetadataChange('includeInCatalog', checked)
+              }
+            />
+            <Label htmlFor="include-in-catalog">Include in catalog</Label>
+          </div>
+        </div>
+        
+        <div className="col-span-2 space-y-2">
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="is-printable"
+              checked={marketMetadata.isPrintable}
+              onCheckedChange={(checked) => 
+                handleMarketMetadataChange('isPrintable', checked)
+              }
+            />
+            <Label htmlFor="is-printable">Available for printing</Label>
           </div>
         </div>
       </div>

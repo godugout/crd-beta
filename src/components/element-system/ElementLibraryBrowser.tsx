@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
@@ -23,6 +22,23 @@ interface ElementLibraryBrowserProps {
   filterTypes?: ElementType[];
 }
 
+// Define category type more specifically
+const ELEMENT_CATEGORIES = [
+  'all', 
+  'sports', 
+  'entertainment', 
+  'achievement', 
+  'decorative', 
+  'seasonal', 
+  'holiday', 
+  'teams', 
+  'brands', 
+  'custom', 
+  'other'
+] as const;
+
+type ElementCategoryType = typeof ELEMENT_CATEGORIES[number];
+
 const ElementLibraryBrowser: React.FC<ElementLibraryBrowserProps> = ({
   onElementSelect,
   selectedElementId,
@@ -31,7 +47,7 @@ const ElementLibraryBrowser: React.FC<ElementLibraryBrowserProps> = ({
   const [elements, setElements] = useState<CardElement[]>([]);
   const [activeTab, setActiveTab] = useState<ElementType | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState<ElementCategory | 'all'>('all');
+  const [categoryFilter, setCategoryFilter] = useState<ElementCategoryType>('all');
   const [officialFilter, setOfficialFilter] = useState<'all' | 'official' | 'community'>('all');
   
   // Load elements on component mount
@@ -101,7 +117,7 @@ const ElementLibraryBrowser: React.FC<ElementLibraryBrowserProps> = ({
   ];
   
   // Category options
-  const categoryOptions: { value: ElementCategory | 'all'; label: string }[] = [
+  const categoryOptions = [
     { value: 'all', label: 'All Categories' },
     { value: 'sports', label: 'Sports' },
     { value: 'entertainment', label: 'Entertainment' },
@@ -146,7 +162,7 @@ const ElementLibraryBrowser: React.FC<ElementLibraryBrowserProps> = ({
           
           <Select
             value={categoryFilter}
-            onValueChange={(value) => setCategoryFilter(value as ElementCategory | 'all')}
+            onValueChange={(value) => setCategoryFilter(value as ElementCategoryType)}
           >
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Category" />
@@ -243,7 +259,7 @@ const ElementLibraryBrowser: React.FC<ElementLibraryBrowserProps> = ({
                 tags: ['star', 'sample', 'decoration'],
                 category: 'decorative',
                 isOfficial: true,
-                position: { x: 0, y: 0, z: 0, rotation: 0 },
+                position: { x: 0, y: 0 },
                 size: { width: 100, height: 100, scale: 1, aspectRatio: 1, preserveAspectRatio: true },
                 style: { opacity: 1 }
               });
@@ -256,7 +272,7 @@ const ElementLibraryBrowser: React.FC<ElementLibraryBrowserProps> = ({
                 tags: ['team', 'logo', 'sports'],
                 category: 'teams',
                 isOfficial: true,
-                position: { x: 0, y: 0, z: 0, rotation: 0 },
+                position: { x: 0, y: 0 },
                 size: { width: 120, height: 120, scale: 1, aspectRatio: 1, preserveAspectRatio: true },
                 style: { opacity: 1 }
               });
@@ -269,7 +285,7 @@ const ElementLibraryBrowser: React.FC<ElementLibraryBrowserProps> = ({
                 tags: ['frame', 'gold', 'decoration'],
                 category: 'decorative',
                 isOfficial: true,
-                position: { x: 0, y: 0, z: 0, rotation: 0 },
+                position: { x: 0, y: 0 },
                 size: { width: 300, height: 400, scale: 1, aspectRatio: 0.75, preserveAspectRatio: true },
                 style: { opacity: 1 }
               });

@@ -32,8 +32,8 @@ const CardPreview = React.forwardRef<HTMLDivElement, CardPreviewProps>(({
   
   // Ensure we have default values for required properties with proper type safety
   const designMetadata = card.designMetadata || {};
-  const cardStyle = designMetadata.cardStyle || {};
-  const textStyle = designMetadata.textStyle || {};
+  const cardStyle = designMetadata?.cardStyle || {}; // Use optional chaining
+  const textStyle = designMetadata?.textStyle || {}; // Use optional chaining
   
   // Extract properties with defaults
   const backgroundColor = cardStyle.backgroundColor || '#FFFFFF';

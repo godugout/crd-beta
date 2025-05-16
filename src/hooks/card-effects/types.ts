@@ -4,7 +4,9 @@ export interface CardEffectSettings {
   speed?: number;
   pattern?: string;
   color?: string;
+  colorScheme?: string[] | string;
   animationEnabled?: boolean;
+  [key: string]: any; // Allow for additional properties as needed
 }
 
 export interface BaseCardEffect {
@@ -41,6 +43,9 @@ export interface CardEffectDefinition {
   premium: boolean;
   enabled: boolean;
   iconUrl?: string;
+  thumbnail?: string;
+  cssClass?: string;
+  supportedCardTypes?: string[];
   renderer: (element: HTMLElement, settings: CardEffectSettings) => void;
 }
 

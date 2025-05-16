@@ -8,6 +8,9 @@ interface DeviceCapabilities {
   mobile: boolean;
   tablet: boolean;
   desktop: boolean;
+  isMobile: boolean;   // Added for convenience
+  isTablet: boolean;   // Added for convenience  
+  isDesktop: boolean;  // Added for convenience
   webGLSupport: boolean;
   webGLVersion: number;
   touchSupport: boolean;
@@ -26,6 +29,9 @@ export function useDeviceDetect(): DeviceCapabilities {
     mobile: false,
     tablet: false,
     desktop: true,
+    isMobile: false,   // Added for convenience
+    isTablet: false,   // Added for convenience
+    isDesktop: true,   // Added for convenience
     webGLSupport: false,
     webGLVersion: 0,
     touchSupport: false,
@@ -125,6 +131,9 @@ export function useDeviceDetect(): DeviceCapabilities {
       mobile,
       tablet,
       desktop,
+      isMobile: mobile,
+      isTablet: tablet,
+      isDesktop: desktop,
       webGLSupport,
       webGLVersion,
       touchSupport,

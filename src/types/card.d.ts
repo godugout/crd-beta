@@ -1,11 +1,13 @@
 
 // Type definitions for card data
+import { MarketMetadata, CardStyle, TextStyle } from '@/lib/types/cardTypes';
+
 export interface CardData {
   id: string;
   title: string;
   description: string;
   imageUrl: string;
-  thumbnailUrl: string; // Making this required for consistency
+  thumbnailUrl: string; 
   player?: string;
   team?: string;
   year?: string;
@@ -16,42 +18,14 @@ export interface CardData {
   effects: string[];
   textColor?: string;  // Added for backward compatibility
   designMetadata?: {
-    cardStyle?: {
-      template?: string;
-      effect?: string;
-      borderRadius?: string;
-      borderWidth?: number;
-      borderColor?: string;
-      backgroundColor?: string;
-      shadowColor?: string;
-      frameWidth?: number;
-      frameColor?: string;
-    };
-    textStyle?: {
-      fontFamily?: string;
-      fontSize?: string;
-      fontWeight?: string;
-      color?: string;
-      titleColor?: string;
-      titleAlignment?: string;
-      titleWeight?: string;
-      descriptionColor?: string;
-    };
+    cardStyle?: CardStyle;
+    textStyle?: TextStyle;
     cardMetadata?: {
       category?: string;
       series?: string;
       cardType?: string;
     };
-    marketMetadata?: {
-      price?: number;
-      currency?: string;
-      availableForSale?: boolean;
-      editionSize?: number;
-      editionNumber?: number;
-      isPrintable?: boolean;
-      isForSale?: boolean;
-      includeInCatalog?: boolean;
-    };
+    marketMetadata?: MarketMetadata;
   };
   [key: string]: any;
 }

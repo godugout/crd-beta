@@ -2,14 +2,18 @@
 /**
  * Definition for card elements like stickers, logos, etc.
  */
+export type ElementType = 'sticker' | 'logo' | 'frame' | 'badge' | 'overlay' | 'decoration';
+export type ElementCategory = string;
+
 export interface CardElement {
   id: string;
   name: string;
   description?: string;
-  type: 'sticker' | 'logo' | 'frame' | 'badge' | 'overlay' | 'decoration';
-  category: string;
+  type: ElementType;
+  category: ElementCategory;
   url: string;
   thumbnailUrl?: string;
+  assetUrl?: string;
   tags: string[];
   isOfficial?: boolean;
   isPremium?: boolean;
@@ -20,8 +24,20 @@ export interface CardElement {
   width?: number;
   height?: number;
   scale?: number;
-  rotation?: number;
-  position?: { x: number; y: number };
+  position: { 
+    x: number; 
+    y: number;
+    z?: number; 
+    rotation?: number;
+  };
+  size: {
+    width: number;
+    height: number;
+    scale?: number;
+    aspectRatio?: number;
+    preserveAspectRatio?: boolean;
+  };
+  style?: Record<string, any>;
   metadata?: Record<string, any>;
 }
 

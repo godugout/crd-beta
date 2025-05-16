@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card } from '@/lib/types/cardTypes';
 import { Label } from '@/components/ui/label';
@@ -49,6 +50,17 @@ const DEFAULT_CARD_STYLE = {
   frameColor: '#000000',
 };
 
+const DEFAULT_MARKET_METADATA = {
+  isPrintable: false,
+  isForSale: false,
+  includeInCatalog: false,
+  price: 0,
+  currency: 'USD',
+  availableForSale: false,
+  editionSize: 1,
+  editionNumber: 1,
+};
+
 const DesignStep: React.FC<DesignStepProps> = ({ cardData, onUpdate }) => {
   // Ensure we have default design metadata
   const designMetadata = cardData.designMetadata || {
@@ -64,13 +76,7 @@ const DesignStep: React.FC<DesignStepProps> = ({ cardData, onUpdate }) => {
       series: 'base',
       cardType: 'standard',
     },
-    marketMetadata: {
-      price: 0,
-      currency: 'USD',
-      availableForSale: false,
-      editionSize: 1,
-      editionNumber: 1,
-    }
+    marketMetadata: DEFAULT_MARKET_METADATA
   };
 
   // Ensure cardStyle is never undefined
@@ -84,6 +90,11 @@ const DesignStep: React.FC<DesignStepProps> = ({ cardData, onUpdate }) => {
         cardStyle: {
           ...cardStyle,
           [property]: value
+        },
+        // Ensure required market metadata fields are always present
+        marketMetadata: {
+          ...DEFAULT_MARKET_METADATA,
+          ...(designMetadata.marketMetadata || {})
         }
       }
     });
