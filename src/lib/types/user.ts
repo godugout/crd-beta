@@ -1,4 +1,3 @@
-
 import { Card } from './cardTypes';
 import { Team, TeamMember } from './teamTypes';
 
@@ -31,7 +30,8 @@ export enum UserRole {
   ADMIN = 'admin',
   MANAGER = 'manager',
   USER = 'user',
-  GUEST = 'guest'
+  GUEST = 'guest',
+  VIEWER = 'viewer'  // Add VIEWER role for backward compatibility
 }
 
 /**
@@ -44,6 +44,9 @@ export interface Permission {
   resource: string;
   action: 'create' | 'read' | 'update' | 'delete' | 'all';
 }
+
+// Add UserPermission type alias for backward compatibility
+export type UserPermission = string;
 
 /**
  * User profile for public display

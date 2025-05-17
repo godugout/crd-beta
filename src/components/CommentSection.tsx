@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/auth';
 import { Button } from '@/components/ui/button';
@@ -94,8 +95,10 @@ const CommentSection: React.FC<CommentSectionProps> = ({ cardId, collectionId, t
     if (!user || !newComment.trim()) return;
     
     try {
+      // Support both content and text fields
       const commentData = {
         content: newComment.trim(),
+        text: newComment.trim(),
         userId: user.id,
         authorId: user.id, // Using authorId for compatibility with different APIs
         cardId,
@@ -213,7 +216,8 @@ const CommentSection: React.FC<CommentSectionProps> = ({ cardId, collectionId, t
   
   const startEditing = (comment: Comment) => {
     setEditingId(comment.id);
-    setEditText(comment.content);
+    // Support both content and text properties
+    setEditText(comment.content || comment.text || '');
   };
   
   const cancelEditing = () => {
@@ -240,6 +244,11 @@ const CommentSection: React.FC<CommentSectionProps> = ({ cardId, collectionId, t
       if (commentUser.displayName) return commentUser.displayName.charAt(0);
       if (commentUser.name) return commentUser.name.charAt(0);
       return commentUser.email?.charAt(0) || '?';
+    };
+
+    // Helper function to get comment content
+    const getCommentContent = (comment: Comment) => {
+      return comment.content || comment.text || '';
     };
     
     return (

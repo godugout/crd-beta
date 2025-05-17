@@ -6,12 +6,13 @@ import { User } from './user';
  */
 export interface Comment {
   id: string;
-  text: string;
+  text?: string;
   content?: string; // Add content field for adaptComment
   cardId?: string;
   collectionId?: string;
   teamId?: string;
   userId: string;
+  authorId?: string; // Add authorId for backward compatibility
   parentId?: string;
   createdAt: string;
   updatedAt: string;
@@ -29,6 +30,7 @@ export interface Reaction {
   commentId?: string;
   type: 'like' | 'love' | 'wow' | 'haha' | 'sad' | 'angry';
   createdAt: string;
+  updatedAt?: string; // Add updatedAt field
   user?: User;
   targetType: 'card' | 'collection' | 'comment';
   targetId: string;

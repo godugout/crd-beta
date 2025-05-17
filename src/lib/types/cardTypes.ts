@@ -1,4 +1,3 @@
-
 /**
  * Card market metadata interface
  */
@@ -96,6 +95,10 @@ export interface FabricSwatch {
   materialType?: 'fabric' | 'leather' | 'plastic' | 'metal' | 'paper';
   roughness?: number;
   metalness?: number;
+  // Additional properties needed by CardBack component
+  year?: string;
+  team?: string;
+  position?: string;
 }
 
 /**

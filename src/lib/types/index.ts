@@ -28,7 +28,7 @@ export * from './ugcTypes';
 
 // Export type aliases for backward compatibility
 export type { Card, CardLayer, CardStyle, TextStyle, CardMetadata, FabricSwatch } from './cardTypes';
-export type { User } from './user';
+export type { User, UserPermission } from './user';
 export type { Comment, Reaction } from './interaction';
 export type { Collection, Deck } from './collection';
 

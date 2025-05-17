@@ -1,4 +1,3 @@
-
 import { User } from './user';
 
 /**
@@ -16,6 +15,15 @@ export interface Team {
   primaryColor?: string;
   secondaryColor?: string;
   tags?: string[];
+  // Extended fields needed by code in other places
+  visibility?: 'public' | 'private' | 'team';
+  banner_url?: string;
+  bannerUrl?: string;
+  website?: string;
+  email?: string;
+  status?: string;
+  specialties?: string[];
+  settings?: Record<string, any>;
 }
 
 /**
@@ -29,6 +37,7 @@ export interface TeamMember {
   joinedAt: string;
   user?: User;
   email?: string;
+  avatarUrl?: string; // Add avatarUrl property for team members
 }
 
 /**
@@ -69,4 +78,12 @@ export interface TeamSettings {
     newContent: boolean;
     contentUpdates: boolean;
   };
+}
+
+// Add UserRole.VIEWER for backward compatibility
+export enum TeamRole {
+  OWNER = 'owner',
+  ADMIN = 'admin',
+  MEMBER = 'member',
+  VIEWER = 'viewer'
 }
