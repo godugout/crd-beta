@@ -1,14 +1,4 @@
 
-import { useContext } from 'react';
-import { AuthContext } from './AuthContext';
-import { AuthContextType } from './types';
-
-export function useAuth(): AuthContextType {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-};
-
-export default useAuth;
+// Re-export the useAuth from AuthProvider to maintain compatibility
+export { useAuth } from './AuthProvider';
+export default { useAuth: () => import('./AuthProvider').then(m => m.useAuth) };

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/context/auth';
 
 interface AuthCheckProps {
   children: React.ReactNode;
@@ -20,7 +20,7 @@ export const AuthCheck: React.FC<AuthCheckProps> = ({
     const auth = useAuth();
     
     // Still show fallback if auth is loading
-    if (auth.isLoading || auth.loading) {
+    if (auth.loading) {
       return <>{fallback}</>;
     }
     

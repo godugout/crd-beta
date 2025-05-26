@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { AuthContextType, AuthState, AuthUser, AuthSession } from './types';
 
@@ -158,4 +157,6 @@ export const useAuth = (): AuthContextType => {
   return context;
 };
 
+// Export both as named exports
+export { AuthProvider };
 export default AuthProvider;

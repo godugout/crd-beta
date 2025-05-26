@@ -59,4 +59,6 @@ const CardBack: React.FC<CardBackProps> = ({ card, fabricSwatches }) => {
   );
 };
 
+// Export as both named and default
+export { CardBack };
 export default CardBack;
