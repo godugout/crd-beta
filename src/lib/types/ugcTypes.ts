@@ -7,7 +7,7 @@ import { User } from './user';
 export interface UGCAsset {
   id: string;
   name: string;
-  title?: string; // Add title property
+  title?: string;
   description?: string;
   assetUrl: string;
   thumbnailUrl?: string;
@@ -15,13 +15,15 @@ export interface UGCAsset {
   updatedAt: string;
   creatorId: string;
   creator?: User;
-  assetType?: string; // Add assetType property
+  assetType?: string;
+  category?: string;
   tags?: string[];
+  isOfficial?: boolean;
   marketplace?: {
     price?: number;
     forSale?: boolean;
-    featured?: boolean; // Add featured property
-    isForSale?: boolean; // Alias for forSale
+    featured?: boolean;
+    isForSale?: boolean;
     salesCount?: number;
   };
 }
@@ -45,7 +47,7 @@ export interface UGCReport {
   reporterId: string;
   reason: string;
   status: UGCModerationStatus;
-  details?: string; // Add details property
+  details?: string;
   createdAt: string;
   updatedAt: string;
   asset?: UGCAsset;

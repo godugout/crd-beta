@@ -1,5 +1,6 @@
 
 import { Card, Collection, Comment, Reaction, Team, TeamMember, User } from '@/lib/types';
+import { CardElement, ElementUploadMetadata, ElementCategory, ElementType } from '@/lib/types/cardElements';
 
 /**
  * Adapts comment data between different API formats
@@ -92,6 +93,34 @@ export function adaptTeam(team: any): Team {
   };
 }
 
-// Map element type and category constants for ElementUploadForm
-export const mapToElementCategory = (category: string) => category;
-export const mapToElementType = (type: string) => type;
+// Element system adapters
+export const mapToElementCategory = (category: string): ElementCategory => {
+  return category as ElementCategory;
+};
+
+export const mapToElementType = (type: string): ElementType => {
+  return type as ElementType;
+};
+
+export function elementUploadToCardElement(upload: ElementUploadMetadata): CardElement {
+  return {
+    id: `element-${Date.now()}`,
+    type: upload.type as ElementType,
+    name: upload.name,
+    url: upload.imageUrl,
+    assetUrl: upload.imageUrl,
+    thumbnailUrl: upload.imageUrl,
+    description: upload.description || '',
+    tags: upload.tags || [],
+    category: upload.category as string,
+    isOfficial: false,
+    position: { x: 0, y: 0 },
+    size: { width: 100, height: 100 },
+    rotation: 0,
+    opacity: 1,
+    zIndex: 1,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    creatorId: 'anonymous'
+  };
+}

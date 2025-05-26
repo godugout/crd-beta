@@ -18,9 +18,10 @@ export interface Collection {
   updatedAt: string;
   designMetadata?: any;
   cards?: Card[];
-  cardIds?: string[]; // Add cardIds property for backward compatibility
+  cardIds?: string[];
   members?: User[];
-  instagramSource?: {  // Change to object type
+  tags?: string[];
+  instagramSource?: {
     username: string;
     lastFetched: string;
     autoUpdate: boolean;
@@ -40,8 +41,8 @@ export interface Deck {
   name: string;
   description: string;
   coverImageUrl: string;
-  userId: string; // Required for Deck
-  ownerId?: string; // Alternative to userId
+  userId: string;
+  ownerId?: string;
   createdAt: string;
   updatedAt: string;
   cards: Card[];
