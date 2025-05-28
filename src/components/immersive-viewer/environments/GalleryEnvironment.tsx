@@ -8,69 +8,61 @@ export const GalleryEnvironment = () => {
       {/* Clean white gallery background */}
       <color attach="background" args={['#f8f8f8']} />
       
-      {/* Use built-in studio environment */}
+      {/* Use built-in warehouse environment for gallery feel */}
       <Environment 
-        preset="studio"
-        background={false}
-        blur={0.4}
+        preset="warehouse"
+        background={true}
+        blur={0.2}
       />
       
       {/* Gallery lighting setup */}
-      <ambientLight intensity={0.6} color="#f5f5f5" />
+      <ambientLight intensity={0.8} color="#f5f5f5" />
       
       {/* Main gallery track lighting */}
       <directionalLight 
-        position={[10, 15, 8]} 
-        intensity={2.2} 
+        position={[12, 20, 10]} 
+        intensity={2.8} 
         color="#ffffff"
         castShadow
       />
       <directionalLight 
-        position={[-8, 15, 8]} 
-        intensity={2.0} 
+        position={[-10, 20, 10]} 
+        intensity={2.6} 
         color="#f8f8ff"
         castShadow
       />
       <directionalLight 
-        position={[0, 18, -12]} 
-        intensity={1.8} 
+        position={[0, 25, -15]} 
+        intensity={2.4} 
         color="#fffafa"
       />
       
       {/* Focused spotlights for artwork */}
       <spotLight
-        position={[0, 20, 10]}
+        position={[0, 30, 15]}
         target-position={[0, 0, 0]}
-        angle={0.25}
-        penumbra={0.4}
-        intensity={2.5}
+        angle={0.2}
+        penumbra={0.3}
+        intensity={3.5}
         color="#ffffff"
         castShadow
       />
       <spotLight
-        position={[15, 22, 5]}
+        position={[20, 28, 8]}
         target-position={[0, 0, 0]}
-        angle={0.3}
-        penumbra={0.5}
-        intensity={2.0}
+        angle={0.25}
+        penumbra={0.4}
+        intensity={3.0}
         color="#ffffff"
       />
       <spotLight
-        position={[-15, 22, 5]}
+        position={[-20, 28, 8]}
         target-position={[0, 0, 0]}
-        angle={0.3}
-        penumbra={0.5}
-        intensity={2.0}
+        angle={0.25}
+        penumbra={0.4}
+        intensity={3.0}
         color="#ffffff"
       />
-      
-      {/* Accent lighting for depth */}
-      <pointLight position={[0, 25, 0]} intensity={0.5} color="#ffffff" />
-      <pointLight position={[20, 10, 20]} intensity={0.3} color="#f0f0ff" />
-      <pointLight position={[-20, 10, 20]} intensity={0.3} color="#f0f0ff" />
-      
-      {/* Minimal atmospheric effect */}
-      <fog attach="fog" args={['#f8f8f8', 80, 200]} />
     </>
   );
 };

@@ -6,17 +6,17 @@ import * as THREE from 'three';
 const StarField = () => {
   const stars = useMemo(() => {
     const starGeometry = new THREE.BufferGeometry();
-    const starCount = 1500;
+    const starCount = 2000;
     const positions = new Float32Array(starCount * 3);
     
     for (let i = 0; i < starCount * 3; i += 3) {
       // Create stars in a dome above the scene
-      const radius = 500 + Math.random() * 300;
+      const radius = 600 + Math.random() * 400;
       const theta = Math.random() * Math.PI * 2;
-      const phi = Math.random() * Math.PI * 0.6; // Only upper hemisphere
+      const phi = Math.random() * Math.PI * 0.7; // More stars visible
       
       positions[i] = radius * Math.sin(phi) * Math.cos(theta);
-      positions[i + 1] = Math.abs(radius * Math.cos(phi)) + 50; // Keep above ground
+      positions[i + 1] = Math.abs(radius * Math.cos(phi)) + 60; // Keep above ground
       positions[i + 2] = radius * Math.sin(phi) * Math.sin(theta);
     }
     
@@ -27,7 +27,7 @@ const StarField = () => {
   return (
     <points>
       <primitive object={stars} />
-      <pointsMaterial size={1.5} color="#ffffff" sizeAttenuation={false} />
+      <pointsMaterial size={2} color="#ffffff" sizeAttenuation={false} />
     </points>
   );
 };
@@ -36,64 +36,61 @@ export const NightSkyEnvironment = () => {
   return (
     <>
       {/* Night sky background */}
-      <color attach="background" args={['#0a0a1a']} />
+      <color attach="background" args={['#0a0a2e']} />
       
       {/* Star field */}
       <StarField />
       
-      {/* Use built-in night environment */}
+      {/* Use built-in night environment with stars */}
       <Environment 
         preset="night"
-        background={false}
-        blur={0.6}
+        background={true}
+        blur={0.4}
       />
       
       {/* Moonlight ambient */}
-      <ambientLight intensity={0.3} color="#b3ccff" />
+      <ambientLight intensity={0.4} color="#b3ccff" />
       
       {/* Main moonlight */}
       <directionalLight 
-        position={[50, 80, 30]} 
-        intensity={1.8} 
+        position={[60, 100, 40]} 
+        intensity={2.5} 
         color="#e6f3ff"
         castShadow
       />
       
       {/* Subtle starlight */}
       <directionalLight 
-        position={[-30, 60, 50]} 
-        intensity={0.6} 
+        position={[-40, 80, 60]} 
+        intensity={1.0} 
         color="#cce6ff"
       />
       <directionalLight 
-        position={[20, 70, -40]} 
-        intensity={0.5} 
+        position={[30, 90, -50]} 
+        intensity={0.8} 
         color="#ddeeff"
       />
       
       {/* Moonbeam spotlight */}
       <spotLight
-        position={[0, 100, 0]}
+        position={[0, 120, 0]}
         target-position={[0, 0, 0]}
-        angle={0.5}
-        penumbra={0.8}
-        intensity={2.0}
+        angle={0.4}
+        penumbra={0.7}
+        intensity={2.8}
         color="#ffffff"
         castShadow
       />
       
       {/* Distant city lights */}
-      <pointLight position={[100, 5, 100]} color="#ffaa00" intensity={0.3} distance={500} />
-      <pointLight position={[-80, 8, 120]} color="#ffcc66" intensity={0.25} distance={400} />
-      <pointLight position={[120, 12, -90]} color="#ff9966" intensity={0.2} distance={450} />
+      <pointLight position={[150, 8, 150]} color="#ffaa00" intensity={0.4} distance={800} />
+      <pointLight position={[-120, 12, 180]} color="#ffcc66" intensity={0.35} distance={600} />
+      <pointLight position={[180, 15, -130]} color="#ff9966" intensity={0.3} distance={700} />
       
       {/* Aurora-like effects */}
-      <pointLight position={[0, 150, 200]} color="#66ff99" intensity={0.15} distance={800} />
-      <pointLight position={[200, 120, 0]} color="#9966ff" intensity={0.12} distance={700} />
-      <pointLight position={[-150, 140, 100]} color="#66ccff" intensity={0.18} distance={750} />
-      
-      {/* Night atmosphere */}
-      <fog attach="fog" args={['#0a0a1a', 150, 400]} />
+      <pointLight position={[0, 200, 300]} color="#66ff99" intensity={0.2} distance={1200} />
+      <pointLight position={[300, 180, 0]} color="#9966ff" intensity={0.18} distance={1000} />
+      <pointLight position={[-250, 200, 150]} color="#66ccff" intensity={0.25} distance={1100} />
     </>
   );
 };

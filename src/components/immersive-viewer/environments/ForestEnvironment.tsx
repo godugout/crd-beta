@@ -8,7 +8,7 @@ const SunbeamEffect = () => {
     return new THREE.ShaderMaterial({
       uniforms: {
         time: { value: 0 },
-        opacity: { value: 0.3 }
+        opacity: { value: 0.4 }
       },
       vertexShader: `
         varying vec2 vUv;
@@ -23,8 +23,8 @@ const SunbeamEffect = () => {
         varying vec2 vUv;
         
         void main() {
-          float sunbeam = sin(vUv.y * 10.0 + time) * 0.5 + 0.5;
-          sunbeam *= sin(vUv.x * 3.0) * 0.3 + 0.7;
+          float sunbeam = sin(vUv.y * 12.0 + time) * 0.5 + 0.5;
+          sunbeam *= sin(vUv.x * 4.0) * 0.4 + 0.6;
           gl_FragColor = vec4(1.0, 0.9, 0.6, sunbeam * opacity);
         }
       `,
@@ -36,7 +36,7 @@ const SunbeamEffect = () => {
   // Animate the sunbeams
   React.useEffect(() => {
     const animate = () => {
-      sunbeamMaterial.uniforms.time.value += 0.005;
+      sunbeamMaterial.uniforms.time.value += 0.008;
       requestAnimationFrame(animate);
     };
     animate();
@@ -45,16 +45,16 @@ const SunbeamEffect = () => {
   return (
     <>
       {/* Multiple sunbeam planes */}
-      <mesh position={[10, 8, 0]} rotation={[0, 0, Math.PI * 0.1]}>
-        <planeGeometry args={[2, 20]} />
-        <primitive object={sunbeamMaterial} />
-      </mesh>
-      <mesh position={[-5, 12, 5]} rotation={[0, 0.3, Math.PI * 0.15]}>
-        <planeGeometry args={[1.5, 18]} />
-        <primitive object={sunbeamMaterial} />
-      </mesh>
-      <mesh position={[0, 15, -8]} rotation={[0, -0.2, Math.PI * 0.08]}>
+      <mesh position={[15, 12, 0]} rotation={[0, 0, Math.PI * 0.12]}>
         <planeGeometry args={[3, 25]} />
+        <primitive object={sunbeamMaterial} />
+      </mesh>
+      <mesh position={[-8, 18, 8]} rotation={[0, 0.4, Math.PI * 0.18]}>
+        <planeGeometry args={[2.5, 22]} />
+        <primitive object={sunbeamMaterial} />
+      </mesh>
+      <mesh position={[0, 20, -12]} rotation={[0, -0.3, Math.PI * 0.1]}>
+        <planeGeometry args={[4, 30]} />
         <primitive object={sunbeamMaterial} />
       </mesh>
     </>
@@ -65,7 +65,7 @@ export const ForestEnvironment = () => {
   return (
     <>
       {/* Forest background */}
-      <color attach="background" args={['#1a2f1a']} />
+      <color attach="background" args={['#1a3d1a']} />
       
       {/* Sunbeam effects */}
       <SunbeamEffect />
@@ -73,64 +73,56 @@ export const ForestEnvironment = () => {
       {/* Use built-in forest environment */}
       <Environment 
         preset="forest"
-        background={false}
-        blur={0.6}
+        background={true}
+        blur={0.5}
       />
       
       {/* Forest ambient lighting */}
-      <ambientLight intensity={0.4} color="#90a865" />
+      <ambientLight intensity={0.5} color="#90a865" />
       
       {/* Dappled sunlight */}
       <directionalLight 
-        position={[20, 30, 15]} 
-        intensity={2.5} 
+        position={[25, 40, 20]} 
+        intensity={3.2} 
         color="#fff8dc"
         castShadow
       />
       <directionalLight 
-        position={[-10, 25, 20]} 
-        intensity={1.8} 
+        position={[-15, 35, 25]} 
+        intensity={2.5} 
         color="#f0f8d0"
         castShadow
       />
       <directionalLight 
-        position={[5, 35, -18]} 
-        intensity={1.5} 
+        position={[8, 45, -22]} 
+        intensity={2.0} 
         color="#fffacd"
       />
       
       {/* Filtered sunlight through canopy */}
       <spotLight
-        position={[15, 40, 10]}
+        position={[20, 50, 15]}
         target-position={[0, 0, 0]}
-        angle={0.3}
-        penumbra={0.9}
-        intensity={3.0}
+        angle={0.25}
+        penumbra={0.8}
+        intensity={4.0}
         color="#fff8dc"
         castShadow
       />
       <spotLight
-        position={[-8, 35, 18]}
+        position={[-12, 45, 25]}
         target-position={[0, 0, 0]}
-        angle={0.4}
-        penumbra={0.8}
-        intensity={2.5}
+        angle={0.3}
+        penumbra={0.7}
+        intensity={3.5}
         color="#f5f5dc"
       />
       
       {/* Green forest reflections */}
-      <pointLight position={[25, 15, 0]} intensity={0.6} color="#90ee90" />
-      <pointLight position={[-25, 15, 0]} intensity={0.6} color="#9acd32" />
-      <pointLight position={[0, 10, 30]} intensity={0.5} color="#adff2f" />
-      <pointLight position={[0, 10, -30]} intensity={0.5} color="#98fb98" />
-      
-      {/* Understory lighting */}
-      <pointLight position={[12, 3, 12]} intensity={0.3} color="#8fbc8f" />
-      <pointLight position={[-12, 3, 12]} intensity={0.3} color="#90ee90" />
-      <pointLight position={[0, 1, 0]} intensity={0.2} color="#7cfc00" />
-      
-      {/* Forest atmosphere */}
-      <fog attach="fog" args={['#1a2f1a', 60, 200]} />
+      <pointLight position={[35, 20, 0]} intensity={0.8} color="#90ee90" />
+      <pointLight position={[-35, 20, 0]} intensity={0.8} color="#9acd32" />
+      <pointLight position={[0, 15, 40]} intensity={0.7} color="#adff2f" />
+      <pointLight position={[0, 15, -40]} intensity={0.7} color="#98fb98" />
     </>
   );
 };

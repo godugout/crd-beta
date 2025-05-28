@@ -12,13 +12,13 @@ const NeonLights = () => {
         <pointLight
           key={index}
           position={[
-            (index - 2) * 15,
-            10 + Math.sin(index) * 5,
-            (index % 2 === 0 ? 20 : -20)
+            (index - 2) * 20,
+            15 + Math.sin(index) * 8,
+            (index % 2 === 0 ? 25 : -25)
           ]}
           color={color}
-          intensity={0.8}
-          distance={50}
+          intensity={1.2}
+          distance={60}
         />
       ))}
     </>
@@ -34,68 +34,65 @@ export const RetroArcadeEnvironment = () => {
       {/* Neon lighting array */}
       <NeonLights />
       
-      {/* Use built-in warehouse environment for arcade feel */}
+      {/* Use built-in warehouse environment for arcade structure */}
       <Environment 
         preset="warehouse"
-        background={false}
-        blur={0.5}
+        background={true}
+        blur={0.6}
       />
       
       {/* Arcade ambient lighting */}
-      <ambientLight intensity={0.3} color="#330066" />
+      <ambientLight intensity={0.4} color="#330066" />
       
       {/* Main arcade lighting */}
       <directionalLight 
-        position={[15, 20, 15]} 
-        intensity={1.5} 
+        position={[20, 30, 20]} 
+        intensity={2.0} 
         color="#ff00ff"
         castShadow
       />
       <directionalLight 
-        position={[-15, 20, 15]} 
-        intensity={1.5} 
+        position={[-20, 30, 20]} 
+        intensity={2.0} 
         color="#00ffff"
         castShadow
       />
       <directionalLight 
-        position={[0, 25, -20]} 
-        intensity={1.2} 
+        position={[0, 35, -25]} 
+        intensity={1.8} 
         color="#ffff00"
       />
       
       {/* Arcade machine glow */}
       <spotLight
-        position={[25, 18, 25]}
+        position={[30, 25, 30]}
         target-position={[0, 0, 0]}
-        angle={0.4}
-        penumbra={0.7}
-        intensity={2.0}
+        angle={0.35}
+        penumbra={0.6}
+        intensity={2.8}
         color="#ff0080"
         castShadow
       />
       <spotLight
-        position={[-25, 18, 25]}
+        position={[-30, 25, 30]}
         target-position={[0, 0, 0]}
-        angle={0.4}
-        penumbra={0.7}
-        intensity={2.0}
+        angle={0.35}
+        penumbra={0.6}
+        intensity={2.8}
         color="#00ff80"
         castShadow
       />
       
       {/* Retro neon accents */}
-      <pointLight position={[30, 8, 0]} intensity={1.0} color="#ff0080" />
-      <pointLight position={[-30, 8, 0]} intensity={1.0} color="#00ff80" />
-      <pointLight position={[0, 12, 35]} intensity={0.8} color="#8000ff" />
-      <pointLight position={[0, 12, -35]} intensity={0.8} color="#ff8000" />
+      <pointLight position={[40, 12, 0]} intensity={1.5} color="#ff0080" />
+      <pointLight position={[-40, 12, 0]} intensity={1.5} color="#00ff80" />
+      <pointLight position={[0, 18, 45]} intensity={1.2} color="#8000ff" />
+      <pointLight position={[0, 18, -45]} intensity={1.2} color="#ff8000" />
       
       {/* Screen glow effects */}
-      <pointLight position={[20, 5, 20]} intensity={0.6} color="#0080ff" />
-      <pointLight position={[-20, 5, 20]} intensity={0.6} color="#ff4080" />
-      <pointLight position={[0, 3, 0]} intensity={0.4} color="#80ff40" />
-      
-      {/* Arcade atmosphere */}
-      <fog attach="fog" args={['#0a0a0a', 70, 200]} />
+      <pointLight position={[25, 8, 25]} intensity={0.8} color="#0080ff" />
+      <pointLight position={[-25, 8, 25]} intensity={0.8} color="#ff4080" />
+      <pointLight position={[0, 5, 0]} intensity={0.6} color="#80ff40" />
     </>
   );
 };
