@@ -15,7 +15,7 @@ import AuthPage from '@/pages/AuthPage';
 import NotFound from '@/pages/NotFound';
 import Collections from '@/pages/Collections';
 import TownCommunityHub from '@/pages/TownCommunityHub';
-import Editor from '@/pages/Editor';
+import UnifiedCardEditor from '@/pages/UnifiedCardEditor';
 
 // Import other route collections
 import { cardRoutes } from './cardRoutes';
@@ -31,7 +31,6 @@ const DeckBuilderPage = React.lazy(() => import('@/pages/DeckBuilderPage'));
 const SeriesManagerPage = React.lazy(() => import('@/pages/SeriesManagerPage'));
 const DeckViewPage = React.lazy(() => import('@/pages/DeckViewPage'));
 const SeriesViewPage = React.lazy(() => import('@/pages/SeriesViewPage'));
-const CardCreator = React.lazy(() => import('@/pages/CardCreator'));
 const CardDetector = React.lazy(() => import('@/pages/CardDetector'));
 const TeamPage = React.lazy(() => import('@/pages/TeamPage'));
 const ArCardViewerPage = React.lazy(() => import('@/pages/ArCardViewerPage'));
@@ -63,19 +62,15 @@ const rootRoutes: RouteObject[] = [
   },
   {
     path: "/cards/create",
-    element: (
-      <Suspense fallback={<LoadingFallback />}>
-        <CardCreator />
-      </Suspense>
-    )
+    element: <UnifiedCardEditor />
   },
   {
     path: "/editor",
-    element: <Editor />
+    element: <UnifiedCardEditor />
   },
   {
     path: "/editor/:id",
-    element: <Editor />
+    element: <UnifiedCardEditor />
   },
   {
     path: "/cards/:id",

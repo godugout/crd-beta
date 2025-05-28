@@ -119,9 +119,9 @@ const UnifiedCardEditor: React.FC = () => {
             backgroundColor: cardData.backgroundColor,
             borderRadius: cardData.borderRadius,
           },
-          effects: effectStack,
+          effects: effectStack.map(effect => effect.name), // Convert CardEffect[] to string[]
         },
-        effects: effectStack.map(effect => effect.name),
+        effects: effectStack.map(effect => effect.name), // This should be string[]
         layers,
         effectClasses: getEffectClasses(),
       };
