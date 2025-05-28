@@ -9,8 +9,20 @@ interface CardEffectsGalleryProps {
   card: Card;
 }
 
+// Local interface that matches what EffectsPanel expects
+interface CardEffect {
+  id: string;
+  name: string;
+  active: boolean;
+  intensity: number;
+  hue?: number;
+  saturation?: number;
+}
+
 const CardEffectsGallery: React.FC<CardEffectsGalleryProps> = ({ card }) => {
   const [isFlipped, setIsFlipped] = useState(false);
+  
+  // Use the hook that returns the card effects management functions
   const { 
     effects,
     toggleEffect,
@@ -21,14 +33,33 @@ const CardEffectsGallery: React.FC<CardEffectsGalleryProps> = ({ card }) => {
     setIsFlipped(prev => !prev);
   };
   
-  // Get active effects from the effects array
-  const activeEffects = effects.filter(effect => effect.active).map(effect => effect.id);
+  // Transform the effects from the hook to match the expected interface
+  const transformedEffects: CardEffect[] = effects.map(effect => ({
+    id: effect.id,
+    name: effect.name,
+    active: effect.enabled, // Map enabled to active
+    intensity: effect.parameters.intensity,
+    hue: effect.parameters.hue,
+    saturation: effect.parameters.saturation
+  }));
   
-  // Generate an object with effect intensities from the effects array
-  const effectIntensities = effects.reduce((acc, effect) => {
+  // Get active effects from the transformed effects array
+  const activeEffects = transformedEffects.filter(effect => effect.active).map(effect => effect.id);
+  
+  // Generate an object with effect intensities from the transformed effects array
+  const effectIntensities = transformedEffects.reduce((acc, effect) => {
     acc[effect.id] = effect.intensity || 0.7;
     return acc;
   }, {} as Record<string, number>);
+  
+  // Wrapper functions to handle the interface differences
+  const handleToggleEffect = (effectId: string) => {
+    toggleEffect(effectId);
+  };
+  
+  const handleUpdateIntensity = (effectId: string, intensity: number) => {
+    updateEffectIntensity(effectId, intensity);
+  };
   
   return (
     <div className="flex flex-col md:flex-row gap-6">
@@ -44,9 +75,9 @@ const CardEffectsGallery: React.FC<CardEffectsGalleryProps> = ({ card }) => {
       
       <div className="w-full md:w-1/3">
         <EffectsPanel
-          effects={effects}
-          onToggleEffect={toggleEffect}
-          onUpdateIntensity={updateEffectIntensity}
+          effects={transformedEffects}
+          onToggleEffect={handleToggleEffect}
+          onUpdateIntensity={handleUpdateIntensity}
         />
         
         <div className="mt-4">
