@@ -7,7 +7,7 @@ import ImmersiveCardViewerPage from '@/pages/ImmersiveCardViewerPage';
 import CardCollectionPage from '@/pages/CardCollectionPage';
 import CollectionGallery from '@/pages/CollectionGallery';
 import CardDetail from '@/pages/CardDetail';
-import CardGallery from '@/pages/CardGallery';
+import UnifiedCardGalleryPage from '@/pages/UnifiedCardGalleryPage';
 import Profile from '@/pages/Profile';
 import Dashboard from '@/pages/Dashboard';
 import Unauthorized from '@/pages/Unauthorized';
@@ -81,11 +81,11 @@ const rootRoutes: RouteObject[] = [
   },
   {
     path: "/gallery",
-    element: <CardGallery />
+    element: <UnifiedCardGalleryPage />
   },
   {
     path: "/cards",
-    element: <CardCollectionPage />
+    element: <UnifiedCardGalleryPage />
   },
   {
     path: "/cards/:id",
@@ -132,7 +132,7 @@ const rootRoutes: RouteObject[] = [
 export const routes: RouteObject[] = [
   ...rootRoutes,
   ...cardEditorRoutes,
-  ...mainRoutes.filter(route => !cardEditorRoutes.some(cr => cr.path === route.path)),
+  ...mainRoutes.filter(route => !cardEditorRoutes.some(cr => cr.path === route.path) && route.path !== "/gallery" && route.path !== "/cards"),
   ...teamRoutes,
   ...townRoutes,
   ...baseballRoutes,
