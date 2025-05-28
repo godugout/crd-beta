@@ -34,6 +34,7 @@ import { useCanvasControls } from '@/hooks/useCanvasControls';
 import { useUndoRedo } from '@/hooks/useUndoRedo';
 import ImageTransformControls from './ImageTransformControls';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
+import { useNavigate } from 'react-router-dom';
 
 interface CardEditorProps {
   initialCard?: Partial<Card>;
@@ -52,6 +53,8 @@ const CardEditor: React.FC<CardEditorProps> = ({
   onExport = () => {},
   className
 }) => {
+  const navigate = useNavigate();
+  
   // Core state
   const [activeCard, setActiveCard] = useState<Partial<Card>>(
     initialCard || {
@@ -1006,7 +1009,12 @@ const CardEditor: React.FC<CardEditorProps> = ({
         layers: activeCard.layers || []
       };
 
+      // Call the original onPreview callback first
       onPreview(cardToPreview);
+      
+      // Navigate to the immersive viewer
+      navigate(`/immersive/${cardToPreview.id}`);
+      
       toast.success('Opening 3D preview');
     } catch (error) {
       console.error('Preview error:', error);
