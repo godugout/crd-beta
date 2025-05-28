@@ -26,7 +26,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
             </AuthProvider>
           </BrandThemeProvider>
         </TeamThemeProvider>
-      </HelmetProvider>
+      </ThemeProvider>
     </HelmetProvider>
   </React.StrictMode>,
 )
