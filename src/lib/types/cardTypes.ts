@@ -1,3 +1,4 @@
+
 /**
  * Consolidated Card Types for Cardshow (CRD)
  * This file serves as the central source of truth for all card-related types
@@ -229,6 +230,9 @@ export interface BaseCard extends BaseEntity {
   reactions?: Reaction[];
   comments?: Comment[];
   viewCount?: number;
+  
+  // Add layers property to the BaseCard interface
+  layers?: CardLayer[];
   
   // Baseball card properties
   player?: string;
