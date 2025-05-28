@@ -1,12 +1,45 @@
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Environment } from '@react-three/drei';
+import * as THREE from 'three';
+
+const StarField = () => {
+  const stars = useMemo(() => {
+    const starGeometry = new THREE.BufferGeometry();
+    const starCount = 2000;
+    const positions = new Float32Array(starCount * 3);
+    
+    for (let i = 0; i < starCount * 3; i += 3) {
+      // Create stars in a large sphere around the scene
+      const radius = 800 + Math.random() * 400;
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.random() * Math.PI;
+      
+      positions[i] = radius * Math.sin(phi) * Math.cos(theta);
+      positions[i + 1] = radius * Math.sin(phi) * Math.sin(theta);
+      positions[i + 2] = radius * Math.cos(phi);
+    }
+    
+    starGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    return starGeometry;
+  }, []);
+
+  return (
+    <points>
+      <primitive object={stars} />
+      <pointsMaterial size={2} color="#ffffff" sizeAttenuation={false} />
+    </points>
+  );
+};
 
 export const CosmicEnvironment = () => {
   return (
     <>
       {/* Deep space background */}
       <color attach="background" args={['#000011']} />
+      
+      {/* Star field */}
+      <StarField />
       
       {/* Use built-in night environment */}
       <Environment 
