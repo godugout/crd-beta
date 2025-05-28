@@ -148,35 +148,37 @@ const UnifiedCardEditor: React.FC = () => {
       title={isEditing ? "Edit Card" : "Create a Card"}
       description={isEditing ? "Update your card design" : "Design your own custom trading cards with advanced effects and 3D visualization"}
     >
-      <div className="container mx-auto max-w-[1400px] px-4 pt-6 pb-20">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold">
-            {isEditing ? 'Edit Your Card' : 'Create Your Card'}
-          </h1>
-          <p className="text-muted-foreground">
-            {isEditing 
-              ? 'Make changes to your card design and save when ready'
-              : 'Design a professional-quality digital trading card'
-            }
-          </p>
-        </div>
+      <div className="min-h-screen bg-[var(--bg-primary)]">
+        <div className="container mx-auto max-w-[1400px] px-4 pt-6 pb-20">
+          <div className="mb-6">
+            <h1 className="text-3xl font-bold text-[var(--text-primary)]">
+              {isEditing ? 'Edit Your Card' : 'Create Your Card'}
+            </h1>
+            <p className="text-[var(--text-secondary)]">
+              {isEditing 
+                ? 'Make changes to your card design and save when ready'
+                : 'Design a professional-quality digital trading card'
+              }
+            </p>
+          </div>
 
-        <CardMakerWizard 
-          cardData={cardData}
-          setCardData={setCardData}
-          layers={layers}
-          setLayers={setLayers}
-          activeLayer={activeLayer}
-          setActiveLayerId={setActiveLayer}
-          updateLayer={updateLayer}
-          effectStack={effectStack}
-          addEffect={addEffect}
-          removeEffect={removeEffect}
-          updateEffectSettings={updateEffectSettings}
-          effectClasses={getEffectClasses()}
-          onSave={handleSaveCard}
-          isEditing={isEditing}
-        />
+          <CardMakerWizard 
+            cardData={cardData}
+            setCardData={setCardData}
+            layers={layers}
+            setLayers={setLayers}
+            activeLayer={activeLayer}
+            setActiveLayerId={setActiveLayer}
+            updateLayer={updateLayer}
+            effectStack={effectStack}
+            addEffect={addEffect}
+            removeEffect={removeEffect}
+            updateEffectSettings={updateEffectSettings}
+            effectClasses={getEffectClasses()}
+            onSave={handleSaveCard}
+            isEditing={isEditing}
+          />
+        </div>
       </div>
     </PageLayout>
   );

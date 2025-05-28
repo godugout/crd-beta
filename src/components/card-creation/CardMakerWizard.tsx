@@ -147,7 +147,7 @@ const CardMakerWizard: React.FC<CardMakerWizardProps> = ({
           onStepClick={handleStepClick}
         />
         
-        <Card>
+        <Card className="bg-[var(--bg-secondary)] border-[var(--border-primary)]">
           <CardContent className="p-6">
             {renderStepContent()}
           </CardContent>
@@ -158,7 +158,7 @@ const CardMakerWizard: React.FC<CardMakerWizardProps> = ({
             variant="outline"
             onClick={handleBack}
             disabled={currentStep === 0}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 bg-[var(--bg-secondary)] border-[var(--border-primary)] text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)]"
           >
             <ArrowLeft className="h-4 w-4" />
             Previous
@@ -168,7 +168,7 @@ const CardMakerWizard: React.FC<CardMakerWizardProps> = ({
             <Button 
               onClick={handleNext}
               disabled={!canProceed()}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 bg-[var(--brand-primary)] hover:bg-[var(--brand-primary)]/90 text-white"
             >
               Continue
               <ArrowRight className="h-4 w-4" />
@@ -176,7 +176,7 @@ const CardMakerWizard: React.FC<CardMakerWizardProps> = ({
           ) : (
             <Button 
               onClick={onSave}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 bg-[var(--brand-primary)] hover:bg-[var(--brand-primary)]/90 text-white"
             >
               <Save className="h-4 w-4" />
               {isEditing ? 'Update Card' : 'Create Card'}
@@ -187,7 +187,7 @@ const CardMakerWizard: React.FC<CardMakerWizardProps> = ({
       
       <div className="order-first lg:order-last">
         <div className="sticky top-20">
-          <h2 className="text-xl font-bold mb-4">Preview</h2>
+          <h2 className="text-xl font-bold mb-4 text-[var(--text-primary)]">Preview</h2>
           <CardPreview 
             cardData={cardData}
             effectClasses={effectClasses}
@@ -195,8 +195,8 @@ const CardMakerWizard: React.FC<CardMakerWizardProps> = ({
           
           {effectStack.length > 0 && (
             <div className="mt-4 space-y-2">
-              <h3 className="text-sm font-medium">Applied Effects</h3>
-              <div className="text-sm text-gray-600">
+              <h3 className="text-sm font-medium text-[var(--text-primary)]">Applied Effects</h3>
+              <div className="text-sm text-[var(--text-secondary)]">
                 <ul className="list-disc pl-5">
                   {effectStack.map(effect => (
                     <li key={effect.id}>{effect.name}</li>
