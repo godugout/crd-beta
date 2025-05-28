@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -134,10 +133,8 @@ const ImmersiveCardViewerPage: React.FC = () => {
   };
 
   const handleSaveRemix = (remixSettings: any) => {
-    // In a real app, this would save to the database and redirect to the editor
     console.log('Saving remix with settings:', remixSettings);
     
-    // Update current view with remix settings
     setActiveEffects(remixSettings.effects);
     setEffectIntensities(remixSettings.effectSettings);
     setEnvironmentType(remixSettings.environmentType);
@@ -146,7 +143,6 @@ const ImmersiveCardViewerPage: React.FC = () => {
     
     setIsCustomizationOpen(false);
     
-    // Simulate redirect to card editor
     setTimeout(() => {
       navigate('/create');
     }, 1500);
@@ -212,6 +208,8 @@ const ImmersiveCardViewerPage: React.FC = () => {
           onRemix={handleRemix}
           isCustomizationOpen={isCustomizationOpen}
           onToggleCustomization={toggleCustomization}
+          environmentType={environmentType}
+          onEnvironmentChange={handleEnvironmentChange}
         />
       </div>
       
