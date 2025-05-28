@@ -1,10 +1,6 @@
 
-// Enhanced card types for the card system
-import { BaseCard } from './cardTypes';
+import { BaseCard, DesignMetadata, CardRarity, HotspotData } from './cardTypes';
 
-/**
- * Enhanced Card with additional functionality
- */
 export interface EnhancedCard extends BaseCard {
   seriesId?: string; 
   deckId?: string;
@@ -31,28 +27,6 @@ export interface EnhancedCard extends BaseCard {
   rarity?: CardRarity;
 }
 
-/**
- * Card rarity types
- */
-export type CardRarity = 'common' | 'uncommon' | 'rare' | 'ultra-rare' | 'legendary' | 'one-of-one';
-
-/**
- * Hotspot data for interactive cards
- */
-export interface HotspotData {
-  id: string;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  content: string;
-  type: 'text' | 'link' | 'image' | 'video';
-  visible: boolean;
-}
-
-/**
- * Series of cards
- */
 export interface Series {
   id: string;
   name?: string;
@@ -72,33 +46,17 @@ export interface Series {
   releaseType?: 'standard' | 'limited' | 'exclusive';
 }
 
-/**
- * Deck of cards
- */
 export interface Deck {
   id: string;
   name: string;
   description: string;
   cards: EnhancedCard[];
   creator?: string;
+  userId: string;
   ownerId?: string;
   createdAt: string;
   updatedAt: string;
   isPublic: boolean;
   coverImageUrl?: string;
   cardIds: string[];
-}
-
-/**
- * Card set for play
- */
-export interface CardSet {
-  id: string;
-  name: string;
-  description: string;
-  cards: EnhancedCard[];
-  category: string;
-  rules?: string;
-  createdAt: string;
-  updatedAt: string;
 }
