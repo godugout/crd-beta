@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, Suspense, useRef } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { 
@@ -13,7 +14,7 @@ import {
 } from '@react-three/drei';
 import * as THREE from 'three';
 import { Card } from '@/lib/types';
-import { useCardLighting } from '@/hooks/useCardLighting';
+import { useCardLighting, LightingSettings } from '@/hooks/useCardLighting';
 import { useUserLightingPreferences } from '@/hooks/useUserLightingPreferences';
 import { logRenderingInfo } from '@/utils/debugRenderer';
 import ViewerSettings from '@/components/gallery/viewer-components/ViewerSettings';

@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Card } from '@/lib/types';
 import { sampleCards } from '@/data/sampleCards';
+import { DEFAULT_DESIGN_METADATA } from '@/lib/utils/cardDefaults';
 
 export const useSampleCards = () => {
   const [cards, setCards] = useState<Card[]>([]);
@@ -25,7 +26,8 @@ export const useSampleCards = () => {
         team: card.team,
         position: card.position,
         year: card.year
-      }
+      },
+      designMetadata: DEFAULT_DESIGN_METADATA
     }));
 
     setCards(transformedCards);
