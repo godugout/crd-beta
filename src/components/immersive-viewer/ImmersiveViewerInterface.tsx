@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card } from '@/lib/types';
-import { ArrowLeft, Share, Download, Heart, Bookmark, Settings, RotateCcw, Remix } from 'lucide-react';
+import { ArrowLeft, Share, Download, Heart, Bookmark, Settings, RotateCcw, Edit } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface ImmersiveViewerInterfaceProps {
@@ -52,7 +52,7 @@ const ImmersiveViewerInterface: React.FC<ImmersiveViewerInterfaceProps> = ({
             onClick={onRemix}
             className="bg-purple-600/80 backdrop-blur-sm text-white hover:bg-purple-700/80"
           >
-            <Remix className="h-4 w-4 mr-2" />
+            <Edit className="h-4 w-4 mr-2" />
             Remix
           </Button>
           <Button

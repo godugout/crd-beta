@@ -15,7 +15,8 @@ const EnvironmentRenderer: React.FC<EnvironmentRendererProps> = ({ environmentTy
           sky: { sunPosition: [0, 0.4, 1], turbidity: 10, rayleigh: 2 },
           stars: { radius: 200, depth: 50, count: 800, factor: 4 },
           fog: { near: 50, far: 200, color: '#1a1a2e' },
-          ambient: '#4a90e2'
+          ambient: '#4a90e2',
+          preset: 'sunset' as const
         };
       
       case 'gallery':
@@ -24,7 +25,7 @@ const EnvironmentRenderer: React.FC<EnvironmentRendererProps> = ({ environmentTy
           stars: null,
           fog: { near: 10, far: 50, color: '#f5f5f5' },
           ambient: '#ffffff',
-          preset: 'city'
+          preset: 'studio' as const
         };
       
       case 'cardshop':
@@ -33,7 +34,7 @@ const EnvironmentRenderer: React.FC<EnvironmentRendererProps> = ({ environmentTy
           stars: null,
           fog: { near: 5, far: 30, color: '#2a2a2a' },
           ambient: '#ffd700',
-          preset: 'warehouse'
+          preset: 'warehouse' as const
         };
       
       case 'store':
@@ -42,7 +43,7 @@ const EnvironmentRenderer: React.FC<EnvironmentRendererProps> = ({ environmentTy
           stars: null,
           fog: { near: 8, far: 40, color: '#e8e8e8' },
           ambient: '#ffffff',
-          preset: 'apartment'
+          preset: 'apartment' as const
         };
       
       case 'mall':
@@ -51,7 +52,7 @@ const EnvironmentRenderer: React.FC<EnvironmentRendererProps> = ({ environmentTy
           stars: null,
           fog: { near: 15, far: 80, color: '#f0f0f0' },
           ambient: '#ffffff',
-          preset: 'city'
+          preset: 'lobby' as const
         };
       
       case 'cosmic':
@@ -60,7 +61,8 @@ const EnvironmentRenderer: React.FC<EnvironmentRendererProps> = ({ environmentTy
           stars: { radius: 500, depth: 100, count: 2000, factor: 8, saturation: 0.5 },
           fog: { near: 100, far: 500, color: '#0a0a0a' },
           ambient: '#4a0e4e',
-          nebula: true
+          nebula: true,
+          preset: 'night' as const
         };
       
       case 'underwater':
@@ -69,7 +71,8 @@ const EnvironmentRenderer: React.FC<EnvironmentRendererProps> = ({ environmentTy
           stars: null,
           fog: { near: 5, far: 50, color: '#006994' },
           ambient: '#0080b3',
-          caustics: true
+          caustics: true,
+          preset: 'forest' as const
         };
       
       default: // studio
@@ -78,7 +81,7 @@ const EnvironmentRenderer: React.FC<EnvironmentRendererProps> = ({ environmentTy
           stars: { radius: 300, depth: 60, count: 1000, factor: 6 },
           fog: null,
           ambient: '#f0f0ff',
-          preset: 'studio'
+          preset: 'studio' as const
         };
     }
   }, [environmentType]);
