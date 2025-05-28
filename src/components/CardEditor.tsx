@@ -1,6 +1,6 @@
 
 import React from 'react';
-import CardEditorContainer from './card-editor/CardEditorContainer';
+import { EnhancedCardEditor } from './card-editor/EnhancedCardEditor';
 import { Card } from '@/lib/types';
 
 interface CardEditorProps {
@@ -10,13 +10,27 @@ interface CardEditorProps {
   onCancel?: () => void;
 }
 
-const CardEditor: React.FC<CardEditorProps> = ({ card, className, onSave, onCancel }) => {
+const CardEditor: React.FC<CardEditorProps> = ({ 
+  card, 
+  className, 
+  onSave = () => {}, 
+  onCancel = () => {} 
+}) => {
+  const handleSave = async (savedCard: Card) => {
+    onSave(savedCard);
+  };
+
+  const handlePreview = (card: Card) => {
+    // For now, just log the preview - integrate with 3D viewer later
+    console.log('Preview card:', card);
+  };
+
   return (
-    <CardEditorContainer 
-      card={card} 
-      className={className} 
-      onSave={onSave}
-      onCancel={onCancel}
+    <EnhancedCardEditor
+      initialCard={card}
+      onSave={handleSave}
+      onPreview={handlePreview}
+      className={className}
     />
   );
 };
