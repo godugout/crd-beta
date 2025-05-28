@@ -1,4 +1,3 @@
-
 /**
  * HDR Image Cache Service
  * Preloads and caches HDR panoramic images for faster environment loading
@@ -41,11 +40,31 @@ class HDRImageCacheService {
     ],
     cosmic: [
       'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/milky_way_1k.hdr',
-      'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/sky_1k.hdr'
+      'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/quarry_01_1k.hdr'
     ],
     underwater: [
       'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/underwater_01_1k.hdr',
       'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/venice_sunset_1k.hdr'
+    ],
+    forest: [
+      'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/forest_slope_1k.hdr',
+      'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/abandoned_parking_1k.hdr'
+    ],
+    nightsky: [
+      'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/night_1k.hdr',
+      'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/evening_road_01_1k.hdr'
+    ],
+    luxury: [
+      'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/royal_esplanade_1k.hdr',
+      'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/hotel_room_1k.hdr'
+    ],
+    cyberpunk: [
+      'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/neon_photostudio_1k.hdr',
+      'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/urban_alley_01_1k.hdr'
+    ],
+    cardshop: [
+      'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/kloppenheim_02_1k.hdr',
+      'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/industrial_workshop_foundry_1k.hdr'
     ]
   };
 
@@ -54,15 +73,19 @@ class HDRImageCacheService {
    */
   private createFallbackTexture(environmentType: string): THREE.DataTexture {
     const size = 512;
-    const data = new Float32Array(size * size * 4); // Changed to 4 components for RGBA
+    const data = new Float32Array(size * size * 4);
     
-    // Create different colors based on environment
     const colors = {
       stadium: [0.2, 0.3, 0.5, 1.0],
       gallery: [0.9, 0.9, 0.95, 1.0],
       studio: [0.8, 0.8, 0.85, 1.0],
       cosmic: [0.02, 0.02, 0.1, 1.0],
-      underwater: [0.1, 0.3, 0.5, 1.0]
+      underwater: [0.1, 0.3, 0.5, 1.0],
+      forest: [0.2, 0.4, 0.2, 1.0],
+      nightsky: [0.05, 0.05, 0.15, 1.0],
+      luxury: [0.4, 0.3, 0.2, 1.0],
+      cyberpunk: [0.1, 0.05, 0.2, 1.0],
+      cardshop: [0.3, 0.25, 0.2, 1.0]
     };
 
     const color = colors[environmentType as keyof typeof colors] || [0.5, 0.5, 0.5, 1.0];
@@ -119,7 +142,6 @@ class HDRImageCacheService {
       }
     }
     
-    // This should never be reached, but just in case
     return this.createFallbackTexture(environmentType);
   }
 
@@ -198,7 +220,25 @@ class HDRImageCacheService {
    * Get HDR URLs for environment type
    */
   getUrlsForEnvironment(environmentType: string): string[] {
-    const key = environmentType.toLowerCase() as keyof typeof this.HDR_URLS;
+    const normalizedType = environmentType.toLowerCase();
+    
+    // Handle aliases
+    const typeMap: Record<string, string> = {
+      'night': 'nightsky',
+      'nature': 'forest',
+      'space': 'cosmic',
+      'ocean': 'underwater',
+      'store': 'cardshop',
+      'mall': 'cardshop',
+      'retro': 'cardshop',
+      'cyber': 'cyberpunk',
+      'neon': 'cyberpunk',
+      'lounge': 'luxury'
+    };
+    
+    const mappedType = typeMap[normalizedType] || normalizedType;
+    const key = mappedType as keyof typeof this.HDR_URLS;
+    
     return this.HDR_URLS[key] || this.HDR_URLS.studio;
   }
 
@@ -215,7 +255,7 @@ class HDRImageCacheService {
    */
   clearOldEntries(): void {
     const now = Date.now();
-    const maxAge = 30 * 60 * 1000; // 30 minutes
+    const maxAge = 30 * 60 * 1000;
 
     for (const [url, cached] of this.cache.entries()) {
       if (now - cached.loadedAt > maxAge) {

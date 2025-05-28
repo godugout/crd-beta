@@ -1,18 +1,19 @@
-
 import React, { useRef, useEffect, useState, useMemo } from 'react';
 import { Card } from '@/lib/types/cardTypes';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, PerspectiveCamera, Environment } from '@react-three/drei';
+import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
 import { DEFAULT_DESIGN_METADATA, FALLBACK_IMAGE_URL } from '@/lib/utils/cardDefaults';
 import { useToast } from '@/hooks/use-toast';
 import * as THREE from 'three';
 import { logRenderingInfo } from '@/utils/debugRenderer';
+import EnvironmentRenderer from '@/components/immersive-viewer/EnvironmentRenderer';
 
 interface ImmersiveCardViewerProps {
   card: Card;
   isFlipped: boolean;
   activeEffects: string[];
   effectIntensities?: Record<string, number>;
+  environmentType?: string;
 }
 
 const Card3DModel = ({ 
@@ -237,7 +238,8 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
   card,
   isFlipped,
   activeEffects,
-  effectIntensities = {}
+  effectIntensities = {},
+  environmentType = 'studio'
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
@@ -329,18 +331,8 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
       <Canvas shadows dpr={[1, 2]} gl={{ antialias: true, alpha: false }}>
         <PerspectiveCamera makeDefault position={[0, 0, 6]} fov={45} />
         
-        <ambientLight intensity={1.0} />
-        <spotLight 
-          position={[5, 5, 5]} 
-          angle={0.4} 
-          penumbra={1} 
-          intensity={2.0} 
-          castShadow 
-        />
-        <pointLight position={[-5, -5, -5]} color="#3050ff" intensity={1.0} />
-        <pointLight position={[5, -3, -5]} color="#ff3050" intensity={0.8} />
-        
-        <Environment preset="city" background={true} />
+        {/* HDR Environment System */}
+        <EnvironmentRenderer environmentType={environmentType} />
         
         <Card3DModel 
           frontTextureUrl={frontTexture}
@@ -363,7 +355,7 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
       </Canvas>
       
       <div className="absolute top-0 left-0 right-0 p-2 text-white text-xs bg-black/30 pointer-events-none">
-        3D Viewer: {processedCard.id} - {processedCard.title || 'Untitled Card'} | Active Effects: {activeEffects.join(', ') || 'None'}
+        3D Viewer: {processedCard.id} - {processedCard.title || 'Untitled Card'} | Environment: {environmentType} | Active Effects: {activeEffects.join(', ') || 'None'}
       </div>
     </div>
   );
