@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Suspense } from 'react';
+import React, { useState, useEffect, Suspense, useRef } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { 
   PerspectiveCamera, 
@@ -273,6 +273,21 @@ const RealisticCardViewer: React.FC<RealisticCardViewerProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isDebugMode]);
 
+  // Fix the updateLightingSetting function to match expected signature
+  const handleUpdateSettings = (key: string, value: any) => {
+    if (key.includes('.')) {
+      const [parent, child] = key.split('.');
+      updateLightingSetting({
+        [parent]: {
+          ...lightingSettings[parent as keyof LightingSettings],
+          [child]: value
+        }
+      });
+    } else {
+      updateLightingSetting({ [key]: value });
+    }
+  };
+
   return (
     <div className="w-full h-full relative">
       {/* Canvas with WebGL renderer */}
@@ -343,7 +358,7 @@ const RealisticCardViewer: React.FC<RealisticCardViewerProps> = ({
       {/* Settings Panel */}
       <ViewerSettings
         settings={lightingSettings}
-        onUpdateSettings={updateLightingSetting}
+        onUpdateSettings={handleUpdateSettings}
         onApplyPreset={applyPreset}
         isOpen={isCustomizationOpen}
       />

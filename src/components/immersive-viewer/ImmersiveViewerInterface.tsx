@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -18,6 +17,7 @@ import {
   EyeOff
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { CrdButton } from '@/components/ui/crd-button';
 import { Card } from '@/lib/types';
 import { cn } from '@/lib/utils';
 
@@ -151,15 +151,15 @@ const ImmersiveViewerInterface: React.FC<ImmersiveViewerInterfaceProps> = ({
                     {isLiked ? 'Liked' : 'Like'}
                   </Button>
                   
-                  <Button
-                    variant="spectrum"
+                  <CrdButton
+                    variant="gradient"
                     size="lg"
                     onClick={onFlip}
                     className="px-8"
                   >
                     <RotateCcw className="h-5 w-5 mr-2" />
                     {isFlipped ? 'Show Front' : 'Show Back'}
-                  </Button>
+                  </CrdButton>
                   
                   <Button
                     variant="ghost"
