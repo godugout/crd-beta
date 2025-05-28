@@ -30,8 +30,9 @@ const Dashboard: React.FC = () => {
     return {
       id: user.id,
       userId: user.id,
+      email: user.email, // Add email property
       bio: user.bio,
-      role: user.role || UserRole.USER,
+      role: user.role,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     };
@@ -49,6 +50,7 @@ const Dashboard: React.FC = () => {
         const mockProfile: UserProfile = {
           id: 'mock-user-id',
           userId: 'mock-user-id',
+          email: 'user@example.com', // Add email property
           role: UserRole.ADMIN, // Default to admin role if password is correct
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),

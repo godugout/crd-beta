@@ -1,6 +1,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { UserRole } from '@/lib/types/user';
 
 export interface User {
   id: string;
@@ -8,7 +9,8 @@ export interface User {
   name?: string;
   displayName?: string;
   avatarUrl?: string;
-  role?: string;
+  bio?: string;
+  role: UserRole; // Use UserRole enum instead of string
   permissions?: string[];
   createdAt: string;
   updatedAt: string;
@@ -51,7 +53,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             name: session.user.user_metadata?.full_name,
             displayName: session.user.user_metadata?.display_name,
             avatarUrl: session.user.user_metadata?.avatar_url,
-            role: 'user',
+            bio: session.user.user_metadata?.bio,
+            role: UserRole.USER, // Use UserRole enum
             permissions: ['read'],
             createdAt: session.user.created_at,
             updatedAt: new Date().toISOString(),
@@ -78,7 +81,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             name: session.user.user_metadata?.full_name,
             displayName: session.user.user_metadata?.display_name,
             avatarUrl: session.user.user_metadata?.avatar_url,
-            role: 'user',
+            bio: session.user.user_metadata?.bio,
+            role: UserRole.USER, // Use UserRole enum
             permissions: ['read'],
             createdAt: session.user.created_at,
             updatedAt: new Date().toISOString(),
@@ -114,7 +118,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         name: data.user.user_metadata?.full_name,
         displayName: data.user.user_metadata?.display_name,
         avatarUrl: data.user.user_metadata?.avatar_url,
-        role: 'user',
+        bio: data.user.user_metadata?.bio,
+        role: UserRole.USER, // Use UserRole enum
         permissions: ['read'],
         createdAt: data.user.created_at,
         updatedAt: new Date().toISOString(),
@@ -148,7 +153,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         name: data.user.user_metadata?.full_name,
         displayName: data.user.user_metadata?.display_name,
         avatarUrl: data.user.user_metadata?.avatar_url,
-        role: 'user',
+        bio: data.user.user_metadata?.bio,
+        role: UserRole.USER, // Use UserRole enum
         permissions: ['read'],
         createdAt: data.user.created_at,
         updatedAt: new Date().toISOString(),

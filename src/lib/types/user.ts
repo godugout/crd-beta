@@ -46,6 +46,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
 export interface UserProfile {
   id: string;
   userId: string;
+  email: string; // Add email property
   bio?: string;
   location?: string;
   website?: string;
