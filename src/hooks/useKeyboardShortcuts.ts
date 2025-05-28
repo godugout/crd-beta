@@ -40,11 +40,9 @@ export const useKeyboardShortcuts = ({
           if (cmdOrCtrl && !shiftKey && canUndo) {
             e.preventDefault();
             onUndo();
-          } else if ((cmdOrCtrl && shiftKey) || (cmdOrCtrl && key === 'Y')) {
-            if (canRedo) {
-              e.preventDefault();
-              onRedo();
-            }
+          } else if (cmdOrCtrl && shiftKey && canRedo) {
+            e.preventDefault();
+            onRedo();
           }
           break;
         

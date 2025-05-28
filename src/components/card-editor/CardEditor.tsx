@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { Card, CardLayer, CardEffect } from '@/lib/types';
 import { fabric } from 'fabric';
@@ -105,7 +106,63 @@ const CardEditor: React.FC<CardEditorProps> = ({
     undoRedoSystem.pushState(newCard);
   }, [activeCard, undoRedoSystem]);
 
-  // Keyboard shortcuts
+  // Define handleSave before using it in keyboard shortcuts
+  const handleSave = useCallback(async () => {
+    try {
+      // Generate image and thumbnail
+      const cardImage = generateCardImage();
+      const thumbnail = generateThumbnail();
+      
+      const cardToSave: Card = {
+        id: activeCard.id || `card-${Date.now()}`,
+        title: activeCard.title || 'Untitled Card',
+        description: activeCard.description || '',
+        imageUrl: cardImage, // Set the generated canvas image
+        thumbnailUrl: thumbnail, // Set the generated thumbnail
+        userId: activeCard.userId || 'current-user',
+        tags: activeCard.tags || [],
+        effects: activeCard.effects || [],
+        createdAt: activeCard.createdAt || new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        designMetadata: {
+          cardStyle: {
+            template: 'custom',
+            effect: 'none',
+            borderRadius: '8px',
+            borderColor: '#000000',
+            frameWidth: 2,
+            frameColor: '#000000',
+            shadowColor: 'rgba(0,0,0,0.2)'
+          },
+          textStyle: {
+            titleColor: '#000000',
+            titleAlignment: 'center',
+            titleWeight: 'bold',
+            descriptionColor: '#333333'
+          },
+          cardMetadata: {
+            category: 'Custom',
+            series: 'Base',
+            cardType: 'Standard'
+          },
+          marketMetadata: {
+            isPrintable: false,
+            isForSale: false,
+            includeInCatalog: false
+          }
+        },
+        layers: activeCard.layers || []
+      };
+
+      await onSave(cardToSave);
+      toast.success('Card saved successfully');
+    } catch (error) {
+      console.error('Save error:', error);
+      toast.error('Failed to save card');
+    }
+  }, [activeCard, onSave]);
+
+  // Keyboard shortcuts - now handleSave is defined
   useKeyboardShortcuts({
     onUndo: undoRedoSystem.undo,
     onRedo: undoRedoSystem.redo,
