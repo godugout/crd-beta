@@ -5,40 +5,41 @@ import { Environment } from '@react-three/drei';
 export const GalleryEnvironment = () => {
   return (
     <>
-      {/* Clean gallery lighting */}
-      <Environment preset="studio" background={false} />
-      
-      {/* Gallery spotlights */}
-      <spotLight 
-        position={[5, 10, 5]} 
-        angle={0.3} 
-        penumbra={0.5} 
-        intensity={2} 
-        color="#ffffff"
-        castShadow
+      {/* Museum/Gallery environment */}
+      <Environment 
+        files="https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/museum_of_ethnography_1k.hdr"
+        background={true}
+        backgroundBlurriness={0.1}
+        backgroundIntensity={0.6}
+        environmentIntensity={1.2}
       />
-      <spotLight 
-        position={[-5, 10, 5]} 
-        angle={0.3} 
-        penumbra={0.5} 
+      
+      {/* Professional gallery lighting */}
+      <directionalLight 
+        position={[10, 15, 8]} 
         intensity={2} 
         color="#ffffff"
         castShadow
+        shadow-mapSize-width={2048}
+        shadow-mapSize-height={2048}
+      />
+      <directionalLight 
+        position={[-8, 12, 8]} 
+        intensity={1.5} 
+        color="#f8f8ff"
       />
       
       {/* Ambient gallery lighting */}
-      <ambientLight intensity={0.8} color="#f5f5f5" />
-      
-      {/* Gallery walls */}
-      <mesh position={[0, 0, -20]} receiveShadow>
-        <planeGeometry args={[40, 20]} />
-        <meshLambertMaterial color="#f8f8f8" />
-      </mesh>
+      <ambientLight intensity={0.4} color="#f5f5f5" />
       
       {/* Gallery floor */}
-      <mesh position={[0, -10, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-        <planeGeometry args={[40, 40]} />
-        <meshLambertMaterial color="#e8e8e8" />
+      <mesh position={[0, -8, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+        <planeGeometry args={[50, 50]} />
+        <meshStandardMaterial 
+          color="#f0f0f0" 
+          roughness={0.1}
+          metalness={0.0}
+        />
       </mesh>
     </>
   );
