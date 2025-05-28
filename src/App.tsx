@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -11,18 +12,15 @@ import PageLayout from "@/components/navigation/PageLayout";
 import Home from "@/pages/Home";
 import Gallery from "@/pages/Gallery";
 import CardDetail from "@/pages/CardDetail";
-import CardEditor from "@/pages/CardEditor";
 import Auth from "@/pages/Auth";
 import Profile from "@/pages/Profile";
-import Settings from "@/pages/Settings";
 import Dashboard from "@/pages/Dashboard";
 import Labs from "@/pages/Labs";
 import CardCreator from "@/components/card-creation/CardCreator";
 import UnifiedCardEditor from "@/pages/UnifiedCardEditor";
 import OaklandMemories from "@/pages/OaklandMemories";
 import OaklandMemoryCreator from "@/components/oakland/OaklandMemoryCreator";
-import CardShowcase from "@/components/card-viewer/CardShowcase";
-import CardCollection from "@/pages/CardCollection";
+import CardShowcase from "@/pages/CardShowcase";
 
 const queryClient = new QueryClient();
 
@@ -38,13 +36,10 @@ const App = () => (
               <Routes>
                 <Route path="/" element={<PageLayout><Home /></PageLayout>} />
                 <Route path="/gallery" element={<PageLayout><Gallery /></PageLayout>} />
-                <Route path="/collections" element={<PageLayout><CardCollection /></PageLayout>} />
                 <Route path="/cards/:id" element={<PageLayout><CardDetail /></PageLayout>} />
-                <Route path="/cards/edit/:id" element={<PageLayout><CardEditor /></PageLayout>} />
                 <Route path="/cards/create" element={<UnifiedCardEditor />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/profile" element={<PageLayout><Profile /></PageLayout>} />
-                <Route path="/settings" element={<PageLayout><Settings /></PageLayout>} />
                 <Route path="/dashboard" element={<PageLayout><Dashboard /></PageLayout>} />
                 <Route path="/labs" element={<PageLayout><Labs /></PageLayout>} />
                 
