@@ -92,12 +92,15 @@ const SmartCardExtractor: React.FC<SmartCardExtractorProps> = ({
     if (!isDragging && !isResizing || !imageRef.current) return;
     
     const { x, y } = getMousePosition(e);
-    const deltaX = x - dragStart.x;
-    const deltaY = y - dragStart.y;
+    
+    // Reduce sensitivity by applying a scaling factor
+    const sensitivityFactor = 0.3; // Lower = less sensitive
+    const deltaX = (x - dragStart.x) * sensitivityFactor;
+    const deltaY = (y - dragStart.y) * sensitivityFactor;
     
     if (isDragging) {
-      const newX = dragStart.cropX + deltaX;
-      const newY = dragStart.cropY + deltaY;
+      const newX = Math.max(0, Math.min(dragStart.cropX + deltaX, imageRef.current.naturalWidth - cropArea.width));
+      const newY = Math.max(0, Math.min(dragStart.cropY + deltaY, imageRef.current.naturalHeight - cropArea.height));
       setCropArea(prev => ({ ...prev, x: newX, y: newY }));
     } else if (isResizing) {
       const aspectRatio = 2.5 / 3.5;
@@ -106,28 +109,38 @@ const SmartCardExtractor: React.FC<SmartCardExtractorProps> = ({
       let newX = cropArea.x;
       let newY = cropArea.y;
       
+      // Apply reduced sensitivity to resizing
+      const resizeDeltaX = deltaX * 3; // Slightly more sensitive for resizing
+      const resizeDeltaY = deltaY * 3;
+      
       switch (isResizing) {
         case 'se':
-          newWidth = Math.max(50, cropArea.width + deltaX);
+          newWidth = Math.max(50, cropArea.width + resizeDeltaX);
           newHeight = newWidth / aspectRatio;
           break;
         case 'sw':
-          newWidth = Math.max(50, cropArea.width - deltaX);
+          newWidth = Math.max(50, cropArea.width - resizeDeltaX);
           newHeight = newWidth / aspectRatio;
           newX = cropArea.x + cropArea.width - newWidth;
           break;
         case 'ne':
-          newWidth = Math.max(50, cropArea.width + deltaX);
+          newWidth = Math.max(50, cropArea.width + resizeDeltaX);
           newHeight = newWidth / aspectRatio;
           newY = cropArea.y + cropArea.height - newHeight;
           break;
         case 'nw':
-          newWidth = Math.max(50, cropArea.width - deltaX);
+          newWidth = Math.max(50, cropArea.width - resizeDeltaX);
           newHeight = newWidth / aspectRatio;
           newX = cropArea.x + cropArea.width - newWidth;
           newY = cropArea.y + cropArea.height - newHeight;
           break;
       }
+      
+      // Ensure crop area stays within image bounds
+      newX = Math.max(0, Math.min(newX, imageRef.current.naturalWidth - newWidth));
+      newY = Math.max(0, Math.min(newY, imageRef.current.naturalHeight - newHeight));
+      newWidth = Math.min(newWidth, imageRef.current.naturalWidth - newX);
+      newHeight = Math.min(newHeight, imageRef.current.naturalHeight - newY);
       
       setCropArea({ x: newX, y: newY, width: newWidth, height: newHeight });
     }
@@ -147,9 +160,10 @@ const SmartCardExtractor: React.FC<SmartCardExtractorProps> = ({
     setIsProcessing(true);
     
     try {
+      // Ensure crop area is within bounds
       const naturalCrop = {
-        x: Math.max(0, cropArea.x),
-        y: Math.max(0, cropArea.y),
+        x: Math.max(0, Math.min(cropArea.x, imageRef.current.naturalWidth)),
+        y: Math.max(0, Math.min(cropArea.y, imageRef.current.naturalHeight)),
         width: Math.min(cropArea.width, imageRef.current.naturalWidth - cropArea.x),
         height: Math.min(cropArea.height, imageRef.current.naturalHeight - cropArea.y)
       };
@@ -173,9 +187,10 @@ const SmartCardExtractor: React.FC<SmartCardExtractorProps> = ({
       const file = new File([blob], 'extracted-card.png', { type: 'image/png' });
       const url = URL.createObjectURL(blob);
       
+      // Call the onSave callback which should handle saving to the card system
       onSave(file, url);
       
-      toast.success('Card extracted successfully!');
+      toast.success('Card extracted and saved successfully! 🔥');
       onClose();
     } catch (error) {
       console.error('Error extracting card:', error);
@@ -235,7 +250,7 @@ const SmartCardExtractor: React.FC<SmartCardExtractorProps> = ({
     transition: 'box-shadow 0.2s ease'
   };
 
-  const handleStyle = 'absolute w-5 h-5 bg-blue-500 border-2 border-white rounded-full shadow-lg cursor-pointer hover:bg-blue-600 hover:scale-110 transition-all duration-200 flex items-center justify-center';
+  const handleStyle = 'absolute w-6 h-6 bg-blue-500 border-2 border-white rounded-full shadow-lg cursor-pointer hover:bg-blue-600 hover:scale-110 transition-all duration-200 flex items-center justify-center';
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -245,7 +260,7 @@ const SmartCardExtractor: React.FC<SmartCardExtractorProps> = ({
             <Crop className="w-6 h-6" />
             Smart Card Extractor
           </DialogTitle>
-          <p className="text-gray-300 text-sm">Crop your card image with precision. Drag to move, use corners to resize.</p>
+          <p className="text-gray-300 text-sm">Crop your card image with precision. Drag to move, use corners to resize. Reduced sensitivity for fine control.</p>
         </DialogHeader>
         
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 p-6 h-[calc(98vh-8rem)] overflow-hidden">
@@ -281,30 +296,30 @@ const SmartCardExtractor: React.FC<SmartCardExtractorProps> = ({
                   onMouseEnter={() => setIsHovering(true)}
                   onMouseLeave={() => setIsHovering(false)}
                 >
-                  {/* Corner resize handles */}
+                  {/* Corner resize handles - made larger for easier interaction */}
                   <div
-                    className={`${handleStyle} -top-2.5 -left-2.5`}
+                    className={`${handleStyle} -top-3 -left-3`}
                     onMouseDown={(e) => handleMouseDown(e, 'nw')}
                     title="Resize from top-left"
                   >
                     <div className="w-2 h-2 bg-white rounded-full"></div>
                   </div>
                   <div
-                    className={`${handleStyle} -top-2.5 -right-2.5`}
+                    className={`${handleStyle} -top-3 -right-3`}
                     onMouseDown={(e) => handleMouseDown(e, 'ne')}
                     title="Resize from top-right"
                   >
                     <div className="w-2 h-2 bg-white rounded-full"></div>
                   </div>
                   <div
-                    className={`${handleStyle} -bottom-2.5 -left-2.5`}
+                    className={`${handleStyle} -bottom-3 -left-3`}
                     onMouseDown={(e) => handleMouseDown(e, 'sw')}
                     title="Resize from bottom-left"
                   >
                     <div className="w-2 h-2 bg-white rounded-full"></div>
                   </div>
                   <div
-                    className={`${handleStyle} -bottom-2.5 -right-2.5`}
+                    className={`${handleStyle} -bottom-3 -right-3`}
                     onMouseDown={(e) => handleMouseDown(e, 'se')}
                     title="Resize from bottom-right"
                   >
@@ -328,7 +343,7 @@ const SmartCardExtractor: React.FC<SmartCardExtractorProps> = ({
               </div>
               <div className="flex items-center gap-2 text-xs">
                 <Square className="w-3 h-3" />
-                Card aspect ratio maintained
+                Reduced sensitivity for precise control
               </div>
             </div>
           </div>
@@ -359,7 +374,7 @@ const SmartCardExtractor: React.FC<SmartCardExtractorProps> = ({
                       <li>• Drag the blue box to move</li>
                       <li>• Drag corner circles to resize</li>
                       <li>• Maintains card aspect ratio</li>
-                      <li>• Hover for better visibility</li>
+                      <li>• Reduced sensitivity for precision</li>
                     </ul>
                   </div>
                   
@@ -391,7 +406,7 @@ const SmartCardExtractor: React.FC<SmartCardExtractorProps> = ({
                 ) : (
                   <>
                     <Download className="h-5 w-5 mr-2" />
-                    Extract Card
+                    Extract & Save Card
                   </>
                 )}
               </Button>

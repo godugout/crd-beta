@@ -23,6 +23,7 @@ const UploadFlow: React.FC<UploadFlowProps> = ({
     title: initialData?.title || '',
     description: initialData?.description || '',
     imageUrl: initialData?.imageUrl || '',
+    file: initialData?.file || null,
     player: initialData?.player || '',
     team: initialData?.team || '',
     year: initialData?.year || '',
@@ -30,10 +31,11 @@ const UploadFlow: React.FC<UploadFlowProps> = ({
   });
 
   const handleImageUpload = (file: File, previewUrl: string) => {
+    console.log('Image uploaded:', { file, previewUrl });
     setCardData(prev => ({
       ...prev,
       imageUrl: previewUrl,
-      file
+      file: file
     }));
   };
 
@@ -45,11 +47,25 @@ const UploadFlow: React.FC<UploadFlowProps> = ({
   };
 
   const handleSave = () => {
-    if (!cardData.imageUrl) {
+    if (!cardData.imageUrl || !cardData.file) {
+      console.error('Missing image data:', { imageUrl: cardData.imageUrl, file: cardData.file });
       return;
     }
     
-    onSave(cardData);
+    console.log('Saving card with data:', cardData);
+    
+    // Ensure we have all the necessary data for card creation
+    const completeCardData = {
+      ...cardData,
+      type: 'uploaded',
+      template: 'custom',
+      designMetadata: {
+        type: 'uploaded',
+        template: 'custom'
+      }
+    };
+    
+    onSave(completeCardData);
   };
 
   return (
@@ -181,8 +197,8 @@ const UploadFlow: React.FC<UploadFlowProps> = ({
                 </Button>
                 <Button
                   onClick={handleSave}
-                  disabled={!cardData.imageUrl}
-                  className="flex-1 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white"
+                  disabled={!cardData.imageUrl || !cardData.file}
+                  className="flex-1 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Create Card
                 </Button>
