@@ -42,7 +42,7 @@
     "@react-three/drei": "^9.96.5",
     "@react-three/fiber": "^8.18.0",
     "@sentry/react": "^7.86.0",
-    "@supabase/supabase-js": "^2.49.1",
+    "@supabase/supabase-js": "^2.49.8",
     "@tanstack/react-query": "^5.56.2",
     "@types/localforage": "^0.0.33",
     "@types/three": "^0.160.0",
