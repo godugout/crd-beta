@@ -1,12 +1,35 @@
 
 import React from 'react';
 import { Environment } from '@react-three/drei';
-import { useLoader } from '@react-three/fiber';
-import { TextureLoader } from 'three';
+import * as THREE from 'three';
 
 export const StudioEnvironment = () => {
-  // Load concrete texture for studio floor
-  const concreteTexture = useLoader(TextureLoader, 'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=1024&h=1024&fit=crop');
+  // Create a procedural concrete texture instead of loading from Unsplash
+  const createConcreteTexture = () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 512;
+    canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+    
+    if (ctx) {
+      // Base concrete color
+      ctx.fillStyle = '#e8e8e8';
+      ctx.fillRect(0, 0, 512, 512);
+      
+      // Add some texture variation
+      for (let i = 0; i < 200; i++) {
+        ctx.fillStyle = `rgba(${180 + Math.random() * 60}, ${180 + Math.random() * 60}, ${180 + Math.random() * 60}, 0.3)`;
+        ctx.fillRect(Math.random() * 512, Math.random() * 512, Math.random() * 20, Math.random() * 20);
+      }
+    }
+    
+    return new THREE.CanvasTexture(canvas);
+  };
+  
+  const concreteTexture = createConcreteTexture();
+  concreteTexture.wrapS = THREE.RepeatWrapping;
+  concreteTexture.wrapT = THREE.RepeatWrapping;
+  concreteTexture.repeat.set(4, 4);
   
   return (
     <>

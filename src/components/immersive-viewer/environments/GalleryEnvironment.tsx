@@ -1,12 +1,43 @@
 
 import React from 'react';
 import { Environment } from '@react-three/drei';
-import { useLoader } from '@react-three/fiber';
-import { TextureLoader } from 'three';
+import * as THREE from 'three';
 
 export const GalleryEnvironment = () => {
-  // Load marble texture for gallery floor
-  const marbleTexture = useLoader(TextureLoader, 'https://images.unsplash.com/photo-1564682999317-83e1e7bb1b55?w=1024&h=1024&fit=crop');
+  // Create a procedural marble texture
+  const createMarbleTexture = () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 512;
+    canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+    
+    if (ctx) {
+      // Base marble color
+      ctx.fillStyle = '#f8f8f8';
+      ctx.fillRect(0, 0, 512, 512);
+      
+      // Add marble veining
+      for (let i = 0; i < 20; i++) {
+        ctx.strokeStyle = `rgba(${200 + Math.random() * 40}, ${200 + Math.random() * 40}, ${200 + Math.random() * 40}, 0.6)`;
+        ctx.lineWidth = Math.random() * 3 + 1;
+        ctx.beginPath();
+        ctx.moveTo(Math.random() * 512, Math.random() * 512);
+        ctx.bezierCurveTo(
+          Math.random() * 512, Math.random() * 512,
+          Math.random() * 512, Math.random() * 512,
+          Math.random() * 512, Math.random() * 512
+        );
+        ctx.stroke();
+      }
+    }
+    
+    return new THREE.CanvasTexture(canvas);
+  };
+  
+  const marbleTexture = createMarbleTexture();
+  marbleTexture.wrapS = THREE.RepeatWrapping;
+  marbleTexture.wrapT = THREE.RepeatWrapping;
+  marbleTexture.repeat.set(3, 3);
   
   return (
     <>

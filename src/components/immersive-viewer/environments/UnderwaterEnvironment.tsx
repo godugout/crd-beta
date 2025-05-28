@@ -1,16 +1,40 @@
 
 import React, { useRef } from 'react';
 import { Environment } from '@react-three/drei';
-import { useFrame, useLoader } from '@react-three/fiber';
-import { TextureLoader } from 'three';
+import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
 export const UnderwaterEnvironment = () => {
   const causticsRef = useRef<THREE.Group>(null);
   const waterRef = useRef<THREE.Mesh>(null);
   
-  // Load sand texture for ocean floor
-  const sandTexture = useLoader(TextureLoader, 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=1024&h=1024&fit=crop');
+  // Create a procedural sand texture
+  const createSandTexture = () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 512;
+    canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+    
+    if (ctx) {
+      // Base sand color
+      ctx.fillStyle = '#c4a484';
+      ctx.fillRect(0, 0, 512, 512);
+      
+      // Add sand grain variations
+      for (let i = 0; i < 2000; i++) {
+        const brightness = 180 + Math.random() * 75;
+        ctx.fillStyle = `rgba(${brightness}, ${brightness * 0.8}, ${brightness * 0.6}, 0.6)`;
+        ctx.fillRect(Math.random() * 512, Math.random() * 512, 1, 1);
+      }
+    }
+    
+    return new THREE.CanvasTexture(canvas);
+  };
+  
+  const sandTexture = createSandTexture();
+  sandTexture.wrapS = THREE.RepeatWrapping;
+  sandTexture.wrapT = THREE.RepeatWrapping;
+  sandTexture.repeat.set(20, 20);
   
   useFrame((state) => {
     const time = state.clock.getElapsedTime();

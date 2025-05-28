@@ -1,13 +1,36 @@
 
 import React from 'react';
 import { Environment, Sky } from '@react-three/drei';
-import { useLoader } from '@react-three/fiber';
-import { TextureLoader } from 'three';
 import * as THREE from 'three';
 
 export const StadiumEnvironment = () => {
-  // Load grass texture for stadium field
-  const grassTexture = useLoader(TextureLoader, 'https://images.unsplash.com/photo-1574680096145-d05b474e2155?w=1024&h=1024&fit=crop');
+  // Create a procedural grass texture
+  const createGrassTexture = () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 512;
+    canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+    
+    if (ctx) {
+      // Base grass color
+      ctx.fillStyle = '#1a4a1a';
+      ctx.fillRect(0, 0, 512, 512);
+      
+      // Add grass blade variations
+      for (let i = 0; i < 1000; i++) {
+        const green = Math.floor(60 + Math.random() * 80);
+        ctx.fillStyle = `rgba(${Math.floor(green * 0.3)}, ${green}, ${Math.floor(green * 0.4)}, 0.8)`;
+        ctx.fillRect(Math.random() * 512, Math.random() * 512, 1, Math.random() * 3 + 1);
+      }
+    }
+    
+    return new THREE.CanvasTexture(canvas);
+  };
+  
+  const grassTexture = createGrassTexture();
+  grassTexture.wrapS = THREE.RepeatWrapping;
+  grassTexture.wrapT = THREE.RepeatWrapping;
+  grassTexture.repeat.set(50, 50);
   
   return (
     <>
