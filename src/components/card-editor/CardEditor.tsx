@@ -30,6 +30,10 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { useCanvasControls } from '@/hooks/useCanvasControls';
+import { useUndoRedo } from '@/hooks/useUndoRedo';
+import ImageTransformControls from './ImageTransformControls';
+import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 
 interface CardEditorProps {
   initialCard?: Partial<Card>;
@@ -69,6 +73,54 @@ const CardEditor: React.FC<CardEditorProps> = ({
   // Canvas refs
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fabricRef = useRef<fabric.Canvas | null>(null);
+
+  // Modern canvas controls
+  const canvasControls = useCanvasControls({
+    fabricRef,
+    minZoom: 0.1,
+    maxZoom: 5,
+    zoomSensitivity: 0.001
+  });
+
+  // Undo/redo system
+  const undoRedoSystem = useUndoRedo(
+    initialCard || {
+      id: `card-${Date.now()}`,
+      title: 'Untitled Card',
+      layers: [],
+      effects: [],
+      metadata: {},
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    }
+  );
+
+  // Sync undo/redo state with activeCard
+  useEffect(() => {
+    setActiveCard(undoRedoSystem.state);
+  }, [undoRedoSystem.state]);
+
+  const updateCardWithHistory = useCallback((updates: Partial<Card>) => {
+    const newCard = { ...activeCard, ...updates, updatedAt: new Date().toISOString() };
+    undoRedoSystem.pushState(newCard);
+  }, [activeCard, undoRedoSystem]);
+
+  // Keyboard shortcuts
+  useKeyboardShortcuts({
+    onUndo: undoRedoSystem.undo,
+    onRedo: undoRedoSystem.redo,
+    onSave: handleSave,
+    onZoomIn: canvasControls.zoomIn,
+    onZoomOut: canvasControls.zoomOut,
+    onResetView: canvasControls.resetView,
+    onDelete: () => {
+      if (selectedLayerId) {
+        deleteLayer(selectedLayerId);
+      }
+    },
+    canUndo: undoRedoSystem.canUndo,
+    canRedo: undoRedoSystem.canRedo
+  });
 
   // Initialize Fabric.js canvas
   useEffect(() => {
@@ -477,14 +529,15 @@ const CardEditor: React.FC<CardEditorProps> = ({
 
   const updateLayer = useCallback((layerId: string, updates: Partial<CardLayer>) => {
     console.log('Updating layer:', layerId, updates);
-    setActiveCard(prev => ({
-      ...prev,
-      layers: prev.layers?.map(layer => 
+    const newCard = {
+      ...activeCard,
+      layers: activeCard.layers?.map(layer => 
         layer.id === layerId ? { ...layer, ...updates } : layer
       ) || [],
       updatedAt: new Date().toISOString()
-    }));
-  }, []);
+    };
+    undoRedoSystem.pushState(newCard);
+  }, [activeCard, undoRedoSystem]);
 
   const moveLayerUp = useCallback((layerId: string) => {
     setActiveCard(prev => {
@@ -658,6 +711,79 @@ const CardEditor: React.FC<CardEditorProps> = ({
     }
   }, [selectedLayerId]);
 
+  // Enhanced image transformation functions
+  const fitImageToCanvas = useCallback(() => {
+    if (!selectedLayerId || !fabricRef.current) return;
+    
+    const canvas = fabricRef.current;
+    const selectedObject = canvas.getObjects().find(obj => 
+      (obj as any).data?.layerId === selectedLayerId
+    );
+    
+    if (selectedObject && selectedObject.type === 'image') {
+      const canvasWidth = canvas.width || 750;
+      const canvasHeight = canvas.height || 1050;
+      const padding = 50;
+      
+      // Calculate scale to fit with padding
+      const scaleX = (canvasWidth - padding * 2) / (selectedObject.width || 1);
+      const scaleY = (canvasHeight - padding * 2) / (selectedObject.height || 1);
+      const scale = Math.min(scaleX, scaleY);
+      
+      selectedObject.set({
+        left: canvasWidth / 2,
+        top: canvasHeight / 2,
+        originX: 'center',
+        originY: 'center',
+        scaleX: scale,
+        scaleY: scale
+      });
+      
+      canvas.renderAll();
+      
+      updateLayer(selectedLayerId, {
+        position: { x: canvasWidth / 2, y: canvasHeight / 2, z: 0 },
+        size: { 
+          width: (selectedObject.width || 1) * scale, 
+          height: (selectedObject.height || 1) * scale 
+        }
+      });
+      
+      toast.success('Image fitted to canvas');
+    }
+  }, [selectedLayerId, updateLayer]);
+
+  const resetImageTransform = useCallback(() => {
+    if (!selectedLayerId || !fabricRef.current) return;
+    
+    const canvas = fabricRef.current;
+    const selectedObject = canvas.getObjects().find(obj => 
+      (obj as any).data?.layerId === selectedLayerId
+    );
+    
+    if (selectedObject) {
+      selectedObject.set({
+        left: 100,
+        top: 100,
+        scaleX: 1,
+        scaleY: 1,
+        angle: 0,
+        flipX: false,
+        flipY: false
+      });
+      
+      canvas.renderAll();
+      
+      updateLayer(selectedLayerId, {
+        position: { x: 100, y: 100, z: 0 },
+        size: { width: selectedObject.width || 200, height: selectedObject.height || 200 },
+        rotation: 0
+      });
+      
+      toast.success('Transform reset');
+    }
+  }, [selectedLayerId, updateLayer]);
+
   const handleSave = async () => {
     try {
       // Generate image and thumbnail
@@ -779,19 +905,63 @@ const CardEditor: React.FC<CardEditorProps> = ({
           <input
             type="text"
             value={activeCard.title || ''}
-            onChange={(e) => setActiveCard(prev => ({ ...prev, title: e.target.value }))}
+            onChange={(e) => updateCardWithHistory({ title: e.target.value })}
             className="bg-gray-700 border border-gray-600 rounded px-3 py-1 text-sm"
             placeholder="Card title"
           />
         </div>
         
         <div className="flex items-center space-x-2">
-          <Button variant="ghost" size="sm">
+          {/* Undo/Redo */}
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={undoRedoSystem.undo}
+            disabled={!undoRedoSystem.canUndo}
+            title="Undo (Ctrl+Z)"
+          >
             <Undo className="w-4 h-4" />
           </Button>
-          <Button variant="ghost" size="sm">
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={undoRedoSystem.redo}
+            disabled={!undoRedoSystem.canRedo}
+            title="Redo (Ctrl+Y)"
+          >
             <Redo className="w-4 h-4" />
           </Button>
+          
+          {/* Canvas Controls */}
+          <Separator orientation="vertical" className="h-6" />
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={canvasControls.zoomOut}
+            title="Zoom Out (-)"
+          >
+            <ZoomOut className="w-4 h-4" />
+          </Button>
+          <span className="text-xs text-gray-400 px-2">
+            {Math.round(canvasControls.zoom * 100)}%
+          </span>
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={canvasControls.zoomIn}
+            title="Zoom In (+)"
+          >
+            <ZoomIn className="w-4 h-4" />
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={canvasControls.resetView}
+            title="Reset View (0)"
+          >
+            <Grid className="w-4 h-4" />
+          </Button>
+          
           <Separator orientation="vertical" className="h-6" />
           <Button onClick={handleSave} size="sm">
             <Save className="w-4 h-4 mr-1" />
@@ -907,11 +1077,29 @@ const CardEditor: React.FC<CardEditorProps> = ({
         </Button>
       </div>
 
-      {/* Canvas Area */}
-      <div className="flex-1 flex items-center justify-center bg-gray-800 pt-16">
+      {/* Canvas Area with Instructions */}
+      <div className="flex-1 flex flex-col items-center justify-center bg-gray-800 pt-16">
+        {/* Canvas Instructions */}
+        <div className="mb-4 text-center">
+          <div className="inline-flex items-center gap-4 bg-gray-700 rounded-lg px-4 py-2 text-sm text-gray-300">
+            <span className="flex items-center gap-1">
+              <kbd className="px-2 py-1 bg-gray-600 rounded text-xs">Space</kbd>
+              + drag to pan
+            </span>
+            <span className="flex items-center gap-1">
+              <kbd className="px-2 py-1 bg-gray-600 rounded text-xs">Scroll</kbd>
+              to zoom
+            </span>
+            <span className="flex items-center gap-1">
+              <kbd className="px-2 py-1 bg-gray-600 rounded text-xs">Ctrl+Z</kbd>
+              to undo
+            </span>
+          </div>
+        </div>
+
         <div 
           className="relative shadow-2xl"
-          style={{ transform: `scale(${zoom})` }}
+          style={{ transform: `scale(${canvasControls.zoom})` }}
         >
           <canvas 
             ref={canvasRef} 
@@ -1071,6 +1259,18 @@ const CardEditor: React.FC<CardEditorProps> = ({
             <h3 className="font-semibold mb-3">Properties</h3>
             {selectedLayer ? (
               <div className="space-y-4">
+                {/* Advanced Image Controls */}
+                {selectedLayer.type === 'image' && (
+                  <ImageTransformControls
+                    layer={selectedLayer}
+                    onLayerUpdate={updateLayer}
+                    onRotateImage={rotateSelectedImage}
+                    onFlipImage={flipSelectedImage}
+                    onFitToCanvas={fitImageToCanvas}
+                    onResetTransform={resetImageTransform}
+                  />
+                )}
+                
                 <div>
                   <label className="text-sm text-gray-400">Position</label>
                   <div className="grid grid-cols-2 gap-2 mt-1">
@@ -1190,6 +1390,7 @@ const CardEditor: React.FC<CardEditorProps> = ({
               <div className="text-center py-8 text-gray-400">
                 <Move className="w-12 h-12 mx-auto opacity-50 mb-2" />
                 <p className="text-sm">Select a layer to edit properties</p>
+                <p className="text-xs mt-1">Use Space + drag to pan the canvas</p>
               </div>
             )}
           </TabsContent>
