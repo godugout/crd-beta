@@ -23,12 +23,7 @@ import {
   Trash2,
   EyeOff,
   Move,
-  Layers3,
-  RotateCw,
-  RotateCcw,
-  FlipHorizontal,
-  FlipVertical,
-  Crop
+  Layers3
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -88,56 +83,6 @@ const CardEditor: React.FC<CardEditorProps> = ({
 
     // Add crop and bleed lines
     addCropAndBleedLines(canvas);
-
-    // Set up mouse wheel zoom and pan
-    canvas.on('mouse:wheel', (opt) => {
-      const delta = opt.e.deltaY;
-      let zoom = canvas.getZoom();
-      zoom *= 0.999 ** delta;
-      if (zoom > 20) zoom = 20;
-      if (zoom < 0.01) zoom = 0.01;
-      canvas.zoomToPoint({ x: opt.e.offsetX, y: opt.e.offsetY }, zoom);
-      opt.e.preventDefault();
-      opt.e.stopPropagation();
-      
-      // Update zoom state
-      setZoom(zoom);
-    });
-
-    // Set up panning with middle mouse or alt+drag
-    let isDragging = false;
-    let lastPosX = 0;
-    let lastPosY = 0;
-
-    canvas.on('mouse:down', (opt) => {
-      const evt = opt.e;
-      if (evt.altKey === true || evt.button === 1) {
-        isDragging = true;
-        canvas.selection = false;
-        lastPosX = evt.clientX;
-        lastPosY = evt.clientY;
-      }
-    });
-
-    canvas.on('mouse:move', (opt) => {
-      if (isDragging) {
-        const e = opt.e;
-        const vpt = canvas.viewportTransform;
-        if (vpt) {
-          vpt[4] += e.clientX - lastPosX;
-          vpt[5] += e.clientY - lastPosY;
-          canvas.requestRenderAll();
-          lastPosX = e.clientX;
-          lastPosY = e.clientY;
-        }
-      }
-    });
-
-    canvas.on('mouse:up', () => {
-      canvas.setViewportTransform(canvas.viewportTransform);
-      isDragging = false;
-      canvas.selection = true;
-    });
 
     // Set up event handlers
     canvas.on('selection:created', (e) => {
@@ -463,49 +408,6 @@ const CardEditor: React.FC<CardEditorProps> = ({
     }
   };
 
-  // Image transformation functions
-  const rotateSelectedLayer = useCallback((degrees: number) => {
-    if (!fabricRef.current || !selectedLayerId) return;
-    
-    const activeObject = fabricRef.current.getActiveObject();
-    if (activeObject && activeObject.data?.layerId === selectedLayerId) {
-      const currentAngle = activeObject.angle || 0;
-      activeObject.rotate(currentAngle + degrees);
-      fabricRef.current.renderAll();
-      
-      updateLayer(selectedLayerId, {
-        rotation: (currentAngle + degrees) % 360
-      });
-      
-      toast.success(`Rotated layer ${degrees > 0 ? 'clockwise' : 'counter-clockwise'}`);
-    }
-  }, [selectedLayerId]);
-
-  const flipSelectedLayer = useCallback((direction: 'horizontal' | 'vertical') => {
-    if (!fabricRef.current || !selectedLayerId) return;
-    
-    const activeObject = fabricRef.current.getActiveObject();
-    if (activeObject && activeObject.data?.layerId === selectedLayerId) {
-      if (direction === 'horizontal') {
-        activeObject.set('flipX', !activeObject.flipX);
-      } else {
-        activeObject.set('flipY', !activeObject.flipY);
-      }
-      fabricRef.current.renderAll();
-      
-      toast.success(`Flipped layer ${direction}ly`);
-    }
-  }, [selectedLayerId]);
-
-  const resetCanvasView = useCallback(() => {
-    if (!fabricRef.current) return;
-    
-    fabricRef.current.setZoom(1);
-    fabricRef.current.absolutePan(new fabric.Point(0, 0));
-    setZoom(1);
-    toast.success('Canvas view reset');
-  }, []);
-
   const updateLayer = useCallback((layerId: string, updates: Partial<CardLayer>) => {
     console.log('Updating layer:', layerId, updates);
     setActiveCard(prev => ({
@@ -562,6 +464,7 @@ const CardEditor: React.FC<CardEditorProps> = ({
       setSelectedLayerId(null);
     }
     
+    // Remove from canvas
     if (fabricRef.current) {
       const objects = fabricRef.current.getObjects();
       const objectToRemove = objects.find(obj => (obj as any).data?.layerId === layerId);
@@ -778,11 +681,6 @@ const CardEditor: React.FC<CardEditorProps> = ({
             <Redo className="w-4 h-4" />
           </Button>
           <Separator orientation="vertical" className="h-6" />
-          <Button onClick={resetCanvasView} variant="ghost" size="sm" title="Reset View">
-            <ZoomOut className="w-4 h-4" />
-          </Button>
-          <span className="text-xs text-gray-400">{Math.round(zoom * 100)}%</span>
-          <Separator orientation="vertical" className="h-6" />
           <Button onClick={handleSave} size="sm">
             <Save className="w-4 h-4 mr-1" />
             Save
@@ -929,17 +827,10 @@ const CardEditor: React.FC<CardEditorProps> = ({
               <span>Safe</span>
             </div>
           </div>
-          
-          {/* Canvas Controls Help */}
-          <div className="absolute top-2 right-2 bg-black bg-opacity-75 text-white text-xs p-2 rounded">
-            <div className="mb-1">Mouse Wheel: Zoom</div>
-            <div className="mb-1">Alt + Drag: Pan</div>
-            <div>Middle Click + Drag: Pan</div>
-          </div>
         </div>
       </div>
 
-      {/* Right Panel - Enhanced Properties Panel */}
+      {/* Right Panel - Enhanced Layers Panel */}
       <div className="w-80 bg-gray-800 border-l border-gray-700 pt-16">
         <Tabs defaultValue="layers" className="h-full">
           <TabsList className="grid w-full grid-cols-3 bg-gray-700">
@@ -969,6 +860,7 @@ const CardEditor: React.FC<CardEditorProps> = ({
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3 flex-1 min-w-0">
+                        {/* Layer type icon */}
                         <div className={cn(
                           "flex-shrink-0 w-8 h-8 rounded flex items-center justify-center",
                           layer.type === 'image' ? 'bg-green-600' : 
@@ -979,6 +871,7 @@ const CardEditor: React.FC<CardEditorProps> = ({
                           {layer.type === 'shape' && <Square size={14} className="text-white" />}
                         </div>
                         
+                        {/* Layer name/content */}
                         <div className="flex-1 min-w-0">
                           <div className="text-sm font-medium truncate">
                             {layer.type === 'text' ? 
@@ -991,7 +884,9 @@ const CardEditor: React.FC<CardEditorProps> = ({
                         </div>
                       </div>
                       
+                      {/* Layer controls */}
                       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        {/* Visibility toggle */}
                         <Button
                           variant="ghost" 
                           size="sm"
@@ -1004,6 +899,7 @@ const CardEditor: React.FC<CardEditorProps> = ({
                           {layer.visible ? <Eye size={14} /> : <EyeOff size={14} />}
                         </Button>
                         
+                        {/* Move up */}
                         <Button
                           variant="ghost" 
                           size="sm"
@@ -1017,6 +913,7 @@ const CardEditor: React.FC<CardEditorProps> = ({
                           <ChevronUp size={14} />
                         </Button>
                         
+                        {/* Move down */}
                         <Button
                           variant="ghost" 
                           size="sm"
@@ -1030,6 +927,7 @@ const CardEditor: React.FC<CardEditorProps> = ({
                           <ChevronDown size={14} />
                         </Button>
                         
+                        {/* Delete */}
                         <Button
                           variant="ghost" 
                           size="sm"
@@ -1086,62 +984,6 @@ const CardEditor: React.FC<CardEditorProps> = ({
                 </div>
                 
                 <div>
-                  <label className="text-sm text-gray-400">Rotation</label>
-                  <div className="flex items-center gap-2 mt-1">
-                    <input
-                      type="number"
-                      value={Math.round(selectedLayer.rotation)}
-                      onChange={(e) => updateLayer(selectedLayer.id, {
-                        rotation: Number(e.target.value)
-                      })}
-                      className="flex-1 bg-gray-700 border border-gray-600 rounded px-2 py-1 text-sm"
-                    />
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => rotateSelectedLayer(-90)}
-                      className="p-1"
-                    >
-                      <RotateCcw size={14} />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => rotateSelectedLayer(90)}
-                      className="p-1"
-                    >
-                      <RotateCw size={14} />
-                    </Button>
-                  </div>
-                </div>
-                
-                {selectedLayer.type === 'image' && (
-                  <div>
-                    <label className="text-sm text-gray-400">Transform</label>
-                    <div className="flex gap-2 mt-1">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => flipSelectedLayer('horizontal')}
-                        className="flex-1"
-                      >
-                        <FlipHorizontal size={14} className="mr-1" />
-                        Flip H
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => flipSelectedLayer('vertical')}
-                        className="flex-1"
-                      >
-                        <FlipVertical size={14} className="mr-1" />
-                        Flip V
-                      </Button>
-                    </div>
-                  </div>
-                )}
-                
-                <div>
                   <label className="text-sm text-gray-400">Opacity</label>
                   <input
                     type="range"
@@ -1189,7 +1031,6 @@ const CardEditor: React.FC<CardEditorProps> = ({
               <div className="text-center py-8 text-gray-400">
                 <Move className="w-12 h-12 mx-auto opacity-50 mb-2" />
                 <p className="text-sm">Select a layer to edit properties</p>
-                <p className="text-xs mt-1">Mouse wheel to zoom, Alt+drag to pan</p>
               </div>
             )}
           </TabsContent>
