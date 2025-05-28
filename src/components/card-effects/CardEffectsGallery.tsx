@@ -25,7 +25,7 @@ const CardEffectsGallery: React.FC<CardEffectsGalleryProps> = ({ card }) => {
   // Use the hook that returns the card effects management functions
   const { 
     effects,
-    toggleEffect,
+    updateEffectProperty,
     updateEffectIntensity
   } = useCardEffects();
   
@@ -37,10 +37,10 @@ const CardEffectsGallery: React.FC<CardEffectsGalleryProps> = ({ card }) => {
   const transformedEffects: CardEffect[] = effects.map(effect => ({
     id: effect.id,
     name: effect.name,
-    active: effect.enabled, // Map enabled to active
-    intensity: effect.parameters.intensity,
-    hue: effect.parameters.hue,
-    saturation: effect.parameters.saturation
+    active: effect.active,
+    intensity: effect.intensity,
+    hue: effect.hue,
+    saturation: effect.saturation
   }));
   
   // Get active effects from the transformed effects array
@@ -54,7 +54,10 @@ const CardEffectsGallery: React.FC<CardEffectsGalleryProps> = ({ card }) => {
   
   // Wrapper functions to handle the interface differences
   const handleToggleEffect = (effectId: string) => {
-    toggleEffect(effectId);
+    const effect = effects.find(e => e.id === effectId);
+    if (effect) {
+      updateEffectProperty(effectId, 'active', !effect.active);
+    }
   };
   
   const handleUpdateIntensity = (effectId: string, intensity: number) => {
