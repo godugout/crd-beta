@@ -1,7 +1,7 @@
 
 import React, { useRef, useMemo } from 'react';
 import { useFrame, useLoader } from '@react-three/fiber';
-import { TextureLoader } from 'three';
+import { TextureLoader, CanvasTexture } from 'three';
 import { Card } from '@/lib/types';
 import * as THREE from 'three';
 
@@ -12,6 +12,40 @@ interface CardModelProps {
   effectIntensities: Record<string, number>;
 }
 
+// Create a simple card back texture programmatically
+const createCardBackTexture = () => {
+  const canvas = document.createElement('canvas');
+  canvas.width = 512;
+  canvas.height = 712; // Card aspect ratio
+  const ctx = canvas.getContext('2d');
+  
+  if (ctx) {
+    // Create a gradient background
+    const gradient = ctx.createLinearGradient(0, 0, 512, 712);
+    gradient.addColorStop(0, '#1a1a2e');
+    gradient.addColorStop(0.5, '#16213e');
+    gradient.addColorStop(1, '#0f3460');
+    
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, 512, 712);
+    
+    // Add some decorative elements
+    ctx.strokeStyle = '#4a90e2';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(20, 20, 472, 672);
+    
+    // Add center logo/text
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 24px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('CRD', 256, 340);
+    ctx.font = '16px Arial';
+    ctx.fillText('Trading Card', 256, 370);
+  }
+  
+  return new CanvasTexture(canvas);
+};
+
 export const CardModel: React.FC<CardModelProps> = ({
   card,
   isFlipped,
@@ -21,9 +55,11 @@ export const CardModel: React.FC<CardModelProps> = ({
   const meshRef = useRef<THREE.Mesh>(null);
   const groupRef = useRef<THREE.Group>(null);
   
-  // Load card texture
+  // Load card front texture with error handling
   const frontTexture = useLoader(TextureLoader, card.imageUrl || '/placeholder-card.png');
-  const backTexture = useLoader(TextureLoader, '/images/card-back-placeholder.png');
+  
+  // Create card back texture programmatically instead of loading from file
+  const backTexture = useMemo(() => createCardBackTexture(), []);
   
   // Create materials based on active effects
   const frontMaterial = useMemo(() => {
