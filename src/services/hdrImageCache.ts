@@ -23,48 +23,53 @@ class HDRImageCacheService {
   }
 
   /**
-   * HDR URLs for different environments with fallbacks
+   * HDR URLs for different environments with fallbacks - Updated names to match actual photos
    */
   private readonly HDR_URLS = {
-    stadium: [
-      'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/stadium_01_1k.hdr',
-      'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/cape_hill_1k.hdr'
+    studio: [
+      'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/photo_studio_01_1k.hdr',
+      'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/studio_small_03_1k.hdr'
     ],
     gallery: [
       'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/museum_of_ethnography_1k.hdr',
       'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/studio_small_03_1k.hdr'
     ],
-    studio: [
-      'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/photo_studio_01_1k.hdr',
-      'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/studio_small_03_1k.hdr'
+    stadium: [
+      'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/stadium_01_1k.hdr',
+      'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/cape_hill_1k.hdr'
     ],
-    cosmic: [
-      'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/milky_way_1k.hdr',
-      'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/quarry_01_1k.hdr'
+    // Updated names based on actual HDR content
+    twilight: [
+      'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/evening_road_01_1k.hdr',
+      'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/twilight_1k.hdr'
     ],
-    underwater: [
-      'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/underwater_01_1k.hdr',
-      'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/venice_sunset_1k.hdr'
-    ],
-    forest: [
-      'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/forest_slope_1k.hdr',
+    quarry: [
+      'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/quarry_01_1k.hdr',
       'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/abandoned_parking_1k.hdr'
     ],
-    nightsky: [
-      'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/night_1k.hdr',
+    coastline: [
+      'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/venice_sunset_1k.hdr',
+      'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/cape_hill_1k.hdr'
+    ],
+    hillside: [
+      'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/forest_slope_1k.hdr',
+      'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/cape_hill_1k.hdr'
+    ],
+    milkyway: [
+      'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/milky_way_1k.hdr',
       'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/evening_road_01_1k.hdr'
     ],
-    luxury: [
+    esplanade: [
       'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/royal_esplanade_1k.hdr',
       'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/hotel_room_1k.hdr'
     ],
-    cyberpunk: [
+    neonclub: [
       'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/neon_photostudio_1k.hdr',
       'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/urban_alley_01_1k.hdr'
     ],
-    cardshop: [
-      'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/kloppenheim_02_1k.hdr',
-      'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/industrial_workshop_foundry_1k.hdr'
+    industrial: [
+      'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/industrial_workshop_foundry_1k.hdr',
+      'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/kloppenheim_02_1k.hdr'
     ]
   };
 
@@ -79,13 +84,14 @@ class HDRImageCacheService {
       stadium: [0.2, 0.3, 0.5, 1.0],
       gallery: [0.9, 0.9, 0.95, 1.0],
       studio: [0.8, 0.8, 0.85, 1.0],
-      cosmic: [0.02, 0.02, 0.1, 1.0],
-      underwater: [0.1, 0.3, 0.5, 1.0],
-      forest: [0.2, 0.4, 0.2, 1.0],
-      nightsky: [0.05, 0.05, 0.15, 1.0],
-      luxury: [0.4, 0.3, 0.2, 1.0],
-      cyberpunk: [0.1, 0.05, 0.2, 1.0],
-      cardshop: [0.3, 0.25, 0.2, 1.0]
+      twilight: [0.15, 0.1, 0.2, 1.0],
+      quarry: [0.4, 0.35, 0.3, 1.0],
+      coastline: [0.2, 0.4, 0.6, 1.0],
+      hillside: [0.2, 0.4, 0.2, 1.0],
+      milkyway: [0.02, 0.02, 0.1, 1.0],
+      esplanade: [0.4, 0.3, 0.2, 1.0],
+      neonclub: [0.1, 0.05, 0.2, 1.0],
+      industrial: [0.3, 0.25, 0.2, 1.0]
     };
 
     const color = colors[environmentType as keyof typeof colors] || [0.5, 0.5, 0.5, 1.0];
@@ -217,23 +223,30 @@ class HDRImageCacheService {
   }
 
   /**
-   * Get HDR URLs for environment type
+   * Get HDR URLs for environment type - Updated with new environment names
    */
   getUrlsForEnvironment(environmentType: string): string[] {
     const normalizedType = environmentType.toLowerCase();
     
-    // Handle aliases
+    // Handle legacy aliases - map old names to new realistic names
     const typeMap: Record<string, string> = {
-      'night': 'nightsky',
-      'nature': 'forest',
-      'space': 'cosmic',
-      'ocean': 'underwater',
-      'store': 'cardshop',
-      'mall': 'cardshop',
-      'retro': 'cardshop',
-      'cyber': 'cyberpunk',
-      'neon': 'cyberpunk',
-      'lounge': 'luxury'
+      'cosmic': 'milkyway',
+      'space': 'milkyway',
+      'nightsky': 'twilight',
+      'night': 'twilight',
+      'underwater': 'coastline',
+      'ocean': 'coastline',
+      'forest': 'hillside',
+      'nature': 'hillside',
+      'cyberpunk': 'neonclub',
+      'cyber': 'neonclub',
+      'neon': 'neonclub',
+      'luxury': 'esplanade',
+      'lounge': 'esplanade',
+      'cardshop': 'industrial',
+      'store': 'industrial',
+      'mall': 'industrial',
+      'retro': 'industrial'
     };
     
     const mappedType = typeMap[normalizedType] || normalizedType;
@@ -242,9 +255,6 @@ class HDRImageCacheService {
     return this.HDR_URLS[key] || this.HDR_URLS.studio;
   }
 
-  /**
-   * Get HDR URL for environment type (for backwards compatibility)
-   */
   getUrlForEnvironment(environmentType: string): string {
     const urls = this.getUrlsForEnvironment(environmentType);
     return urls[0];

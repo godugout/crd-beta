@@ -15,16 +15,17 @@ interface EnvironmentSelectorProps {
 }
 
 const environments = [
-  { value: 'studio', label: 'Professional Studio', description: 'Clean, bright lighting', icon: '🎬' },
-  { value: 'gallery', label: 'Art Gallery', description: 'Museum-quality spotlights', icon: '🏛️' },
-  { value: 'stadium', label: 'Sports Stadium', description: 'Dramatic arena lighting', icon: '🏟️' },
-  { value: 'cosmic', label: 'Deep Space', description: 'Cosmic void with stars', icon: '🌌' },
-  { value: 'underwater', label: 'Underwater Scene', description: 'Ocean depths with caustics', icon: '🌊' },
-  { value: 'night', label: 'Night Sky', description: 'Starlit evening atmosphere', icon: '🌙' },
-  { value: 'forest', label: 'Forest Clearing', description: 'Natural dappled sunlight', icon: '🌲' },
-  { value: 'cardshop', label: 'Retro Arcade', description: 'Neon lights and colors', icon: '🕹️' },
-  { value: 'luxury', label: 'Luxury Lounge', description: 'Elegant gold and marble', icon: '✨' },
-  { value: 'cyberpunk', label: 'Cyberpunk City', description: 'Neon-lit futuristic cityscape', icon: '🌆' },
+  { value: 'studio', label: 'Photo Studio', description: 'Professional photography setup', icon: '🎬' },
+  { value: 'gallery', label: 'Art Gallery', description: 'Museum exhibition space', icon: '🏛️' },
+  { value: 'stadium', label: 'Sports Stadium', description: 'Athletic arena with floodlights', icon: '🏟️' },
+  { value: 'twilight', label: 'Twilight Road', description: 'Evening countryside highway', icon: '🌅' },
+  { value: 'quarry', label: 'Stone Quarry', description: 'Industrial mining landscape', icon: '⛰️' },
+  { value: 'coastline', label: 'Ocean Coastline', description: 'Seaside cliff with sunset', icon: '🌊' },
+  { value: 'hillside', label: 'Forest Hillside', description: 'Wooded mountain slope', icon: '🌲' },
+  { value: 'milkyway', label: 'Milky Way', description: 'Starry night sky panorama', icon: '🌌' },
+  { value: 'esplanade', label: 'Royal Esplanade', description: 'Elegant palace courtyard', icon: '✨' },
+  { value: 'neonclub', label: 'Neon Studio', description: 'Vibrant neon-lit interior', icon: '🌆' },
+  { value: 'industrial', label: 'Industrial Workshop', description: 'Factory foundry environment', icon: '🏭' },
 ];
 
 const EnvironmentSelector: React.FC<EnvironmentSelectorProps> = ({

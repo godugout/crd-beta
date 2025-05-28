@@ -76,18 +76,25 @@ const EnvironmentRenderer: React.FC<EnvironmentRendererProps> = ({ environmentTy
           </>
         );
         
-      case 'cosmic':
-      case 'space':
+      case 'twilight':
         return (
           <>
-            <ambientLight intensity={0.15} color="#001122" />
-            <directionalLight position={[200, 100, 200]} intensity={0.6} color="#e6f3ff" />
-            <pointLight position={[300, 150, 250]} color="#ffffff" intensity={0.4} />
+            <ambientLight intensity={0.4} color="#2a1f3d" />
+            <directionalLight position={[20, 30, 20]} intensity={2.0} color="#ff6b4a" castShadow />
+            <pointLight position={[40, 12, 0]} intensity={1.2} color="#ff8c5a" />
           </>
         );
         
-      case 'underwater':
-      case 'ocean':
+      case 'quarry':
+        return (
+          <>
+            <ambientLight intensity={0.5} color="#8b7355" />
+            <directionalLight position={[30, 50, 20]} intensity={3.0} color="#fff8dc" castShadow />
+            <pointLight position={[50, 30, 0]} intensity={1.0} color="#deb887" />
+          </>
+        );
+        
+      case 'coastline':
         return (
           <>
             <ambientLight intensity={0.4} color="#004466" />
@@ -96,8 +103,7 @@ const EnvironmentRenderer: React.FC<EnvironmentRendererProps> = ({ environmentTy
           </>
         );
         
-      case 'forest':
-      case 'nature':
+      case 'hillside':
         return (
           <>
             <ambientLight intensity={0.5} color="#90a865" />
@@ -106,18 +112,16 @@ const EnvironmentRenderer: React.FC<EnvironmentRendererProps> = ({ environmentTy
           </>
         );
         
-      case 'nightsky':
-      case 'night':
+      case 'milkyway':
         return (
           <>
-            <ambientLight intensity={0.4} color="#b3ccff" />
-            <directionalLight position={[60, 100, 40]} intensity={2.5} color="#e6f3ff" castShadow />
-            <spotLight position={[0, 120, 0]} intensity={2.8} color="#ffffff" castShadow />
+            <ambientLight intensity={0.15} color="#001122" />
+            <directionalLight position={[200, 100, 200]} intensity={0.6} color="#e6f3ff" />
+            <pointLight position={[300, 150, 250]} color="#ffffff" intensity={0.4} />
           </>
         );
         
-      case 'luxury':
-      case 'lounge':
+      case 'esplanade':
         return (
           <>
             <ambientLight intensity={0.7} color="#ffd700" />
@@ -126,9 +130,7 @@ const EnvironmentRenderer: React.FC<EnvironmentRendererProps> = ({ environmentTy
           </>
         );
         
-      case 'cyberpunk':
-      case 'cyber':
-      case 'neon':
+      case 'neonclub':
         return (
           <>
             <ambientLight intensity={0.3} color="#001133" />
@@ -138,15 +140,12 @@ const EnvironmentRenderer: React.FC<EnvironmentRendererProps> = ({ environmentTy
           </>
         );
         
-      case 'cardshop':
-      case 'store':
-      case 'mall':
-      case 'retro':
+      case 'industrial':
         return (
           <>
-            <ambientLight intensity={0.4} color="#330066" />
-            <directionalLight position={[20, 30, 20]} intensity={2.0} color="#ff00ff" castShadow />
-            <pointLight position={[40, 12, 0]} intensity={1.5} color="#ff0080" />
+            <ambientLight intensity={0.4} color="#5a4a3a" />
+            <directionalLight position={[20, 30, 20]} intensity={2.5} color="#ffaa66" castShadow />
+            <pointLight position={[40, 12, 0]} intensity={1.5} color="#ff6600" />
           </>
         );
         
