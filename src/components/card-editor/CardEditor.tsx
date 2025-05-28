@@ -221,7 +221,28 @@ const CardEditor: React.FC<CardEditorProps> = ({
       };
 
       await onSave(cardToSave);
-      toast.success('Card saved successfully');
+      
+      // Show success message with action buttons
+      toast.success(
+        <div className="flex flex-col gap-2">
+          <span>Card saved successfully!</span>
+          <div className="flex gap-2">
+            <button 
+              onClick={() => window.open('/cards', '_blank')} 
+              className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700"
+            >
+              View All Cards
+            </button>
+            <button 
+              onClick={() => handlePreview()} 
+              className="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700"
+            >
+              Preview in 3D
+            </button>
+          </div>
+        </div>,
+        { duration: 5000 }
+      );
     } catch (error) {
       console.error('Save error:', error);
       toast.error('Failed to save card');
@@ -1062,6 +1083,15 @@ const CardEditor: React.FC<CardEditorProps> = ({
           </Button>
           
           <Separator orientation="vertical" className="h-6" />
+          
+          {/* Navigation Links */}
+          <Button asChild variant="ghost" size="sm">
+            <a href="/cards" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white">
+              <Eye className="w-4 h-4 mr-1" />
+              View Cards
+            </a>
+          </Button>
+          
           <Button onClick={handleSave} size="sm">
             <Save className="w-4 h-4 mr-1" />
             Save
@@ -1349,7 +1379,7 @@ const CardEditor: React.FC<CardEditorProps> = ({
                   <Layers3 className="w-12 h-12 mx-auto opacity-50" />
                 </div>
                 <p className="text-sm">No layers yet</p>
-                <p className="text-xs">Add text, images, or shapes to get started</p>
+                <p className="text-xs mt-1">Add text, images, or shapes to get started</p>
               </div>
             )}
           </TabsContent>
