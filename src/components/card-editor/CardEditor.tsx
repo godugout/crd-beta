@@ -1,7 +1,6 @@
-
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { Card, CardLayer, CardEffect } from '@/lib/types';
-import { Canvas as FabricCanvas, FabricImage, FabricText, Rect, Circle } from 'fabric';
+import { Canvas, FabricImage, FabricText, Rect, Circle } from 'fabric';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
@@ -62,13 +61,13 @@ const CardEditor: React.FC<CardEditorProps> = ({
 
   // Canvas refs
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const fabricRef = useRef<FabricCanvas | null>(null);
+  const fabricRef = useRef<Canvas | null>(null);
 
   // Initialize Fabric.js canvas
   useEffect(() => {
     if (!canvasRef.current) return;
 
-    const canvas = new FabricCanvas(canvasRef.current, {
+    const canvas = new Canvas(canvasRef.current, {
       width: 750, // 2.5" at 300 DPI
       height: 1050, // 3.5" at 300 DPI
       backgroundColor: '#ffffff',
@@ -119,7 +118,7 @@ const CardEditor: React.FC<CardEditorProps> = ({
     });
   }, [activeCard.layers]);
 
-  const renderLayer = async (canvas: FabricCanvas, layer: CardLayer) => {
+  const renderLayer = async (canvas: Canvas, layer: CardLayer) => {
     try {
       switch (layer.type) {
         case 'image':
