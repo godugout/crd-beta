@@ -13,7 +13,9 @@ import {
   Camera,
   Palette,
   Globe,
-  X
+  X,
+  RotateCcw,
+  Zap
 } from 'lucide-react';
 import { Card } from '@/lib/types';
 import { motion } from 'framer-motion';
@@ -81,6 +83,36 @@ const AdvancedCustomizationPanel: React.FC<AdvancedCustomizationPanelProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState("effects");
 
+  // Store original settings for reset functionality
+  const [originalSettings] = useState({
+    effects: ['holographic'],
+    effectIntensities: {
+      holographic: 0.7,
+      refractor: 0.5,
+      foil: 0.6,
+      chrome: 0.4,
+      prismatic: 0.8,
+      vintage: 0.3,
+      neon: 0.5,
+      galaxy: 0.6
+    },
+    materialSettings: {
+      roughness: 0.2,
+      metalness: 0.8,
+      reflectivity: 0.5,
+      clearcoat: 0.7,
+      envMapIntensity: 1.0
+    },
+    lightingSettings: {
+      intensity: 1.2,
+      color: '#ffffff',
+      position: { x: 10, y: 10, z: 10 },
+      ambientIntensity: 0.6,
+      environmentType: 'studio'
+    },
+    environmentType: 'studio'
+  });
+
   // Available effects with presets
   const availableEffects = [
     { id: 'holographic', name: 'Holographic', description: 'Rainbow prism effect' },
@@ -105,6 +137,58 @@ const AdvancedCustomizationPanel: React.FC<AdvancedCustomizationPanelProps> = ({
     { id: 'underwater', name: 'Underwater', description: 'Ocean depths' }
   ];
 
+  // Enhanced effect presets with more variety
+  const effectPresets = [
+    {
+      name: 'Original',
+      description: 'Clean card look',
+      effects: ['holographic'],
+      intensities: { holographic: 0.3 }
+    },
+    {
+      name: 'Premium',
+      description: 'High-end collectible',
+      effects: ['holographic', 'foil', 'prismatic'],
+      intensities: { holographic: 0.8, foil: 0.7, prismatic: 0.6 }
+    },
+    {
+      name: 'Vintage',
+      description: 'Classic aged look',
+      effects: ['vintage', 'chrome'],
+      intensities: { vintage: 0.8, chrome: 0.4 }
+    },
+    {
+      name: 'Cosmic',
+      description: 'Space-themed effects',
+      effects: ['galaxy', 'neon', 'holographic'],
+      intensities: { galaxy: 0.9, neon: 0.7, holographic: 0.5 }
+    },
+    {
+      name: 'Chrome',
+      description: 'Ultra-modern metallic',
+      effects: ['chrome', 'refractor'],
+      intensities: { chrome: 0.9, refractor: 0.6 }
+    },
+    {
+      name: 'Neon',
+      description: 'Cyberpunk glow',
+      effects: ['neon', 'prismatic'],
+      intensities: { neon: 0.9, prismatic: 0.5 }
+    },
+    {
+      name: 'Rainbow',
+      description: 'Full spectrum prism',
+      effects: ['holographic', 'refractor', 'prismatic'],
+      intensities: { holographic: 1.0, refractor: 0.8, prismatic: 0.9 }
+    },
+    {
+      name: 'Subtle',
+      description: 'Minimal enhancement',
+      effects: ['foil'],
+      intensities: { foil: 0.3 }
+    }
+  ];
+
   const toggleEffect = (effectId: string) => {
     const newEffects = activeEffects.includes(effectId) 
       ? activeEffects.filter(id => id !== effectId)
@@ -113,16 +197,35 @@ const AdvancedCustomizationPanel: React.FC<AdvancedCustomizationPanelProps> = ({
     toast.success(`${effectId} effect ${activeEffects.includes(effectId) ? 'disabled' : 'enabled'}`);
   };
 
-  const applyEffectPreset = (preset: string) => {
-    const presets = {
-      premium: ['holographic', 'foil', 'prismatic'],
-      vintage: ['vintage', 'chrome'],
-      cosmic: ['galaxy', 'neon', 'holographic'],
-      minimal: ['refractor']
-    };
+  const applyEffectPreset = (preset: typeof effectPresets[0]) => {
+    onEffectsChange(preset.effects);
     
-    onEffectsChange(presets[preset] || []);
-    toast.success(`Applied ${preset} preset`);
+    // Apply preset intensities
+    Object.entries(preset.intensities).forEach(([effect, intensity]) => {
+      onEffectIntensityChange(effect, intensity);
+    });
+    
+    toast.success(`Applied ${preset.name} preset`);
+  };
+
+  const resetToOriginal = () => {
+    onEffectsChange(originalSettings.effects);
+    
+    // Reset effect intensities
+    Object.entries(originalSettings.effectIntensities).forEach(([effect, intensity]) => {
+      onEffectIntensityChange(effect, intensity);
+    });
+    
+    // Reset material settings
+    onMaterialChange(originalSettings.materialSettings);
+    
+    // Reset lighting settings
+    onLightingChange(originalSettings.lightingSettings);
+    
+    // Reset environment
+    onEnvironmentChange(originalSettings.environmentType);
+    
+    toast.success('Reset to original card settings');
   };
 
   const handleSaveRemix = () => {
@@ -153,9 +256,15 @@ const AdvancedCustomizationPanel: React.FC<AdvancedCustomizationPanelProps> = ({
       <div className="p-6 space-y-6">
         <div className="flex items-center justify-between mb-2">
           <h2 className="text-xl font-bold">Card Remix Studio</h2>
-          <Button variant="ghost" size="sm" onClick={onClose}>
-            <X className="h-4 w-4" />
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="sm" onClick={resetToOriginal} className="text-orange-400 hover:text-orange-300">
+              <RotateCcw className="h-4 w-4 mr-1" />
+              Reset
+            </Button>
+            <Button variant="ghost" size="sm" onClick={onClose}>
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
 
         {/* Card Info */}
@@ -184,17 +293,21 @@ const AdvancedCustomizationPanel: React.FC<AdvancedCustomizationPanelProps> = ({
           {/* Effects Tab */}
           <TabsContent value="effects" className="space-y-4">
             <div>
-              <h3 className="text-sm font-medium mb-3">Effect Presets</h3>
+              <h3 className="text-sm font-medium mb-3 flex items-center">
+                <Zap className="h-4 w-4 mr-2" />
+                Effect Presets
+              </h3>
               <div className="grid grid-cols-2 gap-2 mb-4">
-                {['premium', 'vintage', 'cosmic', 'minimal'].map(preset => (
+                {effectPresets.map(preset => (
                   <Button 
-                    key={preset}
+                    key={preset.name}
                     variant="outline"
                     size="sm"
                     onClick={() => applyEffectPreset(preset)}
-                    className="text-xs"
+                    className="text-xs flex flex-col h-auto p-2"
                   >
-                    {preset.charAt(0).toUpperCase() + preset.slice(1)}
+                    <span className="font-medium">{preset.name}</span>
+                    <span className="text-xs text-gray-400 text-center">{preset.description}</span>
                   </Button>
                 ))}
               </div>
