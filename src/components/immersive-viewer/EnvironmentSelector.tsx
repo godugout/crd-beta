@@ -1,5 +1,13 @@
 
 import React from 'react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Palette } from 'lucide-react';
 
 interface EnvironmentSelectorProps {
   environmentType: string;
@@ -25,29 +33,30 @@ const EnvironmentSelector: React.FC<EnvironmentSelectorProps> = ({
   onEnvironmentChange
 }) => {
   return (
-    <div className="space-y-3">
-      {environments.map((env) => (
-        <button
-          key={env.value}
-          onClick={() => onEnvironmentChange(env.value)}
-          className={`w-full p-3 rounded-lg border transition-all text-left ${
-            environmentType === env.value
-              ? 'bg-white/20 border-white/40 text-white'
-              : 'bg-black/20 border-white/20 text-white/80 hover:bg-white/10 hover:border-white/30'
-          }`}
-        >
-          <div className="flex items-center gap-3">
-            <span className="text-xl">{env.icon}</span>
-            <div className="flex-1">
-              <div className="font-medium">{env.label}</div>
-              <div className="text-xs opacity-70">{env.description}</div>
-            </div>
-            {environmentType === env.value && (
-              <div className="w-2 h-2 bg-white rounded-full"></div>
-            )}
-          </div>
-        </button>
-      ))}
+    <div className="flex items-center gap-2">
+      <Palette className="h-4 w-4 text-white/70" />
+      <Select value={environmentType} onValueChange={onEnvironmentChange}>
+        <SelectTrigger className="w-[220px] bg-black/40 backdrop-blur-md border-white/20 text-white hover:bg-black/60 focus:ring-white/30">
+          <SelectValue placeholder="Select environment" />
+        </SelectTrigger>
+        <SelectContent className="bg-gray-900/95 backdrop-blur-xl border-white/20 text-white z-[100]">
+          {environments.map((env) => (
+            <SelectItem 
+              key={env.value} 
+              value={env.value}
+              className="focus:bg-white/10 focus:text-white hover:bg-white/10 cursor-pointer"
+            >
+              <div className="flex items-center gap-3">
+                <span className="text-lg">{env.icon}</span>
+                <div>
+                  <div className="font-medium">{env.label}</div>
+                  <div className="text-xs text-white/60">{env.description}</div>
+                </div>
+              </div>
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   );
 };

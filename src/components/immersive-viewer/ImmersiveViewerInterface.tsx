@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { Card } from '@/lib/types';
 import { Button } from '@/components/ui/button';
-import ImmersiveSettingsPanel from './ImmersiveSettingsPanel';
+import EnvironmentSelector from './EnvironmentSelector';
 
 interface ImmersiveViewerInterfaceProps {
   card: Card;
@@ -46,22 +46,7 @@ const ImmersiveViewerInterface: React.FC<ImmersiveViewerInterfaceProps> = ({
   environmentType = 'studio',
   onEnvironmentChange = () => {}
 }) => {
-  const [settingsPanelOpen, setSettingsPanelOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'environment' | 'settings'>('environment');
-
-  const handleEnvironmentButtonClick = () => {
-    setActiveTab('environment');
-    setSettingsPanelOpen(true);
-  };
-
-  const handleSettingsButtonClick = () => {
-    setActiveTab('settings');
-    setSettingsPanelOpen(true);
-  };
-
-  const handleTabChange = (tab: 'environment' | 'settings') => {
-    setActiveTab(tab);
-  };
+  const [showEnvironmentSelector, setShowEnvironmentSelector] = useState(false);
 
   return (
     <div className="absolute inset-0 pointer-events-none">
@@ -86,25 +71,45 @@ const ImmersiveViewerInterface: React.FC<ImmersiveViewerInterfaceProps> = ({
           </div>
         </div>
 
-        {/* Right side - Environment and settings buttons */}
+        {/* Right side - Environment selector and settings */}
         <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleEnvironmentButtonClick}
-            className={`bg-black/40 backdrop-blur-md border-white/20 text-white hover:bg-black/60 ${
-              settingsPanelOpen && activeTab === 'environment' ? 'bg-white/20' : ''
-            }`}
-          >
-            <Palette className="h-5 w-5" />
-          </Button>
+          {/* Environment Selector */}
+          <div className="relative">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowEnvironmentSelector(!showEnvironmentSelector)}
+              className="bg-black/40 backdrop-blur-md border-white/20 text-white hover:bg-black/60"
+            >
+              <Palette className="h-5 w-5" />
+            </Button>
+            
+            <AnimatePresence>
+              {showEnvironmentSelector && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="absolute top-full right-0 mt-2 z-30"
+                >
+                  <EnvironmentSelector
+                    environmentType={environmentType}
+                    onEnvironmentChange={(env) => {
+                      onEnvironmentChange(env);
+                      setShowEnvironmentSelector(false);
+                    }}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
 
           <Button
             variant="ghost"
             size="icon"
-            onClick={handleSettingsButtonClick}
+            onClick={onToggleCustomization}
             className={`bg-black/40 backdrop-blur-md border-white/20 text-white hover:bg-black/60 ${
-              settingsPanelOpen && activeTab === 'settings' ? 'bg-white/20' : ''
+              isCustomizationOpen ? 'bg-white/20' : ''
             }`}
           >
             <Settings className="h-5 w-5" />
@@ -175,16 +180,6 @@ const ImmersiveViewerInterface: React.FC<ImmersiveViewerInterfaceProps> = ({
           </div>
         </div>
       </div>
-
-      {/* Unified Settings Panel */}
-      <ImmersiveSettingsPanel
-        isOpen={settingsPanelOpen}
-        onClose={() => setSettingsPanelOpen(false)}
-        activeTab={activeTab}
-        onTabChange={handleTabChange}
-        environmentType={environmentType}
-        onEnvironmentChange={onEnvironmentChange}
-      />
     </div>
   );
 };
