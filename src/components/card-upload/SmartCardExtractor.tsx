@@ -37,35 +37,32 @@ const SmartCardExtractor: React.FC<SmartCardExtractorProps> = ({
     
     if (!img || !container) return;
     
-    // Calculate optimal scale and centering
-    const containerWidth = container.clientWidth - 32; // Account for padding
-    const containerHeight = container.clientHeight - 32;
+    // Calculate optimal scale to fill most of the container (80% to leave room for UI)
+    const containerWidth = container.clientWidth - 64; // Account for padding
+    const containerHeight = container.clientHeight - 64;
     
-    const scale = calculateOptimalScale(
-      img.naturalWidth,
-      img.naturalHeight,
-      containerWidth,
-      containerHeight
-    );
+    const scaleX = containerWidth / img.naturalWidth;
+    const scaleY = containerHeight / img.naturalHeight;
+    const scale = Math.min(scaleX, scaleY) * 0.8; // 80% to ensure it fits well
     setImageScale(scale);
     
-    // Calculate image offset to center it
+    // Center the image in the container
     const scaledWidth = img.naturalWidth * scale;
     const scaledHeight = img.naturalHeight * scale;
-    const offsetX = (containerWidth - scaledWidth) / 2;
-    const offsetY = (containerHeight - scaledHeight) / 2;
+    const offsetX = (containerWidth - scaledWidth) / 2 + 32; // Center with padding
+    const offsetY = (containerHeight - scaledHeight) / 2 + 32;
     setImageOffset({ x: offsetX, y: offsetY });
     
-    // Detect initial card bounds - make them larger
+    // Create a smaller, better positioned initial crop box
     const detectedBounds = detectCardBounds(img);
-    // Increase size by 20% for better initial coverage
-    const enlargedBounds = {
-      x: Math.max(0, detectedBounds.x - detectedBounds.width * 0.1),
-      y: Math.max(0, detectedBounds.y - detectedBounds.height * 0.1),
-      width: Math.min(detectedBounds.width * 1.2, img.naturalWidth),
-      height: Math.min(detectedBounds.height * 1.2, img.naturalHeight)
+    // Make it smaller - 40% of detected width/height for better initial size
+    const initialCrop = {
+      x: detectedBounds.x,
+      y: detectedBounds.y,
+      width: detectedBounds.width * 0.4,
+      height: detectedBounds.height * 0.4
     };
-    setCropArea(enlargedBounds);
+    setCropArea(initialCrop);
   };
 
   const getMousePosition = (e: React.MouseEvent) => {
@@ -73,8 +70,9 @@ const SmartCardExtractor: React.FC<SmartCardExtractorProps> = ({
     if (!img) return { x: 0, y: 0 };
     
     const rect = img.getBoundingClientRect();
-    const x = (e.clientX - rect.left - imageOffset.x) / imageScale;
-    const y = (e.clientY - rect.top - imageOffset.y) / imageScale;
+    // Convert screen coordinates to image coordinates
+    const x = (e.clientX - rect.left) / imageScale;
+    const y = (e.clientY - rect.top) / imageScale;
     
     return { x, y };
   };
@@ -104,9 +102,9 @@ const SmartCardExtractor: React.FC<SmartCardExtractorProps> = ({
     const deltaY = y - dragStart.y;
     
     if (isDragging) {
-      // Move the entire crop area
-      const newX = Math.max(0, Math.min(dragStart.cropX + deltaX, imageRef.current.naturalWidth - cropArea.width));
-      const newY = Math.max(0, Math.min(dragStart.cropY + deltaY, imageRef.current.naturalHeight - cropArea.height));
+      // Allow movement anywhere - no constraints
+      const newX = dragStart.cropX + deltaX;
+      const newY = dragStart.cropY + deltaY;
       
       setCropArea(prev => ({ ...prev, x: newX, y: newY }));
     } else if (isResizing) {
@@ -119,33 +117,28 @@ const SmartCardExtractor: React.FC<SmartCardExtractorProps> = ({
       
       switch (isResizing) {
         case 'se': // Bottom-right
-          newWidth = Math.max(100, cropArea.width + deltaX);
+          newWidth = Math.max(50, cropArea.width + deltaX);
           newHeight = newWidth / aspectRatio;
           break;
         case 'sw': // Bottom-left
-          newWidth = Math.max(100, cropArea.width - deltaX);
+          newWidth = Math.max(50, cropArea.width - deltaX);
           newHeight = newWidth / aspectRatio;
           newX = cropArea.x + cropArea.width - newWidth;
           break;
         case 'ne': // Top-right
-          newWidth = Math.max(100, cropArea.width + deltaX);
+          newWidth = Math.max(50, cropArea.width + deltaX);
           newHeight = newWidth / aspectRatio;
           newY = cropArea.y + cropArea.height - newHeight;
           break;
         case 'nw': // Top-left
-          newWidth = Math.max(100, cropArea.width - deltaX);
+          newWidth = Math.max(50, cropArea.width - deltaX);
           newHeight = newWidth / aspectRatio;
           newX = cropArea.x + cropArea.width - newWidth;
           newY = cropArea.y + cropArea.height - newHeight;
           break;
       }
       
-      // Ensure crop area stays within image bounds
-      if (newX >= 0 && newY >= 0 && 
-          newX + newWidth <= imageRef.current.naturalWidth &&
-          newY + newHeight <= imageRef.current.naturalHeight) {
-        setCropArea({ x: newX, y: newY, width: newWidth, height: newHeight });
-      }
+      setCropArea({ x: newX, y: newY, width: newWidth, height: newHeight });
     }
   };
 
@@ -163,8 +156,15 @@ const SmartCardExtractor: React.FC<SmartCardExtractorProps> = ({
     setIsProcessing(true);
     
     try {
-      // Apply crop to canvas using the exact crop area coordinates
-      applyCropToCanvas(imageRef.current, cropArea, canvasRef.current);
+      // Use the crop area coordinates directly on the natural image size
+      const naturalCrop = {
+        x: Math.max(0, cropArea.x),
+        y: Math.max(0, cropArea.y),
+        width: Math.min(cropArea.width, imageRef.current.naturalWidth - cropArea.x),
+        height: Math.min(cropArea.height, imageRef.current.naturalHeight - cropArea.y)
+      };
+      
+      applyCropToCanvas(imageRef.current, naturalCrop, canvasRef.current);
       
       // Convert canvas to blob
       const blob = await new Promise<Blob>((resolve, reject) => {
@@ -201,14 +201,14 @@ const SmartCardExtractor: React.FC<SmartCardExtractorProps> = ({
   const resetCrop = () => {
     if (imageRef.current) {
       const detectedBounds = detectCardBounds(imageRef.current);
-      // Increase size by 20% for better coverage
-      const enlargedBounds = {
-        x: Math.max(0, detectedBounds.x - detectedBounds.width * 0.1),
-        y: Math.max(0, detectedBounds.y - detectedBounds.height * 0.1),
-        width: Math.min(detectedBounds.width * 1.2, imageRef.current.naturalWidth),
-        height: Math.min(detectedBounds.height * 1.2, imageRef.current.naturalHeight)
+      // Reset to a smaller, better sized crop
+      const resetCrop = {
+        x: detectedBounds.x,
+        y: detectedBounds.y,
+        width: detectedBounds.width * 0.4,
+        height: detectedBounds.height * 0.4
       };
-      setCropArea(enlargedBounds);
+      setCropArea(resetCrop);
     }
   };
 
@@ -269,48 +269,48 @@ const SmartCardExtractor: React.FC<SmartCardExtractorProps> = ({
               onMouseUp={handleMouseUp}
               style={{ cursor: isResizing ? 'crosshair' : 'default' }}
             >
-              <div className="absolute inset-4 flex items-center justify-center">
-                <div className="relative">
-                  <img
-                    ref={imageRef}
-                    src={imageUrl}
-                    alt="Card to extract"
-                    className="max-w-full max-h-full object-contain"
-                    style={{ 
-                      transform: `scale(${imageScale})`,
-                      transformOrigin: 'top left'
-                    }}
-                    onLoad={handleImageLoad}
-                    draggable={false}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <img
+                  ref={imageRef}
+                  src={imageUrl}
+                  alt="Card to extract"
+                  className="absolute"
+                  style={{ 
+                    transformOrigin: 'top left',
+                    transform: `scale(${imageScale})`,
+                    left: `${imageOffset.x}px`,
+                    top: `${imageOffset.y}px`
+                  }}
+                  onLoad={handleImageLoad}
+                  draggable={false}
+                />
+                
+                {/* Crop overlay */}
+                <div
+                  style={cropStyle}
+                  onMouseDown={(e) => handleMouseDown(e)}
+                >
+                  {/* Resize handles */}
+                  <div
+                    className="absolute -top-1 -left-1 w-3 h-3 bg-blue-500 border border-white cursor-nw-resize"
+                    onMouseDown={(e) => handleMouseDown(e, 'nw')}
+                  />
+                  <div
+                    className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 border border-white cursor-ne-resize"
+                    onMouseDown={(e) => handleMouseDown(e, 'ne')}
+                  />
+                  <div
+                    className="absolute -bottom-1 -left-1 w-3 h-3 bg-blue-500 border border-white cursor-sw-resize"
+                    onMouseDown={(e) => handleMouseDown(e, 'sw')}
+                  />
+                  <div
+                    className="absolute -bottom-1 -right-1 w-3 h-3 bg-blue-500 border border-white cursor-se-resize"
+                    onMouseDown={(e) => handleMouseDown(e, 'se')}
                   />
                   
-                  {/* Crop overlay */}
-                  <div
-                    style={cropStyle}
-                    onMouseDown={(e) => handleMouseDown(e)}
-                  >
-                    {/* Resize handles */}
-                    <div
-                      className="absolute -top-1 -left-1 w-3 h-3 bg-blue-500 border border-white cursor-nw-resize"
-                      onMouseDown={(e) => handleMouseDown(e, 'nw')}
-                    />
-                    <div
-                      className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 border border-white cursor-ne-resize"
-                      onMouseDown={(e) => handleMouseDown(e, 'ne')}
-                    />
-                    <div
-                      className="absolute -bottom-1 -left-1 w-3 h-3 bg-blue-500 border border-white cursor-sw-resize"
-                      onMouseDown={(e) => handleMouseDown(e, 'sw')}
-                    />
-                    <div
-                      className="absolute -bottom-1 -right-1 w-3 h-3 bg-blue-500 border border-white cursor-se-resize"
-                      onMouseDown={(e) => handleMouseDown(e, 'se')}
-                    />
-                    
-                    {/* Drag instruction */}
-                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white text-sm font-medium bg-black/50 px-2 py-1 rounded pointer-events-none">
-                      Drag to move • Resize with corners
-                    </div>
+                  {/* Drag instruction */}
+                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white text-xs md:text-sm font-medium bg-black/70 px-2 py-1 rounded pointer-events-none">
+                    Drag to move • Resize with corners
                   </div>
                 </div>
               </div>
