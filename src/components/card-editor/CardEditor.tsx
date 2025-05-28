@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { Card, CardLayer, CardEffect } from '@/lib/types';
 import { fabric } from 'fabric';
@@ -17,7 +18,12 @@ import {
   Type,
   Image as ImageIcon,
   Circle as CircleIcon,
-  Square
+  Square,
+  ChevronUp,
+  ChevronDown,
+  Trash2,
+  EyeOff,
+  Move
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -56,8 +62,6 @@ const CardEditor: React.FC<CardEditorProps> = ({
   const [activeTool, setActiveTool] = useState<Tool>('select');
   const [showGrid, setShowGrid] = useState(true);
   const [zoom, setZoom] = useState(1);
-  const [history, setHistory] = useState<Partial<Card>[]>([activeCard]);
-  const [historyIndex, setHistoryIndex] = useState(0);
 
   // Canvas refs
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -72,7 +76,7 @@ const CardEditor: React.FC<CardEditorProps> = ({
     const canvas = new fabric.Canvas(canvasRef.current, {
       width: 750, // 2.5" at 300 DPI
       height: 1050, // 3.5" at 300 DPI
-      backgroundColor: 'transparent', // Make canvas transparent
+      backgroundColor: 'transparent',
     });
 
     fabricRef.current = canvas;
@@ -256,6 +260,9 @@ const CardEditor: React.FC<CardEditorProps> = ({
     console.log('Rendering layers:', activeCard.layers.length);
     fabricRef.current.clear();
     
+    // Re-add guide lines
+    addCropAndBleedLines(fabricRef.current);
+    
     // Sort layers by zIndex to ensure proper rendering order
     const sortedLayers = [...activeCard.layers].sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0));
     
@@ -347,8 +354,8 @@ const CardEditor: React.FC<CardEditorProps> = ({
               top: layer.position.y,
               width: width,
               height: height,
-              fill: layer.color || '#4F46E5', // Use a visible default color
-              stroke: '#000000', // Add stroke to make it more visible
+              fill: layer.color || '#4F46E5',
+              stroke: '#000000',
               strokeWidth: 1,
               angle: layer.rotation,
               opacity: layer.opacity || 1,
@@ -373,8 +380,8 @@ const CardEditor: React.FC<CardEditorProps> = ({
               left: layer.position.x,
               top: layer.position.y,
               radius: radius,
-              fill: layer.color || '#4F46E5', // Use a visible default color
-              stroke: '#000000', // Add stroke to make it more visible
+              fill: layer.color || '#4F46E5',
+              stroke: '#000000',
               strokeWidth: 1,
               angle: layer.rotation,
               opacity: layer.opacity || 1,
@@ -412,17 +419,75 @@ const CardEditor: React.FC<CardEditorProps> = ({
     }));
   }, []);
 
+  const moveLayerUp = useCallback((layerId: string) => {
+    setActiveCard(prev => {
+      const layers = prev.layers || [];
+      const currentIndex = layers.findIndex(l => l.id === layerId);
+      if (currentIndex < layers.length - 1) {
+        const newLayers = [...layers];
+        [newLayers[currentIndex], newLayers[currentIndex + 1]] = [newLayers[currentIndex + 1], newLayers[currentIndex]];
+        // Update zIndex
+        newLayers.forEach((layer, index) => {
+          layer.zIndex = index;
+        });
+        return { ...prev, layers: newLayers, updatedAt: new Date().toISOString() };
+      }
+      return prev;
+    });
+  }, []);
+
+  const moveLayerDown = useCallback((layerId: string) => {
+    setActiveCard(prev => {
+      const layers = prev.layers || [];
+      const currentIndex = layers.findIndex(l => l.id === layerId);
+      if (currentIndex > 0) {
+        const newLayers = [...layers];
+        [newLayers[currentIndex], newLayers[currentIndex - 1]] = [newLayers[currentIndex - 1], newLayers[currentIndex]];
+        // Update zIndex
+        newLayers.forEach((layer, index) => {
+          layer.zIndex = index;
+        });
+        return { ...prev, layers: newLayers, updatedAt: new Date().toISOString() };
+      }
+      return prev;
+    });
+  }, []);
+
+  const deleteLayer = useCallback((layerId: string) => {
+    setActiveCard(prev => ({
+      ...prev,
+      layers: prev.layers?.filter(layer => layer.id !== layerId) || [],
+      updatedAt: new Date().toISOString()
+    }));
+    
+    if (selectedLayerId === layerId) {
+      setSelectedLayerId(null);
+    }
+    
+    // Remove from canvas
+    if (fabricRef.current) {
+      const objects = fabricRef.current.getObjects();
+      const objectToRemove = objects.find(obj => (obj as any).data?.layerId === layerId);
+      if (objectToRemove) {
+        fabricRef.current.remove(objectToRemove);
+        fabricRef.current.renderAll();
+      }
+    }
+    
+    toast.success('Layer deleted');
+  }, [selectedLayerId]);
+
   const addImageLayer = useCallback((imageUrl: string) => {
     console.log('Adding image layer with URL:', imageUrl);
     const newLayer: CardLayer = {
       id: `layer-${Date.now()}`,
       type: 'image',
       content: '',
-      position: { x: 100, y: 100, z: 0 },
+      position: { x: 200, y: 200, z: 0 },
       size: { width: 200, height: 200 },
       rotation: 0,
       opacity: 1,
-      zIndex: (activeCard.layers?.length || 0) + 1,
+      zIndex: (activeCard.layers?.length || 0),
       visible: true,
       imageUrl
     };
@@ -442,11 +507,11 @@ const CardEditor: React.FC<CardEditorProps> = ({
       id: `layer-${Date.now()}`,
       type: 'text',
       content: 'New Text',
-      position: { x: 100, y: 100, z: 0 },
+      position: { x: 200, y: 200, z: 0 },
       size: { width: 'auto', height: 'auto' },
       rotation: 0,
       opacity: 1,
-      zIndex: (activeCard.layers?.length || 0) + 1,
+      zIndex: (activeCard.layers?.length || 0),
       visible: true,
       textStyle: {
         fontSize: 24,
@@ -470,11 +535,11 @@ const CardEditor: React.FC<CardEditorProps> = ({
       id: `layer-${Date.now()}`,
       type: 'shape',
       content: '',
-      position: { x: 100, y: 100, z: 0 },
+      position: { x: 200, y: 200, z: 0 },
       size: { width: 100, height: 100 },
       rotation: 0,
       opacity: 1,
-      zIndex: (activeCard.layers?.length || 0) + 1,
+      zIndex: (activeCard.layers?.length || 0),
       visible: true,
       shapeType,
       color: '#4F46E5'
@@ -502,7 +567,7 @@ const CardEditor: React.FC<CardEditorProps> = ({
         effects: activeCard.effects || [],
         createdAt: activeCard.createdAt || new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        designMetadata: activeCard.designMetadata || {
+        designMetadata: {
           cardStyle: {
             template: 'custom',
             effect: 'none',
@@ -540,6 +605,57 @@ const CardEditor: React.FC<CardEditorProps> = ({
     }
   };
 
+  const handlePreview = () => {
+    try {
+      const cardToPreview: Card = {
+        id: activeCard.id || `card-${Date.now()}`,
+        title: activeCard.title || 'Untitled Card',
+        description: activeCard.description || '',
+        imageUrl: activeCard.imageUrl || '',
+        thumbnailUrl: activeCard.thumbnailUrl || '',
+        userId: activeCard.userId || 'current-user',
+        tags: activeCard.tags || [],
+        effects: activeCard.effects || [],
+        createdAt: activeCard.createdAt || new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        designMetadata: {
+          cardStyle: {
+            template: 'custom',
+            effect: 'none',
+            borderRadius: '8px',
+            borderColor: '#000000',
+            frameWidth: 2,
+            frameColor: '#000000',
+            shadowColor: 'rgba(0,0,0,0.2)'
+          },
+          textStyle: {
+            titleColor: '#000000',
+            titleAlignment: 'center',
+            titleWeight: 'bold',
+            descriptionColor: '#333333'
+          },
+          cardMetadata: {
+            category: 'Custom',
+            series: 'Base',
+            cardType: 'Standard'
+          },
+          marketMetadata: {
+            isPrintable: false,
+            isForSale: false,
+            includeInCatalog: false
+          }
+        },
+        layers: activeCard.layers || []
+      };
+
+      onPreview(cardToPreview);
+      toast.success('Opening 3D preview');
+    } catch (error) {
+      console.error('Preview error:', error);
+      toast.error('Failed to open preview');
+    }
+  };
+
   const selectedLayer = activeCard.layers?.find(layer => layer.id === selectedLayerId);
 
   return (
@@ -569,7 +685,7 @@ const CardEditor: React.FC<CardEditorProps> = ({
             <Save className="w-4 h-4 mr-1" />
             Save
           </Button>
-          <Button onClick={() => onPreview(activeCard as Card)} variant="outline" size="sm">
+          <Button onClick={handlePreview} variant="outline" size="sm">
             <Eye className="w-4 h-4 mr-1" />
             Preview 3D
           </Button>
@@ -696,12 +812,6 @@ const CardEditor: React.FC<CardEditorProps> = ({
               backgroundSize: showGrid ? '20px 20px' : 'auto'
             }}
           />
-          {/* Debug overlay to show canvas bounds */}
-          {process.env.NODE_ENV === 'development' && (
-            <div className="absolute top-0 left-0 bg-red-500 text-white text-xs p-1 opacity-50">
-              Canvas: 750x1050, Layers: {activeCard.layers?.length || 0}
-            </div>
-          )}
           {/* Guide lines legend */}
           <div className="absolute bottom-2 left-2 bg-black bg-opacity-75 text-white text-xs p-2 rounded">
             <div className="flex items-center gap-2 mb-1">
@@ -720,7 +830,7 @@ const CardEditor: React.FC<CardEditorProps> = ({
         </div>
       </div>
 
-      {/* Right Panel */}
+      {/* Right Panel - Enhanced Layers Panel */}
       <div className="w-80 bg-gray-800 border-l border-gray-700 pt-16">
         <Tabs defaultValue="layers" className="h-full">
           <TabsList className="grid w-full grid-cols-3 bg-gray-700">
@@ -730,43 +840,119 @@ const CardEditor: React.FC<CardEditorProps> = ({
           </TabsList>
           
           <TabsContent value="layers" className="p-4 space-y-2">
-            <h3 className="font-semibold mb-3">Layers</h3>
-            {activeCard.layers?.map((layer) => (
-              <div
-                key={layer.id}
-                className={cn(
-                  "p-3 rounded border cursor-pointer transition-colors",
-                  selectedLayerId === layer.id 
-                    ? "bg-blue-600 border-blue-500" 
-                    : "bg-gray-700 border-gray-600 hover:bg-gray-600"
-                )}
-                onClick={() => setSelectedLayerId(layer.id)}
-              >
-                <div className="flex justify-between items-center">
-                  <span className="text-sm capitalize">{layer.type}</span>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setActiveCard(prev => ({
-                        ...prev,
-                        layers: prev.layers?.map(l => 
-                          l.id === layer.id ? { ...l, visible: !l.visible } : l
-                        )
-                      }));
-                    }}
+            <div className="flex justify-between items-center mb-3">
+              <h3 className="font-semibold">Layers</h3>
+              <span className="text-xs text-gray-400">{activeCard.layers?.length || 0} layers</span>
+            </div>
+            
+            {activeCard.layers && activeCard.layers.length > 0 ? (
+              <div className="space-y-1">
+                {[...activeCard.layers].reverse().map((layer, index) => (
+                  <div
+                    key={layer.id}
                     className={cn(
-                      "w-6 h-6 rounded border text-xs",
-                      layer.visible ? "bg-green-600 border-green-500" : "bg-gray-600 border-gray-500"
+                      "group p-3 rounded border cursor-pointer transition-all duration-200",
+                      selectedLayerId === layer.id 
+                        ? "bg-blue-600 border-blue-500 shadow-md" 
+                        : "bg-gray-700 border-gray-600 hover:bg-gray-650 hover:border-gray-500"
                     )}
+                    onClick={() => setSelectedLayerId(layer.id)}
                   >
-                    {layer.visible ? '👁' : '👁‍🗨'}
-                  </button>
-                </div>
-                <div className="text-xs text-gray-400 mt-1">
-                  {layer.type === 'text' ? layer.content : layer.type === 'image' ? 'Image' : 'Shape'}
-                </div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        {/* Layer type icon */}
+                        <div className={cn(
+                          "flex-shrink-0 w-8 h-8 rounded flex items-center justify-center",
+                          layer.type === 'image' ? 'bg-green-600' : 
+                          layer.type === 'text' ? 'bg-blue-600' : 'bg-purple-600'
+                        )}>
+                          {layer.type === 'text' && <Type size={14} className="text-white" />}
+                          {layer.type === 'image' && <ImageIcon size={14} className="text-white" />}
+                          {layer.type === 'shape' && <Square size={14} className="text-white" />}
+                        </div>
+                        
+                        {/* Layer name/content */}
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm font-medium truncate">
+                            {layer.type === 'text' ? 
+                              (typeof layer.content === 'string' && layer.content ? layer.content : 'Text Layer') : 
+                              layer.type === 'image' ? 'Image Layer' :
+                              `${layer.shapeType === 'rectangle' ? 'Rectangle' : 'Circle'} Shape`
+                            }
+                          </div>
+                          <div className="text-xs text-gray-400 capitalize">{layer.type}</div>
+                        </div>
+                      </div>
+                      
+                      {/* Layer controls */}
+                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        {/* Visibility toggle */}
+                        <Button
+                          variant="ghost" 
+                          size="sm"
+                          className="h-7 w-7 p-0 hover:bg-gray-600"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            updateLayer(layer.id, { visible: !layer.visible });
+                          }}
+                        >
+                          {layer.visible ? <Eye size={14} /> : <EyeOff size={14} />}
+                        </Button>
+                        
+                        {/* Move up */}
+                        <Button
+                          variant="ghost" 
+                          size="sm"
+                          className="h-7 w-7 p-0 hover:bg-gray-600"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            moveLayerUp(layer.id);
+                          }}
+                          disabled={index === 0}
+                        >
+                          <ChevronUp size={14} />
+                        </Button>
+                        
+                        {/* Move down */}
+                        <Button
+                          variant="ghost" 
+                          size="sm"
+                          className="h-7 w-7 p-0 hover:bg-gray-600"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            moveLayerDown(layer.id);
+                          }}
+                          disabled={index === activeCard.layers.length - 1}
+                        >
+                          <ChevronDown size={14} />
+                        </Button>
+                        
+                        {/* Delete */}
+                        <Button
+                          variant="ghost" 
+                          size="sm"
+                          className="h-7 w-7 p-0 hover:bg-red-600 text-red-400 hover:text-white"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deleteLayer(layer.id);
+                          }}
+                        >
+                          <Trash2 size={14} />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
+            ) : (
+              <div className="text-center py-8 text-gray-400">
+                <div className="mb-2">
+                  <layers className="w-12 h-12 mx-auto opacity-50" />
+                </div>
+                <p className="text-sm">No layers yet</p>
+                <p className="text-xs">Add text, images, or shapes to get started</p>
+              </div>
+            )}
           </TabsContent>
           
           <TabsContent value="properties" className="p-4">
@@ -779,7 +965,7 @@ const CardEditor: React.FC<CardEditorProps> = ({
                     <input
                       type="number"
                       placeholder="X"
-                      value={selectedLayer.position.x}
+                      value={Math.round(selectedLayer.position.x)}
                       onChange={(e) => updateLayer(selectedLayer.id, {
                         position: { ...selectedLayer.position, x: Number(e.target.value) }
                       })}
@@ -788,7 +974,7 @@ const CardEditor: React.FC<CardEditorProps> = ({
                     <input
                       type="number"
                       placeholder="Y"
-                      value={selectedLayer.position.y}
+                      value={Math.round(selectedLayer.position.y)}
                       onChange={(e) => updateLayer(selectedLayer.id, {
                         position: { ...selectedLayer.position, y: Number(e.target.value) }
                       })}
@@ -810,6 +996,7 @@ const CardEditor: React.FC<CardEditorProps> = ({
                     })}
                     className="w-full mt-1"
                   />
+                  <div className="text-xs text-gray-400 mt-1">{Math.round(selectedLayer.opacity * 100)}%</div>
                 </div>
                 
                 {selectedLayer.type === 'text' && (
@@ -825,9 +1012,26 @@ const CardEditor: React.FC<CardEditorProps> = ({
                     />
                   </div>
                 )}
+                
+                {selectedLayer.type === 'shape' && (
+                  <div>
+                    <label className="text-sm text-gray-400">Fill Color</label>
+                    <input
+                      type="color"
+                      value={selectedLayer.color || '#4F46E5'}
+                      onChange={(e) => updateLayer(selectedLayer.id, {
+                        color: e.target.value
+                      })}
+                      className="w-full h-8 bg-gray-700 border border-gray-600 rounded mt-1"
+                    />
+                  </div>
+                )}
               </div>
             ) : (
-              <p className="text-gray-400 text-sm">Select a layer to edit properties</p>
+              <div className="text-center py-8 text-gray-400">
+                <Move className="w-12 h-12 mx-auto opacity-50 mb-2" />
+                <p className="text-sm">Select a layer to edit properties</p>
+              </div>
             )}
           </TabsContent>
           
