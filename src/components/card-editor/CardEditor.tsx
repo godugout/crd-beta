@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { Card, CardLayer, CardEffect } from '@/lib/types';
 import { fabric } from 'fabric';
@@ -106,6 +105,70 @@ const CardEditor: React.FC<CardEditorProps> = ({
     undoRedoSystem.pushState(newCard);
   }, [activeCard, undoRedoSystem]);
 
+  // Generate thumbnail from canvas
+  const generateThumbnail = useCallback((): string => {
+    if (!fabricRef.current) return '';
+    
+    try {
+      // Temporarily hide guide lines for clean thumbnail
+      const objects = fabricRef.current.getObjects();
+      const guideLines = objects.filter(obj => 
+        obj.name === 'bleed-line' || obj.name === 'crop-line' || obj.name === 'safe-line'
+      );
+      
+      guideLines.forEach(line => line.set('visible', false));
+      fabricRef.current.renderAll();
+      
+      // Generate thumbnail
+      const dataURL = fabricRef.current.toDataURL({
+        format: 'jpeg',
+        quality: 0.8,
+        multiplier: 0.3 // Scale down for thumbnail
+      });
+      
+      // Restore guide lines
+      guideLines.forEach(line => line.set('visible', true));
+      fabricRef.current.renderAll();
+      
+      return dataURL;
+    } catch (error) {
+      console.error('Error generating thumbnail:', error);
+      return '';
+    }
+  }, []);
+
+  // Generate full resolution image from canvas
+  const generateCardImage = useCallback((): string => {
+    if (!fabricRef.current) return '';
+    
+    try {
+      // Temporarily hide guide lines for clean export
+      const objects = fabricRef.current.getObjects();
+      const guideLines = objects.filter(obj => 
+        obj.name === 'bleed-line' || obj.name === 'crop-line' || obj.name === 'safe-line'
+      );
+      
+      guideLines.forEach(line => line.set('visible', false));
+      fabricRef.current.renderAll();
+      
+      // Generate high-quality image
+      const dataURL = fabricRef.current.toDataURL({
+        format: 'png',
+        quality: 1.0,
+        multiplier: 1 // Full resolution
+      });
+      
+      // Restore guide lines
+      guideLines.forEach(line => line.set('visible', true));
+      fabricRef.current.renderAll();
+      
+      return dataURL;
+    } catch (error) {
+      console.error('Error generating card image:', error);
+      return '';
+    }
+  }, []);
+
   // Define handleSave before using it in keyboard shortcuts
   const handleSave = useCallback(async () => {
     try {
@@ -160,7 +223,7 @@ const CardEditor: React.FC<CardEditorProps> = ({
       console.error('Save error:', error);
       toast.error('Failed to save card');
     }
-  }, [activeCard, onSave]);
+  }, [activeCard, onSave, generateCardImage, generateThumbnail]);
 
   // Keyboard shortcuts - now handleSave is defined
   useKeyboardShortcuts({
@@ -520,70 +583,6 @@ const CardEditor: React.FC<CardEditorProps> = ({
     }
   };
 
-  // Generate thumbnail from canvas
-  const generateThumbnail = useCallback((): string => {
-    if (!fabricRef.current) return '';
-    
-    try {
-      // Temporarily hide guide lines for clean thumbnail
-      const objects = fabricRef.current.getObjects();
-      const guideLines = objects.filter(obj => 
-        obj.name === 'bleed-line' || obj.name === 'crop-line' || obj.name === 'safe-line'
-      );
-      
-      guideLines.forEach(line => line.set('visible', false));
-      fabricRef.current.renderAll();
-      
-      // Generate thumbnail
-      const dataURL = fabricRef.current.toDataURL({
-        format: 'jpeg',
-        quality: 0.8,
-        multiplier: 0.3 // Scale down for thumbnail
-      });
-      
-      // Restore guide lines
-      guideLines.forEach(line => line.set('visible', true));
-      fabricRef.current.renderAll();
-      
-      return dataURL;
-    } catch (error) {
-      console.error('Error generating thumbnail:', error);
-      return '';
-    }
-  }, []);
-
-  // Generate full resolution image from canvas
-  const generateCardImage = useCallback((): string => {
-    if (!fabricRef.current) return '';
-    
-    try {
-      // Temporarily hide guide lines for clean export
-      const objects = fabricRef.current.getObjects();
-      const guideLines = objects.filter(obj => 
-        obj.name === 'bleed-line' || obj.name === 'crop-line' || obj.name === 'safe-line'
-      );
-      
-      guideLines.forEach(line => line.set('visible', false));
-      fabricRef.current.renderAll();
-      
-      // Generate high-quality image
-      const dataURL = fabricRef.current.toDataURL({
-        format: 'png',
-        quality: 1.0,
-        multiplier: 1 // Full resolution
-      });
-      
-      // Restore guide lines
-      guideLines.forEach(line => line.set('visible', true));
-      fabricRef.current.renderAll();
-      
-      return dataURL;
-    } catch (error) {
-      console.error('Error generating card image:', error);
-      return '';
-    }
-  }, []);
-
   const updateLayer = useCallback((layerId: string, updates: Partial<CardLayer>) => {
     console.log('Updating layer:', layerId, updates);
     const newCard = {
@@ -840,61 +839,6 @@ const CardEditor: React.FC<CardEditorProps> = ({
       toast.success('Transform reset');
     }
   }, [selectedLayerId, updateLayer]);
-
-  const handleSave = async () => {
-    try {
-      // Generate image and thumbnail
-      const cardImage = generateCardImage();
-      const thumbnail = generateThumbnail();
-      
-      const cardToSave: Card = {
-        id: activeCard.id || `card-${Date.now()}`,
-        title: activeCard.title || 'Untitled Card',
-        description: activeCard.description || '',
-        imageUrl: cardImage, // Set the generated canvas image
-        thumbnailUrl: thumbnail, // Set the generated thumbnail
-        userId: activeCard.userId || 'current-user',
-        tags: activeCard.tags || [],
-        effects: activeCard.effects || [],
-        createdAt: activeCard.createdAt || new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        designMetadata: {
-          cardStyle: {
-            template: 'custom',
-            effect: 'none',
-            borderRadius: '8px',
-            borderColor: '#000000',
-            frameWidth: 2,
-            frameColor: '#000000',
-            shadowColor: 'rgba(0,0,0,0.2)'
-          },
-          textStyle: {
-            titleColor: '#000000',
-            titleAlignment: 'center',
-            titleWeight: 'bold',
-            descriptionColor: '#333333'
-          },
-          cardMetadata: {
-            category: 'Custom',
-            series: 'Base',
-            cardType: 'Standard'
-          },
-          marketMetadata: {
-            isPrintable: false,
-            isForSale: false,
-            includeInCatalog: false
-          }
-        },
-        layers: activeCard.layers || []
-      };
-
-      await onSave(cardToSave);
-      toast.success('Card saved successfully');
-    } catch (error) {
-      console.error('Save error:', error);
-      toast.error('Failed to save card');
-    }
-  };
 
   const handlePreview = () => {
     try {
