@@ -1,11 +1,10 @@
-
 /**
  * HDR Image Cache Service
  * Preloads and caches HDR panoramic images for faster environment loading
  */
 
 import * as THREE from 'three';
-import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader';
+import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
 
 interface CachedHDRImage {
   texture: THREE.DataTexture;
