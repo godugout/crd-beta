@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { Environment } from '@react-three/drei';
 import * as THREE from 'three';
 
 export const GalleryEnvironment = () => {
@@ -41,12 +40,17 @@ export const GalleryEnvironment = () => {
   
   return (
     <>
-      {/* Museum/Gallery environment */}
-      <Environment 
-        files="https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/museum_of_ethnography_1k.hdr"
-        background={true}
-        blur={0.1}
-      />
+      {/* Gallery background */}
+      <color attach="background" args={['#f5f5f5']} />
+      
+      {/* Museum/Gallery backdrop */}
+      <mesh position={[0, 0, -100]}>
+        <sphereGeometry args={[200, 32, 32]} />
+        <meshBasicMaterial 
+          color="#f8f8f8" 
+          side={THREE.BackSide}
+        />
+      </mesh>
       
       {/* Professional gallery lighting */}
       <directionalLight 

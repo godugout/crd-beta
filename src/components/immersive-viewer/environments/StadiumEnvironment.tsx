@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { Environment, Sky } from '@react-three/drei';
 import * as THREE from 'three';
 
 export const StadiumEnvironment = () => {
@@ -34,24 +33,17 @@ export const StadiumEnvironment = () => {
   
   return (
     <>
-      {/* High-quality stadium environment */}
-      <Environment 
-        files="https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/stadium_01_1k.hdr"
-        background={true}
-        blur={0.2}
-      />
+      {/* Stadium sky background */}
+      <color attach="background" args={['#2a3c5f']} />
       
-      {/* Fallback sky if HDR fails to load */}
-      <Sky 
-        distance={450000}
-        sunPosition={[0, 1, 0]}
-        inclination={0}
-        azimuth={0.25}
-        turbidity={10}
-        rayleigh={3}
-        mieCoefficient={0.005}
-        mieDirectionalG={0.7}
-      />
+      {/* Stadium backdrop */}
+      <mesh position={[0, 0, -200]}>
+        <sphereGeometry args={[300, 32, 32]} />
+        <meshBasicMaterial 
+          color="#2a3c5f" 
+          side={THREE.BackSide}
+        />
+      </mesh>
       
       {/* Stadium lighting */}
       <directionalLight 

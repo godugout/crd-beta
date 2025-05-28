@@ -1,6 +1,5 @@
 
 import React, { useRef } from 'react';
-import { Environment } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
@@ -54,15 +53,19 @@ export const UnderwaterEnvironment = () => {
   
   return (
     <>
-      {/* Underwater environment */}
-      <Environment 
-        files="https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/underwater_01_1k.hdr"
-        background={true}
-        blur={0.3}
-      />
-      
-      {/* Fallback underwater background */}
+      {/* Underwater gradient background */}
       <color attach="background" args={['#006994']} />
+      
+      {/* Procedural underwater background sphere */}
+      <mesh position={[0, 0, -200]}>
+        <sphereGeometry args={[300, 32, 32]} />
+        <meshBasicMaterial 
+          color="#004d6b" 
+          side={THREE.BackSide}
+          transparent
+          opacity={0.8}
+        />
+      </mesh>
       
       {/* Underwater lighting */}
       <ambientLight intensity={0.3} color="#0080b3" />

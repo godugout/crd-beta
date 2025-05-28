@@ -1,10 +1,9 @@
 
 import React from 'react';
-import { Environment } from '@react-three/drei';
 import * as THREE from 'three';
 
 export const StudioEnvironment = () => {
-  // Create a procedural concrete texture instead of loading from Unsplash
+  // Create a procedural concrete texture
   const createConcreteTexture = () => {
     const canvas = document.createElement('canvas');
     canvas.width = 512;
@@ -33,12 +32,17 @@ export const StudioEnvironment = () => {
   
   return (
     <>
-      {/* Professional photo studio environment */}
-      <Environment 
-        files="https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/photo_studio_loft_hall_1k.hdr"
-        background={true}
-        blur={0.1}
-      />
+      {/* Studio background */}
+      <color attach="background" args={['#f0f0f0']} />
+      
+      {/* Studio backdrop */}
+      <mesh position={[0, 0, -50]}>
+        <sphereGeometry args={[100, 32, 32]} />
+        <meshBasicMaterial 
+          color="#f8f8f8" 
+          side={THREE.BackSide}
+        />
+      </mesh>
       
       {/* Studio lighting setup */}
       <directionalLight 
