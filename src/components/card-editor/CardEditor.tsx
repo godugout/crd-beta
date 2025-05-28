@@ -1,5 +1,3 @@
-
-
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { Card, CardLayer, CardEffect } from '@/lib/types';
 import { fabric } from 'fabric';
@@ -84,11 +82,13 @@ const CardEditor: React.FC<CardEditorProps> = ({
       const selected = e.selected?.[0];
       if (selected && selected.data?.layerId) {
         setSelectedLayerId(selected.data.layerId);
+        console.log('Layer selected:', selected.data.layerId);
       }
     });
 
     canvas.on('selection:cleared', () => {
       setSelectedLayerId(null);
+      console.log('Selection cleared');
     });
 
     canvas.on('object:modified', (e) => {
@@ -112,22 +112,28 @@ const CardEditor: React.FC<CardEditorProps> = ({
     };
   }, []);
 
-  // Render layers on canvas
+  // Render layers on canvas with proper z-index ordering
   useEffect(() => {
     if (!fabricRef.current || !activeCard.layers) return;
 
     console.log('Rendering layers:', activeCard.layers.length);
     fabricRef.current.clear();
     
-    activeCard.layers.forEach((layer) => {
-      if (layer.visible) {
+    // Sort layers by zIndex to ensure proper rendering order
+    const sortedLayers = [...activeCard.layers].sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0));
+    
+    sortedLayers.forEach((layer) => {
+      if (layer.visible !== false) { // Default to visible if not specified
         renderLayer(fabricRef.current!, layer);
       }
     });
+    
+    // Ensure canvas is rendered after all layers are added
+    fabricRef.current.renderAll();
   }, [activeCard.layers]);
 
   const renderLayer = async (canvas: fabric.Canvas, layer: CardLayer) => {
-    console.log('Rendering layer:', layer.type, layer.id);
+    console.log('Rendering layer:', layer.type, layer.id, 'at position:', layer.position, 'with zIndex:', layer.zIndex);
     
     try {
       switch (layer.type) {
@@ -135,22 +141,32 @@ const CardEditor: React.FC<CardEditorProps> = ({
           if (layer.imageUrl) {
             console.log('Loading image from URL:', layer.imageUrl);
             
-            // Use fabric.Image.fromURL for v6
             fabric.Image.fromURL(layer.imageUrl, (img) => {
               if (img) {
+                // Ensure the image is visible with proper positioning
                 img.set({
                   left: layer.position.x,
                   top: layer.position.y,
                   angle: layer.rotation,
-                  opacity: layer.opacity,
-                  scaleX: typeof layer.size.width === 'number' ? Number(layer.size.width) / (img.width || 1) : 1,
-                  scaleY: typeof layer.size.height === 'number' ? Number(layer.size.height) / (img.height || 1) : 1,
+                  opacity: layer.opacity || 1,
+                  scaleX: typeof layer.size.width === 'number' ? Number(layer.size.width) / (img.width || 1) : 0.5,
+                  scaleY: typeof layer.size.height === 'number' ? Number(layer.size.height) / (img.height || 1) : 0.5,
+                  selectable: true,
+                  moveCursor: 'move',
+                  hoverCursor: 'move',
                 });
-                // Store layer ID for reference
+                
+                // Store layer ID and set z-index
                 (img as any).data = { layerId: layer.id };
+                
+                // Add to canvas and move to proper layer
                 canvas.add(img);
+                if (layer.zIndex !== undefined) {
+                  canvas.moveTo(img, layer.zIndex);
+                }
+                
                 canvas.renderAll();
-                console.log('Image layer rendered successfully');
+                console.log('Image layer rendered successfully at:', img.left, img.top);
               }
             }, {
               crossOrigin: 'anonymous'
@@ -164,14 +180,23 @@ const CardEditor: React.FC<CardEditorProps> = ({
             left: layer.position.x,
             top: layer.position.y,
             angle: layer.rotation,
-            opacity: layer.opacity,
+            opacity: layer.opacity || 1,
             fontSize: layer.textStyle?.fontSize || 24,
             fontFamily: layer.textStyle?.fontFamily || 'Arial',
             fill: layer.textStyle?.color || '#000000',
+            selectable: true,
+            moveCursor: 'move',
+            hoverCursor: 'move',
           });
+          
           (text as any).data = { layerId: layer.id };
           canvas.add(text);
-          console.log('Text layer rendered successfully');
+          
+          if (layer.zIndex !== undefined) {
+            canvas.moveTo(text, layer.zIndex);
+          }
+          
+          console.log('Text layer rendered successfully at:', text.left, text.top);
           break;
         
         case 'shape':
@@ -185,13 +210,24 @@ const CardEditor: React.FC<CardEditorProps> = ({
               top: layer.position.y,
               width: width,
               height: height,
-              fill: layer.color || '#000000',
+              fill: layer.color || '#4F46E5', // Use a visible default color
+              stroke: '#000000', // Add stroke to make it more visible
+              strokeWidth: 1,
               angle: layer.rotation,
-              opacity: layer.opacity,
+              opacity: layer.opacity || 1,
+              selectable: true,
+              moveCursor: 'move',
+              hoverCursor: 'move',
             });
+            
             (rect as any).data = { layerId: layer.id };
             canvas.add(rect);
-            console.log('Rectangle shape rendered successfully');
+            
+            if (layer.zIndex !== undefined) {
+              canvas.moveTo(rect, layer.zIndex);
+            }
+            
+            console.log('Rectangle shape rendered successfully at:', rect.left, rect.top, 'with color:', rect.fill);
           } else if (layer.shapeType === 'circle') {
             console.log('Creating circle shape');
             const radius = typeof layer.size.width === 'number' ? Number(layer.size.width) / 2 : 50;
@@ -200,18 +236,27 @@ const CardEditor: React.FC<CardEditorProps> = ({
               left: layer.position.x,
               top: layer.position.y,
               radius: radius,
-              fill: layer.color || '#000000',
+              fill: layer.color || '#4F46E5', // Use a visible default color
+              stroke: '#000000', // Add stroke to make it more visible
+              strokeWidth: 1,
               angle: layer.rotation,
-              opacity: layer.opacity,
+              opacity: layer.opacity || 1,
+              selectable: true,
+              moveCursor: 'move',
+              hoverCursor: 'move',
             });
+            
             (circle as any).data = { layerId: layer.id };
             canvas.add(circle);
-            console.log('Circle shape rendered successfully');
+            
+            if (layer.zIndex !== undefined) {
+              canvas.moveTo(circle, layer.zIndex);
+            }
+            
+            console.log('Circle shape rendered successfully at:', circle.left, circle.top, 'with color:', circle.fill);
           }
           break;
       }
-      
-      canvas.renderAll();
       
     } catch (error) {
       console.error('Error rendering layer:', layer.type, error);
@@ -513,6 +558,12 @@ const CardEditor: React.FC<CardEditorProps> = ({
               backgroundSize: showGrid ? '20px 20px' : 'auto'
             }}
           />
+          {/* Debug overlay to show canvas bounds */}
+          {process.env.NODE_ENV === 'development' && (
+            <div className="absolute top-0 left-0 bg-red-500 text-white text-xs p-1 opacity-50">
+              Canvas: 750x1050, Layers: {activeCard.layers?.length || 0}
+            </div>
+          )}
         </div>
       </div>
 
@@ -638,4 +689,3 @@ const CardEditor: React.FC<CardEditorProps> = ({
 };
 
 export default CardEditor;
-
