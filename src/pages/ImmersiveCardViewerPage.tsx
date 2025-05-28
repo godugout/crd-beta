@@ -53,12 +53,21 @@ const ImmersiveCardViewerPage: React.FC = () => {
         if (id) {
           console.log('Looking for card with ID:', id);
           
-          foundCard = sampleCards.find(c => c.id === id) || null;
+          // First check localStorage for created cards
+          const createdCards = JSON.parse(localStorage.getItem('createdCards') || '[]');
+          foundCard = createdCards.find((c: Card) => c.id === id) || null;
           
-          if (!foundCard && getCardById) {
-            foundCard = getCardById(id);
-          } else if (!foundCard) {
-            foundCard = cards.find(c => c.id === id) || null;
+          if (foundCard) {
+            console.log('Found card in localStorage:', foundCard.title);
+          } else {
+            // Then check sampleCards
+            foundCard = sampleCards.find(c => c.id === id) || null;
+            
+            if (!foundCard && getCardById) {
+              foundCard = getCardById(id);
+            } else if (!foundCard) {
+              foundCard = cards.find(c => c.id === id) || null;
+            }
           }
         } else if (cards.length > 0) {
           foundCard = cards[0];
@@ -107,7 +116,7 @@ const ImmersiveCardViewerPage: React.FC = () => {
     };
     
     loadCard();
-  }, [id, cards, getCardById, toast, setActiveEffects, setCardEffects]);
+  }, [id, cards, getCardById, sampleCards, toast, setActiveEffects, setCardEffects]);
   
   const handleEffectToggle = (effect: string) => {
     if (card) {

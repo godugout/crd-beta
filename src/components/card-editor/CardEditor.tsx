@@ -223,6 +223,19 @@ const CardEditor: React.FC<CardEditorProps> = ({
         layers: activeCard.layers || []
       };
 
+      // Store the card in localStorage for persistence
+      const existingCards = JSON.parse(localStorage.getItem('createdCards') || '[]');
+      const cardIndex = existingCards.findIndex((c: Card) => c.id === cardToSave.id);
+      
+      if (cardIndex >= 0) {
+        existingCards[cardIndex] = cardToSave;
+      } else {
+        existingCards.push(cardToSave);
+      }
+      
+      localStorage.setItem('createdCards', JSON.stringify(existingCards));
+      console.log('Card saved to localStorage:', cardToSave.id);
+
       await onSave(cardToSave);
       
       // Show success message with action buttons
@@ -1008,6 +1021,19 @@ const CardEditor: React.FC<CardEditorProps> = ({
         },
         layers: activeCard.layers || []
       };
+
+      // Store the card temporarily for preview
+      const existingCards = JSON.parse(localStorage.getItem('createdCards') || '[]');
+      const cardIndex = existingCards.findIndex((c: Card) => c.id === cardToPreview.id);
+      
+      if (cardIndex >= 0) {
+        existingCards[cardIndex] = cardToPreview;
+      } else {
+        existingCards.push(cardToPreview);
+      }
+      
+      localStorage.setItem('createdCards', JSON.stringify(existingCards));
+      console.log('Card stored for preview:', cardToPreview.id);
 
       // Call the original onPreview callback first
       onPreview(cardToPreview);
