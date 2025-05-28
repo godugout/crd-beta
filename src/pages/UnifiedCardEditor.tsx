@@ -16,11 +16,9 @@ const UnifiedCardEditor: React.FC = () => {
   const location = useLocation();
   const { cards, getCardById, addCard, updateCard } = useCards();
   
-  // Determine if we're editing or creating
   const isEditing = !!id;
   const existingCard = isEditing ? getCardById(id) : null;
   
-  // Initialize card data state
   const [cardData, setCardData] = useState<CardDesignState>({
     title: '',
     description: '',
@@ -34,7 +32,6 @@ const UnifiedCardEditor: React.FC = () => {
     year: '',
   });
 
-  // Initialize layers and effects hooks
   const {
     layers,
     activeLayerId,
@@ -56,7 +53,6 @@ const UnifiedCardEditor: React.FC = () => {
     getEffectClasses = () => ""
   } = useCardEffectsStack();
 
-  // Load existing card data for editing
   useEffect(() => {
     if (isEditing && existingCard) {
       setCardData({
@@ -76,7 +72,6 @@ const UnifiedCardEditor: React.FC = () => {
     }
   }, [isEditing, existingCard]);
 
-  // Process data from CardDetector if passed via location state
   useEffect(() => {
     if (location.state && !isEditing) {
       const { imageUrl, metadata, cardType } = location.state;
@@ -119,9 +114,9 @@ const UnifiedCardEditor: React.FC = () => {
             backgroundColor: cardData.backgroundColor,
             borderRadius: cardData.borderRadius,
           },
-          effects: effectStack.map(effect => effect.name), // Convert CardEffect[] to string[]
+          effects: effectStack.map(effect => effect.name),
         },
-        effects: effectStack.map(effect => effect.name), // This should be string[]
+        effects: effectStack.map(effect => effect.name),
         layers,
         effectClasses: getEffectClasses(),
       };
@@ -145,40 +140,27 @@ const UnifiedCardEditor: React.FC = () => {
 
   return (
     <PageLayout
-      title={isEditing ? "Edit Card" : "Create a Card"}
-      description={isEditing ? "Update your card design" : "Design your own custom trading cards with advanced effects and 3D visualization"}
+      title={isEditing ? "Edit Card" : "Create Card"}
+      description={isEditing ? "Update your card design" : "Design your own custom trading cards"}
+      hideNavigation={false}
     >
       <div className="min-h-screen bg-[var(--bg-primary)]">
-        <div className="container mx-auto max-w-[1400px] px-4 pt-6 pb-20">
-          <div className="mb-6">
-            <h1 className="text-3xl font-bold text-[var(--text-primary)]">
-              {isEditing ? 'Edit Your Card' : 'Create Your Card'}
-            </h1>
-            <p className="text-[var(--text-secondary)]">
-              {isEditing 
-                ? 'Make changes to your card design and save when ready'
-                : 'Design a professional-quality digital trading card'
-              }
-            </p>
-          </div>
-
-          <CardMakerWizard 
-            cardData={cardData}
-            setCardData={setCardData}
-            layers={layers}
-            setLayers={setLayers}
-            activeLayer={activeLayer}
-            setActiveLayerId={setActiveLayer}
-            updateLayer={updateLayer}
-            effectStack={effectStack}
-            addEffect={addEffect}
-            removeEffect={removeEffect}
-            updateEffectSettings={updateEffectSettings}
-            effectClasses={getEffectClasses()}
-            onSave={handleSaveCard}
-            isEditing={isEditing}
-          />
-        </div>
+        <CardMakerWizard 
+          cardData={cardData}
+          setCardData={setCardData}
+          layers={layers}
+          setLayers={setLayers}
+          activeLayer={activeLayer}
+          setActiveLayerId={setActiveLayer}
+          updateLayer={updateLayer}
+          effectStack={effectStack}
+          addEffect={addEffect}
+          removeEffect={removeEffect}
+          updateEffectSettings={updateEffectSettings}
+          effectClasses={getEffectClasses()}
+          onSave={handleSaveCard}
+          isEditing={isEditing}
+        />
       </div>
     </PageLayout>
   );

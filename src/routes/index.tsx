@@ -36,7 +36,6 @@ const TeamPage = React.lazy(() => import('@/pages/TeamPage'));
 const ArCardViewerPage = React.lazy(() => import('@/pages/ArCardViewerPage'));
 const Labs = React.lazy(() => import('@/pages/Labs'));
 
-// Loading fallback component
 const LoadingFallback = () => (
   <div className="flex items-center justify-center h-screen">
     <div className="text-center">
@@ -45,6 +44,34 @@ const LoadingFallback = () => (
     </div>
   </div>
 );
+
+// Unified card editor routes
+const cardEditorRoutes: RouteObject[] = [
+  {
+    path: "/cards/create",
+    element: <UnifiedCardEditor />
+  },
+  {
+    path: "/cards/edit/:id",
+    element: <UnifiedCardEditor />
+  },
+  {
+    path: "/create",
+    element: <UnifiedCardEditor />
+  },
+  {
+    path: "/editor",
+    element: <UnifiedCardEditor />
+  },
+  {
+    path: "/editor/:id",
+    element: <UnifiedCardEditor />
+  },
+  {
+    path: "/edit/:id",
+    element: <UnifiedCardEditor />
+  }
+];
 
 // Main application routes
 const rootRoutes: RouteObject[] = [
@@ -59,18 +86,6 @@ const rootRoutes: RouteObject[] = [
   {
     path: "/cards",
     element: <CardCollectionPage />
-  },
-  {
-    path: "/cards/create",
-    element: <UnifiedCardEditor />
-  },
-  {
-    path: "/editor",
-    element: <UnifiedCardEditor />
-  },
-  {
-    path: "/editor/:id",
-    element: <UnifiedCardEditor />
   },
   {
     path: "/cards/:id",
@@ -116,11 +131,12 @@ const rootRoutes: RouteObject[] = [
 
 export const routes: RouteObject[] = [
   ...rootRoutes,
-  ...mainRoutes.filter(route => route.path !== "/" && route.path !== "*"),
+  ...cardEditorRoutes,
+  ...mainRoutes.filter(route => !cardEditorRoutes.some(cr => cr.path === route.path)),
   ...teamRoutes,
   ...townRoutes,
   ...baseballRoutes,
   ...featureRoutes,
-  ...cardRoutes.filter(route => route.path !== "/cards" && route.path !== "/cards/:id"),
+  ...cardRoutes.filter(route => !cardEditorRoutes.some(cr => cr.path === route.path)),
   ...collectionRoutes.filter(route => route.path !== "/collections"),
 ];

@@ -75,7 +75,6 @@ const CardMakerWizard: React.FC<CardMakerWizardProps> = ({
   };
 
   const handleStepClick = (stepIndex: number) => {
-    // Allow clicking previous steps or next step if current requirements are met
     if (stepIndex <= currentStep || (stepIndex === currentStep + 1 && canProceed())) {
       setCurrentStep(stepIndex);
     }
@@ -139,72 +138,74 @@ const CardMakerWizard: React.FC<CardMakerWizardProps> = ({
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
-      <div className="lg:col-span-2 space-y-6">
-        <CardCreationStepper 
-          steps={STEPS}
-          currentStep={currentStep}
-          onStepClick={handleStepClick}
-        />
-        
-        <Card className="bg-[var(--bg-secondary)] border-[var(--border-primary)]">
-          <CardContent className="p-6">
-            {renderStepContent()}
-          </CardContent>
-        </Card>
-        
-        <div className="flex justify-between">
-          <Button
-            variant="outline"
-            onClick={handleBack}
-            disabled={currentStep === 0}
-            className="flex items-center gap-2 bg-[var(--bg-secondary)] border-[var(--border-primary)] text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)]"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Previous
-          </Button>
-          
-          {currentStep < STEPS.length - 1 ? (
-            <Button 
-              onClick={handleNext}
-              disabled={!canProceed()}
-              className="flex items-center gap-2 bg-[var(--brand-primary)] hover:bg-[var(--brand-primary)]/90 text-white"
-            >
-              Continue
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-          ) : (
-            <Button 
-              onClick={onSave}
-              className="flex items-center gap-2 bg-[var(--brand-primary)] hover:bg-[var(--brand-primary)]/90 text-white"
-            >
-              <Save className="h-4 w-4" />
-              {isEditing ? 'Update Card' : 'Create Card'}
-            </Button>
-          )}
-        </div>
-      </div>
-      
-      <div className="order-first lg:order-last">
-        <div className="sticky top-20">
-          <h2 className="text-xl font-bold mb-4 text-[var(--text-primary)]">Preview</h2>
-          <CardPreview 
-            cardData={cardData}
-            effectClasses={effectClasses}
+    <div className="container mx-auto max-w-[1400px] px-4 pt-6 pb-20">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+        <div className="lg:col-span-2 space-y-6">
+          <CardCreationStepper 
+            steps={STEPS}
+            currentStep={currentStep}
+            onStepClick={handleStepClick}
           />
           
-          {effectStack.length > 0 && (
-            <div className="mt-4 space-y-2">
-              <h3 className="text-sm font-medium text-[var(--text-primary)]">Applied Effects</h3>
-              <div className="text-sm text-[var(--text-secondary)]">
-                <ul className="list-disc pl-5">
-                  {effectStack.map(effect => (
-                    <li key={effect.id}>{effect.name}</li>
-                  ))}
-                </ul>
+          <Card className="bg-[var(--bg-secondary)] border-[var(--border-primary)]">
+            <CardContent className="p-6">
+              {renderStepContent()}
+            </CardContent>
+          </Card>
+          
+          <div className="flex justify-between">
+            <Button
+              variant="outline"
+              onClick={handleBack}
+              disabled={currentStep === 0}
+              className="flex items-center gap-2 bg-[var(--bg-secondary)] border-[var(--border-primary)] text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)]"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Previous
+            </Button>
+            
+            {currentStep < STEPS.length - 1 ? (
+              <Button 
+                onClick={handleNext}
+                disabled={!canProceed()}
+                className="flex items-center gap-2 bg-[var(--brand-primary)] hover:bg-[var(--brand-primary)]/90 text-white"
+              >
+                Continue
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            ) : (
+              <Button 
+                onClick={onSave}
+                className="flex items-center gap-2 bg-[var(--brand-primary)] hover:bg-[var(--brand-primary)]/90 text-white"
+              >
+                <Save className="h-4 w-4" />
+                {isEditing ? 'Update Card' : 'Create Card'}
+              </Button>
+            )}
+          </div>
+        </div>
+        
+        <div className="order-first lg:order-last">
+          <div className="sticky top-20">
+            <h2 className="text-xl font-bold mb-4 text-[var(--text-primary)]">Preview</h2>
+            <CardPreview 
+              cardData={cardData}
+              effectClasses={effectClasses}
+            />
+            
+            {effectStack.length > 0 && (
+              <div className="mt-4 space-y-2">
+                <h3 className="text-sm font-medium text-[var(--text-primary)]">Applied Effects</h3>
+                <div className="text-sm text-[var(--text-secondary)]">
+                  <ul className="list-disc pl-5">
+                    {effectStack.map(effect => (
+                      <li key={effect.id}>{effect.name}</li>
+                    ))}
+                  </ul>
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </div>
