@@ -1,6 +1,7 @@
+
 import React, { Suspense, useEffect, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Environment } from '@react-three/drei';
+import { OrbitControls, Environment, Stars, Sky } from '@react-three/drei';
 import { Card } from '@/lib/types';
 import { useCardLighting } from '@/hooks/useCardLighting';
 import { CardModel } from '@/components/card-viewer/CardModel';
@@ -38,7 +39,7 @@ const RealisticCardViewer: React.FC<RealisticCardViewerProps> = ({
 
   // Handle mouse movement for dynamic lighting
   const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (lightingSettings.useDynamicLighting) {
+    if (lightingSettings?.useDynamicLighting) {
       const rect = event.currentTarget.getBoundingClientRect();
       const x = (event.clientX - rect.left) / rect.width;
       const y = (event.clientY - rect.top) / rect.height;
@@ -60,28 +61,31 @@ const RealisticCardViewer: React.FC<RealisticCardViewerProps> = ({
         }}
         gl={{ 
           antialias: true,
-          alpha: true,
+          alpha: false,
           preserveDrawingBuffer: true
         }}
         style={{ 
-          background: 'transparent',
           width: '100%',
           height: '100%'
         }}
       >
+        {/* Background Scene */}
+        <Sky sunPosition={[0, 1, 0]} />
+        <Stars radius={300} depth={60} count={1000} factor={6} saturation={0} fade speed={1} />
+        
         {/* Lighting Setup */}
         <ambientLight 
-          intensity={lightingSettings.ambientLight.intensity} 
-          color={lightingSettings.ambientLight.color}
+          intensity={lightingSettings?.ambientLight?.intensity || 0.6} 
+          color={lightingSettings?.ambientLight?.color || '#f0f0ff'}
         />
         <directionalLight
           position={[
-            lightingSettings.primaryLight.x,
-            lightingSettings.primaryLight.y,
-            lightingSettings.primaryLight.z
+            lightingSettings?.primaryLight?.x || 10,
+            lightingSettings?.primaryLight?.y || 10,
+            lightingSettings?.primaryLight?.z || 10
           ]}
-          intensity={lightingSettings.primaryLight.intensity}
-          color={lightingSettings.primaryLight.color}
+          intensity={lightingSettings?.primaryLight?.intensity || 1.2}
+          color={lightingSettings?.primaryLight?.color || '#ffffff'}
           castShadow
         />
         <pointLight position={[10, 10, 10]} intensity={0.3} />

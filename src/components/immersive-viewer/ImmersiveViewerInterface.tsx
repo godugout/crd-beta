@@ -1,38 +1,21 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Settings, 
-  Palette, 
-  RotateCcw, 
-  Share2, 
-  Download, 
-  Heart, 
-  Bookmark,
-  ArrowLeft,
-  Maximize2,
-  Sun,
-  Moon,
-  Sparkles,
-  Eye,
-  EyeOff
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { CrdButton } from '@/components/ui/crd-button';
+
+import React from 'react';
 import { Card } from '@/lib/types';
-import { cn } from '@/lib/utils';
+import { ArrowLeft, Share, Download, Heart, Bookmark, Settings, RotateCcw } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import CardEffectsPanel from './CardEffectsPanel';
 
 interface ImmersiveViewerInterfaceProps {
   card: Card;
   isFlipped: boolean;
   onFlip: () => void;
   onBack: () => void;
-  onShare?: () => void;
-  onDownload?: () => void;
-  onLike?: () => void;
-  onBookmark?: () => void;
+  onShare: () => void;
+  onDownload: () => void;
+  onLike: () => void;
+  onBookmark: () => void;
   isCustomizationOpen: boolean;
   onToggleCustomization: () => void;
-  className?: string;
 }
 
 const ImmersiveViewerInterface: React.FC<ImmersiveViewerInterfaceProps> = ({
@@ -45,241 +28,77 @@ const ImmersiveViewerInterface: React.FC<ImmersiveViewerInterfaceProps> = ({
   onLike,
   onBookmark,
   isCustomizationOpen,
-  onToggleCustomization,
-  className
+  onToggleCustomization
 }) => {
-  const [isUIVisible, setIsUIVisible] = useState(true);
-  const [isLiked, setIsLiked] = useState(false);
-  const [isBookmarked, setIsBookmarked] = useState(false);
-
-  const handleLike = () => {
-    setIsLiked(!isLiked);
-    onLike?.();
-  };
-
-  const handleBookmark = () => {
-    setIsBookmarked(!isBookmarked);
-    onBookmark?.();
-  };
-
   return (
-    <div className={cn("absolute inset-0 pointer-events-none", className)}>
+    <>
       {/* Top Navigation Bar */}
-      <AnimatePresence>
-        {isUIVisible && (
-          <motion.div
-            initial={{ y: -100, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: -100, opacity: 0 }}
-            className="absolute top-0 left-0 right-0 z-50 pointer-events-auto"
+      <div className="absolute top-4 left-4 right-4 flex justify-between items-center z-20">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onBack}
+          className="bg-black/20 backdrop-blur-sm text-white hover:bg-black/40"
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back
+        </Button>
+        
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onToggleCustomization}
+            className="bg-black/20 backdrop-blur-sm text-white hover:bg-black/40"
           >
-            <div className="glass-panel mx-4 mt-4 px-6 py-4 rounded-2xl">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={onBack}
-                    className="hover:bg-white/10 text-white"
-                  >
-                    <ArrowLeft className="h-5 w-5" />
-                  </Button>
-                  
-                  <div className="text-white">
-                    <h1 className="text-lg font-semibold">{card.title || 'Untitled Card'}</h1>
-                    <p className="text-sm text-white/70">Immersive View</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center space-x-2">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setIsUIVisible(!isUIVisible)}
-                    className="hover:bg-white/10 text-white"
-                  >
-                    {isUIVisible ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                  </Button>
-                  
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={onShare}
-                    className="hover:bg-white/10 text-white"
-                  >
-                    <Share2 className="h-5 w-5" />
-                  </Button>
-                  
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={onDownload}
-                    className="hover:bg-white/10 text-white"
-                  >
-                    <Download className="h-5 w-5" />
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            <Settings className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onShare}
+            className="bg-black/20 backdrop-blur-sm text-white hover:bg-black/40"
+          >
+            <Share className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
 
       {/* Bottom Controls */}
-      <AnimatePresence>
-        {isUIVisible && (
-          <motion.div
-            initial={{ y: 100, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 100, opacity: 0 }}
-            className="absolute bottom-0 left-0 right-0 z-50 pointer-events-auto"
+      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20">
+        <div className="flex items-center gap-2 bg-black/20 backdrop-blur-sm rounded-full p-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onFlip}
+            className="text-white hover:bg-white/20"
           >
-            <div className="flex flex-col items-center space-y-4 mx-4 mb-6">
-              {/* Main Actions */}
-              <div className="glass-panel px-8 py-4 rounded-2xl">
-                <div className="flex items-center space-x-6">
-                  <Button
-                    variant="ghost"
-                    size="lg"
-                    onClick={handleLike}
-                    className={cn(
-                      "hover:bg-white/10 text-white transition-colors",
-                      isLiked && "text-red-400"
-                    )}
-                  >
-                    <Heart className={cn("h-6 w-6 mr-2", isLiked && "fill-current")} />
-                    {isLiked ? 'Liked' : 'Like'}
-                  </Button>
-                  
-                  <CrdButton
-                    variant="gradient"
-                    size="lg"
-                    onClick={onFlip}
-                    className="px-8"
-                  >
-                    <RotateCcw className="h-5 w-5 mr-2" />
-                    {isFlipped ? 'Show Front' : 'Show Back'}
-                  </CrdButton>
-                  
-                  <Button
-                    variant="ghost"
-                    size="lg"
-                    onClick={handleBookmark}
-                    className={cn(
-                      "hover:bg-white/10 text-white transition-colors",
-                      isBookmarked && "text-yellow-400"
-                    )}
-                  >
-                    <Bookmark className={cn("h-6 w-6 mr-2", isBookmarked && "fill-current")} />
-                    {isBookmarked ? 'Saved' : 'Save'}
-                  </Button>
-                </div>
-              </div>
-              
-              {/* Secondary Actions */}
-              <div className="flex items-center space-x-3">
-                <Button
-                  variant="soft"
-                  size="sm"
-                  onClick={onToggleCustomization}
-                  className={cn(
-                    "transition-all",
-                    isCustomizationOpen && "bg-white/20"
-                  )}
-                >
-                  <Settings className="h-4 w-4 mr-2" />
-                  Lighting
-                </Button>
-                
-                <Button
-                  variant="soft"
-                  size="sm"
-                  className="hover:bg-white/15"
-                >
-                  <Sparkles className="h-4 w-4 mr-2" />
-                  Effects
-                </Button>
-                
-                <Button
-                  variant="soft"
-                  size="sm"
-                  className="hover:bg-white/15"
-                >
-                  <Maximize2 className="h-4 w-4 mr-2" />
-                  Fullscreen
-                </Button>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Side Panel Toggle */}
-      <div 
-        className={cn(
-          "absolute top-1/2 -translate-y-1/2 z-40 pointer-events-auto transition-all duration-300",
-          isCustomizationOpen ? "right-[380px]" : "right-4"
-        )}
-      >
-        <Button
-          variant="soft"
-          size="icon"
-          onClick={onToggleCustomization}
-          className="rounded-full shadow-xl hover:scale-105 transition-transform"
-        >
-          <Settings className="h-5 w-5" />
-        </Button>
+            <RotateCcw className="h-4 w-4 mr-2" />
+            {isFlipped ? 'Show Front' : 'Show Back'}
+          </Button>
+        </div>
       </div>
 
-      {/* UI Toggle Button */}
-      <div className="absolute top-1/2 left-4 -translate-y-1/2 z-40 pointer-events-auto">
-        <Button
-          variant="soft"
-          size="icon"
-          onClick={() => setIsUIVisible(!isUIVisible)}
-          className="rounded-full shadow-xl hover:scale-105 transition-transform"
-        >
-          {isUIVisible ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-        </Button>
+      {/* Card Info */}
+      <div className="absolute top-16 left-4 bg-black/20 backdrop-blur-sm rounded-lg p-3 text-white max-w-xs z-10">
+        <h2 className="font-bold text-lg">{card.title}</h2>
+        {card.player && <p className="text-sm opacity-80">{card.player}</p>}
+        {card.team && <p className="text-xs opacity-60">{card.team}</p>}
       </div>
 
-      {/* Card Info Overlay */}
-      <AnimatePresence>
-        {isUIVisible && !isCustomizationOpen && (
-          <motion.div
-            initial={{ x: -100, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            exit={{ x: -100, opacity: 0 }}
-            className="absolute top-24 left-4 z-30 pointer-events-auto"
-          >
-            <div className="glass-panel p-4 rounded-xl max-w-xs">
-              <div className="text-white">
-                <h3 className="font-semibold text-sm mb-1">{card.title}</h3>
-                {card.metadata?.player && (
-                  <p className="text-xs text-white/70 mb-1">{card.metadata.player}</p>
-                )}
-                {card.metadata?.year && (
-                  <p className="text-xs text-white/50">{card.metadata.year}</p>
-                )}
-                {card.metadata?.rarity && (
-                  <div className="mt-2">
-                    <span className={cn(
-                      "text-xs px-2 py-1 rounded-full",
-                      card.metadata.rarity === 'legendary' && "bg-yellow-500/20 text-yellow-300",
-                      card.metadata.rarity === 'rare' && "bg-purple-500/20 text-purple-300",
-                      card.metadata.rarity === 'uncommon' && "bg-blue-500/20 text-blue-300",
-                      card.metadata.rarity === 'common' && "bg-gray-500/20 text-gray-300"
-                    )}>
-                      {card.metadata.rarity}
-                    </span>
-                  </div>
-                )}
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+      {/* Effects Panel */}
+      {isCustomizationOpen && (
+        <div className="absolute right-4 top-16 bottom-16 w-80 z-30">
+          <CardEffectsPanel
+            activeEffects={['holographic']}
+            onToggleEffect={() => {}}
+            effectIntensity={{ holographic: 0.7 }}
+            onEffectIntensityChange={() => {}}
+            onClose={onToggleCustomization}
+          />
+        </div>
+      )}
+    </>
   );
 };
 
