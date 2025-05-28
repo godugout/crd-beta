@@ -1,9 +1,12 @@
 
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { ArrowLeft, Upload, Crop, Sparkles } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowLeft, Upload, Crop, Sparkles, Maximize2, RotateCw, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import CardUpload from '@/components/card-upload/CardUpload';
+import ImageEditor from '@/components/card-upload/ImageEditor';
+import { MemorabiliaType } from '@/components/card-upload/cardDetection';
 
 interface UploadFlowProps {
   onSave: (cardData: any) => void;
@@ -14,6 +17,8 @@ interface UploadFlowProps {
 const UploadFlow: React.FC<UploadFlowProps> = ({ onSave, onBack, initialData }) => {
   const [step, setStep] = useState(0);
   const [imageUrl, setImageUrl] = useState<string | null>(initialData?.imageUrl || null);
+  const [currentFile, setCurrentFile] = useState<File | null>(null);
+  const [showEditor, setShowEditor] = useState(false);
   const [cardData, setCardData] = useState({
     title: '',
     description: '',
@@ -22,13 +27,35 @@ const UploadFlow: React.FC<UploadFlowProps> = ({ onSave, onBack, initialData }) 
 
   const steps = [
     { title: 'Upload Image', icon: Upload },
-    { title: 'Crop & Adjust', icon: Crop },
+    { title: 'Crop & Extract', icon: Crop },
     { title: 'Add Details', icon: Sparkles }
   ];
 
   const handleImageUpload = (file: File, previewUrl: string) => {
     setImageUrl(previewUrl);
+    setCurrentFile(file);
     setStep(1);
+    setShowEditor(true);
+  };
+
+  const handleCropComplete = (file: File, url: string, memorabiliaType?: MemorabiliaType, metadata?: any) => {
+    setImageUrl(url);
+    setCurrentFile(file);
+    setShowEditor(false);
+    
+    // Auto-populate metadata if available
+    if (metadata) {
+      setCardData(prev => ({
+        ...prev,
+        title: metadata.title || prev.title,
+        description: metadata.description || prev.description,
+        player: metadata.player || prev.player,
+        team: metadata.team || prev.team,
+        year: metadata.year || prev.year
+      }));
+    }
+    
+    setStep(2);
   };
 
   const handleNext = () => {
@@ -75,42 +102,81 @@ const UploadFlow: React.FC<UploadFlowProps> = ({ onSave, onBack, initialData }) 
           </div>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-8">
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-8"
-          >
-            {step === 0 && (
-              <div>
+        <AnimatePresence mode="wait">
+          {step === 0 && (
+            <motion.div
+              key="upload"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
+              className="grid lg:grid-cols-2 gap-8"
+            >
+              <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-8">
                 <h2 className="text-3xl font-bold text-white mb-4">Upload Your Image</h2>
                 <p className="text-gray-300 mb-6">
-                  Drop your photo here and we'll help you turn it into a sick trading card
+                  Drop your photo here and we'll help you extract the perfect card
                 </p>
                 <CardUpload
                   onImageUpload={handleImageUpload}
                   className="w-full"
                 />
               </div>
-            )}
 
-            {step === 1 && imageUrl && (
-              <div>
-                <h2 className="text-3xl font-bold text-white mb-4">Perfect Your Shot</h2>
-                <p className="text-gray-300 mb-6">
-                  Crop and adjust your image to look absolutely fire
-                </p>
-                <div className="aspect-[2.5/3.5] bg-gray-900 rounded-lg overflow-hidden mb-6">
-                  <img src={imageUrl} alt="Preview" className="w-full h-full object-cover" />
+              <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-8">
+                <h3 className="text-xl font-bold text-white mb-4">Tips for Best Results</h3>
+                <div className="space-y-4 text-gray-300">
+                  <div className="flex items-start gap-3">
+                    <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold mt-0.5">1</div>
+                    <div>
+                      <p className="font-medium text-white">Good Lighting</p>
+                      <p className="text-sm">Make sure your card is well-lit with minimal shadows</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold mt-0.5">2</div>
+                    <div>
+                      <p className="font-medium text-white">Clear Focus</p>
+                      <p className="text-sm">Ensure the card text and details are sharp and readable</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold mt-0.5">3</div>
+                    <div>
+                      <p className="font-medium text-white">Full Card Visible</p>
+                      <p className="text-sm">Include the entire card with some background space</p>
+                    </div>
+                  </div>
                 </div>
-                <Button onClick={handleNext} className="w-full bg-blue-500 hover:bg-blue-600">
-                  Looks Good!
-                </Button>
               </div>
-            )}
+            </motion.div>
+          )}
 
-            {step === 2 && (
-              <div>
+          {step === 1 && (
+            <motion.div
+              key="crop"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
+              className="max-w-6xl mx-auto"
+            >
+              <div className="text-center mb-6">
+                <h2 className="text-3xl font-bold text-white mb-2">Extract Your Card</h2>
+                <p className="text-gray-300">
+                  Our AI detected the card in your image. Adjust the selection if needed.
+                </p>
+              </div>
+            </motion.div>
+          )}
+
+          {step === 2 && (
+            <motion.div
+              key="details"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
+              className="grid lg:grid-cols-2 gap-8"
+            >
+              <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-8">
                 <h2 className="text-3xl font-bold text-white mb-4">Add the Details</h2>
                 <p className="text-gray-300 mb-6">
                   Give your card a name and description that hits different
@@ -121,45 +187,88 @@ const UploadFlow: React.FC<UploadFlowProps> = ({ onSave, onBack, initialData }) 
                     placeholder="Card title (e.g. 'Beast Mode Activated')"
                     value={cardData.title}
                     onChange={(e) => setCardData({...cardData, title: e.target.value})}
-                    className="w-full p-4 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400"
+                    className="w-full p-4 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:border-blue-500 focus:outline-none"
                   />
                   <textarea
                     placeholder="Description (optional but recommended for max vibes)"
                     value={cardData.description}
                     onChange={(e) => setCardData({...cardData, description: e.target.value})}
-                    className="w-full p-4 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 h-32 resize-none"
+                    className="w-full p-4 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 h-32 resize-none focus:border-blue-500 focus:outline-none"
                   />
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <input
+                      type="text"
+                      placeholder="Player name"
+                      value={cardData.player || ''}
+                      onChange={(e) => setCardData({...cardData, player: e.target.value})}
+                      className="w-full p-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:border-blue-500 focus:outline-none"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Team"
+                      value={cardData.team || ''}
+                      onChange={(e) => setCardData({...cardData, team: e.target.value})}
+                      className="w-full p-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:border-blue-500 focus:outline-none"
+                    />
+                  </div>
+                  
                   <Button 
                     onClick={handleSave} 
-                    className="w-full bg-gradient-to-r from-green-500 to-emerald-400 text-white font-semibold py-4"
+                    className="w-full bg-gradient-to-r from-green-500 to-emerald-400 text-white font-semibold py-4 text-lg"
                     disabled={!cardData.title.trim()}
                   >
                     Create Card 🔥
                   </Button>
                 </div>
               </div>
-            )}
-          </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-8"
-          >
-            <h3 className="text-xl font-bold text-white mb-4">Live Preview</h3>
-            <div className="aspect-[2.5/3.5] bg-gradient-to-br from-gray-900 to-gray-800 rounded-lg flex items-center justify-center">
-              {imageUrl ? (
-                <img src={imageUrl} alt="Card preview" className="w-full h-full object-cover rounded-lg" />
-              ) : (
-                <div className="text-gray-400 text-center">
-                  <Upload className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                  <p>Upload an image to see preview</p>
+              <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-8">
+                <h3 className="text-xl font-bold text-white mb-4">Live Preview</h3>
+                <div className="aspect-[2.5/3.5] bg-gradient-to-br from-gray-900 to-gray-800 rounded-lg overflow-hidden">
+                  {imageUrl ? (
+                    <img src={imageUrl} alt="Card preview" className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-gray-400">
+                      <Upload className="w-12 h-12 opacity-50" />
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-          </motion.div>
-        </div>
+                
+                {cardData.title && (
+                  <div className="mt-4 p-4 bg-white/10 rounded-lg">
+                    <h4 className="text-white font-semibold">{cardData.title}</h4>
+                    {cardData.description && (
+                      <p className="text-gray-300 text-sm mt-1">{cardData.description}</p>
+                    )}
+                    <div className="flex gap-2 mt-2">
+                      {cardData.player && (
+                        <Badge variant="outline" className="bg-blue-500/20 border-blue-500/50 text-blue-200">
+                          {cardData.player}
+                        </Badge>
+                      )}
+                      {cardData.team && (
+                        <Badge variant="outline" className="bg-purple-500/20 border-purple-500/50 text-purple-200">
+                          {cardData.team}
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
+
+      <ImageEditor
+        showEditor={showEditor}
+        setShowEditor={setShowEditor}
+        editorImage={imageUrl}
+        currentFile={currentFile}
+        onCropComplete={handleCropComplete}
+        autoEnhance={true}
+      />
     </div>
   );
 };

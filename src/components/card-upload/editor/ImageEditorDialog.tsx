@@ -1,7 +1,8 @@
+
 import React, { useRef, useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Loader2, Info, Tag, User, Calendar, Shirt } from 'lucide-react';
+import { Loader2, Info, Tag, User, Calendar, Shirt, Maximize2, RotateCw, Plus, Trash2 } from 'lucide-react';
 import { useCropState } from '../hooks/useCropState';
 import { useEditor } from '../hooks/useEditor';
 import { useCropBoxOperations } from '../hooks/useCropBoxOperations';
@@ -235,16 +236,16 @@ const ImageEditorDialog: React.FC<ImageEditorDialogProps> = ({
 
   return (
     <Dialog open={showEditor} onOpenChange={setShowEditor}>
-      <DialogContent className="max-w-5xl w-[95vw] max-h-[90vh] p-0 overflow-hidden">
-        <DialogHeader className="p-4 border-b">
-          <DialogTitle>Card Extractor</DialogTitle>
-          <DialogDescription className="text-sm text-muted-foreground">
-            Detect and extract trading cards from your images
+      <DialogContent className="max-w-7xl w-[95vw] max-h-[95vh] p-0 overflow-hidden bg-[#0a0a0a] border-white/20">
+        <DialogHeader className="p-6 border-b border-white/20 bg-gradient-to-r from-[#1a1a2e] to-[#16213e]">
+          <DialogTitle className="text-2xl font-bold text-white">Card Extractor</DialogTitle>
+          <DialogDescription className="text-gray-300">
+            AI-powered card detection and extraction from your images
           </DialogDescription>
         </DialogHeader>
         
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 h-[calc(90vh-8rem)] overflow-hidden">
-          <div className="md:col-span-3 h-[50vh] md:h-full overflow-hidden flex flex-col">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 p-6 h-[calc(95vh-8rem)] overflow-hidden">
+          <div className="lg:col-span-3 h-[50vh] lg:h-full overflow-hidden flex flex-col bg-gray-900 rounded-xl border border-white/10">
             <EditorContent
               canvasRef={canvasRef}
               editorImgRef={editorImgRef}
@@ -265,23 +266,29 @@ const ImageEditorDialog: React.FC<ImageEditorDialogProps> = ({
           </div>
           
           <div className="flex flex-col space-y-4 overflow-auto">
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h3 className="text-sm font-medium mb-2">Card Detection</h3>
-              <div className="flex flex-col gap-2">
+            <div className="bg-white/5 backdrop-blur-xl border border-white/10 p-4 rounded-xl">
+              <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                <Crop className="w-5 h-5 text-blue-400" />
+                Detection Controls
+              </h3>
+              <div className="flex flex-col gap-3">
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={detectItems}
                   disabled={detectionRunning}
-                  className="w-full"
+                  className="w-full bg-blue-500/20 border-blue-500/50 text-blue-200 hover:bg-blue-500/30"
                 >
                   {detectionRunning ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Detecting...
+                      Detecting Cards...
                     </>
                   ) : (
-                    "Auto Detect Card"
+                    <>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Auto Detect Cards
+                    </>
                   )}
                 </Button>
                 
@@ -290,9 +297,10 @@ const ImageEditorDialog: React.FC<ImageEditorDialogProps> = ({
                   size="sm"
                   onClick={maximizeCrop}
                   disabled={selectedCropIndex < 0}
-                  className="w-full"
+                  className="w-full bg-purple-500/20 border-purple-500/50 text-purple-200 hover:bg-purple-500/30"
                 >
-                  Fit to Card Dimensions
+                  <Maximize2 className="h-4 w-4 mr-2" />
+                  Fit Card Ratio
                 </Button>
                 
                 <Button
@@ -300,49 +308,45 @@ const ImageEditorDialog: React.FC<ImageEditorDialogProps> = ({
                   size="sm"
                   onClick={extractCardMetadata}
                   disabled={selectedCropIndex < 0 || isExtractingMetadata}
-                  className="w-full"
+                  className="w-full bg-green-500/20 border-green-500/50 text-green-200 hover:bg-green-500/30"
                 >
                   {isExtractingMetadata ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Extracting Text...
+                      Reading Text...
                     </>
                   ) : (
-                    "Extract Text"
+                    <>
+                      <Tag className="h-4 w-4 mr-2" />
+                      Extract Text
+                    </>
                   )}
                 </Button>
               </div>
               
               {selectedCropIndex >= 0 && cropBoxes[selectedCropIndex] && (
-                <div className="mt-4 p-2 border border-gray-200 rounded bg-white">
-                  <p className="text-xs font-medium">Detection Confidence</p>
-                  <div className="flex items-center mt-1">
-                    <div className="w-full bg-gray-200 rounded-full h-2.5">
+                <div className="mt-4 p-3 bg-black/40 border border-white/10 rounded-lg">
+                  <p className="text-sm font-medium text-white mb-2">Detection Confidence</p>
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 bg-gray-700 rounded-full h-2">
                       <div 
-                        className="bg-green-600 h-2.5 rounded-full" 
+                        className="bg-gradient-to-r from-green-500 to-blue-500 h-2 rounded-full transition-all" 
                         style={{ 
                           width: `${((cropBoxes[selectedCropIndex].confidence || 0) * 100)}%` 
                         }}
                       ></div>
                     </div>
-                    <span className="ml-2 text-xs font-medium">
+                    <span className="text-sm font-medium text-white">
                       {Math.round((cropBoxes[selectedCropIndex].confidence || 0) * 100)}%
                     </span>
                   </div>
                 </div>
               )}
-              
-              <div className="mt-4">
-                <p className="text-xs text-gray-500 flex items-start">
-                  <Info className="h-3 w-3 mr-1 mt-0.5 flex-shrink-0" />
-                  Card dimensions will automatically use the standard 2.5:3.5 ratio
-                </p>
-              </div>
             </div>
             
             {selectedCropIndex >= 0 && cropBoxes[selectedCropIndex] && (
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <h3 className="text-sm font-medium mb-2">Card Type</h3>
+              <div className="bg-white/5 backdrop-blur-xl border border-white/10 p-4 rounded-xl">
+                <h3 className="text-lg font-semibold text-white mb-4">Card Type</h3>
                 <CardTypeSelector
                   selected={cropBoxes[selectedCropIndex].memorabiliaType || 'card'}
                   onSelect={(type) => handleMemorabiliaTypeChange(selectedCropIndex, type as MemorabiliaType)}
@@ -352,31 +356,34 @@ const ImageEditorDialog: React.FC<ImageEditorDialogProps> = ({
             )}
             
             {extractedMetadata && (
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <h3 className="text-sm font-medium mb-2 flex items-center justify-between">
-                  <span>Detected Info</span>
-                  <Badge variant="outline" className="text-xs">
-                    {Math.round((extractedMetadata?.confidence || 0) * 100)}% accuracy
+              <div className="bg-white/5 backdrop-blur-xl border border-white/10 p-4 rounded-xl">
+                <h3 className="text-lg font-semibold text-white mb-3 flex items-center justify-between">
+                  <span className="flex items-center gap-2">
+                    <Info className="w-5 h-5 text-blue-400" />
+                    Detected Info
+                  </span>
+                  <Badge className="bg-blue-500/20 border-blue-500/50 text-blue-200">
+                    {Math.round((extractedMetadata?.confidence || 0) * 100)}% accurate
                   </Badge>
                 </h3>
                 
-                <div className="space-y-2 text-sm">
+                <div className="space-y-3 text-sm">
                   {extractedMetadata.title && (
-                    <div className="flex items-start gap-2">
-                      <Tag className="h-4 w-4 text-gray-500 mt-0.5 flex-shrink-0" />
+                    <div className="flex items-start gap-3 p-2 bg-black/20 rounded-lg">
+                      <Tag className="h-4 w-4 text-blue-400 mt-0.5 flex-shrink-0" />
                       <div>
-                        <p className="font-medium">Title</p>
-                        <p className="text-gray-700">{extractedMetadata.title}</p>
+                        <p className="font-medium text-white">Title</p>
+                        <p className="text-gray-300">{extractedMetadata.title}</p>
                       </div>
                     </div>
                   )}
                   
                   {extractedMetadata.player && (
-                    <div className="flex items-start gap-2">
-                      <User className="h-4 w-4 text-gray-500 mt-0.5 flex-shrink-0" />
+                    <div className="flex items-start gap-3 p-2 bg-black/20 rounded-lg">
+                      <User className="h-4 w-4 text-green-400 mt-0.5 flex-shrink-0" />
                       <div>
-                        <p className="font-medium">Player</p>
-                        <p className="text-gray-700">
+                        <p className="font-medium text-white">Player</p>
+                        <p className="text-gray-300">
                           {extractedMetadata.player}
                           {extractedMetadata.position ? ` • ${extractedMetadata.position}` : ''}
                         </p>
@@ -385,21 +392,21 @@ const ImageEditorDialog: React.FC<ImageEditorDialogProps> = ({
                   )}
                   
                   {extractedMetadata.team && (
-                    <div className="flex items-start gap-2">
-                      <Shirt className="h-4 w-4 text-gray-500 mt-0.5 flex-shrink-0" />
+                    <div className="flex items-start gap-3 p-2 bg-black/20 rounded-lg">
+                      <Shirt className="h-4 w-4 text-purple-400 mt-0.5 flex-shrink-0" />
                       <div>
-                        <p className="font-medium">Team</p>
-                        <p className="text-gray-700">{extractedMetadata.team}</p>
+                        <p className="font-medium text-white">Team</p>
+                        <p className="text-gray-300">{extractedMetadata.team}</p>
                       </div>
                     </div>
                   )}
                   
                   {extractedMetadata.year && (
-                    <div className="flex items-start gap-2">
-                      <Calendar className="h-4 w-4 text-gray-500 mt-0.5 flex-shrink-0" />
+                    <div className="flex items-start gap-3 p-2 bg-black/20 rounded-lg">
+                      <Calendar className="h-4 w-4 text-orange-400 mt-0.5 flex-shrink-0" />
                       <div>
-                        <p className="font-medium">Year</p>
-                        <p className="text-gray-700">
+                        <p className="font-medium text-white">Details</p>
+                        <p className="text-gray-300">
                           {extractedMetadata.year}
                           {extractedMetadata.manufacturer ? ` ${extractedMetadata.manufacturer}` : ''}
                           {extractedMetadata.cardNumber ? ` #${extractedMetadata.cardNumber}` : ''}
@@ -409,12 +416,15 @@ const ImageEditorDialog: React.FC<ImageEditorDialogProps> = ({
                   )}
                   
                   {extractedMetadata.tags && extractedMetadata.tags.length > 0 && (
-                    <div className="mt-2 flex flex-wrap gap-1">
-                      {extractedMetadata.tags.map((tag: string, i: number) => (
-                        <Badge key={i} variant="secondary" className="text-xs">
-                          {tag}
-                        </Badge>
-                      ))}
+                    <div className="pt-2">
+                      <p className="text-white font-medium mb-2">Tags</p>
+                      <div className="flex flex-wrap gap-1">
+                        {extractedMetadata.tags.map((tag: string, i: number) => (
+                          <Badge key={i} className="bg-gray-700/50 border-gray-600 text-gray-200 text-xs">
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -423,17 +433,20 @@ const ImageEditorDialog: React.FC<ImageEditorDialogProps> = ({
             
             <div className="mt-auto">
               <Button 
-                className="w-full" 
+                className="w-full bg-gradient-to-r from-green-500 to-emerald-400 hover:from-green-600 hover:to-emerald-500 text-white font-semibold py-3 text-lg" 
                 onClick={handleExtractAndSaveCard}
                 disabled={selectedCropIndex < 0 || isExtractingSaving}
               >
                 {isExtractingSaving ? (
                   <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Extracting...
+                    <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                    Extracting Card...
                   </>
                 ) : (
-                  "Extract & Save Card"
+                  <>
+                    <Sparkles className="h-5 w-5 mr-2" />
+                    Extract & Save Card
+                  </>
                 )}
               </Button>
             </div>
