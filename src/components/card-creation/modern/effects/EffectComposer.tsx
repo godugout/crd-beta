@@ -15,9 +15,10 @@ import {
   Trash2, 
   Plus,
   RotateCw,
-  Zap
+  Zap,
+  ChevronUp,
+  ChevronDown
 } from 'lucide-react';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
 export type EffectType = 
   | 'holographic' 
@@ -139,21 +140,18 @@ const EffectComposer: React.FC<EffectComposerProps> = ({
   className = ''
 }) => {
   const [activeEffect, setActiveEffect] = useState<string | null>(null);
-  const [showEffectLibrary, setShowEffectLibrary] = useState(false);
 
-  const handleDragEnd = (result: any) => {
-    if (!result.destination) return;
-
-    const items = Array.from(effects);
-    const [reorderedItem] = items.splice(result.source.index, 1);
-    items.splice(result.destination.index, 0, reorderedItem);
-
-    onReorderEffects(items);
-  };
+  const moveEffect = useCallback((fromIndex: number, toIndex: number) => {
+    if (toIndex < 0 || toIndex >= effects.length) return;
+    
+    const newEffects = [...effects];
+    const [movedEffect] = newEffects.splice(fromIndex, 1);
+    newEffects.splice(toIndex, 0, movedEffect);
+    onReorderEffects(newEffects);
+  }, [effects, onReorderEffects]);
 
   const handleAddEffect = (type: EffectType) => {
     onAddEffect(type);
-    setShowEffectLibrary(false);
   };
 
   const updateEffectParameter = (
@@ -180,11 +178,11 @@ const EffectComposer: React.FC<EffectComposerProps> = ({
           <p className="text-gray-300 text-sm">Stack and customize effects for your card</p>
         </div>
         <Button
-          onClick={() => setShowEffectLibrary(!showEffectLibrary)}
-          className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+          onClick={onPreviewEffects}
+          className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
         >
-          <Plus className="w-4 h-4 mr-2" />
-          Add Effect
+          <Eye className="w-4 h-4 mr-2" />
+          Preview in 3D
         </Button>
       </div>
 
@@ -202,160 +200,171 @@ const EffectComposer: React.FC<EffectComposerProps> = ({
               <p className="text-gray-500 text-sm">Add effects to create stunning card finishes</p>
             </Card>
           ) : (
-            <DragDropContext onDragEnd={handleDragEnd}>
-              <Droppable droppableId="effects">
-                {(provided) => (
-                  <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-2">
-                    {effects.map((effect, index) => (
-                      <Draggable key={effect.id} draggableId={effect.id} index={index}>
-                        {(provided, snapshot) => (
-                          <Card
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            className={`p-4 bg-white/10 border-white/20 transition-all ${
-                              snapshot.isDragging ? 'shadow-lg scale-105' : ''
-                            } ${activeEffect === effect.id ? 'ring-2 ring-purple-500' : ''}`}
-                            onClick={() => setActiveEffect(activeEffect === effect.id ? null : effect.id)}
-                          >
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-3">
-                                <div
-                                  {...provided.dragHandleProps}
-                                  className="cursor-grab active:cursor-grabbing"
-                                >
-                                  <Move className="w-4 h-4 text-gray-400" />
-                                </div>
-                                <div className={`w-8 h-8 rounded-lg bg-gradient-to-r ${EFFECT_TEMPLATES[effect.type].color} flex items-center justify-center`}>
-                                  {EFFECT_TEMPLATES[effect.type].icon}
-                                </div>
-                                <div>
-                                  <h4 className="text-white font-medium">{effect.name}</h4>
-                                  <p className="text-gray-400 text-xs">{effect.blendMode}</p>
-                                </div>
-                              </div>
-                              
-                              <div className="flex items-center gap-2">
-                                <Badge variant={effect.enabled ? 'default' : 'secondary'}>
-                                  {Math.round(effect.parameters.intensity * 100)}%
-                                </Badge>
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    onRemoveEffect(effect.id);
-                                  }}
-                                  className="text-gray-400 hover:text-red-400"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </Button>
-                              </div>
-                            </div>
-
-                            {activeEffect === effect.id && (
-                              <div className="mt-4 pt-4 border-t border-white/10 space-y-4">
-                                <div>
-                                  <label className="block text-sm font-medium text-white mb-2">
-                                    Intensity: {Math.round(effect.parameters.intensity * 100)}%
-                                  </label>
-                                  <Slider
-                                    value={[effect.parameters.intensity]}
-                                    min={0}
-                                    max={1}
-                                    step={0.01}
-                                    onValueChange={([value]) => 
-                                      updateEffectParameter(effect.id, 'intensity', value)
-                                    }
-                                    className="w-full"
-                                  />
-                                </div>
-
-                                <div className="grid grid-cols-2 gap-4">
-                                  <div>
-                                    <label className="block text-sm font-medium text-white mb-2">
-                                      Blend Mode
-                                    </label>
-                                    <Select
-                                      value={effect.blendMode}
-                                      onValueChange={(value) => 
-                                        onUpdateEffect(effect.id, { blendMode: value as BlendMode })
-                                      }
-                                    >
-                                      <SelectTrigger className="bg-white/10 border-white/20 text-white">
-                                        <SelectValue />
-                                      </SelectTrigger>
-                                      <SelectContent>
-                                        <SelectItem value="normal">Normal</SelectItem>
-                                        <SelectItem value="multiply">Multiply</SelectItem>
-                                        <SelectItem value="screen">Screen</SelectItem>
-                                        <SelectItem value="overlay">Overlay</SelectItem>
-                                        <SelectItem value="soft-light">Soft Light</SelectItem>
-                                        <SelectItem value="hard-light">Hard Light</SelectItem>
-                                      </SelectContent>
-                                    </Select>
-                                  </div>
-
-                                  {effect.parameters.scale !== undefined && (
-                                    <div>
-                                      <label className="block text-sm font-medium text-white mb-2">
-                                        Scale: {effect.parameters.scale.toFixed(1)}x
-                                      </label>
-                                      <Slider
-                                        value={[effect.parameters.scale]}
-                                        min={0.5}
-                                        max={3.0}
-                                        step={0.1}
-                                        onValueChange={([value]) => 
-                                          updateEffectParameter(effect.id, 'scale', value)
-                                        }
-                                      />
-                                    </div>
-                                  )}
-                                </div>
-
-                                {effect.parameters.color && (
-                                  <div>
-                                    <label className="block text-sm font-medium text-white mb-2">
-                                      Color
-                                    </label>
-                                    <input
-                                      type="color"
-                                      value={effect.parameters.color}
-                                      onChange={(e) => 
-                                        updateEffectParameter(effect.id, 'color', e.target.value)
-                                      }
-                                      className="w-full h-10 rounded border-2 border-white/20"
-                                    />
-                                  </div>
-                                )}
-
-                                {effect.parameters.speed !== undefined && (
-                                  <div>
-                                    <label className="block text-sm font-medium text-white mb-2">
-                                      Animation Speed: {effect.parameters.speed.toFixed(1)}x
-                                    </label>
-                                    <Slider
-                                      value={[effect.parameters.speed]}
-                                      min={0.1}
-                                      max={3.0}
-                                      step={0.1}
-                                      onValueChange={([value]) => 
-                                        updateEffectParameter(effect.id, 'speed', value)
-                                      }
-                                    />
-                                  </div>
-                                )}
-                              </div>
-                            )}
-                          </Card>
-                        )}
-                      </Draggable>
-                    ))}
-                    {provided.placeholder}
+            <div className="space-y-2">
+              {effects.map((effect, index) => (
+                <Card
+                  key={effect.id}
+                  className={`p-4 bg-white/10 border-white/20 transition-all ${
+                    activeEffect === effect.id ? 'ring-2 ring-purple-500' : ''
+                  }`}
+                  onClick={() => setActiveEffect(activeEffect === effect.id ? null : effect.id)}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-8 h-8 rounded-lg bg-gradient-to-r ${EFFECT_TEMPLATES[effect.type].color} flex items-center justify-center`}>
+                        {EFFECT_TEMPLATES[effect.type].icon}
+                      </div>
+                      <div>
+                        <h4 className="text-white font-medium">{effect.name}</h4>
+                        <p className="text-gray-400 text-xs">{effect.blendMode}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <Badge variant={effect.enabled ? 'default' : 'secondary'}>
+                        {Math.round(effect.parameters.intensity * 100)}%
+                      </Badge>
+                      
+                      {/* Move up button */}
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          moveEffect(index, index - 1);
+                        }}
+                        disabled={index === 0}
+                        className="text-gray-400 hover:text-white h-8 w-8 p-0"
+                      >
+                        <ChevronUp className="w-4 h-4" />
+                      </Button>
+                      
+                      {/* Move down button */}
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          moveEffect(index, index + 1);
+                        }}
+                        disabled={index === effects.length - 1}
+                        className="text-gray-400 hover:text-white h-8 w-8 p-0"
+                      >
+                        <ChevronDown className="w-4 h-4" />
+                      </Button>
+                      
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onRemoveEffect(effect.id);
+                        }}
+                        className="text-gray-400 hover:text-red-400 h-8 w-8 p-0"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
-                )}
-              </Droppable>
-            </DragDropContext>
+
+                  {activeEffect === effect.id && (
+                    <div className="mt-4 pt-4 border-t border-white/10 space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-white mb-2">
+                          Intensity: {Math.round(effect.parameters.intensity * 100)}%
+                        </label>
+                        <Slider
+                          value={[effect.parameters.intensity]}
+                          min={0}
+                          max={1}
+                          step={0.01}
+                          onValueChange={([value]) => 
+                            updateEffectParameter(effect.id, 'intensity', value)
+                          }
+                          className="w-full"
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-white mb-2">
+                            Blend Mode
+                          </label>
+                          <Select
+                            value={effect.blendMode}
+                            onValueChange={(value) => 
+                              onUpdateEffect(effect.id, { blendMode: value as BlendMode })
+                            }
+                          >
+                            <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="normal">Normal</SelectItem>
+                              <SelectItem value="multiply">Multiply</SelectItem>
+                              <SelectItem value="screen">Screen</SelectItem>
+                              <SelectItem value="overlay">Overlay</SelectItem>
+                              <SelectItem value="soft-light">Soft Light</SelectItem>
+                              <SelectItem value="hard-light">Hard Light</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        {effect.parameters.scale !== undefined && (
+                          <div>
+                            <label className="block text-sm font-medium text-white mb-2">
+                              Scale: {effect.parameters.scale.toFixed(1)}x
+                            </label>
+                            <Slider
+                              value={[effect.parameters.scale]}
+                              min={0.5}
+                              max={3.0}
+                              step={0.1}
+                              onValueChange={([value]) => 
+                                updateEffectParameter(effect.id, 'scale', value)
+                              }
+                            />
+                          </div>
+                        )}
+                      </div>
+
+                      {effect.parameters.color && (
+                        <div>
+                          <label className="block text-sm font-medium text-white mb-2">
+                            Color
+                          </label>
+                          <input
+                            type="color"
+                            value={effect.parameters.color}
+                            onChange={(e) => 
+                              updateEffectParameter(effect.id, 'color', e.target.value)
+                            }
+                            className="w-full h-10 rounded border-2 border-white/20"
+                          />
+                        </div>
+                      )}
+
+                      {effect.parameters.speed !== undefined && (
+                        <div>
+                          <label className="block text-sm font-medium text-white mb-2">
+                            Animation Speed: {effect.parameters.speed.toFixed(1)}x
+                          </label>
+                          <Slider
+                            value={[effect.parameters.speed]}
+                            min={0.1}
+                            max={3.0}
+                            step={0.1}
+                            onValueChange={([value]) => 
+                              updateEffectParameter(effect.id, 'speed', value)
+                            }
+                          />
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </Card>
+              ))}
+            </div>
           )}
         </TabsContent>
 
@@ -379,16 +388,6 @@ const EffectComposer: React.FC<EffectComposerProps> = ({
           </div>
         </TabsContent>
       </Tabs>
-
-      <div className="mt-6 pt-4 border-t border-white/10">
-        <Button
-          onClick={onPreviewEffects}
-          className="w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
-        >
-          <Eye className="w-4 h-4 mr-2" />
-          Preview in 3D
-        </Button>
-      </div>
     </div>
   );
 };
