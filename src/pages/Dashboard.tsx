@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { User, UserRole, UserPermission } from '@/lib/types';
 import { CardEnhancedProvider } from '@/context/CardEnhancedContext';
+import { UserProfile } from '@/lib/types/user';
 
 // Import dashboard components based on user role
 import AdminDashboard from '@/components/dashboard/AdminDashboard';
@@ -15,7 +16,7 @@ const Dashboard: React.FC = () => {
   // Check for loading in either auth context format
   const isLoading = auth.loading || auth.isLoading || false;
   
-  const [dashboardUser, setDashboardUser] = useState<User | null>(null);
+  const [dashboardUser, setDashboardUser] = useState<UserProfile | null>(null);
   const [dashboardLoaded, setDashboardLoaded] = useState(false);
   
   // Mock admin credentials for demo purposes
@@ -24,36 +25,35 @@ const Dashboard: React.FC = () => {
     password: "#LGO!"
   };
   
+  // Helper function to convert User to UserProfile
+  const userToProfile = (user: User): UserProfile => {
+    return {
+      id: user.id,
+      userId: user.id,
+      bio: user.bio,
+      role: user.role || UserRole.USER,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    };
+  };
+  
   // For demo purposes, create a mock user if none exists
   useEffect(() => {
     if (!isLoading) {
       if (user) {
-        // Ensure we create a User type compatible object
-        const compatibleUser: User = {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          displayName: user.displayName,
-          role: user.role,
-          permissions: user.permissions as UserPermission[],
-          avatarUrl: user.avatarUrl,
-          createdAt: user.createdAt,
-          updatedAt: user.updatedAt,
-        };
-        setDashboardUser(compatibleUser);
+        // Convert User to UserProfile
+        const profile = userToProfile(user);
+        setDashboardUser(profile);
       } else {
         // Mock user for demo purposes
-        const mockUser: User = {
+        const mockProfile: UserProfile = {
           id: 'mock-user-id',
-          email: 'user@example.com',
-          name: 'Demo User',
-          displayName: 'Demo User',
+          userId: 'mock-user-id',
           role: UserRole.ADMIN, // Default to admin role if password is correct
-          avatarUrl: 'https://api.dicebear.com/7.x/initials/svg?seed=DU',
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         };
-        setDashboardUser(mockUser);
+        setDashboardUser(mockProfile);
       }
       setDashboardLoaded(true);
     }

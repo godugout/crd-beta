@@ -16,7 +16,7 @@ export interface User {
   username?: string;
   bio?: string;
   avatarUrl?: string;
-  role?: UserRole;
+  role: UserRole; // Make role required
   permissions?: Permission[];
   createdAt: string;
   updatedAt: string;
