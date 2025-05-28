@@ -1,258 +1,97 @@
 
-/* Card Effects System CSS */
-
-/* Base classes */
-.card-with-effects {
-  position: relative;
-  overflow: hidden;
-  transition: filter 0.3s ease-out;
-}
-
-/* Effect container to hold overlays */
-.effects-container {
+/* Base effect styles */
+.effect-container {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0;
   pointer-events: none;
   z-index: 10;
-  overflow: hidden;
-}
-
-/* Effect layers */
-.effect-layer {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.3s ease-out;
 }
 
 /* Holographic effect */
-.effect-holographic .holographic-layer {
-  opacity: var(--holographic-intensity, 0.7);
+.effect-holographic {
   background: linear-gradient(
     135deg,
-    hsla(0, 100%, 50%, 0.6),
-    hsla(60, 100%, 50%, 0.6),
-    hsla(120, 100%, 50%, 0.6),
-    hsla(180, 100%, 50%, 0.6),
-    hsla(240, 100%, 50%, 0.6),
-    hsla(300, 100%, 50%, 0.6)
+    rgba(255,0,0,0.2),
+    rgba(255,255,0,0.2),
+    rgba(0,255,0,0.2),
+    rgba(0,255,255,0.2),
+    rgba(0,0,255,0.2),
+    rgba(255,0,255,0.2)
   );
   background-size: 400% 400%;
-  mix-blend-mode: overlay;
-  animation: holographic-shift 8s linear infinite;
-}
-
-@keyframes holographic-shift {
-  0% {
-    background-position: 0% 0%;
-  }
-  100% {
-    background-position: 100% 100%;
-  }
+  animation: rainbow 3s ease infinite;
+  mix-blend-mode: color-dodge;
+  opacity: var(--holographic-intensity, 0.7);
 }
 
 /* Refractor effect */
-.effect-refractor .refractor-layer,
-.effect-prizm .refractor-layer {
-  opacity: var(--refractor-intensity, 0.6);
-  background: conic-gradient(
-    from var(--mouse-position-x, 0deg),
-    hsl(0, 100%, 60%),
-    hsl(60, 100%, 60%),
-    hsl(120, 100%, 60%),
-    hsl(180, 100%, 60%),
-    hsl(240, 100%, 60%),
-    hsl(300, 100%, 60%),
-    hsl(360, 100%, 60%)
-  );
-  background-size: 200% 200%;
-  mix-blend-mode: color-dodge;
-}
-
-/* Premium refractor effects */
-.effect-superfractor .superfractor-layer {
-  opacity: 0.8;
+.effect-refractor {
   background: 
-    repeating-linear-gradient(
+    linear-gradient(
       45deg,
-      rgba(255, 215, 0, 0.5),
-      rgba(255, 215, 0, 0.5) 5px,
-      rgba(255, 255, 255, 0.5) 5px,
-      rgba(255, 255, 255, 0.5) 10px
+      transparent 40%,
+      rgba(255, 255, 255, 0.4) 45%,
+      rgba(255, 255, 255, 0.5) 50%,
+      rgba(255, 255, 255, 0.4) 55%,
+      transparent 60%
     );
-  mix-blend-mode: overlay;
-  animation: shimmer 3s ease-in-out infinite;
+  background-size: 200% 200%;
+  animation: shimmer 1.5s ease infinite;
+  opacity: var(--refractor-intensity, 0.8);
 }
 
-.effect-cracked-ice .cracked-ice-layer {
-  opacity: 0.7;
-  background: 
-    linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 0.5),
-      rgba(210, 235, 255, 0.5) 25%,
-      rgba(230, 240, 255, 0.5) 50%,
-      rgba(190, 215, 255, 0.5) 75%,
-      rgba(170, 200, 255, 0.5)
-    );
-  mix-blend-mode: screen;
-}
-
-/* Metallic effects */
-.effect-chrome .chrome-layer {
-  opacity: var(--chrome-intensity, 0.7);
-  background: 
-    linear-gradient(
-      115deg,
-      rgba(255, 255, 255, 0.7) calc(var(--mouse-position-x, 0.5) * 100%),
-      rgba(190, 190, 190, 0.5) calc(var(--mouse-position-x, 0.5) * 100% + 10%),
-      rgba(150, 150, 150, 0.3)
-    );
-  mix-blend-mode: overlay;
-}
-
-.effect-gold-foil .gold-foil-layer {
-  opacity: 0.8;
-  background: 
-    linear-gradient(
-      135deg,
-      rgba(255, 215, 0, 0.7),
-      rgba(255, 235, 150, 0.7),
-      rgba(255, 215, 0, 0.7),
-      rgba(230, 190, 0, 0.7)
-    );
-  mix-blend-mode: overlay;
-}
-
-/* Special effects */
-.effect-pulsar .pulsar-layer {
-  opacity: 0.5;
+/* Shimmer effect */
+.effect-shimmer {
   background: radial-gradient(
-    circle at center,
-    rgba(150, 150, 255, 0.8) 0%,
-    rgba(100, 100, 255, 0.6) 30%,
-    rgba(50, 50, 255, 0.4) 60%,
-    rgba(0, 0, 0, 0) 70%
+    circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    rgba(255, 255, 255, 0.3) 0%,
+    transparent 60%
   );
-  mix-blend-mode: screen;
-  animation: pulse 4s infinite ease-in-out;
+  opacity: var(--shimmer-intensity, 0.6);
 }
 
-.effect-spectral .spectral-layer {
-  opacity: 0.6;
-  background: linear-gradient(
-    135deg,
-    rgba(130, 0, 255, 0.5),
-    rgba(50, 0, 255, 0.5),
-    rgba(0, 130, 255, 0.5)
-  );
-  mix-blend-mode: color-dodge;
-}
-
-/* Texture effects */
-.effect-vintage .vintage-layer {
-  opacity: 0.7;
+/* Gold Foil effect */
+.effect-goldFoil {
   background: 
-    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.15'/%3E%3C/svg%3E"),
     linear-gradient(
-      to bottom,
-      rgba(255, 240, 220, 0.4),
-      rgba(255, 210, 170, 0.4)
+      45deg,
+      rgba(255, 215, 0, 0.3),
+      rgba(255, 255, 255, 0.4),
+      rgba(255, 215, 0, 0.3)
     );
-  mix-blend-mode: multiply;
+  background-size: 200% 200%;
+  animation: shine 2s linear infinite;
+  opacity: var(--gold-intensity, 0.7);
+}
+
+/* Vintage effect */
+.effect-vintage {
+  background: rgba(160, 140, 110, 0.1);
+  filter: sepia(var(--vintage-intensity, 0.5));
 }
 
 /* Animations */
-@keyframes pulse {
-  0%, 100% {
-    transform: scale(0.95);
-    opacity: 0.5;
-  }
-  50% {
-    transform: scale(1.05);
-    opacity: 0.7;
-  }
+@keyframes rainbow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 @keyframes shimmer {
-  0%, 100% {
-    background-position: 0% 0%;
-  }
-  50% {
-    background-position: 100% 100%;
-  }
+  0% { background-position: 200% 200%; }
+  100% { background-position: -200% -200%; }
 }
 
-/* Interactive light reflection overlay */
-.light-reflection-layer {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: radial-gradient(
-    circle at calc(var(--mouse-position-x, 0.5) * 100%) calc(var(--mouse-position-y, 0.5) * 100%),
-    rgba(255, 255, 255, 0.7) 0%,
-    rgba(255, 255, 255, 0) 50%
-  );
-  opacity: 0;
-  mix-blend-mode: overlay;
-  pointer-events: none;
-  transition: opacity 0.2s ease-out;
+@keyframes shine {
+  0% { background-position: -200% -200%; }
+  100% { background-position: 200% 200%; }
 }
 
-.interactive:hover .light-reflection-layer {
-  opacity: 0.5;
+/* Interactive states */
+.effect-container.interactive {
+  transition: all 0.3s ease;
 }
 
-/* Sizes */
-.size-sm {
-  --effect-scale: 0.8;
-}
-
-.size-md {
-  --effect-scale: 1;
-}
-
-.size-lg {
-  --effect-scale: 1.2;
-}
-
-/* Performance modes */
-.perf-high {
-  --effect-quality: 1;
-}
-
-.perf-balanced {
-  --effect-quality: 0.8;
-}
-
-.perf-low {
-  --effect-quality: 0.6;
-}
-
-/* Effect transition */
-.effect-transition {
-  transition: transform 0.3s ease-out, filter 0.3s ease-out;
-}
-
-/* Debug mode */
-.debug-mode::after {
-  content: "Debug Mode";
-  position: absolute;
-  top: 5px;
-  left: 5px;
-  background: rgba(255, 0, 0, 0.7);
-  color: white;
-  font-size: 10px;
-  padding: 2px 4px;
-  border-radius: 2px;
-  z-index: 1000;
+.effect-container.interactive:hover {
+  opacity: calc(var(--effect-intensity, 1) * 1.2);
 }

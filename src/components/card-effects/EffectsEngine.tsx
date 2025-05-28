@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect, useRef } from 'react';
-import { CardEffectSettings } from '@/hooks/card-effects/types';
+import { PremiumCardEffect, CardEffectSettings } from '@/hooks/card-effects/types';
 
 interface EffectsEngineProps {
   effects: string[];

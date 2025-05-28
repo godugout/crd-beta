@@ -1,172 +1,61 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Sparkles } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { useCards } from '@/context/CardContext';
-import { Card } from '@/lib/types/cardTypes'; 
+import { addSampleCards } from '@/lib/sampleCards';
+import { Sparkles } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
-const SampleCardsButton = () => {
+interface SampleCardsButtonProps {
+  onComplete?: () => void;
+  variant?: "default" | "commonsLink";
+}
+
+const SampleCardsButton: React.FC<SampleCardsButtonProps> = ({ 
+  onComplete,
+  variant = "default" 
+}) => {
   const { addCard } = useCards();
-  const { toast } = useToast();
+  const [isLoading, setIsLoading] = React.useState(false);
+  const navigate = useNavigate();
   
-  const addSampleCards = () => {
-    // Sample card 1
-    const sampleCard1: Omit<Card, 'id' | 'createdAt' | 'updatedAt'> = {
-      title: 'Sample Baseball Card',
-      description: 'A classic baseball card with holographic effects',
-      imageUrl: '/placeholder-card.png',
-      thumbnailUrl: '/placeholder-card.png',
-      tags: ['baseball', 'sample', 'holographic'],
-      userId: 'sample-user',
-      effects: ['holographic', 'refractor'],
-      player: 'John Doe',
-      team: 'Cardinals',
-      year: '2023',
-      designMetadata: {
-        cardStyle: {
-          template: 'classic',
-          effect: 'holographic',
-          borderRadius: '12px',
-          borderColor: '#c9a66b',
-          backgroundColor: '#f5f5f5',
-          frameWidth: 8,
-          frameColor: '#c9a66b',
-          shadowColor: 'rgba(0,0,0,0.3)'
-        },
-        textStyle: {
-          titleColor: '#333',
-          titleAlignment: 'center',
-          titleWeight: 'bold',
-          descriptionColor: '#666'
-        },
-        cardMetadata: {
-          category: 'sports',
-          series: 'demo',
-          cardType: 'baseball'
-        },
-        marketMetadata: {
-          price: 0,
-          currency: 'USD',
-          availableForSale: false,
-          editionSize: 100,
-          editionNumber: 1,
-          isPrintable: true,
-          isForSale: false,
-          includeInCatalog: true
+  const handleAddSampleCards = async () => {
+    if (variant === "commonsLink") {
+      navigate('/collections/commons');
+      return;
+    }
+    
+    setIsLoading(true);
+    
+    try {
+      const addedCards = await addSampleCards(addCard);
+      
+      if (addedCards.length > 0) {
+        toast.success(`Added ${addedCards.length} sample cards to your collection!`);
+        if (onComplete) {
+          onComplete();
         }
+      } else {
+        toast.error('Failed to add sample cards');
       }
-    };
-    
-    // Sample card 2
-    const sampleCard2: Omit<Card, 'id' | 'createdAt' | 'updatedAt'> = {
-      title: 'Sample Football Card',
-      description: 'A classic football card with holographic effects',
-      imageUrl: '/placeholder-card.png',
-      thumbnailUrl: '/placeholder-card.png',
-      tags: ['football', 'sample', 'holographic'],
-      userId: 'sample-user',
-      effects: ['holographic', 'refractor'],
-      player: 'Jane Doe',
-      team: 'Giants',
-      year: '2023',
-      designMetadata: {
-        cardStyle: {
-          template: 'classic',
-          effect: 'holographic',
-          borderRadius: '12px',
-          borderColor: '#c9a66b',
-          backgroundColor: '#f5f5f5',
-          frameWidth: 8,
-          frameColor: '#c9a66b',
-          shadowColor: 'rgba(0,0,0,0.3)'
-        },
-        textStyle: {
-          titleColor: '#333',
-          titleAlignment: 'center',
-          titleWeight: 'bold',
-          descriptionColor: '#666'
-        },
-        cardMetadata: {
-          category: 'sports',
-          series: 'demo',
-          cardType: 'football'
-        },
-        marketMetadata: {
-          price: 0,
-          currency: 'USD',
-          availableForSale: false,
-          editionSize: 100,
-          editionNumber: 1,
-          isPrintable: true,
-          isForSale: false,
-          includeInCatalog: true
-        }
-      }
-    };
-    
-    // Sample card 3
-    const sampleCard3: Omit<Card, 'id' | 'createdAt' | 'updatedAt'> = {
-      title: 'Sample Basketball Card',
-      description: 'A classic basketball card with holographic effects',
-      imageUrl: '/placeholder-card.png',
-      thumbnailUrl: '/placeholder-card.png',
-      tags: ['basketball', 'sample', 'holographic'],
-      userId: 'sample-user',
-      effects: ['holographic', 'refractor'],
-      player: 'Sam Smith',
-      team: 'Heat',
-      year: '2023',
-      designMetadata: {
-        cardStyle: {
-          template: 'classic',
-          effect: 'holographic',
-          borderRadius: '12px',
-          borderColor: '#c9a66b',
-          backgroundColor: '#f5f5f5',
-          frameWidth: 8,
-          frameColor: '#c9a66b',
-          shadowColor: 'rgba(0,0,0,0.3)'
-        },
-        textStyle: {
-          titleColor: '#333',
-          titleAlignment: 'center',
-          titleWeight: 'bold',
-          descriptionColor: '#666'
-        },
-        cardMetadata: {
-          category: 'sports',
-          series: 'demo',
-          cardType: 'basketball'
-        },
-        marketMetadata: {
-          price: 0,
-          currency: 'USD',
-          availableForSale: false,
-          editionSize: 100,
-          editionNumber: 1,
-          isPrintable: true,
-          isForSale: false,
-          includeInCatalog: true
-        }
-      }
-    };
-    
-    // Add the sample cards
-    addCard(sampleCard1);
-    addCard(sampleCard2);
-    addCard(sampleCard3);
-    
-    toast({
-      title: "Sample Cards Added",
-      description: "Sample cards have been added to your collection.",
-      variant: "success"
-    });
+    } catch (error) {
+      console.error('Error adding sample cards:', error);
+      toast.error('An unexpected error occurred while adding sample cards');
+    } finally {
+      setIsLoading(false);
+    }
   };
   
   return (
-    <Button onClick={addSampleCards} variant="outline" size="sm" className="flex items-center gap-1">
+    <Button
+      onClick={handleAddSampleCards}
+      disabled={isLoading}
+      className="flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+      size="lg"
+    >
       <Sparkles className="h-4 w-4" />
-      <span>Add Sample Cards</span>
+      {isLoading ? 'Adding Sample Cards...' : variant === "commonsLink" ? 'Generate Commons Cards' : 'Add Sample Cards'}
     </Button>
   );
 };

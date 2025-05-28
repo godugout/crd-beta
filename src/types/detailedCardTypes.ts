@@ -19,18 +19,7 @@ export interface DetailedViewCard {
   effects: string[];
   isFavorite: boolean;
   rarity: CardRarity;
-  designMetadata: DesignMetadata & {
-    marketMetadata: {
-      isPrintable: boolean;
-      isForSale: boolean;
-      includeInCatalog: boolean;
-      price?: number;
-      currency?: string;
-      availableForSale?: boolean;
-      editionSize?: number;
-      editionNumber?: number;
-    }
-  };
+  designMetadata: DesignMetadata;
   
   // Add baseball card properties
   player?: string;
@@ -60,39 +49,32 @@ export function ensureDetailedViewCard(card: Card): DetailedViewCard {
     effects: card.effects || [],
     isFavorite: false, // Since Card type doesn't have isFavorite, we set a default value
     rarity: card.rarity || 'common', // This will be compatible with CardRarity
-    designMetadata: {
-      ...(card.designMetadata || {
-        cardStyle: {
-          template: 'classic',
-          effect: 'none',
-          borderRadius: '8px',
-          borderColor: '#000000',
-          frameColor: '#000000',
-          frameWidth: 2,
-          shadowColor: 'rgba(0,0,0,0.2)',
-        },
-        textStyle: {
-          titleColor: '#000000',
-          titleAlignment: 'center',
-          titleWeight: 'bold',
-          descriptionColor: '#333333',
-        },
-        cardMetadata: {
-          category: 'general',
-          cardType: 'standard',
-          series: 'base',
-        }
-      }),
+    designMetadata: card.designMetadata || {
+      cardStyle: {
+        template: 'classic',
+        effect: 'none',
+        borderRadius: '8px',
+        borderColor: '#000000',
+        frameColor: '#000000',
+        frameWidth: 2,
+        shadowColor: 'rgba(0,0,0,0.2)',
+      },
+      textStyle: {
+        titleColor: '#000000',
+        titleAlignment: 'center',
+        titleWeight: 'bold',
+        descriptionColor: '#333333',
+      },
       marketMetadata: {
-        isPrintable: card.designMetadata?.marketMetadata?.isPrintable ?? false,
-        isForSale: card.designMetadata?.marketMetadata?.isForSale ?? false,
-        includeInCatalog: card.designMetadata?.marketMetadata?.includeInCatalog ?? false,
-        price: card.designMetadata?.marketMetadata?.price,
-        currency: card.designMetadata?.marketMetadata?.currency,
-        availableForSale: card.designMetadata?.marketMetadata?.availableForSale,
-        editionSize: card.designMetadata?.marketMetadata?.editionSize,
-        editionNumber: card.designMetadata?.marketMetadata?.editionNumber,
-      }
+        isPrintable: false,
+        isForSale: false,
+        includeInCatalog: false,
+      },
+      cardMetadata: {
+        category: 'general',
+        cardType: 'standard',
+        series: 'base',
+      },
     },
     // Copy optional baseball card properties
     player: card.player,

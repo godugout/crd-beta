@@ -1,30 +1,38 @@
 
-/**
- * Instagram-related types
- */
-
 import { BaseEntity } from './index';
 
-/**
- * Instagram Post definition
- */
 export interface InstagramPost extends BaseEntity {
-  postId?: string;
+  postId: string;
   username: string;
   caption?: string;
-  imageUrl?: string;
-  permalink?: string;
+  imageUrl: string;
+  permalink: string;
   timestamp: string;
-  mediaType: string;
+  mediaType: 'IMAGE' | 'VIDEO' | 'CAROUSEL_ALBUM';
+  mediaUrl: string;
+  thumbnailUrl?: string;
+  children?: InstagramPostChild[];
+}
+
+export interface InstagramPostChild {
+  id: string;
+  mediaType: 'IMAGE' | 'VIDEO';
   mediaUrl: string;
   thumbnailUrl?: string;
 }
 
-/**
- * Instagram source information
- */
-export interface InstagramSource {
+export interface InstagramAccount {
+  id: string;
   username: string;
-  lastFetched: string;
-  autoUpdate: boolean;
+  profilePictureUrl?: string;
+  followersCount?: number;
+  mediaCount?: number;
+}
+
+export interface InstagramCollection {
+  id: string;
+  name: string;
+  description?: string;
+  posts: InstagramPost[];
+  instagramSource?: string;
 }

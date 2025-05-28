@@ -1,7 +1,19 @@
-
 import { useState, useCallback, useEffect } from 'react';
 
 export type LightingPreset = 'studio' | 'natural' | 'dramatic' | 'display_case';
+
+// Map our lighting presets to valid @react-three/drei environment presets
+export const LIGHTING_PRESET_MAPPING = {
+  'studio': 'studio',
+  'natural': 'park',
+  'dramatic': 'night',
+  'display_case': 'lobby'
+} as const;
+
+// Valid @react-three/drei environment presets
+export type DreiEnvironmentPreset = 
+  'apartment' | 'city' | 'dawn' | 'forest' | 'lobby' | 
+  'night' | 'park' | 'studio' | 'sunset' | 'warehouse';
 
 interface LightPosition {
   x: number;
@@ -126,7 +138,6 @@ export const useCardLighting = (initialPreset: LightingPreset = 'studio') => {
   }, []);
   
   // Update lighting settings with partial settings object
-  // Fix the function signature to match what's expected in the components
   const updateLightingSetting = useCallback((settings: Partial<LightingSettings>) => {
     setLightingSettings(prev => ({
       ...prev,
@@ -219,6 +230,11 @@ export const useCardLighting = (initialPreset: LightingPreset = 'studio') => {
     setIsUserCustomized(true);
   }, []);
   
+  // Add utility function to get a valid @react-three/drei environment preset
+  const getValidEnvironmentPreset = useCallback((preset: LightingPreset): DreiEnvironmentPreset => {
+    return (LIGHTING_PRESET_MAPPING[preset] || 'studio') as DreiEnvironmentPreset;
+  }, []);
+  
   return {
     lightingSettings,
     lightingPreset,
@@ -231,6 +247,7 @@ export const useCardLighting = (initialPreset: LightingPreset = 'studio') => {
     updateAmbientLightIntensity,
     updateAmbientLightColor,
     toggleDynamicLighting,
-    updateEnvMapIntensity
+    updateEnvMapIntensity,
+    getValidEnvironmentPreset
   };
 };

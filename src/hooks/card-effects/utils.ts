@@ -1,127 +1,308 @@
 
+import { Card } from '@/lib/types';
+import { debounce } from 'lodash-es';
 import { PremiumCardEffect } from './types';
 
-// Helper to create effect IDs in a consistent format
-export const createEffectId = (cardId: string, effectName: string) => `${cardId}:${effectName}`;
+/**
+ * Get default effects based on card metadata
+ */
+export function getDefaultEffectsForCard(card: Card): string[] {
+  const defaultEffects: string[] = [];
+  
+  // Add default effects based on tags
+  if (card.tags?.includes('premium') || card.tags?.includes('rare')) {
+    defaultEffects.push('Holographic');
+  }
+  
+  if (card.tags?.includes('ultra-rare') || card.tags?.includes('limited')) {
+    defaultEffects.push('Refractor');
+  }
+  
+  if (card.tags?.includes('legendary') || card.tags?.includes('one-of-one')) {
+    defaultEffects.push('Superfractor');
+  }
+  
+  // Add effects based on collection
+  if (card.collectionId?.includes('chrome')) {
+    defaultEffects.push('Chrome');
+  }
+  
+  if (card.collectionId?.includes('prizm')) {
+    defaultEffects.push('Prizm');
+  }
+  
+  // Add default effect if no match
+  if (defaultEffects.length === 0 && card.imageUrl) {
+    // Default to no effects for regular cards
+  }
+  
+  return defaultEffects;
+}
 
-// Base effects available to all users
-export const BASE_EFFECTS: PremiumCardEffect[] = [
-  {
-    id: "shimmer",
-    name: "Shimmer",
-    category: "standard",
-    settings: {
-      intensity: 0.5,
-      speed: 0.8,
-    },
-    description: "Subtle shimmer effect that adds a gentle glow",
-    premium: false,
-    iconUrl: "/effects/shimmer-icon.svg",
-    enabled: true
-  },
-  {
-    id: "vintage",
-    name: "Vintage",
-    category: "standard",
-    settings: {
-      intensity: 0.6,
-      speed: 0.4,
-      pattern: "grain"
-    },
-    description: "Classic aged look with subtle grain texture",
-    premium: true,
-    iconUrl: "/effects/vintage-icon.svg",
-    enabled: true
-  },
-  {
-    id: "refractor",
-    name: "Refractor",
-    category: "premium",
-    settings: {
-      intensity: 0.7,
-      speed: 0.6,
-      pattern: "lines"
-    },
-    description: "Light-bending prismatic effect with angular highlights",
-    premium: true,
-    iconUrl: "/effects/refractor-icon.svg",
-    enabled: true
-  },
-  {
-    id: "holographic",
-    name: "Holographic",
-    category: "premium",
+/**
+ * Process cards in batches to prevent UI blocking
+ */
+export async function processCardsBatch(
+  cards: Card[],
+  initialEffects: Record<string, string[]>
+): Promise<Record<string, string[]>> {
+  const updatedEffects = { ...initialEffects };
+  const batchSize = 10;
+  
+  for (let i = 0; i < cards.length; i += batchSize) {
+    const batch = cards.slice(i, i + batchSize);
+    
+    // Process this batch
+    await new Promise<void>((resolve) => {
+      setTimeout(() => {
+        batch.forEach(card => {
+          if (!updatedEffects[card.id]) {
+            const defaultEffects = getDefaultEffectsForCard(card);
+            if (defaultEffects.length > 0) {
+              updatedEffects[card.id] = defaultEffects;
+            }
+          }
+        });
+        resolve();
+      }, 0);
+    });
+  }
+  
+  return updatedEffects;
+}
+
+/**
+ * Predefined premium effects for cards
+ */
+export const premiumEffects: Record<string, PremiumCardEffect> = {
+  'Holographic': {
+    id: 'holographic',
+    name: 'Holographic',
+    category: 'holographic',
     settings: {
       intensity: 0.8,
-      speed: 1.0,
-      pattern: "rainbow"
+      speed: 1.0
     },
-    description: "Rainbow reflective effect that shifts with viewing angle",
-    premium: true,
-    iconUrl: "/effects/holographic-icon.svg",
-    enabled: true
+    description: 'Classic rainbow holographic effect that shifts colors as the card moves',
+    premium: false,
+    iconUrl: '/icons/effects/holographic.svg'
   },
-  {
-    id: "prismatic",
-    name: "Prismatic",
-    category: "premium",
+  'Refractor': {
+    id: 'refractor',
+    name: 'Refractor',
+    category: 'refractor',
+    settings: {
+      intensity: 1.0,
+      speed: 0.8
+    },
+    description: 'Light-refracting pattern that creates a prism effect',
+    premium: false,
+    iconUrl: '/icons/effects/refractor.svg'
+  },
+  'Superfractor': {
+    id: 'superfractor',
+    name: 'Superfractor',
+    category: 'refractor',
+    settings: {
+      intensity: 1.0,
+      speed: 1.2,
+      pattern: 'extreme'
+    },
+    description: 'Extreme rainbow refractor pattern with intense light diffraction',
+    premium: true,
+    iconUrl: '/icons/effects/superfractor.svg'
+  },
+  'Cracked Ice': {
+    id: 'cracked-ice',
+    name: 'Cracked Ice',
+    category: 'refractor',
+    settings: {
+      intensity: 0.9,
+      speed: 0.7,
+      pattern: 'geometric'
+    },
+    description: 'Geometric pattern with multi-layered reflective surfaces',
+    premium: true,
+    iconUrl: '/icons/effects/cracked-ice.svg'
+  },
+  'Mojo': {
+    id: 'mojo',
+    name: 'Mojo',
+    category: 'refractor',
+    settings: {
+      intensity: 0.85,
+      speed: 1.1,
+      pattern: 'spiral'
+    },
+    description: 'Spiral pattern with contrasting color shifting properties',
+    premium: true,
+    iconUrl: '/icons/effects/mojo.svg'
+  },
+  'Pulsar': {
+    id: 'pulsar',
+    name: 'Pulsar',
+    category: 'special',
     settings: {
       intensity: 0.75,
-      speed: 1.2,
-      pattern: "diamonds",
+      speed: 1.5,
+      pattern: 'radial',
       animationEnabled: true
     },
-    description: "Colorful geometric pattern with depth and motion",
+    description: 'Pulsating radial pattern with animated glow',
     premium: true,
-    iconUrl: "/effects/prismatic-icon.svg",
-    enabled: true
+    iconUrl: '/icons/effects/pulsar.svg'
   },
-  {
-    id: "chrome",
-    name: "Chrome",
-    category: "premium",
-    settings: {
-      intensity: 0.6,
-      speed: 0.5,
-      pattern: "metallic"
-    },
-    description: "Metallic chrome finish with reflection and shine",
-    premium: true,
-    iconUrl: "/effects/chrome-icon.svg",
-    enabled: true
-  },
-  {
-    id: "foil",
-    name: "Foil",
-    category: "premium",
+  'Scope': {
+    id: 'scope',
+    name: 'Scope',
+    category: 'special',
     settings: {
       intensity: 0.7,
-      speed: 0.4,
-      pattern: "foil"
+      speed: 0.9,
+      pattern: 'circular'
     },
-    description: "Textured foil effect with subtle highlights",
+    description: 'Lens-like circular patterns with magnification effects',
     premium: true,
-    iconUrl: "/effects/foil-icon.svg",
-    enabled: true
+    iconUrl: '/icons/effects/scope.svg'
+  },
+  'Gold Foil': {
+    id: 'gold-foil',
+    name: 'Gold Foil',
+    category: 'foil',
+    settings: {
+      intensity: 0.8,
+      speed: 0.5,
+      color: '#FFD700'
+    },
+    description: 'Metallic gold foil effect with subtle light reflection',
+    premium: false,
+    iconUrl: '/icons/effects/gold-foil.svg'
+  },
+  'Silver Foil': {
+    id: 'silver-foil',
+    name: 'Silver Foil',
+    category: 'foil',
+    settings: {
+      intensity: 0.8,
+      speed: 0.5,
+      color: '#C0C0C0'
+    },
+    description: 'Metallic silver foil effect with subtle light reflection',
+    premium: false,
+    iconUrl: '/icons/effects/silver-foil.svg'
+  },
+  'Chrome': {
+    id: 'chrome',
+    name: 'Chrome',
+    category: 'texture',
+    settings: {
+      intensity: 0.9,
+      speed: 0.6
+    },
+    description: 'Chrome-style metallic finish with realistic reflections',
+    premium: false,
+    iconUrl: '/icons/effects/chrome.svg'
+  },
+  'Prizm': {
+    id: 'prizm',
+    name: 'Prizm',
+    category: 'refractor',
+    settings: {
+      intensity: 0.85,
+      speed: 0.9,
+      pattern: 'geometric'
+    },
+    description: 'Prizm-inspired geometric patterns with refractor capability',
+    premium: false,
+    iconUrl: '/icons/effects/prizm.svg'
+  },
+  'Vintage': {
+    id: 'vintage',
+    name: 'Vintage',
+    category: 'texture',
+    settings: {
+      intensity: 0.6,
+      speed: 0.3
+    },
+    description: 'Classic vintage card look with subtle texture',
+    premium: false,
+    iconUrl: '/icons/effects/vintage.svg'
+  },
+  'Canvas': {
+    id: 'canvas',
+    name: 'Canvas',
+    category: 'texture',
+    settings: {
+      intensity: 0.7,
+      speed: 0.4
+    },
+    description: 'Canvas texture for a classic art card feel',
+    premium: false,
+    iconUrl: '/icons/effects/canvas.svg'
+  },
+  'Linen': {
+    id: 'linen',
+    name: 'Linen',
+    category: 'texture',
+    settings: {
+      intensity: 0.65,
+      speed: 0.4
+    },
+    description: 'Subtle linen texture for vintage card designs',
+    premium: false,
+    iconUrl: '/icons/effects/linen.svg'
+  },
+  'Spectral': {
+    id: 'spectral',
+    name: 'Spectral',
+    category: 'holographic',
+    settings: {
+      intensity: 0.9,
+      speed: 1.1,
+      animationEnabled: true
+    },
+    description: 'Advanced holographic effect with depth and motion',
+    premium: true,
+    iconUrl: '/icons/effects/spectral.svg'
   }
-];
-
-// Premium effects only available to premium users or special cards
-export const PREMIUM_EFFECTS = BASE_EFFECTS.filter(effect => effect.premium);
-
-// Standard effects available to all users
-export const STANDARD_EFFECTS = BASE_EFFECTS.filter(effect => !effect.premium);
-
-// Get effect by ID utility function
-export const getEffectById = (effects: PremiumCardEffect[], id: string): PremiumCardEffect | undefined => {
-  return effects.find(effect => effect.id === id);
 };
 
-// Determine if an effect is enabled for a given user
-export const isEffectEnabledForUser = (
-  effect: PremiumCardEffect,
-  isPremiumUser: boolean = false
-): boolean => {
-  if (!effect.premium) return true;
-  return isPremiumUser;
-};
+/**
+ * Get the CSS class for a specific effect
+ */
+export function getEffectClass(effectName: string): string {
+  // Normalize effect name for CSS class
+  const normalizedName = effectName.toLowerCase().replace(/\s+/g, '-');
+  return `card-${normalizedName}`;
+}
+
+/**
+ * Generate CSS classes for active effects
+ */
+export function generateEffectClasses(activeEffects: string[]): string {
+  return activeEffects.map(effect => getEffectClass(effect)).join(' ');
+}
+
+/**
+ * Check if a device supports advanced effects
+ */
+export function supportsAdvancedEffects(): boolean {
+  // Check for WebGL support
+  try {
+    const canvas = document.createElement('canvas');
+    return !!(window.WebGLRenderingContext && (
+      canvas.getContext('webgl') || canvas.getContext('experimental-webgl')
+    ));
+  } catch (e) {
+    return false;
+  }
+}
+
+/**
+ * Optimized debounced function for updating effects
+ */
+export const debouncedEffectUpdate = debounce(
+  (callback: () => void) => {
+    callback();
+  }, 100
+);

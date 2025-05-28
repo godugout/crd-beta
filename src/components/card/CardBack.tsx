@@ -1,18 +1,13 @@
 
 import React from 'react';
+import { Card } from '@/lib/types';
 import { format } from 'date-fns';
-import { Card, FabricSwatch } from '@/lib/types';
 
 interface CardBackProps {
   card: Card;
-  fabricSwatches?: FabricSwatch[];
 }
 
-const CardBack: React.FC<CardBackProps> = ({ card, fabricSwatches }) => {
-  const getSwatchProperty = (swatch: FabricSwatch | undefined, property: keyof FabricSwatch) => {
-    return swatch && property in swatch ? swatch[property] : undefined;
-  };
-
+export const CardBack: React.FC<CardBackProps> = ({ card }) => {
   return (
     <div className="card-face card-back absolute inset-0 bg-gray-100 rounded-lg shadow-lg overflow-hidden select-none transform rotateY-180">
       <div className="absolute inset-0 p-5 flex flex-col">
@@ -43,12 +38,12 @@ const CardBack: React.FC<CardBackProps> = ({ card, fabricSwatches }) => {
             <span>Created: {format(new Date(card.createdAt), 'MMM d, yyyy')}</span>
           </div>
           
-          {fabricSwatches && fabricSwatches.length > 0 && (
+          {card.fabricSwatches && card.fabricSwatches.length > 0 && (
             <div className="border-t border-gray-200 pt-2">
               <p className="font-medium text-cardshow-dark mb-1">Fabric Swatches:</p>
-              {fabricSwatches.map((swatch, index) => (
+              {card.fabricSwatches.map((swatch, index) => (
                 <div key={index} className="text-xs ml-2">
-                  <div>Year: {getSwatchProperty(swatch, 'year')} | Team: {getSwatchProperty(swatch, 'team')} | Position: {getSwatchProperty(swatch, 'position')}</div>
+                  • {swatch.type} {swatch.year} {swatch.team} {swatch.position}
                 </div>
               ))}
             </div>
@@ -58,7 +53,3 @@ const CardBack: React.FC<CardBackProps> = ({ card, fabricSwatches }) => {
     </div>
   );
 };
-
-// Export as both named and default
-export { CardBack };
-export default CardBack;

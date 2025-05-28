@@ -18,11 +18,8 @@ const CardEffectsPanel: React.FC<CardEffectsPanelProps> = ({
   onEffectIntensityChange,
   effectIntensities = {}
 }) => {
-  // Use an array of expanded effects - initializing all effects as expanded by default
-  const [expandedEffects, setExpandedEffects] = useState<string[]>(
-    ['Holographic', 'Refractor', 'Chrome', 'Vintage']
-  );
-  
+  // Use an array of expanded effects instead of just one
+  const [expandedEffects, setExpandedEffects] = useState<string[]>([]);
   const [localIntensities, setLocalIntensities] = useState<Record<string, number>>({
     Holographic: effectIntensities.Holographic || 0.7,
     Refractor: effectIntensities.Refractor || 0.8,
@@ -102,16 +99,16 @@ const CardEffectsPanel: React.FC<CardEffectsPanelProps> = ({
   };
 
   return (
-    <div className="absolute bottom-4 left-4 right-4 z-20 bg-black/70 backdrop-blur-md rounded-lg p-4 text-white max-h-[calc(100vh-32rem)] overflow-y-auto">
-      <h3 className="text-lg font-medium mb-3">Visual Effects</h3>
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+    <div className="absolute bottom-4 left-4 right-4 z-20 bg-black/60 backdrop-blur-md rounded-lg p-3 text-white max-h-[calc(100vh-32rem)] overflow-y-auto">
+      <h3 className="text-sm font-medium mb-3">Visual Effects</h3>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {availableEffects.map(effect => (
           <div key={effect.id} className="flex flex-col">
             <button
-              className={`flex flex-col items-center justify-center aspect-square rounded-lg text-sm p-4 transition-all ${
+              className={`flex flex-col items-center justify-center aspect-square rounded-lg text-xs p-4 transition-all ${
                 activeEffects.includes(effect.id)
-                  ? `${effect.color} text-white shadow-lg shadow-${effect.color}/30`
-                  : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                  ? `${effect.color} text-white shadow-lg shadow-${effect.color}/20`
+                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
               }`}
               onClick={() => handleEffectToggle(effect.id)}
             >
@@ -119,7 +116,7 @@ const CardEffectsPanel: React.FC<CardEffectsPanelProps> = ({
               <span className="text-center font-medium">{effect.name}</span>
               {activeEffects.includes(effect.id) && (
                 <Sliders 
-                  size={16} 
+                  size={14} 
                   className={`mt-2 cursor-pointer ${expandedEffects.includes(effect.id) ? 'text-yellow-300' : ''}`}
                   onClick={(e) => toggleExpandEffect(e, effect.id)}
                 />
@@ -127,7 +124,7 @@ const CardEffectsPanel: React.FC<CardEffectsPanelProps> = ({
             </button>
             
             {expandedEffects.includes(effect.id) && activeEffects.includes(effect.id) && (
-              <div className="mt-3 px-3 py-3 bg-gray-800 rounded-md w-full">
+              <div className="mt-2 px-2 py-3 bg-gray-800 rounded-md w-full">
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-xs">Intensity</span>
                   <span className="text-xs">{localIntensities[effect.id]?.toFixed(1) || '0.7'}</span>

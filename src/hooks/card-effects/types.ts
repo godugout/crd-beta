@@ -1,102 +1,72 @@
 
-import { Card, CardEffect } from '@/lib/types/cardTypes';
+import { CardEffectSettings as BaseCardEffectSettings } from '@/components/card-creation/types/cardTypes';
 
-// Export CardEffectSettings for use by other modules
-export interface CardEffectSettings {
-  intensity?: number;
-  speed?: number;
-  pattern?: string;
-  color?: string;
-  animationEnabled?: boolean;
-  [key: string]: any;
-}
-
-export interface EffectCategory {
-  id: string;
-  name: string;
-  description?: string;
-  icon?: React.ReactNode;
-}
-
-export interface PremiumCardEffect extends CardEffect {
-  premium: boolean;
-  price?: number;
-  category?: string;
-  animationClass?: string;
-  renderer?: () => React.ReactNode;
-}
-
-export interface CardEffectContextProps {
-  activeEffects: string[];
-  setActiveEffects: React.Dispatch<React.SetStateAction<string[]>>;
-  effectIntensities: { [key: string]: number };
-  setEffectIntensities: React.Dispatch<React.SetStateAction<{ [key: string]: number }>>;
-  isEffectEnabled: (effectId: string) => boolean;
-  toggleEffect: (effectId: string) => void;
-  setEffectIntensity: (effectId: string, intensity: number) => void;
-  getEffectIntensity: (effectId: string) => number;
-  resetEffects: () => void;
-  cardEffects: CardEffect[];
-  premiumEffects: PremiumCardEffect[];
-  getEffectSettings: (effectId: string) => CardEffectSettings | undefined;
-  getEffectCategory: (effectId: string) => EffectCategory | undefined;
-}
-
-export interface MediaServiceHook {
-  uploadFile: (file: File) => Promise<string>;
-  uploadImage: (file: File) => Promise<string>; // Added uploadImage method
-  getMedia: () => Promise<string[]>;
-  isUploading: boolean;
-  error: Error | null;
-}
-
-export interface EffectRendererProps {
-  card: Card;
-  intensity: number;
-  settings: Record<string, any>;
-}
-
-export interface EffectRegistry {
-  [key: string]: {
-    name: string;
-    description?: string;
-    category?: string;
-    icon?: React.ReactNode;
-    renderer: (props: EffectRendererProps) => React.ReactNode;
-    settings?: CardEffectSettings;
-  };
-}
-
-// Export CardEffectDefinition interface
-export interface CardEffectDefinition {
-  id: string;
-  name: string;
-  description: string;
-  thumbnail: string;
-  category: string;
-  defaultSettings: CardEffectSettings;
-  cssClass: string;
-  supportedCardTypes: string[];
-  premium: boolean;
-  enabled: boolean;
-  iconUrl: string;
-}
-
-// Export MaterialSimulation interface
 export interface MaterialSimulation {
+  /**
+   * Type of material to simulate
+   */
+  type: 'canvas' | 'mesh' | 'synthetic';
+  
+  /**
+   * Base color of the material
+   */
+  baseColor?: string;
+  
+  /**
+   * URL to a texture image
+   */
+  textureUrl?: string;
+  
+  /**
+   * Roughness of the material (0-1)
+   * 0 = mirror-like, 1 = completely diffuse
+   */
   roughness?: number;
+  
+  /**
+   * Metalness of the material (0-1)
+   * 0 = non-metal, 1 = metal
+   */
   metalness?: number;
-  clearcoat?: number;
-  clearcoatRoughness?: number;
-  ior?: number;
-  transmission?: number;
-  reflectivity?: number;
-  emissive?: string;
-  envMapIntensity?: number;
-  textureUrl: string;
-  baseColor: string;
-  color: string;
-  texture: string;
-  type: string;
-  weathering: number;
+  
+  /**
+   * Weathering effect to apply
+   */
+  weathering?: 'new' | 'game-worn' | 'vintage';
+  
+  /**
+   * Team colors for auto-extraction
+   */
+  teamColors?: string[];
+}
+
+// Add missing types that were causing build errors
+export interface PremiumCardEffect {
+  id: string;
+  name: string;
+  category: string;
+  settings: CardEffectSettings;
+  description: string;
+  premium: boolean;
+  iconUrl?: string;
+}
+
+export type CardEffectSettings = BaseCardEffectSettings;
+
+export interface CardEffectsOptions {
+  initialEffects?: Record<string, string[]>;
+  presets?: Record<string, string[]>;
+  defaultIntensity?: number;
+  performanceMode?: 'high' | 'medium' | 'low';
+}
+
+export interface CardEffectsResult {
+  cardEffects: Record<string, string[]>;
+  isLoading: boolean;
+  addEffect: (cardId: string, effect: string) => void;
+  removeEffect: (cardId: string, effect: string) => void;
+  toggleEffect: (cardId: string, effect: string) => void;
+  clearEffects: (cardId: string) => void;
+  setCardEffects: (cardId: string, effects: string[]) => void;
+  setActiveEffects?: (effects: string[]) => void;  // Add optional method for ImmersiveCardViewer
 }

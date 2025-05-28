@@ -1,84 +1,146 @@
-
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import PageLayout from '@/components/navigation/PageLayout';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Shield, Users, Download, Upload, Tag } from 'lucide-react';
+import { Image, Layers, Package, Users, Zap, PlayCircle, Eye, MessageCircle } from 'lucide-react';
 
-const HomePage: React.FC = () => {
-  const navigate = useNavigate();
-  
+const Home = () => {
   return (
-    <PageLayout
-      title="Cardshow (CRD) Platform"
-      description="Create and customize digital trading cards with our powerful tools"
+    <PageLayout 
+      title="Home | CardShow" 
+      description="Create, manage, and share your digital card collection"
     >
-      <div className="container mx-auto px-4 py-12">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold tracking-tight mb-4">
-            Welcome to the Cardshow Platform
-          </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Create, customize, and share stunning digital trading cards with our powerful tools and marketplace
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center max-w-2xl mx-auto mb-12">
+          <h1 className="text-4xl font-bold mb-4">Welcome to Your Collection</h1>
+          <p className="text-lg text-muted-foreground mb-8">
+            Create, manage, and share your digital card collection
           </p>
-          <div className="flex justify-center gap-4 mt-8">
-            <Button size="lg" onClick={() => navigate('/cards/create')}>
-              Create New Card
+          <div className="flex flex-wrap gap-4 justify-center">
+            <Button asChild size="lg">
+              <Link to="/cards/create">Create New Card</Link>
             </Button>
-            <Button size="lg" variant="outline" onClick={() => navigate('/assets')}>
-              Explore Assets
+            <Button asChild size="lg" variant="outline">
+              <Link to="/gallery">Browse Gallery</Link>
+            </Button>
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
+          <div className="bg-card p-6 rounded-lg shadow-sm border">
+            <div className="h-10 w-10 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+              <Image className="h-6 w-6 text-blue-600" />
+            </div>
+            <h2 className="text-xl font-bold mb-3">Card Gallery</h2>
+            <p className="mb-4 text-muted-foreground">Browse your collection of cards and memories</p>
+            <Button asChild variant="outline" className="w-full">
+              <Link to="/gallery">View Cards</Link>
+            </Button>
+          </div>
+          
+          <div className="bg-card p-6 rounded-lg shadow-sm border">
+            <div className="h-10 w-10 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
+              <Layers className="h-6 w-6 text-purple-600" />
+            </div>
+            <h2 className="text-xl font-bold mb-3">Collections</h2>
+            <p className="mb-4 text-muted-foreground">Organize your cards into themed collections</p>
+            <Button asChild variant="outline" className="w-full">
+              <Link to="/collections">View Collections</Link>
+            </Button>
+          </div>
+          
+          <div className="bg-card p-6 rounded-lg shadow-sm border">
+            <div className="h-10 w-10 bg-green-100 rounded-lg flex items-center justify-center mb-4">
+              <Package className="h-6 w-6 text-green-600" />
+            </div>
+            <h2 className="text-xl font-bold mb-3">Memory Packs</h2>
+            <p className="mb-4 text-muted-foreground">Explore themed memory packs</p>
+            <Button asChild variant="outline" className="w-full">
+              <Link to="/packs">Browse Packs</Link>
             </Button>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <FeatureCard
-            title="Create Custom Elements"
-            description="Design and upload your own stickers, logos, frames, badges, and overlays to use in your cards."
-            icon={<Upload className="h-12 w-12" />}
-            action={() => navigate('/assets')}
-            actionText="Asset Library"
-          />
+        <div className="mt-16">
+          <h2 className="text-2xl font-bold mb-6 text-center">Featured Experiences</h2>
           
-          <FeatureCard
-            title="Browse the Marketplace"
-            description="Discover premium and free elements created by our community of designers and artists."
-            icon={<Download className="h-12 w-12" />}
-            action={() => navigate('/assets')}
-            actionText="Marketplace"
-          />
-          
-          <FeatureCard
-            title="Content Moderation"
-            description="Our robust moderation system ensures all content is safe, appropriate and of high quality."
-            icon={<Shield className="h-12 w-12" />}
-            action={() => navigate('/admin')}
-            actionText="Admin Dashboard"
-          />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-950/30 dark:to-blue-900/20 p-6 rounded-lg border">
+              <div className="h-12 w-12 bg-white/80 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
+                <PlayCircle className="h-7 w-7 text-blue-600 dark:text-blue-400" />
+              </div>
+              <h3 className="text-xl font-bold mb-2">Game Day Mode</h3>
+              <p className="mb-4 text-muted-foreground">
+                Enhance your experience during live games with real-time updates and card creation
+              </p>
+              <Button asChild>
+                <Link to="/features/game-day">Try Game Day Mode</Link>
+              </Button>
+            </div>
+            
+            <div className="bg-gradient-to-r from-amber-50 to-amber-100 dark:from-amber-950/30 dark:to-amber-900/20 p-6 rounded-lg border">
+              <div className="h-12 w-12 bg-white/80 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
+                <Zap className="h-7 w-7 text-amber-600 dark:text-amber-400" />
+              </div>
+              <h3 className="text-xl font-bold mb-2">Dugout Labs</h3>
+              <p className="mb-4 text-muted-foreground">
+                Preview experimental features and provide feedback to our team
+              </p>
+              <Button asChild>
+                <Link to="/labs">Explore Labs</Link>
+              </Button>
+            </div>
+          </div>
         </div>
         
-        <div className="mt-20">
-          <h2 className="text-3xl font-bold text-center mb-8">How It Works</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-            <StepCard
-              step={1}
-              title="Upload Your Assets"
-              description="Create and upload your custom elements like stickers, logos, frames, and more."
-              icon={<Upload className="h-8 w-8" />}
-            />
-            <StepCard
-              step={2}
-              title="Browse & Discover"
-              description="Explore the marketplace to find premium and free elements created by the community."
-              icon={<Tag className="h-8 w-8" />}
-            />
-            <StepCard
-              step={3}
-              title="Create Amazing Cards"
-              description="Combine elements to create stunning custom digital trading cards."
-              icon={<Users className="h-8 w-8" />}
-            />
+        <div className="mt-16">
+          <div className="flex flex-col sm:flex-row justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold">Teams</h2>
+            <Button asChild variant="outline">
+              <Link to="/teams">View All Teams</Link>
+            </Button>
+          </div>
+          
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <Link 
+              to="/teams/oakland" 
+              className="bg-card p-4 rounded-lg shadow-sm flex flex-col items-center hover:shadow-md transition-shadow border"
+            >
+              <div className="h-16 w-16 bg-[#006341]/10 rounded-full flex items-center justify-center mb-2">
+                <Users className="h-8 w-8 text-[#006341]" />
+              </div>
+              <span className="font-medium">Oakland A's</span>
+            </Link>
+            
+            <Link 
+              to="/teams/sf-giants" 
+              className="bg-card p-4 rounded-lg shadow-sm flex flex-col items-center hover:shadow-md transition-shadow border"
+            >
+              <div className="h-16 w-16 bg-[#FD5A1E]/10 rounded-full flex items-center justify-center mb-2">
+                <Users className="h-8 w-8 text-[#FD5A1E]" />
+              </div>
+              <span className="font-medium">SF Giants</span>
+            </Link>
+            
+            <Link 
+              to="/community" 
+              className="bg-card p-4 rounded-lg shadow-sm flex flex-col items-center hover:shadow-md transition-shadow border"
+            >
+              <div className="h-16 w-16 bg-purple-100 dark:bg-purple-900/20 rounded-full flex items-center justify-center mb-2">
+                <MessageCircle className="h-8 w-8 text-purple-600 dark:text-purple-400" />
+              </div>
+              <span className="font-medium">Community</span>
+            </Link>
+            
+            <Link 
+              to="/detector" 
+              className="bg-card p-4 rounded-lg shadow-sm flex flex-col items-center hover:shadow-md transition-shadow border"
+            >
+              <div className="h-16 w-16 bg-teal-100 dark:bg-teal-900/20 rounded-full flex items-center justify-center mb-2">
+                <Eye className="h-8 w-8 text-teal-600 dark:text-teal-400" />
+              </div>
+              <span className="font-medium">Card Detector</span>
+            </Link>
           </div>
         </div>
       </div>
@@ -86,66 +148,4 @@ const HomePage: React.FC = () => {
   );
 };
 
-interface FeatureCardProps {
-  title: string;
-  description: string;
-  icon: React.ReactNode;
-  action?: () => void;
-  actionText?: string;
-}
-
-const FeatureCard: React.FC<FeatureCardProps> = ({
-  title,
-  description,
-  icon,
-  action,
-  actionText
-}) => {
-  return (
-    <Card className="h-full flex flex-col">
-      <CardHeader>
-        <div className="p-2 w-16 h-16 rounded-lg bg-primary/10 flex items-center justify-center mb-4 text-primary">
-          {icon}
-        </div>
-        <CardTitle>{title}</CardTitle>
-        <CardDescription>{description}</CardDescription>
-      </CardHeader>
-      <CardFooter className="mt-auto pt-4">
-        {action && actionText && (
-          <Button variant="outline" onClick={action}>
-            {actionText}
-          </Button>
-        )}
-      </CardFooter>
-    </Card>
-  );
-};
-
-interface StepCardProps {
-  step: number;
-  title: string;
-  description: string;
-  icon: React.ReactNode;
-}
-
-const StepCard: React.FC<StepCardProps> = ({
-  step,
-  title,
-  description,
-  icon
-}) => {
-  return (
-    <div className="flex flex-col items-center text-center">
-      <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-        {icon}
-      </div>
-      <div className="bg-primary text-primary-foreground w-8 h-8 rounded-full flex items-center justify-center font-bold mb-4">
-        {step}
-      </div>
-      <h3 className="text-xl font-semibold mb-2">{title}</h3>
-      <p className="text-muted-foreground">{description}</p>
-    </div>
-  );
-};
-
-export default HomePage;
+export default Home;

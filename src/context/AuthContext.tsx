@@ -1,5 +1,6 @@
 
 // Main re-export file to simplify imports
-export { AuthProvider, useAuth } from './auth/AuthProvider';
-export type { AuthContextType, AuthState, AuthUser, AuthSession } from './auth/types';
+export { AuthProvider } from './auth/AuthProvider';
+export { useAuth } from './auth/useAuth';
+export type { AuthContextType, AuthState } from './auth/types';
 export type { User } from '@/lib/types';

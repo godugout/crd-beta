@@ -1,94 +1,66 @@
-import { useState, useEffect } from 'react';
 
-// Define the full PremiumCardEffect type
-export interface PremiumCardEffect {
-  id: string;
-  name: string;
-  description: string;
-  type: string;
-  price: number;
-  isPremium: boolean;
-  isOwned: boolean;
-  iconUrl: string;
-  previewUrl: string;
-  category: string; // Add the missing category property
-  settings: {
-    intensity?: number;
-    color?: string;
-    animation?: boolean;
-    [key: string]: any;
-  };
-  className: string;
+import { useState, useMemo } from 'react';
+import { premiumEffects } from './utils';
+import { PremiumCardEffect } from './types';
+
+export interface UseEffectsLibraryResult {
+  availableEffects: PremiumCardEffect[];
+  premiumEffects: PremiumCardEffect[];
+  standardEffects: PremiumCardEffect[];
+  getEffectByName: (name: string) => PremiumCardEffect | undefined;
+  getCategoryEffects: (category: string) => PremiumCardEffect[];
+  getEffectIcons: () => Record<string, string>;
 }
 
-export const useEffectsLibrary = () => {
-  const [effects, setEffects] = useState<PremiumCardEffect[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [categories, setCategories] = useState<string[]>([]);
-
-  useEffect(() => {
-    // Fetch effects from API or use mock data
-    const fetchEffects = async () => {
-      try {
-        // In a real implementation, this would be an API call
-        // Mock data for now
-        const mockEffects: PremiumCardEffect[] = [
-          {
-            id: 'effect-1',
-            name: 'Holographic',
-            description: 'Shimmering holographic effect',
-            type: 'premium',
-            price: 5.99,
-            isPremium: true,
-            isOwned: false,
-            iconUrl: '/icons/holographic.png',
-            previewUrl: '/previews/holographic.mp4',
-            category: 'Premium',
-            settings: {
-              intensity: 0.8,
-              color: '#00ff00',
-              animation: true
-            },
-            className: 'effect-holographic'
-          },
-          // ... other effects
-        ];
-
-        setEffects(mockEffects);
-        
-        // Extract unique categories
-        const uniqueCategories = [...new Set(mockEffects.map(effect => effect.category))];
-        setCategories(uniqueCategories);
-        
-        setLoading(false);
-      } catch (err: any) {
-        setError(err.message || 'Failed to load effects');
-        setLoading(false);
-      }
-    };
-
-    fetchEffects();
+export function useEffectsLibrary(): UseEffectsLibraryResult {
+  // Convert the premiumEffects object to an array
+  const effectsArray = useMemo(() => {
+    return Object.values(premiumEffects);
   }, []);
-
-  // Filter effects by category
-  const getEffectsByCategory = (category: string) => {
-    return effects.filter(effect => effect.category === category);
+  
+  // Group effects by category
+  const { premiumEffectsList, standardEffectsList } = useMemo(() => {
+    const premium: PremiumCardEffect[] = [];
+    const standard: PremiumCardEffect[] = [];
+    
+    effectsArray.forEach(effect => {
+      if (effect.premium) {
+        premium.push(effect);
+      } else {
+        standard.push(effect);
+      }
+    });
+    
+    return { premiumEffectsList: premium, standardEffectsList: standard };
+  }, [effectsArray]);
+  
+  // Get an effect by name
+  const getEffectByName = (name: string): PremiumCardEffect | undefined => {
+    return effectsArray.find(effect => 
+      effect.name.toLowerCase() === name.toLowerCase()
+    );
   };
-
-  // Get effect by ID
-  const getEffectById = (id: string) => {
-    return effects.find(effect => effect.id === id);
+  
+  // Get effects by category
+  const getCategoryEffects = (category: string): PremiumCardEffect[] => {
+    return effectsArray.filter(effect => effect.category === category);
   };
-
+  
+  // Get icons for effects (placeholder implementation)
+  const getEffectIcons = (): Record<string, string> => {
+    const icons: Record<string, string> = {};
+    effectsArray.forEach(effect => {
+      icons[effect.id] = effect.iconUrl || '/icons/default-effect.svg';
+    });
+    return icons;
+  };
+  
   return {
-    effects,
-    loading,
-    error,
-    categories,
-    getEffectsByCategory,
-    getEffectById,
+    availableEffects: effectsArray,
+    premiumEffects: premiumEffectsList,
+    standardEffects: standardEffectsList,
+    getEffectByName,
+    getCategoryEffects,
+    getEffectIcons
   };
-};
-
-export default useEffectsLibrary;
+}

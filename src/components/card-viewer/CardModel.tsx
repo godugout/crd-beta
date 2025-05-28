@@ -1,182 +1,205 @@
 
-import React, { useRef, useMemo, useEffect } from 'react';
-import { useFrame, useThree } from '@react-three/fiber';
+import React, { useState, useRef } from 'react';
 import * as THREE from 'three';
-import { Card } from '@/lib/types/cardTypes';
+import { useFrame } from '@react-three/fiber';
 import { useTexture } from '@react-three/drei';
+import { Card } from '@/lib/types';
 
 interface CardModelProps {
-  card: Card;
+  imageUrl: string;
+  backImageUrl?: string;
   isFlipped: boolean;
   activeEffects: string[];
-  effectIntensities: Record<string, number>;
+  effectIntensities?: Record<string, number>;
+  qualityLevel?: 'high' | 'medium' | 'low';
 }
 
-export const CardModel: React.FC<CardModelProps> = ({ 
-  card,
+const CardModel: React.FC<CardModelProps> = ({
+  imageUrl,
+  backImageUrl = '/card-back-texture.jpg',
   isFlipped,
-  activeEffects,
-  effectIntensities
+  activeEffects = [],
+  effectIntensities = {},
+  qualityLevel = 'medium'
 }) => {
   const cardRef = useRef<THREE.Group>(null);
-  const { gl } = useThree();
+  const [textureError, setTextureError] = useState(false);
+  const [frontTextureLoaded, setFrontTextureLoaded] = useState(false);
+  const [backTextureLoaded, setBackTextureLoaded] = useState(false);
+  const materialRef = useRef<THREE.MeshPhysicalMaterial>(null);
   
-  // Standard card dimensions (aspect ratio: 2.5 x 3.5)
-  const cardWidth = 2.5;
-  const cardHeight = 3.5;
-  const cardThickness = 0.02;
+  // Default fallback textures
+  const fallbackFrontTexture = new THREE.Color('#2a5298');
+  const fallbackBackTexture = new THREE.Color('#1a3060');
   
-  // Load textures
-  // Use placeholders if the card doesn't have images
-  const frontImageUrl = card.imageUrl || '/placeholders/card-front.jpg';
-  // Use same image for back if backImageUrl doesn't exist
-  const backImageUrl = card.imageUrl || '/placeholders/card-back.jpg';
+  // Load textures with optimized settings based on quality level
+  const textureOptions = {
+    anisotropy: qualityLevel === 'high' ? 16 : qualityLevel === 'medium' ? 4 : 1,
+    minFilter: qualityLevel === 'low' ? THREE.LinearFilter : THREE.LinearMipmapLinearFilter,
+    magFilter: THREE.LinearFilter
+  };
   
   // Load textures with error handling
-  const frontTexture = useTexture(frontImageUrl);
-  const backTexture = useTexture(backImageUrl);
+  const frontTexture = useTexture(
+    imageUrl, 
+    (texture) => {
+      texture.anisotropy = textureOptions.anisotropy;
+      texture.minFilter = textureOptions.minFilter;
+      texture.magFilter = textureOptions.magFilter;
+      texture.needsUpdate = true;
+      
+      // Apply power-of-two optimization for better GPU performance
+      if (qualityLevel !== 'high' && (!isPowerOf2(texture.image.width) || !isPowerOf2(texture.image.height))) {
+        resizeTextureToPowerOfTwo(texture);
+      }
+      
+      setFrontTextureLoaded(true);
+    }
+  );
   
-  // Create materials
-  const materials = useMemo(() => {
-    // Front face material
-    const frontMaterial = new THREE.MeshStandardMaterial({
-      map: frontTexture,
-      metalness: 0.2,
-      roughness: 0.4,
-    });
-    
-    // Back face material
-    const backMaterial = new THREE.MeshStandardMaterial({
-      map: backTexture,
-      metalness: 0.2,
-      roughness: 0.4,
-    });
-    
-    // Edge material (for the thin sides of the card)
-    const edgeMaterial = new THREE.MeshStandardMaterial({
-      color: 0xf0f0f0,
-      metalness: 0.3,
-      roughness: 0.6,
-    });
-    
-    // Apply effects to materials based on activeEffects
-    if (activeEffects.includes('holographic')) {
-      const intensity = effectIntensities['holographic'] || 1;
-      frontMaterial.metalness = 0.8 * intensity;
-      frontMaterial.roughness = 0.2 * (1 - intensity * 0.5);
-      frontMaterial.envMapIntensity = 1.5 * intensity;
-    }
-    
-    if (activeEffects.includes('refractor')) {
-      const intensity = effectIntensities['refractor'] || 1;
-      frontMaterial.metalness = 0.7 * intensity;
-      frontMaterial.roughness = 0.3 * (1 - intensity * 0.5);
-    }
-    
-    if (activeEffects.includes('chrome')) {
-      const intensity = effectIntensities['chrome'] || 1;
-      frontMaterial.metalness = 0.9 * intensity;
-      frontMaterial.roughness = 0.1 * (1 - intensity * 0.7);
-      frontMaterial.envMapIntensity = 2.0 * intensity;
-    }
-    
-    return { frontMaterial, backMaterial, edgeMaterial };
-  }, [frontTexture, backTexture, activeEffects, effectIntensities]);
+  // Use try-catch for back texture since it's optional and might fail
+  let backTexture;
+  try {
+    backTexture = useTexture(
+      backImageUrl, 
+      (texture) => {
+        texture.anisotropy = textureOptions.anisotropy;
+        texture.minFilter = textureOptions.minFilter;
+        texture.magFilter = textureOptions.magFilter;
+        texture.needsUpdate = true;
+        
+        // Apply power-of-two optimization
+        if (qualityLevel !== 'high' && (!isPowerOf2(texture.image.width) || !isPowerOf2(texture.image.height))) {
+          resizeTextureToPowerOfTwo(texture);
+        }
+        
+        setBackTextureLoaded(true);
+      }
+    );
+  } catch (error) {
+    console.warn('Back texture could not be loaded, using fallback');
+  }
   
-  // Handle animations
-  useFrame((state, delta) => {
-    if (!cardRef.current) return;
+  // Helper function to check if number is power of two
+  function isPowerOf2(value: number): boolean {
+    return (value & (value - 1)) === 0 && value !== 0;
+  }
+  
+  // Helper function to resize texture to power of two
+  function resizeTextureToPowerOfTwo(texture: THREE.Texture): void {
+    if (!texture.image) return;
     
-    // Flip animation
-    const targetRotationY = isFlipped ? Math.PI : 0;
+    const canvas = document.createElement('canvas');
+    const width = nextPowerOf2(texture.image.width);
+    const height = nextPowerOf2(texture.image.height);
     
-    // Smooth animation
-    cardRef.current.rotation.y += (targetRotationY - cardRef.current.rotation.y) * 0.1;
+    canvas.width = width;
+    canvas.height = height;
     
-    // Add subtle floating animation if not flipped
-    if (!isFlipped) {
-      cardRef.current.position.y = Math.sin(state.clock.elapsedTime * 0.4) * 0.05;
-      cardRef.current.rotation.z = Math.sin(state.clock.elapsedTime * 0.3) * 0.02;
+    const context = canvas.getContext('2d');
+    if (context) {
+      context.drawImage(texture.image, 0, 0, width, height);
+      texture.image = canvas;
+      texture.needsUpdate = true;
     }
+  }
+  
+  // Helper function to get next power of two
+  function nextPowerOf2(n: number): number {
+    return Math.pow(2, Math.ceil(Math.log2(n)));
+  }
+
+  // Create materials with optimized properties based on quality level
+  const frontMaterial = new THREE.MeshPhysicalMaterial({
+    map: frontTextureLoaded ? frontTexture : null,
+    color: frontTextureLoaded ? undefined : fallbackFrontTexture,
+    metalness: 0.1,
+    roughness: 0.7,
+    clearcoat: qualityLevel === 'low' ? 0.2 : 0.3,
+    clearcoatRoughness: qualityLevel === 'low' ? 0.9 : 0.8,
+    envMapIntensity: qualityLevel === 'low' ? 0.3 : 0.5,
+    flatShading: qualityLevel === 'low',
+    // Optimize material by disabling unnecessary features in low quality mode
+    ...((qualityLevel === 'low') && {
+      defines: {
+        STANDARD: '',
+        PHYSICAL: ''
+      },
+      dithering: false
+    })
+  });
+  
+  const backMaterial = new THREE.MeshPhysicalMaterial({
+    map: backTextureLoaded ? backTexture : null,
+    color: backTextureLoaded ? undefined : fallbackBackTexture,
+    metalness: 0.1,
+    roughness: 0.7,
+    clearcoat: qualityLevel === 'low' ? 0.2 : 0.3,
+    clearcoatRoughness: qualityLevel === 'low' ? 0.9 : 0.8,
+    envMapIntensity: qualityLevel === 'low' ? 0.3 : 0.5,
+    flatShading: qualityLevel === 'low',
+    // Optimize material by disabling unnecessary features in low quality mode
+    ...((qualityLevel === 'low') && {
+      defines: {
+        STANDARD: '',
+        PHYSICAL: ''
+      },
+      dithering: false
+    })
   });
 
-  // Progressive enhancement: enable higher quality rendering on desktop
-  useEffect(() => {
-    // Check if we're on a powerful device
-    const isHighPerformance = gl.capabilities.getMaxAnisotropy() > 8;
-    
-    if (isHighPerformance) {
-      // Enable higher quality settings
-      gl.setPixelRatio(window.devicePixelRatio);
-      gl.shadowMap.type = THREE.PCFSoftShadowMap;
-      
-      // We can't set anisotropy directly on materials as it's not a property of MeshStandardMaterial
-      if (frontTexture) frontTexture.anisotropy = gl.capabilities.getMaxAnisotropy();
-      if (backTexture) backTexture.anisotropy = gl.capabilities.getMaxAnisotropy();
-    } else {
-      // Lower quality for mobile/low-end devices
-      gl.setPixelRatio(Math.min(1.5, window.devicePixelRatio));
-      gl.shadowMap.type = THREE.BasicShadowMap;
-    }
-  }, [gl, frontTexture, backTexture]);
+  // Get intensity value for a specific effect
+  const getEffectIntensity = (effectName: string): number => {
+    return effectIntensities[effectName] || 1.0;
+  };
+
+  // If there's a texture error, show an error cube
+  if (textureError) {
+    return (
+      <mesh position={[0, 0, 0]}>
+        <boxGeometry args={[2.5, 3.5, 0.1]} />
+        <meshStandardMaterial color="red" />
+      </mesh>
+    );
+  }
+
+  // Use optimized geometry for performance
+  const geometryDetail = qualityLevel === 'high' ? 4 : qualityLevel === 'medium' ? 2 : 1;
 
   return (
-    <group ref={cardRef}>
-      {/* Card body - use separate meshes instead of attachArray */}
-      <mesh castShadow receiveShadow>
-        <boxGeometry args={[cardWidth, cardHeight, cardThickness]} />
-        {/* Use an array of materials correctly in React Three Fiber */}
-        <meshStandardMaterial 
-          map={frontTexture}
-          metalness={0.2}
-          roughness={0.4}
-          attach="material-0"
-        />
-        <meshStandardMaterial 
-          map={backTexture}
-          metalness={0.2}
-          roughness={0.4}
-          attach="material-1"
-        />
-        {/* Edge materials for remaining 4 sides */}
-        <meshStandardMaterial
-          color={0xf0f0f0}
-          metalness={0.3}
-          roughness={0.6}
-          attach="material-2"
-        />
-        <meshStandardMaterial
-          color={0xf0f0f0}
-          metalness={0.3}
-          roughness={0.6}
-          attach="material-3"
-        />
-        <meshStandardMaterial
-          color={0xf0f0f0}
-          metalness={0.3}
-          roughness={0.6}
-          attach="material-4"
-        />
-        <meshStandardMaterial
-          color={0xf0f0f0}
-          metalness={0.3}
-          roughness={0.6}
-          attach="material-5"
-        />
+    <group ref={cardRef} position={[0, 0, 0]}>
+      {/* Front face - optimize for performance with simplified meshes in lower quality modes */}
+      <mesh castShadow={qualityLevel !== 'low'} receiveShadow={qualityLevel !== 'low'}>
+        <planeGeometry args={[2.5, 3.5, geometryDetail, geometryDetail]} />
+        <primitive object={frontMaterial} attach="material" />
       </mesh>
       
-      {/* Add special effect overlays based on active effects */}
-      {activeEffects.includes('holographic') && (
-        <mesh position={[0, 0, cardThickness/2 + 0.001]}>
-          <planeGeometry args={[cardWidth - 0.05, cardHeight - 0.05]} />
-          <meshPhysicalMaterial 
-            transparent
-            opacity={0.2 * (effectIntensities['holographic'] || 1)}
-            metalness={0.8}
-            roughness={0.2}
+      {/* Back face */}
+      <mesh 
+        position={[0, 0, -0.01]} 
+        rotation={[0, Math.PI, 0]} 
+        castShadow={qualityLevel !== 'low'} 
+        receiveShadow={qualityLevel !== 'low'}
+      >
+        <planeGeometry args={[2.5, 3.5, geometryDetail, geometryDetail]} />
+        <primitive object={backMaterial} attach="material" />
+      </mesh>
+
+      {/* Card edges only in medium/high quality mode */}
+      {qualityLevel !== 'low' && (
+        <mesh position={[0, 0, -0.005]} scale={[1.01, 1.01, 1]}>
+          <boxGeometry args={[2.5, 3.5, 0.01]} />
+          <meshStandardMaterial 
+            color="#9b87f5" 
+            metalness={0.6}
+            roughness={0.3}
+            transparent={true}
+            opacity={0.8}
           />
         </mesh>
       )}
     </group>
   );
 };
+
+export default CardModel;

@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useMobileOptimization } from './useMobileOptimization';
 import { useToast } from '@/hooks/use-toast';
@@ -118,26 +119,6 @@ export const useAdvancedGestures = (options: AdvancedGestureOptions) => {
       console.log('Haptic feedback not supported');
     }
   }, [enableHaptic]);
-
-  // Fix toast calls to include an ID
-  const showSuccessToast = (title: string, description: string) => {
-    toast({
-      id: Math.random().toString(36).substr(2, 9),
-      title,
-      description,
-      duration: 3000
-    });
-  };
-
-  const showErrorToast = (title: string, description: string) => {
-    toast({
-      id: Math.random().toString(36).substr(2, 9),
-      title,
-      description,
-      variant: "destructive",
-      duration: 3000
-    });
-  };
 
   // Handle touch start
   const handleTouchStart = useCallback((e: TouchEvent | React.TouchEvent) => {
@@ -429,9 +410,18 @@ export const useAdvancedGestures = (options: AdvancedGestureOptions) => {
         
         if (permission === 'granted') {
           window.addEventListener('deviceorientation', handleDeviceOrientation);
-          showSuccessToast("Motion Controls Enabled", "Tilt your device to control card rotation");
+          toast({
+            title: "Motion Controls Enabled",
+            description: "Tilt your device to control card rotation",
+            duration: 3000
+          });
         } else {
-          showErrorToast("Motion Controls Disabled", "Permission was not granted");
+          toast({
+            title: "Motion Controls Disabled",
+            description: "Permission was not granted",
+            variant: "destructive",
+            duration: 3000
+          });
         }
       } else if ('DeviceOrientationEvent' in window) {
         window.addEventListener('deviceorientation', handleDeviceOrientation);
@@ -439,7 +429,7 @@ export const useAdvancedGestures = (options: AdvancedGestureOptions) => {
     } catch (error) {
       console.error('Error requesting device motion permission:', error);
     }
-  }, [enableDeviceMotion, handleDeviceOrientation, showSuccessToast, showErrorToast]);
+  }, [enableDeviceMotion, handleDeviceOrientation, toast]);
 
   // Set up event listeners
   useEffect(() => {

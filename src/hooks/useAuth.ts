@@ -1,12 +1,13 @@
 
-import { useAuth as useAuthFromContext } from '@/context/auth';
+import { AuthContextType } from '@/lib/types/auth';
+import { useAuth as useProviderAuth } from '@/providers/AuthProvider';
 
 /**
- * Hook for accessing auth functionality throughout the application.
- * This is a convenience wrapper around the context's useAuth.
+ * Custom hook for accessing auth context.
+ * This simplified version uses the main AuthProvider.
  */
-export function useAuth() {
-  return useAuthFromContext();
-}
+export const useAuth = (): AuthContextType => {
+  return useProviderAuth();
+};
 
 export default useAuth;

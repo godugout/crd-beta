@@ -47,68 +47,6 @@ export type Database = {
           },
         ]
       }
-      app_registry: {
-        Row: {
-          app_key: string
-          app_name: string
-          app_version: string
-          created_at: string
-          id: string
-          is_active: boolean
-          updated_at: string
-        }
-        Insert: {
-          app_key: string
-          app_name: string
-          app_version: string
-          created_at?: string
-          id?: string
-          is_active?: boolean
-          updated_at?: string
-        }
-        Update: {
-          app_key?: string
-          app_name?: string
-          app_version?: string
-          created_at?: string
-          id?: string
-          is_active?: boolean
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      app_settings: {
-        Row: {
-          app_id: string
-          created_at: string
-          id: string
-          settings: Json
-          updated_at: string
-        }
-        Insert: {
-          app_id: string
-          created_at?: string
-          id?: string
-          settings?: Json
-          updated_at?: string
-        }
-        Update: {
-          app_id?: string
-          created_at?: string
-          id?: string
-          settings?: Json
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "app_settings_app_id_fkey"
-            columns: ["app_id"]
-            isOneToOne: false
-            referencedRelation: "app_registry"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       artists: {
         Row: {
           bio: string | null
@@ -248,9 +186,7 @@ export type Database = {
       cards: {
         Row: {
           collection_id: string | null
-          crd_catalog_inclusion: boolean | null
           created_at: string
-          creator_attribution: Json | null
           creator_id: string
           description: string | null
           design_metadata: Json | null
@@ -258,27 +194,18 @@ export type Database = {
           id: string
           image_url: string | null
           is_public: boolean | null
-          marketplace_listing: boolean | null
           price: number | null
-          print_available: boolean | null
-          print_metadata: Json | null
-          publishing_options: Json | null
           rarity: string
-          shop_id: string | null
           tags: string[] | null
           team_id: string | null
-          template_id: string | null
           thumbnail_url: string | null
           title: string
           updated_at: string
           user_id: string | null
-          verification_status: string | null
         }
         Insert: {
           collection_id?: string | null
-          crd_catalog_inclusion?: boolean | null
           created_at?: string
-          creator_attribution?: Json | null
           creator_id: string
           description?: string | null
           design_metadata?: Json | null
@@ -286,27 +213,18 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_public?: boolean | null
-          marketplace_listing?: boolean | null
           price?: number | null
-          print_available?: boolean | null
-          print_metadata?: Json | null
-          publishing_options?: Json | null
           rarity: string
-          shop_id?: string | null
           tags?: string[] | null
           team_id?: string | null
-          template_id?: string | null
           thumbnail_url?: string | null
           title: string
           updated_at?: string
           user_id?: string | null
-          verification_status?: string | null
         }
         Update: {
           collection_id?: string | null
-          crd_catalog_inclusion?: boolean | null
           created_at?: string
-          creator_attribution?: Json | null
           creator_id?: string
           description?: string | null
           design_metadata?: Json | null
@@ -314,21 +232,14 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_public?: boolean | null
-          marketplace_listing?: boolean | null
           price?: number | null
-          print_available?: boolean | null
-          print_metadata?: Json | null
-          publishing_options?: Json | null
           rarity?: string
-          shop_id?: string | null
           tags?: string[] | null
           team_id?: string | null
-          template_id?: string | null
           thumbnail_url?: string | null
           title?: string
           updated_at?: string
           user_id?: string | null
-          verification_status?: string | null
         }
         Relationships: [
           {
@@ -336,13 +247,6 @@ export type Database = {
             columns: ["collection_id"]
             isOneToOne: false
             referencedRelation: "collections"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "cards_shop_id_fkey"
-            columns: ["shop_id"]
-            isOneToOne: false
-            referencedRelation: "shops"
             referencedColumns: ["id"]
           },
           {
@@ -393,7 +297,6 @@ export type Database = {
       collections: {
         Row: {
           allow_comments: boolean | null
-          app_id: string | null
           cover_image_url: string | null
           created_at: string
           description: string | null
@@ -407,7 +310,6 @@ export type Database = {
         }
         Insert: {
           allow_comments?: boolean | null
-          app_id?: string | null
           cover_image_url?: string | null
           created_at?: string
           description?: string | null
@@ -421,7 +323,6 @@ export type Database = {
         }
         Update: {
           allow_comments?: boolean | null
-          app_id?: string | null
           cover_image_url?: string | null
           created_at?: string
           description?: string | null
@@ -434,13 +335,6 @@ export type Database = {
           visibility?: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: "collections_app_id_fkey"
-            columns: ["app_id"]
-            isOneToOne: false
-            referencedRelation: "app_registry"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "collections_team_id_fkey"
             columns: ["team_id"]
@@ -559,198 +453,6 @@ export type Database = {
           },
         ]
       }
-      custom_users: {
-        Row: {
-          created_at: string
-          id: string
-          is_active: boolean
-          passcode: string
-          updated_at: string
-          username: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          is_active?: boolean
-          passcode: string
-          updated_at?: string
-          username: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          is_active?: boolean
-          passcode?: string
-          updated_at?: string
-          username?: string
-        }
-        Relationships: []
-      }
-      design_elements: {
-        Row: {
-          category: string
-          content: Json
-          created_at: string
-          created_by: string
-          description: string | null
-          id: string
-          metadata: Json | null
-          moderation_status: string
-          name: string
-          performance: Json | null
-          premium: boolean | null
-          price: number | null
-          updated_at: string
-          usage_stats: Json
-          version: string | null
-          visibility: string
-        }
-        Insert: {
-          category: string
-          content: Json
-          created_at?: string
-          created_by: string
-          description?: string | null
-          id?: string
-          metadata?: Json | null
-          moderation_status?: string
-          name: string
-          performance?: Json | null
-          premium?: boolean | null
-          price?: number | null
-          updated_at?: string
-          usage_stats?: Json
-          version?: string | null
-          visibility?: string
-        }
-        Update: {
-          category?: string
-          content?: Json
-          created_at?: string
-          created_by?: string
-          description?: string | null
-          id?: string
-          metadata?: Json | null
-          moderation_status?: string
-          name?: string
-          performance?: Json | null
-          premium?: boolean | null
-          price?: number | null
-          updated_at?: string
-          usage_stats?: Json
-          version?: string | null
-          visibility?: string
-        }
-        Relationships: []
-      }
-      design_frames: {
-        Row: {
-          category: string
-          constraints: Json
-          created_at: string
-          created_by: string
-          description: string | null
-          design: Json
-          id: string
-          inheritance: Json | null
-          moderation_note: string | null
-          moderation_status: string
-          name: string
-          performance: Json | null
-          permissions: Json
-          stats: Json
-          tags: string[] | null
-          updated_at: string
-          version: Json | null
-          visibility: string
-        }
-        Insert: {
-          category: string
-          constraints: Json
-          created_at?: string
-          created_by: string
-          description?: string | null
-          design?: Json
-          id?: string
-          inheritance?: Json | null
-          moderation_note?: string | null
-          moderation_status?: string
-          name: string
-          performance?: Json | null
-          permissions?: Json
-          stats?: Json
-          tags?: string[] | null
-          updated_at?: string
-          version?: Json | null
-          visibility?: string
-        }
-        Update: {
-          category?: string
-          constraints?: Json
-          created_at?: string
-          created_by?: string
-          description?: string | null
-          design?: Json
-          id?: string
-          inheritance?: Json | null
-          moderation_note?: string | null
-          moderation_status?: string
-          name?: string
-          performance?: Json | null
-          permissions?: Json
-          stats?: Json
-          tags?: string[] | null
-          updated_at?: string
-          version?: Json | null
-          visibility?: string
-        }
-        Relationships: []
-      }
-      design_templates: {
-        Row: {
-          category: string
-          created_at: string
-          created_by: string | null
-          description: string | null
-          id: string
-          is_premium: boolean | null
-          name: string
-          preview_url: string | null
-          tags: string[] | null
-          template_data: Json
-          updated_at: string
-          usage_count: number | null
-        }
-        Insert: {
-          category: string
-          created_at?: string
-          created_by?: string | null
-          description?: string | null
-          id?: string
-          is_premium?: boolean | null
-          name: string
-          preview_url?: string | null
-          tags?: string[] | null
-          template_data?: Json
-          updated_at?: string
-          usage_count?: number | null
-        }
-        Update: {
-          category?: string
-          created_at?: string
-          created_by?: string | null
-          description?: string | null
-          id?: string
-          is_premium?: boolean | null
-          name?: string
-          preview_url?: string | null
-          tags?: string[] | null
-          template_data?: Json
-          updated_at?: string
-          usage_count?: number | null
-        }
-        Relationships: []
-      }
       digital_assets: {
         Row: {
           created_at: string
@@ -804,41 +506,6 @@ export type Database = {
           width?: number | null
         }
         Relationships: []
-      }
-      element_usage: {
-        Row: {
-          card_id: string | null
-          context: string | null
-          created_at: string
-          element_id: string
-          id: string
-          user_id: string
-        }
-        Insert: {
-          card_id?: string | null
-          context?: string | null
-          created_at?: string
-          element_id: string
-          id?: string
-          user_id: string
-        }
-        Update: {
-          card_id?: string | null
-          context?: string | null
-          created_at?: string
-          element_id?: string
-          id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "element_usage_element_id_fkey"
-            columns: ["element_id"]
-            isOneToOne: false
-            referencedRelation: "design_elements"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       fan_feeds: {
         Row: {
@@ -926,41 +593,6 @@ export type Database = {
           },
         ]
       }
-      frame_ratings: {
-        Row: {
-          comment: string | null
-          created_at: string
-          frame_id: string
-          id: string
-          rating: number
-          user_id: string
-        }
-        Insert: {
-          comment?: string | null
-          created_at?: string
-          frame_id: string
-          id?: string
-          rating: number
-          user_id: string
-        }
-        Update: {
-          comment?: string | null
-          created_at?: string
-          frame_id?: string
-          id?: string
-          rating?: number
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "frame_ratings_frame_id_fkey"
-            columns: ["frame_id"]
-            isOneToOne: false
-            referencedRelation: "design_frames"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       lyric_annotations: {
         Row: {
           ai_analysis: string | null
@@ -1014,172 +646,8 @@ export type Database = {
           },
         ]
       }
-      media_assets: {
-        Row: {
-          created_at: string
-          deleted_at: string | null
-          description: string | null
-          file_size: number
-          height: number | null
-          id: string
-          metadata: Json | null
-          mime_type: string
-          original_url: string
-          processed_url: string | null
-          status: string
-          thumbnail_url: string | null
-          title: string
-          updated_at: string
-          user_id: string
-          width: number | null
-        }
-        Insert: {
-          created_at?: string
-          deleted_at?: string | null
-          description?: string | null
-          file_size: number
-          height?: number | null
-          id?: string
-          metadata?: Json | null
-          mime_type: string
-          original_url: string
-          processed_url?: string | null
-          status?: string
-          thumbnail_url?: string | null
-          title: string
-          updated_at?: string
-          user_id: string
-          width?: number | null
-        }
-        Update: {
-          created_at?: string
-          deleted_at?: string | null
-          description?: string | null
-          file_size?: number
-          height?: number | null
-          id?: string
-          metadata?: Json | null
-          mime_type?: string
-          original_url?: string
-          processed_url?: string | null
-          status?: string
-          thumbnail_url?: string | null
-          title?: string
-          updated_at?: string
-          user_id?: string
-          width?: number | null
-        }
-        Relationships: []
-      }
-      media_processing: {
-        Row: {
-          asset_id: string
-          created_at: string
-          error: string | null
-          id: string
-          operation: string
-          params: Json | null
-          result: Json | null
-          status: string
-          updated_at: string
-        }
-        Insert: {
-          asset_id: string
-          created_at?: string
-          error?: string | null
-          id?: string
-          operation: string
-          params?: Json | null
-          result?: Json | null
-          status?: string
-          updated_at?: string
-        }
-        Update: {
-          asset_id?: string
-          created_at?: string
-          error?: string | null
-          id?: string
-          operation?: string
-          params?: Json | null
-          result?: Json | null
-          status?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "media_processing_asset_id_fkey"
-            columns: ["asset_id"]
-            isOneToOne: false
-            referencedRelation: "media_assets"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      media_sync_queue: {
-        Row: {
-          asset_id: string | null
-          created_at: string
-          id: string
-          operation: string
-          params: Json
-          retry_count: number | null
-          status: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          asset_id?: string | null
-          created_at?: string
-          id?: string
-          operation: string
-          params: Json
-          retry_count?: number | null
-          status?: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          asset_id?: string | null
-          created_at?: string
-          id?: string
-          operation?: string
-          params?: Json
-          retry_count?: number | null
-          status?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      media_tags: {
-        Row: {
-          asset_id: string
-          created_at: string
-          tag: string
-        }
-        Insert: {
-          asset_id: string
-          created_at?: string
-          tag: string
-        }
-        Update: {
-          asset_id?: string
-          created_at?: string
-          tag?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "media_tags_asset_id_fkey"
-            columns: ["asset_id"]
-            isOneToOne: false
-            referencedRelation: "media_assets"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       memories: {
         Row: {
-          app_id: string | null
           created_at: string
           description: string | null
           game_id: string | null
@@ -1194,7 +662,6 @@ export type Database = {
           visibility: string
         }
         Insert: {
-          app_id?: string | null
           created_at?: string
           description?: string | null
           game_id?: string | null
@@ -1209,7 +676,6 @@ export type Database = {
           visibility?: string
         }
         Update: {
-          app_id?: string | null
           created_at?: string
           description?: string | null
           game_id?: string | null
@@ -1224,13 +690,6 @@ export type Database = {
           visibility?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "memories_app_id_fkey"
-            columns: ["app_id"]
-            isOneToOne: false
-            referencedRelation: "app_registry"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "memories_team_id_fkey"
             columns: ["team_id"]
@@ -1473,83 +932,30 @@ export type Database = {
           },
         ]
       }
-      product_categories: {
-        Row: {
-          created_at: string
-          description: string | null
-          display_order: number | null
-          id: string
-          is_active: boolean | null
-          name: string
-          shop_id: string
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          display_order?: number | null
-          id?: string
-          is_active?: boolean | null
-          name: string
-          shop_id: string
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          display_order?: number | null
-          id?: string
-          is_active?: boolean | null
-          name?: string
-          shop_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "product_categories_shop_id_fkey"
-            columns: ["shop_id"]
-            isOneToOne: false
-            referencedRelation: "shops"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       profiles: {
         Row: {
           avatar_url: string | null
-          bio_extended: string | null
           created_at: string
-          creator_badge: string | null
-          creator_verified: boolean | null
           full_name: string | null
           id: string
-          portfolio_links: Json | null
-          specialties: string[] | null
           team_id: string | null
           updated_at: string
           username: string | null
         }
         Insert: {
           avatar_url?: string | null
-          bio_extended?: string | null
           created_at?: string
-          creator_badge?: string | null
-          creator_verified?: boolean | null
           full_name?: string | null
           id: string
-          portfolio_links?: Json | null
-          specialties?: string[] | null
           team_id?: string | null
           updated_at?: string
           username?: string | null
         }
         Update: {
           avatar_url?: string | null
-          bio_extended?: string | null
           created_at?: string
-          creator_badge?: string | null
-          creator_verified?: boolean | null
           full_name?: string | null
           id?: string
-          portfolio_links?: Json | null
-          specialties?: string[] | null
           team_id?: string | null
           updated_at?: string
           username?: string | null
@@ -1608,95 +1014,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      shop_teams: {
-        Row: {
-          id: string
-          invited_by: string | null
-          joined_at: string
-          permissions: Json | null
-          role: string
-          shop_id: string
-          user_id: string
-        }
-        Insert: {
-          id?: string
-          invited_by?: string | null
-          joined_at?: string
-          permissions?: Json | null
-          role?: string
-          shop_id: string
-          user_id: string
-        }
-        Update: {
-          id?: string
-          invited_by?: string | null
-          joined_at?: string
-          permissions?: Json | null
-          role?: string
-          shop_id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "shop_teams_shop_id_fkey"
-            columns: ["shop_id"]
-            isOneToOne: false
-            referencedRelation: "shops"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      shops: {
-        Row: {
-          banner_url: string | null
-          branding: Json | null
-          contact_info: Json | null
-          created_at: string
-          description: string | null
-          id: string
-          logo_url: string | null
-          name: string
-          owner_id: string
-          shop_status: string
-          social_links: Json | null
-          specialties: string[] | null
-          updated_at: string
-          verification_status: string
-        }
-        Insert: {
-          banner_url?: string | null
-          branding?: Json | null
-          contact_info?: Json | null
-          created_at?: string
-          description?: string | null
-          id?: string
-          logo_url?: string | null
-          name: string
-          owner_id: string
-          shop_status?: string
-          social_links?: Json | null
-          specialties?: string[] | null
-          updated_at?: string
-          verification_status?: string
-        }
-        Update: {
-          banner_url?: string | null
-          branding?: Json | null
-          contact_info?: Json | null
-          created_at?: string
-          description?: string | null
-          id?: string
-          logo_url?: string | null
-          name?: string
-          owner_id?: string
-          shop_status?: string
-          social_links?: Json | null
-          specialties?: string[] | null
-          updated_at?: string
-          verification_status?: string
-        }
-        Relationships: []
       }
       song_analyses: {
         Row: {
@@ -2173,36 +1490,6 @@ export type Database = {
         }
         Relationships: []
       }
-      templates: {
-        Row: {
-          category: string
-          created_at: string
-          id: string
-          layout_json: Json
-          name: string
-          thumbnail_url: string | null
-          updated_at: string
-        }
-        Insert: {
-          category: string
-          created_at?: string
-          id?: string
-          layout_json?: Json
-          name: string
-          thumbnail_url?: string | null
-          updated_at?: string
-        }
-        Update: {
-          category?: string
-          created_at?: string
-          id?: string
-          layout_json?: Json
-          name?: string
-          thumbnail_url?: string | null
-          updated_at?: string
-        }
-        Relationships: []
-      }
       time_capsules: {
         Row: {
           created_at: string
@@ -2487,85 +1774,18 @@ export type Database = {
           },
         ]
       }
-      venue_profiles: {
-        Row: {
-          created_at: string
-          id: string
-          lighting_profile: Json | null
-          location: Json | null
-          metadata: Json | null
-          name: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          lighting_profile?: Json | null
-          location?: Json | null
-          metadata?: Json | null
-          name: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          lighting_profile?: Json | null
-          location?: Json | null
-          metadata?: Json | null
-          name?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      authenticate_user: {
-        Args: { username_input: string; passcode_input: string }
-        Returns: {
-          user_id: string
-          username: string
-          success: boolean
-        }[]
-      }
-      execute_sql: {
-        Args: { query_text: string; query_params?: Json }
-        Returns: Json
-      }
-      get_app_id: {
-        Args: { p_app_key: string }
-        Returns: string
-      }
-      get_column_exists: {
-        Args: { p_table_name: string; p_column_name: string }
-        Returns: boolean
-      }
-      get_table_exists: {
-        Args: { table_name: string }
-        Returns: boolean
-      }
       get_user_team_role: {
         Args: { team_id: string; user_id: string }
-        Returns: string
-      }
-      hash_passcode: {
-        Args: { passcode_input: string }
         Returns: string
       }
       is_team_member: {
         Args: { team_id: string; user_id: string }
         Returns: boolean
-      }
-      register_user: {
-        Args: { username_input: string; passcode_input: string }
-        Returns: {
-          user_id: string
-          username: string
-          success: boolean
-          error_message: string
-        }[]
       }
     }
     Enums: {

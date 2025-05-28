@@ -1,103 +1,45 @@
 
+import { BaseEntity } from './index';
 import { Card } from './cardTypes';
-import { User } from './user';
 
-/**
- * Interface for a collection of cards
- */
-export interface Collection {
-  id: string;
+export interface InstagramSource {
+  username: string;
+  lastFetched: string;
+  autoUpdate: boolean;
+}
+
+export interface Collection extends BaseEntity {
   name: string;
   description?: string;
+  userId: string;
+  cards: Card[];
   coverImageUrl?: string;
-  userId?: string;
-  teamId?: string;
+  isPublic: boolean;
+  tags?: string[];
+  popularity?: number;
+  instagramSource?: InstagramSource;
+  featured?: boolean; // Added this property to fix the type error
+  
+  // Additional properties needed by other components
   visibility?: 'public' | 'private' | 'team' | 'unlisted';
   allowComments?: boolean;
-  createdAt: string;
-  updatedAt: string;
-  designMetadata?: any;
-  cards?: Card[];
+  teamId?: string;
   cardIds?: string[];
-  members?: User[];
-  tags?: string[];
-  instagramSource?: {
-    username: string;
-    lastFetched: string;
-    autoUpdate: boolean;
-  };
-  owner?: User;
-  displayOrder?: number;
-  featured?: boolean;
-  isPublic?: boolean;
-  ownerId?: string;
+  designMetadata?: any;
+  owner_id?: string; // For backward compatibility
 }
 
-/**
- * Interface for a deck of cards (specialized collection)
- */
-export interface Deck {
-  id: string;
-  name: string;
-  description: string;
-  coverImageUrl: string;
-  userId: string;
-  ownerId?: string;
-  createdAt: string;
-  updatedAt: string;
+export interface CollectionWithCards extends Collection {
   cards: Card[];
-  cardIds: string[];
-  isPublic: boolean;
-  featured?: boolean;
-  displayOrder?: number;
-  owner?: User;
 }
 
-/**
- * Types of collections available
- */
-export enum CollectionType {
-  Standard = 'standard',
-  Series = 'series',
-  Set = 'set',
-  Team = 'team',
-  Player = 'player',
-  Personal = 'personal',
-  Favorites = 'favorites',
-  Custom = 'custom'
-}
-
-/**
- * Interface for collection metadata
- */
-export interface CollectionMetadata {
-  type: CollectionType;
-  theme?: string;
-  icon?: string;
-  tags?: string[];
-  featuredCardIds?: string[];
-  customAttributes?: Record<string, any>;
-}
-
-/**
- * Interface for collection statistics
- */
-export interface CollectionStats {
-  totalCards: number;
-  viewCount: number;
-  shareCount: number;
-  favoriteCount: number;
-  averageRating?: number;
-  lastUpdated: string;
-}
-
-// Add a DbCollection type for the collection converter
+// For backwards compatibility with DB models
 export interface DbCollection {
   id: string;
   title: string;
   description?: string;
   cover_image_url?: string;
-  owner_id?: string;
+  owner_id?: string; 
   team_id?: string;
   visibility?: 'public' | 'private' | 'team' | 'unlisted';
   allow_comments?: boolean;
@@ -105,3 +47,13 @@ export interface DbCollection {
   updated_at: string;
   design_metadata?: any;
 }
+
+// Function to serialize metadata for storage
+export const serializeMetadata = (metadata: any) => {
+  if (!metadata) return {};
+  try {
+    return JSON.parse(JSON.stringify(metadata));
+  } catch (e) {
+    return metadata;
+  }
+};

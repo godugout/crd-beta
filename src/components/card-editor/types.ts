@@ -4,10 +4,6 @@ export interface CardStyle {
   effect: string;
   borderColor?: string;
   backgroundColor?: string;
-  shadowColor: string;
-  frameWidth: number;
-  frameColor: string;
-  template?: string;
 }
 
 export interface TextStyle {
@@ -16,10 +12,6 @@ export interface TextStyle {
   fontWeight?: string;
   color?: string;
   textShadow?: string;
-  titleColor?: string;
-  titleAlignment?: string;
-  titleWeight?: string;
-  descriptionColor?: string;
 }
 
 export interface CardEditorState {

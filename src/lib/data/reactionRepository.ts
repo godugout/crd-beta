@@ -1,73 +1,157 @@
 
-// Import necessary dependencies
-import { Reaction } from "@/lib/types";
-import { storageService } from '@/lib/services/storageService';
-import UserRole from '@/lib/enums/userRoles';
+import { supabase } from '@/integrations/supabase/client';
+import { Reaction, User, UserRole } from '@/lib/types';
 
-// Repository implementation
-const reactionFunctions = {
-  /**
-   * Get all reactions for a card
-   */
-  getAllByCardId: async (cardId: string): Promise<Reaction[]> => {
-    // This would be implemented with a database call
-    console.log('Getting reactions for card', cardId);
-    return []; // Mock empty array
-  },
+const reactionTable = 'reactions';
 
-  /**
-   * Add a reaction to a card
-   */
-  add: async (reaction: Reaction): Promise<Reaction> => {
-    // This would be implemented with a database call
-    console.log('Adding reaction', reaction);
-    return {
-      ...reaction,
-      id: `reaction-${Date.now()}`,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
-  },
+const mapReactionFromDb = (reaction: any): Reaction => {
+  const user: User = {
+    id: reaction.user_id,
+    email: reaction.user.email,
+    displayName: reaction.user.display_name,
+    name: reaction.user.full_name, 
+    avatarUrl: reaction.user.avatar_url,
+    role: UserRole.USER, // Add default role
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
 
-  /**
-   * Remove a reaction from a card
-   */
-  remove: async (userId: string, cardId: string): Promise<boolean> => {
-    // This would be implemented with a database call
-    console.log('Removing reaction', { userId, cardId });
-    return true;
-  },
-
-  /**
-   * Get reaction count by card ID
-   */
-  getCountByCardId: async (cardId: string): Promise<Record<string, number>> => {
-    // This would be implemented with a database call
-    console.log('Getting reaction count for card', cardId);
-    return {
-      like: 0,
-      love: 0,
-      wow: 0,
-      fire: 0
-    };
-  },
-
-  /**
-   * Check if a user has reacted to a card
-   */
-  hasReaction: async (userId: string, cardId: string): Promise<boolean> => {
-    // This would be implemented with a database call
-    console.log('Checking if user has reacted', { userId, cardId });
-    return false;
-  }
+  return {
+    id: reaction.id,
+    userId: reaction.user_id,
+    cardId: reaction.card_id,
+    collectionId: reaction.collection_id,
+    commentId: reaction.comment_id,
+    type: reaction.type,
+    createdAt: reaction.created_at,
+    user,
+    targetType: reaction.target_type || 'card', // Add default targetType
+    targetId: reaction.target_id || reaction.card_id || '' // Use card_id as default targetId if available
+  };
 };
 
-// Export all functions as named exports
-export const getAllByCardId = reactionFunctions.getAllByCardId;
-export const add = reactionFunctions.add;
-export const remove = reactionFunctions.remove;
-export const getCountByCardId = reactionFunctions.getCountByCardId;
-export const hasReaction = reactionFunctions.hasReaction;
+const getAllByCardId = async (cardId: string): Promise<Reaction[]> => {
+  const { data, error } = await supabase
+    .from(reactionTable)
+    .select(`
+      id,
+      user_id,
+      card_id,
+      type,
+      created_at,
+      users (
+        id,
+        email,
+        display_name,
+        full_name,
+        username,
+        avatar_url
+      )
+    `)
+    .eq('card_id', cardId);
+  
+  if (error) {
+    console.error('Error fetching reactions by card ID:', error);
+    return [];
+  }
+  
+  return data.map((item: any) => ({
+    id: item.id,
+    userId: item.user_id,
+    cardId: item.card_id,
+    type: item.type,
+    createdAt: item.created_at,
+    targetType: 'card', // Add targetType
+    targetId: item.card_id, // Use card_id as targetId
+    user: item.users ? {
+      id: item.users.id,
+      email: item.users.email,
+      displayName: item.users.display_name,
+      name: item.users.full_name,
+      username: item.users.username,
+      avatarUrl: item.users.avatar_url,
+      role: UserRole.USER, // Add default role
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    } : undefined
+  }));
+};
 
-// Export the object for backward compatibility
-export const reactionRepository = reactionFunctions;
+const getAllByCollectionId = async (collectionId: string): Promise<Reaction[]> => {
+  const { data, error } = await supabase
+    .from(reactionTable)
+    .select('*')
+    .eq('collection_id', collectionId);
+  
+  if (error) {
+    console.error('Error fetching reactions by collection ID:', error);
+    return [];
+  }
+  
+  return data.map(mapReactionFromDb);
+};
+
+const getAllByCommentId = async (commentId: string): Promise<Reaction[]> => {
+  const { data, error } = await supabase
+    .from(reactionTable)
+    .select('*')
+    .eq('comment_id', commentId);
+  
+  if (error) {
+    console.error('Error fetching reactions by comment ID:', error);
+    return [];
+  }
+  
+  return data.map(mapReactionFromDb);
+};
+
+const add = async (userId: string, cardId?: string, collectionId?: string, commentId?: string, type?: string): Promise<Reaction | null> => {
+  // Determine the target type and ID based on which ID is provided
+  const targetType = cardId ? 'card' : (commentId ? 'comment' : 'collection');
+  const targetId = cardId || commentId || collectionId || '';
+  
+  const { data, error } = await supabase
+    .from(reactionTable)
+    .insert([
+      { 
+        user_id: userId, 
+        card_id: cardId, 
+        collection_id: collectionId, 
+        comment_id: commentId, 
+        type: type,
+        target_type: targetType,  // Add target_type field
+        target_id: targetId       // Add target_id field
+      }
+    ])
+    .select('*')
+    .single();
+  
+  if (error) {
+    console.error('Error adding reaction:', error);
+    return null;
+  }
+  
+  return mapReactionFromDb(data);
+};
+
+const remove = async (id: string): Promise<boolean> => {
+  const { error } = await supabase
+    .from(reactionTable)
+    .delete()
+    .eq('id', id);
+  
+  if (error) {
+    console.error('Error removing reaction:', error);
+    return false;
+  }
+  
+  return true;
+};
+
+export const reactionRepository = {
+  getAllByCardId,
+  getAllByCollectionId,
+  getAllByCommentId,
+  add,
+  remove
+};

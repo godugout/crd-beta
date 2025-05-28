@@ -1,118 +1,159 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { toast } from 'sonner';
+import { 
+  getOfflineItems, 
+  saveOfflineItem, 
+  removeOfflineItem, 
+  OfflineItem,
+  getPendingItemCount
+} from '@/lib/offlineStorage';
+import { syncAllData, cancelSync, SyncOptions } from '@/lib/syncService';
 
-interface ConnectivityState {
-  isOnline: boolean;
-  offlineSince: Date | null;
-  lastSync: Date | null;
-  connectionType: string | null;
-  reconnectAttempts: number;
+export interface ConnectivityOptions {
+  autoSync?: boolean;
+  notifySyncEvents?: boolean;
+  syncOnConnect?: boolean;
 }
 
-export const useConnectivity = () => {
-  const [state, setState] = useState<ConnectivityState>({
-    isOnline: navigator.onLine,
-    offlineSince: navigator.onLine ? null : new Date(),
-    lastSync: null,
-    connectionType: null,
-    reconnectAttempts: 0
-  });
+export const useConnectivity = (options: ConnectivityOptions = {}) => {
+  const [isOnline, setIsOnline] = useState<boolean>(
+    typeof navigator !== 'undefined' ? navigator.onLine : true
+  );
+  const [offlineItems, setOfflineItems] = useState<OfflineItem[]>([]);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [pendingCount, setPendingCount] = useState(0);
+  const [lastSyncDate, setLastSyncDate] = useState<Date | null>(null);
   
-  // Get connection type if available in browser
+  const {
+    autoSync = true,
+    notifySyncEvents = true,
+    syncOnConnect = true
+  } = options;
+
+  // Load any stored offline items on mount
   useEffect(() => {
-    const connection = 
-      'connection' in navigator 
-        ? (navigator as any).connection || 
-          (navigator as any).mozConnection || 
-          (navigator as any).webkitConnection
-        : null;
+    const loadOfflineItems = async () => {
+      try {
+        const items = await getOfflineItems();
+        setOfflineItems(items);
         
-    if (connection) {
-      setState(prev => ({
-        ...prev,
-        connectionType: connection.effectiveType || connection.type || null
-      }));
-      
-      const handleConnectionChange = () => {
-        setState(prev => ({
-          ...prev,
-          connectionType: connection.effectiveType || connection.type || null
-        }));
-      };
-      
-      connection.addEventListener('change', handleConnectionChange);
-      return () => connection.removeEventListener('change', handleConnectionChange);
-    }
+        const count = await getPendingItemCount();
+        setPendingCount(count);
+      } catch (e) {
+        console.error('Failed to load stored offline items:', e);
+      }
+    };
+    
+    loadOfflineItems();
   }, []);
-  
-  // Monitor online/offline status
+
+  // Listen for online/offline events
   useEffect(() => {
     const handleOnline = () => {
-      setState(prev => ({
-        ...prev,
-        isOnline: true,
-        lastSync: new Date(),
-        reconnectAttempts: 0
-      }));
+      setIsOnline(true);
+      
+      if (notifySyncEvents) {
+        toast.success('You are back online');
+      }
+      
+      // Automatically sync when coming back online
+      if (syncOnConnect) {
+        syncOfflineItems();
+      }
     };
-    
+
     const handleOffline = () => {
-      setState(prev => ({
-        ...prev,
-        isOnline: false,
-        offlineSince: new Date()
-      }));
+      setIsOnline(false);
+      
+      if (notifySyncEvents) {
+        toast.error('You are offline - data will be saved locally', {
+          duration: 5000
+        });
+      }
     };
-    
+
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
-    
+
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };
-  }, []);
-  
-  // Method to attempt manual reconnection
-  const attemptReconnect = async (): Promise<boolean> => {
-    if (state.isOnline) return true;
+  }, [notifySyncEvents, syncOnConnect]);
+
+  // Add an item to offline storage
+  const saveOfflineItemAndUpdate = async (item: OfflineItem) => {
+    const id = await saveOfflineItem(item);
+    const updatedItems = await getOfflineItems();
+    setOfflineItems(updatedItems);
+    
+    const count = await getPendingItemCount();
+    setPendingCount(count);
+    
+    return id;
+  };
+
+  // Remove an item from offline storage
+  const removeOfflineItemAndUpdate = async (itemId: string) => {
+    await removeOfflineItem(itemId);
+    const updatedItems = await getOfflineItems();
+    setOfflineItems(updatedItems);
+    
+    const count = await getPendingItemCount();
+    setPendingCount(count);
+  };
+
+  // Sync offline items when back online
+  const syncOfflineItems = useCallback(async (syncOptions: SyncOptions = {}) => {
+    if (!isOnline || isSyncing || pendingCount === 0) return 0;
+    
+    setIsSyncing(true);
     
     try {
-      // Try to fetch a small resource to check connectivity
-      const response = await fetch('/api/ping', { 
-        method: 'HEAD',
-        cache: 'no-store'
+      // Use the syncService to perform the sync
+      const syncCount = await syncAllData({
+        notify: notifySyncEvents,
+        continueOnError: true,
+        ...syncOptions
       });
       
-      const isConnected = response.ok;
-      
-      if (isConnected) {
-        setState(prev => ({
-          ...prev,
-          isOnline: true,
-          lastSync: new Date()
-        }));
-        return true;
+      if (syncCount > 0) {
+        // Refresh the offline items list
+        const items = await getOfflineItems();
+        setOfflineItems(items);
+        
+        // Update the pending count
+        const count = await getPendingItemCount();
+        setPendingCount(count);
+        
+        // Update last sync date
+        setLastSyncDate(new Date());
       }
       
-      setState(prev => ({
-        ...prev, 
-        reconnectAttempts: prev.reconnectAttempts + 1
-      }));
-      
-      return false;
-    } catch (error) {
-      setState(prev => ({
-        ...prev, 
-        reconnectAttempts: prev.reconnectAttempts + 1
-      }));
-      
-      return false;
+      return syncCount;
+    } finally {
+      setIsSyncing(false);
     }
-  };
+  }, [isOnline, isSyncing, pendingCount, notifySyncEvents]);
   
+  // Cancel an ongoing sync
+  const cancelSyncOperation = useCallback(() => {
+    cancelSync();
+    setIsSyncing(false);
+  }, []);
+
   return {
-    ...state,
-    attemptReconnect
+    isOnline,
+    isSyncing,
+    offlineItems,
+    pendingCount,
+    lastSyncDate,
+    saveOfflineItem: saveOfflineItemAndUpdate,
+    removeOfflineItem: removeOfflineItemAndUpdate,
+    syncOfflineItems,
+    cancelSync: cancelSyncOperation
   };
 };
+
+export default useConnectivity;

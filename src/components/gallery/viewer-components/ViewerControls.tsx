@@ -1,133 +1,80 @@
 
 import React from 'react';
-import { 
-  RotateCw, 
-  RotateCcw, 
-  Info, 
-  Maximize2, 
-  Share2, 
-  X, 
-  Sparkles 
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { ChevronLeft, ChevronRight, Share2, Maximize, Rotate3D, Info, X } from 'lucide-react';
 
 interface ViewerControlsProps {
   isFlipped: boolean;
   isAutoRotating: boolean;
   showInfo: boolean;
-  showEffectsPanel?: boolean;
   onFlipCard: () => void;
   onToggleAutoRotation: () => void;
   onToggleInfo: () => void;
-  onToggleEffects?: () => void;
   onToggleFullscreen: () => void;
   onShare: () => void;
-  onClose?: () => void;
+  onClose: () => void;
 }
 
-const ViewerControls: React.FC<ViewerControlsProps> = ({
+const ViewerControls = ({
   isFlipped,
   isAutoRotating,
   showInfo,
-  showEffectsPanel = true, // Default to true
   onFlipCard,
   onToggleAutoRotation,
   onToggleInfo,
-  onToggleEffects,
   onToggleFullscreen,
   onShare,
-  onClose
-}) => {
+  onClose,
+}: ViewerControlsProps) => {
   return (
-    <div className="flex items-center space-x-2">
-      <Button
-        size="sm"
-        variant="ghost"
-        className={`bg-transparent hover:bg-white/10 text-white ${
-          isFlipped ? "text-blue-400" : ""
-        }`}
+    <div className="absolute top-4 right-4 flex space-x-3">
+      <button 
+        className="text-white p-2 rounded-full bg-black/50 hover:bg-black/70 transition"
         onClick={onFlipCard}
-        title="Flip Card"
+        title="Flip card"
       >
-        <RotateCw className="h-4 w-4 mr-1" />
-        <span className="hidden sm:inline">Flip</span>
-      </Button>
-      
-      <Button
-        size="sm"
-        variant="ghost"
-        className={`bg-transparent hover:bg-white/10 text-white ${
-          isAutoRotating ? "text-purple-400" : ""
-        }`}
-        onClick={onToggleAutoRotation}
-        title="Auto Rotate"
-      >
-        <RotateCcw className="h-4 w-4 mr-1" />
-        <span className="hidden sm:inline">Auto</span>
-      </Button>
-      
-      <Button
-        size="sm"
-        variant="ghost"
-        className={`bg-transparent hover:bg-white/10 text-white ${
-          showInfo ? "text-blue-400" : ""
-        }`}
-        onClick={onToggleInfo}
-        title="Card Information"
-      >
-        <Info className="h-4 w-4 mr-1" />
-        <span className="hidden sm:inline">Info</span>
-      </Button>
+        <ChevronLeft size={20} className={isFlipped ? "hidden" : ""} />
+        <ChevronRight size={20} className={isFlipped ? "" : "hidden"} />
+      </button>
 
-      {onToggleEffects && (
-        <Button
-          size="sm"
-          variant="ghost"
-          className={`bg-transparent hover:bg-white/10 text-white ${
-            showEffectsPanel ? "text-purple-400" : ""
-          }`}
-          onClick={onToggleEffects}
-          title="Effects Panel"
-        >
-          <Sparkles className="h-4 w-4 mr-1" />
-          <span className="hidden sm:inline">Effects</span>
-        </Button>
-      )}
-      
-      <Button
-        size="sm"
-        variant="ghost"
-        className="bg-transparent hover:bg-white/10 text-white"
+      <button 
+        className="text-white p-2 rounded-full bg-black/50 hover:bg-black/70 transition"
+        onClick={onToggleAutoRotation}
+        title={isAutoRotating ? "Stop auto rotation" : "Start auto rotation"}
+      >
+        <Rotate3D size={20} className={isAutoRotating ? "text-primary" : "text-white"} />
+      </button>
+
+      <button 
+        className="text-white p-2 rounded-full bg-black/50 hover:bg-black/70 transition"
+        onClick={onToggleInfo}
+        title="Show card info"
+      >
+        <Info size={20} className={showInfo ? "text-primary" : "text-white"} />
+      </button>
+
+      <button 
+        className="text-white p-2 rounded-full bg-black/50 hover:bg-black/70 transition"
         onClick={onToggleFullscreen}
-        title="Fullscreen"
+        title="Toggle fullscreen"
       >
-        <Maximize2 className="h-4 w-4 mr-1" />
-        <span className="hidden sm:inline">Full</span>
-      </Button>
-      
-      <Button
-        size="sm"
-        variant="ghost"
-        className="bg-transparent hover:bg-white/10 text-white"
+        <Maximize size={20} />
+      </button>
+
+      <button 
+        className="text-white p-2 rounded-full bg-black/50 hover:bg-black/70 transition"
         onClick={onShare}
-        title="Share"
+        title="Share card"
       >
-        <Share2 className="h-4 w-4 mr-1" />
-        <span className="hidden sm:inline">Share</span>
-      </Button>
-      
-      {onClose && (
-        <Button
-          size="sm"
-          variant="ghost"
-          className="bg-transparent hover:bg-white/10 text-white"
-          onClick={onClose}
-          title="Close"
-        >
-          <X className="h-4 w-4 mr-1" />
-          <span className="hidden sm:inline">Close</span>
-        </Button>
-      )}
+        <Share2 size={20} />
+      </button>
+
+      <button 
+        className="text-white p-2 rounded-full bg-black/50 hover:bg-black/70 transition"
+        onClick={onClose}
+        title="Close viewer"
+      >
+        <X size={20} />
+      </button>
     </div>
   );
 };

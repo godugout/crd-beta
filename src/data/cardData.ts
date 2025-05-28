@@ -1,316 +1,107 @@
-// Import necessary types
-import { Card, CardMarketMetadata } from '@/lib/types/cardTypes';
 
-// Sample card data for testing and development
-export const cardData: Card[] = [
-  {
-    id: "1",
-    title: "Oakland Roots 2023",
-    description: "A tribute to the vibrant Oakland Roots soccer team",
-    imageUrl: "/images/card-samples/oakland-roots-sample.jpg",
-    thumbnailUrl: "/images/card-samples/oakland-roots-sample.jpg",
-    tags: ["soccer", "oakland", "roots", "2023"],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    userId: "user-1",
-    designMetadata: {
-      cardStyle: {
-        template: "gradient",
-        effect: "none",
-        borderRadius: "12px",
-        borderColor: "#32CD32",
-        backgroundColor: "#000000",
-        frameWidth: 4,
-        frameColor: "#32CD32",
-        shadowColor: "rgba(0,0,0,0.5)"
-      },
-      textStyle: {
-        titleColor: "#FFFFFF",
-        titleAlignment: "center",
-        titleWeight: "bold",
-        descriptionColor: "#FFFFFF"
-      },
-      cardMetadata: {
-        category: "sports",
-        series: "2023",
-        cardType: "team"
-      },
-      marketMetadata: {
-        price: 75,
-        currency: "USD",
-        availableForSale: true,
-        editionSize: 500,
-        editionNumber: 123,
-        isPrintable: true,
-        isForSale: true,
-        includeInCatalog: true
-      }
-    }
-  },
-  {
-    id: "2",
-    title: "Golden State Warriors 2017",
-    description: "Celebrating the Warriors' championship season",
-    imageUrl: "/images/card-samples/golden-state-warriors-sample.jpg",
-    thumbnailUrl: "/images/card-samples/golden-state-warriors-sample.jpg",
-    tags: ["basketball", "warriors", "championship", "2017"],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    userId: "user-2",
-    designMetadata: {
-      cardStyle: {
-        template: "metallic",
-        effect: "shine",
-        borderRadius: "8px",
-        borderColor: "#FFD700",
-        backgroundColor: "#006D5B",
-        frameWidth: 3,
-        frameColor: "#FFD700",
-        shadowColor: "rgba(0,0,0,0.4)"
-      },
-      textStyle: {
-        titleColor: "#FFFFFF",
-        titleAlignment: "left",
-        titleWeight: "bold",
-        descriptionColor: "#FFFFFF"
-      },
-      cardMetadata: {
-        category: "sports",
-        series: "2017",
-        cardType: "team"
-      },
-      marketMetadata: {
-        price: 120,
-        currency: "USD",
-        availableForSale: true,
-        editionSize: 250,
-        editionNumber: 45,
-        isPrintable: true,
-        isForSale: true,
-        includeInCatalog: true
-      }
-    }
-  },
-  {
-    id: "3",
-    title: "San Francisco Giants 2014",
-    description: "Honoring the Giants' World Series victory",
-    imageUrl: "/images/card-samples/san-francisco-giants-sample.jpg",
-    thumbnailUrl: "/images/card-samples/san-francisco-giants-sample.jpg",
-    tags: ["baseball", "giants", "world series", "2014"],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    userId: "user-3",
-    designMetadata: {
-      cardStyle: {
-        template: "vintage",
-        effect: "sepia",
-        borderRadius: "6px",
-        borderColor: "#A52A2A",
-        backgroundColor: "#F5F5DC",
-        frameWidth: 2,
-        frameColor: "#A52A2A",
-        shadowColor: "rgba(0,0,0,0.3)"
-      },
-      textStyle: {
-        titleColor: "#8B4513",
-        titleAlignment: "right",
-        titleWeight: "normal",
-        descriptionColor: "#8B4513"
-      },
-      cardMetadata: {
-        category: "sports",
-        series: "2014",
-        cardType: "team"
-      },
-      marketMetadata: {
-        price: 90,
-        currency: "USD",
-        availableForSale: true,
-        editionSize: 300,
-        editionNumber: 78,
-        isPrintable: true,
-        isForSale: true,
-        includeInCatalog: true
-      }
-    }
-  }
-];
+import { CardData } from '@/types/card';
 
-// Update the marketMetadata objects to include the required properties
-export const sampleCardData: Card[] = [
+export const cardData: CardData[] = [
   {
-    id: "card-1",
-    title: "Mike Trout 2021",
-    description: "Limited Edition Holographic Card",
-    imageUrl: "/placeholder-card.png",
-    thumbnailUrl: "/placeholder-card.png",
-    tags: ["baseball", "angels", "holographic"],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    userId: "user-1",
-    player: "Mike Trout",
-    team: "Angels",
-    year: "2021",
-    effects: ["holographic"],
-    designMetadata: {
-      cardStyle: {
-        template: "modern",
-        effect: "holographic",
-        borderRadius: "12px",
-        borderColor: "#ff0000",
-        backgroundColor: "#ffffff",
-        frameWidth: 6,
-        frameColor: "#ff0000",
-        shadowColor: "rgba(0,0,0,0.3)"
-      },
-      textStyle: {
-        titleColor: "#333333",
-        titleAlignment: "center",
-        titleWeight: "bold",
-        descriptionColor: "#666666"
-      },
-      cardMetadata: {
-        category: "sports",
-        series: "2021",
-        cardType: "player"
-      },
-      marketMetadata: {
-        price: 150,
-        currency: "USD",
-        availableForSale: true,
-        editionSize: 100,
-        editionNumber: 42,
-        isPrintable: true,
-        isForSale: true,
-        includeInCatalog: true
-      }
-    }
+    id: 1,
+    name: "Prince",
+    team: "Minnesota Wolves",
+    jersey: "72",
+    year: "2023",
+    backgroundColor: "#5B23A9", // Purple
+    textColor: "white",
+    cardType: "Artist Series",
+    artist: "Jason T.",
+    set: "Music Legends Series",
+    cardNumber: "ML-001",
+    description: "Special tribute artwork celebrating the Minneapolis legend in Wolves colors. Fan-created artwork reimagining Prince as a basketball player for his hometown team.",
+    specialEffect: "Purple Rain Holographic",
+    imageUrl: "/lovable-uploads/667e6ad2-af96-40ac-bd16-a69778e14b21.png",
+    effects: ["Holographic"]
   },
   {
-    id: "card-2",
-    title: "LeBron James 2012",
-    description: "Miami Heat Championship Card",
-    imageUrl: "/placeholder-card.png",
-    thumbnailUrl: "/placeholder-card.png",
-    tags: ["basketball", "heat", "champion"],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    userId: "user-2",
-    player: "LeBron James",
-    team: "Heat",
-    year: "2012",
-    effects: ["refractor"],
-    designMetadata: {
-      cardStyle: {
-        template: "retro",
-        effect: "refractor",
-        borderRadius: "8px",
-        borderColor: "#0000ff",
-        backgroundColor: "#ffff00",
-        frameWidth: 4,
-        frameColor: "#0000ff",
-        shadowColor: "rgba(0,0,0,0.3)"
-      },
-      textStyle: {
-        titleColor: "#ffffff",
-        titleAlignment: "center",
-        titleWeight: "bold",
-        descriptionColor: "#000000"
-      },
-      cardMetadata: {
-        category: "sports",
-        series: "2012",
-        cardType: "player"
-      },
-      marketMetadata: {
-        price: 200,
-        currency: "USD",
-        availableForSale: true,
-        editionSize: 50,
-        editionNumber: 12,
-        isPrintable: true,
-        isForSale: true,
-        includeInCatalog: true
-      }
-    }
+    id: 2,
+    name: "Michael Jordan",
+    team: "Chicago Bulls",
+    jersey: "23",
+    year: "2023",
+    backgroundColor: "#CE1141", // Red
+    textColor: "white",
+    cardType: "Artist Series",
+    artist: "Jules A.",
+    set: "Basketball Legends",
+    cardNumber: "BL-023",
+    description: "Classic illustration of the GOAT in his legendary Bulls uniform. This fan art captures the iconic silhouette and spirit of Jordan's tremendous impact on the game.",
+    specialEffect: "Ruby Shimmer",
+    imageUrl: "/lovable-uploads/371b81a2-cafa-4637-9358-218d4120c658.png",
+    effects: ["Refractor"]
   },
   {
-    id: "card-3",
-    title: "Babe Ruth 1933",
-    description: "New York Yankees Legend",
-    imageUrl: "/placeholder-card.png",
-    thumbnailUrl: "/placeholder-card.png",
-    tags: ["baseball", "yankees", "legend"],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    userId: "user-3",
-    player: "Babe Ruth",
-    team: "Yankees",
-    year: "1933",
-    effects: ["vintage"],
-    designMetadata: {
-      cardStyle: {
-        template: "classic",
-        effect: "vintage",
-        borderRadius: "6px",
-        borderColor: "#808080",
-        backgroundColor: "#f0f0f0",
-        frameWidth: 2,
-        frameColor: "#808080",
-        shadowColor: "rgba(0,0,0,0.3)"
-      },
-      textStyle: {
-        titleColor: "#800000",
-        titleAlignment: "center",
-        titleWeight: "normal",
-        descriptionColor: "#800000"
-      },
-      cardMetadata: {
-        category: "sports",
-        series: "1933",
-        cardType: "player"
-      },
-      marketMetadata: {
-        price: 500,
-        currency: "USD",
-        availableForSale: false,
-        editionSize: 10,
-        editionNumber: 1,
-        isPrintable: true,
-        isForSale: true,
-        includeInCatalog: true
-      }
-    }
-  }
-];
-
-export const teamData = [
-  {
-    id: "team-1",
-    name: "Golden State Warriors",
-    logoUrl: "/images/team-logos/warriors.png",
-    description: "The Golden State Warriors are an American professional basketball team based in San Francisco.",
-    ownerId: "user-1",
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    id: 3,
+    name: "Elvis Presley",
+    team: "Memphis Grizzlies",
+    jersey: "15",
+    year: "2023",
+    backgroundColor: "#5D9AD3", // Light Blue
+    textColor: "navy",
+    cardType: "Artist Series",
+    artist: "Marcel G.",
+    set: "Music Legends Series",
+    cardNumber: "ML-002",
+    description: "Memphis legend reimagined as a Grizzlies player. This creative interpretation connects Elvis to his hometown through the lens of basketball culture.",
+    specialEffect: "Blue Suede Shimmer",
+    imageUrl: "/lovable-uploads/236e3ad9-f7c2-4e5b-b29a-ca52a49ff3ed.png",
+    effects: ["Chrome"]
   },
   {
-    id: "team-2",
-    name: "Los Angeles Lakers",
-    logoUrl: "/images/team-logos/lakers.png",
-    description: "The Los Angeles Lakers are an American professional basketball team based in Los Angeles.",
-    ownerId: "user-2",
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    id: 4,
+    name: "Bob Marley",
+    team: "Los Angeles Lakers",
+    jersey: "23",
+    year: "2023",
+    backgroundColor: "#FDB927", // Gold
+    textColor: "purple",
+    cardType: "Artist Series",
+    artist: "Jessica P.",
+    set: "Music Legends Series",
+    cardNumber: "ML-003",
+    description: "Reggae icon in Lakers gold. This fan creation reimagines what Bob Marley might look like as an LA Laker, combining music and basketball culture.",
+    specialEffect: "Rasta Gold Effect",
+    imageUrl: "/lovable-uploads/a38aa501-ea2d-4416-9699-1e69b1826233.png",
+    effects: ["Holographic", "Refractor"]
   },
   {
-    id: "team-3",
-    name: "Boston Celtics",
-    logoUrl: "/images/team-logos/celtics.png",
-    description: "The Boston Celtics are an American professional basketball team based in Boston.",
-    ownerId: "user-3",
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    id: 5,
+    name: "Tupac Shakur",
+    team: "Duke",
+    jersey: "2",
+    year: "2023",
+    backgroundColor: "#001A57", // Duke Blue
+    textColor: "white",
+    cardType: "Artist Series",
+    artist: "Tyrone J.",
+    set: "Music Legends Series",
+    cardNumber: "ML-004",
+    description: "Hip-hop legend reimagined as a Blue Devil. This creative fan art brings Tupac's intensity to the basketball court as a Duke University player.",
+    specialEffect: "Bandana Pattern",
+    imageUrl: "/lovable-uploads/79a099b9-c77a-491e-9755-ba25419791f5.png",
+    effects: ["Vintage"]
+  },
+  {
+    id: 6,
+    name: "Notorious B.I.G.",
+    team: "Brooklyn Nets",
+    jersey: "72",
+    year: "2023",
+    backgroundColor: "#FF0063", // Hot Pink
+    textColor: "white",
+    cardType: "Artist Series",
+    artist: "Marcus L.",
+    set: "Music Legends Series",
+    cardNumber: "ML-005",
+    description: "Brooklyn's finest in his hometown jersey. This fan creation honors Biggie by visualizing him as a player for his hometown Brooklyn Nets.",
+    specialEffect: "Brooklyn Metal",
+    imageUrl: "/lovable-uploads/c381b388-5693-44a6-852b-93af5f0d5217.png",
+    effects: ["Chrome", "Holographic"]
   }
 ];

@@ -2,7 +2,7 @@
 import { useState, useCallback } from 'react';
 import { EnhancedCropBoxProps, MemorabiliaType } from '@/components/card-upload/cardDetection';
 import { useMobileOptimization } from '@/hooks/useMobileOptimization';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/use-toast'; // Updated to use our enhanced toast
 
 interface UseEditorStateProps {
   isDetecting?: boolean;
@@ -58,7 +58,7 @@ export const useEditorState = ({
       toast({
         variant: "success",
         title: "Selection area added",
-        description: `Added new selection area (#${selectedAreas.length + 1})`
+        description: `Added new selection area (#${selectedAreas.length + 1})`,
       });
     },
     [selectedAreas.length, toast]
@@ -73,7 +73,7 @@ export const useEditorState = ({
       toast({
         variant: "info",
         title: "Selection area removed",
-        description: `Removed selection area (#${removed.id})`
+        description: `Removed selection area (#${removed.id})`,
       });
       
       return updated;
@@ -87,7 +87,7 @@ export const useEditorState = ({
     toast({
       variant: "info",
       title: "Detection started",
-      description: "Analyzing image for face detection..."
+      description: "Analyzing image for face detection...",
     });
     
     // In a real implementation, this would be connected to an actual detection API
@@ -100,7 +100,7 @@ export const useEditorState = ({
     toast({
       variant: "info",
       title: "Processing started",
-      description: "Enhancing selected areas..."
+      description: "Enhancing selected areas...",
     });
     
     // Simulate processing completion after a delay
@@ -110,7 +110,7 @@ export const useEditorState = ({
       toast({
         variant: "success",
         title: "Processing complete",
-        description: `Successfully enhanced ${selectedAreas.length} selection areas`
+        description: `Successfully enhanced ${selectedAreas.length} selection areas`,
       });
     }, 2000);
   }, [selectedAreas.length, toast]);

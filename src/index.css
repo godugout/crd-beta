@@ -1,79 +1,142 @@
 
-@import './styles/card-effects.css';
-
+@import './styles/theme.css';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
- 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
- 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
- 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
- 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
- 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
- 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
- 
-    --radius: 0.5rem;
-  }
- 
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
- 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
- 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
- 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
- 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
- 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
- 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
- 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
- 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-  }
-}
- 
-@layer base {
   * {
-    @apply border-border;
+    @apply border-[var(--border-primary)];
   }
+
   body {
-    @apply bg-background text-foreground;
+    @apply antialiased bg-[var(--bg-primary)] text-[var(--text-primary)];
+    font-feature-settings: "ss01", "ss02", "cv01", "cv02", "cv03";
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-medium tracking-tight;
+  }
+  
+  a {
+    @apply transition-colors duration-200;
+  }
+  
+  button {
+    @apply transition-all duration-200;
   }
 }
+
+@layer components {
+  /* Updated bento grid with improved spacing */
+  .bento-grid {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-7;
+  }
+  
+  /* Redesigned card with subtle hover effects */
+  .bento-card {
+    @apply bg-[var(--bg-secondary)] rounded-[var(--radius-xl)] p-6 border border-[var(--border-primary)] 
+           shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] transition-all duration-300 
+           hover:translate-y-[-2px];
+  }
+  
+  /* Better section container spacing */
+  .section-container {
+    @apply container mx-auto px-5 py-12 md:py-18;
+  }
+  
+  /* Enhanced highlight effect with animated gradient */
+  .crd-highlight {
+    @apply relative;
+  }
+  
+  .crd-highlight::after {
+    content: '';
+    @apply absolute bottom-0 left-0 h-1.5 w-full bg-gradient-to-r from-[var(--brand-accent)] via-[var(--brand-primary)] to-[var(--brand-notification)] rounded-full opacity-90;
+  }
+  
+  /* Improved glass card effect */
+  .glass-card {
+    @apply backdrop-blur-xl bg-black/30 border border-white/10 rounded-xl p-5 hover:bg-black/35 transition-all;
+  }
+  
+  /* Enhanced spectrum text with animation */
+  .spectrum-text {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-[var(--brand-notification)] via-[var(--brand-accent)] to-[var(--brand-primary)] animate-gradient-x;
+  }
+  
+  /* Better animated gradient background */
+  .animated-gradient-bg {
+    background-size: 300% 300%;
+    animation: gradientMove 10s ease infinite;
+  }
+  
+  @keyframes gradientMove {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  
+  @keyframes gradient-x {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 100% 50%; }
+  }
+  
+  .animate-gradient-x {
+    animation: gradient-x 4s linear infinite alternate;
+    background-size: 200% 200%;
+  }
+  
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  /* New card hover effect */
+  .card-hover {
+    @apply transition-all duration-300 hover:translate-y-[-3px] hover:shadow-lg;
+  }
+  
+  /* New button styles */
+  .btn-spectrum {
+    @apply relative overflow-hidden backdrop-blur-md bg-black/30 border border-white/10 
+           text-white shadow-md hover:shadow-lg transition-all transform hover:scale-[1.02] 
+           after:absolute after:inset-0 after:bg-[var(--gradient-rainbow)] after:opacity-20 
+           after:z-[-1] rounded-xl px-5 py-2.5;
+  }
+  
+  .btn-soft {
+    @apply rounded-xl bg-white/5 border border-white/10 px-5 py-2.5 text-white 
+           hover:bg-white/10 transition-all shadow-sm hover:shadow-md;
+  }
+  
+  /* Tag pills with improved design */
+  .tag-pill {
+    @apply inline-flex items-center rounded-full bg-white/10 px-2.5 py-0.5 text-xs 
+           font-medium text-white hover:bg-white/20 transition-colors;
+  }
+  
+  /* New navigation styles */
+  .nav-item {
+    @apply px-4 py-2 rounded-lg transition-colors text-white/80 hover:bg-white/5 hover:text-white;
+  }
+  
+  .nav-item-active {
+    @apply bg-white/10 text-white font-medium;
+  }
+  
+  .nav-glass {
+    @apply backdrop-blur-xl bg-black/70 border-b border-white/10;
+  }
+  
+  .nav-button {
+    @apply flex items-center rounded-xl px-3.5 py-2 text-sm font-medium bg-white/10
+           hover:bg-white/15 transition-all text-white;
+  }
+  
+  .nav-action {
+    @apply p-2 rounded-full bg-white/10 hover:bg-white/15 text-white;
+  }
+}
+

@@ -6,97 +6,82 @@ export interface CardTemplate {
   name: string;
   previewUrl: string;
   sport?: string;
-  style?: 'standard' | 'premium';
-  effects: string[];
-  category?: string;
-  tags?: string[];
+  style?: string;
   description?: string;
+  effects?: string[];
 }
 
-export interface TemplateLibraryProps {
-  onSelect?: (template: CardTemplate) => void;
-  filterBySport?: string;
-  filterByCategory?: string;
+interface TemplateLibraryProps {
+  onSelectTemplate: (template: CardTemplate) => void;
+  sportFilter?: string;
 }
-
-// Sample templates - in a real app these would come from an API
-export const CARD_TEMPLATES: CardTemplate[] = [
-  {
-    id: 'topps-chrome',
-    name: 'Topps Chrome',
-    previewUrl: '/placeholder-card.png',
-    sport: 'baseball',
-    style: 'premium',
-    effects: ['Chrome']
-  },
-  {
-    id: 'panini-prizm',
-    name: 'Panini Prizm',
-    previewUrl: '/placeholder-card.png',
-    sport: 'basketball',
-    style: 'premium',
-    effects: ['Refractor']
-  },
-  {
-    id: 'upper-deck',
-    name: 'Upper Deck',
-    previewUrl: '/placeholder-card.png',
-    sport: 'hockey',
-    style: 'standard',
-    effects: []
-  },
-  {
-    id: 'fleer-ultra',
-    name: 'Fleer Ultra',
-    previewUrl: '/placeholder-card.png',
-    sport: 'baseball',
-    style: 'premium',
-    effects: ['Holographic']
-  },
-  {
-    id: 'donruss',
-    name: 'Donruss',
-    previewUrl: '/placeholder-card.png',
-    sport: 'basketball',
-    style: 'standard',
-    effects: []
-  }
-];
 
 const TemplateLibrary: React.FC<TemplateLibraryProps> = ({
-  onSelect,
-  filterBySport,
-  filterByCategory
+  onSelectTemplate,
+  sportFilter
 }) => {
-  const filteredTemplates = CARD_TEMPLATES.filter(template => {
-    if (filterBySport && template.sport !== filterBySport) {
-      return false;
+  // Sample templates - would be fetched from an API in a real app
+  const templates: CardTemplate[] = [
+    {
+      id: 'template-chrome',
+      name: 'Topps Chrome',
+      previewUrl: '/assets/templates/topps-chrome.jpg',
+      sport: 'baseball',
+      style: 'premium',
+      effects: ['Chrome']
+    },
+    {
+      id: 'template-prizm',
+      name: 'Panini Prizm',
+      previewUrl: '/assets/templates/panini-prizm.jpg',
+      sport: 'basketball',
+      style: 'premium',
+      effects: ['Refractor']
+    },
+    {
+      id: 'template-black-diamond',
+      name: 'Upper Deck Black Diamond',
+      previewUrl: '/assets/templates/black-diamond.jpg',
+      sport: 'hockey',
+      style: 'premium',
+      effects: ['Cracked Ice']
     }
-    if (filterByCategory && template.category !== filterByCategory) {
-      return false;
-    }
-    return true;
-  });
+  ];
+  
+  const filteredTemplates = sportFilter 
+    ? templates.filter(template => template.sport === sportFilter)
+    : templates;
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-      {filteredTemplates.map(template => (
-        <div 
-          key={template.id}
-          className="cursor-pointer border rounded-lg overflow-hidden hover:shadow-md transition-shadow"
-          onClick={() => onSelect?.(template)}
-        >
-          <img 
-            src={template.previewUrl} 
-            alt={template.name}
-            className="w-full aspect-[2.5/3.5] object-cover"
-          />
-          <div className="p-3 bg-gray-50">
-            <h3 className="font-medium text-sm">{template.name}</h3>
-            <p className="text-xs text-gray-500">{template.sport || 'All Sports'}</p>
+    <div>
+      <h2 className="text-xl font-bold mb-4">Card Templates</h2>
+      
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        {filteredTemplates.map(template => (
+          <div
+            key={template.id}
+            className="border rounded-lg overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
+            onClick={() => onSelectTemplate(template)}
+          >
+            <div className="aspect-[2.5/3.5] bg-gray-100">
+              <img 
+                src={template.previewUrl}
+                alt={template.name}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.currentTarget.src = 'https://via.placeholder.com/400x560?text=Template';
+                }}
+              />
+            </div>
+            <div className="p-3">
+              <h3 className="font-medium">{template.name}</h3>
+              {template.sport && (
+                <p className="text-xs text-gray-500 capitalize">{template.sport}</p>
+              )}
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 };

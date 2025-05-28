@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -9,7 +10,6 @@ import { toast } from '@/hooks/use-toast';
 import { Plus, Upload, X, Edit, Trash2, Tag, CheckCircle, Image as ImageIcon } from 'lucide-react';
 import BatchImageUploader from '@/components/dam/BatchImageUploader';
 import { DigitalAsset } from '@/lib/types/assetTypes';
-import { showToast } from '@/lib/adapters/toastAdapter';
 
 // Sample data for the DAM system
 const mockAssets: DigitalAsset[] = [
@@ -136,7 +136,7 @@ const MediaManagerPanel: React.FC = () => {
       try {
         parsedMetadata = JSON.parse(editFormData.metadata);
       } catch (e) {
-        showToast({
+        toast({
           title: "Invalid metadata JSON",
           description: "Please enter valid JSON for metadata",
           variant: "destructive"
@@ -164,14 +164,14 @@ const MediaManagerPanel: React.FC = () => {
       setSelectedAsset(updatedAsset);
       setIsEditing(false);
       
-      showToast({
+      toast({
         title: "Asset updated",
         description: "Asset metadata has been updated successfully",
         variant: "default"
       });
     } catch (err) {
       console.error('Error updating asset:', err);
-      showToast({
+      toast({
         title: "Update failed",
         description: "Failed to update asset metadata",
         variant: "destructive"
@@ -188,7 +188,7 @@ const MediaManagerPanel: React.FC = () => {
         setSelectedAsset(null);
       }
       
-      showToast({
+      toast({
         title: "Asset deleted",
         description: "Asset has been deleted successfully",
         variant: "default"
@@ -222,7 +222,7 @@ const MediaManagerPanel: React.FC = () => {
     setAssets(prev => [...newAssets, ...prev]);
     setActiveTab('browse');
     
-    showToast({
+    toast({
       title: "Upload complete",
       description: `Successfully uploaded ${urls.length} assets`,
       variant: "default"

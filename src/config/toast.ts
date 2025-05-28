@@ -1,59 +1,53 @@
+import type { ToastVariant } from "@/types/toast"
+import { cva } from "class-variance-authority"
+import type { ToastIconName } from "@/components/ui/toast/icons"
 
-import { cva } from "class-variance-authority";
-import type { ToastVariant } from "@/types/toast";
+export const toastViewportStyles = "fixed top-4 right-4 z-[100] flex max-h-screen w-full max-w-[420px] flex-col-reverse p-4"
 
-/**
- * Toast icon configuration for different toast variants
- */
-export const toastIconConfig: Record<string, string | null> = {
-  default: null,
-  success: "Check",
-  error: "X",
-  warning: "AlertTriangle",
-  info: "Info",
-  destructive: "X",
-};
-
-/**
- * Default colors for the color picker
- */
-export const DEFAULT_COLORS = [
-  '#000000', // Black
-  '#FFFFFF', // White
-  '#F87171', // Red
-  '#FB923C', // Orange
-  '#FBBF24', // Amber
-  '#34D399', // Green
-  '#22D3EE', // Cyan
-  '#60A5FA', // Blue
-  '#818CF8', // Indigo
-  '#A78BFA', // Violet
-  '#E879F9', // Pink
-];
-
-/**
- * Toast styles using cva for variants
- */
 export const toastStyles = cva(
-  "group pointer-events-auto relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-md border p-4 shadow-lg transition-all",
+  [
+    "group pointer-events-auto relative flex w-full items-center justify-between",
+    "space-x-4 overflow-hidden rounded-md border p-6 pr-8 shadow-lg transition-all",
+    "data-[swipe=cancel]:translate-x-0",
+    "data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)]",
+    "data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)]",
+    "data-[swipe=move]:transition-none",
+    "data-[state=open]:animate-in data-[state=closed]:animate-out",
+    "data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full",
+    "data-[state=open]:slide-in-from-top-full",
+    "focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20"
+  ].join(" "),
   {
     variants: {
       variant: {
-        default: "border-slate-200 bg-white text-slate-900",
-        destructive:
-          "destructive group border-red-600 bg-red-600 text-slate-50",
-        success:
-          "success group border-green-600 bg-green-600 text-slate-50",
-        warning:
-          "warning group border-yellow-600 bg-yellow-500 text-slate-50",
-        info:
-          "info group border-blue-600 bg-blue-600 text-slate-50",
-        error:
-          "error group border-red-600 bg-red-600 text-slate-50",
+        default: "border-gray-700/30 bg-gray-800/50 text-white/80 backdrop-blur-md",
+        destructive: "border-red-500/30 bg-red-900/50 text-white/80 backdrop-blur-md",
+        success: "border-green-500/30 bg-green-900/50 text-white/80 backdrop-blur-md",
+        warning: "border-yellow-500/30 bg-yellow-900/50 text-white/80 backdrop-blur-md",
+        info: "border-blue-500/30 bg-blue-900/50 text-white/80 backdrop-blur-md",
       },
     },
     defaultVariants: {
       variant: "default",
     },
   }
-);
+)
+
+export const toastTitleStyles = "text-white/80 text-sm font-semibold"
+export const toastDescriptionStyles = "text-white/60 text-sm"
+
+export const toastAccessibilityConfig = {
+  role: "status", 
+  "aria-live": "polite",
+  defaultDuration: 5000, // 5 seconds for standard notifications
+  shortDuration: 3000,   // 3 seconds for simple notifications
+  longDuration: 8000    // 8 seconds for more complex information
+}
+
+export const toastIconConfig: Record<ToastVariant, ToastIconName | null> = {
+  default: null,
+  success: "CheckCircle",
+  warning: "AlertTriangle",
+  destructive: "AlertCircle",
+  info: "Info"
+}

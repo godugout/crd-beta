@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/sheet";
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/hooks/useAuth'; // Use our modified hook
 
 import { navigationGroups } from './mobile/navigationData';
 import NavigationGroup from './mobile/NavigationGroup';

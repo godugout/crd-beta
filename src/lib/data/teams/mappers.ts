@@ -1,51 +1,62 @@
-
-import { Team, TeamMember } from '@/lib/types';
-import { UserRole } from '@/lib/types/user';
-
-/**
- * Map raw team data to Team interface
- * @param rawTeam Raw team data from database
- * @returns Team object
- */
-export function mapToTeam(rawTeam: any): Team {
-  return {
-    id: rawTeam.id,
-    name: rawTeam.name,
-    description: rawTeam.description || '',
-    logoUrl: rawTeam.logo_url,
-    members: rawTeam.members || [],
-    createdAt: rawTeam.created_at,
-    updatedAt: rawTeam.updated_at,
-    ownerId: rawTeam.owner_id,
-    settings: rawTeam.settings || {},
-    isPublic: rawTeam.is_public !== false,
-    // Only copy coverImage if needed for legacy support
-    ...(rawTeam.cover_image ? { coverImage: rawTeam.cover_image } : {})
-  };
-}
+import { TeamMember, User, UserRole } from '@/lib/types';
+import { Team } from '@/lib/types/teamTypes';
 
 /**
- * Map raw team member data to TeamMember interface
- * @param rawMember Raw team member data from database
- * @returns TeamMember object
+ * Maps a team record from the database to the Team interface
  */
-export function mapToTeamMember(rawMember: any): TeamMember {
-  return {
-    id: rawMember.id,
-    userId: rawMember.user_id,
-    teamId: rawMember.team_id,
-    role: rawMember.role || UserRole.VIEWER, // Using VIEWER instead of USER/Member
-    // Only include name if needed for legacy support
-    ...(rawMember.name ? { name: rawMember.name } : {}),
-    email: rawMember.email,
-    avatarUrl: rawMember.avatar_url,
-    joinedAt: rawMember.joined_at || rawMember.created_at,
-    createdAt: rawMember.created_at,
-    updatedAt: rawMember.updated_at,
-    permissions: rawMember.permissions || []
-  };
-}
+export const mapTeamFromDb = (team: any): Team => ({
+  id: team.id,
+  name: team.name,
+  description: team.description,
+  logoUrl: team.logo_url,
+  logo_url: team.logo_url,
+  banner_url: team.banner_url,
+  ownerId: team.owner_id, // Keep only ownerId
+  status: team.status,
+  website: team.website,
+  email: team.email,
+  specialties: team.specialties,
+  createdAt: team.created_at,
+  updatedAt: team.updated_at,
+  visibility: team.visibility || 'public', // Default visibility
+  
+  // Team fields
+  team_code: team.team_code,
+  primary_color: team.primary_color,
+  secondary_color: team.secondary_color,
+  tertiary_color: team.tertiary_color,
+  founded_year: team.founded_year,
+  city: team.city,
+  state: team.state,
+  country: team.country,
+  stadium: team.stadium,
+  mascot: team.mascot,
+  league: team.league,
+  division: team.division,
+  is_active: team.is_active
+});
 
-// Make exports available for teamService and teamMembersService
-export const mapTeamFromDb = mapToTeam;
-export const mapTeamMemberFromDb = mapToTeamMember;
+/**
+ * Maps a team member record from the database to the TeamMember interface
+ */
+export const mapTeamMemberFromDb = (member: any): TeamMember => {
+  const user: User = {
+    id: member.user_id,
+    email: member.users?.email,
+    displayName: member.users?.display_name,
+    name: member.users?.full_name,
+    avatarUrl: member.users?.avatar_url,
+    role: UserRole.USER,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+
+  return {
+    id: member.id,
+    teamId: member.team_id,
+    userId: member.user_id,
+    role: member.role,
+    joinedAt: member.joined_at,
+    user
+  };
+};

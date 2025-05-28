@@ -1,184 +1,176 @@
-import { Card } from '@/lib/types/card';
-import { StorageService } from '@/lib/services/storageService';
-import { JsonObject } from '@/lib/types';
 
-/**
- * Repository class for CRUD operations on cards
- */
-export class CardRepository {
-  private storageService: StorageService;
-  
-  constructor() {
-    this.storageService = new StorageService();
+import { supabase } from '@/lib/supabase';
+import { Card, Collection, JsonObject, serializeMetadata } from '@/lib/types';
+import { v4 as uuidv4 } from 'uuid';
+import { DEFAULT_DESIGN_METADATA } from '@/lib/utils/cardDefaults';
+
+// Demo function to create a card (for development)
+export const createCard = async (card: Omit<Card, 'id' | 'createdAt' | 'updatedAt'>): Promise<Card> => {
+  const newCard: Card = {
+    id: uuidv4(),
+    title: card.title,
+    description: card.description || '',
+    imageUrl: card.imageUrl,
+    thumbnailUrl: card.thumbnailUrl || card.imageUrl,
+    tags: card.tags || [],
+    collectionId: card.collectionId,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    userId: card.userId || 'anonymous',
+    teamId: card.teamId,
+    isPublic: card.isPublic !== undefined ? card.isPublic : true,
+    designMetadata: card.designMetadata || DEFAULT_DESIGN_METADATA,
+    effects: card.effects || [], // Add required effects property
+  };
+
+  try {
+    // In a production app, this would save to Supabase
+    // const { data, error } = await supabase
+    //   .from('cards')
+    //   .insert({
+    //     id: newCard.id,
+    //     title: newCard.title,
+    //     description: newCard.description,
+    //     image_url: newCard.imageUrl,
+    //     thumbnail_url: newCard.thumbnailUrl,
+    //     tags: newCard.tags,
+    //     collection_id: newCard.collectionId,
+    //     user_id: newCard.userId,
+    //     team_id: newCard.teamId,
+    //     is_public: newCard.isPublic,
+    //     design_metadata: serializeMetadata(newCard.designMetadata),
+    //     created_at: newCard.createdAt,
+    //     updated_at: newCard.updatedAt,
+    //   })
+    //   .select()
+    //   .single();
+    
+    // if (error) throw error;
+    // return mapDbCardToCard(data);
+    
+    // For development, just return the new card
+    return newCard;
+  } catch (error) {
+    console.error('Error creating card:', error);
+    throw error;
   }
-  
-  /**
-   * Create a new card
-   * @param card The card to create
-   */
-  async createCard(card: Card): Promise<Card> {
-    try {
-      const cards = await this.getCards();
-      cards.push(card);
-      await this.storageService.setItem('cards', cards);
-      return card;
-    } catch (error) {
-      console.error('Error creating card:', error);
-      throw error;
-    }
+};
+
+// Helper function to map database structure to Card interface
+const mapDbCardToCard = (dbCard: any): Card => {
+  return {
+    id: dbCard.id,
+    title: dbCard.title,
+    description: dbCard.description,
+    imageUrl: dbCard.image_url,
+    thumbnailUrl: dbCard.thumbnail_url,
+    tags: dbCard.tags,
+    collectionId: dbCard.collection_id,
+    createdAt: dbCard.created_at,
+    updatedAt: dbCard.updated_at,
+    userId: dbCard.user_id,
+    teamId: dbCard.team_id,
+    isPublic: dbCard.is_public,
+    designMetadata: dbCard.design_metadata || DEFAULT_DESIGN_METADATA,
+    effects: dbCard.effects || [], // Add required effects property
+  };
+};
+
+// Demo function to fetch cards (for development)
+export const fetchCards = async (options?: {
+  userId?: string;
+  collectionId?: string;
+  isPublic?: boolean;
+  teamId?: string;
+  limit?: number;
+  cursor?: string;
+}): Promise<Card[]> => {
+  try {
+    // In a production app, this would query Supabase
+    // let query = supabase.from('cards').select('*');
+    
+    // if (options?.userId) {
+    //   query = query.eq('user_id', options.userId);
+    // }
+    
+    // if (options?.collectionId) {
+    //   query = query.eq('collection_id', options.collectionId);
+    // }
+    
+    // if (options?.isPublic !== undefined) {
+    //   query = query.eq('is_public', options.isPublic);
+    // }
+    
+    // if (options?.teamId) {
+    //   query = query.eq('team_id', options.teamId);
+    // }
+    
+    // if (options?.limit) {
+    //   query = query.limit(options.limit);
+    // }
+    
+    // const { data, error } = await query;
+    
+    // if (error) throw error;
+    // return data.map(mapDbCardToCard);
+    
+    // For development, return mock data
+    return [
+      {
+        id: '1',
+        title: 'Sample Card 1',
+        description: 'This is a sample card',
+        imageUrl: '/sample-card-1.jpg',
+        thumbnailUrl: '/sample-card-1-thumb.jpg',
+        tags: ['sample', 'development'],
+        collectionId: '1',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        userId: 'user1',
+        teamId: 'team1',
+        isPublic: true,
+        designMetadata: DEFAULT_DESIGN_METADATA,
+        effects: [], // Add required effects property
+      },
+      {
+        id: '2',
+        title: 'Sample Card 2',
+        description: 'Another sample card',
+        imageUrl: '/sample-card-2.jpg',
+        thumbnailUrl: '/sample-card-2-thumb.jpg',
+        tags: ['sample', 'premium'],
+        collectionId: '1',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        userId: 'user1',
+        teamId: 'team1',
+        isPublic: true,
+        designMetadata: DEFAULT_DESIGN_METADATA,
+        effects: ['Holographic'], // Add required effects property
+      },
+    ];
+  } catch (error) {
+    console.error('Error fetching cards:', error);
+    throw error;
   }
-  
-  /**
-   * Get all cards
-   */
-  async getCards(): Promise<Card[]> {
-    try {
-      const cards = await this.storageService.getItem('cards');
-      return cards ? (cards as Card[]) : [];
-    } catch (error) {
-      console.error('Error getting cards:', error);
-      return [];
-    }
-  }
-  
-  /**
-   * Get a card by ID
-   * @param id The ID of the card to get
-   */
-  async getCardById(id: string): Promise<Card | null> {
-    try {
-      const cards = await this.getCards();
-      return cards.find(card => card.id === id) || null;
-    } catch (error) {
-      console.error('Error getting card by ID:', error);
-      return null;
-    }
-  }
-  
-  /**
-   * Update an existing card
-   * @param id The ID of the card to update
-   * @param updatedCard The updated card data
-   */
-  async updateCard(id: string, updatedCard: Card): Promise<Card | null> {
-    try {
-      const cards = await this.getCards();
-      const index = cards.findIndex(card => card.id === id);
-      
-      if (index === -1) {
-        return null; // Card not found
-      }
-      
-      cards[index] = { ...cards[index], ...updatedCard };
-      await this.storageService.setItem('cards', cards);
-      return cards[index];
-    } catch (error) {
-      console.error('Error updating card:', error);
-      return null;
-    }
-  }
-  
-  /**
-   * Delete a card by ID
-   * @param id The ID of the card to delete
-   */
-  async deleteCard(id: string): Promise<boolean> {
-    try {
-      let cards = await this.getCards();
-      cards = cards.filter(card => card.id !== id);
-      await this.storageService.setItem('cards', cards);
-      return true;
-    } catch (error) {
-      console.error('Error deleting card:', error);
-      return false;
-    }
-  }
-  
-  /**
-   * Add a reaction to a card
-   * @param cardId The ID of the card to add the reaction to
-   * @param reaction The reaction to add
-   */
-  async addReaction(cardId: string, reaction: any): Promise<boolean> {
-    try {
-      const card = await this.getCardById(cardId);
-      if (!card) return false;
-      
-      let reactions = card.reactions || [];
-      reactions.push(reaction);
-      
-      card.reactions = reactions;
-      await this.updateCard(cardId, card);
-      return true;
-    } catch (error) {
-      console.error('Error adding reaction to card:', error);
-      return false;
-    }
-  }
-  
-  /**
-   * Remove a reaction from a card
-   * @param cardId The ID of the card to remove the reaction from
-   * @param reactionId The ID of the reaction to remove
-   */
-  async removeReaction(cardId: string, reactionId: string): Promise<boolean> {
-    try {
-      const card = await this.getCardById(cardId);
-      if (!card) return false;
-      
-      let reactions = card.reactions || [];
-      reactions = reactions.filter(reaction => reaction.id !== reactionId);
-      
-      card.reactions = reactions;
-      await this.updateCard(cardId, card);
-      return true;
-    } catch (error) {
-      console.error('Error removing reaction from card:', error);
-      return false;
-    }
-  }
-  
-  /**
-   * Add a comment to a card
-   * @param cardId The ID of the card to add the comment to
-   * @param comment The comment to add
-   */
-  async addComment(cardId: string, comment: any): Promise<boolean> {
-    try {
-      const card = await this.getCardById(cardId);
-      if (!card) return false;
-      
-      let comments = card.comments || [];
-      comments.push(comment);
-      
-      card.comments = comments;
-      await this.updateCard(cardId, card);
-      return true;
-    } catch (error) {
-      console.error('Error adding comment to card:', error);
-      return false;
-    }
-  }
-  
-  /**
-   * Remove a comment from a card
-   * @param cardId The ID of the card to remove the comment from
-   * @param commentId The ID of the comment to remove
-   */
-  async removeComment(cardId: string, commentId: string): Promise<boolean> {
-    try {
-      const card = await this.getCardById(cardId);
-      if (!card) return false;
-      
-      let comments = card.comments || [];
-      comments = comments.filter(comment => comment.id !== commentId);
-      
-      card.comments = comments;
-      await this.updateCard(cardId, card);
-      return true;
-    } catch (error) {
-      console.error('Error removing comment from card:', error);
-      return false;
-    }
-  }
-}
+};
+
+// Function to convert database records to Card objects
+export const convertDbRecordsToCards = (records: any[]): Card[] => {
+  return records.map(record => ({
+    id: record.id,
+    title: record.title,
+    description: record.description,
+    imageUrl: record.imageUrl,
+    thumbnailUrl: record.thumbnailUrl,
+    tags: record.tags,
+    collectionId: record.collectionId,
+    createdAt: record.createdAt,
+    updatedAt: record.updatedAt,
+    userId: record.userId,
+    teamId: record.teamId,
+    isPublic: record.isPublic,
+    designMetadata: record.designMetadata || DEFAULT_DESIGN_METADATA,
+    effects: record.effects || [], // Add required effects property
+  }));
+};

@@ -9,9 +9,9 @@ import {
   ToastTitle,
   ToastViewport,
 } from "@/components/ui/toast"
-import { ToastIcons } from "./toast/icons"
-import type { ToasterToast } from "@/types/toast"
 import { toastIconConfig } from "@/config/toast"
+import { ToastIcons } from "./toast/icons"
+import type { ToasterToastWithStatus } from "@/types/toast"
 
 export function Toaster() {
   const { toasts } = useToast()
@@ -37,7 +37,7 @@ export function Toaster() {
                 )}
               </div>
             </div>
-            {action && React.isValidElement(action) ? action : null}
+            {action}
             <ToastClose />
           </Toast>
         )

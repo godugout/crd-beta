@@ -1,6 +1,5 @@
-
 // Define base types used throughout the application
-import { FabricSwatch } from '@/lib/types/cardTypes';
+import { FabricSwatch } from '@/lib/types/card';
 
 export interface Card {
   id: string;
@@ -11,7 +10,6 @@ export interface Card {
   collectionId?: string;
   userId?: string;
   teamId?: string;
-  team?: string;  // Add team field
   createdAt: string;
   updatedAt: string;
   isPublic?: boolean;
@@ -20,7 +18,6 @@ export interface Card {
   reactions?: Reaction[];
   fabricSwatches?: FabricSwatch[];
   effects: string[]; // Required for card viewer
-  comments?: Comment[]; // Add comments array
 }
 
 export interface OaklandMemoryData {
@@ -46,7 +43,7 @@ export interface Collection {
   coverImageUrl?: string;
   userId?: string;
   teamId?: string;
-  visibility?: 'public' | 'private' | 'team' | 'unlisted';  // Add 'unlisted' as a valid option
+  visibility?: 'public' | 'private' | 'team';
   allowComments?: boolean;
   createdAt: string;
   updatedAt: string;
@@ -60,7 +57,6 @@ export interface User {
   name?: string;
   avatarUrl?: string;
   username?: string;
-  displayName?: string;
 }
 
 export interface Team {
@@ -71,7 +67,6 @@ export interface Team {
   ownerId: string;
   createdAt: string;
   updatedAt: string;
-  members?: User[];  // Add members field
 }
 
 // Update the TeamMember interface to include user property
@@ -82,7 +77,6 @@ export interface TeamMember {
   role: 'owner' | 'admin' | 'member' | 'viewer';
   joinedAt: string;
   user?: User;
-  email?: string; // Add email field for mappers.ts
 }
 
 export interface Comment {
@@ -96,7 +90,6 @@ export interface Comment {
   createdAt: string;
   updatedAt: string;
   user?: User;
-  text?: string; // Add text field for adaptComment
 }
 
 export interface Reaction {
@@ -133,5 +126,26 @@ export interface DbCard {
   rarity: string;
 }
 
-// Update the Collection interface to include unlisted visibility
-export type CollectionVisibility = 'public' | 'private' | 'team' | 'unlisted';
+export interface DbCollection {
+  id: string;
+  title: string;
+  description?: string;
+  cover_image_url?: string;
+  owner_id?: string;
+  team_id?: string;
+  visibility?: 'public' | 'private' | 'team';
+  allow_comments?: boolean;
+  created_at: string;
+  updated_at: string;
+  design_metadata?: any;
+}
+
+export interface DbReaction {
+  id: string;
+  user_id: string;
+  card_id?: string;
+  collection_id?: string;
+  comment_id?: string;
+  type: 'like' | 'love' | 'wow' | 'haha' | 'sad' | 'angry';
+  created_at: string;
+}

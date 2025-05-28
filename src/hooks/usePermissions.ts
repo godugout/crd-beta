@@ -1,83 +1,49 @@
 
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/hooks/useAuth';
+import { UserPermission, ROLE_PERMISSIONS } from '@/lib/types';
+import { UserRole } from '@/lib/types/UserTypes';
 
-interface AuthUser {
-  id: string;
-  email: string;
-  role?: string;
-  permissions?: string[];
-}
-
-// Mock implementation of usePermissions
+/**
+ * Hook to check user permissions based on their role or specific permissions
+ */
 export function usePermissions() {
-  // Get the current user from the auth context
-  const { user } = useAuth() as { user?: AuthUser };
-
-  // Check if the user has a specific permission
-  const hasPermission = (permission: string): boolean => {
-    if (!user) return false;
-    
-    // Check if user has explicitly granted permissions
-    if (user.permissions && user.permissions.includes(permission)) {
-      return true;
+  const { user } = useAuth();
+  
+  /**
+   * Check if user has a specific permission
+   */
+  const hasPermission = (permission: UserPermission): boolean => {
+    // If user has explicit permissions array, check that first
+    if (user?.permissions && Array.isArray(user.permissions)) {
+      return user.permissions.includes(permission);
     }
     
-    // Check role-based permissions
-    if (user.role) {
-      switch (user.role) {
-        case 'admin':
-          // Admins have all permissions
-          return true;
-        case 'moderator':
-          // Moderators have specific permissions
-          const moderatorPermissions = ['view', 'edit', 'approve', 'reject'];
-          return moderatorPermissions.includes(permission);
-        case 'editor':
-          // Editors can view and edit
-          const editorPermissions = ['view', 'edit'];
-          return editorPermissions.includes(permission);
-        case 'viewer':
-          // Viewers can only view
-          return permission === 'view';
-        default:
-          return false;
-      }
+    // Otherwise, fall back to role-based permissions
+    if (user?.role) {
+      const rolePermissions = ROLE_PERMISSIONS[user.role as UserRole] || [];
+      return rolePermissions.includes(permission);
     }
     
-    // Default to no permissions if role is not set
     return false;
   };
-
-  // Check if the user is an admin
+  
+  /**
+   * Check if user has admin role
+   */
   const isAdmin = (): boolean => {
-    if (!user) return false;
-    return user.role === 'admin';
+    return user?.role === UserRole.ADMIN;
   };
-
-  // Check if the user is a moderator or higher
+  
+  /**
+   * Check if user has moderator role or higher
+   */
   const isModerator = (): boolean => {
-    if (!user) return false;
-    return user.role === 'admin' || user.role === 'moderator';
+    return user?.role === UserRole.ADMIN || user?.role === UserRole.MODERATOR;
   };
-
-  // Check if the user can edit content
-  const canEdit = (): boolean => {
-    return hasPermission('edit');
-  };
-
-  // Check if the user can approve content
-  const canApprove = (): boolean => {
-    return hasPermission('approve');
-  };
-
-  // Return the permission checking functions
+  
   return {
     hasPermission,
     isAdmin,
     isModerator,
-    canEdit,
-    canApprove,
   };
 }
-
-export default usePermissions;

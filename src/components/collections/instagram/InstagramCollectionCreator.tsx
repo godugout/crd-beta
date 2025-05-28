@@ -1,10 +1,10 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { useCollection } from '@/context/card/hooks';
-import { Collection } from '@/lib/types';
-import { InstagramPost } from '@/lib/types/instagram';
+import { Collection, InstagramPost } from '@/lib/types';
 import { supabase } from '@/lib/supabase/client';
 import { Loader, Instagram, AlertCircle } from 'lucide-react';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';

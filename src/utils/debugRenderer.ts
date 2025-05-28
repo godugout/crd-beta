@@ -1,90 +1,39 @@
 
 /**
- * Helper utility for debugging rendering performance in development
+ * Utility functions to help debug rendering issues in 3D scenes
  */
 
-// Track render times by component
-const renderCounts: Record<string, number> = {};
-const renderTimes: Record<string, number> = {};
+// Enable debug mode globally
+export const DEBUG_RENDERING = false;
 
-/**
- * Logs information about component renders for performance debugging
- * @param componentName Name of the component being rendered
- * @param props Optional props to log (for checking what causes re-renders)
- */
+// Log visibility issues for debugging
 export const logRenderingInfo = (
   componentName: string, 
-  props?: Record<string, any>
+  visibilityInfo: {
+    elementId?: string;
+    visible: boolean;
+    zIndex?: number;
+    opacity?: number;
+    position?: { x?: number; y?: number; z?: number };
+  }
 ) => {
-  if (process.env.NODE_ENV !== 'development') return;
+  if (!DEBUG_RENDERING) return;
   
-  // Update render count
-  renderCounts[componentName] = (renderCounts[componentName] || 0) + 1;
-  
-  // Track render time
-  const now = performance.now();
-  const lastRender = renderTimes[componentName];
-  renderTimes[componentName] = now;
-  
-  const timeSinceLastRender = lastRender ? now - lastRender : null;
-  
-  // Log render information
-  console.group(`%c🔄 Render: ${componentName} (${renderCounts[componentName]})`);
-  
-  if (timeSinceLastRender !== null) {
-    const color = timeSinceLastRender < 100 
-      ? 'color: green' 
-      : timeSinceLastRender < 500 
-        ? 'color: orange'
-        : 'color: red; font-weight: bold';
-    
-    console.log(`%cTime since last render: ${timeSinceLastRender.toFixed(2)}ms`, color);
-  }
-  
-  if (props) {
-    console.log('Props:', props);
-  }
-  
-  console.groupEnd();
+  console.log(
+    `%c[${componentName}] Rendering debug:`,
+    'background: #334155; color: #94a3b8; padding: 2px 4px; border-radius: 2px;',
+    visibilityInfo
+  );
 };
 
-/**
- * Reset all the rendering stats (useful for testing specific workflows)
- */
-export const resetRenderingStats = () => {
-  Object.keys(renderCounts).forEach(key => {
-    delete renderCounts[key];
-    delete renderTimes[key];
-  });
+// Style object helper for z-index and visibility
+export const getDebugStyles = (zIndex: number, visible: boolean = true) => {
+  if (!DEBUG_RENDERING) return {};
+  
+  return {
+    outline: '1px dashed rgba(255,0,0,0.5)',
+    position: 'relative' as const,
+    zIndex: zIndex,
+    opacity: visible ? 1 : 0.3
+  };
 };
-
-/**
- * Log a summary of all render counts
- */
-export const logRenderingSummary = () => {
-  if (process.env.NODE_ENV !== 'development') return;
-  
-  console.group('📊 Rendering Summary');
-  
-  Object.entries(renderCounts)
-    .sort(([, a], [, b]) => b - a)
-    .forEach(([component, count]) => {
-      console.log(`${component}: ${count} renders`);
-    });
-  
-  console.groupEnd();
-};
-
-/**
- * Debug utility for logging objects with a label
- * @param label Label to identify the debug output
- * @param obj Object to log
- */
-export const debugObject = (label: string, obj: any) => {
-  if (process.env.NODE_ENV !== 'development') return;
-  
-  console.group(`🔍 Debug: ${label}`);
-  console.log(obj);
-  console.groupEnd();
-};
-

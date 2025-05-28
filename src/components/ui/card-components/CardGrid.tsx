@@ -1,122 +1,166 @@
-import React, { useState, useCallback } from 'react';
-import { Card as CardType } from '@/lib/types/cardTypes';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { ScrollArea } from "@/components/ui/scroll-area"
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
+
+import React, { memo } from 'react';
+import { Card } from '@/lib/types';
+import { cn } from '@/lib/utils';
+import { Virtuoso } from 'react-virtuoso';
+import { CardItem } from './CardItem';
+import { CardGridSkeleton } from './CardGridSkeleton';
+import { EmptyState } from './EmptyState';
 
 interface CardGridProps {
-  cards: CardType[];
-  onCardSelect?: (card: CardType) => void;
-  onSearch?: (searchTerm: string) => void;
-  onSort?: (sortBy: string) => void;
+  /**
+   * Array of cards to display
+   */
+  cards: Card[];
+  
+  /**
+   * Optional loading state
+   */
   isLoading?: boolean;
+  
+  /**
+   * Optional error state
+   */
+  error?: Error | null;
+  
+  /**
+   * Optional callback for when a card is clicked
+   */
+  onCardClick?: (cardId: string) => void;
+  
+  /**
+   * Optional classnames to apply to the container
+   */
+  className?: string;
+  
+  /**
+   * Whether to use virtualization for performance with many items
+   * @default true when cards.length > 20
+   */
+  useVirtualization?: boolean;
+  
+  /**
+   * Function to get active effects for a card
+   */
+  getCardEffects?: (cardId: string) => string[];
+  
+  /**
+   * Height of the grid container when using virtualization
+   * @default "600px"
+   */
+  height?: string;
+  
+  /**
+   * Number of columns to display in the grid
+   * @default 2 on mobile, 4 on desktop
+   */
+  columns?: number;
 }
 
-const CardGrid: React.FC<CardGridProps> = ({ 
-  cards, 
-  onCardSelect, 
-  onSearch, 
-  onSort, 
-  isLoading 
-}) => {
-  const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [sortBy, setSortBy] = useState('');
-  
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const term = e.target.value;
-    setSearchTerm(term);
-    onSearch?.(term);
-  };
-  
-  const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const sortValue = e.target.value;
-    setSortBy(sortValue);
-    onSort?.(sortValue);
-  };
+const MemoizedCardItem = memo(CardItem);
 
-  // Find the code that accesses the .id property on an unknown type
-  // and replace it with proper type checking
-  const handleCardSelection = (card: any) => {
-    if (card && typeof card === 'object' && 'id' in card) {
-      setSelectedCardId(card.id);
-      onCardSelect?.(card);
-    }
-  };
+interface ListComponentProps {
+  style?: React.CSSProperties;
+  children?: React.ReactNode;
+}
+
+export const CardGrid = ({
+  cards,
+  isLoading = false,
+  error = null,
+  onCardClick,
+  className = "",
+  useVirtualization,
+  getCardEffects = () => [],
+  height = "600px",
+  columns
+}: CardGridProps) => {
+  // Determine if virtualization should be used based on card count
+  const shouldVirtualize = useVirtualization ?? cards.length > 20;
   
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          <Label htmlFor="search">Search:</Label>
-          <Input 
-            type="search" 
-            id="search" 
-            placeholder="Search cards..." 
-            value={searchTerm}
-            onChange={handleSearchChange}
+  // Default grid columns based on screen size if not specified
+  const gridCols = columns 
+    ? `grid-cols-${columns}` 
+    : 'grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4';
+  
+  // Handle loading state
+  if (isLoading) {
+    return <CardGridSkeleton columns={columns} />;
+  }
+  
+  // Handle error state
+  if (error) {
+    return (
+      <EmptyState 
+        title="Something went wrong"
+        description={error.message || "Failed to load cards"}
+        icon="AlertTriangle"
+        onRefresh={async () => {
+          // Return a Promise
+          return Promise.resolve();
+        }}
+      />
+    );
+  }
+  
+  // Handle empty state
+  if (cards.length === 0) {
+    return (
+      <EmptyState 
+        title="No cards found"
+        description="Try adjusting your filters or create a new card"
+        icon="Inbox"
+        onRefresh={async () => {
+          // Return a Promise
+          return Promise.resolve();
+        }}
+      />
+    );
+  }
+
+  // Render cards with virtualization for better performance with large lists
+  if (shouldVirtualize) {
+    return (
+      <Virtuoso
+        style={{ height }}
+        totalCount={cards.length}
+        overscan={200}
+        itemContent={index => (
+          <MemoizedCardItem
+            card={cards[index]}
+            onClick={() => onCardClick?.(cards[index].id)}
+            activeEffects={getCardEffects(cards[index].id)}
           />
-        </div>
-        
-        <div className="flex items-center space-x-2">
-          <Label htmlFor="sort">Sort by:</Label>
-          <select 
-            id="sort" 
-            className="border rounded px-2 py-1"
-            value={sortBy}
-            onChange={handleSortChange}
-          >
-            <option value="">None</option>
-            <option value="title">Title</option>
-            <option value="createdAt">Date Created</option>
-          </select>
-        </div>
-      </div>
-      
-      {isLoading ? (
-        <p>Loading cards...</p>
-      ) : (
-        <ScrollArea className="rounded-md border">
-          <Table>
-            <TableCaption>A list of your digital trading cards.</TableCaption>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[100px]">ID</TableHead>
-                <TableHead>Title</TableHead>
-                <TableHead>Description</TableHead>
-                <TableHead>Created At</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {cards.map((card) => (
-                <TableRow key={card.id} onClick={() => handleCardSelection(card)} className={`cursor-pointer ${selectedCardId === card.id ? 'bg-secondary' : ''}`}>
-                  <TableCell className="font-medium">{card.id}</TableCell>
-                  <TableCell>{card.title}</TableCell>
-                  <TableCell>{card.description}</TableCell>
-                  <TableCell>{card.createdAt}</TableCell>
-                </TableRow>
-              ))}
-              {cards.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={4} className="text-center">No cards found.</TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </ScrollArea>
-      )}
+        )}
+        className={className}
+        components={{
+          List: React.forwardRef((props: ListComponentProps, ref) => (
+            <div 
+              ref={ref as any} 
+              style={props.style} 
+              className={cn(`grid gap-4 ${gridCols}`, className)}
+            >
+              {props.children}
+            </div>
+          ))
+        }}
+      />
+    );
+  }
+  
+  // Standard grid for smaller lists
+  return (
+    <div className={cn(`grid gap-4 ${columns ? `grid-cols-${columns}` : 'grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4'}`, className)}>
+      {cards.map((card) => (
+        <MemoizedCardItem
+          key={card.id}
+          card={card}
+          onClick={() => onCardClick?.(card.id)}
+          activeEffects={getCardEffects(card.id)}
+        />
+      ))}
     </div>
   );
 };
 
-export default CardGrid;
+export { CardGrid as default };

@@ -1,203 +1,95 @@
-/**
- * Card market metadata interface
- */
-export interface CardMarketMetadata {
-  price?: number;
-  currency?: string;
-  availableForSale?: boolean;
-  editionSize?: number;
-  editionNumber?: number;
-  isPrintable?: boolean;
-  isForSale?: boolean;
-  includeInCatalog?: boolean;
-  featured?: boolean;
-  forSale?: boolean;
-}
-
-// Export alias as MarketMetadata for backward compatibility
-export type MarketMetadata = CardMarketMetadata;
 
 /**
- * Card metadata interface
+ * Consolidated Card Types for Cardshow (CRD)
+ * This file serves as the central source of truth for all card-related types
  */
-export interface CardMetadata {
-  category: string;
-  series: string;
-  cardType: string;
-  effects?: string[];
-  [key: string]: any;
+
+import { BaseEntity, JsonValue } from './index';
+import { Reaction, Comment } from './interaction';
+import { User } from './user';
+
+/**
+ * Fabric Swatch definition for card memorabilia
+ */
+export interface FabricSwatch {
+  type: string;
+  team: string;
+  year: string;
+  manufacturer: string;
+  position: string;
+  size: string;
 }
 
 /**
- * Card style interface
+ * Card statistics for sports cards
+ */
+export interface CardStats {
+  battingAverage?: string;
+  homeRuns?: string;
+  rbis?: string;
+  era?: string;
+  wins?: string;
+  strikeouts?: string;
+  careerYears?: string;
+  ranking?: string;
+}
+
+/**
+ * Card style definition for visual appearance
  */
 export interface CardStyle {
-  borderColor?: string;
-  backgroundColor?: string;
-  titleFont?: string;
-  bodyFont?: string;
-  cornerRadius?: string;
-  borderRadius?: string; // Added for compatibility
-  shadowColor?: string;
-  frameWidth?: number;
-  frameColor?: string;
-  template?: string;
-  effect?: string;
+  template: string;      // Required
+  effect: string;        // Required
+  borderRadius: string;  // Required
   borderWidth?: number;
+  borderColor: string;   // Required
+  backgroundColor?: string;
+  shadowColor: string;   // Required
+  frameWidth: number;    // Required
+  frameColor: string;    // Required
+  [key: string]: JsonValue | undefined;
 }
 
 /**
- * Text style interface
+ * Text style definition for card typography
  */
 export interface TextStyle {
-  titleColor?: string;
-  titleSize?: string;
-  bodyColor?: string;
-  bodySize?: string;
   fontFamily?: string;
   fontSize?: string;
   fontWeight?: string;
   color?: string;
-  titleAlignment?: string;
-  titleWeight?: string;
-  descriptionColor?: string;
+  titleColor: string;      // Required
+  titleAlignment: string;  // Required
+  titleWeight: string;     // Required
+  descriptionColor: string; // Required
+  [key: string]: JsonValue | undefined;
 }
 
 /**
- * Card design metadata interface
+ * Card effect definition for visual effects
  */
-export interface CardDesignMetadata {
-  cardStyle?: CardStyle;
-  textStyle?: TextStyle;
-  cardMetadata: CardMetadata;
-  marketMetadata: CardMarketMetadata;
-  effects?: string[];
-  player?: string;
-  team?: string;
-  year?: string;
-  oaklandMemory?: any; // Add oaklandMemory property
-  layers?: any[]; // Add layers for serialization support
-}
-
-// Export alias as DesignMetadata for backward compatibility
-export type DesignMetadata = CardDesignMetadata;
-
-/**
- * Fabric swatch type for material simulations
- */
-export interface FabricSwatch {
+export interface CardEffect {
   id: string;
   name: string;
-  color: string;
-  texture?: string;
-  normalMap?: string;
-  type: string;
-  materialType?: 'fabric' | 'leather' | 'plastic' | 'metal' | 'paper';
-  roughness?: number;
-  metalness?: number;
-  // Additional properties needed by CardBack component
-  year?: string;
-  team?: string;
-  position?: string;
+  enabled: boolean;
+  settings: CardEffectSettings;
+  className?: string;
 }
 
 /**
- * Card interface for basic card data
+ * Settings for card effects
  */
-export interface Card {
-  id: string;
-  title: string;
-  description?: string;
-  imageUrl: string;
-  thumbnailUrl?: string;
-  tags?: string[];
-  createdAt: string;
-  updatedAt: string;
-  player?: string;
-  team?: string;
-  year?: string;
-  isPublic?: boolean;
-  designMetadata: CardDesignMetadata; // Required property
-  ownerId?: string; 
-  collectionId?: string;
-  userId?: string;
-  teamId?: string; // Add teamId property
-  effects?: string[];
-  reactions?: any[];
-  comments?: any[]; // Add comments property
-  artist?: string;
-  set?: string;
-  rarity?: string;
-  viewCount?: number;
-  cardNumber?: string;
-  fabricSwatches?: FabricSwatch[];
-  name?: string;
-  jersey?: string;
-  seriesId?: string; // Add seriesId property
-  backgroundColor?: string; // Add backgroundColor
-  specialEffect?: string; // Add specialEffect
-  cardType?: string; // Add cardType for sampleCards.ts
-  textColor?: string; // Add textColor for sampleCards.ts
+export interface CardEffectSettings {
+  intensity?: number;
+  speed?: number;
+  pattern?: string;
+  color?: string;
+  animationEnabled?: boolean;
+  [key: string]: JsonValue | undefined;
 }
 
 /**
- * Card template interface for reusable card designs
- */
-export interface CardTemplate {
-  id: string;
-  name: string;
-  description?: string;
-  thumbnail: string;
-  thumbnailUrl?: string;
-  category: string;
-  tags?: string[];
-  popularity?: number;
-  isOfficial?: boolean;
-  isPublic?: boolean;
-  userId?: string;
-  createdAt?: string;
-  updatedAt?: string;
-  designDefaults?: {
-    cardStyle: Partial<CardStyle>;
-    textStyle?: Partial<TextStyle>;
-    effects?: string[];
-  };
-  cardStyle?: Partial<CardStyle>;
-  textStyle?: Partial<TextStyle>;
-  layers?: any[];
-  effects?: string[];
-  backgroundColor?: string;
-  imageUrl?: string;
-  [key: string]: any;
-}
-
-/**
- * Card rarity enum
- */
-export enum CardRarity {
-  COMMON = 'common',
-  UNCOMMON = 'uncommon',
-  RARE = 'rare',
-  ULTRA_RARE = 'ultra-rare',
-  LEGENDARY = 'legendary'
-}
-
-/**
- * Hotspot data interface for interactive card elements
- */
-export interface HotspotData {
-  id: string;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  content: string;
-  type: string;
-  visible?: boolean; // Add visible property
-}
-
-/**
- * Card layer interface for layered card elements
+ * Card layer for the card creation canvas
  */
 export interface CardLayer {
   id: string;
@@ -233,83 +125,153 @@ export interface CardLayer {
 }
 
 /**
- * Card effect interface
+ * Card metadata for additional card information
  */
-export interface CardEffect {
+export interface CardMetadata {
+  edition?: string;
+  serialNumber?: string;
+  certification?: string;
+  gradeScore?: string;
+  category: string;      // Required
+  series: string;        // Required
+  cardType: string;      // Required
+  cardStyle?: CardStyle;
+  textStyle?: TextStyle;
+  effects?: string[];
+  layers?: CardLayer[];
+  effectClasses?: string;
+  [key: string]: JsonValue | undefined;
+}
+
+/**
+ * Market metadata for card marketplace information
+ */
+export interface MarketMetadata {
+  lastSoldPrice?: number;
+  currentAskingPrice?: number;
+  estimatedMarketValue?: number;
+  isPrintable: boolean;      // Required
+  isForSale: boolean;        // Required
+  includeInCatalog: boolean; // Required
+  [key: string]: JsonValue | undefined;
+}
+
+/**
+ * Oakland Memory Data definition
+ */
+export interface OaklandMemoryData {
+  title: string;
+  description: string;
+  date?: string;
+  opponent?: string;
+  score?: string;
+  location?: string;
+  section?: string;
+  memoryType?: string;
+  attendees?: string[];
+  tags?: string[];
+  imageUrl?: string;
+  historicalContext?: string;
+  personalSignificance?: string;
+  template?: string;
+  [key: string]: JsonValue | undefined;
+}
+
+/**
+ * Design metadata for card design information
+ */
+export interface DesignMetadata {
+  cardStyle: CardStyle;            // Required
+  textStyle: TextStyle;            // Required
+  cardMetadata: CardMetadata;      // Required
+  marketMetadata: MarketMetadata;  // Required
+  oaklandMemory?: OaklandMemoryData;
+  effects?: string[];
+  layers?: CardLayer[];
+  effectClasses?: string;
+  [key: string]: JsonValue | undefined;
+}
+
+/**
+ * Hotspot data for interactive cards
+ */
+export interface HotspotData {
   id: string;
-  name: string;
-  enabled: boolean;
-  settings: Record<string, any>;
-  className?: string;
-  iconUrl?: string;
-  description?: string;
-  category?: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  content: string;
+  type: 'text' | 'link' | 'image' | 'video';
+  visible: boolean;
 }
 
 /**
- * Card effect settings interface
+ * Card rarity types
  */
-export interface CardEffectSettings {
-  intensity?: number;
-  speed?: number;
-  pattern?: string;
-  color?: string;
-  animationEnabled?: boolean;
-  [key: string]: any;
-}
+export type CardRarity = 'common' | 'uncommon' | 'rare' | 'ultra-rare' | 'legendary' | 'one-of-one';
 
 /**
- * Stats interface for baseball cards
+ * Base Card interface containing common properties
  */
-export interface CardStats {
-  battingAverage?: string;
-  homeRuns?: string;
-  rbis?: string;
-  era?: string;
-  wins?: string;
-  strikeouts?: string;
-}
-
-/**
- * Export other card types to ensure consistency
- */
-export * from './cardElements';
-
-// Add DEFAULT_CARD_METADATA to satisfy CardMetadata interface
-export const DEFAULT_CARD_METADATA: CardMetadata = {
-  category: 'general',
-  series: 'base',
-  cardType: 'standard'
-};
-
-// Add a helper function to ensure valid cardMetadata
-export function ensureValidCardMetadata(metadata?: Partial<CardMetadata> | null): CardMetadata {
-  if (!metadata) return { ...DEFAULT_CARD_METADATA };
+export interface BaseCard extends BaseEntity {
+  title: string;
+  description: string;
+  imageUrl: string;
+  backImageUrl?: string; // Added backImageUrl property
+  image?: string; // Legacy support for older components
+  thumbnailUrl: string;
+  tags: string[];
+  collectionId?: string;
+  userId: string;
+  teamId?: string;
+  isPublic?: boolean;
+  metadata?: Record<string, any>;
+  effects: string[];
+  reactions?: Reaction[];
+  comments?: Comment[];
+  viewCount?: number;
   
-  return {
-    category: metadata.category || DEFAULT_CARD_METADATA.category,
-    series: metadata.series || DEFAULT_CARD_METADATA.series,
-    cardType: metadata.cardType || DEFAULT_CARD_METADATA.cardType,
-    ...metadata
-  };
+  // Baseball card properties
+  player?: string;
+  team?: string;
+  year?: string;
+  jersey?: string;
+  set?: string;
+  cardNumber?: string;
+  cardType?: string;
+  artist?: string; // For backward compatibility
+  backgroundColor?: string;
+  textColor?: string;
+  specialEffect?: string;
+  fabricSwatches?: FabricSwatch[];
+  stats?: CardStats;
+  
+  // Design related
+  name?: string; // Legacy support
+  cardStyle?: string;
+  backTemplate?: string;
+  designMetadata: DesignMetadata;
+  
+  // Market data
+  price?: number;
+  estimatedValue?: string;
+  condition?: string;
+  rarity?: CardRarity;
+  
+  // Additional fields needed by some components
+  creatorId?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
-// Add a helper function to ensure valid design metadata
-export function ensureValidDesignMetadata(designMetadata?: Partial<CardDesignMetadata> | null): CardDesignMetadata {
-  if (!designMetadata) {
-    return {
-      cardStyle: {},
-      textStyle: {},
-      cardMetadata: { ...DEFAULT_CARD_METADATA },
-      marketMetadata: {}
-    };
-  }
-  
-  return {
-    cardStyle: designMetadata.cardStyle || {},
-    textStyle: designMetadata.textStyle || {},
-    cardMetadata: ensureValidCardMetadata(designMetadata.cardMetadata),
-    marketMetadata: designMetadata.marketMetadata || {},
-    effects: designMetadata.effects || []
-  };
-}
+/**
+ * Main Card interface that can be extended for specific use cases
+ */
+export interface Card extends BaseCard {}
+
+// Export types from enhancedCardTypes using export type for isolatedModules compatibility
+export type { EnhancedCard, Series, Deck } from './enhancedCardTypes';
+
+// Export renamed Reaction type to avoid conflicts
+export type { Reaction as CardReaction } from './interaction';

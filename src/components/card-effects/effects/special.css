@@ -1,5 +1,4 @@
-
-/* Shimmer effect - dramatically enhanced with stronger gradient and animation */
+/* Shimmer effect */
 .effect-shimmer {
   position: relative;
   overflow: hidden;
@@ -12,89 +11,16 @@
   background: linear-gradient(
     90deg,
     transparent,
-    rgba(255, 255, 255, 0.95),
+    rgba(255, 255, 255, 0.5),
     transparent
   );
   transform: translateX(-100%);
-  animation: shimmer 3s infinite ease-in-out;
-  z-index: 15;  /* Increased z-index for visibility */
-  opacity: 0.9;  /* Higher opacity */
-  mix-blend-mode: overlay;
-  filter: blur(2px);
-  pointer-events: none;
-}
-
-/* Base card styles - more pronounced depth */
-.card-base {
-  position: relative;
-  background: linear-gradient(
-    145deg,
-    rgba(255, 255, 255, 0.2) 0%,
-    rgba(255, 255, 255, 0.05) 100%
-  );
-  box-shadow: 
-    0 4px 8px rgba(0, 0, 0, 0.3),
-    0 12px 24px rgba(0, 0, 0, 0.22),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.25);
-}
-
-/* Completely redesigned glossy effect with more dramatic reflection */
-.effect-glossy {
-  position: relative;
-  overflow: hidden;
-}
-
-/* Primary glossy reflection layer */
-.effect-glossy::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    135deg,
-    transparent 20%,
-    rgba(255, 255, 255, 0.8) 35%,
-    rgba(255, 255, 255, 0.9) 40%,
-    rgba(255, 255, 255, 0.4) 50%,
-    transparent 70%
-  );
-  opacity: 0;
-  transition: all 0.8s ease;
-  pointer-events: none;
-  mix-blend-mode: overlay;
-  transform: translateY(-150%) rotate(-45deg);
-  filter: blur(3px);
-  z-index: 10; /* Higher z-index */
-}
-
-/* Make animation more dramatic on hover */
-.effect-glossy:hover::before {
-  opacity: 1;
-  transform: translateY(150%) rotate(-45deg);
-}
-
-/* Always-on glossy base effect - enhanced with two layers */
-.effect-glossy::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: 
-    radial-gradient(
-      ellipse at 70% 30%,
-      rgba(255, 255, 255, 0.8) 0%,
-      transparent 50%
-    ),
-    radial-gradient(
-      ellipse at 30% 70%,
-      rgba(180, 180, 255, 0.3) 0%,
-      transparent 50%
-    );
+  animation: shimmer 2s infinite;
+  z-index: 2;
   opacity: 0.8;
-  pointer-events: none;
-  mix-blend-mode: overlay;
-  z-index: 5; /* Lower than the moving highlight */
 }
 
-/* Electric effect with much more dramatic glow and animation */
+/* Electric effect */
 .effect-electric {
   position: relative;
   overflow: hidden;
@@ -103,174 +29,62 @@
 .effect-electric::before {
   content: '';
   position: absolute;
-  inset: -20px;
+  inset: 0;
   background: radial-gradient(
     circle at 50% 50%,
-    rgba(100, 200, 255, 0.9) 0%,
-    rgba(30, 144, 255, 0.7) 25%,
-    transparent 70%
+    rgba(135, 206, 250, 0.4) 0%,
+    rgba(30, 144, 255, 0.3) 100%
   );
   mix-blend-mode: screen;
   pointer-events: none;
-  animation: pulse-electric 2s ease-in-out infinite;
-  z-index: 15;
-  opacity: 1;
-  filter: blur(15px);
+  animation: pulse 2s ease-in-out infinite;
+  z-index: 2;
+  opacity: 0.8;
 }
 
-.effect-electric::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: 
-    radial-gradient(
-      circle at 70% 30%,
-      rgba(255, 255, 255, 1) 0%,
-      transparent 20%
-    ),
-    radial-gradient(
-      circle at 30% 70%,
-      rgba(200, 230, 255, 0.8) 0%,
-      transparent 40%
-    );
-  mix-blend-mode: overlay;
-  pointer-events: none;
-  z-index: 16;
-  opacity: 0.9;
-  filter: blur(2px);
-}
-
-/* Additional blue electric edge effect */
-.effect-electric:before {
-  content: '';
-  position: absolute;
-  inset: -2px;
-  background: rgba(30, 144, 255, 0.5);
-  z-index: 1;
-  opacity: 0.7;
-  filter: blur(6px);
-  border-radius: inherit;
-  animation: pulse-border 2.5s infinite alternate;
-}
-
-/* Completely redesigned glow effect with layered depth */
+/* Pulsing glow effect */
 .effect-glow {
   position: relative;
 }
 
-/* Outer dramatic glow effect */
 .effect-glow::before {
   content: '';
   position: absolute;
-  inset: -30px;
+  inset: -10px;
   background: radial-gradient(
     circle at center,
-    rgba(255, 255, 255, 1) 0%,
-    rgba(255, 220, 150, 0.8) 20%, 
-    rgba(255, 150, 150, 0.5) 40%,
+    rgba(255, 255, 255, 0.8) 0%,
+    rgba(255, 255, 255, 0.4) 40%,
     transparent 70%
   );
   opacity: 0;
-  z-index: 20;
-  animation: pulse-glow 3s ease-in-out infinite;
-  pointer-events: none;
-  mix-blend-mode: screen;
-  filter: blur(20px);
-}
-
-/* Middle glow layer */
-.effect-glow:nth-child(1)::after {
-  content: '';
-  position: absolute;
-  inset: -15px;
-  background: radial-gradient(
-    circle at center,
-    rgba(255, 220, 255, 0.9) 0%,
-    rgba(255, 150, 255, 0.5) 30%,
-    transparent 70%
-  );
-  opacity: 0;
-  z-index: 19;
-  animation: pulse-glow 3s ease-in-out infinite 0.5s;
-  pointer-events: none;
-  mix-blend-mode: screen;
-  filter: blur(12px);
-}
-
-/* Inner card highlight */
-.effect-glow::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(
-    circle at center,
-    rgba(255, 255, 255, 0.9) 0%,
-    transparent 70%
-  );
-  opacity: 0.7;
-  z-index: 10;
+  z-index: -1;
+  animation: pulse-glow 1.5s ease-in-out;
   pointer-events: none;
   mix-blend-mode: overlay;
-  filter: blur(5px);
 }
 
-/* Optimized animations with more dramatic variations */
 @keyframes shimmer {
-  0% { transform: translateX(-100%); opacity: 0.7; }
-  50% { opacity: 1; }
-  100% { transform: translateX(100%); opacity: 0.7; }
+  100% { transform: translateX(100%); }
 }
 
-@keyframes pulse-electric {
-  0% { opacity: 0.7; transform: scale(0.96); filter: blur(15px); }
-  50% { opacity: 1; transform: scale(1.04); filter: blur(10px); }
-  100% { opacity: 0.7; transform: scale(0.96); filter: blur(15px); }
-}
-
-@keyframes pulse-border {
-  0% { opacity: 0.4; }
-  100% { opacity: 0.8; }
+@keyframes pulse {
+  0% { opacity: 0.5; }
+  50% { opacity: 0.8; }
+  100% { opacity: 0.5; }
 }
 
 @keyframes pulse-glow {
   0% {
     opacity: 0;
-    transform: scale(0.9);
-    filter: blur(20px);
+    transform: scale(0.95);
   }
   50% {
-    opacity: 1;
-    transform: scale(1.1);
-    filter: blur(15px);
+    opacity: 0.6;
+    transform: scale(1.05);
   }
   100% {
     opacity: 0;
-    transform: scale(0.9);
-    filter: blur(20px);
+    transform: scale(1);
   }
-}
-
-/* Additional effect - subtle rainbow edge */
-.effect-rainbow-edge {
-  position: relative;
-}
-
-.effect-rainbow-edge::before {
-  content: '';
-  position: absolute;
-  inset: -2px;
-  background: linear-gradient(
-    135deg, 
-    #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #8b00ff, #ff0000
-  );
-  z-index: 1;
-  border-radius: inherit;
-  opacity: 0.8;
-  filter: blur(3px);
-  animation: rotate-hue 6s linear infinite;
-}
-
-@keyframes rotate-hue {
-  0% { filter: blur(3px) hue-rotate(0deg); }
-  100% { filter: blur(3px) hue-rotate(360deg); }
 }

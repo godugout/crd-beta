@@ -1,124 +1,77 @@
 
-import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import React from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Copy, Share2, X, Check } from 'lucide-react';
-import { showToast } from '@/lib/adapters/toastAdapter';
+import { Copy, Share2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 interface ShareDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  title: string;
-  url: string;
-  imageUrl?: string;
+  cardId: string;
 }
 
-const ShareDialog: React.FC<ShareDialogProps> = ({ 
-  isOpen, 
-  onClose, 
-  title, 
-  url, 
-  imageUrl 
-}) => {
-  const [copied, setCopied] = useState(false);
-
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(url);
-      setCopied(true);
-      showToast({
-        title: "Link copied",
-        description: "The link has been copied to your clipboard"
-      });
-      setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      showToast({
-        title: "Failed to copy",
-        description: "Please try again or copy the link manually",
-        variant: "destructive"
-      });
-    }
-  };
-
-  const handleShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title,
-          url,
-          text: `Check out my card: ${title}`
+export const ShareDialog: React.FC<ShareDialogProps> = ({ isOpen, onClose, cardId }) => {
+  const { toast } = useToast();
+  const shareUrl = `${window.location.origin}/view/${cardId}`;
+  
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(shareUrl)
+      .then(() => {
+        toast({
+          title: "Link copied",
+          description: "The card link has been copied to your clipboard"
         });
-        showToast({
-          title: "Shared successfully",
-          description: "Thank you for sharing!"
+      })
+      .catch(() => {
+        toast({
+          title: "Copy failed",
+          description: "Failed to copy link to clipboard",
+          variant: "destructive"
         });
-      } catch (err) {
-        // User probably canceled the share operation
-        if ((err as Error).name !== 'AbortError') {
-          showToast({
-            title: "Failed to share",
-            description: "Please try again later",
-            variant: "destructive"
-          });
-        }
-      }
-    } else {
-      handleCopy();
-    }
+      });
   };
-
+  
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-md">
+    <Dialog open={isOpen} onOpenChange={() => onClose()}>
+      <DialogContent>
         <DialogHeader>
-          <DialogTitle>Share Card</DialogTitle>
+          <DialogTitle>Share this card</DialogTitle>
           <DialogDescription>
-            Share this card with friends or on social media
+            Share this card with others or copy the link
           </DialogDescription>
         </DialogHeader>
         
-        <div className="py-4">
-          {imageUrl && (
-            <div className="mb-4 flex justify-center">
-              <img 
-                src={imageUrl} 
-                alt={title} 
-                className="w-32 h-44 object-cover rounded-md" 
-              />
-            </div>
-          )}
-          
-          <div className="space-y-2">
-            <Label htmlFor="share-link">Copy Link</Label>
-            <div className="flex space-x-2">
-              <Input 
-                id="share-link" 
-                value={url} 
-                readOnly 
-                className="flex-1" 
-              />
-              <Button onClick={handleCopy} variant="outline" className="flex-shrink-0">
-                {copied ? (
-                  <Check className="h-4 w-4" />
-                ) : (
-                  <Copy className="h-4 w-4" />
-                )}
-              </Button>
-            </div>
-          </div>
-          
-          <div className="mt-4 flex justify-center">
-            <Button onClick={handleShare} className="w-full">
-              <Share2 className="h-4 w-4 mr-2" />
-              Share Now
-            </Button>
-          </div>
+        <div className="flex items-center space-x-2 mt-2">
+          <Input 
+            readOnly 
+            value={shareUrl}
+            className="flex-1"
+          />
+          <Button variant="outline" size="icon" onClick={handleCopyLink}>
+            <Copy className="h-4 w-4" />
+          </Button>
         </div>
+        
+        {navigator.share && (
+          <Button 
+            onClick={() => {
+              navigator.share({
+                title: 'Check out this card',
+                url: shareUrl
+              }).then(() => onClose());
+            }}
+            className="w-full mt-2"
+          >
+            <Share2 className="mr-2 h-4 w-4" /> Share via device
+          </Button>
+        )}
+        
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>Close</Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
-}
-
-export default ShareDialog;
+};

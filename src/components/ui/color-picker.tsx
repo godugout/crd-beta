@@ -1,59 +1,61 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { DEFAULT_COLORS } from '@/config/toast';
+import { cn } from '@/lib/utils';
 
-export interface ColorPickerProps {
-  color: string;
+interface ColorPickerProps {
+  value: string;
   onChange: (color: string) => void;
+  colors?: string[];
   className?: string;
-  title?: string;
-  size?: 'sm' | 'md' | 'lg';
 }
 
-export function ColorPicker({
-  color,
+export const ColorPicker: React.FC<ColorPickerProps> = ({
+  value,
   onChange,
-  className = '',
-  title = 'Select color',
-  size = 'md',
-}: ColorPickerProps) {
-  const sizeClasses = {
-    sm: 'w-4 h-4',
-    md: 'w-6 h-6',
-    lg: 'w-8 h-8',
-  };
-
-  const handleOpenNativeColorPicker = () => {
-    const input = document.createElement('input');
-    input.type = 'color';
-    input.value = color;
-    input.addEventListener('input', (e) => {
-      onChange((e.target as HTMLInputElement).value);
-    });
-    input.click();
-  };
+  colors = ['#000000', '#FFFFFF', '#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF'],
+  className,
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className={`flex flex-wrap gap-1 ${className}`}>
-      {DEFAULT_COLORS.map((colorOption) => (
-        <Button
-          key={colorOption}
-          type="button"
-          variant="ghost"
-          className={`p-1 rounded-full ${sizeClasses[size]} ${color === colorOption ? 'ring-2 ring-offset-1' : ''}`}
-          style={{ backgroundColor: colorOption }}
-          onClick={() => onChange(colorOption)}
-          title={title}
+    <div className={cn('relative', className)}>
+      <div className="flex gap-2 items-center">
+        <div
+          className="w-10 h-10 rounded-md border border-gray-200 cursor-pointer"
+          style={{ backgroundColor: value }}
+          onClick={() => setIsOpen(!isOpen)}
         />
-      ))}
-      <Button
-        type="button"
-        variant="ghost"
-        className={`p-1 rounded-full bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 ${sizeClasses[size]}`}
-        onClick={handleOpenNativeColorPicker}
-        title="Custom color"
-      />
+        
+        <div className="flex-1">
+          <input
+            type="text"
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            className="w-full border border-gray-200 rounded-md px-3 py-1 text-sm"
+          />
+        </div>
+      </div>
+      
+      {isOpen && (
+        <div className="absolute z-10 mt-2 p-2 bg-white rounded-md shadow-md border border-gray-100">
+          <div className="grid grid-cols-4 gap-2">
+            {colors.map((color) => (
+              <Button
+                key={color}
+                type="button"
+                className="w-8 h-8 rounded-md p-0 m-0 border border-gray-200"
+                style={{ backgroundColor: color }}
+                onClick={() => {
+                  onChange(color);
+                  setIsOpen(false);
+                }}
+                variant="ghost"
+              />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
-}
+};

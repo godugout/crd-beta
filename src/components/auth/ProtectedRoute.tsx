@@ -1,14 +1,15 @@
+
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '@/context/auth';
-import { Permission } from '@/lib/types';
+import { useAuth } from '@/hooks/useAuth';
+import { UserPermission } from '@/lib/types';
 import { usePermissions } from '@/hooks/usePermissions';
 import { Loader } from 'lucide-react';
 import { logger } from '@/lib/monitoring/logger';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requiredPermission?: Permission;
+  requiredPermission?: UserPermission;
   adminOnly?: boolean;
   redirectTo?: string;
 }
@@ -19,7 +20,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   adminOnly = false,
   redirectTo = '/auth'
 }) => {
-  const { user, isAuthenticated, loading } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
   const { hasPermission, isAdmin } = usePermissions();
   const location = useLocation();
 
@@ -37,7 +38,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     }
   }, [location.pathname, user, requiredPermission, adminOnly]);
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex justify-center items-center h-screen">
         <Loader className="animate-spin h-8 w-8 text-primary" />

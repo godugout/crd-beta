@@ -111,8 +111,9 @@ const CardDesignCustomization: React.FC<CardDesignCustomizationProps> = ({
           <div className="space-y-2">
             <Label>Border Color</Label>
             <ColorPicker 
-              color={cardStyle.borderColor || '#48BB78'}
+              value={cardStyle.borderColor || '#48BB78'} 
               onChange={handleBorderColorChange}
+              colors={['#48BB78', '#F97316', '#2563EB', '#8B5CF6', '#EC4899', '#FFFFFF', '#000000']}
               className="mt-1"
             />
           </div>
@@ -120,8 +121,9 @@ const CardDesignCustomization: React.FC<CardDesignCustomizationProps> = ({
           <div className="space-y-2">
             <Label>Background Color</Label>
             <ColorPicker 
-              color={cardStyle.backgroundColor || '#FFFFFF'}
+              value={cardStyle.backgroundColor || '#FFFFFF'} 
               onChange={handleBackgroundColorChange}
+              colors={['#FFFFFF', '#F2FCE2', '#FEC6A1', '#F3F4F6', '#E5E7EB', '#D1D5DB', '#111827']}
               className="mt-1"
             />
           </div>

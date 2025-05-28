@@ -1,36 +1,41 @@
 
-/**
- * Core types used throughout the application
- * This file serves as the central export point for all type definitions
- */
+// Base types that might be used across modules
+export type JsonValue = 
+  | string 
+  | number 
+  | boolean 
+  | null 
+  | JsonValue[] 
+  | { [key: string]: JsonValue };
 
-// Define basic types
 export interface BaseEntity {
   id: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
-export type JsonValue = string | number | boolean | null | JsonObject | JsonArray;
-export interface JsonObject { [key: string]: JsonValue; }
-export type JsonArray = Array<JsonValue>;
+// For backward compatibility with JsonObject
+export type JsonObject = Record<string, JsonValue>;
 
-// Re-export all types from other files
+// Export updated type definitions
 export * from './cardTypes';
-export * from './user';
 export * from './interaction';
+export * from './user';
 export * from './collection';
-export * from './cardElements';
+export * from './instagram';
 export * from './teamTypes';
-export * from './historyTypes';
-export * from './oaklandTypes';
-export * from './ugcTypes';
+export type { CardEffect, CardEffectSettings } from './cardEffects';
 
-// Export type aliases for backward compatibility
-export type { Card, CardLayer, CardStyle, TextStyle, CardMetadata, FabricSwatch } from './cardTypes';
-export type { User, UserPermission } from './user';
-export type { Comment, Reaction } from './interaction';
-export type { Collection, Deck } from './collection';
+// Don't re-export enhancedCardTypes directly to avoid ambiguity
+import * as EnhancedCardTypes from './enhancedCardTypes';
+export type { 
+  HotspotData as EnhancedHotspotData,
+  EnhancedCard as ExtendedCard,
+  Series as EnhancedSeries,
+  CardRarity,
+} from './enhancedCardTypes';
 
-// Additional types for backward compatibility
-export type BackgroundColor = string;
+// For backward compatibility, keep the old imports as well
+// But we should gradually migrate to using the centralized types
+import * as OldTypes from '@/types/card';
+export const oldTypes = OldTypes;

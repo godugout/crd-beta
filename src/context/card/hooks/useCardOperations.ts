@@ -1,24 +1,12 @@
+
 import { useState, useCallback, useEffect } from 'react';
-import { Card } from '@/lib/types/cardTypes';
+import { Card } from '@/lib/types/card';
 import { v4 as uuidv4 } from 'uuid';
-import { adaptToLegacyCard } from '@/lib/adapters/cardAdapter';
-import { Card as CardType } from '@/lib/types/cardTypes';
+import { adaptToCard } from '@/lib/adapters/cardAdapter';
 
-// Create default market metadata to conform to the MarketMetadata interface
-const DEFAULT_MARKET_METADATA = {
-  isPrintable: false,
-  isForSale: false,
-  includeInCatalog: false,
-  price: 0,
-  currency: 'USD',
-  availableForSale: false,
-  editionSize: 1,
-  editionNumber: 1
-};
-
-// Ensure the mock data conforms to the Card type
+// Mock data for development
 const initialCards: Card[] = [
-  {
+  adaptToCard({
     id: '1',
     title: 'Sample Card',
     description: 'This is a sample card for development',
@@ -28,31 +16,8 @@ const initialCards: Card[] = [
     userId: 'user1',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
-    effects: [],
-    designMetadata: {
-      cardStyle: {
-        template: 'classic',
-        effect: 'none',
-        borderRadius: '8px',
-        borderColor: '#000000',
-        shadowColor: 'rgba(0,0,0,0.2)',
-        frameWidth: 2,
-        frameColor: '#000000'
-      },
-      textStyle: {
-        titleColor: '#000000',
-        titleAlignment: 'center',
-        titleWeight: 'bold',
-        descriptionColor: '#333333'
-      },
-      cardMetadata: {
-        category: 'general',
-        series: 'base',
-        cardType: 'standard'
-      },
-      marketMetadata: DEFAULT_MARKET_METADATA
-    }
-  },
+    effects: [], // Add required effects property
+  }),
 ];
 
 export const useCardOperations = () => {
@@ -68,19 +33,7 @@ export const useCardOperations = () => {
         if (savedCards) {
           // Parse stored cards and ensure they match the current Card type requirements
           const parsedCards = JSON.parse(savedCards);
-          setCards(parsedCards.map((card: Partial<Card>) => {
-            // Ensure correct structure with defaults
-            return {
-              ...adaptToLegacyCard(card),
-              designMetadata: {
-                ...card.designMetadata,
-                marketMetadata: {
-                  ...DEFAULT_MARKET_METADATA,
-                  ...(card.designMetadata?.marketMetadata || {})
-                }
-              }
-            };
-          }));
+          setCards(parsedCards.map((card: Partial<Card>) => adaptToCard(card)));
         }
       } catch (err) {
         console.error('Error loading cards from storage:', err);
@@ -99,83 +52,23 @@ export const useCardOperations = () => {
     return cards.find(card => card.id === id);
   }, [cards]);
 
-  const addCard = useCallback((cardData: Partial<Card>) => {
-    const now = new Date().toISOString();
-    // Create a complete card with all required fields
-    const newCard: Card = {
+  const addCard = useCallback((card: Omit<Card, 'id' | 'createdAt' | 'updatedAt'>) => {
+    const newCard: Card = adaptToCard({
+      ...card,
       id: uuidv4(),
-      title: cardData.title || 'Untitled Card', // Ensure required field
-      description: cardData.description || '', // Ensure required field
-      imageUrl: cardData.imageUrl || '/placeholder.svg', // Ensure required field
-      thumbnailUrl: cardData.thumbnailUrl || cardData.imageUrl || '/placeholder.svg', // Ensure required field
-      tags: cardData.tags || [],
-      userId: cardData.userId || 'default-user',
-      createdAt: now,
-      updatedAt: now,
-      effects: cardData.effects || [],
-      // Include player property from cardData if available
-      ...(cardData.player && { player: cardData.player }),
-      // Include team property from cardData if available  
-      ...(cardData.team && { team: cardData.team }),
-      // Include year property from cardData if available
-      ...(cardData.year && { year: cardData.year }),
-      designMetadata: {
-        cardStyle: cardData.designMetadata?.cardStyle || {
-          template: 'classic',
-          effect: 'none',
-          borderRadius: '8px',
-          borderColor: '#000000',
-          shadowColor: 'rgba(0,0,0,0.2)',
-          frameWidth: 2,
-          frameColor: '#000000'
-        },
-        textStyle: cardData.designMetadata?.textStyle || {
-          titleColor: '#000000',
-          titleAlignment: 'center',
-          titleWeight: 'bold',
-          descriptionColor: '#333333'
-        },
-        cardMetadata: cardData.designMetadata?.cardMetadata || {
-          category: 'general',
-          series: 'base',
-          cardType: 'standard'
-        },
-        marketMetadata: {
-          isPrintable: false,
-          isForSale: false,
-          includeInCatalog: false,
-          price: 0,
-          currency: 'USD',
-          availableForSale: false,
-          editionSize: 1,
-          editionNumber: 1,
-          ...(cardData.designMetadata?.marketMetadata || {})
-        }
-      }
-    };
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
 
     setCards(prevCards => [...prevCards, newCard]);
     return newCard;
   }, []);
 
-  const updateCard = useCallback((id: string, updates: Partial<CardType>) => {
+  const updateCard = useCallback((id: string, updates: Partial<Card>) => {
     setCards(prevCards =>
       prevCards.map(card =>
         card.id === id
-          ? {
-              ...card,
-              ...updates,
-              updatedAt: new Date().toISOString(),
-              designMetadata: {
-                ...(card.designMetadata || {}),
-                ...(updates.designMetadata || {}),
-                marketMetadata: {
-                  ...DEFAULT_MARKET_METADATA,
-                  ...(card.designMetadata?.marketMetadata || {}),
-                  ...(updates.designMetadata?.marketMetadata || {})
-                }
-              }
-            } as Card
+          ? adaptToCard({ ...card, ...updates, updatedAt: new Date().toISOString() })
           : card
       )
     );

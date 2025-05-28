@@ -1,89 +1,63 @@
+
+import { BaseEntity } from './index';
 import { User } from './user';
 
 /**
- * Interface for team data
+ * Team member roles
  */
-export interface Team {
-  id: string;
-  name: string;
-  description?: string;
-  logoUrl?: string;
-  ownerId: string;
-  createdAt: string;
-  updatedAt: string;
-  members?: TeamMember[];
-  primaryColor?: string;
-  secondaryColor?: string;
-  tags?: string[];
-  // Extended fields needed by code in other places
-  visibility?: 'public' | 'private' | 'team';
-  banner_url?: string;
-  bannerUrl?: string;
-  website?: string;
-  email?: string;
-  status?: string;
-  specialties?: string[];
-  settings?: Record<string, any>;
-}
-
-/**
- * Interface for team members
- */
-export interface TeamMember {
-  id: string;
-  teamId: string;
-  userId: string;
-  role: 'owner' | 'admin' | 'member' | 'viewer';
-  joinedAt: string;
-  user?: User;
-  email?: string;
-  avatarUrl?: string; // Add avatarUrl property for team members
-}
-
-/**
- * Interface for team invitation
- */
-export interface TeamInvitation {
-  id: string;
-  teamId: string;
-  team?: Team;
-  inviterId: string;
-  inviter?: User;
-  email: string;
-  role: 'admin' | 'member' | 'viewer';
-  status: 'pending' | 'accepted' | 'declined' | 'expired';
-  createdAt: string;
-  expiresAt: string;
-  acceptedAt?: string;
-}
-
-/**
- * Interface for team settings
- */
-export interface TeamSettings {
-  teamId: string;
-  allowMemberInvites: boolean;
-  allowMemberCardCreation: boolean;
-  requireContentApproval: boolean;
-  defaultCollectionVisibility: 'public' | 'team' | 'private';
-  brandingSettings: {
-    useCustomBranding: boolean;
-    primaryColor: string;
-    secondaryColor: string;
-    logoPosition: 'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right';
-    defaultTemplate?: string;
-  };
-  notificationSettings: {
-    newMember: boolean;
-    newContent: boolean;
-    contentUpdates: boolean;
-  };
-}
-
-// Add UserRole.VIEWER for backward compatibility
-export enum TeamRole {
+export enum TeamMemberRole {
   OWNER = 'owner',
   ADMIN = 'admin',
   MEMBER = 'member',
-  VIEWER = 'viewer'
+  VIEWER = 'viewer',
+}
+
+/**
+ * Team member interface
+ */
+export interface TeamMember extends BaseEntity {
+  userId: string;
+  teamId: string;
+  role: TeamMemberRole;
+  invitedBy?: string;
+  joinedAt?: string;
+  user?: User;
+}
+
+/**
+ * Team interface
+ */
+export interface Team extends BaseEntity {
+  name: string;
+  description?: string;
+  logoUrl?: string;
+  members?: TeamMember[];
+  ownerId: string;
+  visibility: 'public' | 'private' | 'unlisted';
+  
+  // Additional team properties from DbTeam
+  logo_url?: string;
+  banner_url?: string;
+  status?: string;
+  website?: string;
+  email?: string;
+  specialties?: string[];
+  
+  // Team fields
+  team_code?: string;
+  primary_color?: string;
+  secondary_color?: string;
+  tertiary_color?: string;
+  founded_year?: number;
+  city?: string;
+  state?: string;
+  country?: string;
+  stadium?: string;
+  mascot?: string;
+  league?: string;
+  division?: string;
+  is_active?: boolean;
+  
+  // For display purposes in TeamGallery
+  memberCount?: number;
 }

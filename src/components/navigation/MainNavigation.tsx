@@ -1,85 +1,54 @@
-
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { cn } from '@/lib/utils';
-import { 
-  LayoutDashboard, 
-  ImagePlus, 
-  Search, 
-  Settings,
-  UserRound,
-  Palette
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Home, LayoutGrid, Library, Album, PlusCircle, Settings, Users, Shield } from 'lucide-react';
+import { useAuth } from '@/providers/AuthProvider';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
+
+const NavItem = ({ to, icon: Icon, label, isActive }: { to: string; icon: React.ElementType; label: string; isActive: boolean }) => (
+  <Link
+    to={to}
+    className={`flex items-center px-3 py-2 rounded-md transition-colors ${
+      isActive
+        ? 'bg-primary/10 text-primary'
+        : 'hover:bg-gray-100 dark:hover:bg-gray-800'
+    }`}
+  >
+    <Icon className="h-5 w-5 mr-2" />
+    <span>{label}</span>
+  </Link>
+);
 
 const MainNavigation: React.FC = () => {
   const location = useLocation();
-  const currentPath = location.pathname;
-
-  const navItems = [
-    {
-      name: 'Dashboard',
-      path: '/',
-      icon: <LayoutDashboard className="h-5 w-5" />,
-      exact: true,
-    },
-    {
-      name: 'Create',
-      path: '/create',
-      icon: <ImagePlus className="h-5 w-5" />,
-      exact: false,
-    },
-    {
-      name: 'Gallery',
-      path: '/gallery',
-      icon: <Search className="h-5 w-5" />,
-      exact: false,
-    },
-    {
-      name: 'Personalize',
-      path: '/personalize',
-      icon: <Palette className="h-5 w-5" />,
-      exact: false,
-    },
-    {
-      name: 'Settings',
-      path: '/settings',
-      icon: <Settings className="h-5 w-5" />,
-      exact: false,
-    },
-    {
-      name: 'Account',
-      path: '/account',
-      icon: <UserRound className="h-5 w-5" />,
-      exact: false,
-    },
-  ];
-
-  const isActiveLink = (path: string, exact: boolean) => {
-    if (exact) {
-      return currentPath === path;
-    }
-    return currentPath.startsWith(path);
+  const { user } = useAuth();
+  
+  const isActive = (path: string) => {
+    if (path === '/' && location.pathname === '/') return true;
+    if (path !== '/' && location.pathname.startsWith(path)) return true;
+    return false;
   };
-
+  
   return (
-    <nav className="flex flex-col space-y-2 w-full">
-      {navItems.map((item) => (
-        <Button
-          key={item.path}
-          variant={isActiveLink(item.path, item.exact) ? 'default' : 'ghost'}
-          className={cn(
-            'w-full justify-start',
-            isActiveLink(item.path, item.exact) ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'
-          )}
-          asChild
-        >
-          <Link to={item.path}>
-            {item.icon}
-            <span className="ml-2">{item.name}</span>
-          </Link>
-        </Button>
-      ))}
+    <nav className="hidden md:block">
+      <div className="space-y-1">
+        <NavItem to="/" icon={Home} label="Home" isActive={isActive('/')} />
+        <NavItem to="/cards" icon={LayoutGrid} label="Cards" isActive={isActive('/cards')} />
+        <NavItem to="/collections" icon={Library} label="Collections" isActive={isActive('/collections')} />
+        <NavItem to="/series" icon={Album} label="Series" isActive={isActive('/series')} />
+        <NavItem to="/decks" icon={Library} label="Decks" isActive={isActive('/decks')} />
+        <NavItem to="/cards/create" icon={PlusCircle} label="Create Card" isActive={isActive('/cards/create')} />
+        <NavItem to="/cards/auctions" icon={Users} label="Auctions" isActive={isActive('/cards/auctions')} />
+      </div>
+      
+      <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700 space-y-1">
+        {user?.role === 'admin' && (
+          <NavItem to="/admin" icon={Shield} label="Admin" isActive={isActive('/admin')} />
+        )}
+        <NavItem to="/settings" icon={Settings} label="Settings" isActive={isActive('/settings')} />
+        <div className="px-3 py-2">
+          <ThemeToggle />
+        </div>
+      </div>
     </nav>
   );
 };

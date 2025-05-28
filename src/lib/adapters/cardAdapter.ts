@@ -1,42 +1,54 @@
-import { Card as CardTypeCard } from '@/lib/types/cardTypes';
-import { Card as CardCard } from '@/lib/types/card';
+
+import { Card, DesignMetadata } from '@/lib/types';
 import { DEFAULT_DESIGN_METADATA } from '@/lib/utils/cardDefaults';
 
 /**
- * Adapts a card from one format to another
+ * Adapts partial card data to a complete Card object
  */
-export const adaptToCard = (sourceCard: Partial<CardTypeCard>): CardCard => {
-  return {
-    id: sourceCard.id || crypto.randomUUID(),
-    title: sourceCard.title || '',
-    description: sourceCard.description || '',
-    imageUrl: sourceCard.imageUrl || '',
-    thumbnailUrl: sourceCard.thumbnailUrl || '',
-    tags: sourceCard.tags || [],
-    createdAt: sourceCard.createdAt || new Date().toISOString(),
-    updatedAt: sourceCard.updatedAt || new Date().toISOString(),
-    userId: sourceCard.userId || '',
-    effects: sourceCard.effects || [],
-    designMetadata: sourceCard.designMetadata || DEFAULT_DESIGN_METADATA,
-    // Include other properties as needed
+export const adaptToCard = (data: Partial<Card>): Card => {
+  const now = new Date().toISOString();
+  
+  // Ensure designMetadata has all required properties
+  const designMetadata: DesignMetadata = {
+    ...DEFAULT_DESIGN_METADATA,
+    ...data.designMetadata,
+    cardStyle: {
+      ...DEFAULT_DESIGN_METADATA.cardStyle,
+      ...data.designMetadata?.cardStyle
+    },
+    textStyle: {
+      ...DEFAULT_DESIGN_METADATA.textStyle,
+      ...data.designMetadata?.textStyle
+    },
+    cardMetadata: {
+      ...DEFAULT_DESIGN_METADATA.cardMetadata,
+      ...data.designMetadata?.cardMetadata
+    },
+    marketMetadata: {
+      ...DEFAULT_DESIGN_METADATA.marketMetadata,
+      ...data.designMetadata?.marketMetadata
+    }
   };
-};
 
-/**
- * Adapts a card to legacy format
- */
-export const adaptToLegacyCard = (card: Partial<CardCard>): CardTypeCard => {
   return {
-    id: card.id || crypto.randomUUID(),
-    title: card.title || '',
-    description: card.description || '',
-    imageUrl: card.imageUrl || '',
-    thumbnailUrl: card.thumbnailUrl || '',
-    tags: card.tags || [],
-    createdAt: card.createdAt || new Date().toISOString(),
-    updatedAt: card.updatedAt || new Date().toISOString(),
-    userId: card.userId || '',
-    effects: card.effects || [],
-    designMetadata: card.designMetadata || DEFAULT_DESIGN_METADATA,
+    id: data.id || `card-${Date.now()}`,
+    title: data.title || 'Untitled Card',
+    description: data.description || '',
+    imageUrl: data.imageUrl || '/placeholder-card.png',
+    thumbnailUrl: data.thumbnailUrl || data.imageUrl || '/placeholder-card-thumb.png',
+    tags: data.tags || [],
+    userId: data.userId || 'anonymous',
+    effects: data.effects || [],
+    createdAt: data.createdAt || now,
+    updatedAt: data.updatedAt || now,
+    player: data.player,
+    team: data.team,
+    year: data.year,
+    collectionId: data.collectionId,
+    reactions: data.reactions || [],
+    comments: data.comments || [],
+    rarity: data.rarity,
+    fabricSwatches: data.fabricSwatches || [],
+    designMetadata
   };
 };

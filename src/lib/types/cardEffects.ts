@@ -1,7 +1,19 @@
 
-import { JsonValue } from './index';
-import { ReactNode } from 'react';
+/**
+ * Card effect settings interface
+ */
+export interface CardEffectSettings {
+  intensity?: number;
+  speed?: number;
+  pattern?: string;
+  color?: string;
+  animationEnabled?: boolean;
+  [key: string]: any;
+}
 
+/**
+ * Card effect interface
+ */
 export interface CardEffect {
   id: string;
   name: string;
@@ -10,80 +22,32 @@ export interface CardEffect {
   className?: string;
 }
 
-export interface CardEffectSettings {
-  intensity?: number;
-  speed?: number;
-  pattern?: string;
-  color?: string;
-  animationEnabled?: boolean;
-  colorScheme?: string[];
-  [key: string]: JsonValue | undefined;
+/**
+ * Card effects options for the hook
+ */
+export interface CardEffectsOptions {
+  initialEffects?: Record<string, string[]>;
+  presets?: Record<string, string[]>;
+  defaultIntensity?: number;
+  performanceMode?: 'high' | 'medium' | 'low';
 }
 
-export interface PremiumCardEffect extends CardEffect {
-  premium: boolean;
-  requiresSubscription: boolean;
-  category?: string;
-  iconUrl?: string;
-}
-
+/**
+ * Card effects result from the hook
+ */
 export interface CardEffectsResult {
-  cssClasses: string;
-  effectData: Record<string, any>;
-  jsxElements?: ReactNode[];
+  cardEffects: Record<string, string[]>;
+  isLoading: boolean;
+  addEffect: (cardId: string, effect: string) => void;
+  removeEffect: (cardId: string, effect: string) => void;
+  toggleEffect: (cardId: string, effect: string) => void;
+  clearEffects: (cardId: string) => void;
+  setCardEffects: (cardId: string, effects: string[]) => void;
+  activeEffects: string[];
+  setActiveEffects: (effects: string[]) => void;
 }
 
+/**
+ * Additional effect settings for premium effects
+ */
 export type EffectSettings = CardEffectSettings;
-
-// Material simulation types with all needed properties
-export interface MaterialSimulation {
-  roughness: number;
-  metalness: number;
-  clearcoat: number;
-  clearcoatRoughness: number;
-  ior: number;
-  transmission: number;
-  reflectivity: number;
-  emissive: string;
-  envMapIntensity: number;
-  
-  // Additional properties needed by MaterialSimulator component
-  textureUrl?: string;
-  baseColor?: string;
-  type?: string;
-  weathering?: number;
-}
-
-// Core effect engine interfaces
-export interface EffectCompositor {
-  compose(effects: CardEffect[]): CardEffectsResult;
-  layerEffects(primary: CardEffect, secondary: CardEffect): CardEffect;
-  getHtmlElement(): HTMLElement | null;
-}
-
-export interface WebGLRenderer {
-  initialize(canvas: HTMLCanvasElement): void;
-  applyShader(effect: CardEffect): void;
-  render(): void;
-  dispose(): void;
-}
-
-export interface PreviewGenerator {
-  generateThumbnail(effect: CardEffect, size: { width: number; height: number }): Promise<string>;
-  generatePreview(card: any, effects: CardEffect[]): ReactNode;
-}
-
-export interface EffectEngine {
-  effects: Map<string, CardEffect>;
-  compositor: EffectCompositor;
-  renderer: WebGLRenderer;
-  preview: PreviewGenerator;
-  
-  addEffect(effect: CardEffect): void;
-  removeEffect(id: string): void;
-  applyEffects(cardElement: HTMLElement, effects: CardEffect[]): void;
-  updateSettings(id: string, settings: Partial<CardEffectSettings>): void;
-  getEffectById(id: string): CardEffect | undefined;
-  createPreset(name: string, effects: CardEffect[]): string;
-  loadPreset(presetId: string): CardEffect[];
-}
