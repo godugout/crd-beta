@@ -10,107 +10,63 @@ import { RetroArcadeEnvironment } from './environments/RetroArcadeEnvironment';
 import { ForestEnvironment } from './environments/ForestEnvironment';
 import { LuxuryEnvironment } from './environments/LuxuryEnvironment';
 import { CyberpunkEnvironment } from './environments/CyberpunkEnvironment';
-import { Environment } from '@react-three/drei';
-import { hdrImageCache } from '@/services/hdrImageCache';
-import * as THREE from 'three';
 
 interface EnvironmentRendererProps {
   environmentType: string;
 }
 
 const EnvironmentRenderer: React.FC<EnvironmentRendererProps> = ({ environmentType }) => {
-  const [cachedTexture, setCachedTexture] = useState<THREE.DataTexture | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [hasError, setHasError] = useState(false);
-
   console.log('EnvironmentRenderer: Rendering environment type:', environmentType);
 
-  // Preload and cache the HDR texture for the current environment
-  useEffect(() => {
-    let isMounted = true;
-    
-    const loadEnvironmentTexture = async () => {
-      setIsLoading(true);
-      setHasError(false);
-      
-      try {
-        console.log(`EnvironmentRenderer: Loading HDR for ${environmentType}`);
-        
-        const texture = await hdrImageCache.getTexture(environmentType);
-        
-        if (isMounted && texture) {
-          setCachedTexture(texture);
-          console.log(`EnvironmentRenderer: HDR texture loaded for ${environmentType}`);
-        }
-      } catch (error) {
-        console.error(`EnvironmentRenderer: Failed to load HDR for ${environmentType}:`, error);
-        if (isMounted) {
-          setHasError(true);
-          setCachedTexture(null);
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    loadEnvironmentTexture();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [environmentType]);
-
-  // If we have a cached texture and no errors, use it directly
-  if (cachedTexture && !isLoading && !hasError) {
-    return (
-      <>
-        <primitive object={cachedTexture} attach="background" />
-        <Environment map={cachedTexture} background={false} />
-      </>
-    );
-  }
-
-  // Use dedicated environment components for each type
+  // Use dedicated environment components for each type - no HDR fallback
   switch (environmentType) {
     case 'stadium':
+      console.log('EnvironmentRenderer: Loading Stadium environment');
       return <StadiumEnvironment />;
     
     case 'gallery':
+      console.log('EnvironmentRenderer: Loading Gallery environment');
       return <GalleryEnvironment />;
     
     case 'cardshop':
     case 'store':
     case 'mall':
+      console.log('EnvironmentRenderer: Loading Retro Arcade environment');
       return <RetroArcadeEnvironment />;
     
     case 'cosmic':
     case 'space':
+      console.log('EnvironmentRenderer: Loading Cosmic environment');
       return <CosmicEnvironment />;
     
     case 'underwater':
     case 'ocean':
+      console.log('EnvironmentRenderer: Loading Underwater environment');
       return <UnderwaterEnvironment />;
       
     case 'night':
     case 'nightsky':
+      console.log('EnvironmentRenderer: Loading Night Sky environment');
       return <NightSkyEnvironment />;
       
     case 'forest':
     case 'nature':
+      console.log('EnvironmentRenderer: Loading Forest environment');
       return <ForestEnvironment />;
       
     case 'luxury':
     case 'lounge':
+      console.log('EnvironmentRenderer: Loading Luxury environment');
       return <LuxuryEnvironment />;
       
     case 'cyberpunk':
     case 'cyber':
     case 'neon':
+      console.log('EnvironmentRenderer: Loading Cyberpunk environment');
       return <CyberpunkEnvironment />;
     
     default: // studio
+      console.log('EnvironmentRenderer: Loading Studio environment (default)');
       return <StudioEnvironment />;
   }
 };

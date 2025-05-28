@@ -1,6 +1,5 @@
 
 import React, { useMemo } from 'react';
-import { Environment } from '@react-three/drei';
 import * as THREE from 'three';
 
 const StarField = () => {
@@ -33,20 +32,63 @@ const StarField = () => {
 };
 
 export const NightSkyEnvironment = () => {
+  // Create night sky background texture
+  const nightTexture = useMemo(() => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 1024;
+    canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+    
+    if (ctx) {
+      // Night sky gradient
+      const gradient = ctx.createLinearGradient(0, 0, 0, 512);
+      gradient.addColorStop(0, '#0a0a2e');
+      gradient.addColorStop(0.3, '#1a1a40');
+      gradient.addColorStop(0.6, '#2a2a50');
+      gradient.addColorStop(1, '#3a3a60');
+      
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, 1024, 512);
+      
+      // Add moon
+      ctx.fillStyle = '#f0f0f0';
+      ctx.beginPath();
+      ctx.arc(200, 100, 40, 0, 2 * Math.PI);
+      ctx.fill();
+      
+      // Add moon craters
+      ctx.fillStyle = '#d0d0d0';
+      ctx.beginPath();
+      ctx.arc(190, 90, 8, 0, 2 * Math.PI);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(210, 110, 5, 0, 2 * Math.PI);
+      ctx.fill();
+      
+      // Add stars
+      ctx.fillStyle = '#ffffff';
+      for (let i = 0; i < 150; i++) {
+        const x = Math.random() * 1024;
+        const y = Math.random() * 300; // Keep stars in upper portion
+        const size = Math.random() * 2 + 1;
+        ctx.fillRect(x, y, size, size);
+      }
+      
+      // Add ground silhouette
+      ctx.fillStyle = '#1a1a1a';
+      ctx.fillRect(0, 400, 1024, 112);
+    }
+    
+    return new THREE.CanvasTexture(canvas);
+  }, []);
+
   return (
     <>
       {/* Night sky background */}
-      <color attach="background" args={['#0a0a2e']} />
+      <primitive object={nightTexture} attach="background" />
       
       {/* Star field */}
       <StarField />
-      
-      {/* Use built-in night environment with stars */}
-      <Environment 
-        preset="night"
-        background={true}
-        blur={0.4}
-      />
       
       {/* Moonlight ambient */}
       <ambientLight intensity={0.4} color="#b3ccff" />

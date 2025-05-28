@@ -1,6 +1,5 @@
 
 import React, { useMemo } from 'react';
-import { Environment } from '@react-three/drei';
 import * as THREE from 'three';
 
 const CausticsEffect = () => {
@@ -66,20 +65,57 @@ const CausticsEffect = () => {
 };
 
 export const UnderwaterEnvironment = () => {
+  // Create underwater background texture
+  const underwaterTexture = useMemo(() => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 1024;
+    canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+    
+    if (ctx) {
+      // Deep ocean gradient
+      const gradient = ctx.createLinearGradient(0, 0, 0, 512);
+      gradient.addColorStop(0, '#001a33');
+      gradient.addColorStop(0.3, '#003366');
+      gradient.addColorStop(0.7, '#004080');
+      gradient.addColorStop(1, '#0066cc');
+      
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, 1024, 512);
+      
+      // Add underwater bubbles
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+      for (let i = 0; i < 50; i++) {
+        const x = Math.random() * 1024;
+        const y = Math.random() * 512;
+        const size = Math.random() * 8 + 2;
+        ctx.beginPath();
+        ctx.arc(x, y, size, 0, 2 * Math.PI);
+        ctx.fill();
+      }
+      
+      // Add water surface light rays
+      ctx.strokeStyle = 'rgba(76, 195, 247, 0.4)';
+      ctx.lineWidth = 3;
+      for (let i = 0; i < 10; i++) {
+        const x = i * 100 + Math.random() * 50;
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x + Math.random() * 100 - 50, 512);
+        ctx.stroke();
+      }
+    }
+    
+    return new THREE.CanvasTexture(canvas);
+  }, []);
+
   return (
     <>
       {/* Deep ocean background */}
-      <color attach="background" args={['#001a33']} />
+      <primitive object={underwaterTexture} attach="background" />
       
       {/* Caustics effect */}
       <CausticsEffect />
-      
-      {/* Use built-in sunset environment for water atmosphere */}
-      <Environment 
-        preset="sunset"
-        background={true}
-        blur={0.9}
-      />
       
       {/* Underwater ambient lighting */}
       <ambientLight intensity={0.4} color="#004466" />
