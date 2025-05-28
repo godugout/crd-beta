@@ -51,46 +51,35 @@ interface AdvancedCustomizationPanelProps {
   isOpen: boolean;
   onClose: () => void;
   onSaveRemix: (settings: any) => void;
+  activeEffects: string[];
+  onEffectsChange: (effects: string[]) => void;
+  effectIntensities: Record<string, number>;
+  onEffectIntensityChange: (effect: string, intensity: number) => void;
+  materialSettings: MaterialSettings;
+  onMaterialChange: (settings: Partial<MaterialSettings>) => void;
+  lightingSettings: LightingSettings;
+  onLightingChange: (settings: Partial<LightingSettings>) => void;
+  environmentType: string;
+  onEnvironmentChange: (environment: string) => void;
 }
 
 const AdvancedCustomizationPanel: React.FC<AdvancedCustomizationPanelProps> = ({
   card,
   isOpen,
   onClose,
-  onSaveRemix
+  onSaveRemix,
+  activeEffects,
+  onEffectsChange,
+  effectIntensities,
+  onEffectIntensityChange,
+  materialSettings,
+  onMaterialChange,
+  lightingSettings,
+  onLightingChange,
+  environmentType,
+  onEnvironmentChange
 }) => {
   const [activeTab, setActiveTab] = useState("effects");
-  
-  // Effect settings
-  const [activeEffects, setActiveEffects] = useState<string[]>(['holographic']);
-  const [effectSettings, setEffectSettings] = useState<EffectSettings>({
-    holographic: 0.7,
-    refractor: 0.5,
-    foil: 0.6,
-    chrome: 0.4,
-    prismatic: 0.8,
-    vintage: 0.3,
-    neon: 0.5,
-    galaxy: 0.6
-  });
-  
-  // Material settings
-  const [materialSettings, setMaterialSettings] = useState<MaterialSettings>({
-    roughness: 0.2,
-    metalness: 0.8,
-    reflectivity: 0.5,
-    clearcoat: 0.7,
-    envMapIntensity: 1.0
-  });
-  
-  // Lighting settings
-  const [lightingSettings, setLightingSettings] = useState<LightingSettings>({
-    intensity: 1.2,
-    color: '#ffffff',
-    position: { x: 10, y: 10, z: 10 },
-    ambientIntensity: 0.6,
-    environmentType: 'studio'
-  });
 
   // Available effects with presets
   const availableEffects = [
@@ -117,11 +106,10 @@ const AdvancedCustomizationPanel: React.FC<AdvancedCustomizationPanelProps> = ({
   ];
 
   const toggleEffect = (effectId: string) => {
-    setActiveEffects(prev => 
-      prev.includes(effectId) 
-        ? prev.filter(id => id !== effectId)
-        : [...prev, effectId]
-    );
+    const newEffects = activeEffects.includes(effectId) 
+      ? activeEffects.filter(id => id !== effectId)
+      : [...activeEffects, effectId];
+    onEffectsChange(newEffects);
     toast.success(`${effectId} effect ${activeEffects.includes(effectId) ? 'disabled' : 'enabled'}`);
   };
 
@@ -133,16 +121,17 @@ const AdvancedCustomizationPanel: React.FC<AdvancedCustomizationPanelProps> = ({
       minimal: ['refractor']
     };
     
-    setActiveEffects(presets[preset] || []);
+    onEffectsChange(presets[preset] || []);
     toast.success(`Applied ${preset} preset`);
   };
 
   const handleSaveRemix = () => {
     const remixSettings = {
       effects: activeEffects,
-      effectSettings,
+      effectSettings: effectIntensities,
       materialSettings,
       lightingSettings,
+      environmentType,
       card: {
         ...card,
         title: `${card.title} (Remix)`,
@@ -178,17 +167,17 @@ const AdvancedCustomizationPanel: React.FC<AdvancedCustomizationPanelProps> = ({
         {/* Customization Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid grid-cols-4 mb-4 bg-gray-800/50">
-            <TabsTrigger value="effects" className="text-xs">
-              <Sparkles className="h-3 w-3" />
+            <TabsTrigger value="effects" className="flex items-center justify-center p-3">
+              <Sparkles className="h-6 w-6" />
             </TabsTrigger>
-            <TabsTrigger value="materials" className="text-xs">
-              <Layers className="h-3 w-3" />
+            <TabsTrigger value="materials" className="flex items-center justify-center p-3">
+              <Layers className="h-6 w-6" />
             </TabsTrigger>
-            <TabsTrigger value="lighting" className="text-xs">
-              <Lightbulb className="h-3 w-3" />
+            <TabsTrigger value="lighting" className="flex items-center justify-center p-3">
+              <Lightbulb className="h-6 w-6" />
             </TabsTrigger>
-            <TabsTrigger value="environment" className="text-xs">
-              <Globe className="h-3 w-3" />
+            <TabsTrigger value="environment" className="flex items-center justify-center p-3">
+              <Globe className="h-6 w-6" />
             </TabsTrigger>
           </TabsList>
 
@@ -232,16 +221,14 @@ const AdvancedCustomizationPanel: React.FC<AdvancedCustomizationPanelProps> = ({
                     <div className="ml-8 space-y-1">
                       <div className="flex justify-between text-xs">
                         <span>Intensity</span>
-                        <span>{effectSettings[effect.id]?.toFixed(1)}</span>
+                        <span>{(effectIntensities[effect.id] || 0.5).toFixed(1)}</span>
                       </div>
                       <Slider
-                        value={[effectSettings[effect.id] || 0.5]}
+                        value={[effectIntensities[effect.id] || 0.5]}
                         min={0}
                         max={1}
                         step={0.1}
-                        onValueChange={([value]) => 
-                          setEffectSettings(prev => ({ ...prev, [effect.id]: value }))
-                        }
+                        onValueChange={([value]) => onEffectIntensityChange(effect.id, value)}
                       />
                     </div>
                   )}
@@ -265,7 +252,7 @@ const AdvancedCustomizationPanel: React.FC<AdvancedCustomizationPanelProps> = ({
                     max={key === 'envMapIntensity' ? 2 : 1}
                     step={0.01}
                     onValueChange={([newValue]) => 
-                      setMaterialSettings(prev => ({ ...prev, [key]: newValue }))
+                      onMaterialChange({ [key]: newValue })
                     }
                   />
                 </div>
@@ -287,7 +274,7 @@ const AdvancedCustomizationPanel: React.FC<AdvancedCustomizationPanelProps> = ({
                   max={3}
                   step={0.1}
                   onValueChange={([value]) => 
-                    setLightingSettings(prev => ({ ...prev, intensity: value }))
+                    onLightingChange({ intensity: value })
                   }
                 />
               </div>
@@ -303,7 +290,7 @@ const AdvancedCustomizationPanel: React.FC<AdvancedCustomizationPanelProps> = ({
                   max={1}
                   step={0.05}
                   onValueChange={([value]) => 
-                    setLightingSettings(prev => ({ ...prev, ambientIntensity: value }))
+                    onLightingChange({ ambientIntensity: value })
                   }
                 />
               </div>
@@ -316,7 +303,7 @@ const AdvancedCustomizationPanel: React.FC<AdvancedCustomizationPanelProps> = ({
                       key={color}
                       variant={lightingSettings.color === color ? "default" : "outline"}
                       size="sm"
-                      onClick={() => setLightingSettings(prev => ({ ...prev, color }))}
+                      onClick={() => onLightingChange({ color })}
                       className="h-8"
                       style={{ backgroundColor: color === lightingSettings.color ? color : undefined }}
                     />
@@ -331,8 +318,8 @@ const AdvancedCustomizationPanel: React.FC<AdvancedCustomizationPanelProps> = ({
             <div>
               <Label className="text-sm font-medium mb-3 block">3D Environment</Label>
               <Select 
-                value={lightingSettings.environmentType} 
-                onValueChange={(value) => setLightingSettings(prev => ({ ...prev, environmentType: value }))}
+                value={environmentType} 
+                onValueChange={onEnvironmentChange}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select environment" />

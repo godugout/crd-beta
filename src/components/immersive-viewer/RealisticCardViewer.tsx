@@ -38,13 +38,12 @@ const RealisticCardViewer: React.FC<RealisticCardViewerProps> = ({
   // Use provided lighting settings or defaults
   const currentLighting = lightingSettings || defaultLighting;
 
-  console.log('RealisticCardViewer: Rendering with card:', {
-    id: card.id,
-    title: card.title,
-    imageUrl: card.imageUrl,
-    hasImageUrl: !!card.imageUrl,
+  console.log('RealisticCardViewer: Rendering with effects:', {
     activeEffects,
-    environmentType
+    effectIntensities,
+    environmentType,
+    materialSettings,
+    lightingSettings: currentLighting
   });
 
   // Handle mouse movement for dynamic lighting
@@ -84,17 +83,17 @@ const RealisticCardViewer: React.FC<RealisticCardViewerProps> = ({
         
         {/* Lighting Setup */}
         <ambientLight 
-          intensity={currentLighting?.ambientLight?.intensity || 0.6} 
+          intensity={currentLighting?.ambientLight?.intensity || currentLighting?.ambientIntensity || 0.6} 
           color={currentLighting?.ambientLight?.color || '#f0f0ff'}
         />
         <directionalLight
           position={[
-            currentLighting?.primaryLight?.x || 10,
-            currentLighting?.primaryLight?.y || 10,
-            currentLighting?.primaryLight?.z || 10
+            currentLighting?.primaryLight?.x || currentLighting?.position?.x || 10,
+            currentLighting?.primaryLight?.y || currentLighting?.position?.y || 10,
+            currentLighting?.primaryLight?.z || currentLighting?.position?.z || 10
           ]}
-          intensity={currentLighting?.primaryLight?.intensity || 1.2}
-          color={currentLighting?.primaryLight?.color || '#ffffff'}
+          intensity={currentLighting?.primaryLight?.intensity || currentLighting?.intensity || 1.2}
+          color={currentLighting?.primaryLight?.color || currentLighting?.color || '#ffffff'}
           castShadow
         />
         <pointLight position={[10, 10, 10]} intensity={0.3} />

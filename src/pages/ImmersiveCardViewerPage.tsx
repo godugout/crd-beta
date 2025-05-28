@@ -21,7 +21,12 @@ const ImmersiveCardViewerPage: React.FC = () => {
   const [effectIntensities, setEffectIntensities] = useState<Record<string, number>>({
     holographic: 0.7,
     refractor: 0.5,
-    foil: 0.6
+    foil: 0.6,
+    chrome: 0.4,
+    prismatic: 0.8,
+    vintage: 0.3,
+    neon: 0.5,
+    galaxy: 0.6
   });
   const [environmentType, setEnvironmentType] = useState('studio');
   const [materialSettings, setMaterialSettings] = useState({
@@ -30,6 +35,13 @@ const ImmersiveCardViewerPage: React.FC = () => {
     reflectivity: 0.5,
     clearcoat: 0.7,
     envMapIntensity: 1.0
+  });
+  const [lightingSettings, setLightingSettings] = useState({
+    intensity: 1.2,
+    color: '#ffffff',
+    position: { x: 10, y: 10, z: 10 },
+    ambientIntensity: 0.6,
+    environmentType: 'studio'
   });
 
   console.log('ImmersiveCardViewerPage: Looking for card with ID:', id);
@@ -128,8 +140,9 @@ const ImmersiveCardViewerPage: React.FC = () => {
     // Update current view with remix settings
     setActiveEffects(remixSettings.effects);
     setEffectIntensities(remixSettings.effectSettings);
-    setEnvironmentType(remixSettings.lightingSettings.environmentType);
+    setEnvironmentType(remixSettings.environmentType);
     setMaterialSettings(remixSettings.materialSettings);
+    setLightingSettings(remixSettings.lightingSettings);
     
     setIsCustomizationOpen(false);
     
@@ -143,33 +156,64 @@ const ImmersiveCardViewerPage: React.FC = () => {
     setIsCustomizationOpen(!isCustomizationOpen);
   };
 
+  // Handler functions for the customization panel
+  const handleEffectsChange = (effects: string[]) => {
+    setActiveEffects(effects);
+  };
+
+  const handleEffectIntensityChange = (effect: string, intensity: number) => {
+    setEffectIntensities(prev => ({ ...prev, [effect]: intensity }));
+  };
+
+  const handleMaterialChange = (changes: Partial<typeof materialSettings>) => {
+    setMaterialSettings(prev => ({ ...prev, ...changes }));
+  };
+
+  const handleLightingChange = (changes: Partial<typeof lightingSettings>) => {
+    setLightingSettings(prev => ({ ...prev, ...changes }));
+  };
+
+  const handleEnvironmentChange = (environment: string) => {
+    setEnvironmentType(environment);
+    setLightingSettings(prev => ({ ...prev, environmentType: environment }));
+  };
+
   return (
     <div className="fixed inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-black overflow-hidden">
-      {/* 3D Card Viewer */}
-      <RealisticCardViewer
-        card={card}
-        isCustomizationOpen={isCustomizationOpen}
-        onToggleCustomization={toggleCustomization}
-        activeEffects={activeEffects}
-        effectIntensities={effectIntensities}
-        environmentType={environmentType}
-        materialSettings={materialSettings}
-      />
-      
-      {/* Interface Overlay */}
-      <ImmersiveViewerInterface
-        card={card}
-        isFlipped={isFlipped}
-        onFlip={handleFlip}
-        onBack={handleBack}
-        onShare={handleShare}
-        onDownload={handleDownload}
-        onLike={handleLike}
-        onBookmark={handleBookmark}
-        onRemix={handleRemix}
-        isCustomizationOpen={isCustomizationOpen}
-        onToggleCustomization={toggleCustomization}
-      />
+      {/* Main viewer container - adjust width when panel is open */}
+      <div 
+        className={`transition-all duration-300 ${
+          isCustomizationOpen ? 'mr-[420px]' : 'mr-0'
+        }`}
+        style={{ height: '100vh' }}
+      >
+        {/* 3D Card Viewer */}
+        <RealisticCardViewer
+          card={card}
+          isCustomizationOpen={isCustomizationOpen}
+          onToggleCustomization={toggleCustomization}
+          activeEffects={activeEffects}
+          effectIntensities={effectIntensities}
+          environmentType={environmentType}
+          materialSettings={materialSettings}
+          lightingSettings={lightingSettings}
+        />
+        
+        {/* Interface Overlay */}
+        <ImmersiveViewerInterface
+          card={card}
+          isFlipped={isFlipped}
+          onFlip={handleFlip}
+          onBack={handleBack}
+          onShare={handleShare}
+          onDownload={handleDownload}
+          onLike={handleLike}
+          onBookmark={handleBookmark}
+          onRemix={handleRemix}
+          isCustomizationOpen={isCustomizationOpen}
+          onToggleCustomization={toggleCustomization}
+        />
+      </div>
       
       {/* Advanced Customization Panel */}
       <AdvancedCustomizationPanel
@@ -177,6 +221,16 @@ const ImmersiveCardViewerPage: React.FC = () => {
         isOpen={isCustomizationOpen}
         onClose={toggleCustomization}
         onSaveRemix={handleSaveRemix}
+        activeEffects={activeEffects}
+        onEffectsChange={handleEffectsChange}
+        effectIntensities={effectIntensities}
+        onEffectIntensityChange={handleEffectIntensityChange}
+        materialSettings={materialSettings}
+        onMaterialChange={handleMaterialChange}
+        lightingSettings={lightingSettings}
+        onLightingChange={handleLightingChange}
+        environmentType={environmentType}
+        onEnvironmentChange={handleEnvironmentChange}
       />
     </div>
   );
