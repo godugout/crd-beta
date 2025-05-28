@@ -72,10 +72,13 @@ const CardEditor: React.FC<CardEditorProps> = ({
     const canvas = new fabric.Canvas(canvasRef.current, {
       width: 750, // 2.5" at 300 DPI
       height: 1050, // 3.5" at 300 DPI
-      backgroundColor: '#ffffff',
+      backgroundColor: 'transparent', // Make canvas transparent
     });
 
     fabricRef.current = canvas;
+
+    // Add crop and bleed lines
+    addCropAndBleedLines(canvas);
 
     // Set up event handlers
     canvas.on('selection:created', (e) => {
@@ -111,6 +114,140 @@ const CardEditor: React.FC<CardEditorProps> = ({
       canvas.dispose();
     };
   }, []);
+
+  // Add crop and bleed lines function
+  const addCropAndBleedLines = (canvas: fabric.Canvas) => {
+    const canvasWidth = canvas.width || 750;
+    const canvasHeight = canvas.height || 1050;
+    
+    // Bleed area (extends beyond crop area)
+    const bleedSize = 18; // 0.125" at 144 DPI (common bleed)
+    
+    // Safe area (inside crop area)
+    const safeMargin = 36; // 0.25" margin from crop edge
+    
+    // Create bleed lines (outermost - red dashed)
+    const bleedLines = [
+      // Top bleed
+      new fabric.Line([0, bleedSize, canvasWidth, bleedSize], {
+        stroke: '#ff0000',
+        strokeWidth: 1,
+        strokeDashArray: [5, 5],
+        selectable: false,
+        evented: false,
+        name: 'bleed-line'
+      }),
+      // Bottom bleed  
+      new fabric.Line([0, canvasHeight - bleedSize, canvasWidth, canvasHeight - bleedSize], {
+        stroke: '#ff0000',
+        strokeWidth: 1,
+        strokeDashArray: [5, 5],
+        selectable: false,
+        evented: false,
+        name: 'bleed-line'
+      }),
+      // Left bleed
+      new fabric.Line([bleedSize, 0, bleedSize, canvasHeight], {
+        stroke: '#ff0000',
+        strokeWidth: 1,
+        strokeDashArray: [5, 5],
+        selectable: false,
+        evented: false,
+        name: 'bleed-line'
+      }),
+      // Right bleed
+      new fabric.Line([canvasWidth - bleedSize, 0, canvasWidth - bleedSize, canvasHeight], {
+        stroke: '#ff0000',
+        strokeWidth: 1,
+        strokeDashArray: [5, 5],
+        selectable: false,
+        evented: false,
+        name: 'bleed-line'
+      })
+    ];
+
+    // Create crop lines (card edge - solid black)
+    const cropLines = [
+      // Top crop
+      new fabric.Line([0, bleedSize * 2, canvasWidth, bleedSize * 2], {
+        stroke: '#000000',
+        strokeWidth: 2,
+        selectable: false,
+        evented: false,
+        name: 'crop-line'
+      }),
+      // Bottom crop
+      new fabric.Line([0, canvasHeight - bleedSize * 2, canvasWidth, canvasHeight - bleedSize * 2], {
+        stroke: '#000000',
+        strokeWidth: 2,
+        selectable: false,
+        evented: false,
+        name: 'crop-line'
+      }),
+      // Left crop
+      new fabric.Line([bleedSize * 2, 0, bleedSize * 2, canvasHeight], {
+        stroke: '#000000',
+        strokeWidth: 2,
+        selectable: false,
+        evented: false,
+        name: 'crop-line'
+      }),
+      // Right crop
+      new fabric.Line([canvasWidth - bleedSize * 2, 0, canvasWidth - bleedSize * 2, canvasHeight], {
+        stroke: '#000000',
+        strokeWidth: 2,
+        selectable: false,
+        evented: false,
+        name: 'crop-line'
+      })
+    ];
+
+    // Create safe area lines (inner margin - blue dashed)
+    const safeLines = [
+      // Top safe
+      new fabric.Line([bleedSize * 2 + safeMargin, bleedSize * 2 + safeMargin, canvasWidth - bleedSize * 2 - safeMargin, bleedSize * 2 + safeMargin], {
+        stroke: '#0066cc',
+        strokeWidth: 1,
+        strokeDashArray: [3, 3],
+        selectable: false,
+        evented: false,
+        name: 'safe-line'
+      }),
+      // Bottom safe
+      new fabric.Line([bleedSize * 2 + safeMargin, canvasHeight - bleedSize * 2 - safeMargin, canvasWidth - bleedSize * 2 - safeMargin, canvasHeight - bleedSize * 2 - safeMargin], {
+        stroke: '#0066cc',
+        strokeWidth: 1,
+        strokeDashArray: [3, 3],
+        selectable: false,
+        evented: false,
+        name: 'safe-line'
+      }),
+      // Left safe
+      new fabric.Line([bleedSize * 2 + safeMargin, bleedSize * 2 + safeMargin, bleedSize * 2 + safeMargin, canvasHeight - bleedSize * 2 - safeMargin], {
+        stroke: '#0066cc',
+        strokeWidth: 1,
+        strokeDashArray: [3, 3],
+        selectable: false,
+        evented: false,
+        name: 'safe-line'
+      }),
+      // Right safe
+      new fabric.Line([canvasWidth - bleedSize * 2 - safeMargin, bleedSize * 2 + safeMargin, canvasWidth - bleedSize * 2 - safeMargin, canvasHeight - bleedSize * 2 - safeMargin], {
+        stroke: '#0066cc',
+        strokeWidth: 1,
+        strokeDashArray: [3, 3],
+        selectable: false,
+        evented: false,
+        name: 'safe-line'
+      })
+    ];
+
+    // Add all guide lines to canvas
+    [...bleedLines, ...cropLines, ...safeLines].forEach(line => {
+      canvas.add(line);
+      canvas.sendToBack(line); // Keep guides behind content
+    });
+  };
 
   // Render layers on canvas with proper z-index ordering
   useEffect(() => {
@@ -550,10 +687,11 @@ const CardEditor: React.FC<CardEditorProps> = ({
         >
           <canvas 
             ref={canvasRef} 
-            className="border border-gray-600 bg-white"
+            className="border border-gray-600"
             style={{
+              background: 'transparent',
               backgroundImage: showGrid ? 
-                'linear-gradient(rgba(0,0,0,.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,.1) 1px, transparent 1px)' : 
+                'linear-gradient(rgba(128,128,128,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(128,128,128,0.3) 1px, transparent 1px)' : 
                 'none',
               backgroundSize: showGrid ? '20px 20px' : 'auto'
             }}
@@ -564,6 +702,21 @@ const CardEditor: React.FC<CardEditorProps> = ({
               Canvas: 750x1050, Layers: {activeCard.layers?.length || 0}
             </div>
           )}
+          {/* Guide lines legend */}
+          <div className="absolute bottom-2 left-2 bg-black bg-opacity-75 text-white text-xs p-2 rounded">
+            <div className="flex items-center gap-2 mb-1">
+              <div className="w-4 h-0 border-t border-red-500 border-dashed"></div>
+              <span>Bleed</span>
+            </div>
+            <div className="flex items-center gap-2 mb-1">
+              <div className="w-4 h-0 border-t-2 border-black"></div>
+              <span>Crop</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-0 border-t border-blue-500 border-dashed"></div>
+              <span>Safe</span>
+            </div>
+          </div>
         </div>
       </div>
 
