@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/auth';
 import { Button } from '@/components/ui/button';
@@ -38,7 +37,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ cardId, collectionId, t
         cardId,
         collectionId,
         teamId,
-        parentId: null // Only fetch top-level comments
+        parentId: null
       });
       
       if (error) {
@@ -48,7 +47,6 @@ const CommentSection: React.FC<CommentSectionProps> = ({ cardId, collectionId, t
       }
       
       if (data) {
-        // Ensure we're using a consistent type
         const typedComments = data as Comment[];
         setComments(typedComments);
         typedComments.forEach(comment => {
@@ -76,7 +74,6 @@ const CommentSection: React.FC<CommentSectionProps> = ({ cardId, collectionId, t
       }
       
       if (data && data.length > 0) {
-        // Handle type consistency
         const typedReplies = data as Comment[];
         setRepliesByParentId(prev => ({
           ...prev,
@@ -113,7 +110,6 @@ const CommentSection: React.FC<CommentSectionProps> = ({ cardId, collectionId, t
         toast.success('Comment posted successfully');
         setNewComment('');
         
-        // Ensure type consistency by casting
         const typedComment = data as Comment;
         
         if (replyTo) {
@@ -147,7 +143,6 @@ const CommentSection: React.FC<CommentSectionProps> = ({ cardId, collectionId, t
       if (data) {
         toast.success('Comment updated successfully');
         
-        // Ensure type consistency by casting
         const typedComment = data as Comment;
         
         if (typedComment.parentId) {
@@ -220,13 +215,11 @@ const CommentSection: React.FC<CommentSectionProps> = ({ cardId, collectionId, t
     const isOwnComment = user && comment.userId === user.id;
     const replies = repliesByParentId[comment.id] || [];
     
-    // Helper function to get display name
     const getDisplayName = (user?: User) => {
       if (!user) return 'Anonymous';
-      return user.displayName || user.name || user.username || 'Anonymous';
+      return user.displayName || user.name || 'Anonymous';
     };
     
-    // Helper function to get avatar initial
     const getAvatarInitial = (user?: User) => {
       if (!user) return '?';
       if (user.displayName) return user.displayName.charAt(0);

@@ -1,5 +1,18 @@
 
-import { BaseCard, DesignMetadata, CardRarity, HotspotData } from './cardTypes';
+import { BaseCard, DesignMetadata, CardEffect } from './cardTypes';
+
+export interface HotspotData {
+  id: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  content: string;
+  type: 'text' | 'link' | 'image' | 'video';
+  visible: boolean;
+}
+
+export type CardRarity = 'common' | 'uncommon' | 'rare' | 'ultra-rare' | 'legendary' | 'one-of-one';
 
 export interface EnhancedCard extends BaseCard {
   seriesId?: string; 

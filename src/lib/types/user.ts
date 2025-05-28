@@ -4,7 +4,8 @@ export enum UserRole {
   USER = 'user',
   MODERATOR = 'moderator',
   ARTIST = 'artist',
-  VIEWER = 'viewer'
+  VIEWER = 'viewer',
+  CREATOR = 'creator'
 }
 
 export interface User {
@@ -12,6 +13,8 @@ export interface User {
   email: string;
   name?: string;
   displayName?: string;
+  username?: string;
+  bio?: string;
   avatarUrl?: string;
   role?: UserRole;
   permissions?: Permission[];
@@ -27,12 +30,26 @@ export enum Permission {
   MODERATE = 'moderate'
 }
 
+// Create UserPermission alias for backward compatibility
+export type UserPermission = Permission;
+
+// Define role-based permissions
+export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
+  [UserRole.ADMIN]: [Permission.READ, Permission.WRITE, Permission.DELETE, Permission.ADMIN, Permission.MODERATE],
+  [UserRole.MODERATOR]: [Permission.READ, Permission.WRITE, Permission.MODERATE],
+  [UserRole.ARTIST]: [Permission.READ, Permission.WRITE],
+  [UserRole.CREATOR]: [Permission.READ, Permission.WRITE],
+  [UserRole.USER]: [Permission.READ],
+  [UserRole.VIEWER]: [Permission.READ]
+};
+
 export interface UserProfile {
   id: string;
   userId: string;
   bio?: string;
   location?: string;
   website?: string;
+  role: UserRole;
   socialLinks?: {
     twitter?: string;
     instagram?: string;

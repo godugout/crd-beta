@@ -1,4 +1,3 @@
-
 // Base types that might be used across modules
 export type JsonValue = 
   | string 
@@ -26,10 +25,9 @@ export * from './instagram';
 export * from './teamTypes';
 export type { CardEffect, CardEffectSettings } from './cardEffects';
 
-// Don't re-export enhancedCardTypes directly to avoid ambiguity
-import * as EnhancedCardTypes from './enhancedCardTypes';
+// Export from enhancedCardTypes with proper exports
 export type { 
-  HotspotData as EnhancedHotspotData,
+  HotspotData,
   EnhancedCard as ExtendedCard,
   Series as EnhancedSeries,
   CardRarity,

@@ -1,11 +1,12 @@
-
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { EnhancedCard, Series, Deck } from '@/lib/types/enhancedCardTypes';
 
 interface CardEnhancedContextType {
   enhancedCards: EnhancedCard[];
+  cards: EnhancedCard[]; // Alias for backward compatibility
   series: Series[];
   decks: Deck[];
+  favorites: string[];
   isLoading: boolean;
   addEnhancedCard: (card: Partial<EnhancedCard>) => Promise<EnhancedCard>;
   updateEnhancedCard: (id: string, updates: Partial<EnhancedCard>) => Promise<EnhancedCard>;
@@ -16,6 +17,8 @@ interface CardEnhancedContextType {
   addDeck: (deck: Partial<Deck>) => Promise<Deck>;
   updateDeck: (id: string, updates: Partial<Deck>) => Promise<Deck>;
   deleteDeck: (id: string) => Promise<boolean>;
+  getDeck: (id: string) => Deck | undefined;
+  toggleFavorite: (cardId: string) => void;
 }
 
 const CardEnhancedContext = createContext<CardEnhancedContextType | undefined>(undefined);
@@ -32,6 +35,7 @@ export const CardEnhancedProvider: React.FC<{ children: ReactNode }> = ({ childr
   const [enhancedCards, setEnhancedCards] = useState<EnhancedCard[]>([]);
   const [series, setSeries] = useState<Series[]>([]);
   const [decks, setDecks] = useState<Deck[]>([]);
+  const [favorites, setFavorites] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   const addEnhancedCard = async (cardData: Partial<EnhancedCard>): Promise<EnhancedCard> => {
@@ -181,10 +185,24 @@ export const CardEnhancedProvider: React.FC<{ children: ReactNode }> = ({ childr
     return true;
   };
 
+  const getDeck = (id: string): Deck | undefined => {
+    return decks.find(deck => deck.id === id);
+  };
+
+  const toggleFavorite = (cardId: string): void => {
+    setFavorites(prev => 
+      prev.includes(cardId) 
+        ? prev.filter(id => id !== cardId)
+        : [...prev, cardId]
+    );
+  };
+
   const value = {
     enhancedCards,
+    cards: enhancedCards, // Alias for backward compatibility
     series,
     decks,
+    favorites,
     isLoading,
     addEnhancedCard,
     updateEnhancedCard,
@@ -195,6 +213,8 @@ export const CardEnhancedProvider: React.FC<{ children: ReactNode }> = ({ childr
     addDeck,
     updateDeck,
     deleteDeck,
+    getDeck,
+    toggleFavorite,
   };
 
   return (
