@@ -5,52 +5,67 @@ import { Environment } from '@react-three/drei';
 export const ForestEnvironment = () => {
   return (
     <>
-      {/* Forest background */}
-      <color attach="background" args={['#2d4a22']} />
+      {/* Deep forest background with green tones */}
+      <color attach="background" args={['#1a2f1a']} />
       
       {/* Use built-in forest environment */}
       <Environment 
         preset="forest"
         background={false}
-        blur={0.8}
+        blur={0.6}
       />
       
-      {/* Natural forest lighting */}
-      <ambientLight intensity={0.5} color="#4a6741" />
+      {/* Natural forest lighting with warm sunbeams */}
+      <ambientLight intensity={0.3} color="#4a5d4a" />
       
-      {/* Sunlight filtering through trees */}
+      {/* Main sunlight filtering through canopy */}
       <directionalLight 
-        position={[20, 30, 15]} 
-        intensity={2.0} 
+        position={[15, 25, 10]} 
+        intensity={1.8} 
         color="#fff8dc"
         castShadow
       />
+      
+      {/* Secondary filtered light */}
       <directionalLight 
-        position={[-10, 25, 20]} 
-        intensity={1.2} 
-        color="#f0fff0"
+        position={[-8, 20, 15]} 
+        intensity={1.0} 
+        color="#e6f3e6"
       />
       
-      {/* Dappled light effects */}
+      {/* Dappled sunlight spots */}
       <spotLight
-        position={[25, 35, 25]}
-        target-position={[5, 0, 5]}
+        position={[20, 30, 20]}
+        target-position={[3, 0, 3]}
+        angle={0.25}
+        penumbra={0.9}
+        intensity={2.2}
+        color="#ffffe0"
+        castShadow
+      />
+      <spotLight
+        position={[-15, 35, 12]}
+        target-position={[-2, 0, -2]}
         angle={0.3}
         penumbra={0.8}
         intensity={1.8}
-        color="#fffacd"
+        color="#f0fff0"
       />
       <spotLight
-        position={[-20, 40, 15]}
-        target-position={[-5, 0, -5]}
-        angle={0.4}
-        penumbra={0.7}
+        position={[8, 28, -18]}
+        target-position={[1, 0, -1]}
+        angle={0.2}
+        penumbra={0.85}
         intensity={1.5}
-        color="#f5fffa"
+        color="#fffacd"
       />
       
-      {/* Forest atmosphere */}
-      <fog attach="fog" args={['#2d4a22', 40, 120]} />
+      {/* Soft undergrowth lighting */}
+      <pointLight position={[12, 5, 8]} intensity={0.4} color="#90ee90" />
+      <pointLight position={[-10, 3, -12]} intensity={0.3} color="#98fb98" />
+      
+      {/* Forest atmosphere with depth */}
+      <fog attach="fog" args={['#2d4a22', 30, 100]} />
     </>
   );
 };
