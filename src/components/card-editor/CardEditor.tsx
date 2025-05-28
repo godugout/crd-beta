@@ -1,195 +1,602 @@
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
+import { Card, CardLayer, CardEffect } from '@/lib/types';
 import { fabric } from 'fabric';
-import Canvas from './FabricCanvas';
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Separator } from '@/components/ui/separator';
+import { 
+  Save, 
+  Eye, 
+  Download, 
+  Undo, 
+  Redo,
+  ZoomIn,
+  ZoomOut,
+  Grid,
+  MousePointer,
+  Type,
+  Image as ImageIcon,
+  Circle,
+  Square
+} from 'lucide-react';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 
 interface CardEditorProps {
-  initialImage?: string;
-  onSave?: (canvas: fabric.Canvas) => void;
+  initialCard?: Partial<Card>;
+  onSave?: (card: Card) => void;
+  onPreview?: (card: Card) => void;
+  onExport?: (card: Card) => void;
+  className?: string;
 }
 
+type Tool = 'select' | 'text' | 'image' | 'rectangle' | 'circle';
+
 const CardEditor: React.FC<CardEditorProps> = ({
-  initialImage,
-  onSave,
+  initialCard,
+  onSave = () => {},
+  onPreview = () => {},
+  onExport = () => {},
+  className
 }) => {
-  const [canvas, setCanvas] = useState<fabric.Canvas | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
-
-  // Initialize canvas with image if provided
-  const handleCanvasReady = useCallback((fabricCanvas: fabric.Canvas) => {
-    console.log("Canvas is ready");
-    setCanvas(fabricCanvas);
-    
-    if (initialImage) {
-      setLoading(true);
-      
-      fabric.Image.fromURL(initialImage)
-        .then((img) => {
-          // Scale image to fit canvas
-          const canvasWidth = fabricCanvas.getWidth();
-          const canvasHeight = fabricCanvas.getHeight();
-          
-          const scale = Math.min(
-            (canvasWidth - 40) / img.width!,
-            (canvasHeight - 40) / img.height!
-          );
-          
-          img.scale(scale);
-          
-          // Center image on canvas
-          img.set({
-            left: canvasWidth / 2,
-            top: canvasHeight / 2,
-            originX: 'center',
-            originY: 'center',
-          });
-          
-          fabricCanvas.add(img);
-          fabricCanvas.renderAll();
-          setLoading(false);
-        })
-        .catch(err => {
-          console.error("Error loading image:", err);
-          toast.error("Failed to load image");
-          setLoading(false);
-        });
+  // Core state
+  const [activeCard, setActiveCard] = useState<Partial<Card>>(
+    initialCard || {
+      id: `card-${Date.now()}`,
+      title: 'Untitled Card',
+      layers: [],
+      effects: [],
+      metadata: {},
+      created: new Date(),
+      updated: new Date()
     }
-  }, [initialImage]);
+  );
 
-  // Add text to canvas
-  const addText = useCallback(() => {
-    if (!canvas) return;
-    
-    const text = new fabric.Text('Double click to edit', {
-      left: canvas.getWidth() / 2,
-      top: canvas.getHeight() / 2,
-      fontFamily: 'Arial',
-      fontSize: 20,
-      fill: '#000000',
-      textAlign: 'center',
-      originX: 'center',
-      originY: 'center',
+  const [selectedLayerId, setSelectedLayerId] = useState<string | null>(null);
+  const [activeTool, setActiveTool] = useState<Tool>('select');
+  const [showGrid, setShowGrid] = useState(true);
+  const [zoom, setZoom] = useState(1);
+  const [history, setHistory] = useState<Partial<Card>[]>([activeCard]);
+  const [historyIndex, setHistoryIndex] = useState(0);
+
+  // Canvas refs
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const fabricRef = useRef<fabric.Canvas | null>(null);
+
+  // Initialize Fabric.js canvas
+  useEffect(() => {
+    if (!canvasRef.current) return;
+
+    const canvas = new fabric.Canvas(canvasRef.current, {
+      width: 750, // 2.5" at 300 DPI
+      height: 1050, // 3.5" at 300 DPI
+      backgroundColor: '#ffffff',
+      preserveObjectStacking: true,
     });
-    
-    canvas.add(text);
-    canvas.setActiveObject(text);
-    canvas.renderAll();
-    
-    toast.success("Text added - double click to edit");
-  }, [canvas]);
 
-  // Handle file upload
-  const handleFileUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!canvas || !e.target.files || !e.target.files[0]) return;
-    
-    const file = e.target.files[0];
-    const reader = new FileReader();
-    
-    setLoading(true);
-    reader.onload = (event) => {
-      if (!event.target?.result) return;
-      
-      // Clear existing objects
-      canvas.clear();
-      
-      fabric.Image.fromURL(event.target.result.toString())
-        .then((img) => {
-          // Scale image to fit canvas
-          const canvasWidth = canvas.getWidth();
-          const canvasHeight = canvas.getHeight();
-          
-          const scale = Math.min(
-            (canvasWidth - 40) / img.width!,
-            (canvasHeight - 40) / img.height!
-          );
-          
-          img.scale(scale);
-          
-          // Center image on canvas
-          img.set({
-            left: canvasWidth / 2,
-            top: canvasHeight / 2,
-            originX: 'center',
-            originY: 'center',
-          });
-          
-          canvas.add(img);
-          canvas.renderAll();
-          setLoading(false);
-        })
-        .catch(err => {
-          console.error("Error loading image:", err);
-          toast.error("Failed to load image");
-          setLoading(false);
+    fabricRef.current = canvas;
+
+    // Set up event handlers
+    canvas.on('selection:created', (e) => {
+      const selected = e.selected?.[0];
+      if (selected && selected.data?.layerId) {
+        setSelectedLayerId(selected.data.layerId);
+      }
+    });
+
+    canvas.on('selection:cleared', () => {
+      setSelectedLayerId(null);
+    });
+
+    canvas.on('object:modified', (e) => {
+      if (e.target && e.target.data?.layerId) {
+        updateLayer(e.target.data.layerId, {
+          position: { x: e.target.left || 0, y: e.target.top || 0 },
+          rotation: e.target.angle || 0,
+          size: { 
+            width: (e.target.width || 100) * (e.target.scaleX || 1), 
+            height: (e.target.height || 100) * (e.target.scaleY || 1) 
+          },
         });
-    };
-    
-    reader.readAsDataURL(file);
-  }, [canvas]);
+      }
+    });
 
-  // Save canvas
-  const handleSave = useCallback(() => {
-    if (!canvas || !onSave) return;
+    return () => {
+      canvas.dispose();
+    };
+  }, []);
+
+  // Render layers on canvas
+  useEffect(() => {
+    if (!fabricRef.current || !activeCard.layers) return;
+
+    fabricRef.current.clear();
     
-    try {
-      onSave(canvas);
-      toast.success("Card saved successfully");
-    } catch (error) {
-      console.error("Error saving canvas:", error);
-      toast.error("Failed to save card");
+    activeCard.layers.forEach((layer) => {
+      if (layer.visible) {
+        renderLayer(fabricRef.current!, layer);
+      }
+    });
+  }, [activeCard.layers]);
+
+  const renderLayer = (canvas: fabric.Canvas, layer: CardLayer) => {
+    switch (layer.type) {
+      case 'image':
+        if (layer.imageUrl) {
+          fabric.Image.fromURL(layer.imageUrl)
+            .then((img) => {
+              img.set({
+                left: layer.position.x,
+                top: layer.position.y,
+                angle: layer.rotation,
+                opacity: layer.opacity,
+                scaleX: layer.size.width / (img.width || 1),
+                scaleY: layer.size.height / (img.height || 1),
+                data: { layerId: layer.id }
+              });
+              canvas.add(img);
+              canvas.renderAll();
+            })
+            .catch(err => {
+              console.error('Error loading image:', err);
+              toast.error('Failed to load image layer');
+            });
+        }
+        break;
+      
+      case 'text':
+        const text = new fabric.Text(layer.content || 'Text', {
+          left: layer.position.x,
+          top: layer.position.y,
+          angle: layer.rotation,
+          opacity: layer.opacity,
+          fontSize: layer.textStyle?.fontSize || 24,
+          fontFamily: layer.textStyle?.fontFamily || 'Arial',
+          fill: layer.textStyle?.color || '#000000',
+          data: { layerId: layer.id }
+        });
+        canvas.add(text);
+        break;
+      
+      case 'shape':
+        if (layer.shapeType === 'rectangle') {
+          const rect = new fabric.Rect({
+            left: layer.position.x,
+            top: layer.position.y,
+            width: layer.size.width as number || 100,
+            height: layer.size.height as number || 100,
+            fill: layer.color || '#000000',
+            angle: layer.rotation,
+            opacity: layer.opacity,
+            data: { layerId: layer.id }
+          });
+          canvas.add(rect);
+        } else if (layer.shapeType === 'circle') {
+          const circle = new fabric.Circle({
+            left: layer.position.x,
+            top: layer.position.y,
+            radius: (layer.size.width as number || 100) / 2,
+            fill: layer.color || '#000000',
+            angle: layer.rotation,
+            opacity: layer.opacity,
+            data: { layerId: layer.id }
+          });
+          canvas.add(circle);
+        }
+        break;
     }
-  }, [canvas, onSave]);
+  };
+
+  const updateLayer = useCallback((layerId: string, updates: Partial<CardLayer>) => {
+    setActiveCard(prev => ({
+      ...prev,
+      layers: prev.layers?.map(layer => 
+        layer.id === layerId ? { ...layer, ...updates } : layer
+      ) || [],
+      updated: new Date()
+    }));
+  }, []);
+
+  const addImageLayer = useCallback((imageUrl: string) => {
+    const newLayer: CardLayer = {
+      id: `layer-${Date.now()}`,
+      type: 'image',
+      content: '',
+      position: { x: 100, y: 100, z: 0 },
+      size: { width: 200, height: 200 },
+      rotation: 0,
+      opacity: 1,
+      zIndex: (activeCard.layers?.length || 0) + 1,
+      visible: true,
+      imageUrl
+    };
+
+    setActiveCard(prev => ({
+      ...prev,
+      layers: [...(prev.layers || []), newLayer],
+      updated: new Date()
+    }));
+
+    toast.success('Image layer added');
+  }, [activeCard.layers]);
+
+  const addTextLayer = useCallback(() => {
+    const newLayer: CardLayer = {
+      id: `layer-${Date.now()}`,
+      type: 'text',
+      content: 'New Text',
+      position: { x: 100, y: 100, z: 0 },
+      size: { width: 'auto', height: 'auto' },
+      rotation: 0,
+      opacity: 1,
+      zIndex: (activeCard.layers?.length || 0) + 1,
+      visible: true,
+      textStyle: {
+        fontSize: 24,
+        fontFamily: 'Arial',
+        color: '#000000'
+      }
+    };
+
+    setActiveCard(prev => ({
+      ...prev,
+      layers: [...(prev.layers || []), newLayer],
+      updated: new Date()
+    }));
+
+    toast.success('Text layer added');
+  }, [activeCard.layers]);
+
+  const addShapeLayer = useCallback((shapeType: 'rectangle' | 'circle') => {
+    const newLayer: CardLayer = {
+      id: `layer-${Date.now()}`,
+      type: 'shape',
+      content: '',
+      position: { x: 100, y: 100, z: 0 },
+      size: { width: 100, height: 100 },
+      rotation: 0,
+      opacity: 1,
+      zIndex: (activeCard.layers?.length || 0) + 1,
+      visible: true,
+      shapeType,
+      color: '#4F46E5'
+    };
+
+    setActiveCard(prev => ({
+      ...prev,
+      layers: [...(prev.layers || []), newLayer],
+      updated: new Date()
+    }));
+
+    toast.success('Shape layer added');
+  }, [activeCard.layers]);
+
+  const handleSave = async () => {
+    try {
+      const cardToSave: Card = {
+        id: activeCard.id || `card-${Date.now()}`,
+        title: activeCard.title || 'Untitled Card',
+        description: activeCard.description || '',
+        imageUrl: activeCard.imageUrl || '',
+        thumbnailUrl: activeCard.thumbnailUrl || '',
+        userId: activeCard.userId || 'current-user',
+        tags: activeCard.tags || [],
+        effects: activeCard.effects || [],
+        createdAt: activeCard.createdAt || new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        designMetadata: activeCard.designMetadata || {
+          cardStyle: {
+            template: 'custom',
+            effect: 'none',
+            borderRadius: '8px',
+            borderColor: '#000000',
+            frameWidth: 2,
+            frameColor: '#000000',
+            shadowColor: 'rgba(0,0,0,0.2)'
+          },
+          textStyle: {
+            titleColor: '#000000',
+            titleAlignment: 'center',
+            titleWeight: 'bold',
+            descriptionColor: '#333333'
+          },
+          cardMetadata: {
+            category: 'Custom',
+            series: 'Base',
+            cardType: 'Standard'
+          },
+          marketMetadata: {
+            isPrintable: false,
+            isForSale: false,
+            includeInCatalog: false
+          }
+        },
+        layers: activeCard.layers || []
+      };
+
+      await onSave(cardToSave);
+      toast.success('Card saved successfully');
+    } catch (error) {
+      console.error('Save error:', error);
+      toast.error('Failed to save card');
+    }
+  };
+
+  const selectedLayer = activeCard.layers?.find(layer => layer.id === selectedLayerId);
 
   return (
-    <div className="card-editor">
-      <div className="toolbar flex gap-2 mb-4">
-        <input
-          type="file"
-          id="image-upload"
-          accept="image/*"
-          className="hidden"
-          onChange={handleFileUpload}
-          disabled={loading}
-        />
-        <label htmlFor="image-upload" className="cursor-pointer">
-          <Button variant="outline" disabled={loading} asChild>
-            <span>Upload Image</span>
-          </Button>
-        </label>
+    <div className={cn("flex h-screen bg-gray-900 text-white", className)}>
+      {/* Top Bar */}
+      <div className="absolute top-0 left-0 right-0 h-16 bg-gray-800 border-b border-gray-700 flex items-center justify-between px-4 z-10">
+        <div className="flex items-center space-x-4">
+          <h1 className="text-lg font-semibold">Card Editor</h1>
+          <input
+            type="text"
+            value={activeCard.title || ''}
+            onChange={(e) => setActiveCard(prev => ({ ...prev, title: e.target.value }))}
+            className="bg-gray-700 border border-gray-600 rounded px-3 py-1 text-sm"
+            placeholder="Card title"
+          />
+        </div>
         
+        <div className="flex items-center space-x-2">
+          <Button variant="ghost" size="sm">
+            <Undo className="w-4 h-4" />
+          </Button>
+          <Button variant="ghost" size="sm">
+            <Redo className="w-4 h-4" />
+          </Button>
+          <Separator orientation="vertical" className="h-6" />
+          <Button onClick={handleSave} size="sm">
+            <Save className="w-4 h-4 mr-1" />
+            Save
+          </Button>
+          <Button onClick={() => onPreview(activeCard as Card)} variant="outline" size="sm">
+            <Eye className="w-4 h-4 mr-1" />
+            Preview 3D
+          </Button>
+          <Button onClick={() => onExport(activeCard as Card)} variant="outline" size="sm">
+            <Download className="w-4 h-4 mr-1" />
+            Export
+          </Button>
+        </div>
+      </div>
+
+      {/* Left Toolbar */}
+      <div className="w-16 bg-gray-800 border-r border-gray-700 flex flex-col items-center py-20 space-y-2">
         <Button
-          variant="outline"
-          onClick={addText}
-          disabled={!canvas || loading}
+          variant={activeTool === 'select' ? 'default' : 'ghost'}
+          size="sm"
+          onClick={() => setActiveTool('select')}
+          className="w-12 h-12"
         >
-          Add Text
+          <MousePointer className="w-5 h-5" />
         </Button>
         
-        {onSave && (
-          <Button
-            variant="default"
-            onClick={handleSave}
-            disabled={!canvas || loading}
-          >
-            Save Card
-          </Button>
-        )}
-      </div>
-      
-      <div className="canvas-container relative">
-        {loading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/10 z-10">
-            <div className="animate-spin h-8 w-8 border-4 border-blue-600 border-t-transparent rounded-full"></div>
-          </div>
-        )}
-        <Canvas 
-          width={500} 
-          height={700} 
-          onReady={handleCanvasReady}
-          className="mx-auto"
+        <Button
+          variant={activeTool === 'text' ? 'default' : 'ghost'}
+          size="sm"
+          onClick={() => {
+            setActiveTool('text');
+            addTextLayer();
+          }}
+          className="w-12 h-12"
+        >
+          <Type className="w-5 h-5" />
+        </Button>
+        
+        <input
+          type="file"
+          accept="image/*"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) {
+              const url = URL.createObjectURL(file);
+              addImageLayer(url);
+            }
+          }}
+          className="hidden"
+          id="image-upload"
         />
+        <Button
+          variant={activeTool === 'image' ? 'default' : 'ghost'}
+          size="sm"
+          onClick={() => document.getElementById('image-upload')?.click()}
+          className="w-12 h-12"
+        >
+          <ImageIcon className="w-5 h-5" />
+        </Button>
+        
+        <Button
+          variant={activeTool === 'rectangle' ? 'default' : 'ghost'}
+          size="sm"
+          onClick={() => {
+            setActiveTool('rectangle');
+            addShapeLayer('rectangle');
+          }}
+          className="w-12 h-12"
+        >
+          <Square className="w-5 h-5" />
+        </Button>
+        
+        <Button
+          variant={activeTool === 'circle' ? 'default' : 'ghost'}
+          size="sm"
+          onClick={() => {
+            setActiveTool('circle');
+            addShapeLayer('circle');
+          }}
+          className="w-12 h-12"
+        >
+          <Circle className="w-5 h-5" />
+        </Button>
+        
+        <Separator className="my-4" />
+        
+        <Button
+          variant={showGrid ? 'default' : 'ghost'}
+          size="sm"
+          onClick={() => setShowGrid(!showGrid)}
+          className="w-12 h-12"
+        >
+          <Grid className="w-5 h-5" />
+        </Button>
+        
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setZoom(Math.min(zoom + 0.1, 2))}
+          className="w-12 h-12"
+        >
+          <ZoomIn className="w-5 h-5" />
+        </Button>
+        
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setZoom(Math.max(zoom - 0.1, 0.5))}
+          className="w-12 h-12"
+        >
+          <ZoomOut className="w-5 h-5" />
+        </Button>
+      </div>
+
+      {/* Canvas Area */}
+      <div className="flex-1 flex items-center justify-center bg-gray-800 pt-16">
+        <div 
+          className="relative shadow-2xl"
+          style={{ transform: `scale(${zoom})` }}
+        >
+          <canvas 
+            ref={canvasRef} 
+            className="border border-gray-600 bg-white"
+            style={{
+              backgroundImage: showGrid ? 
+                'linear-gradient(rgba(0,0,0,.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,.1) 1px, transparent 1px)' : 
+                'none',
+              backgroundSize: showGrid ? '20px 20px' : 'auto'
+            }}
+          />
+        </div>
+      </div>
+
+      {/* Right Panel */}
+      <div className="w-80 bg-gray-800 border-l border-gray-700 pt-16">
+        <Tabs defaultValue="layers" className="h-full">
+          <TabsList className="grid w-full grid-cols-3 bg-gray-700">
+            <TabsTrigger value="layers">Layers</TabsTrigger>
+            <TabsTrigger value="properties">Properties</TabsTrigger>
+            <TabsTrigger value="effects">Effects</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="layers" className="p-4 space-y-2">
+            <h3 className="font-semibold mb-3">Layers</h3>
+            {activeCard.layers?.map((layer) => (
+              <div
+                key={layer.id}
+                className={cn(
+                  "p-3 rounded border cursor-pointer transition-colors",
+                  selectedLayerId === layer.id 
+                    ? "bg-blue-600 border-blue-500" 
+                    : "bg-gray-700 border-gray-600 hover:bg-gray-600"
+                )}
+                onClick={() => setSelectedLayerId(layer.id)}
+              >
+                <div className="flex justify-between items-center">
+                  <span className="text-sm capitalize">{layer.type}</span>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setActiveCard(prev => ({
+                        ...prev,
+                        layers: prev.layers?.map(l => 
+                          l.id === layer.id ? { ...l, visible: !l.visible } : l
+                        )
+                      }));
+                    }}
+                    className={cn(
+                      "w-6 h-6 rounded border text-xs",
+                      layer.visible ? "bg-green-600 border-green-500" : "bg-gray-600 border-gray-500"
+                    )}
+                  >
+                    {layer.visible ? '👁' : '👁‍🗨'}
+                  </button>
+                </div>
+                <div className="text-xs text-gray-400 mt-1">
+                  {layer.type === 'text' ? layer.content : layer.type === 'image' ? 'Image' : 'Shape'}
+                </div>
+              </div>
+            ))}
+          </TabsContent>
+          
+          <TabsContent value="properties" className="p-4">
+            <h3 className="font-semibold mb-3">Properties</h3>
+            {selectedLayer ? (
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm text-gray-400">Position</label>
+                  <div className="grid grid-cols-2 gap-2 mt-1">
+                    <input
+                      type="number"
+                      placeholder="X"
+                      value={selectedLayer.position.x}
+                      onChange={(e) => updateLayer(selectedLayer.id, {
+                        position: { ...selectedLayer.position, x: Number(e.target.value) }
+                      })}
+                      className="bg-gray-700 border border-gray-600 rounded px-2 py-1 text-sm"
+                    />
+                    <input
+                      type="number"
+                      placeholder="Y"
+                      value={selectedLayer.position.y}
+                      onChange={(e) => updateLayer(selectedLayer.id, {
+                        position: { ...selectedLayer.position, y: Number(e.target.value) }
+                      })}
+                      className="bg-gray-700 border border-gray-600 rounded px-2 py-1 text-sm"
+                    />
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="text-sm text-gray-400">Opacity</label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.1"
+                    value={selectedLayer.opacity}
+                    onChange={(e) => updateLayer(selectedLayer.id, {
+                      opacity: Number(e.target.value)
+                    })}
+                    className="w-full mt-1"
+                  />
+                </div>
+                
+                {selectedLayer.type === 'text' && (
+                  <div>
+                    <label className="text-sm text-gray-400">Text</label>
+                    <input
+                      type="text"
+                      value={selectedLayer.content || ''}
+                      onChange={(e) => updateLayer(selectedLayer.id, {
+                        content: e.target.value
+                      })}
+                      className="w-full bg-gray-700 border border-gray-600 rounded px-2 py-1 text-sm mt-1"
+                    />
+                  </div>
+                )}
+              </div>
+            ) : (
+              <p className="text-gray-400 text-sm">Select a layer to edit properties</p>
+            )}
+          </TabsContent>
+          
+          <TabsContent value="effects" className="p-4">
+            <h3 className="font-semibold mb-3">Effects</h3>
+            <p className="text-gray-400 text-sm">Effects panel coming soon...</p>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

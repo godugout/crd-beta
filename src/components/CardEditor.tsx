@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { EnhancedCardEditor } from './card-editor/EnhancedCardEditor';
+import CardEditor from './card-editor/CardEditor';
 import { Card } from '@/lib/types';
 
 interface CardEditorProps {
@@ -10,7 +10,7 @@ interface CardEditorProps {
   onCancel?: () => void;
 }
 
-const CardEditor: React.FC<CardEditorProps> = ({ 
+const CardEditorComponent: React.FC<CardEditorProps> = ({ 
   card, 
   className, 
   onSave = () => {}, 
@@ -25,14 +25,20 @@ const CardEditor: React.FC<CardEditorProps> = ({
     console.log('Preview card:', card);
   };
 
+  const handleExport = (card: Card) => {
+    // Export functionality to be implemented
+    console.log('Export card:', card);
+  };
+
   return (
-    <EnhancedCardEditor
+    <CardEditor
       initialCard={card}
       onSave={handleSave}
       onPreview={handlePreview}
+      onExport={handleExport}
       className={className}
     />
   );
 };
 
-export default CardEditor;
+export default CardEditorComponent;

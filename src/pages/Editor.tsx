@@ -1,8 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
-import CardEditorContainer from '@/components/card-editor/CardEditorContainer';
-import PageLayout from '@/components/navigation/PageLayout';
+import CardEditor from '@/components/CardEditor';
 import { useCards } from '@/context/CardContext';
 import { toast } from 'sonner';
 
@@ -40,14 +39,9 @@ const Editor = () => {
   const editorData = card || initialData;
   
   return (
-    <PageLayout
-      title={card ? "Edit Card" : "Create New Card"}
-      description={card ? "Edit your digital card" : "Upload an image and add details to create your digital card."}
-    >
-      <div className="container mx-auto max-w-6xl px-4">
-        <CardEditorContainer card={editorData} />
-      </div>
-    </PageLayout>
+    <div className="h-screen">
+      <CardEditor card={editorData} />
+    </div>
   );
 };
 
