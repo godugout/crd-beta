@@ -126,7 +126,6 @@ export const useCardLighting = (initialPreset: LightingPreset = 'studio') => {
   }, []);
   
   // Update lighting settings with partial settings object
-  // Fix the function signature to match what's expected in the components
   const updateLightingSetting = useCallback((settings: Partial<LightingSettings>) => {
     setLightingSettings(prev => ({
       ...prev,
@@ -136,22 +135,25 @@ export const useCardLighting = (initialPreset: LightingPreset = 'studio') => {
   }, []);
   
   // Update primary light position (typically from mouse movement)
+  // Fixed: Added null check and proper dependency
   const updateLightPosition = useCallback((x: number, y: number) => {
-    if (!lightingSettings.useDynamicLighting) return;
-    
-    // Convert from normalized coordinates (0-1) to actual position values
-    const posX = (x - 0.5) * 20;
-    const posY = (y - 0.5) * -20; // Invert Y axis for natural movement
-    
-    setLightingSettings(prev => ({
-      ...prev,
-      primaryLight: {
-        ...prev.primaryLight,
-        x: posX,
-        y: posY
-      }
-    }));
-  }, [lightingSettings.useDynamicLighting]);
+    setLightingSettings(prev => {
+      if (!prev || !prev.useDynamicLighting) return prev;
+      
+      // Convert from normalized coordinates (0-1) to actual position values
+      const posX = (x - 0.5) * 20;
+      const posY = (y - 0.5) * -20; // Invert Y axis for natural movement
+      
+      return {
+        ...prev,
+        primaryLight: {
+          ...prev.primaryLight,
+          x: posX,
+          y: posY
+        }
+      };
+    });
+  }, []); // Removed lightingSettings dependency to prevent issues
   
   // Update primary light intensity
   const updatePrimaryLightIntensity = useCallback((intensity: number) => {
