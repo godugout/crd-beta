@@ -33,6 +33,16 @@ export const basketballCards: Card[] = [
         titleAlignment: 'center',
         titleWeight: 'bold',
         descriptionColor: '#FEE2E2'
+      },
+      cardMetadata: {
+        category: 'sports',
+        series: 'NBA Legends',
+        cardType: 'player'
+      },
+      marketMetadata: {
+        isPrintable: true,
+        isForSale: false,
+        includeInCatalog: true
       }
     }
   },
@@ -66,6 +76,16 @@ export const basketballCards: Card[] = [
         titleAlignment: 'center',
         titleWeight: 'bold',
         descriptionColor: '#FEF3C7'
+      },
+      cardMetadata: {
+        category: 'sports',
+        series: 'NBA Legends',
+        cardType: 'player'
+      },
+      marketMetadata: {
+        isPrintable: true,
+        isForSale: false,
+        includeInCatalog: true
       }
     }
   },
@@ -99,6 +119,16 @@ export const basketballCards: Card[] = [
         titleAlignment: 'center',
         titleWeight: 'bold',
         descriptionColor: '#DBEAFE'
+      },
+      cardMetadata: {
+        category: 'sports',
+        series: 'NBA Legends',
+        cardType: 'player'
+      },
+      marketMetadata: {
+        isPrintable: true,
+        isForSale: false,
+        includeInCatalog: true
       }
     }
   },
@@ -132,6 +162,16 @@ export const basketballCards: Card[] = [
         titleAlignment: 'center',
         titleWeight: 'bold',
         descriptionColor: '#EDE9FE'
+      },
+      cardMetadata: {
+        category: 'sports',
+        series: 'NBA Legends',
+        cardType: 'player'
+      },
+      marketMetadata: {
+        isPrintable: true,
+        isForSale: false,
+        includeInCatalog: true
       }
     }
   },
@@ -165,6 +205,16 @@ export const basketballCards: Card[] = [
         titleAlignment: 'center',
         titleWeight: 'bold',
         descriptionColor: '#D1FAE5'
+      },
+      cardMetadata: {
+        category: 'sports',
+        series: 'NBA Legends',
+        cardType: 'player'
+      },
+      marketMetadata: {
+        isPrintable: true,
+        isForSale: false,
+        includeInCatalog: true
       }
     }
   },
@@ -198,6 +248,16 @@ export const basketballCards: Card[] = [
         titleAlignment: 'center',
         titleWeight: 'bold',
         descriptionColor: '#FCE7F3'
+      },
+      cardMetadata: {
+        category: 'sports',
+        series: 'NBA Legends',
+        cardType: 'player'
+      },
+      marketMetadata: {
+        isPrintable: true,
+        isForSale: false,
+        includeInCatalog: true
       }
     }
   }
