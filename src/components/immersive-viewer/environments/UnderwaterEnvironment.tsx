@@ -1,12 +1,16 @@
 
 import React, { useRef } from 'react';
 import { Environment } from '@react-three/drei';
-import { useFrame } from '@react-three/fiber';
+import { useFrame, useLoader } from '@react-three/fiber';
+import { TextureLoader } from 'three';
 import * as THREE from 'three';
 
 export const UnderwaterEnvironment = () => {
   const causticsRef = useRef<THREE.Group>(null);
   const waterRef = useRef<THREE.Mesh>(null);
+  
+  // Load sand texture for ocean floor
+  const sandTexture = useLoader(TextureLoader, 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=1024&h=1024&fit=crop');
   
   useFrame((state) => {
     const time = state.clock.getElapsedTime();
@@ -88,11 +92,12 @@ export const UnderwaterEnvironment = () => {
         />
       </mesh>
       
-      {/* Ocean floor with texture */}
+      {/* Sandy ocean floor */}
       <mesh position={[0, -25, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
         <planeGeometry args={[400, 400]} />
         <meshStandardMaterial 
-          color="#1a3d2e" 
+          map={sandTexture}
+          color="#c4a484" 
           roughness={0.8}
           metalness={0.0}
         />

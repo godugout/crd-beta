@@ -1,8 +1,13 @@
 
 import React from 'react';
 import { Environment } from '@react-three/drei';
+import { useLoader } from '@react-three/fiber';
+import { TextureLoader } from 'three';
 
 export const StudioEnvironment = () => {
+  // Load concrete texture for studio floor
+  const concreteTexture = useLoader(TextureLoader, 'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=1024&h=1024&fit=crop');
+  
   return (
     <>
       {/* Professional photo studio environment */}
@@ -47,10 +52,11 @@ export const StudioEnvironment = () => {
       {/* Ambient studio lighting */}
       <ambientLight intensity={0.3} color="#f0f0ff" />
       
-      {/* Studio floor with reflective material */}
+      {/* Polished concrete studio floor */}
       <mesh position={[0, -6, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
         <planeGeometry args={[40, 40]} />
         <meshStandardMaterial 
+          map={concreteTexture}
           color="#e8e8e8" 
           roughness={0.05}
           metalness={0.1}

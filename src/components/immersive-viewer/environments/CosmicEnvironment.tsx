@@ -1,7 +1,8 @@
 
 import React, { useRef, useState, useEffect } from 'react';
 import { Stars, Environment } from '@react-three/drei';
-import { useFrame } from '@react-three/fiber';
+import { useFrame, useLoader } from '@react-three/fiber';
+import { TextureLoader } from 'three';
 import * as THREE from 'three';
 
 export const CosmicEnvironment = () => {
@@ -12,6 +13,9 @@ export const CosmicEnvironment = () => {
   
   const [blackHoleVisible, setBlackHoleVisible] = useState(false);
   const [blackHoleIntensity, setBlackHoleIntensity] = useState(0);
+  
+  // Load space station metal texture for the surface
+  const spaceTexture = useLoader(TextureLoader, 'https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?w=1024&h=1024&fit=crop');
   
   // Black hole formation cycle
   useEffect(() => {
@@ -212,6 +216,17 @@ export const CosmicEnvironment = () => {
           />
         </mesh>
       </group>
+      
+      {/* Space station platform surface */}
+      <mesh position={[0, -8, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+        <planeGeometry args={[50, 50]} />
+        <meshStandardMaterial 
+          map={spaceTexture}
+          color="#1a1a2e"
+          roughness={0.7}
+          metalness={0.8}
+        />
+      </mesh>
       
       {/* Deep space particles */}
       <pointLight position={[300, 50, 200]} color="#87ceeb" intensity={0.3} distance={200} />

@@ -1,9 +1,14 @@
 
 import React from 'react';
 import { Environment, Sky } from '@react-three/drei';
+import { useLoader } from '@react-three/fiber';
+import { TextureLoader } from 'three';
 import * as THREE from 'three';
 
 export const StadiumEnvironment = () => {
+  // Load grass texture for stadium field
+  const grassTexture = useLoader(TextureLoader, 'https://images.unsplash.com/photo-1574680096145-d05b474e2155?w=1024&h=1024&fit=crop');
+  
   return (
     <>
       {/* High-quality stadium environment */}
@@ -40,10 +45,13 @@ export const StadiumEnvironment = () => {
       {/* Stadium atmosphere */}
       <fog attach="fog" args={['#2a3c5f', 80, 300]} />
       
-      {/* Stadium field */}
+      {/* Stadium grass field */}
       <mesh position={[0, -15, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
         <planeGeometry args={[300, 300]} />
-        <meshLambertMaterial color="#1a4a1a" />
+        <meshLambertMaterial 
+          map={grassTexture}
+          color="#1a4a1a" 
+        />
       </mesh>
     </>
   );

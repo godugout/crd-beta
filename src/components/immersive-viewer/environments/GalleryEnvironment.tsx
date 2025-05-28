@@ -1,8 +1,13 @@
 
 import React from 'react';
 import { Environment } from '@react-three/drei';
+import { useLoader } from '@react-three/fiber';
+import { TextureLoader } from 'three';
 
 export const GalleryEnvironment = () => {
+  // Load marble texture for gallery floor
+  const marbleTexture = useLoader(TextureLoader, 'https://images.unsplash.com/photo-1564682999317-83e1e7bb1b55?w=1024&h=1024&fit=crop');
+  
   return (
     <>
       {/* Museum/Gallery environment */}
@@ -30,11 +35,12 @@ export const GalleryEnvironment = () => {
       {/* Ambient gallery lighting */}
       <ambientLight intensity={0.4} color="#f5f5f5" />
       
-      {/* Gallery floor */}
+      {/* Marble gallery floor */}
       <mesh position={[0, -8, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
         <planeGeometry args={[50, 50]} />
         <meshStandardMaterial 
-          color="#f0f0f0" 
+          map={marbleTexture}
+          color="#f8f8f8" 
           roughness={0.1}
           metalness={0.0}
         />
