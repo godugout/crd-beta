@@ -1,6 +1,5 @@
 
 import React, { useMemo } from 'react';
-import { Environment } from '@react-three/drei';
 import * as THREE from 'three';
 
 const NeonLights = () => {
@@ -26,20 +25,72 @@ const NeonLights = () => {
 };
 
 export const RetroArcadeEnvironment = () => {
+  // Create retro arcade background
+  const arcadeTexture = useMemo(() => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 1024;
+    canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+    
+    if (ctx) {
+      // Dark arcade background
+      ctx.fillStyle = '#0a0a0a';
+      ctx.fillRect(0, 0, 1024, 512);
+      
+      // Add arcade machine silhouettes
+      const machines = [
+        { x: 50, width: 80, height: 180 },
+        { x: 180, width: 90, height: 200 },
+        { x: 320, width: 75, height: 170 },
+        { x: 450, width: 85, height: 190 },
+        { x: 580, width: 80, height: 175 },
+        { x: 710, width: 90, height: 185 },
+        { x: 850, width: 80, height: 180 }
+      ];
+      
+      machines.forEach((machine, index) => {
+        ctx.fillStyle = '#1a1a1a';
+        ctx.fillRect(machine.x, 512 - machine.height, machine.width, machine.height);
+        
+        // Add colorful screen glow
+        const colors = ['#ff0080', '#00ff80', '#8000ff', '#ff8000', '#0080ff'];
+        ctx.fillStyle = colors[index % colors.length];
+        ctx.fillRect(machine.x + 10, 512 - machine.height + 20, machine.width - 20, machine.height * 0.4);
+        
+        // Add button panels
+        ctx.fillStyle = '#333333';
+        ctx.fillRect(machine.x + 15, 512 - machine.height * 0.4, machine.width - 30, 30);
+      });
+      
+      // Add neon strip lighting on ceiling
+      ctx.strokeStyle = '#ff00ff';
+      ctx.lineWidth = 4;
+      for (let i = 0; i < 1024; i += 100) {
+        ctx.beginPath();
+        ctx.moveTo(i, 20);
+        ctx.lineTo(i + 80, 20);
+        ctx.stroke();
+      }
+      
+      // Add floor reflection
+      const floorGradient = ctx.createLinearGradient(0, 450, 0, 512);
+      floorGradient.addColorStop(0, 'rgba(255, 0, 128, 0)');
+      floorGradient.addColorStop(1, 'rgba(255, 0, 128, 0.1)');
+      
+      ctx.fillStyle = floorGradient;
+      ctx.fillRect(0, 450, 1024, 62);
+    }
+    
+    return new THREE.CanvasTexture(canvas);
+  }, []);
+
   return (
     <>
-      {/* Dark arcade background */}
-      <color attach="background" args={['#0a0a0a']} />
+      {/* Retro arcade background */}
+      <primitive object={arcadeTexture} attach="background" />
       
       {/* Neon lighting array */}
       <NeonLights />
-      
-      {/* Use built-in warehouse environment for arcade structure */}
-      <Environment 
-        preset="warehouse"
-        background={true}
-        blur={0.6}
-      />
       
       {/* Arcade ambient lighting */}
       <ambientLight intensity={0.4} color="#330066" />

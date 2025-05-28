@@ -1,6 +1,5 @@
 
 import React, { useMemo } from 'react';
-import { Environment } from '@react-three/drei';
 import * as THREE from 'three';
 
 const SunbeamEffect = () => {
@@ -62,20 +61,51 @@ const SunbeamEffect = () => {
 };
 
 export const ForestEnvironment = () => {
+  // Create forest background texture
+  const forestTexture = useMemo(() => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 1024;
+    canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+    
+    if (ctx) {
+      // Create forest gradient background
+      const gradient = ctx.createLinearGradient(0, 0, 0, 512);
+      gradient.addColorStop(0, '#87CEEB'); // Sky blue
+      gradient.addColorStop(0.3, '#228B22'); // Forest green
+      gradient.addColorStop(0.7, '#2F4F2F'); // Dark slate gray
+      gradient.addColorStop(1, '#1C3A1C'); // Dark forest green
+      
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, 1024, 512);
+      
+      // Add tree silhouettes
+      ctx.fillStyle = '#0F2F0F';
+      for (let i = 0; i < 20; i++) {
+        const x = Math.random() * 1024;
+        const height = 100 + Math.random() * 200;
+        const width = 20 + Math.random() * 40;
+        
+        // Tree trunk
+        ctx.fillRect(x - width/4, 512 - height/3, width/2, height/3);
+        
+        // Tree crown
+        ctx.beginPath();
+        ctx.ellipse(x, 512 - height/2, width, height/2, 0, 0, 2 * Math.PI);
+        ctx.fill();
+      }
+    }
+    
+    return new THREE.CanvasTexture(canvas);
+  }, []);
+
   return (
     <>
       {/* Forest background */}
-      <color attach="background" args={['#1a3d1a']} />
+      <primitive object={forestTexture} attach="background" />
       
       {/* Sunbeam effects */}
       <SunbeamEffect />
-      
-      {/* Use built-in forest environment */}
-      <Environment 
-        preset="forest"
-        background={true}
-        blur={0.5}
-      />
       
       {/* Forest ambient lighting */}
       <ambientLight intensity={0.5} color="#90a865" />

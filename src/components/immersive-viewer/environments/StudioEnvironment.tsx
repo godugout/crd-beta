@@ -1,19 +1,62 @@
 
-import React from 'react';
-import { Environment } from '@react-three/drei';
+import React, { useMemo } from 'react';
+import * as THREE from 'three';
 
 export const StudioEnvironment = () => {
+  // Create professional studio background
+  const studioTexture = useMemo(() => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 1024;
+    canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+    
+    if (ctx) {
+      // Clean neutral studio background
+      const gradient = ctx.createLinearGradient(0, 0, 0, 512);
+      gradient.addColorStop(0, '#f0f0f0');
+      gradient.addColorStop(0.5, '#e8e8e8');
+      gradient.addColorStop(1, '#d0d0d0');
+      
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, 1024, 512);
+      
+      // Add studio equipment silhouettes
+      ctx.fillStyle = '#333333';
+      
+      // Camera tripods
+      ctx.fillRect(100, 400, 8, 100);
+      ctx.fillRect(900, 420, 8, 80);
+      
+      // Lighting stands
+      ctx.fillRect(50, 350, 6, 150);
+      ctx.fillRect(200, 380, 6, 120);
+      ctx.fillRect(800, 360, 6, 140);
+      ctx.fillRect(950, 390, 6, 110);
+      
+      // Light fixtures
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(40, 340, 25, 15);
+      ctx.fillRect(190, 370, 25, 15);
+      ctx.fillRect(790, 350, 25, 15);
+      ctx.fillRect(940, 380, 25, 15);
+      
+      // Seamless backdrop curve
+      ctx.fillStyle = '#f8f8f8';
+      ctx.beginPath();
+      ctx.moveTo(0, 350);
+      ctx.quadraticCurveTo(512, 300, 1024, 350);
+      ctx.lineTo(1024, 512);
+      ctx.lineTo(0, 512);
+      ctx.fill();
+    }
+    
+    return new THREE.CanvasTexture(canvas);
+  }, []);
+
   return (
     <>
       {/* Clean neutral studio background */}
-      <color attach="background" args={['#f0f0f0']} />
-      
-      {/* Use built-in studio environment */}
-      <Environment 
-        preset="studio"
-        background={true}
-        blur={0.2}
-      />
+      <primitive object={studioTexture} attach="background" />
       
       {/* Professional studio lighting */}
       <ambientLight intensity={0.6} color="#f0f0ff" />

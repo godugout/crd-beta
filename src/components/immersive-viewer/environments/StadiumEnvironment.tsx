@@ -1,19 +1,59 @@
 
-import React from 'react';
-import { Environment } from '@react-three/drei';
+import React, { useMemo } from 'react';
+import * as THREE from 'three';
 
 export const StadiumEnvironment = () => {
+  // Create stadium background texture
+  const stadiumTexture = useMemo(() => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 1024;
+    canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+    
+    if (ctx) {
+      // Night sky gradient
+      const gradient = ctx.createLinearGradient(0, 0, 0, 512);
+      gradient.addColorStop(0, '#0a0f1a');
+      gradient.addColorStop(0.3, '#1a2040');
+      gradient.addColorStop(1, '#2a3a5a');
+      
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, 1024, 512);
+      
+      // Add stadium structure silhouette
+      ctx.fillStyle = '#0a0a0a';
+      
+      // Stadium bowl outline
+      ctx.beginPath();
+      ctx.ellipse(512, 400, 400, 100, 0, 0, Math.PI);
+      ctx.fill();
+      
+      // Stadium towers/lights
+      for (let i = 0; i < 8; i++) {
+        const angle = (i / 8) * Math.PI;
+        const x = 512 + Math.cos(angle) * 350;
+        const y = 400 - Math.sin(angle) * 80;
+        
+        ctx.fillRect(x - 5, y - 80, 10, 80);
+        
+        // Light fixtures
+        ctx.fillStyle = '#ffff88';
+        ctx.fillRect(x - 15, y - 85, 30, 8);
+        ctx.fillStyle = '#0a0a0a';
+      }
+      
+      // Add some crowd lighting
+      ctx.fillStyle = 'rgba(255, 255, 200, 0.3)';
+      ctx.fillRect(112, 350, 800, 50);
+    }
+    
+    return new THREE.CanvasTexture(canvas);
+  }, []);
+
   return (
     <>
       {/* Stadium night background */}
-      <color attach="background" args={['#0a0f1a']} />
-      
-      {/* Use built-in dawn environment for stadium lighting */}
-      <Environment 
-        preset="dawn"
-        background={true}
-        blur={0.3}
-      />
+      <primitive object={stadiumTexture} attach="background" />
       
       {/* Stadium ambient lighting */}
       <ambientLight intensity={0.6} color="#2a3a5a" />

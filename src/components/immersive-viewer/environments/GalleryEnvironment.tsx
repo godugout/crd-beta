@@ -1,19 +1,51 @@
 
-import React from 'react';
-import { Environment } from '@react-three/drei';
+import React, { useMemo } from 'react';
+import * as THREE from 'three';
 
 export const GalleryEnvironment = () => {
+  // Create gallery background texture
+  const galleryTexture = useMemo(() => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 1024;
+    canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+    
+    if (ctx) {
+      // Clean white gallery walls
+      ctx.fillStyle = '#f8f8f8';
+      ctx.fillRect(0, 0, 1024, 512);
+      
+      // Add subtle wall panels
+      ctx.strokeStyle = '#e8e8e8';
+      ctx.lineWidth = 2;
+      for (let i = 0; i < 5; i++) {
+        const x = i * 200 + 100;
+        ctx.strokeRect(x, 50, 150, 200);
+      }
+      
+      // Add gallery lighting fixtures
+      ctx.fillStyle = '#ffffff';
+      for (let i = 0; i < 6; i++) {
+        const x = i * 170 + 50;
+        ctx.fillRect(x, 20, 60, 10);
+      }
+      
+      // Add subtle floor reflection
+      const floorGradient = ctx.createLinearGradient(0, 400, 0, 512);
+      floorGradient.addColorStop(0, 'rgba(0, 0, 0, 0)');
+      floorGradient.addColorStop(1, 'rgba(0, 0, 0, 0.05)');
+      
+      ctx.fillStyle = floorGradient;
+      ctx.fillRect(0, 400, 1024, 112);
+    }
+    
+    return new THREE.CanvasTexture(canvas);
+  }, []);
+
   return (
     <>
       {/* Clean white gallery background */}
-      <color attach="background" args={['#f8f8f8']} />
-      
-      {/* Use built-in warehouse environment for gallery feel */}
-      <Environment 
-        preset="warehouse"
-        background={true}
-        blur={0.2}
-      />
+      <primitive object={galleryTexture} attach="background" />
       
       {/* Gallery lighting setup */}
       <ambientLight intensity={0.8} color="#f5f5f5" />

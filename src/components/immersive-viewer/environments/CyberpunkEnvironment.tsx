@@ -1,6 +1,5 @@
 
 import React, { useMemo } from 'react';
-import { Environment } from '@react-three/drei';
 import * as THREE from 'three';
 
 const NeonGrid = () => {
@@ -23,20 +22,53 @@ const NeonGrid = () => {
 };
 
 export const CyberpunkEnvironment = () => {
+  // Create cyberpunk city background
+  const cyberpunkTexture = useMemo(() => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 1024;
+    canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+    
+    if (ctx) {
+      // Dark cyberpunk sky gradient
+      const gradient = ctx.createLinearGradient(0, 0, 0, 512);
+      gradient.addColorStop(0, '#0a0a1a');
+      gradient.addColorStop(0.5, '#1a0a2a');
+      gradient.addColorStop(1, '#0a0a0a');
+      
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, 1024, 512);
+      
+      // Add cyberpunk city silhouette
+      ctx.fillStyle = '#0a0a0a';
+      for (let i = 0; i < 30; i++) {
+        const x = i * 35;
+        const height = 150 + Math.random() * 200;
+        const width = 25 + Math.random() * 15;
+        
+        ctx.fillRect(x, 512 - height, width, height);
+        
+        // Add neon window lights
+        ctx.fillStyle = Math.random() > 0.5 ? '#00ffff' : '#ff00ff';
+        for (let j = 0; j < height / 20; j++) {
+          if (Math.random() > 0.7) {
+            ctx.fillRect(x + 2, 512 - height + j * 20 + 2, width - 4, 3);
+          }
+        }
+        ctx.fillStyle = '#0a0a0a';
+      }
+    }
+    
+    return new THREE.CanvasTexture(canvas);
+  }, []);
+
   return (
     <>
-      {/* Dark cyberpunk background */}
-      <color attach="background" args={['#0a0a1a']} />
+      {/* Cyberpunk city background */}
+      <primitive object={cyberpunkTexture} attach="background" />
       
       {/* Neon grid floor */}
       <NeonGrid />
-      
-      {/* Use built-in night environment with city vibes */}
-      <Environment 
-        preset="night"
-        background={true}
-        blur={0.6}
-      />
       
       {/* Cyberpunk ambient lighting */}
       <ambientLight intensity={0.3} color="#001133" />

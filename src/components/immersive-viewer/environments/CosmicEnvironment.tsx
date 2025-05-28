@@ -1,6 +1,5 @@
 
 import React, { useMemo } from 'react';
-import { Environment } from '@react-three/drei';
 import * as THREE from 'three';
 
 const StarField = () => {
@@ -33,20 +32,51 @@ const StarField = () => {
 };
 
 export const CosmicEnvironment = () => {
+  // Create cosmic space background
+  const cosmicTexture = useMemo(() => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 1024;
+    canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+    
+    if (ctx) {
+      // Deep space gradient
+      const gradient = ctx.createRadialGradient(512, 256, 0, 512, 256, 512);
+      gradient.addColorStop(0, '#001122');
+      gradient.addColorStop(0.5, '#000508');
+      gradient.addColorStop(1, '#000000');
+      
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, 1024, 512);
+      
+      // Add nebula colors
+      const nebulaGradient = ctx.createRadialGradient(300, 200, 0, 300, 200, 200);
+      nebulaGradient.addColorStop(0, 'rgba(138, 43, 226, 0.3)');
+      nebulaGradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      
+      ctx.fillStyle = nebulaGradient;
+      ctx.fillRect(0, 0, 1024, 512);
+      
+      // Add distant stars
+      ctx.fillStyle = '#ffffff';
+      for (let i = 0; i < 200; i++) {
+        const x = Math.random() * 1024;
+        const y = Math.random() * 512;
+        const size = Math.random() * 2;
+        ctx.fillRect(x, y, size, size);
+      }
+    }
+    
+    return new THREE.CanvasTexture(canvas);
+  }, []);
+
   return (
     <>
       {/* Deep space background */}
-      <color attach="background" args={['#000008']} />
+      <primitive object={cosmicTexture} attach="background" />
       
       {/* Star field */}
       <StarField />
-      
-      {/* Use built-in night environment for cosmic feel */}
-      <Environment 
-        preset="night"
-        background={true}
-        blur={0.8}
-      />
       
       {/* Minimal cosmic ambient light */}
       <ambientLight intensity={0.15} color="#001122" />
