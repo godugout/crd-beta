@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PageLayout from '@/components/navigation/PageLayout';
@@ -223,7 +222,8 @@ const UnifiedCardGalleryPage = () => {
   };
 
   const handleCardClick = (cardId: string) => {
-    navigate(`/cards/${cardId}`);
+    console.log('Navigating to immersive viewer for card:', cardId);
+    navigate(`/immersive/${cardId}`);
   };
 
   const toggleTag = (tag: string) => {

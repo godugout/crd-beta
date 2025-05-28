@@ -6,15 +6,24 @@ import { Card } from '@/lib/types';
 import RealisticCardViewer from '@/components/immersive-viewer/RealisticCardViewer';
 import ImmersiveViewerInterface from '@/components/immersive-viewer/ImmersiveViewerInterface';
 import { useSampleCards } from '@/hooks/useSampleCards';
+import { basketballCards } from '@/data/basketballCards';
 
 const ImmersiveCardViewerPage: React.FC = () => {
-  const { cardId } = useParams<{ cardId: string }>();
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { cards } = useSampleCards();
   const [isFlipped, setIsFlipped] = useState(false);
   const [isCustomizationOpen, setIsCustomizationOpen] = useState(false);
 
-  const card = cards.find(c => c.id === cardId);
+  console.log('ImmersiveCardViewerPage: Looking for card with ID:', id);
+  console.log('Available cards from useSampleCards:', cards?.length || 0);
+  console.log('Available basketball cards:', basketballCards?.length || 0);
+
+  // Combine all available cards
+  const allCards = [...(cards || []), ...basketballCards];
+  const card = allCards.find(c => c.id === id);
+
+  console.log('Found card:', card?.title || 'Not found');
 
   if (!card) {
     return (
@@ -22,6 +31,7 @@ const ImmersiveCardViewerPage: React.FC = () => {
         <div className="text-center text-white">
           <h1 className="text-2xl font-bold mb-4">Card Not Found</h1>
           <p className="text-gray-400 mb-6">The card you're looking for doesn't exist.</p>
+          <p className="text-sm text-gray-500 mb-6">Looking for ID: {id}</p>
           <button
             onClick={() => navigate('/gallery')}
             className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
@@ -54,7 +64,6 @@ const ImmersiveCardViewerPage: React.FC = () => {
   };
 
   const handleDownload = () => {
-    // Create download functionality
     const link = document.createElement('a');
     link.href = card.imageUrl || '';
     link.download = `${card.title || 'card'}.jpg`;
