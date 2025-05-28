@@ -69,6 +69,7 @@ const CardEditor: React.FC<CardEditorProps> = ({
   const [activeTool, setActiveTool] = useState<Tool>('select');
   const [showGrid, setShowGrid] = useState(true);
   const [zoom, setZoom] = useState(1);
+  const [isUpdatingFromCanvas, setIsUpdatingFromCanvas] = useState(false);
 
   // Canvas refs
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -97,8 +98,10 @@ const CardEditor: React.FC<CardEditorProps> = ({
 
   // Sync undo/redo state with activeCard
   useEffect(() => {
-    setActiveCard(undoRedoSystem.state);
-  }, [undoRedoSystem.state]);
+    if (!isUpdatingFromCanvas) {
+      setActiveCard(undoRedoSystem.state);
+    }
+  }, [undoRedoSystem.state, isUpdatingFromCanvas]);
 
   const updateCardWithHistory = useCallback((updates: Partial<Card>) => {
     const newCard = { ...activeCard, ...updates, updatedAt: new Date().toISOString() };
@@ -275,14 +278,41 @@ const CardEditor: React.FC<CardEditorProps> = ({
 
     canvas.on('object:modified', (e) => {
       if (e.target && e.target.data?.layerId) {
-        updateLayer(e.target.data.layerId, {
+        // Set flag to prevent re-rendering during canvas update
+        setIsUpdatingFromCanvas(true);
+        
+        const layerId = e.target.data.layerId;
+        const updates = {
           position: { x: e.target.left || 0, y: e.target.top || 0, z: 0 },
           rotation: e.target.angle || 0,
           size: { 
             width: ((e.target.width || 100) * (e.target.scaleX || 1)), 
             height: ((e.target.height || 100) * (e.target.scaleY || 1))
           },
+        };
+        
+        // Update activeCard and push to history
+        setActiveCard(prevCard => {
+          const updatedLayers = prevCard.layers?.map(layer => 
+            layer.id === layerId ? { ...layer, ...updates } : layer
+          ) || [];
+          
+          const newCard = {
+            ...prevCard,
+            layers: updatedLayers,
+            updatedAt: new Date().toISOString()
+          };
+          
+          // Push to history after a short delay to avoid infinite loops
+          setTimeout(() => {
+            undoRedoSystem.pushState(newCard);
+            setIsUpdatingFromCanvas(false);
+          }, 0);
+          
+          return newCard;
         });
+        
+        console.log('Updating layer:', layerId, updates);
       }
     });
 
@@ -430,7 +460,7 @@ const CardEditor: React.FC<CardEditorProps> = ({
 
   // Render layers on canvas with proper z-index ordering
   useEffect(() => {
-    if (!fabricRef.current || !activeCard.layers) return;
+    if (!fabricRef.current || !activeCard.layers || isUpdatingFromCanvas) return;
 
     console.log('Rendering layers:', activeCard.layers.length);
     fabricRef.current.clear();
@@ -449,7 +479,7 @@ const CardEditor: React.FC<CardEditorProps> = ({
     
     // Ensure canvas is rendered after all layers are added
     fabricRef.current.renderAll();
-  }, [activeCard.layers]);
+  }, [activeCard.layers, isUpdatingFromCanvas]);
 
   const renderLayer = async (canvas: fabric.Canvas, layer: CardLayer) => {
     console.log('Rendering layer:', layer.type, layer.id, 'at position:', layer.position, 'with zIndex:', layer.zIndex);
@@ -585,15 +615,74 @@ const CardEditor: React.FC<CardEditorProps> = ({
 
   const updateLayer = useCallback((layerId: string, updates: Partial<CardLayer>) => {
     console.log('Updating layer:', layerId, updates);
-    const newCard = {
-      ...activeCard,
-      layers: activeCard.layers?.map(layer => 
-        layer.id === layerId ? { ...layer, ...updates } : layer
-      ) || [],
-      updatedAt: new Date().toISOString()
-    };
-    undoRedoSystem.pushState(newCard);
-  }, [activeCard, undoRedoSystem]);
+    
+    // Set flag to prevent re-rendering during update
+    setIsUpdatingFromCanvas(true);
+    
+    setActiveCard(prev => {
+      const newCard = {
+        ...prev,
+        layers: prev.layers?.map(layer => 
+          layer.id === layerId ? { ...layer, ...updates } : layer
+        ) || [],
+        updatedAt: new Date().toISOString()
+      };
+      
+      // Update Fabric.js object if it exists and we're updating position/size/rotation
+      if (fabricRef.current && (updates.position || updates.size || updates.rotation !== undefined || updates.visible !== undefined)) {
+        const objects = fabricRef.current.getObjects();
+        const layerObject = objects.find(obj => (obj as any).data?.layerId === layerId);
+        
+        if (layerObject) {
+          if (updates.position) {
+            layerObject.set({
+              left: updates.position.x,
+              top: updates.position.y
+            });
+          }
+          
+          if (updates.rotation !== undefined) {
+            layerObject.set({
+              angle: updates.rotation
+            });
+          }
+          
+          if (updates.visible !== undefined) {
+            layerObject.set({
+              visible: updates.visible
+            });
+          }
+          
+          if (updates.size) {
+            const width = typeof updates.size.width === 'number' ? updates.size.width : layerObject.width;
+            const height = typeof updates.size.height === 'number' ? updates.size.height : layerObject.height;
+            
+            if (layerObject.type === 'image') {
+              layerObject.set({
+                scaleX: width / (layerObject.width || 1),
+                scaleY: height / (layerObject.height || 1)
+              });
+            } else {
+              layerObject.set({
+                width,
+                height
+              });
+            }
+          }
+          
+          fabricRef.current.renderAll();
+        }
+      }
+      
+      // Push to history after a short delay
+      setTimeout(() => {
+        undoRedoSystem.pushState(newCard);
+        setIsUpdatingFromCanvas(false);
+      }, 0);
+      
+      return newCard;
+    });
+  }, [undoRedoSystem]);
 
   const moveLayerUp = useCallback((layerId: string) => {
     setActiveCard(prev => {
@@ -668,14 +757,23 @@ const CardEditor: React.FC<CardEditorProps> = ({
       imageUrl
     };
 
-    setActiveCard(prev => ({
-      ...prev,
-      layers: [...(prev.layers || []), newLayer],
-      updatedAt: new Date().toISOString()
-    }));
+    setActiveCard(prev => {
+      const newCard = {
+        ...prev,
+        layers: [...(prev.layers || []), newLayer],
+        updatedAt: new Date().toISOString()
+      };
+      
+      // Push to history after a short delay
+      setTimeout(() => {
+        undoRedoSystem.pushState(newCard);
+      }, 0);
+      
+      return newCard;
+    });
 
     toast.success('Image layer added');
-  }, [activeCard.layers]);
+  }, [activeCard.layers, undoRedoSystem]);
 
   const addTextLayer = useCallback(() => {
     console.log('Adding text layer');
