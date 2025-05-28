@@ -8,10 +8,10 @@ export const GalleryEnvironment = () => {
       {/* Gallery background */}
       <color attach="background" args={['#f5f5f5']} />
       
-      {/* Use museum/gallery HDR */}
+      {/* Use built-in studio environment */}
       <Environment 
-        files="https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/2k/museum_of_ethnography_2k.hdr"
-        background={true}
+        preset="studio"
+        background={false}
         blur={0.3}
       />
       

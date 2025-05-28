@@ -8,11 +8,11 @@ export const UnderwaterEnvironment = () => {
       {/* Underwater background */}
       <color attach="background" args={['#004466']} />
       
-      {/* Use underwater HDR */}
+      {/* Use built-in environment preset instead of external HDR */}
       <Environment 
-        files="https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/2k/underwater_01_2k.hdr"
-        background={true}
-        blur={0.7}
+        preset="dawn"
+        background={false}
+        blur={0.8}
       />
       
       {/* Underwater lighting */}

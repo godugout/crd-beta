@@ -16,6 +16,7 @@ interface EnvironmentRendererProps {
 const EnvironmentRenderer: React.FC<EnvironmentRendererProps> = ({ environmentType }) => {
   const [cachedTexture, setCachedTexture] = useState<THREE.DataTexture | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
 
   console.log('EnvironmentRenderer: Rendering environment type:', environmentType);
 
@@ -25,12 +26,12 @@ const EnvironmentRenderer: React.FC<EnvironmentRendererProps> = ({ environmentTy
     
     const loadEnvironmentTexture = async () => {
       setIsLoading(true);
+      setHasError(false);
       
       try {
-        const url = hdrImageCache.getUrlForEnvironment(environmentType);
-        console.log(`EnvironmentRenderer: Loading HDR for ${environmentType}:`, url);
+        console.log(`EnvironmentRenderer: Loading HDR for ${environmentType}`);
         
-        const texture = await hdrImageCache.getTexture(url);
+        const texture = await hdrImageCache.getTexture(environmentType);
         
         if (isMounted && texture) {
           setCachedTexture(texture);
@@ -38,7 +39,10 @@ const EnvironmentRenderer: React.FC<EnvironmentRendererProps> = ({ environmentTy
         }
       } catch (error) {
         console.error(`EnvironmentRenderer: Failed to load HDR for ${environmentType}:`, error);
-        setCachedTexture(null);
+        if (isMounted) {
+          setHasError(true);
+          setCachedTexture(null);
+        }
       } finally {
         if (isMounted) {
           setIsLoading(false);
@@ -53,8 +57,8 @@ const EnvironmentRenderer: React.FC<EnvironmentRendererProps> = ({ environmentTy
     };
   }, [environmentType]);
 
-  // If we have a cached texture, use it directly
-  if (cachedTexture && !isLoading) {
+  // If we have a cached texture and no errors, use it directly
+  if (cachedTexture && !isLoading && !hasError) {
     return (
       <>
         <primitive object={cachedTexture} attach="background" />
@@ -64,7 +68,7 @@ const EnvironmentRenderer: React.FC<EnvironmentRendererProps> = ({ environmentTy
     );
   }
 
-  // Fallback to original environment components while loading
+  // Fallback to original environment components while loading or on error
   switch (environmentType) {
     case 'stadium':
       return <StadiumEnvironment />;

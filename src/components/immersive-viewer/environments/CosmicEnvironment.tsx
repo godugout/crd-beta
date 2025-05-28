@@ -8,9 +8,9 @@ export const CosmicEnvironment = () => {
       {/* Simple space background with stars */}
       <color attach="background" args={['#000008']} />
       
-      {/* Use a space HDR environment */}
+      {/* Use built-in night environment */}
       <Environment 
-        files="https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/2k/dancing_hall_2k.hdr"
+        preset="night"
         background={false}
         blur={0.8}
       />

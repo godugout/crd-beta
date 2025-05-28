@@ -8,10 +8,10 @@ export const StadiumEnvironment = () => {
       {/* Stadium sky background */}
       <color attach="background" args={['#2a3c5f']} />
       
-      {/* Use stadium/sports venue HDR */}
+      {/* Use built-in environment preset */}
       <Environment 
-        files="https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/2k/stadium_01_2k.hdr"
-        background={true}
+        preset="city"
+        background={false}
         blur={0.6}
       />
       

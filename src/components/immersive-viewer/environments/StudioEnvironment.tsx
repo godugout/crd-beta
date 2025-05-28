@@ -8,10 +8,10 @@ export const StudioEnvironment = () => {
       {/* Studio background */}
       <color attach="background" args={['#f0f0f0']} />
       
-      {/* Use photo studio HDR */}
+      {/* Use built-in studio environment */}
       <Environment 
-        files="https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/2k/photo_studio_01_2k.hdr"
-        background={true}
+        preset="studio"
+        background={false}
         blur={0.2}
       />
       
