@@ -23,7 +23,10 @@ import {
   Trash2,
   EyeOff,
   Move,
-  Layers3
+  Layers3,
+  RotateCw,
+  FlipHorizontal,
+  FlipVertical
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -408,6 +411,70 @@ const CardEditor: React.FC<CardEditorProps> = ({
     }
   };
 
+  // Generate thumbnail from canvas
+  const generateThumbnail = useCallback((): string => {
+    if (!fabricRef.current) return '';
+    
+    try {
+      // Temporarily hide guide lines for clean thumbnail
+      const objects = fabricRef.current.getObjects();
+      const guideLines = objects.filter(obj => 
+        obj.name === 'bleed-line' || obj.name === 'crop-line' || obj.name === 'safe-line'
+      );
+      
+      guideLines.forEach(line => line.set('visible', false));
+      fabricRef.current.renderAll();
+      
+      // Generate thumbnail
+      const dataURL = fabricRef.current.toDataURL({
+        format: 'jpeg',
+        quality: 0.8,
+        multiplier: 0.3 // Scale down for thumbnail
+      });
+      
+      // Restore guide lines
+      guideLines.forEach(line => line.set('visible', true));
+      fabricRef.current.renderAll();
+      
+      return dataURL;
+    } catch (error) {
+      console.error('Error generating thumbnail:', error);
+      return '';
+    }
+  }, []);
+
+  // Generate full resolution image from canvas
+  const generateCardImage = useCallback((): string => {
+    if (!fabricRef.current) return '';
+    
+    try {
+      // Temporarily hide guide lines for clean export
+      const objects = fabricRef.current.getObjects();
+      const guideLines = objects.filter(obj => 
+        obj.name === 'bleed-line' || obj.name === 'crop-line' || obj.name === 'safe-line'
+      );
+      
+      guideLines.forEach(line => line.set('visible', false));
+      fabricRef.current.renderAll();
+      
+      // Generate high-quality image
+      const dataURL = fabricRef.current.toDataURL({
+        format: 'png',
+        quality: 1.0,
+        multiplier: 1 // Full resolution
+      });
+      
+      // Restore guide lines
+      guideLines.forEach(line => line.set('visible', true));
+      fabricRef.current.renderAll();
+      
+      return dataURL;
+    } catch (error) {
+      console.error('Error generating card image:', error);
+      return '';
+    }
+  }, []);
+
   const updateLayer = useCallback((layerId: string, updates: Partial<CardLayer>) => {
     console.log('Updating layer:', layerId, updates);
     setActiveCard(prev => ({
@@ -554,14 +621,55 @@ const CardEditor: React.FC<CardEditorProps> = ({
     toast.success('Shape layer added');
   }, [activeCard.layers]);
 
+  // Image transformation functions
+  const rotateSelectedImage = useCallback((degrees: number) => {
+    if (!selectedLayerId || !fabricRef.current) return;
+    
+    const selectedObject = fabricRef.current.getObjects().find(obj => 
+      (obj as any).data?.layerId === selectedLayerId
+    );
+    
+    if (selectedObject) {
+      const currentAngle = selectedObject.angle || 0;
+      const newAngle = currentAngle + degrees;
+      selectedObject.set('angle', newAngle);
+      fabricRef.current.renderAll();
+      
+      updateLayer(selectedLayerId, { rotation: newAngle });
+      toast.success(`Rotated ${degrees > 0 ? 'clockwise' : 'counter-clockwise'}`);
+    }
+  }, [selectedLayerId, updateLayer]);
+
+  const flipSelectedImage = useCallback((direction: 'horizontal' | 'vertical') => {
+    if (!selectedLayerId || !fabricRef.current) return;
+    
+    const selectedObject = fabricRef.current.getObjects().find(obj => 
+      (obj as any).data?.layerId === selectedLayerId
+    );
+    
+    if (selectedObject) {
+      if (direction === 'horizontal') {
+        selectedObject.set('flipX', !selectedObject.flipX);
+      } else {
+        selectedObject.set('flipY', !selectedObject.flipY);
+      }
+      fabricRef.current.renderAll();
+      toast.success(`Flipped ${direction}ly`);
+    }
+  }, [selectedLayerId]);
+
   const handleSave = async () => {
     try {
+      // Generate image and thumbnail
+      const cardImage = generateCardImage();
+      const thumbnail = generateThumbnail();
+      
       const cardToSave: Card = {
         id: activeCard.id || `card-${Date.now()}`,
         title: activeCard.title || 'Untitled Card',
         description: activeCard.description || '',
-        imageUrl: activeCard.imageUrl || '',
-        thumbnailUrl: activeCard.thumbnailUrl || '',
+        imageUrl: cardImage, // Set the generated canvas image
+        thumbnailUrl: thumbnail, // Set the generated thumbnail
         userId: activeCard.userId || 'current-user',
         tags: activeCard.tags || [],
         effects: activeCard.effects || [],
@@ -607,12 +715,16 @@ const CardEditor: React.FC<CardEditorProps> = ({
 
   const handlePreview = () => {
     try {
+      // Generate image and thumbnail for preview
+      const cardImage = generateCardImage();
+      const thumbnail = generateThumbnail();
+      
       const cardToPreview: Card = {
         id: activeCard.id || `card-${Date.now()}`,
         title: activeCard.title || 'Untitled Card',
         description: activeCard.description || '',
-        imageUrl: activeCard.imageUrl || '',
-        thumbnailUrl: activeCard.thumbnailUrl || '',
+        imageUrl: cardImage, // Use generated canvas image
+        thumbnailUrl: thumbnail, // Use generated thumbnail
         userId: activeCard.userId || 'current-user',
         tags: activeCard.tags || [],
         effects: activeCard.effects || [],
@@ -998,6 +1110,53 @@ const CardEditor: React.FC<CardEditorProps> = ({
                   />
                   <div className="text-xs text-gray-400 mt-1">{Math.round(selectedLayer.opacity * 100)}%</div>
                 </div>
+
+                {/* Image transformation controls */}
+                {selectedLayer.type === 'image' && (
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-sm text-gray-400 mb-2 block">Image Controls</label>
+                      <div className="grid grid-cols-2 gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => rotateSelectedImage(-90)}
+                          className="text-xs"
+                        >
+                          <RotateCw className="w-3 h-3 mr-1 transform scale-x-[-1]" />
+                          Rotate -90°
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => rotateSelectedImage(90)}
+                          className="text-xs"
+                        >
+                          <RotateCw className="w-3 h-3 mr-1" />
+                          Rotate 90°
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => flipSelectedImage('horizontal')}
+                          className="text-xs"
+                        >
+                          <FlipHorizontal className="w-3 h-3 mr-1" />
+                          Flip H
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => flipSelectedImage('vertical')}
+                          className="text-xs"
+                        >
+                          <FlipVertical className="w-3 h-3 mr-1" />
+                          Flip V
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
                 
                 {selectedLayer.type === 'text' && (
                   <div>
