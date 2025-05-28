@@ -8,6 +8,8 @@ import { StudioEnvironment } from './environments/StudioEnvironment';
 import { NightSkyEnvironment } from './environments/NightSkyEnvironment';
 import { RetroArcadeEnvironment } from './environments/RetroArcadeEnvironment';
 import { ForestEnvironment } from './environments/ForestEnvironment';
+import { LuxuryEnvironment } from './environments/LuxuryEnvironment';
+import { CyberpunkEnvironment } from './environments/CyberpunkEnvironment';
 import { Environment } from '@react-three/drei';
 import { hdrImageCache } from '@/services/hdrImageCache';
 import * as THREE from 'three';
@@ -98,6 +100,15 @@ const EnvironmentRenderer: React.FC<EnvironmentRendererProps> = ({ environmentTy
     case 'forest':
     case 'nature':
       return <ForestEnvironment />;
+      
+    case 'luxury':
+    case 'lounge':
+      return <LuxuryEnvironment />;
+      
+    case 'cyberpunk':
+    case 'cyber':
+    case 'neon':
+      return <CyberpunkEnvironment />;
     
     default: // studio
       return <StudioEnvironment />;

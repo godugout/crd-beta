@@ -1,74 +1,140 @@
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Environment } from '@react-three/drei';
+import * as THREE from 'three';
+
+const CausticsEffect = () => {
+  const causticsMaterial = useMemo(() => {
+    return new THREE.ShaderMaterial({
+      uniforms: {
+        time: { value: 0 },
+        color: { value: new THREE.Color('#4fc3f7') }
+      },
+      vertexShader: `
+        varying vec2 vUv;
+        void main() {
+          vUv = uv;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform float time;
+        uniform vec3 color;
+        varying vec2 vUv;
+        
+        float caustic(vec2 uv, float time) {
+          vec2 p = mod(uv * 6.28318, 6.28318) - 250.0;
+          vec2 i = vec2(p);
+          float c = 1.0;
+          float inten = 0.005;
+          
+          for (int n = 0; n < 5; n++) {
+            float t = time * (1.0 - (3.5 / float(n+1)));
+            i = p + vec2(cos(t - i.x) + sin(t + i.y), sin(t - i.y) + cos(t + i.x));
+            c += 1.0/length(vec2(p.x / (sin(i.x+t)/inten),p.y / (cos(i.y+t)/inten)));
+          }
+          c /= 5.0;
+          c = 1.17-pow(c, 1.4);
+          return c;
+        }
+        
+        void main() {
+          float c = caustic(vUv, time * 0.5);
+          gl_FragColor = vec4(color * c, c * 0.3);
+        }
+      `,
+      transparent: true,
+      blending: THREE.AdditiveBlending
+    });
+  }, []);
+
+  // Animate the caustics
+  React.useEffect(() => {
+    const animate = () => {
+      causticsMaterial.uniforms.time.value += 0.01;
+      requestAnimationFrame(animate);
+    };
+    animate();
+  }, [causticsMaterial]);
+
+  return (
+    <mesh position={[0, 10, 0]} rotation={[-Math.PI * 0.5, 0, 0]}>
+      <planeGeometry args={[100, 100]} />
+      <primitive object={causticsMaterial} />
+    </mesh>
+  );
+};
 
 export const UnderwaterEnvironment = () => {
   return (
     <>
-      {/* Deep ocean blue background */}
-      <color attach="background" args={['#003366']} />
+      {/* Deep ocean background */}
+      <color attach="background" args={['#001122']} />
       
-      {/* Use built-in park environment for natural feel */}
+      {/* Caustics effect */}
+      <CausticsEffect />
+      
+      {/* Use built-in sunset environment for water feel */}
       <Environment 
-        preset="park"
+        preset="sunset"
         background={false}
-        blur={0.9}
+        blur={0.8}
       />
       
       {/* Underwater ambient lighting */}
       <ambientLight intensity={0.3} color="#004466" />
       
-      {/* Sunlight filtering down from surface */}
+      {/* Filtered sunlight from above */}
       <directionalLight 
-        position={[0, 25, 0]} 
-        intensity={1.2} 
-        color="#87ceeb"
+        position={[15, 30, 10]} 
+        intensity={2.0} 
+        color="#4fc3f7"
         castShadow
       />
       <directionalLight 
-        position={[15, 20, 10]} 
-        intensity={0.8} 
-        color="#4682b4"
+        position={[-10, 25, 15]} 
+        intensity={1.5} 
+        color="#81d4fa"
+        castShadow
+      />
+      <directionalLight 
+        position={[0, 35, -20]} 
+        intensity={1.2} 
+        color="#b3e5fc"
       />
       
-      {/* Caustic light patterns */}
+      {/* Underwater light beams */}
       <spotLight
-        position={[20, 30, 20]}
-        target-position={[5, 0, 5]}
+        position={[20, 40, 20]}
+        target-position={[0, 0, 0]}
+        angle={0.3}
+        penumbra={0.9}
+        intensity={2.5}
+        color="#4fc3f7"
+        castShadow
+      />
+      <spotLight
+        position={[-15, 35, 25]}
+        target-position={[0, 0, 0]}
         angle={0.4}
         penumbra={0.8}
-        intensity={1.5}
-        color="#87ceeb"
-        castShadow
-      />
-      <spotLight
-        position={[-15, 25, 15]}
-        target-position={[-3, 0, -3]}
-        angle={0.5}
-        penumbra={0.9}
-        intensity={1.2}
-        color="#4682b4"
-      />
-      <spotLight
-        position={[0, 35, -20]}
-        target-position={[0, 0, -2]}
-        angle={0.3}
-        penumbra={0.7}
-        intensity={1.0}
-        color="#5f9ea0"
+        intensity={2.0}
+        color="#81d4fa"
       />
       
-      {/* Underwater creature/plant glow */}
-      <pointLight position={[12, 8, 12]} intensity={0.6} color="#20b2aa" />
-      <pointLight position={[-10, 5, -8]} intensity={0.5} color="#48d1cc" />
-      <pointLight position={[8, 12, -15]} intensity={0.4} color="#40e0d0" />
-      <pointLight position={[-15, 15, 10]} intensity={0.3} color="#00ced1" />
+      {/* Bioluminescent lighting */}
+      <pointLight position={[30, 10, 0]} intensity={0.8} color="#00e5ff" />
+      <pointLight position={[-30, 10, 0]} intensity={0.8} color="#18ffff" />
+      <pointLight position={[0, 5, 40]} intensity={0.6} color="#84ffff" />
+      <pointLight position={[0, 5, -40]} intensity={0.6} color="#b2ebf2" />
       
-      {/* Deep ocean particles effect */}
-      <pointLight position={[0, 0, 30]} intensity={0.2} color="#87ceeb" />
+      {/* Deep water points of light */}
+      <pointLight position={[20, -5, 20]} intensity={0.4} color="#00bcd4" />
+      <pointLight position={[-20, -5, 20]} intensity={0.4} color="#26c6da" />
+      <pointLight position={[0, -10, 0]} intensity={0.3} color="#4dd0e1" />
       
-      {/* Ocean depth atmosphere */}
-      <fog attach="fog" args={['#003366', 15, 80]} />
+      {/* Underwater atmosphere */}
+      <fog attach="fog" args={['#001122', 40, 150]} />
     </>
   );
 };

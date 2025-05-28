@@ -1,64 +1,101 @@
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Environment } from '@react-three/drei';
+import * as THREE from 'three';
+
+const NeonLights = () => {
+  const neonColors = ['#ff0080', '#00ff80', '#8000ff', '#ff8000', '#0080ff'];
+  
+  return (
+    <>
+      {neonColors.map((color, index) => (
+        <pointLight
+          key={index}
+          position={[
+            (index - 2) * 15,
+            10 + Math.sin(index) * 5,
+            (index % 2 === 0 ? 20 : -20)
+          ]}
+          color={color}
+          intensity={0.8}
+          distance={50}
+        />
+      ))}
+    </>
+  );
+};
 
 export const RetroArcadeEnvironment = () => {
   return (
     <>
-      {/* Deep purple arcade background */}
-      <color attach="background" args={['#0d0520']} />
+      {/* Dark arcade background */}
+      <color attach="background" args={['#0a0a0a']} />
       
-      {/* Use built-in apartment environment for base */}
+      {/* Neon lighting array */}
+      <NeonLights />
+      
+      {/* Use built-in warehouse environment for arcade feel */}
       <Environment 
-        preset="apartment"
+        preset="warehouse"
         background={false}
-        blur={0.8}
+        blur={0.5}
       />
       
-      {/* Ambient neon glow */}
-      <ambientLight intensity={0.3} color="#4a0e4e" />
+      {/* Arcade ambient lighting */}
+      <ambientLight intensity={0.3} color="#330066" />
       
-      {/* Primary neon lights with strong colors */}
+      {/* Main arcade lighting */}
       <directionalLight 
-        position={[8, 12, 8]} 
+        position={[15, 20, 15]} 
+        intensity={1.5} 
+        color="#ff00ff"
+        castShadow
+      />
+      <directionalLight 
+        position={[-15, 20, 15]} 
         intensity={1.5} 
         color="#00ffff"
         castShadow
       />
+      <directionalLight 
+        position={[0, 25, -20]} 
+        intensity={1.2} 
+        color="#ffff00"
+      />
       
-      {/* Colorful arcade lighting */}
-      <pointLight position={[12, 8, 12]} intensity={1.8} color="#ff0080" />
-      <pointLight position={[-12, 10, 8]} intensity={1.6} color="#00ff80" />
-      <pointLight position={[0, 6, -15]} intensity={1.4} color="#8000ff" />
-      <pointLight position={[15, 15, 0]} intensity={1.2} color="#ffff00" />
-      <pointLight position={[-8, 12, -10]} intensity={1.0} color="#ff4000" />
-      
-      {/* Animated neon spotlights */}
+      {/* Arcade machine glow */}
       <spotLight
-        position={[0, 20, 15]}
+        position={[25, 18, 25]}
         target-position={[0, 0, 0]}
         angle={0.4}
-        penumbra={0.6}
+        penumbra={0.7}
         intensity={2.0}
-        color="#ff00ff"
+        color="#ff0080"
         castShadow
       />
       <spotLight
-        position={[20, 18, 0]}
+        position={[-25, 18, 25]}
         target-position={[0, 0, 0]}
-        angle={0.5}
+        angle={0.4}
         penumbra={0.7}
-        intensity={1.8}
-        color="#00ffff"
+        intensity={2.0}
+        color="#00ff80"
+        castShadow
       />
       
-      {/* Additional accent lights */}
-      <pointLight position={[0, 25, 0]} intensity={0.8} color="#ffffff" />
-      <pointLight position={[10, 2, 10]} intensity={0.6} color="#ff1493" />
-      <pointLight position={[-10, 3, -10]} intensity={0.5} color="#00ff7f" />
+      {/* Retro neon accents */}
+      <pointLight position={[30, 8, 0]} intensity={1.0} color="#ff0080" />
+      <pointLight position={[-30, 8, 0]} intensity={1.0} color="#00ff80" />
+      <pointLight position={[0, 12, 35]} intensity={0.8} color="#8000ff" />
+      <pointLight position={[0, 12, -35]} intensity={0.8} color="#ff8000" />
       
-      {/* Atmospheric haze */}
-      <fog attach="fog" args={['#1a0826', 20, 70]} />
+      {/* Screen glow effects */}
+      <pointLight position={[20, 5, 20]} intensity={0.6} color="#0080ff" />
+      <pointLight position={[-20, 5, 20]} intensity={0.6} color="#ff4080" />
+      <pointLight position={[0, 3, 0]} intensity={0.4} color="#80ff40" />
+      
+      {/* Arcade atmosphere */}
+      <fog attach="fog" args={['#0a0a0a', 70, 200]} />
     </>
   );
 };
