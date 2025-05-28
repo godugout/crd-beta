@@ -16,8 +16,11 @@ export const UnderwaterEnvironment = () => {
       causticsRef.current.rotation.z = time * 0.15;
     }
     
-    if (waterRef.current) {
-      waterRef.current.material.opacity = 0.7 + Math.sin(time * 2) * 0.1;
+    if (waterRef.current && waterRef.current.material) {
+      const material = waterRef.current.material as THREE.MeshPhysicalMaterial;
+      if (material.opacity !== undefined) {
+        material.opacity = 0.7 + Math.sin(time * 2) * 0.1;
+      }
     }
   });
   
@@ -27,9 +30,8 @@ export const UnderwaterEnvironment = () => {
       <Environment 
         files="https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/underwater_01_1k.hdr"
         background={true}
-        backgroundBlurriness={0.3}
-        backgroundIntensity={0.4}
-        environmentIntensity={1.0}
+        blur={0.3}
+        intensity={1.0}
       />
       
       {/* Fallback underwater background */}

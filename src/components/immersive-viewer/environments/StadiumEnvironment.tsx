@@ -10,9 +10,8 @@ export const StadiumEnvironment = () => {
       <Environment 
         files="https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/stadium_01_1k.hdr"
         background={true}
-        backgroundBlurriness={0.2}
-        backgroundIntensity={0.8}
-        environmentIntensity={1.5}
+        blur={0.2}
+        intensity={1.5}
       />
       
       {/* Fallback sky if HDR fails to load */}
@@ -23,7 +22,6 @@ export const StadiumEnvironment = () => {
         azimuth={0.25}
         turbidity={10}
         rayleigh={3}
-        luminance={1}
         mieCoefficient={0.005}
         mieDirectionalG={0.7}
       />

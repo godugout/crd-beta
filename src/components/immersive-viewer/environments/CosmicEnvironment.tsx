@@ -20,9 +20,8 @@ export const CosmicEnvironment = () => {
       <Environment 
         files="https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/space_exploration_1k.hdr"
         background={true}
-        backgroundBlurriness={0}
-        backgroundIntensity={0.3}
-        environmentIntensity={0.8}
+        blur={0}
+        intensity={0.8}
       />
       
       {/* Fallback space background */}
