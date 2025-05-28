@@ -10,25 +10,25 @@ export const detectCardBounds = (img: HTMLImageElement): CropArea => {
   // Start with reasonable defaults based on typical card aspect ratio (2.5:3.5)
   const cardAspectRatio = 2.5 / 3.5;
   
-  // Initial sizing - start with 50% of image width
-  let cardWidth = img.width * 0.5;
+  // Start with 60% of image width for better coverage
+  let cardWidth = img.naturalWidth * 0.6;
   let cardHeight = cardWidth / cardAspectRatio;
   
   // If calculated height is too large, constrain by height instead
-  if (cardHeight > img.height * 0.8) {
-    cardHeight = img.height * 0.8;
+  if (cardHeight > img.naturalHeight * 0.8) {
+    cardHeight = img.naturalHeight * 0.8;
     cardWidth = cardHeight * cardAspectRatio;
   }
   
   // Center the crop box initially
-  const x = (img.width - cardWidth) / 2;
-  const y = (img.height - cardHeight) / 2;
+  const x = (img.naturalWidth - cardWidth) / 2;
+  const y = (img.naturalHeight - cardHeight) / 2;
   
   return {
     x: Math.max(0, x),
     y: Math.max(0, y),
-    width: Math.min(cardWidth, img.width),
-    height: Math.min(cardHeight, img.height)
+    width: Math.min(cardWidth, img.naturalWidth),
+    height: Math.min(cardHeight, img.naturalHeight)
   };
 };
 
@@ -40,7 +40,7 @@ export const calculateOptimalScale = (
 ): number => {
   const scaleX = containerWidth / imageWidth;
   const scaleY = containerHeight / imageHeight;
-  return Math.min(scaleX, scaleY, 1) * 0.9; // 90% to add padding
+  return Math.min(scaleX, scaleY, 1) * 0.85; // 85% to add padding and room for UI
 };
 
 export const applyCropToCanvas = (
@@ -55,7 +55,10 @@ export const applyCropToCanvas = (
   outputCanvas.width = cropArea.width;
   outputCanvas.height = cropArea.height;
   
-  // Draw the cropped portion
+  // Clear canvas
+  ctx.clearRect(0, 0, cropArea.width, cropArea.height);
+  
+  // Draw the cropped portion using natural image dimensions
   ctx.drawImage(
     sourceImage,
     cropArea.x, cropArea.y, cropArea.width, cropArea.height,
