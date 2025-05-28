@@ -278,12 +278,15 @@ const RealisticCardViewer: React.FC<RealisticCardViewerProps> = ({
   const handleUpdateSettings = (key: string, value: any) => {
     if (key.includes('.')) {
       const [parent, child] = key.split('.');
-      updateLightingSetting({
-        [parent]: {
-          ...lightingSettings[parent as keyof LightingSettings],
-          [child]: value
-        }
-      });
+      const parentSettings = lightingSettings[parent as keyof LightingSettings];
+      if (parentSettings && typeof parentSettings === 'object') {
+        updateLightingSetting({
+          [parent]: {
+            ...parentSettings,
+            [child]: value
+          }
+        });
+      }
     } else {
       updateLightingSetting({ [key]: value });
     }
