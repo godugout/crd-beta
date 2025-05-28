@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { Card, CardLayer, CardEffect } from '@/lib/types';
 import { fabric } from 'fabric';
@@ -23,7 +22,8 @@ import {
   ChevronDown,
   Trash2,
   EyeOff,
-  Move
+  Move,
+  Layers3
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -947,7 +947,7 @@ const CardEditor: React.FC<CardEditorProps> = ({
             ) : (
               <div className="text-center py-8 text-gray-400">
                 <div className="mb-2">
-                  <layers className="w-12 h-12 mx-auto opacity-50" />
+                  <Layers3 className="w-12 h-12 mx-auto opacity-50" />
                 </div>
                 <p className="text-sm">No layers yet</p>
                 <p className="text-xs">Add text, images, or shapes to get started</p>
