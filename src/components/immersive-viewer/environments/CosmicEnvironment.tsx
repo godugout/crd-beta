@@ -1,6 +1,6 @@
 
 import React, { useRef } from 'react';
-import { Stars, Sphere } from '@react-three/drei';
+import { Stars } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
@@ -33,15 +33,16 @@ export const CosmicEnvironment = () => {
       <pointLight position={[-50, -50, -50]} color="#00ffff" intensity={1} />
       <pointLight position={[0, 100, 0]} color="#ffffff" intensity={0.5} />
       
-      {/* Nebula background */}
-      <Sphere ref={nebulaRef} args={[200]} position={[0, 0, -100]}>
+      {/* Nebula background using basic mesh */}
+      <mesh ref={nebulaRef} position={[0, 0, -100]}>
+        <sphereGeometry args={[200, 32, 32]} />
         <meshBasicMaterial 
           color="#4a0e4e" 
           transparent 
           opacity={0.3}
           side={THREE.BackSide}
         />
-      </Sphere>
+      </mesh>
       
       {/* Additional cosmic elements */}
       <mesh position={[100, 50, -150]}>

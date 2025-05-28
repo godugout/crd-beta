@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { Environment } from '@react-three/drei';
-import * as THREE from 'three';
 
 export const StudioEnvironment = () => {
   return (
