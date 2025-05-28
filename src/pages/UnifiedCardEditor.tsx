@@ -5,9 +5,7 @@ import { toast } from 'sonner';
 import { useCards } from '@/context/CardContext';
 import PageLayout from '@/components/navigation/PageLayout';
 import CardCreationHub from '@/components/card-creation/modern/CardCreationHub';
-import DevAuthStatus from '@/components/dev/DevAuthStatus';
 import { DEFAULT_DESIGN_METADATA } from '@/lib/utils/cardDefaults';
-import { ensureDevUserLoggedIn } from '@/utils/devAuth';
 
 const UnifiedCardEditor: React.FC = () => {
   const { id } = useParams<{ id?: string }>();
@@ -17,13 +15,6 @@ const UnifiedCardEditor: React.FC = () => {
   
   const isEditing = !!id;
   const existingCard = isEditing ? getCardById(id) : null;
-
-  useEffect(() => {
-    // Auto-login test user in development
-    if (process.env.NODE_ENV === 'development') {
-      ensureDevUserLoggedIn();
-    }
-  }, []);
 
   useEffect(() => {
     if (isEditing && existingCard) {
@@ -70,20 +61,17 @@ const UnifiedCardEditor: React.FC = () => {
   };
 
   return (
-    <>
-      <DevAuthStatus />
-      <PageLayout
-        title={isEditing ? "Edit Card" : "Create Card"}
-        description={isEditing ? "Update your card design" : "Design your own custom trading cards"}
-        hideNavigation={true}
-      >
-        <CardCreationHub 
-          onSave={handleSaveCard}
-          isEditing={isEditing}
-          initialData={existingCard}
-        />
-      </PageLayout>
-    </>
+    <PageLayout
+      title={isEditing ? "Edit Card" : "Create Card"}
+      description={isEditing ? "Update your card design" : "Design your own custom trading cards"}
+      hideNavigation={true}
+    >
+      <CardCreationHub 
+        onSave={handleSaveCard}
+        isEditing={isEditing}
+        initialData={existingCard}
+      />
+    </PageLayout>
   );
 };
 
