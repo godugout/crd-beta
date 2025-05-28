@@ -1,83 +1,225 @@
 
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { Stars, Environment } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
 export const CosmicEnvironment = () => {
-  const nebulaRef = useRef<THREE.Group>(null);
+  const nebulaGroupRef = useRef<THREE.Group>(null);
+  const blackHoleRef = useRef<THREE.Group>(null);
+  const starField1Ref = useRef<THREE.Points>(null);
+  const starField2Ref = useRef<THREE.Points>(null);
+  
+  const [blackHoleVisible, setBlackHoleVisible] = useState(false);
+  const [blackHoleIntensity, setBlackHoleIntensity] = useState(0);
+  
+  // Black hole formation cycle
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setBlackHoleVisible(true);
+      
+      // Fade in over 3 seconds, stay for 5 seconds, fade out over 3 seconds
+      setTimeout(() => setBlackHoleVisible(false), 8000);
+    }, 15000); // Every 15 seconds
+    
+    return () => clearInterval(interval);
+  }, []);
   
   useFrame((state) => {
-    if (nebulaRef.current) {
-      nebulaRef.current.rotation.y += 0.001;
-      nebulaRef.current.rotation.x += 0.0002;
+    const time = state.clock.getElapsedTime();
+    
+    // Animated nebula clouds
+    if (nebulaGroupRef.current) {
+      nebulaGroupRef.current.rotation.y += 0.0008;
+      nebulaGroupRef.current.rotation.x += 0.0003;
+      
+      // Individual nebula rotations
+      nebulaGroupRef.current.children.forEach((child, index) => {
+        if (child instanceof THREE.Mesh) {
+          child.rotation.y += (0.001 + index * 0.0002);
+          child.rotation.z += (0.0005 + index * 0.0001);
+        }
+      });
+    }
+    
+    // Animated star fields with different speeds
+    if (starField1Ref.current) {
+      starField1Ref.current.rotation.y += 0.0002;
+    }
+    if (starField2Ref.current) {
+      starField2Ref.current.rotation.y -= 0.0001;
+      starField2Ref.current.rotation.x += 0.00005;
+    }
+    
+    // Black hole animation
+    if (blackHoleRef.current) {
+      if (blackHoleVisible && blackHoleIntensity < 1) {
+        setBlackHoleIntensity(prev => Math.min(prev + 0.01, 1));
+      } else if (!blackHoleVisible && blackHoleIntensity > 0) {
+        setBlackHoleIntensity(prev => Math.max(prev - 0.01, 0));
+      }
+      
+      if (blackHoleIntensity > 0) {
+        blackHoleRef.current.rotation.z += 0.02;
+        blackHoleRef.current.scale.setScalar(0.5 + blackHoleIntensity * 0.5);
+        
+        // Update black hole materials
+        blackHoleRef.current.children.forEach((child, index) => {
+          if (child instanceof THREE.Mesh && child.material) {
+            const material = child.material as THREE.MeshBasicMaterial;
+            material.opacity = blackHoleIntensity * (index === 0 ? 1 : 0.7);
+          }
+        });
+      }
     }
   });
   
   return (
     <>
-      {/* Space environment */}
-      <Environment 
-        files="https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/space_exploration_1k.hdr"
-        background={true}
-        blur={0}
-      />
+      {/* Deep space background */}
+      <color attach="background" args={['#000008']} />
       
-      {/* Fallback space background */}
-      <color attach="background" args={['#000011']} />
-      
-      {/* Enhanced stars field */}
+      {/* Enhanced multi-layer star fields */}
       <Stars 
-        radius={500} 
-        depth={200} 
-        count={5000} 
-        factor={8} 
-        saturation={0.8} 
+        ref={starField1Ref}
+        radius={800} 
+        depth={400} 
+        count={8000} 
+        factor={6} 
+        saturation={0.9} 
         fade 
-        speed={2}
+        speed={1}
+      />
+      <Stars 
+        ref={starField2Ref}
+        radius={600} 
+        depth={300} 
+        count={4000} 
+        factor={4} 
+        saturation={0.7} 
+        fade 
+        speed={0.5}
       />
       
-      {/* Cosmic lighting */}
-      <ambientLight intensity={0.1} color="#1a1a3a" />
-      <pointLight position={[100, 100, 100]} color="#4a9eff" intensity={2} />
-      <pointLight position={[-100, -100, -100]} color="#ff4a9e" intensity={1.5} />
-      <pointLight position={[0, 200, 0]} color="#ffffff" intensity={0.8} />
+      {/* Deep space ambient lighting */}
+      <ambientLight intensity={0.05} color="#0a0a2a" />
+      
+      {/* Distant star lighting */}
+      <pointLight position={[200, 150, 100]} color="#4a7fff" intensity={1.5} distance={500} />
+      <pointLight position={[-150, -100, -200]} color="#ff4a7f" intensity={1.2} distance={400} />
+      <pointLight position={[0, 300, -100]} color="#7fff4a" intensity={0.8} distance={600} />
       
       {/* Animated nebula group */}
-      <group ref={nebulaRef}>
-        {/* Main nebula */}
-        <mesh position={[0, 0, -200]}>
-          <sphereGeometry args={[300, 32, 32]} />
+      <group ref={nebulaGroupRef}>
+        {/* Main purple nebula */}
+        <mesh position={[0, 0, -400]}>
+          <sphereGeometry args={[400, 32, 32]} />
           <meshBasicMaterial 
             color="#6a0dad" 
             transparent 
-            opacity={0.15}
+            opacity={0.12}
             side={THREE.BackSide}
           />
         </mesh>
         
-        {/* Secondary nebula clouds */}
-        <mesh position={[150, 80, -180]}>
-          <sphereGeometry args={[80, 16, 16]} />
+        {/* Pink nebula cloud */}
+        <mesh position={[250, 120, -350]}>
+          <sphereGeometry args={[120, 24, 24]} />
           <meshBasicMaterial 
             color="#ff1493" 
             transparent 
-            opacity={0.1}
+            opacity={0.08}
+            side={THREE.BackSide}
           />
         </mesh>
         
-        <mesh position={[-120, -60, -220]}>
-          <sphereGeometry args={[60, 16, 16]} />
+        {/* Blue nebula cloud */}
+        <mesh position={[-200, -80, -450]}>
+          <sphereGeometry args={[90, 20, 20]} />
           <meshBasicMaterial 
             color="#00bfff" 
             transparent 
-            opacity={0.08}
+            opacity={0.06}
+            side={THREE.BackSide}
+          />
+        </mesh>
+        
+        {/* Green nebula wisps */}
+        <mesh position={[150, -150, -300]}>
+          <sphereGeometry args={[60, 16, 16]} />
+          <meshBasicMaterial 
+            color="#7fff00" 
+            transparent 
+            opacity={0.04}
+            side={THREE.BackSide}
+          />
+        </mesh>
+        
+        {/* Orange nebula */}
+        <mesh position={[-100, 200, -380]}>
+          <sphereGeometry args={[80, 18, 18]} />
+          <meshBasicMaterial 
+            color="#ff8c00" 
+            transparent 
+            opacity={0.05}
+            side={THREE.BackSide}
           />
         </mesh>
       </group>
       
-      {/* Deep space fog */}
-      <fog attach="fog" args={['#000022', 200, 800]} />
+      {/* Animated black hole */}
+      <group ref={blackHoleRef} position={[150, -100, -200]} visible={blackHoleIntensity > 0}>
+        {/* Event horizon */}
+        <mesh>
+          <sphereGeometry args={[15, 32, 32]} />
+          <meshBasicMaterial 
+            color="#000000" 
+            transparent 
+            opacity={blackHoleIntensity}
+          />
+        </mesh>
+        
+        {/* Accretion disk */}
+        <mesh rotation={[Math.PI / 2, 0, 0]}>
+          <torusGeometry args={[25, 8, 16, 32]} />
+          <meshBasicMaterial 
+            color="#ff4500" 
+            transparent 
+            opacity={blackHoleIntensity * 0.7}
+            side={THREE.DoubleSide}
+          />
+        </mesh>
+        
+        {/* Outer accretion ring */}
+        <mesh rotation={[Math.PI / 2, 0, 0]}>
+          <torusGeometry args={[40, 5, 12, 24]} />
+          <meshBasicMaterial 
+            color="#ff6347" 
+            transparent 
+            opacity={blackHoleIntensity * 0.4}
+            side={THREE.DoubleSide}
+          />
+        </mesh>
+        
+        {/* Gravitational lensing effect */}
+        <mesh>
+          <sphereGeometry args={[50, 32, 32]} />
+          <meshBasicMaterial 
+            color="#ffffff" 
+            transparent 
+            opacity={blackHoleIntensity * 0.05}
+            side={THREE.BackSide}
+          />
+        </mesh>
+      </group>
+      
+      {/* Deep space particles */}
+      <pointLight position={[300, 50, 200]} color="#87ceeb" intensity={0.3} distance={200} />
+      <pointLight position={[-250, 100, 150]} color="#dda0dd" intensity={0.4} distance={180} />
+      <pointLight position={[0, -200, 300]} color="#98fb98" intensity={0.2} distance={250} />
+      
+      {/* Cosmic fog for depth */}
+      <fog attach="fog" args={['#000011', 300, 1000]} />
     </>
   );
 };
