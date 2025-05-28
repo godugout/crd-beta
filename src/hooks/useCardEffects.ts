@@ -1,128 +1,107 @@
 
 import { useState, useCallback } from 'react';
+import { Effect, EffectType } from '@/components/card-creation/modern/effects/EffectComposer';
 
-export interface CardEffect {
-  id: string;
-  name: string;
-  enabled: boolean;
-  settings: {
-    intensity: number;
-    color?: string;
-    speed?: number;
-    pattern?: string;
-    animationEnabled?: boolean;
-  };
+export interface CardEffectsResult {
+  effects: Effect[];
+  addEffect: (type: EffectType) => void;
+  removeEffect: (id: string) => void;
+  updateEffect: (id: string, updates: Partial<Effect>) => void;
+  reorderEffects: (newEffects: Effect[]) => void;
+  clearEffects: () => void;
+  exportEffectsData: () => any;
 }
 
-export const useCardEffects = (initialEffects: string[] = []) => {
-  const [effects, setEffects] = useState<CardEffect[]>([
-    {
-      id: 'holographic',
-      name: 'Holographic',
-      enabled: initialEffects.includes('holographic'),
-      settings: {
-        intensity: 1.0,
-        color: '#00ffff',
-        animationEnabled: true
-      }
+const generateId = () => `effect-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+const createDefaultEffect = (type: EffectType): Effect => {
+  const baseEffect = {
+    id: generateId(),
+    type,
+    name: type.charAt(0).toUpperCase() + type.slice(1),
+    blendMode: 'normal' as const,
+    enabled: true,
+  };
+
+  const typeSpecificParams = {
+    holographic: {
+      parameters: { intensity: 0.8, scale: 1.0, speed: 1.0 }
     },
-    {
-      id: 'refractor',
-      name: 'Refractor',
-      enabled: initialEffects.includes('refractor'),
-      settings: {
-        intensity: 0.8,
-        pattern: 'wave'
-      }
+    refractor: {
+      parameters: { intensity: 0.7, pattern: 'prism', scale: 1.2 }
     },
-    {
-      id: 'chrome',
-      name: 'Chrome',
-      enabled: initialEffects.includes('chrome'),
-      settings: {
-        intensity: 1.0
-      }
+    foil: {
+      parameters: { intensity: 0.9, color: '#C0C0C0', scale: 1.0 }
     },
-    {
-      id: 'goldFoil',
-      name: 'Gold Foil',
-      enabled: initialEffects.includes('goldFoil'),
-      settings: {
-        intensity: 0.7,
-        color: '#ffcc00'
-      }
+    chrome: {
+      parameters: { intensity: 1.0, scale: 1.0 }
     },
-    {
-      id: 'vintage',
-      name: 'Vintage',
-      enabled: initialEffects.includes('vintage'),
-      settings: {
-        intensity: 0.6
-      }
+    matte: {
+      parameters: { intensity: 0.6, pattern: 'paper' }
     },
-    {
-      id: 'prismatic',
-      name: 'Prismatic',
-      enabled: initialEffects.includes('prismatic'),
-      settings: {
-        intensity: 0.8,
-        color: '#ff00ff'
-      }
+    gloss: {
+      parameters: { intensity: 0.8, scale: 1.1 }
     },
-    {
-      id: 'mojo',
-      name: 'Mojo',
-      enabled: initialEffects.includes('mojo'),
-      settings: {
-        intensity: 0.9,
-        pattern: 'swirl'
-      }
+    textured: {
+      parameters: { intensity: 0.5, pattern: 'canvas', scale: 1.0 }
+    },
+    animated: {
+      parameters: { intensity: 0.7, speed: 1.0, pattern: 'shimmer' }
     }
-  ]);
-  
-  // Toggle an effect on or off
-  const toggleEffect = useCallback((effectId: string) => {
-    setEffects(prevEffects => 
-      prevEffects.map(effect => 
-        effect.id === effectId 
-          ? { ...effect, enabled: !effect.enabled } 
-          : effect
-      )
-    );
+  };
+
+  return {
+    ...baseEffect,
+    ...typeSpecificParams[type]
+  };
+};
+
+export const useCardEffects = (initialEffects: Effect[] = []): CardEffectsResult => {
+  const [effects, setEffects] = useState<Effect[]>(initialEffects);
+
+  const addEffect = useCallback((type: EffectType) => {
+    const newEffect = createDefaultEffect(type);
+    setEffects(prev => [...prev, newEffect]);
   }, []);
-  
-  // Update effect intensity
-  const updateIntensity = useCallback((effectId: string, intensity: number) => {
-    setEffects(prevEffects => 
-      prevEffects.map(effect => 
-        effect.id === effectId 
-          ? { ...effect, settings: { ...effect.settings, intensity } } 
-          : effect
-      )
-    );
+
+  const removeEffect = useCallback((id: string) => {
+    setEffects(prev => prev.filter(effect => effect.id !== id));
   }, []);
-  
-  // Get active effect IDs
-  const getActiveEffectIds = useCallback(() => {
-    return effects
-      .filter(effect => effect.enabled)
-      .map(effect => effect.id);
+
+  const updateEffect = useCallback((id: string, updates: Partial<Effect>) => {
+    setEffects(prev => prev.map(effect => 
+      effect.id === id ? { ...effect, ...updates } : effect
+    ));
+  }, []);
+
+  const reorderEffects = useCallback((newEffects: Effect[]) => {
+    setEffects(newEffects);
+  }, []);
+
+  const clearEffects = useCallback(() => {
+    setEffects([]);
+  }, []);
+
+  const exportEffectsData = useCallback(() => {
+    return {
+      effects: effects.map(effect => ({
+        type: effect.type,
+        parameters: effect.parameters,
+        blendMode: effect.blendMode,
+        enabled: effect.enabled
+      })),
+      timestamp: new Date().toISOString()
+    };
   }, [effects]);
-  
-  // Get effect intensities as a record
-  const getEffectIntensities = useCallback(() => {
-    return effects.reduce((acc, effect) => {
-      acc[effect.id] = effect.settings.intensity;
-      return acc;
-    }, {} as Record<string, number>);
-  }, [effects]);
-  
+
   return {
     effects,
-    toggleEffect,
-    updateIntensity,
-    activeEffects: getActiveEffectIds(),
-    effectIntensities: getEffectIntensities()
+    addEffect,
+    removeEffect,
+    updateEffect,
+    reorderEffects,
+    clearEffects,
+    exportEffectsData
   };
 };
 
