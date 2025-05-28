@@ -13,18 +13,20 @@ const CardEffectsGallery: React.FC<CardEffectsGalleryProps> = ({ card }) => {
   const [isFlipped, setIsFlipped] = useState(false);
   const { 
     effects,
-    activeEffects,
-    updateIntensity,
-    toggleEffect
+    toggleEffect,
+    updateEffectIntensity
   } = useCardEffects();
   
   const handleFlip = () => {
     setIsFlipped(prev => !prev);
   };
   
+  // Get active effects from the effects array
+  const activeEffects = effects.filter(effect => effect.active).map(effect => effect.id);
+  
   // Generate an object with effect intensities from the effects array
   const effectIntensities = effects.reduce((acc, effect) => {
-    acc[effect.id] = effect.settings.intensity || 0.7;
+    acc[effect.id] = effect.intensity || 0.7;
     return acc;
   }, {} as Record<string, number>);
   
@@ -44,7 +46,7 @@ const CardEffectsGallery: React.FC<CardEffectsGalleryProps> = ({ card }) => {
         <EffectsPanel
           effects={effects}
           onToggleEffect={toggleEffect}
-          onUpdateIntensity={updateIntensity}
+          onUpdateIntensity={updateEffectIntensity}
         />
         
         <div className="mt-4">
