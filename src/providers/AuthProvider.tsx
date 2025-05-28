@@ -1,7 +1,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { UserRole } from '@/lib/types/user';
+import { UserRole, Permission } from '@/lib/types/user';
 
 export interface User {
   id: string;
@@ -11,7 +11,7 @@ export interface User {
   avatarUrl?: string;
   bio?: string;
   role: UserRole; // Use UserRole enum instead of string
-  permissions?: string[];
+  permissions?: Permission[]; // Use Permission enum instead of string[]
   createdAt: string;
   updatedAt: string;
 }
@@ -55,7 +55,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             avatarUrl: session.user.user_metadata?.avatar_url,
             bio: session.user.user_metadata?.bio,
             role: UserRole.USER, // Use UserRole enum
-            permissions: ['read'],
+            permissions: [Permission.READ], // Use Permission enum
             createdAt: session.user.created_at,
             updatedAt: new Date().toISOString(),
           };
@@ -83,7 +83,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             avatarUrl: session.user.user_metadata?.avatar_url,
             bio: session.user.user_metadata?.bio,
             role: UserRole.USER, // Use UserRole enum
-            permissions: ['read'],
+            permissions: [Permission.READ], // Use Permission enum
             createdAt: session.user.created_at,
             updatedAt: new Date().toISOString(),
           };
@@ -120,7 +120,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         avatarUrl: data.user.user_metadata?.avatar_url,
         bio: data.user.user_metadata?.bio,
         role: UserRole.USER, // Use UserRole enum
-        permissions: ['read'],
+        permissions: [Permission.READ], // Use Permission enum
         createdAt: data.user.created_at,
         updatedAt: new Date().toISOString(),
       };
@@ -155,7 +155,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         avatarUrl: data.user.user_metadata?.avatar_url,
         bio: data.user.user_metadata?.bio,
         role: UserRole.USER, // Use UserRole enum
-        permissions: ['read'],
+        permissions: [Permission.READ], // Use Permission enum
         createdAt: data.user.created_at,
         updatedAt: new Date().toISOString(),
       };
