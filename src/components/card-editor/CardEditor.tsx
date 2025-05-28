@@ -1,4 +1,5 @@
 
+
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { Card, CardLayer, CardEffect } from '@/lib/types';
 import { fabric } from 'fabric';
@@ -68,6 +69,8 @@ const CardEditor: React.FC<CardEditorProps> = ({
   useEffect(() => {
     if (!canvasRef.current) return;
 
+    console.log('Initializing Fabric.js canvas');
+    
     const canvas = new fabric.Canvas(canvasRef.current, {
       width: 750, // 2.5" at 300 DPI
       height: 1050, // 3.5" at 300 DPI
@@ -101,7 +104,10 @@ const CardEditor: React.FC<CardEditorProps> = ({
       }
     });
 
+    console.log('Fabric.js canvas initialized successfully');
+
     return () => {
+      console.log('Disposing Fabric.js canvas');
       canvas.dispose();
     };
   }, []);
@@ -110,6 +116,7 @@ const CardEditor: React.FC<CardEditorProps> = ({
   useEffect(() => {
     if (!fabricRef.current || !activeCard.layers) return;
 
+    console.log('Rendering layers:', activeCard.layers.length);
     fabricRef.current.clear();
     
     activeCard.layers.forEach((layer) => {
@@ -120,28 +127,40 @@ const CardEditor: React.FC<CardEditorProps> = ({
   }, [activeCard.layers]);
 
   const renderLayer = async (canvas: fabric.Canvas, layer: CardLayer) => {
+    console.log('Rendering layer:', layer.type, layer.id);
+    
     try {
       switch (layer.type) {
         case 'image':
           if (layer.imageUrl) {
-            const img = await fabric.FabricImage.fromURL(layer.imageUrl);
-            img.set({
-              left: layer.position.x,
-              top: layer.position.y,
-              angle: layer.rotation,
-              opacity: layer.opacity,
-              scaleX: typeof layer.size.width === 'number' ? Number(layer.size.width) / (img.width || 1) : 1,
-              scaleY: typeof layer.size.height === 'number' ? Number(layer.size.height) / (img.height || 1) : 1,
+            console.log('Loading image from URL:', layer.imageUrl);
+            
+            // Use fabric.Image.fromURL for v6
+            fabric.Image.fromURL(layer.imageUrl, (img) => {
+              if (img) {
+                img.set({
+                  left: layer.position.x,
+                  top: layer.position.y,
+                  angle: layer.rotation,
+                  opacity: layer.opacity,
+                  scaleX: typeof layer.size.width === 'number' ? Number(layer.size.width) / (img.width || 1) : 1,
+                  scaleY: typeof layer.size.height === 'number' ? Number(layer.size.height) / (img.height || 1) : 1,
+                });
+                // Store layer ID for reference
+                (img as any).data = { layerId: layer.id };
+                canvas.add(img);
+                canvas.renderAll();
+                console.log('Image layer rendered successfully');
+              }
+            }, {
+              crossOrigin: 'anonymous'
             });
-            // Store layer ID for reference
-            (img as any).data = { layerId: layer.id };
-            canvas.add(img);
-            canvas.renderAll();
           }
           break;
         
         case 'text':
-          const text = new fabric.FabricText(layer.content || 'Text', {
+          console.log('Creating text layer:', layer.content);
+          const text = new fabric.Text(layer.content || 'Text', {
             left: layer.position.x,
             top: layer.position.y,
             angle: layer.rotation,
@@ -152,10 +171,12 @@ const CardEditor: React.FC<CardEditorProps> = ({
           });
           (text as any).data = { layerId: layer.id };
           canvas.add(text);
+          console.log('Text layer rendered successfully');
           break;
         
         case 'shape':
           if (layer.shapeType === 'rectangle') {
+            console.log('Creating rectangle shape');
             const width = typeof layer.size.width === 'number' ? Number(layer.size.width) : 100;
             const height = typeof layer.size.height === 'number' ? Number(layer.size.height) : 100;
             
@@ -170,7 +191,9 @@ const CardEditor: React.FC<CardEditorProps> = ({
             });
             (rect as any).data = { layerId: layer.id };
             canvas.add(rect);
+            console.log('Rectangle shape rendered successfully');
           } else if (layer.shapeType === 'circle') {
+            console.log('Creating circle shape');
             const radius = typeof layer.size.width === 'number' ? Number(layer.size.width) / 2 : 50;
             
             const circle = new fabric.Circle({
@@ -183,16 +206,21 @@ const CardEditor: React.FC<CardEditorProps> = ({
             });
             (circle as any).data = { layerId: layer.id };
             canvas.add(circle);
+            console.log('Circle shape rendered successfully');
           }
           break;
       }
+      
+      canvas.renderAll();
+      
     } catch (error) {
-      console.error('Error rendering layer:', error);
-      toast.error('Failed to render layer');
+      console.error('Error rendering layer:', layer.type, error);
+      toast.error(`Failed to render ${layer.type} layer`);
     }
   };
 
   const updateLayer = useCallback((layerId: string, updates: Partial<CardLayer>) => {
+    console.log('Updating layer:', layerId, updates);
     setActiveCard(prev => ({
       ...prev,
       layers: prev.layers?.map(layer => 
@@ -203,6 +231,7 @@ const CardEditor: React.FC<CardEditorProps> = ({
   }, []);
 
   const addImageLayer = useCallback((imageUrl: string) => {
+    console.log('Adding image layer with URL:', imageUrl);
     const newLayer: CardLayer = {
       id: `layer-${Date.now()}`,
       type: 'image',
@@ -226,6 +255,7 @@ const CardEditor: React.FC<CardEditorProps> = ({
   }, [activeCard.layers]);
 
   const addTextLayer = useCallback(() => {
+    console.log('Adding text layer');
     const newLayer: CardLayer = {
       id: `layer-${Date.now()}`,
       type: 'text',
@@ -253,6 +283,7 @@ const CardEditor: React.FC<CardEditorProps> = ({
   }, [activeCard.layers]);
 
   const addShapeLayer = useCallback((shapeType: 'rectangle' | 'circle') => {
+    console.log('Adding shape layer:', shapeType);
     const newLayer: CardLayer = {
       id: `layer-${Date.now()}`,
       type: 'shape',
@@ -607,3 +638,4 @@ const CardEditor: React.FC<CardEditorProps> = ({
 };
 
 export default CardEditor;
+
