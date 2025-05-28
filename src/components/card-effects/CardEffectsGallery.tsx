@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Card } from '@/lib/types/cardTypes';
 import CardInteractive from '@/components/card-viewer/CardInteractive';
 import EffectsPanel from '@/components/card-viewer/panels/EffectsPanel';
-import { useCardEffects } from '@/hooks/useCardEffects';
+import { useCardEffects } from '@/hooks/useCardEffects.tsx';
 
 interface CardEffectsGalleryProps {
   card: Card;
@@ -22,10 +22,10 @@ interface CardEffect {
 const CardEffectsGallery: React.FC<CardEffectsGalleryProps> = ({ card }) => {
   const [isFlipped, setIsFlipped] = useState(false);
   
-  // Use the hook that returns the card effects management functions
+  // Use the hook from useCardEffects.tsx which has the correct interface
   const { 
     effects,
-    updateEffectProperty,
+    toggleEffect,
     updateEffectIntensity
   } = useCardEffects();
   
@@ -54,10 +54,7 @@ const CardEffectsGallery: React.FC<CardEffectsGalleryProps> = ({ card }) => {
   
   // Wrapper functions to handle the interface differences
   const handleToggleEffect = (effectId: string) => {
-    const effect = effects.find(e => e.id === effectId);
-    if (effect) {
-      updateEffectProperty(effectId, 'active', !effect.active);
-    }
+    toggleEffect(effectId);
   };
   
   const handleUpdateIntensity = (effectId: string, intensity: number) => {
