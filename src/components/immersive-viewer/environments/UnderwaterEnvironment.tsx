@@ -31,7 +31,6 @@ export const UnderwaterEnvironment = () => {
         files="https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/underwater_01_1k.hdr"
         background={true}
         blur={0.3}
-        intensity={1.0}
       />
       
       {/* Fallback underwater background */}

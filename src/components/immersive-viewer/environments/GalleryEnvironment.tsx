@@ -10,7 +10,6 @@ export const GalleryEnvironment = () => {
         files="https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/museum_of_ethnography_1k.hdr"
         background={true}
         blur={0.1}
-        intensity={1.2}
       />
       
       {/* Professional gallery lighting */}

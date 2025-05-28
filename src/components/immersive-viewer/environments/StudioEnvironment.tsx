@@ -10,7 +10,6 @@ export const StudioEnvironment = () => {
         files="https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/photo_studio_loft_hall_1k.hdr"
         background={true}
         blur={0.1}
-        intensity={1.5}
       />
       
       {/* Studio lighting setup */}
