@@ -1,12 +1,11 @@
 import React, { useRef, useEffect, useState, useMemo } from 'react';
 import { Card } from '@/lib/types/cardTypes';
-import { Canvas, useFrame } from '@react-three/fiber';
+import { Canvas, useFrame, extend } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera, Environment, shaderMaterial } from '@react-three/drei';
 import { DEFAULT_DESIGN_METADATA, FALLBACK_IMAGE_URL } from '@/lib/utils/cardDefaults';
 import { useToast } from '@/hooks/use-toast';
 import * as THREE from 'three';
 import { logRenderingInfo } from '@/utils/debugRenderer';
-import { extend } from '@react-three/fiber';
 
 interface ImmersiveCardViewerProps {
   card: Card;
@@ -201,7 +200,24 @@ const VintageMaterial = shaderMaterial(
 );
 
 // Extend the materials so they can be used in JSX
-extend({ HolographicMaterial, ShimmerMaterial, RefractorMaterial, VintageMaterial });
+extend({ 
+  HolographicMaterial: HolographicMaterial,
+  ShimmerMaterial: ShimmerMaterial,
+  RefractorMaterial: RefractorMaterial,
+  VintageMaterial: VintageMaterial
+});
+
+// Type declarations for the custom materials
+declare global {
+  namespace JSX {
+    interface IntrinsicElements {
+      holographicMaterial: any;
+      shimmerMaterial: any;
+      refractorMaterial: any;
+      vintageMaterial: any;
+    }
+  }
+}
 
 const Card3DModel = ({ 
   frontTextureUrl, 
@@ -209,6 +225,12 @@ const Card3DModel = ({
   isFlipped,
   activeEffects,
   effectIntensities = {}
+}: {
+  frontTextureUrl: string;
+  backTextureUrl: string;
+  isFlipped: boolean;
+  activeEffects: string[];
+  effectIntensities: Record<string, number>;
 }) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const groupRef = useRef<THREE.Group>(null);
