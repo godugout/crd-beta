@@ -29,7 +29,7 @@ export const cardsNavItems: NavigationItem[] = [
   },
   {
     title: 'Card Detector',
-    path: '/detector',
+    path: '/cards/detector',
     icon: Eye,
     description: 'Scan and digitize physical cards'
   }
