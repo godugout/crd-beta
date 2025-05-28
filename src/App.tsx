@@ -7,6 +7,7 @@ import { AuthProvider } from "@/providers/AuthProvider";
 import { CardProvider } from "@/context/CardContext";
 import { BrandThemeProvider } from "@/context/BrandThemeContext";
 import DevAuthStatus from "@/components/dev/DevAuthStatus";
+import AppHeader from "@/components/navigation/AppHeader";
 import PageLayout from "@/components/navigation/PageLayout";
 import Home from "@/pages/Home";
 import Gallery from "@/pages/Gallery";

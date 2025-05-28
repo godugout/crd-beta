@@ -1,6 +1,7 @@
 
 import React, { ReactNode } from 'react';
 import { Helmet } from 'react-helmet-async';
+import AppHeader from './AppHeader';
 import MobileBottomNav from './MobileBottomNav';
 import { useState } from 'react';
 import MobileMenu from '../navbar/MobileMenu';
@@ -13,7 +14,7 @@ interface PageLayoutProps {
   fullWidth?: boolean;
   hideNavigation?: boolean;
   className?: string;
-  contentClassName?: string;
+  contentClassName?: string;  // Added contentClassName prop
   canonicalPath?: string;
   hideBreadcrumbs?: boolean;
   actions?: React.ReactNode;
@@ -36,7 +37,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({
   fullWidth = false,
   hideNavigation = false,
   className = '',
-  contentClassName = '',
+  contentClassName = '',  // Added default value
   canonicalPath,
   hideBreadcrumbs = false,
   actions,
@@ -71,6 +72,10 @@ const PageLayout: React.FC<PageLayoutProps> = ({
         <meta name="description" content={stringDescription} />
         {canonicalPath && <link rel="canonical" href={`https://cardshow.app${canonicalPath}`} />}
       </Helmet>
+      
+      {!hideNavigation && (
+        <AppHeader />
+      )}
       
       {!hideNavigation && (
         <SecondaryNavbar
