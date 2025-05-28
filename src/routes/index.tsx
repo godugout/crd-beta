@@ -15,6 +15,7 @@ import AuthPage from '@/pages/AuthPage';
 import NotFound from '@/pages/NotFound';
 import Collections from '@/pages/Collections';
 import TownCommunityHub from '@/pages/TownCommunityHub';
+import Editor from '@/pages/Editor';
 
 // Import other route collections
 import { cardRoutes } from './cardRoutes';
@@ -67,6 +68,14 @@ const rootRoutes: RouteObject[] = [
         <CardCreator />
       </Suspense>
     )
+  },
+  {
+    path: "/editor",
+    element: <Editor />
+  },
+  {
+    path: "/editor/:id",
+    element: <Editor />
   },
   {
     path: "/cards/:id",
