@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { Card, CardLayer, CardEffect } from '@/lib/types';
 import { fabric } from 'fabric';
@@ -48,8 +47,8 @@ const CardEditor: React.FC<CardEditorProps> = ({
       layers: [],
       effects: [],
       metadata: {},
-      created: new Date(),
-      updated: new Date()
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
     }
   );
 
@@ -92,7 +91,7 @@ const CardEditor: React.FC<CardEditorProps> = ({
     canvas.on('object:modified', (e) => {
       if (e.target && e.target.data?.layerId) {
         updateLayer(e.target.data.layerId, {
-          position: { x: e.target.left || 0, y: e.target.top || 0 },
+          position: { x: e.target.left || 0, y: e.target.top || 0, z: 0 },
           rotation: e.target.angle || 0,
           size: { 
             width: (e.target.width || 100) * (e.target.scaleX || 1), 
@@ -131,8 +130,8 @@ const CardEditor: React.FC<CardEditorProps> = ({
                 top: layer.position.y,
                 angle: layer.rotation,
                 opacity: layer.opacity,
-                scaleX: layer.size.width / (img.width || 1),
-                scaleY: layer.size.height / (img.height || 1),
+                scaleX: typeof layer.size.width === 'number' ? layer.size.width / (img.width || 1) : 1,
+                scaleY: typeof layer.size.height === 'number' ? layer.size.height / (img.height || 1) : 1,
                 data: { layerId: layer.id }
               });
               canvas.add(img);
@@ -161,11 +160,14 @@ const CardEditor: React.FC<CardEditorProps> = ({
       
       case 'shape':
         if (layer.shapeType === 'rectangle') {
+          const width = typeof layer.size.width === 'number' ? layer.size.width : 100;
+          const height = typeof layer.size.height === 'number' ? layer.size.height : 100;
+          
           const rect = new fabric.Rect({
             left: layer.position.x,
             top: layer.position.y,
-            width: layer.size.width as number || 100,
-            height: layer.size.height as number || 100,
+            width: width,
+            height: height,
             fill: layer.color || '#000000',
             angle: layer.rotation,
             opacity: layer.opacity,
@@ -173,10 +175,12 @@ const CardEditor: React.FC<CardEditorProps> = ({
           });
           canvas.add(rect);
         } else if (layer.shapeType === 'circle') {
+          const radius = typeof layer.size.width === 'number' ? layer.size.width / 2 : 50;
+          
           const circle = new fabric.Circle({
             left: layer.position.x,
             top: layer.position.y,
-            radius: (layer.size.width as number || 100) / 2,
+            radius: radius,
             fill: layer.color || '#000000',
             angle: layer.rotation,
             opacity: layer.opacity,
@@ -194,7 +198,7 @@ const CardEditor: React.FC<CardEditorProps> = ({
       layers: prev.layers?.map(layer => 
         layer.id === layerId ? { ...layer, ...updates } : layer
       ) || [],
-      updated: new Date()
+      updatedAt: new Date().toISOString()
     }));
   }, []);
 
@@ -215,7 +219,7 @@ const CardEditor: React.FC<CardEditorProps> = ({
     setActiveCard(prev => ({
       ...prev,
       layers: [...(prev.layers || []), newLayer],
-      updated: new Date()
+      updatedAt: new Date().toISOString()
     }));
 
     toast.success('Image layer added');
@@ -242,7 +246,7 @@ const CardEditor: React.FC<CardEditorProps> = ({
     setActiveCard(prev => ({
       ...prev,
       layers: [...(prev.layers || []), newLayer],
-      updated: new Date()
+      updatedAt: new Date().toISOString()
     }));
 
     toast.success('Text layer added');
@@ -266,7 +270,7 @@ const CardEditor: React.FC<CardEditorProps> = ({
     setActiveCard(prev => ({
       ...prev,
       layers: [...(prev.layers || []), newLayer],
-      updated: new Date()
+      updatedAt: new Date().toISOString()
     }));
 
     toast.success('Shape layer added');
