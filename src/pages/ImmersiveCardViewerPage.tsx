@@ -5,25 +5,34 @@ import { toast } from 'sonner';
 import { Card } from '@/lib/types';
 import RealisticCardViewer from '@/components/immersive-viewer/RealisticCardViewer';
 import ImmersiveViewerInterface from '@/components/immersive-viewer/ImmersiveViewerInterface';
-import { useSampleCards } from '@/hooks/useSampleCards';
+import { useCards } from '@/hooks/useCards';
 import { basketballCards } from '@/data/basketballCards';
 
 const ImmersiveCardViewerPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { cards } = useSampleCards();
+  const { cards, getCard } = useCards();
   const [isFlipped, setIsFlipped] = useState(false);
   const [isCustomizationOpen, setIsCustomizationOpen] = useState(false);
 
   console.log('ImmersiveCardViewerPage: Looking for card with ID:', id);
-  console.log('Available cards from useSampleCards:', cards?.length || 0);
+  console.log('Available cards from useCards:', cards?.length || 0);
   console.log('Available basketball cards:', basketballCards?.length || 0);
 
-  // Combine all available cards
-  const allCards = [...(cards || []), ...basketballCards];
-  const card = allCards.find(c => c.id === id);
-
-  console.log('Found card:', card?.title || 'Not found');
+  // Try to find the card using the getCard function first (which searches all sources)
+  let card: Card | undefined;
+  
+  if (getCard) {
+    card = getCard(id!);
+    console.log('Found card via getCard:', card?.title || 'Not found');
+  }
+  
+  // If not found via getCard, try combining all available cards as fallback
+  if (!card) {
+    const allCards = [...(cards || []), ...basketballCards];
+    card = allCards.find(c => c.id === id);
+    console.log('Found card via direct search:', card?.title || 'Not found');
+  }
 
   if (!card) {
     return (
