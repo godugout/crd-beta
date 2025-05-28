@@ -1,62 +1,52 @@
 
-import * as React from "react"
-import { Slot } from "@radix-ui/react-slot"
-import { cva, type VariantProps } from "class-variance-authority"
+import React from 'react';
+import { Slot } from '@radix-ui/react-slot';
+import { cva, type VariantProps } from 'class-variance-authority';
+import { cn } from '@/lib/utils';
 
-import { cn } from "@/lib/utils"
-
-const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crd-primary/50 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+const crdButtonVariants = cva(
+  "inline-flex items-center justify-center whitespace-nowrap rounded-xl text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50",
   {
     variants: {
       variant: {
-        default: "bg-crd-primary text-white shadow-sm hover:bg-crd-primary/90",
-        destructive: "bg-crd-error text-white hover:bg-crd-error/90",
-        outline: "border border-input bg-transparent hover:bg-white/5 hover:text-crd-primary",
-        secondary: "bg-crd-secondary text-crd-body hover:bg-crd-secondary/80",
-        ghost: "hover:bg-white/5 hover:text-crd-primary",
-        link: "text-crd-primary underline-offset-4 hover:underline",
-        gradient: "relative overflow-hidden text-white shadow-md bg-gradient-to-r from-crd-primary to-blue-600 hover:shadow-lg transition-all transform hover:scale-[1.03]",
-        rainbow: "relative overflow-hidden text-white shadow-md bg-gradient-to-r from-[#FF5C69] via-[#2AFC98] to-[#38B6FF] hover:shadow-lg transition-all transform hover:scale-[1.03]",
-        glass: "backdrop-blur-xl bg-white/10 border border-white/10 text-white hover:bg-white/15 transition-all transform hover:shadow-md",
-        spectrum: "relative overflow-hidden backdrop-blur-md bg-black/30 border border-white/10 text-white shadow-md hover:shadow-lg transition-all transform hover:scale-[1.02] after:absolute after:inset-0 after:bg-[var(--gradient-rainbow)] after:opacity-20 after:z-[-1]",
-        pill: "rounded-full px-4 py-1.5 text-xs font-semibold bg-black/20 text-white hover:bg-black/30",
-        tag: "rounded-full px-2.5 py-0.5 text-xs font-medium bg-white/10 text-white hover:bg-white/15",
-        featured: "relative overflow-hidden backdrop-blur-md bg-black/40 border border-amber-500/30 text-white shadow-md hover:shadow-lg transition-all transform hover:scale-[1.02] after:absolute after:inset-0 after:bg-gradient-to-r after:from-amber-500/20 after:to-purple-500/20 after:z-[-1]",
+        spectrum: "relative overflow-hidden backdrop-blur-md bg-gradient-to-r from-[var(--brand-primary)] to-[var(--brand-accent)] text-white shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-95",
+        glass: "backdrop-blur-xl bg-black/30 border border-white/10 text-white hover:bg-black/40 transition-all shadow-lg",
+        soft: "bg-white/10 border border-white/10 text-white hover:bg-white/20 transition-all",
+        outline: "border border-white/20 bg-transparent text-white hover:bg-white/10",
+        ghost: "text-white hover:bg-white/10 hover:text-white"
       },
       size: {
-        default: "h-10 px-5 py-2.5",
-        sm: "h-9 rounded-lg px-3.5 text-xs",
-        lg: "h-11 rounded-xl px-8",
-        xl: "h-12 rounded-xl px-10 text-base",
-        icon: "h-10 w-10 rounded-full",
-      },
+        default: "h-9 px-4 py-2",
+        sm: "h-8 rounded-lg px-3 text-xs",
+        lg: "h-10 rounded-xl px-8",
+        icon: "h-9 w-9"
+      }
     },
     defaultVariants: {
-      variant: "default",
-      size: "default",
-    },
+      variant: "spectrum",
+      size: "default"
+    }
   }
-)
+);
 
 export interface CrdButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
-  asChild?: boolean
+    VariantProps<typeof crdButtonVariants> {
+  asChild?: boolean;
 }
 
 const CrdButton = React.forwardRef<HTMLButtonElement, CrdButtonProps>(
   ({ className, variant, size, asChild = false, ...props }, ref) => {
-    const Comp = asChild ? Slot : "button"
+    const Comp = asChild ? Slot : "button";
     return (
       <Comp
-        className={cn(buttonVariants({ variant, size, className }))}
+        className={cn(crdButtonVariants({ variant, size, className }))}
         ref={ref}
         {...props}
       />
-    )
+    );
   }
-)
-CrdButton.displayName = "CrdButton"
+);
+CrdButton.displayName = "CrdButton";
 
-export { CrdButton, buttonVariants }
+export { CrdButton, crdButtonVariants };

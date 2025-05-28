@@ -1,9 +1,8 @@
-import React, { useRef, useState, useEffect, Suspense } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { 
   PerspectiveCamera, 
   Environment, 
-  useGLTF, 
   OrbitControls,
   ContactShadows,
   useTexture,
@@ -14,15 +13,9 @@ import {
 } from '@react-three/drei';
 import * as THREE from 'three';
 import { Card } from '@/lib/types';
-import { useCardLighting, LightingSettings } from '@/hooks/useCardLighting';
+import { useCardLighting } from '@/hooks/useCardLighting';
 import { useUserLightingPreferences } from '@/hooks/useUserLightingPreferences';
-import { motion } from 'framer-motion';
-import { ChevronRight, ChevronLeft } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
-import { getEnvironmentMapById } from '@/lib/environment-maps';
 import { logRenderingInfo } from '@/utils/debugRenderer';
-import { Eye } from 'lucide-react';
 import ViewerSettings from '@/components/gallery/viewer-components/ViewerSettings';
 
 // Define possible return types from useTexture
@@ -259,7 +252,6 @@ const RealisticCardViewer: React.FC<RealisticCardViewerProps> = ({
     isUserCustomized,
     toggleDynamicLighting
   } = useCardLighting(preferences?.environmentType || 'studio');
-  const [showViewerSettings, setShowViewerSettings] = useState(false);
 
   // Save user preferences when they change
   useEffect(() => {
@@ -291,12 +283,12 @@ const RealisticCardViewer: React.FC<RealisticCardViewerProps> = ({
           alpha: false,
           preserveDrawingBuffer: true
         }}
-        className="bg-gray-800 z-0"
+        className="bg-gradient-to-br from-gray-900 via-gray-800 to-black z-0"
       >
         <color attach="background" args={["#0f172a"]} />
         <PerspectiveCamera makeDefault position={[0, 0, 5]} fov={50} />
         
-        <ambientLight intensity={0.7} />
+        <ambientLight intensity={lightingSettings.ambientLight.intensity} color={lightingSettings.ambientLight.color} />
         <spotLight
           position={[
             lightingSettings.primaryLight.x,
@@ -341,61 +333,19 @@ const RealisticCardViewer: React.FC<RealisticCardViewerProps> = ({
         <DebugInfo show={isDebugMode} />
       </Canvas>
 
-      {/* Controls overlay */}
-      <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex gap-3 z-10">
-        <Button
-          variant="secondary"
-          size="lg"
-          className="rounded-full shadow-lg bg-black/50 backdrop-blur-md hover:bg-black/70 text-white"
-          onClick={() => setIsFlipped(!isFlipped)}
-        >
-          {isFlipped ? 'View Front' : 'View Back'}
-        </Button>
-      </div>
-      
-      {/* Customization panel toggle */}
-      <div 
-        className={cn(
-          "absolute top-1/2 -translate-y-1/2 z-10 transition-all duration-300",
-          isCustomizationOpen ? "right-[380px]" : "right-4"
-        )}
-      >
-        <Button
-          variant="secondary"
-          size="icon"
-          className="rounded-full shadow-lg bg-black/50 backdrop-blur-md hover:bg-black/70 text-white h-10 w-10"
-          onClick={onToggleCustomization}
-        >
-          {isCustomizationOpen ? <ChevronRight /> : <ChevronLeft />}
-        </Button>
-      </div>
-      
       {/* Debug indicator */}
       {isDebugMode && (
         <div className="absolute top-2 left-2 bg-red-500/80 text-white text-xs px-2 py-1 rounded z-50">
           Debug Mode
         </div>
       )}
-      
-      {/* Card title overlay */}
-      <div className="absolute top-2 left-1/2 transform -translate-x-1/2 bg-black/50 backdrop-blur-sm text-white px-3 py-1 rounded-full text-sm z-10">
-        {card.title || 'Untitled Card'}
-      </div>
 
-      <Button
-        variant="ghost"
-        size="icon"
-        className="absolute top-4 right-4 text-white bg-black/50 backdrop-blur-sm hover:bg-black/70 z-20"
-        onClick={() => setShowViewerSettings(!showViewerSettings)}
-      >
-        <Eye className="h-5 w-5" />
-      </Button>
-
+      {/* Settings Panel */}
       <ViewerSettings
         settings={lightingSettings}
         onUpdateSettings={updateLightingSetting}
         onApplyPreset={applyPreset}
-        isOpen={showViewerSettings}
+        isOpen={isCustomizationOpen}
       />
     </div>
   );
