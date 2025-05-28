@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PageLayout from '@/components/navigation/PageLayout';
@@ -25,6 +24,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Select,
   SelectContent,
@@ -54,7 +54,8 @@ const UnifiedCardGallery = () => {
   const [filterVisibility, setFilterVisibility] = useState<'all' | 'public' | 'private'>('all');
   const [filterRarity, setFilterRarity] = useState<string>('all');
   const [filterCreator, setFilterCreator] = useState<string>('all');
-  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+  const [activeTab, setActiveTab] = useState('all');
 
   // Combine all card sources
   const allCards = useMemo(() => {
@@ -90,9 +91,35 @@ const UnifiedCardGallery = () => {
     return Array.from(creators);
   }, [allCards]);
 
+  // Filter cards by tab
+  const filteredCardsByTab = useMemo(() => {
+    let filtered = allCards;
+
+    switch (activeTab) {
+      case 'recent':
+        filtered = allCards.filter(card => {
+          const cardDate = new Date(card.createdAt);
+          const thirtyDaysAgo = new Date();
+          thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+          return cardDate >= thirtyDaysAgo;
+        });
+        break;
+      case 'favorites':
+        // For now, show cards with higher rarity as "favorites"
+        filtered = allCards.filter(card => card.rarity && ['rare', 'legendary'].includes(card.rarity));
+        break;
+      case 'all':
+      default:
+        filtered = allCards;
+        break;
+    }
+
+    return filtered;
+  }, [allCards, activeTab]);
+
   // Filter and sort cards
   const filteredCards = useMemo(() => {
-    let filtered = allCards;
+    let filtered = filteredCardsByTab;
 
     // Search filter
     if (searchQuery) {
@@ -149,7 +176,7 @@ const UnifiedCardGallery = () => {
           return 0;
       }
     });
-  }, [allCards, searchQuery, filterTags, filterVisibility, filterRarity, filterCreator, sortBy]);
+  }, [filteredCardsByTab, searchQuery, filterTags, filterVisibility, filterRarity, filterCreator, sortBy]);
 
   // Multi-select operations
   const handleSelectCard = (cardId: string) => {
@@ -216,144 +243,131 @@ const UnifiedCardGallery = () => {
 
   return (
     <PageLayout
-      title="Card Gallery"
+      title="Cards"
       hideBreadcrumbs={false}
-      primaryAction={{
-        label: "New Card",
-        icon: <PlusCircle className="mr-2 h-4 w-4" />,
-        href: "/cards/create"
-      }}
     >
-      <div className="container mx-auto max-w-7xl px-4 py-4">
-        {/* Main Toolbar */}
-        <div className="mb-6 space-y-4">
-          {/* Top Row - Search and Primary Controls */}
-          <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
-            {/* Search Section */}
-            <div className="flex flex-col sm:flex-row gap-3 flex-1 max-w-2xl">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input
-                  placeholder="Search by title, description, player, team, or tags..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 pr-10"
-                />
-                {searchQuery && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-1 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0"
-                    onClick={() => setSearchQuery('')}
-                  >
-                    <X className="h-3 w-3" />
-                  </Button>
-                )}
-              </div>
-            </div>
+      <div className="container mx-auto max-w-7xl px-4 py-6">
+        {/* Header with Title and Description */}
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold mb-2">Cards</h1>
+          <p className="text-gray-600 dark:text-gray-400">Browse and discover unique digital cards</p>
+        </div>
 
-            {/* Primary Controls */}
-            <div className="flex items-center gap-2">
+        {/* Top Toolbar */}
+        <div className="mb-6 flex items-center justify-between">
+          {/* Left side - Tabs */}
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-auto">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="all">All Cards</TabsTrigger>
+              <TabsTrigger value="recent">Recent</TabsTrigger>
+              <TabsTrigger value="favorites">Favorites</TabsTrigger>
+            </TabsList>
+          </Tabs>
+
+          {/* Right side - Controls */}
+          <div className="flex items-center gap-2">
+            {/* Filter Button */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowFilters(!showFilters)}
+              className="flex items-center gap-2"
+            >
+              <Filter className="h-4 w-4" />
+              Filter
+              {hasActiveFilters && (
+                <Badge variant="secondary" className="ml-1 h-5 w-5 p-0 text-xs">
+                  {[searchQuery, ...filterTags, filterVisibility !== 'all' ? 1 : 0, 
+                    filterRarity !== 'all' ? 1 : 0, filterCreator !== 'all' ? 1 : 0].filter(Boolean).length}
+                </Badge>
+              )}
+            </Button>
+
+            {/* View Mode Toggle */}
+            <div className="flex border rounded-lg overflow-hidden">
               <Button
-                variant="outline"
+                variant={viewMode === 'grid' ? 'default' : 'ghost'}
                 size="sm"
-                onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-                className="flex items-center gap-2"
+                onClick={() => setViewMode('grid')}
+                className="rounded-none"
               >
-                <SlidersHorizontal className="h-4 w-4" />
-                Filters
-                {hasActiveFilters && (
-                  <Badge variant="secondary" className="ml-1 h-5 w-5 p-0 text-xs">
-                    {[searchQuery, ...filterTags, filterVisibility !== 'all' ? 1 : 0, 
-                      filterRarity !== 'all' ? 1 : 0, filterCreator !== 'all' ? 1 : 0].filter(Boolean).length}
-                  </Badge>
-                )}
+                <Grid3X3 className="h-4 w-4" />
               </Button>
-
-              {/* View Mode Toggle */}
-              <div className="flex border rounded-lg overflow-hidden">
-                <Button
-                  variant={viewMode === 'grid' ? 'default' : 'ghost'}
-                  size="sm"
-                  onClick={() => setViewMode('grid')}
-                  className="rounded-none"
-                >
-                  <Grid3X3 className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant={viewMode === 'list' ? 'default' : 'ghost'}
-                  size="sm"
-                  onClick={() => setViewMode('list')}
-                  className="rounded-none"
-                >
-                  <List className="h-4 w-4" />
-                </Button>
-              </div>
+              <Button
+                variant={viewMode === 'list' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('list')}
+                className="rounded-none"
+              />
             </div>
+
+            {/* New Card Button */}
+            <Button onClick={() => navigate('/cards/create')}>
+              <PlusCircle className="mr-2 h-4 w-4" />
+              New Card
+            </Button>
           </div>
+        </div>
 
-          {/* Quick Filters Row */}
-          <div className="flex flex-wrap items-center gap-3">
-            {/* Sort */}
-            <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4 text-gray-500" />
-              <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="newest">Newest First</SelectItem>
-                  <SelectItem value="oldest">Oldest First</SelectItem>
-                  <SelectItem value="alphabetical">Alphabetical</SelectItem>
-                  <SelectItem value="rarity">By Rarity</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Visibility Quick Filter */}
-            <Select value={filterVisibility} onValueChange={(value: any) => setFilterVisibility(value)}>
-              <SelectTrigger className="w-[140px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Cards</SelectItem>
-                <SelectItem value="public">Public</SelectItem>
-                <SelectItem value="private">Private</SelectItem>
-              </SelectContent>
-            </Select>
-
-            {/* Popular Tags */}
-            {allTags.slice(0, 5).map(tag => (
-              <Badge
-                key={tag}
-                variant={filterTags.includes(tag) ? "default" : "outline"}
-                className="cursor-pointer text-xs hover:bg-primary/10"
-                onClick={() => toggleTag(tag)}
-              >
-                <Tag className="h-3 w-3 mr-1" />
-                {tag}
-              </Badge>
-            ))}
-
-            {/* Clear Filters */}
-            {hasActiveFilters && (
+        {/* Search and Filters */}
+        <div className="mb-6 space-y-4">
+          {/* Search Bar */}
+          <div className="relative max-w-md">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Input
+              placeholder="Search by title, description, player, team, or tags..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 pr-10"
+            />
+            {searchQuery && (
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={clearAllFilters}
-                className="text-gray-500 hover:text-gray-700"
+                className="absolute right-1 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0"
+                onClick={() => setSearchQuery('')}
               >
-                <X className="h-4 w-4 mr-1" />
-                Clear All
+                <X className="h-3 w-3" />
               </Button>
             )}
           </div>
 
           {/* Advanced Filters Panel */}
-          {showAdvancedFilters && (
+          {showFilters && (
             <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 space-y-4 border">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {/* Rarity Filter */}
+                {/* Sort */}
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Sort By</label>
+                  <Select value={sortBy} onValueChange={setSortBy}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="newest">Newest First</SelectItem>
+                      <SelectItem value="oldest">Oldest First</SelectItem>
+                      <SelectItem value="alphabetical">Alphabetical</SelectItem>
+                      <SelectItem value="rarity">By Rarity</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Visibility */}
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Visibility</label>
+                  <Select value={filterVisibility} onValueChange={(value: any) => setFilterVisibility(value)}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Cards</SelectItem>
+                      <SelectItem value="public">Public</SelectItem>
+                      <SelectItem value="private">Private</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Rarity */}
                 <div>
                   <label className="text-sm font-medium mb-2 block">Rarity</label>
                   <Select value={filterRarity} onValueChange={setFilterRarity}>
@@ -371,7 +385,7 @@ const UnifiedCardGallery = () => {
                   </Select>
                 </div>
 
-                {/* Creator Filter */}
+                {/* Creator */}
                 <div>
                   <label className="text-sm font-medium mb-2 block">Creator/Player</label>
                   <Select value={filterCreator} onValueChange={setFilterCreator}>
@@ -388,98 +402,112 @@ const UnifiedCardGallery = () => {
                     </SelectContent>
                   </Select>
                 </div>
+              </div>
 
-                {/* All Tags */}
-                <div className="md:col-span-2">
-                  <label className="text-sm font-medium mb-2 block">All Tags</label>
-                  <div className="flex flex-wrap gap-1 max-h-24 overflow-y-auto">
-                    {allTags.map(tag => (
-                      <Badge
-                        key={tag}
-                        variant={filterTags.includes(tag) ? "default" : "outline"}
-                        className="cursor-pointer text-xs"
-                        onClick={() => toggleTag(tag)}
-                      >
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
+              {/* Tags */}
+              <div>
+                <label className="text-sm font-medium mb-2 block">Tags</label>
+                <div className="flex flex-wrap gap-1">
+                  {allTags.map(tag => (
+                    <Badge
+                      key={tag}
+                      variant={filterTags.includes(tag) ? "default" : "outline"}
+                      className="cursor-pointer text-xs"
+                      onClick={() => toggleTag(tag)}
+                    >
+                      {tag}
+                    </Badge>
+                  ))}
                 </div>
               </div>
-            </div>
-          )}
 
-          {/* Selection Controls */}
-          {selectedCards.length > 0 && (
-            <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-              <span className="text-sm font-medium">
-                {selectedCards.length} card{selectedCards.length === 1 ? '' : 's'} selected
-              </span>
-              <div className="flex flex-wrap items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleBulkVisibilityChange(true)}
-                  className="flex items-center gap-1"
-                >
-                  <Unlock className="h-3 w-3" />
-                  Make Public
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleBulkVisibilityChange(false)}
-                  className="flex items-center gap-1"
-                >
-                  <Lock className="h-3 w-3" />
-                  Make Private
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex items-center gap-1"
-                >
-                  <FolderPlus className="h-3 w-3" />
-                  Add to Collection
-                </Button>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={handleBulkDelete}
-                  className="flex items-center gap-1"
-                >
-                  <Trash2 className="h-3 w-3" />
-                  Delete
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setSelectedCards([])}
-                >
-                  Clear
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {/* Select All */}
-          {filteredCards.length > 0 && (
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Checkbox
-                  checked={selectedCards.length === filteredCards.length}
-                  onCheckedChange={handleSelectAll}
-                />
-                <span className="text-sm text-gray-600 dark:text-gray-400">
-                  Select all {filteredCards.length} cards
-                </span>
-              </div>
-              <span className="text-sm text-gray-500">
-                Showing {filteredCards.length} of {allCards.length} cards
-              </span>
+              {/* Clear Filters */}
+              {hasActiveFilters && (
+                <div className="pt-2 border-t">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={clearAllFilters}
+                  >
+                    <X className="h-4 w-4 mr-1" />
+                    Clear All Filters
+                  </Button>
+                </div>
+              )}
             </div>
           )}
         </div>
+
+        {/* Selection Controls */}
+        {selectedCards.length > 0 && (
+          <div className="mb-6 bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <span className="text-sm font-medium">
+              {selectedCards.length} card{selectedCards.length === 1 ? '' : 's'} selected
+            </span>
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleBulkVisibilityChange(true)}
+                className="flex items-center gap-1"
+              >
+                <Unlock className="h-3 w-3" />
+                Make Public
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleBulkVisibilityChange(false)}
+                className="flex items-center gap-1"
+              >
+                <Lock className="h-3 w-3" />
+                Make Private
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-1"
+              >
+                <FolderPlus className="h-3 w-3" />
+                Add to Collection
+              </Button>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={handleBulkDelete}
+                className="flex items-center gap-1"
+              >
+                <Trash2 className="h-3 w-3" />
+                Delete
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setSelectedCards([])}
+              >
+                Clear
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Select All */}
+        {filteredCards.length > 0 && (
+          <div className="mb-4 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Checkbox
+                checked={selectedCards.length === filteredCards.length}
+                onCheckedChange={handleSelectAll}
+              />
+              <span className="text-sm text-gray-600 dark:text-gray-400">
+                Select all {filteredCards.length} cards
+              </span>
+            </div>
+            <span className="text-sm text-gray-500">
+              Showing {filteredCards.length} of {allCards.length} cards
+            </span>
+          </div>
+        )}
 
         {/* Basketball Collection Highlight */}
         {filteredCards.some(card => card.tags?.includes('basketball')) && (
@@ -492,141 +520,419 @@ const UnifiedCardGallery = () => {
         )}
 
         {/* Cards Display */}
-        {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-          </div>
-        ) : filteredCards.length === 0 ? (
-          <div className="text-center py-12">
-            <h3 className="text-lg font-medium mb-2">No cards found</h3>
-            <p className="text-gray-500 mb-4">
-              {hasActiveFilters
-                ? "Try adjusting your search or filters" 
-                : "Your collection is empty. Create your first card to get started."}
-            </p>
-            {hasActiveFilters ? (
-              <Button onClick={clearAllFilters} variant="outline">
-                <X className="mr-2 h-4 w-4" />
-                Clear Filters
-              </Button>
-            ) : (
-              <Button onClick={() => navigate('/cards/create')}>
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Create a Card
-              </Button>
-            )}
-          </div>
-        ) : (
-          <div className={viewMode === 'grid' 
-            ? "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4" 
-            : "space-y-3"
-          }>
-            {filteredCards.map(card => (
-              <div key={card.id} className="relative group">
-                {viewMode === 'grid' ? (
-                  <div className="space-y-2">
-                    <div className="relative">
-                      <div 
-                        className="aspect-[2.5/3.5] rounded-lg overflow-hidden cursor-pointer transition-all duration-200 hover:scale-105 hover:shadow-lg"
-                        onClick={() => handleCardClick(card.id)}
-                      >
-                        <img 
-                          src={card.imageUrl || '/placeholder-card.png'}
-                          alt={card.title}
-                          className="w-full h-full object-cover"
-                        />
-                        {card.rarity && card.rarity !== 'common' && (
-                          <div className="absolute top-1 right-1">
-                            <Badge variant="secondary" className="text-xs px-1 py-0">
-                              {card.rarity}
-                            </Badge>
-                          </div>
-                        )}
-                      </div>
-                      <Checkbox
-                        className="absolute top-2 left-2 bg-white/90 border-white"
-                        checked={selectedCards.includes(card.id)}
-                        onCheckedChange={() => handleSelectCard(card.id)}
-                      />
-                      {!card.isPublic && (
-                        <Lock className="absolute bottom-2 right-2 h-4 w-4 text-white bg-black/50 rounded p-0.5" />
-                      )}
-                    </div>
-                    <div className="px-1">
-                      <h3 className="font-medium text-sm truncate">{card.title}</h3>
-                      {card.player && (
-                        <p className="text-xs text-gray-500 truncate">{card.player}</p>
-                      )}
-                      {card.tags && card.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-1 mt-1">
-                          {card.tags.slice(0, 2).map((tag, index) => (
-                            <span key={index} className="text-xs text-gray-500">#{tag}</span>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsContent value="all" className="mt-0">
+            {loading ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+              </div>
+            ) : filteredCards.length === 0 ? (
+              <div className="text-center py-12">
+                <h3 className="text-lg font-medium mb-2">No cards found</h3>
+                <p className="text-gray-500 mb-4">
+                  {hasActiveFilters
+                    ? "Try adjusting your search or filters" 
+                    : "Your collection is empty. Create your first card to get started."}
+                </p>
+                {hasActiveFilters ? (
+                  <Button onClick={clearAllFilters} variant="outline">
+                    <X className="mr-2 h-4 w-4" />
+                    Clear Filters
+                  </Button>
                 ) : (
-                  <div className="flex items-center p-4 bg-white dark:bg-gray-800 rounded-lg border gap-4 hover:shadow-md transition-shadow">
-                    <Checkbox
-                      checked={selectedCards.includes(card.id)}
-                      onCheckedChange={() => handleSelectCard(card.id)}
-                    />
-                    <div 
-                      className="w-16 h-20 rounded overflow-hidden cursor-pointer flex-shrink-0"
-                      onClick={() => handleCardClick(card.id)}
-                    >
-                      <img 
-                        src={card.imageUrl || '/placeholder-card.png'}
-                        alt={card.title}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-medium truncate">{card.title}</h3>
-                          {card.player && (
-                            <p className="text-sm text-gray-600 truncate">{card.player}</p>
-                          )}
-                          {card.description && (
-                            <p className="text-sm text-gray-500 truncate mt-1">{card.description}</p>
-                          )}
-                          <div className="flex items-center gap-2 mt-2 flex-wrap">
-                            {!card.isPublic && (
-                              <Lock className="h-3 w-3 text-gray-400" />
-                            )}
+                  <Button onClick={() => navigate('/cards/create')}>
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Create a Card
+                  </Button>
+                )}
+              </div>
+            ) : (
+              <div className={viewMode === 'grid' 
+                ? "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4" 
+                : "space-y-3"
+              }>
+                {filteredCards.map(card => (
+                  <div key={card.id} className="relative group">
+                    {viewMode === 'grid' ? (
+                      <div className="space-y-2">
+                        <div className="relative">
+                          <div 
+                            className="aspect-[2.5/3.5] rounded-lg overflow-hidden cursor-pointer transition-all duration-200 hover:scale-105 hover:shadow-lg"
+                            onClick={() => handleCardClick(card.id)}
+                          >
+                            <img 
+                              src={card.imageUrl || '/placeholder-card.png'}
+                              alt={card.title}
+                              className="w-full h-full object-cover"
+                            />
                             {card.rarity && card.rarity !== 'common' && (
-                              <Badge variant="outline" className="text-xs">
-                                {card.rarity}
-                              </Badge>
-                            )}
-                            {card.tags && card.tags.length > 0 && (
-                              <div className="flex flex-wrap gap-1">
-                                {card.tags.slice(0, 3).map((tag, index) => (
-                                  <span key={index} className="text-xs text-gray-400">#{tag}</span>
-                                ))}
+                              <div className="absolute top-1 right-1">
+                                <Badge variant="secondary" className="text-xs px-1 py-0">
+                                  {card.rarity}
+                                </Badge>
                               </div>
                             )}
                           </div>
+                          <Checkbox
+                            className="absolute top-2 left-2 bg-white/90 border-white"
+                            checked={selectedCards.includes(card.id)}
+                            onCheckedChange={() => handleSelectCard(card.id)}
+                          />
+                          {!card.isPublic && (
+                            <Lock className="absolute bottom-2 right-2 h-4 w-4 text-white bg-black/50 rounded p-0.5" />
+                          )}
                         </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleCardClick(card.id)}
-                          className="flex items-center gap-1 flex-shrink-0"
-                        >
-                          <Eye className="h-4 w-4" />
-                          View
-                        </Button>
+                        <div className="px-1">
+                          <h3 className="font-medium text-sm truncate">{card.title}</h3>
+                          {card.player && (
+                            <p className="text-xs text-gray-500 truncate">{card.player}</p>
+                          )}
+                          {card.tags && card.tags.length > 0 && (
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {card.tags.slice(0, 2).map((tag, index) => (
+                                <span key={index} className="text-xs text-gray-500">#{tag}</span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    </div>
+                    ) : (
+                      <div className="flex items-center p-4 bg-white dark:bg-gray-800 rounded-lg border gap-4 hover:shadow-md transition-shadow">
+                        <Checkbox
+                          checked={selectedCards.includes(card.id)}
+                          onCheckedChange={() => handleSelectCard(card.id)}
+                        />
+                        <div 
+                          className="w-16 h-20 rounded overflow-hidden cursor-pointer flex-shrink-0"
+                          onClick={() => handleCardClick(card.id)}
+                        >
+                          <img 
+                            src={card.imageUrl || '/placeholder-card.png'}
+                            alt={card.title}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-medium truncate">{card.title}</h3>
+                              {card.player && (
+                                <p className="text-sm text-gray-600 truncate">{card.player}</p>
+                              )}
+                              {card.description && (
+                                <p className="text-sm text-gray-500 truncate mt-1">{card.description}</p>
+                              )}
+                              <div className="flex items-center gap-2 mt-2 flex-wrap">
+                                {!card.isPublic && (
+                                  <Lock className="h-3 w-3 text-gray-400" />
+                                )}
+                                {card.rarity && card.rarity !== 'common' && (
+                                  <Badge variant="outline" className="text-xs">
+                                    {card.rarity}
+                                  </Badge>
+                                )}
+                                {card.tags && card.tags.length > 0 && (
+                                  <div className="flex flex-wrap gap-1">
+                                    {card.tags.slice(0, 3).map((tag, index) => (
+                                      <span key={index} className="text-xs text-gray-400">#{tag}</span>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleCardClick(card.id)}
+                              className="flex items-center gap-1 flex-shrink-0"
+                            >
+                              <Eye className="h-4 w-4" />
+                              View
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+          <TabsContent value="recent" className="mt-0">
+            {loading ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+              </div>
+            ) : filteredCards.length === 0 ? (
+              <div className="text-center py-12">
+                <h3 className="text-lg font-medium mb-2">No cards found</h3>
+                <p className="text-gray-500 mb-4">
+                  {hasActiveFilters
+                    ? "Try adjusting your search or filters" 
+                    : "Your collection is empty. Create your first card to get started."}
+                </p>
+                {hasActiveFilters ? (
+                  <Button onClick={clearAllFilters} variant="outline">
+                    <X className="mr-2 h-4 w-4" />
+                    Clear Filters
+                  </Button>
+                ) : (
+                  <Button onClick={() => navigate('/cards/create')}>
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Create a Card
+                  </Button>
                 )}
               </div>
-            ))}
-          </div>
-        )}
+            ) : (
+              <div className={viewMode === 'grid' 
+                ? "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4" 
+                : "space-y-3"
+              }>
+                {filteredCards.map(card => (
+                  <div key={card.id} className="relative group">
+                    {viewMode === 'grid' ? (
+                      <div className="space-y-2">
+                        <div className="relative">
+                          <div 
+                            className="aspect-[2.5/3.5] rounded-lg overflow-hidden cursor-pointer transition-all duration-200 hover:scale-105 hover:shadow-lg"
+                            onClick={() => handleCardClick(card.id)}
+                          >
+                            <img 
+                              src={card.imageUrl || '/placeholder-card.png'}
+                              alt={card.title}
+                              className="w-full h-full object-cover"
+                            />
+                            {card.rarity && card.rarity !== 'common' && (
+                              <div className="absolute top-1 right-1">
+                                <Badge variant="secondary" className="text-xs px-1 py-0">
+                                  {card.rarity}
+                                </Badge>
+                              </div>
+                            )}
+                          </div>
+                          <Checkbox
+                            className="absolute top-2 left-2 bg-white/90 border-white"
+                            checked={selectedCards.includes(card.id)}
+                            onCheckedChange={() => handleSelectCard(card.id)}
+                          />
+                          {!card.isPublic && (
+                            <Lock className="absolute bottom-2 right-2 h-4 w-4 text-white bg-black/50 rounded p-0.5" />
+                          )}
+                        </div>
+                        <div className="px-1">
+                          <h3 className="font-medium text-sm truncate">{card.title}</h3>
+                          {card.player && (
+                            <p className="text-xs text-gray-500 truncate">{card.player}</p>
+                          )}
+                          {card.tags && card.tags.length > 0 && (
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {card.tags.slice(0, 2).map((tag, index) => (
+                                <span key={index} className="text-xs text-gray-500">#{tag}</span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-center p-4 bg-white dark:bg-gray-800 rounded-lg border gap-4 hover:shadow-md transition-shadow">
+                        <Checkbox
+                          checked={selectedCards.includes(card.id)}
+                          onCheckedChange={() => handleSelectCard(card.id)}
+                        />
+                        <div 
+                          className="w-16 h-20 rounded overflow-hidden cursor-pointer flex-shrink-0"
+                          onClick={() => handleCardClick(card.id)}
+                        >
+                          <img 
+                            src={card.imageUrl || '/placeholder-card.png'}
+                            alt={card.title}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-medium truncate">{card.title}</h3>
+                              {card.player && (
+                                <p className="text-sm text-gray-600 truncate">{card.player}</p>
+                              )}
+                              {card.description && (
+                                <p className="text-sm text-gray-500 truncate mt-1">{card.description}</p>
+                              )}
+                              <div className="flex items-center gap-2 mt-2 flex-wrap">
+                                {!card.isPublic && (
+                                  <Lock className="h-3 w-3 text-gray-400" />
+                                )}
+                                {card.rarity && card.rarity !== 'common' && (
+                                  <Badge variant="outline" className="text-xs">
+                                    {card.rarity}
+                                  </Badge>
+                                )}
+                                {card.tags && card.tags.length > 0 && (
+                                  <div className="flex flex-wrap gap-1">
+                                    {card.tags.slice(0, 3).map((tag, index) => (
+                                      <span key={index} className="text-xs text-gray-400">#{tag}</span>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleCardClick(card.id)}
+                              className="flex items-center gap-1 flex-shrink-0"
+                            >
+                              <Eye className="h-4 w-4" />
+                              View
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+          <TabsContent value="favorites" className="mt-0">
+            {loading ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+              </div>
+            ) : filteredCards.length === 0 ? (
+              <div className="text-center py-12">
+                <h3 className="text-lg font-medium mb-2">No cards found</h3>
+                <p className="text-gray-500 mb-4">
+                  {hasActiveFilters
+                    ? "Try adjusting your search or filters" 
+                    : "Your collection is empty. Create your first card to get started."}
+                </p>
+                {hasActiveFilters ? (
+                  <Button onClick={clearAllFilters} variant="outline">
+                    <X className="mr-2 h-4 w-4" />
+                    Clear Filters
+                  </Button>
+                ) : (
+                  <Button onClick={() => navigate('/cards/create')}>
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Create a Card
+                  </Button>
+                )}
+              </div>
+            ) : (
+              <div className={viewMode === 'grid' 
+                ? "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4" 
+                : "space-y-3"
+              }>
+                {filteredCards.map(card => (
+                  <div key={card.id} className="relative group">
+                    {viewMode === 'grid' ? (
+                      <div className="space-y-2">
+                        <div className="relative">
+                          <div 
+                            className="aspect-[2.5/3.5] rounded-lg overflow-hidden cursor-pointer transition-all duration-200 hover:scale-105 hover:shadow-lg"
+                            onClick={() => handleCardClick(card.id)}
+                          >
+                            <img 
+                              src={card.imageUrl || '/placeholder-card.png'}
+                              alt={card.title}
+                              className="w-full h-full object-cover"
+                            />
+                            {card.rarity && card.rarity !== 'common' && (
+                              <div className="absolute top-1 right-1">
+                                <Badge variant="secondary" className="text-xs px-1 py-0">
+                                  {card.rarity}
+                                </Badge>
+                              </div>
+                            )}
+                          </div>
+                          <Checkbox
+                            className="absolute top-2 left-2 bg-white/90 border-white"
+                            checked={selectedCards.includes(card.id)}
+                            onCheckedChange={() => handleSelectCard(card.id)}
+                          />
+                          {!card.isPublic && (
+                            <Lock className="absolute bottom-2 right-2 h-4 w-4 text-white bg-black/50 rounded p-0.5" />
+                          )}
+                        </div>
+                        <div className="px-1">
+                          <h3 className="font-medium text-sm truncate">{card.title}</h3>
+                          {card.player && (
+                            <p className="text-xs text-gray-500 truncate">{card.player}</p>
+                          )}
+                          {card.tags && card.tags.length > 0 && (
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {card.tags.slice(0, 2).map((tag, index) => (
+                                <span key={index} className="text-xs text-gray-500">#{tag}</span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-center p-4 bg-white dark:bg-gray-800 rounded-lg border gap-4 hover:shadow-md transition-shadow">
+                        <Checkbox
+                          checked={selectedCards.includes(card.id)}
+                          onCheckedChange={() => handleSelectCard(card.id)}
+                        />
+                        <div 
+                          className="w-16 h-20 rounded overflow-hidden cursor-pointer flex-shrink-0"
+                          onClick={() => handleCardClick(card.id)}
+                        >
+                          <img 
+                            src={card.imageUrl || '/placeholder-card.png'}
+                            alt={card.title}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-medium truncate">{card.title}</h3>
+                              {card.player && (
+                                <p className="text-sm text-gray-600 truncate">{card.player}</p>
+                              )}
+                              {card.description && (
+                                <p className="text-sm text-gray-500 truncate mt-1">{card.description}</p>
+                              )}
+                              <div className="flex items-center gap-2 mt-2 flex-wrap">
+                                {!card.isPublic && (
+                                  <Lock className="h-3 w-3 text-gray-400" />
+                                )}
+                                {card.rarity && card.rarity !== 'common' && (
+                                  <Badge variant="outline" className="text-xs">
+                                    {card.rarity}
+                                  </Badge>
+                                )}
+                                {card.tags && card.tags.length > 0 && (
+                                  <div className="flex flex-wrap gap-1">
+                                    {card.tags.slice(0, 3).map((tag, index) => (
+                                      <span key={index} className="text-xs text-gray-400">#{tag}</span>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleCardClick(card.id)}
+                              className="flex items-center gap-1 flex-shrink-0"
+                            >
+                              <Eye className="h-4 w-4" />
+                              View
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
       </div>
     </PageLayout>
   );
