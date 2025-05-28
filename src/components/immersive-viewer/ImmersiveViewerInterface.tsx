@@ -46,20 +46,26 @@ const ImmersiveViewerInterface: React.FC<ImmersiveViewerInterfaceProps> = ({
   environmentType = 'studio',
   onEnvironmentChange = () => {}
 }) => {
-  const [activeTab, setActiveTab] = useState<'environment' | 'settings'>('environment');
+  const [activePanel, setActivePanel] = useState<'environment' | 'settings' | null>(null);
 
   const handleEnvironmentButtonClick = () => {
-    setActiveTab('environment');
-    if (!isCustomizationOpen) {
-      onToggleCustomization();
+    if (activePanel === 'environment') {
+      setActivePanel(null);
+    } else {
+      setActivePanel('environment');
     }
   };
 
   const handleSettingsButtonClick = () => {
-    setActiveTab('settings');
-    if (!isCustomizationOpen) {
-      onToggleCustomization();
+    if (activePanel === 'settings') {
+      setActivePanel(null);
+    } else {
+      setActivePanel('settings');
     }
+  };
+
+  const handleClosePanel = () => {
+    setActivePanel(null);
   };
 
   return (
@@ -92,7 +98,7 @@ const ImmersiveViewerInterface: React.FC<ImmersiveViewerInterfaceProps> = ({
             size="icon"
             onClick={handleEnvironmentButtonClick}
             className={`bg-black/40 backdrop-blur-md border-white/20 text-white hover:bg-black/60 ${
-              isCustomizationOpen && activeTab === 'environment' ? 'bg-white/20' : ''
+              activePanel === 'environment' ? 'bg-white/20' : ''
             }`}
           >
             <Palette className="h-5 w-5" />
@@ -103,7 +109,7 @@ const ImmersiveViewerInterface: React.FC<ImmersiveViewerInterfaceProps> = ({
             size="icon"
             onClick={handleSettingsButtonClick}
             className={`bg-black/40 backdrop-blur-md border-white/20 text-white hover:bg-black/60 ${
-              isCustomizationOpen && activeTab === 'settings' ? 'bg-white/20' : ''
+              activePanel === 'settings' ? 'bg-white/20' : ''
             }`}
           >
             <Settings className="h-5 w-5" />
@@ -113,10 +119,10 @@ const ImmersiveViewerInterface: React.FC<ImmersiveViewerInterfaceProps> = ({
 
       {/* Settings Panel */}
       <ImmersiveSettingsPanel
-        isOpen={isCustomizationOpen}
-        onClose={onToggleCustomization}
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
+        isOpen={activePanel !== null}
+        onClose={handleClosePanel}
+        activeTab={activePanel || 'environment'}
+        onTabChange={setActivePanel}
         environmentType={environmentType}
         onEnvironmentChange={onEnvironmentChange}
       />

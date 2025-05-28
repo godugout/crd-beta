@@ -47,7 +47,9 @@ const ImmersiveSettingsPanel: React.FC<ImmersiveSettingsPanelProps> = ({
     >
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-white/20">
-        <h2 className="text-lg font-semibold text-white">Settings</h2>
+        <h2 className="text-lg font-semibold text-white">
+          {activeTab === 'environment' ? 'Environment' : 'Settings'}
+        </h2>
         <Button
           variant="ghost"
           size="icon"
