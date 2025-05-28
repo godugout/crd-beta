@@ -1,109 +1,135 @@
 
-import React, { useState, useRef, useEffect } from 'react';
-import { useFrame } from '@react-three/fiber';
-import * as THREE from 'three';
+import React, { useRef, useEffect } from 'react';
 import { Card } from '@/lib/types';
-import CardModel from './CardModel';
-import { Environment } from '@react-three/drei';
-import { mapLightingPresetToEnvironment } from '@/utils/environmentPresets';
+import * as THREE from 'three';
 
 interface Card3DRendererProps {
   card: Card;
-  isFlipped: boolean;
-  activeEffects: string[];
+  className?: string;
+  isFlipped?: boolean;
+  activeEffects?: string[];
   effectIntensities?: Record<string, number>;
-  lightingPreset?: string;
-  onRenderFrame?: () => void;
-  qualityLevel?: 'high' | 'medium' | 'low';
 }
 
-/**
- * Optimized 3D Card Renderer with performance improvements
- */
-const Card3DRenderer: React.FC<Card3DRendererProps> = ({
-  card,
-  isFlipped,
+const Card3DRenderer: React.FC<Card3DRendererProps> = ({ 
+  card, 
+  className,
+  isFlipped = false,
   activeEffects = [],
-  effectIntensities = {},
-  lightingPreset = 'studio',
-  onRenderFrame,
-  qualityLevel = 'medium'
+  effectIntensities = {}
 }) => {
-  const groupRef = useRef<THREE.Group>(null);
-  const frameCount = useRef(0);
-  const [environmentPreset, setEnvironmentPreset] = useState('studio');
-  const skipFrameCount = useRef(0);
-  
-  // Map custom lighting preset to valid environment preset
-  useEffect(() => {
-    const mappedPreset = mapLightingPresetToEnvironment(lightingPreset);
-    setEnvironmentPreset(mappedPreset);
-  }, [lightingPreset]);
-  
-  // Optimized frame updates with dynamic frame skipping based on quality level
-  useFrame((state) => {
-    // Update render stats callback
-    if (onRenderFrame) {
-      onRenderFrame();
-    }
-    
-    // Throttle animations based on quality level
-    const skipFrames = qualityLevel === 'high' ? 0 : qualityLevel === 'medium' ? 1 : 3;
-    skipFrameCount.current = (skipFrameCount.current + 1) % (skipFrames + 1);
-    if (skipFrameCount.current !== 0) return;
-    
-    // Add subtle floating animation to the card
-    if (groupRef.current && !isFlipped) {
-      const time = state.clock.getElapsedTime() * 0.3;
-      groupRef.current.position.y = Math.sin(time) * 0.05;
-      groupRef.current.rotation.z = Math.sin(time * 0.7) * 0.02;
-    }
+  const containerRef = useRef<HTMLDivElement>(null);
+  const renderer = useRef<THREE.WebGLRenderer | null>(null);
+  const scene = useRef<THREE.Scene | null>(null);
+  const camera = useRef<THREE.PerspectiveCamera | null>(null);
+  const cardMesh = useRef<THREE.Mesh | null>(null);
 
-    // Smooth card flip animation
-    if (groupRef.current) {
-      const targetRotation = isFlipped ? Math.PI : 0;
-      const currentRotation = groupRef.current.rotation.y;
-      
-      // Use faster lerp for low quality mode
-      const lerpFactor = qualityLevel === 'low' ? 0.2 : 0.1;
-      
-      groupRef.current.rotation.y = THREE.MathUtils.lerp(
-        currentRotation,
-        targetRotation,
-        lerpFactor
-      );
-    }
-  });
-  
-  // Skip rendering specific effects based on quality level
-  const filteredEffects = activeEffects.filter(effect => {
-    // In low quality mode, remove performance-heavy effects
-    if (qualityLevel === 'low') {
-      if (['Spectral', 'Pulsar', 'Mojo'].includes(effect)) {
-        return false;
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    // Setup scene
+    scene.current = new THREE.Scene();
+    camera.current = new THREE.PerspectiveCamera(
+      75, 
+      containerRef.current.clientWidth / containerRef.current.clientHeight,
+      0.1,
+      1000
+    );
+    
+    renderer.current = new THREE.WebGLRenderer({ 
+      antialias: true,
+      alpha: true 
+    });
+    
+    renderer.current.setSize(
+      containerRef.current.clientWidth,
+      containerRef.current.clientHeight
+    );
+    
+    containerRef.current.appendChild(renderer.current.domElement);
+    
+    // Position camera
+    camera.current.position.z = 1.5;
+    
+    // Create card mesh
+    const cardGeometry = new THREE.PlaneGeometry(1, 1.4); // Card aspect ratio
+    
+    // Load card texture
+    const textureLoader = new THREE.TextureLoader();
+    const cardTexture = textureLoader.load(
+      card.imageUrl || '/placeholder-card.png', 
+      () => {
+        if (renderer.current) renderer.current.render(scene.current!, camera.current!);
       }
-    }
-    return true;
-  });
+    );
+    
+    const cardMaterial = new THREE.MeshBasicMaterial({ 
+      map: cardTexture,
+      side: THREE.DoubleSide
+    });
+    
+    cardMesh.current = new THREE.Mesh(cardGeometry, cardMaterial);
+    scene.current.add(cardMesh.current);
+    
+    // Animation loop
+    const animate = () => {
+      requestAnimationFrame(animate);
+      
+      if (cardMesh.current) {
+        // Apply flipping effect if needed
+        if (isFlipped) {
+          cardMesh.current.rotation.y = Math.PI;
+        } else {
+          cardMesh.current.rotation.y = Math.sin(Date.now() * 0.001) * 0.3;
+        }
+      }
+      
+      if (renderer.current && scene.current && camera.current) {
+        renderer.current.render(scene.current, camera.current);
+      }
+    };
+    
+    animate();
+    
+    // Handle resize
+    const handleResize = () => {
+      if (!containerRef.current || !camera.current || !renderer.current) return;
+      
+      camera.current.aspect = containerRef.current.clientWidth / containerRef.current.clientHeight;
+      camera.current.updateProjectionMatrix();
+      
+      renderer.current.setSize(
+        containerRef.current.clientWidth,
+        containerRef.current.clientHeight
+      );
+    };
+    
+    window.addEventListener('resize', handleResize);
+    
+    // Cleanup
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      
+      if (containerRef.current && renderer.current) {
+        containerRef.current.removeChild(renderer.current.domElement);
+      }
+      
+      if (cardMesh.current) {
+        cardMesh.current.geometry.dispose();
+        (cardMesh.current.material as THREE.MeshBasicMaterial).dispose();
+      }
+      
+      if (renderer.current) {
+        renderer.current.dispose();
+      }
+    };
+  }, [card.imageUrl, isFlipped]);
 
   return (
-    <group ref={groupRef}>
-      <CardModel
-        imageUrl={card.imageUrl || '/placeholder-card.jpg'}
-        backImageUrl={card.backImageUrl || '/card-back-texture.jpg'}
-        isFlipped={isFlipped}
-        activeEffects={filteredEffects} 
-        effectIntensities={effectIntensities}
-        qualityLevel={qualityLevel}
-      />
-      
-      {/* Environment provides lighting - using mapped preset */}
-      <Environment 
-        preset={environmentPreset as any} 
-        background={false}
-        resolution={qualityLevel === 'high' ? 256 : qualityLevel === 'medium' ? 128 : 64}
-      />
-    </group>
+    <div 
+      ref={containerRef} 
+      className={className || "w-full h-full min-h-[300px]"}
+    />
   );
 };
 

@@ -21,8 +21,7 @@ export const BASEBALL_CARDS: CardData[] = [
       battingAverage: ".327",
       homeRuns: "101",
       rbis: "1,732"
-    },
-    effects: ["Holographic", "Vintage"] // Add default effects for this card
+    }
   },
   {
     id: "1952-topps-mantle",
@@ -42,8 +41,7 @@ export const BASEBALL_CARDS: CardData[] = [
       battingAverage: ".298",
       homeRuns: "536",
       rbis: "1,509"
-    },
-    effects: ["Refractor", "Holographic"] // Add default effects for this card
+    }
   },
   {
     id: "1933-goudey-ruth",
@@ -62,8 +60,7 @@ export const BASEBALL_CARDS: CardData[] = [
       battingAverage: ".342",
       homeRuns: "714",
       rbis: "2,213"
-    },
-    effects: ["Shimmer", "Vintage"] // Add default effects for this card
+    }
   }
 ];
 
