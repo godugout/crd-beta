@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 import { Upload, X, Image as ImageIcon, Camera, Users, CopyCheck } from 'lucide-react';
 import { toast } from 'sonner';
 import ImageDropzone from './ImageDropzone';
-import ImageEditor from './ImageEditor';
+import SmartCardExtractor from './SmartCardExtractor';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useMobileOptimization } from '@/hooks/useMobileOptimization';
 import { MobileTouchButton } from '@/components/ui/mobile-controls';
@@ -33,9 +33,9 @@ const CardUpload: React.FC<CardUploadProps> = ({
   const [previewUrl, setPreviewUrl] = useState<string | null>(initialImageUrl || null);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [isUploading, setIsUploading] = useState(false);
-  const [showEditor, setShowEditor] = useState(false);
+  const [showExtractor, setShowExtractor] = useState(false);
   const [currentFile, setCurrentFile] = useState<File | null>(null);
-  const [editorImage, setEditorImage] = useState<string | null>(null);
+  const [extractorImage, setExtractorImage] = useState<string | null>(null);
   const [batchMode, setBatchMode] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const isMobile = useIsMobile();
@@ -63,14 +63,11 @@ const CardUpload: React.FC<CardUploadProps> = ({
     
     const localUrl = URL.createObjectURL(file);
     
-    // Preload the image to ensure it's loaded before we try to use it in Fabric.js
+    // Preload the image to ensure it's loaded before we try to use it
     const img = new Image();
     img.onload = () => {
-      setEditorImage(localUrl);
-      setShowEditor(true);
-      if (batchProcessingEnabled) {
-        setBatchMode(true);
-      }
+      setExtractorImage(localUrl);
+      setShowExtractor(true);
     };
     img.onerror = () => {
       toast.error('Failed to load image');
@@ -79,18 +76,19 @@ const CardUpload: React.FC<CardUploadProps> = ({
     img.src = localUrl;
   };
 
-  const handleImageUpload = async (file: File, localUrl: string) => {
+  const handleExtractorSave = async (file: File, url: string) => {
     try {
       setIsUploading(true);
-      setPreviewUrl(localUrl);
+      setPreviewUrl(url);
       
-      onImageUpload(file, localUrl);
-      toast.success('Image processed successfully');
+      onImageUpload(file, url);
+      toast.success('Card extracted and saved successfully! 🔥');
     } catch (err: any) {
       console.error('Upload error:', err);
-      toast.error('Failed to process image: ' + err.message);
+      toast.error('Failed to save card: ' + err.message);
     } finally {
       setIsUploading(false);
+      setShowExtractor(false);
     }
   };
 
@@ -107,13 +105,13 @@ const CardUpload: React.FC<CardUploadProps> = ({
       
       if (onBatchUpload) {
         onBatchUpload(files, urls, types);
-        toast.success(`${files.length} images processed successfully`);
+        toast.success(`${files.length} cards processed successfully! 🔥`);
       } else {
-        handleImageUpload(files[0], urls[0]);
+        handleExtractorSave(files[0], urls[0]);
       }
     } catch (err: any) {
       console.error('Batch upload error:', err);
-      toast.error('Failed to process images: ' + err.message);
+      toast.error('Failed to process cards: ' + err.message);
     } finally {
       setIsUploading(false);
     }
@@ -195,7 +193,7 @@ const CardUpload: React.FC<CardUploadProps> = ({
                   <div key={index} className="relative aspect-[2.5/3.5] rounded-lg overflow-hidden shadow-md">
                     <ResponsiveImage 
                       src={url}
-                      alt={`Processed image ${index + 1}`}
+                      alt={`Processed card ${index + 1}`}
                       className="w-full h-full object-cover"
                     />
                   </div>
@@ -203,7 +201,7 @@ const CardUpload: React.FC<CardUploadProps> = ({
               </div>
               {previewUrls.length > 6 && (
                 <div className="text-center text-sm text-gray-500">
-                  +{previewUrls.length - 6} more images processed
+                  +{previewUrls.length - 6} more cards processed
                 </div>
               )}
               <div className="flex justify-center">
@@ -223,16 +221,11 @@ const CardUpload: React.FC<CardUploadProps> = ({
         </div>
       )}
 
-      <ImageEditor
-        showEditor={showEditor}
-        setShowEditor={setShowEditor}
-        editorImage={editorImage}
-        currentFile={currentFile}
-        onCropComplete={handleImageUpload}
-        onBatchProcessComplete={handleBatchUpload}
-        batchProcessingMode={batchMode}
-        enabledMemorabiliaTypes={enabledMemorabiliaTypes}
-        autoEnhance={autoEnhance}
+      <SmartCardExtractor
+        isOpen={showExtractor}
+        onClose={() => setShowExtractor(false)}
+        imageUrl={extractorImage || ''}
+        onSave={handleExtractorSave}
       />
     </div>
   );
