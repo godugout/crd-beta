@@ -1,9 +1,8 @@
 
 import React from 'react';
 import { Card } from '@/lib/types';
-import { ArrowLeft, Share, Download, Heart, Bookmark, Settings, RotateCcw } from 'lucide-react';
+import { ArrowLeft, Share, Download, Heart, Bookmark, Settings, RotateCcw, Remix } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import CardEffectsPanel from './CardEffectsPanel';
 
 interface ImmersiveViewerInterfaceProps {
   card: Card;
@@ -14,6 +13,7 @@ interface ImmersiveViewerInterfaceProps {
   onDownload: () => void;
   onLike: () => void;
   onBookmark: () => void;
+  onRemix: () => void;
   isCustomizationOpen: boolean;
   onToggleCustomization: () => void;
 }
@@ -27,6 +27,7 @@ const ImmersiveViewerInterface: React.FC<ImmersiveViewerInterfaceProps> = ({
   onDownload,
   onLike,
   onBookmark,
+  onRemix,
   isCustomizationOpen,
   onToggleCustomization
 }) => {
@@ -45,6 +46,15 @@ const ImmersiveViewerInterface: React.FC<ImmersiveViewerInterfaceProps> = ({
         </Button>
         
         <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onRemix}
+            className="bg-purple-600/80 backdrop-blur-sm text-white hover:bg-purple-700/80"
+          >
+            <Remix className="h-4 w-4 mr-2" />
+            Remix
+          </Button>
           <Button
             variant="ghost"
             size="sm"
@@ -85,19 +95,6 @@ const ImmersiveViewerInterface: React.FC<ImmersiveViewerInterfaceProps> = ({
         {card.player && <p className="text-sm opacity-80">{card.player}</p>}
         {card.team && <p className="text-xs opacity-60">{card.team}</p>}
       </div>
-
-      {/* Effects Panel */}
-      {isCustomizationOpen && (
-        <div className="absolute right-4 top-16 bottom-16 w-80 z-30">
-          <CardEffectsPanel
-            activeEffects={['holographic']}
-            onToggleEffect={() => {}}
-            effectIntensity={{ holographic: 0.7 }}
-            onEffectIntensityChange={() => {}}
-            onClose={onToggleCustomization}
-          />
-        </div>
-      )}
     </>
   );
 };

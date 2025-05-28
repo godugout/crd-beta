@@ -10,6 +10,13 @@ interface CardModelProps {
   isFlipped: boolean;
   activeEffects: string[];
   effectIntensities: Record<string, number>;
+  materialSettings?: {
+    roughness: number;
+    metalness: number;
+    reflectivity: number;
+    clearcoat: number;
+    envMapIntensity: number;
+  };
 }
 
 // Create a simple card back texture programmatically
@@ -50,7 +57,14 @@ export const CardModel: React.FC<CardModelProps> = ({
   card,
   isFlipped,
   activeEffects,
-  effectIntensities
+  effectIntensities,
+  materialSettings = {
+    roughness: 0.2,
+    metalness: 0.8,
+    reflectivity: 0.5,
+    clearcoat: 0.7,
+    envMapIntensity: 1.0
+  }
 }) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const groupRef = useRef<THREE.Group>(null);
@@ -61,33 +75,52 @@ export const CardModel: React.FC<CardModelProps> = ({
   // Create card back texture programmatically instead of loading from file
   const backTexture = useMemo(() => createCardBackTexture(), []);
   
-  // Create materials based on active effects
+  // Create materials based on active effects and settings
   const frontMaterial = useMemo(() => {
-    const intensity = effectIntensities.holographic || 0.7;
-    
+    const baseConfig = {
+      map: frontTexture,
+      roughness: materialSettings.roughness,
+      metalness: materialSettings.metalness,
+      envMapIntensity: materialSettings.envMapIntensity,
+      clearcoat: materialSettings.clearcoat,
+      clearcoatRoughness: 0.1,
+    };
+
+    // Apply effects
     if (activeEffects.includes('holographic')) {
+      const intensity = effectIntensities.holographic || 0.7;
       return new THREE.MeshPhysicalMaterial({
-        map: frontTexture,
+        ...baseConfig,
         metalness: 0.9 * intensity,
         roughness: 0.1 * (1 - intensity * 0.8),
-        envMapIntensity: 2.0 * intensity,
-        clearcoat: 1.0,
-        clearcoatRoughness: 0.1,
         iridescence: 1.0 * intensity,
         iridescenceIOR: 1.3,
         iridescenceThicknessRange: [100, 800],
       });
     }
     
-    return new THREE.MeshPhysicalMaterial({
-      map: frontTexture,
-      roughness: 0.2,
-      metalness: 0.8,
-      envMapIntensity: 1.5,
-      clearcoat: 1,
-      clearcoatRoughness: 0.2,
-    });
-  }, [frontTexture, activeEffects, effectIntensities]);
+    if (activeEffects.includes('chrome')) {
+      const intensity = effectIntensities.chrome || 0.6;
+      return new THREE.MeshPhysicalMaterial({
+        ...baseConfig,
+        metalness: 1.0,
+        roughness: 0.05,
+        envMapIntensity: 3.0 * intensity,
+      });
+    }
+    
+    if (activeEffects.includes('foil')) {
+      const intensity = effectIntensities.foil || 0.6;
+      return new THREE.MeshPhysicalMaterial({
+        ...baseConfig,
+        metalness: 0.8 * intensity,
+        roughness: 0.3 * (1 - intensity),
+        envMapIntensity: 2.0 * intensity,
+      });
+    }
+    
+    return new THREE.MeshPhysicalMaterial(baseConfig);
+  }, [frontTexture, activeEffects, effectIntensities, materialSettings]);
 
   const backMaterial = useMemo(() => {
     return new THREE.MeshPhysicalMaterial({
@@ -111,6 +144,12 @@ export const CardModel: React.FC<CardModelProps> = ({
     const time = state.clock.getElapsedTime();
     groupRef.current.position.y = Math.sin(time * 0.5) * 0.05;
     groupRef.current.rotation.z = Math.sin(time * 0.3) * 0.01;
+    
+    // Effect-based animations
+    if (activeEffects.includes('neon')) {
+      const pulse = Math.sin(time * 3) * 0.5 + 0.5;
+      frontMaterial.emissive.setHSL(0.7, 1, pulse * 0.3);
+    }
   });
 
   return (

@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import { Card } from '@/lib/types';
 import RealisticCardViewer from '@/components/immersive-viewer/RealisticCardViewer';
 import ImmersiveViewerInterface from '@/components/immersive-viewer/ImmersiveViewerInterface';
+import AdvancedCustomizationPanel from '@/components/immersive-viewer/AdvancedCustomizationPanel';
 import { useCards } from '@/hooks/useCards';
 import { basketballCards } from '@/data/basketballCards';
 
@@ -14,32 +15,39 @@ const ImmersiveCardViewerPage: React.FC = () => {
   const { cards, getCard, loading } = useCards();
   const [isFlipped, setIsFlipped] = useState(false);
   const [isCustomizationOpen, setIsCustomizationOpen] = useState(false);
+  
+  // Advanced customization state
+  const [activeEffects, setActiveEffects] = useState<string[]>(['holographic']);
+  const [effectIntensities, setEffectIntensities] = useState<Record<string, number>>({
+    holographic: 0.7,
+    refractor: 0.5,
+    foil: 0.6
+  });
+  const [environmentType, setEnvironmentType] = useState('studio');
+  const [materialSettings, setMaterialSettings] = useState({
+    roughness: 0.2,
+    metalness: 0.8,
+    reflectivity: 0.5,
+    clearcoat: 0.7,
+    envMapIntensity: 1.0
+  });
 
   console.log('ImmersiveCardViewerPage: Looking for card with ID:', id);
-  console.log('Cards loading state:', loading);
-  console.log('Available cards from useCards:', cards?.length || 0);
-  console.log('Available basketball cards:', basketballCards?.length || 0);
 
   // Try to find the card using multiple sources
   let card: Card | undefined;
   
   if (id) {
-    // First try the getCard function from useCards hook
     if (getCard) {
       card = getCard(id);
-      console.log('Found card via getCard:', card?.title || 'Not found');
     }
     
-    // If not found via getCard, try direct search in basketball cards
     if (!card) {
       card = basketballCards.find(c => c.id === id);
-      console.log('Found card via basketballCards search:', card?.title || 'Not found');
     }
     
-    // If still not found, try in the cards array
     if (!card && cards && cards.length > 0) {
       card = cards.find(c => c.id === id);
-      console.log('Found card via cards array search:', card?.title || 'Not found');
     }
   }
 
@@ -56,14 +64,11 @@ const ImmersiveCardViewerPage: React.FC = () => {
   }
 
   if (!card) {
-    console.error('ImmersiveCardViewerPage: Card not found with ID:', id);
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
         <div className="text-center text-white">
           <h1 className="text-2xl font-bold mb-4">Card Not Found</h1>
           <p className="text-gray-400 mb-6">The card you're looking for doesn't exist.</p>
-          <p className="text-sm text-gray-500 mb-6">Looking for ID: {id}</p>
-          <p className="text-sm text-gray-500 mb-6">Available cards: {cards?.length || 0}</p>
           <button
             onClick={() => navigate('/gallery')}
             className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
@@ -74,13 +79,6 @@ const ImmersiveCardViewerPage: React.FC = () => {
       </div>
     );
   }
-
-  console.log('ImmersiveCardViewerPage: Rendering card:', {
-    id: card.id,
-    title: card.title,
-    imageUrl: card.imageUrl,
-    hasImage: !!card.imageUrl
-  });
 
   const handleBack = () => {
     navigate('/gallery');
@@ -118,6 +116,29 @@ const ImmersiveCardViewerPage: React.FC = () => {
     toast.success('Card saved!');
   };
 
+  const handleRemix = () => {
+    setIsCustomizationOpen(true);
+    toast.success('Remix mode activated! Customize your card.');
+  };
+
+  const handleSaveRemix = (remixSettings: any) => {
+    // In a real app, this would save to the database and redirect to the editor
+    console.log('Saving remix with settings:', remixSettings);
+    
+    // Update current view with remix settings
+    setActiveEffects(remixSettings.effects);
+    setEffectIntensities(remixSettings.effectSettings);
+    setEnvironmentType(remixSettings.lightingSettings.environmentType);
+    setMaterialSettings(remixSettings.materialSettings);
+    
+    setIsCustomizationOpen(false);
+    
+    // Simulate redirect to card editor
+    setTimeout(() => {
+      navigate('/create');
+    }, 1500);
+  };
+
   const toggleCustomization = () => {
     setIsCustomizationOpen(!isCustomizationOpen);
   };
@@ -129,6 +150,10 @@ const ImmersiveCardViewerPage: React.FC = () => {
         card={card}
         isCustomizationOpen={isCustomizationOpen}
         onToggleCustomization={toggleCustomization}
+        activeEffects={activeEffects}
+        effectIntensities={effectIntensities}
+        environmentType={environmentType}
+        materialSettings={materialSettings}
       />
       
       {/* Interface Overlay */}
@@ -141,8 +166,17 @@ const ImmersiveCardViewerPage: React.FC = () => {
         onDownload={handleDownload}
         onLike={handleLike}
         onBookmark={handleBookmark}
+        onRemix={handleRemix}
         isCustomizationOpen={isCustomizationOpen}
         onToggleCustomization={toggleCustomization}
+      />
+      
+      {/* Advanced Customization Panel */}
+      <AdvancedCustomizationPanel
+        card={card}
+        isOpen={isCustomizationOpen}
+        onClose={toggleCustomization}
+        onSaveRemix={handleSaveRemix}
       />
     </div>
   );
