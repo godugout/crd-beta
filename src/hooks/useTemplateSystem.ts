@@ -27,9 +27,24 @@ export const useTemplateSystem = ({ onApplyTemplate }: UseTemplateSystemProps = 
     
     // Apply template immediately if callback provided
     if (onApplyTemplate) {
+      // Map template layer types to card layer types
+      const mapLayerType = (type: string): 'image' | 'text' | 'shape' | 'effect' => {
+        switch (type) {
+          case 'border':
+            return 'shape';
+          case 'image':
+          case 'text':
+          case 'shape':
+          case 'effect':
+            return type as 'image' | 'text' | 'shape' | 'effect';
+          default:
+            return 'shape';
+        }
+      };
+
       const layers: CardLayer[] = template.layers.map((templateLayer, index) => ({
         id: `layer-${Date.now()}-${index}`,
-        type: templateLayer.type,
+        type: mapLayerType(templateLayer.type),
         content: templateLayer.placeholder?.text || '',
         position: {
           x: templateLayer.defaultPosition.x,

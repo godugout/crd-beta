@@ -19,9 +19,24 @@ export const TemplateApplicator: React.FC<TemplateApplicatorProps> = ({
   React.useEffect(() => {
     const applyTemplate = () => {
       const newLayers: CardLayer[] = template.layers.map((templateLayer, index) => {
+        // Map template layer types to card layer types
+        const mapLayerType = (type: string): 'image' | 'text' | 'shape' | 'effect' => {
+          switch (type) {
+            case 'border':
+              return 'shape';
+            case 'image':
+            case 'text':
+            case 'shape':
+            case 'effect':
+              return type as 'image' | 'text' | 'shape' | 'effect';
+            default:
+              return 'shape';
+          }
+        };
+
         const baseLayer: CardLayer = {
           id: `layer-${Date.now()}-${index}`,
-          type: templateLayer.type,
+          type: mapLayerType(templateLayer.type),
           content: templateLayer.placeholder?.text || '',
           position: {
             x: templateLayer.defaultPosition.x,
@@ -56,7 +71,7 @@ export const TemplateApplicator: React.FC<TemplateApplicatorProps> = ({
         // Map existing content if applicable
         if (existingLayers.length > 0) {
           const matchingLayer = existingLayers.find(layer => 
-            layer.type === templateLayer.type && 
+            layer.type === baseLayer.type && 
             layer.content && 
             layer.content !== ''
           );
