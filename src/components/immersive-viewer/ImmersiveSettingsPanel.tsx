@@ -46,7 +46,7 @@ const ImmersiveSettingsPanel: React.FC<ImmersiveSettingsPanelProps> = ({
       className="fixed top-0 right-0 h-full w-80 bg-black/95 backdrop-blur-xl border-l border-white/20 overflow-y-auto"
       style={{ zIndex: 50 }}
     >
-      {/* Compact Header with tabs and close */}
+      {/* Header with tabs and close */}
       <div className="flex items-center border-b border-white/20">
         <button
           onClick={() => onTabChange('environment')}
@@ -116,77 +116,165 @@ const ImmersiveSettingsPanel: React.FC<ImmersiveSettingsPanelProps> = ({
 
         {activeTab === 'settings' && (
           <div className="space-y-6">
+            {/* Lighting Section */}
             <div>
-              <label className="text-sm font-medium text-white/80 mb-3 block">
-                Auto Rotate
-              </label>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-white/60">Enable automatic rotation</span>
-                <Switch defaultChecked />
-              </div>
-            </div>
+              <h3 className="text-sm font-medium text-white/80 mb-4">Lighting Controls</h3>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm text-white/60 mb-2 block">Primary Light Intensity</label>
+                  <Slider
+                    defaultValue={[1.2]}
+                    max={3}
+                    min={0}
+                    step={0.1}
+                    className="w-full"
+                  />
+                  <div className="flex justify-between text-xs text-white/40 mt-1">
+                    <span>Off</span>
+                    <span>Bright</span>
+                  </div>
+                </div>
 
-            <div>
-              <label className="text-sm font-medium text-white/80 mb-3 block">
-                Shadows
-              </label>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-white/60">Cast shadows</span>
-                <Switch defaultChecked />
-              </div>
-            </div>
+                <div>
+                  <label className="text-sm text-white/60 mb-2 block">Ambient Light</label>
+                  <Slider
+                    defaultValue={[0.5]}
+                    max={1}
+                    min={0}
+                    step={0.05}
+                    className="w-full"
+                  />
+                </div>
 
-            <div>
-              <label className="text-sm font-medium text-white/80 mb-3 block">
-                Rendering Quality
-              </label>
-              <Select defaultValue="high">
-                <SelectTrigger className="bg-white/10 border-white/20 text-white">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-gray-900 border-white/20 text-white z-[60]">
-                  <SelectItem value="low">Low</SelectItem>
-                  <SelectItem value="medium">Medium</SelectItem>
-                  <SelectItem value="high">High</SelectItem>
-                  <SelectItem value="ultra">Ultra</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <label className="text-sm font-medium text-white/80 mb-3 block">
-                Frame Rate Limit
-              </label>
-              <div className="space-y-2">
-                <Slider
-                  defaultValue={[60]}
-                  max={120}
-                  min={30}
-                  step={10}
-                  className="w-full"
-                />
-                <div className="flex justify-between text-xs text-white/60">
-                  <span>30 FPS</span>
-                  <span>120 FPS</span>
+                <div>
+                  <label className="text-sm text-white/60 mb-2 block">Environment Reflection</label>
+                  <Slider
+                    defaultValue={[1]}
+                    max={2}
+                    min={0}
+                    step={0.1}
+                    className="w-full"
+                  />
                 </div>
               </div>
             </div>
 
-            <div>
-              <label className="text-sm font-medium text-white/80 mb-3 block">
-                Lighting Intensity
-              </label>
-              <div className="space-y-2">
-                <Slider
-                  defaultValue={[75]}
-                  max={100}
-                  min={0}
-                  step={5}
-                  className="w-full"
-                />
-                <div className="flex justify-between text-xs text-white/60">
-                  <span>Dark</span>
-                  <span>Bright</span>
+            {/* Dynamic Lighting */}
+            <div className="border-t border-white/10 pt-4">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <label className="text-sm font-medium text-white/80">Dynamic Lighting</label>
+                  <p className="text-xs text-white/50">Light follows mouse movement</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+            </div>
+
+            {/* Material Effects */}
+            <div className="border-t border-white/10 pt-4">
+              <h3 className="text-sm font-medium text-white/80 mb-4">Card Effects</h3>
+              
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-white/60">Holographic</span>
+                  <Switch />
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-white/60">Refractor</span>
+                  <Switch />
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-white/60">Chrome Finish</span>
+                  <Switch />
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-white/60">Gold Foil</span>
+                  <Switch />
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-white/60">Shimmer</span>
+                  <Switch />
+                </div>
+              </div>
+            </div>
+
+            {/* Animation Controls */}
+            <div className="border-t border-white/10 pt-4">
+              <h3 className="text-sm font-medium text-white/80 mb-4">Animation</h3>
+              
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-white/60">Auto Rotate</span>
+                  <Switch />
+                </div>
+                
+                <div>
+                  <label className="text-sm text-white/60 mb-2 block">Motion Speed</label>
+                  <Slider
+                    defaultValue={[0.5]}
+                    max={1}
+                    min={0}
+                    step={0.1}
+                    className="w-full"
+                  />
+                </div>
+                
+                <div>
+                  <label className="text-sm text-white/60 mb-2 block">Pulse Intensity</label>
+                  <Slider
+                    defaultValue={[0.3]}
+                    max={1}
+                    min={0}
+                    step={0.1}
+                    className="w-full"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Rendering Quality */}
+            <div className="border-t border-white/10 pt-4">
+              <h3 className="text-sm font-medium text-white/80 mb-4">Performance</h3>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm text-white/60 mb-2 block">Rendering Quality</label>
+                  <Select defaultValue="high">
+                    <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-gray-900 border-white/20 text-white z-[60]">
+                      <SelectItem value="low">Low</SelectItem>
+                      <SelectItem value="medium">Medium</SelectItem>
+                      <SelectItem value="high">High</SelectItem>
+                      <SelectItem value="ultra">Ultra</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-white/60">Cast Shadows</span>
+                  <Switch defaultChecked />
+                </div>
+
+                <div>
+                  <label className="text-sm text-white/60 mb-2 block">Frame Rate Limit</label>
+                  <Slider
+                    defaultValue={[60]}
+                    max={120}
+                    min={30}
+                    step={10}
+                    className="w-full"
+                  />
+                  <div className="flex justify-between text-xs text-white/40 mt-1">
+                    <span>30 FPS</span>
+                    <span>120 FPS</span>
+                  </div>
                 </div>
               </div>
             </div>
