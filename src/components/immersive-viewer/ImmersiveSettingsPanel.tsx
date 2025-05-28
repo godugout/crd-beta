@@ -43,39 +43,26 @@ const ImmersiveSettingsPanel: React.FC<ImmersiveSettingsPanelProps> = ({
       initial={{ x: '100%' }}
       animate={{ x: isOpen ? 0 : '100%' }}
       transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-      className="fixed top-0 right-0 h-full w-80 bg-black/90 backdrop-blur-xl border-l border-white/20 z-30 overflow-y-auto"
+      className="fixed top-0 right-0 h-full w-80 bg-black/95 backdrop-blur-xl border-l border-white/20 overflow-y-auto"
+      style={{ zIndex: 50 }}
     >
-      {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-white/20">
-        <h2 className="text-lg font-semibold text-white">
-          {activeTab === 'environment' ? 'Environment' : 'Settings'}
-        </h2>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={onClose}
-          className="text-white hover:bg-white/10"
-        >
-          <X className="h-5 w-5" />
-        </Button>
-      </div>
-
-      {/* Tab Navigation */}
-      <div className="flex border-b border-white/20">
+      {/* Compact Header with tabs and close */}
+      <div className="flex items-center border-b border-white/20">
         <button
           onClick={() => onTabChange('environment')}
-          className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-colors ${
+          className={`flex-1 flex items-center justify-center gap-2 px-3 py-3 text-sm font-medium transition-colors ${
             activeTab === 'environment'
               ? 'text-white bg-white/10 border-b-2 border-white'
               : 'text-white/60 hover:text-white hover:bg-white/5'
           }`}
         >
           <Palette className="h-4 w-4" />
-          Environment
+          Scenes
         </button>
+        
         <button
           onClick={() => onTabChange('settings')}
-          className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-colors ${
+          className={`flex-1 flex items-center justify-center gap-2 px-3 py-3 text-sm font-medium transition-colors ${
             activeTab === 'settings'
               ? 'text-white bg-white/10 border-b-2 border-white'
               : 'text-white/60 hover:text-white hover:bg-white/5'
@@ -84,37 +71,45 @@ const ImmersiveSettingsPanel: React.FC<ImmersiveSettingsPanelProps> = ({
           <Settings className="h-4 w-4" />
           Display
         </button>
+
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onClose}
+          className="text-white hover:bg-white/10 m-2"
+        >
+          <X className="h-4 w-4" />
+        </Button>
       </div>
 
       {/* Tab Content */}
       <div className="p-4">
         {activeTab === 'environment' && (
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium text-white/80 mb-3 block">
-                Choose Environment
-              </label>
-              <div className="grid gap-2">
-                {environments.map((env) => (
-                  <button
-                    key={env.value}
-                    onClick={() => onEnvironmentChange(env.value)}
-                    className={`p-3 rounded-lg border transition-all text-left ${
-                      environmentType === env.value
-                        ? 'border-white/40 bg-white/10 text-white'
-                        : 'border-white/20 bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className="text-lg">{env.icon}</span>
-                      <div>
-                        <div className="font-medium">{env.label}</div>
-                        <div className="text-xs opacity-60">{env.description}</div>
-                      </div>
+          <div className="space-y-3">
+            <div className="text-sm font-medium text-white/80 mb-3">
+              Choose Environment
+            </div>
+            <div className="grid gap-2">
+              {environments.map((env) => (
+                <button
+                  key={env.value}
+                  onClick={() => onEnvironmentChange(env.value)}
+                  className={`p-3 rounded-lg border transition-all text-left hover:scale-[1.02] ${
+                    environmentType === env.value
+                      ? 'border-white/40 bg-white/15 text-white shadow-lg'
+                      : 'border-white/20 bg-white/5 text-white/70 hover:bg-white/10 hover:text-white hover:border-white/30'
+                  }`}
+                  style={{ zIndex: 1 }}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-lg">{env.icon}</span>
+                    <div>
+                      <div className="font-medium">{env.label}</div>
+                      <div className="text-xs opacity-60">{env.description}</div>
                     </div>
-                  </button>
-                ))}
-              </div>
+                  </div>
+                </button>
+              ))}
             </div>
           </div>
         )}
@@ -149,7 +144,7 @@ const ImmersiveSettingsPanel: React.FC<ImmersiveSettingsPanelProps> = ({
                 <SelectTrigger className="bg-white/10 border-white/20 text-white">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-gray-900 border-white/20 text-white">
+                <SelectContent className="bg-gray-900 border-white/20 text-white z-[60]">
                   <SelectItem value="low">Low</SelectItem>
                   <SelectItem value="medium">Medium</SelectItem>
                   <SelectItem value="high">High</SelectItem>
