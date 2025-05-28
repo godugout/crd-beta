@@ -1,371 +1,135 @@
 
-import React, { useState, useEffect, Suspense, useRef } from 'react';
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { 
-  PerspectiveCamera, 
-  Environment, 
-  OrbitControls,
-  ContactShadows,
-  useTexture,
-  MeshReflectorMaterial,
-  AccumulativeShadows,
-  RandomizedLight,
-  Stats
-} from '@react-three/drei';
-import * as THREE from 'three';
+import React, { Suspense, useEffect, useState } from 'react';
+import { Canvas } from '@react-three/fiber';
+import { OrbitControls, Environment } from '@react-three/drei';
 import { Card } from '@/lib/types';
-import { useCardLighting, LightingSettings } from '@/hooks/useCardLighting';
-import { useUserLightingPreferences } from '@/hooks/useUserLightingPreferences';
-import { logRenderingInfo } from '@/utils/debugRenderer';
-import ViewerSettings from '@/components/gallery/viewer-components/ViewerSettings';
-
-// Define possible return types from useTexture
-type TextureResult = THREE.Texture | Record<string, THREE.Texture> | THREE.Texture[];
-
-// Debug component to visualize camera and light positions
-const DebugInfo = ({ show = false }) => {
-  if (!show) return null;
-  
-  return <Stats className="top-0 left-0" />;
-};
-
-// Physically-based card model with materials
-const CardModel = ({ 
-  card, 
-  isFlipped, 
-  lightingSettings,
-  materialProps = { roughness: 0.1, metalness: 0.2 }
-}) => {
-  const { scene } = useThree();
-  const meshRef = useRef<THREE.Mesh>(null);
-  const [loadingError, setLoadingError] = useState<string | null>(null);
-
-  // Try to load the textures with better error handling
-  const LoadTexture = ({ url, onLoad, onError }) => {
-    useEffect(() => {
-      const loader = new THREE.TextureLoader();
-      loader.crossOrigin = 'anonymous';
-      
-      console.log(`Loading texture from: ${url}`);
-      
-      loader.load(
-        url,
-        (texture) => {
-          console.log(`Successfully loaded texture from: ${url}`);
-          onLoad(texture);
-        },
-        (progress) => {
-          console.log(`Loading progress: ${Math.round((progress.loaded / progress.total) * 100)}%`);
-        },
-        (error) => {
-          console.error(`Failed to load texture from: ${url}`, error);
-          const errorMsg = error instanceof Error ? error.message : "Unknown error loading texture";
-          onError(errorMsg);
-        }
-      );
-    }, [url, onLoad, onError]);
-    
-    return null;
-  };
-  
-  // Load front texture
-  const [frontTexture, setFrontTexture] = useState<THREE.Texture | null>(null);
-  const frontTextureUrl = card.imageUrl || '/placeholder-card.jpg';
-  
-  // Load back texture
-  const [backTexture, setBackTexture] = useState<THREE.Texture | null>(null);
-  const backTextureUrl = '/card-back-texture.jpg';
-  
-  // Create a simple colored material as fallback
-  const createFallbackMaterial = (color: string) => {
-    return new THREE.MeshStandardMaterial({
-      color: new THREE.Color(color),
-      roughness: 0.5,
-      metalness: 0.2
-    });
-  };
-
-  // Animation effect for flipping
-  useFrame((state) => {
-    if (!meshRef.current) return;
-    
-    const targetRotation = isFlipped ? Math.PI : 0;
-    meshRef.current.rotation.y = THREE.MathUtils.lerp(
-      meshRef.current.rotation.y,
-      targetRotation,
-      0.1
-    );
-
-    // Subtle floating animation
-    const t = state.clock.getElapsedTime();
-    meshRef.current.position.y = Math.sin(t * 0.5) * 0.05;
-    meshRef.current.rotation.z = Math.sin(t * 0.3) * 0.02;
-    
-    // Log the mesh position and rotation for debugging
-    logRenderingInfo("CardModel", {
-      visible: true,
-      position: {
-        y: meshRef.current.position.y,
-        z: meshRef.current.position.z
-      }
-    });
-  });
-  
-  return (
-    <group>
-      {/* Load textures */}
-      <LoadTexture 
-        url={frontTextureUrl} 
-        onLoad={setFrontTexture} 
-        onError={(msg: string) => setLoadingError(`Front texture: ${msg}`)} 
-      />
-      <LoadTexture 
-        url={backTextureUrl} 
-        onLoad={setBackTexture} 
-        onError={(msg: string) => setLoadingError(`Back texture: ${msg}`)} 
-      />
-      
-      {/* Visual feedback for loading errors */}
-      {loadingError && (
-        <mesh position={[0, 1, 0]}>
-          <boxGeometry args={[4, 0.5, 0.1]} />
-          <meshStandardMaterial color="red" transparent opacity={0.7} />
-        </mesh>
-      )}
-      
-      {/* Card mesh - Front Side */}
-      <mesh 
-        ref={meshRef} 
-        castShadow 
-        receiveShadow
-      >
-        {/* Card geometry with proper card proportions (2.5 x 3.5 inch standard) */}
-        <planeGeometry args={[2.5, 3.5, 20, 20]} />
-        
-        {/* Front material */}
-        {frontTexture ? (
-          <meshPhysicalMaterial 
-            map={frontTexture}
-            side={THREE.FrontSide}
-            roughness={materialProps.roughness || 0.2}
-            metalness={materialProps.metalness || 0.8}
-            envMapIntensity={lightingSettings.envMapIntensity || 1.5}
-            clearcoat={1}
-            clearcoatRoughness={0.2}
-            reflectivity={0.8}
-          />
-        ) : (
-          <meshStandardMaterial 
-            color="#2a5298" 
-          />
-        )}
-      </mesh>
-      
-      {/* Card back side - as a separate mesh */}
-      <mesh 
-        position={[0, 0, -0.01]}
-        rotation={[0, Math.PI, 0]}
-        castShadow 
-        receiveShadow
-      >
-        <planeGeometry args={[2.5, 3.5, 20, 20]} />
-        
-        {/* Back material */}
-        {backTexture ? (
-          <meshPhysicalMaterial 
-            map={backTexture}
-            side={THREE.FrontSide}
-            roughness={(materialProps.roughness || 0.2) * 1.2}
-            metalness={(materialProps.metalness || 0.8) * 0.8}
-            envMapIntensity={(lightingSettings.envMapIntensity || 1) * 0.8}
-            clearcoat={0.5}
-            clearcoatRoughness={0.3}
-          />
-        ) : (
-          <meshStandardMaterial 
-            color="#1a3060" 
-          />
-        )}
-      </mesh>
-    </group>
-  );
-};
-
-// Photorealistic environment setup
-const Environment3D = ({ preset }) => {
-  return (
-    <>
-      <Environment preset={preset} background={false} blur={0.6} />
-      
-      <AccumulativeShadows temporal frames={30} alphaTest={0.85} opacity={0.75}>
-        <RandomizedLight amount={8} radius={10} intensity={0.8} position={[5, 5, -10]} />
-      </AccumulativeShadows>
-      
-      <ContactShadows 
-        opacity={0.5}
-        scale={10}
-        blur={2}
-        far={10}
-        resolution={256}
-        color="#000000"
-      />
-      
-      {/* Reflective surface/table */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.5, 0]}>
-        <planeGeometry args={[50, 50]} />
-        <MeshReflectorMaterial
-          blur={[300, 100]}
-          resolution={1024}
-          mixBlur={1}
-          mixStrength={50}
-          roughness={0.8}
-          depthScale={1.2}
-          minDepthThreshold={0.4}
-          maxDepthThreshold={1.4}
-          color="#101010"
-          metalness={0.6}
-          mirror={0.75}
-        />
-      </mesh>
-    </>
-  );
-};
+import { useCardLighting } from '@/hooks/useCardLighting';
+import CardModel from '@/components/card-viewer/CardModel';
 
 interface RealisticCardViewerProps {
   card: Card;
-  isCustomizationOpen?: boolean;
-  onToggleCustomization?: () => void;
+  isCustomizationOpen: boolean;
+  onToggleCustomization: () => void;
 }
 
-const RealisticCardViewer: React.FC<RealisticCardViewerProps> = ({ 
+const RealisticCardViewer: React.FC<RealisticCardViewerProps> = ({
   card,
-  isCustomizationOpen = false,
+  isCustomizationOpen,
   onToggleCustomization
 }) => {
   const [isFlipped, setIsFlipped] = useState(false);
-  const [isDebugMode, setIsDebugMode] = useState(false);
-  const { preferences, savePreferences } = useUserLightingPreferences();
+  const [activeEffects, setActiveEffects] = useState<string[]>(['holographic']);
+  const [effectIntensities, setEffectIntensities] = useState<Record<string, number>>({
+    holographic: 0.7,
+    refractor: 0.5,
+    foil: 0.6
+  });
+
   const {
     lightingSettings,
-    lightingPreset,
-    updateLightingSetting,
-    applyPreset,
-    isUserCustomized,
-    toggleDynamicLighting
-  } = useCardLighting(preferences?.environmentType || 'studio');
+    updateLightPosition
+  } = useCardLighting('studio');
 
-  // Save user preferences when they change
-  useEffect(() => {
-    if (isUserCustomized && lightingSettings) {
-      savePreferences(lightingSettings);
-    }
-  }, [lightingSettings, isUserCustomized, savePreferences]);
-  
-  // Toggle debug mode with Shift+D keyboard shortcut
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.shiftKey && e.key === 'D') {
-        setIsDebugMode(prev => !prev);
-        console.log("Debug mode:", !isDebugMode);
-      }
-    };
-    
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isDebugMode]);
+  console.log('RealisticCardViewer: Rendering with card:', {
+    id: card.id,
+    title: card.title,
+    imageUrl: card.imageUrl,
+    hasImageUrl: !!card.imageUrl
+  });
 
-  // Fix the updateLightingSetting function to match expected signature
-  const handleUpdateSettings = (key: string, value: any) => {
-    if (key.includes('.')) {
-      const [parent, child] = key.split('.');
-      const parentSettings = lightingSettings[parent as keyof LightingSettings];
-      if (parentSettings && typeof parentSettings === 'object') {
-        updateLightingSetting({
-          [parent]: {
-            ...parentSettings,
-            [child]: value
-          }
-        });
-      }
-    } else {
-      updateLightingSetting({ [key]: value });
+  // Handle mouse movement for dynamic lighting
+  const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (lightingSettings.useDynamicLighting) {
+      const rect = event.currentTarget.getBoundingClientRect();
+      const x = (event.clientX - rect.left) / rect.width;
+      const y = (event.clientY - rect.top) / rect.height;
+      updateLightPosition(x, y);
     }
   };
 
   return (
-    <div className="w-full h-full relative">
-      {/* Canvas with WebGL renderer */}
-      <Canvas 
-        shadows 
+    <div 
+      className="w-full h-full relative"
+      onPointerMove={handlePointerMove}
+    >
+      <Canvas
+        camera={{ 
+          position: [0, 0, 5], 
+          fov: 50,
+          near: 0.1,
+          far: 1000
+        }}
         gl={{ 
-          antialias: true, 
-          alpha: false,
+          antialias: true,
+          alpha: true,
           preserveDrawingBuffer: true
         }}
-        className="bg-gradient-to-br from-gray-900 via-gray-800 to-black z-0"
+        style={{ 
+          background: 'transparent',
+          width: '100%',
+          height: '100%'
+        }}
       >
-        <color attach="background" args={["#0f172a"]} />
-        <PerspectiveCamera makeDefault position={[0, 0, 5]} fov={50} />
-        
-        <ambientLight intensity={lightingSettings.ambientLight.intensity} color={lightingSettings.ambientLight.color} />
-        <spotLight
+        {/* Lighting Setup */}
+        <ambientLight 
+          intensity={lightingSettings.ambientLight.intensity} 
+          color={lightingSettings.ambientLight.color}
+        />
+        <directionalLight
           position={[
             lightingSettings.primaryLight.x,
             lightingSettings.primaryLight.y,
             lightingSettings.primaryLight.z
           ]}
-          intensity={lightingSettings.primaryLight.intensity * 1.5}
+          intensity={lightingSettings.primaryLight.intensity}
           color={lightingSettings.primaryLight.color}
           castShadow
-          shadow-mapSize={[2048, 2048]}
         />
-        
-        <Suspense fallback={
-          <mesh position={[0, 0, 0]}>
-            <boxGeometry args={[1, 1, 1]} />
-            <meshStandardMaterial color="purple" />
-          </mesh>
-        }>
-          <CardModel 
+        <pointLight position={[10, 10, 10]} intensity={0.3} />
+        <pointLight position={[-10, -10, -10]} intensity={0.2} />
+
+        {/* Environment for reflections */}
+        <Environment preset="studio" />
+
+        {/* Card Model */}
+        <Suspense fallback={null}>
+          <CardModel
             card={card}
             isFlipped={isFlipped}
-            lightingSettings={lightingSettings}
-            materialProps={{
-              roughness: 0.15,
-              metalness: 0.3
-            }}
+            activeEffects={activeEffects}
+            effectIntensities={effectIntensities}
           />
-          <Environment3D preset={lightingSettings.environmentType} />
         </Suspense>
-        
-        <OrbitControls 
+
+        {/* Controls */}
+        <OrbitControls
           enablePan={false}
           enableZoom={true}
-          minPolarAngle={Math.PI / 6}
-          maxPolarAngle={Math.PI - Math.PI / 6}
-          minDistance={4}
-          maxDistance={10}
-          autoRotate={!isCustomizationOpen && lightingSettings.autoRotate}
-          autoRotateSpeed={0.5}
+          enableRotate={true}
+          minDistance={2}
+          maxDistance={8}
+          maxPolarAngle={Math.PI / 1.5}
+          minPolarAngle={Math.PI / 4}
         />
-        
-        <DebugInfo show={isDebugMode} />
       </Canvas>
 
-      {/* Debug indicator */}
-      {isDebugMode && (
-        <div className="absolute top-2 left-2 bg-red-500/80 text-white text-xs px-2 py-1 rounded z-50">
-          Debug Mode
-        </div>
-      )}
+      {/* Debug Info - Remove this in production */}
+      <div className="absolute top-4 left-4 bg-black/50 text-white p-2 rounded text-xs">
+        <div>Card ID: {card.id}</div>
+        <div>Title: {card.title}</div>
+        <div>Image: {card.imageUrl ? '✓' : '✗'}</div>
+        <div>Effects: {activeEffects.join(', ')}</div>
+      </div>
 
-      {/* Settings Panel */}
-      <ViewerSettings
-        settings={lightingSettings}
-        onUpdateSettings={handleUpdateSettings}
-        onApplyPreset={applyPreset}
-        isOpen={isCustomizationOpen}
-      />
+      {/* Flip Button */}
+      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
+        <button
+          onClick={() => setIsFlipped(!isFlipped)}
+          className="px-4 py-2 bg-white/10 backdrop-blur-sm text-white rounded-full hover:bg-white/20 transition-colors"
+        >
+          {isFlipped ? 'Show Front' : 'Show Back'}
+        </button>
+      </div>
     </div>
   );
 };
