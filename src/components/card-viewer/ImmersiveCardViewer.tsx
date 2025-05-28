@@ -1,7 +1,8 @@
+
 import React, { useRef, useEffect, useState, useMemo } from 'react';
 import { Card } from '@/lib/types/cardTypes';
-import { Canvas, useFrame, extend } from '@react-three/fiber';
-import { OrbitControls, PerspectiveCamera, Environment, shaderMaterial } from '@react-three/drei';
+import { Canvas, useFrame } from '@react-three/fiber';
+import { OrbitControls, PerspectiveCamera, Environment } from '@react-three/drei';
 import { DEFAULT_DESIGN_METADATA, FALLBACK_IMAGE_URL } from '@/lib/utils/cardDefaults';
 import { useToast } from '@/hooks/use-toast';
 import * as THREE from 'three';
@@ -12,211 +13,6 @@ interface ImmersiveCardViewerProps {
   isFlipped: boolean;
   activeEffects: string[];
   effectIntensities?: Record<string, number>;
-}
-
-// Holographic shader material
-const HolographicMaterial = shaderMaterial(
-  {
-    uTime: 0,
-    uTexture: null,
-    uIntensity: 1.0,
-    uMouse: new THREE.Vector2(0.5, 0.5),
-  },
-  // Vertex shader
-  `
-    varying vec2 vUv;
-    varying vec3 vPosition;
-    varying vec3 vNormal;
-    
-    void main() {
-      vUv = uv;
-      vPosition = position;
-      vNormal = normal;
-      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-    }
-  `,
-  // Fragment shader
-  `
-    uniform float uTime;
-    uniform sampler2D uTexture;
-    uniform float uIntensity;
-    uniform vec2 uMouse;
-    
-    varying vec2 vUv;
-    varying vec3 vPosition;
-    varying vec3 vNormal;
-    
-    vec3 rainbow(float t) {
-      vec3 c = vec3(0.5, 0.5, 0.5) + vec3(0.5, 0.5, 0.5) * cos(6.28318 * (vec3(1.0, 1.0, 1.0) * t + vec3(0.0, 0.33, 0.67)));
-      return c;
-    }
-    
-    void main() {
-      vec4 texColor = texture2D(uTexture, vUv);
-      
-      // Create holographic effect based on viewing angle
-      float angle = dot(vNormal, vec3(0.0, 0.0, 1.0));
-      float fresnel = pow(1.0 - angle, 2.0);
-      
-      // Rainbow interference pattern
-      float interference = sin(vUv.x * 50.0 + uTime * 2.0) * sin(vUv.y * 30.0 + uTime * 1.5);
-      interference = (interference + 1.0) * 0.5;
-      
-      vec3 hologramColor = rainbow(interference + uTime * 0.1);
-      
-      // Mix base texture with holographic effect
-      vec3 finalColor = mix(texColor.rgb, hologramColor, fresnel * uIntensity * 0.6);
-      
-      gl_FragColor = vec4(finalColor, texColor.a);
-    }
-  `
-);
-
-// Shimmer shader material
-const ShimmerMaterial = shaderMaterial(
-  {
-    uTime: 0,
-    uTexture: null,
-    uIntensity: 1.0,
-  },
-  // Vertex shader
-  `
-    varying vec2 vUv;
-    void main() {
-      vUv = uv;
-      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-    }
-  `,
-  // Fragment shader
-  `
-    uniform float uTime;
-    uniform sampler2D uTexture;
-    uniform float uIntensity;
-    
-    varying vec2 vUv;
-    
-    void main() {
-      vec4 texColor = texture2D(uTexture, vUv);
-      
-      // Create shimmer effect
-      float shimmer = sin(vUv.x * 10.0 + uTime * 4.0) * sin(vUv.y * 8.0 + uTime * 3.0);
-      shimmer = (shimmer + 1.0) * 0.5;
-      
-      vec3 shimmerColor = vec3(1.0, 1.0, 1.0) * shimmer * uIntensity * 0.3;
-      
-      vec3 finalColor = texColor.rgb + shimmerColor;
-      
-      gl_FragColor = vec4(finalColor, texColor.a);
-    }
-  `
-);
-
-// Refractor shader material
-const RefractorMaterial = shaderMaterial(
-  {
-    uTime: 0,
-    uTexture: null,
-    uIntensity: 1.0,
-  },
-  // Vertex shader
-  `
-    varying vec2 vUv;
-    void main() {
-      vUv = uv;
-      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-    }
-  `,
-  // Fragment shader
-  `
-    uniform float uTime;
-    uniform sampler2D uTexture;
-    uniform float uIntensity;
-    
-    varying vec2 vUv;
-    
-    void main() {
-      // Create refraction distortion
-      vec2 distortion = vec2(
-        sin(vUv.y * 20.0 + uTime) * 0.01,
-        cos(vUv.x * 15.0 + uTime * 1.5) * 0.01
-      ) * uIntensity;
-      
-      vec2 distortedUV = vUv + distortion;
-      vec4 texColor = texture2D(uTexture, distortedUV);
-      
-      // Add prismatic color separation
-      float r = texture2D(uTexture, distortedUV + vec2(0.002, 0.0) * uIntensity).r;
-      float g = texture2D(uTexture, distortedUV).g;
-      float b = texture2D(uTexture, distortedUV - vec2(0.002, 0.0) * uIntensity).b;
-      
-      gl_FragColor = vec4(r, g, b, texColor.a);
-    }
-  `
-);
-
-// Vintage shader material
-const VintageMaterial = shaderMaterial(
-  {
-    uTime: 0,
-    uTexture: null,
-    uIntensity: 1.0,
-  },
-  // Vertex shader
-  `
-    varying vec2 vUv;
-    void main() {
-      vUv = uv;
-      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-    }
-  `,
-  // Fragment shader
-  `
-    uniform float uTime;
-    uniform sampler2D uTexture;
-    uniform float uIntensity;
-    
-    varying vec2 vUv;
-    
-    void main() {
-      vec4 texColor = texture2D(uTexture, vUv);
-      
-      // Sepia tone
-      float gray = dot(texColor.rgb, vec3(0.299, 0.587, 0.114));
-      vec3 sepia = vec3(gray) * vec3(1.2, 1.0, 0.8);
-      
-      // Add noise and aging
-      float noise = fract(sin(dot(vUv * 1000.0, vec2(12.9898, 78.233))) * 43758.5453);
-      vec3 aged = sepia * (0.9 + noise * 0.1);
-      
-      // Vignette effect
-      float vignette = distance(vUv, vec2(0.5)) * 2.0;
-      vignette = 1.0 - smoothstep(0.5, 1.5, vignette);
-      
-      vec3 finalColor = mix(texColor.rgb, aged * vignette, uIntensity);
-      
-      gl_FragColor = vec4(finalColor, texColor.a);
-    }
-  `
-);
-
-// Extend the materials so they can be used in JSX
-extend({ 
-  HolographicMaterial: HolographicMaterial,
-  ShimmerMaterial: ShimmerMaterial,
-  RefractorMaterial: RefractorMaterial,
-  VintageMaterial: VintageMaterial
-});
-
-// Type declarations for the custom materials
-declare global {
-  namespace JSX {
-    interface IntrinsicElements {
-      holographicMaterial: any;
-      shimmerMaterial: any;
-      refractorMaterial: any;
-      vintageMaterial: any;
-    }
-  }
 }
 
 const Card3DModel = ({ 
@@ -234,7 +30,6 @@ const Card3DModel = ({
 }) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const groupRef = useRef<THREE.Group>(null);
-  const materialRef = useRef<any>(null);
   const [hovered, setHovered] = useState(false);
   const [frontTextureLoaded, setFrontTextureLoaded] = useState<THREE.Texture | null>(null);
   const [backTextureLoaded, setBackTextureLoaded] = useState<THREE.Texture | null>(null);
@@ -303,14 +98,73 @@ const Card3DModel = ({
     }
   }, [frontTextureLoaded, backTextureLoaded]);
 
-  // Determine which material to use based on active effects
-  const materialType = useMemo(() => {
-    if (activeEffects.includes('Holographic')) return 'holographic';
-    if (activeEffects.includes('Shimmer')) return 'shimmer';
-    if (activeEffects.includes('Refractor')) return 'refractor';
-    if (activeEffects.includes('Vintage')) return 'vintage';
-    return 'standard';
-  }, [activeEffects]);
+  // Create materials based on active effects
+  const cardMaterial = useMemo(() => {
+    if (!frontTextureLoaded) return null;
+    
+    const intensity = effectIntensities[activeEffects[0]] || 1.0;
+    
+    if (activeEffects.includes('Holographic')) {
+      return new THREE.MeshPhysicalMaterial({
+        map: frontTextureLoaded,
+        metalness: 0.9 * intensity,
+        roughness: 0.1 * (1 - intensity * 0.8),
+        envMapIntensity: 2.0 * intensity,
+        clearcoat: 1.0,
+        clearcoatRoughness: 0.1,
+        iridescence: 1.0 * intensity,
+        iridescenceIOR: 1.3,
+        iridescenceThicknessRange: [100, 800],
+        transparent: true,
+        opacity: 0.95,
+      });
+    }
+    
+    if (activeEffects.includes('Shimmer')) {
+      return new THREE.MeshPhysicalMaterial({
+        map: frontTextureLoaded,
+        metalness: 0.8 * intensity,
+        roughness: 0.2 * (1 - intensity * 0.5),
+        envMapIntensity: 1.5 * intensity,
+        clearcoat: 0.8,
+        clearcoatRoughness: 0.2,
+      });
+    }
+    
+    if (activeEffects.includes('Refractor')) {
+      return new THREE.MeshPhysicalMaterial({
+        map: frontTextureLoaded,
+        metalness: 0.3,
+        roughness: 0.1,
+        envMapIntensity: 1.8 * intensity,
+        transmission: 0.1 * intensity,
+        thickness: 0.5,
+        ior: 1.5,
+        clearcoat: 1.0,
+        clearcoatRoughness: 0.0,
+      });
+    }
+    
+    if (activeEffects.includes('Vintage')) {
+      return new THREE.MeshStandardMaterial({
+        map: frontTextureLoaded,
+        metalness: 0.1,
+        roughness: 0.8,
+        envMapIntensity: 0.5,
+      });
+    }
+    
+    // Default material
+    return new THREE.MeshPhysicalMaterial({
+      map: frontTextureLoaded,
+      roughness: 0.2,
+      metalness: 0.8,
+      envMapIntensity: 1.5,
+      clearcoat: 1,
+      clearcoatRoughness: 0.2,
+      reflectivity: 0.8,
+    });
+  }, [frontTextureLoaded, activeEffects, effectIntensities]);
 
   useFrame((state, delta) => {
     if (!groupRef.current) return;
@@ -329,15 +183,6 @@ const Card3DModel = ({
       groupRef.current.position.y += 0.1;
     }
     
-    // Update shader uniforms
-    if (materialRef.current && materialRef.current.uniforms) {
-      materialRef.current.uniforms.uTime.value = time;
-      if (materialRef.current.uniforms.uIntensity) {
-        const intensity = effectIntensities[activeEffects[0]] || 1.0;
-        materialRef.current.uniforms.uIntensity.value = intensity;
-      }
-    }
-    
     logRenderingInfo("Card3DModel", {
       visible: texturesLoaded,
       position: {
@@ -347,65 +192,7 @@ const Card3DModel = ({
     });
   });
 
-  const renderMaterial = () => {
-    if (!frontTextureLoaded) return null;
-    
-    const commonProps = {
-      ref: materialRef,
-      side: THREE.FrontSide,
-    };
-    
-    switch (materialType) {
-      case 'holographic':
-        return (
-          <holographicMaterial 
-            {...commonProps}
-            uTexture={frontTextureLoaded}
-            uIntensity={effectIntensities.Holographic || 1.0}
-            transparent
-          />
-        );
-      case 'shimmer':
-        return (
-          <shimmerMaterial 
-            {...commonProps}
-            uTexture={frontTextureLoaded}
-            uIntensity={effectIntensities.Shimmer || 1.0}
-          />
-        );
-      case 'refractor':
-        return (
-          <refractorMaterial 
-            {...commonProps}
-            uTexture={frontTextureLoaded}
-            uIntensity={effectIntensities.Refractor || 1.0}
-          />
-        );
-      case 'vintage':
-        return (
-          <vintageMaterial 
-            {...commonProps}
-            uTexture={frontTextureLoaded}
-            uIntensity={effectIntensities.Vintage || 1.0}
-          />
-        );
-      default:
-        return (
-          <meshPhysicalMaterial 
-            {...commonProps}
-            map={frontTextureLoaded}
-            roughness={0.2}
-            metalness={0.8}
-            envMapIntensity={1.5}
-            clearcoat={1}
-            clearcoatRoughness={0.2}
-            reflectivity={0.8}
-          />
-        );
-    }
-  };
-
-  if (!texturesLoaded) {
+  if (!texturesLoaded || !cardMaterial) {
     return (
       <mesh position={[0, 0, 0]}>
         <boxGeometry args={[2.5, 3.5, 0.1]} />
@@ -428,7 +215,7 @@ const Card3DModel = ({
         onPointerOut={() => setHovered(false)}
       >
         <planeGeometry args={[2.5, 3.5, 20, 20]} />
-        {renderMaterial()}
+        <primitive object={cardMaterial} />
       </mesh>
       
       <mesh position={[0, 0, -0.01]} rotation={[0, Math.PI, 0]}>
