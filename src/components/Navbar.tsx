@@ -1,11 +1,11 @@
 
 import React from 'react';
-import AppHeader from '@/components/navigation/AppHeader';
+import { SecondaryNavbar } from '@/components/navigation/SecondaryNavbar';
 
 // This component exists for backward compatibility
-// and simply wraps AppHeader to avoid breaking existing imports
+// Now uses SecondaryNavbar which includes the integrated header
 const Navbar = () => {
-  return <AppHeader />;
+  return <SecondaryNavbar title="CardShow" description="Digital card collection platform" />;
 };
 
 export default Navbar;
