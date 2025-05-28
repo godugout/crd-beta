@@ -1,6 +1,7 @@
+
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { Card, CardLayer, CardEffect } from '@/lib/types';
-import { fabric } from 'fabric';
+import { Canvas as FabricCanvas, FabricImage, FabricText, Rect, Circle } from 'fabric';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
@@ -16,7 +17,7 @@ import {
   MousePointer,
   Type,
   Image as ImageIcon,
-  Circle,
+  Circle as CircleIcon,
   Square
 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -61,17 +62,16 @@ const CardEditor: React.FC<CardEditorProps> = ({
 
   // Canvas refs
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const fabricRef = useRef<fabric.Canvas | null>(null);
+  const fabricRef = useRef<FabricCanvas | null>(null);
 
   // Initialize Fabric.js canvas
   useEffect(() => {
     if (!canvasRef.current) return;
 
-    const canvas = new fabric.Canvas(canvasRef.current, {
+    const canvas = new FabricCanvas(canvasRef.current, {
       width: 750, // 2.5" at 300 DPI
       height: 1050, // 3.5" at 300 DPI
       backgroundColor: '#ffffff',
-      preserveObjectStacking: true,
     });
 
     fabricRef.current = canvas;
@@ -94,8 +94,8 @@ const CardEditor: React.FC<CardEditorProps> = ({
           position: { x: e.target.left || 0, y: e.target.top || 0, z: 0 },
           rotation: e.target.angle || 0,
           size: { 
-            width: (e.target.width || 100) * (e.target.scaleX || 1), 
-            height: (e.target.height || 100) * (e.target.scaleY || 1) 
+            width: ((e.target.width || 100) * (e.target.scaleX || 1)), 
+            height: ((e.target.height || 100) * (e.target.scaleY || 1))
           },
         });
       }
@@ -119,76 +119,76 @@ const CardEditor: React.FC<CardEditorProps> = ({
     });
   }, [activeCard.layers]);
 
-  const renderLayer = (canvas: fabric.Canvas, layer: CardLayer) => {
-    switch (layer.type) {
-      case 'image':
-        if (layer.imageUrl) {
-          fabric.Image.fromURL(layer.imageUrl)
-            .then((img) => {
-              img.set({
-                left: layer.position.x,
-                top: layer.position.y,
-                angle: layer.rotation,
-                opacity: layer.opacity,
-                scaleX: typeof layer.size.width === 'number' ? layer.size.width / (img.width || 1) : 1,
-                scaleY: typeof layer.size.height === 'number' ? layer.size.height / (img.height || 1) : 1,
-                data: { layerId: layer.id }
-              });
-              canvas.add(img);
-              canvas.renderAll();
-            })
-            .catch(err => {
-              console.error('Error loading image:', err);
-              toast.error('Failed to load image layer');
+  const renderLayer = async (canvas: FabricCanvas, layer: CardLayer) => {
+    try {
+      switch (layer.type) {
+        case 'image':
+          if (layer.imageUrl) {
+            const img = await FabricImage.fromURL(layer.imageUrl);
+            img.set({
+              left: layer.position.x,
+              top: layer.position.y,
+              angle: layer.rotation,
+              opacity: layer.opacity,
+              scaleX: typeof layer.size.width === 'number' ? Number(layer.size.width) / (img.width || 1) : 1,
+              scaleY: typeof layer.size.height === 'number' ? Number(layer.size.height) / (img.height || 1) : 1,
             });
-        }
-        break;
-      
-      case 'text':
-        const text = new fabric.Text(layer.content || 'Text', {
-          left: layer.position.x,
-          top: layer.position.y,
-          angle: layer.rotation,
-          opacity: layer.opacity,
-          fontSize: layer.textStyle?.fontSize || 24,
-          fontFamily: layer.textStyle?.fontFamily || 'Arial',
-          fill: layer.textStyle?.color || '#000000',
-          data: { layerId: layer.id }
-        });
-        canvas.add(text);
-        break;
-      
-      case 'shape':
-        if (layer.shapeType === 'rectangle') {
-          const width = typeof layer.size.width === 'number' ? layer.size.width : 100;
-          const height = typeof layer.size.height === 'number' ? layer.size.height : 100;
-          
-          const rect = new fabric.Rect({
+            // Store layer ID for reference
+            (img as any).data = { layerId: layer.id };
+            canvas.add(img);
+            canvas.renderAll();
+          }
+          break;
+        
+        case 'text':
+          const text = new FabricText(layer.content || 'Text', {
             left: layer.position.x,
             top: layer.position.y,
-            width: width,
-            height: height,
-            fill: layer.color || '#000000',
             angle: layer.rotation,
             opacity: layer.opacity,
-            data: { layerId: layer.id }
+            fontSize: layer.textStyle?.fontSize || 24,
+            fontFamily: layer.textStyle?.fontFamily || 'Arial',
+            fill: layer.textStyle?.color || '#000000',
           });
-          canvas.add(rect);
-        } else if (layer.shapeType === 'circle') {
-          const radius = typeof layer.size.width === 'number' ? layer.size.width / 2 : 50;
-          
-          const circle = new fabric.Circle({
-            left: layer.position.x,
-            top: layer.position.y,
-            radius: radius,
-            fill: layer.color || '#000000',
-            angle: layer.rotation,
-            opacity: layer.opacity,
-            data: { layerId: layer.id }
-          });
-          canvas.add(circle);
-        }
-        break;
+          (text as any).data = { layerId: layer.id };
+          canvas.add(text);
+          break;
+        
+        case 'shape':
+          if (layer.shapeType === 'rectangle') {
+            const width = typeof layer.size.width === 'number' ? Number(layer.size.width) : 100;
+            const height = typeof layer.size.height === 'number' ? Number(layer.size.height) : 100;
+            
+            const rect = new Rect({
+              left: layer.position.x,
+              top: layer.position.y,
+              width: width,
+              height: height,
+              fill: layer.color || '#000000',
+              angle: layer.rotation,
+              opacity: layer.opacity,
+            });
+            (rect as any).data = { layerId: layer.id };
+            canvas.add(rect);
+          } else if (layer.shapeType === 'circle') {
+            const radius = typeof layer.size.width === 'number' ? Number(layer.size.width) / 2 : 50;
+            
+            const circle = new Circle({
+              left: layer.position.x,
+              top: layer.position.y,
+              radius: radius,
+              fill: layer.color || '#000000',
+              angle: layer.rotation,
+              opacity: layer.opacity,
+            });
+            (circle as any).data = { layerId: layer.id };
+            canvas.add(circle);
+          }
+          break;
+      }
+    } catch (error) {
+      console.error('Error rendering layer:', error);
+      toast.error('Failed to render layer');
     }
   };
 
@@ -433,7 +433,7 @@ const CardEditor: React.FC<CardEditorProps> = ({
           }}
           className="w-12 h-12"
         >
-          <Circle className="w-5 h-5" />
+          <CircleIcon className="w-5 h-5" />
         </Button>
         
         <Separator className="my-4" />
