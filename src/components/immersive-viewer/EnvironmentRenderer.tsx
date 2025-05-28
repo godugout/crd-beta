@@ -5,6 +5,9 @@ import { GalleryEnvironment } from './environments/GalleryEnvironment';
 import { CosmicEnvironment } from './environments/CosmicEnvironment';
 import { UnderwaterEnvironment } from './environments/UnderwaterEnvironment';
 import { StudioEnvironment } from './environments/StudioEnvironment';
+import { NightSkyEnvironment } from './environments/NightSkyEnvironment';
+import { RetroArcadeEnvironment } from './environments/RetroArcadeEnvironment';
+import { ForestEnvironment } from './environments/ForestEnvironment';
 import { Environment } from '@react-three/drei';
 import { hdrImageCache } from '@/services/hdrImageCache';
 import * as THREE from 'three';
@@ -79,20 +82,23 @@ const EnvironmentRenderer: React.FC<EnvironmentRendererProps> = ({ environmentTy
     case 'cardshop':
     case 'store':
     case 'mall':
-      return (
-        <>
-          <Environment preset="warehouse" background={false} />
-          <ambientLight intensity={0.8} color="#ffd700" />
-          <directionalLight position={[10, 10, 5]} intensity={1.5} />
-          <fog attach="fog" args={['#2a2a2a', 10, 50]} />
-        </>
-      );
+      return <RetroArcadeEnvironment />;
     
     case 'cosmic':
+    case 'space':
       return <CosmicEnvironment />;
     
     case 'underwater':
+    case 'ocean':
       return <UnderwaterEnvironment />;
+      
+    case 'night':
+    case 'nightsky':
+      return <NightSkyEnvironment />;
+      
+    case 'forest':
+    case 'nature':
+      return <ForestEnvironment />;
     
     default: // studio
       return <StudioEnvironment />;
@@ -130,6 +136,7 @@ const renderEnvironmentLighting = (environmentType: string) => {
       );
     
     case 'cosmic':
+    case 'space':
       return (
         <>
           <ambientLight intensity={0.1} color="#001122" />
@@ -140,6 +147,7 @@ const renderEnvironmentLighting = (environmentType: string) => {
       );
     
     case 'underwater':
+    case 'ocean':
       return (
         <>
           <directionalLight position={[0, 20, 0]} intensity={1.5} color="#87ceeb" castShadow />
@@ -147,6 +155,48 @@ const renderEnvironmentLighting = (environmentType: string) => {
           <pointLight position={[-10, 5, -10]} intensity={0.6} color="#20b2aa" />
           <ambientLight intensity={0.3} color="#006994" />
           <fog attach="fog" args={['#004466', 20, 100]} />
+        </>
+      );
+      
+    case 'night':
+    case 'nightsky':
+      return (
+        <>
+          <ambientLight intensity={0.15} color="#1a1a3a" />
+          <directionalLight position={[50, 80, 30]} intensity={0.8} color="#e6f3ff" castShadow />
+          <pointLight position={[200, 100, 150]} color="#ffffff" intensity={0.2} distance={2000} />
+          <fog attach="fog" args={['#0c0c1e', 300, 1000]} />
+        </>
+      );
+      
+    case 'forest':
+    case 'nature':
+      return (
+        <>
+          <ambientLight intensity={0.5} color="#4a6741" />
+          <directionalLight position={[20, 30, 15]} intensity={2.0} color="#fff8dc" castShadow />
+          <spotLight
+            position={[25, 35, 25]}
+            target-position={[5, 0, 5]}
+            angle={0.3}
+            penumbra={0.8}
+            intensity={1.8}
+            color="#fffacd"
+          />
+          <fog attach="fog" args={['#2d4a22', 40, 120]} />
+        </>
+      );
+      
+    case 'cardshop':
+    case 'store':
+    case 'mall':
+      return (
+        <>
+          <ambientLight intensity={0.4} color="#ff00ff" />
+          <directionalLight position={[10, 15, 10]} intensity={1.8} color="#00ffff" castShadow />
+          <pointLight position={[15, 10, 15]} intensity={2.0} color="#ff0080" />
+          <pointLight position={[-15, 12, 10]} intensity={1.5} color="#00ff80" />
+          <fog attach="fog" args={['#1a0826', 25, 80]} />
         </>
       );
     

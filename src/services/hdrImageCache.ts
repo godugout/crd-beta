@@ -1,3 +1,4 @@
+
 /**
  * HDR Image Cache Service
  * Preloads and caches HDR panoramic images for faster environment loading
@@ -53,27 +54,28 @@ class HDRImageCacheService {
    */
   private createFallbackTexture(environmentType: string): THREE.DataTexture {
     const size = 512;
-    const data = new Float32Array(size * size * 3);
+    const data = new Float32Array(size * size * 4); // Changed to 4 components for RGBA
     
     // Create different colors based on environment
     const colors = {
-      stadium: [0.2, 0.3, 0.5],
-      gallery: [0.9, 0.9, 0.95],
-      studio: [0.8, 0.8, 0.85],
-      cosmic: [0.02, 0.02, 0.1],
-      underwater: [0.1, 0.3, 0.5]
+      stadium: [0.2, 0.3, 0.5, 1.0],
+      gallery: [0.9, 0.9, 0.95, 1.0],
+      studio: [0.8, 0.8, 0.85, 1.0],
+      cosmic: [0.02, 0.02, 0.1, 1.0],
+      underwater: [0.1, 0.3, 0.5, 1.0]
     };
 
-    const color = colors[environmentType as keyof typeof colors] || [0.5, 0.5, 0.5];
+    const color = colors[environmentType as keyof typeof colors] || [0.5, 0.5, 0.5, 1.0];
     
     for (let i = 0; i < size * size; i++) {
-      const index = i * 3;
+      const index = i * 4;
       data[index] = color[0];
       data[index + 1] = color[1];
       data[index + 2] = color[2];
+      data[index + 3] = color[3];
     }
 
-    const texture = new THREE.DataTexture(data, size, size, THREE.RGBFormat, THREE.FloatType);
+    const texture = new THREE.DataTexture(data, size, size, THREE.RGBAFormat, THREE.FloatType);
     texture.mapping = THREE.EquirectangularReflectionMapping;
     texture.needsUpdate = true;
     
