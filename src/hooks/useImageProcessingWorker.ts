@@ -9,6 +9,11 @@ interface WorkerTask {
   onProgress?: (progress: number) => void;
 }
 
+interface ProcessingResult {
+  blob: Blob;
+  url: string;
+}
+
 export const useImageProcessingWorker = () => {
   const workerRef = useRef<Worker | null>(null);
   const tasksRef = useRef<Map<string, WorkerTask>>(new Map());
@@ -35,7 +40,7 @@ export const useImageProcessingWorker = () => {
           case 'IMAGE_ENHANCED':
             const blob = new Blob([result]);
             const url = URL.createObjectURL(blob);
-            task.resolve({ blob, url });
+            task.resolve({ blob, url } as ProcessingResult);
             tasksRef.current.delete(id);
             setIsProcessing(false);
             break;
@@ -54,7 +59,7 @@ export const useImageProcessingWorker = () => {
   const removeBackground = useCallback(async (
     imageElement: HTMLImageElement,
     onProgress?: (progress: number) => void
-  ) => {
+  ): Promise<ProcessingResult> => {
     const worker = initializeWorker();
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
@@ -70,7 +75,7 @@ export const useImageProcessingWorker = () => {
     
     setIsProcessing(true);
     
-    return new Promise((resolve, reject) => {
+    return new Promise<ProcessingResult>((resolve, reject) => {
       tasksRef.current.set(id, { id, resolve, reject, onProgress });
       
       worker.postMessage({
@@ -89,7 +94,7 @@ export const useImageProcessingWorker = () => {
     imageElement: HTMLImageElement,
     options: any,
     onProgress?: (progress: number) => void
-  ) => {
+  ): Promise<ProcessingResult> => {
     const worker = initializeWorker();
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
@@ -105,7 +110,7 @@ export const useImageProcessingWorker = () => {
     
     setIsProcessing(true);
     
-    return new Promise((resolve, reject) => {
+    return new Promise<ProcessingResult>((resolve, reject) => {
       tasksRef.current.set(id, { id, resolve, reject, onProgress });
       
       worker.postMessage({
