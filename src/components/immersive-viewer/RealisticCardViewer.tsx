@@ -1,10 +1,9 @@
-
 import React, { Suspense, useEffect, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Environment } from '@react-three/drei';
 import { Card } from '@/lib/types';
 import { useCardLighting } from '@/hooks/useCardLighting';
-import CardModel from '@/components/card-viewer/CardModel';
+import { CardModel } from '@/components/card-viewer/CardModel';
 
 interface RealisticCardViewerProps {
   card: Card;
