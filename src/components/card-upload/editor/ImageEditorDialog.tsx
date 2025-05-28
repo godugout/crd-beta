@@ -1,8 +1,7 @@
-
 import React, { useRef, useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Loader2, Info, Tag, User, Calendar, Shirt, Maximize2, RotateCw, Plus, Trash2 } from 'lucide-react';
+import { Loader2, Info, Tag, User, Calendar, Shirt, Maximize2, RotateCw, Plus, Trash2, Crop, Sparkles } from 'lucide-react';
 import { useCropState } from '../hooks/useCropState';
 import { useEditor } from '../hooks/useEditor';
 import { useCropBoxOperations } from '../hooks/useCropBoxOperations';
