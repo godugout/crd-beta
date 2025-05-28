@@ -1,6 +1,7 @@
+
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { Card, CardLayer, CardEffect } from '@/lib/types';
-import { Canvas, FabricImage, FabricText, Rect, Circle } from 'fabric';
+import { fabric } from 'fabric';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
@@ -61,13 +62,13 @@ const CardEditor: React.FC<CardEditorProps> = ({
 
   // Canvas refs
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const fabricRef = useRef<Canvas | null>(null);
+  const fabricRef = useRef<fabric.Canvas | null>(null);
 
   // Initialize Fabric.js canvas
   useEffect(() => {
     if (!canvasRef.current) return;
 
-    const canvas = new Canvas(canvasRef.current, {
+    const canvas = new fabric.Canvas(canvasRef.current, {
       width: 750, // 2.5" at 300 DPI
       height: 1050, // 3.5" at 300 DPI
       backgroundColor: '#ffffff',
@@ -118,12 +119,12 @@ const CardEditor: React.FC<CardEditorProps> = ({
     });
   }, [activeCard.layers]);
 
-  const renderLayer = async (canvas: Canvas, layer: CardLayer) => {
+  const renderLayer = async (canvas: fabric.Canvas, layer: CardLayer) => {
     try {
       switch (layer.type) {
         case 'image':
           if (layer.imageUrl) {
-            const img = await FabricImage.fromURL(layer.imageUrl);
+            const img = await fabric.FabricImage.fromURL(layer.imageUrl);
             img.set({
               left: layer.position.x,
               top: layer.position.y,
@@ -140,7 +141,7 @@ const CardEditor: React.FC<CardEditorProps> = ({
           break;
         
         case 'text':
-          const text = new FabricText(layer.content || 'Text', {
+          const text = new fabric.FabricText(layer.content || 'Text', {
             left: layer.position.x,
             top: layer.position.y,
             angle: layer.rotation,
@@ -158,7 +159,7 @@ const CardEditor: React.FC<CardEditorProps> = ({
             const width = typeof layer.size.width === 'number' ? Number(layer.size.width) : 100;
             const height = typeof layer.size.height === 'number' ? Number(layer.size.height) : 100;
             
-            const rect = new Rect({
+            const rect = new fabric.Rect({
               left: layer.position.x,
               top: layer.position.y,
               width: width,
@@ -172,7 +173,7 @@ const CardEditor: React.FC<CardEditorProps> = ({
           } else if (layer.shapeType === 'circle') {
             const radius = typeof layer.size.width === 'number' ? Number(layer.size.width) / 2 : 50;
             
-            const circle = new Circle({
+            const circle = new fabric.Circle({
               left: layer.position.x,
               top: layer.position.y,
               radius: radius,
