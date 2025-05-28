@@ -25,7 +25,7 @@ const NeonGrid = () => {
 export const CyberpunkEnvironment = () => {
   return (
     <>
-      {/* Dark cyberpunk background */
+      {/* Dark cyberpunk background */}
       <color attach="background" args={['#0a0a1a']} />
       
       {/* Neon grid floor */}
