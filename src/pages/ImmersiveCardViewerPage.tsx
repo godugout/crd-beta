@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -48,7 +49,7 @@ const ImmersiveCardViewerPage: React.FC = () => {
       intensity: 0.6,
       color: '#f0f0ff'
     },
-    environmentType: 'studio' as const,
+    environmentType: 'studio',
     envMapIntensity: 1.0,
     useDynamicLighting: true
   });
