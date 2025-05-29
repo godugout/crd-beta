@@ -1,146 +1,121 @@
 
 import React, { useMemo } from 'react';
 import { Environment, Sky } from '@react-three/drei';
-import * as THREE from 'three';
 
 interface EnvironmentRendererProps {
   environmentType: string;
 }
 
 const EnvironmentRenderer: React.FC<EnvironmentRendererProps> = ({ environmentType }) => {
-  // Enhanced environment configurations
+  // Map environment types to actual HDR environment presets
   const environmentConfig = useMemo(() => {
     switch (environmentType) {
       case 'studio':
         return {
-          background: '#f0f0f0',
-          fog: { color: '#f0f0f0', near: 20, far: 100 },
-          environment: 'studio'
+          preset: 'studio',
+          background: true,
+          intensity: 1.0
         };
       
-      case 'natural':
-        return {
-          background: '#87ceeb',
-          fog: { color: '#87ceeb', near: 30, far: 200 },
-          environment: 'park'
-        };
-      
-      case 'dramatic':
-        return {
-          background: '#0d1421',
-          fog: { color: '#0d1421', near: 10, far: 50 },
-          environment: 'night'
-        };
-      
-      case 'display_case':
       case 'gallery':
         return {
-          background: '#ffffff',
-          fog: { color: '#ffffff', near: 25, far: 150 },
-          environment: 'warehouse'
+          preset: 'warehouse',
+          background: true,
+          intensity: 0.8
         };
       
       case 'stadium':
         return {
-          background: '#2e7d32',
-          fog: { color: '#2e7d32', near: 40, far: 300 },
-          environment: 'park'
+          preset: 'park',
+          background: true,
+          intensity: 1.2
         };
       
       case 'twilight':
         return {
-          background: '#1a237e',
-          fog: { color: '#1a237e', near: 15, far: 80 },
-          environment: 'sunset'
+          preset: 'sunset',
+          background: true,
+          intensity: 0.7
         };
       
       case 'quarry':
         return {
-          background: '#5d4037',
-          fog: { color: '#5d4037', near: 20, far: 120 },
-          environment: 'warehouse'
+          preset: 'dawn',
+          background: true,
+          intensity: 0.9
         };
       
       case 'coastline':
         return {
-          background: '#006064',
-          fog: { color: '#006064', near: 35, far: 250 },
-          environment: 'dawn'
+          preset: 'dawn',
+          background: true,
+          intensity: 1.1
         };
       
       case 'hillside':
         return {
-          background: '#2e7d32',
-          fog: { color: '#2e7d32', near: 30, far: 200 },
-          environment: 'forest'
+          preset: 'forest',
+          background: true,
+          intensity: 0.8
         };
       
       case 'milkyway':
         return {
-          background: '#0d0d1a',
-          fog: { color: '#0d0d1a', near: 5, far: 30 },
-          environment: 'night'
+          preset: 'night',
+          background: true,
+          intensity: 0.4
         };
       
       case 'esplanade':
         return {
-          background: '#eeeeee',
-          fog: { color: '#eeeeee', near: 25, far: 150 },
-          environment: 'city'
+          preset: 'city',
+          background: true,
+          intensity: 1.0
         };
       
       case 'neonclub':
         return {
-          background: '#1a0933',
-          fog: { color: '#1a0933', near: 8, far: 40 },
-          environment: 'apartment'
+          preset: 'apartment',
+          background: true,
+          intensity: 0.6
         };
       
       case 'industrial':
         return {
-          background: '#263238',
-          fog: { color: '#263238', near: 15, far: 80 },
-          environment: 'warehouse'
+          preset: 'warehouse',
+          background: true,
+          intensity: 0.7
         };
       
       default:
         return {
-          background: '#f0f0f0',
-          fog: { color: '#f0f0f0', near: 20, far: 100 },
-          environment: 'studio'
+          preset: 'studio',
+          background: true,
+          intensity: 1.0
         };
     }
   }, [environmentType]);
 
   return (
     <>
-      {/* Background color */}
-      <color attach="background" args={[environmentConfig.background]} />
-      
-      {/* Fog for atmospheric depth */}
-      <fog 
-        attach="fog" 
-        args={[
-          environmentConfig.fog.color, 
-          environmentConfig.fog.near, 
-          environmentConfig.fog.far
-        ]} 
+      {/* Use HDR environment maps instead of solid colors */}
+      <Environment 
+        preset={environmentConfig.preset as any}
+        background={environmentConfig.background}
+        environmentIntensity={environmentConfig.intensity}
+        backgroundIntensity={0.5}
       />
       
-      {/* Environment lighting */}
-      <Environment preset={environmentConfig.environment as any} background={false} />
-      
       {/* Special sky for certain environments */}
-      {(environmentType === 'twilight' || environmentType === 'natural') && (
+      {environmentType === 'twilight' && (
         <Sky
           distance={450000}
-          sunPosition={environmentType === 'twilight' ? [100, 20, 100] : [100, 100, 100]}
-          inclination={environmentType === 'twilight' ? 0.6 : 0.3}
+          sunPosition={[100, 20, 100]}
+          inclination={0.6}
           azimuth={0.25}
         />
       )}
       
-      {/* Special stars for space environments */}
       {environmentType === 'milkyway' && (
         <StarField count={1000} />
       )}

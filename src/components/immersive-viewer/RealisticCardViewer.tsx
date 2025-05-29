@@ -80,12 +80,12 @@ const RealisticCardViewer: React.FC<RealisticCardViewerProps> = ({
           height: '100%'
         }}
       >
-        {/* Enhanced Environment Scene */}
+        {/* Environment Scene with HDR backgrounds */}
         <EnvironmentRenderer environmentType={environmentType} />
         
         {/* Enhanced Lighting Setup */}
         <ambientLight 
-          intensity={currentLighting?.ambientLight?.intensity || 0.6} 
+          intensity={currentLighting?.ambientLight?.intensity || 0.3} 
           color={currentLighting?.ambientLight?.color || '#f0f0ff'}
         />
         
@@ -106,29 +106,6 @@ const RealisticCardViewer: React.FC<RealisticCardViewerProps> = ({
           shadow-camera-top={10}
           shadow-camera-bottom={-10}
         />
-        
-        {/* Additional fill lights for better illumination */}
-        <pointLight 
-          position={[5, 5, 5]} 
-          intensity={0.4} 
-          color={currentLighting?.primaryLight?.color || '#ffffff'}
-        />
-        <pointLight 
-          position={[-5, -5, 3]} 
-          intensity={0.2} 
-          color={currentLighting?.ambientLight?.color || '#f0f0ff'}
-        />
-        
-        {/* Rim lighting for dramatic effects */}
-        {currentLighting?.rimLighting && (
-          <spotLight
-            position={[0, 0, -5]}
-            intensity={currentLighting.rimLighting.intensity}
-            color={currentLighting.rimLighting.color}
-            angle={Math.PI / 6}
-            penumbra={0.5}
-          />
-        )}
 
         {/* Enhanced Card Model */}
         <Suspense fallback={null}>
