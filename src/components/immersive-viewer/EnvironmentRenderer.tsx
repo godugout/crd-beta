@@ -1,7 +1,6 @@
 
-import React, { useEffect, useState } from 'react';
-import { Environment } from '@react-three/drei';
-import { hdrImageCache } from '@/services/hdrImageCache';
+import React, { useMemo } from 'react';
+import { Environment, Sky } from '@react-three/drei';
 import * as THREE from 'three';
 
 interface EnvironmentRendererProps {
@@ -9,176 +8,176 @@ interface EnvironmentRendererProps {
 }
 
 const EnvironmentRenderer: React.FC<EnvironmentRendererProps> = ({ environmentType }) => {
-  const [hdrTexture, setHdrTexture] = useState<THREE.DataTexture | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  console.log('EnvironmentRenderer: Loading HDR environment for type:', environmentType);
-
-  useEffect(() => {
-    const loadEnvironment = async () => {
-      setIsLoading(true);
-      try {
-        console.log(`EnvironmentRenderer: Loading HDR texture for ${environmentType}`);
-        const texture = await hdrImageCache.getTexture(environmentType);
-        
-        if (texture) {
-          console.log(`EnvironmentRenderer: Successfully loaded HDR texture for ${environmentType}`);
-          setHdrTexture(texture);
-        } else {
-          console.warn(`EnvironmentRenderer: Failed to load HDR texture for ${environmentType}`);
-        }
-      } catch (error) {
-        console.error(`EnvironmentRenderer: Error loading HDR texture for ${environmentType}:`, error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadEnvironment();
-  }, [environmentType]);
-
-  // Show loading state
-  if (isLoading || !hdrTexture) {
-    return (
-      <>
-        {/* Basic lighting while loading */}
-        <ambientLight intensity={0.6} color="#ffffff" />
-        <directionalLight 
-          position={[10, 10, 5]} 
-          intensity={1.5} 
-          color="#ffffff"
-          castShadow
-        />
-        {/* Use preset environment as fallback */}
-        <Environment preset="city" background={false} />
-      </>
-    );
-  }
-
-  // Environment-specific lighting to complement the HDR background
-  const getLighting = () => {
-    switch (environmentType.toLowerCase()) {
-      case 'stadium':
-        return (
-          <>
-            <ambientLight intensity={0.6} color="#2a3a5a" />
-            <directionalLight position={[25, 40, 25]} intensity={3.5} color="#ffffff" castShadow />
-            <pointLight position={[50, 25, 0]} intensity={1.5} color="#ffffe0" />
-          </>
-        );
-        
+  // Enhanced environment configurations
+  const environmentConfig = useMemo(() => {
+    switch (environmentType) {
+      case 'studio':
+        return {
+          background: '#f0f0f0',
+          fog: { color: '#f0f0f0', near: 20, far: 100 },
+          environment: 'studio'
+        };
+      
+      case 'natural':
+        return {
+          background: '#87ceeb',
+          fog: { color: '#87ceeb', near: 30, far: 200 },
+          environment: 'park'
+        };
+      
+      case 'dramatic':
+        return {
+          background: '#0d1421',
+          fog: { color: '#0d1421', near: 10, far: 50 },
+          environment: 'night'
+        };
+      
+      case 'display_case':
       case 'gallery':
-        return (
-          <>
-            <ambientLight intensity={0.8} color="#f5f5f5" />
-            <directionalLight position={[12, 20, 10]} intensity={2.8} color="#ffffff" castShadow />
-            <spotLight position={[0, 30, 15]} intensity={3.5} color="#ffffff" castShadow />
-          </>
-        );
-        
+        return {
+          background: '#ffffff',
+          fog: { color: '#ffffff', near: 25, far: 150 },
+          environment: 'warehouse'
+        };
+      
+      case 'stadium':
+        return {
+          background: '#2e7d32',
+          fog: { color: '#2e7d32', near: 40, far: 300 },
+          environment: 'park'
+        };
+      
       case 'twilight':
-        return (
-          <>
-            <ambientLight intensity={0.4} color="#2a1f3d" />
-            <directionalLight position={[20, 30, 20]} intensity={2.0} color="#ff6b4a" castShadow />
-            <pointLight position={[40, 12, 0]} intensity={1.2} color="#ff8c5a" />
-          </>
-        );
-        
+        return {
+          background: '#1a237e',
+          fog: { color: '#1a237e', near: 15, far: 80 },
+          environment: 'sunset'
+        };
+      
       case 'quarry':
-        return (
-          <>
-            <ambientLight intensity={0.5} color="#8b7355" />
-            <directionalLight position={[30, 50, 20]} intensity={3.0} color="#fff8dc" castShadow />
-            <pointLight position={[50, 30, 0]} intensity={1.0} color="#deb887" />
-          </>
-        );
-        
+        return {
+          background: '#5d4037',
+          fog: { color: '#5d4037', near: 20, far: 120 },
+          environment: 'warehouse'
+        };
+      
       case 'coastline':
-        return (
-          <>
-            <ambientLight intensity={0.4} color="#004466" />
-            <directionalLight position={[20, 40, 15]} intensity={2.5} color="#4fc3f7" castShadow />
-            <pointLight position={[40, 15, 0]} intensity={1.2} color="#00e5ff" />
-          </>
-        );
-        
+        return {
+          background: '#006064',
+          fog: { color: '#006064', near: 35, far: 250 },
+          environment: 'dawn'
+        };
+      
       case 'hillside':
-        return (
-          <>
-            <ambientLight intensity={0.5} color="#90a865" />
-            <directionalLight position={[25, 40, 20]} intensity={3.2} color="#fff8dc" castShadow />
-            <pointLight position={[35, 20, 0]} intensity={0.8} color="#90ee90" />
-          </>
-        );
-        
+        return {
+          background: '#2e7d32',
+          fog: { color: '#2e7d32', near: 30, far: 200 },
+          environment: 'forest'
+        };
+      
       case 'milkyway':
-        return (
-          <>
-            {/* Very dark ambient for night sky with subtle blue tint */}
-            <ambientLight intensity={0.1} color="#001133" />
-            {/* Moonlight - soft, distant directional light */}
-            <directionalLight position={[100, 200, 100]} intensity={0.8} color="#e6f3ff" castShadow />
-            {/* Starlight - multiple soft point lights to simulate distant stars */}
-            <pointLight position={[200, 150, 200]} color="#ffffff" intensity={0.3} distance={1000} />
-            <pointLight position={[-150, 180, -200]} color="#cce6ff" intensity={0.25} distance={800} />
-            <pointLight position={[0, 300, 0]} color="#e6f3ff" intensity={0.4} distance={1200} />
-            {/* Milky Way glow - soft colored lights */}
-            <pointLight position={[300, 100, 100]} color="#b3ccff" intensity={0.2} distance={1500} />
-            <pointLight position={[-200, 120, -300]} color="#ddeeff" intensity={0.15} distance={1200} />
-          </>
-        );
-        
+        return {
+          background: '#0d0d1a',
+          fog: { color: '#0d0d1a', near: 5, far: 30 },
+          environment: 'night'
+        };
+      
       case 'esplanade':
-        return (
-          <>
-            <ambientLight intensity={0.7} color="#ffd700" />
-            <directionalLight position={[15, 25, 20]} intensity={2.8} color="#fff8dc" castShadow />
-            <spotLight position={[0, 35, 12]} intensity={3.8} color="#ffd700" castShadow />
-          </>
-        );
-        
+        return {
+          background: '#eeeeee',
+          fog: { color: '#eeeeee', near: 25, far: 150 },
+          environment: 'city'
+        };
+      
       case 'neonclub':
-        return (
-          <>
-            <ambientLight intensity={0.3} color="#001133" />
-            <directionalLight position={[25, 35, 25]} intensity={2.2} color="#00ffff" castShadow />
-            <pointLight position={[50, 20, 0]} intensity={1.8} color="#00ffff" />
-            <pointLight position={[-50, 20, 0]} intensity={1.8} color="#ff00ff" />
-          </>
-        );
-        
+        return {
+          background: '#1a0933',
+          fog: { color: '#1a0933', near: 8, far: 40 },
+          environment: 'apartment'
+        };
+      
       case 'industrial':
-        return (
-          <>
-            <ambientLight intensity={0.4} color="#5a4a3a" />
-            <directionalLight position={[20, 30, 20]} intensity={2.5} color="#ffaa66" castShadow />
-            <pointLight position={[40, 12, 0]} intensity={1.5} color="#ff6600" />
-          </>
-        );
-        
-      default: // studio
-        return (
-          <>
-            <ambientLight intensity={0.6} color="#f0f0ff" />
-            <directionalLight position={[12, 20, 15]} intensity={3.5} color="#ffffff" castShadow />
-            <spotLight position={[18, 28, 20]} intensity={3.8} color="#ffffff" castShadow />
-          </>
-        );
+        return {
+          background: '#263238',
+          fog: { color: '#263238', near: 15, far: 80 },
+          environment: 'warehouse'
+        };
+      
+      default:
+        return {
+          background: '#f0f0f0',
+          fog: { color: '#f0f0f0', near: 20, far: 100 },
+          environment: 'studio'
+        };
     }
-  };
+  }, [environmentType]);
 
   return (
     <>
-      {/* HDR Environment Background */}
-      <primitive object={hdrTexture} attach="background" />
+      {/* Background color */}
+      <color attach="background" args={[environmentConfig.background]} />
       
-      {/* Use HDR for environment lighting */}
-      <Environment map={hdrTexture} background={false} />
+      {/* Fog for atmospheric depth */}
+      <fog 
+        attach="fog" 
+        args={[
+          environmentConfig.fog.color, 
+          environmentConfig.fog.near, 
+          environmentConfig.fog.far
+        ]} 
+      />
       
-      {/* Additional lighting to enhance the scene */}
-      {getLighting()}
+      {/* Environment lighting */}
+      <Environment preset={environmentConfig.environment as any} background={false} />
+      
+      {/* Special sky for certain environments */}
+      {(environmentType === 'twilight' || environmentType === 'natural') && (
+        <Sky
+          distance={450000}
+          sunPosition={environmentType === 'twilight' ? [100, 20, 100] : [100, 100, 100]}
+          inclination={environmentType === 'twilight' ? 0.6 : 0.3}
+          azimuth={0.25}
+        />
+      )}
+      
+      {/* Special stars for space environments */}
+      {environmentType === 'milkyway' && (
+        <StarField count={1000} />
+      )}
     </>
+  );
+};
+
+// Star field component for space environments
+const StarField: React.FC<{ count: number }> = ({ count }) => {
+  const stars = useMemo(() => {
+    const positions = new Float32Array(count * 3);
+    for (let i = 0; i < count; i++) {
+      positions[i * 3] = (Math.random() - 0.5) * 200;
+      positions[i * 3 + 1] = (Math.random() - 0.5) * 200;
+      positions[i * 3 + 2] = (Math.random() - 0.5) * 200;
+    }
+    return positions;
+  }, [count]);
+
+  return (
+    <points>
+      <bufferGeometry>
+        <bufferAttribute
+          attach="attributes-position"
+          count={count}
+          array={stars}
+          itemSize={3}
+        />
+      </bufferGeometry>
+      <pointsMaterial 
+        size={0.5} 
+        color="#ffffff" 
+        sizeAttenuation={false}
+        transparent
+        opacity={0.8}
+      />
+    </points>
   );
 };
 
