@@ -28,6 +28,11 @@ interface CustomizationPanelProps {
   onShareCard?: () => void;
   onDownloadCard?: () => void;
   isUserCustomized?: boolean;
+  // Add effect props
+  activeEffects?: string[];
+  effectIntensities?: Record<string, number>;
+  onEffectsChange?: (effects: string[]) => void;
+  onEffectIntensityChange?: (effect: string, intensity: number) => void;
 }
 
 const CustomizationPanel: React.FC<CustomizationPanelProps> = ({
@@ -48,21 +53,43 @@ const CustomizationPanel: React.FC<CustomizationPanelProps> = ({
   onUpdateMaterial = () => {},
   onShareCard,
   onDownloadCard,
-  isUserCustomized
+  isUserCustomized,
+  activeEffects = ['holographic'],
+  effectIntensities = {},
+  onEffectsChange = () => {},
+  onEffectIntensityChange = () => {}
 }) => {
-  const [activeEffect, setActiveEffect] = useState('holographic');
-  const [effectIntensity, setEffectIntensity] = useState(70);
   const [lightingMode, setLightingMode] = useState<'easy' | 'pro'>('easy');
   const [brightness, setBrightness] = useState(120);
+
+  // Handle effect changes
+  const handleEffectChange = (effectId: string) => {
+    const newEffects = [effectId]; // For now, only allow one effect at a time
+    onEffectsChange(newEffects);
+  };
+
+  const handleIntensityChange = (intensity: number) => {
+    if (activeEffects.length > 0) {
+      onEffectIntensityChange(activeEffects[0], intensity / 100);
+    }
+  };
+
+  // Get current effect intensity as percentage
+  const getCurrentIntensity = () => {
+    if (activeEffects.length > 0) {
+      return (effectIntensities[activeEffects[0]] || 0.7) * 100;
+    }
+    return 70;
+  };
 
   return (
     <div className="h-full overflow-y-auto">
       <div className="p-6 space-y-8">
         <VisualEffectsSection
-          activeEffect={activeEffect}
-          effectIntensity={effectIntensity}
-          onEffectChange={setActiveEffect}
-          onIntensityChange={setEffectIntensity}
+          activeEffect={activeEffects[0] || 'holographic'}
+          effectIntensity={getCurrentIntensity()}
+          onEffectChange={handleEffectChange}
+          onIntensityChange={handleIntensityChange}
         />
 
         <LightingSection

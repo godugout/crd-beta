@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -42,7 +41,18 @@ const ImmersiveCardViewerPage: React.FC = () => {
     color: '#ffffff',
     position: { x: 10, y: 10, z: 10 },
     ambientIntensity: 0.6,
-    environmentType: 'studio'
+    environmentType: 'studio',
+    primaryLight: {
+      x: 10,
+      y: 10,
+      z: 10,
+      intensity: 1.2,
+      color: '#ffffff'
+    },
+    ambientLight: {
+      intensity: 0.6,
+      color: '#f0f0ff'
+    }
   });
 
   console.log('ImmersiveCardViewerPage: Looking for card with ID:', id);
@@ -150,20 +160,24 @@ const ImmersiveCardViewerPage: React.FC = () => {
     setLightingSettings(prev => ({ ...prev, environmentType: environment }));
   };
 
-  // Handler functions for the customization panel
+  // New handler functions for effects
   const handleEffectsChange = (effects: string[]) => {
+    console.log('Effects changed to:', effects);
     setActiveEffects(effects);
   };
 
   const handleEffectIntensityChange = (effect: string, intensity: number) => {
+    console.log('Effect intensity changed:', effect, intensity);
     setEffectIntensities(prev => ({ ...prev, [effect]: intensity }));
   };
 
   const handleMaterialChange = (changes: Partial<typeof materialSettings>) => {
+    console.log('Material settings changed:', changes);
     setMaterialSettings(prev => ({ ...prev, ...changes }));
   };
 
   const handleLightingChange = (changes: Partial<typeof lightingSettings>) => {
+    console.log('Lighting settings changed:', changes);
     setLightingSettings(prev => ({ ...prev, ...changes }));
   };
 
@@ -223,6 +237,10 @@ const ImmersiveCardViewerPage: React.FC = () => {
         onUpdateMaterial={handleMaterialChange}
         onShareCard={handleShare}
         onDownloadCard={handleDownload}
+        activeEffects={activeEffects}
+        effectIntensities={effectIntensities}
+        onEffectsChange={handleEffectsChange}
+        onEffectIntensityChange={handleEffectIntensityChange}
       />
     </div>
   );
