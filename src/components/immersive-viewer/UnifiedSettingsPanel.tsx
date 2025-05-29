@@ -54,6 +54,20 @@ const UnifiedSettingsPanel: React.FC<UnifiedSettingsPanelProps> = ({
 }) => {
   if (!isOpen) return null;
 
+  const environments = [
+    { id: 'studio', name: 'Studio', emoji: '🎬' },
+    { id: 'gallery', name: 'Gallery', emoji: '🏛️' },
+    { id: 'stadium', name: 'Stadium', emoji: '🏟️' },
+    { id: 'twilight', name: 'Twilight', emoji: '🌅' },
+    { id: 'quarry', name: 'Quarry', emoji: '⛰️' },
+    { id: 'coastline', name: 'Coastline', emoji: '🌊' },
+    { id: 'hillside', name: 'Hillside', emoji: '🌲' },
+    { id: 'milkyway', name: 'Milky Way', emoji: '🌌' },
+    { id: 'esplanade', name: 'Esplanade', emoji: '✨' },
+    { id: 'neonclub', name: 'Neon Club', emoji: '🌆' },
+    { id: 'industrial', name: 'Industrial', emoji: '🏭' }
+  ];
+
   return (
     <div className="fixed right-0 top-0 h-full w-[420px] bg-gray-900/95 backdrop-blur-lg border-l border-gray-700 z-50">
       {/* Header */}
@@ -97,29 +111,18 @@ const UnifiedSettingsPanel: React.FC<UnifiedSettingsPanelProps> = ({
           <div className="p-6">
             <h3 className="text-lg font-medium text-white mb-4">Environment Scenes</h3>
             <div className="grid grid-cols-2 gap-3">
-              {[
-                { id: 'studio', name: 'Studio' },
-                { id: 'gallery', name: 'Gallery' },
-                { id: 'stadium', name: 'Stadium' },
-                { id: 'twilight', name: 'Twilight' },
-                { id: 'quarry', name: 'Quarry' },
-                { id: 'coastline', name: 'Coastline' },
-                { id: 'hillside', name: 'Hillside' },
-                { id: 'milkyway', name: 'Milky Way' },
-                { id: 'esplanade', name: 'Esplanade' },
-                { id: 'neonclub', name: 'Neon Club' },
-                { id: 'industrial', name: 'Industrial' }
-              ].map((env) => (
+              {environments.map((env) => (
                 <button
                   key={env.id}
                   onClick={() => onEnvironmentChange(env.id)}
-                  className={`p-3 rounded-lg text-sm font-medium transition-colors ${
+                  className={`p-4 rounded-xl text-sm font-medium transition-all duration-200 flex flex-col items-center gap-2 ${
                     environmentType === env.id
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                      ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/25'
+                      : 'bg-gray-800/50 text-gray-300 hover:bg-gray-700/50 border border-gray-600/50 hover:border-gray-500/50'
                   }`}
                 >
-                  {env.name}
+                  <span className="text-2xl">{env.emoji}</span>
+                  <span>{env.name}</span>
                 </button>
               ))}
             </div>
