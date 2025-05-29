@@ -1,10 +1,11 @@
+
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Card } from '@/lib/types';
 import RealisticCardViewer from '@/components/immersive-viewer/RealisticCardViewer';
 import ImmersiveViewerInterface from '@/components/immersive-viewer/ImmersiveViewerInterface';
-import AdvancedCustomizationPanel from '@/components/immersive-viewer/AdvancedCustomizationPanel';
+import UnifiedSettingsPanel from '@/components/immersive-viewer/UnifiedSettingsPanel';
 import { useCards } from '@/hooks/useCards';
 import { basketballCards } from '@/data/basketballCards';
 
@@ -13,7 +14,8 @@ const ImmersiveCardViewerPage: React.FC = () => {
   const navigate = useNavigate();
   const { cards, getCard, loading } = useCards();
   const [isFlipped, setIsFlipped] = useState(false);
-  const [isCustomizationOpen, setIsCustomizationOpen] = useState(false);
+  const [isSettingsPanelOpen, setIsSettingsPanelOpen] = useState(false);
+  const [activeSettingsTab, setActiveSettingsTab] = useState<'scenes' | 'customize'>('scenes');
   
   // Advanced customization state
   const [activeEffects, setActiveEffects] = useState<string[]>(['holographic']);
@@ -128,28 +130,24 @@ const ImmersiveCardViewerPage: React.FC = () => {
   };
 
   const handleRemix = () => {
-    setIsCustomizationOpen(true);
+    setIsSettingsPanelOpen(true);
+    setActiveSettingsTab('customize');
     toast.success('Remix mode activated! Customize your card.');
   };
 
-  const handleSaveRemix = (remixSettings: any) => {
-    console.log('Saving remix with settings:', remixSettings);
-    
-    setActiveEffects(remixSettings.effects);
-    setEffectIntensities(remixSettings.effectSettings);
-    setEnvironmentType(remixSettings.environmentType);
-    setMaterialSettings(remixSettings.materialSettings);
-    setLightingSettings(remixSettings.lightingSettings);
-    
-    setIsCustomizationOpen(false);
-    
-    setTimeout(() => {
-      navigate('/create');
-    }, 1500);
+  const handleOpenScenesPanel = () => {
+    setActiveSettingsTab('scenes');
+    setIsSettingsPanelOpen(true);
   };
 
-  const toggleCustomization = () => {
-    setIsCustomizationOpen(!isCustomizationOpen);
+  const handleOpenCustomizePanel = () => {
+    setActiveSettingsTab('customize');
+    setIsSettingsPanelOpen(true);
+  };
+
+  const handleEnvironmentChange = (environment: string) => {
+    setEnvironmentType(environment);
+    setLightingSettings(prev => ({ ...prev, environmentType: environment }));
   };
 
   // Handler functions for the customization panel
@@ -169,25 +167,20 @@ const ImmersiveCardViewerPage: React.FC = () => {
     setLightingSettings(prev => ({ ...prev, ...changes }));
   };
 
-  const handleEnvironmentChange = (environment: string) => {
-    setEnvironmentType(environment);
-    setLightingSettings(prev => ({ ...prev, environmentType: environment }));
-  };
-
   return (
     <div className="fixed inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-black overflow-hidden">
       {/* Main viewer container - adjust width when panel is open */}
       <div 
         className={`transition-all duration-300 ${
-          isCustomizationOpen ? 'mr-[420px]' : 'mr-0'
+          isSettingsPanelOpen ? 'mr-[420px]' : 'mr-0'
         }`}
         style={{ height: '100vh' }}
       >
         {/* 3D Card Viewer */}
         <RealisticCardViewer
           card={card}
-          isCustomizationOpen={isCustomizationOpen}
-          onToggleCustomization={toggleCustomization}
+          isCustomizationOpen={isSettingsPanelOpen}
+          onToggleCustomization={() => setIsSettingsPanelOpen(!isSettingsPanelOpen)}
           activeEffects={activeEffects}
           effectIntensities={effectIntensities}
           environmentType={environmentType}
@@ -206,29 +199,30 @@ const ImmersiveCardViewerPage: React.FC = () => {
           onLike={handleLike}
           onBookmark={handleBookmark}
           onRemix={handleRemix}
-          isCustomizationOpen={isCustomizationOpen}
-          onToggleCustomization={toggleCustomization}
+          isCustomizationOpen={isSettingsPanelOpen}
+          onToggleCustomization={() => setIsSettingsPanelOpen(!isSettingsPanelOpen)}
           environmentType={environmentType}
           onEnvironmentChange={handleEnvironmentChange}
+          onOpenScenesPanel={handleOpenScenesPanel}
+          onOpenCustomizePanel={handleOpenCustomizePanel}
         />
       </div>
       
-      {/* Advanced Customization Panel */}
-      <AdvancedCustomizationPanel
+      {/* Unified Settings Panel */}
+      <UnifiedSettingsPanel
         card={card}
-        isOpen={isCustomizationOpen}
-        onClose={toggleCustomization}
-        onSaveRemix={handleSaveRemix}
-        activeEffects={activeEffects}
-        onEffectsChange={handleEffectsChange}
-        effectIntensities={effectIntensities}
-        onEffectIntensityChange={handleEffectIntensityChange}
-        materialSettings={materialSettings}
-        onMaterialChange={handleMaterialChange}
-        lightingSettings={lightingSettings}
-        onLightingChange={handleLightingChange}
+        isOpen={isSettingsPanelOpen}
+        onClose={() => setIsSettingsPanelOpen(false)}
+        activeTab={activeSettingsTab}
+        onTabChange={setActiveSettingsTab}
         environmentType={environmentType}
         onEnvironmentChange={handleEnvironmentChange}
+        lightingSettings={lightingSettings}
+        onUpdateLighting={handleLightingChange}
+        materialSettings={materialSettings}
+        onUpdateMaterial={handleMaterialChange}
+        onShareCard={handleShare}
+        onDownloadCard={handleDownload}
       />
     </div>
   );

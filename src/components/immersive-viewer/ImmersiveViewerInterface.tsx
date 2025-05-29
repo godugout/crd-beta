@@ -13,7 +13,6 @@ import {
 } from 'lucide-react';
 import { Card } from '@/lib/types';
 import { Button } from '@/components/ui/button';
-import EnvironmentSelector from './EnvironmentSelector';
 
 interface ImmersiveViewerInterfaceProps {
   card: Card;
@@ -29,6 +28,8 @@ interface ImmersiveViewerInterfaceProps {
   onToggleCustomization: () => void;
   environmentType?: string;
   onEnvironmentChange?: (environment: string) => void;
+  onOpenScenesPanel?: () => void;
+  onOpenCustomizePanel?: () => void;
 }
 
 const ImmersiveViewerInterface: React.FC<ImmersiveViewerInterfaceProps> = ({
@@ -44,10 +45,10 @@ const ImmersiveViewerInterface: React.FC<ImmersiveViewerInterfaceProps> = ({
   isCustomizationOpen,
   onToggleCustomization,
   environmentType = 'studio',
-  onEnvironmentChange = () => {}
+  onEnvironmentChange = () => {},
+  onOpenScenesPanel = () => {},
+  onOpenCustomizePanel = () => {}
 }) => {
-  const [showEnvironmentSelector, setShowEnvironmentSelector] = useState(false);
-
   return (
     <div className="absolute inset-0 pointer-events-none">
       {/* Top Bar */}
@@ -73,41 +74,21 @@ const ImmersiveViewerInterface: React.FC<ImmersiveViewerInterfaceProps> = ({
 
         {/* Right side - Environment selector and settings */}
         <div className="flex items-center gap-2">
-          {/* Environment Selector */}
-          <div className="relative">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setShowEnvironmentSelector(!showEnvironmentSelector)}
-              className="bg-black/40 backdrop-blur-md border-white/20 text-white hover:bg-black/60"
-            >
-              <Palette className="h-5 w-5" />
-            </Button>
-            
-            <AnimatePresence>
-              {showEnvironmentSelector && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  className="absolute top-full right-0 mt-2 z-30"
-                >
-                  <EnvironmentSelector
-                    environmentType={environmentType}
-                    onEnvironmentChange={(env) => {
-                      onEnvironmentChange(env);
-                      setShowEnvironmentSelector(false);
-                    }}
-                  />
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-
+          {/* Scenes Button */}
           <Button
             variant="ghost"
             size="icon"
-            onClick={onToggleCustomization}
+            onClick={onOpenScenesPanel}
+            className="bg-black/40 backdrop-blur-md border-white/20 text-white hover:bg-black/60"
+          >
+            <Palette className="h-5 w-5" />
+          </Button>
+
+          {/* Settings Button */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onOpenCustomizePanel}
             className={`bg-black/40 backdrop-blur-md border-white/20 text-white hover:bg-black/60 ${
               isCustomizationOpen ? 'bg-white/20' : ''
             }`}
