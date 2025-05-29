@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { Card } from '@/lib/types';
 import { Button } from '@/components/ui/button';
-import ImmersiveSettingsPanel from './ImmersiveSettingsPanel';
+import EnvironmentSelector from './EnvironmentSelector';
 
 interface ImmersiveViewerInterfaceProps {
   card: Card;
@@ -46,27 +46,7 @@ const ImmersiveViewerInterface: React.FC<ImmersiveViewerInterfaceProps> = ({
   environmentType = 'studio',
   onEnvironmentChange = () => {}
 }) => {
-  const [activePanel, setActivePanel] = useState<'environment' | 'settings' | null>(null);
-
-  const handleEnvironmentButtonClick = () => {
-    if (activePanel === 'environment') {
-      setActivePanel(null);
-    } else {
-      setActivePanel('environment');
-    }
-  };
-
-  const handleSettingsButtonClick = () => {
-    if (activePanel === 'settings') {
-      setActivePanel(null);
-    } else {
-      setActivePanel('settings');
-    }
-  };
-
-  const handleClosePanel = () => {
-    setActivePanel(null);
-  };
+  const [showEnvironmentSelector, setShowEnvironmentSelector] = useState(false);
 
   return (
     <div className="absolute inset-0 pointer-events-none">
@@ -93,39 +73,49 @@ const ImmersiveViewerInterface: React.FC<ImmersiveViewerInterfaceProps> = ({
 
         {/* Right side - Environment selector and settings */}
         <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleEnvironmentButtonClick}
-            className={`bg-black/40 backdrop-blur-md border-white/20 text-white hover:bg-black/60 ${
-              activePanel === 'environment' ? 'bg-white/20' : ''
-            }`}
-          >
-            <Palette className="h-5 w-5" />
-          </Button>
+          {/* Environment Selector */}
+          <div className="relative">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowEnvironmentSelector(!showEnvironmentSelector)}
+              className="bg-black/40 backdrop-blur-md border-white/20 text-white hover:bg-black/60"
+            >
+              <Palette className="h-5 w-5" />
+            </Button>
+            
+            <AnimatePresence>
+              {showEnvironmentSelector && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="absolute top-full right-0 mt-2 z-30"
+                >
+                  <EnvironmentSelector
+                    environmentType={environmentType}
+                    onEnvironmentChange={(env) => {
+                      onEnvironmentChange(env);
+                      setShowEnvironmentSelector(false);
+                    }}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
 
           <Button
             variant="ghost"
             size="icon"
-            onClick={handleSettingsButtonClick}
+            onClick={onToggleCustomization}
             className={`bg-black/40 backdrop-blur-md border-white/20 text-white hover:bg-black/60 ${
-              activePanel === 'settings' ? 'bg-white/20' : ''
+              isCustomizationOpen ? 'bg-white/20' : ''
             }`}
           >
             <Settings className="h-5 w-5" />
           </Button>
         </div>
       </div>
-
-      {/* Settings Panel */}
-      <ImmersiveSettingsPanel
-        isOpen={activePanel !== null}
-        onClose={handleClosePanel}
-        activeTab={activePanel || 'environment'}
-        onTabChange={setActivePanel}
-        environmentType={environmentType}
-        onEnvironmentChange={onEnvironmentChange}
-      />
 
       {/* Bottom Controls */}
       <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 pointer-events-auto z-20">
