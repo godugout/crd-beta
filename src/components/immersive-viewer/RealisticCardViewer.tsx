@@ -40,14 +40,7 @@ const RealisticCardViewer: React.FC<RealisticCardViewerProps> = ({
   // Use provided lighting settings or defaults
   const currentLighting = lightingSettings || defaultLighting;
 
-  console.log('RealisticCardViewer: Rendering with settings:', {
-    activeEffects,
-    effectIntensities,
-    environmentType,
-    lightingIntensity: currentLighting?.primaryLight?.intensity,
-    ambientIntensity: currentLighting?.ambientLight?.intensity,
-    dynamicLighting: currentLighting?.useDynamicLighting
-  });
+  console.log('RealisticCardViewer: Current lighting settings:', currentLighting);
 
   // Enhanced mouse movement for dynamic lighting
   const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
@@ -56,15 +49,13 @@ const RealisticCardViewer: React.FC<RealisticCardViewerProps> = ({
       const x = (event.clientX - rect.left) / rect.width;
       const y = (event.clientY - rect.top) / rect.height;
       
-      // Convert normalized coordinates to light position
-      const lightX = (x - 0.5) * 20;
-      const lightY = (0.5 - y) * 20; // Invert Y for proper lighting
-      const lightZ = 10;
+      // Convert normalized coordinates to light position with more dramatic range
+      const lightX = (x - 0.5) * 40;
+      const lightY = (0.5 - y) * 40;
+      const lightZ = 15;
       
       setDynamicLightPosition({ x: lightX, y: lightY, z: lightZ });
       updateLightPosition(x, y);
-      
-      console.log('Dynamic light position updated:', { x: lightX, y: lightY, z: lightZ });
     }
   };
 
@@ -77,11 +68,24 @@ const RealisticCardViewer: React.FC<RealisticCardViewerProps> = ({
         z: currentLighting?.primaryLight?.z || 10
       };
 
+  const secondaryLightPosition = {
+    x: currentLighting?.secondaryLight?.x || -6,
+    y: currentLighting?.secondaryLight?.y || 8,
+    z: currentLighting?.secondaryLight?.z || 10
+  };
+
+  const fillLightPosition = {
+    x: currentLighting?.fillLight?.x || 0,
+    y: currentLighting?.fillLight?.y || -5,
+    z: currentLighting?.fillLight?.z || 8
+  };
+
   return (
     <div 
       ref={containerRef}
       className="w-full h-full relative"
       onPointerMove={handlePointerMove}
+      style={{ backgroundColor: currentLighting?.backgroundColor || '#1a1a1a' }}
     >
       <Canvas
         camera={{ 
@@ -105,10 +109,10 @@ const RealisticCardViewer: React.FC<RealisticCardViewerProps> = ({
         {/* Environment Scene */}
         <EnvironmentRenderer environmentType={environmentType} />
         
-        {/* Primary directional light with dynamic positioning */}
+        {/* Primary directional light with dramatic positioning */}
         <directionalLight
           position={[finalLightPosition.x, finalLightPosition.y, finalLightPosition.z]}
-          intensity={currentLighting?.primaryLight?.intensity || 1.2}
+          intensity={currentLighting?.primaryLight?.intensity || 2.2}
           color={currentLighting?.primaryLight?.color || '#ffffff'}
           castShadow
           shadow-mapSize-width={2048}
@@ -120,9 +124,29 @@ const RealisticCardViewer: React.FC<RealisticCardViewerProps> = ({
           shadow-camera-bottom={-10}
         />
 
-        {/* Ambient light */}
+        {/* Secondary light for fill lighting */}
+        {currentLighting?.secondaryLight && (
+          <directionalLight
+            position={[secondaryLightPosition.x, secondaryLightPosition.y, secondaryLightPosition.z]}
+            intensity={currentLighting.secondaryLight.intensity}
+            color={currentLighting.secondaryLight.color}
+          />
+        )}
+
+        {/* Fill light from below for gallery/studio setups */}
+        {currentLighting?.fillLight && (
+          <pointLight
+            position={[fillLightPosition.x, fillLightPosition.y, fillLightPosition.z]}
+            intensity={currentLighting.fillLight.intensity}
+            color={currentLighting.fillLight.color}
+            distance={20}
+            decay={2}
+          />
+        )}
+
+        {/* Ambient light with proper intensity */}
         <ambientLight
-          intensity={currentLighting?.ambientLight?.intensity || 0.6}
+          intensity={currentLighting?.ambientLight?.intensity || 0.4}
           color={currentLighting?.ambientLight?.color || '#f0f0ff'}
         />
 
@@ -181,6 +205,13 @@ const RealisticCardViewer: React.FC<RealisticCardViewerProps> = ({
           </div>
         </div>
       )}
+
+      {/* Lighting preset indicator */}
+      <div className="absolute top-4 left-4 z-10">
+        <div className="px-3 py-1 bg-gray-900/80 backdrop-blur-sm text-white text-xs rounded-full capitalize">
+          {currentLighting?.environmentType || environmentType} Lighting
+        </div>
+      </div>
     </div>
   );
 };
