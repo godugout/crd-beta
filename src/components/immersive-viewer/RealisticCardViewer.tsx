@@ -1,5 +1,5 @@
 
-import React, { Suspense, useEffect, useState } from 'react';
+import React, { Suspense, useEffect, useState, useRef } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import { Card } from '@/lib/types';
@@ -29,6 +29,8 @@ const RealisticCardViewer: React.FC<RealisticCardViewerProps> = ({
   lightingSettings
 }) => {
   const [isFlipped, setIsFlipped] = useState(false);
+  const [dynamicLightPosition, setDynamicLightPosition] = useState({ x: 10, y: 10, z: 10 });
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const {
     lightingSettings: defaultLighting,
@@ -43,21 +45,41 @@ const RealisticCardViewer: React.FC<RealisticCardViewerProps> = ({
     effectIntensities,
     environmentType,
     lightingIntensity: currentLighting?.primaryLight?.intensity,
-    ambientIntensity: currentLighting?.ambientLight?.intensity
+    ambientIntensity: currentLighting?.ambientLight?.intensity,
+    dynamicLighting: currentLighting?.useDynamicLighting
   });
 
   // Enhanced mouse movement for dynamic lighting
   const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (currentLighting?.useDynamicLighting) {
-      const rect = event.currentTarget.getBoundingClientRect();
+    if (currentLighting?.useDynamicLighting && containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
       const x = (event.clientX - rect.left) / rect.width;
       const y = (event.clientY - rect.top) / rect.height;
+      
+      // Convert normalized coordinates to light position
+      const lightX = (x - 0.5) * 20;
+      const lightY = (0.5 - y) * 20; // Invert Y for proper lighting
+      const lightZ = 10;
+      
+      setDynamicLightPosition({ x: lightX, y: lightY, z: lightZ });
       updateLightPosition(x, y);
+      
+      console.log('Dynamic light position updated:', { x: lightX, y: lightY, z: lightZ });
     }
   };
 
+  // Use dynamic light position when dynamic lighting is enabled
+  const finalLightPosition = currentLighting?.useDynamicLighting 
+    ? dynamicLightPosition 
+    : {
+        x: currentLighting?.primaryLight?.x || 10,
+        y: currentLighting?.primaryLight?.y || 10,
+        z: currentLighting?.primaryLight?.z || 10
+      };
+
   return (
     <div 
+      ref={containerRef}
       className="w-full h-full relative"
       onPointerMove={handlePointerMove}
     >
@@ -83,13 +105,9 @@ const RealisticCardViewer: React.FC<RealisticCardViewerProps> = ({
         {/* Environment Scene */}
         <EnvironmentRenderer environmentType={environmentType} />
         
-        {/* Primary directional light */}
+        {/* Primary directional light with dynamic positioning */}
         <directionalLight
-          position={[
-            currentLighting?.primaryLight?.x || 10,
-            currentLighting?.primaryLight?.y || 10,
-            currentLighting?.primaryLight?.z || 10
-          ]}
+          position={[finalLightPosition.x, finalLightPosition.y, finalLightPosition.z]}
           intensity={currentLighting?.primaryLight?.intensity || 1.2}
           color={currentLighting?.primaryLight?.color || '#ffffff'}
           castShadow
@@ -102,6 +120,12 @@ const RealisticCardViewer: React.FC<RealisticCardViewerProps> = ({
           shadow-camera-bottom={-10}
         />
 
+        {/* Ambient light */}
+        <ambientLight
+          intensity={currentLighting?.ambientLight?.intensity || 0.6}
+          color={currentLighting?.ambientLight?.color || '#f0f0ff'}
+        />
+
         {/* Enhanced Card Model */}
         <Suspense fallback={null}>
           <CardModel
@@ -110,6 +134,7 @@ const RealisticCardViewer: React.FC<RealisticCardViewerProps> = ({
             activeEffects={activeEffects}
             effectIntensities={effectIntensities}
             materialSettings={materialSettings}
+            lightPosition={finalLightPosition}
           />
         </Suspense>
 
@@ -147,6 +172,15 @@ const RealisticCardViewer: React.FC<RealisticCardViewerProps> = ({
           </span>
         </button>
       </div>
+
+      {/* Dynamic lighting indicator */}
+      {currentLighting?.useDynamicLighting && (
+        <div className="absolute top-4 right-4 z-10">
+          <div className="px-3 py-1 bg-blue-600/80 backdrop-blur-sm text-white text-xs rounded-full">
+            Dynamic Lighting: ON
+          </div>
+        </div>
+      )}
     </div>
   );
 };

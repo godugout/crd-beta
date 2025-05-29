@@ -16,6 +16,11 @@ interface CardModelProps {
     clearcoat: number;
     envMapIntensity: number;
   };
+  lightPosition?: {
+    x: number;
+    y: number;
+    z: number;
+  };
 }
 
 // Enhanced card back texture with better design
@@ -129,7 +134,8 @@ export const CardModel: React.FC<CardModelProps> = ({
     reflectivity: 0.5,
     clearcoat: 0.7,
     envMapIntensity: 1.0
-  }
+  },
+  lightPosition = { x: 10, y: 10, z: 10 }
 }) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const groupRef = useRef<THREE.Group>(null);
@@ -149,7 +155,7 @@ export const CardModel: React.FC<CardModelProps> = ({
     return effectMap[effectId] || effectId;
   };
 
-  // Enhanced materials based on effects
+  // Enhanced materials based on effects with light responsiveness
   const frontMaterial = useMemo(() => {
     const baseConfig = {
       map: frontTexture,
@@ -169,34 +175,42 @@ export const CardModel: React.FC<CardModelProps> = ({
     const baseEffect = getBaseEffect(firstEffect);
     const intensity = effectIntensities[firstEffect] || 0.7;
 
-    console.log('CardModel: Applying effect', { firstEffect, baseEffect, intensity });
+    console.log('CardModel: Applying effect', { firstEffect, baseEffect, intensity, lightPosition });
 
     if (baseEffect === 'galaxy') {
-      return new THREE.MeshPhysicalMaterial({
+      const material = new THREE.MeshPhysicalMaterial({
         ...baseConfig,
         map: frontTexture,
         emissiveMap: galaxyTexture,
         emissive: new THREE.Color(0x1a0033),
-        emissiveIntensity: intensity * 0.4,
+        emissiveIntensity: intensity * 0.5,
         metalness: 0.9,
         roughness: 0.1,
-        envMapIntensity: 2.0 * intensity,
-        iridescence: 0.6 * intensity,
+        envMapIntensity: 2.5 * intensity,
+        iridescence: 0.8 * intensity,
         iridescenceIOR: 1.4,
         iridescenceThicknessRange: [300, 1000],
+        clearcoat: 1.0,
+        clearcoatRoughness: 0.0,
       });
+      
+      // Add cosmic glow effect
+      material.transparent = true;
+      material.opacity = 0.95;
+      return material;
     }
     
     if (baseEffect === 'holographic') {
       return new THREE.MeshPhysicalMaterial({
         ...baseConfig,
-        metalness: 0.9 * intensity,
+        metalness: 0.95 * intensity,
         roughness: 0.05,
         iridescence: 1.0 * intensity,
         iridescenceIOR: 1.3,
         iridescenceThicknessRange: [100, 800],
         clearcoat: 1.0,
         clearcoatRoughness: 0.0,
+        envMapIntensity: 2.0 * intensity,
       });
     }
     
@@ -255,9 +269,12 @@ export const CardModel: React.FC<CardModelProps> = ({
         envMapIntensity: 0.3,
       });
       
-      // Apply sepia tone effect with aging
+      // Apply enhanced sepia tone effect with aging
       const sepiaIntensity = intensity;
-      vintageMaterial.color.setHSL(0.08, 0.4 * sepiaIntensity, 0.85 - sepiaIntensity * 0.3);
+      vintageMaterial.color.setHSL(0.08, 0.6 * sepiaIntensity, 0.8 - sepiaIntensity * 0.2);
+      
+      // Add subtle wear and aging
+      vintageMaterial.roughness = 0.8 + (sepiaIntensity * 0.2);
       return vintageMaterial;
     }
     
@@ -273,7 +290,7 @@ export const CardModel: React.FC<CardModelProps> = ({
     }
     
     return new THREE.MeshPhysicalMaterial(baseConfig);
-  }, [frontTexture, activeEffects, effectIntensities, materialSettings, galaxyTexture]);
+  }, [frontTexture, activeEffects, effectIntensities, materialSettings, galaxyTexture, lightPosition]);
 
   const backMaterial = useMemo(() => {
     return new THREE.MeshPhysicalMaterial({
@@ -300,23 +317,41 @@ export const CardModel: React.FC<CardModelProps> = ({
     groupRef.current.position.y = Math.sin(time * 0.6) * 0.03;
     groupRef.current.rotation.z = Math.sin(time * 0.4) * 0.008;
     
-    // Effect-specific animations
-    const firstEffect = activeEffects[0];
-    const baseEffect = firstEffect ? getBaseEffect(firstEffect) : '';
-    
-    if (baseEffect === 'neon') {
-      const pulse = Math.sin(time * 4) * 0.5 + 0.5;
-      if (frontMaterial instanceof THREE.MeshPhysicalMaterial) {
+    // Dynamic light-responsive effects
+    if (meshRef.current && frontMaterial instanceof THREE.MeshPhysicalMaterial) {
+      const firstEffect = activeEffects[0];
+      const baseEffect = firstEffect ? getBaseEffect(firstEffect) : '';
+      
+      // Calculate light distance for dynamic intensity
+      const lightVector = new THREE.Vector3(lightPosition.x, lightPosition.y, lightPosition.z);
+      const cardPosition = groupRef.current.position;
+      const lightDistance = lightVector.distanceTo(cardPosition);
+      const normalizedDistance = Math.max(0.3, Math.min(1.0, 1.0 - (lightDistance / 30)));
+      
+      if (baseEffect === 'neon') {
+        const pulse = Math.sin(time * 4) * 0.5 + 0.5;
         const intensity = effectIntensities[firstEffect] || 0.5;
-        frontMaterial.emissiveIntensity = intensity * 0.3 * (0.8 + pulse * 0.4);
+        frontMaterial.emissiveIntensity = intensity * 0.3 * (0.8 + pulse * 0.4) * normalizedDistance;
       }
-    }
-    
-    if (baseEffect === 'galaxy') {
-      // Subtle rotation for galaxy effect
-      if (frontMaterial instanceof THREE.MeshPhysicalMaterial && frontMaterial.emissiveMap) {
-        frontMaterial.emissiveMap.offset.x = Math.sin(time * 0.1) * 0.05;
-        frontMaterial.emissiveMap.offset.y = Math.cos(time * 0.08) * 0.05;
+      
+      if (baseEffect === 'galaxy') {
+        // Subtle rotation for galaxy effect
+        if (frontMaterial.emissiveMap) {
+          frontMaterial.emissiveMap.offset.x = Math.sin(time * 0.1) * 0.05;
+          frontMaterial.emissiveMap.offset.y = Math.cos(time * 0.08) * 0.05;
+        }
+        
+        // Dynamic cosmic glow based on light position
+        const intensity = effectIntensities[firstEffect] || 0.6;
+        frontMaterial.emissiveIntensity = intensity * 0.5 * normalizedDistance;
+      }
+      
+      if (baseEffect === 'holographic' || baseEffect === 'prismatic') {
+        // Dynamic iridescence based on light angle
+        const angle = Math.atan2(lightPosition.y, lightPosition.x);
+        const iridescenceShift = (Math.sin(angle + time * 0.5) + 1) * 0.5;
+        const intensity = effectIntensities[firstEffect] || 0.7;
+        frontMaterial.iridescence = intensity * (0.8 + iridescenceShift * 0.2);
       }
     }
   });
