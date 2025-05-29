@@ -23,6 +23,26 @@ const LightingControls: React.FC<LightingControlsProps> = ({
   onToggleDynamicLighting,
   isUserCustomized
 }) => {
+  // Ensure we have proper fallback values for all settings
+  const safeSettings = {
+    environmentType: settings?.environmentType || 'studio',
+    primaryLight: {
+      intensity: settings?.primaryLight?.intensity || 1.2,
+      color: settings?.primaryLight?.color || '#ffffff',
+      x: settings?.primaryLight?.x || 10,
+      y: settings?.primaryLight?.y || 10,
+      z: settings?.primaryLight?.z || 10
+    },
+    ambientLight: {
+      intensity: settings?.ambientLight?.intensity || 0.6,
+      color: settings?.ambientLight?.color || '#f0f0ff'
+    },
+    envMapIntensity: settings?.envMapIntensity || 1,
+    useDynamicLighting: settings?.useDynamicLighting || false,
+    followPointer: settings?.followPointer || false,
+    autoRotate: settings?.autoRotate || false
+  };
+
   // Environment presets
   const environmentPresets = [
     { value: 'studio' as LightingPreset, label: 'Studio' },
@@ -46,7 +66,7 @@ const LightingControls: React.FC<LightingControlsProps> = ({
       <div className="space-y-4">
         <h3 className="text-lg font-medium">Environment</h3>
         <Select 
-          value={settings.environmentType} 
+          value={safeSettings.environmentType} 
           onValueChange={handlePresetChange}
         >
           <SelectTrigger>
@@ -68,17 +88,17 @@ const LightingControls: React.FC<LightingControlsProps> = ({
         <div className="space-y-2">
           <div className="flex justify-between items-center">
             <Label htmlFor="primaryIntensity">Intensity</Label>
-            <span className="text-sm text-gray-400">{settings.primaryLight.intensity.toFixed(1)}</span>
+            <span className="text-sm text-gray-400">{safeSettings.primaryLight.intensity.toFixed(1)}</span>
           </div>
           <Slider
             id="primaryIntensity"
-            value={[settings.primaryLight.intensity]}
+            value={[safeSettings.primaryLight.intensity]}
             min={0}
             max={2}
             step={0.1}
             onValueChange={([value]) => 
               onUpdateSettings({
-                primaryLight: { ...settings.primaryLight, intensity: value }
+                primaryLight: { ...safeSettings.primaryLight, intensity: value }
               })
             }
           />
@@ -88,11 +108,11 @@ const LightingControls: React.FC<LightingControlsProps> = ({
           <Label htmlFor="primaryColor">Color</Label>
           <div className="flex gap-2">
             <Button 
-              variant={settings.primaryLight.color === '#ffffff' ? "default" : "outline"}
+              variant={safeSettings.primaryLight.color === '#ffffff' ? "default" : "outline"}
               size="sm"
               onClick={() => 
                 onUpdateSettings({
-                  primaryLight: { ...settings.primaryLight, color: '#ffffff' }
+                  primaryLight: { ...safeSettings.primaryLight, color: '#ffffff' }
                 })
               }
             >
@@ -100,11 +120,11 @@ const LightingControls: React.FC<LightingControlsProps> = ({
               White
             </Button>
             <Button 
-              variant={settings.primaryLight.color === '#fff5e0' ? "default" : "outline"}
+              variant={safeSettings.primaryLight.color === '#fff5e0' ? "default" : "outline"}
               size="sm"
               onClick={() => 
                 onUpdateSettings({
-                  primaryLight: { ...settings.primaryLight, color: '#fff5e0' }
+                  primaryLight: { ...safeSettings.primaryLight, color: '#fff5e0' }
                 })
               }
             >
@@ -112,11 +132,11 @@ const LightingControls: React.FC<LightingControlsProps> = ({
               Warm
             </Button>
             <Button 
-              variant={settings.primaryLight.color === '#e0f0ff' ? "default" : "outline"}
+              variant={safeSettings.primaryLight.color === '#e0f0ff' ? "default" : "outline"}
               size="sm"
               onClick={() => 
                 onUpdateSettings({
-                  primaryLight: { ...settings.primaryLight, color: '#e0f0ff' }
+                  primaryLight: { ...safeSettings.primaryLight, color: '#e0f0ff' }
                 })
               }
             >
@@ -133,17 +153,17 @@ const LightingControls: React.FC<LightingControlsProps> = ({
         <div className="space-y-2">
           <div className="flex justify-between items-center">
             <Label htmlFor="ambientIntensity">Intensity</Label>
-            <span className="text-sm text-gray-400">{settings.ambientLight.intensity.toFixed(1)}</span>
+            <span className="text-sm text-gray-400">{safeSettings.ambientLight.intensity.toFixed(1)}</span>
           </div>
           <Slider
             id="ambientIntensity"
-            value={[settings.ambientLight.intensity]}
+            value={[safeSettings.ambientLight.intensity]}
             min={0}
             max={1}
             step={0.05}
             onValueChange={([value]) => 
               onUpdateSettings({
-                ambientLight: { ...settings.ambientLight, intensity: value }
+                ambientLight: { ...safeSettings.ambientLight, intensity: value }
               })
             }
           />
@@ -155,7 +175,7 @@ const LightingControls: React.FC<LightingControlsProps> = ({
           <Label htmlFor="autoRotate" className="cursor-pointer">Auto Rotate</Label>
           <Switch
             id="autoRotate"
-            checked={settings.autoRotate || false}
+            checked={safeSettings.autoRotate}
             onCheckedChange={(checked) => {
               onUpdateSettings({ autoRotate: checked });
             }}
@@ -168,7 +188,7 @@ const LightingControls: React.FC<LightingControlsProps> = ({
           <Label htmlFor="followPointer" className="cursor-pointer">Follow Pointer</Label>
           <Switch
             id="followPointer"
-            checked={settings.followPointer || false}
+            checked={safeSettings.followPointer}
             onCheckedChange={(checked) => {
               onUpdateSettings({ followPointer: checked });
             }}
