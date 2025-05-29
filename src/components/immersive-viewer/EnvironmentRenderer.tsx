@@ -98,13 +98,14 @@ const EnvironmentRenderer: React.FC<EnvironmentRendererProps> = ({ environmentTy
 
   return (
     <>
-      {/* Use HDR environment maps instead of solid colors */}
+      {/* Use HDR environment maps with correct props */}
       <Environment 
         preset={environmentConfig.preset as any}
         background={environmentConfig.background}
-        environmentIntensity={environmentConfig.intensity}
-        backgroundIntensity={0.5}
       />
+      
+      {/* Add ambient light to ensure proper illumination */}
+      <ambientLight intensity={environmentConfig.intensity * 0.3} />
       
       {/* Special sky for certain environments */}
       {environmentType === 'twilight' && (
