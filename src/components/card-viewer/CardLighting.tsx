@@ -42,6 +42,8 @@ export const CardLighting = ({ settings, debug = false }: CardLightingProps) => 
         return '/environments/natural.hdr';
       case 'dramatic':
         return '/environments/dramatic.hdr';
+      case 'gallery':
+        return '/environments/gallery.hdr';
       case 'display_case':
         return '/environments/display_case.hdr';
       default:

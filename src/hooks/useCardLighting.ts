@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 
-export type LightingPreset = 'studio' | 'natural' | 'dramatic' | 'gallery';
+export type LightingPreset = 'studio' | 'natural' | 'dramatic' | 'gallery' | 'display_case';
 
 interface LightPosition {
   x: number;
@@ -184,6 +184,42 @@ export const DEFAULT_LIGHTING: Record<LightingPreset, LightingSettings> = {
       color: '#ffffff'
     },
     backgroundColor: '#f5f5f5'
+  },
+  display_case: {
+    primaryLight: {
+      x: 0,
+      y: 18,
+      z: 12,
+      intensity: 1.8,
+      color: '#ffffff'
+    },
+    ambientLight: {
+      intensity: 0.5,
+      color: '#f0f0f0'
+    },
+    secondaryLight: {
+      x: 8,
+      y: 10,
+      z: 8,
+      intensity: 0.7,
+      color: '#ffffff'
+    },
+    fillLight: {
+      x: -8,
+      y: 10,
+      z: 8,
+      intensity: 0.7,
+      color: '#ffffff'
+    },
+    environmentType: 'display_case',
+    envMapIntensity: 1.1,
+    useDynamicLighting: true,
+    shadowIntensity: 0.25,
+    rimLighting: {
+      intensity: 0.35,
+      color: '#ffffff'
+    },
+    backgroundColor: '#e8e8e8'
   }
 };
 
