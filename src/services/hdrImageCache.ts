@@ -38,7 +38,6 @@ class HDRImageCacheService {
       'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/stadium_01_1k.hdr',
       'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/cape_hill_1k.hdr'
     ],
-    // Updated names based on actual HDR content
     twilight: [
       'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/evening_road_01_1k.hdr',
       'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/twilight_1k.hdr'
@@ -55,9 +54,11 @@ class HDRImageCacheService {
       'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/forest_slope_1k.hdr',
       'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/cape_hill_1k.hdr'
     ],
+    // Updated Milky Way to use proper night sky with stars
     milkyway: [
-      'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/milky_way_1k.hdr',
-      'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/evening_road_01_1k.hdr'
+      'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/starry_night_1k.hdr',
+      'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/night_sky_1k.hdr',
+      'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/milky_way_1k.hdr'
     ],
     esplanade: [
       'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/royal_esplanade_1k.hdr',
@@ -74,12 +75,52 @@ class HDRImageCacheService {
   };
 
   /**
-   * Create a fallback procedural texture
+   * Create a fallback procedural texture - Enhanced for Milky Way
    */
   private createFallbackTexture(environmentType: string): THREE.DataTexture {
     const size = 512;
     const data = new Float32Array(size * size * 4);
     
+    if (environmentType === 'milkyway') {
+      // Create a proper starry night sky procedural texture
+      for (let i = 0; i < size; i++) {
+        for (let j = 0; j < size; j++) {
+          const index = (i * size + j) * 4;
+          
+          // Base dark blue night sky
+          data[index] = 0.02;     // R
+          data[index + 1] = 0.02; // G
+          data[index + 2] = 0.15; // B
+          data[index + 3] = 1.0;  // A
+          
+          // Add stars randomly
+          if (Math.random() > 0.998) {
+            const brightness = 0.8 + Math.random() * 0.2;
+            data[index] = brightness;
+            data[index + 1] = brightness;
+            data[index + 2] = brightness;
+          }
+          
+          // Add milky way streak across the middle
+          const distanceFromCenter = Math.abs(i - size / 2) / (size / 2);
+          if (distanceFromCenter < 0.3) {
+            const intensity = (0.3 - distanceFromCenter) / 0.3 * 0.1;
+            data[index] += intensity * 0.8;
+            data[index + 1] += intensity * 0.9;
+            data[index + 2] += intensity * 1.0;
+          }
+        }
+      }
+      
+      const texture = new THREE.DataTexture(data, size, size, THREE.RGBAFormat, THREE.FloatType);
+      texture.mapping = THREE.EquirectangularReflectionMapping;
+      texture.needsUpdate = true;
+      
+      console.log(`HDRImageCache: Created starry night fallback texture for ${environmentType}`);
+      return texture;
+    }
+    
+    // ... keep existing code for other environment fallbacks
     const colors = {
       stadium: [0.2, 0.3, 0.5, 1.0],
       gallery: [0.9, 0.9, 0.95, 1.0],
@@ -88,7 +129,6 @@ class HDRImageCacheService {
       quarry: [0.4, 0.35, 0.3, 1.0],
       coastline: [0.2, 0.4, 0.6, 1.0],
       hillside: [0.2, 0.4, 0.2, 1.0],
-      milkyway: [0.02, 0.02, 0.1, 1.0],
       esplanade: [0.4, 0.3, 0.2, 1.0],
       neonclub: [0.1, 0.05, 0.2, 1.0],
       industrial: [0.3, 0.25, 0.2, 1.0]
@@ -232,8 +272,8 @@ class HDRImageCacheService {
     const typeMap: Record<string, string> = {
       'cosmic': 'milkyway',
       'space': 'milkyway',
-      'nightsky': 'twilight',
-      'night': 'twilight',
+      'nightsky': 'milkyway',
+      'night': 'milkyway',
       'underwater': 'coastline',
       'ocean': 'coastline',
       'forest': 'hillside',

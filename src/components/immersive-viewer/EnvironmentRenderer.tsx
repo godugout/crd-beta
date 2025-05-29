@@ -115,9 +115,17 @@ const EnvironmentRenderer: React.FC<EnvironmentRendererProps> = ({ environmentTy
       case 'milkyway':
         return (
           <>
-            <ambientLight intensity={0.15} color="#001122" />
-            <directionalLight position={[200, 100, 200]} intensity={0.6} color="#e6f3ff" />
-            <pointLight position={[300, 150, 250]} color="#ffffff" intensity={0.4} />
+            {/* Very dark ambient for night sky with subtle blue tint */}
+            <ambientLight intensity={0.1} color="#001133" />
+            {/* Moonlight - soft, distant directional light */}
+            <directionalLight position={[100, 200, 100]} intensity={0.8} color="#e6f3ff" castShadow />
+            {/* Starlight - multiple soft point lights to simulate distant stars */}
+            <pointLight position={[200, 150, 200]} color="#ffffff" intensity={0.3} distance={1000} />
+            <pointLight position={[-150, 180, -200]} color="#cce6ff" intensity={0.25} distance={800} />
+            <pointLight position={[0, 300, 0]} color="#e6f3ff" intensity={0.4} distance={1200} />
+            {/* Milky Way glow - soft colored lights */}
+            <pointLight position={[300, 100, 100]} color="#b3ccff" intensity={0.2} distance={1500} />
+            <pointLight position={[-200, 120, -300]} color="#ddeeff" intensity={0.15} distance={1200} />
           </>
         );
         
