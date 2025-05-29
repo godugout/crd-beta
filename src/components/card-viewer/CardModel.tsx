@@ -1,4 +1,3 @@
-
 import React, { useRef, useMemo, useEffect } from 'react';
 import { useFrame, useLoader } from '@react-three/fiber';
 import { TextureLoader, CanvasTexture } from 'three';
@@ -139,6 +138,17 @@ export const CardModel: React.FC<CardModelProps> = ({
   const backTexture = useMemo(() => createCardBackTexture(), []);
   const galaxyTexture = useMemo(() => createGalaxyTexture(), []);
   
+  // Map preset effect IDs to base effects
+  const getBaseEffect = (effectId: string): string => {
+    const effectMap: Record<string, string> = {
+      'vintage_classic': 'vintage',
+      'cosmic_rare': 'galaxy',
+      'premium_foil': 'foil',
+      'holographic': 'holographic'
+    };
+    return effectMap[effectId] || effectId;
+  };
+
   // Enhanced materials based on effects
   const frontMaterial = useMemo(() => {
     const baseConfig = {
@@ -150,8 +160,18 @@ export const CardModel: React.FC<CardModelProps> = ({
       clearcoatRoughness: 0.1,
     };
 
-    if (activeEffects.includes('galaxy')) {
-      const intensity = effectIntensities.galaxy || 0.6;
+    // Get the first active effect and map it to base effect
+    const firstEffect = activeEffects[0];
+    if (!firstEffect) {
+      return new THREE.MeshPhysicalMaterial(baseConfig);
+    }
+
+    const baseEffect = getBaseEffect(firstEffect);
+    const intensity = effectIntensities[firstEffect] || 0.7;
+
+    console.log('CardModel: Applying effect', { firstEffect, baseEffect, intensity });
+
+    if (baseEffect === 'galaxy') {
       return new THREE.MeshPhysicalMaterial({
         ...baseConfig,
         map: frontTexture,
@@ -161,11 +181,13 @@ export const CardModel: React.FC<CardModelProps> = ({
         metalness: 0.9,
         roughness: 0.1,
         envMapIntensity: 2.0 * intensity,
+        iridescence: 0.6 * intensity,
+        iridescenceIOR: 1.4,
+        iridescenceThicknessRange: [300, 1000],
       });
     }
     
-    if (activeEffects.includes('holographic')) {
-      const intensity = effectIntensities.holographic || 0.7;
+    if (baseEffect === 'holographic') {
       return new THREE.MeshPhysicalMaterial({
         ...baseConfig,
         metalness: 0.9 * intensity,
@@ -178,8 +200,7 @@ export const CardModel: React.FC<CardModelProps> = ({
       });
     }
     
-    if (activeEffects.includes('chrome')) {
-      const intensity = effectIntensities.chrome || 0.6;
+    if (baseEffect === 'chrome') {
       return new THREE.MeshPhysicalMaterial({
         ...baseConfig,
         metalness: 1.0,
@@ -190,8 +211,7 @@ export const CardModel: React.FC<CardModelProps> = ({
       });
     }
     
-    if (activeEffects.includes('foil')) {
-      const intensity = effectIntensities.foil || 0.6;
+    if (baseEffect === 'foil') {
       return new THREE.MeshPhysicalMaterial({
         ...baseConfig,
         metalness: 0.95 * intensity,
@@ -199,11 +219,11 @@ export const CardModel: React.FC<CardModelProps> = ({
         envMapIntensity: 2.5 * intensity,
         clearcoat: 0.8,
         clearcoatRoughness: 0.1,
+        color: new THREE.Color(0xffd700), // Gold tint for foil
       });
     }
     
-    if (activeEffects.includes('refractor')) {
-      const intensity = effectIntensities.refractor || 0.5;
+    if (baseEffect === 'refractor') {
       return new THREE.MeshPhysicalMaterial({
         ...baseConfig,
         metalness: 0.7,
@@ -214,8 +234,7 @@ export const CardModel: React.FC<CardModelProps> = ({
       });
     }
     
-    if (activeEffects.includes('prismatic')) {
-      const intensity = effectIntensities.prismatic || 0.8;
+    if (baseEffect === 'prismatic') {
       return new THREE.MeshPhysicalMaterial({
         ...baseConfig,
         metalness: 0.8,
@@ -228,9 +247,7 @@ export const CardModel: React.FC<CardModelProps> = ({
       });
     }
     
-    if (activeEffects.includes('vintage')) {
-      const intensity = effectIntensities.vintage || 0.3;
-      // Create aged texture effect
+    if (baseEffect === 'vintage') {
       const vintageMaterial = new THREE.MeshPhysicalMaterial({
         ...baseConfig,
         roughness: 0.8,
@@ -238,13 +255,13 @@ export const CardModel: React.FC<CardModelProps> = ({
         envMapIntensity: 0.3,
       });
       
-      // Apply sepia tone effect
-      vintageMaterial.color.setHSL(0.1, 0.3, 0.9 - intensity * 0.2);
+      // Apply sepia tone effect with aging
+      const sepiaIntensity = intensity;
+      vintageMaterial.color.setHSL(0.08, 0.4 * sepiaIntensity, 0.85 - sepiaIntensity * 0.3);
       return vintageMaterial;
     }
     
-    if (activeEffects.includes('neon')) {
-      const intensity = effectIntensities.neon || 0.5;
+    if (baseEffect === 'neon') {
       return new THREE.MeshPhysicalMaterial({
         ...baseConfig,
         emissive: new THREE.Color(0x00ffff),
@@ -284,14 +301,18 @@ export const CardModel: React.FC<CardModelProps> = ({
     groupRef.current.rotation.z = Math.sin(time * 0.4) * 0.008;
     
     // Effect-specific animations
-    if (activeEffects.includes('neon')) {
+    const firstEffect = activeEffects[0];
+    const baseEffect = firstEffect ? getBaseEffect(firstEffect) : '';
+    
+    if (baseEffect === 'neon') {
       const pulse = Math.sin(time * 4) * 0.5 + 0.5;
       if (frontMaterial instanceof THREE.MeshPhysicalMaterial) {
-        frontMaterial.emissiveIntensity = (effectIntensities.neon || 0.5) * 0.3 * (0.8 + pulse * 0.4);
+        const intensity = effectIntensities[firstEffect] || 0.5;
+        frontMaterial.emissiveIntensity = intensity * 0.3 * (0.8 + pulse * 0.4);
       }
     }
     
-    if (activeEffects.includes('galaxy')) {
+    if (baseEffect === 'galaxy') {
       // Subtle rotation for galaxy effect
       if (frontMaterial instanceof THREE.MeshPhysicalMaterial && frontMaterial.emissiveMap) {
         frontMaterial.emissiveMap.offset.x = Math.sin(time * 0.1) * 0.05;
