@@ -28,7 +28,6 @@ interface CustomizationPanelProps {
   onShareCard?: () => void;
   onDownloadCard?: () => void;
   isUserCustomized?: boolean;
-  // Add effect props
   activeEffects?: string[];
   effectIntensities?: Record<string, number>;
   onEffectsChange?: (effects: string[]) => void;
@@ -82,6 +81,18 @@ const CustomizationPanel: React.FC<CustomizationPanelProps> = ({
     return 70;
   };
 
+  // Handle brightness changes and sync with lighting
+  const handleBrightnessChange = (newBrightness: number) => {
+    setBrightness(newBrightness);
+    // Update the actual lighting system
+    onUpdateLighting({
+      primaryLight: {
+        ...lightingSettings.primaryLight,
+        intensity: (newBrightness / 100) * 2 // Scale to reasonable range
+      }
+    });
+  };
+
   return (
     <div className="h-full overflow-y-auto">
       <div className="p-6 space-y-8">
@@ -99,7 +110,7 @@ const CustomizationPanel: React.FC<CustomizationPanelProps> = ({
           onUpdateLighting={onUpdateLighting}
           onApplyPreset={onApplyPreset}
           onLightingModeChange={setLightingMode}
-          onBrightnessChange={setBrightness}
+          onBrightnessChange={handleBrightnessChange}
         />
 
         <MaterialPropertiesSection

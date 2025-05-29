@@ -22,37 +22,90 @@ const MaterialPropertiesSection: React.FC<MaterialPropertiesSectionProps> = ({
 }) => {
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-medium text-white">Material Properties</h3>
-      
+      <div>
+        <h3 className="text-lg font-medium text-white mb-2">Material Properties</h3>
+        <p className="text-sm text-gray-400 mb-4">Fine-tune the card's surface appearance</p>
+      </div>
+
       <div className="space-y-4">
+        {/* Roughness */}
         <div className="space-y-2">
           <div className="flex justify-between items-center">
-            <Label className="text-white">Metalness</Label>
-            <span className="text-sm text-gray-400">{materialSettings.metalness.toFixed(1)}</span>
-          </div>
-          <Slider
-            value={[materialSettings.metalness]}
-            min={0}
-            max={1}
-            step={0.1}
-            onValueChange={([value]) => onUpdateMaterial({ metalness: value })}
-            className="w-full"
-          />
-        </div>
-        
-        <div className="space-y-2">
-          <div className="flex justify-between items-center">
-            <Label className="text-white">Roughness</Label>
-            <span className="text-sm text-gray-400">{materialSettings.roughness.toFixed(1)}</span>
+            <Label className="text-white text-sm">Roughness</Label>
+            <span className="text-xs text-gray-400">{materialSettings.roughness.toFixed(2)}</span>
           </div>
           <Slider
             value={[materialSettings.roughness]}
             min={0}
             max={1}
-            step={0.1}
+            step={0.01}
             onValueChange={([value]) => onUpdateMaterial({ roughness: value })}
             className="w-full"
           />
+          <div className="flex justify-between text-xs text-gray-500">
+            <span>Smooth</span>
+            <span>Rough</span>
+          </div>
+        </div>
+
+        {/* Metalness */}
+        <div className="space-y-2">
+          <div className="flex justify-between items-center">
+            <Label className="text-white text-sm">Metalness</Label>
+            <span className="text-xs text-gray-400">{materialSettings.metalness.toFixed(2)}</span>
+          </div>
+          <Slider
+            value={[materialSettings.metalness]}
+            min={0}
+            max={1}
+            step={0.01}
+            onValueChange={([value]) => onUpdateMaterial({ metalness: value })}
+            className="w-full"
+          />
+          <div className="flex justify-between text-xs text-gray-500">
+            <span>Dielectric</span>
+            <span>Metallic</span>
+          </div>
+        </div>
+
+        {/* Clearcoat */}
+        <div className="space-y-2">
+          <div className="flex justify-between items-center">
+            <Label className="text-white text-sm">Clearcoat</Label>
+            <span className="text-xs text-gray-400">{materialSettings.clearcoat.toFixed(2)}</span>
+          </div>
+          <Slider
+            value={[materialSettings.clearcoat]}
+            min={0}
+            max={1}
+            step={0.01}
+            onValueChange={([value]) => onUpdateMaterial({ clearcoat: value })}
+            className="w-full"
+          />
+          <div className="flex justify-between text-xs text-gray-500">
+            <span>Matte</span>
+            <span>Glossy</span>
+          </div>
+        </div>
+
+        {/* Reflectivity */}
+        <div className="space-y-2">
+          <div className="flex justify-between items-center">
+            <Label className="text-white text-sm">Reflectivity</Label>
+            <span className="text-xs text-gray-400">{materialSettings.reflectivity.toFixed(2)}</span>
+          </div>
+          <Slider
+            value={[materialSettings.reflectivity]}
+            min={0}
+            max={1}
+            step={0.01}
+            onValueChange={([value]) => onUpdateMaterial({ reflectivity: value })}
+            className="w-full"
+          />
+          <div className="flex justify-between text-xs text-gray-500">
+            <span>Dull</span>
+            <span>Mirror</span>
+          </div>
         </div>
       </div>
     </div>

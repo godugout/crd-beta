@@ -7,7 +7,10 @@ import {
   Lightbulb, 
   Sun, 
   Palette,
-  Building
+  Building,
+  Moon,
+  Camera,
+  Sparkles
 } from 'lucide-react';
 import { LightingSettings, LightingPreset } from '@/hooks/useCardLighting';
 import { toast } from 'sonner';
@@ -31,33 +34,60 @@ const LightingSection: React.FC<LightingSectionProps> = ({
   onLightingModeChange,
   onBrightnessChange
 }) => {
-  const lightingPresets = [
-    { id: 'studio', name: 'Studio', icon: Lightbulb },
+  // Easy mode presets
+  const easyPresets = [
+    { id: 'studio', name: 'Studio', icon: Camera, description: 'Professional studio lighting' },
+    { id: 'natural', name: 'Natural', icon: Sun, description: 'Soft daylight appearance' },
+    { id: 'dramatic', name: 'Dramatic', icon: Moon, description: 'High contrast lighting' },
+    { id: 'gallery', name: 'Gallery', icon: Building, description: 'Museum display lighting' },
+  ];
+
+  // Pro mode presets with more options
+  const proPresets = [
+    { id: 'studio', name: 'Studio', icon: Camera },
     { id: 'natural', name: 'Natural', icon: Sun },
-    { id: 'dramatic', name: 'Dramatic', icon: Palette },
-    { id: 'display_case', name: 'Gallery', icon: Building },
+    { id: 'dramatic', name: 'Dramatic', icon: Moon },
+    { id: 'gallery', name: 'Gallery', icon: Building },
+    { id: 'twilight', name: 'Twilight', icon: Palette },
+    { id: 'neonclub', name: 'Neon Club', icon: Sparkles },
   ];
 
   const handleLightingPreset = (presetId: string) => {
     if (onApplyPreset) {
       onApplyPreset(presetId as LightingPreset);
+      toast.success(`Applied ${presetId} lighting`);
     }
-    onUpdateLighting({ environmentType: presetId as LightingPreset });
-    toast.success(`Applied ${presetId} lighting`);
   };
 
   const handleBrightnessChange = (value: number) => {
     onBrightnessChange(value);
+    // Update the actual lighting intensity
     onUpdateLighting({
       primaryLight: {
         ...lightingSettings.primaryLight,
+        intensity: value / 100 * 2 // Scale to 0-2 range
+      }
+    });
+  };
+
+  const handleAmbientIntensityChange = (value: number) => {
+    onUpdateLighting({
+      ambientLight: {
+        ...lightingSettings.ambientLight,
         intensity: value / 100
       }
     });
   };
 
+  const handleDynamicLightingToggle = () => {
+    onUpdateLighting({
+      useDynamicLighting: !lightingSettings.useDynamicLighting
+    });
+    toast.success(`Dynamic lighting ${!lightingSettings.useDynamicLighting ? 'enabled' : 'disabled'}`);
+  };
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-medium text-white">Lighting</h3>
         <div className="flex bg-gray-800 rounded-lg p-1">
@@ -88,44 +118,169 @@ const LightingSection: React.FC<LightingSectionProps> = ({
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
-        {lightingPresets.map((preset) => {
-          const IconComponent = preset.icon;
-          const isActive = lightingSettings.environmentType === preset.id;
-          
-          return (
-            <Button
-              key={preset.id}
-              variant={isActive ? "default" : "outline"}
-              onClick={() => handleLightingPreset(preset.id)}
-              className={`h-16 flex-col gap-2 ${
-                isActive 
-                  ? 'bg-blue-600 hover:bg-blue-700 text-white border-blue-500' 
-                  : 'bg-gray-800/50 hover:bg-gray-700/50 text-gray-300 border-gray-600'
-              }`}
-            >
-              <IconComponent className="h-5 w-5" />
-              <span className="text-xs">{preset.name}</span>
-            </Button>
-          );
-        })}
-      </div>
+      {/* Easy Mode */}
+      {lightingMode === 'easy' && (
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-3">
+            {easyPresets.map((preset) => {
+              const IconComponent = preset.icon;
+              const isActive = lightingSettings.environmentType === preset.id;
+              
+              return (
+                <Button
+                  key={preset.id}
+                  variant={isActive ? "default" : "outline"}
+                  onClick={() => handleLightingPreset(preset.id)}
+                  className={`h-20 flex-col gap-2 p-3 ${
+                    isActive 
+                      ? 'bg-blue-600 hover:bg-blue-700 text-white border-blue-500' 
+                      : 'bg-gray-800/50 hover:bg-gray-700/50 text-gray-300 border-gray-600'
+                  }`}
+                >
+                  <IconComponent className="h-5 w-5" />
+                  <span className="text-xs font-medium">{preset.name}</span>
+                  <span className="text-xs opacity-75 text-center leading-tight">
+                    {preset.description}
+                  </span>
+                </Button>
+              );
+            })}
+          </div>
 
-      {/* Brightness */}
-      <div className="space-y-3">
-        <div className="flex justify-between items-center">
-          <Label className="text-white">Brightness</Label>
-          <span className="text-sm text-gray-400">{brightness}%</span>
+          {/* Simple brightness control */}
+          <div className="space-y-3 bg-gray-800/30 rounded-lg p-4">
+            <div className="flex justify-between items-center">
+              <Label className="text-white">Brightness</Label>
+              <span className="text-sm text-blue-400">{brightness}%</span>
+            </div>
+            <Slider
+              value={[brightness]}
+              min={50}
+              max={200}
+              step={5}
+              onValueChange={([value]) => handleBrightnessChange(value)}
+              className="w-full"
+            />
+          </div>
+
+          {/* Dynamic lighting toggle */}
+          <div className="flex items-center justify-between bg-gray-800/30 rounded-lg p-4">
+            <div>
+              <Label className="text-white">Dynamic Lighting</Label>
+              <p className="text-xs text-gray-400 mt-1">Light follows your mouse</p>
+            </div>
+            <Button
+              variant={lightingSettings.useDynamicLighting ? "default" : "outline"}
+              size="sm"
+              onClick={handleDynamicLightingToggle}
+              className={lightingSettings.useDynamicLighting ? 'bg-blue-600' : ''}
+            >
+              {lightingSettings.useDynamicLighting ? 'On' : 'Off'}
+            </Button>
+          </div>
         </div>
-        <Slider
-          value={[brightness]}
-          min={50}
-          max={200}
-          step={5}
-          onValueChange={([value]) => handleBrightnessChange(value)}
-          className="w-full"
-        />
-      </div>
+      )}
+
+      {/* Pro Mode */}
+      {lightingMode === 'pro' && (
+        <div className="space-y-4">
+          <div className="grid grid-cols-3 gap-2">
+            {proPresets.map((preset) => {
+              const IconComponent = preset.icon;
+              const isActive = lightingSettings.environmentType === preset.id;
+              
+              return (
+                <Button
+                  key={preset.id}
+                  variant={isActive ? "default" : "outline"}
+                  onClick={() => handleLightingPreset(preset.id)}
+                  className={`h-16 flex-col gap-1 text-xs ${
+                    isActive 
+                      ? 'bg-blue-600 hover:bg-blue-700 text-white border-blue-500' 
+                      : 'bg-gray-800/50 hover:bg-gray-700/50 text-gray-300 border-gray-600'
+                  }`}
+                >
+                  <IconComponent className="h-4 w-4" />
+                  <span>{preset.name}</span>
+                </Button>
+              );
+            })}
+          </div>
+
+          {/* Advanced controls */}
+          <div className="space-y-4">
+            {/* Primary Light Intensity */}
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <Label className="text-white text-sm">Primary Light</Label>
+                <span className="text-xs text-gray-400">{lightingSettings.primaryLight.intensity.toFixed(1)}</span>
+              </div>
+              <Slider
+                value={[lightingSettings.primaryLight.intensity]}
+                min={0.1}
+                max={3}
+                step={0.1}
+                onValueChange={([value]) => 
+                  onUpdateLighting({
+                    primaryLight: { ...lightingSettings.primaryLight, intensity: value }
+                  })
+                }
+                className="w-full"
+              />
+            </div>
+
+            {/* Ambient Light */}
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <Label className="text-white text-sm">Ambient Light</Label>
+                <span className="text-xs text-gray-400">{Math.round(lightingSettings.ambientLight.intensity * 100)}%</span>
+              </div>
+              <Slider
+                value={[lightingSettings.ambientLight.intensity * 100]}
+                min={0}
+                max={100}
+                step={5}
+                onValueChange={([value]) => handleAmbientIntensityChange(value)}
+                className="w-full"
+              />
+            </div>
+
+            {/* Environment Map Intensity */}
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <Label className="text-white text-sm">Reflections</Label>
+                <span className="text-xs text-gray-400">{(lightingSettings.envMapIntensity || 1).toFixed(1)}</span>
+              </div>
+              <Slider
+                value={[lightingSettings.envMapIntensity || 1]}
+                min={0}
+                max={3}
+                step={0.1}
+                onValueChange={([value]) => 
+                  onUpdateLighting({ envMapIntensity: value })
+                }
+                className="w-full"
+              />
+            </div>
+
+            {/* Dynamic lighting toggle */}
+            <div className="flex items-center justify-between">
+              <div>
+                <Label className="text-white text-sm">Dynamic Lighting</Label>
+                <p className="text-xs text-gray-400">Mouse interaction</p>
+              </div>
+              <Button
+                variant={lightingSettings.useDynamicLighting ? "default" : "outline"}
+                size="sm"
+                onClick={handleDynamicLightingToggle}
+                className={lightingSettings.useDynamicLighting ? 'bg-blue-600' : ''}
+              >
+                {lightingSettings.useDynamicLighting ? 'On' : 'Off'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

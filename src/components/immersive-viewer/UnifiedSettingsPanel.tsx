@@ -2,7 +2,7 @@
 import React from 'react';
 import { X } from 'lucide-react';
 import { Card } from '@/lib/types';
-import { LightingSettings } from '@/hooks/useCardLighting';
+import { LightingSettings, LightingPreset } from '@/hooks/useCardLighting';
 import CustomizationPanel from './CustomizationPanel';
 
 interface MaterialSettings {
@@ -23,6 +23,7 @@ interface UnifiedSettingsPanelProps {
   onEnvironmentChange: (environment: string) => void;
   lightingSettings: LightingSettings;
   onUpdateLighting: (settings: Partial<LightingSettings>) => void;
+  onApplyPreset?: (preset: LightingPreset) => void;
   materialSettings: MaterialSettings;
   onUpdateMaterial: (settings: Partial<MaterialSettings>) => void;
   onShareCard: () => void;
@@ -43,6 +44,7 @@ const UnifiedSettingsPanel: React.FC<UnifiedSettingsPanelProps> = ({
   onEnvironmentChange,
   lightingSettings,
   onUpdateLighting,
+  onApplyPreset,
   materialSettings,
   onUpdateMaterial,
   onShareCard,
@@ -136,6 +138,7 @@ const UnifiedSettingsPanel: React.FC<UnifiedSettingsPanelProps> = ({
             onClose={onClose}
             lightingSettings={lightingSettings}
             onUpdateLighting={onUpdateLighting}
+            onApplyPreset={onApplyPreset}
             materialSettings={materialSettings}
             onUpdateMaterial={onUpdateMaterial}
             onShareCard={onShareCard}
