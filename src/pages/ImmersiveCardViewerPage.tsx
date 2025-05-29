@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -8,6 +7,7 @@ import ImmersiveViewerInterface from '@/components/immersive-viewer/ImmersiveVie
 import UnifiedSettingsPanel from '@/components/immersive-viewer/UnifiedSettingsPanel';
 import { useCards } from '@/hooks/useCards';
 import { basketballCards } from '@/data/basketballCards';
+import { LightingPreset } from '@/hooks/useCardLighting';
 
 const ImmersiveCardViewerPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -29,7 +29,7 @@ const ImmersiveCardViewerPage: React.FC = () => {
     neon: 0.5,
     galaxy: 0.6
   });
-  const [environmentType, setEnvironmentType] = useState('studio');
+  const [environmentType, setEnvironmentType] = useState<LightingPreset>('studio');
   const [materialSettings, setMaterialSettings] = useState({
     roughness: 0.2,
     metalness: 0.8,
@@ -49,7 +49,7 @@ const ImmersiveCardViewerPage: React.FC = () => {
       intensity: 0.6,
       color: '#f0f0ff'
     },
-    environmentType: 'studio',
+    environmentType: 'studio' as LightingPreset,
     envMapIntensity: 1.0,
     useDynamicLighting: true
   });
@@ -155,8 +155,9 @@ const ImmersiveCardViewerPage: React.FC = () => {
   };
 
   const handleEnvironmentChange = (environment: string) => {
-    setEnvironmentType(environment);
-    setLightingSettings(prev => ({ ...prev, environmentType: environment }));
+    const envType = environment as LightingPreset;
+    setEnvironmentType(envType);
+    setLightingSettings(prev => ({ ...prev, environmentType: envType }));
   };
 
   // New handler functions for effects
