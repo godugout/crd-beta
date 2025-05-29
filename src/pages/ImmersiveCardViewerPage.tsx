@@ -37,11 +37,6 @@ const ImmersiveCardViewerPage: React.FC = () => {
     envMapIntensity: 1.0
   });
   const [lightingSettings, setLightingSettings] = useState({
-    intensity: 1.2,
-    color: '#ffffff',
-    position: { x: 10, y: 10, z: 10 },
-    ambientIntensity: 0.6,
-    environmentType: 'studio',
     primaryLight: {
       x: 10,
       y: 10,
@@ -52,7 +47,10 @@ const ImmersiveCardViewerPage: React.FC = () => {
     ambientLight: {
       intensity: 0.6,
       color: '#f0f0ff'
-    }
+    },
+    environmentType: 'studio' as const,
+    envMapIntensity: 1.0,
+    useDynamicLighting: true
   });
 
   console.log('ImmersiveCardViewerPage: Looking for card with ID:', id);
