@@ -65,11 +65,13 @@ const CustomizationPanel: React.FC<CustomizationPanelProps> = ({
   const handleEffectChange = (effectId: string) => {
     const newEffects = [effectId]; // For now, only allow one effect at a time
     onEffectsChange(newEffects);
+    console.log('Effect changed to:', effectId);
   };
 
   const handleIntensityChange = (intensity: number) => {
     if (activeEffects.length > 0) {
       onEffectIntensityChange(activeEffects[0], intensity / 100);
+      console.log('Effect intensity changed:', activeEffects[0], intensity);
     }
   };
 
@@ -84,13 +86,8 @@ const CustomizationPanel: React.FC<CustomizationPanelProps> = ({
   // Handle brightness changes and sync with lighting
   const handleBrightnessChange = (newBrightness: number) => {
     setBrightness(newBrightness);
-    // Update the actual lighting system
-    onUpdateLighting({
-      primaryLight: {
-        ...lightingSettings.primaryLight,
-        intensity: (newBrightness / 100) * 2 // Scale to reasonable range
-      }
-    });
+    console.log('Brightness changed to:', newBrightness);
+    // This will be handled by the LightingSection component
   };
 
   return (

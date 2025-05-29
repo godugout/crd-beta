@@ -6,10 +6,9 @@ import { Slider } from '@/components/ui/slider';
 import { 
   Lightbulb, 
   Sun, 
-  Palette,
-  Building,
   Moon,
   Camera,
+  Building,
   Sparkles
 } from 'lucide-react';
 import { LightingSettings, LightingPreset } from '@/hooks/useCardLighting';
@@ -42,16 +41,6 @@ const LightingSection: React.FC<LightingSectionProps> = ({
     { id: 'gallery', name: 'Gallery', icon: Building, description: 'Museum display lighting' },
   ];
 
-  // Pro mode presets with more options
-  const proPresets = [
-    { id: 'studio', name: 'Studio', icon: Camera },
-    { id: 'natural', name: 'Natural', icon: Sun },
-    { id: 'dramatic', name: 'Dramatic', icon: Moon },
-    { id: 'gallery', name: 'Gallery', icon: Building },
-    { id: 'twilight', name: 'Twilight', icon: Palette },
-    { id: 'neonclub', name: 'Neon Club', icon: Sparkles },
-  ];
-
   const handleLightingPreset = (presetId: string) => {
     if (onApplyPreset) {
       onApplyPreset(presetId as LightingPreset);
@@ -61,29 +50,25 @@ const LightingSection: React.FC<LightingSectionProps> = ({
 
   const handleBrightnessChange = (value: number) => {
     onBrightnessChange(value);
-    // Update the actual lighting intensity
+    // Directly update lighting intensity
     onUpdateLighting({
       primaryLight: {
         ...lightingSettings.primaryLight,
-        intensity: value / 100 * 2 // Scale to 0-2 range
-      }
-    });
-  };
-
-  const handleAmbientIntensityChange = (value: number) => {
-    onUpdateLighting({
+        intensity: value / 100 * 2.5 // Scale to reasonable range
+      },
       ambientLight: {
         ...lightingSettings.ambientLight,
-        intensity: value / 100
+        intensity: (value / 100) * 0.8 // Scale ambient proportionally
       }
     });
   };
 
   const handleDynamicLightingToggle = () => {
+    const newValue = !lightingSettings.useDynamicLighting;
     onUpdateLighting({
-      useDynamicLighting: !lightingSettings.useDynamicLighting
+      useDynamicLighting: newValue
     });
-    toast.success(`Dynamic lighting ${!lightingSettings.useDynamicLighting ? 'enabled' : 'disabled'}`);
+    toast.success(`Dynamic lighting ${newValue ? 'enabled' : 'disabled'}`);
   };
 
   return (
@@ -92,25 +77,25 @@ const LightingSection: React.FC<LightingSectionProps> = ({
         <h3 className="text-lg font-medium text-white">Lighting</h3>
         <div className="flex bg-gray-800 rounded-lg p-1">
           <Button
-            variant={lightingMode === 'easy' ? "default" : "ghost"}
+            variant="ghost"
             size="sm"
             onClick={() => onLightingModeChange('easy')}
             className={`text-xs px-3 py-1 ${
               lightingMode === 'easy' 
-                ? 'bg-blue-600 text-white' 
-                : 'text-gray-400 hover:text-white'
+                ? 'bg-blue-600 text-white hover:bg-blue-700' 
+                : 'text-gray-400 hover:text-white hover:bg-gray-700'
             }`}
           >
             Easy
           </Button>
           <Button
-            variant={lightingMode === 'pro' ? "default" : "ghost"}
+            variant="ghost"
             size="sm"
             onClick={() => onLightingModeChange('pro')}
             className={`text-xs px-3 py-1 ${
               lightingMode === 'pro' 
-                ? 'bg-blue-600 text-white' 
-                : 'text-gray-400 hover:text-white'
+                ? 'bg-blue-600 text-white hover:bg-blue-700' 
+                : 'text-gray-400 hover:text-white hover:bg-gray-700'
             }`}
           >
             Pro
@@ -129,12 +114,12 @@ const LightingSection: React.FC<LightingSectionProps> = ({
               return (
                 <Button
                   key={preset.id}
-                  variant={isActive ? "default" : "outline"}
+                  variant="outline"
                   onClick={() => handleLightingPreset(preset.id)}
-                  className={`h-20 flex-col gap-2 p-3 ${
+                  className={`h-20 flex-col gap-2 p-3 transition-all duration-200 ${
                     isActive 
-                      ? 'bg-blue-600 hover:bg-blue-700 text-white border-blue-500' 
-                      : 'bg-gray-800/50 hover:bg-gray-700/50 text-gray-300 border-gray-600'
+                      ? 'bg-blue-600 hover:bg-blue-700 text-white border-blue-500 shadow-lg shadow-blue-600/25' 
+                      : 'bg-gray-800/50 hover:bg-gray-700/50 text-gray-300 border-gray-600 hover:border-gray-500'
                   }`}
                 >
                   <IconComponent className="h-5 w-5" />
@@ -151,7 +136,7 @@ const LightingSection: React.FC<LightingSectionProps> = ({
           <div className="space-y-3 bg-gray-800/30 rounded-lg p-4">
             <div className="flex justify-between items-center">
               <Label className="text-white">Brightness</Label>
-              <span className="text-sm text-blue-400">{brightness}%</span>
+              <span className="text-sm text-blue-400 font-medium">{brightness}%</span>
             </div>
             <Slider
               value={[brightness]}
@@ -161,6 +146,10 @@ const LightingSection: React.FC<LightingSectionProps> = ({
               onValueChange={([value]) => handleBrightnessChange(value)}
               className="w-full"
             />
+            <div className="flex justify-between text-xs text-gray-500">
+              <span>Dim</span>
+              <span>Bright</span>
+            </div>
           </div>
 
           {/* Dynamic lighting toggle */}
@@ -173,7 +162,7 @@ const LightingSection: React.FC<LightingSectionProps> = ({
               variant={lightingSettings.useDynamicLighting ? "default" : "outline"}
               size="sm"
               onClick={handleDynamicLightingToggle}
-              className={lightingSettings.useDynamicLighting ? 'bg-blue-600' : ''}
+              className={lightingSettings.useDynamicLighting ? 'bg-blue-600 hover:bg-blue-700' : 'border-gray-600 hover:bg-gray-700'}
             >
               {lightingSettings.useDynamicLighting ? 'On' : 'Off'}
             </Button>
@@ -184,17 +173,17 @@ const LightingSection: React.FC<LightingSectionProps> = ({
       {/* Pro Mode */}
       {lightingMode === 'pro' && (
         <div className="space-y-4">
-          <div className="grid grid-cols-3 gap-2">
-            {proPresets.map((preset) => {
+          <div className="grid grid-cols-2 gap-2">
+            {easyPresets.map((preset) => {
               const IconComponent = preset.icon;
               const isActive = lightingSettings.environmentType === preset.id;
               
               return (
                 <Button
                   key={preset.id}
-                  variant={isActive ? "default" : "outline"}
+                  variant="outline"
                   onClick={() => handleLightingPreset(preset.id)}
-                  className={`h-16 flex-col gap-1 text-xs ${
+                  className={`h-16 flex-col gap-1 text-xs transition-all duration-200 ${
                     isActive 
                       ? 'bg-blue-600 hover:bg-blue-700 text-white border-blue-500' 
                       : 'bg-gray-800/50 hover:bg-gray-700/50 text-gray-300 border-gray-600'
@@ -207,7 +196,7 @@ const LightingSection: React.FC<LightingSectionProps> = ({
             })}
           </div>
 
-          {/* Advanced controls */}
+          {/* Advanced controls with simplified sliders */}
           <div className="space-y-4">
             {/* Primary Light Intensity */}
             <div className="space-y-2">
@@ -240,12 +229,16 @@ const LightingSection: React.FC<LightingSectionProps> = ({
                 min={0}
                 max={100}
                 step={5}
-                onValueChange={([value]) => handleAmbientIntensityChange(value)}
+                onValueChange={([value]) => 
+                  onUpdateLighting({
+                    ambientLight: { ...lightingSettings.ambientLight, intensity: value / 100 }
+                  })
+                }
                 className="w-full"
               />
             </div>
 
-            {/* Environment Map Intensity */}
+            {/* Environment Reflections */}
             <div className="space-y-2">
               <div className="flex justify-between items-center">
                 <Label className="text-white text-sm">Reflections</Label>
@@ -264,7 +257,7 @@ const LightingSection: React.FC<LightingSectionProps> = ({
             </div>
 
             {/* Dynamic lighting toggle */}
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between pt-2 border-t border-gray-700">
               <div>
                 <Label className="text-white text-sm">Dynamic Lighting</Label>
                 <p className="text-xs text-gray-400">Mouse interaction</p>
@@ -273,7 +266,7 @@ const LightingSection: React.FC<LightingSectionProps> = ({
                 variant={lightingSettings.useDynamicLighting ? "default" : "outline"}
                 size="sm"
                 onClick={handleDynamicLightingToggle}
-                className={lightingSettings.useDynamicLighting ? 'bg-blue-600' : ''}
+                className={lightingSettings.useDynamicLighting ? 'bg-blue-600 hover:bg-blue-700' : 'border-gray-600 hover:bg-gray-700'}
               >
                 {lightingSettings.useDynamicLighting ? 'On' : 'Off'}
               </Button>

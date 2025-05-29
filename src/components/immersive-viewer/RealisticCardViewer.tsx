@@ -38,12 +38,12 @@ const RealisticCardViewer: React.FC<RealisticCardViewerProps> = ({
   // Use provided lighting settings or defaults
   const currentLighting = lightingSettings || defaultLighting;
 
-  console.log('RealisticCardViewer: Rendering with effects:', {
+  console.log('RealisticCardViewer: Rendering with settings:', {
     activeEffects,
     effectIntensities,
     environmentType,
-    materialSettings,
-    lightingSettings: currentLighting
+    lightingIntensity: currentLighting?.primaryLight?.intensity,
+    ambientIntensity: currentLighting?.ambientLight?.intensity
   });
 
   // Enhanced mouse movement for dynamic lighting
@@ -80,15 +80,10 @@ const RealisticCardViewer: React.FC<RealisticCardViewerProps> = ({
           height: '100%'
         }}
       >
-        {/* Environment Scene with HDR backgrounds */}
+        {/* Environment Scene */}
         <EnvironmentRenderer environmentType={environmentType} />
         
-        {/* Enhanced Lighting Setup */}
-        <ambientLight 
-          intensity={currentLighting?.ambientLight?.intensity || 0.3} 
-          color={currentLighting?.ambientLight?.color || '#f0f0ff'}
-        />
-        
+        {/* Primary directional light */}
         <directionalLight
           position={[
             currentLighting?.primaryLight?.x || 10,
