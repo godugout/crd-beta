@@ -13,9 +13,9 @@ import {
   Chrome,
   Gem,
   Rainbow,
-  Vintage,
-  Neon,
-  Galaxy
+  Clock,
+  Flashlight,
+  Stars
 } from 'lucide-react';
 import { Card } from '@/lib/types';
 import { LightingSettings, LightingPreset } from '@/hooks/useCardLighting';
@@ -70,16 +70,16 @@ const CustomizationPanel: React.FC<CustomizationPanelProps> = ({
   const [lightingMode, setLightingMode] = useState<'easy' | 'pro'>('easy');
   const [brightness, setBrightness] = useState(120);
   
-  // Visual Effects
+  // Visual Effects with corrected icon imports
   const visualEffects = [
     { id: 'holographic', name: 'Holographic', icon: Rainbow },
     { id: 'refractor', name: 'Refractor', icon: Gem },
     { id: 'foil', name: 'Foil', icon: Sparkles },
     { id: 'chrome', name: 'Chrome', icon: Chrome },
     { id: 'prismatic', name: 'Prismatic', icon: Zap },
-    { id: 'vintage', name: 'Vintage', icon: Vintage },
-    { id: 'neon', name: 'Neon', icon: Neon },
-    { id: 'galaxy', name: 'Galaxy', icon: Galaxy },
+    { id: 'vintage', name: 'Vintage', icon: Clock },
+    { id: 'neon', name: 'Neon', icon: Flashlight },
+    { id: 'galaxy', name: 'Galaxy', icon: Stars },
   ];
 
   // Lighting Presets
