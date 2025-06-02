@@ -1,18 +1,10 @@
 
 import { useState, useEffect } from 'react';
 import { hdrImageCache } from '@/services/hdrImageCache';
-
-interface HDRCacheStats {
-  cachedImages: number;
-  loadingImages: number;
-  cacheUrls: string[];
-  resolutionBreakdown: Record<string, number>;
-  optimalResolution: string;
-  deviceCapabilities: any;
-}
+import type { HDRStats } from '@/services/hdrImageCache';
 
 export const useHDRCache = () => {
-  const [stats, setStats] = useState<HDRCacheStats>({
+  const [stats, setStats] = useState<HDRStats>({
     cachedImages: 0,
     loadingImages: 0,
     cacheUrls: [],
