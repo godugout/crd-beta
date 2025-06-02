@@ -87,20 +87,20 @@ export const useCardMaterials = ({
   const backMaterial = useMemo(() => {
     const envMapIntensity = lightingSettings?.envMapIntensity || 1.0;
     
-    // Enhanced material with darker background and glowing characters
+    // Much darker background with strong character glow
     return new THREE.MeshPhysicalMaterial({
       map: backTexture,
       roughness: 0.1, // Very smooth for reflectivity
-      metalness: 0.1, // Low metalness so texture remains visible
-      envMapIntensity: envMapIntensity * 1.5,
+      metalness: 0.05, // Even lower metalness to preserve texture visibility
+      envMapIntensity: envMapIntensity * 1.2,
       clearcoat: 1.0,
       clearcoatRoughness: 0.02,
-      reflectivity: 0.9,
-      // Strong glow for character visibility with darker background
-      emissive: new THREE.Color(0.05, 0.05, 0.08), // Very subtle blue-tinted glow
-      emissiveIntensity: 0.8, // Strong emission for characters
-      // Darker background adjustment
-      color: new THREE.Color(0.7, 0.7, 0.7), // Darken the overall texture
+      reflectivity: 0.8,
+      // Much stronger glow for character visibility with darker background
+      emissive: new THREE.Color(0.02, 0.02, 0.04), // Subtle blue-tinted glow
+      emissiveIntensity: 1.2, // Increased intensity for better character visibility
+      // Much darker background adjustment
+      color: new THREE.Color(0.3, 0.3, 0.3), // Significantly darker overall texture
       toneMapped: false, // Prevent tone mapping from affecting glow
     });
   }, [backTexture, lightingSettings]);
