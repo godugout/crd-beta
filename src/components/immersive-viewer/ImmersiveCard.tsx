@@ -1,4 +1,3 @@
-
 import React, { useRef, useMemo } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
@@ -111,20 +110,21 @@ const ImmersiveCard: React.FC<ImmersiveCardProps> = ({
   const backMaterial = useMemo(() => {
     const envMapIntensity = lightingSettings?.envMapIntensity || 1.0;
     
-    // Enhanced glowing material for the back with prominent character visibility
+    // Enhanced material with darker background and glowing characters
     return new THREE.MeshPhysicalMaterial({
       map: backTexture,
-      roughness: 0.15, // Slightly rougher to reduce over-reflection
-      metalness: 0.3, // Reduced metalness so texture is more visible
-      envMapIntensity: envMapIntensity * 1.8,
+      roughness: 0.1, // Very smooth for reflectivity
+      metalness: 0.1, // Low metalness so texture remains visible
+      envMapIntensity: envMapIntensity * 1.5,
       clearcoat: 1.0,
-      clearcoatRoughness: 0.05,
-      reflectivity: 0.8,
-      // Enhanced glow properties for character visibility
-      emissive: new THREE.Color(0.15, 0.15, 0.2), // Blue-tinted glow to match reference
-      emissiveIntensity: 0.4, // Strong emission to make characters visible
-      // Tone mapping adjustments
-      toneMapped: false, // Prevent tone mapping from dimming the glow
+      clearcoatRoughness: 0.02,
+      reflectivity: 0.9,
+      // Strong glow for character visibility with darker background
+      emissive: new THREE.Color(0.05, 0.05, 0.08), // Very subtle blue-tinted glow
+      emissiveIntensity: 0.8, // Strong emission for characters
+      // Darker background adjustment
+      color: new THREE.Color(0.7, 0.7, 0.7), // Darken the overall texture
+      toneMapped: false, // Prevent tone mapping from affecting glow
     });
   }, [backTexture, lightingSettings]);
 
@@ -185,7 +185,7 @@ const ImmersiveCard: React.FC<ImmersiveCardProps> = ({
         <primitive object={frontMaterial} />
       </mesh>
       
-      {/* Back of card with enhanced glowing figures */}
+      {/* Back of card with enhanced dark background and glowing figures */}
       <mesh 
         position={[0, 0, -0.01]} 
         rotation={[0, Math.PI, 0]} 
