@@ -23,16 +23,33 @@ class HDRImageCacheService {
   }
 
   /**
-   * HDR URLs for different environments with fallbacks - Updated names to match actual photos
+   * HDR file paths for different environments - Real world scenes
    */
-  private readonly HDR_URLS = {
+  private readonly HDR_PATHS = {
+    studio: '/environments/scenes/photo_studio.hdr',
+    gallery: '/environments/scenes/art_gallery.hdr',
+    stadium: '/environments/scenes/sports_stadium.hdr',
+    twilight: '/environments/scenes/twilight_road.hdr',
+    quarry: '/environments/scenes/stone_quarry.hdr',
+    coastline: '/environments/scenes/ocean_coastline.hdr',
+    hillside: '/environments/scenes/forest_hillside.hdr',
+    milkyway: '/environments/scenes/starry_night.hdr',
+    esplanade: '/environments/scenes/royal_esplanade.hdr',
+    neonclub: '/environments/scenes/cyberpunk_neon.hdr',
+    industrial: '/environments/scenes/industrial_workshop.hdr'
+  };
+
+  /**
+   * Fallback URLs from Polyhaven for when local files are not available
+   */
+  private readonly FALLBACK_URLS = {
     studio: [
       'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/photo_studio_01_1k.hdr',
       'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/studio_small_03_1k.hdr'
     ],
     gallery: [
       'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/museum_of_ethnography_1k.hdr',
-      'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/studio_small_03_1k.hdr'
+      'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/gallery_1k.hdr'
     ],
     stadium: [
       'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/stadium_01_1k.hdr',
@@ -54,11 +71,9 @@ class HDRImageCacheService {
       'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/forest_slope_1k.hdr',
       'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/cape_hill_1k.hdr'
     ],
-    // Updated Milky Way to use proper night sky with stars
     milkyway: [
       'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/starry_night_1k.hdr',
-      'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/night_sky_1k.hdr',
-      'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/milky_way_1k.hdr'
+      'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/night_sky_1k.hdr'
     ],
     esplanade: [
       'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/royal_esplanade_1k.hdr',
@@ -120,7 +135,6 @@ class HDRImageCacheService {
       return texture;
     }
     
-    // ... keep existing code for other environment fallbacks
     const colors = {
       stadium: [0.2, 0.3, 0.5, 1.0],
       gallery: [0.9, 0.9, 0.95, 1.0],
@@ -153,37 +167,68 @@ class HDRImageCacheService {
   }
 
   /**
-   * Try to load HDR with fallbacks
+   * Try to load HDR with local file first, then fallbacks
    */
-  private async loadWithFallbacks(urls: string[], environmentType: string): Promise<THREE.DataTexture> {
-    for (let i = 0; i < urls.length; i++) {
-      try {
-        console.log(`HDRImageCache: Attempting to load ${urls[i]} (attempt ${i + 1}/${urls.length})`);
-        
-        const texture = await new Promise<THREE.DataTexture>((resolve, reject) => {
-          this.loader.load(
-            urls[i],
-            (texture) => {
-              texture.mapping = THREE.EquirectangularReflectionMapping;
-              console.log(`HDRImageCache: Successfully loaded ${urls[i]}`);
-              resolve(texture);
-            },
-            (progress) => {
-              console.log(`HDRImageCache: Loading progress for ${urls[i]}:`, progress);
-            },
-            (error) => {
-              console.warn(`HDRImageCache: Failed to load ${urls[i]}:`, error);
-              reject(error);
-            }
-          );
-        });
-        
-        return texture;
-      } catch (error) {
-        console.warn(`HDRImageCache: Failed to load ${urls[i]}:`, error);
-        if (i === urls.length - 1) {
-          console.log(`HDRImageCache: All HDR URLs failed for ${environmentType}, using fallback`);
-          return this.createFallbackTexture(environmentType);
+  private async loadWithFallbacks(environmentType: string): Promise<THREE.DataTexture> {
+    const localPath = this.HDR_PATHS[environmentType as keyof typeof this.HDR_PATHS];
+    const fallbackUrls = this.FALLBACK_URLS[environmentType as keyof typeof this.FALLBACK_URLS] || [];
+    
+    // Try local file first
+    try {
+      console.log(`HDRImageCache: Attempting to load local HDR: ${localPath}`);
+      
+      const texture = await new Promise<THREE.DataTexture>((resolve, reject) => {
+        this.loader.load(
+          localPath,
+          (texture) => {
+            texture.mapping = THREE.EquirectangularReflectionMapping;
+            console.log(`HDRImageCache: Successfully loaded local HDR: ${localPath}`);
+            resolve(texture);
+          },
+          (progress) => {
+            console.log(`HDRImageCache: Loading progress for ${localPath}:`, progress);
+          },
+          (error) => {
+            console.warn(`HDRImageCache: Failed to load local HDR ${localPath}:`, error);
+            reject(error);
+          }
+        );
+      });
+      
+      return texture;
+    } catch (error) {
+      console.warn(`HDRImageCache: Local HDR failed for ${environmentType}, trying fallbacks`);
+      
+      // Try fallback URLs
+      for (let i = 0; i < fallbackUrls.length; i++) {
+        try {
+          console.log(`HDRImageCache: Attempting fallback ${i + 1}/${fallbackUrls.length}: ${fallbackUrls[i]}`);
+          
+          const texture = await new Promise<THREE.DataTexture>((resolve, reject) => {
+            this.loader.load(
+              fallbackUrls[i],
+              (texture) => {
+                texture.mapping = THREE.EquirectangularReflectionMapping;
+                console.log(`HDRImageCache: Successfully loaded fallback HDR: ${fallbackUrls[i]}`);
+                resolve(texture);
+              },
+              (progress) => {
+                console.log(`HDRImageCache: Loading progress for ${fallbackUrls[i]}:`, progress);
+              },
+              (error) => {
+                console.warn(`HDRImageCache: Failed to load fallback ${fallbackUrls[i]}:`, error);
+                reject(error);
+              }
+            );
+          });
+          
+          return texture;
+        } catch (error) {
+          console.warn(`HDRImageCache: Fallback ${i + 1} failed for ${environmentType}:`, error);
+          if (i === fallbackUrls.length - 1) {
+            console.log(`HDRImageCache: All HDR sources failed for ${environmentType}, using procedural fallback`);
+            return this.createFallbackTexture(environmentType);
+          }
         }
       }
     }
@@ -337,6 +382,38 @@ class HDRImageCacheService {
     this.cache.clear();
     this.preloadPromises.clear();
     console.log('HDRImageCache: Cleared all cache');
+  }
+  /**
+   * Get HDR file path for environment type
+   */
+  getPathForEnvironment(environmentType: string): string {
+    const normalizedType = environmentType.toLowerCase();
+    
+    // Handle legacy aliases
+    const typeMap: Record<string, string> = {
+      'cosmic': 'milkyway',
+      'space': 'milkyway',
+      'nightsky': 'milkyway',
+      'night': 'milkyway',
+      'underwater': 'coastline',
+      'ocean': 'coastline',
+      'forest': 'hillside',
+      'nature': 'hillside',
+      'cyberpunk': 'neonclub',
+      'cyber': 'neonclub',
+      'neon': 'neonclub',
+      'luxury': 'esplanade',
+      'lounge': 'esplanade',
+      'cardshop': 'industrial',
+      'store': 'industrial',
+      'mall': 'industrial',
+      'retro': 'industrial'
+    };
+    
+    const mappedType = typeMap[normalizedType] || normalizedType;
+    const key = mappedType as keyof typeof this.HDR_PATHS;
+    
+    return this.HDR_PATHS[key] || this.HDR_PATHS.studio;
   }
 }
 

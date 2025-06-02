@@ -7,89 +7,89 @@ interface EnvironmentRendererProps {
 }
 
 const EnvironmentRenderer: React.FC<EnvironmentRendererProps> = ({ environmentType }) => {
-  // Map environment types to actual HDR environment presets
+  // Map environment types to actual HDR file paths and configurations
   const environmentConfig = useMemo(() => {
     switch (environmentType) {
       case 'studio':
         return {
-          preset: 'studio',
+          files: '/environments/scenes/photo_studio.hdr',
           background: true,
           intensity: 1.0
         };
       
       case 'gallery':
         return {
-          preset: 'warehouse',
+          files: '/environments/scenes/art_gallery.hdr',
           background: true,
           intensity: 0.8
         };
       
       case 'stadium':
         return {
-          preset: 'park',
+          files: '/environments/scenes/sports_stadium.hdr',
           background: true,
           intensity: 1.2
         };
       
       case 'twilight':
         return {
-          preset: 'sunset',
+          files: '/environments/scenes/twilight_road.hdr',
           background: true,
           intensity: 0.7
         };
       
       case 'quarry':
         return {
-          preset: 'dawn',
+          files: '/environments/scenes/stone_quarry.hdr',
           background: true,
           intensity: 0.9
         };
       
       case 'coastline':
         return {
-          preset: 'dawn',
+          files: '/environments/scenes/ocean_coastline.hdr',
           background: true,
           intensity: 1.1
         };
       
       case 'hillside':
         return {
-          preset: 'forest',
+          files: '/environments/scenes/forest_hillside.hdr',
           background: true,
           intensity: 0.8
         };
       
       case 'milkyway':
         return {
-          preset: 'night',
+          files: '/environments/scenes/starry_night.hdr',
           background: true,
           intensity: 0.4
         };
       
       case 'esplanade':
         return {
-          preset: 'city',
+          files: '/environments/scenes/royal_esplanade.hdr',
           background: true,
           intensity: 1.0
         };
       
       case 'neonclub':
         return {
-          preset: 'apartment',
+          files: '/environments/scenes/cyberpunk_neon.hdr',
           background: true,
           intensity: 0.6
         };
       
       case 'industrial':
         return {
-          preset: 'warehouse',
+          files: '/environments/scenes/industrial_workshop.hdr',
           background: true,
           intensity: 0.7
         };
       
       default:
         return {
-          preset: 'studio',
+          files: '/environments/scenes/photo_studio.hdr',
           background: true,
           intensity: 1.0
         };
@@ -98,16 +98,20 @@ const EnvironmentRenderer: React.FC<EnvironmentRendererProps> = ({ environmentTy
 
   return (
     <>
-      {/* Use HDR environment maps with correct props */}
+      {/* Use HDR files with fallback to preset if file fails to load */}
       <Environment 
-        preset={environmentConfig.preset as any}
+        files={environmentConfig.files}
         background={environmentConfig.background}
+        preset={null}
+        onError={() => {
+          console.warn(`Failed to load HDR for ${environmentType}, using fallback preset`);
+        }}
       />
       
       {/* Add ambient light to ensure proper illumination */}
       <ambientLight intensity={environmentConfig.intensity * 0.3} />
       
-      {/* Special sky for certain environments */}
+      {/* Special sky for twilight environment as enhancement */}
       {environmentType === 'twilight' && (
         <Sky
           distance={450000}
@@ -117,6 +121,7 @@ const EnvironmentRenderer: React.FC<EnvironmentRendererProps> = ({ environmentTy
         />
       )}
       
+      {/* Star field for space environments as enhancement */}
       {environmentType === 'milkyway' && (
         <StarField count={1000} />
       )}

@@ -15,17 +15,17 @@ interface EnvironmentSelectorProps {
 }
 
 const environments = [
-  { value: 'studio', label: 'Photo Studio', description: 'Professional photography setup', icon: '🎬' },
-  { value: 'gallery', label: 'Art Gallery', description: 'Museum exhibition space', icon: '🏛️' },
-  { value: 'stadium', label: 'Sports Stadium', description: 'Athletic arena with floodlights', icon: '🏟️' },
-  { value: 'twilight', label: 'Twilight Road', description: 'Evening countryside highway', icon: '🌅' },
-  { value: 'quarry', label: 'Stone Quarry', description: 'Industrial mining landscape', icon: '⛰️' },
-  { value: 'coastline', label: 'Ocean Coastline', description: 'Seaside cliff with sunset', icon: '🌊' },
-  { value: 'hillside', label: 'Forest Hillside', description: 'Wooded mountain slope', icon: '🌲' },
-  { value: 'milkyway', label: 'Milky Way', description: 'Starry night sky panorama', icon: '🌌' },
-  { value: 'esplanade', label: 'Royal Esplanade', description: 'Elegant palace courtyard', icon: '✨' },
-  { value: 'neonclub', label: 'Neon Studio', description: 'Vibrant neon-lit interior', icon: '🌆' },
-  { value: 'industrial', label: 'Industrial Workshop', description: 'Factory foundry environment', icon: '🏭' },
+  { value: 'studio', label: 'Photo Studio', description: 'Professional photography setup with controlled lighting', icon: '🎬' },
+  { value: 'gallery', label: 'Art Gallery', description: 'Museum exhibition space with gallery lighting', icon: '🏛️' },
+  { value: 'stadium', label: 'Sports Stadium', description: 'Athletic arena with bright floodlights', icon: '🏟️' },
+  { value: 'twilight', label: 'Twilight Road', description: 'Evening countryside highway at golden hour', icon: '🌅' },
+  { value: 'quarry', label: 'Stone Quarry', description: 'Industrial mining landscape with dramatic lighting', icon: '⛰️' },
+  { value: 'coastline', label: 'Ocean Coastline', description: 'Seaside cliff with warm sunset lighting', icon: '🌊' },
+  { value: 'hillside', label: 'Forest Hillside', description: 'Wooded mountain slope with natural light', icon: '🌲' },
+  { value: 'milkyway', label: 'Starry Night', description: 'Night sky with stars and cosmic lighting', icon: '🌌' },
+  { value: 'esplanade', label: 'Royal Esplanade', description: 'Elegant palace courtyard with ambient lighting', icon: '✨' },
+  { value: 'neonclub', label: 'Cyberpunk Club', description: 'Futuristic neon-lit interior space', icon: '🌆' },
+  { value: 'industrial', label: 'Industrial Workshop', description: 'Factory foundry with dramatic industrial lighting', icon: '🏭' },
 ];
 
 const EnvironmentSelector: React.FC<EnvironmentSelectorProps> = ({
