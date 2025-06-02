@@ -111,7 +111,6 @@ const EnvironmentRenderer: React.FC<EnvironmentRendererProps> = ({ environmentTy
           <Environment 
             map={hdrTexture}
             background={true}
-            backgroundIntensity={environmentConfig.intensity}
           />
           {environmentType === 'milkyway' && (
             <fog attach="fog" args={['#000011', 30, 150]} />
@@ -125,7 +124,7 @@ const EnvironmentRenderer: React.FC<EnvironmentRendererProps> = ({ environmentTy
         <>
           {environmentType === 'milkyway' ? (
             <>
-              <Environment preset="night" background={true} backgroundIntensity={0.4} />
+              <Environment preset="night" background={true} />
               <fog attach="fog" args={['#000011', 30, 150]} />
               {/* Add stars manually if HDR fails */}
               <mesh>
@@ -140,14 +139,13 @@ const EnvironmentRenderer: React.FC<EnvironmentRendererProps> = ({ environmentTy
             </>
           ) : environmentType === 'twilight' ? (
             <>
-              <Environment preset="sunset" background={true} backgroundIntensity={0.7} />
+              <Environment preset="sunset" background={true} />
               <fog attach="fog" args={['#4a5568', 40, 180]} />
             </>
           ) : (
             <Environment 
               preset="studio"
               background={true}
-              backgroundIntensity={environmentConfig.intensity}
             />
           )}
         </>
