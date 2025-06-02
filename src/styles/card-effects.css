@@ -10,11 +10,17 @@
   z-index: 10;
 }
 
-/* Interactive states with reduced intensity */
+/* Interactive states with minimal intensity */
 .effect-container.interactive {
   transition: all 0.3s ease;
 }
 
 .effect-container.interactive:hover {
-  opacity: calc(var(--effect-intensity, 1) * 1.05); /* Much more subtle */
+  opacity: calc(var(--effect-intensity, 1) * 1.02); /* Barely noticeable boost */
+}
+
+/* Override any bright light effects */
+.card-effect::before,
+.card-effect::after {
+  opacity: 0.1 !important; /* Force low opacity on any pseudo-elements */
 }

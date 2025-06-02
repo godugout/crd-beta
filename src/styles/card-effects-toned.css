@@ -13,17 +13,17 @@
 .effect-holographic {
   background: linear-gradient(
     135deg,
-    rgba(255,0,0,0.08),    /* Reduced from 0.2 */
-    rgba(255,255,0,0.08),
-    rgba(0,255,0,0.08),
-    rgba(0,255,255,0.08),
-    rgba(0,0,255,0.08),
-    rgba(255,0,255,0.08)
+    rgba(255,0,0,0.05),    /* Further reduced from 0.08 */
+    rgba(255,255,0,0.05),
+    rgba(0,255,0,0.05),
+    rgba(0,255,255,0.05),
+    rgba(0,0,255,0.05),
+    rgba(255,0,255,0.05)
   );
   background-size: 400% 400%;
   animation: rainbow 3s ease infinite;
-  mix-blend-mode: overlay; /* Changed from color-dodge to overlay */
-  opacity: calc(var(--holographic-intensity, 0.7) * 0.6); /* Reduced intensity cap */
+  mix-blend-mode: overlay;
+  opacity: calc(var(--holographic-intensity, 0.7) * 0.4); /* Further reduced */
 }
 
 /* Refractor effect - softer shine */
@@ -32,26 +32,26 @@
     linear-gradient(
       45deg,
       transparent 40%,
-      rgba(255, 255, 255, 0.15) 45%, /* Reduced from 0.4 */
-      rgba(255, 255, 255, 0.2) 50%,  /* Reduced from 0.5 */
-      rgba(255, 255, 255, 0.15) 55%, /* Reduced from 0.4 */
+      rgba(255, 255, 255, 0.08) 45%, /* Further reduced from 0.15 */
+      rgba(255, 255, 255, 0.12) 50%, /* Further reduced from 0.2 */
+      rgba(255, 255, 255, 0.08) 55%, /* Further reduced from 0.15 */
       transparent 60%
     );
   background-size: 200% 200%;
   animation: shimmer 1.5s ease infinite;
-  mix-blend-mode: soft-light; /* Changed from normal to soft-light */
-  opacity: calc(var(--refractor-intensity, 0.8) * 0.5); /* Reduced intensity cap */
+  mix-blend-mode: soft-light;
+  opacity: calc(var(--refractor-intensity, 0.8) * 0.3); /* Further reduced */
 }
 
 /* Shimmer effect - very subtle */
 .effect-shimmer {
   background: radial-gradient(
     circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
-    rgba(255, 255, 255, 0.1) 0%, /* Reduced from 0.3 */
+    rgba(255, 255, 255, 0.05) 0%, /* Further reduced from 0.1 */
     transparent 60%
   );
-  mix-blend-mode: overlay; /* Added softer blend mode */
-  opacity: calc(var(--shimmer-intensity, 0.6) * 0.4); /* Reduced intensity cap */
+  mix-blend-mode: overlay;
+  opacity: calc(var(--shimmer-intensity, 0.6) * 0.2); /* Further reduced */
 }
 
 /* Gold Foil effect - warm but not blinding */
@@ -59,14 +59,14 @@
   background: 
     linear-gradient(
       45deg,
-      rgba(255, 215, 0, 0.12), /* Reduced from 0.3 */
-      rgba(255, 255, 255, 0.15), /* Reduced from 0.4 */
-      rgba(255, 215, 0, 0.12)
+      rgba(255, 215, 0, 0.08), /* Further reduced from 0.12 */
+      rgba(255, 255, 255, 0.1), /* Further reduced from 0.15 */
+      rgba(255, 215, 0, 0.08)
     );
   background-size: 200% 200%;
   animation: shine 2s linear infinite;
-  mix-blend-mode: overlay; /* Changed from normal to overlay */
-  opacity: calc(var(--gold-intensity, 0.7) * 0.6); /* Reduced intensity cap */
+  mix-blend-mode: overlay;
+  opacity: calc(var(--gold-intensity, 0.7) * 0.4); /* Further reduced */
 }
 
 /* Chrome effect - metallic but not harsh */
@@ -74,18 +74,18 @@
   background: 
     linear-gradient(
       45deg,
-      rgba(200, 200, 200, 0.1) 0%,
-      rgba(255, 255, 255, 0.15) 50%,
-      rgba(200, 200, 200, 0.1) 100%
+      rgba(200, 200, 200, 0.06) 0%, /* Further reduced */
+      rgba(255, 255, 255, 0.08) 50%, /* Further reduced */
+      rgba(200, 200, 200, 0.06) 100%
     );
   mix-blend-mode: overlay;
-  opacity: calc(var(--chrome-intensity, 0.8) * 0.5);
+  opacity: calc(var(--chrome-intensity, 0.8) * 0.3); /* Further reduced */
 }
 
 /* Vintage effect - subtle aging */
 .effect-vintage {
-  background: rgba(160, 140, 110, 0.05); /* Reduced from 0.1 */
-  filter: sepia(calc(var(--vintage-intensity, 0.5) * 0.6)); /* Reduced intensity */
+  background: rgba(160, 140, 110, 0.03); /* Further reduced from 0.05 */
+  filter: sepia(calc(var(--vintage-intensity, 0.5) * 0.4)); /* Further reduced */
   mix-blend-mode: multiply;
 }
 
@@ -112,7 +112,7 @@
 }
 
 .effect-container.interactive:hover {
-  opacity: calc(var(--effect-intensity, 1) * 1.1); /* Reduced from 1.2 */
+  opacity: calc(var(--effect-intensity, 1) * 1.05); /* Minimal boost */
 }
 
 /* Card spotlight effect - greatly reduced */
@@ -126,21 +126,21 @@
   inset: 0;
   background: radial-gradient(
     circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
-    rgba(255, 255, 255, 0.02) 0%, /* Greatly reduced from 0.025-0.035 */
+    rgba(255, 255, 255, 0.01) 0%, /* Extremely subtle */
     transparent 40%
   );
   opacity: 0;
   transition: opacity 0.3s ease;
   pointer-events: none;
   z-index: 10;
-  mix-blend-mode: overlay; /* Changed from screen */
+  mix-blend-mode: overlay;
 }
 
 .card-spotlight:hover::before {
-  opacity: 0.6; /* Reduced from 1 */
+  opacity: 0.3; /* Much more subtle */
 }
 
-/* Physical material effects - no more 1.8x boost */
+/* Physical material effects - minimal lighting */
 .card-with-lighting {
   position: relative;
 }
@@ -152,11 +152,26 @@
   background: 
     radial-gradient(
       circle at var(--light-x, 50%) var(--light-y, 50%),
-      rgba(255, 255, 255, 0.008) 0%, /* Greatly reduced from higher values */
+      rgba(255, 255, 255, 0.003) 0%, /* Extremely subtle */
       transparent 60%
     );
-  opacity: calc(var(--light-intensity, 0.8) * 0.5); /* Removed the 1.8x multiplier */
-  mix-blend-mode: soft-light; /* Changed from screen */
+  opacity: calc(var(--light-intensity, 0.8) * 0.3); /* Much lower cap */
+  mix-blend-mode: soft-light;
   pointer-events: none;
   transition: opacity 0.3s ease;
+}
+
+/* Light reflection layer - barely visible */
+.light-reflection-layer {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    rgba(255, 255, 255, 0.02) 0%, /* Extremely subtle */
+    rgba(255, 255, 255, 0) 50%
+  );
+  opacity: 0.2; /* Much lower base opacity */
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  z-index: 5;
 }
