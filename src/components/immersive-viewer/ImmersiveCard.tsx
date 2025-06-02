@@ -24,18 +24,18 @@ const ImmersiveCard: React.FC<ImmersiveCardProps> = ({
   const meshRef = useRef<THREE.Mesh>(null);
   const groupRef = useRef<THREE.Group>(null);
 
-  // Load textures
+  // Load textures with correct orientation
   const frontTexture = useMemo(() => {
     const loader = new THREE.TextureLoader();
     const texture = loader.load(card.imageUrl || '/images/card-placeholder.jpg');
-    texture.flipY = false;
+    texture.flipY = true; // Changed to true to fix upside-down issue
     return texture;
   }, [card.imageUrl]);
 
   const backTexture = useMemo(() => {
     const loader = new THREE.TextureLoader();
     const texture = loader.load('/images/card-back-placeholder.png');
-    texture.flipY = false;
+    texture.flipY = true; // Changed to true to fix upside-down issue
     return texture;
   }, []);
 
@@ -142,7 +142,7 @@ const ImmersiveCard: React.FC<ImmersiveCardProps> = ({
   });
 
   return (
-    <group ref={groupRef} position={[0, 0, 0]}>
+    <group ref={groupRef} position={[0, 0, 0]} rotation={[0, 0, 0]}>
       {/* Front of card */}
       <mesh ref={meshRef} castShadow receiveShadow>
         <planeGeometry args={[2.5, 3.5]} />
