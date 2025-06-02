@@ -1,6 +1,6 @@
 
 import React, { useMemo, useEffect, useState } from 'react';
-import { Environment, Sky } from '@react-three/drei';
+import { Environment } from '@react-three/drei';
 import { hdrImageCache } from '@/services/hdrImageCache';
 import * as THREE from 'three';
 
@@ -53,22 +53,10 @@ const EnvironmentRenderer: React.FC<EnvironmentRendererProps> = ({ environmentTy
       try {
         console.log(`EnvironmentRenderer: Loading environment ${environmentType}`);
         
-        // Force reload for milkyway and twilight to ensure fresh attempt
-        if (environmentType === 'milkyway' || environmentType === 'twilight') {
-          console.log(`EnvironmentRenderer: Force loading ${environmentType} with fresh cache`);
-        }
-        
         const texture = await hdrImageCache.getTexture(environmentType);
         
         if (texture) {
           console.log(`EnvironmentRenderer: Successfully loaded HDR texture for ${environmentType}`);
-          console.log('Texture details:', {
-            width: texture.image?.width,
-            height: texture.image?.height,
-            format: texture.format,
-            mapping: texture.mapping,
-            isDataTexture: texture instanceof THREE.DataTexture
-          });
           
           // Ensure texture is properly configured
           texture.mapping = THREE.EquirectangularReflectionMapping;
@@ -90,71 +78,25 @@ const EnvironmentRenderer: React.FC<EnvironmentRendererProps> = ({ environmentTy
     loadEnvironment();
   }, [environmentType]);
 
-  // Debug logging
-  useEffect(() => {
-    if (isLoading) {
-      console.log(`EnvironmentRenderer: Loading ${environmentType}...`);
-    }
-    if (loadError) {
-      console.error(`EnvironmentRenderer: Error state for ${environmentType}:`, loadError);
-    }
-    if (hdrTexture) {
-      console.log(`EnvironmentRenderer: HDR texture ready for ${environmentType}`, hdrTexture);
-    }
-  }, [isLoading, loadError, hdrTexture, environmentType]);
-
   return (
     <>
-      {/* Use the loaded HDR texture if available, otherwise use specific fallbacks */}
+      {/* Use the loaded HDR texture if available, otherwise use basic presets */}
       {hdrTexture && !isLoading ? (
-        <>
-          <Environment 
-            map={hdrTexture}
-            background={true}
-          />
-          {environmentType === 'milkyway' && (
-            <fog attach="fog" args={['#000011', 30, 150]} />
-          )}
-          {environmentType === 'twilight' && (
-            <fog attach="fog" args={['#4a5568', 40, 180]} />
-          )}
-        </>
+        <Environment 
+          map={hdrTexture}
+          background={true}
+        />
       ) : (
-        /* Fallback environments with enhanced configs */
-        <>
-          {environmentType === 'milkyway' ? (
-            <>
-              <Environment preset="night" background={true} />
-              <fog attach="fog" args={['#000011', 30, 150]} />
-              {/* Add stars manually if HDR fails */}
-              <mesh>
-                <sphereGeometry args={[100, 64, 32]} />
-                <meshBasicMaterial 
-                  color="#000022" 
-                  side={THREE.BackSide}
-                  transparent
-                  opacity={0.8}
-                />
-              </mesh>
-            </>
-          ) : environmentType === 'twilight' ? (
-            <>
-              <Environment preset="sunset" background={true} />
-              <fog attach="fog" args={['#4a5568', 40, 180]} />
-            </>
-          ) : (
-            <Environment 
-              preset="studio"
-              background={true}
-            />
-          )}
-        </>
+        /* Fallback to basic drei presets */
+        <Environment 
+          preset={environmentType === 'milkyway' ? 'night' : 
+                 environmentType === 'twilight' ? 'sunset' : 'studio'}
+          background={true}
+        />
       )}
       
-      {/* Add ambient light to control overall intensity */}
+      {/* Add basic lighting */}
       <ambientLight intensity={environmentConfig.ambientIntensity} />
-      
-      {/* Add directional light with environment-specific intensity */}
       <directionalLight 
         intensity={environmentConfig.intensity} 
         position={[10, 10, 5]} 
