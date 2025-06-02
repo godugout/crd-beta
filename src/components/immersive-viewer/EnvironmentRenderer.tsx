@@ -127,7 +127,6 @@ const EnvironmentRenderer: React.FC<EnvironmentRendererProps> = ({
         <Environment 
           map={hdrTexture}
           background={true}
-          environmentIntensity={lightingSettings?.envMapIntensity || 1.0}
         />
       ) : (
         /* Fallback to basic drei presets */
@@ -135,7 +134,6 @@ const EnvironmentRenderer: React.FC<EnvironmentRendererProps> = ({
           preset={environmentType === 'milkyway' ? 'night' : 
                  environmentType === 'twilight' ? 'sunset' : 'studio'}
           background={true}
-          environmentIntensity={lightingSettings?.envMapIntensity || 1.0}
         />
       )}
       
