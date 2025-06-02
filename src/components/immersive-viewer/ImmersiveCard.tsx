@@ -34,7 +34,7 @@ const ImmersiveCard: React.FC<ImmersiveCardProps> = ({
 
   const backTexture = useMemo(() => {
     const loader = new THREE.TextureLoader();
-    const texture = loader.load('/images/card-back-placeholder.png');
+    const texture = loader.load('/lovable-uploads/f1b608ba-b8c6-40f5-b552-a5d7addbf4ae.png');
     texture.flipY = true; // Changed to true to fix upside-down issue
     return texture;
   }, []);
@@ -106,11 +106,19 @@ const ImmersiveCard: React.FC<ImmersiveCardProps> = ({
 
   const backMaterial = useMemo(() => {
     const envMapIntensity = lightingSettings?.envMapIntensity || 1.0;
+    
+    // Create a highly reflective material for the back with the figures
     return new THREE.MeshPhysicalMaterial({
       map: backTexture,
-      roughness: 0.3,
-      metalness: 0.7,
-      envMapIntensity: envMapIntensity * 1.2,
+      roughness: 0.05, // Very smooth for high reflectivity
+      metalness: 0.95, // High metalness for reflective paint effect
+      envMapIntensity: envMapIntensity * 2.5, // Enhanced environment reflections
+      clearcoat: 1.0, // Full clearcoat for glossy finish
+      clearcoatRoughness: 0.02, // Very smooth clearcoat
+      reflectivity: 1.0, // Maximum reflectivity
+      // Enhanced properties for the "reflective paint" effect
+      color: new THREE.Color(0.1, 0.1, 0.1), // Slight tint to maintain black background
+      emissive: new THREE.Color(0.02, 0.02, 0.02), // Very subtle emission for depth
     });
   }, [backTexture, lightingSettings]);
 
@@ -149,7 +157,7 @@ const ImmersiveCard: React.FC<ImmersiveCardProps> = ({
         <primitive object={frontMaterial} />
       </mesh>
       
-      {/* Back of card */}
+      {/* Back of card with reflective figures */}
       <mesh position={[0, 0, -0.01]} rotation={[0, Math.PI, 0]} castShadow receiveShadow>
         <planeGeometry args={[2.5, 3.5]} />
         <primitive object={backMaterial} />
