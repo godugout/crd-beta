@@ -21,6 +21,8 @@ export const useCardMaterials = ({
 }: CardMaterialsProps) => {
   // Create materials based on active effects and settings
   const frontMaterial = useMemo(() => {
+    console.log('Creating front material with effects:', activeEffects, 'intensities:', effectIntensities);
+    
     // Get environment intensity from lighting settings
     const envMapIntensity = lightingSettings?.envMapIntensity || 1.0;
     
@@ -32,9 +34,15 @@ export const useCardMaterials = ({
       ...materialSettings
     };
 
+    // Get the primary active effect
+    const primaryEffect = activeEffects[0] || 'holographic';
+    const intensity = effectIntensities[primaryEffect] || 0.7;
+    
+    console.log('Applying effect:', primaryEffect, 'with intensity:', intensity);
+
     // Apply effect-specific material properties
-    if (activeEffects.includes('holographic')) {
-      const intensity = effectIntensities.holographic || 0.7;
+    if (primaryEffect === 'holographic' || activeEffects.includes('holographic')) {
+      console.log('Applying holographic effect');
       return new THREE.MeshPhysicalMaterial({
         ...baseSettings,
         metalness: 0.9 * intensity,
@@ -45,11 +53,25 @@ export const useCardMaterials = ({
         iridescence: 1.0 * intensity,
         iridescenceIOR: 1.3,
         iridescenceThicknessRange: [100, 800],
+        reflectivity: 0.9 * intensity,
       });
     }
 
-    if (activeEffects.includes('refractor')) {
-      const intensity = effectIntensities.refractor || 0.5;
+    if (primaryEffect === 'premium_foil' || activeEffects.includes('premium_foil') || activeEffects.includes('foil')) {
+      console.log('Applying premium foil effect');
+      return new THREE.MeshPhysicalMaterial({
+        ...baseSettings,
+        metalness: 1.0 * intensity,
+        roughness: 0.05 * (1 - intensity * 0.9),
+        envMapIntensity: envMapIntensity * 2.5 * intensity,
+        clearcoat: 1.0,
+        clearcoatRoughness: 0.02,
+        reflectivity: 1.0 * intensity,
+      });
+    }
+
+    if (primaryEffect === 'refractor' || activeEffects.includes('refractor')) {
+      console.log('Applying refractor effect');
       return new THREE.MeshPhysicalMaterial({
         ...baseSettings,
         transmission: 0.1 * intensity,
@@ -57,22 +79,26 @@ export const useCardMaterials = ({
         ior: 1.5,
         clearcoat: 1.0,
         clearcoatRoughness: 0.0,
-        envMapIntensity: envMapIntensity,
+        envMapIntensity: envMapIntensity * 1.5,
+        metalness: 0.6 * intensity,
+        roughness: 0.1,
       });
     }
 
-    if (activeEffects.includes('chrome')) {
-      const intensity = effectIntensities.chrome || 0.4;
+    if (primaryEffect === 'chrome' || activeEffects.includes('chrome')) {
+      console.log('Applying chrome effect');
       return new THREE.MeshPhysicalMaterial({
         ...baseSettings,
         metalness: 1.0,
         roughness: 0.05,
         envMapIntensity: envMapIntensity * 3.0 * intensity,
         clearcoat: 1.0,
+        reflectivity: 1.0,
       });
     }
 
-    if (activeEffects.includes('vintage')) {
+    if (primaryEffect === 'vintage_classic' || primaryEffect === 'vintage' || activeEffects.includes('vintage')) {
+      console.log('Applying vintage effect');
       return new THREE.MeshStandardMaterial({
         map: frontTexture,
         roughness: 0.8,
@@ -81,7 +107,35 @@ export const useCardMaterials = ({
       });
     }
 
-    return new THREE.MeshPhysicalMaterial(baseSettings);
+    if (primaryEffect === 'cosmic_rare' || primaryEffect === 'galaxy' || activeEffects.includes('galaxy')) {
+      console.log('Applying cosmic/galaxy effect');
+      return new THREE.MeshPhysicalMaterial({
+        ...baseSettings,
+        metalness: 0.8 * intensity,
+        roughness: 0.1 * (1 - intensity * 0.7),
+        envMapIntensity: envMapIntensity * 2.2 * intensity,
+        clearcoat: 1.0,
+        clearcoatRoughness: 0.05,
+        iridescence: 0.8 * intensity,
+        iridescenceIOR: 1.4,
+        iridescenceThicknessRange: [200, 1000],
+        reflectivity: 0.85 * intensity,
+      });
+    }
+
+    // Default holographic material if no specific effect matched
+    console.log('Applying default holographic material');
+    return new THREE.MeshPhysicalMaterial({
+      ...baseSettings,
+      metalness: 0.9,
+      roughness: 0.1,
+      envMapIntensity: envMapIntensity * 2.0,
+      clearcoat: 1.0,
+      clearcoatRoughness: 0.1,
+      iridescence: 1.0,
+      iridescenceIOR: 1.3,
+      iridescenceThicknessRange: [100, 800],
+    });
   }, [frontTexture, activeEffects, effectIntensities, materialSettings, lightingSettings]);
 
   const backMaterial = useMemo(() => {
@@ -100,7 +154,7 @@ export const useCardMaterials = ({
       emissive: new THREE.Color(0.02, 0.02, 0.04), // Subtle blue-tinted glow
       emissiveIntensity: 1.2, // Increased intensity for better character visibility
       // Much darker background adjustment
-      color: new THREE.Color(0.3, 0.3, 0.3), // Significantly darker overall texture
+      color: new THREE.Color(0.2, 0.2, 0.2), // Even darker overall texture
       toneMapped: false, // Prevent tone mapping from affecting glow
     });
   }, [backTexture, lightingSettings]);
