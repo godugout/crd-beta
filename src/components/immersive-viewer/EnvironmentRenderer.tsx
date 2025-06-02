@@ -75,18 +75,23 @@ const EnvironmentRenderer: React.FC<EnvironmentRendererProps> = ({ environmentTy
         <Environment 
           map={hdrTexture}
           background={true}
-          intensity={environmentConfig.intensity}
         />
       ) : (
         <Environment 
           preset="studio"
           background={true}
-          intensity={environmentConfig.intensity}
         />
       )}
       
-      {/* Add ambient light to ensure proper illumination */}
+      {/* Add ambient light to control overall intensity */}
       <ambientLight intensity={environmentConfig.ambientIntensity} />
+      
+      {/* Add directional light with environment-specific intensity */}
+      <directionalLight 
+        intensity={environmentConfig.intensity} 
+        position={[10, 10, 5]} 
+        castShadow
+      />
       
       {/* Special sky for twilight environment as enhancement */}
       {environmentType === 'twilight' && (
