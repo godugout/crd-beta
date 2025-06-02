@@ -72,13 +72,6 @@ const ImmersiveCardViewerPage: React.FC = () => {
     return loaderResult;
   }
 
-  // Fix the type issue by creating a wrapper function
-  const handleActiveSettingsTabChange = (tab: string) => {
-    if (tab === 'scenes' || tab === 'customize') {
-      setActiveSettingsTab(tab);
-    }
-  };
-
   return (
     <ImmersiveViewerLayout
       card={card!}
@@ -92,7 +85,7 @@ const ImmersiveCardViewerPage: React.FC = () => {
       lightingSettings={lightingSettings}
       handlers={handlers}
       setIsSettingsPanelOpen={setIsSettingsPanelOpen}
-      setActiveSettingsTab={handleActiveSettingsTabChange}
+      setActiveSettingsTab={setActiveSettingsTab}
     />
   );
 };

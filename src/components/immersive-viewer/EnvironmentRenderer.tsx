@@ -1,67 +1,48 @@
 
 import React, { useMemo, useEffect, useState } from 'react';
 import { Environment } from '@react-three/drei';
-import { hdrImageCache } from '@/services/hdr';
+import { hdrImageCache } from '@/services/hdrImageCache';
 import * as THREE from 'three';
 
 interface EnvironmentRendererProps {
   environmentType: string;
-  lightingSettings?: {
-    primaryLight: {
-      intensity: number;
-      color: string;
-      x: number;
-      y: number;
-      z: number;
-    };
-    ambientLight: {
-      intensity: number;
-      color: string;
-    };
-    envMapIntensity: number;
-    useDynamicLighting: boolean;
-    followPointer: boolean;
-    autoRotate: boolean;
-  };
 }
 
-const EnvironmentRenderer: React.FC<EnvironmentRendererProps> = ({ 
-  environmentType, 
-  lightingSettings 
-}) => {
+const EnvironmentRenderer: React.FC<EnvironmentRendererProps> = ({ environmentType }) => {
   const [hdrTexture, setHdrTexture] = useState<THREE.DataTexture | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [currentResolution, setCurrentResolution] = useState<string>('1k');
 
-  // Environment intensity configuration with lighting settings override
+  // Environment intensity configuration
   const environmentConfig = useMemo(() => {
-    const baseConfig = {
-      studio: { intensity: 1.0, ambientIntensity: 0.3 },
-      gallery: { intensity: 0.8, ambientIntensity: 0.3 },
-      stadium: { intensity: 1.2, ambientIntensity: 0.3 },
-      twilight: { intensity: 0.7, ambientIntensity: 0.3 },
-      quarry: { intensity: 0.9, ambientIntensity: 0.3 },
-      coastline: { intensity: 1.1, ambientIntensity: 0.3 },
-      hillside: { intensity: 0.8, ambientIntensity: 0.3 },
-      milkyway: { intensity: 0.4, ambientIntensity: 0.2 },
-      esplanade: { intensity: 1.0, ambientIntensity: 0.3 },
-      neonclub: { intensity: 0.6, ambientIntensity: 0.3 },
-      industrial: { intensity: 0.7, ambientIntensity: 0.3 }
-    };
-
-    const config = baseConfig[environmentType as keyof typeof baseConfig] || baseConfig.studio;
-    
-    // Override with user lighting settings if provided
-    if (lightingSettings) {
-      return {
-        intensity: lightingSettings.primaryLight.intensity,
-        ambientIntensity: lightingSettings.ambientLight.intensity
-      };
+    switch (environmentType) {
+      case 'studio':
+        return { intensity: 1.0, ambientIntensity: 0.3 };
+      case 'gallery':
+        return { intensity: 0.8, ambientIntensity: 0.3 };
+      case 'stadium':
+        return { intensity: 1.2, ambientIntensity: 0.3 };
+      case 'twilight':
+        return { intensity: 0.7, ambientIntensity: 0.3 };
+      case 'quarry':
+        return { intensity: 0.9, ambientIntensity: 0.3 };
+      case 'coastline':
+        return { intensity: 1.1, ambientIntensity: 0.3 };
+      case 'hillside':
+        return { intensity: 0.8, ambientIntensity: 0.3 };
+      case 'milkyway':
+        return { intensity: 0.4, ambientIntensity: 0.2 };
+      case 'esplanade':
+        return { intensity: 1.0, ambientIntensity: 0.3 };
+      case 'neonclub':
+        return { intensity: 0.6, ambientIntensity: 0.3 };
+      case 'industrial':
+        return { intensity: 0.7, ambientIntensity: 0.3 };
+      default:
+        return { intensity: 1.0, ambientIntensity: 0.3 };
     }
-    
-    return config;
-  }, [environmentType, lightingSettings]);
+  }, [environmentType]);
 
   // Load HDR texture using our enhanced cache service with adaptive resolution
   useEffect(() => {
@@ -87,7 +68,7 @@ const EnvironmentRenderer: React.FC<EnvironmentRendererProps> = ({
           texture.minFilter = THREE.LinearMipmapLinearFilter;
           texture.generateMipmaps = true;
           
-          // Enable anisotropic filtering if supported
+          // Enable anisotropic filtering if supported - fixed WebGL extension access
           const canvas = document.createElement('canvas');
           const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
           if (gl) {
@@ -137,36 +118,12 @@ const EnvironmentRenderer: React.FC<EnvironmentRendererProps> = ({
         />
       )}
       
-      {/* Primary directional light with user settings */}
+      {/* Add basic lighting */}
+      <ambientLight intensity={environmentConfig.ambientIntensity} />
       <directionalLight 
         intensity={environmentConfig.intensity} 
-        position={[
-          lightingSettings?.primaryLight.x || 10, 
-          lightingSettings?.primaryLight.y || 10, 
-          lightingSettings?.primaryLight.z || 5
-        ]} 
-        color={lightingSettings?.primaryLight.color || '#ffffff'}
+        position={[10, 10, 5]} 
         castShadow
-        shadow-mapSize-width={2048}
-        shadow-mapSize-height={2048}
-        shadow-camera-far={50}
-        shadow-camera-left={-10}
-        shadow-camera-right={10}
-        shadow-camera-top={10}
-        shadow-camera-bottom={-10}
-      />
-      
-      {/* Ambient light with user settings */}
-      <ambientLight 
-        intensity={environmentConfig.ambientIntensity} 
-        color={lightingSettings?.ambientLight.color || '#f0f0ff'}
-      />
-      
-      {/* Additional fill light for better card visibility */}
-      <pointLight 
-        position={[-5, 5, 5]} 
-        intensity={0.3} 
-        color="#ffffff" 
       />
       
       {/* Debug info for development */}
@@ -175,8 +132,7 @@ const EnvironmentRenderer: React.FC<EnvironmentRendererProps> = ({
           environment: environmentType, 
           resolution: currentResolution,
           isLoading,
-          hasTexture: !!hdrTexture,
-          lightingOverride: !!lightingSettings
+          hasTexture: !!hdrTexture 
         }} />
       )}
     </>
