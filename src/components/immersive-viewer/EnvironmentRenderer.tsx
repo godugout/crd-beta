@@ -52,6 +52,12 @@ const EnvironmentRenderer: React.FC<EnvironmentRendererProps> = ({ environmentTy
     const loadEnvironment = async () => {
       try {
         console.log(`EnvironmentRenderer: Loading environment ${environmentType}`);
+        
+        // Force reload for milkyway and twilight to ensure fresh attempt
+        if (environmentType === 'milkyway' || environmentType === 'twilight') {
+          console.log(`EnvironmentRenderer: Force loading ${environmentType} with fresh cache`);
+        }
+        
         const texture = await hdrImageCache.getTexture(environmentType);
         
         if (texture) {
@@ -60,8 +66,14 @@ const EnvironmentRenderer: React.FC<EnvironmentRendererProps> = ({ environmentTy
             width: texture.image?.width,
             height: texture.image?.height,
             format: texture.format,
-            mapping: texture.mapping
+            mapping: texture.mapping,
+            isDataTexture: texture instanceof THREE.DataTexture
           });
+          
+          // Ensure texture is properly configured
+          texture.mapping = THREE.EquirectangularReflectionMapping;
+          texture.needsUpdate = true;
+          
           setHdrTexture(texture);
         } else {
           console.warn(`EnvironmentRenderer: Failed to load ${environmentType}, texture is null`);
@@ -78,44 +90,64 @@ const EnvironmentRenderer: React.FC<EnvironmentRendererProps> = ({ environmentTy
     loadEnvironment();
   }, [environmentType]);
 
-  // Show loading state
-  if (isLoading) {
-    console.log(`EnvironmentRenderer: Loading ${environmentType}...`);
-  }
-
-  // Show error state
-  if (loadError) {
-    console.error(`EnvironmentRenderer: Error state for ${environmentType}:`, loadError);
-  }
+  // Debug logging
+  useEffect(() => {
+    if (isLoading) {
+      console.log(`EnvironmentRenderer: Loading ${environmentType}...`);
+    }
+    if (loadError) {
+      console.error(`EnvironmentRenderer: Error state for ${environmentType}:`, loadError);
+    }
+    if (hdrTexture) {
+      console.log(`EnvironmentRenderer: HDR texture ready for ${environmentType}`, hdrTexture);
+    }
+  }, [isLoading, loadError, hdrTexture, environmentType]);
 
   return (
     <>
-      {/* Use the loaded HDR texture if available */}
-      {!isLoading && hdrTexture ? (
+      {/* Use the loaded HDR texture if available, otherwise use specific fallbacks */}
+      {hdrTexture && !isLoading ? (
         <>
           <Environment 
             map={hdrTexture}
             background={true}
+            backgroundIntensity={environmentConfig.intensity}
           />
-          <fog attach="fog" args={['#000000', 50, 200]} />
+          {environmentType === 'milkyway' && (
+            <fog attach="fog" args={['#000011', 30, 150]} />
+          )}
+          {environmentType === 'twilight' && (
+            <fog attach="fog" args={['#4a5568', 40, 180]} />
+          )}
         </>
       ) : (
-        /* Fallback environments with specific configs for problematic ones */
+        /* Fallback environments with enhanced configs */
         <>
           {environmentType === 'milkyway' ? (
             <>
-              <Environment preset="night" background={true} />
+              <Environment preset="night" background={true} backgroundIntensity={0.4} />
               <fog attach="fog" args={['#000011', 30, 150]} />
+              {/* Add stars manually if HDR fails */}
+              <mesh>
+                <sphereGeometry args={[100, 64, 32]} />
+                <meshBasicMaterial 
+                  color="#000022" 
+                  side={THREE.BackSide}
+                  transparent
+                  opacity={0.8}
+                />
+              </mesh>
             </>
           ) : environmentType === 'twilight' ? (
             <>
-              <Environment preset="sunset" background={true} />
+              <Environment preset="sunset" background={true} backgroundIntensity={0.7} />
               <fog attach="fog" args={['#4a5568', 40, 180]} />
             </>
           ) : (
             <Environment 
               preset="studio"
               background={true}
+              backgroundIntensity={environmentConfig.intensity}
             />
           )}
         </>
