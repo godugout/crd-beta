@@ -30,7 +30,7 @@ const EnvironmentRenderer: React.FC<EnvironmentRendererProps> = ({ environmentTy
       case 'hillside':
         return { intensity: 0.8, ambientIntensity: 0.3 };
       case 'milkyway':
-        return { intensity: 0.4, ambientIntensity: 0.3 };
+        return { intensity: 0.4, ambientIntensity: 0.2 };
       case 'esplanade':
         return { intensity: 1.0, ambientIntensity: 0.3 };
       case 'neonclub':
@@ -93,7 +93,7 @@ const EnvironmentRenderer: React.FC<EnvironmentRendererProps> = ({ environmentTy
         castShadow
       />
       
-      {/* Special sky for twilight environment as enhancement */}
+      {/* Special sky for twilight environment as enhancement - behind HDR */}
       {environmentType === 'twilight' && (
         <Sky
           distance={450000}
@@ -102,45 +102,7 @@ const EnvironmentRenderer: React.FC<EnvironmentRendererProps> = ({ environmentTy
           azimuth={0.25}
         />
       )}
-      
-      {/* Star field for space environments as enhancement */}
-      {environmentType === 'milkyway' && (
-        <StarField count={1000} />
-      )}
     </>
-  );
-};
-
-// Star field component for space environments
-const StarField: React.FC<{ count: number }> = ({ count }) => {
-  const stars = useMemo(() => {
-    const positions = new Float32Array(count * 3);
-    for (let i = 0; i < count; i++) {
-      positions[i * 3] = (Math.random() - 0.5) * 200;
-      positions[i * 3 + 1] = (Math.random() - 0.5) * 200;
-      positions[i * 3 + 2] = (Math.random() - 0.5) * 200;
-    }
-    return positions;
-  }, [count]);
-
-  return (
-    <points>
-      <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          count={count}
-          array={stars}
-          itemSize={3}
-        />
-      </bufferGeometry>
-      <pointsMaterial 
-        size={0.5} 
-        color="#ffffff" 
-        sizeAttenuation={false}
-        transparent
-        opacity={0.8}
-      />
-    </points>
   );
 };
 
