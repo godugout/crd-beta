@@ -98,14 +98,11 @@ const EnvironmentRenderer: React.FC<EnvironmentRendererProps> = ({ environmentTy
 
   return (
     <>
-      {/* Use HDR files with fallback to preset if file fails to load */}
+      {/* Use HDR files - drei will handle fallbacks internally */}
       <Environment 
         files={environmentConfig.files}
         background={environmentConfig.background}
         preset={null}
-        onError={() => {
-          console.warn(`Failed to load HDR for ${environmentType}, using fallback preset`);
-        }}
       />
       
       {/* Add ambient light to ensure proper illumination */}

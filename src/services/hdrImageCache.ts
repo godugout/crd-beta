@@ -1,3 +1,4 @@
+
 /**
  * HDR Image Cache Service
  * Preloads and caches HDR panoramic images for faster environment loading
@@ -242,8 +243,8 @@ class HDRImageCacheService {
   async preloadAll(): Promise<void> {
     console.log('HDRImageCache: Starting preload of all HDR images...');
     
-    const preloadPromises = Object.entries(this.HDR_URLS).map(([key, urls]) => 
-      this.preloadEnvironment(key, urls).catch(error => {
+    const preloadPromises = Object.keys(this.HDR_PATHS).map(key => 
+      this.preloadEnvironment(key).catch(error => {
         console.warn(`HDRImageCache: Failed to preload ${key}:`, error);
         return null;
       })
@@ -256,7 +257,7 @@ class HDRImageCacheService {
   /**
    * Preload a specific environment with fallbacks
    */
-  async preloadEnvironment(environmentType: string, urls: string[]): Promise<THREE.DataTexture | null> {
+  async preloadEnvironment(environmentType: string): Promise<THREE.DataTexture | null> {
     const cacheKey = `${environmentType}_primary`;
     
     if (this.cache.has(cacheKey)) {
@@ -269,7 +270,7 @@ class HDRImageCacheService {
       return this.preloadPromises.get(cacheKey)!;
     }
 
-    const preloadPromise = this.loadWithFallbacks(urls, environmentType);
+    const preloadPromise = this.loadWithFallbacks(environmentType);
     this.preloadPromises.set(cacheKey, preloadPromise);
     
     try {
@@ -303,8 +304,7 @@ class HDRImageCacheService {
     }
 
     console.log(`HDRImageCache: Texture not cached, loading ${environmentType}...`);
-    const urls = this.getUrlsForEnvironment(environmentType);
-    return this.preloadEnvironment(environmentType, urls);
+    return this.preloadEnvironment(environmentType);
   }
 
   /**
@@ -335,9 +335,9 @@ class HDRImageCacheService {
     };
     
     const mappedType = typeMap[normalizedType] || normalizedType;
-    const key = mappedType as keyof typeof this.HDR_URLS;
+    const key = mappedType as keyof typeof this.FALLBACK_URLS;
     
-    return this.HDR_URLS[key] || this.HDR_URLS.studio;
+    return this.FALLBACK_URLS[key] || this.FALLBACK_URLS.studio;
   }
 
   getUrlForEnvironment(environmentType: string): string {
@@ -383,6 +383,7 @@ class HDRImageCacheService {
     this.preloadPromises.clear();
     console.log('HDRImageCache: Cleared all cache');
   }
+
   /**
    * Get HDR file path for environment type
    */
