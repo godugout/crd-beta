@@ -1,112 +1,92 @@
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect, useState } from 'react';
 import { Environment, Sky } from '@react-three/drei';
+import { hdrImageCache } from '@/services/hdrImageCache';
+import * as THREE from 'three';
 
 interface EnvironmentRendererProps {
   environmentType: string;
 }
 
 const EnvironmentRenderer: React.FC<EnvironmentRendererProps> = ({ environmentType }) => {
-  // Map environment types to actual HDR file paths and configurations
+  const [hdrTexture, setHdrTexture] = useState<THREE.DataTexture | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Environment intensity configuration
   const environmentConfig = useMemo(() => {
     switch (environmentType) {
       case 'studio':
-        return {
-          files: '/environments/scenes/photo_studio.hdr',
-          background: true,
-          intensity: 1.0
-        };
-      
+        return { intensity: 1.0, ambientIntensity: 0.3 };
       case 'gallery':
-        return {
-          files: '/environments/scenes/art_gallery.hdr',
-          background: true,
-          intensity: 0.8
-        };
-      
+        return { intensity: 0.8, ambientIntensity: 0.3 };
       case 'stadium':
-        return {
-          files: '/environments/scenes/sports_stadium.hdr',
-          background: true,
-          intensity: 1.2
-        };
-      
+        return { intensity: 1.2, ambientIntensity: 0.3 };
       case 'twilight':
-        return {
-          files: '/environments/scenes/twilight_road.hdr',
-          background: true,
-          intensity: 0.7
-        };
-      
+        return { intensity: 0.7, ambientIntensity: 0.3 };
       case 'quarry':
-        return {
-          files: '/environments/scenes/stone_quarry.hdr',
-          background: true,
-          intensity: 0.9
-        };
-      
+        return { intensity: 0.9, ambientIntensity: 0.3 };
       case 'coastline':
-        return {
-          files: '/environments/scenes/ocean_coastline.hdr',
-          background: true,
-          intensity: 1.1
-        };
-      
+        return { intensity: 1.1, ambientIntensity: 0.3 };
       case 'hillside':
-        return {
-          files: '/environments/scenes/forest_hillside.hdr',
-          background: true,
-          intensity: 0.8
-        };
-      
+        return { intensity: 0.8, ambientIntensity: 0.3 };
       case 'milkyway':
-        return {
-          files: '/environments/scenes/starry_night.hdr',
-          background: true,
-          intensity: 0.4
-        };
-      
+        return { intensity: 0.4, ambientIntensity: 0.3 };
       case 'esplanade':
-        return {
-          files: '/environments/scenes/royal_esplanade.hdr',
-          background: true,
-          intensity: 1.0
-        };
-      
+        return { intensity: 1.0, ambientIntensity: 0.3 };
       case 'neonclub':
-        return {
-          files: '/environments/scenes/cyberpunk_neon.hdr',
-          background: true,
-          intensity: 0.6
-        };
-      
+        return { intensity: 0.6, ambientIntensity: 0.3 };
       case 'industrial':
-        return {
-          files: '/environments/scenes/industrial_workshop.hdr',
-          background: true,
-          intensity: 0.7
-        };
-      
+        return { intensity: 0.7, ambientIntensity: 0.3 };
       default:
-        return {
-          files: '/environments/scenes/photo_studio.hdr',
-          background: true,
-          intensity: 1.0
-        };
+        return { intensity: 1.0, ambientIntensity: 0.3 };
     }
+  }, [environmentType]);
+
+  // Load HDR texture using our cache service
+  useEffect(() => {
+    setIsLoading(true);
+    setHdrTexture(null);
+
+    const loadEnvironment = async () => {
+      try {
+        console.log(`EnvironmentRenderer: Loading environment ${environmentType}`);
+        const texture = await hdrImageCache.getTexture(environmentType);
+        
+        if (texture) {
+          setHdrTexture(texture);
+          console.log(`EnvironmentRenderer: Successfully loaded ${environmentType}`);
+        } else {
+          console.warn(`EnvironmentRenderer: Failed to load ${environmentType}, using fallback`);
+        }
+      } catch (error) {
+        console.error(`EnvironmentRenderer: Error loading ${environmentType}:`, error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadEnvironment();
   }, [environmentType]);
 
   return (
     <>
-      {/* Use HDR files - drei will handle fallbacks internally */}
-      <Environment 
-        files={environmentConfig.files}
-        background={environmentConfig.background}
-        preset={null}
-      />
+      {/* Use the loaded HDR texture or fallback to preset */}
+      {!isLoading && hdrTexture ? (
+        <Environment 
+          map={hdrTexture}
+          background={true}
+          intensity={environmentConfig.intensity}
+        />
+      ) : (
+        <Environment 
+          preset="studio"
+          background={true}
+          intensity={environmentConfig.intensity}
+        />
+      )}
       
       {/* Add ambient light to ensure proper illumination */}
-      <ambientLight intensity={environmentConfig.intensity * 0.3} />
+      <ambientLight intensity={environmentConfig.ambientIntensity} />
       
       {/* Special sky for twilight environment as enhancement */}
       {environmentType === 'twilight' && (
