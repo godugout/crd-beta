@@ -473,7 +473,7 @@ class HDRImageCacheService {
   }
 
   /**
-   * Get HDR URLs for environment type - Updated with new environment names
+   * Get HDR URLs for environment type - Updated with new environment names - Fixed return type
    */
   getUrlsForEnvironment(environmentType: string): string[] {
     const normalizedType = environmentType.toLowerCase();
@@ -501,8 +501,9 @@ class HDRImageCacheService {
     
     const mappedType = typeMap[normalizedType] || normalizedType;
     const key = mappedType as keyof typeof this.FALLBACK_URLS;
+    const optimalResolution = this.getOptimalResolution();
     
-    return this.FALLBACK_URLS[key] || this.FALLBACK_URLS.studio;
+    return this.FALLBACK_URLS[key]?.[optimalResolution] || this.FALLBACK_URLS.studio[optimalResolution] || this.FALLBACK_URLS.studio['1k'];
   }
 
   getUrlForEnvironment(environmentType: string): string {
@@ -559,7 +560,7 @@ class HDRImageCacheService {
   }
 
   /**
-   * Get HDR file path for environment type
+   * Get HDR file path for environment type - Fixed return type
    */
   getPathForEnvironment(environmentType: string): string {
     const normalizedType = environmentType.toLowerCase();
@@ -587,8 +588,9 @@ class HDRImageCacheService {
     
     const mappedType = typeMap[normalizedType] || normalizedType;
     const key = mappedType as keyof typeof this.HDR_PATHS;
+    const optimalResolution = this.getOptimalResolution();
     
-    return this.HDR_PATHS[key] || this.HDR_PATHS.studio;
+    return this.HDR_PATHS[key]?.[optimalResolution] || this.HDR_PATHS.studio[optimalResolution] || this.HDR_PATHS.studio['1k'];
   }
 }
 

@@ -68,13 +68,16 @@ const EnvironmentRenderer: React.FC<EnvironmentRendererProps> = ({ environmentTy
           texture.minFilter = THREE.LinearMipmapLinearFilter;
           texture.generateMipmaps = true;
           
-          // Enable anisotropic filtering if supported
+          // Enable anisotropic filtering if supported - fixed WebGL extension access
           const canvas = document.createElement('canvas');
           const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
           if (gl) {
-            const maxAnisotropy = gl.getParameter(gl.getExtension('EXT_texture_filter_anisotropic')?.MAX_TEXTURE_MAX_ANISOTROPY_EXT || gl.MAX_TEXTURE_MAX_ANISOTROPY_EXT);
-            if (maxAnisotropy) {
-              texture.anisotropy = Math.min(16, maxAnisotropy);
+            const ext = gl.getExtension('EXT_texture_filter_anisotropic');
+            if (ext) {
+              const maxAnisotropy = gl.getParameter(ext.MAX_TEXTURE_MAX_ANISOTROPY_EXT);
+              if (maxAnisotropy) {
+                texture.anisotropy = Math.min(16, maxAnisotropy);
+              }
             }
           }
           
