@@ -16,42 +16,35 @@ const EnvironmentRenderer: React.FC<EnvironmentRendererProps> = ({
   const [hdrTexture, setHdrTexture] = useState<THREE.DataTexture | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Environment intensity configuration based on environment type
+  // Environment configuration based on environment type
   const environmentConfig = useMemo(() => {
     switch (environmentType) {
       case 'studio':
-        return { intensity: 1.0, background: true };
+        return { background: true };
       case 'gallery':
-        return { intensity: 0.8, background: true };
+        return { background: true };
       case 'stadium':
-        return { intensity: 1.2, background: true };
+        return { background: true };
       case 'twilight':
-        return { intensity: 0.7, background: true };
+        return { background: true };
       case 'quarry':
-        return { intensity: 0.9, background: true };
+        return { background: true };
       case 'coastline':
-        return { intensity: 1.1, background: true };
+        return { background: true };
       case 'hillside':
-        return { intensity: 0.8, background: true };
+        return { background: true };
       case 'milkyway':
-        return { intensity: 0.4, background: true };
+        return { background: true };
       case 'esplanade':
-        return { intensity: 1.0, background: true };
+        return { background: true };
       case 'neonclub':
-        return { intensity: 0.6, background: true };
+        return { background: true };
       case 'industrial':
-        return { intensity: 0.7, background: true };
+        return { background: true };
       default:
-        return { intensity: 1.0, background: true };
+        return { background: true };
     }
   }, [environmentType]);
-
-  // Apply lighting settings intensity multiplier
-  const finalIntensity = useMemo(() => {
-    const baseIntensity = environmentConfig.intensity;
-    const lightingMultiplier = lightingSettings?.envMapIntensity || 1.0;
-    return baseIntensity * lightingMultiplier;
-  }, [environmentConfig.intensity, lightingSettings?.envMapIntensity]);
 
   // Load HDR texture
   useEffect(() => {
@@ -94,14 +87,12 @@ const EnvironmentRenderer: React.FC<EnvironmentRendererProps> = ({
         <Environment 
           map={hdrTexture}
           background={environmentConfig.background}
-          environmentIntensity={finalIntensity}
         />
       ) : (
         <Environment 
           preset={environmentType === 'milkyway' ? 'night' : 
                  environmentType === 'twilight' ? 'sunset' : 'studio'}
           background={environmentConfig.background}
-          environmentIntensity={finalIntensity}
         />
       )}
     </>

@@ -41,11 +41,14 @@ const ImmersiveCard: React.FC<ImmersiveCardProps> = ({
 
   // Create materials based on active effects and settings
   const frontMaterial = useMemo(() => {
+    // Get environment intensity from lighting settings
+    const envMapIntensity = lightingSettings?.envMapIntensity || 1.0;
+    
     const baseSettings = {
       map: frontTexture,
       roughness: materialSettings?.roughness || 0.2,
       metalness: materialSettings?.metalness || 0.8,
-      envMapIntensity: materialSettings?.envMapIntensity || 1.0,
+      envMapIntensity: envMapIntensity,
       ...materialSettings
     };
 
@@ -56,7 +59,7 @@ const ImmersiveCard: React.FC<ImmersiveCardProps> = ({
         ...baseSettings,
         metalness: 0.9 * intensity,
         roughness: 0.1 * (1 - intensity * 0.8),
-        envMapIntensity: 2.0 * intensity,
+        envMapIntensity: envMapIntensity * 2.0 * intensity,
         clearcoat: 1.0,
         clearcoatRoughness: 0.1,
         iridescence: 1.0 * intensity,
@@ -74,6 +77,7 @@ const ImmersiveCard: React.FC<ImmersiveCardProps> = ({
         ior: 1.5,
         clearcoat: 1.0,
         clearcoatRoughness: 0.0,
+        envMapIntensity: envMapIntensity,
       });
     }
 
@@ -83,7 +87,7 @@ const ImmersiveCard: React.FC<ImmersiveCardProps> = ({
         ...baseSettings,
         metalness: 1.0,
         roughness: 0.05,
-        envMapIntensity: 3.0 * intensity,
+        envMapIntensity: envMapIntensity * 3.0 * intensity,
         clearcoat: 1.0,
       });
     }
@@ -93,21 +97,22 @@ const ImmersiveCard: React.FC<ImmersiveCardProps> = ({
         map: frontTexture,
         roughness: 0.8,
         metalness: 0.1,
-        envMapIntensity: 0.3,
+        envMapIntensity: envMapIntensity * 0.3,
       });
     }
 
     return new THREE.MeshPhysicalMaterial(baseSettings);
-  }, [frontTexture, activeEffects, effectIntensities, materialSettings]);
+  }, [frontTexture, activeEffects, effectIntensities, materialSettings, lightingSettings]);
 
   const backMaterial = useMemo(() => {
+    const envMapIntensity = lightingSettings?.envMapIntensity || 1.0;
     return new THREE.MeshPhysicalMaterial({
       map: backTexture,
       roughness: 0.3,
       metalness: 0.7,
-      envMapIntensity: 1.2,
+      envMapIntensity: envMapIntensity * 1.2,
     });
-  }, [backTexture]);
+  }, [backTexture, lightingSettings]);
 
   // Animation loop
   useFrame((state, delta) => {
