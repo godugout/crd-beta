@@ -70,7 +70,14 @@ export const HDR_LOCAL_PATHS: HDRPaths = {
   }
 };
 
-export const HDR_FALLBACK_URLS: HDRPaths = {
+// Fix: HDR_FALLBACK_URLS should contain string arrays for multiple fallback options
+interface HDRFallbackPaths {
+  [key: string]: {
+    [resolution: string]: string[];
+  };
+}
+
+export const HDR_FALLBACK_URLS: HDRFallbackPaths = {
   studio: {
     '1k': ['https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/photo_studio_01_1k.hdr'],
     '2k': ['https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/2k/photo_studio_01_2k.hdr'],

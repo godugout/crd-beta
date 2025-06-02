@@ -91,7 +91,7 @@ export class HDRImageCacheService {
   }
 
   /**
-   * Get HDR URLs for environment type
+   * Get HDR URLs for environment type - returns array of fallback URLs
    */
   getUrlsForEnvironment(environmentType: string): string[] {
     const normalizedType = environmentType.toLowerCase();
@@ -103,9 +103,12 @@ export class HDRImageCacheService {
            HDR_FALLBACK_URLS.studio['1k'];
   }
 
+  /**
+   * Get first HDR URL for environment type - returns single URL string
+   */
   getUrlForEnvironment(environmentType: string): string {
     const urls = this.getUrlsForEnvironment(environmentType);
-    return urls[0];
+    return urls[0] || '';
   }
 
   /**
