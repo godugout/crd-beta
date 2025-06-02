@@ -1,6 +1,6 @@
 
 import React, { useRef, useMemo } from 'react';
-import { useFrame } from '@react-three/fiber';
+import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { Card } from '@/lib/types';
 
@@ -11,6 +11,7 @@ interface ImmersiveCardProps {
   effectIntensities: Record<string, number>;
   materialSettings: any;
   lightingSettings: any;
+  onFlip?: () => void;
 }
 
 const ImmersiveCard: React.FC<ImmersiveCardProps> = ({
@@ -19,23 +20,26 @@ const ImmersiveCard: React.FC<ImmersiveCardProps> = ({
   activeEffects,
   effectIntensities,
   materialSettings,
-  lightingSettings
+  lightingSettings,
+  onFlip
 }) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const groupRef = useRef<THREE.Group>(null);
+  const { raycaster, camera } = useThree();
+  const lastClickTime = useRef(0);
 
   // Load textures with correct orientation
   const frontTexture = useMemo(() => {
     const loader = new THREE.TextureLoader();
     const texture = loader.load(card.imageUrl || '/images/card-placeholder.jpg');
-    texture.flipY = true; // Changed to true to fix upside-down issue
+    texture.flipY = true;
     return texture;
   }, [card.imageUrl]);
 
   const backTexture = useMemo(() => {
     const loader = new THREE.TextureLoader();
     const texture = loader.load('/lovable-uploads/f1b608ba-b8c6-40f5-b552-a5d7addbf4ae.png');
-    texture.flipY = true; // Changed to true to fix upside-down issue
+    texture.flipY = true;
     return texture;
   }, []);
 
@@ -107,20 +111,39 @@ const ImmersiveCard: React.FC<ImmersiveCardProps> = ({
   const backMaterial = useMemo(() => {
     const envMapIntensity = lightingSettings?.envMapIntensity || 1.0;
     
-    // Create a highly reflective material for the back with the figures
+    // Enhanced glowing material for the back with prominent character visibility
     return new THREE.MeshPhysicalMaterial({
       map: backTexture,
-      roughness: 0.05, // Very smooth for high reflectivity
-      metalness: 0.95, // High metalness for reflective paint effect
-      envMapIntensity: envMapIntensity * 2.5, // Enhanced environment reflections
-      clearcoat: 1.0, // Full clearcoat for glossy finish
-      clearcoatRoughness: 0.02, // Very smooth clearcoat
-      reflectivity: 1.0, // Maximum reflectivity
-      // Enhanced properties for the "reflective paint" effect
-      color: new THREE.Color(0.1, 0.1, 0.1), // Slight tint to maintain black background
-      emissive: new THREE.Color(0.02, 0.02, 0.02), // Very subtle emission for depth
+      roughness: 0.15, // Slightly rougher to reduce over-reflection
+      metalness: 0.3, // Reduced metalness so texture is more visible
+      envMapIntensity: envMapIntensity * 1.8,
+      clearcoat: 1.0,
+      clearcoatRoughness: 0.05,
+      reflectivity: 0.8,
+      // Enhanced glow properties for character visibility
+      emissive: new THREE.Color(0.15, 0.15, 0.2), // Blue-tinted glow to match reference
+      emissiveIntensity: 0.4, // Strong emission to make characters visible
+      // Tone mapping adjustments
+      toneMapped: false, // Prevent tone mapping from dimming the glow
     });
   }, [backTexture, lightingSettings]);
+
+  // Handle double-click to flip
+  const handleCardClick = (event: any) => {
+    if (!onFlip) return;
+
+    event.stopPropagation();
+    
+    const currentTime = Date.now();
+    const timeDiff = currentTime - lastClickTime.current;
+    
+    // Double-click detection (within 300ms)
+    if (timeDiff < 300) {
+      onFlip();
+    }
+    
+    lastClickTime.current = currentTime;
+  };
 
   // Animation loop
   useFrame((state, delta) => {
@@ -152,13 +175,24 @@ const ImmersiveCard: React.FC<ImmersiveCardProps> = ({
   return (
     <group ref={groupRef} position={[0, 0, 0]} rotation={[0, 0, 0]}>
       {/* Front of card */}
-      <mesh ref={meshRef} castShadow receiveShadow>
+      <mesh 
+        ref={meshRef} 
+        castShadow 
+        receiveShadow
+        onClick={handleCardClick}
+      >
         <planeGeometry args={[2.5, 3.5]} />
         <primitive object={frontMaterial} />
       </mesh>
       
-      {/* Back of card with reflective figures */}
-      <mesh position={[0, 0, -0.01]} rotation={[0, Math.PI, 0]} castShadow receiveShadow>
+      {/* Back of card with enhanced glowing figures */}
+      <mesh 
+        position={[0, 0, -0.01]} 
+        rotation={[0, Math.PI, 0]} 
+        castShadow 
+        receiveShadow
+        onClick={handleCardClick}
+      >
         <planeGeometry args={[2.5, 3.5]} />
         <primitive object={backMaterial} />
       </mesh>

@@ -95,7 +95,7 @@ const ImmersiveViewerLayout: React.FC<ImmersiveViewerLayoutProps> = ({
           color={lightingSettings?.ambientLight?.color || '#f0f0ff'}
         />
 
-        {/* 3D Card */}
+        {/* 3D Card with flip handler */}
         <ImmersiveCard
           card={card}
           isFlipped={isFlipped}
@@ -103,6 +103,7 @@ const ImmersiveViewerLayout: React.FC<ImmersiveViewerLayoutProps> = ({
           effectIntensities={effectIntensities}
           materialSettings={materialSettings}
           lightingSettings={lightingSettings}
+          onFlip={handlers.handleFlip}
         />
       </Canvas>
 
