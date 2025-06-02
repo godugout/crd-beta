@@ -6,93 +6,79 @@ import * as THREE from 'three';
 
 interface EnvironmentRendererProps {
   environmentType: string;
+  lightingSettings?: any;
 }
 
-const EnvironmentRenderer: React.FC<EnvironmentRendererProps> = ({ environmentType }) => {
+const EnvironmentRenderer: React.FC<EnvironmentRendererProps> = ({ 
+  environmentType, 
+  lightingSettings 
+}) => {
   const [hdrTexture, setHdrTexture] = useState<THREE.DataTexture | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [loadError, setLoadError] = useState<string | null>(null);
-  const [currentResolution, setCurrentResolution] = useState<string>('1k');
 
-  // Environment intensity configuration
+  // Environment intensity configuration based on environment type
   const environmentConfig = useMemo(() => {
     switch (environmentType) {
       case 'studio':
-        return { intensity: 1.0, ambientIntensity: 0.3 };
+        return { intensity: 1.0, background: true };
       case 'gallery':
-        return { intensity: 0.8, ambientIntensity: 0.3 };
+        return { intensity: 0.8, background: true };
       case 'stadium':
-        return { intensity: 1.2, ambientIntensity: 0.3 };
+        return { intensity: 1.2, background: true };
       case 'twilight':
-        return { intensity: 0.7, ambientIntensity: 0.3 };
+        return { intensity: 0.7, background: true };
       case 'quarry':
-        return { intensity: 0.9, ambientIntensity: 0.3 };
+        return { intensity: 0.9, background: true };
       case 'coastline':
-        return { intensity: 1.1, ambientIntensity: 0.3 };
+        return { intensity: 1.1, background: true };
       case 'hillside':
-        return { intensity: 0.8, ambientIntensity: 0.3 };
+        return { intensity: 0.8, background: true };
       case 'milkyway':
-        return { intensity: 0.4, ambientIntensity: 0.2 };
+        return { intensity: 0.4, background: true };
       case 'esplanade':
-        return { intensity: 1.0, ambientIntensity: 0.3 };
+        return { intensity: 1.0, background: true };
       case 'neonclub':
-        return { intensity: 0.6, ambientIntensity: 0.3 };
+        return { intensity: 0.6, background: true };
       case 'industrial':
-        return { intensity: 0.7, ambientIntensity: 0.3 };
+        return { intensity: 0.7, background: true };
       default:
-        return { intensity: 1.0, ambientIntensity: 0.3 };
+        return { intensity: 1.0, background: true };
     }
   }, [environmentType]);
 
-  // Load HDR texture using our enhanced cache service with adaptive resolution
+  // Apply lighting settings intensity multiplier
+  const finalIntensity = useMemo(() => {
+    const baseIntensity = environmentConfig.intensity;
+    const lightingMultiplier = lightingSettings?.envMapIntensity || 1.0;
+    return baseIntensity * lightingMultiplier;
+  }, [environmentConfig.intensity, lightingSettings?.envMapIntensity]);
+
+  // Load HDR texture
   useEffect(() => {
     setIsLoading(true);
     setHdrTexture(null);
-    setLoadError(null);
 
     const loadEnvironment = async () => {
       try {
-        console.log(`EnvironmentRenderer: Loading adaptive resolution environment ${environmentType}`);
+        console.log(`EnvironmentRenderer: Loading environment ${environmentType}`);
         
         const texture = await hdrImageCache.getTexture(environmentType);
         
         if (texture) {
           console.log(`EnvironmentRenderer: Successfully loaded HDR texture for ${environmentType}`);
           
-          // Ensure texture is properly configured with enhanced filtering
           texture.mapping = THREE.EquirectangularReflectionMapping;
           texture.needsUpdate = true;
-          
-          // Enhanced texture filtering for better quality
           texture.magFilter = THREE.LinearFilter;
           texture.minFilter = THREE.LinearMipmapLinearFilter;
           texture.generateMipmaps = true;
           
-          // Enable anisotropic filtering if supported - fixed WebGL extension access
-          const canvas = document.createElement('canvas');
-          const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
-          if (gl) {
-            const ext = gl.getExtension('EXT_texture_filter_anisotropic');
-            if (ext) {
-              const maxAnisotropy = gl.getParameter(ext.MAX_TEXTURE_MAX_ANISOTROPY_EXT);
-              if (maxAnisotropy) {
-                texture.anisotropy = Math.min(16, maxAnisotropy);
-              }
-            }
-          }
-          
           setHdrTexture(texture);
-          
-          // Get stats to show current resolution
-          const stats = hdrImageCache.getStats();
-          setCurrentResolution(stats.optimalResolution);
         } else {
-          console.warn(`EnvironmentRenderer: Failed to load ${environmentType}, texture is null`);
-          setLoadError(`Failed to load HDR texture for ${environmentType}`);
+          console.warn(`EnvironmentRenderer: Failed to load ${environmentType}`);
         }
       } catch (error) {
         console.error(`EnvironmentRenderer: Error loading ${environmentType}:`, error);
-        setLoadError(`Error loading ${environmentType}: ${error}`);
       } finally {
         setIsLoading(false);
       }
@@ -103,37 +89,20 @@ const EnvironmentRenderer: React.FC<EnvironmentRendererProps> = ({ environmentTy
 
   return (
     <>
-      {/* Use the loaded HDR texture if available, otherwise use basic presets */}
+      {/* Use HDR texture if available, otherwise fallback to basic presets */}
       {hdrTexture && !isLoading ? (
         <Environment 
           map={hdrTexture}
-          background={true}
+          background={environmentConfig.background}
+          environmentIntensity={finalIntensity}
         />
       ) : (
-        /* Fallback to basic drei presets */
         <Environment 
           preset={environmentType === 'milkyway' ? 'night' : 
                  environmentType === 'twilight' ? 'sunset' : 'studio'}
-          background={true}
+          background={environmentConfig.background}
+          environmentIntensity={finalIntensity}
         />
-      )}
-      
-      {/* Add basic lighting */}
-      <ambientLight intensity={environmentConfig.ambientIntensity} />
-      <directionalLight 
-        intensity={environmentConfig.intensity} 
-        position={[10, 10, 5]} 
-        castShadow
-      />
-      
-      {/* Debug info for development */}
-      {process.env.NODE_ENV === 'development' && (
-        <group userData={{ 
-          environment: environmentType, 
-          resolution: currentResolution,
-          isLoading,
-          hasTexture: !!hdrTexture 
-        }} />
       )}
     </>
   );

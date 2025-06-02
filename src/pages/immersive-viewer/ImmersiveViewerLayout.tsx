@@ -1,9 +1,11 @@
 
 import React from 'react';
+import { Canvas } from '@react-three/fiber';
+import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
 import { Card } from '@/lib/types';
-import RealisticCardViewer from '@/components/immersive-viewer/RealisticCardViewer';
-import ImmersiveViewerInterface from '@/components/immersive-viewer/ImmersiveViewerInterface';
-import UnifiedSettingsPanel from '@/components/immersive-viewer/UnifiedSettingsPanel';
+import EnvironmentRenderer from '@/components/immersive-viewer/EnvironmentRenderer';
+import ImmersiveCard from '@/components/immersive-viewer/ImmersiveCard';
+import ImmersiveViewerUI from './ImmersiveViewerUI';
 
 interface ImmersiveViewerLayoutProps {
   card: Card;
@@ -50,67 +52,74 @@ const ImmersiveViewerLayout: React.FC<ImmersiveViewerLayoutProps> = ({
   setActiveSettingsTab
 }) => {
   return (
-    <div className="fixed inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-black overflow-hidden">
-      {/* Main viewer container - adjust width when panel is open */}
-      <div 
-        className={`transition-all duration-300 ${
-          isSettingsPanelOpen ? 'mr-[420px]' : 'mr-0'
-        }`}
-        style={{ height: '100vh' }}
-      >
-        {/* 3D Card Viewer */}
-        <RealisticCardViewer
+    <div className="h-screen bg-gray-900 relative overflow-hidden">
+      {/* 3D Canvas */}
+      <Canvas className="w-full h-full" shadows dpr={[1, 2]} gl={{ antialias: true }}>
+        <PerspectiveCamera makeDefault position={[0, 0, 5]} fov={45} />
+        
+        <OrbitControls 
+          enablePan={true}
+          enableZoom={true}
+          enableRotate={true}
+          autoRotate={lightingSettings?.autoRotate || false}
+          autoRotateSpeed={0.5}
+          minDistance={3}
+          maxDistance={8}
+          maxPolarAngle={Math.PI * 0.8}
+          minPolarAngle={Math.PI * 0.2}
+        />
+
+        {/* Environment and Lighting */}
+        <EnvironmentRenderer
+          environmentType={environmentType}
+          lightingSettings={lightingSettings}
+        />
+
+        {/* Primary Lighting */}
+        <directionalLight
+          position={[
+            lightingSettings?.primaryLight?.x || 10,
+            lightingSettings?.primaryLight?.y || 10,
+            lightingSettings?.primaryLight?.z || 5
+          ]}
+          intensity={lightingSettings?.primaryLight?.intensity || 1.2}
+          color={lightingSettings?.primaryLight?.color || '#ffffff'}
+          castShadow
+          shadow-mapSize-width={2048}
+          shadow-mapSize-height={2048}
+        />
+
+        {/* Ambient Lighting */}
+        <ambientLight
+          intensity={lightingSettings?.ambientLight?.intensity || 0.6}
+          color={lightingSettings?.ambientLight?.color || '#f0f0ff'}
+        />
+
+        {/* 3D Card */}
+        <ImmersiveCard
           card={card}
-          isCustomizationOpen={isSettingsPanelOpen}
-          onToggleCustomization={() => setIsSettingsPanelOpen(!isSettingsPanelOpen)}
+          isFlipped={isFlipped}
           activeEffects={activeEffects}
           effectIntensities={effectIntensities}
-          environmentType={environmentType}
           materialSettings={materialSettings}
           lightingSettings={lightingSettings}
         />
-        
-        {/* Interface Overlay */}
-        <ImmersiveViewerInterface
-          card={card}
-          isFlipped={isFlipped}
-          onFlip={handlers.handleFlip}
-          onBack={handlers.handleBack}
-          onShare={handlers.handleShare}
-          onDownload={handlers.handleDownload}
-          onLike={handlers.handleLike}
-          onBookmark={handlers.handleBookmark}
-          onRemix={handlers.handleRemix}
-          isCustomizationOpen={isSettingsPanelOpen}
-          onToggleCustomization={() => setIsSettingsPanelOpen(!isSettingsPanelOpen)}
-          environmentType={environmentType}
-          onEnvironmentChange={handlers.handleEnvironmentChange}
-          onOpenScenesPanel={handlers.handleOpenScenesPanel}
-          onOpenCustomizePanel={handlers.handleOpenCustomizePanel}
-          activeEffects={activeEffects}
-          lightingSettings={lightingSettings}
-        />
-      </div>
-      
-      {/* Unified Settings Panel */}
-      <UnifiedSettingsPanel
+      </Canvas>
+
+      {/* UI Overlay */}
+      <ImmersiveViewerUI
         card={card}
-        isOpen={isSettingsPanelOpen}
-        onClose={() => setIsSettingsPanelOpen(false)}
-        activeTab={activeSettingsTab}
-        onTabChange={setActiveSettingsTab}
-        environmentType={environmentType}
-        onEnvironmentChange={handlers.handleEnvironmentChange}
-        lightingSettings={lightingSettings}
-        onUpdateLighting={handlers.handleLightingChange}
-        materialSettings={materialSettings}
-        onUpdateMaterial={handlers.handleMaterialChange}
-        onShareCard={handlers.handleShare}
-        onDownloadCard={handlers.handleDownload}
+        isFlipped={isFlipped}
+        isSettingsPanelOpen={isSettingsPanelOpen}
+        activeSettingsTab={activeSettingsTab}
         activeEffects={activeEffects}
         effectIntensities={effectIntensities}
-        onEffectsChange={handlers.handleEffectsChange}
-        onEffectIntensityChange={handlers.handleEffectIntensityChange}
+        environmentType={environmentType}
+        materialSettings={materialSettings}
+        lightingSettings={lightingSettings}
+        handlers={handlers}
+        setIsSettingsPanelOpen={setIsSettingsPanelOpen}
+        setActiveSettingsTab={setActiveSettingsTab}
       />
     </div>
   );
