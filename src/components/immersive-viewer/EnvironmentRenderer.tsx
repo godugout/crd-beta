@@ -12,6 +12,7 @@ const EnvironmentRenderer: React.FC<EnvironmentRendererProps> = ({ environmentTy
   const [hdrTexture, setHdrTexture] = useState<THREE.DataTexture | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [currentResolution, setCurrentResolution] = useState<string>('1k');
 
   // Environment intensity configuration
   const environmentConfig = useMemo(() => {
@@ -43,7 +44,7 @@ const EnvironmentRenderer: React.FC<EnvironmentRendererProps> = ({ environmentTy
     }
   }, [environmentType]);
 
-  // Load HDR texture using our cache service
+  // Load HDR texture using our enhanced cache service with adaptive resolution
   useEffect(() => {
     setIsLoading(true);
     setHdrTexture(null);
@@ -51,18 +52,37 @@ const EnvironmentRenderer: React.FC<EnvironmentRendererProps> = ({ environmentTy
 
     const loadEnvironment = async () => {
       try {
-        console.log(`EnvironmentRenderer: Loading environment ${environmentType}`);
+        console.log(`EnvironmentRenderer: Loading adaptive resolution environment ${environmentType}`);
         
         const texture = await hdrImageCache.getTexture(environmentType);
         
         if (texture) {
           console.log(`EnvironmentRenderer: Successfully loaded HDR texture for ${environmentType}`);
           
-          // Ensure texture is properly configured
+          // Ensure texture is properly configured with enhanced filtering
           texture.mapping = THREE.EquirectangularReflectionMapping;
           texture.needsUpdate = true;
           
+          // Enhanced texture filtering for better quality
+          texture.magFilter = THREE.LinearFilter;
+          texture.minFilter = THREE.LinearMipmapLinearFilter;
+          texture.generateMipmaps = true;
+          
+          // Enable anisotropic filtering if supported
+          const canvas = document.createElement('canvas');
+          const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
+          if (gl) {
+            const maxAnisotropy = gl.getParameter(gl.getExtension('EXT_texture_filter_anisotropic')?.MAX_TEXTURE_MAX_ANISOTROPY_EXT || gl.MAX_TEXTURE_MAX_ANISOTROPY_EXT);
+            if (maxAnisotropy) {
+              texture.anisotropy = Math.min(16, maxAnisotropy);
+            }
+          }
+          
           setHdrTexture(texture);
+          
+          // Get stats to show current resolution
+          const stats = hdrImageCache.getStats();
+          setCurrentResolution(stats.optimalResolution);
         } else {
           console.warn(`EnvironmentRenderer: Failed to load ${environmentType}, texture is null`);
           setLoadError(`Failed to load HDR texture for ${environmentType}`);
@@ -102,6 +122,16 @@ const EnvironmentRenderer: React.FC<EnvironmentRendererProps> = ({ environmentTy
         position={[10, 10, 5]} 
         castShadow
       />
+      
+      {/* Debug info for development */}
+      {process.env.NODE_ENV === 'development' && (
+        <group userData={{ 
+          environment: environmentType, 
+          resolution: currentResolution,
+          isLoading,
+          hasTexture: !!hdrTexture 
+        }} />
+      )}
     </>
   );
 };

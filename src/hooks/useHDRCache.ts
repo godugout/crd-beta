@@ -6,13 +6,19 @@ interface HDRCacheStats {
   cachedImages: number;
   loadingImages: number;
   cacheUrls: string[];
+  resolutionBreakdown: Record<string, number>;
+  optimalResolution: string;
+  deviceCapabilities: any;
 }
 
 export const useHDRCache = () => {
   const [stats, setStats] = useState<HDRCacheStats>({
     cachedImages: 0,
     loadingImages: 0,
-    cacheUrls: []
+    cacheUrls: [],
+    resolutionBreakdown: {},
+    optimalResolution: '1k',
+    deviceCapabilities: null
   });
   const [isPreloading, setIsPreloading] = useState(false);
 
@@ -41,19 +47,21 @@ export const useHDRCache = () => {
 
   const clearCache = () => {
     hdrImageCache.clearAll();
-    setStats({ cachedImages: 0, loadingImages: 0, cacheUrls: [] });
-  };
-
-  const getUrlForEnvironment = (environmentType: string) => {
-    return hdrImageCache.getUrlForEnvironment(environmentType);
+    setStats({
+      cachedImages: 0,
+      loadingImages: 0,
+      cacheUrls: [],
+      resolutionBreakdown: {},
+      optimalResolution: '1k',
+      deviceCapabilities: null
+    });
   };
 
   return {
     stats,
     isPreloading,
     preloadAll,
-    clearCache,
-    getUrlForEnvironment
+    clearCache
   };
 };
 
