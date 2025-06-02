@@ -57,13 +57,13 @@ export const useCardEffects = ({
   const getFilterStyle = (): CSSProperties => {
     const style: CSSProperties = {};
     
-    // Apply filter styles based on active effects
+    // Apply filter styles based on active effects with reduced intensity
     if (activeEffects.includes('Vintage')) {
-      style.filter = 'sepia(0.5) contrast(1.1)';
+      style.filter = 'sepia(0.3) contrast(1.05)'; // Reduced from 0.5 and 1.1
     }
     
     if (activeEffects.includes('Chrome')) {
-      style.filter = (style.filter || '') + ' brightness(1.2) contrast(1.2)';
+      style.filter = (style.filter || '') + ' brightness(1.1) contrast(1.1)'; // Reduced from 1.2
     }
     
     return style;

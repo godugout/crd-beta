@@ -1,5 +1,8 @@
 
-/* Base effect styles */
+/* Import the toned-down effects */
+@import './card-effects-toned.css';
+
+/* Keep only the essential base styles here */
 .effect-container {
   position: absolute;
   inset: 0;
@@ -7,91 +10,11 @@
   z-index: 10;
 }
 
-/* Holographic effect */
-.effect-holographic {
-  background: linear-gradient(
-    135deg,
-    rgba(255,0,0,0.2),
-    rgba(255,255,0,0.2),
-    rgba(0,255,0,0.2),
-    rgba(0,255,255,0.2),
-    rgba(0,0,255,0.2),
-    rgba(255,0,255,0.2)
-  );
-  background-size: 400% 400%;
-  animation: rainbow 3s ease infinite;
-  mix-blend-mode: color-dodge;
-  opacity: var(--holographic-intensity, 0.7);
-}
-
-/* Refractor effect */
-.effect-refractor {
-  background: 
-    linear-gradient(
-      45deg,
-      transparent 40%,
-      rgba(255, 255, 255, 0.4) 45%,
-      rgba(255, 255, 255, 0.5) 50%,
-      rgba(255, 255, 255, 0.4) 55%,
-      transparent 60%
-    );
-  background-size: 200% 200%;
-  animation: shimmer 1.5s ease infinite;
-  opacity: var(--refractor-intensity, 0.8);
-}
-
-/* Shimmer effect */
-.effect-shimmer {
-  background: radial-gradient(
-    circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
-    rgba(255, 255, 255, 0.3) 0%,
-    transparent 60%
-  );
-  opacity: var(--shimmer-intensity, 0.6);
-}
-
-/* Gold Foil effect */
-.effect-goldFoil {
-  background: 
-    linear-gradient(
-      45deg,
-      rgba(255, 215, 0, 0.3),
-      rgba(255, 255, 255, 0.4),
-      rgba(255, 215, 0, 0.3)
-    );
-  background-size: 200% 200%;
-  animation: shine 2s linear infinite;
-  opacity: var(--gold-intensity, 0.7);
-}
-
-/* Vintage effect */
-.effect-vintage {
-  background: rgba(160, 140, 110, 0.1);
-  filter: sepia(var(--vintage-intensity, 0.5));
-}
-
-/* Animations */
-@keyframes rainbow {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-@keyframes shimmer {
-  0% { background-position: 200% 200%; }
-  100% { background-position: -200% -200%; }
-}
-
-@keyframes shine {
-  0% { background-position: -200% -200%; }
-  100% { background-position: 200% 200%; }
-}
-
-/* Interactive states */
+/* Interactive states with reduced intensity */
 .effect-container.interactive {
   transition: all 0.3s ease;
 }
 
 .effect-container.interactive:hover {
-  opacity: calc(var(--effect-intensity, 1) * 1.2);
+  opacity: calc(var(--effect-intensity, 1) * 1.05); /* Much more subtle */
 }
