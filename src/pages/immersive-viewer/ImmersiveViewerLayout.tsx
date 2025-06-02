@@ -87,6 +87,8 @@ const ImmersiveViewerLayout: React.FC<ImmersiveViewerLayoutProps> = ({
           onEnvironmentChange={handlers.handleEnvironmentChange}
           onOpenScenesPanel={handlers.handleOpenScenesPanel}
           onOpenCustomizePanel={handlers.handleOpenCustomizePanel}
+          activeEffects={activeEffects}
+          lightingSettings={lightingSettings}
         />
       </div>
       
