@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -66,13 +65,10 @@ const LightingSection: React.FC<LightingSectionProps> = ({
   ];
 
   const handleLightingPreset = (presetId: string) => {
-    console.log('Preset button clicked:', presetId);
     if (onApplyPreset) {
-      console.log('Calling onApplyPreset with:', presetId);
+      console.log('Applying lighting preset:', presetId);
       onApplyPreset(presetId as LightingPreset);
       toast.success(`Applied ${presetId} lighting - watch the card transform!`);
-    } else {
-      console.error('onApplyPreset function not provided');
     }
   };
 
@@ -149,10 +145,7 @@ const LightingSection: React.FC<LightingSectionProps> = ({
                 <Button
                   key={preset.id}
                   variant="outline"
-                  onClick={() => {
-                    console.log('Button clicked for preset:', preset.id);
-                    handleLightingPreset(preset.id);
-                  }}
+                  onClick={() => handleLightingPreset(preset.id)}
                   className={`h-auto p-4 flex-col gap-2 transition-all duration-200 ${
                     isActive 
                       ? 'bg-blue-600 hover:bg-blue-700 text-white border-blue-500 shadow-lg shadow-blue-600/25' 
@@ -227,10 +220,7 @@ const LightingSection: React.FC<LightingSectionProps> = ({
                 <Button
                   key={preset.id}
                   variant="outline"
-                  onClick={() => {
-                    console.log('Pro mode button clicked for preset:', preset.id);
-                    handleLightingPreset(preset.id);
-                  }}
+                  onClick={() => handleLightingPreset(preset.id)}
                   className={`h-16 flex-col gap-1 text-xs transition-all duration-200 ${
                     isActive 
                       ? 'bg-blue-600 hover:bg-blue-700 text-white border-blue-500' 
