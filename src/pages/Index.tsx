@@ -46,8 +46,8 @@ const Index = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
             <div className="border rounded-lg p-6 bg-white shadow-sm">
               <h3 className="font-semibold text-lg mb-2">Card Detection</h3>
-              <p className="text-gray-600 mb-4">Scan and digitize your physical trading cards</p>
-              <Link to="/detector" className="text-blue-600 hover:underline">Try it now →</Link>
+              <p className="text-gray-600 mb-4">Scan and digitize your physical trading cards with AI-powered detection</p>
+              <Link to="/labs" className="text-blue-600 hover:underline">Try it in Dugout Labs →</Link>
             </div>
             
             <div className="border rounded-lg p-6 bg-white shadow-sm">
