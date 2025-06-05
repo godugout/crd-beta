@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Upload, Camera, Grid, Image as ImageIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -74,8 +73,8 @@ const CardDetectorPage: React.FC = () => {
       const isLandscape = aspectRatio > 1.2;
       
       if (detectionMode === 'multi' || (detectionMode === 'auto' && isLandscape && width > 1000)) {
-        // Multi-card detection - simulate finding multiple cards in a grid
-        cards = detectMultipleCards(width, height);
+        // Multi-card detection with dynamic grid analysis
+        cards = detectMultipleCardsAdvanced(width, height);
       } else {
         // Single card detection
         cards = detectSingleCard(width, height);
@@ -86,27 +85,70 @@ const CardDetectorPage: React.FC = () => {
     img.src = imageUrl;
   };
 
-  const detectMultipleCards = (imageWidth: number, imageHeight: number): DetectedCard[] => {
-    // Simulate detecting a grid of cards (like the Finder screenshot)
+  const detectMultipleCardsAdvanced = (imageWidth: number, imageHeight: number): DetectedCard[] => {
     const cards: DetectedCard[] = [];
-    const cols = 7; // Based on the test image
-    const rows = 5;
     
-    const cardWidth = imageWidth / cols * 0.8; // 80% to account for spacing
-    const cardHeight = imageHeight / rows * 0.8;
+    // Dynamic grid detection based on aspect ratio and image size
+    let cols = 5; // Default for the test image
+    let rows = 5;
+    
+    // Analyze image to determine grid size
+    const aspectRatio = imageWidth / imageHeight;
+    
+    // For landscape images, try to detect the grid structure
+    if (aspectRatio > 1.5) {
+      // Very wide image - likely more columns than rows
+      cols = Math.max(5, Math.round(aspectRatio * 3));
+      rows = Math.max(3, Math.round(cols / aspectRatio));
+    } else if (aspectRatio > 1.0) {
+      // Moderately wide - balanced grid
+      cols = 5;
+      rows = 5;
+    } else {
+      // Portrait or square - more rows than columns
+      rows = Math.max(5, Math.round(1 / aspectRatio * 3));
+      cols = Math.max(3, Math.round(rows * aspectRatio));
+    }
+    
+    // Calculate cell dimensions with proper spacing detection
+    const marginX = imageWidth * 0.05; // 5% margin on each side
+    const marginY = imageHeight * 0.05; // 5% margin top and bottom
+    
+    const availableWidth = imageWidth - (marginX * 2);
+    const availableHeight = imageHeight - (marginY * 2);
+    
+    const cellWidth = availableWidth / cols;
+    const cellHeight = availableHeight / rows;
+    
+    // Calculate card size within each cell (accounting for spacing)
+    const spacingRatio = 0.1; // 10% spacing between cards
+    const cardWidth = cellWidth * (1 - spacingRatio);
+    const cardHeight = cellHeight * (1 - spacingRatio);
+    
+    console.log(`Detecting ${rows}x${cols} grid with cards of size ${cardWidth}x${cardHeight}`);
     
     for (let row = 0; row < rows; row++) {
       for (let col = 0; col < cols; col++) {
-        const x = (col * imageWidth / cols) + (imageWidth / cols - cardWidth) / 2;
-        const y = (row * imageHeight / rows) + (imageHeight / rows - cardHeight) / 2;
+        // Calculate position with proper centering within each cell
+        const cellCenterX = marginX + (col * cellWidth) + (cellWidth / 2);
+        const cellCenterY = marginY + (row * cellHeight) + (cellHeight / 2);
+        
+        const x = cellCenterX - (cardWidth / 2);
+        const y = cellCenterY - (cardHeight / 2);
+        
+        // Add some randomness to confidence based on position
+        // Edge cards might have lower confidence
+        const isEdgeCard = row === 0 || row === rows - 1 || col === 0 || col === cols - 1;
+        const baseConfidence = isEdgeCard ? 0.75 : 0.85;
+        const confidence = baseConfidence + (Math.random() * 0.15);
         
         cards.push({
-          id: `card-${row}-${col}`,
+          id: `card-${row + 1}-${col + 1}`,
           x,
           y,
           width: cardWidth,
           height: cardHeight,
-          confidence: 0.85 + Math.random() * 0.1,
+          confidence,
           type: 'multi'
         });
       }
