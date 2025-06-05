@@ -1,36 +1,87 @@
 
-import React, { Suspense } from 'react';
-import { useRoutes } from 'react-router-dom';
-import { CardProvider } from './context/CardContext';
-import { SessionProvider } from './context/SessionContext';
-import { Toaster } from 'sonner';
-import { routes } from './routes';
+import { Suspense, lazy } from 'react';
+import { Toaster } from '@/components/ui/sonner';
+import { TooltipProvider } from '@/components/ui/tooltip';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { CardProvider } from '@/context/CardContext';
+import { CardEnhancedProvider } from '@/context/CardEnhancedContext';
 
-// Loading fallback for the entire app
-const AppLoadingFallback = () => (
-  <div className="flex items-center justify-center h-screen bg-background">
-    <div className="text-center">
-      <div className="h-12 w-12 border-4 border-t-primary border-primary/30 rounded-full animate-spin mx-auto mb-4"></div>
-      <p className="text-foreground">Loading CardShow...</p>
-    </div>
+// Lazy load components
+const ImmersiveViewer = lazy(() => import('@/pages/ImmersiveViewer'));
+const UnifiedCardEditor = lazy(() => import('@/pages/UnifiedCardEditor'));
+const CardDetector = lazy(() => import('@/pages/CardDetector'));
+
+// Create a client
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 60 * 1000,
+    },
+  },
+});
+
+const LoadingSpinner = () => (
+  <div className="flex items-center justify-center h-screen">
+    <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
   </div>
 );
 
 function App() {
-  const routeElements = useRoutes(routes);
-
   return (
-    <SessionProvider>
+    <QueryClientProvider client={queryClient}>
       <CardProvider>
-        <Suspense fallback={<AppLoadingFallback />}>
-          {routeElements}
-        </Suspense>
-        <Toaster 
-          position="bottom-right"
-          closeButton
-        />
+        <CardEnhancedProvider>
+          <TooltipProvider>
+            <div className="min-h-screen bg-background font-sans antialiased">
+              <Router>
+                <Routes>
+                  <Route 
+                    path="/" 
+                    element={
+                      <Navigate to="/card-detector" replace />
+                    } 
+                  />
+                  <Route 
+                    path="/card-detector" 
+                    element={
+                      <Suspense fallback={<LoadingSpinner />}>
+                        <CardDetector />
+                      </Suspense>
+                    } 
+                  />
+                  <Route 
+                    path="/viewer" 
+                    element={
+                      <Suspense fallback={<LoadingSpinner />}>
+                        <ImmersiveViewer />
+                      </Suspense>
+                    } 
+                  />
+                  <Route 
+                    path="/editor" 
+                    element={
+                      <Suspense fallback={<LoadingSpinner />}>
+                        <UnifiedCardEditor />
+                      </Suspense>
+                    } 
+                  />
+                  <Route 
+                    path="/editor/:id" 
+                    element={
+                      <Suspense fallback={<LoadingSpinner />}>
+                        <UnifiedCardEditor />
+                      </Suspense>
+                    } 
+                  />
+                </Routes>
+              </Router>
+              <Toaster />
+            </div>
+          </TooltipProvider>
+        </CardEnhancedProvider>
       </CardProvider>
-    </SessionProvider>
+    </QueryClientProvider>
   );
 }
 
