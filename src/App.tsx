@@ -8,7 +8,7 @@ import { CardProvider } from '@/context/CardContext';
 import { CardEnhancedProvider } from '@/context/CardEnhancedContext';
 
 // Lazy load components
-const ImmersiveViewer = lazy(() => import('@/pages/ImmersiveViewer'));
+const ImmersiveCardViewerPage = lazy(() => import('@/pages/ImmersiveCardViewerPage'));
 const UnifiedCardEditor = lazy(() => import('@/pages/UnifiedCardEditor'));
 const CardDetector = lazy(() => import('@/pages/CardDetector'));
 
@@ -54,7 +54,7 @@ function App() {
                     path="/viewer" 
                     element={
                       <Suspense fallback={<LoadingSpinner />}>
-                        <ImmersiveViewer />
+                        <ImmersiveCardViewerPage />
                       </Suspense>
                     } 
                   />
