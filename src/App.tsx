@@ -3,7 +3,7 @@ import { Suspense, lazy } from 'react';
 import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { CardProvider } from '@/context/CardContext';
 import { CardEnhancedProvider } from '@/context/CardEnhancedContext';
 
@@ -34,48 +34,46 @@ function App() {
         <CardEnhancedProvider>
           <TooltipProvider>
             <div className="min-h-screen bg-background font-sans antialiased">
-              <Router>
-                <Routes>
-                  <Route 
-                    path="/" 
-                    element={
-                      <Navigate to="/card-detector" replace />
-                    } 
-                  />
-                  <Route 
-                    path="/card-detector" 
-                    element={
-                      <Suspense fallback={<LoadingSpinner />}>
-                        <CardDetector />
-                      </Suspense>
-                    } 
-                  />
-                  <Route 
-                    path="/viewer" 
-                    element={
-                      <Suspense fallback={<LoadingSpinner />}>
-                        <ImmersiveCardViewerPage />
-                      </Suspense>
-                    } 
-                  />
-                  <Route 
-                    path="/editor" 
-                    element={
-                      <Suspense fallback={<LoadingSpinner />}>
-                        <UnifiedCardEditor />
-                      </Suspense>
-                    } 
-                  />
-                  <Route 
-                    path="/editor/:id" 
-                    element={
-                      <Suspense fallback={<LoadingSpinner />}>
-                        <UnifiedCardEditor />
-                      </Suspense>
-                    } 
-                  />
-                </Routes>
-              </Router>
+              <Routes>
+                <Route 
+                  path="/" 
+                  element={
+                    <Navigate to="/card-detector" replace />
+                  } 
+                />
+                <Route 
+                  path="/card-detector" 
+                  element={
+                    <Suspense fallback={<LoadingSpinner />}>
+                      <CardDetector />
+                    </Suspense>
+                  } 
+                />
+                <Route 
+                  path="/viewer" 
+                  element={
+                    <Suspense fallback={<LoadingSpinner />}>
+                      <ImmersiveCardViewerPage />
+                    </Suspense>
+                  } 
+                />
+                <Route 
+                  path="/editor" 
+                  element={
+                    <Suspense fallback={<LoadingSpinner />}>
+                      <UnifiedCardEditor />
+                    </Suspense>
+                  } 
+                />
+                <Route 
+                  path="/editor/:id" 
+                  element={
+                    <Suspense fallback={<LoadingSpinner />}>
+                      <UnifiedCardEditor />
+                    </Suspense>
+                  } 
+                />
+              </Routes>
               <Toaster />
             </div>
           </TooltipProvider>
