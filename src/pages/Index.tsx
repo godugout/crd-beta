@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useCards } from '@/context/CardContext';
@@ -8,7 +9,7 @@ import CollectionGrid from '@/components/collections/CollectionGrid';
 import { Button } from '@/components/ui/button';
 import { Container } from '@/components/ui/container';
 import CreateCollectionDialog from '@/components/collections/CreateCollectionDialog';
-import { PlusCircle, Camera, Users, Timeline } from 'lucide-react';
+import { PlusCircle, Camera, Users, Calendar } from 'lucide-react';
 
 const Index = () => {
   const { collections } = useCards();
@@ -90,7 +91,7 @@ const Index = () => {
             
             <div className="border rounded-lg p-6 bg-white shadow-sm opacity-75">
               <div className="h-12 w-12 bg-[#006341]/10 rounded-full flex items-center justify-center mb-4">
-                <Timeline className="h-6 w-6 text-[#006341]" />
+                <Calendar className="h-6 w-6 text-[#006341]" />
               </div>
               <h3 className="font-semibold text-lg mb-2">Oakland Timeline</h3>
               <p className="text-gray-600 mb-4">Connect your memories to historic Oakland sports moments</p>
