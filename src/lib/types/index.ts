@@ -24,7 +24,7 @@ export * from './user';
 export * from './collection';
 export * from './instagram';
 export * from './teamTypes';
-export type { CardEffect, CardEffectSettings } from './cardEffects';
+export type { CardEffect, CardEffectSettings, CardEffectsResult, EffectSettings } from './cardEffects';
 
 // Export from enhancedCardTypes with proper exports
 export type { 

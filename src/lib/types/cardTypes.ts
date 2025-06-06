@@ -23,7 +23,7 @@ export interface CardLayer {
   rotation: number;
   opacity: number;
   visible: boolean;
-  locked: boolean;
+  locked?: boolean; // Make optional
   content?: any;
   style?: any;
   zIndex?: number;

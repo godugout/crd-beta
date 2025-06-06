@@ -22,6 +22,8 @@ export interface OaklandTemplate {
     textColor: string;
     borderColor: string;
   };
+  icon?: string;
+  years?: string;
 }
 
 export const OAKLAND_TEMPLATES: Record<OaklandTemplateType, OaklandTemplate> = {
@@ -39,7 +41,9 @@ export const OAKLAND_TEMPLATES: Record<OaklandTemplateType, OaklandTemplate> = {
       background: 'linear-gradient(135deg, #006341 0%, #003831 100%)',
       textColor: '#FFFFFF',
       borderColor: '#EFB21E'
-    }
+    },
+    icon: '🏟️',
+    years: '1968-Present'
   },
   moneyball: {
     id: 'moneyball',
@@ -55,7 +59,9 @@ export const OAKLAND_TEMPLATES: Record<OaklandTemplateType, OaklandTemplate> = {
       background: 'linear-gradient(135deg, #2D5A3D 0%, #1A3A2A 100%)',
       textColor: '#E5E5E5',
       borderColor: '#C4A962'
-    }
+    },
+    icon: '📊',
+    years: '2002-2006'
   },
   dynasty: {
     id: 'dynasty',
@@ -71,7 +77,9 @@ export const OAKLAND_TEMPLATES: Record<OaklandTemplateType, OaklandTemplate> = {
       background: 'linear-gradient(135deg, #FFD700 0%, #B8860B 100%)',
       textColor: '#003831',
       borderColor: '#006341'
-    }
+    },
+    icon: '🏆',
+    years: '1972-1974'
   },
   coliseum: {
     id: 'coliseum',
@@ -87,7 +95,9 @@ export const OAKLAND_TEMPLATES: Record<OaklandTemplateType, OaklandTemplate> = {
       background: 'linear-gradient(135deg, #4A5D23 0%, #2F3A16 100%)',
       textColor: '#FFFFFF',
       borderColor: '#EFB21E'
-    }
+    },
+    icon: '🏟️',
+    years: '1968-Present'
   },
   tailgate: {
     id: 'tailgate',
@@ -103,7 +113,9 @@ export const OAKLAND_TEMPLATES: Record<OaklandTemplateType, OaklandTemplate> = {
       background: 'linear-gradient(135deg, #8B4513 0%, #654321 100%)',
       textColor: '#FFFFFF',
       borderColor: '#EFB21E'
-    }
+    },
+    icon: '🎉',
+    years: 'All Eras'
   },
   bashbrothers: {
     id: 'bashbrothers',
@@ -119,6 +131,31 @@ export const OAKLAND_TEMPLATES: Record<OaklandTemplateType, OaklandTemplate> = {
       background: 'linear-gradient(135deg, #1E3A5F 0%, #0F1D2F 100%)',
       textColor: '#FFFFFF',
       borderColor: '#FFD700'
-    }
+    },
+    icon: '💪',
+    years: '1988-1990'
   }
 };
+
+// Export for compatibility
+export const oaklandTemplates = OAKLAND_TEMPLATES;
+
+// Default export for template component
+const OaklandCardTemplate: React.FC<{
+  type: OaklandTemplateType;
+  children?: React.ReactNode;
+  className?: string;
+}> = ({ type, children, className = '' }) => {
+  const template = OAKLAND_TEMPLATES[type];
+  
+  return (
+    <div 
+      className={`relative overflow-hidden ${className}`}
+      style={{ background: template.theme.background }}
+    >
+      {children}
+    </div>
+  );
+};
+
+export default OaklandCardTemplate;

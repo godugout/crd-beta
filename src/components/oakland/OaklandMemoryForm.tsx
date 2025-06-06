@@ -1,10 +1,24 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { OaklandMemoryData } from '@/lib/types';
+
+export interface OaklandMemoryFormValues {
+  title: string;
+  description: string;
+  date?: string;
+  memoryType?: string;
+  opponent?: string;
+  score?: string;
+  location?: string;
+  section?: string;
+  attendees?: string[];
+  tags?: string[];
+  historicalContext?: string;
+  personalSignificance?: string;
+}
 
 interface OaklandMemoryFormProps {
   onSubmit: (data: OaklandMemoryData) => void;
