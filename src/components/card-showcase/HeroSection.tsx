@@ -45,7 +45,7 @@ const HeroSection = () => {
           <div className="flex flex-wrap justify-center gap-6 mb-16">
             <div className="relative group">
               <CrdButton 
-                size="xl" 
+                size="lg" 
                 onClick={() => navigate('/cards/create')}
                 variant="spectrum"
                 className="btn-sharp font-bold px-10 py-4 text-lg shadow-[var(--shadow-brand)]"
@@ -59,7 +59,7 @@ const HeroSection = () => {
             
             <Button 
               variant="glass" 
-              size="xl"
+              size="lg"
               onClick={() => navigate('/gallery')}
               className="font-bold px-10 py-4 text-lg border-2 border-[var(--border-highlight)] hover:border-[var(--border-glow)] hover:shadow-[var(--shadow-md)]"
             >
