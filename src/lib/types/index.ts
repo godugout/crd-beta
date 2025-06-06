@@ -33,6 +33,9 @@ export type {
   CardRarity,
 } from './enhancedCardTypes';
 
+// Ensure CardLayer is exported from main types
+export type { CardLayer } from './cardTypes';
+
 // For backward compatibility, keep the old imports as well
 // But we should gradually migrate to using the centralized types
 import * as OldTypes from '@/types/card';

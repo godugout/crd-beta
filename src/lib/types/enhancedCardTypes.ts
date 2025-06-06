@@ -1,75 +1,25 @@
 
-import { BaseCard, DesignMetadata, CardEffect } from './cardTypes';
+import { Card, CardRarity as BaseCardRarity } from './cardTypes';
 
 export interface HotspotData {
   id: string;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
+  position: { x: number; y: number };
   content: string;
-  type: 'text' | 'link' | 'image' | 'video';
-  visible: boolean;
+  type: 'info' | 'stat' | 'achievement';
 }
 
-export type CardRarity = 'common' | 'uncommon' | 'rare' | 'ultra-rare' | 'legendary' | 'one-of-one';
-
-export interface EnhancedCard extends BaseCard {
-  seriesId?: string; 
-  deckId?: string;
-  specialFeatures?: string[];
-  interactiveElements?: string[];
-  graded?: boolean;
-  gradingService?: string;
-  gradingScore?: string;
+export interface EnhancedCard extends Card {
   hotspots?: HotspotData[];
-  backSideImage?: string;
-  cardNumber?: string;
-  artist?: string;
-  artistId?: string;
-  edition?: number;
-  editionSize?: number;
-  releaseDate?: string;
-  qrCodeData?: string;
-  marketData?: {
-    price?: number;
-    currency?: string;
-    lastSoldPrice?: number;
-    availableForSale?: boolean;
-  };
-  rarity?: CardRarity;
+  interactiveElements?: any[];
+  animationPresets?: string[];
 }
 
 export interface Series {
   id: string;
-  name?: string;
-  title: string;
-  description: string;
-  releaseDate: string;
-  cards: EnhancedCard[];
-  totalCards: number;
-  rarity?: string;
-  creator?: string;
-  artistId?: string;
-  createdAt: string;
-  updatedAt: string;
-  coverImageUrl?: string;
-  isPublished?: boolean;
-  cardIds: string[];
-  releaseType?: 'standard' | 'limited' | 'exclusive';
+  name: string;
+  year: string;
+  manufacturer: string;
+  cardCount: number;
 }
 
-export interface Deck {
-  id: string;
-  name: string;
-  description: string;
-  cards: EnhancedCard[];
-  creator?: string;
-  userId: string;
-  ownerId?: string;
-  createdAt: string;
-  updatedAt: string;
-  isPublic: boolean;
-  coverImageUrl?: string;
-  cardIds: string[];
-}
+export type CardRarity = BaseCardRarity;
