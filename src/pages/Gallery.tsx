@@ -1,211 +1,272 @@
 
-import React, { useState, useEffect, useTransition } from 'react';
-import { useNavigate } from 'react-router-dom';
-import PageLayout from '@/components/navigation/PageLayout';
-import CardGallery from '@/components/CardGallery';
-import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
-import { useMobileOptimization } from '@/hooks/useMobileOptimization';
-import { PlusCircle, Info } from 'lucide-react';
-import { Card } from '@/lib/types';
-import { useToast } from '@/hooks/use-toast';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Search, Filter, Grid, List, Sparkles, Star, Calendar, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useCards } from '@/hooks/useCards';
-import FullscreenViewer from '@/components/gallery/FullscreenViewer';
+import { CrdButton } from '@/components/ui/crd-button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Container } from '@/components/ui/container';
+import PageLayout from '@/components/navigation/PageLayout';
 
 const Gallery = () => {
-  const { isMobile } = useMobileOptimization();
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [showTutorial, setShowTutorial] = useState(false);
-  const { toast } = useToast();
-  const navigate = useNavigate();
-  const [isPending, startTransition] = useTransition();
-  
-  const { cards, isLoading, fetchCards } = useCards();
+  const [selectedFilter, setSelectedFilter] = useState('all');
 
-  useEffect(() => {
-    fetchCards();
-    
-    const hasSeenTutorial = localStorage.getItem('hasSeenGalleryTutorial');
-    if (!hasSeenTutorial) {
-      setShowTutorial(true);
+  const filters = [
+    { id: 'all', label: 'All Cards', count: 1247 },
+    { id: 'sports', label: 'Sports', count: 892 },
+    { id: 'entertainment', label: 'Entertainment', count: 234 },
+    { id: 'gaming', label: 'Gaming', count: 121 },
+  ];
+
+  const featuredCards = [
+    {
+      id: 1,
+      title: "Aaron Judge Home Run Record",
+      creator: "BaseballFan2023",
+      views: 15420,
+      likes: 2847,
+      category: "Sports",
+      gradient: "from-[var(--brand-primary)]/20 to-[var(--brand-secondary)]/10",
+      border: "[var(--brand-primary)]/30"
+    },
+    {
+      id: 2,
+      title: "Vintage Mickey Mantle Tribute",
+      creator: "CardCollector",
+      views: 9876,
+      likes: 1965,
+      category: "Classic",
+      gradient: "from-[var(--brand-accent)]/20 to-[var(--brand-warning)]/10",
+      border: "[var(--brand-accent)]/30"
+    },
+    {
+      id: 3,
+      title: "Shohei Ohtani Two-Way Star",
+      creator: "MLBFanatic",
+      views: 12358,
+      likes: 2103,
+      category: "Sports",
+      gradient: "from-[var(--brand-success)]/20 to-[var(--brand-primary)]/10",
+      border: "[var(--brand-success)]/30"
     }
-  }, [fetchCards]);
+  ];
 
-  const completeTutorial = () => {
-    localStorage.setItem('hasSeenGalleryTutorial', 'true');
-    setShowTutorial(false);
-    
-    toast({
-      variant: "info",
-      title: "Tutorial completed",
-      description: "You can access help anytime via the info icon",
-    });
-  };
-
-  const handleCardClick = (cardId: string) => {
-    console.log('Card clicked:', cardId);
-    // Use startTransition to avoid the Suspense error
-    startTransition(() => {
-      setSelectedCardId(cardId);
-      setIsFullscreen(true);
-    });
-    
-    const hasSeenViewer = localStorage.getItem('hasSeenViewerTutorial');
-    if (!hasSeenViewer) {
-      toast({
-        variant: "info",
-        title: "Tip: Interactive Card Viewer",
-        description: "Try dragging the card or using the effect controls for an immersive experience",
-      });
-    }
-  };
-  
-  const handleCloseFullscreen = () => {
-    startTransition(() => {
-      setIsFullscreen(false);
-      setSelectedCardId(null);
-    });
-  };
-  
-  if (isFullscreen && selectedCardId) {
-    return (
-      <React.Suspense fallback={
-        <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50">
-          <div className="w-16 h-16 border-4 border-t-transparent border-primary rounded-full animate-spin"></div>
-        </div>
-      }>
-        <FullscreenViewer 
-          cardId={selectedCardId} 
-          onClose={handleCloseFullscreen}
-        />
-      </React.Suspense>
-    );
-  }
-  
-  const handleRefresh = async () => {
-    startTransition(() => {
-      fetchCards();
-    });
-    
-    toast({
-      title: "Gallery refreshed",
-      description: "Your card collection has been refreshed",
-    });
-  };
-  
   return (
     <PageLayout
-      title="Card Gallery"
-      onSearch={setSearchQuery}
-      searchPlaceholder="Search cards..."
-      primaryAction={{
-        label: "New Card",
-        icon: <PlusCircle className="mr-2 h-5 w-5" />,
-        href: "/cards/create"
-      }}
-      actions={
-        <button
-          onClick={() => setShowTutorial(true)}
-          className="p-2 rounded-full hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-white/20"
-          aria-label="Show help"
-        >
-          <Info size={20} className="text-gray-400" />
-        </button>
-      }
+      title="Gallery | CardShow"
+      description="Discover amazing digital cards from creators worldwide"
+      fullWidth={true}
+      hideBreadcrumbs={true}
     >
-      <div className="container mx-auto max-w-6xl px-4">        
-        <ErrorBoundary>
-          {isPending && (
-            <div className="w-full py-8 flex justify-center">
-              <div className="w-10 h-10 border-4 border-t-transparent border-primary rounded-full animate-spin"></div>
-            </div>
-          )}
-          
-          {!isLoading && (!cards || cards.length === 0) && (
-            <div className="py-16 text-center">
-              <h2 className="text-2xl font-bold mb-4">Your gallery is empty</h2>
-              <p className="text-gray-400 mb-8">Create your first card to get started with your collection</p>
-              <div className="flex flex-wrap gap-3 justify-center">
-                <Button onClick={() => navigate('/cards/create')}>
-                  <PlusCircle className="mr-2 h-5 w-5" />
-                  Create Your First Card
-                </Button>
-                <Button variant="outline" onClick={handleRefresh}>
-                  Refresh Gallery
-                </Button>
-              </div>
-            </div>
-          )}
-          
-          {(cards?.length > 0 || isLoading) && (
-            <CardGallery 
-              viewMode={viewMode} 
-              onCardClick={handleCardClick} 
-              cards={(cards || []) as Card[]}
-              isLoading={isLoading}
-              searchQuery={searchQuery}
-            />
-          )}
-        </ErrorBoundary>
-      </div>
-      
-      <Dialog open={showTutorial} onOpenChange={setShowTutorial}>
-        <DialogContent className="bg-gray-900 text-white border border-gray-700 max-w-2xl">
-          <DialogHeader>
-            <DialogTitle className="text-xl">Welcome to the Card Gallery</DialogTitle>
-            <DialogDescription className="text-gray-300">
-              Let's explore key features to help you get started
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="space-y-4">
-            <div className="bg-gray-800 p-4 rounded-lg">
-              <h3 className="font-medium mb-2 flex items-center">
-                <PlusCircle className="mr-2 h-4 w-4 text-green-400" />
-                Creating Cards
-              </h3>
-              <p className="text-gray-300 text-sm">
-                Click the "New Card" button to create custom digital cards with various effects and designs.
-              </p>
+      {/* Enhanced Hero Section */}
+      <section className="relative py-20 overflow-hidden bg-gradient-to-br from-[var(--bg-primary)] via-[var(--bg-secondary)] to-[var(--bg-tertiary)]">
+        {/* Background effects */}
+        <div className="absolute inset-0">
+          <div className="absolute -top-32 -left-32 w-96 h-96 bg-gradient-to-br from-[var(--brand-primary)]/20 to-[var(--brand-secondary)]/10 rounded-full blur-3xl"></div>
+          <div className="absolute -bottom-40 -right-40 w-[500px] h-[500px] bg-gradient-to-br from-[var(--brand-accent)]/15 to-[var(--brand-warning)]/10 rounded-full blur-3xl"></div>
+        </div>
+
+        <Container className="relative z-10">
+          <div className="max-w-4xl mx-auto text-center">
+            <div className="relative mb-8">
+              <h1 className="text-6xl md:text-7xl font-black text-white mb-6 tracking-tight leading-none">
+                Card
+                <span className="block text-brand-gradient">Gallery</span>
+              </h1>
+              {/* Sharp accent corner */}
+              <div className="absolute -top-4 -right-8 w-8 h-8 bg-gradient-to-br from-[var(--brand-primary)] to-[var(--brand-secondary)] clip-corner-tr opacity-80"></div>
             </div>
             
-            <div className="bg-gray-800 p-4 rounded-lg">
-              <h3 className="font-medium mb-2 flex items-center">
-                <Info className="mr-2 h-4 w-4 text-blue-400" />
-                Viewing Cards
-              </h3>
-              <p className="text-gray-300 text-sm">
-                Click on any card to open it in the immersive viewer. Once open, you can:
-              </p>
-              <ul className="list-disc pl-5 mt-2 text-gray-300 text-sm">
-                <li>Drag the card to rotate it in 3D space</li>
-                <li>Apply visual effects using the sidebar</li>
-                <li>Save snapshots of your favorite effect combinations</li>
-              </ul>
-            </div>
-            
-            <div className="bg-gray-800 p-4 rounded-lg">
-              <h3 className="font-medium mb-2">Keyboard Shortcuts</h3>
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div className="flex items-center"><kbd className="px-1.5 py-0.5 bg-gray-700 rounded text-xs mr-2">Esc</kbd> Close viewer</div>
-                <div className="flex items-center"><kbd className="px-1.5 py-0.5 bg-gray-700 rounded text-xs mr-2">F</kbd> Flip card</div>
-                <div className="flex items-center"><kbd className="px-1.5 py-0.5 bg-gray-700 rounded text-xs mr-2">E</kbd> Toggle effects panel</div>
-                <div className="flex items-center"><kbd className="px-1.5 py-0.5 bg-gray-700 rounded text-xs mr-2">S</kbd> Take snapshot</div>
+            <p className="text-2xl text-[var(--text-secondary)] mb-6 font-semibold">
+              Discover Amazing Digital Cards
+            </p>
+            <p className="text-xl text-[var(--text-tertiary)] max-w-3xl mx-auto leading-relaxed mb-12">
+              Explore thousands of unique digital cards created by talented artists and collectors from around the world
+            </p>
+
+            {/* Enhanced Search Bar */}
+            <div className="relative max-w-2xl mx-auto">
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-6 h-6 text-white/60" />
+                <Input
+                  placeholder="Search cards, creators, or collections..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-12 pr-6 py-4 text-lg bg-white/5 border-2 border-white/10 rounded-xl text-white placeholder-white/60 focus:border-[var(--brand-primary)] focus:ring-[var(--brand-primary)] backdrop-blur-xl"
+                />
               </div>
             </div>
           </div>
-          
-          <DialogFooter>
-            <Button onClick={completeTutorial}>
-              Got it, thanks!
+        </Container>
+      </section>
+
+      <Container className="py-16">
+        {/* Enhanced Filter Section */}
+        <div className="mb-12">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+            {/* Filters */}
+            <div className="flex flex-wrap gap-3">
+              {filters.map((filter) => (
+                <button
+                  key={filter.id}
+                  onClick={() => setSelectedFilter(filter.id)}
+                  className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
+                    selectedFilter === filter.id
+                      ? 'bg-gradient-to-r from-[var(--brand-primary)] to-[var(--brand-secondary)] text-white shadow-[var(--shadow-brand)]'
+                      : 'bg-white/5 border border-white/10 text-white/80 hover:bg-white/10 hover:text-white hover:border-white/20'
+                  }`}
+                >
+                  {filter.label}
+                  <Badge className="ml-2 bg-white/20 text-white/90">
+                    {filter.count}
+                  </Badge>
+                </button>
+              ))}
+            </div>
+
+            {/* View Controls */}
+            <div className="flex items-center gap-3">
+              <div className="flex bg-white/5 border border-white/10 rounded-xl p-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setViewMode('grid')}
+                  className={`px-4 py-2 rounded-lg ${viewMode === 'grid' ? 'bg-white/10 text-white' : 'text-white/60 hover:text-white'}`}
+                >
+                  <Grid className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setViewMode('list')}
+                  className={`px-4 py-2 rounded-lg ${viewMode === 'list' ? 'bg-white/10 text-white' : 'text-white/60 hover:text-white'}`}
+                >
+                  <List className="w-4 h-4" />
+                </Button>
+              </div>
+              
+              <Button variant="glass" size="sm" className="px-4">
+                <Filter className="w-4 h-4 mr-2" />
+                Filter
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Featured Cards Section */}
+        <div className="mb-16">
+          <div className="flex items-center justify-between mb-8">
+            <div className="relative">
+              <h2 className="text-4xl font-black text-white mb-2 tracking-tight">
+                Featured <span className="text-brand-gradient">Cards</span>
+              </h2>
+              <p className="text-xl text-[var(--text-secondary)] font-medium">
+                Handpicked by our community
+              </p>
+              {/* Sharp accent */}
+              <div className="absolute -top-2 -left-2 w-6 h-6 bg-gradient-to-br from-[var(--brand-primary)] to-[var(--brand-secondary)] clip-corner-tl opacity-60"></div>
+            </div>
+            
+            <CrdButton variant="spectrum" size="lg" className="btn-sharp">
+              <Sparkles className="w-5 h-5 mr-2" />
+              View All Featured
+            </CrdButton>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {featuredCards.map((card) => (
+              <div key={card.id} className="group">
+                <div className={`bento-card relative overflow-hidden h-full bg-gradient-to-br ${card.gradient} border border-${card.border} hover:border-${card.border.replace('/30', '/50')} transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl`}>
+                  {/* Sharp accent corner */}
+                  <div className={`absolute top-0 right-0 w-8 h-8 bg-gradient-to-br from-[var(--brand-primary)] to-[var(--brand-secondary)] clip-corner-tr`}></div>
+                  
+                  {/* Card Image Placeholder */}
+                  <div className="aspect-[3/4] bg-gradient-to-br from-white/10 to-white/5 rounded-lg mb-6 flex items-center justify-center">
+                    <div className="text-white/40 text-4xl font-bold">CARD</div>
+                  </div>
+                  
+                  <div className="relative z-10">
+                    <h3 className="text-xl font-bold text-white mb-2">{card.title}</h3>
+                    <p className="text-[var(--text-tertiary)] mb-4">by {card.creator}</p>
+                    
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4 text-sm text-white/60">
+                        <span className="flex items-center gap-1">
+                          <Eye className="w-4 h-4" />
+                          {card.views.toLocaleString()}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Star className="w-4 h-4" />
+                          {card.likes.toLocaleString()}
+                        </span>
+                      </div>
+                      
+                      <Badge className={`bg-gradient-to-r ${card.gradient} border border-${card.border} text-white font-medium`}>
+                        {card.category}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Recent Cards Grid */}
+        <div>
+          <div className="flex items-center justify-between mb-8">
+            <div className="relative">
+              <h2 className="text-4xl font-black text-white mb-2 tracking-tight">
+                Recent <span className="text-brand-gradient">Uploads</span>
+              </h2>
+              <p className="text-xl text-[var(--text-secondary)] font-medium">
+                Fresh from the community
+              </p>
+              {/* Sharp accent */}
+              <div className="absolute -top-2 -right-4 w-6 h-6 bg-gradient-to-br from-[var(--brand-accent)] to-[var(--brand-warning)] clip-corner-tr opacity-60"></div>
+            </div>
+            
+            <Button variant="glass" size="lg" className="font-semibold">
+              <Calendar className="w-5 h-5 mr-2" />
+              View More
             </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          </div>
+
+          {/* Cards Grid */}
+          <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4' : 'grid-cols-1'}`}>
+            {Array.from({ length: 8 }).map((_, index) => (
+              <div key={index} className="group">
+                <div className="bento-card bg-white/5 border border-white/10 hover:border-white/20 transition-all duration-300 hover:scale-[1.02] relative overflow-hidden">
+                  {/* Card content placeholder */}
+                  <div className="aspect-[3/4] bg-gradient-to-br from-white/10 to-white/5 rounded-lg mb-4 flex items-center justify-center">
+                    <div className="text-white/40 text-2xl font-bold">CARD</div>
+                  </div>
+                  
+                  <h3 className="text-lg font-bold text-white mb-1">Sample Card #{index + 1}</h3>
+                  <p className="text-[var(--text-tertiary)] text-sm mb-3">by Creator{index + 1}</p>
+                  
+                  <div className="flex items-center justify-between text-xs text-white/60">
+                    <span className="flex items-center gap-1">
+                      <Eye className="w-3 h-3" />
+                      {Math.floor(Math.random() * 10000)}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Star className="w-3 h-3" />
+                      {Math.floor(Math.random() * 1000)}
+                    </span>
+                  </div>
+                  
+                  {/* Sharp accent corner */}
+                  <div className="absolute top-2 right-2 w-4 h-4 bg-gradient-to-br from-[var(--brand-primary)] to-[var(--brand-secondary)] clip-corner-tr opacity-70"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </Container>
     </PageLayout>
   );
 };

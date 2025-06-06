@@ -130,19 +130,19 @@
   }
 
   /* Sharp corner utilities */
-  .sharp-corner-tr {
+  .clip-corner-tr {
     clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%);
   }
   
-  .sharp-corner-tl {
+  .clip-corner-tl {
     clip-path: polygon(16px 0, 100% 0, 100% 100%, 0 100%, 0 16px);
   }
   
-  .sharp-corner-br {
+  .clip-corner-br {
     clip-path: polygon(0 0, 100% 0, 100% calc(100% - 16px), calc(100% - 16px) 100%, 0 100%);
   }
   
-  .sharp-corner-bl {
+  .clip-corner-bl {
     clip-path: polygon(0 0, 100% 0, 100% 100%, 16px 100%, 0 calc(100% - 16px));
   }
 
@@ -231,5 +231,36 @@
     height: 64px;
     background: var(--gradient-primary);
     clip-path: polygon(100% 0, 0 0, 100% 100%);
+  }
+
+  /* Enhanced bento grid with better spacing */
+  .bento-grid {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8;
+  }
+  
+  /* Updated card design with new theme */
+  .bento-card {
+    @apply bg-[var(--bg-secondary)] rounded-2xl p-8 border border-[var(--border-primary)] 
+           shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] transition-all duration-300 
+           hover:translate-y-[-3px] hover:border-[var(--border-highlight)];
+  }
+}
+
+/* Custom clip-path utilities for sharp corners */
+@layer utilities {
+  .clip-corner-tr {
+    clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%);
+  }
+  
+  .clip-corner-tl {
+    clip-path: polygon(16px 0, 100% 0, 100% 100%, 0 100%, 0 16px);
+  }
+  
+  .clip-corner-br {
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 16px), calc(100% - 16px) 100%, 0 100%);
+  }
+  
+  .clip-corner-bl {
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 16px 100%, 0 calc(100% - 16px));
   }
 }

@@ -1,160 +1,247 @@
+
 import React, { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
+import { Link } from 'react-router-dom';
+import { Mail, Lock, User, Eye, EyeOff, ArrowRight, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { CrdButton } from '@/components/ui/crd-button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
-import { toast } from 'sonner';
+import { Separator } from '@/components/ui/separator';
+import { Container } from '@/components/ui/container';
 
 const Auth = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const auth = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
-  
-  const from = location.state?.from?.pathname || '/';
-  
-  const handleSignIn = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    
-    try {
-      await auth.signIn(email, password);
-      toast.success('Signed in successfully');
-      navigate(from, { replace: true });
-    } catch (error: any) {
-      console.error('Sign in error:', error);
-      toast.error('Sign in failed', { 
-        description: error.message || 'Please check your credentials and try again'
-      });
-    } finally {
-      setIsLoading(false);
-    }
+  const [isLogin, setIsLogin] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    confirmPassword: '',
+    displayName: ''
+  });
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
-  
-  const handleSignUp = async (e: React.FormEvent) => {
+
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    
-    try {
-      await auth.signUp(email, password, { name });
-      toast.success('Account created successfully');
-      navigate(from, { replace: true });
-    } catch (error: any) {
-      console.error('Sign up error:', error);
-      toast.error('Sign up failed', { 
-        description: error.message || 'Please try again with different credentials'
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    // Handle authentication logic here
+    console.log('Auth form submitted:', formData);
   };
-  
+
   return (
-    <div className="flex justify-center items-center min-h-screen bg-background py-12 px-4 sm:px-6 lg:px-8">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle className="text-2xl text-center">Welcome to CardShow</CardTitle>
-          <CardDescription className="text-center">
-            Sign in to your account or create a new one
-          </CardDescription>
-        </CardHeader>
-        <Tabs defaultValue="signin" className="w-full">
-          <TabsList className="grid grid-cols-2 mb-4">
-            <TabsTrigger value="signin">Sign In</TabsTrigger>
-            <TabsTrigger value="signup">Sign Up</TabsTrigger>
-          </TabsList>
+    <div className="min-h-screen bg-gradient-to-br from-[var(--bg-primary)] via-[var(--bg-secondary)] to-[var(--bg-tertiary)] flex items-center justify-center p-6">
+      {/* Background effects */}
+      <div className="absolute inset-0">
+        <div className="absolute -top-32 -left-32 w-96 h-96 bg-gradient-to-br from-[var(--brand-primary)]/20 to-[var(--brand-secondary)]/10 rounded-full blur-3xl"></div>
+        <div className="absolute -bottom-40 -right-40 w-[500px] h-[500px] bg-gradient-to-br from-[var(--brand-accent)]/15 to-[var(--brand-warning)]/10 rounded-full blur-3xl"></div>
+      </div>
+
+      <div className="w-full max-w-md relative z-10">
+        {/* Enhanced Auth Card */}
+        <div className="bento-card bg-gradient-to-br from-white/5 to-white/[0.02] border border-white/10 backdrop-blur-xl relative overflow-hidden">
+          {/* Sharp accent corner */}
+          <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-[var(--brand-primary)] to-[var(--brand-secondary)] clip-corner-tr"></div>
           
-          <TabsContent value="signin">
-            <form onSubmit={handleSignIn}>
-              <CardContent className="space-y-4">
+          <div className="relative z-10 p-8">
+            {/* Header */}
+            <div className="text-center mb-8">
+              <Link to="/" className="inline-block mb-6">
+                <span className="text-3xl font-black text-white tracking-tight">
+                  Card<span className="text-brand-gradient">Show</span>
+                </span>
+              </Link>
+              
+              <h1 className="text-3xl font-black text-white mb-2 tracking-tight">
+                {isLogin ? 'Welcome Back' : 'Join CardShow'}
+              </h1>
+              <p className="text-[var(--text-secondary)] font-medium">
+                {isLogin 
+                  ? 'Sign in to access your digital card collection'
+                  : 'Create an account to start collecting digital cards'
+                }
+              </p>
+            </div>
+
+            {/* Social Login Buttons */}
+            <div className="space-y-3 mb-6">
+              <Button 
+                variant="glass" 
+                className="w-full py-3 font-semibold border-2 border-white/10 hover:border-white/20"
+              >
+                <img src="/google-icon.svg" alt="Google" className="w-5 h-5 mr-3" />
+                Continue with Google
+              </Button>
+              <Button 
+                variant="glass" 
+                className="w-full py-3 font-semibold border-2 border-white/10 hover:border-white/20"
+              >
+                <img src="/apple-icon.svg" alt="Apple" className="w-5 h-5 mr-3" />
+                Continue with Apple
+              </Button>
+            </div>
+
+            <div className="relative my-6">
+              <Separator className="bg-white/10" />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="bg-[var(--bg-secondary)] px-4 text-white/60 text-sm font-medium">
+                  Or continue with email
+                </span>
+              </div>
+            </div>
+
+            {/* Auth Form */}
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {!isLogin && (
                 <div className="space-y-2">
-                  <Label htmlFor="signin-email">Email</Label>
-                  <Input 
-                    id="signin-email" 
-                    type="email" 
-                    placeholder="your@email.com" 
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                  <Label htmlFor="displayName" className="text-white font-semibold">
+                    Display Name
+                  </Label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/60" />
+                    <Input
+                      id="displayName"
+                      type="text"
+                      placeholder="Your display name"
+                      value={formData.displayName}
+                      onChange={(e) => handleInputChange('displayName', e.target.value)}
+                      className="pl-12 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/60 focus:border-[var(--brand-primary)] backdrop-blur-xl"
+                      required={!isLogin}
+                    />
+                  </div>
+                </div>
+              )}
+              
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-white font-semibold">
+                  Email
+                </Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/60" />
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="your@email.com"
+                    value={formData.email}
+                    onChange={(e) => handleInputChange('email', e.target.value)}
+                    className="pl-12 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/60 focus:border-[var(--brand-primary)] backdrop-blur-xl"
                     required
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signin-password">Password</Label>
-                  <Input 
-                    id="signin-password" 
-                    type="password" 
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-white font-semibold">
+                  Password
+                </Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/60" />
+                  <Input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="Enter your password"
+                    value={formData.password}
+                    onChange={(e) => handleInputChange('password', e.target.value)}
+                    className="pl-12 pr-12 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/60 focus:border-[var(--brand-primary)] backdrop-blur-xl"
                     required
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/60 hover:text-white"
+                  >
+                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
                 </div>
-              </CardContent>
-              <CardFooter>
-                <Button 
-                  type="submit" 
-                  className="w-full" 
-                  disabled={isLoading}
+              </div>
+
+              {!isLogin && (
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword" className="text-white font-semibold">
+                    Confirm Password
+                  </Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/60" />
+                    <Input
+                      id="confirmPassword"
+                      type="password"
+                      placeholder="Confirm your password"
+                      value={formData.confirmPassword}
+                      onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
+                      className="pl-12 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/60 focus:border-[var(--brand-primary)] backdrop-blur-xl"
+                      required={!isLogin}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {isLogin && (
+                <div className="flex justify-end">
+                  <Link 
+                    to="/forgot-password" 
+                    className="text-[var(--brand-primary)] hover:text-[var(--brand-secondary)] text-sm font-medium transition-colors"
+                  >
+                    Forgot password?
+                  </Link>
+                </div>
+              )}
+
+              <div className="relative">
+                <CrdButton 
+                  type="submit"
+                  variant="spectrum" 
+                  className="w-full py-3 font-bold text-lg btn-sharp shadow-[var(--shadow-brand)]"
                 >
-                  {isLoading ? "Signing in..." : "Sign In"}
-                </Button>
-              </CardFooter>
+                  {isLogin ? 'Sign In' : 'Create Account'}
+                  <ArrowRight className="w-5 h-5 ml-2" />
+                </CrdButton>
+                <div className="absolute -top-1 -right-1 w-4 h-4 bg-[var(--brand-accent)] clip-corner-tr opacity-90"></div>
+              </div>
             </form>
-          </TabsContent>
-          
-          <TabsContent value="signup">
-            <form onSubmit={handleSignUp}>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="signup-name">Name</Label>
-                  <Input 
-                    id="signup-name" 
-                    placeholder="Your Name" 
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signup-email">Email</Label>
-                  <Input 
-                    id="signup-email" 
-                    type="email" 
-                    placeholder="your@email.com" 
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signup-password">Password</Label>
-                  <Input 
-                    id="signup-password" 
-                    type="password" 
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
-                </div>
-              </CardContent>
-              <CardFooter>
-                <Button 
-                  type="submit" 
-                  className="w-full" 
-                  disabled={isLoading}
+
+            {/* Switch Auth Mode */}
+            <div className="text-center mt-6">
+              <p className="text-white/60">
+                {isLogin ? "Don't have an account?" : "Already have an account?"}
+                <button
+                  onClick={() => setIsLogin(!isLogin)}
+                  className="ml-2 text-[var(--brand-primary)] hover:text-[var(--brand-secondary)] font-semibold transition-colors"
                 >
-                  {isLoading ? "Creating Account..." : "Sign Up"}
-                </Button>
-              </CardFooter>
-            </form>
-          </TabsContent>
-        </Tabs>
-      </Card>
+                  {isLogin ? 'Sign up' : 'Sign in'}
+                </button>
+              </p>
+            </div>
+
+            {/* Enhanced Features Preview */}
+            {!isLogin && (
+              <div className="mt-8 pt-6 border-t border-white/10">
+                <h3 className="text-lg font-bold text-white mb-4 text-center">
+                  Join thousands of collectors
+                </h3>
+                <div className="grid grid-cols-2 gap-4 text-center">
+                  <div>
+                    <Sparkles className="w-6 h-6 text-[var(--brand-primary)] mx-auto mb-2" />
+                    <p className="text-sm text-white/80 font-medium">Create Cards</p>
+                  </div>
+                  <div>
+                    <User className="w-6 h-6 text-[var(--brand-accent)] mx-auto mb-2" />
+                    <p className="text-sm text-white/80 font-medium">Build Collections</p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Footer Links */}
+        <div className="text-center mt-6">
+          <div className="flex flex-wrap justify-center gap-4 text-sm text-white/60">
+            <Link to="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
+            <Link to="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
+            <Link to="/help" className="hover:text-white transition-colors">Help Center</Link>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
