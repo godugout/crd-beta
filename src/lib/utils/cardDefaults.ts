@@ -1,32 +1,30 @@
 
-import { DesignMetadata } from '@/lib/types';
+import { DesignMetadata } from '@/lib/types/cardTypes';
 
 export const DEFAULT_DESIGN_METADATA: DesignMetadata = {
   cardStyle: {
-    template: 'classic',
+    template: 'standard',
     effect: 'none',
     borderRadius: '8px',
     borderColor: '#000000',
-    shadowColor: 'rgba(0,0,0,0.2)',
     frameWidth: 2,
-    frameColor: '#000000'
+    frameColor: '#000000',
+    shadowColor: 'rgba(0,0,0,0.2)'
   },
   textStyle: {
     titleColor: '#000000',
-    titleAlignment: 'center',
-    titleWeight: 'bold',
     descriptionColor: '#333333'
   },
   cardMetadata: {
-    category: 'sports',
-    series: 'base',
-    cardType: 'standard'
+    category: 'Standard',
+    series: 'Base',
+    cardType: 'Standard'
   },
   marketMetadata: {
     isPrintable: false,
     isForSale: false,
-    includeInCatalog: true
+    includeInCatalog: false
   }
 };
 
-export const FALLBACK_IMAGE_URL = '/placeholder-card.png';
+export const FALLBACK_IMAGE_URL = '/images/card-placeholder.png';

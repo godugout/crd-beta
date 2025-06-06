@@ -40,6 +40,7 @@ export interface Series {
   releaseType?: string;
   createdAt?: string;
   updatedAt?: string;
+  // Remove 'cards' property as it doesn't exist in the interface
 }
 
 export interface Deck {

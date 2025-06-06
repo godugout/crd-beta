@@ -78,14 +78,14 @@ export type CardRarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary' |
 
 export interface HotspotData {
   id: string;
-  position: { x: number; y: number };
-  content: string;
-  type: 'info' | 'stat' | 'achievement' | 'text' | 'link' | 'image' | 'video';
-  visible?: boolean;
-  x?: number;
+  position?: { x: number; y: number }; // Make optional since CardDesigner uses x,y directly
+  x?: number; // Add these for CardDesigner compatibility
   y?: number;
   width?: number;
   height?: number;
+  content: string;
+  type: 'info' | 'stat' | 'achievement' | 'text' | 'link' | 'image' | 'video';
+  visible?: boolean;
 }
 
 export interface Card {
@@ -145,7 +145,7 @@ export interface OaklandMemoryData {
   section?: string;
   attendees?: string[];
   tags?: string[];
-  imageUrl: string; // Make required
+  imageUrl?: string; // Make optional again to fix Oakland components
   historicalContext?: string;
   personalSignificance?: string;
 }

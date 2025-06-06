@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { OaklandTemplateType, oaklandTemplates } from './OaklandCardTemplates';
+import { OaklandTemplateType, OAKLAND_TEMPLATES } from './OaklandCardTemplates';
 import OaklandTemplateSelector from './OaklandTemplateSelector';
 import OaklandTemplatePreview from './OaklandTemplatePreview';
 import { Card } from '@/components/ui/card';
@@ -33,6 +33,7 @@ const OaklandEditorIntegration: React.FC<OaklandEditorIntegrationProps> = ({
     section: memoryData.section || 'Section 112',
     attendees: memoryData.attendees || ['Friend', 'Family'],
     tags: memoryData.tags || ['oakland', 'athletics', 'memory'],
+    imageUrl: memoryData.imageUrl || '/images/card-placeholder.png', // Provide default imageUrl
   };
 
   return (
@@ -63,7 +64,7 @@ const OaklandEditorIntegration: React.FC<OaklandEditorIntegrationProps> = ({
               />
               
               <p className="text-sm text-gray-500 mt-4">
-                This is how your memory will look with the {oaklandTemplates[selectedTemplate].name} template.
+                This is how your memory will look with the {OAKLAND_TEMPLATES[selectedTemplate].name} template.
               </p>
             </div>
           </TabsContent>
@@ -71,13 +72,13 @@ const OaklandEditorIntegration: React.FC<OaklandEditorIntegrationProps> = ({
           <TabsContent value="info">
             <div className="space-y-4">
               <div>
-                <h3 className="font-medium">{oaklandTemplates[selectedTemplate].name}</h3>
-                <p className="text-sm text-gray-600">{oaklandTemplates[selectedTemplate].description}</p>
+                <h3 className="font-medium">{OAKLAND_TEMPLATES[selectedTemplate].name}</h3>
+                <p className="text-sm text-gray-600">{OAKLAND_TEMPLATES[selectedTemplate].description}</p>
               </div>
               
               <div>
                 <h4 className="text-sm font-medium">Era</h4>
-                <p className="text-sm text-gray-600">{oaklandTemplates[selectedTemplate].years}</p>
+                <p className="text-sm text-gray-600">{OAKLAND_TEMPLATES[selectedTemplate].years}</p>
               </div>
               
               <div>

@@ -18,6 +18,7 @@ export interface OaklandMemoryFormValues {
   tags?: string[];
   historicalContext?: string;
   personalSignificance?: string;
+  imageUrl?: string; // Add imageUrl to form values
 }
 
 interface OaklandMemoryFormProps {
@@ -26,7 +27,7 @@ interface OaklandMemoryFormProps {
 }
 
 export const OaklandMemoryForm: React.FC<OaklandMemoryFormProps> = ({ onSubmit, initialData }) => {
-  const [formData, setFormData] = useState<OaklandMemoryData>({
+  const [formData, setFormData] = useState<OaklandMemoryFormValues>({
     title: initialData?.title || '',
     description: initialData?.description || '',
     date: initialData?.date || '',
@@ -38,12 +39,18 @@ export const OaklandMemoryForm: React.FC<OaklandMemoryFormProps> = ({ onSubmit, 
     attendees: initialData?.attendees || [],
     tags: initialData?.tags || ['oakland', 'athletics'],
     historicalContext: initialData?.historicalContext || '',
-    personalSignificance: initialData?.personalSignificance || ''
+    personalSignificance: initialData?.personalSignificance || '',
+    imageUrl: initialData?.imageUrl || '/images/card-placeholder.png' // Add default imageUrl
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
+    // Convert to OaklandMemoryData with imageUrl guaranteed
+    const oaklandMemoryData: OaklandMemoryData = {
+      ...formData,
+      imageUrl: formData.imageUrl || '/images/card-placeholder.png'
+    };
+    onSubmit(oaklandMemoryData);
   };
 
   const memoryTypes = [

@@ -1,6 +1,7 @@
 
 import { Card as MainCard } from '@/lib/types/cardTypes';
 import { Card as LegacyCard } from '@/types/card';
+import { DEFAULT_DESIGN_METADATA, FALLBACK_IMAGE_URL } from '@/lib/utils/cardDefaults';
 
 export function adaptToCard(cardData: Partial<MainCard>): MainCard {
   return {
@@ -14,31 +15,7 @@ export function adaptToCard(cardData: Partial<MainCard>): MainCard {
     effects: cardData.effects || [], // Ensure effects is always an array
     createdAt: cardData.createdAt || new Date().toISOString(),
     updatedAt: cardData.updatedAt || new Date().toISOString(),
-    designMetadata: cardData.designMetadata || {
-      cardStyle: {
-        template: 'standard',
-        effect: 'none',
-        borderRadius: '8px',
-        borderColor: '#000000',
-        frameWidth: 2,
-        frameColor: '#000000',
-        shadowColor: 'rgba(0,0,0,0.2)'
-      },
-      textStyle: {
-        titleColor: '#000000',
-        descriptionColor: '#333333'
-      },
-      cardMetadata: {
-        category: 'Standard',
-        series: 'Base',
-        cardType: 'Standard'
-      },
-      marketMetadata: {
-        isPrintable: false,
-        isForSale: false,
-        includeInCatalog: false
-      }
-    },
+    designMetadata: cardData.designMetadata || DEFAULT_DESIGN_METADATA,
     ...cardData
   };
 }
@@ -92,5 +69,9 @@ export function ensureCardHasRequiredProps(card: Partial<MainCard>): MainCard {
     effects: card.effects || [],
     createdAt: card.createdAt || new Date().toISOString(),
     updatedAt: card.updatedAt || new Date().toISOString(),
+    designMetadata: {
+      ...DEFAULT_DESIGN_METADATA,
+      ...card.designMetadata
+    }
   });
 }
