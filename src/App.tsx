@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { CardProvider } from '@/context/CardContext';
 import { CardEnhancedProvider } from '@/context/CardEnhancedContext';
+import { oaklandRoutes } from '@/routes/oakland';
 
 // Lazy load components
 const ImmersiveCardViewerPage = lazy(() => import('@/pages/ImmersiveCardViewerPage'));
@@ -78,22 +79,16 @@ function App() {
                     </Suspense>
                   } 
                 />
-                <Route 
-                  path="/editor" 
-                  element={
-                    <Suspense fallback={<LoadingSpinner />}>
-                      <UnifiedCardEditor />
-                    </Suspense>
-                  } 
-                />
-                <Route 
-                  path="/editor/:id" 
-                  element={
-                    <Suspense fallback={<LoadingSpinner />}>
-                      <UnifiedCardEditor />
-                    </Suspense>
-                  } 
-                />
+                
+                {/* Redirect all create/editor paths to Oakland Memory Creator */}
+                <Route path="/create" element={<Navigate to="/oakland/create" replace />} />
+                <Route path="/editor" element={<Navigate to="/oakland/create" replace />} />
+                <Route path="/editor/:id" element={<Navigate to="/oakland/create" replace />} />
+                
+                {/* Oakland routes */}
+                {oaklandRoutes.map((route, index) => (
+                  <Route key={index} path={route.path} element={route.element} />
+                ))}
               </Routes>
               <Toaster />
             </div>

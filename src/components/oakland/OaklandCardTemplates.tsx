@@ -1,92 +1,124 @@
 
-import React from 'react';
-import { cn } from '@/lib/utils';
-import { CircleDollarSign, Trophy, BarChart3, Building2, Users } from 'lucide-react';
+export type OaklandTemplateType = 
+  | 'classic' 
+  | 'moneyball' 
+  | 'dynasty' 
+  | 'coliseum' 
+  | 'tailgate'
+  | 'bashbrothers';
 
-export type OaklandTemplateType = 'classic' | 'moneyball' | 'dynasty' | 'coliseum' | 'tailgate';
-
-export interface OaklandTemplateMetadata {
+export interface OaklandTemplate {
+  id: OaklandTemplateType;
   name: string;
   description: string;
-  icon: React.ReactNode;
-  years: string;
+  era: string;
+  colors: {
+    primary: string;
+    secondary: string;
+    accent: string;
+  };
+  theme: {
+    background: string;
+    textColor: string;
+    borderColor: string;
+  };
 }
 
-export const oaklandTemplates: Record<OaklandTemplateType, OaklandTemplateMetadata> = {
+export const OAKLAND_TEMPLATES: Record<OaklandTemplateType, OaklandTemplate> = {
   classic: {
-    name: 'Classic A\'s',
-    description: 'Traditional green and gold design with clean borders',
-    icon: <CircleDollarSign className="h-5 w-5" />,
-    years: '1968-Present'
-  },
-  dynasty: {
-    name: '70s Dynasty',
-    description: 'Celebrating the championship era of the 1970s',
-    icon: <Trophy className="h-5 w-5" />,
-    years: '1972-1974'
+    id: 'classic',
+    name: 'Classic Green & Gold',
+    description: 'Timeless A\'s colors with clean design',
+    era: 'All-Time Classic',
+    colors: {
+      primary: '#006341',
+      secondary: '#EFB21E', 
+      accent: '#FFFFFF'
+    },
+    theme: {
+      background: 'linear-gradient(135deg, #006341 0%, #003831 100%)',
+      textColor: '#FFFFFF',
+      borderColor: '#EFB21E'
+    }
   },
   moneyball: {
-    name: 'Moneyball',
-    description: 'Minimal design inspired by the analytical revolution',
-    icon: <BarChart3 className="h-5 w-5" />,
-    years: '2002'
+    id: 'moneyball',
+    name: 'Moneyball Era',
+    description: 'Early 2000s statistical revolution style',
+    era: '2002-2006',
+    colors: {
+      primary: '#2D5A3D',
+      secondary: '#C4A962',
+      accent: '#E5E5E5'
+    },
+    theme: {
+      background: 'linear-gradient(135deg, #2D5A3D 0%, #1A3A2A 100%)',
+      textColor: '#E5E5E5',
+      borderColor: '#C4A962'
+    }
+  },
+  dynasty: {
+    id: 'dynasty',
+    name: 'Dynasty Years',
+    description: 'Championship glory of the 70s',
+    era: '1972-1974',
+    colors: {
+      primary: '#FFD700',
+      secondary: '#006341',
+      accent: '#003831'
+    },
+    theme: {
+      background: 'linear-gradient(135deg, #FFD700 0%, #B8860B 100%)',
+      textColor: '#003831',
+      borderColor: '#006341'
+    }
   },
   coliseum: {
-    name: 'Coliseum',
-    description: 'Tribute to the Oakland Coliseum and its history',
-    icon: <Building2 className="h-5 w-5" />,
-    years: '1968-2024'
+    id: 'coliseum',
+    name: 'Coliseum Classic',
+    description: 'Vintage ballpark atmosphere',
+    era: 'Stadium Heritage',
+    colors: {
+      primary: '#4A5D23',
+      secondary: '#EFB21E',
+      accent: '#FFFFFF'
+    },
+    theme: {
+      background: 'linear-gradient(135deg, #4A5D23 0%, #2F3A16 100%)',
+      textColor: '#FFFFFF',
+      borderColor: '#EFB21E'
+    }
   },
   tailgate: {
-    name: 'Tailgate',
-    description: 'Celebrating the fan experience in the parking lot',
-    icon: <Users className="h-5 w-5" />,
-    years: 'All Years'
+    id: 'tailgate',
+    name: 'Tailgate Party',
+    description: 'Fan community celebration style',
+    era: 'Fan Culture',
+    colors: {
+      primary: '#8B4513',
+      secondary: '#EFB21E',
+      accent: '#FFFFFF'
+    },
+    theme: {
+      background: 'linear-gradient(135deg, #8B4513 0%, #654321 100%)',
+      textColor: '#FFFFFF',
+      borderColor: '#EFB21E'
+    }
+  },
+  bashbrothers: {
+    id: 'bashbrothers',
+    name: 'Bash Brothers',
+    description: 'Power-hitting era of the late 80s',
+    era: '1988-1990',
+    colors: {
+      primary: '#1E3A5F',
+      secondary: '#FFD700',
+      accent: '#FFFFFF'
+    },
+    theme: {
+      background: 'linear-gradient(135deg, #1E3A5F 0%, #0F1D2F 100%)',
+      textColor: '#FFFFFF',
+      borderColor: '#FFD700'
+    }
   }
 };
-
-interface OaklandCardTemplateProps {
-  type: OaklandTemplateType;
-  className?: string;
-  children?: React.ReactNode;
-  onClick?: () => void;
-}
-
-const OaklandCardTemplate: React.FC<OaklandCardTemplateProps> = ({
-  type,
-  className,
-  children,
-  onClick
-}) => {
-  const getTemplateStyles = () => {
-    switch (type) {
-      case 'classic':
-        return 'bg-gradient-to-br from-[#003831] to-[#006341] border-[#EFB21E] border-4';
-      case 'moneyball':
-        return 'bg-gradient-to-r from-[#003831] via-[#004C35] to-[#003831] border-[#FFFFFF] border-2';
-      case 'dynasty':
-        return 'bg-gradient-to-b from-[#003831] to-[#006341] border-[#EFB21E] border-[6px] shadow-xl';
-      case 'coliseum':
-        return 'bg-[url("/oakland/coliseum-bg.jpg")] bg-cover bg-center border-[#EFB21E] border-2';
-      case 'tailgate':
-        return 'bg-[url("/oakland/tailgate-bg.jpg")] bg-cover bg-center border-[#003831] border-4';
-      default:
-        return 'bg-gradient-to-br from-[#003831] to-[#006341] border-[#EFB21E] border-2';
-    }
-  };
-
-  return (
-    <div 
-      className={cn(
-        "relative rounded-xl overflow-hidden aspect-[2.5/3.5] flex flex-col",
-        getTemplateStyles(),
-        className
-      )}
-      onClick={onClick}
-    >
-      {children}
-    </div>
-  );
-};
-
-export default OaklandCardTemplate;
