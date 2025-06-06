@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { EnhancedCard, Series, Deck } from '@/lib/types/enhancedCardTypes';
 
@@ -108,15 +109,15 @@ export const CardEnhancedProvider: React.FC<{ children: ReactNode }> = ({ childr
   const addSeries = async (seriesData: Partial<Series>): Promise<Series> => {
     const newSeries: Series = {
       id: `series-${Date.now()}`,
-      title: seriesData.title || 'Untitled Series',
-      name: seriesData.name || seriesData.title || 'Untitled Series',
+      name: seriesData.name || 'Untitled Series',
+      year: seriesData.year || new Date().getFullYear().toString(),
+      manufacturer: seriesData.manufacturer || 'Unknown',
+      cardCount: seriesData.cardCount || 0,
+      title: seriesData.title || seriesData.name || 'Untitled Series',
       description: seriesData.description || '',
-      releaseDate: seriesData.releaseDate || new Date().toISOString(),
-      cards: seriesData.cards || [],
-      totalCards: seriesData.totalCards || 0,
       cardIds: seriesData.cardIds || [],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      totalCards: seriesData.totalCards || 0,
+      isPublished: seriesData.isPublished || false,
       ...seriesData
     };
     
@@ -130,7 +131,7 @@ export const CardEnhancedProvider: React.FC<{ children: ReactNode }> = ({ childr
     setSeries(prev =>
       prev.map(s => {
         if (s.id === id) {
-          updatedSeries = { ...s, ...updates, updatedAt: new Date().toISOString() };
+          updatedSeries = { ...s, ...updates };
           return updatedSeries;
         }
         return s;
@@ -151,10 +152,7 @@ export const CardEnhancedProvider: React.FC<{ children: ReactNode }> = ({ childr
       name: deckData.name || 'Untitled Deck',
       description: deckData.description || '',
       cards: deckData.cards || [],
-      cardIds: deckData.cardIds || [],
-      userId: deckData.userId || deckData.ownerId || 'default-user',
-      ownerId: deckData.ownerId || deckData.userId || 'default-user',
-      isPublic: deckData.isPublic !== undefined ? deckData.isPublic : true,
+      ownerId: deckData.ownerId || 'default-user',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       ...deckData

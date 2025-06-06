@@ -19,7 +19,7 @@ export interface CardLayer {
   id: string;
   type: 'image' | 'text' | 'shape' | 'effect';
   position: { x: number; y: number; z: number };
-  size: { width: number; height: number };
+  size: { width: number | 'auto'; height: number | 'auto' };
   rotation: number;
   opacity: number;
   visible: boolean;

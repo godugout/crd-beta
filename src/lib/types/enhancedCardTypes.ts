@@ -35,6 +35,10 @@ export interface Series {
   cardIds?: string[];
   totalCards?: number;
   isPublished?: boolean;
+  releaseDate?: string;
+  releaseType?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface Deck {
@@ -45,6 +49,10 @@ export interface Deck {
   createdAt: string;
   updatedAt: string;
   ownerId: string;
+  coverImageUrl?: string;
+  cardIds?: string[];
+  userId?: string;
+  isPublic?: boolean;
 }
 
 export type CardRarity = BaseCardRarity;
