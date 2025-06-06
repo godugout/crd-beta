@@ -12,6 +12,8 @@ const ImmersiveCardViewerPage = lazy(() => import('@/pages/ImmersiveCardViewerPa
 const UnifiedCardEditor = lazy(() => import('@/pages/UnifiedCardEditor'));
 const CardDetector = lazy(() => import('@/pages/CardDetector'));
 const Index = lazy(() => import('@/pages/Index'));
+const Gallery = lazy(() => import('@/pages/Gallery'));
+const Labs = lazy(() => import('@/pages/Labs'));
 
 // Create a client
 const queryClient = new QueryClient({
@@ -41,6 +43,22 @@ function App() {
                   element={
                     <Suspense fallback={<LoadingSpinner />}>
                       <Index />
+                    </Suspense>
+                  } 
+                />
+                <Route 
+                  path="/gallery" 
+                  element={
+                    <Suspense fallback={<LoadingSpinner />}>
+                      <Gallery />
+                    </Suspense>
+                  } 
+                />
+                <Route 
+                  path="/labs" 
+                  element={
+                    <Suspense fallback={<LoadingSpinner />}>
+                      <Labs />
                     </Suspense>
                   } 
                 />
