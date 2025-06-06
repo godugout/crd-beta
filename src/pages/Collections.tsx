@@ -79,8 +79,6 @@ const Collections = () => {
                 Card
                 <span className="block text-brand-gradient">Collections</span>
               </h1>
-              {/* Sharp accent corner */}
-              <div className="absolute -top-4 -right-8 w-8 h-8 bg-gradient-to-br from-[var(--brand-success)] to-[var(--brand-primary)] clip-corner-tr opacity-80"></div>
             </div>
             
             <p className="text-2xl text-[var(--text-secondary)] mb-6 font-semibold">
@@ -102,7 +100,6 @@ const Collections = () => {
                   <Plus className="mr-3 h-6 w-6" />
                   Create Collection
                 </CrdButton>
-                <div className="absolute -top-1 -right-1 w-4 h-4 bg-[var(--brand-accent)] clip-corner-tr opacity-90"></div>
               </div>
               
               <Button 
@@ -160,15 +157,13 @@ const Collections = () => {
         {/* My Collections Section */}
         <div className="mb-16">
           <div className="flex items-center justify-between mb-8">
-            <div className="relative">
+            <div>
               <h2 className="text-4xl font-black text-white mb-2 tracking-tight">
                 My <span className="text-brand-gradient">Collections</span>
               </h2>
               <p className="text-xl text-[var(--text-secondary)] font-medium">
                 Your personal collections
               </p>
-              {/* Sharp accent */}
-              <div className="absolute -top-2 -left-2 w-6 h-6 bg-gradient-to-br from-[var(--brand-primary)] to-[var(--brand-secondary)] clip-corner-tl opacity-60"></div>
             </div>
             
             <CrdButton 
@@ -185,7 +180,7 @@ const Collections = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {myCollections.map((collection) => (
               <div key={collection.id} className="group">
-                <div className="bento-card bg-white/5 border border-white/10 hover:border-white/20 transition-all duration-300 hover:scale-[1.02] relative overflow-hidden">
+                <div className="bento-card bg-white/5 border border-white/10 hover:border-white/20 transition-all duration-300 hover:scale-[1.02] relative overflow-hidden clip-corner-tr">
                   {/* Collection Icon */}
                   <div className="w-full aspect-square bg-gradient-to-br from-white/10 to-white/5 rounded-lg mb-4 flex items-center justify-center">
                     <Folder className="w-12 h-12 text-white/60" />
@@ -202,9 +197,6 @@ const Collections = () => {
                       {collection.cardCount} cards
                     </p>
                   </div>
-                  
-                  {/* Sharp accent corner */}
-                  <div className="absolute top-2 right-2 w-4 h-4 bg-gradient-to-br from-[var(--brand-primary)] to-[var(--brand-secondary)] clip-corner-tr opacity-70"></div>
                 </div>
               </div>
             ))}
@@ -214,15 +206,13 @@ const Collections = () => {
         {/* Featured Collections Section */}
         <div>
           <div className="flex items-center justify-between mb-8">
-            <div className="relative">
+            <div>
               <h2 className="text-4xl font-black text-white mb-2 tracking-tight">
                 Featured <span className="text-brand-gradient">Collections</span>
               </h2>
               <p className="text-xl text-[var(--text-secondary)] font-medium">
                 Curated by the community
               </p>
-              {/* Sharp accent */}
-              <div className="absolute -top-2 -right-4 w-6 h-6 bg-gradient-to-br from-[var(--brand-accent)] to-[var(--brand-warning)] clip-corner-tr opacity-60"></div>
             </div>
             
             <Button variant="glass" size="lg" className="font-semibold">
@@ -234,10 +224,7 @@ const Collections = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {featuredCollections.map((collection) => (
               <div key={collection.id} className="group">
-                <div className={`bento-card relative overflow-hidden h-full bg-gradient-to-br ${collection.gradient} border border-${collection.border} hover:border-${collection.border.replace('/30', '/50')} transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl`}>
-                  {/* Sharp accent corner */}
-                  <div className={`absolute top-0 right-0 w-8 h-8 bg-gradient-to-br from-[var(--brand-primary)] to-[var(--brand-secondary)] clip-corner-tr`}></div>
-                  
+                <div className={`bento-card relative overflow-hidden h-full bg-gradient-to-br ${collection.gradient} border border-${collection.border} hover:border-${collection.border.replace('/30', '/50')} transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl clip-corner-tr`}>
                   {/* Collection Preview */}
                   <div className="aspect-[4/3] bg-gradient-to-br from-white/10 to-white/5 rounded-lg mb-6 flex items-center justify-center">
                     <div className="grid grid-cols-3 gap-2 w-3/4 h-3/4">
