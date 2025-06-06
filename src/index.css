@@ -14,10 +14,25 @@
     font-feature-settings: "ss01", "ss02", "cv01", "cv02", "cv03";
     min-height: 100vh;
     overflow-x: hidden;
+    font-weight: 400;
   }
   
   h1, h2, h3, h4, h5, h6 {
-    @apply font-medium tracking-tight;
+    @apply font-bold tracking-tight;
+    font-weight: 700;
+  }
+  
+  /* Enhanced font weights */
+  .font-black {
+    font-weight: 900;
+  }
+  
+  .font-bold {
+    font-weight: 700;
+  }
+  
+  .font-semibold {
+    font-weight: 600;
   }
   
   a {
@@ -30,47 +45,51 @@
 }
 
 @layer components {
-  /* Updated bento grid with improved spacing */
+  /* Enhanced bento grid with better spacing */
   .bento-grid {
-    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-7;
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8;
   }
   
-  /* Redesigned card with subtle hover effects */
+  /* Updated card design with new theme */
   .bento-card {
-    @apply bg-[var(--bg-secondary)] rounded-[var(--radius-xl)] p-6 border border-[var(--border-primary)] 
+    @apply bg-[var(--bg-secondary)] rounded-2xl p-8 border border-[var(--border-primary)] 
            shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] transition-all duration-300 
-           hover:translate-y-[-2px];
+           hover:translate-y-[-3px] hover:border-[var(--border-highlight)];
   }
   
-  /* Better section container spacing */
+  /* Section container with better spacing */
   .section-container {
-    @apply container mx-auto px-5 py-12 md:py-18;
+    @apply container mx-auto px-6 py-16 md:py-24;
   }
   
-  /* Enhanced highlight effect with animated gradient */
-  .crd-highlight {
+  /* Enhanced brand highlight effect */
+  .brand-highlight {
     @apply relative;
   }
   
-  .crd-highlight::after {
+  .brand-highlight::after {
     content: '';
-    @apply absolute bottom-0 left-0 h-1.5 w-full bg-gradient-to-r from-[var(--brand-accent)] via-[var(--brand-primary)] to-[var(--brand-notification)] rounded-full opacity-90;
+    @apply absolute bottom-0 left-0 h-2 w-full rounded-full opacity-90;
+    background: var(--gradient-primary);
   }
   
-  /* Improved glass card effect */
+  /* Updated glass card with new theme */
   .glass-card {
-    @apply backdrop-blur-xl bg-black/30 border border-white/10 rounded-xl p-5 hover:bg-black/35 transition-all;
+    @apply backdrop-blur-xl border border-[var(--border-primary)] rounded-2xl p-6 
+           hover:border-[var(--border-highlight)] transition-all duration-300;
+    background: rgba(17, 17, 21, 0.4);
   }
   
-  /* Enhanced spectrum text with animation */
+  /* Enhanced spectrum text */
   .spectrum-text {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-[var(--brand-notification)] via-[var(--brand-accent)] to-[var(--brand-primary)] animate-gradient-x;
+    @apply text-brand-gradient font-bold;
   }
   
-  /* Better animated gradient background */
+  /* Updated animated gradient background */
   .animated-gradient-bg {
-    background-size: 300% 300%;
-    animation: gradientMove 10s ease infinite;
+    background: var(--gradient-primary);
+    background-size: 400% 400%;
+    animation: gradientMove 8s ease infinite;
   }
   
   @keyframes gradientMove {
@@ -79,64 +98,84 @@
     100% { background-position: 0% 50%; }
   }
   
-  @keyframes gradient-x {
-    0% { background-position: 0% 50%; }
-    100% { background-position: 100% 50%; }
-  }
-  
-  .animate-gradient-x {
-    animation: gradient-x 4s linear infinite alternate;
-    background-size: 200% 200%;
-  }
-  
-  .text-balance {
-    text-wrap: balance;
-  }
-  
-  /* New card hover effect */
+  /* Enhanced card hover effect */
   .card-hover {
-    @apply transition-all duration-300 hover:translate-y-[-3px] hover:shadow-lg;
+    @apply transition-all duration-300 hover:translate-y-[-4px] hover:shadow-[var(--shadow-md)];
   }
   
-  /* New button styles */
-  .btn-spectrum {
-    @apply relative overflow-hidden backdrop-blur-md bg-black/30 border border-white/10 
-           text-white shadow-md hover:shadow-lg transition-all transform hover:scale-[1.02] 
-           after:absolute after:inset-0 after:bg-[var(--gradient-rainbow)] after:opacity-20 
-           after:z-[-1] rounded-xl px-5 py-2.5;
+  /* New sharp corner button styles */
+  .btn-sharp {
+    @apply relative overflow-hidden bg-[var(--bg-elevated)] border border-[var(--border-primary)] 
+           text-white shadow-sm hover:shadow-md transition-all transform hover:scale-[1.02] 
+           px-6 py-3 font-semibold;
+    border-radius: 0;
+    clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%);
   }
   
-  .btn-soft {
-    @apply rounded-xl bg-white/5 border border-white/10 px-5 py-2.5 text-white 
-           hover:bg-white/10 transition-all shadow-sm hover:shadow-md;
+  .btn-sharp:hover {
+    border-color: var(--border-highlight);
   }
   
-  /* Tag pills with improved design */
+  /* Enhanced tag pills */
   .tag-pill {
-    @apply inline-flex items-center rounded-full bg-white/10 px-2.5 py-0.5 text-xs 
-           font-medium text-white hover:bg-white/20 transition-colors;
+    @apply inline-flex items-center rounded-full px-3 py-1 text-sm 
+           font-medium transition-all duration-200;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-secondary);
   }
   
-  /* New navigation styles */
+  .tag-pill:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: var(--text-primary);
+  }
+  
+  /* Updated navigation styles */
   .nav-item {
-    @apply px-4 py-2 rounded-lg transition-colors text-white/80 hover:bg-white/5 hover:text-white;
+    @apply px-4 py-2 rounded-xl transition-all duration-200 text-white/70 hover:bg-white/5 hover:text-white;
   }
   
   .nav-item-active {
-    @apply bg-white/10 text-white font-medium;
+    @apply bg-white/10 text-white font-semibold;
+    box-shadow: var(--shadow-sm);
   }
   
   .nav-glass {
-    @apply backdrop-blur-xl bg-black/70 border-b border-white/10;
+    @apply backdrop-blur-xl border-b;
+    background: rgba(10, 10, 11, 0.9);
+    border-color: var(--border-primary);
   }
   
   .nav-button {
-    @apply flex items-center rounded-xl px-3.5 py-2 text-sm font-medium bg-white/10
-           hover:bg-white/15 transition-all text-white;
+    @apply flex items-center rounded-xl px-4 py-2 text-sm font-semibold 
+           transition-all duration-200 text-white;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.1);
   }
   
-  .nav-action {
-    @apply p-2 rounded-full bg-white/10 hover:bg-white/15 text-white;
+  .nav-button:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
   }
 }
 
+/* Custom clip-path utilities for sharp corners */
+@layer utilities {
+  .clip-corner-tr {
+    clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%);
+  }
+  
+  .clip-corner-tl {
+    clip-path: polygon(16px 0, 100% 0, 100% 100%, 0 100%, 0 16px);
+  }
+  
+  .clip-corner-br {
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 16px), calc(100% - 16px) 100%, 0 100%);
+  }
+  
+  .clip-corner-bl {
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 16px 100%, 0 calc(100% - 16px));
+  }
+}
