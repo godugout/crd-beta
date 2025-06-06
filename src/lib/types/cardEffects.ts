@@ -13,6 +13,9 @@ export interface CardEffectSettings {
   color?: string;
   speed?: number;
   direction?: 'horizontal' | 'vertical' | 'radial';
+  animationEnabled?: boolean;
+  pattern?: string;
+  angle?: number;
 }
 
 export interface CardEffectsOptions {

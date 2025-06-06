@@ -100,8 +100,8 @@ export interface Card {
   comments?: any[];
   viewCount?: number;
   isPublic?: boolean;
-  createdAt?: string;
-  updatedAt?: string;
+  createdAt: string; // Make required
+  updatedAt: string; // Make required
   
   // Sports card specific properties
   player?: string;
@@ -120,6 +120,11 @@ export interface Card {
   cardStyle?: string;
   backTemplate?: string;
   rarity?: CardRarity;
+  
+  // Additional properties that may be used
+  teamId?: string;
+  creatorId?: string;
+  stats?: Record<string, any>;
   
   // Editor specific properties
   layers?: CardLayer[];

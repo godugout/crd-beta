@@ -19,7 +19,21 @@ interface OaklandMemory {
 }
 
 interface OaklandMemoryCardProps {
-  memory: OaklandMemory;
+  memory: {
+    title: string;
+    description: string;
+    date?: string; // Make optional to handle OaklandMemoryData
+    memoryType?: string;
+    opponent?: string;
+    score?: string;
+    location?: string;
+    section?: string;
+    attendees?: string[];
+    tags?: string[];
+    imageUrl: string;
+    historicalContext?: string;
+    personalSignificance?: string;
+  };
   templateType: OaklandTemplateType;
 }
 
@@ -158,12 +172,14 @@ const OaklandMemoryCard: React.FC<OaklandMemoryCardProps> = ({ memory, templateT
           <span style={{ color: styles.textColor, opacity: 0.8 }}>
             {memory.location || 'Oakland Coliseum'}
           </span>
-          <span 
-            className="font-medium"
-            style={{ color: styles.accent }}
-          >
-            #{memory.tags.join(' #')}
-          </span>
+          {memory.tags && memory.tags.length > 0 && (
+            <span 
+              className="font-medium"
+              style={{ color: styles.accent }}
+            >
+              #{memory.tags.join(' #')}
+            </span>
+          )}
         </div>
       </div>
     </div>
