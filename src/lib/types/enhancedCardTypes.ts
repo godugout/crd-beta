@@ -1,5 +1,5 @@
 
-import { Card, CardRarity as BaseCardRarity } from './cardTypes';
+import { Card, CardRarity as BaseCardRarity, CardStats } from './cardTypes';
 
 export interface HotspotData {
   id: string;
@@ -20,6 +20,7 @@ export interface EnhancedCard extends Card {
   artistId?: string;
   marketData?: any;
   editionSize?: number;
+  releaseDate?: string;
 }
 
 export interface Series {

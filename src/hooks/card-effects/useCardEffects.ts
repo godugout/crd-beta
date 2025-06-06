@@ -5,7 +5,6 @@ import { CardEffectsResult } from '@/lib/types/cardEffects';
 const useCardEffects = (): CardEffectsResult => {
   const [cardEffects, setCardEffectsState] = useState<Record<string, string[]>>({});
   const [isLoading, setIsLoading] = useState(false);
-  const [activeEffects, setActiveEffects] = useState<string[]>([]);
 
   const addEffect = useCallback((cardId: string, effect: string) => {
     setCardEffectsState(prev => {
@@ -61,6 +60,11 @@ const useCardEffects = (): CardEffectsResult => {
     }));
   }, []);
 
+  const setActiveEffects = useCallback((effects: string[]) => {
+    // This could be used for global effects if needed
+    console.log('Setting active effects:', effects);
+  }, []);
+
   return {
     cardEffects,
     isLoading,
@@ -69,7 +73,6 @@ const useCardEffects = (): CardEffectsResult => {
     toggleEffect,
     clearEffects,
     setCardEffects,
-    activeEffects,
     setActiveEffects
   };
 };

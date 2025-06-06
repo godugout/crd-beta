@@ -11,7 +11,7 @@ export function adaptToCard(cardData: Partial<MainCard>): MainCard {
     thumbnailUrl: cardData.thumbnailUrl || cardData.imageUrl || '',
     tags: cardData.tags || [],
     userId: cardData.userId || '',
-    effects: cardData.effects || [],
+    effects: cardData.effects || [], // Ensure effects is always an array
     createdAt: cardData.createdAt || new Date().toISOString(),
     updatedAt: cardData.updatedAt || new Date().toISOString(),
     designMetadata: cardData.designMetadata || {
@@ -83,4 +83,14 @@ export function adaptToLegacyCard(cardData: MainCard): LegacyCard {
     stats: cardData.stats,
     layers: cardData.layers
   };
+}
+
+// Helper function to ensure a card has all required properties
+export function ensureCardHasRequiredProps(card: Partial<MainCard>): MainCard {
+  return adaptToCard({
+    ...card,
+    effects: card.effects || [],
+    createdAt: card.createdAt || new Date().toISOString(),
+    updatedAt: card.updatedAt || new Date().toISOString(),
+  });
 }

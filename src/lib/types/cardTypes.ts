@@ -39,6 +39,10 @@ export interface CardLayer {
   color?: string;
 }
 
+export interface CardStats {
+  [key: string]: string | number;
+}
+
 export interface DesignMetadata {
   cardStyle?: {
     effect?: string;
@@ -70,7 +74,7 @@ export interface DesignMetadata {
   [key: string]: any;
 }
 
-export type CardRarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary' | 'ultra-rare';
+export type CardRarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary' | 'ultra-rare' | 'one-of-one';
 
 export interface HotspotData {
   id: string;
@@ -95,7 +99,7 @@ export interface Card {
   collectionId?: string;
   designMetadata: DesignMetadata;
   metadata?: Record<string, any>;
-  effects?: string[];
+  effects: string[]; // Make required
   reactions?: any[];
   comments?: any[];
   viewCount?: number;
@@ -124,7 +128,7 @@ export interface Card {
   // Additional properties that may be used
   teamId?: string;
   creatorId?: string;
-  stats?: Record<string, any>;
+  stats?: CardStats;
   
   // Editor specific properties
   layers?: CardLayer[];
@@ -141,7 +145,7 @@ export interface OaklandMemoryData {
   section?: string;
   attendees?: string[];
   tags?: string[];
-  imageUrl?: string;
+  imageUrl: string; // Make required
   historicalContext?: string;
   personalSignificance?: string;
 }
