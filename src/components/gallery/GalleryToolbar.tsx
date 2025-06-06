@@ -1,82 +1,67 @@
 
 import React from 'react';
-import { Filter, Grid, List } from 'lucide-react';
+import { PlusCircle, Grid, List } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-
-interface FilterOption {
-  id: string;
-  label: string;
-  count?: number;
-}
+import { cn } from '@/lib/utils';
+import SearchInput from './SearchInput';
 
 interface GalleryToolbarProps {
+  searchQuery: string;
+  onSearchChange: (query: string) => void;
   viewMode: 'grid' | 'list';
-  setViewMode: (mode: 'grid' | 'list') => void;
-  filters: FilterOption[];
-  selectedFilter: string;
-  setSelectedFilter: (id: string) => void;
+  onViewModeChange: (mode: 'grid' | 'list') => void;
+  onCreateCard: () => void;
 }
 
-const GalleryToolbar: React.FC<GalleryToolbarProps> = ({
+export const GalleryToolbar: React.FC<GalleryToolbarProps> = ({
+  searchQuery,
+  onSearchChange,
   viewMode,
-  setViewMode,
-  filters,
-  selectedFilter,
-  setSelectedFilter,
+  onViewModeChange,
+  onCreateCard
 }) => {
   return (
-    <div className="flex items-center justify-between my-6">
-      {/* Category Pills */}
-      <div className="flex overflow-x-auto hide-scrollbar gap-2">
-        {filters.map((filter) => (
-          <button
-            key={filter.id}
-            onClick={() => setSelectedFilter(filter.id)}
-            className={`px-4 py-2 rounded-xl font-medium whitespace-nowrap transition-all duration-300 ${
-              selectedFilter === filter.id
-                ? 'bg-gradient-to-r from-[var(--brand-primary)] to-[var(--brand-secondary)] text-white shadow-[var(--shadow-brand)]'
-                : 'bg-white/5 border border-white/10 text-white/80 hover:bg-white/10 hover:text-white hover:border-white/20'
-            }`}
-          >
-            {filter.label}
-            {filter.count !== undefined && (
-              <Badge className="ml-2 bg-white/20 text-white/90">
-                {filter.count}
-              </Badge>
-            )}
-          </button>
-        ))}
-      </div>
-
-      {/* View Controls */}
-      <div className="flex items-center gap-3">
-        <div className="flex bg-white/5 border border-white/10 rounded-xl p-1">
+    <div className="mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <SearchInput 
+        value={searchQuery}
+        onChange={onSearchChange}
+        placeholder="Search cards..."
+      />
+      
+      <div className="flex gap-2">
+        <div className="flex rounded-lg border overflow-hidden">
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setViewMode('grid')}
-            className={`px-4 py-2 rounded-lg ${viewMode === 'grid' ? 'bg-white/10 text-white' : 'text-white/60 hover:text-white'}`}
+            className={cn(
+              "rounded-none",
+              viewMode === 'grid' && "bg-gray-100"
+            )}
+            onClick={() => onViewModeChange('grid')}
           >
-            <Grid className="w-4 h-4" />
+            <Grid className="h-4 w-4" />
           </Button>
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setViewMode('list')}
-            className={`px-4 py-2 rounded-lg ${viewMode === 'list' ? 'bg-white/10 text-white' : 'text-white/60 hover:text-white'}`}
+            className={cn(
+              "rounded-none",
+              viewMode === 'list' && "bg-gray-100"
+            )}
+            onClick={() => onViewModeChange('list')}
           >
-            <List className="w-4 h-4" />
+            <List className="h-4 w-4" />
           </Button>
         </div>
-        
-        <Button variant="glass" size="sm" className="px-4">
-          <Filter className="w-4 h-4 mr-2" />
-          Filter
+      
+        <Button
+          onClick={onCreateCard}
+          className="flex items-center justify-center rounded-lg bg-cardshow-blue px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-opacity-90 transition-colors"
+        >
+          <PlusCircle className="mr-2 h-4 w-4" />
+          New Card
         </Button>
       </div>
     </div>
   );
 };
-
-export default GalleryToolbar;

@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from 'react';
 
 export type LightingPreset = 'studio' | 'natural' | 'dramatic' | 'gallery' | 'display_case';
@@ -58,130 +57,130 @@ export interface LightingSettings {
 export const DEFAULT_LIGHTING: Record<LightingPreset, LightingSettings> = {
   studio: {
     primaryLight: {
-      x: 10,
+      x: 8,
       y: 15,
       z: 12,
-      intensity: 2.8,
+      intensity: 2.2,
       color: '#ffffff'
     },
     ambientLight: {
-      intensity: 0.7,
+      intensity: 0.4,
       color: '#f8f9fa'
     },
     secondaryLight: {
-      x: -8,
-      y: 10,
+      x: -6,
+      y: 8,
       z: 10,
-      intensity: 1.5,
-      color: '#f0f8ff'
+      intensity: 1.0,
+      color: '#f0f0ff'
     },
     fillLight: {
       x: 0,
-      y: -3,
+      y: -5,
       z: 8,
-      intensity: 0.8,
+      intensity: 0.6,
       color: '#ffffff'
     },
     environmentType: 'studio',
-    envMapIntensity: 2.0,
+    envMapIntensity: 1.5,
     useDynamicLighting: true,
-    shadowIntensity: 0.25,
+    shadowIntensity: 0.3,
     rimLighting: {
-      intensity: 0.6,
+      intensity: 0.4,
       color: '#ffffff'
     },
     backgroundColor: '#1a1a1a'
   },
   natural: {
     primaryLight: {
-      x: 25,
-      y: 30,
-      z: 20,
-      intensity: 2.2,
-      color: '#fff8dc'
+      x: 20,
+      y: 25,
+      z: 15,
+      intensity: 1.8,
+      color: '#fff8e1'
     },
     ambientLight: {
-      intensity: 0.9,
-      color: '#e6f3ff'
+      intensity: 0.8,
+      color: '#e3f2fd'
     },
     secondaryLight: {
-      x: -15,
-      y: 20,
-      z: 15,
-      intensity: 0.8,
-      color: '#add8e6'
+      x: -10,
+      y: 15,
+      z: 12,
+      intensity: 0.6,
+      color: '#bbdefb'
     },
     environmentType: 'natural',
-    envMapIntensity: 1.8,
+    envMapIntensity: 1.2,
     useDynamicLighting: true,
-    shadowIntensity: 0.4,
+    shadowIntensity: 0.6,
     rimLighting: {
-      intensity: 1.0,
-      color: '#ffd700'
+      intensity: 0.7,
+      color: '#ffeb3b'
     },
     backgroundColor: '#87ceeb'
   },
   dramatic: {
     primaryLight: {
-      x: 30,
-      y: 8,
-      z: 25,
-      intensity: 4.2,
-      color: '#ff6b35'
+      x: 25,
+      y: 5,
+      z: 20,
+      intensity: 3.5,
+      color: '#ff8f00'
     },
     ambientLight: {
-      intensity: 0.15,
-      color: '#1a1a3a'
+      intensity: 0.1,
+      color: '#1a1a2e'
     },
     secondaryLight: {
-      x: -20,
-      y: -5,
-      z: 18,
-      intensity: 0.4,
-      color: '#4169e1'
+      x: -15,
+      y: -8,
+      z: 15,
+      intensity: 0.3,
+      color: '#3f51b5'
     },
     environmentType: 'dramatic',
-    envMapIntensity: 2.5,
+    envMapIntensity: 2.0,
     useDynamicLighting: false,
-    shadowIntensity: 0.85,
+    shadowIntensity: 0.9,
     rimLighting: {
-      intensity: 1.8,
-      color: '#ff4500'
+      intensity: 1.2,
+      color: '#ff5722'
     },
-    backgroundColor: '#0a0a1a'
+    backgroundColor: '#0d1421'
   },
   gallery: {
     primaryLight: {
       x: 0,
-      y: 25,
-      z: 18,
-      intensity: 2.5,
-      color: '#fff9e6'
+      y: 20,
+      z: 15,
+      intensity: 2.0,
+      color: '#fff9c4'
     },
     ambientLight: {
-      intensity: 0.8,
+      intensity: 0.6,
       color: '#fafafa'
     },
     secondaryLight: {
-      x: 15,
-      y: 15,
-      z: 12,
-      intensity: 1.2,
+      x: 12,
+      y: 12,
+      z: 10,
+      intensity: 0.8,
       color: '#ffffff'
     },
     fillLight: {
-      x: -15,
-      y: 15,
-      z: 12,
-      intensity: 1.2,
+      x: -12,
+      y: 12,
+      z: 10,
+      intensity: 0.8,
       color: '#ffffff'
     },
     environmentType: 'gallery',
-    envMapIntensity: 1.6,
+    envMapIntensity: 1.3,
     useDynamicLighting: true,
-    shadowIntensity: 0.15,
+    shadowIntensity: 0.2,
     rimLighting: {
-      intensity: 0.4,
+      intensity: 0.3,
       color: '#ffffff'
     },
     backgroundColor: '#f5f5f5'

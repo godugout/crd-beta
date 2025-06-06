@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Search, PlusCircle, Menu, X, Palette, Sparkles, LogIn } from 'lucide-react';
@@ -27,7 +26,14 @@ const AppHeader: React.FC = () => {
     setIsMenuOpen(false);
   };
 
-  // Primary navigation links with enhanced styling
+  // Use the theme variables for styling
+  const headerStyle = {
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    backdropFilter: 'blur(10px)',
+    borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
+  };
+
+  // Primary navigation links
   const primaryNavLinks = [
     { to: '/', label: 'Home' },
     { to: '/gallery', label: 'Gallery' },
@@ -37,52 +43,44 @@ const AppHeader: React.FC = () => {
   ];
 
   return (
-    <header className="sticky top-0 z-50 w-full nav-glass">
-      <div className="container mx-auto px-6">
+    <header className="sticky top-0 z-50 w-full" style={headerStyle}>
+      <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
-          {/* Logo with enhanced branding */}
+          {/* Logo */}
           <div className="flex items-center">
-            <Link to="/" className="flex items-center group" onClick={closeMenu}>
-              <div className="relative">
-                {currentTheme.logo ? (
-                  <img src={currentTheme.logo} alt="Logo" className="h-8 w-auto mr-3" />
-                ) : (
-                  <span className="text-2xl font-black text-white tracking-tight">
-                    Card<span className="text-brand-gradient">Show</span>
-                  </span>
-                )}
-                {/* Sharp accent corner */}
-                <div className="absolute -top-1 -right-1 w-3 h-3 bg-gradient-to-br from-[var(--brand-primary)] to-[var(--brand-secondary)] clip-corner-tr opacity-80 group-hover:opacity-100 transition-opacity"></div>
-              </div>
+            <Link to="/" className="flex items-center" onClick={closeMenu}>
+              {currentTheme.logo ? (
+                <img src={currentTheme.logo} alt="Logo" className="h-8 w-auto mr-2" />
+              ) : (
+                <span className="text-2xl font-bold text-white">CardShow</span>
+              )}
             </Link>
           </div>
 
-          {/* Desktop Navigation with enhanced styling */}
-          <nav className="hidden md:flex items-center space-x-2">
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center space-x-1">
             {primaryNavLinks.map((link) => (
               <Link
                 key={link.to}
                 to={link.to}
-                className={`nav-item relative ${
-                  isActive(link.to) ? 'nav-item-active' : ''
+                className={`px-4 py-2 rounded-lg transition-colors ${
+                  isActive(link.to)
+                    ? 'bg-white/10 text-white font-medium'
+                    : 'text-white/80 hover:bg-white/5 hover:text-white'
                 }`}
               >
                 {link.label}
-                {/* Active state indicator with sharp corner */}
-                {isActive(link.to) && (
-                  <div className="absolute -top-1 -right-1 w-2 h-2 bg-[var(--brand-primary)] clip-corner-tr"></div>
-                )}
               </Link>
             ))}
           </nav>
 
-          {/* Action Buttons with enhanced styling */}
-          <div className="flex items-center space-x-3">
+          {/* Action Buttons */}
+          <div className="flex items-center space-x-2">
             {/* User Profile */}
             {isAuthenticated ? (
               <UserDropdown />
             ) : (
-              <Button asChild variant="glass" size="sm" className="nav-button">
+              <Button asChild variant="glass" size="sm" className="rounded-xl">
                 <Link to="/auth">
                   <LogIn className="h-4 w-4 mr-2" />
                   Sign In
@@ -90,17 +88,13 @@ const AppHeader: React.FC = () => {
               </Button>
             )}
             
-            {/* Enhanced Create Card Button */}
-            <div className="relative">
-              <CrdButton asChild variant="spectrum" size="sm" className="btn-sharp font-bold">
-                <Link to="/cards/create" className="flex items-center">
-                  <PlusCircle className="h-4 w-4 mr-1" />
-                  Create
-                </Link>
-              </CrdButton>
-              {/* Accent corner */}
-              <div className="absolute -top-1 -right-1 w-3 h-3 bg-[var(--brand-accent)] clip-corner-tr opacity-90"></div>
-            </div>
+            {/* Create Card Button */}
+            <CrdButton asChild variant="spectrum" size="sm" className="ml-2">
+              <Link to="/cards/create" className="flex items-center">
+                <PlusCircle className="h-4 w-4 mr-1" />
+                Card
+              </Link>
+            </CrdButton>
 
             {/* Mobile Menu Button */}
             <Button
@@ -108,7 +102,7 @@ const AppHeader: React.FC = () => {
               size="icon"
               onClick={toggleMenu}
               aria-label="Toggle menu"
-              className="md:hidden nav-button"
+              className="md:hidden text-white/80 hover:text-white hover:bg-white/10"
             >
               {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </Button>
@@ -116,17 +110,17 @@ const AppHeader: React.FC = () => {
         </div>
       </div>
 
-      {/* Enhanced Mobile Menu */}
+      {/* Mobile Menu */}
       {isMenuOpen && (
-        <div className="md:hidden border-t border-[var(--border-primary)] animate-in fade-in slide-in-from-top-5 duration-300 nav-glass">
-          <div className="container px-6 py-4 space-y-2">
+        <div className="md:hidden border-t border-white/10 animate-in fade-in slide-in-from-top-5 duration-300" style={{ backgroundColor: 'rgba(0, 0, 0, 0.9)' }}>
+          <div className="container px-4 py-3 space-y-1">
             {primaryNavLinks.map((link) => (
               <Link
                 key={link.to}
                 to={link.to}
-                className={`block px-4 py-3 text-base font-semibold rounded-xl transition-all ${
+                className={`block px-3 py-2 text-base font-medium rounded-lg ${
                   isActive(link.to)
-                    ? 'bg-white/10 text-white border border-[var(--border-highlight)]'
+                    ? 'bg-white/10 text-white'
                     : 'text-white/80 hover:bg-white/5 hover:text-white'
                 }`}
                 onClick={closeMenu}
@@ -137,35 +131,33 @@ const AppHeader: React.FC = () => {
             
             <Link
               to="/labs"
-              className="block px-4 py-3 text-base font-semibold rounded-xl text-white/80 hover:bg-white/5 hover:text-white"
+              className="block px-3 py-2 text-base font-medium rounded-lg text-white/80 hover:bg-white/5 hover:text-white"
               onClick={closeMenu}
             >
               <span className="flex items-center">
-                <Sparkles className="h-5 w-5 mr-2 text-[var(--brand-warning)]" />
+                <Sparkles className="h-5 w-5 mr-2 text-amber-400" />
                 Labs
               </span>
             </Link>
             
-            <div className="pt-4 space-y-3">
+            <div className="pt-4">
               {!isAuthenticated && (
                 <Button
                   asChild
                   variant="glass"
-                  className="w-full nav-button font-semibold"
+                  className="w-full mb-2 rounded-xl"
                   onClick={closeMenu}
                 >
                   <Link to="/auth">Sign In</Link>
                 </Button>
               )}
               
-              <div className="relative">
-                <CrdButton asChild variant="spectrum" className="w-full btn-sharp font-bold">
-                  <Link to="/cards/create" onClick={closeMenu} className="flex items-center justify-center">
-                    <PlusCircle className="h-4 w-4 mr-2" />
-                    <span>Create Card</span>
-                  </Link>
-                </CrdButton>
-              </div>
+              <CrdButton asChild variant="spectrum" className="w-full">
+                <Link to="/cards/create" onClick={closeMenu} className="flex items-center justify-center">
+                  <PlusCircle className="h-4 w-4 mr-1" />
+                  <span>Create Card</span>
+                </Link>
+              </CrdButton>
             </div>
           </div>
         </div>
