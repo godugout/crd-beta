@@ -20,7 +20,7 @@ const OaklandMemoryGrid: React.FC<OaklandMemoryGridProps> = ({ cards }) => {
         const oaklandMemory = card.designMetadata?.oaklandMemory;
         if (!oaklandMemory) return null;
         
-        const memoryData: OaklandMemoryData = {
+        const memoryData = {
           title: card.title || card.name || '',
           description: card.description,
           date: oaklandMemory.date,

@@ -32,7 +32,6 @@ const SeriesManager: React.FC<SeriesManagerProps> = ({ initialSeries }) => {
     totalCards: 0,
     isPublished: false,
     cardIds: [],
-    cards: [],
     releaseType: 'standard',
   });
   

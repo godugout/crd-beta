@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -8,7 +7,6 @@ import { Card } from '@/lib/types';
 import { sampleCards } from '@/lib/data/sampleCards';
 import { toast } from '@/hooks/use-toast';
 import { adaptToCard } from '@/lib/adapters/cardAdapter';
-import { DEFAULT_DESIGN_METADATA } from '@/lib/utils/cardDefaults';
 import { DetailedViewCard, ensureDetailedViewCard } from '@/types/detailedCardTypes';
 import PageLayout from '@/components/navigation/PageLayout';
 
@@ -48,16 +46,7 @@ const CardDetail = () => {
     if (foundCard) {
       console.log('CardDetail: Found card:', foundCard.title, 'with imageUrl:', foundCard.imageUrl);
       
-      const processedCard = ensureDetailedViewCard(adaptToCard({
-        ...foundCard,
-        imageUrl: foundCard.imageUrl || FALLBACK_IMAGE,
-        thumbnailUrl: foundCard.thumbnailUrl || foundCard.imageUrl || FALLBACK_IMAGE,
-        designMetadata: foundCard.designMetadata || DEFAULT_DESIGN_METADATA,
-        createdAt: foundCard.createdAt || new Date().toISOString(),
-        updatedAt: foundCard.updatedAt || new Date().toISOString(),
-        userId: foundCard.userId || 'anonymous',
-        effects: foundCard.effects || []
-      }));
+      const processedCard = ensureDetailedViewCard(adaptToCard(foundCard));
       
       setResolvedCard(processedCard);
       
