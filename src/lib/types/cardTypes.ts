@@ -7,6 +7,12 @@ export interface FabricSwatch {
   color: string;
   material: string;
   source: string;
+  type: string;
+  team: string;
+  year: string;
+  manufacturer: string;
+  position: string;
+  size: string;
 }
 
 export interface CardLayer {
@@ -20,6 +26,17 @@ export interface CardLayer {
   locked: boolean;
   content?: any;
   style?: any;
+  zIndex?: number;
+  imageUrl?: string;
+  textStyle?: {
+    fontSize?: number;
+    fontFamily?: string;
+    color?: string;
+    fontWeight?: string;
+    textAlign?: string;
+  };
+  shapeType?: string;
+  color?: string;
 }
 
 export interface DesignMetadata {
@@ -49,16 +66,22 @@ export interface DesignMetadata {
   animation?: any;
   cardMetadata?: any;
   marketMetadata?: any;
+  oaklandMemory?: any;
   [key: string]: any;
 }
 
-export type CardRarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
+export type CardRarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary' | 'ultra-rare';
 
 export interface HotspotData {
   id: string;
   position: { x: number; y: number };
   content: string;
-  type: 'info' | 'stat' | 'achievement';
+  type: 'info' | 'stat' | 'achievement' | 'text' | 'link' | 'image' | 'video';
+  visible?: boolean;
+  x?: number;
+  y?: number;
+  width?: number;
+  height?: number;
 }
 
 export interface Card {

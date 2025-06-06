@@ -5,6 +5,7 @@ export interface CardEffect {
   type: 'visual' | 'animation' | 'lighting';
   intensity?: number;
   enabled: boolean;
+  className?: string;
 }
 
 export interface CardEffectSettings {

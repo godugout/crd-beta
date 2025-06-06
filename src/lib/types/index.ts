@@ -1,3 +1,4 @@
+
 // Base types that might be used across modules
 export type JsonValue = 
   | string 
@@ -31,6 +32,7 @@ export type {
   EnhancedCard as ExtendedCard,
   Series as EnhancedSeries,
   CardRarity,
+  Deck,
 } from './enhancedCardTypes';
 
 // Ensure CardLayer is exported from main types
