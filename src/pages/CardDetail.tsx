@@ -7,7 +7,6 @@ import { Card } from '@/lib/types';
 import { sampleCards } from '@/lib/data/sampleCards';
 import { toast } from '@/hooks/use-toast';
 import { adaptToCard } from '@/lib/adapters/cardAdapter';
-import { DetailedViewCard, ensureDetailedViewCard } from '@/types/detailedCardTypes';
 import PageLayout from '@/components/navigation/PageLayout';
 
 const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1518770660439-4636190af475';
@@ -18,7 +17,7 @@ const CardDetail = () => {
   const { cards, getCard } = useCards();
   const [showViewer, setShowViewer] = useState(false);
   const [viewMode, setViewMode] = useState<'standard' | 'immersive' | 'ar'>('standard');
-  const [resolvedCard, setResolvedCard] = useState<DetailedViewCard | null>(null);
+  const [resolvedCard, setResolvedCard] = useState<Card | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
   
   useEffect(() => {
@@ -46,7 +45,7 @@ const CardDetail = () => {
     if (foundCard) {
       console.log('CardDetail: Found card:', foundCard.title, 'with imageUrl:', foundCard.imageUrl);
       
-      const processedCard = ensureDetailedViewCard(adaptToCard(foundCard));
+      const processedCard = adaptToCard(foundCard);
       
       setResolvedCard(processedCard);
       
@@ -54,11 +53,11 @@ const CardDetail = () => {
         const img = new Image();
         img.onerror = () => {
           console.error('CardDetail: Image failed to preload:', processedCard.imageUrl);
-          const updatedCard = ensureDetailedViewCard(adaptToCard({ 
+          const updatedCard = adaptToCard({ 
             ...processedCard, 
             imageUrl: FALLBACK_IMAGE,
             thumbnailUrl: FALLBACK_IMAGE 
-          }));
+          });
           setResolvedCard(updatedCard);
         };
         img.src = processedCard.imageUrl;

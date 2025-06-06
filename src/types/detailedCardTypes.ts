@@ -19,7 +19,7 @@ export interface DetailedViewCard {
   effects: string[];
   isFavorite: boolean;
   rarity: CardRarity;
-  designMetadata: DesignMetadata; // Use the actual DesignMetadata type from cardTypes
+  designMetadata: DesignMetadata; // Use the flexible DesignMetadata type from cardTypes
   
   // Add baseball card properties
   player?: string;
@@ -49,7 +49,7 @@ export function ensureDetailedViewCard(card: Card): DetailedViewCard {
     effects: card.effects || [],
     isFavorite: false, // Since Card type doesn't have isFavorite, we set a default value
     rarity: card.rarity || 'common', // This will be compatible with CardRarity
-    designMetadata: card.designMetadata, // Use the designMetadata as-is from the Card
+    designMetadata: card.designMetadata, // Use the designMetadata directly from the Card (which should have been processed by the adapter)
     // Copy optional baseball card properties
     player: card.player,
     team: card.team,
