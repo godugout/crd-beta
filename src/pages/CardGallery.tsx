@@ -31,11 +31,21 @@ const CardGallery = () => {
   return (
     <PageLayout
       title="Card Gallery"
-      hideBreadcrumbs={false}
-      onSearch={setSearchQuery}
-      searchPlaceholder="Search cards..."
     >
       <div className="container mx-auto max-w-6xl px-4 py-4">
+        {/* Add search functionality directly to the page */}
+        <div className="mb-8">
+          <div className="relative max-w-md">
+            <input
+              type="text"
+              placeholder="Search cards..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/60 focus:border-[var(--brand-primary)] focus:outline-none"
+            />
+          </div>
+        </div>
+        
         <div className="mb-8">
           <ContentTypeNavigation 
             items={navigationItems}

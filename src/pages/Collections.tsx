@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Plus, Search, Grid, List, Folder, Star, Eye, Calendar, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -62,7 +61,6 @@ const Collections = () => {
       title="Collections | CardShow"
       description="Organize and showcase your digital card collections"
       fullWidth={true}
-      hideBreadcrumbs={true}
     >
       {/* Enhanced Hero Section */}
       <section className="relative py-20 overflow-hidden bg-gradient-to-br from-[var(--bg-primary)] via-[var(--bg-secondary)] to-[var(--bg-tertiary)]">

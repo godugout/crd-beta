@@ -5,7 +5,6 @@ import AppHeader from './AppHeader';
 import MobileBottomNav from './MobileBottomNav';
 import { useState } from 'react';
 import MobileMenu from '../navbar/MobileMenu';
-import { SecondaryNavbar } from './SecondaryNavbar';
 
 interface PageLayoutProps {
   children: ReactNode;
@@ -14,8 +13,9 @@ interface PageLayoutProps {
   fullWidth?: boolean;
   hideNavigation?: boolean;
   className?: string;
-  contentClassName?: string;  // Added contentClassName prop
+  contentClassName?: string;
   canonicalPath?: string;
+  // Deprecated props - kept for backward compatibility but not used
   hideBreadcrumbs?: boolean;
   actions?: React.ReactNode;
   hideDescription?: boolean;
@@ -37,11 +37,12 @@ const PageLayout: React.FC<PageLayoutProps> = ({
   fullWidth = false,
   hideNavigation = false,
   className = '',
-  contentClassName = '',  // Added default value
+  contentClassName = '',
   canonicalPath,
-  hideBreadcrumbs = false,
+  // Deprecated props - no longer used
+  hideBreadcrumbs,
   actions,
-  hideDescription = false,
+  hideDescription,
   stats,
   onSearch,
   searchPlaceholder,
@@ -75,20 +76,6 @@ const PageLayout: React.FC<PageLayoutProps> = ({
       
       {!hideNavigation && (
         <AppHeader />
-      )}
-      
-      {!hideNavigation && (
-        <SecondaryNavbar
-          title={stringTitle}
-          description={stringDescription}
-          hideBreadcrumbs={hideBreadcrumbs}
-          actions={actions}
-          hideDescription={hideDescription}
-          stats={stats}
-          onSearch={onSearch}
-          searchPlaceholder={searchPlaceholder}
-          primaryAction={primaryAction}
-        />
       )}
       
       <main className={`flex-grow ${className}`}>
