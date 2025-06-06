@@ -4,18 +4,40 @@ import { Card as LegacyCard } from '@/types/card';
 import { DEFAULT_DESIGN_METADATA, FALLBACK_IMAGE_URL } from '@/lib/utils/cardDefaults';
 
 export function adaptToCard(cardData: Partial<MainCard>): MainCard {
+  // Ensure designMetadata has all required properties with proper defaults
+  const designMetadata = {
+    ...DEFAULT_DESIGN_METADATA,
+    ...cardData.designMetadata,
+    cardStyle: {
+      ...DEFAULT_DESIGN_METADATA.cardStyle,
+      ...cardData.designMetadata?.cardStyle
+    },
+    textStyle: {
+      ...DEFAULT_DESIGN_METADATA.textStyle,
+      ...cardData.designMetadata?.textStyle
+    },
+    cardMetadata: {
+      ...DEFAULT_DESIGN_METADATA.cardMetadata,
+      ...cardData.designMetadata?.cardMetadata
+    },
+    marketMetadata: {
+      ...DEFAULT_DESIGN_METADATA.marketMetadata,
+      ...cardData.designMetadata?.marketMetadata
+    }
+  };
+
   return {
     id: cardData.id || '',
     title: cardData.title || '',
     description: cardData.description || '',
-    imageUrl: cardData.imageUrl || '',
-    thumbnailUrl: cardData.thumbnailUrl || cardData.imageUrl || '',
+    imageUrl: cardData.imageUrl || FALLBACK_IMAGE_URL,
+    thumbnailUrl: cardData.thumbnailUrl || cardData.imageUrl || FALLBACK_IMAGE_URL,
     tags: cardData.tags || [],
-    userId: cardData.userId || '',
+    userId: cardData.userId || 'anonymous',
     effects: cardData.effects || [], // Ensure effects is always an array
     createdAt: cardData.createdAt || new Date().toISOString(),
     updatedAt: cardData.updatedAt || new Date().toISOString(),
-    designMetadata: cardData.designMetadata || DEFAULT_DESIGN_METADATA,
+    designMetadata,
     ...cardData
   };
 }
