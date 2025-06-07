@@ -28,3 +28,15 @@ export const DEFAULT_DESIGN_METADATA: DesignMetadata = {
     series: 'base',
   },
 };
+
+export const FALLBACK_IMAGE_URL = '/images/card-placeholder.png';
+
+// Image size configurations for different use cases
+export const IMAGE_SIZES = {
+  thumbnail: { width: 200, height: 280, quality: 75 },
+  preview: { width: 400, height: 560, quality: 85 },
+  card: { width: 800, height: 1120, quality: 90 },
+  fullsize: { width: 1200, height: 1680, quality: 95 }
+};
+
+export const SUPPORTED_IMAGE_FORMATS = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];

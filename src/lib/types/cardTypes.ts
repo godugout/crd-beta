@@ -59,6 +59,8 @@ export interface DesignMetadata {
   };
   textStyle?: {
     titleColor?: string;
+    titleAlignment?: 'left' | 'center' | 'right';
+    titleWeight?: 'normal' | 'bold' | 'lighter';
     descriptionColor?: string;
     backgroundColor?: string;
     [key: string]: any;
@@ -68,8 +70,18 @@ export interface DesignMetadata {
   filters?: any[];
   scene3d?: any;
   animation?: any;
-  cardMetadata?: any;
-  marketMetadata?: any;
+  cardMetadata?: {
+    category?: string;
+    cardType?: string;
+    series?: string;
+    [key: string]: any;
+  };
+  marketMetadata?: {
+    isPrintable?: boolean;
+    isForSale?: boolean;
+    includeInCatalog?: boolean;
+    [key: string]: any;
+  };
   oaklandMemory?: any;
   [key: string]: any;
 }
