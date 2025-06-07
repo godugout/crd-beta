@@ -1,5 +1,4 @@
-
-import { Card } from '@/lib/types/card';
+import { Card } from '@/lib/types/cardTypes';
 import { adaptToCard } from '@/lib/adapters/cardAdapter';
 
 // Mock API functions for CardShow

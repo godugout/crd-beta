@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Share2, Upload, Heart } from 'lucide-react';
-import { CardData } from '@/types/card';
+import { CardData } from '@/lib/types/CardData';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 

@@ -1,24 +1,6 @@
-// Define base types used throughout the application
-import { FabricSwatch } from '@/lib/types/card';
 
-export interface Card {
-  id: string;
-  title: string;
-  description?: string; // Make this optional to be consistent
-  imageUrl: string;
-  thumbnailUrl?: string;
-  collectionId?: string;
-  userId?: string;
-  teamId?: string;
-  createdAt: string;
-  updatedAt: string;
-  isPublic?: boolean;
-  tags?: string[];
-  designMetadata?: any;
-  reactions?: Reaction[];
-  fabricSwatches?: FabricSwatch[];
-  effects: string[]; // Required for card viewer
-}
+// Define base types used throughout the application
+import { FabricSwatch, Card } from '@/lib/types/cardTypes';
 
 export interface OaklandMemoryData {
   title: string;
@@ -149,3 +131,6 @@ export interface DbReaction {
   type: 'like' | 'love' | 'wow' | 'haha' | 'sad' | 'angry';
   created_at: string;
 }
+
+// Re-export Card type for convenience
+export { Card };

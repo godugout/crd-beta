@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { CardData } from '@/types/card';
+import { CardData } from '@/lib/types/CardData';
 
 interface CardCollectionProps {
   cardData: CardData[];

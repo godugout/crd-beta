@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { CardData } from '@/types/card';
+import { CardData } from '@/lib/types/CardData';
 import CardViewer from './CardViewer';
 import CardDescription from './CardDescription';
 import CardSidebar from './CardSidebar';

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { CardData } from '@/types/card';
+import { CardData } from '@/lib/types/CardData';
 import CardItem from './CardItem';
 import { Clock } from 'lucide-react';
 import CardEffectController from './CardEffectController';

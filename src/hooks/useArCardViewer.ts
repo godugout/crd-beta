@@ -1,233 +1,155 @@
+import { useState, useEffect, useRef } from 'react';
+import { useParams } from 'react-router-dom';
+import { Card } from '@/lib/types/cardTypes';
+import { toast } from 'sonner';
 
-import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/lib/supabase';
-import { Card } from '@/lib/types/card';
-import { useToast } from '@/hooks/use-toast';
-import { adaptToCard } from '@/lib/adapters/cardAdapter';
-
-interface CardRecord extends Card {
-  // This interface ensures CardRecord has all the properties of Card
-  collection_id?: string;
-  created_at: string;
-  creator_id: string;
-  design_metadata: any;
-  edition_size: number;
-  image_url: string;
-  is_public: boolean;
-  price?: number;
-  user_id: string;
-}
-
-export function useArCardViewer(cardId?: string) {
-  const [cards, setCards] = useState<Card[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-  const [activeCardId, setActiveCardId] = useState<string | null>(cardId || null);
-  const [isViewerOpen, setIsViewerOpen] = useState(false);
-  const [isArMode, setIsArMode] = useState(false);
-  const [isFlipped, setIsFlipped] = useState(false);
-  const [cameraError, setCameraError] = useState<string | null>(null);
-  const [arCards, setArCards] = useState<Card[]>([]);
-  const { toast } = useToast();
-
-  // Get the active card based on activeCardId
-  const activeCard = activeCardId ? cards.find(card => card.id === activeCardId) || null : null;
-  // Cards available to add to AR scene
-  const availableCards = cards.filter(card => !arCards.some(arCard => arCard.id === card.id));
-
-  const fetchCards = useCallback(async () => {
-    try {
-      setLoading(true);
-      
-      // For demonstration, create some sample cards
-      const demoCards: Card[] = [
-        adaptToCard({
-          id: '1',
-          title: 'AR Demo Card 1',
-          description: 'This is an AR-compatible card',
-          imageUrl: '/ar-card-1.png',
-          thumbnailUrl: '/ar-card-1-thumb.png',
-          tags: ['AR', 'demo'],
-          userId: 'demo-user',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          effects: ['Holographic'],
-        }),
-        adaptToCard({
-          id: '2',
-          title: 'AR Demo Card 2',
-          description: 'Another AR-compatible card',
-          imageUrl: '/ar-card-2.png',
-          thumbnailUrl: '/ar-card-2-thumb.png',
-          tags: ['AR', 'interactive'],
-          userId: 'demo-user',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          effects: ['Refractor'],
-        }),
-      ];
-      
-      // Here, in a real application, you'd fetch from Supabase
-      // const { data, error } = await supabase
-      //   .from('cards')
-      //   .select('*')
-      //   .eq('ar_enabled', true);
-      
-      // if (error) throw error;
-      
-      // Process fetched data (commented out for demo)
-      // if (data) {
-      //   const processedCards = data.map(item => adaptToCard({
-      //     id: item.id,
-      //     title: item.title || '',
-      //     description: item.description || '',
-      //     imageUrl: item.image_url || '',
-      //     thumbnailUrl: item.thumbnail_url || '',
-      //     tags: item.tags || [],
-      //     collectionId: item.collection_id || '',
-      //     createdAt: item.created_at || new Date().toISOString(),
-      //     updatedAt: item.updated_at || new Date().toISOString(),
-      //     userId: item.user_id || '',
-      //     isPublic: item.is_public || false,
-      //     designMetadata: item.design_metadata || {},
-      //     effects: item.effects || ['Holographic'], // Ensure effects is always populated
-      //   }));
-      //   setCards(processedCards);
-      // }
-      
-      setCards(demoCards);
-
-      // If a cardId was provided, add it to AR cards
-      if (cardId) {
-        const cardToAdd = demoCards.find(card => card.id === cardId);
-        if (cardToAdd) {
-          setArCards([cardToAdd]);
-        }
-      }
-    } catch (err) {
-      const error = err as Error;
-      console.error('Error fetching AR cards:', error);
-      setError(error);
-      toast({
-        title: 'Failed to load AR cards',
-        description: error.message,
-        variant: 'destructive',
-      });
-    } finally {
-      setLoading(false);
-    }
-  }, [toast, cardId]);
+export const useArCardViewer = () => {
+  const { id } = useParams<{ id: string }>();
+  const [card, setCard] = useState<Card | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [arSupported, setArSupported] = useState(false);
+  const arCanvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    fetchCards();
-  }, [fetchCards]);
+    const checkARSupport = async () => {
+      if (navigator.xr) {
+        try {
+          const supported = await navigator.xr.isSessionSupported('immersive-ar');
+          setArSupported(supported);
+        } catch (err) {
+          console.error("Error checking AR support:", err);
+          setArSupported(false);
+        }
+      } else {
+        setArSupported(false);
+      }
+    };
 
-  const openViewer = useCallback((cardId: string) => {
-    setActiveCardId(cardId);
-    setIsViewerOpen(true);
+    checkARSupport();
   }, []);
 
-  const closeViewer = useCallback(() => {
-    setIsViewerOpen(false);
-    setActiveCardId(null);
-  }, []);
+  useEffect(() => {
+    if (!id) {
+      setError("No card ID provided");
+      setIsLoading(false);
+      return;
+    }
 
-  // AR interaction methods
-  const handleLaunchAr = useCallback(() => {
-    if (activeCard) {
-      setArCards([activeCard]);
-      setIsArMode(true);
-    } else {
+    setIsLoading(true);
+    setError(null);
+
+    // Mock card data loading (replace with actual API call)
+    setTimeout(() => {
+      const mockCard: Card = {
+        id: id,
+        title: "Sample AR Card",
+        description: "View this card in augmented reality!",
+        imageUrl: "/images/card-placeholder.png",
+        thumbnailUrl: "/images/card-placeholder.png",
+        userId: "user123",
+        tags: ["ar", "sample"],
+        effects: [],
+        designMetadata: {
+          cardStyle: {
+            template: 'classic',
+            effect: 'none',
+            borderRadius: '8px',
+            borderColor: '#000000',
+            frameColor: '#000000',
+            frameWidth: 2,
+            shadowColor: 'rgba(0,0,0,0.2)',
+          },
+          textStyle: {
+            titleColor: '#000000',
+            titleAlignment: 'center',
+            titleWeight: 'bold',
+            descriptionColor: '#333333',
+          },
+          marketMetadata: {
+            isPrintable: false,
+            isForSale: false,
+            includeInCatalog: false,
+          },
+          cardMetadata: {
+            category: 'general',
+            cardType: 'standard',
+            series: 'base',
+          },
+        },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      setCard(mockCard);
+      setIsLoading(false);
+    }, 500);
+  }, [id]);
+
+  const startAR = async () => {
+    if (!arSupported) {
       toast({
-        title: 'No card selected',
-        description: 'Please select a card to view in AR',
-        variant: 'destructive',
+        title: "AR Not Supported",
+        description: "Augmented reality is not supported on this device.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!arCanvasRef.current) {
+      toast({
+        title: "AR Canvas Not Found",
+        description: "Could not find the AR canvas element.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      // Request an AR session
+      const session = await navigator.xr.requestSession('immersive-ar', {
+        requiredFeatures: ['hit-test', 'dom-overlay'],
+        domOverlay: { root: document.getElementById('ar-overlay')! }
+      });
+
+      // Create a THREE.js WebGL renderer backed by the AR session's WebGL context
+      const gl = arCanvasRef.current.getContext('webgl', { xrCompatible: true });
+      if (!gl) {
+        throw new Error("Failed to get WebGL context");
+      }
+
+      // Now you can use the 'session' and 'gl' objects to set up your AR scene
+      console.log("AR Session started:", session);
+      toast({
+        title: "AR Session Started",
+        description: "Point your camera at a surface to place the card.",
+      });
+
+      // End the AR session after a while (for testing purposes)
+      setTimeout(() => {
+        session.end();
+        toast({
+          title: "AR Session Ended",
+          description: "AR session has ended.",
+        });
+      }, 20000);
+
+    } catch (err) {
+      console.error("Error starting AR:", err);
+      toast({
+        title: "AR Failed to Start",
+        description: "Failed to start augmented reality.",
+        variant: "destructive",
       });
     }
-  }, [activeCard, toast]);
-
-  const handleExitAr = useCallback(() => {
-    setIsArMode(false);
-  }, []);
-
-  const handleCameraError = useCallback((error: string) => {
-    setCameraError(error);
-    toast({
-      title: 'Camera Error',
-      description: error,
-      variant: 'destructive',
-    });
-  }, [toast]);
-
-  const handleTakeSnapshot = useCallback(() => {
-    toast({
-      title: 'Snapshot taken',
-      description: 'AR snapshot saved to your gallery',
-    });
-  }, [toast]);
-
-  const handleFlip = useCallback(() => {
-    setIsFlipped(prev => !prev);
-  }, []);
-
-  const handleZoomIn = useCallback(() => {
-    toast({
-      title: 'Zooming in',
-      description: 'Feature coming soon',
-    });
-  }, [toast]);
-
-  const handleZoomOut = useCallback(() => {
-    toast({
-      title: 'Zooming out',
-      description: 'Feature coming soon',
-    });
-  }, [toast]);
-
-  const handleRotate = useCallback(() => {
-    toast({
-      title: 'Rotating card',
-      description: 'Feature coming soon',
-    });
-  }, [toast]);
-
-  const handleAddCard = useCallback((cardId: string) => {
-    const cardToAdd = cards.find(card => card.id === cardId);
-    if (cardToAdd && !arCards.some(card => card.id === cardId)) {
-      setArCards(prev => [...prev, cardToAdd]);
-    }
-  }, [cards, arCards]);
-
-  const handleRemoveCard = useCallback((cardId: string) => {
-    setArCards(prev => prev.filter(card => card.id !== cardId));
-  }, []);
+  };
 
   return {
-    cards,
-    loading,
+    card,
+    isLoading,
     error,
-    activeCardId,
-    isViewerOpen,
-    openViewer,
-    closeViewer,
-    fetchCards,
-    // Add the missing properties
-    activeCard,
-    arCards,
-    availableCards,
-    isArMode,
-    isFlipped,
-    cameraError,
-    isLoading: loading,
-    handleLaunchAr,
-    handleExitAr,
-    handleCameraError,
-    handleTakeSnapshot,
-    handleFlip,
-    handleZoomIn,
-    handleZoomOut,
-    handleRotate,
-    handleAddCard,
-    handleRemoveCard,
+    arSupported,
+    arCanvasRef,
+    startAR,
   };
-}
+};

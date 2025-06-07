@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { CardData } from '@/types/card';
+import { CardData } from '@/lib/types/CardData';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { Box } from 'lucide-react';

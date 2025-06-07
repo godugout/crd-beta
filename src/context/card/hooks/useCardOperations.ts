@@ -1,93 +1,140 @@
+import { useState } from 'react';
+import { useCards } from '@/context/CardContext';
+import { Card } from '@/lib/types/cardTypes';
+import { toast } from 'sonner';
 
-import { useState, useCallback, useEffect } from 'react';
-import { Card } from '@/lib/types/card';
-import { v4 as uuidv4 } from 'uuid';
-import { adaptToCard } from '@/lib/adapters/cardAdapter';
+interface UseCardOperationsResult {
+  createCard: (card: Omit<Card, 'id'>) => void;
+  updateCard: (cardId: string, updates: Partial<Card>) => void;
+  deleteCard: (cardId: string) => void;
+  duplicateCard: (cardId: string) => void;
+  publishCard: (cardId: string) => void;
+  unpublishCard: (cardId: string) => void;
+  isLoading: boolean;
+  error: string | null;
+}
 
-// Mock data for development
-const initialCards: Card[] = [
-  adaptToCard({
-    id: '1',
-    title: 'Sample Card',
-    description: 'This is a sample card for development',
-    imageUrl: '/placeholder.svg',
-    thumbnailUrl: '/placeholder.svg',
-    tags: ['sample', 'development'],
-    userId: 'user1',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    effects: [], // Add required effects property
-  }),
-];
-
-export const useCardOperations = () => {
-  const [cards, setCards] = useState<Card[]>(initialCards);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+export const useCardOperations = (): UseCardOperationsResult => {
+  const { addCard, updateCard: updateCardContext, deleteCard: deleteCardContext } = useCards();
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Load cards from localStorage on initial render
-  useEffect(() => {
-    const loadCards = () => {
-      try {
-        const savedCards = localStorage.getItem('cards');
-        if (savedCards) {
-          // Parse stored cards and ensure they match the current Card type requirements
-          const parsedCards = JSON.parse(savedCards);
-          setCards(parsedCards.map((card: Partial<Card>) => adaptToCard(card)));
+  const createCard = (card: Omit<Card, 'id'>) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      // Simulate API call
+      setTimeout(() => {
+        if (addCard) {
+          addCard(card as Card);
+          toast.success('Card created successfully');
         }
-      } catch (err) {
-        console.error('Error loading cards from storage:', err);
-      }
-    };
+        setIsLoading(false);
+      }, 500);
+    } catch (err: any) {
+      setError(err.message || 'Failed to create card');
+      toast.error('Failed to create card');
+      setIsLoading(false);
+    }
+  };
 
-    loadCards();
-  }, []);
+  const updateCard = (cardId: string, updates: Partial<Card>) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      // Simulate API call
+      setTimeout(() => {
+        if (updateCardContext) {
+          updateCardContext(cardId, updates);
+          toast.success('Card updated successfully');
+        }
+        setIsLoading(false);
+      }, 500);
+    } catch (err: any) {
+      setError(err.message || 'Failed to update card');
+      toast.error('Failed to update card');
+      setIsLoading(false);
+    }
+  };
 
-  // Update localStorage whenever cards change
-  useEffect(() => {
-    localStorage.setItem('cards', JSON.stringify(cards));
-  }, [cards]);
+  const deleteCard = (cardId: string) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      // Simulate API call
+      setTimeout(() => {
+        if (deleteCardContext) {
+          deleteCardContext(cardId);
+          toast.success('Card deleted successfully');
+        }
+        setIsLoading(false);
+      }, 500);
+    } catch (err: any) {
+      setError(err.message || 'Failed to delete card');
+      toast.error('Failed to delete card');
+      setIsLoading(false);
+    }
+  };
 
-  const getCardById = useCallback((id: string): Card | undefined => {
-    return cards.find(card => card.id === id);
-  }, [cards]);
+  const duplicateCard = (cardId: string) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      // Simulate API call
+      setTimeout(() => {
+        // Logic to duplicate card
+        toast.success('Card duplicated successfully');
+        setIsLoading(false);
+      }, 500);
+    } catch (err: any) {
+      setError(err.message || 'Failed to duplicate card');
+      toast.error('Failed to duplicate card');
+      setIsLoading(false);
+    }
+  };
 
-  const addCard = useCallback((card: Omit<Card, 'id' | 'createdAt' | 'updatedAt'>) => {
-    const newCard: Card = adaptToCard({
-      ...card,
-      id: uuidv4(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    });
+  const publishCard = (cardId: string) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      // Simulate API call
+      setTimeout(() => {
+        // Logic to publish card
+        toast.success('Card published successfully');
+        setIsLoading(false);
+      }, 500);
+    } catch (err: any) {
+      setError(err.message || 'Failed to publish card');
+      toast.error('Failed to publish card');
+      setIsLoading(false);
+    }
+  };
 
-    setCards(prevCards => [...prevCards, newCard]);
-    return newCard;
-  }, []);
-
-  const updateCard = useCallback((id: string, updates: Partial<Card>) => {
-    setCards(prevCards =>
-      prevCards.map(card =>
-        card.id === id
-          ? adaptToCard({ ...card, ...updates, updatedAt: new Date().toISOString() })
-          : card
-      )
-    );
-  }, []);
-
-  const deleteCard = useCallback((id: string) => {
-    setCards(prevCards => prevCards.filter(card => card.id !== id));
-  }, []);
+  const unpublishCard = (cardId: string) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      // Simulate API call
+      setTimeout(() => {
+        // Logic to unpublish card
+        toast.success('Card unpublished successfully');
+        setIsLoading(false);
+      }, 500);
+    } catch (err: any) {
+      setError(err.message || 'Failed to unpublish card');
+      toast.error('Failed to unpublish card');
+      setIsLoading(false);
+    }
+  };
 
   return {
-    cards,
-    isLoading,
-    error,
-    getCardById,
-    addCard,
+    createCard,
     updateCard,
     deleteCard,
+    duplicateCard,
+    publishCard,
+    unpublishCard,
+    isLoading,
+    error,
   };
 };
-
-// Export types for consumers
-export type CardOperations = ReturnType<typeof useCardOperations>;

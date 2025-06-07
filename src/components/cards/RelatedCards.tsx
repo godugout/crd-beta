@@ -1,15 +1,14 @@
 
 import React from 'react';
-import { Card as CardType } from '@/lib/types';
+import { Card } from '@/lib/types/cardTypes';
 import { cn } from '@/lib/utils';
 import CardThumbnail from './CardThumbnail';
-import { DetailedViewCard } from '@/types/detailedCardTypes';
 
 interface RelatedCardsProps {
   /**
    * List of related cards to display
    */
-  cards: CardType[];
+  cards: Card[];
   
   /**
    * Current card ID to exclude from related cards

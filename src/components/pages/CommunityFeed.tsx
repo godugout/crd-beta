@@ -1,78 +1,133 @@
+import React, { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card as CardComponent, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card } from '@/lib/types/cardTypes';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Heart, MessageCircle, Share2, MoreHorizontal } from 'lucide-react';
 
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '@/context/auth';
-import { Card } from '@/lib/types/card';
-import CardItem from '@/components/CardItem';
-import { toast } from 'sonner';
-import { adaptToCard } from '@/lib/adapters/cardAdapter';
+const CommunityFeed = () => {
+  const [posts, setPosts] = useState<Card[]>([
+    {
+      id: '1',
+      title: 'Exciting Game Highlights',
+      description: 'Check out the amazing highlights from last night\'s game!',
+      imageUrl: '/images/card-placeholder.png',
+      thumbnailUrl: '/images/card-placeholder.png',
+      userId: 'user1',
+      tags: ['basketball', 'highlights', 'sports'],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      effects: [],
+      designMetadata: {
+        cardStyle: {
+          template: 'classic',
+          effect: 'none',
+          borderRadius: '8px',
+          borderColor: '#000000',
+          frameColor: '#000000',
+          frameWidth: 2,
+          shadowColor: 'rgba(0,0,0,0.2)',
+        },
+        textStyle: {
+          titleColor: '#000000',
+          titleAlignment: 'center',
+          titleWeight: 'bold',
+          descriptionColor: '#333333',
+        },
+        marketMetadata: {
+          isPrintable: false,
+          isForSale: false,
+          includeInCatalog: false,
+        },
+        cardMetadata: {
+          category: 'general',
+          cardType: 'standard',
+          series: 'base',
+        },
+      },
+    },
+    {
+      id: '2',
+      title: 'New Card Design',
+      description: 'I just created a new card design. What do you think?',
+      imageUrl: '/images/card-placeholder.png',
+      thumbnailUrl: '/images/card-placeholder.png',
+      userId: 'user2',
+      tags: ['carddesign', 'digitalart', 'creative'],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      effects: [],
+      designMetadata: {
+        cardStyle: {
+          template: 'modern',
+          effect: 'glow',
+          borderRadius: '12px',
+          borderColor: '#333333',
+          frameColor: '#333333',
+          frameWidth: 3,
+          shadowColor: 'rgba(0,0,0,0.3)',
+        },
+        textStyle: {
+          titleColor: '#FFFFFF',
+          titleAlignment: 'left',
+          titleWeight: 'semibold',
+          descriptionColor: '#EEEEEE',
+        },
+        marketMetadata: {
+          isPrintable: true,
+          isForSale: true,
+          includeInCatalog: true,
+        },
+        cardMetadata: {
+          category: 'art',
+          cardType: 'limitededition',
+          series: 'artistseries',
+        },
+      },
+    },
+  ]);
 
-const CommunityFeed: React.FC = () => {
-  const { user } = useAuth();
-  const [feed, setFeed] = useState<Card[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  
-  useEffect(() => {
-    const fetchFeed = async () => {
-      setIsLoading(true);
-      setError(null);
-      
-      try {
-        // Mock data - replace with actual API call later
-        const mockFeed: Card[] = [
-          adaptToCard({
-            id: '1',
-            title: 'Amazing Baseball Card',
-            description: 'Check out this rare find!',
-            imageUrl: 'https://placekitten.com/200/300',
-            thumbnailUrl: 'https://placekitten.com/200/300',
-            tags: ['baseball', 'rare'],
-            userId: 'user123',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            effects: [] // Add required effects property
-          }),
-          adaptToCard({
-            id: '2',
-            title: 'Vintage Football Card',
-            description: 'Just pulled this from an old collection.',
-            imageUrl: 'https://placekitten.com/200/301',
-            thumbnailUrl: 'https://placekitten.com/200/301',
-            tags: ['football', 'vintage'],
-            userId: 'user456',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            effects: [] // Add required effects property
-          })
-        ];
-        
-        setFeed(mockFeed);
-      } catch (err: any) {
-        console.error('Error fetching feed:', err);
-        setError(err.message || 'Failed to load feed');
-        toast.error('Failed to load community feed');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    fetchFeed();
-  }, [user]);
-  
-  if (isLoading) {
-    return <div>Loading feed...</div>;
-  }
-  
-  if (error) {
-    return <div>Error: {error}</div>;
-  }
-  
   return (
-    <div>
+    <div className="container mx-auto py-8">
       <h1 className="text-2xl font-bold mb-4">Community Feed</h1>
-      {feed.map(card => (
-        <CardItem key={card.id} card={card} />
-      ))}
+      <div className="space-y-4">
+        {posts.map((post) => (
+          <CardComponent key={post.id}>
+            <CardHeader>
+              <div className="flex items-center">
+                <Avatar>
+                  <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
+                  <AvatarFallback>CN</AvatarFallback>
+                </Avatar>
+                <div className="ml-3">
+                  <CardTitle className="text-sm font-semibold">{post.title}</CardTitle>
+                  <p className="text-xs text-gray-500">@username</p>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <img src={post.imageUrl} alt={post.title} className="w-full rounded-md mb-3" />
+              <p className="text-sm text-gray-700">{post.description}</p>
+              <div className="mt-3 flex justify-between items-center">
+                <div className="flex items-center space-x-2">
+                  <Button variant="ghost" size="icon">
+                    <Heart className="h-5 w-5" />
+                  </Button>
+                  <Button variant="ghost" size="icon">
+                    <MessageCircle className="h-5 w-5" />
+                  </Button>
+                  <Button variant="ghost" size="icon">
+                    <Share2 className="h-5 w-5" />
+                  </Button>
+                </div>
+                <Button variant="ghost" size="icon">
+                  <MoreHorizontal className="h-5 w-5" />
+                </Button>
+              </div>
+            </CardContent>
+          </CardComponent>
+        ))}
+      </div>
     </div>
   );
 };

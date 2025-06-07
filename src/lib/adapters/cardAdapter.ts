@@ -1,99 +1,54 @@
 
-import { Card as MainCard } from '@/lib/types/cardTypes';
-import { Card as LegacyCard } from '@/types/card';
-import { DEFAULT_DESIGN_METADATA, FALLBACK_IMAGE_URL } from '@/lib/utils/cardDefaults';
+import { Card } from '@/lib/types/cardTypes';
 
-export function adaptToCard(cardData: Partial<MainCard>): MainCard {
-  // Ensure designMetadata has all required properties with proper defaults
-  const designMetadata = {
-    ...DEFAULT_DESIGN_METADATA,
-    ...cardData.designMetadata,
-    cardStyle: {
-      ...DEFAULT_DESIGN_METADATA.cardStyle,
-      ...cardData.designMetadata?.cardStyle
-    },
-    textStyle: {
-      ...DEFAULT_DESIGN_METADATA.textStyle,
-      ...cardData.designMetadata?.textStyle
-    },
-    cardMetadata: {
-      ...DEFAULT_DESIGN_METADATA.cardMetadata,
-      ...cardData.designMetadata?.cardMetadata
-    },
-    marketMetadata: {
-      ...DEFAULT_DESIGN_METADATA.marketMetadata,
-      ...cardData.designMetadata?.marketMetadata
-    }
-  };
-
+/**
+ * Adapter function to ensure a card object has all required properties with proper defaults
+ */
+export function adaptToCard(input: Partial<Card>): Card {
   return {
-    id: cardData.id || '',
-    title: cardData.title || '',
-    description: cardData.description || '',
-    imageUrl: cardData.imageUrl || FALLBACK_IMAGE_URL,
-    thumbnailUrl: cardData.thumbnailUrl || cardData.imageUrl || FALLBACK_IMAGE_URL,
-    tags: cardData.tags || [],
-    userId: cardData.userId || 'anonymous',
-    effects: cardData.effects || [], // Ensure effects is always an array
-    createdAt: cardData.createdAt || new Date().toISOString(),
-    updatedAt: cardData.updatedAt || new Date().toISOString(),
-    designMetadata,
-    ...cardData
-  };
-}
-
-export function adaptToLegacyCard(cardData: MainCard): LegacyCard {
-  return {
-    id: cardData.id,
-    title: cardData.title,
-    description: cardData.description,
-    imageUrl: cardData.imageUrl,
-    thumbnailUrl: cardData.thumbnailUrl,
-    tags: cardData.tags,
-    userId: cardData.userId,
-    effects: cardData.effects || [],
-    createdAt: cardData.createdAt,
-    updatedAt: cardData.updatedAt,
-    collectionId: cardData.collectionId,
-    designMetadata: cardData.designMetadata,
-    metadata: cardData.metadata,
-    reactions: cardData.reactions,
-    comments: cardData.comments,
-    viewCount: cardData.viewCount,
-    isPublic: cardData.isPublic,
-    player: cardData.player,
-    team: cardData.team,
-    year: cardData.year,
-    jersey: cardData.jersey,
-    set: cardData.set,
-    cardNumber: cardData.cardNumber,
-    cardType: cardData.cardType,
-    artist: cardData.artist,
-    backgroundColor: cardData.backgroundColor,
-    textColor: cardData.textColor,
-    specialEffect: cardData.specialEffect,
-    fabricSwatches: cardData.fabricSwatches,
-    name: cardData.name,
-    cardStyle: cardData.cardStyle,
-    backTemplate: cardData.backTemplate,
-    rarity: cardData.rarity,
-    teamId: cardData.teamId,
-    creatorId: cardData.creatorId,
-    stats: cardData.stats,
-    layers: cardData.layers
-  };
-}
-
-// Helper function to ensure a card has all required properties
-export function ensureCardHasRequiredProps(card: Partial<MainCard>): MainCard {
-  return adaptToCard({
-    ...card,
-    effects: card.effects || [],
-    createdAt: card.createdAt || new Date().toISOString(),
-    updatedAt: card.updatedAt || new Date().toISOString(),
+    id: input.id || '',
+    title: input.title || 'Untitled Card',
+    description: input.description || '',
+    imageUrl: input.imageUrl || '/images/card-placeholder.png',
+    thumbnailUrl: input.thumbnailUrl || input.imageUrl || '/images/card-placeholder.png',
+    tags: input.tags || [],
+    userId: input.userId || '',
+    effects: input.effects || [],
+    createdAt: input.createdAt || new Date().toISOString(),
+    updatedAt: input.updatedAt || new Date().toISOString(),
     designMetadata: {
-      ...DEFAULT_DESIGN_METADATA,
-      ...card.designMetadata
-    }
-  });
+      cardStyle: {
+        template: input.designMetadata?.cardStyle?.template || 'classic',
+        effect: input.designMetadata?.cardStyle?.effect || 'none',
+        borderRadius: input.designMetadata?.cardStyle?.borderRadius || '8px',
+        borderColor: input.designMetadata?.cardStyle?.borderColor || '#000000',
+        frameColor: input.designMetadata?.cardStyle?.frameColor || '#000000',
+        frameWidth: input.designMetadata?.cardStyle?.frameWidth || 2,
+        shadowColor: input.designMetadata?.cardStyle?.shadowColor || 'rgba(0,0,0,0.2)',
+        ...input.designMetadata?.cardStyle
+      },
+      textStyle: {
+        titleColor: input.designMetadata?.textStyle?.titleColor || '#000000',
+        titleAlignment: input.designMetadata?.textStyle?.titleAlignment || 'center',
+        titleWeight: input.designMetadata?.textStyle?.titleWeight || 'bold',
+        descriptionColor: input.designMetadata?.textStyle?.descriptionColor || '#333333',
+        ...input.designMetadata?.textStyle
+      },
+      marketMetadata: {
+        isPrintable: input.designMetadata?.marketMetadata?.isPrintable || false,
+        isForSale: input.designMetadata?.marketMetadata?.isForSale || false,
+        includeInCatalog: input.designMetadata?.marketMetadata?.includeInCatalog || false,
+        ...input.designMetadata?.marketMetadata
+      },
+      cardMetadata: {
+        category: input.designMetadata?.cardMetadata?.category || 'general',
+        cardType: input.designMetadata?.cardMetadata?.cardType || 'standard',
+        series: input.designMetadata?.cardMetadata?.series || 'base',
+        ...input.designMetadata?.cardMetadata
+      },
+      ...input.designMetadata
+    },
+    // Pass through all other properties
+    ...input
+  } as Card;
 }
