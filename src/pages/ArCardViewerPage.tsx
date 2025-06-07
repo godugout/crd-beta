@@ -118,7 +118,7 @@ const ArCardViewerPage: React.FC = () => {
           
           <div className="text-center py-16">
             <h2 className="text-2xl font-bold mb-4">Error Loading AR Experience</h2>
-            <p className="text-red-500 mb-8">{error.message}</p>
+            <p className="text-red-500 mb-8">{error}</p>
             <Button onClick={() => navigate('/cards')}>
               Back to Cards
             </Button>
