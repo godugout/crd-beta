@@ -1,4 +1,5 @@
 
+
 import { Card, DesignMetadata, CardRarity, CardStats } from '@/lib/types/cardTypes';
 
 /**
@@ -36,43 +37,6 @@ export interface DetailedViewCard {
  * Handles optional properties by providing defaults
  */
 export function ensureDetailedViewCard(card: Card): DetailedViewCard {
-  // Ensure designMetadata has the required structure with defaults
-  const ensuredDesignMetadata: DesignMetadata = {
-    cardStyle: {
-      template: card.designMetadata?.cardStyle?.template || 'standard',
-      effect: card.designMetadata?.cardStyle?.effect || 'none',
-      borderRadius: card.designMetadata?.cardStyle?.borderRadius || '8px',
-      borderColor: card.designMetadata?.cardStyle?.borderColor || '#000000',
-      frameWidth: card.designMetadata?.cardStyle?.frameWidth || 2,
-      frameColor: card.designMetadata?.cardStyle?.frameColor || '#000000',
-      shadowColor: card.designMetadata?.cardStyle?.shadowColor || 'rgba(0,0,0,0.2)',
-      // Preserve any additional properties
-      ...card.designMetadata?.cardStyle
-    },
-    textStyle: {
-      titleColor: card.designMetadata?.textStyle?.titleColor || '#000000',
-      descriptionColor: card.designMetadata?.textStyle?.descriptionColor || '#333333',
-      // Preserve any additional properties
-      ...card.designMetadata?.textStyle
-    },
-    cardMetadata: {
-      category: card.designMetadata?.cardMetadata?.category || 'Standard',
-      series: card.designMetadata?.cardMetadata?.series || 'Base',
-      cardType: card.designMetadata?.cardMetadata?.cardType || 'Standard',
-      // Preserve any additional properties
-      ...card.designMetadata?.cardMetadata
-    },
-    marketMetadata: {
-      isPrintable: card.designMetadata?.marketMetadata?.isPrintable || false,
-      isForSale: card.designMetadata?.marketMetadata?.isForSale || false,
-      includeInCatalog: card.designMetadata?.marketMetadata?.includeInCatalog || false,
-      // Preserve any additional properties
-      ...card.designMetadata?.marketMetadata
-    },
-    // Preserve any additional top-level properties
-    ...card.designMetadata
-  };
-
   return {
     id: card.id,
     title: card.title || 'Untitled Card',
@@ -86,7 +50,31 @@ export function ensureDetailedViewCard(card: Card): DetailedViewCard {
     effects: card.effects || [],
     isFavorite: false, // Since Card type doesn't have isFavorite, we set a default value
     rarity: card.rarity || 'common', // This will be compatible with CardRarity
-    designMetadata: ensuredDesignMetadata,
+    designMetadata: card.designMetadata || {
+      cardStyle: {
+        template: 'standard',
+        effect: 'none',
+        borderRadius: '8px',
+        borderColor: '#000000',
+        frameWidth: 2,
+        frameColor: '#000000',
+        shadowColor: 'rgba(0,0,0,0.2)'
+      },
+      textStyle: {
+        titleColor: '#000000',
+        descriptionColor: '#333333'
+      },
+      cardMetadata: {
+        category: 'Standard',
+        series: 'Base',
+        cardType: 'Standard'
+      },
+      marketMetadata: {
+        isPrintable: false,
+        isForSale: false,
+        includeInCatalog: false
+      }
+    },
     // Copy optional baseball card properties
     player: card.player,
     team: card.team,
@@ -97,3 +85,4 @@ export function ensureDetailedViewCard(card: Card): DetailedViewCard {
     stats: card.stats,
   };
 }
+
