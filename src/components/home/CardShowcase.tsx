@@ -19,7 +19,7 @@ interface Snapshot {
   id: number;
   timestamp: Date;
   effects: string[];
-  cardId: number;
+  cardId: string; // Changed to string to match CardData.id
 }
 
 const CardShowcase = ({ 

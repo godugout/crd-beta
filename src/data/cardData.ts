@@ -1,14 +1,14 @@
+
 import { CardData } from '@/lib/types/CardData';
 
 export const cardData: CardData[] = [
   {
-    id: 1,
+    id: "1", // Changed to string
     name: "Prince",
     team: "Minnesota Wolves",
     jersey: "72",
     year: "2023",
     backgroundColor: "#5B23A9", // Purple
-    textColor: "white",
     cardType: "Artist Series",
     artist: "Jason T.",
     set: "Music Legends Series",
@@ -19,13 +19,12 @@ export const cardData: CardData[] = [
     effects: ["Holographic"]
   },
   {
-    id: 2,
+    id: "2", // Changed to string
     name: "Michael Jordan",
     team: "Chicago Bulls",
     jersey: "23",
     year: "2023",
     backgroundColor: "#CE1141", // Red
-    textColor: "white",
     cardType: "Artist Series",
     artist: "Jules A.",
     set: "Basketball Legends",
@@ -36,13 +35,12 @@ export const cardData: CardData[] = [
     effects: ["Refractor"]
   },
   {
-    id: 3,
+    id: "3", // Changed to string
     name: "Elvis Presley",
     team: "Memphis Grizzlies",
     jersey: "15",
     year: "2023",
     backgroundColor: "#5D9AD3", // Light Blue
-    textColor: "navy",
     cardType: "Artist Series",
     artist: "Marcel G.",
     set: "Music Legends Series",
@@ -53,13 +51,12 @@ export const cardData: CardData[] = [
     effects: ["Chrome"]
   },
   {
-    id: 4,
+    id: "4", // Changed to string
     name: "Bob Marley",
     team: "Los Angeles Lakers",
     jersey: "23",
     year: "2023",
     backgroundColor: "#FDB927", // Gold
-    textColor: "purple",
     cardType: "Artist Series",
     artist: "Jessica P.",
     set: "Music Legends Series",
@@ -70,13 +67,12 @@ export const cardData: CardData[] = [
     effects: ["Holographic", "Refractor"]
   },
   {
-    id: 5,
+    id: "5", // Changed to string
     name: "Tupac Shakur",
     team: "Duke",
     jersey: "2",
     year: "2023",
     backgroundColor: "#001A57", // Duke Blue
-    textColor: "white",
     cardType: "Artist Series",
     artist: "Tyrone J.",
     set: "Music Legends Series",
@@ -87,13 +83,12 @@ export const cardData: CardData[] = [
     effects: ["Vintage"]
   },
   {
-    id: 6,
+    id: "6", // Changed to string
     name: "Notorious B.I.G.",
     team: "Brooklyn Nets",
     jersey: "72",
     year: "2023",
     backgroundColor: "#FF0063", // Hot Pink
-    textColor: "white",
     cardType: "Artist Series",
     artist: "Marcus L.",
     set: "Music Legends Series",

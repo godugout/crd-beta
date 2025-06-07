@@ -1,13 +1,14 @@
+
 import React from 'react';
 import { Text, Box } from '@react-three/drei';
 import { CardData } from '@/lib/types/CardData';
 
 interface CardFrontProps {
   card: CardData;
-  isFlipped: boolean;
+  isFlipped?: boolean; // Make optional with default
 }
 
-const CardFront: React.FC<CardFrontProps> = ({ card, isFlipped }) => {
+const CardFront: React.FC<CardFrontProps> = ({ card, isFlipped = false }) => {
   return (
     <Box 
       position={[0, 0, 0.1]} 

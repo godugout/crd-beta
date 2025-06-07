@@ -132,5 +132,5 @@ export interface DbReaction {
   created_at: string;
 }
 
-// Re-export Card type for convenience
-export { Card };
+// Re-export Card type for convenience - use export type for isolatedModules
+export type { Card };

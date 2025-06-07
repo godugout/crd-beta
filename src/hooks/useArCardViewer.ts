@@ -1,14 +1,48 @@
+
 import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { Card } from '@/lib/types/cardTypes';
 import { toast } from 'sonner';
 
-export const useArCardViewer = () => {
-  const { id } = useParams<{ id: string }>();
+// Define the proper return type interface
+interface UseArCardViewerReturn {
+  card: Card | null;
+  isLoading: boolean;
+  error: string | null;
+  arSupported: boolean;
+  arCanvasRef: React.RefObject<HTMLCanvasElement>;
+  startAR: () => Promise<void>;
+  // Add missing properties expected by the pages
+  cards: Card[];
+  loading: boolean;
+  activeCard: Card | null;
+  arCards: Card[];
+  availableCards: Card[];
+  isArMode: boolean;
+  isFlipped: boolean;
+  cameraError: string | null;
+  handleLaunchAr: () => void;
+  handleExitAr: () => void;
+  handleCameraError: (error: string) => void;
+  handleTakeSnapshot: () => void;
+  handleFlip: () => void;
+  handleZoomIn: () => void;
+  handleZoomOut: () => void;
+  handleRotate: () => void;
+  handleAddCard: (cardId: string) => void;
+  handleRemoveCard: (cardId: string) => void;
+}
+
+export const useArCardViewer = (id?: string): UseArCardViewerReturn => {
   const [card, setCard] = useState<Card | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [arSupported, setArSupported] = useState(false);
+  const [isArMode, setIsArMode] = useState(false);
+  const [isFlipped, setIsFlipped] = useState(false);
+  const [cameraError, setCameraError] = useState<string | null>(null);
+  const [arCards, setArCards] = useState<Card[]>([]);
+  const [cards] = useState<Card[]>([]); // Mock cards array
   const arCanvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -37,7 +71,7 @@ export const useArCardViewer = () => {
     }
 
     setIsLoading(true);
-    setError(null);
+    setError('');
 
     // Mock card data loading (replace with actual API call)
     setTimeout(() => {
@@ -82,25 +116,22 @@ export const useArCardViewer = () => {
       };
 
       setCard(mockCard);
+      setArCards([mockCard]);
       setIsLoading(false);
     }, 500);
   }, [id]);
 
   const startAR = async () => {
     if (!arSupported) {
-      toast({
-        title: "AR Not Supported",
-        description: "Augmented reality is not supported on this device.",
-        variant: "destructive",
+      toast.error("AR Not Supported", {
+        description: "Augmented reality is not supported on this device."
       });
       return;
     }
 
     if (!arCanvasRef.current) {
-      toast({
-        title: "AR Canvas Not Found",
-        description: "Could not find the AR canvas element.",
-        variant: "destructive",
+      toast.error("AR Canvas Not Found", {
+        description: "Could not find the AR canvas element."
       });
       return;
     }
@@ -118,30 +149,68 @@ export const useArCardViewer = () => {
         throw new Error("Failed to get WebGL context");
       }
 
-      // Now you can use the 'session' and 'gl' objects to set up your AR scene
       console.log("AR Session started:", session);
-      toast({
-        title: "AR Session Started",
-        description: "Point your camera at a surface to place the card.",
+      setIsArMode(true);
+      toast.success("AR Session Started", {
+        description: "Point your camera at a surface to place the card."
       });
 
       // End the AR session after a while (for testing purposes)
       setTimeout(() => {
         session.end();
-        toast({
-          title: "AR Session Ended",
-          description: "AR session has ended.",
+        setIsArMode(false);
+        toast.info("AR Session Ended", {
+          description: "AR session has ended."
         });
       }, 20000);
 
     } catch (err) {
       console.error("Error starting AR:", err);
-      toast({
-        title: "AR Failed to Start",
-        description: "Failed to start augmented reality.",
-        variant: "destructive",
+      toast.error("AR Failed to Start", {
+        description: "Failed to start augmented reality."
       });
     }
+  };
+
+  const handleLaunchAr = () => {
+    setIsArMode(true);
+    startAR();
+  };
+
+  const handleExitAr = () => {
+    setIsArMode(false);
+  };
+
+  const handleCameraError = (errorMessage: string) => {
+    setCameraError(errorMessage);
+  };
+
+  const handleTakeSnapshot = () => {
+    toast.success("Snapshot taken!");
+  };
+
+  const handleFlip = () => {
+    setIsFlipped(!isFlipped);
+  };
+
+  const handleZoomIn = () => {
+    console.log("Zoom in");
+  };
+
+  const handleZoomOut = () => {
+    console.log("Zoom out");
+  };
+
+  const handleRotate = () => {
+    console.log("Rotate");
+  };
+
+  const handleAddCard = (cardId: string) => {
+    console.log("Add card:", cardId);
+  };
+
+  const handleRemoveCard = (cardId: string) => {
+    setArCards(prev => prev.filter(c => c.id !== cardId));
   };
 
   return {
@@ -151,5 +220,24 @@ export const useArCardViewer = () => {
     arSupported,
     arCanvasRef,
     startAR,
+    // Additional properties for compatibility
+    cards,
+    loading: isLoading,
+    activeCard: card,
+    arCards,
+    availableCards: cards.filter(c => !arCards.find(ac => ac.id === c.id)),
+    isArMode,
+    isFlipped,
+    cameraError,
+    handleLaunchAr,
+    handleExitAr,
+    handleCameraError,
+    handleTakeSnapshot,
+    handleFlip,
+    handleZoomIn,
+    handleZoomOut,
+    handleRotate,
+    handleAddCard,
+    handleRemoveCard,
   };
 };
