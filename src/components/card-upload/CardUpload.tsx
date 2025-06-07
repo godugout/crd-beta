@@ -1,7 +1,6 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { cn } from '@/lib/utils';
-import { Upload, X, Image as ImageIcon, Camera, Users, CopyCheck } from 'lucide-react';
+import { Upload, X, Image as ImageIcon, Camera, Users } from 'lucide-react';
 import { toast } from 'sonner';
 import ImageDropzone from './ImageDropzone';
 import ImageEditor from './ImageEditor';
@@ -10,15 +9,21 @@ import { useMobileOptimization } from '@/hooks/useMobileOptimization';
 import { MobileTouchButton } from '@/components/ui/mobile-controls';
 import { ResponsiveImage } from '@/components/ui/responsive-image';
 import { MemorabiliaType } from './cardDetection';
+import EnhancedImageUploader from '@/components/upload/EnhancedImageUploader';
+import { ImageUploadResult } from '@/lib/services/imageStorageService';
 
 interface CardUploadProps {
-  onImageUpload: (file: File, previewUrl: string, storagePath?: string) => void;
+  onImageUpload: (file: File, previewUrl: string, storagePath?: string, uploadResult?: ImageUploadResult) => void;
   onBatchUpload?: (files: File[], previewUrls: string[], types?: MemorabiliaType[]) => void;
   className?: string;
   initialImageUrl?: string;
   batchProcessingEnabled?: boolean;
   enabledMemorabiliaTypes?: MemorabiliaType[];
   autoEnhance?: boolean;
+  userId?: string;
+  cardId?: string;
+  collectionId?: string;
+  useEnhancedUploader?: boolean;
 }
 
 const CardUpload: React.FC<CardUploadProps> = ({
@@ -28,7 +33,11 @@ const CardUpload: React.FC<CardUploadProps> = ({
   initialImageUrl,
   batchProcessingEnabled = false,
   enabledMemorabiliaTypes = ['card', 'ticket', 'program', 'autograph', 'face'],
-  autoEnhance = true
+  autoEnhance = true,
+  userId = 'anonymous',
+  cardId,
+  collectionId,
+  useEnhancedUploader = true
 }) => {
   const [previewUrl, setPreviewUrl] = useState<string | null>(initialImageUrl || null);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
@@ -40,6 +49,17 @@ const CardUpload: React.FC<CardUploadProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const isMobile = useIsMobile();
   const { shouldOptimizeAnimations, getImageQuality } = useMobileOptimization();
+
+  // Handle enhanced uploader completion
+  const handleEnhancedUploadComplete = (result: ImageUploadResult) => {
+    const previewUrl = result.originalUrl;
+    setPreviewUrl(previewUrl);
+    
+    // Create a placeholder file for compatibility
+    const placeholderFile = new File([''], 'uploaded-image.jpg', { type: 'image/jpeg' });
+    
+    onImageUpload(placeholderFile, previewUrl, result.originalUrl, result);
+  };
 
   const handleCameraCapture = () => {
     if (!inputRef.current) return;
@@ -131,6 +151,26 @@ const CardUpload: React.FC<CardUploadProps> = ({
   const toggleBatchMode = () => {
     setBatchMode(!batchMode);
   };
+
+  // Use enhanced uploader if enabled and userId is provided
+  if (useEnhancedUploader && userId !== 'anonymous') {
+    return (
+      <div className={cn("w-full", className)}>
+        <EnhancedImageUploader
+          userId={userId}
+          cardId={cardId}
+          collectionId={collectionId}
+          onUploadComplete={handleEnhancedUploadComplete}
+          onError={(error) => {
+            console.error('Enhanced upload error:', error);
+            toast.error('Upload failed: ' + error.message);
+          }}
+          generateVariants={true}
+          className="w-full"
+        />
+      </div>
+    );
+  }
 
   return (
     <div className={cn("w-full", className)}>

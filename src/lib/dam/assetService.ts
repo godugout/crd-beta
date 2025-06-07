@@ -1,4 +1,6 @@
+
 import { supabase } from '@/lib/supabase';
+import { imageStorageService, ImageUploadResult } from '@/lib/services/imageStorageService';
 
 export interface DigitalAsset {
   id: string;
@@ -21,6 +23,9 @@ export interface DigitalAsset {
   cardId?: string;
   collectionId?: string;
   assetType?: string;
+  processingStatus?: string;
+  variants?: any;
+  optimizationMetadata?: any;
 }
 
 export interface AssetUploadOptions {
@@ -32,11 +37,13 @@ export interface AssetUploadOptions {
   teamId?: string;
   assetType?: string;
   metadata?: any;
+  generateVariants?: boolean;
 }
 
 export interface AssetUploadResult {
   url: string;
   id: string;
+  uploadResult?: ImageUploadResult;
 }
 
 /**
@@ -60,8 +67,27 @@ export const assetService = {
         console.error('User not authenticated');
         return null;
       }
-      
-      // Create a unique path for the file
+
+      // For images, use the enhanced image storage service
+      if (file.type.startsWith('image/') && options.generateVariants !== false) {
+        const uploadResult = await imageStorageService.uploadImage(file, {
+          userId: user.id,
+          cardId: options.cardId,
+          collectionId: options.collectionId,
+          generateVariants: true
+        });
+
+        if (uploadResult) {
+          return {
+            url: uploadResult.originalUrl,
+            id: uploadResult.assetId,
+            uploadResult
+          };
+        }
+        return null;
+      }
+
+      // Fallback to original upload method for non-images or when variants are disabled
       const timestamp = new Date().getTime();
       const fileExt = file.name.split('.').pop();
       const filePath = `uploads/${user.id}/${timestamp}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
@@ -100,7 +126,8 @@ export const assetService = {
         user_id: user.id,
         card_id: options.cardId,
         collection_id: options.collectionId,
-        asset_type: options.assetType || 'image'
+        asset_type: options.assetType || 'file',
+        processing_status: 'completed'
       };
       
       const { data: asset, error: assetError } = await supabase
@@ -197,7 +224,10 @@ export const assetService = {
           originalFilename: item.original_filename,
           cardId: item.card_id,
           collectionId: item.collection_id,
-          assetType: item.asset_type
+          assetType: item.asset_type,
+          processingStatus: item.processing_status,
+          variants: item.variants,
+          optimizationMetadata: item.optimization_metadata
         };
       });
     } catch (err) {
@@ -211,42 +241,47 @@ export const assetService = {
    */
   deleteAsset: async (assetId: string): Promise<boolean> => {
     try {
-      // First get the asset to know the file path
-      const { data: asset, error: fetchError } = await supabase
-        .from('digital_assets')
-        .select('storage_path, thumbnail_path')
-        .eq('id', assetId)
-        .single();
+      // Try to use the enhanced image storage service for deletion
+      const result = await imageStorageService.deleteAsset(assetId);
       
-      if (fetchError || !asset) {
-        console.error('Error fetching asset for deletion:', fetchError);
-        return false;
-      }
-      
-      // Delete the file from storage
-      const filesToDelete = [asset.storage_path];
-      if (asset.thumbnail_path) {
-        filesToDelete.push(asset.thumbnail_path);
-      }
-      
-      const { error: storageError } = await supabase.storage
-        .from('assets')
-        .remove(filesToDelete);
-      
-      if (storageError) {
-        console.error('Error deleting asset files:', storageError);
-        // Continue with deletion of the record anyway
-      }
-      
-      // Delete the record
-      const { error: deleteError } = await supabase
-        .from('digital_assets')
-        .delete()
-        .eq('id', assetId);
-      
-      if (deleteError) {
-        console.error('Error deleting asset record:', deleteError);
-        return false;
+      if (!result) {
+        // Fallback to original deletion method
+        const { data: asset, error: fetchError } = await supabase
+          .from('digital_assets')
+          .select('storage_path, thumbnail_path')
+          .eq('id', assetId)
+          .single();
+        
+        if (fetchError || !asset) {
+          console.error('Error fetching asset for deletion:', fetchError);
+          return false;
+        }
+        
+        // Delete the file from storage
+        const filesToDelete = [asset.storage_path];
+        if (asset.thumbnail_path) {
+          filesToDelete.push(asset.thumbnail_path);
+        }
+        
+        const { error: storageError } = await supabase.storage
+          .from('assets')
+          .remove(filesToDelete);
+        
+        if (storageError) {
+          console.error('Error deleting asset files:', storageError);
+          // Continue with deletion of the record anyway
+        }
+        
+        // Delete the record
+        const { error: deleteError } = await supabase
+          .from('digital_assets')
+          .delete()
+          .eq('id', assetId);
+        
+        if (deleteError) {
+          console.error('Error deleting asset record:', deleteError);
+          return false;
+        }
       }
       
       return true;
