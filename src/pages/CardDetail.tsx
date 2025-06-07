@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -45,7 +46,7 @@ const CardDetail = () => {
     if (foundCard) {
       console.log('CardDetail: Found card:', foundCard.title, 'with imageUrl:', foundCard.imageUrl);
       
-      // Use adaptToCard to ensure proper defaults
+      // Use adaptToCard to ensure proper defaults and type compatibility
       const processedCard = adaptToCard(foundCard);
       
       setResolvedCard(processedCard);
