@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card as CardComponent, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -70,7 +71,7 @@ const CommunityFeed = () => {
         textStyle: {
           titleColor: '#FFFFFF',
           titleAlignment: 'left',
-          titleWeight: 'semibold',
+          titleWeight: 'bold', // Changed from 'semibold' to 'bold'
           descriptionColor: '#EEEEEE',
         },
         marketMetadata: {

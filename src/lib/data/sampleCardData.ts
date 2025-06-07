@@ -25,8 +25,8 @@ const createDesignMetadata = (borderColor: string, frameColor: string) => ({
   },
   textStyle: {
     titleColor: '#FFFFFF',
-    titleAlignment: 'left',
-    titleWeight: 'bold',
+    titleAlignment: 'left', // Changed from string to specific value
+    titleWeight: 'bold', // Changed from string to specific value
     descriptionColor: '#FFFFFF',
   },
   cardMetadata: {

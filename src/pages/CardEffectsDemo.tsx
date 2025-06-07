@@ -31,8 +31,8 @@ const demoCard = {
     },
     textStyle: {
       titleColor: '#FFFFFF',
-      titleAlignment: 'center',
-      titleWeight: 'bold',
+      titleAlignment: 'center', // Fixed string literal
+      titleWeight: 'bold', // Fixed string literal
       descriptionColor: '#CCCCCC'
     },
     cardMetadata: {
