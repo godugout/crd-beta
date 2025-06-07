@@ -61,7 +61,7 @@ export function adaptToCard(cardData: Partial<Card> | CardData | any): Card {
     };
   }
 
-  // Handle partial Card data
+  // Handle partial Card data with proper type enforcement
   const card = cardData as Partial<Card>;
   return {
     id: card.id || 'unknown',
@@ -81,32 +81,36 @@ export function adaptToCard(cardData: Partial<Card> | CardData | any): Card {
         frameColor: card.designMetadata?.cardStyle?.frameColor || '#000000',
         frameWidth: card.designMetadata?.cardStyle?.frameWidth || 2,
         shadowColor: card.designMetadata?.cardStyle?.shadowColor || 'rgba(0,0,0,0.2)',
-        ...card.designMetadata?.cardStyle
       },
       textStyle: {
-        titleColor: '#000000',
-        titleAlignment: 'center',
-        titleWeight: 'bold',
-        descriptionColor: '#333333',
-        ...card.designMetadata?.textStyle
+        titleColor: card.designMetadata?.textStyle?.titleColor || '#000000',
+        titleAlignment: card.designMetadata?.textStyle?.titleAlignment || 'center',
+        titleWeight: card.designMetadata?.textStyle?.titleWeight || 'bold',
+        descriptionColor: card.designMetadata?.textStyle?.descriptionColor || '#333333',
       },
       marketMetadata: {
-        isPrintable: false,
-        isForSale: false,
-        includeInCatalog: false,
-        ...card.designMetadata?.marketMetadata
+        isPrintable: card.designMetadata?.marketMetadata?.isPrintable || false,
+        isForSale: card.designMetadata?.marketMetadata?.isForSale || false,
+        includeInCatalog: card.designMetadata?.marketMetadata?.includeInCatalog || false,
       },
       cardMetadata: {
-        category: 'general',
-        cardType: 'standard',
-        series: 'base',
-        ...card.designMetadata?.cardMetadata
+        category: card.designMetadata?.cardMetadata?.category || 'general',
+        cardType: card.designMetadata?.cardMetadata?.cardType || 'standard',
+        series: card.designMetadata?.cardMetadata?.series || 'base',
       },
-      ...card.designMetadata
     },
     createdAt: card.createdAt || new Date().toISOString(),
     updatedAt: card.updatedAt || new Date().toISOString(),
-    // Include any additional properties
-    ...card
+    // Include any additional properties safely
+    ...(card.player && { player: card.player }),
+    ...(card.team && { team: card.team }),
+    ...(card.year && { year: card.year }),
+    ...(card.jersey && { jersey: card.jersey }),
+    ...(card.set && { set: card.set }),
+    ...(card.cardNumber && { cardNumber: card.cardNumber }),
+    ...(card.cardType && { cardType: card.cardType }),
+    ...(card.artist && { artist: card.artist }),
+    ...(card.backgroundColor && { backgroundColor: card.backgroundColor }),
+    ...(card.specialEffect && { specialEffect: card.specialEffect }),
   };
 }
