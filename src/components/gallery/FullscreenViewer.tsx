@@ -1,8 +1,9 @@
+
 import React, { useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCards } from '@/hooks/useCards';
-import { Card } from '@/lib/types';
+import { Card } from '@/lib/types/cardTypes';
 import { sampleCards } from '@/lib/data/sampleCards';
 import { useToast } from '@/hooks/use-toast';
 import { adaptToCard } from '@/lib/adapters/cardAdapter';
@@ -43,7 +44,7 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
       }
       
       if (foundCard) {
-        // Always use adaptToCard to ensure the card has all required properties
+        // Use adaptToCard to ensure the card has all required properties with defaults
         const processedCard = adaptToCard(foundCard);
         
         // Always initialize with fallback first, then update if the real image loads

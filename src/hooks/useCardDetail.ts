@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Card } from '@/lib/types/cardTypes';
-import { DetailedViewCard, ensureDetailedViewCard } from '@/types/detailedCardTypes';
+import { adaptToCard } from '@/lib/adapters/cardAdapter';
 
 /**
  * Hook for fetching and managing card details
- * Ensures returned card data has all required properties for detail views
+ * Returns card data using the base Card type with proper defaults
  */
 export function useCardDetail(cardId: string) {
-  const [card, setCard] = useState<DetailedViewCard | null>(null);
+  const [card, setCard] = useState<Card | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -70,8 +70,8 @@ export function useCardDetail(cardId: string) {
             // Other properties would come from API
           };
           
-          // Use our helper to ensure all required fields are present
-          setCard(ensureDetailedViewCard(fetchedCard));
+          // Use adaptToCard to ensure all required fields are present with defaults
+          setCard(adaptToCard(fetchedCard));
           setIsLoading(false);
         }, 500);
       } catch (err) {
@@ -87,12 +87,9 @@ export function useCardDetail(cardId: string) {
   // Function to toggle favorite status
   const toggleFavorite = () => {
     if (card) {
-      const updatedCard = {
-        ...card,
-        isFavorite: !card.isFavorite
-      };
-      setCard(updatedCard);
-      // In a real app, update this in backend/API
+      // In a real app, this would update the backend
+      // For now, we could add a local state for favorites
+      console.log('Toggle favorite for card:', card.id);
     }
   };
 

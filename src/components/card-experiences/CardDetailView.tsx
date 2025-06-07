@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useCards } from '@/context/CardContext';
 import { Button } from "@/components/ui/button";
@@ -16,7 +17,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
-import { DetailedViewCard, ensureDetailedViewCard } from '@/types/detailedCardTypes';
+import { Card as CardType } from '@/lib/types/cardTypes';
 
 interface CardDetailViewProps {
   cardId: string;
@@ -27,9 +28,7 @@ const CardDetailView: React.FC<CardDetailViewProps> = ({ cardId, onBack }) => {
   const { getCard, deleteCard } = useCards();
   const [liked, setLiked] = useState(false);
   
-  const rawCardData = getCard ? getCard(cardId) : null;
-  // Ensure we have a properly formatted card with all required fields
-  const cardData = rawCardData ? ensureDetailedViewCard(rawCardData) : null;
+  const cardData = getCard ? getCard(cardId) : null;
   
   if (!cardData) {
     return (
@@ -195,11 +194,11 @@ const CardDetailView: React.FC<CardDetailViewProps> = ({ cardId, onBack }) => {
                 <div>
                   <h3 className="text-sm text-gray-400 uppercase">Tags</h3>
                   <div className="flex flex-wrap gap-2 mt-1">
-                    {cardData.tags.map((tag, index) => (
+                    {cardData.tags?.map((tag, index) => (
                       <Badge key={index} variant="secondary" className="bg-gray-800 hover:bg-gray-700">
                         {tag}
                       </Badge>
-                    ))}
+                    )) || []}
                   </div>
                 </div>
               </div>

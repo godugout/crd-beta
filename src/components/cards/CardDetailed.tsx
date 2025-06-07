@@ -1,18 +1,17 @@
 
 import React from 'react';
-import { Card } from '@/lib/types';
+import { Card } from '@/lib/types/cardTypes';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Eye, Edit, Share2, Trash2 } from 'lucide-react';
 import CardThumbnail from './CardThumbnail';
-import { DetailedViewCard } from '@/types/detailedCardTypes';
 
 export interface CardDetailedProps {
   /**
    * Card data to display
    */
-  card: Card | DetailedViewCard;
+  card: Card;
   
   /**
    * Optional className for styling
@@ -168,21 +167,21 @@ export const CardDetailed: React.FC<CardDetailedProps> = ({
             </div>
           )}
           
-          {'player' in card && card.player && (
+          {card.player && (
             <div>
               <h3 className="text-sm font-medium text-gray-500">Player</h3>
               <p>{card.player}</p>
             </div>
           )}
           
-          {'team' in card && card.team && (
+          {card.team && (
             <div>
               <h3 className="text-sm font-medium text-gray-500">Team</h3>
               <p>{card.team}</p>
             </div>
           )}
           
-          {'year' in card && card.year && (
+          {card.year && (
             <div>
               <h3 className="text-sm font-medium text-gray-500">Year</h3>
               <p>{card.year}</p>

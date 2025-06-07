@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useCards } from '@/context/CardContext';
 import { ArrowLeft, Eye, Smartphone, Share2, Download } from 'lucide-react';
-import { Card } from '@/lib/types';
+import { Card } from '@/lib/types/cardTypes';
 import { sampleCards } from '@/lib/data/sampleCards';
 import { toast } from '@/hooks/use-toast';
 import { adaptToCard } from '@/lib/adapters/cardAdapter';
@@ -45,6 +45,7 @@ const CardDetail = () => {
     if (foundCard) {
       console.log('CardDetail: Found card:', foundCard.title, 'with imageUrl:', foundCard.imageUrl);
       
+      // Use adaptToCard to ensure proper defaults
       const processedCard = adaptToCard(foundCard);
       
       setResolvedCard(processedCard);
