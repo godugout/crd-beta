@@ -49,7 +49,31 @@ export function ensureDetailedViewCard(card: Card): DetailedViewCard {
     effects: card.effects || [],
     isFavorite: false, // Since Card type doesn't have isFavorite, we set a default value
     rarity: card.rarity || 'common', // This will be compatible with CardRarity
-    designMetadata: card.designMetadata, // Use the designMetadata directly from the Card (which should have been processed by the adapter)
+    designMetadata: card.designMetadata || {
+      cardStyle: {
+        template: 'standard',
+        effect: 'none',
+        borderRadius: '8px',
+        borderColor: '#000000',
+        frameWidth: 2,
+        frameColor: '#000000',
+        shadowColor: 'rgba(0,0,0,0.2)'
+      },
+      textStyle: {
+        titleColor: '#000000',
+        descriptionColor: '#333333'
+      },
+      cardMetadata: {
+        category: 'Standard',
+        series: 'Base',
+        cardType: 'Standard'
+      },
+      marketMetadata: {
+        isPrintable: false,
+        isForSale: false,
+        includeInCatalog: false
+      }
+    },
     // Copy optional baseball card properties
     player: card.player,
     team: card.team,
