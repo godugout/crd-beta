@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,12 +6,17 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeft, ArrowRight, Sparkles, Heart, Megaphone, Camera, Users, MapPin } from 'lucide-react';
-import { OAKLAND_MEMORY_TEMPLATES, OaklandMemoryTemplate } from '@/lib/data/oakland/oaklandTemplates';
-import { OAKLAND_FAN_EXPRESSIONS, OaklandFanExpression, searchExpressions, getExpressionsByCategory } from '@/lib/data/oakland/fanExpressions';
+import { 
+  PROFESSIONAL_OAKLAND_TEMPLATES, 
+  ProfessionalOaklandTemplate,
+  getProfessionalTemplateById 
+} from '@/lib/data/oakland/professionalTemplates';
+import { OAKLAND_FAN_EXPRESSIONS, searchExpressions } from '@/lib/data/oakland/fanExpressions';
 import { useAuth } from '@/context/auth/AuthProvider';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import ProfessionalCardRenderer from './ProfessionalCardRenderer';
 
 type BuilderStep = 'template' | 'content' | 'expressions' | 'emotions' | 'preview';
 
@@ -40,7 +44,7 @@ const OaklandMemoryBuilder: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState<BuilderStep>('template');
-  const [selectedTemplate, setSelectedTemplate] = useState<OaklandMemoryTemplate | null>(null);
+  const [selectedTemplate, setSelectedTemplate] = useState<ProfessionalOaklandTemplate | null>(null);
   const [memoryData, setMemoryData] = useState<MemoryData>({
     title: '',
     description: '',
@@ -81,14 +85,14 @@ const OaklandMemoryBuilder: React.FC = () => {
   ];
 
   const stepTitles = {
-    template: 'Choose Your Memory Style',
+    template: 'Choose Your Professional Memory Style',
     content: 'Tell Your Story',
     expressions: 'Add Fan Voice',
     emotions: 'Capture the Feeling',
     preview: 'Preview & Share'
   };
 
-  const handleTemplateSelect = (template: OaklandMemoryTemplate) => {
+  const handleTemplateSelect = (template: ProfessionalOaklandTemplate) => {
     setSelectedTemplate(template);
     setMemoryData(prev => ({ ...prev, template_id: template.id, era: template.era }));
   };
@@ -233,21 +237,21 @@ const OaklandMemoryBuilder: React.FC = () => {
           {/* Main Content */}
           <div className="space-y-6">
             
-            {/* Template Selection */}
+            {/* Template Selection - Updated with Professional Templates */}
             {currentStep === 'template' && (
               <Card className="bg-gray-800/80 backdrop-blur-sm border-green-600/30">
                 <CardHeader>
                   <CardTitle className="text-white flex items-center gap-2">
                     <Sparkles className="h-6 w-6 text-yellow-400" />
-                    Choose Your Memory Template
+                    Choose Your Professional Memory Style
                   </CardTitle>
                   <CardDescription className="text-gray-300">
-                    Each template captures a different era and emotion of Oakland baseball
+                    Professional Panini-quality card templates for your Oakland memories
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {OAKLAND_MEMORY_TEMPLATES.map((template) => (
+                    {PROFESSIONAL_OAKLAND_TEMPLATES.map((template) => (
                       <div
                         key={template.id}
                         className={`p-4 rounded-lg border cursor-pointer transition-all hover:scale-105 ${
@@ -258,14 +262,26 @@ const OaklandMemoryBuilder: React.FC = () => {
                         onClick={() => handleTemplateSelect(template)}
                       >
                         <div 
-                          className="w-full h-24 rounded mb-3"
-                          style={{ backgroundColor: template.config.backgroundColor }}
+                          className="w-full h-32 rounded mb-3 bg-gradient-to-br"
+                          style={{ background: template.config.effects.background }}
                         />
-                        <h3 className="text-white font-bold">{template.name}</h3>
+                        <div className="flex items-start justify-between mb-2">
+                          <h3 className="text-white font-bold">{template.name}</h3>
+                          {template.premium && (
+                            <Badge className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-black text-xs">
+                              PREMIUM
+                            </Badge>
+                          )}
+                        </div>
                         <p className="text-gray-400 text-sm mb-2">{template.description}</p>
                         <div className="flex flex-wrap gap-1">
                           <Badge variant="outline" className="text-xs">{template.category}</Badge>
                           <Badge variant="outline" className="text-xs">{template.era}</Badge>
+                          {template.config.materials.finish !== 'matte' && (
+                            <Badge variant="outline" className="text-xs capitalize">
+                              {template.config.materials.finish}
+                            </Badge>
+                          )}
                         </div>
                       </div>
                     ))}
@@ -497,50 +513,36 @@ const OaklandMemoryBuilder: React.FC = () => {
             )}
           </div>
 
-          {/* Preview Panel */}
+          {/* Professional Preview Panel */}
           <div className="lg:sticky lg:top-4">
             <Card className="bg-gray-800/80 backdrop-blur-sm border-green-600/30">
               <CardHeader>
-                <CardTitle className="text-white">Live Preview</CardTitle>
+                <CardTitle className="text-white">Professional Preview</CardTitle>
+                <CardDescription className="text-gray-300">
+                  {selectedTemplate?.premium ? 'Premium Panini-Quality Design' : 'Professional Card Design'}
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                {selectedTemplate && (
-                  <div 
-                    className="aspect-[3/4] rounded-lg p-4 text-white relative overflow-hidden"
-                    style={{ 
-                      backgroundColor: selectedTemplate.config.backgroundColor,
-                      border: `2px solid ${selectedTemplate.config.accentColor}`
+                {selectedTemplate ? (
+                  <ProfessionalCardRenderer
+                    template={selectedTemplate}
+                    memory={{
+                      title: memoryData.title || 'Your Memory Title',
+                      description: memoryData.description || 'Your memory description will appear here...',
+                      opponent: memoryData.opponent,
+                      score: memoryData.score,
+                      location: memoryData.location,
+                      section: memoryData.section,
+                      game_date: memoryData.game_date,
+                      emotions: memoryData.emotions,
+                      tags: memoryData.tags,
+                      imageUrl: 'https://images.unsplash.com/photo-1566577739112-5180d4bf9390?w=400&h=600&fit=crop'
                     }}
-                  >
-                    <div className="absolute inset-0 opacity-10 bg-gradient-to-br from-white to-transparent" />
-                    <div className="relative z-10">
-                      <h3 
-                        className="font-bold text-lg mb-2"
-                        style={{ color: selectedTemplate.config.accentColor }}
-                      >
-                        {memoryData.title || 'Your Memory Title'}
-                      </h3>
-                      <p className="text-sm mb-4 opacity-90">
-                        {memoryData.description || 'Your memory description will appear here...'}
-                      </p>
-                      
-                      {memoryData.opponent && (
-                        <div className="text-xs mb-2">vs {memoryData.opponent}</div>
-                      )}
-                      
-                      <div className="absolute bottom-4 left-4 right-4">
-                        <div className="text-xs opacity-75">{memoryData.location}</div>
-                        {memoryData.emotions.length > 0 && (
-                          <div className="flex flex-wrap gap-1 mt-2">
-                            {memoryData.emotions.slice(0, 3).map(emotion => (
-                              <span key={emotion} className="text-[10px] px-1 py-0.5 rounded bg-black/30">
-                                {emotion}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    </div>
+                    className="max-w-xs mx-auto"
+                  />
+                ) : (
+                  <div className="aspect-[3/4] max-w-xs mx-auto bg-gray-700 rounded-lg flex items-center justify-center">
+                    <p className="text-gray-400 text-center">Select a template to see preview</p>
                   </div>
                 )}
               </CardContent>

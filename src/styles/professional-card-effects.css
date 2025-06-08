@@ -1,0 +1,243 @@
+
+/* Professional Oakland Card Effects */
+
+/* Texture Effects */
+.vintage-grain-texture {
+  background-image: 
+    radial-gradient(circle at 20% 50%, transparent 20%, rgba(139, 69, 19, 0.3) 21%, rgba(139, 69, 19, 0.3) 34%, transparent 35%, transparent),
+    linear-gradient(0deg, rgba(0, 0, 0, 0.1) 50%, transparent 50%);
+  background-size: 12px 12px, 4px 4px;
+}
+
+.concrete-texture {
+  background-image: 
+    repeating-linear-gradient(45deg, transparent, transparent 1px, rgba(255,255,255,0.05) 1px, rgba(255,255,255,0.05) 2px),
+    repeating-linear-gradient(-45deg, transparent, transparent 1px, rgba(0,0,0,0.03) 1px, rgba(0,0,0,0.03) 2px);
+  background-size: 8px 8px;
+}
+
+.wood-texture {
+  background-image: 
+    linear-gradient(90deg, rgba(160, 82, 45, 0.1) 0%, transparent 20%, rgba(139, 69, 19, 0.15) 40%, transparent 60%, rgba(160, 82, 45, 0.1) 80%, transparent 100%);
+  background-size: 60px 100%;
+}
+
+.comic-dots-texture {
+  background-image: 
+    radial-gradient(circle at 2px 2px, rgba(59, 130, 246, 0.15) 1px, transparent 0);
+  background-size: 8px 8px;
+}
+
+/* Animation Effects */
+@keyframes gold-shimmer {
+  0% { 
+    transform: translateX(-100%) translateY(-100%) rotate(45deg); 
+    opacity: 0;
+  }
+  50% { 
+    opacity: 1; 
+  }
+  100% { 
+    transform: translateX(100%) translateY(100%) rotate(45deg); 
+    opacity: 0;
+  }
+}
+
+.gold-shimmer-effect {
+  background: linear-gradient(45deg, 
+    transparent 30%, 
+    rgba(255, 215, 0, 0.5) 50%, 
+    transparent 70%);
+  animation: gold-shimmer 3s ease-in-out infinite;
+}
+
+@keyframes victory-sparkle {
+  0%, 100% { 
+    opacity: 0; 
+    transform: scale(0.8) rotate(0deg);
+  }
+  50% { 
+    opacity: 1; 
+    transform: scale(1.2) rotate(180deg);
+  }
+}
+
+.victory-sparkle-effect::before {
+  content: '✨';
+  position: absolute;
+  top: 10%;
+  right: 10%;
+  font-size: 1.5rem;
+  animation: victory-sparkle 2s ease-in-out infinite;
+}
+
+.victory-sparkle-effect::after {
+  content: '⭐';
+  position: absolute;
+  bottom: 15%;
+  left: 15%;
+  font-size: 1.2rem;
+  animation: victory-sparkle 2.5s ease-in-out infinite 0.5s;
+}
+
+@keyframes protest-glitch {
+  0%, 90%, 100% { 
+    transform: translate(0); 
+    filter: hue-rotate(0deg);
+  }
+  10% { 
+    transform: translate(-2px, 2px); 
+    filter: hue-rotate(90deg);
+  }
+  20% { 
+    transform: translate(2px, -2px); 
+    filter: hue-rotate(180deg);
+  }
+  30% { 
+    transform: translate(-2px, -2px); 
+    filter: hue-rotate(270deg);
+  }
+}
+
+.protest-glitch-effect {
+  animation: protest-glitch 4s infinite;
+}
+
+@keyframes power-burst {
+  0% { 
+    transform: scale(1); 
+    opacity: 0.8;
+  }
+  50% { 
+    transform: scale(1.05); 
+    opacity: 1;
+  }
+  100% { 
+    transform: scale(1); 
+    opacity: 0.8;
+  }
+}
+
+.power-burst-effect {
+  background: radial-gradient(circle at center, 
+    rgba(251, 191, 36, 0.3) 0%, 
+    rgba(251, 191, 36, 0.1) 40%, 
+    transparent 70%);
+  animation: power-burst 2s ease-in-out infinite;
+}
+
+/* Foil Effects */
+@keyframes title-foil {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.title-foil-effect {
+  background: linear-gradient(
+    90deg,
+    transparent 25%,
+    rgba(255, 215, 0, 0.6) 50%,
+    transparent 75%
+  );
+  background-size: 200% 100%;
+  animation: title-foil 3s linear infinite;
+  mix-blend-mode: overlay;
+}
+
+@keyframes border-foil {
+  0%, 100% { 
+    box-shadow: inset 0 0 20px rgba(255, 215, 0, 0.3);
+  }
+  50% { 
+    box-shadow: inset 0 0 30px rgba(255, 215, 0, 0.6);
+  }
+}
+
+.border-foil-effect {
+  animation: border-foil 2s ease-in-out infinite;
+  border-radius: inherit;
+}
+
+/* Premium Material Effects */
+.professional-card-container[data-finish="metallic"] {
+  background: linear-gradient(145deg, 
+    rgba(255, 255, 255, 0.1) 0%, 
+    transparent 50%, 
+    rgba(0, 0, 0, 0.1) 100%);
+}
+
+.professional-card-container[data-finish="holographic"] {
+  position: relative;
+}
+
+.professional-card-container[data-finish="holographic"]::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(45deg, 
+    transparent 25%, 
+    rgba(255, 0, 150, 0.1) 30%, 
+    rgba(0, 255, 255, 0.1) 40%, 
+    rgba(255, 255, 0, 0.1) 50%, 
+    rgba(255, 0, 150, 0.1) 60%, 
+    transparent 75%);
+  background-size: 400% 400%;
+  animation: holographic-shift 6s ease-in-out infinite;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+@keyframes holographic-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.professional-card-container[data-finish="textured"] {
+  box-shadow: 
+    inset 1px 1px 2px rgba(255, 255, 255, 0.1),
+    inset -1px -1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Typography Enhancements */
+.professional-card-container h1 {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.professional-card-container p {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Responsive Scaling */
+@media (max-width: 768px) {
+  .professional-card-container {
+    font-size: 0.9em;
+  }
+}
+
+@media (max-width: 480px) {
+  .professional-card-container {
+    font-size: 0.8em;
+  }
+}
+
+/* Performance Optimizations */
+.professional-card-container * {
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .gold-shimmer-effect,
+  .victory-sparkle-effect,
+  .protest-glitch-effect,
+  .power-burst-effect,
+  .title-foil-effect,
+  .border-foil-effect,
+  .professional-card-container[data-finish="holographic"]::before {
+    animation: none;
+  }
+}
