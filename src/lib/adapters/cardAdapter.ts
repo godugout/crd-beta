@@ -124,45 +124,7 @@ export function adaptToCard(cardData: Partial<Card> | CardData | any): Processed
   const card = cardData as Partial<Card>;
   
   // Create a properly structured designMetadata with all required defaults
-  const designMetadata = {
-    cardStyle: {
-      template: card.designMetadata?.cardStyle?.template || 'classic',
-      effect: card.designMetadata?.cardStyle?.effect || 'none',
-      borderRadius: card.designMetadata?.cardStyle?.borderRadius || '8px',
-      borderColor: card.designMetadata?.cardStyle?.borderColor || '#000000',
-      frameColor: card.designMetadata?.cardStyle?.frameColor || '#000000',
-      frameWidth: card.designMetadata?.cardStyle?.frameWidth || 2,
-      shadowColor: card.designMetadata?.cardStyle?.shadowColor || 'rgba(0,0,0,0.2)',
-      // Preserve any additional properties
-      ...card.designMetadata?.cardStyle
-    },
-    textStyle: {
-      titleColor: card.designMetadata?.textStyle?.titleColor || '#000000',
-      titleAlignment: card.designMetadata?.textStyle?.titleAlignment || 'center',
-      titleWeight: card.designMetadata?.textStyle?.titleWeight || 'bold',
-      descriptionColor: card.designMetadata?.textStyle?.descriptionColor || '#333333',
-      // Preserve any additional properties
-      ...card.designMetadata?.textStyle
-    },
-    marketMetadata: {
-      isPrintable: card.designMetadata?.marketMetadata?.isPrintable || false,
-      isForSale: card.designMetadata?.marketMetadata?.isForSale || false,
-      includeInCatalog: card.designMetadata?.marketMetadata?.includeInCatalog || false,
-      // Preserve any additional properties
-      ...card.designMetadata?.marketMetadata
-    },
-    cardMetadata: {
-      category: card.designMetadata?.cardMetadata?.category || 'general',
-      cardType: card.designMetadata?.cardMetadata?.cardType || 'standard',
-      series: card.designMetadata?.cardMetadata?.series || 'base',
-      // Preserve any additional properties
-      ...card.designMetadata?.cardMetadata
-    },
-    // Preserve any additional metadata properties
-    ...card.designMetadata
-  };
-
-  return {
+  const processedCard: ProcessedCard = {
     id: card.id || 'unknown',
     title: card.title || 'Untitled Card',
     description: card.description || '',
@@ -171,21 +133,60 @@ export function adaptToCard(cardData: Partial<Card> | CardData | any): Processed
     userId: card.userId || 'default-user',
     tags: card.tags || [],
     effects: card.effects || [],
-    designMetadata,
+    designMetadata: {
+      cardStyle: {
+        template: card.designMetadata?.cardStyle?.template || 'classic',
+        effect: card.designMetadata?.cardStyle?.effect || 'none',
+        borderRadius: card.designMetadata?.cardStyle?.borderRadius || '8px',
+        borderColor: card.designMetadata?.cardStyle?.borderColor || '#000000',
+        frameColor: card.designMetadata?.cardStyle?.frameColor || '#000000',
+        frameWidth: card.designMetadata?.cardStyle?.frameWidth || 2,
+        shadowColor: card.designMetadata?.cardStyle?.shadowColor || 'rgba(0,0,0,0.2)',
+        // Preserve any additional properties
+        ...card.designMetadata?.cardStyle
+      },
+      textStyle: {
+        titleColor: card.designMetadata?.textStyle?.titleColor || '#000000',
+        titleAlignment: card.designMetadata?.textStyle?.titleAlignment || 'center',
+        titleWeight: card.designMetadata?.textStyle?.titleWeight || 'bold',
+        descriptionColor: card.designMetadata?.textStyle?.descriptionColor || '#333333',
+        // Preserve any additional properties
+        ...card.designMetadata?.textStyle
+      },
+      marketMetadata: {
+        isPrintable: card.designMetadata?.marketMetadata?.isPrintable || false,
+        isForSale: card.designMetadata?.marketMetadata?.isForSale || false,
+        includeInCatalog: card.designMetadata?.marketMetadata?.includeInCatalog || false,
+        // Preserve any additional properties
+        ...card.designMetadata?.marketMetadata
+      },
+      cardMetadata: {
+        category: card.designMetadata?.cardMetadata?.category || 'general',
+        cardType: card.designMetadata?.cardMetadata?.cardType || 'standard',
+        series: card.designMetadata?.cardMetadata?.series || 'base',
+        // Preserve any additional properties
+        ...card.designMetadata?.cardMetadata
+      },
+      // Preserve any additional metadata properties
+      ...card.designMetadata
+    },
     createdAt: card.createdAt || new Date().toISOString(),
     updatedAt: card.updatedAt || new Date().toISOString(),
-    // Include any additional properties safely
-    ...(card.player && { player: card.player }),
-    ...(card.team && { team: card.team }),
-    ...(card.year && { year: card.year }),
-    ...(card.jersey && { jersey: card.jersey }),
-    ...(card.set && { set: card.set }),
-    ...(card.cardNumber && { cardNumber: card.cardNumber }),
-    ...(card.cardType && { cardType: card.cardType }),
-    ...(card.artist && { artist: card.artist }),
-    ...(card.backgroundColor && { backgroundColor: card.backgroundColor }),
-    ...(card.specialEffect && { specialEffect: card.specialEffect }),
   };
+
+  // Add optional properties safely
+  if (card.player) processedCard.player = card.player;
+  if (card.team) processedCard.team = card.team;
+  if (card.year) processedCard.year = card.year;
+  if (card.jersey) processedCard.jersey = card.jersey;
+  if (card.set) processedCard.set = card.set;
+  if (card.cardNumber) processedCard.cardNumber = card.cardNumber;
+  if (card.cardType) processedCard.cardType = card.cardType;
+  if (card.artist) processedCard.artist = card.artist;
+  if (card.backgroundColor) processedCard.backgroundColor = card.backgroundColor;
+  if (card.specialEffect) processedCard.specialEffect = card.specialEffect;
+
+  return processedCard;
 }
 
 // Export the ProcessedCard type for use in components
