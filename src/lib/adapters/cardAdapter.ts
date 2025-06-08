@@ -123,7 +123,37 @@ export function adaptToCard(cardData: Partial<Card> | CardData | any): Processed
   // Handle partial Card data with proper type enforcement
   const card = cardData as Partial<Card>;
   
-  // Create a properly structured designMetadata with all required defaults
+  // Get design metadata with defaults
+  const cardStyleDefaults = {
+    template: 'classic',
+    effect: 'none',
+    borderRadius: '8px',
+    borderColor: '#000000',
+    frameColor: '#000000',
+    frameWidth: 2,
+    shadowColor: 'rgba(0,0,0,0.2)',
+  };
+
+  const textStyleDefaults = {
+    titleColor: '#000000',
+    titleAlignment: 'center',
+    titleWeight: 'bold',
+    descriptionColor: '#333333',
+  };
+
+  const marketMetadataDefaults = {
+    isPrintable: false,
+    isForSale: false,
+    includeInCatalog: false,
+  };
+
+  const cardMetadataDefaults = {
+    category: 'general',
+    cardType: 'standard',
+    series: 'base',
+  };
+
+  // Create a properly structured ProcessedCard with explicit defaults
   const processedCard: ProcessedCard = {
     id: card.id || 'unknown',
     title: card.title || 'Untitled Card',
@@ -135,40 +165,60 @@ export function adaptToCard(cardData: Partial<Card> | CardData | any): Processed
     effects: card.effects || [],
     designMetadata: {
       cardStyle: {
-        template: card.designMetadata?.cardStyle?.template || 'classic',
-        effect: card.designMetadata?.cardStyle?.effect || 'none',
-        borderRadius: card.designMetadata?.cardStyle?.borderRadius || '8px',
-        borderColor: card.designMetadata?.cardStyle?.borderColor || '#000000',
-        frameColor: card.designMetadata?.cardStyle?.frameColor || '#000000',
-        frameWidth: card.designMetadata?.cardStyle?.frameWidth || 2,
-        shadowColor: card.designMetadata?.cardStyle?.shadowColor || 'rgba(0,0,0,0.2)',
+        template: card.designMetadata?.cardStyle?.template || cardStyleDefaults.template,
+        effect: card.designMetadata?.cardStyle?.effect || cardStyleDefaults.effect,
+        borderRadius: card.designMetadata?.cardStyle?.borderRadius || cardStyleDefaults.borderRadius,
+        borderColor: card.designMetadata?.cardStyle?.borderColor || cardStyleDefaults.borderColor,
+        frameColor: card.designMetadata?.cardStyle?.frameColor || cardStyleDefaults.frameColor,
+        frameWidth: card.designMetadata?.cardStyle?.frameWidth || cardStyleDefaults.frameWidth,
+        shadowColor: card.designMetadata?.cardStyle?.shadowColor || cardStyleDefaults.shadowColor,
         // Preserve any additional properties
-        ...card.designMetadata?.cardStyle
+        ...(card.designMetadata?.cardStyle ? Object.fromEntries(
+          Object.entries(card.designMetadata.cardStyle).filter(([key]) => 
+            !['template', 'effect', 'borderRadius', 'borderColor', 'frameColor', 'frameWidth', 'shadowColor'].includes(key)
+          )
+        ) : {})
       },
       textStyle: {
-        titleColor: card.designMetadata?.textStyle?.titleColor || '#000000',
-        titleAlignment: card.designMetadata?.textStyle?.titleAlignment || 'center',
-        titleWeight: card.designMetadata?.textStyle?.titleWeight || 'bold',
-        descriptionColor: card.designMetadata?.textStyle?.descriptionColor || '#333333',
+        titleColor: card.designMetadata?.textStyle?.titleColor || textStyleDefaults.titleColor,
+        titleAlignment: card.designMetadata?.textStyle?.titleAlignment || textStyleDefaults.titleAlignment,
+        titleWeight: card.designMetadata?.textStyle?.titleWeight || textStyleDefaults.titleWeight,
+        descriptionColor: card.designMetadata?.textStyle?.descriptionColor || textStyleDefaults.descriptionColor,
         // Preserve any additional properties
-        ...card.designMetadata?.textStyle
+        ...(card.designMetadata?.textStyle ? Object.fromEntries(
+          Object.entries(card.designMetadata.textStyle).filter(([key]) => 
+            !['titleColor', 'titleAlignment', 'titleWeight', 'descriptionColor'].includes(key)
+          )
+        ) : {})
       },
       marketMetadata: {
-        isPrintable: card.designMetadata?.marketMetadata?.isPrintable || false,
-        isForSale: card.designMetadata?.marketMetadata?.isForSale || false,
-        includeInCatalog: card.designMetadata?.marketMetadata?.includeInCatalog || false,
+        isPrintable: card.designMetadata?.marketMetadata?.isPrintable ?? marketMetadataDefaults.isPrintable,
+        isForSale: card.designMetadata?.marketMetadata?.isForSale ?? marketMetadataDefaults.isForSale,
+        includeInCatalog: card.designMetadata?.marketMetadata?.includeInCatalog ?? marketMetadataDefaults.includeInCatalog,
         // Preserve any additional properties
-        ...card.designMetadata?.marketMetadata
+        ...(card.designMetadata?.marketMetadata ? Object.fromEntries(
+          Object.entries(card.designMetadata.marketMetadata).filter(([key]) => 
+            !['isPrintable', 'isForSale', 'includeInCatalog'].includes(key)
+          )
+        ) : {})
       },
       cardMetadata: {
-        category: card.designMetadata?.cardMetadata?.category || 'general',
-        cardType: card.designMetadata?.cardMetadata?.cardType || 'standard',
-        series: card.designMetadata?.cardMetadata?.series || 'base',
+        category: card.designMetadata?.cardMetadata?.category || cardMetadataDefaults.category,
+        cardType: card.designMetadata?.cardMetadata?.cardType || cardMetadataDefaults.cardType,
+        series: card.designMetadata?.cardMetadata?.series || cardMetadataDefaults.series,
         // Preserve any additional properties
-        ...card.designMetadata?.cardMetadata
+        ...(card.designMetadata?.cardMetadata ? Object.fromEntries(
+          Object.entries(card.designMetadata.cardMetadata).filter(([key]) => 
+            !['category', 'cardType', 'series'].includes(key)
+          )
+        ) : {})
       },
       // Preserve any additional metadata properties
-      ...card.designMetadata
+      ...(card.designMetadata ? Object.fromEntries(
+        Object.entries(card.designMetadata).filter(([key]) => 
+          !['cardStyle', 'textStyle', 'marketMetadata', 'cardMetadata'].includes(key)
+        )
+      ) : {})
     },
     createdAt: card.createdAt || new Date().toISOString(),
     updatedAt: card.updatedAt || new Date().toISOString(),
