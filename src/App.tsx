@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/sonner';
 import { ThemeProvider } from '@/hooks/useTheme';
@@ -36,56 +36,54 @@ function App() {
       <ThemeProvider>
         <AuthProvider>
           <CardProvider>
-            <Router>
-              <div className="min-h-screen bg-background">
-                <Routes>
-                  {/* Home */}
-                  <Route path="/" element={<HomePage />} />
-                  
-                  {/* Authentication */}
-                  <Route path="/auth" element={<AuthPage />} />
-                  
-                  {/* Gallery and Card Viewing */}
-                  <Route path="/gallery" element={<CardGallery />} />
-                  <Route path="/card/:id" element={<CardViewerPage />} />
-                  
-                  {/* Account (Protected) */}
-                  <Route path="/account" element={
-                    <ProtectedRoute>
-                      <Account />
-                    </ProtectedRoute>
-                  } />
-                  
-                  {/* Team Routes */}
-                  {teamRoutes.map((route, index) => (
-                    <Route 
-                      key={`team-${index}`} 
-                      path={route.path} 
-                      element={route.element} 
-                    />
-                  ))}
-                  
-                  {/* Town Routes */}
-                  {townRoutes.map((route, index) => (
-                    <Route 
-                      key={`town-${index}`} 
-                      path={route.path} 
-                      element={route.element} 
-                    />
-                  ))}
-                  
-                  {/* Oakland Routes */}
-                  {oaklandRoutes.map((route, index) => (
-                    <Route 
-                      key={`oakland-${index}`} 
-                      path={route.path} 
-                      element={route.element} 
-                    />
-                  ))}
-                </Routes>
-                <Toaster />
-              </div>
-            </Router>
+            <div className="min-h-screen bg-background">
+              <Routes>
+                {/* Home */}
+                <Route path="/" element={<HomePage />} />
+                
+                {/* Authentication */}
+                <Route path="/auth" element={<AuthPage />} />
+                
+                {/* Gallery and Card Viewing */}
+                <Route path="/gallery" element={<CardGallery />} />
+                <Route path="/card/:id" element={<CardViewerPage />} />
+                
+                {/* Account (Protected) */}
+                <Route path="/account" element={
+                  <ProtectedRoute>
+                    <Account />
+                  </ProtectedRoute>
+                } />
+                
+                {/* Team Routes */}
+                {teamRoutes.map((route, index) => (
+                  <Route 
+                    key={`team-${index}`} 
+                    path={route.path} 
+                    element={route.element} 
+                  />
+                ))}
+                
+                {/* Town Routes */}
+                {townRoutes.map((route, index) => (
+                  <Route 
+                    key={`town-${index}`} 
+                    path={route.path} 
+                    element={route.element} 
+                  />
+                ))}
+                
+                {/* Oakland Routes */}
+                {oaklandRoutes.map((route, index) => (
+                  <Route 
+                    key={`oakland-${index}`} 
+                    path={route.path} 
+                    element={route.element} 
+                  />
+                ))}
+              </Routes>
+              <Toaster />
+            </div>
           </CardProvider>
         </AuthProvider>
       </ThemeProvider>
