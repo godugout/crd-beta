@@ -1,9 +1,11 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ArrowLeft, Home, Plus, LogIn, LogOut } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/context/auth/AuthProvider';
 import { OaklandTemplate } from '@/lib/types/oaklandTypes';
 
 interface TemplatePreviewProps {
@@ -92,6 +94,8 @@ const TemplatePreview: React.FC<TemplatePreviewProps> = ({ template, onSelect })
 
 const OaklandTemplateLibrary: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
 
   // Sample Oakland templates based on the database structure
   const oaklandTemplates: OaklandTemplate[] = [
@@ -206,8 +210,70 @@ const OaklandTemplateLibrary: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-oakland-primary p-6">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-oakland-primary">
+      {/* Navigation Header */}
+      <header className="border-b border-green-600/30 bg-black/20 backdrop-blur-sm">
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              onClick={() => navigate('/')}
+              className="text-white hover:bg-gray-700 flex items-center gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to OAK.FAN
+            </Button>
+            <div className="hidden sm:block">
+              <h1 className="text-xl font-display font-bold text-white">Template Library</h1>
+              <p className="text-yellow-400 text-sm font-nostalgia">Choose your Oakland style</p>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-4">
+            <Button 
+              onClick={() => navigate('/')}
+              variant="outline"
+              size="sm"
+              className="border-gray-600 text-gray-300 hover:bg-gray-700"
+            >
+              <Home className="h-4 w-4 mr-2" />
+              Home
+            </Button>
+            {user ? (
+              <>
+                <Button 
+                  onClick={() => navigate('/oakland/create')}
+                  className="btn-oakland-primary"
+                  size="sm"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Memory
+                </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={logout}
+                  size="sm"
+                  className="border-gray-600 text-white hover:bg-gray-700"
+                >
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Sign Out
+                </Button>
+              </>
+            ) : (
+              <Button 
+                onClick={() => navigate('/auth')}
+                className="btn-oakland-primary"
+                size="sm"
+              >
+                <LogIn className="h-4 w-4 mr-2" />
+                Join
+              </Button>
+            )}
+          </div>
+        </div>
+      </header>
+
+      <div className="max-w-7xl mx-auto p-6">
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-oakland-hero font-protest text-white mb-4">
