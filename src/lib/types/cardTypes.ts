@@ -59,8 +59,8 @@ export interface DesignMetadata {
   };
   textStyle?: {
     titleColor?: string;
-    titleAlignment?: string; // Make more flexible - any string
-    titleWeight?: string; // Make more flexible - any string
+    titleAlignment?: string;
+    titleWeight?: string;
     descriptionColor?: string;
     backgroundColor?: string;
     [key: string]: any;
