@@ -84,3 +84,18 @@ export interface OaklandEvent {
   era?: 'early_years' | 'dynasty_70s' | 'bash_brothers' | 'moneyball' | 'playoff_runs' | 'farewell';
   created_at: string;
 }
+
+export interface AudioMemory {
+  id: string;
+  user_id: string;
+  title: string;
+  description?: string;
+  audio_url: string;
+  duration: number;
+  transcript?: string;
+  memory_type: 'game_reaction' | 'story' | 'chant' | 'protest_speech' | 'celebration';
+  tags: string[];
+  cassette_label: string;
+  plays_count: number;
+  created_at: string;
+}
