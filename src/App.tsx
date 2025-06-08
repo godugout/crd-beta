@@ -1,4 +1,3 @@
-
 import { Suspense, lazy } from 'react';
 import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
@@ -7,7 +6,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { CardProvider } from '@/context/CardContext';
 import { CardEnhancedProvider } from '@/context/CardEnhancedContext';
 import { AuthProvider } from '@/context/auth/AuthProvider';
-import { oaklandRoutes } from '@/routes/oakland';
+import { oaklandRoutes, teamRoutes } from '@/routes/oakland';
 
 // Import Oakland theme CSS
 import '@/styles/oakland-theme.css';
@@ -65,6 +64,16 @@ function App() {
                       </Suspense>
                     } 
                   />
+                  
+                  {/* Legacy Oakland routes - redirect to new team routes */}
+                  <Route 
+                    path="/oakland" 
+                    element={
+                      <Suspense fallback={<LoadingSpinner />}>
+                        <OaklandHomepage />
+                      </Suspense>
+                    } 
+                  />
                   <Route 
                     path="/oakland/create" 
                     element={
@@ -73,6 +82,7 @@ function App() {
                       </Suspense>
                     } 
                   />
+                  
                   <Route 
                     path="/gallery" 
                     element={
@@ -98,7 +108,7 @@ function App() {
                     } 
                   />
                   <Route 
-                    path="/viewer" 
+                    path="/viewer/:id" 
                     element={
                       <Suspense fallback={<LoadingSpinner />}>
                         <ImmersiveCardViewerPage />
@@ -106,12 +116,17 @@ function App() {
                     } 
                   />
                   
-                  {/* Redirect all create/editor paths to Oakland Memory Creator */}
+                  {/* Redirect all create/editor paths to Oakland Memory Creator for now */}
                   <Route path="/create" element={<Navigate to="/oakland/create" replace />} />
                   <Route path="/editor" element={<Navigate to="/oakland/create" replace />} />
                   <Route path="/editor/:id" element={<Navigate to="/oakland/create" replace />} />
                   
-                  {/* Oakland routes */}
+                  {/* Import team routes */}
+                  {teamRoutes.map((route, index) => (
+                    <Route key={index} path={route.path} element={route.element} />
+                  ))}
+                  
+                  {/* Keep existing Oakland routes for backward compatibility */}
                   {oaklandRoutes.map((route, index) => (
                     <Route key={index} path={route.path} element={route.element} />
                   ))}

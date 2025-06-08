@@ -1,38 +1,15 @@
 
 import React from 'react';
-import PageLayout from '@/components/navigation/PageLayout';
-import OaklandPromo from './OaklandPromo';
-import OaklandFeaturesSection from './OaklandFeaturesSection';
-import TeamInfoSection from './TeamInfoSection';
-import TeamHeader from './TeamHeader';
+import { Team } from '@/lib/types/teamTypes';
+import OaklandHomepage from '@/components/oakland/OaklandHomepage';
 
 interface OaklandTeamPageProps {
-  team: {
-    name: string;
-    logo?: string;
-    primaryColor: string;
-    secondaryColor: string;
-    description: string;
-  };
+  team: Team;
 }
 
 const OaklandTeamPage: React.FC<OaklandTeamPageProps> = ({ team }) => {
-  return (
-    <PageLayout title={team.name} description={team.description}>
-      <div className="container mx-auto px-4 py-8">
-        <TeamHeader 
-          name={team.name} 
-          description={team.description}
-          logo={team.logo} 
-          primaryColor={team.primaryColor}
-        />
-        
-        <OaklandPromo primaryColor={team.primaryColor} />
-        <OaklandFeaturesSection primaryColor={team.primaryColor} />
-        <TeamInfoSection teamName={team.name} />
-      </div>
-    </PageLayout>
-  );
+  // Use the existing Oakland homepage but pass team context
+  return <OaklandHomepage team={team} />;
 };
 
 export default OaklandTeamPage;
