@@ -5,6 +5,7 @@ import CardDetail from '@/pages/CardDetail';
 import UnifiedCardGalleryPage from '@/pages/UnifiedCardGalleryPage';
 import CardDetector from '@/pages/CardDetector';
 import ImmersiveCardViewerPage from '@/pages/ImmersiveCardViewerPage';
+import StreamlinedCardCreator from '@/pages/StreamlinedCardCreator';
 
 export const cardRoutes: RouteObject[] = [
   {
@@ -14,6 +15,10 @@ export const cardRoutes: RouteObject[] = [
   {
     path: "/gallery", 
     element: <UnifiedCardGalleryPage />,
+  },
+  {
+    path: "/cards/create",
+    element: <StreamlinedCardCreator />,
   },
   {
     path: "/cards/:id",

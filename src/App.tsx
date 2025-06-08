@@ -19,6 +19,7 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { teamRoutes } from '@/routes/teamRoutes';
 import { townRoutes } from '@/routes/townRoutes';
 import { oaklandRoutes } from '@/routes/oakland';
+import { cardRoutes } from '@/routes/cardRoutes';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -54,6 +55,15 @@ function App() {
                     <Account />
                   </ProtectedRoute>
                 } />
+                
+                {/* Card Routes */}
+                {cardRoutes.map((route, index) => (
+                  <Route 
+                    key={`card-${index}`} 
+                    path={route.path} 
+                    element={route.element} 
+                  />
+                ))}
                 
                 {/* Team Routes */}
                 {teamRoutes.map((route, index) => (
