@@ -2,7 +2,7 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { useTeam } from '@/lib/hooks/useTeam';
-import OaklandMemoryCreator from '@/components/oakland/OaklandMemoryCreator';
+import OaklandMemoryBuilder from '@/components/oakland/OaklandMemoryBuilder';
 
 const TeamMemoryCreator: React.FC = () => {
   const { teamSlug } = useParams<{ teamSlug: string }>();
@@ -16,9 +16,9 @@ const TeamMemoryCreator: React.FC = () => {
     );
   }
 
-  // For Oakland Athletics, use the specialized Oakland Memory Creator
+  // For Oakland Athletics, use the specialized Oakland Memory Builder
   if (team?.slug === 'oakland-athletics') {
-    return <OaklandMemoryCreator />;
+    return <OaklandMemoryBuilder />;
   }
 
   // For other teams, show a coming soon message for now
@@ -28,6 +28,9 @@ const TeamMemoryCreator: React.FC = () => {
         <h1 className="text-4xl font-bold text-white mb-4">Memory Creator</h1>
         <p className="text-gray-400 mb-8">
           Memory creation for {team?.name} is coming soon!
+        </p>
+        <p className="text-gray-500 text-sm">
+          Oakland fans get the full experience first as our pilot program.
         </p>
       </div>
     </div>
