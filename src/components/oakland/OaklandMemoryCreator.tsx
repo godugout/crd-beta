@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,14 +7,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/context/auth/AuthProvider';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
 import { OaklandMemory, OaklandTemplate, OaklandExpression } from '@/lib/types/oaklandTypes';
 import { CalendarDays, MapPin, Users, Heart, Megaphone, Camera } from 'lucide-react';
 
 const OaklandMemoryCreator: React.FC = () => {
-  const { user, loading: authLoading } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [templates, setTemplates] = useState<OaklandTemplate[]>([]);
@@ -55,7 +54,13 @@ const OaklandMemoryCreator: React.FC = () => {
         .select('*')
         .order('usage_count', { ascending: false });
       
-      if (templatesData) setTemplates(templatesData);
+      if (templatesData) {
+        setTemplates(templatesData.map(template => ({
+          ...template,
+          category: template.category as OaklandTemplate['category'],
+          era: template.era as OaklandTemplate['era']
+        })));
+      }
 
       // Fetch expressions
       const { data: expressionsData } = await supabase
@@ -64,7 +69,15 @@ const OaklandMemoryCreator: React.FC = () => {
         .order('usage_count', { ascending: false })
         .limit(50);
       
-      if (expressionsData) setExpressions(expressionsData);
+      if (expressionsData) {
+        setExpressions(expressionsData.map(expression => ({
+          ...expression,
+          category: expression.category as OaklandExpression['category'],
+          source: expression.source as OaklandExpression['source'],
+          decade: expression.decade as OaklandExpression['decade'],
+          era: expression.era as OaklandExpression['era']
+        })));
+      }
     };
 
     fetchData();

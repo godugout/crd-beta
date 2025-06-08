@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/context/auth/AuthProvider';
 import { useNavigate, Link } from 'react-router-dom';
 import { OaklandMemory, OaklandExpression, OaklandEvent } from '@/lib/types/oaklandTypes';
 import { 
@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 
 const OaklandHomepage: React.FC = () => {
-  const { user, signOut } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [memories, setMemories] = useState<OaklandMemory[]>([]);
   const [expressions, setExpressions] = useState<OaklandExpression[]>([]);
@@ -43,7 +43,15 @@ const OaklandHomepage: React.FC = () => {
         .order('created_at', { ascending: false })
         .limit(6);
 
-      if (memoriesData) setMemories(memoriesData);
+      if (memoriesData) {
+        // Type assertion to handle database string types vs our strict types
+        setMemories(memoriesData.map(memory => ({
+          ...memory,
+          memory_type: memory.memory_type as OaklandMemory['memory_type'],
+          era: memory.era as OaklandMemory['era'],
+          visibility: memory.visibility as OaklandMemory['visibility']
+        })));
+      }
 
       // Fetch popular expressions
       const { data: expressionsData } = await supabase
@@ -52,7 +60,15 @@ const OaklandHomepage: React.FC = () => {
         .order('usage_count', { ascending: false })
         .limit(8);
 
-      if (expressionsData) setExpressions(expressionsData);
+      if (expressionsData) {
+        setExpressions(expressionsData.map(expression => ({
+          ...expression,
+          category: expression.category as OaklandExpression['category'],
+          source: expression.source as OaklandExpression['source'],
+          decade: expression.decade as OaklandExpression['decade'],
+          era: expression.era as OaklandExpression['era']
+        })));
+      }
 
       // Fetch featured events
       const { data: eventsData } = await supabase
@@ -62,7 +78,13 @@ const OaklandHomepage: React.FC = () => {
         .order('event_date', { ascending: false })
         .limit(4);
 
-      if (eventsData) setEvents(eventsData);
+      if (eventsData) {
+        setEvents(eventsData.map(event => ({
+          ...event,
+          event_type: event.event_type as OaklandEvent['event_type'],
+          era: event.era as OaklandEvent['era']
+        })));
+      }
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
@@ -112,7 +134,7 @@ const OaklandHomepage: React.FC = () => {
                 </Button>
                 <Button 
                   variant="outline" 
-                  onClick={signOut}
+                  onClick={logout}
                   className="border-gray-600 text-white hover:bg-gray-700"
                 >
                   <LogOut className="h-4 w-4 mr-2" />

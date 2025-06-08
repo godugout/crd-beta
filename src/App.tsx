@@ -6,7 +6,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { CardProvider } from '@/context/CardContext';
 import { CardEnhancedProvider } from '@/context/CardEnhancedContext';
-import { AuthProvider } from '@/hooks/useAuth';
+import { AuthProvider } from '@/context/auth/AuthProvider';
 import { oaklandRoutes } from '@/routes/oakland';
 
 // Lazy load components
