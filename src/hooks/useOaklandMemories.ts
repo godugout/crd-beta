@@ -37,30 +37,61 @@ export const useOaklandMemories = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchMemories = async () => {
-      try {
-        setLoading(true);
-        const { data, error } = await supabase
-          .from('oakland_memories')
-          .select('*')
-          .order('created_at', { ascending: false });
+  const fetchMemories = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('oakland_memories')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-        if (error) {
-          throw error;
-        }
-
-        setMemories(data || []);
-      } catch (err) {
-        console.error('Error fetching Oakland memories:', err);
-        setError(err instanceof Error ? err.message : 'Failed to load memories');
-      } finally {
-        setLoading(false);
+      if (error) {
+        throw error;
       }
-    };
 
+      // Transform the data to match our interface
+      const transformedMemories: OaklandMemory[] = (data || []).map(memory => ({
+        id: memory.id,
+        user_id: memory.user_id,
+        title: memory.title,
+        description: memory.description,
+        memory_type: memory.memory_type,
+        game_date: memory.game_date,
+        opponent: memory.opponent,
+        score: memory.score,
+        location: memory.location,
+        section: memory.section,
+        era: memory.era,
+        image_url: memory.image_url,
+        audio_url: memory.audio_url,
+        video_url: memory.video_url,
+        attendees: memory.attendees || [],
+        personal_significance: memory.personal_significance,
+        historical_context: memory.historical_context,
+        emotions: memory.emotions || [],
+        fan_expressions: memory.fan_expressions || [],
+        tags: memory.tags || [],
+        visibility: memory.visibility,
+        template_id: memory.template_id,
+        effect_settings: (memory.effect_settings as Record<string, any>) || {},
+        is_featured: memory.is_featured,
+        community_reactions: (memory.community_reactions as Record<string, any>) || {},
+        created_at: memory.created_at,
+        updated_at: memory.updated_at,
+      }));
+
+      setMemories(transformedMemories);
+    } catch (err) {
+      console.error('Error fetching Oakland memories:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load memories');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchMemories();
   }, []);
 
-  return { memories, loading, error, refetch: () => fetchMemories() };
+  return { memories, loading, error, refetch: fetchMemories };
 };
