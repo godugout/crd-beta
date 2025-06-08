@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -34,7 +35,7 @@ const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) 
       console.log('FullscreenViewer: Loading card with ID:', cardId);
       
       // First try to find card directly from sampleCards
-      let foundCard = sampleCards?.find(c => c.id === cardId);
+      let foundCard: Card | undefined = sampleCards?.find(c => c.id === cardId);
       
       // If not found in sampleCards, try the cards context
       if (!foundCard) {

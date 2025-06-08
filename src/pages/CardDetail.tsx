@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -35,7 +36,7 @@ const CardDetail = () => {
     
     console.log('CardDetail: Rendering for ID:', id);
     
-    let foundCard = sampleCards.find(c => c.id === id);
+    let foundCard: Card | undefined = sampleCards.find(c => c.id === id);
     
     if (!foundCard) {
       console.log('CardDetail: Card not found in sampleCards, checking context for ID:', id);
