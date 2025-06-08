@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -6,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Team } from '@/lib/types/teamTypes';
 import OaklandHomepage from '@/components/oakland/OaklandHomepage';
-import { Plus, Gallery, BookOpen, Mic, MessageSquare } from 'lucide-react';
+import { Plus, Images, BookOpen, Mic, MessageSquare } from 'lucide-react';
 
 interface OaklandTeamPageProps {
   team: Team;
@@ -50,7 +49,7 @@ const OaklandTeamPage: React.FC<OaklandTeamPageProps> = ({ team }) => {
             <Card className="bg-gradient-to-br from-blue-800 to-blue-900 border-blue-600/30 hover:scale-105 transition-transform">
               <CardHeader className="text-center">
                 <div className="mx-auto w-16 h-16 bg-yellow-400 rounded-full flex items-center justify-center mb-4">
-                  <Gallery className="h-8 w-8 text-blue-900" />
+                  <Images className="h-8 w-8 text-blue-900" />
                 </div>
                 <CardTitle className="text-white">Memory Gallery</CardTitle>
                 <CardDescription className="text-gray-300">
