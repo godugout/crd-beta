@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -7,7 +6,7 @@ import { ArrowLeft, Eye, Smartphone, Share2, Download } from 'lucide-react';
 import { Card } from '@/lib/types/cardTypes';
 import { sampleCards } from '@/lib/data/sampleCards';
 import { toast } from '@/hooks/use-toast';
-import { adaptToCard } from '@/lib/adapters/cardAdapter';
+import { adaptToCard, ProcessedCard } from '@/lib/adapters/cardAdapter';
 import PageLayout from '@/components/navigation/PageLayout';
 
 const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1518770660439-4636190af475';
@@ -18,7 +17,7 @@ const CardDetail = () => {
   const { cards, getCard } = useCards();
   const [showViewer, setShowViewer] = useState(false);
   const [viewMode, setViewMode] = useState<'standard' | 'immersive' | 'ar'>('standard');
-  const [resolvedCard, setResolvedCard] = useState<Card | null>(null);
+  const [resolvedCard, setResolvedCard] = useState<ProcessedCard | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
   
   useEffect(() => {

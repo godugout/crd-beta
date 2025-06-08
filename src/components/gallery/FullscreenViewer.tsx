@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -6,7 +5,7 @@ import { useCards } from '@/hooks/useCards';
 import { Card } from '@/lib/types/cardTypes';
 import { sampleCards } from '@/lib/data/sampleCards';
 import { useToast } from '@/hooks/use-toast';
-import { adaptToCard } from '@/lib/adapters/cardAdapter';
+import { adaptToCard, ProcessedCard } from '@/lib/adapters/cardAdapter';
 
 interface FullscreenViewerProps {
   cardId: string;
@@ -15,7 +14,7 @@ interface FullscreenViewerProps {
 
 const FullscreenViewer: React.FC<FullscreenViewerProps> = ({ cardId, onClose }) => {
   const { cards, getCard } = useCards();
-  const [currentCard, setCurrentCard] = useState<Card | null>(null);
+  const [currentCard, setCurrentCard] = useState<ProcessedCard | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [validImageUrl, setValidImageUrl] = useState<string>('/images/card-placeholder.png');

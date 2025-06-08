@@ -3,10 +3,69 @@ import { Card } from '@/lib/types/cardTypes';
 import { CardData } from '@/lib/types/CardData';
 
 /**
- * Adapter function to convert various card data formats to the base Card type
+ * Properly typed Card interface for consistent usage
+ */
+interface ProcessedCard {
+  id: string;
+  title: string;
+  description: string;
+  imageUrl: string;
+  thumbnailUrl: string;
+  userId: string;
+  tags: string[];
+  effects: string[];
+  designMetadata: {
+    cardStyle: {
+      template: string;
+      effect: string;
+      borderRadius: string;
+      borderColor: string;
+      frameColor: string;
+      frameWidth: number;
+      shadowColor: string;
+      [key: string]: any;
+    };
+    textStyle: {
+      titleColor: string;
+      titleAlignment: string;
+      titleWeight: string;
+      descriptionColor: string;
+      [key: string]: any;
+    };
+    marketMetadata: {
+      isPrintable: boolean;
+      isForSale: boolean;
+      includeInCatalog: boolean;
+      [key: string]: any;
+    };
+    cardMetadata: {
+      category: string;
+      cardType: string;
+      series: string;
+      [key: string]: any;
+    };
+    [key: string]: any;
+  };
+  createdAt: string;
+  updatedAt: string;
+  // Include optional properties from Card
+  player?: string;
+  team?: string;
+  year?: string;
+  jersey?: string;
+  set?: string;
+  cardNumber?: string;
+  artist?: string;
+  backgroundColor?: string;
+  specialEffect?: string;
+  [key: string]: any;
+}
+
+/**
+ * Adapter function to convert various card data formats to a properly typed ProcessedCard
  * Ensures all required fields are present with sensible defaults
  */
-export function adaptToCard(cardData: Partial<Card> | CardData | any): Card {
+export function adaptToCard(cardData: Partial<Card> | CardData | any): ProcessedCard {
   // Handle CardData type conversion
   if ('name' in cardData && 'team' in cardData) {
     const data = cardData as CardData;
@@ -65,7 +124,7 @@ export function adaptToCard(cardData: Partial<Card> | CardData | any): Card {
   const card = cardData as Partial<Card>;
   
   // Create a properly structured designMetadata with all required defaults
-  const designMetadata: any = {
+  const designMetadata = {
     cardStyle: {
       template: card.designMetadata?.cardStyle?.template || 'classic',
       effect: card.designMetadata?.cardStyle?.effect || 'none',
@@ -128,3 +187,6 @@ export function adaptToCard(cardData: Partial<Card> | CardData | any): Card {
     ...(card.specialEffect && { specialEffect: card.specialEffect }),
   };
 }
+
+// Export the ProcessedCard type for use in components
+export type { ProcessedCard };
