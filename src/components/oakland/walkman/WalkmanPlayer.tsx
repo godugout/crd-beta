@@ -88,6 +88,14 @@ const WalkmanPlayer: React.FC<WalkmanPlayerProps> = ({ audioMemories = [] }) => 
     };
   }, [currentTape]);
 
+  // Set volume programmatically when volume state changes
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (audio) {
+      audio.volume = volume;
+    }
+  }, [volume]);
+
   const handlePlay = () => {
     const audio = audioRef.current;
     if (!audio || !currentTape) return;
@@ -169,7 +177,6 @@ const WalkmanPlayer: React.FC<WalkmanPlayerProps> = ({ audioMemories = [] }) => 
           ref={audioRef}
           src={currentTape.audio_url}
           preload="metadata"
-          volume={volume}
         />
       )}
     </>
