@@ -18,7 +18,9 @@ import {
   Camera,
   LogIn,
   LogOut,
-  Archive
+  Archive,
+  Palette,
+  Layout
 } from 'lucide-react';
 
 const OaklandHomepage: React.FC = () => {
@@ -113,28 +115,52 @@ const OaklandHomepage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-900 via-gray-900 to-yellow-900 flex items-center justify-center">
-        <div className="text-white text-xl">Loading Oakland memories...</div>
+      <div className="min-h-screen bg-oakland-primary flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-6xl mb-4 oakland-pulse-effect">⚾</div>
+          <div className="text-white text-xl font-display">Loading Oakland memories...</div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-900 via-gray-900 to-yellow-900">
+    <div className="min-h-screen bg-oakland-primary">
+      {/* Import Oakland CSS */}
+      <link rel="stylesheet" href="/src/styles/oakland-theme.css" />
+      
       {/* Header */}
       <header className="border-b border-green-600/30 bg-black/20 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-white">OAK.FAN</h1>
-            <p className="text-yellow-400 text-sm">We Stayed in the Stands</p>
+            <h1 className="text-3xl font-display font-bold text-white">OAK.FAN</h1>
+            <p className="text-yellow-400 text-sm font-nostalgia">We Stayed in the Stands</p>
           </div>
           
           <div className="flex items-center gap-4">
+            <Button 
+              onClick={() => navigate('/oakland/design-system')}
+              variant="outline"
+              size="sm"
+              className="border-gray-600 text-gray-300 hover:bg-gray-700"
+            >
+              <Palette className="h-4 w-4 mr-2" />
+              Design System
+            </Button>
+            <Button 
+              onClick={() => navigate('/oakland/templates')}
+              variant="outline"
+              size="sm"
+              className="border-gray-600 text-gray-300 hover:bg-gray-700"
+            >
+              <Layout className="h-4 w-4 mr-2" />
+              Templates
+            </Button>
             {user ? (
               <>
                 <Button 
                   onClick={() => navigate('/oakland/create')}
-                  className="bg-green-600 hover:bg-green-700"
+                  className="btn-oakland-primary"
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Create Memory
@@ -151,7 +177,7 @@ const OaklandHomepage: React.FC = () => {
             ) : (
               <Button 
                 onClick={() => navigate('/auth')}
-                className="bg-yellow-600 hover:bg-yellow-700"
+                className="btn-oakland-primary"
               >
                 <LogIn className="h-4 w-4 mr-2" />
                 Join the Community
@@ -162,15 +188,18 @@ const OaklandHomepage: React.FC = () => {
       </header>
 
       {/* Hero Section */}
-      <section className="py-16 px-4">
-        <div className="container mx-auto text-center">
-          <h2 className="text-5xl font-bold text-white mb-4">
+      <section className="py-16 px-4 relative overflow-hidden">
+        {/* Background Effect */}
+        <div className="absolute inset-0 oakland-shine-effect opacity-30" />
+        
+        <div className="container mx-auto text-center relative z-10">
+          <h2 className="text-oakland-hero font-protest text-white mb-4">
             We Stayed in the Stands
           </h2>
-          <p className="text-xl text-yellow-400 mb-6">
+          <p className="text-xl text-yellow-400 font-display mb-6">
             Because no one can relocate what we made together
           </p>
-          <p className="text-gray-300 text-lg max-w-3xl mx-auto mb-8">
+          <p className="text-gray-300 text-lg max-w-3xl mx-auto mb-8 font-body">
             OAK.FAN is a digital sanctuary for Oakland A's fans—a community-powered platform 
             that transforms displaced fan energy into creative memories, protest art, and digital collectibles.
           </p>
@@ -179,7 +208,7 @@ const OaklandHomepage: React.FC = () => {
             <Button 
               size="lg"
               onClick={() => navigate(user ? '/oakland/create' : '/auth')}
-              className="bg-green-600 hover:bg-green-700"
+              className="btn-oakland-primary"
             >
               <Camera className="h-5 w-5 mr-2" />
               {user ? 'Create a Memory' : 'Join & Create'}
@@ -201,8 +230,8 @@ const OaklandHomepage: React.FC = () => {
       <section className="py-16 px-4">
         <div className="container mx-auto">
           <div className="flex items-center justify-between mb-8">
-            <h3 className="text-3xl font-bold text-white">Latest Fan Memories</h3>
-            <Link to="/gallery" className="text-yellow-400 hover:text-yellow-300">
+            <h3 className="text-oakland-display font-display text-white">Latest Fan Memories</h3>
+            <Link to="/gallery" className="text-yellow-400 hover:text-yellow-300 font-display">
               View All →
             </Link>
           </div>
@@ -211,17 +240,17 @@ const OaklandHomepage: React.FC = () => {
             {memories.map((memory) => {
               const era = getEraDisplay(memory.era);
               return (
-                <Card key={memory.id} className="bg-gray-800/80 backdrop-blur-sm border-green-600/30 hover:border-green-500/50 transition-colors">
+                <Card key={memory.id} className="oakland-memory-card">
                   <CardHeader>
                     <div className="flex items-center justify-between">
-                      <Badge variant="outline" className="border-yellow-500 text-yellow-400">
+                      <Badge className="oakland-era-badge">
                         {era.icon} {era.label}
                       </Badge>
-                      <Badge variant="outline" className="border-green-500 text-green-400">
+                      <Badge variant="outline" className="border-green-500 text-green-400 font-display">
                         {memory.memory_type}
                       </Badge>
                     </div>
-                    <CardTitle className="text-white">{memory.title}</CardTitle>
+                    <CardTitle className="text-white font-display">{memory.title}</CardTitle>
                     {memory.description && (
                       <CardDescription className="text-gray-300">
                         {memory.description.substring(0, 100)}...
@@ -251,7 +280,7 @@ const OaklandHomepage: React.FC = () => {
                     {memory.emotions.length > 0 && (
                       <div className="flex flex-wrap gap-1 mt-3">
                         {memory.emotions.slice(0, 3).map((emotion) => (
-                          <Badge key={emotion} variant="secondary" className="text-xs">
+                          <Badge key={emotion} className={`oakland-emotion-badge ${emotion}`}>
                             {emotion}
                           </Badge>
                         ))}
@@ -269,21 +298,21 @@ const OaklandHomepage: React.FC = () => {
       <section className="py-16 px-4 bg-black/20">
         <div className="container mx-auto">
           <div className="text-center mb-8">
-            <h3 className="text-3xl font-bold text-white mb-4">
+            <h3 className="text-oakland-display font-display text-white mb-4">
               <Megaphone className="inline h-8 w-8 mr-2 text-yellow-400" />
               The Voice of Oakland
             </h3>
-            <p className="text-gray-300">Chants, cheers, and expressions that define Oakland fandom</p>
+            <p className="text-gray-300 font-body">Chants, cheers, and expressions that define Oakland fandom</p>
           </div>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
             {expressions.map((expression) => (
-              <Card key={expression.id} className="bg-gray-800/60 border-gray-600 hover:border-yellow-500/50 transition-colors">
+              <Card key={expression.id} className="oakland-memory-card">
                 <CardContent className="p-4 text-center">
-                  <div className="text-yellow-400 font-medium mb-2">
+                  <div className="text-yellow-400 font-medium mb-2 font-nostalgia">
                     "{expression.text_content}"
                   </div>
-                  <Badge variant="outline" className="text-xs">
+                  <Badge className={`oakland-emotion-badge ${expression.category} text-xs`}>
                     {expression.category}
                   </Badge>
                   {expression.decade && (
@@ -301,7 +330,7 @@ const OaklandHomepage: React.FC = () => {
       {/* Historical Events */}
       <section className="py-16 px-4">
         <div className="container mx-auto">
-          <h3 className="text-3xl font-bold text-white mb-8 text-center">
+          <h3 className="text-oakland-display font-display text-white mb-8 text-center">
             Oakland Baseball History
           </h3>
           
@@ -309,17 +338,17 @@ const OaklandHomepage: React.FC = () => {
             {events.map((event) => {
               const era = getEraDisplay(event.era || 'early_years');
               return (
-                <Card key={event.id} className="bg-gray-800/80 backdrop-blur-sm border-green-600/30">
+                <Card key={event.id} className="oakland-memory-card">
                   <CardHeader>
                     <div className="flex items-center justify-between">
-                      <Badge variant="outline" className="border-yellow-500 text-yellow-400">
+                      <Badge className="oakland-era-badge">
                         {era.icon} {era.label}
                       </Badge>
-                      <Badge className="bg-green-600">
+                      <Badge className="bg-green-600 font-display">
                         {event.event_type}
                       </Badge>
                     </div>
-                    <CardTitle className="text-white">{event.title}</CardTitle>
+                    <CardTitle className="text-white font-display">{event.title}</CardTitle>
                     {event.description && (
                       <CardDescription className="text-gray-300">
                         {event.description}
@@ -344,10 +373,10 @@ const OaklandHomepage: React.FC = () => {
       {/* Footer */}
       <footer className="border-t border-green-600/30 bg-black/40 py-8 px-4">
         <div className="container mx-auto text-center">
-          <p className="text-gray-400 mb-4">
+          <p className="text-gray-400 mb-4 font-body">
             Preserving Oakland baseball memories, one story at a time.
           </p>
-          <div className="flex justify-center gap-4 text-sm">
+          <div className="flex justify-center gap-4 text-sm font-display">
             <span className="text-green-400">🌱 Preserve</span>
             <span className="text-red-400">✊ Protest</span>
             <span className="text-yellow-400">🎨 Create</span>

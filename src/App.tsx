@@ -9,6 +9,9 @@ import { CardEnhancedProvider } from '@/context/CardEnhancedContext';
 import { AuthProvider } from '@/context/auth/AuthProvider';
 import { oaklandRoutes } from '@/routes/oakland';
 
+// Import Oakland theme CSS
+import '@/styles/oakland-theme.css';
+
 // Lazy load components
 const ImmersiveCardViewerPage = lazy(() => import('@/pages/ImmersiveCardViewerPage'));
 const UnifiedCardEditor = lazy(() => import('@/pages/UnifiedCardEditor'));
@@ -29,8 +32,11 @@ const queryClient = new QueryClient({
 });
 
 const LoadingSpinner = () => (
-  <div className="flex items-center justify-center h-screen">
-    <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
+  <div className="flex items-center justify-center h-screen bg-oakland-primary">
+    <div className="text-center">
+      <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-yellow-500 mb-4"></div>
+      <div className="text-white font-display">Loading...</div>
+    </div>
   </div>
 );
 
