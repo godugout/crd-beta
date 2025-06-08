@@ -1,7 +1,6 @@
 
 import { useState, useMemo } from 'react';
-import { OaklandMemory } from './useOaklandMemories';
-import { isValid, parse } from 'date-fns';
+import { OaklandMemory } from '@/hooks/useOaklandMemories';
 
 export const useOaklandMemoryFilters = (memories: OaklandMemory[]) => {
   const [filterType, setFilterType] = useState<string | null>(null);
@@ -11,70 +10,88 @@ export const useOaklandMemoryFilters = (memories: OaklandMemory[]) => {
   const [filterDateFrom, setFilterDateFrom] = useState<string | null>(null);
   const [filterDateTo, setFilterDateTo] = useState<string | null>(null);
   const [showHistoricalOnly, setShowHistoricalOnly] = useState(false);
-  
-  const allOpponents = useMemo(() => Array.from(new Set(
-    memories
+
+  // Extract unique opponents and locations
+  const allOpponents = useMemo(() => {
+    const opponents = memories
       .map(memory => memory.opponent)
-      .filter(Boolean) as string[]
-  )).sort(), [memories]);
-  
-  const allLocations = useMemo(() => Array.from(new Set(
-    memories
+      .filter((opponent): opponent is string => Boolean(opponent))
+      .filter((opponent, index, array) => array.indexOf(opponent) === index)
+      .sort();
+    return opponents;
+  }, [memories]);
+
+  const allLocations = useMemo(() => {
+    const locations = memories
       .map(memory => memory.location)
-      .filter(Boolean) as string[]
-  )).sort(), [memories]);
-  
-  const filteredMemories = useMemo(() => memories.filter(memory => {
-    if (filterType && memory.memory_type !== filterType) {
-      return false;
-    }
-    
-    if (filterOpponent && memory.opponent !== filterOpponent) {
-      return false;
-    }
-    
-    if (filterLocation && memory.location !== filterLocation) {
-      return false;
-    }
-    
-    if (filterDateFrom || filterDateTo) {
-      const memoryDate = memory.game_date ? new Date(memory.game_date) : null;
-      
-      if (memoryDate) {
-        if (filterDateFrom) {
-          const fromDate = parse(filterDateFrom, 'yyyy-MM-dd', new Date());
-          if (isValid(fromDate) && memoryDate < fromDate) {
-            return false;
-          }
-        }
+      .filter((location): location is string => Boolean(location))
+      .filter((location, index, array) => array.indexOf(location) === index)
+      .sort();
+    return locations;
+  }, [memories]);
+
+  // Filter memories based on current filters
+  const filteredMemories = useMemo(() => {
+    return memories.filter(memory => {
+      // Filter by type
+      if (filterType && memory.memory_type !== filterType) {
+        return false;
+      }
+
+      // Filter by search term
+      if (searchTerm) {
+        const searchLower = searchTerm.toLowerCase();
+        const titleMatch = memory.title.toLowerCase().includes(searchLower);
+        const descriptionMatch = memory.description?.toLowerCase().includes(searchLower);
+        const opponentMatch = memory.opponent?.toLowerCase().includes(searchLower);
+        const tagsMatch = memory.tags?.some(tag => tag.toLowerCase().includes(searchLower));
         
-        if (filterDateTo) {
-          const toDate = parse(filterDateTo, 'yyyy-MM-dd', new Date());
-          if (isValid(toDate) && memoryDate > toDate) {
-            return false;
-          }
+        if (!titleMatch && !descriptionMatch && !opponentMatch && !tagsMatch) {
+          return false;
         }
       }
-    }
-    
-    if (showHistoricalOnly && !memory.historical_context) {
-      return false;
-    }
-    
-    if (searchTerm) {
-      const searchLower = searchTerm.toLowerCase();
-      const inTitle = memory.title.toLowerCase().includes(searchLower);
-      const inDescription = memory.description?.toLowerCase().includes(searchLower);
-      const inTags = memory.tags?.some(tag => tag.toLowerCase().includes(searchLower));
-      const inHistorical = memory.historical_context?.toLowerCase().includes(searchLower);
-      const inPersonal = memory.personal_significance?.toLowerCase().includes(searchLower);
-      
-      return inTitle || inDescription || inTags || inHistorical || inPersonal;
-    }
-    
-    return true;
-  }), [memories, filterType, searchTerm, filterOpponent, filterLocation, filterDateFrom, filterDateTo, showHistoricalOnly]);
-  
+
+      // Filter by opponent
+      if (filterOpponent && memory.opponent !== filterOpponent) {
+        return false;
+      }
+
+      // Filter by location
+      if (filterLocation && memory.location !== filterLocation) {
+        return false;
+      }
+
+      // Filter by date range
+      if (filterDateFrom && memory.game_date) {
+        if (new Date(memory.game_date) < new Date(filterDateFrom)) {
+          return false;
+        }
+      }
+
+      if (filterDateTo && memory.game_date) {
+        if (new Date(memory.game_date) > new Date(filterDateTo)) {
+          return false;
+        }
+      }
+
+      // Filter by historical context
+      if (showHistoricalOnly && !memory.historical_context) {
+        return false;
+      }
+
+      return true;
+    });
+  }, [
+    memories,
+    filterType,
+    searchTerm,
+    filterOpponent,
+    filterLocation,
+    filterDateFrom,
+    filterDateTo,
+    showHistoricalOnly
+  ]);
+
   const clearFilters = () => {
     setFilterType(null);
     setSearchTerm('');
@@ -84,7 +101,17 @@ export const useOaklandMemoryFilters = (memories: OaklandMemory[]) => {
     setFilterDateTo(null);
     setShowHistoricalOnly(false);
   };
-  
+
+  const hasActiveFilters = !!(
+    filterType ||
+    searchTerm ||
+    filterOpponent ||
+    filterLocation ||
+    filterDateFrom ||
+    filterDateTo ||
+    showHistoricalOnly
+  );
+
   return {
     filterType,
     setFilterType,
@@ -103,6 +130,7 @@ export const useOaklandMemoryFilters = (memories: OaklandMemory[]) => {
     allOpponents,
     allLocations,
     filteredMemories,
-    clearFilters
+    clearFilters,
+    hasActiveFilters
   };
 };

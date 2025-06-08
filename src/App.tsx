@@ -1,130 +1,82 @@
 
-import { Suspense, lazy } from 'react';
-import { Toaster } from '@/components/ui/sonner';
-import { TooltipProvider } from '@/components/ui/tooltip';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Toaster } from '@/components/ui/sonner';
+import { ThemeProvider } from '@/components/theme-provider';
 import { CardProvider } from '@/context/CardContext';
-import { CardEnhancedProvider } from '@/context/CardEnhancedContext';
 import { AuthProvider } from '@/context/auth/AuthProvider';
+
+// Pages
+import HomePage from '@/pages/HomePage';
+import CardGallery from '@/components/CardGallery';
+import CardViewerPage from '@/components/CardViewerPage';
+import Account from '@/components/Account';
+import AuthPage from '@/components/auth/AuthPage';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+
+// Route collections
 import { teamRoutes } from '@/routes/teamRoutes';
-
-// Import Oakland theme CSS
-import '@/styles/oakland-theme.css';
-
-// Lazy load components
-const ImmersiveCardViewerPage = lazy(() => import('@/pages/ImmersiveCardViewerPage'));
-const UnifiedCardEditor = lazy(() => import('@/pages/UnifiedCardEditor'));
-const CardDetector = lazy(() => import('@/pages/CardDetector'));
-const Gallery = lazy(() => import('@/pages/Gallery'));
-const Labs = lazy(() => import('@/pages/Labs'));
-const AuthPage = lazy(() => import('@/components/auth/AuthPage'));
-const OaklandHomepage = lazy(() => import('@/components/oakland/OaklandHomepage'));
-const OaklandMemoryCreator = lazy(() => import('@/components/oakland/OaklandMemoryCreator'));
+import { townRoutes } from '@/routes/townRoutes';
+import { oaklandRoutes } from '@/routes/oakland';
 
 // Create a client
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 60 * 1000,
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      retry: 1,
     },
   },
 });
 
-const LoadingSpinner = () => (
-  <div className="flex items-center justify-center h-screen bg-oakland-primary">
-    <div className="text-center">
-      <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-yellow-500 mb-4"></div>
-      <div className="text-white font-display">Loading...</div>
-    </div>
-  </div>
-);
-
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <CardProvider>
-          <CardEnhancedProvider>
-            <TooltipProvider>
-              <div className="min-h-screen bg-background font-sans antialiased">
+      <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+        <AuthProvider>
+          <CardProvider>
+            <Router>
+              <div className="min-h-screen bg-background">
                 <Routes>
-                  <Route 
-                    path="/" 
-                    element={
-                      <Suspense fallback={<LoadingSpinner />}>
-                        <OaklandHomepage />
-                      </Suspense>
-                    } 
-                  />
-                  <Route 
-                    path="/auth" 
-                    element={
-                      <Suspense fallback={<LoadingSpinner />}>
-                        <AuthPage />
-                      </Suspense>
-                    } 
-                  />
+                  {/* Home */}
+                  <Route path="/" element={<HomePage />} />
                   
-                  {/* Legacy Oakland routes - redirect to new team routes */}
-                  <Route 
-                    path="/oakland" 
-                    element={<Navigate to="/teams/oakland-athletics" replace />}
-                  />
-                  <Route 
-                    path="/oakland/create" 
-                    element={<Navigate to="/teams/oakland-athletics/create" replace />}
-                  />
+                  {/* Authentication */}
+                  <Route path="/auth" element={<AuthPage />} />
                   
-                  <Route 
-                    path="/gallery" 
-                    element={
-                      <Suspense fallback={<LoadingSpinner />}>
-                        <Gallery />
-                      </Suspense>
-                    } 
-                  />
-                  <Route 
-                    path="/labs" 
-                    element={
-                      <Suspense fallback={<LoadingSpinner />}>
-                        <Labs />
-                      </Suspense>
-                    } 
-                  />
-                  <Route 
-                    path="/card-detector" 
-                    element={
-                      <Suspense fallback={<LoadingSpinner />}>
-                        <CardDetector />
-                      </Suspense>
-                    } 
-                  />
-                  <Route 
-                    path="/viewer/:id" 
-                    element={
-                      <Suspense fallback={<LoadingSpinner />}>
-                        <ImmersiveCardViewerPage />
-                      </Suspense>
-                    } 
-                  />
+                  {/* Gallery and Card Viewing */}
+                  <Route path="/gallery" element={<CardGallery />} />
+                  <Route path="/card/:id" element={<CardViewerPage />} />
                   
-                  {/* Redirect all create/editor paths to Oakland Memory Creator for now */}
-                  <Route path="/create" element={<Navigate to="/teams/oakland-athletics/create" replace />} />
-                  <Route path="/editor" element={<Navigate to="/teams/oakland-athletics/create" replace />} />
-                  <Route path="/editor/:id" element={<Navigate to="/teams/oakland-athletics/create" replace />} />
+                  {/* Account (Protected) */}
+                  <Route path="/account" element={
+                    <ProtectedRoute>
+                      <Account />
+                    </ProtectedRoute>
+                  } />
                   
-                  {/* Import team routes */}
+                  {/* Team Routes */}
                   {teamRoutes.map((route, index) => (
-                    <Route key={index} path={route.path} element={route.element} />
+                    <Route key={index} {...route} />
+                  ))}
+                  
+                  {/* Town Routes */}
+                  {townRoutes.map((route, index) => (
+                    <Route key={index} {...route} />
+                  ))}
+                  
+                  {/* Oakland Routes */}
+                  {oaklandRoutes.map((route, index) => (
+                    <Route key={index} {...route} />
                   ))}
                 </Routes>
                 <Toaster />
               </div>
-            </TooltipProvider>
-          </CardEnhancedProvider>
-        </CardProvider>
-      </AuthProvider>
+            </Router>
+          </CardProvider>
+        </AuthProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }

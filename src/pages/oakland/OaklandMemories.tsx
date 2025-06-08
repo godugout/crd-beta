@@ -1,6 +1,6 @@
 
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { PlusCircle } from 'lucide-react';
 import PageLayout from '@/components/navigation/PageLayout';
 import { Button } from '@/components/ui/button';
@@ -12,8 +12,10 @@ import OaklandMemoryTypeFilter from '@/components/oakland/gallery/OaklandMemoryT
 import OaklandAdvancedFilters from '@/components/oakland/gallery/OaklandAdvancedFilters';
 import OaklandActiveFilters from '@/components/oakland/gallery/OaklandActiveFilters';
 import OaklandSampleDataButton from '@/components/oakland/gallery/OaklandSampleDataButton';
+import { toast } from 'sonner';
 
 function OaklandMemories() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const { memories, loading, error, refetch } = useOaklandMemories();
   const {
     filterType,
@@ -35,6 +37,21 @@ function OaklandMemories() {
     filteredMemories,
     clearFilters
   } = useOaklandMemoryFilters(memories);
+
+  // Handle refresh parameter from navigation
+  useEffect(() => {
+    const shouldRefresh = searchParams.get('refresh') === 'true';
+    if (shouldRefresh) {
+      refetch();
+      toast.success('Memories refreshed');
+      // Clear the refresh parameter
+      setSearchParams(prev => {
+        const newParams = new URLSearchParams(prev);
+        newParams.delete('refresh');
+        return newParams;
+      });
+    }
+  }, [searchParams, setSearchParams, refetch]);
   
   if (error) {
     return (
