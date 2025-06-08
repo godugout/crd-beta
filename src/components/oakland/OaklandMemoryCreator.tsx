@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -58,7 +59,10 @@ const OaklandMemoryCreator: React.FC = () => {
         setTemplates(templatesData.map(template => ({
           ...template,
           category: template.category as OaklandTemplate['category'],
-          era: template.era as OaklandTemplate['era']
+          era: template.era as OaklandTemplate['era'],
+          config: (template.config || {}) as Record<string, any>,
+          tags: template.tags || [],
+          usage_count: template.usage_count || 0
         })));
       }
 
@@ -75,7 +79,8 @@ const OaklandMemoryCreator: React.FC = () => {
           category: expression.category as OaklandExpression['category'],
           source: expression.source as OaklandExpression['source'],
           decade: expression.decade as OaklandExpression['decade'],
-          era: expression.era as OaklandExpression['era']
+          era: expression.era as OaklandExpression['era'],
+          emotion_tags: expression.emotion_tags || []
         })));
       }
     };

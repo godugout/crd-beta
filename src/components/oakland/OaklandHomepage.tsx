@@ -44,12 +44,18 @@ const OaklandHomepage: React.FC = () => {
         .limit(6);
 
       if (memoriesData) {
-        // Type assertion to handle database string types vs our strict types
+        // Properly map database data to frontend types
         setMemories(memoriesData.map(memory => ({
           ...memory,
           memory_type: memory.memory_type as OaklandMemory['memory_type'],
           era: memory.era as OaklandMemory['era'],
-          visibility: memory.visibility as OaklandMemory['visibility']
+          visibility: memory.visibility as OaklandMemory['visibility'],
+          effect_settings: (memory.effect_settings || {}) as Record<string, any>,
+          community_reactions: (memory.community_reactions || {}) as Record<string, any>,
+          attendees: memory.attendees || [],
+          emotions: memory.emotions || [],
+          fan_expressions: memory.fan_expressions || [],
+          tags: memory.tags || []
         })));
       }
 
@@ -66,7 +72,8 @@ const OaklandHomepage: React.FC = () => {
           category: expression.category as OaklandExpression['category'],
           source: expression.source as OaklandExpression['source'],
           decade: expression.decade as OaklandExpression['decade'],
-          era: expression.era as OaklandExpression['era']
+          era: expression.era as OaklandExpression['era'],
+          emotion_tags: expression.emotion_tags || []
         })));
       }
 
