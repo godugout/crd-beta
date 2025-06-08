@@ -8,7 +8,7 @@ import { CardProvider } from '@/context/CardContext';
 import { AuthProvider } from '@/context/auth/AuthProvider';
 
 // Pages
-import HomePage from '@/pages/HomePage';
+import Index from '@/pages/Index'; // Oakland landing page
 import CardGallery from '@/components/CardGallery';
 import CardViewerPage from '@/components/CardViewerPage';
 import Account from '@/components/Account';
@@ -38,8 +38,8 @@ function App() {
           <CardProvider>
             <div className="min-h-screen bg-background">
               <Routes>
-                {/* Home */}
-                <Route path="/" element={<HomePage />} />
+                {/* Home - Oakland Landing Page */}
+                <Route path="/" element={<Index />} />
                 
                 {/* Authentication */}
                 <Route path="/auth" element={<AuthPage />} />
