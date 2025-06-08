@@ -67,7 +67,7 @@ const teamToBreadcrumb = (team: Team): BreadcrumbItem => {
   return {
     id: `team-${team.id}`,
     label: team.name,
-    path: `/teams/${team.id}`,
+    path: `/teams/${team.slug}`,
     parentId: 'teams'
   };
 };
@@ -84,10 +84,15 @@ export const useTeamBreadcrumb = (teamId: string) => {
         const mockTeam: Team = {
           id: teamId,
           name: `Team ${teamId}`,
-          ownerId: 'user123',
-          visibility: 'public',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
+          slug: teamId.toLowerCase(),
+          city_id: 'city-1',
+          sport: 'Baseball',
+          primary_color: '#000000',
+          secondary_color: '#FFFFFF',
+          team_config: { features: [], eras: [], theme: 'default' },
+          is_active: true,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
         };
 
         const breadcrumb = teamToBreadcrumb(mockTeam);
