@@ -30,14 +30,14 @@ const OaklandMemoryTypeFilter: React.FC<OaklandMemoryTypeFilterProps> = ({
 }) => {
   return (
     <Select
-      value={filterType || ""}
-      onValueChange={(value) => setFilterType(value || null)}
+      value={filterType || "all"}
+      onValueChange={(value) => setFilterType(value === "all" ? null : value)}
     >
       <SelectTrigger className="w-48">
         <SelectValue placeholder="All memory types" />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value="">All memory types</SelectItem>
+        <SelectItem value="all">All memory types</SelectItem>
         {memoryTypes.map(type => (
           <SelectItem key={type.value} value={type.value}>
             {type.label}

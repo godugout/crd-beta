@@ -66,14 +66,14 @@ const OaklandAdvancedFilters: React.FC<OaklandAdvancedFiltersProps> = ({
           <div className="space-y-2">
             <Label htmlFor="opponent-filter">Opponent</Label>
             <Select
-              value={filterOpponent || ""}
-              onValueChange={(value) => setFilterOpponent(value || null)}
+              value={filterOpponent || "all"}
+              onValueChange={(value) => setFilterOpponent(value === "all" ? null : value)}
             >
               <SelectTrigger id="opponent-filter">
                 <SelectValue placeholder="All opponents" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All opponents</SelectItem>
+                <SelectItem value="all">All opponents</SelectItem>
                 {allOpponents.map(opponent => (
                   <SelectItem key={opponent} value={opponent}>
                     {opponent}
@@ -87,14 +87,14 @@ const OaklandAdvancedFilters: React.FC<OaklandAdvancedFiltersProps> = ({
           <div className="space-y-2">
             <Label htmlFor="location-filter">Location</Label>
             <Select
-              value={filterLocation || ""}
-              onValueChange={(value) => setFilterLocation(value || null)}
+              value={filterLocation || "all"}
+              onValueChange={(value) => setFilterLocation(value === "all" ? null : value)}
             >
               <SelectTrigger id="location-filter">
                 <SelectValue placeholder="All locations" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All locations</SelectItem>
+                <SelectItem value="all">All locations</SelectItem>
                 {allLocations.map(location => (
                   <SelectItem key={location} value={location}>
                     {location}
