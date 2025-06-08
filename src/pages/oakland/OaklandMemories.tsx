@@ -1,110 +1,146 @@
 
-import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { PlusCircle } from 'lucide-react';
 import PageLayout from '@/components/navigation/PageLayout';
-import TownBreadcrumb from '@/components/navigation/components/TownBreadcrumb';
-
-interface TownInfo {
-  name?: string;
-  primary_color?: string;
-  secondary_color?: string;
-}
+import { Button } from '@/components/ui/button';
+import { useOaklandMemories } from '@/hooks/useOaklandMemories';
+import { useOaklandMemoryFilters } from '@/hooks/useOaklandMemoryFilters';
+import OaklandProfessionalMemoryGrid from '@/components/oakland/OaklandProfessionalMemoryGrid';
+import OaklandMemorySearch from '@/components/oakland/gallery/OaklandMemorySearch';
+import OaklandMemoryTypeFilter from '@/components/oakland/gallery/OaklandMemoryTypeFilter';
+import OaklandAdvancedFilters from '@/components/oakland/gallery/OaklandAdvancedFilters';
+import OaklandActiveFilters from '@/components/oakland/gallery/OaklandActiveFilters';
 
 function OaklandMemories() {
-  const { townId } = useParams<{ townId?: string }>();
-  const [townInfo, setTownInfo] = useState<TownInfo>({});
+  const { memories, loading, error } = useOaklandMemories();
+  const {
+    filterType,
+    setFilterType,
+    searchTerm,
+    setSearchTerm,
+    filterOpponent,
+    setFilterOpponent,
+    filterLocation,
+    setFilterLocation,
+    filterDateFrom,
+    setFilterDateFrom,
+    filterDateTo,
+    setFilterDateTo,
+    showHistoricalOnly,
+    setShowHistoricalOnly,
+    allOpponents,
+    allLocations,
+    filteredMemories,
+    clearFilters
+  } = useOaklandMemoryFilters(memories);
   
-  // If we have a town ID, fetch the town's details
-  useEffect(() => {
-    const fetchTownInfo = async () => {
-      try {
-        // Only fetch data we know exists in the database
-        const { data, error } = await supabase
-          .from('teams')
-          .select('name, primary_color, secondary_color')
-          .eq('id', 'oakland')
-          .maybeSingle();
-          
-        if (error) {
-          console.error('Error fetching town info:', error);
-          // Set default values if town is not found
-          setTownInfo({
-            name: 'Oakland',
-            primary_color: '#006341',
-            secondary_color: '#EFB21E'
-          });
-          return;
-        }
-          
-        if (data) {
-          setTownInfo({
-            name: data.name,
-            primary_color: data.primary_color || '#006341',
-            secondary_color: data.secondary_color || '#EFB21E'
-          });
-          return;
-        } else {
-          // Set default values if town is not found
-          setTownInfo({
-            name: 'Oakland',
-            primary_color: '#006341',
-            secondary_color: '#EFB21E'
-          });
-        }
-      } catch (err) {
-        console.error('Error fetching town info:', err);
-        // Set default values on error
-        setTownInfo({
-          name: 'Oakland',
-          primary_color: '#006341',
-          secondary_color: '#EFB21E'
-        });
-      }
-    };
-    
-    fetchTownInfo();
-  }, []);
-  
+  if (error) {
+    return (
+      <PageLayout 
+        title="Oakland A's Memories"
+        description="Browse fan memories from Oakland's baseball history"
+      >
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center py-12">
+            <h3 className="text-2xl font-bold text-red-600 mb-4">Error Loading Memories</h3>
+            <p className="text-gray-600 mb-8">{error}</p>
+            <Button onClick={() => window.location.reload()}>
+              Try Again
+            </Button>
+          </div>
+        </div>
+      </PageLayout>
+    );
+  }
+
   return (
     <PageLayout 
-      title={townInfo.name ? `${townInfo.name} Memories` : 'Town Memories'}
-      description={townInfo.name ? `Browse memories for ${townInfo.name}` : 'Browse town memories'}
+      title="Oakland A's Memories"
+      description="Browse fan memories from Oakland's baseball history"
+      primaryAction={{
+        label: 'Create Memory',
+        icon: <PlusCircle className="h-4 w-4" />,
+        href: '/teams/oakland-athletics/create'
+      }}
     >
-      <TownBreadcrumb currentPage="Memories" />
-      
       <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-6">{townInfo.name || 'Town'} Memories</h1>
-        
-        <div style={{ 
-          backgroundColor: townInfo.primary_color || '#ccc',
-          color: '#fff',
-          padding: '2rem',
-          borderRadius: '0.5rem',
-          marginBottom: '2rem'
-        }}>
-          <p className="text-lg">
-            Browse and explore memories from {townInfo.name || 'this town'}'s rich history.
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+            Oakland A's Fan Memories
+          </h1>
+          <p className="text-lg text-gray-600 max-w-3xl">
+            Explore the rich history of Oakland baseball through the eyes of the fans who lived it. 
+            From dynasty years to heartbreak moments, these are our stories.
           </p>
         </div>
-        
-        {/* Memory content will go here */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div className="border rounded-lg p-6">
-            <h3 className="text-xl font-semibold mb-2">First Memory</h3>
-            <p className="text-gray-600">This is where memories will be displayed.</p>
-          </div>
+
+        {/* Filters */}
+        <div className="flex flex-wrap gap-4 mb-8 items-center">
+          <OaklandMemorySearch 
+            searchTerm={searchTerm} 
+            setSearchTerm={setSearchTerm} 
+          />
           
-          <div className="border rounded-lg p-6">
-            <h3 className="text-xl font-semibold mb-2">Second Memory</h3>
-            <p className="text-gray-600">Each memory card will show details and images.</p>
-          </div>
+          <OaklandMemoryTypeFilter
+            filterType={filterType}
+            setFilterType={setFilterType}
+          />
           
-          <div className="border rounded-lg p-6">
-            <h3 className="text-xl font-semibold mb-2">Third Memory</h3>
-            <p className="text-gray-600">Clicking on a memory will take you to its details.</p>
-          </div>
+          <OaklandAdvancedFilters 
+            filterOpponent={filterOpponent}
+            setFilterOpponent={setFilterOpponent}
+            filterLocation={filterLocation}
+            setFilterLocation={setFilterLocation}
+            filterDateFrom={filterDateFrom}
+            setFilterDateFrom={setFilterDateFrom}
+            filterDateTo={filterDateTo}
+            setFilterDateTo={setFilterDateTo}
+            showHistoricalOnly={showHistoricalOnly}
+            setShowHistoricalOnly={setShowHistoricalOnly}
+            clearFilters={clearFilters}
+            allOpponents={allOpponents}
+            allLocations={allLocations}
+          />
+          
+          <Button asChild>
+            <Link to="/teams/oakland-athletics/create">
+              <PlusCircle className="h-4 w-4 mr-2" />
+              Create Memory
+            </Link>
+          </Button>
         </div>
+        
+        {/* Active Filters */}
+        <OaklandActiveFilters
+          filterType={filterType}
+          filterOpponent={filterOpponent}
+          filterLocation={filterLocation}
+          filterDateFrom={filterDateFrom}
+          filterDateTo={filterDateTo}
+          showHistoricalOnly={showHistoricalOnly}
+          setFilterType={setFilterType}
+          setFilterOpponent={setFilterOpponent}
+          setFilterLocation={setFilterLocation}
+          setFilterDateFrom={setFilterDateFrom}
+          setFilterDateTo={setFilterDateTo}
+          setShowHistoricalOnly={setShowHistoricalOnly}
+          clearFilters={clearFilters}
+        />
+        
+        {/* Stats */}
+        {!loading && memories.length > 0 && (
+          <div className="mb-6 text-sm text-gray-600">
+            Showing {filteredMemories.length} of {memories.length} memories
+          </div>
+        )}
+
+        {/* Memory Grid */}
+        <OaklandProfessionalMemoryGrid 
+          memories={filteredMemories} 
+          loading={loading}
+        />
       </div>
     </PageLayout>
   );

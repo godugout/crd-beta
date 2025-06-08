@@ -2,7 +2,7 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { useTeam } from '@/lib/hooks/useTeam';
-import OaklandMemoryGallery from '@/components/oakland/OaklandMemoryGallery';
+import OaklandMemories from '@/pages/oakland/OaklandMemories';
 
 const TeamMemoriesGallery: React.FC = () => {
   const { teamSlug } = useParams<{ teamSlug: string }>();
@@ -18,7 +18,7 @@ const TeamMemoriesGallery: React.FC = () => {
 
   // For Oakland Athletics, use the specialized Oakland Memory Gallery
   if (team?.slug === 'oakland-athletics') {
-    return <OaklandMemoryGallery />;
+    return <OaklandMemories />;
   }
 
   // For other teams, show a coming soon message for now
