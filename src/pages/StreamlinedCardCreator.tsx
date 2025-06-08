@@ -208,8 +208,8 @@ const StreamlinedCardCreator: React.FC = () => {
             />
           </Canvas>
           
-          {/* Style Badge */}
-          <div className="absolute top-4 left-4">
+          {/* Style Badge - Outside Canvas */}
+          <div className="absolute top-4 left-4 pointer-events-none">
             <Badge variant="secondary" className="bg-black/50 text-white border-white/20">
               {selectedStyle} • {selectedTemplate.name} • {selectedEnvironment.name}
             </Badge>
