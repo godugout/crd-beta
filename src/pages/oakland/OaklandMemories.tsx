@@ -11,9 +11,10 @@ import OaklandMemorySearch from '@/components/oakland/gallery/OaklandMemorySearc
 import OaklandMemoryTypeFilter from '@/components/oakland/gallery/OaklandMemoryTypeFilter';
 import OaklandAdvancedFilters from '@/components/oakland/gallery/OaklandAdvancedFilters';
 import OaklandActiveFilters from '@/components/oakland/gallery/OaklandActiveFilters';
+import OaklandSampleDataButton from '@/components/oakland/gallery/OaklandSampleDataButton';
 
 function OaklandMemories() {
-  const { memories, loading, error } = useOaklandMemories();
+  const { memories, loading, error, refetch } = useOaklandMemories();
   const {
     filterType,
     setFilterType,
@@ -110,6 +111,11 @@ function OaklandMemories() {
               Create Memory
             </Link>
           </Button>
+
+          {/* Development helper button */}
+          {memories.length === 0 && (
+            <OaklandSampleDataButton onDataAdded={refetch} />
+          )}
         </div>
         
         {/* Active Filters */}

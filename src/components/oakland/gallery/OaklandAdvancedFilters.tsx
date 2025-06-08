@@ -1,11 +1,22 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Filter } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Filter, X } from 'lucide-react';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
 
 interface OaklandAdvancedFiltersProps {
   filterOpponent: string | null;
@@ -38,116 +49,110 @@ const OaklandAdvancedFilters: React.FC<OaklandAdvancedFiltersProps> = ({
   allOpponents,
   allLocations
 }) => {
-  const handleDialogClose = () => {
-    const closeButton = document.querySelector('button[aria-label="Close"]');
-    if (closeButton && closeButton instanceof HTMLButtonElement) {
-      closeButton.click();
-    }
-  };
+  const [isOpen, setIsOpen] = React.useState(false);
 
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-1">
-          <Filter className="h-4 w-4" />
+    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+      <CollapsibleTrigger asChild>
+        <Button variant="outline" size="sm">
+          <Filter className="h-4 w-4 mr-2" />
           Advanced Filters
         </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Advanced Filters</DialogTitle>
-        </DialogHeader>
-        
-        <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <label className="text-right text-sm">Opponent:</label>
-            <div className="col-span-3">
-              <Select 
-                value={filterOpponent || ""}
-                onValueChange={value => setFilterOpponent(value === "" ? null : value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Any opponent" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">Any opponent</SelectItem>
-                  {allOpponents.map(opponent => (
-                    <SelectItem key={opponent} value={opponent}>{opponent}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+      </CollapsibleTrigger>
+      
+      <CollapsibleContent className="mt-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 p-4 border rounded-lg bg-gray-50">
+          {/* Opponent Filter */}
+          <div className="space-y-2">
+            <Label htmlFor="opponent-filter">Opponent</Label>
+            <Select
+              value={filterOpponent || ""}
+              onValueChange={(value) => setFilterOpponent(value || null)}
+            >
+              <SelectTrigger id="opponent-filter">
+                <SelectValue placeholder="All opponents" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">All opponents</SelectItem>
+                {allOpponents.map(opponent => (
+                  <SelectItem key={opponent} value={opponent}>
+                    {opponent}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
-          
-          <div className="grid grid-cols-4 items-center gap-4">
-            <label className="text-right text-sm">Location:</label>
-            <div className="col-span-3">
-              <Select
-                value={filterLocation || ""}
-                onValueChange={value => setFilterLocation(value === "" ? null : value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Any location" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">Any location</SelectItem>
-                  {allLocations.map(location => (
-                    <SelectItem key={location} value={location}>{location}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+
+          {/* Location Filter */}
+          <div className="space-y-2">
+            <Label htmlFor="location-filter">Location</Label>
+            <Select
+              value={filterLocation || ""}
+              onValueChange={(value) => setFilterLocation(value || null)}
+            >
+              <SelectTrigger id="location-filter">
+                <SelectValue placeholder="All locations" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">All locations</SelectItem>
+                {allLocations.map(location => (
+                  <SelectItem key={location} value={location}>
+                    {location}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
-          
-          <div className="grid grid-cols-4 items-center gap-4">
-            <label className="text-right text-sm">Date from:</label>
-            <div className="col-span-3">
-              <Input 
-                type="date" 
-                value={filterDateFrom || ''}
-                onChange={e => setFilterDateFrom(e.target.value || null)}
-              />
-            </div>
+
+          {/* Date From */}
+          <div className="space-y-2">
+            <Label htmlFor="date-from">Date From</Label>
+            <Input
+              id="date-from"
+              type="date"
+              value={filterDateFrom || ""}
+              onChange={(e) => setFilterDateFrom(e.target.value || null)}
+            />
           </div>
-          
-          <div className="grid grid-cols-4 items-center gap-4">
-            <label className="text-right text-sm">Date to:</label>
-            <div className="col-span-3">
-              <Input 
-                type="date" 
-                value={filterDateTo || ''}
-                onChange={e => setFilterDateTo(e.target.value || null)}
-              />
-            </div>
+
+          {/* Date To */}
+          <div className="space-y-2">
+            <Label htmlFor="date-to">Date To</Label>
+            <Input
+              id="date-to"
+              type="date"
+              value={filterDateTo || ""}
+              onChange={(e) => setFilterDateTo(e.target.value || null)}
+            />
           </div>
-          
-          <div className="grid grid-cols-4 items-center gap-4">
-            <label className="text-right text-sm">Content:</label>
-            <div className="col-span-3 flex items-center space-x-2">
-              <Checkbox 
-                id="historical" 
-                checked={showHistoricalOnly}
-                onCheckedChange={(checked) => 
-                  setShowHistoricalOnly(checked === true)
-                }
-              />
-              <label htmlFor="historical" className="text-sm font-medium leading-none">
-                Show only memories with historical context
-              </label>
-            </div>
+
+          {/* Historical Only Checkbox */}
+          <div className="flex items-center space-x-2 md:col-span-2">
+            <Checkbox
+              id="historical-only"
+              checked={showHistoricalOnly}
+              onCheckedChange={(checked) => setShowHistoricalOnly(!!checked)}
+            />
+            <Label htmlFor="historical-only">
+              Show only memories with historical context
+            </Label>
+          </div>
+
+          {/* Clear Filters Button */}
+          <div className="flex justify-end md:col-span-2">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={clearFilters}
+              className="text-gray-600 hover:text-gray-800"
+            >
+              <X className="h-4 w-4 mr-2" />
+              Clear All Filters
+            </Button>
           </div>
         </div>
-        
-        <div className="flex justify-between">
-          <Button variant="outline" onClick={clearFilters}>
-            Clear Filters
-          </Button>
-          <Button type="button" onClick={handleDialogClose}>
-            Apply Filters
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
+      </CollapsibleContent>
+    </Collapsible>
   );
 };
 

@@ -1,38 +1,50 @@
 
 import React from 'react';
-import { SlidersHorizontal } from 'lucide-react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from '@/components/ui/select';
 
 interface OaklandMemoryTypeFilterProps {
   filterType: string | null;
-  setFilterType: (value: string | null) => void;
+  setFilterType: (type: string | null) => void;
 }
+
+const memoryTypes = [
+  { value: 'game', label: 'Game Memories' },
+  { value: 'tailgate', label: 'Tailgate' },
+  { value: 'championship', label: 'Championships' },
+  { value: 'protest', label: 'Protest' },
+  { value: 'community', label: 'Community' },
+  { value: 'farewell', label: 'Farewell' },
+  { value: 'player_moment', label: 'Player Moments' },
+  { value: 'season_highlight', label: 'Season Highlights' }
+];
 
 const OaklandMemoryTypeFilter: React.FC<OaklandMemoryTypeFilterProps> = ({
   filterType,
   setFilterType
 }) => {
   return (
-    <div className="flex gap-2 items-center">
-      <SlidersHorizontal className="h-4 w-4 text-gray-600" />
-      <Select 
-        value={filterType || "all"} 
-        onValueChange={value => setFilterType(value === "all" ? null : value)}
-      >
-        <SelectTrigger className="w-[180px]">
-          <SelectValue placeholder="All memory types" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">All memory types</SelectItem>
-          <SelectItem value="game">Game Day</SelectItem>
-          <SelectItem value="tailgate">Tailgate Party</SelectItem>
-          <SelectItem value="memorabilia">Memorabilia</SelectItem>
-          <SelectItem value="historical">Historical Moment</SelectItem>
-          <SelectItem value="fan_experience">Fan Experience</SelectItem>
-          <SelectItem value="stats">Stats & Analysis</SelectItem>
-        </SelectContent>
-      </Select>
-    </div>
+    <Select
+      value={filterType || ""}
+      onValueChange={(value) => setFilterType(value || null)}
+    >
+      <SelectTrigger className="w-48">
+        <SelectValue placeholder="All memory types" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="">All memory types</SelectItem>
+        {memoryTypes.map(type => (
+          <SelectItem key={type.value} value={type.value}>
+            {type.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 };
 
