@@ -126,12 +126,14 @@ export const PROFESSIONAL_OAKLAND_TEMPLATES: ProfessionalOaklandTemplate[] = [
           fontFamily: 'Inter',
           fontSize: 'clamp(0.8rem, 2vw, 1rem)',
           fontWeight: '400',
+          letterSpacing: '0.01em',
           lineHeight: '1.4'
         },
         accent: {
           fontFamily: 'Oswald',
           fontSize: 'clamp(0.7rem, 1.8vw, 0.9rem)',
-          fontWeight: '600'
+          fontWeight: '600',
+          letterSpacing: '0.03em'
         }
       },
       effects: {
@@ -196,12 +198,14 @@ export const PROFESSIONAL_OAKLAND_TEMPLATES: ProfessionalOaklandTemplate[] = [
           fontFamily: 'Inter',
           fontSize: 'clamp(0.75rem, 1.8vw, 0.95rem)',
           fontWeight: '400',
+          letterSpacing: '0.01em',
           lineHeight: '1.5'
         },
         accent: {
           fontFamily: 'Courier Prime',
           fontSize: 'clamp(0.7rem, 1.6vw, 0.85rem)',
-          fontWeight: '700'
+          fontWeight: '700',
+          letterSpacing: '0.02em'
         }
       },
       effects: {
@@ -264,12 +268,14 @@ export const PROFESSIONAL_OAKLAND_TEMPLATES: ProfessionalOaklandTemplate[] = [
           fontFamily: 'Inter',
           fontSize: 'clamp(0.8rem, 2vw, 1rem)',
           fontWeight: '500',
+          letterSpacing: '0.02em',
           lineHeight: '1.3'
         },
         accent: {
           fontFamily: 'Impact',
           fontSize: 'clamp(0.9rem, 2.5vw, 1.2rem)',
-          fontWeight: '700'
+          fontWeight: '700',
+          letterSpacing: '0.04em'
         }
       },
       effects: {
@@ -333,12 +339,14 @@ export const PROFESSIONAL_OAKLAND_TEMPLATES: ProfessionalOaklandTemplate[] = [
           fontFamily: 'Inter',
           fontSize: 'clamp(0.8rem, 2vw, 1rem)',
           fontWeight: '400',
+          letterSpacing: '0.01em',
           lineHeight: '1.6'
         },
         accent: {
           fontFamily: 'Caveat',
           fontSize: 'clamp(0.9rem, 2.2vw, 1.1rem)',
-          fontWeight: '600'
+          fontWeight: '600',
+          letterSpacing: '0.01em'
         }
       },
       effects: {
@@ -403,12 +411,14 @@ export const PROFESSIONAL_OAKLAND_TEMPLATES: ProfessionalOaklandTemplate[] = [
           fontFamily: 'Inter',
           fontSize: 'clamp(0.8rem, 2vw, 1rem)',
           fontWeight: '500',
+          letterSpacing: '0.01em',
           lineHeight: '1.4'
         },
         accent: {
           fontFamily: 'Oswald',
           fontSize: 'clamp(0.9rem, 2.3vw, 1.1rem)',
-          fontWeight: '600'
+          fontWeight: '600',
+          letterSpacing: '0.02em'
         }
       },
       effects: {
@@ -473,12 +483,14 @@ export const PROFESSIONAL_OAKLAND_TEMPLATES: ProfessionalOaklandTemplate[] = [
           fontFamily: 'Inter',
           fontSize: 'clamp(0.75rem, 1.8vw, 0.9rem)',
           fontWeight: '600',
+          letterSpacing: '0.02em',
           lineHeight: '1.3'
         },
         accent: {
           fontFamily: 'Bangers',
           fontSize: 'clamp(0.9rem, 2.2vw, 1.1rem)',
-          fontWeight: '400'
+          fontWeight: '400',
+          letterSpacing: '0.03em'
         }
       },
       effects: {
