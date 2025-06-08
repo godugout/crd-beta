@@ -62,8 +62,8 @@ const ProfessionalCardRenderer: React.FC<ProfessionalCardRendererProps> = ({
       fontWeight: typo.fontWeight,
       letterSpacing: typo.letterSpacing,
       lineHeight: typo.lineHeight || '1.2',
-      textTransform: typo.textTransform as any,
-      textShadow: typo.textShadow,
+      textTransform: (typo.textTransform as any) || 'none',
+      textShadow: typo.textShadow || 'none',
       color: config.colors.text,
     };
   };

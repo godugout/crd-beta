@@ -18,6 +18,7 @@ export interface ProfessionalTemplateConfig {
       fontSize: string;
       fontWeight: string;
       letterSpacing: string;
+      lineHeight?: string;
       textTransform?: string;
       textShadow?: string;
     };
@@ -26,17 +27,27 @@ export interface ProfessionalTemplateConfig {
       fontSize: string;
       fontWeight: string;
       letterSpacing: string;
+      lineHeight?: string;
+      textTransform?: string;
+      textShadow?: string;
     };
     body: {
       fontFamily: string;
       fontSize: string;
       fontWeight: string;
+      letterSpacing: string;
       lineHeight: string;
+      textTransform?: string;
+      textShadow?: string;
     };
     accent: {
       fontFamily: string;
       fontSize: string;
       fontWeight: string;
+      letterSpacing: string;
+      lineHeight?: string;
+      textTransform?: string;
+      textShadow?: string;
     };
   };
   effects: {
