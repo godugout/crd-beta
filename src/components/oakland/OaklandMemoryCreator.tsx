@@ -1,255 +1,477 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
-import { useCards } from '@/context/CardContext';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { OaklandMemoryForm } from './OaklandMemoryForm';
-import ImageUploader from '@/components/dam/ImageUploader';
-import OaklandMemoryCard from './OaklandMemoryCard';
-import { OaklandTemplateType } from './OaklandCardTemplates';
-import { OaklandMemoryData } from '@/lib/types';
+import { toast } from '@/hooks/use-toast';
+import { OaklandMemory, OaklandTemplate, OaklandExpression } from '@/lib/types/oaklandTypes';
+import { CalendarDays, MapPin, Users, Heart, Megaphone, Camera } from 'lucide-react';
 
-interface OaklandMemoryCreatorProps {
-  className?: string;
-}
-
-const OaklandMemoryCreator: React.FC<OaklandMemoryCreatorProps> = ({ className }) => {
+const OaklandMemoryCreator: React.FC = () => {
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
-  const { addCard } = useCards();
-  const [imageUrl, setImageUrl] = useState<string>('');
-  const [memoryData, setMemoryData] = useState<OaklandMemoryData | null>(null);
-  const [selectedTemplate, setSelectedTemplate] = useState<OaklandTemplateType>('classic');
-  const [activeTab, setActiveTab] = useState<string>('upload');
+  const [loading, setLoading] = useState(false);
+  const [templates, setTemplates] = useState<OaklandTemplate[]>([]);
+  const [expressions, setExpressions] = useState<OaklandExpression[]>([]);
+  
+  const [formData, setFormData] = useState({
+    title: '',
+    description: '',
+    memory_type: 'game' as OaklandMemory['memory_type'],
+    era: 'farewell' as OaklandMemory['era'],
+    game_date: '',
+    opponent: '',
+    score: '',
+    location: 'Oakland Coliseum',
+    section: '',
+    personal_significance: '',
+    historical_context: '',
+    attendees: '',
+    tags: '',
+    emotions: [] as string[],
+    fan_expressions: [] as string[],
+    template_id: '',
+    visibility: 'public' as OaklandMemory['visibility']
+  });
 
-  const handleImageUpload = (url: string) => {
-    setImageUrl(url);
-    setActiveTab('details');
-  };
-
-  const handleMemoryDataSubmit = (data: OaklandMemoryData) => {
-    // Update with the imageUrl and set Oakland defaults
-    const updatedData = {
-      ...data,
-      imageUrl: imageUrl,
-      // Set Oakland-specific defaults if not provided
-      tags: data.tags || ['oakland', 'athletics', 'memory'],
-      location: data.location || 'Oakland Coliseum'
-    };
-    setMemoryData(updatedData);
-    setActiveTab('preview');
-  };
-
-  // Expanded Oakland template options with era-specific designs
-  const templateOptions: Array<{id: OaklandTemplateType, name: string, description: string, era: string}> = [
-    { 
-      id: 'classic', 
-      name: 'Classic Green & Gold', 
-      description: 'Timeless A\'s colors with clean design',
-      era: 'All-Time Classic'
-    },
-    { 
-      id: 'moneyball', 
-      name: 'Moneyball Era', 
-      description: 'Early 2000s statistical revolution style',
-      era: '2002-2006'
-    },
-    { 
-      id: 'dynasty', 
-      name: 'Dynasty Years', 
-      description: 'Championship glory of the 70s',
-      era: '1972-1974'
-    },
-    { 
-      id: 'coliseum', 
-      name: 'Coliseum Classic', 
-      description: 'Vintage ballpark atmosphere',
-      era: 'Stadium Heritage'
-    },
-    { 
-      id: 'tailgate', 
-      name: 'Tailgate Party', 
-      description: 'Fan community celebration style',
-      era: 'Fan Culture'
-    },
-    {
-      id: 'bashbrothers',
-      name: 'Bash Brothers',
-      description: 'Power-hitting era of the late 80s',
-      era: '1988-1990'
+  useEffect(() => {
+    if (!authLoading && !user) {
+      navigate('/auth');
     }
+  }, [user, authLoading, navigate]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      // Fetch templates
+      const { data: templatesData } = await supabase
+        .from('oakland_templates')
+        .select('*')
+        .order('usage_count', { ascending: false });
+      
+      if (templatesData) setTemplates(templatesData);
+
+      // Fetch expressions
+      const { data: expressionsData } = await supabase
+        .from('oakland_expressions')
+        .select('*')
+        .order('usage_count', { ascending: false })
+        .limit(50);
+      
+      if (expressionsData) setExpressions(expressionsData);
+    };
+
+    fetchData();
+  }, []);
+
+  const emotionOptions = [
+    { value: 'joy', label: '😊 Joy', color: 'bg-yellow-500' },
+    { value: 'heartbreak', label: '💔 Heartbreak', color: 'bg-red-500' },
+    { value: 'nostalgia', label: '🥺 Nostalgia', color: 'bg-purple-500' },
+    { value: 'anger', label: '😡 Anger', color: 'bg-red-600' },
+    { value: 'hope', label: '🌟 Hope', color: 'bg-blue-500' },
+    { value: 'protest', label: '✊ Protest', color: 'bg-gray-800' }
   ];
 
-  const handleSaveCard = async () => {
-    if (!imageUrl || !memoryData) {
-      toast.error('Please upload an image and provide memory details');
-      return;
-    }
+  const handleEmotionToggle = (emotion: string) => {
+    setFormData(prev => ({
+      ...prev,
+      emotions: prev.emotions.includes(emotion)
+        ? prev.emotions.filter(e => e !== emotion)
+        : [...prev.emotions, emotion]
+    }));
+  };
 
+  const handleExpressionToggle = (expression: string) => {
+    setFormData(prev => ({
+      ...prev,
+      fan_expressions: prev.fan_expressions.includes(expression)
+        ? prev.fan_expressions.filter(e => e !== expression)
+        : [...prev.fan_expressions, expression]
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+
+    setLoading(true);
     try {
-      // Prepare Oakland-specific metadata with enhanced theming
-      const oaklandMetadata = {
-        date: memoryData.date,
-        opponent: memoryData.opponent,
-        score: memoryData.score,
-        location: memoryData.location || 'Oakland Coliseum',
-        section: memoryData.section,
-        memoryType: memoryData.memoryType,
-        attendees: memoryData.attendees,
-        template: selectedTemplate,
-        teamId: 'oakland-athletics',
-        imageUrl: imageUrl,
-        historicalContext: memoryData.historicalContext,
-        personalSignificance: memoryData.personalSignificance,
-        // Oakland theme defaults
-        primaryColor: '#006341',
-        secondaryColor: '#EFB21E',
-        teamColors: true,
-        eraTheme: templateOptions.find(t => t.id === selectedTemplate)?.era || 'Classic'
+      const memoryData = {
+        user_id: user.id,
+        title: formData.title,
+        description: formData.description || null,
+        memory_type: formData.memory_type,
+        era: formData.era,
+        game_date: formData.game_date || null,
+        opponent: formData.opponent || null,
+        score: formData.score || null,
+        location: formData.location,
+        section: formData.section || null,
+        personal_significance: formData.personal_significance || null,
+        historical_context: formData.historical_context || null,
+        attendees: formData.attendees ? formData.attendees.split(',').map(s => s.trim()) : [],
+        tags: formData.tags ? formData.tags.split(',').map(s => s.trim()) : [],
+        emotions: formData.emotions,
+        fan_expressions: formData.fan_expressions,
+        template_id: formData.template_id || null,
+        visibility: formData.visibility,
+        effect_settings: {},
+        is_featured: false,
+        community_reactions: {}
       };
 
-      // Create card with Oakland-specific branding
-      await addCard({
-        title: memoryData.title,
-        description: memoryData.description,
-        imageUrl: imageUrl,
-        thumbnailUrl: imageUrl,
-        tags: memoryData.tags || ['oakland', 'athletics', 'memory'],
-        designMetadata: {
-          cardStyle: {
-            effect: selectedTemplate,
-            teamSpecific: true,
-            primaryColor: '#006341',
-            secondaryColor: '#EFB21E',
-          },
-          textStyle: {
-            titleColor: '#EFB21E',
-            descriptionColor: '#FFFFFF',
-            backgroundColor: '#006341',
-          },
-          oaklandMemory: oaklandMetadata
-        } as any
+      const { data, error } = await supabase
+        .from('oakland_memories')
+        .insert([memoryData])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      toast({
+        title: "Memory Created!",
+        description: "Your Oakland memory has been added to the archive.",
       });
 
-      toast.success('🏟️ Oakland memory saved! Your story is now part of A\'s history.');
       navigate('/');
-    } catch (error) {
-      console.error('Error creating Oakland memory card:', error);
-      toast.error('Failed to create memory card');
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create memory",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
+  if (authLoading) {
+    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+  }
+
+  if (!user) {
+    return null;
+  }
+
   return (
-    <div className={className}>
-      <div className="max-w-6xl mx-auto">
-        {/* Oakland-branded header */}
-        <div className="text-center mb-8 p-6 bg-gradient-to-r from-[#006341] to-[#003831] rounded-lg">
-          <h1 className="text-3xl font-bold text-[#EFB21E] mb-2">Create Your Oakland Memory</h1>
-          <p className="text-white/90">
-            Preserve your A's memories with Oakland-themed designs celebrating our team's legacy
-          </p>
+    <div className="min-h-screen bg-gradient-to-br from-green-900 via-gray-900 to-yellow-900 p-4">
+      <div className="max-w-4xl mx-auto">
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-white mb-2">Create Oakland Memory</h1>
+          <p className="text-yellow-400 text-lg">Preserve your piece of Oakland baseball history</p>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid grid-cols-3 mb-6 bg-[#006341]/10">
-            <TabsTrigger value="upload" className="data-[state=active]:bg-[#006341] data-[state=active]:text-white">
-              1. Upload Memory
-            </TabsTrigger>
-            <TabsTrigger value="details" disabled={!imageUrl} className="data-[state=active]:bg-[#006341] data-[state=active]:text-white">
-              2. Memory Details
-            </TabsTrigger>
-            <TabsTrigger value="preview" disabled={!imageUrl || !memoryData} className="data-[state=active]:bg-[#006341] data-[state=active]:text-white">
-              3. Preview & Save
-            </TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="upload" className="p-6 bg-white rounded-lg shadow-sm border-l-4 border-[#EFB21E]">
-            <div className="max-w-md mx-auto">
-              <h2 className="text-xl font-bold text-center mb-6 text-[#003831]">Upload Your A's Memory</h2>
-              <p className="text-center text-gray-600 mb-6">
-                Share a photo from a game, tailgate, championship celebration, or any Oakland A's moment that matters to you.
-              </p>
-              <ImageUploader 
-                onUploadComplete={handleImageUpload}
-                title="Upload Oakland Memory"
-                maxSizeMB={5}
-              />
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="details" className="p-6 bg-white rounded-lg shadow-sm border-l-4 border-[#EFB21E]">
-            <h2 className="text-xl font-bold text-center mb-6 text-[#003831]">Tell Your Oakland Story</h2>
-            <OaklandMemoryForm 
-              onSubmit={handleMemoryDataSubmit}
-              initialData={memoryData || undefined}
-            />
-          </TabsContent>
-          
-          <TabsContent value="preview" className="p-6 bg-white rounded-lg shadow-sm border-l-4 border-[#EFB21E]">
-            <h2 className="text-xl font-bold text-center mb-6 text-[#003831]">Choose Your Oakland Theme</h2>
-            
-            {memoryData && (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <Card className="bg-gray-800/80 backdrop-blur-sm border-green-600/30">
+          <CardHeader>
+            <CardTitle className="text-white flex items-center gap-2">
+              <Camera className="h-6 w-6 text-yellow-400" />
+              Your Oakland Story
+            </CardTitle>
+            <CardDescription className="text-gray-300">
+              Share your memories, moments, and connection to Oakland baseball
+            </CardDescription>
+          </CardHeader>
+
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Basic Info */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <h3 className="font-medium mb-4 text-gray-700">Select Oakland Era Design:</h3>
-                  <div className="grid grid-cols-1 gap-4 mb-8 max-h-96 overflow-y-auto">
-                    {templateOptions.map((template) => (
-                      <div 
+                  <Label htmlFor="title" className="text-white">Memory Title *</Label>
+                  <Input
+                    id="title"
+                    value={formData.title}
+                    onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                    required
+                    className="bg-gray-700 border-gray-600 text-white"
+                    placeholder="My first A's game..."
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="memory_type" className="text-white">Memory Type</Label>
+                  <Select value={formData.memory_type} onValueChange={(value) => setFormData(prev => ({ ...prev, memory_type: value as any }))}>
+                    <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="game">⚾ Game</SelectItem>
+                      <SelectItem value="tailgate">🍖 Tailgate</SelectItem>
+                      <SelectItem value="championship">🏆 Championship</SelectItem>
+                      <SelectItem value="protest">✊ Protest</SelectItem>
+                      <SelectItem value="community">👥 Community</SelectItem>
+                      <SelectItem value="farewell">👋 Farewell</SelectItem>
+                      <SelectItem value="player_moment">⭐ Player Moment</SelectItem>
+                      <SelectItem value="season_highlight">📅 Season Highlight</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="description" className="text-white">Description</Label>
+                <Textarea
+                  id="description"
+                  value={formData.description}
+                  onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                  className="bg-gray-700 border-gray-600 text-white"
+                  placeholder="Tell us about this memory..."
+                  rows={3}
+                />
+              </div>
+
+              {/* Era & Game Details */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <Label htmlFor="era" className="text-white">Era</Label>
+                  <Select value={formData.era} onValueChange={(value) => setFormData(prev => ({ ...prev, era: value as any }))}>
+                    <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="early_years">🌱 Early Years</SelectItem>
+                      <SelectItem value="dynasty_70s">👑 Dynasty 70s</SelectItem>
+                      <SelectItem value="bash_brothers">💪 Bash Brothers</SelectItem>
+                      <SelectItem value="moneyball">📊 Moneyball</SelectItem>
+                      <SelectItem value="playoff_runs">🎯 Playoff Runs</SelectItem>
+                      <SelectItem value="farewell">👋 Farewell</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label htmlFor="game_date" className="text-white flex items-center gap-1">
+                    <CalendarDays className="h-4 w-4" />
+                    Game Date
+                  </Label>
+                  <Input
+                    id="game_date"
+                    type="date"
+                    value={formData.game_date}
+                    onChange={(e) => setFormData(prev => ({ ...prev, game_date: e.target.value }))}
+                    className="bg-gray-700 border-gray-600 text-white"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="opponent" className="text-white">Opponent</Label>
+                  <Input
+                    id="opponent"
+                    value={formData.opponent}
+                    onChange={(e) => setFormData(prev => ({ ...prev, opponent: e.target.value }))}
+                    className="bg-gray-700 border-gray-600 text-white"
+                    placeholder="vs Yankees..."
+                  />
+                </div>
+              </div>
+
+              {/* Location & Details */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <Label htmlFor="location" className="text-white flex items-center gap-1">
+                    <MapPin className="h-4 w-4" />
+                    Location
+                  </Label>
+                  <Input
+                    id="location"
+                    value={formData.location}
+                    onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
+                    className="bg-gray-700 border-gray-600 text-white"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="section" className="text-white">Section</Label>
+                  <Input
+                    id="section"
+                    value={formData.section}
+                    onChange={(e) => setFormData(prev => ({ ...prev, section: e.target.value }))}
+                    className="bg-gray-700 border-gray-600 text-white"
+                    placeholder="Section 200..."
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="score" className="text-white">Score</Label>
+                  <Input
+                    id="score"
+                    value={formData.score}
+                    onChange={(e) => setFormData(prev => ({ ...prev, score: e.target.value }))}
+                    className="bg-gray-700 border-gray-600 text-white"
+                    placeholder="A's 7, Yankees 3"
+                  />
+                </div>
+              </div>
+
+              {/* Emotions */}
+              <div>
+                <Label className="text-white flex items-center gap-1 mb-3">
+                  <Heart className="h-4 w-4" />
+                  What emotions did this memory evoke?
+                </Label>
+                <div className="flex flex-wrap gap-2">
+                  {emotionOptions.map((emotion) => (
+                    <Badge
+                      key={emotion.value}
+                      variant={formData.emotions.includes(emotion.value) ? "default" : "outline"}
+                      className={`cursor-pointer ${
+                        formData.emotions.includes(emotion.value) 
+                          ? `${emotion.color} text-white` 
+                          : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                      }`}
+                      onClick={() => handleEmotionToggle(emotion.value)}
+                    >
+                      {emotion.label}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+
+              {/* Fan Expressions */}
+              <div>
+                <Label className="text-white flex items-center gap-1 mb-3">
+                  <Megaphone className="h-4 w-4" />
+                  Oakland Fan Expressions (select any that apply)
+                </Label>
+                <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto">
+                  {expressions.slice(0, 20).map((expression) => (
+                    <Badge
+                      key={expression.id}
+                      variant={formData.fan_expressions.includes(expression.text_content) ? "default" : "outline"}
+                      className={`cursor-pointer ${
+                        formData.fan_expressions.includes(expression.text_content)
+                          ? 'bg-green-600 text-white' 
+                          : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                      }`}
+                      onClick={() => handleExpressionToggle(expression.text_content)}
+                    >
+                      {expression.text_content}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+
+              {/* Personal Context */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="personal_significance" className="text-white">Personal Significance</Label>
+                  <Textarea
+                    id="personal_significance"
+                    value={formData.personal_significance}
+                    onChange={(e) => setFormData(prev => ({ ...prev, personal_significance: e.target.value }))}
+                    className="bg-gray-700 border-gray-600 text-white"
+                    placeholder="Why was this moment special to you?"
+                    rows={3}
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="historical_context" className="text-white">Historical Context</Label>
+                  <Textarea
+                    id="historical_context"
+                    value={formData.historical_context}
+                    onChange={(e) => setFormData(prev => ({ ...prev, historical_context: e.target.value }))}
+                    className="bg-gray-700 border-gray-600 text-white"
+                    placeholder="What was happening in Oakland baseball at the time?"
+                    rows={3}
+                  />
+                </div>
+              </div>
+
+              {/* Additional Info */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="attendees" className="text-white flex items-center gap-1">
+                    <Users className="h-4 w-4" />
+                    Who was with you? (comma separated)
+                  </Label>
+                  <Input
+                    id="attendees"
+                    value={formData.attendees}
+                    onChange={(e) => setFormData(prev => ({ ...prev, attendees: e.target.value }))}
+                    className="bg-gray-700 border-gray-600 text-white"
+                    placeholder="Dad, Mom, Brother..."
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="tags" className="text-white">Tags (comma separated)</Label>
+                  <Input
+                    id="tags"
+                    value={formData.tags}
+                    onChange={(e) => setFormData(prev => ({ ...prev, tags: e.target.value }))}
+                    className="bg-gray-700 border-gray-600 text-white"
+                    placeholder="family, first-game, championship..."
+                  />
+                </div>
+              </div>
+
+              {/* Template Selection */}
+              {templates.length > 0 && (
+                <div>
+                  <Label className="text-white mb-3 block">Choose a Template</Label>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    {templates.map((template) => (
+                      <div
                         key={template.id}
-                        onClick={() => setSelectedTemplate(template.id)}
-                        className={`cursor-pointer p-4 rounded-lg border-2 transition-all ${
-                          selectedTemplate === template.id 
-                            ? 'border-[#006341] bg-[#006341]/10 shadow-md' 
-                            : 'border-gray-200 hover:border-[#006341]/50 hover:bg-gray-50'
+                        className={`p-3 rounded-lg border cursor-pointer transition-colors ${
+                          formData.template_id === template.id
+                            ? 'border-green-500 bg-green-900/50'
+                            : 'border-gray-600 bg-gray-700/50 hover:border-gray-500'
                         }`}
+                        onClick={() => setFormData(prev => ({ ...prev, template_id: template.id }))}
                       >
-                        <div className="flex justify-between items-start mb-2">
-                          <p className="text-sm font-medium text-[#003831]">{template.name}</p>
-                          <span className="text-xs bg-[#EFB21E] text-[#003831] px-2 py-1 rounded-full font-medium">
-                            {template.era}
-                          </span>
-                        </div>
-                        <p className="text-xs text-gray-600">{template.description}</p>
+                        <h4 className="text-white font-medium">{template.name}</h4>
+                        <p className="text-gray-400 text-sm">{template.description}</p>
                       </div>
                     ))}
                   </div>
-                  
-                  <div className="flex justify-center">
-                    <button
-                      onClick={handleSaveCard}
-                      className="px-8 py-3 bg-[#006341] hover:bg-[#003831] text-white font-medium rounded-lg transition-colors shadow-md hover:shadow-lg"
-                    >
-                      🏟️ Save Oakland Memory
-                    </button>
-                  </div>
                 </div>
-                
-                <div className="flex justify-center">
-                  <div className="max-w-[300px] w-full">
-                    <OaklandMemoryCard
-                      memory={{
-                        title: memoryData.title,
-                        description: memoryData.description,
-                        date: memoryData.date || '',
-                        memoryType: memoryData.memoryType || '',
-                        opponent: memoryData.opponent,
-                        score: memoryData.score,
-                        location: memoryData.location || 'Oakland Coliseum',
-                        section: memoryData.section,
-                        attendees: memoryData.attendees || [],
-                        tags: memoryData.tags || ['oakland', 'athletics'],
-                        imageUrl: imageUrl,
-                        historicalContext: memoryData.historicalContext,
-                        personalSignificance: memoryData.personalSignificance
-                      }}
-                      templateType={selectedTemplate}
-                    />
-                  </div>
-                </div>
+              )}
+
+              {/* Privacy */}
+              <div>
+                <Label htmlFor="visibility" className="text-white">Privacy</Label>
+                <Select value={formData.visibility} onValueChange={(value) => setFormData(prev => ({ ...prev, visibility: value as any }))}>
+                  <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="public">🌍 Public - Anyone can see</SelectItem>
+                    <SelectItem value="community">👥 Community - Oakland fans only</SelectItem>
+                    <SelectItem value="private">🔒 Private - Only you</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-            )}
-          </TabsContent>
-        </Tabs>
+
+              {/* Submit */}
+              <div className="flex gap-4 pt-4">
+                <Button 
+                  type="submit" 
+                  className="flex-1 bg-green-600 hover:bg-green-700"
+                  disabled={loading}
+                >
+                  {loading ? 'Creating Memory...' : 'Create Memory'}
+                </Button>
+                <Button 
+                  type="button" 
+                  variant="outline"
+                  onClick={() => navigate('/')}
+                  className="border-gray-600 text-white hover:bg-gray-700"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
