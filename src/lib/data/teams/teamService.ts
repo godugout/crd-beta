@@ -44,11 +44,9 @@ export const createTeam = async (team: Omit<Team, 'id' | 'created_at' | 'updated
   const { data, error } = await supabase
     .from('teams')
     .insert({
-      // Only include fields that exist in the actual database schema
-      city: team.city_id,
-      league: team.league,
-      division: team.division,
-      founded_year: team.founded_year,
+      // Map to actual database schema fields
+      name: team.name,
+      owner_id: team.city_id, // Using city_id as a placeholder for owner_id
       description: team.description,
       logo_url: team.logo_url,
       primary_color: team.primary_color,
@@ -73,10 +71,7 @@ export const updateTeam = async (teamId: string, updates: Partial<Team>): Promis
   const updateData: any = {};
   
   // Only include fields that exist in the database schema
-  if (updates.city_id !== undefined) updateData.city = updates.city_id;
-  if (updates.league !== undefined) updateData.league = updates.league;
-  if (updates.division !== undefined) updateData.division = updates.division;
-  if (updates.founded_year !== undefined) updateData.founded_year = updates.founded_year;
+  if (updates.name !== undefined) updateData.name = updates.name;
   if (updates.description !== undefined) updateData.description = updates.description;
   if (updates.logo_url !== undefined) updateData.logo_url = updates.logo_url;
   if (updates.primary_color !== undefined) updateData.primary_color = updates.primary_color;

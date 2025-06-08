@@ -9,8 +9,8 @@ export const createTeam = async (name: string, cityId: string): Promise<Team | n
       .from('teams')
       .insert([{ 
         id: uuidv4(), 
-        city: cityId,
-        league: 'MLB',
+        name: name,
+        owner_id: cityId, // Use owner_id as required by schema
         primary_color: '#000000',
         secondary_color: '#FFFFFF'
       }])
@@ -24,9 +24,9 @@ export const createTeam = async (name: string, cityId: string): Promise<Team | n
 
     return {
       id: data.id,
-      name: name,
+      name: data.name,
       slug: name.toLowerCase().replace(/\s+/g, '-'),
-      city_id: data.city,
+      city_id: data.owner_id, // Map back to city_id for our interface
       sport: 'Baseball',
       primary_color: data.primary_color,
       secondary_color: data.secondary_color,

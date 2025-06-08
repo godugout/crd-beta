@@ -7,11 +7,11 @@ import { Team } from '@/lib/types/teamTypes';
  */
 export const mapTeamFromDb = (team: any): Team => ({
   id: team.id,
-  name: team.title || team.name || `Team ${team.id}`, // Handle different possible name fields
-  slug: team.slug || (team.title || team.name || team.id).toLowerCase().replace(/\s+/g, '-'),
-  city_id: team.city || team.city_id || 'unknown-city',
-  sport: team.sport || 'Baseball',
-  league: team.league,
+  name: team.name || `Team ${team.id}`,
+  slug: team.slug || (team.name || team.id).toLowerCase().replace(/\s+/g, '-'),
+  city_id: team.owner_id || 'unknown-city', // Map owner_id back to city_id for our interface
+  sport: 'Baseball', // Default value since it's not in the database
+  league: team.league || 'MLB',
   division: team.division,
   founded_year: team.founded_year,
   stadium: team.stadium,
