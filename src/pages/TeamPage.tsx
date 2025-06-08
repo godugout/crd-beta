@@ -4,6 +4,7 @@ import { useParams } from 'react-router-dom';
 import TeamNotFound from '@/components/teams/TeamNotFound';
 import OaklandTeamPage from '@/components/teams/OaklandTeamPage';
 import StandardTeamPage from '@/components/teams/StandardTeamPage';
+import { Team } from '@/lib/types/teamTypes';
 
 interface TeamPageProps {
   teamId?: string;
@@ -15,22 +16,54 @@ const TeamPage: React.FC<TeamPageProps> = ({ teamId: propTeamId }) => {
   // Use teamId from props if provided, otherwise from URL params
   const teamId = propTeamId || paramTeamId;
   
-  const teams = [
+  const teams: Team[] = [
     {
       id: 'oakland',
       name: 'Oakland A\'s',
-      logo: '/logo-oak.png',
-      primaryColor: '#006341',
-      secondaryColor: '#EFB21E',
-      description: 'Oakland Athletics team page'
+      slug: 'oakland-athletics',
+      city_id: 'oakland-city',
+      sport: 'Baseball',
+      league: 'MLB',
+      division: 'AL West',
+      founded_year: 1901,
+      stadium: 'Oakland Coliseum',
+      description: 'Oakland Athletics team page',
+      logo_url: '/logo-oak.png',
+      primary_color: '#006341',
+      secondary_color: '#EFB21E',
+      accent_color: '#FFFFFF',
+      team_config: {
+        features: ['walkman', 'protest_memories', 'mascot_gallery'],
+        eras: ['early_years', 'dynasty_70s', 'bash_brothers', 'moneyball', 'playoff_runs', 'farewell'],
+        theme: 'oakland'
+      },
+      is_active: true,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
     },
     {
       id: 'sf-giants',
       name: 'San Francisco Giants',
-      logo: '/logo-sfg.png',
-      primaryColor: '#FD5A1E',
-      secondaryColor: '#27251F',
-      description: 'San Francisco Giants team page'
+      slug: 'san-francisco-giants',
+      city_id: 'sf-city',
+      sport: 'Baseball',
+      league: 'MLB',
+      division: 'NL West',
+      founded_year: 1883,
+      stadium: 'Oracle Park',
+      description: 'San Francisco Giants team page',
+      logo_url: '/logo-sfg.png',
+      primary_color: '#FD5A1E',
+      secondary_color: '#27251F',
+      accent_color: '#FFFFFF',
+      team_config: {
+        features: ['memories', 'community'],
+        eras: ['ny_giants', 'early_sf', 'bonds_era', 'championship_decade'],
+        theme: 'giants'
+      },
+      is_active: true,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
     }
   ];
 

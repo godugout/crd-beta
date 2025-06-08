@@ -1,3 +1,4 @@
+
 import { Suspense, lazy } from 'react';
 import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
@@ -6,7 +7,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { CardProvider } from '@/context/CardContext';
 import { CardEnhancedProvider } from '@/context/CardEnhancedContext';
 import { AuthProvider } from '@/context/auth/AuthProvider';
-import { oaklandRoutes, teamRoutes } from '@/routes/oakland';
+import { teamRoutes } from '@/routes/teamRoutes';
 
 // Import Oakland theme CSS
 import '@/styles/oakland-theme.css';
@@ -68,19 +69,11 @@ function App() {
                   {/* Legacy Oakland routes - redirect to new team routes */}
                   <Route 
                     path="/oakland" 
-                    element={
-                      <Suspense fallback={<LoadingSpinner />}>
-                        <OaklandHomepage />
-                      </Suspense>
-                    } 
+                    element={<Navigate to="/teams/oakland-athletics" replace />}
                   />
                   <Route 
                     path="/oakland/create" 
-                    element={
-                      <Suspense fallback={<LoadingSpinner />}>
-                        <OaklandMemoryCreator />
-                      </Suspense>
-                    } 
+                    element={<Navigate to="/teams/oakland-athletics/create" replace />}
                   />
                   
                   <Route 
@@ -117,17 +110,12 @@ function App() {
                   />
                   
                   {/* Redirect all create/editor paths to Oakland Memory Creator for now */}
-                  <Route path="/create" element={<Navigate to="/oakland/create" replace />} />
-                  <Route path="/editor" element={<Navigate to="/oakland/create" replace />} />
-                  <Route path="/editor/:id" element={<Navigate to="/oakland/create" replace />} />
+                  <Route path="/create" element={<Navigate to="/teams/oakland-athletics/create" replace />} />
+                  <Route path="/editor" element={<Navigate to="/teams/oakland-athletics/create" replace />} />
+                  <Route path="/editor/:id" element={<Navigate to="/teams/oakland-athletics/create" replace />} />
                   
                   {/* Import team routes */}
                   {teamRoutes.map((route, index) => (
-                    <Route key={index} path={route.path} element={route.element} />
-                  ))}
-                  
-                  {/* Keep existing Oakland routes for backward compatibility */}
-                  {oaklandRoutes.map((route, index) => (
                     <Route key={index} path={route.path} element={route.element} />
                   ))}
                 </Routes>

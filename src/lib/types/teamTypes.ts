@@ -56,6 +56,20 @@ export interface TeamConfig {
 
 export type TeamFeature = 'walkman' | 'protest_memories' | 'mascot_gallery' | 'memories' | 'community' | 'templates';
 
+export interface TeamMember {
+  id: string;
+  teamId: string;
+  userId: string;
+  role: string;
+  joinedAt: string;
+  user?: {
+    id: string;
+    displayName: string;
+    email?: string;
+    avatarUrl?: string;
+  };
+}
+
 export interface FanMemory {
   id: string;
   user_id: string;

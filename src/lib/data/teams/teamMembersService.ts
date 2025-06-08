@@ -1,6 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { TeamMember } from '@/lib/types';
+import { TeamMember } from '@/lib/types/teamTypes';
 import { mapTeamMemberFromDb } from './mappers';
 
 /**

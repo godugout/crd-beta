@@ -40,20 +40,25 @@ export const getAllTeams = async (): Promise<Team[]> => {
 /**
  * Create a new team
  */
-export const createTeam = async (team: Omit<Team, 'id' | 'createdAt' | 'updatedAt'>): Promise<Team | null> => {
+export const createTeam = async (team: Omit<Team, 'id' | 'created_at' | 'updated_at'>): Promise<Team | null> => {
   const { data, error } = await supabase
     .from('teams')
     .insert({
       name: team.name,
+      slug: team.slug,
+      city_id: team.city_id,
+      sport: team.sport,
+      league: team.league,
+      division: team.division,
+      founded_year: team.founded_year,
+      stadium: team.stadium,
       description: team.description,
-      logo_url: team.logoUrl || team.logo_url,
-      banner_url: team.banner_url,
-      owner_id: team.ownerId,
-      status: team.status,
-      website: team.website,
-      email: team.email,
-      specialties: team.specialties,
-      visibility: team.visibility
+      logo_url: team.logo_url,
+      primary_color: team.primary_color,
+      secondary_color: team.secondary_color,
+      accent_color: team.accent_color,
+      team_config: team.team_config,
+      is_active: team.is_active
     })
     .select('*')
     .single();
@@ -74,16 +79,20 @@ export const updateTeam = async (teamId: string, updates: Partial<Team>): Promis
     .from('teams')
     .update({
       name: updates.name,
+      slug: updates.slug,
+      city_id: updates.city_id,
+      sport: updates.sport,
+      league: updates.league,
+      division: updates.division,
+      founded_year: updates.founded_year,
+      stadium: updates.stadium,
       description: updates.description,
-      logo_url: updates.logoUrl || updates.logo_url,
-      banner_url: updates.banner_url,
-      status: updates.status,
-      website: updates.website,
-      email: updates.email,
-      specialties: updates.specialties,
-      visibility: updates.visibility,
+      logo_url: updates.logo_url,
       primary_color: updates.primary_color,
-      secondary_color: updates.secondary_color
+      secondary_color: updates.secondary_color,
+      accent_color: updates.accent_color,
+      team_config: updates.team_config,
+      is_active: updates.is_active
     })
     .eq('id', teamId)
     .select('*')
