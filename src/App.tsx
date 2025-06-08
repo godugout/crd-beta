@@ -3,7 +3,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/sonner';
-import { ThemeProvider } from '@/components/theme-provider';
+import { ThemeProvider } from '@/hooks/useTheme';
 import { CardProvider } from '@/context/CardContext';
 import { AuthProvider } from '@/context/auth/AuthProvider';
 
@@ -33,7 +33,7 @@ const queryClient = new QueryClient({
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+      <ThemeProvider>
         <AuthProvider>
           <CardProvider>
             <Router>
@@ -58,17 +58,29 @@ function App() {
                   
                   {/* Team Routes */}
                   {teamRoutes.map((route, index) => (
-                    <Route key={index} {...route} />
+                    <Route 
+                      key={`team-${index}`} 
+                      path={route.path} 
+                      element={route.element} 
+                    />
                   ))}
                   
                   {/* Town Routes */}
                   {townRoutes.map((route, index) => (
-                    <Route key={index} {...route} />
+                    <Route 
+                      key={`town-${index}`} 
+                      path={route.path} 
+                      element={route.element} 
+                    />
                   ))}
                   
                   {/* Oakland Routes */}
                   {oaklandRoutes.map((route, index) => (
-                    <Route key={index} {...route} />
+                    <Route 
+                      key={`oakland-${index}`} 
+                      path={route.path} 
+                      element={route.element} 
+                    />
                   ))}
                 </Routes>
                 <Toaster />
