@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -20,7 +19,7 @@ const WalkmanPlayer: React.FC<WalkmanPlayerProps> = ({ audioMemories = [] }) => 
   const [volume, setVolume] = useState(0.7);
   const audioRef = useRef<HTMLAudioElement>(null);
 
-  // Sample audio memories for demo
+  // Sample audio memories for demo - now with all required fields
   const sampleTapes: AudioMemory[] = audioMemories.length > 0 ? audioMemories : [
     {
       id: '1',
@@ -33,7 +32,13 @@ const WalkmanPlayer: React.FC<WalkmanPlayerProps> = ({ audioMemories = [] }) => 
       tags: ['walkoff', 'victory', 'angels'],
       cassette_label: 'RALLY TAPE #1',
       plays_count: 45,
-      created_at: new Date().toISOString()
+      era: 'playoff_runs',
+      game_date: '2002-10-05',
+      opponent: 'Anaheim Angels',
+      is_featured: true,
+      visibility: 'public',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
     },
     {
       id: '2',
@@ -46,20 +51,30 @@ const WalkmanPlayer: React.FC<WalkmanPlayerProps> = ({ audioMemories = [] }) => 
       tags: ['farewell', 'coliseum', 'emotional'],
       cassette_label: 'GOODBYE OAKLAND',
       plays_count: 89,
-      created_at: new Date().toISOString()
+      era: 'farewell',
+      game_date: '2024-09-26',
+      opponent: 'Texas Rangers',
+      is_featured: true,
+      visibility: 'public',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
     },
     {
       id: '3',
       user_id: 'demo',
       title: 'Lets Go Oakland Chant',
-      description: 'Classic crowd chant from the bleachers',
+      description: 'Classic crowd chant recorded at various games',
       audio_url: '/audio/lets-go-oakland.mp3',
       duration: 60,
       memory_type: 'chant',
       tags: ['chant', 'crowd', 'classic'],
       cassette_label: 'BLEACHER CHANTS',
       plays_count: 156,
-      created_at: new Date().toISOString()
+      era: 'dynasty_70s',
+      is_featured: false,
+      visibility: 'public',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
     }
   ];
 
