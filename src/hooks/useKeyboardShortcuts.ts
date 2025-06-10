@@ -1,98 +1,47 @@
 
 import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-interface KeyboardShortcutsOptions {
-  onUndo: () => void;
-  onRedo: () => void;
-  onSave: () => void;
-  onZoomIn: () => void;
-  onZoomOut: () => void;
-  onResetView: () => void;
-  onDelete: () => void;
-  canUndo: boolean;
-  canRedo: boolean;
-}
+export const useKeyboardShortcuts = () => {
+  const navigate = useNavigate();
 
-export const useKeyboardShortcuts = ({
-  onUndo,
-  onRedo,
-  onSave,
-  onZoomIn,
-  onZoomOut,
-  onResetView,
-  onDelete,
-  canUndo,
-  canRedo
-}: KeyboardShortcutsOptions) => {
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // Prevent shortcuts when typing in inputs
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+    const handleKeyPress = (event: KeyboardEvent) => {
+      // Only trigger if not in an input field
+      if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) {
         return;
       }
 
-      const { ctrlKey, metaKey, shiftKey, key } = e;
-      const cmdOrCtrl = ctrlKey || metaKey;
+      // Only trigger if no modifier keys are pressed (except for search)
+      if (event.ctrlKey || event.metaKey || event.altKey) {
+        return;
+      }
 
-      switch (key) {
-        case 'z':
-        case 'Z':
-          if (cmdOrCtrl && !shiftKey && canUndo) {
-            e.preventDefault();
-            onUndo();
-          } else if (cmdOrCtrl && shiftKey && canRedo) {
-            e.preventDefault();
-            onRedo();
-          }
+      switch (event.key.toLowerCase()) {
+        case 'c':
+          event.preventDefault();
+          navigate('/cards/create');
           break;
-        
-        case 'y':
-        case 'Y':
-          if (cmdOrCtrl && canRedo) {
-            e.preventDefault();
-            onRedo();
-          }
+        case 'g':
+          event.preventDefault();
+          navigate('/gallery');
           break;
-        
-        case 's':
-        case 'S':
-          if (cmdOrCtrl) {
-            e.preventDefault();
-            onSave();
-          }
+        case 'h':
+          event.preventDefault();
+          navigate('/');
           break;
-        
-        case '=':
-        case '+':
-          if (cmdOrCtrl) {
-            e.preventDefault();
-            onZoomIn();
+        case '/':
+          event.preventDefault();
+          // Focus search input if available
+          const searchInput = document.querySelector('input[placeholder*="Search"]') as HTMLInputElement;
+          if (searchInput) {
+            searchInput.focus();
           }
-          break;
-        
-        case '-':
-        case '_':
-          if (cmdOrCtrl) {
-            e.preventDefault();
-            onZoomOut();
-          }
-          break;
-        
-        case '0':
-          if (cmdOrCtrl) {
-            e.preventDefault();
-            onResetView();
-          }
-          break;
-        
-        case 'Delete':
-        case 'Backspace':
-          onDelete();
           break;
       }
     };
 
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [onUndo, onRedo, onSave, onZoomIn, onZoomOut, onResetView, onDelete, canUndo, canRedo]);
+    document.addEventListener('keydown', handleKeyPress);
+    return () => document.removeEventListener('keydown', handleKeyPress);
+  }, [navigate]);
 };
