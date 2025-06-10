@@ -1,33 +1,19 @@
 
-import { useAuth as useProviderAuth } from '@/providers/AuthProvider';
+import { useAuth as useContextAuth } from '@/context/auth/AuthProvider';
 
 /**
  * Custom hook for accessing auth context.
- * This simplified version uses the main AuthProvider.
+ * This uses the AuthProvider from the context directory.
  */
 export const useAuth = () => {
-  const auth = useProviderAuth();
+  const auth = useContextAuth();
   
-  // Add missing methods for compatibility with AuthContextType
+  // For compatibility, ensure we have all expected properties
   return {
     ...auth,
-    signIn: async (email: string, password: string) => {
-      const result = await auth.login(email, password);
-      return { success: !!result, error: result ? undefined : 'Login failed' };
-    },
-    signUp: async (email: string, password: string, userData?: any) => {
-      const result = await auth.register(email, password, userData);
-      return { success: !!result, error: result ? undefined : 'Registration failed' };
-    },
+    signIn: auth.login,
+    signUp: auth.register,
     signOut: auth.logout,
-    resetPassword: async (email: string) => {
-      return { success: false, error: 'Reset password not implemented' };
-    },
-    updateProfile: async (data: any) => {
-      const result = await auth.updateUser(data);
-      return { success: !!result, error: result ? undefined : 'Update failed' };
-    },
-    refreshSession: async () => false,
     loading: auth.isLoading
   };
 };

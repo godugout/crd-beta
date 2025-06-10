@@ -1,7 +1,8 @@
+
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Search, PlusCircle, Menu, X, Palette, Sparkles, LogIn } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/context/auth/AuthProvider'; // Use context auth directly
 import { Button } from '@/components/ui/button';
 import { CrdButton } from '@/components/ui/crd-button';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
@@ -14,7 +15,7 @@ import UserDropdown from '@/components/navbar/UserDropdown';
 const AppHeader: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
-  const { user, signOut, isAuthenticated } = useAuth();
+  const { user, logout, isAuthenticated } = useAuth(); // Use context auth directly
   const { currentTheme } = useBrandTheme();
   const { isActive } = useNavbar();
 
