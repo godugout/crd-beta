@@ -35,6 +35,7 @@ const BaseballModel: React.FC<BaseballModelProps> = ({
 
   return (
     <div className="w-full h-full relative">
+      {/* Upload button - Outside Canvas */}
       <input
         type="file"
         id="model-upload"

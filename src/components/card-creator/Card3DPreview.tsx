@@ -57,8 +57,8 @@ export const Card3DPreview: React.FC<Card3DPreviewProps> = ({
         />
       </Canvas>
       
-      {/* Style Badge - Outside Canvas */}
-      <div className="absolute top-4 left-4 pointer-events-none">
+      {/* Style Badge - Moved outside Canvas */}
+      <div className="absolute top-4 left-4 pointer-events-none z-10">
         <Badge variant="secondary" className="bg-black/50 text-white border-white/20">
           {selectedStyle} • {selectedTemplate.name} • {selectedEnvironment.name}
         </Badge>

@@ -176,7 +176,7 @@ const RealisticCardViewer: React.FC<RealisticCardViewerProps> = ({
         />
       </Canvas>
 
-      {/* Subtle Card Name - moved to bottom right corner */}
+      {/* Subtle Card Name - moved outside Canvas */}
       <div className="absolute bottom-4 right-4 z-10">
         <div className="px-3 py-1 bg-black/20 backdrop-blur-sm text-white/80 text-xs rounded-full border border-white/10">
           {card.title}

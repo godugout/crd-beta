@@ -59,7 +59,7 @@ const ImmersiveCardViewer: React.FC<ImmersiveCardViewerProps> = ({
         />
       </Canvas>
       
-      {/* Controls overlay */}
+      {/* Controls overlay - Moved outside Canvas */}
       <div className="absolute bottom-4 left-0 right-0 flex justify-center z-10">
         <button 
           className="px-4 py-2 bg-gray-800/70 text-white rounded-full hover:bg-gray-700/90 transition"
