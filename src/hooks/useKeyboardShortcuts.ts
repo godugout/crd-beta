@@ -44,4 +44,7 @@ export const useKeyboardShortcuts = () => {
     document.addEventListener('keydown', handleKeyPress);
     return () => document.removeEventListener('keydown', handleKeyPress);
   }, [navigate]);
+
+  // Return an empty object to maintain consistency
+  return {};
 };
