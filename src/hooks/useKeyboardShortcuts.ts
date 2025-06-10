@@ -2,8 +2,9 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-export const useKeyboardShortcuts = () => {
+export const useKeyboardShortcuts = (customNavigate?: any) => {
   const navigate = useNavigate();
+  const navigationFunction = customNavigate || navigate;
 
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
@@ -20,15 +21,15 @@ export const useKeyboardShortcuts = () => {
       switch (event.key.toLowerCase()) {
         case 'c':
           event.preventDefault();
-          navigate('/cards/create');
+          navigationFunction('/cards/create');
           break;
         case 'g':
           event.preventDefault();
-          navigate('/gallery');
+          navigationFunction('/gallery');
           break;
         case 'h':
           event.preventDefault();
-          navigate('/');
+          navigationFunction('/');
           break;
         case '/':
           event.preventDefault();
@@ -43,7 +44,7 @@ export const useKeyboardShortcuts = () => {
 
     document.addEventListener('keydown', handleKeyPress);
     return () => document.removeEventListener('keydown', handleKeyPress);
-  }, [navigate]);
+  }, [navigationFunction]);
 
   // Return an empty object to maintain consistency
   return {};
