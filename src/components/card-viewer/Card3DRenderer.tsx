@@ -1,6 +1,7 @@
 
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useMemo } from 'react';
 import { Card } from '@/lib/types';
+import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
 interface Card3DRendererProps {
@@ -18,118 +19,115 @@ const Card3DRenderer: React.FC<Card3DRendererProps> = ({
   activeEffects = [],
   effectIntensities = {}
 }) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const renderer = useRef<THREE.WebGLRenderer | null>(null);
-  const scene = useRef<THREE.Scene | null>(null);
-  const camera = useRef<THREE.PerspectiveCamera | null>(null);
-  const cardMesh = useRef<THREE.Mesh | null>(null);
+  const meshRef = useRef<THREE.Mesh>(null);
+  const groupRef = useRef<THREE.Group>(null);
+  
+  // Load textures
+  const frontTexture = useMemo(() => {
+    const loader = new THREE.TextureLoader();
+    const texture = loader.load(card.imageUrl || '/placeholder-card.png');
+    texture.flipY = false; // Prevent texture flipping
+    return texture;
+  }, [card.imageUrl]);
 
-  useEffect(() => {
-    if (!containerRef.current) return;
+  const backTexture = useMemo(() => {
+    const loader = new THREE.TextureLoader();
+    const texture = loader.load('/images/card-back-placeholder.png');
+    texture.flipY = false;
+    return texture;
+  }, []);
 
-    // Setup scene
-    scene.current = new THREE.Scene();
-    camera.current = new THREE.PerspectiveCamera(
-      75, 
-      containerRef.current.clientWidth / containerRef.current.clientHeight,
-      0.1,
-      1000
-    );
+  // Create materials based on active effects
+  const frontMaterial = useMemo(() => {
+    const intensity = effectIntensities[activeEffects[0]] || 1.0;
     
-    renderer.current = new THREE.WebGLRenderer({ 
-      antialias: true,
-      alpha: true 
+    if (activeEffects.includes('Holographic')) {
+      return new THREE.MeshPhysicalMaterial({
+        map: frontTexture,
+        metalness: 0.9 * intensity,
+        roughness: 0.1 * (1 - intensity * 0.8),
+        envMapIntensity: 2.0 * intensity,
+        clearcoat: 1.0,
+        clearcoatRoughness: 0.1,
+        iridescence: 1.0 * intensity,
+        iridescenceIOR: 1.3,
+        iridescenceThicknessRange: [100, 800],
+      });
+    }
+    
+    if (activeEffects.includes('Chrome')) {
+      return new THREE.MeshPhysicalMaterial({
+        map: frontTexture,
+        metalness: 1.0,
+        roughness: 0.05,
+        envMapIntensity: 3.0 * intensity,
+        clearcoat: 1.0,
+      });
+    }
+    
+    if (activeEffects.includes('Vintage')) {
+      return new THREE.MeshStandardMaterial({
+        map: frontTexture,
+        roughness: 0.8,
+        metalness: 0.1,
+        envMapIntensity: 0.3,
+      });
+    }
+    
+    // Default material
+    return new THREE.MeshPhysicalMaterial({
+      map: frontTexture,
+      roughness: 0.2,
+      metalness: 0.8,
+      envMapIntensity: 1.5,
+      clearcoat: 1,
+      clearcoatRoughness: 0.2,
     });
-    
-    renderer.current.setSize(
-      containerRef.current.clientWidth,
-      containerRef.current.clientHeight
-    );
-    
-    containerRef.current.appendChild(renderer.current.domElement);
-    
-    // Position camera
-    camera.current.position.z = 1.5;
-    
-    // Create card mesh
-    const cardGeometry = new THREE.PlaneGeometry(1, 1.4); // Card aspect ratio
-    
-    // Load card texture
-    const textureLoader = new THREE.TextureLoader();
-    const cardTexture = textureLoader.load(
-      card.imageUrl || '/placeholder-card.png', 
-      () => {
-        if (renderer.current) renderer.current.render(scene.current!, camera.current!);
-      }
-    );
-    
-    const cardMaterial = new THREE.MeshBasicMaterial({ 
-      map: cardTexture,
-      side: THREE.DoubleSide
+  }, [frontTexture, activeEffects, effectIntensities]);
+
+  const backMaterial = useMemo(() => {
+    return new THREE.MeshPhysicalMaterial({
+      map: backTexture,
+      roughness: 0.3,
+      metalness: 0.7,
+      envMapIntensity: 1.2,
+      clearcoat: 0.8,
     });
+  }, [backTexture]);
+
+  useFrame((state, delta) => {
+    if (!groupRef.current) return;
     
-    cardMesh.current = new THREE.Mesh(cardGeometry, cardMaterial);
-    scene.current.add(cardMesh.current);
+    // Handle flipping animation
+    const targetRotationY = isFlipped ? Math.PI : 0;
+    if (Math.abs(groupRef.current.rotation.y - targetRotationY) > 0.01) {
+      groupRef.current.rotation.y += (targetRotationY - groupRef.current.rotation.y) * 0.1;
+    }
     
-    // Animation loop
-    const animate = () => {
-      requestAnimationFrame(animate);
-      
-      if (cardMesh.current) {
-        // Apply flipping effect if needed
-        if (isFlipped) {
-          cardMesh.current.rotation.y = Math.PI;
-        } else {
-          cardMesh.current.rotation.y = Math.sin(Date.now() * 0.001) * 0.3;
-        }
-      }
-      
-      if (renderer.current && scene.current && camera.current) {
-        renderer.current.render(scene.current, camera.current);
-      }
-    };
+    // Subtle floating animation
+    const time = state.clock.getElapsedTime();
+    groupRef.current.position.y = Math.sin(time * 0.5) * 0.02;
     
-    animate();
-    
-    // Handle resize
-    const handleResize = () => {
-      if (!containerRef.current || !camera.current || !renderer.current) return;
-      
-      camera.current.aspect = containerRef.current.clientWidth / containerRef.current.clientHeight;
-      camera.current.updateProjectionMatrix();
-      
-      renderer.current.setSize(
-        containerRef.current.clientWidth,
-        containerRef.current.clientHeight
-      );
-    };
-    
-    window.addEventListener('resize', handleResize);
-    
-    // Cleanup
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      
-      if (containerRef.current && renderer.current) {
-        containerRef.current.removeChild(renderer.current.domElement);
-      }
-      
-      if (cardMesh.current) {
-        cardMesh.current.geometry.dispose();
-        (cardMesh.current.material as THREE.MeshBasicMaterial).dispose();
-      }
-      
-      if (renderer.current) {
-        renderer.current.dispose();
-      }
-    };
-  }, [card.imageUrl, isFlipped]);
+    // Gentle rotation when not flipped
+    if (!isFlipped) {
+      groupRef.current.rotation.y += Math.sin(time * 0.3) * 0.002;
+    }
+  });
 
   return (
-    <div 
-      ref={containerRef} 
-      className={className || "w-full h-full min-h-[300px]"}
-    />
+    <group ref={groupRef} position={[0, 0, 0]}>
+      {/* Front of card */}
+      <mesh ref={meshRef} castShadow receiveShadow>
+        <planeGeometry args={[2.5, 3.5]} />
+        <primitive object={frontMaterial} />
+      </mesh>
+      
+      {/* Back of card */}
+      <mesh position={[0, 0, -0.01]} rotation={[0, Math.PI, 0]} castShadow receiveShadow>
+        <planeGeometry args={[2.5, 3.5]} />
+        <primitive object={backMaterial} />
+      </mesh>
+    </group>
   );
 };
 
