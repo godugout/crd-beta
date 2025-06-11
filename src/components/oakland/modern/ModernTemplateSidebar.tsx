@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { ChevronLeft, ChevronRight, Search, Grid3X3 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Search, Grid3X3, Sparkles, Star, Clock, Trophy } from 'lucide-react';
 import { OAKLAND_CARD_TEMPLATES, OAKLAND_CARD_CATEGORIES, OaklandCardTemplate } from '@/lib/data/oaklandCardTemplates';
 import { cn } from '@/lib/utils';
 
@@ -13,6 +13,15 @@ interface ModernTemplateSidebarProps {
   collapsed: boolean;
   onToggleCollapse: () => void;
 }
+
+const getCategoryIcon = (categoryId: string) => {
+  switch (categoryId) {
+    case 'nostalgia': return Clock;
+    case 'celebration': return Trophy;
+    case 'protest': return Sparkles;
+    default: return Star;
+  }
+};
 
 const ModernTemplateSidebar: React.FC<ModernTemplateSidebarProps> = ({
   selectedTemplate,
@@ -32,18 +41,23 @@ const ModernTemplateSidebar: React.FC<ModernTemplateSidebarProps> = ({
 
   return (
     <div className={cn(
-      "bg-white border-r border-gray-200 transition-all duration-300 flex flex-col",
-      collapsed ? "w-12" : "w-80"
+      "bg-white border-r border-gray-200/80 transition-all duration-300 flex flex-col shadow-sm",
+      collapsed ? "w-16" : "w-96"
     )}>
-      {/* Collapse Toggle */}
-      <div className="p-4 border-b border-gray-200 flex items-center justify-between">
+      {/* Enhanced Header */}
+      <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-gray-50/50 to-white">
         {!collapsed && (
           <>
-            <div className="flex items-center gap-2">
-              <Grid3X3 className="h-5 w-5 text-[#003831]" />
-              <h2 className="font-semibold text-gray-900">Templates</h2>
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-br from-[#003831] to-[#2F5233] rounded-xl">
+                <Grid3X3 className="h-5 w-5 text-[#EFB21E]" />
+              </div>
+              <div>
+                <h2 className="font-bold text-gray-900 text-lg">Templates</h2>
+                <p className="text-xs text-gray-500 font-medium">Choose your style</p>
+              </div>
             </div>
-            <Badge variant="secondary" className="text-xs">
+            <Badge variant="secondary" className="text-xs bg-[#EFB21E]/20 text-[#003831] border-[#EFB21E]/30">
               {filteredTemplates.length}
             </Badge>
           </>
@@ -52,7 +66,7 @@ const ModernTemplateSidebar: React.FC<ModernTemplateSidebarProps> = ({
           variant="ghost"
           size="sm"
           onClick={onToggleCollapse}
-          className="p-2"
+          className="p-2 hover:bg-gray-100 transition-colors duration-200"
         >
           {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
         </Button>
@@ -60,74 +74,77 @@ const ModernTemplateSidebar: React.FC<ModernTemplateSidebarProps> = ({
 
       {!collapsed && (
         <>
-          {/* Search */}
-          <div className="p-4">
+          {/* Enhanced Search */}
+          <div className="p-6 border-b border-gray-100 bg-gray-50/30">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
               <Input
                 placeholder="Search templates..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
+                className="pl-10 border-gray-200 focus:border-[#003831] focus:ring-[#003831]/20 bg-white shadow-sm"
               />
             </div>
           </div>
 
-          {/* Category Pills */}
-          <div className="px-4 pb-4">
+          {/* Enhanced Category Pills */}
+          <div className="px-6 py-4 border-b border-gray-100">
             <div className="flex flex-wrap gap-2">
-              {OAKLAND_CARD_CATEGORIES.map((category) => (
-                <Button
-                  key={category.id}
-                  variant={selectedCategory === category.id ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setSelectedCategory(category.id)}
-                  className={cn(
-                    "text-xs",
-                    selectedCategory === category.id 
-                      ? "bg-[#003831] text-[#EFB21E] hover:bg-[#002620]" 
-                      : "hover:bg-gray-100"
-                  )}
-                >
-                  <span className="mr-1">{category.icon}</span>
-                  {category.name}
-                </Button>
-              ))}
+              {OAKLAND_CARD_CATEGORIES.map((category) => {
+                const Icon = getCategoryIcon(category.id);
+                return (
+                  <Button
+                    key={category.id}
+                    variant={selectedCategory === category.id ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setSelectedCategory(category.id)}
+                    className={cn(
+                      "text-xs font-medium transition-all duration-200",
+                      selectedCategory === category.id 
+                        ? "bg-gradient-to-r from-[#003831] to-[#2F5233] text-[#EFB21E] shadow-lg border-transparent" 
+                        : "hover:bg-[#003831]/5 hover:border-[#003831]/30 border-gray-200"
+                    )}
+                  >
+                    <Icon className="h-3 w-3 mr-1.5" />
+                    {category.name}
+                  </Button>
+                );
+              })}
             </div>
           </div>
 
-          {/* Template Grid */}
-          <div className="flex-1 overflow-y-auto px-4 pb-4">
-            <div className="grid grid-cols-2 gap-3">
+          {/* Enhanced Template Grid */}
+          <div className="flex-1 overflow-y-auto px-6 py-4">
+            <div className="grid grid-cols-2 gap-4">
               {filteredTemplates.map((template) => (
                 <div
                   key={template.id}
                   className={cn(
-                    "group relative cursor-pointer rounded-lg overflow-hidden border-2 transition-all duration-200",
+                    "group relative cursor-pointer rounded-2xl overflow-hidden border-2 transition-all duration-300 hover:scale-[1.02]",
                     selectedTemplate?.id === template.id
-                      ? "border-[#EFB21E] ring-2 ring-[#EFB21E]/20 shadow-lg"
-                      : "border-gray-200 hover:border-[#003831] hover:shadow-md"
+                      ? "border-[#EFB21E] ring-4 ring-[#EFB21E]/20 shadow-xl"
+                      : "border-gray-200 hover:border-[#003831]/40 hover:shadow-lg"
                   )}
                   onClick={() => onSelectTemplate(template)}
                 >
-                  <div className="aspect-[2.5/3.5] relative overflow-hidden">
+                  <div className="aspect-[2.5/3.5] relative overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
                     <img
                       src={template.imageUrl}
                       alt={template.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     />
                     
-                    {/* Overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                    {/* Enhanced Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     
                     {/* Template Info */}
-                    <div className="absolute bottom-2 left-2 right-2">
-                      <h3 className="text-white text-xs font-medium leading-tight">
+                    <div className="absolute bottom-0 left-0 right-0 p-3 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+                      <h3 className="text-white text-sm font-bold leading-tight mb-1">
                         {template.name}
                       </h3>
                       <Badge 
                         variant="secondary" 
-                        className="mt-1 text-xs bg-white/20 text-white border-white/30"
+                        className="text-xs bg-white/20 text-white border-white/30 backdrop-blur-sm"
                       >
                         {template.category}
                       </Badge>
@@ -135,20 +152,25 @@ const ModernTemplateSidebar: React.FC<ModernTemplateSidebarProps> = ({
 
                     {/* Selection Indicator */}
                     {selectedTemplate?.id === template.id && (
-                      <div className="absolute top-2 right-2 bg-[#EFB21E] text-[#003831] rounded-full w-6 h-6 flex items-center justify-center">
-                        ✓
+                      <div className="absolute top-3 right-3 bg-[#EFB21E] text-[#003831] rounded-full w-7 h-7 flex items-center justify-center shadow-lg">
+                        <Star className="h-4 w-4 fill-current" />
                       </div>
                     )}
+
+                    {/* Hover Glow Effect */}
+                    <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-[#003831]/20 to-[#EFB21E]/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   </div>
                 </div>
               ))}
             </div>
 
             {filteredTemplates.length === 0 && (
-              <div className="text-center py-12">
-                <div className="text-gray-400 text-sm">
-                  No templates found
+              <div className="text-center py-16">
+                <div className="text-gray-400 mb-2">
+                  <Search className="h-12 w-12 mx-auto mb-4" />
                 </div>
+                <p className="text-gray-500 font-medium">No templates found</p>
+                <p className="text-gray-400 text-sm">Try adjusting your search or filters</p>
               </div>
             )}
           </div>

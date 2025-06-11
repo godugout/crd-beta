@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Save, Eye, Share2, Download } from 'lucide-react';
+import { ArrowLeft, Save, Eye, Share2, Download, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { OaklandCardTemplate, OAKLAND_CARD_TEMPLATES } from '@/lib/data/oaklandCardTemplates';
@@ -59,22 +59,26 @@ const ModernCardCreator: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200 shadow-sm">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-gray-50">
+      {/* Modern Header */}
+      <header className="bg-white/80 backdrop-blur-md border-b border-gray-200/60 shadow-sm sticky top-0 z-30">
         <div className="px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Button
               variant="ghost"
               onClick={() => navigate('/')}
-              className="text-gray-600 hover:text-gray-900"
+              className="text-gray-600 hover:text-gray-900 hover:bg-gray-100/80 transition-all duration-200"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back
             </Button>
             <div>
-              <h1 className="text-xl font-semibold text-gray-900">Oakland A's Memory Creator</h1>
-              <p className="text-sm text-gray-500">Design your authentic Oakland Athletics memory card</p>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-[#003831] to-[#2F5233] bg-clip-text text-transparent">
+                Oakland A's Memory Creator
+              </h1>
+              <p className="text-sm text-gray-500 font-medium">
+                Design your authentic Oakland Athletics memory card
+              </p>
             </div>
           </div>
           
@@ -83,7 +87,7 @@ const ModernCardCreator: React.FC = () => {
               onClick={() => setView3D(!view3D)}
               variant="outline"
               size="sm"
-              className="hidden md:flex"
+              className="hidden md:flex border-gray-300 hover:border-[#003831] hover:bg-[#003831]/5 transition-all duration-200"
             >
               <Eye className="h-4 w-4 mr-2" />
               {view3D ? '2D' : '3D'} Preview
@@ -92,13 +96,14 @@ const ModernCardCreator: React.FC = () => {
               onClick={handleShare}
               variant="outline"
               size="sm"
+              className="border-gray-300 hover:border-[#EFB21E] hover:bg-[#EFB21E]/10 transition-all duration-200"
             >
               <Share2 className="h-4 w-4 mr-2" />
               Share
             </Button>
             <Button 
               onClick={handleSaveCard}
-              className="bg-[#003831] hover:bg-[#002620] text-[#EFB21E]"
+              className="bg-gradient-to-r from-[#003831] to-[#2F5233] hover:from-[#002620] hover:to-[#1e3a26] text-[#EFB21E] font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
               size="sm"
             >
               <Save className="h-4 w-4 mr-2" />
@@ -109,7 +114,7 @@ const ModernCardCreator: React.FC = () => {
       </header>
 
       <div className="flex h-[calc(100vh-80px)]">
-        {/* Template Sidebar */}
+        {/* Enhanced Template Sidebar */}
         <ModernTemplateSidebar
           selectedTemplate={selectedTemplate}
           onSelectTemplate={setSelectedTemplate}
@@ -118,9 +123,9 @@ const ModernCardCreator: React.FC = () => {
         />
 
         {/* Main Content Area */}
-        <div className="flex-1 flex flex-col">
-          {/* Preview Area */}
-          <div className="flex-1 p-6">
+        <div className="flex-1 flex flex-col bg-gradient-to-br from-gray-50/50 to-white">
+          {/* Enhanced Preview Area */}
+          <div className="flex-1 p-8">
             <ModernCardPreview
               template={selectedTemplate}
               cardData={cardData}
@@ -131,7 +136,7 @@ const ModernCardCreator: React.FC = () => {
             />
           </div>
 
-          {/* Editing Panel */}
+          {/* Modern Editing Panel */}
           {activeEditPanel && (
             <ModernEditingPanel
               type={activeEditPanel}
@@ -144,7 +149,7 @@ const ModernCardCreator: React.FC = () => {
         </div>
       </div>
 
-      {/* Floating Action Bar */}
+      {/* Enhanced Floating Action Bar */}
       <FloatingActionBar
         selectedTemplate={selectedTemplate}
         onEditText={() => setActiveEditPanel('text')}
