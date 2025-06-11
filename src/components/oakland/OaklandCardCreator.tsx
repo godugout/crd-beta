@@ -5,13 +5,15 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Save, Eye, Shuffle } from 'lucide-react';
+import { ArrowLeft, Save, Eye, Shuffle, Settings } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { OaklandCardTemplate, OAKLAND_CARD_TEMPLATES } from '@/lib/data/oaklandCardTemplates';
+import { useCardLighting } from '@/hooks/useCardLighting';
 import OaklandCardTemplateSelector from './OaklandCardTemplateSelector';
 import OaklandCard3DViewer from './OaklandCard3DViewer';
 import OaklandCardPreview from './OaklandCardPreview';
+import ViewerSettings from '@/components/gallery/viewer-components/ViewerSettings';
 
 interface CardData {
   title: string;
@@ -35,6 +37,15 @@ const OaklandCardCreator: React.FC = () => {
   });
   const [view3D, setView3D] = useState(false);
   const [autoRotate, setAutoRotate] = useState(true);
+  const [showStudioSettings, setShowStudioSettings] = useState(false);
+
+  // Lighting controls
+  const {
+    lightingSettings,
+    lightingPreset,
+    applyPreset,
+    updateLightingSetting
+  } = useCardLighting('studio');
 
   const handleRandomTemplate = () => {
     const randomTemplate = OAKLAND_CARD_TEMPLATES[Math.floor(Math.random() * OAKLAND_CARD_TEMPLATES.length)];
@@ -57,8 +68,27 @@ const OaklandCardCreator: React.FC = () => {
     setView3D(!view3D);
   };
 
+  const handleLightingPresetChange = (preset: string) => {
+    applyPreset(preset as any);
+    toast.success(`Applied ${preset} lighting preset`);
+  };
+
+  const handleLightingSettingUpdate = (key: string, value: any) => {
+    const keys = key.split('.');
+    if (keys.length === 2) {
+      updateLightingSetting({
+        [keys[0]]: {
+          ...lightingSettings[keys[0] as keyof typeof lightingSettings],
+          [keys[1]]: value
+        }
+      });
+    } else {
+      updateLightingSetting({ [key]: value });
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-900 via-green-800 to-green-900">
+    <div className="min-h-screen bg-gradient-to-br from-green-900 via-green-800 to-green-900 relative">
       {/* Header */}
       <header className="border-b border-green-600/30 bg-black/20 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
@@ -96,6 +126,17 @@ const OaklandCardCreator: React.FC = () => {
               <Eye className="h-4 w-4 mr-2" />
               {view3D ? '2D' : '3D'} View
             </Button>
+            {view3D && (
+              <Button 
+                onClick={() => setShowStudioSettings(!showStudioSettings)}
+                variant="outline"
+                size="sm"
+                className={`border-gray-600 text-gray-300 hover:bg-gray-700 ${showStudioSettings ? 'bg-gray-700' : ''}`}
+              >
+                <Settings className="h-4 w-4 mr-2" />
+                Studio
+              </Button>
+            )}
             <Button 
               onClick={handleSaveCard}
               className="bg-yellow-500 hover:bg-yellow-600 text-black"
@@ -207,12 +248,12 @@ const OaklandCardCreator: React.FC = () => {
           </div>
 
           {/* Card Preview */}
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-1 relative">
             <Card className="bg-gray-900/80 border-gray-700">
               <CardHeader>
                 <CardTitle className="text-white flex items-center justify-between">
                   Card Preview
-                  {selectedTemplate && (
+                  {selectedTemplate && view3D && (
                     <Button
                       variant="ghost"
                       size="sm"
@@ -233,6 +274,7 @@ const OaklandCardCreator: React.FC = () => {
                         title={cardData.title}
                         subtitle={cardData.subtitle}
                         autoRotate={autoRotate}
+                        environment={lightingPreset}
                         className="h-96"
                       />
                     ) : (
@@ -263,6 +305,17 @@ const OaklandCardCreator: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Studio Settings Panel */}
+      {view3D && (
+        <ViewerSettings
+          settings={lightingSettings}
+          onUpdateSettings={handleLightingSettingUpdate}
+          onApplyPreset={handleLightingPresetChange}
+          isOpen={showStudioSettings}
+          onClose={() => setShowStudioSettings(false)}
+        />
+      )}
     </div>
   );
 };

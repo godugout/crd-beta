@@ -4,15 +4,23 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Environment } from '@react-three/drei';
 import * as THREE from 'three';
 import { OaklandCardTemplate } from '@/lib/data/oaklandCardTemplates';
+import { LightingSettings } from '@/hooks/useCardLighting';
 
 interface Card3DMeshProps {
   template: OaklandCardTemplate;
   title: string;
   subtitle: string;
   autoRotate?: boolean;
+  lightingSettings?: LightingSettings;
 }
 
-const Card3DMesh: React.FC<Card3DMeshProps> = ({ template, title, subtitle, autoRotate = true }) => {
+const Card3DMesh: React.FC<Card3DMeshProps> = ({ 
+  template, 
+  title, 
+  subtitle, 
+  autoRotate = true,
+  lightingSettings 
+}) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const groupRef = useRef<THREE.Group>(null);
   
@@ -30,27 +38,27 @@ const Card3DMesh: React.FC<Card3DMeshProps> = ({ template, title, subtitle, auto
       map: frontTexture,
       roughness: 0.2,
       metalness: template.category === 'modern' ? 0.8 : 0.3,
-      envMapIntensity: 1.5,
+      envMapIntensity: lightingSettings?.envMapIntensity || 1.5,
       clearcoat: template.effects.includes('chrome') ? 1.0 : 0.5,
       clearcoatRoughness: 0.1,
     });
-  }, [frontTexture, template.category, template.effects]);
+  }, [frontTexture, template.category, template.effects, lightingSettings?.envMapIntensity]);
 
   const backMaterial = useMemo(() => {
     return new THREE.MeshPhysicalMaterial({
       color: template.backgroundConfig.primary,
       roughness: 0.3,
       metalness: 0.7,
-      envMapIntensity: 1.2,
+      envMapIntensity: lightingSettings?.envMapIntensity || 1.2,
       clearcoat: 0.8,
     });
-  }, [template.backgroundConfig.primary]);
+  }, [template.backgroundConfig.primary, lightingSettings?.envMapIntensity]);
 
   useFrame((state, delta) => {
     if (!groupRef.current) return;
     
     // Auto-rotation
-    if (autoRotate) {
+    if (autoRotate && lightingSettings?.autoRotate !== false) {
       groupRef.current.rotation.y += delta * 0.2;
     }
     
@@ -87,8 +95,9 @@ interface OaklandCard3DViewerProps {
   title?: string;
   subtitle?: string;
   autoRotate?: boolean;
-  environment?: 'studio' | 'sunset' | 'warehouse' | 'forest';
+  environment?: 'studio' | 'sunset' | 'warehouse' | 'forest' | 'gallery' | 'dramatic' | 'natural' | 'display_case';
   className?: string;
+  lightingSettings?: LightingSettings;
 }
 
 const OaklandCard3DViewer: React.FC<OaklandCard3DViewerProps> = ({
@@ -97,8 +106,22 @@ const OaklandCard3DViewer: React.FC<OaklandCard3DViewerProps> = ({
   subtitle = 'Baseball Card',
   autoRotate = true,
   environment = 'studio',
-  className = ''
+  className = '',
+  lightingSettings
 }) => {
+  // Use lighting settings for light positioning
+  const primaryLightPosition = lightingSettings ? [
+    lightingSettings.primaryLight.x,
+    lightingSettings.primaryLight.y,
+    lightingSettings.primaryLight.z
+  ] : [10, 10, 5];
+
+  const secondaryLightPosition = lightingSettings?.secondaryLight ? [
+    lightingSettings.secondaryLight.x,
+    lightingSettings.secondaryLight.y,
+    lightingSettings.secondaryLight.z
+  ] : [-10, -10, -10];
+
   return (
     <div className={`w-full h-full min-h-[400px] ${className}`}>
       <Canvas
@@ -106,21 +129,32 @@ const OaklandCard3DViewer: React.FC<OaklandCard3DViewerProps> = ({
         camera={{ position: [0, 0, 5], fov: 50 }}
         gl={{ antialias: true, alpha: true }}
       >
-        <ambientLight intensity={0.4} />
+        <ambientLight 
+          intensity={lightingSettings?.ambientLight?.intensity || 0.4} 
+          color={lightingSettings?.ambientLight?.color || '#f8f9fa'}
+        />
         <directionalLight 
-          position={[10, 10, 5]} 
-          intensity={1.2} 
+          position={primaryLightPosition as [number, number, number]}
+          intensity={lightingSettings?.primaryLight?.intensity || 1.2}
+          color={lightingSettings?.primaryLight?.color || '#ffffff'}
           castShadow
           shadow-mapSize-width={2048}
           shadow-mapSize-height={2048}
         />
-        <pointLight position={[-10, -10, -10]} intensity={0.3} />
+        {lightingSettings?.secondaryLight && (
+          <pointLight 
+            position={secondaryLightPosition as [number, number, number]}
+            intensity={lightingSettings.secondaryLight.intensity}
+            color={lightingSettings.secondaryLight.color}
+          />
+        )}
         
         <Card3DMesh 
           template={template}
           title={title}
           subtitle={subtitle}
           autoRotate={autoRotate}
+          lightingSettings={lightingSettings}
         />
         
         <OrbitControls 
@@ -128,7 +162,7 @@ const OaklandCard3DViewer: React.FC<OaklandCard3DViewerProps> = ({
           enablePan={false}
           minDistance={3}
           maxDistance={8}
-          autoRotate={autoRotate}
+          autoRotate={autoRotate && lightingSettings?.autoRotate !== false}
           autoRotateSpeed={0.5}
         />
         
