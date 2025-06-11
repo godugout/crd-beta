@@ -78,7 +78,7 @@ const OaklandCardCreator: React.FC = () => {
     if (keys.length === 2) {
       updateLightingSetting({
         [keys[0]]: {
-          ...lightingSettings[keys[0] as keyof typeof lightingSettings],
+          ...(lightingSettings[keys[0] as keyof typeof lightingSettings] || {}),
           [keys[1]]: value
         }
       });
@@ -150,14 +150,14 @@ const OaklandCardCreator: React.FC = () => {
       </header>
 
       <div className="container mx-auto px-4 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-200px)]">
           {/* Template Selection */}
-          <div className="lg:col-span-1">
-            <Card className="bg-gray-900/80 border-gray-700">
-              <CardHeader>
+          <div className="lg:col-span-1 h-full overflow-hidden">
+            <Card className="bg-gray-900/80 border-gray-700 h-full flex flex-col">
+              <CardHeader className="flex-shrink-0">
                 <CardTitle className="text-white">Select Template</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="flex-1 overflow-auto">
                 <OaklandCardTemplateSelector
                   onSelectTemplate={setSelectedTemplate}
                   selectedTemplateId={selectedTemplate?.id}
@@ -167,12 +167,12 @@ const OaklandCardCreator: React.FC = () => {
           </div>
 
           {/* Card Customization */}
-          <div className="lg:col-span-1">
-            <Card className="bg-gray-900/80 border-gray-700">
-              <CardHeader>
+          <div className="lg:col-span-1 h-full overflow-hidden">
+            <Card className="bg-gray-900/80 border-gray-700 h-full flex flex-col">
+              <CardHeader className="flex-shrink-0">
                 <CardTitle className="text-white">Card Details</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="flex-1 overflow-auto space-y-4">
                 <div>
                   <Label htmlFor="title" className="text-white">Card Title</Label>
                   <Input
@@ -247,10 +247,10 @@ const OaklandCardCreator: React.FC = () => {
             </Card>
           </div>
 
-          {/* Card Preview */}
-          <div className="lg:col-span-1 relative">
-            <Card className="bg-gray-900/80 border-gray-700">
-              <CardHeader>
+          {/* Card Preview - Full Height */}
+          <div className="lg:col-span-1 h-full">
+            <Card className="bg-gray-900/80 border-gray-700 h-full flex flex-col">
+              <CardHeader className="flex-shrink-0">
                 <CardTitle className="text-white flex items-center justify-between">
                   Card Preview
                   {selectedTemplate && view3D && (
@@ -265,21 +265,24 @@ const OaklandCardCreator: React.FC = () => {
                   )}
                 </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="flex-1 flex flex-col">
                 {selectedTemplate ? (
-                  <div className="space-y-4">
+                  <div className="flex-1 flex flex-col">
                     {view3D ? (
-                      <OaklandCard3DViewer
-                        template={selectedTemplate}
-                        title={cardData.title}
-                        subtitle={cardData.subtitle}
-                        autoRotate={autoRotate}
-                        environment={lightingPreset}
-                        className="h-96"
-                      />
+                      <div className="flex-1 min-h-0">
+                        <OaklandCard3DViewer
+                          template={selectedTemplate}
+                          title={cardData.title}
+                          subtitle={cardData.subtitle}
+                          autoRotate={autoRotate}
+                          environment={lightingPreset}
+                          lightingSettings={lightingSettings}
+                          className="h-full"
+                        />
+                      </div>
                     ) : (
-                      <div className="flex justify-center">
-                        <div className="w-64"> {/* Fixed width for proper 2.5:3.5 ratio */}
+                      <div className="flex-1 flex items-center justify-center">
+                        <div className="w-64 max-w-full">
                           <OaklandCardPreview
                             template={selectedTemplate}
                             title={cardData.title}
@@ -289,15 +292,17 @@ const OaklandCardCreator: React.FC = () => {
                       </div>
                     )}
                     
-                    <div className="text-center text-gray-400 text-sm">
+                    <div className="text-center text-gray-400 text-sm mt-4 flex-shrink-0">
                       Perfect 2.5" × 3.5" trading card proportions
                     </div>
                   </div>
                 ) : (
-                  <div className="text-center py-12">
-                    <div className="text-6xl mb-4">⚾</div>
-                    <h3 className="text-xl text-white mb-2">Select a Template</h3>
-                    <p className="text-gray-400">Choose an Oakland A's template to start creating your card</p>
+                  <div className="flex-1 flex items-center justify-center text-center">
+                    <div>
+                      <div className="text-6xl mb-4">⚾</div>
+                      <h3 className="text-xl text-white mb-2">Select a Template</h3>
+                      <p className="text-gray-400">Choose an Oakland A's template to start creating your card</p>
+                    </div>
                   </div>
                 )}
               </CardContent>

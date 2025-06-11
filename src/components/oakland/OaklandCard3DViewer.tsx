@@ -95,7 +95,7 @@ interface OaklandCard3DViewerProps {
   title?: string;
   subtitle?: string;
   autoRotate?: boolean;
-  environment?: 'studio' | 'sunset' | 'warehouse' | 'forest' | 'gallery' | 'dramatic' | 'natural' | 'display_case';
+  environment?: 'studio' | 'sunset' | 'warehouse' | 'forest' | 'apartment' | 'city' | 'dawn' | 'lobby' | 'night' | 'park';
   className?: string;
   lightingSettings?: LightingSettings;
 }
