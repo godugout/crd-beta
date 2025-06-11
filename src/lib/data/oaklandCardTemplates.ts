@@ -8,6 +8,7 @@ export interface OaklandCardTemplate {
   category: 'nostalgia' | 'protest' | 'community' | 'celebration';
   description: string;
   imageUrl: string;
+  effects: string[];
   metadata: {
     tags: string[];
     difficulty: 'easy' | 'medium' | 'hard';
@@ -62,6 +63,7 @@ export const OAKLAND_CARD_TEMPLATES: OaklandCardTemplate[] = [
     category: 'nostalgia',
     description: 'Traditional Oakland A\'s green and gold design',
     imageUrl: '/lovable-uploads/83c68cf9-abc8-4102-954e-6061d2bc86c5.png',
+    effects: ['vintage-sepia', 'dusty-glow'],
     metadata: {
       tags: ['classic', 'green', 'traditional'],
       difficulty: 'easy',
@@ -74,6 +76,7 @@ export const OAKLAND_CARD_TEMPLATES: OaklandCardTemplate[] = [
     category: 'nostalgia',
     description: 'Retro stadium-inspired card design',
     imageUrl: '/lovable-uploads/93353027-d213-4314-8ab9-0d38bb552e8a.png',
+    effects: ['vintage-grain', 'sepia-tone'],
     metadata: {
       tags: ['vintage', 'stadium', 'retro'],
       difficulty: 'medium',
@@ -86,6 +89,7 @@ export const OAKLAND_CARD_TEMPLATES: OaklandCardTemplate[] = [
     category: 'celebration',
     description: 'Celebrate victories with golden elegance',
     imageUrl: '/lovable-uploads/f1b608ba-b8c6-40f5-b552-a5d7addbf4ae.png',
+    effects: ['gold-foil', 'shine-effect'],
     metadata: {
       tags: ['gold', 'victory', 'championship'],
       difficulty: 'medium',
@@ -98,6 +102,7 @@ export const OAKLAND_CARD_TEMPLATES: OaklandCardTemplate[] = [
     category: 'protest',
     description: 'Bold design for making your voice heard',
     imageUrl: '/lovable-uploads/667e6ad2-af96-40ac-bd16-a69778e14b21.png',
+    effects: ['protest-red', 'glitch-overlay'],
     metadata: {
       tags: ['protest', 'bold', 'statement'],
       difficulty: 'hard',
@@ -110,6 +115,7 @@ export const OAKLAND_CARD_TEMPLATES: OaklandCardTemplate[] = [
     category: 'community',
     description: 'Warm design celebrating fan connections',
     imageUrl: '/lovable-uploads/c381b388-5693-44a6-852b-93af5f0d5217.png',
+    effects: ['warm-glow', 'community-feel'],
     metadata: {
       tags: ['community', 'warm', 'connection'],
       difficulty: 'easy',
@@ -122,6 +128,7 @@ export const OAKLAND_CARD_TEMPLATES: OaklandCardTemplate[] = [
     category: 'celebration',
     description: 'Clean, contemporary Oakland design',
     imageUrl: '/lovable-uploads/f07b9e90-98ec-4e0c-bca4-71acd9ae9924.png',
+    effects: ['clean-lines', 'minimal-shadow'],
     metadata: {
       tags: ['modern', 'clean', 'minimalist'],
       difficulty: 'medium',

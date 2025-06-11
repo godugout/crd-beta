@@ -78,13 +78,15 @@ const OaklandCardTemplateSelector: React.FC<OaklandCardTemplateSelectorProps> = 
               ? OAKLAND_CARD_TEMPLATES.length 
               : OAKLAND_CARD_TEMPLATES.filter(t => t.category === category.id).length;
             
+            const IconComponent = category.icon;
+            
             return (
               <TabsTrigger 
                 key={category.id} 
                 value={category.id}
                 className="data-[state=active]:bg-yellow-500 data-[state=active]:text-black font-display text-xs"
               >
-                <span className="mr-1">{category.icon}</span>
+                <IconComponent className="w-4 h-4 mr-1" />
                 {category.name}
                 <Badge variant="secondary" className="ml-1 text-xs">
                   {count}
@@ -122,7 +124,6 @@ const OaklandCardTemplateSelector: React.FC<OaklandCardTemplateSelectorProps> = 
                       template={template}
                       title={template.name}
                       subtitle={`${template.category} • A's`}
-                      isInteractive={false}
                       className="rounded-t-lg"
                     />
                   </div>
@@ -202,7 +203,6 @@ const OaklandCardTemplateSelector: React.FC<OaklandCardTemplateSelectorProps> = 
                         template={template}
                         title={template.name}
                         subtitle={`${template.category} • A's`}
-                        isInteractive={false}
                       />
                       
                       {/* Minimal Info */}
