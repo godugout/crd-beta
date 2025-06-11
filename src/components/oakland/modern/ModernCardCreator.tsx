@@ -59,26 +59,31 @@ const ModernCardCreator: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-gray-50">
-      {/* Modern Header */}
-      <header className="bg-white/80 backdrop-blur-md border-b border-gray-200/60 shadow-sm sticky top-0 z-30">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-[#003831] to-gray-800">
+      {/* Enhanced Header with Oakland Branding */}
+      <header className="bg-gradient-to-r from-[#003831] via-[#2F5233] to-[#003831] border-b border-[#EFB21E]/20 shadow-xl sticky top-0 z-30 backdrop-blur-sm">
         <div className="px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Button
               variant="ghost"
               onClick={() => navigate('/')}
-              className="text-gray-600 hover:text-gray-900 hover:bg-gray-100/80 transition-all duration-200"
+              className="text-[#EFB21E] hover:text-white hover:bg-[#EFB21E]/20 transition-all duration-200 border border-[#EFB21E]/30 hover:border-[#EFB21E]"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back
             </Button>
-            <div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-[#003831] to-[#2F5233] bg-clip-text text-transparent">
-                Oakland A's Memory Creator
-              </h1>
-              <p className="text-sm text-gray-500 font-medium">
-                Design your authentic Oakland Athletics memory card
-              </p>
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-gradient-to-br from-[#EFB21E] to-yellow-300 rounded-lg flex items-center justify-center">
+                <span className="text-[#003831] font-bold text-sm">⚾</span>
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-[#EFB21E] to-yellow-300 bg-clip-text text-transparent">
+                  Oakland A's Memory Creator
+                </h1>
+                <p className="text-sm text-[#EFB21E]/80 font-medium">
+                  Design your authentic Oakland Athletics memory card
+                </p>
+              </div>
             </div>
           </div>
           
@@ -87,7 +92,7 @@ const ModernCardCreator: React.FC = () => {
               onClick={() => setView3D(!view3D)}
               variant="outline"
               size="sm"
-              className="hidden md:flex border-gray-300 hover:border-[#003831] hover:bg-[#003831]/5 transition-all duration-200"
+              className="hidden md:flex border-[#EFB21E]/50 text-[#EFB21E] hover:border-[#EFB21E] hover:bg-[#EFB21E]/10 transition-all duration-200"
             >
               <Eye className="h-4 w-4 mr-2" />
               {view3D ? '2D' : '3D'} Preview
@@ -96,14 +101,14 @@ const ModernCardCreator: React.FC = () => {
               onClick={handleShare}
               variant="outline"
               size="sm"
-              className="border-gray-300 hover:border-[#EFB21E] hover:bg-[#EFB21E]/10 transition-all duration-200"
+              className="border-[#EFB21E]/50 text-[#EFB21E] hover:border-[#EFB21E] hover:bg-[#EFB21E]/10 transition-all duration-200"
             >
               <Share2 className="h-4 w-4 mr-2" />
               Share
             </Button>
             <Button 
               onClick={handleSaveCard}
-              className="bg-gradient-to-r from-[#003831] to-[#2F5233] hover:from-[#002620] hover:to-[#1e3a26] text-[#EFB21E] font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
+              className="bg-gradient-to-r from-[#EFB21E] to-yellow-400 hover:from-yellow-400 hover:to-[#EFB21E] text-[#003831] font-bold shadow-lg hover:shadow-xl transition-all duration-200"
               size="sm"
             >
               <Save className="h-4 w-4 mr-2" />
@@ -123,7 +128,7 @@ const ModernCardCreator: React.FC = () => {
         />
 
         {/* Main Content Area */}
-        <div className="flex-1 flex flex-col bg-gradient-to-br from-gray-50/50 to-white">
+        <div className="flex-1 flex flex-col bg-gradient-to-br from-gray-800/50 to-gray-900/30 backdrop-blur-sm">
           {/* Enhanced Preview Area */}
           <div className="flex-1 p-8">
             <ModernCardPreview

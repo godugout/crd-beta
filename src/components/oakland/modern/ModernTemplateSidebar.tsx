@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { ChevronLeft, ChevronRight, Search, Grid3X3, Sparkles, Star, Clock, Trophy } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Search, Grid3X3, Sparkles, Star, Clock, Trophy, Megaphone, Heart } from 'lucide-react';
 import { OAKLAND_CARD_TEMPLATES, OAKLAND_CARD_CATEGORIES, OaklandCardTemplate } from '@/lib/data/oaklandCardTemplates';
 import { cn } from '@/lib/utils';
 
@@ -16,9 +16,11 @@ interface ModernTemplateSidebarProps {
 
 const getCategoryIcon = (categoryId: string) => {
   switch (categoryId) {
+    case 'all': return Star;
     case 'nostalgia': return Clock;
     case 'celebration': return Trophy;
-    case 'protest': return Sparkles;
+    case 'protest': return Megaphone;
+    case 'community': return Heart;
     default: return Star;
   }
 };
@@ -41,23 +43,23 @@ const ModernTemplateSidebar: React.FC<ModernTemplateSidebarProps> = ({
 
   return (
     <div className={cn(
-      "bg-white border-r border-gray-200/80 transition-all duration-300 flex flex-col shadow-sm",
+      "bg-gradient-to-b from-gray-900 to-gray-800 border-r border-[#EFB21E]/20 transition-all duration-300 flex flex-col shadow-2xl backdrop-blur-sm",
       collapsed ? "w-16" : "w-96"
     )}>
       {/* Enhanced Header */}
-      <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-gray-50/50 to-white">
+      <div className="p-6 border-b border-[#EFB21E]/20 flex items-center justify-between bg-gradient-to-r from-[#003831]/80 to-[#2F5233]/60 backdrop-blur-sm">
         {!collapsed && (
           <>
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-gradient-to-br from-[#003831] to-[#2F5233] rounded-xl">
-                <Grid3X3 className="h-5 w-5 text-[#EFB21E]" />
+              <div className="p-2 bg-gradient-to-br from-[#EFB21E] to-yellow-300 rounded-xl shadow-lg">
+                <Grid3X3 className="h-5 w-5 text-[#003831]" />
               </div>
               <div>
-                <h2 className="font-bold text-gray-900 text-lg">Templates</h2>
-                <p className="text-xs text-gray-500 font-medium">Choose your style</p>
+                <h2 className="font-bold text-[#EFB21E] text-lg">Templates</h2>
+                <p className="text-xs text-[#EFB21E]/70 font-medium">Choose your style</p>
               </div>
             </div>
-            <Badge variant="secondary" className="text-xs bg-[#EFB21E]/20 text-[#003831] border-[#EFB21E]/30">
+            <Badge variant="secondary" className="text-xs bg-[#EFB21E]/20 text-[#EFB21E] border-[#EFB21E]/30">
               {filteredTemplates.length}
             </Badge>
           </>
@@ -66,7 +68,7 @@ const ModernTemplateSidebar: React.FC<ModernTemplateSidebarProps> = ({
           variant="ghost"
           size="sm"
           onClick={onToggleCollapse}
-          className="p-2 hover:bg-gray-100 transition-colors duration-200"
+          className="p-2 hover:bg-[#EFB21E]/20 text-[#EFB21E] transition-colors duration-200"
         >
           {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
         </Button>
@@ -75,20 +77,20 @@ const ModernTemplateSidebar: React.FC<ModernTemplateSidebarProps> = ({
       {!collapsed && (
         <>
           {/* Enhanced Search */}
-          <div className="p-6 border-b border-gray-100 bg-gray-50/30">
+          <div className="p-6 border-b border-[#EFB21E]/10 bg-gradient-to-r from-gray-800/50 to-gray-700/30">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#EFB21E]/60 h-4 w-4" />
               <Input
                 placeholder="Search templates..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 border-gray-200 focus:border-[#003831] focus:ring-[#003831]/20 bg-white shadow-sm"
+                className="pl-10 bg-gray-800/60 border-[#EFB21E]/30 text-[#EFB21E] placeholder:text-[#EFB21E]/50 focus:border-[#EFB21E] focus:ring-[#EFB21E]/20 backdrop-blur-sm"
               />
             </div>
           </div>
 
           {/* Enhanced Category Pills */}
-          <div className="px-6 py-4 border-b border-gray-100">
+          <div className="px-6 py-4 border-b border-[#EFB21E]/10">
             <div className="flex flex-wrap gap-2">
               {OAKLAND_CARD_CATEGORIES.map((category) => {
                 const Icon = getCategoryIcon(category.id);
@@ -101,8 +103,8 @@ const ModernTemplateSidebar: React.FC<ModernTemplateSidebarProps> = ({
                     className={cn(
                       "text-xs font-medium transition-all duration-200",
                       selectedCategory === category.id 
-                        ? "bg-gradient-to-r from-[#003831] to-[#2F5233] text-[#EFB21E] shadow-lg border-transparent" 
-                        : "hover:bg-[#003831]/5 hover:border-[#003831]/30 border-gray-200"
+                        ? "bg-gradient-to-r from-[#EFB21E] to-yellow-300 text-[#003831] shadow-lg border-transparent hover:shadow-xl" 
+                        : "hover:bg-[#EFB21E]/10 hover:border-[#EFB21E]/50 border-[#EFB21E]/30 text-[#EFB21E] bg-gray-800/50"
                     )}
                   >
                     <Icon className="h-3 w-3 mr-1.5" />
@@ -120,19 +122,34 @@ const ModernTemplateSidebar: React.FC<ModernTemplateSidebarProps> = ({
                 <div
                   key={template.id}
                   className={cn(
-                    "group relative cursor-pointer rounded-2xl overflow-hidden border-2 transition-all duration-300 hover:scale-[1.02]",
+                    "group relative cursor-pointer rounded-2xl overflow-hidden border-2 transition-all duration-300 hover:scale-[1.02] bg-gradient-to-br from-gray-800 to-gray-700",
                     selectedTemplate?.id === template.id
-                      ? "border-[#EFB21E] ring-4 ring-[#EFB21E]/20 shadow-xl"
-                      : "border-gray-200 hover:border-[#003831]/40 hover:shadow-lg"
+                      ? "border-[#EFB21E] ring-4 ring-[#EFB21E]/30 shadow-2xl shadow-[#EFB21E]/20"
+                      : "border-[#EFB21E]/30 hover:border-[#EFB21E]/60 hover:shadow-xl"
                   )}
                   onClick={() => onSelectTemplate(template)}
                 >
-                  <div className="aspect-[2.5/3.5] relative overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
+                  <div className="aspect-[2.5/3.5] relative overflow-hidden">
+                    {/* Template Preview Image */}
                     <img
                       src={template.imageUrl}
                       alt={template.name}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                      onError={(e) => {
+                        // Fallback to generated preview if image fails to load
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        target.nextElementSibling?.classList.remove('hidden');
+                      }}
                     />
+                    
+                    {/* Fallback Generated Preview */}
+                    <div className="hidden absolute inset-0 bg-gradient-to-br from-[#003831] to-[#2F5233] flex items-center justify-center">
+                      <div className="text-center text-[#EFB21E]">
+                        <div className="text-2xl mb-2">⚾</div>
+                        <div className="text-xs font-bold">{template.name}</div>
+                      </div>
+                    </div>
                     
                     {/* Enhanced Overlay */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -144,7 +161,7 @@ const ModernTemplateSidebar: React.FC<ModernTemplateSidebarProps> = ({
                       </h3>
                       <Badge 
                         variant="secondary" 
-                        className="text-xs bg-white/20 text-white border-white/30 backdrop-blur-sm"
+                        className="text-xs bg-[#EFB21E]/20 text-[#EFB21E] border-[#EFB21E]/30 backdrop-blur-sm"
                       >
                         {template.category}
                       </Badge>
@@ -157,8 +174,21 @@ const ModernTemplateSidebar: React.FC<ModernTemplateSidebarProps> = ({
                       </div>
                     )}
 
+                    {/* Category-specific Badge */}
+                    <div className="absolute top-3 left-3">
+                      <Badge className={cn(
+                        "text-xs px-2 py-1",
+                        template.category === 'protest' ? "bg-red-600/80 text-white" :
+                        template.category === 'celebration' ? "bg-yellow-500/80 text-black" :
+                        template.category === 'nostalgia' ? "bg-amber-700/80 text-white" :
+                        "bg-emerald-600/80 text-white"
+                      )}>
+                        {template.metadata.popularity}%
+                      </Badge>
+                    </div>
+
                     {/* Hover Glow Effect */}
-                    <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-[#003831]/20 to-[#EFB21E]/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-[#EFB21E]/20 to-yellow-300/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   </div>
                 </div>
               ))}
@@ -166,11 +196,11 @@ const ModernTemplateSidebar: React.FC<ModernTemplateSidebarProps> = ({
 
             {filteredTemplates.length === 0 && (
               <div className="text-center py-16">
-                <div className="text-gray-400 mb-2">
+                <div className="text-[#EFB21E]/40 mb-4">
                   <Search className="h-12 w-12 mx-auto mb-4" />
                 </div>
-                <p className="text-gray-500 font-medium">No templates found</p>
-                <p className="text-gray-400 text-sm">Try adjusting your search or filters</p>
+                <p className="text-[#EFB21E] font-medium">No templates found</p>
+                <p className="text-[#EFB21E]/60 text-sm">Try adjusting your search or filters</p>
               </div>
             )}
           </div>

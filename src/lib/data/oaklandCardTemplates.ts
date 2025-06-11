@@ -1,204 +1,131 @@
 
+import { LucideIcon } from 'lucide-react';
+import { Clock, Trophy, Megaphone, Star, Heart, Zap } from 'lucide-react';
+
 export interface OaklandCardTemplate {
   id: string;
   name: string;
+  category: 'nostalgia' | 'protest' | 'community' | 'celebration';
   description: string;
-  category: 'vintage' | 'modern' | 'protest' | 'artistic' | 'classic';
   imageUrl: string;
-  aspectRatio: number; // 2.5:3.5 = 0.714
-  backgroundConfig: {
-    type: 'gradient' | 'solid' | 'image' | 'transparent';
-    primary: string;
-    secondary?: string;
-    opacity?: number;
-  };
-  textConfig: {
-    primaryColor: string;
-    secondaryColor: string;
-    fontFamily: string;
-    placement: 'bottom' | 'top' | 'overlay' | 'side';
-  };
-  effects: string[];
   metadata: {
-    team: 'Oakland Athletics';
-    colors: string[];
-    era?: string;
     tags: string[];
+    difficulty: 'easy' | 'medium' | 'hard';
+    popularity: number;
   };
 }
 
-export const OAKLAND_CARD_TEMPLATES: OaklandCardTemplate[] = [
+export interface OaklandCardCategory {
+  id: string;
+  name: string;
+  icon: LucideIcon;
+  description: string;
+}
+
+export const OAKLAND_CARD_CATEGORIES: OaklandCardCategory[] = [
   {
-    id: 'alfred-neuman-as',
-    name: 'Alfred E. Neuman A\'s',
-    description: 'Vintage parody card design with classic Oakland spirit',
-    category: 'vintage',
-    imageUrl: '/images/alfred-neuman-as.jpg',
-    aspectRatio: 0.714, // 2.5:3.5
-    backgroundConfig: {
-      type: 'gradient',
-      primary: '#006341',
-      secondary: '#003831',
-      opacity: 0.15
-    },
-    textConfig: {
-      primaryColor: '#FFFFFF',
-      secondaryColor: '#EFB21E',
-      fontFamily: 'serif',
-      placement: 'bottom'
-    },
-    effects: ['vintage', 'sepia'],
-    metadata: {
-      team: 'Oakland Athletics',
-      colors: ['#006341', '#EFB21E', '#FFFFFF'],
-      era: 'vintage',
-      tags: ['parody', 'classic', 'humor', 'retro']
-    }
+    id: 'all',
+    name: 'All Templates',
+    icon: Star,
+    description: 'Browse all available templates'
   },
   {
-    id: 'oakland-roots-tree',
-    name: 'Oakland Roots Tree',
-    description: 'Artistic tree design representing Oakland\'s deep community roots',
-    category: 'artistic',
-    imageUrl: '/images/oakland-roots-tree.jpg',
-    aspectRatio: 0.714,
-    backgroundConfig: {
-      type: 'gradient',
-      primary: '#2F5233',
-      secondary: '#1A3A2A',
-      opacity: 0.2
-    },
-    textConfig: {
-      primaryColor: '#EFB21E',
-      secondaryColor: '#FFFFFF',
-      fontFamily: 'sans-serif',
-      placement: 'bottom'
-    },
-    effects: ['artistic', 'nature'],
-    metadata: {
-      team: 'Oakland Athletics',
-      colors: ['#2F5233', '#EFB21E', '#8B4513'],
-      tags: ['community', 'roots', 'artistic', 'nature']
-    }
+    id: 'nostalgia',
+    name: 'Nostalgia',
+    icon: Clock,
+    description: 'Classic Oakland memories'
   },
   {
-    id: 'baseball-field-panorama',
-    name: 'Field Panorama',
-    description: 'Beautiful baseball field panoramic view',
-    category: 'classic',
-    imageUrl: '/images/baseball-field-panorama.jpg',
-    aspectRatio: 0.714,
-    backgroundConfig: {
-      type: 'transparent',
-      primary: '#006341',
-      opacity: 0.1
-    },
-    textConfig: {
-      primaryColor: '#FFFFFF',
-      secondaryColor: '#EFB21E',
-      fontFamily: 'sans-serif',
-      placement: 'overlay'
-    },
-    effects: ['stadium', 'panoramic'],
-    metadata: {
-      team: 'Oakland Athletics',
-      colors: ['#4A7C59', '#EFB21E', '#87CEEB'],
-      tags: ['stadium', 'field', 'panoramic', 'classic']
-    }
+    id: 'celebration',
+    name: 'Celebration',
+    icon: Trophy,
+    description: 'Victory and achievement cards'
   },
   {
-    id: 'fck-fisher-bold',
-    name: 'F*CK FISHER Bold',
-    description: 'Bold protest statement with strong typography',
-    category: 'protest',
-    imageUrl: '/images/fck-fisher-bold.jpg',
-    aspectRatio: 0.714,
-    backgroundConfig: {
-      type: 'gradient',
-      primary: '#DC2626',
-      secondary: '#B91C1C',
-      opacity: 0.3
-    },
-    textConfig: {
-      primaryColor: '#FFFFFF',
-      secondaryColor: '#FFD700',
-      fontFamily: 'impact',
-      placement: 'overlay'
-    },
-    effects: ['bold', 'protest'],
-    metadata: {
-      team: 'Oakland Athletics',
-      colors: ['#DC2626', '#FFFFFF', '#FFD700'],
-      tags: ['protest', 'bold', 'activism', 'statement']
-    }
+    id: 'protest',
+    name: 'Protest',
+    icon: Megaphone,
+    description: 'Stand up for Oakland'
   },
   {
-    id: 'sell-the-team',
-    name: 'Sell The Team',
-    description: 'Clean protest typography on Oakland green',
-    category: 'protest',
-    imageUrl: '/images/sell-the-team.jpg',
-    aspectRatio: 0.714,
-    backgroundConfig: {
-      type: 'solid',
-      primary: '#006341',
-      opacity: 0.2
-    },
-    textConfig: {
-      primaryColor: '#FFFFFF',
-      secondaryColor: '#EFB21E',
-      fontFamily: 'sans-serif',
-      placement: 'bottom'
-    },
-    effects: ['clean', 'protest'],
-    metadata: {
-      team: 'Oakland Athletics',
-      colors: ['#006341', '#FFFFFF', '#EFB21E'],
-      tags: ['protest', 'clean', 'typography', 'activism']
-    }
-  },
-  {
-    id: 'holy-toledo-retro',
-    name: 'Holy Toledo Retro',
-    description: 'Vintage dotted text design with nostalgic feel',
-    category: 'vintage',
-    imageUrl: '/images/holy-toledo-retro.jpg',
-    aspectRatio: 0.714,
-    backgroundConfig: {
-      type: 'gradient',
-      primary: '#92400E',
-      secondary: '#654321',
-      opacity: 0.2
-    },
-    textConfig: {
-      primaryColor: '#EFB21E',
-      secondaryColor: '#FFFFFF',
-      fontFamily: 'serif',
-      placement: 'bottom'
-    },
-    effects: ['vintage', 'dotted', 'retro'],
-    metadata: {
-      team: 'Oakland Athletics',
-      colors: ['#92400E', '#EFB21E', '#FFFFFF'],
-      era: 'retro',
-      tags: ['vintage', 'broadcast', 'nostalgia', 'holy-toledo']
-    }
+    id: 'community',
+    name: 'Community',
+    icon: Heart,
+    description: 'Fan community moments'
   }
 ];
 
-export const getOaklandTemplateById = (id: string): OaklandCardTemplate | undefined => {
-  return OAKLAND_CARD_TEMPLATES.find(template => template.id === id);
-};
-
-export const getOaklandTemplatesByCategory = (category: OaklandCardTemplate['category']): OaklandCardTemplate[] => {
-  return OAKLAND_CARD_TEMPLATES.filter(template => template.category === category);
-};
-
-export const OAKLAND_CARD_CATEGORIES = [
-  { id: 'all', name: 'All Templates', icon: '⚾' },
-  { id: 'vintage', name: 'Vintage', icon: '📻' },
-  { id: 'modern', name: 'Modern', icon: '🏟️' },
-  { id: 'protest', name: 'Protest', icon: '✊' },
-  { id: 'artistic', name: 'Artistic', icon: '🎨' },
-  { id: 'classic', name: 'Classic', icon: '🏆' }
+export const OAKLAND_CARD_TEMPLATES: OaklandCardTemplate[] = [
+  {
+    id: 'classic-green',
+    name: 'Classic Green',
+    category: 'nostalgia',
+    description: 'Traditional Oakland A\'s green and gold design',
+    imageUrl: '/lovable-uploads/83c68cf9-abc8-4102-954e-6061d2bc86c5.png',
+    metadata: {
+      tags: ['classic', 'green', 'traditional'],
+      difficulty: 'easy',
+      popularity: 95
+    }
+  },
+  {
+    id: 'vintage-coliseum',
+    name: 'Vintage Coliseum',
+    category: 'nostalgia',
+    description: 'Retro stadium-inspired card design',
+    imageUrl: '/lovable-uploads/93353027-d213-4314-8ab9-0d38bb552e8a.png',
+    metadata: {
+      tags: ['vintage', 'stadium', 'retro'],
+      difficulty: 'medium',
+      popularity: 87
+    }
+  },
+  {
+    id: 'championship-gold',
+    name: 'Championship Gold',
+    category: 'celebration',
+    description: 'Celebrate victories with golden elegance',
+    imageUrl: '/lovable-uploads/f1b608ba-b8c6-40f5-b552-a5d7addbf4ae.png',
+    metadata: {
+      tags: ['gold', 'victory', 'championship'],
+      difficulty: 'medium',
+      popularity: 92
+    }
+  },
+  {
+    id: 'protest-red',
+    name: 'Protest Power',
+    category: 'protest',
+    description: 'Bold design for making your voice heard',
+    imageUrl: '/lovable-uploads/667e6ad2-af96-40ac-bd16-a69778e14b21.png',
+    metadata: {
+      tags: ['protest', 'bold', 'statement'],
+      difficulty: 'hard',
+      popularity: 78
+    }
+  },
+  {
+    id: 'community-spirit',
+    name: 'Community Spirit',
+    category: 'community',
+    description: 'Warm design celebrating fan connections',
+    imageUrl: '/lovable-uploads/c381b388-5693-44a6-852b-93af5f0d5217.png',
+    metadata: {
+      tags: ['community', 'warm', 'connection'],
+      difficulty: 'easy',
+      popularity: 84
+    }
+  },
+  {
+    id: 'modern-minimalist',
+    name: 'Modern Minimalist',
+    category: 'celebration',
+    description: 'Clean, contemporary Oakland design',
+    imageUrl: '/lovable-uploads/f07b9e90-98ec-4e0c-bca4-71acd9ae9924.png',
+    metadata: {
+      tags: ['modern', 'clean', 'minimalist'],
+      difficulty: 'medium',
+      popularity: 81
+    }
+  }
 ];
