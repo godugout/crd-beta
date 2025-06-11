@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -24,6 +23,22 @@ interface CardData {
   year?: string;
   tags: string[];
 }
+
+// Map lighting presets to valid environment values
+const mapLightingPresetToEnvironment = (preset: string): 'studio' | 'sunset' | 'warehouse' | 'forest' | 'apartment' | 'city' | 'dawn' | 'lobby' | 'night' | 'park' => {
+  switch (preset) {
+    case 'natural':
+      return 'park';
+    case 'dramatic':
+      return 'night';
+    case 'gallery':
+      return 'lobby';
+    case 'display_case':
+      return 'apartment';
+    default:
+      return 'studio';
+  }
+};
 
 const OaklandCardCreator: React.FC = () => {
   const navigate = useNavigate();
@@ -76,12 +91,18 @@ const OaklandCardCreator: React.FC = () => {
   const handleLightingSettingUpdate = (key: string, value: any) => {
     const keys = key.split('.');
     if (keys.length === 2) {
-      updateLightingSetting({
-        [keys[0]]: {
-          ...(lightingSettings[keys[0] as keyof typeof lightingSettings] || {}),
-          [keys[1]]: value
-        }
-      });
+      const parentKey = keys[0] as keyof typeof lightingSettings;
+      const childKey = keys[1];
+      
+      const currentParent = lightingSettings[parentKey];
+      if (currentParent && typeof currentParent === 'object') {
+        updateLightingSetting({
+          [parentKey]: {
+            ...currentParent,
+            [childKey]: value
+          }
+        });
+      }
     } else {
       updateLightingSetting({ [key]: value });
     }
@@ -275,7 +296,7 @@ const OaklandCardCreator: React.FC = () => {
                           title={cardData.title}
                           subtitle={cardData.subtitle}
                           autoRotate={autoRotate}
-                          environment={lightingPreset}
+                          environment={mapLightingPresetToEnvironment(lightingPreset)}
                           lightingSettings={lightingSettings}
                           className="h-full"
                         />
