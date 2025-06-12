@@ -10,6 +10,7 @@ import { OaklandTemplate } from '@/lib/types/oaklandTemplates';
 import { OAKLAND_TEMPLATES } from '@/lib/data/oaklandTemplateData';
 import OaklandCardPreview from './OaklandCardPreview';
 import TemplateGallery from './TemplateGallery';
+import OaklandCard3DCanvas from './canvas/OaklandCard3DCanvas';
 
 interface MemoryData {
   title: string;
@@ -45,8 +46,9 @@ const OaklandMemoryBuilder: React.FC = () => {
     toast.success('Memory shared with the Oakland faithful!');
   };
 
-  const handleZoomIn = () => setZoomLevel(prev => Math.min(prev + 25, 200));
-  const handleZoomOut = () => setZoomLevel(prev => Math.max(prev - 25, 50));
+  const handleFullscreenToggle = () => {
+    setIsFullscreen(!isFullscreen);
+  };
 
   // Helper function to map difficulty values
   const mapDifficulty = (difficulty: 'beginner' | 'intermediate' | 'advanced'): 'easy' | 'medium' | 'hard' => {
@@ -101,7 +103,7 @@ const OaklandMemoryBuilder: React.FC = () => {
             className="hidden md:flex border-[#ffd700]/50 text-[#ffd700] hover:border-[#ffd700] hover:bg-[#ffd700]/10 transition-all duration-200"
           >
             <Eye className="h-4 w-4 mr-2" />
-            2D Preview
+            3D Preview
           </Button>
           <Button 
             onClick={handleShare}
@@ -160,81 +162,17 @@ const OaklandMemoryBuilder: React.FC = () => {
           )}
         </div>
 
-        {/* Main Canvas Area */}
+        {/* Main Canvas Area - Now using 3D Canvas */}
         <div className="flex-1 bg-[#f0f0f0] flex flex-col relative overflow-hidden">
-          {/* Canvas Container */}
-          <div className="flex-1 flex items-center justify-center p-8 relative">
-            {/* Zoom Controls - Top Right */}
-            <div className="absolute top-6 right-6 flex items-center gap-2 bg-white/90 backdrop-blur-sm rounded-lg shadow-lg p-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleZoomOut}
-                className="h-8 w-8 p-0 hover:bg-gray-100"
-              >
-                <ZoomOut className="h-4 w-4" />
-              </Button>
-              <span className="text-sm font-medium px-2 min-w-[60px] text-center">
-                {zoomLevel}%
-              </span>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleZoomIn}
-                className="h-8 w-8 p-0 hover:bg-gray-100"
-              >
-                <ZoomIn className="h-4 w-4" />
-              </Button>
-              <div className="w-px h-6 bg-gray-300 mx-1" />
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsFullscreen(!isFullscreen)}
-                className="h-8 w-8 p-0 hover:bg-gray-100"
-              >
-                <Maximize2 className="h-4 w-4" />
-              </Button>
-            </div>
-
-            {/* Card Preview */}
-            <div 
-              className="bg-white rounded-2xl shadow-2xl overflow-hidden transition-transform duration-300"
-              style={{ 
-                transform: `scale(${zoomLevel / 100})`,
-                width: '400px',
-                height: '560px'
-              }}
-            >
-              {selectedTemplate ? (
-                <OaklandCardPreview
-                  template={{
-                    id: selectedTemplate.id,
-                    name: selectedTemplate.name,
-                    category: selectedTemplate.category,
-                    description: selectedTemplate.description,
-                    imageUrl: selectedTemplate.thumbnailUrl,
-                    effects: selectedTemplate.effects,
-                    metadata: {
-                      tags: selectedTemplate.tags,
-                      difficulty: mapDifficulty(selectedTemplate.difficulty),
-                      popularity: selectedTemplate.completionPercentage
-                    }
-                  }}
-                  title={memoryData.title}
-                  subtitle={memoryData.subtitle}
-                  className="w-full h-full"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
-                  <div className="text-center text-gray-500">
-                    <div className="text-6xl mb-4">⚾</div>
-                    <p className="text-lg font-medium">Select a template</p>
-                    <p className="text-sm">Choose from the Oakland A's collection</p>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
+          <OaklandCard3DCanvas
+            selectedTemplate={selectedTemplate}
+            memoryData={memoryData}
+            isFullscreen={isFullscreen}
+            onFullscreenToggle={handleFullscreenToggle}
+            zoomLevel={zoomLevel}
+            onZoomChange={setZoomLevel}
+            className="flex-1"
+          />
 
           {/* Bottom Toolbar */}
           <div className="bg-white border-t border-gray-200 px-6 py-4 shadow-lg">
