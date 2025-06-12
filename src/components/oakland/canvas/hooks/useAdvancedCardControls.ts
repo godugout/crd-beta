@@ -21,11 +21,11 @@ export const useAdvancedCardControls = ({ sidebarOpen = false }: UseAdvancedCard
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [lastRotation, setLastRotation] = useState({ x: 0, y: 0 });
   
-  // Enhanced mouse control state
+  // Improved mouse control state with better smoothing
   const [momentum, setMomentum] = useState({ x: 0, y: 0 });
   const lastMouseTime = useRef(0);
   const lastMousePosition = useRef({ x: 0, y: 0 });
-  const velocityHistory = useRef<Array<{ x: number; y: number; time: number }>>([]);
+  const velocitySmoothing = useRef<Array<{ x: number; y: number; time: number }>>([]);
   
   const [controls, setControls] = useState<CardControls>({
     position: { x: 0, y: 0, z: 0 },
@@ -35,22 +35,22 @@ export const useAdvancedCardControls = ({ sidebarOpen = false }: UseAdvancedCard
     autoRotate: false
   });
 
-  // Enhanced mouse interaction handlers with momentum
+  // Improved mouse interaction handlers with better responsiveness
   const handlePointerDown = useCallback((event: { point: { x: number; y: number } }) => {
     if (isFlipping) return;
     
     setIsDragging(true);
     setDragStart({ x: event.point.x, y: event.point.y });
     setLastRotation({ x: controls.rotation.x, y: controls.rotation.y });
-    setMomentum({ x: 0, y: 0 }); // Reset momentum on new drag
+    setMomentum({ x: 0, y: 0 });
     
-    // Initialize velocity tracking
+    // Initialize smooth velocity tracking
     lastMouseTime.current = performance.now();
     lastMousePosition.current = { x: event.point.x, y: event.point.y };
-    velocityHistory.current = [];
+    velocitySmoothing.current = [];
     
     document.body.style.cursor = 'grabbing';
-    console.log('Enhanced pointer down - starting smooth drag');
+    console.log('Smooth drag started');
   }, [controls.rotation, isFlipping]);
 
   const handlePointerMove = useCallback((event: { point: { x: number; y: number } }) => {
@@ -59,30 +59,32 @@ export const useAdvancedCardControls = ({ sidebarOpen = false }: UseAdvancedCard
     const currentTime = performance.now();
     const deltaTime = currentTime - lastMouseTime.current;
     
-    // Enhanced sensitivity (increased from 4x to 10x)
-    const sensitivity = 10;
-    const deltaX = (event.point.x - dragStart.x) * sensitivity;
-    const deltaY = (event.point.y - dragStart.y) * sensitivity;
+    if (deltaTime > 16) { // Limit to ~60fps for smoother updates
+      // Much higher sensitivity for more responsive controls
+      const sensitivity = 15;
+      const deltaX = (event.point.x - dragStart.x) * sensitivity;
+      const deltaY = (event.point.y - dragStart.y) * sensitivity;
 
-    // Track velocity for momentum calculation
-    if (deltaTime > 0) {
-      const velocityX = (event.point.x - lastMousePosition.current.x) / deltaTime * 1000;
-      const velocityY = (event.point.y - lastMousePosition.current.y) / deltaTime * 1000;
-      
-      velocityHistory.current.push({ x: velocityX, y: velocityY, time: currentTime });
-      
-      // Keep only recent velocity samples (last 100ms)
-      velocityHistory.current = velocityHistory.current.filter(v => currentTime - v.time < 100);
+      // Track velocity with better smoothing
+      if (deltaTime > 0) {
+        const velocityX = (event.point.x - lastMousePosition.current.x) / deltaTime * 1000;
+        const velocityY = (event.point.y - lastMousePosition.current.y) / deltaTime * 1000;
+        
+        velocitySmoothing.current.push({ x: velocityX, y: velocityY, time: currentTime });
+        
+        // Keep only recent samples (last 80ms for smoother momentum)
+        velocitySmoothing.current = velocitySmoothing.current.filter(v => currentTime - v.time < 80);
+      }
+
+      // Apply rotation with immediate response
+      if (groupRef.current) {
+        groupRef.current.rotation.y = lastRotation.y + deltaX;
+        groupRef.current.rotation.x = lastRotation.x - deltaY;
+      }
+
+      lastMouseTime.current = currentTime;
+      lastMousePosition.current = { x: event.point.x, y: event.point.y };
     }
-
-    // Apply rotation immediately for responsiveness
-    if (groupRef.current) {
-      groupRef.current.rotation.y = lastRotation.y + deltaX;
-      groupRef.current.rotation.x = lastRotation.x - deltaY;
-    }
-
-    lastMouseTime.current = currentTime;
-    lastMousePosition.current = { x: event.point.x, y: event.point.y };
   }, [isDragging, dragStart, lastRotation, isFlipping]);
 
   const handlePointerUp = useCallback(() => {
@@ -91,19 +93,20 @@ export const useAdvancedCardControls = ({ sidebarOpen = false }: UseAdvancedCard
     setIsDragging(false);
     document.body.style.cursor = 'grab';
     
-    // Calculate momentum from velocity history
-    if (velocityHistory.current.length > 0) {
-      const avgVelocity = velocityHistory.current.reduce(
+    // Calculate smooth momentum from recent velocity
+    if (velocitySmoothing.current.length > 0) {
+      const recentVelocities = velocitySmoothing.current.slice(-3); // Use last 3 samples
+      const avgVelocity = recentVelocities.reduce(
         (acc, v) => ({ x: acc.x + v.x, y: acc.y + v.y }),
         { x: 0, y: 0 }
       );
-      avgVelocity.x /= velocityHistory.current.length;
-      avgVelocity.y /= velocityHistory.current.length;
+      avgVelocity.x /= recentVelocities.length;
+      avgVelocity.y /= recentVelocities.length;
       
-      // Apply momentum with scaling
+      // Apply momentum with better scaling
       setMomentum({
-        x: avgVelocity.y * 0.01, // Invert Y for correct rotation
-        y: avgVelocity.x * 0.01
+        x: avgVelocity.y * 0.015, // Increased momentum transfer
+        y: avgVelocity.x * 0.015
       });
     }
     
@@ -118,15 +121,15 @@ export const useAdvancedCardControls = ({ sidebarOpen = false }: UseAdvancedCard
         }
       }));
     }
-    console.log('Enhanced pointer up - momentum applied');
+    console.log('Smooth drag ended with momentum');
   }, [isDragging]);
 
-  // Enhanced flip function with smooth animation
+  // Enhanced flip function with better animation
   const flipCard = useCallback(() => {
     if (isFlipping || isDragging) return;
     
     setIsFlipping(true);
-    console.log('Starting enhanced flip animation');
+    console.log('Starting smooth flip animation');
     
     setControls(prev => {
       const newFlipped = !prev.isFlipped;
@@ -134,15 +137,17 @@ export const useAdvancedCardControls = ({ sidebarOpen = false }: UseAdvancedCard
       
       if (groupRef.current) {
         const startY = groupRef.current.rotation.y;
-        const duration = 800; // Slightly longer for smoother feel
+        const duration = 600; // Slightly faster for better feel
         const startTime = Date.now();
         
         const animate = () => {
           const elapsed = Date.now() - startTime;
           const progress = Math.min(elapsed / duration, 1);
           
-          // Enhanced easing function for smoother animation
-          const eased = 1 - Math.pow(1 - progress, 4); // Ease out quart
+          // Better easing for smoother animation
+          const eased = progress < 0.5 
+            ? 4 * progress * progress * progress 
+            : 1 - Math.pow(-2 * progress + 2, 3) / 2;
           
           if (groupRef.current) {
             groupRef.current.rotation.y = startY + (targetY - startY) * eased;
@@ -152,7 +157,7 @@ export const useAdvancedCardControls = ({ sidebarOpen = false }: UseAdvancedCard
             requestAnimationFrame(animate);
           } else {
             setIsFlipping(false);
-            console.log('Enhanced flip animation completed');
+            console.log('Smooth flip completed');
           }
         };
         
@@ -227,17 +232,17 @@ export const useAdvancedCardControls = ({ sidebarOpen = false }: UseAdvancedCard
     setMomentum({ x: 0, y: 0 });
   }, [isFlipping]);
 
-  // Enhanced frame update with momentum and damping
+  // Enhanced frame update with better momentum physics
   useFrame((state, delta) => {
     if (!groupRef.current) return;
 
-    // Apply momentum when not dragging or flipping
+    // Apply momentum with improved damping
     if (!isDragging && !isFlipping && (Math.abs(momentum.x) > 0.001 || Math.abs(momentum.y) > 0.001)) {
       groupRef.current.rotation.x += momentum.x * delta * 60;
       groupRef.current.rotation.y += momentum.y * delta * 60;
       
-      // Apply damping (momentum decay)
-      const damping = 0.95;
+      // Better damping curve for more natural feel
+      const damping = 0.92;
       setMomentum(prev => ({
         x: prev.x * damping,
         y: prev.y * damping
@@ -249,7 +254,7 @@ export const useAdvancedCardControls = ({ sidebarOpen = false }: UseAdvancedCard
       }
     }
 
-    // Auto-rotation (only when not interacting and no momentum)
+    // Auto-rotation
     if (controls.autoRotate && !isDragging && !isFlipping && Math.abs(momentum.x) < 0.001 && Math.abs(momentum.y) < 0.001) {
       groupRef.current.rotation.y += delta * 0.8;
       setControls(prev => ({
@@ -258,7 +263,7 @@ export const useAdvancedCardControls = ({ sidebarOpen = false }: UseAdvancedCard
       }));
     }
 
-    // Adjust position based on sidebar state
+    // Smooth sidebar position adjustment
     const targetX = sidebarOpen ? -0.2 : 0;
     if (Math.abs(groupRef.current.position.x - targetX) > 0.01) {
       groupRef.current.position.x += (targetX - groupRef.current.position.x) * 0.1;

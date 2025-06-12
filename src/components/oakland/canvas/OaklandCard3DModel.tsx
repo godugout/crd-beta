@@ -44,7 +44,7 @@ const OaklandCard3DModel: React.FC<OaklandCard3DModelProps> = ({
   // Card dimensions
   const cardSize = { width: 2.0, height: 2.8, depth: 0.02 };
 
-  // Load textures with improved error handling
+  // Load textures with error handling and logging
   const { cardTexture, backTexture, isLoading, error } = useCardTextures(template.thumbnailUrl);
 
   // Create materials only when textures are loaded
@@ -72,19 +72,25 @@ const OaklandCard3DModel: React.FC<OaklandCard3DModelProps> = ({
     secondary: colorScheme?.secondary || '#EFB21E'
   };
 
-  // Show loading state
-  if (isLoading || !cardTexture || !backTexture) {
+  // Show loading state with better feedback
+  if (isLoading || !cardTexture || !backTexture || !frontMaterial || !backMaterial) {
+    console.log('Card loading state:', { isLoading, cardTexture: !!cardTexture, backTexture: !!backTexture });
     return (
       <group position={[0, 0, 0]}>
         <mesh>
           <planeGeometry args={[cardSize.width, cardSize.height]} />
-          <meshStandardMaterial color="#333333" opacity={0.5} transparent />
+          <meshStandardMaterial color="#444444" opacity={0.7} transparent />
+        </mesh>
+        {/* Loading indicator text */}
+        <mesh position={[0, 0, 0.01]}>
+          <planeGeometry args={[1, 0.3]} />
+          <meshBasicMaterial color="#ffffff" transparent opacity={0.9} />
         </mesh>
       </group>
     );
   }
 
-  // Show error state
+  // Show error state with details
   if (error) {
     console.error('Card texture error:', error);
     return (
@@ -96,6 +102,8 @@ const OaklandCard3DModel: React.FC<OaklandCard3DModelProps> = ({
       </group>
     );
   }
+
+  console.log('Rendering card with materials:', { frontMaterial: !!frontMaterial, backMaterial: !!backMaterial });
 
   return (
     <group 
@@ -123,7 +131,7 @@ const OaklandCard3DModel: React.FC<OaklandCard3DModelProps> = ({
         />
       )}
 
-      {/* Card Front */}
+      {/* Card Front - Ensure material is properly applied */}
       <mesh 
         castShadow 
         receiveShadow
@@ -138,7 +146,7 @@ const OaklandCard3DModel: React.FC<OaklandCard3DModelProps> = ({
         <primitive object={frontMaterial} />
       </mesh>
 
-      {/* Card Back */}
+      {/* Card Back - Ensure material is properly applied */}
       <mesh 
         position={[0, 0, -cardSize.depth]} 
         rotation={[0, Math.PI, 0]} 
