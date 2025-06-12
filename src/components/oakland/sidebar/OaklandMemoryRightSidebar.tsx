@@ -82,27 +82,27 @@ const OaklandMemoryRightSidebar: React.FC<OaklandMemoryRightSidebarProps> = ({
   const handleZoomOut = () => onZoomChange(Math.max(zoomLevel - 25, 50));
   const handleReset = () => {
     onZoomChange(100);
-    onAutoRotateToggle();
+    if (autoRotate) onAutoRotateToggle();
   };
 
   return (
     <div className={cn(
-      "bg-[#1a1a1a] border-l border-[#ffd700]/20 transition-all duration-300 flex flex-col shadow-xl",
+      "bg-white border-l border-gray-200 transition-all duration-300 flex flex-col shadow-lg",
       collapsed ? "w-16" : "w-96"
     )}>
       {/* Header */}
-      <div className="p-4 border-b border-[#ffd700]/20 flex items-center justify-between bg-[#0f4c3a]/60">
+      <div className="p-4 border-b border-gray-200 flex items-center justify-between bg-gray-50">
         {!collapsed && (
           <div className="flex items-center gap-2">
-            <Grid3X3 className="h-5 w-5 text-[#ffd700]" />
-            <span className="font-bold text-[#ffd700]">Controls</span>
+            <Grid3X3 className="h-5 w-5 text-gray-600" />
+            <span className="font-semibold text-gray-900">Controls</span>
           </div>
         )}
         <Button
           variant="ghost"
           size="sm"
           onClick={onToggleCollapse}
-          className="p-2 hover:bg-[#ffd700]/20 text-[#ffd700]"
+          className="p-2 hover:bg-[#EFB21E]/10 text-gray-600 hover:text-[#EFB21E]"
         >
           {collapsed ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
         </Button>
@@ -113,7 +113,7 @@ const OaklandMemoryRightSidebar: React.FC<OaklandMemoryRightSidebarProps> = ({
           {/* View Controls Section */}
           <Collapsible open={viewSectionOpen} onOpenChange={setViewSectionOpen}>
             <CollapsibleTrigger asChild>
-              <Button variant="ghost" className="w-full justify-between text-[#ffd700] hover:bg-[#ffd700]/20">
+              <Button variant="ghost" className="w-full justify-between text-gray-700 hover:bg-gray-100">
                 <div className="flex items-center gap-2">
                   <Eye className="h-4 w-4" />
                   View Controls
@@ -124,18 +124,18 @@ const OaklandMemoryRightSidebar: React.FC<OaklandMemoryRightSidebarProps> = ({
             <CollapsibleContent className="space-y-4 pt-4">
               {/* Zoom Controls */}
               <div className="space-y-2">
-                <Label className="text-[#ffd700] text-sm">Zoom Level</Label>
+                <Label className="text-gray-700 text-sm">Zoom Level</Label>
                 <div className="flex items-center gap-2">
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={handleZoomOut}
                     disabled={zoomLevel <= 50}
-                    className="border-[#ffd700]/50 text-[#ffd700] hover:bg-[#ffd700]/20"
+                    className="border-gray-300 text-gray-600 hover:bg-gray-50"
                   >
                     <ZoomOut className="h-4 w-4" />
                   </Button>
-                  <Badge variant="secondary" className="px-3 min-w-[60px] text-center bg-[#ffd700] text-[#0f4c3a]">
+                  <Badge variant="secondary" className="px-3 min-w-[60px] text-center bg-gray-100 text-gray-800">
                     {zoomLevel}%
                   </Badge>
                   <Button
@@ -143,7 +143,7 @@ const OaklandMemoryRightSidebar: React.FC<OaklandMemoryRightSidebarProps> = ({
                     size="sm"
                     onClick={handleZoomIn}
                     disabled={zoomLevel >= 200}
-                    className="border-[#ffd700]/50 text-[#ffd700] hover:bg-[#ffd700]/20"
+                    className="border-gray-300 text-gray-600 hover:bg-gray-50"
                   >
                     <ZoomIn className="h-4 w-4" />
                   </Button>
@@ -152,14 +152,14 @@ const OaklandMemoryRightSidebar: React.FC<OaklandMemoryRightSidebarProps> = ({
 
               {/* View Mode Toggle */}
               <div className="space-y-2">
-                <Label className="text-[#ffd700] text-sm">View Mode</Label>
+                <Label className="text-gray-700 text-sm">View Mode</Label>
                 <Button
                   onClick={onViewModeToggle}
                   className={cn(
                     "w-full justify-start",
                     viewMode === '3d' 
-                      ? "bg-[#ffd700] text-[#0f4c3a] hover:bg-[#ffd700]/90"
-                      : "border-[#ffd700]/50 text-[#ffd700] hover:bg-[#ffd700]/20 bg-transparent"
+                      ? "bg-[#EFB21E] text-[#0f4c3a] hover:bg-[#EFB21E]/90"
+                      : "border-gray-300 text-gray-600 hover:bg-gray-50 bg-white"
                   )}
                   variant={viewMode === '3d' ? "default" : "outline"}
                 >
@@ -171,14 +171,14 @@ const OaklandMemoryRightSidebar: React.FC<OaklandMemoryRightSidebarProps> = ({
               {/* Auto Rotate (3D only) */}
               {viewMode === '3d' && (
                 <div className="space-y-2">
-                  <Label className="text-[#ffd700] text-sm">Animation</Label>
+                  <Label className="text-gray-700 text-sm">Animation</Label>
                   <Button
                     onClick={onAutoRotateToggle}
                     className={cn(
                       "w-full justify-start",
                       autoRotate 
-                        ? "bg-[#ffd700] text-[#0f4c3a] hover:bg-[#ffd700]/90"
-                        : "border-[#ffd700]/50 text-[#ffd700] hover:bg-[#ffd700]/20 bg-transparent"
+                        ? "bg-[#EFB21E] text-[#0f4c3a] hover:bg-[#EFB21E]/90"
+                        : "border-gray-300 text-gray-600 hover:bg-gray-50 bg-white"
                     )}
                     variant={autoRotate ? "default" : "outline"}
                   >
@@ -192,7 +192,7 @@ const OaklandMemoryRightSidebar: React.FC<OaklandMemoryRightSidebarProps> = ({
               <Button
                 onClick={handleReset}
                 variant="outline"
-                className="w-full border-[#ffd700]/50 text-[#ffd700] hover:bg-[#ffd700]/20"
+                className="w-full border-gray-300 text-gray-600 hover:bg-gray-50"
               >
                 <RotateCcw className="h-4 w-4 mr-2" />
                 Reset View
@@ -203,7 +203,7 @@ const OaklandMemoryRightSidebar: React.FC<OaklandMemoryRightSidebarProps> = ({
           {/* Card Settings Section */}
           <Collapsible open={cardSectionOpen} onOpenChange={setCardSectionOpen}>
             <CollapsibleTrigger asChild>
-              <Button variant="ghost" className="w-full justify-between text-[#ffd700] hover:bg-[#ffd700]/20">
+              <Button variant="ghost" className="w-full justify-between text-gray-700 hover:bg-gray-100">
                 <div className="flex items-center gap-2">
                   <Sparkles className="h-4 w-4" />
                   Card Finish
@@ -219,8 +219,8 @@ const OaklandMemoryRightSidebar: React.FC<OaklandMemoryRightSidebarProps> = ({
                   className={cn(
                     "w-full justify-start capitalize",
                     cardFinish === finish 
-                      ? "bg-[#ffd700] text-[#0f4c3a] hover:bg-[#ffd700]/90"
-                      : "border-[#ffd700]/50 text-[#ffd700] hover:bg-[#ffd700]/20 bg-transparent"
+                      ? "bg-[#EFB21E] text-[#0f4c3a] hover:bg-[#EFB21E]/90"
+                      : "border-gray-300 text-gray-600 hover:bg-gray-50 bg-white"
                   )}
                   variant={cardFinish === finish ? "default" : "outline"}
                 >
@@ -233,7 +233,7 @@ const OaklandMemoryRightSidebar: React.FC<OaklandMemoryRightSidebarProps> = ({
           {/* Templates Section */}
           <Collapsible open={templateSectionOpen} onOpenChange={setTemplateSectionOpen}>
             <CollapsibleTrigger asChild>
-              <Button variant="ghost" className="w-full justify-between text-[#ffd700] hover:bg-[#ffd700]/20">
+              <Button variant="ghost" className="w-full justify-between text-gray-700 hover:bg-gray-100">
                 <div className="flex items-center gap-2">
                   <Grid3X3 className="h-4 w-4" />
                   Templates
@@ -244,12 +244,12 @@ const OaklandMemoryRightSidebar: React.FC<OaklandMemoryRightSidebarProps> = ({
             <CollapsibleContent className="space-y-4 pt-4">
               {/* Template Search */}
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#ffd700]/60 h-4 w-4" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                 <Input
                   placeholder="Search templates..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 bg-[#0f4c3a]/30 border-[#ffd700]/30 text-[#ffd700] placeholder:text-[#ffd700]/50"
+                  className="pl-10 bg-white border-gray-300 text-gray-700 placeholder:text-gray-400"
                 />
               </div>
 
@@ -261,12 +261,12 @@ const OaklandMemoryRightSidebar: React.FC<OaklandMemoryRightSidebarProps> = ({
                     className={cn(
                       "cursor-pointer rounded-lg overflow-hidden border-2 transition-all hover:scale-105",
                       selectedTemplate?.id === template.id
-                        ? "border-[#ffd700] ring-2 ring-[#ffd700]/30"
-                        : "border-[#ffd700]/30 hover:border-[#ffd700]/60"
+                        ? "border-[#EFB21E] ring-2 ring-[#EFB21E]/30"
+                        : "border-gray-200 hover:border-gray-300"
                     )}
                     onClick={() => onSelectTemplate(template)}
                   >
-                    <div className="aspect-[2.5/3.5] bg-[#0f4c3a] flex items-center justify-center">
+                    <div className="aspect-[2.5/3.5] bg-gray-100 flex items-center justify-center">
                       <img
                         src={template.thumbnailUrl}
                         alt={template.name}
@@ -277,13 +277,13 @@ const OaklandMemoryRightSidebar: React.FC<OaklandMemoryRightSidebarProps> = ({
                           target.nextElementSibling?.classList.remove('hidden');
                         }}
                       />
-                      <div className="hidden text-[#ffd700] text-center p-2">
+                      <div className="hidden text-gray-400 text-center p-2">
                         <div className="text-xl mb-1">⚾</div>
                         <div className="text-xs">{template.name}</div>
                       </div>
                     </div>
-                    <div className="p-2 bg-[#0f4c3a]/80">
-                      <p className="text-xs text-[#ffd700] font-medium truncate">{template.name}</p>
+                    <div className="p-2 bg-white">
+                      <p className="text-xs text-gray-600 font-medium truncate">{template.name}</p>
                     </div>
                   </div>
                 ))}
@@ -294,7 +294,7 @@ const OaklandMemoryRightSidebar: React.FC<OaklandMemoryRightSidebarProps> = ({
           {/* Content Section */}
           <Collapsible open={contentSectionOpen} onOpenChange={setContentSectionOpen}>
             <CollapsibleTrigger asChild>
-              <Button variant="ghost" className="w-full justify-between text-[#ffd700] hover:bg-[#ffd700]/20">
+              <Button variant="ghost" className="w-full justify-between text-gray-700 hover:bg-gray-100">
                 <div className="flex items-center gap-2">
                   <Type className="h-4 w-4" />
                   Content
@@ -305,27 +305,27 @@ const OaklandMemoryRightSidebar: React.FC<OaklandMemoryRightSidebarProps> = ({
             <CollapsibleContent className="space-y-4 pt-4">
               <div className="space-y-3">
                 <div>
-                  <Label className="text-[#ffd700] text-sm">Title</Label>
+                  <Label className="text-gray-700 text-sm">Title</Label>
                   <Input
                     value={memoryData.title}
                     onChange={(e) => onMemoryDataChange({ ...memoryData, title: e.target.value })}
-                    className="bg-[#0f4c3a]/30 border-[#ffd700]/30 text-[#ffd700]"
+                    className="bg-white border-gray-300 text-gray-700"
                   />
                 </div>
                 <div>
-                  <Label className="text-[#ffd700] text-sm">Subtitle</Label>
+                  <Label className="text-gray-700 text-sm">Subtitle</Label>
                   <Input
                     value={memoryData.subtitle}
                     onChange={(e) => onMemoryDataChange({ ...memoryData, subtitle: e.target.value })}
-                    className="bg-[#0f4c3a]/30 border-[#ffd700]/30 text-[#ffd700]"
+                    className="bg-white border-gray-300 text-gray-700"
                   />
                 </div>
                 <div>
-                  <Label className="text-[#ffd700] text-sm">Description</Label>
+                  <Label className="text-gray-700 text-sm">Description</Label>
                   <Textarea
                     value={memoryData.description}
                     onChange={(e) => onMemoryDataChange({ ...memoryData, description: e.target.value })}
-                    className="bg-[#0f4c3a]/30 border-[#ffd700]/30 text-[#ffd700] resize-none"
+                    className="bg-white border-gray-300 text-gray-700 resize-none"
                     rows={3}
                   />
                 </div>
@@ -334,11 +334,11 @@ const OaklandMemoryRightSidebar: React.FC<OaklandMemoryRightSidebarProps> = ({
           </Collapsible>
 
           {/* Quick Actions */}
-          <div className="pt-4 border-t border-[#ffd700]/20">
+          <div className="pt-4 border-t border-gray-200">
             <Button
               onClick={onExport}
               variant="outline"
-              className="w-full border-[#ffd700]/50 text-[#ffd700] hover:bg-[#ffd700]/20"
+              className="w-full border-gray-300 text-gray-600 hover:bg-gray-50"
             >
               <Download className="h-4 w-4 mr-2" />
               Export
