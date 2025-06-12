@@ -87,22 +87,22 @@ const OaklandMemoryRightSidebar: React.FC<OaklandMemoryRightSidebarProps> = ({
 
   return (
     <div className={cn(
-      "bg-white border-l border-gray-200 transition-all duration-300 flex flex-col shadow-lg",
+      "bg-gray-900 border-l border-gray-700 transition-all duration-300 flex flex-col shadow-lg",
       collapsed ? "w-16" : "w-96"
     )}>
       {/* Header */}
-      <div className="p-4 border-b border-gray-200 flex items-center justify-between bg-gray-50">
+      <div className="p-4 border-b border-gray-700 flex items-center justify-between bg-gray-800">
         {!collapsed && (
           <div className="flex items-center gap-2">
-            <Grid3X3 className="h-5 w-5 text-gray-600" />
-            <span className="font-semibold text-gray-900">Controls</span>
+            <Grid3X3 className="h-5 w-5 text-gray-400" />
+            <span className="font-semibold text-white">Controls</span>
           </div>
         )}
         <Button
           variant="ghost"
           size="sm"
           onClick={onToggleCollapse}
-          className="p-2 hover:bg-[#EFB21E]/10 text-gray-600 hover:text-[#EFB21E]"
+          className="p-2 hover:bg-[#EFB21E]/10 text-gray-400 hover:text-[#EFB21E]"
         >
           {collapsed ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
         </Button>
@@ -113,7 +113,7 @@ const OaklandMemoryRightSidebar: React.FC<OaklandMemoryRightSidebarProps> = ({
           {/* View Controls Section */}
           <Collapsible open={viewSectionOpen} onOpenChange={setViewSectionOpen}>
             <CollapsibleTrigger asChild>
-              <Button variant="ghost" className="w-full justify-between text-gray-700 hover:bg-gray-100">
+              <Button variant="ghost" className="w-full justify-between text-gray-200 hover:bg-gray-800">
                 <div className="flex items-center gap-2">
                   <Eye className="h-4 w-4" />
                   View Controls
@@ -124,18 +124,18 @@ const OaklandMemoryRightSidebar: React.FC<OaklandMemoryRightSidebarProps> = ({
             <CollapsibleContent className="space-y-4 pt-4">
               {/* Zoom Controls */}
               <div className="space-y-2">
-                <Label className="text-gray-700 text-sm">Zoom Level</Label>
+                <Label className="text-gray-300 text-sm">Zoom Level</Label>
                 <div className="flex items-center gap-2">
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={handleZoomOut}
                     disabled={zoomLevel <= 50}
-                    className="border-gray-300 text-gray-600 hover:bg-gray-50"
+                    className="border-gray-600 text-gray-300 hover:bg-gray-800 bg-gray-800"
                   >
                     <ZoomOut className="h-4 w-4" />
                   </Button>
-                  <Badge variant="secondary" className="px-3 min-w-[60px] text-center bg-gray-100 text-gray-800">
+                  <Badge variant="secondary" className="px-3 min-w-[60px] text-center bg-gray-800 text-gray-200">
                     {zoomLevel}%
                   </Badge>
                   <Button
@@ -143,7 +143,7 @@ const OaklandMemoryRightSidebar: React.FC<OaklandMemoryRightSidebarProps> = ({
                     size="sm"
                     onClick={handleZoomIn}
                     disabled={zoomLevel >= 200}
-                    className="border-gray-300 text-gray-600 hover:bg-gray-50"
+                    className="border-gray-600 text-gray-300 hover:bg-gray-800 bg-gray-800"
                   >
                     <ZoomIn className="h-4 w-4" />
                   </Button>
@@ -152,14 +152,14 @@ const OaklandMemoryRightSidebar: React.FC<OaklandMemoryRightSidebarProps> = ({
 
               {/* View Mode Toggle */}
               <div className="space-y-2">
-                <Label className="text-gray-700 text-sm">View Mode</Label>
+                <Label className="text-gray-300 text-sm">View Mode</Label>
                 <Button
                   onClick={onViewModeToggle}
                   className={cn(
                     "w-full justify-start",
                     viewMode === '3d' 
                       ? "bg-[#EFB21E] text-[#0f4c3a] hover:bg-[#EFB21E]/90"
-                      : "border-gray-300 text-gray-600 hover:bg-gray-50 bg-white"
+                      : "border-gray-600 text-gray-300 hover:bg-gray-800 bg-gray-800"
                   )}
                   variant={viewMode === '3d' ? "default" : "outline"}
                 >
@@ -171,14 +171,14 @@ const OaklandMemoryRightSidebar: React.FC<OaklandMemoryRightSidebarProps> = ({
               {/* Auto Rotate (3D only) */}
               {viewMode === '3d' && (
                 <div className="space-y-2">
-                  <Label className="text-gray-700 text-sm">Animation</Label>
+                  <Label className="text-gray-300 text-sm">Animation</Label>
                   <Button
                     onClick={onAutoRotateToggle}
                     className={cn(
                       "w-full justify-start",
                       autoRotate 
                         ? "bg-[#EFB21E] text-[#0f4c3a] hover:bg-[#EFB21E]/90"
-                        : "border-gray-300 text-gray-600 hover:bg-gray-50 bg-white"
+                        : "border-gray-600 text-gray-300 hover:bg-gray-800 bg-gray-800"
                     )}
                     variant={autoRotate ? "default" : "outline"}
                   >
@@ -192,7 +192,7 @@ const OaklandMemoryRightSidebar: React.FC<OaklandMemoryRightSidebarProps> = ({
               <Button
                 onClick={handleReset}
                 variant="outline"
-                className="w-full border-gray-300 text-gray-600 hover:bg-gray-50"
+                className="w-full border-gray-600 text-gray-300 hover:bg-gray-800 bg-gray-800"
               >
                 <RotateCcw className="h-4 w-4 mr-2" />
                 Reset View
@@ -203,7 +203,7 @@ const OaklandMemoryRightSidebar: React.FC<OaklandMemoryRightSidebarProps> = ({
           {/* Card Settings Section */}
           <Collapsible open={cardSectionOpen} onOpenChange={setCardSectionOpen}>
             <CollapsibleTrigger asChild>
-              <Button variant="ghost" className="w-full justify-between text-gray-700 hover:bg-gray-100">
+              <Button variant="ghost" className="w-full justify-between text-gray-200 hover:bg-gray-800">
                 <div className="flex items-center gap-2">
                   <Sparkles className="h-4 w-4" />
                   Card Finish
@@ -220,7 +220,7 @@ const OaklandMemoryRightSidebar: React.FC<OaklandMemoryRightSidebarProps> = ({
                     "w-full justify-start capitalize",
                     cardFinish === finish 
                       ? "bg-[#EFB21E] text-[#0f4c3a] hover:bg-[#EFB21E]/90"
-                      : "border-gray-300 text-gray-600 hover:bg-gray-50 bg-white"
+                      : "border-gray-600 text-gray-300 hover:bg-gray-800 bg-gray-800"
                   )}
                   variant={cardFinish === finish ? "default" : "outline"}
                 >
@@ -233,7 +233,7 @@ const OaklandMemoryRightSidebar: React.FC<OaklandMemoryRightSidebarProps> = ({
           {/* Templates Section */}
           <Collapsible open={templateSectionOpen} onOpenChange={setTemplateSectionOpen}>
             <CollapsibleTrigger asChild>
-              <Button variant="ghost" className="w-full justify-between text-gray-700 hover:bg-gray-100">
+              <Button variant="ghost" className="w-full justify-between text-gray-200 hover:bg-gray-800">
                 <div className="flex items-center gap-2">
                   <Grid3X3 className="h-4 w-4" />
                   Templates
@@ -244,12 +244,12 @@ const OaklandMemoryRightSidebar: React.FC<OaklandMemoryRightSidebarProps> = ({
             <CollapsibleContent className="space-y-4 pt-4">
               {/* Template Search */}
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-4 w-4" />
                 <Input
                   placeholder="Search templates..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 bg-white border-gray-300 text-gray-700 placeholder:text-gray-400"
+                  className="pl-10 bg-gray-800 border-gray-600 text-gray-200 placeholder:text-gray-500"
                 />
               </div>
 
@@ -262,11 +262,11 @@ const OaklandMemoryRightSidebar: React.FC<OaklandMemoryRightSidebarProps> = ({
                       "cursor-pointer rounded-lg overflow-hidden border-2 transition-all hover:scale-105",
                       selectedTemplate?.id === template.id
                         ? "border-[#EFB21E] ring-2 ring-[#EFB21E]/30"
-                        : "border-gray-200 hover:border-gray-300"
+                        : "border-gray-600 hover:border-gray-500"
                     )}
                     onClick={() => onSelectTemplate(template)}
                   >
-                    <div className="aspect-[2.5/3.5] bg-gray-100 flex items-center justify-center">
+                    <div className="aspect-[2.5/3.5] bg-gray-800 flex items-center justify-center">
                       <img
                         src={template.thumbnailUrl}
                         alt={template.name}
@@ -277,13 +277,13 @@ const OaklandMemoryRightSidebar: React.FC<OaklandMemoryRightSidebarProps> = ({
                           target.nextElementSibling?.classList.remove('hidden');
                         }}
                       />
-                      <div className="hidden text-gray-400 text-center p-2">
+                      <div className="hidden text-gray-500 text-center p-2">
                         <div className="text-xl mb-1">⚾</div>
                         <div className="text-xs">{template.name}</div>
                       </div>
                     </div>
-                    <div className="p-2 bg-white">
-                      <p className="text-xs text-gray-600 font-medium truncate">{template.name}</p>
+                    <div className="p-2 bg-gray-800">
+                      <p className="text-xs text-gray-300 font-medium truncate">{template.name}</p>
                     </div>
                   </div>
                 ))}
@@ -294,7 +294,7 @@ const OaklandMemoryRightSidebar: React.FC<OaklandMemoryRightSidebarProps> = ({
           {/* Content Section */}
           <Collapsible open={contentSectionOpen} onOpenChange={setContentSectionOpen}>
             <CollapsibleTrigger asChild>
-              <Button variant="ghost" className="w-full justify-between text-gray-700 hover:bg-gray-100">
+              <Button variant="ghost" className="w-full justify-between text-gray-200 hover:bg-gray-800">
                 <div className="flex items-center gap-2">
                   <Type className="h-4 w-4" />
                   Content
@@ -305,27 +305,27 @@ const OaklandMemoryRightSidebar: React.FC<OaklandMemoryRightSidebarProps> = ({
             <CollapsibleContent className="space-y-4 pt-4">
               <div className="space-y-3">
                 <div>
-                  <Label className="text-gray-700 text-sm">Title</Label>
+                  <Label className="text-gray-300 text-sm">Title</Label>
                   <Input
                     value={memoryData.title}
                     onChange={(e) => onMemoryDataChange({ ...memoryData, title: e.target.value })}
-                    className="bg-white border-gray-300 text-gray-700"
+                    className="bg-gray-800 border-gray-600 text-gray-200"
                   />
                 </div>
                 <div>
-                  <Label className="text-gray-700 text-sm">Subtitle</Label>
+                  <Label className="text-gray-300 text-sm">Subtitle</Label>
                   <Input
                     value={memoryData.subtitle}
                     onChange={(e) => onMemoryDataChange({ ...memoryData, subtitle: e.target.value })}
-                    className="bg-white border-gray-300 text-gray-700"
+                    className="bg-gray-800 border-gray-600 text-gray-200"
                   />
                 </div>
                 <div>
-                  <Label className="text-gray-700 text-sm">Description</Label>
+                  <Label className="text-gray-300 text-sm">Description</Label>
                   <Textarea
                     value={memoryData.description}
                     onChange={(e) => onMemoryDataChange({ ...memoryData, description: e.target.value })}
-                    className="bg-white border-gray-300 text-gray-700 resize-none"
+                    className="bg-gray-800 border-gray-600 text-gray-200 resize-none"
                     rows={3}
                   />
                 </div>
@@ -334,11 +334,11 @@ const OaklandMemoryRightSidebar: React.FC<OaklandMemoryRightSidebarProps> = ({
           </Collapsible>
 
           {/* Quick Actions */}
-          <div className="pt-4 border-t border-gray-200">
+          <div className="pt-4 border-t border-gray-700">
             <Button
               onClick={onExport}
               variant="outline"
-              className="w-full border-gray-300 text-gray-600 hover:bg-gray-50"
+              className="w-full border-gray-600 text-gray-300 hover:bg-gray-800 bg-gray-800"
             >
               <Download className="h-4 w-4 mr-2" />
               Export
