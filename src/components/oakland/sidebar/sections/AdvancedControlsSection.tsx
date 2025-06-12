@@ -4,7 +4,17 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { ChevronRight, RotateCcw, FlipHorizontal, Move, RotateCw, Keyboard, MousePointer } from 'lucide-react';
+import { 
+  ChevronRight, 
+  RotateCcw, 
+  FlipHorizontal, 
+  Move, 
+  RotateCw, 
+  Keyboard, 
+  MousePointer,
+  Eye,
+  EyeOff
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface AdvancedControlsSectionProps {
@@ -14,6 +24,8 @@ interface AdvancedControlsSectionProps {
   onResetCard: () => void;
   onToggleAutoRotate: () => void;
   onScaleChange: (scale: number) => void;
+  onFaceCamera?: () => void;
+  onShowBack?: () => void;
   scale: number;
   autoRotate: boolean;
   isFlipped: boolean;
@@ -26,6 +38,8 @@ const AdvancedControlsSection: React.FC<AdvancedControlsSectionProps> = ({
   onResetCard,
   onToggleAutoRotate,
   onScaleChange,
+  onFaceCamera,
+  onShowBack,
   scale,
   autoRotate,
   isFlipped
@@ -53,6 +67,35 @@ const AdvancedControlsSection: React.FC<AdvancedControlsSectionProps> = ({
             step={0.1}
             className="w-full"
           />
+        </div>
+
+        {/* Quick View Presets */}
+        <div className="space-y-2">
+          <Label className="text-gray-300 text-sm">Quick Views</Label>
+          <div className="grid grid-cols-2 gap-2">
+            {onFaceCamera && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onFaceCamera}
+                className="border-gray-600 text-gray-300 hover:bg-gray-800"
+              >
+                <Eye className="h-3 w-3 mr-1" />
+                Front
+              </Button>
+            )}
+            {onShowBack && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onShowBack}
+                className="border-gray-600 text-gray-300 hover:bg-gray-800"
+              >
+                <EyeOff className="h-3 w-3 mr-1" />
+                Back
+              </Button>
+            )}
+          </div>
         </div>
 
         {/* Quick Actions */}
@@ -103,8 +146,8 @@ const AdvancedControlsSection: React.FC<AdvancedControlsSectionProps> = ({
           </div>
           <div className="grid grid-cols-1 gap-1 text-xs text-gray-400">
             <div>• Drag: Rotate card in 3D</div>
-            <div>• Hover: Visual feedback</div>
-            <div>• Smooth interactions</div>
+            <div>• Enhanced sensitivity</div>
+            <div>• Smooth cursor feedback</div>
           </div>
           
           <div className="flex items-center gap-2 text-gray-300 text-sm font-medium">
@@ -116,13 +159,15 @@ const AdvancedControlsSection: React.FC<AdvancedControlsSectionProps> = ({
             <div>R: Reset</div>
             <div>Space: Auto-rotate</div>
             <div>+/-: Scale</div>
+            <div>1: Face front</div>
+            <div>2: Show back</div>
             <div>Arrow keys: Move</div>
             <div>Smooth animations</div>
           </div>
         </div>
 
         <div className="text-xs text-gray-500 leading-relaxed">
-          Enhanced 3D controls with smooth animations and proper card orientation. No more sideways cards!
+          Enhanced 3D controls with improved sensitivity and preset views for easy card orientation!
         </div>
       </CollapsibleContent>
     </Collapsible>

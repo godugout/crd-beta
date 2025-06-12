@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { OaklandTemplate } from '@/lib/types/oaklandTemplates';
@@ -12,6 +11,7 @@ import EffectsToggleControls from './sections/EffectsToggleControls';
 import CardSettingsSection from './sections/CardSettingsSection';
 import ViewControlsSection from './sections/ViewControlsSection';
 import QuickActionsSection from './sections/QuickActionsSection';
+import AdvancedControlsSection from './sections/AdvancedControlsSection';
 import { useRandomDesign } from '@/hooks/useRandomDesign';
 import { GeneratedDesign } from '@/lib/services/randomDesignGenerator';
 
@@ -77,7 +77,16 @@ const StepByStepSidebar: React.FC<StepByStepSidebarProps> = ({
   onBorderStyleChange = () => {}
 }) => {
   const [currentStep, setCurrentStep] = useState(0);
-  
+  const [openSections, setOpenSections] = useState({
+    template: true,
+    content: true,
+    cardSettings: false,
+    viewControls: false,
+    advancedControls: false,
+    quickActions: false,
+    luckyDesign: false
+  });
+
   const { applyRandomDesign, isApplying } = useRandomDesign({
     onTemplateChange: onSelectTemplate,
     onMemoryDataChange: onMemoryDataChange,
@@ -157,10 +166,17 @@ const StepByStepSidebar: React.FC<StepByStepSidebarProps> = ({
     setCurrentStep(stepIndex);
   };
 
+  const toggleSection = (section: string, open: boolean) => {
+    setOpenSections((prev) => ({
+      ...prev,
+      [section]: open
+    }));
+  };
+
   return (
     <div className={cn(
-      "bg-gray-900 border-l border-gray-700 transition-all duration-300 flex flex-col shadow-lg",
-      collapsed ? "w-16" : "w-96"
+      "h-full bg-[#0f4c3a] border-l border-[#ffd700]/20 shadow-2xl transition-all duration-300 relative z-20",
+      collapsed ? "w-12" : "w-80"
     )}>
       <SidebarHeader 
         collapsed={collapsed}
@@ -199,7 +215,7 @@ const StepByStepSidebar: React.FC<StepByStepSidebarProps> = ({
           </div>
 
           {/* Step Content */}
-          <div className="flex-1 overflow-y-auto p-4">
+          <div className="flex-1 overflow-y-auto p-4 space-y-4">
             {currentStep === 0 && (
               <TemplateSection
                 isOpen={true}
@@ -265,6 +281,21 @@ const StepByStepSidebar: React.FC<StepByStepSidebarProps> = ({
                 />
               </div>
             )}
+
+            {/* Enhanced Advanced Controls Section */}
+            <AdvancedControlsSection
+              isOpen={openSections.advancedControls}
+              onOpenChange={(open) => toggleSection('advancedControls', open)}
+              onFlipCard={() => {/* Will be connected to card controls */}}
+              onResetCard={() => {/* Will be connected to card controls */}}
+              onToggleAutoRotate={onAutoRotateToggle}
+              onScaleChange={(scale) => {/* Will be connected to card controls */}}
+              onFaceCamera={() => {/* Will be connected to card controls */}}
+              onShowBack={() => {/* Will be connected to card controls */}}
+              scale={1.0}
+              autoRotate={autoRotate}
+              isFlipped={false}
+            />
           </div>
 
           {/* Step Navigation */}

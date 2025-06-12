@@ -8,11 +8,8 @@ export const useCardTextures = (templateUrl: string, backTextureUrl: string = '/
   const cardTexture = useLoader(
     TextureLoader, 
     templateUrl, 
-    (texture) => {
-      console.log('Template texture loaded successfully');
-      texture.flipY = false;
-      texture.wrapS = THREE.ClampToEdgeWrapping;
-      texture.wrapT = THREE.ClampToEdgeWrapping;
+    (loader) => {
+      console.log('Template texture loader initialized');
     },
     (error) => {
       console.warn('Failed to load template texture:', error);
@@ -22,15 +19,26 @@ export const useCardTextures = (templateUrl: string, backTextureUrl: string = '/
   const backTexture = useLoader(
     TextureLoader, 
     backTextureUrl,
-    (texture) => {
-      texture.flipY = false;
-      texture.wrapS = THREE.ClampToEdgeWrapping;
-      texture.wrapT = THREE.ClampToEdgeWrapping;
+    (loader) => {
+      console.log('Back texture loader initialized');
     },
     (error) => {
       console.warn('Failed to load back texture:', error);
     }
   );
+
+  // Configure textures after loading
+  if (cardTexture) {
+    cardTexture.flipY = false;
+    cardTexture.wrapS = THREE.ClampToEdgeWrapping;
+    cardTexture.wrapT = THREE.ClampToEdgeWrapping;
+  }
+
+  if (backTexture) {
+    backTexture.flipY = false;
+    backTexture.wrapS = THREE.ClampToEdgeWrapping;
+    backTexture.wrapT = THREE.ClampToEdgeWrapping;
+  }
 
   return { cardTexture, backTexture };
 };
