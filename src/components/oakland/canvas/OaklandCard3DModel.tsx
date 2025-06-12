@@ -1,4 +1,3 @@
-
 import React, { useRef, useMemo } from 'react';
 import { useFrame, useLoader } from '@react-three/fiber';
 import { TextureLoader } from 'three';
@@ -50,16 +49,16 @@ const OaklandCard3DModel: React.FC<OaklandCard3DModelProps> = ({
       case 'foil':
         return new THREE.MeshPhysicalMaterial({
           ...baseProps,
-          metalness: 0.3,
-          roughness: 0.4,
-          envMapIntensity: 0.8,
-          clearcoat: 0.6,
-          clearcoatRoughness: 0.3,
-          iridescence: 0.7,
-          iridescenceIOR: 1.2,
-          iridescenceThicknessRange: [100, 400],
-          transmission: 0.1,
-          opacity: 0.95,
+          metalness: 0.1,
+          roughness: 0.3,
+          envMapIntensity: 1.0,
+          clearcoat: 0.4,
+          clearcoatRoughness: 0.2,
+          iridescence: 0.4,
+          iridescenceIOR: 1.1,
+          iridescenceThicknessRange: [100, 300],
+          transmission: 0.05,
+          opacity: 0.92,
           transparent: true,
         });
       
@@ -67,12 +66,14 @@ const OaklandCard3DModel: React.FC<OaklandCard3DModelProps> = ({
       default:
         return new THREE.MeshPhysicalMaterial({
           ...baseProps,
-          metalness: 0.05,
-          roughness: 0.4,
-          envMapIntensity: 0.6,
-          clearcoat: 0.5,
-          clearcoatRoughness: 0.4,
-          reflectivity: 0.3,
+          metalness: 0.02,
+          roughness: 0.15,
+          envMapIntensity: 0.8,
+          clearcoat: 0.3,
+          clearcoatRoughness: 0.2,
+          reflectivity: 0.5,
+          transparent: true,
+          opacity: 0.98,
         });
     }
   }, [cardTexture, cardFinish]);
@@ -129,7 +130,7 @@ const OaklandCard3DModel: React.FC<OaklandCard3DModelProps> = ({
       const material = cardRef.current.material as THREE.MeshPhysicalMaterial;
       material.iridescenceThicknessRange = [
         100 + Math.sin(time * 1.5) * 30,
-        400 + Math.cos(time * 1.2) * 50
+        300 + Math.cos(time * 1.2) * 50
       ];
     }
   });
@@ -183,15 +184,15 @@ const OaklandCard3DModel: React.FC<OaklandCard3DModelProps> = ({
           <planeGeometry args={[2.5, 3.5]} />
           <meshBasicMaterial
             transparent
-            opacity={0.15}
+            opacity={0.08}
             blending={THREE.AdditiveBlending}
             side={THREE.DoubleSide}
           >
             <primitive 
               object={new THREE.Color().setHSL(
                 (Date.now() * 0.0005) % 1, 
-                0.4, 
-                0.6
+                0.3, 
+                0.7
               )} 
               attach="color"
             />
