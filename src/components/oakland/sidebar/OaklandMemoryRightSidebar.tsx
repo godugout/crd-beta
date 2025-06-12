@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { OaklandTemplate } from '@/lib/types/oaklandTemplates';
@@ -8,6 +9,7 @@ import TemplateSection from './sections/TemplateSection';
 import ContentSection from './sections/ContentSection';
 import QuickActionsSection from './sections/QuickActionsSection';
 import LuckyDesignSection from './sections/LuckyDesignSection';
+import EffectsToggleControls from './sections/EffectsToggleControls';
 import { useRandomDesign } from '@/hooks/useRandomDesign';
 import { GeneratedDesign } from '@/lib/services/randomDesignGenerator';
 
@@ -34,6 +36,12 @@ interface OaklandMemoryRightSidebarProps {
   };
   onMemoryDataChange: (data: any) => void;
   onExport: () => void;
+  showEffects?: boolean;
+  onShowEffectsChange?: (show: boolean) => void;
+  showBorder?: boolean;
+  onShowBorderChange?: (show: boolean) => void;
+  borderStyle?: 'classic' | 'vintage' | 'modern';
+  onBorderStyleChange?: (style: 'classic' | 'vintage' | 'modern') => void;
 }
 
 const OaklandMemoryRightSidebar: React.FC<OaklandMemoryRightSidebarProps> = ({
@@ -51,19 +59,25 @@ const OaklandMemoryRightSidebar: React.FC<OaklandMemoryRightSidebarProps> = ({
   onCardFinishChange,
   memoryData,
   onMemoryDataChange,
-  onExport
+  onExport,
+  showEffects = true,
+  onShowEffectsChange = () => {},
+  showBorder = true,
+  onShowBorderChange = () => {},
+  borderStyle = 'classic',
+  onBorderStyleChange = () => {}
 }) => {
   const [templateSectionOpen, setTemplateSectionOpen] = useState(true);
   const [viewSectionOpen, setViewSectionOpen] = useState(true);
   const [cardSectionOpen, setCardSectionOpen] = useState(true);
   const [contentSectionOpen, setContentSectionOpen] = useState(false);
   const [luckySectionOpen, setLuckySectionOpen] = useState(true);
+  const [effectsSectionOpen, setEffectsSectionOpen] = useState(true);
 
   const { applyRandomDesign, isApplying } = useRandomDesign({
     onTemplateChange: onSelectTemplate,
     onMemoryDataChange: onMemoryDataChange,
     onEffectsChange: (effects) => {
-      // Handle effects change if needed
       console.log('Applied effects:', effects);
     }
   });
@@ -95,6 +109,18 @@ const OaklandMemoryRightSidebar: React.FC<OaklandMemoryRightSidebarProps> = ({
               isGenerating={isApplying}
             />
           </div>
+
+          {/* Effects & Border Controls - New section */}
+          <EffectsToggleControls
+            isOpen={effectsSectionOpen}
+            onOpenChange={setEffectsSectionOpen}
+            showEffects={showEffects}
+            onShowEffectsChange={onShowEffectsChange}
+            borderStyle={borderStyle}
+            onBorderStyleChange={onBorderStyleChange}
+            showBorder={showBorder}
+            onShowBorderChange={onShowBorderChange}
+          />
 
           <ViewControlsSection
             isOpen={viewSectionOpen}

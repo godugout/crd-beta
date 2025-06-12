@@ -3,6 +3,8 @@ import { useFrame, useLoader } from '@react-three/fiber';
 import { TextureLoader } from 'three';
 import * as THREE from 'three';
 import { OaklandTemplate } from '@/lib/types/oaklandTemplates';
+import BaseballCardBorder from './BaseballCardBorder';
+import CardEffectsLayer from './CardEffectsLayer';
 
 interface OaklandCard3DModelProps {
   template: OaklandTemplate;
@@ -17,6 +19,9 @@ interface OaklandCard3DModelProps {
   cardFinish: 'matte' | 'glossy' | 'foil';
   autoRotate: boolean;
   viewMode: '3d' | '2d';
+  showEffects?: boolean;
+  showBorder?: boolean;
+  borderStyle?: 'classic' | 'vintage' | 'modern';
 }
 
 const OaklandCard3DModel: React.FC<OaklandCard3DModelProps> = ({
@@ -24,10 +29,16 @@ const OaklandCard3DModel: React.FC<OaklandCard3DModelProps> = ({
   memoryData,
   cardFinish,
   autoRotate,
-  viewMode
+  viewMode,
+  showEffects = true,
+  showBorder = true,
+  borderStyle = 'classic'
 }) => {
   const groupRef = useRef<THREE.Group>(null);
   const cardRef = useRef<THREE.Mesh>(null);
+
+  // Card dimensions
+  const cardSize = { width: 2.5, height: 3.5, depth: 0.02 };
 
   // Load card textures
   const cardTexture = useLoader(TextureLoader, template.thumbnailUrl);
@@ -38,6 +49,12 @@ const OaklandCard3DModel: React.FC<OaklandCard3DModelProps> = ({
   const svgOverlays = (memoryData as any)?.svgOverlays || [];
   const canvasEffects = (memoryData as any)?.canvasEffects || [];
 
+  // Oakland A's team colors
+  const teamColors = {
+    primary: colorScheme?.primary || '#003831',
+    secondary: colorScheme?.secondary || '#EFB21E'
+  };
+
   // Create materials based on card finish and color scheme
   const frontMaterial = useMemo(() => {
     const baseProps = {
@@ -45,18 +62,11 @@ const OaklandCard3DModel: React.FC<OaklandCard3DModelProps> = ({
       side: THREE.FrontSide,
     };
 
-    // Apply color scheme if available
-    if (colorScheme) {
-      const colorTint = new THREE.Color(colorScheme.primary);
-      baseProps.map.offset.set(0, 0);
-      baseProps.map.repeat.set(1, 1);
-    }
-
     switch (cardFinish) {
       case 'matte':
         return new THREE.MeshLambertMaterial({
           ...baseProps,
-          color: colorScheme?.background || '#ffffff'
+          color: showEffects && colorScheme ? colorScheme.background : '#ffffff'
         });
       
       case 'foil':
@@ -73,7 +83,7 @@ const OaklandCard3DModel: React.FC<OaklandCard3DModelProps> = ({
           transmission: 0.05,
           opacity: 0.92,
           transparent: true,
-          color: colorScheme?.accent || '#ffffff'
+          color: showEffects && colorScheme ? colorScheme.accent : '#ffffff'
         });
       
       case 'glossy':
@@ -88,10 +98,10 @@ const OaklandCard3DModel: React.FC<OaklandCard3DModelProps> = ({
           reflectivity: 0.5,
           transparent: true,
           opacity: 0.98,
-          color: colorScheme?.background || '#ffffff'
+          color: showEffects && colorScheme ? colorScheme.background : '#ffffff'
         });
     }
-  }, [cardTexture, cardFinish, colorScheme]);
+  }, [cardTexture, cardFinish, colorScheme, showEffects]);
 
   const backMaterial = useMemo(() => {
     return new THREE.MeshPhysicalMaterial({
@@ -105,19 +115,7 @@ const OaklandCard3DModel: React.FC<OaklandCard3DModelProps> = ({
     });
   }, [backTexture]);
 
-  const edgeMaterial = useMemo(() => {
-    // Oakland A's themed edge color
-    const edgeColor = template.category === 'protest' ? '#DC2626' : '#EFB21E';
-    
-    return new THREE.MeshPhysicalMaterial({
-      color: edgeColor,
-      metalness: 0.6,
-      roughness: 0.3,
-      envMapIntensity: 0.8,
-    });
-  }, [template.category]);
-
-  // Enhanced animation loop with random design effects
+  // Enhanced animation loop
   useFrame((state, delta) => {
     if (!groupRef.current) return;
 
@@ -148,102 +146,87 @@ const OaklandCard3DModel: React.FC<OaklandCard3DModelProps> = ({
         300 + Math.cos(time * 1.2) * 50
       ];
     }
-
-    // Apply canvas effects animation if they exist
-    if (canvasEffects.length > 0) {
-      canvasEffects.forEach((effect: any, index: number) => {
-        if (effect.type === 'noise' && cardRef.current?.material) {
-          const material = cardRef.current.material as THREE.MeshPhysicalMaterial;
-          material.roughness = 0.15 + Math.sin(time * effect.settings.intensity * 2) * 0.1;
-        }
-      });
-    }
   });
 
   return (
     <group ref={groupRef} position={[0, 0, 0]}>
+      {/* Traditional Baseball Card Border */}
+      {showBorder && (
+        <BaseballCardBorder
+          borderStyle={borderStyle}
+          teamColors={teamColors}
+          cardSize={cardSize}
+        />
+      )}
+
       {/* Card Front */}
       <mesh ref={cardRef} castShadow receiveShadow>
-        <planeGeometry args={[2.5, 3.5]} />
+        <planeGeometry args={[cardSize.width, cardSize.height]} />
         <primitive object={frontMaterial} />
       </mesh>
 
       {/* Card Back */}
-      <mesh position={[0, 0, -0.02]} rotation={[0, Math.PI, 0]} castShadow receiveShadow>
-        <planeGeometry args={[2.5, 3.5]} />
+      <mesh position={[0, 0, -cardSize.depth]} rotation={[0, Math.PI, 0]} castShadow receiveShadow>
+        <planeGeometry args={[cardSize.width, cardSize.height]} />
         <primitive object={backMaterial} />
       </mesh>
 
-      {/* SVG Overlays as 3D elements */}
-      {svgOverlays.map((overlay: any, index: number) => (
-        <mesh
-          key={overlay.id}
-          position={[
-            (overlay.position.x - 0.5) * 2.4, // Convert 0-1 to card coordinates
-            (0.5 - overlay.position.y) * 3.4, // Convert 0-1 to card coordinates, flip Y
-            0.001 + index * 0.001 // Layer slightly above card
-          ]}
-          scale={[overlay.scale, overlay.scale, 1]}
-        >
-          <planeGeometry args={[0.3, 0.3]} />
-          <meshBasicMaterial
-            color={overlay.color}
-            transparent
-            opacity={overlay.opacity}
-            side={THREE.DoubleSide}
-          />
-        </mesh>
-      ))}
+      {/* Decorative Effects Layer */}
+      <CardEffectsLayer
+        showEffects={showEffects}
+        svgOverlays={svgOverlays}
+        canvasEffects={canvasEffects}
+        cardFinish={cardFinish}
+        cardSize={cardSize}
+      />
 
-      {/* Card Edges (3D thickness) */}
-      {viewMode === '3d' && (
+      {/* Simple Card Edges (when border is disabled) */}
+      {!showBorder && viewMode === '3d' && (
         <>
           {/* Top Edge */}
-          <mesh position={[0, 1.75, -0.01]} rotation={[Math.PI / 2, 0, 0]} castShadow>
-            <planeGeometry args={[2.5, 0.02]} />
-            <primitive object={edgeMaterial} />
+          <mesh position={[0, cardSize.height / 2, -cardSize.depth / 2]} rotation={[Math.PI / 2, 0, 0]} castShadow>
+            <planeGeometry args={[cardSize.width, cardSize.depth]} />
+            <meshPhysicalMaterial
+              color={template.category === 'protest' ? '#DC2626' : '#EFB21E'}
+              metalness={0.6}
+              roughness={0.3}
+              envMapIntensity={0.8}
+            />
           </mesh>
           
           {/* Bottom Edge */}
-          <mesh position={[0, -1.75, -0.01]} rotation={[-Math.PI / 2, 0, 0]} castShadow>
-            <planeGeometry args={[2.5, 0.02]} />
-            <primitive object={edgeMaterial} />
+          <mesh position={[0, -cardSize.height / 2, -cardSize.depth / 2]} rotation={[-Math.PI / 2, 0, 0]} castShadow>
+            <planeGeometry args={[cardSize.width, cardSize.depth]} />
+            <meshPhysicalMaterial
+              color={template.category === 'protest' ? '#DC2626' : '#EFB21E'}
+              metalness={0.6}
+              roughness={0.3}
+              envMapIntensity={0.8}
+            />
           </mesh>
           
           {/* Left Edge */}
-          <mesh position={[-1.25, 0, -0.01]} rotation={[0, 0, Math.PI / 2]} castShadow>
-            <planeGeometry args={[3.5, 0.02]} />
-            <primitive object={edgeMaterial} />
+          <mesh position={[-cardSize.width / 2, 0, -cardSize.depth / 2]} rotation={[0, 0, Math.PI / 2]} castShadow>
+            <planeGeometry args={[cardSize.height, cardSize.depth]} />
+            <meshPhysicalMaterial
+              color={template.category === 'protest' ? '#DC2626' : '#EFB21E'}
+              metalness={0.6}
+              roughness={0.3}
+              envMapIntensity={0.8}
+            />
           </mesh>
           
           {/* Right Edge */}
-          <mesh position={[1.25, 0, -0.01]} rotation={[0, 0, -Math.PI / 2]} castShadow>
-            <planeGeometry args={[3.5, 0.02]} />
-            <primitive object={edgeMaterial} />
+          <mesh position={[cardSize.width / 2, 0, -cardSize.depth / 2]} rotation={[0, 0, -Math.PI / 2]} castShadow>
+            <planeGeometry args={[cardSize.height, cardSize.depth]} />
+            <meshPhysicalMaterial
+              color={template.category === 'protest' ? '#DC2626' : '#EFB21E'}
+              metalness={0.6}
+              roughness={0.3}
+              envMapIntensity={0.8}
+            />
           </mesh>
         </>
-      )}
-
-      {/* Enhanced holographic overlay for special designs */}
-      {(cardFinish === 'foil' || canvasEffects.some((e: any) => e.type === 'gradient')) && (
-        <mesh position={[0, 0, 0.005]}>
-          <planeGeometry args={[2.5, 3.5]} />
-          <meshBasicMaterial
-            transparent
-            opacity={0.08}
-            blending={THREE.AdditiveBlending}
-            side={THREE.DoubleSide}
-          >
-            <primitive 
-              object={new THREE.Color().setHSL(
-                (Date.now() * 0.0005) % 1, 
-                0.3, 
-                0.7
-              )} 
-              attach="color"
-            />
-          </meshBasicMaterial>
-        </mesh>
       )}
     </group>
   );

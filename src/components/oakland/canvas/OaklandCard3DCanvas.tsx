@@ -23,6 +23,9 @@ interface OaklandCard3DCanvasProps {
   viewMode: '3d' | '2d';
   autoRotate: boolean;
   cardFinish: 'matte' | 'glossy' | 'foil';
+  showEffects?: boolean;
+  showBorder?: boolean;
+  borderStyle?: 'classic' | 'vintage' | 'modern';
   className?: string;
 }
 
@@ -63,6 +66,9 @@ const OaklandCard3DCanvas: React.FC<OaklandCard3DCanvasProps> = ({
   viewMode,
   autoRotate,
   cardFinish,
+  showEffects = true,
+  showBorder = true,
+  borderStyle = 'classic',
   className = ''
 }) => {
   const canvasRef = useRef<HTMLDivElement>(null);
@@ -143,6 +149,9 @@ const OaklandCard3DCanvas: React.FC<OaklandCard3DCanvasProps> = ({
               cardFinish={cardFinish}
               autoRotate={autoRotate}
               viewMode={viewMode}
+              showEffects={showEffects}
+              showBorder={showBorder}
+              borderStyle={borderStyle}
             />
           )}
         </Suspense>
@@ -183,9 +192,9 @@ const OaklandCard3DCanvas: React.FC<OaklandCard3DCanvasProps> = ({
         </div>
       )}
 
-      {/* Minimal Performance Indicator */}
+      {/* Enhanced Performance Indicator */}
       <div className="absolute bottom-4 left-4 text-xs text-gray-500 bg-white/80 backdrop-blur-sm rounded px-2 py-1 select-none">
-        {viewMode.toUpperCase()} • {cardFinish} finish
+        {viewMode.toUpperCase()} • {cardFinish} finish • {showBorder ? `${borderStyle} border` : 'simple edges'} • {showEffects ? 'effects on' : 'effects off'}
       </div>
 
       {/* Keyboard Shortcuts Hint - Bottom Right */}

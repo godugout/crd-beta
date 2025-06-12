@@ -5,7 +5,6 @@ import { ArrowLeft, Save, Share2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { OaklandTemplate } from '@/lib/types/oaklandTemplates';
-import { OAKLAND_TEMPLATES } from '@/lib/data/oaklandTemplateData';
 import OaklandCard3DCanvas from './canvas/OaklandCard3DCanvas';
 import OaklandMemoryRightSidebar from './sidebar/OaklandMemoryRightSidebar';
 
@@ -27,6 +26,12 @@ const OaklandMemoryBuilder: React.FC = () => {
   const [viewMode, setViewMode] = useState<'3d' | '2d'>('3d');
   const [autoRotate, setAutoRotate] = useState(false);
   const [cardFinish, setCardFinish] = useState<'matte' | 'glossy' | 'foil'>('glossy');
+  
+  // New effects and border state
+  const [showEffects, setShowEffects] = useState(true);
+  const [showBorder, setShowBorder] = useState(true);
+  const [borderStyle, setBorderStyle] = useState<'classic' | 'vintage' | 'modern'>('classic');
+  
   const [memoryData, setMemoryData] = useState<MemoryData>({
     title: 'My Oakland Memory',
     subtitle: 'A\'s Forever',
@@ -120,6 +125,9 @@ const OaklandMemoryBuilder: React.FC = () => {
             viewMode={viewMode}
             autoRotate={autoRotate}
             cardFinish={cardFinish}
+            showEffects={showEffects}
+            showBorder={showBorder}
+            borderStyle={borderStyle}
             className="flex-1"
           />
         </div>
@@ -141,6 +149,12 @@ const OaklandMemoryBuilder: React.FC = () => {
           memoryData={memoryData}
           onMemoryDataChange={setMemoryData}
           onExport={handleExport}
+          showEffects={showEffects}
+          onShowEffectsChange={setShowEffects}
+          showBorder={showBorder}
+          onShowBorderChange={setShowBorder}
+          borderStyle={borderStyle}
+          onBorderStyleChange={setBorderStyle}
         />
       </div>
     </div>
