@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { OaklandTemplate } from '@/lib/types/oaklandTemplates';
@@ -8,6 +7,9 @@ import CardSettingsSection from './sections/CardSettingsSection';
 import TemplateSection from './sections/TemplateSection';
 import ContentSection from './sections/ContentSection';
 import QuickActionsSection from './sections/QuickActionsSection';
+import LuckyDesignSection from './sections/LuckyDesignSection';
+import { useRandomDesign } from '@/hooks/useRandomDesign';
+import { GeneratedDesign } from '@/lib/services/randomDesignGenerator';
 
 interface OaklandMemoryRightSidebarProps {
   selectedTemplate: OaklandTemplate | null;
@@ -55,6 +57,24 @@ const OaklandMemoryRightSidebar: React.FC<OaklandMemoryRightSidebarProps> = ({
   const [viewSectionOpen, setViewSectionOpen] = useState(true);
   const [cardSectionOpen, setCardSectionOpen] = useState(true);
   const [contentSectionOpen, setContentSectionOpen] = useState(false);
+  const [luckySectionOpen, setLuckySectionOpen] = useState(true);
+
+  const { applyRandomDesign, isApplying } = useRandomDesign({
+    onTemplateChange: onSelectTemplate,
+    onMemoryDataChange: onMemoryDataChange,
+    onEffectsChange: (effects) => {
+      // Handle effects change if needed
+      console.log('Applied effects:', effects);
+    }
+  });
+
+  const handleApplyRandomDesign = async (design: GeneratedDesign) => {
+    try {
+      await applyRandomDesign(design);
+    } catch (error) {
+      console.error('Failed to apply random design:', error);
+    }
+  };
 
   return (
     <div className={cn(
@@ -68,6 +88,14 @@ const OaklandMemoryRightSidebar: React.FC<OaklandMemoryRightSidebarProps> = ({
 
       {!collapsed && (
         <div className="flex-1 overflow-y-auto p-4 space-y-6">
+          {/* Lucky Design Section - Featured at top */}
+          <div>
+            <LuckyDesignSection
+              onApplyDesign={handleApplyRandomDesign}
+              isGenerating={isApplying}
+            />
+          </div>
+
           <ViewControlsSection
             isOpen={viewSectionOpen}
             onOpenChange={setViewSectionOpen}

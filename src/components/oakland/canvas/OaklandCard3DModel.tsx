@@ -33,17 +33,30 @@ const OaklandCard3DModel: React.FC<OaklandCard3DModelProps> = ({
   const cardTexture = useLoader(TextureLoader, template.thumbnailUrl);
   const backTexture = useLoader(TextureLoader, '/lovable-uploads/f1b608ba-b8c6-40f5-b552-a5d7addbf4ae.png');
 
-  // Create materials based on card finish
+  // Apply random design color scheme if available
+  const colorScheme = (memoryData as any)?.colorScheme;
+  const svgOverlays = (memoryData as any)?.svgOverlays || [];
+  const canvasEffects = (memoryData as any)?.canvasEffects || [];
+
+  // Create materials based on card finish and color scheme
   const frontMaterial = useMemo(() => {
     const baseProps = {
       map: cardTexture,
       side: THREE.FrontSide,
     };
 
+    // Apply color scheme if available
+    if (colorScheme) {
+      const colorTint = new THREE.Color(colorScheme.primary);
+      baseProps.map.offset.set(0, 0);
+      baseProps.map.repeat.set(1, 1);
+    }
+
     switch (cardFinish) {
       case 'matte':
         return new THREE.MeshLambertMaterial({
           ...baseProps,
+          color: colorScheme?.background || '#ffffff'
         });
       
       case 'foil':
@@ -60,6 +73,7 @@ const OaklandCard3DModel: React.FC<OaklandCard3DModelProps> = ({
           transmission: 0.05,
           opacity: 0.92,
           transparent: true,
+          color: colorScheme?.accent || '#ffffff'
         });
       
       case 'glossy':
@@ -74,9 +88,10 @@ const OaklandCard3DModel: React.FC<OaklandCard3DModelProps> = ({
           reflectivity: 0.5,
           transparent: true,
           opacity: 0.98,
+          color: colorScheme?.background || '#ffffff'
         });
     }
-  }, [cardTexture, cardFinish]);
+  }, [cardTexture, cardFinish, colorScheme]);
 
   const backMaterial = useMemo(() => {
     return new THREE.MeshPhysicalMaterial({
@@ -102,7 +117,7 @@ const OaklandCard3DModel: React.FC<OaklandCard3DModelProps> = ({
     });
   }, [template.category]);
 
-  // Animation loop
+  // Enhanced animation loop with random design effects
   useFrame((state, delta) => {
     if (!groupRef.current) return;
 
@@ -125,13 +140,23 @@ const OaklandCard3DModel: React.FC<OaklandCard3DModelProps> = ({
       groupRef.current.rotation.z = Math.sin(time * 0.3) * 0.02;
     }
 
-    // Enhance foil effect with dynamic properties
+    // Enhanced foil effect with dynamic properties
     if (cardFinish === 'foil' && cardRef.current?.material) {
       const material = cardRef.current.material as THREE.MeshPhysicalMaterial;
       material.iridescenceThicknessRange = [
         100 + Math.sin(time * 1.5) * 30,
         300 + Math.cos(time * 1.2) * 50
       ];
+    }
+
+    // Apply canvas effects animation if they exist
+    if (canvasEffects.length > 0) {
+      canvasEffects.forEach((effect: any, index: number) => {
+        if (effect.type === 'noise' && cardRef.current?.material) {
+          const material = cardRef.current.material as THREE.MeshPhysicalMaterial;
+          material.roughness = 0.15 + Math.sin(time * effect.settings.intensity * 2) * 0.1;
+        }
+      });
     }
   });
 
@@ -148,6 +173,27 @@ const OaklandCard3DModel: React.FC<OaklandCard3DModelProps> = ({
         <planeGeometry args={[2.5, 3.5]} />
         <primitive object={backMaterial} />
       </mesh>
+
+      {/* SVG Overlays as 3D elements */}
+      {svgOverlays.map((overlay: any, index: number) => (
+        <mesh
+          key={overlay.id}
+          position={[
+            (overlay.position.x - 0.5) * 2.4, // Convert 0-1 to card coordinates
+            (0.5 - overlay.position.y) * 3.4, // Convert 0-1 to card coordinates, flip Y
+            0.001 + index * 0.001 // Layer slightly above card
+          ]}
+          scale={[overlay.scale, overlay.scale, 1]}
+        >
+          <planeGeometry args={[0.3, 0.3]} />
+          <meshBasicMaterial
+            color={overlay.color}
+            transparent
+            opacity={overlay.opacity}
+            side={THREE.DoubleSide}
+          />
+        </mesh>
+      ))}
 
       {/* Card Edges (3D thickness) */}
       {viewMode === '3d' && (
@@ -178,8 +224,8 @@ const OaklandCard3DModel: React.FC<OaklandCard3DModelProps> = ({
         </>
       )}
 
-      {/* Subtle holographic overlay for foil cards */}
-      {cardFinish === 'foil' && (
+      {/* Enhanced holographic overlay for special designs */}
+      {(cardFinish === 'foil' || canvasEffects.some((e: any) => e.type === 'gradient')) && (
         <mesh position={[0, 0, 0.005]}>
           <planeGeometry args={[2.5, 3.5]} />
           <meshBasicMaterial
