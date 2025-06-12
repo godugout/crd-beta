@@ -1,4 +1,3 @@
-
 import React, { useRef, useMemo } from 'react';
 import { useFrame, useLoader } from '@react-three/fiber';
 import { TextureLoader } from 'three';
@@ -42,16 +41,35 @@ const OaklandCard3DModel: React.FC<OaklandCard3DModelProps> = ({
   // Card dimensions
   const cardSize = { width: 2.5, height: 3.5, depth: 0.02 };
 
-  // Load card textures with fallback
-  const cardTexture = useLoader(TextureLoader, template.thumbnailUrl, undefined, (error) => {
-    console.warn('Failed to load template texture:', error);
-  });
+  // Load card textures with proper error handling
+  const cardTexture = useLoader(
+    TextureLoader, 
+    template.thumbnailUrl, 
+    (texture) => {
+      console.log('Template texture loaded successfully:', template.name);
+      texture.flipY = false;
+      texture.wrapS = THREE.ClampToEdgeWrapping;
+      texture.wrapT = THREE.ClampToEdgeWrapping;
+    },
+    (error) => {
+      console.warn('Failed to load template texture:', template.name, error);
+    }
+  );
   
-  const backTexture = useLoader(TextureLoader, '/lovable-uploads/f1b608ba-b8c6-40f5-b552-a5d7addbf4ae.png', undefined, (error) => {
-    console.warn('Failed to load back texture:', error);
-  });
+  const backTexture = useLoader(
+    TextureLoader, 
+    '/lovable-uploads/f1b608ba-b8c6-40f5-b552-a5d7addbf4ae.png',
+    (texture) => {
+      texture.flipY = false;
+      texture.wrapS = THREE.ClampToEdgeWrapping;
+      texture.wrapT = THREE.ClampToEdgeWrapping;
+    },
+    (error) => {
+      console.warn('Failed to load back texture:', error);
+    }
+  );
 
-  // Apply random design color scheme if available
+  // Apply random design color scheme if available (only for effects, not base template)
   const colorScheme = (memoryData as any)?.colorScheme;
   const svgOverlays = (memoryData as any)?.svgOverlays || [];
   const canvasEffects = (memoryData as any)?.canvasEffects || [];
@@ -62,7 +80,7 @@ const OaklandCard3DModel: React.FC<OaklandCard3DModelProps> = ({
     secondary: colorScheme?.secondary || '#EFB21E'
   };
 
-  // Create materials based on card finish and color scheme
+  // Create materials based on card finish - DON'T TINT THE BASE TEMPLATE
   const frontMaterial = useMemo(() => {
     const baseProps = {
       map: cardTexture,
@@ -73,7 +91,8 @@ const OaklandCard3DModel: React.FC<OaklandCard3DModelProps> = ({
       case 'matte':
         return new THREE.MeshLambertMaterial({
           ...baseProps,
-          color: showEffects && colorScheme ? colorScheme.background : '#ffffff'
+          // Don't tint the base template - let it show naturally
+          color: '#ffffff'
         });
       
       case 'foil':
@@ -90,7 +109,8 @@ const OaklandCard3DModel: React.FC<OaklandCard3DModelProps> = ({
           transmission: 0.05,
           opacity: 0.92,
           transparent: true,
-          color: showEffects && colorScheme ? colorScheme.accent : '#ffffff'
+          // Keep base template white, effects will add color
+          color: '#ffffff'
         });
       
       case 'glossy':
@@ -105,10 +125,11 @@ const OaklandCard3DModel: React.FC<OaklandCard3DModelProps> = ({
           reflectivity: 0.5,
           transparent: true,
           opacity: 0.98,
-          color: showEffects && colorScheme ? colorScheme.background : '#ffffff'
+          // Keep base template white, effects will add color
+          color: '#ffffff'
         });
     }
-  }, [cardTexture, cardFinish, colorScheme, showEffects]);
+  }, [cardTexture, cardFinish]);
 
   const backMaterial = useMemo(() => {
     return new THREE.MeshPhysicalMaterial({
@@ -166,7 +187,7 @@ const OaklandCard3DModel: React.FC<OaklandCard3DModelProps> = ({
         />
       )}
 
-      {/* Card Front */}
+      {/* Card Front - Show template clearly */}
       <mesh ref={cardRef} castShadow receiveShadow>
         <planeGeometry args={[cardSize.width, cardSize.height]} />
         <primitive object={frontMaterial} />
@@ -178,40 +199,40 @@ const OaklandCard3DModel: React.FC<OaklandCard3DModelProps> = ({
         <primitive object={backMaterial} />
       </mesh>
 
-      {/* Text Overlays */}
+      {/* Text Overlays - positioned clearly visible */}
       <Text
-        position={[0, 1.2, 0.01]}
-        fontSize={0.2}
+        position={[0, 1.4, 0.01]}
+        fontSize={0.18}
         color={teamColors.primary}
         anchorX="center"
         anchorY="middle"
         font="/fonts/inter-bold.woff"
-        maxWidth={2}
+        maxWidth={2.2}
       >
         {memoryData.title}
       </Text>
 
       <Text
-        position={[0, 0.9, 0.01]}
-        fontSize={0.12}
+        position={[0, 1.1, 0.01]}
+        fontSize={0.11}
         color={teamColors.secondary}
         anchorX="center"
         anchorY="middle"
         font="/fonts/inter-medium.woff"
-        maxWidth={2}
+        maxWidth={2.2}
       >
         {memoryData.subtitle}
       </Text>
 
       {memoryData.player && (
         <Text
-          position={[0, -0.8, 0.01]}
-          fontSize={0.15}
+          position={[0, -1.0, 0.01]}
+          fontSize={0.14}
           color={teamColors.primary}
           anchorX="center"
           anchorY="middle"
           font="/fonts/inter-bold.woff"
-          maxWidth={2}
+          maxWidth={2.2}
         >
           {memoryData.player}
         </Text>
@@ -219,26 +240,28 @@ const OaklandCard3DModel: React.FC<OaklandCard3DModelProps> = ({
 
       {memoryData.date && (
         <Text
-          position={[0, -1.1, 0.01]}
-          fontSize={0.1}
+          position={[0, -1.3, 0.01]}
+          fontSize={0.09}
           color="#666666"
           anchorX="center"
           anchorY="middle"
           font="/fonts/inter-regular.woff"
-          maxWidth={2}
+          maxWidth={2.2}
         >
-          {memoryData.date}
+          {new Date(memoryData.date).toLocaleDateString()}
         </Text>
       )}
 
-      {/* Decorative Effects Layer */}
-      <CardEffectsLayer
-        showEffects={showEffects}
-        svgOverlays={svgOverlays}
-        canvasEffects={canvasEffects}
-        cardFinish={cardFinish}
-        cardSize={cardSize}
-      />
+      {/* Decorative Effects Layer - only show when effects are enabled */}
+      {showEffects && (
+        <CardEffectsLayer
+          showEffects={showEffects}
+          svgOverlays={svgOverlays}
+          canvasEffects={canvasEffects}
+          cardFinish={cardFinish}
+          cardSize={cardSize}
+        />
+      )}
 
       {/* Simple Card Edges (when border is disabled) */}
       {!showBorder && viewMode === '3d' && (

@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { OaklandTemplate } from '@/lib/types/oaklandTemplates';
 import OaklandCard3DCanvas from './canvas/OaklandCard3DCanvas';
-import OaklandMemoryRightSidebar from './sidebar/OaklandMemoryRightSidebar';
+import StepByStepSidebar from './sidebar/StepByStepSidebar';
 
 interface MemoryData {
   title: string;
@@ -84,7 +84,7 @@ const OaklandMemoryBuilder: React.FC = () => {
                 Oakland A's Memory Creator
               </h1>
               <p className="text-xs text-[#ffd700]/70 font-medium">
-                Preserve your Oakland moments forever
+                Step-by-step card creation
               </p>
             </div>
           </div>
@@ -132,8 +132,8 @@ const OaklandMemoryBuilder: React.FC = () => {
           />
         </div>
 
-        {/* Right Sidebar */}
-        <OaklandMemoryRightSidebar
+        {/* Step-by-Step Sidebar */}
+        <StepByStepSidebar
           selectedTemplate={selectedTemplate}
           onSelectTemplate={setSelectedTemplate}
           collapsed={sidebarCollapsed}

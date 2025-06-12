@@ -1,19 +1,12 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
-import { 
-  ChevronRight, 
-  ZoomIn, 
-  ZoomOut, 
-  Eye,
-  Play,
-  Pause,
-  RotateCcw
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Switch } from '@/components/ui/switch';
+import { Slider } from '@/components/ui/slider';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { ChevronRight, Eye, RotateCcw, ZoomIn } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface ViewControlsSectionProps {
   isOpen: boolean;
@@ -36,13 +29,6 @@ const ViewControlsSection: React.FC<ViewControlsSectionProps> = ({
   autoRotate,
   onAutoRotateToggle
 }) => {
-  const handleZoomIn = () => onZoomChange(Math.min(zoomLevel + 25, 200));
-  const handleZoomOut = () => onZoomChange(Math.max(zoomLevel - 25, 50));
-  const handleReset = () => {
-    onZoomChange(100);
-    if (autoRotate) onAutoRotateToggle();
-  };
-
   return (
     <Collapsible open={isOpen} onOpenChange={onOpenChange}>
       <CollapsibleTrigger asChild>
@@ -55,81 +41,72 @@ const ViewControlsSection: React.FC<ViewControlsSectionProps> = ({
         </Button>
       </CollapsibleTrigger>
       <CollapsibleContent className="space-y-4 pt-4">
-        {/* Zoom Controls */}
+        {/* Zoom Control */}
         <div className="space-y-2">
-          <Label className="text-gray-300 text-sm">Zoom Level</Label>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleZoomOut}
-              disabled={zoomLevel <= 50}
-              className="border-gray-600 text-gray-300 hover:bg-gray-800 bg-gray-800"
-            >
-              <ZoomOut className="h-4 w-4" />
-            </Button>
-            <Badge variant="secondary" className="px-3 min-w-[60px] text-center bg-gray-800 text-gray-200">
-              {zoomLevel}%
-            </Badge>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleZoomIn}
-              disabled={zoomLevel >= 200}
-              className="border-gray-600 text-gray-300 hover:bg-gray-800 bg-gray-800"
-            >
-              <ZoomIn className="h-4 w-4" />
-            </Button>
-          </div>
+          <Label className="text-gray-300 text-sm flex items-center gap-2">
+            <ZoomIn className="h-3 w-3" />
+            Zoom Level: {zoomLevel}%
+          </Label>
+          <Slider
+            value={[zoomLevel]}
+            onValueChange={(value) => onZoomChange(value[0])}
+            min={50}
+            max={200}
+            step={5}
+            className="w-full"
+          />
         </div>
 
         {/* View Mode Toggle */}
         <div className="space-y-2">
           <Label className="text-gray-300 text-sm">View Mode</Label>
-          <Button
-            onClick={onViewModeToggle}
-            className={cn(
-              "w-full justify-start",
-              viewMode === '3d' 
-                ? "bg-[#EFB21E] text-[#0f4c3a] hover:bg-[#EFB21E]/90"
-                : "border-gray-600 text-gray-300 hover:bg-gray-800 bg-gray-800"
-            )}
-            variant={viewMode === '3d' ? "default" : "outline"}
-          >
-            <Eye className="h-4 w-4 mr-2" />
-            {viewMode.toUpperCase()} View
-          </Button>
-        </div>
-
-        {/* Auto Rotate (3D only) */}
-        {viewMode === '3d' && (
-          <div className="space-y-2">
-            <Label className="text-gray-300 text-sm">Animation</Label>
+          <div className="grid grid-cols-2 gap-2">
             <Button
-              onClick={onAutoRotateToggle}
+              variant={viewMode === '3d' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => viewMode === '2d' && onViewModeToggle()}
               className={cn(
-                "w-full justify-start",
-                autoRotate 
-                  ? "bg-[#EFB21E] text-[#0f4c3a] hover:bg-[#EFB21E]/90"
-                  : "border-gray-600 text-gray-300 hover:bg-gray-800 bg-gray-800"
+                viewMode === '3d' 
+                  ? "bg-[#EFB21E] text-[#0f4c3a] hover:bg-yellow-400" 
+                  : "border-gray-600 text-gray-300 hover:bg-gray-800"
               )}
-              variant={autoRotate ? "default" : "outline"}
             >
-              {autoRotate ? <Pause className="h-4 w-4 mr-2" /> : <Play className="h-4 w-4 mr-2" />}
-              Auto Rotate
+              3D View
+            </Button>
+            <Button
+              variant={viewMode === '2d' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => viewMode === '3d' && onViewModeToggle()}
+              className={cn(
+                viewMode === '2d' 
+                  ? "bg-[#EFB21E] text-[#0f4c3a] hover:bg-yellow-400" 
+                  : "border-gray-600 text-gray-300 hover:bg-gray-800"
+              )}
+            >
+              2D View
             </Button>
           </div>
-        )}
+        </div>
 
-        {/* Reset Button */}
-        <Button
-          onClick={handleReset}
-          variant="outline"
-          className="w-full border-gray-600 text-gray-300 hover:bg-gray-800 bg-gray-800"
-        >
-          <RotateCcw className="h-4 w-4 mr-2" />
-          Reset View
-        </Button>
+        {/* Auto Rotate */}
+        <div className="space-y-2">
+          <Label className="text-gray-300 text-sm">Auto Rotation</Label>
+          <div className="flex items-center gap-3">
+            <Switch
+              checked={autoRotate}
+              onCheckedChange={onAutoRotateToggle}
+              className="data-[state=checked]:bg-[#EFB21E]"
+            />
+            <span className="text-gray-400 text-sm flex items-center gap-1">
+              <RotateCcw className="h-3 w-3" />
+              {autoRotate ? 'Rotating' : 'Static'}
+            </span>
+          </div>
+        </div>
+
+        <div className="text-xs text-gray-500 leading-relaxed">
+          Adjust how you view your Oakland A's memory card. Use 3D mode for interactive viewing or 2D for a flat preview.
+        </div>
       </CollapsibleContent>
     </Collapsible>
   );
