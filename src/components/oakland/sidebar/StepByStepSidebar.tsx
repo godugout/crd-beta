@@ -87,6 +87,13 @@ const StepByStepSidebar: React.FC<StepByStepSidebarProps> = ({
     luckyDesign: false
   });
 
+  // Card control state for advanced controls
+  const [cardControlState, setCardControlState] = useState({
+    scale: 0.8,
+    isFlipped: false,
+    isFlipping: false
+  });
+
   const { applyRandomDesign, isApplying } = useRandomDesign({
     onTemplateChange: onSelectTemplate,
     onMemoryDataChange: onMemoryDataChange,
@@ -141,6 +148,44 @@ const StepByStepSidebar: React.FC<StepByStepSidebarProps> = ({
       }
     }
   }, [selectedTemplate, memoryData.title, showEffects, showBorder, cardFinish, borderStyle]);
+
+  // Enhanced card control handlers
+  const handleFlipCard = () => {
+    console.log('Flip card triggered from sidebar');
+    setCardControlState(prev => ({ ...prev, isFlipping: true }));
+    
+    // Simulate flip animation
+    setTimeout(() => {
+      setCardControlState(prev => ({ 
+        ...prev, 
+        isFlipped: !prev.isFlipped, 
+        isFlipping: false 
+      }));
+    }, 600);
+  };
+
+  const handleResetCard = () => {
+    console.log('Reset card triggered from sidebar');
+    setCardControlState({
+      scale: 0.8,
+      isFlipped: false,
+      isFlipping: false
+    });
+  };
+
+  const handleScaleChange = (scale: number) => {
+    setCardControlState(prev => ({ ...prev, scale }));
+  };
+
+  const handleFaceCamera = () => {
+    console.log('Face camera triggered from sidebar');
+    setCardControlState(prev => ({ ...prev, isFlipped: false }));
+  };
+
+  const handleShowBack = () => {
+    console.log('Show back triggered from sidebar');
+    setCardControlState(prev => ({ ...prev, isFlipped: true }));
+  };
 
   const handleApplyRandomDesign = async (design: GeneratedDesign) => {
     try {
@@ -286,15 +331,16 @@ const StepByStepSidebar: React.FC<StepByStepSidebarProps> = ({
             <AdvancedControlsSection
               isOpen={openSections.advancedControls}
               onOpenChange={(open) => toggleSection('advancedControls', open)}
-              onFlipCard={() => {/* Will be connected to card controls */}}
-              onResetCard={() => {/* Will be connected to card controls */}}
+              onFlipCard={handleFlipCard}
+              onResetCard={handleResetCard}
               onToggleAutoRotate={onAutoRotateToggle}
-              onScaleChange={(scale) => {/* Will be connected to card controls */}}
-              onFaceCamera={() => {/* Will be connected to card controls */}}
-              onShowBack={() => {/* Will be connected to card controls */}}
-              scale={1.0}
+              onScaleChange={handleScaleChange}
+              onFaceCamera={handleFaceCamera}
+              onShowBack={handleShowBack}
+              scale={cardControlState.scale}
               autoRotate={autoRotate}
-              isFlipped={false}
+              isFlipped={cardControlState.isFlipped}
+              isFlipping={cardControlState.isFlipping}
             />
           </div>
 

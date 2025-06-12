@@ -29,6 +29,7 @@ interface AdvancedControlsSectionProps {
   scale: number;
   autoRotate: boolean;
   isFlipped: boolean;
+  isFlipping?: boolean;
 }
 
 const AdvancedControlsSection: React.FC<AdvancedControlsSectionProps> = ({
@@ -42,7 +43,8 @@ const AdvancedControlsSection: React.FC<AdvancedControlsSectionProps> = ({
   onShowBack,
   scale,
   autoRotate,
-  isFlipped
+  isFlipped,
+  isFlipping = false
 }) => {
   return (
     <Collapsible open={isOpen} onOpenChange={onOpenChange}>
@@ -78,7 +80,8 @@ const AdvancedControlsSection: React.FC<AdvancedControlsSectionProps> = ({
                 variant="outline"
                 size="sm"
                 onClick={onFaceCamera}
-                className="border-gray-600 text-gray-300 hover:bg-gray-800"
+                disabled={isFlipping}
+                className="border-gray-600 text-gray-300 hover:bg-gray-800 disabled:opacity-50"
               >
                 <Eye className="h-3 w-3 mr-1" />
                 Front
@@ -89,7 +92,8 @@ const AdvancedControlsSection: React.FC<AdvancedControlsSectionProps> = ({
                 variant="outline"
                 size="sm"
                 onClick={onShowBack}
-                className="border-gray-600 text-gray-300 hover:bg-gray-800"
+                disabled={isFlipping}
+                className="border-gray-600 text-gray-300 hover:bg-gray-800 disabled:opacity-50"
               >
                 <EyeOff className="h-3 w-3 mr-1" />
                 Back
@@ -104,16 +108,21 @@ const AdvancedControlsSection: React.FC<AdvancedControlsSectionProps> = ({
             variant="outline"
             size="sm"
             onClick={onFlipCard}
-            className="border-gray-600 text-gray-300 hover:bg-gray-800"
+            disabled={isFlipping}
+            className={cn(
+              "border-gray-600 text-gray-300 hover:bg-gray-800 transition-all",
+              isFlipping && "animate-pulse"
+            )}
           >
             <FlipHorizontal className="h-3 w-3 mr-1" />
-            Flip
+            {isFlipping ? 'Flipping...' : 'Flip'}
           </Button>
           <Button
             variant="outline"
             size="sm"
             onClick={onResetCard}
-            className="border-gray-600 text-gray-300 hover:bg-gray-800"
+            disabled={isFlipping}
+            className="border-gray-600 text-gray-300 hover:bg-gray-800 disabled:opacity-50"
           >
             <RotateCcw className="h-3 w-3 mr-1" />
             Reset
@@ -127,16 +136,28 @@ const AdvancedControlsSection: React.FC<AdvancedControlsSectionProps> = ({
             variant={autoRotate ? "default" : "outline"}
             size="sm"
             onClick={onToggleAutoRotate}
+            disabled={isFlipping}
             className={cn(
               autoRotate 
                 ? "bg-[#EFB21E] text-[#0f4c3a] hover:bg-yellow-400" 
-                : "border-gray-600 text-gray-300 hover:bg-gray-800"
+                : "border-gray-600 text-gray-300 hover:bg-gray-800",
+              isFlipping && "opacity-50"
             )}
           >
             <RotateCw className="h-3 w-3 mr-1" />
             {autoRotate ? 'On' : 'Off'}
           </Button>
         </div>
+
+        {/* Status Indicator */}
+        {isFlipping && (
+          <div className="bg-yellow-900/30 border border-yellow-500/30 rounded-lg p-3">
+            <div className="flex items-center gap-2 text-yellow-400 text-sm">
+              <FlipHorizontal className="h-4 w-4 animate-spin" />
+              Card is flipping...
+            </div>
+          </div>
+        )}
 
         {/* Enhanced Controls Guide */}
         <div className="bg-gray-800 rounded-lg p-3 space-y-3">
@@ -146,8 +167,8 @@ const AdvancedControlsSection: React.FC<AdvancedControlsSectionProps> = ({
           </div>
           <div className="grid grid-cols-1 gap-1 text-xs text-gray-400">
             <div>• Drag: Rotate card in 3D</div>
-            <div>• Enhanced sensitivity</div>
-            <div>• Smooth cursor feedback</div>
+            <div>• Enhanced sensitivity & responsiveness</div>
+            <div>• Visual cursor feedback</div>
           </div>
           
           <div className="flex items-center gap-2 text-gray-300 text-sm font-medium">
@@ -158,16 +179,14 @@ const AdvancedControlsSection: React.FC<AdvancedControlsSectionProps> = ({
             <div>F: Flip card</div>
             <div>R: Reset</div>
             <div>Space: Auto-rotate</div>
-            <div>+/-: Scale</div>
             <div>1: Face front</div>
             <div>2: Show back</div>
-            <div>Arrow keys: Move</div>
             <div>Smooth animations</div>
           </div>
         </div>
 
         <div className="text-xs text-gray-500 leading-relaxed">
-          Enhanced 3D controls with improved sensitivity and preset views for easy card orientation!
+          Fixed event conflicts and improved 3D controls for smooth card interaction!
         </div>
       </CollapsibleContent>
     </Collapsible>

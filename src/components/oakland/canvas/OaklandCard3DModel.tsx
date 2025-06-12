@@ -41,66 +41,80 @@ const OaklandCard3DModel: React.FC<OaklandCard3DModelProps> = ({
   borderStyle = 'classic',
   sidebarOpen = false
 }) => {
-  // Card dimensions - optimized for better viewport fit
+  // Card dimensions
   const cardSize = { width: 2.0, height: 2.8, depth: 0.02 };
 
-  // Load textures
-  const { cardTexture, backTexture } = useCardTextures(template.thumbnailUrl);
+  // Load textures with improved error handling
+  const { cardTexture, backTexture, isLoading, error } = useCardTextures(template.thumbnailUrl);
 
-  // Create materials
+  // Create materials only when textures are loaded
   const { frontMaterial, backMaterial } = useCardMaterials({
     cardTexture,
     backTexture,
     cardFinish
   });
 
-  // Advanced card controls with enhanced interaction
+  // Advanced card controls
   const {
     groupRef,
     controls,
     isDragging,
-    handleMouseDown,
-    handleMouseMove,
-    handleMouseUp
+    isFlipping,
+    handlePointerDown,
+    handlePointerMove,
+    handlePointerUp
   } = useAdvancedCardControls({ sidebarOpen });
 
-  // Apply design color scheme if available
+  // Design colors
   const colorScheme = (memoryData as any)?.colorScheme;
-  const svgOverlays = (memoryData as any)?.svgOverlays || [];
-  const canvasEffects = (memoryData as any)?.canvasEffects || [];
-
-  // Oakland A's team colors
   const teamColors = {
     primary: colorScheme?.primary || '#003831',
     secondary: colorScheme?.secondary || '#EFB21E'
   };
 
-  // Handle Three.js fiber events with proper cursor feedback
-  const handlePointerDown = (event: ThreeEvent<PointerEvent>) => {
-    event.stopPropagation();
-    handleMouseDown({ point: { x: event.point.x, y: event.point.y } });
-  };
+  // Show loading state
+  if (isLoading || !cardTexture || !backTexture) {
+    return (
+      <group position={[0, 0, 0]}>
+        <mesh>
+          <planeGeometry args={[cardSize.width, cardSize.height]} />
+          <meshStandardMaterial color="#333333" opacity={0.5} transparent />
+        </mesh>
+      </group>
+    );
+  }
 
-  const handlePointerMove = (event: ThreeEvent<PointerEvent>) => {
-    if (!isDragging) return;
-    event.stopPropagation();
-    handleMouseMove({ point: { x: event.point.x, y: event.point.y } });
-  };
-
-  const handlePointerUp = (event: ThreeEvent<PointerEvent>) => {
-    event.stopPropagation();
-    handleMouseUp();
-  };
+  // Show error state
+  if (error) {
+    console.error('Card texture error:', error);
+    return (
+      <group position={[0, 0, 0]}>
+        <mesh>
+          <planeGeometry args={[cardSize.width, cardSize.height]} />
+          <meshStandardMaterial color="#ff4444" opacity={0.7} transparent />
+        </mesh>
+      </group>
+    );
+  }
 
   return (
     <group 
       ref={groupRef} 
       position={[0, 0, 0]}
-      onPointerDown={handlePointerDown}
-      onPointerMove={handlePointerMove}
-      onPointerUp={handlePointerUp}
+      onPointerDown={(event: ThreeEvent<PointerEvent>) => {
+        event.stopPropagation();
+        handlePointerDown({ point: { x: event.point.x, y: event.point.y } });
+      }}
+      onPointerMove={(event: ThreeEvent<PointerEvent>) => {
+        event.stopPropagation();
+        handlePointerMove({ point: { x: event.point.x, y: event.point.y } });
+      }}
+      onPointerUp={(event: ThreeEvent<PointerEvent>) => {
+        event.stopPropagation();
+        handlePointerUp();
+      }}
     >
-      {/* Traditional Baseball Card Border */}
+      {/* Baseball Card Border */}
       {showBorder && (
         <BaseballCardBorder
           borderStyle={borderStyle}
@@ -109,21 +123,15 @@ const OaklandCard3DModel: React.FC<OaklandCard3DModelProps> = ({
         />
       )}
 
-      {/* Card Front - Main content */}
+      {/* Card Front */}
       <mesh 
         castShadow 
         receiveShadow
-        onPointerEnter={(e) => {
-          document.body.style.cursor = 'grab';
+        onPointerEnter={() => {
+          if (!isDragging && !isFlipping) document.body.style.cursor = 'grab';
         }}
-        onPointerLeave={(e) => {
+        onPointerLeave={() => {
           if (!isDragging) document.body.style.cursor = 'default';
-        }}
-        onPointerDown={(e) => {
-          document.body.style.cursor = 'grabbing';
-        }}
-        onPointerUp={(e) => {
-          document.body.style.cursor = 'grab';
         }}
       >
         <planeGeometry args={[cardSize.width, cardSize.height]} />
@@ -136,10 +144,10 @@ const OaklandCard3DModel: React.FC<OaklandCard3DModelProps> = ({
         rotation={[0, Math.PI, 0]} 
         castShadow 
         receiveShadow
-        onPointerEnter={(e) => {
-          document.body.style.cursor = 'grab';
+        onPointerEnter={() => {
+          if (!isDragging && !isFlipping) document.body.style.cursor = 'grab';
         }}
-        onPointerLeave={(e) => {
+        onPointerLeave={() => {
           if (!isDragging) document.body.style.cursor = 'default';
         }}
       >
@@ -150,18 +158,18 @@ const OaklandCard3DModel: React.FC<OaklandCard3DModelProps> = ({
       {/* Text Overlays */}
       <CardTextOverlays memoryData={memoryData} teamColors={teamColors} />
 
-      {/* Decorative Effects Layer */}
+      {/* Effects Layer */}
       {showEffects && (
         <CardEffectsLayer
           showEffects={showEffects}
-          svgOverlays={svgOverlays}
-          canvasEffects={canvasEffects}
+          svgOverlays={[]}
+          canvasEffects={[]}
           cardFinish={cardFinish}
           cardSize={cardSize}
         />
       )}
 
-      {/* Simple Card Edges (when border is disabled) */}
+      {/* Card Edges */}
       {!showBorder && (
         <CardEdges
           cardSize={cardSize}
