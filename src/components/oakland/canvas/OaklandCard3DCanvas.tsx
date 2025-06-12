@@ -66,6 +66,7 @@ const OaklandCard3DCanvas: React.FC<OaklandCard3DCanvasProps> = ({
   const [autoRotate, setAutoRotate] = useState(false);
   const [cardFinish, setCardFinish] = useState<'matte' | 'glossy' | 'foil'>('glossy');
   const canvasRef = useRef<HTMLDivElement>(null);
+  const [isInteracting, setIsInteracting] = useState(false);
 
   const handleZoomIn = useCallback(() => {
     onZoomChange(Math.min(zoomLevel + 25, 200));
@@ -84,10 +85,28 @@ const OaklandCard3DCanvas: React.FC<OaklandCard3DCanvasProps> = ({
     setViewMode(prev => prev === '3d' ? '2d' : '3d');
   }, []);
 
+  // Prevent text selection during canvas interactions
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    setIsInteracting(true);
+    e.preventDefault();
+  }, []);
+
+  const handleMouseUp = useCallback(() => {
+    setIsInteracting(false);
+  }, []);
+
+  const handleContextMenu = useCallback((e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent right-click context menu
+  }, []);
+
   return (
     <div 
       ref={canvasRef}
-      className={`relative w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden ${className}`}
+      className={`relative w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden select-none touch-none ${isInteracting ? 'cursor-grabbing' : 'cursor-grab'} ${className}`}
+      onMouseDown={handleMouseDown}
+      onMouseUp={handleMouseUp}
+      onContextMenu={handleContextMenu}
+      style={{ userSelect: 'none', WebkitUserSelect: 'none', msUserSelect: 'none' }}
     >
       {/* 3D Canvas */}
       <Canvas
@@ -98,7 +117,9 @@ const OaklandCard3DCanvas: React.FC<OaklandCard3DCanvasProps> = ({
           alpha: false,
           powerPreference: "high-performance"
         }}
-        className="w-full h-full"
+        className="w-full h-full select-none touch-none"
+        onPointerDown={() => setIsInteracting(true)}
+        onPointerUp={() => setIsInteracting(false)}
       >
         <CameraController zoomLevel={zoomLevel} />
         
@@ -187,7 +208,7 @@ const OaklandCard3DCanvas: React.FC<OaklandCard3DCanvasProps> = ({
       {/* Empty State */}
       {!selectedTemplate && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <div className="text-center text-gray-500 bg-white/90 backdrop-blur-sm rounded-xl p-8 shadow-lg">
+          <div className="text-center text-gray-500 bg-white/90 backdrop-blur-sm rounded-xl p-8 shadow-lg select-text">
             <div className="text-6xl mb-4">⚾</div>
             <h3 className="text-xl font-bold text-gray-800 mb-2">Choose Your Template</h3>
             <p className="text-gray-600">Select an Oakland A's template to see your memory card in 3D</p>
@@ -196,7 +217,7 @@ const OaklandCard3DCanvas: React.FC<OaklandCard3DCanvasProps> = ({
       )}
 
       {/* Performance Indicator */}
-      <div className="absolute bottom-4 left-4 text-xs text-gray-500 bg-white/80 backdrop-blur-sm rounded px-2 py-1">
+      <div className="absolute bottom-4 left-4 text-xs text-gray-500 bg-white/80 backdrop-blur-sm rounded px-2 py-1 select-none">
         {viewMode.toUpperCase()} • {cardFinish} finish • {zoomLevel}%
       </div>
     </div>

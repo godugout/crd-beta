@@ -46,18 +46,18 @@ const Canvas3DControls: React.FC<Canvas3DControlsProps> = ({
   return (
     <>
       {/* Top Right Controls */}
-      <div className="absolute top-6 right-6 flex items-center gap-2 bg-white/90 backdrop-blur-sm rounded-lg shadow-lg p-2 z-10">
+      <div className="absolute top-6 right-6 flex items-center gap-2 bg-white/90 backdrop-blur-sm rounded-lg shadow-lg p-2 z-10 select-none">
         <Button
           variant="ghost"
           size="sm"
           onClick={onZoomOut}
-          className="h-8 w-8 p-0 hover:bg-gray-100"
+          className="h-8 w-8 p-0 hover:bg-gray-100 select-none"
           disabled={zoomLevel <= 50}
         >
           <ZoomOut className="h-4 w-4" />
         </Button>
         
-        <Badge variant="secondary" className="px-3 min-w-[60px] text-center font-mono">
+        <Badge variant="secondary" className="px-3 min-w-[60px] text-center font-mono select-none">
           {zoomLevel}%
         </Badge>
         
@@ -65,7 +65,7 @@ const Canvas3DControls: React.FC<Canvas3DControlsProps> = ({
           variant="ghost"
           size="sm"
           onClick={onZoomIn}
-          className="h-8 w-8 p-0 hover:bg-gray-100"
+          className="h-8 w-8 p-0 hover:bg-gray-100 select-none"
           disabled={zoomLevel >= 200}
         >
           <ZoomIn className="h-4 w-4" />
@@ -77,19 +77,19 @@ const Canvas3DControls: React.FC<Canvas3DControlsProps> = ({
           variant="ghost"
           size="sm"
           onClick={onFullscreenToggle}
-          className="h-8 w-8 p-0 hover:bg-gray-100"
+          className="h-8 w-8 p-0 hover:bg-gray-100 select-none"
         >
           {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
         </Button>
       </div>
 
       {/* Top Left View Controls */}
-      <div className="absolute top-6 left-6 flex items-center gap-2 bg-white/90 backdrop-blur-sm rounded-lg shadow-lg p-2 z-10">
+      <div className="absolute top-6 left-6 flex items-center gap-2 bg-white/90 backdrop-blur-sm rounded-lg shadow-lg p-2 z-10 select-none">
         <Button
           variant={viewMode === '3d' ? 'default' : 'ghost'}
           size="sm"
           onClick={onViewModeToggle}
-          className="h-8 px-3"
+          className="h-8 px-3 select-none"
         >
           <Eye className="h-4 w-4 mr-1" />
           {viewMode.toUpperCase()}
@@ -102,7 +102,7 @@ const Canvas3DControls: React.FC<Canvas3DControlsProps> = ({
               variant={autoRotate ? 'default' : 'ghost'}
               size="sm"
               onClick={onAutoRotateToggle}
-              className="h-8 w-8 p-0"
+              className="h-8 w-8 p-0 select-none"
             >
               {autoRotate ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
             </Button>
@@ -115,14 +115,14 @@ const Canvas3DControls: React.FC<Canvas3DControlsProps> = ({
           variant="ghost"
           size="sm"
           onClick={onReset}
-          className="h-8 w-8 p-0 hover:bg-gray-100"
+          className="h-8 w-8 p-0 hover:bg-gray-100 select-none"
         >
           <RotateCcw className="h-4 w-4" />
         </Button>
       </div>
 
       {/* Bottom Controls - Card Finish */}
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-white/90 backdrop-blur-sm rounded-lg shadow-lg p-2 z-10">
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-white/90 backdrop-blur-sm rounded-lg shadow-lg p-2 z-10 select-none">
         <Sparkles className="h-4 w-4 text-gray-600" />
         <span className="text-sm font-medium text-gray-700">Finish:</span>
         
@@ -132,7 +132,7 @@ const Canvas3DControls: React.FC<Canvas3DControlsProps> = ({
             variant={cardFinish === finish ? 'default' : 'ghost'}
             size="sm"
             onClick={() => onCardFinishChange(finish)}
-            className="h-8 px-3 capitalize"
+            className="h-8 px-3 capitalize select-none"
           >
             {finish}
           </Button>
@@ -140,7 +140,7 @@ const Canvas3DControls: React.FC<Canvas3DControlsProps> = ({
       </div>
 
       {/* Keyboard Shortcuts Hint */}
-      <div className="absolute bottom-6 right-6 text-xs text-gray-500 bg-white/80 backdrop-blur-sm rounded px-2 py-1 z-10">
+      <div className="absolute bottom-6 right-6 text-xs text-gray-500 bg-white/80 backdrop-blur-sm rounded px-2 py-1 z-10 select-none">
         <div>Mouse: Drag to rotate • Wheel: Zoom</div>
         <div>R: Reset • Space: Auto-rotate • V: View mode</div>
       </div>
