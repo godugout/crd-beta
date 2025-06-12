@@ -28,17 +28,17 @@ export const useAdvancedCardControls = ({ sidebarOpen = false }: UseAdvancedCard
     autoRotate: false
   });
 
-  // Handle mouse interactions - accepting a more generic event format
-  const handleMouseDown = useCallback((event: { clientX: number; clientY: number }) => {
+  // Handle mouse interactions for Three.js events
+  const handleMouseDown = useCallback((event: { point: { x: number; y: number } }) => {
     setIsDragging(true);
-    setDragStart({ x: event.clientX, y: event.clientY });
+    setDragStart({ x: event.point.x, y: event.point.y });
   }, []);
 
-  const handleMouseMove = useCallback((event: { clientX: number; clientY: number }) => {
+  const handleMouseMove = useCallback((event: { point: { x: number; y: number } }) => {
     if (!isDragging) return;
 
-    const deltaX = event.clientX - dragStart.x;
-    const deltaY = event.clientY - dragStart.y;
+    const deltaX = event.point.x - dragStart.x;
+    const deltaY = event.point.y - dragStart.y;
 
     setControls(prev => ({
       ...prev,
@@ -49,7 +49,7 @@ export const useAdvancedCardControls = ({ sidebarOpen = false }: UseAdvancedCard
       }
     }));
 
-    setDragStart({ x: event.clientX, y: event.clientY });
+    setDragStart({ x: event.point.x, y: event.point.y });
   }, [isDragging, dragStart]);
 
   const handleMouseUp = useCallback(() => {

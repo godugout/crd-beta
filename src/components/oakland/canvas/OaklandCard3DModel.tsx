@@ -78,37 +78,18 @@ const OaklandCard3DModel: React.FC<OaklandCard3DModelProps> = ({
   // Handle Three.js fiber events
   const handlePointerDown = (event: ThreeEvent<PointerEvent>) => {
     event.stopPropagation();
-    // Convert Three.js event to a format our handler expects
-    const syntheticEvent = {
-      clientX: event.point.x,
-      clientY: event.point.y,
-      preventDefault: () => {},
-      stopPropagation: () => {}
-    } as React.MouseEvent;
-    handleMouseDown(syntheticEvent);
+    handleMouseDown({ point: { x: event.point.x, y: event.point.y } });
   };
 
   const handlePointerMove = (event: ThreeEvent<PointerEvent>) => {
     if (!isDragging) return;
     event.stopPropagation();
-    // Convert Three.js event to a format our handler expects
-    const syntheticEvent = {
-      clientX: event.point.x,
-      clientY: event.point.y,
-      preventDefault: () => {},
-      stopPropagation: () => {}
-    } as React.MouseEvent;
-    handleMouseMove(syntheticEvent);
+    handleMouseMove({ point: { x: event.point.x, y: event.point.y } });
   };
 
   const handlePointerUp = (event: ThreeEvent<PointerEvent>) => {
     event.stopPropagation();
-    // Convert Three.js event to a format our handler expects
-    const syntheticEvent = {
-      preventDefault: () => {},
-      stopPropagation: () => {}
-    } as React.MouseEvent;
-    handleMouseUp(syntheticEvent);
+    handleMouseUp();
   };
 
   return (
@@ -118,7 +99,6 @@ const OaklandCard3DModel: React.FC<OaklandCard3DModelProps> = ({
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
-      style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
     >
       {/* Traditional Baseball Card Border */}
       {showBorder && (
