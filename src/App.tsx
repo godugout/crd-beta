@@ -6,14 +6,16 @@ import { Toaster } from '@/components/ui/sonner';
 import { CardProvider } from '@/context/CardContext';
 import { AuthProvider } from '@/context/auth/AuthProvider';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
+import { useAuth } from '@/context/auth/AuthProvider';
 
-// Navigation Components
+// Components
+import AuthLoadingIndicator from '@/components/auth/AuthLoadingIndicator';
 import StreamlinedNavbar from '@/components/navigation/StreamlinedNavbar';
 import FloatingActionButton from '@/components/navigation/FloatingActionButton';
 import MobileBottomNavigation from '@/components/navigation/MobileBottomNavigation';
 
 // Pages
-import Index from '@/pages/Index'; // Oakland landing page
+import Index from '@/pages/Index';
 import CardGallery from '@/components/CardGallery';
 import CardViewerPage from '@/components/CardViewerPage';
 import Account from '@/components/Account';
@@ -38,9 +40,11 @@ const queryClient = new QueryClient({
 
 function AppContent() {
   useKeyboardShortcuts();
+  const { isLoading } = useAuth();
 
   return (
     <div className="min-h-screen bg-background">
+      <AuthLoadingIndicator isLoading={isLoading} />
       <StreamlinedNavbar />
       
       <main className="pb-20 md:pb-0">
