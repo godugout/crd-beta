@@ -12,6 +12,10 @@ export const oaklandRoutes = [
   },
   {
     path: '/oakland/create',
+    element: <OaklandMemoryBuilder />
+  },
+  {
+    path: '/oakland/create-modern',
     element: <ModernCardCreator />
   },
   {
