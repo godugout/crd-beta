@@ -1,5 +1,5 @@
-import React, { useRef } from 'react';
-import { useFrame } from '@react-three/fiber';
+
+import React from 'react';
 import * as THREE from 'three';
 import { OaklandTemplate } from '@/lib/types/oaklandTemplates';
 import BaseballCardBorder from './BaseballCardBorder';
@@ -8,6 +8,7 @@ import CardTextOverlays from './components/CardTextOverlays';
 import CardEdges from './components/CardEdges';
 import { useCardTextures } from './hooks/useCardTextures';
 import { useCardMaterials } from './components/CardMaterials';
+import { useAdvancedCardControls } from './hooks/useAdvancedCardControls';
 
 interface OaklandCard3DModelProps {
   template: OaklandTemplate;
@@ -25,6 +26,7 @@ interface OaklandCard3DModelProps {
   showEffects?: boolean;
   showBorder?: boolean;
   borderStyle?: 'classic' | 'vintage' | 'modern';
+  sidebarOpen?: boolean;
 }
 
 const OaklandCard3DModel: React.FC<OaklandCard3DModelProps> = ({
@@ -35,13 +37,11 @@ const OaklandCard3DModel: React.FC<OaklandCard3DModelProps> = ({
   viewMode,
   showEffects = true,
   showBorder = true,
-  borderStyle = 'classic'
+  borderStyle = 'classic',
+  sidebarOpen = false
 }) => {
-  const groupRef = useRef<THREE.Group>(null);
-  const cardRef = useRef<THREE.Mesh>(null);
-
-  // Card dimensions
-  const cardSize = { width: 2.5, height: 3.5, depth: 0.02 };
+  // Card dimensions - smaller for better viewport fit
+  const cardSize = { width: 2.0, height: 2.8, depth: 0.02 };
 
   // Load textures
   const { cardTexture, backTexture } = useCardTextures(template.thumbnailUrl);
@@ -52,6 +52,16 @@ const OaklandCard3DModel: React.FC<OaklandCard3DModelProps> = ({
     backTexture,
     cardFinish
   });
+
+  // Advanced card controls
+  const {
+    groupRef,
+    controls,
+    isDragging,
+    handleMouseDown,
+    handleMouseMove,
+    handleMouseUp
+  } = useAdvancedCardControls({ sidebarOpen });
 
   // Apply random design color scheme if available (only for effects, not base template)
   const colorScheme = (memoryData as any)?.colorScheme;
@@ -64,41 +74,15 @@ const OaklandCard3DModel: React.FC<OaklandCard3DModelProps> = ({
     secondary: colorScheme?.secondary || '#EFB21E'
   };
 
-  // Enhanced animation loop
-  useFrame((state, delta) => {
-    if (!groupRef.current) return;
-
-    const time = state.clock.getElapsedTime();
-
-    if (autoRotate) {
-      groupRef.current.rotation.y += delta * 0.5;
-    }
-
-    if (viewMode === '2d') {
-      // In 2D mode, keep card flat
-      groupRef.current.rotation.x = 0;
-      groupRef.current.rotation.z = 0;
-      if (!autoRotate) {
-        groupRef.current.rotation.y = 0;
-      }
-    } else {
-      // 3D mode with subtle floating animation
-      groupRef.current.position.y = Math.sin(time * 0.5) * 0.1;
-      groupRef.current.rotation.z = Math.sin(time * 0.3) * 0.02;
-    }
-
-    // Enhanced foil effect with dynamic properties
-    if (cardFinish === 'foil' && cardRef.current?.material) {
-      const material = cardRef.current.material as THREE.MeshPhysicalMaterial;
-      material.iridescenceThicknessRange = [
-        100 + Math.sin(time * 1.5) * 30,
-        300 + Math.cos(time * 1.2) * 50
-      ];
-    }
-  });
-
   return (
-    <group ref={groupRef} position={[0, 0, 0]}>
+    <group 
+      ref={groupRef} 
+      position={[0, 0, 0]}
+      onPointerDown={handleMouseDown}
+      onPointerMove={handleMouseMove}
+      onPointerUp={handleMouseUp}
+      style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
+    >
       {/* Traditional Baseball Card Border */}
       {showBorder && (
         <BaseballCardBorder
@@ -109,7 +93,7 @@ const OaklandCard3DModel: React.FC<OaklandCard3DModelProps> = ({
       )}
 
       {/* Card Front - Show template clearly */}
-      <mesh ref={cardRef} castShadow receiveShadow>
+      <mesh castShadow receiveShadow>
         <planeGeometry args={[cardSize.width, cardSize.height]} />
         <primitive object={frontMaterial} />
       </mesh>

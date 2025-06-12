@@ -84,7 +84,7 @@ const OaklandMemoryBuilder: React.FC = () => {
                 Oakland A's Memory Creator
               </h1>
               <p className="text-xs text-[#ffd700]/70 font-medium">
-                Step-by-step card creation
+                Advanced card controls enabled
               </p>
             </div>
           </div>
@@ -128,6 +128,7 @@ const OaklandMemoryBuilder: React.FC = () => {
             showEffects={showEffects}
             showBorder={showBorder}
             borderStyle={borderStyle}
+            sidebarOpen={!sidebarCollapsed}
             className="flex-1"
           />
         </div>

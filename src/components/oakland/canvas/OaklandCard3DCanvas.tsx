@@ -1,7 +1,7 @@
 
 import React, { Suspense, useRef, useState, useCallback } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, PerspectiveCamera, Environment, ContactShadows } from '@react-three/drei';
+import { PerspectiveCamera, Environment, ContactShadows } from '@react-three/drei';
 import { OaklandTemplate } from '@/lib/types/oaklandTemplates';
 import OaklandCard3DModel from './OaklandCard3DModel';
 import * as THREE from 'three';
@@ -27,45 +27,58 @@ interface OaklandCard3DCanvasProps {
   showBorder?: boolean;
   borderStyle?: 'classic' | 'vintage' | 'modern';
   className?: string;
+  sidebarOpen?: boolean;
 }
 
 const CardLoadingFallback = () => (
   <mesh position={[0, 0, 0]}>
-    <boxGeometry args={[2.5, 3.5, 0.1]} />
+    <boxGeometry args={[2.0, 2.8, 0.1]} />
     <meshStandardMaterial color="#333333" opacity={0.5} transparent />
   </mesh>
 );
 
-const CameraController = ({ zoomLevel, viewMode }: { zoomLevel: number; viewMode: '3d' | '2d' }) => {
+const CameraController = ({ zoomLevel, viewMode, sidebarOpen }: { 
+  zoomLevel: number; 
+  viewMode: '3d' | '2d';
+  sidebarOpen?: boolean;
+}) => {
   const cameraRef = useRef<THREE.PerspectiveCamera>(null);
   
   useFrame(() => {
     if (cameraRef.current) {
       // Calculate target distance based on zoom level
-      const baseDistance = viewMode === '2d' ? 4 : 6;
+      const baseDistance = viewMode === '2d' ? 4 : 5;
       const targetDistance = baseDistance - (zoomLevel - 100) * 0.02;
       const clampedDistance = Math.max(2, Math.min(12, targetDistance));
       
       // Smoothly interpolate to target distance
       const currentDistance = cameraRef.current.position.length();
       const newDistance = THREE.MathUtils.lerp(currentDistance, clampedDistance, 0.1);
-      cameraRef.current.position.setLength(newDistance);
-
-      // Adjust camera position for 2D mode
+      
+      // Adjust camera position based on sidebar state for centering
+      const xOffset = sidebarOpen ? 0.2 : 0;
+      
       if (viewMode === '2d') {
-        cameraRef.current.position.x = 0;
-        cameraRef.current.position.y = 0;
-        cameraRef.current.position.z = newDistance;
-        cameraRef.current.lookAt(0, 0, 0);
+        cameraRef.current.position.set(xOffset, 0, newDistance);
+        cameraRef.current.lookAt(xOffset, 0, 0);
+      } else {
+        // Maintain relative position in 3D
+        const direction = cameraRef.current.position.clone().normalize();
+        direction.multiplyScalar(newDistance);
+        direction.x += xOffset;
+        cameraRef.current.position.copy(direction);
+        cameraRef.current.lookAt(xOffset, 0, 0);
       }
     }
   });
+
+  const initialX = sidebarOpen ? 0.2 : 0;
 
   return (
     <PerspectiveCamera 
       ref={cameraRef}
       makeDefault 
-      position={viewMode === '2d' ? [0, 0, 4] : [0, 0, 6]} 
+      position={viewMode === '2d' ? [initialX, 0, 4] : [initialX, 0, 5]} 
       fov={45} 
     />
   );
@@ -84,7 +97,8 @@ const OaklandCard3DCanvas: React.FC<OaklandCard3DCanvasProps> = ({
   showEffects = true,
   showBorder = true,
   borderStyle = 'classic',
-  className = ''
+  className = '',
+  sidebarOpen = false
 }) => {
   const canvasRef = useRef<HTMLDivElement>(null);
   const [isInteracting, setIsInteracting] = useState(false);
@@ -133,7 +147,7 @@ const OaklandCard3DCanvas: React.FC<OaklandCard3DCanvasProps> = ({
         onPointerDown={() => setIsInteracting(true)}
         onPointerUp={() => setIsInteracting(false)}
       >
-        <CameraController zoomLevel={zoomLevel} viewMode={viewMode} />
+        <CameraController zoomLevel={zoomLevel} viewMode={viewMode} sidebarOpen={sidebarOpen} />
         
         {/* Enhanced Lighting Setup */}
         <ambientLight intensity={0.4} color="#f0f0ff" />
@@ -175,6 +189,7 @@ const OaklandCard3DCanvas: React.FC<OaklandCard3DCanvasProps> = ({
               showEffects={showEffects}
               showBorder={showBorder}
               borderStyle={borderStyle}
+              sidebarOpen={sidebarOpen}
             />
           )}
         </Suspense>
@@ -186,21 +201,6 @@ const OaklandCard3DCanvas: React.FC<OaklandCard3DCanvasProps> = ({
           scale={8} 
           blur={2.5} 
           far={4} 
-        />
-
-        {/* Orbit Controls */}
-        <OrbitControls 
-          enablePan={true}
-          enableZoom={false} // We handle zoom manually
-          enableRotate={viewMode === '3d'}
-          autoRotate={autoRotate}
-          autoRotateSpeed={1}
-          minDistance={2}
-          maxDistance={12}
-          maxPolarAngle={Math.PI * 0.8}
-          minPolarAngle={Math.PI * 0.2}
-          enableDamping
-          dampingFactor={0.05}
         />
       </Canvas>
 
@@ -222,7 +222,7 @@ const OaklandCard3DCanvas: React.FC<OaklandCard3DCanvasProps> = ({
 
       {/* Controls Hint */}
       <div className="absolute bottom-4 right-4 text-xs text-gray-500 bg-white/80 backdrop-blur-sm rounded px-2 py-1 select-none">
-        <div>Mouse: Drag to rotate • Wheel: Zoom • Zoom: {zoomLevel}%</div>
+        <div>Drag: Rotate • Wheel: Zoom • F: Flip • Space: Auto-rotate • R: Reset</div>
       </div>
     </div>
   );
