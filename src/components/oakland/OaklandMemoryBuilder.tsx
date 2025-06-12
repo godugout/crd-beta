@@ -48,6 +48,20 @@ const OaklandMemoryBuilder: React.FC = () => {
   const handleZoomIn = () => setZoomLevel(prev => Math.min(prev + 25, 200));
   const handleZoomOut = () => setZoomLevel(prev => Math.max(prev - 25, 50));
 
+  // Helper function to map difficulty values
+  const mapDifficulty = (difficulty: 'beginner' | 'intermediate' | 'advanced'): 'easy' | 'medium' | 'hard' => {
+    switch (difficulty) {
+      case 'beginner':
+        return 'easy';
+      case 'intermediate':
+        return 'medium';
+      case 'advanced':
+        return 'hard';
+      default:
+        return 'medium';
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#1a1a1a] flex flex-col overflow-hidden">
       {/* Top Header - 60px height */}
@@ -202,7 +216,7 @@ const OaklandMemoryBuilder: React.FC = () => {
                     effects: selectedTemplate.effects,
                     metadata: {
                       tags: selectedTemplate.tags,
-                      difficulty: selectedTemplate.difficulty,
+                      difficulty: mapDifficulty(selectedTemplate.difficulty),
                       popularity: selectedTemplate.completionPercentage
                     }
                   }}
