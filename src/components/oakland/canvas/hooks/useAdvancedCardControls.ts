@@ -28,13 +28,13 @@ export const useAdvancedCardControls = ({ sidebarOpen = false }: UseAdvancedCard
     autoRotate: false
   });
 
-  // Handle mouse interactions
-  const handleMouseDown = useCallback((event: React.MouseEvent) => {
+  // Handle mouse interactions - accepting a more generic event format
+  const handleMouseDown = useCallback((event: { clientX: number; clientY: number }) => {
     setIsDragging(true);
     setDragStart({ x: event.clientX, y: event.clientY });
   }, []);
 
-  const handleMouseMove = useCallback((event: React.MouseEvent) => {
+  const handleMouseMove = useCallback((event: { clientX: number; clientY: number }) => {
     if (!isDragging) return;
 
     const deltaX = event.clientX - dragStart.x;
@@ -54,47 +54,6 @@ export const useAdvancedCardControls = ({ sidebarOpen = false }: UseAdvancedCard
 
   const handleMouseUp = useCallback(() => {
     setIsDragging(false);
-  }, []);
-
-  // Keyboard controls
-  const handleKeyPress = useCallback((event: KeyboardEvent) => {
-    switch (event.key.toLowerCase()) {
-      case 'f':
-        flipCard();
-        break;
-      case ' ':
-        toggleAutoRotate();
-        event.preventDefault();
-        break;
-      case 'r':
-        resetCard();
-        break;
-      case 'arrowup':
-        moveCard('up');
-        event.preventDefault();
-        break;
-      case 'arrowdown':
-        moveCard('down');
-        event.preventDefault();
-        break;
-      case 'arrowleft':
-        moveCard('left');
-        event.preventDefault();
-        break;
-      case 'arrowright':
-        moveCard('right');
-        event.preventDefault();
-        break;
-      case '=':
-      case '+':
-        scaleCard(0.1);
-        event.preventDefault();
-        break;
-      case '-':
-        scaleCard(-0.1);
-        event.preventDefault();
-        break;
-    }
   }, []);
 
   // Control functions
@@ -155,6 +114,47 @@ export const useAdvancedCardControls = ({ sidebarOpen = false }: UseAdvancedCard
       scale: Math.max(0.3, Math.min(2.0, prev.scale + delta))
     }));
   }, []);
+
+  // Keyboard controls
+  const handleKeyPress = useCallback((event: KeyboardEvent) => {
+    switch (event.key.toLowerCase()) {
+      case 'f':
+        flipCard();
+        break;
+      case ' ':
+        toggleAutoRotate();
+        event.preventDefault();
+        break;
+      case 'r':
+        resetCard();
+        break;
+      case 'arrowup':
+        moveCard('up');
+        event.preventDefault();
+        break;
+      case 'arrowdown':
+        moveCard('down');
+        event.preventDefault();
+        break;
+      case 'arrowleft':
+        moveCard('left');
+        event.preventDefault();
+        break;
+      case 'arrowright':
+        moveCard('right');
+        event.preventDefault();
+        break;
+      case '=':
+      case '+':
+        scaleCard(0.1);
+        event.preventDefault();
+        break;
+      case '-':
+        scaleCard(-0.1);
+        event.preventDefault();
+        break;
+    }
+  }, [flipCard, toggleAutoRotate, resetCard, moveCard, scaleCard]);
 
   // Adjust position based on sidebar state
   useEffect(() => {

@@ -1,6 +1,7 @@
 
 import React from 'react';
 import * as THREE from 'three';
+import { ThreeEvent } from '@react-three/fiber';
 import { OaklandTemplate } from '@/lib/types/oaklandTemplates';
 import BaseballCardBorder from './BaseballCardBorder';
 import CardEffectsLayer from './CardEffectsLayer';
@@ -74,13 +75,49 @@ const OaklandCard3DModel: React.FC<OaklandCard3DModelProps> = ({
     secondary: colorScheme?.secondary || '#EFB21E'
   };
 
+  // Handle Three.js fiber events
+  const handlePointerDown = (event: ThreeEvent<PointerEvent>) => {
+    event.stopPropagation();
+    // Convert Three.js event to a format our handler expects
+    const syntheticEvent = {
+      clientX: event.point.x,
+      clientY: event.point.y,
+      preventDefault: () => {},
+      stopPropagation: () => {}
+    } as React.MouseEvent;
+    handleMouseDown(syntheticEvent);
+  };
+
+  const handlePointerMove = (event: ThreeEvent<PointerEvent>) => {
+    if (!isDragging) return;
+    event.stopPropagation();
+    // Convert Three.js event to a format our handler expects
+    const syntheticEvent = {
+      clientX: event.point.x,
+      clientY: event.point.y,
+      preventDefault: () => {},
+      stopPropagation: () => {}
+    } as React.MouseEvent;
+    handleMouseMove(syntheticEvent);
+  };
+
+  const handlePointerUp = (event: ThreeEvent<PointerEvent>) => {
+    event.stopPropagation();
+    // Convert Three.js event to a format our handler expects
+    const syntheticEvent = {
+      preventDefault: () => {},
+      stopPropagation: () => {}
+    } as React.MouseEvent;
+    handleMouseUp(syntheticEvent);
+  };
+
   return (
     <group 
       ref={groupRef} 
       position={[0, 0, 0]}
-      onPointerDown={handleMouseDown}
-      onPointerMove={handleMouseMove}
-      onPointerUp={handleMouseUp}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
       style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
     >
       {/* Traditional Baseball Card Border */}
