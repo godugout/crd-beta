@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { ChevronRight, RotateCcw, FlipHorizontal, Move, RotateCw, Keyboard } from 'lucide-react';
+import { ChevronRight, RotateCcw, FlipHorizontal, Move, RotateCw, Keyboard, MousePointer } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface AdvancedControlsSectionProps {
@@ -36,7 +36,7 @@ const AdvancedControlsSection: React.FC<AdvancedControlsSectionProps> = ({
         <Button variant="ghost" className="w-full justify-between text-gray-200 hover:bg-gray-800">
           <div className="flex items-center gap-2">
             <Move className="h-4 w-4" />
-            Advanced Controls
+            3D Card Controls
           </div>
           <ChevronRight className={cn("h-4 w-4 transition-transform", isOpen && "rotate-90")} />
         </Button>
@@ -95,8 +95,18 @@ const AdvancedControlsSection: React.FC<AdvancedControlsSectionProps> = ({
           </Button>
         </div>
 
-        {/* Keyboard Shortcuts Help */}
-        <div className="bg-gray-800 rounded-lg p-3 space-y-2">
+        {/* Enhanced Controls Guide */}
+        <div className="bg-gray-800 rounded-lg p-3 space-y-3">
+          <div className="flex items-center gap-2 text-gray-300 text-sm font-medium">
+            <MousePointer className="h-3 w-3" />
+            Mouse Controls
+          </div>
+          <div className="grid grid-cols-1 gap-1 text-xs text-gray-400">
+            <div>• Drag: Rotate card in 3D</div>
+            <div>• Hover: Visual feedback</div>
+            <div>• Smooth interactions</div>
+          </div>
+          
           <div className="flex items-center gap-2 text-gray-300 text-sm font-medium">
             <Keyboard className="h-3 w-3" />
             Keyboard Shortcuts
@@ -107,12 +117,12 @@ const AdvancedControlsSection: React.FC<AdvancedControlsSectionProps> = ({
             <div>Space: Auto-rotate</div>
             <div>+/-: Scale</div>
             <div>Arrow keys: Move</div>
-            <div>Drag: Rotate</div>
+            <div>Smooth animations</div>
           </div>
         </div>
 
         <div className="text-xs text-gray-500 leading-relaxed">
-          Use mouse to drag and rotate the card. Keyboard shortcuts provide quick access to common actions.
+          Enhanced 3D controls with smooth animations and proper card orientation. No more sideways cards!
         </div>
       </CollapsibleContent>
     </Collapsible>

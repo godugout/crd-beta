@@ -19,44 +19,45 @@ export const useAdvancedCardControls = ({ sidebarOpen = false }: UseAdvancedCard
   const groupRef = useRef<THREE.Group>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [lastRotation, setLastRotation] = useState({ x: 0, y: 0 });
   
   const [controls, setControls] = useState<CardControls>({
     position: { x: 0, y: 0, z: 0 },
-    rotation: { x: 0, y: 0, z: 0 },
-    scale: 0.8, // Smaller default scale
+    rotation: { x: 0, y: 0, z: 0 }, // Start with proper orientation
+    scale: 0.8,
     isFlipped: false,
     autoRotate: false
   });
 
-  // Handle mouse interactions for Three.js events
+  // Handle Three.js pointer events
   const handleMouseDown = useCallback((event: { point: { x: number; y: number } }) => {
     setIsDragging(true);
     setDragStart({ x: event.point.x, y: event.point.y });
-  }, []);
+    // Store current rotation as reference
+    setLastRotation({ x: controls.rotation.x, y: controls.rotation.y });
+  }, [controls.rotation]);
 
   const handleMouseMove = useCallback((event: { point: { x: number; y: number } }) => {
     if (!isDragging) return;
 
-    const deltaX = event.point.x - dragStart.x;
-    const deltaY = event.point.y - dragStart.y;
+    const deltaX = (event.point.x - dragStart.x) * 2; // Increase sensitivity
+    const deltaY = (event.point.y - dragStart.y) * 2;
 
     setControls(prev => ({
       ...prev,
       rotation: {
         ...prev.rotation,
-        y: prev.rotation.y + deltaX * 0.01,
-        x: prev.rotation.x - deltaY * 0.01
+        y: lastRotation.y + deltaX, // Horizontal movement rotates around Y axis
+        x: lastRotation.x - deltaY  // Vertical movement rotates around X axis
       }
     }));
-
-    setDragStart({ x: event.point.x, y: event.point.y });
-  }, [isDragging, dragStart]);
+  }, [isDragging, dragStart, lastRotation]);
 
   const handleMouseUp = useCallback(() => {
     setIsDragging(false);
   }, []);
 
-  // Control functions
+  // Enhanced control functions
   const flipCard = useCallback(() => {
     setControls(prev => ({
       ...prev,
@@ -84,6 +85,7 @@ export const useAdvancedCardControls = ({ sidebarOpen = false }: UseAdvancedCard
       isFlipped: false,
       autoRotate: false
     }));
+    setLastRotation({ x: 0, y: 0 });
   }, []);
 
   const moveCard = useCallback((direction: 'up' | 'down' | 'left' | 'right') => {
@@ -115,50 +117,53 @@ export const useAdvancedCardControls = ({ sidebarOpen = false }: UseAdvancedCard
     }));
   }, []);
 
-  // Keyboard controls
+  // Enhanced keyboard controls
   const handleKeyPress = useCallback((event: KeyboardEvent) => {
+    // Prevent default for specific keys we handle
     switch (event.key.toLowerCase()) {
       case 'f':
+        event.preventDefault();
         flipCard();
         break;
       case ' ':
-        toggleAutoRotate();
         event.preventDefault();
+        toggleAutoRotate();
         break;
       case 'r':
+        event.preventDefault();
         resetCard();
         break;
       case 'arrowup':
-        moveCard('up');
         event.preventDefault();
+        moveCard('up');
         break;
       case 'arrowdown':
-        moveCard('down');
         event.preventDefault();
+        moveCard('down');
         break;
       case 'arrowleft':
-        moveCard('left');
         event.preventDefault();
+        moveCard('left');
         break;
       case 'arrowright':
-        moveCard('right');
         event.preventDefault();
+        moveCard('right');
         break;
       case '=':
       case '+':
-        scaleCard(0.1);
         event.preventDefault();
+        scaleCard(0.1);
         break;
       case '-':
-        scaleCard(-0.1);
         event.preventDefault();
+        scaleCard(-0.1);
         break;
     }
   }, [flipCard, toggleAutoRotate, resetCard, moveCard, scaleCard]);
 
   // Adjust position based on sidebar state
   useEffect(() => {
-    const sidebarOffset = sidebarOpen ? -0.3 : 0;
+    const sidebarOffset = sidebarOpen ? -0.2 : 0;
     setControls(prev => ({
       ...prev,
       position: { ...prev.position, x: sidebarOffset }
@@ -171,33 +176,43 @@ export const useAdvancedCardControls = ({ sidebarOpen = false }: UseAdvancedCard
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [handleKeyPress]);
 
-  // Animation frame
+  // Animation frame with smooth interpolation
   useFrame((state, delta) => {
     if (!groupRef.current) return;
 
     // Auto rotation
-    if (controls.autoRotate) {
+    if (controls.autoRotate && !isDragging) {
       setControls(prev => ({
         ...prev,
         rotation: {
           ...prev.rotation,
-          y: prev.rotation.y + delta * 0.5
+          y: prev.rotation.y + delta * 0.8
         }
       }));
     }
 
-    // Apply transforms
-    groupRef.current.position.set(
+    // Smooth application of transforms
+    const targetPosition = new THREE.Vector3(
       controls.position.x,
       controls.position.y,
       controls.position.z
     );
-    groupRef.current.rotation.set(
+    const targetRotation = new THREE.Euler(
       controls.rotation.x,
       controls.rotation.y,
       controls.rotation.z
     );
-    groupRef.current.scale.setScalar(controls.scale);
+    const targetScale = controls.scale;
+
+    // Smooth interpolation for better UX
+    groupRef.current.position.lerp(targetPosition, 0.1);
+    groupRef.current.rotation.x += (targetRotation.x - groupRef.current.rotation.x) * 0.1;
+    groupRef.current.rotation.y += (targetRotation.y - groupRef.current.rotation.y) * 0.1;
+    groupRef.current.rotation.z += (targetRotation.z - groupRef.current.rotation.z) * 0.1;
+    
+    const currentScale = groupRef.current.scale.x;
+    const newScale = currentScale + (targetScale - currentScale) * 0.1;
+    groupRef.current.scale.setScalar(newScale);
   });
 
   return {
