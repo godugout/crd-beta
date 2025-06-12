@@ -1,506 +1,354 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/context/auth/AuthProvider';
-import { useOaklandNavigation } from '@/hooks/useOaklandNavigation';
+import { ArrowLeft, Eye, Share2, Save, Search, Grid3X3, Type, Palette, Sparkles, Download, ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { OaklandMemory, OaklandTemplate, OaklandExpression } from '@/lib/types/oaklandTypes';
-import { CalendarDays, MapPin, Users, Heart, Megaphone, Camera, ArrowLeft } from 'lucide-react';
-import PageLayout from '@/components/navigation/PageLayout';
+import { OAKLAND_CARD_TEMPLATES, OAKLAND_CARD_CATEGORIES, OaklandCardTemplate } from '@/lib/data/oaklandCardTemplates';
+import OaklandCardPreview from './OaklandCardPreview';
+
+interface MemoryData {
+  title: string;
+  subtitle: string;
+  description: string;
+  player?: string;
+  date?: string;
+  tags: string[];
+}
 
 const OaklandMemoryBuilder: React.FC = () => {
-  const { user, isLoading: authLoading } = useAuth();
-  const { goToMemories, handleMemoryCreated, handleMemoryError } = useOaklandNavigation();
-  const [loading, setLoading] = useState(false);
-  const [templates, setTemplates] = useState<OaklandTemplate[]>([]);
-  const [expressions, setExpressions] = useState<OaklandExpression[]>([]);
-  
-  const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    memory_type: 'game' as OaklandMemory['memory_type'],
-    era: 'farewell' as OaklandMemory['era'],
-    game_date: '',
-    opponent: '',
-    score: '',
-    location: 'Oakland Coliseum',
-    section: '',
-    personal_significance: '',
-    historical_context: '',
-    attendees: '',
-    tags: '',
-    emotions: [] as string[],
-    fan_expressions: [] as string[],
-    template_id: '',
-    visibility: 'public' as OaklandMemory['visibility']
+  const navigate = useNavigate();
+  const [selectedTemplate, setSelectedTemplate] = useState<OaklandCardTemplate | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [zoomLevel, setZoomLevel] = useState(100);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [memoryData, setMemoryData] = useState<MemoryData>({
+    title: 'My Oakland Memory',
+    subtitle: 'A\'s Forever',
+    description: 'Another unforgettable moment in Oakland',
+    tags: []
   });
 
-  useEffect(() => {
-    if (!authLoading && !user) {
-      toast.error('Please sign in to create memories');
-      goToMemories();
+  const filteredTemplates = OAKLAND_CARD_TEMPLATES.filter(template => {
+    const matchesCategory = selectedCategory === 'all' || template.category === selectedCategory;
+    const matchesSearch = template.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         template.description.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
+
+  const handleSaveMemory = () => {
+    if (!selectedTemplate) {
+      toast.error('Please select a template first');
+      return;
     }
-  }, [user, authLoading, goToMemories]);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      // Fetch templates
-      const { data: templatesData } = await supabase
-        .from('oakland_templates')
-        .select('*')
-        .order('usage_count', { ascending: false });
-      
-      if (templatesData) {
-        setTemplates(templatesData.map(template => ({
-          ...template,
-          category: template.category as OaklandTemplate['category'],
-          era: template.era as OaklandTemplate['era'],
-          config: (template.config || {}) as Record<string, any>,
-          tags: template.tags || [],
-          usage_count: template.usage_count || 0
-        })));
-      }
-
-      // Fetch expressions
-      const { data: expressionsData } = await supabase
-        .from('oakland_expressions')
-        .select('*')
-        .order('usage_count', { ascending: false })
-        .limit(50);
-      
-      if (expressionsData) {
-        setExpressions(expressionsData.map(expression => ({
-          ...expression,
-          category: expression.category as OaklandExpression['category'],
-          source: expression.source as OaklandExpression['source'],
-          decade: expression.decade as OaklandExpression['decade'],
-          era: expression.era as OaklandExpression['era'],
-          emotion_tags: expression.emotion_tags || []
-        })));
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  const emotionOptions = [
-    { value: 'joy', label: '😊 Joy', color: 'bg-yellow-500' },
-    { value: 'heartbreak', label: '💔 Heartbreak', color: 'bg-red-500' },
-    { value: 'nostalgia', label: '🥺 Nostalgia', color: 'bg-purple-500' },
-    { value: 'anger', label: '😡 Anger', color: 'bg-red-600' },
-    { value: 'hope', label: '🌟 Hope', color: 'bg-blue-500' },
-    { value: 'protest', label: '✊ Protest', color: 'bg-gray-800' }
-  ];
-
-  const handleEmotionToggle = (emotion: string) => {
-    setFormData(prev => ({
-      ...prev,
-      emotions: prev.emotions.includes(emotion)
-        ? prev.emotions.filter(e => e !== emotion)
-        : [...prev.emotions, emotion]
-    }));
+    toast.success('Oakland A\'s memory saved! ⚾');
   };
 
-  const handleExpressionToggle = (expression: string) => {
-    setFormData(prev => ({
-      ...prev,
-      fan_expressions: prev.fan_expressions.includes(expression)
-        ? prev.fan_expressions.filter(e => e !== expression)
-        : [...prev.fan_expressions, expression]
-    }));
+  const handleShare = () => {
+    toast.success('Memory shared with the Oakland faithful!');
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user) return;
-
-    setLoading(true);
-    try {
-      const memoryData = {
-        user_id: user.id,
-        title: formData.title,
-        description: formData.description || null,
-        memory_type: formData.memory_type,
-        era: formData.era,
-        game_date: formData.game_date || null,
-        opponent: formData.opponent || null,
-        score: formData.score || null,
-        location: formData.location,
-        section: formData.section || null,
-        personal_significance: formData.personal_significance || null,
-        historical_context: formData.historical_context || null,
-        attendees: formData.attendees ? formData.attendees.split(',').map(s => s.trim()) : [],
-        tags: formData.tags ? formData.tags.split(',').map(s => s.trim()) : [],
-        emotions: formData.emotions,
-        fan_expressions: formData.fan_expressions,
-        template_id: formData.template_id || null,
-        visibility: formData.visibility,
-        effect_settings: {},
-        is_featured: false,
-        community_reactions: {}
-      };
-
-      const { data, error } = await supabase
-        .from('oakland_memories')
-        .insert([memoryData])
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      handleMemoryCreated(data.id);
-    } catch (error: any) {
-      handleMemoryError(error.message || "Failed to create memory");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (authLoading) {
-    return (
-      <PageLayout title="Create Memory" description="Loading...">
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-green-600"></div>
-        </div>
-      </PageLayout>
-    );
-  }
-
-  if (!user) {
-    return null;
-  }
+  const handleZoomIn = () => setZoomLevel(prev => Math.min(prev + 25, 200));
+  const handleZoomOut = () => setZoomLevel(prev => Math.max(prev - 25, 50));
 
   return (
-    <PageLayout 
-      title="Create Oakland Memory" 
-      description="Preserve your piece of Oakland baseball history"
-      primaryAction={{
-        label: 'Back to Memories',
-        icon: <ArrowLeft className="h-4 w-4" />,
-        onClick: goToMemories
-      }}
-    >
-      <div className="min-h-screen bg-gradient-to-br from-green-900 via-gray-900 to-yellow-900 p-4">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-white mb-2">Create Oakland Memory</h1>
-            <p className="text-yellow-400 text-lg">Preserve your piece of Oakland baseball history</p>
+    <div className="min-h-screen bg-[#1a1a1a] flex flex-col overflow-hidden">
+      {/* Top Header - 60px height */}
+      <header className="h-[60px] bg-[#0f4c3a] border-b border-[#ffd700]/20 flex items-center justify-between px-6 shadow-lg relative z-30">
+        {/* Left Side */}
+        <div className="flex items-center gap-4">
+          <Button
+            variant="ghost"
+            onClick={() => navigate('/')}
+            className="text-[#ffd700] hover:text-white hover:bg-[#ffd700]/20 transition-all duration-200 border border-[#ffd700]/30 hover:border-[#ffd700]"
+            size="sm"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back
+          </Button>
+          
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-[#ffd700] to-yellow-300 rounded-full flex items-center justify-center shadow-lg">
+              <span className="text-[#0f4c3a] font-bold text-lg">⚾</span>
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-[#ffd700] leading-tight">
+                Oakland A's Memory Creator
+              </h1>
+              <p className="text-xs text-[#ffd700]/70 font-medium">
+                Preserve your Oakland moments forever
+              </p>
+            </div>
           </div>
+        </div>
 
-          <Card className="bg-gray-800/80 backdrop-blur-sm border-green-600/30">
-            <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
-                <Camera className="h-6 w-6 text-yellow-400" />
-                Your Oakland Story
-              </CardTitle>
-              <CardDescription className="text-gray-300">
-                Share your memories, moments, and connection to Oakland baseball
-              </CardDescription>
-            </CardHeader>
+        {/* Right Side */}
+        <div className="flex items-center gap-3">
+          <Button 
+            variant="outline"
+            size="sm"
+            className="hidden md:flex border-[#ffd700]/50 text-[#ffd700] hover:border-[#ffd700] hover:bg-[#ffd700]/10 transition-all duration-200"
+          >
+            <Eye className="h-4 w-4 mr-2" />
+            2D Preview
+          </Button>
+          <Button 
+            onClick={handleShare}
+            variant="outline"
+            size="sm"
+            className="border-[#ffd700]/50 text-[#ffd700] hover:border-[#ffd700] hover:bg-[#ffd700]/10 transition-all duration-200"
+          >
+            <Share2 className="h-4 w-4 mr-2" />
+            Share
+          </Button>
+          <Button 
+            onClick={handleSaveMemory}
+            className="bg-gradient-to-r from-[#ffd700] to-yellow-400 hover:from-yellow-400 hover:to-[#ffd700] text-[#0f4c3a] font-bold shadow-lg hover:shadow-xl transition-all duration-200"
+            size="sm"
+          >
+            <Save className="h-4 w-4 mr-2" />
+            Save Memory
+          </Button>
+        </div>
+      </header>
 
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Basic Info */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="title" className="text-white">Memory Title *</Label>
-                    <Input
-                      id="title"
-                      value={formData.title}
-                      onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                      required
-                      className="bg-gray-700 border-gray-600 text-white"
-                      placeholder="My first A's game..."
-                    />
+      <div className="flex flex-1 overflow-hidden">
+        {/* Left Sidebar - 320px width */}
+        <div className={`${sidebarCollapsed ? 'w-16' : 'w-80'} bg-[#1a1a1a] border-r border-[#ffd700]/20 flex flex-col transition-all duration-300 shadow-xl`}>
+          {!sidebarCollapsed && (
+            <>
+              {/* Templates Header */}
+              <div className="p-6 border-b border-[#ffd700]/10">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-2 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl shadow-lg">
+                    <Grid3X3 className="h-5 w-5 text-white" />
                   </div>
-
                   <div>
-                    <Label htmlFor="memory_type" className="text-white">Memory Type</Label>
-                    <Select value={formData.memory_type} onValueChange={(value) => setFormData(prev => ({ ...prev, memory_type: value as any }))}>
-                      <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="game">⚾ Game</SelectItem>
-                        <SelectItem value="tailgate">🍖 Tailgate</SelectItem>
-                        <SelectItem value="championship">🏆 Championship</SelectItem>
-                        <SelectItem value="protest">✊ Protest</SelectItem>
-                        <SelectItem value="community">👥 Community</SelectItem>
-                        <SelectItem value="farewell">👋 Farewell</SelectItem>
-                        <SelectItem value="player_moment">⭐ Player Moment</SelectItem>
-                        <SelectItem value="season_highlight">📅 Season Highlight</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <h2 className="font-bold text-[#ffd700] text-lg">Templates</h2>
+                    <p className="text-xs text-[#ffd700]/70 font-medium">Choose your memory style</p>
                   </div>
                 </div>
 
-                <div>
-                  <Label htmlFor="description" className="text-white">Description</Label>
-                  <Textarea
-                    id="description"
-                    value={formData.description}
-                    onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                    className="bg-gray-700 border-gray-600 text-white"
-                    placeholder="Tell us about this memory..."
-                    rows={3}
+                {/* Search Input */}
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#ffd700]/60 h-4 w-4" />
+                  <Input
+                    placeholder="Search templates..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10 bg-[#2a2a2a]/60 border-[#ffd700]/30 text-[#ffd700] placeholder:text-[#ffd700]/50 focus:border-[#ffd700] focus:ring-[#ffd700]/20"
                   />
                 </div>
+              </div>
 
-                {/* Era & Game Details */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <Label htmlFor="era" className="text-white">Era</Label>
-                    <Select value={formData.era} onValueChange={(value) => setFormData(prev => ({ ...prev, era: value as any }))}>
-                      <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="early_years">🌱 Early Years</SelectItem>
-                        <SelectItem value="dynasty_70s">👑 Dynasty 70s</SelectItem>
-                        <SelectItem value="bash_brothers">💪 Bash Brothers</SelectItem>
-                        <SelectItem value="moneyball">📊 Moneyball</SelectItem>
-                        <SelectItem value="playoff_runs">🎯 Playoff Runs</SelectItem>
-                        <SelectItem value="farewell">👋 Farewell</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <Label htmlFor="game_date" className="text-white flex items-center gap-1">
-                      <CalendarDays className="h-4 w-4" />
-                      Game Date
-                    </Label>
-                    <Input
-                      id="game_date"
-                      type="date"
-                      value={formData.game_date}
-                      onChange={(e) => setFormData(prev => ({ ...prev, game_date: e.target.value }))}
-                      className="bg-gray-700 border-gray-600 text-white"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="opponent" className="text-white">Opponent</Label>
-                    <Input
-                      id="opponent"
-                      value={formData.opponent}
-                      onChange={(e) => setFormData(prev => ({ ...prev, opponent: e.target.value }))}
-                      className="bg-gray-700 border-gray-600 text-white"
-                      placeholder="vs Yankees..."
-                    />
-                  </div>
-                </div>
-
-                {/* Location & Details */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <Label htmlFor="location" className="text-white flex items-center gap-1">
-                      <MapPin className="h-4 w-4" />
-                      Location
-                    </Label>
-                    <Input
-                      id="location"
-                      value={formData.location}
-                      onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
-                      className="bg-gray-700 border-gray-600 text-white"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="section" className="text-white">Section</Label>
-                    <Input
-                      id="section"
-                      value={formData.section}
-                      onChange={(e) => setFormData(prev => ({ ...prev, section: e.target.value }))}
-                      className="bg-gray-700 border-gray-600 text-white"
-                      placeholder="Section 200..."
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="score" className="text-white">Score</Label>
-                    <Input
-                      id="score"
-                      value={formData.score}
-                      onChange={(e) => setFormData(prev => ({ ...prev, score: e.target.value }))}
-                      className="bg-gray-700 border-gray-600 text-white"
-                      placeholder="A's 7, Yankees 3"
-                    />
-                  </div>
-                </div>
-
-                {/* Emotions */}
-                <div>
-                  <Label className="text-white flex items-center gap-1 mb-3">
-                    <Heart className="h-4 w-4" />
-                    What emotions did this memory evoke?
-                  </Label>
-                  <div className="flex flex-wrap gap-2">
-                    {emotionOptions.map((emotion) => (
-                      <Badge
-                        key={emotion.value}
-                        variant={formData.emotions.includes(emotion.value) ? "default" : "outline"}
-                        className={`cursor-pointer ${
-                          formData.emotions.includes(emotion.value) 
-                            ? `${emotion.color} text-white` 
-                            : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+              {/* Category Filter Tags */}
+              <div className="px-6 py-4 border-b border-[#ffd700]/10">
+                <div className="flex gap-2 overflow-x-auto pb-2">
+                  {OAKLAND_CARD_CATEGORIES.map((category) => {
+                    const Icon = category.icon;
+                    return (
+                      <Button
+                        key={category.id}
+                        variant={selectedCategory === category.id ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setSelectedCategory(category.id)}
+                        className={`flex-shrink-0 text-xs font-medium transition-all duration-200 ${
+                          selectedCategory === category.id 
+                            ? "bg-gradient-to-r from-[#ffd700] to-yellow-300 text-[#0f4c3a] shadow-lg border-transparent hover:shadow-xl" 
+                            : "hover:bg-[#ffd700]/10 hover:border-[#ffd700]/50 border-[#ffd700]/30 text-[#ffd700] bg-[#2a2a2a]/50"
                         }`}
-                        onClick={() => handleEmotionToggle(emotion.value)}
                       >
-                        {emotion.label}
-                      </Badge>
-                    ))}
-                  </div>
+                        <Icon className="h-3 w-3 mr-1.5" />
+                        {category.name}
+                      </Button>
+                    );
+                  })}
                 </div>
+              </div>
 
-                {/* Fan Expressions */}
-                <div>
-                  <Label className="text-white flex items-center gap-1 mb-3">
-                    <Megaphone className="h-4 w-4" />
-                    Oakland Fan Expressions (select any that apply)
-                  </Label>
-                  <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto">
-                    {expressions.slice(0, 20).map((expression) => (
-                      <Badge
-                        key={expression.id}
-                        variant={formData.fan_expressions.includes(expression.text_content) ? "default" : "outline"}
-                        className={`cursor-pointer ${
-                          formData.fan_expressions.includes(expression.text_content)
-                            ? 'bg-green-600 text-white' 
-                            : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                        }`}
-                        onClick={() => handleExpressionToggle(expression.text_content)}
-                      >
-                        {expression.text_content}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Personal Context */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="personal_significance" className="text-white">Personal Significance</Label>
-                    <Textarea
-                      id="personal_significance"
-                      value={formData.personal_significance}
-                      onChange={(e) => setFormData(prev => ({ ...prev, personal_significance: e.target.value }))}
-                      className="bg-gray-700 border-gray-600 text-white"
-                      placeholder="Why was this moment special to you?"
-                      rows={3}
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="historical_context" className="text-white">Historical Context</Label>
-                    <Textarea
-                      id="historical_context"
-                      value={formData.historical_context}
-                      onChange={(e) => setFormData(prev => ({ ...prev, historical_context: e.target.value }))}
-                      className="bg-gray-700 border-gray-600 text-white"
-                      placeholder="What was happening in Oakland baseball at the time?"
-                      rows={3}
-                    />
-                  </div>
-                </div>
-
-                {/* Additional Info */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="attendees" className="text-white flex items-center gap-1">
-                      <Users className="h-4 w-4" />
-                      Who was with you? (comma separated)
-                    </Label>
-                    <Input
-                      id="attendees"
-                      value={formData.attendees}
-                      onChange={(e) => setFormData(prev => ({ ...prev, attendees: e.target.value }))}
-                      className="bg-gray-700 border-gray-600 text-white"
-                      placeholder="Dad, Mom, Brother..."
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="tags" className="text-white">Tags (comma separated)</Label>
-                    <Input
-                      id="tags"
-                      value={formData.tags}
-                      onChange={(e) => setFormData(prev => ({ ...prev, tags: e.target.value }))}
-                      className="bg-gray-700 border-gray-600 text-white"
-                      placeholder="family, first-game, championship..."
-                    />
-                  </div>
-                </div>
-
-                {/* Template Selection */}
-                {templates.length > 0 && (
-                  <div>
-                    <Label className="text-white mb-3 block">Choose a Template</Label>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                      {templates.map((template) => (
-                        <div
-                          key={template.id}
-                          className={`p-3 rounded-lg border cursor-pointer transition-colors ${
-                            formData.template_id === template.id
-                              ? 'border-green-500 bg-green-900/50'
-                              : 'border-gray-600 bg-gray-700/50 hover:border-gray-500'
-                          }`}
-                          onClick={() => setFormData(prev => ({ ...prev, template_id: template.id }))}
-                        >
-                          <h4 className="text-white font-medium">{template.name}</h4>
-                          <p className="text-gray-400 text-sm">{template.description}</p>
+              {/* Template Grid */}
+              <div className="flex-1 overflow-y-auto px-6 py-4">
+                <div className="grid grid-cols-2 gap-4">
+                  {filteredTemplates.map((template) => (
+                    <div
+                      key={template.id}
+                      className={`group relative cursor-pointer rounded-xl overflow-hidden border-2 transition-all duration-300 hover:scale-[1.02] ${
+                        selectedTemplate?.id === template.id
+                          ? "border-[#ffd700] ring-4 ring-[#ffd700]/30 shadow-2xl shadow-[#ffd700]/20"
+                          : "border-[#ffd700]/30 hover:border-[#ffd700]/60 hover:shadow-xl"
+                      }`}
+                      onClick={() => setSelectedTemplate(template)}
+                    >
+                      <div className="aspect-[2.5/3.5] relative overflow-hidden bg-gradient-to-br from-[#0f4c3a] to-[#2F5233]">
+                        <OaklandCardPreview
+                          template={template}
+                          title={template.name}
+                          subtitle={template.category}
+                          className="w-full h-full"
+                        />
+                        
+                        {/* Overlay */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        
+                        {/* Template Info */}
+                        <div className="absolute bottom-0 left-0 right-0 p-3 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+                          <h3 className="text-white text-sm font-bold leading-tight mb-1">
+                            {template.name}
+                          </h3>
+                          <Badge 
+                            variant="secondary" 
+                            className="text-xs bg-[#ffd700]/20 text-[#ffd700] border-[#ffd700]/30"
+                          >
+                            {template.category}
+                          </Badge>
                         </div>
-                      ))}
+
+                        {/* Selection Indicator */}
+                        {selectedTemplate?.id === template.id && (
+                          <div className="absolute top-3 right-3 bg-[#ffd700] text-[#0f4c3a] rounded-full w-7 h-7 flex items-center justify-center shadow-lg">
+                            ✓
+                          </div>
+                        )}
+                      </div>
                     </div>
+                  ))}
+                </div>
+
+                {filteredTemplates.length === 0 && (
+                  <div className="text-center py-16">
+                    <div className="text-[#ffd700]/40 mb-4">
+                      <Search className="h-12 w-12 mx-auto mb-4" />
+                    </div>
+                    <p className="text-[#ffd700] font-medium">No templates found</p>
+                    <p className="text-[#ffd700]/60 text-sm">Try adjusting your search or filters</p>
                   </div>
                 )}
+              </div>
+            </>
+          )}
+          
+          {/* Collapse Toggle */}
+          <div className="p-4 border-t border-[#ffd700]/10">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+              className="w-full text-[#ffd700] hover:bg-[#ffd700]/20"
+            >
+              {sidebarCollapsed ? '→' : '←'}
+            </Button>
+          </div>
+        </div>
 
-                {/* Privacy */}
-                <div>
-                  <Label htmlFor="visibility" className="text-white">Privacy</Label>
-                  <Select value={formData.visibility} onValueChange={(value) => setFormData(prev => ({ ...prev, visibility: value as any }))}>
-                    <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="public">🌍 Public - Anyone can see</SelectItem>
-                      <SelectItem value="community">👥 Community - Oakland fans only</SelectItem>
-                      <SelectItem value="private">🔒 Private - Only you</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+        {/* Main Canvas Area */}
+        <div className="flex-1 bg-[#f0f0f0] flex flex-col relative overflow-hidden">
+          {/* Canvas Container */}
+          <div className="flex-1 flex items-center justify-center p-8 relative">
+            {/* Zoom Controls - Top Right */}
+            <div className="absolute top-6 right-6 flex items-center gap-2 bg-white/90 backdrop-blur-sm rounded-lg shadow-lg p-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleZoomOut}
+                className="h-8 w-8 p-0 hover:bg-gray-100"
+              >
+                <ZoomOut className="h-4 w-4" />
+              </Button>
+              <span className="text-sm font-medium px-2 min-w-[60px] text-center">
+                {zoomLevel}%
+              </span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleZoomIn}
+                className="h-8 w-8 p-0 hover:bg-gray-100"
+              >
+                <ZoomIn className="h-4 w-4" />
+              </Button>
+              <div className="w-px h-6 bg-gray-300 mx-1" />
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsFullscreen(!isFullscreen)}
+                className="h-8 w-8 p-0 hover:bg-gray-100"
+              >
+                <Maximize2 className="h-4 w-4" />
+              </Button>
+            </div>
 
-                {/* Submit */}
-                <div className="flex gap-4 pt-4">
-                  <Button 
-                    type="submit" 
-                    className="flex-1 bg-green-600 hover:bg-green-700"
-                    disabled={loading}
-                  >
-                    {loading ? 'Creating Memory...' : 'Create Memory'}
-                  </Button>
-                  <Button 
-                    type="button" 
-                    variant="outline"
-                    onClick={goToMemories}
-                    className="border-gray-600 text-white hover:bg-gray-700"
-                  >
-                    Cancel
-                  </Button>
+            {/* Card Preview */}
+            <div 
+              className="bg-white rounded-2xl shadow-2xl overflow-hidden transition-transform duration-300"
+              style={{ 
+                transform: `scale(${zoomLevel / 100})`,
+                width: '400px',
+                height: '560px'
+              }}
+            >
+              {selectedTemplate ? (
+                <OaklandCardPreview
+                  template={selectedTemplate}
+                  title={memoryData.title}
+                  subtitle={memoryData.subtitle}
+                  className="w-full h-full"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+                  <div className="text-center text-gray-500">
+                    <div className="text-6xl mb-4">⚾</div>
+                    <p className="text-lg font-medium">Select a template</p>
+                    <p className="text-sm">Choose from the Oakland A's collection</p>
+                  </div>
                 </div>
-              </form>
-            </CardContent>
-          </Card>
+              )}
+            </div>
+          </div>
+
+          {/* Bottom Toolbar */}
+          <div className="bg-white border-t border-gray-200 px-6 py-4 shadow-lg">
+            <div className="flex items-center justify-center gap-4">
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2 hover:bg-[#0f4c3a]/10 hover:border-[#0f4c3a] transition-colors"
+              >
+                <Type className="h-4 w-4" />
+                Text
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2 hover:bg-[#0f4c3a]/10 hover:border-[#0f4c3a] transition-colors"
+              >
+                <Palette className="h-4 w-4" />
+                Colors
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2 hover:bg-[#0f4c3a]/10 hover:border-[#0f4c3a] transition-colors"
+              >
+                <Sparkles className="h-4 w-4" />
+                Effects
+              </Button>
+              <div className="w-px h-8 bg-gray-300" />
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2 hover:bg-[#0f4c3a]/10 hover:border-[#0f4c3a] transition-colors"
+              >
+                <Download className="h-4 w-4" />
+                Export
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
-    </PageLayout>
+    </div>
   );
 };
 
