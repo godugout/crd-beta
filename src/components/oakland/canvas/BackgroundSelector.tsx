@@ -8,7 +8,6 @@ import {
   Mountain, 
   Sunset, 
   Building, 
-  Stadium, 
   Warehouse,
   Trees,
   Waves
@@ -41,7 +40,7 @@ const BACKGROUND_PRESETS = [
   { id: 'city', name: 'City', icon: Building, description: 'Urban environment' },
   { id: 'ocean', name: 'Ocean', icon: Waves, description: 'Coastal scene' },
   { id: 'mountains', name: 'Mountains', icon: Mountain, description: 'Mountain vista' },
-  { id: 'stadium', name: 'Stadium', icon: Stadium, description: 'Baseball stadium' }
+  { id: 'park', name: 'Park', icon: Trees, description: 'Baseball park' }
 ];
 
 const GRADIENT_PRESETS = [

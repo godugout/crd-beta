@@ -163,7 +163,7 @@ const OaklandCard3DCanvas: React.FC<OaklandCard3DCanvasProps> = ({
         {/* Background Renderer */}
         <BackgroundRenderer settings={backgroundSettings} />
         
-        {/* Enhanced Lighting Setup */}
+        {/* Enhanced Lighting Setup - apply intensity from background settings */}
         <ambientLight intensity={0.4 * backgroundSettings.intensity} color="#f0f0ff" />
         <directionalLight 
           position={[10, 10, 5]} 

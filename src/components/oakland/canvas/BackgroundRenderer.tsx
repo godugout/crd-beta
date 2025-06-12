@@ -56,11 +56,6 @@ const BackgroundRenderer: React.FC<BackgroundRendererProps> = ({ settings }) => 
       <Environment 
         preset={settings.preset as any}
         background={true}
-        backgroundIntensity={settings.intensity}
-        backgroundBlurriness={settings.blur}
-        backgroundRotation={[0, (settings.rotation * Math.PI) / 180, 0]}
-        environmentIntensity={settings.intensity}
-        environmentRotation={[0, (settings.rotation * Math.PI) / 180, 0]}
       />
     );
   }
@@ -71,10 +66,6 @@ const BackgroundRenderer: React.FC<BackgroundRendererProps> = ({ settings }) => 
       <Environment 
         map={backgroundTexture}
         background={true}
-        backgroundIntensity={settings.intensity}
-        backgroundBlurriness={settings.blur}
-        backgroundRotation={[0, (settings.rotation * Math.PI) / 180, 0]}
-        environmentIntensity={settings.intensity * 0.5}
       />
     );
   }
@@ -84,9 +75,6 @@ const BackgroundRenderer: React.FC<BackgroundRendererProps> = ({ settings }) => 
     <Environment 
       preset="studio"
       background={true}
-      backgroundIntensity={settings.intensity}
-      backgroundBlurriness={settings.blur}
-      environmentIntensity={settings.intensity}
     />
   );
 };
