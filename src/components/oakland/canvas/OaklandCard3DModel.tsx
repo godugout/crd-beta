@@ -1,7 +1,9 @@
+
 import React, { useRef, useMemo } from 'react';
 import { useFrame, useLoader } from '@react-three/fiber';
 import { TextureLoader } from 'three';
 import * as THREE from 'three';
+import { Text } from '@react-three/drei';
 import { OaklandTemplate } from '@/lib/types/oaklandTemplates';
 import BaseballCardBorder from './BaseballCardBorder';
 import CardEffectsLayer from './CardEffectsLayer';
@@ -40,9 +42,14 @@ const OaklandCard3DModel: React.FC<OaklandCard3DModelProps> = ({
   // Card dimensions
   const cardSize = { width: 2.5, height: 3.5, depth: 0.02 };
 
-  // Load card textures
-  const cardTexture = useLoader(TextureLoader, template.thumbnailUrl);
-  const backTexture = useLoader(TextureLoader, '/lovable-uploads/f1b608ba-b8c6-40f5-b552-a5d7addbf4ae.png');
+  // Load card textures with fallback
+  const cardTexture = useLoader(TextureLoader, template.thumbnailUrl, undefined, (error) => {
+    console.warn('Failed to load template texture:', error);
+  });
+  
+  const backTexture = useLoader(TextureLoader, '/lovable-uploads/f1b608ba-b8c6-40f5-b552-a5d7addbf4ae.png', undefined, (error) => {
+    console.warn('Failed to load back texture:', error);
+  });
 
   // Apply random design color scheme if available
   const colorScheme = (memoryData as any)?.colorScheme;
@@ -170,6 +177,59 @@ const OaklandCard3DModel: React.FC<OaklandCard3DModelProps> = ({
         <planeGeometry args={[cardSize.width, cardSize.height]} />
         <primitive object={backMaterial} />
       </mesh>
+
+      {/* Text Overlays */}
+      <Text
+        position={[0, 1.2, 0.01]}
+        fontSize={0.2}
+        color={teamColors.primary}
+        anchorX="center"
+        anchorY="middle"
+        font="/fonts/inter-bold.woff"
+        maxWidth={2}
+      >
+        {memoryData.title}
+      </Text>
+
+      <Text
+        position={[0, 0.9, 0.01]}
+        fontSize={0.12}
+        color={teamColors.secondary}
+        anchorX="center"
+        anchorY="middle"
+        font="/fonts/inter-medium.woff"
+        maxWidth={2}
+      >
+        {memoryData.subtitle}
+      </Text>
+
+      {memoryData.player && (
+        <Text
+          position={[0, -0.8, 0.01]}
+          fontSize={0.15}
+          color={teamColors.primary}
+          anchorX="center"
+          anchorY="middle"
+          font="/fonts/inter-bold.woff"
+          maxWidth={2}
+        >
+          {memoryData.player}
+        </Text>
+      )}
+
+      {memoryData.date && (
+        <Text
+          position={[0, -1.1, 0.01]}
+          fontSize={0.1}
+          color="#666666"
+          anchorX="center"
+          anchorY="middle"
+          font="/fonts/inter-regular.woff"
+          maxWidth={2}
+        >
+          {memoryData.date}
+        </Text>
+      )}
 
       {/* Decorative Effects Layer */}
       <CardEffectsLayer

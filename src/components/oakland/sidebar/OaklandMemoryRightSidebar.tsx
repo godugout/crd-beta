@@ -68,11 +68,11 @@ const OaklandMemoryRightSidebar: React.FC<OaklandMemoryRightSidebarProps> = ({
   onBorderStyleChange = () => {}
 }) => {
   const [templateSectionOpen, setTemplateSectionOpen] = useState(true);
-  const [viewSectionOpen, setViewSectionOpen] = useState(true);
-  const [cardSectionOpen, setCardSectionOpen] = useState(true);
-  const [contentSectionOpen, setContentSectionOpen] = useState(false);
+  const [viewSectionOpen, setViewSectionOpen] = useState(false);
+  const [cardSectionOpen, setCardSectionOpen] = useState(false);
+  const [contentSectionOpen, setContentSectionOpen] = useState(true);
   const [luckySectionOpen, setLuckySectionOpen] = useState(true);
-  const [effectsSectionOpen, setEffectsSectionOpen] = useState(true);
+  const [effectsSectionOpen, setEffectsSectionOpen] = useState(false);
 
   const { applyRandomDesign, isApplying } = useRandomDesign({
     onTemplateChange: onSelectTemplate,
@@ -110,7 +110,23 @@ const OaklandMemoryRightSidebar: React.FC<OaklandMemoryRightSidebarProps> = ({
             />
           </div>
 
-          {/* Effects & Border Controls - New section */}
+          {/* Template Selection */}
+          <TemplateSection
+            isOpen={templateSectionOpen}
+            onOpenChange={setTemplateSectionOpen}
+            selectedTemplate={selectedTemplate}
+            onSelectTemplate={onSelectTemplate}
+          />
+
+          {/* Content Editing */}
+          <ContentSection
+            isOpen={contentSectionOpen}
+            onOpenChange={setContentSectionOpen}
+            memoryData={memoryData}
+            onMemoryDataChange={onMemoryDataChange}
+          />
+
+          {/* Effects & Border Controls */}
           <EffectsToggleControls
             isOpen={effectsSectionOpen}
             onOpenChange={setEffectsSectionOpen}
@@ -122,6 +138,7 @@ const OaklandMemoryRightSidebar: React.FC<OaklandMemoryRightSidebarProps> = ({
             onShowBorderChange={onShowBorderChange}
           />
 
+          {/* View Controls */}
           <ViewControlsSection
             isOpen={viewSectionOpen}
             onOpenChange={setViewSectionOpen}
@@ -133,6 +150,7 @@ const OaklandMemoryRightSidebar: React.FC<OaklandMemoryRightSidebarProps> = ({
             onAutoRotateToggle={onAutoRotateToggle}
           />
 
+          {/* Card Settings */}
           <CardSettingsSection
             isOpen={cardSectionOpen}
             onOpenChange={setCardSectionOpen}
@@ -140,21 +158,12 @@ const OaklandMemoryRightSidebar: React.FC<OaklandMemoryRightSidebarProps> = ({
             onCardFinishChange={onCardFinishChange}
           />
 
-          <TemplateSection
-            isOpen={templateSectionOpen}
-            onOpenChange={setTemplateSectionOpen}
-            selectedTemplate={selectedTemplate}
-            onSelectTemplate={onSelectTemplate}
-          />
-
-          <ContentSection
-            isOpen={contentSectionOpen}
-            onOpenChange={setContentSectionOpen}
+          {/* Quick Actions */}
+          <QuickActionsSection 
+            onExport={onExport}
             memoryData={memoryData}
-            onMemoryDataChange={onMemoryDataChange}
+            selectedTemplate={selectedTemplate}
           />
-
-          <QuickActionsSection onExport={onExport} />
         </div>
       )}
     </div>
