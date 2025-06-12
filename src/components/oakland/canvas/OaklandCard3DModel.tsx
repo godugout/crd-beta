@@ -1,3 +1,4 @@
+
 import React, { useRef, useMemo } from 'react';
 import { useFrame, useLoader } from '@react-three/fiber';
 import { TextureLoader } from 'three';
@@ -44,7 +45,6 @@ const OaklandCard3DModel: React.FC<OaklandCard3DModelProps> = ({
       case 'matte':
         return new THREE.MeshLambertMaterial({
           ...baseProps,
-          shininess: 0,
         });
       
       case 'foil':

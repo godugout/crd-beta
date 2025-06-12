@@ -7,6 +7,7 @@ import { ZoomIn, ZoomOut, Maximize2, Minimize2, RotateCcw, Eye } from 'lucide-re
 import { OaklandTemplate } from '@/lib/types/oaklandTemplates';
 import OaklandCard3DModel from './OaklandCard3DModel';
 import Canvas3DControls from './Canvas3DControls';
+import * as THREE from 'three';
 
 interface OaklandCard3DCanvasProps {
   selectedTemplate: OaklandTemplate | null;
@@ -33,7 +34,7 @@ const CardLoadingFallback = () => (
 );
 
 const CameraController = ({ zoomLevel }: { zoomLevel: number }) => {
-  const cameraRef = useRef<THREE.Camera>(null);
+  const cameraRef = useRef<THREE.PerspectiveCamera>(null);
   
   useFrame(() => {
     if (cameraRef.current) {
