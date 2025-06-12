@@ -50,26 +50,29 @@ const OaklandCard3DModel: React.FC<OaklandCard3DModelProps> = ({
       case 'foil':
         return new THREE.MeshPhysicalMaterial({
           ...baseProps,
-          metalness: 0.9,
-          roughness: 0.1,
-          envMapIntensity: 2.0,
-          clearcoat: 1.0,
-          clearcoatRoughness: 0.1,
-          iridescence: 1.0,
-          iridescenceIOR: 1.3,
-          iridescenceThicknessRange: [100, 800],
+          metalness: 0.3,
+          roughness: 0.4,
+          envMapIntensity: 0.8,
+          clearcoat: 0.6,
+          clearcoatRoughness: 0.3,
+          iridescence: 0.7,
+          iridescenceIOR: 1.2,
+          iridescenceThicknessRange: [100, 400],
+          transmission: 0.1,
+          opacity: 0.95,
+          transparent: true,
         });
       
       case 'glossy':
       default:
         return new THREE.MeshPhysicalMaterial({
           ...baseProps,
-          metalness: 0.1,
-          roughness: 0.2,
-          envMapIntensity: 1.5,
-          clearcoat: 1.0,
-          clearcoatRoughness: 0.2,
-          reflectivity: 0.8,
+          metalness: 0.05,
+          roughness: 0.4,
+          envMapIntensity: 0.6,
+          clearcoat: 0.5,
+          clearcoatRoughness: 0.4,
+          reflectivity: 0.3,
         });
     }
   }, [cardTexture, cardFinish]);
@@ -77,11 +80,11 @@ const OaklandCard3DModel: React.FC<OaklandCard3DModelProps> = ({
   const backMaterial = useMemo(() => {
     return new THREE.MeshPhysicalMaterial({
       map: backTexture,
-      metalness: 0.2,
-      roughness: 0.3,
-      envMapIntensity: 1.2,
-      clearcoat: 0.8,
-      clearcoatRoughness: 0.3,
+      metalness: 0.1,
+      roughness: 0.4,
+      envMapIntensity: 0.8,
+      clearcoat: 0.6,
+      clearcoatRoughness: 0.4,
       side: THREE.BackSide,
     });
   }, [backTexture]);
@@ -92,9 +95,9 @@ const OaklandCard3DModel: React.FC<OaklandCard3DModelProps> = ({
     
     return new THREE.MeshPhysicalMaterial({
       color: edgeColor,
-      metalness: 0.8,
-      roughness: 0.2,
-      envMapIntensity: 1.0,
+      metalness: 0.6,
+      roughness: 0.3,
+      envMapIntensity: 0.8,
     });
   }, [template.category]);
 
@@ -125,8 +128,8 @@ const OaklandCard3DModel: React.FC<OaklandCard3DModelProps> = ({
     if (cardFinish === 'foil' && cardRef.current?.material) {
       const material = cardRef.current.material as THREE.MeshPhysicalMaterial;
       material.iridescenceThicknessRange = [
-        100 + Math.sin(time * 2) * 50,
-        800 + Math.cos(time * 1.5) * 100
+        100 + Math.sin(time * 1.5) * 30,
+        400 + Math.cos(time * 1.2) * 50
       ];
     }
   });
@@ -174,21 +177,21 @@ const OaklandCard3DModel: React.FC<OaklandCard3DModelProps> = ({
         </>
       )}
 
-      {/* Holographic overlay for foil cards */}
+      {/* Subtle holographic overlay for foil cards */}
       {cardFinish === 'foil' && (
-        <mesh position={[0, 0, 0.01]}>
+        <mesh position={[0, 0, 0.005]}>
           <planeGeometry args={[2.5, 3.5]} />
           <meshBasicMaterial
             transparent
-            opacity={0.3}
+            opacity={0.15}
             blending={THREE.AdditiveBlending}
             side={THREE.DoubleSide}
           >
             <primitive 
               object={new THREE.Color().setHSL(
-                (Date.now() * 0.001) % 1, 
-                0.8, 
-                0.5
+                (Date.now() * 0.0005) % 1, 
+                0.4, 
+                0.6
               )} 
               attach="color"
             />
