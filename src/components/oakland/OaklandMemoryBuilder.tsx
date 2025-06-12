@@ -1,16 +1,13 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Eye, Share2, Save, ZoomIn, ZoomOut, Maximize2, Download, Type, Palette, Sparkles } from 'lucide-react';
+import { ArrowLeft, Save, Share2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { OaklandTemplate } from '@/lib/types/oaklandTemplates';
 import { OAKLAND_TEMPLATES } from '@/lib/data/oaklandTemplateData';
-import OaklandCardPreview from './OaklandCardPreview';
-import TemplateGallery from './TemplateGallery';
 import OaklandCard3DCanvas from './canvas/OaklandCard3DCanvas';
+import OaklandMemoryRightSidebar from './sidebar/OaklandMemoryRightSidebar';
 
 interface MemoryData {
   title: string;
@@ -27,6 +24,9 @@ const OaklandMemoryBuilder: React.FC = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(100);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [viewMode, setViewMode] = useState<'3d' | '2d'>('3d');
+  const [autoRotate, setAutoRotate] = useState(false);
+  const [cardFinish, setCardFinish] = useState<'matte' | 'glossy' | 'foil'>('glossy');
   const [memoryData, setMemoryData] = useState<MemoryData>({
     title: 'My Oakland Memory',
     subtitle: 'A\'s Forever',
@@ -46,27 +46,17 @@ const OaklandMemoryBuilder: React.FC = () => {
     toast.success('Memory shared with the Oakland faithful!');
   };
 
+  const handleExport = () => {
+    toast.success('Exporting your Oakland memory...');
+  };
+
   const handleFullscreenToggle = () => {
     setIsFullscreen(!isFullscreen);
   };
 
-  // Helper function to map difficulty values
-  const mapDifficulty = (difficulty: 'beginner' | 'intermediate' | 'advanced'): 'easy' | 'medium' | 'hard' => {
-    switch (difficulty) {
-      case 'beginner':
-        return 'easy';
-      case 'intermediate':
-        return 'medium';
-      case 'advanced':
-        return 'hard';
-      default:
-        return 'medium';
-    }
-  };
-
   return (
     <div className="min-h-screen bg-[#1a1a1a] flex flex-col overflow-hidden">
-      {/* Top Header - 60px height */}
+      {/* Top Header */}
       <header className="h-[60px] bg-[#0f4c3a] border-b border-[#ffd700]/20 flex items-center justify-between px-6 shadow-lg relative z-30">
         {/* Left Side */}
         <div className="flex items-center gap-4">
@@ -98,14 +88,6 @@ const OaklandMemoryBuilder: React.FC = () => {
         {/* Right Side */}
         <div className="flex items-center gap-3">
           <Button 
-            variant="outline"
-            size="sm"
-            className="hidden md:flex border-[#ffd700]/50 text-[#ffd700] hover:border-[#ffd700] hover:bg-[#ffd700]/10 transition-all duration-200"
-          >
-            <Eye className="h-4 w-4 mr-2" />
-            3D Preview
-          </Button>
-          <Button 
             onClick={handleShare}
             variant="outline"
             size="sm"
@@ -126,43 +108,7 @@ const OaklandMemoryBuilder: React.FC = () => {
       </header>
 
       <div className="flex flex-1 overflow-hidden">
-        {/* Left Sidebar - Template Gallery */}
-        <div className={`${sidebarCollapsed ? 'w-16' : 'w-96'} bg-[#1a1a1a] border-r border-[#ffd700]/20 flex flex-col transition-all duration-300 shadow-xl`}>
-          {!sidebarCollapsed ? (
-            <TemplateGallery
-              selectedTemplate={selectedTemplate}
-              onSelectTemplate={setSelectedTemplate}
-              className="h-full"
-            />
-          ) : (
-            <div className="p-4">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setSidebarCollapsed(false)}
-                className="w-full text-[#ffd700] hover:bg-[#ffd700]/20"
-              >
-                →
-              </Button>
-            </div>
-          )}
-          
-          {/* Collapse Toggle */}
-          {!sidebarCollapsed && (
-            <div className="p-4 border-t border-[#ffd700]/10">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setSidebarCollapsed(true)}
-                className="w-full text-[#ffd700] hover:bg-[#ffd700]/20"
-              >
-                ←
-              </Button>
-            </div>
-          )}
-        </div>
-
-        {/* Main Canvas Area - Now using 3D Canvas */}
+        {/* Main Canvas Area */}
         <div className="flex-1 bg-[#f0f0f0] flex flex-col relative overflow-hidden">
           <OaklandCard3DCanvas
             selectedTemplate={selectedTemplate}
@@ -171,48 +117,31 @@ const OaklandMemoryBuilder: React.FC = () => {
             onFullscreenToggle={handleFullscreenToggle}
             zoomLevel={zoomLevel}
             onZoomChange={setZoomLevel}
+            viewMode={viewMode}
+            autoRotate={autoRotate}
+            cardFinish={cardFinish}
             className="flex-1"
           />
-
-          {/* Bottom Toolbar */}
-          <div className="bg-white border-t border-gray-200 px-6 py-4 shadow-lg">
-            <div className="flex items-center justify-center gap-4">
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex items-center gap-2 hover:bg-[#0f4c3a]/10 hover:border-[#0f4c3a] transition-colors"
-              >
-                <Type className="h-4 w-4" />
-                Text
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex items-center gap-2 hover:bg-[#0f4c3a]/10 hover:border-[#0f4c3a] transition-colors"
-              >
-                <Palette className="h-4 w-4" />
-                Colors
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex items-center gap-2 hover:bg-[#0f4c3a]/10 hover:border-[#0f4c3a] transition-colors"
-              >
-                <Sparkles className="h-4 w-4" />
-                Effects
-              </Button>
-              <div className="w-px h-8 bg-gray-300" />
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex items-center gap-2 hover:bg-[#0f4c3a]/10 hover:border-[#0f4c3a] transition-colors"
-              >
-                <Download className="h-4 w-4" />
-                Export
-              </Button>
-            </div>
-          </div>
         </div>
+
+        {/* Right Sidebar */}
+        <OaklandMemoryRightSidebar
+          selectedTemplate={selectedTemplate}
+          onSelectTemplate={setSelectedTemplate}
+          collapsed={sidebarCollapsed}
+          onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
+          zoomLevel={zoomLevel}
+          onZoomChange={setZoomLevel}
+          viewMode={viewMode}
+          onViewModeToggle={() => setViewMode(prev => prev === '3d' ? '2d' : '3d')}
+          autoRotate={autoRotate}
+          onAutoRotateToggle={() => setAutoRotate(!autoRotate)}
+          cardFinish={cardFinish}
+          onCardFinishChange={setCardFinish}
+          memoryData={memoryData}
+          onMemoryDataChange={setMemoryData}
+          onExport={handleExport}
+        />
       </div>
     </div>
   );

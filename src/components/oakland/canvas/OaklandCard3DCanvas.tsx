@@ -2,11 +2,8 @@
 import React, { Suspense, useRef, useState, useCallback } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera, Environment, ContactShadows } from '@react-three/drei';
-import { Button } from '@/components/ui/button';
-import { ZoomIn, ZoomOut, Maximize2, Minimize2, RotateCcw, Eye } from 'lucide-react';
 import { OaklandTemplate } from '@/lib/types/oaklandTemplates';
 import OaklandCard3DModel from './OaklandCard3DModel';
-import Canvas3DControls from './Canvas3DControls';
 import * as THREE from 'three';
 
 interface OaklandCard3DCanvasProps {
@@ -23,6 +20,9 @@ interface OaklandCard3DCanvasProps {
   onFullscreenToggle: () => void;
   zoomLevel: number;
   onZoomChange: (zoom: number) => void;
+  viewMode: '3d' | '2d';
+  autoRotate: boolean;
+  cardFinish: 'matte' | 'glossy' | 'foil';
   className?: string;
 }
 
@@ -60,30 +60,13 @@ const OaklandCard3DCanvas: React.FC<OaklandCard3DCanvasProps> = ({
   onFullscreenToggle,
   zoomLevel,
   onZoomChange,
+  viewMode,
+  autoRotate,
+  cardFinish,
   className = ''
 }) => {
-  const [viewMode, setViewMode] = useState<'3d' | '2d'>('3d');
-  const [autoRotate, setAutoRotate] = useState(false);
-  const [cardFinish, setCardFinish] = useState<'matte' | 'glossy' | 'foil'>('glossy');
   const canvasRef = useRef<HTMLDivElement>(null);
   const [isInteracting, setIsInteracting] = useState(false);
-
-  const handleZoomIn = useCallback(() => {
-    onZoomChange(Math.min(zoomLevel + 25, 200));
-  }, [zoomLevel, onZoomChange]);
-
-  const handleZoomOut = useCallback(() => {
-    onZoomChange(Math.max(zoomLevel - 25, 50));
-  }, [zoomLevel, onZoomChange]);
-
-  const handleReset = useCallback(() => {
-    onZoomChange(100);
-    setAutoRotate(false);
-  }, [onZoomChange]);
-
-  const toggleViewMode = useCallback(() => {
-    setViewMode(prev => prev === '3d' ? '2d' : '3d');
-  }, []);
 
   // Prevent text selection during canvas interactions
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
@@ -189,36 +172,25 @@ const OaklandCard3DCanvas: React.FC<OaklandCard3DCanvasProps> = ({
         />
       </Canvas>
 
-      {/* Canvas Controls Overlay */}
-      <Canvas3DControls
-        zoomLevel={zoomLevel}
-        onZoomIn={handleZoomIn}
-        onZoomOut={handleZoomOut}
-        onReset={handleReset}
-        isFullscreen={isFullscreen}
-        onFullscreenToggle={onFullscreenToggle}
-        viewMode={viewMode}
-        onViewModeToggle={toggleViewMode}
-        autoRotate={autoRotate}
-        onAutoRotateToggle={() => setAutoRotate(!autoRotate)}
-        cardFinish={cardFinish}
-        onCardFinishChange={setCardFinish}
-      />
-
       {/* Empty State */}
       {!selectedTemplate && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <div className="text-center text-gray-500 bg-white/90 backdrop-blur-sm rounded-xl p-8 shadow-lg select-text">
             <div className="text-6xl mb-4">⚾</div>
             <h3 className="text-xl font-bold text-gray-800 mb-2">Choose Your Template</h3>
-            <p className="text-gray-600">Select an Oakland A's template to see your memory card in 3D</p>
+            <p className="text-gray-600">Select an Oakland A's template from the sidebar to see your memory card in 3D</p>
           </div>
         </div>
       )}
 
-      {/* Performance Indicator */}
+      {/* Minimal Performance Indicator */}
       <div className="absolute bottom-4 left-4 text-xs text-gray-500 bg-white/80 backdrop-blur-sm rounded px-2 py-1 select-none">
-        {viewMode.toUpperCase()} • {cardFinish} finish • {zoomLevel}%
+        {viewMode.toUpperCase()} • {cardFinish} finish
+      </div>
+
+      {/* Keyboard Shortcuts Hint - Bottom Right */}
+      <div className="absolute bottom-4 right-4 text-xs text-gray-500 bg-white/80 backdrop-blur-sm rounded px-2 py-1 select-none">
+        <div>Mouse: Drag to rotate • Wheel: Zoom</div>
       </div>
     </div>
   );
