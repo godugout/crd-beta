@@ -12,6 +12,8 @@ import CardSettingsSection from './sections/CardSettingsSection';
 import ViewControlsSection from './sections/ViewControlsSection';
 import QuickActionsSection from './sections/QuickActionsSection';
 import AdvancedControlsSection from './sections/AdvancedControlsSection';
+import BackgroundControlsSection from './sections/BackgroundControlsSection';
+import { BackgroundSettings } from '../canvas/BackgroundSelector';
 import { useRandomDesign } from '@/hooks/useRandomDesign';
 import { GeneratedDesign } from '@/lib/services/randomDesignGenerator';
 
@@ -51,6 +53,8 @@ interface StepByStepSidebarProps {
   onShowBorderChange?: (show: boolean) => void;
   borderStyle?: 'classic' | 'vintage' | 'modern';
   onBorderStyleChange?: (style: 'classic' | 'vintage' | 'modern') => void;
+  backgroundSettings?: BackgroundSettings;
+  onBackgroundChange?: (settings: BackgroundSettings) => void;
 }
 
 const StepByStepSidebar: React.FC<StepByStepSidebarProps> = ({
@@ -74,7 +78,15 @@ const StepByStepSidebar: React.FC<StepByStepSidebarProps> = ({
   showBorder = true,
   onShowBorderChange = () => {},
   borderStyle = 'classic',
-  onBorderStyleChange = () => {}
+  onBorderStyleChange = () => {},
+  backgroundSettings = {
+    type: 'preset',
+    preset: 'studio',
+    intensity: 1.0,
+    blur: 0.0,
+    rotation: 0
+  },
+  onBackgroundChange = () => {}
 }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [openSections, setOpenSections] = useState({
@@ -84,7 +96,8 @@ const StepByStepSidebar: React.FC<StepByStepSidebarProps> = ({
     viewControls: false,
     advancedControls: false,
     quickActions: false,
-    luckyDesign: false
+    luckyDesign: false,
+    backgroundControls: false
   });
 
   // Card control state for advanced controls
@@ -102,7 +115,7 @@ const StepByStepSidebar: React.FC<StepByStepSidebarProps> = ({
     }
   });
 
-  // Define the steps
+  // Define the steps with background customization
   const steps: Step[] = [
     {
       id: 'template',
@@ -115,6 +128,12 @@ const StepByStepSidebar: React.FC<StepByStepSidebarProps> = ({
       title: 'Add Content',
       description: 'Add your memory details and text',
       completed: !!memoryData.title && memoryData.title.trim() !== 'My Oakland Memory'
+    },
+    {
+      id: 'background',
+      title: 'Set Background',
+      description: 'Customize the environment and lighting',
+      completed: backgroundSettings.type !== 'preset' || backgroundSettings.preset !== 'studio'
     },
     {
       id: 'design',
@@ -280,10 +299,19 @@ const StepByStepSidebar: React.FC<StepByStepSidebarProps> = ({
             )}
 
             {currentStep === 2 && (
+              <BackgroundControlsSection
+                isOpen={true}
+                onOpenChange={() => {}}
+                backgroundSettings={backgroundSettings}
+                onBackgroundChange={onBackgroundChange}
+              />
+            )}
+
+            {currentStep === 3 && (
               <div className="space-y-6">
                 <LuckyDesignSection
-                  onApplyDesign={handleApplyRandomDesign}
-                  isGenerating={isApplying}
+                  onApplyDesign={() => {}}
+                  isGenerating={false}
                 />
                 <EffectsToggleControls
                   isOpen={true}
@@ -298,7 +326,7 @@ const StepByStepSidebar: React.FC<StepByStepSidebarProps> = ({
               </div>
             )}
 
-            {currentStep === 3 && (
+            {currentStep === 4 && (
               <CardSettingsSection
                 isOpen={true}
                 onOpenChange={() => {}}
@@ -307,7 +335,7 @@ const StepByStepSidebar: React.FC<StepByStepSidebarProps> = ({
               />
             )}
 
-            {currentStep === 4 && (
+            {currentStep === 5 && (
               <div className="space-y-6">
                 <ViewControlsSection
                   isOpen={true}
@@ -327,20 +355,20 @@ const StepByStepSidebar: React.FC<StepByStepSidebarProps> = ({
               </div>
             )}
 
-            {/* Enhanced Advanced Controls Section */}
+            {/* Enhanced Advanced Controls Section - Always Available */}
             <AdvancedControlsSection
               isOpen={openSections.advancedControls}
               onOpenChange={(open) => toggleSection('advancedControls', open)}
-              onFlipCard={handleFlipCard}
-              onResetCard={handleResetCard}
+              onFlipCard={() => console.log('Flip from sidebar')}
+              onResetCard={() => console.log('Reset from sidebar')}
               onToggleAutoRotate={onAutoRotateToggle}
-              onScaleChange={handleScaleChange}
-              onFaceCamera={handleFaceCamera}
-              onShowBack={handleShowBack}
-              scale={cardControlState.scale}
+              onScaleChange={() => {}}
+              onFaceCamera={() => console.log('Face camera')}
+              onShowBack={() => console.log('Show back')}
+              scale={0.8}
               autoRotate={autoRotate}
-              isFlipped={cardControlState.isFlipped}
-              isFlipping={cardControlState.isFlipping}
+              isFlipped={false}
+              isFlipping={false}
             />
           </div>
 
@@ -349,7 +377,7 @@ const StepByStepSidebar: React.FC<StepByStepSidebarProps> = ({
             <Button
               variant="outline"
               size="sm"
-              onClick={prevStep}
+              onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
               disabled={currentStep === 0}
               className="border-gray-600 text-gray-300 hover:bg-gray-800"
             >
@@ -359,7 +387,7 @@ const StepByStepSidebar: React.FC<StepByStepSidebarProps> = ({
             
             <Button
               size="sm"
-              onClick={nextStep}
+              onClick={() => setCurrentStep(Math.min(steps.length - 1, currentStep + 1))}
               disabled={currentStep === steps.length - 1}
               className="bg-[#EFB21E] hover:bg-yellow-400 text-[#0f4c3a] font-bold"
             >

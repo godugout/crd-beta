@@ -4,6 +4,8 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import { PerspectiveCamera, Environment, ContactShadows } from '@react-three/drei';
 import { OaklandTemplate } from '@/lib/types/oaklandTemplates';
 import OaklandCard3DModel from './OaklandCard3DModel';
+import BackgroundRenderer from './BackgroundRenderer';
+import { BackgroundSettings } from './BackgroundSelector';
 import * as THREE from 'three';
 
 interface OaklandCard3DCanvasProps {
@@ -28,6 +30,7 @@ interface OaklandCard3DCanvasProps {
   borderStyle?: 'classic' | 'vintage' | 'modern';
   className?: string;
   sidebarOpen?: boolean;
+  backgroundSettings?: BackgroundSettings;
 }
 
 const CardLoadingFallback = () => (
@@ -98,12 +101,19 @@ const OaklandCard3DCanvas: React.FC<OaklandCard3DCanvasProps> = ({
   showBorder = true,
   borderStyle = 'classic',
   className = '',
-  sidebarOpen = false
+  sidebarOpen = false,
+  backgroundSettings = {
+    type: 'preset',
+    preset: 'studio',
+    intensity: 1.0,
+    blur: 0.0,
+    rotation: 0
+  }
 }) => {
   const canvasRef = useRef<HTMLDivElement>(null);
   const [isInteracting, setIsInteracting] = useState(false);
 
-  // Handle mouse interactions
+  // Handle mouse interactions - removed conflicting handlers
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     setIsInteracting(true);
     e.preventDefault();
@@ -117,43 +127,47 @@ const OaklandCard3DCanvas: React.FC<OaklandCard3DCanvasProps> = ({
     e.preventDefault();
   }, []);
 
-  // Handle zoom with mouse wheel
+  // Enhanced zoom with mouse wheel - improved sensitivity
   const handleWheel = useCallback((e: React.WheelEvent) => {
     e.preventDefault();
-    const newZoom = Math.max(50, Math.min(200, zoomLevel + e.deltaY * 0.1));
+    const zoomSensitivity = 0.2; // Increased from 0.1
+    const newZoom = Math.max(50, Math.min(200, zoomLevel + e.deltaY * zoomSensitivity));
     onZoomChange(newZoom);
   }, [zoomLevel, onZoomChange]);
 
   return (
     <div 
       ref={canvasRef}
-      className={`relative w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden select-none touch-none ${isInteracting ? 'cursor-grabbing' : 'cursor-grab'} ${className}`}
+      className={`relative w-full h-full overflow-hidden select-none touch-none ${isInteracting ? 'cursor-grabbing' : 'cursor-grab'} ${className}`}
       onMouseDown={handleMouseDown}
       onMouseUp={handleMouseUp}
       onContextMenu={handleContextMenu}
       onWheel={handleWheel}
       style={{ userSelect: 'none', WebkitUserSelect: 'none', msUserSelect: 'none' }}
     >
-      {/* 3D Canvas */}
+      {/* Enhanced 3D Canvas with better performance */}
       <Canvas
         shadows
         dpr={[1, 2]}
         gl={{ 
           antialias: true, 
           alpha: false,
-          powerPreference: "high-performance"
+          powerPreference: "high-performance",
+          stencil: false,
+          depth: true
         }}
         className="w-full h-full select-none touch-none"
-        onPointerDown={() => setIsInteracting(true)}
-        onPointerUp={() => setIsInteracting(false)}
       >
         <CameraController zoomLevel={zoomLevel} viewMode={viewMode} sidebarOpen={sidebarOpen} />
         
+        {/* Background Renderer */}
+        <BackgroundRenderer settings={backgroundSettings} />
+        
         {/* Enhanced Lighting Setup */}
-        <ambientLight intensity={0.4} color="#f0f0ff" />
+        <ambientLight intensity={0.4 * backgroundSettings.intensity} color="#f0f0ff" />
         <directionalLight 
           position={[10, 10, 5]} 
-          intensity={1.2}
+          intensity={1.2 * backgroundSettings.intensity}
           color="#ffffff"
           castShadow
           shadow-mapSize-width={2048}
@@ -164,18 +178,19 @@ const OaklandCard3DCanvas: React.FC<OaklandCard3DCanvasProps> = ({
           shadow-camera-top={10}
           shadow-camera-bottom={-10}
         />
-        <pointLight position={[-5, 5, 5]} intensity={0.6} color="#EFB21E" />
+        <pointLight 
+          position={[-5, 5, 5]} 
+          intensity={0.6 * backgroundSettings.intensity} 
+          color="#EFB21E" 
+        />
         <spotLight 
           position={[0, 10, 0]} 
-          intensity={0.8}
+          intensity={0.8 * backgroundSettings.intensity}
           angle={0.3}
           penumbra={0.5}
           color="#ffffff"
           castShadow
         />
-
-        {/* Environment for reflections */}
-        <Environment preset="studio" background={false} />
 
         {/* 3D Card Model */}
         <Suspense fallback={<CardLoadingFallback />}>
@@ -217,12 +232,12 @@ const OaklandCard3DCanvas: React.FC<OaklandCard3DCanvasProps> = ({
 
       {/* Enhanced Status Indicator */}
       <div className="absolute bottom-4 left-4 text-xs text-gray-500 bg-white/80 backdrop-blur-sm rounded px-2 py-1 select-none">
-        {viewMode.toUpperCase()} • {cardFinish} finish • {showBorder ? `${borderStyle} border` : 'simple edges'} • {showEffects ? 'effects on' : 'effects off'}
+        {viewMode.toUpperCase()} • {cardFinish} finish • {backgroundSettings.type} background • Enhanced controls
       </div>
 
-      {/* Controls Hint */}
+      {/* Enhanced Controls Hint */}
       <div className="absolute bottom-4 right-4 text-xs text-gray-500 bg-white/80 backdrop-blur-sm rounded px-2 py-1 select-none">
-        <div>Drag: Rotate • Wheel: Zoom • F: Flip • Space: Auto-rotate • R: Reset</div>
+        <div>Drag: Smooth rotate • Wheel: Zoom • F: Flip • Space: Auto-rotate • R: Reset</div>
       </div>
     </div>
   );

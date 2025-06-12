@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { OaklandTemplate } from '@/lib/types/oaklandTemplates';
 import OaklandCard3DCanvas from './canvas/OaklandCard3DCanvas';
 import StepByStepSidebar from './sidebar/StepByStepSidebar';
+import { BackgroundSettings } from './canvas/BackgroundSelector';
 
 interface MemoryData {
   title: string;
@@ -27,10 +28,19 @@ const OaklandMemoryBuilder: React.FC = () => {
   const [autoRotate, setAutoRotate] = useState(false);
   const [cardFinish, setCardFinish] = useState<'matte' | 'glossy' | 'foil'>('glossy');
   
-  // New effects and border state
+  // Enhanced effects and border state
   const [showEffects, setShowEffects] = useState(true);
   const [showBorder, setShowBorder] = useState(true);
   const [borderStyle, setBorderStyle] = useState<'classic' | 'vintage' | 'modern'>('classic');
+  
+  // Background customization state
+  const [backgroundSettings, setBackgroundSettings] = useState<BackgroundSettings>({
+    type: 'preset',
+    preset: 'studio',
+    intensity: 1.0,
+    blur: 0.0,
+    rotation: 0
+  });
   
   const [memoryData, setMemoryData] = useState<MemoryData>({
     title: 'My Oakland Memory',
@@ -84,7 +94,7 @@ const OaklandMemoryBuilder: React.FC = () => {
                 Oakland A's Memory Creator
               </h1>
               <p className="text-xs text-[#ffd700]/70 font-medium">
-                Advanced card controls enabled
+                Enhanced controls & custom backgrounds
               </p>
             </div>
           </div>
@@ -129,11 +139,12 @@ const OaklandMemoryBuilder: React.FC = () => {
             showBorder={showBorder}
             borderStyle={borderStyle}
             sidebarOpen={!sidebarCollapsed}
+            backgroundSettings={backgroundSettings}
             className="flex-1"
           />
         </div>
 
-        {/* Step-by-Step Sidebar */}
+        {/* Enhanced Step-by-Step Sidebar */}
         <StepByStepSidebar
           selectedTemplate={selectedTemplate}
           onSelectTemplate={setSelectedTemplate}
@@ -156,6 +167,8 @@ const OaklandMemoryBuilder: React.FC = () => {
           onShowBorderChange={setShowBorder}
           borderStyle={borderStyle}
           onBorderStyleChange={setBorderStyle}
+          backgroundSettings={backgroundSettings}
+          onBackgroundChange={setBackgroundSettings}
         />
       </div>
     </div>
